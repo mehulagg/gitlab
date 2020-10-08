@@ -70,7 +70,7 @@ module EE
 
     # override
     def check_for_spam?
-      author.bot? || super
+      author.bot? && (title_changed? || description_changed? || confidential_changed?) || super
     end
 
     # override

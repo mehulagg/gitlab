@@ -13,13 +13,13 @@ exports[`AuditEventsApp when initialized matches the snapshot 1`] = `
   </header>
    
   <div
-    class="row-content-block second-block pb-0"
+    class="row-content-block second-block gl-pb-0"
   >
     <div
-      class="d-flex justify-content-between audit-controls row"
+      class="gl-display-flex gl-justify-content-space-between gl-flex-wrap"
     >
       <div
-        class="col-lg-auto flex-fill form-group align-items-lg-center pr-lg-8"
+        class="gl-mb-5 gl-w-full"
       >
         <div
           class="input-group bg-white flex-grow-1"
@@ -37,10 +37,10 @@ exports[`AuditEventsApp when initialized matches the snapshot 1`] = `
       </div>
        
       <div
-        class="d-flex col-lg-auto flex-wrap pl-lg-0"
+        class="gl-display-flex gl-flex-wrap gl-w-full"
       >
         <div
-          class="audit-controls d-flex align-items-lg-center flex-column flex-lg-row col-lg-auto px-0"
+          class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between gl-px-0 gl-w-full"
         >
           <date-range-field-stub
             enddate="Sun Feb 02 2020 00:00:00 GMT+0000 (Greenwich Mean Time)"

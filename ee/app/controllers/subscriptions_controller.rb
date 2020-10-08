@@ -4,6 +4,8 @@ class SubscriptionsController < ApplicationController
   layout 'checkout'
   skip_before_action :authenticate_user!, only: :new
 
+  feature_category :purchase
+
   content_security_policy do |p|
     next if p.directives.blank?
 

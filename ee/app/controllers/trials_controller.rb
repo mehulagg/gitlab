@@ -10,6 +10,8 @@ class TrialsController < ApplicationController
   before_action :find_or_create_namespace, only: :apply
   before_action :record_user_for_group_only_trials_experiment, only: :select
 
+  feature_category :purchase
+
   def new
   end
 
@@ -36,6 +38,13 @@ class TrialsController < ApplicationController
     else
       render :select
     end
+  end
+
+  protected
+
+  # override the ConfirmEmailWarning method in order to skip
+  def show_confirm_warning?
+    false
   end
 
   private

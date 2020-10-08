@@ -54,6 +54,7 @@ including:
 - LFS objects
 - Container Registry images
 - GitLab Pages content
+- Snippets
 
 CAUTION: **Warning:**
 GitLab does not back up any configuration files, SSL certificates, or system
@@ -355,7 +356,7 @@ sudo -u git -H bundle exec rake gitlab:backup:create GITLAB_BACKUP_MAX_CONCURREN
 You can let the backup script upload (using the [Fog library](http://fog.io/))
 the `.tar` file it creates. In the following example, we use Amazon S3 for
 storage, but Fog also lets you use [other storage providers](http://fog.io/storage/).
-GitLab also [imports cloud drivers](https://gitlab.com/gitlab-org/gitlab/blob/30f5b9a5b711b46f1065baf755e413ceced5646b/Gemfile#L88)
+GitLab also [imports cloud drivers](https://gitlab.com/gitlab-org/gitlab/blob/da46c9655962df7d49caef0e2b9f6bbe88462a02/Gemfile#L113)
 for AWS, Google, OpenStack Swift, Rackspace, and Aliyun. A local driver is
 [also available](#uploading-to-locally-mounted-shares).
 
@@ -914,7 +915,7 @@ restore:
 sudo gitlab-backup restore BACKUP=11493107454_2018_04_25_10.6.4-ce
 ```
 
-Users of GitLab 12.1 and earlier should use the command `gitlab-rake gitlab:backup:create` instead.
+Users of GitLab 12.1 and earlier should use the command `gitlab-rake gitlab:backup:restore` instead.
 
 CAUTION: **Warning:**
 `gitlab-rake gitlab:backup:restore` doesn't set the correct file system
@@ -1081,7 +1082,7 @@ For more information, see:
 - PostgreSQL issue tracker:
   - [Not being a superuser](https://www.postgresql.org/message-id/201110220712.30886.adrian.klaver@gmail.com).
   - [Having different owners](https://www.postgresql.org/message-id/2039.1177339749@sss.pgh.pa.us).
-  
+
 - Stack Overflow: [Resulting errors](https://stackoverflow.com/questions/4368789/error-must-be-owner-of-language-plpgsql).
 
 ### When the secrets file is lost

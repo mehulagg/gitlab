@@ -230,6 +230,7 @@ module ApplicationSettingsHelper
       :hashed_storage_enabled,
       :help_page_hide_commercial_content,
       :help_page_support_url,
+      :help_page_documentation_base_url,
       :help_page_text,
       :hide_third_party_offers,
       :home_page_url,
@@ -265,6 +266,7 @@ module ApplicationSettingsHelper
       :receive_max_input_size,
       :repository_checks_enabled,
       :repository_storages_weighted,
+      :require_admin_approval_after_user_signup,
       :require_two_factor_authentication,
       :restricted_visibility_levels,
       :rsa_key_restriction,
@@ -387,6 +389,10 @@ module ApplicationSettingsHelper
       'self_monitoring_project_full_path' =>
         Gitlab::CurrentSettings.self_monitoring_project&.full_path
     }
+  end
+
+  def show_documentation_base_url_field?
+    Feature.enabled?(:help_page_documentation_redirect)
   end
 end
 

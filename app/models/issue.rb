@@ -56,6 +56,7 @@ class Issue < ApplicationRecord
     dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
   has_many :issue_assignees
+  has_many :issue_email_participants
   has_many :assignees, class_name: "User", through: :issue_assignees
   has_many :zoom_meetings
   has_many :user_mentions, class_name: "IssueUserMention", dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
@@ -126,6 +127,7 @@ class Issue < ApplicationRecord
   scope :counts_by_state, -> { reorder(nil).group(:state_id).count }
 
   scope :service_desk, -> { where(author: ::User.support_bot) }
+  scope :inc_relations_for_view, -> { includes(author: :status) }
 
   # An issue can be uniquely identified by project_id and iid
   # Takes one or more sets of composite IDs, expressed as hash-like records of

@@ -28,6 +28,6 @@ module Types
 
     field :validation_status, Types::DastSiteProfileValidationStatusEnum, null: true,
           description: 'The current validation status of the site profile',
-          resolve: -> (_obj, _args, _ctx) { Types::DastSiteProfileValidationStatusEnum.enum['pending_validation'] }
+          resolve: -> (obj, _args, _ctx) { "#{obj.status.upcase}_VALIDATION" }
   end
 end

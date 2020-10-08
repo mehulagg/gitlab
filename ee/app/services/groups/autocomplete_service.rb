@@ -37,6 +37,13 @@ module Groups
         .select(:iid, :title)
     end
 
+    def vulnerabilities
+      ::Autocomplete::VulnerabilitiesAutocompleteFinder
+        .new(current_user, group, params)
+        .execute
+        .select([:id, :title, :project_id])
+    end
+
     # rubocop: disable CodeReuse/ActiveRecord
     def milestones
       group_ids = group.self_and_ancestors.public_or_visible_to_user(current_user).pluck(:id)

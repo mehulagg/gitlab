@@ -122,8 +122,13 @@ module EE
         enable :admin_wiki
       end
 
-      rule { owner }.policy do
+      rule { owner | admin }.policy do
         enable :owner_access
+      end
+
+      rule { can?(:owner_access) }.policy do
+        enable :set_epic_created_at
+        enable :set_epic_updated_at
       end
 
       rule { can?(:read_cluster) & cluster_deployments_available }

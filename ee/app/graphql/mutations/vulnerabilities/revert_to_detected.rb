@@ -3,7 +3,7 @@
 module Mutations
   module Vulnerabilities
     class RevertToDetected < BaseMutation
-      graphql_name 'RevertVulnerabilityToDetected'
+      graphql_name 'VulnerabilityRevertToDetected'
 
       authorize :admin_vulnerability
 

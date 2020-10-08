@@ -610,6 +610,39 @@ RSpec.describe API::Epics do
         end
       end
 
+      context 'setting created_at' do
+        let(:creation_time) { 2.weeks.ago }
+        let(:params) { { title: 'new epic', created_at: creation_time } }
+
+        it 'sets the creation time on the new epic if the user is an admin' do
+          admin = create(:user, :admin)
+
+          post api(url, admin), params: params
+
+          expect(response).to have_gitlab_http_status(:created)
+          expect(Time.parse(json_response['created_at'])).to be_like_time(creation_time)
+        end
+
+        it 'sets the creation time on the new epic if the user is a group owner' do
+          group.add_owner(user)
+
+          post api(url, user), params: params
+
+          expect(response).to have_gitlab_http_status(:created)
+          expect(Time.parse(json_response['created_at'])).to be_like_time(creation_time)
+        end
+
+        it 'ignores the given creation time if the user is another user' do
+          user2 = create(:user)
+          group.add_developer(user2)
+
+          post api(url, user2), params: params
+
+          expect(response).to have_gitlab_http_status(:created)
+          expect(Time.parse(json_response['created_at'])).not_to be_like_time(creation_time)
+        end
+      end
+
       it 'creates a new epic with labels param as array' do
         params[:labels] = ['label1', 'label2', 'foo, bar', '&,?']
 
@@ -762,6 +795,38 @@ RSpec.describe API::Epics do
             put api(url, user), params: { state_event: 'reopen' }
 
             expect(epic.reload).to be_opened
+          end
+        end
+
+        context 'setting updated_at' do
+          let(:update_time) { 1.week.ago }
+
+          it 'ignores the given update time when run by another user' do
+            user2 = create(:user)
+            group.add_developer(user2)
+
+            put api(url, user2), params: { title: 'updated by other user', updated_at: update_time }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(Time.parse(json_response['updated_at'])).not_to be_like_time(update_time)
+          end
+
+          it 'sets the update time on the epic when run by an admin' do
+            admin = create(:user, :admin)
+
+            put api(url, admin), params: { title: 'updated by admin', updated_at: update_time }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(Time.parse(json_response['updated_at'])).to be_like_time(update_time)
+          end
+
+          it 'sets the update time on the epic when run by a group owner' do
+            group.add_owner(user)
+
+            put api(url, user), params: { title: 'updated by owner', updated_at: update_time }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(Time.parse(json_response['updated_at'])).to be_like_time(update_time)
           end
         end
 

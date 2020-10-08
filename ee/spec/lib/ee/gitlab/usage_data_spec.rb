@@ -37,7 +37,6 @@ RSpec.describe Gitlab::UsageData do
       create(:service, project: projects[1], type: 'JenkinsService', active: true)
       create(:jira_service, project: projects[0], issues_enabled: true, project_key: 'GL')
 
-      create(:project_tracing_setting, project: projects[0])
       create(:operations_feature_flag, project: projects[0])
 
       create(:issue, project: projects[1])
@@ -107,7 +106,6 @@ RSpec.describe Gitlab::UsageData do
         projects_mirrored_with_pipelines_enabled
         projects_reporting_ci_cd_back_to_github
         projects_with_prometheus_alerts
-        projects_with_tracing_enabled
         sast_jobs
         secret_detection_jobs
         status_page_incident_publishes
@@ -227,6 +225,17 @@ RSpec.describe Gitlab::UsageData do
     end
   end
 
+  describe 'merge requests merged using approval rules' do
+    before do
+      create(:approval_merge_request_rule, merge_request: create(:merge_request, :merged))
+      create(:approval_merge_request_rule, merge_request: create(:merge_request))
+    end
+
+    it 'counts the approval rules for merged merge requests' do
+      expect(described_class.system_usage_data[:counts][:merged_merge_requests_using_approval_rules]).to eq(1)
+    end
+  end
+
   describe '.operations_dashboard_usage' do
     subject { described_class.operations_dashboard_usage }
 
@@ -283,9 +292,13 @@ RSpec.describe Gitlab::UsageData do
         project = create(:project, :repository_private, :github_imported,
                           :test_repo, creator: user)
         merge_request = create(:merge_request, source_project: project)
+        overridden_merge_request = create(:merge_request, source_project: project, target_branch: "override")
         project_rule = create(:approval_project_rule, project: project)
+        overridden_project_rule = create(:approval_project_rule, project: project, approvals_required: 1)
         merge_rule = create(:approval_merge_request_rule, merge_request: merge_request)
+        overridden_mr_rule = create(:approval_merge_request_rule, merge_request: overridden_merge_request, approvals_required: 5)
         create(:approval_merge_request_rule_source, approval_merge_request_rule: merge_rule, approval_project_rule: project_rule)
+        create(:approval_merge_request_rule_source, approval_merge_request_rule: overridden_mr_rule, approval_project_rule: overridden_project_rule)
         create(:project, creator: user)
         create(:project, creator: user, disable_overriding_approvers_per_merge_request: true)
         create(:project, creator: user, disable_overriding_approvers_per_merge_request: false)
@@ -317,7 +330,7 @@ RSpec.describe Gitlab::UsageData do
       end
 
       expect(described_class.usage_activity_by_stage_create({})).to include(
-        approval_project_rules: 8,
+        approval_project_rules: 10,
         approval_project_rules_with_target_branch: 2,
         approval_project_rules_with_more_approvers_than_required: 2,
         approval_project_rules_with_less_approvers_than_required: 2,
@@ -327,6 +340,7 @@ RSpec.describe Gitlab::UsageData do
         merge_requests_with_added_rules: 12,
         merge_requests_with_optional_codeowners: 4,
         merge_requests_with_required_codeowners: 8,
+        merge_requests_with_overridden_project_rules: 4,
         projects_imported_from_github: 2,
         projects_with_repositories_enabled: 26,
         protected_branches: 2,
@@ -337,7 +351,7 @@ RSpec.describe Gitlab::UsageData do
         total_number_of_locked_files: 14
       )
       expect(described_class.usage_activity_by_stage_create(described_class.last_28_days_time_period)).to include(
-        approval_project_rules: 8,
+        approval_project_rules: 10,
         approval_project_rules_with_target_branch: 2,
         approval_project_rules_with_more_approvers_than_required: 2,
         approval_project_rules_with_less_approvers_than_required: 2,
@@ -422,20 +436,17 @@ RSpec.describe Gitlab::UsageData do
         create(:users_ops_dashboard_project, user: user)
         create(:prometheus_service, project: project)
         create(:project_error_tracking_setting, project: project)
-        create(:project_tracing_setting, project: project)
       end
 
       expect(described_class.usage_activity_by_stage_monitor({})).to include(
         operations_dashboard_users_with_projects_added: 2,
         projects_prometheus_active: 2,
-        projects_with_error_tracking_enabled: 2,
-        projects_with_tracing_enabled: 2
+        projects_with_error_tracking_enabled: 2
       )
       expect(described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)).to include(
         operations_dashboard_users_with_projects_added: 1,
         projects_prometheus_active: 1,
-        projects_with_error_tracking_enabled: 1,
-        projects_with_tracing_enabled: 1
+        projects_with_error_tracking_enabled: 1
       )
     end
   end
@@ -524,6 +535,8 @@ RSpec.describe Gitlab::UsageData do
         secret_detection_scans: 0,
         coverage_fuzzing_pipeline: 0,
         coverage_fuzzing_scans: 0,
+        api_fuzzing_pipeline: 0,
+        api_fuzzing_scans: 0,
         user_unique_users_all_secure_scanners: 1
       )
     end
@@ -575,13 +588,15 @@ RSpec.describe Gitlab::UsageData do
         dast_pipeline: 0,
         secret_detection_pipeline: 1,
         coverage_fuzzing_pipeline: 0,
+        api_fuzzing_pipeline: 0,
         user_unique_users_all_secure_scanners: 1,
         sast_scans: 0,
         dependency_scanning_scans: 2,
         container_scanning_scans: 1,
         dast_scans: 0,
         secret_detection_scans: 1,
-        coverage_fuzzing_scans: 0
+        coverage_fuzzing_scans: 0,
+        api_fuzzing_scans: 0
       )
     end
 
@@ -613,6 +628,8 @@ RSpec.describe Gitlab::UsageData do
         secret_detection_scans: 0,
         coverage_fuzzing_pipeline: 0,
         coverage_fuzzing_scans: 0,
+        api_fuzzing_pipeline: 0,
+        api_fuzzing_scans: 0,
         user_unique_users_all_secure_scanners: 3
       )
     end
@@ -643,6 +660,8 @@ RSpec.describe Gitlab::UsageData do
         secret_detection_scans: 0,
         coverage_fuzzing_pipeline: 0,
         coverage_fuzzing_scans: 0,
+        api_fuzzing_pipeline: 0,
+        api_fuzzing_scans: 0,
         user_unique_users_all_secure_scanners: 1
       )
     end
@@ -673,6 +692,8 @@ RSpec.describe Gitlab::UsageData do
         secret_detection_scans: -1,
         coverage_fuzzing_pipeline: -1,
         coverage_fuzzing_scans: -1,
+        api_fuzzing_pipeline: -1,
+        api_fuzzing_scans: -1,
         user_unique_users_all_secure_scanners: -1
       )
     end
@@ -691,5 +712,23 @@ RSpec.describe Gitlab::UsageData do
         projects_reporting_ci_cd_back_to_github: 1
       )
     end
+  end
+
+  it 'clears memoized values' do
+    values = %i(issue_minimum_id issue_maximum_id
+                project_minimum_id project_maximum_id
+                user_minimum_id user_maximum_id unique_visit_service
+                deployment_minimum_id deployment_maximum_id
+                auth_providers
+                approval_merge_request_rule_minimum_id
+                approval_merge_request_rule_maximum_id
+                merge_request_minimum_id
+                merge_request_maximum_id)
+
+    values.each do |key|
+      expect(described_class).to receive(:clear_memoization).with(key)
+    end
+
+    described_class.uncached_data
   end
 end

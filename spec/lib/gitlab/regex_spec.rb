@@ -347,6 +347,22 @@ RSpec.describe Gitlab::Regex do
     it { is_expected.not_to match('%2e%2e%2f1.2.3') }
   end
 
+  describe '.nuget_version_regex' do
+    subject { described_class.nuget_version_regex }
+
+    it { is_expected.to match('1.2.3') }
+    it { is_expected.to match('1.2.3.4') }
+    it { is_expected.to match('1.2.3.4-stable.1') }
+    it { is_expected.to match('1.2.3-beta') }
+    it { is_expected.to match('1.2.3-alpha.3') }
+    it { is_expected.to match('1.0.7+r3456') }
+    it { is_expected.not_to match('1') }
+    it { is_expected.not_to match('1.2') }
+    it { is_expected.not_to match('1./2.3') }
+    it { is_expected.not_to match('../../../../../1.2.3') }
+    it { is_expected.not_to match('%2e%2e%2f1.2.3') }
+  end
+
   describe '.pypi_version_regex' do
     subject { described_class.pypi_version_regex }
 
@@ -597,6 +613,20 @@ RSpec.describe Gitlab::Regex do
     it { is_expected.not_to match('../../../../../1.2.3') }
     it { is_expected.not_to match('%2e%2e%2f1.2.3') }
     it { is_expected.not_to match('') }
+  end
+
+  describe '.generic_package_name_regex' do
+    subject { described_class.generic_package_name_regex }
+
+    it { is_expected.to match('123') }
+    it { is_expected.to match('foo') }
+    it { is_expected.to match('foo.bar.baz-2.0-20190901.47283-1') }
+    it { is_expected.not_to match('../../foo') }
+    it { is_expected.not_to match('..\..\foo') }
+    it { is_expected.not_to match('%2f%2e%2e%2f%2essh%2fauthorized_keys') }
+    it { is_expected.not_to match('$foo/bar') }
+    it { is_expected.not_to match('my file name') }
+    it { is_expected.not_to match('!!()()') }
   end
 
   describe '.generic_package_file_name_regex' do

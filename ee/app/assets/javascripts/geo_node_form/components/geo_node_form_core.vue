@@ -2,7 +2,11 @@
 import { GlFormGroup, GlFormInput, GlSprintf, GlLink } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
 import { validateName, validateUrl } from '../validations';
-import { VALIDATION_FIELD_KEYS, NODE_NAME_MORE_INFO } from '../constants';
+import {
+  VALIDATION_FIELD_KEYS,
+  NODE_NAME_MORE_INFO,
+  NODE_INTERNAL_URL_MORE_INFO,
+} from '../constants';
 
 export default {
   name: 'GeoNodeFormCore',
@@ -31,6 +35,7 @@ export default {
     },
   },
   NODE_NAME_MORE_INFO,
+  NODE_INTERNAL_URL_MORE_INFO,
 };
 </script>
 
@@ -54,7 +59,12 @@ export default {
             <code>{{ content }}</code>
           </template>
           <template #link="{ content }">
-            <gl-link :href="$options.NODE_NAME_MORE_INFO" target="_blank">{{ content }}</gl-link>
+            <gl-link
+              :href="$options.NODE_NAME_MORE_INFO"
+              target="_blank"
+              data-testid="nodeNameMoreInfo"
+              >{{ content }}</gl-link
+            >
           </template>
         </gl-sprintf>
       </template>
@@ -120,6 +130,24 @@ export default {
           __('The URL defined on the primary node that secondary nodes should use to contact it.')
         "
       >
+        <template #description>
+          <gl-sprintf
+            :message="
+              __(
+                'The URL defined on the primary node that secondary nodes should use to contact it. %{linkStart}More information%{linkEnd}',
+              )
+            "
+          >
+            <template #link="{ content }">
+              <gl-link
+                :href="$options.NODE_INTERNAL_URL_MORE_INFO"
+                target="_blank"
+                data-testid="nodeInternalUrlMoreInfo"
+                >{{ content }}</gl-link
+              >
+            </template>
+          </gl-sprintf>
+        </template>
         <div class="gl-display-flex gl-align-items-center">
           <gl-form-input
             id="node-internal-url-field"

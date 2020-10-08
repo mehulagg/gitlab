@@ -46,7 +46,10 @@ module SCA
         .diff_with(other.license_scan_report)
         .transform_values do |reported_licenses|
           reported_licenses.map do |reported_license|
-            build_policy(reported_license, known_policies[reported_license.canonical_id])
+            matching_license_policy =
+              known_policies[reported_license.canonical_id] ||
+              known_policies[reported_license&.name&.downcase]
+            build_policy(reported_license, matching_license_policy)
           end
         end
     end

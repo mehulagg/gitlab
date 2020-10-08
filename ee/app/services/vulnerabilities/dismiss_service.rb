@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
+require_dependency 'vulnerabilities/base_service'
+
 module Vulnerabilities
   class DismissService < BaseService
-    include Gitlab::Allowable
-
     FindingsDismissResult = Struct.new(:ok?, :finding, :message)
 
     def initialize(current_user, vulnerability, comment = nil)

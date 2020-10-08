@@ -70,6 +70,7 @@ module API
         requires :title, type: String, desc: 'The title of an epic'
         optional :description, type: String, desc: 'The description of an epic'
         optional :confidential, type: Boolean, desc: 'Indicates if the epic is confidential'
+        optional :created_at, type: DateTime, desc: 'Date time when the epic was created. Available only for admins and project owners.'
         optional :start_date, as: :start_date_fixed, type: String, desc: 'The start date of an epic'
         optional :start_date_is_fixed, type: Boolean, desc: 'Indicates start date should be sourced from start_date_fixed field not the issue milestones'
         optional :end_date, as: :due_date_fixed, type: String, desc: 'The due date of an epic'
@@ -79,6 +80,9 @@ module API
       end
       post ':id/(-/)epics' do
         authorize_can_create!
+
+        # Setting created_at is allowed only for admins and owners
+        params.delete(:created_at) unless current_user.can?(:set_epic_created_at, user_group)
 
         epic = ::Epics::CreateService.new(user_group, current_user, declared_params(include_missing: false)).execute
         if epic.valid?
@@ -96,6 +100,7 @@ module API
         optional :title, type: String, desc: 'The title of an epic'
         optional :description, type: String, desc: 'The description of an epic'
         optional :confidential, type: Boolean, desc: 'Indicates if the epic is confidential'
+        optional :updated_at, type: DateTime, desc: 'Date time when the epic was updated. Available only for admins and project owners.'
         optional :start_date, as: :start_date_fixed, type: String, desc: 'The start date of an epic'
         optional :start_date_is_fixed, type: Boolean, desc: 'Indicates start date should be sourced from start_date_fixed field not the issue milestones'
         optional :end_date, as: :due_date_fixed, type: String, desc: 'The due date of an epic'
@@ -108,6 +113,10 @@ module API
         Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/194104')
 
         authorize_can_admin_epic!
+
+        # Setting updated_at is allowed only for admins and owners
+        params.delete(:updated_at) unless current_user.can?(:set_epic_updated_at, user_group)
+
         update_params = declared_params(include_missing: false)
         update_params.delete(:epic_iid)
 

@@ -153,6 +153,9 @@ module API
       mount ::API::Environments
       mount ::API::ErrorTracking
       mount ::API::Events
+      mount ::API::FeatureFlags
+      mount ::API::FeatureFlagScopes
+      mount ::API::FeatureFlagsUserLists
       mount ::API::Features
       mount ::API::Files
       mount ::API::FreezePeriods
@@ -249,6 +252,7 @@ module API
     end
 
     mount ::API::Internal::Base
+    mount ::API::Internal::Lfs
     mount ::API::Internal::Pages
     mount ::API::Internal::Kubernetes
 

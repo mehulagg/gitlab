@@ -96,9 +96,9 @@ describe('Cycle analytics mutations', () => {
 
   describe('with value streams available', () => {
     it.each`
-      mutation                           | payload               | expectedState
-      ${types.SET_SELECTED_VALUE_STREAM} | ${valueStreams[1].id} | ${{ selectedValueStream: valueStreams[1] }}
-      ${types.SET_SELECTED_VALUE_STREAM} | ${'fake-id'}          | ${{ selectedValueStream: {} }}
+      mutation                           | payload            | expectedState
+      ${types.SET_SELECTED_VALUE_STREAM} | ${valueStreams[1]} | ${{ selectedValueStream: valueStreams[1] }}
+      ${types.SET_SELECTED_VALUE_STREAM} | ${'fake-id'}       | ${{ selectedValueStream: {} }}
     `(
       '$mutation with payload $payload will update state with $expectedState',
       ({ mutation, payload, expectedState }) => {

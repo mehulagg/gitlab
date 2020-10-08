@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class Groups::Analytics::ProductivityAnalyticsController < Groups::Analytics::ApplicationController
-  check_feature_flag Gitlab::Analytics::PRODUCTIVITY_ANALYTICS_FEATURE_FLAG
   increment_usage_counter Gitlab::UsageDataCounters::ProductivityAnalyticsCounter,
     :views, only: :show, if: -> { request.format.html? }
 

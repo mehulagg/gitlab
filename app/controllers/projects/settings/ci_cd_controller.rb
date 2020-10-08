@@ -3,12 +3,16 @@
 module Projects
   module Settings
     class CiCdController < Projects::ApplicationController
+      include RunnerSetupScripts
+
       before_action :authorize_admin_pipeline!
       before_action :define_variables
       before_action do
         push_frontend_feature_flag(:new_variables_ui, @project, default_enabled: true)
         push_frontend_feature_flag(:ajax_new_deploy_token, @project)
       end
+
+      helper_method :highlight_badge
 
       def show
         if Feature.enabled?(:ci_pipeline_triggers_settings_vue_ui, @project)
@@ -52,7 +56,15 @@ module Projects
         redirect_to namespace_project_settings_ci_cd_path
       end
 
+      def runner_setup_scripts
+        private_runner_setup_scripts(project: @project)
+      end
+
       private
+
+      def highlight_badge(name, content, language = nil)
+        Gitlab::Highlight.highlight(name, content, language: language)
+      end
 
       def update_params
         params.require(:project).permit(*permitted_project_params)

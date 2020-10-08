@@ -43,7 +43,6 @@ module EE
 
       def project_merge_request_analytics_navbar_link(project, current_user)
         return unless project_nav_tab?(:merge_request_analytics)
-        return unless ::Gitlab::Analytics.project_merge_request_analytics_enabled?
 
         navbar_sub_item(
           title: _('Merge Request'),
@@ -52,9 +51,10 @@ module EE
         )
       end
 
+      # Currently an empty page, so don't show it on the navbar for now
       def group_merge_request_analytics_navbar_link(group, current_user)
-        return unless ::Gitlab::Analytics.group_merge_request_analytics_enabled?
-        return unless group_sidebar_link?(:merge_request_analytics)
+        return
+        return unless group_sidebar_link?(:merge_request_analytics) # rubocop: disable Lint/UnreachableCode
 
         navbar_sub_item(
           title: _('Merge Request'),
@@ -116,7 +116,7 @@ module EE
       end
 
       def group_repository_analytics_navbar_link(group, current_user)
-        return unless ::Gitlab::Analytics.group_coverage_reports_enabled?
+        return unless group.feature_available?(:group_coverage_reports)
         return unless group_sidebar_link?(:repository_analytics)
 
         navbar_sub_item(

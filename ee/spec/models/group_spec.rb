@@ -705,7 +705,7 @@ RSpec.describe Group do
     context 'with `minimal_access_role` not licensed' do
       before do
         stub_licensed_features(minimal_access_role: false)
-        create(:group_member, :minimal_access, user: user, group: group)
+        create(:group_member, :minimal_access, user: user, source: group)
       end
 
       it { is_expected.to be_falsey }

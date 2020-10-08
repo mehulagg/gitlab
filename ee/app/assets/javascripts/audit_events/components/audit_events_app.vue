@@ -58,9 +58,9 @@ export default {
         <audit-events-export-button v-if="hasExportUrl" :export-href="exportHref" />
       </div>
     </header>
-    <div class="row-content-block second-block pb-0">
-      <div class="d-flex justify-content-between audit-controls row">
-        <div class="col-lg-auto flex-fill form-group align-items-lg-center pr-lg-8">
+    <div class="row-content-block second-block gl-pb-0">
+      <div class="gl-display-flex gl-justify-content-space-between gl-flex-wrap">
+        <div class="gl-mb-5 gl-w-full">
           <audit-events-filter
             :filter-token-options="filterTokenOptions"
             :value="filterValue"
@@ -68,9 +68,9 @@ export default {
             @submit="searchForAuditEvents"
           />
         </div>
-        <div class="d-flex col-lg-auto flex-wrap pl-lg-0">
+        <div class="gl-display-flex gl-flex-wrap gl-w-full">
           <div
-            class="audit-controls d-flex align-items-lg-center flex-column flex-lg-row col-lg-auto px-0"
+            class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between gl-px-0 gl-w-full"
           >
             <date-range-field
               :start-date="startDate"

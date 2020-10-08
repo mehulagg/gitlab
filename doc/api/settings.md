@@ -2,8 +2,8 @@
 
 These API calls allow you to read and modify GitLab instance
 [application settings](#list-of-settings-that-can-be-accessed-via-api-calls)
-as appear in `/admin/application_settings/general`. You have to be an
-administrator in order to perform this action.
+as they appear in `/admin/application_settings/general`. You must be an
+administrator to perform this action.
 
 ## Get current application settings
 
@@ -185,12 +185,12 @@ Example responses: **(PREMIUM ONLY)**
 
 ## List of settings that can be accessed via API calls
 
-In general, all settings are optional. Certain settings though, if enabled, will
-require other settings to be set in order to function properly. These requirements
-are listed in the descriptions of the relevant settings.
+In general, all settings are optional. Certain settings though, if enabled,
+require other settings to be set to function properly. These requirements are
+listed in the descriptions of the relevant settings.
 
-| Attribute | Type | Required | Description |
-| --------- | ---- | :------: | ----------- |
+| Attribute                                | Type             | Required                             | Description |
+|------------------------------------------|------------------|:------------------------------------:|-------------|
 | `admin_notification_email`               | string           | no                                   | Deprecated: Use `abuse_notification_email` instead. If set, [abuse reports](../user/admin_area/abuse_reports.md) are sent to this address. Abuse reports are always available in the Admin Area.  |
 | `abuse_notification_email`               | string           | no                                   | If set, [abuse reports](../user/admin_area/abuse_reports.md) are sent to this address. Abuse reports are always available in the Admin Area. |
 | `after_sign_out_path`                    | string           | no                                   | Where to redirect users after logout. |
@@ -209,6 +209,7 @@ are listed in the descriptions of the relevant settings.
 | `authorized_keys_enabled`                | boolean          | no                                   | By default, we write to the `authorized_keys` file to support Git over SSH without additional configuration. GitLab can be optimized to authenticate SSH keys via the database file. Only disable this if you have configured your OpenSSH server to use the AuthorizedKeysCommand. |
 | `auto_devops_domain`                     | string           | no                                   | Specify a domain to use by default for every project's Auto Review Apps and Auto Deploy stages. |
 | `auto_devops_enabled`                    | boolean          | no                                   | Enable Auto DevOps for projects by default. It will automatically build, test, and deploy applications based on a predefined CI/CD configuration. |
+| `automatic_purchased_storage_allocation` | boolean          | no                                   | Enabling this permits automatic allocation of purchased storage within a namespace. |
 | `check_namespace_plan`                   | boolean          | no                                   | **(PREMIUM)** Enabling this will make only licensed EE features available to projects if the project namespace's plan includes the feature or if the project is public. |
 | `commit_email_hostname`                  | string           | no                                   | Custom hostname (for private commit emails). |
 | `container_registry_token_expire_delay`  | integer          | no                                   | Container Registry token duration in minutes. |

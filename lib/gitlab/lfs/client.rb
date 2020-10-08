@@ -7,9 +7,11 @@ module Gitlab
     #   * https://github.com/git-lfs/git-lfs/blob/master/docs/api/basic-transfers.md
     class Client
       GIT_LFS_CONTENT_TYPE = 'application/vnd.git-lfs+json'
+      GIT_LFS_USER_AGENT = "GitLab #{Gitlab::VERSION} LFS client"
       DEFAULT_HEADERS = {
         'Accept' => GIT_LFS_CONTENT_TYPE,
-        'Content-Type' => GIT_LFS_CONTENT_TYPE
+        'Content-Type' => GIT_LFS_CONTENT_TYPE,
+        'User-Agent' => GIT_LFS_USER_AGENT
       }.freeze
 
       attr_reader :base_url
@@ -53,10 +55,12 @@ module Gitlab
           body_stream: file,
           headers: {
             'Content-Length' => object.size.to_s,
-            'Content-Type' => 'application/octet-stream'
+            'Content-Type' => 'application/octet-stream',
+            'User-Agent' => GIT_LFS_USER_AGENT
           }.merge(upload_action['header'] || {})
         }
 
+        authenticated = true if params[:headers].key?('Authorization')
         params[:basic_auth] = basic_auth unless authenticated
 
         rsp = Gitlab::HTTP.put(upload_action['href'], params)
@@ -72,6 +76,7 @@ module Gitlab
           headers: build_request_headers(verify_action['header'])
         }
 
+        authenticated = true if params[:headers].key?('Authorization')
         params[:basic_auth] = basic_auth unless authenticated
 
         rsp = Gitlab::HTTP.post(verify_action['href'], params)

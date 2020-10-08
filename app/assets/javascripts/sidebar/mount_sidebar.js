@@ -5,6 +5,7 @@ import Vuex from 'vuex';
 import SidebarTimeTracking from './components/time_tracking/sidebar_time_tracking.vue';
 import SidebarAssignees from './components/assignees/sidebar_assignees.vue';
 import SidebarLabels from './components/labels/sidebar_labels.vue';
+import SidebarReviewers from './components/reviewers/sidebar_reviewers.vue';
 import ConfidentialIssueSidebar from './components/confidential/confidential_issue_sidebar.vue';
 import SidebarMoveIssue from './lib/sidebar_move_issue';
 import IssuableLockForm from './components/lock/issuable_lock_form.vue';
@@ -13,7 +14,7 @@ import sidebarSubscriptions from './components/subscriptions/sidebar_subscriptio
 import SidebarSeverity from './components/severity/sidebar_severity.vue';
 import Translate from '../vue_shared/translate';
 import createDefaultClient from '~/lib/graphql';
-import { isInIssuePage, parseBoolean } from '~/lib/utils/common_utils';
+import { isInIssuePage, isInIncidentPage, parseBoolean } from '~/lib/utils/common_utils';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
 import labelsSelectModule from '~/vue_shared/components/sidebar/labels_select_vue/store';
@@ -44,6 +45,36 @@ function mountAssigneesComponent(mediator) {
     },
     render: createElement =>
       createElement('sidebar-assignees', {
+        props: {
+          mediator,
+          issuableIid: String(iid),
+          projectPath: fullPath,
+          field: el.dataset.field,
+          signedIn: el.hasAttribute('data-signed-in'),
+          issuableType: isInIssuePage() || isInIncidentPage() ? 'issue' : 'merge_request',
+        },
+      }),
+  });
+}
+
+function mountReviewersComponent(mediator) {
+  const el = document.getElementById('js-vue-sidebar-reviewers');
+  const apolloProvider = new VueApollo({
+    defaultClient: createDefaultClient(),
+  });
+
+  if (!el) return;
+
+  const { iid, fullPath } = getSidebarOptions();
+  // eslint-disable-next-line no-new
+  new Vue({
+    el,
+    apolloProvider,
+    components: {
+      SidebarReviewers,
+    },
+    render: createElement =>
+      createElement('sidebar-reviewers', {
         props: {
           mediator,
           issuableIid: String(iid),
@@ -127,7 +158,7 @@ function mountLockComponent() {
   const initialData = JSON.parse(dataNode.innerHTML);
 
   let importStore;
-  if (isInIssuePage()) {
+  if (isInIssuePage() || isInIncidentPage()) {
     importStore = import(/* webpackChunkName: 'notesStore' */ '~/notes/stores').then(
       ({ store }) => store,
     );
@@ -245,6 +276,7 @@ function mountSeverityComponent() {
 
 export function mountSidebar(mediator) {
   mountAssigneesComponent(mediator);
+  mountReviewersComponent(mediator);
   mountConfidentialComponent(mediator);
   mountLockComponent();
   mountParticipantsComponent(mediator);

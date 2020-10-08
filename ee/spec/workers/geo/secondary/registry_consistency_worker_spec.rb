@@ -85,7 +85,6 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo do
       lfs_object = create(:lfs_object)
       merge_request_diff = create(:merge_request_diff, :external)
       package_file = create(:conan_package_file, :conan_package)
-      terraform_state = create(:legacy_terraform_state, project: project)
       terraform_state_version = create(:terraform_state_version)
       upload = create(:upload)
 
@@ -96,7 +95,6 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo do
       expect(Geo::MergeRequestDiffRegistry.where(merge_request_diff_id: merge_request_diff.id).count).to eq(0)
       expect(Geo::PackageFileRegistry.where(package_file_id: package_file.id).count).to eq(0)
       expect(Geo::ProjectRegistry.where(project_id: project.id).count).to eq(0)
-      expect(Geo::TerraformStateRegistry.where(terraform_state_id: terraform_state.id).count).to eq(0)
       expect(Geo::TerraformStateVersionRegistry.where(terraform_state_version_id: terraform_state_version.id).count).to eq(0)
       expect(Geo::UploadRegistry.where(file_id: upload.id).count).to eq(0)
 
@@ -109,7 +107,6 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo do
       expect(Geo::MergeRequestDiffRegistry.where(merge_request_diff_id: merge_request_diff.id).count).to eq(1)
       expect(Geo::PackageFileRegistry.where(package_file_id: package_file.id).count).to eq(1)
       expect(Geo::ProjectRegistry.where(project_id: project.id).count).to eq(1)
-      expect(Geo::TerraformStateRegistry.where(terraform_state_id: terraform_state.id).count).to eq(1)
       expect(Geo::TerraformStateVersionRegistry.where(terraform_state_version_id: terraform_state_version.id).count).to eq(1)
       expect(Geo::UploadRegistry.where(file_id: upload.id).count).to eq(1)
     end
@@ -126,23 +123,6 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo do
       it 'does not execute RegistryConsistencyService for merge request diffs' do
         allow(Geo::RegistryConsistencyService).to receive(:new).and_call_original
         expect(Geo::RegistryConsistencyService).not_to receive(:new).with(Geo::MergeRequestDiffRegistry, batch_size: batch_size)
-
-        subject.perform
-      end
-    end
-
-    context 'when geo_terraform_state_replication is disabled' do
-      before do
-        stub_feature_flags(geo_terraform_state_replication: false)
-      end
-
-      it 'returns false' do
-        expect(subject.perform).to be_falsey
-      end
-
-      it 'does not execute RegistryConsistencyService for terraform states' do
-        allow(Geo::RegistryConsistencyService).to receive(:new).and_call_original
-        expect(Geo::RegistryConsistencyService).not_to receive(:new).with(Geo::TerraformStateRegistry, batch_size: batch_size)
 
         subject.perform
       end

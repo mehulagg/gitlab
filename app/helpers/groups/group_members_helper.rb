@@ -10,7 +10,7 @@ module Groups::GroupMembersHelper
   end
 
   def render_invite_member_for_group(group, default_access_level)
-    render 'shared/members/invite_member', submit_url: group_group_members_path(group), access_levels: GroupMember.access_level_roles, default_access_level: default_access_level
+    render 'shared/members/invite_member', submit_url: group_group_members_path(group), access_levels: group.access_level_roles, default_access_level: default_access_level
   end
 
   def linked_groups_data_json(group_links)
@@ -44,7 +44,8 @@ module Groups::GroupMembersHelper
           id: source.id,
           name: source.full_name,
           web_url: Gitlab::UrlBuilder.build(source)
-        }
+        },
+        valid_roles: member.valid_level_roles
       }.merge(member_created_by_data(member.created_by))
 
       if member.invite?

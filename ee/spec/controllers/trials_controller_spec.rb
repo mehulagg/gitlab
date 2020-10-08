@@ -229,4 +229,32 @@ RSpec.describe TrialsController do
       post :apply, params: post_params
     end
   end
+
+  describe 'confirm email warning' do
+    before do
+      get :new
+    end
+
+    RSpec::Matchers.define :set_confirm_warning_for do |email|
+      match do |response|
+        expect(response).to set_flash.now[:warning].to include("Please check your email (#{email}) to verify that you own this address and unlock the power of CI/CD.")
+      end
+    end
+
+    context 'with an unconfirmed email address present' do
+      let(:user) { create(:user, confirmed_at: nil, unconfirmed_email: 'unconfirmed@gitlab.com') }
+
+      before do
+        sign_in(user)
+      end
+
+      it { is_expected.not_to set_confirm_warning_for(user.unconfirmed_email) }
+    end
+
+    context 'without an unconfirmed email address present' do
+      let(:user) { create(:user, confirmed_at: nil) }
+
+      it { is_expected.not_to set_confirm_warning_for(user.email) }
+    end
+  end
 end

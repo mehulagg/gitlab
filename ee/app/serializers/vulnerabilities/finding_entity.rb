@@ -34,6 +34,7 @@ class Vulnerabilities::FindingEntity < Grape::Entity
   end
 
   expose :state
+  expose :scan
 
   expose :blob_path do |occurrence|
     occurrence.present.blob_path

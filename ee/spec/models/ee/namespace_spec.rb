@@ -1431,6 +1431,156 @@ RSpec.describe Namespace do
     end
   end
 
+  describe '#total_repository_size_excess' do
+    let_it_be(:namespace) { create(:namespace) }
+
+    before do
+      namespace.clear_memoization(:total_repository_size_excess)
+    end
+
+    context 'projects with a variety of repository sizes and limits' do
+      before_all do
+        create_storage_excess_example_projects
+      end
+
+      context 'when namespace-level repository_size_limit is not set' do
+        it 'returns the total excess size of projects with repositories that exceed the size limit' do
+          allow(namespace).to receive(:actual_size_limit).and_return(nil)
+
+          expect(namespace.total_repository_size_excess).to eq(400)
+        end
+      end
+
+      context 'when namespace-level repository_size_limit is 0 (unlimited)' do
+        it 'returns the total excess size of projects with repositories that exceed the size limit' do
+          allow(namespace).to receive(:actual_size_limit).and_return(0)
+
+          expect(namespace.total_repository_size_excess).to eq(400)
+        end
+      end
+
+      context 'when namespace-level repository_size_limit is a positive number' do
+        it 'returns the total excess size of projects with repositories that exceed the size limit' do
+          allow(namespace).to receive(:actual_size_limit).and_return(150)
+
+          expect(namespace.total_repository_size_excess).to eq(560)
+        end
+      end
+    end
+
+    context 'when all projects have repository_size_limit of 0 (unlimited)' do
+      before do
+        create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: 0)
+        create_project(repository_size: 150, lfs_objects_size: 0, repository_size_limit: 0)
+        create_project(repository_size: 200, lfs_objects_size: 100, repository_size_limit: 0)
+
+        allow(namespace).to receive(:actual_size_limit).and_return(150)
+      end
+
+      it 'returns zero regardless of the namespace or instance-level repository_size_limit' do
+        expect(namespace.total_repository_size_excess).to eq(0)
+      end
+    end
+  end
+
+  describe '#repository_size_excess_project_count' do
+    let_it_be(:namespace) { create(:namespace) }
+
+    before do
+      namespace.clear_memoization(:repository_size_excess_project_count)
+    end
+
+    context 'projects with a variety of repository sizes and limits' do
+      before_all do
+        create_storage_excess_example_projects
+      end
+
+      context 'when namespace-level repository_size_limit is not set' do
+        before do
+          allow(namespace).to receive(:actual_size_limit).and_return(nil)
+        end
+
+        it 'returns the count of projects with repositories that exceed the size limit' do
+          expect(namespace.repository_size_excess_project_count).to eq(2)
+        end
+      end
+
+      context 'when namespace-level repository_size_limit is 0 (unlimited)' do
+        before do
+          allow(namespace).to receive(:actual_size_limit).and_return(0)
+        end
+
+        it 'returns the count of projects with repositories that exceed the size limit' do
+          expect(namespace.repository_size_excess_project_count).to eq(2)
+        end
+      end
+
+      context 'when namespace-level repository_size_limit is a positive number' do
+        before do
+          allow(namespace).to receive(:actual_size_limit).and_return(150)
+        end
+
+        it 'returns the count of projects with repositories that exceed the size limit' do
+          expect(namespace.repository_size_excess_project_count).to eq(4)
+        end
+      end
+    end
+
+    context 'when all projects have repository_size_limit of 0 (unlimited)' do
+      before do
+        create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: 0)
+        create_project(repository_size: 150, lfs_objects_size: 0, repository_size_limit: 0)
+        create_project(repository_size: 200, lfs_objects_size: 100, repository_size_limit: 0)
+
+        allow(namespace).to receive(:actual_size_limit).and_return(150)
+      end
+
+      it 'returns zero regardless of the namespace or instance-level repository_size_limit' do
+        expect(namespace.repository_size_excess_project_count).to eq(0)
+      end
+    end
+  end
+
+  describe '#total_repository_size' do
+    let(:namespace) { create(:namespace) }
+
+    before do
+      create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: nil)
+      create_project(repository_size: 150, lfs_objects_size: 100, repository_size_limit: 0)
+      create_project(repository_size: 325, lfs_objects_size: 200, repository_size_limit: 400)
+    end
+
+    it 'returns the total size of all project repositories' do
+      expect(namespace.total_repository_size).to eq(875)
+    end
+  end
+
+  describe '#contains_locked_projects?' do
+    using RSpec::Parameterized::TableSyntax
+
+    let_it_be(:namespace) { create(:namespace) }
+
+    before_all do
+      create(:namespace_limit, namespace: namespace, additional_purchased_storage_size: 10)
+    end
+
+    where(:total_excess, :result) do
+      5.megabytes  | false
+      10.megabytes | false
+      15.megabytes | true
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:total_repository_size_excess).and_return(total_excess)
+      end
+
+      it 'returns a boolean indicating whether the root namespace contains locked projects' do
+        expect(namespace.contains_locked_projects?).to be result
+      end
+    end
+  end
+
   describe '#actual_size_limit' do
     let(:namespace) { build(:namespace) }
 
@@ -1618,5 +1768,29 @@ RSpec.describe Namespace do
       expect(namespace).to be_invalid
       expect(namespace.errors[:"namespace_limit.temporary_storage_increase_ends_on"]).to be_present
     end
+  end
+
+  def create_project(repository_size:, lfs_objects_size:, repository_size_limit:)
+    create(:project, namespace: namespace, repository_size_limit: repository_size_limit).tap do |project|
+      create(:project_statistics, project: project, repository_size: repository_size, lfs_objects_size: lfs_objects_size)
+    end
+  end
+
+  def create_storage_excess_example_projects
+    [
+      { repository_size: 100, lfs_objects_size: 0, repository_size_limit: nil },
+      { repository_size: 150, lfs_objects_size: 0, repository_size_limit: nil },
+      { repository_size: 140, lfs_objects_size: 10, repository_size_limit: nil },
+      { repository_size: 150, lfs_objects_size: 10, repository_size_limit: nil },
+      { repository_size: 200, lfs_objects_size: 100, repository_size_limit: nil },
+      { repository_size: 100, lfs_objects_size: 0, repository_size_limit: 0 },
+      { repository_size: 150, lfs_objects_size: 10, repository_size_limit: 0 },
+      { repository_size: 200, lfs_objects_size: 100, repository_size_limit: 0 },
+      { repository_size: 300, lfs_objects_size: 0, repository_size_limit: 400 },
+      { repository_size: 400, lfs_objects_size: 0, repository_size_limit: 400 },
+      { repository_size: 300, lfs_objects_size: 100, repository_size_limit: 400 },
+      { repository_size: 400, lfs_objects_size: 100, repository_size_limit: 400 },
+      { repository_size: 500, lfs_objects_size: 100, repository_size_limit: 300 }
+    ].map { |attrs| create_project(**attrs) }
   end
 end

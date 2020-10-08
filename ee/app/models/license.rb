@@ -116,6 +116,7 @@ class License < ApplicationRecord
     minimal_access_role
     unprotection_restrictions
     ci_project_subscriptions
+    incident_timeline_view
   ]
   EEP_FEATURES.freeze
 
@@ -292,6 +293,19 @@ class License < ApplicationRecord
       decryptable_licenses.sort_by { |license| [license.starts_at, license.created_at, license.expires_at] }.reverse
     end
 
+    def with_valid_license
+      current_license = License.current
+
+      return unless current_license
+      return if current_license.trial?
+
+      yield(current_license) if block_given?
+    end
+
+    def current_active_users
+      User.active.without_bots
+    end
+
     private
 
     def load_future_dated
@@ -404,11 +418,9 @@ class License < ApplicationRecord
 
   def current_active_users_count
     @current_active_users_count ||= begin
-      if exclude_guests_from_active_count?
-        User.active.excluding_guests.count
-      else
-        User.active.count
-      end
+      scope = self.class.current_active_users
+      scope = scope.excluding_guests if exclude_guests_from_active_count?
+      scope.count
     end
   end
 

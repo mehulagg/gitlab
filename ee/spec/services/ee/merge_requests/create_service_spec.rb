@@ -51,6 +51,10 @@ RSpec.describe MergeRequests::CreateService do
     it_behaves_like 'new issuable with scoped labels' do
       let(:parent) { project }
     end
+
+    it_behaves_like 'service with multiple reviewers' do
+      let(:execute) { service.execute }
+    end
   end
 
   describe '#execute with blocking merge requests', :clean_gitlab_redis_shared_state do

@@ -111,7 +111,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -227,7 +227,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "ProjectID",
                   "ofType": null
                 }
               },
@@ -1993,7 +1993,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -2109,7 +2109,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -2225,7 +2225,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -2342,6 +2342,16 @@
           "interfaces": [
 
           ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "AwardableID",
+          "description": "Identifier of Awardable",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
           "enumValues": null,
           "possibleTypes": null
         },
@@ -2841,6 +2851,59 @@
               "deprecationReason": null
             },
             {
+              "name": "labels",
+              "description": "Labels of the board",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "LabelConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "lists",
               "description": "Lists of the board",
               "args": [
@@ -2850,6 +2913,16 @@
                   "type": {
                     "kind": "SCALAR",
                     "name": "ID",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "issueFilters",
+                  "description": "Filters applied when getting issue metadata in the board list",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BoardIssueInput",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -6611,6 +6684,16 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "ClustersClusterID",
+          "description": "Identifier of Clusters::Cluster",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "Commit",
           "description": null,
@@ -7976,7 +8059,7 @@
               "description": "The global id of the environment to add an annotation to",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "EnvironmentID",
                 "ofType": null
               },
               "defaultValue": null
@@ -7986,7 +8069,7 @@
               "description": "The global id of the cluster to add an annotation to",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "ClustersClusterID",
                 "ofType": null
               },
               "defaultValue": null
@@ -8385,7 +8468,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NoteableID",
                   "ofType": null
                 }
               },
@@ -8733,7 +8816,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NoteableID",
                   "ofType": null
                 }
               },
@@ -9021,7 +9104,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NoteableID",
                   "ofType": null
                 }
               },
@@ -9428,6 +9511,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "spam",
+              "description": "Indicates whether the operation returns a record detected as spam",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -9829,6 +9926,12 @@
               "description": "Passive DAST scan. This scan will not make active attacks against the target site.",
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "ACTIVE",
+              "description": "Active DAST scan. This scan will make active attacks against the target site.",
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -9903,6 +10006,38 @@
               "deprecationReason": null
             },
             {
+              "name": "scanType",
+              "description": "Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "ENUM",
+                "name": "DastScanTypeEnum",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "showDebugMessages",
+              "description": "Indicates if debug messages should be included in DAST console output. True to include the debug messages.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "spiderTimeout",
               "description": "The maximum number of minutes allowed for the spider to traverse the site",
               "args": [
@@ -9926,6 +10061,24 @@
                 "kind": "SCALAR",
                 "name": "Int",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "useAjaxSpider",
+              "description": "Indicates if the AJAX spider should be used to crawl the target site. True to run the AJAX spider in addition to the traditional spider, and false to run only the traditional spider.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -10058,6 +10211,36 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "scanType",
+              "description": "Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.",
+              "type": {
+                "kind": "ENUM",
+                "name": "DastScanTypeEnum",
+                "ofType": null
+              },
+              "defaultValue": "PASSIVE"
+            },
+            {
+              "name": "useAjaxSpider",
+              "description": "Indicates if the AJAX spider should be used to crawl the target site. True to run the AJAX spider in addition to the traditional spider, and false to run only the traditional spider.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": "false"
+            },
+            {
+              "name": "showDebugMessages",
+              "description": "Indicates if debug messages should be included in DAST console output. True to include the debug messages.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": "false"
             },
             {
               "name": "clientMutationId",
@@ -10385,6 +10568,36 @@
                   "name": "Int",
                   "ofType": null
                 }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "scanType",
+              "description": "Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.",
+              "type": {
+                "kind": "ENUM",
+                "name": "DastScanTypeEnum",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "useAjaxSpider",
+              "description": "Indicates if the AJAX spider should be used to crawl the target site. True to run the AJAX spider in addition to the traditional spider, and false to run only the traditional spider.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "showDebugMessages",
+              "description": "Indicates if debug messages should be included in DAST console output. True to include the debug messages.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
               },
               "defaultValue": null
             },
@@ -13875,7 +14088,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NoteID",
                   "ofType": null
                 }
               },
@@ -14070,6 +14283,20 @@
           "name": "DetailedStatus",
           "description": null,
           "fields": [
+            {
+              "name": "action",
+              "description": "Action information for the status. This includes method, button title, icon, path, and title",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "StatusAction",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "detailsPath",
               "description": "Path of the details for the pipeline status",
@@ -15310,7 +15537,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "VulnerabilityID",
                   "ofType": null
                 }
               },
@@ -15789,6 +16016,16 @@
           "interfaces": [
 
           ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "EnvironmentID",
+          "description": "Identifier of Environment",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
           "enumValues": null,
           "possibleTypes": null
         },
@@ -18870,7 +19107,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "EpicTreeSortingID",
                   "ofType": null
                 }
               },
@@ -18881,7 +19118,7 @@
               "description": "The id of the epic_issue or issue that the actual epic or issue is switched with",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "EpicTreeSortingID",
                 "ofType": null
               },
               "defaultValue": null
@@ -18901,7 +19138,7 @@
               "description": "ID of the new parent epic",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "EpicID",
                 "ofType": null
               },
               "defaultValue": null
@@ -18925,7 +19162,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "EpicID",
                   "ofType": null
                 }
               },
@@ -19010,6 +19247,16 @@
           "interfaces": [
 
           ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "EpicTreeSortingID",
+          "description": "Identifier of EpicTreeSorting",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
           "enumValues": null,
           "possibleTypes": null
         },
@@ -19427,77 +19674,6 @@
               "deprecationReason": null
             },
             {
-              "name": "terraformStateRegistries",
-              "description": "Find terraform state registries on this Geo node. Available only when feature flag `geo_terraform_state_replication` is enabled",
-              "args": [
-                {
-                  "name": "ids",
-                  "description": "Filters registries by their ID",
-                  "type": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "SCALAR",
-                        "name": "ID",
-                        "ofType": null
-                      }
-                    }
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "after",
-                  "description": "Returns the elements in the list that come after the specified cursor.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "before",
-                  "description": "Returns the elements in the list that come before the specified cursor.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "first",
-                  "description": "Returns the first _n_ elements from the list.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "last",
-                  "description": "Returns the last _n_ elements from the list.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                }
-              ],
-              "type": {
-                "kind": "OBJECT",
-                "name": "TerraformStateRegistryConnection",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
               "name": "terraformStateVersionRegistries",
               "description": "Find terraform state version registries on this Geo node",
               "args": [
@@ -19764,11 +19940,15 @@
               "args": [
                 {
                   "name": "id",
-                  "description": "Find a board by its ID",
+                  "description": "The board's ID",
                   "type": {
-                    "kind": "SCALAR",
-                    "name": "ID",
-                    "ofType": null
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "ID",
+                      "ofType": null
+                    }
                   },
                   "defaultValue": null
                 }
@@ -20369,7 +20549,7 @@
             },
             {
               "name": "issues",
-              "description": "Issues of the group",
+              "description": "Issues for projects in this group",
               "args": [
                 {
                   "name": "iid",
@@ -20599,7 +20779,7 @@
                 },
                 {
                   "name": "includeSubgroups",
-                  "description": "Include issues belonging to subgroups.",
+                  "description": "Include issues belonging to subgroups",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -20892,6 +21072,211 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "mergeRequests",
+              "description": "Merge requests for projects in this group",
+              "args": [
+                {
+                  "name": "iids",
+                  "description": "Array of IIDs of merge requests, for example `[1, 2]`",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "sourceBranches",
+                  "description": "Array of source branch names. All resolved merge requests will have one of these branches as their source.",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "targetBranches",
+                  "description": "Array of target branch names. All resolved merge requests will have one of these branches as their target.",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "state",
+                  "description": "A merge request state. If provided, all resolved merge requests will have this state.",
+                  "type": {
+                    "kind": "ENUM",
+                    "name": "MergeRequestState",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "labels",
+                  "description": "Array of label names. All resolved merge requests will have all of these labels.",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "mergedAfter",
+                  "description": "Merge requests merged after this date",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "mergedBefore",
+                  "description": "Merge requests merged before this date",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "milestoneTitle",
+                  "description": "Title of the milestone",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "sort",
+                  "description": "Sort merge requests by this criteria",
+                  "type": {
+                    "kind": "ENUM",
+                    "name": "MergeRequestSort",
+                    "ofType": null
+                  },
+                  "defaultValue": "created_desc"
+                },
+                {
+                  "name": "includeSubgroups",
+                  "description": "Include merge requests belonging to subgroups",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": "false"
+                },
+                {
+                  "name": "assigneeUsername",
+                  "description": "Username of the assignee",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "authorUsername",
+                  "description": "Username of the author",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "MergeRequestConnection",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -25642,6 +26027,29 @@
           "possibleTypes": null
         },
         {
+          "kind": "ENUM",
+          "name": "IssueStateEvent",
+          "description": "Values for issue state events",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "REOPEN",
+              "description": "Reopens the issue",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "CLOSE",
+              "description": "Closes the issue",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "IssueStatusCountsType",
           "description": "Represents total number of issues for the represented statuses",
@@ -27209,6 +27617,24 @@
           "name": "LabelConnection",
           "description": "The connection type for Label.",
           "fields": [
+            {
+              "name": "count",
+              "description": "Total count of collection",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "edges",
               "description": "A list of edges.",
@@ -33957,8 +34383,8 @@
                 "name": "RevertVulnerabilityToDetectedPayload",
                 "ofType": null
               },
-              "isDeprecated": false,
-              "deprecationReason": null
+              "isDeprecated": true,
+              "deprecationReason": "Use vulnerabilityRevertToDetected. Deprecated in 13.5"
             },
             {
               "name": "runDastScan",
@@ -34171,6 +34597,33 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "UpdateBoardPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "updateBoardEpicUserPreferences",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "UpdateBoardEpicUserPreferencesInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "UpdateBoardEpicUserPreferencesPayload",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -34495,6 +34948,33 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "VulnerabilityResolvePayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "vulnerabilityRevertToDetected",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "VulnerabilityRevertToDetectedInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "VulnerabilityRevertToDetectedPayload",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -34980,6 +35460,16 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "NamespaceID",
+          "description": "Identifier of Namespace",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "INPUT_OBJECT",
           "name": "NamespaceIncreaseStorageTemporarilyInput",
           "description": "Autogenerated input type of NamespaceIncreaseStorageTemporarily",
@@ -34993,7 +35483,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NamespaceID",
                   "ofType": null
                 }
               },
@@ -35601,6 +36091,16 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "NoteID",
+          "description": "Identifier of Note",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "NotePermissions",
           "description": null,
@@ -35873,6 +36373,16 @@
               "ofType": null
             }
           ]
+        },
+        {
+          "kind": "SCALAR",
+          "name": "NoteableID",
+          "description": "Identifier of Noteable",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
         },
         {
           "kind": "OBJECT",
@@ -36358,49 +36868,55 @@
           "enumValues": [
             {
               "name": "MAVEN",
-              "description": "Packages from the maven package manager",
+              "description": "Packages from the Maven package manager",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "NPM",
-              "description": "Packages from the npm package manager",
+              "description": "Packages from the NPM package manager",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "CONAN",
-              "description": "Packages from the conan package manager",
+              "description": "Packages from the Conan package manager",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "NUGET",
-              "description": "Packages from the nuget package manager",
+              "description": "Packages from the Nuget package manager",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "PYPI",
-              "description": "Packages from the pypi package manager",
+              "description": "Packages from the PyPI package manager",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "COMPOSER",
-              "description": "Packages from the composer package manager",
+              "description": "Packages from the Composer package manager",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "GENERIC",
-              "description": "Packages from the generic package manager",
+              "description": "Packages from the Generic package manager",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "GOLANG",
-              "description": "Packages from the golang package manager",
+              "description": "Packages from the Golang package manager",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "DEBIAN",
+              "description": "Packages from the Debian package manager",
               "isDeprecated": false,
               "deprecationReason": null
             }
@@ -37719,11 +38235,15 @@
               "args": [
                 {
                   "name": "id",
-                  "description": "Find a board by its ID",
+                  "description": "The board's ID",
                   "type": {
-                    "kind": "SCALAR",
-                    "name": "ID",
-                    "ofType": null
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "ID",
+                      "ofType": null
+                    }
                   },
                   "defaultValue": null
                 }
@@ -41536,6 +42056,16 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "ProjectID",
+          "description": "Identifier of Project",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "ProjectMember",
           "description": "Represents a Project Membership",
@@ -43206,6 +43736,16 @@
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "sort",
+                  "description": "Sort order of results",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -45136,7 +45676,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -45533,6 +46073,20 @@
                   "name": "ID",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "lastTestReportManuallyCreated",
+              "description": "Indicates if latest test report was created by user",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -47670,6 +48224,20 @@
           "description": "Represents summary of a security report",
           "fields": [
             {
+              "name": "apiFuzzing",
+              "description": "Aggregated counts for the api_fuzzing scan",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "SecurityReportSummarySection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "containerScanning",
               "description": "Aggregated counts for the container_scanning scan",
               "args": [
@@ -47909,6 +48477,12 @@
             },
             {
               "name": "COVERAGE_FUZZING",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "API_FUZZING",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
@@ -51095,6 +51669,89 @@
           "possibleTypes": null
         },
         {
+          "kind": "OBJECT",
+          "name": "StatusAction",
+          "description": null,
+          "fields": [
+            {
+              "name": "buttonTitle",
+              "description": "Title for the button, for example: Retry this job",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "icon",
+              "description": "Icon used in the action button",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "method",
+              "description": "Method for the action, for example: :post",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "path",
+              "description": "Path for the action",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "title",
+              "description": "Title for the action, for example: Retry",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "SCALAR",
           "name": "String",
           "description": "Represents textual data as UTF-8 character sequences. This type is most often used by GraphQL to represent free-form human-readable text.",
@@ -51630,251 +52287,6 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "TerraformState",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [
-
-          ],
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
-          "kind": "OBJECT",
-          "name": "TerraformStateRegistry",
-          "description": "Represents the Geo sync and verification state of a terraform state",
-          "fields": [
-            {
-              "name": "createdAt",
-              "description": "Timestamp when the TerraformStateRegistry was created",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "Time",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "id",
-              "description": "ID of the TerraformStateRegistry",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "lastSyncFailure",
-              "description": "Error message during sync of the TerraformStateRegistry",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "lastSyncedAt",
-              "description": "Timestamp of the most recent successful sync of the TerraformStateRegistry",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "Time",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "retryAt",
-              "description": "Timestamp after which the TerraformStateRegistry should be resynced",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "Time",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "retryCount",
-              "description": "Number of consecutive failed sync attempts of the TerraformStateRegistry",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "Int",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "state",
-              "description": "Sync state of the TerraformStateRegistry",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "ENUM",
-                "name": "RegistryState",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "terraformStateId",
-              "description": "ID of the TerraformState",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [
-
-          ],
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
-          "kind": "OBJECT",
-          "name": "TerraformStateRegistryConnection",
-          "description": "The connection type for TerraformStateRegistry.",
-          "fields": [
-            {
-              "name": "edges",
-              "description": "A list of edges.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "TerraformStateRegistryEdge",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "nodes",
-              "description": "A list of nodes.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "TerraformStateRegistry",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "pageInfo",
-              "description": "Information to aid in pagination.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "PageInfo",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [
-
-          ],
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
-          "kind": "OBJECT",
-          "name": "TerraformStateRegistryEdge",
-          "description": "An edge in a connection.",
-          "fields": [
-            {
-              "name": "cursor",
-              "description": "A cursor for use in pagination.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "node",
-              "description": "The item at the end of the edge.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "OBJECT",
-                "name": "TerraformStateRegistry",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -52957,6 +53369,16 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "TodoID",
+          "description": "Identifier of Todo",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "INPUT_OBJECT",
           "name": "TodoMarkDoneInput",
           "description": "Autogenerated input type of TodoMarkDone",
@@ -53117,7 +53539,7 @@
                     "name": null,
                     "ofType": {
                       "kind": "SCALAR",
-                      "name": "ID",
+                      "name": "TodoID",
                       "ofType": null
                     }
                   }
@@ -53526,7 +53948,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -54302,6 +54724,136 @@
         },
         {
           "kind": "INPUT_OBJECT",
+          "name": "UpdateBoardEpicUserPreferencesInput",
+          "description": "Autogenerated input type of UpdateBoardEpicUserPreferences",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "boardId",
+              "description": "The board global ID",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "BoardID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "epicId",
+              "description": "ID of an epic to set preferences for",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "EpicID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "collapsed",
+              "description": "Whether the epic should be collapsed in the board",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "UpdateBoardEpicUserPreferencesPayload",
+          "description": "Autogenerated return type of UpdateBoardEpicUserPreferences",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "epicUserPreferences",
+              "description": "User preferences for the epic in the board after mutation",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "BoardEpicUserPreferences",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
           "name": "UpdateBoardInput",
           "description": "Autogenerated input type of UpdateBoard",
           "fields": null,
@@ -54314,7 +54866,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "BoardID",
                   "ofType": null
                 }
               },
@@ -54355,7 +54907,7 @@
               "description": "The id of user to be assigned to the board.",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "UserID",
                 "ofType": null
               },
               "defaultValue": null
@@ -54365,7 +54917,7 @@
               "description": "The id of milestone to be assigned to the board.",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "MilestoneID",
                 "ofType": null
               },
               "defaultValue": null
@@ -54377,6 +54929,42 @@
                 "kind": "SCALAR",
                 "name": "Int",
                 "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "labels",
+              "description": "Labels of the issue",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "labelIds",
+              "description": "The IDs of labels to be added to the board.",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "LabelID",
+                    "ofType": null
+                  }
+                }
               },
               "defaultValue": null
             },
@@ -55282,6 +55870,16 @@
               "defaultValue": null
             },
             {
+              "name": "stateEvent",
+              "description": "Close or reopen an issue.",
+              "type": {
+                "kind": "ENUM",
+                "name": "IssueStateEvent",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "healthStatus",
               "description": "The desired health status",
               "type": {
@@ -55958,6 +56556,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "spam",
+              "description": "Indicates whether the operation returns a record detected as spam",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -56124,6 +56736,16 @@
                   "type": {
                     "kind": "SCALAR",
                     "name": "ID",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "authorUsername",
+                  "description": "Username of the author",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -56319,6 +56941,16 @@
                   "type": {
                     "kind": "SCALAR",
                     "name": "ID",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "assigneeUsername",
+                  "description": "Username of the assignee",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -58010,7 +58642,7 @@
             },
             {
               "name": "reportType",
-              "description": "Type of the security report that found the vulnerability (SAST, DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION, COVERAGE_FUZZING)",
+              "description": "Type of the security report that found the vulnerability (SAST, DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION, COVERAGE_FUZZING, API_FUZZING)",
               "args": [
 
               ],
@@ -58070,7 +58702,7 @@
             },
             {
               "name": "state",
-              "description": "State of the vulnerability (DETECTED, DISMISSED, RESOLVED, CONFIRMED)",
+              "description": "State of the vulnerability (DETECTED, CONFIRMED, RESOLVED, DISMISSED)",
               "args": [
 
               ],
@@ -58341,7 +58973,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "VulnerabilityID",
                   "ofType": null
                 }
               },
@@ -59461,6 +60093,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "API_FUZZING",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -59548,6 +60186,108 @@
             {
               "name": "vulnerability",
               "description": "The vulnerability after state change",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Vulnerability",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "VulnerabilityRevertToDetectedInput",
+          "description": "Autogenerated input type of VulnerabilityRevertToDetected",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "id",
+              "description": "ID of the vulnerability to be reverted",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "VulnerabilityID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityRevertToDetectedPayload",
+          "description": "Autogenerated return type of VulnerabilityRevertToDetected",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "vulnerability",
+              "description": "The vulnerability after revert",
               "args": [
 
               ],
@@ -59947,6 +60687,18 @@
               "description": "Report Type in ascending order",
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "state_desc",
+              "description": "State in descending order",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "state_asc",
+              "description": "State in ascending order",
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -59966,7 +60718,7 @@
               "deprecationReason": null
             },
             {
-              "name": "DISMISSED",
+              "name": "CONFIRMED",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
@@ -59978,7 +60730,7 @@
               "deprecationReason": null
             },
             {
-              "name": "CONFIRMED",
+              "name": "DISMISSED",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null

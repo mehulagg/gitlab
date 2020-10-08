@@ -136,13 +136,9 @@ export default {
     },
     viewReplacedFileButtonText() {
       const truncatedBaseSha = escape(truncateSha(this.diffFile.diff_refs.base_sha));
-      return sprintf(
-        s__('MergeRequests|View replaced file @ %{commitId}'),
-        {
-          commitId: `<span class="commit-sha">${truncatedBaseSha}</span>`,
-        },
-        false,
-      );
+      return sprintf(s__('MergeRequests|View replaced file @ %{commitId}'), {
+        commitId: truncatedBaseSha,
+      });
     },
     gfmCopyText() {
       return `\`${this.diffFile.file_path}\``;
@@ -211,7 +207,7 @@ export default {
     class="js-file-title file-title file-title-flex-parent"
     @click.self="handleToggleFile"
   >
-    <div class="file-header-content">
+    <div class="file-header-content gl-display-flex gl-align-items-center gl-pr-0!">
       <gl-icon
         v-if="collapsible"
         ref="collapseIcon"
@@ -245,7 +241,14 @@ export default {
           ></strong>
         </span>
 
-        <strong v-else v-gl-tooltip :title="filePath" class="file-title-name" data-container="body">
+        <strong
+          v-else
+          v-gl-tooltip
+          :title="filePath"
+          class="file-title-name"
+          data-container="body"
+          data-qa-selector="file_name_content"
+        >
           {{ filePath }}
         </strong>
       </a>
@@ -254,7 +257,8 @@ export default {
         :title="__('Copy file path')"
         :text="diffFile.file_path"
         :gfm="gfmCopyText"
-        css-class="btn-default btn-transparent btn-clipboard"
+        data-testid="diff-file-copy-clipboard"
+        category="tertiary"
         data-track-event="click_copy_file_button"
         data-track-label="diff_copy_file_path_button"
         data-track-property="diff_copy_file"
@@ -303,10 +307,11 @@ export default {
           <gl-dropdown-item
             v-if="diffFile.replaced_view_path"
             ref="replacedFileButton"
-            v-safe-html="viewReplacedFileButtonText"
             :href="diffFile.replaced_view_path"
             target="_blank"
-          />
+          >
+            {{ viewReplacedFileButtonText }}
+          </gl-dropdown-item>
           <gl-dropdown-item ref="viewButton" :href="diffFile.view_path" target="_blank">
             {{ viewFileButtonText }}
           </gl-dropdown-item>

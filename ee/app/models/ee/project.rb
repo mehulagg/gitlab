@@ -42,7 +42,6 @@ module EE
       has_one :github_service
       has_one :gitlab_slack_application_service
 
-      has_one :tracing_setting, class_name: 'ProjectTracingSetting'
       has_one :status_page_setting, inverse_of: :project, class_name: 'StatusPage::ProjectSetting'
       has_one :compliance_framework_setting, class_name: 'ComplianceManagement::ComplianceFramework::ProjectSettings', inverse_of: :project
       has_one :security_setting, class_name: 'ProjectSecuritySetting'
@@ -136,7 +135,6 @@ module EE
       scope :with_github_service_pipeline_events, -> { joins(:github_service).merge(GithubService.pipeline_hooks) }
       scope :with_active_prometheus_service, -> { joins(:prometheus_service).merge(PrometheusService.active) }
       scope :with_enabled_error_tracking, -> { joins(:error_tracking_setting).where(project_error_tracking_settings: { enabled: true }) }
-      scope :with_tracing_enabled, -> { joins(:tracing_setting) }
       scope :mirrored_with_enabled_pipelines, -> do
         joins(:project_feature).mirror.where(mirror_trigger_builds: true,
                                              project_features: { builds_access_level: ::ProjectFeature::ENABLED })
@@ -156,6 +154,15 @@ module EE
       scope :with_vulnerability_statistics, -> { includes(:vulnerability_statistic) }
 
       scope :with_group_saml_provider, -> { preload(group: :saml_provider) }
+
+      scope :with_total_repository_size_greater_than, -> (value) do
+        statistics = ::ProjectStatistics.arel_table
+
+        joins(:statistics)
+          .where((statistics[:repository_size] + statistics[:lfs_objects_size]).gt(value))
+      end
+      scope :without_unlimited_repository_size_limit, -> { where.not(repository_size_limit: 0) }
+      scope :without_repository_size_limit, -> { where(repository_size_limit: nil) }
 
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
         to: :statistics, allow_nil: true
@@ -188,7 +195,6 @@ module EE
         validates :mirror_user, presence: true
       end
 
-      accepts_nested_attributes_for :tracing_setting, update_only: true, allow_destroy: true
       accepts_nested_attributes_for :status_page_setting, update_only: true, allow_destroy: true
       accepts_nested_attributes_for :compliance_framework_setting, update_only: true, allow_destroy: true
 
@@ -233,10 +239,6 @@ module EE
 
     def can_store_security_reports?
       namespace.store_security_reports_available? || public?
-    end
-
-    def tracing_external_url
-      self.tracing_setting.try(:external_url)
     end
 
     def latest_pipeline_with_security_reports(only_successful: false)
@@ -514,14 +516,26 @@ module EE
       ::Gitlab::UrlSanitizer.new(bare_url, credentials: { user: import_data&.user }).full_url
     end
 
+    def actual_size_limit
+      strong_memoize(:actual_size_limit) do
+        repository_size_limit || namespace.actual_size_limit
+      end
+    end
+
     def repository_size_checker
       strong_memoize(:repository_size_checker) do
         ::Gitlab::RepositorySizeChecker.new(
           current_size_proc: -> { statistics.total_repository_size },
-          limit: (repository_size_limit || namespace.actual_size_limit),
+          limit: actual_size_limit,
           enabled: License.feature_available?(:repository_size_limit)
         )
       end
+    end
+
+    def repository_size_excess
+      return 0 unless actual_size_limit.to_i > 0
+
+      [statistics.total_repository_size - actual_size_limit, 0].max
     end
 
     def username_only_import_url=(value)

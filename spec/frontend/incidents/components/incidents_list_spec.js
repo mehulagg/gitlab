@@ -28,10 +28,10 @@ import mockFilters from '../mocks/incidents_filter.json';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn().mockName('visitUrlMock'),
-  joinPaths: jest.fn().mockName('joinPaths'),
-  mergeUrlParams: jest.fn().mockName('mergeUrlParams'),
-  setUrlParams: jest.fn().mockName('setUrlParams'),
-  updateHistory: jest.fn().mockName('updateHistory'),
+  joinPaths: jest.fn(),
+  mergeUrlParams: jest.fn(),
+  setUrlParams: jest.fn(),
+  updateHistory: jest.fn(),
 }));
 
 describe('Incidents List', () => {
@@ -81,7 +81,7 @@ describe('Incidents List', () => {
         newIssuePath,
         incidentTemplateName,
         incidentType,
-        issuePath: '/project/isssues',
+        issuePath: '/project/issues',
         publishedAvailable: true,
         emptyListSvgPath,
         textQuery: '',
@@ -182,13 +182,6 @@ describe('Incidents List', () => {
         expect(src).toBe(avatarUrl);
       });
 
-      it('contains a link to the issue details', () => {
-        findTableRows()
-          .at(0)
-          .trigger('click');
-        expect(visitUrl).toHaveBeenCalledWith(joinPaths(`/project/isssues/`, mockIncidents[0].iid));
-      });
-
       it('renders a closed icon for closed incidents', () => {
         expect(findClosedIcon().length).toBe(
           mockIncidents.filter(({ state }) => state === 'closed').length,
@@ -198,6 +191,15 @@ describe('Incidents List', () => {
 
     it('renders severity per row', () => {
       expect(findSeverity().length).toBe(mockIncidents.length);
+    });
+
+    it('contains a link to the incident details page', async () => {
+      findTableRows()
+        .at(0)
+        .trigger('click');
+      expect(visitUrl).toHaveBeenCalledWith(
+        joinPaths(`/project/issues/incident`, mockIncidents[0].iid),
+      );
     });
   });
 
@@ -218,11 +220,10 @@ describe('Incidents List', () => {
       );
     });
 
-    it('sets button loading on click', () => {
+    it('sets button loading on click', async () => {
       findCreateIncidentBtn().vm.$emit('click');
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findCreateIncidentBtn().attributes('loading')).toBe('true');
-      });
+      await wrapper.vm.$nextTick();
+      expect(findCreateIncidentBtn().attributes('loading')).toBe('true');
     });
 
     it("doesn't show the button when list is empty", () => {
@@ -254,51 +255,47 @@ describe('Incidents List', () => {
     });
 
     describe('prevPage', () => {
-      it('returns prevPage button', () => {
+      it('returns prevPage button', async () => {
         findPagination().vm.$emit('input', 3);
 
-        return wrapper.vm.$nextTick(() => {
-          expect(
-            findPagination()
-              .findAll('.page-item')
-              .at(0)
-              .text(),
-          ).toBe('Prev');
-        });
+        await wrapper.vm.$nextTick();
+        expect(
+          findPagination()
+            .findAll('.page-item')
+            .at(0)
+            .text(),
+        ).toBe('Prev');
       });
 
-      it('returns prevPage number', () => {
+      it('returns prevPage number', async () => {
         findPagination().vm.$emit('input', 3);
 
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.prevPage).toBe(2);
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.prevPage).toBe(2);
       });
 
-      it('returns 0 when it is the first page', () => {
+      it('returns 0 when it is the first page', async () => {
         findPagination().vm.$emit('input', 1);
 
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.prevPage).toBe(0);
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.prevPage).toBe(0);
       });
     });
 
     describe('nextPage', () => {
-      it('returns nextPage button', () => {
+      it('returns nextPage button', async () => {
         findPagination().vm.$emit('input', 3);
 
-        return wrapper.vm.$nextTick(() => {
-          expect(
-            findPagination()
-              .findAll('.page-item')
-              .at(1)
-              .text(),
-          ).toBe('Next');
-        });
+        await wrapper.vm.$nextTick();
+        expect(
+          findPagination()
+            .findAll('.page-item')
+            .at(1)
+            .text(),
+        ).toBe('Next');
       });
 
-      it('returns nextPage number', () => {
+      it('returns nextPage number', async () => {
         mountComponent({
           data: {
             incidents: {
@@ -312,17 +309,15 @@ describe('Incidents List', () => {
         });
         findPagination().vm.$emit('input', 1);
 
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.nextPage).toBe(2);
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.nextPage).toBe(2);
       });
 
-      it('returns `null` when currentPage is already last page', () => {
+      it('returns `null` when currentPage is already last page', async () => {
         findStatusTabs().vm.$emit('input', 1);
         findPagination().vm.$emit('input', 1);
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.nextPage).toBeNull();
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.nextPage).toBeNull();
       });
     });
 

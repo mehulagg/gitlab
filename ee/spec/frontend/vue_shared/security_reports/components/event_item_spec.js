@@ -1,4 +1,4 @@
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import Component from 'ee/vue_shared/security_reports/components/event_item.vue';
 import { shallowMount, mount } from '@vue/test-utils';
 import NoteHeader from '~/notes/components/note_header.vue';
@@ -91,12 +91,12 @@ describe('Event Item', () => {
     });
 
     it('renders the action buttons', () => {
-      expect(wrapper.findAll(GlDeprecatedButton)).toHaveLength(2);
+      expect(wrapper.findAll(GlButton)).toHaveLength(2);
       expect(wrapper.element).toMatchSnapshot();
     });
 
     it('emits the button events when clicked', () => {
-      const buttons = wrapper.findAll(GlDeprecatedButton);
+      const buttons = wrapper.findAll(GlButton);
       buttons.at(0).trigger('click');
       return wrapper.vm
         .$nextTick()

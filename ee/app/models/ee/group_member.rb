@@ -3,9 +3,9 @@
 module EE
   module GroupMember
     extend ActiveSupport::Concern
+    extend ::Gitlab::Utils::Override
 
     prepended do
-      extend ::Gitlab::Utils::Override
       include UsageStatistics
 
       validate :sso_enforcement, if: :group
@@ -79,6 +79,14 @@ module EE
     end
 
     private
+
+    override :access_level_inclusion
+    def access_level_inclusion
+      levels = source.access_level_values
+      return if access_level.in?(levels)
+
+      errors.add(:access_level, "is not included in the list")
+    end
 
     def email_does_not_match_any_allowed_domains(email)
       _("email '%{email}' does not match the allowed domains of %{email_domains}" %

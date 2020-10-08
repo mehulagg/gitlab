@@ -91,11 +91,13 @@ export default {
       createdAfter: startDate = null,
       createdBefore: endDate = null,
       selectedProjects = [],
+      selectedValueStream = {},
     } = {},
   ) {
     state.isLoading = true;
     state.currentGroup = group;
     state.selectedProjects = selectedProjects;
+    state.selectedValueStream = selectedValueStream;
     state.startDate = startDate;
     state.endDate = endDate;
   },
@@ -138,8 +140,8 @@ export default {
     state.isDeletingValueStream = false;
     state.deleteValueStreamError = null;
   },
-  [types.SET_SELECTED_VALUE_STREAM](state, streamId) {
-    state.selectedValueStream = state.valueStreams?.find(({ id }) => id === streamId) || null;
+  [types.SET_SELECTED_VALUE_STREAM](state, valueStream) {
+    state.selectedValueStream = valueStream;
   },
   [types.REQUEST_VALUE_STREAMS](state) {
     state.isLoadingValueStreams = true;

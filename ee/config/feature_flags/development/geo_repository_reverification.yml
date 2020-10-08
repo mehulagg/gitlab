@@ -2,6 +2,6 @@
 name: geo_repository_reverification
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/8550
 rollout_issue_url:
-group: geo
+group: group::geo
 type: development
 default_enabled: true

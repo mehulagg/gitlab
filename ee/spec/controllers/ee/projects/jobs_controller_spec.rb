@@ -74,15 +74,44 @@ RSpec.describe Projects::JobsController do
 
         before do
           stub_application_setting(shared_runners_minutes: 2)
-
-          get_show(id: job.id, format: :json)
         end
 
         it 'exposes quota information' do
+          get_show(id: job.id, format: :json)
+
           expect(response).to have_gitlab_http_status(:ok)
           expect(response).to match_response_schema('job/job_details', dir: 'ee')
           expect(json_response['runners']['quota']['used']).to eq 0
           expect(json_response['runners']['quota']['limit']).to eq 2
+        end
+
+        context 'the environment is protected' do
+          before do
+            stub_licensed_features(protected_environments: true)
+            create(:protected_environment, project: project)
+          end
+
+          let(:job) { create(:ci_build, :deploy_to_production, :with_deployment, :success, pipeline: pipeline, runner: runner) }
+
+          it 'renders successfully' do
+            get_show(id: job.id, format: :json)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(response).to match_response_schema('job/job_details', dir: 'ee')
+          end
+
+          context 'anonymous user' do
+            before do
+              sign_out(user)
+            end
+
+            it 'renders successfully' do
+              get_show(id: job.id, format: :json)
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(response).to match_response_schema('job/job_details', dir: 'ee')
+            end
+          end
         end
       end
     end

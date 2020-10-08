@@ -22,6 +22,12 @@ RSpec.describe GroupPolicy do
       it { is_expected.to be_allowed(:read_epic, :create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
     end
 
+    context 'when user is admin' do
+      let(:current_user) { admin }
+
+      it { is_expected.to be_allowed(:read_epic, :create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
+    end
+
     context 'when user is maintainer' do
       let(:current_user) { maintainer }
 

@@ -27,7 +27,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   before_action :authenticate_user!, only: [:assign_related_issues]
   before_action :check_user_can_push_to_source_branch!, only: [:rebase]
   before_action only: [:show] do
-    push_frontend_feature_flag(:suggest_pipeline) if experiment_enabled?(:suggest_pipeline)
+    push_frontend_experiment(:suggest_pipeline)
     push_frontend_feature_flag(:widget_visibility_polling, @project, default_enabled: true)
     push_frontend_feature_flag(:merge_ref_head_comments, @project, default_enabled: true)
     push_frontend_feature_flag(:mr_commit_neighbor_nav, @project, default_enabled: true)
@@ -50,12 +50,17 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
 
   after_action :log_merge_request_show, only: [:show]
 
-  feature_category :source_code_management,
-                   unless: -> (action) { action.ends_with?("_reports") }
-  feature_category :code_testing,
-                   only: [:test_reports, :coverage_reports, :terraform_reports]
-  feature_category :accessibility_testing,
-                   only: [:accessibility_reports]
+  feature_category :code_review, [
+                     :assign_related_issues, :bulk_update, :cancel_auto_merge,
+                     :ci_environments_status, :commit_change_content, :commits,
+                     :context_commits, :destroy, :diff_for_path, :discussions,
+                     :edit, :exposed_artifacts, :index, :merge,
+                     :pipeline_status, :pipelines, :rebase, :remove_wip, :show,
+                     :toggle_award_emoji, :toggle_subscription, :update
+                   ]
+
+  feature_category :code_testing, [:test_reports, :coverage_reports, :terraform_reports]
+  feature_category :accessibility_testing, [:accessibility_reports]
 
   def index
     @merge_requests = @issuables

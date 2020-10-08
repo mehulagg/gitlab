@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'spec_helper'
 
 RSpec.describe Issues::UpdateService do
@@ -8,6 +9,10 @@ RSpec.describe Issues::UpdateService do
   let(:user) { issue.author }
 
   describe 'execute' do
+    before do
+      project.add_reporter(user)
+    end
+
     def update_issue(opts)
       described_class.new(project, user, opts).execute(issue)
     end

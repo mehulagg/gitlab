@@ -80,7 +80,7 @@ The button to do this has a different label depending on whether the issue is al
 List or not. If the issue is:
 
 - Already on your To-Do List: The button is labeled **Mark as done**. Click the button to remove the issue from your To-Do List.
-- Not on your To-Do List: The button is labeled **Add a To Do**. Click the button to add the issue to your To-Do List.
+- Not on your To-Do List: The button is labeled **Add a to do**. Click the button to add the issue to your To-Do List.
 
 ### Assignee
 
@@ -242,7 +242,7 @@ and selecting either:
 Also:
 
 - You can mention a user or a group present in your GitLab instance with
-  `@username` or `@groupname` and they will be notified via To-Do items
+  `@username` or `@groupname` and they will be notified via to-do items
   and email, unless they have [disabled all notifications](#notifications)
   in their profile settings.
 - Mentions for yourself (the current logged in user), will be highlighted

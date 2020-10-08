@@ -146,7 +146,7 @@ export default {
         <gl-loading-icon v-if="isLoading" class="gl-p-2" />
       </div>
     </div>
-    <div v-if="isExpanded" class="gl-display-flex">
+    <div v-if="isExpanded" class="gl-display-flex" data-testid="board-epic-lane-issues">
       <issues-lane-list
         v-for="list in lists"
         :key="`${list.id}-issues`"

@@ -5,6 +5,8 @@ class OperationsController < ApplicationController
 
   respond_to :json, only: [:list]
 
+  feature_category :release_orchestration
+
   POLLING_INTERVAL = 120_000
 
   def index

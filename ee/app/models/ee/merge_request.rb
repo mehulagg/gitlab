@@ -34,6 +34,8 @@ module EE
           end
         end
       end
+      has_many :approval_merge_request_rule_sources, through: :approval_rules
+      has_many :approval_project_rules, through: :approval_merge_request_rule_sources
       has_one :merge_train, inverse_of: :merge_request, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
       has_many :blocks_as_blocker,
@@ -147,7 +149,6 @@ module EE
     end
 
     def has_denied_policies?
-      return false if ::Feature.disabled?(:license_compliance_denies_mr, project, default_enabled: true)
       return false unless has_license_scanning_reports?
 
       return false if has_approved_license_check?
@@ -163,7 +164,8 @@ module EE
         dependency_scanning: report_type_enabled?(:dependency_scanning),
         license_scanning: report_type_enabled?(:license_scanning),
         coverage_fuzzing: report_type_enabled?(:coverage_fuzzing),
-        secret_detection: report_type_enabled?(:secret_detection)
+        secret_detection: report_type_enabled?(:secret_detection),
+        api_fuzzing: report_type_enabled?(:api_fuzzing)
       }
     end
 
@@ -222,7 +224,7 @@ module EE
     end
 
     def compare_license_scanning_reports(current_user)
-      return missing_report_error("license scanning") unless has_license_scanning_reports?
+      return missing_report_error("license scanning") unless actual_head_pipeline&.license_scan_completed?
 
       compare_reports(::Ci::CompareLicenseScanningReportsService, current_user)
     end
@@ -245,6 +247,12 @@ module EE
       return missing_report_error("coverage fuzzing") unless has_coverage_fuzzing_reports?
 
       compare_reports(::Ci::CompareSecurityReportsService, current_user, 'coverage_fuzzing')
+    end
+
+    def compare_api_fuzzing_reports(current_user)
+      return missing_report_error('api fuzzing') unless has_api_fuzzing_reports?
+
+      compare_reports(::Ci::CompareSecurityReportsService, current_user, 'api_fuzzing')
     end
 
     def synchronize_approval_rules_from_target_project

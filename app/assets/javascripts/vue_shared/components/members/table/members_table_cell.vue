@@ -11,7 +11,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['sourceId']),
+    ...mapState(['sourceId', 'currentUserId']),
     isGroup() {
       return Boolean(this.member.sharedWithGroup);
     },
@@ -35,11 +35,25 @@ export default {
     isDirectMember() {
       return this.member.source?.id === this.sourceId;
     },
+    isCurrentUser() {
+      return this.member.user?.id === this.currentUserId;
+    },
+    canRemove() {
+      return this.isDirectMember && this.member.canRemove;
+    },
+    canResend() {
+      return Boolean(this.member.invite?.canResend);
+    },
   },
   render() {
     return this.$scopedSlots.default({
       memberType: this.memberType,
       isDirectMember: this.isDirectMember,
+      isCurrentUser: this.isCurrentUser,
+      permissions: {
+        canRemove: this.canRemove,
+        canResend: this.canResend,
+      },
     });
   },
 };

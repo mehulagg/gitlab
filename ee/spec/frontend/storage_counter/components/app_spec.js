@@ -3,7 +3,7 @@ import StorageApp from 'ee/storage_counter/components/app.vue';
 import Project from 'ee/storage_counter/components/project.vue';
 import TemporaryStorageIncreaseModal from 'ee/storage_counter/components/temporary_storage_increase_modal.vue';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
-import { projects, withRootStorageStatistics } from '../data';
+import { namespaceData, withRootStorageStatistics } from '../mock_data';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 
 const TEST_LIMIT = 1000;
@@ -44,28 +44,28 @@ describe('Storage counter app', () => {
 
   it('renders the 2 projects', async () => {
     wrapper.setData({
-      namespace: projects,
+      namespace: namespaceData,
     });
 
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.findAll(Project)).toHaveLength(2);
+    expect(wrapper.findAll(Project)).toHaveLength(3);
   });
 
   describe('limit', () => {
     it('when limit is set it renders limit information', async () => {
       wrapper.setData({
-        namespace: projects,
+        namespace: namespaceData,
       });
 
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.text()).toContain(numberToHumanSize(projects.limit));
+      expect(wrapper.text()).toContain(numberToHumanSize(namespaceData.limit));
     });
 
     it('when limit is 0 it does not render limit information', async () => {
       wrapper.setData({
-        namespace: { ...projects, limit: 0 },
+        namespace: { ...namespaceData, limit: 0 },
       });
 
       await wrapper.vm.$nextTick();
@@ -89,7 +89,7 @@ describe('Storage counter app', () => {
   describe('without rootStorageStatistics information', () => {
     it('renders N/A', async () => {
       wrapper.setData({
-        namespace: projects,
+        namespace: namespaceData,
       });
 
       await wrapper.vm.$nextTick();
@@ -140,7 +140,7 @@ describe('Storage counter app', () => {
         createComponent({ isTemporaryStorageIncreaseVisible: 'true' });
         wrapper.setData({
           namespace: {
-            ...projects,
+            ...namespaceData,
             limit: TEST_LIMIT,
           },
         });

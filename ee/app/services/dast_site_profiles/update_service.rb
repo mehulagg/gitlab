@@ -30,7 +30,7 @@ module DastSiteProfiles
 
     # rubocop: disable CodeReuse/ActiveRecord
     def find_dast_site_profile!(id)
-      DastSiteProfilesFinder.new(project_id: project.id, id: id.model_id).execute.first!
+      DastSiteProfilesFinder.new(project_id: project.id, id: id).execute.first!
     end
     # rubocop: enable CodeReuse/ActiveRecord
   end

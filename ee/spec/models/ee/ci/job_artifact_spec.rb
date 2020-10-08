@@ -212,4 +212,51 @@ RSpec.describe Ci::JobArtifact do
       end
     end
   end
+
+  describe '#security_report' do
+    let(:job_artifact) { create(:ee_ci_job_artifact, :sast) }
+    let(:security_report) { job_artifact.security_report }
+
+    subject(:findings_count) { security_report.findings.length }
+
+    it { is_expected.to be(33) }
+
+    context 'for different types' do
+      where(:file_type, :security_report?) do
+        :performance         | false
+        :sast                | true
+        :secret_detection    | true
+        :dependency_scanning | true
+        :container_scanning  | true
+        :dast                | true
+        :coverage_fuzzing    | true
+      end
+
+      with_them do
+        let(:job_artifact) { create(:ee_ci_job_artifact, file_type) }
+
+        subject { security_report.is_a?(::Gitlab::Ci::Reports::Security::Report) }
+
+        it { is_expected.to be(security_report?) }
+      end
+    end
+  end
+
+  describe '#clear_security_report' do
+    let(:job_artifact) { create(:ee_ci_job_artifact, :sast) }
+
+    subject(:clear_security_report) { job_artifact.clear_security_report }
+
+    before do
+      job_artifact.security_report # Memoize first
+      allow(::Gitlab::Ci::Reports::Security::Report).to receive(:new).and_call_original
+    end
+
+    it 'clears the security_report' do
+      clear_security_report
+      job_artifact.security_report
+
+      expect(::Gitlab::Ci::Reports::Security::Report).to have_received(:new).once
+    end
+  end
 end

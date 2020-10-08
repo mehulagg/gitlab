@@ -93,8 +93,12 @@ for filtering purposes; otherwise, they appear as normal.
 
 ### Manually creating a to do
 
-You can add an issue or merge request (or epic **(ULTIMATE)**) to your
-To-Do List by clicking its **Add a To Do** button.
+You can also add the following to your To-Do List by clicking the **Add a to do** button on an:
+
+- [Issue](project/issues/index.md)
+- [Merge Request](project/merge_requests/index.md)
+- [Epic](group/epics/index.md) **(ULTIMATE)**
+- [Design](project/issues/design_management.md)
 
 ![Adding a To Do from the issuable sidebar](img/todos_add_todo_sidebar.png)
 
@@ -125,7 +129,7 @@ If no action is needed, you can manually mark the to do item as done by
 clicking its corresponding **Done** button to have GitLab remove the item from
 your To-Do List.
 
-![A to-do in the To-Do List](img/todos_todo_list_item.png)
+![A to do in the To-Do List](img/todos_todo_list_item.png)
 
 You can also mark a to do item as done by clicking the **Mark as done** button
 in the sidebar of an issue or merge request (or epic **(ULTIMATE)**).
@@ -143,9 +147,9 @@ You can use the following types of filters with your To-Do List:
 | ------- | ---------------------------------------------------------------- |
 | Project | Filter by project.                                               |
 | Group   | Filter by group.                                                 |
-| Author  | Filter by the author that triggered the To Do.                   |
+| Author  | Filter by the author that triggered the to do.                   |
 | Type    | Filter by issue, merge request, design, or epic. **(ULTIMATE)**  |
-| Action  | Filter by the action that triggered the To Do.                   |
+| Action  | Filter by the action that triggered the to do.                   |
 
 You can also filter by more than one of these at the same time. The previously
 described [triggering actions](#what-triggers-a-to-do) include:

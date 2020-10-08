@@ -173,13 +173,23 @@ describe('Board Store Mutations', () => {
 
       state = {
         ...state,
-        issuesByListId: {},
+        issuesByListId: {
+          'gid://gitlab/List/1': [],
+        },
         issues: {},
         boardLists: mockListsWithModel,
       };
 
+      const listPageInfo = {
+        'gid://gitlab/List/1': {
+          endCursor: '',
+          hasNextPage: false,
+        },
+      };
+
       mutations.RECEIVE_ISSUES_FOR_LIST_SUCCESS(state, {
         listIssues: { listData: listIssues, issues },
+        listPageInfo,
         listId: 'gid://gitlab/List/1',
       });
 
@@ -322,6 +332,7 @@ describe('Board Store Mutations', () => {
       state = {
         ...state,
         issuesByListId: listIssues,
+        boardLists: mockListsWithModel,
       };
 
       mutations.MOVE_ISSUE_FAILURE(state, {
@@ -389,6 +400,7 @@ describe('Board Store Mutations', () => {
         ...state,
         issuesByListId: listIssues,
         issues,
+        boardLists: mockListsWithModel,
       };
 
       mutations.ADD_ISSUE_TO_LIST_FAILURE(state, { list: mockLists[0], issue: mockIssue2 });

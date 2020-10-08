@@ -49,6 +49,20 @@ See also:
 - [Exposing Global IDs](#exposing-global-ids).
 - [Mutation arguments](#object-identifier-arguments).
 
+We have a custom scalar type (`Types::GlobalIDType`) which should be used as the
+type of input and output arguments when the value is a `GlobalID`. The benefits
+of using this type instead of `ID` are:
+
+- it validates that the value is a `GlobalID`
+- it parses it into a `GlobalID` before passing it to user code
+- it can be parameterized on the type of the object (e.g.
+  `GlobalIDType[Project]`) which offers even better validation and security.
+
+Consider using this type for all new arguments and result types. Remember that
+it is perfectly possible to parameterize this type with a concern or a
+supertype, if you want to accept a wider range of objects (e.g.
+`GlobalIDType[Issuable]` vs `GlobalIDType[Issue]`).
+
 ## Types
 
 We use a code-first schema, and we declare what type everything is in Ruby.
@@ -471,6 +485,28 @@ end
 
 Enum values can be deprecated using the
 [`deprecated` keyword](#deprecating-fields-and-enum-values).
+
+### Defining GraphQL enums dynamically from Rails enums
+
+If your GraphQL enum is backed by a [Rails enum](creating_enums.md), then consider
+using the Rails enum to dynamically define the GraphQL enum values. Doing so
+binds the GraphQL enum values to the Rails enum definition, so if values are
+ever added to the Rails enum then the GraphQL enum automatically reflects the change.
+
+Example:
+
+```ruby
+module Types
+  class IssuableSeverityEnum < BaseEnum
+    graphql_name 'IssuableSeverity'
+    description 'Incident severity'
+
+    ::IssuableSeverity.severities.keys.each do |severity|
+      value severity.upcase, value: severity, description: "#{severity.titleize} severity"
+    end
+  end
+end
+```
 
 ## JSON
 
@@ -1409,5 +1445,4 @@ For information on generating GraphQL documentation and schema files, see
 [updating the schema documentation](rake_tasks.md#update-graphql-documentation-and-schema-definitions).
 
 To help our readers, you should also add a new page to our [GraphQL API](../api/graphql/index.md) documentation.
-For guidance, see the [GraphQL API](documentation/styleguide.md#graphql-api) section
-of our documentation style guide.
+For guidance, see the [GraphQL API](documentation/graphql_styleguide.md) page.

@@ -29,7 +29,7 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
     end
 
     around do |example|
-      Timecop.freeze(today) do
+      travel_to(today) do
         example.run
       end
     end

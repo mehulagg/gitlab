@@ -6,6 +6,8 @@ import {
   mockEpics,
   mockEpic,
   mockListsWithModel,
+  mockIssueWithModel,
+  mockIssue2WithModel,
 } from '../mock_data';
 
 const expectNotImplemented = action => {
@@ -204,6 +206,21 @@ describe('RECEIVE_SWIMLANES_FAILURE', () => {
   });
 });
 
+describe('RECEIVE_FIRST_EPICS_SUCCESS', () => {
+  it('populates epics and canAdminEpic with payload', () => {
+    state = {
+      ...state,
+      epics: {},
+      canAdminEpic: false,
+    };
+
+    mutations.RECEIVE_FIRST_EPICS_SUCCESS(state, { epics: mockEpics, canAdminEpic: true });
+
+    expect(state.epics).toEqual(mockEpics);
+    expect(state.canAdminEpic).toEqual(true);
+  });
+});
+
 describe('RECEIVE_EPICS_SUCCESS', () => {
   it('populates epics with payload', () => {
     state = {
@@ -227,5 +244,64 @@ describe('RESET_EPICS', () => {
     mutations.RESET_EPICS(state);
 
     expect(state.epics).toEqual([]);
+  });
+});
+
+describe('MOVE_ISSUE', () => {
+  beforeEach(() => {
+    const listIssues = {
+      'gid://gitlab/List/1': [mockListsWithModel.id, mockIssue2WithModel.id],
+      'gid://gitlab/List/2': [],
+    };
+
+    const issues = {
+      '436': mockIssueWithModel,
+      '437': mockIssue2WithModel,
+    };
+
+    state = {
+      ...state,
+      issuesByListId: listIssues,
+      boardLists: mockListsWithModel,
+      issues,
+    };
+  });
+
+  it('updates issuesByListId, moving issue between lists and updating epic id on issue', () => {
+    expect(state.issues['437'].epic.id).toEqual('gid://gitlab/Epic/40');
+
+    mutations.MOVE_ISSUE(state, {
+      originalIssue: mockIssue2WithModel,
+      fromListId: 'gid://gitlab/List/1',
+      toListId: 'gid://gitlab/List/2',
+      epicId,
+    });
+
+    const updatedListIssues = {
+      'gid://gitlab/List/1': [mockListsWithModel.id],
+      'gid://gitlab/List/2': [mockIssue2WithModel.id],
+    };
+
+    expect(state.issuesByListId).toEqual(updatedListIssues);
+    expect(state.issues['437'].epic.id).toEqual(epicId);
+  });
+
+  it('removes epic id from issue when epicId is null', () => {
+    expect(state.issues['437'].epic.id).toEqual('gid://gitlab/Epic/40');
+
+    mutations.MOVE_ISSUE(state, {
+      originalIssue: mockIssue2WithModel,
+      fromListId: 'gid://gitlab/List/1',
+      toListId: 'gid://gitlab/List/2',
+      epicId: null,
+    });
+
+    const updatedListIssues = {
+      'gid://gitlab/List/1': [mockListsWithModel.id],
+      'gid://gitlab/List/2': [mockIssue2WithModel.id],
+    };
+
+    expect(state.issuesByListId).toEqual(updatedListIssues);
+    expect(state.issues['437'].epic).toEqual(null);
   });
 });

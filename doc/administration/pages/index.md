@@ -235,7 +235,7 @@ control over how the Pages daemon runs and serves content in your environment.
 | `pages_path` | The directory on disk where pages are stored, defaults to `GITLAB-RAILS/shared/pages`.
 | `pages_nginx[]` | |
 | `enable` | Include a virtual host `server{}` block for Pages inside NGINX. Needed for NGINX to proxy traffic back to the Pages daemon. Set to `false` if the Pages daemon should directly receive all requests, for example, when using [custom domains](index.md#custom-domains).
-| `FF_ENABLE_REDIRECTS` | Feature flag to enable redirects. See the [redirects documentation](../../user/project/pages/redirects.md#enable-or-disable-redirects) for more info. |
+| `FF_ENABLE_REDIRECTS` | Feature flag to disable redirects (enabled by default). Read the [redirects documentation](../../user/project/pages/redirects.md#disable-redirects) for more info. |
 
 ---
 
@@ -370,8 +370,8 @@ Pages access control is disabled by default. To enable it:
 1. Users can now configure it in their [projects' settings](../../user/project/pages/pages_access_control.md).
 
 NOTE: **Important:**
-For multi-node setups, in order for this setting to be effective, it has to be applied
-to all the App nodes as well as the Sidekiq nodes.
+For this setting to be effective with multi-node setups, it has to be applied to
+all the App nodes and Sidekiq nodes.
 
 #### Disabling public access to all Pages websites
 
@@ -397,8 +397,7 @@ redeployed. This issue will be resolved by
 ### Running behind a proxy
 
 Like the rest of GitLab, Pages can be used in those environments where external
-internet connectivity is gated by a proxy. In order to use a proxy for GitLab
-pages:
+internet connectivity is gated by a proxy. To use a proxy for GitLab Pages:
 
 1. Configure in `/etc/gitlab/gitlab.rb`:
 
@@ -424,10 +423,6 @@ For installation from source, this can be fixed by installing the custom Certifi
 Authority (CA) in the system certificate store.
 
 For Omnibus, this is fixed by [installing a custom CA in Omnibus GitLab](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates).
-
-## Enable redirects
-
-In GitLab Pages, you can [enable the redirects feature](../../user/project/pages/redirects.md#enable-or-disable-redirects) to configure rules to forward one URL to another using HTTP redirects.
 
 ## Activate verbose logging for daemon
 
@@ -508,7 +503,8 @@ To override the global maximum pages size for a specific group:
 
 ## Running GitLab Pages on a separate server
 
-You can run the GitLab Pages daemon on a separate server in order to decrease the load on your main application server.
+You can run the GitLab Pages daemon on a separate server to decrease the load on
+your main application server.
 
 To configure GitLab Pages on a separate server:
 

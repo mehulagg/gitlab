@@ -6,6 +6,7 @@ module Ci
     include ::Gitlab::ExclusiveLeaseHelpers
 
     Result = Struct.new(:status, :backoff, keyword_init: true)
+    InvalidTraceError = Class.new(StandardError)
 
     ACCEPT_TIMEOUT = 5.minutes.freeze
 
@@ -70,12 +71,26 @@ module Ci
     end
 
     def validate_build_trace!
-      if chunks_persisted?
+      return unless has_chunks?
+
+      unless live_chunks_pending?
         metrics.increment_trace_operation(operation: :finalized)
       end
 
-      unless ::Gitlab::Ci::Trace::Checksum.new(build).valid?
-        metrics.increment_trace_operation(operation: :invalid)
+      ::Gitlab::Ci::Trace::Checksum.new(build).then do |checksum|
+        unless checksum.valid?
+          metrics.increment_trace_operation(operation: :invalid)
+
+          next unless log_invalid_chunks?
+
+          ::Gitlab::ErrorTracking.log_exception(InvalidTraceError.new,
+            project_path: build.project.full_path,
+            build_id: build.id,
+            state_crc32: checksum.state_crc32,
+            chunks_crc32: checksum.chunks_crc32,
+            chunks_count: checksum.chunks_count
+          )
+        end
       end
     end
 
@@ -110,8 +125,8 @@ module Ci
       build.trace_chunks.live.any?
     end
 
-    def chunks_persisted?
-      build.trace_chunks.any? && !live_chunks_pending?
+    def has_chunks?
+      build.trace_chunks.any?
     end
 
     def pending_state_outdated?
@@ -179,6 +194,10 @@ module Ci
 
     def chunks_migration_enabled?
       ::Gitlab::Ci::Features.accept_trace?(build.project)
+    end
+
+    def log_invalid_chunks?
+      ::Gitlab::Ci::Features.log_invalid_trace_chunks?(build.project)
     end
   end
 end
