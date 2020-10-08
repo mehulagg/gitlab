@@ -40,6 +40,9 @@ export default {
       // remove the seconds portion of the string
       return time.substring(0, time.length - 3);
     },
+    loading() {
+      return this.$apollo?.queries?.slaDueAt?.loading;
+    },
     show() {
       return this.slaFeatureAvailable && this.slaDueAt !== null;
     },
@@ -50,7 +53,7 @@ export default {
 <template>
   <div v-if="slaFeatureAvailable">
     <span class="gl-font-weight-bold">{{ s__('HighlightBar|Time to SLA:') }}</span>
-    <gl-loading-icon v-if="$apollo.queries.slaDueAt.loading" inline />
+    <gl-loading-icon v-if="loading" inline />
     <time-ago-tooltip v-if="slaDueAt" :time="slaDueAt" class="gl-white-space-nowrap">
       <gl-icon name="timer" />
       <span>{{ displayValue }}</span>
