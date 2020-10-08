@@ -36,6 +36,7 @@ class SearchController < ApplicationController
     return unless search_term_valid?
 
     @search_term = params[:search]
+    @with_counts = Gitlab::Utils.to_boolean(params[:with_counts], default: true)
 
     @scope = search_service.scope
     @show_snippets = search_service.show_snippets?

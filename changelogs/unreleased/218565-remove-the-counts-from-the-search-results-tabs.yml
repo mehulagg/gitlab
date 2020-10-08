@@ -1,0 +1,6 @@
+---
+title: Add 'with_counts' search query parameter to toggle results counts outside the
+  selected scope.
+merge_request: 44793
+author:
+type: added

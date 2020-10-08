@@ -17,8 +17,14 @@ function refreshCount(el) {
     });
 }
 
-export default function refreshCounts() {
-  const elements = Array.from(document.querySelectorAll('.js-search-count'));
+function unknownCount(el) {
+  showCount(el, '?');
+}
 
-  return Promise.all(elements.map(refreshCount));
+export default function refreshCounts() {
+  const killswitch = document.querySelector('input[type="hidden"][name="with_counts"]');
+  const elements = Array.from(document.querySelectorAll('.js-search-count'));
+  const strategy = /true/i.test(killswitch.value) ? refreshCount : unknownCount;
+
+  return Promise.all(elements.map(strategy));
 }
