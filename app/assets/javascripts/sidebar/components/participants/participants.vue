@@ -86,7 +86,7 @@ export default {
   <div>
     <div
       v-if="showParticipantLabel"
-      v-gl-tooltip
+      v-gl-tooltip.left.viewport
       :title="participantLabel"
       class="sidebar-collapsed-icon"
       data-container="body"
