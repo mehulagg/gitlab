@@ -142,7 +142,7 @@ These are dynamic dates and recalculated if any of the following occur:
 
 Because the epic's dates can inherit dates from its children, the start date and due date propagate from the bottom to the top.
 If the start date of a child epic on the lowest level changes, that becomes the earliest possible start date for its parent epic.
-The parent epic's start date will reflect this change and will propagate upwards to the top epic.
+The parent epic's start date then reflects this change and propagates upwards to the top epic.
 
 ## Roadmap in epics
 
