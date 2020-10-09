@@ -40,13 +40,12 @@ module Gitlab
 
           raise UnknownEvent.new("Unknown event #{event_name}") unless event.present?
 
-          # Increment unique event for given plan
-          if plan.present? && event[:plan_enabled]
-            Gitlab::Redis::HLL.add(key: redis_key(event, time, plan), value: entity_id, expiry: expiry(event))
-          end
-
           # Increment unique event globaly
           Gitlab::Redis::HLL.add(key: redis_key(event, time), value: entity_id, expiry: expiry(event))
+
+          # Increment unique event for given plan
+          # Track events in plan level if we have more than 1 plan defined and if plan_enabled is true
+          Gitlab::Redis::HLL.add(key: redis_key(event, time, plan), value: entity_id, expiry: expiry(event)) if valid_plan?(plan, event)
         end
 
         # Get the unique events in same category and slot
@@ -167,25 +166,32 @@ module Gitlab
           raise UnknownEvent.new("Unknown event #{event[:name]}") unless known_events_names.include?(event[:name].to_s)
           raise UnknownAggregation.new("Use :daily or :weekly aggregation") unless ALLOWED_AGGREGATIONS.include?(event[:aggregation].to_sym)
 
+          key = apply_slot(event)
+          key = apply_time_aggregation(key, time, event)
+          key = "#{plan}_#{key}" if valid_plan?(plan, event)
+          key
+        end
+
+        def valid_plan?(plan, event)
+          plan.present? && event[:plan_enabled] && Plan.all_plans.size > 1 && plan.in?(Plan.all)
+        end
+
+        def apply_slot(event)
           slot = redis_slot(event)
-          key = if slot.present?
-                  event[:name].to_s.gsub(slot, "{#{slot}}")
-                else
-                  "{#{event[:name]}}"
-                end
-
-          key_with_slot = if event[:aggregation].to_sym == :daily
-                            year_day = time.strftime('%G-%j')
-                            "#{year_day}-#{key}"
-                          else
-                            year_week = time.strftime('%G-%V')
-                            "#{key}-#{year_week}"
-                          end
-
-          if plan.present? && event[:plan_enabled]
-            "#{plan}_#{key_with_slot}"
+          if slot.present?
+            event[:name].to_s.gsub(slot, "{#{slot}}")
           else
-            key_with_slot
+            "{#{event[:name]}}"
+          end
+        end
+
+        def apply_time_aggregation(key, time, event)
+          if event[:aggregation].to_sym == :daily
+            year_day = time.strftime('%G-%j')
+            "#{year_day}-#{key}"
+          else
+            year_week = time.strftime('%G-%V')
+            "#{key}-#{year_week}"
           end
         end
 
