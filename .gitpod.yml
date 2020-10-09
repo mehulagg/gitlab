@@ -83,6 +83,8 @@ ports:
     onOpen: ignore
   - port: 5778
     onOpen: ignore
+  - port: 9000
+    onOpen: ignore
 
 vscode:
   extensions:
