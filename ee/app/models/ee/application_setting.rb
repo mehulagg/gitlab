@@ -7,10 +7,10 @@ module EE
   # and be prepended in the `ApplicationSetting` model
   module ApplicationSetting
     extend ActiveSupport::Concern
+    extend ::Gitlab::Utils::Override
 
     prepended do
       EMAIL_ADDITIONAL_TEXT_CHARACTER_LIMIT = 10_000
-      INSTANCE_REVIEW_MIN_USERS = 50
       DEFAULT_NUMBER_OF_DAYS_BEFORE_REMOVAL = 7
 
       belongs_to :file_template_project, class_name: "Project"
@@ -299,14 +299,11 @@ module EE
       ::Project.where(namespace_id: group_id)
     end
 
+    override :instance_review_permitted?
     def instance_review_permitted?
       return if License.current
 
-      users_count = Rails.cache.fetch('limited_users_count', expires_in: 1.day) do
-        ::User.limit(INSTANCE_REVIEW_MIN_USERS + 1).count(:all)
-      end
-
-      users_count >= INSTANCE_REVIEW_MIN_USERS
+      super
     end
 
     def max_personal_access_token_lifetime_from_now
