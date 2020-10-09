@@ -2,9 +2,8 @@
 
 module EE
   module CveRequestHelper
-    def request_cve_enabled_for_issue_and_user?(issue, user)
-      issue.confidential &&
-        can?(user, :admin_project, issue.project) &&
+    def request_cve_enabled_for_user?(issue, user)
+      can?(user, :admin_project, issue.project) &&
         request_cve_enabled?(issue.project)
     end
 

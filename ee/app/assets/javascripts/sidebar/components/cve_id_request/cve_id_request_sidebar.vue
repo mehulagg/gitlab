@@ -3,6 +3,7 @@ import { GlIcon } from '@gitlab/ui';
 import { __, s__ } from '~/locale'; // eslint-disable-line no-unused-vars
 import { joinPaths } from '~/lib/utils/url_utility';
 import tooltip from '~/vue_shared/directives/tooltip';
+import eventHub from '~/sidebar/event_hub';
 
 export default {
   components: {
@@ -13,7 +14,11 @@ export default {
     tooltip,
   },
 
-  props: {
+  inject: {
+    initialConfidential: {
+      required: true,
+      type: Boolean,
+    },
     iid: {
       required: true,
       type: String,
@@ -31,22 +36,37 @@ export default {
   data() {
     return {
       showHelp: false,
+      confidential: this.initialConfidential,
     };
   },
 
   computed: {
     helpHref() {
-      return joinPaths(gon.relative_url_root || '', '/help/user/project/cve_id_request.md');
+      return joinPaths(
+        gon.relative_url_root || '',
+        '/help/user/application_security/cve_id_request.md',
+      );
     },
     showHelpState() {
       return Boolean(this.showHelp);
     },
   },
 
+  mounted() {
+    eventHub.$on('updateIssuableConfidentiality', this.changeIssueConfidentiality);
+  },
+
+  beforeDestroy() {
+    eventHub.$off('updateIssuableConfidentiality', this.changeIssueConfidentiality);
+  },
 
   methods: {
     toggleHelpState(show) {
       this.showHelp = show;
+    },
+
+    changeIssueConfidentiality(newVal) {
+      this.confidential = newVal;
     },
 
     createCveIdRequestUrl() {
@@ -110,7 +130,7 @@ CVSS scores can be computed by means of the [NVD CVSS Calculator](https://nvd.ni
 </script>
 
 <template>
-  <div class="block cve-id-request">
+  <div class="block cve-id-request" :class="confidential ? 'visible' : 'hidden'">
     <div
       v-tooltip
       title="CVE"

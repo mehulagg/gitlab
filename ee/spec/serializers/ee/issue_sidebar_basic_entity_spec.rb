@@ -11,13 +11,13 @@ RSpec.describe EE::IssueSidebarBasicEntity do
     let(:test_value) { 'TEST VALUE' }
 
     before do
-      allow_any_instance_of(EE::CveRequestHelper).to receive(:request_cve_enabled_for_issue_and_user?).and_return(test_value)
+      allow_any_instance_of(EE::CveRequestHelper).to receive(:request_cve_enabled_for_user?).and_return(test_value)
     end
 
-    it 'uses the value from request_cve_enabled_for_issue_and_user' do
+    it 'uses the value from request_cve_enabled_for_user' do
       serializer = IssueSerializer.new(current_user: user, project: project)
       data = serializer.represent(issue, serializer: 'sidebar')
-      expect(data[:request_cve_enabled_for_issue]).to equal(test_value)
+      expect(data[:request_cve_enabled_for_user]).to equal(test_value)
     end
   end
 end

@@ -58,8 +58,10 @@ function mountCveIdRequestComponent() {
   const el = document.getElementById('js-sidebar-cve-id-request-entry-point');
 
   if (!el) return;
-
   const { iid, fullPath, title } = CEMountSidebar.getSidebarOptions();
+
+  const dataNode = document.getElementById('js-sidebar-cve-id-request-issue-data');
+  const { is_confidential } = JSON.parse(dataNode.innerHTML);
 
   // eslint-disable-next-line no-new
   new Vue({
@@ -67,14 +69,13 @@ function mountCveIdRequestComponent() {
     components: {
       CveIdRequest,
     },
-    render: createElement =>
-      createElement('cve-id-request', {
-        props: {
-          iid: String(iid),
-          fullPath,
-          issueTitle: title,
-        },
-      }),
+    provide: {
+      iid: String(iid),
+      fullPath,
+      issueTitle: title,
+      initialConfidential: is_confidential,
+    },
+    render: createElement => createElement('cve-id-request'),
   });
 }
 

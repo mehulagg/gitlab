@@ -1,10 +1,11 @@
 import Vue from 'vue';
 import CveIdRequest from 'ee/sidebar/components/cve_id_request/cve_id_request_sidebar.vue';
-import mountComponent from 'helpers/vue_mount_component_helper';
+//import mountComponent from 'helpers/vue_mount_component_helper';
+import { shallowMount } from '@vue/test-utils';
 
 describe('CveIdRequest', () => {
   let initialData;
-  let vm;
+  let wrapper;
 
   const initCveIdRequest = () => {
     setFixtures(`
@@ -13,10 +14,11 @@ describe('CveIdRequest', () => {
       </div>
     `);
 
-    initialData = {
+    const provide = {
       iid: 'test',
       fullPath: 'some/path',
       issueTitle: 'Issue Title',
+      initialConfidential: true,
     };
 
     const CveIdRequestComponent = Vue.extend({
@@ -31,7 +33,10 @@ describe('CveIdRequest', () => {
         },
       },
     });
-    vm = mountComponent(CveIdRequestComponent, initialData, '#mock-container');
+    wrapper = shallowMount(CveIdRequestComponent, {
+      provide,
+    });
+    //wrapper = mountComponent(CveIdRequestComponent, initialData, '#mock-container');
   };
 
   beforeEach(() => {
@@ -39,42 +44,42 @@ describe('CveIdRequest', () => {
   });
 
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
   });
 
   it('Renders the main "Request CVE ID" button', () => {
-    expect(vm.$el.querySelector('.js-cve-id-request-button')).not.toBeNull();
+    expect(wrapper.find('.js-cve-id-request-button').element).not.toBeNull();
   });
 
   it('Renders the "help-button" by default', () => {
-    expect(vm.$el.querySelector('.help-button')).not.toBeNull();
+    expect(wrapper.find('.help-button').element).not.toBeNull();
   });
 
   describe('Help Pane', () => {
-    const helpButton = () => vm.$el.querySelector('.help-button');
-    const closeHelpButton = () => vm.$el.querySelector('.close-help-button');
-    const helpPane = () => vm.$el.querySelector('.cve-id-request-help-state');
+    const helpButton = () => wrapper.find('.help-button').element;
+    const closeHelpButton = () => wrapper.find('.close-help-button').element;
+    const helpPane = () => wrapper.find('.cve-id-request-help-state').element;
 
     beforeEach(() => {
       initCveIdRequest();
-      return vm.$nextTick();
+      return wrapper.vm.$nextTick();
     });
 
     it('should not show the "Help" pane by default', () => {
-      expect(vm.showHelpState).toBe(false);
-      expect(helpPane()).toBeNull();
+      expect(wrapper.vm.showHelpState).toBe(false);
+      expect(helpPane()).toBeUndefined();
     });
 
     it('should show the "Help" pane when help button is clicked', () => {
       helpButton().click();
 
-      return vm.$nextTick().then(() => {
-        expect(vm.showHelpState).toBe(true);
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.vm.showHelpState).toBe(true);
 
         // let animations run
         jest.advanceTimersByTime(500);
 
-        expect(helpPane()).toBeVisible();
+        expect(helpPane()).not.toBeUndefined();
       });
     });
 
@@ -85,8 +90,8 @@ describe('CveIdRequest', () => {
         .then(() => closeHelpButton().click())
         .then(() => Vue.nextTick())
         .then(() => {
-          expect(vm.showHelpState).toBe(false);
-          expect(helpPane()).toBeNull();
+          expect(wrapper.vm.showHelpState).toBe(false);
+          expect(helpPane()).toBeUndefined();
         })
         .then(done)
         .catch(done.fail);

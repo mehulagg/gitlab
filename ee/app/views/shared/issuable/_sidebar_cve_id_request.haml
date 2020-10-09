@@ -1,2 +1,3 @@
-- if issuable_sidebar[:request_cve_enabled_for_issue]
+- if issuable_sidebar[:request_cve_enabled_for_user]
+  %script#js-sidebar-cve-id-request-issue-data{ type: "application/json" }= { is_confidential: issuable_sidebar[:confidential] }.to_json.html_safe
   #js-sidebar-cve-id-request-entry-point

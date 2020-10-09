@@ -5,16 +5,15 @@ require 'spec_helper'
 RSpec.describe EE::CveRequestHelper do
   let(:project) { create(:project) }
 
-  describe '#request_cve_enabled_for_issue_and_user?' do
+  describe '#request_cve_enabled_for_user?' do
     where(
       maintainer: [true, false],
-      confidential: [true, false],
       request_cve_enabled: [true, false]
     )
     with_them do
       let(:user) { create_user(maintainer ? :maintainer : :developer) }
       let(:issue) do
-        create(:issue, project: project, assignees: [user], confidential: confidential)
+        create(:issue, project: project, assignees: [user])
       end
 
       before do
@@ -25,8 +24,8 @@ RSpec.describe EE::CveRequestHelper do
       end
 
       it "returns the correct value" do
-        res = helper.request_cve_enabled_for_issue_and_user?(issue, user)
-        expected = maintainer && confidential && request_cve_enabled
+        res = helper.request_cve_enabled_for_user?(issue, user)
+        expected = maintainer && request_cve_enabled
         expect(res).to equal(expected)
       end
     end

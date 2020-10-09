@@ -19,8 +19,8 @@ module EE
         end
       end
 
-      expose :request_cve_enabled_for_issue do |issue|
-        request_cve_enabled_for_issue_and_user?(issue, current_user)
+      expose :request_cve_enabled_for_user do |issue|
+        request_cve_enabled_for_user?(issue, current_user)
       end
     end
   end
