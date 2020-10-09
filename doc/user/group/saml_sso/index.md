@@ -84,7 +84,7 @@ With this option enabled, users must go through your group's GitLab single sign-
 However, users will not be prompted to sign in through SSO on each visit. GitLab will check whether a user has authenticated through SSO, and will only prompt the user to sign in via SSO if the session has expired.
 You can see more information about how long a session is valid in our [user profile documentation](../../profile/#why-do-i-keep-getting-signed-out).
 
-We intend to add a similar SSO requirement for [Git and API activity](https://gitlab.com/gitlab-org/gitlab/-/issues/9152).
+SSO enforce does not affect command line or API activity except HTTPS with password authentication. We intend to add SSO requirement for [Git and API activity](https://gitlab.com/gitlab-org/gitlab/-/issues/9152).
 
 When SSO enforcement is enabled for a group, users cannot share a project in the group outside the top-level group, even if the project is forked.
 
