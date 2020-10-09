@@ -126,7 +126,8 @@ RSpec.describe 'Updating an epic tree' do
           it 'returns the error message' do
             post_graphql_mutation(mutation, current_user: current_user)
 
-            expect(mutation_response['errors']).to eq(['Only epics and epic_issues are supported.'])
+            expect(graphql_errors.first['message']).to include("\"#{variables[:moved][:id]}\" does not represent an instance of EpicTreeSorting")
+            expect(graphql_errors.first['message']).to include("\"#{variables[:moved][:adjacent_reference_id]}\" does not represent an instance of EpicTreeSorting")
           end
         end
 

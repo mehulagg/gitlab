@@ -401,7 +401,7 @@ end
 
 # Gems required in omnibus-gitlab pipeline
 group :development, :test, :omnibus do
-  gem 'license_finder', '~> 5.4', require: false
+  gem 'license_finder', '~> 6.0', require: false
 end
 
 group :test do
@@ -517,3 +517,6 @@ gem 'multi_json', '~> 1.14.1'
 gem 'yajl-ruby', '~> 1.4.1', require: 'yajl'
 
 gem 'webauthn', '~> 2.3'
+
+# IPAddress utilities
+gem 'ipaddress', '~> 0.8.3'

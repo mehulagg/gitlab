@@ -15,7 +15,9 @@ module EE
 
         before_action :whitelist_query_limiting_ee_merge, only: [:merge]
         before_action :authorize_read_pipeline!, only: [:container_scanning_reports, :dependency_scanning_reports,
-                                                        :sast_reports, :secret_detection_reports, :dast_reports, :metrics_reports, :coverage_fuzzing_reports]
+                                                        :sast_reports, :secret_detection_reports, :dast_reports,
+                                                        :metrics_reports, :coverage_fuzzing_reports,
+                                                        :api_fuzzing_reports]
         before_action :authorize_read_licenses!, only: [:license_scanning_reports]
 
         feature_category :code_review, [:delete_description_version, :description_diff]
@@ -58,6 +60,10 @@ module EE
 
       def coverage_fuzzing_reports
         reports_response(merge_request.compare_coverage_fuzzing_reports(current_user), head_pipeline)
+      end
+
+      def api_fuzzing_reports
+        reports_response(merge_request.compare_api_fuzzing_reports(current_user), head_pipeline)
       end
 
       private

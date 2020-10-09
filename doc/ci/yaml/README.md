@@ -740,7 +740,7 @@ using [`|` (literal) and `>` (folded) YAML multi-line block scalar indicators](h
 
 CAUTION: **Warning:**
 If multiple commands are combined into one command string, only the last command's
-failure or success is reported. 
+failure or success is reported.
 [Failures from earlier commands are ignored due to a bug](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/25394).
 To work around this,
 run each command as a separate `script:` item, or add an `exit 1` command
@@ -804,7 +804,7 @@ Second command line.
 ```
 
 When you omit the `>` or `|` block scalar indicators, GitLab forms the command
-by concatenating non-empty lines, so make sure the lines can run when concatenated.
+by concatenating non-empty lines. Make sure the lines can run when concatenated.
 
 Shell [here documents](https://en.wikipedia.org/wiki/Here_document) work with the
 `|` and `>` operators as well. The example below transliterates the lower case letters
@@ -1561,9 +1561,8 @@ job1:
 ```
 
 NOTE: **Note:**
-In GitLab 13.2 and older, the order of operations when mixing `||` and `&&` in a single rule may not have executed
-in the expected order. This is [fixed](https://gitlab.com/gitlab-org/gitlab/-/issues/230938)
-in GitLab 13.3.
+[Before GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/230938),
+rules that use both `||` and `&&` may evaluate with an unexpected order of operations.
 
 ### `only`/`except` (basic)
 
@@ -1677,19 +1676,19 @@ job:
 
 #### Regular expressions
 
-Because `@` is used to denote the beginning of a ref's repository path,
-matching a ref name containing the `@` character in a regular expression
-requires the use of the hex character code match `\x40`.
+The `@` symbol denotes the beginning of a ref's repository path.
+To match a ref name that contains the `@` character in a regular expression,
+you must use the hex character code match `\x40`.
 
 Only the tag or branch name can be matched by a regular expression.
 The repository path, if given, is always matched literally.
 
-If a regular expression is used to match the tag or branch name,
-the entire ref name part of the pattern has to be a regular expression,
-and must be surrounded by `/`.
-(With regular expression flags appended after the closing `/`.)
-So `issue-/.*/` doesn't work to match all tag names or branch names
-that begin with `issue-`.
+To match the tag or branch name,
+the entire ref name part of the pattern must be a regular expression surrounded by `/`.
+For example, you can't use `issue-/.*/` to match all tag names or branch names
+that begin with `issue-`, but you can use `/issue-.*/`.
+
+Regular expression flags must be appended after the closing `/`.
 
 TIP: **Tip:**
 Use anchors `^` and `$` to avoid the regular expression
@@ -1699,20 +1698,17 @@ while just `/issue/` would also match a branch called `severe-issues`.
 
 #### Supported `only`/`except` regexp syntax
 
-CAUTION: **Warning:**
-This is a breaking change that was introduced with GitLab 11.9.4.
-
-In GitLab 11.9.4, GitLab begun internally converting regexp used
+In GitLab 11.9.4, GitLab began internally converting the regexp used
 in `only` and `except` parameters to [RE2](https://github.com/google/re2/wiki/Syntax).
 
-This means that only subset of features provided by [Ruby Regexp](https://ruby-doc.org/core/Regexp.html)
-is supported. [RE2](https://github.com/google/re2/wiki/Syntax) limits the set of features
-provided due to computational complexity, which means some features became unavailable in GitLab 11.9.4.
-For example, negative lookaheads.
+[RE2](https://github.com/google/re2/wiki/Syntax) limits the set of available features
+due to computational complexity, and some features, like negative lookaheads, became unavailable.
+Only a subset of features provided by [Ruby Regexp](https://ruby-doc.org/core/Regexp.html)
+are now supported.
 
-For GitLab versions from 11.9.7 and up to GitLab 12.0, GitLab provides a feature flag that can be
-enabled by administrators that allows users to use unsafe regexp syntax. This brings compatibility
-with previously allowed syntax version and allows users to gracefully migrate to the new syntax.
+From GitLab 11.9.7 to GitLab 12.0, GitLab provided a feature flag to
+let you use the unsafe regexp syntax. This flag allowed
+compatibility with the previous syntax version so you could gracefully migrate to the new syntax.
 
 ```ruby
 Feature.enable(:allow_unsafe_ruby_regexp)
@@ -1768,7 +1764,7 @@ added if the following is true:
 
 - `(any listed refs are true) OR (any listed variables are true) OR (any listed changes are true) OR (a chosen Kubernetes status matches)`
 
-In the example below, the `test` job will **not** be created when **any** of the following are true:
+In the example below, the `test` job is **not** created when **any** of the following are true:
 
 - The pipeline runs for the `master` branch.
 - There are changes to the `README.md` file in the root directory of the repository.
@@ -1820,12 +1816,11 @@ deploy:
 
 > `variables` policy introduced in GitLab 10.7.
 
-The `variables` keyword defines variables expressions. In other words,
-you can use predefined variables / project / group or
-environment-scoped variables to define an expression that GitLab
-evaluates to decide whether a job should be created or not.
+The `variables` keyword defines variable expressions.
 
-Examples of using variables expressions:
+These expressions determine whether or not a job should be created.
+
+Examples of using variable expressions:
 
 ```yaml
 deploy:
@@ -1895,22 +1890,21 @@ docker build:
       - more_scripts/*.{rb,py,sh}
 ```
 
-In the scenario above, when pushing commits to an existing branch in GitLab,
-it creates and triggers the `docker build` job, provided that one of the
-commits contains changes to any of the following:
+When you push commits to an existing branch,
+the `docker build` job is created, but only if changes were made to any of the following:
 
 - The `Dockerfile` file.
-- Any of the files inside `docker/scripts/` directory.
-- Any of the files and subdirectories inside the `dockerfiles` directory.
-- Any of the files with `rb`, `py`, `sh` extensions inside the `more_scripts` directory.
+- Any of the files in the `docker/scripts/` directory.
+- Any of the files and subdirectories in the `dockerfiles` directory.
+- Any of the files with `rb`, `py`, `sh` extensions in the `more_scripts` directory.
 
 CAUTION: **Warning:**
-If using `only:changes` with [only allow merge requests to be merged if the pipeline succeeds](../../user/project/merge_requests/merge_when_pipeline_succeeds.md#only-allow-merge-requests-to-be-merged-if-the-pipeline-succeeds),
-undesired behavior could result if you don't [also use `only:merge_requests`](#using-onlychanges-with-pipelines-for-merge-requests).
+If you use `only:changes` with [only allow merge requests to be merged if the pipeline succeeds](../../user/project/merge_requests/merge_when_pipeline_succeeds.md#only-allow-merge-requests-to-be-merged-if-the-pipeline-succeeds),
+undesired behavior can result if you don't [also use `only:merge_requests`](#using-onlychanges-with-pipelines-for-merge-requests).
 
 You can also use glob patterns to match multiple files in either the root directory
-of the repository, or in _any_ directory within the repository, but they must be wrapped
-in double quotes or GitLab can't parse the `.gitlab-ci.yml`. For example:
+of the repository, or in _any_ directory within the repository. However, they must be wrapped
+in double quotes or GitLab can't parse them. For example:
 
 ```yaml
 test:
@@ -1923,10 +1917,8 @@ test:
       - "**/*.sql"
 ```
 
-The following example skips the `build` job if a change is detected in any file
-with a `.md` extension in the root directory of the repository. This means that if you change multiple files,
-but only one file is a `.md` file, the `build` job is still skipped and does
-not run for the other files.
+You can skip a job if a change is detected in any file with a
+`.md` extension in the root directory of the repository:
 
 ```yaml
 build:
@@ -1936,13 +1928,13 @@ build:
       - "*.md"
 ```
 
-CAUTION: **Warning:**
-There are some points to be aware of when
-[using this feature with new branches or tags *without* pipelines for merge requests](#using-onlychanges-without-pipelines-for-merge-requests).
+If you change multiple files, but only one file ends in `.md`,
+the `build` job is still skipped. The job does not run for any of the files.
 
-CAUTION: **Warning:**
-There are some points to be aware of when
-[using this feature with scheduled pipelines](#using-onlychanges-with-scheduled-pipelines).
+Read more about how to use this feature with:
+
+- [New branches or tags *without* pipelines for merge requests](#using-onlychanges-without-pipelines-for-merge-requests).
+- [Scheduled pipelines](#using-onlychanges-with-scheduled-pipelines).
 
 ##### Using `only:changes` with pipelines for merge requests
 
@@ -1987,15 +1979,17 @@ docker build service one:
       - service-one/**/*
 ```
 
-In the example above, a pipeline could fail due to changes to a file in `service-one/**/*`.
-A later commit could then be pushed that does not include any changes to this file,
-but includes changes to the `Dockerfile`, and this pipeline could pass because it's only
-testing the changes to the `Dockerfile`. GitLab checks the **most recent pipeline**,
-that **passed**, and shows the merge request as mergeable, despite the earlier
-failed pipeline caused by a change that was not yet corrected.
+In the example above, the pipeline might fail because of changes to a file in `service-one/**/*`.
 
-With this configuration, care must be taken to check that the most recent pipeline
-properly corrected any failures from previous pipelines.
+A later commit that doesn't have changes in `service-one/**/*`
+but does have changes to the `Dockerfile` can pass. The job
+only tests the changes to the `Dockerfile`.
+
+GitLab checks the **most recent pipeline** that **passed**. If the merge request is mergeable,
+it doesn't matter that an earlier pipeline failed because of a change that has not been corrected.
+
+When you use this configuration, ensure that the most recent pipeline
+properly corrects any failures from previous pipelines.
 
 ##### Using `only:changes` without pipelines for merge requests
 
@@ -2101,8 +2095,7 @@ can choose a custom limit. For example, to set the limit to 100:
 Plan.default.actual_limits.update!(ci_needs_size_limit: 100)
 ```
 
-NOTE: **Note:**
-To disable the ability to use DAG, set the limit to `0`.
+To disable directed acyclic graphs (DAG), set the limit to `0`.
 
 #### Artifact downloads with `needs`
 
@@ -2138,7 +2131,7 @@ rubocop:
 ```
 
 Additionally, in the three syntax examples below, the `rspec` job downloads the artifacts
-from all three `build_jobs`, as `artifacts` is true for `build_job_1`, and
+from all three `build_jobs`. `artifacts` is true for `build_job_1` and
 **defaults** to true for both `build_job_2` and `build_job_3`.
 
 ```yaml
@@ -2154,9 +2147,10 @@ rspec:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/14311) in GitLab v12.7.
 
-`needs` can be used to download artifacts from up to five jobs in pipelines on
-[other refs in the same project](#artifact-downloads-between-pipelines-in-the-same-project),
-or pipelines in different projects, groups and namespaces:
+Use `needs` to download artifacts from up to five jobs in pipelines:
+
+- [On other refs in the same project](#artifact-downloads-between-pipelines-in-the-same-project).
+- In different projects, groups and namespaces.
 
 ```yaml
 build_job:
@@ -2179,9 +2173,10 @@ The user running the pipeline must have at least `reporter` access to the group 
 
 ##### Artifact downloads between pipelines in the same project
 
-`needs` can be used to download artifacts from different pipelines in the current project
-by setting the `project` keyword as the current project's name, and specifying a ref.
-In the example below, `build_job` downloads the artifacts for the latest successful
+Use `needs` to download artifacts from different pipelines in the current project.
+Set the `project` keyword as the current project's name, and specify a ref.
+
+In this example, `build_job` downloads the artifacts for the latest successful
 `build-1` job with the `other-ref` ref:
 
 ```yaml
@@ -2213,7 +2208,6 @@ build_job:
       artifacts: true
 ```
 
-NOTE: **Note:**
 Downloading artifacts from jobs that are run in [`parallel:`](#parallel) is not supported.
 
 ### `tags`
@@ -2225,7 +2219,7 @@ When you register a runner, you can specify the runner's tags, for
 example `ruby`, `postgres`, `development`.
 
 In this example, the job is run by a runner that
-has both `ruby` AND `postgres` tags defined.
+has both `ruby` and `postgres` tags defined.
 
 ```yaml
 job:
@@ -2570,9 +2564,9 @@ deploy to production:
 >   defined, GitLab automatically triggers a stop action when the associated
 >   branch is deleted.
 
-Closing (stopping) environments can be achieved with the `on_stop` keyword defined under
-`environment`. It declares a different job that runs in order to close
-the environment.
+Closing (stopping) environments can be achieved with the `on_stop` keyword
+defined under `environment`. It declares a different job that runs to close the
+environment.
 
 Read the `environment:action` section for an example.
 
@@ -2610,21 +2604,20 @@ stop_review_app:
     action: stop
 ```
 
-In the above example we set up the `review_app` job to deploy to the `review`
-environment, and we also defined a new `stop_review_app` job under `on_stop`.
+In the above example, the `review_app` job deploys to the `review`
+environment. A new `stop_review_app` job is listed under `on_stop`.
 After the `review_app` job is finished, it triggers the
-`stop_review_app` job based on what is defined under `when`. In this case we
-set it up to `manual` so it needs a [manual action](#whenmanual) from
+`stop_review_app` job based on what is defined under `when`. In this case,
+it is set to `manual`, so it needs a [manual action](#whenmanual) from
 GitLab's user interface to run.
 
-Also in the example, `GIT_STRATEGY` is set to `none` so that GitLab Runner won’t
-try to check out the code after the branch is deleted when the `stop_review_app`
-job is [automatically triggered](../environments/index.md#automatically-stopping-an-environment).
+Also in the example, `GIT_STRATEGY` is set to `none`. If the
+`stop_review_app` job is [automatically triggered](../environments/index.md#automatically-stopping-an-environment),
+the runner won’t try to check out the code after the branch is deleted.
 
-NOTE: **Note:**
-The above example overwrites global variables. If your stop environment job depends
-on global variables, you can use [anchor variables](#yaml-anchors-for-variables) when setting the `GIT_STRATEGY`
-to change it without overriding the global variables.
+The example also overwrites global variables. If your `stop` `environment` job depends
+on global variables, you can use [anchor variables](#yaml-anchors-for-variables) when you set the `GIT_STRATEGY`.
+This changes the job without overriding the global variables.
 
 The `stop_review_app` job is **required** to have the following keywords defined:
 
@@ -3734,6 +3727,22 @@ child-pipeline:
 The `generated-config.yml` is extracted from the artifacts and used as the configuration
 for triggering the child pipeline.
 
+##### Trigger child pipeline with files from another project
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/205157) in GitLab 13.5.
+
+To trigger child pipelines with files from another private project under the same
+GitLab instance, use [`include:file`](#includefile):
+
+```yaml
+child-pipeline:
+  trigger:
+    include:
+      - project: 'my-group/my-pipeline-library'
+        ref: 'master'
+        file: '/path/to/child-pipeline.yml'
+```
+
 #### Linking pipelines with `trigger:strategy`
 
 By default, the `trigger` job completes with the `success` status
@@ -3960,7 +3969,11 @@ The title of each milestone the release is associated with.
 #### `release:released_at`
 
 The date and time when the release is ready. Defaults to the current date and time if not
-defined. Expected in ISO 8601 format (2019-03-15T08:00:00Z).
+defined. Should be enclosed in quotes and expressed in ISO 8601 format.
+
+```json
+released_at: '2021-03-15T08:00:00Z'
+```
 
 #### Complete example for `release`
 

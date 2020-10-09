@@ -66,7 +66,7 @@ RSpec.describe License do
     end
 
     describe "Historical active user count" do
-      let(:active_user_count) { User.active.count + 10 }
+      let(:active_user_count) { described_class.current_active_users.count + 10 }
       let(:date)              { described_class.current.starts_at }
       let!(:historical_data)  { HistoricalData.create!(date: date, active_user_count: active_user_count) }
 
@@ -82,7 +82,7 @@ RSpec.describe License do
 
           gl_license.restrictions = {
             previous_user_count: 1,
-            active_user_count: User.active.count - 1
+            active_user_count: described_class.current_active_users.count - 1
           }
 
           HistoricalData.delete_all
@@ -583,6 +583,21 @@ RSpec.describe License do
         end
       end
     end
+
+    describe '.current_active_users' do
+      before do
+        create(:group_member)
+        create(:group_member, user: create(:admin))
+        create(:group_member, user: create(:user, :bot))
+        create(:group_member, user: create(:user, :project_bot))
+        create(:group_member, user: create(:user, :ghost))
+        create(:group_member).user.deactivate!
+      end
+
+      it 'includes guests in the count' do
+        expect(license.current_active_users_count).to eq(2)
+      end
+    end
   end
 
   describe "#md5" do
@@ -744,6 +759,34 @@ RSpec.describe License do
     def build_license_with_add_ons(add_ons, plan: nil)
       gl_license = build(:gitlab_license, restrictions: { add_ons: add_ons, plan: plan })
       build(:license, data: gl_license.export)
+    end
+  end
+
+  describe '#current_active_users_count' do
+    before_all do
+      create(:group_member)
+      create(:group_member, user: create(:admin))
+      create(:group_member, :guest)
+      create(:group_member, user: create(:user, :bot))
+      create(:group_member, user: create(:user, :project_bot))
+      create(:group_member, user: create(:user, :ghost))
+      create(:group_member).user.deactivate!
+    end
+
+    context 'when license is not for Ultimate plan' do
+      it 'includes guests in the count' do
+        expect(license.current_active_users_count).to eq(3)
+      end
+    end
+
+    context 'when license is for Ultimate plan' do
+      before do
+        allow(license).to receive(:plan).and_return(License::ULTIMATE_PLAN)
+      end
+
+      it 'excludes guests in the count' do
+        expect(license.current_active_users_count).to eq(2)
+      end
     end
   end
 

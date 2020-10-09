@@ -16,11 +16,12 @@ module EE
         dependency_scanning: :dependency_scanning,
         container_scanning: :container_scanning,
         dast: :dast,
-        coverage_fuzzing: :coverage_fuzzing
+        coverage_fuzzing: :coverage_fuzzing,
+        api_fuzzing: :api_fuzzing
       }.with_indifferent_access.freeze
 
       EE_RUNNER_FEATURES = {
-        vault_secrets: -> (build) { build.ci_secrets_management_available? && build.secrets?}
+        vault_secrets: -> (build) { build.ci_secrets_management_available? && build.secrets? }
       }.freeze
 
       prepended do

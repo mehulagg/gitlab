@@ -47,6 +47,25 @@ module Gitlab
         end
       end
 
+      # Pull the highlight attribute out of Elasticsearch results
+      # and map it to the result id
+      def highlight_map(scope)
+        results = case scope
+                  when 'projects'
+                    projects
+                  when 'issues'
+                    issues
+                  when 'merge_requests'
+                    merge_requests
+                  when 'milestones'
+                    milestones
+                  when 'notes'
+                    notes
+                  end
+
+        results.to_h { |x| [x[:_source][:id], x[:highlight]] } if results.present?
+      end
+
       def formatted_count(scope)
         case scope
         when 'projects'
@@ -195,7 +214,7 @@ module Gitlab
 
       def issues
         strong_memoize(:issues) do
-          options = base_options.merge(filters.slice(:confidential, :state))
+          options = base_options.merge(filters.slice(:sort, :confidential, :state))
 
           Issue.elastic_search(query, options: options)
         end
@@ -216,8 +235,7 @@ module Gitlab
 
       def merge_requests
         strong_memoize(:merge_requests) do
-          options = base_options
-          options[:state] = filters[:state] if filters.key?(:state)
+          options = base_options.merge(filters.slice(:sort, :state))
 
           MergeRequest.elastic_search(query, options: options)
         end

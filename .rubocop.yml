@@ -293,6 +293,14 @@ Gitlab/AvoidFeatureGet:
   Enabled: true
 
 RSpec/TimecopFreeze:
+  Enabled: true
+  AutoCorrect: true
+  Include:
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+    - 'qa/spec/**/*.rb'
+
+RSpec/TimecopTravel:
   Enabled: false
   AutoCorrect: true
   Include:

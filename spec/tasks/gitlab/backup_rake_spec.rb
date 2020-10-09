@@ -331,11 +331,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
             "#{project_snippet_a.disk_path}.bundle",
             "#{project_snippet_b.disk_path}.bundle"
           ].each do |repo_name|
-            repo_lines = tar_lines.grep(/#{repo_name}/)
-
-            expect(repo_lines.size).to eq 1
-            # Checking that the size of the bundle is bigger than 0
-            expect(repo_lines.first.split[4].to_i > 0).to be true
+            expect(tar_lines.grep(/#{repo_name}/).size).to eq 1
           end
         end
 

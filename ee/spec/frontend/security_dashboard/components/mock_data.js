@@ -14,7 +14,7 @@ export const generateVulnerabilities = () => [
     ],
     title: 'Vulnerability 0',
     severity: 'critical',
-    state: 'dismissed',
+    state: 'DISMISSED',
     reportType: 'SAST',
     resolvedOnDefaultBranch: true,
     location: {
@@ -39,7 +39,7 @@ export const generateVulnerabilities = () => [
     ],
     title: 'Vulnerability 1',
     severity: 'high',
-    state: 'opened',
+    state: 'DETECTED',
     reportType: 'DEPENDENCY_SCANNING',
     location: {
       file: 'src/main/java/com/gitlab/security_products/tests/App.java',
@@ -58,7 +58,7 @@ export const generateVulnerabilities = () => [
     identifiers: [],
     title: 'Vulnerability 2',
     severity: 'high',
-    state: 'opened',
+    state: 'DETECTED',
     reportType: 'CUSTOM_SCANNER_WITHOUT_TRANSLATION',
     location: {
       file: 'src/main/java/com/gitlab/security_products/tests/App.java',
@@ -74,7 +74,7 @@ export const generateVulnerabilities = () => [
     id: 'id_3',
     title: 'Vulnerability 3',
     severity: 'high',
-    state: 'opened',
+    state: 'DETECTED',
     location: {
       file: 'yarn.lock',
     },
@@ -87,7 +87,7 @@ export const generateVulnerabilities = () => [
     id: 'id_4',
     title: 'Vulnerability 4',
     severity: 'critical',
-    state: 'dismissed',
+    state: 'DISMISSED',
     location: {},
     project: {
       nameWithNamespace: 'Administrator / Security reports',

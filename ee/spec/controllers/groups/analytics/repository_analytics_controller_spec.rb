@@ -10,7 +10,7 @@ RSpec.describe Groups::Analytics::RepositoryAnalyticsController do
   before do
     sign_in(current_user)
 
-    stub_licensed_features(feature_name => true, :group_coverage_reports => true)
+    stub_licensed_features(feature_name => true)
   end
 
   describe 'GET show', :snowplow do
@@ -35,18 +35,10 @@ RSpec.describe Groups::Analytics::RepositoryAnalyticsController do
 
     context 'when license is missing' do
       before do
-        stub_licensed_features(feature_name => false, :group_coverage_reports => true)
+        stub_licensed_features(feature_name => false)
       end
 
       it { is_expected.to have_gitlab_http_status(:forbidden) }
-    end
-
-    context 'when `group_repository_analytics` licensed feature flag is off' do
-      before do
-        stub_feature_flags(group_coverage_reports: false)
-      end
-
-      it { is_expected.to have_gitlab_http_status(:not_found) }
     end
 
     context 'when the user has no access to the group' do

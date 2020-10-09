@@ -158,7 +158,7 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
 
             context 'without namespace' do
               it 'has an expiration blocking message' do
-                expect(subject).to include('Your Gold subscription will expire on 2020-03-09. After that, you will not to be able to create issues or merge requests as well as many other features.')
+                expect(subject).to include('Your Gold subscription will expire on 2020-03-09. After that, you will not be able to create issues or merge requests as well as many other features.')
               end
             end
 
@@ -168,19 +168,19 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
               it 'has gold plan specific messaging' do
                 allow(subscribable).to receive(:plan).and_return('gold')
 
-                expect(subject).to include('Your Gold subscription for No Limit Records will expire on 2020-03-09. After that, you will not to be able to use merge approvals or epics as well as many security features.')
+                expect(subject).to include('Your Gold subscription for No Limit Records will expire on 2020-03-09. After that, you will not be able to use merge approvals or epics as well as many security features.')
               end
 
               it 'has silver plan specific messaging' do
                 allow(subscribable).to receive(:plan).and_return('silver')
 
-                expect(subject).to include('Your Silver subscription for No Limit Records will expire on 2020-03-09. After that, you will not to be able to use merge approvals or epics as well as many other features.')
+                expect(subject).to include('Your Silver subscription for No Limit Records will expire on 2020-03-09. After that, you will not be able to use merge approvals or epics as well as many other features.')
               end
 
               it 'has bronze plan specific messaging' do
                 allow(subscribable).to receive(:plan).and_return('bronze')
 
-                expect(subject).to include('Your Bronze subscription for No Limit Records will expire on 2020-03-09. After that, you will not to be able to use merge approvals or code quality as well as many other features.')
+                expect(subject).to include('Your Bronze subscription for No Limit Records will expire on 2020-03-09. After that, you will not be able to use merge approvals or code quality as well as many other features.')
               end
 
               context 'is auto_renew nil' do

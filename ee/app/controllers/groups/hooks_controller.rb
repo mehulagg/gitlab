@@ -60,7 +60,7 @@ class Groups::HooksController < Groups::ApplicationController
   end
 
   def destroy
-    @hook.destroy
+    destroy_hook(@hook)
 
     redirect_to group_hooks_path(@group), status: :found
   end
