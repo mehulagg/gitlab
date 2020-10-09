@@ -535,6 +535,8 @@ RSpec.describe Gitlab::UsageData do
         secret_detection_scans: 0,
         coverage_fuzzing_pipeline: 0,
         coverage_fuzzing_scans: 0,
+        api_fuzzing_pipeline: 0,
+        api_fuzzing_scans: 0,
         user_unique_users_all_secure_scanners: 1
       )
     end
@@ -586,13 +588,15 @@ RSpec.describe Gitlab::UsageData do
         dast_pipeline: 0,
         secret_detection_pipeline: 1,
         coverage_fuzzing_pipeline: 0,
+        api_fuzzing_pipeline: 0,
         user_unique_users_all_secure_scanners: 1,
         sast_scans: 0,
         dependency_scanning_scans: 2,
         container_scanning_scans: 1,
         dast_scans: 0,
         secret_detection_scans: 1,
-        coverage_fuzzing_scans: 0
+        coverage_fuzzing_scans: 0,
+        api_fuzzing_scans: 0
       )
     end
 
@@ -624,6 +628,8 @@ RSpec.describe Gitlab::UsageData do
         secret_detection_scans: 0,
         coverage_fuzzing_pipeline: 0,
         coverage_fuzzing_scans: 0,
+        api_fuzzing_pipeline: 0,
+        api_fuzzing_scans: 0,
         user_unique_users_all_secure_scanners: 3
       )
     end
@@ -654,6 +660,8 @@ RSpec.describe Gitlab::UsageData do
         secret_detection_scans: 0,
         coverage_fuzzing_pipeline: 0,
         coverage_fuzzing_scans: 0,
+        api_fuzzing_pipeline: 0,
+        api_fuzzing_scans: 0,
         user_unique_users_all_secure_scanners: 1
       )
     end
@@ -684,6 +692,8 @@ RSpec.describe Gitlab::UsageData do
         secret_detection_scans: -1,
         coverage_fuzzing_pipeline: -1,
         coverage_fuzzing_scans: -1,
+        api_fuzzing_pipeline: -1,
+        api_fuzzing_scans: -1,
         user_unique_users_all_secure_scanners: -1
       )
     end

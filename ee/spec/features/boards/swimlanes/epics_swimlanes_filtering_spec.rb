@@ -43,47 +43,60 @@ RSpec.describe 'epics swimlanes filtering', :js do
         page.find('.dropdown-item', text: 'Epic').click
       end
 
+      wait_for_all_requests
+
       stub_const("Gitlab::QueryLimiting::Transaction::THRESHOLD", 200)
     end
 
     it 'filters by author' do
+      wait_for_all_requests
+
       set_filter("author", user2.username)
       click_filter_link(user2.username)
+
       submit_filter
 
-      wait_for_requests
+      wait_for_all_requests
       wait_for_board_cards(2, 1)
       wait_for_empty_boards((3..4))
     end
 
     it 'filters by assignee' do
+      wait_for_all_requests
+
       set_filter("assignee", user.username)
       click_filter_link(user.username)
       submit_filter
 
-      wait_for_requests
+      wait_for_all_requests
 
       wait_for_board_cards(2, 1)
       wait_for_empty_boards((3..4))
     end
 
     it 'filters by milestone' do
+      wait_for_all_requests
+
       set_filter("milestone", "\"#{milestone.title}")
       click_filter_link(milestone.title)
       submit_filter
 
-      wait_for_requests
+      wait_for_all_requests
+
       wait_for_board_cards(2, 1)
       wait_for_board_cards(3, 0)
       wait_for_board_cards(4, 0)
     end
 
     it 'filters by label' do
+      wait_for_all_requests
+
       set_filter("label", testing.title)
       click_filter_link(testing.title)
       submit_filter
 
-      wait_for_requests
+      wait_for_all_requests
+
       wait_for_board_cards(2, 1)
       wait_for_empty_boards((3..4))
     end
@@ -91,7 +104,7 @@ RSpec.describe 'epics swimlanes filtering', :js do
 
   def visit_board_page
     visit project_boards_path(project)
-    wait_for_requests
+    wait_for_all_requests
   end
 
   def wait_for_board_cards(board_number, expected_cards)

@@ -48,7 +48,7 @@ export default {
           ...this.filters,
         };
       },
-      update: ({ project }) => project.vulnerabilities.nodes,
+      update: ({ project }) => project?.vulnerabilities.nodes || [],
       result({ data }) {
         this.pageInfo = preparePageInfo(data?.project?.vulnerabilities?.pageInfo);
       },
@@ -66,8 +66,8 @@ export default {
       error() {
         this.securityScanners = {};
       },
-      update({ project: { securityScanners = {} } = {} }) {
-        const { available = [], enabled = [], pipelineRun = [] } = securityScanners;
+      update({ project = {} }) {
+        const { available = [], enabled = [], pipelineRun = [] } = project?.securityScanners || {};
         const translateScannerName = scannerName => this.$options.i18n[scannerName] || scannerName;
 
         return {

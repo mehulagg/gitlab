@@ -52,7 +52,10 @@ const defaultFeatureFlags = {
   hasCreateMultipleValueStreams: false,
 };
 
+const [selectedValueStream] = mockData.valueStreams;
+
 const initialCycleAnalyticsState = {
+  selectedValueStream,
   createdAfter: mockData.startDate,
   createdBefore: mockData.endDate,
   group: currentGroup,
@@ -627,6 +630,7 @@ describe('Cycle Analytics component', () => {
 
   describe('Url parameters', () => {
     const defaultParams = {
+      value_stream_id: selectedValueStream.id,
       created_after: toYmd(mockData.startDate),
       created_before: toYmd(mockData.endDate),
       project_ids: null,
@@ -640,9 +644,6 @@ describe('Cycle Analytics component', () => {
 
       mock = new MockAdapter(axios);
       mockRequiredRoutes(mock);
-      wrapper = await createComponent();
-
-      await store.dispatch('initializeCycleAnalytics', initialCycleAnalyticsState);
     });
 
     afterEach(() => {
@@ -651,12 +652,41 @@ describe('Cycle Analytics component', () => {
       wrapper = null;
     });
 
-    it('sets the created_after and created_before url parameters', async () => {
-      await shouldMergeUrlParams(wrapper, defaultParams);
+    describe('with minimal parameters set set', () => {
+      beforeEach(async () => {
+        wrapper = await createComponent();
+
+        await store.dispatch('initializeCycleAnalytics', {
+          ...initialCycleAnalyticsState,
+          selectedValueStream: null,
+        });
+      });
+
+      it('sets the created_after and created_before url parameters', async () => {
+        await shouldMergeUrlParams(wrapper, defaultParams);
+      });
+    });
+
+    describe('with selectedValueStream set', () => {
+      beforeEach(async () => {
+        wrapper = await createComponent();
+        await store.dispatch('initializeCycleAnalytics', initialCycleAnalyticsState);
+        await wrapper.vm.$nextTick();
+      });
+
+      it('sets the value_stream_id url parameter', async () => {
+        await shouldMergeUrlParams(wrapper, {
+          ...defaultParams,
+          created_after: toYmd(mockData.startDate),
+          created_before: toYmd(mockData.endDate),
+          project_ids: null,
+        });
+      });
     });
 
     describe('with selectedProjectIds set', () => {
       beforeEach(async () => {
+        wrapper = await createComponent();
         store.dispatch('setSelectedProjects', mockData.selectedProjects);
         await wrapper.vm.$nextTick();
       });

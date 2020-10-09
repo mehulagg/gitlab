@@ -23,7 +23,7 @@ describe('Selection Summary component', () => {
   };
 
   const dismissButton = () => wrapper.find(GlButton);
-  const dismissMessage = () => wrapper.find({ ref: 'dismiss-message' });
+  const dismissMessage = () => wrapper.find('[data-testid="dismiss-message"]');
   const formSelect = () => wrapper.find(GlFormSelect);
   const createComponent = ({ props = {}, data = defaultData, mocks = defaultMocks } = {}) => {
     spyMutate = mocks.$apollo.mutate;
@@ -62,14 +62,15 @@ describe('Selection Summary component', () => {
       it('should have the button enabled if a vulnerability is selected and an option is selected', async () => {
         expect(wrapper.vm.dismissalReason).toBe(null);
         expect(wrapper.findAll('option')).toHaveLength(4);
-        formSelect()
-          .findAll('option')
-          .at(1)
-          .setSelected();
-        formSelect().trigger('change');
-        await wrapper.vm.$nextTick();
 
-        expect(wrapper.vm.dismissalReason).toEqual(expect.any(String));
+        const option = formSelect()
+          .findAll('option')
+          .at(1);
+        option.setSelected();
+        formSelect().trigger('change');
+
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.dismissalReason).toEqual(option.attributes('value'));
         expect(dismissButton().attributes('disabled')).toBe(undefined);
       });
     });

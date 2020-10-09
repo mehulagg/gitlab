@@ -91,6 +91,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         raw_metadata: occurrence.raw_metadata,
         report_type: occurrence.report_type,
         scanner: occurrence.scanner,
+        scan: occurrence.scan,
         severity: occurrence.severity,
         uuid: occurrence.uuid
       })

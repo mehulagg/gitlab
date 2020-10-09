@@ -2,7 +2,6 @@
 - burndown = burndown_chart(milestone)
 - warning = data_warning_for(burndown)
 - burndown_endpoint = milestone.group_milestone? ? api_v4_groups_milestones_burndown_events_path(id: milestone.group.id, milestone_id: milestone.id) : api_v4_projects_milestones_burndown_events_path(id: milestone.project.id, milestone_id: milestone.timebox_id)
-- burnup_endpoint = milestone.group_milestone? ? api_v4_groups_milestones_burnup_events_path(id: milestone.group.id, milestone_id: milestone.id) : api_v4_projects_milestones_burnup_events_path(id: milestone.project.id, milestone_id: milestone.timebox_id)
 
 = warning
 
@@ -10,7 +9,7 @@
   .burndown-chart.mb-2{ data: { start_date: burndown.start_date.strftime("%Y-%m-%d"),
     due_date: burndown.due_date.strftime("%Y-%m-%d"),
     milestone_id: milestone.to_global_id,
-    burndown_events_path: expose_url(burndown_endpoint), burnup_events_path: expose_url(burnup_endpoint) } }
+    burndown_events_path: expose_url(burndown_endpoint) } }
 
 - elsif show_burndown_placeholder?(milestone, warning)
   .burndown-hint.content-block.container-fluid

@@ -1,6 +1,6 @@
 ---
-stage: Create
-group: Source Code
+stage: Manage
+group: Access
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: reference, howto
 ---
@@ -15,7 +15,7 @@ type: reference, howto
 > - It's recommended for production use.
 > - For GitLab self-managed instances, GitLab administrators can [disable it](#enable-or-disable-project-access-tokens).
 
-Project access tokens are scoped to a project and can be used to authenticate with the [GitLab API](../../../api/README.md#personalproject-access-tokens). You can also use project access tokens with Git to authenticate over HTTP or SSH.
+Project access tokens are scoped to a project and can be used to authenticate with the [GitLab API](../../../api/README.md#personalproject-access-tokens). You can also use project access tokens with Git to authenticate over HTTP.
 
 Project access tokens expire on the date you define, at midnight UTC.
 

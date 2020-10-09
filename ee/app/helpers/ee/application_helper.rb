@@ -92,13 +92,15 @@ module EE
           issues: issues_group_autocomplete_sources_path(object),
           mergeRequests: merge_requests_group_autocomplete_sources_path(object),
           epics: epics_group_autocomplete_sources_path(object),
+          vulnerabilities: vulnerabilities_group_autocomplete_sources_path(object),
           commands: commands_group_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
           milestones: milestones_group_autocomplete_sources_path(object)
         }
-      elsif object.group&.feature_available?(:epics)
-        { epics: epics_project_autocomplete_sources_path(object) }.merge(super)
       else
-        super
+        {
+          epics: object.group&.feature_available?(:epics) ? epics_project_autocomplete_sources_path(object) : nil,
+          vulnerabilities: object.feature_available?(:security_dashboard) ? vulnerabilities_project_autocomplete_sources_path(object) : nil
+        }.compact.merge(super)
       end
     end
 

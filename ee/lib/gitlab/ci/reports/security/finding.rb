@@ -53,6 +53,7 @@ module Gitlab
               raw_metadata
               report_type
               scanner
+              scan
               severity
               uuid
             ].each_with_object({}) do |key, hash|

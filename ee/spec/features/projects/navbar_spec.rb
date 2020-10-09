@@ -15,7 +15,7 @@ RSpec.describe 'Project navbar' do
 
     insert_package_nav(_('Operations'))
     insert_after_sub_nav_item(
-      _('Kubernetes'),
+      _('Environments'),
       within: _('Operations'),
       new_sub_nav_item_name: _('Feature Flags')
     )

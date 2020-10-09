@@ -22,5 +22,6 @@ module Security
     validates :project_fingerprint, presence: true, length: { maximum: 40 }
 
     scope :by_project_fingerprint, -> (fingerprints) { where(project_fingerprint: fingerprints) }
+    scope :by_build_ids, -> (build_ids) { joins(scan: :build).where(ci_builds: { id: build_ids }) }
   end
 end

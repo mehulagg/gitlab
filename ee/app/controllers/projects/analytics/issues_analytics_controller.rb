@@ -8,6 +8,8 @@ class Projects::Analytics::IssuesAnalyticsController < Projects::ApplicationCont
 
   track_unique_visits :show, target_id: 'p_analytics_issues'
 
+  feature_category :planning_analytics
+
   def show
     respond_to do |format|
       format.html

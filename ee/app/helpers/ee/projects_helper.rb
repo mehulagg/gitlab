@@ -20,7 +20,6 @@ module EE
     override :sidebar_operations_paths
     def sidebar_operations_paths
       super + %w[
-        tracings
         feature_flags
       ]
     end
@@ -270,12 +269,6 @@ module EE
         !project.feature_available?(:security_dashboard) &&
         can?(current_user, :admin_namespace, project.root_ancestor) &&
         current_user.ab_feature_enabled?(:discover_security)
-    end
-
-    def settings_operations_available?
-      return true if super
-
-      @project.feature_available?(:tracing, current_user) && can?(current_user, :read_environment, @project)
     end
 
     override :can_import_members?
