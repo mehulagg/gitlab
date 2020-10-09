@@ -7,14 +7,18 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Burndown and burnup charts **(STARTER)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1540) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.1 for project milestones.
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5354) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.8 for group milestones.
-> - [Added](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6495) to [GitLab Starter](https://about.gitlab.com/pricing/) 11.2 for group milestones.
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/6903) burnup charts and fixed burndown charts in [GitLab Starter](https://about.gitlab.com/pricing/) 13.5.
+Burndown and burnup charts show the progress of completing a milestone.
+
+![burndown and burnup chart](img/burndown_and_burnup_charts_v13_5.png)
 
 ## Burndown charts
 
-Burndown Charts are visual representations of the progress of completing a milestone.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1540) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.1 for project milestones.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5354) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.8 for group milestones.
+> - [Added](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6495) to [GitLab Starter](https://about.gitlab.com/pricing/) 11.2 for group milestones.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/6903) [fixed burndown charts](#fixed-burndown-charts) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.5.
+
+Burndown charts show the number of issues over the course of a milestone.
 
 ![burndown chart](img/burndown_chart.png)
 
@@ -25,11 +29,11 @@ yourself to have the same sense of progress.
 GitLab plots it for you and presents it in a clear and beautiful chart.
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-For an overview, check the video demonstration on [Mapping work versus time with Burndown Charts](https://www.youtube.com/watch?v=zJU2MuRChzs).
+For an overview, check the video demonstration on [Mapping work versus time with burndown charts](https://www.youtube.com/watch?v=zJU2MuRChzs).
 
 ### Use cases for burndown charts
 
-Burndown Charts are generally used for tracking and analyzing the completion of
+Burndown charts are generally used for tracking and analyzing the completion of
 a milestone. Therefore, their use cases are tied to the
 [use you are assigning your milestone to](index.md).
 
@@ -43,28 +47,28 @@ and you follow this workflow:
 - Every week, you open the milestone, visualize the progress, identify the gaps,
   and help your team to get their work done.
 - Every month, you check in with your supervisor, and show the progress of that milestone
-  from the Burndown Chart.
+  from the burndown chart.
 - By the end of the quarter, your team successfully delivered 100% of that milestone, as
   it was taken care of closely throughout the whole quarter.
 
 ### How burndown charts work
 
-A Burndown Chart is available for every project or group milestone that has been attributed a **start
+A burndown chart is available for every project or group milestone that has been attributed a **start
 date** and a **due date**.
 
-Find your project's **Burndown Chart** under **Project > Issues > Milestones**,
+Find your project's **burndown chart** under **Project > Issues > Milestones**,
 and select a milestone from your current ones, while for group's, access the **Groups** dashboard,
 select a group, and go through **Issues > Milestones** on the sidebar.
 
 NOTE: **Note:**
-You're able to [promote project](index.md#promoting-project-milestones-to-group-milestones) to group milestones and still see the **Burndown Chart** for them, respecting license limitations.
+You're able to [promote project](index.md#promoting-project-milestones-to-group-milestones) to group milestones and still see the **burndown chart** for them, respecting license limitations.
 
 The chart indicates the project's progress throughout that milestone (for issues assigned to it).
 
 In particular, it shows how many issues were or are still open for a given day in the
 milestone's corresponding period.
 
-The Burndown Chart can also be toggled to display the cumulative open issue
+The burndown chart can also be toggled to display the cumulative open issue
 weight for a given day. When using this feature, make sure issue weights have
 been properly assigned, since an open issue with no weight adds zero to the
 cumulative value.
@@ -76,7 +80,7 @@ switch between Legacy and Fixed views.
 
 | Legacy | Fixed |
 | ----- | ----- |
-| ![Legacy burndown chart, ](img/burndown_chart_legacy.png) | ![Fixed burndown chart, showing a jump when a lot of issues were added to the milestone](img/burndown_chart_fixed.png) |
+| ![Legacy burndown chart, ](img/burndown_chart_legacy_v13_5.png) | ![Fixed burndown chart, showing a jump when a lot of issues were added to the milestone](img/burndown_chart_fixed_v13_5.png) |
 
 Fixed burndown charts track the full history of milestone activity, from its creation until the milestone expires. After the milestone due date has passed, issues removed from the milestone will
 not affect the chart.
@@ -88,9 +92,13 @@ considered as having been opened on the day after they were last closed.
 
 ## Burnup charts
 
-Burnup charts show the assigned and completed work for a milestone. 
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/6903) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.5.
 
-![burnup chart](img/burnup_chart.png)
+Burnup charts show the assigned and completed work for a milestone.
+
+![burnup chart](img/burnup_chart_v13_5.png)
+
+### How burnup charts work
 
 Burnup charts have separate lines for total work and completed work. The total line
 shows when scope is reduced or added to a milestone. The completed work is a count
