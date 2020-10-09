@@ -3,6 +3,7 @@
 class ContainerExpirationPolicy < ApplicationRecord
   include Schedulable
   include UsageStatistics
+  include EachBatch
 
   belongs_to :project, inverse_of: :container_expiration_policy
 
@@ -20,8 +21,13 @@ class ContainerExpirationPolicy < ApplicationRecord
   scope :preloaded, -> { preload(project: [:route]) }
 
   def self.executable
-    runnable_schedules.joins(project: :container_repositories)
-                      .distinct
+    runnable_schedules.where(
+      'EXISTS (?)',
+      ContainerRepository.select(1)
+                         .where(
+                           'container_repositories.project_id = container_expiration_policies.project_id'
+                         )
+    )
   end
 
   def self.keep_n_options
