@@ -45,8 +45,22 @@ module API
         source.add_user(user, params[:access_level], current_user: current_user, expires_at: params[:expires_at])
       end
 
+      def invite_member(current_user, source, params)
+        (source.class.name + 'Member').constantize.create(source_id: source.id,
+          user_id: nil,
+          access_level: params[:access_level],
+          invite_email: params[:email],
+          created_by_id: current_user.id,
+          expires_at: params[:expires_at],
+          requested_at: Time.current.utc)
+      end
+
       def present_members(members)
         present members, with: Entities::Member, current_user: current_user, show_seat_info: params[:show_seat_info]
+      end
+
+      def present_invited_members(invited_members)
+        present invited_members, with: Entities::Invitation, current_user: current_user, show_seat_info: params[:show_seat_info]
       end
     end
   end

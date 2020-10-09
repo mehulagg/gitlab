@@ -22,6 +22,8 @@ const Api = {
   projectLabelsPath: '/:namespace_path/:project_path/-/labels',
   projectFileSchemaPath: '/:namespace_path/:project_path/-/schema/:ref/:filename',
   projectUsersPath: '/api/:version/projects/:id/users',
+  projectInvitationsPath: '/api/:version/projects/:id/invitations',
+  projectMembersPath: '/api/:version/projects/:id/members',
   projectMergeRequestsPath: '/api/:version/projects/:id/merge_requests',
   projectMergeRequestPath: '/api/:version/projects/:id/merge_requests/:mrid',
   projectMergeRequestChangesPath: '/api/:version/projects/:id/merge_requests/:mrid/changes',
@@ -205,6 +207,18 @@ const Api = {
         },
       })
       .then(({ data }) => data);
+  },
+
+  inviteProjectMembers(id, data) {
+    const url = Api.buildUrl(this.projectMembersPath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, data);
+  },
+
+  inviteNonMemberToProject(id, data) {
+    const url = Api.buildUrl(this.projectInvitationsPath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, data);
   },
 
   // Return single project

@@ -26,6 +26,7 @@ describe('MembersTokenSelect', () => {
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
+
     gon.api_version = 'v4';
     mock.onGet('/api/v4/users.json').reply(200, allUsers);
 

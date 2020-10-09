@@ -3,7 +3,6 @@ import { debounce } from 'lodash';
 import { GlTokenSelector, GlAvatar, GlAvatarLabeled } from '@gitlab/ui';
 import { USER_SEARCH_DELAY } from '../constants';
 import axios from '~/lib/utils/axios_utils';
-import Api from '~/api';
 
 export default {
   components: {
@@ -33,10 +32,17 @@ export default {
     };
   },
   computed: {
+    emailIsValid() {
+      return this.emailMatches(this.query);
+    },
     newUsersToInvite() {
       return this.selectedTokens
         .map(obj => {
-          return obj.id;
+          if (this.emailMatches(obj.name) && obj.id.includes('user-defined-token')) {
+            return obj.name;
+          } else {
+            return obj.id;
+          }
         })
         .join(',');
     },
@@ -48,6 +54,11 @@ export default {
     },
   },
   methods: {
+    emailMatches(value) {
+      const regex = /@/;
+
+      return (value.match(regex) !== null)
+    },
     handleTextInput(query) {
       this.query = query;
       this.loading = true;
@@ -78,7 +89,8 @@ export default {
     handleBlur() {
       const textInput = this.$el.querySelector('input[type="text"]');
 
-      textInput.value = '';
+      //textInput.value = '';
+
       textInput.dispatchEvent(new Event('input'));
     },
     handleFocus() {
@@ -96,7 +108,7 @@ export default {
     v-model="selectedTokens"
     :dropdown-items="users"
     :loading="loading"
-    :allow-user-defined-tokens="false"
+    :allow-user-defined-tokens="emailIsValid"
     :placeholder="placeholderText"
     :aria-labelledby="label"
     @blur="handleBlur"

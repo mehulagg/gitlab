@@ -30,11 +30,23 @@ export default {
   props: {
     groupId: {
       type: String,
-      required: true,
+      required: false,
+      default: '',
+    },
+    projectId: {
+      type: String,
+      required: false,
+      default: '',
     },
     groupName: {
       type: String,
-      required: true,
+      required: false,
+      default: '',
+    },
+    projectName: {
+      type: String,
+      required: false,
+      default: '',
     },
     accessLevels: {
       type: Object,
@@ -60,9 +72,38 @@ export default {
     };
   },
   computed: {
+    nonMemberEmailsToInvite() {
+      if (this.newUsersToInvite.includes(',')) {
+        return this.newUsersToInvite
+          .split(',')
+          .filter(x => typeof x === 'string' && x.includes('@'))
+          .join(',');
+      } else if (this.newUsersToInvite.includes('@')) {
+        return this.newUsersToInvite;
+      }
+      return '';
+    },
+    memberIdsToInvite() {
+      if (this.newUsersToInvite.includes(',')) {
+        return this.newUsersToInvite
+          .split(',')
+          .filter(value => !Number.isNaN(Number(value)))
+          .join(',');
+      } else if (!this.newUsersToInvite.includes('@')) {
+        return this.newUsersToInvite;
+      }
+      return '';
+    },
+    inviteToName() {
+      return (this.projectName || this.groupName).toUpperCase();
+    },
+    inviteToType() {
+      return this.projectName ? s__('project') : s__('group');
+    },
     introText() {
-      return sprintf(s__("InviteMembersModal|You're inviting members to the %{group_name} group"), {
-        group_name: this.groupName,
+      return sprintf(s__("InviteMembersModal|You're inviting members to the %{name} %{type}"), {
+        name: this.inviteToName,
+        type: this.inviteToType,
       });
     },
     toastOptions() {
@@ -75,7 +116,8 @@ export default {
     },
     postData() {
       return {
-        user_id: this.newUsersToInvite,
+        user_id: this.memberIdsToInvite,
+        email: this.nonMemberEmailsToInvite,
         access_level: this.selectedAccessLevel,
         expires_at: this.selectedDate,
         format: 'json',
@@ -114,13 +156,36 @@ export default {
       this.selectedAccessLevel = item;
     },
     submitForm(formData) {
-      return Api.inviteGroupMember(this.groupId, formData)
-        .then(() => {
-          this.showToastMessageSuccess();
-        })
-        .catch(error => {
-          this.showToastMessageError(error);
-        });
+      if (this.projectId) {
+        if (this.nonMemberEmailsToInvite) {
+          return Api.inviteNonMemberToProject(this.projectId, formData)
+            .then(() => {
+              this.showToastMessageSuccess();
+            })
+            .catch(error => {
+              this.showToastMessageError(error);
+            });
+        }
+
+        if (this.memberIdsToInvite) {
+          return Api.inviteProjectMembers(this.projectId, formData)
+            .then(() => {
+              this.showToastMessageSuccess();
+            })
+            .catch(error => {
+              this.showToastMessageError(error);
+            });
+        }
+      } else {
+        return Api.inviteGroupMember(this.groupId, formData)
+          .then(() => {
+            this.showToastMessageSuccess();
+          })
+          .catch(error => {
+            this.showToastMessageError(error);
+          });
+      }
+      return formData;
     },
     showToastMessageSuccess() {
       this.$toast.show(this.$options.labels.toastMessageSuccessful, this.toastOptions);
