@@ -18,17 +18,11 @@ Runners can be specific to certain projects or available to all projects.
 
 ## Types of runners
 
-There are three types of runners:
+In the GitLab UI there are three categories for managing runners:
 
-- [Shared](#shared-runners) (for all projects)
-- [Group](#group-runners) (for all projects in a group)
-- [Specific](#specific-runners) (for specific projects)
-
-If you are running self-managed GitLab, you can create your own runners.
-
-If you are using GitLab.com, you can use the shared runners provided by GitLab or
-create your own group or specific runners.
-
+- [Shared](#shared-runners) (runners that are available to all groups and projects in a GitLab instance)
+- [Group](#group-runners) (runners that are available to projects in a group)
+- [Specific](#specific-runners) (runners that are typically associated to a single project)
 ### Shared runners
 
 *Shared runners* are available to every project in a GitLab instance.
