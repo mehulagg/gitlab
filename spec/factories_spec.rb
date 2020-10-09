@@ -27,7 +27,7 @@ RSpec.describe 'factories' do
   # and reuse them in other factories.
   #
   # However, for some factories we cannot use FactoryDefault because the
-  # associations must be unique and cannot reused.
+  # associations must be unique and cannot be reused.
   skip_factory_defaults = %i[
     fork_network_member
   ].to_set.freeze
