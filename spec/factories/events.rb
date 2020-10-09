@@ -27,17 +27,17 @@ FactoryBot.define do
 
     factory :wiki_page_event do
       action { :created }
-      project { @overrides[:wiki_page]&.container || create(:project, :wiki_repo) }
-      target { create(:wiki_page_meta, :for_wiki_page, wiki_page: wiki_page) }
+      project { @overrides[:wiki_page]&.container || association(:project, :wiki_repo) }
+      target { association(:wiki_page_meta, :for_wiki_page, wiki_page: wiki_page) }
 
       transient do
-        wiki_page { create(:wiki_page, container: project) }
+        wiki_page { association(:wiki_page, container: project) }
       end
     end
 
     trait :has_design do
       transient do
-        design { create(:design, issue: create(:issue, project: project)) }
+        design { association(:design, issue: association(:issue, project: project)) }
       end
     end
 
@@ -45,7 +45,7 @@ FactoryBot.define do
       has_design
 
       transient do
-        note { create(:note, author: author, project: project, noteable: design) }
+        note { association(:note, author: author, project: project, noteable: design) }
       end
 
       action { :commented }

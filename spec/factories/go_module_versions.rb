@@ -13,7 +13,7 @@ FactoryBot.define do
       new(p.mod, p.type, p.commit, name: p.name, semver: s, ref: p.ref)
     end
 
-    mod { create :go_module }
+    mod { association :go_module }
     type { :commit }
     commit { mod.project.repository.head_commit }
     name { nil }

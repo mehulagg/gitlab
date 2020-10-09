@@ -7,7 +7,7 @@ FactoryBot.define do
     transient do
       files { { 'foo.txt' => 'content' } }
       message { 'Message' }
-      project { create(:project, :repository) }
+      project { association(:project, :repository) }
 
       service do
         Files::MultiService.new(
