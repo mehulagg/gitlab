@@ -63,10 +63,8 @@ export default {
         :key="index"
         class="js-component-links-component-list-item"
       >
-        <gl-link v-if="component.blob_path" :href="component.blob_path" target="_blank">{{
-          component.name
-        }}</gl-link>
-        <template v-else>{{ component.name }}</template>
+        <gl-link v-if="component.blob_path" :href="component.blob_path" target="_blank">{{ component.name }} ({{component.version}})</gl-link>
+        <template v-else>{{ component.name }} ({{component.version}})</template>
       </span>
       <gl-button
         v-if="hasComponentsInModal"

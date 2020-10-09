@@ -82,7 +82,9 @@ RSpec.describe Projects::LicensesController do
                 'url' => 'http://www.apache.org/licenses/LICENSE-2.0.txt',
                 'components' => [{
                   "blob_path" => nil,
-                  "name" => "thread_safe"
+                  "name" => "thread_safe",
+                  "package_manager" => nil,
+                  "version" => nil
                 }]
               })
             end
