@@ -13,6 +13,10 @@ class DastSiteValidation < ApplicationRecord
     joins(:dast_site_token).where(dast_site_tokens: { project_id: project_id })
   end
 
+  scope :most_recent_by_url_base, -> (url_base) do
+    where(url_base: url_base).order(id: :desc)
+  end
+
   before_create :set_normalized_url_base
 
   enum validation_strategy: { text_file: 0, header: 1 }
@@ -59,11 +63,15 @@ class DastSiteValidation < ApplicationRecord
     end
   end
 
+  def self.get_normalized_url_base(url)
+    uri = URI(url)
+
+    "%{scheme}://%{host}:%{port}" % { scheme: uri.scheme, host: uri.host, port: uri.port }
+  end
+
   private
 
   def set_normalized_url_base
-    uri = URI(dast_site_token.url)
-
-    self.url_base = "%{scheme}://%{host}:%{port}" % { scheme: uri.scheme, host: uri.host, port: uri.port }
+    self.url_base = self.class.get_normalized_url_base(dast_site_token.url)
   end
 end
