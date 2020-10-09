@@ -52,7 +52,7 @@ GET /projects
 | `order_by`                                 | string   | **{dotted-circle}** No | Return projects ordered by `id`, `name`, `path`, `created_at`, `updated_at`, or `last_activity_at` fields. `repository_size`, `storage_size`, or `wiki_size` fields are only allowed for admins. Default is `created_at`. |
 | `owned`                                    | boolean  | **{dotted-circle}** No | Limit by projects explicitly owned by the current user. |
 | `repository_checksum_failed` **(PREMIUM)** | boolean  | **{dotted-circle}** No | Limit projects where the repository checksum calculation has failed ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6137) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.2). |
-| `repository_storage`                       | string   | **{dotted-circle}** No | Limit results to projects stored on repository_storage. _(admins only)_ |
+| `repository_storage`                       | string   | **{dotted-circle}** No | Limit results to projects stored on `repository_storage`. _(admins only)_ |
 | `search`                                   | string   | **{dotted-circle}** No | Return list of projects matching the search criteria. |
 | `search_namespaces`                        | boolean  | **{dotted-circle}** No | Include ancestor namespaces when matching search criteria. Default is `false`. |
 | `simple`                                   | boolean  | **{dotted-circle}** No | Return only limited fields for each project. This is a no-op without authentication as then _only_ simple fields are returned. |
