@@ -25,7 +25,7 @@ module Gitlab
       #   category: compliance         # Group events in categories
       #   expiry: 29                   # Optional expiration time in days, default value 29 days for daily and 6.weeks for weekly
       #   aggregation: daily           # Aggregation level, keys are stored daily or weekly
-      #
+      #   plan_enabled: false          # Tracking on a given plan level
       # Usage:
       #
       # * Track event: Gitlab::UsageDataCounters::HLLRedisCounter.track_event(user_id, 'g_compliance_dashboard')
@@ -33,16 +33,24 @@ module Gitlab
       class << self
         include Gitlab::Utils::UsageData
 
-        def track_event(entity_id, event_name, time = Time.zone.now)
+        def track_event(entity_id, event_name, time = Time.zone.now, plan = '')
           return unless Gitlab::CurrentSettings.usage_ping_enabled?
 
           event = event_for(event_name)
 
           raise UnknownEvent.new("Unknown event #{event_name}") unless event.present?
 
+          # Increment unique event for given plan
+          if plan.present? && event[:plan_enabled]
+            Gitlab::Redis::HLL.add(key: redis_key(event, time, plan), value: entity_id, expiry: expiry(event))
+          end
+
+          # Increment unique event globaly
           Gitlab::Redis::HLL.add(key: redis_key(event, time), value: entity_id, expiry: expiry(event))
         end
 
+        # Get the unique events in same category and slot
+        # If plan_enabled: true, the extra data for each plan is added to final results
         def unique_events(event_names:, start_date:, end_date:)
           events = events_for(Array(event_names))
 
@@ -67,6 +75,8 @@ module Gitlab
           known_events.select { |event| event[:category] == category.to_s }.map { |event| event[:name] }
         end
 
+        # Get the unique events data for all known_events
+        # If plan_enabled: true, the extra data for each plan_enabled is added to final results
         def unique_events_data
           categories.each_with_object({}) do |category, category_results|
             events_names = events_for_category(category)
@@ -153,7 +163,7 @@ module Gitlab
         end
 
         # Compose the key in order to store events daily or weekly
-        def redis_key(event, time)
+        def redis_key(event, time, plan = '')
           raise UnknownEvent.new("Unknown event #{event[:name]}") unless known_events_names.include?(event[:name].to_s)
           raise UnknownAggregation.new("Use :daily or :weekly aggregation") unless ALLOWED_AGGREGATIONS.include?(event[:aggregation].to_sym)
 
@@ -164,12 +174,18 @@ module Gitlab
                   "{#{event[:name]}}"
                 end
 
-          if event[:aggregation].to_sym == :daily
-            year_day = time.strftime('%G-%j')
-            "#{year_day}-#{key}"
+          key_with_slot = if event[:aggregation].to_sym == :daily
+                            year_day = time.strftime('%G-%j')
+                            "#{year_day}-#{key}"
+                          else
+                            year_week = time.strftime('%G-%V')
+                            "#{key}-#{year_week}"
+                          end
+
+          if plan.present? && event[:plan_enabled]
+            "#{plan}_#{key_with_slot}"
           else
-            year_week = time.strftime('%G-%V')
-            "#{key}-#{year_week}"
+            key_with_slot
           end
         end
 
