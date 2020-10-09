@@ -6,7 +6,7 @@ import initStore from '~/search/store';
 import DropdownFilter from '~/search/dropdown_filter/components/dropdown_filter.vue';
 import stateFilterData from '~/search/dropdown_filter/constants/state_filter_data';
 import confidentialFilterData from '~/search/dropdown_filter/constants/confidential_filter_data';
-import { MOCK_QUERY } from '../mock_data';
+import { MOCK_QUERY } from '../../mock_data';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn(),

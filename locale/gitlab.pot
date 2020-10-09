@@ -23073,9 +23073,6 @@ msgstr ""
 msgid "Search forks"
 msgstr ""
 
-msgid "Search groups"
-msgstr ""
-
 msgid "Search merge requests"
 msgstr ""
 
@@ -26597,6 +26594,9 @@ msgstr ""
 msgid "There was an error deleting the To Do."
 msgstr ""
 
+msgid "There was an error fetching Groups"
+msgstr ""
+
 msgid "There was an error fetching configuration for charts"
 msgstr ""
 
@@ -26604,6 +26604,9 @@ msgid "There was an error fetching data for the selected stage"
 msgstr ""
 
 msgid "There was an error fetching data for the tasks by type chart"
+msgstr ""
+
+msgid "There was an error fetching initial group id: %{groupId}"
 msgstr ""
 
 msgid "There was an error fetching label data for the selected group"
