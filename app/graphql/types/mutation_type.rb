@@ -68,6 +68,7 @@ module Types
     mount_mutation Mutations::Ci::PipelineCancel
     mount_mutation Mutations::Ci::PipelineDestroy
     mount_mutation Mutations::Ci::PipelineRetry
+    mount_mutation Mutations::UsagePing::Track
   end
 end
 
