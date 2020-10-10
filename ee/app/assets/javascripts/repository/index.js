@@ -1,6 +1,6 @@
 import initTree from '~/repository';
 import axios from '~/lib/utils/axios_utils';
-import { __ } from '~/locale';
+import { sprintf, __ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 export default () => {
@@ -13,6 +13,15 @@ export default () => {
 
     toggleBtn.addEventListener('click', e => {
       e.preventDefault();
+
+      const { dataset } = e.target;
+      const message = sprintf(__('Are you sure you want to %{lock_action} this directory?'), {
+        lock_action: dataset.state,
+      });
+      // eslint-disable-next-line no-alert, no-restricted-globals
+      if (!confirm(message)) {
+        return;
+      }
 
       toggleBtn.setAttribute('disabled', 'disabled');
 

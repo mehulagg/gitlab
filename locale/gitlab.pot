@@ -3387,6 +3387,12 @@ msgstr ""
 msgid "Are you sure that you want to unarchive this project?"
 msgstr ""
 
+msgid "Are you sure you want to %{lock_action} %{path}?"
+msgstr ""
+
+msgid "Are you sure you want to %{lock_action} this directory?"
+msgstr ""
+
 msgid "Are you sure you want to cancel editing this comment?"
 msgstr ""
 
