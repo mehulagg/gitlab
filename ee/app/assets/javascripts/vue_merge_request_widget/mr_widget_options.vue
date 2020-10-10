@@ -11,6 +11,7 @@ import { s__, __, sprintf } from '~/locale';
 import CEWidgetOptions from '~/vue_merge_request_widget/mr_widget_options.vue';
 import MrWidgetGeoSecondaryNode from './components/states/mr_widget_secondary_geo_node.vue';
 import MrWidgetPolicyViolation from './components/states/mr_widget_policy_violation.vue';
+import { GlSafeHtmlDirective } from '@gitlab/ui';
 
 export default {
   components: {
@@ -21,6 +22,9 @@ export default {
     GroupedSecurityReportsApp,
     GroupedMetricsReportsApp,
     ReportSection,
+  },
+  directives: {
+    SafeHtml: GlSafeHtmlDirective,
   },
   extends: CEWidgetOptions,
   mixins: [reportsMixin],
@@ -384,7 +388,7 @@ export default {
           </mr-widget-alert-message>
 
           <mr-widget-alert-message v-if="mr.mergeError" type="danger">
-            {{ mergeError }}
+            <span v-safe-html="mergeError"></span>
           </mr-widget-alert-message>
 
           <source-branch-removal-status v-if="shouldRenderSourceBranchRemovalStatus" />
