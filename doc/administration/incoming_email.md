@@ -84,7 +84,7 @@ To set up a basic Postfix mail server with IMAP access on Ubuntu, follow the
 
 ### Security Concerns
 
-WARNING: **WARNING:**
+CAUTION: **Caution:**
 Be careful when choosing the domain used for receiving incoming email.
 
 For the sake of example, suppose your top-level company domain is `hooli.com`.
