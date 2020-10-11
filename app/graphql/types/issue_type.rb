@@ -86,11 +86,6 @@ module Types
     field :task_completion_status, Types::TaskCompletionStatus, null: false,
           description: 'Task completion status of the issue'
 
-    field :designs, Types::DesignManagement::DesignCollectionType, null: true,
-          method: :design_collection,
-          deprecated: { reason: 'Use `designCollection`', milestone: '12.2' },
-          description: 'The designs associated with this issue'
-
     field :design_collection, Types::DesignManagement::DesignCollectionType, null: true,
           description: 'Collection of design images associated with this issue'
 
@@ -105,6 +100,11 @@ module Types
 
     field :severity, Types::IssuableSeverityEnum, null: true,
           description: 'Severity level of the incident'
+
+    removed_field :designs, Types::DesignManagement::DesignCollectionType, null: true,
+          method: :design_collection,
+          deprecated: { reason: 'Use `designCollection`', milestone: '12.2' },
+          description: 'The designs associated with this issue'
 
     def author
       Gitlab::Graphql::Loaders::BatchModelLoader.new(User, object.author_id).find

@@ -86,9 +86,6 @@ module Types
           description: 'Rebase commit SHA of the merge request'
     field :rebase_in_progress, GraphQL::BOOLEAN_TYPE, method: :rebase_in_progress?, null: false, calls_gitaly: true,
           description: 'Indicates if there is a rebase currently in progress for the merge request'
-    field :merge_commit_message, GraphQL::STRING_TYPE, method: :default_merge_commit_message, null: true,
-          deprecated: { reason: 'Use `defaultMergeCommitMessage`', milestone: '11.8' },
-          description: 'Default merge commit message of the merge request'
     field :default_merge_commit_message, GraphQL::STRING_TYPE, null: true,
           description: 'Default merge commit message of the merge request'
     field :merge_ongoing, GraphQL::BOOLEAN_TYPE, method: :merge_ongoing?, null: false,
@@ -154,6 +151,10 @@ module Types
 
     field :approved_by, Types::UserType.connection_type, null: true,
           description: 'Users who approved the merge request'
+
+    removed_field :merge_commit_message, GraphQL::STRING_TYPE, method: :default_merge_commit_message, null: true,
+          deprecated: { reason: 'Use `defaultMergeCommitMessage`', milestone: '11.8' },
+          description: 'Default merge commit message of the merge request'
 
     def approved_by
       object.approved_by_users

@@ -8,6 +8,10 @@ module Types
 
     field_class Types::BaseField
 
+    def self.removed_field(name, type, args)
+      # no-op placeholder to remove fields from the documentation without removing from the codebase.
+    end
+
     # All graphql fields exposing an id, should expose a global id.
     def id
       GitlabSchema.id_from_object(object)
