@@ -178,9 +178,7 @@ export default {
       if (this.glFeatures.securityOnDemandScansSiteValidation) {
         await this.fetchValidationStatus();
 
-        if ([PASSED, INPROGRESS].some(this.validationStatusMatches)) {
-          this.isSiteValidationActive = true;
-        }
+        this.isSiteValidationActive = this.validationStatusMatches(PASSED);
       }
     }
   },
@@ -249,10 +247,13 @@ export default {
         this.validationStatus = status;
 
         if (this.validationStatusMatches(INPROGRESS)) {
-          this.fetchValidationTimeout = setTimeout(
-            this.fetchValidationStatus,
-            DAST_SITE_VALIDATION_POLL_INTERVAL,
-          );
+          await new Promise(resolve => {
+            this.fetchValidationTimeout = setTimeout(
+              resolve,
+              DAST_SITE_VALIDATION_POLL_INTERVAL,
+            );
+          })
+          await this.fetchValidationStatus();
         }
       } catch (exception) {
         this.showErrors({
