@@ -1,0 +1,5 @@
+---
+title: Fix missing newlines in blob copy and paste in Firefox
+merge_request: 44857
+author:
+type: fixed

@@ -21,11 +21,11 @@ import 'vendor/jquery.scrollTo';
 //       </div>
 //       <pre class="code highlight">
 //         <code>
-//           <span id="LC1" class="line">...</span>
-//           <span id="LC2" class="line">...</span>
-//           <span id="LC3" class="line">...</span>
-//           <span id="LC4" class="line">...</span>
-//           <span id="LC5" class="line">...</span>
+//           <div id="LC1" class="line">...</div>
+//           <div id="LC2" class="line">...</div>
+//           <div id="LC3" class="line">...</div>
+//           <div id="LC4" class="line">...</div>
+//           <div id="LC5" class="line">...</div>
 //         </code>
 //       </pre>
 //     </div>

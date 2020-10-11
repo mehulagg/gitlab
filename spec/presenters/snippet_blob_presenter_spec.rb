@@ -97,7 +97,7 @@ RSpec.describe SnippetBlobPresenter do
       let(:file) { 'README.md' }
 
       it 'returns plain content' do
-        expect(subject).to include('<span id="LC1" class="line" lang="markdown">')
+        expect(subject).to include('<div id="LC1" class="line" lang="markdown">')
       end
     end
 
@@ -106,7 +106,7 @@ RSpec.describe SnippetBlobPresenter do
 
       it 'returns highlighted syntax content' do
         expect(subject)
-          .to include '<span id="LC1" class="line" lang="ruby"><span class="k">module</span> <span class="nn">Gitlab</span>'
+          .to include '<div id="LC1" class="line" lang="ruby"><span class="k">module</span> <span class="nn">Gitlab</span>'
       end
     end
 
@@ -114,7 +114,7 @@ RSpec.describe SnippetBlobPresenter do
       let(:file) { 'LICENSE' }
 
       it 'returns plain text highlighted content' do
-        expect(subject).to include('<span id="LC1" class="line" lang="plaintext">The MIT License (MIT)</span>')
+        expect(subject).to include('<div id="LC1" class="line" lang="plaintext">The MIT License (MIT)</div>')
       end
     end
   end

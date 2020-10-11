@@ -61,25 +61,25 @@ exports[`Blob Simple Viewer component rendering matches the snapshot 1`] = `
       <code
         id="blob-code-content"
       >
-        <span
+        <div
           id="LC1"
         >
           First
-        </span>
+        </div>
         
 
-        <span
+        <div
           id="LC2"
         >
           Second
-        </span>
+        </div>
         
 
-        <span
+        <div
           id="LC3"
         >
           Third
-        </span>
+        </div>
       </code>
     </pre>
   </div>

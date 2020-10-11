@@ -34,23 +34,23 @@ RSpec.describe Gitlab::Highlight do
     end
 
     it 'highlights' do
-      expected = %Q[<span id="LC1" class="line" lang="common_lisp"><span class="p">(</span><span class="nb">make-pathname</span> <span class="ss">:defaults</span> <span class="nv">name</span></span>
-<span id="LC2" class="line" lang="common_lisp"><span class="ss">:type</span> <span class="s">"assem"</span><span class="p">)</span></span>]
-
+      expected = %Q[<div id="LC1" class="line" lang="common_lisp"><span class="p">(</span><span class="nb">make-pathname</span> <span class="ss">:defaults</span> <span class="nv">name</span></div>
+        <div id="LC2" class="line" lang="common_lisp"><span class="ss">:type</span> <span class="s">"assem"</span><span class="p">)</span></div>
+      ]
       expect(described_class.highlight(file_name, content)).to eq(expected)
     end
 
     it 'returns plain version for unknown lexer context' do
       result = described_class.highlight(plain_text_file_name, plain_text_content)
 
-      expect(result).to eq(%[<span id="LC1" class="line" lang="plaintext">plain text contents</span>])
+      expect(result).to eq(%[<div id=\"LC1\" class=\"line\" lang=\"plaintext\">plain text contents</div>])
     end
 
     it 'returns plain version for long content' do
       stub_const('Gitlab::Highlight::MAXIMUM_TEXT_HIGHLIGHT_SIZE', 1)
       result = described_class.highlight(file_name, content)
 
-      expect(result).to eq(%[<span id="LC1" class="line" lang="">(make-pathname :defaults name</span>\n<span id="LC2" class="line" lang="">:type "assem")</span>])
+      expect(result).to eq(%[<div id=\"LC1\" class=\"line\" lang=\"\">(make-pathname :defaults name</div>\n<div id=\"LC2\" class=\"line\" lang=\"\">:type \"assem\")</div>])
     end
 
     it 'highlights multi-line comments' do
@@ -68,10 +68,10 @@ RSpec.describe Gitlab::Highlight do
       let(:file_name) { 'test.diff' }
       let(:content) { "+aaa\n+bbb\n- ccc\n ddd\n"}
       let(:expected) do
-        %q(<span id="LC1" class="line" lang="diff"><span class="gi">+aaa</span></span>
-<span id="LC2" class="line" lang="diff"><span class="gi">+bbb</span></span>
-<span id="LC3" class="line" lang="diff"><span class="gd">- ccc</span></span>
-<span id="LC4" class="line" lang="diff"> ddd</span>)
+        %q(<div id="LC1" class="line" lang="diff"><span class="gi">+aaa</span></div>
+<div id="LC2" class="line" lang="diff"><span class="gi">+bbb</span></div>
+<div id="LC3" class="line" lang="diff"><span class="gd">- ccc</span></div>
+<div id="LC4" class="line" lang="diff"> ddd</div>)
       end
 
       it 'highlights each line properly' do
@@ -90,7 +90,7 @@ RSpec.describe Gitlab::Highlight do
       end
 
       it 'strips extra LFs' do
-        expect(lines[0]).to eq("<span id=\"LC1\" class=\"line\" lang=\"plaintext\">test  </span>")
+        expect(lines[0]).to eq("<div id=\"LC1\" class=\"line\" lang=\"plaintext\">test  </div>")
       end
     end
 

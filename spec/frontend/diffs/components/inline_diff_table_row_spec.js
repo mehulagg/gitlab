@@ -275,8 +275,8 @@ describe('InlineDiffTableRow', () => {
           new_line: 1,
           discussions: [{ ...discussionsMockData }],
           discussionsExpanded: true,
-          text: '+<span id="LC1" class="line" lang="plaintext">  - Bad dates</span>\n',
-          rich_text: '+<span id="LC1" class="line" lang="plaintext">  - Bad dates</span>\n',
+          text: '+<div id="LC1" class="line" lang="plaintext">  - Bad dates</div>\n',
+          rich_text: '+<div id="LC1" class="line" lang="plaintext">  - Bad dates</div>\n',
           meta_data: null,
         };
       });

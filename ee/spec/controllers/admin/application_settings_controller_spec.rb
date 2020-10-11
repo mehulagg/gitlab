@@ -316,7 +316,7 @@ RSpec.describe Admin::ApplicationSettingsController do
         expect(response).to have_gitlab_http_status(:ok)
 
         body = response.body
-        expect(body).to start_with('<span id="LC1" class="line" lang="json">')
+        expect(body).to start_with('<div id="LC1" class="line" lang="json">')
         expect(body).to include('<span class="nl">"license_key"</span>')
         expect(body).to include("<span class=\"s2\">\"#{yesterday}\"</span>")
         expect(body).to include("<span class=\"mi\">#{max_count}</span>")
