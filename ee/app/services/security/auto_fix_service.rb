@@ -21,7 +21,7 @@ module Security
 
         next unless remediation
 
-        VulnerabilityFeedback::CreateService.new(project, User.support_bot, service_params(vulnerability)).execute
+        VulnerabilityFeedback::CreateService.new(project, User.security_bot, service_params(vulnerability)).execute
       end
     end
 
@@ -36,7 +36,15 @@ module Security
 
     def service_params(vulnerability)
       {
-        feedback_type: :merge_request
+        feedback_type: :merge_request,
+        category: vulnerability.report_type,
+        project_fingerprint: vulnerability.project_fingerprint,
+        vulnerability_data: {
+          remediations: vulnerability.remediations,
+          category: vulnerability.report_type,
+          title: vulnerability.name,
+          name: vulnerability.name
+        }
       }
     end
   end

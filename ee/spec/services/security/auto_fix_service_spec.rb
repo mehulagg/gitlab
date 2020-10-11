@@ -6,7 +6,7 @@ RSpec.describe Security::AutoFixService do
   describe '#execute' do
     subject { described_class.new(project).execute(ids) }
 
-    let_it_be(:project) { create(:project) }
+    let_it_be(:project) { create(:project, :repository) }
     let_it_be(:vulnerability_with_rem) { create(:vulnerabilities_finding_with_remediation, report_type: :dependency_scanning, summary: "Test remediation") }
 
     context 'with enabled auto-fix' do
