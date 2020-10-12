@@ -139,8 +139,6 @@ the Web IDE, or easily update the data directly from the WYSIWYG editor:
 Note that support for adding new attributes to the page's front matter from the form is not supported
 yet. You can do so by editing the file locally, or through the GitLab regular file editor, or through the Web IDE. Once added, the form will load the new fields.
 
-![Editing page front matter in the Static Site Editor](img/front_matter_ui_v13_4.png)
-
 ### Configuration files
 
 A new configuration file for the Static Site Editor was [introduced](https://gitlab.com/groups/gitlab-org/-/epics/4267)
