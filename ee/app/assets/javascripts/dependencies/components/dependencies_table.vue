@@ -113,8 +113,8 @@ export default {
         placement="top"
         :title="s__('Dependencies|Location and dependency path')"
       >
-        The component dependency path is based on the lock file. There may be several paths, in
-        these cases the longest path will be dispalyed.
+        The component dependency path is based on the lock file. There may be several paths. In
+        these cases, the longest path is displayed.
         <div class="gl-mt-4">
           <gl-link
             href="https://docs.gitlab.com/ee/user/application_security/dependency_list/#dependency-paths"
