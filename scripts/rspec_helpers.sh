@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function retrieve_tests_metadata() {
-  mkdir -p knapsack/ rspec_flaky/ rspec_profiling/
+  mkdir -p knapsack/ rspec_flaky/ rspec_profiling/ rotoscope/
 
   if [[ ! -f "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" ]]; then
     wget -O "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" "http://${TESTS_METADATA_S3_BUCKET}.s3.amazonaws.com/${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" || echo "{}" > "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}"

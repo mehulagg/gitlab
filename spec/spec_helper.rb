@@ -54,6 +54,11 @@ Dir[Rails.root.join("spec/support/**/*.rb")].sort.each { |f| require f }
 
 quality_level = Quality::TestLevel.new
 
+require 'rotoscope'
+log_base_name = ENV['CI_JOB_NAME'] || 'rotoscope'
+log_name =  Rails.root.join("rotoscope/#{log_base_name.gsub(%r{[/ ]}, '_')}.log").to_s
+rotoscope = Rotoscope::CallLogger.new(log_name, blacklist: %w[/ruby/ /gems/])
+
 RSpec.configure do |config|
   config.filter_run focus: true
   config.run_all_when_everything_filtered = true
@@ -366,6 +371,17 @@ RSpec.configure do |config|
     allow(view).to receive(:can?) do |*args|
       Ability.allowed?(*args)
     end
+  end
+
+  config.around do |example|
+    rotoscope.mark(example.metadata[:file_path])
+    rotoscope.start_trace
+    example.run
+    rotoscope.stop_trace
+  end
+
+  config.after(:suite) do
+    rotoscope.close
   end
 
   config.disable_monkey_patching!
