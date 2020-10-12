@@ -14,7 +14,7 @@ export default {
     alert: {
       type: Object,
       required: false,
-      default: null
+      default: null,
     },
   },
   data() {
@@ -23,9 +23,6 @@ export default {
   computed: {
     startTime() {
       return formatDate(this.alert.startedAt, 'yyyy-mm-dd Z');
-    },
-    incidentSlaExists() {
-      return 'IncidentSla' in this.$options.components;
     },
     showHighlightBar() {
       return this.alert || this.childHasData;
@@ -56,7 +53,7 @@ export default {
       {{ startTime }}
     </div>
 
-    <div v-if="alert" :class="{ 'gl-mr-3': incidentSlaExists }">
+    <div v-if="alert" class="gl-mr-3">
       <span class="gl-font-weight-bold">{{ s__('HighlightBar|Alert events:') }}</span>
       <span>{{ alert.eventCount }}</span>
     </div>
