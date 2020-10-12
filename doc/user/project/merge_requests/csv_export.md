@@ -2,7 +2,7 @@
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3619) in GitLab Core 13.5.
 
-Merge requests can be exported as CSV from GitLab and are sent to your default notification email as an attachment.
+Merge requests can be exported as CSV from GitLab and are sent to your primary email as an attachment.
 
 ## Overview
 
