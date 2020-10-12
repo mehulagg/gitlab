@@ -1,0 +1,5 @@
+---
+title: Fix sending invite to minimal access user
+merge_request: 44936
+author:
+type: fixed
