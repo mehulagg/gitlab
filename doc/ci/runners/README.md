@@ -129,9 +129,9 @@ To disable shared runners for a project:
 To disable shared runners for a group:
 
 1. Go to the group's **Settings > CI/CD** and expand the **Runners** section.
-1. In the **Shared runners** area, click **Disable shared runners globally**.
+1. In the **Shared runners** area, click **Enable shared runners for this group**.
 1. Optionally, to allow shared runners to be enabled for individual projects or subgroups,
-   click **Allow projects/subgroups to override the global setting**.
+   click **Allow projects and subgroups to override the group setting**.
 
 ### Group runners
 
