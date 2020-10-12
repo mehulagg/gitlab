@@ -1,13 +1,12 @@
 <script>
-import { GlButton, GlIcon, GlLoadingIcon } from '@gitlab/ui';
+import { GlButton, GlIcon, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
 import { formatTime } from '~/lib/utils/datetime_utility';
 import eventHub from '../event_hub';
-import tooltip from '../../vue_shared/directives/tooltip';
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
     GlButton,
@@ -70,7 +69,7 @@ export default {
 <template>
   <div class="btn-group" role="group">
     <gl-button
-      v-tooltip
+      v-gl-tooltip
       :title="title"
       :aria-label="title"
       :disabled="isLoading"
