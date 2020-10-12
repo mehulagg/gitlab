@@ -21,6 +21,10 @@
           = link_to project_security_dashboard_index_path(@project), title: _('Security Dashboard') do
             %span= _('Security Dashboard')
 
+        = nav_link(path: 'projects/security/vulnerability_report#index') do
+          = link_to project_security_vulnerability_report_index_path(@project), title: _('Vulnerability Report') do
+            %span= _('Vulnerability Report')
+
       - if project_nav_tab?(:on_demand_scans)
         = nav_link(path: sidebar_on_demand_scans_paths) do
           = link_to project_on_demand_scans_path(@project), title: s_('OnDemandScans|On-demand Scans'), data: { qa_selector: 'on_demand_scans_link' } do
