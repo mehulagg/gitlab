@@ -162,7 +162,8 @@ export default {
             'pl-4': multiselect && !isSelectedLabel(label.id),
             'cursor-not-allowed': disabled,
           }"
-          :active="isSelectedLabel(label.id)"
+          :is-checked="isSelectedLabel(label.id)"
+          is-check-item="true"
           @click.prevent="$emit('selectLabel', label.id, selectedLabelIds)"
         >
           <gl-icon
