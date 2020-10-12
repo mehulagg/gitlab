@@ -31,6 +31,8 @@ module EE
       private
 
       def add_incident_sla(issue)
+        return unless issue.sla_available?
+
         ::IncidentManagement::CreateSlaService.new(issue, current_user).execute
       end
     end

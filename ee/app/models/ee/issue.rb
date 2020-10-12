@@ -220,12 +220,6 @@ module EE
       incident?
     end
 
-    def sla_due_at
-      return unless incident?
-
-      incident_sla&.due_at
-    end
-
     private
 
     def blocking_issues_ids

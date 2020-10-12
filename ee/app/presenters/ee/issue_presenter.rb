@@ -7,7 +7,7 @@ module EE
     def sla_due_at
       return unless sla_available?
 
-      super
+      incident_sla&.due_at
     end
   end
 end
