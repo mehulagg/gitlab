@@ -53,10 +53,6 @@ click of a button:
 
 ![Static Site Editor](img/wysiwyg_editor_v13_3.png)
 
-You can also edit the page's front matter both in WYSIWYG mode via the side-drawer and in Markdown
-mode.
-
-![Editing page front matter in the Static Site Editor](img/front_matter_ui_v13_4.png)
 
 When an editor submits their changes, in the background, GitLab automatically
 creates a new branch, commits their changes, and opens a merge request. The
@@ -127,6 +123,8 @@ front matter is often formatted as YAML or JSON and requires consistent and accu
 To edit the front matter from the Static Site Editor, click the **Settings** button on the
 top-right to reveal a panel that displays a form field for each key defined in the front
 matter. The fields are populated with the current value and you can update them directly from the form.
+
+![Editing page front matter in the Static Site Editor](img/front_matter_ui_v13_4.png)
 
 ### Configuration files
 
