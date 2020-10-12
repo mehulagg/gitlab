@@ -2,6 +2,7 @@ import { merge } from 'lodash';
 import { mount, shallowMount, createWrapper } from '@vue/test-utils';
 import { within } from '@testing-library/dom';
 import { GlModal } from '@gitlab/ui';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import DastProfilesList from 'ee/security_configuration/dast_profiles/components/dast_profiles_list.vue';
 
 const TEST_ERROR_MESSAGE = 'something went wrong';
@@ -27,6 +28,11 @@ describe('EE - DastProfilesList', () => {
           propsData: defaultProps,
         },
         options,
+        {
+          directives: {
+            GlTooltip: createMockDirective(),
+          },
+        },
       ),
     );
   };
@@ -194,6 +200,13 @@ describe('EE - DastProfilesList', () => {
 
       const getCurrentProfileDeleteButton = () =>
         getDeleteButtonWithin(getTableRowForProfile(profile));
+
+      it('shows a tooltip on the delete button', () => {
+        expect(getBinding(getCurrentProfileDeleteButton().element, 'gl-tooltip')).not.toBe(
+          undefined,
+        );
+        expect(getCurrentProfileDeleteButton().attributes().title).toBe('Delete Profile');
+      });
 
       it('opens a modal with the correct title when a delete button is clicked', async () => {
         expect(getModal().html()).toBe('');

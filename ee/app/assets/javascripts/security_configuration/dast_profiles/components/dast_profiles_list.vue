@@ -146,11 +146,13 @@ export default {
         <template #cell(actions)="{ item }">
           <div class="gl-text-right">
             <gl-button
+              v-gl-tooltip.hover.focus
               icon="remove"
               variant="danger"
               category="secondary"
               class="gl-mr-3"
               :aria-label="__('Delete')"
+              :title="s__('DastProfiles|Delete Profile')"
               @click="prepareProfileDeletion(item.id)"
             />
             <gl-button v-if="item.editPath" :href="item.editPath">{{ __('Edit') }}</gl-button>
