@@ -87,7 +87,7 @@ GEM
       asciidoctor (>= 1.5.6, < 3.0.0)
     asciidoctor-plantuml (0.0.12)
       asciidoctor (>= 1.5.6, < 3.0.0)
-    ast (2.4.0)
+    ast (2.4.1)
     atlassian-jwt (0.2.0)
       jwt (~> 2.1.0)
     attr_encrypted (3.1.0)
@@ -533,11 +533,12 @@ GEM
       guard (~> 2.1)
       guard-compat (~> 1.1)
       rspec (>= 2.99.0, < 4.0)
-    haml (5.1.2)
+    haml (5.2.0)
       temple (>= 0.8.0)
       tilt
-    haml_lint (0.34.0)
-      haml (>= 4.0, < 5.2)
+    haml_lint (0.36.0)
+      haml (>= 4.0, < 5.3)
+      parallel (~> 1.10)
       rainbow
       rubocop (>= 0.50.0)
       sysexits (~> 1.1)
@@ -816,9 +817,9 @@ GEM
       rubypants (~> 0.2)
     orm_adapter (0.5.0)
     os (1.0.0)
-    parallel (1.19.1)
-    parser (2.7.1.2)
-      ast (~> 2.4.0)
+    parallel (1.19.2)
+    parser (2.7.2.0)
+      ast (~> 2.4.1)
     parslet (1.8.2)
     peek (1.1.0)
       railties (>= 4.0.0)
@@ -1350,7 +1351,7 @@ DEPENDENCIES
   grpc (~> 1.30.2)
   gssapi
   guard-rspec
-  haml_lint (~> 0.34.0)
+  haml_lint (~> 0.36.0)
   hamlit (~> 2.11.0)
   hangouts-chat (~> 0.0.5)
   hashie
