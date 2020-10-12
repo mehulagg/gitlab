@@ -120,7 +120,7 @@ export default {
             href="https://docs.gitlab.com/ee/user/application_security/dependency_list/#dependency-paths"
             target="_blank"
             class="font-size-inherit"
-            >Learn more about dependency path</gl-link
+            >Learn more about dependency paths</gl-link
           >
         </div>
       </gl-popover>
