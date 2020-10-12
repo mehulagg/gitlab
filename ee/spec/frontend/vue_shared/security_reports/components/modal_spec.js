@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import component from 'ee/vue_shared/security_reports/components/modal.vue';
 import createState from 'ee/vue_shared/security_reports/store/state';
-import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
+import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card_vuex.vue';
 import IssueNote from 'ee/vue_shared/security_reports/components/issue_note.vue';
 import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
 import { mount, shallowMount } from '@vue/test-utils';

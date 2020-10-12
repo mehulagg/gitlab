@@ -226,7 +226,7 @@ sum(JiraImportState.finished, :imported_issues_count)
 ### Grouping & Batch Operations
 
 The `count`, `distinct_count`, and `sum` batch counters can accept an `ActiveRecord::Relation`
-object, which groups by a specified column. With a grouped relation, the methods do batch counting, 
+object, which groups by a specified column. With a grouped relation, the methods do batch counting,
 handle errors, and returns a hash table of key-value pairs.
 
 Examples:
@@ -330,7 +330,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
      include RedisTracking
 
      skip_before_action :authenticate_user!, only: :show
-     track_redis_hll_event :index, :show, name: 'i_analytics_dev_ops_score', feature: :g_compliance_dashboard_feature, feature_default_enabled: true
+     track_redis_hll_event :index, :show, name: 'g_compliance_example_feature_visitors', feature: :compliance_example_feature, feature_default_enabled: true
 
      def index
        render html: 'index'
@@ -912,7 +912,7 @@ The following is example content of the Usage Ping payload.
 
 ## Exporting Usage Ping SQL queries and definitions
 
-Two Rake tasks exist to export Usage Ping definitions. 
+Two Rake tasks exist to export Usage Ping definitions.
 
 - The Rake tasks export the raw SQL queries for `count`, `distinct_count`, `sum`.
 - The Rake tasks export the Redis counter class or the line of the Redis block for `redis_usage_data`.

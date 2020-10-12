@@ -74,13 +74,6 @@ module EE
       ::Gitlab.config.smartcard.client_certificate_required_port
     end
 
-    def page_class
-      class_names = super
-      class_names += system_message_class
-
-      class_names
-    end
-
     override :autocomplete_data_sources
     def autocomplete_data_sources(object, noteable_type)
       return {} unless object && noteable_type

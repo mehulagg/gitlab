@@ -4,12 +4,18 @@ import DateRange from 'ee/analytics/shared/components/daterange.vue';
 import FilterBar from 'ee/analytics/merge_request_analytics/components/filter_bar.vue';
 import ThroughputChart from 'ee/analytics/merge_request_analytics/components/throughput_chart.vue';
 import ThroughputTable from 'ee/analytics/merge_request_analytics/components/throughput_table.vue';
+import UrlSync from '~/vue_shared/components/url_sync.vue';
 
 describe('MergeRequestAnalyticsApp', () => {
   let wrapper;
 
   function createComponent() {
-    wrapper = shallowMount(MergeRequestAnalyticsApp);
+    wrapper = shallowMount(MergeRequestAnalyticsApp, {
+      propsData: {
+        startDate: new Date('2020-05-01'),
+        endDate: new Date('2020-10-01'),
+      },
+    });
   }
 
   beforeEach(() => {
@@ -41,5 +47,20 @@ describe('MergeRequestAnalyticsApp', () => {
 
   it('displays the throughput table component', () => {
     expect(wrapper.find(ThroughputTable).exists()).toBe(true);
+  });
+
+  describe('url sync', () => {
+    it('includes the url sync component', () => {
+      expect(wrapper.find(UrlSync).exists()).toBe(true);
+    });
+
+    it('has the start and end date params', () => {
+      const urlSync = wrapper.find(UrlSync);
+
+      expect(urlSync.props('query')).toMatchObject({
+        start_date: '2020-05-01',
+        end_date: '2020-10-01',
+      });
+    });
   });
 });

@@ -82,7 +82,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::RequestParams do
   describe 'optional `project_ids`' do
     context 'when `project_ids` is not empty' do
       def json_project(project)
-        { id: project.id,
+        { id: project.to_gid.to_s,
           name: project.name,
           path_with_namespace: project.path_with_namespace,
           avatar_url: project.avatar_url }.to_json

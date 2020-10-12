@@ -106,5 +106,14 @@ module EpicTreeSorting
 
       [type, id]
     end
+
+    override :model_class
+    def model_class
+      type = try(:object_type)
+
+      return type.camelcase.constantize if type
+
+      super
+    end
   end
 end

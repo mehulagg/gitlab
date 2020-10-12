@@ -130,14 +130,12 @@ export default {
             'DastProfiles|The maximum number of seconds allowed for the site under test to respond to a request.',
           ),
           scanMode: s__(
-            'DastProfiles|Active scan will make active attacks against the target site while Passive scan will not',
+            'DastProfiles|A passive scan monitors all HTTP messages (requests and responses) sent to the target. An active scan attacks the target to find potential vulnerabilities.',
           ),
           ajaxSpider: s__(
-            'DastProfiles|Enable it to run the AJAX spider (in addition to the traditional spider) to crawl the target site',
+            'DastProfiles|Run the AJAX spider, in addition to the traditional spider, to crawl the target site.',
           ),
-          debugMessage: s__(
-            'DastProfiles|Enable it to include the debug messages in DAST console output',
-          ),
+          debugMessage: s__('DastProfiles|Include debug messages in the DAST console output.'),
         },
       };
     },
