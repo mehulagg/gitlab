@@ -1,7 +1,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import draftCommentsMixin from '~/diffs/mixins/draft_comments';
-import ParallelDraftCommentRow from '~/batch_comments/components/parallel_draft_comment_row.vue';
+import DraftNote from '~/batch_comments/components/draft_note.vue';
 import parallelDiffTableRow from './parallel_diff_table_row.vue';
 import parallelDiffCommentRow from './parallel_diff_comment_row.vue';
 import DiffExpansionCell from './diff_expansion_cell.vue';
@@ -12,7 +12,7 @@ export default {
     DiffExpansionCell,
     parallelDiffTableRow,
     parallelDiffCommentRow,
-    ParallelDraftCommentRow,
+    DraftNote,
   },
   mixins: [draftCommentsMixin],
   props: {
@@ -98,12 +98,25 @@ export default {
           :has-draft-left="hasParallelDraftLeft(diffFile.file_hash, line) || false"
           :has-draft-right="hasParallelDraftRight(diffFile.file_hash, line) || false"
         />
-        <parallel-draft-comment-row
+        <tr
           v-if="shouldRenderParallelDraftRow(diffFile.file_hash, line)"
           :key="`drafts-${index}`"
-          :line="line"
-          :diff-file-content-sha="diffFile.file_hash"
-        />
+          :class="line.draftRowClasses"
+          class="notes_holder"
+        >
+          <td class="notes_line old"></td>
+          <td class="notes-content parallel old" colspan="2">
+            <div v-if="line.leftDraft.isDraft" class="content">
+              <draft-note :draft="line.leftDraft" :line="line.left" />
+            </div>
+          </td>
+          <td class="notes_line new"></td>
+          <td class="notes-content parallel new" colspan="2">
+            <div v-if="line.rightDraft.isDraft" class="content">
+              <draft-note :draft="line.rightDraft" :line="line.right" />
+            </div>
+          </td>
+        </tr>
       </template>
     </tbody>
   </table>

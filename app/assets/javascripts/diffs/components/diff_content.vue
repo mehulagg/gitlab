@@ -85,10 +85,16 @@ export default {
     },
     mappedLines() {
       const mapParallel = line => {
+        const leftDraft = this.draftForLine(this.diffFile.file_hash, line, 'left');
+        const rightDraft = this.draftForLine(this.diffFile.file_hash, line, 'right');
+
         return {
           ...line,
           isMatchLineLeft: line.left?.type === MATCH_LINE_TYPE,
           isMatchLineRight: line.right?.type === MATCH_LINE_TYPE,
+          draftRowClasses: leftDraft > 0 || rightDraft > 0 ? '' : 'js-temp-notes-holder',
+          leftDraft,
+          rightDraft,
         };
       };
 

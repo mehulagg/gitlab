@@ -2,7 +2,7 @@
 import { mapGetters, mapState } from 'vuex';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import draftCommentsMixin from '~/diffs/mixins/draft_comments';
-import InlineDraftCommentRow from '~/batch_comments/components/inline_draft_comment_row.vue';
+import DraftNote from '~/batch_comments/components/draft_note.vue';
 import inlineDiffTableRow from './inline_diff_table_row.vue';
 import inlineDiffCommentRow from './inline_diff_comment_row.vue';
 import DiffExpansionCell from './diff_expansion_cell.vue';
@@ -12,7 +12,7 @@ export default {
   components: {
     inlineDiffCommentRow,
     inlineDiffTableRow,
-    InlineDraftCommentRow,
+    DraftNote,
     DiffExpansionCell,
   },
   mixins: [draftCommentsMixin, glFeatureFlagsMixin()],
@@ -91,13 +91,21 @@ export default {
           :help-page-path="helpPagePath"
           :has-draft="shouldRenderDraftRow(diffFile.file_hash, line) || false"
         />
-        <inline-draft-comment-row
+        <tr
           v-if="shouldRenderDraftRow(diffFile.file_hash, line)"
           :key="`draft_${index}`"
-          :draft="draftForLine(diffFile.file_hash, line)"
-          :diff-file="diffFile"
-          :line="line"
-        />
+          class="notes_holder js-temp-notes-holder"
+        >
+          <td class="notes-content" colspan="4">
+            <div class="content">
+              <draft-note
+                :draft="draftForLine(diffFile.file_hash, line)"
+                :diff-file="diffFile"
+                :line="line"
+              />
+            </div>
+          </td>
+        </tr>
       </template>
     </tbody>
   </table>
