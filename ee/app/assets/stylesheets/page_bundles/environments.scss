@@ -90,7 +90,7 @@
   margin-left: $btn-side-margin;
 
   .dropdown.open & {
-    background: var(--white, $white-normal);
+    background: var(--gray-60, $gray-50);
     outline: 0;
   }
 
@@ -102,7 +102,7 @@
     }
 
     &.chevron {
-      color: var(--gray-500, var(--gray-500, $gray-500));
+      color: var(--gray-500, $gray-500);
     }
   }
 }
@@ -131,7 +131,7 @@
 }
 
 .canary-deployment-callout {
-  border-bottom: 1px solid $border-white-normal;
+  border-bottom: 1px solid var(--gray-500, $gray-500);
   display: flex;
 
   @include media-breakpoint-down(sm) {

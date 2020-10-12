@@ -96,7 +96,7 @@
 .rect-text-metric {
   fill: var(--white, $white);
   stroke-width: 1;
-  stroke: $gray-darkest;
+  stroke: var(--gray-500, $gray-600);
 }
 
 .rect-axis-text {
@@ -119,7 +119,7 @@
 
 .divider-line {
   stroke-width: 1;
-  stroke: $gray-darkest;
+  stroke: var(--gray-500, $gray-600);
 }
 
 .environments-actions {
