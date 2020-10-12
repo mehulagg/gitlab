@@ -15,7 +15,7 @@ import NoteForm from '../../notes/components/note_form.vue';
 import ImageDiffOverlay from './image_diff_overlay.vue';
 import DiffDiscussions from './diff_discussions.vue';
 import eventHub from '../../notes/event_hub';
-import { IMAGE_DIFF_POSITION_TYPE } from '../constants';
+import { IMAGE_DIFF_POSITION_TYPE, MATCH_LINE_TYPE } from '../constants';
 import { getDiffMode } from '../store/utils';
 import { diffViewerModes } from '~/ide/constants';
 
@@ -83,6 +83,29 @@ export default {
     author() {
       return this.getUserData;
     },
+    mappedLines() {
+      const mapParallel = line => {
+        return {
+          ...line,
+          isMatchLineLeft: line.left?.type === MATCH_LINE_TYPE,
+          isMatchLineRight: line.right?.type === MATCH_LINE_TYPE,
+        };
+      };
+
+      const mapInline = line => {
+        return {
+          ...line,
+          isMatchLine: line.type === MATCH_LINE_TYPE,
+        };
+      };
+
+      if (this.isInlineView) {
+        return this.diffFile.highlighted_diff_lines.map(mapInline);
+      }
+      return this.glFeatures.unifiedDiffLines
+        ? this.diffLines(this.diffFile).map(mapParallel)
+        : this.diffFile.parallel_diff_lines.map(mapParallel) || [];
+    },
   },
   updated() {
     this.$nextTick(() => {
@@ -117,15 +140,13 @@ export default {
         <inline-diff-view
           v-if="isInlineView"
           :diff-file="diffFile"
-          :diff-lines="diffFile.highlighted_diff_lines"
+          :diff-lines="mappedLines"
           :help-page-path="helpPagePath"
         />
         <parallel-diff-view
           v-else-if="isParallelView"
           :diff-file="diffFile"
-          :diff-lines="
-            glFeatures.unifiedDiffLines ? diffLines(diffFile) : diffFile.parallel_diff_lines || []
-          "
+          :diff-lines="mappedLines"
           :help-page-path="helpPagePath"
         />
         <gl-loading-icon v-if="diffFile.renderingLines" size="md" class="mt-3" />

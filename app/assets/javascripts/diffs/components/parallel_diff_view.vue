@@ -4,12 +4,12 @@ import draftCommentsMixin from '~/diffs/mixins/draft_comments';
 import ParallelDraftCommentRow from '~/batch_comments/components/parallel_draft_comment_row.vue';
 import parallelDiffTableRow from './parallel_diff_table_row.vue';
 import parallelDiffCommentRow from './parallel_diff_comment_row.vue';
-import parallelDiffExpansionRow from './parallel_diff_expansion_row.vue';
+import DiffExpansionCell from './diff_expansion_cell.vue';
 import { getCommentedLines } from '~/notes/components/multiline_comment_utils';
 
 export default {
   components: {
-    parallelDiffExpansionRow,
+    DiffExpansionCell,
     parallelDiffTableRow,
     parallelDiffCommentRow,
     ParallelDraftCommentRow,
@@ -66,14 +66,21 @@ export default {
     </colgroup>
     <tbody>
       <template v-for="(line, index) in diffLines">
-        <parallel-diff-expansion-row
+        <tr
+          v-if="line.isMatchLineLeft || line.isMatchLineRight"
           :key="`expand-${index}`"
-          :file-hash="diffFile.file_hash"
-          :context-lines-path="diffFile.context_lines_path"
-          :line="line"
-          :is-top="index === 0"
-          :is-bottom="index + 1 === diffLinesLength"
-        />
+          class="line_expansion match"
+        >
+          <td colspan="6" class="text-center gl-font-regular">
+            <diff-expansion-cell
+              :file-hash="diffFile.file_hash"
+              :context-lines-path="diffFile.context_lines_path"
+              :line="line.left"
+              :is-top="index === 0"
+              :is-bottom="index + 1 === diffLinesLength"
+            />
+          </td>
+        </tr>
         <parallel-diff-table-row
           :key="line.line_code"
           :file-hash="diffFile.file_hash"

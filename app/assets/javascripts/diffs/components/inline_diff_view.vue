@@ -5,7 +5,7 @@ import draftCommentsMixin from '~/diffs/mixins/draft_comments';
 import InlineDraftCommentRow from '~/batch_comments/components/inline_draft_comment_row.vue';
 import inlineDiffTableRow from './inline_diff_table_row.vue';
 import inlineDiffCommentRow from './inline_diff_comment_row.vue';
-import inlineDiffExpansionRow from './inline_diff_expansion_row.vue';
+import DiffExpansionCell from './diff_expansion_cell.vue';
 import { getCommentedLines } from '~/notes/components/multiline_comment_utils';
 
 export default {
@@ -13,7 +13,7 @@ export default {
     inlineDiffCommentRow,
     inlineDiffTableRow,
     InlineDraftCommentRow,
-    inlineDiffExpansionRow,
+    DiffExpansionCell,
   },
   mixins: [draftCommentsMixin, glFeatureFlagsMixin()],
   props: {
@@ -65,14 +65,17 @@ export default {
     </colgroup>
     <tbody>
       <template v-for="(line, index) in diffLines">
-        <inline-diff-expansion-row
-          :key="`expand-${index}`"
-          :file-hash="diffFile.file_hash"
-          :context-lines-path="diffFile.context_lines_path"
-          :line="line"
-          :is-top="index === 0"
-          :is-bottom="index + 1 === diffLinesLength"
-        />
+        <tr v-if="line.isMatchLine" :key="`expand-${index}`" class="line_expansion match">
+          <td colspan="4" class="text-center gl-font-regular">
+            <diff-expansion-cell
+              :file-hash="diffFile.file_hash"
+              :context-lines-path="diffFile.context_lines_path"
+              :line="line"
+              :is-top="index === 0"
+              :is-bottom="index + 1 === diffLinesLength"
+            />
+          </td>
+        </tr>
         <inline-diff-table-row
           :key="`${line.line_code || index}`"
           :file-hash="diffFile.file_hash"
