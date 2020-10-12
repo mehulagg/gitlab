@@ -3,6 +3,8 @@
 class Admin::AuditLogReportsController < Admin::ApplicationController
   before_action :validate_audit_log_reports_available!
 
+  feature_category :audit_events
+
   def index
     csv_data = AuditEvents::ExportCsvService.new(audit_log_reports_params).csv_data
 

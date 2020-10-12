@@ -9,6 +9,8 @@ class Groups::Security::ComplianceDashboardsController < Groups::ApplicationCont
 
   track_unique_visits :show, target_id: 'g_compliance_dashboard'
 
+  feature_category :compliance_management
+
   def show
     @last_page = paginated_merge_requests.last_page?
     @merge_requests = serialize(paginated_merge_requests)

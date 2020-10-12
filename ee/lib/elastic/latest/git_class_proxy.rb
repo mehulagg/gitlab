@@ -43,8 +43,25 @@ module Elastic
         languages = [options[:language]].flatten
 
         filters = []
-        filters << { terms: { "#{type}.rid" => repository_ids } } if repository_ids.any?
-        filters << { terms: { "#{type}.language" => languages } } if languages.any?
+
+        if repository_ids.any?
+          filters << {
+            terms: {
+              _name: context.name(type, :related, :repositories),
+              "#{type}.rid" => repository_ids
+            }
+          }
+        end
+
+        if languages.any?
+          filters << {
+            terms: {
+              _name: context.name(type, :match, :languages),
+              "#{type}.language" => languages
+            }
+          }
+        end
+
         filters << options[:additional_filter] if options[:additional_filter]
 
         { filter: filters }
@@ -55,7 +72,8 @@ module Elastic
         fields = %w(message^10 sha^5 author.name^2 author.email^2 committer.name committer.email).map {|i| "commit.#{i}"}
         query_with_prefix = query.split(/\s+/).map { |s| s.gsub(SHA_REGEX) { |sha| "#{sha}*" } }.join(' ')
 
-        bool_expr = Gitlab::Elastic::BoolExpr.new
+        bool_expr = ::Gitlab::Elastic::BoolExpr.new
+
         query_hash = {
           query: { bool: bool_expr },
           size: per,
@@ -67,7 +85,7 @@ module Elastic
         # we need to do a project visibility check.
         #
         # Note that `:current_user` might be `nil` for a anonymous user
-        query_hash = project_ids_filter(query_hash, options) if options.key?(:current_user)
+        query_hash = context.name(:commit, :authorized) { project_ids_filter(query_hash, options) } if options.key?(:current_user)
 
         if query.blank?
           bool_expr[:must] = { match_all: {} }
@@ -75,6 +93,7 @@ module Elastic
         else
           bool_expr[:must] = {
             simple_query_string: {
+              _name: context.name(:commit, :match, :search_terms),
               fields: fields,
               query: query_with_prefix,
               default_operator: :and
@@ -83,7 +102,14 @@ module Elastic
         end
 
         # add the document type filter
-        bool_expr[:filter] << { term: { type: 'commit' } }
+        bool_expr[:filter] << {
+          term: {
+            type: {
+              _name: context.name(:doc, :is_a, :commit),
+              value: 'commit'
+            }
+          }
+        }
 
         # add filters extracted from the options
         options_filter_context = options_filter_context(:commit, options)
@@ -110,6 +136,7 @@ module Elastic
         }
       end
 
+      # rubocop:disable Metrics/AbcSize
       def search_blob(query, type: 'blob', page: 1, per: 20, options: {})
         page ||= 1
 
@@ -131,6 +158,7 @@ module Elastic
         # add the term matching
         bool_expr[:must] = {
           simple_query_string: {
+            _name: context.name(:blob, :match, :search_terms),
             query: query.term,
             default_operator: :and,
             fields: %w[blob.content blob.file_name]
@@ -141,10 +169,17 @@ module Elastic
         # we need to do a project visibility check.
         #
         # Note that `:current_user` might be `nil` for a anonymous user
-        query_hash = project_ids_filter(query_hash, options) if options.key?(:current_user)
+        query_hash = context.name(:blob, :authorized) { project_ids_filter(query_hash, options) } if options.key?(:current_user)
 
         # add the document type filter
-        bool_expr[:filter] << { term: { type: type } }
+        bool_expr[:filter] << {
+          term: {
+            type: {
+              _name: context.name(:doc, :is_a, type),
+              value: type
+            }
+          }
+        }
 
         # add filters extracted from the query
         query_filter_context = query.elasticsearch_filter_context(:blob)

@@ -55,13 +55,7 @@ export default {
       };
     },
     solutionInfo() {
-      const {
-        solution,
-        has_mr: hasMr,
-        vulnerability_feedback_help_path: vulnerabilityFeedbackHelpPath,
-        remediations,
-        state,
-      } = this.vulnerability;
+      const { solution, has_mr: hasMr, remediations, state } = this.vulnerability;
 
       const remediation = remediations?.[0];
       const hasDownload = Boolean(
@@ -73,7 +67,6 @@ export default {
         remediation,
         hasDownload,
         hasMr,
-        vulnerabilityFeedbackHelpPath,
         isStandaloneVulnerability: true,
       };
     },

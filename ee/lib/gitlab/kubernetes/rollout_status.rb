@@ -26,29 +26,41 @@ module Gitlab
         @status == :found
       end
 
-      def self.from_deployments(*deployments, pods_attrs: {})
-        return new([], status: :not_found) if deployments.empty?
+      def self.from_deployments(*deployments_attrs, pods_attrs: [])
+        return new([], status: :not_found) if deployments_attrs.empty?
 
-        deployments = deployments.map { |deploy| ::Gitlab::Kubernetes::Deployment.new(deploy, pods: pods_attrs) }
+        deployments = deployments_attrs.map do |attrs|
+          ::Gitlab::Kubernetes::Deployment.new(attrs, pods: pods_attrs)
+        end
         deployments.sort_by!(&:order)
-        new(deployments)
+
+        pods = pods_attrs.map do |attrs|
+          ::Gitlab::Kubernetes::Pod.new(attrs)
+        end
+
+        new(deployments, pods: pods)
       end
 
       def self.loading
         new([], status: :loading)
       end
 
-      def initialize(deployments, status: :found)
+      def initialize(deployments, pods: [], status: :found)
         @status       = status
         @deployments  = deployments
-        @instances    = deployments.flat_map(&:instances)
+
+        @instances = if ::Feature.enabled?(:deploy_boards_dedupe_instances)
+                       RolloutInstances.new(deployments, pods).pod_instances
+                     else
+                       deployments.flat_map(&:instances)
+                     end
 
         @completion =
           if @instances.empty?
             100
           else
             # We downcase the pod status in Gitlab::Kubernetes::Deployment#deployment_instance
-            finished = @instances.count { |instance| instance[:status] == Gitlab::Kubernetes::Pod::RUNNING.downcase }
+            finished = @instances.count { |instance| instance[:status] == ::Gitlab::Kubernetes::Pod::RUNNING.downcase }
 
             (finished / @instances.count.to_f * 100).to_i
           end

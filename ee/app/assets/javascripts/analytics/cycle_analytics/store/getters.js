@@ -1,6 +1,7 @@
 import dateFormat from 'dateformat';
 import { isNumber } from 'lodash';
 import httpStatus from '~/lib/utils/http_status';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import { dateFormats } from '../../shared/constants';
 import { transformStagesForPathNavigation } from '../utils';
@@ -14,7 +15,7 @@ export const currentValueStreamId = ({ selectedValueStream }) =>
 export const currentGroupPath = ({ currentGroup }) => currentGroup?.fullPath || null;
 
 export const selectedProjectIds = ({ selectedProjects }) =>
-  selectedProjects?.map(({ id }) => id) || [];
+  selectedProjects?.map(({ id }) => getIdFromGraphQLId(id)) || [];
 
 export const cycleAnalyticsRequestParams = (state, getters) => {
   const {

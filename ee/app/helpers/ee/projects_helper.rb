@@ -20,7 +20,6 @@ module EE
     override :sidebar_operations_paths
     def sidebar_operations_paths
       super + %w[
-        tracings
         feature_flags
       ]
     end
@@ -231,7 +230,8 @@ module EE
           dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
           no_pipeline_run_scanners_help_path: new_project_pipeline_path(project),
-          security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index')
+          security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
+          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests')
         }.merge!(security_dashboard_pipeline_data(project))
       end
     end
@@ -269,12 +269,6 @@ module EE
         !project.feature_available?(:security_dashboard) &&
         can?(current_user, :admin_namespace, project.root_ancestor) &&
         current_user.ab_feature_enabled?(:discover_security)
-    end
-
-    def settings_operations_available?
-      return true if super
-
-      @project.feature_available?(:tracing, current_user) && can?(current_user, :read_environment, @project)
     end
 
     override :can_import_members?

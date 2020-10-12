@@ -67,8 +67,9 @@ local machine, this is a simple way to get started:
 1. On your local machine, run `terraform init`, passing in the following options,
    replacing `<YOUR-STATE-NAME>`, `<YOUR-PROJECT-ID>`,  `<YOUR-USERNAME>` and
    `<YOUR-ACCESS-TOKEN>` with the relevant values. This command initializes your
-   Terraform state, and stores that state within your GitLab project. This example
-   uses `gitlab.com`:
+   Terraform state, and stores that state within your GitLab project. The name of
+   your state can contain only uppercase and lowercase letters, decimal digits,
+   hyphens, and underscores. This example uses `gitlab.com`:
 
    ```shell
    terraform init \
@@ -81,10 +82,6 @@ local machine, this is a simple way to get started:
        -backend-config="unlock_method=DELETE" \
        -backend-config="retry_wait_min=5"
    ```
-
-   NOTE: **Note:**
-   The name of your state can contain only uppercase and lowercase letters,
-   decimal digits, hyphens and underscores.
 
 You can now run `terraform plan` and `terraform apply` as you normally would.
 
@@ -202,7 +199,7 @@ recommends encrypting plan output or modifying the project visibility settings.
 
 ## Example project
 
-See [this reference project](https://gitlab.com/nicholasklick/gitlab-terraform-aws) using GitLab and Terraform to deploy a basic AWS EC2 within a custom VPC.
+See [this reference project](https://gitlab.com/gitlab-org/configure/examples/gitlab-terraform-aws) using GitLab and Terraform to deploy a basic AWS EC2 within a custom VPC.
 
 ## Copy Terraform state between backends
 

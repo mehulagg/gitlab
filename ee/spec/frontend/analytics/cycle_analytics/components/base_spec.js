@@ -24,6 +24,7 @@ import httpStatusCodes from '~/lib/utils/http_status';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
 import * as commonUtils from '~/lib/utils/common_utils';
 import * as urlUtils from '~/lib/utils/url_utility';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import * as mockData from '../mock_data';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
@@ -52,7 +53,10 @@ const defaultFeatureFlags = {
   hasCreateMultipleValueStreams: false,
 };
 
+const [selectedValueStream] = mockData.valueStreams;
+
 const initialCycleAnalyticsState = {
+  selectedValueStream,
   createdAfter: mockData.startDate,
   createdBefore: mockData.endDate,
   group: currentGroup,
@@ -61,6 +65,11 @@ const initialCycleAnalyticsState = {
 const mocks = {
   $toast: {
     show: jest.fn(),
+  },
+  $apollo: {
+    query: jest.fn().mockResolvedValue({
+      data: { group: { projects: { nodes: [] } } },
+    }),
   },
 };
 
@@ -387,25 +396,6 @@ describe('Cycle Analytics component', () => {
       });
     });
 
-    describe('when analyticsSimilaritySearch feature flag is on', () => {
-      beforeEach(async () => {
-        wrapper = await createComponent({
-          withStageSelected: true,
-          featureFlags: {
-            hasAnalyticsSimilaritySearch: true,
-          },
-        });
-      });
-
-      it('uses similarity as the order param', () => {
-        displaysProjectsDropdownFilter(true);
-
-        expect(wrapper.find(ProjectsDropdownFilter).props().queryParams.order_by).toEqual(
-          'similarity',
-        );
-      });
-    });
-
     it('displays the date range picker', () => {
       displaysDateRangePicker(true);
     });
@@ -627,12 +617,13 @@ describe('Cycle Analytics component', () => {
 
   describe('Url parameters', () => {
     const defaultParams = {
+      value_stream_id: selectedValueStream.id,
       created_after: toYmd(mockData.startDate),
       created_before: toYmd(mockData.endDate),
       project_ids: null,
     };
 
-    const selectedProjectIds = mockData.selectedProjects.map(({ id }) => id);
+    const selectedProjectIds = mockData.selectedProjects.map(({ id }) => getIdFromGraphQLId(id));
 
     beforeEach(async () => {
       commonUtils.historyPushState = jest.fn();
@@ -640,9 +631,6 @@ describe('Cycle Analytics component', () => {
 
       mock = new MockAdapter(axios);
       mockRequiredRoutes(mock);
-      wrapper = await createComponent();
-
-      await store.dispatch('initializeCycleAnalytics', initialCycleAnalyticsState);
     });
 
     afterEach(() => {
@@ -651,12 +639,41 @@ describe('Cycle Analytics component', () => {
       wrapper = null;
     });
 
-    it('sets the created_after and created_before url parameters', async () => {
-      await shouldMergeUrlParams(wrapper, defaultParams);
+    describe('with minimal parameters set set', () => {
+      beforeEach(async () => {
+        wrapper = await createComponent();
+
+        await store.dispatch('initializeCycleAnalytics', {
+          ...initialCycleAnalyticsState,
+          selectedValueStream: null,
+        });
+      });
+
+      it('sets the created_after and created_before url parameters', async () => {
+        await shouldMergeUrlParams(wrapper, defaultParams);
+      });
+    });
+
+    describe('with selectedValueStream set', () => {
+      beforeEach(async () => {
+        wrapper = await createComponent();
+        await store.dispatch('initializeCycleAnalytics', initialCycleAnalyticsState);
+        await wrapper.vm.$nextTick();
+      });
+
+      it('sets the value_stream_id url parameter', async () => {
+        await shouldMergeUrlParams(wrapper, {
+          ...defaultParams,
+          created_after: toYmd(mockData.startDate),
+          created_before: toYmd(mockData.endDate),
+          project_ids: null,
+        });
+      });
     });
 
     describe('with selectedProjectIds set', () => {
       beforeEach(async () => {
+        wrapper = await createComponent();
         store.dispatch('setSelectedProjects', mockData.selectedProjects);
         await wrapper.vm.$nextTick();
       });

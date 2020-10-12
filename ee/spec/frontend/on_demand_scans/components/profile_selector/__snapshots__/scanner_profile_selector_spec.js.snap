@@ -87,7 +87,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
             </span>
              
             <svg
-              class="dropdown-chevron gl-icon s16"
+              class="gl-button-icon dropdown-chevron gl-icon s16"
               data-testid="chevron-down-icon"
             >
               <use
@@ -195,7 +195,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
               class="col-md-6"
             >
               <div
-                class="row"
+                class="row gl-my-2"
               >
                 <div
                   class="col-md-3"
@@ -221,7 +221,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
               class="col-md-6"
             >
               <div
-                class="row"
+                class="row gl-my-2"
               >
                 <div
                   class="col-md-3"
@@ -243,7 +243,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
               class="col-md-6"
             >
               <div
-                class="row"
+                class="row gl-my-2"
               >
                 <div
                   class="col-md-3"
@@ -256,6 +256,54 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
                 >
                   <strong>
                     10 seconds
+                  </strong>
+                </div>
+              </div>
+            </div>
+          </div>
+           
+          <div
+            class="row"
+          >
+            <div
+              class="col-md-6"
+            >
+              <div
+                class="row gl-my-2"
+              >
+                <div
+                  class="col-md-3"
+                >
+                  AJAX spider:
+                </div>
+                 
+                <div
+                  class="col-md-9"
+                >
+                  <strong>
+                    Off
+                  </strong>
+                </div>
+              </div>
+            </div>
+             
+            <div
+              class="col-md-6"
+            >
+              <div
+                class="row gl-my-2"
+              >
+                <div
+                  class="col-md-3"
+                >
+                  Debug messages:
+                </div>
+                 
+                <div
+                  class="col-md-9"
+                >
+                  <strong>
+                    Hide debug messages
                   </strong>
                 </div>
               </div>

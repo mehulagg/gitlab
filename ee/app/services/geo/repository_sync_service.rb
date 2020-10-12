@@ -19,7 +19,7 @@ module Geo
       project.repository.after_create
     rescue Gitlab::Shell::Error, Gitlab::Git::BaseError => e
       # In some cases repository does not exist, the only way to know about this is to parse the error text.
-      if e.message.include? Gitlab::GitAccess::ERROR_MESSAGES[:no_repo] # rubocop:disable Cop/LineBreakAroundConditionalBlock
+      if e.message.include?(Gitlab::GitAccessProject.error_message(:no_repo))
         if repository_presumably_exists_on_primary?
           log_info('Repository is not found, but it seems to exist on the primary')
           fail_registry_sync!('Repository is not found', e)
@@ -30,6 +30,7 @@ module Geo
       else
         fail_registry_sync!('Error syncing repository', e)
       end
+
     ensure
       expire_repository_caches
       execute_housekeeping

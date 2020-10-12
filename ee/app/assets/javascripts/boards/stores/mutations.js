@@ -68,6 +68,25 @@ export default {
     notImplemented();
   },
 
+  [mutationTypes.RECEIVE_ISSUES_FOR_LIST_SUCCESS]: (
+    state,
+    { listIssues, listPageInfo, listId, noEpicIssues },
+  ) => {
+    const { listData, issues, listIssuesCount } = listIssues;
+    Vue.set(state, 'issues', { ...state.issues, ...issues });
+    Vue.set(
+      state.issuesByListId,
+      listId,
+      union(state.issuesByListId[listId] || [], listData[listId]),
+    );
+    Vue.set(state.pageInfoByListId, listId, listPageInfo[listId]);
+    Vue.set(state.listsFlags, listId, {
+      isLoading: false,
+      isLoadingMore: false,
+      unassignedIssuesCount: noEpicIssues ? listIssuesCount : undefined,
+    });
+  },
+
   [mutationTypes.REQUEST_ISSUES_FOR_EPIC]: (state, epicId) => {
     Vue.set(state.epicsFlags, epicId, { isLoading: true });
   },
@@ -103,9 +122,15 @@ export default {
     state.epicsSwimlanesFetchInProgress = false;
   },
 
-  [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, { epics, canAdminEpic }) => {
+  [mutationTypes.RECEIVE_FIRST_EPICS_SUCCESS]: (state, { epics, canAdminEpic }) => {
+    Vue.set(state, 'epics', epics);
+    if (canAdminEpic !== undefined) {
+      state.canAdminEpic = canAdminEpic;
+    }
+  },
+
+  [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, epics) => {
     Vue.set(state, 'epics', union(state.epics || [], epics));
-    state.canAdminEpic = canAdminEpic;
   },
 
   [mutationTypes.RESET_EPICS]: state => {

@@ -495,7 +495,7 @@ addresses and names, do use:
 - **Email addresses**: Use an email address ending in `example.com`.
 - **Names**: Use strings like `example_username`. Alternatively, use diverse or
   non-gendered names with common surnames, such as `Sidney Jones`, `Zhang Wei`,
-  or `Maria Garcia`.
+  or `Alex Garcia`.
 
 ### Fake URLs
 
@@ -584,6 +584,7 @@ tenses, words, and phrases:
 - Avoid the use of [racially-insensitive terminology or phrases](https://www.marketplace.org/2020/06/17/tech-companies-update-language-to-avoid-offensive-terms/). For example:
   - Use *primary* and *secondary* for database and server relationships.
   - Use *allowlist* and *denylist* to describe access control lists.
+- Avoid the word *please*. For details, see [the Microsoft style guide](https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/p/please).
 
 ### Word usage clarifications
 

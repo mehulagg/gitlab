@@ -43,10 +43,8 @@ module Gitlab
 
       # Initialize gon.features with any flags that should be
       # made globally available to the frontend
-      push_frontend_feature_flag(:snippets_vue, default_enabled: true)
       push_frontend_feature_flag(:monaco_blobs, default_enabled: true)
       push_frontend_feature_flag(:monaco_ci, default_enabled: true)
-      push_frontend_feature_flag(:snippets_edit_vue, default_enabled: true)
       push_frontend_feature_flag(:webperf_experiment, default_enabled: false)
       push_frontend_feature_flag(:snippets_binary_blob, default_enabled: false)
       push_frontend_feature_flag(:usage_data_api, default_enabled: false)
@@ -60,9 +58,9 @@ module Gitlab
     # name - The name of the feature flag, e.g. `my_feature`.
     # args - Any additional arguments to pass to `Feature.enabled?`. This allows
     #        you to check if a flag is enabled for a particular user.
-    def push_frontend_feature_flag(name, *args)
+    def push_frontend_feature_flag(name, *args, **kwargs)
       var_name = name.to_s.camelize(:lower)
-      enabled = Feature.enabled?(name, *args)
+      enabled = Feature.enabled?(name, *args, **kwargs)
 
       # Here the `true` argument signals gon that the value should be merged
       # into any existing ones, instead of overwriting them. This allows you to

@@ -7,6 +7,7 @@ module Ci
     include ::FastDestroyAll
     include ::Checksummable
     include ::Gitlab::ExclusiveLeaseHelpers
+    include ::Gitlab::OptimisticLocking
 
     belongs_to :build, class_name: "Ci::Build", foreign_key: :build_id
 
@@ -116,22 +117,41 @@ module Ci
       (start_offset...end_offset)
     end
 
-    def persist_data!
-      in_lock(*lock_params) { unsafe_persist_data! }
-    end
-
     def schedule_to_persist!
-      return if persisted?
+      return if flushed?
 
       Ci::BuildTraceChunkFlushWorker.perform_async(id)
     end
 
-    def persisted?
-      !redis?
-    end
+    ##
+    # It is possible that we run into two concurrent migrations. It might
+    # happen that a chunk gets migrated after being loaded by another worker
+    # but before the worker acquires a lock to perform the migration.
+    #
+    # We are using Redis locking to ensure that we perform this operation
+    # inside an exclusive lock, but this does not prevent us from running into
+    # race conditions related to updating a model representation in the
+    # database. Optimistic locking is another mechanism that help here.
+    #
+    # We are using optimistic locking combined with Redis locking to ensure
+    # that a chunk gets migrated properly.
+    #
+    def persist_data!
+      in_lock(*lock_params) do         # exclusive Redis lock is acquired first
+        raise FailedToPersistDataError, 'Modifed build trace chunk detected' if has_changes_to_save?
 
-    def live?
-      redis?
+        self.reset.then do |chunk|     # we ensure having latest lock_version
+          chunk.unsafe_persist_data!   # we migrate the data and update data store
+        end
+      end
+    rescue ActiveRecord::StaleObjectError
+      raise FailedToPersistDataError, <<~MSG
+        Data migration race condition detected
+
+        store: #{data_store}
+        build: #{build.id}
+        index: #{chunk_index}
+      MSG
     end
 
     ##
@@ -143,13 +163,25 @@ module Ci
       build.pending_state.present? && chunks_max_index == chunk_index
     end
 
+    def flushed?
+      !redis?
+    end
+
+    def migrated?
+      flushed?
+    end
+
+    def live?
+      redis?
+    end
+
     def <=>(other)
       return unless self.build_id == other.build_id
 
       self.chunk_index <=> other.chunk_index
     end
 
-    private
+    protected
 
     def get_data
       # Redis / database return UTF-8 encoded string by default
@@ -168,7 +200,7 @@ module Ci
           data is not fulfilled in a bucket
 
           size: #{current_size}
-          state: #{build.pending_state.present?}
+          state: #{pending_state?}
           max: #{chunks_max_index}
           index: #{chunk_index}
         MSG
@@ -223,6 +255,12 @@ module Ci
 
     def full?
       size == CHUNK_SIZE
+    end
+
+    private
+
+    def pending_state?
+      build.pending_state.present?
     end
 
     def current_store

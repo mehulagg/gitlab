@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 class Admin::InstanceReviewController < Admin::ApplicationController
+  feature_category :instance_statistics
+
   def index
     redirect_to("#{EE::SUBSCRIPTIONS_URL}/instance_review?#{instance_review_params}")
   end

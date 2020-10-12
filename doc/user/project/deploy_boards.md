@@ -42,8 +42,9 @@ knowledge. In particular, you should be familiar with:
 - [Kubernetes canary deployments](https://kubernetes.io/docs/concepts/cluster-administration/manage-deployment/#canary-deployments)
 
 NOTE: **Note:**
-Apps that consist of multiple deployments are shown as duplicates on the deploy board.
-Follow [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/8463) for details.
+In GitLab 13.4 and earlier, apps that consist of multiple deployments are shown as
+duplicates on the deploy board. This is [fixed](https://gitlab.com/gitlab-org/gitlab/-/issues/8463)
+in GitLab 13.5.
 
 ## Use cases
 
@@ -106,7 +107,7 @@ To display the Deploy Boards for a specific [environment](../../ci/environments/
    be done automatically and no action is necessary.
 
    If you are using GCP to manage clusters, you can see the deployment details in GCP itself by going to **Workloads > deployment name > Details**:
-   
+
    ![Deploy Boards Kubernetes Label](img/deploy_boards_kubernetes_label.png)
 
 Once all of the above are set up and the pipeline has run at least once,

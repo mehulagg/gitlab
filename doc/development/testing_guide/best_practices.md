@@ -81,7 +81,7 @@ browser is much slower than parsing the HTML response from the app.
 
 A common cause of slow tests is excessive creation of objects, and thus
 computation and DB time. Factories are essential to development, but they can
-make inserting data into the DB so easy that we may be able to optimize. 
+make inserting data into the DB so easy that we may be able to optimize.
 
 The two basic techniques to bear in mind here are:
 
@@ -240,7 +240,7 @@ end
 
 it 'schedules a background job' do
   expect(BackgroundJob).to receive(:perform_async)
-  
+
   subject.execute
 end
 ```
@@ -252,7 +252,7 @@ combining the examples:
 ```ruby
 it 'performs the expected side-effects' do
   expect(BackgroundJob).to receive(:perform_async)
-  
+
   expect { subject.execute }
     .to change(Event, :count).by(1)
     .and change { arg_0.frobulance }.to('wibble')
@@ -484,17 +484,22 @@ This will result in only one `Project`, `User`, and `ProjectMember` created for 
 is handled automatically using a transaction rollback.
 
 Note that if you modify an object defined inside a `let_it_be` block,
-then you will need to reload the object as needed, or specify the `reload`
-option to reload for every example.
+then you must do one of the following:
+
+- Reload the object as needed.
+- Use the `let_it_be_with_reload` alias.
+- Specify the `reload` option to reload for every example.
 
 ```ruby
+let_it_be_with_reload(:project) { create(:project) }
 let_it_be(:project, reload: true) { create(:project) }
 ```
 
-You can also specify the `refind` option as well to completely load a
-new object.
+You can also use the `let_it_be_with_refind` alias, or specify the `refind`
+option as well to completely load a new object.
 
 ```ruby
+let_it_be_with_refind(:project) { create(:project) }
 let_it_be(:project, refind: true) { create(:project) }
 ```
 
@@ -890,6 +895,10 @@ GitLab uses [factory_bot](https://github.com/thoughtbot/factory_bot) as a test f
   resulting record to pass validation.
 - When instantiating from a factory, don't supply attributes that aren't
   required by the test.
+- Prefer [implicit](https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#implicit-definition)
+  or [explicit](https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#explicit-definition)
+  association definitions instead of using `create` / `build` for association setup.
+  See [issue #262624](https://gitlab.com/gitlab-org/gitlab/-/issues/262624) for further context.
 - Factories don't have to be limited to `ActiveRecord` objects.
   [See example](https://gitlab.com/gitlab-org/gitlab-foss/commit/0b8cefd3b2385a21cfed779bd659978c0402766d).
 

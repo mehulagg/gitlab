@@ -9,6 +9,8 @@ class Groups::UsageQuotasController < Groups::ApplicationController
 
   layout 'group_settings'
 
+  feature_category :purchase
+
   def index
     @projects = @group.all_projects.with_shared_runners_limit_enabled.page(params[:page])
   end

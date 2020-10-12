@@ -111,7 +111,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -227,7 +227,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "ProjectID",
                   "ofType": null
                 }
               },
@@ -1993,7 +1993,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -2109,7 +2109,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -2225,7 +2225,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -2342,6 +2342,16 @@
           "interfaces": [
 
           ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "AwardableID",
+          "description": "Identifier of Awardable",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
           "enumValues": null,
           "possibleTypes": null
         },
@@ -2841,6 +2851,59 @@
               "deprecationReason": null
             },
             {
+              "name": "labels",
+              "description": "Labels of the board",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "LabelConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "lists",
               "description": "Lists of the board",
               "args": [
@@ -2850,6 +2913,16 @@
                   "type": {
                     "kind": "SCALAR",
                     "name": "ID",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "issueFilters",
+                  "description": "Filters applied when getting issue metadata in the board list",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BoardIssueInput",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -6611,6 +6684,16 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "ClustersClusterID",
+          "description": "Identifier of Clusters::Cluster",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "Commit",
           "description": null,
@@ -7976,7 +8059,7 @@
               "description": "The global id of the environment to add an annotation to",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "EnvironmentID",
                 "ofType": null
               },
               "defaultValue": null
@@ -7986,7 +8069,7 @@
               "description": "The global id of the cluster to add an annotation to",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "ClustersClusterID",
                 "ofType": null
               },
               "defaultValue": null
@@ -8072,6 +8155,172 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "MetricsDashboardAnnotation",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "CreateBoardInput",
+          "description": "Autogenerated input type of CreateBoard",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "projectPath",
+              "description": "The project full path the board is associated with.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "groupPath",
+              "description": "The group full path the board is associated with.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "name",
+              "description": "The board name.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "assigneeId",
+              "description": "The ID of the user to be assigned to the board.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "milestoneId",
+              "description": "The ID of the milestone to be assigned to the board.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "weight",
+              "description": "The weight of the board.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "labelIds",
+              "description": "The IDs of labels to be added to the board.",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "CreateBoardPayload",
+          "description": "Autogenerated return type of CreateBoard",
+          "fields": [
+            {
+              "name": "board",
+              "description": "The board after mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Board",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -8385,7 +8634,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NoteableID",
                   "ofType": null
                 }
               },
@@ -8733,7 +8982,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NoteableID",
                   "ofType": null
                 }
               },
@@ -9021,7 +9270,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NoteableID",
                   "ofType": null
                 }
               },
@@ -9428,6 +9677,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "spam",
+              "description": "Indicates whether the operation returns a record detected as spam",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -9829,6 +10092,12 @@
               "description": "Passive DAST scan. This scan will not make active attacks against the target site.",
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "ACTIVE",
+              "description": "Active DAST scan. This scan will make active attacks against the target site.",
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -9903,6 +10172,38 @@
               "deprecationReason": null
             },
             {
+              "name": "scanType",
+              "description": "Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "ENUM",
+                "name": "DastScanTypeEnum",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "showDebugMessages",
+              "description": "Indicates if debug messages should be included in DAST console output. True to include the debug messages.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "spiderTimeout",
               "description": "The maximum number of minutes allowed for the spider to traverse the site",
               "args": [
@@ -9926,6 +10227,24 @@
                 "kind": "SCALAR",
                 "name": "Int",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "useAjaxSpider",
+              "description": "Indicates if the AJAX spider should be used to crawl the target site. True to run the AJAX spider in addition to the traditional spider, and false to run only the traditional spider.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -10058,6 +10377,36 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "scanType",
+              "description": "Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.",
+              "type": {
+                "kind": "ENUM",
+                "name": "DastScanTypeEnum",
+                "ofType": null
+              },
+              "defaultValue": "PASSIVE"
+            },
+            {
+              "name": "useAjaxSpider",
+              "description": "Indicates if the AJAX spider should be used to crawl the target site. True to run the AJAX spider in addition to the traditional spider, and false to run only the traditional spider.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": "false"
+            },
+            {
+              "name": "showDebugMessages",
+              "description": "Indicates if debug messages should be included in DAST console output. True to include the debug messages.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": "false"
             },
             {
               "name": "clientMutationId",
@@ -10385,6 +10734,36 @@
                   "name": "Int",
                   "ofType": null
                 }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "scanType",
+              "description": "Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.",
+              "type": {
+                "kind": "ENUM",
+                "name": "DastScanTypeEnum",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "useAjaxSpider",
+              "description": "Indicates if the AJAX spider should be used to crawl the target site. True to run the AJAX spider in addition to the traditional spider, and false to run only the traditional spider.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "showDebugMessages",
+              "description": "Indicates if debug messages should be included in DAST console output. True to include the debug messages.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
               },
               "defaultValue": null
             },
@@ -13875,7 +14254,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NoteID",
                   "ofType": null
                 }
               },
@@ -14070,6 +14449,20 @@
           "name": "DetailedStatus",
           "description": null,
           "fields": [
+            {
+              "name": "action",
+              "description": "Action information for the status. This includes method, button title, icon, path, and title",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "StatusAction",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "detailsPath",
               "description": "Path of the details for the pipeline status",
@@ -15310,7 +15703,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "VulnerabilityID",
                   "ofType": null
                 }
               },
@@ -15789,6 +16182,16 @@
           "interfaces": [
 
           ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "EnvironmentID",
+          "description": "Identifier of Environment",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
           "enumValues": null,
           "possibleTypes": null
         },
@@ -18870,7 +19273,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "EpicTreeSortingID",
                   "ofType": null
                 }
               },
@@ -18881,7 +19284,7 @@
               "description": "The id of the epic_issue or issue that the actual epic or issue is switched with",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "EpicTreeSortingID",
                 "ofType": null
               },
               "defaultValue": null
@@ -18901,7 +19304,7 @@
               "description": "ID of the new parent epic",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "EpicID",
                 "ofType": null
               },
               "defaultValue": null
@@ -18925,7 +19328,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "EpicID",
                   "ofType": null
                 }
               },
@@ -19010,6 +19413,16 @@
           "interfaces": [
 
           ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "EpicTreeSortingID",
+          "description": "Identifier of EpicTreeSorting",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
           "enumValues": null,
           "possibleTypes": null
         },
@@ -19660,6 +20073,34 @@
           "description": null,
           "fields": [
             {
+              "name": "actualRepositorySizeLimit",
+              "description": "Size limit for repositories in the namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "additionalPurchasedStorageSize",
+              "description": "Additional storage purchased for the root namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "autoDevopsEnabled",
               "description": "Indicates whether Auto DevOps is enabled for all projects within this group",
               "args": [
@@ -19773,6 +20214,24 @@
                 "kind": "OBJECT",
                 "name": "BoardConnection",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "containsLockedProjects",
+              "description": "Includes at least one project where the repository size exceeds the limit",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -21308,6 +21767,24 @@
               "deprecationReason": null
             },
             {
+              "name": "repositorySizeExcessProjectCount",
+              "description": "Number of projects in the root namespace where the repository size exceeds the limit",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "requestAccessEnabled",
               "description": "Indicates if users can request access to namespace",
               "args": [
@@ -21498,6 +21975,34 @@
                   "name": "TimelogConnection",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "totalRepositorySize",
+              "description": "Total repository size of all projects in the root namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "totalRepositorySizeExcess",
+              "description": "Total excess repository size of all projects in the root namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -25773,6 +26278,29 @@
             {
               "name": "all",
               "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "IssueStateEvent",
+          "description": "Values for issue state events",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "REOPEN",
+              "description": "Reopens the issue",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "CLOSE",
+              "description": "Closes the issue",
               "isDeprecated": false,
               "deprecationReason": null
             }
@@ -32551,6 +33079,33 @@
               "deprecationReason": null
             },
             {
+              "name": "createBoard",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "CreateBoardInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CreateBoardPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "createBranch",
               "description": null,
               "args": [
@@ -34753,6 +35308,52 @@
           "description": null,
           "fields": [
             {
+              "name": "actualRepositorySizeLimit",
+              "description": "Size limit for repositories in the namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "additionalPurchasedStorageSize",
+              "description": "Additional storage purchased for the root namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "containsLockedProjects",
+              "description": "Includes at least one project where the repository size exceeds the limit",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "description",
               "description": "Description of the namespace",
               "args": [
@@ -35000,6 +35601,24 @@
               "deprecationReason": null
             },
             {
+              "name": "repositorySizeExcessProjectCount",
+              "description": "Number of projects in the root namespace where the repository size exceeds the limit",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "requestAccessEnabled",
               "description": "Indicates if users can request access to namespace",
               "args": [
@@ -35050,6 +35669,34 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "totalRepositorySize",
+              "description": "Total repository size of all projects in the root namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "totalRepositorySizeExcess",
+              "description": "Total excess repository size of all projects in the root namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -35190,6 +35837,16 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "NamespaceID",
+          "description": "Identifier of Namespace",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "INPUT_OBJECT",
           "name": "NamespaceIncreaseStorageTemporarilyInput",
           "description": "Autogenerated input type of NamespaceIncreaseStorageTemporarily",
@@ -35203,7 +35860,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NamespaceID",
                   "ofType": null
                 }
               },
@@ -35811,6 +36468,16 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "NoteID",
+          "description": "Identifier of Note",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "NotePermissions",
           "description": null,
@@ -36083,6 +36750,16 @@
               "ofType": null
             }
           ]
+        },
+        {
+          "kind": "SCALAR",
+          "name": "NoteableID",
+          "description": "Identifier of Noteable",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
         },
         {
           "kind": "OBJECT",
@@ -36574,7 +37251,7 @@
             },
             {
               "name": "NPM",
-              "description": "Packages from the Npm package manager",
+              "description": "Packages from the NPM package manager",
               "isDeprecated": false,
               "deprecationReason": null
             },
@@ -36592,7 +37269,7 @@
             },
             {
               "name": "PYPI",
-              "description": "Packages from the Pypi package manager",
+              "description": "Packages from the PyPI package manager",
               "isDeprecated": false,
               "deprecationReason": null
             },
@@ -37688,6 +38365,20 @@
           "name": "Project",
           "description": null,
           "fields": [
+            {
+              "name": "actualRepositorySizeLimit",
+              "description": "Size limit for the repository in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "alertManagementAlert",
               "description": "A single Alert Management alert of the project",
@@ -40500,6 +41191,20 @@
               "deprecationReason": null
             },
             {
+              "name": "repositorySizeExcess",
+              "description": "Size of repository that exceeds the limit in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "requestAccessEnabled",
               "description": "Indicates if users can request member access to the project",
               "args": [
@@ -41752,6 +42457,16 @@
           "interfaces": [
 
           ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "ProjectID",
+          "description": "Identifier of Project",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
           "enumValues": null,
           "possibleTypes": null
         },
@@ -43426,6 +44141,16 @@
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "sort",
+                  "description": "Sort order of results",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -45356,7 +46081,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -45753,6 +46478,20 @@
                   "name": "ID",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "lastTestReportManuallyCreated",
+              "description": "Indicates if latest test report was created by user",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -46453,6 +47192,24 @@
             {
               "name": "packagesSize",
               "description": "The packages size in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Float",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pipelineArtifactsSize",
+              "description": "The CI pipeline artifacts size in bytes",
               "args": [
 
               ],
@@ -47890,6 +48647,20 @@
           "description": "Represents summary of a security report",
           "fields": [
             {
+              "name": "apiFuzzing",
+              "description": "Aggregated counts for the api_fuzzing scan",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "SecurityReportSummarySection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "containerScanning",
               "description": "Aggregated counts for the container_scanning scan",
               "args": [
@@ -48129,6 +48900,12 @@
             },
             {
               "name": "COVERAGE_FUZZING",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "API_FUZZING",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
@@ -51315,6 +52092,89 @@
           "possibleTypes": null
         },
         {
+          "kind": "OBJECT",
+          "name": "StatusAction",
+          "description": null,
+          "fields": [
+            {
+              "name": "buttonTitle",
+              "description": "Title for the button, for example: Retry this job",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "icon",
+              "description": "Icon used in the action button",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "method",
+              "description": "Method for the action, for example: :post",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "path",
+              "description": "Path for the action",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "title",
+              "description": "Title for the action, for example: Retry",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "SCALAR",
           "name": "String",
           "description": "Represents textual data as UTF-8 character sequences. This type is most often used by GraphQL to represent free-form human-readable text.",
@@ -52932,6 +53792,16 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "TodoID",
+          "description": "Identifier of Todo",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "INPUT_OBJECT",
           "name": "TodoMarkDoneInput",
           "description": "Autogenerated input type of TodoMarkDone",
@@ -53092,7 +53962,7 @@
                     "name": null,
                     "ofType": {
                       "kind": "SCALAR",
-                      "name": "ID",
+                      "name": "TodoID",
                       "ofType": null
                     }
                   }
@@ -53501,7 +54371,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -54419,7 +55289,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "BoardID",
                   "ofType": null
                 }
               },
@@ -54460,7 +55330,7 @@
               "description": "The id of user to be assigned to the board.",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "UserID",
                 "ofType": null
               },
               "defaultValue": null
@@ -54470,7 +55340,7 @@
               "description": "The id of milestone to be assigned to the board.",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "MilestoneID",
                 "ofType": null
               },
               "defaultValue": null
@@ -54482,6 +55352,42 @@
                 "kind": "SCALAR",
                 "name": "Int",
                 "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "labels",
+              "description": "Labels of the issue",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "labelIds",
+              "description": "The IDs of labels to be added to the board.",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "LabelID",
+                    "ofType": null
+                  }
+                }
               },
               "defaultValue": null
             },
@@ -55387,6 +56293,16 @@
               "defaultValue": null
             },
             {
+              "name": "stateEvent",
+              "description": "Close or reopen an issue.",
+              "type": {
+                "kind": "ENUM",
+                "name": "IssueStateEvent",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "healthStatus",
               "description": "The desired health status",
               "type": {
@@ -56059,6 +56975,20 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "Snippet",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "spam",
+              "description": "Indicates whether the operation returns a record detected as spam",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -58135,7 +59065,7 @@
             },
             {
               "name": "reportType",
-              "description": "Type of the security report that found the vulnerability (SAST, DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION, COVERAGE_FUZZING)",
+              "description": "Type of the security report that found the vulnerability (SAST, DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION, COVERAGE_FUZZING, API_FUZZING)",
               "args": [
 
               ],
@@ -58195,7 +59125,7 @@
             },
             {
               "name": "state",
-              "description": "State of the vulnerability (DETECTED, DISMISSED, RESOLVED, CONFIRMED)",
+              "description": "State of the vulnerability (DETECTED, CONFIRMED, RESOLVED, DISMISSED)",
               "args": [
 
               ],
@@ -58466,7 +59396,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "VulnerabilityID",
                   "ofType": null
                 }
               },
@@ -59586,6 +60516,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "API_FUZZING",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -60174,6 +61110,18 @@
               "description": "Report Type in ascending order",
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "state_desc",
+              "description": "State in descending order",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "state_asc",
+              "description": "State in ascending order",
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -60193,7 +61141,7 @@
               "deprecationReason": null
             },
             {
-              "name": "DISMISSED",
+              "name": "CONFIRMED",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
@@ -60205,7 +61153,7 @@
               "deprecationReason": null
             },
             {
-              "name": "CONFIRMED",
+              "name": "DISMISSED",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null

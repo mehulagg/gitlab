@@ -14,6 +14,8 @@ module Groups
       push_frontend_feature_flag(:async_filtering, @group)
     end
 
+    feature_category :roadmaps
+
     # show roadmap for a group
     def show
       # Used to persist the order and show the correct sorting dropdown on UI.

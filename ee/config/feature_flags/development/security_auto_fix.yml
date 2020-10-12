@@ -2,6 +2,6 @@
 name: security_auto_fix
 introduced_by_url:
 rollout_issue_url:
-group: composition_analysis
+group: group::composition analysis
 type: development
 default_enabled: false

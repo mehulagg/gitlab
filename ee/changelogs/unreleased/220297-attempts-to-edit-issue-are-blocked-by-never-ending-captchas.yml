@@ -1,6 +1,0 @@
----
-title: Limit spam checks to title, description, or confidentiality changes on bot-created
-  issues
-merge_request: 43463
-author:
-type: fixed

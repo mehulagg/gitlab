@@ -8,6 +8,8 @@ class Admin::LicensesController < Admin::ApplicationController
 
   respond_to :html
 
+  feature_category :provision
+
   def show
     if @license.present? || License.future_dated_only?
       @licenses = License.history

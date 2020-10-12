@@ -12,6 +12,8 @@ class Admin::AuditLogsController < Admin::ApplicationController
 
   track_unique_visits :index, target_id: 'i_compliance_audit_events'
 
+  feature_category :audit_events
+
   PER_PAGE = 25
 
   def index

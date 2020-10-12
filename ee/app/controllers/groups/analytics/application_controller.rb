@@ -4,6 +4,8 @@ class Groups::Analytics::ApplicationController < ApplicationController
   include RoutableActions
   include GracefulTimeoutHandling
 
+  feature_category :planning_analytics
+
   private
 
   def self.increment_usage_counter(counter_klass, counter, *args)

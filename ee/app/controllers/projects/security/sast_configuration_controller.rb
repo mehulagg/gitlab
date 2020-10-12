@@ -11,6 +11,8 @@ module Projects
       before_action :ensure_sast_configuration_enabled!, except: [:create]
       before_action :authorize_edit_tree!, only: [:create]
 
+      feature_category :static_application_security_testing
+
       def show
       end
 

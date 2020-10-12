@@ -38,11 +38,20 @@ module DastSiteValidations
     end
 
     def token_found?(response)
-      response.body.include?(dast_site_validation.dast_site_token.token)
+      token = dast_site_validation.dast_site_token.token
+
+      case dast_site_validation.validation_strategy
+      when 'text_file'
+        response.body.include?(token)
+      when 'header'
+        response.headers[DastSiteValidation::HEADER] == token
+      else
+        false
+      end
     end
 
     def validate!(response)
-      raise TokenNotFound.new('Could not find token in response body') unless token_found?(response)
+      raise TokenNotFound.new('Could not find token') unless token_found?(response)
 
       dast_site_validation.pass
     end

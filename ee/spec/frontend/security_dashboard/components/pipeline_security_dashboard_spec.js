@@ -15,7 +15,6 @@ const pipelineIid = 4321;
 const projectId = 5678;
 const sourceBranch = 'feature-branch-1';
 const vulnerabilitiesEndpoint = '/vulnerabilities';
-const vulnerabilityFeedbackHelpPath = '/vulnerabilities_feedback_help';
 const loadingErrorIllustrations = {
   401: '/401.svg',
   403: '/403.svg',
@@ -56,7 +55,6 @@ describe('Pipeline Security Dashboard component', () => {
         projectId,
         sourceBranch,
         vulnerabilitiesEndpoint,
-        vulnerabilityFeedbackHelpPath,
         loadingErrorIllustrations,
       },
       ...options,
@@ -93,7 +91,6 @@ describe('Pipeline Security Dashboard component', () => {
         lockToProject: { id: projectId },
         pipelineId,
         vulnerabilitiesEndpoint,
-        vulnerabilityFeedbackHelpPath,
       });
     });
   });

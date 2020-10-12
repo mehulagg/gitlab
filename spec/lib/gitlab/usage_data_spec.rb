@@ -28,9 +28,16 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
                     project_minimum_id project_maximum_id
                     user_minimum_id user_maximum_id unique_visit_service
                     deployment_minimum_id deployment_maximum_id
-                    approval_merge_request_rule_minimum_id
-                    approval_merge_request_rule_maximum_id
                     auth_providers)
+
+        if Gitlab.ee?
+          values << %i(approval_merge_request_rule_minimum_id
+                       approval_merge_request_rule_maximum_id
+                       merge_request_minimum_id
+                       merge_request_maximum_id)
+          values.flatten!
+        end
+
         values.each do |key|
           expect(described_class).to receive(:clear_memoization).with(key)
         end
@@ -580,7 +587,16 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
   end
 
   describe '.system_usage_data_monthly' do
+    let_it_be(:project) { create(:project) }
     let!(:ud) { build(:usage_data) }
+
+    before do
+      stub_application_setting(self_monitoring_project: project)
+
+      for_defined_days_back do
+        create(:product_analytics_event, project: project, se_category: 'epics', se_action: 'promote')
+      end
+    end
 
     subject { described_class.system_usage_data_monthly }
 
@@ -594,6 +610,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(counts_monthly[:personal_snippets]).to eq(1)
       expect(counts_monthly[:project_snippets]).to eq(2)
       expect(counts_monthly[:packages]).to eq(3)
+      expect(counts_monthly[:promoted_issues]).to eq(1)
     end
   end
 

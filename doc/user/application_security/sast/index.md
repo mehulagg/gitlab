@@ -61,7 +61,7 @@ is **not** `19.03.0`. See [troubleshooting information](#error-response-from-dae
 
 GitLab SAST supports a variety of languages, package managers, and frameworks. Our SAST security scanners also feature automatic language detection which works even for mixed-language projects. If any supported language is detected in project source code we will automatically run the appropriate SAST analyzers.
 
-You can also [view our language roadmap](https://about.gitlab.com/direction/secure/static-analysis/sast/#language-support) and [request other language support by opening an issue](https://gitlab.com/groups/gitlab-org/-/epics/297). 
+You can also [view our language roadmap](https://about.gitlab.com/direction/secure/static-analysis/sast/#language-support) and [request other language support by opening an issue](https://gitlab.com/groups/gitlab-org/-/epics/297).
 
 | Language (package managers) / framework                                                                                                          | Scan tool                                                                                                     | Introduced in GitLab Version                                                                                                                                          |
 |--------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -267,7 +267,7 @@ spotbugs-sast:
     - build
   variables:
     MAVEN_REPO_PATH: ./.m2/repository
-    COMPILE: false
+    COMPILE: "false"
   artifacts:
     reports:
       sast: gl-sast-report.json
@@ -554,3 +554,12 @@ affected. Read more in
 ### Getting warning message `gl-sast-report.json: no matching files`
 
 For information on this, see the [general Application Security troubleshooting section](../../../ci/pipelines/job_artifacts.md#error-message-no-files-to-upload).
+
+### Limitation when using rules:exists
+
+The [SAST CI template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml)
+uses the `rules:exists` parameter. For performance reasons, a maximum number of matches are made
+against the given glob pattern. If the number of matches exceeds the maximum, the `rules:exists`
+parameter returns `true`. Depending on the number of files in your repository, a SAST job might be
+triggered even if the scanner doesn't support your project. For more details about this issue, see
+the [`rules:exists` documentation](../../../ci/yaml/README.md#rulesexists).

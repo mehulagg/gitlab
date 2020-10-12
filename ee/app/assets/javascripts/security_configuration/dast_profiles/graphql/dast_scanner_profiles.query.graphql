@@ -24,6 +24,9 @@ query DastScannerProfiles(
           profileName
           spiderTimeout
           targetTimeout
+          scanType
+          useAjaxSpider
+          showDebugMessages
           editPath
         }
       }

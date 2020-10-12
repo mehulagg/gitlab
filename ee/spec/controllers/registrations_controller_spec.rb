@@ -6,8 +6,11 @@ RSpec.describe RegistrationsController do
   let_it_be(:user) { create(:user) }
 
   describe '#create' do
+    let(:base_user_params) { build_stubbed(:user).slice(:first_name, :last_name, :username, :email, :password) }
+    let(:user_params) { { user: base_user_params } }
+
     context 'when the user opted-in' do
-      let(:user_params) { { user: attributes_for(:user, email_opted_in: '1') } }
+      let(:user_params) { { user: base_user_params.merge(email_opted_in: '1') } }
 
       it 'sets the rest of the email_opted_in fields' do
         post :create, params: user_params
@@ -20,7 +23,7 @@ RSpec.describe RegistrationsController do
     end
 
     context 'when the user opted-out' do
-      let(:user_params) { { user: attributes_for(:user, email_opted_in: '0') } }
+      let(:user_params) { { user: base_user_params.merge(email_opted_in: '0') } }
 
       it 'does not set the rest of the email_opted_in fields' do
         post :create, params: user_params
@@ -34,7 +37,6 @@ RSpec.describe RegistrationsController do
 
     context 'when reCAPTCHA experiment enabled' do
       it "logs a 'User Created' message including the experiment state" do
-        user_params = { user: attributes_for(:user) }
         allow_any_instance_of(EE::RecaptchaExperimentHelper).to receive(:show_recaptcha_sign_up?).and_return(true)
 
         expect(Gitlab::AppLogger).to receive(:info).with(/\AUser Created: .+experiment_growth_recaptcha\?true\z/).and_call_original

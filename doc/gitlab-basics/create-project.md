@@ -18,13 +18,13 @@ To create a project in GitLab:
    icon in the navigation bar. This opens the **New project** page.
 1. On the **New project** page, choose if you want to:
    - Create a [blank project](#blank-projects).
-   - Create a project using with one of the available [project templates](#project-templates).
+   - Create a project using one of the available [project templates](#project-templates).
    - [Import a project](../user/project/import/index.md) from a different repository,
      if enabled on your GitLab instance. Contact your GitLab administrator if this is unavailable.
    - Run [CI/CD pipelines for external repositories](../ci/ci_cd_for_external_repos/index.md). **(PREMIUM)**
 
 NOTE: **Note:**
-For a list of words that cannot be used as project names see
+For a list of words that can't be used as project names see
 [Reserved project and group names](../user/reserved_names.md).
 
 ### Blank projects
@@ -33,7 +33,7 @@ To create a new blank project on the **New project** page:
 
 1. On the **Blank project** tab, provide the following information:
    - The name of your project in the **Project name** field. You can't use
-     special characters, but you can use spaces, hyphens, underscores or even
+     special characters, but you can use spaces, hyphens, underscores, or even
      emoji. When adding the name, the **Project slug** will auto populate.
      The slug is what the GitLab instance will use as the URL path to the project.
      If you want a different slug, input the project name first,

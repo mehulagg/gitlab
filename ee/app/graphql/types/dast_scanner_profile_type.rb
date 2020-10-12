@@ -25,6 +25,18 @@ module Types
     field :target_timeout, GraphQL::INT_TYPE, null: true,
           description: 'The maximum number of seconds allowed for the site under test to respond to a request'
 
+    field :scan_type, Types::DastScanTypeEnum, null: true,
+          description: 'Indicates the type of DAST scan that will run. ' \
+          'Either a Passive Scan or an Active Scan.'
+
+    field :use_ajax_spider, GraphQL::BOOLEAN_TYPE, null: false,
+          description: 'Indicates if the AJAX spider should be used to crawl the target site. ' \
+          'True to run the AJAX spider in addition to the traditional spider, and false to run only the traditional spider.'
+
+    field :show_debug_messages, GraphQL::BOOLEAN_TYPE, null: false,
+          description: 'Indicates if debug messages should be included in DAST console output. ' \
+          'True to include the debug messages.'
+
     field :edit_path, GraphQL::STRING_TYPE, null: true,
           description: 'Relative web path to the edit page of a scanner profile',
           resolve: -> (obj, _args, _ctx) do

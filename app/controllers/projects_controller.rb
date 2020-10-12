@@ -37,7 +37,7 @@ class ProjectsController < Projects::ApplicationController
   # Experiments
   before_action only: [:new, :create] do
     frontend_experimentation_tracking_data(:new_create_project_ui, 'click_tab')
-    push_frontend_feature_flag(:new_create_project_ui) if experiment_enabled?(:new_create_project_ui)
+    push_frontend_experiment(:new_create_project_ui)
   end
 
   before_action only: [:edit] do
@@ -46,6 +46,16 @@ class ProjectsController < Projects::ApplicationController
   end
 
   layout :determine_layout
+
+  feature_category :projects, [
+                     :index, :show, :new, :create, :edit, :update, :transfer,
+                     :destroy, :resolve, :archive, :unarchive, :toggle_star
+                   ]
+
+  feature_category :source_code_management, [:remove_fork, :housekeeping, :refs]
+  feature_category :issue_tracking, [:preview_markdown, :new_issuable_address]
+  feature_category :importers, [:export, :remove_export, :generate_new_export, :download_export]
+  feature_category :audit_events, [:activity]
 
   def index
     redirect_to(current_user ? root_path : explore_root_path)

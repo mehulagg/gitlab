@@ -201,7 +201,7 @@ module Gitlab
             personal_snippets: count(PersonalSnippet.where(last_28_days_time_period)),
             project_snippets: count(ProjectSnippet.where(last_28_days_time_period))
           }.merge(
-            snowplow_event_counts(time_period: last_28_days_time_period(column: :collector_tstamp))
+            snowplow_event_counts(last_28_days_time_period(column: :collector_tstamp))
           ).tap do |data|
             data[:snippets] = data[:personal_snippets] + data[:project_snippets]
           end
@@ -816,8 +816,6 @@ module Gitlab
         clear_memoization(:unique_visit_service)
         clear_memoization(:deployment_minimum_id)
         clear_memoization(:deployment_maximum_id)
-        clear_memoization(:approval_merge_request_rule_minimum_id)
-        clear_memoization(:approval_merge_request_rule_maximum_id)
         clear_memoization(:project_minimum_id)
         clear_memoization(:project_maximum_id)
         clear_memoization(:auth_providers)

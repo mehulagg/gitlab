@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Plan' do
+  RSpec.describe 'Plan', :reliable do
     describe 'Assign Iterations' do
       let!(:iteration) { EE::Resource::GroupIteration.fabricate_via_api! }
 
