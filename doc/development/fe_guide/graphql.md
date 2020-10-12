@@ -830,6 +830,35 @@ it('calls a mutation with correct parameters and reorders designs', async () => 
 });
 ```
 
+In cases where a handler's response needs to be changed independent of component creation the mock provider's default
+client can be overridden:
+
+```javascript
+const respondWith = handlers => {
+    fakeApollo.defaultClient = createMockApollo(handlers);
+};
+
+function createComponentWithApollo({
+  moveHandler = jest.fn().mockResolvedValue(moveDesignMutationResponse),
+}) {
+  moveDesignHandler = moveHandler;
+
+  const requestHandlers = [
+    [getDesignListQuery, jest.fn().mockResolvedValue(designListQueryResponse)],
+    [permissionsQuery, jest.fn().mockResolvedValue(permissionsQueryResponse)],
+    [moveDesignMutation, moveDesignHandler],
+  ];
+
+  fakeApollo = createMockApollo(requestHandlers);
+  wrapper = shallowMount(Index, {
+    localVue,
+    apolloProvider: fakeApollo,
+  });
+}
+...
+// @TODO - Add example
+```
+
 ## Handling errors
 
 GitLab's GraphQL mutations currently have two distinct error modes: [Top-level](#top-level-errors) and [errors-as-data](#errors-as-data).
