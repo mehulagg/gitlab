@@ -232,7 +232,21 @@ RSpec.describe 'getting merge request listings nested in a project' do
 
       include_examples 'N+1 query check'
     end
+
+    context 'when requesting `user_notes_count`' do
+      let(:requested_fields) { [:user_notes_count] }
+
+      before do
+        create(:note_on_merge_request, noteable: merge_request_a, project: merge_request_a.target_project)
+        create(:note_on_merge_request, noteable: merge_request_a, project: merge_request_a.target_project)
+
+        create(:note_on_merge_request, noteable: merge_request_b, project: merge_request_a.target_project)
+      end
+
+      include_examples 'N+1 query check'
+    end
   end
+
   describe 'sorting and pagination' do
     let(:data_path) { [:project, :mergeRequests] }
 
