@@ -31,7 +31,7 @@ module EE
           description: 'Indicates whether an issue is published to the status page'
 
         field :sla_due_at, ::Types::TimeType, null: true,
-          description: 'Timestamp of when the incident SLA expires'
+          description: 'Timestamp of when the incident SLA expires. Returns null if `incident_sla_dev` feature flag is disabled.'
       end
     end
   end
