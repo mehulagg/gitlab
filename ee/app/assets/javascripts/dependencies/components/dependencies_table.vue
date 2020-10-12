@@ -91,6 +91,14 @@ export default {
     { key: 'isVulnerable', label: '', tdClass },
   ],
   DEPENDENCIES_PER_PAGE: 20,
+  DEPENDENCY_PATH_LINK:
+    'https://docs.gitlab.com/ee/user/application_security/dependency_list/#dependency-paths',
+  i18n: {
+    tooltipText: s__(
+      'Dependencies|The component dependency path is based on the lock file. There may be several paths. In these cases, the longest path is displayed.',
+    ),
+    tooltipMoreText: s__('Dependencies|Learn more about dependency paths'),
+  },
 };
 </script>
 
@@ -113,14 +121,13 @@ export default {
         placement="top"
         :title="s__('Dependencies|Location and dependency path')"
       >
-        The component dependency path is based on the lock file. There may be several paths. In
-        these cases, the longest path is displayed.
+        {{ $options.i18n.tooltipText }}
         <div class="gl-mt-4">
           <gl-link
-            href="https://docs.gitlab.com/ee/user/application_security/dependency_list/#dependency-paths"
+            :href="$options.DEPENDENCY_PATH_LINK"
             target="_blank"
             class="font-size-inherit"
-            >Learn more about dependency paths</gl-link
+            >{{ $options.i18n.tooltipMoreText }}</gl-link
           >
         </div>
       </gl-popover>
