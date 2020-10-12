@@ -26,7 +26,7 @@ RSpec.describe DastSiteValidationsFinder do
       end
     end
 
-    context 'filtering by project' do
+    context 'filtering by project_id' do
       let(:params) { { project_id: dast_site_validation_2.project.id } }
 
       it 'returns the matching dast_site_validations' do

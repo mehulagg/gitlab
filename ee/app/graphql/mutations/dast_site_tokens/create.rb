@@ -33,17 +33,14 @@ module Mutations
         project = authorized_find_project!(full_path: full_path)
         raise Gitlab::Graphql::Errors::ResourceNotAvailable, 'Feature disabled' unless allowed?(project)
 
-        dast_site_token = DastSiteToken.new(project: project, token: SecureRandom.uuid, url: target_url)
+        response = DastSiteValidations::CreateService.new(
+          container: project,
+          params: { target_url: target_url }
+        ).execute
 
-        if dast_site_token.save
-          url_base = normalize_target_url(target_url)
-          dast_site_validation = find_dast_site_validation(project, url_base)
-          status = calculate_status(dast_site_validation)
+        return error_response(response.errors) if response.error?
 
-          success_response(dast_site_token, status)
-        else
-          error_response(dast_site_token)
-        end
+        success_response(response.payload[:dast_site_token], response.payload[:status])
       end
 
       private
@@ -52,26 +49,12 @@ module Mutations
         Feature.enabled?(:security_on_demand_scans_site_validation, project)
       end
 
-      def normalize_target_url(target_url)
-        DastSiteValidation.get_normalized_url_base(target_url)
-      end
-
-      def find_dast_site_validation(project, url_base)
-        DastSiteValidationsFinder.new(project_id: project.id, url_base: url_base).execute.first
-      end
-
-      def calculate_status(dast_site_validation)
-        state = dast_site_validation&.state || DastSiteValidation::INITIAL_STATE
-
-        "#{state}_VALIDATION".upcase
+      def error_response(errors)
+        { errors: errors }
       end
 
       def success_response(dast_site_token, status)
         { errors: [], id: dast_site_token.to_global_id, status: status, token: dast_site_token.token }
-      end
-
-      def error_response(dast_site_token)
-        { errors: dast_site_token.errors.full_messages }
       end
     end
   end
