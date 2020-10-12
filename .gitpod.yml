@@ -25,7 +25,6 @@ tasks:
         until gdk psql -d gitlabhq_development -c '\l' >/dev/null 2>/dev/null; do printf '.'; sleep 5; done && echo ""
         cd gitlab
         rails db:migrate RAILS_ENV=development
-        REQUIRES_RESTART=true
         cd -
         # stop GDK
         echo "$(date) – Stopping GDK" | tee -a /workspace/startup.log
