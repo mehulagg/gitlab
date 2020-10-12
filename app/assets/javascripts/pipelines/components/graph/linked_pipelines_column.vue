@@ -29,6 +29,8 @@ export default {
   },
   data() {
     return {
+      // TODO: Delete this when upstream/downstream are available from backend
+      currentPipelineId: null,
       currentPipeline: null,
       pipelineExpanded: false,
     }
@@ -50,22 +52,35 @@ export default {
   },
   methods: {
     isExpanded(id){
-      return Boolean(this.currentPipeline?.id && id === this.currentPipeline.id);
+      //STUB VERSION
+      return this.currentPipelineId === id;
+      // return Boolean(this.currentPipeline?.id && id === this.currentPipeline.id);
     },
     onPipelineClick(pipeline, index) {
 
       // if it is expanded already, close it and clear
-      if (this.currentPipeline?.id === pipeline.id) {
+      // REAL VERSION
+      // if (this.currentPipeline?.id === pipeline.id) {
+      //   this.pipelineExpanded = false;
+      //   this.currentPipeline = null;
+      //   return;
+      // }
+
+      // STUB VERSION
+      if (this.currentPipelineId === pipeline.id) {
         this.pipelineExpanded = false;
         this.currentPipeline = null;
+        this.currentPipelineId = null;
         return;
       }
 
       // if it is already showing a different pipeline, then
       // this will be a no-op, but that doesn't matter
-      // this.pipelineExpanded = true;
 
-      this.pipelineExpanded = !this.pipelineExpanded
+      this.pipelineExpanded = true;
+
+      // STUB
+      this.currentPipelineId = pipeline.id;
 
 
       // if the pipleine has been loaded before, this will return the cached value
@@ -118,7 +133,7 @@ export default {
             @pipelineClicked="onPipelineClick(pipeline, index)"
             @pipelineExpandToggle="onPipelineExpandToggle"
           />
-          <div v-if="pipelineExpanded" class="gl-display-inline-block" :style="{ width: 'max-content', background: 'mistyrose'}">
+          <div v-if="(isExpanded(pipeline.id))" class="gl-display-inline-block" :style="{ width: 'max-content', background: 'mistyrose'}">
             <gl-loading-icon v-if="$apollo.queries.currentPipeline.loading" class="m-auto" size="lg" />
             <pipeline-graph
               v-else
