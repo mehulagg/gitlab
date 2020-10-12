@@ -219,7 +219,7 @@ Table description links:
 - [Omnibus GitLab](https://docs.gitlab.com/omnibus/)
 - [GitLab chart](https://docs.gitlab.com/charts/)
 - [Minikube Minimal](https://docs.gitlab.com/charts/development/minikube/#deploying-gitlab-with-minimal-settings)
-- [GitLab.com](https://gitlab.com)
+- [GitLab.com](https://about.gitlab.com)
 - [Source](../install/installation.md)
 - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit)
 

@@ -208,7 +208,7 @@ before_script:
 ## Example project
 
 We have set up an [Example SSH Project](https://gitlab.com/gitlab-examples/ssh-private-key/) for your convenience
-that runs on [GitLab.com](https://gitlab.com) using our publicly available
+that runs on [GitLab.com](https://about.gitlab.com) using our publicly available
 [shared runners](../runners/README.md).
 
 Want to hack on it? Simply fork it, commit and push your changes. Within a few

@@ -120,7 +120,7 @@ Database: nice_marmot
 ## Example project
 
 We have set up an [Example PostgreSQL Project](https://gitlab.com/gitlab-examples/postgres) for your
-convenience that runs on [GitLab.com](https://gitlab.com) using our publicly
+convenience that runs on [GitLab.com](https://about.gitlab.com) using our publicly
 available [shared runners](../runners/README.md).
 
 Want to hack on it? Fork it, commit, and push your changes. Within a few

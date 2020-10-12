@@ -135,7 +135,7 @@ Each CI/CD template must be tested in order to make sure that it's safe to be pu
 It's always good practice to test the template in a minimal demo project.
 To do so, please follow the following steps:
 
-1. Create a public sample project on <https://gitlab.com>.
+1. Create a public sample project on <https://about.gitlab.com>.
 1. Add a `.gitlab-ci.yml` to the project with the proposed template.
 1. Run pipelines and make sure that everything runs properly, in all possible cases
    (merge request pipelines, schedules, and so on).

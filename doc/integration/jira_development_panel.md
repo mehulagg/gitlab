@@ -213,7 +213,7 @@ Potential resolutions:
 - If you're using GitLab Core or GitLab Starter, be sure you're using
   GitLab 13.4 or later.
 
-[Contact GitLab Support](https://about.gitlab.com/support) if none of these reasons apply.
+[Contact GitLab Support](https://about.gitlab.com/support/) if none of these reasons apply.
 
 #### Fixing synchronization issues
 

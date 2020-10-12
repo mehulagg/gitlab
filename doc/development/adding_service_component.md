@@ -4,7 +4,7 @@ The GitLab product is made up of several service components that run as independ
 
 ## Integration phases
 
-The following outline re-uses the [maturity metric](https://about.gitlab.com/direction/maturity) naming as an example of the various phases of integrating a component. These are only loosely coupled to a components actual maturity, and are intended as a guide for implementation order (for example, a component does not need to be enabled by default to be Lovable, and being enabled by default does not on its own cause a component to be Lovable).
+The following outline re-uses the [maturity metric](https://about.gitlab.com/direction/maturity/) naming as an example of the various phases of integrating a component. These are only loosely coupled to a components actual maturity, and are intended as a guide for implementation order (for example, a component does not need to be enabled by default to be Lovable, and being enabled by default does not on its own cause a component to be Lovable).
 
 - Proposed
   - [Proposing a new component](#proposing-a-new-component)
@@ -25,7 +25,7 @@ The following outline re-uses the [maturity metric](https://about.gitlab.com/dir
 
 The initial step for integrating a new component with GitLab starts with creating a [Feature proposal in the issue tracker](https://gitlab.com/gitlab-org/gitlab/-/issues/new?issuable_template=Feature%20proposal).
 
-Identify the [product category](https://about.gitlab.com/handbook/product/categories/) the component falls under and assign the Engineering Manager and Product Manager responsible for that category.
+Identify the [product category](https://about.gitlab.com/handbook/product/product-categories/) the component falls under and assign the Engineering Manager and Product Manager responsible for that category.
 
 The general steps for getting any GitLab feature from proposal to release can be found in the [Product development flow](https://about.gitlab.com/handbook/product-development-flow/).
 

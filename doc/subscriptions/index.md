@@ -132,11 +132,11 @@ account:
 
 1. Log in to the
    [Customers Portal](https://customers.gitlab.com/customers/sign_in).
-1. In a separate browser tab, go to [GitLab.com](https://gitlab.com) and ensure you
+1. In a separate browser tab, go to [GitLab.com](https://gitlab.com/users/sign_in) and ensure you
    are not logged in.
 1. On the Customers Portal page, click **My account > Account details**.
 1. Under **Your GitLab.com account**, click **Change linked account**.
-1. Log in to the [GitLab.com](https://gitlab.com) account you want to link to the Customers Portal
+1. Log in to the [GitLab.com](https://gitlab.com/users/sign_in) account you want to link to the Customers Portal
    account.
 
 ### Change the associated namespace
@@ -170,7 +170,7 @@ Find more information how to apply and renew at
 
 ## GitLab for Open Source subscriptions
 
-All [GitLab for Open Source](https://about.gitlab.com/solutions/open-source/program/)
+All [GitLab for Open Source](https://about.gitlab.com/solutions/open-source/join/)
 requests, including subscription renewals, must be made by using the application process.
 If you have any questions, send an email to `opensource@gitlab.com` for assistance.
 

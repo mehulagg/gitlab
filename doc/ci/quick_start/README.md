@@ -40,7 +40,7 @@ over to our format.
 This guide assumes that you have:
 
 - A working GitLab instance of version 8.0+ or are using
-  [GitLab.com](https://gitlab.com).
+  [GitLab.com](https://about.gitlab.com).
 - A project in GitLab that you would like to use CI for.
 - Maintainer or owner access to the project
 
@@ -183,7 +183,7 @@ clicking **Settings > CI/CD** and expanding **Runners**.
 
 ### Shared runners
 
-If you use [GitLab.com](https://gitlab.com/), you can use the **shared runners**
+If you use [GitLab.com](https://about.gitlab.com/), you can use the **shared runners**
 provided by GitLab.
 
 These are special virtual machines that run on GitLab's infrastructure and can
