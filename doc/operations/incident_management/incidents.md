@@ -189,4 +189,27 @@ un-threaded and ordered chronologically, newest to oldest:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241663) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5.
 
-TODO
+A Service Level Agreement (SLA) timer may be configured for Incidents. When set, the timer appears on new incidents beginning with the configured duration and counting down until it reaches zero.
+
+#### How to configure
+
+The Service Level Agreement countdown timer may be configured in the Operations settings.
+
+1. Sign in as a user with Maintainer [permissions](../../user/permissions.md).
+1. Navigate to **Settings > Operations > Incidents** and expand **Incidents**.
+1. Select the **Incident Settings** tab:
+
+   ![Incident SLA settings](./img/incident_sla_settings_v13_5.png)
+
+1. Activate the integration, and set a time limit.
+   - This is the length of time from when a new incident is created to when the SLA is reached for that incident.
+1. Save the changes in GitLab.
+
+NOTE: **Note:**
+Any changes to the Incident SLA settings are applied to _new_ incidents only. Existing incidents will remain unchanged.
+
+#### Viewing the SLA on incidents
+
+The Service Level Agreement timer appears in the highlight bar for new incident issues.
+
+When the timer reaches zero a special system note appears, and a label is added to the incident.
