@@ -2042,7 +2042,19 @@ msgstr ""
 msgid "AdminUsers|Access"
 msgstr ""
 
+msgid "AdminUsers|Access Git repositories"
+msgstr ""
+
+msgid "AdminUsers|Access the API"
+msgstr ""
+
+msgid "AdminUsers|Activate their account"
+msgstr ""
+
 msgid "AdminUsers|Active"
+msgstr ""
+
+msgid "AdminUsers|Add them to projects or groups they are currently invited to"
 msgstr ""
 
 msgid "AdminUsers|Admin"
@@ -2054,10 +2066,31 @@ msgstr ""
 msgid "AdminUsers|Admins"
 msgstr ""
 
+msgid "AdminUsers|Approve"
+msgstr ""
+
+msgid "AdminUsers|Approve user"
+msgstr ""
+
+msgid "AdminUsers|Approved users can:"
+msgstr ""
+
+msgid "AdminUsers|Approving a user will:"
+msgstr ""
+
+msgid "AdminUsers|Are you sure?"
+msgstr ""
+
 msgid "AdminUsers|Automatically marked as default internal user"
 msgstr ""
 
+msgid "AdminUsers|Be added to groups and projects"
+msgstr ""
+
 msgid "AdminUsers|Block"
+msgstr ""
+
+msgid "AdminUsers|Block this user"
 msgstr ""
 
 msgid "AdminUsers|Block user"
@@ -2073,6 +2106,9 @@ msgid "AdminUsers|Blocking user has the following effects:"
 msgstr ""
 
 msgid "AdminUsers|Cannot unblock LDAP blocked users"
+msgstr ""
+
+msgid "AdminUsers|Confirm their email address"
 msgstr ""
 
 msgid "AdminUsers|Deactivate"
@@ -2114,6 +2150,9 @@ msgstr ""
 msgid "AdminUsers|It's you!"
 msgstr ""
 
+msgid "AdminUsers|Log in"
+msgstr ""
+
 msgid "AdminUsers|New user"
 msgstr ""
 
@@ -2121,6 +2160,9 @@ msgid "AdminUsers|No users found"
 msgstr ""
 
 msgid "AdminUsers|Owned groups will be left"
+msgstr ""
+
+msgid "AdminUsers|Pending approval"
 msgstr ""
 
 msgid "AdminUsers|Personal projects will be left"
@@ -2166,6 +2208,9 @@ msgid "AdminUsers|The user will not be able to use slash commands"
 msgstr ""
 
 msgid "AdminUsers|The user will not receive any notifications"
+msgstr ""
+
+msgid "AdminUsers|This user has requested access"
 msgstr ""
 
 msgid "AdminUsers|To confirm, type %{projectName}"
@@ -25058,6 +25103,9 @@ msgstr ""
 msgid "Successfully activated"
 msgstr ""
 
+msgid "Successfully approved"
+msgstr ""
+
 msgid "Successfully blocked"
 msgstr ""
 
@@ -25960,6 +26008,9 @@ msgid "The user map is a JSON document mapping the Google Code users that partic
 msgstr ""
 
 msgid "The user map is a mapping of the FogBugz users that participated on your projects to the way their email address and usernames will be imported into GitLab. You can change this by populating the table below."
+msgstr ""
+
+msgid "The user you are trying to approve is not pending an approval"
 msgstr ""
 
 msgid "The user you are trying to deactivate has been active in the past %{minimum_inactive_days} days and cannot be deactivated"
@@ -29483,6 +29534,9 @@ msgid "You are going to turn off the confidentiality. This means %{strongStart}e
 msgstr ""
 
 msgid "You are going to turn on the confidentiality. This means that only team members with %{strongStart}at least Reporter access%{strongEnd} are able to see and leave comments on the %{issuableType}."
+msgstr ""
+
+msgid "You are not allowed to approve a user"
 msgstr ""
 
 msgid "You are not allowed to push into this branch. Create another branch or open a merge request."

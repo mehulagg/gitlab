@@ -1,7 +1,10 @@
 %h3.page-title
   = @user.name
   - if @user.blocked?
-    %span.cred (Blocked)
+    - if @user.blocked_pending_approval?
+      %span.cred (Pending approval)
+    - else
+      %span.cred (Blocked)
   - if @user.internal?
     %span.cred (Internal)
   - if @user.admin

@@ -126,6 +126,16 @@ RSpec.describe UsersHelper do
       end
     end
 
+    context 'with a pending approval user' do
+      it 'returns the pending approval badge' do
+        blocked_pending_approval_user = create(:user, :blocked_pending_approval)
+
+        badges = helper.user_badges_in_admin_section(blocked_pending_approval_user)
+
+        expect(filter_ee_badges(badges)).to eq([text: 'Pending approval', variant: 'info'])
+      end
+    end
+
     context 'with an admin user' do
       it "returns the admin badge" do
         admin_user = create(:admin)
@@ -175,6 +185,36 @@ RSpec.describe UsersHelper do
         badges = helper.user_badges_in_admin_section(user)
 
         expect(filter_ee_badges(badges)).to be_empty
+      end
+    end
+  end
+
+  describe '#can_force_email_confirmation?' do
+    subject { helper.can_force_email_confirmation?(user) }
+
+    context 'for a user that is already confirmed' do
+      it 'returns false' do
+        is_expected.to eq(false)
+      end
+    end
+
+    context 'for a user that is not confirmed' do
+      let(:user) { create(:user, :unconfirmed) }
+
+      context 'user is pending approval' do
+        before do
+          user.block_pending_approval!
+        end
+
+        it 'returns false' do
+          is_expected.to eq(false)
+        end
+      end
+
+      context 'user is not pending approval' do
+        it 'returns true' do
+          is_expected.to eq(true)
+        end
       end
     end
   end

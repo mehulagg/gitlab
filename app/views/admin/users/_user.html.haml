@@ -35,7 +35,14 @@
                   %span.small
                     = s_('AdminUsers|Cannot unblock LDAP blocked users')
                 - elsif user.blocked?
-                  = link_to _('Unblock'), unblock_admin_user_path(user), method: :put
+                  - if user.blocked_pending_approval?
+                    = link_to s_('AdminUsers|Approve'), approve_admin_user_path(user), method: :put
+                    %button.btn.gl-button.btn-default-tertiary{ data: { 'gl-modal-action': 'block',
+                      url: block_admin_user_path(user),
+                      username: sanitize_name(user.name) } }
+                      = s_('AdminUsers|Block')
+                  - else
+                    = link_to _('Unblock'), unblock_admin_user_path(user), method: :put
                 - else
                   %button.btn.gl-button.btn-default-tertiary{ data: { 'gl-modal-action': 'block',
                     url: block_admin_user_path(user),

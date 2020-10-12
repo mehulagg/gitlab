@@ -84,7 +84,14 @@ module UsersHelper
 
   def user_badges_in_admin_section(user)
     [].tap do |badges|
-      badges << { text: s_('AdminUsers|Blocked'), variant: 'danger' } if user.blocked?
+      if user.blocked?
+        badges << if user.blocked_pending_approval?
+                    { text: s_('AdminUsers|Pending approval'), variant: 'info' }
+                  else
+                    { text: s_('AdminUsers|Blocked'), variant: 'danger' }
+                  end
+      end
+
       badges << { text: s_('AdminUsers|Admin'), variant: 'success' } if user.admin?
       badges << { text: s_('AdminUsers|External'), variant: 'secondary' } if user.external?
       badges << { text: s_("AdminUsers|It's you!"), variant: nil } if current_user == user
@@ -104,6 +111,10 @@ module UsersHelper
     elsif organization.present?
       organization
     end
+  end
+
+  def can_force_email_confirmation?(user)
+    !user.confirmed? && !user.blocked_pending_approval?
   end
 
   private
