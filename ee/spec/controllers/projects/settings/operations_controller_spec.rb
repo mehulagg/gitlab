@@ -56,7 +56,7 @@ RSpec.describe Projects::Settings::OperationsController do
 
     context 'with a license' do
       before do
-        stub_licensed_features(status_page: true)
+        stub_licensed_features(status_page: true, incident_sla: true)
       end
 
       context 'with maintainer role' do
@@ -87,7 +87,7 @@ RSpec.describe Projects::Settings::OperationsController do
 
     context 'without license' do
       before do
-        stub_licensed_features(status_page: false)
+        stub_licensed_features(status_page: false, incident_sla: false)
       end
 
       it_behaves_like 'user with read access', :public
@@ -116,30 +116,6 @@ RSpec.describe Projects::Settings::OperationsController do
     context 'with a license' do
       before do
         stub_licensed_features(status_page: true, incident_sla: true)
-      end
-
-      shared_examples 'user with write access' do |project_visibility|
-        let(:project) { create(:project, project_visibility) }
-        let(:tracing_url) { 'https://gitlab.com' }
-
-        before do
-          project.add_maintainer(user)
-        end
-
-        it 'creates tracing setting' do
-          update_project(
-            project,
-            tracing_params: { external_url: tracing_url }
-          )
-
-          expect(project.tracing_setting.external_url).to eq(tracing_url)
-        end
-      end
-
-      context 'with maintainer role' do
-        it_behaves_like 'user with write access', :public
-        it_behaves_like 'user with write access', :private
-        it_behaves_like 'user with write access', :internal
       end
 
       context 'with non maintainer roles' do
@@ -290,15 +266,11 @@ RSpec.describe Projects::Settings::OperationsController do
 
     private
 
-    def update_project(project, status_page_params: nil)
+    def update_project(project, incident_management_params: nil, status_page_params: nil)
       patch :update, params: project_params(
         project,
-<<<<<<< HEAD
-=======
-        tracing_params: tracing_params,
-        incident_management_setting_attributes: incident_management_params,
->>>>>>> 481c2a19df5... Add EE changes to controller for SLA
-        status_page_params: status_page_params
+        status_page_params: status_page_params,
+        incident_management_params: incident_management_params
       )
 
       project.reload
@@ -307,21 +279,13 @@ RSpec.describe Projects::Settings::OperationsController do
 
   private
 
-<<<<<<< HEAD
-  def project_params(project, status_page_params: nil)
-=======
-  def project_params(project, tracing_params: nil, incident_management_setting_attributes: nil, status_page_params: nil)
->>>>>>> 481c2a19df5... Add EE changes to controller for SLA
+  def project_params(project, incident_management_params: nil, status_page_params: nil)
     {
       namespace_id: project.namespace,
       project_id: project,
       project: {
-<<<<<<< HEAD
-=======
-        tracing_setting_attributes: tracing_params,
-        incident_management_setting_attributes: incident_management_setting_attributes,
->>>>>>> 481c2a19df5... Add EE changes to controller for SLA
-        status_page_setting_attributes: status_page_params
+        status_page_setting_attributes: status_page_params,
+        incident_management_setting_attributes: incident_management_params
       }
     }
   end
