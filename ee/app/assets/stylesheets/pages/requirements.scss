@@ -20,6 +20,12 @@
       overflow-y: auto !important;
     }
   }
+
+  .requirement-form-drawer.zen-mode {
+    // We need to override `z-index` provided to GlDrawer
+    // in Zen mode to enable full-screen editing.
+    z-index: auto !important;
+  }
 }
 
 .requirements-list-container {
@@ -32,6 +38,11 @@
       // takes up maximum available horizontal space
       // while still preventing REQ ID from wrapping.
       flex-grow: 100;
+    }
+
+    .requirement:hover {
+      background-color: $blue-50;
+      cursor: pointer;
     }
   }
 
@@ -73,7 +84,7 @@
   }
 
   .gl-drawer {
-    width: 480px;
+    width: 520px;
     padding-left: $gl-padding;
     padding-right: $gl-padding;
     box-shadow: none;

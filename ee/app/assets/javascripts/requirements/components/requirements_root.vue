@@ -176,6 +176,7 @@ export default {
       sortBy: this.initialSortBy,
       showCreateForm: false,
       showEditForm: false,
+      editMode: false,
       editedRequirement: null,
       createRequirementRequestActive: false,
       stateChangeRequestActiveFor: 0,
@@ -325,7 +326,7 @@ export default {
         replace: true,
       });
     },
-    updateRequirement({ iid, title, state, errorFlashMessage }) {
+    updateRequirement({ iid, title, description, state, errorFlashMessage }) {
       const updateRequirementInput = {
         projectPath: this.projectPath,
         iid,
@@ -333,6 +334,9 @@ export default {
 
       if (title) {
         updateRequirementInput.title = title;
+      }
+      if (description) {
+        updateRequirementInput.description = description;
       }
       if (state) {
         updateRequirementInput.state = state;
@@ -373,7 +377,7 @@ export default {
       this.showEditForm = true;
       this.editedRequirement = requirement;
     },
-    handleNewRequirementSave(title) {
+    handleNewRequirementSave({ title, description }) {
       this.createRequirementRequestActive = true;
       return this.$apollo
         .mutate({
@@ -382,6 +386,7 @@ export default {
             createRequirementInput: {
               projectPath: this.projectPath,
               title,
+              description,
             },
           },
         })
@@ -407,6 +412,9 @@ export default {
           this.createRequirementRequestActive = false;
         });
     },
+    handleRequirementEdit(editMode) {
+      this.editMode = editMode;
+    },
     handleNewRequirementCancel() {
       this.showCreateForm = false;
     },
@@ -418,8 +426,8 @@ export default {
       })
         .then(({ data }) => {
           if (!data.updateRequirement.errors.length) {
-            this.showEditForm = false;
-            this.editedRequirement = null;
+            this.editMode = false;
+            this.editedRequirement = data.updateRequirement.requirement;
             this.$toast.show(
               sprintf(__('Requirement %{reference} has been updated'), {
                 reference: `REQ-${data.updateRequirement.requirement.iid}`,
@@ -461,7 +469,8 @@ export default {
         }
       });
     },
-    handleUpdateRequirementCancel() {
+    handleUpdateRequirementDrawerClose() {
+      this.editMode = false;
       this.showEditForm = false;
       this.editedRequirement = null;
     },
@@ -519,8 +528,8 @@ export default {
       :requirements-count="requirementsCount"
       :show-create-form="showCreateForm"
       :can-create-requirement="canCreateRequirement"
-      @clickTab="handleTabClick"
-      @clickNewRequirement="handleNewRequirementClick"
+      @click-tab="handleTabClick"
+      @click-new-requirement="handleNewRequirementClick"
     />
     <filtered-search-bar
       :namespace="projectPath"
@@ -538,14 +547,17 @@ export default {
       :drawer-open="showCreateForm"
       :requirement-request-active="createRequirementRequestActive"
       @save="handleNewRequirementSave"
-      @cancel="handleNewRequirementCancel"
+      @drawer-close="handleNewRequirementCancel"
     />
     <requirement-edit-form
       :drawer-open="showEditForm"
       :requirement="editedRequirement"
+      :edit-mode="editMode"
       :requirement-request-active="createRequirementRequestActive"
       @save="handleUpdateRequirementSave"
-      @cancel="handleUpdateRequirementCancel"
+      @enable-edit="handleRequirementEdit(true)"
+      @disable-edit="handleRequirementEdit(false)"
+      @drawer-close="handleUpdateRequirementDrawerClose"
     />
     <requirements-empty-state
       v-if="showEmptyState"
@@ -553,7 +565,7 @@ export default {
       :empty-state-path="emptyStatePath"
       :requirements-count="requirementsCount"
       :can-create-requirement="canCreateRequirement"
-      @clickNewRequirement="handleNewRequirementClick"
+      @click-new-requirement="handleNewRequirementClick"
     />
     <requirements-loading
       v-show="requirementsListLoading"
@@ -570,7 +582,7 @@ export default {
         :key="requirement.iid"
         :requirement="requirement"
         :state-change-request-active="stateChangeRequestActiveFor === requirement.iid"
-        @editClick="handleEditRequirementClick"
+        @edit-click="handleEditRequirementClick"
         @archiveClick="handleRequirementStateChange"
         @reopenClick="handleRequirementStateChange"
       />
