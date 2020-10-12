@@ -56,7 +56,8 @@ file or creating similar dashboard configuration files. To learn more, read abou
 
 #### Available metrics
 
-**Note:** metrics today have both *instance* and *node* labels. The *instance* label will be deprecated in a future version.
+NOTE: **Note:**
+Metrics today have both *instance* and *node* labels. The *instance* label will be deprecated in a future version.
 
 | Metric       | Description                                                                                            |
 | ------------ | ------------------------------------------------------------------------------------------------------ |
