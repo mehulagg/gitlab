@@ -393,7 +393,7 @@ module EE
     end
 
     def allowed_frameworks
-      if Array.wrap(compliance_frameworks).any? { |value| !::ComplianceManagement::ComplianceFramework::FRAMEWORKS.value?(value) }
+      if Array.wrap(compliance_frameworks).any? { |value| !::ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.map(&:id).include?(value) }
         errors.add(:compliance_frameworks, _('must contain only valid frameworks'))
       end
     end

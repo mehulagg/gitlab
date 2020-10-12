@@ -5,8 +5,8 @@ require 'spec_helper'
 RSpec.describe 'Admin interacts with merge requests approvals settings' do
   include StubENV
 
-  let_it_be(:hippa) { ComplianceManagement::ComplianceFramework::FRAMEWORKS[:hipaa] }
-  let_it_be(:application_settings) { create(:application_setting, compliance_frameworks: [hippa]) }
+  let_it_be(:hippa) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS_BY_IDENTIFIER[:hipaa] }
+  let_it_be(:application_settings) { create(:application_setting, compliance_frameworks: [hippa.id]) }
   let_it_be(:user) { create(:admin) }
 
   before do
