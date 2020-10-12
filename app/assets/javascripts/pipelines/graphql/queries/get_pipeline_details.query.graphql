@@ -7,10 +7,20 @@ query getPipelineDetails($projectPath: ID!, $iid: ID!) {
       stages {
         nodes {
           name
-          status @client
+          status: detailedStatus {
+            action {
+              icon
+              path
+              title
+            }
+          }
           groups {
             nodes {
-              status @client
+              status: detailedStatus {
+                label
+                group
+                icon
+              }
               name
               size
               jobs {
@@ -21,10 +31,21 @@ query getPipelineDetails($projectPath: ID!, $iid: ID!) {
                       name
                     }
                   }
-                  status @client
+              status: detailedStatus {
+                    icon
+                    tooltip
+                    hasDetails
+                    detailsPath
+                    group
+                    action {
+                      buttonTitle
+                      icon
+                      path
+                      title
+                    }
+                  }
                   scheduled @client
                   scheduledAt @client
-                  # should we combine these?
                 }
               }
             }

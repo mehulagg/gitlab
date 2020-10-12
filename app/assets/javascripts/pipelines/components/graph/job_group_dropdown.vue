@@ -58,7 +58,7 @@ export default {
     <ul class="dropdown-menu big-pipeline-graph-dropdown-menu js-grouped-pipeline-dropdown">
       <li class="scrollable-menu">
         <ul>
-          <li v-for="job in group.jobs" :key="job.id">
+          <li v-for="job in group.jobs" :key="job.id || job.name">
             <job-item
               :dropdown-length="group.size"
               :job="job"

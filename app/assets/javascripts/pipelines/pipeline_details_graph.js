@@ -5,23 +5,6 @@ import PipelineGraphWrapper from './components/graph/graph_component_wrapper.vue
 
 Vue.use(VueApollo);
 
-const mockStatus = {
-  icon: 'status_canceled', // used in ci-icon via job and jobDropdown (group)
-  tooltip: 'status_tooltip', // used in job %{remainingTime}
-  has_details: true, // used in job
-  details_path: '/example/example-project/-/jobs/7', // used in job
-  group: 'canceled', // used in ci-icon via job and jobDropdown (group)
-  label: 'status_label', // used in group for jobDropdown (group)
-  text: '', // may or may not be used
-  action: {
-    button_title: 'Retry this job',
-    icon: 'retry', // used
-    method: 'post', // may or may not be used
-    path: '/example/example-project/-/jobs/id/retry', // used
-    title: 'Retry', // used
-  }
-}
-
 const apolloProvider = new VueApollo({
   defaultClient: createDefaultClient({
     Pipeline: {
@@ -88,33 +71,8 @@ const apolloProvider = new VueApollo({
         return false;
       },
       scheduledAt() {
-        // let d = new Date();
-        // d.setMinutes(d.getMinutes() + 5);
-        // return d;
         return Date.now() + 600000;
       },
-      status() {
-        return mockStatus;
-      }
-    },
-    CiGroup: {
-      status() {
-        return {
-          label: 'cool stage bro',
-          ...mockStatus
-        };
-      }
-    },
-    CiStage: {
-      status() {
-        return {
-          action: {
-            icon: 'play',
-            title: 'play this song for me',
-            path: 'play/example/id',
-          }
-        }
-      }
     },
   }),
 });

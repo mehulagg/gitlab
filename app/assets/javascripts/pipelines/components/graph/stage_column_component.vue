@@ -81,7 +81,7 @@ export default {
         <li
           v-for="(group, index) in groups"
           :id="groupId(group)"
-          :key="group.id"
+          :key="group.id || group.name"
           :class="buildConnnectorClass(index)"
           class="build"
         >
