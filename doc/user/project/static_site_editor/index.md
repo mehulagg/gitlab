@@ -90,7 +90,7 @@ To edit a file:
 1. Click the **Edit this page** button.
 1. The file is opened in the Static Site Editor in **WYSIWYG** mode. If you wish to edit the raw Markdown
    instead, you can toggle the **Markdown** mode in the bottom-right corner.
-1. When you're done, click **Submit changes**.
+1. When you're done, click **Submit changes...**.
 1. Describe your changes (add a commit message).
 1. Click **Submit changes**.
 1. A new merge request is automatically created and you can assign a colleague for review.
