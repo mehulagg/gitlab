@@ -1,4 +1,4 @@
-# Export Merge Requests to CSV
+# Export Merge Requests to CSV **(CORE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3619) in GitLab Core 13.5.
 
@@ -7,6 +7,8 @@ Merge requests can be exported as CSV from GitLab and are sent to your primary e
 ## Overview
 
 Export Merge Requests CSV enables you and your team to export all the data collected from merge requests into a comma-separated values (CSV) file, which stores tabular data in plain text. 
+
+To export Merge Requests to CSV, navigate to your **Merge Requests list** from the sidebar of a project and click **Export to CSV**.
 
 Exported files are generated asynchronously and delivered as an email attachment upon generation.
 
@@ -38,4 +40,4 @@ Exported files are generated asynchronously and delivered as an email attachment
 ## Limitations
 
 - Export merge requests to CSV is not available at the Group’s merge request list.
-- As the merge requests will be sent as an email attachment, there is a limit on how much data can be exported. Currently this limit is 15MB to ensure successful delivery across a range of email providers. If this limit is reached we suggest narrowing the search before export, perhaps by exporting open and closed merge requests separately. 
+- As the merge request CSV file is sent as an email attachment, the size is limited to 15MB to ensure successful delivery across a range of email providers. If you need to minimize the size of the file, you can narrow the search before export. For example, you can set up exports of open and closed merge requests in separate files. 
