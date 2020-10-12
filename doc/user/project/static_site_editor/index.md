@@ -119,9 +119,20 @@ title, layout template, or author, but can be used to pass any kind of metadata 
 generator as the page renders out to HTML. Included at the very top of each data file, the
 front matter is often formatted as YAML or JSON and requires consistent and accurate syntax.
 
-To edit the front matter from the Static Site Editor, click the **Settings** button on the
-top-right to reveal a panel that displays a form field for each key defined in the front
-matter. The fields are populated with the current value and you can update them directly from the form.
+To edit the front matter from the Static Site Editor you can use the GitLab's regular file editor,
+the Web IDE, or easily update the data directly from the WYSIWYG editor:
+
+1. Click the **Page settings** button on the bottom-right to reveal a web form with the data you
+   have on the page's front matter. The form is populated with the current data.
+1. Update the values as you wish and close the panel.
+1. When you're done, click **Submit changes**.
+1. Describe your changes (add a commit message).
+1. Click **Submit changes**.
+1. Click **View merge request** and GitLab will take you there. You can click **Edit** to update
+   its description.
+
+Note that support for adding new attributes to the page's front matter from the form is not supported
+yet. You can do so by editing the file locally, or through the GitLab regular file editor, or through the Web IDE. Once added, the form will load the new fields.
 
 ![Editing page front matter in the Static Site Editor](img/front_matter_ui_v13_4.png)
 
