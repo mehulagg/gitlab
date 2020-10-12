@@ -187,4 +187,6 @@ un-threaded and ordered chronologically, newest to oldest:
 
 ### Service Level Agreement Countdown Timer
 
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241663) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5.
+
 TODO
