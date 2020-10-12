@@ -40,7 +40,7 @@
       - if show_recaptcha_sign_up?
         = recaptcha_tags
       .submit-container.mt-3
-        = f.submit _("Register"), class: "btn-register btn btn-block btn-success mb-0 p-2", data: { qa_selector: 'new_user_register_button' }
+        = f.submit _("Register"), class: "btn-register gl-button btn btn-block btn-success mb-0 p-2", data: { qa_selector: 'new_user_register_button' }
       - if experiment_enabled?(:terms_opt_in)
         %p.gl-text-gray-500.gl-mt-5.gl-mb-0
           = html_escape(_("By clicking Register, I agree that I have read and accepted the GitLab %{linkStart}Terms of Use and Privacy Policy%{linkEnd}")) % { linkStart: "<a href='#{terms_path}' target='_blank' rel='noreferrer noopener'>".html_safe, linkEnd: '</a>'.html_safe }

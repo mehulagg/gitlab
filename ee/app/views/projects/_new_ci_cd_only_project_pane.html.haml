@@ -19,7 +19,7 @@
           .import-buttons
             %div
               - if github_import_enabled?
-                = link_to new_import_github_path(ci_cd_only: true), class: 'btn js-import-github', data: { track_label: "#{track_label}", track_property: 'github', track_event: "click_button", track_value: "" } do
+                = link_to new_import_github_path(ci_cd_only: true), class: 'gl-button btn js-import-github', data: { track_label: "#{track_label}", track_property: 'github', track_event: "click_button", track_value: "" } do
                   = icon('github', text: 'GitHub')
             %div
               - if git_import_enabled?

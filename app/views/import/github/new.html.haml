@@ -10,7 +10,7 @@
   = import_github_authorize_message
 
 - if github_import_configured? && !has_ci_cd_only_params?
-  = link_to icon('github', text: title), status_import_github_path, class: 'btn btn-success'
+  = link_to icon('github', text: title), status_import_github_path, class: 'gl-button btn btn-success'
 
   %hr
 
@@ -29,4 +29,4 @@
 
   .form-actions.d-flex.justify-content-end
     = link_to _('Cancel'), new_project_path, class: 'btn'
-    = submit_tag _('Authenticate'), class: 'btn btn-success ml-2', data: { qa_selector: 'authenticate_button' }
+    = submit_tag _('Authenticate'), class: 'gl-button btn btn-success ml-2', data: { qa_selector: 'authenticate_button' }

@@ -13,11 +13,11 @@
   %hr
   %p
   - if @incompatible_repos.any?
-    = button_tag class: "btn btn-import btn-success js-import-all" do
+    = button_tag class: "gl-button btn btn-import btn-success js-import-all" do
       = _("Import all compatible projects")
       = loading_icon(css_class: 'loading-icon')
   - else
-    = button_tag class: "btn btn-import btn-success js-import-all" do
+    = button_tag class: "gl-button btn btn-import btn-success js-import-all" do
       = _("Import all projects")
       = loading_icon(css_class: 'loading-icon')
 
@@ -57,7 +57,7 @@
           %td.import-target
             #{current_user.username}/#{repo.name}
           %td.import-actions.job-status
-            = button_tag class: "btn btn-import js-add-to-import" do
+            = button_tag class: "gl-button btn btn-import js-add-to-import" do
               = _("Import")
               = loading_icon(css_class: 'loading-icon')
       - @incompatible_repos.each do |repo|

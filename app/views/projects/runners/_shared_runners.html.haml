@@ -5,10 +5,10 @@
       = _('Shared runners disabled on group level')
   - else
     - if @project.shared_runners_enabled?
-      = link_to toggle_shared_runners_project_runners_path(@project), class: 'btn btn-close', method: :post do
+      = link_to toggle_shared_runners_project_runners_path(@project), class: 'gl-button btn btn-close', method: :post do
         = _('Disable shared runners')
     - else
-      = link_to toggle_shared_runners_project_runners_path(@project), class: 'btn btn-success', method: :post do
+      = link_to toggle_shared_runners_project_runners_path(@project), class: 'gl-button btn btn-success', method: :post do
         = _('Enable shared runners')
     &nbsp; for this project
 

@@ -39,14 +39,14 @@
 - if can?(current_user, :award_emoji, note)
   - if note.emoji_awardable?
     .note-actions-item
-      = button_tag title: 'Add reaction', class: "note-action-button note-emoji-button js-add-award js-note-emoji has-tooltip btn btn-transparent", data: { position: 'right', container: 'body' } do
+      = button_tag title: 'Add reaction', class: "note-action-button note-emoji-button js-add-award js-note-emoji has-tooltip gl-button btn btn-transparent", data: { position: 'right', container: 'body' } do
         %span{ class: 'link-highlight award-control-icon-neutral' }= sprite_icon('slight-smile')
         %span{ class: 'link-highlight award-control-icon-positive' }= sprite_icon('smiley')
         %span{ class: 'link-highlight award-control-icon-super-positive' }= sprite_icon('smile')
 
   - if note_editable
     .note-actions-item
-      = button_tag title: 'Edit comment', class: 'note-action-button js-note-edit has-tooltip btn btn-transparent', data: { container: 'body', qa_selector: 'edit_comment_button' } do
+      = button_tag title: 'Edit comment', class: 'note-action-button js-note-edit has-tooltip gl-button btn btn-transparent', data: { container: 'body', qa_selector: 'edit_comment_button' } do
         %span.link-highlight
           = custom_icon('icon_pencil')
 
