@@ -165,10 +165,9 @@ module Projects
         @project.create_or_update_import_data(data: @import_data[:data], credentials: @import_data[:credentials]) if @import_data
 
         if @project.save
-          unless @project.gitlab_project_import?
-            Service.create_from_active_default_integrations(@project, :project_id, with_templates: true)
-            @project.create_labels
-          end
+          Service.create_from_active_default_integrations(@project, :project_id, with_templates: true)
+
+          @project.create_labels unless @project.gitlab_project_import?
 
           unless @project.import?
             raise 'Failed to create repository' unless @project.create_repository
