@@ -1,0 +1,72 @@
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+#import "./count.fragment.graphql"
+
+query pipelineStats(
+  $first: Int
+  $afterTotal: String
+  $afterSucceeded: String
+  $afterFailed: String
+  $afterCanceled: String
+  $afterSkipped: String
+) {
+  pipelinesTotal: instanceStatisticsMeasurements(
+    identifier: PIPELINES
+    first: $first
+    after: $afterTotal
+  ) {
+    nodes {
+      ...Count
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+  pipelinesSucceeded: instanceStatisticsMeasurements(
+    identifier: PIPELINES_SUCCEEDED
+    first: $first
+    after: $afterSucceeded
+  ) {
+    nodes {
+      ...Count
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+  pipelinesFailed: instanceStatisticsMeasurements(
+    identifier: PIPELINES_FAILED
+    first: $first
+    after: $afterFailed
+  ) {
+    nodes {
+      ...Count
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+  pipelinesCanceled: instanceStatisticsMeasurements(
+    identifier: PIPELINES_CANCELED
+    first: $first
+    after: $afterCanceled
+  ) {
+    nodes {
+      ...Count
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+  pipelinesSkipped: instanceStatisticsMeasurements(
+    identifier: PIPELINES_SKIPPED
+    first: $first
+    after: $afterSkipped
+  ) {
+    nodes {
+      ...Count
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
