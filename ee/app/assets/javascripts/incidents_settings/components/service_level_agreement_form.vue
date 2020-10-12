@@ -28,10 +28,9 @@ const units = {
 
 export default {
   i18n: {
-    description: s__(`IncidentSettings|You may choose to introduce a countdown timer in incident issues
-    to better track Service Level Agreements (SLAs). The timer is automatically started when the incident
-    is created, and sets a time limit for the incident to be resolved in. When activated, "time to SLA"
-    countdown will appear on all new incidents.`),
+    description: s__(
+      'IncidentSettings|You may choose to introduce a countdown timer in incident issues to better track Service Level Agreements (SLAs). The timer is automatically started when the incident is created, and sets a time limit for the incident to be resolved in. When activated, "time to SLA" countdown will appear on all new incidents.',
+    ),
     validFeedback: s__('IncidentSettings|Time limit must be a multiple of 15 minutes'),
   },
   selectOptions: Object.values(units),
@@ -53,7 +52,7 @@ export default {
       duration: this.serviceLevelAgreementSettings.minutes ?? '',
       enabled: this.serviceLevelAgreementSettings.active,
       loading: false,
-      unit: units.minutes.value,
+      unit: this.$options.units.minutes.value,
     };
   },
   computed: {
@@ -74,7 +73,7 @@ export default {
         return s__('IncidentSettings|Time limit must be greater than 0');
       }
 
-      const minutes = duration * units[this.unit].multiplier;
+      const minutes = duration * this.$options.units[this.unit].multiplier;
       if (minutes % 15 !== 0) {
         return s__('IncidentSettings|Time limit must be a multiple of 15 minutes');
       }
@@ -91,7 +90,7 @@ export default {
       return this.service
         .updateSettings({
           sla_timer: this.enabled,
-          sla_timer_minutes: this.duration * units[this.unit].multiplier,
+          sla_timer_minutes: this.duration * this.$options.units[this.unit].multiplier,
         })
         .catch(() => {
           this.loading = false;
