@@ -220,11 +220,13 @@ the ones defined in the upstream project will take precedence.
 
 #### Using variables inheriting
 
-You can also pass variables to a downstream pipeline with [variables inheriting](variables/README.md#inherit-environment-variables) and [cross project artifact downloads](yaml/README.md#cross-project-artifact-downloads-with-needs).
+You can pass variables to a downstream pipeline with [`dotenv` variable inheritance](variables/README.md#inherit-environment-variables) and [cross project artifact downloads](yaml/README.md#cross-project-artifact-downloads-with-needs).
 
-Example:
+In the upstream pipeline:
 
-Upstream pipeline:
+1. Save the variables in a `.env` file.
+1. Save the `.env` file as a `dotenv` report.
+1. Trigger the downstream pipeline. 
 
 ```yaml
 build_vars:
@@ -240,7 +242,9 @@ deploy:
   trigger: my/downstream_project
 ```
 
-Downstream pipeline:
+Set the `test` job in the downstream pipeline to inherit the variables from the `build_vars`
+job in the upstream project with `needs:`. The `test` job inherits the variables in the
+`dotenv` report and it can access `BUILD_VERSION` in the script:
 
 ```yaml
 test:
