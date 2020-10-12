@@ -261,8 +261,8 @@ To upgrade your [GitLab tier](https://about.gitlab.com/pricing/):
    [Manage purchases](https://customers.gitlab.com/subscriptions) page.
 1. Select the desired upgrade.
 1. Confirm the active form of payment, or add a new form of payment.
-1. Check the **I accept the Privacy Policy and Terms of Service** checkbox.
-1. Select **Confirm purchase**.
+1. Select the **I accept the Privacy Policy and Terms of Service** checkbox.
+1. Select **Purchase**.
 
 The following is emailed to you:
 
