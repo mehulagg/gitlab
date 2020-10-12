@@ -9,14 +9,14 @@ module IncidentManagement
     end
 
     def execute
-      return unless ::Feature.enabled?(:incident_sla_dev, @project) && project.feature_available?(:incident_sla, current_user)
-      return unless incident_setting&.sla_timer?
+      return not_enabled_success unless incident.sla_available?
+      return not_enabled_success unless incident_setting&.sla_timer?
 
       sla = incident.build_incident_sla(
         due_at: incident.created_at + incident_setting.sla_timer_minutes.minutes
       )
 
-      return sla if sla.save
+      return success(sla: sla) if sla.save
 
       error(sla.errors&.full_messages)
     end
@@ -24,6 +24,18 @@ module IncidentManagement
     attr_reader :incident
 
     private
+
+    def not_enabled_success
+      ServiceResponse.success(message: 'SLA not enabled')
+    end
+
+    def success(payload)
+      ServiceResponse.success(payload: payload)
+    end
+
+    def error(message)
+      ServiceResponse.error(message: message)
+    end
 
     def incident_setting
       @incident_setting ||= project.incident_management_setting

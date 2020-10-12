@@ -210,6 +210,22 @@ module EE
       super || promoted_to_epic
     end
 
+    def sla_available?
+      return false unless ::Feature.enabled?(:incident_sla_dev, project)
+
+      supports_sla? && project.feature_available?(:incident_sla)
+    end
+
+    def supports_sla?
+      incident?
+    end
+
+    def sla_due_at
+      return unless incident?
+
+      incident_sla&.due_at
+    end
+
     private
 
     def blocking_issues_ids

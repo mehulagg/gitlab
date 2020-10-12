@@ -3,19 +3,21 @@
 require 'spec_helper'
 
 RSpec.describe IncidentManagement::CreateSlaService do
-  let_it_be(:project, reload: true) { create(:project) }
+  let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
-  let_it_be(:incident) { create(:incident, project: project) }
+  let_it_be_with_refind(:incident) { create(:incident, project: project) }
 
   describe '#execute' do
-    subject { described_class.new(incident, user).execute }
+    subject(:create_incident_sla_response) { described_class.new(incident, user).execute }
+
+    let(:response_payload_sla) { create_incident_sla_response.payload[:sla] }
+    let(:response_payload_message) { create_incident_sla_response.message }
 
     before_all do
       project.add_maintainer(user)
     end
 
     before do
-      project.clear_memoization(:licensed_feature_available)
       stub_licensed_features(incident_sla: true)
     end
 
@@ -24,7 +26,9 @@ RSpec.describe IncidentManagement::CreateSlaService do
         expect { subject }.not_to change(IncidentManagement::IncidentSla, :count)
       end
 
-      it { is_expected.to eq(nil) }
+      it 'does not return a sla' do
+        expect(response_payload_sla).to eq(nil)
+      end
     end
 
     context 'incident setting not created' do
@@ -51,21 +55,23 @@ RSpec.describe IncidentManagement::CreateSlaService do
       end
 
       it 'creates the incident sla with the given offset', :aggregate_failures do
-        incident_sla = nil
-        expect { incident_sla = subject }.to change(IncidentManagement::IncidentSla, :count)
+        expect { subject }.to change(IncidentManagement::IncidentSla, :count)
 
         offset_time = incident.created_at + setting.sla_timer_minutes.minutes
-        expect(incident_sla.due_at).to eq(offset_time)
+        expect(response_payload_sla.due_at).to eq(offset_time)
       end
 
-      it { is_expected.to be_a(IncidentManagement::IncidentSla) }
+      it 'returns a success with the sla', :aggregate_failures do
+        expect(create_incident_sla_response.success?).to eq(true)
+        expect(response_payload_sla).to be_a(IncidentManagement::IncidentSla)
+      end
 
       context 'errors when saving' do
         before do
           allow_next_instance_of(IncidentManagement::IncidentSla) do |incident_sla|
             allow(incident_sla).to receive(:save).and_return(false)
 
-            errors = ActiveModel::Errors.new(incident_sla).tap { |e| e.add(:issue_id, "error message") }
+            errors = ActiveModel::Errors.new(incident_sla).tap { |e| e.add(:issue_id, 'error message') }
             allow(incident_sla).to receive(:errors).and_return(errors)
           end
         end
@@ -74,7 +80,10 @@ RSpec.describe IncidentManagement::CreateSlaService do
           expect { subject }.not_to change(IncidentManagement::IncidentSla, :count)
         end
 
-        it { is_expected.to include(status: :error, message: ["Issue error message"]) }
+        it 'returns an error', :aggregate_failures do
+          expect(create_incident_sla_response.error?).to eq(true)
+          expect(response_payload_message).to include('Issue error message')
+        end
       end
     end
   end
