@@ -87,6 +87,8 @@ export const getDayName = date =>
 
 /**
  * Returns the i18n month name from a given date
+ * @example
+ * formatDateAsMonth(new Date('2020-06-28')) -> 'Jun'
  * @param  {String} datetime where month is extracted from
  * @return {String} the i18n month name
  */
