@@ -27,7 +27,7 @@ tasks:
         rails db:migrate RAILS_ENV=development
         REQUIRES_RESTART=true
         cd -
-        # stopping GitLab
+        # stop GDK
         echo "$(date) – Stopping GDK" | tee -a /workspace/startup.log
         gdk stop
         echo "$(date) – GDK stopped" | tee -a /workspace/startup.log
@@ -39,15 +39,15 @@ tasks:
         SECONDS=0
         cd /workspace/gitlab-development-kit
         # update GDK
-        if [ "$GITLAB_UPDATE_GDK" = true ]; then
+        if [ "$GITLAB_UPDATE_GDK" == true ]; then
           echo "$(date) – Updating GDK" | tee -a /workspace/startup.log
           gdk update
         fi
-        # start GitLab
+        # start GDK
         echo "$(date) – Starting GDK" | tee -a /workspace/startup.log
         gdk start
         # Run DB migrations
-        if [ "$GITLAB_RUN_DB_MIGRATIONS" = true ]; then
+        if [ "$GITLAB_RUN_DB_MIGRATIONS" == true ]; then
           echo "$(date) – Running DB migrations" | tee -a /workspace/startup.log
           printf "Waiting for GitLab database ..."
           until gdk psql -d gitlabhq_development -c '\l' >/dev/null 2>/dev/null; do printf '.'; sleep 5; done && echo ""
@@ -75,17 +75,17 @@ tasks:
       )
 
 ports:
-  - port: 3000
+  - port: 3000  # rails-web
     onOpen: ignore
-  - port: 3010
+  - port: 3010  # gitlab-pages
     onOpen: ignore
-  - port: 3808
+  - port: 3808  # webpack
     onOpen: ignore
-  - port: 5000
+  - port: 5000  # auto_devops
     onOpen: ignore
   - port: 5778
     onOpen: ignore
-  - port: 9000
+  - port: 9000  # object_store / minio
     onOpen: ignore
 
 vscode:
