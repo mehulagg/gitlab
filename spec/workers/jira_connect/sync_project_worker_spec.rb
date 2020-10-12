@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe JiraConnect::SyncProjectWorker do
+RSpec.describe JiraConnect::SyncProjectWorker, factory_default: :keep do
   describe '#perform' do
     let_it_be(:project) { create_default(:project) }
     let!(:mr_with_jira_title) { create(:merge_request, :unique_branches, title: 'TEST-123') }
@@ -11,13 +11,7 @@ RSpec.describe JiraConnect::SyncProjectWorker do
     let!(:merged_mr_with_jira_reference) { create(:merged_merge_request, :unique_branches, description: 'TEST-323', title: 'TEST-123') }
     let!(:mr_with_other_title) { create(:merge_request, :unique_branches) }
 
-    it 'syncs open merge requests with Jira references in title or description' do
-      expect_next_instance_of(JiraConnect::SyncService) do |sync_service|
-        expect(sync_service).to receive(:execute).with(merge_requests: [mr_with_jira_description, mr_with_jira_title])
-      end
-
-      described_class.new.perform(project.id)
-    end
+    let(:job_args) { [project.id] }
 
     context 'when the project is not found' do
       it 'does not raise an error' do
@@ -25,19 +19,34 @@ RSpec.describe JiraConnect::SyncProjectWorker do
       end
     end
 
-    context 'when the number of merge requests to sync is higher than the limit' do
-      let!(:merge_requests) { create_list(:merge_request, 2, :unique_branches, description: 'TEST-323', title: 'TEST-123', source_project: project) }
+    it_behaves_like 'an idempotent worker' do
+      def expect_sync_service_to_execute_multiple_times_with(*args)
+        jira_connect_sync_service = JiraConnect::SyncService.new(project)
+        allow(JiraConnect::SyncService).to receive(:new) { jira_connect_sync_service }
 
-      before do
-        stub_const("#{described_class}::MERGE_REQUEST_LIMIT", 1)
+        expect(jira_connect_sync_service).to receive(:execute)
+        .exactly(IdempotentWorkerHelper::WORKER_EXEC_TIMES).times
+        .with(*args)
       end
 
-      it 'syncs only the most recent merge requests within the limit' do
-        expect_next_instance_of(JiraConnect::SyncService) do |sync_service|
-          expect(sync_service).to receive(:execute).with(merge_requests: MergeRequest.order(id: :desc).limit(1))
+      it 'syncs open merge requests with Jira references in title or description' do
+        expect_sync_service_to_execute_multiple_times_with(merge_requests: [mr_with_jira_description, mr_with_jira_title])
+
+        subject
+      end
+
+      context 'when the number of merge requests to sync is higher than the limit' do
+        let!(:merge_requests) { create_list(:merge_request, 2, :unique_branches, description: 'TEST-323', title: 'TEST-123') }
+
+        before do
+          stub_const("#{described_class}::MERGE_REQUEST_LIMIT", 1)
         end
 
-        described_class.new.perform(project.id)
+        it 'syncs only the most recent merge requests within the limit' do
+          expect_sync_service_to_execute_multiple_times_with(merge_requests: MergeRequest.order(id: :desc).limit(1))
+
+          subject
+        end
       end
     end
   end
