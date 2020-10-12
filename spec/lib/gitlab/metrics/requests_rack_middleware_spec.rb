@@ -113,6 +113,27 @@ RSpec.describe Gitlab::Metrics::RequestsRackMiddleware do
       end
     end
 
+    context 'when a feature category header is present' do
+      before do
+        allow(app).to receive(:call).and_return([200, { described_class::FEATURE_CATEGORY_HEADER => 'issue_tracking' }, nil])
+      end
+
+      it 'adds the feature category to the labels for http_request_total' do
+        expect(described_class).to receive_message_chain(:http_request_total, :increment).with(method: 'get', status: 200, feature_category: 'issue_tracking')
+
+        subject.call(env)
+      end
+
+      it 'does not record a feature category for health check endpoints' do
+        env['PATH_INFO'] = '/-/liveness'
+
+        expect(described_class).to receive_message_chain(:http_health_requests_total, :increment).with(method: 'get', status: 200)
+        expect(described_class).not_to receive(:http_request_total)
+
+        subject.call(env)
+      end
+    end
+
     describe '.initialize_http_request_duration_seconds' do
       it "sets labels" do
         expected_labels = []

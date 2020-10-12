@@ -271,6 +271,7 @@ class ApplicationController < ActionController::Base
     headers['X-XSS-Protection'] = '1; mode=block'
     headers['X-UA-Compatible'] = 'IE=edge'
     headers['X-Content-Type-Options'] = 'nosniff'
+    headers[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category_name
   end
 
   def default_cache_headers
@@ -549,6 +550,10 @@ class ApplicationController < ActionController::Base
 
   def full_action_name
     "#{self.class.name}##{action_name}"
+  end
+
+  def feature_category_name
+    self.class.feature_category_for_action(action_name).to_s
   end
 
   def required_signup_info
