@@ -71,7 +71,7 @@ RSpec.shared_examples 'a repository replicator' do
   end
 
   describe 'updated event consumption' do
-    context 'in replicables_for_geo_node list' do
+    context 'in secondary_replicables list' do
       it 'runs SnippetRepositorySyncService service' do
         model_record.save!
 
@@ -87,7 +87,7 @@ RSpec.shared_examples 'a repository replicator' do
       end
     end
 
-    context 'not in replicables_for_geo_node list' do
+    context 'not in secondary_replicables list' do
       it 'runs SnippetRepositorySyncService service' do
         expect(::Geo::FrameworkRepositorySyncService)
           .not_to receive(:new)

@@ -13,7 +13,7 @@ module EE
     class_methods do
       # @param primary_key_in [Range, SnippetRepository] arg to pass to primary_key_in scope
       # @return [ActiveRecord::Relation<SnippetRepository>] everything that should be synced to this node, restricted by primary key
-      def replicables_for_geo_node(primary_key_in)
+      def secondary_replicables(primary_key_in)
         # Not implemented yet. Should be responsible for selective sync
         all
       end

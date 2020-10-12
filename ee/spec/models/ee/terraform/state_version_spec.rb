@@ -25,7 +25,7 @@ RSpec.describe Terraform::StateVersion do
     end
   end
 
-  describe '.replicables_for_geo_node' do
+  describe '.secondary_replicables' do
     where(:selective_sync_enabled, :object_storage_sync_enabled, :terraform_object_storage_enabled, :synced_states) do
       true  | true  | true  | 5
       true  | true  | false | 5
@@ -60,7 +60,7 @@ RSpec.describe Terraform::StateVersion do
       end
 
       it 'returns the proper number of terraform states' do
-        expect(described_class.replicables_for_geo_node(1..described_class.last.id).count).to eq(synced_states)
+        expect(described_class.secondary_replicables(1..described_class.last.id).count).to eq(synced_states)
       end
     end
   end

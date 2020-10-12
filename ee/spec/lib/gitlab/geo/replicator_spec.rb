@@ -171,7 +171,7 @@ RSpec.describe Gitlab::Geo::Replicator do
     end
   end
 
-  describe '#in_replicables_for_geo_node?' do
-    it { is_expected.to delegate_method(:in_replicables_for_geo_node?).to(:model_record) }
+  describe '#in_secondary_replicables?' do
+    it { is_expected.to delegate_method(:in_secondary_replicables?).to(:model_record) }
   end
 end

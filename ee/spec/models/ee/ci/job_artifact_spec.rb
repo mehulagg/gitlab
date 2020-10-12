@@ -133,7 +133,7 @@ RSpec.describe Ci::JobArtifact do
     end
   end
 
-  describe '#replicables_for_geo_node' do
+  describe '#secondary_replicables' do
     # Selective sync is configured relative to the job artifact's project.
     #
     # Permutations of sync_object_storage combined with object-stored-artifacts
@@ -162,7 +162,7 @@ RSpec.describe Ci::JobArtifact do
     end
 
     with_them do
-      subject(:job_artifact_included) { described_class.replicables_for_geo_node(ci_job_artifact).exists? }
+      subject(:job_artifact_included) { described_class.secondary_replicables(ci_job_artifact).exists? }
 
       let(:project) { create(*project_factory) }
       let(:ci_build) { create(:ci_build, project: project) }

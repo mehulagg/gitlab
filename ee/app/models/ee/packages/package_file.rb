@@ -13,7 +13,7 @@ module EE
       class_methods do
         # @param primary_key_in [Range, Packages::PackageFile] arg to pass to primary_key_in scope
         # @return [ActiveRecord::Relation<LfsObject>] everything that should be synced to this node, restricted by primary key
-        def replicables_for_geo_node(primary_key_in)
+        def secondary_replicables(primary_key_in)
           primary_key_in(primary_key_in)
             .merge(selective_sync_scope)
             .merge(object_storage_scope)

@@ -109,7 +109,7 @@ RSpec.shared_examples 'a blob replicator' do
   describe 'created event consumption' do
     context "when the blob's project is in replicables for this geo node" do
       it 'invokes Geo::BlobDownloadService' do
-        expect(replicator).to receive(:in_replicables_for_geo_node?).and_return(true)
+        expect(replicator).to receive(:in_secondary_replicables?).and_return(true)
         service = double(:service)
 
         expect(service).to receive(:execute)
@@ -121,7 +121,7 @@ RSpec.shared_examples 'a blob replicator' do
 
     context "when the blob's project is not in replicables for this geo node" do
       it 'does not invoke Geo::BlobDownloadService' do
-        expect(replicator).to receive(:in_replicables_for_geo_node?).and_return(false)
+        expect(replicator).to receive(:in_secondary_replicables?).and_return(false)
 
         expect(::Geo::BlobDownloadService).not_to receive(:new)
 

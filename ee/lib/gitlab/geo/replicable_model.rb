@@ -83,8 +83,8 @@ module Gitlab
         end
       end
 
-      def in_replicables_for_geo_node?
-        self.class.replicables_for_geo_node(self).exists?
+      def in_secondary_replicables?
+        self.class.secondary_replicables(self).exists?
       end
     end
   end

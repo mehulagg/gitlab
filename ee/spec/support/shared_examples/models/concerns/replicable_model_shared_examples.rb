@@ -28,7 +28,7 @@ RSpec.shared_examples 'a replicable model' do
     model_record.save!
   end
 
-  describe '.replicables_for_geo_node' do
+  describe '.secondary_replicables' do
     let_it_be(:secondary) { create(:geo_node) }
 
     before do
@@ -36,7 +36,7 @@ RSpec.shared_examples 'a replicable model' do
     end
 
     it 'is implemented' do
-      expect(model_record.class.replicables_for_geo_node(model_record.id)).to be_an(ActiveRecord::Relation)
+      expect(model_record.class.secondary_replicables(model_record.id)).to be_an(ActiveRecord::Relation)
     end
   end
 end
