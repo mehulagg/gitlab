@@ -269,7 +269,7 @@ gem 'babosa', '~> 1.0.2'
 gem 'loofah', '~> 2.2'
 
 # Working with license
-gem 'licensee', '~> 8.9'
+gem 'licensee', git: 'https://gitlab.com/gitlab-org/licensee.git', ref: 'c3e1c39a8a96886a7b43e3384a502ee3254e933b'
 
 # Ace editor
 gem 'ace-rails-ap', '~> 4.1.0'

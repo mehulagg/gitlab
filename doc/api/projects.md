@@ -849,7 +849,6 @@ GET /projects/:id
     "name": "GNU Lesser General Public License v3.0",
     "nickname": "GNU LGPLv3",
     "html_url": "http://choosealicense.com/licenses/lgpl-3.0/",
-    "source_url": "http://www.gnu.org/licenses/lgpl-3.0.txt"
   },
   "shared_runners_enabled": true,
   "forks_count": 0,
@@ -962,7 +961,6 @@ If the project is a fork, and you provide a valid token to authenticate, the
         "name": "MIT License",
         "nickname": null,
         "html_url": "http://choosealicense.com/licenses/mit/",
-        "source_url": "https://opensource.org/licenses/MIT",
       },
       "star_count":3812,
       "forks_count":3561,
@@ -1422,7 +1420,6 @@ Example response:
     "name": "GNU Lesser General Public License v3.0",
     "nickname": "GNU LGPLv3",
     "html_url": "http://choosealicense.com/licenses/lgpl-3.0/",
-    "source_url": "http://www.gnu.org/licenses/lgpl-3.0.txt"
   },
   "shared_runners_enabled": true,
   "forks_count": 0,
@@ -1513,7 +1510,6 @@ Example response:
     "name": "GNU Lesser General Public License v3.0",
     "nickname": "GNU LGPLv3",
     "html_url": "http://choosealicense.com/licenses/lgpl-3.0/",
-    "source_url": "http://www.gnu.org/licenses/lgpl-3.0.txt"
   },
   "shared_runners_enabled": true,
   "forks_count": 0,
@@ -1694,7 +1690,6 @@ Example response:
     "name": "GNU Lesser General Public License v3.0",
     "nickname": "GNU LGPLv3",
     "html_url": "http://choosealicense.com/licenses/lgpl-3.0/",
-    "source_url": "http://www.gnu.org/licenses/lgpl-3.0.txt"
   },
   "shared_runners_enabled": true,
   "forks_count": 0,
@@ -1804,7 +1799,6 @@ Example response:
     "name": "GNU Lesser General Public License v3.0",
     "nickname": "GNU LGPLv3",
     "html_url": "http://choosealicense.com/licenses/lgpl-3.0/",
-    "source_url": "http://www.gnu.org/licenses/lgpl-3.0.txt"
   },
   "shared_runners_enabled": true,
   "forks_count": 0,

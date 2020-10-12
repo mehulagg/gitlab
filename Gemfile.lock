@@ -1,3 +1,15 @@
+GIT
+  remote: https://gitlab.com/gitlab-org/licensee.git
+  revision: c3e1c39a8a96886a7b43e3384a502ee3254e933b
+  ref: c3e1c39a8a96886a7b43e3384a502ee3254e933b
+  specs:
+    licensee (9.14.0)
+      dotenv (~> 2.0)
+      octokit (~> 4.17)
+      reverse_markdown (~> 1.0)
+      rugged (>= 0.24, < 2.0)
+      thor (>= 0.19, < 2.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -260,6 +272,7 @@ GEM
     doorkeeper-openid_connect (1.7.4)
       doorkeeper (>= 5.2, < 5.5)
       json-jwt (>= 1.11.0)
+    dotenv (2.7.6)
     dry-configurable (0.11.5)
       concurrent-ruby (~> 1.0)
       dry-core (~> 0.4, >= 0.4.7)
@@ -650,8 +663,6 @@ GEM
       toml (= 0.2.0)
       with_env (= 1.1.0)
       xml-simple
-    licensee (8.9.2)
-      rugged (~> 0.24)
     listen (3.2.1)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
@@ -730,7 +741,7 @@ GEM
       multi_json (~> 1.3)
       multi_xml (~> 0.5)
       rack (>= 1.2, < 3)
-    octokit (4.15.0)
+    octokit (4.18.0)
       faraday (>= 0.9)
       sawyer (~> 0.8.0, >= 0.5.3)
     oj (3.10.6)
@@ -847,7 +858,7 @@ GEM
       pry (~> 0.13.0)
     pry-rails (0.3.9)
       pry (>= 0.10.4)
-    public_suffix (4.0.3)
+    public_suffix (4.0.6)
     pyu-ruby-sasl (0.0.3.3)
     raabro (1.1.6)
     rack (2.0.9)
@@ -956,6 +967,8 @@ GEM
       mime-types (>= 1.16, < 4.0)
       netrc (~> 0.8)
     retriable (3.1.2)
+    reverse_markdown (1.4.0)
+      nokogiri
     rexml (3.2.4)
     rinku (2.0.0)
     rotp (2.1.2)
@@ -1375,7 +1388,7 @@ DEPENDENCIES
   kubeclient (~> 4.6.0)
   letter_opener_web (~> 1.3.4)
   license_finder (~> 6.0)
-  licensee (~> 8.9)
+  licensee!
   lockbox (~> 0.3.3)
   lograge (~> 0.5)
   loofah (~> 2.2)
