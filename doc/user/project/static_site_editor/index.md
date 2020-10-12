@@ -77,7 +77,7 @@ codebase.
 
 ## Edit content
 
-After setting up your project, you can start editing content directly from the Static Site editor.
+After setting up your project, you can start editing content directly from the Static Site Editor.
 
 ### Markdown files
 
