@@ -130,12 +130,6 @@
   float: none;
 }
 
-.test-reports-table {
-  .build-trace {
-    @include build-trace();
-  }
-}
-
 .codequality-report {
   .media {
     padding: $gl-padding;

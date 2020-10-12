@@ -462,3 +462,9 @@
     border-right-color: $white;
   }
 }
+
+.test-reports-table {
+  .build-trace {
+    @include build-trace();
+  }
+}
