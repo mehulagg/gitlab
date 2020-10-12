@@ -105,7 +105,7 @@ module MembershipActions
   # rubocop: enable CodeReuse/ActiveRecord
 
   def resend_invite
-    member = membershipable.members.find(params[:id])
+    member = membershipable.all_group_members.find(params[:id])
 
     if member.invite?
       member.resend_invite
