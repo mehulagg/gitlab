@@ -101,7 +101,9 @@ module API
       delete ":id/hooks/:hook_id" do
         hook = user_group.hooks.find(params.delete(:hook_id))
 
-        destroy_conditionally!(hook)
+        destroy_conditionally!(hook) do
+          WebHooks::DestroyService.new(current_user).execute(hook)
+        end
       end
     end
   end

@@ -51,7 +51,8 @@ module EE
           license_scanning: %i[license_scanning],
           metrics: %i[metrics_reports],
           requirements: %i[requirements],
-          coverage_fuzzing: %i[coverage_fuzzing]
+          coverage_fuzzing: %i[coverage_fuzzing],
+          api_fuzzing: %i[api_fuzzing]
         }.freeze
 
         state_machine :status do
@@ -60,6 +61,7 @@ module EE
 
             pipeline.run_after_commit do
               StoreSecurityReportsWorker.perform_async(pipeline.id) if pipeline.default_branch?
+              ::Security::StoreScansWorker.perform_async(pipeline.id)
               SyncSecurityReportsToReportApprovalRulesWorker.perform_async(pipeline.id)
             end
           end
@@ -169,10 +171,18 @@ module EE
         builds.latest.with_reports(::Ci::JobArtifact.license_scanning_reports).exists?
       end
 
+      def can_store_security_reports?
+        project.can_store_security_reports? && has_security_reports?
+      end
+
       private
 
+      def has_security_reports?
+        has_reports?(::Ci::JobArtifact.security_reports.or(::Ci::JobArtifact.license_scanning_reports))
+      end
+
       def project_has_subscriptions?
-        project.beta_feature_available?(:ci_project_subscriptions) &&
+        project.feature_available?(:ci_project_subscriptions) &&
           project.downstream_projects.any?
       end
 

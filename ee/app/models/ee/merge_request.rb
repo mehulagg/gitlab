@@ -164,7 +164,8 @@ module EE
         dependency_scanning: report_type_enabled?(:dependency_scanning),
         license_scanning: report_type_enabled?(:license_scanning),
         coverage_fuzzing: report_type_enabled?(:coverage_fuzzing),
-        secret_detection: report_type_enabled?(:secret_detection)
+        secret_detection: report_type_enabled?(:secret_detection),
+        api_fuzzing: report_type_enabled?(:api_fuzzing)
       }
     end
 
@@ -246,6 +247,12 @@ module EE
       return missing_report_error("coverage fuzzing") unless has_coverage_fuzzing_reports?
 
       compare_reports(::Ci::CompareSecurityReportsService, current_user, 'coverage_fuzzing')
+    end
+
+    def compare_api_fuzzing_reports(current_user)
+      return missing_report_error('api fuzzing') unless has_api_fuzzing_reports?
+
+      compare_reports(::Ci::CompareSecurityReportsService, current_user, 'api_fuzzing')
     end
 
     def synchronize_approval_rules_from_target_project

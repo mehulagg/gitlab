@@ -6,6 +6,7 @@ query getProjects(
   $after: String = ""
   $first: Int!
   $searchNamespaces: Boolean = false
+  $sort: String
 ) {
   projects(
     search: $search
@@ -13,6 +14,7 @@ query getProjects(
     first: $first
     membership: true
     searchNamespaces: $searchNamespaces
+    sort: $sort
   ) {
     nodes {
       ...Project

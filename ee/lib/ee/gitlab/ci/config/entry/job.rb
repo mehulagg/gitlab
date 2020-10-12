@@ -12,9 +12,10 @@ module EE
             prepended do
               attributes :secrets
 
-              entry :secrets, ::Gitlab::Ci::Config::Entry::Secrets,
+              entry :secrets, ::Gitlab::Config::Entry::ComposableHash,
                 description: 'Configured secrets for this job',
-                inherit: false
+                inherit: false,
+                metadata: { composable_class: ::Gitlab::Ci::Config::Entry::Secret }
             end
 
             override :value

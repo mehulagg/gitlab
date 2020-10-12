@@ -121,7 +121,7 @@ RSpec.describe Geo::FrameworkRepositorySyncService, :geo do
     it 'marks sync as successful if no repository found' do
       allow(repository).to receive(:fetch_as_mirror)
         .with(url_to_repo, remote_name: 'geo', forced: true)
-        .and_raise(Gitlab::Shell::Error.new(Gitlab::GitAccess::ERROR_MESSAGES[:no_repo]))
+        .and_raise(Gitlab::Shell::Error.new(Gitlab::GitAccessSnippet::ERROR_MESSAGES[:no_repo]))
 
       subject.execute
 

@@ -20,5 +20,7 @@ module Security
     enum severity: Vulnerabilities::Finding::SEVERITY_LEVELS, _prefix: :severity
 
     validates :project_fingerprint, presence: true, length: { maximum: 40 }
+
+    scope :by_project_fingerprint, -> (fingerprints) { where(project_fingerprint: fingerprints) }
   end
 end

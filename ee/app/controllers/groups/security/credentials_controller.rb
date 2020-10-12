@@ -11,6 +11,8 @@ class Groups::Security::CredentialsController < Groups::ApplicationController
 
   before_action :validate_group_level_credentials_inventory_available!, only: [:index]
 
+  feature_category :compliance_management
+
   private
 
   def validate_group_level_credentials_inventory_available!

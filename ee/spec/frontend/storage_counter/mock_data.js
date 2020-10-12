@@ -24,7 +24,7 @@ export const projects = [
     name: 'Html5 Boilerplate',
     statistics: {
       commitCount: 0,
-      storageSize: 1293346,
+      storageSize: 9933460120,
       repositorySize: 0,
       lfsObjectsSize: 0,
       buildArtifactsSize: 1272375,

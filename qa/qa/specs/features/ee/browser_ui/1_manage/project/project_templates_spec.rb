@@ -58,10 +58,12 @@ module QA
             namespace: Runtime::Namespace.name(reset_cache: false),
             template_name: built_in)
 
-          Page::Project::Show.perform(&:wait_for_import_success)
+          Page::Project::Show.perform do |project|
+            project.wait_for_import_success
 
-          expect(page).to have_content("Initialized from '#{built_in}' project template")
-          expect(page).to have_content(".ruby-version")
+            expect(project).to have_content("Initialized from '#{built_in}' project template")
+            expect(project).to have_file(".ruby-version")
+          end
         end
       end
 
@@ -104,9 +106,12 @@ module QA
             namespace: Runtime::Namespace.path,
             template_name: @template_project.name)
 
-          Page::Project::Show.perform(&:wait_for_import_success)
-          @files.each do |file|
-            expect(page).to have_content(file[:name])
+          Page::Project::Show.perform do |project|
+            project.wait_for_import_success
+
+            @files.each do |file|
+              expect(project).to have_file(file[:name])
+            end
           end
         end
       end
@@ -151,9 +156,12 @@ module QA
             namespace: Runtime::Namespace.sandbox_name,
             template_name: @template_project.name)
 
-          Page::Project::Show.perform(&:wait_for_import_success)
-          @files.each do |file|
-            expect(page).to have_content(file[:name])
+          Page::Project::Show.perform do |project|
+            project.wait_for_import_success
+
+            @files.each do |file|
+              expect(project).to have_file(file[:name])
+            end
           end
         end
       end

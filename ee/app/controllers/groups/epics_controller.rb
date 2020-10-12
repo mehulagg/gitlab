@@ -21,6 +21,8 @@ class Groups::EpicsController < Groups::ApplicationController
     push_frontend_feature_flag(:vue_issuable_epic_sidebar, @group)
   end
 
+  feature_category :epics
+
   def new
     @noteable = Epic.new
   end

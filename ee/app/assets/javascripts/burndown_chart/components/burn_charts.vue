@@ -1,5 +1,5 @@
 <script>
-import { GlAlert, GlButton, GlButtonGroup } from '@gitlab/ui';
+import { GlAlert, GlButton, GlButtonGroup, GlSprintf } from '@gitlab/ui';
 import dateFormat from 'dateformat';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
@@ -7,6 +7,9 @@ import { getDayDifference, nDaysAfter, newDateAsLocaleTime } from '~/lib/utils/d
 import BurndownChart from './burndown_chart.vue';
 import BurnupChart from './burnup_chart.vue';
 import BurnupQuery from '../queries/burnup.query.graphql';
+import BurndownChartData from '../burn_chart_data';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 
 export default {
   components: {
@@ -15,6 +18,7 @@ export default {
     GlButtonGroup,
     BurndownChart,
     BurnupChart,
+    GlSprintf,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -26,17 +30,12 @@ export default {
       type: String,
       required: true,
     },
-    openIssuesCount: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
-    openIssuesWeight: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
     milestoneId: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    burndownEventsPath: {
       type: String,
       required: false,
       default: '',
@@ -65,8 +64,12 @@ export default {
   },
   data() {
     return {
+      openIssuesCount: [],
+      openIssuesWeight: [],
       issuesSelected: true,
       burnupData: [],
+      useLegacyBurndown: !this.glFeatures.burnupCharts,
+      showInfo: true,
       error: '',
     };
   },
@@ -80,8 +83,57 @@ export default {
     weightButtonCategory() {
       return this.issuesSelected ? 'secondary' : 'primary';
     },
+    issuesCount() {
+      if (this.useLegacyBurndown) {
+        return this.openIssuesCount;
+      }
+      return this.pluckBurnupDataProperties('scopeCount', 'completedCount');
+    },
+    issuesWeight() {
+      if (this.useLegacyBurndown) {
+        return this.openIssuesWeight;
+      }
+      return this.pluckBurnupDataProperties('scopeWeight', 'completedWeight');
+    },
+  },
+  mounted() {
+    if (!this.glFeatures.burnupCharts) {
+      this.fetchLegacyBurndownEvents();
+    }
   },
   methods: {
+    fetchLegacyBurndownEvents() {
+      this.fetchedLegacyData = true;
+
+      axios
+        .get(this.burndownEventsPath)
+        .then(burndownResponse => {
+          const burndownEvents = burndownResponse.data;
+          const burndownChartData = new BurndownChartData(
+            burndownEvents,
+            this.startDate,
+            this.dueDate,
+          ).generateBurndownTimeseries();
+
+          this.openIssuesCount = burndownChartData.map(d => [d[0], d[1]]);
+          this.openIssuesWeight = burndownChartData.map(d => [d[0], d[2]]);
+        })
+        .catch(() => {
+          this.fetchedLegacyData = false;
+          createFlash(__('Error loading burndown chart data'));
+        });
+    },
+    pluckBurnupDataProperties(total, completed) {
+      return this.burnupData.map(data => {
+        return [data.date, data[total] - data[completed]];
+      });
+    },
+    toggleLegacyBurndown(enabled) {
+      if (!this.fetchedLegacyData) {
+        this.fetchLegacyBurndownEvents();
+      }
+      this.useLegacyBurndown = enabled;
+    },
     setIssueSelected(selected) {
       this.issuesSelected = selected;
     },
@@ -164,9 +216,27 @@ export default {
 
 <template>
   <div>
-    <div class="burndown-header d-flex align-items-center">
+    <gl-alert
+      v-if="glFeatures.burnupCharts && showInfo"
+      variant="info"
+      class="col-12 gl-mt-3"
+      @dismiss="showInfo = false"
+    >
+      <gl-sprintf
+        :message="
+          __(
+            `Burndown charts are now fixed. This means that removing issues from a milestone after it has expired won't affect the chart. You can view the old chart using the %{strongStart}Legacy burndown chart%{strongEnd} button.`,
+          )
+        "
+      >
+        <template #strong="{ content }">
+          <strong>{{ content }}</strong>
+        </template>
+      </gl-sprintf>
+    </gl-alert>
+    <div class="burndown-header gl-display-flex gl-align-items-center gl-flex-wrap">
       <h3 ref="chartsTitle">{{ title }}</h3>
-      <gl-button-group class="ml-3 js-burndown-data-selector">
+      <gl-button-group>
         <gl-button
           ref="totalIssuesButton"
           :category="issueButtonCategory"
@@ -187,6 +257,27 @@ export default {
           {{ __('Issue weight') }}
         </gl-button>
       </gl-button-group>
+
+      <gl-button-group v-if="glFeatures.burnupCharts">
+        <gl-button
+          ref="oldBurndown"
+          :category="useLegacyBurndown ? 'primary' : 'secondary'"
+          variant="info"
+          size="small"
+          @click="toggleLegacyBurndown(true)"
+        >
+          {{ __('Legacy burndown chart') }}
+        </gl-button>
+        <gl-button
+          ref="newBurndown"
+          :category="useLegacyBurndown ? 'secondary' : 'primary'"
+          variant="info"
+          size="small"
+          @click="toggleLegacyBurndown(false)"
+        >
+          {{ __('Fixed burndown chart') }}
+        </gl-button>
+      </gl-button-group>
     </div>
     <div v-if="glFeatures.burnupCharts" class="row">
       <gl-alert v-if="error" variant="danger" class="col-12" @dismiss="error = ''">
@@ -195,8 +286,8 @@ export default {
       <burndown-chart
         :start-date="startDate"
         :due-date="dueDate"
-        :open-issues-count="openIssuesCount"
-        :open-issues-weight="openIssuesWeight"
+        :open-issues-count="issuesCount"
+        :open-issues-weight="issuesWeight"
         :issues-selected="issuesSelected"
         class="col-md-6"
       />

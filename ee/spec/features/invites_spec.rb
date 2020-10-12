@@ -16,7 +16,8 @@ RSpec.describe 'Group or Project invitations' do
   end
 
   def fill_in_sign_up_form(user)
-    fill_in 'new_user_name', with: user.name
+    fill_in 'new_user_first_name', with: user.first_name
+    fill_in 'new_user_last_name', with: user.last_name
     fill_in 'new_user_username', with: user.username
     fill_in 'new_user_email', with: user.email
     fill_in 'new_user_password', with: user.password

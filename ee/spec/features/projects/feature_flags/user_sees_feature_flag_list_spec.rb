@@ -28,58 +28,6 @@ RSpec.describe 'User sees feature flag list', :js do
       stub_feature_flags(feature_flags_legacy_read_only_override: false)
     end
 
-    it 'user sees the first flag' do
-      visit(project_feature_flags_path(project))
-
-      within_feature_flag_row(1) do
-        expect(page.find('.js-feature-flag-id')).to have_content('^1')
-        expect(page.find('.feature-flag-name')).to have_content('ci_live_trace')
-        expect_status_toggle_button_not_to_be_checked
-
-        within_feature_flag_scopes do
-          expect(page.find('[data-qa-selector="feature-flag-scope-muted-badge"]:nth-child(1)')).to have_content('*')
-          expect(page.find('[data-qa-selector="feature-flag-scope-info-badge"]:nth-child(2)')).to have_content('review/*')
-        end
-      end
-    end
-
-    it 'user sees the second flag' do
-      visit(project_feature_flags_path(project))
-
-      within_feature_flag_row(2) do
-        expect(page.find('.js-feature-flag-id')).to have_content('^2')
-        expect(page.find('.feature-flag-name')).to have_content('drop_legacy_artifacts')
-        expect_status_toggle_button_not_to_be_checked
-
-        within_feature_flag_scopes do
-          expect(page.find('[data-qa-selector="feature-flag-scope-muted-badge"]:nth-child(1)')).to have_content('*')
-        end
-      end
-    end
-
-    it 'user sees the third flag' do
-      visit(project_feature_flags_path(project))
-
-      within_feature_flag_row(3) do
-        expect(page.find('.js-feature-flag-id')).to have_content('^3')
-        expect(page.find('.feature-flag-name')).to have_content('mr_train')
-        expect_status_toggle_button_to_be_checked
-
-        within_feature_flag_scopes do
-          expect(page.find('[data-qa-selector="feature-flag-scope-info-badge"]:nth-child(1)')).to have_content('*')
-          expect(page.find('[data-qa-selector="feature-flag-scope-muted-badge"]:nth-child(2)')).to have_content('production')
-        end
-      end
-    end
-
-    it 'user sees the status toggle disabled' do
-      visit(project_feature_flags_path(project))
-
-      within_feature_flag_row(1) do
-        expect_status_toggle_button_to_be_disabled
-      end
-    end
-
     context 'when legacy feature flags are not read-only' do
       before do
         stub_feature_flags(feature_flags_legacy_read_only: false)
@@ -148,18 +96,6 @@ RSpec.describe 'User sees feature flag list', :js do
       expect(page).to(
         have_text('Updated feature flag my_flag. Updated active from "false" to "true".')
       )
-    end
-  end
-
-  context 'when there are no feature flags' do
-    before do
-      visit(project_feature_flags_path(project))
-    end
-
-    it 'shows empty page' do
-      expect(page).to have_text 'Get started with feature flags'
-      expect(page).to have_selector('.btn-success', text: 'New feature flag')
-      expect(page).to have_selector('[data-qa-selector="configure_feature_flags_button"]', text: 'Configure')
     end
   end
 end

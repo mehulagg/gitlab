@@ -99,6 +99,7 @@ gem 'graphiql-rails', '~> 1.4.10'
 gem 'apollo_upload_server', '~> 2.0.2'
 gem 'graphql-docs', '~> 1.6.0', group: [:development, :test]
 
+gem 'hashie'
 # Disable strong_params so that Mash does not respond to :permitted?
 gem 'hashie-forbidden_attributes'
 
@@ -110,7 +111,7 @@ gem 'hamlit', '~> 2.11.0'
 
 # Files attachments
 gem 'carrierwave', '~> 1.3'
-gem 'mini_magick'
+gem 'mini_magick', '~> 4.10.1'
 
 # for backups
 gem 'fog-aws', '~> 3.5'
@@ -337,7 +338,7 @@ end
 
 group :development do
   gem 'brakeman', '~> 4.2', require: false
-  gem 'danger', '~> 8.0', require: false
+  gem 'danger', '~> 8.0.6', require: false
 
   gem 'letter_opener_web', '~> 1.3.4'
 
@@ -516,3 +517,6 @@ gem 'multi_json', '~> 1.14.1'
 gem 'yajl-ruby', '~> 1.4.1', require: 'yajl'
 
 gem 'webauthn', '~> 2.3'
+
+# IPAddress utilities
+gem 'ipaddress', '~> 0.8.3'

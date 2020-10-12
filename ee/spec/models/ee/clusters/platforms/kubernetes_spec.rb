@@ -276,6 +276,28 @@ RSpec.describe Clusters::Platforms::Kubernetes do
         ])
       end
     end
+
+    context 'with multiple matching deployments' do
+      let(:deployments) do
+        [
+          kube_deployment(name: 'deployment-a', environment_slug: environment.slug, project_slug: project.full_path_slug, replicas: 2),
+          kube_deployment(name: 'deployment-b', environment_slug: environment.slug, project_slug: project.full_path_slug, replicas: 2)
+        ]
+      end
+
+      let(:pods) do
+        [
+          kube_pod(name: 'pod-a-1', environment_slug: environment.slug, project_slug: project.full_path_slug),
+          kube_pod(name: 'pod-a-2', environment_slug: environment.slug, project_slug: project.full_path_slug),
+          kube_pod(name: 'pod-b-1', environment_slug: environment.slug, project_slug: project.full_path_slug),
+          kube_pod(name: 'pod-b-2', environment_slug: environment.slug, project_slug: project.full_path_slug)
+        ]
+      end
+
+      it 'returns each pod once' do
+        expect(rollout_status.instances.map { |p| p[:pod_name] }).to eq(['pod-a-1', 'pod-a-2', 'pod-b-1', 'pod-b-2'])
+      end
+    end
   end
 
   describe '#calculate_reactive_cache_for' do

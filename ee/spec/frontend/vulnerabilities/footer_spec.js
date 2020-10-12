@@ -30,7 +30,6 @@ describe('Vulnerability Footer', () => {
     can_modify_related_issues: true,
     related_issues_help_path: 'help/path',
     has_mr: false,
-    vulnerability_feedback_help_path: 'feedback/help/path',
     pipeline: {},
   };
 
@@ -69,7 +68,6 @@ describe('Vulnerability Footer', () => {
         remediation: properties.remediations[0],
         hasDownload: true,
         hasMr: vulnerability.has_mr,
-        vulnerabilityFeedbackHelpPath: vulnerability.vulnerability_feedback_help_path,
         isStandaloneVulnerability: true,
       });
     });
