@@ -103,7 +103,7 @@ To edit a file:
 > - Support for adding images through the WYSIWYG editor [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216640) in GitLab 13.1.
 > - Support for uploading images added through the WYSIWYG editor directly to the repository [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218529) in GitLab 13.5.
 
-You can upload image files directly from the WYSIWYG mode by clicking the image icon **{doc-image}**.
+You can upload image files directly from the WYSIWYG mode by clicking the image icon (**{doc-image}**).
 The following formats are supported:
 
 - `jpg`/`jpeg`
@@ -111,16 +111,22 @@ The following formats are supported:
 - `png`
 
 A description (`ALT` text) is not required, but recommended for SEO and acessibility. Images are uploaded to a
-default directory. <!--  what directory is it? -->
+default directory (`source/images/`).
 
 ### Front matter
 
 > - Markdown front matter hidden on the WYSIWYG editor [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216834) in GitLab 13.1.
 > - Ability to edit page front matter [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235921) in GitLab 13.4.
 
-The YAML front matter of Markdown files is hidden on the WYSIWYG editor to avoid unintended changes.
-To edit it, use the Markdown editing mode, the regular GitLab file editor, or the Web IDE.
-<!-- THIS SEEMS PRETTY OUTDATED. How are we editing the front matter? -->
+Front matter is a flexible and convenient way to define page-specific variables in data files
+intended to be parsed by a static site generator. It is commonly used for setting a page's
+title, layout template, or author, but can be used to pass any kind of metadata to the
+generator as the page renders out to HTML. Included at the very top of each data file, the
+front matter is often formatted as YAML or JSON and requires consistent and accurate syntax.
+
+To edit the front matter from the Static Site Editor, click the **Settings** button on the
+top-right to reveal a panel that displays a form field for each key defined in the front
+matter. The fields are populated with the current value and you can update them directly from the form.
 
 ### Configuration files
 
