@@ -1,9 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SubscriptionApp component on creation matches the snapshot 1`] = `
-<subscription-table-stub
-  customerportalurl="https://customers.gitlab.com/subscriptions"
-  namespacename="bronze"
-  planupgradehref="/url"
-/>
+<div>
+  <subscription-table-stub
+    customerportalurl="https://customers.gitlab.com/subscriptions"
+    namespacename="bronze"
+    planupgradehref="/url"
+  />
+   
+  <subscription-seats-table-stub
+    class="gl-mt-7"
+    namespaceid="42"
+    namespacename="bronze"
+  />
+</div>
 `;

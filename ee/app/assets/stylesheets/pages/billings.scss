@@ -107,3 +107,24 @@
     }
   }
 }
+
+.seats-table {
+  /*
+  * TODO
+  * Remove these overrides when the ones inside of
+  * app/assets/stylesheets/framework/tables.scss
+  * will be removed.
+  *
+  * Read more about this in the comments of that file.
+  */
+  &.table.gl-table {
+    margin-bottom: 0;
+
+    tr {
+      th {
+        background: none;
+        color: $gl-text-color-secondary;
+      }
+    }
+  }
+}

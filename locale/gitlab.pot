@@ -3010,9 +3010,6 @@ msgstr ""
 msgid "An error occurred while loading the pipelines jobs."
 msgstr ""
 
-msgid "An error occurred while loading the subscription details."
-msgstr ""
-
 msgid "An error occurred while making the request."
 msgstr ""
 
@@ -4185,7 +4182,13 @@ msgstr ""
 msgid "BillingPlan|Upgrade"
 msgstr ""
 
+msgid "Billing|%{total} Users occupying seats in %{namespaceName}"
+msgstr ""
+
 msgid "Billing|An error occurred while loading billable members list"
+msgstr ""
+
+msgid "Billing|Loading billable members list"
 msgstr ""
 
 msgid "Bitbucket Server Import"
@@ -25257,6 +25260,12 @@ msgid "Subscription successfully created."
 msgstr ""
 
 msgid "Subscription successfully deleted."
+msgstr ""
+
+msgid "SubscriptionTable|An error occurred while loading billable members list"
+msgstr ""
+
+msgid "SubscriptionTable|An error occurred while loading the subscription details."
 msgstr ""
 
 msgid "SubscriptionTable|Billing"
