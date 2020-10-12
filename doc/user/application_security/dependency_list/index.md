@@ -53,7 +53,7 @@ dependencies, but the UI only shows one of the shortest paths.
 Dependency Paths are supported for the following package managers:
 
 - [NuGet](https://www.nuget.org/)
-<!-- insert screenshot here -->
+![Dependency Path](img/nuget_dependency_path_v13_5.png)
 
 ## Licenses
 
