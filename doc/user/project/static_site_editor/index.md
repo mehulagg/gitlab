@@ -90,7 +90,7 @@ To edit a file:
 1. Click the **Edit this page** button.
 1. The file is opened in the Static Site Editor in **WYSIWYG** mode. If you wish to edit the raw Markdown
    instead, you can toggle the **Markdown** mode in the bottom-right corner.
-1. When you're done, click **Submit changes**.
+1. When you're done, click **Submit changes...**.
 1. Describe your changes (add a commit message).
 1. Click **Submit changes**.
 1. A new merge request is automatically created and you can assign a colleague for review.
@@ -125,12 +125,9 @@ To edit the front matter from the Static Site Editor you can use the GitLab's re
 the Web IDE, or easily update the data directly from the WYSIWYG editor:
 
 1. Click the **Page settings** button on the bottom-right to reveal a web form with the data you
-   have on the page's front matter. The form is populated with the current data:
-
-   ![Editing page front matter in the Static Site Editor](img/front_matter_ui_v13_4.png)
-
+   have on the page's front matter. The form is populated with the current data.
 1. Update the values as you wish and close the panel.
-1. When you're done, click **Submit changes**.
+1. When you're done, click **Submit changes...**.
 1. Describe your changes (add a commit message).
 1. Click **Submit changes**.
 1. Click **View merge request** and GitLab will take you there. You can click **Edit** to update
