@@ -66,14 +66,18 @@ export default {
     eventHub.$off('sidebar.closeAll', this.unsetActiveId);
   },
   methods: {
-    ...mapActions(['unsetActiveId']),
+    ...mapActions(['unsetActiveId', 'deleteList']),
     showScopedLabels(label) {
       return boardsStore.scopedLabels.enabled && isScopedLabel(label);
     },
     deleteBoard() {
       // eslint-disable-next-line no-alert
       if (window.confirm(__('Are you sure you want to delete this list?'))) {
-        this.activeList.destroy();
+        if (this.glFeatures.graphqlBoardLists) {
+          this.deleteList(this.activeId);
+        } else {
+          this.activeList.destroy();
+        }
         this.unsetActiveId();
       }
     },
