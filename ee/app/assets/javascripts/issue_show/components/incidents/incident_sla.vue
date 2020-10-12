@@ -19,7 +19,9 @@ export default {
         };
       },
       update(data) {
-        return data?.project?.issue?.slaDueAt;
+        const slaDueAt = data?.project?.issue?.slaDueAt;
+        this.$emit('update', Boolean(slaDueAt));
+        return slaDueAt;
       },
       error() {
         createFlash({
@@ -51,9 +53,11 @@ export default {
   <div v-if="slaFeatureAvailable">
     <span class="gl-font-weight-bold">{{ s__('HighlightBar|Time to SLA:') }}</span>
     <gl-loading-icon v-if="loading" inline />
-    <time-ago-tooltip v-if="slaDueAt" :time="slaDueAt" class="gl-white-space-nowrap">
+    <span class="gl-white-space-nowrap">
       <gl-icon name="timer" />
-      <span>{{ displayValue }}</span>
-    </time-ago-tooltip>
+      <time-ago-tooltip v-if="slaDueAt" :time="slaDueAt">
+        <span>{{ displayValue }}</span>
+      </time-ago-tooltip>
+    </span>
   </div>
 </template>

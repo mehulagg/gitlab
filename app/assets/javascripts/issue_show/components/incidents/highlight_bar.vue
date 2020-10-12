@@ -13,8 +13,12 @@ export default {
   props: {
     alert: {
       type: Object,
-      required: true,
+      required: false,
+      default: null
     },
+  },
+  data() {
+    return { childHasData: false };
   },
   computed: {
     startTime() {
@@ -23,31 +27,40 @@ export default {
     incidentSlaExists() {
       return 'IncidentSla' in this.$options.components;
     },
+    showHighlightBar() {
+      return this.alert || this.childHasData;
+    },
+  },
+  methods: {
+    update(hasData) {
+      this.childHasData = hasData;
+    },
   },
 };
 </script>
 
 <template>
   <div
+    v-show="showHighlightBar"
     class="gl-border-solid gl-border-1 gl-border-gray-100 gl-p-5 gl-mb-3 gl-rounded-base gl-display-flex gl-justify-content-space-between gl-xs-flex-direction-column"
   >
-    <div class="gl-mr-3">
+    <div v-if="alert" class="gl-mr-3">
       <span class="gl-font-weight-bold">{{ s__('HighlightBar|Original alert:') }}</span>
       <gl-link v-gl-tooltip :title="alert.title" :href="alert.detailsUrl">
         #{{ alert.iid }}
       </gl-link>
     </div>
 
-    <div class="gl-mr-3">
+    <div v-if="alert" class="gl-mr-3">
       <span class="gl-font-weight-bold">{{ s__('HighlightBar|Alert start time:') }}</span>
       {{ startTime }}
     </div>
 
-    <div :class="{ 'gl-mr-3': incidentSlaExists }">
+    <div v-if="alert" :class="{ 'gl-mr-3': incidentSlaExists }">
       <span class="gl-font-weight-bold">{{ s__('HighlightBar|Alert events:') }}</span>
       <span>{{ alert.eventCount }}</span>
     </div>
 
-    <incident-sla />
+    <incident-sla @update="update" />
   </div>
 </template>
