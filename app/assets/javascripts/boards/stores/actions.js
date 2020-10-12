@@ -195,6 +195,10 @@ export default {
   },
 
   deleteList: ({ state, commit }, listId) => {
+    const listsBackup = [...state.boardLists];
+
+    commit(types.REMOVE_LIST, listId);
+
     gqlClient
       .mutate({
         mutation: destroyBoardList,
@@ -204,18 +208,13 @@ export default {
       })
       .then(errors => {
         if (errors) {
-          return;
+          throw new Error();
         }
-
-        const lists = state.boardLists;
-        const index = lists.findIndex(l => l.id === listId);
-
-        // todo: this is a mutation
-        lists.splice(index, 1);
-        commit(types.RECEIVE_BOARD_LISTS_SUCCESS, lists);
       })
       .catch(() => {
-        // TODO: error message
+        // show error message and re-add the list
+        commit(types.REMOVE_LIST_FAILURE);
+        commit(types.RECEIVE_BOARD_LISTS_SUCCESS, listsBackup);
       });
   },
 
