@@ -9,7 +9,8 @@ module SearchHelper
     resources_results = [
       recent_items_autocomplete(term),
       groups_autocomplete(term),
-      projects_autocomplete(term)
+      projects_autocomplete(term),
+      issue_autocomplete(term)
     ].flatten
 
     search_pattern = Regexp.new(Regexp.escape(term), "i")
@@ -186,6 +187,26 @@ module SearchHelper
         avatar_url: p.avatar_url || ''
       }
     end
+  end
+
+  def issue_autocomplete(term)
+    return unless @project.present? && current_user
+
+    return unless term =~ /\A#\d+\z/
+
+    iid = term.sub('#', '')
+    issue = @project.issues.find_by_iid(iid)
+    return unless issue && Ability.allowed?(current_user, :read_issue, issue)
+
+    [
+      {
+        category: "In this project",
+        id: issue.id,
+        label: search_result_sanitize(issue.title),
+        url: issue_path(issue),
+        avatar_url: issue.project.avatar_url || ''
+      }
+    ]
   end
 
   def recent_merge_requests_autocomplete(term)
