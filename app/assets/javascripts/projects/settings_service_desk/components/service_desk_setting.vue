@@ -1,7 +1,13 @@
 <script>
-import { GlButton, GlFormSelect, GlToggle, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import {
+  GlButton,
+  GlFormSelect,
+  GlToggle,
+  GlLoadingIcon,
+  GlSprintf,
+  GlTooltipDirective,
+} from '@gitlab/ui';
 import { __ } from '~/locale';
-import tooltip from '~/vue_shared/directives/tooltip';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import eventHub from '../event_hub';
@@ -9,7 +15,7 @@ import eventHub from '../event_hub';
 export default {
   name: 'ServiceDeskSetting',
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
     ClipboardButton,
