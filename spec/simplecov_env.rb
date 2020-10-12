@@ -27,6 +27,8 @@ module SimpleCovEnv
 
   def configure_job
     SimpleCov.configure do
+      enable_coverage :branch
+
       if ENV['CI_JOB_NAME']
         job_name = Gitlab::Utils.slugify(ENV['CI_JOB_NAME'])
         coverage_dir "coverage/#{job_name}"
