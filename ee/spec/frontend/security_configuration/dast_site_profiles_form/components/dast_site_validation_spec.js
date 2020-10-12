@@ -2,7 +2,7 @@ import merge from 'lodash/merge';
 import VueApollo from 'vue-apollo';
 import { within } from '@testing-library/dom';
 import { createLocalVue, mount, shallowMount } from '@vue/test-utils';
-import { createMockClient } from 'mock-apollo-client';
+import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import { GlLoadingIcon } from '@gitlab/ui';
 import waitForPromises from 'jest/helpers/wait_for_promises';
 import DastSiteValidation from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_validation.vue';
@@ -29,42 +29,25 @@ const defaultProps = {
   token,
 };
 
-const defaultRequestHandlers = {
-  dastSiteValidation: jest.fn().mockResolvedValue(responses.dastSiteValidation()),
-  dastSiteValidationCreate: jest.fn().mockResolvedValue(responses.dastSiteValidationCreate()),
-};
+const dastSiteValidationCreateHandler = jest
+  .fn()
+  .mockResolvedValue(responses.dastSiteValidationCreate());
+
+const defaultRequestHandlers = [
+  [dastSiteValidationQuery, jest.fn().mockResolvedValue(responses.dastSiteValidation())],
+  [dastSiteValidationCreateMutation, dastSiteValidationCreateHandler],
+];
 
 describe('DastSiteValidation', () => {
   let wrapper;
-  let apolloProvider;
-  let requestHandlers;
-
-  const mockClientFactory = handlers => {
-    const mockClient = createMockClient();
-
-    requestHandlers = {
-      ...defaultRequestHandlers,
-      ...handlers,
-    };
-
-    mockClient.setRequestHandler(dastSiteValidationQuery, requestHandlers.dastSiteValidation);
-
-    mockClient.setRequestHandler(
-      dastSiteValidationCreateMutation,
-      requestHandlers.dastSiteValidationCreate,
-    );
-
-    return mockClient;
-  };
+  let fakeApollo;
 
   const respondWith = handlers => {
-    apolloProvider.defaultClient = mockClientFactory(handlers);
+    fakeApollo.defaultClient = createMockApollo(handlers);
   };
 
   const componentFactory = (mountFn = shallowMount) => options => {
-    apolloProvider = new VueApollo({
-      defaultClient: mockClientFactory(),
-    });
+    fakeApollo = createMockApollo(defaultRequestHandlers);
 
     wrapper = mountFn(
       DastSiteValidation,
@@ -76,7 +59,7 @@ describe('DastSiteValidation', () => {
         options,
         {
           localVue,
-          apolloProvider,
+          apolloProvider: fakeApollo,
         },
       ),
     );
@@ -196,7 +179,7 @@ describe('DastSiteValidation', () => {
       });
 
       it('triggers the dastSiteValidationCreate GraphQL mutation', () => {
-        expect(requestHandlers.dastSiteValidationCreate).toHaveBeenCalledWith({
+        expect(dastSiteValidationCreateHandler).toHaveBeenCalledWith({
           projectFullPath: fullPath,
           dastSiteTokenId: tokenId,
           validationPath: wrapper.vm.validationPath,
@@ -213,10 +196,12 @@ describe('DastSiteValidation', () => {
 
     describe('failed', () => {
       beforeEach(() => {
-        respondWith({
-          dastSiteValidation: () =>
-            Promise.resolve(responses.dastSiteValidation(DAST_SITE_VALIDATION_STATUS.FAILED)),
-        });
+        respondWith([
+          [
+            dastSiteValidationQuery,
+            () => Promise.resolve(responses.dastSiteValidation(DAST_SITE_VALIDATION_STATUS.FAILED)),
+          ],
+        ]);
       });
 
       it('shows failure message', async () => {
@@ -235,9 +220,7 @@ describe('DastSiteValidation', () => {
       ${'errors as data'}  | ${() => Promise.resolve(responses.dastSiteValidationCreate(['error#1', 'error#2']))}
     `('$errorKind', ({ errorResponse }) => {
       beforeEach(() => {
-        respondWith({
-          dastSiteValidationCreate: errorResponse,
-        });
+        respondWith([[dastSiteValidationCreateMutation, errorResponse]]);
       });
 
       it('on error, shows error state', async () => {
