@@ -231,6 +231,9 @@ RSpec.describe Backup::Repositories do
     end
 
     it 'cleans existing repositories' do
+      success_response = ServiceResponse.success(message: "Valid Snippet Repo")
+      allow(Snippets::RepositoryValidationService).to receive_message_chain(:new, :execute).and_return(success_response)
+
       expect_next_instance_of(DesignManagement::Repository) do |repository|
         expect(repository).to receive(:remove)
       end
@@ -245,6 +248,44 @@ RSpec.describe Backup::Repositories do
       end
 
       subject.restore
+    end
+
+    context 'restoring snippets' do
+      context 'when repository is invalid' do
+        before do
+          error_response = ServiceResponse.error(message: "Repository has more than one branch")
+          allow(Snippets::RepositoryValidationService).to receive_message_chain(:new, :execute).and_return(error_response)
+
+          create(:snippet_repository, snippet: personal_snippet)
+          create(:snippet_repository, snippet: project_snippet)
+        end
+
+        it 'shows the appropriate error' do
+          subject.restore
+
+          expect(progress).to have_received(:puts).with("Snippet #{personal_snippet.full_path} can't be restored: Repository has more than one branch")
+          expect(progress).to have_received(:puts).with("Snippet #{project_snippet.full_path} can't be restored: Repository has more than one branch")
+        end
+
+        it 'removes the snippets from the DB' do
+          expect { subject.restore }.to change(PersonalSnippet, :count).by(-1)
+            .and change(ProjectSnippet, :count).by(-1)
+            .and change(SnippetRepository, :count).by(-2)
+        end
+
+        it 'removes the repository from disk' do
+          gitlab_shell = Gitlab::Shell.new
+          shard_name = personal_snippet.repository.shard
+          path = personal_snippet.disk_path + '.git'
+
+          subject.restore
+
+          repository = Repository.new(personal_snippet.full_path, personal_snippet, shard: 'default')
+
+          expect(repository.exists?).to be false
+          expect(gitlab_shell.repository_exists?(shard_name, path)).to eq false
+        end
+      end
     end
   end
 end
