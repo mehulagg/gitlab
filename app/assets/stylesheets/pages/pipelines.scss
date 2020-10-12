@@ -481,21 +481,6 @@ button.mini-pipeline-graph-dropdown-toggle {
   }
 }
 
-/**
- * Pipelines / Jobs header
- */
-[data-page='projects:pipelines:show'],
-[data-page='projects:jobs:show'] {
-  .ci-header-container {
-    min-height: $gl-spacing-scale-7;
-    display: flex;
-
-    .text-center {
-      padding-top: 12px;
-    }
-  }
-}
-
 .pipelines-container .top-area .nav-controls > .btn:last-child {
   float: none;
 }

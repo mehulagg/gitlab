@@ -97,7 +97,7 @@ export default {
 </script>
 
 <template>
-  <header class="page-content-header ci-header-container" data-testid="pipeline-header-content">
+  <header class="page-content-header ci-header-container gl-display-flex gl-min-h-7" data-testid="pipeline-header-content">
     <section class="header-main-content">
       <ci-icon-badge :status="status" />
 
