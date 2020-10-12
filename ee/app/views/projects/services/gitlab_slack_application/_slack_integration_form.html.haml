@@ -23,8 +23,8 @@
       %td
         .controls
           - project = @service.project
-          = link_to 'Edit', edit_project_settings_slack_path(project), class: 'btn btn-sm'
-          = link_to 'Remove', project_settings_slack_path(project), method: :delete, class: 'btn btn-danger btn-sm', data: { confirm: 'Are you sure?' }
+          = link_to 'Edit', edit_project_settings_slack_path(project), class: 'gl-button btn btn-sm'
+          = link_to 'Remove', project_settings_slack_path(project), method: :delete, class: 'gl-button btn btn-danger btn-sm', data: { confirm: 'Are you sure?' }
 - else
   %p To set up this service press "Add to Slack"
   = render "projects/services/#{@service.to_param}/slack_button", project: @project

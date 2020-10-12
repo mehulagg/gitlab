@@ -13,9 +13,9 @@
     - if @group_saml_identity || !user_signed_in?
       %p= _("This will redirect you to an external sign in page.")
 
-      = saml_link _('Sign in with Single Sign-On'), @group_path, html_class: 'btn btn-success btn-block qa-saml-sso-signin-button', redirect: @redirect_path
+      = saml_link _('Sign in with Single Sign-On'), @group_path, html_class: 'gl-button btn btn-success btn-block qa-saml-sso-signin-button', redirect: @redirect_path
     - else
       .card.card-body.bs-callout-warning
         = _("Only proceed if you trust %{idp_url} to control your GitLab account sign in.") % { idp_url: @idp_url }
 
-      = saml_link _('Authorize'), @group_path, html_class: 'btn btn-success btn-block qa-saml-sso-signin-button'
+      = saml_link _('Authorize'), @group_path, html_class: 'gl-button btn btn-success btn-block qa-saml-sso-signin-button'
