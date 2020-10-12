@@ -1046,7 +1046,7 @@ GEM
     rubyntlm (0.6.2)
     rubypants (0.2.0)
     rubyzip (2.0.0)
-    rugged (0.28.4.1)
+    rugged (1.0.1)
     safe_yaml (1.0.4)
     safety_net_attestation (0.4.0)
       jwt (~> 2.0)
@@ -1473,7 +1473,7 @@ DEPENDENCIES
   ruby-progressbar
   ruby_parser (~> 3.8)
   rubyzip (~> 2.0.0)
-  rugged (~> 0.28)
+  rugged (~> 1.0)
   sanitize (~> 5.2.1)
   sassc-rails (~> 2.1.0)
   scss_lint (~> 0.56.0)
