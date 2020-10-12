@@ -83,9 +83,10 @@ module EE
       end
 
       # @param primary_key_in [Range, Ci::JobArtifact] arg to pass to primary_key_in scope
-      # @param node [GeoNode] defaults to ::Gitlab::Geo.current_node
       # @return [ActiveRecord::Relation<Ci::JobArtifact>] everything that should be synced to this node, restricted by primary key
-      def replicables_for_geo_node(primary_key_in, node = ::Gitlab::Geo.current_node)
+      def replicables_for_geo_node(primary_key_in)
+        node = ::Gitlab::Geo.current_node
+
         not_expired
           .primary_key_in(primary_key_in)
           .merge(selective_sync_scope(node))
