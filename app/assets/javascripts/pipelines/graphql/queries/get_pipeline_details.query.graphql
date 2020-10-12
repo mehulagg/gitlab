@@ -17,7 +17,7 @@ query getPipelineDetails($projectPath: ID!, $iid: ID!) {
           groups {
             nodes {
               status: detailedStatus {
-                label
+                # label
                 group
                 icon
               }
@@ -33,7 +33,7 @@ query getPipelineDetails($projectPath: ID!, $iid: ID!) {
                   }
               status: detailedStatus {
                     icon
-                    tooltip
+                    # tooltip
                     hasDetails
                     detailsPath
                     group

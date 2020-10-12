@@ -19,8 +19,9 @@ const apolloProvider = new VueApollo({
                 name: 'eltern-pipe',
               },
               status: {
-                label: 'running',
-                icon: 'status_running',
+                label: 'success',
+                group: 'success',
+                icon: 'status_success',
               },
               sourceJob: {
                 name: 'pete',
@@ -40,8 +41,9 @@ const apolloProvider = new VueApollo({
                 name: 'kinder-pipe',
               },
               status :{
-                label: 'running',
-                icon: 'status_running',
+                label: 'success',
+                group: 'success',
+                icon: 'status_success',
               },
               sourceJob: {
                 name: 'build_b',
@@ -55,8 +57,9 @@ const apolloProvider = new VueApollo({
                 name: 'wee-pipe',
               },
               status :{
-                label: 'running',
-                icon: 'status_running',
+                label: 'success',
+                group: 'success',
+                icon: 'status_success',
               },
               sourceJob: {
                 name: 'test_a',
