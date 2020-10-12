@@ -190,13 +190,11 @@ module SearchHelper
   end
 
   def issue_autocomplete(term)
-    return unless @project.present? && current_user
-
-    return unless term =~ /\A#\d+\z/
+    return [] unless @project.present? && current_user && term =~ /\A#\d+\z/
 
     iid = term.sub('#', '')
     issue = @project.issues.find_by_iid(iid)
-    return unless issue && Ability.allowed?(current_user, :read_issue, issue)
+    return [] unless issue && Ability.allowed?(current_user, :read_issue, issue)
 
     [
       {
