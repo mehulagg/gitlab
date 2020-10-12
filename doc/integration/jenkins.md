@@ -23,7 +23,7 @@ For a real use case, read the blog post [Continuous integration: From Jenkins to
 
 Moving from a traditional CI plug-in to a single application for the entire software development
 life cycle can decrease hours spent on maintaining toolchains by 10% or more. For more details, see
-the ['GitLab vs. Jenkins' comparison page](https://about.gitlab.com/devops-tools/jenkins-vs-gitlab.html).
+the ['GitLab vs. Jenkins' comparison page](https://about.gitlab.com/devops-tools/jenkins-vs-gitlab/).
 
 ## Configure GitLab integration with Jenkins
 
