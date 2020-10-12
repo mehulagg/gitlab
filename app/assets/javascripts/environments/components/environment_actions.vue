@@ -76,6 +76,7 @@ export default {
       class="dropdown dropdown-new js-environment-actions-dropdown"
       data-container="body"
       data-toggle="dropdown"
+      data-testid="environment-actions-button"
     >
       <span>
         <gl-icon name="play" />
