@@ -5,7 +5,7 @@ import { GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
 export default {
   name: 'CollapsedCalendarIcon',
   directives: {
-    GlTooltip: GlTooltipDirective
+    GlTooltip: GlTooltipDirective,
   },
   components: {
     GlIcon,
