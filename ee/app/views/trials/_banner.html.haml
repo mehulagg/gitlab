@@ -1,7 +1,7 @@
 - return unless show_trial_banner?(namespace)
 .user-callout
   .alert.bordered-box.landing.justify-content-start.pl-md-8
-    %button{ type:"button", class:"btn btn-default close", "data-dismiss":"alert", "aria-label": _("Close") }
+    %button{ type:"button", class:"gl-button btn btn-default close", "data-dismiss":"alert", "aria-label": _("Close") }
       = sprite_icon('close')
     .svg-container
       = custom_icon('trial_activated_banner')
