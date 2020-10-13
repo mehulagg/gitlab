@@ -3325,7 +3325,7 @@ These are the available report types:
 
 By default, all [`artifacts`](#artifacts) from previous [stages](#stages)
 are passed to each job. However, you can use the `dependencies` parameter to
-define a limited list of jobs to fetch artifacts from. Or you can define no jobs at all.
+define a limited list of jobs to fetch artifacts from. You can also set a job to download no artifacts at all.
 
 To use this feature, define `dependencies` in context of the job and pass
 a list of all previous jobs the artifacts should be downloaded from.
