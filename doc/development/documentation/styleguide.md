@@ -239,7 +239,7 @@ Project features; specifically about Merge Requests. Our site's paths match
 those of our repository, so the clear structure also makes documentation easier
 to update.
 
-The following table shows what kind of documentation goes where:
+Put files for a specific product area into the related folder:
 
 | Directory             | What belongs here                                                                                                                       |
 |:----------------------|:----------------------------------------------------------------------------------------------------------------------------------------|
