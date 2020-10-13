@@ -160,7 +160,7 @@ module Ci
     # no chunk with higher index in the database.
     #
     def final?
-      build.pending_state.present? && chunks_max_index == chunk_index
+      has_pending_state? && chunks_max_index == chunk_index
     end
 
     def flushed?
@@ -190,6 +190,7 @@ module Ci
 
     def unsafe_persist_data!(new_store = self.class.persistable_store)
       return if data_store == new_store.to_s
+      return if build.complete?
 
       current_data = data
       old_store_class = current_store
@@ -200,7 +201,7 @@ module Ci
           data is not fulfilled in a bucket
 
           size: #{current_size}
-          state: #{pending_state?}
+          state: #{has_pending_state?}
           max: #{chunks_max_index}
           index: #{chunk_index}
         MSG
@@ -259,7 +260,7 @@ module Ci
 
     private
 
-    def pending_state?
+    def has_pending_state?
       build.pending_state.present?
     end
 

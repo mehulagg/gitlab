@@ -605,6 +605,14 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
                 .to raise_error(described_class::FailedToPersistDataError,
                                 /Modifed build trace chunk detected/)
             end
+
+            it 'does nothing in case of build being complete' do
+              expect(build_trace_chunk).not_to receive(:data)
+
+              Ci::Build.find(build.id).success!
+
+              build_trace_chunk.persist_data!
+            end
           end
         end
       end
