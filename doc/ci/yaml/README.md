@@ -3853,7 +3853,7 @@ deploy-to-production:
   resource_group: production
 ```
 
-In this case, two `deploy-to-production` jobs can never run at the same time. As a result,
+In this case, two `deploy-to-production` jobs in two separate pipelines can never run at the same time. As a result,
 you can ensure that concurrent deployments never happen to the production environment.
 
 There can be multiple `resource_group`s defined per environment. A good use case for this
