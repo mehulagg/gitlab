@@ -1502,7 +1502,7 @@ won't render correctly. For multiple lines, use [blockquotes](#blockquotes)
 instead.
 
 Alert boxes render only on the GitLab documentation site (<https://docs.gitlab.com>).
-Within GitLab itself, they appear as plain Markdown text.
+In the GitLab product help, alert boxes appear as plain Markdown text.
 
 These alert boxes are used in the GitLab documentation. These aren't strict
 guidelines, but for consistency you should try to use these values:
