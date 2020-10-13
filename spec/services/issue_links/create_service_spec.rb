@@ -24,7 +24,7 @@ RSpec.describe IssueLinks::CreateService do
       end
 
       it 'returns error' do
-        is_expected.to eq(message: 'No Issue found for given params', status: :error, http_status: 404)
+        is_expected.to eq(message: 'No matching issue found', status: :error, http_status: 404)
       end
     end
 
@@ -34,7 +34,7 @@ RSpec.describe IssueLinks::CreateService do
       end
 
       it 'returns error' do
-        is_expected.to eq(message: 'No Issue found for given params', status: :error, http_status: 404)
+        is_expected.to eq(message: 'No matching issue found', status: :error, http_status: 404)
       end
 
       it 'no relationship is created' do

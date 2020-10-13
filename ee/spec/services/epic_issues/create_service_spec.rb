@@ -70,7 +70,7 @@ RSpec.describe EpicIssues::CreateService do
 
     shared_examples 'returns an error' do
       it 'returns an error' do
-        expect(subject).to eq(message: 'No Issue found for given params', status: :error, http_status: 404)
+        expect(subject).to eq(message: 'No matching issue found', status: :error, http_status: 404)
       end
 
       it 'no relationship is created' do

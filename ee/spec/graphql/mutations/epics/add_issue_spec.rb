@@ -47,7 +47,7 @@ RSpec.describe Mutations::Epics::AddIssue do
       it 'returns error if issue is not found' do
         issue.update!(project: create(:project))
 
-        expect(subject[:errors]).to eq('No Issue found for given params')
+        expect(subject[:errors]).to eq('No matching issue found')
       end
     end
   end
