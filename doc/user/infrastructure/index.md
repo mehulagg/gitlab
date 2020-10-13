@@ -30,7 +30,7 @@ Note that this template is not stable (`.latest.`), so it could get breaking cha
 
 - Including the latest [GitLab Terraform Image](https://gitlab.com/gitlab-org/terraform-images)
 - Using the [GitLab provided Terraform HTTP backend](#gitlab-managed-terraform-state) as default
-- Creates [4 pipeline stages](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform.latest.gitlab-ci.yml): init, validate, build and deploy. This stages are basically running Terraform commands: `init`, `validate`, `plan`, `plan-json` and `apply`. The latter only on master.
+- Creates [4 pipeline stages](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform.latest.gitlab-ci.yml): init, validate, build and deploy. This [stages are basically running Terraform commands](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform/Base.latest.gitlab-ci.yml): `init`, `validate`, `plan`, `plan-json` and `apply`. The latter only on master.
 
 ## GitLab managed Terraform State
 
