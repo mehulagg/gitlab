@@ -11,19 +11,30 @@ RSpec.describe BuildFinishedWorker do
     context 'when build exists' do
       let!(:build) { create(:ci_build) }
 
-      it 'calculates coverage and calls hooks' do
-        expect(BuildTraceSectionsWorker)
-          .to receive(:new).ordered.and_call_original
-        expect(BuildCoverageWorker)
-          .to receive(:new).ordered.and_call_original
+      it 'calculates coverage and calls hooks', :aggregate_failures do
+        trace_worker = double('trace worker')
+        coverage_worker = double('coverage worker')
+        build_report_result_worker = double('build report result worker')
+        test_cases_worker = double('test cases worker')
 
-        expect_any_instance_of(BuildTraceSectionsWorker).to receive(:perform)
-        expect_any_instance_of(BuildCoverageWorker).to receive(:perform)
+        allow(BuildTraceSectionsWorker).to receive(:new).and_return(trace_worker)
+        allow(BuildCoverageWorker).to receive(:new).and_return(coverage_worker)
+        allow(Ci::BuildReportResultWorker).to receive(:new).and_return(build_report_result_worker)
+        allow(Ci::TestCasesWorker).to receive(:new).and_return(test_cases_worker)
+
+        # Unfortunately, `ordered` does not seem to work when called within `allow_next_instance_of`
+        # so we're doing this the long and dirty way
+        expect(trace_worker).to receive(:perform).ordered
+        expect(coverage_worker).to receive(:perform).ordered
+        expect(build_report_result_worker).to receive(:perform).ordered
+        expect(test_cases_worker).to receive(:perform).ordered
+
         expect(BuildHooksWorker).to receive(:perform_async)
         expect(ArchiveTraceWorker).to receive(:perform_async)
         expect(ExpirePipelineCacheWorker).to receive(:perform_async)
         expect(ChatNotificationWorker).not_to receive(:perform_async)
-        expect(Ci::BuildReportResultWorker).not_to receive(:perform)
+        expect(Ci::BuildReportResultWorker).not_to receive(:perform_async)
+        expect(Ci::TestCasesWorker).not_to receive(:perform_async)
 
         subject
       end
@@ -41,18 +52,6 @@ RSpec.describe BuildFinishedWorker do
 
       it 'schedules a ChatNotification job' do
         expect(ChatNotificationWorker).to receive(:perform_async).with(build.id)
-
-        subject
-      end
-    end
-
-    context 'when build has a test report' do
-      let(:build) { create(:ci_build, :test_reports) }
-
-      it 'schedules a BuildReportResult job' do
-        expect_next_instance_of(Ci::BuildReportResultWorker) do |worker|
-          expect(worker).to receive(:perform).with(build.id)
-        end
 
         subject
       end
