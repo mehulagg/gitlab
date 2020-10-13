@@ -95,9 +95,7 @@ export default {
       return this.glFeatures.additionalRepoStorageByNamespace;
     },
     shouldShowStorageInlineAlert() {
-      return (
-        this.isAdditionalStorageFlagEnabled && this.namespace.containsLockedProjects !== undefined
-      );
+      return this.isAdditionalStorageFlagEnabled && !this.$apollo.loading;
     },
   },
   methods: {
