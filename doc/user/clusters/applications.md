@@ -129,8 +129,8 @@ chart is used to install this application, using
 [a preconfigured `values.yaml`](https://gitlab.com/gitlab-org/charts/gitlab-runner/-/blob/master/values.yaml)
 file. Customizing the installation by modifying this file is not supported. This
 also means you cannot modify `config.toml` file for this Runner. If you want to
-have that possibility and still deploy Runner in k8s, consider utilizing
-[Cluster management project (alpha)](management_project.md) or install Runner manually
+have that possibility and still deploy Runner in Kubernetes, consider using the
+[Cluster management project](management_project.md) or installing Runner manually
 via [GitLab Runner Helm Chart](https://docs.gitlab.com/runner/install/kubernetes.html).
 
 ### Ingress
