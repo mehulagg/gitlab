@@ -6,6 +6,8 @@ import { descriptionProps } from '../../mock_data';
 import DescriptionComponent from '~/issue_show/components/description.vue';
 import HighlightBar from '~/issue_show/components/incidents/highlight_bar.vue';
 import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
+import Tracking from '~/tracking';
+import { trackIncidentsDetailsViewsOptions } from '~/incidents/constants';
 
 const mockAlert = {
   __typename: 'AlertManagementAlert',
@@ -96,6 +98,18 @@ describe('Incident Tabs component', () => {
 
     it('passes all props to the description component', () => {
       expect(findDescriptionComponent().props()).toMatchObject(descriptionProps);
+    });
+  });
+
+  describe('Snowplow tracking', () => {
+    beforeEach(() => {
+      jest.spyOn(Tracking, 'event');
+      mountComponent();
+    });
+
+    it('should track incident details views', () => {
+      const { category, action } = trackIncidentsDetailsViewsOptions;
+      expect(Tracking.event).toHaveBeenCalledWith(category, action);
     });
   });
 });

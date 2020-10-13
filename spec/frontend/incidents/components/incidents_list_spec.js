@@ -22,9 +22,11 @@ import {
   TH_CREATED_AT_TEST_ID,
   TH_SEVERITY_TEST_ID,
   TH_PUBLISHED_TEST_ID,
+  trackIncidentsListViewsOptions,
 } from '~/incidents/constants';
 import mockIncidents from '../mocks/incidents.json';
 import mockFilters from '../mocks/incidents_filter.json';
+import Tracking from '~/tracking';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn().mockName('visitUrlMock'),
@@ -62,7 +64,7 @@ describe('Incidents List', () => {
   const findEmptyState = () => wrapper.find(GlEmptyState);
   const findSeverity = () => wrapper.findAll(SeverityToken);
 
-  function mountComponent({ data = { incidents: [], incidentsCount: {} }, loading = false }) {
+  function mountComponent({ data = { incidents: [], incidentsCount: {} }, loading = false } = {}) {
     wrapper = mount(IncidentsList, {
       data() {
         return data;
@@ -455,6 +457,18 @@ describe('Incidents List', () => {
       columnHeader().trigger('click');
       await wrapper.vm.$nextTick();
       expect(columnHeader().attributes('aria-sort')).toBe(nextSort);
+    });
+  });
+
+  describe('Snowplow tracking', () => {
+    beforeEach(() => {
+      jest.spyOn(Tracking, 'event');
+      mountComponent();
+    });
+
+    it('should track incident list views', () => {
+      const { category, action } = trackIncidentsListViewsOptions;
+      expect(Tracking.event).toHaveBeenCalledWith(category, action);
     });
   });
 });

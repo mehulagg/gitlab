@@ -1,3 +1,4 @@
+/* eslint-disable @gitlab/require-i18n-strings */
 import { s__, __ } from '~/locale';
 
 export const I18N = {
@@ -39,3 +40,19 @@ export const TH_CREATED_AT_TEST_ID = { 'data-testid': 'incident-management-creat
 export const TH_SEVERITY_TEST_ID = { 'data-testid': 'incident-management-severity-sort' };
 export const TH_PUBLISHED_TEST_ID = { 'data-testid': 'incident-management-published-sort' };
 export const INCIDENT_DETAILS_PATH = 'incident';
+
+/**
+ * Tracks snowplow event when user views error list
+ */
+export const trackIncidentsListViewsOptions = {
+  category: 'Incident Management',
+  action: 'view_incidents_list',
+};
+
+/**
+ * Tracks snowplow event when user views error details
+ */
+export const trackIncidentsDetailsViewsOptions = {
+  category: 'Incident Management',
+  action: 'view_incident_details',
+};

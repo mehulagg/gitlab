@@ -41,7 +41,9 @@ import {
   TH_SEVERITY_TEST_ID,
   TH_PUBLISHED_TEST_ID,
   INCIDENT_DETAILS_PATH,
+  trackIncidentsListViewsOptions,
 } from '../constants';
+import Tracking from '~/tracking';
 
 const tdClass =
   'table-col gl-display-flex d-md-table-cell gl-align-items-center gl-white-space-nowrap';
@@ -322,6 +324,9 @@ export default {
       return value;
     },
   },
+  mounted() {
+    this.trackPageViews();
+  },
   methods: {
     filterIncidentsByStatus(tabIndex) {
       this.resetPagination();
@@ -424,6 +429,10 @@ export default {
         title: document.title,
         replace: true,
       });
+    },
+    trackPageViews() {
+      const { category, action } = trackIncidentsListViewsOptions;
+      Tracking.event(category, action);
     },
   },
 };
