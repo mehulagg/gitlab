@@ -37,19 +37,18 @@ module Mutations
         project = authorized_find_project!(full_path: full_path)
         raise Gitlab::Graphql::Errors::ResourceNotAvailable, 'Feature disabled' unless allowed?(project)
 
-        dast_site_validation = DastSiteValidation.new(
-          dast_site_token: dast_site_token_id.find,
-          url_path: validation_path,
-          validation_strategy: strategy
-        )
+        response = ::DastSiteValidations::CreateService.new(
+          container: project,
+          params: {
+            dast_site_token: dast_site_token_id.find,
+            url_path: validation_path,
+            validation_strategy: strategy
+          }
+        ).execute
 
-        if dast_site_validation.save
-          DastSiteValidationWorker.perform_async(dast_site_validation.id)
+        return error_response(response.errors) if response.error?
 
-          success_response(dast_site_validation)
-        else
-          error_response(dast_site_validation)
-        end
+        success_response(response.payload)
       end
 
       private
@@ -58,14 +57,14 @@ module Mutations
         Feature.enabled?(:security_on_demand_scans_site_validation, project)
       end
 
+      def error_response(errors)
+        { errors: errors }
+      end
+
       def success_response(dast_site_validation)
         status = "#{dast_site_validation.state}_VALIDATION".upcase
 
         { errors: [], id: dast_site_validation.to_global_id, status: status }
-      end
-
-      def error_response(dast_site_validation)
-        { errors: dast_site_validation.errors.full_messages }
       end
     end
   end
