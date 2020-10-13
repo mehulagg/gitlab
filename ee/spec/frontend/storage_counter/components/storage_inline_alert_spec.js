@@ -27,7 +27,7 @@ describe('StorageInlineAlert', () => {
         totalRepositorySizeExcess: 0,
         totalRepositorySize: FIVE_GB_IN_BYTES,
         additionalPurchasedStorageSize: 0,
-        repositoryFreeSizeLimit: TEN_GB_IN_BYTES,
+        actualRepositorySizeLimit: TEN_GB_IN_BYTES,
       });
     });
 
@@ -44,7 +44,7 @@ describe('StorageInlineAlert', () => {
         totalRepositorySizeExcess: THREE_GB_IN_BYTES,
         totalRepositorySize: THIRTEEN_GB_IN_BYTES,
         additionalPurchasedStorageSize: 0,
-        repositoryFreeSizeLimit: TEN_GB_IN_BYTES,
+        actualRepositorySizeLimit: TEN_GB_IN_BYTES,
       });
     });
 
@@ -68,7 +68,7 @@ describe('StorageInlineAlert', () => {
         totalRepositorySizeExcess: THREE_GB_IN_BYTES,
         totalRepositorySize: THIRTEEN_GB_IN_BYTES,
         additionalPurchasedStorageSize: FIVE_GB_IN_BYTES,
-        repositoryFreeSizeLimit: TEN_GB_IN_BYTES,
+        actualRepositorySizeLimit: TEN_GB_IN_BYTES,
       });
     });
 
@@ -92,7 +92,7 @@ describe('StorageInlineAlert', () => {
         totalRepositorySizeExcess: THREE_GB_IN_BYTES,
         totalRepositorySize: THIRTEEN_GB_IN_BYTES,
         additionalPurchasedStorageSize: THREE_GB_IN_BYTES,
-        repositoryFreeSizeLimit: TEN_GB_IN_BYTES,
+        actualRepositorySizeLimit: TEN_GB_IN_BYTES,
       });
     });
 
