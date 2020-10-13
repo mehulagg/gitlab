@@ -242,7 +242,6 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def set_user_state
-    return unless Feature.enabled?(:admin_approval_for_new_user_signups)
     return unless Gitlab::CurrentSettings.require_admin_approval_after_user_signup
 
     resource.state = BLOCKED_PENDING_APPROVAL_STATE
