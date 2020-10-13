@@ -201,9 +201,10 @@ export default {
           :src="project.avatarUrl"
           shape="rect"
         />
-        {{ project.name }}
-        <br />
-        {{ project.fullPath }}
+        <div>
+          <div data-testid="project-name">{{ project.name }}</div>
+          <div class="gl-text-gray-500" data-testid="project-full-path">{{ project.fullPath }}</div>
+        </div>
       </div>
     </gl-dropdown-item>
     <gl-dropdown-item v-show="noResultsAvailable" class="gl-pointer-events-none text-secondary">{{
