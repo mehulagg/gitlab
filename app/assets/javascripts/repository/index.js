@@ -13,6 +13,7 @@ import { setTitle } from './utils/title';
 import { updateFormAction } from './utils/dom';
 import { convertObjectPropsToCamelCase, parseBoolean } from '../lib/utils/common_utils';
 import { __ } from '../locale';
+import { registerStartupCall } from '~/lib/graphql';
 
 export default function setupVueRepositoryList() {
   const el = document.getElementById('js-tree-list');
@@ -48,28 +49,15 @@ export default function setupVueRepositoryList() {
       },
     });
 
-  if (window.gl.startup_graphql_calls) {
-    const query = window.gl.startup_graphql_calls.find(
-      call => call.operationName === 'pathLastCommit',
-    );
-    query.fetchCall
-      .then(res => res.json())
-      .then(res => {
-        apolloProvider.clients.defaultClient.writeQuery({
-          query: PathLastCommitQuery,
-          data: res.data,
-          variables: {
-            projectPath,
-            ref,
-            path: currentRoutePath,
-          },
-        });
-      })
-      .catch(() => {})
-      .finally(() => initLastCommitApp());
-  } else {
-    initLastCommitApp();
-  }
+  registerStartupCall(initLastCommitApp, {
+    apolloProvider,
+    query: PathLastCommitQuery,
+    variables: {
+      projectPath,
+      ref,
+      path: currentRoutePath,
+    },
+  }).catch(() => {});
 
   router.afterEach(({ params: { path } }) => {
     setTitle(path, ref, fullName);

@@ -14,6 +14,29 @@ export const fetchPolicies = {
   CACHE_ONLY: 'cache-only',
 };
 
+export const registerStartupCall = async (initFn, { apolloProvider, query, variables = {} }) => {
+  if (window.gl.startup_graphql_calls) {
+    try {
+      const startup = window.gl.startup_graphql_calls.find(call =>
+        Object.keys(startup).includes(call.operationName),
+      );
+
+      const { json } = await startup.fetchCall;
+      const { data } = await json();
+
+      apolloProvider.clients.defaultClient.writeQuery({
+        query,
+        data,
+        variables,
+      });
+    } catch (e) {
+      // No call found or call just failed
+    }
+  }
+
+  initFn();
+};
+
 export default (resolvers = {}, config = {}) => {
   let uri = `${gon.relative_url_root || ''}/api/graphql`;
 
