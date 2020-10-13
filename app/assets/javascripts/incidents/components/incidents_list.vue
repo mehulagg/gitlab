@@ -22,6 +22,7 @@ import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/auth
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import { s__, __ } from '~/locale';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
+import { formatTime, calculateRemainingMilliseconds } from '~/lib/utils/datetime_utility';
 import {
   visitUrl,
   mergeUrlParams,
@@ -84,10 +85,24 @@ export default {
       thAttr: TH_CREATED_AT_TEST_ID,
     },
     {
+      key: 'incidentSla',
+      label: s__('IncidentManagement|Time to SLA'),
+      thClass: `${thClass} gl-text-center`,
+      tdClass: `${tdClass} sortable-cell gl-text-center`,
+    },
+    {
       key: 'assignees',
       label: s__('IncidentManagement|Assignees'),
       thClass: 'gl-pointer-events-none',
       tdClass,
+    },
+    {
+      key: 'published',
+      label: s__('IncidentManagement|Published'),
+      thClass,
+      tdClass: `${tdClass} sortable-cell`,
+      sortable: true,
+      thAttr: TH_PUBLISHED_TEST_ID,
     },
   ],
   components: {
@@ -123,6 +138,7 @@ export default {
     'textQuery',
     'authorUsernamesQuery',
     'assigneeUsernamesQuery',
+    'incidentSlaAvailable',
   ],
   apollo: {
     incidents: {
@@ -228,21 +244,12 @@ export default {
       );
     },
     availableFields() {
-      return this.publishedAvailable
-        ? [
-            ...this.$options.fields,
-            ...[
-              {
-                key: 'published',
-                label: s__('IncidentManagement|Published'),
-                thClass,
-                tdClass: `${tdClass} sortable-cell`,
-                sortable: true,
-                thAttr: TH_PUBLISHED_TEST_ID,
-              },
-            ],
-          ]
-        : this.$options.fields;
+      const isHidden = {
+        published: !this.publishedAvailable,
+        incidentSla: !this.incidentSlaAvailable,
+      };
+
+      return this.$options.fields.filter(field => !isHidden[field.key]);
     },
     isEmpty() {
       return !this.incidents.list?.length;
@@ -425,6 +432,12 @@ export default {
         replace: true,
       });
     },
+    formatDueAt(slaDueAt) {
+      const time = formatTime(calculateRemainingMilliseconds(slaDueAt));
+
+      // remove the seconds portion of the string
+      return time.substring(0, time.length - 3);
+    },
   },
 };
 </script>
@@ -516,6 +529,12 @@ export default {
 
       <template #cell(createdAt)="{ item }">
         <time-ago-tooltip :time="item.createdAt" />
+      </template>
+
+      <template v-if="incidentSlaAvailable" #cell(incidentSla)="{ item }">
+        <time-ago-tooltip v-if="item.slaDueAt" :time="item.slaDueAt">
+          {{ formatDueAt(item.slaDueAt) }}
+        </time-ago-tooltip>
       </template>
 
       <template #cell(assignees)="{ item }">

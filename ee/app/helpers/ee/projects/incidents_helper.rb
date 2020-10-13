@@ -15,10 +15,9 @@ module EE
       private
 
       def incidents_data_published_available(project)
-        return {} unless project.feature_available?(:status_page)
-
         {
-          'published-available' => 'true'
+          'published-available' => project.feature_available?(:status_page),
+          'incident-sla-available' => (::Feature.enabled?(:incident_sla_dev, @project) && project.feature_available?(:incident_sla)).to_s
         }
       end
     end
