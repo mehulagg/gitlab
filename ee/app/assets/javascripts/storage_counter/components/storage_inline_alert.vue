@@ -30,7 +30,7 @@ export default {
       type: Number,
       required: true,
     },
-    repositoryFreeSizeLimit: {
+    actualRepositorySizeLimit: {
       type: Number,
       required: true,
     },
@@ -93,7 +93,7 @@ export default {
       if (this.thresholdLevel === ERROR_THRESHOLD) {
         return __(
           `You have consumed all of your additional storage, please purchase more to unlock your projects over the free ${this.formatSize(
-            this.repositoryFreeSizeLimit,
+            this.actualRepositorySizeLimit,
           )} limit`,
         );
       } else if (
@@ -106,7 +106,7 @@ export default {
       }
       return __(
         `When you purchase additional storage, we automatically unlock projects that were locked when you reached the ${this.formatSize(
-          this.repositoryFreeSizeLimit,
+          this.actualRepositorySizeLimit,
         )} limit.`,
       );
     },
@@ -114,7 +114,7 @@ export default {
       if (this.thresholdLevel === ERROR_THRESHOLD) {
         return __(
           `You have reached the free storage limit of ${this.formatSize(
-            this.repositoryFreeSizeLimit,
+            this.actualRepositorySizeLimit,
           )} on ${this.projectsLockedText}. To unlock them, please purchase additional storage.`,
         );
       }
