@@ -9,6 +9,7 @@ RSpec.describe Mutations::DastSiteValidations::Create do
   let(:full_path) { project.full_path }
   let(:dast_site_token) { create(:dast_site_token, project: create(:project, group: group)) }
   let(:dast_site_validation) { DastSiteValidation.first! }
+  let(:validation_path) { SecureRandom.hex }
 
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
 
@@ -21,7 +22,7 @@ RSpec.describe Mutations::DastSiteValidations::Create do
       mutation.resolve(
         full_path: full_path,
         dast_site_token_id: dast_site_token.to_global_id,
-        validation_path: '/path/to/the/file.txt',
+        validation_path: validation_path,
         strategy: :text_file
       )
     end

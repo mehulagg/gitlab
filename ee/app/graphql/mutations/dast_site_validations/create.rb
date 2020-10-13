@@ -39,6 +39,7 @@ module Mutations
 
         dast_site_validation = DastSiteValidation.new(
           dast_site_token: dast_site_token_id.find,
+          url_path: validation_path,
           validation_strategy: strategy
         )
 
@@ -60,7 +61,7 @@ module Mutations
       def success_response(dast_site_validation)
         status = "#{dast_site_validation.state}_VALIDATION".upcase
 
-        { errors: [], id: validation.to_global_id, status: status }
+        { errors: [], id: dast_site_validation.to_global_id, status: status }
       end
 
       def error_response(dast_site_validation)
