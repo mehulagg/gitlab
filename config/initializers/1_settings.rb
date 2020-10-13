@@ -761,6 +761,13 @@ Gitlab.ee do
 end
 
 #
+# FortiAuthenticator
+#
+Settings['forti_authenticator'] ||= Settingslogic.new({})
+Settings.forti_authenticator['enabled'] = false if Settings.forti_authenticator['enabled'].nil?
+Settings.forti_authenticator['port'] = 443 if Settings.forti_authenticator['port'].nil?
+
+#
 # Extra customization
 #
 Settings['extra'] ||= Settingslogic.new({})

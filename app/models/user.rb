@@ -776,7 +776,7 @@ class User < ApplicationRecord
   end
 
   def two_factor_otp_enabled?
-    otp_required_for_login?
+    otp_required_for_login? || Feature.enabled?(:forti_authenticator, self)
   end
 
   def two_factor_u2f_enabled?
@@ -1753,6 +1753,15 @@ class User < ApplicationRecord
 
   def created_recently?
     created_at > Devise.confirm_within.ago
+  end
+
+  alias_method :devise_validate_and_consume_otp!, :validate_and_consume_otp!
+
+  # overrides Devise::Models::TwoFactorAuthenticatable#validate_and_consume_otp!
+  def validate_and_consume_otp!(code, options = {})
+    result = ::Users::ValidateOtpService.new(self).execute(code) # rubocop: disable CodeReuse/ServiceClass
+
+    result[:status] == :success
   end
 
   protected
