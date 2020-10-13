@@ -4,13 +4,13 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import draftCommentsMixin from '~/diffs/mixins/draft_comments';
 import DraftNote from '~/batch_comments/components/draft_note.vue';
 import inlineDiffTableRow from './inline_diff_table_row.vue';
-import inlineDiffCommentRow from './inline_diff_comment_row.vue';
+import DiffCommentCell from './diff_comment_cell.vue';
 import DiffExpansionCell from './diff_expansion_cell.vue';
 import { getCommentedLines } from '~/notes/components/multiline_comment_utils';
 
 export default {
   components: {
-    inlineDiffCommentRow,
+    DiffCommentCell,
     inlineDiffTableRow,
     DraftNote,
     DiffExpansionCell,
@@ -84,18 +84,22 @@ export default {
           :is-bottom="index + 1 === diffLinesLength"
           :is-commented="index >= commentedLines.startLine && index <= commentedLines.endLine"
         />
-        <inline-diff-comment-row
-          :key="`icr-${line.line_code || index}`"
-          :diff-file-hash="diffFile.file_hash"
-          :line="line"
-          :help-page-path="helpPagePath"
-          :has-draft="shouldRenderDraftRow(diffFile.file_hash, line) || false"
-        />
         <tr
-          v-if="shouldRenderDraftRow(diffFile.file_hash, line)"
-          :key="`draft_${index}`"
-          class="notes_holder js-temp-notes-holder"
+          v-if="line.renderCommentRow"
+          :key="`icr-${line.line_code || index}`"
+          :class="line.commentRowClasses"
+          class="notes_holder"
         >
+          <td class="notes-content" colspan="4">
+            <diff-comment-cell
+              :diff-file-hash="diffFile.file_hash"
+              :line="line"
+              :help-page-path="helpPagePath"
+              :has-draft="line.hasDraft"
+            />
+          </td>
+        </tr>
+        <tr v-if="line.hasDraft" :key="`draft_${index}`" class="notes_holder js-temp-notes-holder">
           <td class="notes-content" colspan="4">
             <div class="content">
               <draft-note

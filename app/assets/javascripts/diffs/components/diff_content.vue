@@ -18,6 +18,7 @@ import eventHub from '../../notes/event_hub';
 import { IMAGE_DIFF_POSITION_TYPE, MATCH_LINE_TYPE } from '../constants';
 import { getDiffMode } from '../store/utils';
 import { diffViewerModes } from '~/ide/constants';
+import { hasDiscussions } from './diff_row_utils';
 
 export default {
   components: {
@@ -85,23 +86,74 @@ export default {
     },
     mappedLines() {
       const mapParallel = line => {
-        const leftDraft = this.draftForLine(this.diffFile.file_hash, line, 'left');
-        const rightDraft = this.draftForLine(this.diffFile.file_hash, line, 'right');
+        let { left, right } = line;
+
+        // Dicussions/Comments
+        const hasExpandedDiscussionOnLeft =
+          left?.discussions?.length > 0 ? left?.discussionsExpanded : false;
+        const hasExpandedDiscussionOnRight =
+          right?.discussions?.length > 0 ? right?.discussionsExpanded : false;
+
+        const shouldRenderCommentRow = () => {
+          const hasDiscussion = left?.discussions?.length > 0 || right?.discussions?.length > 0;
+          if (hasDiscussion && (hasExpandedDiscussionOnLeft || hasExpandedDiscussionOnRight)) {
+            return true;
+          }
+
+          return left?.hasForm || right?.hasForm;
+        };
+
+        if (left) {
+          left = {
+            ...left,
+            renderDiscussion: hasExpandedDiscussionOnLeft,
+            hasDraft: this.hasParallelDraftLeft(this.diffFile.file_hash, line),
+            lineDraft: this.draftForLine(this.diffFile.file_hash, line, 'left'),
+            hasCommentForm: left.hasForm,
+          };
+        }
+        if (right) {
+          right = {
+            ...right,
+            renderDiscussion: hasExpandedDiscussionOnRight && right.type,
+            hasDraft: this.hasParallelDraftRight(this.diffFile.file_hash, line),
+            lineDraft: this.draftForLine(this.diffFile.file_hash, line, 'right'),
+            hasCommentForm: Boolean(right.hasForm && right.type),
+          };
+        }
 
         return {
           ...line,
-          isMatchLineLeft: line.left?.type === MATCH_LINE_TYPE,
-          isMatchLineRight: line.right?.type === MATCH_LINE_TYPE,
-          draftRowClasses: leftDraft > 0 || rightDraft > 0 ? '' : 'js-temp-notes-holder',
-          leftDraft,
-          rightDraft,
+          left,
+          right,
+          isMatchLineLeft: left?.type === MATCH_LINE_TYPE,
+          isMatchLineRight: right?.type === MATCH_LINE_TYPE,
+          draftRowClasses:
+            left?.lineDraft > 0 || right?.lineDraft > 0 ? '' : 'js-temp-notes-holder',
+          renderCommentRow: shouldRenderCommentRow(),
+          commentRowClasses: hasDiscussions ? '' : 'js-temp-notes-holder',
         };
       };
 
       const mapInline = line => {
+        // Discussions/Comments
+        const shouldRenderCommentRow = () => {
+          if (line.hasForm) return true;
+
+          if (!line.discussions || !line.discussions.length) {
+            return false;
+          }
+          return line.discussionsExpanded;
+        };
+
         return {
           ...line,
+          renderDiscussion: line.discussions.length,
           isMatchLine: line.type === MATCH_LINE_TYPE,
+          commentRowClasses: line.discussions.length ? '' : 'js-temp-notes-holder',
+          renderCommentRow: shouldRenderCommentRow(),
+          hasDraft: this.shouldRenderDraftRow(this.diffFile.file_hash, line),
+          hasCommentForm: line.hasForm,
         };
       };
 

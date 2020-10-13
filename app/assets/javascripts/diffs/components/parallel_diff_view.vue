@@ -3,7 +3,7 @@ import { mapGetters, mapState } from 'vuex';
 import draftCommentsMixin from '~/diffs/mixins/draft_comments';
 import DraftNote from '~/batch_comments/components/draft_note.vue';
 import parallelDiffTableRow from './parallel_diff_table_row.vue';
-import parallelDiffCommentRow from './parallel_diff_comment_row.vue';
+import DiffCommentCell from './diff_comment_cell.vue';
 import DiffExpansionCell from './diff_expansion_cell.vue';
 import { getCommentedLines } from '~/notes/components/multiline_comment_utils';
 
@@ -11,7 +11,7 @@ export default {
   components: {
     DiffExpansionCell,
     parallelDiffTableRow,
-    parallelDiffCommentRow,
+    DiffCommentCell,
     DraftNote,
   },
   mixins: [draftCommentsMixin],
@@ -89,15 +89,34 @@ export default {
           :is-bottom="index + 1 === diffLinesLength"
           :is-commented="index >= commentedLines.startLine && index <= commentedLines.endLine"
         />
-        <parallel-diff-comment-row
+        <tr
+          v-if="line.renderCommentRow"
           :key="`dcr-${line.line_code || index}`"
-          :line="line"
-          :diff-file-hash="diffFile.file_hash"
-          :line-index="index"
-          :help-page-path="helpPagePath"
-          :has-draft-left="hasParallelDraftLeft(diffFile.file_hash, line) || false"
-          :has-draft-right="hasParallelDraftRight(diffFile.file_hash, line) || false"
-        />
+          :class="line.commentRowClasses"
+          class="notes_holder"
+        >
+          <td class="notes-content parallel old" colspan="3">
+            <diff-comment-cell
+              v-if="line.left"
+              :line="line.left"
+              :diff-file-hash="diffFile.file_hash"
+              :help-page-path="helpPagePath"
+              :has-draft="line.left.hasDraft"
+              line-position="left"
+            />
+          </td>
+          <td class="notes-content parallel new" colspan="3">
+            <diff-comment-cell
+              v-if="line.right"
+              :line="line.right"
+              :diff-file-hash="diffFile.file_hash"
+              :line-index="index"
+              :help-page-path="helpPagePath"
+              :has-draft="line.right.hasDraft"
+              line-position="right"
+            />
+          </td>
+        </tr>
         <tr
           v-if="shouldRenderParallelDraftRow(diffFile.file_hash, line)"
           :key="`drafts-${index}`"
@@ -106,14 +125,14 @@ export default {
         >
           <td class="notes_line old"></td>
           <td class="notes-content parallel old" colspan="2">
-            <div v-if="line.leftDraft.isDraft" class="content">
-              <draft-note :draft="line.leftDraft" :line="line.left" />
+            <div v-if="line.left && line.left.lineDraft.isDraft" class="content">
+              <draft-note :draft="line.left.lineDraft" :line="line.left" />
             </div>
           </td>
           <td class="notes_line new"></td>
           <td class="notes-content parallel new" colspan="2">
-            <div v-if="line.rightDraft.isDraft" class="content">
-              <draft-note :draft="line.rightDraft" :line="line.right" />
+            <div v-if="line.right && line.right.lineDraft.isDraft" class="content">
+              <draft-note :draft="line.right.lineDraft" :line="line.right" />
             </div>
           </td>
         </tr>
