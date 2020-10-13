@@ -3766,7 +3766,7 @@ trigger_job:
 
 This setting can help keep your pipeline execution linear. In the example above, jobs from
 subsequent stages wait for the triggered pipeline to successfully complete before
-starting. This occurs at the cost of reduced parallelization.
+starting, which reduces parallelization.
 
 #### Trigger a pipeline by API call
 
