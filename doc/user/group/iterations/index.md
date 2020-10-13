@@ -68,7 +68,7 @@ To learn how to add an issue to an iteration, see the steps in
 
 > Viewing iteration reports in projects [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/222763) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.5.
 
-To view an iteration report, go to the iterations list page and click on an iteration title.
+To view an iteration report, go to the iterations list page and click an iteration's title.
 
 ## Disable Iterations **(CORE ONLY)**
 
