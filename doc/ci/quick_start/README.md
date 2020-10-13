@@ -117,6 +117,10 @@ What is important is that each job is run independently from each other.
 If you want to check whether the `.gitlab-ci.yml` of your project is valid, there is a
 [CI Lint tool](../lint.md) available in every project.
 
+You can also use the [CI Config Visualization](../config_visualization.md) feature to 
+preview your `.gitlab-ci.yml` structure by clicking on the Visualization tab 
+while on your config file in the repository.
+
 For more information and a complete `.gitlab-ci.yml` syntax, please read
 [the reference documentation on `.gitlab-ci.yml`](../yaml/README.md).
 
