@@ -33,7 +33,7 @@ export default {
       failureType: null,
       highlightedJob: null,
       links: [],
-      needsObject: {},
+      needsObject: null,
       height: 0,
       width: 0,
     };
@@ -55,9 +55,6 @@ export default {
     },
     viewBox() {
       return [0, 0, this.width, this.height];
-    },
-    lineStyle() {
-      return `stroke-width:${this.$options.STROKE_WIDTH}px;`;
     },
     highlightedJobs() {
       // If you are hovering on a job, then the jobs we want to highlight are:
@@ -86,7 +83,6 @@ export default {
     if (!this.isPipelineDataEmpty) {
       this.getGraphDimensions();
       this.drawJobLinks();
-      this.needsObject = generateJobNeedsDict(this.pipelineData);
     }
   },
   methods: {
@@ -102,6 +98,12 @@ export default {
       }
     },
     highlightNeeds(uniqueJobId) {
+      // The first time we hover, we create the object where
+      // we store all the data to properly highlight the needs.
+      if (!this.needsObject) {
+        this.needsObject = generateJobNeedsDict(this.pipelineData) ?? {};
+      }
+
       this.highlightedJob = uniqueJobId;
     },
     removeHighlightNeeds() {
@@ -164,7 +166,7 @@ export default {
             :d="link.path"
             class="gl-fill-transparent gl-transition-duration-slow gl-transition-timing-function-ease"
             :class="getLinkClasses(link)"
-            :style="lineStyle"
+            :stroke-width="$options.STROKE_WIDTH"
           />
         </template>
       </svg>
@@ -190,7 +192,7 @@ export default {
             :key="group.name"
             :job-id="group.id"
             :job-name="group.name"
-            :is-highlighted="isJobHighlighted(group.id)"
+            :is-highlighted="hasHighlightedJob && isJobHighlighted(group.id)"
             :is-faded-out="hasHighlightedJob && !isJobHighlighted(group.id)"
             @on-mouse-enter="highlightNeeds"
             @on-mouse-leave="removeHighlightNeeds"
