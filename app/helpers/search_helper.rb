@@ -198,9 +198,9 @@ module SearchHelper
 
     [
       {
-        category: "In this project",
+        category: 'In this project',
         id: issue.id,
-        label: search_result_sanitize(issue.title),
+        label: search_result_sanitize("#{issue.iid} #{issue.title}"),
         url: issue_path(issue),
         avatar_url: issue.project.avatar_url || ''
       }
