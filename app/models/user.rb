@@ -1755,15 +1755,6 @@ class User < ApplicationRecord
     created_at > Devise.confirm_within.ago
   end
 
-  alias_method :devise_validate_and_consume_otp!, :validate_and_consume_otp!
-
-  # overrides Devise::Models::TwoFactorAuthenticatable#validate_and_consume_otp!
-  def validate_and_consume_otp!(code, options = {})
-    result = ::Users::ValidateOtpService.new(self).execute(code) # rubocop: disable CodeReuse/ServiceClass
-
-    result[:status] == :success
-  end
-
   protected
 
   # override, from Devise::Validatable
