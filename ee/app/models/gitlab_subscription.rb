@@ -93,7 +93,7 @@ class GitlabSubscription < ApplicationRecord
   # We need to show seats in use for free or trial subscriptions
   # in order to make it easy for customers to get this information.
   def seats_in_use
-    return super if has_a_paid_hosted_plan?
+    return super if has_a_paid_hosted_plan? || !hosted?
 
     calculate_seats_in_use
   end
