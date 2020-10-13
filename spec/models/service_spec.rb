@@ -481,11 +481,19 @@ RSpec.describe Service do
             expect(described_class.default_integration('JiraService', subgroup)).to eq(group_service)
           end
 
-          context 'having a service' do
+          context 'having a service with custom settings' do
             let!(:subgroup_service) { create(:jira_service, group_id: subgroup.id, project_id: nil) }
 
             it 'returns the closest group service for a project' do
               expect(described_class.default_integration('JiraService', project)).to eq(subgroup_service)
+            end
+          end
+
+          context 'having a service inheriting settings' do
+            let!(:subgroup_service) { create(:jira_service, group_id: subgroup.id, project_id: nil, inherit_from_id: group_service.id) }
+
+            it 'returns the closest group service which does not inherit from its parent for a project' do
+              expect(described_class.default_integration('JiraService', project)).to eq(group_service)
             end
           end
         end
