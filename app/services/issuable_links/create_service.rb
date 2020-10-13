@@ -111,7 +111,7 @@ module IssuableLinks
     end
 
     def issuables_not_found_message
-      'No Issue found for given params'
+      'No matching issue found'
     end
   end
 end
