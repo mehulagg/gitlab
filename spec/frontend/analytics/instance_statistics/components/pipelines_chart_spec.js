@@ -14,6 +14,9 @@ import {
   countsMonthlyChartData2,
 } from '../mock_data';
 
+const reversedChartData1 = [...countsMonthlyChartData1].reverse();
+const reversedChartData2 = [...countsMonthlyChartData2].reverse();
+
 const localVue = createLocalVue();
 localVue.use(VueApollo);
 
@@ -136,11 +139,11 @@ describe('PipelinesChart', () => {
 
     it('passes the data to the line chart', () => {
       expect(findChart().props('data')).toEqual([
-        { data: countsMonthlyChartData1, name: 'Total' },
-        { data: countsMonthlyChartData2, name: 'Succeeded' },
-        { data: countsMonthlyChartData2, name: 'Failed' },
-        { data: countsMonthlyChartData1, name: 'Canceled' },
-        { data: countsMonthlyChartData1, name: 'Skipped' },
+        { data: reversedChartData1, name: 'Total' },
+        { data: reversedChartData2, name: 'Succeeded' },
+        { data: reversedChartData2, name: 'Failed' },
+        { data: reversedChartData1, name: 'Canceled' },
+        { data: reversedChartData1, name: 'Skipped' },
       ]);
     });
 
@@ -199,14 +202,16 @@ describe('PipelinesChart', () => {
       });
 
       it('passes the data to the line chart', async () => {
-        const [[data1Date], ...remainingChartData1] = countsMonthlyChartData1;
-        const [[data2Date], ...remainingChartData2] = countsMonthlyChartData2;
+        const data1Date = reversedChartData1[reversedChartData1.length - 1][0];
+        const data2Date = reversedChartData2[reversedChartData2.length - 1][0];
+        const remainingChartData1 = reversedChartData1.slice(0, -1);
+        const remainingChartData2 = reversedChartData2.slice(0, -1);
         expect(findChart().props('data')).toEqual([
-          { data: [[data1Date, 8], ...remainingChartData2], name: 'Total' },
-          { data: [[data2Date, 8], ...remainingChartData2], name: 'Succeeded' },
-          { data: [[data2Date, 32], ...remainingChartData1], name: 'Failed' },
-          { data: [[data2Date, 8], ...remainingChartData2], name: 'Canceled' },
-          { data: [[data2Date, 8], ...remainingChartData2], name: 'Skipped' },
+          { data: [...remainingChartData2, [data2Date, 8]], name: 'Total' },
+          { data: [...remainingChartData2, [data2Date, 8]], name: 'Succeeded' },
+          { data: [...remainingChartData1, [data1Date, 32]], name: 'Failed' },
+          { data: [...remainingChartData2, [data2Date, 8]], name: 'Canceled' },
+          { data: [...remainingChartData2, [data2Date, 8]], name: 'Skipped' },
         ]);
       });
     });

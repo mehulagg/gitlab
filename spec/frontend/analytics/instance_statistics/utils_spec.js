@@ -1,4 +1,4 @@
-import { getAverageByMonth } from '~/analytics/instance_statistics/utils';
+import { getAverageByMonth, sortByDate } from '~/analytics/instance_statistics/utils';
 import {
   mockCountsData1,
   mockCountsData2,
@@ -26,5 +26,18 @@ describe('getAverageByMonth', () => {
     expect(() => {
       getAverageByMonth(null);
     }).toThrow();
+  });
+});
+
+describe('sortByDate', () => {
+  it('sorts the array by date', () => {
+    expect(sortByDate(countsMonthlyChartData1)).toStrictEqual([
+      countsMonthlyChartData1[1],
+      countsMonthlyChartData1[0],
+    ]);
+  });
+
+  it('does not modify the original array', () => {
+    expect(sortByDate(countsMonthlyChartData1) === countsMonthlyChartData1).toBe(false);
   });
 });

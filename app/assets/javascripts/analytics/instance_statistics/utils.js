@@ -1,3 +1,4 @@
+import { sortBy } from 'lodash';
 import { formatDate } from '~/lib/utils/datetime_utility';
 
 /**
@@ -26,4 +27,14 @@ export function getAverageByMonth(items = []) {
     const { sum, recordCount } = itemsMap[month];
     return [month, sum / recordCount];
   });
+}
+
+/**
+ * Creates a new array of items sorted by the date string of each item
+ * @param  {Array} items [description]
+ * @param  {String} items[0] date string
+ * @return {Array} the new sorted array.
+ */
+export function sortByDate(items = []) {
+  return sortBy(items, item => new Date(item[0]).getTime());
 }

@@ -5,7 +5,7 @@ import createFlash from '~/flash';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { __ } from '~/locale';
 import { formatDateAsMonth } from '~/lib/utils/datetime_utility';
-import { getAverageByMonth } from '../utils';
+import { getAverageByMonth, sortByDate } from '../utils';
 import pipelineStatsQuery from '../graphql/queries/pipeline_stats.query.graphql';
 
 export default {
@@ -30,12 +30,6 @@ export default {
   },
   data() {
     return {
-      pipelinesTotal: [],
-      pipelinesSucceeded: [],
-      pipelinesFailed: [],
-      pipelinesCanceled: [],
-      pipelinesSkipped: [],
-      pageInfo: null,
       loading: true,
     };
   },
@@ -45,35 +39,32 @@ export default {
       variables() {
         return {
           first: this.totalDataPoints,
-          after: null,
         };
       },
-      update: data => data,
-      result({ data }) {
+      update(data) {
         const {
-          pipelinesTotal: { pageInfo: pageInfoTotal = {}, nodes: pipelinesTotal } = {},
-          pipelinesSucceeded: { pageInfo: pageInfoSucceeded = {}, nodes: pipelinesSucceeded } = {},
-          pipelinesFailed: { pageInfo: pageInfoFailed = {}, nodes: pipelinesFailed } = {},
-          pipelinesCanceled: { pageInfo: pageInfoCanceled = {}, nodes: pipelinesCanceled } = {},
-          pipelinesSkipped: { pageInfo: pageInfoSkipped = {}, nodes: pipelinesSkipped } = {},
+          pipelinesTotal: { pageInfo: pageInfoTotal = {}, nodes: dataTotal = [] } = {},
+          pipelinesSucceeded: { pageInfo: pageInfoSucceeded = {}, nodes: dataSucceeded = [] } = {},
+          pipelinesFailed: { pageInfo: pageInfoFailed = {}, nodes: dataFailed = [] } = {},
+          pipelinesCanceled: { pageInfo: pageInfoCanceled = {}, nodes: dataCanceled = [] } = {},
+          pipelinesSkipped: { pageInfo: pageInfoSkipped = {}, nodes: dataSkipped = [] } = {},
         } = data;
-        this.pipelinesTotal = getAverageByMonth(pipelinesTotal);
-        this.pipelinesSucceeded = getAverageByMonth(pipelinesSucceeded);
-        this.pipelinesFailed = getAverageByMonth(pipelinesFailed);
-        this.pipelinesCanceled = getAverageByMonth(pipelinesCanceled);
-        this.pipelinesSkipped = getAverageByMonth(pipelinesSkipped);
-        this.pageInfoTotal = pageInfoTotal;
-        this.pageInfoSucceeded = pageInfoSucceeded;
-        this.pageInfoFailed = pageInfoFailed;
-        this.pageInfoCanceled = pageInfoCanceled;
-        this.pageInfoSkipped = pageInfoSkipped;
-        if (
-          pageInfoTotal.hasNextPage ||
-          pageInfoSucceeded.hasNextPage ||
-          pageInfoFailed.hasNextPage ||
-          pageInfoCanceled.hasNextPage ||
-          pageInfoSkipped.hasNextPage
-        ) {
+
+        return {
+          dataTotal,
+          dataSucceeded,
+          dataFailed,
+          dataCanceled,
+          dataSkipped,
+          pageInfoTotal,
+          pageInfoSucceeded,
+          pageInfoFailed,
+          pageInfoCanceled,
+          pageInfoSkipped,
+        };
+      },
+      result() {
+        if (this.hasNextPage) {
           this.fetchNextPage();
         } else {
           this.loading = false;
@@ -88,33 +79,79 @@ export default {
     loadPipelineChartError: __(
       'Could not load the pipelines chart. Please refresh the page to try again.',
     ),
+    total: __('Total'),
+    succeeded: __('Succeeded'),
+    failed: __('Failed'),
+    canceled: __('Canceled'),
+    skipped: __('Skipped'),
+    yAxisTitle: __('Items'),
+    xAxisTitle: __('Month'),
   },
   computed: {
     isLoading() {
       // Don't show the chart until all data is fetched
       return this.loading || this.$apollo.queries.pipelineStats.loading;
     },
+    cursorVariables() {
+      const {
+        pageInfoTotal,
+        pageInfoSucceeded,
+        pageInfoFailed,
+        pageInfoCanceled,
+        pageInfoSkipped,
+      } = this.pipelineStats;
+      return {
+        afterTotal: pageInfoTotal.endCursor,
+        afterSucceeded: pageInfoSucceeded.endCursor,
+        afterFailed: pageInfoFailed.endCursor,
+        afterCanceled: pageInfoCanceled.endCursor,
+        afterSkipped: pageInfoSkipped.endCursor,
+      };
+    },
+    hasNextPage() {
+      const {
+        pageInfoTotal,
+        pageInfoSucceeded,
+        pageInfoFailed,
+        pageInfoCanceled,
+        pageInfoSkipped,
+      } = this.pipelineStats;
+      return (
+        pageInfoTotal.hasNextPage ||
+        pageInfoSucceeded.hasNextPage ||
+        pageInfoFailed.hasNextPage ||
+        pageInfoCanceled.hasNextPage ||
+        pageInfoSkipped.hasNextPage
+      );
+    },
     chartData() {
+      const {
+        dataTotal,
+        dataSucceeded,
+        dataFailed,
+        dataCanceled,
+        dataSkipped,
+      } = this.pipelineStats;
       return [
         {
-          name: __('Total'),
-          data: this.pipelinesTotal,
+          name: this.$options.i18n.total,
+          data: sortByDate(getAverageByMonth(dataTotal)),
         },
         {
-          name: __('Succeeded'),
-          data: this.pipelinesSucceeded,
+          name: this.$options.i18n.succeeded,
+          data: sortByDate(getAverageByMonth(dataSucceeded)),
         },
         {
-          name: __('Failed'),
-          data: this.pipelinesFailed,
+          name: this.$options.i18n.failed,
+          data: sortByDate(getAverageByMonth(dataFailed)),
         },
         {
-          name: __('Canceled'),
-          data: this.pipelinesCanceled,
+          name: this.$options.i18n.canceled,
+          data: sortByDate(getAverageByMonth(dataCanceled)),
         },
         {
-          name: __('Skipped'),
-          data: this.pipelinesSkipped,
+          name: this.$options.i18n.skipped,
+          data: sortByDate(getAverageByMonth(dataSkipped)),
         },
       ];
     },
@@ -128,7 +165,7 @@ export default {
       return {
         xAxis: {
           ...this.range,
-          name: __('Month'),
+          name: this.$options.i18n.xAxisTitle,
           type: 'time',
           splitNumber: 12,
           axisLabel: {
@@ -140,7 +177,7 @@ export default {
           },
         },
         yAxis: {
-          name: __('Items'),
+          name: this.$options.i18n.yAxisTitle,
         },
       };
     },
@@ -159,11 +196,7 @@ export default {
         .fetchMore({
           variables: {
             first: this.totalDataPoints,
-            afterTotal: this.pageInfoTotal.endCursor,
-            afterSucceeded: this.pageInfoSucceeded.endCursor,
-            afterFailed: this.pageInfoFailed.endCursor,
-            afterCanceled: this.pageInfoCanceled.endCursor,
-            afterSkipped: this.pageInfoSkipped.endCursor,
+            ...this.cursorVariables,
           },
           updateQuery: (previousResult, { fetchMoreResult }) => {
             const {
