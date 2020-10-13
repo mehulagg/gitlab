@@ -11,7 +11,7 @@
 
   .milestone-buttons
     - if can?(current_user, :admin_milestone, @group || @project)
-      = link_to _('Edit'), edit_milestone_path(milestone), class: 'btn btn-grouped'
+      = link_to _('Edit'), edit_milestone_path(milestone), class: 'gl-button btn btn-grouped'
 
       - if milestone.project_milestone? && milestone.project.group
         %button.js-promote-project-milestone-button.btn.btn-grouped{ data: { toggle: 'modal',
@@ -26,9 +26,9 @@
         #promote-milestone-modal
 
       - if milestone.active?
-        = link_to _('Close milestone'), update_milestone_path(milestone, { state_event: :close }), method: :put, class: 'btn btn-grouped btn-close'
+        = link_to _('Close milestone'), update_milestone_path(milestone, { state_event: :close }), method: :put, class: 'gl-button btn btn-grouped btn-close'
       - else
-        = link_to _('Reopen milestone'), update_milestone_path(milestone, { state_event: :activate }), method: :put, class: 'btn btn-grouped btn-reopen'
+        = link_to _('Reopen milestone'), update_milestone_path(milestone, { state_event: :activate }), method: :put, class: 'gl-button btn btn-grouped btn-reopen'
 
       = render 'shared/milestones/delete_button'
 
