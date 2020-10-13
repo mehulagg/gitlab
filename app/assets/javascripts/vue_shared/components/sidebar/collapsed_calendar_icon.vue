@@ -1,11 +1,11 @@
 <script>
 import { GlIcon } from '@gitlab/ui';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
 
 export default {
   name: 'CollapsedCalendarIcon',
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective
   },
   components: {
     GlIcon,
