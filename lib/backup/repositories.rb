@@ -46,11 +46,11 @@ module Backup
         restore_repository(project, Gitlab::GlRepository::DESIGN)
       end
 
-      Snippet.find_each(batch_size: 1000) do |snippet|
-        restore_snippet_repository(snippet)
-      end
+      invalid_ids = Snippet.find_each(batch_size: 1000)
+        .map { |snippet| restore_snippet_repository(snippet) }
+        .compact
 
-      cleanup_snippets_without_repositories
+      cleanup_snippets_without_repositories(invalid_ids)
 
       restore_object_pools
     end
@@ -201,16 +201,19 @@ module Backup
 
       if response.error?
         snippet.repository.remove
-        snippet.snippet_repository&.delete
 
         progress.puts("Snippet #{snippet.full_path} can't be restored: #{response.message}")
+
+        snippet.id
+      else
+        nil
       end
     end
 
     # Snippets without a repository should be removed because they failed to import
     # due to having invalid repositories
-    def cleanup_snippets_without_repositories
-      Snippet.where.not(id: SnippetRepository.select(:snippet_id)).delete_all
+    def cleanup_snippets_without_repositories(ids)
+      Snippet.id_in(ids).delete_all
     end
 
     class BackupRestore
