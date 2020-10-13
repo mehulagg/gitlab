@@ -351,7 +351,7 @@ Use sentence case. For example:
 
 #### UI text
 
-When referring to specific user interface text, such as a button label or menu
+When referring to specific user interface text, like a button label or menu
 item, use the same capitalization that's displayed in the user interface.
 Standards for this content are listed in the [Pajamas Design System Content section](https://design.gitlab.com/content/punctuation/)
 and typically match what's called for in this Documentation Style Guide.
