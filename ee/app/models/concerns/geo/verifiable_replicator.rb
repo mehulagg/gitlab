@@ -6,6 +6,20 @@ module Geo
 
     include Delay
 
+    class_methods do
+      def checksummed
+        model.available_replicables.checksummed
+      end
+
+      def checksummed_count
+        model.available_replicables.checksummed.count
+      end
+
+      def checksum_failed_count
+        model.available_replicables.checksum_failed.count
+      end
+    end
+
     def after_verifiable_update
       schedule_checksum_calculation if needs_checksum?
     end
@@ -24,6 +38,23 @@ module Geo
     # @return [Boolean] whether checksum matches
     def matches_checksum?(checksum)
       model_record.verification_checksum == checksum
+    end
+
+    def needs_checksum?
+      return true unless model_record.respond_to?(:needs_checksum?)
+
+      model_record.needs_checksum?
+    end
+
+    # Checksum value from the main database
+    #
+    # @abstract
+    def primary_checksum
+      model_record.verification_checksum
+    end
+
+    def secondary_checksum
+      registry.verification_checksum
     end
 
     private
@@ -47,6 +78,10 @@ module Geo
     def calculate_next_retry_attempt
       retry_count = model_record.verification_retry_count.to_i + 1
       [next_retry_time(retry_count), retry_count]
+    end
+
+    def schedule_checksum_calculation
+      raise NotImplementedError
     end
   end
 end
