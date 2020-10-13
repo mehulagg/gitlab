@@ -90,6 +90,14 @@ class GitlabSubscription < ApplicationRecord
     self.hosted_plan = Plan.find_by(name: code)
   end
 
+  # We need to show seats in use for free or trial subscriptions
+  # in order to make it easy for customers to get this information.
+  def seats_in_use
+    return super if has_a_paid_hosted_plan?
+
+    calculate_seats_in_use
+  end
+
   private
 
   def log_previous_state_for_update
