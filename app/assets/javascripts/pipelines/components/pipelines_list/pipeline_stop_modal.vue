@@ -70,7 +70,7 @@ export default {
     :title="modalTitle"
     :action-primary="primaryProps"
     :action-cancel="cancelProps"
-    @submit="emitSubmit($event)"
+    @primary="emitSubmit($event)"
   >
     <p v-html="modalText"></p>
 
