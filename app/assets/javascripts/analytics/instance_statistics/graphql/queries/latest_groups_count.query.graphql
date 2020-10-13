@@ -1,0 +1,14 @@
+query getProjectsCount($first: Int, $after: String) {
+  groups: instanceStatisticsMeasurements(identifier: GROUPS, first: $first, after: $after) {
+    nodes {
+      count
+      recordedAt
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+  }
+}
