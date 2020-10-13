@@ -48,9 +48,9 @@
                         %strong= new_subgroup_label
                         %span= s_("GroupsTree|Create a subgroup in this group.")
           - elsif can_create_projects
-            = link_to new_project_label, new_project_path(namespace_id: @group.id), class: "btn btn-success gl-mt-3"
+            = link_to new_project_label, new_project_path(namespace_id: @group.id), class: "gl-button btn btn-success gl-mt-3"
           - elsif can_create_subgroups
-            = link_to new_subgroup_label, new_group_path(parent_id: @group.id), class: "btn btn-success gl-mt-3"
+            = link_to new_subgroup_label, new_group_path(parent_id: @group.id), class: "gl-button btn btn-success gl-mt-3"
 
   - if @group.description.present?
     .group-home-desc.mt-1

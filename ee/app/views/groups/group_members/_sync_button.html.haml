@@ -7,7 +7,7 @@
     = icon("refresh spin")
     Pending sync&hellip;
 - else
-  = link_to sync_group_ldap_path(@group), method: :put, class: 'btn qa-sync-now-button' do
+  = link_to sync_group_ldap_path(@group), method: :put, class: 'gl-button btn qa-sync-now-button' do
     = icon("refresh")
     Sync now
 - if @group.ldap_sync_ready? && @group.ldap_sync_last_successful_update_at

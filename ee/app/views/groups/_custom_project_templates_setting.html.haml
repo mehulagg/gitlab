@@ -21,4 +21,4 @@
             = _('Custom project templates')
           = groups_select_tag('group[custom_project_templates_group_id]', data: { parent_id: @group.id }, selected: @group.custom_project_templates_group_id, class: 'input-clamp allowClear qa-custom-project-template-select', multiple: false)
 
-      = f.submit _('Save changes'), class: 'btn btn-success qa-save-changes-button'
+      = f.submit _('Save changes'), class: 'gl-button btn btn-success qa-save-changes-button'
