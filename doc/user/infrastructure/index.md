@@ -29,7 +29,7 @@ variables:
 Note that this template is not stable (`.latest.`), so it could get breaking changes. It also has some opinionated decisions, that can all be overridden at your will, like:
 
 - Including the latest [GitLab Terraform Image](https://gitlab.com/gitlab-org/terraform-images)
-- Using the [GitLab provided Terraform HTTP backend](https://docs.gitlab.com/ee/user/infrastructure/#gitlab-managed-terraform-state) as default
+- Using the [GitLab provided Terraform HTTP backend](#gitlab-managed-terraform-state) as default
 - Creates [4 pipeline stages](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform.latest.gitlab-ci.yml): init, validate, build and deploy. This stages are basically running Terraform commands: `init`, `validate`, `plan`, `plan-json` and `apply`. The latter only on master.
 
 ## GitLab managed Terraform State
