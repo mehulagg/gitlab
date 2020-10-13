@@ -1,18 +1,22 @@
 import $ from 'jquery';
 import Clipboard from 'clipboard';
 import { sprintf, __ } from '~/locale';
+import { fixTitle, show } from '~/tooltips';
 
 function showTooltip(target, title) {
   const $target = $(target);
   const originalTitle = $target.data('originalTitle');
 
   if (!$target.data('hideTooltip')) {
-    $target
-      .attr('title', title)
-      .tooltip('_fixTitle')
-      .tooltip('show')
-      .attr('title', originalTitle)
-      .tooltip('_fixTitle');
+    $target.attr('title', title);
+
+    fixTitle($target);
+
+    show($target);
+
+    $target.attr('title', originalTitle);
+
+    fixTitle($target);
   }
 }
 
