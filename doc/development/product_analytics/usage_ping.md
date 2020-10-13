@@ -750,7 +750,8 @@ The following is example content of the Usage Ping payload.
   },
   "database": {
     "adapter": "postgresql",
-    "version": "9.6.15"
+    "version": "9.6.15",
+    "pg_system_id": "6842684531675334351"
   },
   "avg_cycle_analytics": {
     "issue": {
