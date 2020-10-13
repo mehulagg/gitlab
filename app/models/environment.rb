@@ -213,7 +213,7 @@ class Environment < ApplicationRecord
   end
 
   def update_merge_request_metrics?
-    folder_name == "production"
+    %w[gprd prod production].include?(folder_name.downcase)
   end
 
   def ref_path
