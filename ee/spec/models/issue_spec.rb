@@ -819,7 +819,6 @@ RSpec.describe Issue do
 
     with_them do
       before do
-        stub_feature_flags(incident_sla_dev: feature_enabled)
         stub_licensed_features(incident_sla: license_available)
         issue_type = incident_type ? 'incident' : 'issue'
         issue.update(issue_type: issue_type)

@@ -6726,7 +6726,7 @@ type EpicIssue implements CurrentUserTodos & Noteable {
   severity: IssuableSeverity
 
   """
-  Timestamp of when the issue SLA expires. Returns null if `incident_sla_dev` feature flag is disabled.
+  Timestamp of when the issue SLA expires.
   """
   slaDueAt: Time
 
@@ -8886,7 +8886,7 @@ type Issue implements CurrentUserTodos & Noteable {
   severity: IssuableSeverity
 
   """
-  Timestamp of when the issue SLA expires. Returns null if `incident_sla_dev` feature flag is disabled.
+  Timestamp of when the issue SLA expires.
   """
   slaDueAt: Time
 

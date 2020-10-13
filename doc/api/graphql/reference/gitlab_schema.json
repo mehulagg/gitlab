@@ -18534,7 +18534,7 @@
             },
             {
               "name": "slaDueAt",
-              "description": "Timestamp of when the issue SLA expires. Returns null if `incident_sla_dev` feature flag is disabled.",
+              "description": "Timestamp of when the issue SLA expires.",
               "args": [
 
               ],
@@ -24236,7 +24236,7 @@
             },
             {
               "name": "slaDueAt",
-              "description": "Timestamp of when the issue SLA expires. Returns null if `incident_sla_dev` feature flag is disabled.",
+              "description": "Timestamp of when the issue SLA expires.",
               "args": [
 
               ],
