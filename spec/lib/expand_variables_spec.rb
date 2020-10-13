@@ -131,5 +131,19 @@ RSpec.describe ExpandVariables do
         end
       end
     end
+
+    context 'with replace_missing: false' do
+      [
+        'key$variable', 'key${variable}',
+        'key$variable$variable2', 'key${variable}${variable2}',
+        'key%variable%', 'key%variable%%variable%'
+      ].each do |value|
+        context "when replacing #{value}" do
+          subject { ExpandVariables.expand(value, [], replace_missing: false) }
+
+          it { is_expected.to eq(value) }
+        end
+      end
+    end
   end
 end

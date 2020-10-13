@@ -1858,6 +1858,12 @@ RSpec.describe Ci::CreatePipelineService do
                 - changes:
                   - README.md
                   allow_failure: true
+
+            READ:
+              script: "I use variables for changes!"
+              rules:
+                - changes:
+                  - $CI_JOB_NAME*
           EOY
         end
 
@@ -1867,10 +1873,10 @@ RSpec.describe Ci::CreatePipelineService do
               .to receive(:modified_paths).and_return(%w[README.md])
           end
 
-          it 'creates two jobs' do
+          it 'creates four jobs' do
             expect(pipeline).to be_persisted
             expect(build_names)
-              .to contain_exactly('regular-job', 'rules-job', 'delayed-job', 'negligible-job')
+              .to contain_exactly('regular-job', 'rules-job', 'delayed-job', 'negligible-job', 'READ')
           end
 
           it 'sets when: for all jobs' do

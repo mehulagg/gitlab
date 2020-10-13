@@ -2,12 +2,14 @@
 
 module ExpandVariables
   class << self
-    def expand(value, variables)
+    def expand(value, variables, replace_missing: true)
       variables_hash = nil
 
       value.gsub(/\$([a-zA-Z_][a-zA-Z0-9_]*)|\${\g<1>}|%\g<1>%/) do
         variables_hash ||= transform_variables(variables)
-        variables_hash[Regexp.last_match(1) || Regexp.last_match(2)]
+        new_value = variables_hash[Regexp.last_match(1) || Regexp.last_match(2)]
+        new_value ||= Regexp.last_match(0) unless replace_missing
+        new_value
       end
     end
 

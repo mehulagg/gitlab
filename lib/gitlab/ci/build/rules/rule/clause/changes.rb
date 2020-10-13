@@ -11,10 +11,19 @@ module Gitlab
         def satisfied_by?(pipeline, context)
           return true if pipeline.modified_paths.nil?
 
+          expanded_globs = expand_globs(context)
           pipeline.modified_paths.any? do |path|
-            @globs.any? do |glob|
+            expanded_globs.any? do |glob|
               File.fnmatch?(glob, path, File::FNM_PATHNAME | File::FNM_DOTMATCH | File::FNM_EXTGLOB)
             end
+          end
+        end
+
+        def expand_globs(context)
+          return @globs unless context
+
+          @globs.map do |glob|
+            ExpandVariables.expand(glob, context.variables, replace_missing: false)
           end
         end
       end
