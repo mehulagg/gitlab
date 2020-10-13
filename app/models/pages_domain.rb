@@ -3,6 +3,7 @@
 class PagesDomain < ApplicationRecord
   include Presentable
   include FromUnion
+  include AfterCommitQueue
 
   VERIFICATION_KEY = 'gitlab-pages-verification-code'
   VERIFICATION_THRESHOLD = 3.days.freeze
@@ -222,6 +223,8 @@ class PagesDomain < ApplicationRecord
   private
 
   def pages_deployed?
+    return false unless project
+
     # TODO: remove once `pages_metadatum` is migrated
     # https://gitlab.com/gitlab-org/gitlab/issues/33106
     unless project.pages_metadatum
@@ -244,8 +247,9 @@ class PagesDomain < ApplicationRecord
   # rubocop: disable CodeReuse/ServiceClass
   def update_daemon
     return if usage_serverless?
+    return unless pages_deployed?
 
-    ::Projects::UpdatePagesConfigurationService.new(project).execute
+    run_after_commit { PagesUpdateConfigurationWorker.perform_async(project_id) }
   end
   # rubocop: enable CodeReuse/ServiceClass
 

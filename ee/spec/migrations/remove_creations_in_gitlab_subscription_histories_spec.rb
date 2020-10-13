@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20200113151354_remove_creations_in_gitlab_subscription_histories.rb')
+require_migration!
 
 RSpec.describe RemoveCreationsInGitlabSubscriptionHistories do
   before do

@@ -11,6 +11,15 @@ with [onboarding as a partner](https://about.gitlab.com/partners/integrate/).
 The steps below are a high-level view of what needs to be done to complete an
 integration as well as linking to more detailed resources for how to do so.
 
+## Integration Tiers
+
+GitLab's security offerings are designed for GitLab Gold and GitLab Ultimate users, and the
+[DevSecOps](https://about.gitlab.com/handbook/use-cases/#4-devsecops-shift-left-security)
+use case. All the features are in those tiers. This includes the APIs and standard reporting
+framework needed to provide a consistent experience for users to easily bring their preferred
+security tools into GitLab. We ask that our integration partners focus their work on those license
+tiers so that we can provide the most value to our mutual customers.
+
 ## What is the GitLab Developer Workflow?
 
 This workflow is how GitLab users interact with our product and expect it to
@@ -27,15 +36,15 @@ best place to integrate your own product and its results into GitLab.
 - Pipeline jobs serve a variety of purposes. Jobs can do scanning for and have
   implications for app security, corporate policy, or compliance. When complete,
   the job reports back on its status and creates a
-  [job artifact](../../user/project/pipelines/job_artifacts.md) as a result.
-- The [Merge Request Security Widget](../../user/project/merge_requests/testing_and_reports_in_merge_requests.md#security-reports-ultimate)
+  [job artifact](../../ci/pipelines/job_artifacts.md) as a result.
+- The [Merge Request Security Widget](../../user/project/merge_requests/testing_and_reports_in_merge_requests.md#security-reports)
   displays the results of the pipeline's security checks and the developer can
   review them. The developer can review both a summary and a detailed version
   of the results.
 - If certain policies (such as [merge request approvals](../../user/project/merge_requests/merge_request_approvals.md))
   are in place for a project, developers must resolve specific findings or get
   an approval from a specific list of people.
-- The [security dashboard](../../user/application_security/security_dashboard/index.md#gitlab-security-dashboard-ultimate)
+- The [security dashboard](../../user/application_security/security_dashboard/index.md)
   also shows results which can developers can use to quickly see all the
   vulnerabilities that need to be addressed in the code.
 - When the developer reads the details about a vulnerability, they are
@@ -69,7 +78,7 @@ and complete an integration with the Secure stage.
    to successfully display your own product's results with the rest of GitLab.
    - See detailed [technical directions](secure.md) for this step.
    - Read more about [job report artifacts](../../ci/pipelines/job_artifacts.md#artifactsreports).
-   - Read about [job artifacts](../../user/project/pipelines/job_artifacts.md).
+   - Read about [job artifacts](../../ci/pipelines/job_artifacts.md).
    - Your report artifact must be in one of our currently supported formats.
      For more information, see the [documentation on reports](secure.md#report).
      - Documentation for [SAST reports](../../user/application_security/sast/index.md#reports-json-format).
@@ -79,8 +88,8 @@ and complete an integration with the Secure stage.
      - If you need a new kind of scan or report, [create an issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new#)
        and add the label `devops::secure`.
    - Once the job is completed, the data can be seen:
-      - In the [Merge Request Security Report](../../user/project/merge_requests/testing_and_reports_in_merge_requests.md#security-reports-ultimate) ([MR Security Report data flow](https://gitlab.com/snippets/1910005#merge-request-view)).
-      - While [browsing a Job Artifact](../../user/project/pipelines/job_artifacts.md).
+      - In the [Merge Request Security Report](../../user/project/merge_requests/testing_and_reports_in_merge_requests.md#security-reports) ([MR Security Report data flow](https://gitlab.com/snippets/1910005#merge-request-view)).
+      - While [browsing a Job Artifact](../../ci/pipelines/job_artifacts.md).
       - In the [Security Dashboard](../../user/application_security/security_dashboard/index.md) ([Dashboard data flow](https://gitlab.com/snippets/1910005#project-and-group-dashboards)).
 1. Optional: Provide a way to interact with results as Vulnerabilities:
    - Users can interact with the findings from your artifact within their workflow. They can dismiss the findings or accept them and create a backlog issue.
@@ -98,6 +107,10 @@ and complete an integration with the Secure stage.
    - Examples of supported marketing could include being listed on our [Security Partner page](https://about.gitlab.com/partners/#security),
      doing an [Unfiltered blog post](https://about.gitlab.com/handbook/marketing/blog/unfiltered/),
      doing a co-branded webinar, or producing a co-branded whitepaper.
+
+We have a [video playlist](https://www.youtube.com/playlist?list=PL05JrBw4t0KpMqYxJiOLz-uBIr5w-yP4A)
+that may be helpful as part of this process. This covers various topics related to integrating your
+tool.
 
 If you have any issues while working through your integration or the steps
 above, please create an issue to discuss with us further.

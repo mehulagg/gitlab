@@ -14,21 +14,33 @@ module Ci
     end
 
     def execute
-      return none unless can?(current_user, :read_build_report_results, project)
+      return none unless query_allowed?
 
+      query
+    end
+
+    protected
+
+    attr_reader :current_user, :project, :ref_path, :start_date, :end_date, :limit
+
+    def query
       Ci::DailyBuildGroupReportResult.recent_results(
-        {
-          project_id: project,
-          ref_path: ref_path,
-          date: start_date..end_date
-        },
-        limit: @limit
+        query_params,
+        limit: limit
       )
     end
 
-    private
+    def query_allowed?
+      can?(current_user, :read_build_report_results, project)
+    end
 
-    attr_reader :current_user, :project, :ref_path, :start_date, :end_date
+    def query_params
+      {
+        project_id: project,
+        ref_path: ref_path,
+        date: start_date..end_date
+      }
+    end
 
     def none
       Ci::DailyBuildGroupReportResult.none

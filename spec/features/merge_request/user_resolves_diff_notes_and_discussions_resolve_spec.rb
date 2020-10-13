@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User resolves diff notes and threads', :js do
+RSpec.describe 'Merge request > User resolves diff notes and threads', :js do
   let(:project)       { create(:project, :public, :repository) }
   let(:user)          { project.creator }
   let(:guest)         { create(:user) }
@@ -15,15 +15,11 @@ describe 'Merge request > User resolves diff notes and threads', :js do
           diff_refs: merge_request.diff_refs)
   end
 
-  before do
-    stub_feature_flags(diffs_batch_load: false)
-  end
-
   context 'no threads' do
     before do
       project.add_maintainer(user)
       sign_in(user)
-      note.destroy
+      note.destroy!
       visit_merge_request
     end
 

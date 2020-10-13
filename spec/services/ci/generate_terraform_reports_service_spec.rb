@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::GenerateTerraformReportsService do
+RSpec.describe Ci::GenerateTerraformReportsService do
   let_it_be(:project) { create(:project, :repository) }
 
   describe '#execute' do
@@ -12,29 +12,54 @@ describe Ci::GenerateTerraformReportsService do
 
     context 'when head pipeline has terraform reports' do
       it 'returns status and data' do
-        result = subject.execute(nil, merge_request.head_pipeline)
+        pipeline = merge_request.head_pipeline
+        result = subject.execute(nil, pipeline)
 
-        expect(result).to match(
-          status: :parsed,
-          data: match(
-            a_hash_including('tfplan.json' => a_hash_including('create' => 0, 'update' => 1, 'delete' => 0))
-          ),
-          key: an_instance_of(Array)
-        )
+        pipeline.builds.each do |build|
+          expect(result).to match(
+            status: :parsed,
+            data: match(
+              a_hash_including(build.id.to_s => hash_including(
+                'create' => 0,
+                'delete' => 0,
+                'update' => 1,
+                'job_name' => build.options.dig(:artifacts, :name).to_s
+              ))
+            ),
+            key: an_instance_of(Array)
+          )
+        end
       end
     end
 
     context 'when head pipeline has corrupted terraform reports' do
-      it 'returns status and error message' do
+      it 'returns a report with error messages' do
         build = create(:ci_build, pipeline: merge_request.head_pipeline, project: project)
         create(:ci_job_artifact, :terraform_with_corrupted_data, job: build, project: project)
 
         result = subject.execute(nil, merge_request.head_pipeline)
 
         expect(result).to match(
-          status: :error,
-          status_reason: 'An error occurred while fetching terraform reports.',
+          status: :parsed,
+          data: match(
+            a_hash_including(build.id.to_s => hash_including(
+              'tf_report_error' => :invalid_json_format
+            ))
+          ),
           key: an_instance_of(Array)
+        )
+      end
+    end
+
+    context 'when head pipeline is corrupted' do
+      it 'returns status and error message' do
+        result = subject.execute(nil, nil)
+
+        expect(result).to match(
+          a_hash_including(
+            status: :error,
+            status_reason: 'An error occurred while fetching terraform reports.'
+          )
         )
       end
     end

@@ -26,6 +26,9 @@ module EE
         },
         secret_detection: {
           name: :secret_detection_jobs
+        },
+        coverage_fuzzing: {
+          name: :coverage_fuzzing_jobs
         }
       }.freeze
 
@@ -34,21 +37,19 @@ module EE
 
         override :usage_data_counters
         def usage_data_counters
-          super + [::Gitlab::UsageDataCounters::LicensesList]
+          super + [
+            ::Gitlab::UsageDataCounters::LicensesList,
+            ::Gitlab::UsageDataCounters::IngressModsecurityCounter,
+            ::Gitlab::StatusPage::UsageDataCounters::IncidentCounter,
+            ::Gitlab::UsageDataCounters::NetworkPolicyCounter
+          ]
         end
 
         override :uncached_data
         def uncached_data
-          super
-            .merge(usage_activity_by_stage)
-            .merge(usage_activity_by_stage(:usage_activity_by_stage_monthly, default_time_period))
-            .merge(recording_ee_finish_data)
-        end
-
-        def recording_ee_finish_data
-          {
-            recording_ee_finished_at: Time.now
-          }
+          with_finished_at(:recording_ee_finished_at) do
+            super
+          end
         end
 
         override :features_usage_data
@@ -78,7 +79,9 @@ module EE
           if license
             usage_data[:license_md5] = license.md5
             usage_data[:license_id] = license.license_id
+            # rubocop: disable UsageData/LargeTable
             usage_data[:historical_max_users] = ::HistoricalData.max_historical_user_count
+            # rubocop: enable UsageData/LargeTable
             usage_data[:licensee] = license.licensee
             usage_data[:license_user_count] = license.restricted_user_count
             usage_data[:license_starts_at] = license.starts_at
@@ -99,24 +102,27 @@ module EE
           }
         end
 
-        # rubocop: disable CodeReuse/ActiveRecord
-        def service_desk_counts
-          return {} unless ::License.feature_available?(:service_desk)
-
-          projects_with_service_desk = ::Project.where(service_desk_enabled: true)
+        # rubocop:disable CodeReuse/ActiveRecord, UsageData/LargeTable
+        def approval_rules_counts
+          approval_project_rules_with_users =
+            ApprovalProjectRule
+              .regular
+              .joins('INNER JOIN approval_project_rules_users ON approval_project_rules_users.approval_project_rule_id = approval_project_rules.id')
+              .group(:id)
 
           {
-            service_desk_enabled_projects: count(projects_with_service_desk),
-            service_desk_issues: count(
-              ::Issue.where(
-                project: projects_with_service_desk,
-                author: ::User.support_bot,
-                confidential: true
-              )
-            )
+            approval_project_rules: count(ApprovalProjectRule),
+            approval_project_rules_with_target_branch: count(ApprovalProjectRulesProtectedBranch, :approval_project_rule_id),
+            approval_project_rules_with_more_approvers_than_required: count_approval_rules_with_users(approval_project_rules_with_users.having('COUNT(approval_project_rules_users) > approvals_required')),
+            approval_project_rules_with_less_approvers_than_required: count_approval_rules_with_users(approval_project_rules_with_users.having('COUNT(approval_project_rules_users) < approvals_required')),
+            approval_project_rules_with_exact_required_approvers: count_approval_rules_with_users(approval_project_rules_with_users.having('COUNT(approval_project_rules_users) = approvals_required'))
           }
         end
-        # rubocop: enable CodeReuse/ActiveRecord
+
+        def count_approval_rules_with_users(relation)
+          count(relation, batch_size: 10_000, start: ApprovalProjectRule.regular.minimum(:id), finish: ApprovalProjectRule.regular.maximum(:id)).size
+        end
+        # rubocop:enable CodeReuse/ActiveRecord, UsageData/LargeTable
 
         def security_products_usage
           results = SECURE_PRODUCT_TYPES.each_with_object({}) do |(secure_type, attribs), response|
@@ -125,9 +131,13 @@ module EE
 
           # handle license rename https://gitlab.com/gitlab-org/gitlab/issues/8911
           license_scan_count = results.delete(:license_scanning_jobs)
-          results[:license_management_jobs] += license_scan_count > 0 ? license_scan_count : 0
+          results[:license_management_jobs] += license_scan_count > 0 ? license_scan_count : 0 if license_scan_count.is_a?(Integer)
 
           results
+        end
+
+        def on_demand_pipelines_usage
+          { dast_on_demand_pipelines: count(::Ci::Pipeline.ondemand_dast_scan) }
         end
 
         # Note: when adding a preference, check if it's mapped to an attribute of a User model. If so, name
@@ -153,6 +163,12 @@ module EE
         end
 
         override :system_usage_data
+        # Rubocop's Metrics/AbcSize metric is disabled for this method as Rubocop
+        # determines this method to be too complex while there's no way to make it
+        # less "complex" without introducing extra methods (which actually will
+        # make things _more_ complex).
+        #
+        # rubocop: disable Metrics/AbcSize
         def system_usage_data
           super.tap do |usage_data|
             usage_data[:counts].merge!(
@@ -164,24 +180,30 @@ module EE
                 geo_nodes: count(::GeoNode),
                 geo_event_log_max_id: alt_usage_data { Geo::EventLog.maximum(:id) || 0 },
                 ldap_group_links: count(::LdapGroupLink),
-                issues_with_health_status: count(::Issue.with_health_status),
+                issues_with_health_status: count(::Issue.with_health_status, start: issue_minimum_id, finish: issue_maximum_id),
                 ldap_keys: count(::LDAPKey),
                 ldap_users: count(::User.ldap, 'users.id'),
                 pod_logs_usages_total: redis_usage_data { ::Gitlab::UsageCounters::PodLogs.usage_totals[:total] },
                 projects_enforcing_code_owner_approval: count(::Project.without_deleted.non_archived.requiring_code_owner_approval),
+                merge_requests_with_added_rules: distinct_count(::ApprovalMergeRequestRule.with_added_approval_rules,
+                                                                :merge_request_id,
+                                                                start: approval_merge_request_rule_minimum_id,
+                                                                finish: approval_merge_request_rule_maximum_id),
                 merge_requests_with_optional_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_optional, :merge_request_id),
+                merge_requests_with_overridden_project_rules: merge_requests_with_overridden_project_rules,
                 merge_requests_with_required_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_required, :merge_request_id),
+                merged_merge_requests_using_approval_rules: count(::MergeRequest.merged.joins(:approval_rules), # rubocop: disable CodeReuse/ActiveRecord
+                                                                  start: merge_request_minimum_id,
+                                                                  finish: merge_request_maximum_id),
                 projects_mirrored_with_pipelines_enabled: count(::Project.mirrored_with_enabled_pipelines),
-                projects_reporting_ci_cd_back_to_github: count(::GithubService.without_defaults.active),
-                projects_with_packages: distinct_count(::Packages::Package, :project_id),
-                projects_with_tracing_enabled: count(ProjectTracingSetting),
+                projects_reporting_ci_cd_back_to_github: count(::GithubService.active),
                 status_page_projects: count(::StatusPage::ProjectSetting.enabled),
-                status_page_issues: count(::Issue.on_status_page),
+                status_page_issues: count(::Issue.on_status_page, start: issue_minimum_id, finish: issue_maximum_id),
                 template_repositories: count(::Project.with_repos_templates) + count(::Project.with_groups_level_repos_templates)
               },
               requirements_counts,
-              service_desk_counts,
               security_products_usage,
+              on_demand_pipelines_usage,
               epics_deepest_relationship_level,
               operations_dashboard_usage)
           end
@@ -190,172 +212,118 @@ module EE
         override :jira_usage
         def jira_usage
           super.merge(
-            projects_jira_dvcs_cloud_active: count(ProjectFeatureUsage.with_jira_dvcs_integration_enabled),
-            projects_jira_dvcs_server_active: count(ProjectFeatureUsage.with_jira_dvcs_integration_enabled(cloud: false))
+            projects_jira_issuelist_active: projects_jira_issuelist_active
           )
         end
 
         def epics_deepest_relationship_level
+          # rubocop: disable UsageData/LargeTable
           { epics_deepest_relationship_level: ::Epic.deepest_relationship_level.to_i }
-        end
-
-        # Source: https://gitlab.com/gitlab-data/analytics/blob/master/transform/snowflake-dbt/data/ping_metrics_to_stage_mapping_data.csv
-        def usage_activity_by_stage(key = :usage_activity_by_stage, time_period = {})
-          {
-            key => {
-              configure: usage_activity_by_stage_configure(time_period),
-              create: usage_activity_by_stage_create(time_period),
-              manage: usage_activity_by_stage_manage(time_period),
-              monitor: usage_activity_by_stage_monitor(time_period),
-              package: usage_activity_by_stage_package(time_period),
-              plan: usage_activity_by_stage_plan(time_period),
-              release: usage_activity_by_stage_release(time_period),
-              secure: usage_activity_by_stage_secure(time_period),
-              verify: usage_activity_by_stage_verify(time_period)
-            }
-          }
+          # rubocop: enable UsageData/LargeTable
         end
 
         # Omitted because no user, creator or author associated: `auto_devops_disabled`, `auto_devops_enabled`
         # Omitted because not in use anymore: `gcp_clusters`, `gcp_clusters_disabled`, `gcp_clusters_enabled`
         # rubocop:disable CodeReuse/ActiveRecord
+        override :usage_activity_by_stage_configure
         def usage_activity_by_stage_configure(time_period)
-          {
-            clusters_applications_cert_managers: cluster_applications_user_distinct_count(::Clusters::Applications::CertManager, time_period),
-            clusters_applications_helm: cluster_applications_user_distinct_count(::Clusters::Applications::Helm, time_period),
-            clusters_applications_ingress: cluster_applications_user_distinct_count(::Clusters::Applications::Ingress, time_period),
-            clusters_applications_knative: cluster_applications_user_distinct_count(::Clusters::Applications::Knative, time_period),
-            clusters_management_project: clusters_user_distinct_count(::Clusters::Cluster.with_management_project, time_period),
-            clusters_disabled: clusters_user_distinct_count(::Clusters::Cluster.disabled, time_period),
-            clusters_enabled: clusters_user_distinct_count(::Clusters::Cluster.enabled, time_period),
-            clusters_platforms_gke: clusters_user_distinct_count(::Clusters::Cluster.gcp_installed.enabled, time_period),
-            clusters_platforms_eks: clusters_user_distinct_count(::Clusters::Cluster.aws_installed.enabled, time_period),
-            clusters_platforms_user: clusters_user_distinct_count(::Clusters::Cluster.user_provided.enabled, time_period),
-            instance_clusters_disabled: clusters_user_distinct_count(::Clusters::Cluster.disabled.instance_type, time_period),
-            instance_clusters_enabled: clusters_user_distinct_count(::Clusters::Cluster.enabled.instance_type, time_period),
-            group_clusters_disabled: clusters_user_distinct_count(::Clusters::Cluster.disabled.group_type, time_period),
-            group_clusters_enabled: clusters_user_distinct_count(::Clusters::Cluster.enabled.group_type, time_period),
-            project_clusters_disabled: clusters_user_distinct_count(::Clusters::Cluster.disabled.project_type, time_period),
-            project_clusters_enabled: clusters_user_distinct_count(::Clusters::Cluster.enabled.project_type, time_period),
+          super.merge({
             projects_slack_notifications_active: distinct_count(::Project.with_slack_service.where(time_period), :creator_id),
             projects_slack_slash_active: distinct_count(::Project.with_slack_slash_commands_service.where(time_period), :creator_id),
             projects_with_prometheus_alerts: distinct_count(::Project.with_prometheus_service.where(time_period), :creator_id)
-          }
+          })
         end
 
         # Omitted because no user, creator or author associated: `lfs_objects`, `pool_repositories`, `web_hooks`
+        override :usage_activity_by_stage_create
         def usage_activity_by_stage_create(time_period)
-          {
-            deploy_keys: distinct_count(::DeployKey.where(time_period), :user_id),
-            keys: distinct_count(::Key.regular_keys.where(time_period), :user_id),
-            merge_requests: distinct_count(::MergeRequest.where(time_period), :author_id),
+          super.merge({
             projects_enforcing_code_owner_approval: distinct_count(::Project.requiring_code_owner_approval.where(time_period), :creator_id),
+            projects_with_sectional_code_owner_rules: projects_with_sectional_code_owner_rules(time_period),
+            merge_requests_with_added_rules: distinct_count(::ApprovalMergeRequestRule.where(time_period).with_added_approval_rules,
+                                                            :merge_request_id,
+                                                            start: approval_merge_request_rule_minimum_id,
+                                                            finish: approval_merge_request_rule_maximum_id),
             merge_requests_with_optional_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_optional.where(time_period), :merge_request_id),
+            merge_requests_with_overridden_project_rules: merge_requests_with_overridden_project_rules(time_period),
             merge_requests_with_required_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_required.where(time_period), :merge_request_id),
             projects_imported_from_github: distinct_count(::Project.github_imported.where(time_period), :creator_id),
             projects_with_repositories_enabled: distinct_count(::Project.with_repositories_enabled.where(time_period),
                                                                :creator_id,
                                                                start: user_minimum_id,
                                                                finish: user_maximum_id),
-            protected_branches: distinct_count(::Project.with_protected_branches.where(time_period), :creator_id, start: user_minimum_id, finish: user_maximum_id),
-            remote_mirrors: distinct_count(::Project.with_remote_mirrors.where(time_period), :creator_id),
-            snippets: distinct_count(::Snippet.where(time_period), :author_id),
+            protected_branches: distinct_count(::Project.with_protected_branches.where(time_period),
+                                               :creator_id,
+                                               start: user_minimum_id,
+                                               finish: user_maximum_id),
             suggestions: distinct_count(::Note.with_suggestions.where(time_period),
                                         :author_id,
                                         start: user_minimum_id,
-                                        finish: user_maximum_id)
-          }
+                                        finish: user_maximum_id),
+            users_using_path_locks: distinct_count(PathLock.where(time_period), :user_id),
+            users_using_lfs_locks: distinct_count(LfsFileLock.where(time_period), :user_id),
+            total_number_of_path_locks: count(::PathLock.where(time_period)),
+            total_number_of_locked_files: count(::LfsFileLock.where(time_period))
+          }, approval_rules_counts)
         end
 
         # Omitted because no user, creator or author associated: `campaigns_imported_from_github`, `ldap_group_links`
+        override :usage_activity_by_stage_manage
         def usage_activity_by_stage_manage(time_period)
-          {
-            events: distinct_count(::Event.where(time_period), :author_id),
-            groups: distinct_count(::GroupMember.where(time_period), :user_id),
+          super.merge({
             ldap_keys: distinct_count(::LDAPKey.where(time_period), :user_id),
             ldap_users: distinct_count(::GroupMember.of_ldap_type.where(time_period), :user_id),
-            users_created: count(::User.where(time_period), start: user_minimum_id, finish: user_maximum_id),
             value_stream_management_customized_group_stages: count(::Analytics::CycleAnalytics::GroupStage.where(custom: true)),
             projects_with_compliance_framework: count(::ComplianceManagement::ComplianceFramework::ProjectSettings),
             ldap_servers: ldap_available_servers.size,
             ldap_group_sync_enabled: ldap_config_present_for_any_provider?(:group_base),
             ldap_admin_sync_enabled: ldap_config_present_for_any_provider?(:admin_group),
-            omniauth_providers: filtered_omniauth_provider_names.reject { |name| name == 'group_saml' },
             group_saml_enabled: omniauth_provider_names.include?('group_saml')
-          }
+          })
         end
 
+        override :usage_activity_by_stage_monitor
         def usage_activity_by_stage_monitor(time_period)
-          {
-            clusters: distinct_count(::Clusters::Cluster.where(time_period), :user_id),
-            clusters_applications_prometheus: cluster_applications_user_distinct_count(::Clusters::Applications::Prometheus, time_period),
-            operations_dashboard_default_dashboard: count(::User.active.with_dashboard('operations').where(time_period),
-                                                          start: user_minimum_id,
-                                                          finish: user_maximum_id),
+          super.merge({
             operations_dashboard_users_with_projects_added: distinct_count(UsersOpsDashboardProject.joins(:user).merge(::User.active).where(time_period), :user_id),
             projects_prometheus_active: distinct_count(::Project.with_active_prometheus_service.where(time_period), :creator_id),
-            projects_with_error_tracking_enabled: distinct_count(::Project.with_enabled_error_tracking.where(time_period), :creator_id),
-            projects_with_tracing_enabled: distinct_count(::Project.with_tracing_enabled.where(time_period), :creator_id)
-          }
-        end
-
-        def usage_activity_by_stage_package(time_period)
-          {
-            projects_with_packages: distinct_count(::Project.with_packages.where(time_period), :creator_id)
-          }
+            projects_with_error_tracking_enabled: distinct_count(::Project.with_enabled_error_tracking.where(time_period), :creator_id)
+          })
         end
 
         # Omitted because no user, creator or author associated: `boards`, `labels`, `milestones`, `uploads`
         # Omitted because too expensive: `epics_deepest_relationship_level`
         # Omitted because of encrypted properties: `projects_jira_cloud_active`, `projects_jira_server_active`
+        override :usage_activity_by_stage_plan
         def usage_activity_by_stage_plan(time_period)
-          {
+          super.merge({
             assignee_lists: distinct_count(::List.assignee.where(time_period), :user_id),
             epics: distinct_count(::Epic.where(time_period), :author_id),
-            issues: distinct_count(::Issue.where(time_period), :author_id),
             label_lists: distinct_count(::List.label.where(time_period), :user_id),
-            milestone_lists: distinct_count(::List.milestone.where(time_period), :user_id),
-            notes: distinct_count(::Note.where(time_period), :author_id),
-            projects: distinct_count(::Project.where(time_period), :creator_id),
-            projects_jira_active: distinct_count(::Project.with_active_jira_services.where(time_period), :creator_id),
-            projects_jira_dvcs_cloud_active: distinct_count(::Project.with_active_jira_services.with_jira_dvcs_cloud.where(time_period), :creator_id),
-            projects_jira_dvcs_server_active: distinct_count(::Project.with_active_jira_services.with_jira_dvcs_server.where(time_period), :creator_id),
-            service_desk_enabled_projects: distinct_count_service_desk_enabled_projects(time_period),
-            service_desk_issues: count(::Issue.service_desk.where(time_period)),
-            todos: distinct_count(::Todo.where(time_period), :author_id)
-          }
+            milestone_lists: distinct_count(::List.milestone.where(time_period), :user_id)
+          })
         end
 
         # Omitted because no user, creator or author associated: `environments`, `feature_flags`, `in_review_folder`, `pages_domains`
+        override :usage_activity_by_stage_release
         def usage_activity_by_stage_release(time_period)
-          {
-            deployments: distinct_count(::Deployment.where(time_period), :user_id),
-            failed_deployments: distinct_count(::Deployment.failed.where(time_period), :user_id),
-            projects_mirrored_with_pipelines_enabled: distinct_count(::Project.mirrored_with_enabled_pipelines.where(time_period), :creator_id),
-            releases: distinct_count(::Release.where(time_period), :author_id),
-            successful_deployments: distinct_count(::Deployment.success.where(time_period), :user_id)
-          }
+          super.merge({
+            projects_mirrored_with_pipelines_enabled: distinct_count(::Project.mirrored_with_enabled_pipelines.where(time_period), :creator_id)
+          })
         end
 
         # Omitted because no user, creator or author associated: `ci_runners`
+        override :usage_activity_by_stage_verify
         def usage_activity_by_stage_verify(time_period)
-          {
-            ci_builds: distinct_count(::Ci::Build.where(time_period), :user_id),
-            ci_external_pipelines: distinct_count(::Ci::Pipeline.external.where(time_period), :user_id),
-            ci_internal_pipelines: distinct_count(::Ci::Pipeline.internal.where(time_period), :user_id),
-            ci_pipeline_config_auto_devops: distinct_count(::Ci::Pipeline.auto_devops_source.where(time_period), :user_id),
-            ci_pipeline_config_repository: distinct_count(::Ci::Pipeline.repository_source.where(time_period), :user_id),
-            ci_pipeline_schedules: distinct_count(::Ci::PipelineSchedule.where(time_period), :owner_id),
-            ci_pipelines: distinct_count(::Ci::Pipeline.where(time_period), :user_id),
-            ci_triggers: distinct_count(::Ci::Trigger.where(time_period), :owner_id),
-            clusters_applications_runner: cluster_applications_user_distinct_count(::Clusters::Applications::Runner, time_period),
+          super.merge({
             projects_reporting_ci_cd_back_to_github: distinct_count(::Project.with_github_service_pipeline_events.where(time_period), :creator_id)
-          }
+          })
         end
 
         # Currently too complicated and to get reliable counts for these stats:
-        # container_scanning_jobs, dast_jobs, dependency_scanning_jobs, license_management_jobs, sast_jobs, secret_detection_jobs
+        # container_scanning_jobs, dast_jobs, dependency_scanning_jobs, license_management_jobs, sast_jobs, secret_detection_jobs, coverage_fuzzing_jobs
         # Once https://gitlab.com/gitlab-org/gitlab/merge_requests/17568 is merged, this might be doable
+        override :usage_activity_by_stage_secure
         def usage_activity_by_stage_secure(time_period)
           prefix = 'user_'
 
@@ -370,50 +338,157 @@ module EE
                                                                           finish: user_maximum_id)
           end
 
+          results.merge!(count_secure_pipelines(time_period))
+          results.merge!(count_secure_jobs(time_period))
+
+          results[:"#{prefix}unique_users_all_secure_scanners"] = distinct_count(::Ci::Build.where(name: SECURE_PRODUCT_TYPES.keys).where(time_period), :user_id)
+
           # handle license rename https://gitlab.com/gitlab-org/gitlab/issues/8911
           combined_license_key = "#{prefix}license_management_jobs".to_sym
           license_scan_count = results.delete("#{prefix}license_scanning_jobs".to_sym)
-          results[combined_license_key] += license_scan_count > 0 ? license_scan_count : 0
+          results[combined_license_key] += license_scan_count > 0 ? license_scan_count : 0 if license_scan_count.is_a?(Integer)
 
-          results
-        end
-
-        private
-
-        def distinct_count_service_desk_enabled_projects(time_period)
-          project_creator_id_start = user_minimum_id
-          project_creator_id_finish = user_maximum_id
-
-          distinct_count(::Project.service_desk_enabled.where(time_period), :creator_id, start: project_creator_id_start, finish: project_creator_id_finish)
-        end
-
-        def cluster_applications_user_distinct_count(applications, time_period)
-          distinct_count(applications.where(time_period).available.joins(:cluster), 'clusters.user_id')
-        end
-
-        def clusters_user_distinct_count(clusters, time_period)
-          distinct_count(clusters.where(time_period), :user_id)
+          super.merge(results)
         end
         # rubocop:enable CodeReuse/ActiveRecord
 
-        def ldap_available_servers
-          ::Gitlab::Auth::Ldap::Config.available_servers
+        private
+
+        # rubocop:disable CodeReuse/ActiveRecord
+        # rubocop: disable UsageData/LargeTable
+        def count_secure_jobs(time_period)
+          start = ::Security::Scan.minimum(:build_id)
+          finish = ::Security::Scan.maximum(:build_id)
+
+          {}.tap do |secure_jobs|
+            ::Security::Scan.scan_types.each do |name, scan_type|
+              secure_jobs["#{name}_scans".to_sym] = count(::Security::Scan.joins(:build)
+                .where(scan_type: scan_type)
+                .merge(::CommitStatus.latest.success)
+                .where(time_period), :build_id, start: start, finish: finish)
+            end
+          end
+        end
+
+        def count_secure_pipelines(time_period)
+          return {} if time_period.blank?
+
+          start = ::Ci::Pipeline.minimum(:id)
+          finish = ::Ci::Pipeline.maximum(:id)
+          pipelines_with_secure_jobs = {}
+
+          ::Security::Scan.scan_types.each do |name, scan_type|
+            relation = ::Ci::Build.joins(:security_scans)
+                                .where(status: 'success', retried: [nil, false])
+                                .where('security_scans.scan_type = ?', scan_type)
+                                .where(time_period)
+            pipelines_with_secure_jobs["#{name}_pipeline".to_sym] = distinct_count(relation, :commit_id, start: start, finish: finish, batch: false)
+          end
+
+          pipelines_with_secure_jobs
+        end
+        # rubocop: enable UsageData/LargeTable
+
+        def approval_merge_request_rule_minimum_id
+          strong_memoize(:approval_merge_request_rule_minimum_id) do
+            ::ApprovalMergeRequestRule.minimum(:merge_request_id)
+          end
+        end
+
+        def approval_merge_request_rule_maximum_id
+          strong_memoize(:approval_merge_request_rule_maximum_id) do
+            ::ApprovalMergeRequestRule.maximum(:merge_request_id)
+          end
+        end
+
+        def merge_request_minimum_id
+          strong_memoize(:merge_request_minimum_id) do
+            ::MergeRequest.minimum(:id)
+          end
+        end
+
+        def merge_request_maximum_id
+          strong_memoize(:merge_request_maximum_id) do
+            ::MergeRequest.maximum(:id)
+          end
         end
 
         def ldap_config_present_for_any_provider?(configuration_item)
           ldap_available_servers.any? { |server_config| server_config[configuration_item.to_s] }
         end
 
-        def omniauth_provider_names
-          ::Gitlab.config.omniauth.providers.map(&:name)
+        def ldap_available_servers
+          ::Gitlab::Auth::Ldap::Config.available_servers
         end
 
-        # LDAP provider names are set by customers and could include
-        # sensitive info (server names, etc). LDAP providers normally
-        # don't appear in omniauth providers but filter to ensure
-        # no internal details leak via usage ping.
-        def filtered_omniauth_provider_names
-          omniauth_provider_names.reject { |name| name.starts_with?('ldap') }
+        def merge_requests_with_overridden_project_rules(time_period = nil)
+          sql =
+            <<~SQL
+          (EXISTS (
+            SELECT
+              1
+            FROM
+              approval_merge_request_rule_sources
+            WHERE
+              approval_merge_request_rule_sources.approval_merge_request_rule_id = approval_merge_request_rules.id
+              AND NOT EXISTS (
+                SELECT
+                  1
+                FROM
+                  approval_project_rules
+                WHERE
+                  approval_project_rules.id = approval_merge_request_rule_sources.approval_project_rule_id
+                  AND EXISTS (
+                    SELECT
+                      1
+                    FROM
+                      projects
+                    WHERE
+                      projects.id = approval_project_rules.project_id
+                      AND projects.disable_overriding_approvers_per_merge_request = FALSE))))
+              OR("approval_merge_request_rules"."modified_from_project_rule" = TRUE)
+            SQL
+
+          distinct_count(
+            ::ApprovalMergeRequestRule.where(time_period).where(sql),
+            :merge_request_id,
+            start: approval_merge_request_rule_minimum_id,
+            finish: approval_merge_request_rule_maximum_id
+          )
+        end
+
+        def projects_jira_issuelist_active
+          # rubocop: disable UsageData/LargeTable:
+          min_id = JiraTrackerData.where(issues_enabled: true).minimum(:service_id)
+          max_id = JiraTrackerData.where(issues_enabled: true).maximum(:service_id)
+          # rubocop: enable UsageData/LargeTable:
+          count(::JiraService.active.includes(:jira_tracker_data).where(jira_tracker_data: { issues_enabled: true }), start: min_id, finish: max_id)
+        end
+        # rubocop:enable CodeReuse/ActiveRecord
+
+        # rubocop:disable CodeReuse/ActiveRecord
+        def projects_with_sectional_code_owner_rules(time_period)
+          distinct_count(
+            ::ApprovalMergeRequestRule
+              .code_owner
+              .joins(:merge_request)
+              .where("section != ?", ::Gitlab::CodeOwners::Entry::DEFAULT_SECTION)
+              .where(time_period),
+            'merge_requests.target_project_id',
+            start: project_minimum_id,
+            finish: project_maximum_id
+          )
+        end
+        # rubocop:enable CodeReuse/ActiveRecord
+
+        override :clear_memoized
+        def clear_memoized
+          super
+
+          clear_memoization(:approval_merge_request_rule_minimum_id)
+          clear_memoization(:approval_merge_request_rule_maximum_id)
+          clear_memoization(:merge_request_minimum_id)
+          clear_memoization(:merge_request_maximum_id)
         end
       end
     end

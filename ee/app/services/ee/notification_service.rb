@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
-require 'ee/gitlab/service_desk'
-
 module EE
   module NotificationService
-    extend ::Gitlab::Utils::Override
-
     # When we add approvers to a merge request we should send an email to:
     #
     #  * the new approvers
@@ -24,17 +20,19 @@ module EE
       unapprove_mr_email(merge_request, merge_request.target_project, current_user)
     end
 
-    override :send_new_note_notifications
-    def send_new_note_notifications(note)
-      super
-      send_service_desk_notification(note)
-    end
-
     def mirror_was_hard_failed(project)
       return if project.emails_disabled?
 
       owners_and_maintainers_without_invites(project).each do |recipient|
         mailer.mirror_was_hard_failed_email(project.id, recipient.user.id).deliver_later
+      end
+    end
+
+    def mirror_was_disabled(project, deleted_user_name)
+      return if project.emails_disabled?
+
+      owners_and_maintainers_without_invites(project).each do |recipient|
+        mailer.mirror_was_disabled_email(project.id, recipient.user.id, deleted_user_name).deliver_later
       end
     end
 
@@ -86,21 +84,6 @@ module EE
       recipients.each do |recipient|
         mailer.unapproved_merge_request_email(recipient.user.id, merge_request.id, current_user.id).deliver_later
       end
-    end
-
-    def send_service_desk_notification(note)
-      return unless EE::Gitlab::ServiceDesk.enabled?
-      return unless note.noteable_type == 'Issue'
-
-      issue = note.noteable
-      support_bot = ::User.support_bot
-
-      return unless issue.service_desk_reply_to.present?
-      return unless issue.project.service_desk_enabled?
-      return if note.author == support_bot
-      return unless issue.subscribed?(support_bot, issue.project)
-
-      mailer.service_desk_new_note_email(issue.id, note.id).deliver_later
     end
 
     def removed_iteration_resource_email(target, current_user)

@@ -13,14 +13,16 @@ module Mutations
         alert = authorized_find!(project_path: args[:project_path], iid: args[:iid])
         result = update_status(alert, args[:status])
 
+        track_usage_event(:incident_management_alert_status_changed, current_user.id)
+
         prepare_response(result)
       end
 
       private
 
       def update_status(alert, status)
-        ::AlertManagement::UpdateAlertStatusService
-          .new(alert, current_user, status)
+        ::AlertManagement::Alerts::UpdateService
+          .new(alert, current_user, status: status)
           .execute
       end
 

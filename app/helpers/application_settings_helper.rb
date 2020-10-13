@@ -26,6 +26,17 @@ module ApplicationSettingsHelper
     end
   end
 
+  def storage_weights
+    ApplicationSetting.repository_storages_weighted_attributes.map do |attribute|
+      storage = attribute.to_s.delete_prefix('repository_storages_weighted_')
+      {
+        name: attribute,
+        label: storage,
+        value: @application_setting.repository_storages_weighted[storage] || 0
+      }
+    end
+  end
+
   def all_protocols_enabled?
     Gitlab::CurrentSettings.enabled_git_access_protocol.blank?
   end
@@ -157,7 +168,7 @@ module ApplicationSettingsHelper
 
   def visible_attributes
     [
-      :admin_notification_email,
+      :abuse_notification_email,
       :after_sign_out_path,
       :after_sign_up_text,
       :akismet_api_key,
@@ -179,6 +190,7 @@ module ApplicationSettingsHelper
       :container_expiration_policies_enable_historic_entries,
       :container_registry_token_expire_delay,
       :default_artifacts_expire_in,
+      :default_branch_name,
       :default_branch_protection,
       :default_ci_config_path,
       :default_group_visibility,
@@ -210,12 +222,15 @@ module ApplicationSettingsHelper
       :gitaly_timeout_default,
       :gitaly_timeout_medium,
       :gitaly_timeout_fast,
+      :gitpod_enabled,
+      :gitpod_url,
       :grafana_enabled,
       :grafana_url,
       :gravatar_enabled,
       :hashed_storage_enabled,
       :help_page_hide_commercial_content,
       :help_page_support_url,
+      :help_page_documentation_base_url,
       :help_page_text,
       :hide_third_party_offers,
       :home_page_url,
@@ -233,6 +248,7 @@ module ApplicationSettingsHelper
       :metrics_method_call_threshold,
       :minimum_password_length,
       :mirror_available,
+      :notify_on_unknown_sign_in,
       :pages_domain_verification_enabled,
       :password_authentication_enabled_for_web,
       :password_authentication_enabled_for_git,
@@ -249,7 +265,8 @@ module ApplicationSettingsHelper
       :login_recaptcha_protection_enabled,
       :receive_max_input_size,
       :repository_checks_enabled,
-      :repository_storages,
+      :repository_storages_weighted,
+      :require_admin_approval_after_user_signup,
       :require_two_factor_authentication,
       :restricted_visibility_levels,
       :rsa_key_restriction,
@@ -285,7 +302,6 @@ module ApplicationSettingsHelper
       :unique_ips_limit_per_user,
       :unique_ips_limit_time_window,
       :usage_ping_enabled,
-      :instance_statistics_visibility_private,
       :user_default_external,
       :user_show_add_ssh_key_message,
       :user_default_internal_regex,
@@ -300,7 +316,6 @@ module ApplicationSettingsHelper
       :snowplow_cookie_domain,
       :snowplow_enabled,
       :snowplow_app_id,
-      :snowplow_iglu_registry_url,
       :push_event_hooks_limit,
       :push_event_activities_limit,
       :custom_http_clone_url_root,
@@ -308,7 +323,15 @@ module ApplicationSettingsHelper
       :email_restrictions_enabled,
       :email_restrictions,
       :issues_create_limit,
-      :raw_blob_request_limit
+      :raw_blob_request_limit,
+      :project_import_limit,
+      :project_export_limit,
+      :project_download_export_limit,
+      :group_import_limit,
+      :group_export_limit,
+      :group_download_export_limit,
+      :wiki_page_max_content_bytes,
+      :container_registry_delete_tags_service_timeout
     ]
   end
 
@@ -321,6 +344,12 @@ module ApplicationSettingsHelper
       :external_authorization_service_enabled,
       :external_authorization_service_timeout,
       :external_authorization_service_url
+    ]
+  end
+
+  def deprecated_attributes
+    [
+      :admin_notification_email # ok to remove in REST API v5
     ]
   end
 
@@ -360,6 +389,10 @@ module ApplicationSettingsHelper
       'self_monitoring_project_full_path' =>
         Gitlab::CurrentSettings.self_monitoring_project&.full_path
     }
+  end
+
+  def show_documentation_base_url_field?
+    Feature.enabled?(:help_page_documentation_redirect)
   end
 end
 

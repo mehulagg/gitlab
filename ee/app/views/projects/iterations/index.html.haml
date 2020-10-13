@@ -1,0 +1,4 @@
+- return unless Feature.enabled?(:project_iterations, @project.group)
+- page_title _("Iterations")
+
+.js-iterations-list{ data: { full_path: @project.full_path } }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Branches' do
+RSpec.describe 'Branches' do
   let(:user) { create(:user) }
   let(:project) { create(:project, :public, :repository) }
   let(:repository) { project.repository }
@@ -21,11 +21,11 @@ describe 'Branches' do
       before do
         # Add 4 stale branches
         (1..4).reverse_each do |i|
-          Timecop.freeze((threshold + i).ago) { create_file(message: "a commit in stale-#{i}", branch_name: "stale-#{i}") }
+          travel_to((threshold + i).ago) { create_file(message: "a commit in stale-#{i}", branch_name: "stale-#{i}") }
         end
         # Add 6 active branches
         (1..6).each do |i|
-          Timecop.freeze((threshold - i).ago) { create_file(message: "a commit in active-#{i}", branch_name: "active-#{i}") }
+          travel_to((threshold - i).ago) { create_file(message: "a commit in active-#{i}", branch_name: "active-#{i}") }
         end
       end
 
@@ -97,11 +97,11 @@ describe 'Branches' do
     end
 
     describe 'Delete unprotected branch on Overview' do
-      it 'removes branch after confirmation', :js do
+      it 'removes branch after confirmation', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/239019' do
         visit project_branches_filtered_path(project, state: 'all')
 
         expect(all('.all-branches').last).to have_selector('li', count: 20)
-        accept_confirm { first('.js-branch-item .btn-remove').click }
+        accept_confirm { first('.js-branch-item .btn-danger').click }
 
         expect(all('.all-branches').last).to have_selector('li', count: 19)
       end
@@ -163,7 +163,7 @@ describe 'Branches' do
 
         expect(page).to have_content('fix')
         expect(find('.all-branches')).to have_selector('li', count: 1)
-        accept_confirm { find('.js-branch-fix .btn-remove').click }
+        accept_confirm { find('.js-branch-fix .btn-danger').click }
 
         expect(page).not_to have_content('fix')
         expect(find('.all-branches')).to have_selector('li', count: 0)
@@ -227,6 +227,44 @@ describe 'Branches' do
     it 'does not show merge request button' do
       page.within first('.all-branches li') do
         expect(page).not_to have_content 'Merge request'
+      end
+    end
+  end
+
+  context 'with one or more pipeline', :js do
+    before do
+      sha = create_file(branch_name: "branch")
+      create(:ci_pipeline,
+        project: project,
+        user: user,
+        ref: "branch",
+        sha: sha,
+        status: :success,
+        created_at: 5.months.ago)
+      visit project_branches_path(project)
+    end
+
+    it 'shows pipeline status when available' do
+      page.within first('.all-branches li') do
+        expect(page).to have_css 'a.ci-status-icon-success'
+      end
+    end
+
+    it 'displays a placeholder when not available' do
+      page.all('.all-branches li') do |li|
+        expect(li).to have_css 'svg.s24'
+      end
+    end
+  end
+
+  context 'with no pipelines', :js do
+    before do
+      visit project_branches_path(project)
+    end
+
+    it 'does not show placeholder or pipeline status' do
+      page.all('.all-branches') do |branches|
+        expect(branches).not_to have_css 'svg.s24'
       end
     end
   end

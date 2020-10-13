@@ -5,11 +5,17 @@ class ApplicationSetting < ApplicationRecord
   include CacheMarkdownField
   include TokenAuthenticatable
   include ChronicDurationAttribute
+  include IgnorableColumns
 
+  ignore_column :namespace_storage_size_limit, remove_with: '13.5', remove_after: '2020-09-22'
+  ignore_column :instance_statistics_visibility_private, remove_with: '13.6', remove_after: '2020-10-22'
+  ignore_column :snowplow_iglu_registry_url, remove_with: '13.6', remove_after: '2020-11-22'
+
+  INSTANCE_REVIEW_MIN_USERS = 50
   GRAFANA_URL_ERROR_MESSAGE = 'Please check your Grafana URL setting in ' \
     'Admin Area > Settings > Metrics and profiling > Metrics - Grafana'
 
-  add_authentication_token_field :runners_registration_token, encrypted: -> { Feature.enabled?(:application_settings_tokens_optional_encryption, default_enabled: true) ? :optional : :required }
+  add_authentication_token_field :runners_registration_token, encrypted: -> { Feature.enabled?(:application_settings_tokens_optional_encryption) ? :optional : :required }
   add_authentication_token_field :health_check_access_token
   add_authentication_token_field :static_objects_external_storage_auth_token
 
@@ -17,7 +23,9 @@ class ApplicationSetting < ApplicationRecord
   belongs_to :push_rule
   alias_attribute :self_monitoring_project_id, :instance_administration_project_id
 
-  belongs_to :instance_administrators_group, class_name: "Group"
+  belongs_to :instance_group, class_name: "Group", foreign_key: 'instance_administrators_group_id'
+  alias_attribute :instance_group_id, :instance_administrators_group_id
+  alias_attribute :instance_administrators_group, :instance_group
 
   def self.repository_storages_weighted_attributes
     @repository_storages_weighted_atributes ||= Gitlab.config.repositories.storages.keys.map { |k| "repository_storages_weighted_#{k}".to_sym }.freeze
@@ -84,11 +92,16 @@ class ApplicationSetting < ApplicationRecord
             addressable_url: true,
             if: :help_page_support_url_column_exists?
 
+  validates :help_page_documentation_base_url,
+            length: { maximum: 255, message: _("is too long (maximum is %{count} characters)") },
+            allow_blank: true,
+            addressable_url: true
+
   validates :after_sign_out_path,
             allow_blank: true,
             addressable_url: true
 
-  validates :admin_notification_email,
+  validates :abuse_notification_email,
             devise_email: true,
             allow_blank: true
 
@@ -125,14 +138,14 @@ class ApplicationSetting < ApplicationRecord
             presence: true,
             if: :sourcegraph_enabled
 
+  validates :gitpod_url,
+            presence: true,
+            addressable_url: { enforce_sanitization: true },
+            if: :gitpod_enabled
+
   validates :snowplow_collector_hostname,
             presence: true,
             hostname: true,
-            if: :snowplow_enabled
-
-  validates :snowplow_iglu_registry_url,
-            addressable_url: true,
-            allow_blank: true,
             if: :snowplow_enabled
 
   validates :max_attachment_size,
@@ -272,20 +285,20 @@ class ApplicationSetting < ApplicationRecord
             numericality: { greater_than_or_equal_to: 0 }
 
   validates :snippet_size_limit, numericality: { only_integer: true, greater_than: 0 }
+  validates :wiki_page_max_content_bytes, numericality: { only_integer: true, greater_than_or_equal_to: 1.kilobytes }
 
   validates :email_restrictions, untrusted_regexp: true
 
   validates :hashed_storage_enabled, inclusion: { in: [true], message: _("Hashed storage can't be disabled anymore for new projects") }
+
+  validates :container_registry_delete_tags_service_timeout,
+            numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
   SUPPORTED_KEY_TYPES.each do |type|
     validates :"#{type}_key_restriction", presence: true, key_restriction: { type: type }
   end
 
   validates :allowed_key_types, presence: true
-
-  repository_storages_weighted_attributes.each do |attribute|
-    validates attribute, allow_nil: true, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
-  end
 
   validates_each :restricted_visibility_levels do |record, attr, value|
     value&.each do |level|
@@ -366,10 +379,6 @@ class ApplicationSetting < ApplicationRecord
     length: { maximum: 255 },
     allow_blank: true
 
-  validates :namespace_storage_size_limit,
-            presence: true,
-            numericality: { only_integer: true, greater_than_or_equal_to: 0 }
-
   validates :issues_create_limit,
             numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
@@ -429,13 +438,39 @@ class ApplicationSetting < ApplicationRecord
     !!(sourcegraph_url =~ /\Ahttps:\/\/(www\.)?sourcegraph\.com/)
   end
 
+  def instance_review_permitted?
+    users_count = Rails.cache.fetch('limited_users_count', expires_in: 1.day) do
+      ::User.limit(INSTANCE_REVIEW_MIN_USERS + 1).count(:all)
+    end
+
+    users_count >= INSTANCE_REVIEW_MIN_USERS
+  end
+
   def self.create_from_defaults
+    check_schema!
+
     transaction(requires_new: true) do
       super
     end
   rescue ActiveRecord::RecordNotUnique
     # We already have an ApplicationSetting record, so just return it.
     current_without_cache
+  end
+
+  # Due to the frequency with which settings are accessed, it is
+  # likely that during a backup restore a running GitLab process
+  # will insert a new `application_settings` row before the
+  # constraints have been added to the table. This would add an
+  # extra row with ID 1 and prevent the primary key constraint from
+  # being added, which made ActiveRecord throw a
+  # IrreversibleOrderError anytime the settings were accessed
+  # (https://gitlab.com/gitlab-org/gitlab/-/issues/36405).  To
+  # prevent this from happening, we do a sanity check that the
+  # primary key constraint is present before inserting a new entry.
+  def self.check_schema!
+    return if ActiveRecord::Base.connection.primary_key(self.table_name).present?
+
+    raise "The `#{self.table_name}` table is missing a primary key constraint in the database schema"
   end
 
   # By default, the backend is Rails.cache, which uses

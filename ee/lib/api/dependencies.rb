@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Dependencies < Grape::API
+  class Dependencies < Grape::API::Instance
     helpers do
       def dependencies_by(params)
         pipeline = ::Security::ReportFetchService.new(user_project, ::Ci::JobArtifact.dependency_list_reports).pipeline
@@ -12,9 +12,7 @@ module API
       end
     end
 
-    before do
-      authenticate!
-    end
+    before { authenticate! }
 
     params do
       requires :id, type: String, desc: 'The ID of a project'
@@ -28,6 +26,7 @@ module API
       params do
         optional :package_manager,
                  type: Array[String],
+                 coerce_with: Validations::Types::CommaSeparatedToArray.coerce,
                  desc: "Returns dependencies belonging to specified package managers: #{::Security::DependencyListService::FILTER_PACKAGE_MANAGERS_VALUES.join(', ')}.",
                  values: ::Security::DependencyListService::FILTER_PACKAGE_MANAGERS_VALUES
       end
@@ -37,7 +36,8 @@ module API
 
         track_event('view_dependencies')
 
-        dependencies = dependencies_by(declared_params.merge(project: user_project))
+        dependency_params = declared_params(include_missing: false).merge(project: user_project)
+        dependencies = dependencies_by(dependency_params)
 
         present dependencies, with: ::EE::API::Entities::Dependency, user: current_user, project: user_project
       end

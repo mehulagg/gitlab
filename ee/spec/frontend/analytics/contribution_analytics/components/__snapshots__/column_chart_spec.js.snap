@@ -4,7 +4,7 @@ exports[`Contribution Analytics Column Chart matches the snapshot 1`] = `
 <div>
   <gl-column-chart-stub
     data="[object Object]"
-    height="220"
+    height="350"
     option="[object Object]"
     width="0"
     xaxistitle="Username"

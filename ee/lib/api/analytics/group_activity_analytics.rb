@@ -2,7 +2,7 @@
 
 module API
   module Analytics
-    class GroupActivityAnalytics < Grape::API
+    class GroupActivityAnalytics < Grape::API::Instance
       DESCRIPTION_DETAIL =
         'This feature is gated by the `:group_activity_analytics`'\
         ' feature flag, introduced in GitLab 12.9.'

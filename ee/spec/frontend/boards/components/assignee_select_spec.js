@@ -90,7 +90,7 @@ describe('Assignee select component', () => {
 
       beforeEach(() => {
         mock = new MockAdapter(axios);
-        mock.onGet('/autocomplete/users.json').reply(200, [assignee, assignee2]);
+        mock.onGet('/-/autocomplete/users.json').reply(200, [assignee, assignee2]);
       });
 
       afterEach(() => {

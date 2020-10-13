@@ -44,6 +44,16 @@ RSpec.describe Projects::MergeRequestsController do
       get :show, params: params.merge(extra_params)
     end
 
+    context 'with view param' do
+      before do
+        go(view: 'parallel')
+      end
+
+      it 'saves the preferred diff view in a cookie' do
+        expect(response.cookies['diff_view']).to eq('parallel')
+      end
+    end
+
     context 'when merge request is unchecked' do
       before do
         merge_request.mark_as_unchecked!
@@ -77,6 +87,22 @@ RSpec.describe Projects::MergeRequestsController do
         end
       end
 
+      context 'with `default_merge_ref_for_diffs` feature flag enabled' do
+        before do
+          stub_feature_flags(default_merge_ref_for_diffs: true)
+          go
+        end
+
+        it 'adds the diff_head parameter' do
+          expect(assigns["endpoint_metadata_url"]).to eq(
+            diffs_metadata_project_json_merge_request_path(
+              project,
+              merge_request,
+              'json',
+              diff_head: true))
+        end
+      end
+
       context 'when diff is missing' do
         render_views
 
@@ -95,6 +121,16 @@ RSpec.describe Projects::MergeRequestsController do
         go(format: :html)
 
         expect(response).to be_successful
+      end
+
+      it 'logs the view with Gitlab::Search::RecentMergeRequests' do
+        recent_merge_requests_double = instance_double(::Gitlab::Search::RecentMergeRequests, log_view: nil)
+        expect(::Gitlab::Search::RecentMergeRequests).to receive(:new).with(user: user).and_return(recent_merge_requests_double)
+
+        go(format: :html)
+
+        expect(response).to be_successful
+        expect(recent_merge_requests_double).to have_received(:log_view).with(merge_request)
       end
 
       context "that is invalid" do
@@ -334,7 +370,7 @@ RSpec.describe Projects::MergeRequestsController do
       it 'closes MR without errors' do
         update_merge_request(state_event: 'close')
 
-        expect(response).to redirect_to([merge_request.target_project.namespace.becomes(Namespace), merge_request.target_project, merge_request])
+        expect(response).to redirect_to([merge_request.target_project, merge_request])
         expect(merge_request.reload.closed?).to be_truthy
       end
 
@@ -343,7 +379,7 @@ RSpec.describe Projects::MergeRequestsController do
 
         update_merge_request(title: 'New title')
 
-        expect(response).to redirect_to([merge_request.target_project.namespace.becomes(Namespace), merge_request.target_project, merge_request])
+        expect(response).to redirect_to([merge_request.target_project, merge_request])
         expect(merge_request.reload.title).to eq 'New title'
       end
 
@@ -442,7 +478,7 @@ RSpec.describe Projects::MergeRequestsController do
           merge_request.update(squash: false)
           merge_with_sha(squash: '1')
 
-          expect(merge_request.reload.squash).to be_truthy
+          expect(merge_request.reload.squash_on_merge?).to be_truthy
         end
       end
 
@@ -451,7 +487,7 @@ RSpec.describe Projects::MergeRequestsController do
           merge_request.update(squash: true)
           merge_with_sha(squash: '0')
 
-          expect(merge_request.reload.squash).to be_falsey
+          expect(merge_request.reload.squash_on_merge?).to be_falsey
         end
       end
 
@@ -1183,15 +1219,19 @@ RSpec.describe Projects::MergeRequestsController do
           subject
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response).to match(
-            a_hash_including(
-              'tfplan.json' => hash_including(
-                'create' => 0,
-                'delete' => 0,
-                'update' => 1
+
+          pipeline.builds.each do |build|
+            expect(json_response).to match(
+              a_hash_including(
+                build.id.to_s => hash_including(
+                  'create' => 0,
+                  'delete' => 0,
+                  'update' => 1,
+                  'job_name' => build.options.dig(:artifacts, :name).to_s
+                )
               )
             )
-          )
+          end
         end
       end
 

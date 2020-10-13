@@ -141,8 +141,55 @@ function initFoo() {
   });
 }
 
-// Vuex action can now reference the path from it's state :)
+// Vuex action can now reference the path from its state :)
 export const fetchFoos = ({ state }) => {
   return axios.get(state.settings.fooPath);
 };
 ```
+
+### 7. How can I test the production build locally?
+
+Sometimes it's necessary to test locally what the frontend production build would produce, to do so the steps are:
+
+1. Stop webpack: `gdk stop webpack`.
+1. Open `gitlab.yaml` located in your `gitlab` installation folder, scroll down to the `webpack` section and change `dev_server` to `enabled: false`.
+1. Run `yarn webpack-prod && gdk restart rails-web`.
+
+The production build takes a few minutes to be completed; any code change at this point will be
+displayed only after executing the item 3 above again.
+To return to the normal development mode:
+
+1. Open `gitlab.yaml` located in your `gitlab` installation folder, scroll down to the `webpack` section and change back `dev_server` to `enabled: true`.
+1. Run `yarn clean` to remove the production assets and free some space (optional).
+1. Start webpack again: `gdk start webpack`.
+1. Restart GDK: `gdk restart rails-web`.
+
+### 8. Babel polyfills
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/28837) in GitLab 12.8.
+
+GitLab has enabled the Babel `preset-env` option
+[`useBuiltIns: 'usage'`](https://babeljs.io/docs/en/babel-preset-env#usebuiltins-usage),
+which adds the appropriate `core-js` polyfills once for each JavaScript feature
+we're using that our target browsers don't support. You don't need to add `core-js`
+polyfills manually.
+
+NOTE: **Note:**
+GitLab still manually adds non-`core-js` polyfills for extending browser features
+(such as GitLab's SVG polyfill) that allow us reference SVGs by using `<use xlink:href>`.
+These polyfills should be added to `app/assets/javascripts/commons/polyfills.js`.
+
+To see what polyfills are being used:
+
+1. Navigate to your merge request.
+1. In the secondary menu below the title of the merge request, click **Pipelines**, then
+   click the pipeline you want to view, to display the jobs in that pipeline.
+1. Click the [`compile-production-assets`](https://gitlab.com/gitlab-org/gitlab/-/jobs/641770154) job.
+1. In the right-hand sidebar, scroll to **Job Artifacts**, and click **Browse**.
+1. Click the **webpack-report** folder to open it, and click **index.html**.
+1. In the upper left corner of the page, click the right arrow **{angle-right}**
+   to display the explorer.
+1. In the **Search modules** field, enter `gitlab/node_modules/core-js` to see
+   which polyfills are being loaded and where:
+
+   ![Image of webpack report](img/webpack_report_v12_8.png)

@@ -4,17 +4,13 @@
  * Used in environments table.
  */
 
-import $ from 'jquery';
-import { GlTooltipDirective } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlTooltipDirective, GlButton } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import eventHub from '../event_hub';
-import LoadingButton from '../../vue_shared/components/loading_button.vue';
 
 export default {
   components: {
-    Icon,
-    LoadingButton,
+    GlButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -43,7 +39,7 @@ export default {
   },
   methods: {
     onClick() {
-      $(this.$el).tooltip('dispose');
+      this.$root.$emit('bv::hide::tooltip', this.$options.stopEnvironmentTooltipId);
       eventHub.$emit('requestStopEnvironment', this.environment);
     },
     onStopEnvironment(environment) {
@@ -52,19 +48,20 @@ export default {
       }
     },
   },
+  stopEnvironmentTooltipId: 'stop-environment-button-tooltip',
 };
 </script>
 <template>
-  <loading-button
-    v-gl-tooltip
+  <gl-button
+    v-gl-tooltip="{ id: $options.stopEnvironmentTooltipId }"
     :loading="isLoading"
     :title="title"
     :aria-label="title"
-    container-class="btn btn-danger d-none d-sm-none d-md-block"
+    icon="stop"
+    category="primary"
+    variant="danger"
     data-toggle="modal"
     data-target="#stop-environment-modal"
     @click="onClick"
-  >
-    <icon name="stop" />
-  </loading-button>
+  />
 </template>

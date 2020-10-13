@@ -17,6 +17,7 @@ RSpec.describe Repositories::GitHttpController do
       repository_id: repository_id
     }
   end
+
   let(:params) { container_params }
 
   describe 'HEAD #info_refs' do
@@ -60,10 +61,21 @@ RSpec.describe Repositories::GitHttpController do
 
           get :info_refs, params: params
         end
+
+        include_context 'parsed logs' do
+          it 'adds user info to the logs' do
+            get :info_refs, params: params
+
+            expect(log_data).to include('username' => user.username,
+                                        'user_id' => user.id,
+                                        'meta.user' => user.username)
+          end
+        end
       end
 
       context 'with exceptions' do
         before do
+          allow(controller).to receive(:authenticate_user).and_return(true)
           allow(controller).to receive(:verify_workhorse_api!).and_return(true)
         end
 

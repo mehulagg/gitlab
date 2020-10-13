@@ -1,21 +1,18 @@
 import { shallowMount, mount } from '@vue/test-utils';
-import Tracking from '~/tracking';
-import { ESC_KEY, ESC_KEY_IE11 } from '~/lib/utils/keys';
-import { GlModal, GlDropdownItem, GlDeprecatedButton, GlIcon } from '@gitlab/ui';
-import { objectToQuery } from '~/lib/utils/url_utility';
 import VueDraggable from 'vuedraggable';
 import MockAdapter from 'axios-mock-adapter';
+import { TEST_HOST } from 'helpers/test_constants';
+import { ESC_KEY } from '~/lib/utils/keys';
+import { objectToQuery } from '~/lib/utils/url_utility';
 import axios from '~/lib/utils/axios_utils';
-import { metricStates } from '~/monitoring/constants';
+import { dashboardEmptyStates, metricStates } from '~/monitoring/constants';
 import Dashboard from '~/monitoring/components/dashboard.vue';
 
 import DashboardHeader from '~/monitoring/components/dashboard_header.vue';
-import DateTimePicker from '~/vue_shared/components/date_time_picker/date_time_picker.vue';
-import CustomMetricsFormFields from '~/custom_metrics/components/custom_metrics_form_fields.vue';
-import DashboardsDropdown from '~/monitoring/components/dashboards_dropdown.vue';
 import EmptyState from '~/monitoring/components/empty_state.vue';
 import GroupEmptyState from '~/monitoring/components/group_empty_state.vue';
 import DashboardPanel from '~/monitoring/components/dashboard_panel.vue';
+import GraphGroup from '~/monitoring/components/graph_group.vue';
 import LinksSection from '~/monitoring/components/links_section.vue';
 import { createStore } from '~/monitoring/stores';
 import * as types from '~/monitoring/stores/mutation_types';
@@ -24,12 +21,16 @@ import {
   setupStoreWithDashboard,
   setMetricResult,
   setupStoreWithData,
-  setupStoreWithVariable,
+  setupStoreWithDataForPanelCount,
   setupStoreWithLinks,
 } from '../store_utils';
-import { environmentData, dashboardGitResponse, propsData } from '../mock_data';
-import { metricsDashboardViewModel, metricsDashboardPanelCount } from '../fixture_data';
-import createFlash from '~/flash';
+import { dashboardGitResponse, storeVariables } from '../mock_data';
+import {
+  metricsDashboardViewModel,
+  metricsDashboardPanelCount,
+  dashboardProps,
+} from '../fixture_data';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -38,17 +39,9 @@ describe('Dashboard', () => {
   let wrapper;
   let mock;
 
-  const findDashboardHeader = () => wrapper.find(DashboardHeader);
-  const findEnvironmentsDropdown = () =>
-    findDashboardHeader().find({ ref: 'monitorEnvironmentsDropdown' });
-  const findAllEnvironmentsDropdownItems = () => findEnvironmentsDropdown().findAll(GlDropdownItem);
-  const setSearchTerm = searchTerm => {
-    store.commit(`monitoringDashboard/${types.SET_ENVIRONMENTS_FILTER}`, searchTerm);
-  };
-
   const createShallowWrapper = (props = {}, options = {}) => {
     wrapper = shallowMount(Dashboard, {
-      propsData: { ...propsData, ...props },
+      propsData: { ...dashboardProps, ...props },
       store,
       stubs: {
         DashboardHeader,
@@ -59,7 +52,7 @@ describe('Dashboard', () => {
 
   const createMountedWrapper = (props = {}, options = {}) => {
     wrapper = mount(Dashboard, {
-      propsData: { ...propsData, ...props },
+      propsData: { ...dashboardProps, ...props },
       store,
       stubs: {
         'graph-group': true,
@@ -83,28 +76,6 @@ describe('Dashboard', () => {
     }
   });
 
-  describe('no metrics are available yet', () => {
-    beforeEach(() => {
-      createShallowWrapper();
-    });
-
-    it('shows the environment selector', () => {
-      expect(findEnvironmentsDropdown().exists()).toBe(true);
-    });
-  });
-
-  describe('no data found', () => {
-    beforeEach(() => {
-      createShallowWrapper();
-
-      return wrapper.vm.$nextTick();
-    });
-
-    it('shows the environment selector dropdown', () => {
-      expect(findEnvironmentsDropdown().exists()).toBe(true);
-    });
-  });
-
   describe('request information to the server', () => {
     it('calls to set time range and fetch data', () => {
       createShallowWrapper({ hasMetrics: true });
@@ -120,13 +91,13 @@ describe('Dashboard', () => {
     });
 
     it('shows up a loading state', () => {
-      store.state.monitoringDashboard.emptyState = 'loading';
+      store.state.monitoringDashboard.emptyState = dashboardEmptyStates.LOADING;
 
       createShallowWrapper({ hasMetrics: true });
 
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.find(EmptyState).exists()).toBe(true);
-        expect(wrapper.find(EmptyState).props('selectedState')).toBe('loading');
+        expect(wrapper.find(EmptyState).props('selectedState')).toBe(dashboardEmptyStates.LOADING);
       });
     });
 
@@ -136,23 +107,117 @@ describe('Dashboard', () => {
       setupStoreWithData(store);
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.vm.showEmptyState).toEqual(false);
+        expect(wrapper.vm.emptyState).toBeNull();
         expect(wrapper.findAll('.prometheus-panel')).toHaveLength(0);
       });
     });
 
     it('fetches the metrics data with proper time window', () => {
-      jest.spyOn(store, 'dispatch');
+      createMountedWrapper({ hasMetrics: true });
 
+      return wrapper.vm.$nextTick().then(() => {
+        expect(store.dispatch).toHaveBeenCalledWith('monitoringDashboard/fetchData', undefined);
+        expect(store.dispatch).toHaveBeenCalledWith(
+          'monitoringDashboard/setTimeRange',
+          expect.objectContaining({ duration: { seconds: 28800 } }),
+        );
+      });
+    });
+  });
+
+  describe('panel containers layout', () => {
+    const findPanelLayoutWrapperAt = index => {
+      return wrapper
+        .find(GraphGroup)
+        .findAll('[data-testid="dashboard-panel-layout-wrapper"]')
+        .at(index);
+    };
+
+    beforeEach(() => {
+      createMountedWrapper({ hasMetrics: true });
+
+      return wrapper.vm.$nextTick();
+    });
+
+    describe('when the graph group has an even number of panels', () => {
+      it('2 panels - all panel wrappers take half width of their parent', () => {
+        setupStoreWithDataForPanelCount(store, 2);
+
+        wrapper.vm.$nextTick(() => {
+          expect(findPanelLayoutWrapperAt(0).classes('col-lg-6')).toBe(true);
+          expect(findPanelLayoutWrapperAt(1).classes('col-lg-6')).toBe(true);
+        });
+      });
+
+      it('4 panels - all panel wrappers take half width of their parent', () => {
+        setupStoreWithDataForPanelCount(store, 4);
+
+        wrapper.vm.$nextTick(() => {
+          expect(findPanelLayoutWrapperAt(0).classes('col-lg-6')).toBe(true);
+          expect(findPanelLayoutWrapperAt(1).classes('col-lg-6')).toBe(true);
+          expect(findPanelLayoutWrapperAt(2).classes('col-lg-6')).toBe(true);
+          expect(findPanelLayoutWrapperAt(3).classes('col-lg-6')).toBe(true);
+        });
+      });
+    });
+
+    describe('when the graph group has an odd number of panels', () => {
+      it('1 panel - panel wrapper does not take half width of its parent', () => {
+        setupStoreWithDataForPanelCount(store, 1);
+
+        wrapper.vm.$nextTick(() => {
+          expect(findPanelLayoutWrapperAt(0).classes('col-lg-6')).toBe(false);
+        });
+      });
+
+      it('3 panels - all panels but last take half width of their parents', () => {
+        setupStoreWithDataForPanelCount(store, 3);
+
+        wrapper.vm.$nextTick(() => {
+          expect(findPanelLayoutWrapperAt(0).classes('col-lg-6')).toBe(true);
+          expect(findPanelLayoutWrapperAt(1).classes('col-lg-6')).toBe(true);
+          expect(findPanelLayoutWrapperAt(2).classes('col-lg-6')).toBe(false);
+        });
+      });
+
+      it('5 panels - all panels but last take half width of their parents', () => {
+        setupStoreWithDataForPanelCount(store, 5);
+
+        wrapper.vm.$nextTick(() => {
+          expect(findPanelLayoutWrapperAt(0).classes('col-lg-6')).toBe(true);
+          expect(findPanelLayoutWrapperAt(1).classes('col-lg-6')).toBe(true);
+          expect(findPanelLayoutWrapperAt(2).classes('col-lg-6')).toBe(true);
+          expect(findPanelLayoutWrapperAt(3).classes('col-lg-6')).toBe(true);
+          expect(findPanelLayoutWrapperAt(4).classes('col-lg-6')).toBe(false);
+        });
+      });
+    });
+  });
+
+  describe('dashboard validation warning', () => {
+    it('displays a warning if there are validation warnings', () => {
       createMountedWrapper({ hasMetrics: true });
 
       store.commit(
-        `monitoringDashboard/${types.RECEIVE_ENVIRONMENTS_DATA_SUCCESS}`,
-        environmentData,
+        `monitoringDashboard/${types.RECEIVE_DASHBOARD_VALIDATION_WARNINGS_SUCCESS}`,
+        true,
       );
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(store.dispatch).toHaveBeenCalled();
+        expect(createFlash).toHaveBeenCalled();
+      });
+    });
+
+    it('does not display a warning if there are no validation warnings', () => {
+      createMountedWrapper({ hasMetrics: true });
+
+      store.commit(
+        `monitoringDashboard/${types.RECEIVE_DASHBOARD_VALIDATION_WARNINGS_SUCCESS}`,
+        false,
+      );
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(createFlash).not.toHaveBeenCalled();
       });
     });
   });
@@ -325,10 +390,39 @@ describe('Dashboard', () => {
     });
   });
 
+  describe('when all panels in the first group are loading', () => {
+    const findGroupAt = i => wrapper.findAll(GraphGroup).at(i);
+
+    beforeEach(() => {
+      setupStoreWithDashboard(store);
+
+      const { panels } = store.state.monitoringDashboard.dashboard.panelGroups[0];
+      panels.forEach(({ metrics }) => {
+        store.commit(`monitoringDashboard/${types.REQUEST_METRIC_RESULT}`, {
+          metricId: metrics[0].metricId,
+        });
+      });
+
+      createShallowWrapper();
+
+      return wrapper.vm.$nextTick();
+    });
+
+    it('a loading icon appears in the first group', () => {
+      expect(findGroupAt(0).props('isLoading')).toBe(true);
+    });
+
+    it('a loading icon does not appear in the second group', () => {
+      expect(findGroupAt(1).props('isLoading')).toBe(false);
+    });
+  });
+
   describe('when all requests have been commited by the store', () => {
     beforeEach(() => {
       store.commit(`monitoringDashboard/${types.SET_INITIAL_STATE}`, {
         currentEnvironmentName: 'production',
+        currentDashboard: dashboardGitResponse[0].path,
+        projectPath: TEST_HOST,
       });
       createMountedWrapper({ hasMetrics: true });
       setupStoreWithData(store);
@@ -336,138 +430,14 @@ describe('Dashboard', () => {
       return wrapper.vm.$nextTick();
     });
 
-    it('renders the environments dropdown with a number of environments', () => {
-      expect(findAllEnvironmentsDropdownItems().length).toEqual(environmentData.length);
+    it('it does not show loading icons in any group', () => {
+      setupStoreWithData(store);
 
-      findAllEnvironmentsDropdownItems().wrappers.forEach((itemWrapper, index) => {
-        const anchorEl = itemWrapper.find('a');
-        if (anchorEl.exists() && environmentData[index].metrics_path) {
-          const href = anchorEl.attributes('href');
-          expect(href).toBe(environmentData[index].metrics_path);
-        }
-      });
-    });
-
-    // Note: This test is not working, .active does not show the active environment
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('renders the environments dropdown with a single active element', () => {
-      const activeItem = findAllEnvironmentsDropdownItems().wrappers.filter(itemWrapper =>
-        itemWrapper.find('.active').exists(),
-      );
-
-      expect(activeItem.length).toBe(1);
-    });
-  });
-
-  describe('star dashboards', () => {
-    const findToggleStar = () => wrapper.find(DashboardHeader).find({ ref: 'toggleStarBtn' });
-    const findToggleStarIcon = () => findToggleStar().find(GlIcon);
-
-    beforeEach(() => {
-      createShallowWrapper();
-      setupAllDashboards(store);
-    });
-
-    it('toggle star button is shown', () => {
-      expect(findToggleStar().exists()).toBe(true);
-      expect(findToggleStar().props('disabled')).toBe(false);
-    });
-
-    it('toggle star button is disabled when starring is taking place', () => {
-      store.commit(`monitoringDashboard/${types.REQUEST_DASHBOARD_STARRING}`);
-
-      return wrapper.vm.$nextTick(() => {
-        expect(findToggleStar().exists()).toBe(true);
-        expect(findToggleStar().props('disabled')).toBe(true);
-      });
-    });
-
-    describe('when the dashboard list is loaded', () => {
-      // Tooltip element should wrap directly
-      const getToggleTooltip = () => findToggleStar().element.parentElement.getAttribute('title');
-
-      beforeEach(() => {
-        setupAllDashboards(store);
-        jest.spyOn(store, 'dispatch');
-      });
-
-      it('dispatches a toggle star action', () => {
-        findToggleStar().vm.$emit('click');
-
-        return wrapper.vm.$nextTick().then(() => {
-          expect(store.dispatch).toHaveBeenCalledWith(
-            'monitoringDashboard/toggleStarredValue',
-            undefined,
-          );
+      wrapper.vm.$nextTick(() => {
+        wrapper.findAll(GraphGroup).wrappers.forEach(groupWrapper => {
+          expect(groupWrapper.props('isLoading')).toBe(false);
         });
       });
-
-      describe('when dashboard is not starred', () => {
-        beforeEach(() => {
-          store.commit(`monitoringDashboard/${types.SET_INITIAL_STATE}`, {
-            currentDashboard: dashboardGitResponse[0].path,
-          });
-          return wrapper.vm.$nextTick();
-        });
-
-        it('toggle star button shows "Star dashboard"', () => {
-          expect(getToggleTooltip()).toBe('Star dashboard');
-        });
-
-        it('toggle star button shows  an unstarred state', () => {
-          expect(findToggleStarIcon().attributes('name')).toBe('star-o');
-        });
-      });
-
-      describe('when dashboard is starred', () => {
-        beforeEach(() => {
-          store.commit(`monitoringDashboard/${types.SET_INITIAL_STATE}`, {
-            currentDashboard: dashboardGitResponse[1].path,
-          });
-          return wrapper.vm.$nextTick();
-        });
-
-        it('toggle star button shows "Star dashboard"', () => {
-          expect(getToggleTooltip()).toBe('Unstar dashboard');
-        });
-
-        it('toggle star button shows a starred state', () => {
-          expect(findToggleStarIcon().attributes('name')).toBe('star');
-        });
-      });
-    });
-  });
-
-  it('hides the environments dropdown list when there is no environments', () => {
-    createMountedWrapper({ hasMetrics: true });
-
-    setupStoreWithDashboard(store);
-
-    return wrapper.vm.$nextTick().then(() => {
-      expect(findAllEnvironmentsDropdownItems()).toHaveLength(0);
-    });
-  });
-
-  it('renders the datetimepicker dropdown', () => {
-    createMountedWrapper({ hasMetrics: true });
-
-    setupStoreWithData(store);
-
-    return wrapper.vm.$nextTick().then(() => {
-      expect(wrapper.find(DateTimePicker).exists()).toBe(true);
-    });
-  });
-
-  it('renders the refresh dashboard button', () => {
-    createMountedWrapper({ hasMetrics: true });
-
-    setupStoreWithData(store);
-
-    return wrapper.vm.$nextTick().then(() => {
-      const refreshBtn = wrapper.find(DashboardHeader).findAll({ ref: 'refreshDashboardBtn' });
-
-      expect(refreshBtn).toHaveLength(1);
-      expect(refreshBtn.is(GlDeprecatedButton)).toBe(true);
     });
   });
 
@@ -475,8 +445,7 @@ describe('Dashboard', () => {
     beforeEach(() => {
       createShallowWrapper({ hasMetrics: true });
       setupStoreWithData(store);
-      setupStoreWithVariable(store);
-
+      store.state.monitoringDashboard.variables = storeVariables;
       return wrapper.vm.$nextTick();
     });
 
@@ -597,15 +566,6 @@ describe('Dashboard', () => {
           undefined,
         );
       });
-
-      it('restores dashboard from full screen by typing the Escape key on IE11', () => {
-        mockKeyup(ESC_KEY_IE11);
-
-        expect(store.dispatch).toHaveBeenCalledWith(
-          `monitoringDashboard/clearExpandedPanel`,
-          undefined,
-        );
-      });
     });
   });
 
@@ -633,100 +593,6 @@ describe('Dashboard', () => {
           .at(0)
           .props('selectedState'),
       ).toEqual(metricStates.NO_DATA);
-    });
-  });
-
-  describe('searchable environments dropdown', () => {
-    beforeEach(() => {
-      createMountedWrapper({ hasMetrics: true }, { attachToDocument: true });
-
-      setupStoreWithData(store);
-
-      return wrapper.vm.$nextTick();
-    });
-
-    afterEach(() => {
-      wrapper.destroy();
-    });
-
-    it('renders a search input', () => {
-      expect(
-        wrapper
-          .find(DashboardHeader)
-          .find({ ref: 'monitorEnvironmentsDropdownSearch' })
-          .exists(),
-      ).toBe(true);
-    });
-
-    it('renders dropdown items', () => {
-      findAllEnvironmentsDropdownItems().wrappers.forEach((itemWrapper, index) => {
-        const anchorEl = itemWrapper.find('a');
-        if (anchorEl.exists()) {
-          expect(anchorEl.text()).toBe(environmentData[index].name);
-        }
-      });
-    });
-
-    it('filters rendered dropdown items', () => {
-      const searchTerm = 'production';
-      const resultEnvs = environmentData.filter(({ name }) => name.indexOf(searchTerm) !== -1);
-      setSearchTerm(searchTerm);
-
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findAllEnvironmentsDropdownItems().length).toEqual(resultEnvs.length);
-      });
-    });
-
-    it('does not filter dropdown items if search term is empty string', () => {
-      const searchTerm = '';
-      setSearchTerm(searchTerm);
-
-      return wrapper.vm.$nextTick(() => {
-        expect(findAllEnvironmentsDropdownItems().length).toEqual(environmentData.length);
-      });
-    });
-
-    it("shows error message if search term doesn't match", () => {
-      const searchTerm = 'does-not-exist';
-      setSearchTerm(searchTerm);
-
-      return wrapper.vm.$nextTick(() => {
-        expect(
-          wrapper
-            .find(DashboardHeader)
-            .find({ ref: 'monitorEnvironmentsDropdownMsg' })
-            .isVisible(),
-        ).toBe(true);
-      });
-    });
-
-    it('shows loading element when environments fetch is still loading', () => {
-      store.commit(`monitoringDashboard/${types.REQUEST_ENVIRONMENTS_DATA}`);
-
-      return wrapper.vm
-        .$nextTick()
-        .then(() => {
-          expect(
-            wrapper
-              .find(DashboardHeader)
-              .find({ ref: 'monitorEnvironmentsDropdownLoading' })
-              .exists(),
-          ).toBe(true);
-        })
-        .then(() => {
-          store.commit(
-            `monitoringDashboard/${types.RECEIVE_ENVIRONMENTS_DATA_SUCCESS}`,
-            environmentData,
-          );
-        })
-        .then(() => {
-          expect(
-            wrapper
-              .find(DashboardHeader)
-              .find({ ref: 'monitorEnvironmentsDropdownLoading' })
-              .exists(),
-          ).toBe(false);
-        });
     });
   });
 
@@ -779,7 +645,7 @@ describe('Dashboard', () => {
 
         it('it enables draggables', () => {
           expect(findRearrangeButton().attributes('pressed')).toBeTruthy();
-          expect(findEnabledDraggables()).toEqual(findDraggables());
+          expect(findEnabledDraggables().wrappers).toEqual(findDraggables().wrappers);
         });
 
         it('metrics can be swapped', () => {
@@ -802,7 +668,11 @@ describe('Dashboard', () => {
         });
 
         it('shows a remove button, which removes a panel', () => {
-          expect(findFirstDraggableRemoveButton().isEmpty()).toBe(false);
+          expect(
+            findFirstDraggableRemoveButton()
+              .find('a')
+              .exists(),
+          ).toBe(true);
 
           expect(findDraggablePanels().length).toEqual(metricsDashboardPanelCount);
           findFirstDraggableRemoveButton().trigger('click');
@@ -823,57 +693,6 @@ describe('Dashboard', () => {
     });
   });
 
-  describe('dashboard timezone', () => {
-    const setupWithTimezone = value => {
-      store = createStore({ dashboardTimezone: value });
-      setupStoreWithData(store);
-      createShallowWrapper({ hasMetrics: true });
-      return wrapper.vm.$nextTick;
-    };
-
-    describe('local timezone is enabled by default', () => {
-      beforeEach(() => {
-        return setupWithTimezone();
-      });
-
-      it('shows the data time picker in local timezone', () => {
-        expect(
-          findDashboardHeader()
-            .find(DateTimePicker)
-            .props('utc'),
-        ).toBe(false);
-      });
-    });
-
-    describe('when LOCAL timezone is enabled', () => {
-      beforeEach(() => {
-        return setupWithTimezone('LOCAL');
-      });
-
-      it('shows the data time picker in local timezone', () => {
-        expect(
-          findDashboardHeader()
-            .find(DateTimePicker)
-            .props('utc'),
-        ).toBe(false);
-      });
-    });
-
-    describe('when UTC timezone is enabled', () => {
-      beforeEach(() => {
-        return setupWithTimezone('UTC');
-      });
-
-      it('shows the data time picker in UTC format', () => {
-        expect(
-          findDashboardHeader()
-            .find(DateTimePicker)
-            .props('utc'),
-        ).toBe(true);
-      });
-    });
-  });
-
   describe('cluster health', () => {
     beforeEach(() => {
       createShallowWrapper({ hasMetrics: true, showHeader: false });
@@ -888,41 +707,13 @@ describe('Dashboard', () => {
     });
 
     it('renders correctly', () => {
-      expect(wrapper.isVueInstance()).toBe(true);
-      expect(wrapper.exists()).toBe(true);
-    });
-  });
-
-  describe('dashboard edit link', () => {
-    const findEditLink = () => wrapper.find('.js-edit-link');
-
-    beforeEach(() => {
-      createShallowWrapper({ hasMetrics: true });
-
-      setupAllDashboards(store);
-      return wrapper.vm.$nextTick();
-    });
-
-    it('is not present for the default dashboard', () => {
-      expect(findEditLink().exists()).toBe(false);
-    });
-
-    it('is present for a custom dashboard, and links to its edit_path', () => {
-      const dashboard = dashboardGitResponse[1];
-      store.commit(`monitoringDashboard/${types.SET_INITIAL_STATE}`, {
-        currentDashboard: dashboard.path,
-      });
-
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findEditLink().exists()).toBe(true);
-        expect(findEditLink().attributes('href')).toBe(dashboard.project_blob_path);
-      });
+      expect(wrapper.html()).not.toBe('');
     });
   });
 
   describe('document title', () => {
     const originalTitle = 'Original Title';
-    const defaultDashboardName = dashboardGitResponse[0].display_name;
+    const overviewDashboardName = dashboardGitResponse[0].display_name;
 
     beforeEach(() => {
       document.title = originalTitle;
@@ -933,11 +724,11 @@ describe('Dashboard', () => {
       document.title = '';
     });
 
-    it('is prepended with default dashboard name by default', () => {
+    it('is prepended with the overview dashboard name by default', () => {
       setupAllDashboards(store);
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(document.title.startsWith(`${defaultDashboardName} · `)).toBe(true);
+        expect(document.title.startsWith(`${overviewDashboardName} · `)).toBe(true);
       });
     });
 
@@ -952,11 +743,11 @@ describe('Dashboard', () => {
       });
     });
 
-    it('is prepended with default dashboard name is path is not known', () => {
+    it('is prepended with the overview dashboard name if path is not known', () => {
       setupAllDashboards(store, 'unknown/path');
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(document.title.startsWith(`${defaultDashboardName} · `)).toBe(true);
+        expect(document.title.startsWith(`${overviewDashboardName} · `)).toBe(true);
       });
     });
 
@@ -973,41 +764,6 @@ describe('Dashboard', () => {
       return wrapper.vm.$nextTick().then(() => {
         expect(document.title).toBe(originalTitle);
       });
-    });
-  });
-
-  describe('Dashboard dropdown', () => {
-    beforeEach(() => {
-      createMountedWrapper({ hasMetrics: true });
-      setupAllDashboards(store);
-      return wrapper.vm.$nextTick();
-    });
-
-    it('shows the dashboard dropdown', () => {
-      const dashboardDropdown = wrapper.find(DashboardsDropdown);
-
-      expect(dashboardDropdown.exists()).toBe(true);
-    });
-  });
-
-  describe('external dashboard link', () => {
-    beforeEach(() => {
-      createMountedWrapper({
-        hasMetrics: true,
-        showPanels: false,
-        showTimeWindowDropdown: false,
-        externalDashboardUrl: '/mockUrl',
-      });
-
-      return wrapper.vm.$nextTick();
-    });
-
-    it('shows the link', () => {
-      const externalDashboardButton = wrapper.find('.js-external-dashboard-link');
-
-      expect(externalDashboardButton.exists()).toBe(true);
-      expect(externalDashboardButton.is(GlDeprecatedButton)).toBe(true);
-      expect(externalDashboardButton.text()).toContain('View full dashboard');
     });
   });
 
@@ -1041,73 +797,31 @@ describe('Dashboard', () => {
     });
   });
 
-  describe('add custom metrics', () => {
-    const findAddMetricButton = () => wrapper.find(DashboardHeader).find({ ref: 'addMetricBtn' });
+  describe('keyboard shortcuts', () => {
+    const currentDashboard = dashboardGitResponse[1].path;
+    const panelRef = 'dashboard-panel-response-metrics-aws-elb-4-1'; // skip expanded panel
 
-    describe('when not available', () => {
-      beforeEach(() => {
-        createShallowWrapper({
-          hasMetrics: true,
-          customMetricsPath: '/endpoint',
-        });
+    // While the recommendation in the documentation is to test
+    // with a data-testid attribute, I want to make sure that
+    // the dashboard panels have a ref attribute set.
+    const getDashboardPanel = () => wrapper.find({ ref: panelRef });
+
+    beforeEach(() => {
+      setupStoreWithData(store);
+      store.commit(`monitoringDashboard/${types.SET_INITIAL_STATE}`, {
+        currentDashboard,
       });
-      it('does not render add button on the dashboard', () => {
-        expect(findAddMetricButton().exists()).toBe(false);
-      });
+      createShallowWrapper({ hasMetrics: true });
+
+      wrapper.setData({ hoveredPanel: panelRef });
+
+      return wrapper.vm.$nextTick();
     });
 
-    describe('when available', () => {
-      let origPage;
-      beforeEach(done => {
-        jest.spyOn(Tracking, 'event').mockReturnValue();
-        createShallowWrapper({
-          hasMetrics: true,
-          customMetricsPath: '/endpoint',
-          customMetricsAvailable: true,
-        });
-        setupStoreWithData(store);
+    it('contains a ref attribute inside a DashboardPanel component', () => {
+      const dashboardPanel = getDashboardPanel();
 
-        origPage = document.body.dataset.page;
-        document.body.dataset.page = 'projects:environments:metrics';
-
-        wrapper.vm.$nextTick(done);
-      });
-      afterEach(() => {
-        document.body.dataset.page = origPage;
-      });
-
-      it('renders add button on the dashboard', () => {
-        expect(findAddMetricButton()).toBeDefined();
-      });
-
-      it('uses modal for custom metrics form', () => {
-        expect(wrapper.find(GlModal).exists()).toBe(true);
-        expect(wrapper.find(GlModal).attributes().modalid).toBe('add-metric');
-      });
-      it('adding new metric is tracked', done => {
-        const submitButton = wrapper
-          .find(DashboardHeader)
-          .find({ ref: 'submitCustomMetricsFormBtn' }).vm;
-        wrapper.vm.$nextTick(() => {
-          submitButton.$el.click();
-          wrapper.vm.$nextTick(() => {
-            expect(Tracking.event).toHaveBeenCalledWith(
-              document.body.dataset.page,
-              'click_button',
-              {
-                label: 'add_new_metric',
-                property: 'modal',
-                value: undefined,
-              },
-            );
-            done();
-          });
-        });
-      });
-
-      it('renders custom metrics form fields', () => {
-        expect(wrapper.find(CustomMetricsFormFields).exists()).toBe(true);
-      });
+      expect(dashboardPanel.exists()).toBe(true);
     });
   });
 });

@@ -6,30 +6,34 @@ module Projects
     SameFilesystemError = Class.new(Error)
 
     attr_reader :repository_storage_move
-    delegate :project, :destination_storage_name, to: :repository_storage_move
-    delegate :repository, to: :project
+    delegate :project, :source_storage_name, :destination_storage_name, to: :repository_storage_move
 
     def initialize(repository_storage_move)
       @repository_storage_move = repository_storage_move
     end
 
     def execute
-      repository_storage_move.start!
+      repository_storage_move.with_lock do
+        return ServiceResponse.success unless repository_storage_move.scheduled? # rubocop:disable Cop/AvoidReturnFromBlocks
 
-      raise SameFilesystemError if same_filesystem?(repository.storage, destination_storage_name)
+        repository_storage_move.start!
+      end
+
+      raise SameFilesystemError if same_filesystem?(source_storage_name, destination_storage_name)
 
       mirror_repositories
 
-      project.transaction do
-        mark_old_paths_for_archive
-
-        repository_storage_move.finish!
+      repository_storage_move.transaction do
+        repository_storage_move.finish_replication!
 
         project.leave_pool_repository
         project.track_project_repository
       end
 
+      remove_old_paths
       enqueue_housekeeping
+
+      repository_storage_move.finish_cleanup!
 
       ServiceResponse.success
 
@@ -79,8 +83,6 @@ module Projects
         full_path
       )
 
-      new_repository.create_repository
-
       new_repository.replicate(raw_repository)
       new_checksum = new_repository.checksum
 
@@ -89,36 +91,31 @@ module Projects
       end
     end
 
-    def mark_old_paths_for_archive
-      old_repository_storage = project.repository_storage
-      new_project_path = moved_path(project.disk_path)
+    def remove_old_paths
+      Gitlab::Git::Repository.new(
+        source_storage_name,
+        "#{project.disk_path}.git",
+        nil,
+        nil
+      ).remove
 
-      # Notice that the block passed to `run_after_commit` will run with `project`
-      # as its context
-      project.run_after_commit do
-        GitlabShellWorker.perform_async(:mv_repository,
-                                        old_repository_storage,
-                                        disk_path,
-                                        new_project_path)
-
-        if wiki.repository_exists?
-          GitlabShellWorker.perform_async(:mv_repository,
-                                          old_repository_storage,
-                                          wiki.disk_path,
-                                          "#{new_project_path}.wiki")
-        end
-
-        if design_repository.exists?
-          GitlabShellWorker.perform_async(:mv_repository,
-                                          old_repository_storage,
-                                          design_repository.disk_path,
-                                          "#{new_project_path}.design")
-        end
+      if project.wiki.repository_exists?
+        Gitlab::Git::Repository.new(
+          source_storage_name,
+          "#{project.wiki.disk_path}.git",
+          nil,
+          nil
+        ).remove
       end
-    end
 
-    def moved_path(path)
-      "#{path}+#{project.id}+moved+#{Time.current.to_i}"
+      if project.design_repository.exists?
+        Gitlab::Git::Repository.new(
+          source_storage_name,
+          "#{project.design_repository.disk_path}.git",
+          nil,
+          nil
+        ).remove
+      end
     end
 
     # The underlying FetchInternalRemote call uses a `git fetch` to move data

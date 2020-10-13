@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Editing file blob', :js do
+RSpec.describe 'Editing file blob', :js do
   include TreeHelper
 
   let(:project) { create(:project, :public, :repository) }
@@ -10,10 +10,6 @@ describe 'Editing file blob', :js do
   let(:branch) { 'master' }
   let(:file_path) { project.repository.ls_files(project.repository.root_ref)[1] }
   let(:readme_file_path) { 'README.md' }
-
-  before do
-    stub_feature_flags(web_ide_default: false)
-  end
 
   context 'as a developer' do
     let(:user) { create(:user) }
@@ -24,9 +20,14 @@ describe 'Editing file blob', :js do
       sign_in(user)
     end
 
-    def edit_and_commit(commit_changes: true)
+    def edit_and_commit(commit_changes: true, is_diff: false)
       wait_for_requests
-      find('.js-edit-blob').click
+
+      if is_diff
+        first('.js-diff-more-actions').click
+      end
+
+      first('.js-edit-blob').click
       fill_editor(content: 'class NextFeature\\nend\\n')
 
       if commit_changes
@@ -36,14 +37,13 @@ describe 'Editing file blob', :js do
 
     def fill_editor(content: 'class NextFeature\\nend\\n')
       wait_for_requests
-      find('#editor')
-      execute_script("ace.edit('editor').setValue('#{content}')")
+      execute_script("monaco.editor.getModels()[0].setValue('#{content}')")
     end
 
     context 'from MR diff' do
       before do
         visit diffs_project_merge_request_path(project, merge_request)
-        edit_and_commit
+        edit_and_commit(is_diff: true)
       end
 
       it 'returns me to the mr' do
@@ -67,10 +67,17 @@ describe 'Editing file blob', :js do
       expect(find_by_id('file_path').value).to eq('ci/.gitlab-ci.yml')
     end
 
+    it 'updating file path updates syntax highlighting' do
+      visit project_edit_blob_path(project, tree_join(branch, readme_file_path))
+      expect(find('#editor')['data-mode-id']).to eq('markdown')
+
+      find('#file_path').send_keys('foo.txt') do
+        expect(find('#editor')['data-mode-id']).to eq('plaintext')
+      end
+    end
+
     context 'from blob file path' do
       before do
-        stub_feature_flags(code_navigation: false)
-
         visit project_blob_path(project, tree_join(branch, file_path))
       end
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::DailyBuildGroupReportResultsFinder do
+RSpec.describe Ci::DailyBuildGroupReportResultsFinder do
   describe '#execute' do
     let(:project) { create(:project, :private) }
     let(:ref_path) { 'refs/heads/master' }
@@ -58,6 +58,8 @@ describe Ci::DailyBuildGroupReportResultsFinder do
       end
     end
   end
+
+  private
 
   def create_daily_coverage(group_name, coverage, date)
     create(

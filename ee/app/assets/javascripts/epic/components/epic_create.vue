@@ -7,7 +7,6 @@ import {
   GlIcon,
   GlButton,
   GlTooltipDirective,
-  GlDeprecatedButton,
 } from '@gitlab/ui';
 
 import { __ } from '~/locale';
@@ -18,7 +17,6 @@ export default {
   components: {
     GlFormCheckbox,
     GlIcon,
-    GlDeprecatedButton,
     GlButton,
     GlForm,
     GlFormInput,
@@ -72,9 +70,14 @@ export default {
 
 <template>
   <div class="dropdown epic-create-dropdown">
-    <gl-deprecated-button variant="success" class="qa-new-epic-button" data-toggle="dropdown">
+    <gl-button
+      category="primary"
+      variant="success"
+      data-qa-selector="new_epic_button"
+      data-toggle="dropdown"
+    >
       {{ __('New epic') }}
-    </gl-deprecated-button>
+    </gl-button>
 
     <div :class="{ 'dropdown-menu-right': alignRight }" class="dropdown-menu">
       <gl-form>
@@ -90,9 +93,9 @@ export default {
           @keyup.enter.exact="createEpic"
         />
         <gl-form-checkbox
-          v-if="glFeatures.confidentialEpics"
           v-model="epicConfidential"
           class="mt-3 mb-3 mr-0"
+          data-qa-selector="confidential_epic_checkbox"
           ><span> {{ __('Make this epic confidential') }} </span>
           <span
             v-gl-tooltip.viewport.top.hover
@@ -115,7 +118,8 @@ export default {
           :loading="epicCreateInProgress"
           category="primary"
           variant="success"
-          class="prepend-top-10 qa-create-epic-button"
+          class="gl-mt-3"
+          data-qa-selector="create_epic_button"
           @click.stop="createEpic"
           >{{ buttonLabel }}</gl-button
         >

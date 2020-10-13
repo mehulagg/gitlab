@@ -160,6 +160,7 @@ RSpec.describe Burndown do
           author: user
         }
       end
+
       let(:scope) { project }
     end
   end
@@ -188,6 +189,7 @@ RSpec.describe Burndown do
             author: user
           }
         end
+
         let(:scope) { group }
       end
     end
@@ -204,6 +206,7 @@ RSpec.describe Burndown do
             author: user
           }
         end
+
         let(:scope) { group }
       end
     end

@@ -1,14 +1,18 @@
 <script>
 import { mapGetters } from 'vuex';
-import { GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlLoadingIcon, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import { __, sprintf } from '~/locale';
 import resolvedStatusMixin from '~/batch_comments/mixins/resolved_status';
-import Icon from '~/vue_shared/components/icon.vue';
 import ReplyButton from './note_actions/reply_button.vue';
+import eventHub from '~/sidebar/event_hub';
+import Api from '~/api';
+import { deprecatedCreateFlash as flash } from '~/flash';
+import { splitCamelCase } from '../../lib/utils/text_utility';
 
 export default {
   name: 'NoteActions',
   components: {
-    Icon,
+    GlIcon,
     ReplyButton,
     GlLoadingIcon,
   },
@@ -17,6 +21,10 @@ export default {
   },
   mixins: [resolvedStatusMixin],
   props: {
+    author: {
+      type: Object,
+      required: true,
+    },
     authorId: {
       type: Number,
       required: true,
@@ -39,6 +47,26 @@ export default {
       type: String,
       required: false,
       default: null,
+    },
+    isAuthor: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    isContributor: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    noteableType: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    projectName: {
+      type: String,
+      required: false,
+      default: '',
     },
     showReply: {
       type: Boolean,
@@ -87,7 +115,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['getUserDataByProp']),
+    ...mapGetters(['getUserDataByProp', 'getNoteableData']),
     shouldShowActionsDropdown() {
       return this.currentUserId && (this.canEdit || this.canReportAsAbuse);
     },
@@ -99,6 +127,48 @@ export default {
     },
     currentUserId() {
       return this.getUserDataByProp('id');
+    },
+    isUserAssigned() {
+      return this.assignees && this.assignees.some(({ id }) => id === this.author.id);
+    },
+    displayAssignUserText() {
+      return this.isUserAssigned
+        ? __('Unassign from commenting user')
+        : __('Assign to commenting user');
+    },
+    sidebarAction() {
+      return this.isUserAssigned ? 'sidebar.addAssignee' : 'sidebar.removeAssignee';
+    },
+    targetType() {
+      return this.getNoteableData.targetType;
+    },
+    noteableDisplayName() {
+      return splitCamelCase(this.noteableType).toLowerCase();
+    },
+    assignees() {
+      return this.getNoteableData.assignees || [];
+    },
+    isIssue() {
+      return this.targetType === 'issue';
+    },
+    canAssign() {
+      return this.getNoteableData.current_user?.can_update && this.isIssue;
+    },
+    displayAuthorBadgeText() {
+      return sprintf(__('This user is the author of this %{noteable}.'), {
+        noteable: this.noteableDisplayName,
+      });
+    },
+    displayMemberBadgeText() {
+      return sprintf(__('This user has the %{access} role in the %{name} project.'), {
+        access: this.accessLevel.toLowerCase(),
+        name: this.projectName,
+      });
+    },
+    displayContributorBadgeText() {
+      return sprintf(__('This user has previously committed to the %{name} project.'), {
+        name: this.projectName,
+      });
     },
   },
   methods: {
@@ -116,13 +186,53 @@ export default {
         this.$root.$emit('bv::hide::tooltip');
       });
     },
+    handleAssigneeUpdate(assignees) {
+      this.$emit('updateAssignees', assignees);
+      eventHub.$emit(this.sidebarAction, this.author);
+      eventHub.$emit('sidebar.saveAssignees');
+    },
+    assignUser() {
+      let { assignees } = this;
+      const { project_id, iid } = this.getNoteableData;
+
+      if (this.isUserAssigned) {
+        assignees = assignees.filter(assignee => assignee.id !== this.author.id);
+      } else {
+        assignees.push({ id: this.author.id });
+      }
+
+      if (this.targetType === 'issue') {
+        Api.updateIssue(project_id, iid, {
+          assignee_ids: assignees.map(assignee => assignee.id),
+        })
+          .then(() => this.handleAssigneeUpdate(assignees))
+          .catch(() => flash(__('Something went wrong while updating assignees')));
+      }
+    },
   },
 };
 </script>
 
 <template>
   <div class="note-actions">
-    <span v-if="accessLevel" class="note-role user-access-role">{{ accessLevel }}</span>
+    <span
+      v-if="isAuthor"
+      class="note-role user-access-role has-tooltip d-none d-md-inline-block"
+      :title="displayAuthorBadgeText"
+      >{{ __('Author') }}</span
+    >
+    <span
+      v-if="accessLevel"
+      class="note-role user-access-role has-tooltip"
+      :title="displayMemberBadgeText"
+      >{{ accessLevel }}</span
+    >
+    <span
+      v-else-if="isContributor"
+      class="note-role user-access-role has-tooltip"
+      :title="displayContributorBadgeText"
+      >{{ __('Contributor') }}</span
+    >
     <div v-if="canResolve" class="note-actions-item">
       <button
         ref="resolveButton"
@@ -135,7 +245,7 @@ export default {
         @click="onResolve"
       >
         <template v-if="!isResolving">
-          <icon :name="isResolved ? 'check-circle-filled' : 'check-circle'" />
+          <gl-icon :name="isResolved ? 'check-circle-filled' : 'check-circle'" />
         </template>
         <gl-loading-icon v-else inline />
       </button>
@@ -149,9 +259,9 @@ export default {
         title="Add reaction"
         data-position="right"
       >
-        <icon class="link-highlight award-control-icon-neutral" name="slight-smile" />
-        <icon class="link-highlight award-control-icon-positive" name="smiley" />
-        <icon class="link-highlight award-control-icon-super-positive" name="smiley" />
+        <gl-icon class="link-highlight award-control-icon-neutral" name="slight-smile" />
+        <gl-icon class="link-highlight award-control-icon-positive" name="smiley" />
+        <gl-icon class="link-highlight award-control-icon-super-positive" name="smiley" />
       </a>
     </div>
     <reply-button
@@ -165,10 +275,11 @@ export default {
         v-gl-tooltip
         type="button"
         title="Edit comment"
-        class="note-action-button js-note-edit btn btn-transparent qa-note-edit-button"
+        class="note-action-button js-note-edit btn btn-transparent"
+        data-qa-selector="note_edit_button"
         @click="onEdit"
       >
-        <icon name="pencil" class="link-highlight" />
+        <gl-icon name="pencil" class="link-highlight" />
       </button>
     </div>
     <div v-if="showDeleteAction" class="note-actions-item">
@@ -179,7 +290,7 @@ export default {
         class="note-action-button js-note-delete btn btn-transparent"
         @click="onDelete"
       >
-        <icon name="remove" class="link-highlight" />
+        <gl-icon name="remove" class="link-highlight" />
       </button>
     </div>
     <div v-else-if="shouldShowActionsDropdown" class="dropdown more-actions note-actions-item">
@@ -191,7 +302,7 @@ export default {
         data-toggle="dropdown"
         @click="closeTooltip"
       >
-        <icon class="icon" name="ellipsis_v" />
+        <gl-icon class="icon" name="ellipsis_v" />
       </button>
       <ul class="dropdown-menu more-actions-dropdown dropdown-open-left">
         <li v-if="canReportAsAbuse">
@@ -204,6 +315,16 @@ export default {
             class="btn-default btn-transparent js-btn-copy-note-link"
           >
             {{ __('Copy link') }}
+          </button>
+        </li>
+        <li v-if="canAssign">
+          <button
+            class="btn-default btn-transparent"
+            data-testid="assign-user"
+            type="button"
+            @click="assignUser"
+          >
+            {{ displayAssignUserText }}
           </button>
         </li>
         <li v-if="canEdit">

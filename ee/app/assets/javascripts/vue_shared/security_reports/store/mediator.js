@@ -6,6 +6,7 @@ const updateIssueActionsMap = {
   container_scanning: 'updateContainerScanningIssue',
   dast: 'updateDastIssue',
   secret_scanning: 'updateSecretScanningIssue',
+  coverage_fuzzing: 'updateCoverageFuzzingIssue',
 };
 
 export default function configureMediator(store) {

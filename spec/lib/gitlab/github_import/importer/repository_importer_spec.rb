@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Importer::RepositoryImporter do
+RSpec.describe Gitlab::GithubImport::Importer::RepositoryImporter do
   let(:repository) { double(:repository) }
   let(:import_state) { double(:import_state) }
   let(:client) { double(:client) }
@@ -261,7 +261,7 @@ describe Gitlab::GithubImport::Importer::RepositoryImporter do
 
   describe '#update_clone_time' do
     it 'sets the timestamp for when the cloning process finished' do
-      Timecop.freeze do
+      freeze_time do
         expect(project)
           .to receive(:update_column)
           .with(:last_repository_updated_at, Time.zone.now)

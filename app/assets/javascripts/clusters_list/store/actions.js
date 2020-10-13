@@ -1,10 +1,10 @@
+import * as Sentry from '~/sentry/wrapper';
 import Poll from '~/lib/utils/poll';
 import axios from '~/lib/utils/axios_utils';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
 import { MAX_REQUESTS } from '../constants';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
-import * as Sentry from '@sentry/browser';
 import * as types from './mutation_types';
 
 const allNodesPresent = (clusters, retryCount) => {
@@ -16,8 +16,17 @@ const allNodesPresent = (clusters, retryCount) => {
   return retryCount > MAX_REQUESTS || clusters.every(cluster => cluster.nodes != null);
 };
 
-export const fetchClusters = ({ state, commit }) => {
+export const reportSentryError = (_store, { error, tag }) => {
+  Sentry.withScope(scope => {
+    scope.setTag('javascript_clusters_list', tag);
+    Sentry.captureException(error);
+  });
+};
+
+export const fetchClusters = ({ state, commit, dispatch }) => {
   let retryCount = 0;
+
+  commit(types.SET_LOADING_NODES, true);
 
   const poll = new Poll({
     resource: {
@@ -34,31 +43,30 @@ export const fetchClusters = ({ state, commit }) => {
           const paginationInformation = parseIntPagination(normalizedHeaders);
 
           commit(types.SET_CLUSTERS_DATA, { data, paginationInformation });
-          commit(types.SET_LOADING_STATE, false);
+          commit(types.SET_LOADING_CLUSTERS, false);
 
           if (allNodesPresent(data.clusters, retryCount)) {
             poll.stop();
+            commit(types.SET_LOADING_NODES, false);
           }
         }
       } catch (error) {
         poll.stop();
 
-        Sentry.withScope(scope => {
-          scope.setTag('javascript_clusters_list', 'fetchClustersSuccessCallback');
-          Sentry.captureException(error);
-        });
+        commit(types.SET_LOADING_CLUSTERS, false);
+        commit(types.SET_LOADING_NODES, false);
+
+        dispatch('reportSentryError', { error, tag: 'fetchClustersSuccessCallback' });
       }
     },
     errorCallback: response => {
       poll.stop();
 
-      commit(types.SET_LOADING_STATE, false);
+      commit(types.SET_LOADING_CLUSTERS, false);
+      commit(types.SET_LOADING_NODES, false);
       flash(__('Clusters|An error occurred while loading clusters'));
 
-      Sentry.withScope(scope => {
-        scope.setTag('javascript_clusters_list', 'fetchClustersErrorCallback');
-        Sentry.captureException(response);
-      });
+      dispatch('reportSentryError', { error: response, tag: 'fetchClustersErrorCallback' });
     },
   });
 
@@ -68,6 +76,3 @@ export const fetchClusters = ({ state, commit }) => {
 export const setPage = ({ commit }, page) => {
   commit(types.SET_PAGE, page);
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

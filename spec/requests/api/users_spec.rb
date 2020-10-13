@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Users, :do_not_mock_admin_mode do
+RSpec.describe API::Users, :do_not_mock_admin_mode do
   let_it_be(:admin) { create(:admin) }
   let_it_be(:user, reload: true) { create(:user, username: 'user.with.dot') }
   let_it_be(:key) { create(:key, user: user) }
@@ -64,6 +64,7 @@ describe API::Users, :do_not_mock_admin_mode do
 
             expect(json_response).to have_key('note')
             expect(json_response['note']).to eq(user.note)
+            expect(json_response).to have_key('sign_in_count')
           end
         end
 
@@ -72,6 +73,7 @@ describe API::Users, :do_not_mock_admin_mode do
             get api("/users/#{user.id}", user)
 
             expect(json_response).not_to have_key('note')
+            expect(json_response).not_to have_key('sign_in_count')
           end
         end
       end
@@ -345,6 +347,26 @@ describe API::Users, :do_not_mock_admin_mode do
 
         expect(response).to match_response_schema('public_api/v4/user/basics')
         expect(json_response.first.keys).not_to include 'is_admin'
+      end
+
+      context 'exclude_internal param' do
+        let_it_be(:internal_user) { User.alert_bot }
+
+        it 'returns all users when it is not set' do
+          get api("/users?exclude_internal=false", user)
+
+          expect(response).to match_response_schema('public_api/v4/user/basics')
+          expect(response).to include_pagination_headers
+          expect(json_response.map { |u| u['id'] }).to include(internal_user.id)
+        end
+
+        it 'returns all non internal users when it is set' do
+          get api("/users?exclude_internal=true", user)
+
+          expect(response).to match_response_schema('public_api/v4/user/basics')
+          expect(response).to include_pagination_headers
+          expect(json_response.map { |u| u['id'] }).not_to include(internal_user.id)
+        end
       end
     end
 
@@ -892,6 +914,50 @@ describe API::Users, :do_not_mock_admin_mode do
       expect(response).to have_gitlab_http_status(:ok)
     end
 
+    context 'updating password' do
+      def update_password(user, admin, password = User.random_password)
+        put api("/users/#{user.id}", admin), params: { password: password }
+      end
+
+      context 'admin updates their own password' do
+        it 'does not force reset on next login' do
+          update_password(admin, admin)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(user.reload.password_expired?).to eq(false)
+        end
+
+        it 'does not enqueue the `admin changed your password` email' do
+          expect { update_password(admin, admin) }
+            .not_to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+        end
+
+        it 'enqueues the `password changed` email' do
+          expect { update_password(admin, admin) }
+            .to have_enqueued_mail(DeviseMailer, :password_change)
+        end
+      end
+
+      context 'admin updates the password of another user' do
+        it 'forces reset on next login' do
+          update_password(user, admin)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(user.reload.password_expired?).to eq(true)
+        end
+
+        it 'enqueues the `admin changed your password` email' do
+          expect { update_password(user, admin) }
+            .to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+        end
+
+        it 'does not enqueue the `password changed` email' do
+          expect { update_password(user, admin) }
+            .not_to have_enqueued_mail(DeviseMailer, :password_change)
+        end
+      end
+    end
+
     it "updates user with new bio" do
       put api("/users/#{user.id}", admin), params: { bio: 'new test bio' }
 
@@ -910,11 +976,12 @@ describe API::Users, :do_not_mock_admin_mode do
       expect(user.reload.bio).to eq('')
     end
 
-    it "updates user with new password and forces reset on next login" do
-      put api("/users/#{user.id}", admin), params: { password: '12345678' }
+    it 'updates user with nil bio' do
+      put api("/users/#{user.id}", admin), params: { bio: nil }
 
       expect(response).to have_gitlab_http_status(:ok)
-      expect(user.reload.password_expires_at).to be <= Time.now
+      expect(json_response['bio']).to eq('')
+      expect(user.reload.bio).to eq('')
     end
 
     it "updates user with organization" do
@@ -1276,6 +1343,36 @@ describe API::Users, :do_not_mock_admin_mode do
       expect(json_response).to be_an Array
       expect(json_response.first['title']).to eq(key.title)
     end
+
+    it 'returns array of ssh keys with comments replaced with'\
+      'a simple identifier of username + hostname' do
+      get api("/users/#{user.id}/keys")
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(response).to include_pagination_headers
+      expect(json_response).to be_an Array
+
+      keys = json_response.map { |key_detail| key_detail['key'] }
+      expect(keys).to all(include("#{user.name} (#{Gitlab.config.gitlab.host}"))
+    end
+
+    context 'N+1 queries' do
+      before do
+        get api("/users/#{user.id}/keys")
+      end
+
+      it 'avoids N+1 queries', :request_store do
+        control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
+          get api("/users/#{user.id}/keys")
+        end.count
+
+        create_list(:key, 2, user: user)
+
+        expect do
+          get api("/users/#{user.id}/keys")
+        end.not_to exceed_all_query_limit(control_count)
+      end
+    end
   end
 
   describe 'GET /user/:user_id/keys' do
@@ -1337,7 +1434,7 @@ describe API::Users, :do_not_mock_admin_mode do
     end
   end
 
-  describe 'POST /users/:id/keys' do
+  describe 'POST /users/:id/gpg_keys' do
     it 'does not create invalid GPG key' do
       post api("/users/#{user.id}/gpg_keys", admin)
 
@@ -1363,39 +1460,47 @@ describe API::Users, :do_not_mock_admin_mode do
   end
 
   describe 'GET /user/:id/gpg_keys' do
-    context 'when unauthenticated' do
-      it 'returns authentication error' do
-        get api("/users/#{user.id}/gpg_keys")
+    it 'returns 404 for non-existing user' do
+      get api('/users/0/gpg_keys')
 
-        expect(response).to have_gitlab_http_status(:unauthorized)
-      end
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(json_response['message']).to eq('404 User Not Found')
     end
 
-    context 'when authenticated' do
-      it 'returns 404 for non-existing user' do
-        get api('/users/0/gpg_keys', admin)
+    it 'returns array of GPG keys' do
+      user.gpg_keys << gpg_key
 
-        expect(response).to have_gitlab_http_status(:not_found)
-        expect(json_response['message']).to eq('404 User Not Found')
-      end
+      get api("/users/#{user.id}/gpg_keys")
 
-      it 'returns 404 error if key not foud' do
-        delete api("/users/#{user.id}/gpg_keys/#{non_existing_record_id}", admin)
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(response).to include_pagination_headers
+      expect(json_response).to be_an Array
+      expect(json_response.first['key']).to eq(gpg_key.key)
+    end
+  end
 
-        expect(response).to have_gitlab_http_status(:not_found)
-        expect(json_response['message']).to eq('404 GPG Key Not Found')
-      end
+  describe 'GET /user/:id/gpg_keys/:key_id' do
+    it 'returns 404 for non-existing user' do
+      get api('/users/0/gpg_keys/1')
 
-      it 'returns array of GPG keys' do
-        user.gpg_keys << gpg_key
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(json_response['message']).to eq('404 User Not Found')
+    end
 
-        get api("/users/#{user.id}/gpg_keys", admin)
+    it 'returns 404 for non-existing key' do
+      get api("/users/#{user.id}/gpg_keys/0")
 
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response).to be_an Array
-        expect(json_response.first['key']).to eq(gpg_key.key)
-      end
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(json_response['message']).to eq('404 GPG Key Not Found')
+    end
+
+    it 'returns a single GPG key' do
+      user.gpg_keys << gpg_key
+
+      get api("/users/#{user.id}/gpg_keys/#{gpg_key.id}")
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['key']).to eq(gpg_key.key)
     end
   end
 
@@ -1751,6 +1856,36 @@ describe API::Users, :do_not_mock_admin_mode do
         expect(json_response.first["title"]).to eq(key.title)
       end
 
+      it 'returns array of ssh keys with comments replaced with'\
+        'a simple identifier of username + hostname' do
+        get api("/user/keys", user)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to include_pagination_headers
+        expect(json_response).to be_an Array
+
+        keys = json_response.map { |key_detail| key_detail['key'] }
+        expect(keys).to all(include("#{user.name} (#{Gitlab.config.gitlab.host}"))
+      end
+
+      context 'N+1 queries' do
+        before do
+          get api("/user/keys", user)
+        end
+
+        it 'avoids N+1 queries', :request_store do
+          control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
+            get api("/user/keys", user)
+          end.count
+
+          create_list(:key, 2, user: user)
+
+          expect do
+            get api("/user/keys", user)
+          end.not_to exceed_all_query_limit(control_count)
+        end
+      end
+
       context "scopes" do
         let(:path) { "/user/keys" }
         let(:api_call) { method(:api) }
@@ -1767,6 +1902,13 @@ describe API::Users, :do_not_mock_admin_mode do
       get api("/user/keys/#{key.id}", user)
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response["title"]).to eq(key.title)
+    end
+
+    it 'exposes SSH key comment as a simple identifier of username + hostname' do
+      get api("/user/keys/#{key.id}", user)
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['key']).to include("#{key.user_name} (#{Gitlab.config.gitlab.host})")
     end
 
     it "returns 404 Not Found within invalid ID" do
@@ -2174,23 +2316,31 @@ describe API::Users, :do_not_mock_admin_mode do
     end
 
     describe 'POST /users/:id/activate' do
+      subject(:activate) { post api("/users/#{user_id}/activate", api_user) }
+
+      let(:user_id) { user.id }
+
       context 'performed by a non-admin user' do
+        let(:api_user) { user }
+
         it 'is not authorized to perform the action' do
-          post api("/users/#{user.id}/activate", user)
+          activate
 
           expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
 
       context 'performed by an admin user' do
+        let(:api_user) { admin }
+
         context 'for a deactivated user' do
           before do
             user.deactivate
-
-            post api("/users/#{user.id}/activate", admin)
           end
 
           it 'activates a deactivated user' do
+            activate
+
             expect(response).to have_gitlab_http_status(:created)
             expect(user.reload.state).to eq('active')
           end
@@ -2199,11 +2349,11 @@ describe API::Users, :do_not_mock_admin_mode do
         context 'for an active user' do
           before do
             user.activate
-
-            post api("/users/#{user.id}/activate", admin)
           end
 
           it 'returns 201' do
+            activate
+
             expect(response).to have_gitlab_http_status(:created)
             expect(user.reload.state).to eq('active')
           end
@@ -2212,11 +2362,11 @@ describe API::Users, :do_not_mock_admin_mode do
         context 'for a blocked user' do
           before do
             user.block
-
-            post api("/users/#{user.id}/activate", admin)
           end
 
           it 'returns 403' do
+            activate
+
             expect(response).to have_gitlab_http_status(:forbidden)
             expect(json_response['message']).to eq('403 Forbidden  - A blocked user must be unblocked to be activated')
             expect(user.reload.state).to eq('blocked')
@@ -2226,11 +2376,11 @@ describe API::Users, :do_not_mock_admin_mode do
         context 'for a ldap blocked user' do
           before do
             user.ldap_block
-
-            post api("/users/#{user.id}/activate", admin)
           end
 
           it 'returns 403' do
+            activate
+
             expect(response).to have_gitlab_http_status(:forbidden)
             expect(json_response['message']).to eq('403 Forbidden  - A blocked user must be unblocked to be activated')
             expect(user.reload.state).to eq('ldap_blocked')
@@ -2238,8 +2388,10 @@ describe API::Users, :do_not_mock_admin_mode do
         end
 
         context 'for a user that does not exist' do
+          let(:user_id) { 0 }
+
           before do
-            post api("/users/0/activate", admin)
+            activate
           end
 
           it_behaves_like '404'
@@ -2370,6 +2522,15 @@ describe API::Users, :do_not_mock_admin_mode do
       post api('/users/0/block', admin)
       expect(response).to have_gitlab_http_status(:not_found)
       expect(json_response['message']).to eq('404 User Not Found')
+    end
+
+    it 'returns a 403 error if user is internal' do
+      internal_user = create(:user, :bot)
+
+      post api("/users/#{internal_user.id}/block", admin)
+
+      expect(response).to have_gitlab_http_status(:forbidden)
+      expect(json_response['message']).to eq('An internal user cannot be blocked')
     end
 
     it 'returns a 201 if user is already blocked' do

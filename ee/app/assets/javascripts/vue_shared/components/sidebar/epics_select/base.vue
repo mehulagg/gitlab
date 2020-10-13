@@ -4,8 +4,8 @@ import { mapState, mapGetters, mapActions } from 'vuex';
 import $ from 'jquery';
 import { GlLoadingIcon } from '@gitlab/ui';
 
-import { __ } from '~/locale';
 import { noneEpic } from 'ee/vue_shared/constants';
+import { __ } from '~/locale';
 
 import createStore from './store';
 
@@ -39,11 +39,13 @@ export default {
     },
     issueId: {
       type: Number,
-      required: true,
+      required: false,
+      default: 0,
     },
     epicIssueId: {
       type: Number,
-      required: true,
+      required: false,
+      default: 0,
     },
     canEdit: {
       type: Boolean,
@@ -66,6 +68,11 @@ export default {
       type: String,
       required: false,
       default: DropdownVariant.Sidebar,
+    },
+    showHeader: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -132,7 +139,7 @@ export default {
       variant: this.variant,
       groupId: this.groupId,
       issueId: this.issueId,
-      selectedEpic: this.selectedEpic,
+      selectedEpic: this.initialEpic,
       selectedEpicIssueId: this.epicIssueId,
     });
     $(this.$refs.dropdown).on('shown.bs.dropdown', () => this.fetchEpics());
@@ -205,7 +212,7 @@ export default {
           :toggle-text-class="dropdownButtonTextClass"
         />
         <div class="dropdown-menu dropdown-select dropdown-menu-epics dropdown-menu-selectable">
-          <dropdown-header v-if="isDropdownVariantSidebar" />
+          <dropdown-header v-if="isDropdownVariantSidebar || showHeader" />
           <dropdown-search-input @onSearchInput="setSearchQuery" />
           <dropdown-contents
             v-if="!epicsFetchInProgress"

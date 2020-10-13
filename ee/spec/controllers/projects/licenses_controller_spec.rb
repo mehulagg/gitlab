@@ -24,16 +24,34 @@ RSpec.describe Projects::LicensesController do
             project.add_reporter(user)
           end
 
-          it 'responds to an HTML request' do
-            get :index, params: params
+          context "when requesting HTML" do
+            subject { get :index, params: params }
 
-            expect(response).to have_gitlab_http_status(:ok)
-            licenses_app_data = assigns(:licenses_app_data)
-            expect(licenses_app_data[:project_licenses_endpoint]).to eql(controller.helpers.project_licenses_path(project, detected: true, format: :json))
-            expect(licenses_app_data[:read_license_policies_endpoint]).to eql(controller.helpers.api_v4_projects_managed_licenses_path(id: project.id))
-            expect(licenses_app_data[:write_license_policies_endpoint]).to eql('')
-            expect(licenses_app_data[:documentation_path]).to eql(help_page_path('user/compliance/license_compliance/index'))
-            expect(licenses_app_data[:empty_state_svg_path]).to eql(controller.helpers.image_path('illustrations/Dependency-list-empty-state.svg'))
+            let_it_be(:mit_license) { create(:software_license, :mit) }
+            let_it_be(:apache_license) { create(:software_license, :apache_2_0) }
+            let_it_be(:custom_license) { create(:software_license, :user_entered) }
+
+            before do
+              subject
+            end
+
+            it 'returns the necessary licenses app data' do
+              licenses_app_data = assigns(:licenses_app_data)
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(licenses_app_data[:project_licenses_endpoint]).to eql(controller.helpers.project_licenses_path(project, detected: true, format: :json))
+              expect(licenses_app_data[:read_license_policies_endpoint]).to eql(controller.helpers.api_v4_projects_managed_licenses_path(id: project.id))
+              expect(licenses_app_data[:write_license_policies_endpoint]).to eql('')
+              expect(licenses_app_data[:documentation_path]).to eql(help_page_path('user/compliance/license_compliance/index'))
+              expect(licenses_app_data[:empty_state_svg_path]).to eql(controller.helpers.image_path('illustrations/Dependency-list-empty-state.svg'))
+              expect(licenses_app_data[:software_licenses]).to eql([apache_license.name, mit_license.name])
+              expect(licenses_app_data[:project_id]).to eql(project.id)
+              expect(licenses_app_data[:project_path]).to eql(controller.helpers.api_v4_projects_path(id: project.id))
+              expect(licenses_app_data[:rules_path]).to eql(controller.helpers.api_v4_projects_approval_settings_rules_path(id: project.id))
+              expect(licenses_app_data[:settings_path]).to eql(controller.helpers.api_v4_projects_approval_settings_path(id: project.id))
+              expect(licenses_app_data[:approvals_documentation_path]).to eql(help_page_path('user/application_security/index', anchor: 'enabling-license-approvals-within-a-project'))
+              expect(licenses_app_data[:locked_approvals_rule_name]).to eql(ApprovalRuleLike::DEFAULT_NAME_FOR_LICENSE_REPORT)
+            end
           end
 
           it 'counts usage of the feature' do
@@ -91,7 +109,7 @@ RSpec.describe Projects::LicensesController do
             let_it_be(:mit_policy) { create(:software_license_policy, :denied, software_license: mit, project: project) }
             let_it_be(:other_license) { create(:software_license, spdx_identifier: "Other-Id") }
             let_it_be(:other_license_policy) { create(:software_license_policy, :allowed, software_license: other_license, project: project) }
-            let_it_be(:pipeline) { create(:ee_ci_pipeline, project: project, builds: [create(:ee_ci_build, :license_scan_v2, :success)]) }
+            let_it_be(:pipeline) { create(:ee_ci_pipeline, project: project, builds: [create(:ee_ci_build, :license_scan_v2_1, :success)]) }
 
             context "when loading all policies" do
               before do
@@ -116,7 +134,7 @@ RSpec.describe Projects::LicensesController do
                   "id" => nil,
                   "spdx_identifier" => "BSD-3-Clause",
                   "name" => "BSD 3-Clause \"New\" or \"Revised\" License",
-                  "url" => "http://spdx.org/licenses/BSD-3-Clause.json",
+                  "url" => "https://opensource.org/licenses/BSD-3-Clause",
                   "classification" => "unclassified"
                 })
               end
@@ -126,7 +144,7 @@ RSpec.describe Projects::LicensesController do
                   "id" => mit_policy.id,
                   "spdx_identifier" => "MIT",
                   "name" => mit.name,
-                  "url" => "http://spdx.org/licenses/MIT.json",
+                  "url" => "https://opensource.org/licenses/MIT",
                   "classification" => "denied"
                 })
               end

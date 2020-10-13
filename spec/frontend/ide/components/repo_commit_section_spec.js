@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { createStore } from '~/ide/stores';
 import { createRouter } from '~/ide/ide_router';
+import { keepAlive } from '../../helpers/keep_alive_component_helper';
 import RepoCommitSection from '~/ide/components/repo_commit_section.vue';
 import EmptyState from '~/ide/components/commit_sidebar/empty_state.vue';
 import { stageKeys } from '~/ide/constants';
@@ -14,7 +15,7 @@ describe('RepoCommitSection', () => {
   let store;
 
   function createComponent() {
-    wrapper = mount(RepoCommitSection, { store });
+    wrapper = mount(keepAlive(RepoCommitSection), { store });
   }
 
   function setupDefaultState() {
@@ -64,6 +65,7 @@ describe('RepoCommitSection', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   describe('empty state', () => {
@@ -123,6 +125,28 @@ describe('RepoCommitSection', () => {
     });
   });
 
+  describe('if nothing is changed or staged', () => {
+    beforeEach(() => {
+      setupDefaultState();
+
+      store.state.openFiles = [...Object.values(store.state.entries)];
+      store.state.openFiles[0].active = true;
+      store.state.stagedFiles = [];
+
+      createComponent();
+    });
+
+    it('opens currently active file', () => {
+      expect(store.state.openFiles.length).toBe(1);
+      expect(store.state.openFiles[0].pending).toBe(true);
+
+      expect(store.dispatch).toHaveBeenCalledWith('openPendingTab', {
+        file: store.state.entries[store.getters.activeFile.path],
+        keyPrefix: stageKeys.unstaged,
+      });
+    });
+  });
+
   describe('with unstaged file', () => {
     beforeEach(() => {
       setupDefaultState();
@@ -144,6 +168,23 @@ describe('RepoCommitSection', () => {
 
     it('does not show empty state', () => {
       expect(wrapper.find(EmptyState).exists()).toBe(false);
+    });
+  });
+
+  describe('activated', () => {
+    let inititializeSpy;
+
+    beforeEach(async () => {
+      createComponent();
+
+      inititializeSpy = jest.spyOn(wrapper.find(RepoCommitSection).vm, 'initialize');
+      store.state.viewer = 'diff';
+
+      await wrapper.vm.reactivate();
+    });
+
+    it('re initializes the component', () => {
+      expect(inititializeSpy).toHaveBeenCalled();
     });
   });
 });

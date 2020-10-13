@@ -3,6 +3,7 @@
 module Mutations
   module AlertManagement
     class Base < BaseMutation
+      include Gitlab::Utils::UsageData
       include ResolvesProject
 
       argument :project_path, GraphQL::ID_TYPE,
@@ -17,6 +18,11 @@ module Mutations
             Types::AlertManagement::AlertType,
             null: true,
             description: "The alert after mutation"
+
+      field :todo,
+            Types::TodoType,
+            null: true,
+            description: "The todo after mutation"
 
       field :issue,
             Types::IssueType,

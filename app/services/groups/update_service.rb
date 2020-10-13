@@ -17,7 +17,13 @@ module Groups
 
       return false unless valid_share_with_group_lock_change?
 
+      return false unless valid_path_change_with_npm_packages?
+
+      return false unless update_shared_runners
+
       before_assignment_hook(group, params)
+
+      handle_namespace_settings
 
       group.assign_attributes(params)
 
@@ -35,6 +41,32 @@ module Groups
     end
 
     private
+
+    def handle_namespace_settings
+      settings_params = params.slice(*::NamespaceSetting::NAMESPACE_SETTINGS_PARAMS)
+
+      return if settings_params.empty?
+
+      ::NamespaceSetting::NAMESPACE_SETTINGS_PARAMS.each do |nsp|
+        params.delete(nsp)
+      end
+
+      ::NamespaceSettings::UpdateService.new(current_user, group, settings_params).execute
+    end
+
+    def valid_path_change_with_npm_packages?
+      return true unless group.packages_feature_enabled?
+      return true if params[:path].blank?
+      return true if !group.has_parent? && group.path == params[:path]
+
+      npm_packages = ::Packages::GroupPackagesFinder.new(current_user, group, package_type: :npm).execute
+      if npm_packages.exists?
+        group.errors.add(:path, s_('GroupSettings|cannot change when group contains projects with NPM packages'))
+        return
+      end
+
+      true
+    end
 
     def before_assignment_hook(group, params)
       # overridden in EE
@@ -81,6 +113,17 @@ module Groups
       return false if params[:share_with_group_lock].nil?
 
       params[:share_with_group_lock] != group.share_with_group_lock
+    end
+
+    def update_shared_runners
+      return true if params[:shared_runners_setting].nil?
+
+      result = Groups::UpdateSharedRunnersService.new(group, current_user, shared_runners_setting: params.delete(:shared_runners_setting)).execute
+
+      return true if result[:status] == :success
+
+      group.errors.add(:update_shared_runners, result[:message])
+      false
     end
   end
 end

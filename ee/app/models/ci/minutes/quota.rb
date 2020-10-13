@@ -25,7 +25,7 @@ module Ci
 
       def monthly_percent_used
         return 0 unless namespace.shared_runners_minutes_limit_enabled?
-        return 0 if monthly_minutes.zero?
+        return 0 if monthly_minutes == 0
 
         100 * monthly_minutes_used.to_i / monthly_minutes
       end
@@ -38,7 +38,7 @@ module Ci
 
       def purchased_percent_used
         return 0 unless namespace.shared_runners_minutes_limit_enabled?
-        return 0 if purchased_minutes.zero?
+        return 0 if purchased_minutes == 0
 
         100 * purchased_minutes_used.to_i / purchased_minutes
       end
@@ -75,11 +75,11 @@ module Ci
       end
 
       def no_minutes_purchased?
-        purchased_minutes.zero?
+        purchased_minutes == 0
       end
 
       def any_minutes_purchased?
-        purchased_minutes.positive?
+        purchased_minutes > 0
       end
 
       # TODO: maps to NamespaceStatistics#shared_runners_minutes(include_extra: true)

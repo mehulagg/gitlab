@@ -1,6 +1,7 @@
 <script>
-import Tracking from '~/tracking';
+/* eslint-disable vue/no-v-html */
 import { GlPopover } from '@gitlab/ui';
+import Tracking from '~/tracking';
 import LegacyContainer from './legacy_container.vue';
 
 const trackingMixin = Tracking.mixin(gon.tracking_data);
@@ -32,6 +33,7 @@ export default {
         v-for="panel in panels"
         :key="panel.name"
         :href="`#${panel.name}`"
+        :data-qa-selector="`${panel.name}_link`"
         class="blank-state blank-state-link experiment-new-project-page-blank-state"
         @click="track('click_tab', { label: panel.name })"
       >

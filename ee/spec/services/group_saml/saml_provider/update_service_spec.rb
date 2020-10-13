@@ -9,6 +9,7 @@ RSpec.describe GroupSaml::SamlProvider::UpdateService do
   let(:saml_provider) do
     create :saml_provider, enabled: false, enforced_sso: false
   end
+
   let(:group) { saml_provider.group }
 
   include_examples 'base SamlProvider service'

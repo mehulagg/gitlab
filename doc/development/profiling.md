@@ -10,7 +10,8 @@ There is a `Gitlab::Profiler.profile` method, and corresponding
 `bin/profile-url` script, that enable profiling a GET or POST request to a
 specific URL, either as an anonymous user (the default) or as a specific user.
 
-NOTE: **Note:** The first argument to the profiler is either a full URL
+NOTE: **Note:**
+The first argument to the profiler is either a full URL
 (including the instance hostname) or an absolute path, including the
 leading slash.
 
@@ -89,9 +90,6 @@ printer.print(File.open('/tmp/profile.html', 'w'))
 that builds on this to add some additional niceties, such as allowing
 configuration with a single YAML file for multiple URLs, and uploading of the
 profile and log output to S3.
-
-For GitLab.com, you can find the latest results here (restricted to GitLab Team members only):
-`https://redash.gitlab.com/dashboard/gitlab-profiler-statistics`
 
 ## Sherlock
 

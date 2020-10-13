@@ -1,18 +1,30 @@
 <script>
-import { GlLink } from '@gitlab/ui';
-import Project from './project.vue';
+import { GlLink, GlSprintf, GlModalDirective, GlButton, GlIcon } from '@gitlab/ui';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import ProjectsTable from './projects_table.vue';
 import UsageGraph from './usage_graph.vue';
-import query from '../queries/storage.graphql';
+import UsageStatistics from './usage_statistics.vue';
+import query from '../queries/storage.query.graphql';
+import TemporaryStorageIncreaseModal from './temporary_storage_increase_modal.vue';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
-import Icon from '~/vue_shared/components/icon.vue';
+import { parseBoolean } from '~/lib/utils/common_utils';
 
 export default {
+  name: 'StorageCounterApp',
   components: {
-    Project,
+    ProjectsTable,
     GlLink,
-    Icon,
+    GlButton,
+    GlSprintf,
+    GlIcon,
     UsageGraph,
+    UsageStatistics,
+    TemporaryStorageIncreaseModal,
   },
+  directives: {
+    GlModalDirective,
+  },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     namespacePath: {
       type: String,
@@ -21,6 +33,16 @@ export default {
     helpPagePath: {
       type: String,
       required: true,
+    },
+    purchaseStorageUrl: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    isTemporaryStorageIncreaseVisible: {
+      type: String,
+      required: false,
+      default: 'false',
     },
   },
   apollo: {
@@ -44,6 +66,7 @@ export default {
             ? numberToHumanSize(data.namespace.rootStorageStatistics.storageSize)
             : 'N/A',
         rootStorageStatistics: data.namespace.rootStorageStatistics,
+        limit: data.namespace.storageSizeLimit,
       }),
     },
   },
@@ -52,49 +75,89 @@ export default {
       namespace: {},
     };
   },
+  computed: {
+    namespaceProjects() {
+      return this.namespace?.projects ?? [];
+    },
+    isStorageIncreaseModalVisible() {
+      return parseBoolean(this.isTemporaryStorageIncreaseVisible);
+    },
+    isAdditionalStorageFlagEnabled() {
+      return this.glFeatures.additionalRepoStorageByNamespace;
+    },
+  },
+  methods: {
+    formatSize(size) {
+      return numberToHumanSize(size);
+    },
+  },
+  modalId: 'temporary-increase-storage-modal',
 };
 </script>
 <template>
   <div>
-    <div class="pipeline-quota container-fluid py-4 px-2 m-0">
-      <div class="row py-0">
-        <div class="col-sm-12">
-          <strong>{{ s__('UsageQuota|Storage usage:') }}</strong>
-          <span data-testid="total-usage">
-            {{ namespace.totalUsage }}
-            <gl-link
-              :href="helpPagePath"
-              target="_blank"
-              :aria-label="s__('UsageQuota|Usage quotas help link')"
-            >
-              <icon name="question" :size="12" />
-            </gl-link>
-          </span>
+    <div v-if="isAdditionalStorageFlagEnabled && namespace.rootStorageStatistics">
+      <usage-statistics :root-storage-statistics="namespace.rootStorageStatistics" />
+    </div>
+    <div v-else class="gl-py-4 gl-px-2 gl-m-0">
+      <div class="gl-display-flex gl-align-items-center">
+        <div class="gl-w-half">
+          <gl-sprintf :message="s__('UsageQuota|You used: %{usage} %{limit}')">
+            <template #usage>
+              <span class="gl-font-weight-bold" data-testid="total-usage">
+                {{ namespace.totalUsage }}
+              </span>
+            </template>
+            <template #limit>
+              <gl-sprintf
+                v-if="namespace.limit"
+                :message="s__('UsageQuota|out of %{formattedLimit} of your namespace storage')"
+              >
+                <template #formattedLimit>
+                  <span class="gl-font-weight-bold">{{ formatSize(namespace.limit) }}</span>
+                </template>
+              </gl-sprintf>
+            </template>
+          </gl-sprintf>
+          <gl-link
+            :href="helpPagePath"
+            target="_blank"
+            :aria-label="s__('UsageQuota|Usage quotas help link')"
+          >
+            <gl-icon name="question" :size="12" />
+          </gl-link>
+        </div>
+        <div class="gl-w-half gl-text-right">
+          <gl-button
+            v-if="isStorageIncreaseModalVisible"
+            v-gl-modal-directive="$options.modalId"
+            category="secondary"
+            variant="success"
+            data-testid="temporary-storage-increase-button"
+            >{{ s__('UsageQuota|Increase storage temporarily') }}</gl-button
+          >
+          <gl-link
+            v-if="purchaseStorageUrl"
+            :href="purchaseStorageUrl"
+            class="btn btn-success gl-ml-2"
+            target="_blank"
+            data-testid="purchase-storage-link"
+            >{{ s__('UsageQuota|Purchase more storage') }}</gl-link
+          >
         </div>
       </div>
-      <div class="row py-0">
-        <div class="col-sm-12">
-          <usage-graph
-            v-if="namespace.rootStorageStatistics"
-            :root-storage-statistics="namespace.rootStorageStatistics"
-          />
-        </div>
+      <div v-if="namespace.rootStorageStatistics" class="gl-w-full">
+        <usage-graph
+          :root-storage-statistics="namespace.rootStorageStatistics"
+          :limit="namespace.limit"
+        />
       </div>
     </div>
-    <div class="ci-table" role="grid">
-      <div
-        class="gl-responsive-table-row table-row-header bg-gray-light pl-2 border-top mt-3 lh-100"
-        role="row"
-      >
-        <div class="table-section section-70 font-weight-bold" role="columnheader">
-          {{ __('Project') }}
-        </div>
-        <div class="table-section section-30 font-weight-bold" role="columnheader">
-          {{ __('Usage') }}
-        </div>
-      </div>
-
-      <project v-for="project in namespace.projects" :key="project.id" :project="project" />
-    </div>
+    <projects-table :projects="namespaceProjects" />
+    <temporary-storage-increase-modal
+      v-if="isStorageIncreaseModalVisible"
+      :limit="formatSize(namespace.limit)"
+      :modal-id="$options.modalId"
+    />
   </div>
 </template>

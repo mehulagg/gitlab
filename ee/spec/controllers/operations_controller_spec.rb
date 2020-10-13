@@ -97,15 +97,15 @@ RSpec.describe OperationsController do
 
       let!(:alert_events) do
         [
-          create(:prometheus_alert_event, prometheus_alert: alert1),
-          create(:prometheus_alert_event, prometheus_alert: alert2),
-          create(:prometheus_alert_event, prometheus_alert: alert1),
-          create(:prometheus_alert_event, :resolved, prometheus_alert: alert2)
+          create(:alert_management_alert, prometheus_alert: alert1, project: project, environment: environment),
+          create(:alert_management_alert, prometheus_alert: alert2, project: project, environment: environment),
+          create(:alert_management_alert, prometheus_alert: alert1, project: project, environment: environment),
+          create(:alert_management_alert, :resolved, prometheus_alert: alert2, project: project, environment: environment)
         ]
       end
 
-      let(:firing_alert_events) { alert_events.select(&:firing?) }
-      let(:last_firing_alert) { firing_alert_events.last.prometheus_alert }
+      let(:open_alerts) { alert_events.select(&:triggered?) + alert_events.select(&:acknowledged?) }
+      let(:last_firing_alert) { open_alerts.last.prometheus_alert }
 
       let(:alert_path) do
         metrics_project_environment_path(project, environment)
@@ -135,7 +135,7 @@ RSpec.describe OperationsController do
         expect(expected_project['remove_path'])
           .to eq(remove_operations_project_path(project_id: project.id))
         expect(expected_project['last_deployment']['id']).to eq(deployment.id)
-        expect(expected_project['alert_count']).to eq(firing_alert_events.size)
+        expect(expected_project['alert_count']).to eq(open_alerts.size)
         expect(expected_project['alert_path']).to eq(alert_path)
         expect(expected_project['last_alert']['id']).to eq(last_firing_alert.id)
       end
@@ -400,19 +400,53 @@ RSpec.describe OperationsController do
           expect(last_deployment_json['id']).to eq(deployment.id)
         end
 
-        it 'returns a maximum of seven projects' do
-          projects = Array.new(8).map do
-            project = create(:project)
-            project.add_developer(user)
-            project
+        context 'with environments pagination' do
+          shared_examples_for 'environments pagination' do |params, projects_count|
+            specify do
+              get :environments_list, params: params
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(response).to match_response_schema('dashboard/operations/environments_list', dir: 'ee')
+              expect(json_response['projects'].count).to eq(projects_count)
+              expect(response).to include_pagination_headers
+            end
           end
-          user.update!(ops_dashboard_projects: projects)
 
-          get :environments_list
+          context 'pagination behaviour' do
+            before do
+              projects = create_list(:project, 8) do |project|
+                project.add_developer(user)
+              end
+              user.update!(ops_dashboard_projects: projects)
+            end
 
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(response).to match_response_schema('dashboard/operations/environments_list', dir: 'ee')
-          expect(json_response['projects'].count).to eq(7)
+            context 'with `per_page`' do
+              it_behaves_like 'environments pagination', { per_page: 7 }, 7
+            end
+
+            context 'with `page=1`' do
+              it_behaves_like 'environments pagination', { per_page: 7, page: 1 }, 7
+            end
+
+            context 'with `page=2`' do
+              it_behaves_like 'environments pagination', { per_page: 7, page: 2 }, 1
+            end
+          end
+
+          context 'N+1 queries' do
+            subject { get :environments_list }
+
+            it 'avoids N+1 database queries' do
+              control_count = ActiveRecord::QueryRecorder.new { subject }.count
+
+              projects = create_list(:project, 8) do |project|
+                project.add_developer(user)
+              end
+              user.update!(ops_dashboard_projects: projects)
+
+              expect { subject }.not_to exceed_query_limit(control_count)
+            end
+          end
         end
 
         it 'does not return a project for which the operations dashboard feature is unavailable' do
@@ -626,7 +660,7 @@ RSpec.describe OperationsController do
         project_b.add_developer(user)
       end
 
-      it 'adds projects to the dasboard' do
+      it 'adds projects to the dashboard' do
         post :create, params: { project_ids: [project_a.id, project_b.id.to_s] }
 
         expect(response).to have_gitlab_http_status(:ok)

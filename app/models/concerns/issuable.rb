@@ -61,11 +61,13 @@ module Issuable
       end
     end
 
+    has_many :note_authors, -> { distinct }, through: :notes, source: :author
+
     has_many :label_links, as: :target, dependent: :destroy, inverse_of: :target # rubocop:disable Cop/ActiveRecordDependent
     has_many :labels, through: :label_links
     has_many :todos, as: :target, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
-    has_one :metrics
+    has_one :metrics, inverse_of: model_name.singular.to_sym, autosave: true
 
     delegate :name,
              :email,
@@ -175,8 +177,30 @@ module Issuable
       assignees.count > 1
     end
 
-    def supports_weight?
+    def allows_reviewers?
       false
+    end
+
+    def supports_time_tracking?
+      is_a?(TimeTrackable)
+    end
+
+    def supports_severity?
+      incident?
+    end
+
+    def incident?
+      is_a?(Issue) && super
+    end
+
+    def supports_issue_type?
+      is_a?(Issue)
+    end
+
+    def severity
+      return IssuableSeverity::DEFAULT unless incident?
+
+      issuable_severity&.severity || IssuableSeverity::DEFAULT
     end
 
     private
@@ -195,7 +219,7 @@ module Issuable
   class_methods do
     # Searches for records with a matching title.
     #
-    # This method uses ILIKE on PostgreSQL and LIKE on MySQL.
+    # This method uses ILIKE on PostgreSQL.
     #
     # query - The search query as a String
     #
@@ -219,7 +243,7 @@ module Issuable
 
     # Searches for records with a matching title or description.
     #
-    # This method uses ILIKE on PostgreSQL and LIKE on MySQL.
+    # This method uses ILIKE on PostgreSQL.
     #
     # query - The search query as a String
     # matched_columns - Modify the scope of the query. 'title', 'description' or joining them with a comma.
@@ -375,8 +399,12 @@ module Issuable
     Date.today == created_at.to_date
   end
 
+  def created_hours_ago
+    (Time.now.utc.to_i - created_at.utc.to_i) / 3600
+  end
+
   def new?
-    today? && created_at == updated_at
+    created_hours_ago < 24
   end
 
   def open?
@@ -403,12 +431,16 @@ module Issuable
     participants(user).include?(user)
   end
 
+  def can_assign_epic?(user)
+    false
+  end
+
   def to_hook_data(user, old_associations: {})
     changes = previous_changes
 
     if old_associations
-      old_labels = old_associations.fetch(:labels, [])
-      old_assignees = old_associations.fetch(:assignees, [])
+      old_labels = old_associations.fetch(:labels, labels)
+      old_assignees = old_associations.fetch(:assignees, assignees)
 
       if old_labels != labels
         changes[:labels] = [old_labels.map(&:hook_attrs), labels.map(&:hook_attrs)]
@@ -419,7 +451,7 @@ module Issuable
       end
 
       if self.respond_to?(:total_time_spent)
-        old_total_time_spent = old_associations.fetch(:total_time_spent, nil)
+        old_total_time_spent = old_associations.fetch(:total_time_spent, total_time_spent)
 
         if old_total_time_spent != total_time_spent
           changes[:total_time_spent] = [old_total_time_spent, total_time_spent]

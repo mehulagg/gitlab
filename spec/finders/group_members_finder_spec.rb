@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupMembersFinder, '#execute' do
+RSpec.describe GroupMembersFinder, '#execute' do
   let(:group) { create(:group) }
   let(:nested_group) { create(:group, parent: group) }
   let(:deeper_nested_group) { create(:group, parent: nested_group) }
@@ -16,6 +16,7 @@ describe GroupMembersFinder, '#execute' do
     member1 = group.add_maintainer(user1)
     member2 = group.add_maintainer(user2)
     member3 = group.add_maintainer(user3)
+    create(:group_member, :minimal_access, user: create(:user), source: group)
 
     result = described_class.new(group).execute
 

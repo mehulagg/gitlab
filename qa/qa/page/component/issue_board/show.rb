@@ -39,11 +39,6 @@ module QA
             element :boards_list
           end
 
-          view 'app/views/shared/boards/components/_board.html.haml' do
-            element :board_list
-            element :board_list_header
-          end
-
           view 'app/assets/javascripts/boards/toggle_focus.js' do
             element :focus_mode_button
           end
@@ -101,6 +96,8 @@ module QA
             click_boards_config_button
             click_element(:labels_edit_button)
             find_element(:labels_dropdown_content).find('li', text: label).click
+            # Clicking the edit button again closes the dropdown and allows the save button to be clicked
+            click_element(:labels_edit_button)
             click_element(:save_changes_button)
             wait_boards_list_finish_loading
           end

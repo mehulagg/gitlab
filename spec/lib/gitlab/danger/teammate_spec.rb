@@ -1,19 +1,52 @@
 # frozen_string_literal: true
 
-require 'fast_spec_helper'
-
+require 'timecop'
 require 'rspec-parameterized'
 
 require 'gitlab/danger/teammate'
+require 'active_support/testing/time_helpers'
 
-describe Gitlab::Danger::Teammate do
-  subject { described_class.new(options.stringify_keys) }
+RSpec.describe Gitlab::Danger::Teammate do
+  using RSpec::Parameterized::TableSyntax
 
-  let(:options) { { username: 'luigi', projects: projects, role: role } }
+  subject { described_class.new(options) }
+
+  let(:tz_offset_hours) { 2.0 }
+  let(:options) do
+    {
+      'username' => 'luigi',
+      'projects' => projects,
+      'role' => role,
+      'markdown_name' => '[Luigi](https://gitlab.com/luigi) (`@luigi`)',
+      'tz_offset_hours' => tz_offset_hours
+    }
+  end
+
+  let(:capabilities) { ['reviewer backend'] }
   let(:projects) { { project => capabilities } }
   let(:role) { 'Engineer, Manage' }
   let(:labels) { [] }
   let(:project) { double }
+
+  describe '#==' do
+    it 'compares Teammate username' do
+      joe1 = described_class.new('username' => 'joe', 'projects' => projects)
+      joe2 = described_class.new('username' => 'joe', 'projects' => [])
+      jane1 = described_class.new('username' => 'jane', 'projects' => projects)
+      jane2 = described_class.new('username' => 'jane', 'projects' => [])
+
+      expect(joe1).to eq(joe2)
+      expect(jane1).to eq(jane2)
+      expect(jane1).not_to eq(nil)
+      expect(described_class.new('username' => nil)).not_to eq(nil)
+    end
+  end
+
+  describe '#to_h' do
+    it 'returns the given options' do
+      expect(subject.to_h).to eq(options)
+    end
+  end
 
   context 'when having multiple capabilities' do
     let(:capabilities) { ['reviewer backend', 'maintainer frontend', 'trainee_maintainer qa'] }
@@ -115,78 +148,65 @@ describe Gitlab::Danger::Teammate do
     end
   end
 
-  describe '#status' do
-    let(:capabilities) { ['dish washing'] }
+  describe '#local_hour' do
+    include ActiveSupport::Testing::TimeHelpers
 
-    context 'with empty cache' do
-      context 'for successful request' do
-        it 'returns the response' do
-          mock_status = double(does_not: 'matter')
-          expect(Gitlab::Danger::RequestHelper).to receive(:http_get_json)
-                                                       .and_return(mock_status)
-
-          expect(subject.status).to be mock_status
-        end
-      end
-
-      context 'for failing request' do
-        it 'returns nil' do
-          expect(Gitlab::Danger::RequestHelper).to receive(:http_get_json)
-                                                       .and_raise(Gitlab::Danger::RequestHelper::HTTPError.new)
-
-          expect(subject.status).to be nil
-        end
-      end
+    around do |example|
+      travel_to(Time.utc(2020, 6, 23, 10)) { example.run }
     end
 
-    context 'with filled cache' do
-      it 'returns the cached response' do
-        mock_status = double(does_not: 'matter')
-        expect(Gitlab::Danger::RequestHelper).to receive(:http_get_json)
-                                                     .and_return(mock_status)
-        subject.status
+    context 'when author is given' do
+      where(:tz_offset_hours, :expected_local_hour) do
+        -12 | 22
+        -10 | 0
+        2 | 12
+        4 | 14
+        12 | 22
+      end
 
-        expect(Gitlab::Danger::RequestHelper).not_to receive(:http_get_json)
-        expect(subject.status).to be mock_status
+      with_them do
+        it 'returns the correct local_hour' do
+          expect(subject.local_hour).to eq(expected_local_hour)
+        end
       end
     end
   end
 
-  describe '#available?' do
-    using RSpec::Parameterized::TableSyntax
-
-    let(:capabilities) { ['dry head'] }
-
-    where(:status, :result) do
-      {}                               | true
-      { message: 'dear reader' }       | true
-      { message: 'OOO: massage' }      | false
-      { message: 'love it SOOO much' } | false
-      { emoji: 'red_circle' }          | false
-      { emoji: 'palm_tree' }           | false
-      { emoji: 'beach' }               | false
-      { emoji: 'beach_umbrella' }      | false
-      { emoji: 'beach_with_umbrella' } | false
-      { emoji: nil }                   | true
-      { emoji: '' }                    | true
-      { emoji: 'dancer' }              | true
+  describe '#markdown_name' do
+    it 'returns markdown name with timezone info' do
+      expect(subject.markdown_name).to eq("#{options['markdown_name']} (UTC+2)")
     end
 
-    with_them do
-      before do
-        expect(Gitlab::Danger::RequestHelper).to receive(:http_get_json)
-                                                     .and_return(status&.stringify_keys)
+    context 'when offset is 1.5' do
+      let(:tz_offset_hours) { 1.5 }
+
+      it 'returns markdown name with timezone info, not truncated' do
+        expect(subject.markdown_name).to eq("#{options['markdown_name']} (UTC+1.5)")
+      end
+    end
+
+    context 'when author is given' do
+      where(:tz_offset_hours, :author_offset, :diff_text) do
+        -12 | -10 | "2 hours behind `@mario`"
+        -10 | -12 | "2 hours ahead of `@mario`"
+        -10 | 2 | "12 hours behind `@mario`"
+        2 | 4 | "2 hours behind `@mario`"
+        4 | 2 | "2 hours ahead of `@mario`"
+        2 | 3 | "1 hour behind `@mario`"
+        3 | 2 | "1 hour ahead of `@mario`"
+        2 | 2 | "same timezone as `@mario`"
       end
 
-      it { expect(subject.available?).to be result }
-    end
+      with_them do
+        it 'returns markdown name with timezone info' do
+          author = described_class.new(options.merge('username' => 'mario', 'tz_offset_hours' => author_offset))
 
-    it 'returns true if request fails' do
-      expect(Gitlab::Danger::RequestHelper)
-        .to receive(:http_get_json)
-        .and_raise(Gitlab::Danger::RequestHelper::HTTPError.new)
+          floored_offset_hours = subject.__send__(:floored_offset_hours)
+          utc_offset = floored_offset_hours >= 0 ? "+#{floored_offset_hours}" : floored_offset_hours
 
-      expect(subject.available?).to be true
+          expect(subject.markdown_name(author: author)).to eq("#{options['markdown_name']} (UTC#{utc_offset}, #{diff_text})")
+        end
+      end
     end
   end
 end

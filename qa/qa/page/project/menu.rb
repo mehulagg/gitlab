@@ -11,13 +11,17 @@ module QA
         include SubMenus::Operations
         include SubMenus::Repository
         include SubMenus::Settings
+        include SubMenus::Packages
 
         view 'app/views/layouts/nav/sidebar/_project.html.haml' do
           element :activity_link
           element :merge_requests_link
-          element :wiki_link
           element :snippets_link
           element :members_link
+        end
+
+        view 'app/views/layouts/nav/sidebar/_wiki_link.html.haml' do
+          element :wiki_link
         end
 
         def click_merge_requests

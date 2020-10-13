@@ -2,15 +2,15 @@
 
 require 'spec_helper'
 
-describe 'Running a DAST Scan' do
+RSpec.describe 'Running a DAST Scan' do
   include GraphqlHelpers
 
-  let(:project) { create(:project) }
+  let(:project) { create(:project, :repository, creator: current_user) }
   let(:current_user) { create(:user) }
   let(:project_path) { project.full_path }
-  let(:target_url) { FFaker::Internet.uri(:https) }
-  let(:branch) { SecureRandom.hex }
-  let(:scan_type) { Types::DastScanTypeEnum.enum[:passive] }
+  let(:target_url) { generate(:url) }
+  let(:branch) { project.default_branch }
+  let(:scan_type) { Types::DastScanTypeEnum.enum[:passive].upcase }
 
   let(:mutation) do
     graphql_mutation(
@@ -24,6 +24,10 @@ describe 'Running a DAST Scan' do
 
   def mutation_response
     graphql_mutation_response(:run_dast_scan)
+  end
+
+  before do
+    stub_licensed_features(security_on_demand_scans: true)
   end
 
   context 'when on demand scan feature is not enabled' do
@@ -58,36 +62,13 @@ describe 'Running a DAST Scan' do
         expect(mutation_response['pipelineUrl']).to eq(expected_url)
       end
 
-      context 'when the pipeline could not be created' do
+      context 'when pipeline creation fails' do
         before do
-          allow(Ci::Pipeline).to receive(:create!).and_raise(StandardError)
+          allow_any_instance_of(Ci::Pipeline).to receive(:created_successfully?).and_return(false)
+          allow_any_instance_of(Ci::Pipeline).to receive(:full_error_messages).and_return('error message')
         end
 
-        it_behaves_like 'a mutation that returns errors in the response', errors: ['Could not create pipeline']
-      end
-
-      context 'when the stage could not be created' do
-        before do
-          allow(Ci::Stage).to receive(:create!).and_raise(StandardError)
-        end
-
-        it_behaves_like 'a mutation that returns errors in the response', errors: ['Could not create stage']
-      end
-
-      context 'when the build could not be created' do
-        before do
-          allow(Ci::Build).to receive(:create!).and_raise(StandardError)
-        end
-
-        it_behaves_like 'a mutation that returns errors in the response', errors: ['Could not create build']
-      end
-
-      context 'when the build could not be enqueued' do
-        before do
-          allow_any_instance_of(Ci::Build).to receive(:enqueue!).and_raise(StandardError)
-        end
-
-        it_behaves_like 'a mutation that returns errors in the response', errors: ['Could not enqueue build']
+        it_behaves_like 'a mutation that returns errors in the response', errors: ['error message']
       end
     end
   end

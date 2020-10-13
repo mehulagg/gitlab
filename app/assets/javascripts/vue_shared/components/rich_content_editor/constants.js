@@ -1,12 +1,13 @@
 import { __ } from '~/locale';
-import { generateToolbarItem } from './editor_service';
 
 export const CUSTOM_EVENTS = {
   openAddImageModal: 'gl_openAddImageModal',
 };
 
+export const ALLOWED_VIDEO_ORIGINS = ['https://www.youtube.com'];
+
 /* eslint-disable @gitlab/require-i18n-strings */
-const TOOLBAR_ITEM_CONFIGS = [
+export const TOOLBAR_ITEM_CONFIGS = [
   { icon: 'heading', event: 'openHeadingSelect', classes: 'tui-heading', tooltip: __('Headings') },
   { icon: 'bold', command: 'Bold', tooltip: __('Add bold text') },
   { icon: 'italic', command: 'Italic', tooltip: __('Add italic text') },
@@ -29,14 +30,15 @@ const TOOLBAR_ITEM_CONFIGS = [
   { icon: 'doc-code', command: 'CodeBlock', tooltip: __('Insert a code block') },
 ];
 
-export const EDITOR_OPTIONS = {
-  toolbarItems: TOOLBAR_ITEM_CONFIGS.map(config => generateToolbarItem(config)),
-};
-
 export const EDITOR_TYPES = {
+  markdown: 'markdown',
   wysiwyg: 'wysiwyg',
 };
 
 export const EDITOR_HEIGHT = '100%';
 
 export const EDITOR_PREVIEW_STYLE = 'horizontal';
+
+export const IMAGE_TABS = { UPLOAD_TAB: 0, URL_TAB: 1 };
+
+export const MAX_FILE_SIZE = 2097152; // 2Mb

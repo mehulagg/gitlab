@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User posts diff notes', :js do
+RSpec.describe 'Merge request > User posts diff notes', :js do
   include MergeRequestDiffHelpers
 
   let(:merge_request) { create(:merge_request) }
@@ -46,7 +46,7 @@ describe 'Merge request > User posts diff notes', :js do
     end
 
     context 'with an old line on the left and a new line on the right' do
-      it 'allows commenting on the left side', quarantine: 'https://gitlab.com/gitlab-org/gitlab/issues/199050' do
+      it 'allows commenting on the left side', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/199050' do
         should_allow_commenting(find('[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_9_9"]').find(:xpath, '..'), 'left')
       end
 
@@ -56,7 +56,7 @@ describe 'Merge request > User posts diff notes', :js do
     end
 
     context 'with an unchanged line on the left and an unchanged line on the right' do
-      it 'allows commenting on the left side', quarantine: 'https://gitlab.com/gitlab-org/gitlab/issues/196826' do
+      it 'allows commenting on the left side', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/196826' do
         should_allow_commenting(find('[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_7_7"]', match: :first).find(:xpath, '..'), 'left')
       end
 
@@ -193,7 +193,7 @@ describe 'Merge request > User posts diff notes', :js do
 
   context 'when the MR only supports legacy diff notes' do
     before do
-      merge_request.merge_request_diff.update(start_commit_sha: nil)
+      merge_request.merge_request_diff.update!(start_commit_sha: nil)
       visit diffs_project_merge_request_path(project, merge_request, view: 'inline')
     end
 

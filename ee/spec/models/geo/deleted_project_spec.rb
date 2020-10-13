@@ -2,8 +2,10 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::DeletedProject, type: :model do
+RSpec.describe Geo::DeletedProject, :geo, type: :model do
   include StubConfiguration
+
+  subject { described_class.new(id: 1, name: 'sample', disk_path: 'root/sample', repository_storage: 'foo') }
 
   before do
     storages = {
@@ -14,11 +16,23 @@ RSpec.describe Geo::DeletedProject, type: :model do
     stub_storage_settings(storages)
   end
 
-  subject { described_class.new(id: 1, name: 'sample', disk_path: 'root/sample', repository_storage: 'foo') }
+  describe 'attributes' do
+    it { is_expected.to respond_to(:id) }
+    it { is_expected.to respond_to(:name) }
+    it { is_expected.to respond_to(:disk_path) }
+  end
 
-  it { is_expected.to respond_to(:id) }
-  it { is_expected.to respond_to(:name) }
-  it { is_expected.to respond_to(:disk_path) }
+  describe 'validations' do
+    it { is_expected.to validate_presence_of(:id) }
+    it { is_expected.to validate_presence_of(:name) }
+    it { is_expected.to validate_presence_of(:disk_path) }
+  end
+
+  describe 'attributes' do
+    it { is_expected.to respond_to(:id) }
+    it { is_expected.to respond_to(:name) }
+    it { is_expected.to respond_to(:disk_path) }
+  end
 
   describe '#full_path' do
     it 'is an alias for disk_path' do

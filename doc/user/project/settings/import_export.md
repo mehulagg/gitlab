@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, howto
+---
+
 # Project import/export
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/3050) in GitLab 8.9.
@@ -17,7 +24,7 @@ See also:
 
 To set up a project import/export:
 
-  1. Navigate to **{admin}** **Admin Area >** **{settings}** **Settings > Visibility and access controls**.
+  1. Navigate to **Admin Area > Settings > Visibility and access controls**.
   1. Scroll to **Import sources**
   1. Enable desired **Import sources**
 
@@ -34,7 +41,7 @@ Note the following:
 - Group members are exported as project members, as long as the user has
   maintainer or admin access to the group where the exported project lives.
 - Project members with owner access will be imported as maintainers.
-- Using an admin account to import will map users by email address (self-managed only).
+- Using an admin account to import will map users by primary email address (self-managed only).
   Otherwise, a supplementary comment is left to mention that the original author and
   the MRs, notes, or issues will be owned by the importer.
 - If an imported project contains merge requests originating from forks,
@@ -43,6 +50,8 @@ Note the following:
   in the exported project could be bigger than in the original project.
 
 ## Version history
+
+### 13.0+
 
 Starting with GitLab 13.0, GitLab can import bundles that were exported from a different GitLab deployment.
 This ability is limited to two previous GitLab [minor](../../../policy/maintenance.md#versioning)
@@ -61,7 +70,7 @@ Prior to 13.0 this was a defined compatibility table:
 
 | Exporting GitLab version   | Importing GitLab version   |
 | -------------------------- | -------------------------- |
-| 11.7 to 13.0               | 11.7 to 13.0               |
+| 11.7 to 12.10              | 11.7 to 12.10              |
 | 11.1 to 11.6               | 11.1 to 11.6               |
 | 10.8 to 11.0               | 10.8 to 11.0               |
 | 10.4 to 10.7               | 10.4 to 10.7               |
@@ -95,7 +104,7 @@ The following items will be exported:
 
 - Project and wiki repositories
 - Project uploads
-- Project configuration, including services
+- Project configuration, excluding integrations
 - Issues with comments, merge requests with diffs and comments, labels, milestones, snippets, time tracking,
   and other project entities
 - Design Management files and data
@@ -122,7 +131,7 @@ For more details on the specific data persisted in a project export, see the
 
 1. Go to your project's homepage.
 
-1. Click **{settings}** **Settings** in the sidebar.
+1. Click **Settings** in the sidebar.
 
 1. Scroll down to find the **Export project** button:
 
@@ -161,6 +170,15 @@ all imported projects are given the visibility of `Private`.
 NOTE: **Note:**
 The maximum import file size can be set by the Administrator, default is 50MB.
 As an administrator, you can modify the maximum import file size. To do so, use the `max_import_size` option in the [Application settings API](../../../api/settings.md#change-application-settings) or the [Admin UI](../../admin_area/settings/account_and_limit_settings.md).
+
+### Project import status
+
+You can query an import through the [Project import/export API](../../../api/project_import_export.md#import-status).
+As described in the API documentation, the query may return an import error or exceptions.
+
+### Import large projects **(CORE ONLY)**
+
+If you have a larger project, consider using a Rake task, as described in our [developer documentation](../../../development/import_project.md#importing-via-a-rake-task).
 
 ## Rate limits
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectRepositoryStorageMoves < Grape::API
+  class ProjectRepositoryStorageMoves < Grape::API::Instance
     include PaginationParams
 
     before { authenticated_as_admin! }
@@ -62,6 +62,25 @@ module API
         storage_move = user_project.repository_storage_moves.find(params[:repository_storage_move_id])
 
         present storage_move, with: Entities::ProjectRepositoryStorageMove, current_user: current_user
+      end
+
+      desc 'Schedule a project repository storage move' do
+        detail 'This feature was introduced in GitLab 13.1.'
+        success Entities::ProjectRepositoryStorageMove
+      end
+      params do
+        requires :destination_storage_name, type: String, desc: 'The destination storage shard'
+      end
+      post ':id/repository_storage_moves' do
+        storage_move = user_project.repository_storage_moves.build(
+          declared_params.merge(source_storage_name: user_project.repository_storage)
+        )
+
+        if storage_move.schedule
+          present storage_move, with: Entities::ProjectRepositoryStorageMove, current_user: current_user
+        else
+          render_validation_error!(storage_move)
+        end
       end
     end
   end

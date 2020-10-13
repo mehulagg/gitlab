@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::ParseDotenvArtifactService do
+RSpec.describe Ci::ParseDotenvArtifactService do
   let_it_be(:project) { create(:project) }
   let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
   let(:build) { create(:ci_build, pipeline: pipeline, project: project) }
@@ -66,12 +66,13 @@ describe Ci::ParseDotenvArtifactService do
         end
 
         context 'when multiple key/value pairs exist in one line' do
-          let(:blob) { 'KEY1=VAR1KEY2=VAR1' }
+          let(:blob) { 'KEY=VARCONTAINING=EQLS' }
 
-          it 'returns error' do
-            expect(subject[:status]).to eq(:error)
-            expect(subject[:message]).to eq("Validation failed: Key can contain only letters, digits and '_'.")
-            expect(subject[:http_status]).to eq(:bad_request)
+          it 'parses the dotenv data' do
+            subject
+
+            expect(build.job_variables.as_json).to contain_exactly(
+              hash_including('key' => 'KEY', 'value' => 'VARCONTAINING=EQLS'))
           end
         end
 

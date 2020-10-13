@@ -65,12 +65,16 @@ class SearchService
     @search_objects ||= redact_unauthorized_results(search_results.objects(scope, page: params[:page], per_page: per_page, preload_method: preload_method))
   end
 
+  def search_highlight
+    search_results.highlight_map(scope)
+  end
+
   private
 
   def per_page
     per_page_param = params[:per_page].to_i
 
-    return DEFAULT_PER_PAGE unless per_page_param.positive?
+    return DEFAULT_PER_PAGE unless per_page_param > 0
 
     [MAX_PER_PAGE, per_page_param].min
   end
@@ -82,16 +86,21 @@ class SearchService
   end
 
   def redact_unauthorized_results(results_collection)
-    results = results_collection.to_a
-    permitted_results = results.select { |object| visible_result?(object) }
+    redacted_results = results_collection.reject { |object| visible_result?(object) }
 
-    redacted_results = (results - permitted_results).each_with_object({}) do |object, memo|
-      memo[object.id] = { ability: :"read_#{object.to_ability_name}", id: object.id, class_name: object.class.name }
+    if redacted_results.any?
+      redacted_log = redacted_results.each_with_object({}) do |object, memo|
+        memo[object.id] = { ability: :"read_#{object.to_ability_name}", id: object.id, class_name: object.class.name }
+      end
+
+      log_redacted_search_results(redacted_log.values)
+
+      return results_collection.id_not_in(redacted_log.keys) if results_collection.is_a?(ActiveRecord::Relation)
     end
 
-    log_redacted_search_results(redacted_results.values) if redacted_results.any?
+    return results_collection if results_collection.is_a?(ActiveRecord::Relation)
 
-    return results_collection.id_not_in(redacted_results.keys) if results_collection.is_a?(ActiveRecord::Relation)
+    permitted_results = results_collection - redacted_results
 
     Kaminari.paginate_array(
       permitted_results,

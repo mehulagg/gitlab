@@ -1,22 +1,35 @@
 # frozen_string_literal: true
 
 module VulnerabilitiesHelper
-  def vulnerability_data(vulnerability, pipeline)
+  def vulnerability_details_json(vulnerability, pipeline)
+    vulnerability_details(vulnerability, pipeline).to_json
+  end
+
+  def vulnerability_details(vulnerability, pipeline)
     return unless vulnerability
 
-    {
-      vulnerability_json: VulnerabilitySerializer.new.represent(vulnerability).to_json,
-      project_fingerprint: vulnerability.finding.project_fingerprint,
-      create_issue_url: create_vulnerability_feedback_issue_path(vulnerability.finding.project),
-      notes_url: project_security_vulnerability_notes_path(vulnerability.project, vulnerability),
-      discussions_url: discussions_project_security_vulnerability_path(vulnerability.project, vulnerability),
-      pipeline_json: vulnerability_pipeline_data(pipeline).to_json,
+    result = {
+      timestamp: Time.now.to_i,
+      create_issue_url: create_issue_url_for(vulnerability),
       has_mr: !!vulnerability.finding.merge_request_feedback.try(:merge_request_iid),
-      vulnerability_feedback_help_path: help_page_path('user/application_security/index', anchor: 'interacting-with-the-vulnerabilities'),
-      finding_json: vulnerability_finding_data(vulnerability).to_json,
       create_mr_url: create_vulnerability_feedback_merge_request_path(vulnerability.finding.project),
-      timestamp: Time.now.to_i
+      discussions_url: discussions_project_security_vulnerability_path(vulnerability.project, vulnerability),
+      notes_url: project_security_vulnerability_notes_path(vulnerability.project, vulnerability),
+      vulnerability_feedback_help_path: help_page_path('user/application_security/index', anchor: 'interacting-with-the-vulnerabilities'),
+      related_issues_help_path: help_page_path('user/application_security/index', anchor: 'managing-related-issues-for-a-vulnerability'),
+      pipeline: vulnerability_pipeline_data(pipeline),
+      can_modify_related_issues: current_user.can?(:admin_vulnerability_issue_link, vulnerability),
+      issue_tracking_help_path: help_page_path('user/project/settings', anchor: 'sharing-and-permissions'),
+      permissions_help_path: help_page_path('user/permissions', anchor: 'project-members-permissions')
     }
+
+    result.merge(vulnerability_data(vulnerability), vulnerability_finding_data(vulnerability))
+  end
+
+  def create_issue_url_for(vulnerability)
+    return unless vulnerability.project.issues_enabled?
+
+    create_issue_project_security_vulnerability_path(vulnerability.project, vulnerability)
   end
 
   def vulnerability_pipeline_data(pipeline)
@@ -30,9 +43,12 @@ module VulnerabilitiesHelper
     }
   end
 
+  def vulnerability_data(vulnerability)
+    VulnerabilitySerializer.new.represent(vulnerability)
+  end
+
   def vulnerability_finding_data(vulnerability)
     finding = Vulnerabilities::FindingSerializer.new(current_user: current_user).represent(vulnerability.finding)
-    remediation = finding[:remediations]&.first
 
     data = finding.slice(
       :description,
@@ -43,9 +59,13 @@ module VulnerabilitiesHelper
       :issue_feedback,
       :merge_request_feedback,
       :project,
-      :remediations
-    ).merge(
-      solution: remediation ? remediation['summary'] : finding[:solution]
+      :project_fingerprint,
+      :remediations,
+      :evidence,
+      :scanner,
+      :solution,
+      :request,
+      :response
     )
 
     if data[:location]['file']

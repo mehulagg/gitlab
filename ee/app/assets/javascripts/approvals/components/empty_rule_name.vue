@@ -1,10 +1,9 @@
 <script>
-import { GlPopover, GlLink } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlPopover, GlLink, GlIcon } from '@gitlab/ui';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     GlPopover,
     GlLink,
   },
@@ -22,7 +21,7 @@ export default {
   <div class="d-flex align-items-center">
     <span class="mt-n1">{{ __('Any eligible user') }}</span>
     <span id="popovercontainer" class="ml-2 align-self-end">
-      <icon
+      <gl-icon
         id="pop-approver"
         tabindex="0"
         name="question"

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     context 'Wiki' do
       describe 'testing wiki content creation inside a project' do
         let(:new_wiki_title) { "just_another_wiki_page" }
@@ -15,7 +15,7 @@ module QA
           Flow::Login.sign_in
         end
 
-        it 'by adding a home page to the wiki' do
+        it 'by adding a home page to the wiki', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/856' do
           project.visit!
 
           Page::Project::Menu.perform(&:click_wiki)
@@ -35,7 +35,7 @@ module QA
           end
         end
 
-        it 'by adding a second page to the wiki' do
+        it 'by adding a second page to the wiki', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/855' do
           wiki.visit!
 
           Page::Project::Wiki::Show.perform(&:click_new_page)
@@ -54,7 +54,7 @@ module QA
           end
         end
 
-        it 'by adding a home page to the wiki using git push' do
+        it 'by adding a home page to the wiki using git push', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/853' do
           empty_wiki = Resource::Wiki::ProjectPage.new do |empty_wiki|
             empty_wiki.project = project
           end
@@ -73,7 +73,7 @@ module QA
           end
         end
 
-        it 'by adding a second page to the wiki using git push' do
+        it 'by adding a second page to the wiki using git push', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/854' do
           Resource::Repository::WikiPush.fabricate! do |push|
             push.file_name = "#{new_wiki_title}.md"
             push.file_content = new_wiki_content

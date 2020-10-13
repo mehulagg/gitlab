@@ -4,8 +4,8 @@ require 'spec_helper'
 
 RSpec.describe Boards::DestroyService do
   describe '#execute' do
-    let(:project) { create(:project) }
-    let(:group) { create(:group) }
+    let_it_be(:project) { create(:project) }
+    let_it_be(:group) { create(:group) }
 
     shared_examples 'remove the board' do |parent_name|
       let(:parent) { public_send(parent_name) }
@@ -17,13 +17,17 @@ RSpec.describe Boards::DestroyService do
         it "removes board from #{parent_name}" do
           create(:board, parent_name => parent)
 
-          expect { service.execute(board) }.to change(parent.boards, :count).by(-1)
+          expect do
+            expect(service.execute(board)).to be_success
+          end.to change(parent.boards, :count).by(-1)
         end
       end
 
       context "when #{parent_name} have one board" do
         it "does not remove board from #{parent_name}" do
-          expect { service.execute(board) }.not_to change(group.boards, :count)
+          expect do
+            expect(service.execute(board)).to be_error
+          end.not_to change(parent.boards, :count)
         end
       end
     end

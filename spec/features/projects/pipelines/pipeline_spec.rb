@@ -111,7 +111,7 @@ RSpec.describe 'Pipeline', :js do
       end
 
       context 'when there is one related merge request' do
-        before do
+        let!(:merge_request) do
           create(:merge_request,
             source_project: project,
             source_branch: pipeline.ref)
@@ -123,7 +123,7 @@ RSpec.describe 'Pipeline', :js do
           within '.related-merge-requests' do
             expect(page).to have_content('1 related merge request: ')
             expect(page).to have_selector('.js-truncated-mr-list')
-            expect(page).to have_link('!1 My title 1')
+            expect(page).to have_link("#{merge_request.to_reference} #{merge_request.title}")
 
             expect(page).not_to have_selector('.js-full-mr-list')
             expect(page).not_to have_selector('.text-expander')
@@ -132,9 +132,17 @@ RSpec.describe 'Pipeline', :js do
       end
 
       context 'when there are two related merge requests' do
-        before do
-          create(:merge_request, source_project: project, source_branch: pipeline.ref)
-          create(:merge_request, source_project: project, source_branch: pipeline.ref, target_branch: 'fix')
+        let!(:merge_request1) do
+          create(:merge_request,
+            source_project: project,
+            source_branch: pipeline.ref)
+        end
+
+        let!(:merge_request2) do
+          create(:merge_request,
+            source_project: project,
+            source_branch: pipeline.ref,
+            target_branch: 'fix')
         end
 
         it 'links to the most recent related merge request' do
@@ -142,7 +150,7 @@ RSpec.describe 'Pipeline', :js do
 
           within '.related-merge-requests' do
             expect(page).to have_content('2 related merge requests: ')
-            expect(page).to have_link('!2 My title 3')
+            expect(page).to have_link("#{merge_request2.to_reference} #{merge_request2.title}")
             expect(page).to have_selector('.text-expander')
             expect(page).to have_selector('.js-full-mr-list', visible: false)
           end
@@ -164,10 +172,17 @@ RSpec.describe 'Pipeline', :js do
       end
     end
 
-    it_behaves_like 'showing user status' do
-      let(:user_with_status) { pipeline.user }
+    describe 'pipelines details view' do
+      let!(:status) { create(:user_status, user: pipeline.user, emoji: 'smirk', message: 'Authoring this object') }
 
-      subject { visit project_pipeline_path(project, pipeline) }
+      it 'pipeline header shows the user status and emoji' do
+        visit project_pipeline_path(project, pipeline)
+
+        within '[data-testid="pipeline-header-content"]' do
+          expect(page).to have_selector("[data-testid='#{status.message}']")
+          expect(page).to have_selector("[data-name='#{status.emoji}']")
+        end
+      end
     end
 
     describe 'pipeline graph' do
@@ -354,7 +369,7 @@ RSpec.describe 'Pipeline', :js do
     end
 
     describe 'test tabs' do
-      let(:pipeline) { create(:ci_pipeline, :with_test_reports, project: project) }
+      let(:pipeline) { create(:ci_pipeline, :with_test_reports, :with_report_results, project: project) }
 
       before do
         visit_pipeline
@@ -363,28 +378,22 @@ RSpec.describe 'Pipeline', :js do
 
       context 'with test reports' do
         it 'shows badge counter in Tests tab' do
-          expect(pipeline.test_reports.total_count).to eq(4)
-          expect(page.find('.js-test-report-badge-counter').text).to eq(pipeline.test_reports.total_count.to_s)
+          expect(page.find('.js-test-report-badge-counter').text).to eq(pipeline.test_report_summary.total[:count].to_s)
         end
 
-        it 'does not call test_report.json endpoint by default', :js do
-          expect(page).to have_selector('.js-no-tests-to-show', visible: :all)
-        end
-
-        it 'does call test_report.json endpoint when tab is selected', :js do
+        it 'calls summary.json endpoint', :js do
           find('.js-tests-tab-link').click
-          wait_for_requests
 
-          expect(page).to have_content('Test suites')
-          expect(page).to have_selector('.js-tests-detail', visible: :all)
+          expect(page).to have_content('Jobs')
+          expect(page).to have_selector('[data-testid="tests-detail"]', visible: :all)
         end
       end
 
       context 'without test reports' do
         let(:pipeline) { create(:ci_pipeline, project: project) }
 
-        it 'shows nothing' do
-          expect(page.find('.js-test-report-badge-counter', visible: :all).text).to eq("")
+        it 'shows zero' do
+          expect(page.find('.js-test-report-badge-counter', visible: :all).text).to eq("0")
         end
       end
     end
@@ -398,7 +407,7 @@ RSpec.describe 'Pipeline', :js do
 
       context 'when retrying' do
         before do
-          find('.js-retry-button').click
+          find('[data-testid="retryPipeline"]').click
         end
 
         it 'does not show a "Retry" button', :sidekiq_might_not_need_inline do
@@ -900,7 +909,7 @@ RSpec.describe 'Pipeline', :js do
 
       context 'when retrying' do
         before do
-          find('.js-retry-button').click
+          find('[data-testid="retryPipeline"]').click
         end
 
         it 'does not show a "Retry" button', :sidekiq_might_not_need_inline do

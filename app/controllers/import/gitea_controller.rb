@@ -21,15 +21,17 @@ class Import::GiteaController < Import::GithubController
     super
   end
 
+  protected
+
+  override :provider_name
+  def provider_name
+    :gitea
+  end
+
   private
 
   def host_key
-    :"#{provider}_host_url"
-  end
-
-  override :provider
-  def provider
-    :gitea
+    :"#{provider_name}_host_url"
   end
 
   override :provider_url
@@ -50,6 +52,16 @@ class Import::GiteaController < Import::GithubController
       redirect_to new_import_gitea_url,
         alert: _('You need to specify both an Access Token and a Host URL.')
     end
+  end
+
+  override :client_repos
+  def client_repos
+    @client_repos ||= filtered(client.repos)
+  end
+
+  override :client
+  def client
+    @client ||= Gitlab::LegacyGithubImport::Client.new(session[access_token_key], client_options)
   end
 
   override :client_options

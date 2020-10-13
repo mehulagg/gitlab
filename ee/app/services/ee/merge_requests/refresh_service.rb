@@ -13,18 +13,13 @@ module EE
 
         super
 
-        update_approvers
+        update_approvers_for_source_branch_merge_requests
+        update_approvers_for_target_branch_merge_requests
         reset_approvals_for_merge_requests(push.ref, push.newrev)
       end
 
-      # Note: Closed merge requests also need approvals reset.
       def reset_approvals_for_merge_requests(ref, newrev)
-        branch_name = ::Gitlab::Git.ref_name(ref)
-        merge_requests = merge_requests_for(branch_name, mr_states: [:opened, :closed])
-
-        merge_requests.each do |merge_request|
-          reset_approvals(merge_request, newrev)
-        end
+        MergeRequestResetApprovalsWorker.perform_async(project.id, current_user.id, ref, newrev)
       end
 
       # @return [Hash<Integer, MergeRequestDiff>] Diffs prior to code push, mapped from merge request id
@@ -34,11 +29,31 @@ module EE
         merge_requests.map(&:latest_merge_request_diff)
       end
 
-      def update_approvers
+      def update_approvers_for_source_branch_merge_requests
         merge_requests_for_source_branch.each do |merge_request|
           ::MergeRequests::SyncCodeOwnerApprovalRules.new(merge_request).execute if project.feature_available?(:code_owners)
           ::MergeRequests::SyncReportApproverApprovalRules.new(merge_request).execute if project.feature_available?(:report_approver_rules)
         end
+      end
+
+      def update_approvers_for_target_branch_merge_requests
+        if update_target_approvers_features_enabled? && branch_protected? && code_owners_updated?
+          merge_requests_for_target_branch.each do |merge_request|
+            ::MergeRequests::SyncCodeOwnerApprovalRules.new(merge_request).execute unless merge_request.on_train?
+          end
+        end
+      end
+
+      def update_target_approvers_features_enabled?
+        ::Feature.enabled?(:update_target_approvers, project) && project.feature_available?(:code_owners)
+      end
+
+      def branch_protected?
+        project.branch_requires_code_owner_approval?(push.branch_name)
+      end
+
+      def code_owners_updated?
+        push.modified_paths.find { |path| ::Gitlab::CodeOwners::FILE_PATHS.include?(path) }
       end
 
       # rubocop:disable Gitlab/ModuleWithInstanceVariables
@@ -48,11 +63,15 @@ module EE
         MergeTrains::CheckStatusService.new(project, current_user)
           .execute(project, @push.branch_name, @push.newrev)
       end
-      # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
-      def reset_approvals?(merge_request, newrev)
-        super && merge_request.rebase_commit_sha != newrev
+      def merge_requests_for_target_branch(reload: false, mr_states: [:opened])
+        @target_merge_requests = nil if reload
+        @target_merge_requests ||= project.merge_requests
+          .with_state(mr_states)
+          .by_target_branch(push.branch_name)
+          .including_merge_train
       end
+      # rubocop:enable Gitlab/ModuleWithInstanceVariables
     end
   end
 end

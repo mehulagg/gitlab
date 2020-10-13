@@ -1,7 +1,7 @@
-import * as Sentry from '@sentry/browser';
+import * as Sentry from '~/sentry/wrapper';
 import * as types from './mutation_types';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { convertToFixedRange } from '~/lib/utils/datetime_range';
 import {
   gqClient,
@@ -12,15 +12,15 @@ import {
 import trackDashboardLoad from '../monitoring_tracking_helper';
 import getEnvironments from '../queries/getEnvironments.query.graphql';
 import getAnnotations from '../queries/getAnnotations.query.graphql';
-import statusCodes from '../../lib/utils/http_status';
-import { backOff, convertObjectPropsToCamelCase } from '../../lib/utils/common_utils';
+import getDashboardValidationWarnings from '../queries/getDashboardValidationWarnings.query.graphql';
+import { convertObjectPropsToCamelCase } from '../../lib/utils/common_utils';
 import { s__, sprintf } from '../../locale';
+import { getDashboard, getPrometheusQueryData } from '../requests';
 
-import {
-  PROMETHEUS_TIMEOUT,
-  ENVIRONMENT_AVAILABLE_STATE,
-  DEFAULT_DASHBOARD_PATH,
-} from '../constants';
+import { ENVIRONMENT_AVAILABLE_STATE, OVERVIEW_DASHBOARD_PATH, VARIABLE_TYPES } from '../constants';
+
+const axiosCancelToken = axios.CancelToken;
+let cancelTokenSource;
 
 function prometheusMetricQueryParams(timeRange) {
   const { start, end } = convertToFixedRange(timeRange);
@@ -36,30 +36,18 @@ function prometheusMetricQueryParams(timeRange) {
   };
 }
 
-function backOffRequest(makeRequestCallback) {
-  return backOff((next, stop) => {
-    makeRequestCallback()
-      .then(resp => {
-        if (resp.status === statusCodes.NO_CONTENT) {
-          next();
-        } else {
-          stop(resp);
-        }
-      })
-      .catch(stop);
-  }, PROMETHEUS_TIMEOUT);
-}
-
-function getPrometheusMetricResult(prometheusEndpoint, params) {
-  return backOffRequest(() => axios.get(prometheusEndpoint, { params }))
-    .then(res => res.data)
-    .then(response => {
-      if (response.status === 'error') {
-        throw new Error(response.error);
-      }
-
-      return response.data.result;
-    });
+/**
+ * Extract error messages from API or HTTP request errors.
+ *
+ * - API errors are in `error.response.data.message`
+ * - HTTP (axios) errors are in `error.messsage`
+ *
+ * @param {Object} error
+ * @returns {String} User friendly error message
+ */
+function extractErrorMessage(error) {
+  const message = error?.response?.data?.message;
+  return message ?? error.message;
 }
 
 // Setup
@@ -74,10 +62,6 @@ export const setInitialState = ({ commit }, initialState) => {
 
 export const setTimeRange = ({ commit }, timeRange) => {
   commit(types.SET_TIME_RANGE, timeRange);
-};
-
-export const setVariables = ({ commit }, variables) => {
-  commit(types.SET_VARIABLES, variables);
 };
 
 export const filterEnvironments = ({ commit, dispatch }, searchTerm) => {
@@ -100,6 +84,10 @@ export const clearExpandedPanel = ({ commit }) => {
   });
 };
 
+export const setCurrentDashboard = ({ commit }, { currentDashboard }) => {
+  commit(types.SET_CURRENT_DASHBOARD, currentDashboard);
+};
+
 // All Data
 
 /**
@@ -117,17 +105,26 @@ export const fetchData = ({ dispatch }) => {
 
 // Metrics dashboard
 
-export const fetchDashboard = ({ state, commit, dispatch }) => {
+export const fetchDashboard = ({ state, commit, dispatch, getters }) => {
   dispatch('requestMetricsDashboard');
 
   const params = {};
-  if (state.currentDashboard) {
-    params.dashboard = state.currentDashboard;
+  if (getters.fullDashboardPath) {
+    params.dashboard = getters.fullDashboardPath;
   }
 
-  return backOffRequest(() => axios.get(state.dashboardEndpoint, { params }))
-    .then(resp => resp.data)
-    .then(response => dispatch('receiveMetricsDashboardSuccess', { response }))
+  return getDashboard(state.dashboardEndpoint, params)
+    .then(response => {
+      dispatch('receiveMetricsDashboardSuccess', { response });
+      /**
+       * After the dashboard is fetched, there can be non-blocking invalid syntax
+       * in the dashboard file. This call will fetch such syntax warnings
+       * and surface a warning on the UI. If the invalid syntax is blocking,
+       * the `fetchDashboard` returns a 404 with error messages that are displayed
+       * on the UI.
+       */
+      dispatch('fetchDashboardValidationWarnings');
+    })
     .catch(error => {
       Sentry.captureException(error);
 
@@ -181,7 +178,11 @@ export const fetchDashboardData = ({ state, dispatch, getters }) => {
     return Promise.reject();
   }
 
+  // Time range params must be pre-calculated once for all metrics and options
+  // A subsequent call, may calculate a different time range
   const defaultQueryParams = prometheusMetricQueryParams(state.timeRange);
+
+  dispatch('fetchVariableMetricLabelValues', { defaultQueryParams });
 
   const promises = [];
   state.dashboard.panelGroups.forEach(group => {
@@ -194,7 +195,7 @@ export const fetchDashboardData = ({ state, dispatch, getters }) => {
 
   return Promise.all(promises)
     .then(() => {
-      const dashboardType = state.currentDashboard === '' ? 'default' : 'custom';
+      const dashboardType = getters.fullDashboardPath === '' ? 'default' : 'custom';
       trackDashboardLoad({
         label: `${dashboardType}_metrics_dashboard`,
         value: getters.metricsWithData().length,
@@ -220,7 +221,7 @@ export const fetchPrometheusMetric = (
     queryParams.step = metric.step;
   }
 
-  if (Object.keys(state.variables).length > 0) {
+  if (state.variables.length > 0) {
     queryParams = {
       ...queryParams,
       ...getters.getCustomVariablesParams,
@@ -229,9 +230,9 @@ export const fetchPrometheusMetric = (
 
   commit(types.REQUEST_METRIC_RESULT, { metricId: metric.metricId });
 
-  return getPrometheusMetricResult(metric.prometheusEndpointPath, queryParams)
-    .then(result => {
-      commit(types.RECEIVE_METRIC_RESULT_SUCCESS, { metricId: metric.metricId, result });
+  return getPrometheusQueryData(metric.prometheusEndpointPath, queryParams)
+    .then(data => {
+      commit(types.RECEIVE_METRIC_RESULT_SUCCESS, { metricId: metric.metricId, data });
     })
     .catch(error => {
       Sentry.captureException(error);
@@ -312,9 +313,9 @@ export const receiveEnvironmentsDataFailure = ({ commit }) => {
   commit(types.RECEIVE_ENVIRONMENTS_DATA_FAILURE);
 };
 
-export const fetchAnnotations = ({ state, dispatch }) => {
+export const fetchAnnotations = ({ state, dispatch, getters }) => {
   const { start } = convertToFixedRange(state.timeRange);
-  const dashboardPath = state.currentDashboard || DEFAULT_DASHBOARD_PATH;
+  const dashboardPath = getters.fullDashboardPath || OVERVIEW_DASHBOARD_PATH;
   return gqClient
     .mutate({
       mutation: getAnnotations,
@@ -345,6 +346,46 @@ export const receiveAnnotationsSuccess = ({ commit }, data) =>
   commit(types.RECEIVE_ANNOTATIONS_SUCCESS, data);
 export const receiveAnnotationsFailure = ({ commit }) => commit(types.RECEIVE_ANNOTATIONS_FAILURE);
 
+export const fetchDashboardValidationWarnings = ({ state, dispatch, getters }) => {
+  /**
+   * Normally, the overview dashboard won't throw any validation warnings.
+   *
+   * However, if a bug sneaks into the overview dashboard making it invalid,
+   * this might come handy for our clients
+   */
+  const dashboardPath = getters.fullDashboardPath || OVERVIEW_DASHBOARD_PATH;
+  return gqClient
+    .mutate({
+      mutation: getDashboardValidationWarnings,
+      variables: {
+        projectPath: removeLeadingSlash(state.projectPath),
+        environmentName: state.currentEnvironmentName,
+        dashboardPath,
+      },
+    })
+    .then(resp => resp.data?.project?.environments?.nodes?.[0]?.metricsDashboard)
+    .then(({ schemaValidationWarnings } = {}) => {
+      const hasWarnings = schemaValidationWarnings && schemaValidationWarnings.length !== 0;
+      /**
+       * The payload of the dispatch is a boolean, because at the moment a standard
+       * warning message is shown instead of the warnings the BE returns
+       */
+      dispatch('receiveDashboardValidationWarningsSuccess', hasWarnings || false);
+    })
+    .catch(err => {
+      Sentry.captureException(err);
+      dispatch('receiveDashboardValidationWarningsFailure');
+      createFlash(
+        s__('Metrics|There was an error getting dashboard validation warnings information.'),
+      );
+    });
+};
+
+export const receiveDashboardValidationWarningsSuccess = ({ commit }, hasWarnings) =>
+  commit(types.RECEIVE_DASHBOARD_VALIDATION_WARNINGS_SUCCESS, hasWarnings);
+export const receiveDashboardValidationWarningsFailure = ({ commit }) =>
+  commit(types.RECEIVE_DASHBOARD_VALIDATION_WARNINGS_FAILURE);
+
 // Dashboard manipulation
 
 export const toggleStarredValue = ({ commit, state, getters }) => {
@@ -369,7 +410,7 @@ export const toggleStarredValue = ({ commit, state, getters }) => {
     method,
   })
     .then(() => {
-      commit(types.RECEIVE_DASHBOARD_STARRING_SUCCESS, newStarredValue);
+      commit(types.RECEIVE_DASHBOARD_STARRING_SUCCESS, { selectedDashboard, newStarredValue });
     })
     .catch(() => {
       commit(types.RECEIVE_DASHBOARD_STARRING_FAILURE);
@@ -416,10 +457,93 @@ export const duplicateSystemDashboard = ({ state }, payload) => {
 // Variables manipulation
 
 export const updateVariablesAndFetchData = ({ commit, dispatch }, updatedVariable) => {
-  commit(types.UPDATE_VARIABLES, updatedVariable);
+  commit(types.UPDATE_VARIABLE_VALUE, updatedVariable);
 
   return dispatch('fetchDashboardData');
 };
 
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};
+export const fetchVariableMetricLabelValues = ({ state, commit }, { defaultQueryParams }) => {
+  const { start_time, end_time } = defaultQueryParams;
+  const optionsRequests = [];
+
+  state.variables.forEach(variable => {
+    if (variable.type === VARIABLE_TYPES.metric_label_values) {
+      const { prometheusEndpointPath, label } = variable.options;
+
+      const optionsRequest = getPrometheusQueryData(prometheusEndpointPath, {
+        start_time,
+        end_time,
+      })
+        .then(data => {
+          commit(types.UPDATE_VARIABLE_METRIC_LABEL_VALUES, { variable, label, data });
+        })
+        .catch(() => {
+          createFlash(
+            sprintf(s__('Metrics|There was an error getting options for variable "%{name}".'), {
+              name: variable.name,
+            }),
+          );
+        });
+      optionsRequests.push(optionsRequest);
+    }
+  });
+
+  return Promise.all(optionsRequests);
+};
+
+// Panel Builder
+
+export const setPanelPreviewTimeRange = ({ commit }, timeRange) => {
+  commit(types.SET_PANEL_PREVIEW_TIME_RANGE, timeRange);
+};
+
+export const fetchPanelPreview = ({ state, commit, dispatch }, panelPreviewYml) => {
+  if (!panelPreviewYml) {
+    return null;
+  }
+
+  commit(types.SET_PANEL_PREVIEW_IS_SHOWN, true);
+  commit(types.REQUEST_PANEL_PREVIEW, panelPreviewYml);
+
+  return axios
+    .post(state.panelPreviewEndpoint, { panel_yaml: panelPreviewYml })
+    .then(({ data }) => {
+      commit(types.RECEIVE_PANEL_PREVIEW_SUCCESS, data);
+
+      dispatch('fetchPanelPreviewMetrics');
+    })
+    .catch(error => {
+      commit(types.RECEIVE_PANEL_PREVIEW_FAILURE, extractErrorMessage(error));
+    });
+};
+
+export const fetchPanelPreviewMetrics = ({ state, commit }) => {
+  if (cancelTokenSource) {
+    cancelTokenSource.cancel();
+  }
+  cancelTokenSource = axiosCancelToken.source();
+
+  const defaultQueryParams = prometheusMetricQueryParams(state.panelPreviewTimeRange);
+
+  state.panelPreviewGraphData.metrics.forEach((metric, index) => {
+    commit(types.REQUEST_PANEL_PREVIEW_METRIC_RESULT, { index });
+
+    const params = { ...defaultQueryParams };
+    if (metric.step) {
+      params.step = metric.step;
+    }
+    return getPrometheusQueryData(metric.prometheusEndpointPath, params, {
+      cancelToken: cancelTokenSource.token,
+    })
+      .then(data => {
+        commit(types.RECEIVE_PANEL_PREVIEW_METRIC_RESULT_SUCCESS, { index, data });
+      })
+      .catch(error => {
+        Sentry.captureException(error);
+
+        commit(types.RECEIVE_PANEL_PREVIEW_METRIC_RESULT_FAILURE, { index, error });
+        // Continue to throw error so the panel builder can notify using createFlash
+        throw error;
+      });
+  });
+};

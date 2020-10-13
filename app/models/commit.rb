@@ -21,7 +21,6 @@ class Commit
   participant :committer
   participant :notes_with_associations
 
-  attr_accessor :author
   attr_accessor :redacted_description_html
   attr_accessor :redacted_title_html
   attr_accessor :redacted_full_title_html
@@ -29,12 +28,6 @@ class Commit
 
   delegate :repository, to: :container
   delegate :project, to: :repository, allow_nil: true
-
-  DIFF_SAFE_LINES = Gitlab::Git::DiffCollection::DEFAULT_LIMITS[:max_lines]
-
-  # Commits above this size will not be rendered in HTML
-  DIFF_HARD_LIMIT_FILES = 1000
-  DIFF_HARD_LIMIT_LINES = 50000
 
   MIN_SHA_LENGTH = Gitlab::Git::Commit::MIN_SHA_LENGTH
   COMMIT_SHA_PATTERN = /\h{#{MIN_SHA_LENGTH},40}/.freeze
@@ -81,10 +74,30 @@ class Commit
       sha[0..MIN_SHA_LENGTH]
     end
 
-    def max_diff_options
+    def diff_safe_lines(project: nil)
+      Gitlab::Git::DiffCollection.default_limits(project: project)[:max_lines]
+    end
+
+    def diff_hard_limit_files(project: nil)
+      if Feature.enabled?(:increased_diff_limits, project)
+        2000
+      else
+        1000
+      end
+    end
+
+    def diff_hard_limit_lines(project: nil)
+      if Feature.enabled?(:increased_diff_limits, project)
+        75000
+      else
+        50000
+      end
+    end
+
+    def max_diff_options(project: nil)
       {
-        max_files: DIFF_HARD_LIMIT_FILES,
-        max_lines: DIFF_HARD_LIMIT_LINES
+        max_files: diff_hard_limit_files(project: project),
+        max_lines: diff_hard_limit_lines(project: project)
       }
     end
 
@@ -222,12 +235,16 @@ class Commit
     description.present?
   end
 
+  def timestamp
+    committed_date.xmlschema
+  end
+
   def hook_attrs(with_changed_files: false)
     data = {
       id: id,
       message: safe_message,
       title: title,
-      timestamp: committed_date.xmlschema,
+      timestamp: timestamp,
       url: Gitlab::UrlBuilder.build(self),
       author: {
         name: author_name,
@@ -469,10 +486,12 @@ class Commit
     # We don't want to do anything for `Commit` model, so this is empty.
   end
 
-  WIP_REGEX = /\A\s*(((?i)(\[WIP\]|WIP:|WIP)\s|WIP$))|(fixup!|squash!)\s/.freeze
+  # WIP is deprecated in favor of Draft. Currently both options are supported
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/227426
+  DRAFT_REGEX = /\A\s*#{Regexp.union(Gitlab::Regex.merge_request_wip, Gitlab::Regex.merge_request_draft)}|(fixup!|squash!)\s/.freeze
 
   def work_in_progress?
-    !!(title =~ WIP_REGEX)
+    !!(title =~ DRAFT_REGEX)
   end
 
   def merged_merge_request?(user)

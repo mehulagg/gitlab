@@ -18,6 +18,7 @@ RSpec.describe 'Geo read-only message', :geo do
 
     visit root_dashboard_path
 
-    expect(page).to have_content('You are on a secondary, read-only Geo node. If you want to make changes, you must visit this page on the primary node.')
+    expect(page).to have_content('You are on a secondary, read-only Geo node. If you want to make changes, you must visit the primary site.')
+    expect(page).to have_content('Go to the primary site')
   end
 end

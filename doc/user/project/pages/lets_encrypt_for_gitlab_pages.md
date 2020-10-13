@@ -1,7 +1,5 @@
 ---
 description: "How to secure GitLab Pages websites with Let's Encrypt (manual process, deprecated)."
-type: howto
-last_updated: 2019-07-15
 ---
 
 # Let's Encrypt for GitLab Pages (manual process, deprecated)
@@ -105,7 +103,7 @@ operating systems the steps might be slightly different. Follow the
    therefore, it needs to be part of the website content under the
    repo's [`public`](index.md#how-it-works) folder.
 
-1. Add, commit, and push the file into your repo in GitLab. Once the pipeline
+1. Add, commit, and push the file into your repository in GitLab. Once the pipeline
    passes, press **Enter** on your terminal to continue issuing your
    certificate. CertBot will then prompt you with the following message:
 

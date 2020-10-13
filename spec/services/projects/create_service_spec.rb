@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::CreateService, '#execute' do
+RSpec.describe Projects::CreateService, '#execute' do
   include ExternalAuthorizationServiceHelpers
   include GitHelpers
 
@@ -43,10 +43,16 @@ describe Projects::CreateService, '#execute' do
       create_project(user, opts)
     end
 
-    it 'creates associated project settings' do
+    it 'builds associated project settings' do
       project = create_project(user, opts)
 
-      expect(project.project_setting).to be_persisted
+      expect(project.project_setting).to be_new_record
+    end
+
+    it_behaves_like 'storing arguments in the application context' do
+      let(:expected_params) { { project: subject.full_path, related_class: described_class.to_s } }
+
+      subject { create_project(user, opts) }
     end
   end
 
@@ -240,13 +246,21 @@ describe Projects::CreateService, '#execute' do
   end
 
   context 'import data' do
-    it 'stores import data and URL' do
-      import_data = { data: { 'test' => 'some data' } }
-      project = create_project(user, { name: 'test', import_url: 'http://import-url', import_data: import_data })
+    let(:import_data) { { data: { 'test' => 'some data' } } }
+    let(:imported_project) { create_project(user, { name: 'test', import_url: 'http://import-url', import_data: import_data }) }
 
-      expect(project.import_data).to be_persisted
-      expect(project.import_data.data).to eq(import_data[:data])
-      expect(project.import_url).to eq('http://import-url')
+    it 'does not write repository config' do
+      expect_next_instance_of(Project) do |project|
+        expect(project).not_to receive(:write_repository_config)
+      end
+
+      imported_project
+    end
+
+    it 'stores import data and URL' do
+      expect(imported_project.import_data).to be_persisted
+      expect(imported_project.import_data.data).to eq(import_data[:data])
+      expect(imported_project.import_url).to eq('http://import-url')
     end
   end
 
@@ -438,38 +452,102 @@ describe Projects::CreateService, '#execute' do
   end
 
   context 'when readme initialization is requested' do
-    it 'creates README.md' do
+    let(:project) { create_project(user, opts) }
+
+    before do
       opts[:initialize_with_readme] = '1'
+    end
 
-      project = create_project(user, opts)
+    shared_examples 'creates README.md' do
+      it { expect(project.repository.commit_count).to be(1) }
+      it { expect(project.repository.readme.name).to eql('README.md') }
+      it { expect(project.repository.readme.data).to include('# GitLab') }
+    end
 
-      expect(project.repository.commit_count).to be(1)
-      expect(project.repository.readme.name).to eql('README.md')
-      expect(project.repository.readme.data).to include('# GitLab')
+    it_behaves_like 'creates README.md'
+
+    context 'and a default_branch_name is specified' do
+      before do
+        allow(Gitlab::CurrentSettings)
+          .to receive(:default_branch_name)
+          .and_return('example_branch')
+      end
+
+      it_behaves_like 'creates README.md'
+
+      it 'creates README.md within the specified branch rather than master' do
+        branches = project.repository.branches
+
+        expect(branches.size).to eq(1)
+        expect(branches.collect(&:name)).to contain_exactly('example_branch')
+      end
     end
   end
 
   describe 'create service for the project' do
     subject(:project) { create_project(user, opts) }
 
-    context 'when there is an active instance-level and an active template integration' do
-      let!(:template_integration) { create(:prometheus_service, :template, api_url: 'https://prometheus.template.com/') }
-      let!(:instance_integration) { create(:prometheus_service, :instance, api_url: 'https://prometheus.instance.com/') }
-
-      it 'creates a service from the instance-level integration' do
-        expect(project.services.count).to eq(1)
-        expect(project.services.first.api_url).to eq(instance_integration.api_url)
-        expect(project.services.first.inherit_from_id).to eq(instance_integration.id)
-      end
-    end
-
-    context 'when there is an active service template' do
+    context 'with an active service template' do
       let!(:template_integration) { create(:prometheus_service, :template, api_url: 'https://prometheus.template.com/') }
 
       it 'creates a service from the template' do
         expect(project.services.count).to eq(1)
         expect(project.services.first.api_url).to eq(template_integration.api_url)
         expect(project.services.first.inherit_from_id).to be_nil
+      end
+
+      context 'with an active instance-level integration' do
+        let!(:instance_integration) { create(:prometheus_service, :instance, api_url: 'https://prometheus.instance.com/') }
+
+        it 'creates a service from the instance-level integration' do
+          expect(project.services.count).to eq(1)
+          expect(project.services.first.api_url).to eq(instance_integration.api_url)
+          expect(project.services.first.inherit_from_id).to eq(instance_integration.id)
+        end
+
+        context 'with an active group-level integration' do
+          let!(:group_integration) { create(:prometheus_service, group: group, project: nil, api_url: 'https://prometheus.group.com/') }
+          let!(:group) do
+            create(:group).tap do |group|
+              group.add_owner(user)
+            end
+          end
+
+          let(:opts) do
+            {
+              name: 'GitLab',
+              namespace_id: group.id
+            }
+          end
+
+          it 'creates a service from the group-level integration' do
+            expect(project.services.count).to eq(1)
+            expect(project.services.first.api_url).to eq(group_integration.api_url)
+            expect(project.services.first.inherit_from_id).to eq(group_integration.id)
+          end
+
+          context 'with an active subgroup' do
+            let!(:subgroup_integration) { create(:prometheus_service, group: subgroup, project: nil, api_url: 'https://prometheus.subgroup.com/') }
+            let!(:subgroup) do
+              create(:group, parent: group).tap do |subgroup|
+                subgroup.add_owner(user)
+              end
+            end
+
+            let(:opts) do
+              {
+                name: 'GitLab',
+                namespace_id: subgroup.id
+              }
+            end
+
+            it 'creates a service from the subgroup-level integration' do
+              expect(project.services.count).to eq(1)
+              expect(project.services.first.api_url).to eq(subgroup_integration.api_url)
+              expect(project.services.first.inherit_from_id).to eq(subgroup_integration.id)
+            end
+          end
+        end
       end
     end
 
@@ -647,10 +725,6 @@ describe Projects::CreateService, '#execute' do
     end
 
     it 'updates authorization for current_user' do
-      expect(Users::RefreshAuthorizedProjectsService).to(
-        receive(:new).with(user).and_call_original
-      )
-
       project = create_project(user, opts)
 
       expect(
@@ -682,10 +756,6 @@ describe Projects::CreateService, '#execute' do
       end
 
       it 'updates authorization for current_user' do
-        expect(Users::RefreshAuthorizedProjectsService).to(
-          receive(:new).with(user).and_call_original
-        )
-
         project = create_project(user, opts)
 
         expect(
@@ -711,5 +781,101 @@ describe Projects::CreateService, '#execute' do
 
   def create_project(user, opts)
     Projects::CreateService.new(user, opts).execute
+  end
+
+  context 'shared Runners config' do
+    using RSpec::Parameterized::TableSyntax
+
+    let_it_be(:user) { create :user }
+
+    context 'when parent group is present' do
+      let_it_be(:group) do
+        create(:group) do |group|
+          group.add_owner(user)
+        end
+      end
+
+      before do
+        allow_next_found_instance_of(Group) do |group|
+          allow(group).to receive(:shared_runners_setting).and_return(shared_runners_setting)
+        end
+
+        user.refresh_authorized_projects # Ensure cache is warm
+      end
+
+      context 'default value based on parent group setting' do
+        where(:shared_runners_setting, :desired_config_for_new_project, :expected_result_for_project) do
+          'enabled'                    | nil | true
+          'disabled_with_override'     | nil | false
+          'disabled_and_unoverridable' | nil | false
+        end
+
+        with_them do
+          it 'creates project following the parent config' do
+            params = opts.merge(namespace_id: group.id)
+            params = params.merge(shared_runners_enabled: desired_config_for_new_project) unless desired_config_for_new_project.nil?
+            project = create_project(user, params)
+
+            expect(project).to be_valid
+            expect(project.shared_runners_enabled).to eq(expected_result_for_project)
+          end
+        end
+      end
+
+      context 'parent group is present and allows desired config' do
+        where(:shared_runners_setting, :desired_config_for_new_project, :expected_result_for_project) do
+          'enabled'                    | true  | true
+          'enabled'                    | false | false
+          'disabled_with_override'     | false | false
+          'disabled_with_override'     | true  | true
+          'disabled_and_unoverridable' | false | false
+        end
+
+        with_them do
+          it 'creates project following the parent config' do
+            params = opts.merge(namespace_id: group.id, shared_runners_enabled: desired_config_for_new_project)
+            project = create_project(user, params)
+
+            expect(project).to be_valid
+            expect(project.shared_runners_enabled).to eq(expected_result_for_project)
+          end
+        end
+      end
+
+      context 'parent group is present and disallows desired config' do
+        where(:shared_runners_setting, :desired_config_for_new_project) do
+          'disabled_and_unoverridable' | true
+        end
+
+        with_them do
+          it 'does not create project' do
+            params = opts.merge(namespace_id: group.id, shared_runners_enabled: desired_config_for_new_project)
+            project = create_project(user, params)
+
+            expect(project.persisted?).to eq(false)
+            expect(project).to be_invalid
+            expect(project.errors[:shared_runners_enabled]).to include('cannot be enabled because parent group does not allow it')
+          end
+        end
+      end
+    end
+
+    context 'parent group is not present' do
+      where(:desired_config, :expected_result) do
+        true  | true
+        false | false
+        nil   | true
+      end
+
+      with_them do
+        it 'follows desired config' do
+          opts[:shared_runners_enabled] = desired_config unless desired_config.nil?
+          project = create_project(user, opts)
+
+          expect(project).to be_valid
+          expect(project.shared_runners_enabled).to eq(expected_result)
+        end
+      end
+    end
   end
 end

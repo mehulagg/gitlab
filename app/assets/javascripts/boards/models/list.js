@@ -1,12 +1,11 @@
 /* eslint-disable no-underscore-dangle, class-methods-use-this */
-
-import ListIssue from 'ee_else_ce/boards/models/issue';
 import { __ } from '~/locale';
 import ListLabel from './label';
 import ListAssignee from './assignee';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import boardsStore from '../stores/boards_store';
 import ListMilestone from './milestone';
+import 'ee_else_ce/boards/models/issue';
 
 const TYPES = {
   backlog: {
@@ -48,7 +47,7 @@ class List {
     this.loading = true;
     this.loadingMore = false;
     this.issues = obj.issues || [];
-    this.issuesSize = obj.issuesSize ? obj.issuesSize : 0;
+    this.issuesSize = obj.issuesSize || obj.issuesCount || 0;
     this.maxIssueCount = obj.maxIssueCount || obj.max_issue_count || 0;
 
     if (obj.label) {
@@ -61,7 +60,9 @@ class List {
       this.title = this.milestone.title;
     }
 
-    if (!typeInfo.isBlank && this.id) {
+    // doNotFetchIssues is a temporary workaround until issues are fetched using GraphQL on issue boards
+    // Issue: https://gitlab.com/gitlab-org/gitlab/-/issues/229416
+    if (!typeInfo.isBlank && this.id && !obj.doNotFetchIssues) {
       this.getIssues().catch(() => {
         // TODO: handle request error
       });
@@ -100,12 +101,6 @@ class List {
     return boardsStore.newListIssue(this, issue);
   }
 
-  createIssues(data) {
-    data.forEach(issueObj => {
-      this.addIssue(new ListIssue(issueObj));
-    });
-  }
-
   addMultipleIssues(issues, listFrom, newIndex) {
     boardsStore.addMultipleListIssues(this, issues, listFrom, newIndex);
   }
@@ -119,16 +114,12 @@ class List {
   }
 
   moveMultipleIssues({ issues, oldIndicies, newIndex, moveBeforeId, moveAfterId }) {
-    oldIndicies.reverse().forEach(index => {
-      this.issues.splice(index, 1);
-    });
-    this.issues.splice(newIndex, 0, ...issues);
-
     boardsStore
-      .moveMultipleIssues({
-        ids: issues.map(issue => issue.id),
-        fromListId: null,
-        toListId: null,
+      .moveListMultipleIssues({
+        list: this,
+        issues,
+        oldIndicies,
+        newIndex,
         moveBeforeId,
         moveAfterId,
       })
@@ -158,18 +149,7 @@ class List {
   }
 
   removeMultipleIssues(removeIssues) {
-    const ids = removeIssues.map(issue => issue.id);
-
-    this.issues = this.issues.filter(issue => {
-      const matchesRemove = ids.includes(issue.id);
-
-      if (matchesRemove) {
-        this.issuesSize -= 1;
-        issue.removeLabel(this.label);
-      }
-
-      return !matchesRemove;
-    });
+    return boardsStore.removeListMultipleIssues(this, removeIssues);
   }
 
   removeIssue(removeIssue) {
@@ -181,12 +161,7 @@ class List {
   }
 
   onNewIssueResponse(issue, data) {
-    issue.refreshData(data);
-
-    if (this.issuesSize > 1) {
-      const moveBeforeId = this.issues[1].id;
-      boardsStore.moveIssue(issue.id, null, null, null, moveBeforeId);
-    }
+    boardsStore.onNewListIssueResponse(this, issue, data);
   }
 }
 

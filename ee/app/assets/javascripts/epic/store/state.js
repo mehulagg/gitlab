@@ -14,8 +14,10 @@ export default () => ({
   epicsWebUrl: '',
   labelsWebUrl: '',
   markdownDocsPath: '',
+  newEpicWebUrl: '',
 
   // Flags
+  canCreate: false,
   canUpdate: false,
   canDestroy: false,
   canAdmin: false,
@@ -56,6 +58,7 @@ export default () => ({
   ancestors: [],
   participants: [],
   subscribed: false,
+  confidential: false,
 
   // Create Epic Props
   newEpicTitle: '',

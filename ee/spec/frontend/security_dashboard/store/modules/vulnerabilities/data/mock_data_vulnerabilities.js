@@ -8,6 +8,7 @@ export default [
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
+      vendor: 'GitLab',
     },
     identifiers: [
       {
@@ -75,6 +76,7 @@ export default [
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
+      vendor: 'GitLab',
     },
     identifiers: [
       {
@@ -128,6 +130,7 @@ export default [
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
+      vendor: 'GitLab',
     },
     identifiers: [
       {
@@ -205,6 +208,7 @@ export default [
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
+      vendor: 'GitLab',
     },
     identifiers: [
       {
@@ -283,6 +287,7 @@ export default [
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
+      vendor: 'GitLab',
     },
     identifiers: [
       {
@@ -384,6 +389,7 @@ export default [
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
+      vendor: 'GitLab',
     },
     identifiers: [
       {
@@ -437,6 +443,7 @@ export default [
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
+      vendor: 'GitLab',
     },
     identifiers: [
       {
@@ -514,6 +521,7 @@ export default [
     scanner: {
       external_id: 'clair',
       name: 'Clair',
+      vendor: 'GitLab',
     },
     identifiers: [
       {

@@ -5,29 +5,41 @@ module Projects
     module Alerts
       class NotifyService < BaseService
         include Gitlab::Utils::StrongMemoize
-        include IncidentManagement::Settings
+        include ::IncidentManagement::Settings
+
+        # This set of keys identifies a payload as a valid Prometheus
+        # payload and thus processable by this service. See also
+        # https://prometheus.io/docs/alerting/configuration/#webhook_config
+        REQUIRED_PAYLOAD_KEYS = %w[
+          version groupKey status receiver groupLabels commonLabels
+          commonAnnotations externalURL alerts
+        ].to_set.freeze
+
+        SUPPORTED_VERSION = '4'
 
         def execute(token)
           return bad_request unless valid_payload_size?
-          return unprocessable_entity unless valid_version?
+          return unprocessable_entity unless self.class.processable?(params)
           return unauthorized unless valid_alert_manager_token?(token)
 
           process_prometheus_alerts
-          persist_events
           send_alert_email if send_email?
-          process_incident_issues if process_issues?
 
           ServiceResponse.success
+        end
+
+        def self.processable?(params)
+          # Workaround for https://gitlab.com/gitlab-org/gitlab/-/issues/220496
+          return false unless params
+
+          REQUIRED_PAYLOAD_KEYS.subset?(params.keys.to_set) &&
+            params['version'] == SUPPORTED_VERSION
         end
 
         private
 
         def valid_payload_size?
           Gitlab::Utils::DeepSize.new(params).valid?
-        end
-
-        def send_email?
-          incident_management_setting.send_email && firings.any?
         end
 
         def firings
@@ -42,12 +54,10 @@ module Projects
           params['alerts']
         end
 
-        def valid_version?
-          params['version'] == '4'
-        end
-
         def valid_alert_manager_token?(token)
-          valid_for_manual?(token) || valid_for_managed?(token)
+          valid_for_manual?(token) ||
+            valid_for_alerts_endpoint?(token) ||
+            valid_for_managed?(token)
         end
 
         def valid_for_manual?(token)
@@ -59,6 +69,13 @@ module Projects
           else
             token.nil?
           end
+        end
+
+        def valid_for_alerts_endpoint?(token)
+          return false unless project.alerts_service_activated?
+
+          # Here we are enforcing the existence of the token
+          compare_token(token, project.alerts_service.token)
         end
 
         def valid_for_managed?(token)
@@ -104,16 +121,11 @@ module Projects
         end
 
         def send_alert_email
+          return unless firings.any?
+
           notification_service
             .async
-            .prometheus_alerts_fired(project, firings)
-        end
-
-        def process_incident_issues
-          alerts.each do |alert|
-            IncidentManagement::ProcessPrometheusAlertWorker
-              .perform_async(project.id, alert.to_h)
-          end
+            .prometheus_alerts_fired(project, alerts_attributes)
         end
 
         def process_prometheus_alerts
@@ -124,8 +136,16 @@ module Projects
           end
         end
 
-        def persist_events
-          CreateEventsService.new(project, nil, params).execute
+        def alerts_attributes
+          firings.map do |payload|
+            alert_params = Gitlab::AlertManagement::Payload.parse(
+              project,
+              payload,
+              monitoring_tool: Gitlab::AlertManagement::Payload::MONITORING_TOOLS[:prometheus]
+            ).alert_params
+
+            AlertManagement::Alert.new(alert_params).attributes
+          end
         end
 
         def bad_request

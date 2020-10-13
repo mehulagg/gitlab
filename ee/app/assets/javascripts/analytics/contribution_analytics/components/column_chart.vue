@@ -1,14 +1,22 @@
 <script>
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
+import { GlResizeObserverDirective } from '@gitlab/ui';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
-import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
+import { truncateWidth } from '~/lib/utils/text_utility';
 
-const CHART_HEIGHT = 220;
+import {
+  CHART_HEIGHT,
+  CHART_X_AXIS_NAME_TOP_PADDING,
+  CHART_X_AXIS_ROTATE,
+  INNER_CHART_HEIGHT,
+} from '../constants';
 
 export default {
   components: {
     GlColumnChart,
-    ResizableChartContainer,
+  },
+  directives: {
+    GlResizeObserverDirective,
   },
   props: {
     chartData: {
@@ -28,6 +36,8 @@ export default {
   },
   data() {
     return {
+      width: 0,
+      height: CHART_HEIGHT,
       svgs: {},
     };
   },
@@ -40,6 +50,18 @@ export default {
     chartOptions() {
       return {
         dataZoom: [this.dataZoomConfig],
+        height: INNER_CHART_HEIGHT,
+        xAxis: {
+          axisLabel: {
+            rotate: CHART_X_AXIS_ROTATE,
+            formatter(value) {
+              return truncateWidth(value);
+            },
+          },
+          nameTextStyle: {
+            padding: [CHART_X_AXIS_NAME_TOP_PADDING, 0, 0, 0],
+          },
+        },
       };
     },
     seriesData() {
@@ -59,21 +81,27 @@ export default {
           console.error('SVG could not be rendered correctly: ', e);
         });
     },
-    onChartCreated() {
+    onResize() {
+      const { columnChart } = this.$refs;
+      if (!columnChart) return;
+      const { width } = columnChart.$el.getBoundingClientRect();
+      this.width = width;
+    },
+    onChartCreated(columnChart) {
       this.setSvg('scroll-handle');
+      columnChart.on('datazoom', this.updateAxisNamePadding);
     },
   },
-  height: CHART_HEIGHT,
 };
 </script>
 
 <template>
-  <resizable-chart-container>
+  <div v-gl-resize-observer-directive="onResize">
     <gl-column-chart
-      slot-scope="{ width }"
+      ref="columnChart"
       v-bind="$attrs"
       :width="width"
-      :height="$options.height"
+      :height="height"
       :data="seriesData"
       :x-axis-title="xAxisTitle"
       :y-axis-title="yAxisTitle"
@@ -81,5 +109,5 @@ export default {
       :option="chartOptions"
       @created="onChartCreated"
     />
-  </resizable-chart-container>
+  </div>
 </template>

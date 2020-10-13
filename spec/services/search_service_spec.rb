@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SearchService do
+RSpec.describe SearchService do
   let_it_be(:user) { create(:user) }
 
   let_it_be(:accessible_group) { create(:group, :private) }
@@ -374,6 +374,19 @@ describe SearchService do
 
       subject(:result) { search_service.search_objects }
 
+      shared_examples "redaction limits N+1 queries" do |limit:|
+        it 'does not exceed the query limit' do
+          # issuing the query to remove the data loading call
+          unredacted_results.to_a
+
+          # only the calls from the redaction are left
+          query = ActiveRecord::QueryRecorder.new { result }
+
+          # these are the project authorization calls, which are not preloaded
+          expect(query.count).to be <= limit
+        end
+      end
+
       def found_blob(project)
         Gitlab::Search::FoundBlob.new(project: project)
       end
@@ -427,6 +440,12 @@ describe SearchService do
         it 'redacts the inaccessible merge request' do
           expect(result).to contain_exactly(readable)
         end
+
+        context 'with :with_api_entity_associations' do
+          let(:unredacted_results) { ar_relation(MergeRequest.with_api_entity_associations, readable, unreadable) }
+
+          it_behaves_like "redaction limits N+1 queries", limit: 8
+        end
       end
 
       context 'project repository blobs' do
@@ -460,6 +479,10 @@ describe SearchService do
         it 'redacts the inaccessible snippet' do
           expect(result).to contain_exactly(readable)
         end
+
+        context 'with :with_api_entity_associations' do
+          it_behaves_like "redaction limits N+1 queries", limit: 13
+        end
       end
 
       context 'personal snippets' do
@@ -470,6 +493,10 @@ describe SearchService do
 
         it 'redacts the inaccessible snippet' do
           expect(result).to contain_exactly(readable)
+        end
+
+        context 'with :with_api_entity_associations' do
+          it_behaves_like "redaction limits N+1 queries", limit: 4
         end
       end
 

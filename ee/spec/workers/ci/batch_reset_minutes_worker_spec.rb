@@ -11,7 +11,7 @@ RSpec.describe Ci::BatchResetMinutesWorker do
         id: 1,
         shared_runners_minutes_limit: 100,
         extra_shared_runners_minutes_limit: 50,
-        last_ci_minutes_notification_at: Time.now,
+        last_ci_minutes_notification_at: Time.current,
         last_ci_minutes_usage_notification_level: 30)
     end
 
@@ -20,7 +20,7 @@ RSpec.describe Ci::BatchResetMinutesWorker do
         id: 10,
         shared_runners_minutes_limit: 100,
         extra_shared_runners_minutes_limit: 50,
-        last_ci_minutes_notification_at: Time.now,
+        last_ci_minutes_notification_at: Time.current,
         last_ci_minutes_usage_notification_level: 30)
     end
 

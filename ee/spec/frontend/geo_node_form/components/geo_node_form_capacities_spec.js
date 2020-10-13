@@ -1,7 +1,12 @@
 import Vuex from 'vuex';
 import { createLocalVue, mount } from '@vue/test-utils';
+import { GlLink } from '@gitlab/ui';
 import GeoNodeFormCapacities from 'ee/geo_node_form/components/geo_node_form_capacities.vue';
-import { VALIDATION_FIELD_KEYS } from 'ee/geo_node_form/constants';
+import {
+  VALIDATION_FIELD_KEYS,
+  REVERIFICATION_MORE_INFO,
+  BACKFILL_MORE_INFO,
+} from 'ee/geo_node_form/constants';
 import { MOCK_NODE } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -44,6 +49,8 @@ describe('GeoNodeFormCapacities', () => {
     wrapper.destroy();
   });
 
+  const findGeoNodeFormCapcitiesSectionDescription = () => wrapper.find('p');
+  const findGeoNodeFormCapacitiesMoreInfoLink = () => wrapper.find(GlLink);
   const findGeoNodeFormRepositoryCapacityField = () =>
     wrapper.find('#node-repository-capacity-field');
   const findGeoNodeFormFileCapacityField = () => wrapper.find('#node-file-capacity-field');
@@ -56,6 +63,28 @@ describe('GeoNodeFormCapacities', () => {
   const findErrorMessage = () => wrapper.find('.invalid-feedback');
 
   describe('template', () => {
+    describe.each`
+      primaryNode | description                                                                                                     | link
+      ${true}     | ${'Set the synchronization and verification capacity for the secondary node.'}                                  | ${REVERIFICATION_MORE_INFO}
+      ${false}    | ${'Set the number of concurrent requests this secondary node will make to the primary node while backfilling.'} | ${BACKFILL_MORE_INFO}
+    `(`section description`, ({ primaryNode, description, link }) => {
+      describe(`when node is ${primaryNode ? 'primary' : 'secondary'}`, () => {
+        beforeEach(() => {
+          createComponent({
+            nodeData: { ...defaultProps.nodeData, primary: primaryNode },
+          });
+        });
+
+        it(`sets section description correctly`, () => {
+          expect(findGeoNodeFormCapcitiesSectionDescription().text()).toContain(description);
+        });
+
+        it(`sets section More Information link correctly`, () => {
+          expect(findGeoNodeFormCapacitiesMoreInfoLink().attributes('href')).toBe(link);
+        });
+      });
+    });
+
     describe.each`
       primaryNode | showRepoCapacity | showFileCapacity | showVerificationCapacity | showContainerCapacity | showReverificationInterval
       ${true}     | ${false}         | ${false}         | ${true}                  | ${false}              | ${true}
@@ -70,42 +99,44 @@ describe('GeoNodeFormCapacities', () => {
         showVerificationCapacity,
         showReverificationInterval,
       }) => {
-        beforeEach(() => {
-          createComponent({
-            nodeData: { ...defaultProps.nodeData, primary: primaryNode },
+        describe(`when node is ${primaryNode ? 'primary' : 'secondary'}`, () => {
+          beforeEach(() => {
+            createComponent({
+              nodeData: { ...defaultProps.nodeData, primary: primaryNode },
+            });
           });
-        });
 
-        it(`it ${showRepoCapacity ? 'shows' : 'hides'} the Repository Capacity Field`, () => {
-          expect(findGeoNodeFormRepositoryCapacityField().exists()).toBe(showRepoCapacity);
-        });
+          it(`it ${showRepoCapacity ? 'shows' : 'hides'} the Repository Capacity Field`, () => {
+            expect(findGeoNodeFormRepositoryCapacityField().exists()).toBe(showRepoCapacity);
+          });
 
-        it(`it ${showFileCapacity ? 'shows' : 'hides'} the File Capacity Field`, () => {
-          expect(findGeoNodeFormFileCapacityField().exists()).toBe(showFileCapacity);
-        });
+          it(`it ${showFileCapacity ? 'shows' : 'hides'} the File Capacity Field`, () => {
+            expect(findGeoNodeFormFileCapacityField().exists()).toBe(showFileCapacity);
+          });
 
-        it(`it ${
-          showContainerCapacity ? 'shows' : 'hides'
-        } the Container Repository Capacity Field`, () => {
-          expect(findGeoNodeFormContainerRepositoryCapacityField().exists()).toBe(
-            showContainerCapacity,
-          );
-        });
+          it(`it ${
+            showContainerCapacity ? 'shows' : 'hides'
+          } the Container Repository Capacity Field`, () => {
+            expect(findGeoNodeFormContainerRepositoryCapacityField().exists()).toBe(
+              showContainerCapacity,
+            );
+          });
 
-        it(`it ${
-          showVerificationCapacity ? 'shows' : 'hides'
-        } the Verification Capacity Field`, () => {
-          expect(findGeoNodeFormVerificationCapacityField().exists()).toBe(
-            showVerificationCapacity,
-          );
-        });
+          it(`it ${
+            showVerificationCapacity ? 'shows' : 'hides'
+          } the Verification Capacity Field`, () => {
+            expect(findGeoNodeFormVerificationCapacityField().exists()).toBe(
+              showVerificationCapacity,
+            );
+          });
 
-        it(`it ${
-          showReverificationInterval ? 'shows' : 'hides'
-        } the Reverification Interval Field`, () => {
-          expect(findGeoNodeFormReverificationIntervalField().exists()).toBe(
-            showReverificationInterval,
-          );
+          it(`it ${
+            showReverificationInterval ? 'shows' : 'hides'
+          } the Reverification Interval Field`, () => {
+            expect(findGeoNodeFormReverificationIntervalField().exists()).toBe(
+              showReverificationInterval,
+            );
+          });
         });
       },
     );
@@ -120,7 +151,7 @@ describe('GeoNodeFormCapacities', () => {
       ${999}  | ${false}  | ${null}
       ${1000} | ${true}   | ${'should be between 1-999'}
     `(`errors`, ({ data, showError, errorMessage }) => {
-      describe('on primary node', () => {
+      describe('when node is primary', () => {
         beforeEach(() => {
           createComponent({
             nodeData: { ...defaultProps.nodeData, primary: true },
@@ -158,7 +189,7 @@ describe('GeoNodeFormCapacities', () => {
         });
       });
 
-      describe('on secondary node', () => {
+      describe('when node is secondary', () => {
         beforeEach(() => {
           createComponent();
         });
@@ -226,7 +257,7 @@ describe('GeoNodeFormCapacities', () => {
 
   describe('computed', () => {
     describe('visibleFormGroups', () => {
-      describe('when nodeData.primary is true', () => {
+      describe('when node is primary', () => {
         beforeEach(() => {
           createComponent({
             nodeData: { ...defaultProps.nodeData, primary: true },
@@ -242,7 +273,7 @@ describe('GeoNodeFormCapacities', () => {
         });
       });
 
-      describe('when nodeData.primary is false', () => {
+      describe('when node is secondary', () => {
         beforeEach(() => {
           createComponent();
         });

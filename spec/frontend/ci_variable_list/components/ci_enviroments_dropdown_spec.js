@@ -1,7 +1,7 @@
 import Vuex from 'vuex';
-import CiEnvironmentsDropdown from '~/ci_variable_list/components/ci_environments_dropdown.vue';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { mount, createLocalVue } from '@vue/test-utils';
 import { GlDropdownItem, GlIcon } from '@gitlab/ui';
+import CiEnvironmentsDropdown from '~/ci_variable_list/components/ci_environments_dropdown.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -17,7 +17,7 @@ describe('Ci environments dropdown', () => {
       },
     });
 
-    wrapper = shallowMount(CiEnvironmentsDropdown, {
+    wrapper = mount(CiEnvironmentsDropdown, {
       store,
       localVue,
       propsData: {
@@ -28,7 +28,7 @@ describe('Ci environments dropdown', () => {
 
   const findAllDropdownItems = () => wrapper.findAll(GlDropdownItem);
   const findDropdownItemByIndex = index => wrapper.findAll(GlDropdownItem).at(index);
-  const findActiveIconByIndex = index => wrapper.findAll(GlIcon).at(index);
+  const findActiveIconByIndex = index => findDropdownItemByIndex(index).find(GlIcon);
 
   afterEach(() => {
     wrapper.destroy();
@@ -61,6 +61,10 @@ describe('Ci environments dropdown', () => {
       expect(findDropdownItemByIndex(1).text()).toBe('prod');
       expect(findDropdownItemByIndex(2).text()).toBe('staging');
     });
+
+    it('should not display active checkmark on the inactive stage', () => {
+      expect(findActiveIconByIndex(0).classes('gl-visibility-hidden')).toBe(true);
+    });
   });
 
   describe('Enviroments found', () => {
@@ -84,7 +88,7 @@ describe('Ci environments dropdown', () => {
     });
 
     it('should display active checkmark if active', () => {
-      expect(findActiveIconByIndex(0).classes('invisible')).toBe(false);
+      expect(findActiveIconByIndex(0).classes('gl-visibility-hidden')).toBe(false);
     });
 
     describe('Custom events', () => {

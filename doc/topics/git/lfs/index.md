@@ -1,4 +1,8 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, howto
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/lfs/lfs/index.html'
 ---
 
@@ -37,7 +41,8 @@ Documentation for GitLab instance administrators is under [LFS administration do
 - Any Git LFS request will ask for HTTPS credentials to be provided so a good Git
   credentials store is recommended
 - Git LFS always assumes HTTPS so if you have GitLab server on HTTP you will have
-  to add the URL to Git config manually (see [troubleshooting](#troubleshooting))
+  to add the URL to Git configuration manually (see [troubleshooting](#troubleshooting))
+- Files added using Git LFS are [not included in the archives created using "download zip" functionality](https://gitlab.com/gitlab-org/gitlab/-/issues/15079)
 
 NOTE: **Note:**
 With 8.12 GitLab added LFS support to SSH. The Git LFS communication
@@ -83,15 +88,18 @@ git clone git@gitlab.example.com:group/project.git
 ```
 
 If you already cloned the repository and you want to get the latest LFS object
-that are on the remote repository, eg. for a branch from origin:
+that are on the remote repository, such as for a branch from origin:
 
 ```shell
 git lfs fetch origin master
 ```
 
+Make sure your files aren't listed in `.gitignore`, otherwise, they will be ignored by Git thus will not
+be pushed to the remote repository.
+
 ### Migrate an existing repo to Git LFS
 
-Read the documentation on how to [migrate an existing Git repo with Git LFS](migrate_to_git_lfs.md).
+Read the documentation on how to [migrate an existing Git repository with Git LFS](migrate_to_git_lfs.md).
 
 ### Removing objects from LFS
 
@@ -102,71 +110,7 @@ To remove objects from LFS:
 
 ## File Locking
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/35856) in GitLab 10.5.
-
-The first thing to do before using File Locking is to tell Git LFS which
-kind of files are lockable. The following command will store PNG files
-in LFS and flag them as lockable:
-
-```shell
-git lfs track "*.png" --lockable
-```
-
-After executing the above command a file named `.gitattributes` will be
-created or updated with the following content:
-
-```shell
-*.png filter=lfs diff=lfs merge=lfs -text lockable
-```
-
-You can also register a file type as lockable without using LFS
-(In order to be able to lock/unlock a file you need a remote server that implements the LFS File Locking API),
-in order to do that you can edit the `.gitattributes` file manually:
-
-```shell
-*.pdf lockable
-```
-
-After a file type has been registered as lockable, Git LFS will make
-them readonly on the file system automatically. This means you will
-need to lock the file before editing it.
-
-### Managing Locked Files
-
-Once you're ready to edit your file you need to lock it first:
-
-```shell
-git lfs lock images/banner.png
-Locked images/banner.png
-```
-
-This will register the file as locked in your name on the server:
-
-```shell
-git lfs locks
-images/banner.png  joe   ID:123
-```
-
-Once you have pushed your changes, you can unlock the file so others can
-also edit it:
-
-```shell
-git lfs unlock images/banner.png
-```
-
-You can also unlock by ID:
-
-```shell
-git lfs unlock --id=123
-```
-
-If for some reason you need to unlock a file that was not locked by you,
-you can use the `--force` flag as long as you have a `maintainer` access on
-the project:
-
-```shell
-git lfs unlock --id=123 --force
-```
+See the documentation on [File Locking](../../../user/project/file_lock.md).
 
 ## Troubleshooting
 
@@ -205,8 +149,8 @@ If the status `error 501` is shown, it is because:
   on how to enable LFS support.
 
 - Git LFS client version is not supported by GitLab server. Check your Git LFS
-  version with `git lfs version`. Check the Git config of the project for traces
-  of deprecated API with `git lfs -l`. If `batch = false` is set in the config,
+  version with `git lfs version`. Check the Git configuration of the project for traces
+  of deprecated API with `git lfs -l`. If `batch = false` is set in the configuration,
   remove the line and try to update your Git LFS client. Only version 1.0.1 and
   newer are supported.
 
@@ -218,9 +162,9 @@ the LFS client is trying to reach GitLab through HTTPS. However, your GitLab
 instance is being served on HTTP.
 
 This behavior is caused by Git LFS using HTTPS connections by default when a
-`lfsurl` is not set in the Git config.
+`lfsurl` is not set in the Git configuration.
 
-To prevent this from happening, set the lfs URL in project Git config:
+To prevent this from happening, set the LFS URL in project Git configuration:
 
 ```shell
 git config --add lfs.url "http://gitlab.example.com/group/project.git/info/lfs"

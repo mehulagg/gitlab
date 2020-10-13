@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Strings and the Text data type
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30453) in GitLab 13.0.
@@ -38,6 +44,8 @@ For example, consider a migration that creates a table with two text columns,
 
 ```ruby
 class CreateDbGuides < ActiveRecord::Migration[6.0]
+  include Gitlab::Database::MigrationHelpers
+
   DOWNTIME = false
 
   disable_ddl_transaction!
@@ -179,6 +187,7 @@ in a post-deployment migration,
 ```ruby
 class AddTextLimitMigration < ActiveRecord::Migration[6.0]
   include Gitlab::Database::MigrationHelpers
+
   DOWNTIME = false
 
   disable_ddl_transaction!
@@ -276,7 +285,7 @@ end
 
 ## Text limit constraints on large tables
 
-If you have to clean up a text column for a really [large table](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/migration_helpers.rb#L12)
+If you have to clean up a text column for a really [large table](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/rubocop-migrations.yml#L3)
 (for example, the `artifacts` in `ci_builds`), your background migration will go on for a while and
 it will need an additional [background migration cleaning up](../background_migrations.md#cleaning-up)
 in the release after adding the data migration.

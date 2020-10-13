@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Metrics::Dashboard::Annotation do
+RSpec.describe Metrics::Dashboard::Annotation do
   using RSpec::Parameterized::TableSyntax
 
   describe 'associations' do
@@ -100,7 +100,7 @@ describe Metrics::Dashboard::Annotation do
 
     describe '#ending_before' do
       it 'returns annotations only for appointed dashboard' do
-        Timecop.freeze do
+        freeze_time do
           twelve_minutes_old_annotation = create(:metrics_dashboard_annotation, starting_at: 15.minutes.ago, ending_at: 12.minutes.ago)
           create(:metrics_dashboard_annotation, starting_at: 15.minutes.ago, ending_at: 11.minutes.ago)
 

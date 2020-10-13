@@ -11,9 +11,8 @@ module EE
     GOLD_TRIAL_BILLINGS = 'gold_trial_billings'
     THREAT_MONITORING_INFO = 'threat_monitoring_info'
     ACCOUNT_RECOVERY_REGULAR_CHECK = 'account_recovery_regular_check'
-    USERS_OVER_LICENSE_BANNER = 'users_over_license_banner'
-    STANDALONE_VULNERABILITIES_INTRODUCTION_BANNER = 'standalone_vulnerabilities_introduction_banner'
     ACTIVE_USER_COUNT_THRESHOLD = 'active_user_count_threshold'
+    PERSONAL_ACCESS_TOKEN_EXPIRY = 'personal_access_token_expiry'
 
     def show_canary_deployment_callout?(project)
       !user_dismissed?(CANARY_DEPLOYMENT) &&
@@ -55,7 +54,6 @@ module EE
     def render_dashboard_gold_trial(user)
       return unless show_gold_trial?(user, GOLD_TRIAL) &&
           user_default_dashboard?(user) &&
-          ::Feature.enabled?(:render_dashboard_gold_trial, default_enabled: true) &&
           !user.owns_paid_namespace? &&
           user.any_namespace_without_trial?
 
@@ -83,8 +81,12 @@ module EE
       !user_dismissed?(THREAT_MONITORING_INFO)
     end
 
-    def show_standalone_vulnerabilities_introduction_banner?
-      !user_dismissed?(STANDALONE_VULNERABILITIES_INTRODUCTION_BANNER)
+    def show_token_expiry_notification?
+      return false unless current_user
+
+      !token_expiration_enforced? &&
+        current_user.active? &&
+        !user_dismissed?(PERSONAL_ACCESS_TOKEN_EXPIRY, 1.week.ago)
     end
 
     private
@@ -110,7 +112,7 @@ module EE
     end
 
     def add_migrate_to_hashed_storage_link(message)
-      migrate_link = link_to(_('For more info, read the documentation.'), help_page_path('administration/repository_storage_types.md', anchor: 'how-to-migrate-to-hashed-storage'), target: '_blank')
+      migrate_link = link_to(_('For more info, read the documentation.'), help_page_path('administration/raketasks/storage.md', anchor: 'migrate-to-hashed-storage'), target: '_blank')
       linked_message = message % { migrate_link: migrate_link }
       linked_message.html_safe
     end
@@ -125,6 +127,10 @@ module EE
 
     def show_gold_trial_suitable_env?
       ::Gitlab.com? && !::Gitlab::Database.read_only?
+    end
+
+    def token_expiration_enforced?
+      ::PersonalAccessToken.expiration_enforced?
     end
   end
 end

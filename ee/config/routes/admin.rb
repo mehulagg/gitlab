@@ -15,15 +15,20 @@ namespace :admin do
     end
   end
 
-  get :instance_review, to: 'instance_review#index'
-
   resource :push_rule, only: [:show, :update]
   resource :email, only: [:show, :create]
   resources :audit_logs, controller: 'audit_logs', only: [:index]
-  resources :credentials, only: [:index]
+  resources :audit_log_reports, only: [:index], constraints: { format: :csv }
+  resources :credentials, only: [:index] do
+    member do
+      put :revoke
+    end
+  end
 
   resource :license, only: [:show, :new, :create, :destroy] do
     get :download, on: :member
+
+    resource :usage_export, controller: 'licenses/usage_exports', only: [:show]
   end
 
   # using `only: []` to keep duplicate routes from being created
@@ -60,9 +65,10 @@ namespace :admin do
       end
 
       resources :designs, only: [:index]
-      resources :package_files, only: [:index]
 
       resources :uploads, only: [:index, :destroy]
+
+      get '/:replicable_name_plural', to: 'replicables#index', as: 'replicables'
     end
 
     resource :settings, only: [:show, :update]
@@ -70,5 +76,7 @@ namespace :admin do
 
   namespace :elasticsearch do
     post :enqueue_index
+    post :trigger_reindexing
+    post :cancel_index_deletion
   end
 end

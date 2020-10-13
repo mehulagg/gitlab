@@ -40,6 +40,22 @@ RSpec.describe OmniauthCallbacksController, type: :controller do
       end
     end
 
+    context 'when sign in is not valid' do
+      let(:provider) { :github }
+      let(:extern_uid) { 'my-uid' }
+
+      it 'renders omniauth error page' do
+        allow_next_instance_of(Gitlab::Auth::OAuth::User) do |instance|
+          allow(instance).to receive(:valid_sign_in?).and_return(false)
+        end
+
+        post provider
+
+        expect(response).to render_template("errors/omniauth_error")
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
+      end
+    end
+
     context 'when the user is on the last sign in attempt' do
       let(:extern_uid) { 'my-uid' }
 
@@ -154,6 +170,11 @@ RSpec.describe OmniauthCallbacksController, type: :controller do
           expect(request.env['warden']).to be_authenticated
         end
 
+        it 'creates an authentication event record' do
+          expect { post provider }.to change { AuthenticationEvent.count }.by(1)
+          expect(AuthenticationEvent.last.provider).to eq(provider.to_s)
+        end
+
         context 'when user has no linked provider' do
           let(:user) { create(:user) }
 
@@ -178,6 +199,23 @@ RSpec.describe OmniauthCallbacksController, type: :controller do
 
               expect(response).to have_gitlab_http_status(:forbidden)
             end
+          end
+        end
+
+        context 'when user with 2FA is unconfirmed' do
+          render_views
+
+          let(:user) { create(:omniauth_user, :two_factor, extern_uid: 'my-uid', provider: provider) }
+
+          before do
+            user.update_column(:confirmed_at, nil)
+          end
+
+          it 'redirects to login page' do
+            post provider
+
+            expect(response).to redirect_to(new_user_session_path)
+            expect(flash[:alert]).to match(/You have to confirm your email address before continuing./)
           end
         end
 
@@ -240,6 +278,51 @@ RSpec.describe OmniauthCallbacksController, type: :controller do
           expect(request.env['warden']).not_to be_authenticated
           expect(response).to have_gitlab_http_status(:found)
           expect(controller).to set_flash[:alert].to('Wrong extern UID provided. Make sure Auth0 is configured correctly.')
+        end
+      end
+
+      context 'atlassian_oauth2' do
+        let(:provider) { :atlassian_oauth2 }
+        let(:extern_uid) { 'my-uid' }
+
+        context 'when the user and identity already exist' do
+          let(:user) { create(:atlassian_user, extern_uid: extern_uid) }
+
+          it 'allows sign-in' do
+            post :atlassian_oauth2
+
+            expect(request.env['warden']).to be_authenticated
+          end
+        end
+
+        context 'for a new user' do
+          before do
+            stub_omniauth_setting(enabled: true, auto_link_user: true, allow_single_sign_on: ['atlassian_oauth2'])
+
+            user.destroy
+          end
+
+          it 'denies sign-in if sign-up is enabled, but block_auto_created_users is set' do
+            post :atlassian_oauth2
+
+            expect(flash[:alert]).to start_with 'Your account has been blocked.'
+          end
+
+          it 'accepts sign-in if sign-up is enabled' do
+            stub_omniauth_setting(block_auto_created_users: false)
+
+            post :atlassian_oauth2
+
+            expect(request.env['warden']).to be_authenticated
+          end
+
+          it 'denies sign-in if sign-up is not enabled' do
+            stub_omniauth_setting(allow_single_sign_on: false, block_auto_created_users: false)
+
+            post :atlassian_oauth2
+
+            expect(flash[:alert]).to start_with 'Signing in using your Atlassian account without a pre-existing GitLab account is not allowed.'
+          end
         end
       end
 

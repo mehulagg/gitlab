@@ -8,6 +8,7 @@ module QA
           project.name = 'project-with-merge-request'
         end
       end
+
       let(:merge_request) do
         Resource::MergeRequest.fabricate_via_api! do |merge_request|
           merge_request.title = 'This is a merge request'
@@ -16,7 +17,7 @@ module QA
         end
       end
 
-      it 'user submits a non-diff review' do
+      it 'user submits a non-diff review', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/637' do
         Flow::Login.sign_in
 
         merge_request.visit!
@@ -37,7 +38,7 @@ module QA
         end
       end
 
-      it 'user submits a diff review' do
+      it 'user submits a diff review', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/638' do
         Flow::Login.sign_in
 
         merge_request.visit!

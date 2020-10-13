@@ -1,9 +1,9 @@
 <script>
-import Icon from '../../../vue_shared/components/icon.vue';
+import { GlIcon } from '@gitlab/ui';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
   },
   props: {
     item: {
@@ -40,8 +40,8 @@ export default {
 
 <template>
   <a :href="mergeRequestHref" class="btn-link d-flex align-items-center">
-    <span class="d-flex append-right-default ide-search-list-current-icon">
-      <icon v-if="isActive" :size="18" name="mobile-issue-close" />
+    <span class="d-flex gl-mr-3 ide-search-list-current-icon">
+      <gl-icon v-if="isActive" :size="18" name="mobile-issue-close" />
     </span>
     <span>
       <strong> {{ item.title }} </strong>

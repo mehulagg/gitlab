@@ -174,6 +174,7 @@ RSpec.describe API::MergeRequestApprovals do
       expect(rule_response['name']).to eq('foo')
       expect(rule_response['approvers'][0]['username']).to eq(approver.username)
       expect(rule_response['approved_by'][0]['username']).to eq(approver.username)
+      expect(rule_response['commented_by']).to eq([])
       expect(rule_response['source_rule']).to be_nil
       expect(rule_response['section']).to be_nil
     end
@@ -342,7 +343,7 @@ RSpec.describe API::MergeRequestApprovals do
         it 'does not allow overriding approvers' do
           expect do
             put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/approvers", current_user),
-              params: { approver_ids: [approver.id], approver_group_ids: [group.id] }
+              params: { approver_ids: approver.id.to_s, approver_group_ids: group.id.to_s }
           end.to not_change { merge_request.approvers.count }.and not_change { merge_request.approver_groups.count }
         end
       end
@@ -355,12 +356,12 @@ RSpec.describe API::MergeRequestApprovals do
         it 'allows overriding approvers' do
           expect do
             put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/approvers", current_user),
-              params: { approver_ids: [approver.id], approver_group_ids: [group.id] }
-          end.to change { merge_request.approvers.count }.from(0).to(1)
+              params: { approver_ids: "#{approver.id},#{user2.id}", approver_group_ids: "#{group.id}" }
+          end.to change { merge_request.approvers.count }.from(0).to(2)
             .and change { merge_request.approver_groups.count }.from(0).to(1)
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['approvers'][0]['user']['username']).to eq(approver.username)
+          expect(json_response['approvers'].map { |approver| approver['user'] }.map { |user| user['username'] }).to contain_exactly(approver.username, user2.username)
           expect(json_response['approver_groups'][0]['group']['name']).to eq(group.name)
         end
 
@@ -370,7 +371,7 @@ RSpec.describe API::MergeRequestApprovals do
 
           expect do
             put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/approvers", current_user),
-              params: { approver_ids: [], approver_group_ids: [] }.to_json, headers: { CONTENT_TYPE: 'application/json' }
+              params: { approver_ids: '', approver_group_ids: '' }.to_json, headers: { CONTENT_TYPE: 'application/json' }
           end.to change { merge_request.approvers.count }.from(1).to(0)
             .and change { merge_request.approver_groups.count }.from(1).to(0)
 

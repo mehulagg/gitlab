@@ -1,17 +1,21 @@
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { refreshCurrentPage } from '~/lib/utils/url_utility';
 import * as mutationTypes from './mutation_types';
 
 export const setExternalDashboardUrl = ({ commit }, url) =>
   commit(mutationTypes.SET_EXTERNAL_DASHBOARD_URL, url);
 
+export const setDashboardTimezone = ({ commit }, selected) =>
+  commit(mutationTypes.SET_DASHBOARD_TIMEZONE, selected);
+
 export const saveChanges = ({ state, dispatch }) =>
   axios
     .patch(state.operationsSettingsEndpoint, {
       project: {
         metrics_setting_attributes: {
+          dashboard_timezone: state.dashboardTimezone.selected,
           external_dashboard_url: state.externalDashboard.url,
         },
       },
@@ -33,6 +37,3 @@ export const receiveSaveChangesError = (_, error) => {
 
   createFlash(`${__('There was an error saving your changes.')} ${message}`, 'alert');
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

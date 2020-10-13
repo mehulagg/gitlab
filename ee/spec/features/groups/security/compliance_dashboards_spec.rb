@@ -31,7 +31,7 @@ RSpec.describe 'Compliance Dashboard', :js do
     it 'shows merge requests with details' do
       expect(page).to have_link(merge_request.title)
       expect(page).to have_content('merged 10 minutes ago')
-      expect(page).to have_content('No approvers')
+      expect(page).to have_content('no approvers')
     end
   end
 end

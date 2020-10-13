@@ -18,11 +18,9 @@ class Release < ApplicationRecord
   has_many :milestones, through: :milestone_releases
   has_many :evidences, inverse_of: :release, class_name: 'Releases::Evidence'
 
-  default_value_for :released_at, allows_nil: false do
-    Time.zone.now
-  end
-
   accepts_nested_attributes_for :links, allow_destroy: true
+
+  before_create :set_released_at
 
   validates :project, :tag, presence: true
   validates_associated :milestone_releases, message: -> (_, obj) { obj[:value].map(&:errors).map(&:full_messages).join(",") }
@@ -31,6 +29,12 @@ class Release < ApplicationRecord
   scope :preloaded, -> { includes(:evidences, :milestones, project: [:project_feature, :route, { namespace: :route }]) }
   scope :with_project_and_namespace, -> { includes(project: :namespace) }
   scope :recent, -> { sorted.limit(MAX_NUMBER_TO_DISPLAY) }
+
+  # Sorting
+  scope :order_created, -> { reorder('created_at ASC') }
+  scope :order_created_desc, -> { reorder('created_at DESC') }
+  scope :order_released, -> { reorder('released_at ASC') }
+  scope :order_released_desc, -> { reorder('released_at DESC') }
 
   delegate :repository, to: :project
 
@@ -88,6 +92,21 @@ class Release < ApplicationRecord
   def actual_tag
     strong_memoize(:actual_tag) do
       repository.find_tag(tag)
+    end
+  end
+
+  def set_released_at
+    self.released_at ||= created_at
+  end
+
+  def self.sort_by_attribute(method)
+    case method.to_s
+    when 'created_at_asc' then order_created
+    when 'created_at_desc' then order_created_desc
+    when 'released_at_asc' then order_released
+    when 'released_at_desc' then order_released_desc
+    else
+      order_created_desc
     end
   end
 end

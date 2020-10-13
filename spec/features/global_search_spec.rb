@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Global search' do
+RSpec.describe 'Global search' do
   let(:user) { create(:user) }
   let(:project) { create(:project, namespace: user.namespace) }
 
@@ -36,7 +36,7 @@ describe 'Global search' do
     end
   end
 
-  it 'closes the dropdown on blur', :js do
+  it 'closes the dropdown on blur', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/201841' do
     fill_in 'search', with: "a"
     dropdown = find('.js-dashboard-search-options')
 

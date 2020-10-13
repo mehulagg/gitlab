@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Search < Grape::API
+  class Search < Grape::API::Instance
     include PaginationParams
 
     before { authenticate! }
@@ -24,13 +24,15 @@ module API
         merge_requests: :with_api_entity_associations,
         projects: :with_api_entity_associations,
         issues: :with_api_entity_associations,
-        milestones: :with_api_entity_associations
+        milestones: :with_api_entity_associations,
+        commits: :with_api_commit_entity_associations
       }.freeze
 
       def search(additional_params = {})
         search_params = {
           scope: params[:scope],
           search: params[:search],
+          state: params[:state],
           snippets: snippets?,
           page: params[:page],
           per_page: params[:per_page]
@@ -60,12 +62,6 @@ module API
         # Defining this method here as a noop allows us to easily extend it in
         # EE, without having to modify this file directly.
       end
-
-      def check_users_search_allowed!
-        if params[:scope].to_sym == :users && Feature.disabled?(:users_search, default_enabled: true)
-          render_api_error!({ error: _("Scope not supported with disabled 'users_search' feature!") }, 400)
-        end
-      end
     end
 
     resource :search do
@@ -78,11 +74,11 @@ module API
           type: String,
           desc: 'The scope of the search',
           values: Helpers::SearchHelpers.global_search_scopes
+        optional :state, type: String, desc: 'Filter results by state', values: Helpers::SearchHelpers.search_states
         use :pagination
       end
       get do
         verify_search_scope!(resource: nil)
-        check_users_search_allowed!
 
         present search, with: entity
       end
@@ -99,11 +95,11 @@ module API
           type: String,
           desc: 'The scope of the search',
           values: Helpers::SearchHelpers.group_search_scopes
+        optional :state, type: String, desc: 'Filter results by state', values: Helpers::SearchHelpers.search_states
         use :pagination
       end
       get ':id/(-/)search' do
         verify_search_scope!(resource: user_group)
-        check_users_search_allowed!
 
         present search(group_id: user_group.id), with: entity
       end
@@ -121,11 +117,10 @@ module API
           desc: 'The scope of the search',
           values: Helpers::SearchHelpers.project_search_scopes
         optional :ref, type: String, desc: 'The name of a repository branch or tag. If not given, the default branch is used'
+        optional :state, type: String, desc: 'Filter results by state', values: Helpers::SearchHelpers.search_states
         use :pagination
       end
       get ':id/(-/)search' do
-        check_users_search_allowed!
-
         present search({ project_id: user_project.id, repository_ref: params[:ref] }), with: entity
       end
     end

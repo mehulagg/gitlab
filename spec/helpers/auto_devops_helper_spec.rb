@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AutoDevopsHelper do
+RSpec.describe AutoDevopsHelper do
   let_it_be(:project, reload: true) { create(:project) }
   let_it_be(:user) { create(:user) }
 
@@ -93,6 +93,12 @@ describe AutoDevopsHelper do
     end
   end
 
+  describe '#auto_devops_settings_path' do
+    it 'returns auto devops settings path' do
+      expect(helper.auto_devops_settings_path(project)).to eql(project_settings_ci_cd_path(project, anchor: 'autodevops-settings'))
+    end
+  end
+
   describe '#badge_for_auto_devops_scope' do
     subject { helper.badge_for_auto_devops_scope(receiver) }
 
@@ -122,7 +128,7 @@ describe AutoDevopsHelper do
 
         context 'with groups' do
           before do
-            receiver.update(parent: parent)
+            receiver.update!(parent: parent)
           end
 
           context 'when auto devops is enabled on parent' do

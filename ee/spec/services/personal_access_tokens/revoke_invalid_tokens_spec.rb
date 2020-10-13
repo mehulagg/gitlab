@@ -13,19 +13,64 @@ RSpec.describe PersonalAccessTokens::RevokeInvalidTokens do
     let_it_be(:invalid_pat1) { create(:personal_access_token, expires_at: nil, user: user) }
     let_it_be(:invalid_pat2) { create(:personal_access_token, expires_at: 20.days.from_now, user: user) }
 
+    shared_examples 'user does not receive revoke notification email' do
+      it 'does not send any notification to user' do
+        expect(Notify).not_to receive(:policy_revoked_personal_access_tokens_email).and_call_original
+
+        service.execute
+      end
+    end
+
     context 'with a valid user and expiration date' do
       context 'with user tokens that will be revoked' do
-        it 'calls mailer to send an email notifying the user' do
-          expect(Notify).to receive(:policy_revoked_personal_access_tokens_email).and_call_original
-          service.execute
+        shared_examples 'revokes token' do
+          it 'calls mailer to send an email notifying the user' do
+            expect(Notify).to receive(:policy_revoked_personal_access_tokens_email).and_call_original
+
+            service.execute
+          end
+
+          it "revokes invalid user's tokens" do
+            service.execute
+
+            expect(pat.reload).not_to be_revoked
+            expect(invalid_pat1.reload).to be_revoked
+            expect(invalid_pat2.reload).to be_revoked
+          end
         end
 
-        it "revokes invalid user's tokens" do
-          service.execute
+        shared_examples 'does not revoke token' do
+          it_behaves_like 'user does not receive revoke notification email'
 
-          expect(pat.reload).not_to be_revoked
-          expect(invalid_pat1.reload).to be_revoked
-          expect(invalid_pat2.reload).to be_revoked
+          it "does not revoke user's invalid tokens" do
+            service.execute
+
+            [pat, invalid_pat1, invalid_pat2].each do |token_object|
+              expect(token_object.reload).not_to be_revoked
+            end
+          end
+        end
+
+        it_behaves_like 'revokes token'
+
+        context 'enforcement of personal access token expiry' do
+          using RSpec::Parameterized::TableSyntax
+
+          where(:licensed, :application_setting, :behavior) do
+            true  | true   | 'revokes token'
+            true  | false  | 'does not revoke token'
+            false | true   | 'revokes token'
+            false | false  | 'revokes token'
+          end
+
+          with_them do
+            before do
+              stub_licensed_features(enforce_pat_expiration: licensed)
+              stub_application_setting(enforce_pat_expiration: application_setting)
+
+              it_behaves_like behavior
+            end
+          end
         end
 
         context 'user optout for notifications' do
@@ -33,10 +78,7 @@ RSpec.describe PersonalAccessTokens::RevokeInvalidTokens do
             allow(user).to receive(:can?).and_return(false)
           end
 
-          it "doesn't call mailer to send a notification" do
-            expect(Notify).not_to receive(:policy_revoked_personal_access_tokens_email)
-            service.execute
-          end
+          it_behaves_like 'user does not receive revoke notification email'
         end
       end
     end
@@ -44,10 +86,7 @@ RSpec.describe PersonalAccessTokens::RevokeInvalidTokens do
     context 'with no user' do
       let(:user) { nil }
 
-      it "doesn't call mailer to send an email notifying the user" do
-        expect(Notify).not_to receive(:policy_revoked_personal_access_tokens_email)
-        service.execute
-      end
+      it_behaves_like 'user does not receive revoke notification email'
 
       it "doesn't revoke user's tokens" do
         expect { service.execute }.not_to change { pat.reload.revoked }
@@ -57,10 +96,7 @@ RSpec.describe PersonalAccessTokens::RevokeInvalidTokens do
     context 'with no expiration date' do
       let(:expiration_date) { nil }
 
-      it "doesn't call mailer to send an email notifying the user" do
-        expect(Notify).not_to receive(:policy_revoked_personal_access_tokens_email)
-        service.execute
-      end
+      it_behaves_like 'user does not receive revoke notification email'
 
       it "doesn't revoke user's tokens" do
         expect { service.execute }.not_to change { pat.reload.revoked }
@@ -72,10 +108,7 @@ RSpec.describe PersonalAccessTokens::RevokeInvalidTokens do
         stub_feature_flags(personal_access_token_expiration_policy: false)
       end
 
-      it "doesn't call mailer to send an email notifying the user" do
-        expect(Notify).not_to receive(:policy_revoked_personal_access_tokens_email)
-        service.execute
-      end
+      it_behaves_like 'user does not receive revoke notification email'
 
       it "doesn't revoke user's tokens" do
         expect { service.execute }.not_to change { pat.reload.revoked }

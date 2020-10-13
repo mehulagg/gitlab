@@ -1,14 +1,23 @@
-import { GlDropdown, GlDropdownItem, GlLoadingIcon, GlTooltip } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlLoadingIcon } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import Vue from 'vue';
 import Status from 'ee/sidebar/components/status/status.vue';
 import { healthStatus, healthStatusTextMap } from 'ee/sidebar/constants';
 
 const getStatusText = wrapper => wrapper.find('.value .text-plain').text();
 
-const getTooltipText = wrapper => wrapper.find(GlTooltip).text();
+const getStatusTitleText = wrapper => wrapper.find('[data-testid="statusTitle"]').text();
+
+const getStatusTooltipValue = wrapper =>
+  getBinding(wrapper.find({ ref: 'status' }).element, 'gl-tooltip').value;
+
+const getEditButtonTooltipValue = wrapper =>
+  getBinding(wrapper.find('[data-testid="editButtonTooltip"]').element, 'gl-tooltip').value;
 
 const getEditButton = wrapper => wrapper.find({ ref: 'editButton' });
+
+const getDropdownClasses = wrapper => wrapper.find('[data-testid="dropdownWrapper"]').classes();
 
 const getDropdownElement = wrapper => wrapper.find(GlDropdown);
 
@@ -20,12 +29,18 @@ describe('Status', () => {
   function shallowMountStatus(propsData) {
     wrapper = shallowMount(Status, {
       propsData,
+      directives: {
+        GlTooltip: createMockDirective(),
+      },
     });
   }
 
   function mountStatus(propsData) {
     wrapper = mount(Status, {
       propsData,
+      directives: {
+        GlTooltip: createMockDirective(),
+      },
     });
   }
 
@@ -35,7 +50,7 @@ describe('Status', () => {
 
   it('shows the text "Status"', () => {
     shallowMountStatus();
-    expect(wrapper.find('.title').text()).toBe('Health status');
+    expect(getStatusTitleText(wrapper)).toBe('Health status');
   });
 
   describe('loading icon', () => {
@@ -46,7 +61,7 @@ describe('Status', () => {
 
       shallowMountStatus(props);
 
-      expect(wrapper.contains(GlLoadingIcon)).toBe(true);
+      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
     });
 
     it('is hidden when not retrieving data', () => {
@@ -56,7 +71,7 @@ describe('Status', () => {
 
       shallowMountStatus(props);
 
-      expect(wrapper.contains(GlLoadingIcon)).toBe(false);
+      expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
     });
   });
 
@@ -71,14 +86,22 @@ describe('Status', () => {
       expect(getEditButton(wrapper).exists()).toBe(true);
     });
 
-    it('is hidden when user cannot edit', () => {
-      const props = {
-        isEditable: false,
-      };
+    describe('when disabled', () => {
+      beforeEach(() => {
+        const props = {
+          isEditable: false,
+        };
 
-      shallowMountStatus(props);
+        shallowMountStatus(props);
+      });
+      it('is disabled when user cannot edit', () => {
+        expect(getEditButton(wrapper).attributes().disabled).toBe('true');
+      });
 
-      expect(getEditButton(wrapper).exists()).toBe(false);
+      it('will render a tooltip with an informative message', () => {
+        const tooltipTitle = 'Health status cannot be edited because this issue is closed';
+        expect(getEditButtonTooltipValue(wrapper).title).toBe(tooltipTitle);
+      });
     });
   });
 
@@ -131,7 +154,7 @@ describe('Status', () => {
       });
 
       it('shows "Status" in the tooltip', () => {
-        expect(getTooltipText(wrapper)).toBe('Health status');
+        expect(getStatusTooltipValue(wrapper).title).toBe('Health status');
       });
     });
 
@@ -149,7 +172,9 @@ describe('Status', () => {
       });
 
       it(`shows "Status: ${healthStatusTextMap[statusValue]}" in the tooltip`, () => {
-        expect(getTooltipText(wrapper)).toBe(`Health status: ${healthStatusTextMap[statusValue]}`);
+        expect(getStatusTooltipValue(wrapper).title).toBe(
+          `Health status: ${healthStatusTextMap[statusValue]}`,
+        );
       });
     });
   });
@@ -164,7 +189,7 @@ describe('Status', () => {
 
       const dropdown = wrapper.find('.dropdown');
 
-      expect(dropdown.classes()).toContain('d-none');
+      expect(dropdown.classes()).toContain('gl-display-none');
     });
 
     describe('when hidden', () => {
@@ -180,7 +205,7 @@ describe('Status', () => {
         getEditButton(wrapper).trigger('click');
 
         return Vue.nextTick().then(() => {
-          expect(wrapper.find('.dropdown').classes()).toContain('show');
+          expect(getDropdownClasses(wrapper)).toContain('show');
         });
       });
     });
@@ -191,7 +216,7 @@ describe('Status', () => {
           isEditable: true,
         };
 
-        shallowMountStatus(props);
+        mountStatus(props);
 
         wrapper.setData({ isDropdownShowing: true });
       });
@@ -210,7 +235,7 @@ describe('Status', () => {
         getEditButton(wrapper).trigger('click');
 
         return Vue.nextTick().then(() => {
-          expect(wrapper.find('.dropdown').classes()).toContain('d-none');
+          expect(getDropdownClasses(wrapper)).toContain('gl-display-none');
         });
       });
 
@@ -220,7 +245,7 @@ describe('Status', () => {
         dropdownItem.vm.$emit('click');
 
         return wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.find('.dropdown').classes()).toContain('d-none');
+          expect(getDropdownClasses(wrapper)).toContain('gl-display-none');
         });
       });
     });

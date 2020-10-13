@@ -2,15 +2,20 @@
 
 require 'spec_helper'
 
-describe Mutations::Pipelines::RunDastScan do
-  let(:project) { create(:project) }
+RSpec.describe Mutations::Pipelines::RunDastScan do
+  let(:group) { create(:group) }
+  let(:project) { create(:project, :repository, group: group) }
   let(:user) { create(:user) }
   let(:project_path) { project.full_path }
-  let(:target_url) { FFaker::Internet.uri(:https) }
-  let(:branch) { SecureRandom.hex }
+  let(:target_url) { generate(:url) }
+  let(:branch) { project.default_branch }
   let(:scan_type) { Types::DastScanTypeEnum.enum[:passive] }
 
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
+
+  before do
+    stub_licensed_features(security_on_demand_scans: true)
+  end
 
   describe '#resolve' do
     subject do
@@ -41,22 +46,40 @@ describe Mutations::Pipelines::RunDastScan do
         end
       end
 
-      context 'when the user does not have permission to run a dast scan' do
+      context 'when the user is not associated with the project' do
         it 'raises an exception' do
           expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
         end
       end
 
-      context 'when the user can run a dast scan' do
-        before do
-          project.add_developer(user)
-        end
-
+      context 'when the user is an owner' do
         it 'has no errors' do
+          group.add_owner(user)
+
           expect(subject[:errors]).to be_empty
         end
+      end
 
+      context 'when the user is a maintainer' do
+        it 'has no errors' do
+          project.add_maintainer(user)
+
+          expect(subject[:errors]).to be_empty
+        end
+      end
+
+      context 'when the user is a developer' do
+        it 'has no errors' do
+          project.add_developer(user)
+
+          expect(subject[:errors]).to be_empty
+        end
+      end
+
+      context 'when the user can run a dast scan' do
         it 'returns a pipeline_url containing the correct path' do
+          project.add_developer(user)
+
           actual_url = subject[:pipeline_url]
           pipeline = Ci::Pipeline.last
           expected_url = Rails.application.routes.url_helpers.project_pipeline_url(

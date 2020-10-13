@@ -29,7 +29,7 @@ RSpec.describe EE::Audit::ProjectChangesAuditor do
       it 'does not call the audit event service' do
         project.update!(description: 'new description')
 
-        expect { foo_instance.execute }.not_to change { SecurityEvent.count }
+        expect { foo_instance.execute }.not_to change { AuditEvent.count }
       end
     end
 
@@ -37,22 +37,22 @@ RSpec.describe EE::Audit::ProjectChangesAuditor do
       it 'creates an event when the visibility change' do
         project.update!(visibility_level: 20)
 
-        expect { foo_instance.execute }.to change { SecurityEvent.count }.by(1)
-        expect(SecurityEvent.last.details[:change]).to eq 'visibility'
+        expect { foo_instance.execute }.to change { AuditEvent.count }.by(1)
+        expect(AuditEvent.last.details[:change]).to eq 'visibility'
       end
 
       it 'creates an event when the name change' do
         project.update!(name: 'new name')
 
-        expect { foo_instance.execute }.to change { SecurityEvent.count }.by(1)
-        expect(SecurityEvent.last.details[:change]).to eq 'name'
+        expect { foo_instance.execute }.to change { AuditEvent.count }.by(1)
+        expect(AuditEvent.last.details[:change]).to eq 'name'
       end
 
       it 'creates an event when the path change' do
         project.update!(path: 'newpath')
 
-        expect { foo_instance.execute }.to change { SecurityEvent.count }.by(1)
-        expect(SecurityEvent.last.details[:change]).to eq 'path'
+        expect { foo_instance.execute }.to change { AuditEvent.count }.by(1)
+        expect(AuditEvent.last.details[:change]).to eq 'path'
       end
 
       it 'creates an event when the namespace change' do
@@ -60,30 +60,30 @@ RSpec.describe EE::Audit::ProjectChangesAuditor do
 
         project.update!(namespace: new_namespace)
 
-        expect { foo_instance.execute }.to change { SecurityEvent.count }.by(1)
-        expect(SecurityEvent.last.details[:change]).to eq 'namespace'
+        expect { foo_instance.execute }.to change { AuditEvent.count }.by(1)
+        expect(AuditEvent.last.details[:change]).to eq 'namespace'
       end
 
       it 'creates an event when the repository size limit changes' do
         project.update!(repository_size_limit: 100)
 
-        expect { foo_instance.execute }.to change { SecurityEvent.count }.by(1)
-        expect(SecurityEvent.last.details[:change]).to eq 'repository_size_limit'
+        expect { foo_instance.execute }.to change { AuditEvent.count }.by(1)
+        expect(AuditEvent.last.details[:change]).to eq 'repository_size_limit'
       end
 
       it 'creates an event when the packages enabled setting changes' do
         project.update!(packages_enabled: false)
 
-        expect { foo_instance.execute }.to change { SecurityEvent.count }.by(1)
-        expect(SecurityEvent.last.details[:change]).to eq 'packages_enabled'
+        expect { foo_instance.execute }.to change { AuditEvent.count }.by(1)
+        expect(AuditEvent.last.details[:change]).to eq 'packages_enabled'
       end
 
       it 'creates an event when the merge requests author approval changes' do
         project.update!(merge_requests_author_approval: true)
 
         aggregate_failures do
-          expect { foo_instance.execute }.to change { SecurityEvent.count }.by(1)
-          expect(SecurityEvent.last.details).to include(
+          expect { foo_instance.execute }.to change { AuditEvent.count }.by(1)
+          expect(AuditEvent.last.details).to include(
             change: 'prevent merge request approval from authors',
             from: true,
             to: false
@@ -95,8 +95,8 @@ RSpec.describe EE::Audit::ProjectChangesAuditor do
         project.update!(merge_requests_disable_committers_approval: false)
 
         aggregate_failures do
-          expect { foo_instance.execute }.to change { SecurityEvent.count }.by(1)
-          expect(SecurityEvent.last.details).to include(
+          expect { foo_instance.execute }.to change { AuditEvent.count }.by(1)
+          expect(AuditEvent.last.details).to include(
             change: 'prevent merge request approval from reviewers',
             from: true,
             to: false

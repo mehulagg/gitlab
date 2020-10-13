@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DesignManagement::GenerateImageVersionsService do
+RSpec.describe DesignManagement::GenerateImageVersionsService do
   let_it_be(:project) { create(:project) }
   let_it_be(:issue) { create(:issue, project: project) }
   let_it_be(:version) { create(:design, :with_lfs_file, issue: issue).versions.first }
@@ -52,25 +52,50 @@ describe DesignManagement::GenerateImageVersionsService do
     end
 
     context 'when an error is encountered when generating the image versions' do
-      before do
-        expect_next_instance_of(DesignManagement::DesignV432x230Uploader) do |uploader|
-          expect(uploader).to receive(:cache!).and_raise(CarrierWave::DownloadError, 'foo')
+      context "CarrierWave::IntegrityError" do
+        before do
+          expect_next_instance_of(DesignManagement::DesignV432x230Uploader) do |uploader|
+            expect(uploader).to receive(:cache!).and_raise(CarrierWave::IntegrityError, 'foo')
+          end
+        end
+
+        it 'logs the exception' do
+          expect(Gitlab::ErrorTracking).to receive(:log_exception).with(
+            instance_of(CarrierWave::IntegrityError),
+            project_id: project.id, version_id: version.id, design_id: version.designs.first.id
+          )
+
+          described_class.new(version).execute
+        end
+
+        it 'logs the error' do
+          expect(Gitlab::AppLogger).to receive(:error).with('foo')
+
+          described_class.new(version).execute
         end
       end
 
-      it 'logs the error' do
-        expect(Gitlab::AppLogger).to receive(:error).with('foo')
+      context "CarrierWave::UploadError" do
+        before do
+          expect_next_instance_of(DesignManagement::DesignV432x230Uploader) do |uploader|
+            expect(uploader).to receive(:cache!).and_raise(CarrierWave::UploadError, 'foo')
+          end
+        end
 
-        described_class.new(version).execute
-      end
+        it 'logs the error' do
+          expect(Gitlab::AppLogger).to receive(:error).with('foo')
 
-      it 'tracks the error' do
-        expect(Gitlab::ErrorTracking).to receive(:track_exception).with(
-          instance_of(CarrierWave::DownloadError),
-          project_id: project.id, version_id: version.id, design_id: version.designs.first.id
-        )
+          described_class.new(version).execute
+        end
 
-        described_class.new(version).execute
+        it 'tracks the error' do
+          expect(Gitlab::ErrorTracking).to receive(:track_exception).with(
+            instance_of(CarrierWave::UploadError),
+            project_id: project.id, version_id: version.id, design_id: version.designs.first.id
+          )
+
+          described_class.new(version).execute
+        end
       end
     end
   end

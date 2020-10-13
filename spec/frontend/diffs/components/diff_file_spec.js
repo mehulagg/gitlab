@@ -1,7 +1,7 @@
 import Vue from 'vue';
-import { createStore } from '~/mr_notes/stores';
 import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { mockTracking, triggerEvent } from 'helpers/tracking_helper';
+import { createStore } from '~/mr_notes/stores';
 import DiffFileComponent from '~/diffs/components/diff_file.vue';
 import { diffViewerModes, diffViewerErrors } from '~/ide/constants';
 import diffFileMockDataReadable from '../mock_data/diff_file';
@@ -15,6 +15,7 @@ describe('DiffFile', () => {
     vm = createComponentWithStore(Vue.extend(DiffFileComponent), createStore(), {
       file: JSON.parse(JSON.stringify(diffFileMockDataReadable)),
       canCurrentUserFork: false,
+      viewDiffsFileByFile: false,
     }).$mount();
     trackingSpy = mockTracking('_category_', vm.$el, jest.spyOn);
   });
@@ -36,7 +37,7 @@ describe('DiffFile', () => {
 
       expect(el.querySelectorAll('.diff-content.hidden').length).toEqual(0);
       expect(el.querySelector('.js-file-title')).toBeDefined();
-      expect(el.querySelector('.btn-clipboard')).toBeDefined();
+      expect(el.querySelector('[data-testid="diff-file-copy-clipboard"]')).toBeDefined();
       expect(el.querySelector('.file-title-name').innerText.indexOf(file_path)).toBeGreaterThan(-1);
       expect(el.querySelector('.js-syntax-highlight')).toBeDefined();
 
@@ -44,9 +45,9 @@ describe('DiffFile', () => {
 
       vm.$nextTick()
         .then(() => {
-          expect(el.querySelectorAll('.line_content').length).toBe(5);
+          expect(el.querySelectorAll('.line_content').length).toBe(8);
           expect(el.querySelectorAll('.js-line-expansion-content').length).toBe(1);
-          triggerEvent('.btn-clipboard');
+          triggerEvent('[data-testid="diff-file-copy-clipboard"]');
         })
         .then(done)
         .catch(done.fail);
@@ -55,11 +56,11 @@ describe('DiffFile', () => {
     it('should track a click event on copy to clip board button', done => {
       const el = vm.$el;
 
-      expect(el.querySelector('.btn-clipboard')).toBeDefined();
+      expect(el.querySelector('[data-testid="diff-file-copy-clipboard"]')).toBeDefined();
       vm.file.renderIt = true;
       vm.$nextTick()
         .then(() => {
-          triggerEvent('.btn-clipboard');
+          triggerEvent('[data-testid="diff-file-copy-clipboard"]');
 
           expect(trackingSpy).toHaveBeenCalledWith('_category_', 'click_copy_file_button', {
             label: 'diff_copy_file_path_button',
@@ -113,6 +114,7 @@ describe('DiffFile', () => {
         vm = createComponentWithStore(Vue.extend(DiffFileComponent), createStore(), {
           file: JSON.parse(JSON.stringify(diffFileMockDataUnreadable)),
           canCurrentUserFork: false,
+          viewDiffsFileByFile: false,
         }).$mount();
 
         vm.renderIt = false;
@@ -179,7 +181,7 @@ describe('DiffFile', () => {
       });
 
       it('updates local state when changing file state', done => {
-        vm.file.viewer.collapsed = true;
+        vm.file.viewer.automaticallyCollapsed = true;
 
         vm.$nextTick(() => {
           expect(vm.isCollapsed).toBe(true);
@@ -213,7 +215,7 @@ describe('DiffFile', () => {
     it('calls handleLoadCollapsedDiff if collapsed changed & file has no lines', done => {
       jest.spyOn(vm, 'handleLoadCollapsedDiff').mockImplementation(() => {});
 
-      vm.file.highlighted_diff_lines = undefined;
+      vm.file.highlighted_diff_lines = [];
       vm.file.parallel_diff_lines = [];
       vm.isCollapsed = true;
 
@@ -235,12 +237,13 @@ describe('DiffFile', () => {
       vm = createComponentWithStore(Vue.extend(DiffFileComponent), createStore(), {
         file: JSON.parse(JSON.stringify(diffFileMockDataUnreadable)),
         canCurrentUserFork: false,
+        viewDiffsFileByFile: false,
       }).$mount();
 
       jest.spyOn(vm, 'handleLoadCollapsedDiff').mockImplementation(() => {});
 
-      vm.file.highlighted_diff_lines = undefined;
-      vm.file.parallel_diff_lines = [];
+      vm.file.highlighted_diff_lines = [];
+      vm.file.parallel_diff_lines = undefined;
       vm.isCollapsed = true;
 
       vm.$nextTick()

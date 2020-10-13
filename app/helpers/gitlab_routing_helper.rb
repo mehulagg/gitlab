@@ -100,8 +100,12 @@ module GitlabRoutingHelper
     toggle_award_emoji_snippet_path(*args)
   end
 
-  def toggle_award_emoji_namespace_project_project_snippet_path(*args)
-    toggle_award_emoji_namespace_project_snippet_path(*args)
+  def toggle_award_emoji_project_project_snippet_path(*args)
+    toggle_award_emoji_project_snippet_path(*args)
+  end
+
+  def toggle_award_emoji_project_project_snippet_url(*args)
+    toggle_award_emoji_project_snippet_url(*args)
   end
 
   ## Members
@@ -245,6 +249,14 @@ module GitlabRoutingHelper
     end
   end
 
+  def gitlab_dashboard_snippets_path(snippet, *args)
+    if snippet.is_a?(ProjectSnippet)
+      project_snippets_path(snippet.project, *args)
+    else
+      dashboard_snippets_path
+    end
+  end
+
   def gitlab_raw_snippet_path(snippet, *args)
     if snippet.is_a?(ProjectSnippet)
       raw_project_snippet_path(snippet.project, snippet, *args)
@@ -261,6 +273,24 @@ module GitlabRoutingHelper
       new_args = snippet_query_params(snippet, *args)
       raw_snippet_url(snippet, *new_args)
     end
+  end
+
+  def gitlab_raw_snippet_blob_url(snippet, path, ref = nil, **options)
+    params = {
+      snippet_id: snippet,
+      ref: ref || snippet.repository.root_ref,
+      path: path
+    }
+
+    if snippet.is_a?(ProjectSnippet)
+      project_snippet_blob_raw_url(snippet.project, **params, **options)
+    else
+      snippet_blob_raw_url(**params, **options)
+    end
+  end
+
+  def gitlab_raw_snippet_blob_path(snippet, path, ref = nil, **options)
+    gitlab_raw_snippet_blob_url(snippet, path, ref, only_path: true, **options)
   end
 
   def gitlab_snippet_notes_path(snippet, *args)
@@ -305,8 +335,24 @@ module GitlabRoutingHelper
 
   # Wikis
 
+  def wiki_path(wiki, **options)
+    Gitlab::UrlBuilder.wiki_url(wiki, only_path: true, **options)
+  end
+
   def wiki_page_path(wiki, page, **options)
-    Gitlab::UrlBuilder.wiki_page_url(wiki, page, **options, only_path: true)
+    Gitlab::UrlBuilder.wiki_page_url(wiki, page, only_path: true, **options)
+  end
+
+  def gitlab_ide_merge_request_path(merge_request)
+    target_project = merge_request.target_project
+    source_project = merge_request.source_project
+    params = {}
+
+    if target_project != source_project
+      params = { target_project: target_project.full_path }
+    end
+
+    ide_merge_request_path(source_project.namespace, source_project, merge_request, params)
   end
 
   private

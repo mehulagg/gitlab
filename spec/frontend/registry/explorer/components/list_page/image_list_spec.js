@@ -24,6 +24,11 @@ describe('Image List', () => {
     mountComponent();
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+  });
+
   describe('list', () => {
     it('contains one list element for each image', () => {
       expect(findRow().length).toBe(imagesListResponse.data.length);
@@ -50,7 +55,7 @@ describe('Image List', () => {
     });
 
     it('emits a pageChange event when the page change', () => {
-      wrapper.setData({ currentPage: 2 });
+      findPagination().vm.$emit(GlPagination.model.event, 2);
       expect(wrapper.emitted('pageChange')).toEqual([[2]]);
     });
   });

@@ -16,6 +16,7 @@ module Analytics
 
           parent.class.transaction do
             persist_default_stages!
+            stage.value_stream ||= value_stream
             stage.save!
           end
 

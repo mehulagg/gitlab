@@ -1,14 +1,16 @@
-/* eslint-disable import/no-commonjs */
+/* eslint-disable import/no-commonjs, max-classes-per-file */
 
 const path = require('path');
 const { ErrorWithStack } = require('jest-util');
 const JSDOMEnvironment = require('jest-environment-jsdom');
+const { TEST_HOST } = require('./helpers/test_constants');
 
 const ROOT_PATH = path.resolve(__dirname, '../..');
 
 class CustomEnvironment extends JSDOMEnvironment {
   constructor(config, context) {
-    super(config, context);
+    // Setup testURL so that window.location is setup properly
+    super({ ...config, testURL: TEST_HOST }, context);
 
     Object.assign(context.console, {
       error(...args) {
@@ -48,15 +50,22 @@ class CustomEnvironment extends JSDOMEnvironment {
      */
     this.global.fetch = () => {};
 
-    // Not yet supported by JSDOM: https://github.com/jsdom/jsdom/issues/317
-    this.global.document.createRange = () => ({
-      setStart: () => {},
-      setEnd: () => {},
-      commonAncestorContainer: {
-        nodeName: 'BODY',
-        ownerDocument: this.global.document,
-      },
+    // Expose the jsdom (created in super class) to the global so that we can call reconfigure({ url: '' }) to properly set `window.location`
+    this.global.jsdom = this.dom;
+
+    Object.assign(this.global.performance, {
+      mark: () => null,
+      measure: () => null,
+      getEntriesByName: () => [],
     });
+
+    this.global.PerformanceObserver = class {
+      /* eslint-disable no-useless-constructor, no-unused-vars, no-empty-function, class-methods-use-this */
+      constructor(callback) {}
+      disconnect() {}
+      observe(element, initObject) {}
+      /* eslint-enable no-useless-constructor, no-unused-vars, no-empty-function, class-methods-use-this */
+    };
   }
 
   async teardown() {

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-shared_examples 'pages settings editing' do
+RSpec.shared_examples 'pages settings editing' do
   let_it_be(:project) { create(:project, pages_https_only: false) }
   let(:user) { create(:user) }
   let(:role) { :maintainer }
@@ -380,21 +380,21 @@ shared_examples 'pages settings editing' do
         expect(project).to be_pages_deployed
       end
 
-      it 'removes the pages' do
+      it 'removes the pages', :sidekiq_inline do
         visit project_pages_path(project)
 
         expect(page).to have_link('Remove pages')
 
         accept_confirm { click_link 'Remove pages' }
 
-        expect(page).to have_content('Pages were removed')
+        expect(page).to have_content('Pages were scheduled for removal')
         expect(project.reload.pages_deployed?).to be_falsey
       end
     end
   end
 end
 
-describe 'Pages', :js do
+RSpec.describe 'Pages', :js do
   include LetsEncryptHelpers
 
   context 'when editing normally' do

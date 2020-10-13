@@ -19,17 +19,33 @@ RSpec.describe GroupsHelper do
   describe '#group_epics_count' do
     before do
       stub_licensed_features(epics: true)
-
-      create_list(:epic, 3, :opened, group: group)
-      create_list(:epic, 2, :closed, group: group)
     end
 
-    it 'returns open epics count' do
-      expect(helper.group_epics_count(state: 'opened')).to eq(3)
+    describe 'filtering by state' do
+      before do
+        create_list(:epic, 3, :opened, group: group)
+        create_list(:epic, 2, :closed, group: group)
+      end
+
+      it 'returns open epics count' do
+        expect(helper.group_epics_count(state: 'opened')).to eq(3)
+      end
+
+      it 'returns closed epics count' do
+        expect(helper.group_epics_count(state: 'closed')).to eq(2)
+      end
     end
 
-    it 'returns closed epics count' do
-      expect(helper.group_epics_count(state: 'closed')).to eq(2)
+    it 'counts also epics from subgroups not visible to user' do
+      parent_group = create(:group, :public)
+      subgroup = create(:group, :private, parent: parent_group)
+      create(:epic, :opened, group: parent_group)
+      create(:epic, :opened, group: subgroup)
+      helper.instance_variable_set(:@group, parent_group)
+
+      expect(Ability.allowed?(owner, :read_epic, parent_group)).to be_truthy
+      expect(Ability.allowed?(owner, :read_epic, subgroup)).to be_falsey
+      expect(helper.group_epics_count(state: 'opened')).to eq(2)
     end
   end
 
@@ -88,17 +104,17 @@ RSpec.describe GroupsHelper do
   describe '#remove_group_message' do
     subject { helper.remove_group_message(group) }
 
-    context 'adjourned deletion feature is available' do
+    context 'delayed deletion feature is available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
 
-      it 'returns the message related to adjourned deletion' do
+      it 'returns the message related to delayed deletion' do
         expect(subject).to include("The contents of this group, its subgroups and projects will be permanently removed after")
       end
     end
 
-    context 'adjourned deletion feature is not available' do
+    context 'delayed deletion feature is not available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
       end
@@ -117,7 +133,6 @@ RSpec.describe GroupsHelper do
       ab_feature_enabled?: [true, false],
       gitlab_com?: [true, false],
       user?: [true, false],
-      created_at: [Time.mktime(2010, 1, 20), Time.mktime(2030, 1, 20)],
       discover_security_feature_enabled?: [true, false],
       security_dashboard_feature_available?: [true, false],
       can_admin_group?: [true, false]
@@ -128,12 +143,11 @@ RSpec.describe GroupsHelper do
         allow(helper).to receive(:current_user) { user? ? owner : nil }
         allow(::Gitlab).to receive(:com?) { gitlab_com? }
         allow(owner).to receive(:ab_feature_enabled?) { ab_feature_enabled? }
-        allow(owner).to receive(:created_at) { created_at }
         allow(::Feature).to receive(:enabled?).with(:discover_security) { discover_security_feature_enabled? }
         allow(group).to receive(:feature_available?) { security_dashboard_feature_available? }
         allow(helper).to receive(:can?) { can_admin_group? }
 
-        expected_value = user? && created_at > DateTime.new(2019, 11, 1) && gitlab_com? &&
+        expected_value = user? && gitlab_com? &&
                          ab_feature_enabled? && !security_dashboard_feature_available? && can_admin_group?
 
         expect(helper.show_discover_group_security?(group)).to eq(expected_value)
@@ -143,7 +157,6 @@ RSpec.describe GroupsHelper do
 
   describe '#show_group_activity_analytics?' do
     before do
-      stub_feature_flags(group_activity_analytics: feature_available)
       stub_licensed_features(group_activity_analytics: feature_available)
 
       allow(helper).to receive(:current_user) { current_user }
@@ -291,6 +304,21 @@ RSpec.describe GroupsHelper do
           end
         end
       end
+    end
+  end
+
+  describe '#show_delayed_project_removal_setting?' do
+    before do
+      stub_licensed_features(adjourned_deletion_for_projects_and_groups: licensed?)
+    end
+
+    where(:licensed?, :result) do
+      true  | true
+      false | false
+    end
+
+    with_them do
+      it { expect(helper.show_delayed_project_removal_setting?(group)).to be result }
     end
   end
 end

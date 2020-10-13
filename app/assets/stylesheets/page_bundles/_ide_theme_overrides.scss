@@ -6,9 +6,10 @@
   $bs-input-focus-box-shadow: rgba(0, 123, 255, 0.25);
 
   a:not(.btn),
-  .btn-link:hover,
-  .btn-link:focus,
-  .btn-link:active {
+  .gl-button.btn-link,
+  .gl-button.btn-link:hover,
+  .gl-button.btn-link:focus,
+  .gl-button.btn-link:active {
     color: var(--ide-link-color, $blue-600);
   }
 
@@ -38,7 +39,7 @@
   }
 
   .badge.badge-pill {
-    color: var(--ide-text-color, $gray-800);
+    color: var(--ide-text-color, $gray-700);
     background-color: var(--ide-background, $badge-bg);
   }
 
@@ -84,7 +85,8 @@
     color: var(--ide-input-border, $gl-text-color-tertiary);
   }
 
-  .dropdown-input .fa {
+  .dropdown-input .fa,
+  .dropdown-input .dropdown-input-clear {
     color: var(--ide-input-border, $dropdown-input-fa-color);
   }
 
@@ -146,7 +148,7 @@
   }
 
   pre {
-    border-color: var(--ide-border-color-alt, $gray-200);
+    border-color: var(--ide-border-color-alt, $gray-100);
 
     code {
       background-color: var(--ide-border-color, inherit);
@@ -216,7 +218,7 @@
     color: var(--ide-text-color, $gl-text-color);
 
     &:hover {
-      background-color: var(--ide-input-border, $gray-200);
+      background-color: var(--ide-input-border, $gray-100);
     }
   }
 
@@ -300,8 +302,8 @@
     }
 
     .divider {
-      background-color: var(--ide-dropdown-hover-background, $gray-200);
-      border-color: var(--ide-dropdown-hover-background, $gray-200);
+      background-color: var(--ide-dropdown-hover-background, $gray-100);
+      border-color: var(--ide-dropdown-hover-background, $gray-100);
     }
 
     li > a:not(.disable-hover):hover,
@@ -316,7 +318,7 @@
 
   .dropdown-title,
   .dropdown-input {
-    border-color: var(--ide-dropdown-hover-background, $gray-200) !important;
+    border-color: var(--ide-dropdown-hover-background, $gray-100) !important;
   }
 
   .btn-primary,
@@ -356,7 +358,7 @@
 
   .btn[disabled] {
     background-color: var(--ide-btn-default-background, $gray-light) !important;
-    border: 1px solid var(--ide-btn-disabled-border, $gray-200) !important;
+    border: 1px solid var(--ide-btn-disabled-border, $gray-100) !important;
     color: var(--ide-btn-disabled-color, $gl-text-color-disabled) !important;
   }
 

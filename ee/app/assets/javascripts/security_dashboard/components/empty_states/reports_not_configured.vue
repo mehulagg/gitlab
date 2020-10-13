@@ -11,11 +11,8 @@ export default {
       type: String,
       required: true,
     },
-    svgPath: {
-      type: String,
-      required: true,
-    },
   },
+  inject: ['emptyStateSvgPath'],
   DESCRIPTION: s__(
     `SecurityReports|The security dashboard displays the latest security report. Use it to find and fix vulnerabilities.`,
   ),
@@ -25,7 +22,7 @@ export default {
 <template>
   <gl-empty-state
     :title="s__('SecurityReports|Monitor vulnerabilities in your code')"
-    :svg-path="svgPath"
+    :svg-path="emptyStateSvgPath"
     :description="$options.DESCRIPTION"
     :primary-button-link="helpPath"
     :primary-button-text="__('Learn more')"

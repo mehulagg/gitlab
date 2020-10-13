@@ -11,6 +11,10 @@ RSpec.describe MergeRequests::ApprovalService do
 
     subject(:service) { described_class.new(project, user) }
 
+    before do
+      project.add_developer(user)
+    end
+
     context 'with invalid approval' do
       before do
         allow(merge_request.approvals).to receive(:new).and_return(double(save: false))
@@ -129,12 +133,12 @@ RSpec.describe MergeRequests::ApprovalService do
 
     context 'when project requires force auth for approval' do
       before do
-        project.update(require_password_to_approve: true)
-        user.update(password: 'password')
+        project.update!(require_password_to_approve: true)
+        user.update!(password: 'password')
       end
       context 'when password not specified' do
-        it 'raises an error' do
-          expect { service.execute(merge_request) }.to raise_error(::MergeRequests::ApprovalService::IncorrectApprovalPasswordError)
+        it 'does not update the approvals' do
+          expect { service.execute(merge_request) }.not_to change { merge_request.approvals.size }
         end
       end
 
@@ -143,9 +147,10 @@ RSpec.describe MergeRequests::ApprovalService do
           { approval_password: 'incorrect' }
         end
 
-        it 'raises an error' do
+        it 'does not update the approvals' do
           service_with_params = described_class.new(project, user, params)
-          expect { service_with_params.execute(merge_request) }.to raise_error(::MergeRequests::ApprovalService::IncorrectApprovalPasswordError)
+
+          expect { service_with_params.execute(merge_request) }.not_to change { merge_request.approvals.size }
         end
       end
 
@@ -154,9 +159,10 @@ RSpec.describe MergeRequests::ApprovalService do
           { approval_password: 'password' }
         end
 
-        it 'does not raise an error' do
+        it 'approves the merge request' do
           service_with_params = described_class.new(project, user, params)
-          expect { service_with_params.execute(merge_request) }.not_to raise_error(::MergeRequests::ApprovalService::IncorrectApprovalPasswordError)
+
+          expect { service_with_params.execute(merge_request) }.to change { merge_request.approvals.size }
         end
       end
     end

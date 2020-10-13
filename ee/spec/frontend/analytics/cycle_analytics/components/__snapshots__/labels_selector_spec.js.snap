@@ -1,22 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Value Stream Analytics LabelsSelector with no item selected will render the label selector 1`] = `
-"<gl-dropdown-stub text=\\"\\" toggle-class=\\"overflow-hidden\\" class=\\"w-100\\">
-  <gl-dropdown-item-stub active=\\"true\\">Select a label
+"<gl-dropdown-stub headertext=\\"\\" text=\\"\\" category=\\"tertiary\\" variant=\\"default\\" size=\\"medium\\" toggleclass=\\"overflow-hidden\\" class=\\"gl-w-full\\">
+  <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" active=\\"true\\">Select a label
   </gl-dropdown-item-stub>
   <div class=\\"mb-3 px-3\\">
     <gl-search-box-by-type-stub value=\\"\\" clearbuttontitle=\\"Clear\\" class=\\"mb-2\\"></gl-search-box-by-type-stub>
   </div>
   <div class=\\"mb-3 px-3\\">
-    <gl-dropdown-item-stub class=\\"\\">
+    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(255, 0, 0);\\"></span>
       roses
     </gl-dropdown-item-stub>
-    <gl-dropdown-item-stub class=\\"\\">
+    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(255, 255, 255);\\"></span>
       some space
     </gl-dropdown-item-stub>
-    <gl-dropdown-item-stub class=\\"\\">
+    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(0, 0, 255);\\"></span>
       violets
     </gl-dropdown-item-stub>
@@ -31,22 +31,22 @@ exports[`Value Stream Analytics LabelsSelector with no item selected will render
 `;
 
 exports[`Value Stream Analytics LabelsSelector with selectedLabelId set will render the label selector 1`] = `
-"<gl-dropdown-stub text=\\"\\" toggle-class=\\"overflow-hidden\\" class=\\"w-100\\">
-  <gl-dropdown-item-stub>Select a label
+"<gl-dropdown-stub headertext=\\"\\" text=\\"\\" category=\\"tertiary\\" variant=\\"default\\" size=\\"medium\\" toggleclass=\\"overflow-hidden\\" class=\\"gl-w-full\\">
+  <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\">Select a label
   </gl-dropdown-item-stub>
   <div class=\\"mb-3 px-3\\">
     <gl-search-box-by-type-stub value=\\"\\" clearbuttontitle=\\"Clear\\" class=\\"mb-2\\"></gl-search-box-by-type-stub>
   </div>
   <div class=\\"mb-3 px-3\\">
-    <gl-dropdown-item-stub class=\\"\\">
+    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(255, 0, 0);\\"></span>
       roses
     </gl-dropdown-item-stub>
-    <gl-dropdown-item-stub class=\\"\\">
+    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(255, 255, 255);\\"></span>
       some space
     </gl-dropdown-item-stub>
-    <gl-dropdown-item-stub active=\\"true\\" class=\\"\\">
+    <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" active=\\"true\\" class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(0, 0, 255);\\"></span>
       violets
     </gl-dropdown-item-stub>

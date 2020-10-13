@@ -1,3 +1,4 @@
+import { GlIcon, GlButton } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import milestonesListSectionComponent from 'ee/roadmap/components/milestones_list_section.vue';
 import MilestoneTimeline from 'ee/roadmap/components/milestone_timeline.vue';
@@ -9,57 +10,72 @@ import {
   TIMELINE_CELL_MIN_WIDTH,
 } from 'ee/roadmap/constants';
 import { mockTimeframeInitialDate, mockGroupId, rawMilestones } from 'ee_jest/roadmap/mock_data';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
-const mockTimeframeMonths = getTimeframeForMonthsView(mockTimeframeInitialDate);
-const store = createStore();
-store.dispatch('setInitialData', {
-  currentGroupId: mockGroupId,
-  presetType: PRESET_TYPES.MONTHS,
-  timeframe: mockTimeframeMonths,
-});
-
-store.dispatch('receiveMilestonesSuccess', { rawMilestones });
-
-const mockMilestones = store.state.milestones;
-
-const createComponent = ({
-  milestones = mockMilestones,
-  timeframe = mockTimeframeMonths,
-  currentGroupId = mockGroupId,
-  presetType = PRESET_TYPES.MONTHS,
-} = {}) => {
-  const localVue = createLocalVue();
-
-  return shallowMount(milestonesListSectionComponent, {
-    localVue,
-    store,
-    stubs: {
-      MilestoneTimeline: false,
-    },
-    propsData: {
-      presetType,
-      milestones,
-      timeframe,
-      currentGroupId,
-    },
+const initializeStore = mockTimeframeMonths => {
+  const store = createStore();
+  store.dispatch('setInitialData', {
+    currentGroupId: mockGroupId,
+    presetType: PRESET_TYPES.MONTHS,
+    timeframe: mockTimeframeMonths,
   });
+  store.dispatch('receiveMilestonesSuccess', { rawMilestones });
+  return store;
 };
 
 describe('MilestonesListSectionComponent', () => {
   let wrapper;
+  let store;
+
+  const mockTimeframeMonths = getTimeframeForMonthsView(mockTimeframeInitialDate);
+  const findMilestoneCount = () => wrapper.find('[data-testid="count"]');
+  const findMilestoneCountTooltip = () => getBinding(findMilestoneCount().element, 'gl-tooltip');
+  const findExpandButtonContainer = () => wrapper.find('[data-testid="expandButton"]');
+  const findExpandButtonData = () => {
+    const container = findExpandButtonContainer();
+    return {
+      icon: container.find(GlIcon).attributes('name'),
+      iconLabel: container.find(GlButton).attributes('aria-label'),
+      tooltip: getBinding(container.element, 'gl-tooltip').value.title,
+    };
+  };
+
+  const createWrapper = (props = {}) => {
+    const localVue = createLocalVue();
+    wrapper = shallowMount(milestonesListSectionComponent, {
+      localVue,
+      store,
+      stubs: {
+        MilestoneTimeline: false,
+      },
+      propsData: {
+        milestones: store.state.milestones,
+        timeframe: mockTimeframeMonths,
+        currentGroupId: mockGroupId,
+        presetType: PRESET_TYPES.MONTHS,
+        ...props,
+      },
+      directives: {
+        GlTooltip: createMockDirective(),
+      },
+    });
+  };
 
   beforeEach(() => {
-    wrapper = createComponent();
+    store = initializeStore(mockTimeframeMonths);
+    createWrapper();
   });
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   describe('data', () => {
     it('returns default data props', () => {
       expect(wrapper.vm.offsetLeft).toBe(0);
       expect(wrapper.vm.roadmapShellEl).toBeDefined();
+      expect(wrapper.vm.milestonesExpanded).toBe(true);
     });
   });
 
@@ -133,6 +149,42 @@ describe('MilestonesListSectionComponent', () => {
       });
 
       expect(wrapper.find('.scroll-bottom-shadow').exists()).toBe(true);
+    });
+
+    it('show the correct count of milestones ', () => {
+      expect(findMilestoneCount().text()).toBe('2');
+    });
+
+    it('has a tooltip with the correct count of milestones', () => {
+      expect(findMilestoneCountTooltip().value).toBe('2 milestones');
+    });
+
+    describe('milestone expand/collapse button', () => {
+      it('is rendered', () => {
+        expect(findExpandButtonData()).toEqual({
+          icon: 'chevron-down',
+          iconLabel: 'Collapse milestones',
+          tooltip: 'Collapse',
+        });
+      });
+    });
+  });
+
+  describe('when the milestone list is expanded', () => {
+    beforeEach(() => {
+      findExpandButtonContainer()
+        .find(GlButton)
+        .vm.$emit('click');
+
+      return wrapper.vm.$nextTick();
+    });
+
+    it('shows "chevron-right" icon when the milestone toggle button is clicked', () => {
+      expect(findExpandButtonData()).toEqual({
+        icon: 'chevron-right',
+        iconLabel: 'Expand milestones',
+        tooltip: 'Expand',
+      });
     });
   });
 });

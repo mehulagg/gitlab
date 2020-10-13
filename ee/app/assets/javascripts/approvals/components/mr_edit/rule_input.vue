@@ -1,7 +1,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import { RULE_TYPE_ANY_APPROVER } from '../../constants';
 import { debounce } from 'lodash';
+import { RULE_TYPE_ANY_APPROVER } from '../../constants';
 
 const ANY_RULE_NAME = 'All Members';
 

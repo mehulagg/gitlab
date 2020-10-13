@@ -5,7 +5,7 @@ module Types
     include ::Gitlab::Graphql::Aggregations::Epics::Constants
 
     graphql_name 'Epic'
-    description 'Represents an epic.'
+    description 'Represents an epic'
 
     authorize :read_epic
 
@@ -14,6 +14,7 @@ module Types
     present_using EpicPresenter
 
     implements(Types::Notes::NoteableType)
+    implements(Types::CurrentUserTodos)
 
     field :id, GraphQL::ID_TYPE, null: false,
           description: 'ID of the epic'
@@ -29,11 +30,9 @@ module Types
           description: 'Indicates if the epic is confidential'
 
     field :group, GroupType, null: false,
-          description: 'Group to which the epic belongs',
-          resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Group, obj.group_id).find }
+          description: 'Group to which the epic belongs'
     field :parent, EpicType, null: true,
-          description: 'Parent epic of the epic',
-          resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Epic, obj.parent_id).find }
+          description: 'Parent epic of the epic'
     field :author, Types::UserType, null: false,
           description: 'Author of the epic',
           resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(User, obj.author_id).find }
@@ -68,14 +67,15 @@ module Types
           description: 'Number of downvotes the epic has received'
 
     field :closed_at, Types::TimeType, null: true,
-          description: "Timestamp of the epic's closure"
+          description: 'Timestamp of when the epic was closed'
     field :created_at, Types::TimeType, null: true,
-          description: "Timestamp of the epic's creation"
+          description: 'Timestamp of when the epic was created'
     field :updated_at, Types::TimeType, null: true,
-          description: "Timestamp of the epic's last activity"
+          description: 'Timestamp of when the epic was updated'
 
     field :children, ::Types::EpicType.connection_type, null: true,
           description: 'Children (sub-epics) of the epic',
+          max_page_size: 2000,
           resolver: ::Resolvers::EpicsResolver
     field :labels, Types::LabelType.connection_type, null: true,
           description: 'Labels assigned to the epic'
@@ -123,6 +123,7 @@ module Types
           null: true,
           complexity: 5,
           description: 'A list of issues associated with the epic',
+          max_page_size: 2000,
           resolver: Resolvers::EpicIssuesResolver
 
     field :descendant_counts, Types::EpicDescendantCountType, null: true,

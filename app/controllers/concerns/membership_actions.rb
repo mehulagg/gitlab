@@ -22,16 +22,23 @@ module MembershipActions
       .new(current_user, update_params)
       .execute(member)
 
-    member = present_members([member]).first
-
-    respond_to do |format|
-      format.js { render 'shared/members/update', locals: { member: member } }
+    if member.expires?
+      render json: {
+        expires_in: helpers.distance_of_time_in_words_to_now(member.expires_at),
+        expires_soon: member.expires_soon?,
+        expires_at_formatted: member.expires_at.to_time.in_time_zone.to_s(:medium)
+      }
+    else
+      render json: {}
     end
   end
 
   def destroy
     member = membershipable.members_and_requesters.find(params[:id])
-    Members::DestroyService.new(current_user).execute(member)
+    # !! is used in case unassign_issuables contains empty string which would result in nil
+    unassign_issuables = !!ActiveRecord::Type::Boolean.new.cast(params.delete(:unassign_issuables))
+
+    Members::DestroyService.new(current_user).execute(member, unassign_issuables: unassign_issuables)
 
     respond_to do |format|
       format.html do

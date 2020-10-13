@@ -1,4 +1,4 @@
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
 import service from '../../services';
 import * as types from '../mutation_types';
@@ -16,6 +16,7 @@ export const getMergeRequestsForBranch = (
     .getProjectMergeRequests(`${projectId}`, {
       source_branch: branchId,
       source_project_id: state.projects[projectId].id,
+      state: 'opened',
       order_by: 'created_at',
       per_page: 1,
     })

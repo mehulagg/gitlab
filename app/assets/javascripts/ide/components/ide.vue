@@ -1,8 +1,19 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { GlDeprecatedButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
+import {
+  WEBIDE_MARK_APP_START,
+  WEBIDE_MARK_FILE_FINISH,
+  WEBIDE_MARK_FILE_CLICKED,
+  WEBIDE_MARK_TREE_FINISH,
+  WEBIDE_MEASURE_TREE_FROM_REQUEST,
+  WEBIDE_MEASURE_FILE_FROM_REQUEST,
+  WEBIDE_MEASURE_FILE_AFTER_INTERACTION,
+} from '~/performance_constants';
+import { performanceMarkAndMeasure } from '~/performance_utils';
 import { modalTypes } from '../constants';
+import eventHub from '../eventhub';
 import FindFile from '~/vue_shared/components/file_finder/index.vue';
 import NewModal from './new_dropdown/modal.vue';
 import IdeSidebar from './ide_side_bar.vue';
@@ -14,6 +25,22 @@ import ErrorMessage from './error_message.vue';
 import CommitEditorHeader from './commit_sidebar/editor_header.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
+import { measurePerformance } from '../utils';
+
+eventHub.$on(WEBIDE_MEASURE_TREE_FROM_REQUEST, () =>
+  measurePerformance(WEBIDE_MARK_TREE_FINISH, WEBIDE_MEASURE_TREE_FROM_REQUEST),
+);
+eventHub.$on(WEBIDE_MEASURE_FILE_FROM_REQUEST, () =>
+  measurePerformance(WEBIDE_MARK_FILE_FINISH, WEBIDE_MEASURE_FILE_FROM_REQUEST),
+);
+eventHub.$on(WEBIDE_MEASURE_FILE_AFTER_INTERACTION, () =>
+  measurePerformance(
+    WEBIDE_MARK_FILE_FINISH,
+    WEBIDE_MEASURE_FILE_AFTER_INTERACTION,
+    WEBIDE_MARK_FILE_CLICKED,
+  ),
+);
+
 export default {
   components: {
     NewModal,
@@ -24,7 +51,7 @@ export default {
     FindFile,
     ErrorMessage,
     CommitEditorHeader,
-    GlDeprecatedButton,
+    GlButton,
     GlLoadingIcon,
     RightPane,
   },
@@ -47,6 +74,7 @@ export default {
       'emptyRepo',
       'currentTree',
       'editorTheme',
+      'getUrlForPath',
     ]),
     themeName() {
       return window.gon?.user_color_scheme;
@@ -57,6 +85,9 @@ export default {
 
     if (this.themeName)
       document.querySelector('.navbar-gitlab').classList.add(`theme-${this.themeName}`);
+  },
+  beforeCreate() {
+    performanceMarkAndMeasure({ mark: WEBIDE_MARK_APP_START });
   },
   methods: {
     ...mapActions(['toggleFileFinder']),
@@ -71,7 +102,7 @@ export default {
       return returnValue;
     },
     openFile(file) {
-      this.$router.push(`/project${file.url}`);
+      this.$router.push(this.getUrlForPath(file.path));
     },
     createNewFile() {
       this.$refs.newModal.open(modalTypes.blob);
@@ -121,15 +152,16 @@ export default {
                         )
                       }}
                     </p>
-                    <gl-deprecated-button
+                    <gl-button
                       variant="success"
+                      category="primary"
                       :title="__('New file')"
                       :aria-label="__('New file')"
                       data-qa-selector="first_file_button"
                       @click="createNewFile()"
                     >
                       {{ __('New file') }}
-                    </gl-deprecated-button>
+                    </gl-button>
                   </template>
                   <gl-loading-icon v-else-if="!currentTree || currentTree.loading" size="md" />
                   <p v-else>

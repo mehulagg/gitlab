@@ -1,0 +1,5 @@
+---
+title: SCIM get users API to search for email fragment as username
+merge_request: 38807
+author:
+type: changed

@@ -1,4 +1,4 @@
-query projectRequirements(
+query projectRequirementsEE(
   $projectPath: ID!
   $state: RequirementState
   $firstPageSize: Int
@@ -26,6 +26,13 @@ query projectRequirements(
         createdAt
         updatedAt
         state
+        testReports(first: 1, sort: created_desc) {
+          nodes {
+            id
+            state
+            createdAt
+          }
+        }
         userPermissions {
           updateRequirement
           adminRequirement

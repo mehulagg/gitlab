@@ -22,16 +22,16 @@ known response, the result is cached for 6 hours.
 If the external authorization is enabled, GitLab will further block pages and
 functionality that render cross-project data. That includes:
 
-- most pages under Dashboard (Activity, Milestones, Snippets, Assigned merge
-  requests, Assigned issues, Todos)
-- under a specific group (Activity, Contribution analytics, Issues, Issue boards,
-  Labels, Milestones, Merge requests)
-- Global and Group search will be disabled
+- Most pages under Dashboard (Activity, Milestones, Snippets, Assigned merge
+  requests, Assigned issues, To-Do List).
+- Under a specific group (Activity, Contribution analytics, Issues, Issue boards,
+  Labels, Milestones, Merge requests).
+- Global and Group search will be disabled.
 
 This is to prevent performing to many requests at once to the external
 authorization service.
 
-Whenever access is granted or denied this is logged in a logfile called
+Whenever access is granted or denied this is logged in a log file called
 `external-policy-access-control.log`.
 Read more about logs GitLab keeps in the [omnibus documentation](https://docs.gitlab.com/omnibus/settings/logs.html).
 
@@ -60,7 +60,7 @@ The available required properties are:
   requesting authorization if no specific label is defined on the project
 
 When using TLS Authentication with a self signed certificate, the CA certificate
-needs to be trusted by the openssl installation. When using GitLab installed using
+needs to be trusted by the OpenSSL installation. When using GitLab installed using
 Omnibus, learn to install a custom CA in the
 [omnibus documentation](https://docs.gitlab.com/omnibus/settings/ssl.html). Alternatively learn where to install
 custom certificates using `openssl version -d`.

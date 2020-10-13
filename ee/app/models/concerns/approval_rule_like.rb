@@ -14,8 +14,11 @@ module ApprovalRuleLike
   ALL_MEMBERS = 'All Members'
 
   included do
-    has_and_belongs_to_many :users
-    has_and_belongs_to_many :groups, class_name: 'Group', join_table: "#{self.table_name}_groups"
+    has_and_belongs_to_many :users,
+      after_add: :audit_add, after_remove: :audit_remove
+    has_and_belongs_to_many :groups,
+      class_name: 'Group', join_table: "#{self.table_name}_groups",
+      after_add: :audit_add, after_remove: :audit_remove
     has_many :group_users, -> { distinct }, through: :groups, source: :users
 
     validates :name, presence: true
@@ -23,6 +26,15 @@ module ApprovalRuleLike
 
     scope :with_users, -> { preload(:users, :group_users) }
     scope :regular_or_any_approver, -> { where(rule_type: [:regular, :any_approver]) }
+    scope :for_groups, -> (groups) { joins(:groups).where(approval_project_rules_groups: { group_id: groups }) }
+  end
+
+  def audit_add
+    raise NotImplementedError
+  end
+
+  def audit_remove
+    raise NotImplementedError
   end
 
   # Users who are eligible to approve, including specified group members.

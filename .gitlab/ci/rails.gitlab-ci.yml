@@ -1,8 +1,132 @@
+######################
+# rspec job base specs
 .rails-job-base:
   extends:
     - .default-retry
     - .default-before_script
     - .rails-cache
+
+.base-script: &base-script
+  # Only install knapsack after bundle install! Otherwise oddly some native
+  # gems could not be found under some circumstance. No idea why, hours wasted.
+  - run_timed_command "gem install knapsack --no-document"
+  - run_timed_command "scripts/gitaly-test-build"
+  - run_timed_command "scripts/gitaly-test-spawn"
+  - source ./scripts/rspec_helpers.sh
+
+.rspec-base:
+  extends: .rails-job-base
+  stage: test
+  variables:
+    RUBY_GC_MALLOC_LIMIT: 67108864
+    RUBY_GC_MALLOC_LIMIT_MAX: 134217728
+  needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets"]
+  script:
+    - *base-script
+    - rspec_paralellized_job "--tag ~quarantine --tag ~geo --tag ~level:migration"
+  artifacts:
+    expire_in: 31d
+    when: always
+    paths:
+      - coverage/
+      - knapsack/
+      - rspec_flaky/
+      - rspec_profiling/
+      - tmp/capybara/
+      - tmp/memory_test/
+      - log/*.log
+    reports:
+      junit: junit_rspec.xml
+
+.rspec-base-migration:
+  extends: .rails:rules:ee-and-foss-migration
+  script:
+    - *base-script
+    - rspec_paralellized_job "--tag ~quarantine --tag ~geo --tag level:migration"
+
+.rspec-base-pg11:
+  extends:
+    - .rspec-base
+    - .use-pg11
+
+.rspec-base-pg12:
+  extends:
+    - .rspec-base
+    - .use-pg12
+
+.rspec-base-pg11-as-if-foss:
+  extends:
+    - .rspec-base
+    - .as-if-foss
+    - .use-pg11
+  needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets as-if-foss"]
+
+.rspec-ee-base-pg11:
+  extends:
+    - .rspec-base
+    - .use-pg11-ee
+
+.rspec-ee-base-pg12:
+  extends:
+    - .rspec-base
+    - .use-pg12-ee
+
+.rspec-ee-base-geo:
+  extends: .rspec-base
+  script:
+    - *base-script
+    - rspec_paralellized_job "--tag ~quarantine --tag geo"
+
+.rspec-ee-base-geo-pg11:
+  extends:
+    - .rspec-ee-base-geo
+    - .use-pg11-ee
+
+.rspec-ee-base-geo-pg12:
+  extends:
+    - .rspec-ee-base-geo
+    - .use-pg12-ee
+
+.db-job-base:
+  extends:
+    - .rails-job-base
+    - .rails:rules:ee-and-foss-migration
+    - .use-pg11
+  stage: test
+  needs: ["setup-test-env"]
+# rspec job base specs
+######################
+
+############################
+# rspec job parallel configs
+.rspec-migration-parallel:
+  parallel: 5
+
+.rspec-ee-migration-parallel:
+  parallel: 2
+
+.rspec-unit-parallel:
+  parallel: 20
+
+.rspec-ee-unit-parallel:
+  parallel: 10
+
+.rspec-ee-unit-geo-parallel:
+  parallel: 2
+
+.rspec-integration-parallel:
+  parallel: 8
+
+.rspec-ee-integration-parallel:
+  parallel: 4
+
+.rspec-system-parallel:
+  parallel: 24
+
+.rspec-ee-system-parallel:
+  parallel: 6
+# rspec job parallel configs
+############################
 
 #######################################################
 # EE/FOSS: default refs (MRs, master, schedules) jobs #
@@ -41,6 +165,25 @@ update-rails-cache:
   cache:
     policy: push  # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
 
+.coverage-base:
+  extends:
+    - .default-retry
+    - .default-before_script
+    - .coverage-cache
+  variables:
+    SETUP_DB: "false"
+    USE_BUNDLE_INSTALL: "false"
+
+update-coverage-cache:
+  extends:
+    - .coverage-base
+    - .shared:rules:update-cache
+  stage: prepare
+  script:
+    - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --without default development test production puma unicorn kerberos metrics omnibus ed25519"
+  cache:
+    policy: push  # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
+
 .static-analysis-base:
   extends:
     - .default-retry
@@ -59,7 +202,7 @@ update-static-analysis-cache:
   script:
     - rm -rf ./node_modules  # We remove node_modules because there's no mechanism to remove stall entries.
     - run_timed_command "retry yarn install --frozen-lockfile"
-    - bundle exec rubocop --parallel  # For the moment we only cache `vendor/ruby/`, `node_modules/`, and `tmp/rubocop_cache` so we don't need to run all the tasks,
+    - run_timed_command "bundle exec rubocop --parallel"  # For the moment we only cache `vendor/ruby/`, `node_modules/`, and `tmp/rubocop_cache` so we don't need to run all the tasks,
   cache:
     # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up but RuboCop has a mechanism
     # for keeping only the N latest cache files, so we take advantage of it with `pull-push` and removing `node_modules` at the start of the job.
@@ -86,72 +229,36 @@ downtime_check:
   script:
     - bundle exec rake downtime_check
 
-.rspec-base:
-  extends: .rails-job-base
-  stage: test
-  needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets"]
-  script:
-    - run_timed_command "scripts/gitaly-test-build"
-    - run_timed_command "scripts/gitaly-test-spawn"
-    - source scripts/rspec_helpers.sh
-    - rspec_paralellized_job "--tag ~quarantine --tag ~geo --tag ~level:migration"
-  artifacts:
-    expire_in: 31d
-    when: always
-    paths:
-      - coverage/
-      - knapsack/
-      - rspec_flaky/
-      - rspec_profiling/
-      - tmp/capybara/
-      - tmp/memory_test/
-      - log/*.log
-    reports:
-      junit: junit_rspec.xml
-
-.rspec-base-pg11:
-  extends:
-    - .rspec-base
-    - .rails:rules:ee-and-foss
-    - .use-pg11
-
-.rspec-base-migration:
-  script:
-    - run_timed_command "scripts/gitaly-test-build"
-    - run_timed_command "scripts/gitaly-test-spawn"
-    - source scripts/rspec_helpers.sh
-    - rspec_paralellized_job "--tag ~quarantine --tag ~geo --tag level:migration"
-
 rspec migration pg11:
   extends:
     - .rspec-base-pg11
     - .rspec-base-migration
-  parallel: 5
+    - .rspec-migration-parallel
 
 rspec unit pg11:
-  extends: .rspec-base-pg11
-  parallel: 20
+  extends:
+    - .rspec-base-pg11
+    - .rails:rules:ee-and-foss-unit
+    - .rspec-unit-parallel
 
 rspec integration pg11:
-  extends: .rspec-base-pg11
-  parallel: 8
+  extends:
+    - .rspec-base-pg11
+    - .rails:rules:ee-and-foss-integration
+    - .rspec-integration-parallel
 
 rspec system pg11:
-  extends: .rspec-base-pg11
-  parallel: 24
+  extends:
+    - .rspec-base-pg11
+    - .rails:rules:ee-and-foss-system
+    - .rspec-system-parallel
 
 rspec fast_spec_helper:
-  extends: .rspec-base-pg11
+  extends:
+    - .rspec-base-pg11
+    - .rails:rules:ee-and-foss-fast_spec_helper
   script:
     - bin/rspec spec/fast_spec_helper.rb
-
-.db-job-base:
-  extends:
-    - .rails-job-base
-    - .rails:rules:ee-and-foss
-    - .use-pg11
-  stage: test
-  needs: ["setup-test-env"]
 
 db:migrate:reset:
   extends: .db-job-base
@@ -204,8 +311,7 @@ gitlab:setup:
     # db/fixtures/development/04_project.rb thanks to SIZE=1 below
     - git clone https://gitlab.com/gitlab-org/gitlab-test.git
        /home/git/repositories/gitlab-org/gitlab-test.git
-    - run_timed_command "scripts/gitaly-test-build"
-    - run_timed_command "scripts/gitaly-test-spawn"
+    - *base-script
     - force=yes SIZE=1 FIXTURE_PATH="db/fixtures/development" bundle exec rake gitlab:setup
   artifacts:
     when: on_failure
@@ -213,10 +319,25 @@ gitlab:setup:
     paths:
       - log/*.log
 
+db:backup_and_restore:
+  extends: .db-job-base
+  variables:
+    SETUP_DB: "false"
+    GITLAB_ASSUME_YES: "1"
+  script:
+    - . scripts/prepare_build.sh
+    - bundle exec rake db:drop db:create db:structure:load db:seed_fu
+    - mkdir -p tmp/tests/public/uploads tmp/tests/{artifacts,pages,lfs-objects,registry}
+    - bundle exec rake gitlab:backup:create
+    - date
+    - bundle exec rake gitlab:backup:restore
+  rules:
+    - changes: ["lib/backup/**/*"]
+
 rspec:coverage:
   extends:
-    - .rails-job-base
-    - .rails:rules:ee-mr-and-master-only
+    - .coverage-base
+    - .rails:rules:rspec-coverage
   stage: post-test
   # We cannot use needs since it would mean needing 84 jobs (since most are parallelized)
   # so we use `dependencies` here.
@@ -235,11 +356,10 @@ rspec:coverage:
     - rspec-ee system pg11 geo
     - memory-static
     - memory-on-boot
-  variables:
-    SETUP_DB: "false"
   script:
-    - bundle exec scripts/merge-simplecov
-    - bundle exec scripts/gather-test-memory-data
+    - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --without default development test production puma unicorn kerberos metrics omnibus ed25519"
+    - run_timed_command "bundle exec scripts/merge-simplecov"
+    - run_timed_command "bundle exec scripts/gather-test-memory-data"
   coverage: '/LOC \((\d+\.\d+%)\) covered.$/'
   artifacts:
     name: coverage
@@ -248,118 +368,205 @@ rspec:coverage:
       - coverage/index.html
       - coverage/assets/
       - tmp/memory_test/
+    reports:
+      cobertura: coverage/coverage.xml
 # EE/FOSS: default refs (MRs, master, schedules) jobs #
 #######################################################
 
 ##################################################
 # EE: default refs (MRs, master, schedules) jobs #
-.rspec-base-ee:
-  extends:
-    - .rspec-base
-    - .rails:rules:ee-only
-
-.rspec-base-pg11-as-if-foss:
-  extends:
-    - .rspec-base
-    - .rails:rules:as-if-foss
-    - .as-if-foss
-    - .use-pg11
-  needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets as-if-foss"]
-
-.rspec-ee-base-pg11:
-  extends:
-    - .rspec-base-ee
-    - .use-pg11-ee
-
 rspec migration pg11-as-if-foss:
   extends:
     - .rspec-base-pg11-as-if-foss
     - .rspec-base-migration
-  parallel: 5
+    - .rails:rules:as-if-foss-migration
+    - .rspec-migration-parallel
 
 rspec unit pg11-as-if-foss:
-  extends: .rspec-base-pg11-as-if-foss
-  parallel: 20
+  extends:
+    - .rspec-base-pg11-as-if-foss
+    - .rails:rules:as-if-foss-unit
+    - .rspec-unit-parallel
 
 rspec integration pg11-as-if-foss:
-  extends: .rspec-base-pg11-as-if-foss
-  parallel: 8
+  extends:
+    - .rspec-base-pg11-as-if-foss
+    - .rails:rules:as-if-foss-integration
+    - .rspec-integration-parallel
 
 rspec system pg11-as-if-foss:
-  extends: .rspec-base-pg11-as-if-foss
-  parallel: 24
+  extends:
+    - .rspec-base-pg11-as-if-foss
+    - .rails:rules:as-if-foss-system
+    - .rspec-system-parallel
 
 rspec-ee migration pg11:
   extends:
     - .rspec-ee-base-pg11
     - .rspec-base-migration
-  parallel: 2
+    - .rails:rules:ee-only-migration
+    - .rspec-ee-migration-parallel
 
 rspec-ee unit pg11:
-  extends: .rspec-ee-base-pg11
-  parallel: 10
+  extends:
+    - .rspec-ee-base-pg11
+    - .rails:rules:ee-only-unit
+    - .rspec-ee-unit-parallel
 
 rspec-ee integration pg11:
-  extends: .rspec-ee-base-pg11
-  parallel: 4
+  extends:
+    - .rspec-ee-base-pg11
+    - .rails:rules:ee-only-integration
+    - .rspec-ee-integration-parallel
 
 rspec-ee system pg11:
-  extends: .rspec-ee-base-pg11
-  parallel: 6
-
-.rspec-ee-base-geo:
-  extends: .rspec-base-ee
-  script:
-    - run_timed_command "scripts/gitaly-test-build"
-    - run_timed_command "scripts/gitaly-test-spawn"
-    - source scripts/rspec_helpers.sh
-    - scripts/prepare_postgres_fdw.sh
-    - rspec_paralellized_job "--tag ~quarantine --tag geo"
-
-.rspec-ee-base-geo-pg11:
   extends:
-    - .rspec-ee-base-geo
-    - .use-pg11-ee
+    - .rspec-ee-base-pg11
+    - .rails:rules:ee-only-system
+    - .rspec-ee-system-parallel
 
 rspec-ee unit pg11 geo:
-  extends: .rspec-ee-base-geo-pg11
-  parallel: 2
+  extends:
+    - .rspec-ee-base-geo-pg11
+    - .rails:rules:ee-only-unit
+    - .rspec-ee-unit-geo-parallel
 
 rspec-ee integration pg11 geo:
-  extends: .rspec-ee-base-geo-pg11
+  extends:
+    - .rspec-ee-base-geo-pg11
+    - .rails:rules:ee-only-integration
 
 rspec-ee system pg11 geo:
-  extends: .rspec-ee-base-geo-pg11
+  extends:
+    - .rspec-ee-base-geo-pg11
+    - .rails:rules:ee-only-system
 
 db:rollback geo:
   extends:
     - db:rollback
-    - .rails:rules:ee-only
+    - .rails:rules:ee-only-migration
   script:
     - bundle exec rake geo:db:migrate VERSION=20170627195211
     - bundle exec rake geo:db:migrate
 # EE: default refs (MRs, master, schedules) jobs #
 ##################################################
 
+##########################################
+# EE/FOSS: master nightly scheduled jobs #
+rspec migration pg12:
+  extends:
+    - .rspec-base-pg12
+    - .rspec-base-migration
+    - .rails:rules:master-schedule-nightly--code-backstage
+    - .rspec-migration-parallel
+
+rspec unit pg12:
+  extends:
+    - .rspec-base-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage
+    - .rspec-unit-parallel
+
+rspec integration pg12:
+  extends:
+    - .rspec-base-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage
+    - .rspec-integration-parallel
+
+rspec system pg12:
+  extends:
+    - .rspec-base-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage
+    - .rspec-system-parallel
+# EE/FOSS: master nightly scheduled jobs #
+##########################################
+
+#####################################
+# EE: master nightly scheduled jobs #
+rspec-ee migration pg12:
+  extends:
+    - .rspec-ee-base-pg12
+    - .rspec-base-migration
+    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rspec-ee-migration-parallel
+
+rspec-ee unit pg12:
+  extends:
+    - .rspec-ee-base-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rspec-ee-unit-parallel
+
+rspec-ee integration pg12:
+  extends:
+    - .rspec-ee-base-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rspec-ee-integration-parallel
+
+rspec-ee system pg12:
+  extends:
+    - .rspec-ee-base-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rspec-ee-system-parallel
+
+rspec-ee unit pg12 geo:
+  extends:
+    - .rspec-ee-base-geo-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rspec-ee-unit-geo-parallel
+
+rspec-ee integration pg12 geo:
+  extends:
+    - .rspec-ee-base-geo-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+
+rspec-ee system pg12 geo:
+  extends:
+    - .rspec-ee-base-geo-pg12
+    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+# EE: master nightly scheduled jobs #
+#####################################
+
 ##################################################
 # EE: Canonical MR pipelines
-rspec foss-impact:
+rspec fail-fast:
   extends:
-    - .rspec-base
-    - .as-if-foss
-    - .rails:rules:ee-mr-only
-    - .use-pg11
+    - .rspec-ee-base-pg11 # This job also runs EE spec which needs elasticsearch
+    - .rails:rules:rspec fail-fast
+  stage: test
+  needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets", "detect-tests"]
   script:
-    - install_gitlab_gem
-    - run_timed_command "scripts/gitaly-test-build"
-    - run_timed_command "scripts/gitaly-test-spawn"
-    - source scripts/rspec_helpers.sh
-    - tooling/bin/find_foss_tests tmp/matching_foss_tests.txt
-    - 'if [[ -n "$(cat tmp/matching_foss_tests.txt)" ]]; then rspec_simple_job "--tag ~quarantine --tag ~geo --tag ~level:migration $(cat tmp/matching_foss_tests.txt)"; fi'
+    - *base-script
+    - rspec_fail_fast tmp/matching_tests.txt "--tag ~quarantine"
   artifacts:
     expire_in: 7d
     paths:
-      - tmp/matching_foss_tests.txt
       - tmp/capybara/
-# EE: Merge Request pipelines
+
+rspec foss-impact:
+  extends:
+    - .rspec-base-pg11-as-if-foss
+    - .rails:rules:rspec-foss-impact
+  needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets as-if-foss", "detect-tests as-if-foss"]
+  script:
+    - *base-script
+    - rspec_matched_foss_tests tmp/matching_foss_tests.txt "--tag ~quarantine"
+  artifacts:
+    expire_in: 7d
+    paths:
+      - tmp/capybara/
+
+fail-pipeline-early:
+  extends:
+    - .rails:rules:fail-pipeline-early
+  stage: post-test
+  needs:
+    - job: rspec fail-fast
+      artifacts: false
+  variables:
+    GIT_DEPTH: 1
+  before_script:
+    - source scripts/utils.sh
+    - install_api_client_dependencies_with_apt
+  script:
+    - fail_pipeline_early
+# EE: Canonical MR pipelines
 ##################################################

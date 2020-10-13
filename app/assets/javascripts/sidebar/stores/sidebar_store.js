@@ -18,8 +18,10 @@ export default class SidebarStore {
     this.humanTimeSpent = '';
     this.timeTrackingLimitToHours = timeTrackingLimitToHours;
     this.assignees = [];
+    this.reviewers = [];
     this.isFetching = {
       assignees: true,
+      reviewers: true,
       participants: true,
       subscriptions: true,
     };
@@ -35,10 +37,17 @@ export default class SidebarStore {
     SidebarStore.singleton = this;
   }
 
-  setAssigneeData(data) {
+  setAssigneeData({ assignees }) {
     this.isFetching.assignees = false;
-    if (data.assignees) {
-      this.assignees = data.assignees;
+    if (assignees) {
+      this.assignees = assignees;
+    }
+  }
+
+  setReviewerData({ reviewers }) {
+    this.isFetching.reviewers = false;
+    if (reviewers) {
+      this.reviewers = reviewers;
     }
   }
 
@@ -75,18 +84,38 @@ export default class SidebarStore {
     }
   }
 
-  findAssignee(findAssignee) {
-    return this.assignees.find(assignee => assignee.id === findAssignee.id);
+  addReviewer(reviewer) {
+    if (!this.findReviewer(reviewer)) {
+      this.reviewers.push(reviewer);
+    }
   }
 
-  removeAssignee(removeAssignee) {
-    if (removeAssignee) {
-      this.assignees = this.assignees.filter(assignee => assignee.id !== removeAssignee.id);
+  findAssignee(findAssignee) {
+    return this.assignees.find(({ id }) => id === findAssignee.id);
+  }
+
+  findReviewer(findReviewer) {
+    return this.reviewers.find(({ id }) => id === findReviewer.id);
+  }
+
+  removeAssignee(assignee) {
+    if (assignee) {
+      this.assignees = this.assignees.filter(({ id }) => id !== assignee.id);
+    }
+  }
+
+  removeReviewer(reviewer) {
+    if (reviewer) {
+      this.reviewers = this.reviewers.filter(({ id }) => id !== reviewer.id);
     }
   }
 
   removeAllAssignees() {
     this.assignees = [];
+  }
+
+  removeAllReviewers() {
+    this.reviewers = [];
   }
 
   setAssigneesFromRealtime(data) {

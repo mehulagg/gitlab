@@ -78,7 +78,7 @@ export default {
 <template>
   <div
     v-if="show"
-    class="daterange-container d-flex flex-column flex-lg-row align-items-lg-center justify-content-lg-end"
+    class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row align-items-lg-center justify-content-lg-end"
   >
     <gl-daterange-picker
       v-model="dateRange"

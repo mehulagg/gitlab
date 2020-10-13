@@ -1,6 +1,0 @@
----
-title: Geo - Does not try to unlink file when it not possible to get the file path
-  while cleaning orphaned registries
-merge_request: 33658
-author:
-type: fixed

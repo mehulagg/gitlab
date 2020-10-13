@@ -45,7 +45,7 @@ RSpec.describe ApprovalRules::FinalizeService do
         let(:merge_request) { create(:merged_merge_request, source_project: project, target_project: project) }
 
         before do
-          merge_request.approval_rules.code_owner.create(name: 'Code Owner', rule_type: :code_owner, code_owner: true)
+          merge_request.approval_rules.code_owner.create(name: 'Code Owner', rule_type: :code_owner)
         end
 
         it 'copies project rules to MR, keep snapshot of group member by including it as part of users association' do

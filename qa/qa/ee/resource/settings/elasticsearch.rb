@@ -17,9 +17,9 @@ module QA
 
           def fabricate!
             QA::Page::Main::Menu.perform(&:go_to_admin_area)
-            QA::Page::Admin::Menu.perform(&:go_to_integration_settings)
-            QA::EE::Page::Admin::Settings::Integration.perform do |integration|
-              integration.expand_elasticsearch do |es|
+            QA::Page::Admin::Menu.perform(&:go_to_general_settings)
+            QA::EE::Page::Admin::Settings::Elasticsearch.perform do |settings|
+              settings.expand_elasticsearch do |es|
                 es.check_indexing if @es_indexing
                 es.check_search if @es_enabled
                 es.enter_link(@es_url)

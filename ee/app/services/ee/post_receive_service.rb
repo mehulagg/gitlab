@@ -13,6 +13,8 @@ module EE
       response.add_basic_message(geo_redirect_to_primary_message) if display_geo_redirect_to_primary_message?
       response.add_basic_message(geo_secondary_lag_message) if geo_display_secondary_lag_message?
 
+      response.add_alert_message(storage_size_limit_alert)
+
       response
     end
 
@@ -49,6 +51,17 @@ module EE
 
     def geo_display_secondary_lag_message?
       ::Gitlab::Geo.primary? && geo_current_replication_lag.to_i > 0
+    end
+
+    def storage_size_limit_alert
+      return unless repository&.repo_type&.project?
+
+      payload = Namespaces::CheckStorageSizeService.new(project.namespace, user).execute.payload
+      return unless payload.present?
+
+      alert_level = "##### #{payload[:alert_level].to_s.upcase} #####"
+
+      [alert_level, payload[:usage_message], payload[:explanation_message]].join("\n")
     end
   end
 end

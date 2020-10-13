@@ -1,14 +1,19 @@
 import { shallowMount } from '@vue/test-utils';
 
-import { GlFormGroup, GlFormTextarea } from '@gitlab/ui';
+import { GlDrawer, GlFormGroup, GlFormTextarea } from '@gitlab/ui';
 import RequirementForm from 'ee/requirements/components/requirement_form.vue';
 import { MAX_TITLE_LENGTH } from 'ee/requirements/constants';
 
 import { mockRequirementsOpen } from '../mock_data';
 
-const createComponent = ({ requirement = null, requirementRequestActive = false } = {}) =>
+const createComponent = ({
+  drawerOpen = true,
+  requirement = null,
+  requirementRequestActive = false,
+} = {}) =>
   shallowMount(RequirementForm, {
     propsData: {
+      drawerOpen,
       requirement,
       requirementRequestActive,
     },
@@ -31,13 +36,23 @@ describe('RequirementForm', () => {
   });
 
   describe('computed', () => {
-    describe('fieldLabel', () => {
-      it('returns string "New requirement" when `requirement` prop is null', () => {
-        expect(wrapper.vm.fieldLabel).toBe('New requirement');
+    describe('isCreate', () => {
+      it('returns true when `requirement` prop is null', () => {
+        expect(wrapper.vm.isCreate).toBe(true);
       });
 
-      it('returns string "Requirement" when `requirement` prop is defined', () => {
-        expect(wrapperWithRequirement.vm.fieldLabel).toBe('Requirement');
+      it('returns false when `requirement` prop is not null', () => {
+        expect(wrapperWithRequirement.vm.isCreate).toBe(false);
+      });
+    });
+
+    describe('fieldLabel', () => {
+      it('returns string "New Requirement" when `requirement` prop is null', () => {
+        expect(wrapper.vm.fieldLabel).toBe('New Requirement');
+      });
+
+      it('returns string "Edit Requirement" when `requirement` prop is defined', () => {
+        expect(wrapperWithRequirement.vm.fieldLabel).toBe('Edit Requirement');
       });
     });
 
@@ -77,6 +92,46 @@ describe('RequirementForm', () => {
     });
   });
 
+  describe('watchers', () => {
+    describe('requirement', () => {
+      it('sets `title` to the value of `requirement.title` when requirement is not null', async () => {
+        wrapper.setProps({
+          requirement: mockRequirementsOpen[0],
+        });
+
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.vm.title).toBe(mockRequirementsOpen[0].title);
+      });
+
+      it('sets `title` to empty string when requirement is null', async () => {
+        wrapperWithRequirement.setProps({
+          requirement: null,
+        });
+
+        await wrapperWithRequirement.vm.$nextTick();
+
+        expect(wrapperWithRequirement.vm.title).toBe('');
+      });
+    });
+
+    describe('drawerOpen', () => {
+      it('clears `title` value when `drawerOpen` prop is changed to false', async () => {
+        wrapper.setData({
+          title: 'Foo',
+        });
+
+        wrapper.setProps({
+          drawerOpen: false,
+        });
+
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.vm.title).toBe('');
+      });
+    });
+  });
+
   describe('methods', () => {
     describe('handleSave', () => {
       it('emits `save` event on component with `title` as param when form is in create mode', () => {
@@ -109,18 +164,8 @@ describe('RequirementForm', () => {
   });
 
   describe('template', () => {
-    it('renders component container element with classes `p-3 border-bottom` when form is in create mode', () => {
-      const wrapperClasses = wrapper.classes();
-
-      expect(wrapperClasses).toContain('p-3');
-      expect(wrapperClasses).toContain('border-bottom');
-    });
-
-    it('renders component container element with classes `d-block d-sm-flex` when form is in edit mode', () => {
-      const wrapperClasses = wrapperWithRequirement.classes();
-
-      expect(wrapperClasses).toContain('d-block');
-      expect(wrapperClasses).toContain('d-sm-flex');
+    it('renders gl-drawer as component container element', () => {
+      expect(wrapper.find(GlDrawer).exists()).toBe(true);
     });
 
     it('renders element containing requirement reference when form is in edit mode', () => {
@@ -131,7 +176,7 @@ describe('RequirementForm', () => {
       const glFormGroup = wrapper.find(GlFormGroup);
 
       expect(glFormGroup.exists()).toBe(true);
-      expect(glFormGroup.attributes('label')).toBe('New requirement');
+      expect(glFormGroup.attributes('label')).toBe('Title');
       expect(glFormGroup.attributes('label-for')).toBe('requirementTitle');
       expect(glFormGroup.attributes('invalid-feedback')).toBe(
         `Requirement title cannot have more than ${MAX_TITLE_LENGTH} characters.`,

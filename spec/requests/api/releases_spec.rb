@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Releases do
+RSpec.describe API::Releases do
   let(:project) { create(:project, :repository, :private) }
   let(:maintainer) { create(:user) }
   let(:reporter) { create(:user) }
@@ -51,6 +51,49 @@ describe API::Releases do
         expect(json_response.count).to eq(2)
         expect(json_response.first['tag_name']).to eq(release_2.tag)
         expect(json_response.second['tag_name']).to eq(release_1.tag)
+      end
+
+      RSpec.shared_examples 'release sorting' do |order_by|
+        subject { get api(url, access_level), params: { sort: sort, order_by: order_by } }
+
+        context "sorting by #{order_by}" do
+          context 'ascending order' do
+            let(:sort) { 'asc' }
+
+            it 'returns the sorted releases' do
+              subject
+
+              expect(json_response.map { |release| release['name'] }).to eq(releases.map(&:name))
+            end
+          end
+
+          context 'descending order' do
+            let(:sort) { 'desc' }
+
+            it 'returns the sorted releases' do
+              subject
+
+              expect(json_response.map { |release| release['name'] }).to eq(releases.reverse.map(&:name))
+            end
+          end
+        end
+      end
+
+      context 'return releases in sorted order' do
+        before do
+          release_2.update_attribute(:created_at, 3.days.ago)
+        end
+
+        let(:url) { "/projects/#{project.id}/releases" }
+        let(:access_level) { maintainer }
+
+        it_behaves_like 'release sorting', 'released_at' do
+          let(:releases) { [release_1, release_2] }
+        end
+
+        it_behaves_like 'release sorting', 'created_at' do
+          let(:releases) { [release_2, release_1] }
+        end
       end
 
       it 'matches response schema' do
@@ -259,7 +302,7 @@ describe API::Releases do
         end
 
         it '#collected_at' do
-          Timecop.freeze(Time.now.round) do
+          travel_to(Time.now.round) do
             get api("/projects/#{project.id}/releases/v0.1", maintainer)
 
             expect(json_response['evidences'].first['collected_at'].to_datetime.to_i).to be_within(1.minute).of(release.evidences.first.created_at.to_i)
@@ -420,7 +463,17 @@ describe API::Releases do
       {
         name: 'New release',
         tag_name: 'v0.1',
-        description: 'Super nice release'
+        description: 'Super nice release',
+        assets: {
+          links: [
+            {
+              name: 'An example runbook link',
+              url: 'https://example.com/runbook',
+              link_type: 'runbook',
+              filepath: '/permanent/path/to/runbook'
+            }
+          ]
+        }
       }
     end
 
@@ -435,9 +488,17 @@ describe API::Releases do
         post api("/projects/#{project.id}/releases", maintainer), params: params
       end.to change { Release.count }.by(1)
 
-      expect(project.releases.last.name).to eq('New release')
-      expect(project.releases.last.tag).to eq('v0.1')
-      expect(project.releases.last.description).to eq('Super nice release')
+      release = project.releases.last
+
+      aggregate_failures do
+        expect(release.name).to eq('New release')
+        expect(release.tag).to eq('v0.1')
+        expect(release.description).to eq('Super nice release')
+        expect(release.links.last.name).to eq('An example runbook link')
+        expect(release.links.last.url).to eq('https://example.com/runbook')
+        expect(release.links.last.link_type).to eq('runbook')
+        expect(release.links.last.filepath).to eq('/permanent/path/to/runbook')
+      end
     end
 
     it 'creates a new release without description' do
@@ -458,7 +519,7 @@ describe API::Releases do
 
     it 'sets the released_at to the current time if the released_at parameter is not provided' do
       now = Time.zone.parse('2015-08-25 06:00:00Z')
-      Timecop.freeze(now) do
+      travel_to(now) do
         post api("/projects/#{project.id}/releases", maintainer), params: params
 
         expect(project.releases.last.released_at).to eq(now)
@@ -580,7 +641,7 @@ describe API::Releases do
           end
         end
 
-        context 'when create two assets' do
+        context 'when creating two assets' do
           let(:params) do
             base_params.merge({
               assets: {
@@ -653,11 +714,19 @@ describe API::Releases do
       end
 
       context 'when a valid token is provided' do
-        it 'creates the release' do
+        it 'creates the release for a running job' do
+          job.update!(status: :running)
           post api("/projects/#{project.id}/releases"), params: params.merge(job_token: job.token)
 
           expect(response).to have_gitlab_http_status(:created)
           expect(project.releases.last.description).to eq('Another nice release')
+        end
+
+        it 'returns an :unauthorized error for a completed job' do
+          job.success!
+          post api("/projects/#{project.id}/releases"), params: params.merge(job_token: job.token)
+
+          expect(response).to have_gitlab_http_status(:unauthorized)
         end
       end
     end
@@ -730,6 +799,65 @@ describe API::Releases do
         post api("/projects/#{project.id}/releases", maintainer), params: params
 
         expect(response).to have_gitlab_http_status(:conflict)
+      end
+    end
+
+    context 'with milestones' do
+      let(:subject) { post api("/projects/#{project.id}/releases", maintainer), params: params }
+      let(:milestone) { create(:milestone, project: project, title: 'v1.0') }
+      let(:returned_milestones) { json_response['milestones'].map {|m| m['title']} }
+
+      before do
+        params.merge!(milestone_params)
+
+        subject
+      end
+
+      context 'with a project milestone' do
+        let(:milestone_params) { { milestones: [milestone.title] } }
+
+        it 'adds the milestone' do
+          expect(response).to have_gitlab_http_status(:created)
+          expect(returned_milestones).to match_array(['v1.0'])
+        end
+      end
+
+      context 'with multiple milestones' do
+        let(:milestone2) { create(:milestone, project: project, title: 'm2') }
+        let(:milestone_params) { { milestones: [milestone.title, milestone2.title] } }
+
+        it 'adds all milestones' do
+          expect(response).to have_gitlab_http_status(:created)
+          expect(returned_milestones).to match_array(['v1.0', 'm2'])
+        end
+      end
+
+      context 'with an empty milestone' do
+        let(:milestone_params) { { milestones: [] } }
+
+        it 'removes all milestones' do
+          expect(response).to have_gitlab_http_status(:created)
+          expect(json_response['milestones']).to be_nil
+        end
+      end
+
+      context 'with a non-existant milestone' do
+        let(:milestone_params) { { milestones: ['xyz'] } }
+
+        it 'returns a 400 error as milestone not found' do
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to eq("Milestone(s) not found: xyz")
+        end
+      end
+
+      context 'with a milestone from a different project' do
+        let(:milestone) { create(:milestone, title: 'v1.0') }
+        let(:milestone_params) { { milestones: [milestone.title] } }
+
+        it 'returns a 400 error as milestone not found' do
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to eq("Milestone(s) not found: v1.0")
+        end
       end
     end
   end
@@ -834,6 +962,83 @@ describe API::Releases do
                params: params
 
           expect(response).to have_gitlab_http_status(:forbidden)
+        end
+      end
+    end
+
+    context 'with milestones' do
+      let(:returned_milestones) { json_response['milestones'].map {|m| m['title']} }
+
+      subject { put api("/projects/#{project.id}/releases/v0.1", maintainer), params: params }
+
+      context 'when a milestone is passed in' do
+        let(:milestone) { create(:milestone, project: project, title: 'v1.0') }
+        let(:milestone_title) { milestone.title }
+        let(:params) { { milestones: [milestone_title] } }
+
+        before do
+          release.milestones << milestone
+        end
+
+        context 'a different milestone' do
+          let(:milestone_title) { 'v2.0' }
+          let!(:milestone2) { create(:milestone, project: project, title: milestone_title) }
+
+          it 'replaces the milestone' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(returned_milestones).to match_array(['v2.0'])
+          end
+        end
+
+        context 'an identical milestone' do
+          let(:milestone_title) { 'v1.0' }
+
+          it 'does not change the milestone' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(returned_milestones).to match_array(['v1.0'])
+          end
+        end
+
+        context 'an empty milestone' do
+          let(:milestone_title) { nil }
+
+          it 'removes the milestone' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['milestones']).to be_nil
+          end
+        end
+
+        context 'multiple milestones' do
+          context 'with one new' do
+            let!(:milestone2) { create(:milestone, project: project, title: 'milestone2') }
+            let(:params) { { milestones: [milestone.title, milestone2.title] } }
+
+            it 'adds the new milestone' do
+              subject
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(returned_milestones).to match_array(['v1.0', 'milestone2'])
+            end
+          end
+
+          context 'with all new' do
+            let!(:milestone2) { create(:milestone, project: project, title: 'milestone2') }
+            let!(:milestone3) { create(:milestone, project: project, title: 'milestone3') }
+            let(:params) { { milestones: [milestone2.title, milestone3.title] } }
+
+            it 'replaces the milestones' do
+              subject
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(returned_milestones).to match_array(%w(milestone2 milestone3))
+            end
+          end
         end
       end
     end

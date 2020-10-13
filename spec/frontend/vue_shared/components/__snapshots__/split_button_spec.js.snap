@@ -2,14 +2,22 @@
 
 exports[`SplitButton renders actionItems 1`] = `
 <gl-dropdown-stub
-  menu-class="dropdown-menu-selectable "
+  category="tertiary"
+  headertext=""
+  menu-class=""
+  size="medium"
   split="true"
   text="professor"
-  variant="secondary"
+  variant="default"
 >
   <gl-dropdown-item-stub
-    active="true"
-    active-class="is-active"
+    avatarurl=""
+    iconcolor=""
+    iconname=""
+    iconrightname=""
+    ischecked="true"
+    ischeckitem="true"
+    secondarytext=""
   >
     <strong>
       professor
@@ -22,7 +30,12 @@ exports[`SplitButton renders actionItems 1`] = `
    
   <gl-dropdown-divider-stub />
   <gl-dropdown-item-stub
-    active-class="is-active"
+    avatarurl=""
+    iconcolor=""
+    iconname=""
+    iconrightname=""
+    ischeckitem="true"
+    secondarytext=""
   >
     <strong>
       captain

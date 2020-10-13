@@ -32,9 +32,9 @@
         .note-header-info
           %a{ href: user_path(note.author) }
             %span.note-header-author-name.bold
-              = sanitize(note.author.name)
+              = note.author.name
             = user_status(note.author)
-            %span.note-headline-light
+            %span.note-headline-light{ data: { qa_selector: 'note_author_content' } }
               = note.author.to_reference
           %span.note-headline-light.note-headline-meta
             - if note.system
@@ -51,7 +51,7 @@
             - else
               = render 'projects/notes/actions', note: note, note_editable: note_editable
       .note-body{ class: note_editable ? 'js-task-list-container' : '' }
-        .note-text.md
+        .note-text.md{ data: { qa_selector: 'note_content' } }
           = markdown_field(note, :note)
         = edited_time_ago_with_tooltip(note, placement: 'bottom', html_class: 'note_edited_ago')
         .original-note-content.hidden{ data: { post_url: note_url(note), target_id: note.noteable.id, target_type: note.noteable.class.name.underscore } }
@@ -63,7 +63,8 @@
         - if note.system
           .system-note-commit-list-toggler.hide
             = _("Toggle commit list")
-            %i.fa.fa-angle-down
+            = sprite_icon('chevron-down', css_class: 'js-chevron-down gl-ml-1 gl-vertical-align-text-bottom')
+            = sprite_icon('chevron-up', css_class: 'js-chevron-up gl-ml-1 gl-vertical-align-text-bottom gl-display-none')
       - if note.attachment.url
         .note-attachment
           - if note.attachment.image?
@@ -75,4 +76,4 @@
               = note.attachment_identifier
               = link_to delete_attachment_project_note_path(note.project, note),
                 title: _('Delete this attachment'), method: :delete, remote: true, data: { confirm: _('Are you sure you want to remove the attachment?') }, class: 'danger js-note-attachment-delete' do
-                = icon('trash-o', class: 'cred')
+                = sprite_icon('remove', css_class: 'cred')

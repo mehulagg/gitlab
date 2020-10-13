@@ -3,6 +3,8 @@
 module Resolvers
   module AlertManagement
     class AlertResolver < BaseResolver
+      include LooksAhead
+
       argument :iid, GraphQL::STRING_TYPE,
                 required: false,
                 description: 'IID of the alert. For example, "1"'
@@ -20,13 +22,24 @@ module Resolvers
                 description: 'Search criteria for filtering alerts. This will search on title, description, service, monitoring_tool.',
                 required: false
 
+      argument :assignee_username, GraphQL::STRING_TYPE,
+                required: false,
+                description: 'Username of a user assigned to the issue'
+
       type Types::AlertManagement::AlertType, null: true
 
-      def resolve(**args)
+      def resolve_with_lookahead(**args)
         parent = object.respond_to?(:sync) ? object.sync : object
         return ::AlertManagement::Alert.none if parent.nil?
 
-        ::AlertManagement::AlertsFinder.new(context[:current_user], parent, args).execute
+        apply_lookahead(::AlertManagement::AlertsFinder.new(context[:current_user], parent, args).execute)
+      end
+
+      def preloads
+        {
+          assignees: [:assignees],
+          notes: [:ordered_notes, { ordered_notes: [:system_note_metadata, :project, :noteable] }]
+        }
       end
     end
   end

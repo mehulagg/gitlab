@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference
+---
+
 # Projects
 
 In GitLab, you can create projects for hosting
@@ -27,9 +34,11 @@ When you create a project in GitLab, you'll have access to a large number of
   - [Protected tags](protected_tags.md): Control over who has
   permission to create tags, and prevent accidental update or deletion
   - [Repository mirroring](repository/repository_mirroring.md)
-  - [Signing commits](gpg_signed_commits/index.md): use GPG to sign your commits
+  - [Signing commits](repository/gpg_signed_commits/index.md): use GPG to sign your commits
   - [Deploy tokens](deploy_tokens/index.md): Manage project-based deploy tokens that allow permanent access to the repository and Container Registry.
 - [Web IDE](web_ide/index.md)
+- [CVE ID Requests](../application_security/cve_id_request.md): Request a CVE identifier to track a
+  vulnerability in your project.
 
 **Issues and merge requests:**
 
@@ -78,7 +87,7 @@ When you create a project in GitLab, you'll have access to a large number of
       timeout (defines the maximum amount of time in minutes that a job is able run), custom path for `.gitlab-ci.yml`, test coverage parsing, pipeline's visibility, and much more
   - [Kubernetes cluster integration](clusters/index.md): Connecting your GitLab project
     with a Kubernetes cluster
-  - [Feature Flags](operations/feature_flags.md): Feature flags allow you to ship a project in
+  - [Feature Flags](../../operations/feature_flags.md): Feature flags allow you to ship a project in
     different flavors by dynamically toggling certain functionality **(PREMIUM)**
 - [GitLab Pages](pages/index.md): Build, test, and deploy your static
   website with GitLab Pages
@@ -87,23 +96,24 @@ When you create a project in GitLab, you'll have access to a large number of
 
 - [Wiki](wiki/index.md): document your GitLab project in an integrated Wiki.
 - [Snippets](../snippets.md): store, share and collaborate on code snippets.
-- [Value Stream Analytics](cycle_analytics.md): review your development lifecycle.
+- [Value Stream Analytics](../analytics/value_stream_analytics.md): review your development lifecycle.
 - [Insights](insights/index.md): configure the Insights that matter for your projects. **(ULTIMATE)**
-- [Security Dashboard](security_dashboard.md): Security Dashboard. **(ULTIMATE)**
+- [Security Dashboard](../application_security/security_dashboard/index.md): Security Dashboard. **(ULTIMATE)**
 - [Syntax highlighting](highlighting.md): an alternative to customize
   your code blocks, overriding GitLab's default choice of language.
 - [Badges](badges.md): badges for the project overview.
 - [Releases](releases/index.md): a way to track deliverables in your project as snapshot in time of
   the source, build output, other metadata, and other artifacts
   associated with a released version of your code.
-- [Conan packages](../packages/conan_repository/index.md): your private Conan repository in GitLab. **(PREMIUM)**
-- [Maven packages](../packages/maven_repository/index.md): your private Maven repository in GitLab. **(PREMIUM)**
-- [NPM packages](../packages/npm_registry/index.md): your private NPM package registry in GitLab. **(PREMIUM)**
+- [Conan packages](../packages/conan_repository/index.md): your private Conan repository in GitLab.
+- [Maven packages](../packages/maven_repository/index.md): your private Maven repository in GitLab.
+- [NPM packages](../packages/npm_registry/index.md): your private NPM package registry in GitLab.
 - [Code owners](code_owners.md): specify code owners for certain files **(STARTER)**
 - [License Compliance](../compliance/license_compliance/index.md): approve and deny licenses for projects. **(ULTIMATE)**
 - [Dependency List](../application_security/dependency_list/index.md): view project dependencies. **(ULTIMATE)**
 - [Requirements](requirements/index.md): Requirements allow you to create criteria to check your products against. **(ULTIMATE)**
 - [Static Site Editor](static_site_editor/index.md): quickly edit content on static websites without prior knowledge of the codebase or Git commands.
+- [Code Intelligence](code_intelligence.md): code navigation features.
 
 ### Project integrations
 
@@ -171,6 +181,28 @@ Read through the documentation on [project settings](settings/index.md).
   - [FogBugz to GitLab](import/fogbugz.md)
 - [Export a project from GitLab](settings/import_export.md#exporting-a-project-and-its-data)
 - [Importing and exporting projects between GitLab instances](settings/import_export.md)
+
+## Delete a project
+
+To delete a project, first navigate to the home page for that project.
+
+1. Navigate to **Settings > General**.
+1. Expand the **Advanced** section.
+1. Scroll down to the **Delete project** section.
+1. Click **Delete project**
+1. Confirm this action by typing in the expected text.
+
+### Delayed deletion **(PREMIUM)**
+
+By default, projects in a personal namespace are deleted after a seven day delay.
+
+Admins can restore the project during this period of time.
+This delay [may be changed by an admin](../admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
+
+Admins can view all projects pending deletion. If you're an administrator, go to the top navigation bar, click **Projects > Your projects**, and then select the **Deleted projects** tab.
+From this tab an admin can restore any project.
+
+For information on delay deletion of projects within a group, please see [Enabling delayed Project removal](../group/index.md#enabling-delayed-project-removal)
 
 ## CI/CD for external repositories **(PREMIUM)**
 
@@ -242,21 +274,77 @@ When [renaming a user](../profile/index.md#changing-your-username),
 
 ## Use your project as a Go package
 
-Any project can be used as a Go package including private projects in subgroups.
-GitLab responds correctly to `go get` and `godoc.org` discovery requests,
-including the [`go-import`](https://golang.org/cmd/go/#hdr-Remote_import_paths)
-and [`go-source`](https://github.com/golang/gddo/wiki/Source-Code-Links) meta
-tags, respectively. To use packages hosted in private projects with the `go get`
-command, use a [`.netrc` file](https://ec.haxx.se/usingcurl-netrc.html) and a
-[personal access token](../profile/personal_access_tokens.md) in the password
-field.
+Any project can be used as a Go package. GitLab responds correctly to `go get`
+and `godoc.org` discovery requests, including the
+[`go-import`](https://golang.org/cmd/go/#hdr-Remote_import_paths) and
+[`go-source`](https://github.com/golang/gddo/wiki/Source-Code-Links) meta tags.
+
+Private projects, including projects in subgroups, can be used as a Go package,
+but may require configuration to work correctly. GitLab will respond correctly
+to `go get` discovery requests for projects that *are not* in subgroups,
+regardless of authentication or authorization.
+[Authentication](#authenticate-go-requests) is required to use a private project
+in a subgroup as a Go package. Otherwise, GitLab will truncate the path for
+private projects in subgroups to the first two segments, causing `go get` to
+fail.
+
+GitLab implements its own Go proxy. This feature must be enabled by an
+administrator and requires additional configuration. See [GitLab Go
+Proxy](../packages/go_proxy/index.md).
+
+### Disable Go module features for private projects
+
+In Go 1.12 and later, Go queries module proxies and checksum databases in the
+process of [fetching a
+module](../../development/go_guide/dependencies.md#fetching). This can be
+selectively disabled with `GOPRIVATE` (disable both),
+[`GONOPROXY`](../../development/go_guide/dependencies.md#proxies) (disable proxy
+queries), and [`GONOSUMDB`](../../development/go_guide/dependencies.md#fetching)
+(disable checksum queries).
+
+`GOPRIVATE`, `GONOPROXY`, and `GONOSUMDB` are comma-separated lists of Go
+modules and Go module prefixes. For example,
+`GOPRIVATE=gitlab.example.com/my/private/project` will disable queries for that
+one project, but `GOPRIVATE=gitlab.example.com` will disable queries for *all*
+projects on GitLab.com. Go will not query module proxies if the module name or a
+prefix of it appears in `GOPRIVATE` or `GONOPROXY`. Go will not query checksum
+databases if the module name or a prefix of it appears in `GONOPRIVATE` or
+`GONOSUMDB`.
+
+### Authenticate Go requests
+
+To authenticate requests to private projects made by Go, use a [`.netrc`
+file](https://ec.haxx.se/usingcurl-netrc.html) and a [personal access
+token](../profile/personal_access_tokens.md) in the password field. **This only
+works if your GitLab instance can be accessed with HTTPS.** The `go` command
+will not transmit credentials over insecure connections. This will authenticate
+all HTTPS requests made directly by Go but will not authenticate requests made
+through Git.
 
 For example:
 
 ```plaintext
-machine example.gitlab.com
+machine gitlab.example.com
 login <gitlab_user_name>
 password <personal_access_token>
+```
+
+NOTE: **Note:**
+On Windows, Go reads `~/_netrc` instead of `~/.netrc`.
+
+### Authenticate Git fetches
+
+If a module cannot be fetched from a proxy, Go will fall back to using Git (for
+GitLab projects). Git will use `.netrc` to authenticate requests. Alternatively,
+Git can be configured to embed specific credentials in the request URL, or to
+use SSH instead of HTTPS (as Go always uses HTTPS to fetch Git repositories):
+
+```shell
+# embed credentials in any request to GitLab.com:
+git config --global url."https://${user}:${personal_access_token}@gitlab.example.com".insteadOf "https://gitlab.example.com"
+
+# use SSH instead of HTTPS:
+git config --global url."git@gitlab.example.com".insteadOf "https://gitlab.example.com"
 ```
 
 ## Access project page with project ID

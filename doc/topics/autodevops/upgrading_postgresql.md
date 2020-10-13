@@ -26,8 +26,12 @@ involves:
    This varies based on Kubernetes providers.
 1. Prepare for downtime. The steps below include taking the application offline
    so that the in-cluster database does not get modified after the database dump is created.
+1. Ensure you have not set `POSTGRES_ENABLED` to `false`, as this setting deletes
+   any existing channel 1 database. For more information, see
+   [Detected an existing PostgreSQL database](index.md#detected-an-existing-postgresql-database).
 
-TIP: **Tip:** If you have configured Auto DevOps to have staging,
+TIP: **Tip:**
+If you have configured Auto DevOps to have staging,
 consider trying out the backup and restore steps on staging first, or
 trying this out on a review app.
 
@@ -158,12 +162,13 @@ pvc-9085e3d3-5239-11ea-9c8d-42010a8e0096   8Gi        RWO            Retain     
 
 ## Install new PostgreSQL
 
-CAUTION: **Caution:** Using the newer version of PostgreSQL will delete
+CAUTION: **Caution:**
+Using the newer version of PostgreSQL will delete
 the older 0.7.1 PostgreSQL. To prevent the underlying data from being
-deleted, you can choose to retain the [persistent
-volume](#retain-persistent-volumes).
+deleted, you can choose to retain the [persistent volume](#retain-persistent-volumes).
 
-TIP: **Tip:** You can also
+TIP: **Tip:**
+You can also
 [scope](../../ci/environments/index.md#scoping-environments-with-specs) the
 `AUTO_DEVOPS_POSTGRES_CHANNEL`, `AUTO_DEVOPS_POSTGRES_DELETE_V1` and
 `POSTGRES_VERSION` variables to specific environments, e.g. `staging`.
@@ -173,8 +178,11 @@ TIP: **Tip:** You can also
    PostgreSQL.
 1. Set `AUTO_DEVOPS_POSTGRES_DELETE_V1` to a non-empty value. This flag is a
    safeguard to prevent accidental deletion of databases.
-1. Set `POSTGRES_VERSION` to `11.7`. This is the minimum PostgreSQL
-   version supported.
+   <!-- DO NOT REPLACE when upgrading GitLab's supported version. This is NOT related to GitLab's PostgreSQL version support, but the one deployed by Auto DevOps. -->
+1. If you have a `POSTGRES_VERSION` set, make sure it is set to `9.6.16` *or
+higher*. This is the
+   minimum PostgreSQL version supported by Auto DevOps. See also the list of
+   [tags available](https://hub.docker.com/r/bitnami/postgresql/tags).
 1. Set `PRODUCTION_REPLICAS` to `0`. For other environments, use
    `REPLICAS` with an [environment scope](../../ci/environments/index.md#scoping-environments-with-specs).
 1. If you have set the `DB_INITIALIZE` or `DB_MIGRATE` variables, either

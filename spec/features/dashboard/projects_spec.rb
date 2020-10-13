@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Dashboard Projects' do
+RSpec.describe 'Dashboard Projects' do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, name: 'awesome stuff') }
   let(:project2) { create(:project, :public, name: 'Community project') }
@@ -125,7 +125,7 @@ describe 'Dashboard Projects' do
   end
 
   context 'when on Starred projects tab', :js do
-    it 'shows the empty state when there are no starred projects' do
+    it 'shows the empty state when there are no starred projects', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/222357' do
       visit(starred_dashboard_projects_path)
 
       element = page.find('.row.empty-state')
@@ -201,6 +201,14 @@ describe 'Dashboard Projects' do
     context 'when dashboard_pipeline_status is disabled' do
       before do
         stub_feature_flags(dashboard_pipeline_status: false)
+      end
+
+      it_behaves_like 'hidden pipeline status'
+    end
+
+    context "when last_pipeline is missing" do
+      before do
+        project.last_pipeline.delete
       end
 
       it_behaves_like 'hidden pipeline status'

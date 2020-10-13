@@ -14,6 +14,11 @@ localVue.use(Vuex);
 describe('Approvals ModalRuleCreate', () => {
   let createModalState;
   let wrapper;
+  let modal;
+  let form;
+
+  const findModal = () => wrapper.find(GlModalVuex);
+  const findForm = () => wrapper.find(RuleForm);
 
   const factory = (options = {}) => {
     const store = new Vuex.Store({
@@ -49,15 +54,13 @@ describe('Approvals ModalRuleCreate', () => {
   describe('without data', () => {
     beforeEach(() => {
       createModalState.data = null;
+      factory();
+      modal = findModal();
+      form = findForm();
     });
 
     it('renders modal', () => {
-      factory();
-
-      const modal = wrapper.find(GlModalVuex);
-
       expect(modal.exists()).toBe(true);
-
       expect(modal.props('modalModule')).toEqual(MODAL_MODULE);
       expect(modal.props('modalId')).toEqual(TEST_MODAL_ID);
       expect(modal.attributes('title')).toEqual('Add approval rule');
@@ -65,22 +68,12 @@ describe('Approvals ModalRuleCreate', () => {
     });
 
     it('renders form', () => {
-      factory();
-
-      const modal = wrapper.find(GlModalVuex);
-      const form = modal.find(RuleForm);
-
       expect(form.exists()).toBe(true);
       expect(form.props('initRule')).toEqual(null);
     });
 
     it('when modal emits ok, submits form', () => {
-      factory();
-
-      const form = wrapper.find(RuleForm);
       form.vm.submit = jest.fn();
-
-      const modal = wrapper.find(GlModalVuex);
       modal.vm.$emit('ok', new Event('ok'));
 
       expect(form.vm.submit).toHaveBeenCalled();
@@ -90,27 +83,50 @@ describe('Approvals ModalRuleCreate', () => {
   describe('with data', () => {
     beforeEach(() => {
       createModalState.data = TEST_RULE;
+      factory();
+      modal = findModal();
+      form = findForm();
     });
 
     it('renders modal', () => {
-      factory();
-
-      const modal = wrapper.find(GlModalVuex);
-
       expect(modal.exists()).toBe(true);
-
       expect(modal.attributes('title')).toEqual('Update approval rule');
       expect(modal.attributes('ok-title')).toEqual('Update approval rule');
     });
 
     it('renders form', () => {
-      factory();
-
-      const modal = wrapper.find(GlModalVuex);
-      const form = modal.find(RuleForm);
-
       expect(form.exists()).toBe(true);
       expect(form.props('initRule')).toEqual(TEST_RULE);
+    });
+  });
+
+  describe('with approvalSuggestions feature flag', () => {
+    beforeEach(() => {
+      createModalState.data = { ...TEST_RULE, defaultRuleName: 'Vulnerability-Check' };
+
+      factory({
+        provide: {
+          glFeatures: { approvalSuggestions: true },
+        },
+      });
+      modal = findModal();
+      form = findForm();
+    });
+
+    it('renders add rule modal', () => {
+      expect(modal.exists()).toBe(true);
+      expect(modal.attributes('title')).toEqual('Add approval rule');
+      expect(modal.attributes('ok-title')).toEqual('Add approval rule');
+    });
+
+    it('renders form with defaultRuleName', () => {
+      expect(form.props().defaultRuleName).toBe('Vulnerability-Check');
+      expect(form.exists()).toBe(true);
+    });
+
+    it('renders the form when passing in an existing rule', () => {
+      expect(form.exists()).toBe(true);
+      expect(form.props('initRule')).toEqual(createModalState.data);
     });
   });
 });

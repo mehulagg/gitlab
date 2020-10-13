@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Groups::AutocompleteService do
-  let!(:group) { create(:group, :nested, :private, avatar: fixture_file_upload('spec/fixtures/dk.png')) }
-  let!(:sub_group) { create(:group, :private, parent: group) }
+  let_it_be(:group, refind: true) { create(:group, :nested, :private, avatar: fixture_file_upload('spec/fixtures/dk.png')) }
+  let_it_be(:sub_group) { create(:group, :private, parent: group) }
   let(:user) { create(:user) }
   let!(:epic) { create(:epic, group: group, author: user) }
 
@@ -16,7 +16,7 @@ RSpec.describe Groups::AutocompleteService do
 
   def expect_labels_to_equal(labels, expected_labels)
     extract_title = lambda { |label| label['title'] }
-    expect(labels.map(&extract_title)).to eq(expected_labels.map(&extract_title))
+    expect(labels.map(&extract_title)).to match_array(expected_labels.map(&extract_title))
   end
 
   describe '#labels_as_hash' do
@@ -61,11 +61,20 @@ RSpec.describe Groups::AutocompleteService do
     let(:sub_group_project) { create(:project, group: sub_group) }
 
     let!(:project_issue) { create(:issue, project: project) }
-    let!(:sub_group_project_issue) { create(:issue, project: sub_group_project) }
+    let!(:sub_group_project_issue) { create(:issue, confidential: true, project: sub_group_project) }
 
     it 'returns issues in group and subgroups' do
-      expect(subject.issues.map(&:iid)).to contain_exactly(project_issue.iid, sub_group_project_issue.iid)
-      expect(subject.issues.map(&:title)).to contain_exactly(project_issue.title, sub_group_project_issue.title)
+      issues = subject.issues
+
+      expect(issues.map(&:iid)).to contain_exactly(project_issue.iid, sub_group_project_issue.iid)
+      expect(issues.map(&:title)).to contain_exactly(project_issue.title, sub_group_project_issue.title)
+    end
+
+    it 'returns only confidential issues if confidential_only is true' do
+      issues = subject.issues(confidential_only: true)
+
+      expect(issues.map(&:iid)).to contain_exactly(sub_group_project_issue.iid)
+      expect(issues.map(&:title)).to contain_exactly(sub_group_project_issue.title)
     end
   end
 
@@ -97,6 +106,37 @@ RSpec.describe Groups::AutocompleteService do
 
     it 'returns epics from group' do
       expect(subject.epics.map(&:iid)).to contain_exactly(epic.iid)
+    end
+
+    it 'returns only confidential epics if confidential_only is true' do
+      confidential_epic = create(:epic, :confidential, group: group)
+
+      epics = subject.epics(confidential_only: true)
+
+      expect(epics.map(&:iid)).to contain_exactly(confidential_epic.iid)
+      expect(epics.map(&:title)).to contain_exactly(confidential_epic.title)
+    end
+  end
+
+  describe '#vulnerability' do
+    let_it_be(:project) { create(:project, group: group) }
+    let_it_be(:vulnerability) { create(:vulnerability, project: project) }
+
+    before do
+      stub_licensed_features(security_dashboard: true)
+      project.add_developer(user)
+    end
+
+    it 'returns nothing if not allowed' do
+      guest = create(:user)
+
+      vulnerabilities = described_class.new(group, guest).vulnerabilities
+
+      expect(vulnerabilities).to be_empty
+    end
+
+    it 'returns vulnerabilities from group' do
+      expect(subject.vulnerabilities.map(&:id)).to contain_exactly(vulnerability.id)
     end
   end
 

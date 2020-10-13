@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Mutations::Commits::Create do
+RSpec.describe Mutations::Commits::Create do
   subject(:mutation) { described_class.new(object: nil, context: context, field: nil) }
 
   let_it_be(:project) { create(:project, :public, :repository) }
@@ -147,7 +147,7 @@ describe Mutations::Commits::Create do
 
         it 'returns errors' do
           expect(mutated_commit).to be_nil
-          expect(subject[:errors]).to eq(['3:UserCommitFiles: empty CommitMessage'])
+          expect(subject[:errors].to_s).to match(/3:UserCommitFiles: empty CommitMessage/)
         end
       end
 

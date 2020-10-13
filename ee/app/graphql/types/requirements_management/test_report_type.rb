@@ -4,7 +4,7 @@ module Types
   module RequirementsManagement
     class TestReportType < BaseObject
       graphql_name 'TestReport'
-      description 'Represents a requirement test report.'
+      description 'Represents a requirement test report'
 
       authorize :read_requirement
 
@@ -17,10 +17,6 @@ module Types
       field :author, UserType, null: true,
             description: 'Author of the test report',
             resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(User, obj.author_id).find }
-
-      field :pipeline, Ci::PipelineType, null: true,
-            description: 'Pipeline that created the test report',
-            resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(::Ci::Pipeline, obj.pipeline_id).find }
 
       field :created_at, TimeType, null: false,
             description: 'Timestamp of when the test report was created'

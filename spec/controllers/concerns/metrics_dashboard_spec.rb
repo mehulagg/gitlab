@@ -76,6 +76,22 @@ RSpec.describe MetricsDashboard do
         end
       end
 
+      context 'when dashboard path includes encoded characters' do
+        let(:params) { { dashboard_path: 'dashboard%26copy.yml' } }
+
+        before do
+          allow(controller)
+            .to receive(:metrics_dashboard_params)
+                  .and_return(params)
+        end
+
+        it 'decodes dashboard path' do
+          expect(::Gitlab::Metrics::Dashboard::Finder).to receive(:find).with(anything, anything, hash_including(dashboard_path: 'dashboard&copy.yml'))
+
+          json_response
+        end
+      end
+
       context 'when parameters are provided and the list of all dashboards is required' do
         before do
           allow(controller).to receive(:include_all_dashboards?).and_return(true)
@@ -88,11 +104,26 @@ RSpec.describe MetricsDashboard do
 
         context 'in all_dashboard list' do
           let(:system_dashboard) { json_response['all_dashboards'].find { |dashboard| dashboard["system_dashboard"] == true } }
-          let(:project_dashboard) { json_response['all_dashboards'].find { |dashboard| dashboard["system_dashboard"] == false } }
+
+          let(:project_dashboard) do
+            json_response['all_dashboards'].find do |dashboard|
+              dashboard['path'] == '.gitlab/dashboards/test.yml'
+            end
+          end
 
           it 'includes project_blob_path only for project dashboards' do
             expect(system_dashboard['project_blob_path']).to be_nil
             expect(project_dashboard['project_blob_path']).to eq("/#{project.namespace.path}/#{project.name}/-/blob/master/.gitlab/dashboards/test.yml")
+          end
+
+          it 'allows editing only for project dashboards' do
+            expect(system_dashboard['can_edit']).to be(false)
+            expect(project_dashboard['can_edit']).to be(true)
+          end
+
+          it 'includes out_of_the_box_dashboard key' do
+            expect(system_dashboard['out_of_the_box_dashboard']).to be(true)
+            expect(project_dashboard['out_of_the_box_dashboard']).to be(false)
           end
 
           describe 'project permissions' do
@@ -134,13 +165,14 @@ RSpec.describe MetricsDashboard do
             it 'adds starred dashboard information and sorts the list' do
               all_dashboards = json_response['all_dashboards'].map { |dashboard| dashboard.slice('display_name', 'starred', 'user_starred_path') }
               expected_response = [
-                { "display_name" => "Default dashboard", "starred" => false, 'user_starred_path' => api_v4_projects_metrics_user_starred_dashboards_path(id: project.id, params: { dashboard_path: 'config/prometheus/common_metrics.yml' }) },
                 { "display_name" => "anomaly.yml", "starred" => false, 'user_starred_path' => api_v4_projects_metrics_user_starred_dashboards_path(id: project.id, params: { dashboard_path: '.gitlab/dashboards/anomaly.yml' }) },
                 { "display_name" => "errors.yml", "starred" => true, 'user_starred_path' => api_v4_projects_metrics_user_starred_dashboards_path(id: project.id, params: { dashboard_path: '.gitlab/dashboards/errors.yml' }) },
+                { "display_name" => "K8s pod health", "starred" => false, 'user_starred_path' => api_v4_projects_metrics_user_starred_dashboards_path(id: project.id, params: { dashboard_path: 'config/prometheus/pod_metrics.yml' }) },
+                { "display_name" => "Overview", "starred" => false, 'user_starred_path' => api_v4_projects_metrics_user_starred_dashboards_path(id: project.id, params: { dashboard_path: 'config/prometheus/common_metrics.yml' }) },
                 { "display_name" => "test.yml", "starred" => true, 'user_starred_path' => api_v4_projects_metrics_user_starred_dashboards_path(id: project.id, params: { dashboard_path: '.gitlab/dashboards/test.yml' }) }
               ]
 
-              expect(all_dashboards).to eql expected_response
+              expect(all_dashboards).to eq(expected_response)
             end
           end
         end

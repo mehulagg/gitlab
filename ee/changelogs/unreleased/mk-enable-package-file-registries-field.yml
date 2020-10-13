@@ -1,0 +1,5 @@
+---
+title: 'Geo: Permanently enable package_file_registries field'
+merge_request: 43245
+author:
+type: fixed

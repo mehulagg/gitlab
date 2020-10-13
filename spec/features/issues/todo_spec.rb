@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Manually create a todo item from issue', :js do
+RSpec.describe 'Manually create a todo item from issue', :js do
   let!(:project) { create(:project) }
   let!(:issue)   { create(:issue, project: project) }
   let!(:user)    { create(:user)}
@@ -15,7 +15,7 @@ describe 'Manually create a todo item from issue', :js do
 
   it 'creates todo when clicking button' do
     page.within '.issuable-sidebar' do
-      click_button 'Add a To Do'
+      click_button 'Add a to do'
       expect(page).to have_content 'Mark as done'
     end
 
@@ -32,7 +32,7 @@ describe 'Manually create a todo item from issue', :js do
 
   it 'marks a todo as done' do
     page.within '.issuable-sidebar' do
-      click_button 'Add a To Do'
+      click_button 'Add a to do'
       click_button 'Mark as done'
     end
 

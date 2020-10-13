@@ -32,6 +32,18 @@ RSpec.describe SessionsController, :geo do
         end
       end
 
+      context 'when relative URL is configured' do
+        before do
+          host = 'http://this.is.my.host/secondary-relative-url-part'
+
+          stub_config_setting(url: host, https: false)
+          stub_default_url_options(host: "this.is.my.host", script_name: '/secondary-relative-url-part')
+          request.headers['HOST'] = host
+        end
+
+        it_behaves_like 'a valid oauth authentication redirect'
+      end
+
       context 'with a tampered HOST header' do
         before do
           request.headers['HOST'] = 'http://this.is.not.my.host'
@@ -73,6 +85,46 @@ RSpec.describe SessionsController, :geo do
           post :create, params: { user: { login: 'foo@bar.com', password: '11111' } }
 
           expect(response).to render_template("devise/sessions/new")
+        end
+      end
+    end
+
+    context 'when using two-factor authentication' do
+      def authenticate_2fa(user_params, otp_user_id: user.id)
+        post(:create, params: { user: user_params }, session: { otp_user_id: otp_user_id })
+      end
+
+      context 'when OTP authentication fails' do
+        it_behaves_like 'an auditable failed authentication' do
+          let(:user) { create(:user, :two_factor) }
+          let(:operation) { authenticate_2fa(otp_attempt: 'invalid', otp_user_id: user.id) }
+          let(:method) { 'OTP' }
+        end
+      end
+
+      context 'when U2F authentication fails' do
+        before do
+          allow(U2fRegistration).to receive(:authenticate).and_return(false)
+        end
+
+        it_behaves_like 'an auditable failed authentication' do
+          let(:user) { create(:user, :two_factor_via_u2f) }
+          let(:operation) { authenticate_2fa(device_response: 'invalid', otp_user_id: user.id) }
+          let(:method) { 'U2F' }
+        end
+      end
+
+      context 'when WebAuthn authentication fails' do
+        before do
+          stub_feature_flags(webauthn: true)
+          webauthn_authenticate_service = instance_spy(Webauthn::AuthenticateService, execute: false)
+          allow(Webauthn::AuthenticateService).to receive(:new).and_return(webauthn_authenticate_service)
+        end
+
+        it_behaves_like 'an auditable failed authentication' do
+          let(:user) { create(:user, :two_factor_via_webauthn) }
+          let(:operation) { authenticate_2fa(device_response: 'invalid', otp_user_id: user.id) }
+          let(:method) { 'WebAuthn' }
         end
       end
     end

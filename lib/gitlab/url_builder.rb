@@ -39,7 +39,7 @@ module Gitlab
         when User
           instance.user_url(object, **options)
         when Wiki
-          wiki_page_url(object, Wiki::HOMEPAGE, **options)
+          wiki_url(object, **options)
         when WikiPage
           wiki_page_url(object.wiki, object, **options)
         when ::DesignManagement::Design
@@ -71,19 +71,34 @@ module Gitlab
       end
 
       def snippet_url(snippet, **options)
-        if options.delete(:raw).present?
+        if options[:file].present?
+          file, ref = options.values_at(:file, :ref)
+
+          instance.gitlab_raw_snippet_blob_url(snippet, file, ref)
+        elsif options.delete(:raw).present?
           instance.gitlab_raw_snippet_url(snippet, **options)
         else
           instance.gitlab_snippet_url(snippet, **options)
         end
       end
 
-      def wiki_page_url(wiki, page, **options)
+      def wiki_url(wiki, **options)
+        return wiki_page_url(wiki, Wiki::HOMEPAGE, **options) unless options[:action]
+
         if wiki.container.is_a?(Project)
-          instance.project_wiki_url(wiki.container, page, **options)
-        else
-          raise NotImplementedError.new("No URL builder defined for #{wiki.container.inspect} wikis")
+          options[:controller] = 'projects/wikis'
+          options[:namespace_id] = wiki.container.namespace
+          options[:project_id] = wiki.container
         end
+
+        instance.url_for(**options)
+      end
+
+      def wiki_page_url(wiki, page, **options)
+        options[:action] ||= :show
+        options[:id] = page
+
+        wiki_url(wiki, **options)
       end
 
       def design_url(design, **options)

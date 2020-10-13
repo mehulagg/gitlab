@@ -16,12 +16,11 @@ module IntegrationsActions
 
   def update
     saved = integration.update(service_params[:service])
-    overwrite = Gitlab::Utils.to_boolean(params[:overwrite])
 
     respond_to do |format|
       format.html do
         if saved
-          PropagateIntegrationWorker.perform_async(integration.id, overwrite)
+          PropagateIntegrationWorker.perform_async(integration.id)
           redirect_to scoped_edit_integration_path(integration), notice: success_message
         else
           render 'shared/integrations/edit'
@@ -51,16 +50,17 @@ module IntegrationsActions
   end
 
   def integration
-    # Using instance variable `@service` still required as it's used in ServiceParams
-    # and app/views/shared/_service_settings.html.haml. Should be removed once
-    # those 2 are refactored to use `@integration`.
+    # Using instance variable `@service` still required as it's used in ServiceParams.
+    # Should be removed once that is refactored to use `@integration`.
     @integration = @service ||= find_or_initialize_integration(params[:id]) # rubocop:disable Gitlab/ModuleWithInstanceVariables
   end
 
   def success_message
-    message = integration.active? ? _('activated') : _('settings saved, but not activated')
-
-    _('%{service_title} %{message}.') % { service_title: integration.title, message: message }
+    if integration.active?
+      s_('Integrations|%{integration} settings saved and active.') % { integration: integration.title }
+    else
+      s_('Integrations|%{integration} settings saved, but not active.') % { integration: integration.title }
+    end
   end
 
   def serialize_as_json

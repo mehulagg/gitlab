@@ -1,13 +1,7 @@
 <script>
-import {
-  GlDropdown,
-  GlDropdownItem,
-  GlDropdownDivider,
-  GlSearchBoxByType,
-  GlIcon,
-} from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
+import { GlDropdown, GlDropdownItem, GlDropdownDivider, GlSearchBoxByType } from '@gitlab/ui';
 import { mapGetters } from 'vuex';
+import { __, sprintf } from '~/locale';
 
 export default {
   name: 'CiEnvironmentsDropdown',
@@ -16,7 +10,6 @@ export default {
     GlDropdownItem,
     GlDropdownDivider,
     GlSearchBoxByType,
-    GlIcon,
   },
   props: {
     value: {
@@ -67,17 +60,14 @@ export default {
 </script>
 <template>
   <gl-dropdown :text="value">
-    <gl-search-box-by-type v-model.trim="searchTerm" class="m-2" />
+    <gl-search-box-by-type v-model.trim="searchTerm" class="gl-m-3" />
     <gl-dropdown-item
       v-for="environment in filteredResults"
       :key="environment"
+      :is-checked="isSelected(environment)"
+      is-check-item
       @click="selectEnvironment(environment)"
     >
-      <gl-icon
-        :class="{ invisible: !isSelected(environment) }"
-        name="mobile-issue-close"
-        class="vertical-align-middle"
-      />
       {{ environment }}
     </gl-dropdown-item>
     <gl-dropdown-item v-if="!filteredResults.length" ref="noMatchingResults">{{

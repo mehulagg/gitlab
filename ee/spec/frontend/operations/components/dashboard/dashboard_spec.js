@@ -1,11 +1,11 @@
 import MockAdapter from 'axios-mock-adapter';
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
+import { GlEmptyState } from '@gitlab/ui';
 import Project from 'ee/operations/components/dashboard/project.vue';
 import Dashboard from 'ee/operations/components/dashboard/dashboard.vue';
 import createStore from 'ee/vue_shared/dashboards/store';
 import waitForPromises from 'helpers/wait_for_promises';
-import { trimText } from 'helpers/text_helper';
 import axios from '~/lib/utils/axios_utils';
 import { mockProjectData, mockText } from '../../mock_data';
 
@@ -19,17 +19,25 @@ describe('dashboard component', () => {
   let wrapper;
   let mockAxios;
 
-  const mountComponent = () =>
+  const emptyDashboardHelpPath = '/help/user/operations_dashboard/index.html';
+  const emptyDashboardSvgPath = '/assets/illustrations/operations-dashboard_empty.svg';
+
+  const mountComponent = ({ stubs = {}, state = {} } = {}) =>
     mount(Dashboard, {
       store,
       localVue,
       propsData: {
         addPath: mockAddEndpoint,
         listPath: mockListEndpoint,
-        emptyDashboardSvgPath: '/assets/illustrations/operations-dashboard_empty.svg',
-        emptyDashboardHelpPath: '/help/user/operations_dashboard/index.html',
+        emptyDashboardSvgPath,
+        emptyDashboardHelpPath,
       },
+      state,
+      stubs,
     });
+
+  const findEmptyState = () => wrapper.find(GlEmptyState);
+  const findAddProjectButton = () => wrapper.find('[data-testid=add-projects-button]');
 
   beforeEach(() => {
     mockAxios = new MockAdapter(axios);
@@ -52,17 +60,11 @@ describe('dashboard component', () => {
     let button;
 
     beforeEach(() => {
-      button = wrapper.element.querySelector('.js-add-projects-button');
+      button = findAddProjectButton();
     });
 
     it('renders add projects text', () => {
-      expect(button.innerText.trim()).toBe(mockText.ADD_PROJECTS);
-    });
-
-    it('renders the projects modal', () => {
-      button.click();
-
-      expect(wrapper.element.querySelector('.add-projects-modal')).toBeDefined();
+      expect(button.text()).toBe(mockText.ADD_PROJECTS);
     });
 
     describe('when a project is added', () => {
@@ -204,42 +206,28 @@ describe('dashboard component', () => {
       });
     });
 
-    describe('empty state', () => {
+    describe('when no projects have been added', () => {
       beforeEach(() => {
         store.state.projects = [];
-        mockAxios.reset();
-        mockAxios.onGet(mockListEndpoint).replyOnce(200, { projects: [] });
-        wrapper = mountComponent();
+        store.state.isLoadingProjects = false;
       });
 
-      it('renders empty state svg after requesting projects with no results', () => {
-        const svgSrc = wrapper.element.querySelector('.js-empty-state-svg').src;
-
-        expect(svgSrc).toMatch(mockText.EMPTY_SVG_SOURCE);
+      it('should render the empty state', () => {
+        expect(findEmptyState().exists()).toBe(true);
       });
 
-      it('renders title', () => {
-        expect(wrapper.element.querySelector('.js-title').innerText.trim()).toBe(
-          mockText.EMPTY_TITLE,
-        );
+      it('should link to the documentation', () => {
+        const link = findEmptyState().find('[data-testid="documentation-link"]');
+
+        expect(link.exists()).toBe(true);
+        expect(link.attributes().href).toEqual(emptyDashboardHelpPath);
       });
 
-      it('renders sub-title', () => {
-        expect(trimText(wrapper.element.querySelector('.js-sub-title').innerText)).toBe(
-          mockText.EMPTY_SUBTITLE,
-        );
-      });
+      it('should render the add projects button', () => {
+        const button = findAddProjectButton();
 
-      it('renders link to documentation', () => {
-        const link = wrapper.element.querySelector('.js-documentation-link');
-
-        expect(link.innerText.trim()).toBe('More information');
-      });
-
-      it('links to documentation', () => {
-        const link = wrapper.element.querySelector('.js-documentation-link');
-
-        expect(link.href).toMatch(wrapper.props().emptyDashboardHelpPath);
+        expect(button.exists()).toBe(true);
+        expect(button.text()).toEqual('Add projects');
       });
     });
   });

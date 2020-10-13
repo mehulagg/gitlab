@@ -1,14 +1,13 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Project Vulnerabilities API **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10242) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.6.
-
-CAUTION: **Caution:**
-This API is currently in development and is protected by a **disabled**
-[feature flag](../development/feature_flags/index.md).
-On a self-managed GitLab instance, an administrator can enable it by starting the Rails console
-(`sudo gitlab-rails console`) and then running the following command: `Feature.enable(:first_class_vulnerabilities)`.
-To test if the Vulnerabilities API was successfully enabled, run the following command:
-`Feature.enabled?(:first_class_vulnerabilities)`.
 
 CAUTION: **Caution:**
 This API is in an alpha stage and considered unstable.

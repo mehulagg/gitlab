@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlPopover, GlLink } from '@gitlab/ui';
+import { GlPopover, GlLink, GlSprintf } from '@gitlab/ui';
 
 import GeoNodeDetailItemComponent from 'ee/geo_nodes/components/geo_node_detail_item.vue';
 import GeoNodeSyncSettings from 'ee/geo_nodes/components/geo_node_sync_settings.vue';
@@ -24,6 +24,7 @@ describe('GeoNodeDetailItemComponent', () => {
 
   const createComponent = (props = {}) => {
     wrapper = shallowMount(GeoNodeDetailItemComponent, {
+      stubs: { GlSprintf },
       propsData: {
         ...defaultProps,
         ...props,
@@ -149,6 +150,12 @@ describe('GeoNodeDetailItemComponent', () => {
 
       it('renders GlPopover', () => {
         expect(wrapper.find(GlPopover).exists()).toBeTruthy();
+      });
+
+      it('renders disabled text', () => {
+        expect(wrapper.find(GlPopover).text()).toContain(
+          `Synchronization of ${defaultProps.itemTitle.toLowerCase()} is disabled.`,
+        );
       });
 
       it('renders link to replication help documentation in popover', () => {

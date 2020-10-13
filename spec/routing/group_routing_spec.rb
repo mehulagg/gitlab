@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe "Groups", "routing" do
-  let(:group_path) { 'complex.group-namegit' }
+RSpec.shared_examples 'groups routing' do
+  let(:group_path) { 'projects.abc123' }
   let!(:group) { create(:group, path: group_path) }
 
   it "to #show" do
@@ -43,6 +43,10 @@ describe "Groups", "routing" do
     expect(get("/groups/#{group_path}/-/milestones")).to route_to('groups/milestones#index', group_id: group_path)
   end
 
+  it "to #runner_setup_scripts" do
+    expect(get("/groups/#{group_path}/-/settings/ci_cd/runner_setup_scripts")).to route_to('groups/settings/ci_cd#runner_setup_scripts', group_id: group_path)
+  end
+
   it 'routes to the avatars controller' do
     expect(delete("/groups/#{group_path}/-/avatar"))
       .to route_to(group_id: group_path,
@@ -54,5 +58,25 @@ describe "Groups", "routing" do
     allow(Group).to receive(:find_by_full_path).with('gitlabhq', any_args).and_return(true)
 
     expect(get('/groups/gitlabhq/-/boards')).to route_to('groups/boards#index', group_id: 'gitlabhq')
+  end
+end
+
+RSpec.describe "Groups", "routing" do
+  context 'complex group path with dot' do
+    include_examples 'groups routing' do
+      let(:group_path) { 'complex.group-namegit' }
+    end
+  end
+
+  context 'group path starting with help' do
+    include_examples 'groups routing' do
+      let(:group_path) { 'help.abc123' }
+    end
+  end
+
+  context 'group path starting with projects' do
+    include_examples 'groups routing' do
+      let(:group_path) { 'projects.abc123' }
+    end
   end
 end

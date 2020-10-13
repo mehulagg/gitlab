@@ -1,6 +1,5 @@
 import { debounce } from 'lodash';
 import { editor as monacoEditor, KeyCode, KeyMod, Range } from 'monaco-editor';
-import store from '../stores';
 import DecorationsController from './decorations/controller';
 import DirtyDiffController from './diff/controller';
 import Disposable from './common/disposable';
@@ -19,14 +18,14 @@ function setupThemes() {
 }
 
 export default class Editor {
-  static create(options = {}) {
+  static create(...args) {
     if (!this.editorInstance) {
-      this.editorInstance = new Editor(options);
+      this.editorInstance = new Editor(...args);
     }
     return this.editorInstance;
   }
 
-  constructor(options = {}) {
+  constructor(store, options = {}) {
     this.currentModel = null;
     this.instance = null;
     this.dirtyDiffController = null;
@@ -37,6 +36,11 @@ export default class Editor {
       ...defaultEditorOptions,
       ...options,
     };
+    this.diffOptions = {
+      ...defaultDiffEditorOptions,
+      ...options,
+    };
+    this.store = store;
 
     setupThemes();
     registerLanguages(...languages);
@@ -66,18 +70,14 @@ export default class Editor {
     }
   }
 
-  createDiffInstance(domElement, readOnly = true) {
+  createDiffInstance(domElement) {
     if (!this.instance) {
       clearDomElement(domElement);
 
       this.disposable.add(
         (this.instance = monacoEditor.createDiffEditor(domElement, {
-          ...this.options,
-          ...defaultDiffEditorOptions,
+          ...this.diffOptions,
           renderSideBySide: Editor.renderSideBySide(domElement),
-          readOnly,
-          renderLineHighlight: readOnly ? 'all' : 'none',
-          hideCursorInOverviewRuler: !readOnly,
         })),
       );
 
@@ -210,6 +210,7 @@ export default class Editor {
   }
 
   addCommands() {
+    const { store } = this;
     const getKeyCode = key => {
       const monacoKeyMod = key.indexOf('KEY_') === 0;
 

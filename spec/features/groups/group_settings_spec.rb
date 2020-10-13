@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Edit group settings' do
+RSpec.describe 'Edit group settings' do
   let(:user)  { create(:user) }
   let(:group) { create(:group, path: 'foo') }
 
@@ -158,7 +158,7 @@ describe 'Edit group settings' do
 
     page.within('.gs-advanced') do
       fill_in 'group_path', with: new_group_path
-      click_button 'Change group path'
+      click_button 'Change group URL'
     end
   end
 

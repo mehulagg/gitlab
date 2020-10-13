@@ -5,7 +5,7 @@ type: concepts, reference, howto
 # Webhooks and insecure internal web services
 
 NOTE: **Note:**
-On GitLab.com the [maximum number of webhooks](../user/gitlab_com/index.md#maximum-number-of-webhooks) per project is limited.
+On GitLab.com, the [maximum number of webhooks and their size](../user/gitlab_com/index.md#webhooks) per project, and per group, is limited.
 
 If you have non-GitLab web services running on your GitLab server or within its
 local network, these may be vulnerable to exploitation via Webhooks.
@@ -65,7 +65,7 @@ and expand **Outbound requests**:
 
 The allowed entries can be separated by semicolons, commas or whitespaces
 (including newlines) and be in different formats like hostnames, IP addresses and/or
-IP ranges. IPv6 is supported. Hostnames that contain unicode characters should
+IP ranges. IPv6 is supported. Hostnames that contain Unicode characters should
 use IDNA encoding.
 
 The allowlist can hold a maximum of 1000 entries. Each entry can be a maximum of

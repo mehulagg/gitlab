@@ -3,11 +3,13 @@
 module Types
   class MilestoneType < BaseObject
     graphql_name 'Milestone'
-    description 'Represents a milestone.'
+    description 'Represents a milestone'
 
     present_using MilestonePresenter
 
     authorize :read_milestone
+
+    alias_method :milestone, :object
 
     field :id, GraphQL::ID_TYPE, null: false,
           description: 'ID of the milestone'
@@ -47,5 +49,16 @@ module Types
     field :subgroup_milestone, GraphQL::BOOLEAN_TYPE, null: false,
           description: 'Indicates if milestone is at subgroup level',
           method: :subgroup_milestone?
+
+    field :stats, Types::MilestoneStatsType, null: true,
+          description: 'Milestone statistics'
+
+    def stats
+      return unless Feature.enabled?(:graphql_milestone_stats, milestone.project || milestone.group, default_enabled: true)
+
+      milestone
+    end
   end
 end
+
+Types::MilestoneType.prepend_if_ee('::EE::Types::MilestoneType')

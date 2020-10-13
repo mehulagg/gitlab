@@ -1,12 +1,13 @@
 <script>
 import { componentNames } from 'ee/reports/components/issue_body';
+import { GlSprintf } from '@gitlab/ui';
 import ReportSection from '~/reports/components/report_section.vue';
 import { status as reportStatus } from '~/reports/constants';
-import { n__ } from '~/locale';
+import { n__, sprintf } from '~/locale';
 
 export default {
   name: 'BlockingMergeRequestsReport',
-  components: { ReportSection },
+  components: { ReportSection, GlSprintf },
   props: {
     mr: {
       type: Object,
@@ -64,10 +65,13 @@ export default {
     },
     blockedByText() {
       if (this.closedCount > 0 && this.closedCount === this.unmergedCount) {
-        return n__(
-          'Depends on <strong>%d closed</strong> merge request.',
-          'Depends on <strong>%d closed</strong> merge requests.',
-          this.closedCount,
+        return sprintf(
+          n__(
+            'Depends on %{strongStart}%{closedCount} closed%{strongEnd} merge request.',
+            'Depends on %{strongStart}%{closedCount} closed%{strongEnd} merge requests.',
+            this.closedCount,
+          ),
+          { closedCount: this.closedCount },
         );
       }
 
@@ -114,7 +118,13 @@ export default {
       </span>
     </template>
     <template #error>
-      <span v-html="blockedByText"></span>
+      <span>
+        <gl-sprintf :message="blockedByText">
+          <template #strong="{ content }">
+            <strong>{{ content }}</strong>
+          </template>
+        </gl-sprintf>
+      </span>
     </template>
   </report-section>
 </template>

@@ -2,17 +2,15 @@ import axios from '~/lib/utils/axios_utils';
 import { joinPaths, escapeFileUrl } from '~/lib/utils/url_utility';
 import Api from '~/api';
 import getUserPermissions from '../queries/getUserPermissions.query.graphql';
-import gqClient from './gql';
+import { query } from './gql';
 
 const fetchApiProjectData = projectPath => Api.project(projectPath).then(({ data }) => data);
 
 const fetchGqlProjectData = projectPath =>
-  gqClient
-    .query({
-      query: getUserPermissions,
-      variables: { projectPath },
-    })
-    .then(({ data }) => data.project);
+  query({
+    query: getUserPermissions,
+    variables: { projectPath },
+  }).then(({ data }) => data.project);
 
 export default {
   getFileData(endpoint) {
@@ -35,7 +33,7 @@ export default {
       })
       .then(({ data }) => data);
   },
-  getBaseRawFileData(file, sha) {
+  getBaseRawFileData(file, projectId, ref) {
     if (file.tempFile || file.baseRaw) return Promise.resolve(file.baseRaw);
 
     // if files are renamed, their base path has changed
@@ -46,10 +44,10 @@ export default {
       .get(
         joinPaths(
           gon.relative_url_root || '/',
-          file.projectId,
+          projectId,
           '-',
           'raw',
-          sha,
+          ref,
           escapeFileUrl(filePath),
         ),
         {

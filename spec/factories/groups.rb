@@ -14,6 +14,8 @@ FactoryBot.define do
         # https://gitlab.com/gitlab-org/gitlab-foss/issues/43292
         raise "Don't set owner for groups, use `group.add_owner(user)` instead"
       end
+
+      create(:namespace_settings, namespace: group)
     end
 
     trait :public do
@@ -50,6 +52,14 @@ FactoryBot.define do
 
     trait :owner_subgroup_creation_only do
       subgroup_creation_level { ::Gitlab::Access::OWNER_SUBGROUP_ACCESS }
+    end
+
+    trait :shared_runners_disabled do
+      shared_runners_enabled { false }
+    end
+
+    trait :allow_descendants_override_disabled_shared_runners do
+      allow_descendants_override_disabled_shared_runners { true }
     end
   end
 end

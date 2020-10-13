@@ -29,4 +29,54 @@ RSpec.describe EE::Issuable do
       it_behaves_like 'matches_cross_reference_regex? fails fast'
     end
   end
+
+  describe '#supports_epic?' do
+    let(:group) { build_stubbed(:group) }
+    let(:project_with_group) { build_stubbed(:project, group: group) }
+    let(:project_without_group) { build_stubbed(:project) }
+
+    where(:issuable_type, :project, :supports_epic) do
+      [
+        [:issue, :project_with_group, true],
+        [:issue, :project_without_group, false],
+        [:incident, :project_with_group, false],
+        [:incident, :project_without_group, false],
+        [:merge_request, :project_with_group, false],
+        [:merge_request, :project_without_group, false]
+      ]
+    end
+
+    with_them do
+      let(:issuable) { build_stubbed(issuable_type, project: send(project)) }
+
+      subject { issuable.supports_epic? }
+
+      it { is_expected.to eq(supports_epic) }
+    end
+  end
+
+  describe '#weight_available?' do
+    let(:group) { build_stubbed(:group) }
+    let(:project_with_group) { build_stubbed(:project, group: group) }
+    let(:project_without_group) { build_stubbed(:project) }
+
+    where(:issuable_type, :project, :weight_available) do
+      [
+        [:issue, :project_with_group, true],
+        [:issue, :project_without_group, true],
+        [:incident, :project_with_group, false],
+        [:incident, :project_without_group, false],
+        [:merge_request, :project_with_group, false],
+        [:merge_request, :project_without_group, false]
+      ]
+    end
+
+    with_them do
+      let(:issuable) { build_stubbed(issuable_type, project: send(project)) }
+
+      subject { issuable.weight_available? }
+
+      it { is_expected.to eq(weight_available) }
+    end
+  end
 end

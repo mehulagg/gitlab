@@ -4,6 +4,8 @@ const PERSISTENT_USER_CALLOUTS = [
   '.js-recovery-settings-callout',
   '.js-users-over-license-callout',
   '.js-admin-licensed-user-count-threshold',
+  '.js-buy-pipeline-minutes-notification-callout',
+  '.js-token-expiry-callout',
 ];
 
 const initCallouts = () => {

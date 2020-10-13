@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LooksAhead do
+RSpec.describe LooksAhead do
   include GraphqlHelpers
 
   let_it_be(:the_user) { create(:user) }
@@ -115,20 +115,6 @@ describe LooksAhead do
     expect(the_user.issues).to receive(:preload).with(:labels)
 
     query.result
-  end
-
-  context 'the feature flag is off' do
-    before do
-      stub_feature_flags(described_class::FEATURE_FLAG => false)
-    end
-
-    it_behaves_like 'a working query on the test schema'
-
-    it 'does not preload labels on issues' do
-      expect(the_user.issues).not_to receive(:preload).with(:labels)
-
-      query.result
-    end
   end
 
   it 'issues fewer queries than the naive approach' do

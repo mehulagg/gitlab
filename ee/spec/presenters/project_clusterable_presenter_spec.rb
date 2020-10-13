@@ -14,10 +14,4 @@ RSpec.describe ProjectClusterablePresenter do
 
     it { is_expected.to eq(metrics_project_cluster_path(project, cluster)) }
   end
-
-  describe '#metrics_dashboard_path' do
-    subject { presenter.metrics_dashboard_path(cluster) }
-
-    it { is_expected.to eq(metrics_dashboard_project_cluster_path(project, cluster)) }
-  end
 end

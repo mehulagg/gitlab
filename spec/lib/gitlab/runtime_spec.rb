@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Runtime do
+RSpec.describe Gitlab::Runtime do
   shared_examples "valid runtime" do |runtime, max_threads|
     it "identifies itself" do
       expect(subject.identify).to eq(runtime)
@@ -48,14 +48,15 @@ describe Gitlab::Runtime do
     before do
       stub_const('::Puma', puma_type)
       allow(puma_type).to receive_message_chain(:cli_config, :options).and_return(max_threads: 2)
-      stub_config(action_cable: { in_app: false })
+      stub_env('ACTION_CABLE_IN_APP', 'false')
     end
 
     it_behaves_like "valid runtime", :puma, 3
 
     context "when ActionCable in-app mode is enabled" do
       before do
-        stub_config(action_cable: { in_app: true, worker_pool_size: 3 })
+        stub_env('ACTION_CABLE_IN_APP', 'true')
+        stub_env('ACTION_CABLE_WORKER_POOL_SIZE', '3')
       end
 
       it_behaves_like "valid runtime", :puma, 6
@@ -64,7 +65,7 @@ describe Gitlab::Runtime do
     context "when ActionCable standalone is run" do
       before do
         stub_const('ACTION_CABLE_SERVER', true)
-        stub_config(action_cable: { worker_pool_size: 8 })
+        stub_env('ACTION_CABLE_WORKER_POOL_SIZE', '8')
       end
 
       it_behaves_like "valid runtime", :puma, 11
@@ -75,14 +76,15 @@ describe Gitlab::Runtime do
     before do
       stub_const('::Unicorn', Module.new)
       stub_const('::Unicorn::HttpServer', Class.new)
-      stub_config(action_cable: { in_app: false })
+      stub_env('ACTION_CABLE_IN_APP', 'false')
     end
 
     it_behaves_like "valid runtime", :unicorn, 1
 
     context "when ActionCable in-app mode is enabled" do
       before do
-        stub_config(action_cable: { in_app: true, worker_pool_size: 3 })
+        stub_env('ACTION_CABLE_IN_APP', 'true')
+        stub_env('ACTION_CABLE_WORKER_POOL_SIZE', '3')
       end
 
       it_behaves_like "valid runtime", :unicorn, 4

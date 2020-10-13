@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: howto
 ---
 
@@ -15,13 +18,13 @@ To create a project in GitLab:
    icon in the navigation bar. This opens the **New project** page.
 1. On the **New project** page, choose if you want to:
    - Create a [blank project](#blank-projects).
-   - Create a project using with one of the available [project templates](#project-templates).
+   - Create a project using one of the available [project templates](#project-templates).
    - [Import a project](../user/project/import/index.md) from a different repository,
-     if enabled on your GitLab instance. Contact your GitLab admin if this is unavailable.
+     if enabled on your GitLab instance. Contact your GitLab administrator if this is unavailable.
    - Run [CI/CD pipelines for external repositories](../ci/ci_cd_for_external_repos/index.md). **(PREMIUM)**
 
 NOTE: **Note:**
-For a list of words that cannot be used as project names see
+For a list of words that can't be used as project names see
 [Reserved project and group names](../user/reserved_names.md).
 
 ### Blank projects
@@ -30,7 +33,7 @@ To create a new blank project on the **New project** page:
 
 1. On the **Blank project** tab, provide the following information:
    - The name of your project in the **Project name** field. You can't use
-     special characters, but you can use spaces, hyphens, underscores or even
+     special characters, but you can use spaces, hyphens, underscores, or even
      emoji. When adding the name, the **Project slug** will auto populate.
      The slug is what the GitLab instance will use as the URL path to the project.
      If you want a different slug, input the project name first,
@@ -60,7 +63,7 @@ There are two types of project templates:
 - [Built-in templates](#built-in-templates), sourced from the following groups:
   - [`project-templates`](https://gitlab.com/gitlab-org/project-templates)
   - [`pages`](https://gitlab.com/pages)
-- [Custom project templates](#custom-project-templates-premium), for custom templates
+- [Custom project templates](#custom-project-templates), for custom templates
   configured by GitLab administrators and users.
 
 #### Built-in templates
@@ -126,7 +129,7 @@ To use a custom project template on the **New project** page:
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/26388) in GitLab 10.5.
 
 When you create a new repository locally, instead of going to GitLab to manually
-create a new project and then [clone the repo](start-using-git.md#clone-a-repository)
+create a new project and then [clone the repository](start-using-git.md#clone-a-repository)
 locally, you can directly push it to GitLab to create the new project, all without leaving
 your terminal. If you have access rights to the associated namespace, GitLab will
 automatically create a new project under that GitLab namespace with its visibility

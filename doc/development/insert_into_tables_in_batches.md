@@ -121,10 +121,10 @@ These callbacks cannot be used with bulk insertions, since they are meant to be 
 every instance that is saved or created. Since these events do not fire when
 records are inserted in bulk, we currently disallow their use.
 
-The specifics around which callbacks are disallowed are defined in
+The specifics around which callbacks are explicitly allowed are defined in
 [`BulkInsertSafe`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/models/concerns/bulk_insert_safe.rb).
-Consult the module source code for details. If your class uses any of the blacklisted
-functionality, and you `include BulkInsertSafe`, the application will fail with an error.
+Consult the module source code for details. If your class uses callbacks that are not explicitly designated
+safe and you `include BulkInsertSafe` the application will fail with an error.
 
 ### `BulkInsertSafe` versus `InsertAll`
 
@@ -187,8 +187,6 @@ There are a few restrictions to how these APIs can be used:
 - `BulkInsertableAssociations`:
   - It is currently only compatible with `has_many` relations.
   - It does not yet support `has_many through: ...` relations.
-- Writing [`jsonb`](https://www.postgresql.org/docs/current/datatype-json.html) content is
-[not currently supported](https://gitlab.com/gitlab-org/gitlab/-/issues/210560).
 
 Moreover, input data should either be limited to around 1000 records at most,
 or already batched prior to calling bulk insert. The `INSERT` statement will run in a single

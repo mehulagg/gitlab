@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Users::DestroyService do
+RSpec.describe Users::DestroyService do
   describe "Deletes a user and all their personal projects" do
     let!(:user)      { create(:user) }
     let!(:admin)     { create(:admin) }
@@ -233,6 +233,14 @@ describe Users::DestroyService do
         described_class.new(user).execute(user)
 
         expect(User.exists?(user.id)).to be(false)
+      end
+
+      it 'allows user to be deleted if skip_authorization: true' do
+        other_user = create(:user)
+
+        described_class.new(user).execute(other_user, skip_authorization: true)
+
+        expect(User.exists?(other_user.id)).to be(false)
       end
     end
 

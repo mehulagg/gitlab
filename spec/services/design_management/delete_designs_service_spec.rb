@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe DesignManagement::DeleteDesignsService do
+RSpec.describe DesignManagement::DeleteDesignsService do
   include DesignManagementTestHelpers
 
   let_it_be(:project) { create(:project) }
@@ -105,7 +105,7 @@ describe DesignManagement::DeleteDesignsService do
         end
 
         it 'informs the new-version-worker' do
-          expect(::DesignManagement::NewVersionWorker).to receive(:perform_async).with(Integer)
+          expect(::DesignManagement::NewVersionWorker).to receive(:perform_async).with(Integer, false)
 
           run_service
         end

@@ -65,7 +65,7 @@ describe('ApproversList', () => {
         return wrapper.vm.$nextTick().then(() => {
           const expected = TEST_APPROVERS.filter((x, i) => i !== idx);
 
-          expect(wrapper.emittedByOrder()).toEqual([{ name: 'input', args: [expected] }]);
+          expect(wrapper.emitted().input).toEqual([[expected]]);
         });
       });
     });

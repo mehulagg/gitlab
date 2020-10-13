@@ -2,18 +2,40 @@ import {
   generateToolbarItem,
   addCustomEventListener,
   removeCustomEventListener,
+  registerHTMLToMarkdownRenderer,
   addImage,
   getMarkdown,
-} from '~/vue_shared/components/rich_content_editor/editor_service';
+  getEditorOptions,
+} from '~/vue_shared/components/rich_content_editor/services/editor_service';
+import buildHTMLToMarkdownRenderer from '~/vue_shared/components/rich_content_editor/services/build_html_to_markdown_renderer';
+import buildCustomRenderer from '~/vue_shared/components/rich_content_editor/services/build_custom_renderer';
+import sanitizeHTML from '~/vue_shared/components/rich_content_editor/services/sanitize_html';
+
+jest.mock('~/vue_shared/components/rich_content_editor/services/build_html_to_markdown_renderer');
+jest.mock('~/vue_shared/components/rich_content_editor/services/build_custom_renderer');
+jest.mock('~/vue_shared/components/rich_content_editor/services/sanitize_html');
 
 describe('Editor Service', () => {
-  const mockInstance = {
-    eventManager: { addEventType: jest.fn(), removeEventHandler: jest.fn(), listen: jest.fn() },
-    editor: { exec: jest.fn() },
-    invoke: jest.fn(),
-  };
-  const event = 'someCustomEvent';
-  const handler = jest.fn();
+  let mockInstance;
+  let event;
+  let handler;
+
+  beforeEach(() => {
+    mockInstance = {
+      eventManager: { addEventType: jest.fn(), removeEventHandler: jest.fn(), listen: jest.fn() },
+      editor: { exec: jest.fn() },
+      invoke: jest.fn(),
+      toMarkOptions: {
+        renderer: {
+          constructor: {
+            factory: jest.fn(),
+          },
+        },
+      },
+    };
+    event = 'someCustomEvent';
+    handler = jest.fn();
+  });
 
   describe('generateToolbarItem', () => {
     const config = {
@@ -72,6 +94,65 @@ describe('Editor Service', () => {
       getMarkdown(mockInstance);
 
       expect(mockInstance.invoke).toHaveBeenCalledWith('getMarkdown');
+    });
+  });
+
+  describe('registerHTMLToMarkdownRenderer', () => {
+    let baseRenderer;
+    const htmlToMarkdownRenderer = {};
+    const extendedRenderer = {};
+
+    beforeEach(() => {
+      baseRenderer = mockInstance.toMarkOptions.renderer;
+      buildHTMLToMarkdownRenderer.mockReturnValueOnce(htmlToMarkdownRenderer);
+      baseRenderer.constructor.factory.mockReturnValueOnce(extendedRenderer);
+
+      registerHTMLToMarkdownRenderer(mockInstance);
+    });
+
+    it('builds a new instance of the HTML to Markdown renderer', () => {
+      expect(buildHTMLToMarkdownRenderer).toHaveBeenCalledWith(baseRenderer);
+    });
+
+    it('extends base renderer with the HTML to Markdown renderer', () => {
+      expect(baseRenderer.constructor.factory).toHaveBeenCalledWith(
+        baseRenderer,
+        htmlToMarkdownRenderer,
+      );
+    });
+
+    it('replaces the default renderer with extended renderer', () => {
+      expect(mockInstance.toMarkOptions.renderer).toBe(extendedRenderer);
+    });
+  });
+
+  describe('getEditorOptions', () => {
+    const externalOptions = {
+      customRenderers: {},
+    };
+    const renderer = {};
+
+    beforeEach(() => {
+      buildCustomRenderer.mockReturnValueOnce(renderer);
+    });
+
+    it('generates a configuration object with a custom HTML renderer and toolbarItems', () => {
+      expect(getEditorOptions()).toHaveProp('customHTMLRenderer', renderer);
+      expect(getEditorOptions()).toHaveProp('toolbarItems');
+    });
+
+    it('passes external renderers to the buildCustomRenderers function', () => {
+      getEditorOptions(externalOptions);
+      expect(buildCustomRenderer).toHaveBeenCalledWith(externalOptions.customRenderers);
+    });
+
+    it('uses the internal sanitizeHTML service for HTML sanitization', () => {
+      const options = getEditorOptions();
+      const html = '<div></div>';
+
+      options.customHTMLSanitizer(html);
+
+      expect(sanitizeHTML).toHaveBeenCalledWith(html);
     });
   });
 });

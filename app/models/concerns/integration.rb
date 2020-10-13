@@ -15,5 +15,17 @@ module Integration
 
       Project.where(id: custom_integration_project_ids)
     end
+
+    def without_integration(integration)
+      services = Service
+        .select('1')
+        .where('services.project_id = projects.id')
+        .where(type: integration.type)
+
+      Project
+        .where('NOT EXISTS (?)', services)
+        .where(pending_delete: false)
+        .where(archived: false)
+    end
   end
 end

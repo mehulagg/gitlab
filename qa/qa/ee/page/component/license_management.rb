@@ -22,7 +22,7 @@ module QA
               view 'ee/app/assets/javascripts/vue_shared/license_compliance/components/set_approval_status_modal.vue' do
                 element :license_management_modal
                 element :approve_license_button
-                element :blacklist_license_button
+                element :deny_license_button
               end
 
               view 'ee/app/assets/javascripts/vue_shared/license_compliance/mr_widget_license_report.vue' do
@@ -37,7 +37,7 @@ module QA
             end
           end
 
-          def has_blacklisted_license?(name)
+          def has_denied_license?(name)
             within_element(:report_item_row, text: name) do
               has_element?(:status_failed_icon, wait: 1)
             end
@@ -51,13 +51,19 @@ module QA
           end
 
           def approve_license(name)
-            click_license(name)
+            wait_until(reload: true) do
+              click_license(name)
+              has_element?(:approve_license_button, wait: 1)
+            end
             click_element(:approve_license_button)
           end
 
-          def blacklist_license(name)
-            click_license(name)
-            click_element(:blacklist_license_button)
+          def deny_license(name)
+            wait_until(reload: true) do
+              click_license(name)
+              has_element?(:deny_license_button, wait: 1)
+            end
+            click_element(:deny_license_button)
           end
         end
       end

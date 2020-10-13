@@ -5,7 +5,7 @@ across GitLab's frontend team.
 
 ## Overview
 
-GitLab is built on top of [Ruby on Rails](https://rubyonrails.org) using [Haml](http://haml.info/) and also a JavaScript based Frontend with [Vue.js](https://vuejs.org).
+GitLab is built on top of [Ruby on Rails](https://rubyonrails.org) using [Haml](https://haml.info/) and also a JavaScript based Frontend with [Vue.js](https://vuejs.org).
 Be wary of [the limitations that come with using Hamlit](https://github.com/k0kubun/hamlit/blob/master/REFERENCE.md#limitations). We also use [SCSS](https://sass-lang.com) and plain JavaScript with
 modern ECMAScript standards supported through [Babel](https://babeljs.io/) and ES module support through [webpack](https://webpack.js.org/).
 
@@ -17,7 +17,9 @@ Working with our frontend assets requires Node (v10.13.0 or greater) and Yarn
 
 For our currently-supported browsers, see our [requirements](../../install/requirements.md#supported-web-browsers).
 
-Use [BrowserStack](https://www.browserstack.com/) to test with our supported browsers. Login to BrowserStack with the credentials saved in GitLab's [shared 1Password account](https://about.gitlab.com/handbook/security/#1password-for-teams).
+Use [BrowserStack](https://www.browserstack.com/) to test with our supported browsers.
+Sign in to BrowserStack with the credentials saved in the **Engineering** vault of GitLab's
+[shared 1Password account](https://about.gitlab.com/handbook/security/#1password-guide).
 
 ## Initiatives
 
@@ -73,6 +75,10 @@ How we use SVG for our [Icons and Illustrations](icons.md).
 ## Dependencies
 
 General information about frontend [dependencies](dependencies.md) and how we manage them.
+
+## Keyboard Shortcuts
+
+How we implement [keyboard shortcuts](keyboard_shortcuts.md) that can be customized and disabled.
 
 ## Frontend FAQ
 

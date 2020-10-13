@@ -16,6 +16,10 @@ export default {
     state.sourceBranch = branch;
   },
 
+  [types.SET_CAN_READ_VULNERABILITY_FEEDBACK](state, value) {
+    state.canReadVulnerabilityFeedback = value;
+  },
+
   [types.SET_VULNERABILITY_FEEDBACK_PATH](state, path) {
     state.vulnerabilityFeedbackPath = path;
   },
@@ -95,6 +99,36 @@ export default {
   [types.RECEIVE_DAST_DIFF_ERROR](state) {
     Vue.set(state.dast, 'isLoading', false);
     Vue.set(state.dast, 'hasError', true);
+  },
+
+  // COVERAGE_FUZZING
+
+  [types.SET_COVERAGE_FUZZING_DIFF_ENDPOINT](state, path) {
+    Vue.set(state.coverageFuzzing.paths, 'diffEndpoint', path);
+  },
+
+  [types.REQUEST_COVERAGE_FUZZING_DIFF](state) {
+    Vue.set(state.coverageFuzzing, 'isLoading', true);
+  },
+
+  [types.RECEIVE_COVERAGE_FUZZING_DIFF_SUCCESS](state, { diff, enrichData }) {
+    const { added, fixed, existing } = parseDiff(diff, enrichData);
+    const baseReportOutofDate = diff.base_report_out_of_date || false;
+    const scans = diff.scans || [];
+    const hasBaseReport = Boolean(diff.base_report_created_at);
+
+    Vue.set(state.coverageFuzzing, 'isLoading', false);
+    Vue.set(state.coverageFuzzing, 'newIssues', added);
+    Vue.set(state.coverageFuzzing, 'resolvedIssues', fixed);
+    Vue.set(state.coverageFuzzing, 'allIssues', existing);
+    Vue.set(state.coverageFuzzing, 'baseReportOutofDate', baseReportOutofDate);
+    Vue.set(state.coverageFuzzing, 'hasBaseReport', hasBaseReport);
+    Vue.set(state.coverageFuzzing, 'scans', scans);
+  },
+
+  [types.RECEIVE_COVERAGE_FUZZING_DIFF_ERROR](state) {
+    Vue.set(state.coverageFuzzing, 'isLoading', false);
+    Vue.set(state.coverageFuzzing, 'hasError', true);
   },
 
   // DEPENDECY SCANNING

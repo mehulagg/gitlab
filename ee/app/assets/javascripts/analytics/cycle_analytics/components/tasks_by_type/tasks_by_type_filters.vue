@@ -1,7 +1,7 @@
 <script>
-import { GlDropdownDivider, GlSegmentedControl, GlIcon } from '@gitlab/ui';
+import { GlDeprecatedDropdownDivider, GlSegmentedControl, GlIcon } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { removeFlash } from '../../utils';
 import {
   TASKS_BY_TYPE_FILTERS,
@@ -15,7 +15,7 @@ export default {
   name: 'TasksByTypeFilters',
   components: {
     GlSegmentedControl,
-    GlDropdownDivider,
+    GlDeprecatedDropdownDivider,
     GlIcon,
     LabelsSelector,
   },
@@ -126,7 +126,7 @@ export default {
               "
             />
           </div>
-          <gl-dropdown-divider />
+          <gl-deprecated-dropdown-divider />
           <div class="mb-3 px-3">
             <p class="font-weight-bold text-left my-2">
               {{ s__('CycleAnalytics|Select labels') }}

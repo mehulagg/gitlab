@@ -5,21 +5,31 @@ module Gitlab
     module Reports
       module Security
         class Reports
-          attr_reader :reports, :commit_sha
+          attr_reader :reports, :pipeline
 
-          delegate :empty?, to: :reports
+          delegate :each, :empty?, to: :reports
 
-          def initialize(commit_sha)
+          def initialize(pipeline)
             @reports = {}
-            @commit_sha = commit_sha
+            @pipeline = pipeline
           end
 
           def get_report(report_type, report_artifact)
-            reports[report_type] ||= Report.new(report_type, commit_sha, report_artifact.created_at)
+            reports[report_type] ||= Report.new(report_type, pipeline, report_artifact.created_at)
           end
 
-          def violates_default_policy?
-            reports.values.any? { |report| report.unsafe_severity? }
+          def findings
+            reports.values.flat_map(&:findings)
+          end
+
+          def violates_default_policy_against?(target_reports)
+            findings_diff(target_reports).any?(&:unsafe?)
+          end
+
+          private
+
+          def findings_diff(target_reports)
+            findings - target_reports&.findings.to_a
           end
         end
       end

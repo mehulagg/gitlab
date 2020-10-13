@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ChatMessage::MergeMessage do
+RSpec.describe ChatMessage::MergeMessage do
   subject { described_class.new(args) }
 
   let(:args) do
@@ -27,23 +27,6 @@ describe ChatMessage::MergeMessage do
         target_branch: 'target_branch'
       }
     }
-  end
-
-  # Integration point in EE
-  context 'when state is overridden' do
-    it 'respects the overridden state' do
-      allow(subject).to receive(:state_or_action_text) { 'devoured' }
-
-      aggregate_failures do
-        expect(subject.summary).not_to include('opened')
-        expect(subject.summary).to include('devoured')
-
-        activity_title = subject.activity[:title]
-
-        expect(activity_title).not_to include('opened')
-        expect(activity_title).to include('devoured')
-      end
-    end
   end
 
   context 'without markdown' do
@@ -104,6 +87,58 @@ describe ChatMessage::MergeMessage do
           image: 'http://someavatar.com'
         })
       end
+    end
+  end
+
+  context 'approved' do
+    before do
+      args[:object_attributes][:action] = 'approved'
+    end
+
+    it 'returns a message regarding completed approval of merge requests' do
+      expect(subject.pretext).to eq(
+        'Test User (test.user) approved merge request <http://somewhere.com/-/merge_requests/100|!100 *Merge Request title*> '\
+        'in <http://somewhere.com|project_name>')
+      expect(subject.attachments).to be_empty
+    end
+  end
+
+  context 'unapproved' do
+    before do
+      args[:object_attributes][:action] = 'unapproved'
+    end
+
+    it 'returns a message regarding revocation of completed approval of merge requests' do
+      expect(subject.pretext).to eq(
+        'Test User (test.user) unapproved merge request <http://somewhere.com/-/merge_requests/100|!100 *Merge Request title*> '\
+        'in <http://somewhere.com|project_name>')
+      expect(subject.attachments).to be_empty
+    end
+  end
+
+  context 'approval' do
+    before do
+      args[:object_attributes][:action] = 'approval'
+    end
+
+    it 'returns a message regarding added approval of merge requests' do
+      expect(subject.pretext).to eq(
+        'Test User (test.user) added their approval to merge request <http://somewhere.com/-/merge_requests/100|!100 *Merge Request title*> '\
+        'in <http://somewhere.com|project_name>')
+      expect(subject.attachments).to be_empty
+    end
+  end
+
+  context 'unapproval' do
+    before do
+      args[:object_attributes][:action] = 'unapproval'
+    end
+
+    it 'returns a message regarding revoking approval of merge requests' do
+      expect(subject.pretext).to eq(
+        'Test User (test.user) removed their approval from merge request <http://somewhere.com/-/merge_requests/100|!100 *Merge Request title*> '\
+        'in <http://somewhere.com|project_name>')
+      expect(subject.attachments).to be_empty
     end
   end
 end

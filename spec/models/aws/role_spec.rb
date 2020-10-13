@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Aws::Role do
+RSpec.describe Aws::Role do
   it { is_expected.to belong_to(:user) }
   it { is_expected.to validate_length_of(:role_external_id).is_at_least(1).is_at_most(64) }
 
@@ -26,6 +26,12 @@ describe Aws::Role do
 
       context 'ARN is valid' do
         let(:role_arn) { 'arn:aws:iam::123456789012:role/test-role' }
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'ARN is nil' do
+        let(:role_arn) { }
 
         it { is_expected.to be_truthy }
       end

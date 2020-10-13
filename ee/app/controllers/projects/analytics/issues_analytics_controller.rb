@@ -2,8 +2,13 @@
 
 class Projects::Analytics::IssuesAnalyticsController < Projects::ApplicationController
   include IssuableCollections
+  include ::Analytics::UniqueVisitsHelper
 
   before_action :authorize_read_issue_analytics!
+
+  track_unique_visits :show, target_id: 'p_analytics_issues'
+
+  feature_category :planning_analytics
 
   def show
     respond_to do |format|

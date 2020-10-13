@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::Conflicts::ResolveService do
+RSpec.describe MergeRequests::Conflicts::ResolveService do
   include ProjectForksHelper
   let(:user) { create(:user) }
   let(:project) { create(:project, :public, :repository) }
@@ -205,6 +205,7 @@ describe MergeRequests::Conflicts::ResolveService do
       let(:resolver) do
         MergeRequests::Conflicts::ListService.new(merge_request).conflicts.resolver
       end
+
       let(:regex_conflict) do
         resolver.conflict_for_path(resolver.conflicts, 'files/ruby/regex.rb', 'files/ruby/regex.rb')
       end

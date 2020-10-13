@@ -1,5 +1,5 @@
 mutation deleteProjectFromSecurityDashboard($id: ID!) {
-  removeProjectFromSecurityDashboard(input: {id: $id}) {
+  removeProjectFromSecurityDashboard(input: { id: $id }) {
     errors
   }
 }

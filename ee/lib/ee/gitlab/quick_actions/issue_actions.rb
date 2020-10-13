@@ -12,7 +12,8 @@ module EE
           explanation _('Adds an issue to an epic.')
           types Issue
           condition do
-            quick_action_target.project.group&.feature_available?(:epics) &&
+            quick_action_target.supports_epic? &&
+              quick_action_target.project.group&.feature_available?(:epics) &&
               current_user.can?(:"admin_#{quick_action_target.to_ability_name}", quick_action_target)
           end
           params '<&epic | group&epic | Epic URL>'
@@ -42,6 +43,7 @@ module EE
           types Issue
           condition do
             quick_action_target.persisted? &&
+              quick_action_target.supports_epic? &&
               quick_action_target.project.group&.feature_available?(:epics) &&
               current_user.can?(:"admin_#{quick_action_target.to_ability_name}", quick_action_target)
           end
@@ -69,6 +71,7 @@ module EE
           types Issue
           condition do
             quick_action_target.persisted? &&
+              quick_action_target.supports_epic? &&
               !quick_action_target.promoted? &&
               current_user.can?(:admin_issue, project) &&
               current_user.can?(:create_epic, project.group)
@@ -90,16 +93,17 @@ module EE
           execution_message do |iteration|
             _("Set the iteration to %{iteration_reference}.") % { iteration_reference: iteration.to_reference } if iteration
           end
-          params '*iteration:"iteration"'
+          params '*iteration:"iteration name"'
           types Issue
           condition do
-            current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project) &&
+            quick_action_target.supports_iterations? &&
+              current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project) &&
               quick_action_target.project.group&.feature_available?(:iterations) &&
-              find_iterations(project, state: 'active').any?
+              find_iterations(project, state: 'opened').any?
           end
           parse_params do |iteration_param|
             extract_references(iteration_param, :iteration).first ||
-              find_iterations(project, title: iteration_param.strip).first
+              find_iterations(project, title: iteration_param.strip, state: 'opened').first
           end
           command :iteration do |iteration|
             @updates[:iteration] = iteration if iteration
@@ -114,7 +118,8 @@ module EE
           end
           types Issue
           condition do
-            quick_action_target.persisted? &&
+            quick_action_target.supports_iterations? &&
+              quick_action_target.persisted? &&
               quick_action_target.sprint_id? &&
               quick_action_target.project.group&.feature_available?(:iterations) &&
               current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)
@@ -130,9 +135,9 @@ module EE
           end
 
           def find_iterations(project, params = {})
-            group_ids = project.group.self_and_ancestors.select(:id) if project.group
+            group_ids = project.group.self_and_ancestors.map(&:id) if project.group
 
-            ::IterationsFinder.new(params.merge(project_ids: [project.id], group_ids: group_ids)).execute
+            ::IterationsFinder.new(current_user, params.merge(project_ids: [project.id], group_ids: group_ids)).execute
           end
 
           desc _('Publish to status page')
@@ -142,11 +147,8 @@ module EE
             StatusPage::MarkForPublicationService.publishable?(project, current_user, quick_action_target)
           end
           command :publish do
-            if StatusPage.mark_for_publication(project, current_user, quick_action_target).success?
-              # Ideally, we want to use `StatusPage.trigger_publish` instead of dispatching a worker.
-              # See https://gitlab.com/gitlab-org/gitlab/-/issues/219266
-              StatusPage::PublishWorker.perform_async(current_user.id, project.id, quick_action_target.id)
-
+            if ::Gitlab::StatusPage.mark_for_publication(project, current_user, quick_action_target).success?
+              ::Gitlab::StatusPage.trigger_publish(project, current_user, quick_action_target, action: :init)
               @execution_message[:publish] = _('Issue published on status page.')
             else
               @execution_message[:publish] = _('Failed to publish issue on status page.')

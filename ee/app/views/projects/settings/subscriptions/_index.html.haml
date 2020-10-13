@@ -1,4 +1,4 @@
-.row.prepend-top-default.append-bottom-default
+.row.gl-mt-3.gl-mb-3
   .col-lg-12
     = form_with url: project_subscriptions_path(@project), id: 'pipeline-subscriptions-form', method: :post, authenticity_token: true do |f|
       %fieldset
@@ -6,16 +6,16 @@
           = f.label :upstream_project_path do
             = _("Project path")
           = f.text_field :upstream_project_path, class: "form-control"
-        = f.submit _('Subscribe'), class: "btn btn-success float-right"
+        = f.submit _('Subscribe'), class: "btn btn-success"
 
-.row.prepend-top-default.append-bottom-default
+.row.gl-mt-3.gl-mb-3
   .col-lg-12
     %h5
       = _("Subscriptions")
       %span.badge.badge-pill
         = @project.upstream_projects.count + @project.downstream_projects.count
 
-    %table.table.prepend-top-default
+    %table.table.gl-mt-3
       %thead
         %tr
           %th= _("Project")

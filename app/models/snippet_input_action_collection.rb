@@ -7,8 +7,12 @@ class SnippetInputActionCollection
 
   delegate :empty?, :any?, :[], to: :actions
 
-  def initialize(actions = [])
-    @actions = actions.map { |action| SnippetInputAction.new(action) }
+  def initialize(actions = [], allowed_actions: nil)
+    @actions = actions.map do |action|
+      params = action.merge(allowed_actions: allowed_actions)
+
+      SnippetInputAction.new(**params)
+    end
   end
 
   def to_commit_actions

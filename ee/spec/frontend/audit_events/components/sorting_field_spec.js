@@ -1,60 +1,67 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlNewDropdownItem } from '@gitlab/ui';
-
-import * as urlUtils from '~/lib/utils/url_utility';
-
+import { GlDropdownItem } from '@gitlab/ui';
 import SortingField from 'ee/audit_events/components/sorting_field.vue';
 
 describe('SortingField component', () => {
   let wrapper;
 
-  const DUMMY_URL = 'https://localhost';
-  const createComponent = () =>
-    shallowMount(SortingField, { stubs: { GlNewDropdown: true, GlNewDropdownItem: true } });
-
-  const getCheckedOptions = () =>
-    wrapper.findAll(GlNewDropdownItem).filter(item => item.props().isChecked);
-
-  const getCheckedOptionHref = () => {
-    return getCheckedOptions()
-      .at(0)
-      .attributes().href;
+  const initComponent = (props = {}) => {
+    wrapper = shallowMount(SortingField, {
+      propsData: { ...props },
+    });
   };
 
+  const getCheckedOptions = () =>
+    wrapper.findAll(GlDropdownItem).filter(item => item.props().isChecked);
+
   beforeEach(() => {
-    urlUtils.setUrlParams = jest.fn(({ sort }) => `${DUMMY_URL}/?sort=${sort}`);
-    wrapper = createComponent();
+    initComponent();
   });
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
-  describe('Sorting behaviour', () => {
+  describe('when initialized', () => {
     it('should have sorting options', () => {
-      expect(wrapper.findAll(GlNewDropdownItem)).toHaveLength(2);
+      expect(wrapper.findAll(GlDropdownItem)).toHaveLength(2);
     });
 
     it('should set the sorting option to `created_desc` by default', () => {
       expect(getCheckedOptions()).toHaveLength(1);
-      expect(getCheckedOptionHref()).toBe(`${DUMMY_URL}/?sort=created_desc`);
     });
 
-    it('should get the sorting option from the URL', () => {
-      urlUtils.queryToObject = jest.fn(() => ({ sort: 'created_asc' }));
-      wrapper = createComponent();
+    describe('with a sortBy value', () => {
+      beforeEach(() => {
+        initComponent({
+          sortBy: 'created_asc',
+        });
+      });
 
-      expect(getCheckedOptions()).toHaveLength(1);
-      expect(getCheckedOptionHref()).toBe(`${DUMMY_URL}/?sort=created_asc`);
+      it('should set the sorting option accordingly', () => {
+        expect(getCheckedOptions()).toHaveLength(1);
+        expect(
+          getCheckedOptions()
+            .at(0)
+            .text(),
+        ).toEqual('Oldest created');
+      });
+    });
+  });
+
+  describe('when the user clicks on a option', () => {
+    beforeEach(() => {
+      initComponent();
+      wrapper
+        .findAll(GlDropdownItem)
+        .at(1)
+        .vm.$emit('click');
     });
 
-    it('should retain other params when creating the option URL', () => {
-      urlUtils.setUrlParams = jest.fn(({ sort }) => `${DUMMY_URL}/?abc=defg&sort=${sort}`);
-      urlUtils.queryToObject = jest.fn(() => ({ sort: 'created_desc', abc: 'defg' }));
-
-      wrapper = createComponent();
-
-      expect(getCheckedOptionHref()).toBe(`${DUMMY_URL}/?abc=defg&sort=created_desc`);
+    it('should emit the "selected" event with clicked option', () => {
+      expect(wrapper.emitted().selected).toBeTruthy();
+      expect(wrapper.emitted().selected[0]).toEqual(['created_asc']);
     });
   });
 });

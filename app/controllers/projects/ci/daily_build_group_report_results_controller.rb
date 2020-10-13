@@ -6,21 +6,19 @@ class Projects::Ci::DailyBuildGroupReportResultsController < Projects::Applicati
   MAX_ITEMS = 1000
   REPORT_WINDOW = 90.days
 
-  before_action :validate_feature_flag!
   before_action :authorize_read_build_report_results!
   before_action :validate_param_type!
 
+  feature_category :continuous_integration
+
   def index
     respond_to do |format|
-      format.csv { send_data(render_csv(results), type: 'text/csv; charset=utf-8') }
+      format.csv { send_data(render_csv(report_results), type: 'text/csv; charset=utf-8') }
+      format.json { render json: render_json(report_results) }
     end
   end
 
   private
-
-  def validate_feature_flag!
-    render_404 unless Feature.enabled?(:ci_download_daily_code_coverage, project, default_enabled: true)
-  end
 
   def validate_param_type!
     respond_422 unless allowed_param_types.include?(param_type)
@@ -37,8 +35,12 @@ class Projects::Ci::DailyBuildGroupReportResultsController < Projects::Applicati
     ).render
   end
 
-  def results
-    Ci::DailyBuildGroupReportResultsFinder.new(finder_params).execute
+  def render_json(collection)
+    Ci::DailyBuildGroupReportResultSerializer.new.represent(collection, param_type: param_type)
+  end
+
+  def report_results
+    Ci::DailyBuildGroupReportResultsFinder.new(**finder_params).execute
   end
 
   def finder_params

@@ -8,7 +8,11 @@ module AlertManagement
     include AtomicInternalId
     include ShaAttribute
     include Sortable
+    include Noteable
     include Gitlab::SQL::Pattern
+    include Presentable
+    include Gitlab::Utils::StrongMemoize
+    include Referable
 
     STATUSES = {
       triggered: 0,
@@ -16,19 +20,19 @@ module AlertManagement
       resolved: 2,
       ignored: 3
     }.freeze
-
-    STATUS_EVENTS = {
-      triggered: :trigger,
-      acknowledged: :acknowledge,
-      resolved: :resolve,
-      ignored: :ignore
-    }.freeze
+    private_constant :STATUSES
 
     belongs_to :project
     belongs_to :issue, optional: true
+    belongs_to :prometheus_alert, optional: true
+    belongs_to :environment, optional: true
 
     has_many :alert_assignees, inverse_of: :alert
     has_many :assignees, through: :alert_assignees
+
+    has_many :notes, as: :noteable, inverse_of: :noteable, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
+    has_many :ordered_notes, -> { fresh }, as: :noteable, class_name: 'Note'
+    has_many :user_mentions, class_name: 'AlertManagement::AlertUserMention', foreign_key: :alert_management_alert_id
 
     has_internal_id :iid, scope: :project, init: ->(s) { s.project.alert_management_alerts.maximum(:iid) }
 
@@ -45,8 +49,12 @@ module AlertManagement
     validates :severity,        presence: true
     validates :status,          presence: true
     validates :started_at,      presence: true
-    validates :fingerprint,     uniqueness: { scope: :project }, allow_blank: true
-    validate  :hosts_length
+    validates :fingerprint,     allow_blank: true, uniqueness: {
+      scope: :project,
+      conditions: -> { not_resolved },
+      message: -> (object, data) { _('Cannot have multiple unresolved alerts') }
+    }, unless: :resolved?
+    validate :hosts_length
 
     enum severity: {
       critical: 0,
@@ -99,19 +107,57 @@ module AlertManagement
     end
 
     delegate :iid, to: :issue, prefix: true, allow_nil: true
+    delegate :details_url, to: :present
 
     scope :for_iid, -> (iid) { where(iid: iid) }
-    scope :for_status, -> (status) { where(status: status) }
+    scope :for_status, -> (status) { with_status(status) }
     scope :for_fingerprint, -> (project, fingerprint) { where(project: project, fingerprint: fingerprint) }
+    scope :for_environment, -> (environment) { where(environment: environment) }
+    scope :for_assignee_username, -> (assignee_username) { joins(:assignees).merge(User.by_username(assignee_username)) }
     scope :search, -> (query) { fuzzy_search(query, [:title, :description, :monitoring_tool, :service]) }
+    scope :open, -> { with_status(open_statuses) }
+    scope :not_resolved, -> { without_status(:resolved) }
+    scope :with_prometheus_alert, -> { includes(:prometheus_alert) }
 
     scope :order_start_time,    -> (sort_order) { order(started_at: sort_order) }
     scope :order_end_time,      -> (sort_order) { order(ended_at: sort_order) }
     scope :order_event_count,   -> (sort_order) { order(events: sort_order) }
-    scope :order_severity,      -> (sort_order) { order(severity: sort_order) }
-    scope :order_status,        -> (sort_order) { order(status: sort_order) }
 
-    scope :counts_by_status, -> { group(:status).count }
+    # Ascending sort order sorts severity from less critical to more critical.
+    # Descending sort order sorts severity from more critical to less critical.
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/221242#what-is-the-expected-correct-behavior
+    scope :order_severity,      -> (sort_order) { order(severity: sort_order == :asc ? :desc : :asc) }
+    scope :order_severity_with_open_prometheus_alert, -> { open.with_prometheus_alert.order(severity: :asc, started_at: :desc) }
+
+    # Ascending sort order sorts statuses: Ignored > Resolved > Acknowledged > Triggered
+    # Descending sort order sorts statuses: Triggered > Acknowledged > Resolved > Ignored
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/221242#what-is-the-expected-correct-behavior
+    scope :order_status, -> (sort_order) { order(status: sort_order == :asc ? :desc : :asc) }
+
+    scope :counts_by_project_id, -> { group(:project_id).count }
+
+    alias_method :state, :status_name
+
+    def self.state_machine_statuses
+      @state_machine_statuses ||= state_machines[:status].states.to_h { |s| [s.name, s.value] }
+    end
+    private_class_method :state_machine_statuses
+
+    def self.status_value(name)
+      state_machine_statuses[name]
+    end
+
+    def self.status_name(raw_status)
+      state_machine_statuses.key(raw_status)
+    end
+
+    def self.counts_by_status
+      group(:status).count.transform_keys { |k| status_name(k) }
+    end
+
+    def self.status_names
+      @status_names ||= state_machine_statuses.keys
+    end
 
     def self.sort_by_attribute(method)
       case method.to_s
@@ -130,31 +176,73 @@ module AlertManagement
       end
     end
 
-    def details
-      details_payload = payload.except(*attributes.keys)
+    def self.last_prometheus_alert_by_project_id
+      ids = select(arel_table[:id].maximum).group(:project_id)
+      with_prometheus_alert.where(id: ids)
+    end
 
-      Gitlab::Utils::InlineHash.merge_keys(details_payload)
+    def self.reference_prefix
+      '^alert#'
+    end
+
+    def self.reference_pattern
+      @reference_pattern ||= %r{
+        (#{Project.reference_pattern})?
+        #{Regexp.escape(reference_prefix)}(?<alert>\d+)
+      }x
+    end
+
+    def self.link_reference_pattern
+      @link_reference_pattern ||= super("alert_management", /(?<alert>\d+)\/details(\#)?/)
+    end
+
+    def self.reference_valid?(reference)
+      reference.to_i > 0 && reference.to_i <= Gitlab::Database::MAX_INT_VALUE
+    end
+
+    def self.open_statuses
+      [:triggered, :acknowledged]
+    end
+
+    def self.open_status?(status)
+      open_statuses.include?(status)
+    end
+
+    def status_event_for(status)
+      self.class.state_machines[:status].events.transitions_for(self, to: status.to_s.to_sym).first&.event
+    end
+
+    def change_status_to(new_status)
+      event = status_event_for(new_status)
+      event && fire_status_event(event)
     end
 
     def prometheus?
-      monitoring_tool == Gitlab::AlertManagement::AlertParams::MONITORING_TOOLS[:prometheus]
+      monitoring_tool == Gitlab::AlertManagement::Payload::MONITORING_TOOLS[:prometheus]
     end
 
     def register_new_event!
       increment!(:events)
     end
 
-    # required for todos (typically contains an identifier like issue iid)
-    #  no-op; we could use iid, but we don't have a reference prefix
-    def to_reference(_from = nil, full: false)
-      ''
+    def to_reference(from = nil, full: false)
+      reference = "#{self.class.reference_prefix}#{iid}"
+
+      "#{project.to_reference_base(from, full: full)}#{reference}"
     end
 
     def execute_services
-      return unless Feature.enabled?(:alert_slack_event, project)
       return unless project.has_active_services?(:alert_hooks)
 
       project.execute_services(hook_data, :alert_hooks)
+    end
+
+    # Representation of the alert's payload. Avoid accessing
+    # #payload attribute directly.
+    def parsed_payload
+      strong_memoize(:parsed_payload) do
+        Gitlab::AlertManagement::Payload.parse(project, payload, monitoring_tool: monitoring_tool)
+      end
     end
 
     private

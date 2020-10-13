@@ -1,6 +1,10 @@
 import { s__ } from '~/locale';
 
 export const ALL = 'all';
+export const STATE = {
+  DETECTED: 'DETECTED',
+  CONFIRMED: 'CONFIRMED',
+};
 
 export const BASE_FILTERS = {
   severity: {
@@ -8,7 +12,7 @@ export const BASE_FILTERS = {
     id: ALL,
   },
   report_type: {
-    name: s__('ciReport|All report types'),
+    name: s__('ciReport|All scanners'),
     id: ALL,
   },
   project_id: {

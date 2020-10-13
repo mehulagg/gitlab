@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'fast_spec_helper'
 require 'rubocop'
 require_relative '../../../rubocop/cop/active_record_association_reload'
 
-describe RuboCop::Cop::ActiveRecordAssociationReload do
+RSpec.describe RuboCop::Cop::ActiveRecordAssociationReload, type: :rubocop do
   include CopHelper
 
   subject(:cop) { described_class.new }
@@ -15,7 +15,7 @@ describe RuboCop::Cop::ActiveRecordAssociationReload do
         users = User.all
         users.reload
               ^^^^^^ Use reset instead of reload. For more details check the https://gitlab.com/gitlab-org/gitlab-foss/issues/60218.
-        PATTERN
+      PATTERN
     end
 
     it 'does not register an offense on reset usage' do

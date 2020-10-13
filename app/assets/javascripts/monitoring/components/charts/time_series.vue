@@ -1,11 +1,10 @@
 <script>
-import { omit, throttle } from 'lodash';
-import { GlLink, GlDeprecatedButton, GlTooltip, GlResizeObserverDirective } from '@gitlab/ui';
+import { isEmpty, omit, throttle } from 'lodash';
+import { GlLink, GlTooltip, GlResizeObserverDirective, GlIcon } from '@gitlab/ui';
 import { GlAreaChart, GlLineChart, GlChartSeriesLabel } from '@gitlab/ui/dist/charts';
 import { s__ } from '~/locale';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
-import Icon from '~/vue_shared/components/icon.vue';
-import { panelTypes, chartHeight, lineTypes, lineWidths } from '../../constants';
+import { panelTypes, chartHeight, lineTypes, lineWidths, legendLayoutTypes } from '../../constants';
 import { getYAxisOptions, getTimeAxisOptions, getChartGrid, getTooltipFormatter } from './options';
 import { annotationsYAxis, generateAnnotationsSeries } from './annotations';
 import { makeDataSeries } from '~/helpers/monitor_helper';
@@ -25,10 +24,9 @@ export default {
     GlAreaChart,
     GlLineChart,
     GlTooltip,
-    GlDeprecatedButton,
     GlChartSeriesLabel,
     GlLink,
-    Icon,
+    GlIcon,
   },
   directives: {
     GlResizeObserverDirective,
@@ -41,6 +39,11 @@ export default {
       validator: graphDataValidatorForValues.bind(null, false),
     },
     option: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
+    timeRange: {
       type: Object,
       required: false,
       default: () => ({}),
@@ -75,15 +78,30 @@ export default {
       required: false,
       default: () => [],
     },
+    legendLayout: {
+      type: String,
+      required: false,
+      default: legendLayoutTypes.table,
+    },
     legendAverageText: {
       type: String,
       required: false,
       default: s__('Metrics|Avg'),
     },
+    legendCurrentText: {
+      type: String,
+      required: false,
+      default: s__('Metrics|Current'),
+    },
     legendMaxText: {
       type: String,
       required: false,
       default: s__('Metrics|Max'),
+    },
+    legendMinText: {
+      type: String,
+      required: false,
+      default: s__('Metrics|Min'),
     },
     groupId: {
       type: String,
@@ -159,10 +177,17 @@ export default {
     chartOptions() {
       const { yAxis, xAxis } = this.option;
       const option = omit(this.option, ['series', 'yAxis', 'xAxis']);
+      const xAxisBounds = isEmpty(this.timeRange)
+        ? {}
+        : {
+            min: this.timeRange.start,
+            max: this.timeRange.end,
+          };
 
       const timeXAxis = {
         ...getTimeAxisOptions({ timezone: this.timezone }),
         ...xAxis,
+        ...xAxisBounds,
       };
 
       const dataYAxis = {
@@ -368,8 +393,11 @@ export default {
       :thresholds="thresholds"
       :width="width"
       :height="height"
-      :average-text="legendAverageText"
-      :max-text="legendMaxText"
+      :legend-layout="legendLayout"
+      :legend-average-text="legendAverageText"
+      :legend-current-text="legendCurrentText"
+      :legend-max-text="legendMaxText"
+      :legend-min-text="legendMinText"
       @created="onChartCreated"
       @updated="onChartUpdated"
     >
@@ -378,7 +406,7 @@ export default {
           {{ __('Deployed') }}
         </template>
         <div slot="tooltipContent" class="d-flex align-items-center">
-          <icon name="commit" class="mr-2" />
+          <gl-icon name="commit" class="mr-2" />
           <gl-link :href="tooltip.commitUrl">{{ tooltip.sha }}</gl-link>
         </div>
       </template>
@@ -397,7 +425,7 @@ export default {
             <gl-chart-series-label :color="isMultiSeries ? content.color : ''">
               {{ content.name }}
             </gl-chart-series-label>
-            <div class="prepend-left-32">
+            <div class="gl-ml-7">
               {{ content.value }}
             </div>
           </div>

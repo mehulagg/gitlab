@@ -47,8 +47,22 @@ class CommitCollection
     pipelines = project.ci_pipelines.latest_pipeline_per_commit(map(&:id), ref)
 
     each do |commit|
-      commit.set_latest_pipeline_for_ref(ref, pipelines[commit.id])
+      pipeline = pipelines[commit.id]
+      pipeline&.number_of_warnings # preload number of warnings
+
+      commit.set_latest_pipeline_for_ref(ref, pipeline)
     end
+
+    self
+  end
+
+  # Returns the collection with markdown fields preloaded.
+  #
+  # Get the markdown cache from redis using pipeline to prevent n+1 requests
+  # when rendering the markdown of an attribute (e.g. title, full_title,
+  # description).
+  def with_markdown_cache
+    Commit.preload_markdown_cache!(commits)
 
     self
   end

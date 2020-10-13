@@ -86,6 +86,26 @@ RSpec.describe Ci::BuildDependencies do
 
         it { is_expected.to be_empty }
       end
+
+      context 'with dependency names from environment variables' do
+        before do
+          job.yaml_variables.push(key: 'DEPENDENCY_NAME', value: 'dependency', public: true)
+          job.save!
+        end
+
+        let(:dependencies) do
+          [
+            {
+              project: '$CI_PROJECT_PATH',
+              job: '$DEPENDENCY_NAME',
+              ref: '$CI_COMMIT_BRANCH',
+              artifacts: true
+            }
+          ]
+        end
+
+        it { is_expected.to contain_exactly(dependency) }
+      end
     end
 
     context 'with cross_dependencies to another pipeline in same project' do

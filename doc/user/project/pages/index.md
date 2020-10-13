@@ -46,20 +46,20 @@ To create a GitLab Pages website:
 
 | Document | Description |
 | -------- | ----------- |
-| [Use a `.gitlab-ci.yml` template](getting_started/new_or_existing_website.md) | Add a Pages site to an existing project. Use a pre-populated CI template file. |
-| [Create a `gitlab-ci.yml` file from scratch](getting_started_part_four.md)    | Add a Pages site to an existing project. Learn how to create and configure your own CI file. |
-| [Use a new project template](getting_started/pages_bundled_template.md)       | Create a new project with Pages already configured by using a new project template. |
-| [Fork a sample project](getting_started/fork_sample_project.md)               | Create a new project with Pages already configured by forking a sample project. |
+| [Fork a sample project](getting_started/pages_forked_sample_project.md)               | Create a new project with Pages already configured by forking a sample project. |
+| [Use a new project template](getting_started/pages_new_project_template.md)       | Create a new project with Pages already configured by using a new project template. |
+| [Use a `.gitlab-ci.yml` template](getting_started/pages_ci_cd_template.md) | Add a Pages site to an existing project. Use a pre-populated CI template file. |
+| [Create a `gitlab-ci.yml` file from scratch](getting_started/pages_from_scratch.md)    | Add a Pages site to an existing project. Learn how to create and configure your own CI file. |
 
 To update a GitLab Pages website:
 
 | Document | Description |
 | -------- | ----------- |
-| [GitLab Pages domain names, URLs, and baseurls](getting_started_part_one.md) | Learn about GitLab Pages default domains. |
+| [GitLab Pages domain names, URLs, and base URLs](getting_started_part_one.md) | Learn about GitLab Pages default domains. |
 | [Explore GitLab Pages](introduction.md) | Requirements, technical aspects, specific GitLab CI/CD configuration options, Access Control, custom 404 pages, limitations, FAQ. |
 | [Custom domains and SSL/TLS Certificates](custom_domains_ssl_tls_certification/index.md) | Custom domains and subdomains, DNS records, and SSL/TLS certificates. |
 | [Let's Encrypt integration](custom_domains_ssl_tls_certification/lets_encrypt_integration.md) | Secure your Pages sites with Let's Encrypt certificates, which are automatically obtained and renewed by GitLab. |
-| [CloudFlare certificates](https://about.gitlab.com/blog/2017/02/07/setting-up-gitlab-pages-with-cloudflare-certificates/) | Secure your Pages site with CloudFlare certificates. |
+| [Redirects](redirects.md) | Set up HTTP redirects to forward one page to another. |
 
 Learn more and see examples:
 
@@ -81,7 +81,7 @@ becomes available automatically.
 To deploy your site, GitLab uses its built-in tool called [GitLab CI/CD](../../../ci/README.md)
 to build your site and publish it to the GitLab Pages server. The sequence of
 scripts that GitLab CI/CD runs to accomplish this task is created from a file named
-`.gitlab-ci.yml`, which you can [create and modify](getting_started_part_four.md) at will. A specific `job` called `pages` in the configuration file will make GitLab aware that you are deploying a GitLab Pages website.
+`.gitlab-ci.yml`, which you can [create and modify](getting_started/pages_from_scratch.md) at will. A specific `job` called `pages` in the configuration file will make GitLab aware that you are deploying a GitLab Pages website.
 
 You can either use GitLab's [default domain for GitLab Pages websites](getting_started_part_one.md#gitlab-pages-default-domain-names),
 `*.gitlab.io`, or your own domain (`example.com`). In that case, you'll
@@ -124,3 +124,24 @@ If you are running a self-managed instance of GitLab (GitLab Community Edition a
 [follow the administration steps](../../../administration/pages/index.md) to configure Pages.
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> Watch a [video tutorial](https://www.youtube.com/watch?v=dD8c7WNcc6s) about how to get started with GitLab Pages administration.
+
+## Security for GitLab Pages
+
+If your username is `foo`, your GitLab Pages website is located at `foo.gitlab.io`.
+GitLab allows usernames to contain a `.`, so a user named `bar.foo` could create
+a GitLab Pages website `bar.foo.gitlab.io` that effectively is a subdomain of your
+`foo.gitlab.io` website. Be careful if you use JavaScript to set cookies for your website.
+The safe way to manually set cookies with JavaScript is to not specify the `domain` at all:
+
+```javascript
+// Safe: This cookie is only visible to foo.gitlab.io
+document.cookie = "key=value";
+
+// Unsafe: This cookie is visible to foo.gitlab.io and its subdomains,
+// regardless of the presence of the leading dot.
+document.cookie = "key=value;domain=.foo.gitlab.io";
+document.cookie = "key=value;domain=foo.gitlab.io";
+```
+
+This issue doesn't affect users with a custom domain, or users who don't set any
+cookies manually with JavaScript.

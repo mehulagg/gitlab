@@ -8,14 +8,63 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::GroupStageTimeSummary do
   let_it_be(:user) { create(:user, :admin) }
   let(:from) { 1.day.ago }
   let(:to) { nil }
+  let(:options) { { from: from, to: to, current_user: user } }
 
-  subject { described_class.new(group, options: { from: from, to: to, current_user: user }).data }
+  subject { described_class.new(group, options: options).data }
 
   around do |example|
     Timecop.freeze { example.run }
   end
 
   describe '#lead_time' do
+    describe 'issuable filter parameters' do
+      let_it_be(:label) { create(:group_label, group: group) }
+
+      before do
+        create(:closed_issue, project: project, created_at: 1.day.ago, closed_at: Time.zone.now, author: user, labels: [label])
+      end
+
+      context 'when `author_username` is given' do
+        before do
+          options[:author_username] = user.username
+        end
+
+        it 'returns the correct lead time' do
+          expect(subject.first[:value]).to eq('1.0')
+        end
+      end
+
+      context 'when unknown `author_username` is given' do
+        before do
+          options[:author_username] = 'unknown_user'
+        end
+
+        it 'returns `-`' do
+          expect(subject.first[:value]).to eq('-')
+        end
+      end
+
+      context 'when `label_name` is given' do
+        before do
+          options[:label_name] = [label.name]
+        end
+
+        it 'returns the correct lead time' do
+          expect(subject.first[:value]).to eq('1.0')
+        end
+      end
+
+      context 'when unknown `label_name` is given' do
+        before do
+          options[:label_name] = ['unknown_label']
+        end
+
+        it 'returns `-`' do
+          expect(subject.first[:value]).to eq('-')
+        end
+      end
+    end
+
     context 'with `from` date' do
       let(:from) { 6.days.ago }
 

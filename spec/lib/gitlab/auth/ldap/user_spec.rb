@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::Ldap::User do
+RSpec.describe Gitlab::Auth::Ldap::User do
   include LdapHelpers
 
   let(:ldap_user) { described_class.new(auth_hash) }
@@ -14,9 +14,11 @@ describe Gitlab::Auth::Ldap::User do
       nickname: 'john'
     }
   end
+
   let(:auth_hash) do
     OmniAuth::AuthHash.new(uid: 'uid=John Smith,ou=People,dc=example,dc=com', provider: 'ldapmain', info: info)
   end
+
   let(:ldap_user_upper_case) { described_class.new(auth_hash_upper_case) }
   let(:info_upper_case) do
     {
@@ -25,6 +27,7 @@ describe Gitlab::Auth::Ldap::User do
       nickname: 'john'
     }
   end
+
   let(:auth_hash_upper_case) do
     OmniAuth::AuthHash.new(uid: 'uid=John Smith,ou=People,dc=example,dc=com', provider: 'ldapmain', info: info_upper_case)
   end

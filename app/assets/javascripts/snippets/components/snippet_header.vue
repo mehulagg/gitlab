@@ -1,5 +1,4 @@
 <script>
-import { __ } from '~/locale';
 import {
   GlAvatar,
   GlIcon,
@@ -7,16 +6,19 @@ import {
   GlModal,
   GlAlert,
   GlLoadingIcon,
-  GlDropdown,
-  GlDropdownItem,
+  GlDeprecatedDropdown,
+  GlDeprecatedDropdownItem,
   GlButton,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { __ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 import DeleteSnippetMutation from '../mutations/deleteSnippet.mutation.graphql';
 import CanCreatePersonalSnippet from '../queries/userPermissions.query.graphql';
 import CanCreateProjectSnippet from '../queries/projectPermissions.query.graphql';
+import { joinPaths } from '~/lib/utils/url_utility';
+import { fetchPolicies } from '~/lib/graphql';
 
 export default {
   components: {
@@ -26,8 +28,8 @@ export default {
     GlModal,
     GlAlert,
     GlLoadingIcon,
-    GlDropdown,
-    GlDropdownItem,
+    GlDeprecatedDropdown,
+    GlDeprecatedDropdownItem,
     TimeAgoTooltip,
     GlButton,
   },
@@ -36,6 +38,7 @@ export default {
   },
   apollo: {
     canCreateSnippet: {
+      fetchPolicy: fetchPolicies.NO_CACHE,
       query() {
         return this.snippet.project ? CanCreateProjectSnippet : CanCreatePersonalSnippet;
       },
@@ -65,14 +68,22 @@ export default {
     };
   },
   computed: {
+    snippetHasBinary() {
+      return Boolean(this.snippet.blobs.find(blob => blob.binary));
+    },
+    authoredMessage() {
+      return this.snippet.author
+        ? __('Authored %{timeago} by %{author}')
+        : __('Authored %{timeago}');
+    },
     personalSnippetActions() {
       return [
         {
           condition: this.snippet.userPermissions.updateSnippet,
           text: __('Edit'),
           href: this.editLink,
-          disabled: this.snippet.blob.binary,
-          title: this.snippet.blob.binary
+          disabled: this.snippetHasBinary,
+          title: this.snippetHasBinary
             ? __('Snippets with non-text files can only be edited via Git.')
             : undefined,
         },
@@ -88,8 +99,8 @@ export default {
           condition: this.canCreateSnippet,
           text: __('New snippet'),
           href: this.snippet.project
-            ? `${this.snippet.project.webUrl}/snippets/new`
-            : '/snippets/new',
+            ? joinPaths(this.snippet.project.webUrl, '-/snippets/new')
+            : joinPaths('/', gon.relative_url_root, '/-/snippets/new'),
           variant: 'success',
           category: 'secondary',
           cssClass: 'ml-2',
@@ -127,7 +138,9 @@ export default {
   },
   methods: {
     redirectToSnippets() {
-      window.location.pathname = `${this.snippet.project?.fullPath || 'dashboard'}/snippets`;
+      window.location.pathname = this.snippet.project
+        ? `${this.snippet.project.fullPath}/-/snippets`
+        : `${gon.relative_url_root}dashboard/snippets`;
     },
     closeDeleteModal() {
       this.$refs.deleteModal.hide();
@@ -163,7 +176,7 @@ export default {
   <div class="detail-page-header">
     <div class="detail-page-header-body">
       <div
-        class="snippet-box has-tooltip d-flex align-items-center append-right-5 mb-1"
+        class="snippet-box has-tooltip d-flex align-items-center gl-mr-2 mb-1"
         data-qa-selector="snippet_container"
         :title="snippetVisibilityLevelDescription"
         data-container="body"
@@ -173,8 +186,8 @@ export default {
         </span>
         <gl-icon :name="visibilityLevelIcon" :size="14" />
       </div>
-      <div class="creator">
-        <gl-sprintf :message="__('Authored %{timeago} by %{author}')">
+      <div class="creator" data-testid="authored-message">
+        <gl-sprintf :message="authoredMessage">
           <template #timeago>
             <time-ago-tooltip
               :time="snippet.createdAt"
@@ -218,17 +231,17 @@ export default {
         </template>
       </div>
       <div class="d-block d-sm-none dropdown">
-        <gl-dropdown :text="__('Options')" class="w-100" toggle-class="text-center">
-          <gl-dropdown-item
+        <gl-deprecated-dropdown :text="__('Options')" class="w-100" toggle-class="text-center">
+          <gl-deprecated-dropdown-item
             v-for="(action, index) in personalSnippetActions"
             :key="index"
             :disabled="action.disabled"
             :title="action.title"
             :href="action.href"
             @click="action.click ? action.click() : undefined"
-            >{{ action.text }}</gl-dropdown-item
+            >{{ action.text }}</gl-deprecated-dropdown-item
           >
-        </gl-dropdown>
+        </gl-deprecated-dropdown>
       </div>
     </div>
 

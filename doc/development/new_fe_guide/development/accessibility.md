@@ -12,7 +12,7 @@ WAI-ARIA (the Accessible Rich Internet Applications specification) defines a way
 
 The `role` attribute describes the role the element plays in the context of the document.
 
-Check the list of WAI-ARIA roles [here](https://www.w3.org/TR/wai-aria-1.1/#landmark_roles)
+Review the list of [WAI-ARIA roles](https://www.w3.org/TR/wai-aria-1.1/#landmark_roles).
 
 ## Icons
 
@@ -43,4 +43,4 @@ In forms we should use the `for` attribute in the label statement:
 
 - [Chrome Accessibility Developer Tools](https://github.com/GoogleChrome/accessibility-developer-tools) for testing accessibility
 - [Audit Rules Page](https://github.com/GoogleChrome/accessibility-developer-tools/wiki/Audit-Rules) for best practices
-- [Lighthouse Accessibility Score](https://developers.google.com/web/tools/lighthouse/scoring#a11y) for accessibility audits
+- [Lighthouse Accessibility Score](https://web.dev/performance-scoring/) for accessibility audits

@@ -30,41 +30,27 @@ RSpec.describe Projects::Security::DashboardController do
       get :index, params: { namespace_id: project.namespace, project_id: project }
     end
 
-    context 'when uses legacy reports syntax' do
-      before do
-        create(:ci_build, :artifacts, pipeline: pipeline, name: 'sast')
-      end
-
-      it 'returns the latest pipeline with security reports for project' do
-        show_security_dashboard
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to render_template(:index)
-        expect(response.body).to have_css("div#js-security-report-app[data-has-pipeline-data]")
-      end
-    end
-
-    context 'when uses new reports syntax' do
-      before do
-        create(:ee_ci_build, :sast, pipeline: pipeline)
-      end
-
-      it 'returns the latest pipeline with security reports for project' do
-        show_security_dashboard
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to render_template(:index)
-        expect(response.body).to have_css("div#js-security-report-app[data-has-pipeline-data]")
-      end
-    end
-
-    context 'when there is no matching pipeline' do
+    context 'when project has no vulnerabilities' do
       it 'renders empty state' do
         show_security_dashboard
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to render_template(:index)
-        expect(response.body).not_to have_css("div#js-security-report-app[data-has-pipeline-data]")
+        expect(response.body).to have_css('div#js-security-report-app[data-has-vulnerabilities="false"]')
+      end
+    end
+
+    context 'when project has vulnerabilities' do
+      before do
+        create(:vulnerability, project: project)
+      end
+
+      it 'renders dashboard with vulnerability metadata' do
+        show_security_dashboard
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to render_template(:index)
+        expect(response.body).to have_css('div#js-security-report-app[data-has-vulnerabilities="true"]')
       end
     end
   end

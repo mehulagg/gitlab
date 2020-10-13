@@ -1,23 +1,25 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import $ from 'jquery';
 import '~/behaviors/markdown/render_gfm';
-import { GlLink, GlLoadingIcon } from '@gitlab/ui';
+import { GlIcon, GlLink, GlLoadingIcon } from '@gitlab/ui';
 import { handleLocationHash } from '~/lib/utils/common_utils';
-import getReadmeQuery from '../../queries/getReadme.query.graphql';
+import readmeQuery from '../../queries/readme.query.graphql';
 
 export default {
   apollo: {
     readme: {
-      query: getReadmeQuery,
+      query: readmeQuery,
       variables() {
         return {
-          url: this.blob.webUrl,
+          url: this.blob.webPath,
         };
       },
       loadingKey: 'loading',
     },
   },
   components: {
+    GlIcon,
     GlLink,
     GlLoadingIcon,
   },
@@ -50,8 +52,8 @@ export default {
   <article class="file-holder limited-width-container readme-holder">
     <div class="js-file-title file-title-flex-parent">
       <div class="file-header-content">
-        <i aria-hidden="true" class="fa fa-file-text-o fa-fw"></i>
-        <gl-link :href="blob.webUrl">
+        <gl-icon name="doc-text" aria-hidden="true" />
+        <gl-link :href="blob.webPath">
           <strong>{{ blob.name }}</strong>
         </gl-link>
       </div>

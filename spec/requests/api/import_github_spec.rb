@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::ImportGithub do
+RSpec.describe API::ImportGithub do
   let(:token) { "asdasd12345" }
   let(:provider) { :github }
   let(:access_params) { { github_access_token: token } }
@@ -22,8 +22,24 @@ describe API::ImportGithub do
 
     before do
       Grape::Endpoint.before_each do |endpoint|
-        allow(endpoint).to receive(:client).and_return(double('client', user: provider_user, repo: provider_repo).as_null_object)
+        allow(endpoint).to receive(:client).and_return(double('client', user: provider_user, repository: provider_repo).as_null_object)
       end
+    end
+
+    after do
+      Grape::Endpoint.before_each nil
+    end
+
+    it 'rejects requests when Github Importer is disabled' do
+      stub_application_setting(import_sources: nil)
+
+      post api("/import/github", user), params: {
+        target_namespace: user.namespace_path,
+        personal_access_token: token,
+        repo_id: non_existing_record_id
+      }
+
+      expect(response).to have_gitlab_http_status(:forbidden)
     end
 
     it 'returns 201 response when the project is imported successfully' do

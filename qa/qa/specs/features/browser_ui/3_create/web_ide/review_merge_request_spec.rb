@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Review a merge request in Web IDE' do
       let(:new_file) { 'awesome_new_file.txt' }
       let(:original_text) { 'Text' }
@@ -20,7 +20,7 @@ module QA
         merge_request.visit!
       end
 
-      it 'opens and edits a merge request in Web IDE' do
+      it 'opens and edits a merge request in Web IDE', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/705' do
         Page::MergeRequest::Show.perform do |show|
           show.click_open_in_web_ide
         end

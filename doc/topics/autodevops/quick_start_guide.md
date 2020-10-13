@@ -8,7 +8,7 @@ to create a Kubernetes cluster manually using the Google Cloud Platform console.
 You will create and deploy a simple application that you create from a GitLab template.
 
 These instructions will also work for a self-managed GitLab instance; you'll just
-need to ensure your own [Runners are configured](../../ci/runners/README.md) and
+need to ensure your own [runners are configured](../../ci/runners/README.md) and
 [Google OAuth is enabled](../../integration/google.md).
 
 ## Configure your Google account
@@ -57,7 +57,7 @@ to deploy this project to.
 ## Create a Kubernetes cluster from within GitLab
 
 1. On your project's landing page, click **Add Kubernetes cluster**
-   (note that this option is also available when you navigate to **{cloud-gear}** **Operations > Kubernetes**).
+   (note that this option is also available when you navigate to **Operations > Kubernetes**).
 
    ![Project landing page](img/guide_project_landing_page_v12_10.png)
 
@@ -98,24 +98,10 @@ status on your [GCP dashboard](https://console.cloud.google.com/kubernetes).
 Next, you will install some applications on your cluster that are needed
 to take full advantage of Auto DevOps.
 
-## Install the package manager
-
-After creating your Kubernetes cluster, GitLab's Kubernetes integration provides
-[pre-defined applications](../../user/project/clusters/index.md#installing-applications)
-for you to install. To install them, you must next install Helm Tiller, the
-Kubernetes package manager for Kubernetes, to enable the installation of other applications.
-
-Next to **Helm Tiller**, click **Install**.
-
-![Cluster applications](img/guide_cluster_apps_v12_3.png)
-
-After installation completes, the page reloads, and you can install other
-applications.
-
 ## Install Ingress and Prometheus
 
-After installing **Helm Tiller**, you can install other applications that rely on it,
-including Ingress and Prometheus, which we will install in this quick start guide:
+After your cluster is running, you can install your first applications.
+In this guide, we will install Ingress and Prometheus:
 
 - Ingress - Provides load balancing, SSL termination, and name-based virtual hosting,
   using NGINX behind the scenes.
@@ -124,7 +110,7 @@ including Ingress and Prometheus, which we will install in this quick start guid
 
 NOTE: **Note:**
 We won't install GitLab Runner in this quick start guide, as this guide uses the
-shared Runners provided by GitLab.com.
+shared runners provided by GitLab.com.
 
 To install the applications:
 
@@ -141,7 +127,7 @@ While Auto DevOps is enabled by default, Auto DevOps can be disabled at both
 the instance level (for self-managed instances) and the group level. Complete
 these steps to enable Auto DevOps if it's disabled:
 
-1. Navigate to **{settings}** **Settings > CI/CD > Auto DevOps**, and click **Expand**.
+1. Navigate to **Settings > CI/CD > Auto DevOps**, and click **Expand**.
 1. Select **Default to Auto DevOps pipeline** to display more options.
 1. In **Deployment strategy**, select your desired [continuous deployment strategy](index.md#deployment-strategy)
    to deploy the application to production after the pipeline successfully runs on the `master` branch.
@@ -174,17 +160,18 @@ The jobs are separated into stages:
   - The `test` job runs unit and integration tests by detecting the language and
     framework ([Auto Test](stages.md#auto-test))
   - The `code_quality` job checks the code quality and is allowed to fail
-    ([Auto Code Quality](stages.md#auto-code-quality-starter)) **(STARTER)**
+    ([Auto Code Quality](stages.md#auto-code-quality)) **(STARTER)**
   - The `container_scanning` job checks the Docker container if it has any
-    vulnerabilities and is allowed to fail ([Auto Container Scanning](stages.md#auto-container-scanning-ultimate))
+    vulnerabilities and is allowed to fail ([Auto Container Scanning](stages.md#auto-container-scanning))
   - The `dependency_scanning` job checks if the application has any dependencies
     susceptible to vulnerabilities and is allowed to fail
-    ([Auto Dependency Scanning](stages.md#auto-dependency-scanning-ultimate)) **(ULTIMATE)**
+    ([Auto Dependency Scanning](stages.md#auto-dependency-scanning)) **(ULTIMATE)**
   - Jobs suffixed with `-sast` run static analysis on the current code to check for potential
-    security issues, and are allowed to fail ([Auto SAST](stages.md#auto-sast-ultimate)) **(ULTIMATE)**
+    security issues, and are allowed to fail ([Auto SAST](stages.md#auto-sast)) **(ULTIMATE)**
+  - The `secret-detection` job checks for leaked secrets and is allowed to fail ([Auto Secret Detection](stages.md#auto-secret-detection)) **(ULTIMATE)**
   - The `license_management` job searches the application's dependencies to determine each of their
     licenses and is allowed to fail
-    ([Auto License Compliance](stages.md#auto-license-compliance-ultimate)) **(ULTIMATE)**
+    ([Auto License Compliance](stages.md#auto-license-compliance)) **(ULTIMATE)**
 
    NOTE: **Note:**
    All jobs except `test` are allowed to fail in the test stage.
@@ -196,7 +183,7 @@ The jobs are separated into stages:
   Kubernetes ([Auto Deploy](stages.md#auto-deploy)).
 
 - **Performance** - Performance tests are run on the deployed application
-  ([Auto Browser Performance Testing](stages.md#auto-browser-performance-testing-premium)). **(PREMIUM)**
+  ([Auto Browser Performance Testing](stages.md#auto-browser-performance-testing)). **(PREMIUM)**
 
 - **Cleanup** - Pipelines on `master` include this stage with a `stop_dast_environment` job.
 
@@ -207,7 +194,7 @@ to monitor it.
 
 After successfully deploying your application, you can view its website and check
 on its health on the **Environments** page by navigating to
-**{cloud-gear}** **Operations > Environments**. This page displays details about
+**Operations > Environments**. This page displays details about
 the deployed applications, and the right-hand column displays icons that link
 you to common environment tasks:
 
@@ -234,7 +221,7 @@ takes you to the pod's logs page.
 TIP: **Tip:**
 The example shows only one pod hosting the application at the moment, but you can add
 more pods by defining the [`REPLICAS` variable](customize.md#environment-variables)
-in **{settings}** **Settings > CI/CD > Environment variables**.
+in **Settings > CI/CD > Environment variables**.
 
 ### Work with branches
 
@@ -304,8 +291,8 @@ all within GitLab. Despite its automatic nature, Auto DevOps can also be configu
 and customized to fit your workflow. Here are some helpful resources for further reading:
 
 1. [Auto DevOps](index.md)
-1. [Multiple Kubernetes clusters](index.md#using-multiple-kubernetes-clusters-premium) **(PREMIUM)**
-1. [Incremental rollout to production](customize.md#incremental-rollout-to-production-premium) **(PREMIUM)**
+1. [Multiple Kubernetes clusters](index.md#using-multiple-kubernetes-clusters)
+1. [Incremental rollout to production](customize.md#incremental-rollout-to-production) **(PREMIUM)**
 1. [Disable jobs you don't need with environment variables](customize.md#environment-variables)
 1. [Use a static IP for your cluster](../../user/clusters/applications.md#using-a-static-ip)
 1. [Use your own buildpacks to build your application](customize.md#custom-buildpacks)

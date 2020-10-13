@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'issuable list' do
+RSpec.describe 'issuable list', :js do
   let(:project) { create(:project) }
   let(:user)    { create(:user) }
 
@@ -15,7 +15,7 @@ describe 'issuable list' do
   end
 
   issuable_types.each do |issuable_type|
-    it "avoids N+1 database queries for #{issuable_type.to_s.humanize.pluralize}" do
+    it "avoids N+1 database queries for #{issuable_type.to_s.humanize.pluralize}", quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/231426' } do
       control_count = ActiveRecord::QueryRecorder.new { visit_issuable_list(issuable_type) }.count
 
       create_issuables(issuable_type)
@@ -26,9 +26,9 @@ describe 'issuable list' do
     it "counts upvotes, downvotes and notes count for each #{issuable_type.to_s.humanize}" do
       visit_issuable_list(issuable_type)
 
-      expect(first('.fa-thumbs-up').find(:xpath, '..')).to have_content(1)
-      expect(first('.fa-thumbs-down').find(:xpath, '..')).to have_content(1)
-      expect(first('.fa-comments').find(:xpath, '..')).to have_content(2)
+      expect(first('.issuable-upvotes')).to have_content(1)
+      expect(first('.issuable-downvotes')).to have_content(1)
+      expect(first('.issuable-comments')).to have_content(2)
     end
 
     it 'sorts labels alphabetically' do
@@ -51,8 +51,8 @@ describe 'issuable list' do
   it "counts merge requests closing issues icons for each issue" do
     visit_issuable_list(:issue)
 
-    expect(page).to have_selector('.icon-merge-request-unmerged', count: 1)
-    expect(first('.icon-merge-request-unmerged').find(:xpath, '..')).to have_content(1)
+    expect(page).to have_selector('[data-testid="merge-requests"]', count: 1)
+    expect(first('[data-testid="merge-requests"]').find(:xpath, '..')).to have_content(1)
   end
 
   def visit_issuable_list(issuable_type)

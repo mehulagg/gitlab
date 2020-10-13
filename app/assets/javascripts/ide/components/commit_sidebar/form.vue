@@ -1,13 +1,13 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
+import { GlModal, GlSafeHtmlDirective } from '@gitlab/ui';
 import { n__, __ } from '~/locale';
-import { GlModal } from '@gitlab/ui';
 import LoadingButton from '~/vue_shared/components/loading_button.vue';
 import CommitMessageField from './message_field.vue';
 import Actions from './actions.vue';
 import SuccessMessage from './success_message.vue';
 import { leftSidebarViews, MAX_WINDOW_HEIGHT_COMPACT } from '../../constants';
-import consts from '../../stores/modules/commit/constants';
+import { createUnexpectedCommitError } from '../../lib/errors';
 
 export default {
   components: {
@@ -17,15 +17,20 @@ export default {
     SuccessMessage,
     GlModal,
   },
+  directives: {
+    SafeHtml: GlSafeHtmlDirective,
+  },
   data() {
     return {
       isCompact: true,
       componentHeight: null,
+      // Keep track of "lastCommitError" so we hold onto the value even when "commitError" is cleared.
+      lastCommitError: createUnexpectedCommitError(),
     };
   },
   computed: {
     ...mapState(['changedFiles', 'stagedFiles', 'currentActivityView', 'lastCommitMsg']),
-    ...mapState('commit', ['commitMessage', 'submitCommitLoading']),
+    ...mapState('commit', ['commitMessage', 'submitCommitLoading', 'commitError']),
     ...mapGetters(['someUncommittedChanges']),
     ...mapGetters('commit', ['discardDraftButtonDisabled', 'preBuiltCommitMessage']),
     overviewText() {
@@ -38,21 +43,26 @@ export default {
     currentViewIsCommitView() {
       return this.currentActivityView === leftSidebarViews.commit.name;
     },
+    commitErrorPrimaryAction() {
+      const { primaryAction } = this.lastCommitError || {};
+
+      return {
+        button: primaryAction ? { text: primaryAction.text } : undefined,
+        callback: primaryAction?.callback?.bind(this, this.$store) || (() => {}),
+      };
+    },
   },
   watch: {
-    currentActivityView() {
-      if (this.lastCommitMsg) {
-        this.isCompact = false;
-      } else {
-        this.isCompact = !(
-          this.currentViewIsCommitView && window.innerHeight >= MAX_WINDOW_HEIGHT_COMPACT
-        );
+    currentActivityView: 'handleCompactState',
+    someUncommittedChanges: 'handleCompactState',
+    lastCommitMsg: 'handleCompactState',
+    commitError(val) {
+      if (!val) {
+        return;
       }
-    },
 
-    lastCommitMsg() {
-      this.isCompact =
-        this.currentActivityView !== leftSidebarViews.commit.name && this.lastCommitMsg === '';
+      this.lastCommitError = val;
+      this.$refs.commitErrorModal.show();
     },
   },
   methods: {
@@ -64,25 +74,25 @@ export default {
       'updateCommitAction',
     ]),
     commit() {
-      return this.commitChanges().catch(() => {
-        this.$refs.createBranchModal.show();
-      });
+      return this.commitChanges();
     },
-    forceCreateNewBranch() {
-      return this.updateCommitAction(consts.COMMIT_TO_NEW_BRANCH).then(() => this.commit());
+    handleCompactState() {
+      if (this.lastCommitMsg) {
+        this.isCompact = false;
+      } else {
+        this.isCompact =
+          !this.someUncommittedChanges ||
+          !this.currentViewIsCommitView ||
+          window.innerHeight < MAX_WINDOW_HEIGHT_COMPACT;
+      }
     },
     toggleIsCompact() {
-      if (this.currentViewIsCommitView) {
-        this.isCompact = !this.isCompact;
-      } else {
-        this.updateActivityBarView(leftSidebarViews.commit.name)
-          .then(() => {
-            this.isCompact = false;
-          })
-          .catch(e => {
-            throw e;
-          });
-      }
+      this.isCompact = !this.isCompact;
+    },
+    beginCommit() {
+      return this.updateActivityBarView(leftSidebarViews.commit.name).then(() => {
+        this.isCompact = false;
+      });
     },
     beforeEnterTransition() {
       const elHeight = this.isCompact
@@ -129,13 +139,14 @@ export default {
           :disabled="!someUncommittedChanges"
           type="button"
           class="btn btn-primary btn-sm btn-block qa-begin-commit-button"
-          @click="toggleIsCompact"
+          data-testid="begin-commit-button"
+          @click="beginCommit"
         >
           {{ __('Commit…') }}
         </button>
         <p class="text-center bold">{{ overviewText }}</p>
       </div>
-      <form v-if="!isCompact" ref="formEl" @submit.prevent.stop="commit">
+      <form v-else ref="formEl" @submit.prevent.stop="commit">
         <transition name="fade"> <success-message v-show="lastCommitMsg" /> </transition>
         <commit-message-field
           :text="commitMessage"
@@ -143,7 +154,7 @@ export default {
           @input="updateCommitMessage"
           @submit="commit"
         />
-        <div class="clearfix prepend-top-15">
+        <div class="clearfix gl-mt-5">
           <actions />
           <loading-button
             :loading="submitCommitLoading"
@@ -169,17 +180,14 @@ export default {
           </button>
         </div>
         <gl-modal
-          ref="createBranchModal"
-          modal-id="ide-create-branch-modal"
-          :ok-title="__('Create new branch')"
-          :title="__('Branch has changed')"
-          ok-variant="success"
-          @ok="forceCreateNewBranch"
+          ref="commitErrorModal"
+          modal-id="ide-commit-error-modal"
+          :title="lastCommitError.title"
+          :action-primary="commitErrorPrimaryAction.button"
+          :action-cancel="{ text: __('Cancel') }"
+          @ok="commitErrorPrimaryAction.callback"
         >
-          {{
-            __(`This branch has changed since you started editing.
-                Would you like to create a new branch?`)
-          }}
+          <div v-safe-html="lastCommitError.messageHTML"></div>
         </gl-modal>
       </form>
     </transition>

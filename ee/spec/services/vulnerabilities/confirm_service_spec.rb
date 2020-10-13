@@ -21,6 +21,8 @@ RSpec.describe Vulnerabilities::ConfirmService do
       project.add_developer(user)
     end
 
+    it_behaves_like 'calls vulnerability statistics utility services in order'
+
     it 'confirms a vulnerability' do
       Timecop.freeze do
         confirm_vulnerability

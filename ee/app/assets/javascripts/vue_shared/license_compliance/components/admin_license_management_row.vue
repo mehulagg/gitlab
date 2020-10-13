@@ -1,13 +1,12 @@
 <script>
 import { mapActions } from 'vuex';
-import { GlDropdown, GlDropdownItem, GlLoadingIcon } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { getIssueStatusFromLicenseStatus } from 'ee/vue_shared/license_compliance/store/utils';
+import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import { s__ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import IssueStatusIcon from '~/reports/components/issue_status_icon.vue';
 
 import { LICENSE_APPROVAL_STATUS, LICENSE_APPROVAL_ACTION } from '../constants';
-import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 
 const visibleClass = 'visible';
 const invisibleClass = 'invisible';
@@ -18,7 +17,7 @@ export default {
     GlDropdown,
     GlDropdownItem,
     GlLoadingIcon,
-    Icon,
+    GlIcon,
     IssueStatusIcon,
   },
   props: {
@@ -66,7 +65,7 @@ export default {
 </script>
 <template>
   <div data-qa-selector="admin_license_compliance_row">
-    <issue-status-icon :status="status" class="float-left append-right-default" />
+    <issue-status-icon :status="status" class="float-left gl-mr-3" />
     <span class="js-license-name" data-qa-selector="license_name_content">{{ license.name }}</span>
     <div class="float-right">
       <div class="d-flex">
@@ -78,11 +77,11 @@ export default {
           right
         >
           <gl-dropdown-item @click="allowLicense(license)">
-            <icon :class="approveIconClass" name="mobile-issue-close" />
+            <gl-icon :class="approveIconClass" name="mobile-issue-close" />
             {{ $options[$options.LICENSE_APPROVAL_ACTION.ALLOW] }}
           </gl-dropdown-item>
           <gl-dropdown-item @click="denyLicense(license)">
-            <icon :class="blacklistIconClass" name="mobile-issue-close" />
+            <gl-icon :class="blacklistIconClass" name="mobile-issue-close" />
             {{ $options[$options.LICENSE_APPROVAL_ACTION.DENY] }}
           </gl-dropdown-item>
         </gl-dropdown>
@@ -94,7 +93,7 @@ export default {
           data-target="#modal-license-delete-confirmation"
           @click="setLicenseInModal(license)"
         >
-          <icon name="remove" />
+          <gl-icon name="remove" />
         </button>
       </div>
     </div>

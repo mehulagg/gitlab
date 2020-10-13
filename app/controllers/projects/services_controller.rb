@@ -12,25 +12,29 @@ class Projects::ServicesController < Projects::ApplicationController
   before_action :set_deprecation_notice_for_prometheus_service, only: [:edit, :update]
   before_action :redirect_deprecated_prometheus_service, only: [:update]
   before_action only: :edit do
-    push_frontend_feature_flag(:integration_form_refactor)
+    push_frontend_feature_flag(:jira_issues_integration, @project, type: :licensed, default_enabled: true)
   end
 
   respond_to :html
 
   layout "project_settings"
 
+  feature_category :integrations
+
   def edit
+    @default_integration = Service.default_integration(service.type, project)
   end
 
   def update
     @service.attributes = service_params[:service]
+    @service.inherit_from_id = nil if service_params[:service][:inherit_from_id].blank?
 
     saved = @service.save(context: :manual_change)
 
     respond_to do |format|
       format.html do
         if saved
-          target_url = safe_redirect_path(params[:redirect_to]).presence || project_settings_integrations_path(@project)
+          target_url = safe_redirect_path(params[:redirect_to]).presence || edit_project_service_path(@project, @service)
           redirect_to target_url, notice: success_message
         else
           render 'edit'
@@ -60,21 +64,23 @@ class Projects::ServicesController < Projects::ApplicationController
       return { error: true, message: _('Validations failed.'), service_response: @service.errors.full_messages.join(','), test_failed: false }
     end
 
-    result = Integrations::Test::ProjectService.new(@service, current_user, params[:event]).execute
+    result = ::Integrations::Test::ProjectService.new(@service, current_user, params[:event]).execute
 
     unless result[:success]
-      return { error: true, message: _('Test failed.'), service_response: result[:message].to_s, test_failed: true }
+      return { error: true, message: s_('Integrations|Connection failed. Please check your settings.'), service_response: result[:message].to_s, test_failed: true }
     end
 
     {}
   rescue Gitlab::HTTP::BlockedUrlError => e
-    { error: true, message: _('Test failed.'), service_response: e.message, test_failed: true }
+    { error: true, message: s_('Integrations|Connection failed. Please check your settings.'), service_response: e.message, test_failed: true }
   end
 
   def success_message
-    message = @service.active? ? _('activated') : _('settings saved, but not activated')
-
-    _('%{service_title} %{message}.') % { service_title: @service.title, message: message }
+    if @service.active?
+      s_('Integrations|%{integration} settings saved and active.') % { integration: @service.title }
+    else
+      s_('Integrations|%{integration} settings saved, but not active.') % { integration: @service.title }
+    end
   end
 
   def service

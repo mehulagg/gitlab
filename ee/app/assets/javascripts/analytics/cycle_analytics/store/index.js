@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import filters from '~/vue_shared/components/filtered_search_bar/store/modules/filters';
 import * as actions from './actions';
 import * as getters from './getters';
 import mutations from './mutations';
@@ -16,5 +17,5 @@ export default () =>
     getters,
     mutations,
     state,
-    modules: { customStages, durationChart, typeOfWork },
+    modules: { customStages, durationChart, typeOfWork, filters },
   });

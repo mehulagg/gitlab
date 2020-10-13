@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Group show page' do
+RSpec.describe 'Group show page' do
   let(:group) { create(:group) }
   let(:path) { group_path(group) }
 
@@ -183,5 +183,18 @@ describe 'Group show page' do
 
       expect(page).to have_selector('.notifications-btn.disabled', visible: true)
     end
+  end
+
+  context 'page og:description' do
+    let(:group) { create(:group, description: '**Lorem** _ipsum_ dolor sit [amet](https://example.com)') }
+    let(:maintainer) { create(:user) }
+
+    before do
+      group.add_maintainer(maintainer)
+      sign_in(maintainer)
+      visit path
+    end
+
+    it_behaves_like 'page meta description', 'Lorem ipsum dolor sit amet'
   end
 end

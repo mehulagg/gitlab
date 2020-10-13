@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Features, stub_feature_flags: false do
+RSpec.describe API::Features, stub_feature_flags: false do
   let_it_be(:user)  { create(:user) }
   let_it_be(:admin) { create(:admin) }
 
@@ -12,6 +12,8 @@ describe API::Features, stub_feature_flags: false do
     Flipper.register(:perf_team) do |actor|
       actor.respond_to?(:admin) && actor.admin?
     end
+
+    skip_feature_flags_yaml_validation
   end
 
   describe 'GET /features' do

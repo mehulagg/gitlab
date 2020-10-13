@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::JobArtifact do
+RSpec.describe Ci::JobArtifact do
   let(:artifact) { create(:ci_job_artifact, :archive) }
 
   describe "Associations" do
@@ -19,8 +19,10 @@ describe Ci::JobArtifact do
 
   it_behaves_like 'having unique enum values'
 
-  it_behaves_like 'UpdateProjectStatistics' do
-    subject { build(:ci_job_artifact, :archive, size: 107464) }
+  it_behaves_like 'UpdateProjectStatistics', :with_counter_attribute do
+    let_it_be(:job, reload: true) { create(:ci_build) }
+
+    subject { build(:ci_job_artifact, :archive, job: job, size: 107464) }
   end
 
   describe '.not_expired' do
@@ -42,7 +44,7 @@ describe Ci::JobArtifact do
       let!(:metrics_report) { create(:ci_job_artifact, :junit) }
       let!(:codequality_report) { create(:ci_job_artifact, :codequality) }
 
-      it { is_expected.to eq([metrics_report, codequality_report]) }
+      it { is_expected.to match_array([metrics_report, codequality_report]) }
     end
   end
 
@@ -110,6 +112,21 @@ describe Ci::JobArtifact do
     end
   end
 
+  describe '.associated_file_types_for' do
+    using RSpec::Parameterized::TableSyntax
+
+    subject { Ci::JobArtifact.associated_file_types_for(file_type) }
+
+    where(:file_type, :result) do
+      'codequality'         | %w(codequality)
+      'quality'             | nil
+    end
+
+    with_them do
+      it { is_expected.to eq result }
+    end
+  end
+
   describe '.erasable' do
     subject { described_class.erasable }
 
@@ -171,18 +188,6 @@ describe Ci::JobArtifact do
     it 'returns job artifacts for a given pipeline sha' do
       expect(described_class.for_sha(first_pipeline.sha, first_pipeline.project.id)).to eq([first_artifact])
       expect(described_class.for_sha(second_pipeline.sha, first_pipeline.project.id)).to eq([second_artifact])
-    end
-  end
-
-  describe '.for_ref' do
-    let(:first_pipeline) { create(:ci_pipeline, ref: 'first_ref') }
-    let(:second_pipeline) { create(:ci_pipeline, ref: 'second_ref', project: first_pipeline.project) }
-    let!(:first_artifact) { create(:ci_job_artifact, job: create(:ci_build, pipeline: first_pipeline)) }
-    let!(:second_artifact) { create(:ci_job_artifact, job: create(:ci_build, pipeline: second_pipeline)) }
-
-    it 'returns job artifacts for a given pipeline ref' do
-      expect(described_class.for_ref(first_pipeline.ref, first_pipeline.project.id)).to eq([first_artifact])
-      expect(described_class.for_ref(second_pipeline.ref, first_pipeline.project.id)).to eq([second_artifact])
     end
   end
 
@@ -340,42 +345,6 @@ describe Ci::JobArtifact do
     end
   end
 
-  describe '#each_blob' do
-    context 'when file format is gzip' do
-      context 'when gzip file contains one file' do
-        let(:artifact) { build(:ci_job_artifact, :junit) }
-
-        it 'iterates blob once' do
-          expect { |b| artifact.each_blob(&b) }.to yield_control.once
-        end
-      end
-
-      context 'when gzip file contains three files' do
-        let(:artifact) { build(:ci_job_artifact, :junit_with_three_testsuites) }
-
-        it 'iterates blob three times' do
-          expect { |b| artifact.each_blob(&b) }.to yield_control.exactly(3).times
-        end
-      end
-    end
-
-    context 'when file format is raw' do
-      let(:artifact) { build(:ci_job_artifact, :codequality, file_format: :raw) }
-
-      it 'iterates blob once' do
-        expect { |b| artifact.each_blob(&b) }.to yield_control.once
-      end
-    end
-
-    context 'when there are no adapters for the file format' do
-      let(:artifact) { build(:ci_job_artifact, :junit, file_format: :zip) }
-
-      it 'raises an error' do
-        expect { |b| artifact.each_blob(&b) }.to raise_error(described_class::NotSupportedAdapterError)
-      end
-    end
-  end
-
   describe 'expired?' do
     subject { artifact.expired? }
 
@@ -480,11 +449,7 @@ describe Ci::JobArtifact do
     subject { create(:ci_job_artifact, :archive) }
 
     context 'when existing object has local store' do
-      it 'is stored locally' do
-        expect(subject.file_store).to be(ObjectStorage::Store::LOCAL)
-        expect(subject.file).to be_file_storage
-        expect(subject.file.object_store).to eq(ObjectStorage::Store::LOCAL)
-      end
+      it_behaves_like 'mounted file in local store'
     end
 
     context 'when direct upload is enabled' do
@@ -493,12 +458,94 @@ describe Ci::JobArtifact do
       end
 
       context 'when file is stored' do
-        it 'is stored remotely' do
-          expect(subject.file_store).to eq(ObjectStorage::Store::REMOTE)
-          expect(subject.file).not_to be_file_storage
-          expect(subject.file.object_store).to eq(ObjectStorage::Store::REMOTE)
+        it_behaves_like 'mounted file in object store'
+      end
+    end
+  end
+
+  describe '.file_types' do
+    context 'all file types have corresponding limit' do
+      let_it_be(:plan_limits) { create(:plan_limits) }
+
+      where(:file_type) do
+        described_class.file_types.keys
+      end
+
+      with_them do
+        let(:limit_name) { "#{described_class::PLAN_LIMIT_PREFIX}#{file_type}" }
+
+        it { expect(plan_limits.attributes).to include(limit_name), file_type_limit_failure_message(file_type, limit_name) }
+      end
+    end
+  end
+
+  describe '.max_artifact_size' do
+    let(:build) { create(:ci_build) }
+
+    subject(:max_size) { described_class.max_artifact_size(type: artifact_type, project: build.project) }
+
+    context 'when file type is supported' do
+      let(:project_closest_setting) { 1024 }
+      let(:artifact_type) { 'junit' }
+      let(:limit_name) { "#{described_class::PLAN_LIMIT_PREFIX}#{artifact_type}" }
+
+      let!(:plan_limits) { create(:plan_limits, :default_plan) }
+
+      shared_examples_for 'basing off the project closest setting' do
+        it { is_expected.to eq(project_closest_setting.megabytes.to_i) }
+      end
+
+      shared_examples_for 'basing off the plan limit' do
+        it { is_expected.to eq(max_size_for_type.megabytes.to_i) }
+      end
+
+      before do
+        allow(build.project).to receive(:closest_setting).with(:max_artifacts_size).and_return(project_closest_setting)
+      end
+
+      context 'and plan limit is disabled for the given artifact type' do
+        before do
+          plan_limits.update!(limit_name => 0)
+        end
+
+        it_behaves_like 'basing off the project closest setting'
+
+        context 'and project closest setting results to zero' do
+          let(:project_closest_setting) { 0 }
+
+          it { is_expected.to eq(0) }
+        end
+      end
+
+      context 'and plan limit is enabled for the given artifact type' do
+        before do
+          plan_limits.update!(limit_name => max_size_for_type)
+        end
+
+        context 'and plan limit is smaller than project setting' do
+          let(:max_size_for_type) { project_closest_setting - 1 }
+
+          it_behaves_like 'basing off the plan limit'
+        end
+
+        context 'and plan limit is larger than project setting' do
+          let(:max_size_for_type) { project_closest_setting + 1 }
+
+          it_behaves_like 'basing off the project closest setting'
         end
       end
     end
+  end
+
+  def file_type_limit_failure_message(type, limit_name)
+    <<~MSG
+      The artifact type `#{type}` is missing its counterpart plan limit which is expected to be named `#{limit_name}`.
+
+      Please refer to https://docs.gitlab.com/ee/development/application_limits.html on how to add new plan limit columns.
+
+      Take note that while existing max size plan limits default to 0, succeeding new limits are recommended to have
+      non-zero default values. Also, remember to update the plan limits documentation (doc/administration/instance_limits.md)
+      when changes or new entries are made.
+    MSG
   end
 end

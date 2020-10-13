@@ -1,47 +1,21 @@
-import SnippetHeader from '~/snippets/components/snippet_header.vue';
-import DeleteSnippetMutation from '~/snippets/mutations/deleteSnippet.mutation.graphql';
 import { ApolloMutation } from 'vue-apollo';
 import { GlButton, GlModal } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
+import { Blob, BinaryBlob } from 'jest/blob/components/mock_data';
+import waitForPromises from 'helpers/wait_for_promises';
+import DeleteSnippetMutation from '~/snippets/mutations/deleteSnippet.mutation.graphql';
+import SnippetHeader from '~/snippets/components/snippet_header.vue';
+import { differenceInMilliseconds } from '~/lib/utils/datetime_utility';
 
 describe('Snippet header component', () => {
   let wrapper;
-  const snippet = {
-    id: 'gid://gitlab/PersonalSnippet/50',
-    title: 'The property of Thor',
-    visibilityLevel: 'private',
-    webUrl: 'http://personal.dev.null/42',
-    userPermissions: {
-      adminSnippet: true,
-      updateSnippet: true,
-      reportSnippet: false,
-    },
-    project: null,
-    author: {
-      name: 'Thor Odinson',
-    },
-    blob: {
-      binary: false,
-    },
-  };
-  const mutationVariables = {
-    mutation: DeleteSnippetMutation,
-    variables: {
-      id: snippet.id,
-    },
-  };
-  const errorMsg = 'Foo bar';
-  const err = { message: errorMsg };
+  let snippet;
+  let mutationTypes;
+  let mutationVariables;
 
-  const resolveMutate = jest.fn(() =>
-    Promise.resolve({ data: { destroySnippet: { errors: [] } } }),
-  );
-  const rejectMutation = jest.fn(() => Promise.reject(err));
-
-  const mutationTypes = {
-    RESOLVE: resolveMutate,
-    REJECT: rejectMutation,
-  };
+  let errorMsg;
+  let err;
+  const originalRelativeUrlRoot = gon.relative_url_root;
 
   function createComponent({
     loading = false,
@@ -49,7 +23,6 @@ describe('Snippet header component', () => {
     mutationRes = mutationTypes.RESOLVE,
     snippetProps = {},
   } = {}) {
-    // const defaultProps = Object.assign({}, snippet, snippetProps);
     const defaultProps = Object.assign(snippet, snippetProps);
     if (permissions) {
       Object.assign(defaultProps.userPermissions, {
@@ -65,7 +38,7 @@ describe('Snippet header component', () => {
       mutate: mutationRes,
     };
 
-    wrapper = shallowMount(SnippetHeader, {
+    wrapper = mount(SnippetHeader, {
       mocks: { $apollo },
       propsData: {
         snippet: {
@@ -78,13 +51,67 @@ describe('Snippet header component', () => {
     });
   }
 
+  beforeEach(() => {
+    gon.relative_url_root = '/foo/';
+    snippet = {
+      id: 'gid://gitlab/PersonalSnippet/50',
+      title: 'The property of Thor',
+      visibilityLevel: 'private',
+      webUrl: 'http://personal.dev.null/42',
+      userPermissions: {
+        adminSnippet: true,
+        updateSnippet: true,
+        reportSnippet: false,
+      },
+      project: null,
+      author: {
+        name: 'Thor Odinson',
+      },
+      blobs: [Blob],
+      createdAt: new Date(differenceInMilliseconds(32 * 24 * 3600 * 1000)).toISOString(),
+    };
+
+    mutationVariables = {
+      mutation: DeleteSnippetMutation,
+      variables: {
+        id: snippet.id,
+      },
+    };
+
+    errorMsg = 'Foo bar';
+    err = { message: errorMsg };
+
+    mutationTypes = {
+      RESOLVE: jest.fn(() => Promise.resolve({ data: { destroySnippet: { errors: [] } } })),
+      REJECT: jest.fn(() => Promise.reject(err)),
+    };
+  });
+
   afterEach(() => {
     wrapper.destroy();
+    gon.relative_url_root = originalRelativeUrlRoot;
   });
 
   it('renders itself', () => {
     createComponent();
     expect(wrapper.find('.detail-page-header').exists()).toBe(true);
+  });
+
+  it('renders a message showing snippet creation date and author', () => {
+    createComponent();
+
+    const text = wrapper.find('[data-testid="authored-message"]').text();
+    expect(text).toContain('Authored 1 month ago by');
+    expect(text).toContain('Thor Odinson');
+  });
+
+  it('renders a message showing only snippet creation date if author is null', () => {
+    snippet.author = null;
+
+    createComponent();
+
+    const text = wrapper.find('[data-testid="authored-message"]').text();
+    expect(text).toBe('Authored 1 month ago');
   });
 
   it('renders action buttons based on permissions', () => {
@@ -131,15 +158,18 @@ describe('Snippet header component', () => {
     expect(wrapper.find(GlModal).exists()).toBe(true);
   });
 
-  it('renders Edit button as disabled for binary snippets', () => {
+  it.each`
+    blobs                 | isDisabled | condition
+    ${[Blob]}             | ${false}   | ${'no binary'}
+    ${[Blob, BinaryBlob]} | ${true}    | ${'several blobs. incl. a binary'}
+    ${[BinaryBlob]}       | ${true}    | ${'binary'}
+  `('renders Edit button when snippet contains $condition file', ({ blobs, isDisabled }) => {
     createComponent({
       snippetProps: {
-        blob: {
-          binary: true,
-        },
+        blobs,
       },
     });
-    expect(wrapper.find('[href*="edit"]').props('disabled')).toBe(true);
+    expect(wrapper.find('[href*="edit"]').props('disabled')).toBe(isDisabled);
   });
 
   describe('Delete mutation', () => {
@@ -162,14 +192,15 @@ describe('Snippet header component', () => {
       expect(mutationTypes.RESOLVE).toHaveBeenCalledWith(mutationVariables);
     });
 
-    it('sets error message if mutation fails', () => {
+    it('sets error message if mutation fails', async () => {
       createComponent({ mutationRes: mutationTypes.REJECT });
       expect(Boolean(wrapper.vm.errorMessage)).toBe(false);
 
       wrapper.vm.deleteSnippet();
-      return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.vm.errorMessage).toEqual(errorMsg);
-      });
+
+      await waitForPromises();
+
+      expect(wrapper.vm.errorMessage).toEqual(errorMsg);
     });
 
     describe('in case of successful mutation, closes modal and redirects to correct listing', () => {
@@ -186,7 +217,7 @@ describe('Snippet header component', () => {
       it('redirects to dashboard/snippets for personal snippet', () => {
         return createDeleteSnippet().then(() => {
           expect(wrapper.vm.closeDeleteModal).toHaveBeenCalled();
-          expect(window.location.pathname).toBe('dashboard/snippets');
+          expect(window.location.pathname).toBe(`${gon.relative_url_root}dashboard/snippets`);
         });
       });
 
@@ -198,7 +229,7 @@ describe('Snippet header component', () => {
           },
         }).then(() => {
           expect(wrapper.vm.closeDeleteModal).toHaveBeenCalled();
-          expect(window.location.pathname).toBe(`${fullPath}/snippets`);
+          expect(window.location.pathname).toBe(`${fullPath}/-/snippets`);
         });
       });
     });

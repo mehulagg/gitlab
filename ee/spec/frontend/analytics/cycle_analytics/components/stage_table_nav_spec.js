@@ -13,7 +13,6 @@ describe('StageTableNav', () => {
         stages,
         isCreatingCustomStage: false,
         customStageFormActive: false,
-        canEditStages: false,
         customOrdering: false,
         errorSavingStageOrder: false,
         ...props,
@@ -61,20 +60,17 @@ describe('StageTableNav', () => {
     });
   });
 
-  describe('canEditStages = true', () => {
-    beforeEach(() => {
-      wrapper = createComponent({
-        props: {
-          canEditStages: true,
-        },
-      });
+  describe('Add stage button', () => {
+    it('will render', () => {
+      wrapper = createComponent();
+      expect(wrapper.find(AddStageButton).exists()).toBe(true);
     });
 
-    afterEach(() => {
-      wrapper.destroy();
-    });
-    it('will render the add a stage button', () => {
-      expect(wrapper.find(AddStageButton).exists()).toBe(true);
+    it('will emit showAddStageForm action when clicked', () => {
+      wrapper = createComponent({ mountFn: mount });
+      wrapper.find(AddStageButton).trigger('click');
+
+      expect(wrapper.emitted('showAddStageForm')).toHaveLength(1);
     });
   });
 

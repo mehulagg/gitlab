@@ -1,6 +1,6 @@
 - page_title s_('GroupSAML|SAML Single Sign On Settings')
-%section.row.prepend-top-default
-  .col-lg-3.append-bottom-default
+%section.row.gl-mt-3
+  .col-lg-3.gl-mb-3
     %h4.page-title
       = s_("GroupSAML|SAML Single Sign On")
     %p
@@ -11,7 +11,7 @@
   .col-lg-9
     = render 'info'
 %section.row.border-top.mt-4
-  .col-lg-3.append-bottom-default
+  .col-lg-3.gl-mb-3
     %h4.page-title
       = s_('GroupSAML|Configuration')
   .col-lg-9
@@ -19,23 +19,23 @@
 - if @saml_response_check
   #response.pt-3
     %section.row.border-top.mt-4
-      .col-lg-3.append-bottom-default
+      .col-lg-3.gl-mb-3
         %h4.page-title
           = s_('GroupSAML|SAML Response Output')
       .col-lg-9
         = render 'response_debug'
 %section.row.border-top.mt-4
-  .col-lg-3.append-bottom-default
+  .col-lg-3.gl-mb-3
     %h4.page-title
       = s_('GroupSAML|SCIM Token')
   .col-lg-9
     = render 'scim_token'
 %section.row.border-top.mt-4
-  .col-lg-3.append-bottom-default
+  .col-lg-3.gl-mb-3
     %h4.page-title
       = s_('GroupSAML|Members')
   .col-lg-9
-    .js-saml-members.prepend-top-default{ data: { group_id: @group.id } }
+    .js-saml-members.gl-mt-3{ data: { group_id: @group.id } }
       .animation-container
         .skeleton-line-1
         .skeleton-line-2

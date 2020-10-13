@@ -62,6 +62,30 @@ RSpec.describe Projects::UpdateMirrorService do
       end
     end
 
+    context "when the URL is blocked" do
+      before do
+        allow(Gitlab::UrlBlocker).to receive(:blocked_url?).and_return(true)
+
+        stub_fetch_mirror(project)
+      end
+
+      it "fails and returns error status" do
+        expect(service.execute[:status]).to eq(:error)
+      end
+    end
+
+    context "when given URLs containing escaped elements" do
+      it_behaves_like "URLs containing escaped elements return expected status" do
+        let(:result) { service.execute }
+
+        before do
+          allow(project).to receive(:import_url).and_return(url)
+
+          stub_fetch_mirror(project)
+        end
+      end
+    end
+
     context "updating tags" do
       it "creates new tags" do
         stub_fetch_mirror(project)
@@ -107,6 +131,8 @@ RSpec.describe Projects::UpdateMirrorService do
 
       before do
         allow(project).to receive(:import_url).and_return(mirror_path)
+
+        allow(Gitlab::UrlBlocker).to receive(:blocked_url?).and_return(false)
       end
 
       context 'when mirror_overwrites_diverged_branches is true' do
@@ -189,7 +215,7 @@ RSpec.describe Projects::UpdateMirrorService do
             let(:protected_branch_name) { "#{branch_prefix}existing-branch" }
 
             before do
-              project.update(only_mirror_protected_branches: true)
+              project.update!(only_mirror_protected_branches: true)
             end
 
             it 'creates a new protected branch' do
@@ -282,7 +308,7 @@ RSpec.describe Projects::UpdateMirrorService do
         let(:pull_mirror_branch_prefix) { 'upstream/' }
 
         before do
-          project.update(pull_mirror_branch_prefix: pull_mirror_branch_prefix)
+          project.update!(pull_mirror_branch_prefix: pull_mirror_branch_prefix)
         end
 
         it "doesn't create unprefixed branches" do

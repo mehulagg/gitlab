@@ -4,10 +4,10 @@ require 'spec_helper'
 RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
   include ImportExport::CommonUtil
 
+  subject(:restored_project_json) { project_tree_restorer.restore }
+
   let(:shared) { project.import_export_shared }
   let(:project_tree_restorer) { described_class.new(user: user, shared: shared, project: project) }
-
-  subject(:restored_project_json) { project_tree_restorer.restore }
 
   describe 'epics' do
     let_it_be(:user) { create(:user)}
@@ -17,8 +17,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
     end
 
     context 'with group' do
-      let(:issue) { project.issues.find_by_title('Issue with Epic') }
-      let!(:project) do
+      let_it_be(:project) do
         create(:project,
                :builds_disabled,
                :issues_disabled,
@@ -27,8 +26,10 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
                group: create(:group, :private))
       end
 
+      let(:issue) { project.issues.find_by_title('Issue with Epic') }
+
       context 'with pre-existing epic' do
-        let!(:epic) { create(:epic, title: 'An epic', group: project.group) }
+        let_it_be(:epic) { create(:epic, title: 'An epic', group: project.group) }
 
         it 'associates epics' do
           project = Project.find_by_path('project')
@@ -54,7 +55,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
     end
 
     context 'with personal namespace' do
-      let!(:project) do
+      let_it_be(:project) do
         create(:project,
                :builds_disabled,
                :issues_disabled,
@@ -92,6 +93,23 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
         protected_env = project.protected_environments.first
         expect(protected_env.deploy_access_levels.count).to eq(1)
       end
+    end
+  end
+
+  describe 'security_settings' do
+    let_it_be(:project) { create(:project, name: 'project', path: 'project') }
+    let(:user) { create(:user)}
+
+    before do
+      setup_import_export_config('complex', 'ee')
+    end
+
+    it 'creates security setting' do
+      project = Project.find_by_path('project')
+
+      expect { restored_project_json }.to change { ProjectSecuritySetting.count }.from(0).to(1)
+      expect(project.security_setting.auto_fix_dependency_scanning).to be_falsey
+      expect(project.security_setting.auto_fix_container_scanning).to be_truthy
     end
   end
 end

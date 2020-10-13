@@ -1,15 +1,23 @@
 <script>
-import { GlEmptyState, GlLink, GlSprintf } from '@gitlab/ui';
+import OnDemandScansForm from './on_demand_scans_form.vue';
+import OnDemandScansEmptyState from './on_demand_scans_empty_state.vue';
 
 export default {
   name: 'OnDemandScansApp',
   components: {
-    GlEmptyState,
-    GlLink,
-    GlSprintf,
+    OnDemandScansForm,
+    OnDemandScansEmptyState,
   },
   props: {
     helpPagePath: {
+      type: String,
+      required: true,
+    },
+    projectPath: {
+      type: String,
+      required: true,
+    },
+    defaultBranch: {
       type: String,
       required: true,
     },
@@ -18,32 +26,29 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      showForm: false,
+    };
+  },
 };
 </script>
 
 <template>
   <div>
-    <gl-empty-state
-      :svg-path="emptyStateSvgPath"
-      :title="s__('OnDemandScans|On-demand Scans')"
-      :primary-button-text="s__('OnDemandScans|Create new DAST scan')"
-      primary-button-link="#"
-    >
-      <template #description>
-        <gl-sprintf
-          :message="
-            s__(
-              'OnDemandScans|Schedule or run scans immediately against target sites. Currently available on-demand scan type: DAST. %{helpLinkStart}More information%{helpLinkEnd}',
-            )
-          "
-        >
-          <template #helpLink="{ content }">
-            <gl-link :href="helpPagePath">
-              {{ content }}
-            </gl-link>
-          </template>
-        </gl-sprintf>
-      </template>
-    </gl-empty-state>
+    <template v-if="showForm">
+      <on-demand-scans-form
+        :help-page-path="helpPagePath"
+        :project-path="projectPath"
+        :default-branch="defaultBranch"
+        @cancel="showForm = false"
+      />
+    </template>
+    <on-demand-scans-empty-state
+      v-else
+      :help-page-path="helpPagePath"
+      :empty-state-svg-path="emptyStateSvgPath"
+      @createNewScan="showForm = true"
+    />
   </div>
 </template>

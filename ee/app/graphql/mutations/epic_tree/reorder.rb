@@ -8,7 +8,7 @@ module Mutations
       authorize :admin_epic
 
       argument :base_epic_id,
-               GraphQL::ID_TYPE,
+               ::Types::GlobalIDType[::Epic],
                required: true,
                description: 'The id of the base epic of the tree'
 
@@ -18,13 +18,31 @@ module Mutations
                description: 'Parameters for updating the tree positions'
 
       def resolve(args)
-        params = args[:moved]
-        moving_params = params.to_hash.slice(:adjacent_reference_id, :relative_position, :new_parent_id).merge(base_epic_id: args[:base_epic_id])
+        moving_object_id = args[:moved][:id]
+        moving_params = args[:moved].to_hash.slice(:adjacent_reference_id, :relative_position, :new_parent_id).merge(base_epic_id: args[:base_epic_id])
+        moving_object_id, moving_params = coerce_input(moving_object_id, moving_params)
 
-        result = ::Epics::TreeReorderService.new(current_user, params[:id], moving_params).execute
+        result = ::Epics::TreeReorderService.new(current_user, moving_object_id, moving_params).execute
         errors = result[:status] == :error ? [result[:message]] : []
 
         { errors: errors }
+      end
+
+      # TODO: remove explicit coercion once compatibility layer has been removed
+      # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+      def coerce_input(moving_object_id, moving_params)
+        moving_object_id = ::Types::GlobalIDType[::EpicTreeSorting].coerce_isolated_input(moving_object_id)
+        moving_params[:base_epic_id] = ::Types::GlobalIDType[::Epic].coerce_isolated_input(moving_params[:base_epic_id])
+
+        if moving_params[:adjacent_reference_id]
+          moving_params[:adjacent_reference_id] = ::Types::GlobalIDType[::EpicTreeSorting].coerce_isolated_input(moving_params[:adjacent_reference_id])
+        end
+
+        if moving_params[:new_parent_id]
+          moving_params[:new_parent_id] = ::Types::GlobalIDType[::Epic].coerce_isolated_input(moving_params[:new_parent_id])
+        end
+
+        [moving_object_id, moving_params]
       end
     end
   end

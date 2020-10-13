@@ -14,70 +14,6 @@ RSpec.describe SystemNoteService do
   let_it_be(:issue)    { noteable }
   let_it_be(:epic)     { create(:epic, group: group) }
 
-  describe '.relate_issue' do
-    let(:noteable_ref) { double }
-    let(:noteable) { double }
-
-    before do
-      allow(noteable).to receive(:project).and_return(double)
-    end
-
-    it 'calls IssuableService' do
-      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
-        expect(service).to receive(:relate_issue).with(noteable_ref)
-      end
-
-      described_class.relate_issue(noteable, noteable_ref, double)
-    end
-  end
-
-  describe '.unrelate_issue' do
-    let(:noteable_ref) { double }
-    let(:noteable) { double }
-
-    before do
-      allow(noteable).to receive(:project).and_return(double)
-    end
-
-    it 'calls IssuableService' do
-      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
-        expect(service).to receive(:unrelate_issue).with(noteable_ref)
-      end
-
-      described_class.unrelate_issue(noteable, noteable_ref, double)
-    end
-  end
-
-  describe '.approve_mr' do
-    it 'calls MergeRequestsService' do
-      expect_next_instance_of(::SystemNotes::MergeRequestsService) do |service|
-        expect(service).to receive(:approve_mr)
-      end
-
-      described_class.approve_mr(noteable, author)
-    end
-  end
-
-  describe '.unapprove_mr' do
-    it 'calls MergeRequestsService' do
-      expect_next_instance_of(::SystemNotes::MergeRequestsService) do |service|
-        expect(service).to receive(:unapprove_mr)
-      end
-
-      described_class.unapprove_mr(noteable, author)
-    end
-  end
-
-  describe '.change_weight_note' do
-    it 'calls IssuableService' do
-      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
-        expect(service).to receive(:change_weight_note)
-      end
-
-      described_class.change_weight_note(noteable, project, author)
-    end
-  end
-
   describe '.change_health_status_note' do
     it 'calls IssuableService' do
       expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
@@ -223,16 +159,6 @@ RSpec.describe SystemNoteService do
       end
 
       described_class.publish_issue_to_status_page(noteable, project, author)
-    end
-  end
-
-  describe '.change_iteration' do
-    it 'calls IssuablesService' do
-      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
-        expect(service).to receive(:change_iteration)
-      end
-
-      described_class.change_iteration(noteable, author, nil)
     end
   end
 end

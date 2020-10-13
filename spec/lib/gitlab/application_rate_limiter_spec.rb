@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ApplicationRateLimiter, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::ApplicationRateLimiter, :clean_gitlab_redis_cache do
   let(:redis) { double('redis') }
   let(:user) { create(:user) }
   let(:project) { create(:project) }
@@ -14,6 +14,7 @@ describe Gitlab::ApplicationRateLimiter, :clean_gitlab_redis_cache do
       }
     }
   end
+
   let(:key) { rate_limits.keys[0] }
 
   subject { described_class }

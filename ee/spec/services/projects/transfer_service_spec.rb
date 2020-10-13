@@ -34,6 +34,7 @@ RSpec.describe Projects::TransferService do
           expect(instance).to receive(:has_container_registry_tags?).and_return(true)
         end
       end
+
       let(:attributes) do
         {
            author_id: user.id,
@@ -49,37 +50,6 @@ RSpec.describe Projects::TransferService do
              target_details: project.full_path
            }
          }
-      end
-    end
-  end
-
-  context 'with npm packages' do
-    let!(:package) { create(:npm_package, project: project) }
-
-    before do
-      stub_licensed_features(packages: true)
-    end
-
-    context 'with a root namespace change' do
-      it 'does not allow the transfer' do
-        expect(subject.execute(group)).to be false
-        expect(project.errors[:new_namespace]).to include("Root namespace can't be updated if project has NPM packages")
-      end
-    end
-
-    context 'without a root namespace change' do
-      let(:root) { create(:group) }
-      let(:group) { create(:group, parent: root) }
-      let(:other_group) { create(:group, parent: root) }
-      let(:project) { create(:project, :repository, namespace: group) }
-
-      before do
-        other_group.add_owner(user)
-      end
-
-      it 'does allow the transfer' do
-        expect(subject.execute(other_group)).to be true
-        expect(project.errors[:new_namespace]).to be_empty
       end
     end
   end

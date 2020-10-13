@@ -97,7 +97,9 @@ describe('Report issues', () => {
     });
 
     it('renders severity', () => {
-      expect(vm.$el.textContent.trim()).toContain(dockerReportParsed.unapproved[0].severity);
+      expect(vm.$el.textContent.trim().toLowerCase()).toContain(
+        dockerReportParsed.unapproved[0].severity,
+      );
     });
 
     it('renders CVE name', () => {
@@ -121,7 +123,7 @@ describe('Report issues', () => {
 
     it('renders severity and title', () => {
       expect(vm.$el.textContent).toContain(parsedDast[0].title);
-      expect(vm.$el.textContent).toContain(`${parsedDast[0].severity}`);
+      expect(vm.$el.textContent.toLowerCase()).toContain(`${parsedDast[0].severity}`);
     });
   });
 
@@ -135,7 +137,9 @@ describe('Report issues', () => {
     });
 
     it('renders severity', () => {
-      expect(vm.$el.textContent.trim()).toContain(secretScanningParsedIssues[0].severity);
+      expect(vm.$el.textContent.trim().toLowerCase()).toContain(
+        secretScanningParsedIssues[0].severity,
+      );
     });
 
     it('renders CVE name', () => {

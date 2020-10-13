@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::DeleteNonLatestDiffsService, :clean_gitlab_redis_shared_state do
+RSpec.describe MergeRequests::DeleteNonLatestDiffsService, :clean_gitlab_redis_shared_state do
   let(:merge_request) { create(:merge_request) }
 
   let!(:subject) { described_class.new(merge_request) }
@@ -19,7 +19,7 @@ describe MergeRequests::DeleteNonLatestDiffsService, :clean_gitlab_redis_shared_
 
       expect(diffs.count).to eq(4)
 
-      Timecop.freeze do
+      freeze_time do
         expect(DeleteDiffFilesWorker)
           .to receive(:bulk_perform_in)
           .with(5.minutes, [[diffs.first.id], [diffs.second.id]])

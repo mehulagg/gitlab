@@ -2,43 +2,17 @@
 
 require 'spec_helper'
 
-describe API::Jobs do
+RSpec.describe API::Jobs do
   include HttpIOHelpers
-
-  shared_examples 'a job with artifacts and trace' do |result_is_array: true|
-    context 'with artifacts and trace' do
-      let!(:second_job) { create(:ci_build, :trace_artifact, :artifacts, :test_reports, pipeline: pipeline) }
-
-      it 'returns artifacts and trace data', :skip_before_request do
-        get api(api_endpoint, api_user)
-        json_job = result_is_array ? json_response.select { |job| job['id'] == second_job.id }.first : json_response
-
-        expect(json_job['artifacts_file']).not_to be_nil
-        expect(json_job['artifacts_file']).not_to be_empty
-        expect(json_job['artifacts_file']['filename']).to eq(second_job.artifacts_file.filename)
-        expect(json_job['artifacts_file']['size']).to eq(second_job.artifacts_file.size)
-        expect(json_job['artifacts']).not_to be_nil
-        expect(json_job['artifacts']).to be_an Array
-        expect(json_job['artifacts'].size).to eq(second_job.job_artifacts.length)
-        json_job['artifacts'].each do |artifact|
-          expect(artifact).not_to be_nil
-          file_type = Ci::JobArtifact.file_types[artifact['file_type']]
-          expect(artifact['size']).to eq(second_job.job_artifacts.find_by(file_type: file_type).size)
-          expect(artifact['filename']).to eq(second_job.job_artifacts.find_by(file_type: file_type).filename)
-          expect(artifact['file_format']).to eq(second_job.job_artifacts.find_by(file_type: file_type).file_format)
-        end
-      end
-    end
-  end
 
   let_it_be(:project, reload: true) do
     create(:project, :repository, public_builds: false)
   end
 
   let_it_be(:pipeline, reload: true) do
-    create(:ci_empty_pipeline, project: project,
-                               sha: project.commit.id,
-                               ref: project.default_branch)
+    create(:ci_pipeline, project: project,
+                         sha: project.commit.id,
+                         ref: project.default_branch)
   end
 
   let!(:job) do
@@ -56,7 +30,7 @@ describe API::Jobs do
   end
 
   describe 'GET /projects/:id/jobs' do
-    let(:query) { Hash.new }
+    let(:query) { {} }
 
     before do |example|
       unless example.metadata[:skip_before_request]
@@ -163,111 +137,6 @@ describe API::Jobs do
 
     def go
       get api("/projects/#{project.id}/jobs", api_user), params: query
-    end
-  end
-
-  describe 'GET /projects/:id/pipelines/:pipeline_id/jobs' do
-    let(:query) { Hash.new }
-
-    before do |example|
-      unless example.metadata[:skip_before_request]
-        job
-        get api("/projects/#{project.id}/pipelines/#{pipeline.id}/jobs", api_user), params: query
-      end
-    end
-
-    context 'authorized user' do
-      it 'returns pipeline jobs' do
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response).to be_an Array
-      end
-
-      it 'returns correct values' do
-        expect(json_response).not_to be_empty
-        expect(json_response.first['commit']['id']).to eq project.commit.id
-        expect(Time.parse(json_response.first['artifacts_expire_at'])).to be_like_time(job.artifacts_expire_at)
-        expect(json_response.first['artifacts_file']).to be_nil
-        expect(json_response.first['artifacts']).to be_an Array
-        expect(json_response.first['artifacts']).to be_empty
-      end
-
-      it_behaves_like 'a job with artifacts and trace' do
-        let(:api_endpoint) { "/projects/#{project.id}/pipelines/#{pipeline.id}/jobs" }
-      end
-
-      it 'returns pipeline data' do
-        json_job = json_response.first
-
-        expect(json_job['pipeline']).not_to be_empty
-        expect(json_job['pipeline']['id']).to eq job.pipeline.id
-        expect(json_job['pipeline']['ref']).to eq job.pipeline.ref
-        expect(json_job['pipeline']['sha']).to eq job.pipeline.sha
-        expect(json_job['pipeline']['status']).to eq job.pipeline.status
-      end
-
-      context 'filter jobs with one scope element' do
-        let(:query) { { 'scope' => 'pending' } }
-
-        it do
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response).to be_an Array
-        end
-      end
-
-      context 'filter jobs with array of scope elements' do
-        let(:query) { { scope: %w(pending running) } }
-
-        it do
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response).to be_an Array
-        end
-      end
-
-      context 'respond 400 when scope contains invalid state' do
-        let(:query) { { scope: %w(unknown running) } }
-
-        it { expect(response).to have_gitlab_http_status(:bad_request) }
-      end
-
-      context 'jobs in different pipelines' do
-        let!(:pipeline2) { create(:ci_empty_pipeline, project: project) }
-        let!(:job2) { create(:ci_build, pipeline: pipeline2) }
-
-        it 'excludes jobs from other pipelines' do
-          json_response.each { |job| expect(job['pipeline']['id']).to eq(pipeline.id) }
-        end
-      end
-
-      it 'avoids N+1 queries' do
-        control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
-          get api("/projects/#{project.id}/pipelines/#{pipeline.id}/jobs", api_user), params: query
-        end.count
-
-        create_list(:ci_build, 3, :trace_artifact, :artifacts, :test_reports, pipeline: pipeline)
-
-        expect do
-          get api("/projects/#{project.id}/pipelines/#{pipeline.id}/jobs", api_user), params: query
-        end.not_to exceed_all_query_limit(control_count)
-      end
-    end
-
-    context 'unauthorized user' do
-      context 'when user is not logged in' do
-        let(:api_user) { nil }
-
-        it 'does not return jobs' do
-          expect(response).to have_gitlab_http_status(:unauthorized)
-        end
-      end
-
-      context 'when user is guest' do
-        let(:api_user) { guest }
-
-        it 'does not return jobs' do
-          expect(response).to have_gitlab_http_status(:forbidden)
-        end
-      end
     end
   end
 
@@ -596,12 +465,14 @@ describe API::Jobs do
     end
 
     context 'find proper job' do
+      let(:job_with_artifacts) { job }
+
       shared_examples 'a valid file' do
         context 'when artifacts are stored locally', :sidekiq_might_not_need_inline do
           let(:download_headers) do
             { 'Content-Transfer-Encoding' => 'binary',
               'Content-Disposition' =>
-              %Q(attachment; filename="#{job.artifacts_file.filename}"; filename*=UTF-8''#{job.artifacts_file.filename}) }
+              %Q(attachment; filename="#{job_with_artifacts.artifacts_file.filename}"; filename*=UTF-8''#{job.artifacts_file.filename}) }
           end
 
           it { expect(response).to have_gitlab_http_status(:ok) }
@@ -645,6 +516,18 @@ describe API::Jobs do
 
         before do
           get_for_ref('improve/awesome')
+        end
+
+        it_behaves_like 'a valid file'
+      end
+
+      context 'with job name in a child pipeline' do
+        let(:child_pipeline) { create(:ci_pipeline, child_of: pipeline) }
+        let!(:child_job) { create(:ci_build, :artifacts, :success, name: 'rspec', pipeline: child_pipeline) }
+        let(:job_with_artifacts) { child_job }
+
+        before do
+          get_for_ref('master', child_job.name)
         end
 
         it_behaves_like 'a valid file'

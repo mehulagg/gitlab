@@ -56,11 +56,12 @@ const bindEvents = () => {
 
   function chooseTemplate() {
     const subgroupId = $(this).data('subgroup-id');
+    const groupId = $(this).data('parent-group-id');
     const templateName = $(this).data('template-name');
 
     if (subgroupId) {
       $subgroupWithTemplatesIdInput.val(subgroupId);
-      $namespaceSelect.val(subgroupId).trigger('change');
+      $namespaceSelect.val(groupId).trigger('change');
 
       hideNonRootParentPathOptions();
 
@@ -102,7 +103,7 @@ const bindEvents = () => {
     $projectFieldsForm
       .find('.js-select-namespace')
       .first()
-      .val(subgroupId);
+      .val(groupId);
   }
 
   $useCustomTemplateBtn.on('change', chooseTemplate);

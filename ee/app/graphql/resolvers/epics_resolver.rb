@@ -3,6 +3,7 @@
 module Resolvers
   class EpicsResolver < BaseResolver
     include TimeFrameArguments
+    include LooksAhead
 
     argument :iid, GraphQL::ID_TYPE,
              required: false,
@@ -18,7 +19,7 @@ module Resolvers
 
     argument :search, GraphQL::STRING_TYPE,
              required: false,
-             description: 'Filter epics by title and description'
+             description: 'Search query for epic title or description'
 
     argument :sort, Types::EpicSortEnum,
              required: false,
@@ -31,6 +32,10 @@ module Resolvers
     argument :label_name, [GraphQL::STRING_TYPE],
              required: false,
              description: 'Filter epics by labels'
+
+    argument :milestone_title, GraphQL::STRING_TYPE,
+             required: false,
+             description: "Filter epics by milestone title, computed from epic's issues"
 
     argument :iid_starts_with, GraphQL::STRING_TYPE,
              required: false,
@@ -45,7 +50,7 @@ module Resolvers
       super(args)
     end
 
-    def resolve(**args)
+    def resolve_with_lookahead(**args)
       @resolver_object = object.respond_to?(:sync) ? object.sync : object
 
       return [] unless resolver_object.present?
@@ -58,8 +63,18 @@ module Resolvers
 
     attr_reader :resolver_object
 
+    def unconditional_includes
+      [:group]
+    end
+
+    def preloads
+      {
+        parent: [:parent]
+      }
+    end
+
     def find_epics(args)
-      EpicsFinder.new(context[:current_user], args).execute
+      apply_lookahead(EpicsFinder.new(context[:current_user], args).execute)
     end
 
     def epic_feature_enabled?
@@ -68,7 +83,7 @@ module Resolvers
 
     def transform_args(args)
       transformed               = args.dup
-      transformed[:group_id]    = group.id
+      transformed[:group_id]    = group
       transformed[:parent_id]   = parent.id if parent
       transformed[:iids]      ||= [args[:iid]].compact
 

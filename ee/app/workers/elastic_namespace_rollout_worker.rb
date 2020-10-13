@@ -5,6 +5,7 @@ class ElasticNamespaceRolloutWorker # rubocop:disable Scalability/IdempotentWork
 
   feature_category :global_search
   sidekiq_options retry: 2
+  loggable_arguments 0, 2
 
   ROLLOUT = 'rollout'
   ROLLBACK = 'rollback'

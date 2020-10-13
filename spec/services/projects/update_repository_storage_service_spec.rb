@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::UpdateRepositoryStorageService do
+RSpec.describe Projects::UpdateRepositoryStorageService do
   include Gitlab::ShellAdapter
 
   subject { described_class.new(repository_storage_move) }
@@ -21,6 +21,7 @@ describe Projects::UpdateRepositoryStorageService do
       let(:repository_storage_move) { create(:project_repository_storage_move, :scheduled, project: project, destination_storage_name: destination) }
       let!(:checksum) { project.repository.checksum }
       let(:project_repository_double) { double(:repository) }
+      let(:original_project_repository_double) { double(:repository) }
 
       before do
         allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('default').and_call_original
@@ -29,6 +30,9 @@ describe Projects::UpdateRepositoryStorageService do
         allow(Gitlab::Git::Repository).to receive(:new)
           .with('test_second_storage', project.repository.raw.relative_path, project.repository.gl_repository, project.repository.full_path)
           .and_return(project_repository_double)
+        allow(Gitlab::Git::Repository).to receive(:new)
+          .with('default', project.repository.raw.relative_path, nil, nil)
+          .and_return(original_project_repository_double)
       end
 
       context 'when the move succeeds' do
@@ -37,14 +41,14 @@ describe Projects::UpdateRepositoryStorageService do
             project.repository.path_to_repo
           end
 
-          expect(project_repository_double).to receive(:create_repository)
-            .and_return(true)
           expect(project_repository_double).to receive(:replicate)
             .with(project.repository.raw)
           expect(project_repository_double).to receive(:checksum)
             .and_return(checksum)
+          expect(original_project_repository_double).to receive(:remove)
 
           result = subject.execute
+          project.reload
 
           expect(result).to be_success
           expect(project).not_to be_repository_read_only
@@ -70,18 +74,32 @@ describe Projects::UpdateRepositoryStorageService do
           allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('default').and_call_original
           allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('test_second_storage').and_return(SecureRandom.uuid)
 
-          expect(project_repository_double).to receive(:create_repository)
-            .and_return(true)
           expect(project_repository_double).to receive(:replicate)
             .with(project.repository.raw)
             .and_raise(Gitlab::Git::CommandError)
-          expect(GitlabShellWorker).not_to receive(:perform_async)
 
           result = subject.execute
 
           expect(result).to be_error
           expect(project).not_to be_repository_read_only
           expect(project.repository_storage).to eq('default')
+          expect(repository_storage_move).to be_failed
+        end
+      end
+
+      context 'when the cleanup fails' do
+        it 'sets the correct state' do
+          expect(project_repository_double).to receive(:replicate)
+            .with(project.repository.raw)
+          expect(project_repository_double).to receive(:checksum)
+            .and_return(checksum)
+          expect(original_project_repository_double).to receive(:remove)
+            .and_raise(Gitlab::Git::CommandError)
+
+          result = subject.execute
+
+          expect(result).to be_error
+          expect(repository_storage_move).to be_cleanup_failed
         end
       end
 
@@ -90,13 +108,10 @@ describe Projects::UpdateRepositoryStorageService do
           allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('default').and_call_original
           allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('test_second_storage').and_return(SecureRandom.uuid)
 
-          expect(project_repository_double).to receive(:create_repository)
-            .and_return(true)
           expect(project_repository_double).to receive(:replicate)
             .with(project.repository.raw)
           expect(project_repository_double).to receive(:checksum)
             .and_return('not matching checksum')
-          expect(GitlabShellWorker).not_to receive(:perform_async)
 
           result = subject.execute
 
@@ -113,18 +128,42 @@ describe Projects::UpdateRepositoryStorageService do
           allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('default').and_call_original
           allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('test_second_storage').and_return(SecureRandom.uuid)
 
-          expect(project_repository_double).to receive(:create_repository)
-            .and_return(true)
           expect(project_repository_double).to receive(:replicate)
             .with(project.repository.raw)
           expect(project_repository_double).to receive(:checksum)
             .and_return(checksum)
+          expect(original_project_repository_double).to receive(:remove)
 
           result = subject.execute
+          project.reload
 
           expect(result).to be_success
           expect(project.repository_storage).to eq('test_second_storage')
           expect(project.reload_pool_repository).to be_nil
+        end
+      end
+
+      context 'when the repository move is finished' do
+        let(:repository_storage_move) { create(:project_repository_storage_move, :finished, project: project, destination_storage_name: destination) }
+
+        it 'is idempotent' do
+          expect do
+            result = subject.execute
+
+            expect(result).to be_success
+          end.not_to change(repository_storage_move, :state)
+        end
+      end
+
+      context 'when the repository move is failed' do
+        let(:repository_storage_move) { create(:project_repository_storage_move, :failed, project: project, destination_storage_name: destination) }
+
+        it 'is idempotent' do
+          expect do
+            result = subject.execute
+
+            expect(result).to be_success
+          end.not_to change(repository_storage_move, :state)
         end
       end
     end

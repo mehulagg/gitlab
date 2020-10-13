@@ -4,20 +4,20 @@ class Projects::JobsController < Projects::ApplicationController
   include SendFileUpload
   include ContinueParams
 
-  before_action :build, except: [:index]
+  before_action :find_job_as_build, except: [:index, :play]
+  before_action :find_job_as_processable, only: [:play]
   before_action :authorize_read_build!
   before_action :authorize_update_build!,
     except: [:index, :show, :status, :raw, :trace, :erase]
   before_action :authorize_erase_build!, only: [:erase]
   before_action :authorize_use_build_terminal!, only: [:terminal, :terminal_websocket_authorize]
   before_action :verify_api_request!, only: :terminal_websocket_authorize
-  before_action only: [:show] do
-    push_frontend_feature_flag(:job_log_json, project, default_enabled: true)
-  end
   before_action :authorize_create_proxy_build!, only: :proxy_websocket_authorize
   before_action :verify_proxy_request!, only: :proxy_websocket_authorize
 
   layout 'project'
+
+  feature_category :continuous_integration
 
   def index
     # We need all builds for tabs counters
@@ -31,11 +31,6 @@ class Projects::JobsController < Projects::ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def show
-    @pipeline = @build.pipeline
-    @builds = @pipeline.builds
-      .order('id DESC')
-      .present(current_user: current_user)
-
     respond_to do |format|
       format.html
       format.json do
@@ -50,20 +45,15 @@ class Projects::JobsController < Projects::ApplicationController
   # rubocop: enable CodeReuse/ActiveRecord
 
   def trace
-    build.trace.read do |stream|
+    @build.trace.read do |stream|
       respond_to do |format|
         format.json do
-          build.trace.being_watched!
-
-          # TODO: when the feature flag is removed we should not pass
-          # content_format to serialize method.
-          content_format = Feature.enabled?(:job_log_json, @project, default_enabled: true) ? :json : :html
+          @build.trace.being_watched!
 
           build_trace = Ci::BuildTrace.new(
             build: @build,
             stream: stream,
-            state: params[:state],
-            content_format: content_format)
+            state: params[:state])
 
           render json: BuildTraceSerializer
             .new(project: @project, current_user: @current_user)
@@ -83,8 +73,13 @@ class Projects::JobsController < Projects::ApplicationController
   def play
     return respond_422 unless @build.playable?
 
-    build = @build.play(current_user, play_params[:job_variables_attributes])
-    redirect_to build_path(build)
+    job = @build.play(current_user, play_params[:job_variables_attributes])
+
+    if job.is_a?(Ci::Bridge)
+      redirect_to pipeline_path(job.pipeline)
+    else
+      redirect_to build_path(job)
+    end
   end
 
   def cancel
@@ -128,7 +123,7 @@ class Projects::JobsController < Projects::ApplicationController
                   send_params: raw_send_params,
                   redirect_params: raw_redirect_params)
     else
-      build.trace.read do |stream|
+      @build.trace.read do |stream|
         if stream.file?
           workhorse_set_content_type!
           send_file stream.path, type: 'text/plain; charset=utf-8', disposition: 'inline'
@@ -160,19 +155,19 @@ class Projects::JobsController < Projects::ApplicationController
   private
 
   def authorize_update_build!
-    return access_denied! unless can?(current_user, :update_build, build)
+    return access_denied! unless can?(current_user, :update_build, @build)
   end
 
   def authorize_erase_build!
-    return access_denied! unless can?(current_user, :erase_build, build)
+    return access_denied! unless can?(current_user, :erase_build, @build)
   end
 
   def authorize_use_build_terminal!
-    return access_denied! unless can?(current_user, :create_build_terminal, build)
+    return access_denied! unless can?(current_user, :create_build_terminal, @build)
   end
 
   def authorize_create_proxy_build!
-    return access_denied! unless can?(current_user, :create_build_service_proxy, build)
+    return access_denied! unless can?(current_user, :create_build_service_proxy, @build)
   end
 
   def verify_api_request!
@@ -197,12 +192,20 @@ class Projects::JobsController < Projects::ApplicationController
   end
 
   def trace_artifact_file
-    @trace_artifact_file ||= build.job_artifacts_trace&.file
+    @trace_artifact_file ||= @build.job_artifacts_trace&.file
   end
 
-  def build
-    @build ||= project.builds.find(params[:id])
+  def find_job_as_build
+    @build = project.builds.find(params[:id])
       .present(current_user: current_user)
+  end
+
+  def find_job_as_processable
+    if ::Gitlab::Ci::Features.manual_bridges_enabled?(project)
+      @build = project.processables.find(params[:id])
+    else
+      find_job_as_build
+    end
   end
 
   def build_path(build)
@@ -219,10 +222,10 @@ class Projects::JobsController < Projects::ApplicationController
   end
 
   def build_service_specification
-    build.service_specification(service: params['service'],
-                                port: params['port'],
-                                path: params['path'],
-                                subprotocols: proxy_subprotocol)
+    @build.service_specification(service: params['service'],
+                                 port: params['port'],
+                                 path: params['path'],
+                                 subprotocols: proxy_subprotocol)
   end
 
   def proxy_subprotocol

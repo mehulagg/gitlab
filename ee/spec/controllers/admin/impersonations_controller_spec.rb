@@ -19,7 +19,7 @@ RSpec.describe Admin::ImpersonationsController do
         end
 
         it 'creates an audit log record' do
-          expect { delete :destroy }.to change { SecurityEvent.count }.by(1)
+          expect { delete :destroy }.to change { AuditEvent.count }.by(1)
         end
       end
     end

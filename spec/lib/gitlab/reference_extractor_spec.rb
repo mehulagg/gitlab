@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ReferenceExtractor do
+RSpec.describe Gitlab::ReferenceExtractor do
   let_it_be(:project) { create(:project) }
 
   before do
@@ -296,7 +296,7 @@ describe Gitlab::ReferenceExtractor do
     end
 
     it 'returns all supported prefixes' do
-      expect(prefixes.keys.uniq).to match_array(%w(@ # ~ % ! $ & *iteration:))
+      expect(prefixes.keys.uniq).to match_array(%w(@ # ~ % ! $ & + *iteration:))
     end
 
     it 'does not allow one prefix for multiple referables if not allowed specificly' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'test coverage badge' do
+RSpec.describe 'test coverage badge' do
   let!(:user) { create(:user) }
   let!(:project) { create(:project, :private) }
 
@@ -63,7 +63,7 @@ describe 'test coverage badge' do
 
     create(:ci_pipeline, opts).tap do |pipeline|
       yield pipeline
-      pipeline.update_legacy_status
+      ::Ci::ProcessPipelineService.new(pipeline).execute
     end
   end
 

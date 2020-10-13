@@ -1,36 +1,31 @@
 <script>
 import Visibility from 'visibilityjs';
+import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
+import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
+import Api from 'ee/api';
+import { VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
+import { GlIcon } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import Poll from '~/lib/utils/poll';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, __ } from '~/locale';
-import IssueNote from 'ee/vue_shared/security_reports/components/issue_note.vue';
-import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
+import RelatedIssues from './related_issues.vue';
 import HistoryEntry from './history_entry.vue';
-import VulnerabilitiesEventBus from './vulnerabilities_event_bus';
+import StatusDescription from './status_description.vue';
+import initUserPopovers from '~/user_popovers';
 
 export default {
   name: 'VulnerabilityFooter',
-  components: { IssueNote, SolutionCard, HistoryEntry },
+  components: {
+    SolutionCard,
+    MergeRequestNote,
+    HistoryEntry,
+    RelatedIssues,
+    GlIcon,
+    StatusDescription,
+  },
   props: {
-    discussionsUrl: {
-      type: String,
-      required: true,
-    },
-    feedback: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    notesUrl: {
-      type: String,
-      required: true,
-    },
-    project: {
-      type: Object,
-      required: true,
-    },
-    solutionInfo: {
+    vulnerability: {
       type: Object,
       required: true,
     },
@@ -53,18 +48,49 @@ export default {
           return acc;
         }, {});
     },
-    hasIssue() {
-      return Boolean(this.feedback?.issue_iid);
+    project() {
+      return {
+        url: this.vulnerability.project.full_path,
+        value: this.vulnerability.project.full_name,
+      };
+    },
+    solutionInfo() {
+      const { solution, has_mr: hasMr, remediations, state } = this.vulnerability;
+
+      const remediation = remediations?.[0];
+      const hasDownload = Boolean(
+        state !== VULNERABILITY_STATE_OBJECTS.resolved.state && remediation?.diff?.length && !hasMr,
+      );
+
+      return {
+        solution,
+        remediation,
+        hasDownload,
+        hasMr,
+      };
     },
     hasSolution() {
-      return this.solutionInfo.solution || this.solutionInfo.hasRemediation;
+      return Boolean(this.solutionInfo.solution || this.solutionInfo.remediation);
+    },
+    issueLinksEndpoint() {
+      return Api.buildUrl(Api.vulnerabilityIssueLinksPath).replace(':id', this.vulnerability.id);
+    },
+    vulnerabilityDetectionData() {
+      return {
+        state: 'detected',
+        pipeline: this.vulnerability.pipeline,
+      };
     },
   },
 
   created() {
     this.fetchDiscussions();
+  },
 
-    VulnerabilitiesEventBus.$on('VULNERABILITY_STATE_CHANGE', this.fetchDiscussions);
+  updated() {
+    this.$nextTick(() => {
+      initUserPopovers(this.$el.querySelectorAll('.js-user-link'));
+    });
   },
 
   beforeDestroy() {
@@ -77,7 +103,7 @@ export default {
     },
     fetchDiscussions() {
       axios
-        .get(this.discussionsUrl)
+        .get(this.vulnerability.discussions_url)
         .then(({ data, headers: { date } }) => {
           this.discussionsDictionary = data.reduce((acc, discussion) => {
             acc[discussion.id] = discussion;
@@ -89,7 +115,8 @@ export default {
           if (!this.poll) this.createNotesPoll();
 
           if (!Visibility.hidden()) {
-            this.poll.makeRequest();
+            // delays the initial request by 6 seconds
+            this.poll.makeDelayedRequest(6 * 1000);
           }
 
           Visibility.change(() => {
@@ -112,7 +139,9 @@ export default {
       this.poll = new Poll({
         resource: {
           fetchNotes: () =>
-            axios.get(this.notesUrl, { headers: { 'X-Last-Fetched-At': this.lastFetchedAt } }),
+            axios.get(this.vulnerability.notes_url, {
+              headers: { 'X-Last-Fetched-At': this.lastFetchedAt },
+            }),
         },
         method: 'fetchNotes',
         successCallback: ({ data: { notes, last_fetched_at: lastFetchedAt } }) => {
@@ -124,6 +153,8 @@ export default {
       });
     },
     updateNotes(notes) {
+      let isVulnerabilityStateChanged = false;
+
       notes.forEach(note => {
         // If the note exists, update it.
         if (this.noteDictionary[note.id]) {
@@ -147,18 +178,54 @@ export default {
             notes: [note],
           };
           this.$set(this.discussionsDictionary, newDiscussion.id, newDiscussion);
+
+          // If the vulnerability status has changed, the note will be a system note.
+          if (note.system === true) {
+            isVulnerabilityStateChanged = true;
+          }
         }
       });
+
+      // Emit an event that tells the header to refresh the vulnerability.
+      if (isVulnerabilityStateChanged) {
+        this.$emit('vulnerability-state-change');
+      }
     },
   },
 };
 </script>
 <template>
-  <div>
+  <div data-qa-selector="vulnerability_footer">
     <solution-card v-if="hasSolution" v-bind="solutionInfo" />
-    <div v-if="hasIssue" class="card">
-      <issue-note :feedback="feedback" :project="project" class="card-body" />
+
+    <div v-if="vulnerability.merge_request_feedback" class="card gl-mt-5">
+      <merge-request-note
+        :feedback="vulnerability.merge_request_feedback"
+        :project="project"
+        class="card-body"
+      />
     </div>
+
+    <related-issues
+      :endpoint="issueLinksEndpoint"
+      :can-modify-related-issues="vulnerability.can_modify_related_issues"
+      :project-path="project.url"
+      :help-path="vulnerability.related_issues_help_path"
+    />
+
+    <div class="notes" data-testid="detection-note">
+      <div class="system-note gl-display-flex gl-align-items-center gl-p-0! gl-mt-6!">
+        <div class="timeline-icon gl-m-0!">
+          <gl-icon name="search-dot" class="circle-icon-container" />
+        </div>
+        <status-description
+          :vulnerability="vulnerabilityDetectionData"
+          :is-state-bolded="true"
+          class="gl-ml-5"
+        />
+      </div>
+    </div>
+
     <hr />
 
     <ul v-if="discussions.length" ref="historyList" class="notes discussion-body">
@@ -166,7 +233,7 @@ export default {
         v-for="discussion in discussions"
         :key="discussion.id"
         :discussion="discussion"
-        :notes-url="notesUrl"
+        :notes-url="vulnerability.notes_url"
       />
     </ul>
   </div>

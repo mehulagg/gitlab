@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::BuildTraceChunks::Database do
+RSpec.describe Ci::BuildTraceChunks::Database do
   let(:data_store) { described_class.new }
 
   describe '#available?' do
@@ -85,6 +85,24 @@ describe Ci::BuildTraceChunks::Database do
         subject
 
         expect(data_store.data(model)).to be_nil
+      end
+    end
+  end
+
+  describe '#size' do
+    context 'when data exists' do
+      let(:model) { create(:ci_build_trace_chunk, :database_with_data, initial_data: 'üabcdef') }
+
+      it 'returns data bytesize correctly' do
+        expect(data_store.size(model)).to eq 8
+      end
+    end
+
+    context 'when data does not exist' do
+      let(:model) { create(:ci_build_trace_chunk, :database_without_data) }
+
+      it 'returns zero' do
+        expect(data_store.size(model)).to be_zero
       end
     end
   end

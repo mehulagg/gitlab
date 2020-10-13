@@ -5,7 +5,7 @@ export const sastParsedIssues = [
     title: 'Arbitrary file existence disclosure in Action Pack',
     path: 'Gemfile.lock',
     line: 12,
-    severity: 'High',
+    severity: 'high',
     urlPath: 'foo/Gemfile.lock',
     report_type: 'sast',
   },
@@ -32,7 +32,7 @@ export const dockerReportParsed = {
     {
       vulnerability: 'CVE-2017-12944',
       namespace: 'debian:8',
-      severity: 'Medium',
+      severity: 'medium',
       title: 'CVE-2017-12944',
       path: 'debian:8',
       identifiers: [
@@ -47,7 +47,7 @@ export const dockerReportParsed = {
     {
       vulnerability: 'CVE-2017-16232',
       namespace: 'debian:8',
-      severity: 'Negligible',
+      severity: 'low',
       title: 'CVE-2017-16232',
       path: 'debian:8',
       identifiers: [
@@ -64,7 +64,7 @@ export const dockerReportParsed = {
     {
       vulnerability: 'CVE-2014-8130',
       namespace: 'debian:8',
-      severity: 'Negligible',
+      severity: 'low',
       title: 'CVE-2014-8130',
       path: 'debian:8',
       identifiers: [
@@ -81,7 +81,7 @@ export const dockerReportParsed = {
     {
       vulnerability: 'CVE-2017-12944',
       namespace: 'debian:8',
-      severity: 'Medium',
+      severity: 'medium',
       title: 'CVE-2017-12944',
       path: 'debian:8',
       identifiers: [
@@ -96,7 +96,7 @@ export const dockerReportParsed = {
     {
       vulnerability: 'CVE-2017-16232',
       namespace: 'debian:8',
-      severity: 'Negligible',
+      severity: 'low',
       title: 'CVE-2017-16232',
       path: 'debian:8',
       identifiers: [
@@ -111,7 +111,7 @@ export const dockerReportParsed = {
     {
       vulnerability: 'CVE-2014-8130',
       namespace: 'debian:8',
-      severity: 'Negligible',
+      severity: 'low',
       title: 'CVE-2014-8130',
       path: 'debian:8',
       identifiers: [
@@ -134,7 +134,7 @@ export const parsedDast = [
     title: 'Absence of Anti-CSRF Tokens',
     riskcode: '1',
     riskdesc: 'Low (Medium)',
-    severity: 'Low',
+    severity: 'low',
     cweid: '3',
     desc: '<p>No Anti-CSRF tokens were found in a HTML submission form.</p>',
     pluginid: '123',
@@ -176,7 +176,7 @@ export const parsedDast = [
         url: 'https://cwe.mitre.org/data/definitions/4.html',
       },
     ],
-    severity: 'Low',
+    severity: 'low',
     cweid: '4',
     desc: '<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to "nosniff".</p>',
     pluginid: '3456',
@@ -197,7 +197,7 @@ export const secretScanningParsedIssues = [
     title: 'AWS SecretKey detected',
     path: 'Gemfile.lock',
     line: 12,
-    severity: 'Critical',
+    severity: 'critical',
     urlPath: 'foo/Gemfile.lock',
   },
 ];
@@ -284,7 +284,7 @@ export const secretScanningFeedbacks = [
     author_id: 1,
     issue_iid: null,
     pipeline_id: 132,
-    category: 'secret_scanning',
+    category: 'secret_detection',
     feedback_type: 'dismissal',
     branch: 'try_new_secret_scanning',
     project_fingerprint: libTiffCveFingerprint2,
@@ -295,10 +295,35 @@ export const secretScanningFeedbacks = [
     author_id: 1,
     issue_iid: 123,
     pipeline_id: 132,
-    category: 'secret_scanning',
+    category: 'secret_detection',
     feedback_type: 'issue',
     branch: 'try_new_secret_scanning',
     project_fingerprint: libTiffCveFingerprint2,
+  },
+];
+
+export const coverageFuzzingFeedbacks = [
+  {
+    id: 3,
+    project_id: 17,
+    author_id: 1,
+    issue_iid: null,
+    pipeline_id: 132,
+    category: 'coverage_fuzzing',
+    feedback_type: 'dismissal',
+    branch: 'try_new_coverage_fuzzing',
+    project_fingerprint: 'f55331d66fd4f3bfb4237d48e9c9fa8704bd33c6',
+  },
+  {
+    id: 4,
+    project_id: 17,
+    author_id: 1,
+    issue_iid: 123,
+    pipeline_id: 132,
+    category: 'coverage_fuzzing',
+    feedback_type: 'issue',
+    branch: 'try_new_coverage_fuzzing',
+    project_fingerprint: 'f55331d66fd4f3bfb4237d48e9c9fa8704bd33c6',
   },
 ];
 
@@ -307,7 +332,7 @@ export const mockFindings = [
     id: null,
     report_type: 'dependency_scanning',
     name: 'Cross-site Scripting in serialize-javascript',
-    severity: 'unknown',
+    severity: 'critical',
     scanner: {
       external_id: 'gemnasium',
       name: 'Gemnasium',
@@ -360,7 +385,7 @@ export const mockFindings = [
     id: null,
     report_type: 'dependency_scanning',
     name: '3rd party CORS request may execute in jquery',
-    severity: 'medium',
+    severity: 'high',
     scanner: { external_id: 'retire.js', name: 'Retire.js' },
     identifiers: [
       {
@@ -638,6 +663,14 @@ export const dependencyScanningDiffSuccessMock = {
 };
 
 export const secretScanningDiffSuccessMock = {
+  added: [mockFindings[0], mockFindings[1]],
+  fixed: [mockFindings[2]],
+  base_report_created_at: '2020-01-01T10:00:00.000Z',
+  base_report_out_of_date: false,
+  head_report_created_at: '2020-01-10T10:00:00.000Z',
+};
+
+export const coverageFuzzingDiffSuccessMock = {
   added: [mockFindings[0], mockFindings[1]],
   fixed: [mockFindings[2]],
   base_report_created_at: '2020-01-01T10:00:00.000Z',

@@ -7,6 +7,7 @@ class GroupsController < Groups::ApplicationController
   include PreviewMarkdown
   include RecordUserLastActivity
   include SendFileUpload
+  include FiltersEvents
   extend ::Gitlab::Utils::Override
 
   respond_to :html
@@ -45,6 +46,17 @@ class GroupsController < Groups::ApplicationController
 
   layout :determine_layout
 
+  feature_category :subgroups, [
+                     :index, :new, :create, :show, :edit, :update,
+                     :destroy, :details, :transfer
+                   ]
+
+  feature_category :audit_events, [:activity]
+  feature_category :issue_tracking, [:issues, :issues_calendar, :preview_markdown]
+  feature_category :code_review, [:merge_requests]
+  feature_category :projects, [:projects]
+  feature_category :importers, [:export, :download_export]
+
   def index
     redirect_to(current_user ? dashboard_groups_path : explore_groups_path)
   end
@@ -57,6 +69,8 @@ class GroupsController < Groups::ApplicationController
     @group = Groups::CreateService.new(current_user, group_params).execute
 
     if @group.persisted?
+      track_experiment_event(:onboarding_issues, 'created_namespace')
+
       notice = if @group.chat_team.present?
                  "Group '#{@group.name}' and its Mattermost team were successfully created."
                else
@@ -72,7 +86,11 @@ class GroupsController < Groups::ApplicationController
   def show
     respond_to do |format|
       format.html do
-        render_show_html
+        if @group.import_state&.in_progress?
+          redirect_to group_import_path(@group)
+        else
+          render_show_html
+        end
       end
 
       format.atom do
@@ -116,7 +134,7 @@ class GroupsController < Groups::ApplicationController
     if Groups::UpdateService.new(@group, current_user, group_params).execute
       redirect_to edit_group_path(@group, anchor: params[:update_section]), notice: "Group '#{@group.name}' was successfully updated."
     else
-      @group.path = @group.path_before_last_save || @group.path_was
+      @group.reset
       render action: "edit"
     end
   end
@@ -223,7 +241,8 @@ class GroupsController < Groups::ApplicationController
       :two_factor_grace_period,
       :project_creation_level,
       :subgroup_creation_level,
-      :default_branch_protection
+      :default_branch_protection,
+      :default_branch_name
     ]
   end
 

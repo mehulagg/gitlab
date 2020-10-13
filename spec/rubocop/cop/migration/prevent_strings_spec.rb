@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'fast_spec_helper'
 require 'rubocop'
-require 'rubocop/rspec/support'
-
 require_relative '../../../../rubocop/cop/migration/prevent_strings'
 
-describe RuboCop::Cop::Migration::PreventStrings do
+RSpec.describe RuboCop::Cop::Migration::PreventStrings, type: :rubocop do
   include CopHelper
 
   subject(:cop) { described_class.new }
@@ -84,6 +82,27 @@ describe RuboCop::Cop::Migration::PreventStrings do
               add_column(:users, :bio, :text)
               add_column_with_default(:users, :url, :text, default: '/-/user', allow_null: false, limit: 255)
               change_column_type_concurrently :users, :commit_id, :text
+            end
+          end
+        RUBY
+      end
+    end
+
+    context 'when the string data type is used for arrays' do
+      it 'registers no offense' do
+        expect_no_offenses(<<~RUBY)
+          class TestStringArrays < ActiveRecord::Migration[6.0]
+            DOWNTIME = false
+
+            def up
+              create_table :test_string_arrays, id: false do |t|
+                t.integer :test_id, null: false
+                t.string :name, array: true, default: [], null: false
+              end
+
+              add_column :test_string_arrays, :email, :string, array: true
+              add_column_with_default :test_string_arrays, :role, :string, default: [], array: true
+              change_column_type_concurrently :test_string_arrays, :test_id, :string, array: true
             end
           end
         RUBY

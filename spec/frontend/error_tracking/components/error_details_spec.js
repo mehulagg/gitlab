@@ -1,9 +1,7 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { __ } from '~/locale';
-import createFlash from '~/flash';
 import {
-  GlDeprecatedButton,
+  GlButton,
   GlLoadingIcon,
   GlLink,
   GlBadge,
@@ -11,6 +9,8 @@ import {
   GlAlert,
   GlSprintf,
 } from '@gitlab/ui';
+import { __ } from '~/locale';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Stacktrace from '~/error_tracking/components/stacktrace.vue';
 import ErrorDetails from '~/error_tracking/components/error_details.vue';
 import {
@@ -48,10 +48,11 @@ describe('ErrorDetails', () => {
   const findUpdateResolveStatusButton = () =>
     wrapper.find('[data-testid="update-resolve-status-btn"]');
   const findExternalUrl = () => wrapper.find('[data-testid="external-url-link"]');
+  const findAlert = () => wrapper.find(GlAlert);
 
   function mountComponent() {
     wrapper = shallowMount(ErrorDetails, {
-      stubs: { GlDeprecatedButton, GlSprintf },
+      stubs: { GlButton, GlSprintf },
       localVue,
       store,
       mocks,
@@ -183,6 +184,9 @@ describe('ErrorDetails', () => {
           count: 12,
           userCount: 2,
         },
+        stacktraceData: {
+          date_received: '2020-05-20',
+        },
       });
     });
 
@@ -191,7 +195,7 @@ describe('ErrorDetails', () => {
       expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
       expect(wrapper.find(Stacktrace).exists()).toBe(false);
       expect(wrapper.find(GlBadge).exists()).toBe(false);
-      expect(wrapper.findAll(GlDeprecatedButton).length).toBe(3);
+      expect(wrapper.findAll(GlButton)).toHaveLength(3);
     });
 
     describe('unsafe chars for culprit field', () => {
@@ -275,15 +279,17 @@ describe('ErrorDetails', () => {
         return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
           expect(wrapper.find(Stacktrace).exists()).toBe(true);
+          expect(findAlert().exists()).toBe(false);
         });
       });
 
-      it('should NOT show stacktrace if no entries', () => {
+      it('should NOT show stacktrace if no entries and show Alert message', () => {
         store.state.details.loadingStacktrace = false;
         store.getters = { 'details/sentryUrl': () => 'sentry.io', 'details/stacktrace': () => [] };
         return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
           expect(wrapper.find(Stacktrace).exists()).toBe(false);
+          expect(findAlert().text()).toBe('No stack trace for this error');
         });
       });
     });
@@ -401,7 +407,6 @@ describe('ErrorDetails', () => {
         });
 
         it('should show alert with closed issueId', () => {
-          const findAlert = () => wrapper.find(GlAlert);
           const closedIssueId = 123;
           wrapper.setData({
             isAlertVisible: true,

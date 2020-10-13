@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ContainerRepository do
+RSpec.describe ContainerRepository do
   let(:group) { create(:group, name: 'group') }
   let(:project) { create(:project, path: 'test', group: group) }
 
@@ -181,6 +181,33 @@ describe ContainerRepository do
       it 'returns false' do
         expect(repository).not_to be_root_repository
       end
+    end
+  end
+
+  describe '#start_expiration_policy!' do
+    subject { repository.start_expiration_policy! }
+
+    it 'sets the expiration policy started at to now' do
+      Timecop.freeze do
+        expect { subject }
+          .to change { repository.expiration_policy_started_at }.from(nil).to(Time.zone.now)
+      end
+    end
+  end
+
+  describe '#reset_expiration_policy_started_at!' do
+    subject { repository.reset_expiration_policy_started_at! }
+
+    before do
+      repository.start_expiration_policy!
+    end
+
+    it 'resets the expiration policy started at' do
+      started_at = repository.expiration_policy_started_at
+
+      expect(started_at).not_to be_nil
+      expect { subject }
+          .to change { repository.expiration_policy_started_at }.from(started_at).to(nil)
     end
   end
 

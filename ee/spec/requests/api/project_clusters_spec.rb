@@ -17,11 +17,9 @@ RSpec.describe API::ProjectClusters do
 
       stub_kubeclient_get_secret(
         api_url,
-        {
-          metadata_name: "#{namespace}-token",
-          token: Base64.encode64('sample-token'),
-          namespace: namespace
-        }
+        metadata_name: "#{namespace}-token",
+        token: Base64.encode64('sample-token'),
+        namespace: namespace
       )
 
       stub_kubeclient_put_secret(api_url, "#{namespace}-token", namespace: namespace)
@@ -78,10 +76,8 @@ RSpec.describe API::ProjectClusters do
       end
     end
 
-    context 'when license has multiple clusters feature' do
+    context 'when another cluster exists' do
       before do
-        stub_licensed_features(multiple_clusters: true)
-
         create(:cluster, :provided_by_gcp, :project,
                projects: [project])
 

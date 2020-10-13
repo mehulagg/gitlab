@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CustomStageForm Editing a custom stage isSavingCustomStage=true displays a loading icon 1`] = `
-"<button disabled=\\"disabled\\" type=\\"button\\" class=\\"js-save-stage btn btn-success\\"><span class=\\"gl-spinner-container\\"><span aria-label=\\"Loading\\" aria-hidden=\\"true\\" class=\\"align-text-bottom gl-spinner gl-spinner-orange gl-spinner-sm\\"></span></span>
+"<button disabled=\\"disabled\\" type=\\"button\\" class=\\"js-save-stage btn btn-success\\"><span class=\\"gl-spinner-container\\"><span aria-label=\\"Loading\\" class=\\"align-text-bottom gl-spinner gl-spinner-orange gl-spinner-sm\\"></span></span>
   Update stage
 </button>"
 `;
 
 exports[`CustomStageForm isSavingCustomStage=true displays a loading icon 1`] = `
-"<button disabled=\\"disabled\\" type=\\"button\\" class=\\"js-save-stage btn btn-success\\"><span class=\\"gl-spinner-container\\"><span aria-label=\\"Loading\\" aria-hidden=\\"true\\" class=\\"align-text-bottom gl-spinner gl-spinner-orange gl-spinner-sm\\"></span></span>
+"<button disabled=\\"disabled\\" type=\\"button\\" class=\\"js-save-stage btn btn-success\\"><span class=\\"gl-spinner-container\\"><span aria-label=\\"Loading\\" class=\\"align-text-bottom gl-spinner gl-spinner-orange gl-spinner-sm\\"></span></span>
   Add stage
 </button>"
 `;

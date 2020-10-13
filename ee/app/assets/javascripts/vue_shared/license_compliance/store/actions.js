@@ -1,3 +1,4 @@
+import { LICENSE_CHECK_NAME } from 'ee/approvals/constants';
 import axios from '~/lib/utils/axios_utils';
 import pollUntilComplete from '~/lib/utils/poll_until_complete';
 import * as types from './mutation_types';
@@ -11,6 +12,15 @@ export const setAPISettings = ({ commit }, data) => {
 export const setLicenseInModal = ({ commit }, license) => {
   commit(types.SET_LICENSE_IN_MODAL, license);
 };
+
+export const setIsAdmin = ({ commit }, payload) => {
+  commit(types.SET_IS_ADMIN, payload);
+};
+
+export const setKnownLicenses = ({ commit }, licenses) => {
+  commit(types.SET_KNOWN_LICENSES, licenses);
+};
+
 export const resetLicenseInModal = ({ commit }) => {
   commit(types.RESET_LICENSE_IN_MODAL);
 };
@@ -111,8 +121,45 @@ export const receiveSetLicenseApprovalError = ({ commit }, error) => {
   commit(types.RECEIVE_SET_LICENSE_APPROVAL_ERROR, error);
 };
 
-export const setIsAdmin = ({ commit }, payload) => {
-  commit(types.SET_IS_ADMIN, payload);
+export const fetchLicenseCheckApprovalRule = ({ dispatch, state }) => {
+  dispatch('requestLicenseCheckApprovalRule');
+
+  /* 
+    If we call this action from the "License" tab in the pipeline view,
+    then we don't fetch the approvals since we aren't in the Merge request context.
+    Pipelines cannot have approval rules.
+  */
+  if (!state.approvalsApiPath) {
+    return dispatch(
+      'receiveLicenseCheckApprovalRuleError',
+      new Error('approvalsApiPath not provided'),
+    );
+  }
+
+  return axios
+    .get(state.approvalsApiPath)
+    .then(({ data }) => {
+      const hasLicenseCheckApprovalRule = data.approval_rules_left.some(rule => {
+        return rule.name === LICENSE_CHECK_NAME;
+      });
+
+      dispatch('receiveLicenseCheckApprovalRuleSuccess', { hasLicenseCheckApprovalRule });
+    })
+    .catch(error => {
+      dispatch('receiveLicenseCheckApprovalRuleError', error);
+    });
+};
+
+export const requestLicenseCheckApprovalRule = ({ commit }) => {
+  commit(types.REQUEST_LICENSE_CHECK_APPROVAL_RULE);
+};
+
+export const receiveLicenseCheckApprovalRuleSuccess = ({ commit }, rule) => {
+  commit(types.RECEIVE_LICENSE_CHECK_APPROVAL_RULE_SUCCESS, rule);
+};
+
+export const receiveLicenseCheckApprovalRuleError = ({ commit }, error) => {
+  commit(types.RECEIVE_LICENSE_CHECK_APPROVAL_RULE_ERROR, error);
 };
 
 export const addPendingLicense = ({ state, commit }, id = null) => {
@@ -167,6 +214,3 @@ export const denyLicense = ({ dispatch }, license) => {
     dispatch('setLicenseApproval', { license, newStatus: LICENSE_APPROVAL_STATUS.DENIED });
   }
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

@@ -10,7 +10,7 @@ exports[`Design management design index page renders design index 1`] = `
     <design-destroyer-stub
       filenames="test.jpg"
       iid="1"
-      projectpath=""
+      project-path="project-path"
     />
      
     <!---->
@@ -30,8 +30,20 @@ exports[`Design management design index page renders design index 1`] = `
   </div>
    
   <div
-    class="image-notes"
+    class="image-notes gl-pt-0"
   >
+    <div
+      class="gl-py-4 gl-mb-4 gl-display-flex gl-justify-content-space-between gl-align-items-center gl-border-b-1 gl-border-b-solid gl-border-b-gray-100"
+    >
+      <span>
+        To Do
+      </span>
+       
+      <design-todo-button-stub
+        design="[object Object]"
+      />
+    </div>
+     
     <h2
       class="gl-font-weight-bold gl-mt-0"
     >
@@ -41,7 +53,7 @@ exports[`Design management design index page renders design index 1`] = `
     </h2>
      
     <a
-      class="gl-text-gray-600 gl-text-decoration-none gl-mb-6 gl-display-block"
+      class="gl-text-gray-400 gl-text-decoration-none gl-mb-6 gl-display-block"
       href="full-issue-url"
     >
       ull-issue-path
@@ -57,16 +69,17 @@ exports[`Design management design index page renders design index 1`] = `
      
     <design-discussion-stub
       data-testid="unresolved-discussion"
-      designid="test"
+      designid="gid::/gitlab/Design/1"
       discussion="[object Object]"
       discussionwithopenform=""
-      markdownpreviewpath="//preview_markdown?target_type=Issue"
-      noteableid="design-id"
+      markdownpreviewpath="/project-path/preview_markdown?target_type=Issue"
+      noteableid="gid::/gitlab/Design/1"
     />
      
     <gl-button-stub
-      category="tertiary"
-      class="link-inherit-color gl-text-black-normal gl-text-decoration-none gl-font-weight-bold gl-mb-4"
+      buttontextclasses=""
+      category="primary"
+      class="link-inherit-color gl-text-body gl-text-decoration-none gl-font-weight-bold gl-mb-4"
       data-testid="resolved-comments"
       icon="chevron-right"
       id="resolved-comments"
@@ -92,7 +105,7 @@ exports[`Design management design index page renders design index 1`] = `
       </p>
        
       <a
-        href="#"
+        href="https://docs.gitlab.com/ee/user/project/issues/design_management.html#resolve-design-threads"
         rel="noopener noreferrer"
         target="_blank"
       >
@@ -105,11 +118,11 @@ exports[`Design management design index page renders design index 1`] = `
     >
       <design-discussion-stub
         data-testid="resolved-discussion"
-        designid="test"
+        designid="gid::/gitlab/Design/1"
         discussion="[object Object]"
         discussionwithopenform=""
-        markdownpreviewpath="//preview_markdown?target_type=Issue"
-        noteableid="design-id"
+        markdownpreviewpath="/project-path/preview_markdown?target_type=Issue"
+        noteableid="gid::/gitlab/Design/1"
       />
     </gl-collapse-stub>
      
@@ -140,7 +153,7 @@ exports[`Design management design index page with error GlAlert is rendered in c
     <design-destroyer-stub
       filenames="test.jpg"
       iid="1"
-      projectpath=""
+      project-path="project-path"
     />
      
     <div
@@ -177,8 +190,20 @@ exports[`Design management design index page with error GlAlert is rendered in c
   </div>
    
   <div
-    class="image-notes"
+    class="image-notes gl-pt-0"
   >
+    <div
+      class="gl-py-4 gl-mb-4 gl-display-flex gl-justify-content-space-between gl-align-items-center gl-border-b-1 gl-border-b-solid gl-border-b-gray-100"
+    >
+      <span>
+        To Do
+      </span>
+       
+      <design-todo-button-stub
+        design="[object Object]"
+      />
+    </div>
+     
     <h2
       class="gl-font-weight-bold gl-mt-0"
     >
@@ -188,7 +213,7 @@ exports[`Design management design index page with error GlAlert is rendered in c
     </h2>
      
     <a
-      class="gl-text-gray-600 gl-text-decoration-none gl-mb-6 gl-display-block"
+      class="gl-text-gray-400 gl-text-decoration-none gl-mb-6 gl-display-block"
       href="full-issue-url"
     >
       ull-issue-path

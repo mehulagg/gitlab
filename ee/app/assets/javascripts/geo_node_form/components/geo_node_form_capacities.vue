@@ -1,15 +1,16 @@
 <script>
-import { GlFormGroup, GlFormInput } from '@gitlab/ui';
+import { GlFormGroup, GlFormInput, GlLink } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
 import { __ } from '~/locale';
 import { validateCapacity } from '../validations';
-import { VALIDATION_FIELD_KEYS } from '../constants';
+import { VALIDATION_FIELD_KEYS, REVERIFICATION_MORE_INFO, BACKFILL_MORE_INFO } from '../constants';
 
 export default {
   name: 'GeoNodeFormCapacities',
   components: {
     GlFormGroup,
     GlFormInput,
+    GlLink,
   },
   props: {
     nodeData: {
@@ -23,44 +24,30 @@ export default {
         {
           id: 'node-repository-capacity-field',
           label: __('Repository sync capacity'),
-          description: __(
-            'Control the maximum concurrency of repository backfill for this secondary node',
-          ),
           key: VALIDATION_FIELD_KEYS.REPOS_MAX_CAPACITY,
           conditional: 'secondary',
         },
         {
           id: 'node-file-capacity-field',
           label: __('File sync capacity'),
-          description: __(
-            'Control the maximum concurrency of LFS/attachment backfill for this secondary node',
-          ),
           key: VALIDATION_FIELD_KEYS.FILES_MAX_CAPACITY,
           conditional: 'secondary',
         },
         {
           id: 'node-container-repository-capacity-field',
           label: __('Container repositories sync capacity'),
-          description: __(
-            'Control the maximum concurrency of container repository operations for this Geo node',
-          ),
           key: VALIDATION_FIELD_KEYS.CONTAINER_REPOSITORIES_MAX_CAPACITY,
           conditional: 'secondary',
         },
         {
           id: 'node-verification-capacity-field',
           label: __('Verification capacity'),
-          description: __(
-            'Control the maximum concurrency of verification operations for this Geo node',
-          ),
           key: VALIDATION_FIELD_KEYS.VERIFICATION_MAX_CAPACITY,
         },
         {
           id: 'node-reverification-interval-field',
           label: __('Re-verification interval'),
-          description: __(
-            'Control the minimum interval in days that a repository should be reverified for this primary node',
-          ),
+          description: __('Minimum interval in days'),
           key: VALIDATION_FIELD_KEYS.MINIMUM_REVERIFICATION_INTERVAL,
           conditional: 'primary',
         },
@@ -79,6 +66,16 @@ export default {
         return true;
       });
     },
+    sectionDescription() {
+      return this.nodeData.primary
+        ? __('Set the synchronization and verification capacity for the secondary node.')
+        : __(
+            'Set the number of concurrent requests this secondary node will make to the primary node while backfilling.',
+          );
+    },
+    sectionLink() {
+      return this.nodeData.primary ? REVERIFICATION_MORE_INFO : BACKFILL_MORE_INFO;
+    },
   },
   methods: {
     ...mapActions(['setError']),
@@ -94,6 +91,11 @@ export default {
 
 <template>
   <div>
+    <h2 class="gl-font-size-h2 gl-my-5">{{ __('Tuning settings') }}</h2>
+    <p class="gl-mb-5">
+      {{ sectionDescription }}
+      <gl-link :href="sectionLink" target="_blank">{{ __('More information') }}</gl-link>
+    </p>
     <gl-form-group
       v-for="formGroup in visibleFormGroups"
       :key="formGroup.id"
@@ -109,7 +111,7 @@ export default {
         :class="{ 'is-invalid': Boolean(formErrors[formGroup.key]) }"
         class="col-sm-3"
         type="number"
-        @input="checkCapacity(formGroup)"
+        @update="checkCapacity(formGroup)"
       />
     </gl-form-group>
   </div>

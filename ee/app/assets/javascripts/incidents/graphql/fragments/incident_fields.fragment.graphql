@@ -1,0 +1,4 @@
+fragment IncidentFields on Issue {
+  severity
+  statusPagePublishedIncident
+}

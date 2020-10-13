@@ -2,43 +2,30 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Reports::TestCase do
+RSpec.describe Gitlab::Ci::Reports::TestCase do
   describe '#initialize' do
-    let(:test_case) { described_class.new(params)}
+    let(:test_case) { described_class.new(params) }
 
-    context 'when both classname and name are given' do
-      context 'when test case is passed' do
-        let(:job) { build(:ci_build) }
-        let(:params) { attributes_for(:test_case).merge!(job: job) }
+    context 'when required params are given' do
+      let(:job) { build(:ci_build) }
+      let(:params) { attributes_for(:test_case).merge!(job: job) }
 
-        it 'initializes an instance' do
-          expect { test_case }.not_to raise_error
+      it 'initializes an instance', :aggregate_failures do
+        expect { test_case }.not_to raise_error
 
-          expect(test_case.name).to eq('test-1')
-          expect(test_case.classname).to eq('trace')
-          expect(test_case.file).to eq('spec/trace_spec.rb')
-          expect(test_case.execution_time).to eq(1.23)
-          expect(test_case.status).to eq(described_class::STATUS_SUCCESS)
-          expect(test_case.system_output).to be_nil
-          expect(test_case.job).to be_present
-        end
-      end
+        expect(test_case).to have_attributes(
+          suite_name: params[:suite_name],
+          name: params[:name],
+          classname: params[:classname],
+          file: params[:file],
+          execution_time: params[:execution_time],
+          status: params[:status],
+          system_output: params[:system_output],
+          job: params[:job]
+        )
 
-      context 'when test case is failed' do
-        let(:job) { build(:ci_build) }
-        let(:params) { attributes_for(:test_case, :failed).merge!(job: job) }
-
-        it 'initializes an instance' do
-          expect { test_case }.not_to raise_error
-
-          expect(test_case.name).to eq('test-1')
-          expect(test_case.classname).to eq('trace')
-          expect(test_case.file).to eq('spec/trace_spec.rb')
-          expect(test_case.execution_time).to eq(1.23)
-          expect(test_case.status).to eq(described_class::STATUS_FAILED)
-          expect(test_case.system_output)
-            .to eq('Failure/Error: is_expected.to eq(300) expected: 300 got: -100')
-        end
+        key = "#{test_case.suite_name}_#{test_case.classname}_#{test_case.name}"
+        expect(test_case.key).to eq(Digest::SHA256.hexdigest(key))
       end
     end
 
@@ -53,6 +40,10 @@ describe Gitlab::Ci::Reports::TestCase do
       end
     end
 
+    context 'when suite_name is missing' do
+      it_behaves_like 'param is missing', :suite_name
+    end
+
     context 'when classname is missing' do
       it_behaves_like 'param is missing', :classname
     end
@@ -62,7 +53,9 @@ describe Gitlab::Ci::Reports::TestCase do
     end
 
     context 'when attachment is present' do
-      let(:attachment_test_case) { build(:test_case, :failed_with_attachment) }
+      let_it_be(:job) { create(:ci_build) }
+
+      let(:attachment_test_case) { build(:test_case, :failed_with_attachment, job: job) }
 
       it "initializes the attachment if present" do
         expect(attachment_test_case.attachment).to eq("some/path.png")

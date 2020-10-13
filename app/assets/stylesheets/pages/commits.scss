@@ -306,7 +306,6 @@
 .commit,
 .generic-commit-status,
 .branch-commit {
-  .autodevops-link,
   .commit-sha {
     color: $blue-600;
   }
@@ -387,4 +386,10 @@
 .commit .gpg-popover-help-link {
   display: block;
   color: $link-color;
+}
+
+.add-review-item {
+  .gl-tab-nav-item {
+    height: 100%;
+  }
 }

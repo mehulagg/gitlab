@@ -93,7 +93,7 @@
   width: 440px;
 
   .block {
-    padding: $gl-padding 0;
+    padding: $gl-padding-8 0;
 
     // add a border between all items, but not at the start or end
     + .block {

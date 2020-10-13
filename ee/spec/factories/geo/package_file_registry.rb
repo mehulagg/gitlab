@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :package_file_registry, class: 'Geo::PackageFileRegistry' do
+  factory :geo_package_file_registry, class: 'Geo::PackageFileRegistry' do
     association :package_file, factory: [:package_file, :npm]
     state { Geo::PackageFileRegistry.state_value(:pending) }
 

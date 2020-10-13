@@ -21,7 +21,7 @@ module Resolvers
 
       argument :search, GraphQL::STRING_TYPE,
                required: false,
-               description: 'Filter requirements by title search'
+               description: 'Search query for requirement title'
 
       argument :author_username, [GraphQL::STRING_TYPE],
                required: false,
@@ -35,7 +35,6 @@ module Resolvers
         # make sure it's loaded and not `nil` before continuing.
         project = object.respond_to?(:sync) ? object.sync : object
         return ::RequirementsManagement::Requirement.none if project.nil?
-        return ::RequirementsManagement::Requirement.none unless Feature.enabled?(:requirements_management, project, default_enabled: true)
 
         args[:project_id] = project.id
         args[:iids] ||= [args[:iid]].compact

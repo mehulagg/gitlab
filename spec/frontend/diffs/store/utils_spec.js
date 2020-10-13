@@ -14,9 +14,19 @@ import {
 } from '~/diffs/constants';
 import { MERGE_REQUEST_NOTEABLE_TYPE } from '~/notes/constants';
 import diffFileMockData from '../mock_data/diff_file';
+import { diffMetadata } from '../mock_data/diff_metadata';
 import { noteableDataMock } from '../../notes/mock_data';
 
 const getDiffFileMock = () => JSON.parse(JSON.stringify(diffFileMockData));
+const getDiffMetadataMock = () => JSON.parse(JSON.stringify(diffMetadata));
+
+function extractLinesFromFile(file) {
+  const unpackedParallel = file.parallel_diff_lines
+    .flatMap(({ left, right }) => [left, right])
+    .filter(Boolean);
+
+  return [...file.highlighted_diff_lines, ...unpackedParallel];
+}
 
 describe('DiffsStoreUtils', () => {
   describe('findDiffFile', () => {
@@ -427,115 +437,227 @@ describe('DiffsStoreUtils', () => {
       expect(preppedLine.right).toEqual(correctLine);
       expect(preppedLine.line_code).toEqual(correctLine.line_code);
     });
+
+    it.each`
+      brokenSymlink
+      ${false}
+      ${{}}
+      ${'anything except `false`'}
+    `(
+      "properly assigns each line's `commentsDisabled` as the same value as the parent file's `brokenSymlink` value (`$brokenSymlink`)",
+      ({ brokenSymlink }) => {
+        preppedLine = utils.prepareLineForRenamedFile({
+          diffViewType: INLINE_DIFF_VIEW_TYPE,
+          line: sourceLine,
+          index: lineIndex,
+          diffFile: {
+            ...diffFile,
+            brokenSymlink,
+          },
+        });
+
+        expect(preppedLine.commentsDisabled).toStrictEqual(brokenSymlink);
+      },
+    );
   });
 
   describe('prepareDiffData', () => {
-    let mock;
-    let preparedDiff;
-    let splitInlineDiff;
-    let splitParallelDiff;
-    let completedDiff;
+    describe('for regular diff files', () => {
+      let mock;
+      let preparedDiff;
+      let splitInlineDiff;
+      let splitParallelDiff;
+      let completedDiff;
 
-    beforeEach(() => {
-      mock = getDiffFileMock();
-      preparedDiff = { diff_files: [mock] };
-      splitInlineDiff = {
-        diff_files: [{ ...mock, parallel_diff_lines: undefined }],
-      };
-      splitParallelDiff = {
-        diff_files: [{ ...mock, highlighted_diff_lines: undefined }],
-      };
-      completedDiff = {
-        diff_files: [{ ...mock, highlighted_diff_lines: undefined }],
-      };
+      beforeEach(() => {
+        mock = getDiffFileMock();
 
-      preparedDiff.diff_files = utils.prepareDiffData(preparedDiff);
-      splitInlineDiff.diff_files = utils.prepareDiffData(splitInlineDiff);
-      splitParallelDiff.diff_files = utils.prepareDiffData(splitParallelDiff);
-      completedDiff.diff_files = utils.prepareDiffData(completedDiff, [mock]);
-    });
+        preparedDiff = { diff_files: [mock] };
+        splitInlineDiff = {
+          diff_files: [{ ...mock, parallel_diff_lines: undefined }],
+        };
+        splitParallelDiff = {
+          diff_files: [{ ...mock, highlighted_diff_lines: undefined }],
+        };
+        completedDiff = {
+          diff_files: [{ ...mock, highlighted_diff_lines: undefined }],
+        };
 
-    it('sets the renderIt and collapsed attribute on files', () => {
-      const firstParallelDiffLine = preparedDiff.diff_files[0].parallel_diff_lines[2];
+        preparedDiff.diff_files = utils.prepareDiffData(preparedDiff);
+        splitInlineDiff.diff_files = utils.prepareDiffData(splitInlineDiff);
+        splitParallelDiff.diff_files = utils.prepareDiffData(splitParallelDiff);
+        completedDiff.diff_files = utils.prepareDiffData(completedDiff, [mock]);
+      });
 
-      expect(firstParallelDiffLine.left.discussions.length).toBe(0);
-      expect(firstParallelDiffLine.left).not.toHaveAttr('text');
-      expect(firstParallelDiffLine.right.discussions.length).toBe(0);
-      expect(firstParallelDiffLine.right).not.toHaveAttr('text');
-      const firstParallelChar = firstParallelDiffLine.right.rich_text.charAt(0);
+      it('sets the renderIt and collapsed attribute on files', () => {
+        const firstParallelDiffLine = preparedDiff.diff_files[0].parallel_diff_lines[2];
 
-      expect(firstParallelChar).not.toBe(' ');
-      expect(firstParallelChar).not.toBe('+');
-      expect(firstParallelChar).not.toBe('-');
+        expect(firstParallelDiffLine.left.discussions.length).toBe(0);
+        expect(firstParallelDiffLine.left).not.toHaveAttr('text');
+        expect(firstParallelDiffLine.right.discussions.length).toBe(0);
+        expect(firstParallelDiffLine.right).not.toHaveAttr('text');
+        const firstParallelChar = firstParallelDiffLine.right.rich_text.charAt(0);
 
-      const checkLine = preparedDiff.diff_files[0].highlighted_diff_lines[0];
+        expect(firstParallelChar).not.toBe(' ');
+        expect(firstParallelChar).not.toBe('+');
+        expect(firstParallelChar).not.toBe('-');
 
-      expect(checkLine.discussions.length).toBe(0);
-      expect(checkLine).not.toHaveAttr('text');
-      const firstChar = checkLine.rich_text.charAt(0);
+        const checkLine = preparedDiff.diff_files[0].highlighted_diff_lines[0];
 
-      expect(firstChar).not.toBe(' ');
-      expect(firstChar).not.toBe('+');
-      expect(firstChar).not.toBe('-');
+        expect(checkLine.discussions.length).toBe(0);
+        expect(checkLine).not.toHaveAttr('text');
+        const firstChar = checkLine.rich_text.charAt(0);
 
-      expect(preparedDiff.diff_files[0].renderIt).toBeTruthy();
-      expect(preparedDiff.diff_files[0].collapsed).toBeFalsy();
-    });
+        expect(firstChar).not.toBe(' ');
+        expect(firstChar).not.toBe('+');
+        expect(firstChar).not.toBe('-');
 
-    it('adds line_code to all lines', () => {
-      expect(
-        preparedDiff.diff_files[0].parallel_diff_lines.filter(line => !line.line_code),
-      ).toHaveLength(0);
-    });
+        expect(preparedDiff.diff_files[0].renderIt).toBeTruthy();
+        expect(preparedDiff.diff_files[0].collapsed).toBeFalsy();
+      });
 
-    it('uses right line code if left has none', () => {
-      const firstLine = preparedDiff.diff_files[0].parallel_diff_lines[0];
+      it('adds line_code to all lines', () => {
+        expect(
+          preparedDiff.diff_files[0].parallel_diff_lines.filter(line => !line.line_code),
+        ).toHaveLength(0);
+      });
 
-      expect(firstLine.line_code).toEqual(firstLine.right.line_code);
-    });
+      it('uses right line code if left has none', () => {
+        const firstLine = preparedDiff.diff_files[0].parallel_diff_lines[0];
 
-    it('guarantees an empty array for both diff styles', () => {
-      expect(splitInlineDiff.diff_files[0].parallel_diff_lines.length).toEqual(0);
-      expect(splitInlineDiff.diff_files[0].highlighted_diff_lines.length).toBeGreaterThan(0);
-      expect(splitParallelDiff.diff_files[0].parallel_diff_lines.length).toBeGreaterThan(0);
-      expect(splitParallelDiff.diff_files[0].highlighted_diff_lines.length).toEqual(0);
-    });
+        expect(firstLine.line_code).toEqual(firstLine.right.line_code);
+      });
 
-    it('merges existing diff files with newly loaded diff files to ensure split diffs are eventually completed', () => {
-      expect(completedDiff.diff_files.length).toEqual(1);
-      expect(completedDiff.diff_files[0].parallel_diff_lines.length).toBeGreaterThan(0);
-      expect(completedDiff.diff_files[0].highlighted_diff_lines.length).toBeGreaterThan(0);
-    });
+      it('guarantees an empty array for both diff styles', () => {
+        expect(splitInlineDiff.diff_files[0].parallel_diff_lines.length).toEqual(0);
+        expect(splitInlineDiff.diff_files[0].highlighted_diff_lines.length).toBeGreaterThan(0);
+        expect(splitParallelDiff.diff_files[0].parallel_diff_lines.length).toBeGreaterThan(0);
+        expect(splitParallelDiff.diff_files[0].highlighted_diff_lines.length).toEqual(0);
+      });
 
-    it('leaves files in the existing state', () => {
-      const priorFiles = [mock];
-      const fakeNewFile = {
-        ...mock,
-        content_sha: 'ABC',
-        file_hash: 'DEF',
-      };
-      const updatedFilesList = utils.prepareDiffData({ diff_files: [fakeNewFile] }, priorFiles);
+      it('merges existing diff files with newly loaded diff files to ensure split diffs are eventually completed', () => {
+        expect(completedDiff.diff_files.length).toEqual(1);
+        expect(completedDiff.diff_files[0].parallel_diff_lines.length).toBeGreaterThan(0);
+        expect(completedDiff.diff_files[0].highlighted_diff_lines.length).toBeGreaterThan(0);
+      });
 
-      expect(updatedFilesList).toEqual([mock, fakeNewFile]);
-    });
-
-    it('completes an existing split diff without overwriting existing diffs', () => {
-      // The current state has a file that has only loaded inline lines
-      const priorFiles = [{ ...mock, parallel_diff_lines: [] }];
-      // The next (batch) load loads two files: the other half of that file, and a new file
-      const fakeBatch = [
-        { ...mock, highlighted_diff_lines: undefined },
-        { ...mock, highlighted_diff_lines: undefined, content_sha: 'ABC', file_hash: 'DEF' },
-      ];
-      const updatedFilesList = utils.prepareDiffData({ diff_files: fakeBatch }, priorFiles);
-
-      expect(updatedFilesList).toEqual([
-        mock,
-        expect.objectContaining({
+      it('leaves files in the existing state', () => {
+        const priorFiles = [mock];
+        const fakeNewFile = {
+          ...mock,
           content_sha: 'ABC',
           file_hash: 'DEF',
-        }),
-      ]);
+        };
+        const updatedFilesList = utils.prepareDiffData({ diff_files: [fakeNewFile] }, priorFiles);
+
+        expect(updatedFilesList).toEqual([mock, fakeNewFile]);
+      });
+
+      it('completes an existing split diff without overwriting existing diffs', () => {
+        // The current state has a file that has only loaded inline lines
+        const priorFiles = [{ ...mock, parallel_diff_lines: [] }];
+        // The next (batch) load loads two files: the other half of that file, and a new file
+        const fakeBatch = [
+          { ...mock, highlighted_diff_lines: undefined },
+          { ...mock, highlighted_diff_lines: undefined, content_sha: 'ABC', file_hash: 'DEF' },
+        ];
+        const updatedFilesList = utils.prepareDiffData({ diff_files: fakeBatch }, priorFiles);
+
+        expect(updatedFilesList).toEqual([
+          mock,
+          expect.objectContaining({
+            content_sha: 'ABC',
+            file_hash: 'DEF',
+          }),
+        ]);
+      });
+
+      it('adds the `.brokenSymlink` property to each diff file', () => {
+        preparedDiff.diff_files.forEach(file => {
+          expect(file).toEqual(expect.objectContaining({ brokenSymlink: false }));
+        });
+      });
+
+      it("copies the diff file's `.brokenSymlink` value to each of that file's child lines", () => {
+        const lines = [
+          ...preparedDiff.diff_files,
+          ...splitInlineDiff.diff_files,
+          ...splitParallelDiff.diff_files,
+          ...completedDiff.diff_files,
+        ].flatMap(file => extractLinesFromFile(file));
+
+        lines.forEach(line => {
+          expect(line.commentsDisabled).toBe(false);
+        });
+      });
+    });
+
+    describe('for diff metadata', () => {
+      let mock;
+      let preparedDiffFiles;
+
+      beforeEach(() => {
+        mock = getDiffMetadataMock();
+
+        preparedDiffFiles = utils.prepareDiffData(mock);
+      });
+
+      it('sets the renderIt and collapsed attribute on files', () => {
+        expect(preparedDiffFiles[0].renderIt).toBeTruthy();
+        expect(preparedDiffFiles[0].collapsed).toBeFalsy();
+      });
+
+      it('guarantees an empty array of lines for both diff styles', () => {
+        expect(preparedDiffFiles[0].parallel_diff_lines.length).toEqual(0);
+        expect(preparedDiffFiles[0].highlighted_diff_lines.length).toEqual(0);
+      });
+
+      it('leaves files in the existing state', () => {
+        const fileMock = getDiffFileMock();
+        const metaData = getDiffMetadataMock();
+        const priorFiles = [fileMock];
+        const updatedFilesList = utils.prepareDiffData(metaData, priorFiles);
+
+        expect(updatedFilesList.length).toEqual(2);
+        expect(updatedFilesList[0]).toEqual(fileMock);
+      });
+
+      it('adds a new file to the file that already exists in state', () => {
+        // This is actually buggy behavior:
+        // Because the metadata doesn't include a content_sha,
+        // the de-duplicator in prepareDiffData doesn't realize it
+        // should combine these two.
+
+        // This buggy behavior hasn't caused a defect YET, because
+        // `diffs_metadata.json` is only called the first time the
+        // diffs app starts up, which is:
+        // - after a fresh page load
+        // - after you switch to the changes tab *the first time*
+
+        // This test should begin FAILING and can be reversed to check
+        // for just a single file when this is implemented:
+        // https://gitlab.com/groups/gitlab-org/-/epics/2852#note_304803233
+
+        const fileMock = getDiffFileMock();
+        const metaMock = getDiffMetadataMock();
+        const priorFiles = [{ ...fileMock }];
+        const updatedFilesList = utils.prepareDiffData(metaMock, priorFiles);
+
+        expect(updatedFilesList).toEqual([
+          fileMock,
+          {
+            ...metaMock.diff_files[0],
+            highlighted_diff_lines: [],
+            parallel_diff_lines: [],
+          },
+        ]);
+      });
+
+      it('adds the `.brokenSymlink` property to each meta diff file', () => {
+        preparedDiffFiles.forEach(file => {
+          expect(file).toMatchObject({ brokenSymlink: false });
+        });
+      });
     });
   });
 
@@ -1021,6 +1143,83 @@ describe('DiffsStoreUtils', () => {
           new_line: 2,
         },
       ]);
+    });
+  });
+
+  describe('getDefaultWhitespace', () => {
+    it('defaults to true if querystring and cookie are undefined', () => {
+      expect(utils.getDefaultWhitespace()).toBe(true);
+    });
+
+    it('returns false if querystring is `1`', () => {
+      expect(utils.getDefaultWhitespace('1', '0')).toBe(false);
+    });
+
+    it('returns true if querystring is `0`', () => {
+      expect(utils.getDefaultWhitespace('0', undefined)).toBe(true);
+    });
+
+    it('returns false if cookie is `1`', () => {
+      expect(utils.getDefaultWhitespace(undefined, '1')).toBe(false);
+    });
+
+    it('returns true if cookie is `0`', () => {
+      expect(utils.getDefaultWhitespace(undefined, '0')).toBe(true);
+    });
+  });
+
+  describe('isAdded', () => {
+    it.each`
+      type               | expected
+      ${'new'}           | ${true}
+      ${'new-nonewline'} | ${true}
+      ${'old'}           | ${false}
+    `('returns $expected when type is $type', ({ type, expected }) => {
+      expect(utils.isAdded({ type })).toBe(expected);
+    });
+  });
+
+  describe('isRemoved', () => {
+    it.each`
+      type               | expected
+      ${'old'}           | ${true}
+      ${'old-nonewline'} | ${true}
+      ${'new'}           | ${false}
+    `('returns $expected when type is $type', ({ type, expected }) => {
+      expect(utils.isRemoved({ type })).toBe(expected);
+    });
+  });
+
+  describe('isUnchanged', () => {
+    it.each`
+      type     | expected
+      ${null}  | ${true}
+      ${'new'} | ${false}
+      ${'old'} | ${false}
+    `('returns $expected when type is $type', ({ type, expected }) => {
+      expect(utils.isUnchanged({ type })).toBe(expected);
+    });
+  });
+
+  describe('isMeta', () => {
+    it.each`
+      type               | expected
+      ${'match'}         | ${true}
+      ${'new-nonewline'} | ${true}
+      ${'old-nonewline'} | ${true}
+      ${'new'}           | ${false}
+    `('returns $expected when type is $type', ({ type, expected }) => {
+      expect(utils.isMeta({ type })).toBe(expected);
+    });
+  });
+
+  describe('parallelizeDiffLines', () => {
+    it('converts inline diff lines to parallel diff lines', () => {
+      const file = getDiffFileMock();
+
+      expect(utils.parallelizeDiffLines(file.highlighted_diff_lines)).toEqual(
+        file.parallel_diff_lines,
+      );
     });
   });
 });

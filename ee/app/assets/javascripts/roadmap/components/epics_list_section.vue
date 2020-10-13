@@ -54,7 +54,7 @@ export default {
   computed: {
     ...mapState(['bufferSize', 'epicIid', 'childrenEpics', 'childrenFlags', 'epicIds']),
     emptyRowContainerVisible() {
-      return this.epics.length < this.bufferSize;
+      return this.displayedEpics.length < this.bufferSize;
     },
     sectionContainerStyles() {
       return {
@@ -66,21 +66,10 @@ export default {
         left: `${this.offsetLeft}px`,
       };
     },
-    findEpicsMatchingFilter() {
-      return this.epics.reduce((acc, epic) => {
-        if (!epic.hasParent || (epic.hasParent && this.epicIds.indexOf(epic.parent.id) < 0)) {
-          acc.push(epic);
-        }
-        return acc;
-      }, []);
-    },
-    findParentEpics() {
-      return this.epics.reduce((acc, epic) => {
-        if (!epic.hasParent) {
-          acc.push(epic);
-        }
-        return acc;
-      }, []);
+    epicsWithAssociatedParents() {
+      return this.epics.filter(
+        epic => !epic.hasParent || (epic.hasParent && this.epicIds.indexOf(epic.parent.id) < 0),
+      );
     },
     displayedEpics() {
       // If roadmap is accessed from epic, return all epics
@@ -88,8 +77,8 @@ export default {
         return this.epics;
       }
 
-      // If a search is being performed, add child as parent if parent doesn't match the search
-      return this.hasFiltersApplied ? this.findEpicsMatchingFilter : this.findParentEpics;
+      // Return epics with correct parent associations.
+      return this.epicsWithAssociatedParents;
     },
   },
   mounted() {
@@ -106,7 +95,7 @@ export default {
   methods: {
     ...mapActions(['setBufferSize', 'toggleEpic']),
     initMounted() {
-      this.roadmapShellEl = this.$root.$el && this.$root.$el.firstChild;
+      this.roadmapShellEl = this.$root.$el && this.$root.$el.querySelector('.js-roadmap-shell');
       this.setBufferSize(Math.ceil((window.innerHeight - this.$el.offsetTop) / EPIC_ITEM_HEIGHT));
 
       // Wait for component render to complete
@@ -152,7 +141,7 @@ export default {
     },
     getEpicItemProps(index) {
       return {
-        key: index,
+        key: generateKey(this.displayedEpics[index]),
         props: {
           epic: this.displayedEpics[index],
           presetType: this.presetType,

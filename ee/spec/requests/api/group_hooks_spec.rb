@@ -106,6 +106,23 @@ RSpec.describe API::GroupHooks do
   end
 
   describe "POST /groups/:id/hooks" do
+    let(:hook_params) do
+      {
+        url: "http://example.com",
+        push_events: true,
+        issues_events: true,
+        confidential_issues_events: true,
+        merge_requests_events: true,
+        tag_push_events: true,
+        note_events: true,
+        confidential_note_events: true,
+        job_events: true,
+        pipeline_events: true,
+        wiki_page_events: true,
+        deployment_events: true
+      }
+    end
+
     context "authorized user" do
       it "adds a new hook to group" do
         expect do
@@ -114,6 +131,20 @@ RSpec.describe API::GroupHooks do
 
         expect(response).to have_gitlab_http_status(:created)
         expect(response).to match_response_schema('public_api/v4/group_hook', dir: 'ee')
+
+        expect(json_response['url']).to eq('http://example.com')
+        expect(json_response['issues_events']).to eq(true)
+        expect(json_response['confidential_issues_events']).to eq(true)
+        expect(json_response['push_events']).to eq(true)
+        expect(json_response['merge_requests_events']).to eq(true)
+        expect(json_response['tag_push_events']).to eq(true)
+        expect(json_response['note_events']).to eq(true)
+        expect(json_response['confidential_note_events']).to eq(true)
+        expect(json_response['job_events']).to eq(true)
+        expect(json_response['pipeline_events']).to eq(true)
+        expect(json_response['wiki_page_events']).to eq(true)
+        expect(json_response['deployment_events']).to eq(true)
+        expect(json_response['enable_ssl_verification']).to eq(true)
       end
 
       it "returns 400 if url is not given" do

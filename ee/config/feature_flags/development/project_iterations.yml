@@ -1,0 +1,7 @@
+---
+name: project_iterations
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37715
+rollout_issue_url:
+group: group::project management
+type: development
+default_enabled: false

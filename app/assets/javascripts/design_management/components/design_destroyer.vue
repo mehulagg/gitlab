@@ -1,7 +1,7 @@
 <script>
 import { ApolloMutation } from 'vue-apollo';
 import getDesignListQuery from '../graphql/queries/get_design_list.query.graphql';
-import destroyDesignMutation from '../graphql/mutations/destroyDesign.mutation.graphql';
+import destroyDesignMutation from '../graphql/mutations/destroy_design.mutation.graphql';
 import { updateStoreAfterDesignsDelete } from '../utils/cache_update';
 
 export default {
@@ -13,13 +13,14 @@ export default {
       type: Array,
       required: true,
     },
+  },
+  inject: {
     projectPath: {
-      type: String,
-      required: true,
+      default: '',
     },
     iid: {
-      type: String,
-      required: true,
+      from: 'issueIid',
+      defaut: '',
     },
   },
   computed: {

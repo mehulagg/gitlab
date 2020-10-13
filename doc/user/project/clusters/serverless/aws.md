@@ -136,8 +136,8 @@ This example code does the following:
 In order to interact with your AWS account, the GitLab CI/CD pipelines require both `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` to be defined in your GitLab settings under **Settings > CI/CD > Variables**.
 For more information please see [Create a custom variable in the UI](../../../../ci/variables/README.md#create-a-custom-variable-in-the-ui).
 
-NOTE: **Note:**
-   The AWS credentials you provide must include IAM policies that provision correct access control to AWS Lambda, API Gateway, CloudFormation, and IAM resources.
+ The AWS credentials you provide must include IAM policies that provision correct
+ access control to AWS Lambda, API Gateway, CloudFormation, and IAM resources.
 
 #### Deploying your function
 
@@ -154,9 +154,7 @@ endpoints:
 #### Manually testing your function
 
 Running the following `curl` command should trigger your function.
-
-NOTE: **Note:**
-Your URL should be the one retrieved from the GitLab deploy stage log.
+Your URL should be the one retrieved from the GitLab deploy stage log:
 
 ```shell
 curl https://u768nzby1j.execute-api.us-east-1.amazonaws.com/production/hello
@@ -222,7 +220,8 @@ the environment of the deployed function:
 
 ```yaml
 provider:
-  ...
+  # Other configuration omitted
+  # ...
   environment:
     A_VARIABLE: ${env:A_VARIABLE}
 ```
@@ -245,10 +244,10 @@ functions:
   hello:
     handler: src/handler.hello
     events:
-      - http: # Rewrite this part to enable CORS
+      - http:  # Rewrite this part to enable CORS
           path: hello
           method: get
-          cors: true # <-- CORS here
+          cors: true  # <-- CORS here
 ```
 
 You also need to return CORS specific headers in your function response:
@@ -373,7 +372,7 @@ variables.
 
 To set these:
 
-1. Navigate to the project's **{settings}** **Settings > CI / CD**.
+1. Navigate to the project's **Settings > CI / CD**.
 1. Expand the **Variables** section and create entries for `AWS_ACCESS_KEY_ID` and
    `AWS_SECRET_ACCESS_KEY`.
 1. Mask the credentials so they do not show in logs using the **Masked** toggle.
@@ -392,29 +391,19 @@ want to store your package:
 image: python:latest
 
 stages:
-
   - deploy
 
 production:
-
   stage: deploy
-
   before_script:
-
     - pip3 install awscli --upgrade
-
     - pip3 install aws-sam-cli --upgrade
-
   script:
-
     - sam build
-
     - sam package --output-template-file packaged.yaml --s3-bucket <S3_bucket_name>
-
     - sam deploy --template-file packaged.yaml --stack-name gitlabpoc  --s3-bucket <S3_bucket_name> --capabilities CAPABILITY_IAM --region us-east-1
-
   environment: production
-  ```
+```
 
 Let’s examine the configuration file more closely:
 

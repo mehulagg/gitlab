@@ -23,9 +23,19 @@ module EE
         data[:epicLinksEndpoint] = group_epic_links_path(parent, issuable)
         data[:fullPath] = parent.full_path
         data[:projectsEndpoint] = expose_path(api_v4_groups_projects_path(id: parent.id))
+        data[:confidential] = issuable.confidential
       end
 
       data
+    end
+
+    override :issue_only_initial_data
+    def issue_only_initial_data(issuable)
+      return {} unless issuable.is_a?(Issue)
+
+      super.merge(
+        publishedIncidentUrl: ::Gitlab::StatusPage::Storage.details_url(issuable)
+      )
     end
 
     override :issuable_meta_author_slot

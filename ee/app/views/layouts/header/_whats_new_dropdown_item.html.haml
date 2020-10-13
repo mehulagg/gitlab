@@ -1,3 +1,10 @@
-- if show_whats_new_dropdown_item?
-  %li
-    = link_to _("See what's new at GitLab"), "#{promo_url}/releases/gitlab-com/", target: '_blank', rel: 'noopener noreferrer', data: { track_event: 'click_whats_new', track_property: 'question_menu' }
+- if ::Feature.enabled?(:whats_new_dropdown)
+  - if ::Feature.enabled?(:whats_new_drawer)
+    %li
+      %button.js-whats-new-trigger{ type: 'button', data: { storage_key: whats_new_storage_key } }
+        = _("See what's new at GitLab")
+        %span.js-whats-new-notification-count.whats-new-notification-count.gl-ml-4
+          = whats_new_most_recent_release_items_count
+  - else
+    %li
+      = link_to _("See what's new at GitLab"), "#{promo_url}/releases/gitlab-com/", target: '_blank', rel: 'noopener noreferrer', data: { track_event: 'click_whats_new', track_property: 'question_menu' }

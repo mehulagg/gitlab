@@ -206,7 +206,7 @@ The best place to start is to determine if the issue is with creating an empty i
 If it is, check on the Elasticsearch side to determine if the `gitlab-production` (the
 name for the GitLab index) exists. If it exists, manually delete it on the Elasticsearch
 side and attempt to recreate it from the
-[`recreate_index`](../../integration/elasticsearch.md#gitlab-elasticsearch-rake-tasks)
+[`recreate_index`](../../integration/elasticsearch.md#gitlab-advanced-search-rake-tasks)
 Rake task.
 
 If you still encounter issues, try creating an index manually on the Elasticsearch
@@ -225,8 +225,8 @@ during the indexing of projects. If errors do occur, they will either stem from 
 
 If the indexing process does not present errors, you will want to check the status of the indexed projects. You can do this via the following Rake tasks:
 
-- [`sudo gitlab-rake gitlab:elastic:index_projects_status`](../../integration/elasticsearch.md#gitlab-elasticsearch-rake-tasks) (shows the overall status)
-- [`sudo gitlab-rake gitlab:elastic:projects_not_indexed`](../../integration/elasticsearch.md#gitlab-elasticsearch-rake-tasks) (shows specific projects that are not indexed)
+- [`sudo gitlab-rake gitlab:elastic:index_projects_status`](../../integration/elasticsearch.md#gitlab-advanced-search-rake-tasks) (shows the overall status)
+- [`sudo gitlab-rake gitlab:elastic:projects_not_indexed`](../../integration/elasticsearch.md#gitlab-advanced-search-rake-tasks) (shows specific projects that are not indexed)
 
 If:
 
@@ -261,6 +261,9 @@ Beyond that, you will want to review the error. If it is:
 - Specifically from the indexer, this could be a bug/issue and should be escalated to
   GitLab support.
 - An OS issue, you will want to reach out to your systems administrator.
+- A `Faraday::TimeoutError (execution expired)` error **and** you're using a proxy,
+  [set a custom  `gitlab_rails['env']` environment variable, called `no_proxy`](https://docs.gitlab.com/omnibus/settings/environment-variables.html)
+  with the IP address of your Elasticsearch host.
 
 ### Troubleshooting performance
 

@@ -1,6 +1,4 @@
 ---
-type: reference
-last_updated: 2020-01-06
 stage: Release
 group: Release Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
@@ -25,7 +23,7 @@ In brief, this is what you need to upload your website in GitLab Pages:
 1. Domain of the instance: domain name that is used for GitLab Pages
    (ask your administrator).
 1. GitLab CI/CD: a `.gitlab-ci.yml` file with a specific job named [`pages`](../../../ci/yaml/README.md#pages) in the root directory of your repository.
-1. A directory called `public` in your site's repo containing the content
+1. A directory called `public` in your site's repository containing the content
    to be published.
 1. GitLab Runner enabled for the project.
 
@@ -36,7 +34,7 @@ If you are using [GitLab Pages on GitLab.com](#gitlab-pages-on-gitlabcom) to hos
 - The domain name for GitLab Pages on GitLab.com is `gitlab.io`.
 - Custom domains and TLS support are enabled.
 - Shared runners are enabled by default, provided for free and can be used to
-  build your website. If you want you can still bring your own Runner.
+  build your website. If you want you can still bring your own runner.
 
 ## Example projects
 
@@ -62,13 +60,8 @@ If the case of `404.html`, there are different scenarios. For example:
 
 ## Redirects in GitLab Pages
 
-Since you cannot use any custom server configuration files, like `.htaccess` or
-any `.conf` file, if you want to redirect a page to another
-location, you can use the [HTTP meta refresh tag](https://en.wikipedia.org/wiki/Meta_refresh).
-
-Some static site generators provide plugins for that functionality so that you
-don't have to create and edit HTML files manually. For example, Jekyll has the
-[redirect-from plugin](https://github.com/jekyll/jekyll-redirect-from).
+You can configure redirects for your site using a `_redirects` file. To learn more, read
+the [redirects documentation](redirects.md).
 
 ## GitLab Pages Access Control **(CORE)**
 
@@ -87,7 +80,7 @@ will be deleted.
 
 When using Pages under the general domain of a GitLab instance (`*.example.io`),
 you _cannot_ use HTTPS with sub-subdomains. That means that if your
-username/groupname contains a dot, for example `foo.bar`, the domain
+username or group name contains a dot, for example `foo.bar`, the domain
 `https://foo.bar.example.io` will _not_ work. This is a limitation of the
 [HTTP Over TLS protocol](https://tools.ietf.org/html/rfc2818#section-3.1). HTTP pages will continue to work provided you
 don't redirect HTTP to HTTPS.
@@ -118,19 +111,19 @@ is so `cp` doesn't also copy `public/` to itself in an infinite loop:
 ```yaml
 pages:
   script:
-  - mkdir .public
-  - cp -r * .public
-  - mv .public public
+    - mkdir .public
+    - cp -r * .public
+    - mv .public public
   artifacts:
     paths:
-    - public
+      - public
   only:
-  - master
+    - master
 ```
 
 ### `.gitlab-ci.yml` for a static site generator
 
-See this document for a [step-by-step guide](getting_started_part_four.md).
+See this document for a [step-by-step guide](getting_started/pages_from_scratch.md).
 
 ### `.gitlab-ci.yml` for a repository where there's also actual code
 
@@ -161,13 +154,13 @@ image: ruby:2.6
 
 pages:
   script:
-  - gem install jekyll
-  - jekyll build -d public/
+    - gem install jekyll
+    - jekyll build -d public/
   artifacts:
     paths:
-    - public
+      - public
   only:
-  - pages
+    - pages
 ```
 
 See an example that has different files in the [`master` branch](https://gitlab.com/pages/jekyll-branched/tree/master)

@@ -53,12 +53,12 @@ module Dashboard
       def load_last_firing_events(environments)
         return [0, {}] if environments.empty?
 
-        events = PrometheusAlertEvent
-          .firing
+        events = AlertManagement::Alert
+          .open
           .for_environment(environments.values)
 
-        event_counts = events.count_by_project_id # 1 query
-        last_firing_events = events.last_by_project_id.index_by(&:project_id) # 2 queries
+        event_counts = events.counts_by_project_id # 1 query
+        last_firing_events = events.last_prometheus_alert_by_project_id.index_by(&:project_id) # 3 queries
 
         [event_counts, last_firing_events]
       end

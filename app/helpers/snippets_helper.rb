@@ -12,7 +12,7 @@ module SnippetsHelper
   end
 
   def download_raw_snippet_button(snippet)
-    link_to(icon('download'),
+    link_to(sprite_icon('download'),
             gitlab_raw_snippet_path(snippet, inline: false),
             target: '_blank',
             rel: 'noopener noreferrer',
@@ -32,37 +32,12 @@ module SnippetsHelper
     end
   end
 
-  # Get an array of line numbers surrounding a matching
-  # line, bounded by min/max.
-  #
-  # @returns Array of line numbers
-  def bounded_line_numbers(line, min, max, surrounding_lines)
-    lower = line - surrounding_lines > min ? line - surrounding_lines : min
-    upper = line + surrounding_lines < max ? line + surrounding_lines : max
-    (lower..upper).to_a
-  end
-
-  def snippet_embed_tag(snippet)
-    content_tag(:script, nil, src: gitlab_snippet_url(snippet, format: :js))
-  end
-
-  def snippet_embed_input(snippet)
-    content_tag(:input,
-                nil,
-                type: :text,
-                readonly: true,
-                class: 'js-snippet-url-area snippet-embed-input form-control',
-                data: { url: gitlab_snippet_url(snippet) },
-                value: snippet_embed_tag(snippet),
-                autocomplete: 'off')
-  end
-
   def snippet_badge(snippet)
     return unless attrs = snippet_badge_attributes(snippet)
 
-    css_class, text = attrs
+    icon_name, text = attrs
     tag.span(class: %w[badge badge-gray]) do
-      concat(tag.i(class: ['fa', css_class]))
+      concat(sprite_icon(icon_name, size: 14, css_class: 'gl-vertical-align-middle'))
       concat(' ')
       concat(text)
     end
@@ -70,25 +45,24 @@ module SnippetsHelper
 
   def snippet_badge_attributes(snippet)
     if snippet.private?
-      ['fa-lock', _('private')]
+      ['lock', _('private')]
     end
   end
 
-  def embedded_raw_snippet_button
-    blob = @snippet.blob
+  def embedded_raw_snippet_button(snippet, blob)
     return if blob.empty? || blob.binary? || blob.stored_externally?
 
     link_to(external_snippet_icon('doc-code'),
-            gitlab_raw_snippet_url(@snippet),
+            gitlab_raw_snippet_blob_url(snippet, blob.path),
             class: 'btn',
             target: '_blank',
             rel: 'noopener noreferrer',
             title: 'Open raw')
   end
 
-  def embedded_snippet_download_button
+  def embedded_snippet_download_button(snippet, blob)
     link_to(external_snippet_icon('download'),
-            gitlab_raw_snippet_url(@snippet, inline: false),
+            gitlab_raw_snippet_blob_url(snippet, blob.path, nil, inline: false),
             class: 'btn',
             target: '_blank',
             title: 'Download',

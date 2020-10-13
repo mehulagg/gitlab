@@ -1,4 +1,4 @@
-import { GlButton, GlIcon, GlTooltip } from '@gitlab/ui';
+import { GlButton, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import createStore from 'ee/roadmap/store';
 import EpicItemDetails from 'ee/roadmap/components/epic_item_details.vue';
@@ -10,45 +10,12 @@ import {
   mockFormattedChildEpic1,
 } from 'ee_jest/roadmap/mock_data';
 
-let store;
-
-const createComponent = ({
-  epic = mockFormattedEpic,
-  currentGroupId = mockGroupId,
-  timeframeString = 'Jul 10, 2017 – Jun 2, 2018',
-  childLevel = 0,
-  childrenFlags = { '41': { itemExpanded: false } },
-  hasFiltersApplied = false,
-  isChildrenEmpty = false,
-} = {}) => {
-  return shallowMount(EpicItemDetails, {
-    store,
-    propsData: {
-      epic,
-      currentGroupId,
-      timeframeString,
-      childLevel,
-      childrenFlags,
-      hasFiltersApplied,
-      isChildrenEmpty,
-    },
-  });
-};
-
-const getTitle = wrapper => wrapper.find('.epic-title');
-
-const getGroupName = wrapper => wrapper.find('.epic-group');
-
-const getExpandIconButton = wrapper => wrapper.find(GlButton);
-
-const getChildEpicsCount = wrapper => wrapper.find({ ref: 'childEpicsCount' });
-
 describe('EpicItemDetails', () => {
   let wrapper;
+  let store;
 
   beforeEach(() => {
     store = createStore();
-    wrapper = createComponent();
   });
 
   afterEach(() => {
@@ -56,67 +23,104 @@ describe('EpicItemDetails', () => {
     wrapper = null;
   });
 
+  const createWrapper = (props = {}) => {
+    wrapper = shallowMount(EpicItemDetails, {
+      store,
+      propsData: {
+        epic: mockFormattedEpic,
+        currentGroupId: mockGroupId,
+        timeframeString: 'Jul 10, 2017 – Jun 2, 2018',
+        childLevel: 0,
+        childrenFlags: { '41': { itemExpanded: false } },
+        hasFiltersApplied: false,
+        isChildrenEmpty: false,
+        ...props,
+      },
+    });
+  };
+
+  const getTitle = () => wrapper.find('.epic-title');
+
+  const getGroupName = () => wrapper.find('.epic-group');
+
+  const getChildMarginClassName = () => wrapper.vm.childMarginClassname;
+
+  const getExpandIconButton = () => wrapper.find(GlButton);
+
+  const getExpandIconTooltip = () => wrapper.find({ ref: 'expandIconTooltip' });
+
+  const getChildEpicsCount = () => wrapper.find({ ref: 'childEpicsCount' });
+
+  const getChildEpicsCountTooltip = () => wrapper.find({ ref: 'childEpicsCountTooltip' });
+
+  const getExpandButtonData = () => ({
+    icon: wrapper.find(GlIcon).attributes('name'),
+    iconLabel: getExpandIconButton().attributes('aria-label'),
+    tooltip: getExpandIconTooltip().text(),
+  });
+
+  const getEpicTitleData = () => ({
+    title: getTitle().text(),
+    link: getTitle().attributes('href'),
+  });
+
+  const getEpicGroupNameData = () => ({
+    groupName: getGroupName().text(),
+    title: getGroupName().attributes('title'),
+  });
+
+  const createMockEpic = epic => ({
+    ...mockFormattedEpic,
+    ...epic,
+  });
+
   describe('epic title', () => {
-    it('is displayed', () => {
-      expect(getTitle(wrapper).text()).toBe(mockFormattedEpic.title);
+    beforeEach(() => {
+      createWrapper();
     });
 
-    it('contains a link to the epic', () => {
-      expect(getTitle(wrapper).attributes('href')).toBe(mockFormattedEpic.webUrl);
+    it('is displayed with a link to the epic', () => {
+      expect(getEpicTitleData()).toEqual({
+        title: mockFormattedEpic.title,
+        link: mockFormattedEpic.webUrl,
+      });
     });
   });
 
   describe('epic group name', () => {
+    const epic = {
+      id: '41',
+      ...mockFormattedEpic,
+      groupId: 1,
+      groupName: 'Bar',
+      groupFullName: 'Foo / Bar',
+      descendantCounts: {
+        closedIssues: 3,
+        openedIssues: 2,
+      },
+    };
+
     describe('when the epic group ID is different from the current group ID', () => {
-      let epic;
-
-      beforeEach(() => {
-        epic = {
-          id: '41',
-          mockFormattedEpic,
-          groupId: 1,
-          groupName: 'Bar',
-          groupFullName: 'Foo / Bar',
-          descendantCounts: {
-            closedIssues: 3,
-            openedIssues: 2,
-          },
-        };
-
-        wrapper.setProps({ epic, currentGroupId: 2 });
-      });
-
-      it('is displayed', () => {
-        expect(getGroupName(wrapper).text()).toContain(epic.groupName);
-      });
-
-      it('is set to the title attribute', () => {
-        expect(getGroupName(wrapper).attributes('title')).toBe(epic.groupFullName);
+      it('is displayed and set to the title attribute', () => {
+        createWrapper({ epic, currentGroupId: 2 });
+        expect(getEpicGroupNameData()).toEqual({
+          groupName: epic.groupName,
+          title: epic.groupFullName,
+        });
       });
     });
 
     describe('when the epic group ID is the same as the current group ID', () => {
-      let epic;
-
-      beforeEach(() => {
-        epic = {
-          ...mockFormattedEpic,
-          groupId: 1,
-          groupName: 'Bar',
-          groupFullName: 'Foo / Bar',
-        };
-
-        wrapper.setProps({ epic, currentGroupId: 1 });
-      });
-
       it('is hidden', () => {
-        expect(getGroupName(wrapper).exists()).toBe(false);
+        createWrapper({ epic, currentGroupId: 1 });
+        expect(getGroupName().exists()).toBe(false);
       });
     });
   });
 
   describe('timeframe', () => {
     it('is displayed', () => {
+      createWrapper();
       const timeframe = wrapper.find('.epic-timeframe');
 
       expect(timeframe.text()).toBe('Jul 10, 2017 – Jun 2, 2018');
@@ -125,13 +129,13 @@ describe('EpicItemDetails', () => {
 
   describe('childMarginClassname', () => {
     it('childMarginClassname returns class for level 1 child is childLevel is 1', () => {
-      wrapper.setProps({ childLevel: 1 });
-      expect(wrapper.vm.childMarginClassname).toEqual('ml-4');
+      createWrapper({ childLevel: 1 });
+      expect(getChildMarginClassName()).toEqual('ml-4');
     });
 
     it('childMarginClassname returns class for level 2 child is childLevel is 2', () => {
-      wrapper.setProps({ childLevel: 2 });
-      expect(wrapper.vm.childMarginClassname).toEqual('ml-6');
+      createWrapper({ childLevel: 2 });
+      expect(getChildMarginClassName()).toEqual('ml-6');
     });
   });
 
@@ -141,204 +145,152 @@ describe('EpicItemDetails', () => {
     });
 
     describe('expand icon', () => {
-      it('is hidden when epic has no child epics', () => {
-        const epic = {
-          ...mockFormattedEpic,
-          hasChildren: false,
-        };
-        wrapper = createComponent({ epic });
-
-        expect(getExpandIconButton(wrapper).classes()).toContain('invisible');
-      });
-
-      it('is shown when epic has child epics', () => {
-        const epic = {
-          ...mockFormattedEpic,
-          hasChildren: true,
-          children: {
-            edges: [mockFormattedChildEpic1],
-          },
-        };
-        wrapper = createComponent({ epic });
-
-        expect(getExpandIconButton(wrapper).classes()).not.toContain('invisible');
-      });
-
-      it('shows "chevron-right" icon when child epics are not expanded', () => {
-        wrapper = createComponent();
-
-        expect(wrapper.find(GlIcon).attributes('name')).toBe('chevron-right');
-      });
-
-      it('shows "chevron-down" icon when child epics are expanded', () => {
-        const epic = {
-          ...mockFormattedEpic,
-          hasChildren: true,
-        };
-        wrapper = createComponent({
-          epic,
-          childrenFlags: {
-            '41': { itemExpanded: true },
-          },
-        });
-
-        expect(wrapper.find(GlIcon).attributes('name')).toBe('chevron-down');
-      });
-
-      it('shows "information-o" icon when child epics are expanded but no children are returned due to applied filters', () => {
-        const epic = {
-          ...mockFormattedEpic,
-          hasChildren: true,
-        };
-        wrapper = createComponent({
-          epic,
-          childrenFlags: {
-            '41': { itemExpanded: true },
-          },
-          hasFiltersApplied: true,
-          isChildrenEmpty: true,
-        });
-
-        expect(wrapper.find(GlIcon).attributes('name')).toBe('information-o');
-      });
-
-      it('has "Expand child epics" label when child epics are not expanded', () => {
-        wrapper = createComponent();
-
-        expect(getExpandIconButton(wrapper).attributes('aria-label')).toBe('Expand child epics');
-      });
-
-      it('has "Collapse child epics" label when child epics are expanded', () => {
-        const epic = {
-          ...mockFormattedEpic,
-          hasChildren: true,
-        };
-        wrapper = createComponent({
-          epic,
-          childrenFlags: {
-            '41': { itemExpanded: true },
-          },
-        });
-
-        expect(getExpandIconButton(wrapper).attributes('aria-label')).toBe('Collapse child epics');
-      });
-
-      it('has "No child epics match applied filters" label when child epics are expanded', () => {
-        const epic = {
-          ...mockFormattedEpic,
-          hasChildren: true,
-        };
-        wrapper = createComponent({
-          epic,
-          childrenFlags: {
-            '41': { itemExpanded: true },
-          },
-          hasFiltersApplied: true,
-          isChildrenEmpty: true,
-        });
-
-        expect(getExpandIconButton(wrapper).attributes('aria-label')).toBe(
-          'No child epics match applied filters',
-        );
-      });
-
-      it('emits toggleIsEpicExpanded event when clicked', () => {
-        jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
-
-        const id = 41;
-        const epic = {
-          ...mockFormattedEpic,
-          id,
-          children: {
-            edges: [mockFormattedChildEpic1],
-          },
-        };
-        wrapper = createComponent({ epic });
-
-        getExpandIconButton(wrapper).vm.$emit('click');
-
-        expect(eventHub.$emit).toHaveBeenCalledWith('toggleIsEpicExpanded', epic);
-      });
-
       it('is hidden when it is child epic', () => {
-        const epic = {
-          ...mockFormattedEpic,
+        const epic = createMockEpic({
           isChildEpic: true,
-        };
-        wrapper = createComponent({ epic });
-
-        expect(getExpandIconButton(wrapper).classes()).toContain('invisible');
-      });
-    });
-
-    describe('child epics count', () => {
-      it('shows the correct count of child epics', () => {
-        const epic = {
-          ...mockFormattedEpic,
-          children: {
-            edges: [mockFormattedChildEpic1, mockFormattedChildEpic2],
-          },
-          descendantCounts: {
-            openedEpics: 0,
-            closedEpics: 2,
-          },
-        };
-        wrapper = createComponent({ epic });
-
-        expect(getChildEpicsCount(wrapper).text()).toBe('2');
+        });
+        createWrapper({ epic });
+        expect(getExpandIconButton().classes()).toContain('invisible');
       });
 
-      it('shows the count as 0 when there are no child epics', () => {
-        const epic = {
-          ...mockFormattedEpic,
-          descendantCounts: {
-            openedEpics: 0,
-            closedEpics: 0,
-          },
-        };
-        wrapper = createComponent({ epic });
-
-        expect(getChildEpicsCount(wrapper).text()).toBe('0');
+      describe('when epic has no child epics', () => {
+        beforeEach(() => {
+          const epic = createMockEpic({
+            hasChildren: false,
+            descendantCounts: {
+              openedEpics: 0,
+              closedEpics: 0,
+            },
+          });
+          createWrapper({ epic });
+        });
+        it('is hidden', () => {
+          expect(getExpandIconButton().classes()).toContain('invisible');
+        });
+        describe('child epics count', () => {
+          it('shows the count as 0', () => {
+            expect(getChildEpicsCount().text()).toBe('0');
+          });
+        });
       });
 
-      it('has a tooltip with the count', () => {
-        const epic = {
-          ...mockFormattedEpic,
-          children: {
-            edges: [mockFormattedChildEpic1],
-          },
-          descendantCounts: {
-            openedEpics: 0,
-            closedEpics: 1,
-          },
-        };
-        wrapper = createComponent({ epic });
+      describe('when epic has child epics', () => {
+        let epic;
+        beforeEach(() => {
+          epic = createMockEpic({
+            id: 41,
+            hasChildren: true,
+            children: {
+              edges: [mockFormattedChildEpic1],
+            },
+            descendantCounts: {
+              openedEpics: 0,
+              closedEpics: 1,
+            },
+          });
+          createWrapper({ epic });
+        });
 
-        expect(wrapper.find(GlTooltip).text()).toBe('1 child epic');
-      });
+        it('is shown', () => {
+          expect(getExpandIconButton().classes()).not.toContain('invisible');
+        });
 
-      it('has a tooltip with the count and explanation if search is being performed', () => {
-        const epic = {
-          ...mockFormattedEpic,
-          children: {
-            edges: [mockFormattedChildEpic1],
-          },
-          descendantCounts: {
-            openedEpics: 0,
-            closedEpics: 1,
-          },
-        };
-        wrapper = createComponent({ epic, hasFiltersApplied: true });
+        it('emits toggleIsEpicExpanded event when clicked', () => {
+          jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
+          getExpandIconButton().vm.$emit('click');
+          expect(eventHub.$emit).toHaveBeenCalledWith('toggleIsEpicExpanded', epic);
+        });
 
-        expect(wrapper.find(GlTooltip).text()).toBe(
-          '1 child epic Some child epics may be hidden due to applied filters',
-        );
-      });
+        describe('when child epics are expanded', () => {
+          const childrenFlags = {
+            '41': { itemExpanded: true },
+          };
 
-      it('does not render if the user license does not support child epics', () => {
-        store.state.allowSubEpics = false;
-        wrapper = createComponent();
-        expect(getChildEpicsCount(wrapper).exists()).toBe(false);
+          beforeEach(() => {
+            createWrapper({ epic, childrenFlags });
+          });
+
+          it('shows collapse button', () => {
+            expect(getExpandButtonData()).toEqual({
+              icon: 'chevron-down',
+              iconLabel: 'Collapse',
+              tooltip: 'Collapse',
+            });
+          });
+
+          describe('when filters are applied', () => {
+            beforeEach(() => {
+              createWrapper({
+                epic,
+                childrenFlags,
+                hasFiltersApplied: true,
+                isChildrenEmpty: true,
+              });
+            });
+
+            it('shows child epics match filters button', () => {
+              expect(getExpandButtonData()).toEqual({
+                icon: 'information-o',
+                iconLabel: 'No child epics match applied filters',
+                tooltip: 'No child epics match applied filters',
+              });
+            });
+          });
+        });
+
+        describe('when child epics are not expanded', () => {
+          beforeEach(() => {
+            const childrenFlags = {
+              '41': { itemExpanded: false },
+            };
+            createWrapper({
+              epic,
+              childrenFlags,
+            });
+          });
+
+          it('shows expand button', () => {
+            expect(getExpandButtonData()).toEqual({
+              icon: 'chevron-right',
+              iconLabel: 'Expand',
+              tooltip: 'Expand',
+            });
+          });
+        });
+
+        describe('child epics count', () => {
+          it('has a tooltip with the count', () => {
+            createWrapper({ epic });
+            expect(getChildEpicsCountTooltip().text()).toBe('1 child epic');
+          });
+
+          it('has a tooltip with the count and explanation if search is being performed', () => {
+            createWrapper({ epic, hasFiltersApplied: true });
+            expect(getChildEpicsCountTooltip().text()).toBe(
+              '1 child epic Some child epics may be hidden due to applied filters',
+            );
+          });
+
+          it('does not render if the user license does not support child epics', () => {
+            store.state.allowSubEpics = false;
+            createWrapper({ epic });
+            expect(getChildEpicsCount().exists()).toBe(false);
+          });
+
+          it('shows the correct count of child epics', () => {
+            epic = createMockEpic({
+              children: {
+                edges: [mockFormattedChildEpic1, mockFormattedChildEpic2],
+              },
+              descendantCounts: {
+                openedEpics: 0,
+                closedEpics: 2,
+              },
+            });
+            createWrapper({ epic });
+            expect(getChildEpicsCount().text()).toBe('2');
+          });
+        });
       });
     });
   });

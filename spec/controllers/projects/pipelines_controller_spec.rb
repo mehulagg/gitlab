@@ -37,9 +37,6 @@ RSpec.describe Projects::PipelinesController do
         expect(json_response).to include('pipelines')
         expect(json_response['pipelines'].count).to eq 6
         expect(json_response['count']['all']).to eq '6'
-        expect(json_response['count']['running']).to eq '2'
-        expect(json_response['count']['pending']).to eq '1'
-        expect(json_response['count']['finished']).to eq '3'
 
         json_response.dig('pipelines', 0, 'details', 'stages').tap do |stages|
           expect(stages.count).to eq 3
@@ -77,9 +74,9 @@ RSpec.describe Projects::PipelinesController do
 
         expect(::Gitlab::GitalyClient).to receive(:allow_ref_name_caching).and_call_original
 
-        # ListCommitsByOid, RepositoryExists, HasLocalBranches
+        # ListCommitsByOid, RepositoryExists, HasLocalBranches, ListCommitsByRefNames
         expect { get_pipelines_index_json }
-          .to change { Gitlab::GitalyClient.get_request_count }.by(3)
+          .to change { Gitlab::GitalyClient.get_request_count }.by(4)
       end
     end
 
@@ -101,23 +98,27 @@ RSpec.describe Projects::PipelinesController do
       end
     end
 
-    context 'filter by scope' do
-      it 'returns matched pipelines' do
-        get_pipelines_index_json(scope: 'running')
+    context 'when user tries to access legacy scope via URL' do
+      it 'redirects to all pipelines with that status instead' do
+        get_pipelines_index_html(scope: 'running')
 
-        check_pipeline_response(returned: 2, all: 6, running: 2, pending: 1, finished: 3)
+        expect(response).to redirect_to(project_pipelines_path(project, status: 'running', format: :html))
       end
+    end
 
+    context 'filter by scope' do
       context 'scope is branches or tags' do
         before do
           create(:ci_pipeline, :failed, project: project, ref: 'v1.0.0', tag: true)
+          create(:ci_pipeline, :failed, project: project, ref: 'master', tag: false)
+          create(:ci_pipeline, :failed, project: project, ref: 'feature', tag: false)
         end
 
         context 'when scope is branches' do
           it 'returns matched pipelines' do
             get_pipelines_index_json(scope: 'branches')
 
-            check_pipeline_response(returned: 1, all: 7, running: 2, pending: 1, finished: 4)
+            check_pipeline_response(returned: 2, all: 9)
           end
         end
 
@@ -125,7 +126,7 @@ RSpec.describe Projects::PipelinesController do
           it 'returns matched pipelines' do
             get_pipelines_index_json(scope: 'tags')
 
-            check_pipeline_response(returned: 1, all: 7, running: 2, pending: 1, finished: 4)
+            check_pipeline_response(returned: 1, all: 9)
           end
         end
       end
@@ -138,7 +139,7 @@ RSpec.describe Projects::PipelinesController do
         it 'returns matched pipelines' do
           get_pipelines_index_json(username: user.username)
 
-          check_pipeline_response(returned: 1, all: 1, running: 1, pending: 0, finished: 0)
+          check_pipeline_response(returned: 1, all: 1)
         end
       end
 
@@ -146,7 +147,7 @@ RSpec.describe Projects::PipelinesController do
         it 'returns empty' do
           get_pipelines_index_json(username: 'invalid-username')
 
-          check_pipeline_response(returned: 0, all: 0, running: 0, pending: 0, finished: 0)
+          check_pipeline_response(returned: 0, all: 0)
         end
       end
     end
@@ -158,7 +159,7 @@ RSpec.describe Projects::PipelinesController do
         it 'returns matched pipelines' do
           get_pipelines_index_json(ref: 'branch-1')
 
-          check_pipeline_response(returned: 1, all: 1, running: 1, pending: 0, finished: 0)
+          check_pipeline_response(returned: 1, all: 1)
         end
       end
 
@@ -166,7 +167,7 @@ RSpec.describe Projects::PipelinesController do
         it 'returns empty list' do
           get_pipelines_index_json(ref: 'invalid-ref')
 
-          check_pipeline_response(returned: 0, all: 0, running: 0, pending: 0, finished: 0)
+          check_pipeline_response(returned: 0, all: 0)
         end
       end
     end
@@ -176,15 +177,7 @@ RSpec.describe Projects::PipelinesController do
         it 'returns matched pipelines' do
           get_pipelines_index_json(status: 'success')
 
-          check_pipeline_response(returned: 1, all: 1, running: 0, pending: 0, finished: 1)
-        end
-
-        context 'when filter by unrelated scope' do
-          it 'returns empty list' do
-            get_pipelines_index_json(status: 'success', scope: 'running')
-
-            check_pipeline_response(returned: 0, all: 1, running: 0, pending: 0, finished: 1)
-          end
+          check_pipeline_response(returned: 1, all: 1)
         end
       end
 
@@ -192,7 +185,7 @@ RSpec.describe Projects::PipelinesController do
         it 'returns empty list' do
           get_pipelines_index_json(status: 'manual')
 
-          check_pipeline_response(returned: 0, all: 0, running: 0, pending: 0, finished: 0)
+          check_pipeline_response(returned: 0, all: 0)
         end
       end
 
@@ -200,9 +193,17 @@ RSpec.describe Projects::PipelinesController do
         it 'returns all list' do
           get_pipelines_index_json(status: 'invalid-status')
 
-          check_pipeline_response(returned: 6, all: 6, running: 2, pending: 1, finished: 3)
+          check_pipeline_response(returned: 6, all: 6)
         end
       end
+    end
+
+    def get_pipelines_index_html(params = {})
+      get :index, params: {
+                    namespace_id: project.namespace,
+                    project_id: project
+                  }.merge(params),
+                  format: :html
     end
 
     def get_pipelines_index_json(params = {})
@@ -234,7 +235,8 @@ RSpec.describe Projects::PipelinesController do
       user = create(:user)
       pipeline = create(:ci_empty_pipeline, status: status,
                                             project: project,
-                                            sha: sha,
+                                            sha: sha.id,
+                                            ref: sha.id.first(8),
                                             user: user,
                                             merge_request: merge_request)
 
@@ -260,15 +262,12 @@ RSpec.describe Projects::PipelinesController do
       )
     end
 
-    def check_pipeline_response(returned:, all:, running:, pending:, finished:)
+    def check_pipeline_response(returned:, all:)
       aggregate_failures do
         expect(response).to match_response_schema('pipeline')
 
         expect(json_response['pipelines'].count).to eq returned
         expect(json_response['count']['all'].to_i).to eq all
-        expect(json_response['count']['running'].to_i).to eq running
-        expect(json_response['count']['pending'].to_i).to eq pending
-        expect(json_response['count']['finished'].to_i).to eq finished
       end
     end
   end
@@ -689,6 +688,15 @@ RSpec.describe Projects::PipelinesController do
     end
   end
 
+  describe 'GET #charts' do
+    let(:pipeline) { create(:ci_pipeline, project: project) }
+
+    it_behaves_like 'tracking unique visits', :charts do
+      let(:request_params) { { namespace_id: project.namespace, project_id: project, id: pipeline.id } }
+      let(:target_id) { 'p_analytics_pipelines' }
+    end
+  end
+
   describe 'POST create' do
     let(:project) { create(:project, :public, :repository) }
 
@@ -752,6 +760,71 @@ RSpec.describe Projects::PipelinesController do
           ref: 'master'
         }
       }
+    end
+  end
+
+  describe 'POST create.json' do
+    let(:project) { create(:project, :public, :repository) }
+
+    subject do
+      post :create, params: {
+                      namespace_id: project.namespace,
+                      project_id: project,
+                      pipeline: { ref: 'master' }
+                    },
+                    format: :json
+    end
+
+    before do
+      project.add_developer(user)
+      project.project_feature.update(builds_access_level: feature)
+    end
+
+    context 'with a valid .gitlab-ci.yml file' do
+      before do
+        stub_ci_pipeline_yaml_file(YAML.dump({
+          test: {
+            stage: 'test',
+            script: 'echo'
+          }
+        }))
+      end
+
+      it 'creates a pipeline' do
+        expect { subject }.to change { project.ci_pipelines.count }.by(1)
+
+        expect(response).to have_gitlab_http_status(:created)
+        expect(json_response['id']).to eq(project.ci_pipelines.last.id)
+      end
+    end
+
+    context 'with an invalid .gitlab-ci.yml file' do
+      before do
+        stub_ci_pipeline_yaml_file(YAML.dump({
+          build: {
+            stage: 'build',
+            script: 'echo',
+            rules: [{ when: 'always' }]
+          },
+          test: {
+            stage: 'invalid',
+            script: 'echo'
+          }
+        }))
+      end
+
+      it 'does not create a pipeline' do
+        expect { subject }.not_to change { project.ci_pipelines.count }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response['errors']).to eq([
+          'test job: chosen stage does not exist; available stages are .pre, build, test, deploy, .post'
+        ])
+        expect(json_response['warnings'][0]).to include(
+          'jobs:build may allow multiple pipelines to run for a single action due to `rules:when`'
+        )
+        expect(json_response['total_warnings']).to eq(1)
+      end
     end
   end
 
@@ -851,113 +924,88 @@ RSpec.describe Projects::PipelinesController do
       end
     end
 
-    context 'when feature is enabled' do
+    context 'when pipeline does not have a test report' do
+      it 'renders an empty test report' do
+        get_test_report_json
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['total_count']).to eq(0)
+      end
+    end
+
+    context 'when pipeline has a test report' do
       before do
-        stub_feature_flags(junit_pipeline_view: project)
+        create(:ci_build, :test_reports, name: 'rspec', pipeline: pipeline)
       end
 
-      context 'when pipeline does not have a test report' do
-        it 'renders an empty test report' do
-          get_test_report_json
+      it 'renders the test report' do
+        get_test_report_json
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['total_count']).to eq(4)
+      end
+    end
+
+    context 'when pipeline has a corrupt test report artifact' do
+      before do
+        create(:ci_build, :broken_test_reports, name: 'rspec', pipeline: pipeline)
+
+        get_test_report_json
+      end
+
+      it 'renders the test reports' do
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['test_suites'].count).to eq(1)
+      end
+
+      it 'returns a suite_error on the suite with corrupted XML' do
+        expect(json_response['test_suites'].first['suite_error']).to eq('JUnit XML parsing failed: 1:1: FATAL: Document is empty')
+      end
+    end
+
+    context 'when junit_pipeline_screenshots_view is enabled' do
+      before do
+        stub_feature_flags(junit_pipeline_screenshots_view: project)
+      end
+
+      context 'when test_report contains attachment and scope is with_attachment as a URL param' do
+        let(:pipeline) { create(:ci_pipeline, :with_test_reports_attachment, project: project) }
+
+        it 'returns a test reports with attachment' do
+          get_test_report_json(scope: 'with_attachment')
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['total_count']).to eq(0)
+          expect(json_response["test_suites"]).to be_present
+          expect(json_response["test_suites"].first["test_cases"].first).to include("attachment_url")
         end
       end
 
-      context 'when pipeline has a test report' do
-        before do
-          create(:ci_build, name: 'rspec', pipeline: pipeline).tap do |build|
-            create(:ci_job_artifact, :junit, job: build)
-          end
-        end
+      context 'when test_report does not contain attachment and scope is with_attachment as a URL param' do
+        let(:pipeline) { create(:ci_pipeline, :with_test_reports, project: project) }
 
-        it 'renders the test report' do
-          get_test_report_json
+        it 'returns a test reports with empty values' do
+          get_test_report_json(scope: 'with_attachment')
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['total_count']).to eq(4)
-        end
-      end
-
-      context 'when pipeline has a corrupt test report artifact' do
-        before do
-          create(:ci_build, name: 'rspec', pipeline: pipeline).tap do |build|
-            create(:ci_job_artifact, :junit_with_corrupted_data, job: build)
-          end
-
-          get_test_report_json
-        end
-
-        it 'renders the test reports' do
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['test_suites'].count).to eq(1)
-        end
-
-        it 'returns a suite_error on the suite with corrupted XML' do
-          expect(json_response['test_suites'].first['suite_error']).to eq('JUnit XML parsing failed: 1:1: FATAL: Document is empty')
-        end
-      end
-
-      context 'when junit_pipeline_screenshots_view is enabled' do
-        before do
-          stub_feature_flags(junit_pipeline_screenshots_view: project)
-        end
-
-        context 'when test_report contains attachment and scope is with_attachment as a URL param' do
-          let(:pipeline) { create(:ci_pipeline, :with_test_reports_attachment, project: project) }
-
-          it 'returns a test reports with attachment' do
-            get_test_report_json(scope: 'with_attachment')
-
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(json_response["test_suites"]).to be_present
-            expect(json_response["test_suites"].first["test_cases"].first).to include("attachment_url")
-          end
-        end
-
-        context 'when test_report does not contain attachment and scope is with_attachment as a URL param' do
-          let(:pipeline) { create(:ci_pipeline, :with_test_reports, project: project) }
-
-          it 'returns a test reports with empty values' do
-            get_test_report_json(scope: 'with_attachment')
-
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(json_response["test_suites"]).to be_empty
-          end
-        end
-      end
-
-      context 'when junit_pipeline_screenshots_view is disabled' do
-        before do
-          stub_feature_flags(junit_pipeline_screenshots_view: false)
-        end
-
-        context 'when test_report contains attachment and scope is with_attachment as a URL param' do
-          let(:pipeline) { create(:ci_pipeline, :with_test_reports_attachment, project: project) }
-
-          it 'returns a test reports without attachment_url' do
-            get_test_report_json(scope: 'with_attachment')
-
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(json_response["test_suites"].first["test_cases"].first).not_to include("attachment_url")
-          end
+          expect(json_response["test_suites"]).to be_empty
         end
       end
     end
 
-    context 'when feature is disabled' do
-      let(:pipeline) { create(:ci_empty_pipeline, project: project) }
-
+    context 'when junit_pipeline_screenshots_view is disabled' do
       before do
-        stub_feature_flags(junit_pipeline_view: false)
+        stub_feature_flags(junit_pipeline_screenshots_view: false)
       end
 
-      it 'renders empty response' do
-        get_test_report_json
+      context 'when test_report contains attachment and scope is with_attachment as a URL param' do
+        let(:pipeline) { create(:ci_pipeline, :with_test_reports_attachment, project: project) }
 
-        expect(response).to have_gitlab_http_status(:no_content)
-        expect(response.body).to be_empty
+        it 'returns a test reports without attachment_url' do
+          get_test_report_json(scope: 'with_attachment')
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response["test_suites"].first["test_cases"].first).not_to include("attachment_url")
+        end
       end
     end
 
@@ -978,76 +1026,6 @@ RSpec.describe Projects::PipelinesController do
     def clear_controller_memoization
       controller.clear_memoization(:pipeline_test_report)
       controller.instance_variable_set(:@pipeline, nil)
-    end
-  end
-
-  describe 'GET test_report_count.json' do
-    subject(:test_reports_count_json) do
-      get :test_reports_count, params: {
-        namespace_id: project.namespace,
-        project_id: project,
-        id: pipeline.id
-      },
-      format: :json
-    end
-
-    context 'when feature is enabled' do
-      before do
-        stub_feature_flags(junit_pipeline_view: true)
-      end
-
-      context 'when pipeline does not have a test report' do
-        let(:pipeline) { create(:ci_pipeline, project: project) }
-
-        it 'renders an empty badge counter' do
-          test_reports_count_json
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['total_count']).to eq(0)
-        end
-      end
-
-      context 'when pipeline has a test report' do
-        let(:pipeline) { create(:ci_pipeline, :with_test_reports, project: project) }
-
-        it 'renders the badge counter value' do
-          test_reports_count_json
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['total_count']).to eq(4)
-        end
-      end
-
-      context 'when pipeline has corrupt test reports' do
-        let(:pipeline) { create(:ci_pipeline, project: project) }
-
-        before do
-          job = create(:ci_build, pipeline: pipeline)
-          create(:ci_job_artifact, :junit_with_corrupted_data, job: job, project: project)
-        end
-
-        it 'renders 0' do
-          test_reports_count_json
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['total_count']).to eq(0)
-        end
-      end
-    end
-
-    context 'when feature is disabled' do
-      let(:pipeline) { create(:ci_empty_pipeline, project: project) }
-
-      before do
-        stub_feature_flags(junit_pipeline_view: false)
-      end
-
-      it 'renders empty response' do
-        test_reports_count_json
-
-        expect(response).to have_gitlab_http_status(:no_content)
-        expect(response.body).to be_empty
-      end
     end
   end
 

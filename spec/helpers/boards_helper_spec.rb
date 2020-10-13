@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BoardsHelper do
+RSpec.describe BoardsHelper do
   let_it_be(:project) { create(:project) }
 
   describe '#build_issue_link_base' do
@@ -43,6 +43,7 @@ describe BoardsHelper do
 
       allow(helper).to receive(:current_user) { user }
       allow(helper).to receive(:can?).with(user, :create_non_backlog_issues, board).and_return(true)
+      allow(helper).to receive(:can?).with(user, :admin_issue, board).and_return(true)
     end
 
     it 'returns a board_lists_path as lists_endpoint' do
@@ -51,6 +52,10 @@ describe BoardsHelper do
 
     it 'returns board type as parent' do
       expect(helper.board_data[:parent]).to eq('project')
+    end
+
+    it 'returns can_update for user permissions on the board' do
+      expect(helper.board_data[:can_update]).to eq('true')
     end
   end
 

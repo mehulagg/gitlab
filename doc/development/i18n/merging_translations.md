@@ -25,13 +25,14 @@ suggesting to automate this process. Disapproving will exclude the
 invalid translation, the merge request will be updated within a few
 minutes.
 
+If the translation has failed validation due to angle brackets `<` or `>`
+it should be disapproved on CrowdIn as our strings should be
+using [variables](externalization.md#html) for HTML instead.
+
 It might be handy to pause the integration on the CrowdIn side for a
 little while so translations don't keep coming. This can be done by
 clicking `Pause sync` on the [CrowdIn integration settings
 page](https://translate.gitlab.com/project/gitlab-ee/settings#integration).
-
-When all failures are resolved, the translations need to be double
-checked once more as discussed in [confidential issue](../../user/project/issues/confidential_issues.md) `https://gitlab.com/gitlab-org/gitlab/-/issues/19485`.
 
 ## Merging translations
 
@@ -53,3 +54,18 @@ and delete the
 
 This might be needed when the merge request contains failures that
 have been fixed on master.
+
+## Recreate the GitLab integration in CrowdIn
+
+NOTE: **Note:**
+These instructions work only for GitLab Team Members.
+
+If for some reason the GitLab integration in CrowdIn does not exist, it can be
+recreated by the following steps:
+
+1. Sign in to GitLab as `gitlab-crowdin-bot` (If you're a GitLab Team Member, find credentials in the GitLab shared  [1Password account](https://about.gitlab.com/handbook/security/#1password-for-teams)
+1. Sign in to Crowdin with the GitLab integration
+1. Navigate to Settings > Integrations > GitLab > Set Up Integration
+1. Select `gitlab-org/gitlab` repository
+1. On `Select Branches for Translation`, select `master`
+1. Ensure the `Service Branch Name` is `master-i18n`

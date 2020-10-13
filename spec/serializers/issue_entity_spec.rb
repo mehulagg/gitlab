@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe IssueEntity do
+RSpec.describe IssueEntity do
   let(:project)  { create(:project) }
   let(:resource) { create(:issue, project: project) }
   let(:user)     { create(:user) }
@@ -112,7 +112,7 @@ describe IssueEntity do
 
     context 'when project is archived' do
       before do
-        project.update(archived: true)
+        project.update!(archived: true)
       end
 
       it 'returns archived true' do

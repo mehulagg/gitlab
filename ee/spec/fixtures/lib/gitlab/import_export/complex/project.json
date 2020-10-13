@@ -1,0 +1,37 @@
+{
+  "description": "Nisi et repellendus ut enim quo accusamus vel magnam.",
+  "import_type": "gitlab_project",
+  "creator_id": 123,
+  "visibility_level": 10,
+  "archived": false,
+  "project_members": [
+    {
+      "id": 36,
+      "access_level": 40,
+      "source_id": 5,
+      "source_type": "Project",
+      "user_id": 16,
+      "notification_level": 3,
+      "created_at": "2016-06-14T15:02:03.834Z",
+      "updated_at": "2016-06-14T15:02:03.834Z",
+      "created_by_id": null,
+      "invite_email": null,
+      "invite_token": null,
+      "invite_accepted_at": null,
+      "requested_at": null,
+      "user": {
+        "id": 16,
+        "email": "bernard_willms@gitlabexample.com",
+        "username": "bernard_willms"
+      }
+    }
+  ],
+  "security_setting": {
+    "auto_fix_container_scanning": true,
+    "auto_fix_dast": true,
+    "auto_fix_dependency_scanning": false,
+    "auto_fix_sast": false,
+    "auto_fix_coverage_fuzzing": false,
+    "auto_fix_api_fuzzing": false
+  }
+}

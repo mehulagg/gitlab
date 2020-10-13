@@ -13,9 +13,11 @@ Always use an [Entity](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/api/
 
 ## Documentation
 
-API endpoints must come with [documentation](documentation/styleguide.md#api), unless it is internal or behind a feature flag.
+Each new or updated API endpoint must come with documentation, unless it is internal or behind a feature flag.
 The docs should be in the same merge request, or, if strictly necessary,
 in a follow-up with the same milestone as the original merge request.
+
+See the [Documentation Style Guide RESTful API page](documentation/restful_api_styleguide.md) for details on documenting API resources in Markdown as well as in OpenAPI definition files.
 
 ## Methods and parameters description
 
@@ -85,7 +87,7 @@ User.create(params) # imagine the user submitted `admin=1`... :)
 User.create(declared(params, include_parent_namespaces: false).to_h)
 ```
 
->**Note:**
+NOTE: **Note:**
 `declared(params)` return a `Hashie::Mash` object, on which you will have to
 call `.to_h`.
 
@@ -97,6 +99,46 @@ For instance:
 # good
 Model.create(foo: params[:foo])
 ```
+
+## Array types
+
+With Grape v1.3+, Array types must be defined with a `coerce_with`
+block, or parameters will fail to validate when passed a string from an
+API request. See the [Grape upgrading
+documentation](https://github.com/ruby-grape/grape/blob/master/UPGRADING.md#ensure-that-array-types-have-explicit-coercions)
+for more details.
+
+### Automatic coercion of nil inputs
+
+Prior to Grape v1.3.3, Array parameters with `nil` values would
+automatically be coerced to an empty Array. However, due to [this pull
+request in v1.3.3](https://github.com/ruby-grape/grape/pull/2040), this
+is no longer the case. For example, suppose you define a PUT `/test`
+request that has an optional parameter:
+
+```ruby
+optional :user_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'The user ids for this rule'
+```
+
+Normally, a request to PUT `/test?user_ids` would cause Grape to pass
+`params` of `{ user_ids: nil }`.
+
+This may introduce errors with endpoints that expect a blank array and
+do not handle `nil` inputs properly. To preserve the previous behavior,
+there is a helper method `coerce_nil_params_to_array!` that is used
+in the `before` block of all API calls:
+
+```ruby
+before do
+  coerce_nil_params_to_array!
+end
+```
+
+With this change, a request to PUT `/test?user_ids` will cause Grape to
+pass `params` to be `{ user_ids: [] }`.
+
+There is [an open issue in the Grape tracker](https://github.com/ruby-grape/grape/issues/2068)
+to make this easier.
 
 ## Using HTTP status helpers
 
@@ -120,7 +162,7 @@ For instance:
 
 In order to validate some parameters in the API request, we validate them
 before sending them further (say Gitaly). The following are the
-[custom validators](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/api/validations/validators),
+[custom validators](https://GitLab.com/gitlab-org/gitlab/-/tree/master/lib/api/validations/validators),
 which we have added so far and how to use them. We also wrote a
 guide on how you can add a new custom validator.
 
@@ -133,7 +175,8 @@ guide on how you can add a new custom validator.
   validates the parameter value for different cases. Mainly, it checks whether a
   path is relative and does it contain `../../` relative traversal using
   `File::Separator` or not, and whether the path is absolute, for example
-  `/etc/passwd/`.
+  `/etc/passwd/`. By default, absolute paths are not allowed. However, you can optionally pass in an allowlist for allowed absolute paths in the following way:
+  `requires :file_path, type: String, file_path: { allowlist: ['/foo/bar/', '/home/foo/', '/app/home'] }`
 
 - `Git SHA`:
 
@@ -206,7 +249,7 @@ most basic entity, with successive entities building upon that scope.
 
 The `with_api_entity_associations` scope will also [automatically preload
 data](https://gitlab.com/gitlab-org/gitlab/blob/19f74903240e209736c7668132e6a5a735954e7c/app%2Fmodels%2Ftodo.rb#L34)
-for `Todo` _targets_ when returned in the Todos API.
+for `Todo` _targets_ when returned in the [to-dos API](../api/todos.md).
 
 For more context and discussion about preloading see
 [this merge request](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/25711)

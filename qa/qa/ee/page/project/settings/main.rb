@@ -19,7 +19,7 @@ module QA
             end
 
             def expand_merge_request_approvals_settings(&block)
-              expand_section(:merge_request_approvals_settings) do
+              expand_content(:merge_request_approvals_settings) do
                 MergeRequestApprovals.perform(&block)
               end
             end

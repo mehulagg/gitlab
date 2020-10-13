@@ -4,12 +4,12 @@ require 'spec_helper'
 
 RSpec.describe EpicIssues::DestroyService do
   describe '#execute' do
-    let(:user) { create(:user) }
-    let(:group) { create(:group, :public) }
-    let(:project) { create(:project, group: group) }
-    let(:epic) { create(:epic, group: group) }
-    let(:issue) { create(:issue, project: project) }
-    let!(:epic_issue) { create(:epic_issue, epic: epic, issue: issue) }
+    let_it_be(:user) { create(:user) }
+    let_it_be(:group, refind: true) { create(:group, :public) }
+    let_it_be(:project, refind: true) { create(:project, group: group) }
+    let_it_be(:epic, reload: true) { create(:epic, group: group) }
+    let_it_be(:issue, reload: true) { create(:issue, project: project) }
+    let_it_be(:epic_issue, reload: true) { create(:epic_issue, epic: epic, issue: issue) }
 
     subject { described_class.new(epic_issue, user).execute }
 

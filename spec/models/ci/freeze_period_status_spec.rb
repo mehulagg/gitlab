@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Ci::FreezePeriodStatus do
+RSpec.describe Ci::FreezePeriodStatus do
   let(:project) { create :project }
   # '0 23 * * 5' == "At 23:00 on Friday."", '0 7 * * 1' == "At 07:00 on Monday.""
   let(:friday_2300) { '0 23 * * 5' }
@@ -11,7 +11,7 @@ describe Ci::FreezePeriodStatus do
 
   shared_examples 'within freeze period' do |time|
     it 'is frozen' do
-      Timecop.freeze(time) do
+      travel_to(time) do
         expect(subject).to be_truthy
       end
     end
@@ -19,7 +19,7 @@ describe Ci::FreezePeriodStatus do
 
   shared_examples 'outside freeze period' do |time|
     it 'is not frozen' do
-      Timecop.freeze(time) do
+      travel_to(time) do
         expect(subject).to be_falsy
       end
     end

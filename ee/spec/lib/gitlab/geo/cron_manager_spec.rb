@@ -11,11 +11,11 @@ RSpec.describe Gitlab::Geo::CronManager, :geo do
     geo_repository_verification_primary_batch_worker
     geo_repository_sync_worker
     geo_file_download_dispatch_worker
+    geo_registry_sync_worker
     geo_container_repository_sync_worker
     geo_repository_verification_secondary_scheduler_worker
     geo_metrics_update_worker
     geo_prune_event_log_worker
-    geo_migrated_local_files_clean_up_worker
   ].freeze
 
   def job(name)
@@ -35,10 +35,10 @@ RSpec.describe Gitlab::Geo::CronManager, :geo do
     let(:secondary_jobs) do
       [
         job('geo_file_download_dispatch_worker'),
+        job('geo_registry_sync_worker'),
         job('geo_repository_sync_worker'),
         job('geo_container_repository_sync_worker'),
-        job('geo_repository_verification_secondary_scheduler_worker'),
-        job('geo_migrated_local_files_clean_up_worker')
+        job('geo_repository_verification_secondary_scheduler_worker')
       ]
     end
 
@@ -47,7 +47,7 @@ RSpec.describe Gitlab::Geo::CronManager, :geo do
     end
 
     after(:all) do
-      jobs.each { |name| job(name)&.destroy }
+      jobs.each { |name| job(name)&.destroy } # rubocop: disable Rails/SaveBang
     end
 
     def init_cron_job(job_name, class_name)

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GitlabSchema do
+RSpec.describe GitlabSchema do
   let_it_be(:connections) { GitlabSchema.connections.all_wrappers }
   let(:user) { build :user }
 
@@ -209,6 +209,55 @@ describe GitlabSchema do
 
     it 'raises the correct error on invalid input' do
       expect { described_class.object_from_id("bogus id") }.to raise_error(Gitlab::Graphql::Errors::ArgumentError)
+    end
+  end
+
+  describe '.parse_gid' do
+    let_it_be(:global_id) { 'gid://gitlab/TestOne/2147483647' }
+
+    before do
+      test_base = Class.new
+      test_one = Class.new(test_base)
+      test_two = Class.new(test_base)
+
+      stub_const('TestBase', test_base)
+      stub_const('TestOne', test_one)
+      stub_const('TestTwo', test_two)
+    end
+
+    it 'parses the gid' do
+      gid = described_class.parse_gid(global_id)
+
+      expect(gid.model_id).to eq '2147483647'
+      expect(gid.model_class).to eq TestOne
+    end
+
+    context 'when gid is malformed' do
+      let_it_be(:global_id) { 'malformed://gitlab/TestOne/2147483647' }
+
+      it 'raises an error' do
+        expect { described_class.parse_gid(global_id) }
+          .to raise_error(Gitlab::Graphql::Errors::ArgumentError, "#{global_id} is not a valid GitLab ID.")
+      end
+    end
+
+    context 'when using expected_type' do
+      it 'accepts a single type' do
+        gid = described_class.parse_gid(global_id, expected_type: TestOne)
+
+        expect(gid.model_class).to eq TestOne
+      end
+
+      it 'accepts an ancestor type' do
+        gid = described_class.parse_gid(global_id, expected_type: TestBase)
+
+        expect(gid.model_class).to eq TestOne
+      end
+
+      it 'rejects an unknown type' do
+        expect { described_class.parse_gid(global_id, expected_type: TestTwo) }
+          .to raise_error(Gitlab::Graphql::Errors::ArgumentError, "#{global_id} is not a valid ID for TestTwo.")
+      end
     end
   end
 

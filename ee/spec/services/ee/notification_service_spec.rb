@@ -10,85 +10,6 @@ RSpec.describe EE::NotificationService, :mailer do
 
   let(:mailer) { double(deliver_later: true) }
 
-  context 'service desk issues' do
-    before do
-      allow(Notify).to receive(:service_desk_new_note_email)
-                         .with(Integer, Integer).and_return(mailer)
-
-      allow(::EE::Gitlab::ServiceDesk).to receive(:enabled?).and_return(true)
-      allow(::Gitlab::IncomingEmail).to receive(:enabled?) { true }
-      allow(::Gitlab::IncomingEmail).to receive(:supports_wildcard?) { true }
-    end
-
-    def should_email!
-      expect(Notify).to receive(:service_desk_new_note_email)
-        .with(issue.id, note.id)
-    end
-
-    def should_not_email!
-      expect(Notify).not_to receive(:service_desk_new_note_email)
-    end
-
-    def execute!
-      subject.new_note(note)
-    end
-
-    def self.it_should_email!
-      it 'sends the email' do
-        should_email!
-        execute!
-      end
-    end
-
-    def self.it_should_not_email!
-      it 'doesn\'t send the email' do
-        should_not_email!
-        execute!
-      end
-    end
-
-    let(:issue) { create(:issue, author: User.support_bot) }
-    let(:project) { issue.project }
-    let(:note) { create(:note, noteable: issue, project: project) }
-
-    context 'a non-service-desk issue' do
-      it_should_not_email!
-    end
-
-    context 'a service-desk issue' do
-      before do
-        issue.update!(service_desk_reply_to: 'service.desk@example.com')
-        project.update!(service_desk_enabled: true)
-      end
-
-      it_should_email!
-
-      context 'where the project has disabled the feature' do
-        before do
-          project.update(service_desk_enabled: false)
-        end
-
-        it_should_not_email!
-      end
-
-      context 'when the license doesn\'t allow service desk' do
-        before do
-          allow(::EE::Gitlab::ServiceDesk).to receive(:enabled?).and_return(false)
-        end
-
-        it_should_not_email!
-      end
-
-      context 'when the support bot has unsubscribed' do
-        before do
-          issue.unsubscribe(User.support_bot, project)
-        end
-
-        it_should_not_email!
-      end
-    end
-  end
-
   context 'new review' do
     let(:project) { create(:project, :repository) }
     let(:user) { create(:user) }
@@ -307,6 +228,125 @@ RSpec.describe EE::NotificationService, :mailer do
     end
   end
 
+  describe 'mirror was disabled' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:project) { create(:project) }
+    let(:deleted_username) { 'deleted_user_name' }
+
+    context 'when the project has invited members' do
+      let!(:project_member) { create(:project_member, :invited, project: project) }
+
+      it 'sends email' do
+        expect(Notify).to receive(:mirror_was_disabled_email).with(project.id, project.owner.id, deleted_username).and_call_original
+
+        subject.mirror_was_disabled(project, deleted_username)
+      end
+
+      it_behaves_like 'project emails are disabled' do
+        let(:notification_target)  { project }
+        let(:notification_trigger) { subject.mirror_was_disabled(project, deleted_username) }
+
+        around do |example|
+          perform_enqueued_jobs { example.run }
+        end
+      end
+    end
+
+    context 'when user is owner' do
+      it 'sends email' do
+        expect(Notify).to receive(:mirror_was_disabled_email).with(project.id, project.owner.id, deleted_username).and_call_original
+
+        subject.mirror_was_disabled(project, deleted_username)
+      end
+
+      it_behaves_like 'project emails are disabled' do
+        let(:notification_target)  { project }
+        let(:notification_trigger) { subject.mirror_was_disabled(project, deleted_username) }
+
+        around do |example|
+          perform_enqueued_jobs { example.run }
+        end
+      end
+
+      context 'when owner is blocked' do
+        it 'does not send email' do
+          project.owner.block!
+
+          expect(Notify).not_to receive(:mirror_was_disabled_email)
+
+          subject.mirror_was_disabled(project, deleted_username)
+        end
+
+        context 'when project belongs to group' do
+          it 'does not send email to the blocked owner' do
+            blocked_user = create(:user, :blocked)
+
+            group = create(:group, :public)
+            group.add_owner(blocked_user)
+            group.add_owner(user)
+
+            project = create(:project, namespace: group)
+
+            expect(Notify).not_to receive(:mirror_was_disabled_email).with(project.id, blocked_user.id, deleted_username).and_call_original
+            expect(Notify).to receive(:mirror_was_disabled_email).with(project.id, user.id, deleted_username).and_call_original
+
+            subject.mirror_was_disabled(project, deleted_username)
+          end
+        end
+      end
+    end
+
+    context 'when user is maintainer' do
+      it 'sends email' do
+        project.add_maintainer(user)
+
+        expect(Notify).to receive(:mirror_was_disabled_email).with(project.id, project.owner.id, deleted_username).and_call_original
+        expect(Notify).to receive(:mirror_was_disabled_email).with(project.id, user.id, deleted_username).and_call_original
+
+        subject.mirror_was_disabled(project, deleted_username)
+      end
+    end
+
+    context 'when user is not owner nor maintainer' do
+      it 'does not send email' do
+        project.add_developer(user)
+
+        expect(Notify).not_to receive(:mirror_was_disabled_email).with(project.id, user.id, deleted_username).and_call_original
+        expect(Notify).to receive(:mirror_was_disabled_email).with(project.id, project.creator.id, deleted_username).and_call_original
+
+        subject.mirror_was_disabled(project, deleted_username)
+      end
+
+      context 'when user is group owner' do
+        it 'sends email' do
+          group = create(:group, :public) do |group|
+            group.add_owner(user)
+          end
+
+          project = create(:project, namespace: group)
+
+          expect(Notify).to receive(:mirror_was_disabled_email).with(project.id, user.id, deleted_username).and_call_original
+
+          subject.mirror_was_disabled(project, deleted_username)
+        end
+      end
+
+      context 'when user is group maintainer' do
+        it 'sends email' do
+          group = create(:group, :public) do |group|
+            group.add_maintainer(user)
+          end
+
+          project = create(:project, namespace: group)
+
+          expect(Notify).to receive(:mirror_was_disabled_email).with(project.id, user.id, deleted_username).and_call_original
+
+          subject.mirror_was_disabled(project, deleted_username)
+        end
+      end
+    end
+  end
+
   context 'mirror user changed' do
     let(:mirror_user) { create(:user) }
     let(:project) { create(:project, :mirror, mirror_user_id: mirror_user.id) }
@@ -399,7 +439,7 @@ RSpec.describe EE::NotificationService, :mailer do
         let(:guest) { create(:user) }
         let(:admin) { create(:admin) }
         let(:confidential_issue) { create(:issue, :confidential, project: project, title: 'Confidential issue', author: author, assignees: [assignee]) }
-        let(:iteration) { create(:iteration, project: project, issues: [confidential_issue]) }
+        let(:iteration) { create(:iteration, :skip_project_validation, project: project, issues: [confidential_issue]) }
 
         it "emails subscribers of the issue's iteration that can read the issue" do
           project.add_developer(member)
@@ -430,7 +470,7 @@ RSpec.describe EE::NotificationService, :mailer do
       let(:mailer_method) { :changed_iteration_issue_email }
 
       context do
-        let(:new_iteration) { create(:iteration, project: project, issues: [issue]) }
+        let(:new_iteration) { create(:iteration, :skip_project_validation, project: project, issues: [issue]) }
         let!(:subscriber_to_new_iteration) { create(:user) { |u| issue.toggle_subscription(u, project) } }
 
         it_behaves_like 'altered iteration notification on issue' do
@@ -453,7 +493,7 @@ RSpec.describe EE::NotificationService, :mailer do
         let(:guest) { create(:user) }
         let(:admin) { create(:admin) }
         let(:confidential_issue) { create(:issue, :confidential, project: project, title: 'Confidential issue', author: author, assignees: [assignee]) }
-        let(:new_iteration) { create(:iteration, project: project, issues: [confidential_issue]) }
+        let(:new_iteration) { create(:iteration, :skip_project_validation, project: project, issues: [confidential_issue]) }
 
         it "emails subscribers of the issue's iteration that can read the issue" do
           project.add_developer(member)

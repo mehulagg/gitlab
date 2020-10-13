@@ -6,6 +6,7 @@ RSpec.describe PersonalAccessToken do
   describe 'scopes' do
     let_it_be(:expired_token) { create(:personal_access_token, expires_at: 1.day.ago) }
     let_it_be(:valid_token) { create(:personal_access_token, expires_at: 1.day.from_now) }
+    let_it_be(:long_expiry_token) { create(:personal_access_token, expires_at: '999999-12-31'.to_date) }
     let!(:pat) { create(:personal_access_token, expires_at: expiration_date) }
 
     describe 'with_expires_at_after' do
@@ -14,7 +15,7 @@ RSpec.describe PersonalAccessToken do
       let(:expiration_date) { 3.days.from_now }
 
       it 'includes the tokens with higher than the lifetime expires_at value' do
-        expect(subject).to contain_exactly(pat)
+        expect(subject).to contain_exactly(pat, long_expiry_token)
       end
 
       it "doesn't contain expired tokens" do
@@ -41,6 +42,16 @@ RSpec.describe PersonalAccessToken do
 
       it "doesn't contain tokens within the expiration time" do
         expect(subject).not_to include(valid_token)
+      end
+    end
+
+    describe 'expires_in' do
+      subject { described_class.expires_in(1.day.from_now) }
+
+      let(:expiration_date) { nil }
+
+      it 'only includes one token' do
+        expect(subject).to contain_exactly(valid_token)
       end
     end
   end
@@ -194,6 +205,97 @@ RSpec.describe PersonalAccessToken do
       expired_token = create(:personal_access_token, expires_at: 1.day.ago)
 
       expect(subject).not_to include(expired_token)
+    end
+  end
+
+  shared_examples 'enforcement of personal access token expiry' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:licensed, :application_setting, :result) do
+      true  | true   | true
+      true  | false  | false
+      false | true   | true
+      false | false  | true
+    end
+
+    with_them do
+      before do
+        stub_licensed_features(enforce_pat_expiration: licensed)
+        stub_application_setting(enforce_pat_expiration: application_setting)
+      end
+
+      it { expect(subject).to be result }
+    end
+  end
+
+  describe '.expiration_enforced??' do
+    subject { described_class.expiration_enforced? }
+
+    it_behaves_like 'enforcement of personal access token expiry'
+  end
+
+  describe '#expired?' do
+    let_it_be(:expired_token) { create(:personal_access_token, expires_at: 1.week.ago) }
+
+    subject { expired_token.expired? }
+
+    it_behaves_like 'enforcement of personal access token expiry'
+  end
+
+  describe '.enforce_pat_expiration_feature_available?' do
+    using RSpec::Parameterized::TableSyntax
+
+    subject { described_class.enforce_pat_expiration_feature_available? }
+
+    where(:feature_flag, :licensed, :result) do
+      true  | true   | true
+      true  | false  | false
+      false | true   | false
+      false | false  | false
+    end
+
+    with_them do
+      before do
+        stub_feature_flags(enforce_pat_expiration: feature_flag)
+        stub_licensed_features(enforce_pat_expiration: licensed)
+      end
+
+      it { expect(subject).to be result }
+    end
+  end
+
+  shared_context 'write to cache' do
+    let_it_be(:pat) { create(:personal_access_token) }
+    let_it_be(:cache_keys) { %w(token_expired_rotation token_expiring_rotation) }
+
+    before do
+      cache_keys.each do |key|
+        Rails.cache.write(['users', pat.user.id, key], double)
+      end
+    end
+  end
+
+  describe '#revoke', :use_clean_rails_memory_store_caching do
+    include_context 'write to cache'
+
+    it 'clears cache on revoke access' do
+      pat.revoke!
+
+      cache_keys.each do |key|
+        expect(Rails.cache.read(['users', pat.user.id, key])).to be_nil
+      end
+    end
+  end
+
+  describe 'after create callback', :use_clean_rails_memory_store_caching do
+    include_context 'write to cache'
+
+    it 'clears cache for the user' do
+      create(:personal_access_token, user_id: pat.user_id)
+
+      cache_keys.each do |key|
+        expect(Rails.cache.read(['users', pat.user.id, key])).to be_nil
+      end
     end
   end
 end

@@ -3,7 +3,7 @@
 require_dependency 'declarative_policy'
 
 module API
-  class ProjectMirror < Grape::API
+  class ProjectMirror < Grape::API::Instance
     helpers do
       def github_webhook_signature
         @github_webhook_signature ||= headers['X-Hub-Signature']
@@ -49,7 +49,7 @@ module API
       end
 
       def process_pull_request
-        external_pull_request = Ci::ExternalPullRequests::ProcessGithubEventService.new(project, mirror_user).execute(params)
+        external_pull_request = ::Ci::ExternalPullRequests::ProcessGithubEventService.new(project, mirror_user).execute(params)
 
         if external_pull_request
           render_validation_error!(external_pull_request)

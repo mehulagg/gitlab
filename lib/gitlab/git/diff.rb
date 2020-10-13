@@ -120,8 +120,8 @@ module Gitlab
         # default.
         #
         # Patches surpassing this limit should still be persisted in the database.
-        def patch_safe_limit_bytes
-          patch_hard_limit_bytes / 10
+        def patch_safe_limit_bytes(limit = patch_hard_limit_bytes)
+          limit / 10
         end
 
         # Returns the limit for a single diff file (patch).
@@ -174,9 +174,13 @@ module Gitlab
         @line_count ||= Util.count_lines(@diff)
       end
 
+      def diff_bytesize
+        @diff_bytesize ||= @diff.bytesize
+      end
+
       def too_large?
         if @too_large.nil?
-          @too_large = @diff.bytesize >= self.class.patch_hard_limit_bytes
+          @too_large = diff_bytesize >= self.class.patch_hard_limit_bytes
         else
           @too_large
         end
@@ -194,7 +198,7 @@ module Gitlab
       def collapsed?
         return @collapsed if defined?(@collapsed)
 
-        @collapsed = !expanded && @diff.bytesize >= self.class.patch_safe_limit_bytes
+        @collapsed = !expanded && diff_bytesize >= self.class.patch_safe_limit_bytes
       end
 
       def collapse!
@@ -224,18 +228,18 @@ module Gitlab
         end
       end
 
-      def init_from_gitaly(diff)
-        @diff = diff.respond_to?(:patch) ? encode!(diff.patch) : ''
-        @new_path = encode!(diff.to_path.dup)
-        @old_path = encode!(diff.from_path.dup)
-        @a_mode = diff.old_mode.to_s(8)
-        @b_mode = diff.new_mode.to_s(8)
-        @new_file = diff.from_id == BLANK_SHA
-        @renamed_file = diff.from_path != diff.to_path
-        @deleted_file = diff.to_id == BLANK_SHA
-        @too_large = diff.too_large if diff.respond_to?(:too_large)
+      def init_from_gitaly(gitaly_diff)
+        @diff = gitaly_diff.respond_to?(:patch) ? encode!(gitaly_diff.patch) : ''
+        @new_path = encode!(gitaly_diff.to_path.dup)
+        @old_path = encode!(gitaly_diff.from_path.dup)
+        @a_mode = gitaly_diff.old_mode.to_s(8)
+        @b_mode = gitaly_diff.new_mode.to_s(8)
+        @new_file = gitaly_diff.from_id == BLANK_SHA
+        @renamed_file = gitaly_diff.from_path != gitaly_diff.to_path
+        @deleted_file = gitaly_diff.to_id == BLANK_SHA
+        @too_large = gitaly_diff.too_large if gitaly_diff.respond_to?(:too_large)
 
-        collapse! if diff.respond_to?(:collapsed) && diff.collapsed
+        collapse! if gitaly_diff.respond_to?(:collapsed) && gitaly_diff.collapsed
       end
 
       def prune_diff_if_eligible

@@ -48,10 +48,21 @@ module StatusPage
       super && project&.feature_available?(:status_page)
     end
 
+    # Status page uses hash-routing, so we may see a number
+    # of different url endings from user-provided value;
+    # This ensures `/#/` is the tail
+    def normalized_status_page_url
+      return if status_page_url.blank?
+
+      status_page_url
+        .chomp('/').chomp('#').chomp('/')
+        .concat('/#/')
+    end
+
     def storage_client
       return unless enabled?
 
-      StatusPage::Storage::S3Client.new(
+      Gitlab::StatusPage::Storage::S3Client.new(
         region: aws_region,
         bucket_name: aws_s3_bucket_name,
         access_key_id: aws_access_key,

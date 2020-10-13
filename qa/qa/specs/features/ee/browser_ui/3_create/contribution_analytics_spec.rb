@@ -41,7 +41,7 @@ module QA
         Page::Group::Menu.perform(&:click_contribution_analytics_item)
       end
 
-      it 'tests contributions' do
+      it 'tests contributions', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/225303', type: :bug }, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/527' do
         EE::Page::Group::ContributionAnalytics.perform do |contribution_analytics|
           expect(contribution_analytics).to have_push_element('3 pushes, more than 4.0 commits by 1 person contributors.')
           expect(contribution_analytics).to have_mr_element('1 created, 1 merged.')

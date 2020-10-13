@@ -6,33 +6,22 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::DesignRepositoryUpdatedEvent, :cl
   include ::EE::GeoHelpers
 
   let_it_be(:secondary) { create(:geo_node) }
-
+  let_it_be(:secondary_excludes_all_projects) { create(:geo_node, :selective_sync_excludes_all_projects) }
   let(:logger) { Gitlab::Geo::LogCursor::Logger.new(described_class, Logger::INFO) }
   let(:project) { create(:project) }
-  let(:event) { create(:geo_design_repository_updated_event, project: project) }
-  let(:event_log) { create(:geo_event_log, repository_updated_event: event) }
+  let(:design_repository_updated_event) { create(:geo_design_repository_updated_event, project: project) }
+  let(:event_log) { create(:geo_event_log, repository_updated_event: design_repository_updated_event) }
   let!(:event_log_state) { create(:geo_event_log_state, event_id: event_log.id - 1) }
+  let(:sync_worker_class) { ::Geo::DesignRepositorySyncWorker }
+  let(:registry_class) { ::Geo::DesignRegistry }
+  let(:registry_factory) { :geo_design_registry }
+  let(:registry_factory_args) { [:synced, project: project] }
+  let(:sync_worker_expected_arg) { project.id }
 
-  subject { described_class.new(event, Time.now, logger) }
-
-  around do |example|
-    Sidekiq::Testing.fake! { example.run }
-  end
+  subject(:event) { described_class.new(design_repository_updated_event, Time.now, logger) }
 
   before do
     stub_current_geo_node(secondary)
-  end
-
-  shared_examples 'DesignRepositoryUpdatedEvent' do
-    it 'creates a new registry when a design registry does not exist' do
-      expect { subject.process }.to change(Geo::DesignRegistry, :count).by(1)
-    end
-
-    it 'marks registry as pending when a design registry exists' do
-      registry = create(:geo_design_registry, :synced, project: project)
-
-      expect { subject.process }.to change { registry.reload.state }.from('synced').to('pending')
-    end
   end
 
   describe '#process' do
@@ -41,12 +30,47 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::DesignRepositoryUpdatedEvent, :cl
         allow(Gitlab::ShardHealthCache).to receive(:healthy_shard?).with('default').and_return(true)
       end
 
-      it_behaves_like 'DesignRepositoryUpdatedEvent'
+      context 'when the design repository is not excluded by selective sync' do
+        it_behaves_like 'event should trigger a sync'
 
-      it 'schedules a Geo::DesignRepositorySyncWorker' do
-        expect(Geo::DesignRepositorySyncWorker).to receive(:perform_async).with(project.id).once
+        context 'when the project is included in selective sync but there is no design' do
+          before do
+            node = create(:geo_node, selective_sync_type: 'shards', selective_sync_shards: [project.repository_storage])
+            stub_current_geo_node(node)
+          end
 
-        subject.process
+          context 'when a registry does not yet exist' do
+            it_behaves_like 'event does not create a registry'
+            it_behaves_like 'event does not schedule a sync worker'
+            it_behaves_like 'logs event source info'
+          end
+        end
+      end
+
+      context "when the design repository is excluded by selective sync" do
+        before do
+          stub_current_geo_node(secondary_excludes_all_projects)
+        end
+
+        context 'when a registry does not yet exist' do
+          it_behaves_like 'event does not create a registry'
+          it_behaves_like 'event does not schedule a sync worker'
+          it_behaves_like 'logs event source info'
+        end
+
+        # This describes an optimization to avoid double-checking a heavy (330ms
+        # is heavy for the log cursor) selective sync query too often:
+        # If the registry exists, then we assume it *should* exist. This will
+        # usually be accurate. The responsibility falls to proper handling of
+        # delete events as well as the `RegistryConsistencyWorker` to remove
+        # registries.
+        context 'when a registry exists' do
+          let!(:registry) { create(registry_factory, *registry_factory_args) }
+
+          it_behaves_like 'event transitions a registry to pending'
+          it_behaves_like 'event schedules a sync worker'
+          it_behaves_like 'logs event source info'
+        end
       end
     end
 
@@ -55,15 +79,19 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::DesignRepositoryUpdatedEvent, :cl
         allow(Gitlab::ShardHealthCache).to receive(:healthy_shard?).with('default').and_return(false)
       end
 
-      it_behaves_like 'DesignRepositoryUpdatedEvent'
+      context 'when a registry does not yet exist' do
+        it_behaves_like 'event creates a registry'
+        it_behaves_like 'event does not schedule a sync worker'
+        it_behaves_like 'logs event source info'
+      end
 
-      it 'does not schedule a Geo::DesignRepositorySyncWorker job' do
-        expect(Geo::DesignRepositorySyncWorker).not_to receive(:perform_async).with(project.id)
+      context 'when a registry exists' do
+        let!(:registry) { create(registry_factory, *registry_factory_args) }
 
-        subject.process
+        it_behaves_like 'event transitions a registry to pending'
+        it_behaves_like 'event does not schedule a sync worker'
+        it_behaves_like 'logs event source info'
       end
     end
-
-    it_behaves_like 'logs event source info'
   end
 end

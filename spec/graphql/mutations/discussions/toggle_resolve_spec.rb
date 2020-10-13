@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Mutations::Discussions::ToggleResolve do
+RSpec.describe Mutations::Discussions::ToggleResolve do
   subject(:mutation) do
     described_class.new(object: nil, context: { current_user: user }, field: nil)
   end
@@ -51,7 +51,7 @@ describe Mutations::Discussions::ToggleResolve do
           it 'raises an error' do
             expect { subject }.to raise_error(
               Gitlab::Graphql::Errors::ArgumentError,
-              "#{discussion.to_global_id} is not a valid id for Discussion."
+              "#{discussion.to_global_id} is not a valid ID for Discussion."
             )
           end
         end

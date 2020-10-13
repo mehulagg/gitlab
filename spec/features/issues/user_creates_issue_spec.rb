@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe "User creates issue" do
+RSpec.describe "User creates issue" do
   include DropzoneHelper
 
   let_it_be(:project) { create(:project_empty_repo, :public) }
@@ -60,6 +60,10 @@ describe "User creates issue" do
         .and have_content(user.name)
         .and have_content(project.name)
       expect(page).to have_selector('strong', text: 'Description')
+    end
+
+    it 'does not render the issue type dropdown' do
+      expect(page).not_to have_selector('.s-issuable-type-filter-dropdown-wrap')
     end
   end
 
@@ -185,6 +189,50 @@ describe "User creates issue" do
 
       it 'fills in template' do
         expect(find('.js-issuable-selector .dropdown-toggle-text')).to have_content('bug')
+      end
+    end
+
+    context 'form create handles issue creation by default' do
+      let(:project) { create(:project) }
+
+      before do
+        visit new_project_issue_path(project)
+      end
+
+      it 'pre-fills the issue type dropdown with issue type' do
+        expect(find('.js-issuable-type-filter-dropdown-wrap .dropdown-toggle-text')).to have_content('Issue')
+      end
+
+      it 'does not hide the milestone select' do
+        expect(page).to have_selector('.qa-issuable-milestone-dropdown')
+      end
+    end
+
+    context 'form create handles incident creation' do
+      let(:project) { create(:project) }
+
+      before do
+        visit new_project_issue_path(project, { issuable_template: 'incident', issue: { issue_type: 'incident' } })
+      end
+
+      it 'pre-fills the issue type dropdown with incident type' do
+        expect(find('.js-issuable-type-filter-dropdown-wrap .dropdown-toggle-text')).to have_content('Incident')
+      end
+
+      it 'hides the epic select' do
+        expect(page).not_to have_selector('.epic-dropdown-container')
+      end
+
+      it 'hides the milestone select' do
+        expect(page).not_to have_selector('.qa-issuable-milestone-dropdown')
+      end
+
+      it 'hides the weight input' do
+        expect(page).not_to have_selector('.qa-issuable-weight-input')
+      end
+
+      it 'shows the incident help text' do
+        expect(page).to have_text('A modified issue to guide the resolution of incidents.')
       end
     end
 

@@ -18,6 +18,7 @@ RSpec.describe 'Billing plan pages', :feature do
   end
 
   before do
+    stub_experiment_for_user(contact_sales_btn_in_app: true)
     stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan.name}")
       .to_return(status: 200, body: plans_data.to_json)
     stub_application_setting(check_namespace_plan: true)
@@ -39,6 +40,20 @@ RSpec.describe 'Billing plan pages', :feature do
     it 'displays the upgrade link' do
       page.within('.content') do
         expect(page).to have_link('Upgrade', href: external_upgrade_url(namespace, plan))
+      end
+    end
+  end
+
+  shared_examples 'can contact sales' do
+    before do
+      visit page_path
+    end
+
+    it 'displays the contact sales link' do
+      # see ApplicationHelper#contact_sales_url
+      contact_sales_url = 'https://about.gitlab.com/sales'
+      page.within('.content') do
+        expect(page).to have_link('Contact sales', href: %r{#{contact_sales_url}\?test=inappcontactsales(bronze|silver|gold)})
       end
     end
   end
@@ -99,7 +114,7 @@ RSpec.describe 'Billing plan pages', :feature do
       let(:plan) { free_plan }
 
       let!(:subscription) do
-        create(:gitlab_subscription, namespace: namespace, hosted_plan: nil, seats: 15)
+        create(:gitlab_subscription, namespace: namespace, hosted_plan: plan, seats: 15)
       end
 
       before do
@@ -141,6 +156,7 @@ RSpec.describe 'Billing plan pages', :feature do
       end
 
       it_behaves_like 'plan with subscription table'
+      it_behaves_like 'can contact sales'
     end
 
     context 'on bronze plan' do
@@ -153,6 +169,7 @@ RSpec.describe 'Billing plan pages', :feature do
       it_behaves_like 'plan with header'
       it_behaves_like 'downgradable plan'
       it_behaves_like 'upgradable plan'
+      it_behaves_like 'can contact sales'
       it_behaves_like 'plan with subscription table'
     end
 
@@ -166,6 +183,7 @@ RSpec.describe 'Billing plan pages', :feature do
       it_behaves_like 'plan with header'
       it_behaves_like 'downgradable plan'
       it_behaves_like 'upgradable plan'
+      it_behaves_like 'can contact sales'
       it_behaves_like 'plan with subscription table'
     end
 
@@ -231,6 +249,8 @@ RSpec.describe 'Billing plan pages', :feature do
           end
         end
       end
+
+      it_behaves_like 'can contact sales'
     end
 
     context 'on bronze plan' do
@@ -243,6 +263,7 @@ RSpec.describe 'Billing plan pages', :feature do
       it_behaves_like 'plan with header'
       it_behaves_like 'downgradable plan'
       it_behaves_like 'upgradable plan'
+      it_behaves_like 'can contact sales'
     end
 
     context 'on gold plan' do
@@ -319,6 +340,8 @@ RSpec.describe 'Billing plan pages', :feature do
         it 'displays subscription table', :js do
           expect(page).to have_selector('.js-subscription-table')
         end
+
+        it_behaves_like 'can contact sales'
       end
     end
   end

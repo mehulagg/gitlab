@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class EpicIssues < Grape::API
+  class EpicIssues < Grape::API::Instance
     before do
       authenticate!
       authorize_epics_feature!
@@ -55,12 +55,14 @@ module API
       params do
         requires :epic_iid, type: Integer, desc: 'The iid of the epic'
       end
-      get ':id/(-/)epics/:epic_iid/issues' do
-        authorize_can_read!
+      [':id/epics/:epic_iid/issues', ':id/-/epics/:epic_iid/issues'].each do |path|
+        get path do
+          authorize_can_read!
 
-        present epic.issues_readable_by(current_user),
-          with: EE::API::Entities::EpicIssue,
-          current_user: current_user
+          present epic.issues_readable_by(current_user),
+            with: EE::API::Entities::EpicIssue,
+            current_user: current_user
+        end
       end
 
       desc 'Assign an issue to the epic' do

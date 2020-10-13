@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Issues do
+RSpec.describe API::Issues do
   let_it_be(:user) { create(:user) }
   let_it_be(:project, reload: true) do
     create(:project, :public, creator_id: user.id, namespace: user.namespace)
@@ -27,6 +27,7 @@ describe API::Issues do
       updated_at: 3.hours.ago,
       closed_at: 1.hour.ago
   end
+
   let!(:confidential_issue) do
     create :issue,
       :confidential,
@@ -36,6 +37,7 @@ describe API::Issues do
       created_at: generate(:past_time),
       updated_at: 2.hours.ago
   end
+
   let!(:issue) do
     create :issue,
       author: user,
@@ -47,6 +49,7 @@ describe API::Issues do
       title: issue_title,
       description: issue_description
   end
+
   let_it_be(:label) do
     create(:label, title: 'label', color: '#FFAABB', project: project)
   end

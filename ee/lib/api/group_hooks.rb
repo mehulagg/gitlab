@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class GroupHooks < Grape::API
+  class GroupHooks < Grape::API::Instance
     include ::API::PaginationParams
 
     before { authenticate! }
@@ -20,6 +20,7 @@ module API
         optional :job_events, type: Boolean, desc: "Trigger hook on job events"
         optional :pipeline_events, type: Boolean, desc: "Trigger hook on pipeline events"
         optional :wiki_page_events, type: Boolean, desc: "Trigger hook on wiki events"
+        optional :deployment_events, type: Boolean, desc: "Trigger hook on deployment events"
         optional :enable_ssl_verification, type: Boolean, desc: "Do SSL verification when triggering the hook"
         optional :token, type: String, desc: "Secret token to validate received payloads; this will not be returned in the response"
       end
@@ -100,7 +101,9 @@ module API
       delete ":id/hooks/:hook_id" do
         hook = user_group.hooks.find(params.delete(:hook_id))
 
-        destroy_conditionally!(hook)
+        destroy_conditionally!(hook) do
+          WebHooks::DestroyService.new(current_user).execute(hook)
+        end
       end
     end
   end

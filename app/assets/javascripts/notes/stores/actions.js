@@ -3,7 +3,7 @@ import $ from 'jquery';
 import Visibility from 'visibilityjs';
 import axios from '~/lib/utils/axios_utils';
 import TaskList from '../../task_list';
-import Flash from '../../flash';
+import { deprecatedCreateFlash as Flash } from '../../flash';
 import Poll from '../../lib/utils/poll';
 import * as types from './mutation_types';
 import * as utils from './utils';
@@ -13,10 +13,37 @@ import sidebarTimeTrackingEventHub from '../../sidebar/event_hub';
 import { isInViewport, scrollToElement, isInMRPage } from '../../lib/utils/common_utils';
 import { mergeUrlParams } from '../../lib/utils/url_utility';
 import mrWidgetEventHub from '../../vue_merge_request_widget/event_hub';
+import updateIssueConfidentialMutation from '~/sidebar/components/confidential/mutations/update_issue_confidential.mutation.graphql';
+import updateMergeRequestLockMutation from '~/sidebar/components/lock/mutations/update_merge_request_lock.mutation.graphql';
+import updateIssueLockMutation from '~/sidebar/components/lock/mutations/update_issue_lock.mutation.graphql';
 import { __, sprintf } from '~/locale';
 import Api from '~/api';
 
 let eTagPoll;
+
+export const updateLockedAttribute = ({ commit, getters }, { locked, fullPath }) => {
+  const { iid, targetType } = getters.getNoteableData;
+
+  return utils.gqClient
+    .mutate({
+      mutation: targetType === 'issue' ? updateIssueLockMutation : updateMergeRequestLockMutation,
+      variables: {
+        input: {
+          projectPath: fullPath,
+          iid: String(iid),
+          locked,
+        },
+      },
+    })
+    .then(({ data }) => {
+      const discussionLocked =
+        targetType === 'issue'
+          ? data.issueSetLocked.issue.discussionLocked
+          : data.mergeRequestSetLocked.mergeRequest.discussionLocked;
+
+      commit(types.SET_ISSUABLE_LOCK, discussionLocked);
+    });
+};
 
 export const expandDiscussion = ({ commit, dispatch }, data) => {
   if (data.discussionId) {
@@ -31,6 +58,8 @@ export const collapseDiscussion = ({ commit }, data) => commit(types.COLLAPSE_DI
 export const setNotesData = ({ commit }, data) => commit(types.SET_NOTES_DATA, data);
 
 export const setNoteableData = ({ commit }, data) => commit(types.SET_NOTEABLE_DATA, data);
+
+export const setConfidentiality = ({ commit }, data) => commit(types.SET_ISSUE_CONFIDENTIAL, data);
 
 export const setUserData = ({ commit }, data) => commit(types.SET_USER_DATA, data);
 
@@ -58,6 +87,7 @@ export const fetchDiscussions = ({ commit, dispatch }, { path, filter, persistFi
 
   return axios.get(path, config).then(({ data }) => {
     commit(types.SET_INITIAL_DISCUSSIONS, data);
+    commit(types.SET_FETCHING_DISCUSSIONS, false);
 
     dispatch('updateResolvableDiscussionsCounts');
   });
@@ -69,8 +99,20 @@ export const updateDiscussion = ({ commit, state }, discussion) => {
   return utils.findNoteObjectById(state.discussions, discussion.id);
 };
 
-export const setDiscussionSortDirection = ({ commit }, direction) => {
-  commit(types.SET_DISCUSSIONS_SORT, direction);
+export const setDiscussionSortDirection = ({ commit }, { direction, persist = true }) => {
+  commit(types.SET_DISCUSSIONS_SORT, { direction, persist });
+};
+
+export const setTimelineView = ({ commit }, enabled) => {
+  commit(types.SET_TIMELINE_VIEW, enabled);
+};
+
+export const setSelectedCommentPosition = ({ commit }, position) => {
+  commit(types.SET_SELECTED_COMMENT_POSITION, position);
+};
+
+export const setSelectedCommentPositionHover = ({ commit }, position) => {
+  commit(types.SET_SELECTED_COMMENT_POSITION_HOVER, position);
 };
 
 export const removeNote = ({ commit, dispatch, state }, note) => {
@@ -99,6 +141,23 @@ export const updateNote = ({ commit, dispatch }, { endpoint, note }) =>
 
 export const updateOrCreateNotes = ({ commit, state, getters, dispatch }, notes) => {
   const { notesById } = getters;
+  const debouncedFetchDiscussions = isFetching => {
+    if (!isFetching) {
+      commit(types.SET_FETCHING_DISCUSSIONS, true);
+      dispatch('fetchDiscussions', { path: state.notesData.discussionsPath });
+    } else {
+      if (isFetching !== true) {
+        clearTimeout(state.currentlyFetchingDiscussions);
+      }
+
+      commit(
+        types.SET_FETCHING_DISCUSSIONS,
+        setTimeout(() => {
+          dispatch('fetchDiscussions', { path: state.notesData.discussionsPath });
+        }, constants.DISCUSSION_FETCH_TIMEOUT),
+      );
+    }
+  };
 
   notes.forEach(note => {
     if (notesById[note.id]) {
@@ -109,7 +168,7 @@ export const updateOrCreateNotes = ({ commit, state, getters, dispatch }, notes)
       if (discussion) {
         commit(types.ADD_NEW_REPLY_TO_DISCUSSION, note);
       } else if (note.type === constants.DIFF_NOTE) {
-        dispatch('fetchDiscussions', { path: state.notesData.discussionsPath });
+        debouncedFetchDiscussions(state.currentlyFetchingDiscussions);
       } else {
         commit(types.ADD_NEW_NOTE, note);
       }
@@ -205,7 +264,6 @@ export const closeIssue = ({ commit, dispatch, state }) => {
     commit(types.CLOSE_ISSUE);
     dispatch('emitStateChangedEvent', data);
     dispatch('toggleStateButtonLoading', false);
-    dispatch('toggleBlockedIssueWarning', false);
   });
 };
 
@@ -377,9 +435,8 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
 };
 
 const pollSuccessCallBack = (resp, commit, state, getters, dispatch) => {
-  if (resp.notes && resp.notes.length) {
-    updateOrCreateNotes({ commit, state, getters, dispatch }, resp.notes);
-
+  if (resp.notes?.length) {
+    dispatch('updateOrCreateNotes', resp.notes);
     dispatch('startTaskList');
   }
 
@@ -399,12 +456,12 @@ const getFetchDataParams = state => {
   return { endpoint, options };
 };
 
-export const fetchData = ({ commit, state, getters }) => {
+export const fetchData = ({ commit, state, getters, dispatch }) => {
   const { endpoint, options } = getFetchDataParams(state);
 
   axios
     .get(endpoint, options)
-    .then(({ data }) => pollSuccessCallBack(data, commit, state, getters))
+    .then(({ data }) => pollSuccessCallBack(data, commit, state, getters, dispatch))
     .catch(() => Flash(__('Something went wrong while fetching latest comments.')));
 };
 
@@ -422,9 +479,9 @@ export const poll = ({ commit, state, getters, dispatch }) => {
   });
 
   if (!Visibility.hidden()) {
-    eTagPoll.makeRequest();
+    eTagPoll.makeDelayedRequest(2500);
   } else {
-    fetchData({ commit, state, getters });
+    dispatch('fetchData');
   }
 
   Visibility.change(() => {
@@ -647,5 +704,36 @@ export const receiveDeleteDescriptionVersionError = ({ commit }, error) => {
   commit(types.RECEIVE_DELETE_DESCRIPTION_VERSION_ERROR, error);
 };
 
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};
+export const updateAssignees = ({ commit }, assignees) => {
+  commit(types.UPDATE_ASSIGNEES, assignees);
+};
+
+export const updateDiscussionPosition = ({ commit }, updatedPosition) => {
+  commit(types.UPDATE_DISCUSSION_POSITION, updatedPosition);
+};
+
+export const updateConfidentialityOnIssuable = (
+  { getters, commit },
+  { confidential, fullPath },
+) => {
+  const { iid } = getters.getNoteableData;
+
+  return utils.gqClient
+    .mutate({
+      mutation: updateIssueConfidentialMutation,
+      variables: {
+        input: {
+          projectPath: fullPath,
+          iid: String(iid),
+          confidential,
+        },
+      },
+    })
+    .then(({ data }) => {
+      const {
+        issueSetConfidential: { issue },
+      } = data;
+
+      setConfidentiality({ commit }, issue.confidential);
+    });
+};

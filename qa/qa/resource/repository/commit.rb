@@ -29,20 +29,49 @@ module QA
           @add_files = files
         end
 
+        def add_directory(dir)
+          raise "Must set directory as a Pathname" unless dir.is_a?(Pathname)
+
+          files_to_add = []
+
+          dir.each_child do |child|
+            case child.ftype?
+            when "file"
+              files_to_add.append({
+                file_path: child.to_s,
+                content: child.read
+              })
+            when "directory"
+              add_directory(child)
+            else
+              continue
+            end
+          end
+
+          validate_files!(files_to_add)
+
+          @add_files.merge(files_to_add)
+        end
+
         def update_files(files)
           validate_files!(files)
 
           @update_files = files
         end
 
-        def resource_web_url(resource)
+        # If `actions` are specified, it performs the actions to create,
+        # update, or delete commits. If no actions are specified it
+        # gets existing commits.
+        def fabricate_via_api!
+          return api_get if actions.empty?
+
           super
-        rescue ResourceURLMissingError
-          # this particular resource does not expose a web_url property
+        rescue ResourceNotFoundError
+          super
         end
 
         def api_get_path
-          "#{api_post_path}/#{@sha}"
+          api_post_path
         end
 
         def api_post_path

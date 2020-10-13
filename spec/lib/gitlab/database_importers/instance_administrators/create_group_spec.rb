@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::DatabaseImporters::InstanceAdministrators::CreateGroup do
+RSpec.describe Gitlab::DatabaseImporters::InstanceAdministrators::CreateGroup do
   describe '#execute' do
     let(:result) { subject.execute }
 
@@ -65,8 +65,8 @@ describe Gitlab::DatabaseImporters::InstanceAdministrators::CreateGroup do
       it 'creates group' do
         expect(result[:status]).to eq(:success)
         expect(group).to be_persisted
-        expect(group.name).to eq('GitLab Instance Administrators')
-        expect(group.path).to start_with('gitlab-instance-administrators')
+        expect(group.name).to eq('GitLab Instance')
+        expect(group.path).to start_with('gitlab-instance')
         expect(group.path.split('-').last.length).to eq(8)
         expect(group.visibility_level).to eq(described_class::VISIBILITY_LEVEL)
       end

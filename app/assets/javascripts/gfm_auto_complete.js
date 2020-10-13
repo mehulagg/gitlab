@@ -1,10 +1,12 @@
 import $ from 'jquery';
-import '@gitlab/at.js';
+import '~/lib/utils/jquery_at_who';
 import { escape, template } from 'lodash';
 import SidebarMediator from '~/sidebar/sidebar_mediator';
 import glRegexp from './lib/utils/regexp';
 import AjaxCache from './lib/utils/ajax_cache';
+import axios from '~/lib/utils/axios_utils';
 import { spriteIcon } from './lib/utils/common_utils';
+import * as Emoji from '~/emoji';
 
 function sanitize(str) {
   return str.replace(/<(?:.|\n)*?>/gm, '');
@@ -29,7 +31,7 @@ export function membersBeforeSave(members) {
     const imgAvatar = `<img src="${member.avatar_url}" alt="${member.username}" class="avatar ${rectAvatarClass} avatar-inline center s26"/>`;
     const txtAvatar = `<div class="avatar ${rectAvatarClass} center avatar-inline s26">${autoCompleteAvatar}</div>`;
     const avatarIcon = member.mentionsDisabled
-      ? spriteIcon('notifications-off', 's16 vertical-align-middle prepend-left-5')
+      ? spriteIcon('notifications-off', 's16 vertical-align-middle gl-ml-2')
       : '';
 
     return {
@@ -51,6 +53,7 @@ export const defaultAutocompleteConfig = {
   milestones: true,
   labels: true,
   snippets: true,
+  vulnerabilities: true,
 };
 
 class GfmAutoComplete {
@@ -58,6 +61,7 @@ class GfmAutoComplete {
     this.dataSources = dataSources;
     this.cachedData = {};
     this.isLoadingData = {};
+    this.previousQuery = '';
   }
 
   setup(input, enableMap = defaultAutocompleteConfig) {
@@ -70,12 +74,15 @@ class GfmAutoComplete {
   setupLifecycle() {
     this.input.each((i, input) => {
       const $input = $(input);
-      $input.off('focus.setupAtWho').on('focus.setupAtWho', this.setupAtWho.bind(this, $input));
-      $input.on('change.atwho', () => input.dispatchEvent(new Event('input')));
-      // This triggers at.js again
-      // Needed for quick actions with suffixes (ex: /label ~)
-      $input.on('inserted-commands.atwho', $input.trigger.bind($input, 'keyup'));
-      $input.on('clear-commands-cache.atwho', () => this.clearCache());
+      if (!$input.hasClass('js-gfm-input-initialized')) {
+        $input.off('focus.setupAtWho').on('focus.setupAtWho', this.setupAtWho.bind(this, $input));
+        $input.on('change.atwho', () => input.dispatchEvent(new Event('input')));
+        // This triggers at.js again
+        // Needed for quick actions with suffixes (ex: /label ~)
+        $input.on('inserted-commands.atwho', $input.trigger.bind($input, 'keyup'));
+        $input.on('clear-commands-cache.atwho', () => this.clearCache());
+        $input.addClass('js-gfm-input-initialized');
+      }
     });
   }
 
@@ -88,7 +95,6 @@ class GfmAutoComplete {
     if (this.enableMap.labels) this.setupLabels($input);
     if (this.enableMap.snippets) this.setupSnippets($input);
 
-    // We don't instantiate the quick actions autocomplete for note and issue/MR edit forms
     $input.filter('[data-supports-quick-actions="true"]').atwho({
       at: '/',
       alias: 'commands',
@@ -109,8 +115,10 @@ class GfmAutoComplete {
           tpl += ' <small class="params"><%- params.join(" ") %></small>';
         }
         if (value.warning && value.icon && value.icon === 'confidential') {
-          tpl +=
-            '<small class="description"><em><i class="fa fa-eye-slash" aria-hidden="true"/><%- warning %></em></small>';
+          tpl += `<small class="description gl-display-flex gl-align-items-center">${spriteIcon(
+            'eye-slash',
+            's16 gl-mr-2',
+          )}<em><%- warning %></em></small>`;
         } else if (value.warning) {
           tpl += '<small class="description"><em><%- warning %></em></small>';
         } else if (value.description !== '') {
@@ -183,8 +191,7 @@ class GfmAutoComplete {
         }
         return tmpl;
       },
-      // eslint-disable-next-line no-template-curly-in-string
-      insertTpl: ':${name}:',
+      insertTpl: GfmAutoComplete.Emoji.insertTemplateFunction,
       skipSpecialCharacterTest: true,
       data: GfmAutoComplete.defaultLoadingData,
       callbacks: {
@@ -517,7 +524,7 @@ class GfmAutoComplete {
   }
 
   getDefaultCallbacks() {
-    const fetchData = this.fetchData.bind(this);
+    const self = this;
 
     return {
       sorter(query, items, searchKey) {
@@ -530,7 +537,15 @@ class GfmAutoComplete {
       },
       filter(query, data, searchKey) {
         if (GfmAutoComplete.isLoading(data)) {
-          fetchData(this.$inputor, this.at);
+          self.fetchData(this.$inputor, this.at);
+          return data;
+        }
+        if (
+          GfmAutoComplete.typesWithBackendFiltering.includes(GfmAutoComplete.atTypeMap[this.at]) &&
+          self.previousQuery !== query
+        ) {
+          self.fetchData(this.$inputor, this.at, query);
+          self.previousQuery = query;
           return data;
         }
         return $.fn.atwho.default.callbacks.filter(query, data, searchKey);
@@ -578,23 +593,25 @@ class GfmAutoComplete {
     };
   }
 
-  fetchData($input, at) {
+  fetchData($input, at, search) {
     if (this.isLoadingData[at]) return;
 
     this.isLoadingData[at] = true;
     const dataSource = this.dataSources[GfmAutoComplete.atTypeMap[at]];
 
-    if (this.cachedData[at]) {
-      this.loadData($input, at, this.cachedData[at]);
-    } else if (GfmAutoComplete.atTypeMap[at] === 'emojis') {
-      import(/* webpackChunkName: 'emoji' */ './emoji')
-        .then(({ validEmojiNames, glEmojiTag }) => {
-          this.loadData($input, at, validEmojiNames);
-          GfmAutoComplete.glEmojiTag = glEmojiTag;
+    if (GfmAutoComplete.typesWithBackendFiltering.includes(GfmAutoComplete.atTypeMap[at])) {
+      axios
+        .get(dataSource, { params: { search } })
+        .then(({ data }) => {
+          this.loadData($input, at, data);
         })
         .catch(() => {
           this.isLoadingData[at] = false;
         });
+    } else if (this.cachedData[at]) {
+      this.loadData($input, at, this.cachedData[at]);
+    } else if (GfmAutoComplete.atTypeMap[at] === 'emojis') {
+      this.loadEmojiData($input, at).catch(() => {});
     } else if (dataSource) {
       AjaxCache.retrieve(dataSource, true)
         .then(data => {
@@ -615,6 +632,18 @@ class GfmAutoComplete {
     // This trigger at.js again
     // otherwise we would be stuck with loading until the user types
     return $input.trigger('keyup');
+  }
+
+  async loadEmojiData($input, at) {
+    await Emoji.initEmojiMap();
+
+    this.loadData($input, at, [
+      ...Emoji.getValidEmojiNames(),
+      ...Emoji.getValidEmojiDescriptions(),
+      ...Emoji.getValidEmojiUnicodeValues(),
+    ]);
+
+    GfmAutoComplete.glEmojiTag = Emoji.glEmojiTag;
   }
 
   clearCache() {
@@ -644,7 +673,8 @@ class GfmAutoComplete {
     // https://github.com/ichord/At.js
     const atSymbolsWithBar = Object.keys(controllers)
       .join('|')
-      .replace(/[$]/, '\\$&');
+      .replace(/[$]/, '\\$&')
+      .replace(/[+]/, '\\+');
     const atSymbolsWithoutBar = Object.keys(controllers).join('');
     const targetSubtext = subtext.split(GfmAutoComplete.regexSubtext).pop();
     const resultantFlag = flag.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
@@ -675,18 +705,25 @@ GfmAutoComplete.atTypeMap = {
   '~': 'labels',
   '%': 'milestones',
   '/': 'commands',
+  '+': 'vulnerabilities',
   $: 'snippets',
 };
+
+GfmAutoComplete.typesWithBackendFiltering = ['vulnerabilities'];
 
 // Emoji
 GfmAutoComplete.glEmojiTag = null;
 GfmAutoComplete.Emoji = {
+  insertTemplateFunction(value) {
+    const { name = value.name } = Emoji.searchEmoji(value.name, { match: 'contains' })[0] || {};
+    return `:${name}:`;
+  },
   templateFunction(name) {
     // glEmojiTag helper is loaded on-demand in fetchData()
-    if (GfmAutoComplete.glEmojiTag) {
-      return `<li>${name} ${GfmAutoComplete.glEmojiTag(name)}</li>`;
-    }
-    return `<li>${name}</li>`;
+    if (!GfmAutoComplete.glEmojiTag) return `<li>${name}</li>`;
+
+    const emoji = Emoji.searchEmoji(name, { match: 'contains' })[0];
+    return `<li>${name} ${GfmAutoComplete.glEmojiTag(emoji?.name || name)}</li>`;
   },
 };
 // Team Members

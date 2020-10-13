@@ -36,7 +36,7 @@ export default {
       );
     },
     xAxisName() {
-      return this.graphData.x_label || '';
+      return this.graphData.xLabel || '';
     },
     yAxisName() {
       return this.graphData.y_label || '';
@@ -48,7 +48,10 @@ export default {
       return this.result.values.map(val => {
         const [yLabel] = val;
 
-        return formatDate(new Date(yLabel), { format: formats.shortTime, timezone: this.timezone });
+        return formatDate(new Date(yLabel), {
+          format: formats.shortTime,
+          timezone: this.timezone,
+        });
       });
     },
     result() {

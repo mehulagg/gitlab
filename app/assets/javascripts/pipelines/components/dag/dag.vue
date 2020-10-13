@@ -1,47 +1,104 @@
 <script>
-import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
-import axios from '~/lib/utils/axios_utils';
+import { GlAlert, GlButton, GlEmptyState, GlSprintf } from '@gitlab/ui';
+import { isEmpty } from 'lodash';
 import { __ } from '~/locale';
+import { fetchPolicies } from '~/lib/graphql';
+import getDagVisData from '../../graphql/queries/get_dag_vis_data.query.graphql';
 import DagGraph from './dag_graph.vue';
-import { DEFAULT, PARSE_FAILURE, LOAD_FAILURE, UNSUPPORTED_DATA } from './constants';
-import { parseData } from './parsing_utils';
+import DagAnnotations from './dag_annotations.vue';
+import { ADD_NOTE, REMOVE_NOTE, REPLACE_NOTES } from './constants';
+import { parseData } from '../parsing_utils';
+import { DEFAULT, PARSE_FAILURE, LOAD_FAILURE, UNSUPPORTED_DATA } from '../../constants';
 
 export default {
   // eslint-disable-next-line @gitlab/require-i18n-strings
   name: 'Dag',
   components: {
+    DagAnnotations,
     DagGraph,
     GlAlert,
-    GlLink,
     GlSprintf,
+    GlEmptyState,
+    GlButton,
   },
-  props: {
-    graphUrl: {
-      type: String,
-      required: false,
+  inject: {
+    dagDocPath: {
+      default: null,
+    },
+    emptySvgPath: {
       default: '',
+    },
+    pipelineIid: {
+      default: '',
+    },
+    pipelineProjectPath: {
+      default: '',
+    },
+  },
+  apollo: {
+    graphData: {
+      fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
+      query: getDagVisData,
+      variables() {
+        return {
+          projectPath: this.pipelineProjectPath,
+          iid: this.pipelineIid,
+        };
+      },
+      update(data) {
+        const {
+          stages: { nodes: stages },
+        } = data.project.pipeline;
+
+        const unwrappedGroups = stages
+          .map(({ name, groups: { nodes: groups } }) => {
+            return groups.map(group => {
+              return { category: name, ...group };
+            });
+          })
+          .flat(2);
+
+        const nodes = unwrappedGroups.map(group => {
+          const jobs = group.jobs.nodes.map(({ name, needs }) => {
+            return { name, needs: needs.nodes.map(need => need.name) };
+          });
+
+          return { ...group, jobs };
+        });
+
+        return nodes;
+      },
+      error() {
+        this.reportFailure(LOAD_FAILURE);
+      },
     },
   },
   data() {
     return {
-      showFailureAlert: false,
-      showBetaInfo: true,
+      annotationsMap: {},
       failureType: null,
       graphData: null,
+      showFailureAlert: false,
+      hasNoDependentJobs: false,
     };
   },
   errorTexts: {
     [LOAD_FAILURE]: __('We are currently unable to fetch data for this graph.'),
     [PARSE_FAILURE]: __('There was an error parsing the data for this graph.'),
-    [UNSUPPORTED_DATA]: __('A DAG must have two dependent jobs to be visualized on this tab.'),
+    [UNSUPPORTED_DATA]: __('DAG visualization requires at least 3 dependent jobs.'),
     [DEFAULT]: __('An unknown error occurred while loading this graph.'),
   },
+  emptyStateTexts: {
+    title: __('Start using Directed Acyclic Graphs (DAG)'),
+    firstDescription: __(
+      "This pipeline does not use the %{codeStart}needs%{codeEnd} keyword and can't be represented as a directed acyclic graph.",
+    ),
+    secondDescription: __(
+      'Using %{codeStart}needs%{codeEnd} allows jobs to run before their stage is reached, as soon as their individual dependencies are met, which speeds up your pipelines.',
+    ),
+    button: __('Learn more about job dependencies'),
+  },
   computed: {
-    betaMessage() {
-      return __(
-        'This feature is currently in beta. We invite you to %{linkStart}give feedback%{linkEnd}.',
-      );
-    },
     failure() {
       switch (this.failureType) {
         case LOAD_FAILURE:
@@ -62,56 +119,72 @@ export default {
         default:
           return {
             text: this.$options.errorTexts[DEFAULT],
-            vatiant: 'danger',
+            variant: 'danger',
           };
       }
     },
+    processedData() {
+      return this.processGraphData(this.graphData);
+    },
+    shouldDisplayAnnotations() {
+      return !isEmpty(this.annotationsMap);
+    },
     shouldDisplayGraph() {
-      return Boolean(!this.showFailureAlert && this.graphData);
+      return Boolean(!this.showFailureAlert && !this.hasNoDependentJobs && this.graphData);
     },
   },
-  mounted() {
-    const { processGraphData, reportFailure } = this;
-
-    if (!this.graphUrl) {
-      reportFailure();
-      return;
-    }
-
-    axios
-      .get(this.graphUrl)
-      .then(response => {
-        processGraphData(response.data);
-      })
-      .catch(() => reportFailure(LOAD_FAILURE));
-  },
   methods: {
+    addAnnotationToMap({ uid, source, target }) {
+      this.$set(this.annotationsMap, uid, { source, target });
+    },
     processGraphData(data) {
       let parsed;
 
       try {
-        parsed = parseData(data.stages);
+        parsed = parseData(data);
       } catch {
         this.reportFailure(PARSE_FAILURE);
-        return;
+        return {};
       }
 
-      if (parsed.links.length < 2) {
+      if (parsed.links.length === 1) {
         this.reportFailure(UNSUPPORTED_DATA);
-        return;
+        return {};
       }
 
-      this.graphData = parsed;
+      // If there are no links, we don't report failure
+      // as it simply means the user does not use job dependencies
+      if (parsed.links.length === 0) {
+        this.hasNoDependentJobs = true;
+        return {};
+      }
+
+      return parsed;
     },
     hideAlert() {
       this.showFailureAlert = false;
     },
-    hideBetaInfo() {
-      this.showBetaInfo = false;
+    removeAnnotationFromMap({ uid }) {
+      this.$delete(this.annotationsMap, uid);
     },
     reportFailure(type) {
       this.showFailureAlert = true;
       this.failureType = type;
+    },
+    updateAnnotation({ type, data }) {
+      switch (type) {
+        case ADD_NOTE:
+          this.addAnnotationToMap(data);
+          break;
+        case REMOVE_NOTE:
+          this.removeAnnotationFromMap(data);
+          break;
+        case REPLACE_NOTES:
+          this.annotationsMap = data;
+          break;
+        default:
+          break;
+      }
     },
   },
 };
@@ -122,15 +195,43 @@ export default {
       {{ failure.text }}
     </gl-alert>
 
-    <gl-alert v-if="showBetaInfo" @dismiss="hideBetaInfo">
-      <gl-sprintf :message="betaMessage">
-        <template #link="{ content }">
-          <gl-link href="https://gitlab.com/gitlab-org/gitlab/-/issues/220368" target="_blank">
-            {{ content }}
-          </gl-link>
+    <div class="gl-relative">
+      <dag-annotations v-if="shouldDisplayAnnotations" :annotations="annotationsMap" />
+      <dag-graph
+        v-if="shouldDisplayGraph"
+        :graph-data="processedData"
+        @onFailure="reportFailure"
+        @update-annotation="updateAnnotation"
+      />
+      <gl-empty-state
+        v-else-if="hasNoDependentJobs"
+        :svg-path="emptySvgPath"
+        :title="$options.emptyStateTexts.title"
+      >
+        <template #description>
+          <div class="gl-text-left">
+            <p>
+              <gl-sprintf :message="$options.emptyStateTexts.firstDescription">
+                <template #code="{ content }">
+                  <code>{{ content }}</code>
+                </template>
+              </gl-sprintf>
+            </p>
+            <p>
+              <gl-sprintf :message="$options.emptyStateTexts.secondDescription">
+                <template #code="{ content }">
+                  <code>{{ content }}</code>
+                </template>
+              </gl-sprintf>
+            </p>
+          </div>
         </template>
-      </gl-sprintf>
-    </gl-alert>
-    <dag-graph v-if="shouldDisplayGraph" :graph-data="graphData" @onFailure="reportFailure" />
+        <template v-if="dagDocPath" #actions>
+          <gl-button :href="dagDocPath" target="__blank" variant="success">
+            {{ $options.emptyStateTexts.button }}
+          </gl-button>
+        </template>
+      </gl-empty-state>
+    </div>
   </div>
 </template>

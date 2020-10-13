@@ -5,6 +5,7 @@ class Member < ApplicationRecord
   include AfterCommitQueue
   include Sortable
   include Importable
+  include CreatedAtFilterable
   include Expirable
   include Gitlab::Access
   include Presentable
@@ -20,12 +21,12 @@ class Member < ApplicationRecord
 
   delegate :name, :username, :email, to: :user, prefix: true
 
+  validates :expires_at, allow_blank: true, future_date: true
   validates :user, presence: true, unless: :invite?
   validates :source, presence: true
   validates :user_id, uniqueness: { scope: [:source_type, :source_id],
                                     message: "already exists in source",
                                     allow_nil: true }
-  validates :access_level, inclusion: { in: Gitlab::Access.all_values }, presence: true
   validate :higher_access_level_than_group, unless: :importing?
   validates :invite_email,
     presence: {
@@ -38,6 +39,11 @@ class Member < ApplicationRecord
       scope: [:source_type, :source_id],
       allow_nil: true
     }
+  validates :user_id,
+    uniqueness: {
+      message: _('project bots cannot be added to other groups / projects')
+    },
+    if: :project_bot?
 
   # This scope encapsulates (most of) the conditions a row in the member table
   # must satisfy if it is a valid permission. Of particular note:
@@ -55,6 +61,7 @@ class Member < ApplicationRecord
     left_join_users
       .where(user_ok)
       .where(requested_at: nil)
+      .non_minimal_access
       .reorder(nil)
   end
 
@@ -63,6 +70,8 @@ class Member < ApplicationRecord
     left_join_users
       .where(users: { state: 'active' })
       .non_request
+      .non_invite
+      .non_minimal_access
       .reorder(nil)
   end
 
@@ -71,6 +80,11 @@ class Member < ApplicationRecord
   scope :request, -> { where.not(requested_at: nil) }
   scope :non_request, -> { where(requested_at: nil) }
 
+  scope :not_accepted_invitations, -> { invite.where(invite_accepted_at: nil) }
+  scope :not_accepted_invitations_by_user, -> (user) { not_accepted_invitations.where(created_by: user) }
+  scope :not_expired, -> (today = Date.current) { where(arel_table[:expires_at].gt(today).or(arel_table[:expires_at].eq(nil))) }
+  scope :last_ten_days_excluding_today, -> (today = Date.current) { where(created_at: (today - 10).beginning_of_day..(today - 1).end_of_day) }
+
   scope :has_access, -> { active.where('access_level > 0') }
 
   scope :guests, -> { active.where(access_level: GUEST) }
@@ -78,9 +92,11 @@ class Member < ApplicationRecord
   scope :developers, -> { active.where(access_level: DEVELOPER) }
   scope :maintainers, -> { active.where(access_level: MAINTAINER) }
   scope :non_guests, -> { where('members.access_level > ?', GUEST) }
+  scope :non_minimal_access, -> { where('members.access_level > ?', MINIMAL_ACCESS) }
   scope :owners, -> { active.where(access_level: OWNER) }
   scope :owners_and_maintainers, -> { active.where(access_level: [OWNER, MAINTAINER]) }
   scope :with_user, -> (user) { where(user: user) }
+  scope :preload_user_and_notification_settings, -> { preload(user: :notification_settings) }
 
   scope :with_source_id, ->(source_id) { where(source_id: source_id) }
   scope :including_source, -> { includes(:source) }
@@ -153,8 +169,8 @@ class Member < ApplicationRecord
       where(user_id: user_ids).has_access.pluck(:user_id, :access_level).to_h
     end
 
-    def find_by_invite_token(invite_token)
-      invite_token = Devise.token_generator.digest(self, :invite_token, invite_token)
+    def find_by_invite_token(raw_invite_token)
+      invite_token = Devise.token_generator.digest(self, :invite_token, raw_invite_token)
       find_by(invite_token: invite_token)
     end
 
@@ -359,6 +375,14 @@ class Member < ApplicationRecord
     send_invite
   end
 
+  def send_invitation_reminder(reminder_index)
+    return unless invite?
+
+    generate_invite_token! unless @raw_invite_token
+
+    run_after_commit_or_now { notification_service.invite_member_reminder(self, @raw_invite_token, reminder_index) }
+  end
+
   def create_notification_setting
     user.notification_settings.find_or_create_for(source)
   end
@@ -387,6 +411,10 @@ class Member < ApplicationRecord
 
       GroupMember.where(source: source.ancestors, user_id: user_id).order(:access_level).last
     end
+  end
+
+  def invite_to_unknown_user?
+    invite? && user_id.nil?
   end
 
   private
@@ -472,6 +500,10 @@ class Member < ApplicationRecord
 
   def update_highest_role_attribute
     user_id
+  end
+
+  def project_bot?
+    user&.project_bot?
   end
 end
 

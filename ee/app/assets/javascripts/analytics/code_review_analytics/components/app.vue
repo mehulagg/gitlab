@@ -1,7 +1,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { GlBadge, GlLoadingIcon, GlEmptyState, GlPagination } from '@gitlab/ui';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import MergeRequestTable from './merge_request_table.vue';
 import FilterBar from './filter_bar.vue';
 import FilteredSearchCodeReviewAnalytics from '../filtered_search_code_review_analytics';
@@ -21,19 +21,15 @@ export default {
       type: Number,
       required: true,
     },
+    projectPath: {
+      type: String,
+      required: true,
+    },
     newMergeRequestUrl: {
       type: String,
       required: true,
     },
     emptyStateSvgPath: {
-      type: String,
-      required: true,
-    },
-    milestonePath: {
-      type: String,
-      required: true,
-    },
-    labelsPath: {
       type: String,
       required: true,
     },
@@ -62,16 +58,12 @@ export default {
     if (!this.codeReviewAnalyticsHasNewSearch) {
       this.filterManager = new FilteredSearchCodeReviewAnalytics();
       this.filterManager.setup();
-    } else {
-      this.setMilestonesEndpoint(this.milestonePath);
-      this.setLabelsEndpoint(this.labelsPath);
     }
 
     this.setProjectId(this.projectId);
     this.fetchMergeRequests();
   },
   methods: {
-    ...mapActions('filters', ['setMilestonesEndpoint', 'setLabelsEndpoint']),
     ...mapActions('mergeRequests', ['setProjectId', 'fetchMergeRequests', 'setPage']),
   },
 };
@@ -79,7 +71,7 @@ export default {
 
 <template>
   <div>
-    <filter-bar v-if="codeReviewAnalyticsHasNewSearch" />
+    <filter-bar v-if="codeReviewAnalyticsHasNewSearch" :project-path="projectPath" />
     <div class="mt-2">
       <gl-loading-icon v-show="isLoading" size="md" class="mt-3" />
       <template v-if="!isLoading">

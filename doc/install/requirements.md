@@ -1,4 +1,7 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -11,8 +14,8 @@ as the hardware requirements that are needed to install and use GitLab.
 
 ### Supported Linux distributions
 
-- Ubuntu (16.04/18.04)
-- Debian (8/9/10)
+- Ubuntu (16.04/18.04/20.04)
+- Debian (9/10)
 - CentOS (6/7/8)
 - openSUSE (Leap 15.1/Enterprise Server 12.2)
 - Red Hat Enterprise Linux (please use the CentOS packages and instructions)
@@ -54,13 +57,15 @@ The minimum required Go version is 1.13.
 
 ### Git versions
 
-GitLab 11.11 and higher only supports Git 2.24.x and newer, and
-[dropped support for older versions](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/54255).
+From GitLab 13.1:
+
+- Git 2.24.x and later is required.
+- Git 2.28.x and later [is recommended](https://gitlab.com/gitlab-org/gitaly/-/issues/2959).
 
 ### Node.js versions
 
-Beginning in GitLab 12.9, we only support node.js 10.13.0 or higher, and we have dropped
-support for node.js 8. (node.js 6 support was dropped in GitLab 11.8)
+Beginning in GitLab 12.9, we only support Node.js 10.13.0 or higher, and we have dropped
+support for Node.js 8. (Node.js 6 support was dropped in GitLab 11.8)
 
 We recommend Node 12.x, as it's faster.
 
@@ -72,9 +77,12 @@ a version older than `v10.13.0`, you need to update it to a newer version. You
 can find instructions to install from community maintained packages or compile
 from source at the [Node.js website](https://nodejs.org/en/download/).
 
-## Redis versions
+### Redis versions
 
-GitLab requires Redis 5.0+. Beginning in GitLab 13.0, lower versions are not supported.
+GitLab 13.0 and later requires Redis version 4.0 or higher.
+
+Redis version 5.0 or higher is recommended, as this is what ships with
+[Omnibus GitLab](https://docs.gitlab.com/omnibus/) packages starting with GitLab 12.7.
 
 ## Hardware requirements
 
@@ -88,45 +96,35 @@ Apart from a local hard drive you can also mount a volume that supports the netw
 
 If you have enough RAM and a recent CPU the speed of GitLab is mainly limited by hard drive seek times. Having a fast drive (7200 RPM and up) or a solid state drive (SSD) will improve the responsiveness of GitLab.
 
-NOTE: **Note:** Since file system performance may affect GitLab's overall performance, [we don't recommend using AWS EFS for storage](../administration/high_availability/nfs.md#avoid-using-awss-elastic-file-system-efs).
+NOTE: **Note:**
+Since file system performance may affect GitLab's overall performance, [we don't recommend using AWS EFS for storage](../administration/nfs.md#avoid-using-awss-elastic-file-system-efs).
 
 ### CPU
 
-This is the recommended minimum hardware for a handful of example GitLab user base sizes. Your exact needs may be more, depending on your workload. Your workload is influenced by factors such as - but not limited to - how active your users are, how much automation you use, mirroring, and repository/change size.
+CPU requirements are dependent on the number of users and expected workload. Your exact needs may be more, depending on your workload. Your workload is influenced by factors such as - but not limited to - how active your users are, how much automation you use, mirroring, and repo/change size.
 
-- 1 core supports up to 100 users but the application can be a bit slower due to having all workers and background jobs running on the same core
-- **2 cores** is the **recommended** minimum number of cores and supports up to 100 users
-- 4 cores support up to 500 users
-- 8 cores support up to 1,000 users
-- 32 cores support up to 5,000 users
+The following is the recommended minimum CPU hardware guidance for a handful of example GitLab user base sizes.
+
+- **4 cores** is the **recommended** minimum number of cores and supports up to 500 users
+- 8 cores supports up to 1000 users
 - More users? Consult the [reference architectures page](../administration/reference_architectures/index.md)
 
 ### Memory
 
-This is the recommended minimum hardware for a handful of example GitLab user base sizes. Your exact needs may be more, depending on your workload. Your workload is influenced by factors such as - but not limited to - how active your users are, how much automation you use, mirroring, and the size of repositories as well as changes/commits.
+Memory requirements are dependent on the number of users and expected workload. Your exact needs may be more, depending on your workload. Your workload is influenced by factors such as - but not limited to - how active your users are, how much automation you use, mirroring, and repo/change size.
 
-You need at least 8GB of addressable memory (RAM + swap) to install and use GitLab!
-The operating system and any other running applications will also be using memory
-so keep in mind that you need at least 4GB available before running GitLab. With
-less memory GitLab will give strange errors during the reconfigure run and 500
-errors during usage.
+The following is the recommended minimum Memory hardware guidance for a handful of example GitLab user base sizes.
 
-- 4GB RAM + 4GB swap supports up to 100 users but it will be very slow
-- **8GB RAM** is the **recommended** minimum memory size for all installations and supports up to 100 users
-- 16GB RAM supports up to 500 users
-- 32GB RAM supports up to 1,000 users
-- 128GB RAM supports up to 5,000 users
+- **4GB RAM** is the **required** minimum memory size and supports up to 500 users
+  - Our [Memory Team](https://about.gitlab.com/handbook/engineering/development/enablement/memory/) is working to reduce the memory requirement.
+- 8GB RAM supports up to 1000 users
 - More users? Consult the [reference architectures page](../administration/reference_architectures/index.md)
 
-We recommend having at least [2GB of swap on your server](https://askubuntu.com/a/505344/310789), even if you currently have
-enough available RAM. Having swap will help reduce the chance of errors occurring
-if your available memory changes. We also recommend [configuring the kernel's swappiness setting](https://askubuntu.com/a/103916)
+In addition to the above, we generally recommend having at least 2GB of swap on your server,
+even if you currently have enough available RAM. Having swap will help reduce the chance of errors occurring
+if your available memory changes. We also recommend configuring the kernel's swappiness setting
 to a low value like `10` to make the most of your RAM while still having the swap
 available when needed.
-
-Our [Memory Team](https://about.gitlab.com/handbook/engineering/development/enablement/memory/) is actively working to reduce the memory requirement.
-
-NOTE: **Note:** The 25 workers of Sidekiq will show up as separate processes in your process overview (such as `top` or `htop`). However, they share the same RAM allocation, as Sidekiq is a multi-threaded application. See the section below about Unicorn workers for information about how many you need for those.
 
 ## Database
 
@@ -145,44 +143,21 @@ We highly recommend users to use the minimum PostgreSQL versions specified below
 GitLab version | Minimum PostgreSQL version
 -|-
 10.0 | 9.6
-12.10 | 11
 13.0 | 11
 
-You must also ensure the `pg_trgm` extension is loaded into every
-GitLab database. This extension [can be enabled](https://www.postgresql.org/docs/11/sql-createextension.html) using a PostgreSQL super user.
+You must also ensure the `pg_trgm` and `btree_gist` extensions are [loaded into every
+GitLab database](postgresql_extensions.html).
 
-On some systems you may need to install an additional package (for example,
-`postgresql-contrib`) for this extension to become available.
-
-NOTE: **Note:** Support for [PostgreSQL 9.6 and 10 has been removed in GitLab 13.0](https://about.gitlab.com/releases/2020/05/22/gitlab-13-0-released/#postgresql-11-is-now-the-minimum-required-version-to-install-gitlab) so that GitLab can benefit from PostgreSQL 11 improvements, such as partitioning. For the schedule of transitioning to PostgreSQL 12, see [the related epic](https://gitlab.com/groups/gitlab-org/-/epics/2184).
+NOTE: **Note:**
+Support for [PostgreSQL 9.6 and 10 has been removed in GitLab 13.0](https://about.gitlab.com/releases/2020/05/22/gitlab-13-0-released/#postgresql-11-is-now-the-minimum-required-version-to-install-gitlab) so that GitLab can benefit from PostgreSQL 11 improvements, such as partitioning. For the schedule of transitioning to PostgreSQL 12, see [the related epic](https://gitlab.com/groups/gitlab-org/-/epics/2184).
 
 #### Additional requirements for GitLab Geo
 
-If you're using [GitLab Geo](../administration/geo/replication/index.md):
+If you're using [GitLab Geo](../administration/geo/index.md):
 
 - We strongly recommend running Omnibus-managed instances as they are actively
   developed and tested. We aim to be compatible with most external (not managed
   by Omnibus) databases (for example, [AWS Relational Database Service (RDS)](https://aws.amazon.com/rds/)) but we don't guarantee compatibility.
-- You must also ensure the `postgres_fdw` extension is loaded into every
-  GitLab database. This extension
-  [can be enabled](https://www.postgresql.org/docs/11/sql-createextension.html)
-  using a PostgreSQL super user.
-
-## Unicorn Workers
-
-For most instances we recommend using: (CPU cores * 1.5) + 1 = Unicorn workers.
-For example a node with 4 cores would have 7 Unicorn workers.
-
-For all machines that have 2GB and up we recommend a minimum of three Unicorn workers.
-If you have a 1GB machine we recommend to configure only two Unicorn workers to prevent excessive
-swapping.
-
-As long as you have enough available CPU and memory capacity, it's okay to increase the number of
-Unicorn workers and this will usually help to reduce the response time of the applications and
-increase the ability to handle parallel requests.
-
-To change the Unicorn workers when you have the Omnibus package (which defaults to the
-recommendation above) please see [the Unicorn settings in the Omnibus GitLab documentation](https://docs.gitlab.com/omnibus/settings/unicorn.html).
 
 ## Puma settings
 
@@ -210,7 +185,7 @@ optimal settings for your infrastructure.
 ### Puma threads
 
 The recommended number of threads is dependent on several factors, including total memory, and use
-of [legacy Rugged code](../development/gitaly.md#legacy-rugged-code).
+of [legacy Rugged code](../administration/gitaly/index.md#direct-access-to-git-in-gitlab).
 
 - If the operating system has a maximum 2 GB of memory, the recommended number of threads is `1`.
   A higher value will result in excess swapping, and decrease performance.
@@ -218,6 +193,22 @@ of [legacy Rugged code](../development/gitaly.md#legacy-rugged-code).
 - In all other cases, the recommended number of threads is `4`. We don't recommend setting this
 higher, due to how [Ruby MRI multi-threading](https://en.wikipedia.org/wiki/Global_interpreter_lock)
 works.
+
+## Unicorn Workers
+
+For most instances we recommend using: (CPU cores * 1.5) + 1 = Unicorn workers.
+For example a node with 4 cores would have 7 Unicorn workers.
+
+For all machines that have 2GB and up we recommend a minimum of three Unicorn workers.
+If you have a 1GB machine we recommend to configure only two Unicorn workers to prevent excessive
+swapping.
+
+As long as you have enough available CPU and memory capacity, it's okay to increase the number of
+Unicorn workers and this will usually help to reduce the response time of the applications and
+increase the ability to handle parallel requests.
+
+To change the Unicorn workers when you have the Omnibus package (which defaults to the
+recommendation above) please see [the Unicorn settings in the Omnibus GitLab documentation](https://docs.gitlab.com/omnibus/settings/unicorn.html).
 
 ## Redis and Sidekiq
 
@@ -269,9 +260,8 @@ For reference, GitLab.com's [auto-scaling shared runner](../user/gitlab_com/inde
 
 ## Supported web browsers
 
-CAUTION: **Caution:** With GitLab 13.0 (May 2020) we have removed official support for Internet Explorer 11.
-With the release of GitLab 13.4 (September 2020) we will remove all code that supports Internet Explorer 11.
-You can provide feedback [on this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/197987) or via your usual support channels.
+CAUTION: **Caution:**
+With GitLab 13.0 (May 2020) we have removed official support for Internet Explorer 11.
 
 GitLab supports the following web browsers:
 
@@ -283,10 +273,11 @@ GitLab supports the following web browsers:
 
 For the listed web browsers, GitLab supports:
 
-- The current and previous major versions of browsers except Internet Explorer.
+- The current and previous major versions of browsers.
 - The current minor version of a supported major version.
 
-NOTE: **Note:** We don't support running GitLab with JavaScript disabled in the browser and have no plans of supporting that
+NOTE: **Note:**
+We don't support running GitLab with JavaScript disabled in the browser and have no plans of supporting that
 in the future because we have features such as Issue Boards which require JavaScript extensively.
 
 <!-- ## Troubleshooting

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Pipeline::Chain::Seed do
+RSpec.describe Gitlab::Ci::Pipeline::Chain::Seed do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user, developer_projects: [project]) }
 
@@ -37,6 +37,10 @@ describe Gitlab::Ci::Pipeline::Chain::Seed do
 
     it 'allocates next IID' do
       expect(pipeline.iid).to be_present
+    end
+
+    it 'ensures ci_ref' do
+      expect(pipeline.ci_ref).to be_present
     end
 
     it 'sets the seeds in the command object' do

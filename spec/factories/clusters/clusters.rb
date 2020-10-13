@@ -86,6 +86,10 @@ FactoryBot.define do
       application_helm factory: %i(clusters_applications_helm installed)
     end
 
+    trait :with_installed_prometheus do
+      application_prometheus factory: %i(clusters_applications_prometheus installed)
+    end
+
     trait :with_all_applications do
       application_helm factory: %i(clusters_applications_helm installed)
       application_ingress factory: %i(clusters_applications_ingress installed)
@@ -97,6 +101,7 @@ FactoryBot.define do
       application_knative factory: %i(clusters_applications_knative installed)
       application_elastic_stack factory: %i(clusters_applications_elastic_stack installed)
       application_fluentd factory: %i(clusters_applications_fluentd installed)
+      application_cilium factory: %i(clusters_applications_cilium installed)
     end
 
     trait :with_domain do

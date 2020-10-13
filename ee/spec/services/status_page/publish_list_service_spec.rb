@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe StatusPage::PublishListService do
   let_it_be(:project, refind: true) { create(:project) }
   let(:issues) { [instance_double(Issue)] }
-  let(:key) { StatusPage::Storage.list_path }
+  let(:key) { Gitlab::StatusPage::Storage.list_path }
   let(:content) { [{ some: :content }] }
 
   let(:service) { described_class.new(project: project) }

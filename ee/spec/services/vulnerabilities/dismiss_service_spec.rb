@@ -21,6 +21,8 @@ RSpec.describe Vulnerabilities::DismissService do
       project.add_developer(user)
     end
 
+    it_behaves_like 'calls vulnerability statistics utility services in order'
+
     it 'dismisses a vulnerability and its associated findings' do
       Timecop.freeze do
         dismiss_vulnerability

@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: index
 ---
 
@@ -26,8 +29,9 @@ The following resources will help you get started with Git:
 - [Git Basics](https://git-scm.com/book/en/v2/Getting-Started-Git-Basics)
 - [Git on the Server - GitLab](https://git-scm.com/book/en/v2/Git-on-the-Server-GitLab)
 - [How to install Git](how_to_install_git/index.md)
+- [Git terminology](../../gitlab-basics/start-using-git.md#git-terminology)
 - [Start using Git on the command line](../../gitlab-basics/start-using-git.md)
-- [Command line file editing basic commands](../../gitlab-basics/command-line-commands.md)
+- [Edit files through the command line](../../gitlab-basics/command-line-commands.md)
 - [GitLab Git Cheat Sheet (download)](https://about.gitlab.com/images/press/git-cheat-sheet.pdf)
 - Commits:
   - [Revert a commit](../../user/project/merge_requests/revert_changes.md#reverting-a-commit)
@@ -68,6 +72,7 @@ If you have problems with Git, the following may help:
 ## Branching strategies
 
 - [Feature branch workflow](../../gitlab-basics/feature_branch_workflow.md)
+- [Develop on a feature branch](feature_branch_development.md)
 - [GitLab Flow](../gitlab_flow.md)
 - [Git Branching - Branches in a Nutshell](https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell)
 - [Git Branching - Branching Workflows](https://git-scm.com/book/en/v2/Git-Branching-Branching-Workflows)
@@ -76,6 +81,7 @@ If you have problems with Git, the following may help:
 
 The following are advanced topics for those who want to get the most out of Git:
 
+- [Introduction to Git rebase, force-push, and merge conflicts](git_rebase.md)
 - [Server Hooks](../../administration/server_hooks.md)
 - [Git Attributes](../../user/project/git_attributes.md)
 - Git Submodules: [Using Git submodules with GitLab CI](../../ci/git_submodules.md#using-git-submodules-with-gitlab-ci)
@@ -91,7 +97,7 @@ Git-related queries from GitLab.
 The following relate to Git Large File Storage:
 
 - [Getting Started with Git LFS](https://about.gitlab.com/blog/2017/01/30/getting-started-with-git-lfs-tutorial/)
-- [Migrate an existing Git repo with Git LFS](lfs/migrate_to_git_lfs.md)
+- [Migrate an existing Git repository with Git LFS](lfs/migrate_to_git_lfs.md)
 - [Removing objects from LFS](lfs/index.md#removing-objects-from-lfs)
 - [GitLab Git LFS user documentation](lfs/index.md)
 - [GitLab Git LFS admin documentation](../../administration/lfs/index.md)

@@ -27,16 +27,18 @@ module QA
                 element :use_template_button
                 element :template_option_row
               end
+
+              view 'ee/app/views/projects/_new_ci_cd_only_project_tab.html.haml' do
+                element :ci_cd_project_tab
+              end
             end
           end
 
           def go_to_create_from_template_group_tab
-            click_create_from_template_tab
             click_element(:group_templates_tab)
           end
 
           def go_to_create_from_template_instance_tab
-            click_create_from_template_tab
             click_element(:instance_templates_tab)
           end
 
@@ -46,6 +48,10 @@ module QA
 
           def instance_template_tab_badge_text
             find_element(:instance_template_tab_badge).text
+          end
+
+          def click_ci_cd_for_external_repo
+            click_element :ci_cd_project_tab
           end
         end
       end

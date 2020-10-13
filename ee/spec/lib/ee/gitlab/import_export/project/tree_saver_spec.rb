@@ -15,6 +15,8 @@ RSpec.describe Gitlab::ImportExport::Project::TreeSaver do
 
   let_it_be(:export_path) { "#{Dir.tmpdir}/project_tree_saver_spec_ee" }
 
+  let_it_be(:security_setting) { create(:project_security_setting, project: project, auto_fix_dast: false) }
+
   after :all do
     FileUtils.rm_rf(export_path)
   end
@@ -62,6 +64,18 @@ RSpec.describe Gitlab::ImportExport::Project::TreeSaver do
 
       it 'does not have issue_id' do
         expect(issue_json['epic_issue']['issue_id']).to be_nil
+      end
+    end
+
+    context 'security setting' do
+      let(:security_json) do
+        json = get_json(full_path, exportable_path, :security_setting, ndjson_enabled)
+        ndjson_enabled ? json.first : json
+      end
+
+      it 'has security settings' do
+        expect(security_json['auto_fix_dast']).to be_falsey
+        expect(security_json['auto_fix_dependency_scanning']).to be_truthy
       end
     end
   end

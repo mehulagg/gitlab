@@ -5,8 +5,15 @@ class JiraService < IssueTrackerService
   include Gitlab::Routing
   include ApplicationHelper
   include ActionView::Helpers::AssetUrlHelper
+  include Gitlab::Utils::StrongMemoize
 
   PROJECTS_PER_PAGE = 50
+
+  # TODO: use jira_service.deployment_type enum when https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37003 is merged
+  DEPLOYMENT_TYPES = {
+    server: 'SERVER',
+    cloud: 'CLOUD'
+  }.freeze
 
   validates :url, public_url: true, presence: true, if: :activated?
   validates :api_url, public_url: true, allow_blank: true
@@ -23,9 +30,10 @@ class JiraService < IssueTrackerService
 
   # TODO: we can probably just delegate as part of
   # https://gitlab.com/gitlab-org/gitlab/issues/29404
-  data_field :username, :password, :url, :api_url, :jira_issue_transition_id
+  data_field :username, :password, :url, :api_url, :jira_issue_transition_id, :project_key, :issues_enabled
 
   before_update :reset_password
+  after_commit :update_deployment_type, on: [:create, :update], if: :update_deployment_type?
 
   enum comment_detail: {
     standard: 1,
@@ -64,8 +72,6 @@ class JiraService < IssueTrackerService
   def set_default_data
     return unless issues_tracker.present?
 
-    self.title ||= issues_tracker['title']
-
     return if url
 
     data_fields.url ||= issues_tracker['url']
@@ -103,11 +109,11 @@ class JiraService < IssueTrackerService
     [Jira service documentation](#{help_page_url('user/project/integrations/jira')})."
   end
 
-  def default_title
+  def title
     'Jira'
   end
 
-  def default_description
+  def description
     s_('JiraService|Jira issue tracker')
   end
 
@@ -130,7 +136,7 @@ class JiraService < IssueTrackerService
   end
 
   def new_issue_url
-    "#{url}/secure/CreateIssue.jspa"
+    "#{url}/secure/CreateIssue!default.jspa"
   end
 
   alias_method :original_url, :url
@@ -208,7 +214,7 @@ class JiraService < IssueTrackerService
   end
 
   def test(_)
-    result = test_settings
+    result = server_info
     success = result.present?
     result = @error&.message unless success
 
@@ -227,10 +233,10 @@ class JiraService < IssueTrackerService
 
   private
 
-  def test_settings
-    return unless client_url.present?
-
-    jira_request { client.ServerInfo.all.attrs }
+  def server_info
+    strong_memoize(:server_info) do
+      client_url.present? ? jira_request { client.ServerInfo.all.attrs } : nil
+    end
   end
 
   def can_cross_reference?(noteable)
@@ -377,7 +383,6 @@ class JiraService < IssueTrackerService
   def build_entity_url(noteable_type, entity_id)
     polymorphic_url(
       [
-        self.project.namespace.becomes(Namespace),
         self.project,
         noteable_type.to_sym
       ],
@@ -414,7 +419,7 @@ class JiraService < IssueTrackerService
   # Handle errors when doing Jira API calls
   def jira_request
     yield
-  rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, Errno::ECONNREFUSED, URI::InvalidURIError, JIRA::HTTPError, OpenSSL::SSL::SSLError => error
+  rescue => error
     @error = error
     log_error("Error sending message", client_url: client_url, error: @error.message)
     nil
@@ -433,6 +438,26 @@ class JiraService < IssueTrackerService
     url_changed?
   end
 
+  def update_deployment_type?
+    (api_url_changed? || url_changed? || username_changed? || password_changed?) &&
+      can_test?
+  end
+
+  def update_deployment_type
+    clear_memoization(:server_info) # ensure we run the request when we try to update deployment type
+    results = server_info
+    return data_fields.deployment_unknown! unless results.present?
+
+    case results['deploymentType']
+    when 'Server'
+      data_fields.deployment_server!
+    when 'Cloud'
+      data_fields.deployment_cloud!
+    else
+      data_fields.deployment_unknown!
+    end
+  end
+
   def self.event_description(event)
     case event
     when "merge_request", "merge_request_events"
@@ -442,3 +467,5 @@ class JiraService < IssueTrackerService
     end
   end
 end
+
+JiraService.prepend_if_ee('EE::JiraService')

@@ -1,69 +1,68 @@
 <script>
 import { GlDaterangePicker } from '@gitlab/ui';
-
-import { parsePikadayDate, pikadayToString } from '~/lib/utils/datetime_utility';
-import { queryToObject } from '~/lib/utils/url_utility';
+import { dateAtFirstDayOfMonth, getDateInPast } from '~/lib/utils/datetime_utility';
+import { CURRENT_DATE, MAX_DATE_RANGE } from '../constants';
+import DateRangeButtons from './date_range_buttons.vue';
 
 export default {
   components: {
+    DateRangeButtons,
     GlDaterangePicker,
   },
   props: {
-    formElement: {
-      type: HTMLFormElement,
-      required: true,
+    startDate: {
+      type: Date,
+      required: false,
+      default: null,
     },
-  },
-  data() {
-    const data = {
-      startDate: null,
-      endDate: null,
-    };
-
-    const { created_after: initialStartDate, created_before: initialEndDate } = queryToObject(
-      window.location.search,
-    );
-
-    if (initialStartDate) {
-      data.startDate = parsePikadayDate(initialStartDate);
-    }
-
-    if (initialEndDate) {
-      data.endDate = parsePikadayDate(initialEndDate);
-    }
-
-    return data;
+    endDate: {
+      type: Date,
+      required: false,
+      default: null,
+    },
   },
   computed: {
-    createdAfter() {
-      return this.startDate ? pikadayToString(this.startDate) : '';
+    defaultStartDate() {
+      return this.startDate || dateAtFirstDayOfMonth(CURRENT_DATE);
     },
-    createdBefore() {
-      return this.endDate ? pikadayToString(this.endDate) : '';
+    defaultEndDate() {
+      return this.endDate || CURRENT_DATE;
+    },
+    defaultDateRange() {
+      return { startDate: this.defaultStartDate, endDate: this.defaultEndDate };
     },
   },
   methods: {
-    handleInput(dates) {
-      this.startDate = dates.startDate;
-      this.endDate = dates.endDate;
-
-      this.$nextTick(() => this.formElement.submit());
+    onInput({ startDate, endDate }) {
+      if (!startDate && endDate) {
+        this.$emit('selected', { startDate: getDateInPast(endDate, 1), endDate });
+      } else {
+        this.$emit('selected', { startDate, endDate });
+      }
     },
   },
+  CURRENT_DATE,
+  MAX_DATE_RANGE,
 };
 </script>
 
 <template>
-  <div>
+  <div
+    class="gl-display-flex gl-align-items-flex-end gl-xs-align-items-baseline gl-xs-flex-direction-column"
+  >
+    <div class="gl-pr-5 gl-mb-5">
+      <date-range-buttons :date-range="defaultDateRange" @input="onInput" />
+    </div>
     <gl-daterange-picker
-      class="d-flex flex-wrap flex-sm-nowrap"
-      :default-start-date="startDate"
-      :default-end-date="endDate"
-      start-picker-class="form-group align-items-lg-center mr-0 mr-sm-1 d-flex flex-column flex-lg-row"
-      end-picker-class="form-group align-items-lg-center mr-0 mr-sm-2 d-flex flex-column flex-lg-row"
-      @input="handleInput"
+      class="gl-display-flex gl-pl-0 gl-w-full"
+      :default-start-date="defaultStartDate"
+      :default-end-date="defaultEndDate"
+      :default-max-date="$options.CURRENT_DATE"
+      :max-date-range="$options.MAX_DATE_RANGE"
+      :same-day-selection="true"
+      start-picker-class="gl-mb-5 gl-pr-5 gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-flex-fill-1 gl-lg-align-items-baseline"
+      end-picker-class="gl-mb-5 gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-flex-fill-1 gl-lg-align-items-baseline"
+      @input="onInput"
     />
-    <input type="hidden" name="created_after" :value="createdAfter" />
-    <input type="hidden" name="created_before" :value="createdBefore" />
   </div>
 </template>

@@ -10,7 +10,7 @@ RSpec.describe Projects::RepositoriesController do
       it 'logs the audit event' do
         expect do
           get :archive, params: { namespace_id: project.namespace, project_id: project, id: "master" }, format: "zip"
-        end.to change { SecurityEvent.count }.by(1)
+        end.to change { AuditEvent.count }.by(1)
       end
     end
 

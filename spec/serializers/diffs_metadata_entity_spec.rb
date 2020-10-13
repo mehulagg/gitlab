@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DiffsMetadataEntity do
+RSpec.describe DiffsMetadataEntity do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository) }
   let(:request) { EntityRequest.new(project: project, current_user: user) }
@@ -30,6 +30,7 @@ describe DiffsMetadataEntity do
         :email_patch_path, :plain_diff_path,
         :merge_request_diffs, :context_commits,
         :definition_path_prefix, :source_branch_exists,
+        :can_merge, :conflict_resolution_path, :has_conflicts,
         # Attributes
         :diff_files
       )

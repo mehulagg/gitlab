@@ -4,6 +4,7 @@ import { createUploadLink } from 'apollo-upload-client';
 import { ApolloLink } from 'apollo-link';
 import { BatchHttpLink } from 'apollo-link-batch-http';
 import csrf from '~/lib/utils/csrf';
+import PerformanceBarService from '~/performance_bar/services/performance_bar_service';
 
 export const fetchPolicies = {
   CACHE_FIRST: 'cache-first',
@@ -14,7 +15,7 @@ export const fetchPolicies = {
 };
 
 export default (resolvers = {}, config = {}) => {
-  let uri = `${gon.relative_url_root}/api/graphql`;
+  let uri = `${gon.relative_url_root || ''}/api/graphql`;
 
   if (config.baseUrl) {
     // Prepend baseUrl and ensure that `///` are replaced with `/`
@@ -30,15 +31,38 @@ export default (resolvers = {}, config = {}) => {
     // We set to `same-origin` which is default value in modern browsers.
     // See https://github.com/whatwg/fetch/pull/585 for more information.
     credentials: 'same-origin',
+    batchMax: config.batchMax || 10,
   };
+
+  const uploadsLink = ApolloLink.split(
+    operation => operation.getContext().hasUpload || operation.getContext().isSingleRequest,
+    createUploadLink(httpOptions),
+    new BatchHttpLink(httpOptions),
+  );
+
+  const performanceBarLink = new ApolloLink((operation, forward) => {
+    return forward(operation).map(response => {
+      const httpResponse = operation.getContext().response;
+
+      if (PerformanceBarService.interceptor) {
+        PerformanceBarService.interceptor({
+          config: {
+            url: httpResponse.url,
+          },
+          headers: {
+            'x-request-id': httpResponse.headers.get('x-request-id'),
+            'x-gitlab-from-cache': httpResponse.headers.get('x-gitlab-from-cache'),
+          },
+        });
+      }
+
+      return response;
+    });
+  });
 
   return new ApolloClient({
     typeDefs: config.typeDefs,
-    link: ApolloLink.split(
-      operation => operation.getContext().hasUpload || operation.getContext().isSingleRequest,
-      createUploadLink(httpOptions),
-      new BatchHttpLink(httpOptions),
-    ),
+    link: ApolloLink.from([performanceBarLink, uploadsLink]),
     cache: new InMemoryCache({
       ...config.cacheConfig,
       freezeResults: config.assumeImmutableResults,

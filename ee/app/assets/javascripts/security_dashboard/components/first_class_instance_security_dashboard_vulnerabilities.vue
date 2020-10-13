@@ -1,29 +1,20 @@
 <script>
-import { GlAlert, GlButton, GlEmptyState, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import produce from 'immer';
+import { GlAlert, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
 import { fetchPolicies } from '~/lib/graphql';
-import VulnerabilityList from 'ee/vulnerabilities/components/vulnerability_list.vue';
+import VulnerabilityList from './vulnerability_list.vue';
 import vulnerabilitiesQuery from '../graphql/instance_vulnerabilities.graphql';
-import { VULNERABILITIES_PER_PAGE } from 'ee/vulnerabilities/constants';
+import { VULNERABILITIES_PER_PAGE } from '../store/constants';
+import { preparePageInfo } from '../helpers';
 
 export default {
   components: {
     GlAlert,
-    GlButton,
-    GlEmptyState,
     GlIntersectionObserver,
     GlLoadingIcon,
     VulnerabilityList,
   },
   props: {
-    dashboardDocumentation: {
-      type: String,
-      required: true,
-    },
-    emptyStateSvgPath: {
-      type: String,
-      required: true,
-    },
     filters: {
       type: Object,
       required: false,
@@ -36,11 +27,16 @@ export default {
       isFirstResultLoading: true,
       vulnerabilities: [],
       errorLoadingVulnerabilities: false,
+      sortBy: 'severity',
+      sortDirection: 'desc',
     };
   },
   computed: {
-    isQueryLoading() {
+    isLoadingQuery() {
       return this.$apollo.queries.vulnerabilities.loading;
+    },
+    sort() {
+      return `${this.sortBy}_${this.sortDirection}`;
     },
   },
   apollo: {
@@ -50,14 +46,14 @@ export default {
       variables() {
         return {
           first: VULNERABILITIES_PER_PAGE,
+          sort: this.sort,
           ...this.filters,
         };
       },
       update: ({ vulnerabilities }) => vulnerabilities.nodes,
       result({ data, loading }) {
         this.isFirstResultLoading = loading;
-        this.pageInfo = data.vulnerabilities.pageInfo;
-        this.$emit('projectFetch', data.instanceSecurityDashboard.projects.nodes);
+        this.pageInfo = preparePageInfo(data?.vulnerabilities?.pageInfo);
       },
       error() {
         this.errorLoadingVulnerabilities = true;
@@ -73,16 +69,23 @@ export default {
         this.$apollo.queries.vulnerabilities.fetchMore({
           variables: { after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            fetchMoreResult.vulnerabilities.nodes.unshift(...previousResult.vulnerabilities.nodes);
-            return fetchMoreResult;
+            const results = produce(fetchMoreResult, draftData => {
+              // eslint-disable-next-line no-param-reassign
+              draftData.vulnerabilities.nodes = [
+                ...previousResult.vulnerabilities.nodes,
+                ...draftData.vulnerabilities.nodes,
+              ];
+            });
+            return results;
           },
         });
       }
     },
+    handleSortChange({ sortBy, sortDesc }) {
+      this.sortDirection = sortDesc ? 'desc' : 'asc';
+      this.sortBy = sortBy;
+    },
   },
-  emptyStateDescription: s__(
-    `SecurityReports|While it's rare to have no vulnerabilities, it can happen. In any event, we ask that you please double check your settings to make sure you've set up your dashboard correctly.`,
-  ),
 };
 </script>
 
@@ -102,31 +105,18 @@ export default {
     </gl-alert>
     <vulnerability-list
       v-else
+      :filters="filters"
       :is-loading="isFirstResultLoading"
-      :dashboard-documentation="dashboardDocumentation"
-      :empty-state-svg-path="emptyStateSvgPath"
       :vulnerabilities="vulnerabilities"
       should-show-project-namespace
-    >
-      <template #emptyState>
-        <gl-empty-state
-          :title="s__(`SecurityReports|No vulnerabilities found for dashboard`)"
-          :svg-path="emptyStateSvgPath"
-          :description="$options.emptyStateDescription"
-          :primary-button-link="dashboardDocumentation"
-          :primary-button-text="s__('SecurityReports|Learn more about setting up your dashboard')"
-        />
-      </template>
-    </vulnerability-list>
+      @sort-changed="handleSortChange"
+    />
     <gl-intersection-observer
       v-if="pageInfo.hasNextPage"
       class="text-center"
       @appear="fetchNextPage"
     >
-      <gl-button :disabled="isFirstResultLoading" @click="fetchNextPage">
-        <gl-loading-icon v-if="isQueryLoading" size="md" />
-        <template v-else>{{ s__('SecurityReports|Load more vulnerabilities') }}</template>
-      </gl-button>
+      <gl-loading-icon v-if="isLoadingQuery" size="md" />
     </gl-intersection-observer>
   </div>
 </template>

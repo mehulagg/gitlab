@@ -1,38 +1,79 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ComplianceDashboard component when there are merge requests matches the snapshot 1`] = `
+exports[`ComplianceDashboard component when there are merge requests and the show tabs cookie is true matches the snapshot 1`] = `
 <div
   class="compliance-dashboard"
 >
-  <header
-    class="my-3"
-  >
-    <h4>
-      Compliance Dashboard
-    </h4>
+  <header>
+    <div
+      class="gl-mt-5 d-flex"
+    >
+      <h4
+        class="gl-flex-grow-1 gl-my-0"
+      >
+        Compliance Dashboard
+      </h4>
+       
+      <merge-commits-export-button-stub
+        mergecommitscsvexportpath="/csv"
+      />
+    </div>
      
     <p>
       Here you will find recent merge request activity
     </p>
   </header>
    
-  <ul
-    class="content-list issuable-list issues-list"
+  <gl-tabs-stub
+    theme="indigo"
   >
-    <div
-      class="merge-request"
+    <b-tab-stub
+      tag="div"
+      title=""
+      titlelinkclass="gl-tab-nav-item"
     >
-      Merge request 0
-    </div>
+      <template>
+         
+        <merge-requests-grid-stub
+          mergerequests="[object Object],[object Object]"
+        />
+      </template>
+      <template>
+        <span>
+          Merge Requests
+        </span>
+      </template>
+    </b-tab-stub>
+  </gl-tabs-stub>
+</div>
+`;
+
+exports[`ComplianceDashboard component when there are merge requests matches the snapshot 1`] = `
+<div
+  class="compliance-dashboard"
+>
+  <header>
     <div
-      class="merge-request"
+      class="gl-mt-5 d-flex"
     >
-      Merge request 1
+      <h4
+        class="gl-flex-grow-1 gl-my-0"
+      >
+        Compliance Dashboard
+      </h4>
+       
+      <merge-commits-export-button-stub
+        mergecommitscsvexportpath="/csv"
+      />
     </div>
-  </ul>
+     
+    <p>
+      Here you will find recent merge request activity
+    </p>
+  </header>
    
-  <pagination-stub
-    class="my-3"
+  <merge-requests-grid-stub
+    mergerequests="[object Object],[object Object]"
   />
 </div>
 `;

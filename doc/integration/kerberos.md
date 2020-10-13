@@ -42,7 +42,7 @@ sudo chmod 0600 /etc/http.keytab
 
 **Installations from source**
 
->**Note:**
+NOTE: **Note:**
 For source installations, make sure the `kerberos` gem group
 [has been installed](../install/installation.md#install-gems).
 
@@ -103,7 +103,7 @@ enabled, then your users will be automatically linked to their LDAP accounts on
 first login. For this to work, some prerequisites must be met:
 
 The Kerberos username must match the LDAP user's UID. You can choose which LDAP
-attribute is used as the UID in GitLab's [LDAP configuration](../administration/auth/ldap/index.md#configuration-core-only)
+attribute is used as the UID in GitLab's [LDAP configuration](../administration/auth/ldap/index.md#configuration)
 but for Active Directory, this should be `sAMAccountName`.
 
 The Kerberos realm must match the domain part of the LDAP user's Distinguished
@@ -113,6 +113,40 @@ user's Distinguished Name should end in `dc=ad,dc=example,dc=com`.
 Taken together, these rules mean that linking will only work if your users'
 Kerberos usernames are of the form `foo@AD.EXAMPLE.COM` and their
 LDAP Distinguished Names look like `sAMAccountName=foo,dc=ad,dc=example,dc=com`.
+
+### Custom allowed realms
+
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9962) in GitLab 13.5.
+
+You can configure custom allowed realms when
+the user's Kerberos realm doesn't match the domain from the user's LDAP DN. The
+configuration value must specify all domains that users may be expected to
+have. Any other domains will be ignored and an LDAP identity will not be linked.
+
+**For Omnibus installations**
+
+1. Edit `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   gitlab_rails['kerberos_simple_ldap_linking_allowed_realms'] = ['example.com','kerberos.example.com']
+   ```
+
+1. Save the file and [reconfigure](../administration/restart_gitlab.md#omnibus-gitlab-reconfigure)
+   GitLab for the changes to take effect.
+
+---
+
+**For installations from source**
+
+1. Edit `config/gitlab.yml`:
+
+   ```yaml
+   kerberos:
+     simple_ldap_linking_allowed_realms: ['example.com','kerberos.example.com']
+   ```
+
+1. Save the file and [restart](../administration/restart_gitlab.md#installations-from-source)
+   GitLab for the changes to take effect.
 
 ## HTTP Git access
 
@@ -207,9 +241,10 @@ remove the OmniAuth provider named `kerberos` from your `gitlab.yml` /
 
    ```yaml
    omniauth:
+     # Rest of configuration omitted
      # ...
      providers:
-       - { name: 'kerberos' } # <-- remove this line
+       - { name: 'kerberos' }  # <-- remove this line
    ```
 
 1. [Restart GitLab](../administration/restart_gitlab.md#installations-from-source) for the changes to take effect.

@@ -28,6 +28,7 @@ module GroupsHelper
 
   def group_packages_nav_link_paths
     %w[
+      groups/packages#index
       groups/container_registries#index
     ]
   end
@@ -129,7 +130,7 @@ module GroupsHelper
   end
 
   def remove_group_message(group)
-    _("You are going to remove %{group_name}, this will also remove all of its subgroups and projects. Removed groups CANNOT be restored! Are you ABSOLUTELY sure?") %
+    _("You are going to remove %{group_name}, this will also delete all of its subgroups and projects. Removed groups CANNOT be restored! Are you ABSOLUTELY sure?") %
       { group_name: group.name }
   end
 
@@ -157,7 +158,31 @@ module GroupsHelper
     groups.to_json
   end
 
+  def group_packages_nav?
+    group_packages_list_nav? ||
+      group_container_registry_nav?
+  end
+
+  def group_packages_list_nav?
+    @group.packages_feature_enabled?
+  end
+
+  def show_invite_banner?(group)
+    Feature.enabled?(:invite_your_teammates_banner_a, group) &&
+      can?(current_user, :admin_group, group) &&
+      !just_created? &&
+      !multiple_members?(group)
+  end
+
   private
+
+  def just_created?
+    flash[:notice] =~ /successfully created/
+  end
+
+  def multiple_members?(group)
+    group.member_count > 1
+  end
 
   def get_group_sidebar_links
     links = [:overview, :group_members]
@@ -174,6 +199,10 @@ module GroupsHelper
 
     if can?(current_user, :admin_group, @group)
       links << :settings
+    end
+
+    if can?(current_user, :read_wiki, @group)
+      links << :wiki
     end
 
     links

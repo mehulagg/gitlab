@@ -17,6 +17,18 @@ RSpec.describe Gitlab::GitAccess do
   let(:authentication_abilities) { %i[read_project download_code push_code] }
   let(:redirected_path) { nil }
 
+  let(:access_class) do
+    Class.new(described_class) do
+      def push_ability
+        :push_code
+      end
+
+      def download_ability
+        :download_code
+      end
+    end
+  end
+
   context "when in a read-only GitLab instance" do
     before do
       create(:protected_branch, name: 'feature', project: project)
@@ -600,6 +612,18 @@ RSpec.describe Gitlab::GitAccess do
         end
       end
 
+      context "when license blocks changes" do
+        before do
+          create_current_license(starts_at: 1.month.ago.to_date, block_changes_at: Date.current, notify_admins_at: Date.current)
+          user.update_attribute(:admin, true)
+          project.add_role(user, :developer)
+        end
+
+        it 'raises an error' do
+          expect { push_changes(changes[:any]) }.to raise_error(Gitlab::GitAccess::ForbiddenError, /Your subscription will expire/)
+        end
+      end
+
       context "group-specific access control" do
         let(:user) { create(:user) }
         let(:group) { create(:group) }
@@ -705,10 +729,44 @@ RSpec.describe Gitlab::GitAccess do
     end
   end
 
+  describe '#check_maintenance_mode!' do
+    let(:changes) { Gitlab::GitAccess::ANY }
+
+    before do
+      project.add_maintainer(user)
+    end
+
+    def push_access_check
+      access.check('git-receive-pack', changes)
+    end
+
+    context 'when maintenance mode is enabled' do
+      before do
+        stub_application_setting(maintenance_mode: true)
+      end
+
+      it 'blocks git push' do
+        aggregate_failures do
+          expect { push_access_check }.to raise_forbidden('Git push is not allowed because this GitLab instance is currently in (read-only) maintenance mode.')
+        end
+      end
+    end
+
+    context 'when maintenance mode is disabled' do
+      before do
+        stub_application_setting(maintenance_mode: false)
+      end
+
+      it 'allows git push' do
+        expect { push_access_check }.not_to raise_error
+      end
+    end
+  end
+
   private
 
   def access
-    described_class.new(
+    access_class.new(
       actor,
       project,
       protocol,

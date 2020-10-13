@@ -6,7 +6,7 @@ RSpec.describe StatusPage::TriggerPublishService do
   let_it_be(:user) { create(:user) }
   let_it_be(:project, refind: true) { create(:project, :repository) }
 
-  let(:service) { described_class.new(project, user, triggered_by) }
+  let(:service) { described_class.new(project, user, triggered_by, action: :update) }
 
   describe '#execute' do
     # Variables used by shared examples
@@ -17,6 +17,16 @@ RSpec.describe StatusPage::TriggerPublishService do
     end
 
     subject { service.execute }
+
+    describe 'invalid action' do
+      let(:service) { described_class.new(project, user, double(:issue), action: :something_invalid) }
+
+      it 'raises an argument error and does not process' do
+        expect(StatusPage::PublishWorker).not_to receive(:perform_async)
+
+        expect { subject }.to raise_error(ArgumentError)
+      end
+    end
 
     describe 'triggered by issue' do
       let_it_be(:triggered_by, reload: true) { create(:issue, :published, project: project) }
@@ -41,6 +51,12 @@ RSpec.describe StatusPage::TriggerPublishService do
 
       context 'without changes' do
         include_examples 'no trigger status page publish'
+
+        context 'with init action' do
+          let(:service) { described_class.new(project, user, triggered_by, action: :init) }
+
+          include_examples 'trigger status page publish'
+        end
       end
 
       context 'when a confidential issue changes' do
@@ -86,7 +102,7 @@ RSpec.describe StatusPage::TriggerPublishService do
 
     describe 'triggered by note' do
       let(:issue_id) { triggered_by.noteable_id }
-      let(:emoji_name) { StatusPage::AWARD_EMOJI }
+      let(:emoji_name) { Gitlab::StatusPage::AWARD_EMOJI }
 
       before do
         create(:award_emoji, user: user, name: emoji_name,
@@ -167,7 +183,7 @@ RSpec.describe StatusPage::TriggerPublishService do
     end
 
     describe 'triggered by award emoji' do
-      let(:emoji_name) { StatusPage::AWARD_EMOJI }
+      let(:emoji_name) { Gitlab::StatusPage::AWARD_EMOJI }
       let(:issue_id) { triggered_by.awardable.noteable_id }
 
       let(:triggered_by) do

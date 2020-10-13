@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::UrlBuilder do
+RSpec.describe Gitlab::UrlBuilder do
   subject { described_class }
 
   describe '#build' do
@@ -22,7 +22,7 @@ describe Gitlab::UrlBuilder do
       :issue             | ->(issue)         { "/#{issue.project.full_path}/-/issues/#{issue.iid}" }
       :merge_request     | ->(merge_request) { "/#{merge_request.project.full_path}/-/merge_requests/#{merge_request.iid}" }
       :project_milestone | ->(milestone)     { "/#{milestone.project.full_path}/-/milestones/#{milestone.iid}" }
-      :project_snippet   | ->(snippet)       { "/#{snippet.project.full_path}/snippets/#{snippet.id}" }
+      :project_snippet   | ->(snippet)       { "/#{snippet.project.full_path}/-/snippets/#{snippet.id}" }
       :project_wiki      | ->(wiki)          { "/#{wiki.container.full_path}/-/wikis/home" }
       :ci_build          | ->(build)         { "/#{build.project.full_path}/-/jobs/#{build.id}" }
       :design            | ->(design)        { "/#{design.project.full_path}/-/design_management/designs/#{design.id}/raw_image" }
@@ -31,7 +31,7 @@ describe Gitlab::UrlBuilder do
       :group_milestone   | ->(milestone)     { "/groups/#{milestone.group.full_path}/-/milestones/#{milestone.iid}" }
 
       :user              | ->(user)          { "/#{user.full_path}" }
-      :personal_snippet  | ->(snippet)       { "/snippets/#{snippet.id}" }
+      :personal_snippet  | ->(snippet)       { "/-/snippets/#{snippet.id}" }
       :wiki_page         | ->(wiki_page)     { "#{wiki_page.wiki.wiki_base_path}/#{wiki_page.slug}" }
 
       :note_on_commit                      | ->(note) { "/#{note.project.full_path}/-/commit/#{note.commit_id}#note_#{note.id}" }
@@ -47,10 +47,10 @@ describe Gitlab::UrlBuilder do
       :discussion_note_on_merge_request    | ->(note) { "/#{note.project.full_path}/-/merge_requests/#{note.noteable.iid}#note_#{note.id}" }
       :legacy_diff_note_on_merge_request   | ->(note) { "/#{note.project.full_path}/-/merge_requests/#{note.noteable.iid}#note_#{note.id}" }
 
-      :note_on_project_snippet             | ->(note) { "/#{note.project.full_path}/snippets/#{note.noteable_id}#note_#{note.id}" }
-      :discussion_note_on_project_snippet  | ->(note) { "/#{note.project.full_path}/snippets/#{note.noteable_id}#note_#{note.id}" }
-      :discussion_note_on_personal_snippet | ->(note) { "/snippets/#{note.noteable_id}#note_#{note.id}" }
-      :note_on_personal_snippet            | ->(note) { "/snippets/#{note.noteable_id}#note_#{note.id}" }
+      :note_on_project_snippet             | ->(note) { "/#{note.project.full_path}/-/snippets/#{note.noteable_id}#note_#{note.id}" }
+      :discussion_note_on_project_snippet  | ->(note) { "/#{note.project.full_path}/-/snippets/#{note.noteable_id}#note_#{note.id}" }
+      :discussion_note_on_personal_snippet | ->(note) { "/-/snippets/#{note.noteable_id}#note_#{note.id}" }
+      :note_on_personal_snippet            | ->(note) { "/-/snippets/#{note.noteable_id}#note_#{note.id}" }
     end
 
     with_them do
@@ -87,12 +87,73 @@ describe Gitlab::UrlBuilder do
     end
 
     context 'when passing a Snippet' do
-      let(:snippet) { build_stubbed(:personal_snippet) }
+      let_it_be(:personal_snippet) { create(:personal_snippet, :repository) }
+      let_it_be(:project_snippet)  { create(:project_snippet, :repository) }
+      let(:blob)                   { snippet.blobs.first }
+      let(:ref)                    { blob.repository.root_ref }
 
-      it 'returns a raw snippet URL if requested' do
-        url = subject.build(snippet, raw: true)
+      context 'for a PersonalSnippet' do
+        let(:snippet) { personal_snippet }
 
-        expect(url).to eq "#{Gitlab.config.gitlab.url}/snippets/#{snippet.id}/raw"
+        it 'returns a raw snippet URL if requested' do
+          url = subject.build(snippet, raw: true)
+
+          expect(url).to eq "#{Gitlab.config.gitlab.url}/-/snippets/#{snippet.id}/raw"
+        end
+
+        it 'returns a raw snippet blob URL if requested' do
+          url = subject.build(snippet, file: blob.path, ref: ref)
+
+          expect(url).to eq "#{Gitlab.config.gitlab.url}/-/snippets/#{snippet.id}/raw/#{ref}/#{blob.path}"
+        end
+      end
+
+      context 'for a ProjectSnippet' do
+        let(:snippet) { project_snippet }
+
+        it 'returns a raw snippet URL if requested' do
+          url = subject.build(snippet, raw: true)
+
+          expect(url).to eq "#{Gitlab.config.gitlab.url}/#{snippet.project.full_path}/-/snippets/#{snippet.id}/raw"
+        end
+
+        it 'returns a raw snippet blob URL if requested' do
+          url = subject.build(snippet, file: blob.path, ref: ref)
+
+          expect(url).to eq "#{Gitlab.config.gitlab.url}/#{snippet.project.full_path}/-/snippets/#{snippet.id}/raw/#{ref}/#{blob.path}"
+        end
+      end
+    end
+
+    context 'when passing a Wiki' do
+      let(:wiki) { build_stubbed(:project_wiki) }
+
+      describe '#wiki_url' do
+        it 'uses the default collection action' do
+          url = subject.wiki_url(wiki)
+
+          expect(url).to eq "#{Gitlab.config.gitlab.url}/#{wiki.project.full_path}/-/wikis/home"
+        end
+
+        it 'supports a custom collection action' do
+          url = subject.wiki_url(wiki, action: :pages)
+
+          expect(url).to eq "#{Gitlab.config.gitlab.url}/#{wiki.project.full_path}/-/wikis/pages"
+        end
+      end
+
+      describe '#wiki_page_url' do
+        it 'uses the default member action' do
+          url = subject.wiki_page_url(wiki, 'foo')
+
+          expect(url).to eq "#{Gitlab.config.gitlab.url}/#{wiki.project.full_path}/-/wikis/foo"
+        end
+
+        it 'supports a custom member action' do
+          url = subject.wiki_page_url(wiki, 'foo', action: :edit)
+
+          expect(url).to eq "#{Gitlab.config.gitlab.url}/#{wiki.project.full_path}/-/wikis/foo/edit"
+        end
       end
     end
 

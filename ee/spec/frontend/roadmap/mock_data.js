@@ -621,3 +621,34 @@ export const mockGroupMilestonesQueryResponse = {
     },
   },
 };
+
+export const mockEpicsWithParents = [
+  {
+    id: 'gid://gitlab-org/subgroup/Epic/1',
+    hasParent: true,
+    parent: {
+      id: 'gid://gitlab-org/Epic/1',
+    },
+  },
+  {
+    id: 'gid://gitlab-org/subgroup/Epic/2',
+    hasParent: true,
+    parent: {
+      id: 'gid://gitlab-org/subgroup/Epic/1',
+    },
+  },
+  {
+    id: 'gid://gitlab-org/subgroup/Epic/3',
+    hasParent: true,
+    parent: {
+      id: 'gid://gitlab-org/subgroup/Epic/1',
+    },
+  },
+  {
+    id: 'gid://gitlab-org/subgroup/Epic/4',
+    hasParent: true,
+    parent: {
+      id: 'gid://gitlab-org/subgroup/Epic/1',
+    },
+  },
+];

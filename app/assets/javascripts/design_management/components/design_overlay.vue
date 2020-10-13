@@ -1,4 +1,5 @@
 <script>
+import { __ } from '~/locale';
 import activeDiscussionQuery from '../graphql/queries/active_discussion.query.graphql';
 import updateActiveDiscussionMutation from '../graphql/mutations/update_active_discussion.mutation.graphql';
 import DesignNotePin from './design_note_pin.vue';
@@ -144,7 +145,7 @@ export default {
     },
     onExistingNoteMove(e) {
       const note = this.notes.find(({ id }) => id === this.movingNoteStartPosition.noteId);
-      if (!note) return;
+      if (!note || !this.canMoveNote(note)) return;
 
       const { position } = note;
       const { width, height } = position;
@@ -190,8 +191,6 @@ export default {
       });
     },
     onNoteMousedown({ clientX, clientY }, note) {
-      if (note && !this.canMoveNote(note)) return;
-
       this.movingNoteStartPosition = {
         noteId: note?.id,
         discussionId: note?.discussion.id,
@@ -238,18 +237,26 @@ export default {
       });
     },
     isNoteInactive(note) {
-      return this.activeDiscussion.id && this.activeDiscussion.id !== note.id;
+      const discussionNotes = note.discussion.notes.nodes || [];
+
+      return (
+        this.activeDiscussion.id &&
+        !discussionNotes.some(({ id }) => id === this.activeDiscussion.id)
+      );
     },
     designPinClass(note) {
       return { inactive: this.isNoteInactive(note), resolved: note.resolved };
     },
+  },
+  i18n: {
+    newCommentButtonLabel: __('Add comment to design'),
   },
 };
 </script>
 
 <template>
   <div
-    class="position-absolute image-diff-overlay frame"
+    class="gl-absolute gl-top-0 gl-left-0 frame"
     :style="overlayStyle"
     @mousemove="onOverlayMousemove"
     @mouseleave="onNoteMouseup"
@@ -257,31 +264,31 @@ export default {
     <button
       v-show="!disableCommenting"
       type="button"
-      class="btn-transparent position-absolute image-diff-overlay-add-comment w-100 h-100 js-add-image-diff-note-button"
+      role="button"
+      :aria-label="$options.i18n.newCommentButtonLabel"
+      class="gl-absolute gl-w-full gl-h-full gl-p-0 gl-top-0 gl-left-0 gl-outline-0! btn-transparent gl-hover-cursor-crosshair"
       data-qa-selector="design_image_button"
       @mouseup="onAddCommentMouseup"
     ></button>
-    <template v-for="note in notes">
-      <design-note-pin
-        v-if="resolvedDiscussionsExpanded || !note.resolved"
-        :key="note.id"
-        :label="note.index"
-        :repositioning="isMovingNote(note.id)"
-        :position="
-          isMovingNote(note.id) && movingNoteNewPosition
-            ? getNotePositionStyle(movingNoteNewPosition)
-            : getNotePositionStyle(note.position)
-        "
-        :class="designPinClass(note)"
-        @mousedown.stop="onNoteMousedown($event, note)"
-        @mouseup.stop="onNoteMouseup(note)"
-      />
-    </template>
+
+    <design-note-pin
+      v-for="note in notes"
+      v-if="resolvedDiscussionsExpanded || !note.resolved"
+      :key="note.id"
+      :label="note.index"
+      :position="
+        isMovingNote(note.id) && movingNoteNewPosition
+          ? getNotePositionStyle(movingNoteNewPosition)
+          : getNotePositionStyle(note.position)
+      "
+      :class="designPinClass(note)"
+      @mousedown.stop="onNoteMousedown($event, note)"
+      @mouseup.stop="onNoteMouseup(note)"
+    />
 
     <design-note-pin
       v-if="currentCommentForm"
       :position="currentCommentPositionStyle"
-      :repositioning="isMovingCurrentComment"
       @mousedown.stop="onNoteMousedown"
       @mouseup.stop="onNoteMouseup"
     />

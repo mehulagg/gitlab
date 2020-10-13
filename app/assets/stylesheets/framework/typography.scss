@@ -84,15 +84,15 @@
     padding: 3px 5px;
     font-size: 11px;
     line-height: 10px;
-    color: $gl-gray-700;
+    color: $gray-700;
     vertical-align: middle;
     background-color: $gray-10;
     border-width: 1px;
     border-style: solid;
-    border-color: $gray-200 $gray-200 $gray-400;
+    border-color: $gray-100 $gray-100 $gray-200;
     border-image: none;
     border-radius: 3px;
-    box-shadow: 0 -1px 0 $gray-400 inset;
+    box-shadow: 0 -1px 0 $gray-200 inset;
   }
 
   h1 {
@@ -181,13 +181,13 @@
       background-color: $white;
 
       td {
-        border-color: $gray-200;
+        border-color: $gray-100;
       }
     }
 
     tr {
       th {
-        border-bottom: solid 2px $gray-300;
+        border-bottom: solid 2px $gray-200;
       }
     }
 
@@ -439,10 +439,6 @@
       content: '\f0c6';
     }
 
-    &:hover::before {
-      text-decoration: none;
-    }
-
     &.no-attachment-icon {
       &::before {
         display: none;
@@ -611,7 +607,7 @@ pre {
   word-wrap: break-word;
   color: $gl-text-color;
   background-color: $gray-light;
-  border: 1px solid $gray-200;
+  border: 1px solid $gray-100;
   border-radius: $border-radius-small;
 }
 

@@ -1,6 +1,8 @@
 <script>
 import { mapActions } from 'vuex';
 import { GlEmptyState } from '@gitlab/ui';
+import { s__ } from '~/locale';
+import SecurityReportsSummary from './security_reports_summary.vue';
 import SecurityDashboard from './security_dashboard_vuex.vue';
 import { fetchPolicies } from '~/lib/graphql';
 import pipelineSecurityReportSummaryQuery from '../graphql/pipeline_security_report_summary.query.graphql';
@@ -10,6 +12,7 @@ export default {
   name: 'PipelineSecurityDashboard',
   components: {
     GlEmptyState,
+    SecurityReportsSummary,
     SecurityDashboard,
   },
   mixins: [glFeatureFlagsMixin()],
@@ -20,11 +23,12 @@ export default {
       variables() {
         return {
           fullPath: this.projectFullPath,
-          pipelineId: this.pipelineId,
+          pipelineIid: this.pipelineIid,
         };
       },
       update(data) {
-        return data?.project?.pipelines?.nodes?.[0]?.securityReportSummary;
+        const summary = data?.project?.pipeline?.securityReportSummary;
+        return summary && Object.keys(summary).length ? summary : null;
       },
       skip() {
         return !this.glFeatures.pipelinesSecurityReportSummary;
@@ -44,6 +48,10 @@ export default {
       type: Number,
       required: true,
     },
+    pipelineIid: {
+      type: Number,
+      required: true,
+    },
     projectId: {
       type: Number,
       required: true,
@@ -56,10 +64,6 @@ export default {
       type: String,
       required: true,
     },
-    vulnerabilityFeedbackHelpPath: {
-      type: String,
-      required: true,
-    },
     loadingErrorIllustrations: {
       type: Object,
       required: true,
@@ -69,37 +73,54 @@ export default {
       required: false,
       default: '',
     },
+    pipelineJobsPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+  },
+  computed: {
+    emptyStateProps() {
+      return {
+        svgPath: this.emptyStateSvgPath,
+        title: s__('SecurityReports|No vulnerabilities found for this pipeline'),
+        description: s__(
+          `SecurityReports|While it's rare to have no vulnerabilities for your pipeline, it can happen. In any event, we ask that you double check your settings to make sure all security scanning jobs have passed successfully.`,
+        ),
+        primaryButtonLink: this.dashboardDocumentation,
+        primaryButtonText: s__('SecurityReports|Learn more about setting up your dashboard'),
+      };
+    },
   },
   created() {
     this.setSourceBranch(this.sourceBranch);
+    this.setPipelineJobsPath(this.pipelineJobsPath);
+    this.setProjectId(this.projectId);
   },
   methods: {
     ...mapActions('vulnerabilities', ['setSourceBranch']),
+    ...mapActions('pipelineJobs', ['setPipelineJobsPath', 'setProjectId']),
   },
 };
 </script>
 
 <template>
-  <security-dashboard
-    :vulnerabilities-endpoint="vulnerabilitiesEndpoint"
-    :vulnerability-feedback-help-path="vulnerabilityFeedbackHelpPath"
-    :lock-to-project="{ id: projectId }"
-    :pipeline-id="pipelineId"
-    :loading-error-illustrations="loadingErrorIllustrations"
-    :security-report-summary="securityReportSummary"
-  >
-    <template #emptyState>
-      <gl-empty-state
-        :title="s__('SecurityReports|No vulnerabilities found for this pipeline')"
-        :svg-path="emptyStateSvgPath"
-        :description="
-          s__(
-            `SecurityReports|While it's rare to have no vulnerabilities for your pipeline, it can happen. In any event, we ask that you double check your settings to make sure all security scanning jobs have passed successfully.`,
-          )
-        "
-        :primary-button-link="dashboardDocumentation"
-        :primary-button-text="s__('SecurityReports|Learn more about setting up your dashboard')"
-      />
-    </template>
-  </security-dashboard>
+  <div>
+    <security-reports-summary
+      v-if="securityReportSummary"
+      :summary="securityReportSummary"
+      class="gl-mt-5"
+    />
+    <security-dashboard
+      :vulnerabilities-endpoint="vulnerabilitiesEndpoint"
+      :lock-to-project="{ id: projectId }"
+      :pipeline-id="pipelineId"
+      :loading-error-illustrations="loadingErrorIllustrations"
+      :security-report-summary="securityReportSummary"
+    >
+      <template #emptyState>
+        <gl-empty-state v-bind="emptyStateProps" />
+      </template>
+    </security-dashboard>
+  </div>
 </template>

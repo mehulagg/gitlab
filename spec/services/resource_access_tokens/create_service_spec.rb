@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ResourceAccessTokens::CreateService do
+RSpec.describe ResourceAccessTokens::CreateService do
   subject { described_class.new(user, resource, params).execute }
 
   let_it_be(:user) { create(:user) }
@@ -24,9 +24,9 @@ describe ResourceAccessTokens::CreateService do
       end
     end
 
-    shared_examples 'fails when flag is disabled' do
+    shared_examples 'fails on gitlab.com' do
       before do
-        stub_feature_flags(resource_access_token: false)
+        allow(Gitlab).to receive(:com?) { true }
       end
 
       it 'returns nil' do
@@ -43,6 +43,28 @@ describe ResourceAccessTokens::CreateService do
         access_token = response.payload[:access_token]
 
         expect(access_token.user.reload.user_type).to eq("#{resource_type}_bot")
+        expect(access_token.user.created_by_id).to eq(user.id)
+      end
+
+      context 'email confirmation status' do
+        shared_examples_for 'creates a user that has their email confirmed' do
+          it 'creates a user that has their email confirmed' do
+            response = subject
+            access_token = response.payload[:access_token]
+
+            expect(access_token.user.reload.confirmed?).to eq(true)
+          end
+        end
+
+        context 'when created by an admin' do
+          it_behaves_like 'creates a user that has their email confirmed' do
+            let(:user) { create(:admin) }
+          end
+        end
+
+        context 'when created by a non-admin' do
+          it_behaves_like 'creates a user that has their email confirmed'
+        end
       end
 
       context 'bot name' do
@@ -149,7 +171,7 @@ describe ResourceAccessTokens::CreateService do
       let_it_be(:resource) { project }
 
       it_behaves_like 'fails when user does not have the permission to create a Resource Bot'
-      it_behaves_like 'fails when flag is disabled'
+      it_behaves_like 'fails on gitlab.com'
 
       context 'user with valid permission' do
         before_all do

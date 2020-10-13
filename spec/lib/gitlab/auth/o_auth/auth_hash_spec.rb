@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::OAuth::AuthHash do
+RSpec.describe Gitlab::Auth::OAuth::AuthHash do
   let(:provider) { 'ldap'.freeze }
   let(:auth_hash) do
     described_class.new(
@@ -17,6 +17,7 @@ describe Gitlab::Auth::OAuth::AuthHash do
   let(:uid_raw) do
     +"CN=Onur K\xC3\xBC\xC3\xA7\xC3\xBCk,OU=Test,DC=example,DC=net"
   end
+
   let(:email_raw) { +"onur.k\xC3\xBC\xC3\xA7\xC3\xBCk_ABC-123@example.net" }
   let(:nickname_raw) { +"ok\xC3\xBC\xC3\xA7\xC3\xBCk" }
   let(:first_name_raw) { +'Onur' }

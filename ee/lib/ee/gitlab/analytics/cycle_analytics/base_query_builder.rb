@@ -13,6 +13,8 @@ module EE::Gitlab::Analytics::CycleAnalytics::BaseQueryBuilder
   override :build_finder_params
   def build_finder_params(params)
     super.tap do |finder_params|
+      finder_params.merge!(params.slice(*::Gitlab::Analytics::CycleAnalytics::RequestParams::FINDER_PARAM_NAMES))
+
       finder_params[:project_ids] = Array(params[:project_ids])
     end
   end

@@ -1,26 +1,37 @@
 # frozen_string_literal: true
 
 module WikiActions
+  include DiffHelper
+  include PreviewMarkdown
   include SendsBlob
   include Gitlab::Utils::StrongMemoize
   extend ActiveSupport::Concern
 
   included do
+    before_action { respond_to :html }
+
     before_action :authorize_read_wiki!
     before_action :authorize_create_wiki!, only: [:edit, :create]
     before_action :authorize_admin_wiki!, only: :destroy
 
     before_action :wiki
-    before_action :page, only: [:show, :edit, :update, :history, :destroy]
+    before_action :page, only: [:show, :edit, :update, :history, :destroy, :diff]
     before_action :load_sidebar, except: [:pages]
+    before_action :set_content_class
 
     before_action only: [:show, :edit, :update] do
       @valid_encoding = valid_encoding?
     end
 
     before_action only: [:edit, :update], unless: :valid_encoding? do
-      redirect_to wiki_page_path(wiki, page)
+      if params[:id].present?
+        redirect_to wiki_page_path(wiki, page || params[:id])
+      else
+        redirect_to wiki_path(wiki)
+      end
     end
+
+    helper_method :view_file_button, :diff_file_html_data
   end
 
   def new
@@ -33,7 +44,9 @@ module WikiActions
       wiki.list_pages(sort: params[:sort], direction: params[:direction])
     ).page(params[:page])
 
-    @wiki_entries = WikiPage.group_by_directory(@wiki_pages)
+    @wiki_entries = WikiDirectory.group_pages(@wiki_pages)
+
+    render 'shared/wikis/pages'
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
@@ -54,62 +67,62 @@ module WikiActions
       @ref = params[:version_id]
       @path = page.path
 
-      render 'show'
+      Gitlab::UsageDataCounters::WikiPageCounter.count(:view)
+
+      render 'shared/wikis/show'
     elsif file_blob
-      send_blob(wiki.repository, file_blob, allow_caching: container.public?)
+      send_blob(wiki.repository, file_blob)
     elsif show_create_form?
       # Assign a title to the WikiPage unless `id` is a randomly generated slug from #new
       title = params[:id] unless params[:random_title].present?
 
       @page = build_page(title: title)
 
-      render 'edit'
+      render 'shared/wikis/edit'
     else
-      render 'empty'
+      render 'shared/wikis/empty'
     end
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
   def edit
+    render 'shared/wikis/edit'
   end
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def update
-    return render('empty') unless can?(current_user, :create_wiki, container)
+    return render('shared/wikis/empty') unless can?(current_user, :create_wiki, container)
 
-    @page = WikiPages::UpdateService.new(container: container, current_user: current_user, params: wiki_params).execute(page)
+    response = WikiPages::UpdateService.new(container: container, current_user: current_user, params: wiki_params).execute(page)
+    @page = response.payload[:page]
 
-    if page.valid?
+    if response.success?
       redirect_to(
         wiki_page_path(wiki, page),
         notice: _('Wiki was successfully updated.')
       )
     else
-      render 'edit'
+      render 'shared/wikis/edit'
     end
-  rescue WikiPage::PageChangedError, WikiPage::PageRenameError, Gitlab::Git::Wiki::OperationError => e
+  rescue WikiPage::PageChangedError, WikiPage::PageRenameError => e
     @error = e
-    render 'edit'
+    render 'shared/wikis/edit'
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def create
-    @page = WikiPages::CreateService.new(container: container, current_user: current_user, params: wiki_params).execute
+    response = WikiPages::CreateService.new(container: container, current_user: current_user, params: wiki_params).execute
+    @page = response.payload[:page]
 
-    if page.persisted?
+    if response.success?
       redirect_to(
         wiki_page_path(wiki, page),
         notice: _('Wiki was successfully updated.')
       )
     else
-      render action: "edit"
+      render 'shared/wikis/edit'
     end
-  rescue Gitlab::Git::Wiki::OperationError => e
-    @page = build_page(wiki_params)
-    @error = e
-
-    render 'edit'
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
@@ -119,9 +132,11 @@ module WikiActions
       @page_versions = Kaminari.paginate_array(page.versions(page: params[:page].to_i),
                                                total_count: page.count_versions)
         .page(params[:page])
+
+      render 'shared/wikis/history'
     else
       redirect_to(
-        wiki_page_path(wiki, :home),
+        wiki_path(wiki),
         notice: _("Page not found")
       )
     end
@@ -129,15 +144,32 @@ module WikiActions
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
-  def destroy
-    WikiPages::DestroyService.new(container: container, current_user: current_user).execute(page)
+  def diff
+    return render_404 unless page
 
-    redirect_to wiki_page_path(wiki, :home),
-                status: :found,
-                notice: _("Page was successfully deleted")
-  rescue Gitlab::Git::Wiki::OperationError => e
-    @error = e
-    render 'edit'
+    apply_diff_view_cookie!
+
+    @diffs = page.diffs(diff_options)
+    @diff_notes_disabled = true
+
+    render 'shared/wikis/diff'
+  end
+  # rubocop:disable Gitlab/ModuleWithInstanceVariables
+
+  # rubocop:disable Gitlab/ModuleWithInstanceVariables
+  def destroy
+    return render_404 unless page
+
+    response = WikiPages::DestroyService.new(container: container, current_user: current_user).execute(page)
+
+    if response.success?
+      redirect_to wiki_path(wiki),
+      status: :found,
+      notice: _("Page was successfully deleted")
+    else
+      @error = response
+      render 'shared/wikis/edit'
+    end
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
@@ -199,7 +231,7 @@ module WikiActions
 
   def page_params
     keys = [:id]
-    keys << :version_id if params[:action] == 'show'
+    keys << :version_id if %w[show diff].include?(params[:action])
 
     params.values_at(*keys)
   end
@@ -224,5 +256,26 @@ module WikiActions
 
       wiki.repository.blob_at(commit.id, params[:id])
     end
+  end
+
+  def set_content_class
+    @content_class = 'limit-container-width' unless fluid_layout # rubocop:disable Gitlab/ModuleWithInstanceVariables
+  end
+
+  # Override CommitsHelper#view_file_button
+  def view_file_button(commit_sha, *args)
+    path = wiki_page_path(wiki, page, version_id: page.version.id)
+
+    helpers.link_to(path, class: 'btn') do
+      helpers.raw(_('View page @ ')) + helpers.content_tag(:span, Commit.truncate_sha(commit_sha), class: 'commit-sha')
+    end
+  end
+
+  # Override DiffHelper#diff_file_html_data
+  def diff_file_html_data(_project, _diff_file_path, diff_commit_id)
+    {
+      blob_diff_path: wiki_page_path(wiki, page, action: :diff, version_id: diff_commit_id),
+      view: diff_view
+    }
   end
 end

@@ -1,10 +1,13 @@
+---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Instance-level CI/CD variables API
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/14108) in GitLab 13.0
-> - It's deployed behind a feature flag, enabled by default.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-instance-level-cicd-variables-core-only). **(CORE ONLY)**
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/218249) in GitLab 13.2.
 
 ## List all instance variables
 
@@ -76,7 +79,7 @@ POST /admin/ci/variables
 | Attribute       | Type    | required | Description           |
 |-----------------|---------|----------|-----------------------|
 | `key`           | string  | yes      | The `key` of a variable. Max 255 characters, only `A-Z`, `a-z`, `0-9`, and `_` are allowed. |
-| `value`         | string  | yes      | The `value` of a variable. Around 700 characters allowed. |
+| `value`         | string  | yes      | The `value` of a variable. 10,000 characters allowed. [Since GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/220028) |
 | `variable_type` | string  | no       | The type of a variable. Available types are: `env_var` (default) and `file`. |
 | `protected`     | boolean | no       | Whether the variable is protected. |
 | `masked`        | boolean | no       | Whether the variable is masked. |
@@ -106,7 +109,7 @@ PUT /admin/ci/variables/:key
 | Attribute       | Type    | required | Description             |
 |-----------------|---------|----------|-------------------------|
 | `key`           | string  | yes      | The `key` of a variable.   |
-| `value`         | string  | yes      | The `value` of a variable. |
+| `value`         | string  | yes      | The `value` of a variable. [Since GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/220028), around 10,000 characters allowed. Previously 700 characters. |
 | `variable_type` | string  | no       | The type of a variable. Available types are: `env_var` (default) and `file`. |
 | `protected`     | boolean | no       | Whether the variable is protected. |
 | `masked`        | boolean | no       | Whether the variable is masked. |
@@ -139,23 +142,4 @@ DELETE /admin/ci/variables/:key
 
 ```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/admin/ci/variables/VARIABLE_1"
-```
-
-### Enable or disable instance-level CI/CD variables **(CORE ONLY)**
-
-Instance-level CI/CD variables is under development but ready for production use.
-It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
-can opt to disable it for your instance.
-
-To disable it:
-
-```ruby
-Feature.disable(:ci_instance_level_variables)
-```
-
-To enable it:
-
-```ruby
-Feature.enable(:ci_instance_level_variables)
 ```

@@ -5,20 +5,20 @@ module Gitlab
     module ExternalDatabaseChecker
       extend self
 
-      # DB is considered deprecated if it is below version 11
-      def db_version_deprecated?
-        Gitlab::Database.version.to_f < 11
-      end
-
       def check
-        return [] unless db_version_deprecated?
+        return [] if Gitlab::Database.postgresql_minimum_supported_version?
 
         [
           {
             type: 'warning',
-            message: _('Note that PostgreSQL 11 will become the minimum required PostgreSQL version in GitLab 13.0 (May 2020). '\
-                     'PostgreSQL 9.6 and PostgreSQL 10 will no longer be supported in GitLab 13.0. '\
-                     'Please consider upgrading your PostgreSQL version (%{db_version}) soon.') % { db_version: Gitlab::Database.version.to_s }
+            message: _('You are using PostgreSQL %{pg_version_current}, but PostgreSQL ' \
+                       '%{pg_version_minimum} is required for this version of GitLab. ' \
+                       'Please upgrade your environment to a supported PostgreSQL version, ' \
+                       'see %{pg_requirements_url} for details.') % {
+                                                                      pg_version_current: Gitlab::Database.version,
+                                                                      pg_version_minimum: Gitlab::Database::MINIMUM_POSTGRES_VERSION,
+                                                                      pg_requirements_url: '<a href="https://docs.gitlab.com/ee/install/requirements.html#database">database requirements</a>'
+                                                                    }
           }
         ]
       end

@@ -3,7 +3,10 @@
 class SyncSeatLinkRequestWorker
   include ApplicationWorker
 
-  feature_category :billing
+  feature_category :provision
+
+  # Retry for up to approximately 6 days
+  sidekiq_options retry: 20
 
   idempotent!
   worker_has_external_dependencies!

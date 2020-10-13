@@ -6,7 +6,7 @@ require_relative 'danger_spec_helper'
 
 require 'gitlab/danger/commit_linter'
 
-describe Gitlab::Danger::CommitLinter do
+RSpec.describe Gitlab::Danger::CommitLinter do
   using RSpec::Parameterized::TableSyntax
 
   let(:total_files_changed) { 2 }
@@ -16,6 +16,7 @@ describe Gitlab::Danger::CommitLinter do
   let(:commit_class) do
     Struct.new(:message, :sha, :diff_parent)
   end
+
   let(:commit_message) { 'A commit message' }
   let(:commit_sha) { 'abcd1234' }
   let(:commit) { commit_class.new(commit_message, commit_sha, diff_parent) }
@@ -156,7 +157,7 @@ describe Gitlab::Danger::CommitLinter do
       context 'when subject is a WIP' do
         let(:final_message) { 'A B C' }
         # commit message with prefix will be over max length. commit message without prefix will be of maximum size
-        let(:commit_message) { described_class::WIP_PREFIX + final_message + 'D' * (described_class::WARN_SUBJECT_LENGTH - final_message.size) }
+        let(:commit_message) { described_class::WIP_PREFIX + final_message + 'D' * (described_class::MAX_LINE_LENGTH - final_message.size) }
 
         it 'does not have any problems' do
           commit_linter.lint
@@ -171,16 +172,6 @@ describe Gitlab::Danger::CommitLinter do
         it 'adds a problem' do
           expect(commit_linter).to receive(:add_problem).with(:subject_too_short, described_class::DEFAULT_SUBJECT_DESCRIPTION)
           expect(commit_linter).to receive(:add_problem).with(:subject_too_long, described_class::DEFAULT_SUBJECT_DESCRIPTION)
-
-          commit_linter.lint
-        end
-      end
-
-      context 'when subject is above warning' do
-        let(:commit_message) { 'A B ' + 'C' * described_class::WARN_SUBJECT_LENGTH }
-
-        it 'adds a problem' do
-          expect(commit_linter).to receive(:add_problem).with(:subject_above_warning, described_class::DEFAULT_SUBJECT_DESCRIPTION)
 
           commit_linter.lint
         end
@@ -332,6 +323,16 @@ describe Gitlab::Danger::CommitLinter do
         end
       end
 
+      context 'when message includes a value that is surrounded by backticks' do
+        let(:commit_message) { "A commit message `%20`" }
+
+        it 'does not add a problem' do
+          expect(commit_linter).not_to receive(:add_problem)
+
+          commit_linter.lint
+        end
+      end
+
       context 'when message includes a short reference' do
         [
           'A commit message to fix #1234',
@@ -345,7 +346,9 @@ describe Gitlab::Danger::CommitLinter do
           'A commit message to fix gitlab-org/gitlab#1234',
           'A commit message to fix gitlab-org/gitlab!1234',
           'A commit message to fix gitlab-org/gitlab&1234',
-          'A commit message to fix gitlab-org/gitlab%1234'
+          'A commit message to fix gitlab-org/gitlab%1234',
+          'A commit message to fix "gitlab-org/gitlab%1234"',
+          'A commit message to fix `gitlab-org/gitlab%1234'
         ].each do |message|
           let(:commit_message) { message }
 

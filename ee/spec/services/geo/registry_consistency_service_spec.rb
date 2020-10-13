@@ -9,13 +9,25 @@ RSpec.describe Geo::RegistryConsistencyService, :geo, :use_clean_rails_memory_st
 
   before do
     stub_current_geo_node(secondary)
+    stub_registry_replication_config(enabled: true)
+    stub_external_diffs_setting(enabled: true)
   end
 
-  ::Geo::Secondary::RegistryConsistencyWorker::REGISTRY_CLASSES.each do |klass|
+  def model_class_factory_name(registry_class)
+    default_factory_name = registry_class::MODEL_CLASS.underscore.tr('/', '_').to_sym
+
+    { Geo::DesignRegistry => :project_with_design,
+      Geo::MergeRequestDiffRegistry => :external_merge_request_diff,
+      Geo::PackageFileRegistry => :package_file_with_file,
+      Geo::TerraformStateVersionRegistry => :terraform_state_version }
+      .fetch(registry_class, default_factory_name)
+  end
+
+  shared_examples 'registry consistency service' do |klass|
     let(:registry_class) { klass }
-    let(:registry_class_factory) { registry_class.underscore.tr('/', '_').to_sym }
+    let(:registry_class_factory) { registry_factory_name(registry_class) }
     let(:model_class) { registry_class::MODEL_CLASS }
-    let(:model_class_factory) { model_class.underscore.tr('/', '_').to_sym }
+    let(:model_class_factory) { model_class_factory_name(registry_class) }
     let(:model_foreign_key) { registry_class::MODEL_FOREIGN_KEY }
     let(:batch_size) { 2 }
 
@@ -38,8 +50,8 @@ RSpec.describe Geo::RegistryConsistencyService, :geo, :use_clean_rails_memory_st
         expect(registry_class).to respond_to(:delete_for_model_ids)
       end
 
-      it 'responds to .finder_class' do
-        expect(registry_class).to respond_to(:finder_class)
+      it 'responds to .find_registry_differences' do
+        expect(registry_class).to respond_to(:find_registry_differences)
       end
 
       it 'responds to .has_create_events?' do
@@ -185,7 +197,7 @@ RSpec.describe Geo::RegistryConsistencyService, :geo, :use_clean_rails_memory_st
           end
 
           before do
-            model_class.where(id: unused_registry_ids).delete_all
+            model_class.where(model_class.primary_key => unused_registry_ids).delete_all
           end
 
           it 'deletes unused registries', :sidekiq_inline do
@@ -210,7 +222,7 @@ RSpec.describe Geo::RegistryConsistencyService, :geo, :use_clean_rails_memory_st
           end
 
           before do
-            model_class.where(id: unused_registry_ids).delete_all
+            model_class.where(model_class.primary_key => unused_registry_ids).delete_all
           end
 
           it 'deletes unused registries', :sidekiq_inline do
@@ -257,5 +269,9 @@ RSpec.describe Geo::RegistryConsistencyService, :geo, :use_clean_rails_memory_st
         end
       end
     end
+  end
+
+  ::Geo::Secondary::RegistryConsistencyWorker::REGISTRY_CLASSES.each do |klass|
+    it_behaves_like 'registry consistency service', klass
   end
 end

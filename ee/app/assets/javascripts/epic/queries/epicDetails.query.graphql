@@ -4,8 +4,8 @@ query epicDetails($fullPath: ID!, $iid: ID!) {
       participants {
         edges {
           node {
-            name,
-            avatarUrl,
+            name
+            avatarUrl
             webUrl
           }
         }

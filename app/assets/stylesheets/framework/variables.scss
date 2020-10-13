@@ -73,108 +73,109 @@ $size-scale: (
   'xl': #{70 * $grid-size}
 );
 
-/*
- * Color schema
- */
-$darken-normal-factor: 7%;
-$darken-dark-factor: 10%;
-$darken-border-factor: 5%;
-$darken-border-dashed-factor: 25%;
+// Color schema
+$darken-normal-factor: 7% !default;
+$darken-dark-factor: 10% !default;
+$darken-border-factor: 5% !default;
+$darken-border-dashed-factor: 25% !default;
 
-$white: #fff;
-$white-normal: #f0f0f0;
-$white-dark: #eaeaea;
-$white-transparent: rgba(255, 255, 255, 0.8);
+$white: #fff !default;
+$white-normal: #f0f0f0 !default;
+$white-dark: #eaeaea !default;
+$white-transparent: rgba(255, 255, 255, 0.8) !default;
 
-$gray-lightest: #fdfdfd;
-$gray-light: #fafafa;
-$gray-lighter: #f9f9f9;
-$gray-normal: #f5f5f5;
-$gray-dark: darken($gray-light, $darken-dark-factor);
-$gray-darker: #eee;
-$gray-darkest: #c4c4c4;
+$gray-lightest: #fdfdfd !default;
+$gray-light: #fafafa !default;
+$gray-lighter: #f9f9f9 !default;
+$gray-normal: #f5f5f5 !default;
+$gray-dark: darken($gray-light, $darken-dark-factor) !default;
+$gray-darker: #eee !default;
+$gray-darkest: #c4c4c4 !default;
 
-$purple: #6d49cb;
-$purple-light: #ede8fb;
+$purple: #6d49cb !default;
+$purple-light: #ede8fb !default;
 
-$black: #000;
-$black-transparent: rgba(0, 0, 0, 0.3);
-$almost-black: #242424;
+$black: #000 !default;
+$black-transparent: rgba(0, 0, 0, 0.3) !default;
+$almost-black: #242424 !default;
 
-$t-gray-a-02: rgba($black, 0.02);
-$t-gray-a-04: rgba($black, 0.04);
-$t-gray-a-06: rgba($black, 0.06);
-$t-gray-a-08: rgba($black, 0.08);
+$t-gray-a-02: rgba($black, 0.02) !default;
+$t-gray-a-04: rgba($black, 0.04) !default;
+$t-gray-a-06: rgba($black, 0.06) !default;
+$t-gray-a-08: rgba($black, 0.08) !default;
 
-$gl-gray-100: #ddd;
-$gl-gray-200: #ccc;
-$gl-gray-350: #aaa;
-$gl-gray-400: #999;
-$gl-gray-500: #777;
-$gl-gray-600: #666;
-$gl-gray-700: #555;
-$gl-gray-800: #333;
+$green-50: #ecf4ee !default;
+$green-100: #c3e6cd !default;
+$green-200: #91d4a8 !default;
+$green-300: #52b87a !default;
+$green-400: #2da160 !default;
+$green-500: #108548 !default;
+$green-600: #217645 !default;
+$green-700: #24663b !default;
+$green-800: #0d532a !default;
+$green-900: #0a4020 !default;
+$green-950: #072b15 !default;
 
-$green-50: #f1fdf6;
-$green-100: #dcf5e7;
-$green-200: #b3e6c8;
-$green-300: #75d09b;
-$green-400: #37b96d;
-$green-500: #1aaa55;
-$green-600: #168f48;
-$green-700: #12753a;
-$green-800: #0e5a2d;
-$green-900: #0a4020;
-$green-950: #072b15;
+$blue-50: #e9f3fc !default;
+$blue-100: #cbe2f9 !default;
+$blue-200: #9dc7f1 !default;
+$blue-300: #63a6e9 !default;
+$blue-400: #428fdc !default;
+$blue-500: #1f75cb !default;
+$blue-600: #1068bf !default;
+$blue-700: #0b5cad !default;
+$blue-800: #064787 !default;
+$blue-900: #033464 !default;
+$blue-950: #002850 !default;
 
-$blue-50: #f6fafe;
-$blue-100: #e4f0fb;
-$blue-200: #b8d6f4;
-$blue-300: #73afea;
-$blue-400: #418cd8;
-$blue-500: #1f78d1;
-$blue-600: #1b69b6;
-$blue-700: #17599c;
-$blue-800: #134a81;
-$blue-900: #0f3b66;
-$blue-950: #0a2744;
+$orange-50: #fdf1dd !default;
+$orange-100: #f5d9a8 !default;
+$orange-200: #e9be74 !default;
+$orange-300: #d99530 !default;
+$orange-400: #c17d10 !default;
+$orange-500: #ab6100 !default;
+$orange-600: #9e5400 !default;
+$orange-700: #8f4700 !default;
+$orange-800: #703800 !default;
+$orange-900: #5c2900 !default;
+$orange-950: #421f00 !default;
 
-$orange-50: #fffaf4;
-$orange-100: #fff1de;
-$orange-200: #fed69f;
-$orange-300: #fdbc60;
-$orange-400: #fca429;
-$orange-500: #fc9403;
-$orange-600: #de7e00;
-$orange-700: #c26700;
-$orange-800: #a35200;
-$orange-900: #853c00;
-$orange-950: #592800;
+$red-50: #fcf1ef !default;
+$red-100: #fdd4cd !default;
+$red-200: #fcb5aa !default;
+$red-300: #f57f6c !default;
+$red-400: #ec5941 !default;
+$red-500: #dd2b0e !default;
+$red-600: #c91c00 !default;
+$red-700: #ae1800 !default;
+$red-800: #8d1300 !default;
+$red-900: #660e00 !default;
+$red-950: #4d0a00 !default;
 
-$red-50: #fef6f5;
-$red-100: #fbe5e1;
-$red-200: #f2b4a9;
-$red-300: #ea8271;
-$red-400: #e05842;
-$red-500: #db3b21;
-$red-600: #c0341d;
-$red-700: #a62d19;
-$red-800: #8b2615;
-$red-900: #711e11;
-$red-950: #4b140b;
+$purple-50: #f4f0ff !default;
+$purple-100: #e1d8f9 !default;
+$purple-200: #cbbbf2 !default;
+$purple-300: #ac93e6 !default;
+$purple-400: #9475db !default;
+$purple-500: #7b58cf !default;
+$purple-600: #694cc0 !default;
+$purple-700: #5943b6 !default;
+$purple-800: #453894 !default;
+$purple-900: #2f2a6b !default;
+$purple-950: #232150 !default;
 
-$gray-10: #fafafa;
-$gray-50: #f0f0f0;
-$gray-100: #dbdbdb;
-$gray-200: #dfdfdf;
-$gray-300: #ccc;
-$gray-400: #bababa;
-$gray-500: #a7a7a7;
-$gray-600: #919191;
-$gray-700: #707070;
-$gray-800: #4f4f4f;
-$gray-900: #2e2e2e;
-$gray-950: #1f1f1f;
+$gray-10: #fafafa !default;
+$gray-50: #f0f0f0 !default;
+$gray-100: #dbdbdb !default;
+$gray-200: #bfbfbf !default;
+$gray-300: #999 !default;
+$gray-400: #868686 !default;
+$gray-500: #666 !default;
+$gray-600: #5e5e5e !default;
+$gray-700: #525252 !default;
+$gray-800: #404040 !default;
+$gray-900: #303030 !default;
+$gray-950: #1f1f1f !default;
 
 $greens: (
   '50': $green-50,
@@ -230,6 +231,20 @@ $reds: (
   '800': $red-800,
   '900': $red-900,
   '950': $red-950
+);
+
+$purples: (
+  '50': $purple-50,
+  '100': $purple-100,
+  '200': $purple-200,
+  '300': $purple-300,
+  '400': $purple-400,
+  '500': $purple-500,
+  '600': $purple-600,
+  '700': $purple-700,
+  '800': $purple-800,
+  '900': $purple-900,
+  '950': $purple-950
 );
 
 $grays: (
@@ -325,8 +340,8 @@ $theme-light-red-500: #c24b38;
 $theme-light-red-600: #b03927;
 $theme-light-red-700: #a62e21;
 
-$border-white-light: darken($white, $darken-border-factor);
-$border-white-normal: darken($white-normal, $darken-border-factor);
+$border-white-light: darken($white, $darken-border-factor) !default;
+$border-white-normal: darken($white-normal, $darken-border-factor) !default;
 
 $border-gray-light: darken($gray-light, $darken-border-factor);
 $border-gray-normal: darken($gray-normal, $darken-border-factor);
@@ -335,7 +350,7 @@ $border-gray-normal-dashed: darken($gray-normal, $darken-border-dashed-factor);
 /*
  * UI elements
  */
-$border-color: #e5e5e5;
+$border-color: $gray-100;
 $shadow-color: $t-gray-a-08;
 $well-expand-item: #e8f2f7;
 $well-inner-border: #eef0f2;
@@ -352,20 +367,17 @@ $gl-font-size-large: 16px;
 $gl-font-weight-normal: 400;
 $gl-font-weight-bold: 600;
 $gl-text-color: $gray-900;
-$gl-text-color-secondary: $gray-700;
-$gl-text-color-tertiary: $gray-600;
+$gl-text-color-secondary: $gray-500;
+$gl-text-color-tertiary: $gray-400;
 $gl-text-color-quaternary: #d6d6d6;
 $gl-text-color-inverted: $white;
-$gl-text-color-secondary-inverted: rgba(255, 255, 255, 0.85);
-$gl-text-color-disabled: $gray-600;
+$gl-text-color-secondary-inverted: rgba($white, 0.85);
+$gl-text-color-disabled: $gray-400;
 $gl-grayish-blue: #7f8fa4;
-$gl-gray-dark: #313236;
-$gl-gray-light: #5c5c5c;
 $gl-header-color: #4c4e54;
 $gl-font-size-12: 12px;
 $gl-font-size-14: 14px;
 $gl-font-size-16: 16px;
-$gl-font-size-20: 20px;
 $gl-font-size-28: 28px;
 $gl-font-size-42: 42px;
 
@@ -435,7 +447,6 @@ $layout-link-gray: #7e7c7c;
 $btn-side-margin: 10px;
 $btn-sm-side-margin: 7px;
 $btn-margin-5: 5px;
-$sidebar-block-hover-color: #ebebeb;
 $count-arrow-border: #dce0e5;
 $general-hover-transition-duration: 100ms;
 $general-hover-transition-curve: linear;
@@ -449,6 +460,8 @@ $context-header-height: 60px;
 $breadcrumb-min-height: 48px;
 $home-panel-title-row-height: 64px;
 $home-panel-avatar-mobile-size: 24px;
+$issuable-title-max-width: 350px;
+$milestone-title-max-width: 75px;
 $gl-line-height: 16px;
 $gl-line-height-18: 18px;
 $gl-line-height-20: 20px;
@@ -482,17 +495,33 @@ $gl-btn-active-gradient: inset 0 2px 3px $gl-btn-active-background;
 $added: #63c363;
 $deleted: #f77;
 $line-added: #ecfdf0;
-$line-added-dark: #c7f0d2;
+$line-added-dark: #c7f0d2 !default;
 $line-removed: #fbe9eb;
-$line-removed-dark: #fac5cd;
+$line-removed-dark: #fac5cd !default;
+/*
+ * The transparent colors are used in Monaco editor. Using full opacity colors
+ * would hide other layers (selected text, matching brackets).
+ *
+ * When the transparent colors get layered on white background, they create their
+ * full opacity counterparts (computed with https://stackoverflow.com/a/12228643/606571):
+ *
+ *  - white + $line-added-transparent = $line-added
+ *  - white + $line-added-transparent + $line-added-dark-transparent = $line-added-dark
+ *
+ * More details: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41553
+ */
+$line-added-transparent: rgba(160, 245, 180, 0.2);
+$line-added-dark-transparent: rgba(51, 188, 90, 0.2);
+$line-removed-transparent: rgba(235, 145, 155, 0.2);
+$line-removed-dark-transparent: rgba(246, 53, 85, 0.2);
 $line-number-old: #f9d7dc;
 $line-number-new: #ddfbe6;
 $line-number-select: #fbf2da;
 $line-target-blue: $blue-50;
 $line-select-yellow: #fcf8e7;
 $line-select-yellow-dark: #f0e2bd;
-$dark-diff-match-bg: rgba(255, 255, 255, 0.3);
-$dark-diff-match-color: rgba(255, 255, 255, 0.1);
+$dark-diff-match-bg: rgba($white, 0.3);
+$dark-diff-match-color: rgba($white, 0.1);
 $diff-image-info-color: #808080;
 $diff-view-modes-color: #808080;
 $diff-view-modes-border: #c1c1c1;
@@ -520,7 +549,7 @@ $dropdown-shadow-color: rgba(#000, 0.1);
 $dropdown-title-btn-color: #bfbfbf;
 $dropdown-input-fa-color: #c7c7c7;
 $dropdown-input-focus-shadow: rgba($blue-300, 0.4);
-$dropdown-loading-bg: rgba(#fff, 0.6);
+$dropdown-loading-bg: rgba($white, 0.6);
 $dropdown-chevron-size: 10px;
 $dropdown-toggle-active-border-color: darken($border-color, 14%);
 $dropdown-fade-mask-height: 32px;
@@ -534,9 +563,9 @@ $filtered-search-term-shadow-color: rgba(0, 0, 0, 0.09);
 /*
 * Contextual Sidebar
 */
-$link-active-background: rgba(0, 0, 0, 0.04);
-$link-hover-background: rgba(0, 0, 0, 0.06);
-$inactive-badge-background: rgba(0, 0, 0, 0.08);
+$link-active-background: rgba($black, 0.04);
+$link-hover-background: rgba($gray-900, 0.06);
+$inactive-badge-background: rgba($black, 0.08);
 $sidebar-toggle-height: 60px;
 $sidebar-toggle-width: 40px;
 $sidebar-milestone-toggle-bottom-margin: 10px;
@@ -544,8 +573,8 @@ $sidebar-milestone-toggle-bottom-margin: 10px;
 /*
 * Buttons
 */
-$btn-active-gray: #ececec;
-$btn-active-gray-light: #e4e7ed;
+$btn-active-gray: $gray-50;
+$btn-active-gray-light: $gray-50;
 $btn-white-active: #848484;
 $gl-btn-padding: 10px;
 $gl-btn-line-height: 16px;
@@ -589,7 +618,6 @@ $award-emoji-width-xs: 90%;
 $search-input-border-color: rgba($blue-400, 0.8);
 $search-input-width: 200px;
 $search-input-xl-width: 320px;
-$location-icon-color: #e7e9ed;
 
 /*
  *  Notes
@@ -602,12 +630,12 @@ $note-icon-gutter-width: 55px;
 /*
 * Identicon
 */
-$identicon-red: #ffebee;
-$identicon-purple: #f3e5f5;
-$identicon-indigo: #e8eaf6;
-$identicon-blue: #e3f2fd;
-$identicon-teal: #e0f2f1;
-$identicon-orange: #fbe9e7;
+$identicon-red: #ffebee !default;
+$identicon-purple: #f3e5f5 !default;
+$identicon-indigo: #e8eaf6 !default;
+$identicon-blue: #e3f2fd !default;
+$identicon-teal: #e0f2f1 !default;
+$identicon-orange: #fbe9e7 !default;
 
 /*
 * Calendar
@@ -640,10 +668,13 @@ $issue-boards-card-shadow: rgba(0, 0, 0, 0.1);
  They probably should be derived in a smarter way.
 */
 $issue-boards-filter-height: 68px;
+$issue-boards-filter-height-md: 110px;
+$issue-boards-filter-height-sm: 299px;
 $issue-boards-breadcrumbs-height-xs: 63px;
 $issue-board-list-difference-xs: $header-height + $issue-boards-breadcrumbs-height-xs;
 $issue-board-list-difference-sm: $header-height + $breadcrumb-min-height;
-$issue-board-list-difference-md: $issue-board-list-difference-sm + $issue-boards-filter-height;
+$issue-board-list-difference-md: $issue-board-list-difference-sm + $issue-boards-filter-height-md;
+$issue-board-list-difference-lg: $issue-board-list-difference-sm + $issue-boards-filter-height;
 /*
  The following heights are used in environment_logs.scss and are used for calculation of the log viewer height.
 */
@@ -714,13 +745,12 @@ $input-lg-width: 320px;
 */
 $document-index-color: #888;
 $help-shortcut-header-color: #333;
-$accepting-mr-label-color: #69d100;
 
 /*
 * Issues
 */
-$issues-today-bg: #f3fff2;
-$issues-today-border: #e1e8d5;
+$issues-today-bg: #f3fff2 !default;
+$issues-today-border: #e1e8d5 !default;
 $compare-display-color: #888;
 
 /*
@@ -750,11 +780,6 @@ $login-brand-holder-color: #888;
 * Projects
 */
 $project-option-descr-color: #54565b;
-$project-network-controls-color: #888;
-
-$feature-toggle-color: #fff;
-$feature-toggle-text-color: #fff;
-$feature-toggle-color-enabled: #4a8bee;
 
 /*
  * Monitor Charts
@@ -793,7 +818,6 @@ $pipeline-dropdown-line-height: 20px;
 $pipeline-dropdown-status-icon-size: 18px;
 $ci-action-dropdown-button-size: 24px;
 $ci-action-dropdown-svg-size: 12px;
-$pipelines-table-header-height: 40px;
 
 /*
 CI variable lists
@@ -842,9 +866,6 @@ $add-to-slack-popup-max-width: 400px;
 $add-to-slack-gif-max-width: 850px;
 $add-to-slack-well-max-width: 750px;
 $add-to-slack-logo-size: 100px;
-$double-headed-arrow-width: 100px;
-$double-headed-arrow-height: 25px;
-$right-arrow-size: 16px;
 
 /*
 Popup
@@ -871,9 +892,10 @@ $priority-label-empty-state-width: 114px;
 Popovers
 */
 $popover-max-width: 384px;
+$popover-box-shadow: 0 2px 3px 1px $gray-100;
 
 /*
-Issues Analytics
+Issue Analytics
 */
 $issues-analytics-popover-boarder-color: rgba(0, 0, 0, 0.15);
 
@@ -896,8 +918,3 @@ $compare-branches-sticky-header-height: 68px;
  - Issue: https://gitlab.com/gitlab-org/design.gitlab.com/issues/242
  */
 $enable-validation-icons: false;
-
-/*
-Licenses
-*/
-$license-header-cell-width: 150px;

@@ -9,28 +9,30 @@ module Gitlab
       #   * Returning a detailed Result object
       class FileTransfer < BaseTransfer
         # Initialize a transfer service for a specified Upload
-        #
         # @param [Symbol] file_type
         # @param [Upload] upload
         def initialize(file_type, upload)
           if upload.local?
-            super(local_file_attributes(file_type, upload))
+            super(**local_file_attributes(file_type, upload))
           else
-            super(remote_file_attributes(file_type, upload))
+            super(**remote_file_attributes(file_type, upload))
           end
-
         rescue ObjectStorage::RemoteStoreError
           ::Gitlab::Geo::Logger.warn "Error trying to transfer a remote object as a local object."
         end
 
         private
 
+        def uploader
+          resource.retrieve_uploader
+        end
+
         def local_file_attributes(file_type, upload)
           {
+            resource: upload,
             file_type: file_type,
             file_id: upload.id,
             filename: upload.absolute_path,
-            uploader: upload.retrieve_uploader,
             expected_checksum: upload.checksum,
             request_data: build_request_data(file_type, upload)
           }
@@ -38,9 +40,9 @@ module Gitlab
 
         def remote_file_attributes(file_type, upload)
           {
+            resource: upload,
             file_type: file_type,
             file_id: upload.id,
-            uploader: upload.retrieve_uploader,
             request_data: build_request_data(file_type, upload)
           }
         end

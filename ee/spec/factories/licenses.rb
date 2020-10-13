@@ -21,7 +21,7 @@ FactoryBot.define do
 
     starts_at { Date.new(1970, 1, 1) }
     expires_at { Date.current + 11.months }
-    block_changes_at { expires_at + 2.weeks }
+    block_changes_at { expires_at ? expires_at + 2.weeks : nil }
     notify_users_at  { expires_at }
     notify_admins_at { expires_at }
 
@@ -57,6 +57,6 @@ FactoryBot.define do
     end
 
     # Disable validations when creating an expired license key
-    to_create {|instance| instance.save(validate: !expired) }
+    to_create {|instance| instance.save!(validate: !expired) }
   end
 end

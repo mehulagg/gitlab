@@ -14,6 +14,7 @@ RSpec.describe 'getting project information' do
     }
     QUERY
   end
+
   let(:query) do
     graphql_query_for('currentUser', {}, query_graphql_field('todos', {}, fields))
   end

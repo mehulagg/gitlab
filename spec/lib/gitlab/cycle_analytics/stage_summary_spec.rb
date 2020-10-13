@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::CycleAnalytics::StageSummary do
+RSpec.describe Gitlab::CycleAnalytics::StageSummary do
   let(:project) { create(:project, :repository) }
   let(:options) { { from: 1.day.ago, current_user: user } }
   let(:user) { create(:user, :admin) }
@@ -231,7 +231,7 @@ describe Gitlab::CycleAnalytics::StageSummary do
 
       context 'when `from` and `to` are within a day' do
         it 'returns the number of deployments made on that day' do
-          Timecop.freeze(Time.now) do
+          freeze_time do
             create(:deployment, :success, project: project)
             options[:from] = options[:to] = Time.now
 

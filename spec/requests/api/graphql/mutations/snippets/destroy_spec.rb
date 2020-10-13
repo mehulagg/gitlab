@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Destroying a Snippet' do
+RSpec.describe 'Destroying a Snippet' do
   include GraphqlHelpers
 
   let(:current_user) { snippet.author }
@@ -45,6 +45,31 @@ describe 'Destroying a Snippet' do
 
         expect(mutation_response).to have_key('snippet')
         expect(mutation_response['snippet']).to be_nil
+      end
+
+      context 'when a bad gid is given' do
+        let!(:project) { create(:project, :private) }
+        let!(:snippet) { create(:project_snippet, :private, project: project, author: create(:user)) }
+        let!(:snippet_gid) { project.to_gid.to_s }
+
+        it 'returns an error' do
+          post_graphql_mutation(mutation, current_user: current_user)
+
+          expect(graphql_errors)
+            .to include(a_hash_including('message' => "#{snippet_gid} is not a valid ID for Snippet."))
+        end
+
+        it 'does not destroy the Snippet' do
+          expect do
+            post_graphql_mutation(mutation, current_user: current_user)
+          end.not_to change { Snippet.count }
+        end
+
+        it 'does not destroy the Project' do
+          expect do
+            post_graphql_mutation(mutation, current_user: current_user)
+          end.not_to change { Project.count }
+        end
       end
     end
   end

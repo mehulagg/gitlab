@@ -19,51 +19,60 @@ exports[`GroupActivity component matches the snapshot 1`] = `
     <!---->
      
     <div
-      class="d-flex"
+      class="gl-display-flex"
     >
       <div
-        class="js-metric-card-item flex-grow text-center"
+        class="js-metric-card-item gl-flex-grow-1 gl-text-center"
       >
         <h3
-          class="my-2"
+          class="gl-my-2"
         >
           10
         </h3>
          
         <p
-          class="text-secondary gl-font-sm mb-2"
+          class="text-secondary gl-font-sm gl-mb-2"
         >
-          Merge Requests created
+          
+          Merge Requests opened
+          
+          <!---->
         </p>
       </div>
       <div
-        class="js-metric-card-item flex-grow text-center"
+        class="js-metric-card-item gl-flex-grow-1 gl-text-center"
       >
         <h3
-          class="my-2"
+          class="gl-my-2"
         >
           20
         </h3>
          
         <p
-          class="text-secondary gl-font-sm mb-2"
+          class="text-secondary gl-font-sm gl-mb-2"
         >
-          Issues created
+          
+          Issues opened
+          
+          <!---->
         </p>
       </div>
       <div
-        class="js-metric-card-item flex-grow text-center"
+        class="js-metric-card-item gl-flex-grow-1 gl-text-center"
       >
         <h3
-          class="my-2"
+          class="gl-my-2"
         >
           30
         </h3>
          
         <p
-          class="text-secondary gl-font-sm mb-2"
+          class="text-secondary gl-font-sm gl-mb-2"
         >
-          New Members created
+          
+          Members added
+          
+          <!---->
         </p>
       </div>
     </div>

@@ -13,7 +13,7 @@
 - breadcrumb_title epic_reference
 
 - page_title           "#{@epic.title} (#{epic_reference})", _("Epics")
-- page_description     @epic.description
+- page_description     @epic.description_html
 
 - page_card_attributes @epic.card_attributes
 
@@ -67,6 +67,7 @@
 .d-flex.justify-content-between.content-block.content-block-small.emoji-list-container.js-noteable-awards
   = render 'award_emoji/awards_block', awardable: @epic, inline: true
   .d-flex.flex-wrap.align-items-center.justify-content-lg-end
+    #js-vue-sort-issue-discussions
     #js-vue-discussion-filter{ data: { default_filter: current_user&.notes_filter_for(@epic),
       notes_filters: UserPreference.notes_filters.to_json } }
 .row

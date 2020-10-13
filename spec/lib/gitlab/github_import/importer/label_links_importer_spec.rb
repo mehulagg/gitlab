@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Importer::LabelLinksImporter do
+RSpec.describe Gitlab::GithubImport::Importer::LabelLinksImporter do
   let(:project) { create(:project) }
   let(:client) { double(:client) }
   let(:issue) do
@@ -38,7 +38,7 @@ describe Gitlab::GithubImport::Importer::LabelLinksImporter do
         .to receive(:find_target_id)
         .and_return(1)
 
-      Timecop.freeze do
+      freeze_time do
         expect(Gitlab::Database)
           .to receive(:bulk_insert)
           .with(

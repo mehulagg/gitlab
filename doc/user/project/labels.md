@@ -6,8 +6,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Labels
 
-## Overview
-
 As your count of issues, merge requests, and epics grows in GitLab, it's more and more challenging
 to keep track of those items. Especially as your organization grows from just a few people to
 hundreds or thousands. This is where labels come in. They help you organize and tag your work
@@ -32,18 +30,25 @@ There are two types of labels in GitLab:
 
 ## Assign and unassign labels
 
-Every issue, merge request and epic can be assigned any number of labels. The labels are
+> Unassigning labels with the **X** button [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216881) in GitLab 13.5.
+
+Every issue, merge request, and epic can be assigned any number of labels. The labels are
 managed in the right sidebar, where you can assign or unassign labels as needed.
 
-To assign a label to an issue, merge request or epic:
+To assign or unassign a label:
 
-1. In the label section of the sidebar, click **Edit**, then:
-   - In the list, click the labels you want. Each label is flagged with a checkmark.
-   - Find labels by entering a search query and clicking search (**{search}**), then
-     click on them. You can search repeatedly and add more labels.
-1. Click **X** or anywhere outside the label section and the labels are applied.
+1. In the **Labels** section of the sidebar, click **Edit**.
+1. In the **Assign labels** list, search for labels by typing their names.
+   You can search repeatedly to add more labels.
+   The selected labels are marked with a checkmark.
+1. Click the labels you want to assign or unassign.
+1. To apply your changes to labels, click **X** next to **Assign labels** or anywhere outside the
+   label section.
 
-You can also assign a label with the [`/assign @username` quick action](quick_actions.md).
+Alternatively, to unassign a label, click the **X** on the label you want to unassign.
+
+You can also assign a label with the `/label` [quick action](quick_actions.md),
+remove labels with `/unlabel`, and reassign labels (remove all and assign new ones) with `/relabel`.
 
 ## Label management
 
@@ -54,8 +59,9 @@ and edit labels.
 
 View the project labels list by going to the project and clicking **Issues > Labels**.
 The list includes all labels that are defined at the project level, as well as all
-labels inherited from the parent group. You can filter the list by entering a search
-query at the top and clicking search (**{search}**).
+labels inherited from the immediate parent group.
+For each label, you can see the project or group path from where it was created.
+You can filter the list by entering a search query at the top and clicking search (**{search}**).
 
 To create a new project label:
 
@@ -82,6 +88,9 @@ Once created, you can edit a label by clicking the pencil (**{pencil}**), or del
 a label by clicking the three dots (**{ellipsis_v}**) next to the **Subscribe** button
 and selecting **Delete**.
 
+CAUTION: **Caution:**
+If you delete a label, it is permanently deleted. You will not be able to undo the deletion, and all references to the label will be removed from the system.
+
 #### Promote a project label to a group label
 
 If you previously created a project label and now want to make it available for other
@@ -94,7 +103,7 @@ also be merged.
 All issues, merge requests, issue board lists, issue board filters, and label subscriptions
 with the old labels will be assigned to the new group label.
 
-WARNING: **Caution:**
+CAUTION: **Caution:**
 Promoting a label is a permanent action, and cannot be reversed.
 
 To promote a project label to a group label:
@@ -251,3 +260,16 @@ If you sort by `Priority`, GitLab uses this sort comparison order:
 Ties are broken arbitrarily.
 
 ![Labels sort priority](img/labels_sort_priority.png)
+
+## Troubleshooting
+
+### Some label titles end with `_duplicate<number>`
+
+In specific circumstances it was possible to create labels with duplicate titles in the same
+namespace.
+
+To resolve the duplication, [in GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21384)
+and later, some duplicate labels have `_duplicate<number>` appended to their titles.
+
+You can safely change these labels' titles if you prefer.
+For details of the original problem, see [issue 30390](https://gitlab.com/gitlab-org/gitlab/issues/30390).

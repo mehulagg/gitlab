@@ -24,15 +24,9 @@ module Ci
 
     def status
       strong_memoize(:status) do
-        if Feature.enabled?(:ci_composite_status, project, default_enabled: false)
-          Gitlab::Ci::Status::Composite
-            .new(@jobs)
-            .status
-        else
-          CommitStatus
-            .where(id: @jobs)
-            .legacy_status
-        end
+        Gitlab::Ci::Status::Composite
+          .new(@jobs)
+          .status
       end
     end
 

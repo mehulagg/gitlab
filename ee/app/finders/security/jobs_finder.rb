@@ -3,7 +3,7 @@
 # Security::JobsFinder
 #
 # Abstract class encapsulating common logic for finding jobs (builds) that are related to the Secure products
-# SAST, DAST, Dependency Scanning, Container Scanning and License Management
+# SAST, DAST, Dependency Scanning, Container Scanning and License Management, Coverage Fuzzing
 #
 # Arguments:
 #   params:
@@ -15,7 +15,7 @@ module Security
     attr_reader :pipeline
 
     def self.allowed_job_types
-      # Example return: [:sast, :dast, :dependency_scanning, :container_scanning, :license_management]
+      # Example return: [:sast, :dast, :dependency_scanning, :container_scanning, :license_management, :coverage_fuzzing]
       raise NotImplementedError, 'allowed_job_types must be overwritten to return an array of job types'
     end
 

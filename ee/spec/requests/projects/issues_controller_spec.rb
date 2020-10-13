@@ -21,8 +21,6 @@ RSpec.describe Projects::IssuesController do
 
     context 'with blocking issues' do
       before do
-        stub_feature_flags(prevent_closing_blocked_issues: true)
-
         get_show # Warm the cache
       end
 

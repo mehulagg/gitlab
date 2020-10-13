@@ -1,14 +1,11 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlDropdownItem, GlModal, GlLoadingIcon, GlAlert, GlIcon } from '@gitlab/ui';
-import waitForPromises from 'helpers/wait_for_promises';
+import { GlDropdownItem, GlIcon } from '@gitlab/ui';
 
 import DashboardsDropdown from '~/monitoring/components/dashboards_dropdown.vue';
-import DuplicateDashboardForm from '~/monitoring/components/duplicate_dashboard_form.vue';
 
 import { dashboardGitResponse } from '../mock_data';
 
 const defaultBranch = 'master';
-
 const starredDashboards = dashboardGitResponse.filter(({ starred }) => starred);
 const notStarredDashboards = dashboardGitResponse.filter(({ starred }) => !starred);
 
@@ -19,16 +16,13 @@ describe('DashboardsDropdown', () => {
 
   function createComponent(props, opts = {}) {
     const storeOpts = {
-      methods: {
-        duplicateSystemDashboard: jest.fn(),
-      },
       computed: {
         allDashboards: () => mockDashboards,
         selectedDashboard: () => mockSelectedDashboard,
       },
     };
 
-    return shallowMount(DashboardsDropdown, {
+    wrapper = shallowMount(DashboardsDropdown, {
       propsData: {
         ...props,
         defaultBranch,
@@ -53,7 +47,7 @@ describe('DashboardsDropdown', () => {
 
   describe('when it receives dashboards data', () => {
     beforeEach(() => {
-      wrapper = createComponent();
+      createComponent();
     });
 
     it('displays an item for each dashboard', () => {
@@ -79,10 +73,10 @@ describe('DashboardsDropdown', () => {
     });
 
     it('filters dropdown items when searched for item exists in the list', () => {
-      const searchTerm = 'Default';
+      const searchTerm = 'Overview';
       setSearchTerm(searchTerm);
 
-      return wrapper.vm.$nextTick(() => {
+      return wrapper.vm.$nextTick().then(() => {
         expect(findItems()).toHaveLength(1);
       });
     });
@@ -91,16 +85,28 @@ describe('DashboardsDropdown', () => {
       const searchTerm = 'does-not-exist';
       setSearchTerm(searchTerm);
 
-      return wrapper.vm.$nextTick(() => {
+      return wrapper.vm.$nextTick().then(() => {
         expect(findNoItemsMsg().isVisible()).toBe(true);
       });
+    });
+  });
+
+  describe('when a dashboard is selected', () => {
+    beforeEach(() => {
+      [mockSelectedDashboard] = starredDashboards;
+      createComponent();
+    });
+
+    it('dashboard item is selected', () => {
+      expect(findItemAt(0).props('isChecked')).toBe(true);
+      expect(findItemAt(1).props('isChecked')).toBe(false);
     });
   });
 
   describe('when the dashboard is missing a display name', () => {
     beforeEach(() => {
       mockDashboards = dashboardGitResponse.map(d => ({ ...d, display_name: undefined }));
-      wrapper = createComponent();
+      createComponent();
     });
 
     it('displays items with the dashboard path, with starred dashboards first', () => {
@@ -113,7 +119,7 @@ describe('DashboardsDropdown', () => {
   describe('when it receives starred dashboards', () => {
     beforeEach(() => {
       mockDashboards = starredDashboards;
-      wrapper = createComponent();
+      createComponent();
     });
 
     it('displays an item for each dashboard', () => {
@@ -134,7 +140,7 @@ describe('DashboardsDropdown', () => {
   describe('when it receives only not-starred dashboards', () => {
     beforeEach(() => {
       mockDashboards = notStarredDashboards;
-      wrapper = createComponent();
+      createComponent();
     });
 
     it('displays an item for each dashboard', () => {
@@ -151,177 +157,9 @@ describe('DashboardsDropdown', () => {
     });
   });
 
-  describe('when a system dashboard is selected', () => {
-    let duplicateDashboardAction;
-    let modalDirective;
-
-    beforeEach(() => {
-      [mockSelectedDashboard] = dashboardGitResponse;
-      modalDirective = jest.fn();
-      duplicateDashboardAction = jest.fn().mockResolvedValue();
-
-      wrapper = createComponent(
-        {},
-        {
-          directives: {
-            GlModal: modalDirective,
-          },
-          methods: {
-            // Mock vuex actions
-            duplicateSystemDashboard: duplicateDashboardAction,
-          },
-        },
-      );
-
-      wrapper.vm.$refs.duplicateDashboardModal.hide = jest.fn();
-    });
-
-    it('displays an item for each dashboard plus a "duplicate dashboard" item', () => {
-      const item = wrapper.findAll({ ref: 'duplicateDashboardItem' });
-
-      expect(findItems().length).toEqual(dashboardGitResponse.length + 1);
-      expect(item.length).toBe(1);
-    });
-
-    describe('modal form', () => {
-      let okEvent;
-
-      const findModal = () => wrapper.find(GlModal);
-      const findAlert = () => wrapper.find(GlAlert);
-
-      beforeEach(() => {
-        okEvent = {
-          preventDefault: jest.fn(),
-        };
-      });
-
-      it('exists and contains a form to duplicate a dashboard', () => {
-        expect(findModal().exists()).toBe(true);
-        expect(findModal().contains(DuplicateDashboardForm)).toBe(true);
-      });
-
-      it('saves a new dashboard', () => {
-        findModal().vm.$emit('ok', okEvent);
-
-        return waitForPromises().then(() => {
-          expect(okEvent.preventDefault).toHaveBeenCalled();
-
-          expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
-          expect(wrapper.vm.$refs.duplicateDashboardModal.hide).toHaveBeenCalled();
-          expect(wrapper.emitted().selectDashboard).toBeTruthy();
-          expect(findAlert().exists()).toBe(false);
-        });
-      });
-
-      describe('when a new dashboard is saved succesfully', () => {
-        const newDashboard = {
-          can_edit: true,
-          default: false,
-          display_name: 'A new dashboard',
-          system_dashboard: false,
-        };
-
-        const submitForm = formVals => {
-          duplicateDashboardAction.mockResolvedValueOnce(newDashboard);
-          findModal()
-            .find(DuplicateDashboardForm)
-            .vm.$emit('change', {
-              dashboard: 'common_metrics.yml',
-              commitMessage: 'A commit message',
-              ...formVals,
-            });
-          findModal().vm.$emit('ok', okEvent);
-        };
-
-        it('to the default branch, redirects to the new dashboard', () => {
-          submitForm({
-            branch: defaultBranch,
-          });
-
-          return waitForPromises().then(() => {
-            expect(wrapper.emitted().selectDashboard[0][0]).toEqual(newDashboard);
-          });
-        });
-
-        it('to a new branch refreshes in the current dashboard', () => {
-          submitForm({
-            branch: 'another-branch',
-          });
-
-          return waitForPromises().then(() => {
-            expect(wrapper.emitted().selectDashboard[0][0]).toEqual(dashboardGitResponse[0]);
-          });
-        });
-      });
-
-      it('handles error when a new dashboard is not saved', () => {
-        const errMsg = 'An error occurred';
-
-        duplicateDashboardAction.mockRejectedValueOnce(errMsg);
-        findModal().vm.$emit('ok', okEvent);
-
-        return waitForPromises().then(() => {
-          expect(okEvent.preventDefault).toHaveBeenCalled();
-
-          expect(findAlert().exists()).toBe(true);
-          expect(findAlert().text()).toBe(errMsg);
-
-          expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
-          expect(wrapper.vm.$refs.duplicateDashboardModal.hide).not.toHaveBeenCalled();
-        });
-      });
-
-      it('id is correct, as the value of modal directive binding matches modal id', () => {
-        expect(modalDirective).toHaveBeenCalledTimes(1);
-
-        // Binding's second argument contains the modal id
-        expect(modalDirective.mock.calls[0][1]).toEqual(
-          expect.objectContaining({
-            value: findModal().props('modalId'),
-          }),
-        );
-      });
-
-      it('updates the form on changes', () => {
-        const formVals = {
-          dashboard: 'common_metrics.yml',
-          commitMessage: 'A commit message',
-        };
-
-        findModal()
-          .find(DuplicateDashboardForm)
-          .vm.$emit('change', formVals);
-
-        // Binding's second argument contains the modal id
-        expect(wrapper.vm.form).toEqual(formVals);
-      });
-    });
-  });
-
-  describe('when a custom dashboard is selected', () => {
-    const findModal = () => wrapper.find(GlModal);
-
-    beforeEach(() => {
-      wrapper = createComponent({
-        selectedDashboard: dashboardGitResponse[1],
-      });
-    });
-
-    it('displays an item for each dashboard', () => {
-      const item = wrapper.findAll({ ref: 'duplicateDashboardItem' });
-
-      expect(findItems()).toHaveLength(dashboardGitResponse.length);
-      expect(item.length).toBe(0);
-    });
-
-    it('modal form does not exist and contains a form to duplicate a dashboard', () => {
-      expect(findModal().exists()).toBe(false);
-    });
-  });
-
   describe('when a dashboard gets selected by the user', () => {
     beforeEach(() => {
-      wrapper = createComponent();
+      createComponent();
       findItemAt(1).vm.$emit('click');
     });
 

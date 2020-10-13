@@ -1,3 +1,9 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Irker IRC Gateway
 
 GitLab provides a way to push update messages to an Irker server. When
@@ -47,7 +53,7 @@ Irker accepts channel names of the form `chan` and `#chan`, both for the
 case, `Aorimn` is treated as a nick and no more as a channel name.
 
 Irker can also join password-protected channels. Users need to append
-`?key=thesecretpassword` to the chan name. When using this feature remember to
+`?key=thesecretpassword` to the channel name. When using this feature remember to
 **not** put the `#` sign in front of the channel name; failing to do so will
 result on irker joining a channel literally named `#chan?key=password` henceforth
 leaking the channel key through the `/whois` IRC command (depending on IRC server

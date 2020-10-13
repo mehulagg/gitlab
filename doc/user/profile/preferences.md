@@ -36,11 +36,37 @@ The default theme is Indigo. You can choose between 10 themes:
 
 ![Profile preferences navigation themes](img/profil-preferences-navigation-theme.png)
 
+## Dark mode
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28252) in GitLab 13.1 as an Alpha release.
+
+GitLab has started work on dark mode! The dark mode Alpha release is available in the
+spirit of iteration and the lower expectations of
+[Alpha versions](https://about.gitlab.com/handbook/product/#alpha).
+
+Progress on dark mode is tracked in the [Dark theme epic](https://gitlab.com/groups/gitlab-org/-/epics/2902). See the epic for:
+
+- A list of known issues.
+- Our planned direction and next steps.
+
+If you find an issue that isn’t listed, please leave a comment on the epic or create a
+new issue.
+
+Dark mode is available as a navigation theme, for MVC and compatibility reasons. In
+the future, we plan to make it configurable in its own section along with support for
+[different navigation themes](https://gitlab.com/gitlab-org/gitlab/-/issues/219512).
+
+NOTE: **Note:**
+Dark theme currently only works with the 'Dark' syntax highlighting.
+
 ## Syntax highlighting theme
 
 NOTE: **Note:**
 GitLab uses the [rouge Ruby library](http://rouge.jneen.net/ "Rouge website")
-for syntax highlighting. For a list of supported languages visit the rouge website.
+for syntax highlighting outside of any Editor context. The WebIDE (like Snippets)
+uses [Monaco Editor](https://microsoft.github.io/monaco-editor/) and it's provided [Monarch](https://microsoft.github.io/monaco-editor/monarch.html) library for
+syntax highlighting. For a list of supported languages, visit the documentation of
+the respective libraries.
 
 Changing this setting allows you to customize the color theme when viewing any
 syntax highlighted code on GitLab.
@@ -57,8 +83,9 @@ The default syntax theme is White, and you can choose among 5 different themes:
 
 [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2389) in 13.0, the theme
 you choose also applies to the [Web IDE](../project/web_ide/index.md)'s code editor and [Snippets](../snippets.md).
-The themes are available only in the Web IDE file editor, except for the [dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/209808),
-which applies to the entire Web IDE screen.
+The themes are available only in the Web IDE file editor, except for the [dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/209808) and
+the [solarized dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/219228),
+which apply to the entire Web IDE screen.
 
 ## Behavior
 
@@ -87,7 +114,7 @@ You have 8 options here that you can use for your default dashboard view:
 - Your projects' activity
 - Starred projects' activity
 - Your groups
-- Your [Todos](../todos.md)
+- Your [to-dos](../todos.md)
 - Assigned Issues
 - Assigned Merge Requests
 - Operations Dashboard **(PREMIUM)**
@@ -154,6 +181,12 @@ This setting is only visible if Sourcegraph has been enabled by a GitLab adminis
 Manage the availability of integrated code intelligence features powered by
 Sourcegraph. View [the Sourcegraph feature documentation](../../integration/sourcegraph.md#enable-sourcegraph-in-user-preferences)
 for more information.
+
+### Gitpod
+
+Enable and disable the [GitLab-Gitpod integration](../../integration/gitpod.md). This is only
+visible after the integration is configured by a GitLab administrator. View
+[the Gitpod feature documentation](../../integration/gitpod.md) for more information.
 
 <!-- ## Troubleshooting
 

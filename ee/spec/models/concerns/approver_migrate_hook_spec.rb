@@ -23,7 +23,7 @@ RSpec.describe ApproverMigrateHook do
         end
 
         context 'when rule already exists' do
-          let!(:approval_rule) { target.approval_rules.create(name: 'foo') }
+          let!(:approval_rule) { target.approval_rules.create!(name: 'foo') }
 
           it 'reuses rule' do
             expect do

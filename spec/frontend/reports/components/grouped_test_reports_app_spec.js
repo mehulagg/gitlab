@@ -1,7 +1,7 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import GroupedTestReportsApp from '~/reports/components/grouped_test_reports_app.vue';
-import store from '~/reports/store';
+import { getStoreConfig } from '~/reports/store';
 
 import { failedReport } from '../mock_data/mock_data';
 import successTestReports from '../mock_data/no_failures_report.json';
@@ -15,19 +15,19 @@ localVue.use(Vuex);
 
 describe('Grouped test reports app', () => {
   const endpoint = 'endpoint.json';
+  const pipelinePath = '/path/to/pipeline';
   const Component = localVue.extend(GroupedTestReportsApp);
   let wrapper;
   let mockStore;
 
-  const mountComponent = () => {
+  const mountComponent = ({ props = { pipelinePath } } = {}) => {
     wrapper = mount(Component, {
       store: mockStore,
       localVue,
       propsData: {
         endpoint,
-      },
-      methods: {
-        fetchReports: () => {},
+        pipelinePath,
+        ...props,
       },
     });
   };
@@ -39,13 +39,20 @@ describe('Grouped test reports app', () => {
   };
 
   const findHeader = () => wrapper.find('[data-testid="report-section-code-text"]');
+  const findFullTestReportLink = () => wrapper.find('[data-testid="group-test-reports-full-link"]');
   const findSummaryDescription = () => wrapper.find('[data-testid="test-summary-row-description"]');
   const findIssueDescription = () => wrapper.find('[data-testid="test-issue-body-description"]');
   const findAllIssueDescriptions = () =>
     wrapper.findAll('[data-testid="test-issue-body-description"]');
 
   beforeEach(() => {
-    mockStore = store();
+    mockStore = new Vuex.Store({
+      ...getStoreConfig(),
+      actions: {
+        fetchReports: () => {},
+        setEndpoint: () => {},
+      },
+    });
     mountComponent();
   });
 
@@ -64,6 +71,28 @@ describe('Grouped test reports app', () => {
       expect(findHeader().text()).toBe(
         'Test summary contained no changed test results out of 11 total tests',
       );
+    });
+  });
+
+  describe('`View full report` button', () => {
+    it('should render the full test report link', () => {
+      const fullTestReportLink = findFullTestReportLink();
+
+      expect(fullTestReportLink.exists()).toBe(true);
+      expect(pipelinePath).not.toBe('');
+      expect(fullTestReportLink.attributes('href')).toBe(`${pipelinePath}/test_report`);
+    });
+
+    describe('Without a pipelinePath', () => {
+      beforeEach(() => {
+        mountComponent({
+          props: { pipelinePath: '' },
+        });
+      });
+
+      it('should not render the full test report link', () => {
+        expect(findFullTestReportLink().exists()).toBe(false);
+      });
     });
   });
 

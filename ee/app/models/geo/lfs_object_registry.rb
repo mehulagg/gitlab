@@ -11,20 +11,6 @@ class Geo::LfsObjectRegistry < Geo::BaseRegistry
 
   belongs_to :lfs_object, class_name: 'LfsObject'
 
-  scope :never, -> { where(success: false, retry_count: nil) }
-
-  def self.failed
-    where(success: false).where.not(retry_count: nil)
-  end
-
-  def self.finder_class
-    ::Geo::LfsObjectRegistryFinder
-  end
-
-  def self.delete_worker_class
-    ::Geo::FileRegistryRemovalWorker
-  end
-
   # If false, RegistryConsistencyService will frequently check the end of the
   # table to quickly handle new replicables.
   def self.has_create_events?

@@ -1,7 +1,128 @@
 # End-to-end testing Best Practices
 
 NOTE: **Note:**
-This is an tailored extension of the Best Practices [found in the testing guide](../best_practices.md).
+This is a tailored extension of the Best Practices [found in the testing guide](../best_practices.md).
+
+## Link a test to its test-case issue
+
+Every test should have a corresponding issue in the [Quality Testcases project](https://gitlab.com/gitlab-org/quality/testcases/).
+It's recommended that you reuse the issue created to plan the test. If one does not already exist you
+can create the issue yourself. Alternatively, you can run the test in a pipeline that has reporting
+enabled and the test-case issue reporter will automatically create a new issue.
+
+Whether you create a new test-case issue or one is created automatically, you will need to manually add
+a `testcase` RSpec metadata tag. In most cases, a single test will be associated with a single test-case
+issue ([see below for exceptions](#exceptions)).
+
+For example:
+
+```ruby
+RSpec.describe 'Stage' do
+  describe 'General description of the feature under test' do
+    it 'test name', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/:issue_id' do
+      ...
+    end
+
+    it 'another test', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/:another_issue_id' do
+      ...
+    end
+  end
+end
+```
+
+### Exceptions
+
+Most tests are defined by a single line of a `spec` file, which is why those tests can be linked to a
+single test-case issue via the `testcase` tag.
+
+However, some tests don't have a one-to-one relationship between a line of a `spec` file and a test-case
+issue. This is because some tests are defined in a way that means a single line is associated with
+multiple tests, including:
+
+- Parallelized tests.
+- Templated tests.
+- Tests in shared examples that include more than one example.
+
+In those and similar cases we can't assign a single `testcase` tag and so we rely on the test-case
+reporter to programmatically determine the correct test-case issue based on the name and description of
+the test. In such cases, the test-case reporter will automatically create a test-case issue the first time
+the test runs, if no issue exists already.
+
+In such a case, if you create the issue yourself or want to reuse an existing issue,
+you must use this [end-to-end test issue template](https://gitlab.com/gitlab-org/quality/testcases/-/blob/master/.gitlab/issue_templates/End-to-end%20Test.md)
+to format the issue description.
+
+To illustrate, there are two tests in the shared examples in [`qa/specs/features/ee/browser_ui/3_create/repository/restrict_push_protected_branch_spec.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/47b17db82c38ab704a23b5ba5d296ea0c6a732c8/qa/qa/specs/features/ee/browser_ui/3_create/repository/restrict_push_protected_branch_spec.rb):
+
+```ruby
+shared_examples 'only user with access pushes and merges' do
+  it 'unselected maintainer user fails to push' do
+    ...
+  end
+
+  it 'selected developer user pushes and merges' do
+    ...
+  end
+end
+```
+
+Consider the following test that includes the shared examples:
+
+```ruby
+RSpec.describe 'Create' do
+  describe 'Restricted protected branch push and merge' do
+    context 'when only one user is allowed to merge and push to a protected branch' do
+      ...
+      it_behaves_like 'only user with access pushes and merges'
+    end
+  end
+end
+```
+
+There would be two associated test-case issues, one for each shared example, with the following content:
+
+[Test 1](https://gitlab.com/gitlab-org/quality/testcases/-/issues/600):
+
+````markdown
+```markdown
+Title: browser_ui/3_create/repository/restrict_push_protected_branch_spec.rb | Create Restricted
+protected branch push and merge when only one user is allowed to merge and push to a protected
+branch behaves like only user with access pushes and merges selecte...
+
+Description:
+### Full description
+
+Create Restricted protected branch push and merge when only one user is allowed to merge and push
+to a protected branch behaves like only user with access pushes and merges selected developer user
+pushes and merges
+
+### File path
+
+./qa/specs/features/ee/browser_ui/3_create/repository/restrict_push_protected_branch_spec.rb
+
+```
+````
+
+[Test 2](https://gitlab.com/gitlab-org/quality/testcases/-/issues/602):
+
+````markdown
+```markdown
+Title: browser_ui/3_create/repository/restrict_push_protected_branch_spec.rb | Create Restricted
+protected branch push and merge when only one user is allowed to merge and push to a protected
+branch behaves like only user with access pushes and merges unselec...
+
+Description:
+### Full description
+
+Create Restricted protected branch push and merge when only one user is allowed to merge and push
+to a protected branch behaves like only user with access pushes and merges unselected maintainer
+user fails to push
+
+### File path
+
+./qa/specs/features/ee/browser_ui/3_create/repository/restrict_push_protected_branch_spec.rb
+```
+````
 
 ## Prefer API over UI
 
@@ -55,6 +176,33 @@ Project::Issues::Index.perform do |index|
 end
 ```
 
+## Prefer `aggregate_failures` when there are back-to-back expectations
+
+In cases where there must be multiple (back-to-back) expectations within a test case, it is preferable to use `aggregate_failures`.
+
+This allows you to group a set of expectations and see all the failures altogether, rather than having the test being aborted on the first failure.
+
+For example:
+
+```ruby
+#=> Good
+Page::Search::Results.perform do |search|
+  search.switch_to_code
+
+  aggregate_failures 'testing search results' do
+    expect(search).to have_file_in_project(template[:file_name], project.name)
+    expect(search).to have_file_with_content(template[:file_name], content[0..33])
+  end
+end
+
+#=> Bad
+Page::Search::Results.perform do |search|
+  search.switch_to_code
+  expect(search).to have_file_in_project(template[:file_name], project.name)
+  expect(search).to have_file_with_content(template[:file_name], content[0..33])
+end
+```
+
 ## Prefer to split tests across multiple files
 
 Our framework includes a couple of parallelization mechanisms that work by executing spec files in parallel.
@@ -93,7 +241,11 @@ All tests expect to be able to log in at the start of the test.
 
 For an example see: <https://gitlab.com/gitlab-org/gitlab/-/issues/34736>
 
-Ideally, any actions performed in an `after(:context)` (or [`before(:context)`](#limit-the-use-of-the-ui-in-beforecontext-and-after-hooks)) block would be performed via the API. But if it's necessary to do so via the UI (e.g., if API functionality doesn't exist), make sure to log out at the end of the block.
+Ideally, actions performed in an `after(:context)` (or
+[`before(:context)`](#limit-the-use-of-the-ui-in-beforecontext-and-after-hooks))
+block are performed using the API. If it's necessary to do so with the user
+interface (for example, if API functionality doesn't exist), be sure to sign
+out at the end of the block.
 
 ```ruby
 after(:all) do
@@ -139,3 +291,79 @@ end
 NOTE: **Note:**
 A few exceptions for using a `ProjectPush` would be when your test calls for testing SSH integration or
 using the Git CLI.
+
+## Preferred method to blur elements
+
+To blur an element, the preferred method is to click another element that does not alter the test state.
+If there's a mask that blocks the page elements, such as may occur with some dropdowns,
+use WebDriver's native mouse events to simulate a click event on the coordinates of an element. Use the following method: `click_element_coordinates`.
+
+Avoid clicking the `body` for blurring elements such as inputs and dropdowns because it clicks the center of the viewport.
+This action can also unintentionally click other elements, altering the test state and causing it to fail.
+
+```ruby
+# Clicking another element to blur an input
+def add_issue_to_epic(issue_url)
+  find_element(:issue_actions_split_button).find('button', text: 'Add an issue').click
+  fill_element :add_issue_input, issue_url
+  # Clicking the title blurs the input
+  click_element :title
+  click_element :add_issue_button
+end
+
+# Using native mouse click events in the case of a mask/overlay
+click_element_coordinates(:title)
+```
+
+## Ensure `expect` statements wait efficiently
+
+In general, we use an `expect` statement to check that something _is_ as we expect it. For example:
+
+```ruby
+Page::Project::Pipeline::Show.perform do |pipeline|
+  expect(pipeline).to have_job("a_job")
+end
+```
+
+### Ensure `expect` checks for negation efficiently
+
+However, sometimes we want to check that something is _not_ as we _don't_ want it to be. In other
+words, we want to make sure something is absent. In such a case we should use an appropriate
+predicate method that returns quickly, rather than waiting for a state that won't appear.
+
+It's most efficient to use a predicate method that returns immediately when there is no job, or waits
+until it disappears:
+
+```ruby
+# Good
+Page::Project::Pipeline::Show.perform do |pipeline|
+  expect(pipeline).to have_no_job("a_job")
+end
+```
+
+### Problematic alternatives
+
+Alternatively, if we want to check that a job doesn't exist it might be tempting to use `not_to`:
+
+```ruby
+# Bad
+Page::Project::Pipeline::Show.perform do |pipeline|
+  expect(pipeline).not_to have_job("a_job")
+end
+```
+
+For this statement to pass, `have_job("a_job")` has to return `false` so that `not_to` can negate it.
+The problem is that `have_job("a_job")` waits up to ten seconds for `"a job"` to appear before
+returning `false`. Under the expected condition this test will take ten seconds longer than it needs to.
+
+Instead, we could force no wait:
+
+```ruby
+# Not as bad but potentially flaky
+Page::Project::Pipeline::Show.perform do |pipeline|
+  expect(pipeline).not_to have_job("a_job", wait: 0)
+end
+```
+
+The problem is that if `"a_job"` is present and we're waiting for it to disappear, this statement
+will fail.

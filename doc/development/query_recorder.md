@@ -20,7 +20,8 @@ end
 
 As an example you might create 5 issues in between counts, which would cause the query count to increase by 5 if an N+1 problem exists.
 
-> **Note:** In some cases the query count might change slightly between runs for unrelated reasons. In this case you might need to test `exceed_query_limit(control_count + acceptable_change)`, but this should be avoided if possible.
+NOTE: **Note:**
+In some cases the query count might change slightly between runs for unrelated reasons. In this case you might need to test `exceed_query_limit(control_count + acceptable_change)`, but this should be avoided if possible.
 
 ## Cached queries
 
@@ -115,6 +116,6 @@ There are multiple ways to find the source of queries.
 
 ## See also
 
-- [Bullet](profiling.md#Bullet) For finding `N+1` query problems
+- [Bullet](profiling.md#bullet) For finding `N+1` query problems
 - [Performance guidelines](performance.md)
 - [Merge request performance guidelines](merge_request_performance_guidelines.md#query-counts)

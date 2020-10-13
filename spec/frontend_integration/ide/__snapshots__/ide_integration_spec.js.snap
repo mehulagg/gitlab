@@ -20,6 +20,7 @@ exports[`WebIDE runs 1`] = `
       >
         <div
           class="multi-file-commit-panel-inner"
+          data-testid="ide-side-bar-inner"
         >
           <div
             class="multi-file-loading-container"
@@ -112,7 +113,6 @@ exports[`WebIDE runs 1`] = `
                   class="gl-spinner-container"
                 >
                   <span
-                    aria-hidden="true"
                     aria-label="Loading"
                     class="align-text-bottom gl-spinner gl-spinner-orange gl-spinner-md"
                   />

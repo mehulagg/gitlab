@@ -143,6 +143,48 @@ RSpec.describe StatusPage::ProjectSetting do
     end
   end
 
+  describe '#normalized_status_page_url' do
+    let(:status_page_setting) { build(:status_page_setting, status_page_url: status_page_url) }
+    let(:status_page_url) { 'https://status.gitlab.com' }
+    let(:expected_url) { 'https://status.gitlab.com/#/' }
+
+    subject { status_page_setting.normalized_status_page_url }
+
+    context 'when status_page_url exists' do
+      it { is_expected.to eq(expected_url) }
+    end
+
+    context 'when status_page_url is blank' do
+      let(:status_page_url) { '' }
+
+      it { is_expected.to be_nil }
+    end
+
+    context 'when status_page_url is nil' do
+      let(:status_page_url) { nil }
+
+      it { is_expected.to be_nil }
+    end
+
+    context 'when status_page_url contains trailing slash' do
+      let(:status_page_url) { 'https://status.gitlab.com/' }
+
+      it { is_expected.to eq(expected_url) }
+    end
+
+    context 'when status_page_url contains trailing hash-navigator' do
+      let(:status_page_url) { 'https://status.gitlab.com/#' }
+
+      it { is_expected.to eq(expected_url) }
+    end
+
+    context 'when status_page_url matches expected url' do
+      let(:status_page_url) { 'https://status.gitlab.com/#/' }
+
+      it { is_expected.to eq(expected_url) }
+    end
+  end
+
   describe '#storage_client' do
     let(:status_page_setting) { build(:status_page_setting, :enabled) }
 
@@ -156,7 +198,7 @@ RSpec.describe StatusPage::ProjectSetting do
     context 'when status page settings is enabled' do
       let(:status_page_setting_enabled) { true }
 
-      it { is_expected.to be_instance_of(StatusPage::Storage::S3Client) }
+      it { is_expected.to be_instance_of(Gitlab::StatusPage::Storage::S3Client) }
     end
 
     context 'when not enabled' do

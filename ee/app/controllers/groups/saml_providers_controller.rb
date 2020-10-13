@@ -8,6 +8,8 @@ class Groups::SamlProvidersController < Groups::ApplicationController
   before_action :check_group_saml_available!
   before_action :check_group_saml_configured
 
+  feature_category :authentication_and_authorization
+
   def show
     @saml_provider = @group.saml_provider || @group.build_saml_provider
     @saml_response_check = load_test_response if @saml_provider.persisted?
@@ -45,7 +47,7 @@ class Groups::SamlProvidersController < Groups::ApplicationController
   end
 
   def saml_provider_params
-    allowed_params = %i[sso_url certificate_fingerprint enabled enforced_sso]
+    allowed_params = %i[sso_url certificate_fingerprint enabled enforced_sso default_membership_role]
 
     if Feature.enabled?(:group_managed_accounts, group)
       allowed_params += [:enforced_group_managed_accounts, :prohibited_outer_forks]

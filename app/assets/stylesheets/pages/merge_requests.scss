@@ -64,7 +64,7 @@ $mr-widget-min-height: 69px;
   background-color: $gray-light;
 
   &.clickable:hover {
-    background-color: $gl-gray-200;
+    background-color: $gray-100;
     cursor: pointer;
   }
 }
@@ -75,7 +75,7 @@ $mr-widget-min-height: 69px;
 
   &::before {
     content: '';
-    border-left: 1px solid $gray-200;
+    border-left: 1px solid $gray-100;
     position: absolute;
     left: 28px;
     top: -17px;
@@ -161,10 +161,6 @@ $mr-widget-min-height: 69px;
 
   .btn {
     font-size: $gl-font-size;
-
-    &[disabled] {
-      opacity: 0.3;
-    }
 
     &.dropdown-toggle {
       .fa {
@@ -315,7 +311,7 @@ $mr-widget-min-height: 69px;
 
     .bold {
       font-weight: $gl-font-weight-bold;
-      color: $gl-gray-light;
+      color: $gray-600;
       margin-left: 10px;
     }
 
@@ -399,6 +395,16 @@ $mr-widget-min-height: 69px;
         p {
           margin-top: $gl-padding;
         }
+      }
+    }
+
+    &.mr-pipeline-suggest {
+      border-radius: $border-radius-default;
+      line-height: 20px;
+      border: 1px solid $border-color;
+
+      .circle-icon-container {
+        color: $gl-text-color-quaternary;
       }
     }
   }
@@ -600,26 +606,6 @@ $mr-widget-min-height: 69px;
   }
 }
 
-.mr-pipeline-suggest {
-  flex-wrap: wrap;
-  border-radius: $border-radius-default;
-  padding: $gl-padding;
-  border: 1px solid $border-color;
-  min-height: $mr-widget-min-height;
-
-  @include media-breakpoint-up(md) {
-    align-items: center;
-  }
-
-  .circle-icon-container {
-    color: $gl-text-color-quaternary;
-  }
-
-  .popover {
-    z-index: 240;
-  }
-}
-
 .card-new-merge-request {
   .card-header {
     padding: 5px 10px;
@@ -774,11 +760,6 @@ $mr-widget-min-height: 69px;
     color: $gl-text-color;
   }
 
-  .fa-info-circle {
-    color: $orange-500;
-    padding-right: 5px;
-  }
-
   // Shortening button height by 1px to make compare-versions
   // header 56px and fit into our 8px design grid
   button {
@@ -789,8 +770,14 @@ $mr-widget-min-height: 69px;
     position: -webkit-sticky;
     position: sticky;
     top: $header-height + $mr-tabs-height;
-    margin-left: -16px;
-    width: calc(100% + 32px);
+
+    .with-system-header & {
+      top: $header-height + $mr-tabs-height + $system-header-height;
+    }
+
+    .with-system-header.with-performance-bar & {
+      top: $header-height + $mr-tabs-height + $system-header-height + $performance-bar-height;
+    }
 
     .mr-version-menus-container {
       flex-wrap: nowrap;
@@ -808,6 +795,14 @@ $mr-widget-min-height: 69px;
   z-index: 250;
   background-color: $white;
   border-bottom: 1px solid $border-color;
+
+  .with-system-header & {
+    top: $header-height + $system-header-height;
+  }
+
+  .with-system-header.with-performance-bar & {
+    top: $header-height + $system-header-height + $performance-bar-height;
+  }
 
   @include media-breakpoint-up(sm) {
     position: -webkit-sticky;
@@ -887,12 +882,18 @@ $mr-widget-min-height: 69px;
   }
 }
 
+.container-fluid {
+  // Negative margins for mobile/tablet screen
+  .diffs.tab-pane {
+    margin: 0 (-$gl-padding);
+  }
+}
+
 // Wrap MR tabs/buttons so you don't have to scroll on desktop
 @include media-breakpoint-down(md) {
   .merge-request-tabs-container,
   .epic-tabs-container {
     flex-direction: column-reverse;
-    padding-top: $gl-padding-8;
   }
 }
 
@@ -902,7 +903,6 @@ $mr-widget-min-height: 69px;
     .epic-tabs-container {
       flex-direction: column-reverse;
       align-items: flex-start;
-      padding-top: $gl-padding-8;
     }
   }
 }
@@ -999,7 +999,7 @@ $mr-widget-min-height: 69px;
     opacity: 0.65;
 
     &:hover {
-      color: $gl-gray-500;
+      color: $gray-500;
       text-decoration: none;
     }
   }
@@ -1024,7 +1024,7 @@ $mr-widget-min-height: 69px;
 
   .coverage {
     font-size: 12px;
-    color: $gray-700;
+    color: $gray-500;
     line-height: initial;
   }
 
@@ -1048,5 +1048,15 @@ $mr-widget-min-height: 69px;
     .with-performance-bar & {
       top: $performance-bar-height + $header-height + 51px;
     }
+  }
+}
+
+.diff-file-row.is-active {
+  background-color: $gray-50;
+}
+
+.merge-request-container {
+  .flash-container {
+    @include gl-mb-4;
   }
 }

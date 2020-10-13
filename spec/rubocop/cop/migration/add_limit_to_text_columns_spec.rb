@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'fast_spec_helper'
 require 'rubocop'
-require 'rubocop/rspec/support'
-
 require_relative '../../../../rubocop/cop/migration/add_limit_to_text_columns'
 
-describe RuboCop::Cop::Migration::AddLimitToTextColumns do
+RSpec.describe RuboCop::Cop::Migration::AddLimitToTextColumns, type: :rubocop do
   include CopHelper
 
   subject(:cop) { described_class.new }
@@ -67,6 +65,27 @@ describe RuboCop::Cop::Migration::AddLimitToTextColumns do
               add_text_limit :test_text_limits, :email, 255
               add_text_limit :test_text_limits, :role, 255
               add_text_limit :test_text_limits, :test_id, 255
+            end
+          end
+        RUBY
+      end
+    end
+
+    context 'when text array columns are defined without a limit' do
+      it 'registers no offense' do
+        expect_no_offenses(<<~RUBY)
+          class TestTextLimits < ActiveRecord::Migration[6.0]
+            DOWNTIME = false
+
+            def up
+              create_table :test_text_limits, id: false do |t|
+                t.integer :test_id, null: false
+                t.text :name, array: true, default: [], null: false
+              end
+
+              add_column :test_text_limits, :email, :text, array: true
+              add_column_with_default :test_text_limits, :role, :text, default: [], array: true
+              change_column_type_concurrently :test_text_limits, :test_id, :text, array: true
             end
           end
         RUBY

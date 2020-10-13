@@ -2,12 +2,10 @@
 
 require 'fast_spec_helper'
 require 'rubocop'
-require_relative '../../../support/helpers/expect_offense'
 require_relative '../../../../rubocop/cop/scalability/cron_worker_context'
 
-describe RuboCop::Cop::Scalability::CronWorkerContext do
+RSpec.describe RuboCop::Cop::Scalability::CronWorkerContext, type: :rubocop do
   include CopHelper
-  include ExpectOffense
 
   subject(:cop) { described_class.new }
 

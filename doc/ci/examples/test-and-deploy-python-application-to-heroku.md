@@ -23,32 +23,32 @@ stages:
 test:
   stage: test
   script:
-  # this configures Django application to use attached postgres database that is run on `postgres` host
-  - export DATABASE_URL=postgres://postgres:@postgres:5432/python-test-app
-  - apt-get update -qy
-  - apt-get install -y python-dev python-pip
-  - pip install -r requirements.txt
-  - python manage.py test
+    # this configures Django application to use attached postgres database that is run on `postgres` host
+    - export DATABASE_URL=postgres://postgres:@postgres:5432/python-test-app
+    - apt-get update -qy
+    - apt-get install -y python-dev python-pip
+    - pip install -r requirements.txt
+    - python manage.py test
 
 staging:
   stage: deploy
   script:
-  - apt-get update -qy
-  - apt-get install -y ruby-dev
-  - gem install dpl
-  - dpl --provider=heroku --app=gitlab-ci-python-test-staging --api-key=$HEROKU_STAGING_API_KEY
+    - apt-get update -qy
+    - apt-get install -y ruby-dev
+    - gem install dpl
+    - dpl --provider=heroku --app=gitlab-ci-python-test-staging --api-key=$HEROKU_STAGING_API_KEY
   only:
-  - master
+    - master
 
 production:
   stage: deploy
   script:
-  - apt-get update -qy
-  - apt-get install -y ruby-dev
-  - gem install dpl
-  - dpl --provider=heroku --app=gitlab-ci-python-test-prod --api-key=$HEROKU_PRODUCTION_API_KEY
+    - apt-get update -qy
+    - apt-get install -y ruby-dev
+    - gem install dpl
+    - dpl --provider=heroku --app=gitlab-ci-python-test-prod --api-key=$HEROKU_PRODUCTION_API_KEY
   only:
-  - tags
+    - tags
 ```
 
 This project has three jobs:
@@ -71,7 +71,7 @@ Find your Heroku API key in [Manage Account](https://dashboard.heroku.com/accoun
 For each of your environments, you'll need to create a new Heroku application.
 You can do this through the [Dashboard](https://dashboard.heroku.com/).
 
-## Create Runner
+## Create a runner
 
 First install [Docker Engine](https://docs.docker.com/installation/).
 

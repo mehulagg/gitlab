@@ -13,7 +13,6 @@ module Approvable
     approvals_left
     approvals_required
     can_approve?
-    has_approved?
     authors_can_approve?
     committers_can_approve?
     approvers_overwritten?

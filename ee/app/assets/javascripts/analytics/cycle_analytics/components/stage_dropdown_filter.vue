@@ -1,15 +1,13 @@
 <script>
-import $ from 'jquery';
-import { escape } from 'lodash';
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlDropdown, GlDropdownSectionHeader, GlDropdownItem } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   name: 'StageDropdownFilter',
   components: {
-    Icon,
-    GlDeprecatedButton,
+    GlDropdown,
+    GlDropdownSectionHeader,
+    GlDropdownItem,
   },
   props: {
     stages: {
@@ -31,77 +29,53 @@ export default {
     selectedStagesLabel() {
       const { stages, selectedStages } = this;
 
-      if (selectedStages.length === stages.length) {
+      if (selectedStages.length === 1) {
+        return selectedStages[0].title;
+      } else if (selectedStages.length === stages.length) {
         return s__('CycleAnalytics|All stages');
-      }
-      if (selectedStages.length > 1) {
+      } else if (selectedStages.length > 1) {
         return sprintf(s__('CycleAnalytics|%{stageCount} stages selected'), {
           stageCount: selectedStages.length,
         });
-      }
-      if (selectedStages.length === 1) {
-        return selectedStages[0].title;
       }
 
       return s__('CycleAnalytics|No stages selected');
     },
   },
-  mounted() {
-    $(this.$refs.stagesDropdown).glDropdown({
-      selectable: true,
-      multiSelect: true,
-      clicked: this.onClick.bind(this),
-      data: this.formatData.bind(this),
-      renderRow: group => this.rowTemplate(group),
-      text: stage => stage.title,
-    });
-  },
+
   methods: {
-    setSelectedStages(selectedObj, isMarking) {
+    isStageSelected(stageId) {
+      return this.selectedStages.some(({ id }) => id === stageId);
+    },
+    onClick({ stage, isMarking }) {
       this.selectedStages = isMarking
-        ? this.selectedStages.concat([selectedObj])
-        : this.selectedStages.filter(stage => stage.title !== selectedObj.title);
-    },
-    onClick({ selectedObj, e, isMarking }) {
-      e.preventDefault();
-      this.setSelectedStages(selectedObj, isMarking);
+        ? this.selectedStages.filter(s => s.id !== stage.id)
+        : this.selectedStages.concat([stage]);
+
       this.$emit('selected', this.selectedStages);
-    },
-    formatData(term, callback) {
-      callback(this.stages);
-    },
-    rowTemplate(stage) {
-      return `
-          <li>
-            <a href='#' class='dropdown-menu-link is-active'>
-              ${escape(stage.title)}
-            </a>
-          </li>
-        `;
     },
   },
 };
 </script>
 
 <template>
-  <div>
-    <div ref="stagesDropdown" class="dropdown dropdown-stages">
-      <gl-deprecated-button
-        class="dropdown-menu-toggle wide shadow-none bg-white"
-        type="button"
-        data-toggle="dropdown"
-        aria-expanded="false"
-        :aria-label="label"
-      >
-        {{ selectedStagesLabel }}
-        <icon name="chevron-down" />
-      </gl-deprecated-button>
-      <div
-        class="dropdown-menu dropdown-menu-selectable dropdown-menu-full-width dropdown-menu-right"
-      >
-        <div class="dropdown-title text-left">{{ s__('CycleAnalytics|Stages') }}</div>
-        <div class="dropdown-content"></div>
-      </div>
-    </div>
-  </div>
+  <gl-dropdown
+    ref="stagesDropdown"
+    class="js-dropdown-stages"
+    toggle-class="gl-shadow-none"
+    :text="selectedStagesLabel"
+    right
+  >
+    <gl-dropdown-section-header>{{ s__('CycleAnalytics|Stages') }}</gl-dropdown-section-header>
+    <gl-dropdown-item
+      v-for="stage in stages"
+      :key="stage.id"
+      :active="isStageSelected(stage.id)"
+      :is-check-item="true"
+      :is-checked="isStageSelected(stage.id)"
+      @click="onClick({ stage, isMarking: isStageSelected(stage.id) })"
+    >
+      {{ stage.title }}
+    </gl-dropdown-item>
+  </gl-dropdown>
 </template>

@@ -1,15 +1,15 @@
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
 import VueDraggable from 'vuedraggable';
-import { GlIcon, GlButton, GlModalDirective, GlTooltipDirective } from '@gitlab/ui';
+import Mousetrap from 'mousetrap';
+import { GlButton, GlModalDirective, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import DashboardHeader from './dashboard_header.vue';
 import DashboardPanel from './dashboard_panel.vue';
 import { s__ } from '~/locale';
-import createFlash from '~/flash';
-import { ESC_KEY, ESC_KEY_IE11 } from '~/lib/utils/keys';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { ESC_KEY } from '~/lib/utils/keys';
 import { mergeUrlParams, updateHistory } from '~/lib/utils/url_utility';
 import invalidUrl from '~/lib/utils/invalid_url';
-import Icon from '~/vue_shared/components/icon.vue';
 
 import GraphGroup from './graph_group.vue';
 import EmptyState from './empty_state.vue';
@@ -24,7 +24,7 @@ import {
   expandedPanelPayloadFromUrl,
   convertVariablesForURL,
 } from '../utils';
-import { metricStates } from '../constants';
+import { metricStates, keyboardShortcutKeys } from '../constants';
 import { defaultTimeRange } from '~/vue_shared/constants';
 
 export default {
@@ -32,7 +32,6 @@ export default {
     VueDraggable,
     DashboardHeader,
     DashboardPanel,
-    Icon,
     GlIcon,
     GlButton,
     GraphGroup,
@@ -47,11 +46,6 @@ export default {
     TrackEvent: TrackEventDirective,
   },
   props: {
-    externalDashboardUrl: {
-      type: String,
-      required: false,
-      default: '',
-    },
     hasMetrics: {
       type: Boolean,
       required: false,
@@ -85,7 +79,8 @@ export default {
     },
     defaultBranch: {
       type: String,
-      required: true,
+      required: false,
+      default: '',
     },
     emptyGettingStartedSvgPath: {
       type: String,
@@ -148,21 +143,25 @@ export default {
       selectedTimeRange: timeRangeFromUrl() || defaultTimeRange,
       isRearrangingPanels: false,
       originalDocumentTitle: document.title,
+      hoveredPanel: '',
     };
   },
   computed: {
     ...mapState('monitoringDashboard', [
       'dashboard',
       'emptyState',
-      'showEmptyState',
       'expandedPanel',
       'variables',
       'links',
       'currentDashboard',
+      'hasDashboardValidationWarnings',
     ]),
     ...mapGetters('monitoringDashboard', ['selectedDashboard', 'getMetricStates']),
+    shouldShowEmptyState() {
+      return Boolean(this.emptyState);
+    },
     shouldShowVariablesSection() {
-      return Object.keys(this.variables).length > 0;
+      return Boolean(this.variables.length);
     },
     shouldShowLinksSection() {
       return Object.keys(this.links).length > 0;
@@ -196,12 +195,29 @@ export default {
     selectedDashboard(dashboard) {
       this.prependToDocumentTitle(dashboard?.display_name);
     },
+    hasDashboardValidationWarnings(hasWarnings) {
+      /**
+       * This watcher is set for future SPA behaviour of the dashboard
+       */
+      if (hasWarnings) {
+        createFlash(
+          s__(
+            'Metrics|Your dashboard schema is invalid. Edit the dashboard to correct the YAML schema.',
+          ),
+          'warning',
+        );
+      }
+    },
   },
   created() {
     window.addEventListener('keyup', this.onKeyup);
+
+    Mousetrap.bind(Object.values(keyboardShortcutKeys), this.runShortcut);
   },
   destroyed() {
     window.removeEventListener('keyup', this.onKeyup);
+
+    Mousetrap.unbind(Object.values(keyboardShortcutKeys));
   },
   mounted() {
     if (!this.hasMetrics) {
@@ -253,6 +269,14 @@ export default {
       return null;
     },
     /**
+     * Return true if the entire group is loading.
+     * @param {String} groupKey - Identifier for group
+     * @returns {boolean}
+     */
+    isGroupLoading(groupKey) {
+      return this.groupSingleEmptyState(groupKey) === metricStates.LOADING;
+    },
+    /**
      * A group should be not collapsed if any metric is loaded (OK)
      *
      * @param {String} groupKey - Identifier for group
@@ -273,6 +297,9 @@ export default {
         title: document.title,
       });
       this.selectedTimeRange = { start, end };
+      // keep the current dashboard time range
+      // in sync with the Vuex store
+      this.setTimeRange(this.selectedTimeRange);
     },
     onExpandPanel(group, panel) {
       this.setExpandedPanel({ group, panel });
@@ -282,7 +309,7 @@ export default {
     },
     onKeyup(event) {
       const { key } = event;
-      if (key === ESC_KEY || key === ESC_KEY_IE11) {
+      if (key === ESC_KEY) {
         this.clearExpandedPanel();
       }
     },
@@ -298,9 +325,70 @@ export default {
       // As a fallback, switch to default time range instead
       this.selectedTimeRange = defaultTimeRange;
     },
+    isPanelHalfWidth(panelIndex, totalPanels) {
+      /**
+       * A single panel on a row should take the full width of its parent.
+       * All others should have half the width their parent.
+       */
+      const isNumberOfPanelsEven = totalPanels % 2 === 0;
+      const isLastPanel = panelIndex === totalPanels - 1;
+
+      return isNumberOfPanelsEven || !isLastPanel;
+    },
+    /**
+     * TODO: Investigate this to utilize the eventBus from Vue
+     * The intentation behind this cleanup is to allow for better tests
+     * as well as use the correct eventBus facilities that are compatible
+     * with Vue 3
+     * https://gitlab.com/gitlab-org/gitlab/-/issues/225583
+     */
+    //
+    runShortcut(e) {
+      const panel = this.$refs[this.hoveredPanel];
+
+      if (!panel) return;
+
+      const [panelInstance] = panel;
+      let actionToRun = '';
+
+      switch (e.key) {
+        case keyboardShortcutKeys.EXPAND:
+          actionToRun = 'onExpandFromKeyboardShortcut';
+          break;
+
+        case keyboardShortcutKeys.VISIT_LOGS:
+          actionToRun = 'visitLogsPageFromKeyboardShortcut';
+          break;
+
+        case keyboardShortcutKeys.SHOW_ALERT:
+          actionToRun = 'showAlertModalFromKeyboardShortcut';
+          break;
+
+        case keyboardShortcutKeys.DOWNLOAD_CSV:
+          actionToRun = 'downloadCsvFromKeyboardShortcut';
+          break;
+
+        case keyboardShortcutKeys.CHART_COPY:
+          actionToRun = 'copyChartLinkFromKeyboardShotcut';
+          break;
+
+        default:
+          actionToRun = 'onExpandFromKeyboardShortcut';
+          break;
+      }
+
+      panelInstance[actionToRun]();
+    },
+    setHoveredPanel(groupKey, graphIndex) {
+      this.hoveredPanel = `dashboard-panel-${groupKey}-${graphIndex}`;
+    },
+    clearHoveredPanel() {
+      this.hoveredPanel = '';
+    },
   },
   i18n: {
-    goBackLabel: s__('Metrics|Go back (Esc)'),
+    collapsePanelLabel: s__('Metrics|Collapse panel'),
+    collapsePanelTooltip: s__('Metrics|Collapse panel (Esc)'),
   },
 };
 </script>
@@ -316,16 +404,14 @@ export default {
       :custom-metrics-available="customMetricsAvailable"
       :custom-metrics-path="customMetricsPath"
       :validate-query-path="validateQueryPath"
-      :external-dashboard-url="externalDashboardUrl"
-      :has-metrics="hasMetrics"
       :is-rearranging-panels="isRearrangingPanels"
       :selected-time-range="selectedTimeRange"
       @dateTimePickerInvalid="onDateTimePickerInvalid"
       @setRearrangingPanels="onSetRearrangingPanels"
     />
-    <variables-section v-if="shouldShowVariablesSection && !showEmptyState" />
-    <links-section v-if="shouldShowLinksSection && !showEmptyState" />
-    <div v-if="!showEmptyState">
+    <template v-if="!shouldShowEmptyState">
+      <variables-section v-if="shouldShowVariablesSection" />
+      <links-section v-if="shouldShowLinksSection" />
       <dashboard-panel
         v-show="expandedPanel.panel"
         ref="expandedPanel"
@@ -342,14 +428,10 @@ export default {
             ref="goBackBtn"
             v-gl-tooltip
             class="mr-3 my-3"
-            :title="$options.i18n.goBackLabel"
+            :title="$options.i18n.collapsePanelTooltip"
             @click="onGoBack"
           >
-            <gl-icon
-              name="arrow-left"
-              :aria-label="$options.i18n.goBackLabel"
-              class="text-secondary"
-            />
+            {{ $options.i18n.collapsePanelLabel }}
           </gl-button>
         </template>
       </dashboard-panel>
@@ -360,6 +442,7 @@ export default {
           :key="`${groupData.group}.${groupData.priority}`"
           :name="groupData.group"
           :show-panels="showPanels"
+          :is-loading="isGroupLoading(groupData.key)"
           :collapse-group="collapseGroup(groupData.key)"
         >
           <vue-draggable
@@ -373,8 +456,14 @@ export default {
             <div
               v-for="(graphData, graphIndex) in groupData.panels"
               :key="`dashboard-panel-${graphIndex}`"
-              class="col-12 col-lg-6 px-2 mb-2 draggable"
-              :class="{ 'draggable-enabled': isRearrangingPanels }"
+              data-testid="dashboard-panel-layout-wrapper"
+              class="col-12 px-2 mb-2 draggable"
+              :class="{
+                'draggable-enabled': isRearrangingPanels,
+                'col-lg-6': isPanelHalfWidth(graphIndex, groupData.panels.length),
+              }"
+              @mouseover="setHoveredPanel(groupData.key, graphIndex)"
+              @mouseout="clearHoveredPanel"
             >
               <div class="position-relative draggable-panel js-draggable-panel">
                 <div
@@ -383,11 +472,12 @@ export default {
                   @click="removePanel(groupData.key, groupData.panels, graphIndex)"
                 >
                   <a class="mx-2 p-2 draggable-remove-link" :aria-label="__('Remove')">
-                    <icon name="close" />
+                    <gl-icon name="close" />
                   </a>
                 </div>
 
                 <dashboard-panel
+                  :ref="`dashboard-panel-${groupData.key}-${graphIndex}`"
                   :settings-path="settingsPath"
                   :clipboard-text="generatePanelUrl(groupData.group, graphData)"
                   :graph-data="graphData"
@@ -410,7 +500,7 @@ export default {
           </div>
         </graph-group>
       </div>
-    </div>
+    </template>
     <empty-state
       v-else
       :selected-state="emptyState"

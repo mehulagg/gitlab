@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Issue Boards', :js do
+RSpec.describe 'Issue Boards', :js do
   include BoardHelpers
   include FilteredSearchHelpers
 
@@ -23,7 +23,7 @@ describe 'Issue Boards', :js do
   let(:application_settings) { {} }
 
   around do |example|
-    Timecop.freeze { example.run }
+    freeze_time { example.run }
   end
 
   before do

@@ -13,7 +13,7 @@ RSpec.describe "User manages members" do
 
   shared_examples "when group membership is unlocked" do
     before do
-      group.update(membership_lock: false)
+      group.update!(membership_lock: false)
 
       visit(project_project_members_path(project))
     end
@@ -23,7 +23,7 @@ RSpec.describe "User manages members" do
 
   shared_examples "when group membership is locked" do
     before do
-      group.update(membership_lock: true)
+      group.update!(membership_lock: true)
 
       visit(project_project_members_path(project))
     end

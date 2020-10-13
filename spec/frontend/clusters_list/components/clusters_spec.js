@@ -1,10 +1,16 @@
+import MockAdapter from 'axios-mock-adapter';
+import { mount } from '@vue/test-utils';
+import {
+  GlLoadingIcon,
+  GlPagination,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlTable,
+} from '@gitlab/ui';
+import * as Sentry from '~/sentry/wrapper';
 import axios from '~/lib/utils/axios_utils';
 import Clusters from '~/clusters_list/components/clusters.vue';
 import ClusterStore from '~/clusters_list/store';
-import MockAdapter from 'axios-mock-adapter';
 import { apiData } from '../mock_data';
-import { mount } from '@vue/test-utils';
-import { GlLoadingIcon, GlTable, GlPagination } from '@gitlab/ui';
 
 describe('Clusters', () => {
   let mock;
@@ -12,6 +18,13 @@ describe('Clusters', () => {
   let wrapper;
 
   const endpoint = 'some/endpoint';
+
+  const entryData = {
+    endpoint,
+    imgTagsAwsText: 'AWS Icon',
+    imgTagsDefaultText: 'Default Icon',
+    imgTagsGcpText: 'GCP Icon',
+  };
 
   const findLoader = () => wrapper.find(GlLoadingIcon);
   const findPaginatedButtons = () => wrapper.find(GlPagination);
@@ -23,7 +36,7 @@ describe('Clusters', () => {
   };
 
   const mountWrapper = () => {
-    store = ClusterStore({ endpoint });
+    store = ClusterStore(entryData);
     wrapper = mount(Clusters, { store });
     return axios.waitForAll();
   };
@@ -36,7 +49,11 @@ describe('Clusters', () => {
     };
   };
 
+  let captureException;
+
   beforeEach(() => {
+    captureException = jest.spyOn(Sentry, 'captureException');
+
     mock = new MockAdapter(axios);
     mockPollingApi(200, apiData, paginationHeader());
 
@@ -46,12 +63,13 @@ describe('Clusters', () => {
   afterEach(() => {
     wrapper.destroy();
     mock.restore();
+    captureException.mockRestore();
   });
 
   describe('clusters table', () => {
     describe('when data is loading', () => {
       beforeEach(() => {
-        wrapper.vm.$store.state.loading = true;
+        wrapper.vm.$store.state.loadingClusters = true;
         return wrapper.vm.$nextTick();
       });
 
@@ -81,6 +99,23 @@ describe('Clusters', () => {
     });
   });
 
+  describe('cluster icon', () => {
+    it.each`
+      providerText      | lineNumber
+      ${'GCP Icon'}     | ${0}
+      ${'AWS Icon'}     | ${1}
+      ${'Default Icon'} | ${2}
+      ${'Default Icon'} | ${3}
+      ${'Default Icon'} | ${4}
+      ${'Default Icon'} | ${5}
+    `('renders provider image and alt text for each cluster', ({ providerText, lineNumber }) => {
+      const images = findTable().findAll('.js-status img');
+      const image = images.at(lineNumber);
+
+      expect(image.attributes('alt')).toBe(providerText);
+    });
+  });
+
   describe('cluster status', () => {
     it.each`
       statusName    | lineNumber | result
@@ -101,19 +136,100 @@ describe('Clusters', () => {
   });
 
   describe('nodes present', () => {
-    it.each`
-      nodeSize     | lineNumber
-      ${'Unknown'} | ${0}
-      ${'1'}       | ${1}
-      ${'2'}       | ${2}
-      ${'Unknown'} | ${3}
-      ${'Unknown'} | ${4}
-      ${'Unknown'} | ${5}
-    `('renders node size for each cluster', ({ nodeSize, lineNumber }) => {
-      const sizes = findTable().findAll('td:nth-child(3)');
-      const size = sizes.at(lineNumber);
+    describe('nodes while loading', () => {
+      it.each`
+        nodeSize | lineNumber
+        ${null}  | ${0}
+        ${'1'}   | ${1}
+        ${'2'}   | ${2}
+        ${'1'}   | ${3}
+        ${'1'}   | ${4}
+        ${null}  | ${5}
+      `('renders node size for each cluster', ({ nodeSize, lineNumber }) => {
+        const sizes = findTable().findAll('td:nth-child(3)');
+        const size = sizes.at(lineNumber);
 
-      expect(size.text()).toBe(nodeSize);
+        if (nodeSize) {
+          expect(size.text()).toBe(nodeSize);
+        } else {
+          expect(size.find(GlSkeletonLoading).exists()).toBe(true);
+        }
+      });
+    });
+
+    describe('nodes finish loading', () => {
+      beforeEach(() => {
+        wrapper.vm.$store.state.loadingNodes = false;
+        return wrapper.vm.$nextTick();
+      });
+
+      it.each`
+        nodeText                    | lineNumber
+        ${'Unable to Authenticate'} | ${0}
+        ${'1'}                      | ${1}
+        ${'2'}                      | ${2}
+        ${'1'}                      | ${3}
+        ${'1'}                      | ${4}
+        ${'Unknown Error'}          | ${5}
+      `('renders node size for each cluster', ({ nodeText, lineNumber }) => {
+        const sizes = findTable().findAll('td:nth-child(3)');
+        const size = sizes.at(lineNumber);
+
+        expect(size.text()).toContain(nodeText);
+        expect(size.find(GlSkeletonLoading).exists()).toBe(false);
+      });
+    });
+
+    describe('nodes with unknown quantity', () => {
+      it('notifies Sentry about all missing quantity types', () => {
+        expect(captureException).toHaveBeenCalledTimes(8);
+      });
+
+      it('notifies Sentry about CPU missing quantity types', () => {
+        const missingCpuTypeError = new Error('UnknownK8sCpuQuantity:1missingCpuUnit');
+
+        expect(captureException).toHaveBeenCalledWith(missingCpuTypeError);
+      });
+
+      it('notifies Sentry about Memory missing quantity types', () => {
+        const missingMemoryTypeError = new Error('UnknownK8sMemoryQuantity:1missingMemoryUnit');
+
+        expect(captureException).toHaveBeenCalledWith(missingMemoryTypeError);
+      });
+    });
+  });
+
+  describe('cluster CPU', () => {
+    it.each`
+      clusterCpu           | lineNumber
+      ${''}                | ${0}
+      ${'1.93 (87% free)'} | ${1}
+      ${'3.87 (86% free)'} | ${2}
+      ${'(% free)'}        | ${3}
+      ${'(% free)'}        | ${4}
+      ${''}                | ${5}
+    `('renders total cpu for each cluster', ({ clusterCpu, lineNumber }) => {
+      const clusterCpus = findTable().findAll('td:nth-child(4)');
+      const cpuData = clusterCpus.at(lineNumber);
+
+      expect(cpuData.text()).toBe(clusterCpu);
+    });
+  });
+
+  describe('cluster Memory', () => {
+    it.each`
+      clusterMemory         | lineNumber
+      ${''}                 | ${0}
+      ${'5.92 (78% free)'}  | ${1}
+      ${'12.86 (79% free)'} | ${2}
+      ${'(% free)'}         | ${3}
+      ${'(% free)'}         | ${4}
+      ${''}                 | ${5}
+    `('renders total memory for each cluster', ({ clusterMemory, lineNumber }) => {
+      const clusterMemories = findTable().findAll('td:nth-child(5)');
+      const memoryData = clusterMemories.at(lineNumber);
+
+      expect(memoryData.text()).toBe(clusterMemory);
     });
   });
 

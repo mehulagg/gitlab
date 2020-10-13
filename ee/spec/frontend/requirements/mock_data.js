@@ -10,6 +10,27 @@ export const mockAuthor = {
   webUrl: 'http://0.0.0.0:3000/root',
 };
 
+export const mockTestReport = {
+  id: 'gid://gitlab/RequirementsManagement::TestReport/1',
+  state: 'PASSED',
+  createdAt: '2020-06-04T10:55:48Z',
+  __typename: 'TestReport',
+};
+
+export const mockTestReportFailed = {
+  id: 'gid://gitlab/RequirementsManagement::TestReport/1',
+  state: 'FAILED',
+  createdAt: '2020-06-04T10:55:48Z',
+  __typename: 'TestReport',
+};
+
+export const mockTestReportMissing = {
+  id: 'gid://gitlab/RequirementsManagement::TestReport/1',
+  state: '',
+  createdAt: '2020-06-04T10:55:48Z',
+  __typename: 'TestReport',
+};
+
 export const requirement1 = {
   iid: '1',
   title: 'Virtutis, magnitudinis animi, patientiae, fortitudinis fomentis dolor mitigari solet.',
@@ -18,6 +39,9 @@ export const requirement1 = {
   state: 'OPENED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
+  testReports: {
+    nodes: [mockTestReport],
+  },
 };
 
 export const requirement2 = {
@@ -28,6 +52,9 @@ export const requirement2 = {
   state: 'OPENED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
+  testReports: {
+    nodes: [mockTestReport],
+  },
 };
 
 export const requirement3 = {
@@ -38,6 +65,9 @@ export const requirement3 = {
   state: 'OPENED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
+  testReports: {
+    nodes: [mockTestReport],
+  },
 };
 
 export const requirementArchived = {
@@ -48,6 +78,9 @@ export const requirementArchived = {
   state: 'ARCHIVED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
+  testReports: {
+    nodes: [mockTestReport],
+  },
 };
 
 export const mockRequirementsOpen = [requirement1, requirement2, requirement3];

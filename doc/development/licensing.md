@@ -12,7 +12,7 @@ Some gems may not include their license information in their `gemspec` file, and
 
 ### License Finder commands
 
-> Note: License Finder currently uses GitLab misused terms of whitelist and blacklist. As a result, the commands below references those terms. We've created an [issue on their project](https://github.com/pivotal/LicenseFinder/issues/745) to propose that they rename their commands.
+> Note: License Finder currently uses GitLab misused terms of `whitelist` and `blacklist`. As a result, the commands below reference those terms. We've created an [issue on their project](https://github.com/pivotal/LicenseFinder/issues/745) to propose that they rename their commands.
 
 There are a few basic commands License Finder provides that you'll need in order to manage license detection.
 
@@ -31,7 +31,7 @@ license_finder whitelist add MIT
 To denylist a new license:
 
 ```shell
-license_finder blacklist add GPLv2
+license_finder blacklist add Unlicense
 ```
 
 To tell License Finder about a dependency's license if it isn't auto-detected:

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Commits::CommitPatchService do
+RSpec.describe Commits::CommitPatchService do
   describe '#execute' do
     let(:patches) do
       patches_folder = Rails.root.join('spec/fixtures/patchfiles')
@@ -10,6 +10,7 @@ describe Commits::CommitPatchService do
 
       [content_1, content_2]
     end
+
     let(:user) { project.creator }
     let(:branch_name) { 'branch-with-patches' }
     let(:project) { create(:project, :repository) }

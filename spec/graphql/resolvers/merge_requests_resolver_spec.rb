@@ -2,34 +2,41 @@
 
 require 'spec_helper'
 
-describe Resolvers::MergeRequestsResolver do
+RSpec.describe Resolvers::MergeRequestsResolver do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:milestone) { create(:milestone, project: project) }
   let_it_be(:current_user) { create(:user) }
+  let_it_be(:other_user) { create(:user) }
   let_it_be(:common_attrs) { { author: current_user, source_project: project, target_project: project } }
   let_it_be(:merge_request_1) { create(:merge_request, :simple, **common_attrs) }
   let_it_be(:merge_request_2) { create(:merge_request, :rebased, **common_attrs) }
   let_it_be(:merge_request_3) { create(:merge_request, :unique_branches, **common_attrs) }
   let_it_be(:merge_request_4) { create(:merge_request, :unique_branches, :locked, **common_attrs) }
   let_it_be(:merge_request_5) { create(:merge_request, :simple, :locked, **common_attrs) }
-  let_it_be(:merge_request_6) { create(:labeled_merge_request, :unique_branches, labels: create_list(:label, 2), **common_attrs) }
+  let_it_be(:merge_request_6) { create(:labeled_merge_request, :unique_branches, labels: create_list(:label, 2, project: project), **common_attrs) }
+  let_it_be(:merge_request_with_milestone) { create(:merge_request, :unique_branches, **common_attrs, milestone: milestone) }
   let_it_be(:other_project) { create(:project, :repository) }
   let_it_be(:other_merge_request) { create(:merge_request, source_project: other_project, target_project: other_project) }
+
   let(:iid_1) { merge_request_1.iid }
   let(:iid_2) { merge_request_2.iid }
   let(:other_iid) { other_merge_request.iid }
 
   before do
     project.add_developer(current_user)
+    other_project.add_developer(current_user)
   end
 
   describe '#resolve' do
+    let(:queries_per_project) { 3 }
+
     context 'no arguments' do
       it 'returns all merge requests' do
         result = resolve_mr(project, {})
 
-        expect(result).to contain_exactly(merge_request_1, merge_request_2, merge_request_3, merge_request_4, merge_request_5, merge_request_6)
+        expect(result).to contain_exactly(merge_request_1, merge_request_2, merge_request_3, merge_request_4, merge_request_5, merge_request_6, merge_request_with_milestone)
       end
 
       it 'returns only merge requests that the current user can see' do
@@ -40,24 +47,34 @@ describe Resolvers::MergeRequestsResolver do
     end
 
     context 'by iid alone' do
-      it 'batch-resolves by target project full path and individual IID' do
-        result = batch_sync(max_queries: 2) do
+      it 'batch-resolves by target project full path and individual IID', :request_store do
+        # 1 query for project_authorizations, and 1 for merge_requests
+        result = batch_sync(max_queries: queries_per_project) do
           [iid_1, iid_2].map { |iid| resolve_mr_single(project, iid) }
         end
 
         expect(result).to contain_exactly(merge_request_1, merge_request_2)
       end
 
-      it 'batch-resolves by target project full path and IIDS' do
-        result = batch_sync(max_queries: 2) do
+      it 'batch-resolves by target project full path and IIDS', :request_store do
+        result = batch_sync(max_queries: queries_per_project) do
           resolve_mr(project, iids: [iid_1, iid_2])
         end
 
         expect(result).to contain_exactly(merge_request_1, merge_request_2)
       end
 
+      it 'batch-resolves by target project full path and IIDS, single or plural', :request_store do
+        result = batch_sync(max_queries: queries_per_project) do
+          [resolve_mr_single(project, merge_request_3.iid), *resolve_mr(project, iids: [iid_1, iid_2])]
+        end
+
+        expect(result).to contain_exactly(merge_request_1, merge_request_2, merge_request_3)
+      end
+
       it 'can batch-resolve merge requests from different projects' do
-        result = batch_sync(max_queries: 3) do
+        # 2 queries for project_authorizations, and 2 for merge_requests
+        result = batch_sync(max_queries: queries_per_project * 2) do
           resolve_mr(project, iids: iid_1) +
             resolve_mr(project, iids: iid_2) +
             resolve_mr(other_project, iids: other_iid)
@@ -148,6 +165,38 @@ describe Resolvers::MergeRequestsResolver do
       end
     end
 
+    context 'by merged_after and merged_before' do
+      before do
+        merge_request_1.metrics.update!(merged_at: 10.days.ago)
+      end
+
+      it 'returns merge requests merged between the given period' do
+        result = resolve_mr(project, merged_after: 20.days.ago, merged_before: 5.days.ago)
+
+        expect(result).to eq([merge_request_1])
+      end
+
+      it 'does not return anything' do
+        result = resolve_mr(project, merged_after: 2.days.ago)
+
+        expect(result).to be_empty
+      end
+    end
+
+    context 'by milestone' do
+      it 'filters merge requests by milestone title' do
+        result = resolve_mr(project, milestone_title: milestone.title)
+
+        expect(result).to eq([merge_request_with_milestone])
+      end
+
+      it 'does not find anything' do
+        result = resolve_mr(project, milestone_title: 'unknown-milestone')
+
+        expect(result).to be_empty
+      end
+    end
+
     describe 'combinations' do
       it 'requires all filters' do
         create(:merge_request, :closed, source_project: project, target_project: project, source_branch: merge_request_4.source_branch)
@@ -155,6 +204,33 @@ describe Resolvers::MergeRequestsResolver do
         result = resolve_mr(project, source_branch: [merge_request_4.source_branch], state: 'locked')
 
         expect(result.compact).to contain_exactly(merge_request_4)
+      end
+    end
+
+    describe 'sorting' do
+      context 'when sorting by created' do
+        it 'sorts merge requests ascending' do
+          expect(resolve_mr(project, sort: 'created_asc')).to eq [merge_request_1, merge_request_2, merge_request_3, merge_request_4, merge_request_5, merge_request_6, merge_request_with_milestone]
+        end
+
+        it 'sorts merge requests descending' do
+          expect(resolve_mr(project, sort: 'created_desc')).to eq [merge_request_with_milestone, merge_request_6, merge_request_5, merge_request_4, merge_request_3, merge_request_2, merge_request_1]
+        end
+      end
+
+      context 'when sorting by merged at' do
+        before do
+          merge_request_1.metrics.update!(merged_at: 10.days.ago)
+          merge_request_3.metrics.update!(merged_at: 5.days.ago)
+        end
+
+        it 'sorts merge requests ascending' do
+          expect(resolve_mr(project, sort: :merged_at_asc)).to eq [merge_request_1, merge_request_3, merge_request_with_milestone, merge_request_6, merge_request_5, merge_request_4, merge_request_2]
+        end
+
+        it 'sorts merge requests descending' do
+          expect(resolve_mr(project, sort: :merged_at_desc)).to eq [merge_request_3, merge_request_1, merge_request_with_milestone, merge_request_6, merge_request_5, merge_request_4, merge_request_2]
+        end
       end
     end
   end

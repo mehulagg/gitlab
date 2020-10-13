@@ -4,25 +4,29 @@ module ServicesHelper
   def service_event_description(event)
     case event
     when "push", "push_events"
-      "Event will be triggered by a push to the repository"
+      s_("ProjectService|Event will be triggered by a push to the repository")
     when "tag_push", "tag_push_events"
-      "Event will be triggered when a new tag is pushed to the repository"
+      s_("ProjectService|Event will be triggered when a new tag is pushed to the repository")
     when "note", "note_events"
-      "Event will be triggered when someone adds a comment"
+      s_("ProjectService|Event will be triggered when someone adds a comment")
     when "confidential_note", "confidential_note_events"
-      "Event will be triggered when someone adds a comment on a confidential issue"
+      s_("ProjectService|Event will be triggered when someone adds a comment on a confidential issue")
     when "issue", "issue_events"
-      "Event will be triggered when an issue is created/updated/closed"
-    when "confidential_issue", "confidential_issues_events"
-      "Event will be triggered when a confidential issue is created/updated/closed"
+      s_("ProjectService|Event will be triggered when an issue is created/updated/closed")
+    when "confidential_issue", "confidential_issue_events"
+      s_("ProjectService|Event will be triggered when a confidential issue is created/updated/closed")
     when "merge_request", "merge_request_events"
-      "Event will be triggered when a merge request is created/updated/merged"
+      s_("ProjectService|Event will be triggered when a merge request is created/updated/merged")
     when "pipeline", "pipeline_events"
-      "Event will be triggered when a pipeline status changes"
+      s_("ProjectService|Event will be triggered when a pipeline status changes")
     when "wiki_page", "wiki_page_events"
-      "Event will be triggered when a wiki page is created/updated"
+      s_("ProjectService|Event will be triggered when a wiki page is created/updated")
     when "commit", "commit_events"
-      "Event will be triggered when a commit is created/updated"
+      s_("ProjectService|Event will be triggered when a commit is created/updated")
+    when "deployment"
+      s_("ProjectService|Event will be triggered when a deployment starts or finishes")
+    when "alert"
+      s_("ProjectService|Event will be triggered when a new, unique alert is recorded")
     end
   end
 
@@ -31,28 +35,8 @@ module ServicesHelper
     "#{event}_events"
   end
 
-  def service_event_action_field_name(action)
-    "#{action}_on_event_enabled"
-  end
-
-  def event_action_title(action)
-    case action
-    when "comment"
-      s_("ProjectService|Comment")
-    else
-      action.humanize
-    end
-  end
-
-  def event_action_description(action)
-    case action
-    when "comment"
-      s_("ProjectService|Comment will be posted on each event")
-    end
-  end
-
-  def service_save_button
-    button_tag(class: 'btn btn-success', type: 'submit', data: { qa_selector: 'save_changes_button' }) do
+  def service_save_button(disabled: false)
+    button_tag(class: 'btn btn-success', type: 'submit', disabled: disabled, data: { qa_selector: 'save_changes_button' }) do
       icon('spinner spin', class: 'hidden js-btn-spinner') +
         content_tag(:span, 'Save changes', class: 'js-btn-label')
     end
@@ -90,7 +74,7 @@ module ServicesHelper
 
   def scoped_test_integration_path(integration)
     if @project.present?
-      test_project_settings_integration_path(@project, integration)
+      test_project_service_path(@project, integration)
     elsif @group.present?
       test_group_settings_integration_path(@group, integration)
     else
@@ -98,29 +82,65 @@ module ServicesHelper
     end
   end
 
-  def integration_form_refactor?
-    Feature.enabled?(:integration_form_refactor, @project)
+  def integration_form_data(integration)
+    {
+      id: integration.id,
+      show_active: integration.show_active_box?.to_s,
+      activated: (integration.active || integration.new_record?).to_s,
+      type: integration.to_param,
+      merge_request_events: integration.merge_requests_events.to_s,
+      commit_events: integration.commit_events.to_s,
+      enable_comments: integration.comment_on_event_enabled.to_s,
+      comment_detail: integration.comment_detail,
+      learn_more_path: integrations_help_page_path,
+      trigger_events: trigger_events_for_service(integration),
+      fields: fields_for_service(integration),
+      inherit_from_id: integration.inherit_from_id,
+      integration_level: integration_level(integration),
+      editable: integration.editable?.to_s,
+      cancel_path: scoped_integrations_path,
+      can_test: integration.can_test?.to_s,
+      test_path: scoped_test_integration_path(integration)
+    }
   end
 
-  def trigger_events_for_service
-    return [] unless integration_form_refactor?
-
-    ServiceEventSerializer.new(service: @service).represent(@service.configurable_events).to_json
+  def trigger_events_for_service(integration)
+    ServiceEventSerializer.new(service: integration).represent(integration.configurable_events).to_json
   end
 
-  def fields_for_service
-    return [] unless integration_form_refactor?
-
-    ServiceFieldSerializer.new(service: @service).represent(@service.global_fields).to_json
+  def fields_for_service(integration)
+    ServiceFieldSerializer.new(service: integration).represent(integration.global_fields).to_json
   end
 
-  def show_service_trigger_events?
-    return false if @service.is_a?(JiraService) || integration_form_refactor?
+  def integrations_help_page_path
+    help_page_path('user/admin_area/settings/project_integration_management')
+  end
 
-    @service.configurable_events.present?
+  def project_jira_issues_integration?
+    false
+  end
+
+  def group_level_integrations?
+    @group.present? && Feature.enabled?(:group_level_integrations, @group)
+  end
+
+  def instance_level_integrations?
+    !Gitlab.com?
   end
 
   extend self
+
+  private
+
+  def integration_level(integration)
+    if integration.instance
+      'instance'
+    elsif integration.group_id
+      'group'
+    else
+      'project'
+    end
+  end
 end
 
 ServicesHelper.prepend_if_ee('EE::ServicesHelper')

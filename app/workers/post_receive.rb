@@ -7,12 +7,13 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
   urgency :high
   worker_resource_boundary :cpu
   weight 5
+  loggable_arguments 0, 1, 2, 3
 
   def perform(gl_repository, identifier, changes, push_options = {})
     container, project, repo_type = Gitlab::GlRepository.parse(gl_repository)
 
-    if project.nil? && (!repo_type.snippet? || container.is_a?(ProjectSnippet))
-      log("Triggered hook for non-existing project with gl_repository \"#{gl_repository}\"")
+    if container.nil? || (container.is_a?(ProjectSnippet) && project.nil?)
+      log("Triggered hook for non-existing gl_repository \"#{gl_repository}\"")
       return false
     end
 
@@ -58,18 +59,15 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
     after_project_changes_hooks(project, user, changes.refs, changes.repository_data)
   end
 
-  def process_wiki_changes(post_received, project)
-    project.touch(:last_activity_at, :last_repository_updated_at)
-    project.wiki.repository.expire_statistics_caches
-    ProjectCacheWorker.perform_async(project.id, [], [:wiki_size])
-
+  def process_wiki_changes(post_received, wiki)
     user = identify_user(post_received)
     return false unless user
 
     # We only need to expire certain caches once per push
-    expire_caches(post_received, project.wiki.repository)
+    expire_caches(post_received, wiki.repository)
+    wiki.repository.expire_statistics_caches
 
-    ::Git::WikiPushService.new(project, user, changes: post_received.changes).execute
+    ::Git::WikiPushService.new(wiki, user, changes: post_received.changes).execute
   end
 
   def process_snippet_changes(post_received, snippet)
@@ -77,8 +75,14 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
 
     return false unless user
 
+    replicate_snippet_changes(snippet)
+
     expire_caches(post_received, snippet.repository)
-    snippet.repository.expire_statistics_caches
+    Snippets::UpdateStatisticsService.new(snippet).execute
+  end
+
+  def replicate_snippet_changes(snippet)
+    # Used by Gitlab Geo
   end
 
   # Expire the repository status, branch, and tag cache once per push.

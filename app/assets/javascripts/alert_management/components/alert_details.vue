@@ -1,26 +1,36 @@
 <script>
-import * as Sentry from '@sentry/browser';
 import {
   GlAlert,
   GlBadge,
   GlIcon,
+  GlLink,
   GlLoadingIcon,
   GlSprintf,
   GlTabs,
   GlTab,
   GlButton,
-  GlTable,
+  GlSafeHtmlDirective,
 } from '@gitlab/ui';
+import * as Sentry from '~/sentry/wrapper';
 import { s__ } from '~/locale';
-import query from '../graphql/queries/details.query.graphql';
+import alertQuery from '../graphql/queries/details.query.graphql';
+import sidebarStatusQuery from '../graphql/queries/sidebar_status.query.graphql';
 import { fetchPolicies } from '~/lib/graphql';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import highlightCurrentUser from '~/behaviors/markdown/highlight_current_user';
+import initUserPopovers from '~/user_popovers';
 import { ALERTS_SEVERITY_LABELS, trackAlertsDetailsViewsOptions } from '../constants';
-import createIssueQuery from '../graphql/mutations/create_issue_from_alert.graphql';
+import createIssueMutation from '../graphql/mutations/create_issue_from_alert.mutation.graphql';
+import toggleSidebarStatusMutation from '../graphql/mutations/toggle_sidebar_status.mutation.graphql';
 import { visitUrl, joinPaths } from '~/lib/utils/url_utility';
 import Tracking from '~/tracking';
 import { toggleContainerClasses } from '~/lib/utils/dom_utils';
+import SystemNote from './system_notes/system_note.vue';
 import AlertSidebar from './alert_sidebar.vue';
+import AlertMetrics from './alert_metrics.vue';
+import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
+import AlertSummaryRow from './alert_summary_row.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 const containerEl = document.querySelector('.page-with-contextual-sidebar');
 
@@ -29,43 +39,63 @@ export default {
     errorMsg: s__(
       'AlertManagement|There was an error displaying the alert. Please refresh the page to try again.',
     ),
-    fullAlertDetailsTitle: s__('AlertManagement|Alert details'),
-    overviewTitle: s__('AlertManagement|Overview'),
     reportedAt: s__('AlertManagement|Reported %{when}'),
     reportedAtWithTool: s__('AlertManagement|Reported %{when} by %{tool}'),
   },
+  directives: {
+    SafeHtml: GlSafeHtmlDirective,
+  },
   severityLabels: ALERTS_SEVERITY_LABELS,
+  tabsConfig: [
+    {
+      id: 'overview',
+      title: s__('AlertManagement|Alert details'),
+    },
+    {
+      id: 'metrics',
+      title: s__('AlertManagement|Metrics'),
+    },
+    {
+      id: 'activity',
+      title: s__('AlertManagement|Activity feed'),
+    },
+  ],
   components: {
+    AlertDetailsTable,
+    AlertSummaryRow,
     GlBadge,
     GlAlert,
     GlIcon,
+    GlLink,
     GlLoadingIcon,
     GlSprintf,
     GlTab,
     GlTabs,
     GlButton,
-    GlTable,
     TimeAgoTooltip,
     AlertSidebar,
+    SystemNote,
+    AlertMetrics,
   },
-  props: {
-    alertId: {
-      type: String,
-      required: true,
-    },
+  mixins: [glFeatureFlagsMixin()],
+  inject: {
     projectPath: {
-      type: String,
-      required: true,
+      default: '',
+    },
+    alertId: {
+      default: '',
+    },
+    projectId: {
+      default: '',
     },
     projectIssuesPath: {
-      type: String,
-      required: true,
+      default: '',
     },
   },
   apollo: {
     alert: {
       fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
-      query,
+      query: alertQuery,
       variables() {
         return {
           fullPath: this.projectPath,
@@ -80,15 +110,18 @@ export default {
         Sentry.captureException(error);
       },
     },
+    sidebarStatus: {
+      query: sidebarStatusQuery,
+    },
   },
   data() {
     return {
       alert: null,
       errored: false,
+      sidebarStatus: false,
       isErrorDismissed: false,
-      createIssueError: '',
-      issueCreationInProgress: false,
-      sidebarCollapsed: false,
+      createIncidentError: '',
+      incidentCreationInProgress: false,
       sidebarErrorMessage: '',
     };
   },
@@ -104,6 +137,27 @@ export default {
     showErrorMsg() {
       return this.errored && !this.isErrorDismissed;
     },
+    activeTab() {
+      return this.$route.params.tabId || this.$options.tabsConfig[0].id;
+    },
+    currentTabIndex: {
+      get() {
+        return this.$options.tabsConfig.findIndex(tab => tab.id === this.activeTab);
+      },
+      set(tabIdx) {
+        const tabId = this.$options.tabsConfig[tabIdx].id;
+        this.$router.replace({ name: 'tab', params: { tabId } });
+      },
+    },
+    environmentName() {
+      return this.shouldDisplayEnvironment && this.alert?.environment?.name;
+    },
+    environmentPath() {
+      return this.shouldDisplayEnvironment && this.alert?.environment?.path;
+    },
+    shouldDisplayEnvironment() {
+      return this.glFeatures.exposeEnvironmentPathInAlertDetails;
+    },
   },
   mounted() {
     this.trackPageViews();
@@ -112,28 +166,34 @@ export default {
       'right-sidebar-expanded': true,
     });
   },
+  updated() {
+    this.$nextTick(() => {
+      highlightCurrentUser(this.$el.querySelectorAll('.gfm-project_member'));
+      initUserPopovers(this.$el.querySelectorAll('.js-user-link'));
+    });
+  },
   methods: {
     dismissError() {
       this.isErrorDismissed = true;
       this.sidebarErrorMessage = '';
     },
     toggleSidebar() {
-      this.sidebarCollapsed = !this.sidebarCollapsed;
+      this.$apollo.mutate({ mutation: toggleSidebarStatusMutation });
       toggleContainerClasses(containerEl, {
-        'right-sidebar-collapsed': this.sidebarCollapsed,
-        'right-sidebar-expanded': !this.sidebarCollapsed,
+        'right-sidebar-collapsed': !this.sidebarStatus,
+        'right-sidebar-expanded': this.sidebarStatus,
       });
     },
     handleAlertSidebarError(errorMessage) {
       this.errored = true;
       this.sidebarErrorMessage = errorMessage;
     },
-    createIssue() {
-      this.issueCreationInProgress = true;
+    createIncident() {
+      this.incidentCreationInProgress = true;
 
       this.$apollo
         .mutate({
-          mutation: createIssueQuery,
+          mutation: createIssueMutation,
           variables: {
             iid: this.alert.iid,
             projectPath: this.projectPath,
@@ -141,18 +201,18 @@ export default {
         })
         .then(({ data: { createAlertIssue: { errors, issue } } }) => {
           if (errors?.length) {
-            [this.createIssueError] = errors;
-            this.issueCreationInProgress = false;
+            [this.createIncidentError] = errors;
+            this.incidentCreationInProgress = false;
           } else if (issue) {
-            visitUrl(this.issuePath(issue.iid));
+            visitUrl(this.incidentPath(issue.iid));
           }
         })
         .catch(error => {
-          this.createIssueError = error;
-          this.issueCreationInProgress = false;
+          this.createIncidentError = error;
+          this.incidentCreationInProgress = false;
         });
     },
-    issuePath(issueId) {
+    incidentPath(issueId) {
       return joinPaths(this.projectIssuesPath, issueId);
     },
     trackPageViews() {
@@ -166,36 +226,29 @@ export default {
 <template>
   <div>
     <gl-alert v-if="showErrorMsg" variant="danger" @dismiss="dismissError">
-      {{ sidebarErrorMessage || $options.i18n.errorMsg }}
+      <p v-safe-html="sidebarErrorMessage || $options.i18n.errorMsg"></p>
     </gl-alert>
     <gl-alert
-      v-if="createIssueError"
+      v-if="createIncidentError"
       variant="danger"
-      data-testid="issueCreationError"
-      @dismiss="createIssueError = null"
+      data-testid="incidentCreationError"
+      @dismiss="createIncidentError = null"
     >
-      {{ createIssueError }}
+      {{ createIncidentError }}
     </gl-alert>
     <div v-if="loading"><gl-loading-icon size="lg" class="gl-mt-5" /></div>
     <div
       v-if="alert"
       class="alert-management-details gl-relative"
-      :class="{ 'pr-8': sidebarCollapsed }"
+      :class="{ 'pr-sm-8': sidebarStatus }"
     >
       <div
-        class="gl-display-flex gl-justify-content-space-between gl-align-items-baseline gl-px-1 py-3 py-md-4 gl-border-b-1 gl-border-b-gray-200 gl-border-b-solid flex-column flex-sm-row"
+        class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-px-1 py-3 py-md-4 gl-border-b-1 gl-border-b-gray-100 gl-border-b-solid gl-flex-direction-column gl-sm-flex-direction-row"
       >
-        <div
-          data-testid="alert-header"
-          class="gl-display-flex gl-align-items-center gl-justify-content-center"
-        >
-          <div
-            class="gl-display-inline-flex gl-align-items-center gl-justify-content-space-between"
-          >
-            <gl-badge class="gl-mr-3">
-              <strong>{{ s__('AlertManagement|Alert') }}</strong>
-            </gl-badge>
-          </div>
+        <div data-testid="alert-header">
+          <gl-badge class="gl-mr-3">
+            <strong>{{ s__('AlertManagement|Alert') }}</strong>
+          </gl-badge>
           <span>
             <gl-sprintf :message="reportedAtMessage">
               <template #when>
@@ -207,30 +260,30 @@ export default {
         </div>
         <gl-button
           v-if="alert.issueIid"
-          class="gl-mt-3 mt-sm-0 align-self-center align-self-sm-baseline alert-details-issue-button"
-          data-testid="viewIssueBtn"
-          :href="issuePath(alert.issueIid)"
+          class="gl-mt-3 mt-sm-0 align-self-center align-self-sm-baseline alert-details-incident-button"
+          data-testid="viewIncidentBtn"
+          :href="incidentPath(alert.issueIid)"
           category="primary"
           variant="success"
         >
-          {{ s__('AlertManagement|View issue') }}
+          {{ s__('AlertManagement|View incident') }}
         </gl-button>
         <gl-button
           v-else
-          class="gl-mt-3 mt-sm-0 align-self-center align-self-sm-baseline alert-details-issue-button"
-          data-testid="createIssueBtn"
-          :loading="issueCreationInProgress"
+          class="gl-mt-3 mt-sm-0 align-self-center align-self-sm-baseline alert-details-incident-button"
+          data-testid="createIncidentBtn"
+          :loading="incidentCreationInProgress"
           category="primary"
           variant="success"
-          @click="createIssue()"
+          @click="createIncident()"
         >
-          {{ s__('AlertManagement|Create issue') }}
+          {{ s__('AlertManagement|Create incident') }}
         </gl-button>
         <gl-button
           :aria-label="__('Toggle sidebar')"
           category="primary"
           variant="default"
-          class="d-sm-none position-absolute toggle-sidebar-mobile-button"
+          class="d-sm-none gl-absolute toggle-sidebar-mobile-button"
           type="button"
           @click="toggleSidebar"
         >
@@ -243,74 +296,84 @@ export default {
       >
         <h2 data-testid="title">{{ alert.title }}</h2>
       </div>
-      <gl-tabs v-if="alert" data-testid="alertDetailsTabs">
-        <gl-tab data-testid="overviewTab" :title="$options.i18n.overviewTitle">
-          <div v-if="alert.severity" class="gl-mt-3 gl-mb-5 gl-display-flex">
-            <div class="gl-font-weight-bold gl-w-13 gl-text-right gl-pr-3">
-              {{ s__('AlertManagement|Severity') }}:
-            </div>
-            <div class="gl-pl-2" data-testid="severity">
-              <span>
-                <gl-icon
-                  class="gl-vertical-align-middle"
-                  :size="12"
-                  :name="`severity-${alert.severity.toLowerCase()}`"
-                  :class="`icon-${alert.severity.toLowerCase()}`"
-                />
-              </span>
+      <gl-tabs v-if="alert" v-model="currentTabIndex" data-testid="alertDetailsTabs">
+        <gl-tab :data-testid="$options.tabsConfig[0].id" :title="$options.tabsConfig[0].title">
+          <alert-summary-row v-if="alert.severity" :label="`${s__('AlertManagement|Severity')}:`">
+            <span data-testid="severity">
+              <gl-icon
+                class="gl-vertical-align-middle"
+                :size="12"
+                :name="`severity-${alert.severity.toLowerCase()}`"
+                :class="`icon-${alert.severity.toLowerCase()}`"
+              />
               {{ $options.severityLabels[alert.severity] }}
-            </div>
-          </div>
-          <div v-if="alert.startedAt" class="gl-my-5 gl-display-flex">
-            <div class="gl-font-weight-bold gl-w-13 gl-text-right gl-pr-3">
-              {{ s__('AlertManagement|Start time') }}:
-            </div>
-            <div class="gl-pl-2">
-              <time-ago-tooltip data-testid="startTimeItem" :time="alert.startedAt" />
-            </div>
-          </div>
-          <div v-if="alert.eventCount" class="gl-my-5 gl-display-flex">
-            <div class="gl-font-weight-bold gl-w-13 gl-text-right gl-pr-3">
-              {{ s__('AlertManagement|Events') }}:
-            </div>
-            <div class="gl-pl-2" data-testid="eventCount">{{ alert.eventCount }}</div>
-          </div>
-          <div v-if="alert.monitoringTool" class="gl-my-5 gl-display-flex">
-            <div class="gl-font-weight-bold gl-w-13 gl-text-right gl-pr-3">
-              {{ s__('AlertManagement|Tool') }}:
-            </div>
-            <div class="gl-pl-2" data-testid="monitoringTool">{{ alert.monitoringTool }}</div>
-          </div>
-          <div v-if="alert.service" class="gl-my-5 gl-display-flex">
-            <div class="bold gl-w-13 gl-text-right gl-pr-3">
-              {{ s__('AlertManagement|Service') }}:
-            </div>
-            <div class="gl-pl-2" data-testid="service">{{ alert.service }}</div>
-          </div>
-        </gl-tab>
-        <gl-tab data-testid="fullDetailsTab" :title="$options.i18n.fullAlertDetailsTitle">
-          <gl-table
-            class="alert-management-details-table"
-            :items="[{ key: 'Value', ...alert }]"
-            :show-empty="true"
-            :busy="loading"
-            stacked
+            </span>
+          </alert-summary-row>
+          <alert-summary-row
+            v-if="environmentName"
+            :label="`${s__('AlertManagement|Environment')}:`"
           >
-            <template #empty>
-              {{ s__('AlertManagement|No alert data to display.') }}
-            </template>
-            <template #table-busy>
-              <gl-loading-icon size="lg" color="dark" class="mt-3" />
-            </template>
-          </gl-table>
+            <gl-link
+              v-if="environmentPath"
+              class="gl-display-inline-block"
+              data-testid="environmentPath"
+              :href="environmentPath"
+            >
+              {{ environmentName }}
+            </gl-link>
+            <span v-else data-testid="environmentName">{{ environmentName }}</span>
+          </alert-summary-row>
+          <alert-summary-row
+            v-if="alert.startedAt"
+            :label="`${s__('AlertManagement|Start time')}:`"
+          >
+            <time-ago-tooltip data-testid="startTimeItem" :time="alert.startedAt" />
+          </alert-summary-row>
+          <alert-summary-row
+            v-if="alert.eventCount"
+            :label="`${s__('AlertManagement|Events')}:`"
+            data-testid="eventCount"
+          >
+            {{ alert.eventCount }}
+          </alert-summary-row>
+          <alert-summary-row
+            v-if="alert.monitoringTool"
+            :label="`${s__('AlertManagement|Tool')}:`"
+            data-testid="monitoringTool"
+          >
+            {{ alert.monitoringTool }}
+          </alert-summary-row>
+          <alert-summary-row
+            v-if="alert.service"
+            :label="`${s__('AlertManagement|Service')}:`"
+            data-testid="service"
+          >
+            {{ alert.service }}
+          </alert-summary-row>
+          <alert-summary-row
+            v-if="alert.runbook"
+            :label="`${s__('AlertManagement|Runbook')}:`"
+            data-testid="runbook"
+          >
+            {{ alert.runbook }}
+          </alert-summary-row>
+          <alert-details-table :alert="alert" :loading="loading" />
+        </gl-tab>
+        <gl-tab :data-testid="$options.tabsConfig[1].id" :title="$options.tabsConfig[1].title">
+          <alert-metrics :dashboard-url="alert.metricsDashboardUrl" />
+        </gl-tab>
+        <gl-tab :data-testid="$options.tabsConfig[2].id" :title="$options.tabsConfig[2].title">
+          <div v-if="alert.notes.nodes.length > 0" class="issuable-discussion">
+            <ul class="notes main-notes-list timeline">
+              <system-note v-for="note in alert.notes.nodes" :key="note.id" :note="note" />
+            </ul>
+          </div>
         </gl-tab>
       </gl-tabs>
       <alert-sidebar
-        :project-path="projectPath"
         :alert="alert"
-        :sidebar-collapsed="sidebarCollapsed"
         @toggle-sidebar="toggleSidebar"
-        @alert-sidebar-error="handleAlertSidebarError"
+        @alert-error="handleAlertSidebarError"
       />
     </div>
   </div>

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GrapeLogging::Formatters::LogrageWithTimestamp do
+RSpec.describe Gitlab::GrapeLogging::Formatters::LogrageWithTimestamp do
   let(:log_entry) do
     {
       status: 200,
@@ -29,6 +29,7 @@ describe Gitlab::GrapeLogging::Formatters::LogrageWithTimestamp do
       correlation_id: 'WMefXn60429'
     }
   end
+
   let(:time) { Time.now }
   let(:result) { Gitlab::Json.parse(subject) }
 

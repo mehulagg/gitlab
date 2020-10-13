@@ -10,9 +10,7 @@ module EE
       before_action :log_archive_audit_event, only: [:archive]
       before_action :log_unarchive_audit_event, only: [:unarchive]
 
-      before_action do
-        push_frontend_feature_flag(:service_desk_custom_address, @project)
-      end
+      feature_category :projects, [:restore]
     end
 
     def restore
@@ -79,10 +77,8 @@ module EE
         merge_requests_template
         repository_size_limit
         reset_approvals_on_push
-        service_desk_enabled
         ci_cd_only
         use_custom_template
-        packages_enabled
         require_password_to_approve
         group_with_project_templates_id
       ]

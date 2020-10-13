@@ -33,7 +33,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Formatters::Dast do
       expect(vulnerability['severity']).to eq('high')
       expect(vulnerability['confidence']).to eq('medium')
       expect(vulnerability['solution']).to eq(sanitized_solution)
-      expect(vulnerability['scanner']).to eq({ 'id' => 'zaproxy', 'name' => 'ZAProxy' })
+      expect(vulnerability['scanner']).to eq({ 'id' => 'zaproxy', 'name' => 'ZAProxy', 'vendor' => { 'name' => 'GitLab' } })
       expect(vulnerability['links']).to eq([{ 'url' => 'http://projects.webappsec.org/Cross-Site-Request-Forgery' },
                                             { 'url' => 'http://cwe.mitre.org/data/definitions/352.html' }])
       expect(vulnerability['identifiers'][0]).to eq({

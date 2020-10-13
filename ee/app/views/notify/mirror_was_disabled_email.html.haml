@@ -1,0 +1,5 @@
+%p
+  Repository mirroring on #{@project.full_path} was disabled because the mirror user #{sanitize_name(@deleted_user_name)} was deleted.
+
+%p
+  To re-enable mirroring, update your #{link_to("repository mirroring settings", project_settings_repository_url(@project))}.

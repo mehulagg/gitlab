@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe "projects/on_demand_scans/index", type: :view do
   before do
+    @project = create(:project)
     render
   end
 

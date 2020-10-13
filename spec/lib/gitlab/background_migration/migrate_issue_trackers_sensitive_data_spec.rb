@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Gitlab::BackgroundMigration::MigrateIssueTrackersSensitiveData, schema: 20200130145430 do
+RSpec.describe Gitlab::BackgroundMigration::MigrateIssueTrackersSensitiveData, schema: 20200130145430 do
   let(:services) { table(:services) }
 
   before do
@@ -286,9 +286,11 @@ describe Gitlab::BackgroundMigration::MigrateIssueTrackersSensitiveData, schema:
     let!(:jira_service_invalid) do
       services.create(id: 19, title: 'invalid - title', description: 'invalid - description', type: 'JiraService', properties: 'invalid data', category: 'issue_tracker')
     end
+
     let!(:jira_service_valid) do
       services.create(id: 20, type: 'JiraService', properties: jira_properties.to_json, category: 'issue_tracker')
     end
+
     let!(:bugzilla_service_valid) do
       services.create(id: 11, type: 'BugzillaService', title: nil, properties: tracker_properties.to_json, category: 'issue_tracker')
     end

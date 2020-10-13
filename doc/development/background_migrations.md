@@ -1,4 +1,11 @@
-# Background Migrations
+---
+type: reference, dev
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+---
+
+# Background migrations
 
 Background migrations can be used to perform data migrations that would
 otherwise take a very long time (hours, days, years, etc) to complete. For
@@ -29,10 +36,10 @@ Some examples where background migrations can be useful:
 - Populating one column based on JSON stored in another column.
 - Migrating data that depends on the output of external services (e.g. an API).
 
-> **Note:**
-> If the background migration is part of an important upgrade, make sure it's announced
-> in the release post. Discuss with your Project Manager if you're not sure the migration falls
-> into this category.
+NOTE: **Note:**
+If the background migration is part of an important upgrade, make sure it's announced
+in the release post. Discuss with your Project Manager if you're not sure the migration falls
+into this category.
 
 ## Isolation
 
@@ -92,6 +99,20 @@ bulk_migrate_async(
 )
 ```
 
+Note that this will queue a Sidekiq job immediately: if you have a large number
+of records, this may not be what you want. You can use the function
+`queue_background_migration_jobs_by_range_at_intervals` to split the job into
+batches:
+
+```ruby
+queue_background_migration_jobs_by_range_at_intervals(
+  ClassName,
+  BackgroundMigrationClassName,
+  2.minutes,
+  batch_size: 10_000
+  )
+```
+
 You'll also need to make sure that newly created data is either migrated, or
 saved in both the old and new version upon creation. For complex and time
 consuming migrations it's best to schedule a background job using an
@@ -123,7 +144,7 @@ once.
 
 ## Cleaning Up
 
->**Note:**
+NOTE: **Note:**
 Cleaning up any remaining background migrations _must_ be done in either a major
 or minor release, you _must not_ do this in a patch release.
 

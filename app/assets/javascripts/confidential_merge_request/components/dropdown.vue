@@ -1,13 +1,12 @@
 <script>
-import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { GlDeprecatedDropdown, GlDeprecatedDropdownItem, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   components: {
-    GlDropdown,
-    GlDropdownItem,
-    Icon,
+    GlDeprecatedDropdown,
+    GlDeprecatedDropdownItem,
+    GlIcon,
   },
   props: {
     projects: {
@@ -38,21 +37,25 @@ export default {
 </script>
 
 <template>
-  <gl-dropdown toggle-class="d-flex align-items-center w-100" class="w-100">
+  <gl-deprecated-dropdown toggle-class="d-flex align-items-center w-100" class="w-100">
     <template #button-content>
       <span class="str-truncated-100 mr-2">
-        <icon name="lock" />
+        <gl-icon name="lock" />
         {{ dropdownText }}
       </span>
-      <icon name="chevron-down" class="ml-auto" />
+      <gl-icon name="chevron-down" class="ml-auto" />
     </template>
-    <gl-dropdown-item v-for="project in projects" :key="project.id" @click="selectProject(project)">
-      <icon
+    <gl-deprecated-dropdown-item
+      v-for="project in projects"
+      :key="project.id"
+      @click="selectProject(project)"
+    >
+      <gl-icon
         name="mobile-issue-close"
         :class="{ icon: project.id !== selectedProject.id }"
         class="js-active-project-check"
       />
       <span class="ml-1">{{ project.name }}</span>
-    </gl-dropdown-item>
-  </gl-dropdown>
+    </gl-deprecated-dropdown-item>
+  </gl-deprecated-dropdown>
 </template>

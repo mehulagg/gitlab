@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe "Admin::Users" do
+RSpec.describe "Admin::Users" do
   include Spec::Support::Helpers::Features::ResponsiveTableHelpers
 
   let!(:user) do
@@ -31,6 +31,7 @@ describe "Admin::Users" do
       expect(page).to have_content(current_user.last_activity_on.strftime("%e %b, %Y"))
       expect(page).to have_content(user.email)
       expect(page).to have_content(user.name)
+      expect(page).to have_content('Projects')
       expect(page).to have_button('Block')
       expect(page).to have_button('Deactivate')
       expect(page).to have_button('Delete user')
@@ -38,13 +39,26 @@ describe "Admin::Users" do
     end
 
     describe "view extra user information" do
-      it 'shows the user popover on hover', :js, :quarantine do
+      it 'shows the user popover on hover', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/11290' do
         expect(page).not_to have_selector('#__BV_popover_1__')
 
         first_user_link = page.first('.js-user-link')
         first_user_link.hover
 
         expect(page).to have_selector('#__BV_popover_1__')
+      end
+    end
+
+    context 'user project count' do
+      before do
+        project = create(:project)
+        project.add_maintainer(current_user)
+      end
+
+      it 'displays count of users projects' do
+        visit admin_users_path
+
+        expect(page.find("[data-testid='user-project-count-#{current_user.id}']").text).to eq("1")
       end
     end
 
@@ -279,7 +293,8 @@ describe "Admin::Users" do
 
       expect(page).to have_content(user.email)
       expect(page).to have_content(user.name)
-      expect(page).to have_content(user.id)
+      expect(page).to have_content("ID: #{user.id}")
+      expect(page).to have_content("Namespace ID: #{user.namespace_id}")
       expect(page).to have_button('Deactivate user')
       expect(page).to have_button('Block user')
       expect(page).to have_button('Delete user')
@@ -353,7 +368,7 @@ describe "Admin::Users" do
         it 'sees impersonation log out icon' do
           subject
 
-          icon = first('.fa.fa-user-secret')
+          icon = first('[data-testid="incognito-icon"]')
           expect(icon).not_to be nil
         end
 
@@ -512,14 +527,14 @@ describe "Admin::Users" do
     end
 
     it "lists group projects" do
-      within(:css, '.append-bottom-default + .card') do
+      within(:css, '.gl-mb-3 + .card') do
         expect(page).to have_content 'Group projects'
         expect(page).to have_link group.name, href: admin_group_path(group)
       end
     end
 
     it 'allows navigation to the group details' do
-      within(:css, '.append-bottom-default + .card') do
+      within(:css, '.gl-mb-3 + .card') do
         click_link group.name
       end
       within(:css, 'h3.page-title') do
@@ -529,14 +544,14 @@ describe "Admin::Users" do
     end
 
     it 'shows the group access level' do
-      within(:css, '.append-bottom-default + .card') do
+      within(:css, '.gl-mb-3 + .card') do
         expect(page).to have_content 'Developer'
       end
     end
 
     it 'allows group membership to be revoked', :js do
       page.within(first('.group_member')) do
-        accept_confirm { find('.btn-remove').click }
+        accept_confirm { find('.btn[data-testid="remove-user"]').click }
       end
       wait_for_requests
 
@@ -605,7 +620,7 @@ describe "Admin::Users" do
     end
   end
 
-  describe 'show user keys' do
+  describe 'show user keys', :js do
     let!(:key1) do
       create(:key, user: user, title: "ssh-rsa Key1", key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4FIEBXGi4bPU8kzxMefudPIJ08/gNprdNTaO9BR/ndy3+58s2HCTw2xCHcsuBmq+TsAqgEidVq4skpqoTMB+Uot5Uzp9z4764rc48dZiI661izoREoKnuRQSsRqUTHg5wrLzwxlQbl1MVfRWQpqiz/5KjBC7yLEb9AbusjnWBk8wvC1bQPQ1uLAauEA7d836tgaIsym9BrLsMVnR4P1boWD3Xp1B1T/ImJwAGHvRmP/ycIqmKdSpMdJXwxcb40efWVj0Ibbe7ii9eeoLdHACqevUZi6fwfbymdow+FeqlkPoHyGg3Cu4vD/D8+8cRc7mE/zGCWcQ15Var83Tczour Key1")
     end
@@ -628,7 +643,11 @@ describe "Admin::Users" do
       expect(page).to have_content(key2.title)
       expect(page).to have_content(key2.key)
 
-      click_link 'Remove'
+      click_button 'Delete'
+
+      page.within('.modal') do
+        page.click_button('Delete')
+      end
 
       expect(page).not_to have_content(key2.title)
     end

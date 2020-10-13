@@ -22,22 +22,30 @@ module Prometheus
 
     attr_accessor :proxyable, :method, :path, :params
 
+    PROMETHEUS_QUERY_API = 'query'
+    PROMETHEUS_QUERY_RANGE_API = 'query_range'
+    PROMETHEUS_SERIES_API = 'series'
+
     PROXY_SUPPORT = {
-      'query' => {
+      PROMETHEUS_QUERY_API => {
         method: ['GET'],
         params: %w(query time timeout)
       },
-      'query_range' => {
+      PROMETHEUS_QUERY_RANGE_API => {
         method: ['GET'],
         params: %w(query start end step timeout)
+      },
+      PROMETHEUS_SERIES_API => {
+        method: %w(GET),
+        params: %w(match start end)
       }
     }.freeze
 
     def self.from_cache(proxyable_class_name, proxyable_id, method, path, params)
       proxyable_class = begin
         proxyable_class_name.constantize
-      rescue NameError
-        nil
+                        rescue NameError
+                          nil
       end
       return unless proxyable_class
 

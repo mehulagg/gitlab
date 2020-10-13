@@ -35,6 +35,11 @@ RSpec.describe 'Group Dependency Proxy' do
           visit path
         end
 
+        it 'sidebar menu is open' do
+          sidebar = find('.nav-sidebar')
+          expect(sidebar).to have_link _('Dependency Proxy')
+        end
+
         it 'toggles defaults to enabled' do
           page.within('.js-dependency-proxy-toggle-area') do
             expect(find('.js-project-feature-toggle-input', visible: false).value).to eq('true')

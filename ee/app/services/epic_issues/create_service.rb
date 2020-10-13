@@ -16,9 +16,12 @@ module EpicIssues
 
       link.epic = issuable
       link.move_to_start
-      link.save!
 
-      yield params
+      if link.save
+        create_notes(referenced_issue, params)
+      end
+
+      link
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
@@ -47,7 +50,9 @@ module EpicIssues
         return [] unless can?(current_user, :admin_epic, issuable.group)
 
         issues.select do |issue|
-          issuable_group_descendants.include?(issue.project.group) && !previous_related_issuables.include?(issue)
+          issue.supports_epic? &&
+            issuable_group_descendants.include?(issue.project.group) &&
+            !previous_related_issuables.include?(issue)
         end
       end
     end

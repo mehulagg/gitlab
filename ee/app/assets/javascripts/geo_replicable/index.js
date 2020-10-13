@@ -7,30 +7,25 @@ Vue.use(Translate);
 
 export default () => {
   const el = document.getElementById('js-geo-replicable');
-  const { replicableType } = el.dataset;
+  const {
+    replicableType,
+    geoTroubleshootingLink,
+    geoReplicableEmptySvgPath,
+    graphqlFieldName,
+  } = el.dataset;
 
   return new Vue({
     el,
-    store: createStore(replicableType),
+    store: createStore({ replicableType, graphqlFieldName }),
     components: {
       GeoReplicableApp,
-    },
-    data() {
-      const {
-        dataset: { geoTroubleshootingLink, geoReplicableEmptySvgPath },
-      } = this.$options.el;
-
-      return {
-        geoTroubleshootingLink,
-        geoReplicableEmptySvgPath,
-      };
     },
 
     render(createElement) {
       return createElement('geo-replicable-app', {
         props: {
-          geoTroubleshootingLink: this.geoTroubleshootingLink,
-          geoReplicableEmptySvgPath: this.geoReplicableEmptySvgPath,
+          geoTroubleshootingLink,
+          geoReplicableEmptySvgPath,
         },
       });
     },

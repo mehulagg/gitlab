@@ -6,28 +6,29 @@ type: reference
 
 Your GitLab instance can perform HTTP POST requests on the following events:
 
+- `group_create`
+- `group_destroy`
+- `group_rename`
+- `key_create`
+- `key_destroy`
 - `project_create`
 - `project_destroy`
 - `project_rename`
 - `project_transfer`
 - `project_update`
+- `repository_update`
+- `user_add_to_group`
 - `user_add_to_team`
-- `user_remove_from_team`
-- `user_update_for_team`
 - `user_create`
 - `user_destroy`
 - `user_failed_login`
-- `user_rename`
-- `key_create`
-- `key_destroy`
-- `group_create`
-- `group_destroy`
-- `group_rename`
-- `user_add_to_group`
 - `user_remove_from_group`
+- `user_remove_from_team`
+- `user_rename`
 - `user_update_for_group`
+- `user_update_for_team`
 
-The triggers for most of these are self-explanatory, but `project_update` and `project_rename` deserve some clarification: `project_update` is fired any time an attribute of a project is changed (name, description, tags, etc.) *unless* the `path` attribute is also changed. In that case, a `project_rename` is triggered instead (so that, for instance, if all you care about is the repo URL, you can just listen for `project_rename`).
+The triggers for most of these are self-explanatory, but `project_update` and `project_rename` deserve some clarification: `project_update` is fired any time an attribute of a project is changed (name, description, tags, etc.) *unless* the `path` attribute is also changed. In that case, a `project_rename` is triggered instead (so that, for instance, if all you care about is the repository URL, you can just listen for `project_rename`).
 
 `user_failed_login` is sent whenever a **blocked** user attempts to login and denied access.
 
@@ -313,7 +314,7 @@ If the user is blocked via LDAP, `state` will be `ldap_blocked`.
 }
 ```
 
-`owner_name` and `owner_email` are always `null`. Please see <https://gitlab.com/gitlab-org/gitlab/-/issues/20011>.
+`owner_name` and `owner_email` are always `null`. Please see [issue #20011](https://gitlab.com/gitlab-org/gitlab/-/issues/20011).
 
 **Group renamed:**
 
@@ -671,7 +672,7 @@ X-Gitlab-Event: System Hook
     "homepage":"http://example.com/jsmith/example",
     "url":"git@example.com:jsmith/example.git",
     "ssh_url":"git@example.com:jsmith/example.git",
-    "http_url":"http://example.com/jsmith/example.git",
+    "http_url":"http://example.com/jsmith/example.git"
   },
   "changes": [
     {

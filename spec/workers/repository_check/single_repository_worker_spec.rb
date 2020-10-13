@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'fileutils'
 
-describe RepositoryCheck::SingleRepositoryWorker do
+RSpec.describe RepositoryCheck::SingleRepositoryWorker do
   subject(:worker) { described_class.new }
 
   it 'skips when the project has no push events' do
@@ -86,7 +86,7 @@ describe RepositoryCheck::SingleRepositoryWorker do
   end
 
   def create_push_event(project)
-    project.events.create(action: :pushed, author_id: create(:user).id)
+    project.events.create!(action: :pushed, author_id: create(:user).id)
   end
 
   def break_wiki(project)

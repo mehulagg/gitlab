@@ -186,7 +186,7 @@ git push origin squash_some_bugs
 - When you want feedback create a merge request.
 - Target is the ‘default’ branch (usually master).
 - Assign or mention the person you would like to review.
-- Add 'WIP' to the title if it's a work in progress.
+- Add `[Draft]` to the title if it's a work in progress.
 - When accepting, always delete the branch.
 - Anyone can comment, not just the assignee.
 - Push corrections to the same branch.
@@ -222,7 +222,7 @@ See GitLab merge requests for examples: <https://gitlab.com/gitlab-org/gitlab-fo
 
 - Dashboard
 - User Preferences
-- ReadMe, Changelog, License shortcuts
+- README, Changelog, License shortcuts
 - Issues
 - Milestones and Labels
 - Manage project members
@@ -314,7 +314,7 @@ Squash the commits on the same branch we used for the merge conflicts step.
 git rebase -i master
 ```
 
-In the editor, leave the first commit as 'pick' and set others to 'fixup'.
+In the editor, leave the first commit as `pick` and set others to `fixup`.
 
 ## Questions?
 

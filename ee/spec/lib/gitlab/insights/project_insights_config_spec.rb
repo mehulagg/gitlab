@@ -54,7 +54,7 @@ RSpec.describe Gitlab::Insights::ProjectInsightsConfig do
     end
   end
 
-  context 'when not included in the projcts.only filter' do
+  context 'when not included in the projects.only filter' do
     context 'by project id' do
       before do
         chart = config[:item1][:charts].last

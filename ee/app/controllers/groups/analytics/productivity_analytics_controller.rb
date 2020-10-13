@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class Groups::Analytics::ProductivityAnalyticsController < Groups::Analytics::ApplicationController
-  check_feature_flag Gitlab::Analytics::PRODUCTIVITY_ANALYTICS_FEATURE_FLAG
   increment_usage_counter Gitlab::UsageDataCounters::ProductivityAnalyticsCounter,
     :views, only: :show, if: -> { request.format.html? }
 
@@ -24,6 +23,9 @@ class Groups::Analytics::ProductivityAnalyticsController < Groups::Analytics::Ap
   before_action :validate_params, only: :show, if: -> { request.format.json? }
 
   include IssuableCollections
+  include Analytics::UniqueVisitsHelper
+
+  track_unique_visits :show, target_id: 'g_analytics_productivity'
 
   def show
     respond_to do |format|

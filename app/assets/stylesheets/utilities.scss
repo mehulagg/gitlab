@@ -14,12 +14,6 @@
     #{'.text-#{$variant}-#{$suffix}'} {
       color: $color;
     }
-
-    #{'.hover-text-#{$variant}-#{$suffix}'} {
-      &:hover {
-        color: $color;
-      }
-    }
   }
 }
 
@@ -43,19 +37,17 @@
 
 @for $i from 1 through 12 {
   #{'.tab-width-#{$i}'} {
+    /* stylelint-disable-next-line property-no-vendor-prefix */
     -moz-tab-size: $i;
     tab-size: $i;
   }
 }
 
 .border-width-1px { border-width: 1px; }
-.border-bottom-width-1px { border-bottom-width: 1px; }
 .border-style-dashed { border-style: dashed; }
 .border-style-solid { border-style: solid; }
-.border-bottom-style-solid { border-bottom-style: solid; }
 .border-color-blue-300 { border-color: $blue-300; }
 .border-color-default { border-color: $border-color; }
-.border-bottom-color-default { border-bottom-color: $border-color; }
 .border-radius-default { border-radius: $border-radius-default; }
 .border-radius-small { border-radius: $border-radius-small; }
 .box-shadow-default { box-shadow: 0 2px 4px 0 $black-transparent; }
@@ -81,6 +73,10 @@
 .gl-h-32 { height: px-to-rem($grid-size * 4); }
 .gl-h-64 { height: px-to-rem($grid-size * 8); }
 
+// Migrate this to Gitlab UI when FF is removed
+// https://gitlab.com/groups/gitlab-org/-/epics/2882
+.gl-h-200\! { height: px-to-rem($grid-size * 25) !important; }
+
 .d-sm-table-column {
   @include media-breakpoint-up(sm) {
     display: table-column !important;
@@ -89,3 +85,40 @@
 
 .gl-text-purple { color: $purple; }
 .gl-bg-purple-light { background-color: $purple-light; }
+
+// move this to GitLab UI once onboarding experiment is considered a success
+.gl-py-8 {
+  padding-top: $gl-spacing-scale-8;
+  padding-bottom: $gl-spacing-scale-8;
+}
+
+.gl-transition-property-stroke-opacity {
+  transition-property: stroke-opacity;
+}
+
+.gl-transition-property-stroke {
+  transition-property: stroke;
+}
+
+.gl-top-66vh {
+  top: 66vh;
+}
+
+.gl-shadow-x0-y0-b3-s1-blue-500 {
+  box-shadow: inset 0 0 3px $gl-border-size-1 $blue-500;
+}
+
+// This utility is used to force the z-index to match that of dropdown menu's
+.gl-z-dropdown-menu\! {
+  z-index: 300 !important;
+}
+
+.gl-flex-basis-quarter {
+  flex-basis: 25%;
+}
+
+.gl-md-ml-3 {
+  @media (min-width: $breakpoint-md) {
+    margin-left: $gl-spacing-scale-3;
+  }
+}

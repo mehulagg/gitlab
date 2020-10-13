@@ -3,7 +3,7 @@ import { find } from 'lodash';
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
 import Poll from '~/lib/utils/poll';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__, n__, sprintf } from '~/locale';
 import * as types from './mutation_types';
 
@@ -95,17 +95,23 @@ export const receiveAddProjectsToDashboardError = ({ state }) => {
   );
 };
 
-export const fetchProjects = ({ state, dispatch }) => {
+export const fetchProjects = ({ state, dispatch, commit }, page) => {
   if (eTagPoll) return;
 
   dispatch('requestProjects');
 
   eTagPoll = new Poll({
     resource: {
-      fetchProjects: () => axios.get(state.projectEndpoints.list),
+      fetchProjects: () => axios.get(state.projectEndpoints.list, { params: { page } }),
     },
     method: 'fetchProjects',
-    successCallback: ({ data }) => dispatch('receiveProjectsSuccess', data),
+    successCallback: response => {
+      const {
+        data: { projects },
+        headers,
+      } = response;
+      commit(types.RECEIVE_PROJECTS_SUCCESS, { projects, headers });
+    },
     errorCallback: () => dispatch('receiveProjectsError'),
   });
 
@@ -126,10 +132,6 @@ export const requestProjects = ({ commit }) => {
   commit(types.REQUEST_PROJECTS);
 };
 
-export const receiveProjectsSuccess = ({ commit }, data) => {
-  commit(types.RECEIVE_PROJECTS_SUCCESS, data.projects);
-};
-
 export const receiveProjectsError = ({ commit }) => {
   commit(types.RECEIVE_PROJECTS_ERROR);
   createFlash(__('Something went wrong, unable to get projects'));
@@ -145,7 +147,7 @@ export const removeProject = ({ dispatch }, removePath) => {
 export const receiveRemoveProjectSuccess = ({ dispatch }) => dispatch('forceProjectsRequest');
 
 export const receiveRemoveProjectError = () => {
-  createFlash(__('Something went wrong, unable to remove project'));
+  createFlash(__('Something went wrong, unable to delete project'));
 };
 
 export const setSearchQuery = ({ commit }, query) => commit(types.SET_SEARCH_QUERY, query);
@@ -199,5 +201,10 @@ export const setProjects = ({ commit }, projects) => {
   commit(types.SET_PROJECTS, projects);
 };
 
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};
+export const paginateDashboard = ({ dispatch }, newPage) => {
+  return Promise.all([
+    dispatch('stopProjectsPolling'),
+    dispatch('clearProjectsEtagPoll'),
+    dispatch('fetchProjects', newPage),
+  ]);
+};

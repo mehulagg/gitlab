@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class EpicLinks < Grape::API
+  class EpicLinks < Grape::API::Instance
     include ::Gitlab::Utils::StrongMemoize
 
     before do
@@ -74,12 +74,14 @@ module API
       end
       params do
         requires :title, type: String, desc: 'The title of a child epic'
+        optional :confidential, type: Boolean, desc: 'Indicates if the epic is confidential. Will be ignored if `confidential_epics` feature flag is disabled'
       end
       post ':id/(-/)epics/:epic_iid/epics' do
         authorize_subepics_feature!
         authorize_can_admin_epic_link!
 
-        create_params = { parent_id: epic.id, title: params[:title] }
+        confidential = params[:confidential].nil? ? epic.confidential : params[:confidential]
+        create_params = { parent_id: epic.id, title: params[:title], confidential: confidential }
 
         child_epic = ::Epics::CreateService.new(user_group, current_user, create_params).execute
 
@@ -95,8 +97,7 @@ module API
         use :child_epic_id
       end
       delete ':id/(-/)epics/:epic_iid/epics/:child_epic_id' do
-        authorize_subepics_feature!
-        authorize_can_admin_epic_link!
+        authorize_can_destroy_epic_link!
 
         updated_epic = ::Epics::UpdateService.new(user_group, current_user, { parent: nil }).execute(child_epic)
 

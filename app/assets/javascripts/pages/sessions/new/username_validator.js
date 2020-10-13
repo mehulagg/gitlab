@@ -2,7 +2,7 @@ import { debounce } from 'lodash';
 import InputValidator from '~/validators/input_validator';
 
 import axios from '~/lib/utils/axios_utils';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
 
 const debounceTimeoutDuration = 1000;
@@ -39,7 +39,7 @@ export default class UsernameValidator extends InputValidator {
   static validateUsernameInput(inputDomElement) {
     const username = inputDomElement.value;
 
-    if (inputDomElement.checkValidity() && username.length > 0) {
+    if (inputDomElement.checkValidity() && username.length > 1) {
       UsernameValidator.setMessageVisibility(inputDomElement, pendingMessageSelector);
       UsernameValidator.fetchUsernameAvailability(username)
         .then(usernameTaken => {

@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe Gitlab::GoogleCodeImport::Importer do
+RSpec.describe Gitlab::GoogleCodeImport::Importer do
   let(:mapped_user) { create(:user, username: "thilo123") }
   let(:raw_data) { Gitlab::Json.parse(fixture_file("GoogleCodeProjectHosting.json")) }
   let(:client) { Gitlab::GoogleCodeImport::Client.new(raw_data) }
@@ -12,6 +12,7 @@ describe Gitlab::GoogleCodeImport::Importer do
       'user_map' => { 'thilo...' => "@#{mapped_user.username}" }
     }
   end
+
   let(:project) { create(:project) }
 
   subject { described_class.new(project) }

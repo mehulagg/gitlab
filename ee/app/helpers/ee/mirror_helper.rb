@@ -8,7 +8,7 @@ module EE
 
       return message if raw_message
 
-      message = icon('warning triangle') + ' ' + message
+      message = icon('warning') + ' ' + message
 
       if can?(current_user, :admin_project, @project)
         link_to message, project_mirror_path(@project)
@@ -41,7 +41,8 @@ module EE
       docs_link_url = help_page_path('topics/git/lfs/index')
       docs_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: docs_link_url }
 
-      _('Git LFS objects will be synced in pull mirrors if LFS is %{docs_link_start}enabled for the project%{docs_link_end}. They will <strong>not</strong> be synced in push mirrors.').html_safe % { docs_link_start: docs_link_start, docs_link_end: '</a>'.html_safe }
+      html_escape(_('Git LFS objects will be synced in pull mirrors if LFS is %{docs_link_start}enabled for the project%{docs_link_end}. They will %{strong_open}not%{strong_close} be synced in push mirrors.')) %
+        { docs_link_start: docs_link_start, docs_link_end: '</a>'.html_safe, strong_open: '<strong>'.html_safe, strong_close: '</strong>'.html_safe }
     end
   end
 end

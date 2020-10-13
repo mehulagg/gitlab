@@ -1,15 +1,18 @@
-import { transformIssuesApiEndpoint } from 'ee/issues_analytics/utils';
-import { TEST_HOST } from 'helpers/test_constants';
+import { transformFilters } from 'ee/issues_analytics/utils';
 
-const dirtyEndpoint = `${TEST_HOST}/issues?label_name[]=cool&label_name[]=beans&milestone_title=v4.0`;
-const cleanEndpoint = `${TEST_HOST}/issues?labels=cool%2Cbeans&milestone=v4.0`;
+const originalFilters = {
+  label_name: ['one', 'two'],
+  milestone_title: 'title',
+  author_username: 'root',
+};
+const tranformedFilters = { labels: ['one', 'two'], milestone: 'title', author_username: 'root' };
 
-describe('issues analytics utils', () => {
-  describe('transformIssuesApiEndpoint', () => {
-    it('replaces the params as expected', () => {
-      const endpoint = transformIssuesApiEndpoint(dirtyEndpoint);
+describe('issue analytics utils', () => {
+  describe('transformFilters', () => {
+    it('transforms the object keys as expected', () => {
+      const filters = transformFilters(originalFilters);
 
-      expect(endpoint).toBe(cleanEndpoint);
+      expect(filters).toStrictEqual(tranformedFilters);
     });
   });
 });

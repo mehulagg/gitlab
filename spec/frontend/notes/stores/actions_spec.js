@@ -1,8 +1,9 @@
 import { TEST_HOST } from 'spec/test_constants';
 import AxiosMockAdapter from 'axios-mock-adapter';
 import Api from '~/api';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import * as actions from '~/notes/stores/actions';
+import mutations from '~/notes/stores/mutations';
 import * as mutationTypes from '~/notes/stores/mutation_types';
 import * as notesConstants from '~/notes/constants';
 import createStore from '~/notes/stores';
@@ -18,6 +19,10 @@ import {
   batchSuggestionsInfoMock,
 } from '../mock_data';
 import axios from '~/lib/utils/axios_utils';
+import * as utils from '~/notes/stores/utils';
+import updateIssueConfidentialMutation from '~/sidebar/components/confidential/mutations/update_issue_confidential.mutation.graphql';
+import updateMergeRequestLockMutation from '~/sidebar/components/lock/mutations/update_merge_request_lock.mutation.graphql';
+import updateIssueLockMutation from '~/sidebar/components/lock/mutations/update_issue_lock.mutation.graphql';
 
 const TEST_ERROR_MESSAGE = 'Test error message';
 jest.mock('~/flash');
@@ -272,9 +277,54 @@ describe('Actions Notes Store', () => {
     });
   });
 
+  describe('fetchData', () => {
+    describe('given there are no notes', () => {
+      const lastFetchedAt = '13579';
+
+      beforeEach(() => {
+        axiosMock
+          .onGet(notesDataMock.notesPath)
+          .replyOnce(200, { notes: [], last_fetched_at: lastFetchedAt });
+      });
+
+      it('should commit SET_LAST_FETCHED_AT', () =>
+        testAction(
+          actions.fetchData,
+          undefined,
+          { notesData: notesDataMock },
+          [{ type: 'SET_LAST_FETCHED_AT', payload: lastFetchedAt }],
+          [],
+        ));
+    });
+
+    describe('given there are notes', () => {
+      const lastFetchedAt = '12358';
+
+      beforeEach(() => {
+        axiosMock
+          .onGet(notesDataMock.notesPath)
+          .replyOnce(200, { notes: discussionMock.notes, last_fetched_at: lastFetchedAt });
+      });
+
+      it('should dispatch updateOrCreateNotes, startTaskList and commit SET_LAST_FETCHED_AT', () =>
+        testAction(
+          actions.fetchData,
+          undefined,
+          { notesData: notesDataMock },
+          [{ type: 'SET_LAST_FETCHED_AT', payload: lastFetchedAt }],
+          [
+            { type: 'updateOrCreateNotes', payload: discussionMock.notes },
+            { type: 'startTaskList' },
+          ],
+        ));
+    });
+  });
+
   describe('poll', () => {
     beforeEach(done => {
-      jest.spyOn(axios, 'get');
+      axiosMock
+        .onGet(notesDataMock.notesPath)
+        .reply(200, { notes: [], last_fetched_at: '123456' }, { 'poll-interval': '1000' });
 
       store
         .dispatch('setNotesData', notesDataMock)
@@ -283,15 +333,13 @@ describe('Actions Notes Store', () => {
     });
 
     it('calls service with last fetched state', done => {
-      axiosMock
-        .onAny()
-        .reply(200, { notes: [], last_fetched_at: '123456' }, { 'poll-interval': '1000' });
-
       store
         .dispatch('poll')
+        .then(() => {
+          jest.advanceTimersByTime(2);
+        })
         .then(() => new Promise(resolve => requestAnimationFrame(resolve)))
         .then(() => {
-          expect(axios.get).toHaveBeenCalled();
           expect(store.state.lastFetchedAt).toBe('123456');
 
           jest.advanceTimersByTime(1500);
@@ -303,8 +351,9 @@ describe('Actions Notes Store', () => {
             }),
         )
         .then(() => {
-          expect(axios.get.mock.calls.length).toBe(2);
-          expect(axios.get.mock.calls[axios.get.mock.calls.length - 1][1].headers).toEqual({
+          const expectedGetRequests = 2;
+          expect(axiosMock.history.get.length).toBe(expectedGetRequests);
+          expect(axiosMock.history.get[expectedGetRequests - 1].headers).toMatchObject({
             'X-Last-Fetched-At': '123456',
           });
         })
@@ -449,7 +498,7 @@ describe('Actions Notes Store', () => {
       it('commits ADD_NEW_NOTE and dispatches updateMergeRequestWidget', done => {
         testAction(
           actions.createNewNote,
-          { endpoint: `${gl.TEST_HOST}`, data: {} },
+          { endpoint: `${TEST_HOST}`, data: {} },
           store.state,
           [
             {
@@ -485,7 +534,7 @@ describe('Actions Notes Store', () => {
       it('does not commit ADD_NEW_NOTE or dispatch updateMergeRequestWidget', done => {
         testAction(
           actions.createNewNote,
-          { endpoint: `${gl.TEST_HOST}`, data: {} },
+          { endpoint: `${TEST_HOST}`, data: {} },
           store.state,
           [],
           [],
@@ -508,7 +557,7 @@ describe('Actions Notes Store', () => {
       it('commits UPDATE_NOTE and dispatches updateMergeRequestWidget', done => {
         testAction(
           actions.toggleResolveNote,
-          { endpoint: `${gl.TEST_HOST}`, isResolved: true, discussion: false },
+          { endpoint: `${TEST_HOST}`, isResolved: true, discussion: false },
           store.state,
           [
             {
@@ -533,7 +582,7 @@ describe('Actions Notes Store', () => {
       it('commits UPDATE_DISCUSSION and dispatches updateMergeRequestWidget', done => {
         testAction(
           actions.toggleResolveNote,
-          { endpoint: `${gl.TEST_HOST}`, isResolved: true, discussion: true },
+          { endpoint: `${TEST_HOST}`, isResolved: true, discussion: true },
           store.state,
           [
             {
@@ -606,6 +655,26 @@ describe('Actions Notes Store', () => {
   });
 
   describe('updateOrCreateNotes', () => {
+    it('Prevents `fetchDiscussions` being called multiple times within time limit', () => {
+      jest.useFakeTimers();
+      const note = { id: 1234, type: notesConstants.DIFF_NOTE };
+      const getters = { notesById: {} };
+      state = { discussions: [note], notesData: { discussionsPath: '' } };
+      commit.mockImplementation((type, value) => {
+        if (type === mutationTypes.SET_FETCHING_DISCUSSIONS) {
+          mutations[type](state, value);
+        }
+      });
+
+      actions.updateOrCreateNotes({ commit, state, getters, dispatch }, [note]);
+      actions.updateOrCreateNotes({ commit, state, getters, dispatch }, [note]);
+
+      jest.runAllTimers();
+      actions.updateOrCreateNotes({ commit, state, getters, dispatch }, [note]);
+
+      expect(dispatch).toHaveBeenCalledTimes(2);
+    });
+
     it('Updates existing note', () => {
       const note = { id: 1234 };
       const getters = { notesById: { 1234: note } };
@@ -1075,9 +1144,27 @@ describe('Actions Notes Store', () => {
     it('calls the correct mutation with the correct args', done => {
       testAction(
         actions.setDiscussionSortDirection,
-        notesConstants.DESC,
+        { direction: notesConstants.DESC, persist: false },
         {},
-        [{ type: mutationTypes.SET_DISCUSSIONS_SORT, payload: notesConstants.DESC }],
+        [
+          {
+            type: mutationTypes.SET_DISCUSSIONS_SORT,
+            payload: { direction: notesConstants.DESC, persist: false },
+          },
+        ],
+        [],
+        done,
+      );
+    });
+  });
+
+  describe('setSelectedCommentPosition', () => {
+    it('calls the correct mutation with the correct args', done => {
+      testAction(
+        actions.setSelectedCommentPosition,
+        {},
+        {},
+        [{ type: mutationTypes.SET_SELECTED_COMMENT_POSITION, payload: {} }],
         [],
         done,
       );
@@ -1139,6 +1226,143 @@ describe('Actions Notes Store', () => {
             done();
           });
       });
+    });
+  });
+
+  describe('setConfidentiality', () => {
+    it('calls the correct mutation with the correct args', () => {
+      testAction(actions.setConfidentiality, true, { noteableData: { confidential: false } }, [
+        { type: mutationTypes.SET_ISSUE_CONFIDENTIAL, payload: true },
+      ]);
+    });
+  });
+
+  describe('updateAssignees', () => {
+    it('update the assignees state', done => {
+      testAction(
+        actions.updateAssignees,
+        [userDataMock.id],
+        { state: noteableDataMock },
+        [{ type: mutationTypes.UPDATE_ASSIGNEES, payload: [userDataMock.id] }],
+        [],
+        done,
+      );
+    });
+  });
+
+  describe('updateConfidentialityOnIssuable', () => {
+    state = { noteableData: { confidential: false } };
+    const iid = '1';
+    const projectPath = 'full/path';
+    const getters = { getNoteableData: { iid } };
+    const actionArgs = { fullPath: projectPath, confidential: true };
+    const confidential = true;
+
+    beforeEach(() => {
+      jest
+        .spyOn(utils.gqClient, 'mutate')
+        .mockResolvedValue({ data: { issueSetConfidential: { issue: { confidential } } } });
+    });
+
+    it('calls gqClient mutation one time', () => {
+      actions.updateConfidentialityOnIssuable({ commit: () => {}, state, getters }, actionArgs);
+
+      expect(utils.gqClient.mutate).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls gqClient mutation with the correct values', () => {
+      actions.updateConfidentialityOnIssuable({ commit: () => {}, state, getters }, actionArgs);
+
+      expect(utils.gqClient.mutate).toHaveBeenCalledWith({
+        mutation: updateIssueConfidentialMutation,
+        variables: { input: { iid, projectPath, confidential } },
+      });
+    });
+
+    describe('on success of mutation', () => {
+      it('calls commit with the correct values', () => {
+        const commitSpy = jest.fn();
+
+        return actions
+          .updateConfidentialityOnIssuable({ commit: commitSpy, state, getters }, actionArgs)
+          .then(() => {
+            expect(commitSpy).toHaveBeenCalledWith(
+              mutationTypes.SET_ISSUE_CONFIDENTIAL,
+              confidential,
+            );
+          });
+      });
+    });
+  });
+
+  describe.each`
+    issuableType
+    ${'issue'}   | ${'merge_request'}
+  `('updateLockedAttribute for issuableType=$issuableType', ({ issuableType }) => {
+    // Payload for mutation query
+    state = { noteableData: { discussion_locked: false } };
+    const targetType = issuableType;
+    const getters = { getNoteableData: { iid: '1', targetType } };
+
+    // Target state after mutation
+    const locked = true;
+    const actionArgs = { fullPath: 'full/path', locked };
+    const input = { iid: '1', projectPath: 'full/path', locked: true };
+
+    // Helper functions
+    const targetMutation = () => {
+      return targetType === 'issue' ? updateIssueLockMutation : updateMergeRequestLockMutation;
+    };
+
+    const mockResolvedValue = () => {
+      return targetType === 'issue'
+        ? { data: { issueSetLocked: { issue: { discussionLocked: locked } } } }
+        : { data: { mergeRequestSetLocked: { mergeRequest: { discussionLocked: locked } } } };
+    };
+
+    beforeEach(() => {
+      jest.spyOn(utils.gqClient, 'mutate').mockResolvedValue(mockResolvedValue());
+    });
+
+    it('calls gqClient mutation one time', () => {
+      actions.updateLockedAttribute({ commit: () => {}, state, getters }, actionArgs);
+
+      expect(utils.gqClient.mutate).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls gqClient mutation with the correct values', () => {
+      actions.updateLockedAttribute({ commit: () => {}, state, getters }, actionArgs);
+
+      expect(utils.gqClient.mutate).toHaveBeenCalledWith({
+        mutation: targetMutation(),
+        variables: { input },
+      });
+    });
+
+    describe('on success of mutation', () => {
+      it('calls commit with the correct values', () => {
+        const commitSpy = jest.fn();
+
+        return actions
+          .updateLockedAttribute({ commit: commitSpy, state, getters }, actionArgs)
+          .then(() => {
+            expect(commitSpy).toHaveBeenCalledWith(mutationTypes.SET_ISSUABLE_LOCK, locked);
+          });
+      });
+    });
+  });
+
+  describe('updateDiscussionPosition', () => {
+    it('update the assignees state', done => {
+      const updatedPosition = { discussionId: 1, position: { test: true } };
+      testAction(
+        actions.updateDiscussionPosition,
+        updatedPosition,
+        { state: { discussions: [] } },
+        [{ type: mutationTypes.UPDATE_DISCUSSION_POSITION, payload: updatedPosition }],
+        [],
+        done,
+      );
     });
   });
 });

@@ -7,6 +7,8 @@ module Groups
     before_action :authorize_admin_dependency_proxy!, only: :update
     before_action :dependency_proxy
 
+    feature_category :package_registry
+
     def show
       @blobs_count = group.dependency_proxy_blobs.count
       @blobs_total_size = group.dependency_proxy_blobs.total_size

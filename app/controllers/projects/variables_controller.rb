@@ -3,16 +3,23 @@
 class Projects::VariablesController < Projects::ApplicationController
   before_action :authorize_admin_build!
 
+  feature_category :continuous_integration
+
   def show
     respond_to do |format|
       format.json do
-        render status: :ok, json: { variables: VariableSerializer.new.represent(@project.variables) }
+        render status: :ok, json: { variables: ::Ci::VariableSerializer.new.represent(@project.variables) }
       end
     end
   end
 
   def update
-    if @project.update(variables_params)
+    update_result = Ci::ChangeVariablesService.new(
+      container: @project, current_user: current_user,
+      params: variables_params
+    ).execute
+
+    if update_result
       respond_to do |format|
         format.json { render_variables }
       end
@@ -26,7 +33,7 @@ class Projects::VariablesController < Projects::ApplicationController
   private
 
   def render_variables
-    render status: :ok, json: { variables: VariableSerializer.new.represent(@project.variables) }
+    render status: :ok, json: { variables: ::Ci::VariableSerializer.new.represent(@project.variables) }
   end
 
   def render_error

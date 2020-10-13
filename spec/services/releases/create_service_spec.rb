@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Releases::CreateService do
+RSpec.describe Releases::CreateService do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
   let(:tag_name) { project.repository.tag_names.first }
@@ -188,6 +188,7 @@ describe Releases::CreateService do
   end
 
   context 'Evidence collection' do
+    let(:sha) { project.repository.commit('master').sha }
     let(:params) do
       {
         name: 'New release',
@@ -197,10 +198,11 @@ describe Releases::CreateService do
         released_at: released_at
       }.compact
     end
+
     let(:last_release) { project.releases.last }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     subject { service.execute }
@@ -226,6 +228,75 @@ describe Releases::CreateService do
         subject
 
         expect(last_release.upcoming_release?).to be_falsy
+      end
+    end
+
+    shared_examples 'uses the right pipeline for evidence' do
+      it 'creates evidence without pipeline if it does not exist', :sidekiq_inline do
+        expect_next_instance_of(Releases::CreateEvidenceService, anything, pipeline: nil) do |service|
+          expect(service).to receive(:execute).and_call_original
+        end
+
+        expect { subject }.to change(Releases::Evidence, :count).by(1)
+      end
+
+      it 'uses the last pipeline for evidence', :sidekiq_inline do
+        create(:ci_empty_pipeline, sha: sha, project: project) # old pipeline
+        pipeline = create(:ci_empty_pipeline, sha: sha, project: project)
+
+        expect_next_instance_of(Releases::CreateEvidenceService, anything, pipeline: pipeline) do |service|
+          expect(service).to receive(:execute).and_call_original
+        end
+
+        expect { subject }.to change(Releases::Evidence, :count).by(1)
+      end
+
+      context 'when old evidence_pipeline is passed to service' do
+        let!(:old_pipeline) { create(:ci_empty_pipeline, sha: sha, project: project) }
+        let!(:new_pipeline) { create(:ci_empty_pipeline, sha: sha, project: project) }
+        let(:params) do
+          super().merge(
+            evidence_pipeline: old_pipeline
+          )
+        end
+
+        it 'uses the old pipeline for evidence', :sidekiq_inline do
+          expect_next_instance_of(Releases::CreateEvidenceService, anything, pipeline: old_pipeline) do |service|
+            expect(service).to receive(:execute).and_call_original
+          end
+
+          expect { subject }.to change(Releases::Evidence, :count).by(1)
+        end
+      end
+
+      it 'pipeline is still being used for evidence if new pipeline is being created for tag', :sidekiq_inline do
+        pipeline = create(:ci_empty_pipeline, sha: sha, project: project)
+
+        expect(project.repository).to receive(:add_tag).and_wrap_original do |m, *args|
+          create(:ci_empty_pipeline, sha: sha, project: project)
+          m.call(*args)
+        end
+
+        expect_next_instance_of(Releases::CreateEvidenceService, anything, pipeline: pipeline) do |service|
+          expect(service).to receive(:execute).and_call_original
+        end
+
+        expect { subject }.to change(Releases::Evidence, :count).by(1)
+      end
+
+      it 'uses the last pipeline for evidence when tag is already created', :sidekiq_inline do
+        Tags::CreateService.new(project, user).execute('v0.1', 'master', nil)
+
+        expect(project.repository.find_tag('v0.1')).to be_present
+
+        create(:ci_empty_pipeline, sha: sha, project: project) # old pipeline
+        pipeline = create(:ci_empty_pipeline, sha: sha, project: project)
+
+        expect_next_instance_of(Releases::CreateEvidenceService, anything, pipeline: pipeline) do |service|
+          expect(service).to receive(:execute).and_call_original
+        end
+
+        expect { subject }.to change(Releases::Evidence, :count).by(1)
       end
     end
 
@@ -257,6 +328,8 @@ describe Releases::CreateService do
 
         expect(last_release.upcoming_release?).to be_falsy
       end
+
+      include_examples 'uses the right pipeline for evidence'
     end
 
     context 'upcoming release' do
@@ -287,6 +360,8 @@ describe Releases::CreateService do
 
         expect(last_release.upcoming_release?).to be_truthy
       end
+
+      include_examples 'uses the right pipeline for evidence'
     end
   end
 end

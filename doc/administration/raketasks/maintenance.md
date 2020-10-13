@@ -23,32 +23,73 @@ Example output:
 
 ```plaintext
 System information
-System:           Debian 7.8
-Current User:     git
-Using RVM:        no
-Ruby Version:     2.1.5p273
-Gem Version:      2.4.3
-Bundler Version:  1.7.6
-Rake Version:     10.3.2
-Redis Version:    3.2.5
-Sidekiq Version:  2.17.8
+System:         Ubuntu 20.04
+Proxy:          no
+Current User:   git
+Using RVM:      no
+Ruby Version:   2.6.6p146
+Gem Version:    2.7.10
+Bundler Version:1.17.3
+Rake Version:   12.3.3
+Redis Version:  5.0.9
+Git Version:    2.27.0
+Sidekiq Version:5.2.9
+Go Version:     unknown
 
 GitLab information
-Version:          7.7.1
-Revision:         41ab9e1
-Directory:        /home/git/gitlab
-DB Adapter:       postgresql
-URL:              https://gitlab.example.com
-HTTP Clone URL:   https://gitlab.example.com/some-project.git
-SSH Clone URL:    git@gitlab.example.com:some-project.git
-Using LDAP:       no
-Using Omniauth:   no
+Version:        13.2.2-ee
+Revision:       618883a1f9d
+Directory:      /opt/gitlab/embedded/service/gitlab-rails
+DB Adapter:     PostgreSQL
+DB Version:     11.7
+URL:            http://gitlab.example.com
+HTTP Clone URL: http://gitlab.example.com/some-group/some-project.git
+SSH Clone URL:  git@gitlab.example.com:some-group/some-project.git
+Elasticsearch:  no
+Geo:            no
+Using LDAP:     no
+Using Omniauth: yes
+Omniauth Providers:
 
 GitLab Shell
-Version:          2.4.1
-Repositories:     /home/git/repositories/
-Hooks:            /home/git/gitlab-shell/hooks/
-Git:              /usr/bin/git
+Version:    13.3.0
+Repository storage paths:
+- default:  /var/opt/gitlab/git-data/repositories
+GitLab Shell path:      /opt/gitlab/embedded/service/gitlab-shell
+```
+
+## Show GitLab license information **(STARTER ONLY)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20501) in GitLab Starter 12.6.
+
+This command shows information about your [GitLab license](../../user/admin_area/license.md) and
+how many seats are used. It is only available on GitLab Enterprise
+installations: a license cannot be installed into GitLab Community Edition.
+
+These may be useful when raising tickets with Support, or for programmatically
+checking your license parameters.
+
+**Omnibus Installation**
+
+```shell
+sudo gitlab-rake gitlab:license:info
+```
+
+**Source Installation**
+
+```shell
+bundle exec rake gitlab:license:info RAILS_ENV=production
+```
+
+Example output:
+
+```plaintext
+Today's Date: 2020-02-29
+Current User Count: 30
+Max Historical Count: 30
+Max Users in License: 40
+License valid from: 2019-11-29 to 2020-11-28
+Email associated with license: user@example.com
 ```
 
 ## Check GitLab configuration
@@ -62,7 +103,7 @@ The `gitlab:check` Rake task runs the following Rake tasks:
 
 It will check that each component was set up according to the installation guide and suggest fixes
 for issues found. This command must be run from your application server and will not work correctly on
-component servers like [Gitaly](../gitaly/index.md#running-gitaly-on-its-own-server).
+component servers like [Gitaly](../gitaly/index.md#run-gitaly-on-its-own-server).
 
 You may also have a look at our troubleshooting guides for:
 
@@ -226,7 +267,7 @@ clear it.
 
 To clear all exclusive leases:
 
-DANGER: **DANGER**:
+DANGER: **Danger:**
 Don't run it while GitLab or Sidekiq is running
 
 ```shell
@@ -283,7 +324,7 @@ migrations are completed (have an `up` status).
 
 Sometimes you may need to re-import the common metrics that power the Metrics dashboards.
 
-This could be as a result of [updating existing metrics](../../development/prometheus_metrics.md#update-existing-metrics), or as a [troubleshooting measure](../../user/project/integrations/prometheus.md#troubleshooting).
+This could be as a result of [updating existing metrics](../../development/prometheus_metrics.md#update-existing-metrics), or as a [troubleshooting measure](../../operations/metrics/dashboards/index.md#troubleshooting).
 
 To re-import the metrics you can run:
 

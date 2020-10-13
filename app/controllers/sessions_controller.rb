@@ -8,8 +8,11 @@ class SessionsController < Devise::SessionsController
   include Recaptcha::Verify
   include RendersLdapServers
   include KnownSignIn
+  include Gitlab::Utils::StrongMemoize
 
   skip_before_action :check_two_factor_requirement, only: [:destroy]
+  skip_before_action :check_password_expiration, only: [:destroy]
+
   # replaced with :require_no_authentication_without_flash
   skip_before_action :require_no_authentication, only: [:new, :create]
 
@@ -25,7 +28,10 @@ class SessionsController < Devise::SessionsController
   before_action :store_unauthenticated_sessions, only: [:new]
   before_action :save_failed_login, if: :action_new_and_failed_login?
   before_action :load_recaptcha
-  before_action :frontend_tracking_data, only: [:new]
+  before_action :set_invite_params, only: [:new]
+  before_action do
+    push_frontend_feature_flag(:webauthn)
+  end
 
   after_action :log_failed_login, if: :action_new_and_failed_login?
   after_action :verify_known_sign_in, only: [:create]
@@ -42,6 +48,8 @@ class SessionsController < Devise::SessionsController
   # RequestForgeryProtection#verify_authenticity_token would fail because of
   # token mismatch.
   protect_from_forgery with: :exception, prepend: true, except: :destroy
+
+  feature_category :authentication_and_authorization
 
   CAPTCHA_HEADER = 'X-GitLab-Show-Login-Captcha'
   MAX_FAILED_LOGIN_ATTEMPTS = 5
@@ -156,13 +164,13 @@ class SessionsController < Devise::SessionsController
     (options = request.env["warden.options"]) && options[:action] == "unauthenticated"
   end
 
-  # storing sessions per IP lets us check if there are associated multiple
+  # counting sessions per IP lets us check if there are associated multiple
   # anonymous sessions with one IP and prevent situations when there are
   # multiple attempts of logging in
   def store_unauthenticated_sessions
     return if current_user
 
-    Gitlab::AnonymousSession.new(request.remote_ip, session_id: request.session.id).store_session_id_per_ip
+    Gitlab::AnonymousSession.new(request.remote_ip).count_session_ip
   end
 
   # Handle an "initial setup" state, where there's only one user, it's an admin,
@@ -197,10 +205,14 @@ class SessionsController < Devise::SessionsController
   end
 
   def find_user
-    if session[:otp_user_id]
-      User.find(session[:otp_user_id])
-    elsif user_params[:login]
-      User.by_login(user_params[:login])
+    strong_memoize(:find_user) do
+      if session[:otp_user_id] && user_params[:login]
+        User.by_id_and_login(session[:otp_user_id], user_params[:login]).first
+      elsif session[:otp_user_id]
+        User.find(session[:otp_user_id])
+      elsif user_params[:login]
+        User.by_login(user_params[:login])
+      end
     end
   end
 
@@ -280,22 +292,23 @@ class SessionsController < Devise::SessionsController
   end
 
   def exceeded_anonymous_sessions?
-    Gitlab::AnonymousSession.new(request.remote_ip).stored_sessions >= MAX_FAILED_LOGIN_ATTEMPTS
+    Gitlab::AnonymousSession.new(request.remote_ip).session_count >= MAX_FAILED_LOGIN_ATTEMPTS
   end
 
   def authentication_method
     if user_params[:otp_attempt]
       "two-factor"
-    elsif user_params[:device_response]
+    elsif user_params[:device_response] && Feature.enabled?(:webauthn)
+      "two-factor-via-webauthn-device"
+    elsif user_params[:device_response] && !Feature.enabled?(:webauthn)
       "two-factor-via-u2f-device"
     else
       "standard"
     end
   end
 
-  def frontend_tracking_data
-    # We want tracking data pushed to the frontend when the user is _in_ the control group
-    frontend_experimentation_tracking_data(:signup_flow, 'start') unless experiment_enabled?(:signup_flow)
+  def set_invite_params
+    @invite_email = ActionController::Base.helpers.sanitize(params[:invite_email])
   end
 end
 

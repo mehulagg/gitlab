@@ -1,19 +1,35 @@
 import invalidUrl from '~/lib/utils/invalid_url';
 import { timezones } from '../format_date';
+import { dashboardEmptyStates } from '../constants';
+import { defaultTimeRange } from '~/vue_shared/constants';
 
 export default () => ({
   // API endpoints
   deploymentsEndpoint: null,
   dashboardEndpoint: invalidUrl,
   dashboardsEndpoint: invalidUrl,
+  panelPreviewEndpoint: invalidUrl,
 
   // Dashboard request parameters
   timeRange: null,
+  /**
+   * Currently selected dashboard. For custom dashboards,
+   * this could be the filename or the file path.
+   *
+   * If this is the filename and full path is required,
+   * getters.fullDashboardPath should be used.
+   */
   currentDashboard: null,
 
   // Dashboard data
-  emptyState: 'gettingStarted',
-  showEmptyState: true,
+  hasDashboardValidationWarnings: false,
+
+  /**
+   * {?String} If set, dashboard should display a global
+   * empty state, there is no way to interact (yet)
+   * with the dashboard.
+   */
+  emptyState: dashboardEmptyStates.GETTING_STARTED,
   showErrorBanner: true,
   isUpdatingStarredValue: false,
   dashboard: {
@@ -39,12 +55,21 @@ export default () => ({
    * User-defined custom variables are passed
    * via the dashboard yml file.
    */
-  variables: {},
+  variables: [],
   /**
    * User-defined custom links are passed
    * via the dashboard yml file.
    */
-  links: {},
+  links: [],
+
+  // Panel editor / builder
+  panelPreviewYml: '',
+  panelPreviewIsLoading: false,
+  panelPreviewGraphData: null,
+  panelPreviewError: null,
+  panelPreviewTimeRange: defaultTimeRange,
+  panelPreviewIsShown: false,
+
   // Other project data
   dashboardTimezone: timezones.LOCAL,
   annotations: [],
@@ -55,6 +80,19 @@ export default () => ({
   currentEnvironmentName: null,
 
   // GitLab paths to other pages
+  externalDashboardUrl: '',
   projectPath: null,
+  operationsSettingsPath: '',
   logsPath: invalidUrl,
+  addDashboardDocumentationPath: '',
+
+  // static paths
+  customDashboardBasePath: '',
+
+  // current user data
+  /**
+   * Flag that denotes if the currently logged user can access
+   * the project Settings -> Operations
+   */
+  canAccessOperationsSettings: false,
 });

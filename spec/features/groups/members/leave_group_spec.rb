@@ -2,12 +2,14 @@
 
 require 'spec_helper'
 
-describe 'Groups > Members > Leave group' do
+RSpec.describe 'Groups > Members > Leave group' do
   let(:user) { create(:user) }
   let(:other_user) { create(:user) }
   let(:group) { create(:group) }
 
   before do
+    stub_feature_flags(vue_group_members_list: false)
+
     gitlab_sign_in(user)
   end
 
@@ -31,6 +33,7 @@ describe 'Groups > Members > Leave group' do
 
     page.accept_confirm
 
+    wait_for_all_requests
     expect(current_path).to eq(dashboard_groups_path)
     expect(group.users).not_to include(user)
   end
@@ -67,7 +70,7 @@ describe 'Groups > Members > Leave group' do
 
     visit group_group_members_path(group)
 
-    expect(find(:css, '.project-members-page li', text: user.name)).not_to have_selector(:css, 'a.btn-remove')
+    expect(find(:css, '.project-members-page li', text: user.name)).to have_no_selector(:css, 'a.btn-danger')
   end
 
   it 'owner can not leave the group by url param if they are the last owner', :js do

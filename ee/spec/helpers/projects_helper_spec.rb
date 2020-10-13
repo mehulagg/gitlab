@@ -87,85 +87,159 @@ RSpec.describe ProjectsHelper do
     end
   end
 
-  shared_context 'project with owner and pipeline' do
-    let(:user) { create(:user) }
-    let(:group) { create(:group).tap { |g| g.add_owner(user) } }
-    let(:pipeline) do
-      create(:ee_ci_pipeline,
-             :with_sast_report,
-             user: user,
-             project: project,
-             ref: project.default_branch,
-             sha: project.commit.sha)
-    end
-    let(:project) { create(:project, :repository, group: group) }
-  end
+  describe '#group_project_templates_count' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:parent_group) { create(:group, name: 'parent-group') }
+    let_it_be(:template_group) { create(:group, parent: parent_group, name: 'template-group') }
+    let_it_be(:template_project) { create(:project, group: template_group, name: 'template-project') }
 
-  describe '#project_security_dashboard_config' do
-    include_context 'project with owner and pipeline'
+    before_all do
+      parent_group.update!(custom_project_templates_group_id: template_group.id)
+      parent_group.add_owner(user)
+    end
 
     before do
       allow(helper).to receive(:current_user).and_return(user)
     end
 
-    let(:project) { create(:project, :repository, group: group) }
+    it do
+      expect(helper.group_project_templates_count(parent_group.id)).to eq 1
+    end
 
-    context 'project without pipeline' do
-      subject { helper.project_security_dashboard_config(project, nil) }
+    context 'when template project is pending deletion' do
+      before do
+        template_project.update!(marked_for_deletion_at: Date.current)
+      end
 
-      it 'returns simple config' do
-        expect(subject).to match(
+      it do
+        expect(helper.group_project_templates_count(parent_group.id)).to eq 0
+      end
+    end
+  end
+
+  describe '#project_security_dashboard_config' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, :repository, group: group) }
+
+    subject { helper.project_security_dashboard_config(project) }
+
+    before do
+      group.add_owner(user)
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    context 'project without vulnerabilities' do
+      let(:expected_value) do
+        {
+          has_vulnerabilities: 'false',
           empty_state_svg_path: start_with('/assets/illustrations/security-dashboard_empty'),
           security_dashboard_help_path: '/help/user/application_security/security_dashboard/index'
-        )
+        }
       end
+
+      it { is_expected.to match(expected_value) }
     end
 
-    context 'project with pipeline' do
-      subject { helper.project_security_dashboard_config(project, pipeline) }
-
-      it 'checks if first vulnerability class is enabled' do
-        expect(::Feature).to receive(:enabled?).with(:first_class_vulnerabilities, project, default_enabled: true)
-
-        subject
+    context 'project with vulnerabilities' do
+      let(:base_values) do
+        {
+          has_vulnerabilities: 'true',
+          project: { id: project.id, name: project.name },
+          project_full_path: project.full_path,
+          vulnerabilities_export_endpoint: "/api/v4/security/projects/#{project.id}/vulnerability_exports",
+          vulnerability_feedback_help_path: '/help/user/application_security/index#interacting-with-the-vulnerabilities',
+          no_vulnerabilities_svg_path: start_with('/assets/illustrations/issues-'),
+          empty_state_svg_path: start_with('/assets/illustrations/security-dashboard-empty-state'),
+          dashboard_documentation: '/help/user/application_security/security_dashboard/index',
+          security_dashboard_help_path: '/help/user/application_security/security_dashboard/index',
+          not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
+          no_pipeline_run_scanners_help_path: "/#{project.full_path}/-/pipelines/new",
+          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests')
+        }
       end
 
-      context 'when first first class vulnerabilities is enabled for project' do
+      before do
+        create(:vulnerability, project: project)
+      end
+
+      context 'without pipeline' do
         before do
-          expect(::Feature).to receive(:enabled?).with(:first_class_vulnerabilities, project, default_enabled: true).and_return(true)
+          allow(project).to receive(:latest_pipeline_with_security_reports).and_return(nil)
         end
 
-        it 'checks if first vulnerability class is enabled' do
-          expect(subject[:vulnerabilities_export_endpoint]).to(
-            eq(
-              api_v4_security_projects_vulnerability_exports_path(id: project.id)
-            ))
-        end
+        it { is_expected.to match(base_values) }
       end
 
-      context 'when first first class vulnerabilities is disabled for project' do
+      context 'with pipeline' do
+        let(:pipeline_created_at) { '1881-05-19T00:00:00Z' }
+        let(:pipeline) { build_stubbed(:ci_pipeline, project: project, created_at: pipeline_created_at) }
+        let(:pipeline_values) do
+          {
+            pipeline: {
+              id: pipeline.id,
+              path: "/#{project.full_path}/-/pipelines/#{pipeline.id}",
+              created_at: pipeline_created_at,
+              security_builds: {
+                failed: {
+                  count: 0,
+                  path: "/#{project.full_path}/-/pipelines/#{pipeline.id}/failures"
+                }
+              }
+            }
+          }
+        end
+
         before do
-          expect(::Feature).to receive(:enabled?).with(:first_class_vulnerabilities, project, default_enabled: true).and_return(false)
+          allow(project).to receive(:latest_pipeline_with_security_reports).and_return(pipeline)
         end
 
-        it 'checks if first vulnerability class is enabled' do
-          expect(subject).not_to have_key(:vulnerabilities_export_endpoint)
-        end
-      end
-
-      it 'returns config containing pipeline details' do
-        expect(subject[:security_dashboard_help_path]).to eq '/help/user/application_security/security_dashboard/index'
-        expect(subject[:has_pipeline_data]).to eq 'true'
-      end
-
-      it 'returns the "vulnerability findings" endpoint paths' do
-        expect(subject[:vulnerabilities_endpoint]).to eq project_security_vulnerability_findings_path(project)
-        expect(subject[:vulnerabilities_summary_endpoint]).to(
-          eq(
-            summary_project_security_vulnerability_findings_path(project)
-          ))
+        it { is_expected.to match(base_values.merge!(pipeline_values)) }
       end
     end
+  end
+
+  describe '#sidebar_security_paths' do
+    let(:expected_security_paths) do
+      %w[
+        projects/security/configuration#show
+        projects/security/sast_configuration#show
+        projects/security/vulnerabilities#show
+        projects/security/dashboard#index
+        projects/on_demand_scans#index
+        projects/dast_profiles#index
+        projects/dast_site_profiles#new
+        projects/dast_site_profiles#edit
+        projects/dast_scanner_profiles#new
+        projects/dast_scanner_profiles#edit
+        projects/dependencies#index
+        projects/licenses#index
+        projects/threat_monitoring#show
+        projects/threat_monitoring#new
+        projects/threat_monitoring#edit
+      ]
+    end
+
+    subject { helper.sidebar_security_paths }
+
+    it { is_expected.to eq(expected_security_paths) }
+  end
+
+  describe '#sidebar_on_demand_scans_paths' do
+    let(:expected_on_demand_scans_paths) do
+      %w[
+        projects/on_demand_scans#index
+        projects/dast_profiles#index
+        projects/dast_site_profiles#new
+        projects/dast_site_profiles#edit
+        projects/dast_scanner_profiles#new
+        projects/dast_scanner_profiles#edit
+      ]
+    end
+
+    subject { helper.sidebar_on_demand_scans_paths }
+
+    it { is_expected.to eq(expected_on_demand_scans_paths) }
   end
 
   describe '#get_project_nav_tabs' do
@@ -221,7 +295,6 @@ RSpec.describe ProjectsHelper do
       ab_feature_enabled?: [true, false],
       gitlab_com?: [true, false],
        user?: [true, false],
-      created_at: [Time.mktime(2010, 1, 20), Time.mktime(2030, 1, 20)],
       security_dashboard_feature_available?: [true, false],
       can_admin_namespace?: [true, false]
     )
@@ -231,15 +304,52 @@ RSpec.describe ProjectsHelper do
         allow(::Gitlab).to receive(:com?) { gitlab_com? }
         allow(user).to receive(:ab_feature_enabled?) { ab_feature_enabled? }
         allow(helper).to receive(:current_user) { user? ? user : nil }
-        allow(user).to receive(:created_at) { created_at }
         allow(project).to receive(:feature_available?) { security_dashboard_feature_available? }
         allow(helper).to receive(:can?) { can_admin_namespace? }
 
-        expected_value = user? && created_at > DateTime.new(2019, 11, 1) && gitlab_com? &&
+        expected_value = user? && gitlab_com? &&
                          ab_feature_enabled? && !security_dashboard_feature_available? && can_admin_namespace?
 
         expect(helper.show_discover_project_security?(project)).to eq(expected_value)
       end
+    end
+  end
+
+  describe '#remove_project_message' do
+    subject { helper.remove_project_message(project) }
+
+    before do
+      allow(project).to receive(:adjourned_deletion?).and_return(enabled)
+    end
+
+    context 'when project has delayed deletion enabled' do
+      let(:enabled) { true }
+
+      it do
+        deletion_date = helper.permanent_deletion_date(Time.now.utc)
+
+        expect(subject).to eq "Deleting a project places it into a read-only state until #{deletion_date}, at which point the project will be permanently deleted. Are you ABSOLUTELY sure?"
+      end
+    end
+
+    context 'when project has delayed deletion disabled' do
+      let(:enabled) { false }
+
+      it do
+        expect(subject).to eq "You are going to delete #{project.full_name}. Deleted projects CANNOT be restored! Are you ABSOLUTELY sure?"
+      end
+    end
+  end
+
+  describe '#scheduled_for_deletion?' do
+    context 'when project is NOT scheduled for deletion' do
+      it { expect(helper.scheduled_for_deletion?(project)).to be false }
+    end
+
+    context 'when project is scheduled for deletion' do
+      let_it_be(:archived_project) { create(:project, :archived, marked_for_deletion_at: 10.minutes.ago) }
+
+      it { expect(helper.scheduled_for_deletion?(archived_project)).to be true }
     end
   end
 end

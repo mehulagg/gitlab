@@ -100,13 +100,12 @@ the project repository contains Java source code and the `dependency_scanning` f
 
 ```yaml
 mysec_dependency_scanning:
-  except:
-    variables:
-      - $DEPENDENCY_SCANNING_DISABLED
-  only:
-    variables:
-      - $GITLAB_FEATURES =~ /\bdependency_scanning\b/ &&
-        $CI_PROJECT_REPOSITORY_LANGUAGES =~ /\bjava\b/
+  rules:
+    - if: $DEPENDENCY_SCANNING_DISABLED
+      when: never
+    - if: $GITLAB_FEATURES =~ /\bdependency_scanning\b/
+      exists:
+        - '**/*.java'
 ```
 
 Any additional job policy should only be configured by users based on their needs.
@@ -232,6 +231,32 @@ to colorize the messages they write to the Unix standard output and standard err
 We recommend using red to report errors, yellow for warnings, and green for notices.
 Also, we recommend prefixing error messages with `[ERRO]`, warnings with `[WARN]`, and notices with `[INFO]`.
 
+#### Logging level
+
+The scanner should filter out a log message if its log level is lower than the
+one set in the `SECURE_LOG_LEVEL` variable. For instance, `info` and `warn`
+messages should be skipped when `SECURE_LOG_LEVEL` is set to `error`. Accepted
+values are as follows, listed from highest to lowest:
+
+- `fatal`
+- `error`
+- `warn`
+- `info`
+- `debug`
+
+It is recommended to use the `debug` level for verbose logging that could be
+useful when debugging. The default value for `SECURE_LOG_LEVEL` should be set
+to `info`.
+
+#### common logutil package
+
+If you are using [go](https://golang.org/) and
+[common](https://gitlab.com/gitlab-org/security-products/analyzers/common),
+then it is suggested that you use [logrus](https://github.com/Sirupsen/logrus)
+and [common's logutil package](https://gitlab.com/gitlab-org/security-products/analyzers/common/-/tree/master/logutil)
+to configure the formatter for [logrus](https://github.com/Sirupsen/logrus).
+See the [logutil README.md](https://gitlab.com/gitlab-org/security-products/analyzers/common/-/tree/master/logutil/README.md)
+
 ## Report
 
 The report is a JSON document that combines vulnerabilities with possible remediations.
@@ -240,10 +265,16 @@ This documentation gives an overview of the report JSON format,
 as well as recommendations and examples to help integrators set its fields.
 The format is extensively described in the documentation of
 [SAST](../../user/application_security/sast/index.md#reports-json-format),
+[DAST](../../user/application_security/dast/#reports),
 [Dependency Scanning](../../user/application_security/dependency_scanning/index.md#reports-json-format),
 and [Container Scanning](../../user/application_security/container_scanning/index.md#reports-json-format).
 
-The DAST variant of the report JSON format is not documented at the moment.
+You can find the schemas for these scanners here:
+
+- [SAST](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/sast-report-format.json)
+- [DAST](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/dast-report-format.json)
+- [Dependency Scanning](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/dependency-scanning-report-format.json)
+- [Container Scanning](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/container-scanning-report-format.json)
 
 ### Version
 
@@ -333,7 +364,7 @@ It is recommended to reuse the identifiers the GitLab scanners already define:
 | [CVE](https://cve.mitre.org/cve/) | `cve` | CVE-2019-10086 |
 | [CWE](https://cwe.mitre.org/data/index.html) | `cwe` | CWE-1026 |
 | [OSVD](https://cve.mitre.org/data/refs/refmap/source-OSVDB.html) | `osvdb` | OSVDB-113928 |
-| [USN](https://usn.ubuntu.com/) | `usn` | USN-4234-1 |
+| [USN](https://ubuntu.com/security/notices) | `usn` | USN-4234-1 |
 | [WASC](http://projects.webappsec.org/Threat-Classification-Reference-Grid)  | `wasc` | WASC-19 |
 | [RHSA](https://access.redhat.com/errata/#/) | `rhsa` | RHSA-2020:0111 |
 | [ELSA](https://linux.oracle.com/security/) | `elsa` | ELSA-2020-0085 |
@@ -343,11 +374,15 @@ which is shared by the analyzers that GitLab maintains. You can [contribute](htt
 new generic identifiers to if needed. Analyzers may also produce vendor-specific or product-specific
 identifiers, which don't belong in the [common library](https://gitlab.com/gitlab-org/security-products/analyzers/common).
 
-The first item of the `identifiers` array is called the primary identifier.
+The first item of the `identifiers` array is called the [primary
+identifier](../../user/application_security/terminology/#primary-identifier).
 The primary identifier is particularly important, because it is used to
 [track vulnerabilities](#tracking-and-merging-vulnerabilities) as new commits are pushed to the repository.
 Identifiers are also used to [merge duplicate vulnerabilities](#tracking-and-merging-vulnerabilities)
 reported for the same commit, except for `CWE` and `WASC`.
+
+Not all vulnerabilities have CVEs, and a CVE can be identified multiple times. As a result, a CVE
+isn't a stable identifier and you shouldn't assume it as such when tracking vulnerabilities.
 
 ### Location
 
@@ -547,3 +582,15 @@ remediation. `fixes[].id` contains a fixed vulnerability's [unique identifier](#
 
 The `diff` field is a base64-encoded remediation code diff, compatible with
 [`git apply`](https://git-scm.com/docs/git-format-patch#_discussion). This field is required.
+
+## Limitations
+
+### Container Scanning
+
+Container Scanning currently has these limitations:
+
+- Although the Security Dashboard can display scan results from multiple images, if multiple
+  vulnerabilities have the same fingerprint, only the first instance of that vulnerability is
+  displayed. We're working on removing this limitation. You can follow our progress on the issue
+  [Change location fingerprint for Container Scanning](https://gitlab.com/gitlab-org/gitlab/-/issues/215466).
+- Different scanners may each report the same vulnerability, resulting in duplicate findings.

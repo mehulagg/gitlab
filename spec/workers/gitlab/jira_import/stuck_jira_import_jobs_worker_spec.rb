@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::Gitlab::JiraImport::StuckJiraImportJobsWorker do
+RSpec.describe ::Gitlab::JiraImport::StuckJiraImportJobsWorker do
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let(:worker) { described_class.new }
@@ -12,7 +12,7 @@ describe ::Gitlab::JiraImport::StuckJiraImportJobsWorker do
       let(:import_state) { create(:jira_import_state, :scheduled, project: project) }
 
       before do
-        import_state.update(jid: '123')
+        import_state.update!(jid: '123')
       end
     end
   end
@@ -22,7 +22,7 @@ describe ::Gitlab::JiraImport::StuckJiraImportJobsWorker do
       let(:import_state) { create(:jira_import_state, :started, project: project) }
 
       before do
-        import_state.update(jid: '123')
+        import_state.update!(jid: '123')
       end
     end
   end

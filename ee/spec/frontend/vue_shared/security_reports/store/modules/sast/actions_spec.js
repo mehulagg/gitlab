@@ -92,6 +92,7 @@ describe('sast report actions', () => {
     beforeEach(() => {
       mock = new MockAdapter(axios);
       state.paths.diffEndpoint = diffEndpoint;
+      rootState.canReadVulnerabilityFeedback = true;
     });
 
     afterEach(() => {
@@ -109,6 +110,35 @@ describe('sast report actions', () => {
 
       it('should dispatch the `receiveDiffSuccess` action', done => {
         const { diff, enrichData } = reports;
+        testAction(
+          actions.fetchDiff,
+          {},
+          { ...rootState, ...state },
+          [],
+          [
+            { type: 'requestDiff' },
+            {
+              type: 'receiveDiffSuccess',
+              payload: {
+                diff,
+                enrichData,
+              },
+            },
+          ],
+          done,
+        );
+      });
+    });
+
+    describe('when diff endpoint responds successfully and fetching vulnerability feedback is not authorized', () => {
+      beforeEach(() => {
+        rootState.canReadVulnerabilityFeedback = false;
+        mock.onGet(diffEndpoint).replyOnce(200, reports.diff);
+      });
+
+      it('should dispatch the `receiveDiffSuccess` action with empty enrich data', done => {
+        const { diff } = reports;
+        const enrichData = [];
         testAction(
           actions.fetchDiff,
           {},

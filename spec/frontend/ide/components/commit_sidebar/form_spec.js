@@ -1,16 +1,28 @@
 import Vue from 'vue';
+import { getByText } from '@testing-library/dom';
 import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { projectData } from 'jest/ide/mock_data';
-import store from '~/ide/stores';
+import waitForPromises from 'helpers/wait_for_promises';
+import { createStore } from '~/ide/stores';
+import consts from '~/ide/stores/modules/commit/constants';
 import CommitForm from '~/ide/components/commit_sidebar/form.vue';
 import { leftSidebarViews } from '~/ide/constants';
-import { resetStore } from '../../helpers';
+import {
+  createCodeownersCommitError,
+  createUnexpectedCommitError,
+  createBranchChangedCommitError,
+  branchAlreadyExistsCommitError,
+} from '~/ide/lib/errors';
 
 describe('IDE commit form', () => {
   const Component = Vue.extend(CommitForm);
   let vm;
+  let store;
+
+  const beginCommitButton = () => vm.$el.querySelector('[data-testid="begin-commit-button"]');
 
   beforeEach(() => {
+    store = createStore();
     store.state.changedFiles.push('test');
     store.state.currentProjectId = 'abcproject';
     store.state.currentBranchId = 'master';
@@ -21,12 +33,17 @@ describe('IDE commit form', () => {
 
   afterEach(() => {
     vm.$destroy();
-
-    resetStore(vm.$store);
   });
 
-  it('enables button when has changes', () => {
-    expect(vm.$el.querySelector('[disabled]')).toBe(null);
+  it('enables begin commit button when there are changes', () => {
+    expect(beginCommitButton()).not.toHaveAttr('disabled');
+  });
+
+  it('disables begin commit button when there are no changes', async () => {
+    store.state.changedFiles = [];
+    await vm.$nextTick();
+
+    expect(beginCommitButton()).toHaveAttr('disabled');
   });
 
   describe('compact', () => {
@@ -37,8 +54,8 @@ describe('IDE commit form', () => {
     });
 
     it('renders commit button in compact mode', () => {
-      expect(vm.$el.querySelector('.btn-primary')).not.toBeNull();
-      expect(vm.$el.querySelector('.btn-primary').textContent).toContain('Commit');
+      expect(beginCommitButton()).not.toBeNull();
+      expect(beginCommitButton().textContent).toContain('Commit');
     });
 
     it('does not render form', () => {
@@ -54,7 +71,7 @@ describe('IDE commit form', () => {
     });
 
     it('shows form when clicking commit button', () => {
-      vm.$el.querySelector('.btn-primary').click();
+      beginCommitButton().click();
 
       return vm.$nextTick(() => {
         expect(vm.$el.querySelector('form')).not.toBeNull();
@@ -62,7 +79,7 @@ describe('IDE commit form', () => {
     });
 
     it('toggles activity bar view when clicking commit button', () => {
-      vm.$el.querySelector('.btn-primary').click();
+      beginCommitButton().click();
 
       return vm.$nextTick(() => {
         expect(store.state.currentActivityView).toBe(leftSidebarViews.commit.name);
@@ -82,6 +99,97 @@ describe('IDE commit form', () => {
 
       // collapsed when set to empty
       expect(vm.isCompact).toBe(true);
+    });
+
+    it('collapses if in commit view but there are no changes and vice versa', async () => {
+      store.state.currentActivityView = leftSidebarViews.commit.name;
+      await vm.$nextTick();
+
+      // expanded by default if there are changes
+      expect(vm.isCompact).toBe(false);
+
+      store.state.changedFiles = [];
+      await vm.$nextTick();
+
+      expect(vm.isCompact).toBe(true);
+
+      store.state.changedFiles.push('test');
+      await vm.$nextTick();
+
+      // uncollapsed once again
+      expect(vm.isCompact).toBe(false);
+    });
+
+    it('collapses if switched from commit view to edit view and vice versa', async () => {
+      store.state.currentActivityView = leftSidebarViews.edit.name;
+      await vm.$nextTick();
+
+      expect(vm.isCompact).toBe(true);
+
+      store.state.currentActivityView = leftSidebarViews.commit.name;
+      await vm.$nextTick();
+
+      expect(vm.isCompact).toBe(false);
+
+      store.state.currentActivityView = leftSidebarViews.edit.name;
+      await vm.$nextTick();
+
+      expect(vm.isCompact).toBe(true);
+    });
+
+    describe('when window height is less than MAX_WINDOW_HEIGHT', () => {
+      let oldHeight;
+
+      beforeEach(() => {
+        oldHeight = window.innerHeight;
+        window.innerHeight = 700;
+      });
+
+      afterEach(() => {
+        window.innerHeight = oldHeight;
+      });
+
+      it('stays collapsed when switching from edit view to commit view and back', async () => {
+        store.state.currentActivityView = leftSidebarViews.edit.name;
+        await vm.$nextTick();
+
+        expect(vm.isCompact).toBe(true);
+
+        store.state.currentActivityView = leftSidebarViews.commit.name;
+        await vm.$nextTick();
+
+        expect(vm.isCompact).toBe(true);
+
+        store.state.currentActivityView = leftSidebarViews.edit.name;
+        await vm.$nextTick();
+
+        expect(vm.isCompact).toBe(true);
+      });
+
+      it('stays uncollapsed if changes are added or removed', async () => {
+        store.state.currentActivityView = leftSidebarViews.commit.name;
+        await vm.$nextTick();
+
+        expect(vm.isCompact).toBe(true);
+
+        store.state.changedFiles = [];
+        await vm.$nextTick();
+
+        expect(vm.isCompact).toBe(true);
+
+        store.state.changedFiles.push('test');
+        await vm.$nextTick();
+
+        expect(vm.isCompact).toBe(true);
+      });
+
+      it('uncollapses when clicked on Commit button in the edit view', async () => {
+        store.state.currentActivityView = leftSidebarViews.edit.name;
+        beginCommitButton().click();
+        await waitForPromises();
+
+        expect(vm.isCompact).toBe(false);
+      });
     });
   });
 
@@ -113,7 +221,7 @@ describe('IDE commit form', () => {
     });
 
     it('always opens itself in full view current activity view is not commit view when clicking commit button', () => {
-      vm.$el.querySelector('.btn-primary').click();
+      beginCommitButton().click();
 
       return vm.$nextTick(() => {
         expect(store.state.currentActivityView).toBe(leftSidebarViews.commit.name);
@@ -159,22 +267,58 @@ describe('IDE commit form', () => {
         });
       });
 
-      it('opens new branch modal if commitChanges throws an error', () => {
-        vm.commitChanges.mockRejectedValue({ success: false });
+      it.each`
+        createError                                          | props
+        ${() => createCodeownersCommitError('test message')} | ${{ actionPrimary: { text: 'Create new branch' } }}
+        ${createUnexpectedCommitError}                       | ${{ actionPrimary: null }}
+      `('opens error modal if commitError with $error', async ({ createError, props }) => {
+        jest.spyOn(vm.$refs.commitErrorModal, 'show');
 
-        jest.spyOn(vm.$refs.createBranchModal, 'show').mockImplementation();
+        const error = createError();
+        store.state.commit.commitError = error;
 
-        return vm
-          .$nextTick()
-          .then(() => {
-            vm.$el.querySelector('.btn-success').click();
+        await vm.$nextTick();
 
-            return vm.$nextTick();
-          })
-          .then(() => {
-            expect(vm.$refs.createBranchModal.show).toHaveBeenCalled();
-          });
+        expect(vm.$refs.commitErrorModal.show).toHaveBeenCalled();
+        expect(vm.$refs.commitErrorModal).toMatchObject({
+          actionCancel: { text: 'Cancel' },
+          ...props,
+        });
+        // Because of the legacy 'mountComponent' approach here, the only way to
+        // test the text of the modal is by viewing the content of the modal added to the document.
+        expect(document.body).toHaveText(error.messageHTML);
       });
+    });
+
+    describe('with error modal with primary', () => {
+      beforeEach(() => {
+        jest.spyOn(vm.$store, 'dispatch').mockReturnValue(Promise.resolve());
+      });
+
+      const commitActions = [
+        ['commit/updateCommitAction', consts.COMMIT_TO_NEW_BRANCH],
+        ['commit/commitChanges'],
+      ];
+
+      it.each`
+        commitError                       | expectedActions
+        ${createCodeownersCommitError}    | ${commitActions}
+        ${createBranchChangedCommitError} | ${commitActions}
+        ${branchAlreadyExistsCommitError} | ${[['commit/addSuffixToBranchName'], ...commitActions]}
+      `(
+        'updates commit action and commits for error: $commitError',
+        async ({ commitError, expectedActions }) => {
+          store.state.commit.commitError = commitError('test message');
+
+          await vm.$nextTick();
+
+          getByText(document.body, 'Create new branch').click();
+
+          await waitForPromises();
+
+          expect(vm.$store.dispatch.mock.calls).toEqual(expectedActions);
+        },
+      );
     });
   });
 

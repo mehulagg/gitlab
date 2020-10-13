@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe API::GeoNodes, :request_store, :geo_fdw, :prometheus, api: true do
+RSpec.describe API::GeoNodes, :request_store, :geo, :prometheus, api: true do
   include ApiHelpers
   include ::EE::GeoHelpers
 
@@ -33,7 +33,7 @@ RSpec.describe API::GeoNodes, :request_store, :geo_fdw, :prometheus, api: true d
         url: 'http://example.com',
         selective_sync_type: "shards",
         selective_sync_shards: %w[shard1 shard2],
-        selective_sync_namespace_ids: [group_to_sync.id],
+        selective_sync_namespace_ids: group_to_sync.id,
         minimum_reverification_interval: 10
       }
       expect_any_instance_of(Geo::NodeCreateService).to receive(:execute).once.and_call_original

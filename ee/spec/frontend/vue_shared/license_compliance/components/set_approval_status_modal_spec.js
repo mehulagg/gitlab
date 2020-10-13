@@ -300,7 +300,6 @@ describe('SetApprovalModal', () => {
         expect(actions.allowLicense).toHaveBeenCalledWith(
           expect.any(Object),
           store.state.licenseManagement.currentLicenseInModal,
-          undefined,
         );
       });
     });
@@ -313,7 +312,6 @@ describe('SetApprovalModal', () => {
         expect(actions.denyLicense).toHaveBeenCalledWith(
           expect.any(Object),
           store.state.licenseManagement.currentLicenseInModal,
-          undefined,
         );
       });
     });
@@ -339,9 +337,8 @@ describe('SetApprovalModal', () => {
         expect(licenseName).not.toBeNull();
         expect(trimText(licenseName.innerText)).toBe(`URL: ${badURL}`);
 
-        expect(licenseName.querySelector('a')).toBeNull();
-        expect(licenseName.querySelector('span')).not.toBeNull();
-        expect(licenseName.querySelector('span').innerText).toBe(badURL);
+        expect(licenseName.querySelector('a').getAttribute('href')).toBe('about:blank');
+        expect(licenseName.querySelector('a').innerText).toBe(badURL);
       })
       .then(done)
       .catch(done.fail);

@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
+import { GlAlert, GlDropdown, GlFormCheckbox } from '@gitlab/ui';
 import FluentdOutputSettings from '~/clusters/components/fluentd_output_settings.vue';
 import { APPLICATION_STATUS, FLUENTD } from '~/clusters/constants';
-import { GlAlert, GlDropdown, GlFormCheckbox } from '@gitlab/ui';
 import eventHub from '~/clusters/event_hub';
 
 const { UPDATING } = APPLICATION_STATUS;
@@ -70,12 +70,12 @@ describe('FluentdOutputSettings', () => {
     });
 
     describe.each`
-      desc                                     | changeFn                                                       | key                   | value
-      ${'when protocol dropdown is triggered'} | ${() => changeProtocol(1)}                                     | ${'protocol'}         | ${'udp'}
-      ${'when host is changed'}                | ${() => changeHost('test-host')}                               | ${'host'}             | ${'test-host'}
-      ${'when port is changed'}                | ${() => changePort(123)}                                       | ${'port'}             | ${123}
-      ${'when wafLogEnabled changes'}          | ${() => changeCheckbox(findCheckbox('Send ModSecurity Logs'))} | ${'wafLogEnabled'}    | ${!defaultSettings.wafLogEnabled}
-      ${'when ciliumLogEnabled changes'}       | ${() => changeCheckbox(findCheckbox('Send Cilium Logs'))}      | ${'ciliumLogEnabled'} | ${!defaultSettings.ciliumLogEnabled}
+      desc                                     | changeFn                                                                      | key                   | value
+      ${'when protocol dropdown is triggered'} | ${() => changeProtocol(1)}                                                    | ${'protocol'}         | ${'udp'}
+      ${'when host is changed'}                | ${() => changeHost('test-host')}                                              | ${'host'}             | ${'test-host'}
+      ${'when port is changed'}                | ${() => changePort(123)}                                                      | ${'port'}             | ${123}
+      ${'when wafLogEnabled changes'}          | ${() => changeCheckbox(findCheckbox('Send Web Application Firewall Logs'))}   | ${'wafLogEnabled'}    | ${!defaultSettings.wafLogEnabled}
+      ${'when ciliumLogEnabled changes'}       | ${() => changeCheckbox(findCheckbox('Send Container Network Policies Logs'))} | ${'ciliumLogEnabled'} | ${!defaultSettings.ciliumLogEnabled}
     `('$desc', ({ changeFn, key, value }) => {
       beforeEach(() => {
         changeFn();
@@ -168,7 +168,7 @@ describe('FluentdOutputSettings', () => {
       });
 
       it('displays a error message', () => {
-        expect(wrapper.contains(GlAlert)).toBe(true);
+        expect(wrapper.find(GlAlert).exists()).toBe(true);
       });
     });
   });

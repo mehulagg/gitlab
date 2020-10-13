@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApplicationSettingsHelper do
+RSpec.describe ApplicationSettingsHelper do
   context 'when all protocols in use' do
     before do
       stub_application_setting(enabled_git_access_protocol: '')
@@ -121,6 +121,49 @@ describe ApplicationSettingsHelper do
           'self_monitoring_project_full_path' => project.full_path
         )
       end
+    end
+  end
+
+  describe '.storage_weights' do
+    let(:application_setting) { build(:application_setting) }
+
+    before do
+      helper.instance_variable_set(:@application_setting, application_setting)
+      stub_storage_settings({ 'default': {}, 'storage_1': {}, 'storage_2': {} })
+      allow(ApplicationSetting).to receive(:repository_storages_weighted_attributes).and_return(
+        [:repository_storages_weighted_default,
+         :repository_storages_weighted_storage_1,
+         :repository_storages_weighted_storage_2])
+
+      stub_application_setting(repository_storages_weighted: { 'default' => 100, 'storage_1' => 50, 'storage_2' => nil })
+    end
+
+    it 'returns storages correctly' do
+      expect(helper.storage_weights).to eq([
+          { name: :repository_storages_weighted_default, label: 'default', value: 100 },
+          { name: :repository_storages_weighted_storage_1, label: 'storage_1', value: 50 },
+          { name: :repository_storages_weighted_storage_2, label: 'storage_2', value: 0 }
+        ])
+    end
+  end
+
+  describe '.show_documentation_base_url_field?' do
+    subject { helper.show_documentation_base_url_field? }
+
+    before do
+      stub_feature_flags(help_page_documentation_redirect: feature_flag)
+    end
+
+    context 'when feature flag is enabled' do
+      let(:feature_flag) { true }
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when feature flag is disabled' do
+      let(:feature_flag) { false }
+
+      it { is_expected.to eq(false) }
     end
   end
 end

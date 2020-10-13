@@ -3,6 +3,7 @@
 class UsersController < ApplicationController
   include RoutableActions
   include RendersMemberAccess
+  include RendersProjectsList
   include ControllerWithCrossProjectAccessCheck
   include Gitlab::NoteableMetadata
 
@@ -19,6 +20,8 @@ class UsersController < ApplicationController
   before_action :user, except: [:exists, :suggests]
   before_action :authorize_read_user_profile!,
                 only: [:calendar, :calendar_activities, :groups, :projects, :contributed_projects, :starred_projects, :snippets]
+
+  feature_category :users
 
   def show
     respond_to do |format|
@@ -105,7 +108,7 @@ class UsersController < ApplicationController
 
   def calendar_activities
     @calendar_date = Date.parse(params[:date]) rescue Date.today
-    @events = contributions_calendar.events_by_date(@calendar_date)
+    @events = contributions_calendar.events_by_date(@calendar_date).map(&:present)
 
     render 'calendar_activities', layout: false
   end

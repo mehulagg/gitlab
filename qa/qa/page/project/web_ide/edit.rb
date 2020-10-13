@@ -10,6 +10,11 @@ module QA
 
           view 'app/assets/javascripts/ide/components/activity_bar.vue' do
             element :commit_mode_tab
+            element :edit_mode_tab
+          end
+
+          view 'app/assets/javascripts/ide/components/ide_status_bar.vue' do
+            element :commit_sha_content
           end
 
           view 'app/assets/javascripts/ide/components/ide_tree.vue' do
@@ -50,10 +55,32 @@ module QA
             element :first_file_button
           end
 
+          view 'app/assets/javascripts/vue_shared/components/file_row.vue' do
+            element :file_name_content
+          end
+
+          view 'app/assets/javascripts/ide/components/new_dropdown/index.vue' do
+            element :dropdown_button
+            element :rename_move_button
+          end
+
+          view 'app/views/shared/_confirm_fork_modal.html.haml' do
+            element :fork_project_button
+            element :confirm_fork_modal
+          end
+
+          view 'app/assets/javascripts/ide/components/ide_project_header.vue' do
+            element :project_path_content
+          end
+
           def has_file?(file_name)
             within_element(:file_list) do
               page.has_content? file_name
             end
+          end
+
+          def has_project_path?(project_path)
+            has_element?(:project_path_content, project_path: project_path)
           end
 
           def create_new_file_from_template(file_name, template)
@@ -82,11 +109,19 @@ module QA
             end
           end
 
-          def commit_changes
+          def commit_sha
+            return unless has_element?(:commit_sha_content, wait: 0)
+
+            find_element(:commit_sha_content).text
+          end
+
+          def commit_changes(open_merge_request: false)
             # Clicking :begin_commit_button switches from the
             # edit to the commit view
-            click_element :begin_commit_button
-            active_element? :commit_mode_tab
+            click_element(:begin_commit_button)
+            active_element?(:commit_mode_tab)
+
+            original_commit = commit_sha
 
             # After clicking :begin_commit_button, there is an animation
             # that hides :begin_commit_button and shows :commit_button
@@ -98,19 +133,24 @@ module QA
                 has_element?(:commit_button)
             end
 
-            # Click :commit_button and keep retrying just in case part of the
-            # animation is still in process even when the buttons have the
-            # expected visibility.
-            commit_success_msg_shown = retry_until(sleep_interval: 5) do
-              click_element(:commit_to_current_branch_radio) if has_element?(:commit_to_current_branch_radio)
-              click_element(:commit_button) if has_element?(:commit_button)
+            if open_merge_request
+              click_element(:commit_button, Page::MergeRequest::New)
+            else
+              # Click :commit_button and keep retrying just in case part of the
+              # animation is still in process even when the buttons have the
+              # expected visibility.
+              commit_success = retry_until(sleep_interval: 5) do
+                click_element(:commit_to_current_branch_radio) if has_element?(:commit_to_current_branch_radio)
+                click_element(:commit_button) if has_element?(:commit_button)
 
-              wait_until(reload: false) do
-                has_text?('Your changes have been committed')
+                # If this is the first commit, the commit SHA only appears after reloading
+                wait_until(reload: true) do
+                  active_element?(:edit_mode_tab) && commit_sha != original_commit
+                end
               end
-            end
 
-            raise "The changes do not appear to have been committed successfully." unless commit_success_msg_shown
+              raise "The changes do not appear to have been committed successfully." unless commit_success
+            end
           end
 
           def add_to_modified_content(content)
@@ -127,10 +167,38 @@ module QA
           end
 
           def create_first_file(file_name)
-            finished_loading?
             click_element(:first_file_button, Page::Component::WebIDE::Modal::CreateNewFile)
             fill_element(:file_name_field, file_name)
             click_button('Create file')
+          end
+
+          def add_file(file_name, file_text)
+            click_element(:new_file, Page::Component::WebIDE::Modal::CreateNewFile)
+            fill_element(:file_name_field, file_name)
+            click_button('Create file')
+            wait_until(reload: false) { has_file?(file_name) }
+            within_element(:editor_container) do
+              find('textarea.inputarea').click.set(file_text)
+            end
+          end
+
+          def rename_file(file_name, new_file_name)
+            click_element(:file_name_content, text: file_name)
+            click_element(:dropdown_button)
+            click_element(:rename_move_button, Page::Component::WebIDE::Modal::CreateNewFile)
+            fill_element(:file_name_field, new_file_name)
+            click_button('Rename file')
+          end
+
+          def fork_project!
+            wait_until(reload: false) do
+              has_element?(:confirm_fork_modal)
+            end
+            click_element(:fork_project_button)
+            # wait for the fork to be created
+            wait_until(reload: true) do
+              has_element?(:file_list)
+            end
           end
         end
       end

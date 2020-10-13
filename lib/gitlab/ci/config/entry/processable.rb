@@ -14,7 +14,8 @@ module Gitlab
           include ::Gitlab::Config::Entry::Attributable
           include ::Gitlab::Config::Entry::Inheritable
 
-          PROCESSABLE_ALLOWED_KEYS = %i[extends stage only except rules variables inherit].freeze
+          PROCESSABLE_ALLOWED_KEYS = %i[extends stage only except rules variables
+                                        inherit allow_failure when needs].freeze
 
           included do
             validations do
@@ -82,10 +83,27 @@ module Gitlab
                 @entries.delete(:except) unless except_defined? # rubocop:disable Gitlab/ModuleWithInstanceVariables
               end
 
+              unless has_workflow_rules
+                validate_against_warnings
+              end
+
               # inherit root variables
               @root_variables_value = deps&.variables_value # rubocop:disable Gitlab/ModuleWithInstanceVariables
 
               yield if block_given?
+            end
+          end
+
+          def validate_against_warnings
+            # If rules are valid format and workflow rules are not specified
+            return unless rules_value
+            return unless Gitlab::Ci::Features.raise_job_rules_without_workflow_rules_warning?
+
+            last_rule = rules_value.last
+
+            if last_rule&.keys == [:when] && last_rule[:when] != 'never'
+              docs_url = 'read more: https://docs.gitlab.com/ee/ci/troubleshooting.html#pipeline-warnings'
+              add_warning("may allow multiple pipelines to run for a single action due to `rules:when` clause with no `workflow:rules` - #{docs_url}")
             end
           end
 

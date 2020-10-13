@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 class LicenseScanningReportsSerializer < BaseSerializer
-  entity LicenseScanningReportLicenseEntity
+  entity ::Security::LicensePolicyEntity
 end

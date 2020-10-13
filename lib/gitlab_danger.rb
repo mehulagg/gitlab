@@ -11,8 +11,9 @@ class GitlabDanger
     karma
     database
     commit_messages
-    telemetry
+    product_analytics
     utility_css
+    pajamas
   ].freeze
 
   CI_ONLY_RULES ||= %w[
@@ -21,6 +22,8 @@ class GitlabDanger
     specs
     roulette
     ce_ee_vue_templates
+    sidekiq_queues
+    specialization_labels
   ].freeze
 
   MESSAGE_PREFIX = '==>'.freeze

@@ -1,12 +1,15 @@
 import { mount, shallowMount } from '@vue/test-utils';
-import { GlDeprecatedButton, GlLink, GlFormGroup, GlFormInput } from '@gitlab/ui';
+import { GlButton, GlLink, GlFormGroup, GlFormInput, GlFormSelect } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
 import MetricsSettings from '~/operation_settings/components/metrics_settings.vue';
+
 import ExternalDashboard from '~/operation_settings/components/form_group/external_dashboard.vue';
+import DashboardTimezone from '~/operation_settings/components/form_group/dashboard_timezone.vue';
+import { timezones } from '~/monitoring/format_date';
 import store from '~/operation_settings/store';
 import axios from '~/lib/utils/axios_utils';
 import { refreshCurrentPage } from '~/lib/utils/url_utility';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/lib/utils/url_utility');
 jest.mock('~/flash');
@@ -17,7 +20,7 @@ describe('operation settings external dashboard component', () => {
   const operationsSettingsEndpoint = `${TEST_HOST}/mock/ops/settings/endpoint`;
   const helpPage = `${TEST_HOST}/help/metrics/page/path`;
   const externalDashboardUrl = `http://mock-external-domain.com/external/dashboard/url`;
-  const externalDashboardHelpPage = `${TEST_HOST}/help/external/page/path`;
+  const dashboardTimezoneSetting = timezones.LOCAL;
 
   const mountComponent = (shallow = true) => {
     const config = [
@@ -27,10 +30,11 @@ describe('operation settings external dashboard component', () => {
           operationsSettingsEndpoint,
           helpPage,
           externalDashboardUrl,
-          externalDashboardHelpPage,
+          dashboardTimezoneSetting,
         }),
         stubs: {
           ExternalDashboard,
+          DashboardTimezone,
         },
       },
     ];
@@ -52,12 +56,12 @@ describe('operation settings external dashboard component', () => {
 
   it('renders header text', () => {
     mountComponent();
-    expect(wrapper.find('.js-section-header').text()).toBe('Metrics Dashboard');
+    expect(wrapper.find('.js-section-header').text()).toBe('Metrics dashboard');
   });
 
   describe('expand/collapse button', () => {
     it('renders as an expand button by default', () => {
-      const button = wrapper.find(GlDeprecatedButton);
+      const button = wrapper.find(GlButton);
 
       expect(button.text()).toBe('Expand');
     });
@@ -84,50 +88,86 @@ describe('operation settings external dashboard component', () => {
   });
 
   describe('form', () => {
-    describe('input label', () => {
-      let formGroup;
+    describe('dashboard timezone', () => {
+      describe('field label', () => {
+        let formGroup;
 
-      beforeEach(() => {
-        mountComponent(false);
-        formGroup = wrapper.find(ExternalDashboard).find(GlFormGroup);
+        beforeEach(() => {
+          mountComponent(false);
+          formGroup = wrapper.find(DashboardTimezone).find(GlFormGroup);
+        });
+
+        it('uses label text', () => {
+          expect(formGroup.find('label').text()).toBe('Dashboard timezone');
+        });
+
+        it('uses description text', () => {
+          const description = formGroup.find('small');
+          expect(description.text()).not.toBeFalsy();
+        });
       });
 
-      it('uses label text', () => {
-        expect(formGroup.find('label').text()).toBe('External dashboard URL');
-      });
+      describe('select field', () => {
+        let select;
 
-      it('uses description text', () => {
-        const description = formGroup.find('small');
-        expect(description.find('a').attributes('href')).toBe(externalDashboardHelpPage);
+        beforeEach(() => {
+          mountComponent();
+          select = wrapper.find(DashboardTimezone).find(GlFormSelect);
+        });
+
+        it('defaults to externalDashboardUrl', () => {
+          expect(select.attributes('value')).toBe(dashboardTimezoneSetting);
+        });
       });
     });
 
-    describe('input field', () => {
-      let input;
+    describe('external dashboard', () => {
+      describe('input label', () => {
+        let formGroup;
 
-      beforeEach(() => {
-        mountComponent();
-        input = wrapper.find(GlFormInput);
+        beforeEach(() => {
+          mountComponent(false);
+          formGroup = wrapper.find(ExternalDashboard).find(GlFormGroup);
+        });
+
+        it('uses label text', () => {
+          expect(formGroup.find('label').text()).toBe('External dashboard URL');
+        });
+
+        it('uses description text', () => {
+          const description = formGroup.find('small');
+          expect(description.text()).not.toBeFalsy();
+        });
       });
 
-      it('defaults to externalDashboardUrl', () => {
-        expect(input.attributes().value).toBe(externalDashboardUrl);
-      });
+      describe('input field', () => {
+        let input;
 
-      it('uses a placeholder', () => {
-        expect(input.attributes().placeholder).toBe('https://my-org.gitlab.io/my-dashboards');
+        beforeEach(() => {
+          mountComponent();
+          input = wrapper.find(ExternalDashboard).find(GlFormInput);
+        });
+
+        it('defaults to externalDashboardUrl', () => {
+          expect(input.attributes().value).toBeTruthy();
+          expect(input.attributes().value).toBe(externalDashboardUrl);
+        });
+
+        it('uses a placeholder', () => {
+          expect(input.attributes().placeholder).toBe('https://my-org.gitlab.io/my-dashboards');
+        });
       });
     });
 
     describe('submit button', () => {
-      const findSubmitButton = () =>
-        wrapper.find('.settings-content form').find(GlDeprecatedButton);
+      const findSubmitButton = () => wrapper.find('.settings-content form').find(GlButton);
 
       const endpointRequest = [
         operationsSettingsEndpoint,
         {
           project: {
             metrics_setting_attributes: {
+              dashboard_timezone: dashboardTimezoneSetting,
               external_dashboard_url: externalDashboardUrl,
             },
           },

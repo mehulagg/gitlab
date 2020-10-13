@@ -1,23 +1,38 @@
-export const sourceContent = `
----
+export const sourceContentHeaderYAML = `---
 layout: handbook-page-toc
 title: Handbook
-twitter_image: '/images/tweets/handbook-gitlab.png'
----
-
-## On this page
+twitter_image: /images/tweets/handbook-gitlab.png
+suppress_header: true
+extra_css:
+  - sales-and-free-trial-common.css
+  - form-to-resource.css
+---`;
+export const sourceContentHeaderObjYAML = {
+  layout: 'handbook-page-toc',
+  title: 'Handbook',
+  twitter_image: '/images/tweets/handbook-gitlab.png',
+  suppress_header: true,
+  extra_css: ['sales-and-free-trial-common.css', 'form-to-resource.css'],
+};
+export const sourceContentSpacing = `\n`;
+export const sourceContentBody = `## On this page
 {:.no_toc .hidden-md .hidden-lg}
 
 - TOC
 {:toc .hidden-md .hidden-lg}
-`;
+
+![image](path/to/image1.png)`;
+export const sourceContentYAML = `${sourceContentHeaderYAML}${sourceContentSpacing}${sourceContentBody}`;
 export const sourceContentTitle = 'Handbook';
 
 export const username = 'gitlabuser';
 export const projectId = '123456';
 export const returnUrl = 'https://www.gitlab.com';
 export const sourcePath = 'foobar.md.html';
-
+export const mergeRequestMeta = {
+  title: `Update ${sourcePath} file`,
+  description: 'Copy update',
+};
 export const savedContentMeta = {
   branch: {
     label: 'foobar',
@@ -47,3 +62,8 @@ export const createMergeRequestResponse = {
 };
 
 export const trackingCategory = 'projects:static_site_editor:show';
+
+export const images = new Map([
+  ['path/to/image1.png', 'image1-content'],
+  ['path/to/image2.png', 'image2-content'],
+]);

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RequirementsManagement::ProcessRequirementsReportsWorker do
+RSpec.describe RequirementsManagement::ProcessRequirementsReportsWorker do
   describe '#perform' do
     context 'build exists' do
       let(:build) { create(:ci_build) }

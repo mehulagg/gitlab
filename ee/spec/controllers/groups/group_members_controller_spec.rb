@@ -163,7 +163,7 @@ RSpec.describe Groups::GroupMembersController do
           post :request_access, params: { group_id: group }
 
           expect(response).to redirect_to(new_user_session_path)
-          expect(response).to set_flash.to 'You have to confirm your email address before continuing.'
+          expect(response).to set_flash.to I18n.t('devise.failure.unconfirmed')
           expect(group.requesters.exists?(user_id: requesting_user)).to be_falsey
           expect(group.users).not_to include requesting_user
         end

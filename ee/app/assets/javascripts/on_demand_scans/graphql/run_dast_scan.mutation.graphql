@@ -1,0 +1,18 @@
+mutation runDastScan(
+  $projectPath: ID!
+  $targetUrl: String!
+  $branch: String!
+  $scanType: DastScanTypeEnum!
+) {
+  runDastScan(
+    input: {
+      projectPath: $projectPath
+      targetUrl: $targetUrl
+      branch: $branch
+      scanType: $scanType
+    }
+  ) {
+    pipelineUrl
+    errors
+  }
+}

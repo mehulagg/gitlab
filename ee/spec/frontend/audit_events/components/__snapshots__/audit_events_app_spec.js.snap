@@ -2,63 +2,62 @@
 
 exports[`AuditEventsApp when initialized matches the snapshot 1`] = `
 <div>
+  <header>
+    <div
+      class="gl-my-5 gl-display-flex gl-flex-direction-row gl-justify-content-end"
+    >
+      <audit-events-export-button-stub
+        exporthref="http://example.com/audit_log_reports.csv?created_after=2020-01-01&created_before=2020-02-02"
+      />
+    </div>
+  </header>
+   
   <div
-    class="row-content-block second-block pb-0"
+    class="row-content-block second-block gl-pb-0"
   >
-    <form
-      class="filter-form d-flex justify-content-between audit-controls row"
-      method="GET"
-      path="form/path"
+    <div
+      class="gl-display-flex gl-justify-content-space-between gl-flex-wrap"
     >
       <div
-        class="col-lg-auto flex-fill form-group align-items-lg-center pr-lg-8"
+        class="gl-mb-5 gl-w-full"
       >
         <div
           class="input-group bg-white flex-grow-1"
-          data-qa-selector="filter_qa_selector"
           data-testid="audit-events-filter"
         >
           <gl-filtered-search-stub
-            availabletokens="[object Object],[object Object],[object Object]"
+            availabletokens="[object Object],[object Object],[object Object],[object Object]"
             class="gl-h-32 w-100"
             clearbuttontitle="Clear"
             close-button-title="Close"
             placeholder="Search"
-            value=""
-          />
-           
-          <input
-            name="entity_type"
-            type="hidden"
-          />
-           
-          <input
-            name="entity_id"
-            type="hidden"
+            value="[object Object]"
           />
         </div>
       </div>
        
       <div
-        class="d-flex col-lg-auto flex-wrap pl-lg-0"
+        class="gl-display-flex gl-flex-wrap gl-w-full"
       >
         <div
-          class="audit-controls d-flex align-items-lg-center flex-column flex-lg-row col-lg-auto px-0"
+          class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between gl-px-0 gl-w-full"
         >
           <date-range-field-stub
-            formelement="[object HTMLFormElement]"
+            enddate="Sun Feb 02 2020 00:00:00 GMT+0000 (Greenwich Mean Time)"
+            startdate="Wed Jan 01 2020 00:00:00 GMT+0000 (Greenwich Mean Time)"
           />
            
-          <sorting-field-stub />
+          <sorting-field-stub
+            sortby="created_asc"
+          />
         </div>
       </div>
-    </form>
+    </div>
   </div>
    
   <audit-events-table-stub
     events="[object Object]"
     islastpage="true"
-    qaselector="table_qa_selector"
   />
 </div>
 `;

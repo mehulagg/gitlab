@@ -60,7 +60,7 @@ RSpec.describe 'SAML provider settings' do
     it 'allows creation of new provider' do
       visit group_saml_providers_path(group)
 
-      fill_in 'Identity provider single sign on URL', with: 'https://localhost:9999/adfs/ls'
+      fill_in 'Identity provider single sign-on URL', with: 'https://localhost:9999/adfs/ls'
       fill_in 'Certificate fingerprint', with: 'aa:bb:cc:dd:ee:ff:11:22:33:44:55:66:77:88:99:0a:1b:2c:3d:00'
 
       expect { submit }.to change(SamlProvider, :count).by(1)
@@ -88,7 +88,7 @@ RSpec.describe 'SAML provider settings' do
       it 'displays user login URL' do
         visit group_saml_providers_path(group)
 
-        login_url = find('label', text: 'GitLab single sign on URL').find('~* a').text
+        login_url = find('label', text: 'GitLab single sign-on URL').find('~* a').text
 
         expect(login_url).to include "/groups/#{group.full_path}/-/saml/sso"
         expect(login_url).to end_with "?token=#{group.reload.saml_discovery_token}"

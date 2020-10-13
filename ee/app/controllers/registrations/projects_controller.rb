@@ -7,6 +7,8 @@ module Registrations
     before_action :check_experiment_enabled
     before_action :find_namespace, only: :new
 
+    feature_category :navigation
+
     def new
       @project = Project.new(namespace: @namespace)
     end
@@ -16,7 +18,7 @@ module Registrations
 
       if @project.saved?
         create_learn_gitlab_project
-        redirect_to users_sign_up_experience_level_path
+        redirect_to users_sign_up_experience_level_path(namespace_path: @project.namespace)
       else
         render :new
       end

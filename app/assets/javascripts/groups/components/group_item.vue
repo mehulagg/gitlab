@@ -1,4 +1,5 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { GlLoadingIcon, GlBadge } from '@gitlab/ui';
 import { visitUrl } from '../../lib/utils/url_utility';
 import tooltip from '../../vue_shared/directives/tooltip';
@@ -11,6 +12,8 @@ import itemTypeIcon from './item_type_icon.vue';
 import itemStats from './item_stats.vue';
 import itemStatsValue from './item_stats_value.vue';
 import itemActions from './item_actions.vue';
+
+import { showLearnGitLabGroupItemPopover } from '~/onboarding_issues';
 
 export default {
   directives: {
@@ -73,6 +76,11 @@ export default {
       return GROUP_VISIBILITY_TYPE[this.group.visibility];
     },
   },
+  mounted() {
+    if (this.group.name === 'Learn GitLab') {
+      showLearnGitLabGroupItemPopover(this.group.id);
+    }
+  },
   methods: {
     onClickRowGroup(e) {
       const NO_EXPAND_CLS = 'no-expand';
@@ -97,7 +105,7 @@ export default {
       :class="{ 'project-row-contents': !isGroup }"
       class="group-row-contents d-flex align-items-center py-2 pr-3"
     >
-      <div class="folder-toggle-wrap append-right-4 d-flex align-items-center">
+      <div class="folder-toggle-wrap gl-mr-2 d-flex align-items-center">
         <item-caret :is-group-open="group.isOpen" />
         <item-type-icon :item-type="group.type" :is-group-open="group.isOpen" />
       </div>
@@ -133,7 +141,7 @@ export default {
             <item-stats-value
               :icon-name="visibilityIcon"
               :title="visibilityTooltip"
-              css-class="item-visibility d-inline-flex align-items-center gl-mt-3 append-right-4 text-secondary"
+              css-class="item-visibility d-inline-flex align-items-center gl-mt-3 gl-mr-2 text-secondary"
             />
             <span v-if="group.permission" class="user-access-role gl-mt-3">
               {{ group.permission }}

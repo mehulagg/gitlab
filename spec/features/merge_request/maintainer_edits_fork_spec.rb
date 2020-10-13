@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'a maintainer edits files on a source-branch of an MR from a fork', :js, :sidekiq_might_not_need_inline do
+RSpec.describe 'a maintainer edits files on a source-branch of an MR from a fork', :js, :sidekiq_might_not_need_inline do
   include ProjectForksHelper
   let(:user) { create(:user, username: 'the-maintainer') }
   let(:target_project) { create(:project, :public, :repository) }
@@ -20,15 +20,18 @@ describe 'a maintainer edits files on a source-branch of an MR from a fork', :js
   end
 
   before do
-    stub_feature_flags(web_ide_default: false, single_mr_diff_view: false, code_navigation: false)
-
     target_project.add_maintainer(user)
     sign_in(user)
 
     visit project_merge_request_path(target_project, merge_request)
     click_link 'Changes'
     wait_for_requests
-    first('.js-file-title').find('.js-edit-blob').click
+
+    page.within(first('.js-file-title')) do
+      find('.js-diff-more-actions').click
+      find('.js-edit-blob').click
+    end
+
     wait_for_requests
   end
 
@@ -37,7 +40,7 @@ describe 'a maintainer edits files on a source-branch of an MR from a fork', :js
   end
 
   it 'allows committing to the source branch' do
-    find('.ace_text-input', visible: false).send_keys('Updated the readme')
+    execute_script("monaco.editor.getModels()[0].setValue('Updated the readme')")
 
     click_button 'Commit changes'
     wait_for_requests

@@ -1,3 +1,9 @@
+---
+stage: Release
+group: Progressive Delivery
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Deploy Tokens API
 
 ## List all deploy tokens
@@ -136,7 +142,8 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://git
 
 ## Group deploy tokens
 
-These endpoints require group maintainer access or higher.
+Group maintainers and owners can list group deploy
+tokens. Only group owners can create and delete group deploy tokens.
 
 ### List group deploy tokens
 

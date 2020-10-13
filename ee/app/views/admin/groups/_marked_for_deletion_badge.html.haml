@@ -1,3 +1,5 @@
+- css_class = local_assigns.fetch(:css_class)
+
 - if group.marked_for_deletion?
-  %span.badge.badge-warning
+  %span.badge.badge-warning{ class: css_class }
     = _('pending removal')

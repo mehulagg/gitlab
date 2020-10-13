@@ -6,9 +6,9 @@ To get started with Vue, read through [their documentation](https://vuejs.org/v2
 
 What is described in the following sections can be found in these examples:
 
-- web ide: <https://gitlab.com/gitlab-org/gitlab-foss/tree/master/app/assets/javascripts/ide/stores>
-- security products: <https://gitlab.com/gitlab-org/gitlab/tree/master/ee/app/assets/javascripts/vue_shared/security_reports>
-- registry: <https://gitlab.com/gitlab-org/gitlab-foss/tree/master/app/assets/javascripts/registry/stores>
+- [Web IDE](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/app/assets/javascripts/ide/stores)
+- [Security products](https://gitlab.com/gitlab-org/gitlab/tree/master/ee/app/assets/javascripts/vue_shared/security_reports)
+- [Registry](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/app/assets/javascripts/registry/stores)
 
 ## Vue architecture
 
@@ -16,7 +16,7 @@ All new features built with Vue.js must follow a [Flux architecture](https://fac
 The main goal we are trying to achieve is to have only one data flow and only one data entry.
 In order to achieve this goal we use [vuex](#vuex).
 
-You can also read about this architecture in vue docs about [state management](https://vuejs.org/v2/guide/state-management.html#Simple-State-Management-from-Scratch)
+You can also read about this architecture in Vue docs about [state management](https://vuejs.org/v2/guide/state-management.html#Simple-State-Management-from-Scratch)
 and about [one way data flow](https://vuejs.org/v2/guide/components.html#One-Way-Data-Flow).
 
 ### Components and Store
@@ -53,22 +53,22 @@ Be sure to read about [page-specific JavaScript](./performance.md#page-specific-
 
 #### Providing data from HAML to JavaScript
 
-While mounting a Vue application may be a need to provide data from Rails to JavaScript.
-To do that, provide the data through `data` attributes in the HTML element and query them while mounting the application.
+While mounting a Vue application, you might need to provide data from Rails to JavaScript.
+To do that, you can use the `data` attributes in the HTML element and query them while mounting the application.
 
 _Note:_ You should only do this while initializing the application, because the mounted element will be replaced with Vue-generated DOM.
 
 The advantage of providing data from the DOM to the Vue instance through `props` in the `render` function
-instead of querying the DOM inside the main vue component is that makes tests easier by avoiding the need to
-create a fixture or an HTML element in the unit test. See the following example:
+instead of querying the DOM inside the main Vue component is avoiding the need to create a fixture or an HTML element in the unit test,
+which will make the tests easier. See the following example:
 
 ```javascript
 // haml
-.js-vue-app{ data: { endpoint: 'foo' }}
+#js-vue-app{ data: { endpoint: 'foo' }}
 
 // index.js
 document.addEventListener('DOMContentLoaded', () => new Vue({
-  el: '.js-vue-app',
+  el: '#js-vue-app',
   data() {
     const dataset = this.$options.el.dataset;
     return {
@@ -84,6 +84,8 @@ document.addEventListener('DOMContentLoaded', () => new Vue({
   },
 }));
 ```
+
+> When adding an `id` attribute to mount a Vue application, please make sure this `id` is unique across the codebase
 
 #### Accessing the `gl` object
 
@@ -134,7 +136,7 @@ This approach has a few benefits:
   intermediate components being aware of it (c.f. passing the flag down via
   props).
 - Good testability, since the flag can be provided to `mount`/`shallowMount`
-  from `vue-test-utils` as easily as a prop.
+  from `vue-test-utils` simply as a prop.
 
   ```javascript
   import { shallowMount } from '@vue/test-utils';
@@ -155,7 +157,7 @@ This folder holds all components that are specific of this new feature.
 If you need to use or create a component that will probably be used somewhere
 else, please refer to `vue_shared/components`.
 
-A good thumb rule to know when you should create a component is to think if
+A good rule of thumb to know when you should create a component is to think if
 it will be reusable elsewhere.
 
 For example, tables are used in a quite amount of places across GitLab, a table
@@ -283,7 +285,7 @@ describe('~/todos/app.vue', () => {
 ### Test the component's output
 
 The main return value of a Vue component is the rendered output. In order to test the component we
-need to test the rendered output. [Vue](https://vuejs.org/v2/guide/unit-testing.html) guide's to unit test show us exactly that:
+need to test the rendered output. Visit the [Vue testing guide](https://vuejs.org/v2/guide/testing.html#Unit-Testing).
 
 ### Events
 
@@ -321,7 +323,7 @@ We should verify an event has been fired by asserting against the result of the 
 
 ## Vue.js Expert Role
 
-One should apply to be a Vue.js expert by opening an MR when the Merge Request's they create and review show:
+You should only apply to be a Vue.js expert when your own merge requests and your reviews show:
 
 - Deep understanding of Vue and Vuex reactivity
 - Vue and Vuex code are structured according to both official and our guidelines

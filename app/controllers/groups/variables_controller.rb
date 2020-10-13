@@ -6,16 +6,23 @@ module Groups
 
     skip_cross_project_access_check :show, :update
 
+    feature_category :continuous_integration
+
     def show
       respond_to do |format|
         format.json do
-          render status: :ok, json: { variables: GroupVariableSerializer.new.represent(@group.variables) }
+          render status: :ok, json: { variables: ::Ci::GroupVariableSerializer.new.represent(@group.variables) }
         end
       end
     end
 
     def update
-      if @group.update(group_variables_params)
+      update_result = Ci::ChangeVariablesService.new(
+        container: @group, current_user: current_user,
+        params: group_variables_params
+      ).execute
+
+      if update_result
         respond_to do |format|
           format.json { render_group_variables }
         end
@@ -29,7 +36,7 @@ module Groups
     private
 
     def render_group_variables
-      render status: :ok, json: { variables: GroupVariableSerializer.new.represent(@group.variables) }
+      render status: :ok, json: { variables: ::Ci::GroupVariableSerializer.new.represent(@group.variables) }
     end
 
     def render_error

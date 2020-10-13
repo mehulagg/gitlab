@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Group do
+RSpec.describe Group do
   let!(:group) { create(:group) }
 
   describe 'associations' do
@@ -26,6 +26,8 @@ describe Group do
     it { is_expected.to have_many(:container_repositories) }
     it { is_expected.to have_many(:milestones) }
     it { is_expected.to have_many(:iterations) }
+    it { is_expected.to have_many(:group_deploy_keys) }
+    it { is_expected.to have_many(:services) }
 
     describe '#members & #requesters' do
       let(:requester) { create(:user) }
@@ -219,6 +221,50 @@ describe Group do
           expect(internal_group).to be_valid
         end
       end
+    end
+
+    describe '#two_factor_authentication_allowed' do
+      let_it_be(:group) { create(:group) }
+
+      context 'for a parent group' do
+        it 'is valid' do
+          group.require_two_factor_authentication = true
+
+          expect(group).to be_valid
+        end
+      end
+
+      context 'for a child group' do
+        let(:sub_group) { create(:group, parent: group) }
+
+        it 'is valid when parent group allows' do
+          sub_group.require_two_factor_authentication = true
+
+          expect(sub_group).to be_valid
+        end
+
+        it 'is invalid when parent group blocks' do
+          group.namespace_settings.update!(allow_mfa_for_subgroups: false)
+          sub_group.require_two_factor_authentication = true
+
+          expect(sub_group).to be_invalid
+          expect(sub_group.errors[:require_two_factor_authentication]).to include('is forbidden by a top-level group')
+        end
+      end
+    end
+  end
+
+  describe '.without_integration' do
+    let(:another_group) { create(:group) }
+    let(:instance_integration) { build(:jira_service, :instance) }
+
+    before do
+      create(:jira_service, group: group, project: nil)
+      create(:slack_service, group: another_group, project: nil)
+    end
+
+    it 'returns groups without integration' do
+      expect(Group.without_integration(instance_integration)).to contain_exactly(another_group)
     end
   end
 
@@ -651,6 +697,19 @@ describe Group do
         expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::MAINTAINER)
       end
     end
+
+    context 'evaluating admin access level' do
+      let_it_be(:admin) { create(:admin) }
+
+      it 'returns OWNER by default' do
+        expect(group.max_member_access_for_user(admin)).to eq(Gitlab::Access::OWNER)
+      end
+
+      it 'returns NO_ACCESS when only concrete membership should be considered' do
+        expect(group.max_member_access_for_user(admin, only_concrete_membership: true))
+          .to eq(Gitlab::Access::NO_ACCESS)
+      end
+    end
   end
 
   describe '#members_with_parents' do
@@ -691,6 +750,7 @@ describe Group do
     before do
       create(:group_member, user: user, group: group_parent, access_level: parent_group_access_level)
       create(:group_member, user: user, group: group, access_level: group_access_level)
+      create(:group_member, :minimal_access, user: create(:user), source: group)
       create(:group_member, user: user, group: group_child, access_level: child_group_access_level)
     end
 
@@ -1311,6 +1371,182 @@ describe Group do
       groups = described_class.groups_including_descendants_by([parent_group2.id, parent_group1.id])
 
       expect(groups).to contain_exactly(parent_group1, parent_group2, child_group1, child_group2, child_group3)
+    end
+  end
+
+  def subject_and_reload(*models)
+    subject
+    models.map(&:reload)
+  end
+
+  describe '#update_shared_runners_setting!' do
+    context 'enabled' do
+      subject { group.update_shared_runners_setting!('enabled') }
+
+      context 'group that its ancestors have shared runners disabled' do
+        let_it_be(:parent) { create(:group, :shared_runners_disabled) }
+        let_it_be(:group) { create(:group, :shared_runners_disabled, parent: parent) }
+        let_it_be(:project) { create(:project, shared_runners_enabled: false, group: group) }
+
+        it 'raises error and does not enable shared Runners' do
+          expect { subject_and_reload(parent, group, project) }
+            .to raise_error(ActiveRecord::RecordInvalid, 'Validation failed: Shared runners enabled cannot be enabled because parent group has shared Runners disabled')
+            .and not_change { parent.shared_runners_enabled }
+            .and not_change { group.shared_runners_enabled }
+            .and not_change { project.shared_runners_enabled }
+        end
+      end
+
+      context 'root group with shared runners disabled' do
+        let_it_be(:group) { create(:group, :shared_runners_disabled) }
+        let_it_be(:sub_group) { create(:group, :shared_runners_disabled, parent: group) }
+        let_it_be(:project) { create(:project, shared_runners_enabled: false, group: sub_group) }
+
+        it 'enables shared Runners only for itself' do
+          expect { subject_and_reload(group, sub_group, project) }
+            .to change { group.shared_runners_enabled }.from(false).to(true)
+            .and not_change { sub_group.shared_runners_enabled }
+            .and not_change { project.shared_runners_enabled }
+        end
+      end
+    end
+
+    context 'disabled_and_unoverridable' do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:sub_group) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners, parent: group) }
+      let_it_be(:sub_group_2) { create(:group, parent: group) }
+      let_it_be(:project) { create(:project, group: group, shared_runners_enabled: true) }
+      let_it_be(:project_2) { create(:project, group: sub_group_2, shared_runners_enabled: true) }
+
+      subject { group.update_shared_runners_setting!('disabled_and_unoverridable') }
+
+      it 'disables shared Runners for all descendant groups and projects' do
+        expect { subject_and_reload(group, sub_group, sub_group_2, project, project_2) }
+          .to change { group.shared_runners_enabled }.from(true).to(false)
+          .and not_change { group.allow_descendants_override_disabled_shared_runners }
+          .and not_change { sub_group.shared_runners_enabled }
+          .and change { sub_group.allow_descendants_override_disabled_shared_runners }.from(true).to(false)
+          .and change { sub_group_2.shared_runners_enabled }.from(true).to(false)
+          .and not_change { sub_group_2.allow_descendants_override_disabled_shared_runners }
+          .and change { project.shared_runners_enabled }.from(true).to(false)
+          .and change { project_2.shared_runners_enabled }.from(true).to(false)
+      end
+
+      context 'with override on self' do
+        let_it_be(:group) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners) }
+
+        it 'disables it' do
+          expect { subject_and_reload(group) }
+            .to not_change { group.shared_runners_enabled }
+            .and change { group.allow_descendants_override_disabled_shared_runners }.from(true).to(false)
+        end
+      end
+    end
+
+    context 'disabled_with_override' do
+      subject { group.update_shared_runners_setting!('disabled_with_override') }
+
+      context 'top level group' do
+        let_it_be(:group) { create(:group, :shared_runners_disabled) }
+        let_it_be(:sub_group) { create(:group, :shared_runners_disabled, parent: group) }
+        let_it_be(:project) { create(:project, shared_runners_enabled: false, group: sub_group) }
+
+        it 'enables allow descendants to override only for itself' do
+          expect { subject_and_reload(group, sub_group, project) }
+            .to change { group.allow_descendants_override_disabled_shared_runners }.from(false).to(true)
+            .and not_change { group.shared_runners_enabled }
+            .and not_change { sub_group.allow_descendants_override_disabled_shared_runners }
+            .and not_change { sub_group.shared_runners_enabled }
+            .and not_change { project.shared_runners_enabled }
+        end
+      end
+
+      context 'group that its ancestors have shared Runners disabled but allows to override' do
+        let_it_be(:parent) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners) }
+        let_it_be(:group) { create(:group, :shared_runners_disabled, parent: parent) }
+        let_it_be(:project) { create(:project, shared_runners_enabled: false, group: group) }
+
+        it 'enables allow descendants to override' do
+          expect { subject_and_reload(parent, group, project) }
+            .to not_change { parent.allow_descendants_override_disabled_shared_runners }
+            .and not_change { parent.shared_runners_enabled }
+            .and change { group.allow_descendants_override_disabled_shared_runners }.from(false).to(true)
+            .and not_change { group.shared_runners_enabled }
+            .and not_change { project.shared_runners_enabled }
+        end
+      end
+
+      context 'when parent does not allow' do
+        let_it_be(:parent) { create(:group, :shared_runners_disabled, allow_descendants_override_disabled_shared_runners: false ) }
+        let_it_be(:group) { create(:group, :shared_runners_disabled, allow_descendants_override_disabled_shared_runners: false, parent: parent) }
+
+        it 'raises error and does not allow descendants to override' do
+          expect { subject_and_reload(parent, group) }
+            .to raise_error(ActiveRecord::RecordInvalid, 'Validation failed: Allow descendants override disabled shared runners cannot be enabled because parent group does not allow it')
+            .and not_change { parent.allow_descendants_override_disabled_shared_runners }
+            .and not_change { parent.shared_runners_enabled }
+            .and not_change { group.allow_descendants_override_disabled_shared_runners }
+            .and not_change { group.shared_runners_enabled }
+        end
+      end
+
+      context 'top level group that has shared Runners enabled' do
+        let_it_be(:group) { create(:group, shared_runners_enabled: true) }
+        let_it_be(:sub_group) { create(:group, shared_runners_enabled: true, parent: group) }
+        let_it_be(:project) { create(:project, shared_runners_enabled: true, group: sub_group) }
+
+        it 'enables allow descendants to override & disables shared runners everywhere' do
+          expect { subject_and_reload(group, sub_group, project) }
+            .to change { group.shared_runners_enabled }.from(true).to(false)
+            .and change { group.allow_descendants_override_disabled_shared_runners }.from(false).to(true)
+            .and change { sub_group.shared_runners_enabled }.from(true).to(false)
+            .and change { project.shared_runners_enabled }.from(true).to(false)
+        end
+      end
+    end
+  end
+
+  describe '#default_owner' do
+    let(:group) { build(:group) }
+
+    context 'the group has owners' do
+      before do
+        group.add_owner(create(:user))
+        group.add_owner(create(:user))
+      end
+
+      it 'is the first owner' do
+        expect(group.default_owner)
+          .to eq(group.owners.first)
+          .and be_a(User)
+      end
+    end
+
+    context 'the group has a parent' do
+      let(:parent) { build(:group) }
+
+      before do
+        group.parent = parent
+        parent.add_owner(create(:user))
+      end
+
+      it 'is the first owner of the parent' do
+        expect(group.default_owner)
+          .to eq(parent.default_owner)
+          .and be_a(User)
+      end
+    end
+
+    context 'we fallback to group.owner' do
+      before do
+        group.owner = build(:user)
+      end
+
+      it 'is the group.owner' do
+        expect(group.default_owner)
+          .to eq(group.owner)
+          .and be_a(User)
+      end
     end
   end
 end

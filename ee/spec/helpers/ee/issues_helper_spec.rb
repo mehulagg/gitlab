@@ -13,7 +13,7 @@ RSpec.describe EE::IssuesHelper do
     context 'with linked issue' do
       context 'with promoted issue' do
         before do
-          issue.update(promoted_to_epic: new_epic)
+          issue.update!(promoted_to_epic: new_epic)
         end
 
         context 'when user has permission to see new epic' do
@@ -70,25 +70,23 @@ RSpec.describe EE::IssuesHelper do
     end
   end
 
-  describe '#show_moved_service_desk_issue_warning?' do
-    let(:project1) { create(:project, service_desk_enabled: true) }
-    let(:project2) { create(:project, service_desk_enabled: true) }
-    let!(:old_issue) { create(:issue, author: User.support_bot, project: project1) }
-    let!(:new_issue) { create(:issue, author: User.support_bot, project: project2) }
+  describe '#show_timeline_view_toggle?' do
+    subject { helper.show_timeline_view_toggle?(issue) }
 
-    before do
-      allow(::EE::Gitlab::ServiceDesk).to receive(:enabled?).and_return(true)
-      old_issue.update(moved_to: new_issue)
-    end
+    it { is_expected.to be_falsy }
 
-    it 'is true when moved issue project has service desk disabled' do
-      project2.update!(service_desk_enabled: false)
+    context 'issue is an incident' do
+      let(:issue) { build_stubbed(:incident) }
 
-      expect(helper.show_moved_service_desk_issue_warning?(new_issue)).to be(true)
-    end
+      it { is_expected.to be_falsy }
 
-    it 'is false when moved issue project has service desk enabled' do
-      expect(helper.show_moved_service_desk_issue_warning?(new_issue)).to be(false)
+      context 'with license' do
+        before do
+          stub_licensed_features(incident_timeline_view: true)
+        end
+
+        it { is_expected.to be_truthy }
+      end
     end
   end
 end

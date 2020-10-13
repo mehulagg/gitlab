@@ -2,14 +2,7 @@
 stage: Release
 group: Progressive Delivery
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
-author: Dylan Griffith
-author_gitlab: DylanGriffith
-level: intermediate
-article_type: tutorial
 type: tutorial
-date: 2018-06-07
-last_updated: 2019-04-08
-description: "Continuous Deployment of a Spring Boot application to Cloud Foundry with GitLab CI/CD"
 ---
 
 # Deploy a Spring Boot application to Cloud Foundry with GitLab CI/CD
@@ -61,10 +54,10 @@ content:
 ```yaml
 ---
 applications:
-- name: gitlab-hello-world
-  random-route: true
-  memory: 1G
-  path: target/demo-0.0.1-SNAPSHOT.jar
+  - name: gitlab-hello-world
+    random-route: true
+    memory: 1G
+    path: target/demo-0.0.1-SNAPSHOT.jar
 ```
 
 ## Configure GitLab CI/CD to deploy your application
@@ -96,11 +89,11 @@ build:
 production:
   stage: deploy
   script:
-  - curl --location "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github" | tar zx
-  - ./cf login -u $CF_USERNAME -p $CF_PASSWORD -a api.run.pivotal.io
-  - ./cf push
+    - curl --location "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github" | tar zx
+    - ./cf login -u $CF_USERNAME -p $CF_PASSWORD -a api.run.pivotal.io
+    - ./cf push
   only:
-  - master
+    - master
 ```
 
 We've used the `java:8` [Docker

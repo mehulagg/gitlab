@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Issue Boards add issue modal', :js do
+RSpec.describe 'Issue Boards add issue modal', :js do
   let(:project) { create(:project, :public) }
   let(:board) { create(:board, project: project) }
   let(:user) { create(:user) }
@@ -79,7 +79,7 @@ describe 'Issue Boards add issue modal', :js do
 
     it 'loads issues' do
       page.within('.add-issues-modal') do
-        page.within('.nav-links') do
+        page.within('.gl-tabs') do
           expect(page).to have_content('2')
         end
 
@@ -146,7 +146,7 @@ describe 'Issue Boards add issue modal', :js do
         page.within('.add-issues-modal') do
           first('.board-card .board-card-number').click
 
-          page.within('.nav-links') do
+          page.within('.gl-tabs') do
             expect(page).to have_content('Selected issues 1')
           end
         end

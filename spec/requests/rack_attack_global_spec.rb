@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Rack Attack global throttles' do
+RSpec.describe 'Rack Attack global throttles' do
   include RackAttackSpecHelpers
 
   let(:settings) { Gitlab::CurrentSettings.current_application_settings }
@@ -227,6 +227,7 @@ describe 'Rack Attack global throttles' do
       let(:protected_path_that_does_not_require_authentication) do
         '/users/sign_in'
       end
+
       let(:post_params) { { user: { login: 'username', password: 'password' } } }
 
       before do

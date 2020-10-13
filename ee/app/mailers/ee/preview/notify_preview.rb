@@ -24,6 +24,10 @@ module EE
           ::Notify.mirror_was_hard_failed_email(project.id, user.id).message
         end
 
+        def mirror_was_disabled_email
+          ::Notify.mirror_was_disabled_email(project.id, user.id, 'deleted_user_name').message
+        end
+
         def project_mirror_user_changed_email
           ::Notify.project_mirror_user_changed_email(user.id, 'deleted_user_name', project.id).message
         end
@@ -34,18 +38,6 @@ module EE
 
         def send_unsubscribed_notification
           ::Notify.send_unsubscribed_notification(user.id).message
-        end
-
-        def service_desk_new_note_email
-          cleanup do
-            note = create_note(noteable_type: 'Issue', noteable_id: issue.id, note: 'Issue note content')
-
-            ::Notify.service_desk_new_note_email(issue.id, note.id).message
-          end
-        end
-
-        def service_desk_thank_you_email
-          ::Notify.service_desk_thank_you_email(issue.id).message
         end
       end
 

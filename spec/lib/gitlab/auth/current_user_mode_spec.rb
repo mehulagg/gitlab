@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::CurrentUserMode, :do_not_mock_admin_mode, :request_store do
+RSpec.describe Gitlab::Auth::CurrentUserMode, :do_not_mock_admin_mode, :request_store do
   let(:user) { build_stubbed(:user) }
 
   subject { described_class.new(user) }
@@ -121,7 +121,7 @@ describe Gitlab::Auth::CurrentUserMode, :do_not_mock_admin_mode, :request_store 
             subject.enable_admin_mode!(password: user.password)
             expect(subject.admin_mode?).to be(true), 'admin mode is not active in the present'
 
-            Timecop.freeze(Gitlab::Auth::CurrentUserMode::MAX_ADMIN_MODE_TIME.from_now) do
+            travel_to(Gitlab::Auth::CurrentUserMode::MAX_ADMIN_MODE_TIME.from_now) do
               # in the future this will be a new request, simulate by clearing the RequestStore
               Gitlab::SafeRequestStore.clear!
 

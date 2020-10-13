@@ -1,6 +1,5 @@
 fragment BoardFragment on Board {
-  id,
-  name,
+  id
+  name
   weight
 }
-

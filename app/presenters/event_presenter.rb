@@ -24,9 +24,31 @@ class EventPresenter < Gitlab::View::Presenter::Delegated
     when Group
       [event.group, event.target]
     when Project
-      [event.project.namespace.becomes(Namespace), event.project, event.target]
+      [event.project, event.target]
     else
       ''
     end
+  end
+
+  def target_type_name
+    if design?
+      'Design'
+    elsif wiki_page?
+      'Wiki Page'
+    elsif target_type.present?
+      target_type.titleize
+    else
+      "Project"
+    end.downcase
+  end
+
+  def note_target_type_name
+    return unless note?
+
+    if design_note?
+      'Design'
+    else
+      target.noteable_type.titleize
+    end.downcase
   end
 end

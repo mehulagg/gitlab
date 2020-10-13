@@ -3,6 +3,7 @@
 class Projects::ForksController < Projects::ApplicationController
   include ContinueParams
   include RendersMemberAccess
+  include RendersProjectsList
   include Gitlab::Utils::StrongMemoize
 
   # Authorize
@@ -12,6 +13,8 @@ class Projects::ForksController < Projects::ApplicationController
   before_action :authenticate_user!, only: [:new, :create]
   before_action :authorize_fork_project!, only: [:new, :create]
   before_action :authorize_fork_namespace!, only: [:create]
+
+  feature_category :source_code_management
 
   def index
     @total_forks_count    = project.forks.size
@@ -35,7 +38,20 @@ class Projects::ForksController < Projects::ApplicationController
   end
 
   def new
-    @namespaces = fork_service.valid_fork_targets - [project.namespace]
+    respond_to do |format|
+      format.html do
+        @own_namespace = current_user.namespace if fork_service.valid_fork_targets.include?(current_user.namespace)
+        @project = project
+      end
+
+      format.json do
+        namespaces = load_namespaces_with_associations - [project.namespace]
+
+        render json: {
+          namespaces: ForkNamespaceSerializer.new.represent(namespaces, project: project, current_user: current_user, memberships: memberships_hash)
+        }
+      end
+    end
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -86,6 +102,14 @@ class Projects::ForksController < Projects::ApplicationController
 
   def whitelist_query_limiting
     Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42335')
+  end
+
+  def load_namespaces_with_associations
+    @load_namespaces_with_associations ||= fork_service.valid_fork_targets(only_groups: true).preload(:route)
+  end
+
+  def memberships_hash
+    current_user.members.where(source: load_namespaces_with_associations).index_by(&:source_id)
   end
 end
 

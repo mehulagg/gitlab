@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Badge::Coverage::Report do
+RSpec.describe Gitlab::Badge::Coverage::Report do
   let(:project) { create(:project, :repository) }
   let(:job_name) { nil }
 
@@ -102,7 +102,7 @@ describe Gitlab::Badge::Coverage::Report do
 
     create(:ci_pipeline, opts).tap do |pipeline|
       yield pipeline
-      pipeline.update_legacy_status
+      ::Ci::ProcessPipelineService.new(pipeline).execute
     end
   end
 end

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Ci::Minutes::Context do
   let_it_be(:group) { create(:group) }
-  let(:project) { build(:project, namespace: group) }
+  let_it_be(:project) { create(:project, namespace: group) }
 
   describe 'delegation' do
     subject { described_class.new(project, group) }

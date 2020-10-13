@@ -1,3 +1,4 @@
+import { TEST_HOST } from 'helpers/test_constants';
 import { setHTMLFixture } from '../../helpers/fixtures';
 import { updateElementsVisibility, updateFormAction } from '~/repository/utils/dom';
 
@@ -31,7 +32,7 @@ describe('updateFormAction', () => {
     updateFormAction('.js-test', '/gitlab/create', path);
 
     expect(document.querySelector('.js-test').action).toBe(
-      `http://localhost/gitlab/create/${path.replace(/^\//, '')}`,
+      `${TEST_HOST}/gitlab/create/${path.replace(/^\//, '')}`,
     );
   });
 });

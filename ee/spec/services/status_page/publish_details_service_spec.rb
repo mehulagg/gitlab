@@ -9,7 +9,7 @@ RSpec.describe StatusPage::PublishDetailsService do
   let(:user_notes) { [] }
   let(:incident_id) { 1 }
   let(:issue) { instance_double(Issue, notes: user_notes, description: 'Incident Occuring', iid: incident_id) }
-  let(:key) { StatusPage::Storage.details_path(incident_id) }
+  let(:key) { Gitlab::StatusPage::Storage.details_path(incident_id) }
   let(:content) { { id: incident_id } }
 
   let(:service) { described_class.new(project: project) }
@@ -37,17 +37,6 @@ RSpec.describe StatusPage::PublishDetailsService do
       before do
         allow(storage_client).to receive(:upload_object).and_return(success)
         allow(storage_client).to receive(:list_object_keys).and_return([])
-      end
-
-      context 'when feature flag disabled' do
-        before do
-          stub_feature_flags(status_page_attachments: false)
-        end
-
-        it 'does not publish attachments and returns success' do
-          expect(StatusPage::PublishAttachmentsService).not_to receive(:new)
-          expect(subject.success?).to be true
-        end
       end
 
       context 'when successful' do

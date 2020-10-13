@@ -183,6 +183,8 @@ RSpec.describe Projects::ClustersController do
       end
     end
 
+    include_examples 'GET new cluster shared examples'
+
     describe 'security' do
       it 'is allowed for admin when admin mode enabled', :enable_admin_mode do
         expect { go }.to be_allowed_for(:admin)
@@ -200,6 +202,48 @@ RSpec.describe Projects::ClustersController do
     end
   end
 
+  describe 'GET #prometheus_proxy' do
+    let(:proxyable) do
+      create(:cluster, :provided_by_gcp, projects: [project])
+    end
+
+    it_behaves_like 'metrics dashboard prometheus api proxy' do
+      let(:proxyable_params) do
+        {
+          id: proxyable.id.to_s,
+          namespace_id: project.namespace.full_path,
+          project_id: project.name
+        }
+      end
+
+      context 'with anonymous user' do
+        let(:prometheus_body) { nil }
+
+        before do
+          sign_out(user)
+        end
+
+        it 'redirects to signin page' do
+          get :prometheus_proxy, params: prometheus_proxy_params
+
+          expect(response).to redirect_to(new_user_session_path)
+        end
+      end
+    end
+  end
+
+  it_behaves_like 'GET #metrics_dashboard for dashboard', 'Cluster health' do
+    let(:cluster) { create(:cluster, :provided_by_gcp, projects: [project]) }
+
+    let(:metrics_dashboard_req_params) do
+      {
+        id: cluster.id,
+        namespace_id: project.namespace.full_path,
+        project_id: project.name
+      }
+    end
+  end
+
   describe 'POST create for new cluster' do
     let(:legacy_abac_param) { 'true' }
     let(:params) do
@@ -207,6 +251,7 @@ RSpec.describe Projects::ClustersController do
         cluster: {
           name: 'new-cluster',
           managed: '1',
+          namespace_per_environment: '0',
           provider_gcp_attributes: {
             gcp_project_id: 'gcp-project-12345',
             legacy_abac: legacy_abac_param
@@ -234,6 +279,7 @@ RSpec.describe Projects::ClustersController do
           expect(project.clusters.first).to be_kubernetes
           expect(project.clusters.first.provider_gcp).to be_legacy_abac
           expect(project.clusters.first.managed?).to be_truthy
+          expect(project.clusters.first.namespace_per_environment?).to be_falsy
         end
 
         context 'when legacy_abac param is false' do
@@ -325,6 +371,7 @@ RSpec.describe Projects::ClustersController do
 
           expect(project.clusters.first).to be_user
           expect(project.clusters.first).to be_kubernetes
+          expect(project.clusters.first).to be_namespace_per_environment
         end
       end
 
@@ -356,6 +403,7 @@ RSpec.describe Projects::ClustersController do
           expect(cluster).to be_user
           expect(cluster).to be_kubernetes
           expect(cluster).to be_platform_kubernetes_rbac
+          expect(cluster).to be_namespace_per_environment
         end
       end
 
@@ -479,14 +527,13 @@ RSpec.describe Projects::ClustersController do
   end
 
   describe 'POST authorize AWS role for EKS cluster' do
-    let(:role_arn) { 'arn:aws:iam::123456789012:role/role-name' }
-    let(:role_external_id) { '12345' }
+    let!(:role) { create(:aws_role, user: user) }
 
+    let(:role_arn) { 'arn:new-role' }
     let(:params) do
       {
         cluster: {
-          role_arn: role_arn,
-          role_external_id: role_external_id
+          role_arn: role_arn
         }
       }
     end
@@ -500,28 +547,32 @@ RSpec.describe Projects::ClustersController do
         .and_return(double(execute: double))
     end
 
-    it 'creates an Aws::Role record' do
-      expect { go }.to change { Aws::Role.count }
+    it 'updates the associated role with the supplied ARN' do
+      go
 
       expect(response).to have_gitlab_http_status(:ok)
-
-      role = Aws::Role.last
-      expect(role.user).to eq user
-      expect(role.role_arn).to eq role_arn
-      expect(role.role_external_id).to eq role_external_id
+      expect(role.reload.role_arn).to eq(role_arn)
     end
 
-    context 'role cannot be created' do
+    context 'supplied role is invalid' do
       let(:role_arn) { 'invalid-role' }
 
-      it 'does not create a record' do
-        expect { go }.not_to change { Aws::Role.count }
+      it 'does not update the associated role' do
+        expect { go }.not_to change { role.role_arn }
 
         expect(response).to have_gitlab_http_status(:unprocessable_entity)
       end
     end
 
     describe 'security' do
+      before do
+        allow_next_instance_of(Clusters::Aws::AuthorizeRoleService) do |service|
+          response = double(status: :ok, body: double)
+
+          allow(service).to receive(:execute).and_return(response)
+        end
+      end
+
       it 'is allowed for admin when admin mode enabled', :enable_admin_mode do
         expect { go }.to be_allowed_for(:admin)
       end
@@ -679,6 +730,7 @@ RSpec.describe Projects::ClustersController do
           enabled: false,
           name: 'my-new-cluster-name',
           managed: false,
+          namespace_per_environment: false,
           platform_kubernetes_attributes: {
             namespace: 'my-namespace'
           }
@@ -695,6 +747,7 @@ RSpec.describe Projects::ClustersController do
       expect(cluster.enabled).to be_falsey
       expect(cluster.name).to eq('my-new-cluster-name')
       expect(cluster).not_to be_managed
+      expect(cluster).not_to be_namespace_per_environment
       expect(cluster.platform_kubernetes.namespace).to eq('my-namespace')
     end
 

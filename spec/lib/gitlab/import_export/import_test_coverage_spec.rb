@@ -7,7 +7,7 @@ require 'spec_helper'
 # Fixture JSONs we use for testing Import such as
 # `spec/fixtures/lib/gitlab/import_export/complex/project.json`
 # should include these relations being non-empty.
-describe 'Test coverage of the Project Import' do
+RSpec.describe 'Test coverage of the Project Import' do
   include ConfigurationHelper
 
   # `muted_relations` is a technical debt.
@@ -51,6 +51,7 @@ describe 'Test coverage of the Project Import' do
       project.metrics_setting
       project.boards.lists.label.priorities
       project.service_desk_setting
+      project.security_setting
     ].freeze
   end
 

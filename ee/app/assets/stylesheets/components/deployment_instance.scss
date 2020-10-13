@@ -48,18 +48,18 @@
   }
 
   &-pending {
-    background-color: $gray-300;
-    border-color: $gray-700;
+    background-color: $gray-200;
+    border-color: $gray-500;
 
     &.link:hover {
-      background-color: $gray-500;
+      background-color: $gray-300;
       border-color: $gray-900;
     }
   }
 
   &-unknown {
     background-color: $white;
-    border-color: $gray-700;
+    border-color: $gray-500;
 
     &.link:hover {
       background-color: $white;

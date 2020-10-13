@@ -54,11 +54,11 @@ const projectSelect = () => {
             this.groupId,
             query.term,
             {
-              search_namespaces: true,
               with_issues_enabled: this.withIssuesEnabled,
               with_merge_requests_enabled: this.withMergeRequestsEnabled,
               with_shared: this.withShared,
               include_subgroups: this.includeProjectsInSubgroups,
+              order_by: 'similarity',
             },
             projectsCallback,
           );
@@ -110,7 +110,10 @@ const projectSelect = () => {
   });
 };
 
-export default () =>
-  import(/* webpackChunkName: 'select2' */ 'select2/select2')
-    .then(projectSelect)
-    .catch(() => {});
+export default () => {
+  if ($('.ajax-project-select').length) {
+    import(/* webpackChunkName: 'select2' */ 'select2/select2')
+      .then(projectSelect)
+      .catch(() => {});
+  }
+};

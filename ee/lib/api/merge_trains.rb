@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class MergeTrains < ::Grape::API
+  class MergeTrains < ::Grape::API::Instance
     include PaginationParams
 
     before do

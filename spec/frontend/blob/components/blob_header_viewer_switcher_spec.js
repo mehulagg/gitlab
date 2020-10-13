@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils';
+import { GlButtonGroup, GlButton } from '@gitlab/ui';
 import BlobHeaderViewerSwitcher from '~/blob/components/blob_header_viewer_switcher.vue';
 import {
   RICH_BLOB_VIEWER,
@@ -6,7 +7,6 @@ import {
   SIMPLE_BLOB_VIEWER,
   SIMPLE_BLOB_VIEWER_TITLE,
 } from '~/blob/components/constants';
-import { GlButtonGroup, GlDeprecatedButton } from '@gitlab/ui';
 
 describe('Blob Header Viewer Switcher', () => {
   let wrapper;
@@ -35,7 +35,7 @@ describe('Blob Header Viewer Switcher', () => {
     beforeEach(() => {
       createComponent();
       btnGroup = wrapper.find(GlButtonGroup);
-      buttons = wrapper.findAll(GlDeprecatedButton);
+      buttons = wrapper.findAll(GlButton);
     });
 
     it('renders gl-button-group component', () => {
@@ -57,7 +57,7 @@ describe('Blob Header Viewer Switcher', () => {
 
     function factory(propsData = {}) {
       createComponent(propsData);
-      buttons = wrapper.findAll(GlDeprecatedButton);
+      buttons = wrapper.findAll(GlButton);
       simpleBtn = buttons.at(0);
       richBtn = buttons.at(1);
 

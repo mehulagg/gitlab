@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'gitlab/qa'
+require 'uri'
 
 module QA
   module Runtime
@@ -23,12 +24,54 @@ module QA
         SUPPORTED_FEATURES
       end
 
-      def dot_com?
-        Runtime::Scenario.gitlab_address.include?(".com")
+      def context_matches?(*options)
+        return false unless Runtime::Scenario.attributes[:gitlab_address]
+
+        opts = {}
+        opts[:domain] = '.+'
+        opts[:tld] = '.com'
+
+        uri = URI(Runtime::Scenario.gitlab_address)
+
+        options.each do |option|
+          opts[:domain] = 'gitlab' if option == :production
+
+          if option.is_a?(Hash) && !option[:pipeline].nil? && !ci_project_name.nil?
+            return pipeline_matches?(option[:pipeline])
+
+          elsif option.is_a?(Hash) && !option[:subdomain].nil?
+            opts.merge!(option)
+
+            opts[:subdomain] = case option[:subdomain]
+                               when Array
+                                 "(#{option[:subdomain].join("|")})."
+                               when Regexp
+                                 option[:subdomain]
+                               else
+                                 "(#{option[:subdomain]})."
+                               end
+          end
+        end
+
+        uri.host.match?(/^#{opts[:subdomain]}#{opts[:domain]}#{opts[:tld]}$/)
+      end
+
+      alias_method :dot_com?, :context_matches?
+
+      def pipeline_matches?(pipeline_to_run_in)
+        Array(pipeline_to_run_in).any? { |pipeline| pipeline.to_s.casecmp?(pipeline_from_project_name) }
+      end
+
+      def pipeline_from_project_name
+        ci_project_name.to_s.start_with?('gitlab-qa') ? 'master' : ci_project_name
       end
 
       def additional_repository_storage
         ENV['QA_ADDITIONAL_REPOSITORY_STORAGE']
+      end
+
+      def non_cluster_repository_storage
+        ENV['QA_GITALY_NON_CLUSTER_STORAGE'] || 'gitaly'
       end
 
       def praefect_repository_storage
@@ -45,6 +88,10 @@ module QA
 
       def admin_personal_access_token
         ENV['GITLAB_QA_ADMIN_ACCESS_TOKEN']
+      end
+
+      def ci_job_url
+        ENV['CI_JOB_URL']
       end
 
       def ci_project_name
@@ -75,6 +122,10 @@ module QA
 
       def running_in_ci?
         ENV['CI'] || ENV['CI_SERVER']
+      end
+
+      def cluster_api_url
+        ENV['CLUSTER_API_URL']
       end
 
       def qa_cookies
@@ -194,6 +245,14 @@ module QA
         ENV['GITLAB_QA_PASSWORD_6']
       end
 
+      def gitlab_qa_2fa_owner_username_1
+        ENV['GITLAB_QA_2FA_OWNER_USERNAME_1'] || 'gitlab-qa-2fa-owner-user1'
+      end
+
+      def gitlab_qa_2fa_owner_password_1
+        ENV['GITLAB_QA_2FA_OWNER_PASSWORD_1']
+      end
+
       def gitlab_qa_1p_email
         ENV['GITLAB_QA_1P_EMAIL']
       end
@@ -220,6 +279,10 @@ module QA
 
       def jira_hostname
         ENV['JIRA_HOSTNAME']
+      end
+
+      def cache_namespace_name?
+        enabled?(ENV['CACHE_NAMESPACE_NAME'], default: true)
       end
 
       def knapsack?
@@ -316,6 +379,15 @@ module QA
 
       def mailhog_hostname
         ENV['MAILHOG_HOSTNAME']
+      end
+
+      # Get the version of GitLab currently being tested against
+      # @return String Version
+      # @example
+      #   > Env.deploy_version
+      #   #=> 13.3.4-ee.0
+      def deploy_version
+        ENV['DEPLOY_VERSION']
       end
 
       private

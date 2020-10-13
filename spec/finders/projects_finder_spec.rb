@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectsFinder, :do_not_mock_admin_mode do
+RSpec.describe ProjectsFinder, :do_not_mock_admin_mode do
   include AdminModeHelper
 
   describe '#execute' do
@@ -30,6 +30,10 @@ describe ProjectsFinder, :do_not_mock_admin_mode do
     let(:project_ids_relation) { nil }
     let(:use_cte) { true }
     let(:finder) { described_class.new(params: params.merge(use_cte: use_cte), current_user: current_user, project_ids_relation: project_ids_relation) }
+
+    before do
+      stub_feature_flags(project_finder_similarity_sort: false)
+    end
 
     subject { finder.execute }
 
@@ -234,18 +238,48 @@ describe ProjectsFinder, :do_not_mock_admin_mode do
       end
 
       describe 'filter by without_deleted' do
-        let(:params) { { without_deleted: true } }
-        let!(:pending_delete_project) { create(:project, :public, pending_delete: true) }
+        let_it_be(:pending_delete_project) { create(:project, :public, pending_delete: true) }
 
-        it { is_expected.to match_array([public_project, internal_project]) }
+        let(:params) { { without_deleted: without_deleted } }
+
+        shared_examples 'returns all projects' do
+          it { expect(subject).to include(public_project, internal_project, pending_delete_project) }
+        end
+
+        context 'when without_deleted is true' do
+          let(:without_deleted) { true }
+
+          it 'returns projects that are not pending_delete' do
+            expect(subject).not_to include(pending_delete_project)
+            expect(subject).to include(public_project, internal_project)
+          end
+        end
+
+        context 'when without_deleted is false' do
+          let(:without_deleted) { false }
+
+          it_behaves_like 'returns all projects'
+        end
+
+        context 'when without_deleted is nil' do
+          let(:without_deleted) { nil }
+
+          it_behaves_like 'returns all projects'
+        end
+
+        context 'when without_deleted is not present' do
+          let(:params) { {} }
+
+          it_behaves_like 'returns all projects'
+        end
       end
 
       describe 'filter by last_activity_after' do
         let(:params) { { last_activity_after: 60.minutes.ago } }
 
         before do
-          internal_project.update(last_activity_at: Time.now)
-          public_project.update(last_activity_at: 61.minutes.ago)
+          internal_project.update!(last_activity_at: Time.now)
+          public_project.update!(last_activity_at: 61.minutes.ago)
         end
 
         it { is_expected.to match_array([internal_project]) }
@@ -255,17 +289,52 @@ describe ProjectsFinder, :do_not_mock_admin_mode do
         let(:params) { { last_activity_before: 60.minutes.ago } }
 
         before do
-          internal_project.update(last_activity_at: Time.now)
-          public_project.update(last_activity_at: 61.minutes.ago)
+          internal_project.update!(last_activity_at: Time.now)
+          public_project.update!(last_activity_at: 61.minutes.ago)
         end
 
         it { is_expected.to match_array([public_project]) }
       end
 
-      describe 'sorting' do
-        let(:params) { { sort: 'name_asc' } }
+      describe 'filter by repository_storage' do
+        let(:params) { { repository_storage: 'nfs-05' } }
+        let!(:project) { create(:project, :public) }
 
-        it { is_expected.to eq([internal_project, public_project]) }
+        before do
+          project.update_columns(repository_storage: 'nfs-05')
+        end
+
+        it { is_expected.to match_array([project]) }
+      end
+
+      describe 'sorting' do
+        context 'when sorting by a field' do
+          let(:params) { { sort: 'name_asc' } }
+
+          it { is_expected.to eq([internal_project, public_project]) }
+        end
+
+        context 'when sorting by similarity' do
+          let(:params) { { sort: 'similarity', search: 'pro' } }
+
+          let_it_be(:internal_project2) do
+            create(:project, :internal, group: group, name: 'projA', path: 'projA')
+          end
+
+          let_it_be(:internal_project3) do
+            create(:project, :internal, group: group, name: 'projABC', path: 'projABC')
+          end
+
+          let_it_be(:internal_project4) do
+            create(:project, :internal, group: group, name: 'projAB', path: 'projAB')
+          end
+
+          before do
+            stub_feature_flags(project_finder_similarity_sort: true)
+          end
+
+          it { is_expected.to eq([internal_project2, internal_project4, internal_project3]) }
+        end
       end
 
       describe 'with admin user' do

@@ -3,7 +3,7 @@
 module SystemCheck
   module App
     class ElasticsearchCheck < SystemCheck::BaseCheck
-      set_name 'Elasticsearch version 5.6 - 6.x?'
+      set_name 'Elasticsearch version 6.x - 7.x?'
       set_skip_reason 'skipped (elasticsearch is disabled)'
       set_check_pass -> { "yes (#{self.current_version})" }
       set_check_fail -> { "no (#{self.current_version})" }

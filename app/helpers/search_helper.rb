@@ -1,7 +1,34 @@
 # frozen_string_literal: true
 
 module SearchHelper
-  SEARCH_PERMITTED_PARAMS = [:search, :scope, :project_id, :group_id, :repository_ref, :snippets].freeze
+  SEARCH_PERMITTED_PARAMS = [:search, :scope, :project_id, :group_id, :repository_ref, :snippets, :sort, :state, :confidential].freeze
+
+  def search_autocomplete_opts(term)
+    return unless current_user
+
+    resources_results = [
+      recent_items_autocomplete(term),
+      groups_autocomplete(term),
+      projects_autocomplete(term)
+    ].flatten
+
+    search_pattern = Regexp.new(Regexp.escape(term), "i")
+
+    generic_results = project_autocomplete + default_autocomplete + help_autocomplete
+    generic_results.concat(default_autocomplete_admin) if current_user.admin?
+    generic_results.select! { |result| result[:label] =~ search_pattern }
+
+    [
+      resources_results,
+      generic_results
+    ].flatten.uniq do |item|
+      item[:label]
+    end
+  end
+
+  def recent_items_autocomplete(term)
+    recent_merge_requests_autocomplete(term) + recent_issues_autocomplete(term)
+  end
 
   def search_entries_info(collection, scope, term)
     return if collection.to_a.empty?
@@ -62,7 +89,12 @@ module SearchHelper
     }).html_safe
   end
 
-  # Overriden in EE
+  def repository_ref(project)
+    # Always #to_s the repository_ref param in case the value is also a number
+    params[:repository_ref].to_s.presence || project.default_branch
+  end
+
+  # Overridden in EE
   def search_blob_title(project, path)
     path
   end
@@ -72,6 +104,118 @@ module SearchHelper
   end
 
   private
+
+  # Autocomplete results for various settings pages
+  def default_autocomplete
+    [
+      { category: "Settings", label: _("User settings"),    url: profile_path },
+      { category: "Settings", label: _("SSH Keys"),         url: profile_keys_path },
+      { category: "Settings", label: _("Dashboard"),        url: root_path }
+    ]
+  end
+
+  # Autocomplete results for settings pages, for admins
+  def default_autocomplete_admin
+    [
+      { category: "Settings", label: _("Admin Section"), url: admin_root_path }
+    ]
+  end
+
+  # Autocomplete results for internal help pages
+  def help_autocomplete
+    [
+      { category: "Help", label: _("API Help"),           url: help_page_path("api/README") },
+      { category: "Help", label: _("Markdown Help"),      url: help_page_path("user/markdown") },
+      { category: "Help", label: _("Permissions Help"),   url: help_page_path("user/permissions") },
+      { category: "Help", label: _("Public Access Help"), url: help_page_path("public_access/public_access") },
+      { category: "Help", label: _("Rake Tasks Help"),    url: help_page_path("raketasks/README") },
+      { category: "Help", label: _("SSH Keys Help"),      url: help_page_path("ssh/README") },
+      { category: "Help", label: _("System Hooks Help"),  url: help_page_path("system_hooks/system_hooks") },
+      { category: "Help", label: _("Webhooks Help"),      url: help_page_path("user/project/integrations/webhooks") }
+    ]
+  end
+
+  # Autocomplete results for the current project, if it's defined
+  def project_autocomplete
+    if @project && @project.repository.root_ref
+      ref = @ref || @project.repository.root_ref
+
+      [
+        { category: "In this project", label: _("Files"),          url: project_tree_path(@project, ref) },
+        { category: "In this project", label: _("Commits"),        url: project_commits_path(@project, ref) },
+        { category: "In this project", label: _("Network"),        url: project_network_path(@project, ref) },
+        { category: "In this project", label: _("Graph"),          url: project_graph_path(@project, ref) },
+        { category: "In this project", label: _("Issues"),         url: project_issues_path(@project) },
+        { category: "In this project", label: _("Merge Requests"), url: project_merge_requests_path(@project) },
+        { category: "In this project", label: _("Milestones"),     url: project_milestones_path(@project) },
+        { category: "In this project", label: _("Snippets"),       url: project_snippets_path(@project) },
+        { category: "In this project", label: _("Members"),        url: project_project_members_path(@project) },
+        { category: "In this project", label: _("Wiki"),           url: project_wikis_path(@project) }
+      ]
+    else
+      []
+    end
+  end
+
+  # Autocomplete results for the current user's groups
+  # rubocop: disable CodeReuse/ActiveRecord
+  def groups_autocomplete(term, limit = 5)
+    current_user.authorized_groups.order_id_desc.search(term).limit(limit).map do |group|
+      {
+        category: "Groups",
+        id: group.id,
+        label: "#{search_result_sanitize(group.full_name)}",
+        url: group_path(group),
+        avatar_url: group.avatar_url || ''
+      }
+    end
+  end
+  # rubocop: enable CodeReuse/ActiveRecord
+
+  # Autocomplete results for the current user's projects
+  # rubocop: disable CodeReuse/ActiveRecord
+  def projects_autocomplete(term, limit = 5)
+    current_user.authorized_projects.order_id_desc.search_by_title(term)
+      .sorted_by_stars_desc.non_archived.limit(limit).map do |p|
+      {
+        category: "Projects",
+        id: p.id,
+        value: "#{search_result_sanitize(p.name)}",
+        label: "#{search_result_sanitize(p.full_name)}",
+        url: project_path(p),
+        avatar_url: p.avatar_url || ''
+      }
+    end
+  end
+
+  def recent_merge_requests_autocomplete(term)
+    return [] unless current_user
+
+    ::Gitlab::Search::RecentMergeRequests.new(user: current_user).search(term).map do |mr|
+      {
+        category: "Recent merge requests",
+        id: mr.id,
+        label: search_result_sanitize(mr.title),
+        url: merge_request_path(mr),
+        avatar_url: mr.project.avatar_url || ''
+      }
+    end
+  end
+
+  def recent_issues_autocomplete(term)
+    return [] unless current_user
+
+    ::Gitlab::Search::RecentIssues.new(user: current_user).search(term).map do |i|
+      {
+        category: "Recent issues",
+        id: i.id,
+        label: search_result_sanitize(i.title),
+        url: issue_path(i),
+        avatar_url: i.project.avatar_url || ''
+      }
+    end
+  end
+  # rubocop: enable CodeReuse/ActiveRecord
 
   def search_result_sanitize(str)
     Sanitize.clean(str)
@@ -122,6 +266,7 @@ module SearchHelper
       opts[:data]['group-id'] = @group.id
       opts[:data]['labels-endpoint'] = group_labels_path(@group)
       opts[:data]['milestones-endpoint'] = group_milestones_path(@group)
+      opts[:data]['releases-endpoint'] = group_releases_path(@group)
     else
       opts[:data]['labels-endpoint'] = dashboard_labels_path
       opts[:data]['milestones-endpoint'] = dashboard_milestones_path
@@ -142,22 +287,39 @@ module SearchHelper
 
   # Sanitize a HTML field for search display. Most tags are stripped out and the
   # maximum length is set to 200 characters.
-  def search_md_sanitize(object, field)
-    html = markdown_field(object, field)
-    html = Truncato.truncate(
-      html,
+  def search_md_sanitize(source)
+    source = Truncato.truncate(
+      source,
       count_tags: false,
       count_tail: false,
       max_length: 200
     )
 
+    html = markdown(source)
+
     # Truncato's filtered_tags and filtered_attributes are not quite the same
     sanitize(html, tags: %w(a p ol ul li pre code))
   end
 
-  def show_user_search_tab?
-    return false if Feature.disabled?(:users_search, default_enabled: true)
+  def simple_search_highlight_and_truncate(text, phrase, options = {})
+    text = Truncato.truncate(
+      text,
+      count_tags: false,
+      count_tail: false,
+      max_length: options.delete(:length) { 200 }
+    )
 
+    highlight(text, phrase.split, options)
+  end
+
+  # _search_highlight is used in EE override
+  def highlight_and_truncate_issue(issue, search_term, _search_highlight)
+    return unless issue.description.present?
+
+    simple_search_highlight_and_truncate(issue.description, search_term, highlighter: '<span class="gl-text-black-normal gl-font-weight-bold">\1</span>')
+  end
+
+  def show_user_search_tab?
     if @project
       project_search_tabs?(:members)
     else

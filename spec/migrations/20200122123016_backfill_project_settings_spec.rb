@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20200122123016_backfill_project_settings.rb')
 
-describe BackfillProjectSettings, :sidekiq, schema: 20200114113341 do
+RSpec.describe BackfillProjectSettings, :sidekiq, schema: 20200114113341 do
   let(:projects) { table(:projects) }
   let(:namespace) { table(:namespaces).create(name: 'user', path: 'user') }
   let(:project) { projects.create(namespace_id: namespace.id) }
@@ -19,7 +19,7 @@ describe BackfillProjectSettings, :sidekiq, schema: 20200114113341 do
 
     it 'schedules BackfillProjectSettings background jobs' do
       Sidekiq::Testing.fake! do
-        Timecop.freeze do
+        freeze_time do
           migrate!
 
           expect(described_class::MIGRATION).to be_scheduled_delayed_migration(2.minutes, 1, 2)

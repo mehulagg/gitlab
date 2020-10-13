@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 module Ci
-  describe RegisterJobService do
+  RSpec.describe RegisterJobService do
     let_it_be(:group) { create(:group) }
     let_it_be(:project, reload: true) { create(:project, group: group, shared_runners_enabled: false, group_runners_enabled: false) }
     let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
@@ -15,14 +15,14 @@ module Ci
     describe '#execute' do
       context 'runner follow tag list' do
         it "picks build with the same tag" do
-          pending_job.update(tag_list: ["linux"])
-          specific_runner.update(tag_list: ["linux"])
+          pending_job.update!(tag_list: ["linux"])
+          specific_runner.update!(tag_list: ["linux"])
           expect(execute(specific_runner)).to eq(pending_job)
         end
 
         it "does not pick build with different tag" do
-          pending_job.update(tag_list: ["linux"])
-          specific_runner.update(tag_list: ["win32"])
+          pending_job.update!(tag_list: ["linux"])
+          specific_runner.update!(tag_list: ["win32"])
           expect(execute(specific_runner)).to be_falsey
         end
 
@@ -31,24 +31,24 @@ module Ci
         end
 
         it "does not pick build with tag" do
-          pending_job.update(tag_list: ["linux"])
+          pending_job.update!(tag_list: ["linux"])
           expect(execute(specific_runner)).to be_falsey
         end
 
         it "pick build without tag" do
-          specific_runner.update(tag_list: ["win32"])
+          specific_runner.update!(tag_list: ["win32"])
           expect(execute(specific_runner)).to eq(pending_job)
         end
       end
 
       context 'deleted projects' do
         before do
-          project.update(pending_delete: true)
+          project.update!(pending_delete: true)
         end
 
         context 'for shared runners' do
           before do
-            project.update(shared_runners_enabled: true)
+            project.update!(shared_runners_enabled: true)
           end
 
           it 'does not pick a build' do
@@ -65,7 +65,7 @@ module Ci
 
       context 'allow shared runners' do
         before do
-          project.update(shared_runners_enabled: true)
+          project.update!(shared_runners_enabled: true)
         end
 
         context 'for multiple builds' do
@@ -109,12 +109,14 @@ module Ci
         end
 
         context 'shared runner' do
-          let(:build) { execute(shared_runner) }
+          let(:response) { described_class.new(shared_runner).execute }
+          let(:build) { response.build }
 
           it { expect(build).to be_kind_of(Build) }
           it { expect(build).to be_valid }
           it { expect(build).to be_running }
           it { expect(build.runner).to eq(shared_runner) }
+          it { expect(Gitlab::Json.parse(response.build_json)['id']).to eq(build.id) }
         end
 
         context 'specific runner' do
@@ -129,7 +131,7 @@ module Ci
 
       context 'disallow shared runners' do
         before do
-          project.update(shared_runners_enabled: false)
+          project.update!(shared_runners_enabled: false)
         end
 
         context 'shared runner' do
@@ -150,7 +152,7 @@ module Ci
 
       context 'disallow when builds are disabled' do
         before do
-          project.update(shared_runners_enabled: true, group_runners_enabled: true)
+          project.update!(shared_runners_enabled: true, group_runners_enabled: true)
           project.project_feature.update_attribute(:builds_access_level, ProjectFeature::DISABLED)
         end
 
@@ -356,13 +358,8 @@ module Ci
       end
 
       context 'runner feature set is verified' do
-        let!(:pending_job) { create(:ci_build, :pending, pipeline: pipeline) }
-
-        before do
-          expect_any_instance_of(Ci::Build).to receive(:runner_required_feature_names) do
-            [:runner_required_feature]
-          end
-        end
+        let(:options) { { artifacts: { reports: { junit: "junit.xml" } } } }
+        let!(:pending_job) { create(:ci_build, :pending, pipeline: pipeline, options: options) }
 
         subject { execute(specific_runner, params) }
 
@@ -378,7 +375,7 @@ module Ci
 
         context 'when feature is supported by runner' do
           let(:params) do
-            { info: { features: { runner_required_feature: true } } }
+            { info: { features: { upload_multiple_artifacts: true } } }
           end
 
           it 'does pick job' do
@@ -594,8 +591,8 @@ module Ci
                                     .with(:job_queue_duration_seconds, anything, anything, anything)
                                     .and_return(job_queue_duration_seconds)
 
-        project.update(shared_runners_enabled: true)
-        pending_job.update(created_at: current_time - 3600, queued_at: current_time - 1800)
+        project.update!(shared_runners_enabled: true)
+        pending_job.update!(created_at: current_time - 3600, queued_at: current_time - 1800)
       end
 
       shared_examples 'attempt counter collector' do
@@ -664,7 +661,7 @@ module Ci
 
         context 'when pending job with queued_at=nil is used' do
           before do
-            pending_job.update(queued_at: nil)
+            pending_job.update!(queued_at: nil)
           end
 
           it_behaves_like 'attempt counter collector'

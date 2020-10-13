@@ -34,7 +34,7 @@ module EE
         queries << snippets_of_authorized_projects unless only_personal
       end
 
-      find_union(queries, ::Snippet)
+      prepared_union(queries)
     end
 
     def restricted_personal_snippets

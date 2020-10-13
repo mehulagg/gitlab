@@ -57,7 +57,7 @@ module Gitlab
             end
 
             unless PERMITTED_FACETS.include?(aggregate_facet.to_sym)
-              return "Invalid aggregate facet #{aggregate_facet} provided."
+              "Invalid aggregate facet #{aggregate_facet} provided."
             end
           end
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::UrlBlocker, :stub_invalid_dns_only do
+RSpec.describe Gitlab::UrlBlocker, :stub_invalid_dns_only do
   include StubRequests
 
   describe '#validate!' do
@@ -280,6 +280,7 @@ describe Gitlab::UrlBlocker, :stub_invalid_dns_only do
           '[fc00:bf8b:e62c:abcd:abcd:aaaa:aaaa:aaaa]'
         ]
       end
+
       let(:fake_domain) { 'www.fakedomain.fake' }
 
       shared_examples 'allows local requests' do |url_blocker_attributes|

@@ -1,6 +1,6 @@
 # reCAPTCHA
 
-GitLab leverages [Google's reCAPTCHA](https://www.google.com/recaptcha/intro/index.html)
+GitLab leverages [Google's reCAPTCHA](https://www.google.com/recaptcha/about/)
 to protect against spam and abuse. GitLab displays the CAPTCHA form on the sign-up page
 to confirm that a real user, not a bot, is attempting to create an account.
 
@@ -15,6 +15,12 @@ To use reCAPTCHA, first you must create a site and private key.
 1. Fill all reCAPTCHA fields with keys from previous steps.
 1. Check the `Enable reCAPTCHA` checkbox.
 1. Save the configuration.
+1. Change the first line of the `#execute` method in `app/services/spam/spam_verdict_service.rb`
+   to `return CONDITONAL_ALLOW` so that the spam check short-circuits and triggers the response to
+   return `recaptcha_html`.
+
+NOTE: **Note:**
+Make sure you are viewing an issuable in a project that is public, and if you're working with an issue, the issue is public.
 
 ## Enabling reCAPTCHA for user logins via passwords
 
@@ -30,5 +36,5 @@ proxy_set_header X-GitLab-Show-Login-Captcha 1;
 In Omnibus GitLab, this can be configured via `/etc/gitlab/gitlab.rb`:
 
 ```ruby
-nginx['proxy_set_headers'] = { 'X-GitLab-Show-Login-Captcha' => 1 }
+nginx['proxy_set_headers'] = { 'X-GitLab-Show-Login-Captcha' => '1' }
 ```

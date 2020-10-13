@@ -50,3 +50,18 @@ RSpec.describe Projects::Analytics::CodeReviewsController, type: :request do
     end
   end
 end
+
+RSpec.describe Projects::Analytics::CodeReviewsController, type: :controller do
+  let(:user) { create :user }
+  let(:project) { create(:project) }
+
+  before do
+    sign_in user
+    project.add_reporter(user)
+  end
+
+  it_behaves_like 'tracking unique visits', :index do
+    let(:request_params) { { namespace_id: project.namespace, project_id: project } }
+    let(:target_id) { 'p_analytics_code_reviews' }
+  end
+end

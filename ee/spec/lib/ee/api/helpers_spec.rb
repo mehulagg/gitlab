@@ -6,7 +6,7 @@ RSpec.describe EE::API::Helpers do
   include Rack::Test::Methods
 
   let(:helper) do
-    Class.new(Grape::API) do
+    Class.new(Grape::API::Instance) do
       helpers EE::API::Helpers
       helpers API::APIGuard::HelperMethods
       helpers API::Helpers

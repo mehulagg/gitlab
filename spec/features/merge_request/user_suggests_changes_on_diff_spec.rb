@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User comments on a diff', :js do
+RSpec.describe 'User comments on a diff', :js do
   include MergeRequestDiffHelpers
   include RepoHelpers
 
@@ -22,6 +22,7 @@ describe 'User comments on a diff', :js do
   let(:merge_request) do
     create(:merge_request_with_diffs, source_project: project, target_project: project, source_branch: 'merge-test')
   end
+
   let(:user) { create(:user) }
 
   before do
@@ -118,7 +119,8 @@ describe 'User comments on a diff', :js do
     it 'can add and remove suggestions from a batch' do
       files.each_with_index do |file, index|
         page.within("[id='#{file[:hash]}']") do
-          find("button[title='Show full file']").click
+          find('.js-diff-more-actions').click
+          click_button 'Show full file'
           wait_for_requests
 
           click_diff_line(find("[id='#{file[:line_code]}']"))
@@ -129,7 +131,9 @@ describe 'User comments on a diff', :js do
             wait_for_requests
           end
         end
+      end
 
+      files.each_with_index do |file, index|
         page.within("[id='#{file[:hash]}']") do
           expect(page).not_to have_content('Applied')
 
@@ -155,7 +159,7 @@ describe 'User comments on a diff', :js do
       end
     end
 
-    it 'can apply multiple suggestions as a batch' do
+    it 'can apply multiple suggestions as a batch', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/224100' do
       files.each_with_index do |file, index|
         page.within("[id='#{file[:hash]}']") do
           find("button[title='Show full file']").click
@@ -188,8 +192,7 @@ describe 'User comments on a diff', :js do
   end
 
   context 'multiple suggestions in expanded lines' do
-    # https://gitlab.com/gitlab-org/gitlab/issues/38277
-    it 'suggestions are appliable', :quarantine do
+    it 'suggestions are appliable', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/38277' do
       diff_file = merge_request.diffs(paths: ['files/ruby/popen.rb']).diff_files.first
       hash = Digest::SHA1.hexdigest(diff_file.file_path)
 

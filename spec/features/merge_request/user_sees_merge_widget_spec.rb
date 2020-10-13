@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User sees merge widget', :js do
+RSpec.describe 'Merge request > User sees merge widget', :js do
   include ProjectForksHelper
   include TestReportsHelper
   include ReactiveCachingHelpers
@@ -127,8 +127,10 @@ describe 'Merge request > User sees merge widget', :js do
     end
   end
 
-  context 'when merge request is in the blocked pipeline state' do
+  context 'when merge request is in the blocked pipeline state and pipeline must succeed' do
     before do
+      project.update_attribute(:only_allow_merge_if_pipeline_succeeds, true)
+
       create(
         :ci_pipeline,
         project: project,
@@ -268,7 +270,7 @@ describe 'Merge request > User sees merge widget', :js do
     end
   end
 
-  context 'view merge request where project has CI set up but no CI status' do
+  context 'view merge request where there is no pipeline yet' do
     before do
       pipeline = create(:ci_pipeline, project: project,
                                       sha: merge_request.diff_head_sha,
@@ -278,11 +280,11 @@ describe 'Merge request > User sees merge widget', :js do
       visit project_merge_request_path(project, merge_request)
     end
 
-    it 'has pipeline error text' do
+    it 'has pipeline loading state' do
       # Wait for the `ci_status` and `merge_check` requests
       wait_for_requests
 
-      expect(page).to have_text("Could not retrieve the pipeline status. For troubleshooting steps, read the documentation.")
+      expect(page).to have_text("Checking pipeline status")
     end
   end
 
@@ -302,7 +304,7 @@ describe 'Merge request > User sees merge widget', :js do
 
   context 'view merge request with MWPS enabled but automatically merge fails' do
     before do
-      merge_request.update(
+      merge_request.update!(
         auto_merge_enabled: true,
         auto_merge_strategy: AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS,
         merge_user: merge_request.author,
@@ -324,7 +326,7 @@ describe 'Merge request > User sees merge widget', :js do
 
   context 'view merge request with MWPS enabled but automatically merge fails' do
     before do
-      merge_request.update(
+      merge_request.update!(
         merge_when_pipeline_succeeds: true,
         merge_user: merge_request.author,
         merge_error: 'Something went wrong'
@@ -345,9 +347,9 @@ describe 'Merge request > User sees merge widget', :js do
 
   context 'view merge request where fast-forward merge is not possible' do
     before do
-      project.update(merge_requests_ff_only_enabled: true)
+      project.update!(merge_requests_ff_only_enabled: true)
 
-      merge_request.update(
+      merge_request.update!(
         merge_user: merge_request.author,
         merge_status: :cannot_be_merged
       )
@@ -380,19 +382,19 @@ describe 'Merge request > User sees merge widget', :js do
     end
   end
 
-  context 'user can merge into source project but cannot push to fork', :js do
-    let(:fork_project) { create(:project, :public, :repository) }
+  context 'user can merge into target project but cannot push to fork', :js do
+    let(:forked_project) { fork_project(project, nil, repository: true) }
     let(:user2) { create(:user) }
 
     before do
       project.add_maintainer(user2)
       sign_out(:user)
       sign_in(user2)
-      merge_request.update(target_project: fork_project)
+      merge_request.update!(source_project: forked_project)
       visit project_merge_request_path(project, merge_request)
     end
 
-    it 'user can merge into the source project' do
+    it 'user can merge into the target project', :sidekiq_inline do
       expect(page).to have_button('Merge', disabled: false)
     end
 
@@ -409,7 +411,7 @@ describe 'Merge request > User sees merge widget', :js do
       project.add_developer(user2)
       sign_out(:user)
       sign_in(user2)
-      merge_request.update(
+      merge_request.update!(
         source_project: forked_project,
         target_project: project,
         merge_params: { 'force_remove_source_branch' => '1' }
@@ -879,7 +881,7 @@ describe 'Merge request > User sees merge widget', :js do
     let!(:pipeline) { create(:ci_pipeline, status: 'success', sha: sha, project: project, ref: merge_request.source_branch) }
 
     before do
-      project.update(
+      project.update!(
         visibility_level: Gitlab::VisibilityLevel::PUBLIC,
         public_builds: false
       )
@@ -889,9 +891,9 @@ describe 'Merge request > User sees merge widget', :js do
       visit project_merge_request_path(project, merge_request)
     end
 
-    it 'renders a CI pipeline error' do
+    it 'renders a CI pipeline loading state' do
       within '.ci-widget' do
-        expect(page).to have_content('Could not retrieve the pipeline status.')
+        expect(page).to have_content('Checking pipeline status')
       end
     end
   end

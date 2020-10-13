@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectPresenter do
+RSpec.describe ProjectPresenter do
   let(:user) { create(:user) }
   let(:project) { create(:project) }
   let(:presenter) { described_class.new(project, current_user: user) }
@@ -525,7 +525,7 @@ describe ProjectPresenter do
   end
 
   describe '#statistics_buttons' do
-    let(:project) { build(:project) }
+    let(:project) { build_stubbed(:project) }
 
     it 'orders the items correctly' do
       allow(project.repository).to receive(:readme).and_return(double(name: 'readme'))

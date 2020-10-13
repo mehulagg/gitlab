@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::MergeabilityCheckService, :clean_gitlab_redis_shared_state do
+RSpec.describe MergeRequests::MergeabilityCheckService, :clean_gitlab_redis_shared_state do
   shared_examples_for 'unmergeable merge request' do
     it 'updates or keeps merge status as cannot_be_merged' do
       subject
@@ -39,16 +39,6 @@ describe MergeRequests::MergeabilityCheckService, :clean_gitlab_redis_shared_sta
       end
 
       subject
-    end
-
-    context 'when merge_ref_head_comments is disabled' do
-      it 'does not update diff discussion positions' do
-        stub_feature_flags(merge_ref_head_comments: false)
-
-        expect(Discussions::CaptureDiffNotePositionsService).not_to receive(:new)
-
-        subject
-      end
     end
 
     it 'updates the merge ref' do

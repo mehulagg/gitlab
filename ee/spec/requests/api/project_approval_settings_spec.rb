@@ -9,6 +9,7 @@ RSpec.describe API::ProjectApprovalSettings do
   let_it_be(:admin) { create(:user, :admin) }
   let_it_be(:project) { create(:project, :public, :repository, creator: user, namespace: user.namespace, only_allow_merge_if_pipeline_succeeds: false) }
   let_it_be(:approver) { create(:user) }
+  let_it_be(:other_approver) { create(:user) }
 
   describe 'GET /projects/:id/approval_settings' do
     let(:url) { "/projects/#{project.id}/approval_settings" }

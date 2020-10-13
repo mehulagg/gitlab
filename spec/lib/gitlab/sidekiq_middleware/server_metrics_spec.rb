@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::SidekiqMiddleware::ServerMetrics do
+RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
   context "with worker attribution" do
     subject { described_class.new }
 
@@ -124,6 +124,13 @@ describe Gitlab::SidekiqMiddleware::ServerMetrics do
             expect(elasticsearch_seconds_metric).to receive(:observe).with(labels_with_job_status, elasticsearch_duration)
             expect(redis_requests_total).to receive(:increment).with(labels_with_job_status, redis_calls)
             expect(elasticsearch_requests_total).to receive(:increment).with(labels_with_job_status, elasticsearch_calls)
+
+            subject.call(worker, job, :test) { nil }
+          end
+
+          it 'sets the thread name if it was nil' do
+            allow(Thread.current).to receive(:name).and_return(nil)
+            expect(Thread.current).to receive(:name=).with(Gitlab::Metrics::Samplers::ThreadsSampler::SIDEKIQ_WORKER_THREAD_NAME)
 
             subject.call(worker, job, :test) { nil }
           end

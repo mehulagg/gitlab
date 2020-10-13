@@ -9,7 +9,7 @@ import { PRESET_TYPES, EXTEND_AS } from 'ee/roadmap/constants';
 import groupMilestones from 'ee/roadmap/queries/groupMilestones.query.graphql';
 import testAction from 'helpers/vuex_action_helper';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   mockGroupId,
   basePath,
@@ -155,7 +155,21 @@ describe('Roadmap Vuex Actions', () => {
             payload: [{ ...mockFormattedEpic, newEpic: true }],
           },
         ],
-        [],
+        [
+          {
+            type: 'initItemChildrenFlags',
+            payload: {
+              epics: [
+                {
+                  ...mockFormattedEpic,
+                  startDateOutOfRange: true,
+                  endDateOutOfRange: false,
+                  newEpic: true,
+                },
+              ],
+            },
+          },
+        ],
       );
     });
   });

@@ -2,30 +2,28 @@ import * as types from './mutation_types';
 
 export default {
   [types.SET_FILTER](state, filterIndex) {
-    state.currentPage = 1;
+    state.paginationData.page = 1;
     state.currentFilterIndex = filterIndex;
   },
   [types.SET_SEARCH](state, search) {
-    state.currentPage = 1;
+    state.paginationData.page = 1;
     state.searchFilter = search;
   },
   [types.SET_PAGE](state, page) {
-    state.currentPage = page;
+    state.paginationData.page = page;
   },
   [types.REQUEST_REPLICABLE_ITEMS](state) {
     state.isLoading = true;
   },
-  [types.RECEIVE_REPLICABLE_ITEMS_SUCCESS](state, { data, perPage, total }) {
+  [types.RECEIVE_REPLICABLE_ITEMS_SUCCESS](state, { data, pagination }) {
     state.isLoading = false;
     state.replicableItems = data;
-    state.pageSize = perPage;
-    state.totalReplicableItems = total;
+    state.paginationData = pagination;
   },
   [types.RECEIVE_REPLICABLE_ITEMS_ERROR](state) {
     state.isLoading = false;
     state.replicableItems = [];
-    state.pageSize = 0;
-    state.totalReplicableItems = 0;
+    state.paginationData = {};
   },
   [types.REQUEST_INITIATE_ALL_REPLICABLE_SYNCS](state) {
     state.isLoading = true;

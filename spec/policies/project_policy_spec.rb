@@ -2,95 +2,13 @@
 
 require 'spec_helper'
 
-describe ProjectPolicy do
+RSpec.describe ProjectPolicy do
   include ExternalAuthorizationServiceHelpers
   include_context 'ProjectPolicy context'
-  let_it_be(:other_user) { create(:user) }
-  let_it_be(:guest) { create(:user) }
-  let_it_be(:reporter) { create(:user) }
-  let_it_be(:developer) { create(:user) }
-  let_it_be(:maintainer) { create(:user) }
-  let_it_be(:owner) { create(:user) }
-  let_it_be(:admin) { create(:admin) }
-  let(:project) { create(:project, :public, namespace: owner.namespace) }
 
-  let(:base_guest_permissions) do
-    %i[
-      read_project read_board read_list read_wiki read_issue
-      read_project_for_iids read_issue_iid read_label
-      read_milestone read_snippet read_project_member read_note
-      create_project create_issue create_note upload_file create_merge_request_in
-      award_emoji read_release
-    ]
-  end
+  let(:project) { public_project }
 
-  let(:base_reporter_permissions) do
-    %i[
-      download_code fork_project create_snippet update_issue
-      admin_issue admin_label admin_list read_commit_status read_build
-      read_container_image read_pipeline read_environment read_deployment
-      read_merge_request download_wiki_code read_sentry_issue read_metrics_dashboard_annotation
-      metrics_dashboard
-    ]
-  end
-
-  let(:team_member_reporter_permissions) do
-    %i[build_download_code build_read_container_image]
-  end
-
-  let(:developer_permissions) do
-    %i[
-      admin_tag admin_milestone admin_merge_request update_merge_request create_commit_status
-      update_commit_status create_build update_build create_pipeline
-      update_pipeline create_merge_request_from create_wiki push_code
-      resolve_note create_container_image update_container_image destroy_container_image daily_statistics
-      create_environment update_environment create_deployment update_deployment create_release update_release
-      create_metrics_dashboard_annotation delete_metrics_dashboard_annotation update_metrics_dashboard_annotation
-    ]
-  end
-
-  let(:base_maintainer_permissions) do
-    %i[
-      push_to_delete_protected_branch update_snippet
-      admin_snippet admin_project_member admin_note admin_wiki admin_project
-      admin_commit_status admin_build admin_container_image
-      admin_pipeline admin_environment admin_deployment destroy_release add_cluster
-      read_deploy_token create_deploy_token destroy_deploy_token
-      admin_terraform_state
-    ]
-  end
-
-  let(:public_permissions) do
-    %i[
-      download_code fork_project read_commit_status read_pipeline
-      read_container_image build_download_code build_read_container_image
-      download_wiki_code read_release
-    ]
-  end
-
-  let(:owner_permissions) do
-    %i[
-      change_namespace change_visibility_level rename_project remove_project
-      archive_project remove_fork_project destroy_merge_request destroy_issue
-      set_issue_iid set_issue_created_at set_issue_updated_at set_note_created_at
-    ]
-  end
-
-  # Used in EE specs
-  let(:additional_guest_permissions) { [] }
-  let(:additional_reporter_permissions) { [] }
-  let(:additional_maintainer_permissions) { [] }
-
-  let(:guest_permissions) { base_guest_permissions + additional_guest_permissions }
-  let(:reporter_permissions) { base_reporter_permissions + additional_reporter_permissions }
-  let(:maintainer_permissions) { base_maintainer_permissions + additional_maintainer_permissions }
-
-  before do
-    project.add_guest(guest)
-    project.add_maintainer(maintainer)
-    project.add_developer(developer)
-    project.add_reporter(reporter)
-  end
+  subject { described_class.new(current_user, project) }
 
   def expect_allowed(*permissions)
     permissions.each { |p| is_expected.to be_allowed(p) }
@@ -101,10 +19,10 @@ describe ProjectPolicy do
   end
 
   context 'with no project feature' do
-    subject { described_class.new(owner, project) }
+    let(:current_user) { owner }
 
     before do
-      project.project_feature.destroy
+      project.project_feature.destroy!
       project.reload
     end
 
@@ -133,7 +51,7 @@ describe ProjectPolicy do
   end
 
   context 'issues feature' do
-    subject { described_class.new(owner, project) }
+    let(:current_user) { owner }
 
     context 'when the feature is disabled' do
       before do
@@ -161,7 +79,7 @@ describe ProjectPolicy do
   end
 
   context 'merge requests feature' do
-    subject { described_class.new(owner, project) }
+    let(:current_user) { owner }
 
     it 'disallows all permissions when the feature is disabled' do
       project.project_feature.update!(merge_requests_access_level: ProjectFeature::DISABLED)
@@ -175,9 +93,8 @@ describe ProjectPolicy do
   end
 
   context 'for a guest in a private project' do
-    let(:project) { create(:project, :private) }
-
-    subject { described_class.new(guest, project) }
+    let(:current_user) { guest }
+    let(:project) { private_project }
 
     it 'disallows the guest from reading the merge request and merge request iid' do
       expect_disallowed(:read_merge_request)
@@ -186,12 +103,10 @@ describe ProjectPolicy do
   end
 
   context 'pipeline feature' do
-    let(:project) { create(:project) }
+    let(:project) { private_project }
 
     describe 'for unconfirmed user' do
-      let(:unconfirmed_user) { create(:user, confirmed_at: nil) }
-
-      subject { described_class.new(unconfirmed_user, project) }
+      let(:current_user) { create(:user, confirmed_at: nil) }
 
       it 'disallows to modify pipelines' do
         expect_disallowed(:create_pipeline)
@@ -201,7 +116,7 @@ describe ProjectPolicy do
     end
 
     describe 'for confirmed user' do
-      subject { described_class.new(developer, project) }
+      let(:current_user) { developer }
 
       it 'allows modify pipelines' do
         expect_allowed(:create_pipeline)
@@ -213,7 +128,7 @@ describe ProjectPolicy do
 
   context 'builds feature' do
     context 'when builds are disabled' do
-      subject { described_class.new(owner, project) }
+      let(:current_user) { owner }
 
       before do
         project.project_feature.update!(builds_access_level: ProjectFeature::DISABLED)
@@ -233,7 +148,7 @@ describe ProjectPolicy do
     end
 
     context 'when builds are disabled only for some users' do
-      subject { described_class.new(guest, project) }
+      let(:current_user) { guest }
 
       before do
         project.project_feature.update!(builds_access_level: ProjectFeature::PRIVATE)
@@ -264,7 +179,7 @@ describe ProjectPolicy do
     end
 
     context 'when user is a project member' do
-      subject { described_class.new(owner, project) }
+      let(:current_user) { owner }
 
       context 'when it is disabled' do
         before do
@@ -282,8 +197,8 @@ describe ProjectPolicy do
       end
     end
 
-    context 'when user is some other user' do
-      subject { described_class.new(other_user, project) }
+    context 'when user is non-member' do
+      let(:current_user) { non_member }
 
       context 'when access level is private' do
         before do
@@ -313,7 +228,7 @@ describe ProjectPolicy do
 
   context 'when a public project has merge requests allowing access' do
     include ProjectForksHelper
-    let(:user) { create(:user) }
+    let(:current_user) { create(:user) }
     let(:target_project) { create(:project, :public) }
     let(:project) { fork_project(target_project) }
     let!(:merge_request) do
@@ -324,24 +239,23 @@ describe ProjectPolicy do
         allow_collaboration: true
       )
     end
+
     let(:maintainer_abilities) do
       %w(create_build create_pipeline)
     end
-
-    subject { described_class.new(user, project) }
 
     it 'does not allow pushing code' do
       expect_disallowed(*maintainer_abilities)
     end
 
     it 'allows pushing if the user is a member with push access to the target project' do
-      target_project.add_developer(user)
+      target_project.add_developer(current_user)
 
       expect_allowed(*maintainer_abilities)
     end
 
     it 'disallows abilities to a maintainer if the merge request was closed' do
-      target_project.add_developer(user)
+      target_project.add_developer(current_user)
       merge_request.close!
 
       expect_disallowed(*maintainer_abilities)
@@ -349,12 +263,9 @@ describe ProjectPolicy do
   end
 
   it_behaves_like 'clusterable policies' do
-    let(:clusterable) { create(:project, :repository) }
-    let(:cluster) do
-      create(:cluster,
-             :provided_by_gcp,
-             :project,
-             projects: [clusterable])
+    let_it_be(:clusterable) { create(:project, :repository) }
+    let_it_be(:cluster) do
+      create(:cluster, :provided_by_gcp, :project, projects: [clusterable])
     end
   end
 
@@ -425,16 +336,14 @@ describe ProjectPolicy do
   end
 
   context 'forking a project' do
-    subject { described_class.new(current_user, project) }
-
     context 'anonymous user' do
-      let(:current_user) { nil }
+      let(:current_user) { anonymous }
 
       it { is_expected.to be_disallowed(:fork_project) }
     end
 
     context 'project member' do
-      let_it_be(:project) { create(:project, :private) }
+      let(:project) { private_project }
 
       context 'guest' do
         let(:current_user) { guest }
@@ -453,10 +362,8 @@ describe ProjectPolicy do
   end
 
   describe 'update_max_artifacts_size' do
-    subject { described_class.new(current_user, project) }
-
     context 'when no user' do
-      let(:current_user) { nil }
+      let(:current_user) { anonymous }
 
       it { expect_disallowed(:update_max_artifacts_size) }
     end
@@ -485,20 +392,41 @@ describe ProjectPolicy do
   context 'alert bot' do
     let(:current_user) { User.alert_bot }
 
-    subject { described_class.new(current_user, project) }
-
     it { is_expected.to be_allowed(:reporter_access) }
 
     context 'within a private project' do
-      let(:project) { create(:project, :private) }
+      let(:project) { private_project }
 
       it { is_expected.to be_allowed(:admin_issue) }
     end
   end
 
-  describe 'read_prometheus_alerts' do
-    subject { described_class.new(current_user, project) }
+  context 'support bot' do
+    let(:current_user) { User.support_bot }
 
+    context 'with service desk disabled' do
+      it { expect_allowed(:guest_access) }
+      it { expect_disallowed(:create_note, :read_project) }
+    end
+
+    context 'with service desk enabled' do
+      before do
+        allow(project).to receive(:service_desk_enabled?).and_return(true)
+      end
+
+      it { expect_allowed(:reporter_access, :create_note, :read_issue) }
+
+      context 'when issues are protected members only' do
+        before do
+          project.project_feature.update!(issues_access_level: ProjectFeature::PRIVATE)
+        end
+
+        it { expect_allowed(:reporter_access, :create_note, :read_issue) }
+      end
+    end
+  end
+
+  describe 'read_prometheus_alerts' do
     context 'with admin' do
       let(:current_user) { admin }
 
@@ -542,17 +470,15 @@ describe ProjectPolicy do
     end
 
     context 'with anonymous' do
-      let(:current_user) { nil }
+      let(:current_user) { anonymous }
 
       it { is_expected.to be_disallowed(:read_prometheus_alerts) }
     end
   end
 
   describe 'metrics_dashboard feature' do
-    subject { described_class.new(current_user, project) }
-
     context 'public project' do
-      let(:project) { create(:project, :public) }
+      let(:project) { public_project }
 
       context 'feature private' do
         context 'with reporter' do
@@ -572,7 +498,7 @@ describe ProjectPolicy do
         end
 
         context 'with anonymous' do
-          let(:current_user) { nil }
+          let(:current_user) { anonymous }
 
           it { is_expected.to be_disallowed(:metrics_dashboard) }
         end
@@ -604,7 +530,7 @@ describe ProjectPolicy do
         end
 
         context 'with anonymous' do
-          let(:current_user) { nil }
+          let(:current_user) { anonymous }
 
           it { is_expected.to be_allowed(:metrics_dashboard) }
           it { is_expected.to be_allowed(:read_prometheus) }
@@ -616,7 +542,7 @@ describe ProjectPolicy do
     end
 
     context 'internal project' do
-      let(:project) { create(:project, :internal) }
+      let(:project) { internal_project }
 
       context 'feature private' do
         context 'with reporter' do
@@ -636,7 +562,7 @@ describe ProjectPolicy do
         end
 
         context 'with anonymous' do
-          let(:current_user) { nil }
+          let(:current_user) { anonymous }
 
           it { is_expected.to be_disallowed(:metrics_dashboard)}
         end
@@ -668,7 +594,7 @@ describe ProjectPolicy do
         end
 
         context 'with anonymous' do
-          let(:current_user) { nil }
+          let(:current_user) { anonymous }
 
           it { is_expected.to be_disallowed(:metrics_dashboard) }
         end
@@ -676,7 +602,7 @@ describe ProjectPolicy do
     end
 
     context 'private project' do
-      let(:project) { create(:project, :private) }
+      let(:project) { private_project }
 
       context 'feature private' do
         context 'with reporter' do
@@ -696,7 +622,7 @@ describe ProjectPolicy do
         end
 
         context 'with anonymous' do
-          let(:current_user) { nil }
+          let(:current_user) { anonymous }
 
           it { is_expected.to be_disallowed(:metrics_dashboard) }
         end
@@ -720,7 +646,7 @@ describe ProjectPolicy do
         end
 
         context 'with anonymous' do
-          let(:current_user) { nil }
+          let(:current_user) { anonymous }
 
           it { is_expected.to be_disallowed(:metrics_dashboard) }
         end
@@ -745,7 +671,7 @@ describe ProjectPolicy do
       end
 
       context 'with anonymous' do
-        let(:current_user) { nil }
+        let(:current_user) { anonymous }
 
         it { is_expected.to be_disallowed(:metrics_dashboard) }
       end
@@ -777,8 +703,6 @@ describe ProjectPolicy do
   end
 
   describe 'create_web_ide_terminal' do
-    subject { described_class.new(current_user, project) }
-
     context 'with admin' do
       let(:current_user) { admin }
 
@@ -822,20 +746,20 @@ describe ProjectPolicy do
     end
 
     context 'with non member' do
-      let(:current_user) { create(:user) }
+      let(:current_user) { non_member }
 
       it { is_expected.to be_disallowed(:create_web_ide_terminal) }
     end
 
     context 'with anonymous' do
-      let(:current_user) { nil }
+      let(:current_user) { anonymous }
 
       it { is_expected.to be_disallowed(:create_web_ide_terminal) }
     end
   end
 
   describe 'read_repository_graphs' do
-    subject { described_class.new(guest, project) }
+    let(:current_user) { guest }
 
     before do
       allow(subject).to receive(:allowed?).with(:read_repository_graphs).and_call_original
@@ -855,8 +779,30 @@ describe ProjectPolicy do
     end
   end
 
+  describe 'design permissions' do
+    let(:current_user) { guest }
+
+    let(:design_permissions) do
+      %i[read_design_activity read_design]
+    end
+
+    context 'when design management is not available' do
+      it { is_expected.not_to be_allowed(*design_permissions) }
+    end
+
+    context 'when design management is available' do
+      include DesignManagementTestHelpers
+
+      before do
+        enable_design_management
+      end
+
+      it { is_expected.to be_allowed(*design_permissions) }
+    end
+  end
+
   describe 'read_build_report_results' do
-    subject { described_class.new(guest, project) }
+    let(:current_user) { guest }
 
     before do
       allow(subject).to receive(:allowed?).with(:read_build_report_results).and_call_original
@@ -892,4 +838,109 @@ describe ProjectPolicy do
       it { is_expected.to be_disallowed(:read_build_report_results) }
     end
   end
+
+  describe 'read_package' do
+    context 'with admin' do
+      let(:current_user) { admin }
+
+      it { is_expected.to be_allowed(:read_package) }
+
+      context 'when repository is disabled' do
+        before do
+          project.project_feature.update!(
+            # Disable merge_requests and builds as well, since merge_requests and
+            # builds cannot have higher visibility than repository.
+            merge_requests_access_level: ProjectFeature::DISABLED,
+            builds_access_level: ProjectFeature::DISABLED,
+            repository_access_level: ProjectFeature::DISABLED)
+        end
+
+        it { is_expected.to be_disallowed(:read_package) }
+      end
+    end
+
+    context 'with owner' do
+      let(:current_user) { owner }
+
+      it { is_expected.to be_allowed(:read_package) }
+    end
+
+    context 'with maintainer' do
+      let(:current_user) { maintainer }
+
+      it { is_expected.to be_allowed(:read_package) }
+    end
+
+    context 'with developer' do
+      let(:current_user) { developer }
+
+      it { is_expected.to be_allowed(:read_package) }
+    end
+
+    context 'with reporter' do
+      let(:current_user) { reporter }
+
+      it { is_expected.to be_allowed(:read_package) }
+    end
+
+    context 'with guest' do
+      let(:current_user) { guest }
+
+      it { is_expected.to be_allowed(:read_package) }
+    end
+
+    context 'with non member' do
+      let(:current_user) { non_member }
+
+      it { is_expected.to be_allowed(:read_package) }
+    end
+
+    context 'with anonymous' do
+      let(:current_user) { anonymous }
+
+      it { is_expected.to be_allowed(:read_package) }
+    end
+  end
+
+  describe 'read_feature_flag' do
+    subject { described_class.new(current_user, project) }
+
+    context 'with maintainer' do
+      let(:current_user) { maintainer }
+
+      context 'when repository is available' do
+        it { is_expected.to be_allowed(:read_feature_flag) }
+      end
+
+      context 'when repository is disabled' do
+        before do
+          project.project_feature.update!(
+            merge_requests_access_level: ProjectFeature::DISABLED,
+            builds_access_level: ProjectFeature::DISABLED,
+            repository_access_level: ProjectFeature::DISABLED
+          )
+        end
+
+        it { is_expected.to be_disallowed(:read_feature_flag) }
+      end
+    end
+
+    context 'with developer' do
+      let(:current_user) { developer }
+
+      context 'when repository is available' do
+        it { is_expected.to be_allowed(:read_feature_flag) }
+      end
+    end
+
+    context 'with reporter' do
+      let(:current_user) { reporter }
+
+      context 'when repository is available' do
+        it { is_expected.to be_disallowed(:read_feature_flag) }
+      end
+    end
+  end
+
+  it_behaves_like 'Self-managed Core resource access tokens'
 end

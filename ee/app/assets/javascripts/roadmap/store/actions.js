@@ -1,4 +1,4 @@
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { s__ } from '~/locale';
 
 import * as epicUtils from '../utils/epic_utils';
@@ -107,13 +107,13 @@ export const receiveEpicsSuccess = (
   }, []);
 
   commit(types.UPDATE_EPIC_IDS, epicIds);
+  dispatch('initItemChildrenFlags', { epics });
 
   if (timeframeExtended) {
     const updatedEpics = state.epics.concat(epics);
     sortEpics(updatedEpics, state.sortedBy);
     commit(types.RECEIVE_EPICS_FOR_TIMEFRAME_SUCCESS, updatedEpics);
   } else {
-    dispatch('initItemChildrenFlags', { epics });
     commit(types.RECEIVE_EPICS_SUCCESS, epics);
   }
 };
@@ -345,6 +345,13 @@ export const refreshMilestoneDates = ({ commit, state, getters }) => {
 };
 
 export const setBufferSize = ({ commit }, bufferSize) => commit(types.SET_BUFFER_SIZE, bufferSize);
+
+export const setEpicsState = ({ commit }, epicsState) => commit(types.SET_EPICS_STATE, epicsState);
+
+export const setFilterParams = ({ commit }, filterParams) =>
+  commit(types.SET_FILTER_PARAMS, filterParams);
+
+export const setSortedBy = ({ commit }, sortedBy) => commit(types.SET_SORTED_BY, sortedBy);
 
 // prevent babel-plugin-rewire from generating an invalid default during karma tests
 export default () => {};

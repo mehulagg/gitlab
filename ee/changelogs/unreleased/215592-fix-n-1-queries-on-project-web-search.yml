@@ -1,5 +1,0 @@
----
-title: Fix N+1 queries for Elastic Web Search projects scope
-merge_request: 30346
-author:
-type: performance

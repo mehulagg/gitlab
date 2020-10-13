@@ -3,13 +3,13 @@
 exports[`AuditFilterToken when initialized with a value matches the snapshot 1`] = `
 <div
   config="[object Object]"
-  fetchitem="function mockConstructor() {
+  fetchitem="function () {
         return fn.apply(this, arguments);
       }"
-  fetchsuggestions="function mockConstructor() {
+  fetchsuggestions="function () {
         return fn.apply(this, arguments);
       }"
-  getitemname="function mockConstructor() {
+  getitemname="function () {
         return fn.apply(this, arguments);
       }"
   id="filtered-search-token"
@@ -47,13 +47,13 @@ exports[`AuditFilterToken when initialized with a value matches the snapshot 1`]
 exports[`AuditFilterToken when initialized without a value matches the snapshot 1`] = `
 <div
   config="[object Object]"
-  fetchitem="function mockConstructor() {
+  fetchitem="function () {
         return fn.apply(this, arguments);
       }"
-  fetchsuggestions="function mockConstructor() {
+  fetchsuggestions="function () {
         return fn.apply(this, arguments);
       }"
-  getitemname="function mockConstructor() {
+  getitemname="function () {
         return fn.apply(this, arguments);
       }"
   id="filtered-search-token"

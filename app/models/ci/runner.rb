@@ -52,7 +52,7 @@ module Ci
     has_many :runner_namespaces, inverse_of: :runner
     has_many :groups, through: :runner_namespaces
 
-    has_one :last_build, ->() { order('id DESC') }, class_name: 'Ci::Build'
+    has_one :last_build, -> { order('id DESC') }, class_name: 'Ci::Build'
 
     before_save :ensure_token
 
@@ -163,14 +163,14 @@ module Ci
 
     # Searches for runners matching the given query.
     #
-    # This method uses ILIKE on PostgreSQL and LIKE on MySQL.
+    # This method uses ILIKE on PostgreSQL.
     #
     # This method performs a *partial* match on tokens, thus a query for "a"
     # will match any runner where the token contains the letter "a". As a result
     # you should *not* use this method for non-admin purposes as otherwise users
     # might be able to query a list of all runners.
     #
-    # query - The search query as a String
+    # query - The search query as a String.
     #
     # Returns an ActiveRecord::Relation.
     def self.search(query)
@@ -237,6 +237,10 @@ module Ci
 
     def belongs_to_one_project?
       runner_projects.count == 1
+    end
+
+    def belongs_to_more_than_one_project?
+      self.projects.limit(2).count(:all) > 1
     end
 
     def assigned_to_group?

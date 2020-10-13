@@ -61,6 +61,14 @@ RSpec.shared_examples 'wiki controller actions' do
       expect(assigns(:sidebar_wiki_entries)).to be_nil
       expect(assigns(:sidebar_limited)).to be_nil
     end
+
+    context 'when the request is of non-html format' do
+      it 'returns a 404 error' do
+        get :pages, params: routing_params.merge(format: 'json')
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
   end
 
   describe 'GET #history' do
@@ -104,6 +112,35 @@ RSpec.shared_examples 'wiki controller actions' do
     end
   end
 
+  describe 'GET #diff' do
+    context 'when commit exists' do
+      it 'renders the diff' do
+        get :diff, params: routing_params.merge(id: wiki_title, version_id: wiki.repository.commit.id)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to render_template('shared/wikis/diff')
+        expect(assigns(:diffs)).to be_a(Gitlab::Diff::FileCollection::Base)
+        expect(assigns(:diff_notes_disabled)).to be(true)
+      end
+    end
+
+    context 'when commit does not exist' do
+      it 'returns a 404 error' do
+        get :diff, params: routing_params.merge(id: wiki_title, version_id: 'invalid')
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'when page does not exist' do
+      it 'returns a 404 error' do
+        get :diff, params: routing_params.merge(id: 'invalid')
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+  end
+
   describe 'GET #show' do
     render_views
 
@@ -118,9 +155,18 @@ RSpec.shared_examples 'wiki controller actions' do
         subject
 
         expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to render_template('shared/wikis/show')
         expect(assigns(:page).title).to eq(wiki_title)
         expect(assigns(:sidebar_wiki_entries)).to contain_exactly(an_instance_of(WikiPage))
         expect(assigns(:sidebar_limited)).to be(false)
+      end
+
+      it 'increases the page view counter' do
+        expect do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end.to change { Gitlab::UsageDataCounters::WikiPageCounter.read(:view) }.by(1)
       end
 
       context 'when page content encoding is invalid' do
@@ -130,6 +176,7 @@ RSpec.shared_examples 'wiki controller actions' do
           subject
 
           expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to render_template('shared/wikis/show')
           expect(flash[:notice]).to eq(_('The content of this page is not encoded in UTF-8. Edits can only be made via the Git repository.'))
         end
       end
@@ -138,19 +185,37 @@ RSpec.shared_examples 'wiki controller actions' do
     context 'when the page does not exist' do
       let(:id) { 'does not exist' }
 
-      before do
-        subject
+      context 'when the user can create pages' do
+        before do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to render_template('shared/wikis/edit')
+        end
+
+        it 'builds a new wiki page with the id as the title' do
+          expect(assigns(:page).title).to eq(id)
+        end
+
+        context 'when a random_title param is present' do
+          let(:random_title) { true }
+
+          it 'builds a new wiki page with no title' do
+            expect(assigns(:page).title).to be_empty
+          end
+        end
       end
 
-      it 'builds a new wiki page with the id as the title' do
-        expect(assigns(:page).title).to eq(id)
-      end
+      context 'when the user cannot create pages' do
+        before do
+          sign_out(:user)
+        end
 
-      context 'when a random_title param is present' do
-        let(:random_title) { true }
+        it 'shows the empty state' do
+          subject
 
-        it 'builds a new wiki page with no title' do
-          expect(assigns(:page).title).to be_empty
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to render_template('shared/wikis/empty')
         end
       end
     end
@@ -158,46 +223,19 @@ RSpec.shared_examples 'wiki controller actions' do
     context 'when page is a file' do
       include WikiHelpers
 
-      let(:id) { upload_file_to_wiki(container, user, file_name) }
+      where(:file_name) { ['dk.png', 'unsanitized.svg', 'git-cheat-sheet.pdf'] }
 
-      context 'when file is an image' do
-        let(:file_name) { 'dk.png' }
+      with_them do
+        let(:id) { upload_file_to_wiki(wiki, user, file_name) }
 
-        it 'delivers the image' do
+        it 'delivers the file with the correct headers' do
           subject
 
+          expect(response).to have_gitlab_http_status(:ok)
           expect(response.headers['Content-Disposition']).to match(/^inline/)
-          expect(response.headers[Gitlab::Workhorse::DETECT_HEADER]).to eq "true"
-        end
-
-        context 'when file is a svg' do
-          let(:file_name) { 'unsanitized.svg' }
-
-          it 'delivers the image' do
-            subject
-
-            expect(response.headers['Content-Disposition']).to match(/^inline/)
-            expect(response.headers[Gitlab::Workhorse::DETECT_HEADER]).to eq "true"
-          end
-        end
-
-        it_behaves_like 'project cache control headers' do
-          let(:project) { container }
-        end
-      end
-
-      context 'when file is a pdf' do
-        let(:file_name) { 'git-cheat-sheet.pdf' }
-
-        it 'sets the content type to sets the content response headers' do
-          subject
-
-          expect(response.headers['Content-Disposition']).to match(/^inline/)
-          expect(response.headers[Gitlab::Workhorse::DETECT_HEADER]).to eq "true"
-        end
-
-        it_behaves_like 'project cache control headers' do
-          let(:project) { container }
+          expect(response.headers[Gitlab::Workhorse::DETECT_HEADER]).to eq('true')
+          expect(response.cache_control[:public]).to be(false)
+          expect(response.cache_control[:extras]).to include('no-store')
         end
       end
     end
@@ -207,12 +245,31 @@ RSpec.shared_examples 'wiki controller actions' do
     it 'renders json in a correct format' do
       post :preview_markdown, params: routing_params.merge(id: 'page/path', text: '*Markdown* text')
 
+      expect(response).to have_gitlab_http_status(:ok)
       expect(json_response.keys).to match_array(%w(body references))
     end
   end
 
-  describe 'GET #edit' do
-    subject { get(:edit, params: routing_params.merge(id: wiki_title)) }
+  shared_examples 'edit action' do
+    context 'when the page does not exist' do
+      let(:id_param) { 'invalid' }
+
+      it 'redirects to show' do
+        subject
+
+        expect(response).to redirect_to_wiki(wiki, 'invalid')
+      end
+    end
+
+    context 'when id param is blank' do
+      let(:id_param) { ' ' }
+
+      it 'redirects to the home page' do
+        subject
+
+        expect(response).to redirect_to_wiki(wiki, 'home')
+      end
+    end
 
     context 'when page content encoding is invalid' do
       it 'redirects to show' do
@@ -236,6 +293,14 @@ RSpec.shared_examples 'wiki controller actions' do
         expect(response).to redirect_to_wiki(wiki, page)
       end
     end
+  end
+
+  describe 'GET #edit' do
+    let(:id_param) { wiki_title }
+
+    subject { get(:edit, params: routing_params.merge(id: id_param)) }
+
+    it_behaves_like 'edit action'
 
     context 'when page content encoding is valid' do
       render_views
@@ -252,23 +317,17 @@ RSpec.shared_examples 'wiki controller actions' do
   describe 'PATCH #update' do
     let(:new_title) { 'New title' }
     let(:new_content) { 'New content' }
+    let(:id_param) { wiki_title }
 
     subject do
       patch(:update,
             params: routing_params.merge(
-              id: wiki_title,
+              id: id_param,
               wiki: { title: new_title, content: new_content }
             ))
     end
 
-    context 'when page content encoding is invalid' do
-      it 'redirects to show' do
-        allow(controller).to receive(:valid_encoding?).and_return(false)
-
-        subject
-        expect(response).to redirect_to_wiki(wiki, wiki.list_pages.first)
-      end
-    end
+    it_behaves_like 'edit action'
 
     context 'when page content encoding is valid' do
       render_views
@@ -280,6 +339,103 @@ RSpec.shared_examples 'wiki controller actions' do
 
         expect(wiki_page.title).to eq new_title
         expect(wiki_page.content).to eq new_content
+      end
+    end
+
+    context 'when user does not have edit permissions' do
+      before do
+        sign_out(:user)
+      end
+
+      it 'renders the empty state' do
+        subject
+
+        expect(response).to render_template('shared/wikis/empty')
+      end
+    end
+  end
+
+  describe 'POST #create' do
+    let(:new_title) { 'New title' }
+    let(:new_content) { 'New content' }
+
+    subject do
+      post(:create,
+            params: routing_params.merge(
+              wiki: { title: new_title, content: new_content }
+            ))
+    end
+
+    context 'when page is valid' do
+      it 'creates the page' do
+        expect do
+          subject
+        end.to change { wiki.list_pages.size }.by 1
+
+        wiki_page = wiki.find_page(new_title)
+
+        expect(wiki_page.title).to eq new_title
+        expect(wiki_page.content).to eq new_content
+      end
+    end
+
+    context 'when page is not valid' do
+      let(:new_title) { '' }
+
+      it 'renders the edit state' do
+        expect do
+          subject
+        end.not_to change { wiki.list_pages.size }
+
+        expect(response).to render_template('shared/wikis/edit')
+      end
+    end
+  end
+
+  describe 'DELETE #destroy' do
+    let(:id_param) { wiki_title }
+
+    subject do
+      delete(:destroy,
+            params: routing_params.merge(
+              id: id_param
+            ))
+    end
+
+    context 'when page exists' do
+      it 'deletes the page' do
+        expect do
+          subject
+        end.to change { wiki.list_pages.size }.by(-1)
+      end
+
+      context 'but page cannot be deleted' do
+        before do
+          allow_next_instance_of(WikiPage) do |page|
+            allow(page).to receive(:delete).and_return(false)
+          end
+        end
+
+        it 'renders the edit state' do
+          expect do
+            subject
+          end.not_to change { wiki.list_pages.size }
+
+          expect(response).to render_template('shared/wikis/edit')
+          expect(assigns(:error).message).to eq('Could not delete wiki page')
+        end
+      end
+    end
+
+    context 'when page does not exist' do
+      let(:id_param) { 'nil' }
+
+      it 'renders 404' do
+        expect do
+          subject
+        end.not_to change { wiki.list_pages.size }
+
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end

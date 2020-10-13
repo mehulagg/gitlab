@@ -3,7 +3,7 @@
 .col-lg-3
   %p
     = s_('PrometheusService|Custom metrics require Prometheus installed on a cluster with environment scope "*" OR a manually configured Prometheus to be available.')
-    = link_to s_('PrometheusService|More information'), help_page_path('user/project/integrations/prometheus', anchor: 'adding-custom-metrics'), target: '_blank', rel: "noopener noreferrer"
+    = link_to s_('PrometheusService|More information'), help_page_path('operations/metrics/index.md', anchor: 'adding-custom-metrics'), target: '_blank', rel: "noopener noreferrer"
 
 .col-lg-9
   .card.custom-monitored-metrics.js-panel-custom-monitored-metrics{ data: { qa_selector: 'custom_metrics_container', active_custom_metrics: project_prometheus_metrics_path(project), environments_data: environments_list_data, service_active: "#{@service.active}" } }
@@ -13,14 +13,14 @@
       -# haml-lint:disable NoPlainNodes
       %span.badge.badge-pill.js-custom-monitored-count 0
       -# haml-lint:enable NoPlainNodes
-      = link_to s_('PrometheusService|New metric'), new_project_prometheus_metric_path(project), class: 'btn btn-success js-new-metric-button hidden', data: { qa_selector: 'new_metric_button' }
+      = link_to s_('PrometheusService|New metric'), new_project_prometheus_metric_path(project), class: 'btn gl-button btn-success js-new-metric-button hidden', data: { qa_selector: 'new_metric_button' }
     .card-body
       .flash-container.hidden
         .flash-warning
           .flash-text
       .loading-metrics.js-loading-custom-metrics
         %p.m-3
-          = icon('spinner spin', class: 'metrics-load-spinner')
+          = loading_icon(css_class: 'metrics-load-spinner')
           = s_('PrometheusService|Finding custom metrics...')
       .empty-metrics.hidden.js-empty-custom-metrics
         %p.text-tertiary.m-3.js-no-active-integration-text.hidden

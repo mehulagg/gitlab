@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Git::ObjectPool do
+RSpec.describe Gitlab::Git::ObjectPool do
   include RepoHelpers
 
   let(:pool_repository) { create(:pool_repository) }
@@ -19,7 +19,7 @@ describe Gitlab::Git::ObjectPool do
 
   describe '#create' do
     before do
-      subject.create
+      subject.create # rubocop:disable Rails/SaveBang
     end
 
     context "when the pool doesn't exist yet" do
@@ -31,7 +31,7 @@ describe Gitlab::Git::ObjectPool do
     context 'when the pool already exists' do
       it 'raises an FailedPrecondition' do
         expect do
-          subject.create
+          subject.create # rubocop:disable Rails/SaveBang
         end.to raise_error(GRPC::FailedPrecondition)
       end
     end

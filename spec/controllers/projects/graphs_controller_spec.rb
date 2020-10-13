@@ -44,13 +44,13 @@ RSpec.describe Projects::GraphsController do
 
       context 'when anonymous users can read build report results' do
         it 'sets the daily coverage options' do
-          Timecop.freeze do
+          freeze_time do
             get(:charts, params: { namespace_id: project.namespace.path, project_id: project.path, id: 'master' })
 
             expect(assigns[:daily_coverage_options]).to eq(
               base_params: {
-                start_date: Time.current.to_date - 90.days,
-                end_date: Time.current.to_date,
+                start_date: Date.current - 90.days,
+                end_date: Date.current,
                 ref_path: project.repository.expand_ref('master'),
                 param_type: 'coverage'
               },
@@ -58,6 +58,11 @@ RSpec.describe Projects::GraphsController do
                 namespace_id: project.namespace,
                 project_id: project,
                 format: :csv
+              ),
+              graph_api_path: namespace_project_ci_daily_build_group_report_results_path(
+                namespace_id: project.namespace,
+                project_id: project,
+                format: :json
               )
             )
           end
@@ -74,6 +79,15 @@ RSpec.describe Projects::GraphsController do
         it 'does not set daily coverage options' do
           expect(assigns[:daily_coverage_options]).to be_nil
         end
+      end
+
+      it_behaves_like 'tracking unique visits', :charts do
+        before do
+          sign_in(user)
+        end
+
+        let(:request_params) { { namespace_id: project.namespace.path, project_id: project.path, id: 'master' } }
+        let(:target_id) { 'p_analytics_repo' }
       end
     end
 

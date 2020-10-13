@@ -25,6 +25,13 @@ $ide-commit-header-height: 48px;
   @include str-truncated(250px);
 }
 
+.ide-layout {
+  // Fix for iOS 13+, the height of the page is actually less than
+  // 100vh because of the presence of the bottom bar
+  max-height: 100%;
+  position: fixed;
+}
+
 .ide-view {
   position: relative;
   margin-top: 0;
@@ -138,7 +145,7 @@ $ide-commit-header-height: 48px;
   }
 
   &:not([disabled]):hover {
-    background-color: var(--ide-input-border, $gray-200);
+    background-color: var(--ide-input-border, $gray-100);
   }
 
   &:not([disabled]):focus {
@@ -243,10 +250,6 @@ $ide-commit-header-height: 48px;
   > div + div {
     padding-left: $gl-padding;
   }
-}
-
-.ide-status-file {
-  text-align: right;
 }
 // Not great, but this is to deal with our current output
 .multi-file-preview-holder {
@@ -363,7 +366,7 @@ $ide-commit-header-height: 48px;
     display: block;
     margin-left: auto;
     margin-right: auto;
-    color: var(--ide-text-color-secondary, $gray-700);
+    color: var(--ide-text-color-secondary, $gray-500);
   }
 
   .file-status-icon {
@@ -393,7 +396,7 @@ $ide-commit-header-height: 48px;
   }
 
   &:active {
-    background: var(--ide-background, $gray-200);
+    background: var(--ide-background, $gray-100);
   }
 
   &.is-active {
@@ -564,7 +567,7 @@ $ide-commit-header-height: 48px;
 
   &:focus {
     color: var(--ide-text-color, $gl-text-color);
-    background-color: var(--ide-background-hover, $gray-200);
+    background-color: var(--ide-background-hover, $gray-100);
   }
 
   &.active {
@@ -686,7 +689,7 @@ $ide-commit-header-height: 48px;
   border-bottom: 1px solid var(--ide-border-color-alt, $white-dark);
 
   svg {
-    color: var(--ide-text-color-secondary, $gray-700);
+    color: var(--ide-text-color-secondary, $gray-500);
 
     &:focus,
     &:hover {
@@ -718,7 +721,7 @@ $ide-commit-header-height: 48px;
 
       &,
       &:hover {
-        color: var(--ide-text-color-secondary, $gray-700);
+        color: var(--ide-text-color-secondary, $gray-500);
       }
     }
 
@@ -860,9 +863,6 @@ $ide-commit-header-height: 48px;
 .ide-external-link {
   svg {
     display: none;
-    position: absolute;
-    top: 2px;
-    right: -$gl-padding;
   }
 
   &:hover,
@@ -1043,7 +1043,7 @@ $ide-commit-header-height: 48px;
   background-color: var(--ide-background, $gray-50);
 
   &:hover {
-    background-color: var(--ide-file-row-btn-hover-background, $gray-200);
+    background-color: var(--ide-file-row-btn-hover-background, $gray-100);
   }
 
   &:active,
@@ -1080,7 +1080,7 @@ $ide-commit-header-height: 48px;
   max-width: 24px;
   padding: 0;
   margin: 0 ($grid-size / 2);
-  color: var(--ide-text-color-secondary, $gl-gray-light);
+  color: var(--ide-text-color-secondary, $gray-600);
 
   &:first-child {
     margin-left: 0;
@@ -1094,7 +1094,7 @@ $ide-commit-header-height: 48px;
   &:focus {
     outline: 0;
     box-shadow: none;
-    border-color: var(--ide-border-color, $gray-200);
+    border-color: var(--ide-border-color, $gray-100);
   }
 }
 
@@ -1133,11 +1133,11 @@ $ide-commit-header-height: 48px;
 .ide-file-icon-holder {
   display: flex;
   align-items: center;
-  color: var(--ide-text-color-secondary, $gray-700);
+  color: var(--ide-text-color-secondary, $gray-500);
 }
 
 .file-row:active {
-  background: var(--ide-background, $gray-200);
+  background: var(--ide-background, $gray-100);
 }
 
 .file-row.is-active {

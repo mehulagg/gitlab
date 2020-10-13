@@ -1,4 +1,5 @@
-import { n__, s__, sprintf } from '~/locale';
+import { CRITICAL, HIGH } from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
+import { __, n__, sprintf } from '~/locale';
 
 /**
  * Returns the index of an issue in given list
@@ -42,103 +43,109 @@ export const enrichVulnerabilityWithFeedback = (vulnerability, feedback = []) =>
       return vuln;
     }, vulnerability);
 
+/**
+ * Takes an object of options and returns an externalized string representing
+ * the critical, high, and other severity vulnerabilities for a given report.
+ *
+ * The resulting string _may_ still contain sprintf-style placeholders. These
+ * are left in place so they can be replaced with markup, via the
+ * SecuritySummary component.
+ * @param {{reportType: string, status: string, critical: number, high: number, other: number}} options
+ * @returns {string}
+ */
 export const groupedTextBuilder = ({
   reportType = '',
-  paths = {},
-  added = 0,
-  fixed = 0,
-  existing = 0,
-  dismissed = 0,
   status = '',
-}) => {
-  let baseString = '';
+  critical = 0,
+  high = 0,
+  other = 0,
+} = {}) => {
+  // This approach uses bitwise (ish) flags to determine which vulnerabilities
+  // we have, without the need for too many nested levels of if/else statements.
+  //
+  // Here's a video explaining how it works
+  // https://youtu.be/qZzKNC7TPbA
+  //
+  // Here's a link to a similar approach on MDN:
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_Operators#Examples
 
-  if (!paths.base && !paths.diffEndpoint) {
-    if (added && !dismissed) {
-      // added
-      baseString = n__(
-        'ciReport|%{reportType} %{status} detected %{newCount} vulnerability for the source branch only',
-        'ciReport|%{reportType} %{status} detected %{newCount} vulnerabilities for the source branch only',
-        added,
-      );
-    } else if (!added && dismissed) {
-      // dismissed
-      baseString = n__(
-        'ciReport|%{reportType} %{status} detected %{dismissedCount} dismissed vulnerability for the source branch only',
-        'ciReport|%{reportType} %{status} detected %{dismissedCount} dismissed vulnerabilities for the source branch only',
-        dismissed,
-      );
-    } else if (added && dismissed) {
-      // added & dismissed
-      baseString = s__(
-        'ciReport|%{reportType} %{status} detected %{newCount} new, and %{dismissedCount} dismissed vulnerabilities for the source branch only',
-      );
-    } else {
-      // no vulnerabilities
-      baseString = s__(
-        'ciReport|%{reportType} %{status} detected no vulnerabilities for the source branch only',
-      );
-    }
-  } else if (paths.head || paths.diffEndpoint) {
-    if (added && !fixed && !dismissed) {
-      // added
-      baseString = n__(
-        'ciReport|%{reportType} %{status} detected %{newCount} new vulnerability',
-        'ciReport|%{reportType} %{status} detected %{newCount} new vulnerabilities',
-        added,
-      );
-    } else if (!added && fixed && !dismissed) {
-      // fixed
-      baseString = n__(
-        'ciReport|%{reportType} %{status} detected %{fixedCount} fixed vulnerability',
-        'ciReport|%{reportType} %{status} detected %{fixedCount} fixed vulnerabilities',
-        fixed,
-      );
-    } else if (!added && !fixed && dismissed) {
-      // dismissed
-      baseString = n__(
-        'ciReport|%{reportType} %{status} detected %{dismissedCount} dismissed vulnerability',
-        'ciReport|%{reportType} %{status} detected %{dismissedCount} dismissed vulnerabilities',
-        dismissed,
-      );
-    } else if (added && fixed && !dismissed) {
-      // added & fixed
-      baseString = s__(
-        'ciReport|%{reportType} %{status} detected %{newCount} new, and %{fixedCount} fixed vulnerabilities',
-      );
-    } else if (added && !fixed && dismissed) {
-      // added & dismissed
-      baseString = s__(
-        'ciReport|%{reportType} %{status} detected %{newCount} new, and %{dismissedCount} dismissed vulnerabilities',
-      );
-    } else if (!added && fixed && dismissed) {
-      // fixed & dismissed
-      baseString = s__(
-        'ciReport|%{reportType} %{status} detected %{fixedCount} fixed, and %{dismissedCount} dismissed vulnerabilities',
-      );
-    } else if (added && fixed && dismissed) {
-      // added & fixed & dismissed
-      baseString = s__(
-        'ciReport|%{reportType} %{status} detected %{newCount} new, %{fixedCount} fixed, and %{dismissedCount} dismissed vulnerabilities',
-      );
-    } else if (existing) {
-      baseString = s__('ciReport|%{reportType} %{status} detected no new vulnerabilities');
-    } else {
-      baseString = s__('ciReport|%{reportType} %{status} detected no vulnerabilities');
-    }
+  let options = 0;
+  const HAS_CRITICAL = 1;
+  const HAS_HIGH = 2;
+  const HAS_OTHER = 4;
+  let message;
+
+  if (critical) {
+    options += HAS_CRITICAL;
+  }
+  if (high) {
+    options += HAS_HIGH;
+  }
+  if (other) {
+    options += HAS_OTHER;
   }
 
-  if (!status) {
-    baseString = baseString.replace('%{status}', '').replace('  ', ' ');
+  switch (options) {
+    case HAS_CRITICAL:
+      message = n__(
+        '%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} severity vulnerability.',
+        '%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} severity vulnerabilities.',
+        critical,
+      );
+      break;
+
+    case HAS_HIGH:
+      message = n__(
+        '%{reportType} %{status} detected %{highStart}%{high} high%{highEnd} severity vulnerability.',
+        '%{reportType} %{status} detected %{highStart}%{high} high%{highEnd} severity vulnerabilities.',
+        high,
+      );
+      break;
+
+    case HAS_OTHER:
+      message = n__(
+        '%{reportType} %{status} detected %{other} vulnerability.',
+        '%{reportType} %{status} detected %{other} vulnerabilities.',
+        other,
+      );
+      break;
+
+    case HAS_CRITICAL + HAS_HIGH:
+      message = __(
+        '%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} and %{highStart}%{high} high%{highEnd} severity vulnerabilities.',
+      );
+      break;
+
+    case HAS_CRITICAL + HAS_OTHER:
+      message = __(
+        '%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} severity vulnerabilities out of %{total}.',
+      );
+      break;
+
+    case HAS_HIGH + HAS_OTHER:
+      message = __(
+        '%{reportType} %{status} detected %{highStart}%{high} high%{highEnd} severity vulnerabilities out of %{total}.',
+      );
+      break;
+
+    case HAS_CRITICAL + HAS_HIGH + HAS_OTHER:
+      message = __(
+        '%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} and %{highStart}%{high} high%{highEnd} severity vulnerabilities out of %{total}.',
+      );
+      break;
+
+    default:
+      message = __('%{reportType} %{status} detected no vulnerabilities.');
   }
 
-  return sprintf(baseString, {
-    status,
+  return sprintf(message, {
     reportType,
-    newCount: added,
-    fixedCount: fixed,
-    dismissedCount: dismissed,
-  });
+    status,
+    critical,
+    high,
+    other,
+    total: critical + high + other,
+  }).replace(/\s\s+/g, ' ');
 };
 
 export const statusIcon = (loading = false, failed = false, newIssues = 0, neutralIssues = 0) => {
@@ -154,22 +161,21 @@ export const statusIcon = (loading = false, failed = false, newIssues = 0, neutr
 };
 
 /**
- * Counts issues. Simply returns the amount of existing and fixed Issues.
- * New Issues are divided into dismissed and added.
+ * Counts vulnerabilities.
+ * Returns the amount of critical, high, and other vulnerabilities.
  *
- * @param newIssues
- * @param resolvedIssues
- * @param allIssues
- * @returns {{existing: number, added: number, dismissed: number, fixed: number}}
+ * @param {Array} vulnerabilities The raw vulnerabilities to parse
+ * @returns {{critical: number, high: number, other: number}}
  */
-export const countIssues = ({ newIssues = [], resolvedIssues = [], allIssues = [] } = {}) => {
-  const dismissed = newIssues.reduce((sum, issue) => (issue.isDismissed ? sum + 1 : sum), 0);
+export const countVulnerabilities = (vulnerabilities = []) => {
+  const critical = vulnerabilities.filter(vuln => vuln.severity === CRITICAL).length;
+  const high = vulnerabilities.filter(vuln => vuln.severity === HIGH).length;
+  const other = vulnerabilities.length - critical - high;
 
   return {
-    added: newIssues.length - dismissed,
-    dismissed,
-    existing: allIssues.length,
-    fixed: resolvedIssues.length,
+    critical,
+    high,
+    other,
   };
 };
 
@@ -183,8 +189,6 @@ export const countIssues = ({ newIssues = [], resolvedIssues = [], allIssues = [
  * @returns {String}
  */
 export const groupedReportText = (report, reportType, errorMessage, loadingMessage) => {
-  const { paths } = report;
-
   if (report.hasError) {
     return errorMessage;
   }
@@ -194,9 +198,8 @@ export const groupedReportText = (report, reportType, errorMessage, loadingMessa
   }
 
   return groupedTextBuilder({
-    ...countIssues(report),
     reportType,
-    paths,
+    ...countVulnerabilities(report.newIssues),
   });
 };
 

@@ -110,8 +110,7 @@ module Gitlab
               end
 
               if last
-                # grab one more than we need
-                paginated_nodes = sliced_nodes.last(limit_value + 1)
+                paginated_nodes = LastItems.take_items(sliced_nodes, limit_value + 1)
 
                 # there is an extra node, so there is a previous page
                 @has_previous_page = paginated_nodes.count > limit_value
@@ -194,7 +193,12 @@ module Gitlab
 
             order_list.each do |field|
               field_name = field.attribute_name
-              ordering[field_name] = node[field_name].to_s
+              field_value = node[field_name]
+              ordering[field_name] = if field_value.is_a?(Time)
+                                       field_value.strftime('%Y-%m-%d %H:%M:%S.%N %Z')
+                                     else
+                                       field_value.to_s
+                                     end
             end
 
             encode(ordering.to_json)

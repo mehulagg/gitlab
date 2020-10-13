@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20190322132835_schedule_populate_merge_request_assignees_table.rb')
 
-describe SchedulePopulateMergeRequestAssigneesTable do
+RSpec.describe SchedulePopulateMergeRequestAssigneesTable do
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
   let(:namespace) { namespaces.create(name: 'gitlab', path: 'gitlab-org') }
@@ -31,7 +31,7 @@ describe SchedulePopulateMergeRequestAssigneesTable do
     stub_const("#{described_class.name}::BATCH_SIZE", 2)
 
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         expect(described_class::MIGRATION)

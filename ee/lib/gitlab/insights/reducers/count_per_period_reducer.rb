@@ -9,7 +9,10 @@ module Gitlab
         InvalidPeriodLimitError = Class.new(BaseReducerError)
 
         VALID_PERIOD = %w[day week month].freeze
-        VALID_PERIOD_FIELD = %i[created_at].freeze
+        VALID_PERIOD_FIELDS = {
+          issue: %i[created_at closed_at],
+          merge_request: %i[created_at merged_at]
+        }.with_indifferent_access.freeze
 
         def initialize(issuables, period:, period_limit:, period_field: :created_at)
           super(issuables)
@@ -42,8 +45,8 @@ module Gitlab
             raise InvalidPeriodError, "Invalid value for `period`: `#{period}`. Allowed values are #{VALID_PERIOD}!"
           end
 
-          unless VALID_PERIOD_FIELD.include?(period_field)
-            raise InvalidPeriodFieldError, "Invalid value for `period_field`: `#{period_field}`. Allowed values are #{VALID_PERIOD_FIELD}!"
+          unless VALID_PERIOD_FIELDS[issuable_type].include?(period_field.to_sym)
+            raise InvalidPeriodFieldError, "Invalid value for `period_field`: `#{period_field}`. Allowed values are #{VALID_PERIOD_FIELDS[issuable_type].join(', ')}!"
           end
 
           unless period_limit > 0
@@ -59,7 +62,8 @@ module Gitlab
         #   }
         def issuables_grouped_by_normalized_period
           @issuables_grouped_by_normalized_period ||= issuables.group_by do |issuable|
-            normalized_time(issuable.public_send(period_field)) # rubocop:disable GitlabSecurity/PublicSend
+            time_field = issuable.public_send(period_field) || issuable.created_at # rubocop:disable GitlabSecurity/PublicSend
+            normalized_time(time_field)
           end
         end
 

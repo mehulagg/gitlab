@@ -3,10 +3,10 @@
 .form-check.builds-feature
   = form.check_box :merge_pipelines_enabled, class: 'form-check-input js-merge-options-merge-pipelines', data: { qa_selector: 'merged_results_pipeline_checkbox' }
   = form.label :merge_pipelines_enabled, class: 'form-check-label' do
-    = s_('ProjectSettings|Merge pipelines will try to validate the post-merge result prior to merging')
+    = s_('ProjectSettings|Enable merge trains and pipelines for merged results')
     .text-secondary.mb-2
-      = s_('ProjectSettings|Pipelines need to be configured to enable this feature.')
-      = link_to icon('question-circle'),
+      = s_('ProjectSettings|Pipelines for merge requests must be enabled in the CI/CD configuration file, or pipelines could be unresolvable or dropped')
+      = link_to sprite_icon('question-o'),
         help_page_path('ci/merge_request_pipelines/index.md',
-        anchor: 'pipelines-for-merge-requests'),
+        anchor: 'configuring-pipelines-for-merge-requests'),
         target: '_blank'

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DeployToken do
+RSpec.describe DeployToken do
   subject(:deploy_token) { create(:deploy_token) }
 
   it { is_expected.to have_many :project_deploy_tokens }
@@ -350,6 +350,31 @@ describe DeployToken do
     context 'with no gitlab deploy token associated' do
       it 'returns nil' do
         is_expected.to be_nil
+      end
+    end
+  end
+
+  describe '#accessible_projects' do
+    subject { deploy_token.accessible_projects }
+
+    context 'when a deploy token is associated to a project' do
+      let_it_be(:deploy_token) { create(:deploy_token, :project) }
+
+      it 'returns only projects directly associated with the token' do
+        expect(deploy_token).to receive(:projects)
+
+        subject
+      end
+    end
+
+    context 'when a deploy token is associated to a group' do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:deploy_token) { create(:deploy_token, :group, groups: [group]) }
+
+      it 'returns all projects from the group' do
+        expect(group).to receive(:all_projects)
+
+        subject
       end
     end
   end

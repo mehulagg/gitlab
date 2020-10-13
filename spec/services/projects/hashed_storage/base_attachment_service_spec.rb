@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::HashedStorage::BaseAttachmentService do
+RSpec.describe Projects::HashedStorage::BaseAttachmentService do
   let(:project) { create(:project, :repository, storage_version: 0, skip_disk_validation: true) }
 
   subject(:service) { described_class.new(project: project, old_disk_path: project.full_path, logger: nil) }
@@ -30,7 +30,7 @@ describe Projects::HashedStorage::BaseAttachmentService do
       target_path = Dir.mktmpdir
       expect(Dir.exist?(target_path)).to be_truthy
 
-      Timecop.freeze do
+      freeze_time do
         suffix = Time.current.utc.to_i
         subject.send(:discard_path!, target_path)
 

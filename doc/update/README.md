@@ -50,7 +50,8 @@ However, for this to work there are the following requirements:
    migrations](../development/post_deployment_migrations.md) (included in
    zero downtime update steps below).
 - You are using PostgreSQL. Starting from GitLab 12.1, MySQL is not supported.
-- Multi-node GitLab instance. Single-node instances may experience brief interruptions as services restart.
+- Multi-node GitLab instance. Single-node instances may experience brief interruptions
+  [as services restart (Puma in particular)](https://docs.gitlab.com/omnibus/update/README.html#single-node-deployment).
 
 Most of the time you can safely upgrade from a patch release to the next minor
 release if the patch release is not the latest. For example, upgrading from
@@ -147,8 +148,37 @@ puts Sidekiq::Queue.new("background_migration").size
 Sidekiq::ScheduledSet.new.select { |r| r.klass == 'BackgroundMigrationWorker' }.size
 ```
 
-There is also a [Rake task](../administration/raketasks/maintenance.md#display-status-of-database-migrations)
-for displaying the status of each database migration.
+### What do I do if my background migrations are stuck?
+
+CAUTION: **Warning:**
+The following operations can disrupt your GitLab performance.
+
+NOTE: **Note:**
+It is safe to re-execute these commands, especially if you have 1000+ pending jobs which would likely overflow your runtime memory.
+
+**For Omnibus installations**
+
+```shell
+# Start the rails console
+sudo gitlab-rails c
+
+# Execute the following in the rails console
+scheduled_queue = Sidekiq::ScheduledSet.new
+pending_job_classes = scheduled_queue.select { |job| job["class"] == "BackgroundMigrationWorker" }.map { |job| job["args"].first }.uniq
+pending_job_classes.each { |job_class| Gitlab::BackgroundMigration.steal(job_class) }
+```
+
+**For installations from source**
+
+```shell
+# Start the rails console
+sudo -u git -H bundle exec rails RAILS_ENV=production
+
+# Execute the following in the rails console
+scheduled_queue = Sidekiq::ScheduledSet.new
+pending_job_classes = scheduled_queue.select { |job| job["class"] == "BackgroundMigrationWorker" }.map { |job| job["args"].first }.uniq
+pending_job_classes.each { |job_class| Gitlab::BackgroundMigration.steal(job_class) }
+```
 
 ## Upgrading to a new major version
 
@@ -171,7 +201,7 @@ Below you can find some guides to help you change editions easily.
 
 ### Community to Enterprise Edition
 
->**Note:**
+NOTE: **Note:**
 The following guides are for subscribers of the Enterprise Edition only.
 
 If you wish to upgrade your GitLab installation from Community to Enterprise
@@ -192,6 +222,28 @@ possible.
 
 ## Version specific upgrading instructions
 
+### 13.3.0
+
+The recommended Git version is Git v2.28. The minimum required version of Git
+v2.24 remains the same.
+
+### 13.2.0
+
+GitLab installations that have multiple web nodes will need to be
+[upgraded to 13.1](#1310) before upgrading to 13.2 (and later) due to a
+breaking change in Rails that can result in authorization issues.
+
+GitLab 13.2.0 [remediates](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/35492) an [email verification bypass](https://about.gitlab.com/releases/2020/05/27/security-release-13-0-1-released/).
+After upgrading, if some of your users are unexpectedly encountering 404 or 422 errors when signing in,
+or "blocked" messages when using the command line,
+their accounts may have been un-confirmed.
+In that case, please ask them to check their email for a re-confirmation link.
+For more information, see our discussion of [Email confirmation issues](../user/upgrade_email_bypass.md).
+
+GitLab 13.2.0 relies on the `btree_gist` extension for PostgreSQL. For installations with an externally managed PostgreSQL setup, please make sure to
+[install the extension manually](https://www.postgresql.org/docs/11/sql-createextension.html) before upgrading GitLab if the database user for GitLab
+is not a superuser. This is not necessary for installations using a GitLab managed PostgreSQL database.
+
 ### 13.1.0
 
 In 13.1.0, you must upgrade to either:
@@ -201,6 +253,27 @@ In 13.1.0, you must upgrade to either:
 
 Failure to do so will result in internal errors in the Gitaly service in some RPCs due
 to the use of the new `--end-of-options` Git flag.
+
+Additionally, in GitLab 13.1.0, the version of [Rails was upgraded from 6.0.3 to
+6.0.3.1](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/33454).
+The Rails upgrade included a change to CSRF token generation which is
+not backwards-compatible - GitLab servers with the new Rails version
+will generate CSRF tokens that are not recognizable by GitLab servers
+with the older Rails version - which could cause non-GET requests to
+fail for [multi-node GitLab installations](https://docs.gitlab.com/omnibus/update/#multi-node--ha-deployment).
+
+So, if you are using multiple Rails servers and specifically upgrading from 13.0,
+all servers must first be upgraded to 13.1.0 before upgrading to later versions:
+
+1. Ensure all GitLab web nodes are on GitLab 13.1.0.
+1. Optionally, enable the `global_csrf_token` feature flag to enable new
+   method of CSRF token generation:
+
+   ```ruby
+   Feature.enable(:global_csrf_token)
+   ```
+
+1. Only then, continue to upgrade to later versions of GitLab.
 
 ### 12.2.0
 
@@ -237,3 +310,4 @@ for more information.
 - [Restoring from backup after a failed upgrade](restore_after_failure.md)
 - [Upgrading PostgreSQL Using Slony](upgrading_postgresql_using_slony.md), for
   upgrading a PostgreSQL database with minimal downtime.
+- [Managing PostgreSQL extensions](../install/postgresql_extensions.md)

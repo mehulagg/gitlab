@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::ImportExport::ImportService do
+RSpec.describe Groups::ImportExport::ImportService do
   describe '#async_execute' do
     let_it_be(:user) { create(:user) }
     let_it_be(:group) { create(:group) }
@@ -10,10 +10,25 @@ describe Groups::ImportExport::ImportService do
     context 'when the job can be successfully scheduled' do
       subject(:import_service) { described_class.new(group: group, user: user) }
 
+      it 'creates group import state' do
+        import_service.async_execute
+
+        import_state = group.import_state
+
+        expect(import_state.user).to eq(user)
+        expect(import_state.group).to eq(group)
+      end
+
       it 'enqueues an import job' do
         expect(GroupImportWorker).to receive(:perform_async).with(user.id, group.id)
 
         import_service.async_execute
+      end
+
+      it 'marks the group import as in progress' do
+        import_service.async_execute
+
+        expect(group.import_state.in_progress?).to eq true
       end
 
       it 'returns truthy' do
@@ -30,6 +45,10 @@ describe Groups::ImportExport::ImportService do
 
       it 'returns falsey' do
         expect(import_service.async_execute).to be_falsey
+      end
+
+      it 'does not mark the group import as created' do
+        expect { import_service.async_execute }.not_to change { group.import_state }
       end
     end
   end

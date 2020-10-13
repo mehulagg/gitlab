@@ -8,7 +8,7 @@ import {
 import { debounce } from 'lodash';
 import { sprintf, s__, __ } from '~/locale';
 import httpStatusCodes from '~/lib/utils/http_status';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { isNumeric } from '../../../utils';
 
 export default {
@@ -64,7 +64,10 @@ export default {
       return this.suggestions.length > 0;
     },
     lowerCaseType() {
-      return this.config.type.toLowerCase();
+      return this.config.type
+        .replace('_', ' ')
+        .trim()
+        .toLowerCase();
     },
     noSuggestionsString() {
       return sprintf(s__('AuditLogs|No matching %{type} found.'), { type: this.lowerCaseType });

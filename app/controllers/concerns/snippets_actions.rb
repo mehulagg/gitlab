@@ -2,20 +2,27 @@
 
 module SnippetsActions
   extend ActiveSupport::Concern
-  include SendsBlob
+
+  include RendersNotes
+  include RendersBlob
+  include PaginatedCollection
+  include Gitlab::NoteableMetadata
+  include Snippets::SendBlob
+  include SnippetsSort
 
   included do
-    before_action :redirect_if_binary, only: [:edit, :update]
+    skip_before_action :verify_authenticity_token,
+      if: -> { action_name == 'show' && js_request? }
+
+    respond_to :html
   end
 
-  def edit
-    # We need to load some info from the existing blob
-    snippet.content = blob.data
-    snippet.file_name = blob.path
+  def edit; end
 
-    render 'edit'
-  end
-
+  # This endpoint is being replaced by Snippets::BlobController#raw
+  # Support for old raw links will be maintainted via this action but
+  # it will only return the first blob found,
+  # see: https://gitlab.com/gitlab-org/gitlab/-/issues/217775
   def raw
     workhorse_set_content_type!
 
@@ -30,12 +37,7 @@ module SnippetsActions
         filename: Snippet.sanitized_file_name(blob.name)
       )
     else
-      send_blob(
-        snippet.repository,
-        blob,
-        inline: content_disposition == 'inline',
-        allow_caching: snippet.public?
-      )
+      send_snippet_blob(snippet, blob)
     end
   end
 
@@ -43,37 +45,53 @@ module SnippetsActions
     request.format.js?
   end
 
-  private
+  # rubocop:disable Gitlab/ModuleWithInstanceVariables
+  def show
+    respond_to do |format|
+      format.html do
+        @note = Note.new(noteable: @snippet, project: @snippet.project)
+        @noteable = @snippet
 
-  def content_disposition
-    @disposition ||= params[:inline] == 'false' ? 'attachment' : 'inline'
+        @discussions = @snippet.discussions
+        @notes = prepare_notes_for_rendering(@discussions.flat_map(&:notes), @noteable)
+        render 'show'
+      end
+
+      format.json do
+        conditionally_expand_blob(blob)
+        render_blob_json(blob)
+      end
+
+      format.js do
+        if @snippet.embeddable?
+          conditionally_expand_blobs(blobs)
+
+          render 'shared/snippets/show'
+        else
+          head :not_found
+        end
+      end
+    end
   end
+  # rubocop:enable Gitlab/ModuleWithInstanceVariables
+
+  private
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def blob
-    return unless snippet
+    @blob ||= blobs.first
+  end
 
-    @blob ||= if snippet.empty_repo?
-                snippet.blob
-              else
-                snippet.blobs.first
-              end
+  def blobs
+    @blobs ||= if snippet.empty_repo?
+                 [snippet.blob]
+               else
+                 snippet.blobs
+               end
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
   def convert_line_endings(content)
     params[:line_ending] == 'raw' ? content : content.gsub(/\r\n/, "\n")
-  end
-
-  def handle_repository_error(action)
-    errors = Array(snippet.errors.delete(:repository))
-
-    flash.now[:alert] = errors.first if errors.present?
-
-    recaptcha_check_with_fallback(errors.empty?) { render action }
-  end
-
-  def redirect_if_binary
-    redirect_to gitlab_snippet_path(snippet) if blob&.binary?
   end
 end

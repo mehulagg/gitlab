@@ -65,22 +65,6 @@ RSpec.describe Admin::Geo::NodesController do
         expect(response).not_to redirect_to(:forbidden)
       end
     end
-
-    context 'with Postgres 9.6 or greater' do
-      before do
-        allow(Gitlab::Database).to receive(:postgresql_minimum_supported_version?).and_return(true)
-      end
-
-      it_behaves_like 'no flash message', :warning
-    end
-
-    context 'without Postgres 9.6 or greater' do
-      before do
-        allow(Gitlab::Database).to receive(:postgresql_minimum_supported_version?).and_return(false)
-      end
-
-      it_behaves_like 'with flash message', :warning, 'Please upgrade PostgreSQL to version 9.6 or greater.'
-    end
   end
 
   describe '#create' do

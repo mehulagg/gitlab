@@ -2,12 +2,14 @@ import MockAdapter from 'axios-mock-adapter';
 import {
   setHeadBlobPath,
   setBaseBlobPath,
+  setCanReadVulnerabilityFeedback,
   setVulnerabilityFeedbackPath,
   setVulnerabilityFeedbackHelpPath,
   setPipelineId,
   requestContainerScanningDiff,
   requestDastDiff,
   requestDependencyScanningDiff,
+  requestCoverageFuzzingDiff,
   openModal,
   setModalData,
   requestDismissVulnerability,
@@ -28,6 +30,7 @@ import {
   updateContainerScanningIssue,
   updateDastIssue,
   updateSecretScanningIssue,
+  updateCoverageFuzzingIssue,
   addDismissalComment,
   receiveAddDismissalCommentError,
   receiveAddDismissalCommentSuccess,
@@ -54,6 +57,10 @@ import {
   receiveSecretScanningDiffSuccess,
   receiveSecretScanningDiffError,
   fetchSecretScanningDiff,
+  setCoverageFuzzingDiffEndpoint,
+  receiveCoverageFuzzingDiffSuccess,
+  receiveCoverageFuzzingDiffError,
+  fetchCoverageFuzzingDiff,
 } from 'ee/vue_shared/security_reports/store/actions';
 import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
 import state from 'ee/vue_shared/security_reports/store/state';
@@ -64,6 +71,7 @@ import {
   containerScanningFeedbacks,
   dependencyScanningFeedbacks,
   secretScanningFeedbacks,
+  coverageFuzzingFeedbacks,
 } from '../mock_data';
 import toasted from '~/vue_shared/plugins/global_toast';
 
@@ -140,6 +148,24 @@ describe('security reports actions', () => {
           {
             type: types.SET_BASE_BLOB_PATH,
             payload: 'path',
+          },
+        ],
+        [],
+        done,
+      );
+    });
+  });
+
+  describe('setCanReadVulnerabilityFeedback', () => {
+    it('should commit set vulnerabulity feedback path', done => {
+      testAction(
+        setCanReadVulnerabilityFeedback,
+        true,
+        mockedState,
+        [
+          {
+            type: types.SET_CAN_READ_VULNERABILITY_FEEDBACK,
+            payload: true,
           },
         ],
         [],
@@ -245,6 +271,23 @@ describe('security reports actions', () => {
         [
           {
             type: types.REQUEST_DEPENDENCY_SCANNING_DIFF,
+          },
+        ],
+        [],
+        done,
+      );
+    });
+  });
+
+  describe('requestCoverageFuzzingDiff', () => {
+    it('should commit request mutation', done => {
+      testAction(
+        requestCoverageFuzzingDiff,
+        null,
+        mockedState,
+        [
+          {
+            type: types.REQUEST_COVERAGE_FUZZING_DIFF,
           },
         ],
         [],
@@ -414,6 +457,7 @@ describe('security reports actions', () => {
     it('with error should dispatch `receiveDismissVulnerabilityError`', done => {
       mock.onPost('dismiss_vulnerability_path').reply(500, {});
       mockedState.vulnerabilityFeedbackPath = 'dismiss_vulnerability_path';
+      mockedState.canReadVulnerabilityFeedback = true;
 
       testAction(
         dismissVulnerability,
@@ -852,6 +896,7 @@ describe('security reports actions', () => {
     it('with error should dispatch `receiveCreateIssueError`', done => {
       mock.onPost('create_issue_path').reply(500, {});
       mockedState.vulnerabilityFeedbackPath = 'create_issue_path';
+      mockedState.canReadVulnerabilityFeedback = true;
 
       testAction(
         createNewIssue,
@@ -980,6 +1025,7 @@ describe('security reports actions', () => {
     it('with error should dispatch `receiveCreateMergeRequestError`', done => {
       mock.onPost('create_merge_request_path').reply(500, {});
       mockedState.vulnerabilityFeedbackPath = 'create_merge_request_path';
+      mockedState.canReadVulnerabilityFeedback = true;
 
       testAction(
         createMergeRequest,
@@ -1080,6 +1126,26 @@ describe('security reports actions', () => {
     });
   });
 
+  describe('updateCoverageFuzzingIssue', () => {
+    it('commits update coverageFuzzing issue', done => {
+      const payload = { foo: 'bar' };
+
+      testAction(
+        updateCoverageFuzzingIssue,
+        payload,
+        mockedState,
+        [
+          {
+            type: types.UPDATE_COVERAGE_FUZZING_ISSUE,
+            payload,
+          },
+        ],
+        [],
+        done,
+      );
+    });
+  });
+
   describe('setContainerScanningDiffEndpoint', () => {
     it('should pass down the endpoint to the mutation', done => {
       const payload = '/container_scanning_endpoint.json';
@@ -1143,6 +1209,7 @@ describe('security reports actions', () => {
 
     beforeEach(() => {
       mockedState.vulnerabilityFeedbackPath = 'vulnerabilities_feedback';
+      mockedState.canReadVulnerabilityFeedback = true;
       mockedState.containerScanning.paths.diffEndpoint = endpoint;
     });
 
@@ -1171,6 +1238,35 @@ describe('security reports actions', () => {
               payload: {
                 diff,
                 enrichData: containerScanningFeedbacks,
+              },
+            },
+          ],
+          done,
+        );
+      });
+    });
+
+    describe('when diff endpoint responds successfully and fetching vulnerability feedback is not authorized', () => {
+      beforeEach(() => {
+        mockedState.canReadVulnerabilityFeedback = false;
+        mock.onGet(endpoint).reply(200, diff);
+      });
+
+      it('should dispatch `receiveContainerScanningDiffSuccess`', done => {
+        testAction(
+          fetchContainerScanningDiff,
+          null,
+          mockedState,
+          [],
+          [
+            {
+              type: 'requestContainerScanningDiff',
+            },
+            {
+              type: 'receiveContainerScanningDiffSuccess',
+              payload: {
+                diff,
+                enrichData: [],
               },
             },
           ],
@@ -1300,6 +1396,7 @@ describe('security reports actions', () => {
 
     beforeEach(() => {
       mockedState.vulnerabilityFeedbackPath = 'vulnerabilities_feedback';
+      mockedState.canReadVulnerabilityFeedback = true;
       mockedState.dependencyScanning.paths.diffEndpoint = 'dependency_scanning_diff.json';
     });
 
@@ -1328,6 +1425,35 @@ describe('security reports actions', () => {
               payload: {
                 diff,
                 enrichData: dependencyScanningFeedbacks,
+              },
+            },
+          ],
+          done,
+        );
+      });
+    });
+
+    describe('when diff endpoint responds successfully and fetching vulnerability feedback is not authorized', () => {
+      beforeEach(() => {
+        mockedState.canReadVulnerabilityFeedback = false;
+        mock.onGet('dependency_scanning_diff.json').reply(200, diff);
+      });
+
+      it('should dispatch `receiveDependencyScanningDiffSuccess`', done => {
+        testAction(
+          fetchDependencyScanningDiff,
+          null,
+          mockedState,
+          [],
+          [
+            {
+              type: 'requestDependencyScanningDiff',
+            },
+            {
+              type: 'receiveDependencyScanningDiffSuccess',
+              payload: {
+                diff,
+                enrichData: [],
               },
             },
           ],
@@ -1457,6 +1583,7 @@ describe('security reports actions', () => {
 
     beforeEach(() => {
       mockedState.vulnerabilityFeedbackPath = 'vulnerabilities_feedback';
+      mockedState.canReadVulnerabilityFeedback = true;
       mockedState.dast.paths.diffEndpoint = 'dast_diff.json';
     });
 
@@ -1485,6 +1612,35 @@ describe('security reports actions', () => {
               payload: {
                 diff,
                 enrichData: dastFeedbacks,
+              },
+            },
+          ],
+          done,
+        );
+      });
+    });
+
+    describe('when diff endpoint responds successfully and fetching vulnerability feedback is not authorized', () => {
+      beforeEach(() => {
+        mockedState.canReadVulnerabilityFeedback = false;
+        mock.onGet('dast_diff.json').reply(200, diff);
+      });
+
+      it('should dispatch `receiveDastDiffSuccess`', done => {
+        testAction(
+          fetchDastDiff,
+          null,
+          mockedState,
+          [],
+          [
+            {
+              type: 'requestDastDiff',
+            },
+            {
+              type: 'receiveDastDiffSuccess',
+              payload: {
+                diff,
+                enrichData: [],
               },
             },
           ],
@@ -1615,6 +1771,7 @@ describe('security reports actions', () => {
 
     beforeEach(() => {
       mockedState.vulnerabilityFeedbackPath = 'vulnerabilities_feedback';
+      mockedState.canReadVulnerabilityFeedback = true;
       mockedState.secretScanning.paths.diffEndpoint = endpoint;
     });
 
@@ -1624,7 +1781,7 @@ describe('security reports actions', () => {
         mock
           .onGet('vulnerabilities_feedback', {
             params: {
-              category: 'secret_scanning',
+              category: 'secret_detection',
             },
           })
           .reply(200, secretScanningFeedbacks);
@@ -1643,6 +1800,35 @@ describe('security reports actions', () => {
               payload: {
                 diff,
                 enrichData: secretScanningFeedbacks,
+              },
+            },
+          ],
+          done,
+        );
+      });
+    });
+
+    describe('when diff endpoint responds successfully and fetching vulnerability feedback is not authorized', () => {
+      beforeEach(() => {
+        mockedState.canReadVulnerabilityFeedback = false;
+        mock.onGet(endpoint).reply(200, diff);
+      });
+
+      it('should dispatch `secret_scanning`', done => {
+        testAction(
+          fetchSecretScanningDiff,
+          null,
+          mockedState,
+          [],
+          [
+            {
+              type: 'requestSecretScanningDiff',
+            },
+            {
+              type: 'receiveSecretScanningDiffSuccess',
+              payload: {
+                diff,
+                enrichData: [],
               },
             },
           ],
@@ -1702,6 +1888,163 @@ describe('security reports actions', () => {
             },
             {
               type: 'receiveSecretScanningDiffError',
+            },
+          ],
+          done,
+        );
+      });
+    });
+  });
+
+  describe('setCoverageFuzzingDiffEndpoint', () => {
+    it('should pass down the endpoint to the mutation', done => {
+      const payload = '/coverage_fuzzing_endpoint.json';
+
+      testAction(
+        setCoverageFuzzingDiffEndpoint,
+        payload,
+        mockedState,
+        [
+          {
+            type: types.SET_COVERAGE_FUZZING_DIFF_ENDPOINT,
+            payload,
+          },
+        ],
+        [],
+        done,
+      );
+    });
+  });
+
+  describe('receiveCoverageFuzzingDiffSuccess', () => {
+    it('should pass down the response to the mutation', done => {
+      const payload = { data: 'Effort yields its own rewards.' };
+
+      testAction(
+        receiveCoverageFuzzingDiffSuccess,
+        payload,
+        mockedState,
+        [
+          {
+            type: types.RECEIVE_COVERAGE_FUZZING_DIFF_SUCCESS,
+            payload,
+          },
+        ],
+        [],
+        done,
+      );
+    });
+  });
+
+  describe('receiveCoverageFuzzingDiffError', () => {
+    it('should commit coverage fuzzing diff error mutation', done => {
+      testAction(
+        receiveCoverageFuzzingDiffError,
+        undefined,
+        mockedState,
+        [
+          {
+            type: types.RECEIVE_COVERAGE_FUZZING_DIFF_ERROR,
+          },
+        ],
+        [],
+        done,
+      );
+    });
+  });
+
+  describe('fetcCoverageFuzzingDiff', () => {
+    const diff = { foo: {} };
+
+    beforeEach(() => {
+      mockedState.vulnerabilityFeedbackPath = 'vulnerabilities_feedback';
+      mockedState.coverageFuzzing.paths.diffEndpoint = 'coverage_fuzzing_diff.json';
+    });
+
+    describe('on success', () => {
+      it('should dispatch `receiveCoverageFuzzingDiffSuccess`', done => {
+        mock.onGet('coverage_fuzzing_diff.json').reply(200, diff);
+        mock
+          .onGet('vulnerabilities_feedback', {
+            params: {
+              category: 'coverage_fuzzing',
+            },
+          })
+          .reply(200, coverageFuzzingFeedbacks);
+
+        testAction(
+          fetchCoverageFuzzingDiff,
+          null,
+          mockedState,
+          [],
+          [
+            {
+              type: 'requestCoverageFuzzingDiff',
+            },
+            {
+              type: 'receiveCoverageFuzzingDiffSuccess',
+              payload: {
+                diff,
+                enrichData: coverageFuzzingFeedbacks,
+              },
+            },
+          ],
+          done,
+        );
+      });
+    });
+
+    describe('when vulnerabilities path errors', () => {
+      it('should dispatch `receiveCoverageFuzzingError`', done => {
+        mock.onGet('coverage_fuzzing_diff.json').reply(500);
+        mock
+          .onGet('vulnerabilities_feedback', {
+            params: {
+              category: 'coverage_fuzzing',
+            },
+          })
+          .reply(200, coverageFuzzingFeedbacks);
+
+        testAction(
+          fetchCoverageFuzzingDiff,
+          null,
+          mockedState,
+          [],
+          [
+            {
+              type: 'requestCoverageFuzzingDiff',
+            },
+            {
+              type: 'receiveCoverageFuzzingDiffError',
+            },
+          ],
+          done,
+        );
+      });
+    });
+
+    describe('when feedback path errors', () => {
+      it('should dispatch `receiveCoverageFuzzingError`', done => {
+        mock.onGet('coverage_fuzzing_diff.json').reply(200, diff);
+        mock
+          .onGet('vulnerabilities_feedback', {
+            params: {
+              category: 'coverage_fuzzing',
+            },
+          })
+          .reply(500);
+
+        testAction(
+          fetchCoverageFuzzingDiff,
+          null,
+          mockedState,
+          [],
+          [
+            {
+              type: 'requestCoverageFuzzingDiff',
+            },
+            {
+              type: 'receiveCoverageFuzzingDiffError',
             },
           ],
           done,

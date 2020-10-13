@@ -1,8 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
-import SeverityBadge, {
-  CLASS_NAME_MAP,
-  TOOLTIP_TITLE_MAP,
-} from 'ee/vue_shared/security_reports/components/severity_badge.vue';
+import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
+import {
+  SEVERITY_CLASS_NAME_MAP,
+  SEVERITY_TOOLTIP_TITLE_MAP,
+} from 'ee/vue_shared/security_reports/components/constants';
 import { GlIcon } from '@gitlab/ui';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
@@ -33,7 +34,7 @@ describe('Severity Badge', () => {
       createWrapper({ severity });
     });
 
-    const className = CLASS_NAME_MAP[severity];
+    const className = SEVERITY_CLASS_NAME_MAP[severity];
 
     it(`renders the component with ${severity} badge`, () => {
       expect(wrapper.find(`.${className}`).exists()).toBe(true);
@@ -49,7 +50,7 @@ describe('Severity Badge', () => {
     });
 
     it('renders tooltip', () => {
-      expect(findTooltip()).toBe(TOOLTIP_TITLE_MAP[severity]);
+      expect(findTooltip()).toBe(SEVERITY_TOOLTIP_TITLE_MAP[severity]);
     });
   });
 
@@ -59,7 +60,7 @@ describe('Severity Badge', () => {
     });
 
     it(`renders an empty component`, () => {
-      expect(wrapper.isEmpty()).toBe(true);
+      expect(wrapper.html()).toBe('');
     });
   });
 });

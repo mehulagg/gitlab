@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::Ldap::Adapter do
+RSpec.describe Gitlab::Auth::Ldap::Adapter do
   include LdapHelpers
 
   let(:ldap) { double(:ldap) }
@@ -128,7 +128,7 @@ describe Gitlab::Auth::Ldap::Adapter do
       before do
         allow(adapter).to receive(:renew_connection_adapter).and_return(ldap)
         allow(ldap).to receive(:search) { raise Net::LDAP::Error, "some error" }
-        allow(Rails.logger).to receive(:warn)
+        allow(Gitlab::AppLogger).to receive(:warn)
       end
 
       context 'retries the operation' do
@@ -152,7 +152,7 @@ describe Gitlab::Auth::Ldap::Adapter do
 
           it 'logs the error' do
             expect { subject }.to raise_error(Gitlab::Auth::Ldap::LdapConnectionError)
-            expect(Rails.logger).to have_received(:warn).with(
+            expect(Gitlab::AppLogger).to have_received(:warn).with(
               "LDAP search raised exception Net::LDAP::Error: some error")
           end
         end

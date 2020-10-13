@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-describe API::Internal::Base do
+RSpec.describe API::Internal::Base do
+  include APIInternalBaseHelpers
+
   let_it_be(:user, reload: true) { create(:user) }
   let_it_be(:project, reload: true) { create(:project, :repository, :wiki_repo) }
   let_it_be(:personal_snippet) { create(:personal_snippet, :repository, author: user) }
@@ -120,6 +122,138 @@ describe API::Internal::Base do
     end
   end
 
+  describe 'POST /internal/personal_access_token' do
+    it 'returns an error message when the key does not exist' do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id: non_existing_record_id
+           }
+
+      expect(json_response['success']).to be_falsey
+      expect(json_response['message']).to eq('Could not find the given key')
+    end
+
+    it 'returns an error message when the key is a deploy key' do
+      deploy_key = create(:deploy_key)
+
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id: deploy_key.id
+           }
+
+      expect(json_response['success']).to be_falsey
+      expect(json_response['message']).to eq('Deploy keys cannot be used to create personal access tokens')
+    end
+
+    it 'returns an error message when the user does not exist' do
+      key_without_user = create(:key, user: nil)
+
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id: key_without_user.id
+           }
+
+      expect(json_response['success']).to be_falsey
+      expect(json_response['message']).to eq('Could not find a user for the given key')
+      expect(json_response['token']).to be_nil
+    end
+
+    it 'returns an error message when given an non existent user' do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             user_id: 0
+           }
+
+      expect(json_response['success']).to be_falsey
+      expect(json_response['message']).to eq("Could not find the given user")
+    end
+
+    it 'returns an error message when no name parameter is received' do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id:  key.id
+           }
+
+      expect(json_response['success']).to be_falsey
+      expect(json_response['message']).to eq("No token name specified")
+    end
+
+    it 'returns an error message when no scopes parameter is received' do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id:  key.id,
+             name: 'newtoken'
+           }
+
+      expect(json_response['success']).to be_falsey
+      expect(json_response['message']).to eq("No token scopes specified")
+    end
+
+    it 'returns an error message when expires_at contains an invalid date' do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id:  key.id,
+             name: 'newtoken',
+             scopes: ['api'],
+             expires_at: 'invalid-date'
+           }
+
+      expect(json_response['success']).to be_falsey
+      expect(json_response['message']).to eq("Invalid token expiry date: 'invalid-date'")
+    end
+
+    it 'returns an error message when it receives an invalid scope' do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id:  key.id,
+             name: 'newtoken',
+             scopes: %w(read_api badscope read_repository)
+           }
+
+      expect(json_response['success']).to be_falsey
+      expect(json_response['message']).to match(/\AInvalid scope: 'badscope'. Valid scopes are: /)
+    end
+
+    it 'returns a token without expiry when the expires_at parameter is missing' do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id:  key.id,
+             name: 'newtoken',
+             scopes: %w(read_api read_repository)
+           }
+
+      expect(json_response['success']).to be_truthy
+      expect(json_response['token']).to match(/\A\S{20}\z/)
+      expect(json_response['scopes']).to match_array(%w(read_api read_repository))
+      expect(json_response['expires_at']).to be_nil
+    end
+
+    it 'returns a token with expiry when it receives a valid expires_at parameter' do
+      post api('/internal/personal_access_token'),
+           params: {
+             secret_token: secret_token,
+             key_id:  key.id,
+             name: 'newtoken',
+             scopes: %w(read_api read_repository),
+             expires_at: '9001-11-17'
+           }
+
+      expect(json_response['success']).to be_truthy
+      expect(json_response['token']).to match(/\A\S{20}\z/)
+      expect(json_response['scopes']).to match_array(%w(read_api read_repository))
+      expect(json_response['expires_at']).to eq('9001-11-17')
+    end
+  end
+
   describe "POST /internal/lfs_authenticate" do
     before do
       project.add_developer(user)
@@ -218,7 +352,15 @@ describe API::Internal::Base do
         get(api('/internal/authorized_keys'), params: { fingerprint: key.fingerprint, secret_token: secret_token })
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response["key"]).to eq(key.key)
+        expect(json_response['id']).to eq(key.id)
+        expect(json_response['key'].split[1]).to eq(key.key.split[1])
+      end
+
+      it 'exposes the comment of the key as a simple identifier of username + hostname' do
+        get(api('/internal/authorized_keys'), params: { fingerprint: key.fingerprint, secret_token: secret_token })
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['key']).to include("#{key.user_name} (#{Gitlab.config.gitlab.host})")
       end
     end
 
@@ -239,11 +381,21 @@ describe API::Internal::Base do
     end
 
     context "sending the key" do
-      it "finds the key" do
-        get(api('/internal/authorized_keys'), params: { key: key.key.split[1], secret_token: secret_token })
+      context "using an existing key" do
+        it "finds the key" do
+          get(api('/internal/authorized_keys'), params: { key: key.key.split[1], secret_token: secret_token })
 
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response["key"]).to eq(key.key)
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['id']).to eq(key.id)
+          expect(json_response['key'].split[1]).to eq(key.key.split[1])
+        end
+
+        it 'exposes the comment of the key as a simple identifier of username + hostname' do
+          get(api('/internal/authorized_keys'), params: { fingerprint: key.fingerprint, secret_token: secret_token })
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['key']).to include("#{key.user_name} (#{Gitlab.config.gitlab.host})")
+        end
       end
 
       it "returns 404 with a partial key" do
@@ -265,7 +417,7 @@ describe API::Internal::Base do
       let(:env) { {} }
 
       around do |example|
-        Timecop.freeze { example.run }
+        freeze_time { example.run }
       end
 
       before do
@@ -303,11 +455,13 @@ describe API::Internal::Base do
           expect(json_response["status"]).to be_truthy
           expect(json_response["gl_project_path"]).to eq(project.wiki.full_path)
           expect(json_response["gl_repository"]).to eq("wiki-#{project.id}")
+          expect(json_response["gl_key_type"]).to eq("key")
+          expect(json_response["gl_key_id"]).to eq(key.id)
           expect(user.reload.last_activity_on).to be_nil
         end
 
         it_behaves_like 'sets hook env' do
-          let(:gl_repository) { Gitlab::GlRepository::WIKI.identifier_for_container(project) }
+          let(:gl_repository) { Gitlab::GlRepository::WIKI.identifier_for_container(project.wiki) }
         end
       end
 
@@ -426,6 +580,8 @@ describe API::Internal::Base do
             expect(json_response["status"]).to be_truthy
             expect(json_response["gl_repository"]).to eq("project-#{project.id}")
             expect(json_response["gl_project_path"]).to eq(project.full_path)
+            expect(json_response["gl_key_type"]).to eq("key")
+            expect(json_response["gl_key_id"]).to eq(key.id)
             expect(json_response["gitaly"]).not_to be_nil
             expect(json_response["gitaly"]["repository"]).not_to be_nil
             expect(json_response["gitaly"]["repository"]["storage_name"]).to eq(project.repository.gitaly_repository.storage_name)
@@ -449,21 +605,6 @@ describe API::Internal::Base do
             expect(json_response["git_config_options"]).to include("uploadpack.allowFilter=true")
             expect(json_response["git_config_options"]).to include("uploadpack.allowAnySHA1InWant=true")
           end
-
-          context 'when gitaly_upload_pack_filter feature flag is disabled' do
-            before do
-              stub_feature_flags(gitaly_upload_pack_filter: false)
-            end
-
-            it 'returns only maxInputSize and not partial clone git config' do
-              push(key, project)
-
-              expect(json_response["git_config_options"]).to be_present
-              expect(json_response["git_config_options"]).to include("receive.maxInputSize=1048576")
-              expect(json_response["git_config_options"]).not_to include("uploadpack.allowFilter=true")
-              expect(json_response["git_config_options"]).not_to include("uploadpack.allowAnySHA1InWant=true")
-            end
-          end
         end
 
         context 'when receive_max_input_size is empty' do
@@ -477,18 +618,6 @@ describe API::Internal::Base do
             expect(json_response["git_config_options"]).to be_present
             expect(json_response["git_config_options"]).to include("uploadpack.allowFilter=true")
             expect(json_response["git_config_options"]).to include("uploadpack.allowAnySHA1InWant=true")
-          end
-
-          context 'when gitaly_upload_pack_filter feature flag is disabled' do
-            before do
-              stub_feature_flags(gitaly_upload_pack_filter: false)
-            end
-
-            it 'returns an empty git config' do
-              push(key, project)
-
-              expect(json_response["git_config_options"]).to be_empty
-            end
           end
         end
       end
@@ -556,6 +685,7 @@ describe API::Internal::Base do
           }
         }
       end
+
       let(:console_messages) { ['informational message'] }
       let(:custom_action_result) { Gitlab::GitAccessResult::CustomAction.new(payload, console_messages) }
 
@@ -715,6 +845,8 @@ describe API::Internal::Base do
           expect(response).to have_gitlab_http_status(:ok)
           expect(json_response["status"]).to be_truthy
           expect(json_response["gitaly"]).not_to be_nil
+          expect(json_response["gl_key_type"]).to eq("deploy_key")
+          expect(json_response["gl_key_id"]).to eq(key.id)
           expect(json_response["gitaly"]["repository"]).not_to be_nil
           expect(json_response["gitaly"]["repository"]["storage_name"]).to eq(project.repository.gitaly_repository.storage_name)
           expect(json_response["gitaly"]["repository"]["relative_path"]).to eq(project.repository.gitaly_repository.relative_path)
@@ -1049,7 +1181,7 @@ describe API::Internal::Base do
         let(:gl_repository) { "snippet-#{personal_snippet.id}" }
 
         it 'does not try to notify that project moved' do
-          allow(Gitlab::GlRepository).to receive(:parse).and_return([personal_snippet, nil, Gitlab::GlRepository::PROJECT])
+          allow(Gitlab::GlRepository).to receive(:parse).and_return([personal_snippet, nil, Gitlab::GlRepository::SNIPPET])
 
           expect(Gitlab::Checks::ProjectMoved).not_to receive(:fetch_message)
 
@@ -1075,88 +1207,6 @@ describe API::Internal::Base do
 
       expect(json_response['reference_counter_increased']).to be(true)
     end
-  end
-
-  def gl_repository_for(container)
-    case container
-    when ProjectWiki
-      Gitlab::GlRepository::WIKI.identifier_for_container(container.project)
-    when Project
-      Gitlab::GlRepository::PROJECT.identifier_for_container(container)
-    when Snippet
-      Gitlab::GlRepository::SNIPPET.identifier_for_container(container)
-    else
-      nil
-    end
-  end
-
-  def full_path_for(container)
-    case container
-    when PersonalSnippet
-      "snippets/#{container.id}"
-    when ProjectSnippet
-      "#{container.project.full_path}/snippets/#{container.id}"
-    else
-      container.full_path
-    end
-  end
-
-  def pull(key, container, protocol = 'ssh')
-    post(
-      api("/internal/allowed"),
-      params: {
-        key_id: key.id,
-        project: full_path_for(container),
-        gl_repository: gl_repository_for(container),
-        action: 'git-upload-pack',
-        secret_token: secret_token,
-        protocol: protocol
-      }
-    )
-  end
-
-  def push(key, container, protocol = 'ssh', env: nil, changes: nil)
-    push_with_path(key,
-                   full_path: full_path_for(container),
-                   gl_repository: gl_repository_for(container),
-                   protocol: protocol,
-                   env: env,
-                   changes: changes)
-  end
-
-  def push_with_path(key, full_path:, gl_repository: nil, protocol: 'ssh', env: nil, changes: nil)
-    changes ||= 'd14d6c0abdd253381df51a723d58691b2ee1ab08 570e7b2abdd848b95f2f578043fc23bd6f6fd24d refs/heads/master'
-
-    params = {
-      changes: changes,
-      key_id: key.id,
-      project: full_path,
-      action: 'git-receive-pack',
-      secret_token: secret_token,
-      protocol: protocol,
-      env: env
-    }
-    params[:gl_repository] = gl_repository if gl_repository
-
-    post(
-      api("/internal/allowed"),
-      params: params
-    )
-  end
-
-  def archive(key, container)
-    post(
-      api("/internal/allowed"),
-      params: {
-        ref: 'master',
-        key_id: key.id,
-        project: full_path_for(container),
-        gl_repository: gl_repository_for(container),
-        action: 'git-upload-archive',
-        secret_token: secret_token,
-        protocol: 'ssh'
-      }
-    )
   end
 
   def lfs_auth_project(project)

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Create, list, and delete branches via web' do
       master_branch = 'master'
       second_branch = 'second-branch'
@@ -55,7 +55,7 @@ module QA
         project.visit!
       end
 
-      it 'lists branches correctly after CRUD operations' do
+      it 'lists branches correctly after CRUD operations', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/413' do
         Page::Project::Menu.perform(&:go_to_repository_branches)
 
         expect(page).to have_content(master_branch)

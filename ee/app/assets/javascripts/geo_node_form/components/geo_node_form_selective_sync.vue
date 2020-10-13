@@ -1,7 +1,8 @@
 <script>
-import { GlFormGroup, GlFormSelect } from '@gitlab/ui';
+import { GlFormGroup, GlFormSelect, GlFormCheckbox, GlSprintf, GlLink } from '@gitlab/ui';
 import GeoNodeFormNamespaces from './geo_node_form_namespaces.vue';
 import GeoNodeFormShards from './geo_node_form_shards.vue';
+import { SELECTIVE_SYNC_MORE_INFO, OBJECT_STORAGE_MORE_INFO } from '../constants';
 
 export default {
   name: 'GeoNodeFormSelectiveSync',
@@ -10,6 +11,9 @@ export default {
     GlFormSelect,
     GeoNodeFormNamespaces,
     GeoNodeFormShards,
+    GlFormCheckbox,
+    GlSprintf,
+    GlLink,
   },
   props: {
     nodeData: {
@@ -41,11 +45,27 @@ export default {
       this.$emit('removeSyncOption', { key, index });
     },
   },
+  SELECTIVE_SYNC_MORE_INFO,
+  OBJECT_STORAGE_MORE_INFO,
 };
 </script>
 
 <template>
   <div ref="geoNodeFormSelectiveSyncContainer">
+    <h2 class="gl-font-size-h2 gl-my-5">{{ __('Selective synchronization') }}</h2>
+    <p class="gl-mb-5">
+      {{
+        __(
+          'Set what should be replicated by choosing specific projects or groups by the secondary node.',
+        )
+      }}
+      <gl-link
+        :href="$options.SELECTIVE_SYNC_MORE_INFO"
+        target="_blank"
+        data-testid="selectiveSyncMoreInfo"
+        >{{ __('More information') }}</gl-link
+      >
+    </p>
     <gl-form-group
       :label="__('Selective synchronization')"
       label-for="node-selective-synchronization-field"
@@ -56,14 +76,13 @@ export default {
         :options="selectiveSyncTypes"
         value-field="value"
         text-field="label"
-        class="col-sm-6"
+        class="col-sm-3"
       />
     </gl-form-group>
     <gl-form-group
       v-if="selectiveSyncNamespaces"
       :label="__('Groups to synchronize')"
       label-for="node-synchronization-namespaces-field"
-      :description="__('Choose which groups you wish to synchronize to this secondary node')"
     >
       <geo-node-form-namespaces
         id="node-synchronization-namespaces-field"
@@ -76,7 +95,6 @@ export default {
       v-if="selectiveSyncShards"
       :label="__('Shards to synchronize')"
       label-for="node-synchronization-shards-field"
-      :description="__('Choose which shards you wish to synchronize to this secondary node')"
     >
       <geo-node-form-shards
         id="node-synchronization-shards-field"
@@ -85,6 +103,29 @@ export default {
         @addSyncOption="addSyncOption"
         @removeSyncOption="removeSyncOption"
       />
+    </gl-form-group>
+    <gl-form-group :label="__('Object Storage replication')" label-for="node-object-storage-field">
+      <template #description>
+        <gl-sprintf
+          :message="
+            __(
+              'If enabled, GitLab will handle Object Storage replication using Geo. %{linkStart}More information%{linkEnd}',
+            )
+          "
+        >
+          <template #link="{ content }">
+            <gl-link
+              :href="$options.OBJECT_STORAGE_MORE_INFO"
+              data-testid="objectStorageMoreInfo"
+              target="_blank"
+              >{{ content }}</gl-link
+            >
+          </template>
+        </gl-sprintf>
+      </template>
+      <gl-form-checkbox id="node-object-storage-field" v-model="nodeData.syncObjectStorage">{{
+        __('Allow this secondary node to replicate content on Object Storage')
+      }}</gl-form-checkbox>
     </gl-form-group>
   </div>
 </template>

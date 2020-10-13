@@ -72,78 +72,6 @@ RSpec.describe Notify do
   end
 
   context 'for a project' do
-    context 'for service desk issues' do
-      before do
-        issue.update!(service_desk_reply_to: 'service.desk@example.com')
-      end
-
-      def expect_sender(username)
-        sender = subject.header[:from].addrs[0]
-        expect(sender.display_name).to eq(username)
-        expect(sender.address).to eq(gitlab_sender)
-      end
-
-      describe 'thank you email' do
-        subject { described_class.service_desk_thank_you_email(issue.id) }
-
-        it_behaves_like 'an unsubscribeable thread'
-
-        it 'has the correct recipient' do
-          is_expected.to deliver_to('service.desk@example.com')
-        end
-
-        it 'has the correct subject and body' do
-          aggregate_failures do
-            is_expected.to have_referable_subject(issue, include_project: false, reply: true)
-            is_expected.to have_body_text("Thank you for your support request! We are tracking your request as ticket #{issue.to_reference}, and will respond as soon as we can.")
-          end
-        end
-
-        it 'uses service bot name by default' do
-          expect_sender(User.support_bot.name)
-        end
-
-        context 'when custom outgoing name is set' do
-          let_it_be(:settings) { create(:service_desk_setting, project: project, outgoing_name: 'some custom name') }
-
-          it 'uses custom name in "from" header' do
-            expect_sender('some custom name')
-          end
-        end
-
-        context 'when custom outgoing name is empty' do
-          let_it_be(:settings) { create(:service_desk_setting, project: project, outgoing_name: '') }
-
-          it 'uses service bot name' do
-            expect_sender(User.support_bot.name)
-          end
-        end
-      end
-
-      describe 'new note email' do
-        let_it_be(:first_note) { create(:discussion_note_on_issue, note: 'Hello world') }
-
-        subject { described_class.service_desk_new_note_email(issue.id, first_note.id) }
-
-        it_behaves_like 'an unsubscribeable thread'
-
-        it 'has the correct recipient' do
-          is_expected.to deliver_to('service.desk@example.com')
-        end
-
-        it 'uses author\'s name in "from" header' do
-          expect_sender(first_note.author.name)
-        end
-
-        it 'has the correct subject and body' do
-          aggregate_failures do
-            is_expected.to have_referable_subject(issue, include_project: false, reply: true)
-            is_expected.to have_body_text(first_note.note)
-          end
-        end
-      end
-    end
-
     context 'for merge requests' do
       describe "that are new with approver" do
         before do
@@ -369,6 +297,33 @@ RSpec.describe Notify do
       is_expected.to have_subject("#{project.name} | Repository mirroring paused")
       is_expected.to have_body_text(project.full_path)
       is_expected.to have_body_text(project_settings_repository_url(project))
+    end
+  end
+
+  describe 'mirror was disabled' do
+    let(:project) { create(:project) }
+
+    subject { described_class.mirror_was_disabled_email(project.id, user.id, 'deleted_user_name') }
+
+    it_behaves_like 'an email sent from GitLab'
+    it_behaves_like 'it should not have Gmail Actions links'
+    it_behaves_like "a user cannot unsubscribe through footer link"
+
+    it 'has the correct subject and body' do
+      is_expected.to have_subject("#{project.name} | Repository mirroring disabled")
+      is_expected.to have_body_text(project.full_path)
+      is_expected.to have_body_text(project_settings_repository_url(project))
+      is_expected.to have_body_text('deleted_user_name')
+    end
+
+    context 'user was deleted' do
+      before do
+        user.destroy!
+      end
+
+      it 'does not send email' do
+        expect(subject.message).to be_a_kind_of ActionMailer::Base::NullMail
+      end
     end
   end
 

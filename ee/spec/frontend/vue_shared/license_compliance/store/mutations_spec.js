@@ -20,6 +20,15 @@ describe('License store mutations', () => {
     });
   });
 
+  describe('SET_KNOWN_LICENSES', () => {
+    it('assigns knownLicenses to the store', () => {
+      const licenses = [{ name: 'BSD' }, { name: 'Apache' }];
+      store.commit(`licenseManagement/${types.SET_KNOWN_LICENSES}`, licenses);
+
+      expect(store.state.licenseManagement.knownLicenses).toBe(licenses);
+    });
+  });
+
   describe('RESET_LICENSE_IN_MODAL', () => {
     it('closes modal and deletes licenseInApproval', () => {
       store.replaceState({
@@ -150,6 +159,54 @@ describe('License store mutations', () => {
       store.commit(`licenseManagement/${types.REQUEST_SET_LICENSE_APPROVAL}`);
 
       expect(store.state.licenseManagement.isSaving).toBe(true);
+    });
+  });
+
+  describe('REQUEST_LICENSE_CHECK_APPROVAL_RULE', () => {
+    it('sets isLoadingLicenseCheckApprovalRule to true', () => {
+      store.replaceState({
+        ...store.state,
+        licenseManagement: {
+          isLoadingLicenseCheckApprovalRule: true,
+        },
+      });
+
+      store.commit(`licenseManagement/${types.REQUEST_LICENSE_CHECK_APPROVAL_RULE}`);
+
+      expect(store.state.licenseManagement.isLoadingLicenseCheckApprovalRule).toBe(true);
+    });
+  });
+
+  describe('RECEIVE_LICENSE_CHECK_APPROVAL_RULE_SUCCESS', () => {
+    it('sets isLoadingLicenseCheckApprovalRule to false and hasLicenseCheckApprovalRule to true', () => {
+      store.replaceState({
+        ...store.state,
+        licenseManagement: {
+          isLoadingLicenseCheckApprovalRule: true,
+        },
+      });
+
+      store.commit(`licenseManagement/${types.RECEIVE_LICENSE_CHECK_APPROVAL_RULE_SUCCESS}`, {
+        hasLicenseCheckApprovalRule: true,
+      });
+
+      expect(store.state.licenseManagement.isLoadingLicenseCheckApprovalRule).toBe(false);
+      expect(store.state.licenseManagement.hasLicenseCheckApprovalRule).toBe(true);
+    });
+  });
+
+  describe('RECEIVE_LICENSE_CHECK_APPROVAL_RULE_ERROR', () => {
+    it('sets isLoadingLicenseCheckApprovalRule to false', () => {
+      store.replaceState({
+        ...store.state,
+        licenseManagement: {
+          isLoadingLicenseCheckApprovalRule: true,
+        },
+      });
+
+      store.commit(`licenseManagement/${types.RECEIVE_LICENSE_CHECK_APPROVAL_RULE_ERROR}`);
+
+      expect(store.state.licenseManagement.isLoadingLicenseCheckApprovalRule).toBe(false);
     });
   });
 

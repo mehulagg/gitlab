@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Issue Sidebar' do
+RSpec.describe 'Issue Sidebar' do
   include MobileHelpers
 
   let(:group) { create(:group, :nested) }
@@ -13,7 +13,6 @@ describe 'Issue Sidebar' do
   let!(:xss_label) { create(:label, project: project, title: '&lt;script&gt;alert("xss");&lt;&#x2F;script&gt;') }
 
   before do
-    stub_feature_flags(save_issuable_health_status: false)
     sign_in(user)
   end
 
@@ -56,6 +55,8 @@ describe 'Issue Sidebar' do
         it 'sees link to invite members' do
           page.within '.dropdown-menu-user' do
             expect(page).to have_link('Invite Members', href: project_project_members_path(project))
+            expect(page).to have_selector('[data-track-event="click_invite_members"]')
+            expect(page).to have_selector("[data-track-label='edit_assignee']")
           end
         end
       end
@@ -167,7 +168,7 @@ describe 'Issue Sidebar' do
 
       it 'escapes XSS when viewing issue labels' do
         page.within('.block.labels') do
-          find('.edit-link').click
+          click_on 'Edit'
 
           expect(page).to have_content '<script>alert("xss");</script>'
         end
@@ -178,7 +179,7 @@ describe 'Issue Sidebar' do
       before do
         issue.update(labels: [label])
         page.within('.block.labels') do
-          find('.edit-link').click
+          click_on 'Edit'
         end
       end
 
@@ -194,7 +195,7 @@ describe 'Issue Sidebar' do
         end
       end
 
-      context 'creating a project label', :js, :quarantine do
+      context 'creating a project label', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/27992' do
         before do
           page.within('.block.labels') do
             click_link 'Create project'
@@ -285,7 +286,7 @@ describe 'Issue Sidebar' do
     end
 
     it 'does not have a option to edit labels' do
-      expect(page).not_to have_selector('.block.labels .edit-link')
+      expect(page).not_to have_selector('.block.labels .js-sidebar-dropdown-toggle')
     end
 
     context 'interacting with collapsed sidebar', :js do

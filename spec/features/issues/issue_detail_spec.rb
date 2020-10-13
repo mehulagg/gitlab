@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Issue Detail', :js do
+RSpec.describe 'Issue Detail', :js do
   let(:user)     { create(:user) }
   let(:project)  { create(:project, :public) }
   let(:issue)    { create(:issue, project: project, author: user) }
@@ -20,6 +20,19 @@ describe 'Issue Detail', :js do
     end
   end
 
+  context 'when user displays the issue as an incident' do
+    let(:issue) { create(:incident, project: project, author: user) }
+
+    before do
+      visit project_issue_path(project, issue)
+      wait_for_requests
+    end
+
+    it 'does not show design management' do
+      expect(page).not_to have_selector('.js-design-management')
+    end
+  end
+
   context 'when issue description has xss snippet' do
     before do
       issue.update!(description: '![xss" onload=alert(1);//](a)')
@@ -28,7 +41,7 @@ describe 'Issue Detail', :js do
       visit project_issue_path(project, issue)
     end
 
-    it 'encodes the description to prevent xss issues', quarantine: 'https://gitlab.com/gitlab-org/gitlab/issues/207951' do
+    it 'encodes the description to prevent xss issues', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/207951' do
       page.within('.issuable-details .detail-page-description') do
         image = find('img.js-lazy-loaded')
 

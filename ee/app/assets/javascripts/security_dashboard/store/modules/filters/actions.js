@@ -45,6 +45,3 @@ export const setToggleValue = ({ commit }, { key, value }) => {
     value,
   });
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

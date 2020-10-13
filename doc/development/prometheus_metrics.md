@@ -1,3 +1,9 @@
+---
+stage: Monitor
+group: APM
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Working with Prometheus Metrics
 
 ## Adding to the library
@@ -11,16 +17,16 @@ The requirement for adding a new metric is to make each query to have an unique 
 ```yaml
 - group: Response metrics (NGINX Ingress)
   metrics:
-  - title: "Throughput"
-    y_axis:
-      name: "Requests / Sec"
-      format: "number"
-      precision: 2
-    queries:
-    - id: response_metrics_nginx_ingress_throughput_status_code
-      query_range: 'sum(rate(nginx_upstream_responses_total{upstream=~"%{kube_namespace}-%{ci_environment_slug}-.*"}[2m])) by (status_code)'
-      unit: req / sec
-      label: Status Code
+    - title: "Throughput"
+      y_axis:
+        name: "Requests / Sec"
+        format: "number"
+        precision: 2
+      queries:
+        - id: response_metrics_nginx_ingress_throughput_status_code
+          query_range: 'sum(rate(nginx_upstream_responses_total{upstream=~"%{kube_namespace}-%{ci_environment_slug}-.*"}[2m])) by (status_code)'
+          unit: req / sec
+          label: Status Code
 ```
 
 ### Update existing metrics

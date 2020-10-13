@@ -135,13 +135,18 @@ RSpec.describe 'getting a requirement list for a project' do
     end
 
     describe 'sorting and pagination' do
-      let(:start_cursor) { graphql_data['project']['requirements']['pageInfo']['startCursor'] }
-      let(:end_cursor) { graphql_data['project']['requirements']['pageInfo']['endCursor'] }
+      let_it_be(:data_path) { [:project, :requirements] }
 
-      def grab_iids(data = requirements_data)
-        data.map do |requirement_hash|
-          requirement_hash.dig('node', 'iid').to_i
-        end
+      def pagination_query(params, page_info)
+        graphql_query_for(
+          'project',
+          { 'fullPath' => sort_project.full_path },
+          query_graphql_field('requirements', params, "#{page_info} edges { node { iid createdAt} }")
+        )
+      end
+
+      def pagination_results_data(data)
+        data.map { |issue| issue.dig('node', 'iid').to_i }
       end
 
       context 'when sorting by created_at' do
@@ -152,76 +157,19 @@ RSpec.describe 'getting a requirement list for a project' do
         let_it_be(:requirement4) { create(:requirement, project: sort_project, created_at: 5.days.ago) }
         let_it_be(:requirement5) { create(:requirement, project: sort_project, created_at: 1.day.ago) }
 
-        let(:params) { 'sort: created_asc' }
-
-        def query(requirement_params = params)
-          graphql_query_for(
-            'project',
-            { 'fullPath' => sort_project.full_path },
-            <<~REQUIREMENTS
-            requirements(#{requirement_params}) {
-              pageInfo {
-                endCursor
-              }
-              edges {
-                node {
-                  iid
-                  createdAt
-                }
-              }
-            }
-            REQUIREMENTS
-          )
-        end
-
-        def post_query_with_after_cursor(sort_by)
-          cursored_query = query("sort: #{sort_by}, after: \"#{end_cursor}\"")
-          post_graphql(cursored_query, current_user: current_user)
-
-          Gitlab::Json.parse(response.body)['data']['project']['requirements']['edges']
-        end
-
-        before do
-          post_graphql(query, current_user: current_user)
-        end
-
-        it_behaves_like 'a working graphql query'
-
         context 'when ascending' do
-          it 'sorts requirements' do
-            expect(grab_iids).to eq [requirement4.iid, requirement3.iid, requirement5.iid, requirement1.iid, requirement2.iid]
-          end
-
-          context 'when paginating' do
-            let(:params) { 'sort: created_asc, first: 2' }
-
-            it 'sorts requirements' do
-              expect(grab_iids).to eq [requirement4.iid, requirement3.iid]
-
-              response_data = post_query_with_after_cursor('created_asc')
-
-              expect(grab_iids(response_data)).to eq [requirement5.iid, requirement1.iid, requirement2.iid]
-            end
+          it_behaves_like 'sorted paginated query' do
+            let(:sort_param)       { 'created_asc' }
+            let(:first_param)      { 2 }
+            let(:expected_results) { [requirement4.iid, requirement3.iid, requirement5.iid, requirement1.iid, requirement2.iid] }
           end
         end
 
         context 'when descending' do
-          let(:params) { 'sort: created_desc' }
-
-          it 'sorts requirements' do
-            expect(grab_iids).to eq [requirement2.iid, requirement1.iid, requirement5.iid, requirement3.iid, requirement4.iid]
-          end
-
-          context 'when paginating' do
-            let(:params) { 'sort: created_desc, first: 2' }
-
-            it 'sorts requirements' do
-              expect(grab_iids).to eq [requirement2.iid, requirement1.iid]
-
-              response_data = post_query_with_after_cursor('created_desc')
-
-              expect(grab_iids(response_data)).to eq [requirement5.iid, requirement3.iid, requirement4.iid]
-            end
+          it_behaves_like 'sorted paginated query' do
+            let(:sort_param)       { 'created_desc' }
+            let(:first_param)      { 2 }
+            let(:expected_results) { [requirement2.iid, requirement1.iid, requirement5.iid, requirement3.iid, requirement4.iid] }
           end
         end
       end

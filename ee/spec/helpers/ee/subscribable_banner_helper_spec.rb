@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::SubscribableBannerHelper do
+RSpec.describe EE::SubscribableBannerHelper do
   describe '#gitlab_subscription_or_license' do
     subject { helper.gitlab_subscription_or_license }
 

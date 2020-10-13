@@ -1,3 +1,10 @@
+---
+type: reference, dev
+stage: none
+group: Development
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Issues workflow
 
 ## Issue tracker guidelines
@@ -36,21 +43,21 @@ project.
 
 To allow for asynchronous issue handling, we use [milestones](https://gitlab.com/groups/gitlab-org/-/milestones)
 and [labels](https://gitlab.com/gitlab-org/gitlab/-/labels). Leads and product managers handle most of the
-scheduling into milestones. Labeling is a task for everyone.
+scheduling into milestones. Labeling is a task for everyone. (For some projects, labels can be set only by GitLab team members and not by community contributors).
 
 Most issues will have labels for at least one of the following:
 
-- Type: `~feature`, `~bug`, `~backstage`, `~documentation`, etc.
+- Type: `~feature`, `~bug`, `~tooling`, `~documentation`, etc.
 - Stage: `~"devops::plan"`, `~"devops::create"`, etc.
 - Group: `~"group::source code"`, `~"group::knowledge"`, `~"group::editor"`, etc.
-- Category: `~"Category:Code Analytics"`, `~"Category:DevOps Score"`, `~"Category:Templates"`, etc.
+- Category: `~"Category:Code Analytics"`, `~"Category:DevOps Reports"`, `~"Category:Templates"`, etc.
 - Feature: `~wiki`, `~ldap`, `~api`, `~issues`, `~"merge requests"`, etc.
 - Department: `~UX`, `~Quality`
 - Team: `~"Technical Writing"`, `~Delivery`
 - Specialization: `~frontend`, `~backend`, `~documentation`
 - Release Scoping: `~Deliverable`, `~Stretch`, `~"Next Patch Release"`
-- Priority: `~P1`, `~P2`, `~P3`, `~P4`
-- Severity: ~`S1`, `~S2`, `~S3`, `~S4`
+- Priority: `~"priority::1"`, `~"priority::2"`, `~"priority::3"`, `~"priority::4"`
+- Severity: ~`"severity::1"`, `~"severity::2"`, `~"severity::3"`, `~"severity::4"`
 
 All labels, their meaning and priority are defined on the
 [labels page](https://gitlab.com/gitlab-org/gitlab/-/labels).
@@ -67,7 +74,7 @@ The current type labels are:
 
 - ~feature
 - ~bug
-- ~backstage
+- ~tooling
 - ~"support request"
 - ~meta
 - ~documentation
@@ -81,7 +88,7 @@ already reserved for category labels).
 The descriptions on the [labels page](https://gitlab.com/groups/gitlab-org/-/labels)
 explain what falls under each type label.
 
-The GitLab handbook documents [when something is a bug and when it is a feature request](https://about.gitlab.com/handbook/product/product-management/process/feature-or-bug.html).
+The GitLab handbook documents [when something is a bug](https://about.gitlab.com/handbook/product/product-processes/#bug-issues) and [when it is a feature request](https://about.gitlab.com/handbook/product/product-processes/#feature-issues).
 
 ### Facet labels
 
@@ -93,9 +100,9 @@ Following is a non-exhaustive list of facet labels:
 - ~enhancement: This label can refine an issue that has the ~feature label.
 - ~"master:broken": This label can refine an issue that has the ~bug label.
 - ~"failure::flaky-test": This label can refine an issue that has the ~bug label.
-- ~"technical debt": This label can refine an issue that has the ~backstage label.
-- ~"static analysis": This label can refine an issue that has the ~backstage label.
-- ~"ci-build": This label can refine an issue that has the ~backstage label.
+- ~"technical debt": This label can refine an issue that has the ~tooling label.
+- ~"static analysis": This label can refine an issue that has the ~tooling label.
+- ~"ci-build": This label can refine an issue that has the ~tooling label.
 - ~performance: A performance issue could describe a ~bug or a ~feature.
 - ~security: A security issue could describe a ~bug or a ~feature.
 - ~database: A database issue could describe a ~bug or a ~feature.
@@ -104,7 +111,7 @@ Following is a non-exhaustive list of facet labels:
 
 ### Stage labels
 
-Stage labels specify which [stage](https://about.gitlab.com/handbook/product/categories/#hierarchy) the issue belongs to.
+Stage labels specify which [stage](https://about.gitlab.com/handbook/product/product-categories/#hierarchy) the issue belongs to.
 
 #### Naming and color convention
 
@@ -118,7 +125,7 @@ the `gitlab-org` group since its key under `stages` is `manage`.
 
 The current stage labels can be found by [searching the labels list for `devops::`](https://gitlab.com/groups/gitlab-org/-/labels?search=devops::).
 
-These labels are [scoped labels](../../user/project/labels.md#scoped-labels-premium)
+These labels are [scoped labels](../../user/project/labels.md#scoped-labels)
 and thus are mutually exclusive.
 
 The Stage labels are used to generate the [direction pages](https://about.gitlab.com/direction/) automatically.
@@ -145,10 +152,10 @@ under `stages.manage.groups` is `continuous_integration`.
 
 The current group labels can be found by [searching the labels list for `group::`](https://gitlab.com/groups/gitlab-org/-/labels?search=group::).
 
-These labels are [scoped labels](../../user/project/labels.md#scoped-labels-premium)
+These labels are [scoped labels](../../user/project/labels.md#scoped-labels)
 and thus are mutually exclusive.
 
-You can find the groups listed in the [Product Stages, Groups, and Categories](https://about.gitlab.com/handbook/product/categories/) page.
+You can find the groups listed in the [Product Stages, Groups, and Categories](https://about.gitlab.com/handbook/product/product-categories/) page.
 
 We use the term group to map down product requirements from our product stages.
 As a team needs some way to collect the work their members are planning to be assigned to, we use the `~group::` labels to do so.
@@ -167,7 +174,7 @@ Please read [Stage and Group labels in Throughput](https://about.gitlab.com/hand
 ### Category labels
 
 From the handbook's
-[Product stages, groups, and categories](https://about.gitlab.com/handbook/product/categories/#hierarchy)
+[Product stages, groups, and categories](https://about.gitlab.com/handbook/product/product-categories/#hierarchy)
 page:
 
 > Categories are high-level capabilities that may be a standalone product at
@@ -188,9 +195,9 @@ their color is `#428BCA`.
 `<Category Name>` is the category name as it is in the single source of truth for categories at
 <https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/categories.yml>.
 
-For instance, the "DevOps Score" category is represented by the
-~"Category:DevOps Score" label in the `gitlab-org` group since its
-`devops_score.name` value is "DevOps Score".
+For instance, the "DevOps Report" category is represented by the
+~"Category:DevOps Reports" label in the `gitlab-org` group since its
+`devops_reports.name` value is "DevOps Reports".
 
 If a category's label doesn't respect this naming convention, it should be specified
 with [the `label` attribute](https://about.gitlab.com/handbook/marketing/website/#category-attributes)
@@ -199,7 +206,7 @@ in <https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/categories.yml
 ### Feature labels
 
 From the handbook's
-[Product stages, groups, and categories](https://about.gitlab.com/handbook/product/categories/#hierarchy)
+[Product stages, groups, and categories](https://about.gitlab.com/handbook/product/product-categories/#hierarchy)
 page:
 
 > Features: Small, discrete functionalities. e.g. Issue weights. Some common
@@ -275,10 +282,10 @@ or ~"Stretch". Any open issue for a previous milestone should be labeled
 
 We have the following priority labels:
 
-- ~P1
-- ~P2
-- ~P3
-- ~P4
+- ~"priority::1"
+- ~"priority::2"
+- ~"priority::3"
+- ~"priority::4"
 
 Please refer to the issue triage [priority label](https://about.gitlab.com/handbook/engineering/quality/issue-triage/#priority) section in our handbook to see how it's used.
 
@@ -286,10 +293,10 @@ Please refer to the issue triage [priority label](https://about.gitlab.com/handb
 
 We have the following severity labels:
 
-- ~S1
-- ~S2
-- ~S3
-- ~S4
+- ~"severity::1"
+- ~"severity::2"
+- ~"severity::3"
+- ~"severity::4"
 
 Please refer to the issue triage [severity label](https://about.gitlab.com/handbook/engineering/quality/issue-triage/#severity) section in our handbook to see how it's used.
 
@@ -312,22 +319,18 @@ We want to avoid a situation when a contributor picks an
 because we realize that it does not fit our vision, or we want to solve it in a
 different way.
 
-We add the ~"Accepting merge requests" label to:
+We automatically add the ~"Accepting merge requests" label to issues
+that match the [triage policy](https://about.gitlab.com/handbook/engineering/quality/triage-operations/#accepting-merge-requests).
 
-- Low priority ~bug issues (i.e. we do not add it to the bugs that we want to
-  solve in the ~"Next Patch Release")
-- Small ~feature
-- Small ~"technical debt" issues
+We recommend people that have never contributed to any open source project to
+look for issues labeled `~"Accepting merge requests"` with a [weight of 1](https://gitlab.com/groups/gitlab-org/-/issues?state=opened&label_name[]=Accepting+merge+requests&assignee_id=None&sort=weight&weight=1) or the `~"Good for 1st time contributors"` [label](https://gitlab.com/gitlab-org/gitlab/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=Good%20for%201st%20time%20contributors&assignee_id=None) attached to it.
+More experienced contributors are very welcome to tackle
+[any of them](https://gitlab.com/groups/gitlab-org/-/issues?state=opened&label_name[]=Accepting+merge+requests&assignee_id=None).
 
-After adding the ~"Accepting merge requests" label, we try to estimate the
-[weight](#issue-weight) of the issue. We use issue weight to let contributors
-know how difficult the issue is. Additionally:
-
-- We advertise [`Accepting merge requests` issues with weight < 5](https://gitlab.com/groups/gitlab-org/-/issues?state=opened&label_name[]=Accepting+merge+requests&assignee_id=None&sort=weight)
-  as suitable for people that have never contributed to GitLab before on the
-  [Up For Grabs campaign](https://up-for-grabs.net/#/)
-- We encourage people that have never contributed to any open source project to
-  look for [`Accepting merge requests` issues with a weight of 1](https://gitlab.com/groups/gitlab-org/-/issues?state=opened&label_name[]=Accepting+merge+requests&assignee_id=None&sort=weight&weight=1)
+For more complex features that have a weight of 2 or more and clear scope, we recommend looking at issues
+with the [label `~"Community Challenge"`](https://gitlab.com/gitlab-org/gitlab/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=Accepting%20merge%20requests&label_name[]=Community%20challenge).
+If your MR for the `~"Community Challenge"` issue gets merged, you will also have a chance to win a custom
+GitLab merchandise.
 
 If you've decided that you would like to work on an issue, please @-mention
 the [appropriate product manager](https://about.gitlab.com/handbook/product/#who-to-talk-to-for-what)

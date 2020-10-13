@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Getting Metrics Dashboard Annotations' do
+RSpec.describe 'Getting Metrics Dashboard Annotations' do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project) }
@@ -30,22 +30,22 @@ describe 'Getting Metrics Dashboard Annotations' do
 
   let(:query) do
     %(
-          query {
-            project(fullPath:"#{project.full_path}") {
-              environments(name: "#{environment.name}") {
-                nodes {
-                  metricsDashboard(path: "#{path}"){
-                    annotations(#{args}){
-                      nodes {
-                        #{fields}
-                      }
-                    }
+      query {
+        project(fullPath: "#{project.full_path}") {
+          environments(name: "#{environment.name}") {
+            nodes {
+              metricsDashboard(path: "#{path}") {
+                annotations(#{args}) {
+                  nodes {
+                    #{fields}
                   }
                 }
               }
             }
           }
-        )
+        }
+      }
+    )
   end
 
   before do

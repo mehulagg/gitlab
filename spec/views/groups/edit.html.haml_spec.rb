@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'groups/edit.html.haml' do
+RSpec.describe 'groups/edit.html.haml' do
   include Devise::Test::ControllerHelpers
 
   describe '"Share with group lock" setting' do
@@ -26,7 +26,7 @@ describe 'groups/edit.html.haml' do
 
         expect(rendered).to have_content("Prevent sharing a project within #{test_group.name} with other groups")
         expect(rendered).to have_css('.js-descr', text: 'help text here')
-        expect(rendered).to have_field('group_share_with_group_lock', checkbox_options)
+        expect(rendered).to have_field('group_share_with_group_lock', **checkbox_options)
       end
     end
 

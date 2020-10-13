@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::MergeRequestsController, '(JavaScript fixtures)', type: :controller do
+RSpec.describe Projects::MergeRequestsController, '(JavaScript fixtures)', type: :controller do
   include JavaScriptFixturesHelpers
 
   let(:admin) { create(:admin) }
@@ -38,6 +38,7 @@ describe Projects::MergeRequestsController, '(JavaScript fixtures)', type: :cont
       sha: merge_request.diff_head_sha
     )
   end
+
   let(:path) { "files/ruby/popen.rb" }
   let(:position) do
     build(:text_diff_position, :added,

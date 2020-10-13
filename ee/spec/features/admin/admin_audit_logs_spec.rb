@@ -105,33 +105,11 @@ RSpec.describe 'Admin::AuditLogs', :js do
     describe 'filter by date' do
       let_it_be(:audit_event_1) { create(:user_audit_event, created_at: 5.days.ago) }
       let_it_be(:audit_event_2) { create(:user_audit_event, created_at: 3.days.ago) }
-      let_it_be(:audit_event_3) { create(:user_audit_event, created_at: 1.day.ago) }
+      let_it_be(:audit_event_3) { create(:user_audit_event, created_at: Date.current) }
+      let_it_be(:events_path) { :admin_audit_logs_path }
+      let_it_be(:entity) { nil }
 
-      it 'shows only 2 days old events' do
-        visit admin_audit_logs_path(created_after: 4.days.ago.to_date, created_before: 2.days.ago.to_date)
-
-        find('[data-testid="audit-events-table"] td', match: :first)
-
-        expect(page).not_to have_content(audit_event_1.present.date)
-        expect(page).to have_content(audit_event_2.present.date)
-        expect(page).not_to have_content(audit_event_3.present.date)
-      end
-
-      it 'shows only yesterday events' do
-        visit admin_audit_logs_path(created_after: 2.days.ago.to_date)
-
-        find('[data-testid="audit-events-table"] td', match: :first)
-
-        expect(page).not_to have_content(audit_event_1.present.date)
-        expect(page).not_to have_content(audit_event_2.present.date)
-        expect(page).to have_content(audit_event_3.present.date)
-      end
-
-      it 'shows a message if provided date is invalid' do
-        visit admin_audit_logs_path(created_after: '12-345-6789')
-
-        expect(page).to have_content('Invalid date format. Please use UTC format as YYYY-MM-DD')
-      end
+      it_behaves_like 'audit events date filter'
     end
 
     describe 'impersonated events' do
@@ -162,13 +140,14 @@ RSpec.describe 'Admin::AuditLogs', :js do
   end
 
   def filter_for(type, name)
-    within '[data-qa-selector="admin_audit_log_filter"]' do
-      find('input').click
+    filter_container = '[data-testid="audit-events-filter"]'
 
+    find(filter_container).click
+    within filter_container do
       click_link type
       click_link name
 
-      find('button[type="button"]').click
+      find('button[type="button"]:not([name="clear"])').click
     end
 
     wait_for_requests

@@ -14,6 +14,7 @@ RSpec.describe API::Geo do
   let(:geo_token_header) do
     { 'X-Gitlab-Token' => secondary_node.system_hook.token }
   end
+
   let(:invalid_geo_auth_header) do
     { Authorization: "#{::Gitlab::Geo::BaseRequest::GITLAB_GEO_AUTH_TOKEN_TYPE}...Test" }
   end
@@ -336,29 +337,6 @@ RSpec.describe API::Geo do
         geo_node_id: secondary_node.id,
         status_message: nil,
         db_replication_lag_seconds: 0,
-        projects_count: 10,
-        repositories_synced_count: 1,
-        repositories_failed_count: 2,
-        wikis_synced_count: 2,
-        wikis_failed_count: 3,
-        lfs_objects_count: 100,
-        lfs_objects_synced_count: 50,
-        lfs_objects_failed_count: 12,
-        lfs_objects_synced_missing_on_primary_count: 4,
-        job_artifacts_count: 100,
-        job_artifacts_synced_count: 50,
-        job_artifacts_failed_count: 12,
-        job_artifacts_synced_missing_on_primary_count: 5,
-        container_repositories_count: 100,
-        container_repositories_synced_count: 50,
-        container_repositories_failed_count: 12,
-        design_repositories_count: 100,
-        design_repositories_synced_count: 50,
-        design_repositories_failed_count: 12,
-        attachments_count: 30,
-        attachments_synced_count: 30,
-        attachments_failed_count: 25,
-        attachments_synced_missing_on_primary_count: 6,
         last_event_id: 2,
         last_event_date: Time.now.utc,
         cursor_last_event_id: 1,
@@ -368,7 +346,39 @@ RSpec.describe API::Geo do
         repository_updated_max_id: 132,
         repository_deleted_max_id: 23,
         repository_renamed_max_id: 11,
-        repositories_changed_max_id: 109
+        repositories_changed_max_id: 109,
+        status: {
+          projects_count: 10,
+          repositories_synced_count: 1,
+          repositories_failed_count: 2,
+          wikis_synced_count: 2,
+          wikis_failed_count: 3,
+          lfs_objects_count: 100,
+          lfs_objects_synced_count: 50,
+          lfs_objects_failed_count: 12,
+          lfs_objects_synced_missing_on_primary_count: 4,
+          job_artifacts_count: 100,
+          job_artifacts_synced_count: 50,
+          job_artifacts_failed_count: 12,
+          job_artifacts_synced_missing_on_primary_count: 5,
+          container_repositories_count: 100,
+          container_repositories_synced_count: 50,
+          container_repositories_failed_count: 12,
+          design_repositories_count: 100,
+          design_repositories_synced_count: 50,
+          design_repositories_failed_count: 12,
+          attachments_count: 30,
+          attachments_synced_count: 30,
+          attachments_failed_count: 25,
+          attachments_synced_missing_on_primary_count: 6,
+          attachments_replication_enabled: false,
+          container_repositories_replication_enabled: true,
+          design_repositories_replication_enabled: false,
+          job_artifacts_replication_enabled: true,
+          lfs_objects_replication_enabled: true,
+          repositories_replication_enabled: true,
+          repository_verification_enabled: true
+        }
       }
     end
 

@@ -1,10 +1,9 @@
 <script>
 import { sortBy } from 'lodash';
 import { mapState } from 'vuex';
-import { GlLabel, GlTooltipDirective } from '@gitlab/ui';
+import { GlLabel, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import issueCardInner from 'ee_else_ce/boards/mixins/issue_card_inner';
 import { sprintf, __ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 import UserAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import IssueDueDate from './issue_due_date.vue';
@@ -15,7 +14,7 @@ import { isScopedLabel } from '~/lib/utils/common_utils';
 export default {
   components: {
     GlLabel,
-    Icon,
+    GlIcon,
     UserAvatarLink,
     TooltipOnTruncate,
     IssueDueDate,
@@ -31,30 +30,18 @@ export default {
       type: Object,
       required: true,
     },
-    issueLinkBase: {
-      type: String,
-      required: true,
-    },
     list: {
       type: Object,
       required: false,
       default: () => ({}),
-    },
-    rootPath: {
-      type: String,
-      required: true,
     },
     updateFilters: {
       type: Boolean,
       required: false,
       default: false,
     },
-    groupId: {
-      type: Number,
-      required: false,
-      default: null,
-    },
   },
+  inject: ['groupId', 'rootPath'],
   data() {
     return {
       limitBeforeCounter: 2,
@@ -148,20 +135,20 @@ export default {
   <div>
     <div class="d-flex board-card-header" dir="auto">
       <h4 class="board-card-title gl-mb-0 gl-mt-0">
-        <icon
+        <gl-icon
           v-if="issue.blocked"
           v-gl-tooltip
           name="issue-block"
           :title="__('Blocked issue')"
-          class="issue-blocked-icon append-right-4"
+          class="issue-blocked-icon gl-mr-2"
           :aria-label="__('Blocked issue')"
         />
-        <icon
+        <gl-icon
           v-if="issue.confidential"
           v-gl-tooltip
           name="eye-slash"
           :title="__('Confidential')"
-          class="confidential-icon append-right-4"
+          class="confidential-icon gl-mr-2"
           :aria-label="__('Confidential')"
         />
         <a :href="issue.path" :title="issue.title" class="js-no-trigger" @mousemove.stop>{{
@@ -169,7 +156,7 @@ export default {
         }}</a>
       </h4>
     </div>
-    <div v-if="showLabelFooter" class="board-card-labels prepend-top-4 d-flex flex-wrap">
+    <div v-if="showLabelFooter" class="board-card-labels gl-mt-2 d-flex flex-wrap">
       <template v-for="label in orderedLabels">
         <gl-label
           :key="label.id"

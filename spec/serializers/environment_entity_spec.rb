@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EnvironmentEntity do
+RSpec.describe EnvironmentEntity do
   include Gitlab::Routing.url_helpers
 
   let(:request) { double('request') }
@@ -83,9 +83,9 @@ describe EnvironmentEntity do
   end
 
   context 'pod_logs' do
-    context 'with developer access' do
+    context 'with reporter access' do
       before do
-        project.add_developer(user)
+        project.add_reporter(user)
       end
 
       it 'does not expose logs keys' do
@@ -95,9 +95,9 @@ describe EnvironmentEntity do
       end
     end
 
-    context 'with maintainer access' do
+    context 'with developer access' do
       before do
-        project.add_maintainer(user)
+        project.add_developer(user)
       end
 
       it 'exposes logs keys' do

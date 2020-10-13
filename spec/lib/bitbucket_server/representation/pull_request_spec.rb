@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BitbucketServer::Representation::PullRequest do
+RSpec.describe BitbucketServer::Representation::PullRequest do
   let(:sample_data) { Gitlab::Json.parse(fixture_file('importers/bitbucket_server/pull_request.json')) }
 
   subject { described_class.new(sample_data) }
@@ -13,6 +13,33 @@ describe BitbucketServer::Representation::PullRequest do
 
   describe '#author_email' do
     it { expect(subject.author_email).to eq('joe.montana@49ers.com') }
+  end
+
+  describe '#author_username' do
+    it 'returns username' do
+      expect(subject.author_username).to eq('username')
+    end
+
+    context 'when username is absent' do
+      before do
+        sample_data['author']['user'].delete('username')
+      end
+
+      it 'returns slug' do
+        expect(subject.author_username).to eq('slug')
+      end
+    end
+
+    context 'when slug and username are absent' do
+      before do
+        sample_data['author']['user'].delete('username')
+        sample_data['author']['user'].delete('slug')
+      end
+
+      it 'returns displayName' do
+        expect(subject.author_username).to eq('displayName')
+      end
+    end
   end
 
   describe '#description' do

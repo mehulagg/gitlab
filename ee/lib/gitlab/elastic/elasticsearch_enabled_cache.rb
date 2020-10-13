@@ -55,7 +55,7 @@ module Gitlab
         #
         # @param type [Symbol] the type of resource, `:project` or `:namespace`
         def delete(type)
-          Gitlab::Redis::Cache.with { |redis| redis.del(redis_key(type)) }
+          Gitlab::Redis::Cache.with { |redis| redis.unlink(redis_key(type)) }
         end
 
         private

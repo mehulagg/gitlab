@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Auth::ContainerRegistryAuthenticationService do
+RSpec.describe Auth::ContainerRegistryAuthenticationService do
   let(:current_project) { nil }
   let(:current_user) { nil }
   let(:current_params) { {} }
@@ -644,6 +644,19 @@ describe Auth::ContainerRegistryAuthenticationService do
       before do
         project.update(container_registry_enabled: false)
       end
+
+      context 'disallow when pulling' do
+        let(:current_params) do
+          { scopes: ["repository:#{project.full_path}:pull"] }
+        end
+
+        it_behaves_like 'an inaccessible'
+        it_behaves_like 'not a container repository factory'
+      end
+    end
+
+    context 'for project that disables repository' do
+      let(:project) { create(:project, :public, :repository_disabled) }
 
       context 'disallow when pulling' do
         let(:current_params) do

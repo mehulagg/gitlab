@@ -38,7 +38,7 @@ RSpec.describe Gitlab::Geo::JwtRequestDecoder do
       data = request.headers['Authorization']
 
       primary_node.secret_access_key = ''
-      primary_node.save
+      primary_node.save!
       expect(described_class.new(data).decode).to be_nil
     end
 

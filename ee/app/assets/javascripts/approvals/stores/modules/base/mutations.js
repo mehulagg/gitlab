@@ -8,7 +8,7 @@ export default {
   [types.SET_APPROVAL_SETTINGS](state, settings) {
     state.hasLoaded = true;
     state.rules = settings.rules;
-    state.initialRules = settings.rules;
+    state.initialRules = [...settings.rules];
     state.fallbackApprovalsRequired = settings.fallbackApprovalsRequired;
     state.minFallbackApprovalsRequired = settings.minFallbackApprovalsRequired;
   },
@@ -25,5 +25,13 @@ export default {
       ruleType: RULE_TYPE_ANY_APPROVER,
       isNew: true,
     });
+  },
+  [types.SET_RESET_TO_DEFAULT](state, resetToDefault) {
+    state.resetToDefault = resetToDefault;
+    state.oldRules = [...state.rules];
+  },
+  [types.UNDO_RULES](state) {
+    state.resetToDefault = false;
+    state.rules = [...state.oldRules];
   },
 };

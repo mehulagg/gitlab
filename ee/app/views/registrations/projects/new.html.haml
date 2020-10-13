@@ -4,10 +4,10 @@
 .row.flex-grow-1.bg-gray-light
   .d-flex.flex-column.align-items-center.w-100.p-3
     .new-project.d-flex.flex-column.align-items-center.pt-5
-      #progress-bar{ data: { is_in_subscription_flow: in_subscription_flow?.to_s } }
+      #progress-bar
       %h2.center= _('Create/import your first project')
       %p
-        .center= _('This project will live in your group <strong>%{namespace}</strong>. A project is where you house your files (repository), plan your work (issues), publish your documentation (wiki), and so much more.').html_safe % { namespace: html_escape(@project.namespace.name) }
+        .center= html_escape(_('This project will live in your group %{strong_open}%{namespace}%{strong_close}. A project is where you house your files (repository), plan your work (issues), publish your documentation (wiki), and so much more.')) % { namespace: html_escape(@project.namespace.name), strong_open: '<strong>'.html_safe, strong_close: '</strong>'.html_safe }
 
       .js-toggle-container.w-100
         %ul.nav.nav-tabs.nav-links.gitlab-tabs{ role: 'tablist' }
@@ -40,7 +40,7 @@
 
               = f.label :visibility_level, class: 'label-bold' do
                 = s_('ProjectsNew|Visibility Level')
-                = link_to icon('question-circle'), help_page_path('public_access/public_access'), aria: { label: 'Documentation for Visibility Level' }, target: '_blank', rel: 'noopener noreferrer'
+                = link_to sprite_icon('question-o'), help_page_path('public_access/public_access'), aria: { label: 'Documentation for Visibility Level' }, target: '_blank', rel: 'noopener noreferrer'
               = render 'shared/visibility_level', f: f, visibility_level: visibility_level.to_i, can_change_visibility_level: true, form_model: @project, with_label: false
 
               = f.submit _('Create project'), class: 'btn btn-success project-submit w-100', data: { track_label: 'blank_project', track_event: 'click_button', track_property: 'create_project', track_value: '' }

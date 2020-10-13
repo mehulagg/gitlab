@@ -1,7 +1,7 @@
-import flash from '~/flash';
 import $ from 'jquery';
-import { __, sprintf } from '~/locale';
 import { once } from 'lodash';
+import { deprecatedCreateFlash as flash } from '~/flash';
+import { __, sprintf } from '~/locale';
 
 // Renders diagrams and flowcharts from text using Mermaid in any element with the
 // `js-render-mermaid` class.
@@ -174,7 +174,7 @@ export default function renderMermaid($els) {
   if (!$els.length) return;
 
   const visibleMermaids = $els.filter(function filter() {
-    return $(this).closest('details').length === 0;
+    return $(this).closest('details').length === 0 && $(this).is(':visible');
   });
 
   renderMermaids(visibleMermaids);

@@ -8,7 +8,7 @@
       = _('Productivity Analytics')
   .row-content-block.second-block.d-flex.flex-column.flex-lg-row.mt-3.py-2.px-3
     .js-group-project-select-container
-    .js-search-bar.filter-container.hide
+    .js-search-bar.filter-container.hide.gl-mr-0.mr-lg-3
       = render 'shared/issuable/search_bar', type: :productivity_analytics, placeholder: _('Filter results...')
     .js-timeframe-container{ data: { start_date: ProductivityAnalytics.start_date } }
   .js-productivity-analytics-app-container{ data: { endpoint: group_analytics_productivity_analytics_path(@group), empty_state_svg_path: image_path('illustrations/productivity-analytics-empty-state.svg'), no_access_svg_path: image_path('illustrations/analytics/no-access.svg') } }

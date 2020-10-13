@@ -3,13 +3,17 @@
 require 'base64'
 
 module API
-  class Geo < Grape::API
+  class Geo < Grape::API::Instance
     resource :geo do
       helpers do
         def sanitized_node_status_params
-          allowed_attributes = GeoNodeStatus.attribute_names - ['id']
-          valid_attributes = params.keys & allowed_attributes
-          params.slice(*valid_attributes)
+          valid_attributes = GeoNodeStatus.attribute_names - GeoNodeStatus::RESOURCE_STATUS_FIELDS - ['id']
+          sanitized_params = params.slice(*valid_attributes)
+
+          # sanitize status field
+          sanitized_params['status'] = sanitized_params['status'].slice(*GeoNodeStatus::RESOURCE_STATUS_FIELDS) if sanitized_params['status']
+
+          sanitized_params
         end
 
         # Check if a Geo request is legit or fail the flow
@@ -27,7 +31,7 @@ module API
       get 'retrieve/:replicable_name/:replicable_id' do
         check_gitlab_geo_request_ip!
         params_sym = params.symbolize_keys
-        authorize_geo_transfer!(params_sym)
+        authorize_geo_transfer!(**params_sym)
 
         decoded_params = geo_jwt_decoder.decode
         service = ::Geo::BlobUploadService.new(**params_sym, decoded_params: decoded_params)

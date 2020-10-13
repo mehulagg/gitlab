@@ -7,4 +7,4 @@
     = render 'namespaces/shared_runners_minutes_setting', form: namespace_form
     .form-group.gl-mb-0
       .offset-sm-2.col-sm-10
-        = render 'namespaces/shared_runners_minutes_setting_reset', link_reset_minutes: reset_runners_minutes_admin_user_path(@user), css_class: 'gl-mb-0'
+        #pipeline-minutes-vue{ data: { reset_minutes_path: reset_runners_minutes_admin_user_path(@user) } }

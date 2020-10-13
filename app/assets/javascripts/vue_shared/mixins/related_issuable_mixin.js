@@ -2,7 +2,6 @@ import { isEmpty } from 'lodash';
 import { sprintf, __ } from '~/locale';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import tooltip from '~/vue_shared/directives/tooltip';
-import icon from '~/vue_shared/components/icon.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 const mixins = {
@@ -100,9 +99,6 @@ const mixins = {
       default: () => ({}),
     },
   },
-  components: {
-    icon,
-  },
   directives: {
     tooltip,
   },
@@ -115,7 +111,7 @@ const mixins = {
       return this.isMergeRequest && this.pipelineStatus && Object.keys(this.pipelineStatus).length;
     },
     isOpen() {
-      return this.state === 'opened';
+      return this.state === 'opened' || this.state === 'reopened';
     },
     isClosed() {
       return this.state === 'closed';
@@ -144,7 +140,9 @@ const mixins = {
         return 'merge-request-status closed issue-token-state-icon-closed';
       }
 
-      return this.isOpen ? 'issue-token-state-icon-open' : 'issue-token-state-icon-closed';
+      return this.isOpen
+        ? 'issue-token-state-icon-open gl-text-green-500'
+        : 'issue-token-state-icon-closed gl-text-blue-500';
     },
     computedLinkElementType() {
       return this.path.length > 0 ? 'a' : 'span';

@@ -8,6 +8,8 @@ module EE
 
         override :filter
         def filter(issues)
+          return issues if params[:all_lists]
+
           unless list&.movable? || list&.closed?
             issues = without_assignees_from_lists(issues)
             issues = without_milestones_from_lists(issues)

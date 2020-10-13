@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, howto
+---
+
 # Partial Clone
 
 As Git repositories grow in size, they can become cumbersome to work with
@@ -84,7 +91,7 @@ Updating files: 100% (28/28), done.
 
 $ cd www-gitlab-com
 
-$ git sparse-checkout init --cone
+$ git sparse-checkout init --clone
 
 $ git sparse-checkout add data
 remote: Enumerating objects: 301, done.
@@ -112,9 +119,6 @@ file to specify which files should be included when cloning and fetching.
 
 For more details, see the Git documentation for
 [`rev-list-options`](https://gitlab.com/gitlab-org/git/-/blob/9fadedd637b312089337d73c3ed8447e9f0aa775/Documentation/rev-list-options.txt#L735-780).
-
-With the `uploadpack.allowFilter` and `uploadpack.allowAnySHA1InWant` options
-enabled on the Git server:
 
 1. **Create a filter spec.** For example, consider a monolithic repository with
    many applications, each in a different subdirectory in the root. Create a file
@@ -185,3 +189,47 @@ enabled on the Git server:
    # Checkout master
    git checkout master
    ```
+
+## Remove partial clone filtering
+
+Git repositories with partial clone filtering can have the filtering removed. To
+remove filtering:
+
+1. Fetch everything that has been excluded by the filters, to make sure that the
+   repository is complete. If `git sparse-checkout` was used, use
+   `git sparse-checkout disable` to disable it. See the
+   [`disable` documentation](https://git-scm.com/docs/git-sparse-checkout#Documentation/git-sparse-checkout.txt-emdisableem)
+   for more information.
+
+   Then do a regular `fetch` to ensure that the repository is complete. To check if
+   there are missing objects to fetch, and then fetch them, especially when not using
+   `git sparse-checkout`, the following commands can be used:
+
+   ```shell
+   # Show missing objects
+   git rev-list --objects --all --missing=print | grep -e '^\?'
+
+   # Show missing objects without a '?' character before them (needs GNU grep)
+   git rev-list --objects --all --missing=print | grep -oP '^\?\K\w+'
+
+   # Fetch missing objects
+   git fetch origin $(git rev-list --objects --all --missing=print | grep -oP '^\?\K\w+')
+
+   # Show number of missing objects
+   git rev-list --objects --all --missing=print | grep -e '^\?' | wc -l
+   ```
+
+1. Repack everything. This can be done using `git repack -a -d`, for example. This
+   should leave only three files in `.git/objects/pack/`:
+   - A `pack-<SHA1>.pack` file.
+   - Its corresponding `pack-<SHA1>.idx` file.
+   - A `pack-<SHA1>.promisor` file.
+
+1. Delete the `.promisor` file. The above step should have left only one
+   `pack-<SHA1>.promisor` file, which should be empty and should be deleted.
+
+1. Remove partial clone configuration. The partial clone-related configuration
+   variables should be removed from Git config files. Usually only the following
+   configuration must be removed:
+   - `remote.origin.promisor`.
+   - `remote.origin.partialclonefilter`.

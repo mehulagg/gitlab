@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Project members list' do
+RSpec.describe 'Project members list' do
   include Select2Helper
   include Spec::Support::Helpers::Features::ListRowsHelpers
 
@@ -64,9 +64,12 @@ describe 'Project members list' do
 
     visit_members_page
 
-    accept_confirm do
-      find(:css, 'li.project_member', text: other_user.name).find(:css, 'a.btn-remove').click
-    end
+    # Open modal
+    find(:css, 'li.project_member', text: other_user.name).find(:css, 'button.btn-danger').click
+
+    expect(page).to have_unchecked_field 'Also unassign this user from related issues and merge requests'
+
+    click_on('Remove member')
 
     wait_for_requests
 
@@ -99,7 +102,7 @@ describe 'Project members list' do
       visit_members_page
 
       expect(page).not_to have_selector("#edit_project_member_#{project_member.id}")
-      expect(page).not_to have_selector("#project_member_#{project_member.id} .btn-remove")
+      expect(page).to have_no_selector("#project_member_#{project_member.id} .btn-danger")
     end
   end
 

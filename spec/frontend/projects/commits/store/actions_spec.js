@@ -1,10 +1,10 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import * as types from '~/projects/commits/store/mutation_types';
 import testAction from 'helpers/vuex_action_helper';
+import * as types from '~/projects/commits/store/mutation_types';
 import actions from '~/projects/commits/store/actions';
 import createState from '~/projects/commits/store/state';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -45,7 +45,7 @@ describe('Project commits actions', () => {
 
   describe('fetchAuthors', () => {
     it('dispatches request/receive', () => {
-      const path = '/autocomplete/users.json';
+      const path = '/-/autocomplete/users.json';
       state.projectId = '8';
       const data = [{ id: 1 }];
 
@@ -60,7 +60,7 @@ describe('Project commits actions', () => {
     });
 
     it('dispatches request/receive on error', () => {
-      const path = '/autocomplete/users.json';
+      const path = '/-/autocomplete/users.json';
       mock.onGet(path).replyOnce(500);
 
       testAction(actions.fetchAuthors, null, state, [], [{ type: 'receiveAuthorsError' }]);

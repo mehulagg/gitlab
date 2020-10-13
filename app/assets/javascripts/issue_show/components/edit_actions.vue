@@ -1,5 +1,5 @@
 <script>
-/* eslint-disable @gitlab/vue-require-i18n-strings */
+import { GlButton } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import updateMixin from '../mixins/update';
 import eventHub from '../event_hub';
@@ -10,6 +10,9 @@ const issuableTypes = {
 };
 
 export default {
+  components: {
+    GlButton,
+  },
   mixins: [updateMixin],
   props: {
     canDestroy: {
@@ -63,29 +66,31 @@ export default {
 </script>
 
 <template>
-  <div class="prepend-top-default append-bottom-default clearfix">
-    <button
-      :class="{ disabled: formState.updateLoading || !isSubmitEnabled }"
+  <div class="gl-mt-3 gl-mb-3 clearfix">
+    <gl-button
+      :loading="formState.updateLoading"
       :disabled="formState.updateLoading || !isSubmitEnabled"
-      class="btn btn-success float-left qa-save-button"
+      category="primary"
+      variant="success"
+      class="float-left qa-save-button"
       type="submit"
       @click.prevent="updateIssuable"
     >
-      Save changes
-      <i v-if="formState.updateLoading" class="fa fa-spinner fa-spin" aria-hidden="true"> </i>
-    </button>
-    <button class="btn btn-default float-right" type="button" @click="closeForm">
+      {{ __('Save changes') }}
+    </gl-button>
+    <gl-button class="float-right" @click="closeForm">
       {{ __('Cancel') }}
-    </button>
-    <button
+    </gl-button>
+    <gl-button
       v-if="shouldShowDeleteButton"
-      :class="{ disabled: deleteLoading }"
+      :loading="deleteLoading"
       :disabled="deleteLoading"
-      class="btn btn-danger float-right append-right-default qa-delete-button"
-      type="button"
+      category="primary"
+      variant="danger"
+      class="float-right gl-mr-3 qa-delete-button"
       @click="deleteIssuable"
     >
-      Delete <i v-if="deleteLoading" class="fa fa-spinner fa-spin" aria-hidden="true"> </i>
-    </button>
+      {{ __('Delete') }}
+    </gl-button>
   </div>
 </template>

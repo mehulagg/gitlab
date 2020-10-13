@@ -8,10 +8,6 @@ class Admin::Geo::NodesController < Admin::Geo::ApplicationController
   def index
     @nodes = GeoNode.all.order(:id)
     @node = GeoNode.new
-
-    unless Gitlab::Database.postgresql_minimum_supported_version?
-      flash.now[:warning] = _('Please upgrade PostgreSQL to version 9.6 or greater. The status of the replication cannot be determined reliably with the current version.')
-    end
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
@@ -29,7 +25,7 @@ class Admin::Geo::NodesController < Admin::Geo::ApplicationController
   end
 
   def new
-    @form_title = _('New Geo Node')
+    @form_title = _('Add New Node')
     render :form
   end
 

@@ -1,12 +1,11 @@
 <script>
-import { GlLink } from '@gitlab/ui';
-import Icon from '../../icon.vue';
+import { GlLink, GlIcon } from '@gitlab/ui';
 import { numberToHumanSize } from '../../../../lib/utils/number_utils';
 
 export default {
   components: {
     GlLink,
-    Icon,
+    GlIcon,
   },
   props: {
     path: {
@@ -39,7 +38,7 @@ export default {
 <template>
   <div class="file-container">
     <div class="file-content">
-      <p class="prepend-top-10 file-info">
+      <p class="gl-mt-3 file-info">
         {{ fileName }}
         <template v-if="fileSize > 0">
           ({{ fileSizeReadable }})
@@ -52,7 +51,7 @@ export default {
         :download="fileName"
         target="_blank"
       >
-        <icon :size="16" name="download" class="float-left gl-mr-3" />
+        <gl-icon :size="16" name="download" class="float-left gl-mr-3" />
         {{ __('Download') }}
       </gl-link>
     </div>

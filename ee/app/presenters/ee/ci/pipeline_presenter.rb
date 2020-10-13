@@ -21,26 +21,11 @@ module EE
       def expose_security_dashboard?
         return false unless can?(current_user, :read_vulnerability, pipeline.project)
 
-        batch_lookup_report_artifact_for_file_type(:sast) ||
-        batch_lookup_report_artifact_for_file_type(:secret_detection) ||
-        batch_lookup_report_artifact_for_file_type(:dependency_scanning) ||
-        batch_lookup_report_artifact_for_file_type(:dast) ||
-        batch_lookup_report_artifact_for_file_type(:container_scanning)
+        Ci::JobArtifact::SECURITY_REPORT_FILE_TYPES.any? { |file_type| batch_lookup_report_artifact_for_file_type(file_type.to_sym) }
       end
 
-      def downloadable_path_for_report_type(file_type)
+      def degradation_threshold(file_type)
         if (job_artifact = batch_lookup_report_artifact_for_file_type(file_type)) &&
-            can?(current_user, :read_build, job_artifact.job)
-          download_project_job_artifacts_path(
-            job_artifact.project,
-            job_artifact.job,
-            file_type: file_type,
-            proxy: true)
-        end
-      end
-
-      def degradation_threshold
-        if (job_artifact = batch_lookup_report_artifact_for_file_type(:performance)) &&
             can?(current_user, :read_build, job_artifact.job)
           job_artifact.job.degradation_threshold
         end

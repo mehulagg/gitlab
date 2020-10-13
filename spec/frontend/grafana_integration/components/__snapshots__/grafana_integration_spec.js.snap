@@ -12,17 +12,20 @@ exports[`grafana integration component default state to match the default snapsh
       class="js-section-header h4"
     >
       
-      Grafana Authentication
+      Grafana authentication
     
     </h3>
      
-    <gl-deprecated-button-stub
+    <gl-button-stub
+      buttontextclasses=""
+      category="primary"
       class="js-settings-toggle"
-      size="md"
-      variant="secondary"
+      icon=""
+      size="medium"
+      variant="default"
     >
       Expand
-    </gl-deprecated-button-stub>
+    </gl-button-stub>
      
     <p
       class="js-section-sub-header"
@@ -81,7 +84,7 @@ exports[`grafana integration component default state to match the default snapsh
             
             More information
             
-            <icon-stub
+            <gl-icon-stub
               class="vertical-align-middle"
               name="external-link"
               size="16"
@@ -90,14 +93,17 @@ exports[`grafana integration component default state to match the default snapsh
         </p>
       </gl-form-group-stub>
        
-      <gl-deprecated-button-stub
-        size="md"
+      <gl-button-stub
+        buttontextclasses=""
+        category="primary"
+        icon=""
+        size="medium"
         variant="success"
       >
         
         Save Changes
       
-      </gl-deprecated-button-stub>
+      </gl-button-stub>
     </form>
   </div>
 </section>

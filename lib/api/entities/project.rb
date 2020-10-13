@@ -35,6 +35,7 @@ module API
         end
       end
 
+      expose :packages_enabled
       expose :empty_repo?, as: :empty_repo
       expose :archived?, as: :archived
       expose :visibility
@@ -51,6 +52,8 @@ module API
       expose(:wiki_enabled) { |project, options| project.feature_available?(:wiki, options[:current_user]) }
       expose(:jobs_enabled) { |project, options| project.feature_available?(:builds, options[:current_user]) }
       expose(:snippets_enabled) { |project, options| project.feature_available?(:snippets, options[:current_user]) }
+      expose :service_desk_enabled
+      expose :service_desk_address
 
       expose(:can_create_merge_request_in) do |project, options|
         Ability.allowed?(options[:current_user], :create_merge_request_in, project)
@@ -90,9 +93,10 @@ module API
       expose :build_coverage_regex
       expose :ci_config_path, if: -> (project, options) { Ability.allowed?(options[:current_user], :download_code, project) }
       expose :shared_with_groups do |project, options|
-        SharedGroup.represent(project.project_group_links, options)
+        SharedGroupWithProject.represent(project.project_group_links, options)
       end
       expose :only_allow_merge_if_pipeline_succeeds
+      expose :allow_merge_on_skipped_pipeline
       expose :request_access_enabled
       expose :only_allow_merge_if_all_discussions_are_resolved
       expose :remove_source_branch_after_merge
@@ -119,6 +123,7 @@ module API
         # MR describing the solution: https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/20555
         super(projects_relation).preload(:group)
                                 .preload(:ci_cd_settings)
+                                .preload(:project_setting)
                                 .preload(:container_expiration_policy)
                                 .preload(:auto_devops)
                                 .preload(project_group_links: { group: :route },

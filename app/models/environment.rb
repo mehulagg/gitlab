@@ -4,6 +4,7 @@ class Environment < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
   include ReactiveCaching
   include FastDestroyAll::Helpers
+  include Presentable
 
   self.reactive_cache_refresh_interval = 1.minute
   self.reactive_cache_lifetime = 55.seconds
@@ -21,6 +22,7 @@ class Environment < ApplicationRecord
   has_many :prometheus_alerts, inverse_of: :environment
   has_many :metrics_dashboard_annotations, class_name: 'Metrics::Dashboard::Annotation', inverse_of: :environment
   has_many :self_managed_prometheus_alert_events, inverse_of: :environment
+  has_many :alert_management_alerts, class_name: 'AlertManagement::Alert', inverse_of: :environment
 
   has_one :last_deployment, -> { success.order('deployments.id DESC') }, class_name: 'Deployment'
   has_one :last_deployable, through: :last_deployment, source: 'deployable', source_type: 'CommitStatus'
@@ -28,6 +30,7 @@ class Environment < ApplicationRecord
   has_one :last_visible_deployment, -> { visible.distinct_on_environment }, inverse_of: :environment, class_name: 'Deployment'
   has_one :last_visible_deployable, through: :last_visible_deployment, source: 'deployable', source_type: 'CommitStatus'
   has_one :last_visible_pipeline, through: :last_visible_deployable, source: 'pipeline'
+  has_one :latest_opened_most_severe_alert, -> { order_severity_with_open_prometheus_alert }, class_name: 'AlertManagement::Alert', inverse_of: :environment
 
   before_validation :nullify_external_url
   before_validation :generate_slug, if: ->(env) { env.slug.blank? }
@@ -84,6 +87,7 @@ class Environment < ApplicationRecord
   scope :with_rank, -> do
     select('environments.*, rank() OVER (PARTITION BY project_id ORDER BY id DESC)')
   end
+  scope :for_id, -> (id) { where(id: id) }
 
   state_machine :state, initial: :available do
     event :start do
@@ -147,7 +151,7 @@ class Environment < ApplicationRecord
       Ci::Build.joins(inner_join_stop_actions)
                .with(cte.to_arel)
                .where(ci_builds[:commit_id].in(pipeline_ids))
-               .where(status: HasStatus::BLOCKED_STATUS)
+               .where(status: Ci::HasStatus::BLOCKED_STATUS)
                .preload_project_and_pipeline_project
                .preload(:user, :metadata, :deployment)
     end
@@ -226,6 +230,21 @@ class Environment < ApplicationRecord
     available? && stop_action.present?
   end
 
+  def cancel_deployment_jobs!
+    jobs = active_deployments.with_deployable
+    jobs.each do |deployment|
+      # guard against data integrity issues,
+      # for example https://gitlab.com/gitlab-org/gitlab/-/issues/218659#note_348823660
+      next unless deployment.deployable
+
+      Gitlab::OptimisticLocking.retry_lock(deployment.deployable) do |deployable|
+        deployable.cancel! if deployable&.cancelable?
+      end
+    rescue => e
+      Gitlab::ErrorTracking.track_exception(e, environment_id: id, deployment_id: deployment.id)
+    end
+  end
+
   def stop_with_action!(current_user)
     return unless available?
 
@@ -273,6 +292,10 @@ class Environment < ApplicationRecord
 
   def has_sample_metrics?
     !!ENV['USE_SAMPLE_METRICS']
+  end
+
+  def has_opened_alert?
+    latest_opened_most_severe_alert.present?
   end
 
   def metrics
@@ -350,7 +373,7 @@ class Environment < ApplicationRecord
   end
 
   def elastic_stack_available?
-    !!deployment_platform&.cluster&.application_elastic_stack&.available?
+    !!deployment_platform&.cluster&.application_elastic_stack_available?
   end
 
   private
@@ -361,6 +384,11 @@ class Environment < ApplicationRecord
 
   def generate_slug
     self.slug = Gitlab::Slug::Environment.new(name).generate
+  end
+
+  # Overrides ReactiveCaching default to activate limit checking behind a FF
+  def reactive_cache_limit_enabled?
+    Feature.enabled?(:reactive_caching_limit_environment, project)
   end
 end
 

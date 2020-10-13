@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Project > Members > Invite group', :js do
+RSpec.describe 'Project > Members > Invite group', :js do
   include Select2Helper
   include ActionView::Helpers::DateHelper
 
@@ -112,7 +112,7 @@ describe 'Project > Members > Invite group', :js do
     let!(:group) { create(:group) }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     before do

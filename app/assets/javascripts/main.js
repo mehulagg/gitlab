@@ -9,6 +9,9 @@ import './commons';
 import './behaviors';
 
 // lib/utils
+import applyGitLabUIConfig from '@gitlab/ui/dist/config';
+import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
+import { initRails } from '~/lib/utils/rails_ujs';
 import {
   handleLocationHash,
   addSelectOnFocusBehaviour,
@@ -18,29 +21,29 @@ import { localTimeAgo } from './lib/utils/datetime_utility';
 import { getLocationHash, visitUrl } from './lib/utils/url_utility';
 
 // everything else
-import loadAwardsHandler from './awards_handler';
-import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
-import Flash, { removeFlashClickListener } from './flash';
-import './gl_dropdown';
+import { deprecatedCreateFlash as Flash, removeFlashClickListener } from './flash';
 import initTodoToggle from './header';
 import initImporterStatus from './importer_status';
 import initLayoutNav from './layout_nav';
+import initAlertHandler from './alert_handler';
 import './feature_highlight/feature_highlight_options';
 import LazyLoader from './lazy_loader';
 import initLogoAnimation from './logo';
 import initFrequentItemDropdowns from './frequent_items';
 import initBreadcrumbs from './breadcrumb';
 import initUsagePingConsent from './usage_ping_consent';
-import initPerformanceBar from './performance_bar';
-import initGlobalSearchInput from './global_search_input';
 import GlFieldErrors from './gl_field_errors';
 import initUserPopovers from './user_popovers';
 import initBroadcastNotifications from './broadcast_notification';
 import initPersistentUserCallouts from './persistent_user_callouts';
-import { initUserTracking } from './tracking';
+import { initUserTracking, initDefaultTrackers } from './tracking';
 import { __ } from './locale';
 
+import * as tooltips from '~/tooltips';
+
 import 'ee_else_ce/main_ee';
+
+applyGitLabUIConfig();
 
 // expose jQuery as global (TODO: remove these)
 window.jQuery = jQuery;
@@ -62,12 +65,12 @@ function disableJQueryAnimations() {
 }
 
 // Disable jQuery animations
-if (gon && gon.disable_animations) {
+if (gon?.disable_animations) {
   disableJQueryAnimations();
 }
 
 // inject test utilities if necessary
-if (process.env.NODE_ENV !== 'production' && gon && gon.test_env) {
+if (process.env.NODE_ENV !== 'production' && gon?.test_env) {
   disableJQueryAnimations();
   import(/* webpackMode: "eager" */ './test_utils/'); // eslint-disable-line no-unused-expressions
 }
@@ -76,7 +79,7 @@ document.addEventListener('beforeunload', () => {
   // Unbind scroll events
   $(document).off('scroll');
   // Close any open tooltips
-  $('.has-tooltip, [data-toggle="tooltip"]').tooltip('dispose');
+  tooltips.dispose(document.querySelectorAll('.has-tooltip, [data-toggle="tooltip"]'));
   // Close any open popover
   $('[data-toggle="popover"]').popover('dispose');
 });
@@ -96,6 +99,8 @@ gl.lazyLoader = new LazyLoader({
   observerNode: '#content-body',
 });
 
+initRails();
+
 // Put all initialisations here that can also wait after everything is rendered and ready
 function deferredInitialisation() {
   const $body = $('body');
@@ -109,14 +114,31 @@ function deferredInitialisation() {
   initBroadcastNotifications();
   initFrequentItemDropdowns();
   initPersistentUserCallouts();
+  initDefaultTrackers();
 
-  if (document.querySelector('.search')) initGlobalSearchInput();
+  const search = document.querySelector('#search');
+  if (search) {
+    search.addEventListener(
+      'focus',
+      () => {
+        import(/* webpackChunkName: 'globalSearch' */ './search_autocomplete')
+          .then(({ default: initSearchAutocomplete }) => {
+            const searchDropdown = initSearchAutocomplete();
+            searchDropdown.onSearchInputFocus();
+          })
+          .catch(() => {});
+      },
+      { once: true },
+    );
+  }
 
   addSelectOnFocusBehaviour('.js-select-on-focus');
 
   $('.remove-row').on('ajax:success', function removeRowAjaxSuccessCallback() {
+    tooltips.dispose(this);
+
+    // eslint-disable-next-line no-jquery/no-fade
     $(this)
-      .tooltip('dispose')
       .closest('li')
       .fadeOut();
   });
@@ -132,32 +154,11 @@ function deferredInitialisation() {
       .fadeOut();
   });
 
-  // Initialize select2 selects
-  if ($('select.select2').length) {
-    import(/* webpackChunkName: 'select2' */ 'select2/select2')
-      .then(() => {
-        $('select.select2').select2({
-          width: 'resolve',
-          minimumResultsForSearch: 10,
-          dropdownAutoWidth: true,
-        });
-
-        // Close select2 on escape
-        $('.js-select2').on('select2-close', () => {
-          setTimeout(() => {
-            $('.select2-container-active').removeClass('select2-container-active');
-            $(':focus').blur();
-          }, 1);
-        });
-      })
-      .catch(() => {});
-  }
-
   const glTooltipDelay = localStorage.getItem('gl-tooltip-delay');
   const delay = glTooltipDelay ? JSON.parse(glTooltipDelay) : 0;
 
   // Initialize tooltips
-  $body.tooltip({
+  tooltips.initTooltips({
     selector: '.has-tooltip, [data-toggle="tooltip"]',
     trigger: 'hover',
     boundary: 'viewport',
@@ -173,20 +174,18 @@ function deferredInitialisation() {
     viewport: '.layout-page',
   });
 
-  loadAwardsHandler();
+  // Adding a helper class to activate animations only after all is rendered
+  setTimeout(() => $body.addClass('page-initialised'), 1000);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   const $body = $('body');
   const $document = $(document);
-  const $window = $(window);
-  const $sidebarGutterToggle = $('.js-sidebar-toggle');
-  let bootstrapBreakpoint = bp.getBreakpointSize();
-
-  if (document.querySelector('#js-peek')) initPerformanceBar({ container: '#js-peek' });
+  const bootstrapBreakpoint = bp.getBreakpointSize();
 
   initUserTracking();
   initLayoutNav();
+  initAlertHandler();
 
   // Set the default path for all cookies to GitLab's root directory
   Cookies.defaults.path = gon.relative_url_root || '/';
@@ -199,6 +198,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  /**
+   * TODO: Apparently we are collapsing the right sidebar on certain screensizes per default
+   * except on issue board pages. Why can't we do it with CSS?
+   *
+   * Proposal: Expose a global sidebar API, which we could import wherever we are manipulating
+   * the visibility of the sidebar.
+   *
+   * Quick fix: Get rid of jQuery for this implementation
+   */
   const isBoardsPage = /(projects|groups):boards:show/.test(document.body.dataset.page);
   if (!isBoardsPage && (bootstrapBreakpoint === 'sm' || bootstrapBreakpoint === 'xs')) {
     const $rightSidebar = $('aside.right-sidebar');
@@ -225,14 +233,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   localTimeAgo($('abbr.timeago, .js-timeago'), true);
 
-  // Form submitter
-  $('.trigger-submit').on('change', function triggerSubmitCallback() {
-    $(this)
-      .parents('form')
-      .submit();
-  });
-
-  // Disable form buttons while a form is submitting
+  /**
+   * This disables form buttons while a form is submitting
+   * We do not difinitively know all of the places where this is used
+   *
+   * TODO: Defer execution, migrate to behaviors, and add sentry logging
+   */
   $body.on('ajax:complete, ajax:beforeSend, submit', 'form', function ajaxCompleteCallback(e) {
     const $buttons = $('[type="submit"], .js-disable-on-submit', this).not('.js-no-auto-disable');
     switch (e.type) {
@@ -259,7 +265,11 @@ document.addEventListener('DOMContentLoaded', () => {
     $('.header-content').toggleClass('menu-expanded');
   });
 
-  // Commit show suppressed diff
+  /**
+   * Show suppressed commit diff
+   *
+   * TODO: Move to commit diff pages
+   */
   $document.on('click', '.diff-content .js-show-suppressed-diff', function showDiffCallback() {
     const $container = $(this).parent();
     $container.next('table').show();
@@ -289,39 +299,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     $(document).trigger('toggle.comments');
   });
-
-  $document.on('breakpoint:change', (e, breakpoint) => {
-    const breakpointSizes = ['md', 'sm', 'xs'];
-    if (breakpointSizes.includes(breakpoint)) {
-      const $gutterIcon = $sidebarGutterToggle.find('i');
-      if ($gutterIcon.hasClass('fa-angle-double-right')) {
-        $sidebarGutterToggle.trigger('click');
-      }
-
-      const sidebarGutterVueToggleEl = document.querySelector('.js-sidebar-vue-toggle');
-
-      // Sidebar has an icon which corresponds to collapsing the sidebar
-      // only then trigger the click.
-      if (sidebarGutterVueToggleEl) {
-        const collapseIcon = sidebarGutterVueToggleEl.querySelector('i.fa-angle-double-right');
-
-        if (collapseIcon) {
-          collapseIcon.click();
-        }
-      }
-    }
-  });
-
-  function fitSidebarForSize() {
-    const oldBootstrapBreakpoint = bootstrapBreakpoint;
-    bootstrapBreakpoint = bp.getBreakpointSize();
-
-    if (bootstrapBreakpoint !== oldBootstrapBreakpoint) {
-      $document.trigger('breakpoint:change', [bootstrapBreakpoint]);
-    }
-  }
-
-  $window.on('resize.app', fitSidebarForSize);
 
   $('form.filter-form').on('submit', function filterFormSubmitCallback(event) {
     const link = document.createElement('a');

@@ -1,5 +1,0 @@
----
-title: Fix Elasticsearch illegal_argument_exception when searching for large files
-merge_request: 33176
-author:
-type: fixed

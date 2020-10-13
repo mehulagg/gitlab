@@ -1,7 +1,7 @@
 ---
-stage: Release
-group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
 type: reference
 description: "GitLab administrator: enable and disable GitLab features deployed behind feature flags"
 ---
@@ -79,10 +79,10 @@ To enable a feature, run:
 Feature.enable(:<feature flag>)
 ```
 
-Example, to enable Evidence Collection:
+Example, to enable a fictional feature flag named `my_awesome_feature`:
 
 ```ruby
-Feature.enable(:release_evidence_collection)
+Feature.enable(:my_awesome_feature)
 ```
 
 To disable a feature, run:
@@ -91,10 +91,10 @@ To disable a feature, run:
 Feature.disable(:<feature flag>)
 ```
 
-Example, to disable Evidence Collection:
+Example, to disable a fictional feature flag named `my_awesome_feature`:
 
 ```ruby
-Feature.disable(:release_evidence_collection)
+Feature.disable(:my_awesome_feature)
 ```
 
 Some feature flags can be enabled or disabled on a per project basis:
@@ -103,10 +103,28 @@ Some feature flags can be enabled or disabled on a per project basis:
 Feature.enable(:<feature flag>, Project.find(<project id>))
 ```
 
-For example, to enable the [`:release_evidence_collection`](../ci/junit_test_reports.md#enabling-the-feature) feature flag for project `1234`:
+For example, to enable the [`:product_analytics`](../operations/product_analytics.md#enable-or-disable-product-analytics) feature flag for project `1234`:
 
 ```ruby
-Feature.enable(:release_evidence_collection, Project.find(1234))
+Feature.enable(:product_analytics, Project.find(1234))
+```
+
+`Feature.enable` and `Feature.disable` always return `nil`, this is not an indication that the command failed:
+
+```ruby
+irb(main):001:0> Feature.enable(:my_awesome_feature)
+=> nil
+```
+
+To check if a flag is enabled or disabled you can use `Feature.enabled?` or `Feature.disabled?`. For example, for a fictional feature flag named `my_awesome_feature`:
+
+```ruby
+Feature.enable(:my_awesome_feature)
+=> nil
+Feature.enabled?(:my_awesome_feature)
+=> true
+Feature.disabled?(:my_awesome_feature)
+=> false
 ```
 
 When the feature is ready, GitLab will remove the feature flag, the option for

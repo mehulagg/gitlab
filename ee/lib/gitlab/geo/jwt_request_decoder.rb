@@ -84,7 +84,7 @@ module Gitlab
           raise InvalidSignatureTimeError.new(message)
         rescue JWT::DecodeError => e
           log_error("Error decoding Geo request: #{e}")
-          return
+          nil
         end
       end
 

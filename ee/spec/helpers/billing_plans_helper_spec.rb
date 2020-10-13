@@ -3,22 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe BillingPlansHelper do
-  describe '#current_plan?' do
-    it 'returns true when current_plan' do
-      plan = Hashie::Mash.new(purchase_link: { action: 'current_plan' })
-
-      expect(helper.current_plan?(plan)).to be_truthy
-    end
-
-    it 'return false when not current_plan' do
-      plan = Hashie::Mash.new(purchase_link: { action: 'upgrade' })
-
-      expect(helper.current_plan?(plan)).to be_falsy
-    end
-  end
-
   describe '#subscription_plan_data_attributes' do
-    let(:customer_portal_url) { "https://customers.gitlab.com/subscriptions" }
+    let(:customer_portal_url) { "#{EE::SUBSCRIPTIONS_URL}/subscriptions" }
 
     let(:group) { build(:group) }
     let(:plan) do
@@ -60,10 +46,7 @@ RSpec.describe BillingPlansHelper do
   end
 
   describe '#use_new_purchase_flow?' do
-    using RSpec::Parameterized::TableSyntax
-
-    where free_group_new_purchase: [true, false],
-          type: ['Group', nil],
+    where type: ['Group', nil],
           plan: Plan.all_plans
 
     with_them do
@@ -75,15 +58,92 @@ RSpec.describe BillingPlansHelper do
 
       before do
         allow(helper).to receive(:current_user).and_return(user)
-        stub_feature_flags free_group_new_purchase_flow: free_group_new_purchase
       end
 
       subject { helper.use_new_purchase_flow?(namespace) }
 
       it do
-        result = free_group_new_purchase && type == 'Group' && plan == Plan::FREE
+        result = type == 'Group' && plan == Plan::FREE
 
         is_expected.to be(result)
+      end
+    end
+  end
+
+  describe '#show_contact_sales_button?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:experiment_enabled, :link_action, :result) do
+      true | 'downgrade' | false
+      true | 'current' | false
+      true | 'upgrade' | true
+      false | 'downgrade' | false
+      false | 'current' | false
+      false | 'upgrade' | false
+    end
+
+    with_them do
+      before do
+        allow(helper).to receive(:experiment_enabled?).with(:contact_sales_btn_in_app).and_return(experiment_enabled)
+      end
+
+      subject { helper.show_contact_sales_button?(link_action) }
+
+      it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '#experiment_tracking_data_for_button_click' do
+    let(:button_label) { 'some_label' }
+    let(:experiment_enabled) { false }
+
+    subject { helper.experiment_tracking_data_for_button_click(button_label) }
+
+    before do
+      stub_experiment(contact_sales_btn_in_app: experiment_enabled)
+    end
+
+    context 'when the experiment is not enabled' do
+      it { is_expected.to eq({}) }
+    end
+
+    context 'when the experiment is enabled' do
+      let(:experiment_enabled) { true }
+
+      before do
+        allow(helper).to receive(:experiment_tracking_category_and_group).with(:contact_sales_btn_in_app).and_return("Category:control_group")
+      end
+
+      it 'returns a hash to be used as data-attributes in a view' do
+        is_expected.to eq({
+          track: {
+            event: 'click_button',
+            label: button_label,
+            property: 'Category:control_group'
+          }
+        })
+      end
+    end
+  end
+
+  describe '#seats_data_last_update_info' do
+    before do
+      allow(UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker).to receive(:last_enqueue_time).and_return(enqueue_time)
+    end
+
+    context 'when last_enqueue_time from the worker is known' do
+      let(:enqueue_time) { Time.current }
+
+      it 'shows the last enqueue time' do
+        expect(helper.seats_data_last_update_info).to match("as of #{enqueue_time}")
+      end
+    end
+
+    context 'when last_enqueue_time from the worker is unknown' do
+      let(:enqueue_time) { nil }
+
+      it 'shows default message' do
+        expect(helper.seats_data_last_update_info).to match('is updated every day at 12:00pm UTC')
       end
     end
   end

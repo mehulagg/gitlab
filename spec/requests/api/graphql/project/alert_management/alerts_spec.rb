@@ -1,21 +1,22 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'getting Alert Management Alerts' do
+RSpec.describe 'getting Alert Management Alerts' do
   include GraphqlHelpers
 
-  let_it_be(:payload) { { 'custom' => { 'alert' => 'payload' } } }
+  let_it_be(:payload) { { 'custom' => { 'alert' => 'payload' }, 'runbook' => 'runbook' } }
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:current_user) { create(:user) }
-  let_it_be(:resolved_alert) { create(:alert_management_alert, :all_fields, :resolved, project: project, issue: nil, severity: :low) }
-  let_it_be(:triggered_alert) { create(:alert_management_alert, :all_fields, project: project, severity: :critical, payload: payload) }
-  let_it_be(:other_project_alert) { create(:alert_management_alert, :all_fields) }
+  let_it_be(:resolved_alert) { create(:alert_management_alert, :all_fields, :resolved, project: project, issue: nil, severity: :low).present }
+  let_it_be(:triggered_alert) { create(:alert_management_alert, :all_fields, project: project, severity: :critical, payload: payload).present }
+  let_it_be(:other_project_alert) { create(:alert_management_alert, :all_fields).present }
+
   let(:params) { {} }
 
   let(:fields) do
     <<~QUERY
       nodes {
-        #{all_graphql_fields_for('AlertManagementAlert'.classify)}
+        #{all_graphql_fields_for('AlertManagementAlert', excluded: ['assignees'])}
       }
     QUERY
   end
@@ -70,16 +71,18 @@ describe 'getting Alert Management Alerts' do
           'eventCount' => triggered_alert.events,
           'startedAt' => triggered_alert.started_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
           'endedAt' => nil,
-          'details' => { 'custom.alert' => 'payload' },
+          'details' => { 'custom.alert' => 'payload', 'runbook' => 'runbook' },
           'createdAt' => triggered_alert.created_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
-          'updatedAt' => triggered_alert.updated_at.strftime('%Y-%m-%dT%H:%M:%SZ')
+          'updatedAt' => triggered_alert.updated_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+          'metricsDashboardUrl' => nil,
+          'detailsUrl' => triggered_alert.details_url,
+          'prometheusAlert' => nil,
+          'runbook' => 'runbook'
         )
-
-        expect(first_alert['assignees'].first).to include('username' => triggered_alert.assignees.first.username)
 
         expect(second_alert).to include(
           'iid' => resolved_alert.iid.to_s,
-          'issueIid' => nil,
+          'issueIid' => resolved_alert.issue_iid.to_s,
           'status' => 'RESOLVED',
           'endedAt' => resolved_alert.ended_at.strftime('%Y-%m-%dT%H:%M:%SZ')
         )
@@ -110,14 +113,14 @@ describe 'getting Alert Management Alerts' do
         it_behaves_like 'a working graphql query'
 
         it 'sorts in the correct order' do
-          expect(iids).to eq [resolved_alert.iid.to_s, triggered_alert.iid.to_s]
+          expect(iids).to eq [triggered_alert.iid.to_s, resolved_alert.iid.to_s]
         end
 
         context 'ascending order' do
           let(:params) { 'sort: SEVERITY_ASC' }
 
           it 'sorts in the correct order' do
-            expect(iids).to eq [triggered_alert.iid.to_s, resolved_alert.iid.to_s]
+            expect(iids).to eq [resolved_alert.iid.to_s, triggered_alert.iid.to_s]
           end
         end
       end
@@ -136,18 +139,18 @@ describe 'getting Alert Management Alerts' do
           it { expect(alerts.size).to eq(0) }
         end
       end
-    end
 
-    context 'with alert_assignee flag disabled' do
-      before do
-        stub_feature_flags(alert_assignee: false)
-        project.add_developer(current_user)
+      context 'assignee_username' do
+        let(:alert) { triggered_alert }
+        let(:assignee) { alert.assignees.first! }
+        let(:params) { { assignee_username: assignee.username } }
 
-        post_graphql(query, current_user: current_user)
-      end
+        it_behaves_like 'a working graphql query'
 
-      it 'excludes assignees' do
-        expect(alerts.first['assignees']).to be_empty
+        specify do
+          expect(alerts.size).to eq(1)
+          expect(first_alert['iid']).to eq(alert.iid.to_s)
+        end
       end
     end
   end

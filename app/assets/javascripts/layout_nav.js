@@ -13,6 +13,26 @@ function hideEndFade($scrollingTabs) {
 
 function initDeferred() {
   $(document).trigger('init.scrolling-tabs');
+
+  const whatsNewTriggerEl = document.querySelector('.js-whats-new-trigger');
+  if (whatsNewTriggerEl) {
+    const storageKey = whatsNewTriggerEl.getAttribute('data-storage-key');
+
+    $('.header-help').on('show.bs.dropdown', () => {
+      const displayNotification = JSON.parse(localStorage.getItem(storageKey));
+      if (displayNotification === false) {
+        $('.js-whats-new-notification-count').remove();
+      }
+    });
+
+    whatsNewTriggerEl.addEventListener('click', () => {
+      import(/* webpackChunkName: 'whatsNewApp' */ '~/whats_new')
+        .then(({ default: initWhatsNew }) => {
+          initWhatsNew();
+        })
+        .catch(() => {});
+    });
+  }
 }
 
 export default function initLayoutNav() {

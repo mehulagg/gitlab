@@ -2,26 +2,37 @@ import { shallowMount } from '@vue/test-utils';
 import UsageGraph from 'ee/storage_counter/components/usage_graph.vue';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 
-const data = {
-  wikiSize: 5000,
-  repositorySize: 4000,
-  packagesSize: 3000,
-  lfsObjectsSize: 2000,
-  buildArtifactsSize: 1000,
-  storageSize: 15000,
-};
-
+let data;
 let wrapper;
-function mountComponent(rootStorageStatistics) {
+
+function mountComponent({ rootStorageStatistics, limit }) {
   wrapper = shallowMount(UsageGraph, {
     propsData: {
       rootStorageStatistics,
+      limit,
     },
   });
+}
+function findStorageTypeUsagesSerialized() {
+  return wrapper
+    .findAll('[data-testid="storage-type-usage"]')
+    .wrappers.map(wp => wp.element.style.flex);
 }
 
 describe('Storage Counter usage graph component', () => {
   beforeEach(() => {
+    data = {
+      rootStorageStatistics: {
+        wikiSize: 5000,
+        repositorySize: 4000,
+        packagesSize: 3000,
+        lfsObjectsSize: 2000,
+        buildArtifactsSize: 1000,
+        snippetsSize: 2000,
+        storageSize: 17000,
+      },
+      limit: 2000,
+    };
     mountComponent(data);
   });
 
@@ -30,26 +41,38 @@ describe('Storage Counter usage graph component', () => {
   });
 
   it('renders the legend in order', () => {
-    const types = wrapper.findAll('[data-testid="storage-type"]');
+    const types = wrapper.findAll('[data-testid="storage-type-legend"]');
 
-    expect(types.at(0).text()).toContain('Wikis');
-    expect(types.at(1).text()).toContain('Repositories');
-    expect(types.at(2).text()).toContain('Packages');
-    expect(types.at(3).text()).toContain('LFS Objects');
-    expect(types.at(4).text()).toContain('Build Artifacts');
-  });
+    const {
+      buildArtifactsSize,
+      lfsObjectsSize,
+      packagesSize,
+      repositorySize,
+      wikiSize,
+      snippetsSize,
+    } = data.rootStorageStatistics;
 
-  it('renders formatted data in the legend', () => {
-    expect(wrapper.text()).toContain(numberToHumanSize(data.buildArtifactsSize));
-    expect(wrapper.text()).toContain(numberToHumanSize(data.lfsObjectsSize));
-    expect(wrapper.text()).toContain(numberToHumanSize(data.packagesSize));
-    expect(wrapper.text()).toContain(numberToHumanSize(data.repositorySize));
-    expect(wrapper.text()).toContain(numberToHumanSize(data.wikiSize));
+    expect(types.at(0).text()).toMatchInterpolatedText(`Wikis ${numberToHumanSize(wikiSize)}`);
+    expect(types.at(1).text()).toMatchInterpolatedText(
+      `Repositories ${numberToHumanSize(repositorySize)}`,
+    );
+    expect(types.at(2).text()).toMatchInterpolatedText(
+      `Packages ${numberToHumanSize(packagesSize)}`,
+    );
+    expect(types.at(3).text()).toMatchInterpolatedText(
+      `LFS Objects ${numberToHumanSize(lfsObjectsSize)}`,
+    );
+    expect(types.at(4).text()).toMatchInterpolatedText(
+      `Snippets ${numberToHumanSize(snippetsSize)}`,
+    );
+    expect(types.at(5).text()).toMatchInterpolatedText(
+      `Build Artifacts ${numberToHumanSize(buildArtifactsSize)}`,
+    );
   });
 
   describe('when storage type is not used', () => {
     beforeEach(() => {
-      data.wikiSize = 0;
+      data.rootStorageStatistics.wikiSize = 0;
       mountComponent(data);
     });
 
@@ -60,11 +83,48 @@ describe('Storage Counter usage graph component', () => {
 
   describe('when there is no storage usage', () => {
     beforeEach(() => {
-      mountComponent({ storageSize: 0 });
+      data.rootStorageStatistics.storageSize = 0;
+      mountComponent(data);
     });
 
     it('it does not render', () => {
       expect(wrapper.html()).toEqual('');
+    });
+  });
+
+  describe('when limit is 0', () => {
+    beforeEach(() => {
+      data.limit = 0;
+      mountComponent(data);
+    });
+
+    it('sets correct flex values', () => {
+      expect(findStorageTypeUsagesSerialized()).toStrictEqual([
+        '0.29411764705882354',
+        '0.23529411764705882',
+        '0.17647058823529413',
+        '0.11764705882352941',
+        '0.11764705882352941',
+        '0.058823529411764705',
+      ]);
+    });
+  });
+
+  describe('when storage exceeds limit', () => {
+    beforeEach(() => {
+      data.limit = data.rootStorageStatistics.storageSize - 1;
+      mountComponent(data);
+    });
+
+    it('it does render correclty', () => {
+      expect(findStorageTypeUsagesSerialized()).toStrictEqual([
+        '0.29411764705882354',
+        '0.23529411764705882',
+        '0.17647058823529413',
+        '0.11764705882352941',
+        '0.11764705882352941',
+        '0.058823529411764705',
+      ]);
     });
   });
 });

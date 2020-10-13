@@ -1,38 +1,54 @@
 import { mount } from '@vue/test-utils';
-import { GlFilteredSearchToken, GlFilteredSearchTokenSegment } from '@gitlab/ui';
+import {
+  GlFilteredSearchToken,
+  GlFilteredSearchTokenSegment,
+  GlFilteredSearchSuggestion,
+  GlDropdownDivider,
+} from '@gitlab/ui';
 import MockAdapter from 'axios-mock-adapter';
 import waitForPromises from 'helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';
 
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import {
+  DEFAULT_LABEL_NONE,
+  DEFAULT_LABEL_ANY,
+} from '~/vue_shared/components/filtered_search_bar/constants';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 
 import { mockAuthorToken, mockAuthors } from '../mock_data';
 
 jest.mock('~/flash');
+const defaultStubs = {
+  Portal: true,
+  GlFilteredSearchSuggestionList: {
+    template: '<div></div>',
+    methods: {
+      getValue: () => '=',
+    },
+  },
+};
 
-const createComponent = ({ config = mockAuthorToken, value = { data: '' } } = {}) =>
-  mount(AuthorToken, {
+function createComponent(options = {}) {
+  const {
+    config = mockAuthorToken,
+    value = { data: '' },
+    active = false,
+    stubs = defaultStubs,
+  } = options;
+  return mount(AuthorToken, {
     propsData: {
       config,
       value,
+      active,
     },
     provide: {
       portalName: 'fake target',
       alignSuggestions: function fakeAlignSuggestions() {},
     },
-    stubs: {
-      Portal: {
-        template: '<div><slot></slot></div>',
-      },
-      GlFilteredSearchSuggestionList: {
-        template: '<div></div>',
-        methods: {
-          getValue: () => '=',
-        },
-      },
-    },
+    stubs,
   });
+}
 
 describe('AuthorToken', () => {
   let mock;
@@ -51,29 +67,23 @@ describe('AuthorToken', () => {
   describe('computed', () => {
     describe('currentValue', () => {
       it('returns lowercase string for `value.data`', () => {
-        wrapper.setProps({
-          value: { data: 'FOO' },
-        });
+        wrapper = createComponent({ value: { data: 'FOO' } });
 
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.currentValue).toBe('foo');
-        });
+        expect(wrapper.vm.currentValue).toBe('foo');
       });
     });
 
     describe('activeAuthor', () => {
-      it('returns object for currently present `value.data`', () => {
+      it('returns object for currently present `value.data`', async () => {
+        wrapper = createComponent({ value: { data: mockAuthors[0].username } });
+
         wrapper.setData({
           authors: mockAuthors,
         });
 
-        wrapper.setProps({
-          value: { data: mockAuthors[0].username },
-        });
+        await wrapper.vm.$nextTick();
 
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.activeAuthor).toEqual(mockAuthors[0]);
-        });
+        expect(wrapper.vm.activeAuthor).toEqual(mockAuthors[0]);
       });
     });
   });
@@ -145,6 +155,58 @@ describe('AuthorToken', () => {
         expect(tokenSegments).toHaveLength(3); // Author, =, "Administrator"
         expect(tokenSegments.at(2).text()).toBe(mockAuthors[0].name); // "Administrator"
       });
+    });
+
+    it('renders provided defaultAuthors as suggestions', async () => {
+      const defaultAuthors = [DEFAULT_LABEL_NONE, DEFAULT_LABEL_ANY];
+      wrapper = createComponent({
+        active: true,
+        config: { ...mockAuthorToken, defaultAuthors },
+        stubs: { Portal: true },
+      });
+      const tokenSegments = wrapper.findAll(GlFilteredSearchTokenSegment);
+      const suggestionsSegment = tokenSegments.at(2);
+      suggestionsSegment.vm.$emit('activate');
+      await wrapper.vm.$nextTick();
+
+      const suggestions = wrapper.findAll(GlFilteredSearchSuggestion);
+
+      expect(suggestions).toHaveLength(defaultAuthors.length);
+      defaultAuthors.forEach((label, index) => {
+        expect(suggestions.at(index).text()).toBe(label.text);
+      });
+    });
+
+    it('does not render divider when no defaultAuthors', async () => {
+      wrapper = createComponent({
+        active: true,
+        config: { ...mockAuthorToken, defaultAuthors: [] },
+        stubs: { Portal: true },
+      });
+      const tokenSegments = wrapper.findAll(GlFilteredSearchTokenSegment);
+      const suggestionsSegment = tokenSegments.at(2);
+      suggestionsSegment.vm.$emit('activate');
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.contains(GlFilteredSearchSuggestion)).toBe(false);
+      expect(wrapper.contains(GlDropdownDivider)).toBe(false);
+    });
+
+    it('renders `DEFAULT_LABEL_ANY` as default suggestions', async () => {
+      wrapper = createComponent({
+        active: true,
+        config: { ...mockAuthorToken },
+        stubs: { Portal: true },
+      });
+      const tokenSegments = wrapper.findAll(GlFilteredSearchTokenSegment);
+      const suggestionsSegment = tokenSegments.at(2);
+      suggestionsSegment.vm.$emit('activate');
+      await wrapper.vm.$nextTick();
+
+      const suggestions = wrapper.findAll(GlFilteredSearchSuggestion);
+
+      expect(suggestions).toHaveLength(1);
+      expect(suggestions.at(0).text()).toBe(DEFAULT_LABEL_ANY.text);
     });
   });
 });

@@ -5,6 +5,8 @@ module Gitlab
   class PrometheusClient
     include Gitlab::Utils::StrongMemoize
     Error = Class.new(StandardError)
+    ConnectionError = Class.new(Gitlab::PrometheusClient::Error)
+    UnexpectedResponseError = Class.new(Gitlab::PrometheusClient::Error)
     QueryError = Class.new(Gitlab::PrometheusClient::Error)
     HEALTHY_RESPONSE = "Prometheus is Healthy.\n"
 
@@ -40,11 +42,20 @@ module Gitlab
       response_body == HEALTHY_RESPONSE
     end
 
+    def ready?
+      response = get(ready_url, {})
+
+      # From Prometheus docs: This endpoint returns 200 when Prometheus is ready to serve traffic (i.e. respond to queries).
+      response.code == 200
+    rescue => e
+      raise PrometheusClient::UnexpectedResponseError, "#{e.message}"
+    end
+
     def proxy(type, args)
       path = api_path(type)
       get(path, args)
     rescue Gitlab::HTTP::ResponseError => ex
-      raise PrometheusClient::Error, "Network connection error" unless ex.response && ex.response.try(:code)
+      raise PrometheusClient::ConnectionError, "Network connection error" unless ex.response && ex.response.try(:code)
 
       handle_querying_api_response(ex.response)
     end
@@ -71,15 +82,16 @@ module Gitlab
       end
     end
 
-    # Queries Prometheus for values aggregated by the given label string.
+    # Queries Prometheus with the given aggregate query and groups the results by mapping
+    # metric labels to their respective values.
     #
     # @return [Hash] mapping labels to their aggregate numeric values, or the empty hash if no results were found
-    def aggregate(func:, metric:, by:, time: Time.now)
-      response = query("#{func} (#{metric}) by (#{by})", time: time)
+    def aggregate(aggregate_query, time: Time.now, transform_value: :to_f)
+      response = query(aggregate_query, time: time)
       response.to_h do |result|
-        group_name = result.dig('metric', by)
+        key = block_given? ? yield(result['metric']) : result['metric']
         _timestamp, value = result['value']
-        [group_name, value.to_i]
+        [key, value.public_send(transform_value)] # rubocop:disable GitlabSecurity/PublicSend
       end
     end
 
@@ -100,7 +112,11 @@ module Gitlab
     end
 
     def health_url
-      [api_url, '-/healthy'].join('/')
+      "#{api_url}/-/healthy"
+    end
+
+    def ready_url
+      "#{api_url}/-/ready"
     end
 
     private
@@ -114,7 +130,7 @@ module Gitlab
       response = get(path, args)
       handle_querying_api_response(response)
     rescue Gitlab::HTTP::ResponseError => ex
-      raise PrometheusClient::Error, "Network connection error" unless ex.response && ex.response.try(:code)
+      raise PrometheusClient::ConnectionError, "Network connection error" unless ex.response && ex.response.try(:code)
 
       handle_querying_api_response(ex.response)
     end
@@ -136,18 +152,18 @@ module Gitlab
     def get(path, args)
       Gitlab::HTTP.get(path, { query: args }.merge(http_options) )
     rescue SocketError
-      raise PrometheusClient::Error, "Can't connect to #{api_url}"
+      raise PrometheusClient::ConnectionError, "Can't connect to #{api_url}"
     rescue OpenSSL::SSL::SSLError
-      raise PrometheusClient::Error, "#{api_url} contains invalid SSL data"
+      raise PrometheusClient::ConnectionError, "#{api_url} contains invalid SSL data"
     rescue Errno::ECONNREFUSED
-      raise PrometheusClient::Error, 'Connection refused'
+      raise PrometheusClient::ConnectionError, 'Connection refused'
     end
 
     def handle_management_api_response(response)
       if response.code == 200
         response.body
       else
-        raise PrometheusClient::Error, "#{response.code} - #{response.body}"
+        raise PrometheusClient::UnexpectedResponseError, "#{response.code} - #{response.body}"
       end
     end
 
@@ -155,7 +171,7 @@ module Gitlab
       response_code = response.try(:code)
       response_body = response.try(:body)
 
-      raise PrometheusClient::Error, "#{response_code} - #{response_body}" unless response_code
+      raise PrometheusClient::UnexpectedResponseError, "#{response_code} - #{response_body}" unless response_code
 
       json_data = parse_json(response_body) if [200, 400].include?(response_code)
 
@@ -165,7 +181,7 @@ module Gitlab
       when 400
         raise PrometheusClient::QueryError, json_data['error'] || 'Bad data received'
       else
-        raise PrometheusClient::Error, "#{response_code} - #{response_body}"
+        raise PrometheusClient::UnexpectedResponseError, "#{response_code} - #{response_body}"
       end
     end
 
@@ -177,7 +193,7 @@ module Gitlab
     def parse_json(response_body)
       Gitlab::Json.parse(response_body, legacy_mode: true)
     rescue JSON::ParserError
-      raise PrometheusClient::Error, 'Parsing response failed'
+      raise PrometheusClient::UnexpectedResponseError, 'Parsing response failed'
     end
   end
 end

@@ -29,7 +29,7 @@ RSpec.shared_examples 'restricts access to protected environments' do |developer
 
     context 'when user has access to the environment' do
       before do
-        protected_environment.deploy_access_levels.create(user: user)
+        protected_environment.deploy_access_levels.create!(user: user)
       end
 
       it 'enqueues the build' do

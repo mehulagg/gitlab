@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SnippetInputActionCollection do
+RSpec.describe SnippetInputActionCollection do
   let(:action_name)    { 'create' }
   let(:action)         { { action: action_name, file_path: 'foo', content: 'bar', previous_path: 'foobar' } }
   let(:data)           { [action, action] }
@@ -34,6 +34,14 @@ describe SnippetInputActionCollection do
       it 'returns false' do
         expect(subject).to be false
       end
+    end
+  end
+
+  context 'when allowed_actions param is passed' do
+    it 'builds SnippetInputAction with that param' do
+      expect(SnippetInputAction).to receive(:new).with(hash_including(allowed_actions: :create))
+
+      described_class.new([action], allowed_actions: :create)
     end
   end
 end

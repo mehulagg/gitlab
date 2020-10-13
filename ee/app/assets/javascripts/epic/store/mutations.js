@@ -121,4 +121,7 @@ export default {
   [types.RECEIVE_EPIC_LABELS_SELECT_FAILURE](state) {
     state.epicLabelsSelectInProgress = false;
   },
+  [types.SET_EPIC_CONFIDENTIAL](state, confidential) {
+    state.confidential = confidential;
+  },
 };

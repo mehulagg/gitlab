@@ -5,7 +5,8 @@ FactoryBot.define do
     skip_create # non-model factories (i.e. without #save)
 
     initialize_with do
-      projects = create_list(:project, 4)
+      projects = create_list(:project, 3)
+      projects << create(:project, :repository)
       create(:board, project: projects[0])
       create(:jira_service, project: projects[0])
       create(:jira_service, :without_properties_callback, project: projects[1])
@@ -23,13 +24,15 @@ FactoryBot.define do
       create(:service, project: projects[2], type: 'SlackService', active: true)
       create(:service, project: projects[2], type: 'MattermostService', active: false)
       create(:service, :template, type: 'MattermostService', active: true)
+      matermost_instance = create(:service, :instance, type: 'MattermostService', active: true)
+      create(:service, project: projects[1], type: 'MattermostService', active: true, inherit_from_id: matermost_instance.id)
       create(:service, project: projects[2], type: 'CustomIssueTrackerService', active: true)
       create(:project_error_tracking_setting, project: projects[0])
       create(:project_error_tracking_setting, project: projects[1], enabled: false)
       create(:alerts_service, project: projects[0])
       create(:alerts_service, :inactive, project: projects[1])
-      alert_bot_issues = create_list(:issue, 2, project: projects[0], author: User.alert_bot)
-      create_list(:issue, 2, project: projects[1], author: User.alert_bot)
+      alert_bot_issues = create_list(:incident, 2, project: projects[0], author: User.alert_bot)
+      create_list(:incident, 2, project: projects[1], author: User.alert_bot)
       issues = create_list(:issue, 4, project: projects[0])
       create_list(:prometheus_alert, 2, project: projects[0])
       create(:prometheus_alert, project: projects[1])
@@ -44,14 +47,18 @@ FactoryBot.define do
       create(:zoom_meeting, project: projects[0], issue: projects[0].issues[2], issue_status: :added)
       create_list(:zoom_meeting, 2, project: projects[0], issue: projects[0].issues[2], issue_status: :removed)
       create(:sentry_issue, issue: projects[0].issues[0])
+      create(:protected_branch, project: projects[0])
+      create(:protected_branch, name: 'main', project: projects[0])
+
+      # Tracing
+      create(:project_tracing_setting, project: projects[0])
 
       # Incident Labeled Issues
-      incident_label_attrs = IncidentManagement::CreateIssueService::INCIDENT_LABEL
-      incident_label = create(:label, project: projects[0], **incident_label_attrs)
+      incident_label = create(:label, :incident, project: projects[0])
       create(:labeled_issue, project: projects[0], labels: [incident_label])
       incident_group = create(:group)
-      incident_label_scoped_to_project = create(:label, project: projects[1], **incident_label_attrs)
-      incident_label_scoped_to_group = create(:group_label, group: incident_group, **incident_label_attrs)
+      incident_label_scoped_to_project = create(:label, :incident, project: projects[1])
+      incident_label_scoped_to_group = create(:group_label, :incident, group: incident_group)
       create(:labeled_issue, project: projects[1], labels: [incident_label_scoped_to_project])
       create(:labeled_issue, project: projects[1], labels: [incident_label_scoped_to_group])
 
@@ -59,6 +66,10 @@ FactoryBot.define do
       create(:alert_management_alert, issue: issues[0], project: projects[0])
       create(:alert_management_alert, issue: alert_bot_issues[0], project: projects[0])
       create(:self_managed_prometheus_alert_event, related_issues: [issues[1]], project: projects[0])
+
+      # Kubernetes agents
+      create(:cluster_agent, project: projects[0])
+      create(:cluster_agent_token, agent: create(:cluster_agent, project: projects[1]) )
 
       # Enabled clusters
       gcp_cluster = create(:cluster_provider_gcp, :created).cluster
@@ -83,12 +94,31 @@ FactoryBot.define do
       create(:clusters_applications_knative, :installed, cluster: gcp_cluster)
       create(:clusters_applications_elastic_stack, :installed, cluster: gcp_cluster)
       create(:clusters_applications_jupyter, :installed, cluster: gcp_cluster)
+      create(:clusters_applications_cilium, :installed, cluster: gcp_cluster)
 
       create(:grafana_integration, project: projects[0], enabled: true)
       create(:grafana_integration, project: projects[1], enabled: true)
       create(:grafana_integration, project: projects[2], enabled: false)
 
+      create(:package, project: projects[0], created_at: 3.days.ago)
+      create(:package, project: projects[0], created_at: 3.days.ago)
+      create(:package, project: projects[1], created_at: 3.days.ago)
+      create(:package, created_at: 2.months.ago, project: projects[1])
+
+      # User Preferences
+      create(:user_preference, gitpod_enabled: true)
+
       ProjectFeature.first.update_attribute('repository_access_level', 0)
+
+      # Create fresh & a month (28-days SMAU) old  data
+      env = create(:environment, project: projects[3])
+      [3, 31].each do |n|
+        deployment_options = { created_at: n.days.ago, project: env.project, environment: env }
+        create(:deployment, :failed, deployment_options)
+        create(:deployment, :success, deployment_options)
+        create_list(:project_snippet, 2, project: projects[0], created_at: n.days.ago)
+        create(:personal_snippet, created_at: n.days.ago)
+      end
     end
   end
 end

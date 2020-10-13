@@ -44,6 +44,8 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::ResetChecksumEvent, :clean_gitlab
         subject.process
 
         expect(registry.reload).to have_attributes(
+          primary_repository_checksummed: true,
+          primary_wiki_checksummed: true,
           repository_verification_checksum_sha: nil,
           wiki_verification_checksum_sha: nil
         )

@@ -12,7 +12,7 @@ RSpec.describe Gitlab::Prometheus::Queries::ClusterQuery do
   end
 
   it 'load cluster metrics from yaml' do
-    expect(Gitlab::Prometheus::AdditionalMetricsParser).to receive(:load_groups_from_yaml).with('cluster_metrics.yml').and_call_original
+    expect(Gitlab::Prometheus::AdditionalMetricsParser).to receive(:load_groups_from_yaml).with('queries_cluster_metrics.yml').and_call_original
 
     subject.query
   end

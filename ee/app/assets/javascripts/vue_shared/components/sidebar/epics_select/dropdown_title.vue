@@ -25,7 +25,7 @@ export default {
 </script>
 
 <template>
-  <div class="title hide-collapsed align-items-center append-bottom-10">
+  <div class="title hide-collapsed align-items-center gl-mb-3">
     <div class="flex-grow-1">
       <span :class="{ 'align-text-top': isLoading }">{{ blockTitle }}</span>
       <gl-loading-icon v-show="isLoading" inline />

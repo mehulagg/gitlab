@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User edits MR' do
+RSpec.describe 'Merge request > User edits MR' do
   include ProjectForksHelper
 
   before do
@@ -19,5 +19,15 @@ describe 'Merge request > User edits MR' do
 
     include_context 'merge request edit context'
     it_behaves_like 'an editable merge request'
+  end
+
+  context 'when merge_request_reviewers is turned off' do
+    before do
+      stub_feature_flags(merge_request_reviewers: false)
+    end
+
+    it 'does not render reviewers dropdown' do
+      expect(page).not_to have_selector('.js-reviewer-search')
+    end
   end
 end

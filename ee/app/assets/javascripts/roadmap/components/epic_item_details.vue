@@ -74,9 +74,7 @@ export default {
       if (this.isEmptyChildrenWithFilter) {
         return this.infoSearchLabel;
       }
-      return this.childrenFlags[this.itemId].itemExpanded
-        ? __('Collapse child epics')
-        : __('Expand child epics');
+      return this.childrenFlags[this.itemId].itemExpanded ? __('Collapse') : __('Expand');
     },
     childrenFetchInProgress() {
       return this.epic.hasChildren && this.childrenFlags[this.itemId].itemChildrenFetchInProgress;
@@ -108,9 +106,12 @@ export default {
 </script>
 
 <template>
-  <div class="epic-details-cell" data-qa-selector="epic_details_cell">
+  <div
+    class="epic-details-cell gl-display-flex gl-flex-direction-column gl-justify-content-center"
+    data-qa-selector="epic_details_cell"
+  >
     <div
-      class="d-flex align-items-start p-2"
+      class="gl-display-flex align-items-start gl-px-3 gl-mb-1"
       :class="[epic.isChildEpic ? childMarginClassname : '']"
     >
       <span ref="expandCollapseInfo">
@@ -130,38 +131,44 @@ export default {
         </gl-button>
       </span>
       <gl-tooltip
-        v-if="isEmptyChildrenWithFilter"
+        v-if="!isExpandIconHidden"
+        ref="expandIconTooltip"
+        triggers="hover"
         :target="() => $refs.expandCollapseInfo"
         boundary="viewport"
-        offset="80"
+        offset="15"
         placement="topright"
       >
-        {{ infoSearchLabel }}
+        {{ expandIconLabel }}
       </gl-tooltip>
       <div class="overflow-hidden flex-grow-1 mx-2">
-        <a :href="epic.webUrl" :title="epic.title" class="epic-title d-block text-body bold">
+        <a
+          :href="epic.webUrl"
+          :title="epic.title"
+          class="epic-title gl-mt-1 d-block text-body bold"
+        >
           {{ epic.title }}
         </a>
         <div class="epic-group-timeframe d-flex text-secondary">
-          <p
+          <span
             v-if="isEpicGroupDifferent && !epic.hasParent"
             :title="epic.groupFullName"
             class="epic-group"
           >
             {{ epic.groupName }}
-          </p>
+          </span>
           <span v-if="isEpicGroupDifferent && !epic.hasParent" class="mx-1" aria-hidden="true"
             >&middot;</span
           >
-          <p class="epic-timeframe" :title="timeframeString">{{ timeframeString }}</p>
+          <span class="epic-timeframe" :title="timeframeString">{{ timeframeString }}</span>
         </div>
       </div>
       <template v-if="allowSubEpics">
-        <div ref="childEpicsCount" class="d-flex text-secondary text-nowrap">
+        <div ref="childEpicsCount" class="gl-mt-1 d-flex text-secondary text-nowrap">
           <gl-icon name="epic" class="align-text-bottom mr-1" aria-hidden="true" />
           <p class="m-0" :aria-label="childEpicsCountText">{{ childEpicsCount }}</p>
         </div>
-        <gl-tooltip :target="() => $refs.childEpicsCount">
+        <gl-tooltip ref="childEpicsCountTooltip" :target="() => $refs.childEpicsCount">
           <span :class="{ bold: hasFiltersApplied }">{{ childEpicsCountText }}</span>
           <span v-if="hasFiltersApplied" class="d-block">{{ childEpicsSearchText }}</span>
         </gl-tooltip>

@@ -4,8 +4,6 @@ module API
   class MergeRequestApprovalRules < ::Grape::API
     before { authenticate_non_get! }
 
-    ARRAY_COERCION_LAMBDA = ->(val) { val.empty? ? [] : Array.wrap(val) }
-
     helpers do
       def find_merge_request_approval_rule(merge_request, id)
         merge_request.approval_rules.find_by_id!(id)
@@ -34,8 +32,8 @@ module API
           requires :name, type: String, desc: 'The name of the approval rule'
           requires :approvals_required, type: Integer, desc: 'The number of required approvals for this rule'
           optional :approval_project_rule_id, type: Integer, desc: 'The ID of a project-level approval rule'
-          optional :user_ids, type: Array, coerce_with: ARRAY_COERCION_LAMBDA, desc: 'The user ids for this rule'
-          optional :group_ids, type: Array, coerce_with: ARRAY_COERCION_LAMBDA, desc: 'The group ids for this rule'
+          optional :user_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'The user ids for this rule'
+          optional :group_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'The group ids for this rule'
         end
         post do
           merge_request = find_merge_request_with_access(params[:merge_request_iid], :update_approvers)
@@ -56,8 +54,8 @@ module API
             requires :approval_rule_id, type: Integer, desc: 'The ID of an approval rule'
             optional :name, type: String, desc: 'The name of the approval rule'
             optional :approvals_required, type: Integer, desc: 'The number of required approvals for this rule'
-            optional :user_ids, type: Array, coerce_with: ARRAY_COERCION_LAMBDA, desc: 'The user ids for this rule'
-            optional :group_ids, type: Array, coerce_with: ARRAY_COERCION_LAMBDA, desc: 'The group ids for this rule'
+            optional :user_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'The user ids for this rule'
+            optional :group_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'The group ids for this rule'
             optional :remove_hidden_groups, type: Boolean, desc: 'Whether hidden groups should be removed'
           end
           put do

@@ -1,142 +1,183 @@
-import Vue from 'vue';
+import { shallowMount } from '@vue/test-utils';
+import { GlIcon } from '@gitlab/ui';
 
 import EpicHeader from 'ee/epic/components/epic_header.vue';
 import createStore from 'ee/epic/store';
 import { statusType } from 'ee/epic/constants';
+import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 
-import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { mockEpicMeta, mockEpicData } from '../mock_data';
 
 describe('EpicHeaderComponent', () => {
-  let vm;
+  let wrapper;
   let store;
 
   beforeEach(() => {
-    const Component = Vue.extend(EpicHeader);
-
     store = createStore();
     store.dispatch('setEpicMeta', mockEpicMeta);
     store.dispatch('setEpicData', mockEpicData);
 
-    vm = mountComponentWithStore(Component, {
+    wrapper = shallowMount(EpicHeader, {
       store,
     });
   });
 
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
+    wrapper = null;
   });
+
+  const findStatusBox = () => wrapper.find('[data-testid="status-box"]');
+  const findStatusIcon = () => wrapper.find('[data-testid="status-icon"]');
+  const findStatusText = () => wrapper.find('[data-testid="status-text"]');
+  const findConfidentialIcon = () => wrapper.find('[data-testid="confidential-icon"]').find(GlIcon);
+  const findAuthorDetails = () => wrapper.find('[data-testid="author-details"]');
+  const findActionButtons = () => wrapper.find('[data-testid="action-buttons"]');
+  const findToggleStatusButton = () => wrapper.find('[data-testid="toggle-status-button"]');
+  const findNewEpicButton = () => wrapper.find('[data-testid="new-epic-button"]');
+  const findSidebarToggle = () => wrapper.find('[data-testid="sidebar-toggle"]');
 
   describe('computed', () => {
     describe('statusIcon', () => {
       it('returns string `issue-open-m` when `isEpicOpen` is true', () => {
-        vm.$store.state.state = statusType.open;
+        store.state.state = statusType.open;
 
-        expect(vm.statusIcon).toBe('issue-open-m');
+        expect(findStatusIcon().props('name')).toBe('issue-open-m');
       });
 
       it('returns string `mobile-issue-close` when `isEpicOpen` is false', () => {
-        vm.$store.state.state = statusType.close;
+        store.state.state = statusType.close;
 
-        expect(vm.statusIcon).toBe('mobile-issue-close');
+        return wrapper.vm.$nextTick().then(() => {
+          expect(findStatusIcon().props('name')).toBe('mobile-issue-close');
+        });
       });
     });
 
     describe('statusText', () => {
       it('returns string `Open` when `isEpicOpen` is true', () => {
-        vm.$store.state.state = statusType.open;
+        store.state.state = statusType.open;
 
-        expect(vm.statusText).toBe('Open');
+        expect(findStatusText().text()).toBe('Open');
       });
 
       it('returns string `Closed` when `isEpicOpen` is false', () => {
-        vm.$store.state.state = statusType.close;
+        store.state.state = statusType.close;
 
-        expect(vm.statusText).toBe('Closed');
+        return wrapper.vm.$nextTick().then(() => {
+          expect(findStatusText().text()).toBe('Closed');
+        });
       });
     });
 
     describe('actionButtonClass', () => {
-      it('returns default button classes along with `btn-close` when `isEpicOpen` is true', () => {
-        vm.$store.state.state = statusType.open;
+      it('returns `btn-close` when `isEpicOpen` is true', () => {
+        store.state.state = statusType.open;
 
-        expect(vm.actionButtonClass).toBe(
-          'btn btn-grouped js-btn-epic-action qa-close-reopen-epic-button btn-close',
-        );
+        expect(findToggleStatusButton().classes()).toContain('btn-close');
       });
 
-      it('returns default button classes along with `btn-open` when `isEpicOpen` is false', () => {
-        vm.$store.state.state = statusType.close;
+      it('returns `btn-open` when `isEpicOpen` is false', () => {
+        store.state.state = statusType.close;
 
-        expect(vm.actionButtonClass).toBe(
-          'btn btn-grouped js-btn-epic-action qa-close-reopen-epic-button btn-open',
-        );
+        return wrapper.vm.$nextTick().then(() => {
+          expect(findToggleStatusButton().classes()).toContain('btn-open');
+        });
       });
     });
 
     describe('actionButtonText', () => {
       it('returns string `Close epic` when `isEpicOpen` is true', () => {
-        vm.$store.state.state = statusType.open;
+        store.state.state = statusType.open;
 
-        expect(vm.actionButtonText).toBe('Close epic');
+        expect(findToggleStatusButton().text()).toBe('Close epic');
       });
 
       it('returns string `Reopen epic` when `isEpicOpen` is false', () => {
-        vm.$store.state.state = statusType.close;
+        store.state.state = statusType.close;
 
-        expect(vm.actionButtonText).toBe('Reopen epic');
+        return wrapper.vm.$nextTick().then(() => {
+          expect(findToggleStatusButton().text()).toBe('Reopen epic');
+        });
       });
     });
   });
 
   describe('template', () => {
     it('renders component container element with class `detail-page-header`', () => {
-      expect(vm.$el.classList.contains('detail-page-header')).toBe(true);
-      expect(vm.$el.querySelector('.detail-page-header-body')).not.toBeNull();
+      expect(wrapper.classes()).toContain('detail-page-header');
+      expect(wrapper.find('.detail-page-header-body').exists()).toBeTruthy();
     });
 
     it('renders epic status icon and text elements', () => {
-      const statusEl = vm.$el.querySelector('.issuable-status-box');
+      const statusBox = findStatusBox();
 
-      expect(statusEl).not.toBeNull();
-      expect(
-        statusEl.querySelector('svg.ic-issue-open-m use').getAttribute('xlink:href'),
-      ).toContain('issue-open-m');
+      expect(statusBox.exists()).toBe(true);
+      expect(statusBox.find(GlIcon).props('name')).toBe('issue-open-m');
+      expect(statusBox.find('span').text()).toBe('Open');
+    });
 
-      expect(statusEl.querySelector('span').innerText.trim()).toBe('Open');
+    it('renders confidential icon when `confidential` prop is true', () => {
+      store.state.confidential = true;
+
+      return wrapper.vm.$nextTick(() => {
+        const confidentialIcon = findConfidentialIcon();
+
+        expect(confidentialIcon.exists()).toBe(true);
+        expect(confidentialIcon.props('name')).toBe('eye-slash');
+      });
     });
 
     it('renders epic author details element', () => {
-      const metaEl = vm.$el.querySelector('.issuable-meta');
+      const epicDetails = findAuthorDetails();
 
-      expect(metaEl).not.toBeNull();
-      expect(metaEl.querySelector('strong a.user-avatar-link')).not.toBeNull();
+      expect(epicDetails.exists()).toBe(true);
+      expect(epicDetails.find(TimeagoTooltip).exists()).toBe(true);
+      expect(epicDetails.find(UserAvatarLink).exists()).toBe(true);
     });
 
     it('renders action buttons element', () => {
-      const actionsEl = vm.$el.querySelector('.js-issuable-actions');
+      const actionButtons = findActionButtons();
+      const toggleStatusButton = findToggleStatusButton();
 
-      expect(actionsEl).not.toBeNull();
-      expect(actionsEl.querySelector('.js-btn-epic-action')).not.toBeNull();
-      expect(actionsEl.querySelector('.js-btn-epic-action').innerText.trim()).toBe('Close epic');
+      expect(actionButtons.exists()).toBeTruthy();
+      expect(toggleStatusButton.exists()).toBeTruthy();
+      expect(toggleStatusButton.text()).toBe('Close epic');
     });
 
     it('renders toggle sidebar button element', () => {
-      const toggleButtonEl = vm.$el.querySelector('button.js-sidebar-toggle');
+      const toggleButton = findSidebarToggle();
 
-      expect(toggleButtonEl).not.toBeNull();
-      expect(toggleButtonEl.getAttribute('aria-label')).toBe('Toggle sidebar');
-      expect(toggleButtonEl.classList.contains('d-block')).toBe(true);
-      expect(toggleButtonEl.classList.contains('d-sm-none')).toBe(true);
-      expect(toggleButtonEl.classList.contains('gutter-toggle')).toBe(true);
+      expect(toggleButton.exists()).toBeTruthy();
+      expect(toggleButton.attributes('aria-label')).toBe('Toggle sidebar');
+      expect(toggleButton.classes()).toEqual(
+        expect.arrayContaining([('d-block', 'd-sm-none', 'gutter-toggle')]),
+      );
     });
 
     it('renders GitLab team member badge when `author.isGitlabEmployee` is `true`', () => {
-      vm.$store.state.author.isGitlabEmployee = true;
+      store.state.author.isGitlabEmployee = true;
 
       // Wait for dynamic imports to resolve
       return new Promise(setImmediate).then(() => {
-        expect(vm.$refs.gitlabTeamMemberBadge).not.toBeUndefined();
+        expect(wrapper.vm.$refs.gitlabTeamMemberBadge).not.toBeUndefined();
+      });
+    });
+
+    it('does not render new epic button if user cannot create it', () => {
+      store.state.canCreate = false;
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(findNewEpicButton().exists()).toBe(false);
+      });
+    });
+
+    it('renders new epic button if user can create it', () => {
+      store.state.canCreate = true;
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(findNewEpicButton().exists()).toBe(true);
       });
     });
   });

@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Analytics::CycleAnalytics::Stages::ListService do
   let_it_be(:group, refind: true) { create(:group) }
+  let_it_be(:value_stream, refind: true) { create(:cycle_analytics_group_value_stream, group: group) }
   let_it_be(:user) { create(:user) }
   let(:stages) { subject.payload[:stages] }
 
@@ -27,10 +28,14 @@ RSpec.describe Analytics::CycleAnalytics::Stages::ListService do
     expect(stages.map(&:id)).to all(be_nil)
   end
 
+  it 'does not persist the value stream record' do
+    expect { subject }.not_to change { Analytics::CycleAnalytics::GroupValueStream.count }
+  end
+
   context 'when there are persisted stages' do
-    let_it_be(:stage1) { create(:cycle_analytics_group_stage, parent: group, relative_position: 2) }
-    let_it_be(:stage2) { create(:cycle_analytics_group_stage, parent: group, relative_position: 3) }
-    let_it_be(:stage3) { create(:cycle_analytics_group_stage, parent: group, relative_position: 1) }
+    let_it_be(:stage1) { create(:cycle_analytics_group_stage, parent: group, relative_position: 2, value_stream: value_stream) }
+    let_it_be(:stage2) { create(:cycle_analytics_group_stage, parent: group, relative_position: 3, value_stream: value_stream) }
+    let_it_be(:stage3) { create(:cycle_analytics_group_stage, parent: group, relative_position: 1, value_stream: value_stream) }
 
     it 'returns the persisted stages in order' do
       expect(stages).to eq([stage3, stage1, stage2])

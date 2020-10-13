@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Metrics::Samplers::RubySampler do
+RSpec.describe Gitlab::Metrics::Samplers::RubySampler do
   let(:sampler) { described_class.new }
   let(:null_metric) { double('null_metric', set: nil, observe: nil) }
 
@@ -12,7 +12,7 @@ describe Gitlab::Metrics::Samplers::RubySampler do
 
   describe '#initialize' do
     it 'sets process_start_time_seconds' do
-      Timecop.freeze do
+      freeze_time do
         expect(sampler.metrics[:process_start_time_seconds].get).to eq(Time.now.to_i)
       end
     end

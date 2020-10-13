@@ -27,7 +27,8 @@ module TriggerHelpers
     expected_timing, expected_events = fires_on.first
     expect(timing).to eq(expected_timing.to_s)
     expect(events).to match_array(Array.wrap(expected_events))
-    expect(definition).to eq("execute procedure #{fn_name}()")
+
+    expect(definition).to match(%r{execute (?:procedure|function) #{fn_name}()})
   end
 
   private

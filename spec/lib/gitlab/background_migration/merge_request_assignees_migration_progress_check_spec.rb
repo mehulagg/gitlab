@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::BackgroundMigration::MergeRequestAssigneesMigrationProgressCheck do
+RSpec.describe Gitlab::BackgroundMigration::MergeRequestAssigneesMigrationProgressCheck do
   context 'rescheduling' do
     context 'when there are ongoing and no dead jobs' do
       it 'reschedules check' do
@@ -73,7 +73,7 @@ describe Gitlab::BackgroundMigration::MergeRequestAssigneesMigrationProgressChec
 
       described_class.new.perform
 
-      expect(Feature.enabled?(:multiple_merge_request_assignees)).to eq(true)
+      expect(Feature.enabled?(:multiple_merge_request_assignees, type: :licensed)).to eq(true)
     end
   end
 

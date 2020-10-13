@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import mountComponent from 'helpers/vue_mount_component_helper';
+import { TEST_HOST } from 'jest/helpers/test_constants';
 import promoteMilestoneModal from '~/pages/milestones/shared/components/promote_milestone_modal.vue';
 import eventHub from '~/pages/milestones/shared/event_hub';
 import axios from '~/lib/utils/axios_utils';
@@ -9,7 +10,7 @@ describe('Promote milestone modal', () => {
   const Component = Vue.extend(promoteMilestoneModal);
   const milestoneMockData = {
     milestoneTitle: 'v1.0',
-    url: `${gl.TEST_HOST}/dummy/promote/milestones`,
+    url: `${TEST_HOST}/dummy/promote/milestones`,
     groupName: 'group',
   };
 
@@ -46,7 +47,7 @@ describe('Promote milestone modal', () => {
     });
 
     it('redirects when a milestone is promoted', done => {
-      const responseURL = `${gl.TEST_HOST}/dummy/endpoint`;
+      const responseURL = `${TEST_HOST}/dummy/endpoint`;
       jest.spyOn(axios, 'post').mockImplementation(url => {
         expect(url).toBe(milestoneMockData.url);
         expect(eventHub.$emit).toHaveBeenCalledWith(

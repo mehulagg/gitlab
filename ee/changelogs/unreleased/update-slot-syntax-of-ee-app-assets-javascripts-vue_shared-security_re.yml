@@ -1,5 +1,0 @@
----
-title: Update deprecated Vue 3 slot syntax in ee/app/assets/javascripts/vue_shared/security_reports/components/modal.vue
-merge_request: 31966
-author: Gilang Gumilar
-type: other

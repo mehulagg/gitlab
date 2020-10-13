@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Email::Receiver do
+RSpec.describe Gitlab::Email::Receiver do
   include_context :email_shared_context
 
   shared_examples 'correctly finds the mail key' do
@@ -32,6 +32,12 @@ describe Gitlab::Email::Receiver do
 
     context 'when in an Envelope-To header' do
       let(:email_raw) { fixture_file('emails/envelope_to_header.eml') }
+
+      it_behaves_like 'correctly finds the mail key'
+    end
+
+    context 'when in an X-Envelope-To header' do
+      let(:email_raw) { fixture_file('emails/x_envelope_to_header.eml') }
 
       it_behaves_like 'correctly finds the mail key'
     end

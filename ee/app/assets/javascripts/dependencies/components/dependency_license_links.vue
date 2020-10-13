@@ -1,7 +1,7 @@
 <script>
 import { uniqueId } from 'lodash';
 
-import { GlDeprecatedButton, GlLink, GlModal, GlModalDirective, GlIntersperse } from '@gitlab/ui';
+import { GlButton, GlLink, GlModal, GlModalDirective, GlIntersperse } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
 
 // If there are more licenses than this count, a counter will be displayed for the remaining licenses
@@ -12,7 +12,7 @@ const MODAL_ID_PREFIX = 'dependency-license-link-modal-';
 export default {
   components: {
     GlIntersperse,
-    GlDeprecatedButton,
+    GlButton,
     GlLink,
     GlModal,
   },
@@ -72,12 +72,12 @@ export default {
         <gl-link v-if="license.url" :href="license.url" target="_blank">{{ license.name }}</gl-link>
         <template v-else>{{ license.name }}</template>
       </span>
-      <gl-deprecated-button
+      <gl-button
         v-if="hasLicensesInModal"
         v-gl-modal-directive="modalId"
         variant="link"
         class="align-baseline js-license-links-modal-trigger"
-        >{{ modalButtonText }}</gl-deprecated-button
+        >{{ modalButtonText }}</gl-button
       >
     </gl-intersperse>
     <div class="js-license-links-modal">

@@ -16,7 +16,7 @@ module StatusPage
     private
 
     def links
-      { details: StatusPage::Storage.details_path(object.iid) }
+      { details: Gitlab::StatusPage::Storage.details_path(object.iid) }
     end
 
     def user_notes

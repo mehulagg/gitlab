@@ -1,6 +1,5 @@
-#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
-#import "ee/vulnerabilities/graphql/vulnerability.fragment.graphql"
-#import "./project.fragment.graphql"
+#import "~/graphql_shared/fragments/pageInfoCursorsOnly.fragment.graphql"
+#import "./vulnerability.fragment.graphql"
 
 query instance(
   $after: String
@@ -8,15 +7,10 @@ query instance(
   $projectId: [ID!]
   $severity: [VulnerabilitySeverity!]
   $reportType: [VulnerabilityReportType!]
+  $scanner: [String!]
   $state: [VulnerabilityState!]
+  $sort: VulnerabilitySort
 ) {
-  instanceSecurityDashboard {
-    projects{
-      nodes{
-        ...Project
-      }
-    }
-  }
   vulnerabilities(
     after: $after
     first: $first
@@ -24,6 +18,8 @@ query instance(
     reportType: $reportType
     state: $state
     projectId: $projectId
+    scanner: $scanner
+    sort: $sort
   ) {
     nodes {
       ...Vulnerability

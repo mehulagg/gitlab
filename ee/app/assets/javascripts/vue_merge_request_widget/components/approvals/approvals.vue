@@ -8,21 +8,23 @@ import MrWidgetIcon from '~/vue_merge_request_widget/components/mr_widget_icon.v
 import ApprovalsSummary from './approvals_summary.vue';
 import ApprovalsSummaryOptional from './approvals_summary_optional.vue';
 import ApprovalsFooter from './approvals_footer.vue';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import Approvals from '~/vue_merge_request_widget/components/approvals/approvals.vue';
+import approvalsMixin from '~/vue_merge_request_widget/mixins/approvals';
 import ApprovalsAuth from './approvals_auth.vue';
-import { FETCH_LOADING, FETCH_ERROR, APPROVE_ERROR, UNAPPROVE_ERROR } from './messages';
+import { FETCH_ERROR } from '~/vue_merge_request_widget/components/approvals/messages';
+import ApprovalsFooter from './approvals_footer.vue';
 
 export default {
   name: 'MRWidgetMultipleRuleApprovals',
   components: {
-    MrWidgetContainer,
-    MrWidgetIcon,
-    ApprovalsSummary,
-    ApprovalsSummaryOptional,
-    ApprovalsFooter,
+    Approvals,
     ApprovalsAuth,
     GlButton,
     GlLoadingIcon,
+    ApprovalsFooter,
   },
+  mixins: [approvalsMixin],
   props: {
     mr: {
       type: Object,
@@ -35,44 +37,29 @@ export default {
   },
   data() {
     return {
-      fetchingApprovals: true,
-      isApproving: false,
-      isExpanded: false,
       isLoadingRules: false,
-      hasApprovalAuthError: false,
+      isExpanded: false,
       modalId: 'approvals-auth',
     };
   },
   computed: {
+    isBasic() {
+      return this.mr.approvalsWidgetType === 'base';
+    },
     approvals() {
       return this.mr.approvals || {};
-    },
-    hasFooter() {
-      return Boolean(this.mr.approvals);
     },
     approvedBy() {
       return this.approvals.approved_by ? this.approvals.approved_by.map(x => x.user) : [];
     },
-    isApproved() {
-      return Boolean(this.approvals.approved);
-    },
     approvalsRequired() {
-      return this.approvals.approvals_required || 0;
+      return (!this.isBasic && this.approvals.approvals_required) || 0;
     },
     isOptional() {
       return !this.approvedBy.length && !this.approvalsRequired;
     },
-    userHasApproved() {
-      return Boolean(this.approvals.user_has_approved);
-    },
-    userCanApprove() {
-      return Boolean(this.approvals.user_can_approve);
-    },
-    showApprove() {
-      return !this.userHasApproved && this.userCanApprove && this.mr.isOpen;
-    },
-    showUnapprove() {
-      return this.userHasApproved && !this.userCanApprove && this.mr.state !== 'merged';
+    hasFooter() {
+      return Boolean(this.mr.approvals);
     },
     requirePasswordToApprove() {
       return this.mr.approvals.require_password_to_approve;
@@ -105,6 +92,7 @@ export default {
     },
     hasAction() {
       return Boolean(this.action);
+      return !this.isBasic && this.approvals.require_password_to_approve;
     },
   },
   watch: {
@@ -114,27 +102,19 @@ export default {
       }
     },
   },
-  created() {
-    this.refreshApprovals()
-      .then(() => {
-        this.fetchingApprovals = false;
-      })
-      .catch(() => createFlash(FETCH_ERROR));
-  },
   methods: {
-    clearError() {
-      this.hasApprovalAuthError = false;
-      const flashEl = document.querySelector('.flash-alert');
-      if (flashEl) {
-        hideFlash(flashEl);
-      }
-    },
     refreshAll() {
+      if (this.isBasic) return Promise.resolve();
+
       return Promise.all([this.refreshRules(), this.refreshApprovals()]).catch(() =>
         createFlash(FETCH_ERROR),
       );
     },
     refreshRules() {
+      if (this.isBasic) return Promise.resolve();
+
+      this.$root.$emit('bv::hide::modal', this.modalId);
+
       this.isLoadingRules = true;
 
       return this.service.fetchApprovalSettings().then(settings => {
@@ -142,56 +122,7 @@ export default {
         this.isLoadingRules = false;
       });
     },
-    refreshApprovals() {
-      return this.service.fetchApprovals().then(data => {
-        this.mr.setApprovals(data);
-      });
-    },
-    approve() {
-      if (this.requirePasswordToApprove) {
-        this.$root.$emit('bv::show::modal', this.modalId);
-        return;
-      }
-      this.updateApproval(
-        () => this.service.approveMergeRequest(),
-        () => createFlash(APPROVE_ERROR),
-      );
-    },
-    unapprove() {
-      this.updateApproval(
-        () => this.service.unapproveMergeRequest(),
-        () => createFlash(UNAPPROVE_ERROR),
-      );
-    },
-    approveWithAuth(data) {
-      this.updateApproval(
-        () => this.service.approveMergeRequestWithAuth(data),
-        error => {
-          if (error && error.response && error.response.status === 401) {
-            this.hasApprovalAuthError = true;
-            return;
-          }
-          createFlash(APPROVE_ERROR);
-        },
-      );
-    },
-    updateApproval(serviceFn, errFn) {
-      this.isApproving = true;
-      this.clearError();
-      return serviceFn()
-        .then(data => {
-          this.mr.setApprovals(data);
-          eventHub.$emit('MRWidgetUpdateRequested');
-          this.$root.$emit('bv::hide::modal', this.modalId);
-        })
-        .catch(errFn)
-        .then(() => {
-          this.isApproving = false;
-          this.refreshRules();
-        });
-    },
   },
-  FETCH_LOADING,
 };
 </script>
 <template>
@@ -244,4 +175,33 @@ export default {
       :eligible-approvers-docs-path="mr.eligibleApproversDocsPath"
     />
   </mr-widget-container>
+  <approvals
+    :mr="mr"
+    :service="service"
+    :is-optional-default="isOptional"
+    :require-password-to-approve="requirePasswordToApprove"
+    :modal-id="modalId"
+    @updated="refreshRules"
+  >
+    <template v-if="!isBasic" #default="{ isApproving, approveWithAuth, hasApprovalAuthError }">
+      <approvals-auth
+        :is-approving="isApproving"
+        :has-error="hasApprovalAuthError"
+        :modal-id="modalId"
+        @approve="approveWithAuth"
+        @hide="clearError"
+      />
+    </template>
+    <template v-if="!isBasic" #footer>
+      <approvals-footer
+        v-if="hasFooter"
+        v-model="isExpanded"
+        :suggested-approvers="approvals.suggested_approvers"
+        :approval-rules="mr.approvalRules"
+        :is-loading-rules="isLoadingRules"
+        :security-approvals-help-page-path="mr.securityApprovalsHelpPagePath"
+        :eligible-approvers-docs-path="mr.eligibleApproversDocsPath"
+      />
+    </template>
+  </approvals>
 </template>

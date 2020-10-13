@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SnippetsController, '(JavaScript fixtures)', type: :controller do
+RSpec.describe SnippetsController, '(JavaScript fixtures)', type: :controller do
   include JavaScriptFixturesHelpers
 
   let(:admin) { create(:admin) }
@@ -17,7 +17,6 @@ describe SnippetsController, '(JavaScript fixtures)', type: :controller do
   end
 
   before do
-    stub_feature_flags(snippets_vue: false)
     sign_in(admin)
     allow(Discussion).to receive(:build_discussion_id).and_return(['discussionid:ceterumcenseo'])
   end

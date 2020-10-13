@@ -4,7 +4,10 @@ module Types
   class MergeRequestType < BaseObject
     graphql_name 'MergeRequest'
 
+    connection_type_class(Types::CountableConnectionType)
+
     implements(Types::Notes::NoteableType)
+    implements(Types::CurrentUserTodos)
 
     authorize :read_merge_request
 
@@ -54,6 +57,13 @@ module Types
           description: 'Indicates if the merge has been set to be merged when its pipeline succeeds (MWPS)'
     field :diff_head_sha, GraphQL::STRING_TYPE, null: true,
           description: 'Diff head SHA of the merge request'
+    field :diff_stats, [Types::DiffStatsType], null: true, calls_gitaly: true,
+          description: 'Details about which files were changed in this merge request' do
+      argument :path, GraphQL::STRING_TYPE, required: false, description: 'A specific file-path'
+    end
+
+    field :diff_stats_summary, Types::DiffStatsSummaryType, null: true, calls_gitaly: true,
+          description: 'Summary of which files were changed in this merge request'
     field :merge_commit_sha, GraphQL::STRING_TYPE, null: true,
           description: 'SHA of the merge request commit (set once merged)'
     field :user_notes_count, GraphQL::INT_TYPE, null: true,
@@ -70,7 +80,7 @@ module Types
           description: 'Error message due to a merge error'
     field :allow_collaboration, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates if members of the target project can push to the fork'
-    field :should_be_rebased, GraphQL::BOOLEAN_TYPE, method: :should_be_rebased?, null: false,
+    field :should_be_rebased, GraphQL::BOOLEAN_TYPE, method: :should_be_rebased?, null: false, calls_gitaly: true,
           description: 'Indicates if the merge request will be rebased'
     field :rebase_commit_sha, GraphQL::STRING_TYPE, null: true,
           description: 'Rebase commit SHA of the merge request'
@@ -103,6 +113,7 @@ module Types
     field :head_pipeline, Types::Ci::PipelineType, null: true, method: :actual_head_pipeline,
           description: 'The pipeline running on the branch HEAD of the merge request'
     field :pipelines, Types::Ci::PipelineType.connection_type,
+          null: true,
           description: 'Pipelines for the merge request',
           resolver: Resolvers::MergeRequestPipelinesResolver
 
@@ -134,5 +145,48 @@ module Types
     end
     field :task_completion_status, Types::TaskCompletionStatus, null: false,
           description: Types::TaskCompletionStatus.description
+    field :commit_count, GraphQL::INT_TYPE, null: true,
+          description: 'Number of commits in the merge request'
+    field :conflicts, GraphQL::BOOLEAN_TYPE, null: false, method: :cannot_be_merged?,
+          description: 'Indicates if the merge request has conflicts'
+    field :auto_merge_enabled, GraphQL::BOOLEAN_TYPE, null: false,
+          description: 'Indicates if auto merge is enabled for the merge request'
+
+    field :approved_by, Types::UserType.connection_type, null: true,
+          description: 'Users who approved the merge request'
+
+    def approved_by
+      object.approved_by_users
+    end
+
+    def diff_stats(path: nil)
+      stats = Array.wrap(object.diff_stats&.to_a)
+
+      if path.present?
+        stats.select { |s| s.path == path }
+      else
+        stats
+      end
+    end
+
+    def diff_stats_summary
+      metrics = object.metrics
+
+      if metrics && metrics.added_lines && metrics.removed_lines
+        return { additions: metrics.added_lines, deletions: metrics.removed_lines, file_count: object.merge_request_diff&.files_count || 0 }
+      end
+
+      nil_stats = { additions: 0, deletions: 0, file_count: 0 }
+      return nil_stats unless object.diff_stats.present?
+
+      object.diff_stats.each_with_object(nil_stats) do |status, hash|
+        hash.merge!(additions: status.additions, deletions: status.deletions, file_count: 1) { |_, x, y| x + y }
+      end
+    end
+
+    def commit_count
+      object&.metrics&.commits_count
+    end
   end
 end
+Types::MergeRequestType.prepend_if_ee('::EE::Types::MergeRequestType')

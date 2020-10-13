@@ -7,9 +7,12 @@ module Ci
     include UpdateProjectStatistics
     include UsageStatistics
     include Sortable
+    include IgnorableColumns
+    include Artifactable
+    include FileStoreMounter
     extend Gitlab::Ci::Model
 
-    NotSupportedAdapterError = Class.new(StandardError)
+    ignore_columns :locked, remove_after: '2020-07-22', remove_with: '13.4'
 
     TEST_REPORT_FILE_TYPES = %w[junit].freeze
     COVERAGE_REPORT_FILE_TYPES = %w[cobertura].freeze
@@ -34,13 +37,17 @@ module Ci
       license_management: 'gl-license-management-report.json',
       license_scanning: 'gl-license-scanning-report.json',
       performance: 'performance.json',
+      browser_performance: 'browser-performance.json',
+      load_performance: 'load-performance.json',
       metrics: 'metrics.txt',
       lsif: 'lsif.json',
       dotenv: '.env',
       cobertura: 'cobertura-coverage.xml',
       terraform: 'tfplan.json',
       cluster_applications: 'gl-cluster-applications.json',
-      requirements: 'requirements.json'
+      requirements: 'requirements.json',
+      coverage_fuzzing: 'gl-coverage-fuzzing.json',
+      api_fuzzing: 'gl-api-fuzzing-report.json'
     }.freeze
 
     INTERNAL_TYPES = {
@@ -59,11 +66,8 @@ module Ci
       cluster_applications: :gzip,
       lsif: :zip,
 
-      # All these file formats use `raw` as we need to store them uncompressed
-      # for Frontend to fetch the files and do analysis
-      # When they will be only used by backend, they can be `gzipped`.
-      accessibility: :raw,
-      codequality: :raw,
+      # Security reports and license scanning reports are raw artifacts
+      # because they used to be fetched by the frontend, but this is not the case anymore.
       sast: :raw,
       secret_detection: :raw,
       dependency_scanning: :raw,
@@ -71,13 +75,24 @@ module Ci
       dast: :raw,
       license_management: :raw,
       license_scanning: :raw,
+
+      # All these file formats use `raw` as we need to store them uncompressed
+      # for Frontend to fetch the files and do analysis
+      # When they will be only used by backend, they can be `gzipped`.
+      accessibility: :raw,
+      codequality: :raw,
       performance: :raw,
+      browser_performance: :raw,
+      load_performance: :raw,
       terraform: :raw,
-      requirements: :raw
+      requirements: :raw,
+      coverage_fuzzing: :raw,
+      api_fuzzing: :raw
     }.freeze
 
     DOWNLOADABLE_TYPES = %w[
       accessibility
+      api_fuzzing
       archive
       cobertura
       codequality
@@ -91,20 +106,21 @@ module Ci
       lsif
       metrics
       performance
+      browser_performance
+      load_performance
       sast
+      secret_detection
       requirements
     ].freeze
 
     TYPE_AND_FORMAT_PAIRS = INTERNAL_TYPES.merge(REPORT_TYPES).freeze
 
-    # This is required since we cannot add a default to the database
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/215418
-    attribute :locked, :boolean, default: false
+    PLAN_LIMIT_PREFIX = 'ci_max_artifact_size_'
 
     belongs_to :project
     belongs_to :job, class_name: "Ci::Build", foreign_key: :job_id
 
-    mount_uploader :file, JobArtifactUploader
+    mount_file_store_uploader JobArtifactUploader
 
     validates :file_format, presence: true, unless: :trace?, on: :create
     validate :validate_supported_file_format!, on: :create
@@ -113,13 +129,10 @@ module Ci
 
     update_project_statistics project_statistics_name: :build_artifacts_size
 
-    after_save :update_file_store, if: :saved_change_to_file?
-
     scope :not_expired, -> { where('expire_at IS NULL OR expire_at > ?', Time.current) }
-    scope :with_files_stored_locally, -> { where(file_store: [nil, ::JobArtifactUploader::Store::LOCAL]) }
+    scope :with_files_stored_locally, -> { where(file_store: ::JobArtifactUploader::Store::LOCAL) }
     scope :with_files_stored_remotely, -> { where(file_store: ::JobArtifactUploader::Store::REMOTE) }
     scope :for_sha, ->(sha, project_id) { joins(job: :pipeline).where(ci_pipelines: { sha: sha, project_id: project_id }) }
-    scope :for_ref, ->(ref, project_id) { joins(job: :pipeline).where(ci_pipelines: { ref: ref, project_id: project_id }) }
     scope :for_job_name, ->(name) { joins(:job).where(ci_builds: { name: name }) }
 
     scope :with_file_types, -> (file_types) do
@@ -154,10 +167,8 @@ module Ci
       where(file_type: types)
     end
 
-    scope :expired, -> (limit) { where('expire_at < ?', Time.current).limit(limit) }
     scope :downloadable, -> { where(file_type: DOWNLOADABLE_TYPES) }
-    scope :locked, -> { where(locked: true) }
-    scope :unlocked, -> { where(locked: [false, nil]) }
+    scope :unlocked, -> { joins(job: :pipeline).merge(::Ci::Pipeline.unlocked).order(expire_at: :desc) }
 
     scope :scoped_project, -> { where('ci_job_artifacts.project_id = projects.id') }
 
@@ -175,7 +186,7 @@ module Ci
       codequality: 9, ## EE-specific
       license_management: 10, ## EE-specific
       license_scanning: 101, ## EE-specific till 13.0
-      performance: 11, ## EE-specific
+      performance: 11, ## EE-specific till 13.2
       metrics: 12, ## EE-specific
       metrics_referee: 13, ## runner referees
       network_referee: 14, ## runner referees
@@ -186,14 +197,12 @@ module Ci
       accessibility: 19,
       cluster_applications: 20,
       secret_detection: 21, ## EE-specific
-      requirements: 22 ## EE-specific
+      requirements: 22, ## EE-specific
+      coverage_fuzzing: 23, ## EE-specific
+      browser_performance: 24, ## EE-specific
+      load_performance: 25, ## EE-specific
+      api_fuzzing: 26 ## EE-specific
     }
-
-    enum file_format: {
-      raw: 1,
-      zip: 2,
-      gzip: 3
-    }, _suffix: true
 
     # `file_location` indicates where actual files are stored.
     # Ideally, actual files should be stored in the same directory, and use the same
@@ -209,11 +218,6 @@ module Ci
       hashed_path: 2
     }
 
-    FILE_FORMAT_ADAPTERS = {
-      gzip: Gitlab::Ci::Build::Artifacts::Adapters::GzipStream,
-      raw: Gitlab::Ci::Build::Artifacts::Adapters::RawStream
-    }.freeze
-
     def validate_supported_file_format!
       return if Feature.disabled?(:drop_license_management_artifact, project, default_enabled: true)
 
@@ -228,10 +232,10 @@ module Ci
       end
     end
 
-    def update_file_store
-      # The file.object_store is set during `uploader.store!`
-      # which happens after object is inserted/updated
-      self.update_column(:file_store, file.object_store)
+    def self.associated_file_types_for(file_type)
+      return unless file_types.include?(file_type)
+
+      [file_type]
     end
 
     def self.total_size
@@ -267,29 +271,35 @@ module Ci
     def expire_in=(value)
       self.expire_at =
         if value
-          ChronicDuration.parse(value)&.seconds&.from_now
+          ::Gitlab::Ci::Build::Artifacts::ExpireInParser.new(value).seconds_from_now
         end
-    end
-
-    def each_blob(&blk)
-      unless file_format_adapter_class
-        raise NotSupportedAdapterError, 'This file format requires a dedicated adapter'
-      end
-
-      file.open do |stream|
-        file_format_adapter_class.new(stream).each_blob(&blk)
-      end
     end
 
     def self.archived_trace_exists_for?(job_id)
       where(job_id: job_id).trace.take&.file&.file&.exists?
     end
 
-    private
+    def self.max_artifact_size(type:, project:)
+      limit_name = "#{PLAN_LIMIT_PREFIX}#{type}"
 
-    def file_format_adapter_class
-      FILE_FORMAT_ADAPTERS[file_format.to_sym]
+      max_size = project.actual_limits.limit_for(
+        limit_name,
+        alternate_limit: -> { project.closest_setting(:max_artifacts_size) }
+      )
+
+      max_size&.megabytes.to_i
     end
+
+    def to_deleted_object_attrs
+      {
+        file_store: file_store,
+        store_dir: file.store_dir.to_s,
+        file: file_identifier,
+        pick_up_at: expire_at || Time.current
+      }
+    end
+
+    private
 
     def set_size
       self.size = file.size

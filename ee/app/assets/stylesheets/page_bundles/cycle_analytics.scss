@@ -1,0 +1,41 @@
+@import '../../../../../app/assets/stylesheets/page_bundles/cycle_analytics';
+
+.gl-daterange-picker {
+  .gl-datepicker-input {
+    width: 140px;
+
+    @include media-breakpoint-down(md) {
+      width: 100%;
+    }
+  }
+
+  label {
+    @include media-breakpoint-up(lg) {
+      margin-bottom: 0;
+      margin-right: $gl-padding-4;
+    }
+  }
+}
+
+.daterange-indicator {
+  @include media-breakpoint-down(md) {
+    .number-of-days {
+      padding-left: 0.25rem !important;
+      margin-top: 0.25rem;
+    }
+
+    svg {
+      margin-top: 0.45rem;
+    }
+  }
+}
+
+// This can be refactored once the offical design implementation is complete
+// https://gitlab.com/gitlab-org/gitlab/-/issues/211796
+.sortable-drag {
+  border-radius: 0.25rem;
+  background-color: var(--white, $white);
+  box-shadow: 0 0 0.25rem $gl-btn-active-background,
+    0 0.25rem 0.75rem $gl-btn-active-background;
+}
+

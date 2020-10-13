@@ -15,7 +15,7 @@ class ListIssue {
     this.labels = [];
     this.assignees = [];
     this.selected = false;
-    this.position = obj.position || obj.relative_position || Infinity;
+    this.position = obj.position || obj.relative_position || obj.relativePosition || Infinity;
     this.isFetching = {
       subscriptions: true,
     };
@@ -30,9 +30,7 @@ class ListIssue {
   }
 
   addLabel(label) {
-    if (!this.findLabel(label)) {
-      this.labels.push(new ListLabel(label));
-    }
+    boardsStore.addIssueLabel(this, label);
   }
 
   findLabel(findLabel) {
@@ -40,13 +38,11 @@ class ListIssue {
   }
 
   removeLabel(removeLabel) {
-    if (removeLabel) {
-      this.labels = this.labels.filter(label => removeLabel.id !== label.id);
-    }
+    boardsStore.removeIssueLabel(this, removeLabel);
   }
 
   removeLabels(labels) {
-    labels.forEach(this.removeLabel.bind(this));
+    boardsStore.removeIssueLabels(this, labels);
   }
 
   addAssignee(assignee) {
@@ -54,7 +50,7 @@ class ListIssue {
   }
 
   findAssignee(findAssignee) {
-    return this.assignees.find(assignee => assignee.id === findAssignee.id);
+    return boardsStore.findIssueAssignee(this, findAssignee);
   }
 
   removeAssignee(removeAssignee) {
@@ -66,16 +62,11 @@ class ListIssue {
   }
 
   addMilestone(milestone) {
-    const miletoneId = this.milestone ? this.milestone.id : null;
-    if (IS_EE && milestone.id !== miletoneId) {
-      this.milestone = new ListMilestone(milestone);
-    }
+    boardsStore.addIssueMilestone(this, milestone);
   }
 
   removeMilestone(removeMilestone) {
-    if (IS_EE && removeMilestone && removeMilestone.id === this.milestone.id) {
-      this.milestone = {};
-    }
+    boardsStore.removeIssueMilestone(this, removeMilestone);
   }
 
   getLists() {
@@ -83,15 +74,15 @@ class ListIssue {
   }
 
   updateData(newData) {
-    Object.assign(this, newData);
+    boardsStore.updateIssueData(this, newData);
   }
 
   setFetchingState(key, value) {
-    this.isFetching[key] = value;
+    boardsStore.setIssueFetchingState(this, key, value);
   }
 
   setLoadingState(key, value) {
-    this.isLoading[key] = value;
+    boardsStore.setIssueLoadingState(this, key, value);
   }
 
   update() {

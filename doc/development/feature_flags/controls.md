@@ -1,3 +1,10 @@
+---
+type: reference, dev
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+---
+
 # Feature flag controls
 
 ## Access
@@ -81,15 +88,13 @@ parts of the company. The developer responsible needs to determine
 whether this is necessary and the appropriate level of communication.
 This depends on the feature and what sort of impact it might have.
 
-As a guideline:
+Guidelines:
 
-- For simple features that are low-risk, and easily rolled back, then
-  just proceed to [enabling the feature in `#production`](#process).
-- For features that will impact user experience consider notifying
+1. If the feature meets the requirements for creating a [Change Management](https://about.gitlab.com/handbook/engineering/infrastructure/change-management/#feature-flags-and-the-change-management-process) issue, create a Change Management issue per [criticality guidelines](https://about.gitlab.com/handbook/engineering/infrastructure/change-management/#change-request-workflows).
+1. For simple, low-risk, easily reverted features, proceed and [enable the feature in `#production`](#process).
+1. For features that impact the user experience, consider notifying
+  `#support_gitlab-com` first.
   `#support_gitlab-com` beforehand.
-- For features with significant downstream effects (e.g.: turning on/off
-  Elasticsearch indexing) consider coordinating with `#production`
-  beforehand.
 
 #### Process
 
@@ -140,7 +145,7 @@ run the following in Slack:
 This sets a feature flag to `true` based on the following formula:
 
 ```ruby
-feature_flag_state = Zlib.crc32("some_feature<Actor>:#{actor.id}") % (100 * 1_000) < 25 * 1_000]
+feature_flag_state = Zlib.crc32("some_feature<Actor>:#{actor.id}") % (100 * 1_000) < 25 * 1_000
 # where <Actor>: is a `User`, `Group`, `Project` and actor is an instance
 ```
 
@@ -210,10 +215,19 @@ actors.
 Feature.enabled?(:some_feature, group)
 ```
 
-NOTE:
-
+NOTE: **Note:**
 **Percentage of time** rollout is not a good idea if what you want is to make sure a feature
 is always on or off to the users. In that case, **Percentage of actors** rollout is a better method.
+
+Lastly, to verify that the feature is deemed stable in as many cases as possible,
+you should fully roll out the feature by enabling the flag **globally** by running:
+
+```shell
+/chatops run feature set some_feature true
+```
+
+This changes the feature flag state to be **enabled** always, which overrides the
+existing gates (e.g. `--group=gitlab-org`) in the above processes.
 
 ### Feature flag change logging
 

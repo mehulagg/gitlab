@@ -2,13 +2,12 @@
 
 require 'spec_helper'
 
-describe Gitlab::BackgroundMigration::FixRubyObjectInAuditEvents, :migration, schema: 20200518114540 do
+RSpec.describe Gitlab::BackgroundMigration::FixRubyObjectInAuditEvents, :migration, schema: 20200518114540 do
   let(:audit_events) { table(:audit_events) }
 
   it 'cleans up ruby/object in details field', :aggregate_failures do
     tainted_audit_event = audit_events.create!(
       author_id: -1,
-      type: 'SecurityEvent',
       entity_id: 1,
       entity_type: 'User',
       details: "---\n:failed_login: STANDARD\n:author_name: hacker\n" \
@@ -18,7 +17,6 @@ describe Gitlab::BackgroundMigration::FixRubyObjectInAuditEvents, :migration, sc
 
     clean_audit_event = audit_events.create!(
       author_id: 1,
-      type: 'SecurityEvent',
       entity_id: 1,
       entity_type: 'User',
       details: "---\n:failed_login: STANDARD\n:author_name: homer\n" \

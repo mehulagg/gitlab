@@ -1,5 +1,6 @@
 <script>
 import { GlPopover, GlSprintf, GlLink } from '@gitlab/ui';
+import { toNumber } from 'lodash';
 import StackedProgressBar from '~/vue_shared/components/stacked_progress_bar.vue';
 import tooltip from '~/vue_shared/directives/tooltip';
 
@@ -22,8 +23,6 @@ export default {
     itemValue: {
       type: Object,
       required: true,
-      validator: value =>
-        ['totalCount', 'successCount', 'failureCount'].every(key => typeof value[key] === 'number'),
     },
     detailsPath: {
       type: String,
@@ -33,7 +32,16 @@ export default {
   },
   computed: {
     queuedCount() {
-      return this.itemValue.totalCount - this.itemValue.successCount - this.itemValue.failureCount;
+      return this.totalCount - this.successCount - this.failureCount;
+    },
+    totalCount() {
+      return toNumber(this.itemValue.totalCount) || 0;
+    },
+    failureCount() {
+      return toNumber(this.itemValue.failureCount) || 0;
+    },
+    successCount() {
+      return toNumber(this.itemValue.successCount) || 0;
     },
   },
 };
@@ -46,9 +54,9 @@ export default {
       tabindex="0"
       :hide-tooltips="true"
       :unavailable-label="__('Nothing to synchronize')"
-      :success-count="itemValue.successCount"
-      :failure-count="itemValue.failureCount"
-      :total-count="itemValue.totalCount"
+      :success-count="successCount"
+      :failure-count="failureCount"
+      :total-count="totalCount"
     />
     <gl-popover
       :target="`syncProgress-${itemTitle}`"
@@ -67,12 +75,12 @@ export default {
         <div class="d-flex align-items-center my-1">
           <div class="mr-2 bg-transparent gl-w-5 gl-h-2"></div>
           <span class="flex-grow-1 mr-3">{{ __('Total') }}</span>
-          <span class="font-weight-bold">{{ itemValue.totalCount.toLocaleString() }}</span>
+          <span class="font-weight-bold">{{ totalCount.toLocaleString() }}</span>
         </div>
         <div class="d-flex align-items-center my-2">
           <div class="mr-2 bg-success-500 gl-w-5 gl-h-2"></div>
           <span class="flex-grow-1 mr-3">{{ __('Synced') }}</span>
-          <span class="font-weight-bold">{{ itemValue.successCount.toLocaleString() }}</span>
+          <span class="font-weight-bold">{{ successCount.toLocaleString() }}</span>
         </div>
         <div class="d-flex align-items-center my-2">
           <div class="mr-2 bg-secondary-200 gl-w-5 gl-h-2"></div>
@@ -82,7 +90,7 @@ export default {
         <div class="d-flex align-items-center my-2">
           <div class="mr-2 bg-danger-500 gl-w-5 gl-h-2"></div>
           <span class="flex-grow-1 mr-3">{{ __('Failed') }}</span>
-          <span class="font-weight-bold">{{ itemValue.failureCount.toLocaleString() }}</span>
+          <span class="font-weight-bold">{{ failureCount.toLocaleString() }}</span>
         </div>
         <div v-if="detailsPath" class="mt-3">
           <gl-link class="gl-font-sm" :href="detailsPath" target="_blank">{{

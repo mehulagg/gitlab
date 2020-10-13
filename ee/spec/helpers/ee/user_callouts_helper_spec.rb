@@ -3,6 +3,8 @@
 require "spec_helper"
 
 RSpec.describe EE::UserCalloutsHelper do
+  using RSpec::Parameterized::TableSyntax
+
   describe '.render_enable_hashed_storage_warning' do
     context 'when we should show the enable warning' do
       it 'renders the enable warning' do
@@ -171,8 +173,6 @@ RSpec.describe EE::UserCalloutsHelper do
   end
 
   describe '#render_dashboard_gold_trial' do
-    using RSpec::Parameterized::TableSyntax
-
     let_it_be(:namespace) { create(:namespace) }
     let_it_be(:gold_plan) { create(:gold_plan) }
     let(:user) { namespace.owner }
@@ -217,27 +217,9 @@ RSpec.describe EE::UserCalloutsHelper do
         helper.render_dashboard_gold_trial(user)
       end
     end
-
-    context 'when render_dashboard_gold_trial feature is disabled' do
-      before do
-        stub_feature_flags(render_dashboard_gold_trial: false)
-
-        allow(helper).to receive(:show_gold_trial?).and_return(true)
-        allow(helper).to receive(:user_default_dashboard?).and_return(true)
-        allow(helper).to receive(:has_some_namespaces_with_no_trials?).and_return(true)
-      end
-
-      it 'does not render' do
-        expect(helper).not_to receive(:render)
-
-        helper.render_dashboard_gold_trial(user)
-      end
-    end
   end
 
   describe '#render_billings_gold_trial' do
-    using RSpec::Parameterized::TableSyntax
-
     let(:namespace) { create(:namespace) }
     let_it_be(:free_plan) { create(:free_plan) }
     let_it_be(:silver_plan) { create(:silver_plan) }
@@ -289,8 +271,6 @@ RSpec.describe EE::UserCalloutsHelper do
   end
 
   describe '#render_account_recovery_regular_check' do
-    using RSpec::Parameterized::TableSyntax
-
     let(:new_user) { create(:user) }
     let(:old_user) { create(:user, created_at: 4.months.ago )}
     let(:anonymous) { nil }
@@ -348,25 +328,44 @@ RSpec.describe EE::UserCalloutsHelper do
     end
   end
 
-  describe '.show_standalone_vulnerabilities_introduction_banner?' do
-    subject { helper.show_standalone_vulnerabilities_introduction_banner? }
+  describe '.show_token_expiry_notification?' do
+    subject { helper.show_token_expiry_notification? }
 
-    let(:user) { create(:user) }
+    let_it_be(:user) { create(:user) }
 
-    before do
-      allow(helper).to receive(:current_user).and_return(user)
+    where(:expiration_enforced?, :dismissed_callout?, :active?, :result) do
+      true  | true  | true  | false
+      true  | true  | false | false
+      true  | false | true  | false
+      false | true  | true  | false
+      true  | false | false | false
+      false | false | true  | true
+      false | true  | false | false
+      false | false | false | false
     end
 
-    context 'when the introduction banner has not been dismissed' do
-      it { is_expected.to be_truthy }
-    end
-
-    context 'when the introduction banner was dismissed' do
+    with_them do
       before do
-        create(:user_callout, user: user, feature_name: described_class::STANDALONE_VULNERABILITIES_INTRODUCTION_BANNER)
+        allow(helper).to receive(:current_user).and_return(user)
+        allow(user).to receive(:active?).and_return(active?)
+        allow(helper).to receive(:token_expiration_enforced?).and_return(expiration_enforced?)
+        allow(user).to receive(:dismissed_callout?).and_return(dismissed_callout?)
       end
 
-      it { is_expected.to be_falsy }
+      it do
+        expect(subject).to be result
+      end
+
+      context 'when user is nil' do
+        before do
+          allow(helper).to receive(:current_user).and_return(nil)
+          allow(helper).to receive(:token_expiration_enforced?).and_return(false)
+        end
+
+        it do
+          expect(subject).to be false
+        end
+      end
     end
   end
 end

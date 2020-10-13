@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::AutocompleteService do
+RSpec.describe Projects::AutocompleteService do
   describe '#issues' do
     describe 'confidential issues' do
       let(:author) { create(:user) }
@@ -138,7 +138,7 @@ describe Projects::AutocompleteService do
     def expect_labels_to_equal(labels, expected_labels)
       expect(labels.size).to eq(expected_labels.size)
       extract_title = lambda { |label| label['title'] }
-      expect(labels.map(&extract_title)).to eq(expected_labels.map(&extract_title))
+      expect(labels.map(&extract_title)).to match_array(expected_labels.map(&extract_title))
     end
 
     let(:user) { create(:user) }

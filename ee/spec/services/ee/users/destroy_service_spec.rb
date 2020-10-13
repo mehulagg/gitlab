@@ -21,15 +21,17 @@ RSpec.describe Users::DestroyService do
     context 'when project is a mirror' do
       let(:project) { create(:project, :mirror, mirror_user_id: user.id) }
 
-      it 'assigns mirror_user to a project owner' do
-        new_mirror_user = project.team.owners.first
+      it 'disables mirror and does not assign a new mirror_user' do
+        expect(::Gitlab::ErrorTracking).to receive(:track_exception)
 
-        expect_any_instance_of(EE::NotificationService)
-          .to receive(:project_mirror_user_changed)
-          .with(new_mirror_user, user.name, project)
+        allow_next_instance_of(::NotificationService) do |notification|
+          expect(notification).to receive(:mirror_was_disabled)
+            .with(project, user.name)
+            .and_call_original
+        end
 
-        expect { operation }.to change { project.reload.mirror_user }
-          .from(user).to(new_mirror_user)
+        expect { operation }.to change { project.reload.mirror_user }.from(user).to(nil)
+          .and change { project.reload.mirror }.from(true).to(false)
       end
     end
 
@@ -48,7 +50,7 @@ RSpec.describe Users::DestroyService do
             details: {
               remove: 'user',
               author_name: current_user.name,
-              target_id: @resource.full_path,
+              target_id: @resource.id,
               target_type: 'User',
               target_details: @resource.full_path
             }

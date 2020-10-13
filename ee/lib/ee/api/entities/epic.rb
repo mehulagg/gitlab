@@ -4,6 +4,8 @@ module EE
   module API
     module Entities
       class Epic < Grape::Entity
+        include ::API::Helpers::RelatedResourcesHelpers
+
         can_admin_epic = ->(epic, opts) { Ability.allowed?(opts[:user], :admin_epic, epic) }
 
         expose :id
@@ -76,6 +78,20 @@ module EE
 
         def web_edit_url
           ::Gitlab::Routing.url_helpers.group_epic_path(object.group, object)
+        end
+
+        expose :_links do
+          expose :self do |epic|
+            expose_url(api_v4_groups_epics_path(id: epic.group_id, epic_iid: epic.iid))
+          end
+
+          expose :epic_issues do |epic|
+            expose_url(api_v4_groups_epics_issues_path(id: epic.group_id, epic_iid: epic.iid))
+          end
+
+          expose :group do |epic|
+            expose_url(api_v4_groups_path(id: epic.group_id))
+          end
         end
       end
     end
