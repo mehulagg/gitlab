@@ -37,14 +37,14 @@ module Mutations
         project = authorized_find_project!(full_path: full_path)
         raise Gitlab::Graphql::Errors::ResourceNotAvailable, 'Feature disabled' unless allowed?(project)
 
-        dast_site_token = dast_site_token_id.find
-
         dast_site_validation = DastSiteValidation.new(
-          dast_site_token: dast_site_token,
+          dast_site_token: dast_site_token_id.find,
           validation_strategy: strategy
         )
 
         if dast_site_validation.save
+          DastSiteValidationWorker.perform_async(dast_site_validation.id)
+
           success_response(dast_site_validation)
         else
           error_response(dast_site_validation)
