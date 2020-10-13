@@ -79,7 +79,7 @@ ports:
     onOpen: ignore
   - port: 5000  # auto_devops
     onOpen: ignore
-  - port: 5778
+  - port: 5778  # jaeger
     onOpen: ignore
   - port: 9000  # object_store / minio
     onOpen: ignore
