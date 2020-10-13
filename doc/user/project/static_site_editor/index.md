@@ -10,7 +10,7 @@ description: "The static site editor enables users to edit content on static web
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28758) in GitLab 12.10.
 > - WYSIWYG editor [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214559) in GitLab 13.0.
-> - Non-Markdown content blocks uneditable on the WYSIWYG mode [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216836) in GitLab 13.3.
+> - Non-Markdown content blocks are not editable on the WYSIWYG mode [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216836) in GitLab 13.3.
 
 Static Site Editor (SSE) enables users to edit content on static websites without
 prior knowledge of the underlying templating language, site architecture, or
@@ -19,7 +19,7 @@ and submit the changes for review.
 
 ## Use cases
 
-The Static Site Editors allows collaborators to submit changes to static site
+The Static Site Editor allows collaborators to submit changes to static site
 files seamlessly. For example:
 
 - Non-technical collaborators can easily edit a page directly from the browser;
@@ -42,7 +42,7 @@ Middleman sites for now. You have to use a specific site template to start
 using it. The project template is configured to deploy a [Middleman](https://middlemanapp.com/)
 static website with [GitLab Pages](../pages/index.md).
 
-Once your website is up and running, you'll see a button **Edit this page** on
+Once your website is up and running, an **Edit this page** button displays on
 the bottom-left corner of its pages:
 
 ![Edit this page button](img/edit_this_page_button_v12_10.png)
@@ -66,12 +66,15 @@ easily edit your content.
 1. To get started, create a new project from the [Static Site Editor - Middleman](https://gitlab.com/gitlab-org/project-templates/static-site-editor-middleman)
    template. You can either [fork it](../repository/forking_workflow.md#creating-a-fork)
    or [create a new project from a template](../../../gitlab-basics/create-project.md#built-in-templates).
-1. Edit the `data/config.yml` file adding your project's path.
-1. Editing the file triggers a CI/CD pipeline to deploy your project with GitLab Pages.
+1. Edit the [`data/config.yml`](#static-site-generator-configuration) file, and replace the `<username>`
+   and `<project-name>` with the proper values for your project's path. See
+   ["Static Site Generator configuration"](#static-site-generator-configuration) for more details.
+1. (Optional) Edit the [`.gitlab/static-site-editor.yml`](#static-site-editor-configuration-file) file. See ["Static Site Editor configuration file"](#static-site-editor-configuration-file) for more details.
+1. Committing the edits to these files triggers a CI/CD pipeline to deploy your project with GitLab Pages.
 1. When the pipeline finishes, from your project's left-side menu, go to **Settings > Pages** to find the URL of your new website.
 1. Visit your website and look at the bottom-left corner of the screen to see the new **Edit this page** button.
 
-Anyone satisfying the [requirements](#requirements) will be able to edit the
+Anyone satisfying the [requirements](#requirements) can edit the
 content of the pages without prior knowledge of Git or of your site's
 codebase.
 
@@ -147,6 +150,51 @@ configuration options for the editor. When the functionality of the existing `da
 is replicated in the new configuration file, `data/config.yml` will be formally deprecated.
 <!-- THIS SECTION WILL BE UPDATED BY https://gitlab.com/gitlab-org/gitlab/-/merge_requests/44507 -->
 
+
+## Configuration files
+
+You can customize the behavior of a project which uses the Static Site Editor with
+the following configuration files:
+
+- The `.gitlab/static-site-editor.yml` customizes the behavior of the Static Site Editor.
+- Static Site Generator configuration files, such as `data/config.yml`, customize
+  the behavior of the project itself. It controls the **Edit this page** button when
+  the site is generated.
+
+### Static Site Editor configuration file
+
+The `.gitlab/static-site-editor.yml` configuration file contains entries you can
+use to customize behavior of the Static Site Editor. If the file does not exist
+default values which support a default Middleman project configuration are used.
+The [Static Site Editor - Middleman](https://gitlab.com/gitlab-org/project-templates/static-site-editor-middleman) project template generates a file pre-populated with these defaults.
+
+Although the Static Site Editor configuration file was
+[introduced](https://gitlab.com/groups/gitlab-org/-/epics/4267) in GitLab 13.5 with support for
+some entries, these entries are not yet used in the Static Site editor. This section will be updated
+as the features which use these entries are implemented.
+
+### Static Site Generator configuration
+
+#### `data/config.yml`
+
+Middleman uses the `data/config.yml` configuration file in the
+[`layout.erb`](https://gitlab.com/gitlab-org/project-templates/static-site-editor-middleman/-/blob/master/source/layouts/layout.erb)
+to render an **Edit this page** button, which opens the page in the Static Site Editor.
+In the default version of the file created by the Static Site Editor Middleman
+project template, you must replace the `<username>` and `<project-name>` with the
+proper values for your project's path.
+
+Other Static Site Generators used with the Static Site Generator may use different
+configuration files or approaches.
+
+#### Using Other Static Site Generators
+
+Although Middleman is the only Static Site Generator currently officially supported
+by the Static Site Editor, you can configure your project's build and deployment
+to use a different Static Site Generator. In this case, use the Middleman layout
+as an example, and follow a similar approach to properly render an **Edit this page**
+button in your Static Site Generator's layout.
+
 ## Upgrade from GitLab 12.10 to 13.0
 
 In GitLab 13.0, we [introduced breaking changes](https://gitlab.com/gitlab-org/gitlab/-/issues/213282)
@@ -156,5 +204,5 @@ to update your project with the 13.0 changes.
 
 ## Limitations
 
-The Static Site Editor still cannot be quickly added to existing Middleman sites.
-Follow this [epic](https://gitlab.com/groups/gitlab-org/-/epics/2784) for updates.
+- The Static Site Editor still cannot be quickly added to existing Middleman sites.
+  Follow this [epic](https://gitlab.com/groups/gitlab-org/-/epics/2784) for updates.
