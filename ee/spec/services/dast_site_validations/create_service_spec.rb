@@ -56,7 +56,7 @@ RSpec.describe DastSiteValidations::CreateService do
         expect(subject.payload[:status]).to eq('PENDING_VALIDATION')
       end
 
-      context 'when a downstream exception is thrown' do
+      context 'when a downstream exception is thrown because an invalid target_url is given' do
         it 'does not create a dast_site_validation' do
           allow(DastSiteValidation).to receive(:get_normalized_url_base).and_raise(RuntimeError)
 

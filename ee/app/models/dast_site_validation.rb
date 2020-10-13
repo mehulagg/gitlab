@@ -13,8 +13,8 @@ class DastSiteValidation < ApplicationRecord
     joins(:dast_site_token).where(dast_site_tokens: { project_id: project_id })
   end
 
-  scope :most_recent_by_url_base, -> (url_base) do
-    where(url_base: url_base).order(id: :desc)
+  scope :by_url_base, -> (url_base) do
+    where(url_base: url_base)
   end
 
   before_create :set_normalized_url_base

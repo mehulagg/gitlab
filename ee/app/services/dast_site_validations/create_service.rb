@@ -5,23 +5,21 @@ module DastSiteValidations
     def execute
       return ServiceResponse.error(message: 'Insufficient permissions') unless allowed?
 
-      ActiveRecord::Base.transaction do
-        target_url = params[:target_url]
+      target_url = params[:target_url]
+      url_base = normalize_target_url(target_url)
+      dast_site_validation = find_dast_site_validation(url_base)
 
-        dast_site_token = DastSiteToken.create!(
-          project: container,
-          token: SecureRandom.uuid,
-          url: target_url
-        )
+      dast_site_token = DastSiteToken.create!(
+        project: container,
+        token: SecureRandom.uuid,
+        url: target_url
+      )
 
-        url_base = normalize_target_url(target_url)
-        dast_site_validation = find_dast_site_validation(url_base)
-        status = calculate_status(dast_site_validation)
+      status = calculate_status(dast_site_validation)
 
-        ServiceResponse.success(
-          payload: { dast_site_token: dast_site_token, status: status }
-        )
-      end
+      ServiceResponse.success(
+        payload: { dast_site_token: dast_site_token, status: status }
+      )
     rescue ActiveRecord::RecordInvalid => err
       ServiceResponse.error(message: err.record.errors.full_messages)
     end

@@ -14,15 +14,15 @@ RSpec.describe DastSiteValidationsFinder do
   end
 
   describe '#execute' do
-    it 'returns all dast_site_validation_validations' do
-      expect(subject).to contain_exactly(dast_site_validation_1, dast_site_validation_2, dast_site_validation_3)
+    it 'returns all dast_site_validation_validations most recent first' do
+      expect(subject).to eq([dast_site_validation_3, dast_site_validation_2, dast_site_validation_1])
     end
 
     context 'filtering by url_base' do
       let(:params) { { url_base: dast_site_validation_1.url_base } }
 
       it 'returns the matching dast_site_validations' do
-        expect(subject).to contain_exactly(dast_site_validation_1, dast_site_validation_3)
+        expect(subject).to eq([dast_site_validation_3, dast_site_validation_1])
       end
     end
 
@@ -30,7 +30,7 @@ RSpec.describe DastSiteValidationsFinder do
       let(:params) { { project_id: dast_site_validation_2.project.id } }
 
       it 'returns the matching dast_site_validations' do
-        expect(subject).to contain_exactly(dast_site_validation_2)
+        expect(subject).to eq([dast_site_validation_2])
       end
     end
 

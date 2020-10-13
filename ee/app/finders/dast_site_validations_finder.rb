@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class DastSiteValidationsFinder
+  DEFAULT_SORT_VALUE = 'id'.freeze
+  DEFAULT_SORT_DIRECTION = 'desc'.freeze
+
   def initialize(params = {})
     @params = params
   end
@@ -9,7 +12,8 @@ class DastSiteValidationsFinder
     relation = DastSiteValidation.all
     relation = by_project(relation)
     relation = by_url_base(relation)
-    relation
+
+    sort(relation)
   end
 
   private
@@ -25,6 +29,12 @@ class DastSiteValidationsFinder
   def by_url_base(relation)
     return relation if params[:url_base].nil?
 
-    relation.most_recent_by_url_base(params[:url_base])
+    relation.by_url_base(params[:url_base])
   end
+
+  # rubocop: disable CodeReuse/ActiveRecord
+  def sort(relation)
+    relation.order(DEFAULT_SORT_VALUE => DEFAULT_SORT_DIRECTION)
+  end
+  # rubocop: enable CodeReuse/ActiveRecord
 end
