@@ -7,6 +7,18 @@ ENV["RAILS_ENV"] = 'test'
 ENV["IN_MEMORY_APPLICATION_SETTINGS"] = 'true'
 ENV["RSPEC_ALLOW_INVALID_URLS"] = 'true'
 
+if ENV['CRYSTALBALL'] == 'true'
+  require 'crystalball'
+
+  map_storage_path_base = ENV['CI_JOB_NAME'] || 'crystalball_data'
+  map_storage_path =  Rails.root.join("crystalball/#{map_storage_path_base.gsub(%r{[/ ]}, '_')}.yml").to_s
+
+  Crystalball::MapGenerator.start! do |config|
+    config.map_storage_path = map_storage_path
+    config.register Crystalball::MapGenerator::CoverageStrategy.new
+  end
+end
+
 require File.expand_path('../config/environment', __dir__)
 
 require 'rspec/mocks'
