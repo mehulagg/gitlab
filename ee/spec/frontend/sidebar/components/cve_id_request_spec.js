@@ -80,7 +80,7 @@ describe('CveIdRequest', () => {
       });
     });
 
-    it('should not show the "Help" pane when help button is clicked and then closed', (done) => {
+    it('should not show the "Help" pane when help button is clicked and then closed', done => {
       helpButton().click();
 
       Vue.nextTick()
