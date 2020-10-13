@@ -120,14 +120,76 @@ RSpec.describe Gitlab::AlertManagement::Payload::Base do
   end
 
   describe '#alert_params' do
-    before do
-      allow(parsed_payload).to receive(:title).and_return('title')
-      allow(parsed_payload).to receive(:description).and_return('description')
-    end
-
     subject { parsed_payload.alert_params }
 
-    it { is_expected.to eq({ description: 'description', project_id: project.id, title: 'title' }) }
+    context 'with every key' do
+      let_it_be(:raw_payload) { { 'key' => 'value' } }
+      let_it_be(:stubs) do
+        {
+          description: 'description',
+          ends_at: Time.now,
+          environment: create(:environment, project: project),
+          gitlab_fingerprint: 'gitlab_fingerprint',
+          hosts: 'hosts',
+          monitoring_tool: 'monitoring_tool',
+          gitlab_alert: create(:prometheus_alert, project: project),
+          service: 'service',
+          severity: 'critical',
+          starts_at: Time.now,
+          title: 'title'
+        }
+      end
+
+      let(:expected_result) do
+        {
+          description: stubs[:description],
+          ended_at: stubs[:ends_at],
+          environment: stubs[:environment],
+          fingerprint: stubs[:gitlab_fingerprint],
+          hosts: [stubs[:hosts]],
+          monitoring_tool: stubs[:monitoring_tool],
+          payload: raw_payload,
+          project_id: project.id,
+          prometheus_alert: stubs[:gitlab_alert],
+          service: stubs[:service],
+          severity: stubs[:severity],
+          started_at: stubs[:starts_at],
+          title: stubs[:title]
+        }
+      end
+
+      before do
+        stubs.each do |method, value|
+          allow(parsed_payload).to receive(method).and_return(value)
+        end
+      end
+
+      it { is_expected.to eq(expected_result) }
+
+      it 'can be used to saved a new alert' do
+        expect(::AlertManagement::Alert.create(subject)).to be_truthy
+      end
+    end
+
+    context 'with too-long strings' do
+      before do
+        # Limits follow validations in AlertManagement::Alert
+        allow(parsed_payload).to receive(:description).and_return('a' * 1_001)
+        allow(parsed_payload).to receive(:monitoring_tool).and_return('c' * 101)
+        allow(parsed_payload).to receive(:service).and_return('d' * 101)
+        allow(parsed_payload).to receive(:title).and_return('e' * 201)
+      end
+
+      it do
+        is_expected.to eq({
+          description: 'a' * 997 + '...',
+          monitoring_tool: 'c' * 97 + '...',
+          service: 'd' * 97 + '...',
+          project_id: project.id,
+          title: 'e' * 197 + '...'
+        })
+      end
+    end
   end
 
   describe '#gitlab_fingerprint' do

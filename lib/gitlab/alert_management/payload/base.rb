@@ -88,19 +88,19 @@ module Gitlab
         # AlertManagement::Alert directly for read operations.
         def alert_params
           {
-            description: description,
+            description: description&.truncate(1_000),
             ended_at: ends_at,
             environment: environment,
             fingerprint: gitlab_fingerprint,
             hosts: Array(hosts),
-            monitoring_tool: monitoring_tool,
+            monitoring_tool: monitoring_tool&.truncate(100),
             payload: payload,
             project_id: project.id,
             prometheus_alert: gitlab_alert,
-            service: service,
+            service: service&.truncate(100),
             severity: severity,
             started_at: starts_at,
-            title: title
+            title: title&.truncate(200)
           }.transform_values(&:presence).compact
         end
 
