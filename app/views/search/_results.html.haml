@@ -19,6 +19,7 @@
       - elsif @group
         - link_to_group = link_to(@group.name, @group, class: 'ml-md-1')
         = _("in group %{link_to_group}").html_safe % { link_to_group: link_to_group }
+    = render partial: 'sort_dropdown'
   = render_if_exists 'shared/promotions/promote_advanced_search'
   = render partial: "search/results/filters"
 

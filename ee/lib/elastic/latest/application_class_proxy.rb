@@ -136,13 +136,13 @@ module Elastic
 
       def apply_sort(query_hash, options)
         case options[:sort]
-        when 'oldest'
+        when 'created_asc'
           query_hash.merge(sort: {
             created_at: {
               order: 'asc'
             }
           })
-        when 'newest'
+        when 'created_date'
           query_hash.merge(sort: {
             created_at: {
               order: 'desc'

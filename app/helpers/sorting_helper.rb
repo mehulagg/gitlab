@@ -28,7 +28,8 @@ module SortingHelper
       sort_value_contacted_date    => sort_title_contacted_date,
       sort_value_relative_position => sort_title_relative_position,
       sort_value_size              => sort_title_size,
-      sort_value_expire_date       => sort_title_expire_date
+      sort_value_expire_date       => sort_title_expire_date,
+      sort_value_relevant          => sort_title_relevant
     }
   end
 
@@ -421,6 +422,10 @@ module SortingHelper
     s_('SortOptions|Expired date')
   end
 
+  def sort_title_relevant
+    s_('SortOptions|Relevant')
+  end
+
   # Values.
   def sort_value_access_level_asc
     'access_level_asc'
@@ -580,6 +585,10 @@ module SortingHelper
 
   def sort_value_expire_date
     'expired_asc'
+  end
+
+  def sort_value_relevant
+    'relevant'
   end
 
   def packages_sort_options_hash

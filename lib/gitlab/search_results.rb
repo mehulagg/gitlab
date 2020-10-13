@@ -133,9 +133,9 @@ module Gitlab
     # rubocop: disable CodeReuse/ActiveRecord
     def apply_sort(scope)
       case sort
-      when 'oldest'
+      when 'created_asc'
         scope.reorder('created_at ASC')
-      when 'newest'
+      when 'created_date'
         scope.reorder('created_at DESC')
       else
         scope

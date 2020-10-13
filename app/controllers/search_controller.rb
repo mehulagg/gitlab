@@ -5,6 +5,7 @@ class SearchController < ApplicationController
   include SearchHelper
   include RendersCommits
   include RedisTracking
+  include SortingHelper
 
   SCOPE_PRELOAD_METHOD = {
     projects: :with_web_entity_associations,
@@ -36,6 +37,7 @@ class SearchController < ApplicationController
     return unless search_term_valid?
 
     @search_term = params[:search]
+    @sort = params[:sort] || 'relevant'
 
     @scope = search_service.scope
     @show_snippets = search_service.show_snippets?
