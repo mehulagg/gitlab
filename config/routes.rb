@@ -179,6 +179,14 @@ Rails.application.routes.draw do
 
     draw :snippets
 
+    # Serve profile routes under /-/ scope.
+    # To ensure an old unscoped routing is used for the UI we need to
+    # add prefix 'as' to the scope routing and place it below original routing.
+    # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/210024
+    scope '-', as: :scoped do
+      draw :profile
+    end
+
     # Product analytics collector
     match '/collector/i', to: ProductAnalytics::CollectorApp.new, via: :all
   end
