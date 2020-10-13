@@ -576,3 +576,7 @@ Should an error occur during a push, GitLab will display an "Error" highlight fo
 ### 13:Received RST_STREAM with error code 2 with GitHub
 
 If you receive an "13:Received RST_STREAM with error code 2" while mirroring to a GitHub repository, your GitHub settings might be set to block pushes that expose your email address used in commits. Either set your email address on GitHub to be public, or disable the [Block command line pushes that expose my email](https://github.com/settings/emails) setting.
+
+### 4:Deadline Exceeded
+
+This is error can appear if you have the wrong username or password. If you just upgraded to Gitlab `11.11.8` from an earlier version, escaping the `@` with the code `%40` could possibly cause this error. Make sure to update your mirroring username so that it doesn't include any URL escape characters.
