@@ -52,7 +52,7 @@ RSpec.describe IssueLinks::CreateService do
       it 'returns error' do
         target_issuable.project.add_guest(user)
 
-        is_expected.to eq(message: 'No Issue found for given params', status: :error, http_status: 404)
+        is_expected.to eq(message: 'No matching issue found. To add an issue, you must at least have the role of Reporter.', status: :error, http_status: 404)
       end
 
       it 'no relationship is created' do
