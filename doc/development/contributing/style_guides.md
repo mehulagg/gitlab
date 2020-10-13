@@ -17,6 +17,8 @@ we suggest investigating to see if a plugin exists. For instance here is the
 
 ## Pre-commit static analysis
 
+### Overcommit
+
 You should install [`overcommit`](https://github.com/sds/overcommit) to automatically check for
 static analysis offenses before committing locally.
 
@@ -34,6 +36,22 @@ This saves you time as you don't have to wait for the same errors to be detected
 `overcommit` relies on a pre-commit hook to prevent commits that violate its ruleset. To override
 this behavior, pass the `OVERCOMMIT_DISABLE` environment variable. For example,
 `OVERCOMMIT_DISABLE=1 git rebase master` to rebase while disabling the Git hook.
+
+### Lefthook
+
+[Lefthook](https://github.com/Arkweid/lefthook) is an alternative to Overcommit, to install it you need to run the following in your GitLab source directory:
+
+```shell
+gem install lefthook
+lefthook install
+```
+
+Lefthook uses 2 config files:
+
+- [`lefthook.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lefthook.yml), which is checked out in git
+- [`lefthook-local.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lefthook-local.yml), which is in `.gitignore` and you can use it to customize the behavior. For example, you can disable hooks from `lefthook.yml`, or add your own locally without changing `lefthook.yml` in the main repo.
+
+To temporarily disable lefthook you can use `LEFTHOOK=0` env variable. For example `LEFTHOOK=0 git rebase master` to rebase while disabling the Git hook.
 
 ## Ruby, Rails, RSpec
 

@@ -24,6 +24,7 @@ eslint-report.html
 /.vagrant
 /.yarn-cache
 /.byebug_history
+/lefthook-local.yml
 /Vagrantfile
 /app/assets/images/icons.json
 /app/assets/images/icons.svg

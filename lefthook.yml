@@ -1,0 +1,22 @@
+pre-commit:
+  parallel: true
+  commands:
+    rubocop:
+      glob: "*.rb"
+      run: bundle exec rubocop --parallel --force-exclusion {staged_files}
+pre-push:
+  parallel: true
+  commands:
+    rubocop:
+      files: git diff --name-only master
+      glob: "*.rb"
+      run: bundle exec rubocop --parallel --force-exclusion {files}
+    sidekiq_yml_check:
+      files: git diff --name-only master
+      glob: "*.rb"
+      run: bin/rake gitlab:sidekiq:all_queues_yml:check
+lint:
+  parallel: true
+  commands:
+    gettext:
+      run: bin/rake gettext:lint
