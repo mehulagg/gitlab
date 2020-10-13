@@ -1917,11 +1917,11 @@ the preference is to document it in the CE documentation to avoid duplication.
 
 Configuration settings include:
 
-1. Settings that touch configuration files in `config/`.
-1. NGINX settings and settings in `lib/support/` in general.
+- Settings that touch configuration files in `config/`.
+- NGINX settings and settings in `lib/support/` in general.
 
-When you document a list of steps, it may entail editing the
-configuration file and reconfiguring or restarting GitLab. In that case, use these styles:
+When you document a list of steps, it may entail editing the configuration file
+and reconfiguring or restarting GitLab. In that case, use these styles:
 
 ````markdown
 **For Omnibus installations**
