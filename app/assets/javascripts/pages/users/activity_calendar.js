@@ -7,6 +7,7 @@ import { getDayName, getDayDifference } from '~/lib/utils/datetime_utility';
 import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { n__, s__, __ } from '~/locale';
+import { initTooltips } from '~/tooltips';
 
 const d3 = { select, scaleLinear, scaleThreshold };
 
@@ -127,7 +128,7 @@ export default class ActivityCalendar {
     this.renderKey();
 
     // Init tooltips
-    $(`${container} .js-tooltip`).tooltip({ html: true });
+    initTooltips({ html: true, selector: `${container} .js-tooltip` });
   }
 
   // Add extra padding for the last month label if it is also the last column
