@@ -73,7 +73,9 @@ RSpec.describe Mutations::DastSiteValidations::Create do
 
         context 'when the associated dast_site_validation has been validated' do
           it 'returns the correct status' do
-            # does something...
+            create(:dast_site_validation, dast_site_token: dast_site_token, state: :passed)
+
+            expect(subject[:status]).to eq('PASSED_VALIDATION')
           end
         end
 
