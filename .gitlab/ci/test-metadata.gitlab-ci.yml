@@ -9,6 +9,7 @@
       - knapsack/
       - rspec_flaky/
       - rspec_profiling/
+      - crystalball/
 
 retrieve-tests-metadata:
   extends:
