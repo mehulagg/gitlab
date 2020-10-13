@@ -15,10 +15,10 @@ import NoteForm from '../../notes/components/note_form.vue';
 import ImageDiffOverlay from './image_diff_overlay.vue';
 import DiffDiscussions from './diff_discussions.vue';
 import eventHub from '../../notes/event_hub';
-import { IMAGE_DIFF_POSITION_TYPE, MATCH_LINE_TYPE } from '../constants';
+import { IMAGE_DIFF_POSITION_TYPE } from '../constants';
 import { getDiffMode } from '../store/utils';
 import { diffViewerModes } from '~/ide/constants';
-import { hasDiscussions } from './diff_row_utils';
+import { mapInline, mapParallel } from './diff_row_utils';
 
 export default {
   components: {
@@ -85,84 +85,12 @@ export default {
       return this.getUserData;
     },
     mappedLines() {
-      const mapParallel = line => {
-        let { left, right } = line;
-
-        // Dicussions/Comments
-        const hasExpandedDiscussionOnLeft =
-          left?.discussions?.length > 0 ? left?.discussionsExpanded : false;
-        const hasExpandedDiscussionOnRight =
-          right?.discussions?.length > 0 ? right?.discussionsExpanded : false;
-
-        const shouldRenderCommentRow = () => {
-          const hasDiscussion = left?.discussions?.length > 0 || right?.discussions?.length > 0;
-          if (hasDiscussion && (hasExpandedDiscussionOnLeft || hasExpandedDiscussionOnRight)) {
-            return true;
-          }
-
-          return left?.hasForm || right?.hasForm;
-        };
-
-        if (left) {
-          left = {
-            ...left,
-            renderDiscussion: hasExpandedDiscussionOnLeft,
-            hasDraft: this.hasParallelDraftLeft(this.diffFile.file_hash, line),
-            lineDraft: this.draftForLine(this.diffFile.file_hash, line, 'left'),
-            hasCommentForm: left.hasForm,
-          };
-        }
-        if (right) {
-          right = {
-            ...right,
-            renderDiscussion: hasExpandedDiscussionOnRight && right.type,
-            hasDraft: this.hasParallelDraftRight(this.diffFile.file_hash, line),
-            lineDraft: this.draftForLine(this.diffFile.file_hash, line, 'right'),
-            hasCommentForm: Boolean(right.hasForm && right.type),
-          };
-        }
-
-        return {
-          ...line,
-          left,
-          right,
-          isMatchLineLeft: left?.type === MATCH_LINE_TYPE,
-          isMatchLineRight: right?.type === MATCH_LINE_TYPE,
-          draftRowClasses:
-            left?.lineDraft > 0 || right?.lineDraft > 0 ? '' : 'js-temp-notes-holder',
-          renderCommentRow: shouldRenderCommentRow(),
-          commentRowClasses: hasDiscussions ? '' : 'js-temp-notes-holder',
-        };
-      };
-
-      const mapInline = line => {
-        // Discussions/Comments
-        const shouldRenderCommentRow = () => {
-          if (line.hasForm) return true;
-
-          if (!line.discussions || !line.discussions.length) {
-            return false;
-          }
-          return line.discussionsExpanded;
-        };
-
-        return {
-          ...line,
-          renderDiscussion: line.discussions.length,
-          isMatchLine: line.type === MATCH_LINE_TYPE,
-          commentRowClasses: line.discussions.length ? '' : 'js-temp-notes-holder',
-          renderCommentRow: shouldRenderCommentRow(),
-          hasDraft: this.shouldRenderDraftRow(this.diffFile.file_hash, line),
-          hasCommentForm: line.hasForm,
-        };
-      };
-
       if (this.isInlineView) {
-        return this.diffFile.highlighted_diff_lines.map(mapInline);
+        return this.diffFile.highlighted_diff_lines.map(mapInline(this));
       }
       return this.glFeatures.unifiedDiffLines
-        ? this.diffLines(this.diffFile).map(mapParallel)
-        : this.diffFile.parallel_diff_lines.map(mapParallel) || [];
+        ? this.diffLines(this.diffFile).map(mapParallel(this))
+        : this.diffFile.parallel_diff_lines.map(mapParallel(this)) || [];
     },
   },
   updated() {

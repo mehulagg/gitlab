@@ -77,6 +77,7 @@ export default {
           </td>
         </tr>
         <inline-diff-table-row
+          v-if="!line.isMatchLine"
           :key="`${line.line_code || index}`"
           :file-hash="diffFile.file_hash"
           :file-path="diffFile.file_path"

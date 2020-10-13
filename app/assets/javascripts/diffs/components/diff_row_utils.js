@@ -83,3 +83,88 @@ export const parallelViewLeftLineType = (line, hll) => {
 export const shouldShowCommentButton = (hover, context, meta, discussions) => {
   return hover && !context && !meta && !discussions;
 };
+
+export const mapParallel = content => line => {
+  let { left, right } = line;
+
+  // Dicussions/Comments
+  const hasExpandedDiscussionOnLeft =
+    left?.discussions?.length > 0 ? left?.discussionsExpanded : false;
+  const hasExpandedDiscussionOnRight =
+    right?.discussions?.length > 0 ? right?.discussionsExpanded : false;
+
+  const shouldRenderCommentRow = () => {
+    const hasDiscussion = left?.discussions?.length > 0 || right?.discussions?.length > 0;
+    if (hasDiscussion && (hasExpandedDiscussionOnLeft || hasExpandedDiscussionOnRight)) {
+      return true;
+    }
+
+    return left?.hasForm || right?.hasForm;
+  };
+
+  if (left) {
+    left = {
+      ...left,
+      renderDiscussion: hasExpandedDiscussionOnLeft,
+      hasDraft: content.hasParallelDraftLeft(content.diffFile.file_hash, line),
+      lineDraft: content.draftForLine(content.diffFile.file_hash, line, 'left'),
+      hasCommentForm: left.hasForm,
+    };
+  }
+  if (right) {
+    right = {
+      ...right,
+      renderDiscussion: hasExpandedDiscussionOnRight && right.type,
+      hasDraft: content.hasParallelDraftRight(content.diffFile.file_hash, line),
+      lineDraft: content.draftForLine(content.diffFile.file_hash, line, 'right'),
+      hasCommentForm: Boolean(right.hasForm && right.type),
+    };
+  }
+
+  return {
+    ...line,
+    left,
+    right,
+    isMatchLineLeft: isMatchLine(left?.type),
+    isMatchLineRight: isMatchLine(right?.type),
+    isContextLineLeft: isContextLine(left?.type),
+    isContextLineRight: isContextLine(right?.type),
+    hasDiscussionsLeft: hasDiscussions(left),
+    hasDiscussionsRight: hasDiscussions(right),
+    lineHrefOld: lineHref(left),
+    lineHrefNew: lineHref(right),
+    lineCode: lineCode(line),
+    isMetaLineLeft: isMetaLine(left?.type),
+    isMetaLineRight: isMetaLine(right?.type),
+    draftRowClasses: left?.lineDraft > 0 || right?.lineDraft > 0 ? '' : 'js-temp-notes-holder',
+    renderCommentRow: shouldRenderCommentRow(),
+    commentRowClasses: hasDiscussions ? '' : 'js-temp-notes-holder',
+  };
+};
+
+export const mapInline = content => line => {
+  // Discussions/Comments
+  const shouldRenderCommentRow = () => {
+    if (line.hasForm) return true;
+
+    if (!line.discussions || !line.discussions.length) {
+      return false;
+    }
+    return line.discussionsExpanded;
+  };
+
+  return {
+    ...line,
+    renderDiscussion: line.discussions.length,
+    isMatchLine: isMatchLine(line.type),
+    commentRowClasses: line.discussions.length ? '' : 'js-temp-notes-holder',
+    renderCommentRow: shouldRenderCommentRow(),
+    hasDraft: content.shouldRenderDraftRow(content.diffFile.file_hash, line),
+    hasCommentForm: line.hasForm,
+    isMetaLine: isMetaLine(line.type),
+    isContextLine: isContextLine(line.type),
+    hasDiscussions: hasDiscussions(line),
+    lineHref: lineHref(line),
+    lineCode: lineCode(line),
+  };
+};
