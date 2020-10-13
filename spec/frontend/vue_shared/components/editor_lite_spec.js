@@ -68,7 +68,7 @@ describe('Editor Lite component', () => {
       createComponent({ value: undefined });
 
       expect(spy).not.toHaveBeenCalled();
-      expect(wrapper.find('#editor').exists()).toBe(true);
+      expect(wrapper.find('[id^="editor-lite-"]').exists()).toBe(true);
     });
 
     it('initialises Editor Lite instance', () => {

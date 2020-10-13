@@ -83,9 +83,12 @@ export default {
 };
 </script>
 <template>
-  <div class="file-content code">
-    <div id="editor" ref="editor" data-editor-loading @editor-ready="$emit('editor-ready')">
-      <pre class="editor-loading-content">{{ value }}</pre>
-    </div>
+  <div
+    :id="`editor-lite-${fileGlobalId}`"
+    ref="editor"
+    data-editor-loading
+    @editor-ready="$emit('editor-ready')"
+  >
+    <pre class="editor-loading-content">{{ value }}</pre>
   </div>
 </template>
