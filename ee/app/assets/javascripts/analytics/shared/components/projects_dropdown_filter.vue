@@ -202,6 +202,8 @@ export default {
           shape="rect"
         />
         {{ project.name }}
+        <br />
+        {{ project.fullPath }}
       </div>
     </gl-dropdown-item>
     <gl-dropdown-item v-show="noResultsAvailable" class="gl-pointer-events-none text-secondary">{{
