@@ -42,9 +42,7 @@ function convertMonacoSelectionToAceFormat(sel) {
 }
 
 function getEditorSelectionRange(editor) {
-  return window.gon.features?.monacoBlobs
-    ? convertMonacoSelectionToAceFormat(editor.getSelection())
-    : editor.getSelectionRange();
+  return convertMonacoSelectionToAceFormat(editor.getSelection());
 }
 
 function editorBlockTagText(text, blockTag, selected, editor) {
@@ -110,12 +108,7 @@ function moveCursor({
       const endPosition = startPosition + select.length;
       return textArea.setSelectionRange(startPosition, endPosition);
     } else if (editor) {
-      if (window.gon.features?.monacoBlobs) {
-        editor.selectWithinSelection(select, tag);
-      } else {
-        editor.navigateLeft(tag.length - tag.indexOf(select));
-        editor.getSelection().selectAWord();
-      }
+      editor.selectWithinSelection(select, tag);
       return;
     }
   }
@@ -139,11 +132,7 @@ function moveCursor({
     }
   } else if (editor && editorSelectionStart.row === editorSelectionEnd.row) {
     if (positionBetweenTags) {
-      if (window.gon.features?.monacoBlobs) {
-        editor.moveCursor(tag.length * -1);
-      } else {
-        editor.navigateLeft(tag.length);
-      }
+      editor.moveCursor(tag.length * -1);
     }
   }
 }
@@ -266,11 +255,7 @@ export function insertMarkdownText({
   }
 
   if (editor) {
-    if (window.gon.features?.monacoBlobs) {
-      editor.replaceSelectedText(textToInsert, select);
-    } else {
-      editor.insert(textToInsert);
-    }
+    editor.replaceSelectedText(textToInsert, select);
   } else {
     insertText(textArea, textToInsert);
   }

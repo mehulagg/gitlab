@@ -8,18 +8,15 @@ import TemplateSelectorMediator from '../blob/file_template_mediator';
 import getModeByFileExtension from '~/lib/utils/ace_utils';
 import { addEditorMarkdownListeners } from '~/lib/utils/text_markdown';
 
-const monacoEnabledGlobally = window.gon.features?.monacoBlobs;
-
 export default class EditBlob {
   // The options object has:
   // assetsPath, filePath, currentAction, projectId, isMarkdown
   constructor(options) {
     this.options = options;
-    this.options.monacoEnabled = this.options.monacoEnabled ?? monacoEnabledGlobally;
-    const { isMarkdown, monacoEnabled } = this.options;
+    const { isMarkdown } = this.options;
     return Promise.resolve()
       .then(() => {
-        return monacoEnabled ? this.configureMonacoEditor() : this.configureAceEditor();
+        return this.configureMonacoEditor();
       })
       .then(() => {
         this.initModePanesAndLinks();
@@ -137,7 +134,7 @@ export default class EditBlob {
   }
 
   initSoftWrap() {
-    this.isSoftWrapped = Boolean(this.options.monacoEnabled);
+    this.isSoftWrapped = true;
     this.$toggleButton = $('.soft-wrap-toggle');
     this.$toggleButton.toggleClass('soft-wrap-active', this.isSoftWrapped);
     this.$toggleButton.on('click', () => this.toggleSoftWrap());
@@ -146,10 +143,6 @@ export default class EditBlob {
   toggleSoftWrap() {
     this.isSoftWrapped = !this.isSoftWrapped;
     this.$toggleButton.toggleClass('soft-wrap-active', this.isSoftWrapped);
-    if (this.options.monacoEnabled) {
-      this.editor.updateOptions({ wordWrap: this.isSoftWrapped ? 'on' : 'off' });
-    } else {
-      this.editor.getSession().setUseWrapMode(this.isSoftWrapped);
-    }
+    this.editor.updateOptions({ wordWrap: this.isSoftWrapped ? 'on' : 'off' });
   }
 }
