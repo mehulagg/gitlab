@@ -1920,9 +1920,8 @@ Configuration settings include:
 1. Settings that touch configuration files in `config/`.
 1. NGINX settings and settings in `lib/support/` in general.
 
-When there's a list of steps to perform, usually that entails editing the
-configuration file and reconfiguring/restarting GitLab. In such case, use the
-following style as a guide:
+When you document a list of steps, it may entail editing the
+configuration file and reconfiguring or restarting GitLab. In that case, use these styles:
 
 ````markdown
 **For Omnibus installations**
