@@ -16,7 +16,7 @@ export const LOADING_LIST_ITEMS_LENGTH = 8;
 export const PAGE_SIZE = 20;
 export const PAGE_SIZE_MANUAL = 100;
 
-export const sortOrderMap = {
+export const SortOrderMap = {
   priority: { order_by: PRIORITY, sort: ASC }, // asc and desc are flipped for some reason
   created_date: { order_by: CREATED_AT, sort: DESC },
   created_asc: { order_by: CREATED_AT, sort: ASC },
@@ -34,7 +34,21 @@ export const sortOrderMap = {
   weight: { order_by: WEIGHT, sort: ASC },
 };
 
-export const availableSortOptionsJira = [
+export const IssuesState = {
+  Opened: 'opened',
+  Closed: 'closed',
+  All: 'all',
+};
+
+const JIRA = 'jira';
+const SERVICE_DESK = 'service_desk';
+
+export const IssuesListType = {
+  jira: JIRA,
+  serviceDesk: SERVICE_DESK,
+};
+
+export const AvailableSortOptionsForJira = [
   {
     id: 1,
     title: __('Created date'),

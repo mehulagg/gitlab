@@ -7,13 +7,18 @@ import {
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
 } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
-import { TEST_HOST } from 'helpers/test_constants';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import IssuablesListApp from '~/issues_list/components/issuables_list_app.vue';
 import Issuable from '~/issues_list/components/issuable.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import issueablesEventBus from '~/issues_list/eventhub';
-import { PAGE_SIZE, PAGE_SIZE_MANUAL, RELATIVE_POSITION } from '~/issues_list/constants';
+import {
+  PAGE_SIZE,
+  PAGE_SIZE_MANUAL,
+  RELATIVE_POSITION,
+  IssuesListType,
+} from '~/issues_list/constants';
+import { TEST_LOCATION, setUrl } from '../helpers';
 
 jest.mock('~/flash');
 jest.mock('~/issues_list/eventhub');
@@ -22,15 +27,9 @@ jest.mock('~/lib/utils/common_utils', () => ({
   scrollToElement: () => {},
 }));
 
-const TEST_LOCATION = `${TEST_HOST}/issues`;
 const TEST_ENDPOINT = '/issues';
 const TEST_CREATE_ISSUES_PATH = '/createIssue';
 const TEST_SVG_PATH = '/emptySvg';
-
-const setUrl = query => {
-  window.location.href = `${TEST_LOCATION}${query}`;
-  window.location.search = query;
-};
 
 const MOCK_ISSUES = Array(PAGE_SIZE_MANUAL)
   .fill(0)
@@ -38,6 +37,17 @@ const MOCK_ISSUES = Array(PAGE_SIZE_MANUAL)
     id: i,
     web_url: `url${i}`,
   }));
+
+const mockDefaultProvide = {
+  type: '',
+  canBulkEdit: false,
+  endpoint: TEST_ENDPOINT,
+  filteredSearchOptions: null,
+  emptyStateMeta: {
+    createIssuePath: TEST_CREATE_ISSUES_PATH,
+    svgPath: TEST_SVG_PATH,
+  },
+};
 
 describe('Issuables list component', () => {
   let oldLocation;
@@ -51,16 +61,14 @@ describe('Issuables list component', () => {
     mockAxios.onGet(TEST_ENDPOINT).reply(cfg => apiSpy(cfg));
   };
 
-  const factory = (props = { sortKey: 'priority' }) => {
-    const emptyStateMeta = {
-      createIssuePath: TEST_CREATE_ISSUES_PATH,
-      svgPath: TEST_SVG_PATH,
-    };
-
+  const factory = ({ provide = {}, props = {} } = { provide: {}, props: {} }) => {
     wrapper = shallowMount(IssuablesListApp, {
+      provide: {
+        ...mockDefaultProvide,
+        ...provide,
+      },
       propsData: {
-        endpoint: TEST_ENDPOINT,
-        emptyStateMeta,
+        sortKey: 'priority',
         ...props,
       },
     });
@@ -123,12 +131,6 @@ describe('Issuables list component', () => {
     it('has default props and data', () => {
       factory();
       expect(wrapper.vm).toMatchObject({
-        // Props
-        canBulkEdit: false,
-        emptyStateMeta: {
-          createIssuePath: TEST_CREATE_ISSUES_PATH,
-          svgPath: TEST_SVG_PATH,
-        },
         // Data
         filters: {
           state: 'opened',
@@ -172,7 +174,6 @@ describe('Issuables list component', () => {
 
       it('does not display empty state', () => {
         expect(wrapper.vm.issuables.length).toBeGreaterThan(0);
-        expect(wrapper.vm.emptyState).toEqual({});
         expect(wrapper.find(GlEmptyState).exists()).toBe(false);
       });
 
@@ -200,7 +201,7 @@ describe('Issuables list component', () => {
       issueablesEventBus.$emit.mockReset();
 
       setupApiMock(() => [200, MOCK_ISSUES.slice(0)]);
-      factory({ canBulkEdit: true });
+      factory({ provide: { canBulkEdit: true }});
 
       return waitForPromises();
     });
@@ -318,7 +319,7 @@ describe('Issuables list component', () => {
         setUrl(query);
 
         setupApiMock(() => [200, MOCK_ISSUES.slice(0)]);
-        factory({ sortKey: 'milestone_due_desc' });
+        factory({ props: { sortKey: 'milestone_due_desc' }});
 
         return waitForPromises();
       });
@@ -362,7 +363,7 @@ describe('Issuables list component', () => {
         setUrl(query);
 
         setupApiMock(() => [200, MOCK_ISSUES.slice(0)]);
-        factory({ sortKey: 'milestone_due_desc' });
+        factory({props: {sortKey: 'milestone_due_desc' }});
 
         return waitForPromises();
       });
@@ -402,7 +403,7 @@ describe('Issuables list component', () => {
   describe('with manual sort', () => {
     beforeEach(() => {
       setupApiMock(() => [200, MOCK_ISSUES.slice(0)]);
-      factory({ sortKey: RELATIVE_POSITION });
+      factory({ props: { sortKey: RELATIVE_POSITION }});
     });
 
     it('uses manual page size', () => {
@@ -416,64 +417,22 @@ describe('Issuables list component', () => {
     });
   });
 
-  describe('with empty issues response', () => {
-    beforeEach(() => {
-      setupApiMock(() => [200, []]);
-    });
+  describe.only('with empty issues response', () => {
+    it.each`
+      loading          | issuesList         | shouldRenderEmptyState
+      ${true}          | ${[]}              | ${false}
+      ${true}          | ${MOCK_ISSUES}     | ${false}
+      ${false}         | ${[]}              | ${true}
+      ${false}         | ${MOCK_ISSUES}     | ${true}
+    `(
+      'FILL IN TODO',
+      ({ loading, issuesList, shouldRenderEmptyState }) => {
+        const wrapper = factory()
 
-    describe('with query in window location', () => {
-      beforeEach(() => {
-        window.location.search = '?weight=Any';
-
-        factory();
-
-        return waitForPromises().then(() => wrapper.vm.$nextTick());
-      });
-
-      it('should display "Sorry, your filter produced no results" if filters are too specific', () => {
-        expect(findEmptyState().props('title')).toMatchSnapshot();
-      });
-    });
-
-    describe('with closed state', () => {
-      beforeEach(() => {
-        window.location.search = '?state=closed';
-
-        factory();
-
-        return waitForPromises().then(() => wrapper.vm.$nextTick());
-      });
-
-      it('should display a message "There are no closed issues" if there are no closed issues', () => {
-        expect(findEmptyState().props('title')).toMatchSnapshot();
-      });
-    });
-
-    describe('with all state', () => {
-      beforeEach(() => {
-        window.location.search = '?state=all';
-
-        factory();
-
-        return waitForPromises().then(() => wrapper.vm.$nextTick());
-      });
-
-      it('should display a catch-all if there are no issues to show', () => {
-        expect(findEmptyState().element).toMatchSnapshot();
-      });
-    });
-
-    describe('with empty query', () => {
-      beforeEach(() => {
-        factory();
-
-        return wrapper.vm.$nextTick().then(waitForPromises);
-      });
-
-      it('should display the message "There are no open issues"', () => {
-        expect(findEmptyState().props('title')).toMatchSnapshot();
-      });
-    });
+        expect(findEmptyState().exists()).toBe(shouldRenderEmptyState);
+        wrapper.destroy();
+      },
+    );
   });
 
   describe('when paginates', () => {
@@ -550,46 +509,24 @@ describe('Issuables list component', () => {
   });
 
   describe('when type is "jira"', () => {
+    beforeEach(() => {
+      const mockFilteredSearchOptions = {
+        projectPath: "gitlab-org/gitlab-test",
+        availableSortOptions: [],
+        searchInputPlaceholder: "",
+        initialFilterValue: [''],
+        initialSortBy: '',
+      };
+    
+      factory({
+        provide: {
+         type: IssuesListType.jira,
+         filteredSearchOptions: mockFilteredSearchOptions
+        }});
+    });
+
     it('renders FilteredSearchBar', () => {
-      factory({ type: 'jira' });
-
       expect(findFilteredSearchBar().exists()).toBe(true);
-    });
-
-    describe('initialSortBy', () => {
-      const query = '?sort=updated_asc';
-
-      it('sets default value', () => {
-        factory({ type: 'jira' });
-
-        expect(findFilteredSearchBar().props('initialSortBy')).toBe('created_desc');
-      });
-
-      it('sets value according to query', () => {
-        setUrl(query);
-
-        factory({ type: 'jira' });
-
-        expect(findFilteredSearchBar().props('initialSortBy')).toBe('updated_asc');
-      });
-    });
-
-    describe('initialFilterValue', () => {
-      it('does not set value when no query', () => {
-        factory({ type: 'jira' });
-
-        expect(findFilteredSearchBar().props('initialFilterValue')).toEqual([]);
-      });
-
-      it('sets value according to query', () => {
-        const query = '?search=free+text';
-
-        setUrl(query);
-
-        factory({ type: 'jira' });
-
-        expect(findFilteredSearchBar().props('initialFilterValue')).toEqual(['free text']);
-      });
     });
   });
 });

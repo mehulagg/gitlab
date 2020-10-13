@@ -1,10 +1,8 @@
 <script>
 import { toNumber, omit } from 'lodash';
 import {
-  GlEmptyState,
   GlPagination,
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
-  GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
@@ -19,8 +17,7 @@ import initManualOrdering from '~/manual_ordering';
 import Issuable from './issuable.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import {
-  sortOrderMap,
-  availableSortOptionsJira,
+  SortOrderMap,
   RELATIVE_POSITION,
   PAGE_SIZE,
   PAGE_SIZE_MANUAL,
@@ -28,45 +25,20 @@ import {
 } from '../constants';
 import { setUrlParams } from '~/lib/utils/url_utility';
 import issueableEventHub from '../eventhub';
-import { emptyStateHelper } from '../service_desk_helper';
+import IssuesListEmptyState from './issues_list_empty_state.vue';
 
 export default {
   LOADING_LIST_ITEMS_LENGTH,
-  directives: {
-    SafeHtml,
-  },
   components: {
-    GlEmptyState,
     GlPagination,
     GlSkeletonLoading,
     Issuable,
     FilteredSearchBar,
+    IssuesListEmptyState,
   },
+  inject: ['canBulkEdit', 'endpoint', 'filteredSearchOptions'],
   props: {
-    canBulkEdit: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    emptyStateMeta: {
-      type: Object,
-      required: true,
-    },
-    endpoint: {
-      type: String,
-      required: true,
-    },
-    projectPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
     sortKey: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    type: {
       type: String,
       required: false,
       default: '',
@@ -74,7 +46,6 @@ export default {
   },
   data() {
     return {
-      availableSortOptionsJira,
       filters: {},
       isBulkEditing: false,
       issuables: [],
@@ -93,48 +64,6 @@ export default {
       // this works, we will need to rethink this if we start tracking
       // [id]: false for not selected values.
       return this.issuables.length === Object.keys(this.selection).length;
-    },
-    emptyState() {
-      if (this.issuables.length) {
-        return {}; // Empty state shouldn't be shown here
-      }
-
-      if (this.isServiceDesk) {
-        return emptyStateHelper(this.emptyStateMeta);
-      }
-
-      if (this.hasFilters) {
-        return {
-          title: __('Sorry, your filter produced no results'),
-          svgPath: this.emptyStateMeta.svgPath,
-          description: __('To widen your search, change or remove filters above'),
-          primaryLink: this.emptyStateMeta.createIssuePath,
-          primaryText: __('New issue'),
-        };
-      }
-
-      if (this.filters.state === 'opened') {
-        return {
-          title: __('There are no open issues'),
-          svgPath: this.emptyStateMeta.svgPath,
-          description: __('To keep this project going, create a new issue'),
-          primaryLink: this.emptyStateMeta.createIssuePath,
-          primaryText: __('New issue'),
-        };
-      } else if (this.filters.state === 'closed') {
-        return {
-          title: __('There are no closed issues'),
-          svgPath: this.emptyStateMeta.svgPath,
-        };
-      }
-
-      return {
-        title: __('There are no issues to show'),
-        svgPath: this.emptyStateMeta.svgPath,
-        description: __(
-          'The Issue Tracker is the place to add things that need to be improved or solved in a project. You can register or sign in to create issues for this project.',
-        ),
-      };
     },
     hasFilters() {
       const ignored = ['utf8', 'state', 'scope', 'order_by', 'sort'];
@@ -171,25 +100,6 @@ export default {
         prevPage: this.paginationPrev,
         nextPage: this.paginationNext,
       };
-    },
-    isServiceDesk() {
-      return this.type === 'service_desk';
-    },
-    isJira() {
-      return this.type === 'jira';
-    },
-    initialFilterValue() {
-      const value = [];
-      const { search } = this.getQueryObject();
-
-      if (search) {
-        value.push(search);
-      }
-      return value;
-    },
-    initialSortBy() {
-      const { sort } = this.getQueryObject();
-      return sort || 'created_desc';
     },
   },
   watch: {
@@ -320,7 +230,7 @@ export default {
         filters['not[milestone]'] = excludedMilestone;
       }
 
-      Object.assign(filters, sortOrderMap[this.sortKey]);
+      Object.assign(filters, SortOrderMap[this.sortKey]);
 
       this.filters = filters;
     },
@@ -357,14 +267,15 @@ export default {
 
 <template>
   <div>
+    <!-- Currently, only Jira issues list uses the Vue version of filtered search bar -->
     <filtered-search-bar
-      v-if="isJira"
-      :namespace="projectPath"
-      :search-input-placeholder="__('Search Jira issues')"
+      v-if="filteredSearchOptions"
+      :namespace="filteredSearchOptions.projectPath"
+      :search-input-placeholder="filteredSearchOptions.searchInputPlaceholder"
       :tokens="[]"
-      :sort-options="availableSortOptionsJira"
-      :initial-filter-value="initialFilterValue"
-      :initial-sort-by="initialSortBy"
+      :sort-options="filteredSearchOptions.availableSortOptions"
+      :initial-filter-value="filteredSearchOptions.initialFilterValue"
+      :initial-sort-by="filteredSearchOptions.initialSortBy"
       class="row-content-block"
       @onFilter="handleFilter"
       @onSort="handleSort"
@@ -409,16 +320,6 @@ export default {
         />
       </div>
     </div>
-    <gl-empty-state
-      v-else
-      :title="emptyState.title"
-      :svg-path="emptyState.svgPath"
-      :primary-button-link="emptyState.primaryLink"
-      :primary-button-text="emptyState.primaryText"
-    >
-      <template #description>
-        <div v-safe-html="emptyState.description"></div>
-      </template>
-    </gl-empty-state>
+    <IssuesListEmptyState v-else :has-filters="hasFilters" :issues-state="filters.state" />
   </div>
 </template>
