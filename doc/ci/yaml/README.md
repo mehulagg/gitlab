@@ -2780,8 +2780,8 @@ rspec:
       - binaries/
 ```
 
-Because the cache is shared between jobs, if you're using different
-paths for different jobs, you should also set a different **cache:key**.
+The cache is shared between jobs, so if you're using different
+paths for different jobs, you should also set a different `cache:key`.
 Otherwise cache content can be overwritten.
 
 #### `cache:key`
