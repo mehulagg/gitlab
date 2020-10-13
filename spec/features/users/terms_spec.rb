@@ -99,7 +99,7 @@ RSpec.describe 'Users > Terms' do
         enforce_terms
 
         # Application settings are cached for a minute
-        Timecop.travel 2.minutes do
+        travel_to 2.minutes do
           within('.nav-sidebar') do
             click_link 'Issues'
           end

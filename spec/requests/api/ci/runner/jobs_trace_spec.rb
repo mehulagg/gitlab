@@ -274,7 +274,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
           end
         end
 
-        Timecop.travel(job.updated_at + update_interval) do
+        travel_to(job.updated_at + update_interval) do
           patch api("/jobs/#{job.id}/trace"), params: content, headers: request_headers
           job.reload
         end

@@ -135,7 +135,7 @@ RSpec.describe Reenqueuer::ReenqueuerSleeper do
         expect(dummy).to receive(:sleep).with(a_value_within(0.01).of(time_left))
 
         dummy.ensure_minimum_duration(minimum_duration) do
-          Timecop.travel(minimum_duration - time_left)
+          travel_to(minimum_duration - time_left)
         end
       end
     end
@@ -147,7 +147,7 @@ RSpec.describe Reenqueuer::ReenqueuerSleeper do
         expect(dummy).to receive(:sleep).with(a_value_within(0.01).of(time_left))
 
         dummy.ensure_minimum_duration(minimum_duration) do
-          Timecop.travel(minimum_duration - time_left)
+          travel_to(minimum_duration - time_left)
         end
       end
     end
@@ -159,7 +159,7 @@ RSpec.describe Reenqueuer::ReenqueuerSleeper do
         expect(dummy).not_to receive(:sleep)
 
         dummy.ensure_minimum_duration(minimum_duration) do
-          Timecop.travel(minimum_duration + time_over)
+          travel_to(minimum_duration + time_over)
         end
       end
     end
@@ -171,7 +171,7 @@ RSpec.describe Reenqueuer::ReenqueuerSleeper do
         expect(dummy).not_to receive(:sleep)
 
         dummy.ensure_minimum_duration(minimum_duration) do
-          Timecop.travel(minimum_duration + time_over)
+          travel_to(minimum_duration + time_over)
         end
       end
     end
