@@ -15,7 +15,7 @@ GitLab, and support Terraform best practices.
 
 ## Quick Start
 
-The easiest way to setup a simple Terraform project integration, would be using the following `.gitlab-ci.yml`.
+The easiest way to setup a simple Terraform project integration, since GitLab 13.5, would be using the following `.gitlab-ci.yml`:
 
 ```yaml
 include:
