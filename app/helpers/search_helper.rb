@@ -173,6 +173,24 @@ module SearchHelper
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
+  def issue_autocomplete(term)
+    return [] unless @project.present? && current_user && term =~ /\A#\d+\z/
+
+    iid = term.sub('#', '')
+    issue = @project.issues.find_by_iid(iid)
+    return [] unless issue && Ability.allowed?(current_user, :read_issue, issue)
+
+    [
+        {
+            category: 'In this project',
+            id: issue.id,
+            label: search_result_sanitize("#{issue.iid} #{issue.title}"),
+            url: project_issues_path(@project, issue),
+            avatar_url: issue.project.avatar_url || ''
+        }
+    ]
+  end
+
   # Autocomplete results for the current user's projects
   # rubocop: disable CodeReuse/ActiveRecord
   def projects_autocomplete(term, limit = 5)
@@ -187,24 +205,6 @@ module SearchHelper
         avatar_url: p.avatar_url || ''
       }
     end
-  end
-
-  def issue_autocomplete(term)
-    return [] unless @project.present? && current_user && term =~ /\A#\d+\z/
-
-    iid = term.sub('#', '')
-    issue = @project.issues.find_by_iid(iid)
-    return [] unless issue && Ability.allowed?(current_user, :read_issue, issue)
-
-    [
-      {
-        category: 'In this project',
-        id: issue.id,
-        label: search_result_sanitize("#{issue.iid} #{issue.title}"),
-        url: issue_path(issue),
-        avatar_url: issue.project.avatar_url || ''
-      }
-    ]
   end
 
   def recent_merge_requests_autocomplete(term)
