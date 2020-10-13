@@ -20,7 +20,7 @@
           = message
 
           - if subscribable.block_changes?
-            = link_to 'Upgrade your plan', 'https://customers.gitlab.com/subscriptions/my_renewal', class: 'btn btn-primary', data: { track_event: 'click_text', track_label: 'subscribable_action', track_property: 'upgrade' }
+            = link_to 'Upgrade your plan', 'https://customers.gitlab.com/subscriptions/my_renewal', class: 'gl-button btn btn-primary', data: { track_event: 'click_text', track_label: 'subscribable_action', track_property: 'upgrade' }
           - else
-            = link_to 'Renew subscription', 'https://customers.gitlab.com/subscriptions/my_renewal', class: 'btn btn-primary', data: { track_event: 'click_text', track_label: 'subscribable_action', track_property: 'renew' }
-            = link_to "That's ok, I don't want to renew", '#', data: { dismiss: 'alert', track_event: 'click_text', track_label: 'subscribable_action', track_property: 'thats_ok' }, 'aria-label' => 'Dismiss banner', class: 'btn btn-inverted-secondary ml-2'
+            = link_to 'Renew subscription', 'https://customers.gitlab.com/subscriptions/my_renewal', class: 'gl-button btn btn-primary', data: { track_event: 'click_text', track_label: 'subscribable_action', track_property: 'renew' }
+            = link_to "That's ok, I don't want to renew", '#', data: { dismiss: 'alert', track_event: 'click_text', track_label: 'subscribable_action', track_property: 'thats_ok' }, 'aria-label' => 'Dismiss banner', class: 'gl-button btn btn-inverted-secondary ml-2'
