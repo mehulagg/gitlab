@@ -1,7 +1,7 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { escape } from 'lodash';
-import { GlLoadingIcon, GlIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { GlLoadingIcon, GlIcon, GlSafeHtmlDirective as SafeHtml, GlTabs, GlTab, GlBadge } from '@gitlab/ui';
 import { sprintf, __ } from '../../../locale';
 import CiIcon from '../../../vue_shared/components/ci_icon.vue';
 import Tabs from '../../../vue_shared/components/tabs/tabs';
@@ -20,6 +20,9 @@ export default {
     JobsList,
     EmptyState,
     GlLoadingIcon,
+    GlTabs,
+    GlTab,
+    GlBadge,
   },
   directives: {
     SafeHtml,
@@ -88,22 +91,22 @@ export default {
         <p class="gl-mb-0 break-word">{{ latestPipeline.yamlError }}</p>
         <p v-safe-html="ciLintText" class="gl-mb-0"></p>
       </div>
-      <tabs v-else class="ide-pipeline-list">
-        <tab :active="!pipelineFailed">
+      <gl-tabs v-else class="ide-pipeline-list">
+        <gl-tab :active="!pipelineFailed">
           <template #title>
             {{ __('Jobs') }}
-            <span v-if="jobsCount" class="badge badge-pill"> {{ jobsCount }} </span>
+            <gl-badge size="sm" class="gl-tab-counter-badge">{{ jobsCount }}</gl-badge>
           </template>
           <jobs-list :loading="isLoadingJobs" :stages="stages" />
-        </tab>
-        <tab :active="pipelineFailed">
+        </gl-tab>
+        <gl-tab :active="pipelineFailed">
           <template #title>
             {{ __('Failed Jobs') }}
-            <span v-if="failedJobsCount" class="badge badge-pill"> {{ failedJobsCount }} </span>
+            <gl-badge size="sm" class="gl-tab-counter-badge">{{ failedJobsCount }}</gl-badge>
           </template>
           <jobs-list :loading="isLoadingJobs" :stages="failedStages" />
-        </tab>
-      </tabs>
+        </gl-tab>
+      </gl-tabs>
     </template>
   </div>
 </template>
