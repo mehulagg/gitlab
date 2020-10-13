@@ -202,26 +202,6 @@ DAST-url-scan-1:
   variables:
     DAST_USERNAME: "user14"
   script:
-    - export DAST_PATHS=$(cat urls1.txt)
-    - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 40012)
-    - /analyze -t $DAST_WEBSITE -d
-
-DAST-url-scan-2:
-  extends:
-    - .dast_conf
-  variables:
-    DAST_USERNAME: "user14"
-  script:
-    - export DAST_PATHS=$(cat urls2.txt)
-    - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 40012)
-    - /analyze -t $DAST_WEBSITE -d
-
-DAST-url-scan-3:
-  extends:
-    - .dast_conf
-  variables:
-    DAST_USERNAME: "user14"
-  script:
-    - export DAST_PATHS=$(cat urls3.txt)
+    - export DAST_PATHS=$(cat urls.txt)
     - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 40012)
     - /analyze -t $DAST_WEBSITE -d
