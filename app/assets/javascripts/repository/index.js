@@ -20,10 +20,6 @@ export default function setupVueRepositoryList() {
   const { dataset } = el;
   const { projectPath, projectShortPath, ref, escapedRef, fullName } = dataset;
   const router = createRouter(projectPath, escapedRef);
-  const pathRegex = /-\/tree\/[^/]+\/(.+$)/;
-  const matches = window.location.href.match(pathRegex);
-
-  const currentRoutePath = matches ? matches[1] : '';
 
   apolloProvider.clients.defaultClient.cache.writeData({
     data: {
@@ -55,7 +51,7 @@ export default function setupVueRepositoryList() {
     variables: {
       projectPath,
       ref,
-      path: currentRoutePath,
+      path: router.currentRoute.params.path,
     },
   }).catch(() => {});
 
