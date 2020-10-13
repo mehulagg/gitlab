@@ -656,8 +656,7 @@ Some contractions, however, should be avoided:
 
 ### Punctuation
 
-Review the general punctuation rules for GitLab documentation in the
-following table:
+Follow these guidelines for punctuation:
 
 | Rule                                                             | Example                                                |
 |------------------------------------------------------------------|--------------------------------------------------------|
