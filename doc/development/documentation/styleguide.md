@@ -1310,8 +1310,7 @@ For videos from other sources, [link](#link-to-video) them instead.
 In most cases, it is better to [link to video](#link-to-video) instead, because
 an embed takes up a lot of space on the page and can be distracting to readers.
 
-To embed a video, use the following instructions and be sure you have your MR
-reviewed and approved by a technical writer.
+To embed a video:
 
 1. Copy the code from this procedure and paste it into your Markdown file. Leave a
    blank line above and below it. Do _not_ edit the code (don't remove or add any spaces).
