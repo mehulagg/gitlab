@@ -229,7 +229,7 @@ Support for custom certificate authorities was introduced in the following versi
 
 | Analyzer | Version |
 | -------- | ------- |
-| klar | [v2.3.0](https://gitlab.com/gitlab-org/security-products/analyzers/klar/-/releases/v2.3.0) |
+| `klar` | [v2.3.0](https://gitlab.com/gitlab-org/security-products/analyzers/klar/-/releases/v2.3.0) |
 
 #### Make GitLab container scanning analyzer images available inside your Docker registry
 
