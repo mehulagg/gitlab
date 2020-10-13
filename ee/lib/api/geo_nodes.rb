@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class GeoNodes < Grape::API::Instance
+  class GeoNodes < API::Base
     include PaginationParams
     include APIGuard
     include ::Gitlab::Utils::StrongMemoize

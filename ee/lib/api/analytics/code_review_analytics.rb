@@ -2,7 +2,7 @@
 
 module API
   module Analytics
-    class CodeReviewAnalytics < Grape::API::Instance
+    class CodeReviewAnalytics < API::Base
       include PaginationParams
 
       helpers do

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Scim < Grape::API::Instance
+  class Scim < API::Base
     include ::Gitlab::Utils::StrongMemoize
 
     prefix 'api/scim'
