@@ -4,9 +4,9 @@ group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Alert notifications
+# Paging and notifications
 
-GitLab can react to alerts triggered from your applications. When an alert is
+GitLab can react to triggered alerts and new incidents. When an alert is
 triggered in GitLab by [managed-Prometheus](../../user/project/integrations/prometheus.md#managed-prometheus-on-kubernetes)
 or triggered using an external source and received with an integration, it's
 important for a responder to be notified.
