@@ -45,7 +45,7 @@ tasks:
         gdk start
         # Run DB migrations
         if [ "$GITLAB_RUN_DB_MIGRATIONS" == true ]; then
-          make ensure-databases-running gitlab-db-migrate
+          make gitlab-db-migrate
         fi
         # Fix DB key
         if [ "$GITLAB_FIX_DB_KEY" = true ]; then
