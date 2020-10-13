@@ -8,7 +8,7 @@ RSpec.describe Mutations::DastSiteValidations::Create do
   let(:user) { create(:user) }
   let(:full_path) { project.full_path }
   let(:dast_site_token) { create(:dast_site_token, project: create(:project, group: group)) }
-  let(:dast_site_validation) { DastSiteValidation.first! }
+  let(:dast_site_validation) { DastSiteValidation.find_by!(url_path: validation_path) }
   let(:validation_path) { SecureRandom.hex }
 
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
