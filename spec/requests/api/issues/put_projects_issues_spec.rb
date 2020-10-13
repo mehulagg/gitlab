@@ -323,7 +323,7 @@ RSpec.describe API::Issues do
     end
 
     it 'removes all labels and touches the record' do
-      travel_to(1.minute.from_now) do
+      Timecop.travel(1.minute.from_now) do
         put api_for_user, params: { labels: '' }
       end
 
@@ -333,7 +333,7 @@ RSpec.describe API::Issues do
     end
 
     it 'removes all labels and touches the record with labels param as array' do
-      travel_to(1.minute.from_now) do
+      Timecop.travel(1.minute.from_now) do
         put api_for_user, params: { labels: [''] }
       end
 
@@ -343,7 +343,7 @@ RSpec.describe API::Issues do
     end
 
     it 'updates labels and touches the record' do
-      travel_to(1.minute.from_now) do
+      Timecop.travel(1.minute.from_now) do
         put api_for_user, params: { labels: 'foo,bar' }
       end
 
@@ -353,7 +353,7 @@ RSpec.describe API::Issues do
     end
 
     it 'updates labels and touches the record with labels param as array' do
-      travel_to(1.minute.from_now) do
+      Timecop.travel(1.minute.from_now) do
         put api_for_user, params: { labels: %w(foo bar) }
       end
 

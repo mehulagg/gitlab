@@ -109,7 +109,7 @@ RSpec.shared_examples 'it is rate limited to 1 call per' do |minimum_duration|
     allow(subject).to receive(:ensure_minimum_duration) do |minimum_duration, &block|
       original_ensure_minimum_duration.call(minimum_duration) do
         # Time travel inside the block inside ensure_minimum_duration
-        travel_to(actual_duration) if actual_duration && actual_duration > 0
+        Timecop.travel(actual_duration) if actual_duration && actual_duration > 0
       end
     end
   end
