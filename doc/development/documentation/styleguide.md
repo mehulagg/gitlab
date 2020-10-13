@@ -1772,8 +1772,8 @@ For example:
 ### Importance of referencing GitLab versions and tiers
 
 Mentioning GitLab versions and tiers is important to all users and contributors
-to quickly have access to the issue or merge request that introduced the change
-for reference. Also, they can know what features they have in their GitLab
+to quickly have access to the issue or merge request that introduced the change.
+Also, they can know what features they have in their GitLab
 instance and version, given that the note has some key information.
 
 `[Introduced](link-to-issue) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.7`
