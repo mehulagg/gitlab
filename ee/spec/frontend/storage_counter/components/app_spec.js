@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils';
 import StorageApp from 'ee/storage_counter/components/app.vue';
 import Project from 'ee/storage_counter/components/project.vue';
+import StorageInlineAlert from 'ee/storage_counter/components/storage_inline_alert.vue';
 import UsageGraph from 'ee/storage_counter/components/usage_graph.vue';
 import UsageStatistics from 'ee/storage_counter/components/usage_statistics.vue';
 import TemporaryStorageIncreaseModal from 'ee/storage_counter/components/temporary_storage_increase_modal.vue';
@@ -19,6 +20,7 @@ describe('Storage counter app', () => {
     wrapper.find("[data-testid='temporary-storage-increase-button']");
   const findUsageGraph = () => wrapper.find(UsageGraph);
   const findUsageStatistics = () => wrapper.find(UsageStatistics);
+  const findStorageInlineAlert = () => wrapper.find(StorageInlineAlert);
 
   const createComponent = ({
     props = {},
@@ -109,6 +111,7 @@ describe('Storage counter app', () => {
 
       expect(findUsageGraph().exists()).toBe(true);
       expect(findUsageStatistics().exists()).toBe(false);
+      expect(findStorageInlineAlert().exists()).toBe(false);
     });
 
     it('usage_statistics component is rendered when flag is true', async () => {
@@ -124,6 +127,7 @@ describe('Storage counter app', () => {
 
       expect(findUsageStatistics().exists()).toBe(true);
       expect(findUsageGraph().exists()).toBe(false);
+      expect(findStorageInlineAlert().exists()).toBe(true);
     });
   });
 
