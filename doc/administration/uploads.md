@@ -2,6 +2,36 @@
 
 Uploads represent all user data that may be sent to GitLab as a single file. As an example, avatars and notes' attachments are uploads. Uploads are integral to GitLab functionality, and therefore cannot be disabled.
 
+## Processing uploads
+
+> - [Updated](https://gitlab.com/gitlab-org/gitlab/-/issues/214785) in GitLab 13.5.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(CORE ONLY)**
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
+
+### Enable or disabling the updated uploads processing **(CORE ONLY)**
+
+The uploads processing has been updated.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](./feature_flags.md)
+can opt to disable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:upload_middleware_jwt_params_handler)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:upload_middleware_jwt_params_handler)
+```
+
 ## Using local storage
 
 NOTE: **Note:**
