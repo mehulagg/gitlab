@@ -50,7 +50,7 @@ module Backup
         restore_snippet_repository(snippet)
       end
 
-      cleanup_snippets
+      cleanup_snippets_without_repositories
 
       restore_object_pools
     end
@@ -195,21 +195,21 @@ module Backup
     end
 
     def restore_snippet_repository(snippet)
-      repository = restore_repository(snippet, Gitlab::GlRepository::SNIPPET)
+      restore_repository(snippet, Gitlab::GlRepository::SNIPPET)
 
       response = Snippets::RepositoryValidationService.new(nil, snippet).execute
 
       if response.error?
-        repository.remove
+        snippet.repository.remove
         snippet.snippet_repository&.delete
 
         progress.puts("Snippet #{snippet.full_path} can't be restored: #{response.message}")
       end
     end
 
-    # Restored snippets without a repository should be removed because they failed to import
-    # correctly
-    def cleanup_snippets
+    # Snippets without a repository should be removed because they failed to import
+    # due to having invalid repositories
+    def cleanup_snippets_without_repositories
       Snippet.where.not(id: SnippetRepository.select(:snippet_id)).delete_all
     end
 
@@ -255,7 +255,6 @@ module Backup
         end
 
         progress.puts " * #{display_repo_path} ... " + "[DONE]".color(:green)
-        repository
 
       rescue => e
         progress.puts "[Failed] restoring #{display_repo_path}".color(:red)
