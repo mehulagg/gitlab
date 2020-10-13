@@ -13978,7 +13978,7 @@ msgstr ""
 msgid "Integrations|Standard"
 msgstr ""
 
-msgid "Integrations|Update your project(s) on Packagist, the main Composer repository"
+msgid "Integrations|Update your projects on Packagist, the main Composer repository"
 msgstr ""
 
 msgid "Integrations|Use custom settings"
