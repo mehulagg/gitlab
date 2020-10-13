@@ -9,7 +9,11 @@ module Mutations
 
       field :id, ::Types::GlobalIDType[::DastSiteValidation],
             null: true,
-            description: 'ID of the site profile.'
+            description: 'ID of the site validation.'
+
+      field :status, ::Types::DastSiteProfileValidationStatusEnum,
+            null: true,
+            description: 'The current validation status.'
 
       argument :full_path, GraphQL::ID_TYPE,
                required: true,
@@ -23,7 +27,7 @@ module Mutations
                required: true,
                description: 'The path to be requested during validation.'
 
-      argument :strategy, Types::DastSiteValidationStrategyEnum,
+      argument :strategy, ::Types::DastSiteValidationStrategyEnum,
                required: false,
                description: 'The validation strategy to be used.'
 
