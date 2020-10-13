@@ -1,3 +1,11 @@
+GIT
+  remote: https://github.com/balasankarc/terser-ruby
+  revision: ded53c03d63a210723ded7da4c6fc0522c4dc606
+  tag: 1.0.1-gitlab
+  specs:
+    terser (1.0.1)
+      execjs (>= 0.3.0, < 3)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -1130,8 +1138,6 @@ GEM
     temple (0.8.2)
     terminal-table (1.8.0)
       unicode-display_width (~> 1.1, >= 1.1.1)
-    terser (1.0.1)
-      execjs (>= 0.3.0, < 3)
     test-prof (0.12.0)
     text (1.3.1)
     thin (1.7.2)
@@ -1482,7 +1488,7 @@ DEPENDENCIES
   stackprof (~> 0.2.15)
   state_machines-activerecord (~> 0.6.0)
   sys-filesystem (~> 1.1.6)
-  terser (~> 1.0)
+  terser!
   test-prof (~> 0.12.0)
   thin (~> 1.7.0)
   timecop (~> 0.9.1)
