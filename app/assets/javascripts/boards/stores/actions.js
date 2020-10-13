@@ -15,6 +15,7 @@ import boardListsQuery from '../queries/board_lists.query.graphql';
 import createBoardListMutation from '../queries/board_list_create.mutation.graphql';
 import updateBoardListMutation from '../queries/board_list_update.mutation.graphql';
 import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
+import issueSetMilestone from '../queries/issue_set_milestone.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -268,6 +269,30 @@ export default {
       .catch(() =>
         commit(types.MOVE_ISSUE_FAILURE, { originalIssue, fromListId, toListId, originalIndex }),
       );
+  },
+
+  setActiveIssueMilestone: async ({ commit, getters }, input) => {
+    const activeIssue = getters.getActiveIssue;
+    const { data } = await gqlClient.mutate({
+      mutation: issueSetMilestone,
+      variables: {
+        input: {
+          iid: String(activeIssue.iid),
+          milestoneId: getIdFromGraphQLId(input.milestoneId),
+          projectPath: input.projectPath,
+        },
+      },
+    });
+
+    if (data.updateIssue?.errors?.length > 0) {
+      throw new Error(data.updateIssue.errors);
+    }
+
+    commit(types.UPDATE_ISSUE_BY_ID, {
+      issueId: activeIssue.id,
+      prop: 'milestone',
+      value: data.updateIssue.issue.milestone,
+    });
   },
 
   createNewIssue: () => {

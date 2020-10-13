@@ -1,0 +1,13 @@
+query groupMilestones($fullPath: ID!) {
+  group(fullPath: $fullPath) {
+    milestones(state: active, includeDescendants: true) {
+      edges {
+        node {
+          id
+          title
+          description
+        }
+      }
+    }
+  }
+}
