@@ -360,7 +360,6 @@ export default {
           v-gl-modal-directive="'confirmation-modal'"
           :loading="isCancelling"
           :disabled="isCancelling"
-          data-toggle="modal"
           icon="close"
           variant="danger"
           category="primary"
