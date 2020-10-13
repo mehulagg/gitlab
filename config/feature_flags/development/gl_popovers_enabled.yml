@@ -1,0 +1,7 @@
+---
+name: gl_popovers_enabled
+introduced_by_url: 
+rollout_issue_url: 
+type: development
+group: group::composition analysis
+default_enabled: false
