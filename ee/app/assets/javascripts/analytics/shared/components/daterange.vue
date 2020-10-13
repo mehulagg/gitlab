@@ -92,6 +92,7 @@ export default {
       theme="animate-picker"
       start-picker-class="js-daterange-picker-from d-flex flex-column flex-lg-row align-items-lg-center mr-lg-2 mb-2 mb-md-0"
       end-picker-class="js-daterange-picker-to d-flex flex-column flex-lg-row align-items-lg-center"
+      label-class="gl-mb-0"
     />
     <div
       v-if="maxDateRange"
