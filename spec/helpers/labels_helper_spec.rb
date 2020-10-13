@@ -291,4 +291,40 @@ RSpec.describe LabelsHelper do
       expect(tooltip).to eq('This is an image')
     end
   end
+
+  describe '#show_labels_full_path?' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:subgroup) { create(:group, parent: group) }
+    let_it_be(:project) { create(:project) }
+
+    context 'within a project' do
+      it 'returns truthy' do
+        assign(:project, project)
+
+        expect(helper.show_labels_full_path?).to be_truthy
+      end
+    end
+
+    context 'within a subgroup' do
+      it 'returns truthy' do
+        assign(:group, subgroup)
+
+        expect(helper.show_labels_full_path?).to be_truthy
+      end
+    end
+
+    context 'within a group' do
+      it 'returns falsey' do
+        assign(:group, group)
+
+        expect(helper.show_labels_full_path?).to be_falsey
+      end
+    end
+
+    context 'within the admin area' do
+      it 'returns falsey' do
+        expect(helper.show_labels_full_path?).to be_falsey
+      end
+    end
+  end
 end

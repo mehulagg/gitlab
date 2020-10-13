@@ -36,6 +36,33 @@ RSpec.describe 'shared/_label_row.html.haml' do
     end
   end
 
+  context 'with a subgroup context' do
+    let_it_be(:subgroup) { create(:group, parent: group) }
+    let(:label) { build_stubbed(:group_label, group: subgroup).present(issuable_subject: subgroup) }
+
+    before do
+      assign(:group, label.group)
+
+      render
+    end
+
+    it 'has a non-linked label title' do
+      expect(rendered).not_to have_css('a', text: label.title)
+    end
+
+    it "has Issues link" do
+      expect(rendered).to have_css('a', text: 'Issues')
+    end
+
+    it "has Merge request link" do
+      expect(rendered).to have_css('a', text: 'Merge requests')
+    end
+
+    it "shows the path from where the label was created" do
+      expect(rendered).to have_css('.label-badge', text: subgroup.full_name)
+    end
+  end
+
   context 'with a group context' do
     before do
       assign(:group, label.group)
