@@ -9,7 +9,7 @@ module Mutations
         argument :list_id, GraphQL::ID_TYPE,
                   required: true,
                   loads: Types::BoardListType,
-                  description: 'Global ID of the list.'
+                  description: 'Global ID of the list'
 
         argument :position, GraphQL::INT_TYPE,
                   required: false,

@@ -14,7 +14,7 @@ module Mutations
         argument :confidential,
                   GraphQL::BOOLEAN_TYPE,
                   required: false,
-                  description: 'The confidentiality flag of a note. Default is false.'
+                  description: 'The confidentiality flag of a note. Default is false'
 
         private
 

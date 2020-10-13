@@ -9,12 +9,12 @@ module Mutations
         field :list,
             Types::BoardListType,
             null: true,
-            description: 'The list after mutation.'
+            description: 'The list after mutation'
 
         argument :list_id, ::Types::GlobalIDType[::List],
                   required: true,
                   loads: Types::BoardListType,
-                  description: 'Global ID of the list to destroy. Only label lists are accepted.'
+                  description: 'Global ID of the list to destroy. Only label lists are accepted'
 
         def resolve(list:)
           raise_resource_not_available_error! unless can_admin_list?(list)

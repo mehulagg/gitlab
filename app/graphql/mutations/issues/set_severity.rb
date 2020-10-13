@@ -6,7 +6,7 @@ module Mutations
       graphql_name 'IssueSetSeverity'
 
       argument :severity, Types::IssuableSeverityEnum, required: true,
-               description: 'Set the incident severity level.'
+               description: 'Set the incident severity level'
 
       def resolve(project_path:, iid:, severity:)
         issue = authorized_find!(project_path: project_path, iid: iid)

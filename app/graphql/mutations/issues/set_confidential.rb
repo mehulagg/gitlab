@@ -8,7 +8,7 @@ module Mutations
       argument :confidential,
                GraphQL::BOOLEAN_TYPE,
                required: true,
-               description: 'Whether or not to set the issue as a confidential.'
+               description: 'Whether or not to set the issue as a confidential'
 
       def resolve(project_path:, iid:, confidential:)
         issue = authorized_find!(project_path: project_path, iid: iid)

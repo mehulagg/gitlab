@@ -10,7 +10,7 @@ module Mutations
       field :jira_users,
             [Types::JiraUserType],
             null: true,
-            description: 'Users returned from Jira, matched by email and name if possible.'
+            description: 'Users returned from Jira, matched by email and name if possible'
 
       argument :project_path, GraphQL::ID_TYPE,
                required: true,

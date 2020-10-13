@@ -25,21 +25,21 @@ module Resolvers
     argument :source_branches, [GraphQL::STRING_TYPE],
              required: false,
              as: :source_branch,
-             description: 'Array of source branch names. All resolved merge requests will have one of these branches as their source.'
+             description: 'Array of source branch names. All resolved merge requests will have one of these branches as their source'
 
     argument :target_branches, [GraphQL::STRING_TYPE],
              required: false,
              as: :target_branch,
-             description: 'Array of target branch names. All resolved merge requests will have one of these branches as their target.'
+             description: 'Array of target branch names. All resolved merge requests will have one of these branches as their target'
 
     argument :state, ::Types::MergeRequestStateEnum,
              required: false,
-             description: 'A merge request state. If provided, all resolved merge requests will have this state.'
+             description: 'A merge request state. If provided, all resolved merge requests will have this state'
 
     argument :labels, [GraphQL::STRING_TYPE],
              required: false,
              as: :label_name,
-             description: 'Array of label names. All resolved merge requests will have all of these labels.'
+             description: 'Array of label names. All resolved merge requests will have all of these labels'
     argument :merged_after, Types::TimeType,
              required: false,
              description: 'Merge requests merged after this date'

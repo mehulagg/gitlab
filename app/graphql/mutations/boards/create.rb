@@ -11,34 +11,34 @@ module Mutations
       field :board,
             Types::BoardType,
             null: true,
-            description: 'The board after mutation.'
+            description: 'The board after mutation'
 
       argument :project_path, GraphQL::ID_TYPE,
                required: false,
-               description: 'The project full path the board is associated with.'
+               description: 'The project full path the board is associated with'
       argument :group_path, GraphQL::ID_TYPE,
                required: false,
-               description: 'The group full path the board is associated with.'
+               description: 'The group full path the board is associated with'
       argument :name,
                 GraphQL::STRING_TYPE,
                 required: false,
-                description: 'The board name.'
+                description: 'The board name'
       argument :assignee_id,
                 GraphQL::STRING_TYPE,
                 required: false,
-                description: 'The ID of the user to be assigned to the board.'
+                description: 'The ID of the user to be assigned to the board'
       argument :milestone_id,
                GraphQL::ID_TYPE,
                required: false,
-               description: 'The ID of the milestone to be assigned to the board.'
+               description: 'The ID of the milestone to be assigned to the board'
       argument :weight,
                GraphQL::BOOLEAN_TYPE,
                required: false,
-               description: 'The weight of the board.'
+               description: 'The weight of the board'
       argument :label_ids,
                [GraphQL::ID_TYPE],
                required: false,
-               description: 'The IDs of labels to be added to the board.'
+               description: 'The IDs of labels to be added to the board'
 
       authorize :admin_board
 

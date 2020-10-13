@@ -181,7 +181,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -269,7 +269,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -431,7 +431,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -1574,7 +1574,7 @@
             },
             {
               "name": "assigneeUsernames",
-              "description": "The usernames to assign to the alert. Replaces existing assignees by default.",
+              "description": "The usernames to assign to the alert. Replaces existing assignees by default",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -1596,7 +1596,7 @@
             },
             {
               "name": "operationMode",
-              "description": "The operation to perform. Defaults to REPLACE.",
+              "description": "The operation to perform. Defaults to REPLACE",
               "type": {
                 "kind": "ENUM",
                 "name": "MutationOperationMode",
@@ -1654,7 +1654,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -1798,7 +1798,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -2063,7 +2063,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -2179,7 +2179,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -2295,7 +2295,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -4967,7 +4967,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -5144,7 +5144,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -6211,7 +6211,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -6470,7 +6470,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -6586,7 +6586,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -7294,7 +7294,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -7562,7 +7562,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -7988,7 +7988,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -8176,7 +8176,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -8216,7 +8216,7 @@
           "inputFields": [
             {
               "name": "projectPath",
-              "description": "The project full path the board is associated with.",
+              "description": "The project full path the board is associated with",
               "type": {
                 "kind": "SCALAR",
                 "name": "ID",
@@ -8226,7 +8226,7 @@
             },
             {
               "name": "groupPath",
-              "description": "The group full path the board is associated with.",
+              "description": "The group full path the board is associated with",
               "type": {
                 "kind": "SCALAR",
                 "name": "ID",
@@ -8246,7 +8246,7 @@
             },
             {
               "name": "assigneeId",
-              "description": "The ID of the user to be assigned to the board.",
+              "description": "The ID of the user to be assigned to the board",
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
@@ -8256,7 +8256,7 @@
             },
             {
               "name": "milestoneId",
-              "description": "The ID of the milestone to be assigned to the board.",
+              "description": "The ID of the milestone to be assigned to the board",
               "type": {
                 "kind": "SCALAR",
                 "name": "ID",
@@ -8266,7 +8266,7 @@
             },
             {
               "name": "weight",
-              "description": "The weight of the board.",
+              "description": "The weight of the board",
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
@@ -8276,7 +8276,7 @@
             },
             {
               "name": "labelIds",
-              "description": "The IDs of labels to be added to the board.",
+              "description": "The IDs of labels to be added to the board",
               "type": {
                 "kind": "LIST",
                 "name": null,
@@ -8314,7 +8314,7 @@
           "fields": [
             {
               "name": "board",
-              "description": "The board after mutation.",
+              "description": "The board after mutation",
               "args": [
 
               ],
@@ -8342,7 +8342,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -8472,7 +8472,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -8588,7 +8588,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -8656,7 +8656,7 @@
             },
             {
               "name": "confidential",
-              "description": "The confidentiality flag of a note. Default is false.",
+              "description": "The confidentiality flag of a note. Default is false",
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
@@ -8714,7 +8714,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -8936,7 +8936,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -9004,7 +9004,7 @@
             },
             {
               "name": "confidential",
-              "description": "The confidentiality flag of a note. Default is false.",
+              "description": "The confidentiality flag of a note. Default is false",
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
@@ -9062,7 +9062,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -9210,7 +9210,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -9292,7 +9292,7 @@
             },
             {
               "name": "confidential",
-              "description": "The confidentiality flag of a note. Default is false.",
+              "description": "The confidentiality flag of a note. Default is false",
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
@@ -9346,7 +9346,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -9468,7 +9468,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -9640,7 +9640,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -9798,7 +9798,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -10033,7 +10033,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -10444,7 +10444,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -10574,7 +10574,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -10803,7 +10803,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -11101,7 +11101,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -11217,7 +11217,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -11429,7 +11429,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -11566,7 +11566,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -13289,7 +13289,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -13435,7 +13435,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -13585,7 +13585,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -14079,7 +14079,7 @@
           "inputFields": [
             {
               "name": "listId",
-              "description": "Global ID of the list to destroy. Only label lists are accepted.",
+              "description": "Global ID of the list to destroy. Only label lists are accepted",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -14127,7 +14127,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -14153,7 +14153,7 @@
             },
             {
               "name": "list",
-              "description": "The list after mutation.",
+              "description": "The list after mutation",
               "args": [
 
               ],
@@ -14208,7 +14208,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -14296,7 +14296,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -14398,7 +14398,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -15657,7 +15657,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -15755,7 +15755,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -17421,7 +17421,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -19140,7 +19140,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -19384,7 +19384,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -21313,7 +21313,7 @@
                 },
                 {
                   "name": "sourceBranches",
-                  "description": "Array of source branch names. All resolved merge requests will have one of these branches as their source.",
+                  "description": "Array of source branch names. All resolved merge requests will have one of these branches as their source",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -21331,7 +21331,7 @@
                 },
                 {
                   "name": "targetBranches",
-                  "description": "Array of target branch names. All resolved merge requests will have one of these branches as their target.",
+                  "description": "Array of target branch names. All resolved merge requests will have one of these branches as their target",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -21349,7 +21349,7 @@
                 },
                 {
                   "name": "state",
-                  "description": "A merge request state. If provided, all resolved merge requests will have this state.",
+                  "description": "A merge request state. If provided, all resolved merge requests will have this state",
                   "type": {
                     "kind": "ENUM",
                     "name": "MergeRequestState",
@@ -21359,7 +21359,7 @@
                 },
                 {
                   "name": "labels",
-                  "description": "Array of label names. All resolved merge requests will have all of these labels.",
+                  "description": "Array of label names. All resolved merge requests will have all of these labels",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -24717,7 +24717,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -24956,7 +24956,7 @@
             },
             {
               "name": "assigneeUsernames",
-              "description": "The usernames to assign to the resource. Replaces existing assignees by default.",
+              "description": "The usernames to assign to the resource. Replaces existing assignees by default",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -24978,7 +24978,7 @@
             },
             {
               "name": "operationMode",
-              "description": "The operation to perform. Defaults to REPLACE.",
+              "description": "The operation to perform. Defaults to REPLACE",
               "type": {
                 "kind": "ENUM",
                 "name": "MutationOperationMode",
@@ -25022,7 +25022,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -25104,7 +25104,7 @@
             },
             {
               "name": "confidential",
-              "description": "Whether or not to set the issue as a confidential.",
+              "description": "Whether or not to set the issue as a confidential",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -25152,7 +25152,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -25282,7 +25282,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -25408,7 +25408,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -25534,7 +25534,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -25664,7 +25664,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -25746,7 +25746,7 @@
             },
             {
               "name": "severity",
-              "description": "Set the incident severity level.",
+              "description": "Set the incident severity level",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -25794,7 +25794,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -25924,7 +25924,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -26054,7 +26054,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -27168,7 +27168,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -27280,7 +27280,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -27306,7 +27306,7 @@
             },
             {
               "name": "jiraUsers",
-              "description": "Users returned from Jira, matched by email and name if possible.",
+              "description": "Users returned from Jira, matched by email and name if possible",
               "args": [
 
               ],
@@ -28105,7 +28105,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -30157,7 +30157,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -30704,7 +30704,7 @@
             },
             {
               "name": "assigneeUsernames",
-              "description": "The usernames to assign to the resource. Replaces existing assignees by default.",
+              "description": "The usernames to assign to the resource. Replaces existing assignees by default",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -30726,7 +30726,7 @@
             },
             {
               "name": "operationMode",
-              "description": "The operation to perform. Defaults to REPLACE.",
+              "description": "The operation to perform. Defaults to REPLACE",
               "type": {
                 "kind": "ENUM",
                 "name": "MutationOperationMode",
@@ -30770,7 +30770,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -30918,7 +30918,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -31048,7 +31048,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -31174,7 +31174,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -31304,7 +31304,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -31434,7 +31434,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -31728,7 +31728,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -35902,7 +35902,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -37805,7 +37805,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -38037,7 +38037,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -38237,7 +38237,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -40438,7 +40438,7 @@
                 },
                 {
                   "name": "sourceBranches",
-                  "description": "Array of source branch names. All resolved merge requests will have one of these branches as their source.",
+                  "description": "Array of source branch names. All resolved merge requests will have one of these branches as their source",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -40456,7 +40456,7 @@
                 },
                 {
                   "name": "targetBranches",
-                  "description": "Array of target branch names. All resolved merge requests will have one of these branches as their target.",
+                  "description": "Array of target branch names. All resolved merge requests will have one of these branches as their target",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -40474,7 +40474,7 @@
                 },
                 {
                   "name": "state",
-                  "description": "A merge request state. If provided, all resolved merge requests will have this state.",
+                  "description": "A merge request state. If provided, all resolved merge requests will have this state",
                   "type": {
                     "kind": "ENUM",
                     "name": "MergeRequestState",
@@ -40484,7 +40484,7 @@
                 },
                 {
                   "name": "labels",
-                  "description": "Array of label names. All resolved merge requests will have all of these labels.",
+                  "description": "Array of label names. All resolved merge requests will have all of these labels",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -46181,7 +46181,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -46269,7 +46269,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -47132,7 +47132,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -47433,7 +47433,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -53887,7 +53887,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -54036,7 +54036,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -54141,7 +54141,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -54303,7 +54303,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -54471,7 +54471,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -55115,7 +55115,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -55273,7 +55273,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -55444,7 +55444,7 @@
           "inputFields": [
             {
               "name": "listId",
-              "description": "Global ID of the list.",
+              "description": "Global ID of the list",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -55512,7 +55512,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -55593,7 +55593,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -55755,7 +55755,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -56038,7 +56038,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -56146,7 +56146,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -56278,7 +56278,7 @@
             },
             {
               "name": "addLabelIds",
-              "description": "The IDs of labels to be added to the issue.",
+              "description": "The IDs of labels to be added to the issue",
               "type": {
                 "kind": "LIST",
                 "name": null,
@@ -56296,7 +56296,7 @@
             },
             {
               "name": "removeLabelIds",
-              "description": "The IDs of labels to be removed from the issue.",
+              "description": "The IDs of labels to be removed from the issue",
               "type": {
                 "kind": "LIST",
                 "name": null,
@@ -56314,7 +56314,7 @@
             },
             {
               "name": "milestoneId",
-              "description": "The ID of the milestone to be assigned, milestone will be removed if set to null.",
+              "description": "The ID of the milestone to be assigned, milestone will be removed if set to null",
               "type": {
                 "kind": "SCALAR",
                 "name": "ID",
@@ -56324,7 +56324,7 @@
             },
             {
               "name": "stateEvent",
-              "description": "Close or reopen an issue.",
+              "description": "Close or reopen an issue",
               "type": {
                 "kind": "ENUM",
                 "name": "IssueStateEvent",
@@ -56388,7 +56388,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -56544,7 +56544,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -56622,7 +56622,7 @@
             },
             {
               "name": "confidential",
-              "description": "The confidentiality flag of a note. Default is false.",
+              "description": "The confidentiality flag of a note. Default is false",
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
@@ -56666,7 +56666,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -56822,7 +56822,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -56972,7 +56972,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -57071,7 +57071,7 @@
                 },
                 {
                   "name": "sourceBranches",
-                  "description": "Array of source branch names. All resolved merge requests will have one of these branches as their source.",
+                  "description": "Array of source branch names. All resolved merge requests will have one of these branches as their source",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -57089,7 +57089,7 @@
                 },
                 {
                   "name": "targetBranches",
-                  "description": "Array of target branch names. All resolved merge requests will have one of these branches as their target.",
+                  "description": "Array of target branch names. All resolved merge requests will have one of these branches as their target",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -57107,7 +57107,7 @@
                 },
                 {
                   "name": "state",
-                  "description": "A merge request state. If provided, all resolved merge requests will have this state.",
+                  "description": "A merge request state. If provided, all resolved merge requests will have this state",
                   "type": {
                     "kind": "ENUM",
                     "name": "MergeRequestState",
@@ -57117,7 +57117,7 @@
                 },
                 {
                   "name": "labels",
-                  "description": "Array of label names. All resolved merge requests will have all of these labels.",
+                  "description": "Array of label names. All resolved merge requests will have all of these labels",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -57276,7 +57276,7 @@
                 },
                 {
                   "name": "sourceBranches",
-                  "description": "Array of source branch names. All resolved merge requests will have one of these branches as their source.",
+                  "description": "Array of source branch names. All resolved merge requests will have one of these branches as their source",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -57294,7 +57294,7 @@
                 },
                 {
                   "name": "targetBranches",
-                  "description": "Array of target branch names. All resolved merge requests will have one of these branches as their target.",
+                  "description": "Array of target branch names. All resolved merge requests will have one of these branches as their target",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -57312,7 +57312,7 @@
                 },
                 {
                   "name": "state",
-                  "description": "A merge request state. If provided, all resolved merge requests will have this state.",
+                  "description": "A merge request state. If provided, all resolved merge requests will have this state",
                   "type": {
                     "kind": "ENUM",
                     "name": "MergeRequestState",
@@ -57322,7 +57322,7 @@
                 },
                 {
                   "name": "labels",
-                  "description": "Array of label names. All resolved merge requests will have all of these labels.",
+                  "description": "Array of label names. All resolved merge requests will have all of these labels",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -59299,7 +59299,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -59478,7 +59478,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -60612,7 +60612,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],
@@ -60714,7 +60714,7 @@
             },
             {
               "name": "errors",
-              "description": "Errors encountered during execution of the mutation.",
+              "description": "Errors encountered during execution of the mutation",
               "args": [
 
               ],

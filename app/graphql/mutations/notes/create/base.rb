@@ -21,7 +21,7 @@ module Mutations
         argument :confidential,
                   GraphQL::BOOLEAN_TYPE,
                   required: false,
-                  description: 'The confidentiality flag of a note. Default is false.'
+                  description: 'The confidentiality flag of a note. Default is false'
 
         def resolve(args)
           noteable = authorized_find!(id: args[:noteable_id])

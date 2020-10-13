@@ -59,9 +59,14 @@ module Gitlab
         # Returns the object description. If the object has been deprecated,
         # the deprecation reason will be returned in place of the description.
         def render_description(object)
-          return object[:description] unless object[:is_deprecated]
+          unless object[:is_deprecated]
+            description = object[:description]
+            description = "#{description}." if description
 
-          "**Deprecated:** #{object[:deprecation_reason]}"
+            return description
+          end
+
+          "**Deprecated:** #{object[:deprecation_reason]}."
         end
 
         # Some fields types are arrays of other types and are displayed

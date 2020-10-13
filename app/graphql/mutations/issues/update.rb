@@ -34,20 +34,20 @@ module Mutations
       argument :add_label_ids,
                [GraphQL::ID_TYPE],
                required: false,
-               description: 'The IDs of labels to be added to the issue.'
+               description: 'The IDs of labels to be added to the issue'
 
       argument :remove_label_ids,
                [GraphQL::ID_TYPE],
                required: false,
-               description: 'The IDs of labels to be removed from the issue.'
+               description: 'The IDs of labels to be removed from the issue'
 
       argument :milestone_id,
                GraphQL::ID_TYPE,
                required: false,
-               description: 'The ID of the milestone to be assigned, milestone will be removed if set to null.'
+               description: 'The ID of the milestone to be assigned, milestone will be removed if set to null'
 
       argument :state_event, Types::IssueStateEventEnum,
-               description: 'Close or reopen an issue.',
+               description: 'Close or reopen an issue',
                required: false
 
       def resolve(project_path:, iid:, **args)

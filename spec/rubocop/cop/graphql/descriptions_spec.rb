@@ -38,6 +38,23 @@ RSpec.describe RuboCop::Cop::Graphql::Descriptions, type: :rubocop do
         end
       TYPE
     end
+
+    it 'adds an offense for fields with a description that ends in a period' do
+      inspect_source(<<~TYPE.strip)
+        module Types
+          class FakeType < BaseObject
+            graphql_name 'FakeTypeName'
+
+            argument :a_thing,
+              GraphQL::STRING_TYPE,
+              null: false,
+              description: 'A descriptive description.'
+          end
+        end
+      TYPE
+
+      expect(cop.offenses.size).to eq 1
+    end
   end
 
   context 'arguments' do
@@ -69,5 +86,33 @@ RSpec.describe RuboCop::Cop::Graphql::Descriptions, type: :rubocop do
         end
       TYPE
     end
+
+    it 'adds an offense for arguments with a description that ends in a period' do
+      inspect_source(<<~TYPE)
+        module Types
+          class FakeType < BaseObject
+            argument :a_thing,
+              GraphQL::STRING_TYPE,
+              null: false,
+              description: 'Behold! A description.'
+          end
+        end
+      TYPE
+
+      expect(cop.offenses.size).to eq 1
+    end
+  end
+
+  it 'does not add an offense if description is a call to `#copy_field_description`' do
+    expect_no_offenses(<<~TYPE)
+      module Types
+        class FakeType < BaseObject
+          field :a_thing,
+            GraphQL::STRING_TYPE,
+            null: false,
+            description: copy_field_description()
+        end
+      end
+    TYPE
   end
 end
