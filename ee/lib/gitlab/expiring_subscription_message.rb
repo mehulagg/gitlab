@@ -87,7 +87,7 @@ module Gitlab
     def expiring_message
       return namespace_expiring_message if namespace
 
-      _('Your %{strong}%{plan_name}%{strong_close} subscription will expire on %{strong}%{expires_on}%{strong_close}. After that, you will not to be able to create issues or merge requests as well as many other features.') % { expires_on: expires_at_or_cutoff_at.strftime("%Y-%m-%d"), plan_name: plan_name, strong: strong, strong_close: strong_close }
+      _('Your %{strong}%{plan_name}%{strong_close} subscription will expire on %{strong}%{expires_on}%{strong_close}. After that, you will not be able to create issues or merge requests as well as many other features.') % { expires_on: expires_at_or_cutoff_at.strftime("%Y-%m-%d"), plan_name: plan_name, strong: strong, strong_close: strong_close }
     end
 
     def namespace_expiring_message
@@ -103,11 +103,11 @@ module Gitlab
     def expiring_features_message
       case plan_name
       when 'Gold'
-        _('After that, you will not to be able to use merge approvals or epics as well as many security features.')
+        _('After that, you will not be able to use merge approvals or epics as well as many security features.')
       when 'Silver'
-        _('After that, you will not to be able to use merge approvals or epics as well as many other features.')
+        _('After that, you will not be able to use merge approvals or epics as well as many other features.')
       else
-        _('After that, you will not to be able to use merge approvals or code quality as well as many other features.')
+        _('After that, you will not be able to use merge approvals or code quality as well as many other features.')
       end
     end
 

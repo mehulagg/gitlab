@@ -38,8 +38,8 @@ export const FIELDS = [
   {
     key: 'maxRole',
     label: __('Max role'),
-    thClass: 'col-meta',
-    tdClass: 'col-meta',
+    thClass: 'col-max-role',
+    tdClass: 'col-max-role',
   },
   {
     key: 'expiration',
@@ -64,3 +64,5 @@ export const MEMBER_TYPES = {
 };
 
 export const DAYS_TO_EXPIRE_SOON = 7;
+
+export const LEAVE_MODAL_ID = 'member-leave-modal';

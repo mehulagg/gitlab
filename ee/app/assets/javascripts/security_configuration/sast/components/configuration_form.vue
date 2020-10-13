@@ -1,7 +1,7 @@
 <script>
 import { GlAlert, GlButton, GlIcon, GlLink } from '@gitlab/ui';
-import * as Sentry from '@sentry/browser';
 import { cloneDeep } from 'lodash';
+import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
 import AnalyzerConfiguration from './analyzer_configuration.vue';

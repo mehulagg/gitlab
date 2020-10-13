@@ -24,6 +24,7 @@ import httpStatusCodes from '~/lib/utils/http_status';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
 import * as commonUtils from '~/lib/utils/common_utils';
 import * as urlUtils from '~/lib/utils/url_utility';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import * as mockData from '../mock_data';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
@@ -64,6 +65,11 @@ const initialCycleAnalyticsState = {
 const mocks = {
   $toast: {
     show: jest.fn(),
+  },
+  $apollo: {
+    query: jest.fn().mockResolvedValue({
+      data: { group: { projects: { nodes: [] } } },
+    }),
   },
 };
 
@@ -390,25 +396,6 @@ describe('Cycle Analytics component', () => {
       });
     });
 
-    describe('when analyticsSimilaritySearch feature flag is on', () => {
-      beforeEach(async () => {
-        wrapper = await createComponent({
-          withStageSelected: true,
-          featureFlags: {
-            hasAnalyticsSimilaritySearch: true,
-          },
-        });
-      });
-
-      it('uses similarity as the order param', () => {
-        displaysProjectsDropdownFilter(true);
-
-        expect(wrapper.find(ProjectsDropdownFilter).props().queryParams.order_by).toEqual(
-          'similarity',
-        );
-      });
-    });
-
     it('displays the date range picker', () => {
       displaysDateRangePicker(true);
     });
@@ -636,7 +623,7 @@ describe('Cycle Analytics component', () => {
       project_ids: null,
     };
 
-    const selectedProjectIds = mockData.selectedProjects.map(({ id }) => id);
+    const selectedProjectIds = mockData.selectedProjects.map(({ id }) => getIdFromGraphQLId(id));
 
     beforeEach(async () => {
       commonUtils.historyPushState = jest.fn();

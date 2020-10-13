@@ -1,0 +1,56 @@
+<script>
+import { GlLink, GlIcon, GlSprintf } from '@gitlab/ui';
+
+export default {
+  components: {
+    GlIcon,
+    GlLink,
+    GlSprintf,
+  },
+  props: {
+    link: {
+      type: Object,
+      required: false,
+      default: () => ({ text: '', url: '' }),
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    usage: {
+      type: Object,
+      required: true,
+    },
+    cssClass: {
+      type: String,
+      required: false,
+      default: '',
+    },
+  },
+};
+</script>
+<template>
+  <div class="gl-p-5 gl-my-5 gl-bg-gray-10 gl-flex-fill-1 gl-white-space-nowrap" :class="cssClass">
+    <p class="mb-2">
+      <gl-sprintf :message="__('%{size} %{unit}')">
+        <template #size>
+          <span class="gl-font-size-h-display gl-font-weight-bold">{{ usage.value }}</span>
+        </template>
+        <template #unit>
+          <span class="gl-font-lg gl-font-weight-bold">{{ usage.unit }}</span>
+        </template>
+      </gl-sprintf>
+    </p>
+    <p class="gl-border-b-2 gl-border-b-solid gl-border-b-gray-100 gl-font-weight-bold gl-pb-3">
+      {{ description }}
+    </p>
+    <p class="gl-mb-0">
+      <slot v-bind="{ link }" name="link">
+        <gl-link target="_blank" :href="link.url">
+          <span class="text-truncate">{{ link.text }}</span>
+          <gl-icon name="external-link" class="gl-ml-2 gl-flex-shrink-0 gl-text-black-normal" />
+        </gl-link>
+      </slot>
+    </p>
+  </div>
+</template>

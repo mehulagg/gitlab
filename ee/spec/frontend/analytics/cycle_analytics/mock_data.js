@@ -251,13 +251,13 @@ export const rawDurationMedianData = [
 
 export const selectedProjects = [
   {
-    id: 1,
+    id: 'gid://gitlab/Project/1',
     name: 'cool project',
     pathWithNamespace: 'group/cool-project',
     avatarUrl: null,
   },
   {
-    id: 2,
+    id: 'gid://gitlab/Project/2',
     name: 'another cool project',
     pathWithNamespace: 'group/another-cool-project',
     avatarUrl: null,

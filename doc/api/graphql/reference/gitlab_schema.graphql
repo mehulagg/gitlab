@@ -245,6 +245,11 @@ type AlertManagementAlert implements Noteable {
   endedAt: Time
 
   """
+  Environment for the alert
+  """
+  environment: Environment
+
+  """
   Number of events of this alert
   """
   eventCount: Int
@@ -2006,6 +2011,11 @@ type BurnupChartDailyTotals {
 
 type CiGroup {
   """
+  Detailed status of the group
+  """
+  detailedStatus: DetailedStatus
+
+  """
   Jobs in group
   """
   jobs(
@@ -2078,6 +2088,11 @@ type CiGroupEdge {
 
 type CiJob {
   """
+  Detailed status of the job
+  """
+  detailedStatus: DetailedStatus
+
+  """
   Name of the job
   """
   name: String
@@ -2149,6 +2164,11 @@ Identifier of Ci::Pipeline
 scalar CiPipelineID
 
 type CiStage {
+  """
+  Detailed status of the stage
+  """
+  detailedStatus: DetailedStatus
+
   """
   Group of jobs for the stage
   """
@@ -5290,42 +5310,42 @@ type DetailedStatus {
   action: StatusAction
 
   """
-  Path of the details for the pipeline status
+  Path of the details for the status
   """
-  detailsPath: String!
+  detailsPath: String
 
   """
-  Favicon of the pipeline status
+  Favicon of the status
   """
   favicon: String!
 
   """
-  Group of the pipeline status
+  Group of the status
   """
   group: String!
 
   """
-  Indicates if the pipeline status has further details
+  Indicates if the status has further details
   """
   hasDetails: Boolean!
 
   """
-  Icon of the pipeline status
+  Icon of the status
   """
   icon: String!
 
   """
-  Label of the pipeline status
+  Label of the status
   """
   label: String!
 
   """
-  Text of the pipeline status
+  Text of the status
   """
   text: String!
 
   """
-  Tooltip associated with the pipeline status
+  Tooltip associated with the status
   """
   tooltip: String!
 }
@@ -5773,7 +5793,7 @@ type Environment {
   id: ID!
 
   """
-  The most severe open alert for the environment. If multiple alerts have equal severity, the most recent is returned.
+  The most severe open alert for the environment. If multiple alerts have equal severity, the most recent is returned
   """
   latestOpenedMostSevereAlert: AlertManagementAlert
 
@@ -5791,6 +5811,12 @@ type Environment {
   Human-readable name of the environment
   """
   name: String!
+
+  """
+  The path to the environment. Will always return null if
+  `expose_environment_path_in_alert_details` feature flag is disabled
+  """
+  path: String
 
   """
   State of the environment, for example: available/stopped
@@ -7261,6 +7287,16 @@ type GrafanaIntegration {
 
 type Group {
   """
+  Size limit for repositories in the namespace in bytes
+  """
+  actualRepositorySizeLimit: Float
+
+  """
+  Additional storage purchased for the root namespace in bytes
+  """
+  additionalPurchasedStorageSize: Float
+
+  """
   Indicates whether Auto DevOps is enabled for all projects within this group
   """
   autoDevopsEnabled: Boolean
@@ -7309,6 +7345,11 @@ type Group {
     """
     last: Int
   ): BoardConnection
+
+  """
+  Includes at least one project where the repository size exceeds the limit
+  """
+  containsLockedProjects: Boolean!
 
   """
   Description of the namespace
@@ -7969,6 +8010,11 @@ type Group {
   ): ProjectConnection!
 
   """
+  Number of projects in the root namespace where the repository size exceeds the limit
+  """
+  repositorySizeExcessProjectCount: Int!
+
+  """
   Indicates if users can request access to namespace
   """
   requestAccessEnabled: Boolean
@@ -8047,6 +8093,16 @@ type Group {
     """
     startTime: Time
   ): TimelogConnection!
+
+  """
+  Total repository size of all projects in the root namespace in bytes
+  """
+  totalRepositorySize: Float
+
+  """
+  Total excess repository size of all projects in the root namespace in bytes
+  """
+  totalRepositorySizeExcess: Float
 
   """
   Time before two-factor authentication is enforced
@@ -11955,6 +12011,21 @@ enum MutationOperationMode {
 
 type Namespace {
   """
+  Size limit for repositories in the namespace in bytes
+  """
+  actualRepositorySizeLimit: Float
+
+  """
+  Additional storage purchased for the root namespace in bytes
+  """
+  additionalPurchasedStorageSize: Float
+
+  """
+  Includes at least one project where the repository size exceeds the limit
+  """
+  containsLockedProjects: Boolean!
+
+  """
   Description of the namespace
   """
   description: String
@@ -12045,6 +12116,11 @@ type Namespace {
   ): ProjectConnection!
 
   """
+  Number of projects in the root namespace where the repository size exceeds the limit
+  """
+  repositorySizeExcessProjectCount: Int!
+
+  """
   Indicates if users can request access to namespace
   """
   requestAccessEnabled: Boolean
@@ -12063,6 +12139,16 @@ type Namespace {
   Date until the temporary storage increase is active
   """
   temporaryStorageIncreaseEndsOn: Time
+
+  """
+  Total repository size of all projects in the root namespace in bytes
+  """
+  totalRepositorySize: Float
+
+  """
+  Total excess repository size of all projects in the root namespace in bytes
+  """
+  totalRepositorySizeExcess: Float
 
   """
   Visibility of the namespace
@@ -12934,9 +13020,19 @@ enum PipelineStatusEnum {
 
 type Project {
   """
+  Size limit for the repository in bytes
+  """
+  actualRepositorySizeLimit: Float
+
+  """
   A single Alert Management alert of the project
   """
   alertManagementAlert(
+    """
+    Username of a user assigned to the issue
+    """
+    assigneeUsername: String
+
     """
     IID of the alert. For example, "1"
     """
@@ -12963,6 +13059,11 @@ type Project {
   """
   alertManagementAlertStatusCounts(
     """
+    Username of a user assigned to the issue
+    """
+    assigneeUsername: String
+
+    """
     Search criteria for filtering alerts. This will search on title, description, service, monitoring_tool.
     """
     search: String
@@ -12976,6 +13077,11 @@ type Project {
     Returns the elements in the list that come after the specified cursor.
     """
     after: String
+
+    """
+    Username of a user assigned to the issue
+    """
+    assigneeUsername: String
 
     """
     Returns the elements in the list that come before the specified cursor.
@@ -14120,6 +14226,11 @@ type Project {
   Git repository of the project
   """
   repository: Repository
+
+  """
+  Size of repository that exceeds the limit in bytes
+  """
+  repositorySizeExcess: Float
 
   """
   Indicates if users can request member access to the project

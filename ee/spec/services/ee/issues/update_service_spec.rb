@@ -171,6 +171,20 @@ RSpec.describe Issues::UpdateService do
           group.add_maintainer(user)
         end
 
+        context 'when EpicIssues::CreateService returns failure', :aggregate_failures do
+          it 'does not send usage data for added or changed epic action' do
+            link_sevice = double
+            expect(EpicIssues::CreateService).to receive(:new)
+                                                   .with(epic, user, { target_issuable: issue, skip_epic_dates_update: true })
+                                                   .and_return(link_sevice)
+            expect(link_sevice).to receive(:execute).and_return({ status: :failure })
+
+            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_added_to_epic_action)
+
+            subject
+          end
+        end
+
         context 'when issue does not belong to an epic yet' do
           it 'assigns an issue to the provided epic' do
             expect { update_issue(epic: epic) }.to change { issue.reload.epic }.from(nil).to(epic)
@@ -182,6 +196,12 @@ RSpec.describe Issues::UpdateService do
               .with(epic, user, { target_issuable: issue, skip_epic_dates_update: true })
               .and_return(link_sevice)
             expect(link_sevice).to receive(:execute).and_return({ status: :success })
+
+            subject
+          end
+
+          it 'tracks usage data for added to epic action' do
+            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_added_to_epic_action).with(author: user)
 
             subject
           end
@@ -207,6 +227,12 @@ RSpec.describe Issues::UpdateService do
 
             subject
           end
+
+          it 'tracks usage data for changed epic action' do
+            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_changed_epic_action).with(author: user)
+
+            subject
+          end
         end
       end
     end
@@ -229,6 +255,12 @@ RSpec.describe Issues::UpdateService do
           it 'does not do anything' do
             expect { subject }.not_to change { issue.reload.epic }
           end
+
+          it 'does not send usage data for removed epic action' do
+            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_removed_from_epic_action)
+
+            subject
+          end
         end
 
         context 'when issue belongs to an epic' do
@@ -245,6 +277,25 @@ RSpec.describe Issues::UpdateService do
             expect(link_sevice).to receive(:execute).and_return({ status: :success })
 
             subject
+          end
+
+          it 'tracks usage data for removed from epic action' do
+            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_removed_from_epic_action).with(author: user)
+
+            subject
+          end
+
+          context 'but EpicIssues::DestroyService returns failure', :aggregate_failures do
+            it 'does not send usage data for removed epic action' do
+              link_sevice = double
+              expect(EpicIssues::DestroyService).to receive(:new).with(EpicIssue.last, user)
+                                                      .and_return(link_sevice)
+              expect(link_sevice).to receive(:execute).and_return({ status: :failure })
+
+              expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_removed_from_epic_action)
+
+              subject
+            end
           end
         end
       end

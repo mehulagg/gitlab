@@ -16,7 +16,6 @@ class Groups::Analytics::CycleAnalyticsController < Groups::Analytics::Applicati
     push_frontend_feature_flag(:cycle_analytics_scatterplot_enabled, default_enabled: true)
     push_frontend_feature_flag(:value_stream_analytics_path_navigation, @group)
     push_frontend_feature_flag(:value_stream_analytics_create_multiple_value_streams, default_enabled: true)
-    push_frontend_feature_flag(:analytics_similarity_search, @group, default_enabled: true)
     render_403 unless can?(current_user, :read_group_cycle_analytics, @group)
   end
 

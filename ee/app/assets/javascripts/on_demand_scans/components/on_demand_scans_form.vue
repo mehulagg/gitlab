@@ -1,5 +1,4 @@
 <script>
-import * as Sentry from '@sentry/browser';
 import {
   GlAlert,
   GlButton,
@@ -10,6 +9,7 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import * as Sentry from '~/sentry/wrapper';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { redirectTo } from '~/lib/utils/url_utility';
 import {

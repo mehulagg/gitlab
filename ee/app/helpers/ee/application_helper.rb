@@ -74,13 +74,6 @@ module EE
       ::Gitlab.config.smartcard.client_certificate_required_port
     end
 
-    def page_class
-      class_names = super
-      class_names += system_message_class
-
-      class_names
-    end
-
     override :autocomplete_data_sources
     def autocomplete_data_sources(object, noteable_type)
       return {} unless object && noteable_type
@@ -102,10 +95,6 @@ module EE
           vulnerabilities: object.feature_available?(:security_dashboard) ? vulnerabilities_project_autocomplete_sources_path(object) : nil
         }.compact.merge(super)
       end
-    end
-
-    def instance_review_permitted?
-      ::Gitlab::CurrentSettings.instance_review_permitted? && current_user&.admin?
     end
 
     override :show_last_push_widget?

@@ -232,6 +232,17 @@ describe('RECEIVE_EPICS_SUCCESS', () => {
 
     expect(state.epics).toEqual(mockEpics);
   });
+
+  it("doesn't add duplicate epics", () => {
+    state = {
+      ...state,
+      epics: mockEpics,
+    };
+
+    mutations.RECEIVE_EPICS_SUCCESS(state, mockEpics);
+
+    expect(state.epics).toEqual(mockEpics);
+  });
 });
 
 describe('RESET_EPICS', () => {

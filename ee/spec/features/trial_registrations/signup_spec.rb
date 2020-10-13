@@ -37,8 +37,6 @@ RSpec.describe 'Trial Sign Up', :js do
           fill_in 'new_user_email',      with: user_attrs[:email]
           fill_in 'new_user_password',   with: user_attrs[:password]
 
-          check 'terms_opt_in'
-
           click_button 'Continue'
         end
 
