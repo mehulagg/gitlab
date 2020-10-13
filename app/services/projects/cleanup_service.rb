@@ -11,6 +11,21 @@ module Projects
 
     include Gitlab::Utils::StrongMemoize
 
+    class << self
+      def enqueue!(project, current_user, params)
+        unless project.set_repository_read_only!
+          return { status: :error, message: _('Failed to make repository read-only. Check for ongoing git push operations') }
+        end
+
+        Projects::UpdateService.new(project, current_user, cleanup_params).execute
+      end
+
+      def cleanup_after(project)
+        project.bfg_object_map.remove!
+        project.set_repository_writable!
+      end
+    end
+
     # Attempt to clean up the project following the push. Warning: this is
     # destructive!
     #
@@ -29,7 +44,7 @@ module Projects
       # time. Better to feel the pain immediately.
       project.repository.expire_all_method_caches
 
-      project.bfg_object_map.remove!
+      self.class.cleanup_after(project)
     end
 
     private

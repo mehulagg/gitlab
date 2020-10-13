@@ -18,14 +18,14 @@ module Projects
       end
 
       def cleanup
-        cleanup_params = params.require(:project).permit(:bfg_object_map)
-        result = Projects::UpdateService.new(project, current_user, cleanup_params).execute
+        cleanup_params = params.require(:project).require(:bfg_object_map)
+        result = Projects::CleanupService.enqueue(project, current_user, cleanup_params)
 
         if result[:status] == :success
           RepositoryCleanupWorker.perform_async(project.id, current_user.id) # rubocop:disable CodeReuse/Worker
           flash[:notice] = _('Repository cleanup has started. You will receive an email once the cleanup operation is complete.')
         else
-          flash[:alert] = _('Failed to upload object map file')
+          flash[:alert] = status.fetch(:message, _('Failed to upload object map file'))
         end
 
         redirect_to project_settings_repository_path(project)
