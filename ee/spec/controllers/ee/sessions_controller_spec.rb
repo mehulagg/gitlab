@@ -99,6 +99,10 @@ RSpec.describe SessionsController, :geo do
           let(:user) { create(:user, :two_factor) }
           let(:operation) { authenticate_2fa(otp_attempt: 'invalid', otp_user_id: user.id) }
           let(:method) { 'OTP' }
+
+          before do
+            stub_feature_flags(forti_authenticator: false)
+          end
         end
       end
 

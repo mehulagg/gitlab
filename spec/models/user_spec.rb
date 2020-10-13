@@ -1545,6 +1545,10 @@ RSpec.describe User do
   end
 
   describe '#disable_two_factor!' do
+    before do
+      stub_feature_flags(forti_authenticator: false)
+    end
+
     it 'clears all 2FA-related fields' do
       user = create(:user, :two_factor)
 

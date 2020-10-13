@@ -8,6 +8,7 @@ module Users
 
     def execute(otp_code)
       if Feature.enabled?(:forti_authenticator, current_user)
+        raise 'boom'
         validate_against_forti_authenticator(otp_code)
       else
         validate_against_devise(otp_code)
@@ -17,7 +18,7 @@ module Users
     private
 
     def validate_against_devise(otp_code)
-      current_user.devise_validate_and_consume_otp!(otp_code) ? success : error('failure')
+      current_user.validate_and_consume_otp!(otp_code) ? success : error('failure')
     end
 
     def validate_against_forti_authenticator(otp_code)
