@@ -175,7 +175,7 @@ RSpec.describe SearchHelper do
               id: issue.id,
               label: 'issue 1',
               url: Gitlab::Routing.url_helpers.project_issue_path(issue.project, issue),
-              avatar_url: project.avatar_url
+              avatar_url: issue.project.avatar_url
             })
           end
         end
