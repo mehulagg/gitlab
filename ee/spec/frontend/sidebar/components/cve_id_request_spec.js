@@ -1,10 +1,8 @@
 import Vue from 'vue';
 import CveIdRequest from 'ee/sidebar/components/cve_id_request/cve_id_request_sidebar.vue';
-//import mountComponent from 'helpers/vue_mount_component_helper';
 import { shallowMount } from '@vue/test-utils';
 
 describe('CveIdRequest', () => {
-  let initialData;
   let wrapper;
 
   const initCveIdRequest = () => {
@@ -36,7 +34,6 @@ describe('CveIdRequest', () => {
     wrapper = shallowMount(CveIdRequestComponent, {
       provide,
     });
-    //wrapper = mountComponent(CveIdRequestComponent, initialData, '#mock-container');
   };
 
   beforeEach(() => {
@@ -83,7 +80,7 @@ describe('CveIdRequest', () => {
       });
     });
 
-    it('should not show the "Help" pane when help button is clicked and then closed', done => {
+    it('should not show the "Help" pane when help button is clicked and then closed', (done) => {
       helpButton().click();
 
       Vue.nextTick()
