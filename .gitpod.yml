@@ -45,13 +45,7 @@ tasks:
         gdk start
         # Run DB migrations
         if [ "$GITLAB_RUN_DB_MIGRATIONS" == true ]; then
-          echo "$(date) – Running DB migrations" | tee -a /workspace/startup.log
-          printf "Waiting for GitLab database ..."
-          until gdk psql -d gitlabhq_development -c '\l' >/dev/null 2>/dev/null; do printf '.'; sleep 5; done && echo ""
-          cd gitlab
-          # Run DB migrations
-          rails db:migrate RAILS_ENV=development
-          cd -
+          make ensure-databases-running gitlab-db-migrate
         fi
         # Fix DB key
         if [ "$GITLAB_FIX_DB_KEY" = true ]; then
