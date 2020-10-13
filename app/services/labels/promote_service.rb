@@ -9,6 +9,16 @@ module Labels
       return unless project.group &&
           label.is_a?(ProjectLabel)
 
+      # if a group label with the same name already exists, update the referenced entity (group or project) only.
+      group_label = GroupLabel.find_by(group_id: project.group.id, title: label.title)
+
+      unless group_label
+        # update label to overwrite project_id with group_id to make it a GroupLabel
+        # this keeps all other references intact
+        label.update(group_id: project.group.id, project_id: nil)
+        return label
+      end
+
       Label.transaction do
         new_label = clone_label_to_group_label(label)
 
