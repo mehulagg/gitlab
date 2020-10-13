@@ -117,11 +117,14 @@ describe('Storage counter app', () => {
     it('usage_statistics component is rendered when flag is true', async () => {
       createComponent({
         additionalRepoStorageByNamespace: true,
+        loading: true,
       });
 
       wrapper.setData({
         namespace: withRootStorageStatistics,
       });
+
+      wrapper.vm.$apollo.queries.namespace.loading = false;
 
       await wrapper.vm.$nextTick();
 
