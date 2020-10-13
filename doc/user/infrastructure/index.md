@@ -13,6 +13,25 @@ workflows to tie into GitLab's authentication and authorization. These features 
 lowering the barrier to entry for teams to adopt Terraform, collaborate effectively within
 GitLab, and support Terraform best practices.
 
+## Quick Start
+
+The easiest way to setup a simple Terraform project integration, would be using the following `.gitlab-ci.yml`.
+
+```yaml
+include:
+  - template: Terraform.latest.gitlab-ci.yml
+
+variables:
+  TF_STATE_NAME: default # if not using GitLab's HTTP backend, remove this line and specify TF_HTTP_* variables
+  TF_CACHE_KEY: default
+```
+
+Note that this template is not stable (`.latest.`), so it could get breaking changes. It also has some opinionated decisions, that can all be overridden at your will, like:
+
+- Including the latest [GitLab Terraform Image](https://gitlab.com/gitlab-org/terraform-images)
+- Using the [GitLab provided Terraform HTTP backend](https://docs.gitlab.com/ee/user/infrastructure/#gitlab-managed-terraform-state) as default
+- Creates [4 pipeline stages](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform.latest.gitlab-ci.yml): init, validate, build and deploy. This stages are basically running Terraform commands: `init`, `validate`, `plan`, `plan-json` and `apply`. The latter only on master.
+
 ## GitLab managed Terraform State
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2673) in GitLab 13.0.
