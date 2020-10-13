@@ -95,6 +95,7 @@ export default {
 <template>
   <div v-cloak class="time_tracker time-tracking-component-wrap">
     <time-tracking-collapsed-state
+      data-testid="collapsedState"
       :show-comparison-state="showComparisonState"
       :show-no-time-tracking-state="showNoTimeTrackingState"
       :show-help-state="showHelpState"
@@ -128,6 +129,7 @@ export default {
       <time-tracking-no-tracking-pane v-if="showNoTimeTrackingState" />
       <time-tracking-comparison-pane
         v-if="showComparisonState"
+        data-testid="comparisonPane"
         :time-estimate="timeEstimate"
         :time-spent="timeSpent"
         :time-spent-human-readable="humanTimeSpent"

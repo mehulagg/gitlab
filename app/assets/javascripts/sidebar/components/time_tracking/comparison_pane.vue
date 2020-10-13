@@ -77,7 +77,11 @@ export default {
       :class="timeRemainingStatusClass"
       class="compare-meter"
     >
-      <gl-progress-bar :value="timeRemainingPercent" :variant="progressBarVariant" />
+      <gl-progress-bar
+        data-testid="timeRemainingProgress"
+        :value="timeRemainingPercent"
+        :variant="progressBarVariant"
+      />
       <div class="compare-display-container">
         <div class="compare-display float-left">
           <span class="compare-label">{{ s__('TimeTracking|Spent') }}</span>
