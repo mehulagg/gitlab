@@ -193,3 +193,16 @@ After enabling **Incident SLA** in the Incident Management configuration, newly-
 incidents display a SLA (Service Level Agreement) timer showing the time remaining before
 the SLA period expires. If the incident is not closed before the SLA period ends, GitLab
 adds a `missed::SLA` label to the incident.
+
+### Embed metrics in incidents and issues
+
+You can embed metrics anywhere [GitLab Markdown](../../user/markdown.md) is
+used, such as descriptions, comments on issues, and merge requests. Embedding
+metrics helps you share them when discussing incidents or performance issues.
+You can output the dashboard directly into any issue, merge request, epic, or
+any other Markdown text field in GitLab by
+[copying and pasting the link to the metrics dashboard](../metrics/embed.md#embedding-gitlab-managed-kubernetes-metrics).
+
+You can embed both [GitLab-hosted metrics](../metrics/embed.md) and
+[Grafana metrics](../metrics/embed_grafana.md) in incidents and issue
+templates.
