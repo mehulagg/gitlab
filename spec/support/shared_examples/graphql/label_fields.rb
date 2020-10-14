@@ -106,8 +106,6 @@ RSpec.shared_examples 'querying a GraphQL type with labels' do
     end
 
     it 'batches queries for labels by title' do
-      pending('See: https://gitlab.com/gitlab-org/gitlab/-/issues/217767')
-
       multi_selection = query_for(label_b, label_c)
       single_selection = query_for(label_d)
 
