@@ -26,7 +26,7 @@ module QA
           private
 
           def text_area
-            find('#editor textarea', visible: false)
+            find('.monaco-editor textarea', visible: false)
           end
         end
       end
