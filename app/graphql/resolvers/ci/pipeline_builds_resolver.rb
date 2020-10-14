@@ -31,7 +31,7 @@ module Resolvers
         # NOTE: Remove the else branch once the ci_jobs_finder_refactor FF is
         # removed. https://gitlab.com/gitlab-org/gitlab/-/issues/245183
         # rubocop: disable CodeReuse/ActiveRecord
-        if Feature.enabled?(:ci_jobs_finder_refactor)
+        if Feature.enabled?(:ci_jobs_finder_refactor, default_enabled: true)
           params = { scope: status }
           ::Ci::JobsFinder
             .new(current_user: current_user, pipeline: pipeline, params: params)
