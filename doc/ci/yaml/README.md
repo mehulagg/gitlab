@@ -399,6 +399,10 @@ configuration files. This helps avoid duplicated configuration, for example, glo
 `include` requires the external YAML file to have the extensions `.yml` or `.yaml`,
 otherwise the external file is not included.
 
+Using [YAML anchors](#anchors) across different YAML files sourced by `include` is not
+supported. You must only refer to anchors in the same file. Instead
+of using YAML anchors, you can use the [`extends` keyword](#extends).
+
 `include` supports the following inclusion methods:
 
 | Method                          | Description                                                       |
@@ -410,7 +414,6 @@ otherwise the external file is not included.
 
 The `include` methods do not support [variable expansion](../variables/where_variables_can_be_used.md#variables-usage).
 
-NOTE: **Note:**
 `.gitlab-ci.yml` configuration included by all methods is evaluated at pipeline creation.
 The configuration is a snapshot in time and persisted in the database. Any changes to
 referenced `.gitlab-ci.yml` configuration is not reflected in GitLab until the next pipeline is created.
@@ -425,11 +428,6 @@ TIP: **Tip:**
 Use merging to customize and override included CI/CD configurations with local
 definitions. Local definitions in `.gitlab-ci.yml` override included definitions.
 
-NOTE: **Note:**
-Using [YAML anchors](#anchors) across different YAML files sourced by `include` is not
-supported. You must only refer to anchors in the same file. Instead
-of using YAML anchors, you can use the [`extends` keyword](#extends).
-
 #### `include:local`
 
 `include:local` includes a file from the same repository as `.gitlab-ci.yml`.
@@ -439,11 +437,10 @@ You can only use files that are tracked by Git on the same branch
 your configuration file is on. In other words, when using a `include:local`, make
 sure that both `.gitlab-ci.yml` and the local file are on the same branch.
 
+Including local files through Git submodules paths is not supported.
+
 All [nested includes](#nested-includes) are executed in the scope of the same project,
 so it's possible to use local, project, remote, or template includes.
-
-NOTE: **Note:**
-Including local files through Git submodules paths is not supported.
 
 Example:
 
@@ -452,7 +449,6 @@ include:
   - local: '/templates/.gitlab-ci-template.yml'
 ```
 
-TIP: **Tip:**
 Local includes can be used as a replacement for symbolic links that are not followed.
 
 This can be defined as a short local include:
@@ -891,6 +887,8 @@ The following stages are available to every pipeline:
 
 User-defined stages are executed after `.pre` and before `.post`.
 
+A pipeline is not created if all jobs are in `.pre` or `.post` stages.
+
 The order of `.pre` and `.post` can't be changed, even if defined out of order in `.gitlab-ci.yml`.
 For example, the following are equivalent configuration:
 
@@ -921,9 +919,6 @@ For example, the following are equivalent configuration:
     - a
     - b
   ```
-
-NOTE: **Note:**
-A pipeline is not created if all jobs are in `.pre` or `.post` stages.
 
 ### `extends`
 
@@ -1106,7 +1101,6 @@ is either included or excluded from the pipeline, depending on the configuration
 If included, the job also has [certain attributes](#rules-attributes)
 added to it.
 
-CAUTION: **Caution:**
 `rules` replaces [`only/except`](#onlyexcept-basic) and can't be used in conjunction with it.
 If you attempt to use both keywords in the same job, the linter returns a
 `key may not be used with rules` error.
@@ -1560,7 +1554,7 @@ job1:
     if: ($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop") && $MY_VARIABLE
 ```
 
-NOTE: **Note:**
+CAUTION: **Caution:**
 [Before GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/230938),
 rules that use both `||` and `&&` may evaluate with an unexpected order of operations.
 
@@ -1715,10 +1709,6 @@ Feature.enable(:allow_unsafe_ruby_regexp)
 ```
 
 ### `only`/`except` (advanced)
-
-CAUTION: **Warning:**
-This is an _alpha_ feature, and is subject to change at any time without
-prior notice!
 
 GitLab supports both simple and complex strategies, so it's possible to use an
 array and a hash configuration scheme.
@@ -2296,15 +2286,15 @@ failure.
 `when` can be set to one of the following values:
 
 1. `on_success` - execute job only when all jobs from prior stages
-    succeed (or are considered succeeding because they are marked
-    `allow_failure`). This is the default.
+    succeed (or are considered succeeding because they have `allow_failure: true`).
+    This is the default.
 1. `on_failure` - execute job only when at least one job from prior stages
     fails.
 1. `always` - execute job regardless of the status of jobs from prior stages.
 1. `manual` - execute job manually (added in GitLab 8.10). Read about
-    [manual actions](#whenmanual) below.
+    [manual jobs](#whenmanual) below.
 1. `delayed` - execute job after a certain period (added in GitLab 11.14).
-    Read about [delayed actions](#whendelayed) below.
+    Read about [delayed jobs](#whendelayed) below.
 1. `never`:
    - With [`rules`](#rules), don't execute job.
    - With [`workflow:rules`](#workflowrules), don't run pipeline.
@@ -2358,45 +2348,41 @@ The above script:
 #### `when:manual`
 
 > - Introduced in GitLab 8.10.
-> - Blocking manual actions were introduced in GitLab 9.0.
+> - Blocking manual jobs were introduced in GitLab 9.0.
 > - Protected actions were introduced in GitLab 9.2.
 
-Manual actions are a special type of job that are not executed automatically,
-they need to be explicitly started by a user. An example usage of manual actions
-would be a deployment to a production environment. Manual actions can be started
-from the pipeline, job, environment, and deployment views. Read more at the
-[environments documentation](../environments/index.md#configuring-manual-deployments).
+A manual job is a type of job that is not executed automatically and must be explicitly
+started by a user. You might want to use manual jobs for things like deploying to production.
 
-Manual actions can be either optional or blocking. Blocking manual actions
-block the execution of the pipeline at the stage this action is defined in. It's
-possible to resume execution of the pipeline when someone executes a blocking
-manual action by clicking a _play_ button.
+To make a job manual, add `when: manual` to its configuration.
 
-When a pipeline is blocked, it isn't merged if Merge When Pipeline Succeeds
-is set. Blocked pipelines also have a special status, called _manual_.
-When the `when:manual` syntax is used, manual actions are non-blocking by
-default. If you want to make a manual action blocking, add
-`allow_failure: false` to the job's definition in `.gitlab-ci.yml`.
+Manual jobs can be started from the pipeline, job, [environment](../environments/index.md#configuring-manual-deployments),
+and deployment views.
 
-Optional manual actions have `allow_failure: true` set by default and their
-statuses don't contribute to the overall pipeline status. So, if a manual
-action fails, the pipeline eventually succeeds.
+Manual jobs can be either optional or blocking:
 
-NOTE: **Note:**
-When using [`rules:`](#rules), `allow_failure` defaults to `false`, including for manual jobs.
+- **Optional**: Manual jobs have [`allow_failure: true](#allow_failure) set by default
+  and are considered optional. The status of an optional manual job does not contribute
+  to the overall pipeline status. A pipeline can succeed even if all its manual jobs fail.
 
-Manual actions are considered to be write actions, so permissions for
-[protected branches](../../user/project/protected_branches.md) are used when
-a user wants to trigger an action. In other words, to trigger a manual
-action assigned to a branch that the pipeline is running for, the user must
-have the ability to merge to this branch. It's possible to use protected environments
-to more strictly [protect manual deployments](#protecting-manual-jobs) from being
-run by unauthorized users.
+- **Blocking**: To make a blocking manual job, add `allow_failure: false` to its configuration.
+  Blocking manual jobs stop further execution of the pipeline at the stage where the
+  job is defined. To let the pipeline continue running, click **{play}** (play) on
+  the blocking manual job.
 
-NOTE: **Note:**
-Using `when:manual` and `trigger` together results in the error `jobs:#{job-name} when
-should be on_success, on_failure or always`, because `when:manual` prevents triggers
-being used.
+  Merge requests in projects with [merge when pipeline succeeds](../../user/project/merge_requests/merge_when_pipeline_succeeds.md)
+  enabled can't be merged with a blocked pipeline. Blocked pipelines show a status
+  of **blocked**.
+
+When you use [`rules:`](#rules), `allow_failure` defaults to `false`, including for manual jobs.
+
+To trigger a manual job, a user must have permission to merge to the assigned branch.
+You can use [protected branches](../../user/project/protected_branches.md) to more strictly
+[protect manual deployments](#protecting-manual-jobs) from being run by unauthorized users.
+
+In [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/201938) and later, you
+can use `when:manual` in the same job as [`trigger`](#trigger). In GitLab 13.4 and
+earlier, using them together causes the error `jobs:#{job-name} when should be on_success, on_failure or always`.
 
 ##### Protecting manual jobs **(PREMIUM)**
 
@@ -2431,9 +2417,9 @@ To do this, you must:
    this list can trigger this manual job, as well as GitLab administrators
    who are always able to use protected environments.
 
-Additionally, if a manual job is defined as blocking by adding `allow_failure: false`,
-the next stages of the pipeline don't run until the manual job is triggered. This
-can be used to define a list of users allowed to "approve" later pipeline
+Additionally, if you define a manual job as blocking by adding `allow_failure: false`,
+the pipeline's next stages don't run until the manual job is triggered. You can use this
+to define a list of users allowed to "approve" later pipeline
 stages by triggering the blocking manual job.
 
 #### `when:delayed`
@@ -2626,10 +2612,12 @@ The `stop_review_app` job is **required** to have the following keywords defined
 - `environment:action`
 
 Additionally, both jobs should have matching [`rules`](../yaml/README.md#onlyexcept-basic)
-or [`only/except`](../yaml/README.md#onlyexcept-basic) configuration. In the example
-above, if the configuration is not identical, the `stop_review_app` job might not be
-included in all pipelines that include the `review_app` job, and it is not
-possible to trigger the `action: stop` to stop the environment automatically.
+or [`only/except`](../yaml/README.md#onlyexcept-basic) configuration. 
+
+In the example above, if the configuration is not identical:
+
+- The `stop_review_app` job might not be included in all pipelines that include the `review_app` job.
+- It is not possible to trigger the `action: stop` to stop the environment automatically.
 
 #### `environment:auto_stop_in`
 
@@ -2728,16 +2716,15 @@ as Review Apps. You can see a simple example using Review Apps at
 >   by default.
 > - From GitLab 9.2, caches are restored before [artifacts](#artifacts).
 
-TIP: **Learn more:**
-Read how caching works and find out some good practices in the
-[caching dependencies documentation](../caching/index.md).
-
 `cache` is used to specify a list of files and directories that should be
 cached between jobs. You can only use paths that are within the local working
 copy.
 
 If `cache` is defined outside the scope of jobs, it means it's set
 globally and all jobs use that definition.
+
+Read how caching works and find out some good practices in the
+[caching dependencies documentation](../caching/index.md).
 
 #### `cache:paths`
 
@@ -2778,17 +2765,17 @@ rspec:
       - binaries/
 ```
 
-Note that since cache is shared between jobs, if you're using different
-paths for different jobs, you should also set a different **cache:key**
-otherwise cache content can be overwritten.
+The cache is shared between jobs, so if you're using different
+paths for different jobs, you should also set a different `cache:key`.
+Otherwise cache content can be overwritten.
 
 #### `cache:key`
 
 > Introduced in GitLab Runner v1.0.0.
 
-Since the cache is shared between jobs, if you're using different
-paths for different jobs, you should also set a different `cache:key`
-otherwise cache content can be overwritten.
+The cache is shared between jobs, so if you're using different
+paths for different jobs, you should also set a different `cache:key`.
+Otherwise cache content can be overwritten.
 
 The `key` parameter defines the affinity of caching between jobs,
 to have a single cache for all jobs, cache per-job, cache per-branch
@@ -2799,10 +2786,6 @@ The `cache:key` variable can use any of the
 [predefined variables](../variables/README.md). The default key, if not
 set, is just literal `default`, which means everything is shared between
 pipelines and jobs by default, starting from GitLab 9.0.
-
-NOTE: **Note:**
-The `cache:key` variable can't contain the `/` character, or the equivalent
-URI-encoded `%2F`; a value made only of dots (`.`, `%2E`) is also forbidden.
 
 For example, to enable per-branch caching:
 
@@ -2822,6 +2805,11 @@ cache:
   paths:
     - binaries/
 ```
+
+The `cache:key` variable can't contain the `/` character, or the equivalent
+URI-encoded `%2F`. A value made only of dots (`.`, `%2E`) is also forbidden.
+
+You can specify a [fallback cache key](#fallback-cache-key) to use if the specified `cache:key` is not found.
 
 ##### `cache:key:files`
 
@@ -2975,13 +2963,13 @@ rspec:
     - bundle exec rspec ...
 ```
 
-This helps to speed up job execution and reduce load on the cache server,
-especially when you have a large number of cache-using jobs executing in
+This helps to speed up job execution and reduce load on the cache server.
+It is especially helpful when you have a large number of cache-using jobs executing in
 parallel.
 
-Additionally, if you have a job that unconditionally recreates the cache without
-reference to its previous contents, you can use `policy: push` in that job to
-skip the download step.
+If you have a job that unconditionally recreates the cache without
+referring to its previous contents, you can skip the download step.
+To do so, add `policy: push` to the job.
 
 ### `artifacts`
 
@@ -2994,7 +2982,7 @@ skip the download step.
 `artifacts` is used to specify a list of files and directories that are
 attached to the job when it [succeeds, fails, or always](#artifactswhen).
 
-The artifacts are sent to GitLab after the job finishes and are
+The artifacts are sent to GitLab after the job finishes. They are
 available for download in the GitLab UI if the size is not
 larger than the [maximum artifact size](../../user/gitlab_com/index.md#gitlab-cicd).
 
@@ -3141,11 +3129,6 @@ useful when you want to download the archive from GitLab. The `artifacts:name`
 variable can make use of any of the [predefined variables](../variables/README.md).
 The default name is `artifacts`, which becomes `artifacts.zip` when you download it.
 
-NOTE: **Note:**
-If your branch-name contains forward slashes
-(for example `feature/my-feature`) it's advised to use `$CI_COMMIT_REF_SLUG`
-instead of `$CI_COMMIT_REF_NAME` for proper naming of the artifact.
-
 To create an archive with a name of the current job:
 
 ```yaml
@@ -3166,6 +3149,10 @@ job:
     paths:
       - binaries/
 ```
+
+If your branch-name contains forward slashes
+(for example `feature/my-feature`) it's advised to use `$CI_COMMIT_REF_SLUG`
+instead of `$CI_COMMIT_REF_NAME` for proper naming of the artifact.
 
 To create an archive with a name of the current job and the current branch or
 tag including only the binaries directory:
@@ -3215,10 +3202,8 @@ job:
 #### `artifacts:untracked`
 
 `artifacts:untracked` is used to add all Git untracked files as artifacts (along
-to the paths defined in `artifacts:paths`).
-
-NOTE: **Note:**
-`artifacts:untracked` ignores configuration in the repository's `.gitignore` file.
+to the paths defined in `artifacts:paths`). `artifacts:untracked` ignores configuration
+in the repository's `.gitignore` file.
 
 Send all Git untracked files:
 
@@ -3308,7 +3293,6 @@ job:
     expire_in: 1 week
 ```
 
-NOTE: **Note:**
 The latest artifacts for refs are locked against deletion, and kept regardless of
 the expiry time. [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/16267)
 GitLab 13.0 behind a disabled feature flag, and [made the default behavior](https://gitlab.com/gitlab-org/gitlab/-/issues/229936)
@@ -3343,19 +3327,22 @@ These are the available report types:
 
 > Introduced in GitLab 8.6 and GitLab Runner v1.1.1.
 
-By default, all [`artifacts`](#artifacts) from all previous [stages](#stages)
-are passed, but you can use the `dependencies` parameter to define a limited
-list of jobs (or no jobs) to fetch artifacts from.
+By default, all [`artifacts`](#artifacts) from previous [stages](#stages)
+are passed to each job. However, you can use the `dependencies` parameter to
+define a limited list of jobs to fetch artifacts from. You can also set a job to download no artifacts at all.
 
 To use this feature, define `dependencies` in context of the job and pass
 a list of all previous jobs the artifacts should be downloaded from.
-You can only define jobs from stages that are executed before the current one.
-An error is shown if you define jobs from the current stage or next ones.
-Defining an empty array skips downloading any artifacts for that job.
-The status of the previous job is not considered when using `dependencies`, so
-if it failed or it's a manual job that was not run, no error occurs.
 
-In the following example, we define two jobs with artifacts, `build:osx` and
+You can define jobs from stages that were executed before the current one.
+An error occurs if you define jobs from the current or an upcoming stage.
+
+To prevent a job from downloading artifacts, define an empty array.
+
+When you use `dependencies`, the status of the previous job is not considered.
+If a job fails or it's a manual job that was not run, no error occurs.
+
+The following example defines two jobs with artifacts: `build:osx` and
 `build:linux`. When the `test:osx` is executed, the artifacts from `build:osx`
 are downloaded and extracted in the context of the build. The same happens
 for `test:linux` and artifacts from `build:linux`.
@@ -3404,7 +3391,6 @@ If the artifacts of the job that is set as a dependency have been
 [erased](../pipelines/job_artifacts.md#erasing-artifacts), then
 the dependent job fails.
 
-NOTE: **Note:**
 You can ask your administrator to
 [flip this switch](../../administration/job_artifacts.md#validation-for-dependencies)
 and bring back the old behavior.
@@ -3437,14 +3423,14 @@ job1:
 Use `retry` to configure how many times a job is retried in
 case of a failure.
 
-When a job fails and has `retry` configured, the job is processed again,
-up to the amount of times specified by the `retry` keyword.
+When a job fails, the job is processed again,
+until the limit specified by the `retry` keyword is reached.
 
-If `retry` is set to 2, and a job succeeds in a second run (first retry), it is not tried
-again. `retry` value has to be a positive integer, equal to or larger than 0, but
-less than or equal to 2 (two retries maximum, three runs in total).
+If `retry` is set to `2`, and a job succeeds in a second run (first retry), it is not retried.
+The `retry` value must be a positive integer, from `0` to `2`
+(two retries maximum, three runs in total).
 
-A simple example to retry in all failure cases:
+This example retries all failure cases:
 
 ```yaml
 test:
@@ -3551,7 +3537,6 @@ test:
   parallel: 5
 ```
 
-TIP: **Tip:**
 Parallelize tests suites across parallel jobs.
 Different languages have different tools to facilitate this.
 
@@ -3586,10 +3571,11 @@ job split into three separate jobs.
 Use `matrix:` to configure different variables for jobs that are running in parallel.
 There can be from 2 to 50 jobs.
 
-In GitLab 13.5 and later, you can have one-dimensional matrices with a single job.
+[In GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/26362) and later,
+you can have one-dimensional matrices with a single job.
 The ability to have one-dimensional matrices is [deployed behind a feature flag](../../user/feature_flags.md),
 disabled by default. It's disabled on GitLab.com. To use it in a GitLab self-managed
-instance, ask a GitLab administrator to [enable the `one_dimensional_matrix:` feature flag](../../administration/feature_flags.md). **(CORE-ONLY)**
+instance, ask a GitLab administrator to [enable the `one_dimensional_matrix:` feature flag](../../administration/feature_flags.md). **(CORE ONLY)**
 
 Every job gets the same `CI_NODE_TOTAL` [environment variable](../variables/README.md#predefined-environment-variables) value, and a unique `CI_NODE_INDEX` value.
 
@@ -3641,14 +3627,13 @@ You can use this keyword to create two different types of downstream pipelines:
 - [Multi-project pipelines](../multi_project_pipelines.md#creating-multi-project-pipelines-from-gitlab-ciyml)
 - [Child pipelines](../parent_child_pipelines.md)
 
-[Since GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/197140/), you can
-see which job triggered a downstream pipeline by hovering your mouse cursor over
-the downstream pipeline job in the [pipeline graph](../pipelines/index.md#visualize-pipelines).
+[In GitLab 13.2 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/197140/), you can
+view which job triggered a downstream pipeline. In the [pipeline graph](../pipelines/index.md#visualize-pipelines),
+hover over the downstream pipeline job.
 
-NOTE: **Note:**
-Using a `trigger` with `when:manual` together results in the error `jobs:#{job-name}
-when should be on_success, on_failure or always`, because `when:manual` prevents
-triggers being used.
+In [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/201938) and later, you
+can use [`when:manual`](#whenmanual) in the same job as `trigger`. In GitLab 13.4 and
+earlier, using them together causes the error `jobs:#{job-name} when should be on_success, on_failure or always`.
 
 #### Simple `trigger` syntax for multi-project pipelines
 
@@ -3784,7 +3769,7 @@ trigger_job:
 
 This setting can help keep your pipeline execution linear. In the example above, jobs from
 subsequent stages wait for the triggered pipeline to successfully complete before
-starting, at the cost of reduced parallelization.
+starting, which reduces parallelization.
 
 #### Trigger a pipeline by API call
 
@@ -3808,10 +3793,9 @@ When enabled, a pipeline on the same branch is canceled when:
 - It's made redundant by a newer pipeline run.
 - Either all jobs are set as interruptible, or any uninterruptible jobs haven't started.
 
-Pending jobs are always considered interruptible.
-
-TIP: **Tip:**
 Set jobs as interruptible that can be safely canceled once started (for instance, a build job).
+
+Pending jobs are always considered interruptible.
 
 Here is a simple example:
 
@@ -3844,7 +3828,6 @@ In the example above, a new pipeline run causes an existing running pipeline to 
 - Canceled, if only `step-1` is running or pending.
 - Not canceled, once `step-2` starts running.
 
-NOTE: **Note:**
 When an uninterruptible job is running, the pipeline can never be canceled, regardless of the final job's state.
 
 ### `resource_group`
@@ -3861,7 +3844,7 @@ to semaphores in other programming languages.
 When the `resource_group` key is defined for a job in `.gitlab-ci.yml`,
 job executions are mutually exclusive across different pipelines for the same project.
 If multiple jobs belonging to the same resource group are enqueued simultaneously,
-only one of the jobs is picked by the runner, and the other jobs wait until the
+only one of the jobs is picked by the runner. The other jobs wait until the
 `resource_group` is free.
 
 Here is a simple example:
@@ -3872,17 +3855,14 @@ deploy-to-production:
   resource_group: production
 ```
 
-In this case, if a `deploy-to-production` job is running in a pipeline, and a new
-`deploy-to-production` job is created in a different pipeline, it doesn't run until
-the currently running/pending `deploy-to-production` job finishes. As a result,
+In this case, two `deploy-to-production` jobs in two separate pipelines can never run at the same time. As a result,
 you can ensure that concurrent deployments never happen to the production environment.
 
 There can be multiple `resource_group`s defined per environment. A good use case for this
-is when deploying to physical devices. You may have more than one physical device, and each
-one can be deployed to, but there can be only one deployment per device at any given time.
+is when deploying to physical devices. You may have multiple physical devices that
+can be deployed to, but there can be only one deployment per device at any given time.
 
-NOTE: **Note:**
-This key can only contain letters, digits, `-`, `_`, `/`, `$`, `{`, `}`, `.`, and spaces.
+The `resource_group` value can only contain letters, digits, `-`, `_`, `/`, `$`, `{`, `}`, `.`, and spaces.
 It can't start or end with `/`.
 
 For more information, see [Deployments Safety](../environments/deployment_safety.md).
@@ -4072,6 +4052,11 @@ tags. These options cannot be used together, so choose one:
         - 'm3'
       released_at: '2020-07-15T08:00:00Z'  # Optional, will auto generate if not defined, or can use a variable.
   ```
+
+#### Release assets as Generic packages
+
+You can use [Generic packages](../../user/packages/generic_packages/) to host your release assets.
+For a complete example of how to do this, see the [example in the repository](https://gitlab.com/gitlab-org/release-cli/-/tree/master/docs/examples/release-assets-as-generic-package/).
 
 #### `releaser-cli` command line
 
@@ -4408,6 +4393,32 @@ variables:
 
 You can set them globally or per-job in the [`variables`](#variables) section.
 
+### Fallback cache key
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/1534) in GitLab Runner 13.4.
+
+You can use the `$CI_COMMIT_REF_SLUG` variable to specify your [`cache:key`](#cachekey).
+For example, if your `$CI_COMMIT_REF_SLUG` is `test` you can set a job
+to download cache that's tagged with `test`.
+
+If a cache with this tag is not found, you can use `CACHE_FALLBACK_KEY` to 
+specify a cache to use when none exists.
+
+For example:
+
+```yaml
+variables:
+  CACHE_FALLBACK_KEY: fallback-key
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - binaries/
+```
+
+In this example, if the `$CI_COMMIT_REF_SLUG` is not found, the job uses the key defined
+by the `CACHE_FALLBACK_KEY` variable.
+
 ### Shallow cloning
 
 > Introduced in GitLab 8.9 as an experimental feature.
@@ -4446,11 +4457,6 @@ You can set it globally or per-job in the [`variables`](#variables) section.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2211) in GitLab Runner 11.10.
 
-NOTE: **Note:**
-This can only be used when `custom_build_dir` is enabled in the [runner's
-configuration](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runnerscustom_build_dir-section).
-This is the default configuration for `docker` and `kubernetes` executor.
-
 By default, GitLab Runner clones the repository in a unique subpath of the
 `$CI_BUILDS_DIR` directory. However, your project might require the code in a
 specific directory (Go projects, for example). In that case, you can specify
@@ -4469,6 +4475,10 @@ test:
 The `GIT_CLONE_PATH` has to always be within `$CI_BUILDS_DIR`. The directory set in `$CI_BUILDS_DIR`
 is dependent on executor and configuration of [runners.builds_dir](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runners-section)
 setting.
+
+This can only be used when `custom_build_dir` is enabled in the
+[runner's configuration](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runnerscustom_build_dir-section).
+This is the default configuration for the `docker` and `kubernetes` executors.
 
 #### Handling concurrency
 
@@ -4549,6 +4559,10 @@ content across your document.
 Use anchors to duplicate or inherit properties. Use anchors with [hidden jobs](#hide-jobs)
 to provide templates for your jobs. When there are duplicate keys, GitLab
 performs a reverse deep merge based on the keys.
+
+You can't use YAML anchors across multiple files when leveraging the [`include`](#include)
+feature. Anchors are only valid within the file they were defined in. Instead
+of using YAML anchors, you can use the [`extends` keyword](#extends).
 
 The following example uses anchors and map merging. It creates two jobs,
 `test1` and `test2`, that inherit the parameters of `.job_template`, each
@@ -4671,15 +4685,8 @@ test:mysql:
     - dev
 ```
 
-You can see that the hidden jobs are conveniently used as templates.
-
-NOTE: **Note:**
-Note that `tags: [dev]` has been overwritten by `tags: [postgres]`.
-
-NOTE: **Note:**
-You can't use YAML anchors across multiple files when leveraging the [`include`](#include)
-feature. Anchors are only valid within the file they were defined in. Instead
-of using YAML anchors, you can use the [`extends` keyword](#extends).
+You can see that the hidden jobs are conveniently used as templates, and
+`tags: [dev]` has been overwritten by `tags: [postgres]`.
 
 #### YAML anchors for `before_script` and `after_script`
 

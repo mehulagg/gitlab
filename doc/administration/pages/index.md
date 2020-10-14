@@ -53,8 +53,14 @@ supporting custom domains a secondary IP is not needed.
 
 Before proceeding with the Pages configuration, you will need to:
 
-1. Have an exclusive root domain for serving GitLab Pages. Note that you cannot
-   use a subdomain of your GitLab's instance domain.
+1. Have a domain for Pages that is not a subdomain of your GitLab's instance domain.
+
+   | GitLab domain | Pages domain | Does it work? |
+   | :---: | :---: | :---: |
+   | `example.com` | `example.io` | **{check-circle}** Yes |
+   | `example.com` | `pages.example.com` | **{dotted-circle}** No |
+   | `gitlab.example.com` | `pages.example.com` | **{check-circle}** Yes |
+
 1. Configure a **wildcard DNS record**.
 1. (Optional) Have a **wildcard certificate** for that domain if you decide to
    serve Pages under HTTPS.
@@ -775,3 +781,10 @@ For example, if there is a connection timeout:
 ```plaintext
 error="failed to connect to internal Pages API: Get \"https://gitlab.example.com:3000/api/v4/internal/pages/status\": net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)"
 ```
+
+### 500 error with `securecookie: failed to generate random iv` and `Failed to save the session`
+
+This problem most likely results from an [out-dated operating system](https://docs.gitlab.com/omnibus/package-information/deprecated_os.html).
+The [Pages daemon uses the `securecookie` library](https://gitlab.com/search?group_id=9970&project_id=734943&repository_ref=master&scope=blobs&search=securecookie&snippets=false) to get random strings via [crypto/rand in Go](https://golang.org/pkg/crypto/rand/#pkg-variables).
+This requires the `getrandom` syscall or `/dev/urandom` to be available on the host OS.
+Upgrading to an [officially supported operating system](https://about.gitlab.com/install/) is recommended.

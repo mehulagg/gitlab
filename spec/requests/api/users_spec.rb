@@ -2482,6 +2482,17 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
           end
         end
 
+        context 'for an internal user' do
+          it 'returns 403' do
+            internal_user = User.alert_bot
+
+            post api("/users/#{internal_user.id}/deactivate", admin)
+
+            expect(response).to have_gitlab_http_status(:forbidden)
+            expect(json_response['message']).to eq('403 Forbidden  - An internal user cannot be deactivated by the API')
+          end
+        end
+
         context 'for a user that does not exist' do
           before do
             post api("/users/0/deactivate", admin)
@@ -2522,6 +2533,15 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
       post api('/users/0/block', admin)
       expect(response).to have_gitlab_http_status(:not_found)
       expect(json_response['message']).to eq('404 User Not Found')
+    end
+
+    it 'returns a 403 error if user is internal' do
+      internal_user = create(:user, :bot)
+
+      post api("/users/#{internal_user.id}/block", admin)
+
+      expect(response).to have_gitlab_http_status(:forbidden)
+      expect(json_response['message']).to eq('An internal user cannot be blocked')
     end
 
     it 'returns a 201 if user is already blocked' do

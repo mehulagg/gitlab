@@ -36,7 +36,7 @@ RSpec.shared_examples 'a replicable model' do
     end
 
     it 'is implemented' do
-      expect(model_record.class.replicables_for_geo_node).to be_an(ActiveRecord::Relation)
+      expect(model_record.class.replicables_for_geo_node(model_record.id)).to be_an(ActiveRecord::Relation)
     end
   end
 end

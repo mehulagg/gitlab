@@ -1,7 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 
 import { GlPagination } from '@gitlab/ui';
-import * as Sentry from '@sentry/browser';
 
 import RequirementsRoot from 'ee/requirements/components/requirements_root.vue';
 import RequirementsTabs from 'ee/requirements/components/requirements_tabs.vue';
@@ -13,6 +12,7 @@ import createRequirement from 'ee/requirements/queries/createRequirement.mutatio
 import updateRequirement from 'ee/requirements/queries/updateRequirement.mutation.graphql';
 
 import { TEST_HOST } from 'helpers/test_constants';
+import * as Sentry from '~/sentry/wrapper';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import FilteredSearchBarRoot from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
@@ -349,6 +349,51 @@ describe('RequirementsRoot', () => {
             },
           }),
         );
+      });
+
+      describe('when `lastTestReportState` is included in object param', () => {
+        beforeEach(() => {
+          jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue(mockUpdateMutationResult);
+        });
+
+        it('calls `$apollo.mutate` with `lastTestReportState` when it is not null', () => {
+          wrapper.vm.updateRequirement({
+            iid: '1',
+            lastTestReportState: 'PASSED',
+          });
+
+          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith(
+            expect.objectContaining({
+              mutation: updateRequirement,
+              variables: {
+                updateRequirementInput: {
+                  projectPath: 'gitlab-org/gitlab-shell',
+                  iid: '1',
+                  lastTestReportState: 'PASSED',
+                },
+              },
+            }),
+          );
+        });
+
+        it('calls `$apollo.mutate` without `lastTestReportState` when it is null', () => {
+          wrapper.vm.updateRequirement({
+            iid: '1',
+            lastTestReportState: null,
+          });
+
+          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith(
+            expect.objectContaining({
+              mutation: updateRequirement,
+              variables: {
+                updateRequirementInput: {
+                  projectPath: 'gitlab-org/gitlab-shell',
+                  iid: '1',
+                },
+              },
+            }),
+          );
+        });
       });
 
       it('calls `createFlash` with provided `errorFlashMessage` param and `Sentry.captureException` when request fails', () => {

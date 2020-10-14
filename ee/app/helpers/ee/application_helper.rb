@@ -97,10 +97,6 @@ module EE
       end
     end
 
-    def instance_review_permitted?
-      ::Gitlab::CurrentSettings.instance_review_permitted? && current_user&.admin?
-    end
-
     override :show_last_push_widget?
     def show_last_push_widget?(event)
       show = super

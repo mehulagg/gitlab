@@ -17,13 +17,6 @@ module EE
       super + %w(path_locks)
     end
 
-    override :sidebar_operations_paths
-    def sidebar_operations_paths
-      super + %w[
-        feature_flags
-      ]
-    end
-
     override :get_project_nav_tabs
     def get_project_nav_tabs(project, current_user)
       nav_tabs = super
@@ -38,10 +31,6 @@ module EE
         nav_tabs << :merge_request_analytics
       end
 
-      if can?(current_user, :read_feature_flag, project) && !nav_tabs.include?(:operations)
-        nav_tabs << :operations
-      end
-
       if project.feature_available?(:issues_analytics) && can?(current_user, :read_project, project)
         nav_tabs << :issues_analytics
       end
@@ -51,13 +40,6 @@ module EE
       end
 
       nav_tabs
-    end
-
-    override :tab_ability_map
-    def tab_ability_map
-      tab_ability_map = super
-      tab_ability_map[:feature_flags] = :read_feature_flag
-      tab_ability_map
     end
 
     override :default_url_to_repo
@@ -77,11 +59,6 @@ module EE
       else
         super
       end
-    end
-
-    override :sidebar_operations_link_path
-    def sidebar_operations_link_path(project = @project)
-      super || project_feature_flags_path(project)
     end
 
     override :remove_project_message

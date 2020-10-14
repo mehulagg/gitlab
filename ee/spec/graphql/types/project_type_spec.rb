@@ -89,7 +89,7 @@ RSpec.describe GitlabSchema.types['Project'] do
       expect(secure_analyzers_prefix['label']).to eq('Image prefix')
       expect(secure_analyzers_prefix['defaultValue']).to eq('registry.gitlab.com/gitlab-org/security-products/analyzers')
       expect(secure_analyzers_prefix['value']).to eq('registry.gitlab.com/gitlab-org/security-products/analyzers')
-      expect(secure_analyzers_prefix['size']).to eq('MEDIUM')
+      expect(secure_analyzers_prefix['size']).to eq('LARGE')
       expect(secure_analyzers_prefix['options']).to be_nil
     end
 

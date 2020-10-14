@@ -13,6 +13,7 @@ module.exports = path => {
       'jest-junit',
       {
         outputName: './junit_jest.xml',
+        addFileAttribute: 'true',
       },
     ]);
   }
@@ -33,6 +34,7 @@ module.exports = path => {
     '^~(/.*)$': '<rootDir>/app/assets/javascripts$1',
     '^ee_component(/.*)$':
       '<rootDir>/app/assets/javascripts/vue_shared/components/empty_component.js',
+    '^shared_queries(/.*)$': '<rootDir>/app/graphql/queries$1',
     '^ee_else_ce(/.*)$': '<rootDir>/app/assets/javascripts$1',
     '^helpers(/.*)$': '<rootDir>/spec/frontend/helpers$1',
     '^vendor(/.*)$': '<rootDir>/vendor/assets/javascripts$1',

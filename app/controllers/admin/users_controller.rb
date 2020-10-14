@@ -72,6 +72,7 @@ class Admin::UsersController < Admin::ApplicationController
   def deactivate
     return redirect_back_or_admin_user(notice: _("Error occurred. A blocked user cannot be deactivated")) if user.blocked?
     return redirect_back_or_admin_user(notice: _("Successfully deactivated")) if user.deactivated?
+    return redirect_back_or_admin_user(notice: _("Internal users cannot be deactivated")) if user.internal?
     return redirect_back_or_admin_user(notice: _("The user you are trying to deactivate has been active in the past %{minimum_inactive_days} days and cannot be deactivated") % { minimum_inactive_days: ::User::MINIMUM_INACTIVE_DAYS }) unless user.can_be_deactivated?
 
     user.deactivate
@@ -171,7 +172,7 @@ class Admin::UsersController < Admin::ApplicationController
         # restore username to keep form action url.
         user.username = params[:id]
         format.html { render "edit" }
-        format.json { render json: [result[:message]], status: result[:status] }
+        format.json { render json: [result[:message]], status: :internal_server_error }
       end
     end
   end

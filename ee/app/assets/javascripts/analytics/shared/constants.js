@@ -1,6 +1,10 @@
+import { masks } from 'dateformat';
+
+const { isoDate, mediumDate } = masks;
+
 export const dateFormats = {
-  isoDate: 'yyyy-mm-dd',
-  defaultDate: 'mmm d, yyyy',
+  isoDate,
+  defaultDate: mediumDate,
   defaultDateTime: 'mmm d, yyyy h:MMtt',
 };
 

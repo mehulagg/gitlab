@@ -1,5 +1,4 @@
 <script>
-import * as Sentry from '@sentry/browser';
 import { isEqual } from 'lodash';
 import {
   GlAlert,
@@ -15,6 +14,7 @@ import {
   GlFormCheckbox,
   GlFormRadioGroup,
 } from '@gitlab/ui';
+import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';

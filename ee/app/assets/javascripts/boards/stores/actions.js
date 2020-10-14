@@ -1,4 +1,4 @@
-import { sortBy, pick } from 'lodash';
+import { pick } from 'lodash';
 import Cookies from 'js-cookie';
 import axios from '~/lib/utils/axios_utils';
 import boardsStore from '~/boards/stores/boards_store';
@@ -10,7 +10,12 @@ import { EpicFilterType } from '../constants';
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
 import { fullEpicId } from '../boards_util';
-import { formatListIssues, formatListsPageInfo, fullBoardId } from '~/boards/boards_util';
+import {
+  formatBoardLists,
+  formatListIssues,
+  formatListsPageInfo,
+  fullBoardId,
+} from '~/boards/boards_util';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '~/boards/eventhub';
 
@@ -112,11 +117,7 @@ export default {
           commit(types.RECEIVE_EPICS_SUCCESS, epicsFormatted);
         } else {
           if (lists) {
-            let boardLists = lists.nodes.map(list =>
-              boardsStore.updateListPosition({ ...list, doNotFetchIssues: true }),
-            );
-            boardLists = sortBy([...boardLists], 'position');
-            commit(types.RECEIVE_BOARD_LISTS_SUCCESS, boardLists);
+            commit(types.RECEIVE_BOARD_LISTS_SUCCESS, formatBoardLists(lists));
           }
 
           if (epicsFormatted) {

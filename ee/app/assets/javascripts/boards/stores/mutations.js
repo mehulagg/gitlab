@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { union } from 'lodash';
+import { union, unionBy } from 'lodash';
 import mutationsCE, { addIssueToList, removeIssueFromList } from '~/boards/stores/mutations';
 import { moveIssueListHelper } from '~/boards/boards_util';
 import { s__ } from '~/locale';
@@ -130,7 +130,7 @@ export default {
   },
 
   [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, epics) => {
-    Vue.set(state, 'epics', union(state.epics || [], epics));
+    Vue.set(state, 'epics', unionBy(state.epics || [], epics, 'id'));
   },
 
   [mutationTypes.RESET_EPICS]: state => {
@@ -141,8 +141,8 @@ export default {
     state,
     { originalIssue, fromListId, toListId, moveBeforeId, moveAfterId, epicId },
   ) => {
-    const fromList = state.boardLists.find(l => l.id === fromListId);
-    const toList = state.boardLists.find(l => l.id === toListId);
+    const fromList = state.boardLists[fromListId];
+    const toList = state.boardLists[toListId];
 
     const issue = moveIssueListHelper(originalIssue, fromList, toList);
 
