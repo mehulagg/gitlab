@@ -6,11 +6,84 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Incidents
 
+Incidents are critical entities in incident management workflows. They represent a service disruption or outage that needs to be restored urgently. GitLab provides tools for the triage, response, and remediation of incidents.
 While no configuration is required to use the [manual features](#create-an-incident-manually)
 of incident management, some simple [configuration](#configure-incidents) is needed to automate incident creation.
 
+## Incident Creation
+
+You can create an incident manually or automatically. 
+
+### Create incidents manually
+
+If you have at least Guest [permissions](../../user/permissions.md), to create an Incident, you have two options to do this manually.
+
+**From the Incidents List:** 
+
+> [Moved](https://gitlab.com/gitlab-org/monitor/health/-/issues/24) to GitLab core in 13.3.
+
+- Navigate to **Operations > Incidents** and click **Create Incident**.
+- Create a new issue using the `incident` template available when creating it.
+- Create a new issue and assign the `incident` label to it.
+
+![Incident List Create](./img/incident_list_create_v13_3.png)
+
+**From the Issues List:**  
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/230857) in GitLab 13.4.
+
+- Navigate to **Issues > List** and click **Create Issue**.
+- Create a new issue using the `type` drop-down and select `Incident`.
+- The page refreshes and the page only displays fields relevant to Incidents.
+
+![Incident List Create](./img/new_incident_create_v13_4.png)
+
+### Create incidents automatically
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4925) in GitLab Ultimate 11.11.
+
+With Maintainer or higher [permissions](../../user/permissions.md), you can enable
+ Gitlab to create incident automatically whenever an alert is triggered:
+
+1. Navigate to **Settings > Operations > Incidents** and expand
+   **Incidents**:
+
+   ![Incident Management Settings](./img/incident_management_settings_v13_3.png)
+
+1. Check the **Create an incident**
+   checkbox.
+1. To customize the incident, select an [issue templates](../../user/project/description_templates.md#creating-issue-templates).
+1. To send [an email notification](alert_notifications.md#email-notifications) to users
+   with [Developer permissions](../../user/permissions.md), select
+   **Send a separate email notification to Developers**. Email notifications will also be sent to users with **Maintainer** and **Owner** permissions.
+1. Click **Save changes**.
+
+### Create incidents via the PagerDuty webhook 
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/119018) in GitLab 13.3.
+
+You can set up a webhook with PagerDuty to automatically create a GitLab incident
+for each PagerDuty incident. This configuration requires you to make changes
+in both PagerDuty and GitLab:
+
+1. Sign in as a user with Maintainer [permissions](../../user/permissions.md).
+1. Navigate to **Settings > Operations > Incidents** and expand **Incidents**.
+1. Select the **PagerDuty integration** tab:
+
+   ![PagerDuty incidents integration](./img/pagerduty_incidents_integration_v13_3.png)
+
+1. Activate the integration, and save the changes in GitLab.
+1. Copy the value of **Webhook URL** for use in a later step.
+1. Follow the steps described in the
+   [PagerDuty documentation](https://support.pagerduty.com/docs/webhooks)
+   to add the webhook URL to a PagerDuty webhook integration.
+
+To confirm the integration is successful, trigger a test incident from PagerDuty to
+confirm that a GitLab incident is created from the incident.
+
+## Incident list
 For users with at least Guest [permissions](../../user/permissions.md), the
-Incident Management list is available at **Operations > Incidents**
+Incident list is available at **Operations > Incidents**
 in your project's sidebar. The list contains the following metrics:
 
 ![Incident List](img/incident_list_v13_4.png)
@@ -49,84 +122,6 @@ Incidents share the [Issues API](../../user/project/issues/index.md).
 TIP: **Tip:**
 For a live example of the incident list in action, visit this
 [demo project](https://gitlab.com/gitlab-examples/ops/incident-setup/everyone/tanuki-inc/-/incidents).
-
-## Configure incidents
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4925) in GitLab Ultimate 11.11.
-
-With Maintainer or higher [permissions](../../user/permissions.md), you can enable
-or disable Incident Management features in the GitLab user interface
-to create issues when alerts are triggered:
-
-1. Navigate to **Settings > Operations > Incidents** and expand
-   **Incidents**:
-
-   ![Incident Management Settings](./img/incident_management_settings_v13_3.png)
-
-1. For GitLab versions 11.11 and greater, you can select the **Create an issue**
-   checkbox to create an issue based on your own
-   [issue templates](../../user/project/description_templates.md#creating-issue-templates).
-   For more information, see
-   [Trigger actions from alerts](../metrics/alerts.md#trigger-actions-from-alerts) **(ULTIMATE)**.
-1. To create issues from alerts, select the template in the **Issue Template**
-   select box.
-1. To send [separate email notifications](alert_notifications.md#email-notifications) to users
-   with [Developer permissions](../../user/permissions.md), select
-   **Send a separate email notification to Developers**.
-1. Click **Save changes**.
-
-Appropriately configured alerts include an
-[embedded chart](../metrics/embed.md#embedding-metrics-based-on-alerts-in-incident-issues)
-for the query corresponding to the alert. You can also configure GitLab to
-[close issues](../metrics/alerts.md#trigger-actions-from-alerts)
-when you receive notification that the alert is resolved.
-
-## Create an incident manually
-
-If you have at least Guest [permissions](../../user/permissions.md), to create an Incident, you have two options.
-
-### From the Incidents List
-
-> [Moved](https://gitlab.com/gitlab-org/monitor/health/-/issues/24) to GitLab core in 13.3.
-
-- Navigate to **Operations > Incidents** and click **Create Incident**.
-- Create a new issue using the `incident` template available when creating it.
-- Create a new issue and assign the `incident` label to it.
-
-![Incident List Create](./img/incident_list_create_v13_3.png)
-
-### From the Issues List
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/230857) in GitLab 13.4.
-
-- Navigate to **Issues > List** and click **Create Issue**.
-- Create a new issue using the `type` drop-down and select `Incident`.
-- The page refreshes and the page only displays fields relevant to Incidents.
-
-![Incident List Create](./img/new_incident_create_v13_4.png)
-
-## Configure PagerDuty integration
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/119018) in GitLab 13.3.
-
-You can set up a webhook with PagerDuty to automatically create a GitLab issue
-for each PagerDuty incident. This configuration requires you to make changes
-in both PagerDuty and GitLab:
-
-1. Sign in as a user with Maintainer [permissions](../../user/permissions.md).
-1. Navigate to **Settings > Operations > Incidents** and expand **Incidents**.
-1. Select the **PagerDuty integration** tab:
-
-   ![PagerDuty incidents integration](./img/pagerduty_incidents_integration_v13_3.png)
-
-1. Activate the integration, and save the changes in GitLab.
-1. Copy the value of **Webhook URL** for use in a later step.
-1. Follow the steps described in the
-   [PagerDuty documentation](https://support.pagerduty.com/docs/webhooks)
-   to add the webhook URL to a PagerDuty webhook integration.
-
-To confirm the integration is successful, trigger a test incident from PagerDuty to
-confirm that a GitLab issue is created from the incident.
 
 ## Incident details
 
@@ -194,7 +189,7 @@ incidents display a SLA (Service Level Agreement) timer showing the time remaini
 the SLA period expires. If the incident is not closed before the SLA period ends, GitLab
 adds a `missed::SLA` label to the incident.
 
-### Embed metrics in incidents and issues
+### Embed metrics in incidents
 
 You can embed metrics anywhere [GitLab Markdown](../../user/markdown.md) is
 used, such as descriptions, comments on issues, and merge requests. Embedding
@@ -206,3 +201,17 @@ any other Markdown text field in GitLab by
 You can embed both [GitLab-hosted metrics](../metrics/embed.md) and
 [Grafana metrics](../metrics/embed_grafana.md) in incidents and issue
 templates.
+
+## Integrate incidents with Slack
+
+Slack slash commands allow you to control GitLab and view GitLab content without leaving Slack.
+
+Learn how to [set up Slack slash commands](../../user/project/integrations/slack_slash_commands.md)
+and how to [use the available slash commands](../../integration/slash_commands.md).
+
+## Integrate issues with Zoom
+
+GitLab enables you to [associate a Zoom meeting with an issue](../../user/project/issues/associate_zoom_meeting.md)
+for synchronous communication during incident management. After starting a Zoom
+call for an incident, you can associate the conference call with an issue. Your
+team members can join the Zoom call without requesting a link.
