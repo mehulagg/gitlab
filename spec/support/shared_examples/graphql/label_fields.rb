@@ -110,7 +110,7 @@ RSpec.shared_examples 'querying a GraphQL type with labels' do
       single_selection = query_for(label_d)
 
       expect { run_query(multi_selection) }
-        .to issue_same_number_of_queries_as { run_query(single_selection) }
+        .to issue_same_number_of_queries_as { run_query(single_selection) }.ignoring_cached_queries
     end
   end
 
