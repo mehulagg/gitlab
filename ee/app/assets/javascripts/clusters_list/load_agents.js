@@ -20,6 +20,13 @@ export default (Vue, VueApollo) => {
         clusterAgents: {
           __typename: 'ClusterAgents',
           nodes: [],
+          pageInfo: {
+            __typename: 'ClusterAgentsPagination',
+            startCursor: String,
+            endCursor: String,
+            hasNextPage: Boolean,
+            hasPreviousPage: Boolean,
+          },
         },
 
         repository: {

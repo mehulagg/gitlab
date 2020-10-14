@@ -1,9 +1,21 @@
-query getAgents($defaultBranchName: String!, $projectPath: ID!) {
+query getAgents(
+  $defaultBranchName: String!,
+  $projectPath: ID!,
+  $before: String,
+  $after: String,
+) {
   project(fullPath: $projectPath) {
-    clusterAgents {
+    clusterAgents(first: 25, before: $before, after: $after) {
       nodes {
         id
         name
+      }
+
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
       }
     }
 

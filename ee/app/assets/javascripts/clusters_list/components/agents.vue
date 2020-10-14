@@ -1,5 +1,5 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlPagination } from '@gitlab/ui';
 import AgentEmptyState from './agent_empty_state.vue';
 import AgentTable from './agent_table.vue';
 import getAgentsQuery from '../graphql/queries/get_agents.query.graphql';
@@ -15,17 +15,20 @@ export default {
         };
       },
       update: data => {
-        let agentList = data.project.clusterAgents.nodes;
         const configFolders = data.project.repository.tree?.trees?.nodes;
+        let list = data.project.clusterAgents.nodes;
 
         if (configFolders) {
-          agentList = agentList.map(agent => {
+          list = list.map(agent => {
             const configFolder = configFolders.find(({ name }) => name === agent.name);
             return { ...agent, configFolder };
           });
         }
 
-        return agentList;
+        return {
+          list,
+          pageInfo: data.project.clusterAgents.pageInfo,
+        };
       },
     },
   },
@@ -33,6 +36,7 @@ export default {
     AgentEmptyState,
     AgentTable,
     GlLoadingIcon,
+    GlPagination,
   },
   props: {
     emptyStateImage: {
@@ -54,9 +58,11 @@ export default {
 
 <template>
   <section v-if="agents" class="gl-mt-3">
-    <AgentTable v-if="agents.length" :agents="agents" />
+    <AgentTable v-if="agents.list.length" :agents="agents.list" />
 
     <AgentEmptyState v-else :image="emptyStateImage" />
+
+    <gl-pagination :prev-page="0" :next-page="1" prev-text="Prev" next-text="Next" align="center" />
   </section>
 
   <gl-loading-icon v-else size="md" class="gl-mt-3" />
