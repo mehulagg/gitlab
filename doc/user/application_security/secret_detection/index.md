@@ -142,6 +142,44 @@ Secret Detection can be customized by defining available variables:
 | `SECRET_DETECTION_EXCLUDED_PATHS` | "" | Exclude vulnerabilities from output based on the paths. This is a comma-separated list of patterns. Patterns can be globs, or file or folder paths (for example, `doc,spec` ). Parent directories also match patterns. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/225273) in GitLab 13.3. |
 | `SECRET_DETECTION_HISTORIC_SCAN` | false | Flag to enable a historic Gitleaks scan. |
 
+### Rulesets
+
+Rulesets were [introduced](https://gitlab.com/gitlab-org/security-products/analyzers/secrets/-/merge_requests/80) in GitLab 13.5. They can be defined in your project by creating a ".gitlab/secret-detection-ruleset.toml".
+
+#### gitleaks.toml override
+
+It is possible to override gitleaks rules by supplying a relative path to a gitleaks.toml file in your project or embedding the gitleaks configuration in the ".gitlab/secret-detection-ruleset.toml" file directly.
+
+##### Relative path example
+
+```toml
+[secrets]
+  description = 'secrets custom rules configuration'
+
+  [[secrets.passthrough]]
+    type  = "file"
+    target = "gitleaks.toml"
+    value = "config/gitleaks.toml"
+```
+
+##### Embedded gitleaks.toml example
+
+```toml
+[secrets]
+  description = 'secrets custom rules configuration'
+
+  [[secrets.passthrough]]
+    type  = "raw"
+    target = "gitleaks.toml"
+    value = """\
+title = "gitleaks config"
+# add regexes to the regex table
+[[rules]]
+description = "Test for Raw Custom Rulesets"
+regex = '''Custom Raw Ruleset T[est]{3}'''
+"""
+```
+
 ### Logging level
 
 To control the verbosity of logs set the `SECURE_LOG_LEVEL` environment variable. Messages of this logging level or higher are output. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10880) in GitLab 13.1.
