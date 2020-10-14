@@ -59,7 +59,7 @@ RSpec.describe NamespaceLimit do
     context 'when usage ratio is above the threshold' do
       let(:usage_ratio) { 0.5 }
 
-      it { is_expected.to be_truthy }
+      it { is_expected.to eq(true) }
 
       context 'when feature flag :temporary_storage_increase disabled' do
         before do
@@ -78,7 +78,7 @@ RSpec.describe NamespaceLimit do
       context 'when feature flag :namespace_storage_limit disabled' do
         let(:namespace_storage_limit_enabled) { false }
 
-        it { is_expected.to be_truthy }
+        it { is_expected.to eq(true) }
       end
     end
 
@@ -88,10 +88,10 @@ RSpec.describe NamespaceLimit do
       context 'when feature flag :namespace_storage_limit disabled' do
         let(:namespace_storage_limit_enabled) { false }
 
-        it { is_expected.to be_falsey }
+        it { is_expected.to eq(false) }
       end
 
-      it { is_expected.to be_falsey }
+      it { is_expected.to eq(false) }
     end
   end
 
