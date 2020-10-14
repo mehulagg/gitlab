@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe AlertManagement::HttpIntegrationsFinder do
   let_it_be(:project) { create(:project) }
   let_it_be_with_reload(:integration) { create(:alert_management_http_integration, project: project ) }
+  let_it_be(:extra_integration) { create(:alert_management_http_integration, project: project ) }
   let_it_be(:alt_project_integration) { create(:alert_management_http_integration) }
 
   let(:params) { {} }
@@ -20,6 +21,12 @@ RSpec.describe AlertManagement::HttpIntegrationsFinder do
       let(:params) { { endpoint_identifier: integration.endpoint_identifier } }
 
       it { is_expected.to contain_exactly(integration) }
+
+      context 'matches an unavailable integration' do
+        let(:params) { { endpoint_identifier: extra_integration.endpoint_identifier } }
+
+        it { is_expected.to be_empty }
+      end
 
       context 'but unknown' do
         let(:params) { { endpoint_identifier: 'unknown' } }
@@ -52,6 +59,12 @@ RSpec.describe AlertManagement::HttpIntegrationsFinder do
 
         it { is_expected.to contain_exactly(integration) }
       end
+    end
+
+    context 'project has no integrations' do
+      subject(:execute) { described_class.new(create(:project), params).execute }
+
+      it { is_expected.to be_empty }
     end
   end
 end

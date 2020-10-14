@@ -18,9 +18,10 @@ module AlertManagement
 
     attr_reader :project, :params
 
-    # Overridden in EE
     def by_availability(collection)
-      collection.limit(1) # rubocop: disable CodeReuse/ActiveRecord
+      return collection if multiple_alert_http_integrations?
+
+      collection.id_in(project.alert_management_http_integrations.first&.id)
     end
 
     def by_endpoint_identifier(collection)
@@ -33,6 +34,11 @@ module AlertManagement
       return collection unless params[:active]
 
       collection.active
+    end
+
+    # Overridden in EE
+    def multiple_alert_http_integrations?
+      false
     end
   end
 end

@@ -7,11 +7,9 @@ module EE
 
       private
 
-      override :by_availability
-      def by_availability(collection)
-        return collection if project.feature_available?(:multiple_alert_http_integrations)
-
-        super
+      override :multiple_alert_http_integrations?
+      def multiple_alert_http_integrations?
+        project.feature_available?(:multiple_alert_http_integrations)
       end
     end
   end
