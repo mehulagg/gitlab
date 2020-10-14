@@ -7,11 +7,9 @@ RSpec.describe Gitlab::VisibilityLevelChecker do
   let(:project) { create(:project) }
   let(:override_params) { {} }
 
-  subject(:visibility_level_checker) { described_class.new(user, project, project_params: override_params) }
-
-  let(:result) { subject.level_restricted? }
-
   describe '#level_restricted?' do
+    subject(:result) { described_class.new(user, project, project_params: override_params).level_restricted? }
+
     context 'when visibility level is allowed' do
       it 'returns false with nil for visibility level' do
         expect(result.restricted?).to eq(false)
