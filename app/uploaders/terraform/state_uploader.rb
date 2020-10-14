@@ -12,11 +12,11 @@ module Terraform
     encrypt(key: :key)
 
     def filename
-      "#{model.uuid}.tfstate"
+      "#{model.version}.tfstate"
     end
 
     def store_dir
-      project_id.to_s
+      Gitlab::HashedPath.new(model.uuid, root_hash: project_id)
     end
 
     def key
