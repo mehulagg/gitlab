@@ -61,7 +61,7 @@ and edit labels.
 
 View the project labels list by going to the project and clicking **Issues > Labels**.
 The list includes all labels that are defined at the project level, as well as all
-labels defined by its ancestors.
+labels defined by its ancestor groups.
 For each label, you can see the project or group path from where it was created.
 You can filter the list by entering a search query at the top and clicking search (**{search}**).
 
