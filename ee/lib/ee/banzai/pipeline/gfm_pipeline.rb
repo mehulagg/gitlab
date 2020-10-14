@@ -18,14 +18,8 @@ module EE
             [
               ::Banzai::Filter::EpicReferenceFilter,
               ::Banzai::Filter::IterationReferenceFilter,
+              ::Banzai::Filter::VulnerabilityReferenceFilter,
               *super
-            ]
-          end
-
-          def filters
-            [
-              *super,
-              ::Banzai::Filter::VulnerabilityReferenceFilter
             ]
           end
         end
