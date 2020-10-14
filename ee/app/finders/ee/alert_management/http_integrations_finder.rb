@@ -11,7 +11,7 @@ module EE
       def by_availability(collection)
         return collection if project.feature_available?(:multiple_alert_http_integrations)
 
-        collection.limit(1) # rubocop: disable CodeReuse/ActiveRecord
+        super
       end
     end
   end
