@@ -87,7 +87,7 @@ You should see a new directory where you ran this command matching your
 
 ## Use Gradle to create a Java project
 
-This section explains how to install Gradle and intialize a Java project.
+This section explains how to install Gradle and initialize a Java project.
 
 If you already use Gradle and know how to build your own packages, go to the
 [next section](#add-the-package-registry-as-a-maven-remote).
@@ -432,7 +432,7 @@ domain name.
 NOTE: **Note:**
 For retrieving artifacts, you can use either the
 [URL encoded](../../../api/README.md#namespaced-path-encoding) path of the project
-(e.g., `group%2Fproject`) or the project's ID (e.g., `42`). However, only the
+(such as `group%2Fproject`) or the project's ID (such as `42`). However, only the
 project's ID can be used for uploading.
 
 ### Group level Maven endpoint
@@ -496,7 +496,7 @@ domain name.
 NOTE: **Note:**
 For retrieving artifacts, you can use either the
 [URL encoded](../../../api/README.md#namespaced-path-encoding) path of the group
-(e.g., `group%2Fsubgroup`) or the group's ID (e.g., `12`).
+(such as `group%2Fsubgroup`) or the group's ID (such as `12`).
 
 ### Instance level Maven endpoint
 
@@ -562,7 +562,7 @@ domain name.
 NOTE: **Note:**
 For retrieving artifacts, you can use either the
 [URL encoded](../../../api/README.md#namespaced-path-encoding) path of the project
-(e.g., `group%2Fproject`) or the project's ID (e.g., `42`). However, only the
+(such as `group%2Fproject`) or the project's ID (such as `42`). However, only the
 project's ID can be used for uploading.
 
 ## Uploading packages
@@ -688,7 +688,7 @@ Package details page, allowing for quick and easy installation.
 
 ### Install using Gradle
 
-Add a [dependency](https://docs.gradle.org/current/userguide/declaring_dependencies.html) to build.gradle in the dependencies section:
+Add a [dependency](https://docs.gradle.org/current/userguide/declaring_dependencies.html) to `build.gradle` in the dependencies section:
 
 ```groovy
 dependencies {
