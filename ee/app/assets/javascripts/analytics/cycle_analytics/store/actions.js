@@ -3,6 +3,7 @@ import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, sprintf } from '~/locale';
 import httpStatus from '~/lib/utils/http_status';
 import * as types from './mutation_types';
+import { FETCH_VALUE_STREAM_DATA } from '../constants';
 import {
   removeFlash,
   throwIfUserForbidden,
@@ -373,16 +374,19 @@ export const fetchValueStreamData = ({ dispatch }) =>
 
 export const setSelectedValueStream = ({ commit, dispatch }, streamId) => {
   commit(types.SET_SELECTED_VALUE_STREAM, streamId);
-  return dispatch('fetchValueStreamData');
+  return dispatch(FETCH_VALUE_STREAM_DATA);
 };
 
-export const receiveValueStreamsSuccess = ({ commit, dispatch }, data = []) => {
+export const receiveValueStreamsSuccess = (
+  { state: { selectedValueStream = null }, commit, dispatch },
+  data = [],
+) => {
   commit(types.RECEIVE_VALUE_STREAMS_SUCCESS, data);
-  if (data.length) {
+  if (!selectedValueStream && data.length) {
     const [firstStream] = data;
-    return dispatch('setSelectedValueStream', firstStream.id);
+    return dispatch('setSelectedValueStream', firstStream);
   }
-  return Promise.resolve();
+  return dispatch(FETCH_VALUE_STREAM_DATA);
 };
 
 export const fetchValueStreams = ({ commit, dispatch, getters, state }) => {
@@ -404,7 +408,7 @@ export const fetchValueStreams = ({ commit, dispatch, getters, state }) => {
         throw error;
       });
   }
-  return dispatch('fetchValueStreamData');
+  return dispatch(FETCH_VALUE_STREAM_DATA);
 };
 
 export const setFilters = ({ dispatch }) => {

@@ -4,11 +4,14 @@ import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import storeConfig from 'ee/analytics/cycle_analytics/store';
 import FilterBar from 'ee/analytics/cycle_analytics/components/filter_bar.vue';
-import initialFiltersState from 'ee/analytics/shared/store/modules/filters/state';
+import {
+  filterMilestones,
+  filterLabels,
+} from 'jest/vue_shared/components/filtered_search_bar/store/modules/filters/mock_data';
+import initialFiltersState from '~/vue_shared/components/filtered_search_bar/store/modules/filters/state';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
 import * as utils from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
-import { filterMilestones, filterLabels } from '../../shared/store/modules/filters/mock_data';
 import * as commonUtils from '~/lib/utils/common_utils';
 import * as urlUtils from '~/lib/utils/url_utility';
 

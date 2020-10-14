@@ -30,6 +30,7 @@ issues:
 - metrics
 - timelogs
 - issuable_severity
+- issuable_sla
 - issue_assignees
 - closed_by
 - epic_issue
@@ -304,6 +305,7 @@ protected_branches:
 - push_access_levels
 - unprotect_access_levels
 - approval_project_rules
+- required_code_owners_sections
 protected_tags:
 - project
 - create_access_levels
@@ -412,6 +414,7 @@ project:
 - stages
 - ci_refs
 - builds
+- processables
 - runner_projects
 - runners
 - variables
@@ -711,3 +714,5 @@ system_note_metadata:
 - description_version
 status_page_published_incident:
 - issue
+issuable_sla:
+  - issue

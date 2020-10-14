@@ -18,12 +18,12 @@ tests failed so that they can fix them.
 
 You can configure your job to use Unit test reports, and GitLab will display a
 report on the merge request so that it's easier and faster to identify the
-failure without having to check the entire log. Unit test reports currently 
+failure without having to check the entire log. Unit test reports currently
 only support test reports in the JUnit report format.
 
-If you don't use Merge Requests but still want to see the unit test report 
-output without searching through job logs, the full 
-[Unit test reports](#viewing-unit-test-reports-on-gitlab) are available 
+If you don't use Merge Requests but still want to see the unit test report
+output without searching through job logs, the full
+[Unit test reports](#viewing-unit-test-reports-on-gitlab) are available
 in the pipeline detail view.
 
 Consider the following workflow:
@@ -82,7 +82,6 @@ To make the Unit test report output files browsable, include them with the
 To upload the report even if the job fails (for example if the tests do not pass), use the [`artifacts:when:always`](yaml/README.md#artifactswhen)
 keyword.
 
-NOTE: **Note:**
 You cannot have multiple tests with the same name and class in your JUnit report format XML file.
 
 ### Ruby example
@@ -144,8 +143,8 @@ java:
       junit: build/test-results/test/**/TEST-*.xml
 ```
 
-NOTE: **Note:**
-Support for `**` was added in [GitLab Runner 13.0](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2620).
+In [GitLab Runner 13.0](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2620)
+and later, you can use `**`.
 
 #### Maven
 

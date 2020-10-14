@@ -1,7 +1,7 @@
 <script>
-import * as Sentry from '@sentry/browser';
 import { GlDropdown, GlDropdownItem, GlTab, GlTabs } from '@gitlab/ui';
 import { camelCase, kebabCase } from 'lodash';
+import * as Sentry from '~/sentry/wrapper';
 import { s__ } from '~/locale';
 import { getLocationHash } from '~/lib/utils/url_utility';
 import ProfilesList from './dast_profiles_list.vue';

@@ -7,6 +7,7 @@ RSpec.describe Gitlab::UsageData do
 
   before do
     stub_usage_data_connections
+    clear_memoized_values(described_class::EE_MEMOIZED_VALUES + described_class::CE_MEMOIZED_VALUES)
   end
 
   describe '.data' do
@@ -535,6 +536,8 @@ RSpec.describe Gitlab::UsageData do
         secret_detection_scans: 0,
         coverage_fuzzing_pipeline: 0,
         coverage_fuzzing_scans: 0,
+        api_fuzzing_pipeline: 0,
+        api_fuzzing_scans: 0,
         user_unique_users_all_secure_scanners: 1
       )
     end
@@ -586,13 +589,15 @@ RSpec.describe Gitlab::UsageData do
         dast_pipeline: 0,
         secret_detection_pipeline: 1,
         coverage_fuzzing_pipeline: 0,
+        api_fuzzing_pipeline: 0,
         user_unique_users_all_secure_scanners: 1,
         sast_scans: 0,
         dependency_scanning_scans: 2,
         container_scanning_scans: 1,
         dast_scans: 0,
         secret_detection_scans: 1,
-        coverage_fuzzing_scans: 0
+        coverage_fuzzing_scans: 0,
+        api_fuzzing_scans: 0
       )
     end
 
@@ -624,6 +629,8 @@ RSpec.describe Gitlab::UsageData do
         secret_detection_scans: 0,
         coverage_fuzzing_pipeline: 0,
         coverage_fuzzing_scans: 0,
+        api_fuzzing_pipeline: 0,
+        api_fuzzing_scans: 0,
         user_unique_users_all_secure_scanners: 3
       )
     end
@@ -654,6 +661,8 @@ RSpec.describe Gitlab::UsageData do
         secret_detection_scans: 0,
         coverage_fuzzing_pipeline: 0,
         coverage_fuzzing_scans: 0,
+        api_fuzzing_pipeline: 0,
+        api_fuzzing_scans: 0,
         user_unique_users_all_secure_scanners: 1
       )
     end
@@ -684,6 +693,8 @@ RSpec.describe Gitlab::UsageData do
         secret_detection_scans: -1,
         coverage_fuzzing_pipeline: -1,
         coverage_fuzzing_scans: -1,
+        api_fuzzing_pipeline: -1,
+        api_fuzzing_scans: -1,
         user_unique_users_all_secure_scanners: -1
       )
     end
@@ -705,20 +716,12 @@ RSpec.describe Gitlab::UsageData do
   end
 
   it 'clears memoized values' do
-    values = %i(issue_minimum_id issue_maximum_id
-                project_minimum_id project_maximum_id
-                user_minimum_id user_maximum_id unique_visit_service
-                deployment_minimum_id deployment_maximum_id
-                auth_providers
-                approval_merge_request_rule_minimum_id
-                approval_merge_request_rule_maximum_id
-                merge_request_minimum_id
-                merge_request_maximum_id)
-
-    values.each do |key|
-      expect(described_class).to receive(:clear_memoization).with(key)
-    end
+    allow(described_class).to receive(:clear_memoization)
 
     described_class.uncached_data
+
+    described_class::EE_MEMOIZED_VALUES.each do |key|
+      expect(described_class).to have_received(:clear_memoization).with(key)
+    end
   end
 end

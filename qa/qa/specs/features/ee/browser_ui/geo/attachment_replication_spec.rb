@@ -3,7 +3,7 @@
 module QA
   RSpec.describe 'Geo', :orchestrated, :geo do
     describe 'GitLab Geo attachment replication' do
-      let(:file_to_attach) { File.absolute_path(File.join('spec', 'fixtures', 'banana_sample.gif')) }
+      let(:file_to_attach) { File.absolute_path(File.join('qa', 'fixtures', 'designs', 'banana_sample.gif')) }
 
       it 'user uploads attachment to the primary node', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/692' do
         QA::Flow::Login.while_signed_in(address: :geo_primary) do

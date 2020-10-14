@@ -159,14 +159,20 @@ RSpec.describe Backup::Repositories do
 
   describe '#restore' do
     let_it_be(:project) { create(:project) }
+    let_it_be(:personal_snippet) { create(:personal_snippet, author: project.owner) }
+    let_it_be(:project_snippet) { create(:project_snippet, project: project, author: project.owner) }
 
-    it 'restores repositories from bundles', :aggregate_failures do
-      next_path_to_bundle = [
+    let(:next_path_to_bundle) do
+      [
         Rails.root.join('spec/fixtures/lib/backup/project_repo.bundle'),
         Rails.root.join('spec/fixtures/lib/backup/wiki_repo.bundle'),
-        Rails.root.join('spec/fixtures/lib/backup/design_repo.bundle')
+        Rails.root.join('spec/fixtures/lib/backup/design_repo.bundle'),
+        Rails.root.join('spec/fixtures/lib/backup/personal_snippet_repo.bundle'),
+        Rails.root.join('spec/fixtures/lib/backup/project_snippet_repo.bundle')
       ].to_enum
+    end
 
+    it 'restores repositories from bundles', :aggregate_failures do
       allow_next_instance_of(described_class::BackupRestore) do |backup_restore|
         allow(backup_restore).to receive(:path_to_bundle).and_return(next_path_to_bundle.next)
       end
@@ -178,6 +184,8 @@ RSpec.describe Backup::Repositories do
       expect(collect_commit_shas.call(project.repository)).to eq(['393a7d860a5a4c3cc736d7eb00604e3472bb95ec'])
       expect(collect_commit_shas.call(project.wiki.repository)).to eq(['c74b9948d0088d703ee1fafeddd9ed9add2901ea'])
       expect(collect_commit_shas.call(project.design_repository)).to eq(['c3cd4d7bd73a51a0f22045c3a4c871c435dc959d'])
+      expect(collect_commit_shas.call(personal_snippet.repository)).to eq(['3b3c067a3bc1d1b695b51e2be30c0f8cf698a06e'])
+      expect(collect_commit_shas.call(project_snippet.repository)).to eq(['6e44ba56a4748be361a841e759c20e421a1651a1'])
     end
 
     describe 'command failure' do
@@ -225,10 +233,15 @@ RSpec.describe Backup::Repositories do
     end
 
     it 'cleans existing repositories' do
+      success_response = ServiceResponse.success(message: "Valid Snippet Repo")
+      allow(Snippets::RepositoryValidationService).to receive_message_chain(:new, :execute).and_return(success_response)
+
       expect_next_instance_of(DesignManagement::Repository) do |repository|
         expect(repository).to receive(:remove)
       end
-      expect(Repository).to receive(:new).twice.and_wrap_original do |method, *original_args|
+
+      # 4 times = project repo + wiki repo + project_snippet repo + personal_snippet repo
+      expect(Repository).to receive(:new).exactly(4).times.and_wrap_original do |method, *original_args|
         repository = method.call(*original_args)
 
         expect(repository).to receive(:remove)
@@ -237,6 +250,59 @@ RSpec.describe Backup::Repositories do
       end
 
       subject.restore
+    end
+
+    context 'restoring snippets' do
+      before do
+        create(:snippet_repository, snippet: personal_snippet)
+        create(:snippet_repository, snippet: project_snippet)
+
+        allow_next_instance_of(described_class::BackupRestore) do |backup_restore|
+          allow(backup_restore).to receive(:path_to_bundle).and_return(next_path_to_bundle.next)
+        end
+      end
+
+      context 'when the repository is valid' do
+        it 'restores the snippet repositories' do
+          subject.restore
+
+          expect(personal_snippet.snippet_repository.persisted?).to be true
+          expect(personal_snippet.repository).to exist
+
+          expect(project_snippet.snippet_repository.persisted?).to be true
+          expect(project_snippet.repository).to exist
+        end
+      end
+
+      context 'when repository is invalid' do
+        before do
+          error_response = ServiceResponse.error(message: "Repository has more than one branch")
+          allow(Snippets::RepositoryValidationService).to receive_message_chain(:new, :execute).and_return(error_response)
+        end
+
+        it 'shows the appropriate error' do
+          subject.restore
+
+          expect(progress).to have_received(:puts).with("Snippet #{personal_snippet.full_path} can't be restored: Repository has more than one branch")
+          expect(progress).to have_received(:puts).with("Snippet #{project_snippet.full_path} can't be restored: Repository has more than one branch")
+        end
+
+        it 'removes the snippets from the DB' do
+          expect { subject.restore }.to change(PersonalSnippet, :count).by(-1)
+            .and change(ProjectSnippet, :count).by(-1)
+            .and change(SnippetRepository, :count).by(-2)
+        end
+
+        it 'removes the repository from disk' do
+          gitlab_shell = Gitlab::Shell.new
+          shard_name = personal_snippet.repository.shard
+          path = personal_snippet.disk_path + '.git'
+
+          subject.restore
+
+          expect(gitlab_shell.repository_exists?(shard_name, path)).to eq false
+        end
+      end
     end
   end
 end

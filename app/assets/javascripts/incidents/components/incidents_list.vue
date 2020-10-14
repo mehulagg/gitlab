@@ -16,10 +16,10 @@ import {
   GlEmptyState,
 } from '@gitlab/ui';
 import Api from '~/api';
+import Tracking from '~/tracking';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import { s__, __ } from '~/locale';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
@@ -42,6 +42,7 @@ import {
   TH_SEVERITY_TEST_ID,
   TH_PUBLISHED_TEST_ID,
   INCIDENT_DETAILS_PATH,
+  trackIncidentCreateNewOptions,
 } from '../constants';
 
 const tdClass =
@@ -59,6 +60,7 @@ const initialPaginationState = {
 };
 
 export default {
+  trackIncidentCreateNewOptions,
   i18n: I18N,
   statusTabs: INCIDENT_STATUS_TABS,
   fields: [
@@ -113,7 +115,6 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [glFeatureFlagsMixin()],
   inject: [
     'projectPath',
     'newIssuePath',
@@ -335,10 +336,12 @@ export default {
       return Boolean(assignees.nodes?.length);
     },
     navigateToIncidentDetails({ iid }) {
-      const path = this.glFeatures.issuesIncidentDetails
-        ? joinPaths(this.issuePath, INCIDENT_DETAILS_PATH)
-        : this.issuePath;
-      return visitUrl(joinPaths(path, iid));
+      return visitUrl(joinPaths(this.issuePath, INCIDENT_DETAILS_PATH, iid));
+    },
+    navigateToCreateNewIncident() {
+      const { category, action } = this.$options.trackIncidentCreateNewOptions;
+      Tracking.event(category, action);
+      this.redirecting = true;
     },
     handlePageChange(page) {
       const { startCursor, endCursor } = this.incidents.pageInfo;
@@ -463,7 +466,7 @@ export default {
         category="primary"
         variant="success"
         :href="newIncidentPath"
-        @click="redirecting = true"
+        @click="navigateToCreateNewIncident"
       >
         {{ $options.i18n.createIncidentBtnLabel }}
       </gl-button>

@@ -56,7 +56,7 @@ module Gitlab
 
       def self.accept_trace?(project)
         ::Feature.enabled?(:ci_enable_live_trace, project) &&
-          ::Feature.enabled?(:ci_accept_trace, project, type: :ops, default_enabled: false)
+          ::Feature.enabled?(:ci_accept_trace, project, type: :ops, default_enabled: true)
       end
 
       def self.log_invalid_trace_chunks?(project)
@@ -68,7 +68,11 @@ module Gitlab
       end
 
       def self.one_dimensional_matrix_enabled?
-        ::Feature.enabled?(:one_dimensional_matrix, default_enabled: false)
+        ::Feature.enabled?(:one_dimensional_matrix, default_enabled: true)
+      end
+
+      def self.manual_bridges_enabled?(project)
+        ::Feature.enabled?(:ci_manual_bridges, project, default_enabled: false)
       end
     end
   end

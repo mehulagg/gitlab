@@ -12,6 +12,19 @@
 #   redis_usage_data { ::Gitlab::UsageCounters::PodLogs.usage_totals[:total] }
 module Gitlab
   class UsageData
+    CE_MEMOIZED_VALUES = %i(
+        issue_minimum_id
+        issue_maximum_id
+        project_minimum_id
+        project_maximum_id
+        user_minimum_id
+        user_maximum_id
+        unique_visit_service
+        deployment_minimum_id
+        deployment_maximum_id
+        auth_providers
+      ).freeze
+
     class << self
       include Gitlab::Utils::UsageData
       include Gitlab::Utils::StrongMemoize
@@ -201,7 +214,7 @@ module Gitlab
             personal_snippets: count(PersonalSnippet.where(last_28_days_time_period)),
             project_snippets: count(ProjectSnippet.where(last_28_days_time_period))
           }.merge(
-            snowplow_event_counts(time_period: last_28_days_time_period(column: :collector_tstamp))
+            snowplow_event_counts(last_28_days_time_period(column: :collector_tstamp))
           ).tap do |data|
             data[:snippets] = data[:personal_snippets] + data[:project_snippets]
           end
@@ -266,7 +279,8 @@ module Gitlab
           Gitlab::UsageDataCounters::SourceCodeCounter,
           Gitlab::UsageDataCounters::MergeRequestCounter,
           Gitlab::UsageDataCounters::DesignsCounter,
-          Gitlab::UsageDataCounters::KubernetesAgentCounter
+          Gitlab::UsageDataCounters::KubernetesAgentCounter,
+          Gitlab::UsageDataCounters::StaticSiteEditorCounter
         ]
       end
 
@@ -809,16 +823,7 @@ module Gitlab
       end
 
       def clear_memoized
-        clear_memoization(:issue_minimum_id)
-        clear_memoization(:issue_maximum_id)
-        clear_memoization(:user_minimum_id)
-        clear_memoization(:user_maximum_id)
-        clear_memoization(:unique_visit_service)
-        clear_memoization(:deployment_minimum_id)
-        clear_memoization(:deployment_maximum_id)
-        clear_memoization(:project_minimum_id)
-        clear_memoization(:project_maximum_id)
-        clear_memoization(:auth_providers)
+        CE_MEMOIZED_VALUES.each { |v| clear_memoization(v) } # rubocop:disable UsageData/LargeTable
       end
 
       # rubocop: disable CodeReuse/ActiveRecord

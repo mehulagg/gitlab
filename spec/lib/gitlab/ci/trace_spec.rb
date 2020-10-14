@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Ci::Trace, :clean_gitlab_redis_shared_state do
-  let(:build) { create(:ci_build) }
+RSpec.describe Gitlab::Ci::Trace, :clean_gitlab_redis_shared_state, factory_default: :keep do
+  let_it_be(:project) { create_default(:project) }
+  let_it_be_with_reload(:build) { create(:ci_build) }
   let(:trace) { described_class.new(build) }
 
   describe "associations" do
@@ -31,6 +32,16 @@ RSpec.describe Gitlab::Ci::Trace, :clean_gitlab_redis_shared_state do
       end
 
       expect(artifact2.job.trace.raw).to eq(test_data)
+    end
+
+    it 'reloads the trace in case of a chunk error' do
+      chunk_error = described_class::ChunkedIO::FailedToGetChunkError
+
+      allow_any_instance_of(described_class::Stream)
+        .to receive(:raw).and_raise(chunk_error)
+
+      expect(build).to receive(:reset).and_return(build)
+      expect { trace.raw }.to raise_error(chunk_error)
     end
   end
 

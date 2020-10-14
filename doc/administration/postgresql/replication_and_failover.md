@@ -1269,6 +1269,11 @@ with:
 sudo gitlab-ctl stop patroni
 ```
 
+Note that stopping or restarting Patroni service on the leader node will trigger the automatic failover. If you
+want to signal Patroni to reload its configuration or restart PostgreSQL process without triggering the failover, you
+must use the `reload` or `restart` sub-commands of `gitlab-ctl patroni` instead. These two sub-commands are wrappers of
+the same `patronictl` commands.
+
 ### Manual failover procedure for Patroni
 
 While Patroni supports automatic failover, you also have the ability to perform
@@ -1423,7 +1428,7 @@ Considering these, you should carefully plan your PostgreSQL upgrade:
    ```shell
    gitlab-ctl patroni check-leader
 
-   # OR 
+   # OR
 
    gitlab-ctl patroni members
    ```
@@ -1440,7 +1445,7 @@ Considering these, you should carefully plan your PostgreSQL upgrade:
    sudo gitlab-ctl pg-upgrade -V 12
    ```
 
-CAUTION: **Warning:**
+NOTE: **Note:**
 Reverting PostgreSQL upgrade with `gitlab-ctl revert-pg-upgrade` has the same considerations as
-`gitlab-ctl pg-upgrade`. It can be complicated and may involve deletion of the data directory.
-If you need to do that, please contact GitLab support.
+`gitlab-ctl pg-upgrade`. You should follow the same procedure by first stopping the replicas,
+then reverting the leader, and finally reverting the replicas.

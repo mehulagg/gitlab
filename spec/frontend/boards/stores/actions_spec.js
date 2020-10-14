@@ -177,16 +177,26 @@ describe('createList', () => {
 
 describe('moveList', () => {
   it('should commit MOVE_LIST mutation and dispatch updateList action', done => {
+    const initialBoardListsState = {
+      'gid://gitlab/List/1': mockListsWithModel[0],
+      'gid://gitlab/List/2': mockListsWithModel[1],
+    };
+
     const state = {
       endpoints: { fullPath: 'gitlab-org', boardId: '1' },
       boardType: 'group',
       disabled: false,
-      boardLists: mockListsWithModel,
+      boardLists: initialBoardListsState,
     };
 
     testAction(
       actions.moveList,
-      { listId: 'gid://gitlab/List/1', newIndex: 1, adjustmentValue: 1 },
+      {
+        listId: 'gid://gitlab/List/1',
+        replacedListId: 'gid://gitlab/List/2',
+        newIndex: 1,
+        adjustmentValue: 1,
+      },
       state,
       [
         {
@@ -197,7 +207,11 @@ describe('moveList', () => {
       [
         {
           type: 'updateList',
-          payload: { listId: 'gid://gitlab/List/1', position: 0, backupList: mockListsWithModel },
+          payload: {
+            listId: 'gid://gitlab/List/1',
+            position: 0,
+            backupList: initialBoardListsState,
+          },
         },
       ],
       done,
@@ -250,6 +264,13 @@ describe('fetchIssuesForList', () => {
     boardType: 'group',
   };
 
+  const mockIssuesNodes = mockIssues.map(issue => ({ node: issue }));
+
+  const pageInfo = {
+    endCursor: '',
+    hasNextPage: false,
+  };
+
   const queryResponse = {
     data: {
       group: {
@@ -259,7 +280,8 @@ describe('fetchIssuesForList', () => {
               {
                 id: listId,
                 issues: {
-                  nodes: mockIssues,
+                  edges: mockIssuesNodes,
+                  pageInfo,
                 },
               },
             ],
@@ -271,17 +293,25 @@ describe('fetchIssuesForList', () => {
 
   const formattedIssues = formatListIssues(queryResponse.data.group.board.lists);
 
-  it('should commit mutation RECEIVE_ISSUES_FOR_LIST_SUCCESS on success', done => {
+  const listPageInfo = {
+    [listId]: pageInfo,
+  };
+
+  it('should commit mutations REQUEST_ISSUES_FOR_LIST and RECEIVE_ISSUES_FOR_LIST_SUCCESS on success', done => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
 
     testAction(
       actions.fetchIssuesForList,
-      listId,
+      { listId },
       state,
       [
         {
+          type: types.REQUEST_ISSUES_FOR_LIST,
+          payload: { listId, fetchNext: false },
+        },
+        {
           type: types.RECEIVE_ISSUES_FOR_LIST_SUCCESS,
-          payload: { listIssues: formattedIssues, listId },
+          payload: { listIssues: formattedIssues, listPageInfo, listId },
         },
       ],
       [],
@@ -289,14 +319,20 @@ describe('fetchIssuesForList', () => {
     );
   });
 
-  it('should commit mutation RECEIVE_ISSUES_FOR_LIST_FAILURE on failure', done => {
+  it('should commit mutations REQUEST_ISSUES_FOR_LIST and RECEIVE_ISSUES_FOR_LIST_FAILURE on failure', done => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
 
     testAction(
       actions.fetchIssuesForList,
-      listId,
+      { listId },
       state,
-      [{ type: types.RECEIVE_ISSUES_FOR_LIST_FAILURE, payload: listId }],
+      [
+        {
+          type: types.REQUEST_ISSUES_FOR_LIST,
+          payload: { listId, fetchNext: false },
+        },
+        { type: types.RECEIVE_ISSUES_FOR_LIST_FAILURE, payload: listId },
+      ],
       [],
       done,
     );

@@ -19,7 +19,8 @@ module Security
       container_scanning: 3,
       dast: 4,
       secret_detection: 5,
-      coverage_fuzzing: 6
+      coverage_fuzzing: 6,
+      api_fuzzing: 7
     }
 
     delegate :project, to: :build

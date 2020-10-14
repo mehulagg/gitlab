@@ -123,4 +123,18 @@ RSpec.describe Gitlab::Ci::Reports::Security::Report do
       expect(report).to have_received(:replace_with!).with(merged_report)
     end
   end
+
+  describe '#primary_scanner' do
+    let(:scanner_1) { create(:ci_reports_security_scanner, external_id: 'external_id_1') }
+    let(:scanner_2) { create(:ci_reports_security_scanner, external_id: 'external_id_2') }
+
+    subject { report.primary_scanner }
+
+    before do
+      report.add_scanner(scanner_1)
+      report.add_scanner(scanner_2)
+    end
+
+    it { is_expected.to eq(scanner_1) }
+  end
 end

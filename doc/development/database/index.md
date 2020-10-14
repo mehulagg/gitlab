@@ -56,6 +56,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 - [Database Debugging and Troubleshooting](../database_debugging.md)
 - [Query Count Limits](../query_count_limits.md)
 - [Creating enums](../creating_enums.md)
+- [Client-side connection-pool](client_side_connection_pool.md)
+- [Updating multiple values](./setting_multiple_values.md)
 
 ## Case studies
 

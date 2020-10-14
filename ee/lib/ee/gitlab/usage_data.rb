@@ -5,6 +5,13 @@ module EE
     module UsageData
       extend ActiveSupport::Concern
 
+      EE_MEMOIZED_VALUES = %i(
+        approval_merge_request_rule_minimum_id
+        approval_merge_request_rule_maximum_id
+        merge_request_minimum_id
+        merge_request_maximum_id
+      ).freeze
+
       SECURE_PRODUCT_TYPES = {
         container_scanning: {
           name: :container_scanning_jobs
@@ -485,10 +492,7 @@ module EE
         def clear_memoized
           super
 
-          clear_memoization(:approval_merge_request_rule_minimum_id)
-          clear_memoization(:approval_merge_request_rule_maximum_id)
-          clear_memoization(:merge_request_minimum_id)
-          clear_memoization(:merge_request_maximum_id)
+          EE_MEMOIZED_VALUES.each { |v| clear_memoization(v) } # rubocop:disable UsageData/LargeTable
         end
       end
     end

@@ -10,6 +10,7 @@ import {
   GlBadge,
   GlEmptyState,
 } from '@gitlab/ui';
+import Tracking from '~/tracking';
 import { visitUrl, joinPaths, mergeUrlParams } from '~/lib/utils/url_utility';
 import IncidentsList from '~/incidents/components/incidents_list.vue';
 import SeverityToken from '~/sidebar/components/severity/severity.vue';
@@ -22,6 +23,7 @@ import {
   TH_CREATED_AT_TEST_ID,
   TH_SEVERITY_TEST_ID,
   TH_PUBLISHED_TEST_ID,
+  trackIncidentCreateNewOptions,
 } from '~/incidents/constants';
 import mockIncidents from '../mocks/incidents.json';
 import mockFilters from '../mocks/incidents_filter.json';
@@ -33,6 +35,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
   setUrlParams: jest.fn(),
   updateHistory: jest.fn(),
 }));
+jest.mock('~/tracking');
 
 describe('Incidents List', () => {
   let wrapper;
@@ -52,7 +55,7 @@ describe('Incidents List', () => {
   const findLoader = () => wrapper.find(GlLoadingIcon);
   const findTimeAgo = () => wrapper.findAll(TimeAgoTooltip);
   const findSearch = () => wrapper.find(FilteredSearchBar);
-  const findAssingees = () => wrapper.findAll('[data-testid="incident-assignees"]');
+  const findAssignees = () => wrapper.findAll('[data-testid="incident-assignees"]');
   const findCreateIncidentBtn = () => wrapper.find('[data-testid="createIncidentBtn"]');
   const findClosedIcon = () => wrapper.findAll("[data-testid='incident-closed']");
   const findPagination = () => wrapper.find(GlPagination);
@@ -87,7 +90,6 @@ describe('Incidents List', () => {
         textQuery: '',
         authorUsernamesQuery: '',
         assigneeUsernamesQuery: '',
-        issuesIncidentDetails: false,
       },
       stubs: {
         GlButton: true,
@@ -165,14 +167,14 @@ describe('Incidents List', () => {
     describe('Assignees', () => {
       it('shows Unassigned when there are no assignees', () => {
         expect(
-          findAssingees()
+          findAssignees()
             .at(0)
             .text(),
         ).toBe(I18N.unassigned);
       });
 
       it('renders an avatar component when there is an assignee', () => {
-        const avatar = findAssingees()
+        const avatar = findAssignees()
           .at(1)
           .find(GlAvatar);
         const { src, label } = avatar.attributes();
@@ -194,22 +196,7 @@ describe('Incidents List', () => {
       expect(findSeverity().length).toBe(mockIncidents.length);
     });
 
-    it('contains a link to the issue details page', () => {
-      findTableRows()
-        .at(0)
-        .trigger('click');
-      expect(visitUrl).toHaveBeenCalledWith(joinPaths(`/project/issues/`, mockIncidents[0].iid));
-    });
-
     it('contains a link to the incident details page', async () => {
-      beforeEach(() =>
-        mountComponent({
-          data: { incidents: { list: mockIncidents }, incidentsCount: {} },
-          loading: false,
-          provide: { glFeatures: { issuesIncidentDetails: true } },
-        }),
-      );
-
       findTableRows()
         .at(0)
         .trigger('click');
@@ -227,7 +214,7 @@ describe('Incidents List', () => {
       });
     });
 
-    it('shows the button linking to new incidents page with prefilled incident template when clicked', () => {
+    it('shows the button linking to new incidents page with pre-filled incident template when clicked', () => {
       expect(findCreateIncidentBtn().exists()).toBe(true);
       findCreateIncidentBtn().trigger('click');
       expect(mergeUrlParams).toHaveBeenCalledWith(
@@ -248,6 +235,13 @@ describe('Incidents List', () => {
         loading: false,
       });
       expect(findCreateIncidentBtn().exists()).toBe(false);
+    });
+
+    it('should track alert list page views', async () => {
+      findCreateIncidentBtn().vm.$emit('click');
+      await wrapper.vm.$nextTick();
+      const { category, action } = trackIncidentCreateNewOptions;
+      expect(Tracking.event).toHaveBeenCalledWith(category, action);
     });
   });
 

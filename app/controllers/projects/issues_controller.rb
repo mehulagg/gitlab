@@ -44,7 +44,6 @@ class Projects::IssuesController < Projects::ApplicationController
     push_frontend_feature_flag(:vue_issuable_sidebar, project.group)
     push_frontend_feature_flag(:tribute_autocomplete, @project)
     push_frontend_feature_flag(:vue_issuables_list, project)
-    push_frontend_feature_flag(:design_management_todo_button, project, default_enabled: true)
     push_frontend_feature_flag(:vue_sidebar_labels, @project)
   end
 
@@ -53,10 +52,9 @@ class Projects::IssuesController < Projects::ApplicationController
     real_time_enabled = Gitlab::ActionCable::Config.in_app? || Feature.enabled?(real_time_feature_flag, @project)
 
     gon.push({ features: { real_time_feature_flag.to_s.camelize(:lower) => real_time_enabled } }, true)
-  end
 
-  before_action only: :index do
-    push_frontend_feature_flag(:scoped_labels, @project, type: :licensed)
+    record_experiment_user(:invite_members_version_a)
+    record_experiment_user(:invite_members_version_b)
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:discussions]
@@ -64,6 +62,17 @@ class Projects::IssuesController < Projects::ApplicationController
   respond_to :html
 
   alias_method :designs, :show
+
+  feature_category :issue_tracking, [
+                     :index, :calendar, :show, :new, :create, :edit, :update,
+                     :destroy, :move, :reorder, :designs, :toggle_subscription,
+                     :discussions, :bulk_update, :realtime_changes,
+                     :toggle_award_emoji, :mark_as_spam, :related_branches,
+                     :can_create_branch, :create_merge_request
+                   ]
+
+  feature_category :service_desk, [:service_desk]
+  feature_category :importers, [:import_csv, :export_csv]
 
   def index
     @issues = @issuables

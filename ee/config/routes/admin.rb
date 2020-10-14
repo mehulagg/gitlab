@@ -15,8 +15,6 @@ namespace :admin do
     end
   end
 
-  get :instance_review, to: 'instance_review#index'
-
   resource :push_rule, only: [:show, :update]
   resource :email, only: [:show, :create]
   resources :audit_logs, controller: 'audit_logs', only: [:index]

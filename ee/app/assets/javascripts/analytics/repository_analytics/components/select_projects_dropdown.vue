@@ -43,7 +43,7 @@ export default {
       update(data) {
         return data.group.projects.nodes.map(project => ({
           ...project,
-          id: getIdFromGraphQLId(project.id),
+          parsedId: getIdFromGraphQLId(project.id),
           isSelected: false,
         }));
       },
@@ -87,7 +87,7 @@ export default {
       const index = this.groupProjects.map(project => project.id).indexOf(id);
       this.groupProjects[index].isSelected = !this.groupProjects[index].isSelected;
       this.selectAllProjects = false;
-      this.$emit('select-project', id);
+      this.$emit('select-project', this.groupProjects[index]);
     },
     clickSelectAllProjects() {
       this.selectAllProjects = true;
@@ -95,7 +95,7 @@ export default {
         ...project,
         isSelected: false,
       }));
-      this.$emit('select-all-projects');
+      this.$emit('select-all-projects', this.groupProjects);
     },
     handleError() {
       this.$emit('projects-query-error');

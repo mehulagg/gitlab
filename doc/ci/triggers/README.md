@@ -183,9 +183,9 @@ webhook URL for Push and Tag events (change the project ID, ref and token):
 https://gitlab.example.com/api/v4/projects/9/ref/master/trigger/pipeline?token=TOKEN
 ```
 
-`ref` should be passed as part of the URL in order to take precedence over
-`ref` from the webhook body that designates the branch ref that fired the
-trigger in the source repository. `ref` should be URL-encoded if it contains slashes.
+You should pass `ref` as part of the URL, to take precedence over `ref` from
+the webhook body that designates the branch ref that fired the trigger in the
+source repository. Be sure to URL-encode `ref` if it contains slashes.
 
 ## Making use of trigger variables
 
@@ -252,10 +252,6 @@ of all types of variables.
 
 ## Using cron to trigger nightly pipelines
 
-NOTE: **Note:**
-The following behavior can also be achieved through GitLab's UI with
-[pipeline schedules](../pipelines/schedules.md).
-
 Whether you craft a script or just run cURL directly, you can trigger jobs
 in conjunction with cron. The example below triggers a job on the `master`
 branch of project with ID `9` every night at `00:30`:
@@ -263,6 +259,9 @@ branch of project with ID `9` every night at `00:30`:
 ```shell
 30 0 * * * curl --request POST --form token=TOKEN --form ref=master https://gitlab.example.com/api/v4/projects/9/trigger/pipeline
 ```
+
+This behavior can also be achieved through GitLab's UI with
+[pipeline schedules](../pipelines/schedules.md).
 
 ## Legacy triggers
 

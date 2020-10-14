@@ -73,6 +73,12 @@
 .if-rspec-fail-fast-skipped: &if-rspec-fail-fast-skipped
   if: '$CI_MERGE_REQUEST_TITLE =~ /SKIP RSPEC FAIL-FAST/'
 
+# For Security merge requests, the gitlab-release-tools-bot triggers a new
+# pipeline for the "Pipelines for merged results" feature. If the pipeline
+# fails, we notify release managers.
+.if-security-pipeline-merge-result: &if-security-pipeline-merge-result
+  if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_PROJECT_NAMESPACE == "gitlab-org/security" && $GITLAB_USER_LOGIN == "gitlab-release-tools-bot"'
+
 ####################
 # Changes patterns #
 ####################
@@ -284,6 +290,14 @@
     - <<: *if-dot-com-gitlab-org-and-security-tag
       when: manual
       allow_failure: true
+
+##################
+# Delivery rules #
+##################
+.delivery:rules:security-pipeline-merge-result-failure:
+  rules:
+    - <<: *if-security-pipeline-merge-result
+      when: on_failure
 
 ######################
 # Dev fixtures rules #
@@ -631,6 +645,13 @@
     - <<: *if-master-schedule-2-hourly
     - <<: *if-merge-request-title-run-all-rspec
 
+.rails:rules:rspec-feature-flags:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - <<: *if-master-schedule-2-hourly
+    - <<: *if-merge-request-title-run-all-rspec
+
 .rails:rules:master-schedule-nightly--code-backstage:
   rules:
     - <<: *if-master-schedule-nightly
@@ -703,6 +724,14 @@
     - if: '$DAST_DISABLED || $GITLAB_FEATURES !~ /\bdast\b/'
       when: never
     - <<: *if-master-schedule-nightly
+      allow_failure: true
+
+.reports:rules:license_scanning:
+  rules:
+    - if: '$LICENSE_SCANNING_DISABLED || $GITLAB_FEATURES !~ /\blicense_scanning\b/'
+      when: never
+    - <<: *if-default-refs
+      changes: *code-backstage-qa-patterns
       allow_failure: true
 
 ################

@@ -19,9 +19,13 @@ module API
       end
       params do
         use :pagination
+        optional :order_by, type: String, values: %w[released_at created_at], default: 'released_at',
+                            desc: 'Return releases ordered by `released_at` or `created_at`.'
+        optional :sort, type: String, values: %w[asc desc], default: 'desc',
+                        desc: 'Return releases sorted in `asc` or `desc` order.'
       end
       get ':id/releases' do
-        releases = ::ReleasesFinder.new(user_project, current_user).execute
+        releases = ::ReleasesFinder.new(user_project, current_user, declared_params.slice(:order_by, :sort)).execute
 
         present paginate(releases), with: Entities::Release, current_user: current_user
       end
@@ -152,7 +156,7 @@ module API
       end
 
       def authorize_create_evidence!
-        # This is a separate method so that EE can extend its behaviour
+        # extended in EE
       end
 
       def release
@@ -160,15 +164,15 @@ module API
       end
 
       def log_release_created_audit_event(release)
-        # This is a separate method so that EE can extend its behaviour
+        # extended in EE
       end
 
       def log_release_updated_audit_event
-        # This is a separate method so that EE can extend its behaviour
+        # extended in EE
       end
 
       def log_release_milestones_updated_audit_event
-        # This is a separate method so that EE can extend its behaviour
+        # extended in EE
       end
     end
   end

@@ -250,7 +250,22 @@ module IssuablesHelper
 
     if display_count
       count = issuables_count_for_state(issuable_type, state)
-      html << " " << content_tag(:span, number_with_delimiter(count), class: 'badge badge-pill')
+      tag =
+        if count == -1
+          tooltip = _("Couldn't calculate number of %{issuables}.") % { issuables: issuable_type.to_s.humanize(capitalize: false) }
+
+          content_tag(
+            :span,
+            '?',
+            class: 'badge badge-pill has-tooltip',
+            aria: { label: tooltip },
+            title: tooltip
+          )
+        else
+          content_tag(:span, number_with_delimiter(count), class: 'badge badge-pill')
+        end
+
+      html << " " << tag
     end
 
     html.html_safe
@@ -435,7 +450,7 @@ module IssuablesHelper
 
   def issuable_todo_button_data(issuable, is_collapsed)
     {
-      todo_text: _('Add a To Do'),
+      todo_text: _('Add a to do'),
       mark_text: _('Mark as done'),
       todo_icon: sprite_icon('todo-add'),
       mark_icon: sprite_icon('todo-done', css_class: 'todo-undone'),

@@ -113,9 +113,9 @@ To authenticate, run the `docker` command. For example:
 
 To build and push to the Container Registry:
 
-1. Authenticate with the Container Registry. 
+1. Authenticate with the Container Registry.
 
-1. Run the command to build or push. For example, to build: 
+1. Run the command to build or push. For example, to build:
 
    ```shell
    docker build -t registry.example.com/group/project/image .
@@ -181,7 +181,7 @@ You can configure your `.gitlab-ci.yml` file to build and push images to the Con
   longer, but it ensures your image is up-to-date.
 - Before each `docker run`, do an explicit `docker pull` to fetch
   the image that was just built. This is especially important if you are
-  using multiple runners that cache images locally.   
+  using multiple runners that cache images locally.
 
   If you use the Git SHA in your image tag, each job is unique and you
   should never have a stale image. However, it's still possible to have a
@@ -461,7 +461,7 @@ Cleanup policies can be run on all projects, with these exceptions:
   for all projects (even those created before 12.8) in
   [GitLab application settings](../../../api/settings.md#change-application-settings)
   by setting `container_expiration_policies_enable_historic_entries` to true.
-  Alternatively, you can execute the following command in the [Rails console](../../../administration/troubleshooting/navigating_gitlab_via_rails_console.md#starting-a-rails-console-session):
+  Alternatively, you can execute the following command in the [Rails console](../../../administration/operations/rails_console.md#starting-a-rails-console-session):
 
   ```ruby
   ApplicationSetting.last.update(container_expiration_policies_enable_historic_entries: true)
@@ -469,6 +469,20 @@ Cleanup policies can be run on all projects, with these exceptions:
 
   There are performance risks with enabling it for all projects, especially if you
   are using an [external registry](./index.md#use-with-external-container-registries).
+- For self-managed GitLab instances, you can enable or disable the cleanup policy for a specific
+  project.
+
+  To enable it:
+
+  ```ruby
+  Feature.enable(:container_expiration_policies_historic_entry, Project.find(<project id>))
+  ```
+
+  To disable it:
+
+  ```ruby
+  Feature.disable(:container_expiration_policies_historic_entry, Project.find(<project id>))
+  ```
 
 ### How the cleanup policy works
 
@@ -603,7 +617,7 @@ are not deleted by the cleanup policy.
 
 ## Disable the Container Registry for a project
 
-The Container Registry is enabled by default. 
+The Container Registry is enabled by default.
 
 You can, however, remove the Container Registry for a project:
 
@@ -634,6 +648,14 @@ a Docker Engine version earlier than 17.12. Later versions of Docker Engine use
 
 The images in your GitLab Container Registry must also use the Docker v2 API.
 For information on how to update your images, see the [Docker help](https://docs.docker.com/registry/spec/deprecated-schema-v1).
+
+### `Blob unknown to registry` error when pushing a manifest list
+
+When [pushing a Docker manifest list](https://docs.docker.com/engine/reference/commandline/manifest/#create-and-push-a-manifest-list) to the GitLab Container Registry, you may receive the error `manifest blob unknown: blob unknown to registry`. This issue occurs when the individual child manifests referenced in the manifest list were not pushed to the same repository.
+
+For example, you may have two individual images, one for `amd64` and another for `arm64v8`, and you want to build a multi-arch image with them. The `amd64` and `arm64v8` images must be pushed to the same repository where you want to push the multi-arch image.
+
+As a workaround, you should include the architecture in the tag name of individual images. For example, use `mygroup/myapp:1.0.0-amd64` instead of using sub repositories, like `mygroup/myapp/amd64:1.0.0`. You can then tag the manifest list with `mygroup/myapp:1.0.0`.
 
 ### Troubleshoot as a GitLab server admin
 

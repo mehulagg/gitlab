@@ -664,6 +664,16 @@ RSpec.describe EpicsFinder do
       expect(results).to eq('opened' => 2, 'closed' => 1, 'all' => 3)
     end
 
+    it 'returns -1 if the query times out' do
+      finder = described_class.new(search_user, group_id: group.id)
+
+      expect_next_instance_of(described_class) do |subfinder|
+        expect(subfinder).to receive(:execute).and_raise(ActiveRecord::QueryCanceled)
+      end
+
+      expect(finder.row_count).to eq(-1)
+    end
+
     context 'when using group cte for search' do
       before do
         stub_feature_flags(use_subquery_for_group_issues_search: false)

@@ -36,7 +36,7 @@ RSpec.describe 'Reposition and move issue within board lists' do
     project.add_maintainer(user)
   end
 
-  context 'when user has access to the epic' do
+  context 'when user can admin epic' do
     before do
       group.add_maintainer(user)
     end
@@ -81,7 +81,7 @@ RSpec.describe 'Reposition and move issue within board lists' do
       post_graphql_mutation(mutation(params), current_user: user)
 
       mutation_response = graphql_mutation_response(:issue_move_list)
-      expect(mutation_response['errors']).to eq(['Resource not found'])
+      expect(mutation_response['errors']).to eq(['You are not allowed to move the issue'])
       expect(mutation_response['issue']['epic']).to eq(nil)
       expect(mutation_response['issue']['relativePosition']).to eq(3)
     end

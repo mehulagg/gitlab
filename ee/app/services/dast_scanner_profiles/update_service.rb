@@ -16,8 +16,8 @@ module DastScannerProfiles
         spider_timeout: spider_timeout
       }
       update_args[:scan_type] = scan_type if scan_type
-      update_args[:use_ajax_spider] = use_ajax_spider if use_ajax_spider
-      update_args[:show_debug_messages] = show_debug_messages if show_debug_messages
+      update_args[:use_ajax_spider] = use_ajax_spider unless use_ajax_spider.nil?
+      update_args[:show_debug_messages] = show_debug_messages unless show_debug_messages.nil?
 
       if dast_scanner_profile.update(update_args)
         ServiceResponse.success(payload: dast_scanner_profile)

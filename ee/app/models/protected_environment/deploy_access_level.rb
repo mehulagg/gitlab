@@ -21,6 +21,7 @@ class ProtectedEnvironment::DeployAccessLevel < ApplicationRecord
   delegate :project, to: :protected_environment
 
   def check_access(user)
+    return false unless user
     return true if user.admin?
     return user.id == user_id if user_type?
     return group.users.exists?(user.id) if group_type?

@@ -230,6 +230,7 @@ module EE
       rule { admin | owner }.policy do
         enable :read_group_compliance_dashboard
         enable :read_group_credentials_inventory
+        enable :admin_group_credentials_inventory
       end
 
       rule { needs_new_sso_session }.policy do

@@ -26,6 +26,7 @@ module EE
       scope :no_epic, -> { left_outer_joins(:epic_issue).where(epic_issues: { epic_id: nil }) }
       scope :any_epic, -> { joins(:epic_issue) }
       scope :in_epics, ->(epics) { joins(:epic_issue).where(epic_issues: { epic_id: epics }) }
+      scope :not_in_epics, ->(epics) { left_outer_joins(:epic_issue).where('epic_issues.epic_id NOT IN (?) OR epic_issues.epic_id IS NULL', epics) }
       scope :no_iteration, -> { where(sprint_id: nil) }
       scope :any_iteration, -> { where.not(sprint_id: nil) }
       scope :in_iterations, ->(iterations) { where(sprint_id: iterations) }
@@ -49,6 +50,7 @@ module EE
       belongs_to :promoted_to_epic, class_name: 'Epic'
 
       has_one :status_page_published_incident, class_name: 'StatusPage::PublishedIncident', inverse_of: :issue
+      has_one :issuable_sla
 
       has_many :vulnerability_links, class_name: 'Vulnerabilities::IssueLink', inverse_of: :issue
       has_many :related_vulnerabilities, through: :vulnerability_links, source: :vulnerability

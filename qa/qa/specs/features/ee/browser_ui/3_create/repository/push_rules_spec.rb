@@ -191,7 +191,7 @@ module QA
       def expect_error_on_push(commit_message: 'allowed commit', branch: 'master', file:, user: @creator, tag: nil, gpg: nil, error: nil)
         expect do
           push commit_message: commit_message, branch: branch, file: file, user: user, tag: tag, gpg: gpg
-        end.to raise_error(QA::Git::Repository::RepositoryCommandError, /#{error}/)
+        end.to raise_error(QA::Support::Run::CommandError, /#{error}/)
       end
 
       def prepare

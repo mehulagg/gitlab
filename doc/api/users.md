@@ -980,7 +980,8 @@ Example response:
 
 ## Get a specific GPG key for a given user
 
-Get a specific GPG key for a given user. Available only for admins.
+Get a specific GPG key for a given user. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43693)
+in GitLab 13.5, this endpoint can be accessed without admin authentication.
 
 ```plaintext
 GET /users/:id/gpg_keys/:key_id
@@ -1209,7 +1210,9 @@ Returns:
 
 - `201 OK` on success.
 - `404 User Not Found` if user cannot be found.
-- `403 Forbidden` when trying to block an already blocked user by LDAP synchronization.
+- `403 Forbidden` when trying to block:
+  - A user that is blocked through LDAP.
+  - An internal user.
 
 ## Unblock user
 
@@ -1247,6 +1250,7 @@ Returns:
 - `403 Forbidden` when trying to deactivate a user:
   - Blocked by admin or by LDAP synchronization.
   - That has any activity in past 180 days. These users cannot be deactivated.
+  - That is internal.
 
 ## Activate user
 

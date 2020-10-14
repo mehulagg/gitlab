@@ -136,6 +136,7 @@ export default {
           <requirement-status-badge
             v-if="testReport"
             :test-report="testReport"
+            :last-test-report-manually-created="requirement.lastTestReportManuallyCreated"
             class="d-block d-sm-none"
           />
         </div>
@@ -144,6 +145,7 @@ export default {
             <requirement-status-badge
               v-if="testReport"
               :test-report="testReport"
+              :last-test-report-manually-created="requirement.lastTestReportManuallyCreated"
               element-type="li"
               class="d-none d-sm-block"
             />

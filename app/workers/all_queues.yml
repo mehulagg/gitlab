@@ -147,6 +147,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: cronjob:ci_schedule_delete_objects_cron
+  :feature_category: :continuous_integration
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: cronjob:container_expiration_policy
   :feature_category: :container_registry
   :has_external_dependencies:
@@ -946,7 +954,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: pipeline_background:ci_build_report_result
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -954,7 +963,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: pipeline_background:ci_build_trace_chunk_flush
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -1034,7 +1044,8 @@
   :resource_boundary: :unknown
   :weight: 3
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: pipeline_default:build_trace_sections
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -1042,7 +1053,8 @@
   :resource_boundary: :unknown
   :weight: 3
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: pipeline_default:ci_create_cross_project_pipeline
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -1299,6 +1311,15 @@
   :resource_boundary: :unknown
   :weight: 2
   :idempotent:
+  :tags:
+  - :requires_disk_io
+- :name: ci_delete_objects
+  :feature_category: :continuous_integration
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: create_commit_signature
   :feature_category: :source_code_management
@@ -1419,7 +1440,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: export_csv
   :feature_category: :issue_tracking
   :has_external_dependencies:
@@ -1483,7 +1505,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: group_export
   :feature_category: :importers
   :has_external_dependencies:
@@ -1635,7 +1658,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: pages_domain_ssl_renewal
   :feature_category: :pages
   :has_external_dependencies:
@@ -1643,7 +1667,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: pages_domain_verification
   :feature_category: :pages
   :has_external_dependencies:
@@ -1651,7 +1676,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: pages_remove
   :feature_category: :pages
   :has_external_dependencies:
@@ -1723,7 +1749,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: project_export
   :feature_category: :importers
   :has_external_dependencies:
@@ -1939,6 +1966,14 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
+  :tags: []
+- :name: web_hooks_destroy
+  :feature_category: :integrations
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: x509_certificate_revoke
   :feature_category: :source_code_management

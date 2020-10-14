@@ -43,7 +43,7 @@ For example, the following policy document allows assuming a role whose name sta
 
 Generate an access key for the IAM user, and configure GitLab with the credentials:
 
-1. Navigate to **Admin Area > Settings > Integrations** and expand the **Amazon EKS** section.
+1. Navigate to **Admin Area > Settings > General** and expand the **Amazon EKS** section.
 1. Check **Enable Amazon EKS integration**.
 1. Enter the account ID and access key credentials into the respective
    `Account ID`, `Access key ID` and `Secret access key` fields.
@@ -65,7 +65,9 @@ To create and add a new Kubernetes cluster to your project, group, or instance:
 1. In the [IAM Management Console](https://console.aws.amazon.com/iam/home), create an IAM policy:
    1. From the left panel, select **Policies**.
    1. Click **Create Policy**, which opens a new window.
-   1. Select the **JSON** tab, and paste in the following snippet in place of the existing content:
+   1. Select the **JSON** tab, and paste the following snippet in place of the
+      existing content. These permissions give GitLab the ability to create
+      resources, but not delete them:
 
       ```json
       {
@@ -112,9 +114,7 @@ To create and add a new Kubernetes cluster to your project, group, or instance:
       }
       ```
 
-      NOTE: **Note:**
-      These permissions give GitLab the ability to create resources, but not delete them.
-      This means that if an error is encountered during the creation process, changes will
+      If an error is encountered during the creation process, changes will
       not be rolled back and you must remove resources manually. You can do this by deleting
       the relevant [CloudFormation stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-delete-stack.html)
 

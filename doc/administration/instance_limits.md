@@ -163,7 +163,7 @@ There is a limit when embedding metrics in GFM for performance reasons.
 On GitLab.com, the [maximum number of webhooks and their size](../user/gitlab_com/index.md#webhooks) per project, and per group, is limited.
 
 To set this limit on a self-managed installation, run the following in the
-[GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 # If limits don't exist for the default plan, you can create one with:
@@ -203,7 +203,7 @@ support keyset-based pagination. More information about pagination options can b
 found in the [API docs section on pagination](../api/README.md#pagination).
 
 To set this limit on a self-managed installation, run the following in the
-[GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 # If limits don't exist for the default plan, you can create one with:
@@ -238,7 +238,7 @@ will fail with a `job_activity_limit_exceeded` error.
   This limit is disabled by default.
 
 To set this limit on a self-managed installation, run the following in the
-[GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 # If limits don't exist for the default plan, you can create one with:
@@ -264,7 +264,7 @@ limit, the subscription will be considered invalid.
 - On [GitLab Starter](https://about.gitlab.com/pricing/#self-managed) tier or higher self-managed installations, this limit is defined for the `default` plan that affects all projects.
 
 To set this limit on a self-managed installation, run the following in the
-[GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 Plan.default.actual_limits.update!(ci_project_subscriptions: 500)
@@ -290,7 +290,7 @@ or higher tiers), this limit is defined for the `default` plan that affects all
 projects. By default, there is no limit.
 
 To set this limit on a self-managed installation, run the following in the
-[GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 Plan.default.actual_limits.update!(ci_pipeline_schedules: 100)
@@ -308,7 +308,7 @@ On self-managed instances this limit is defined for the `default` plan. By defau
 this limit is set to `25`.
 
 To update this limit to a new value on a self-managed installation, run the following in the
-[GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 Plan.default.actual_limits.update!(ci_instance_level_variables: 30)
@@ -361,7 +361,7 @@ setting is used:
 | `ci_max_artifact_size_trace`                | 0             |
 
 For example, to set the `ci_max_artifact_size_junit` limit to 10MB on a self-managed
-installation, run the following in the [GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+installation, run the following in the [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 Plan.default.actual_limits.update!(ci_max_artifact_size_junit: 10)
@@ -528,13 +528,17 @@ More information can be found in the [Push event activities limit and bulk push 
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218017) in GitLab 13.4.
 
-On GitLab.com, the maximum file size for a package that's uploaded to the [GitLab Package Registry](../user/packages/package_registry/index.md)
-is 5 gigabytes.
+On GitLab.com, the maximum file size for a package that's uploaded to the [GitLab Package Registry](../user/packages/package_registry/index.md) varies by format:
 
-Limits are set per package type.
+- Conan: 3GB
+- Generic: 5GB
+- Maven: 3GB
+- NPM: 500MB
+- NuGet: 500MB
+- PyPI: 3GB
 
 To set this limit on a self-managed installation, run the following in the
-[GitLab Rails console](troubleshooting/debug.md#starting-a-rails-console-session):
+[GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 # File size limit is stored in bytes
@@ -556,6 +560,9 @@ Plan.default.actual_limits.update!(pypi_max_file_size: 100.megabytes)
 
 # For Debian Packages
 Plan.default.actual_limits.update!(debian_max_file_size: 100.megabytes)
+
+# For Generic Packages
+Plan.default.actual_limits.update!(generic_packages_max_file_size: 100.megabytes)
 ```
 
 Set the limit to `0` to allow any file size.

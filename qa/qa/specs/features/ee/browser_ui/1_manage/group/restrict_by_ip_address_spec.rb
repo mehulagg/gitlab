@@ -88,7 +88,7 @@ module QA
           end
 
           it 'denies access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/860' do
-            expect { push_a_project_with_ssh_key(key) }.to raise_error(QA::Git::Repository::RepositoryCommandError, /fatal: Could not read from remote repository/)
+            expect { push_a_project_with_ssh_key(key) }.to raise_error(QA::Support::Run::CommandError, /fatal: Could not read from remote repository/)
           end
         end
       end

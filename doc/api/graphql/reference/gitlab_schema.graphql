@@ -32,7 +32,7 @@ input AddAwardEmojiInput {
   """
   The global id of the awardable resource
   """
-  awardableId: ID!
+  awardableId: AwardableID!
 
   """
   A unique identifier for the client performing the mutation.
@@ -77,7 +77,7 @@ input AddProjectToSecurityDashboardInput {
   """
   ID of the project to be added to Instance Security Dashboard
   """
-  id: ID!
+  id: ProjectID!
 }
 
 """
@@ -243,6 +243,11 @@ type AlertManagementAlert implements Noteable {
   Timestamp the alert ended
   """
   endedAt: Time
+
+  """
+  Environment for the alert
+  """
+  environment: Environment
 
   """
   Number of events of this alert
@@ -792,7 +797,7 @@ input AwardEmojiAddInput {
   """
   The global id of the awardable resource
   """
-  awardableId: ID!
+  awardableId: AwardableID!
 
   """
   A unique identifier for the client performing the mutation.
@@ -832,7 +837,7 @@ input AwardEmojiRemoveInput {
   """
   The global id of the awardable resource
   """
-  awardableId: ID!
+  awardableId: AwardableID!
 
   """
   A unique identifier for the client performing the mutation.
@@ -872,7 +877,7 @@ input AwardEmojiToggleInput {
   """
   The global id of the awardable resource
   """
-  awardableId: ID!
+  awardableId: AwardableID!
 
   """
   A unique identifier for the client performing the mutation.
@@ -909,6 +914,11 @@ type AwardEmojiTogglePayload {
   """
   toggledOn: Boolean!
 }
+
+"""
+Identifier of Awardable
+"""
+scalar AwardableID
 
 type BaseService implements Service {
   """
@@ -1073,6 +1083,31 @@ type Board {
   id: ID!
 
   """
+  Labels of the board
+  """
+  labels(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): LabelConnection
+
+  """
   Lists of the board
   """
   lists(
@@ -1187,8 +1222,8 @@ type BoardEpic implements CurrentUserTodos & Noteable {
     before: String
 
     """
-    List items within a time frame where items.end_date is between startDate and
-    endDate parameters (startDate parameter must be present)
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use timeframe.end
     """
     endDate: Time
 
@@ -1238,8 +1273,9 @@ type BoardEpic implements CurrentUserTodos & Noteable {
     sort: EpicSort
 
     """
-    List items within a time frame where items.start_date is between startDate
-    and endDate parameters (endDate parameter must be present)
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use
+    timeframe.start
     """
     startDate: Time
 
@@ -1247,6 +1283,11 @@ type BoardEpic implements CurrentUserTodos & Noteable {
     Filter epics by state
     """
     state: EpicState
+
+    """
+    List items overlapping the given timeframe
+    """
+    timeframe: Timeframe
   ): EpicConnection
 
   """
@@ -1976,6 +2017,11 @@ type BurnupChartDailyTotals {
 
 type CiGroup {
   """
+  Detailed status of the group
+  """
+  detailedStatus: DetailedStatus
+
+  """
   Jobs in group
   """
   jobs(
@@ -2048,6 +2094,11 @@ type CiGroupEdge {
 
 type CiJob {
   """
+  Detailed status of the job
+  """
+  detailedStatus: DetailedStatus
+
+  """
   Name of the job
   """
   name: String
@@ -2076,6 +2127,11 @@ type CiJob {
     """
     last: Int
   ): CiJobConnection
+
+  """
+  Schedule for the build
+  """
+  scheduledAt: Time
 }
 
 """
@@ -2119,6 +2175,11 @@ Identifier of Ci::Pipeline
 scalar CiPipelineID
 
 type CiStage {
+  """
+  Detailed status of the stage
+  """
+  detailedStatus: DetailedStatus
+
   """
   Group of jobs for the stage
   """
@@ -2433,6 +2494,11 @@ scalar ClustersAgentID
 Identifier of Clusters::AgentToken
 """
 scalar ClustersAgentTokenID
+
+"""
+Identifier of Clusters::Cluster
+"""
+scalar ClustersClusterID
 
 type Commit {
   """
@@ -2978,7 +3044,7 @@ input CreateAnnotationInput {
   """
   The global id of the cluster to add an annotation to
   """
-  clusterId: ID
+  clusterId: ClustersClusterID
 
   """
   The path to a file defining the dashboard on which the annotation should be added
@@ -2998,7 +3064,7 @@ input CreateAnnotationInput {
   """
   The global id of the environment to add an annotation to
   """
-  environmentId: ID
+  environmentId: EnvironmentID
 
   """
   Timestamp indicating starting moment to which the annotation relates
@@ -3014,6 +3080,71 @@ type CreateAnnotationPayload {
   The created annotation
   """
   annotation: MetricsDashboardAnnotation
+
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+}
+
+"""
+Autogenerated input type of CreateBoard
+"""
+input CreateBoardInput {
+  """
+  The ID of the user to be assigned to the board.
+  """
+  assigneeId: String
+
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  The group full path the board is associated with.
+  """
+  groupPath: ID
+
+  """
+  The IDs of labels to be added to the board.
+  """
+  labelIds: [ID!]
+
+  """
+  The ID of the milestone to be assigned to the board.
+  """
+  milestoneId: ID
+
+  """
+  The board name.
+  """
+  name: String
+
+  """
+  The project full path the board is associated with.
+  """
+  projectPath: ID
+
+  """
+  The weight of the board.
+  """
+  weight: Boolean
+}
+
+"""
+Autogenerated return type of CreateBoard
+"""
+type CreateBoardPayload {
+  """
+  The board after mutation.
+  """
+  board: Board
 
   """
   A unique identifier for the client performing the mutation.
@@ -3133,7 +3264,7 @@ input CreateDiffNoteInput {
   """
   The global id of the resource to add a note to
   """
-  noteableId: ID!
+  noteableId: NoteableID!
 
   """
   The position of this note on a diff
@@ -3263,7 +3394,7 @@ input CreateImageDiffNoteInput {
   """
   The global id of the resource to add a note to
   """
-  noteableId: ID!
+  noteableId: NoteableID!
 
   """
   The position of this note on a diff
@@ -3289,6 +3420,111 @@ type CreateImageDiffNotePayload {
   The note after mutation
   """
   note: Note
+}
+
+"""
+Autogenerated input type of CreateIssue
+"""
+input CreateIssueInput {
+  """
+  The array of user IDs to assign to the issue
+  """
+  assigneeIds: [UserID!]
+
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Indicates the issue is confidential
+  """
+  confidential: Boolean
+
+  """
+  Timestamp when the issue was created. Available only for admins and project owners
+  """
+  createdAt: Time
+
+  """
+  Description of the issue
+  """
+  description: String
+
+  """
+  The ID of a discussion to resolve. Also pass `merge_request_to_resolve_discussions_of`
+  """
+  discussionToResolve: String
+
+  """
+  Due date of the issue
+  """
+  dueDate: ISO8601Date
+
+  """
+  The ID of an epic to associate the issue with
+  """
+  epicId: EpicID
+
+  """
+  The IID (internal ID) of a project issue. Only admins and project owners can modify
+  """
+  iid: Int
+
+  """
+  The IDs of labels to be added to the issue
+  """
+  labelIds: [LabelID!]
+
+  """
+  Labels of the issue
+  """
+  labels: [String!]
+
+  """
+  Indicates discussion is locked on the issue
+  """
+  locked: Boolean
+
+  """
+  The IID of a merge request for which to resolve discussions
+  """
+  mergeRequestToResolveDiscussionsOf: MergeRequestID
+
+  """
+  The ID of the milestone to assign to the issue. On update milestone will be removed if set to null
+  """
+  milestoneId: MilestoneID
+
+  """
+  Project full path the issue is associated with
+  """
+  projectPath: ID!
+
+  """
+  Title of the issue
+  """
+  title: String!
+}
+
+"""
+Autogenerated return type of CreateIssue
+"""
+type CreateIssuePayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+
+  """
+  The issue after mutation
+  """
+  issue: Issue
 }
 
 """
@@ -3378,7 +3614,7 @@ input CreateNoteInput {
   """
   The global id of the resource to add a note to
   """
-  noteableId: ID!
+  noteableId: NoteableID!
 }
 
 """
@@ -4157,6 +4393,11 @@ enum DastSiteProfileValidationStatusEnum {
   """
   PENDING_VALIDATION
 }
+
+"""
+Date represented in ISO 8601
+"""
+scalar Date
 
 """
 Autogenerated input type of DeleteAnnotation
@@ -5125,7 +5366,7 @@ input DestroyNoteInput {
   """
   The global id of the note to destroy
   """
-  id: ID!
+  id: NoteID!
 }
 
 """
@@ -5185,44 +5426,49 @@ type DestroySnippetPayload {
 
 type DetailedStatus {
   """
-  Path of the details for the pipeline status
+  Action information for the status. This includes method, button title, icon, path, and title
   """
-  detailsPath: String!
+  action: StatusAction
 
   """
-  Favicon of the pipeline status
+  Path of the details for the status
   """
-  favicon: String!
+  detailsPath: String
 
   """
-  Group of the pipeline status
+  Favicon of the status
   """
-  group: String!
+  favicon: String
 
   """
-  Indicates if the pipeline status has further details
+  Group of the status
   """
-  hasDetails: Boolean!
+  group: String
 
   """
-  Icon of the pipeline status
+  Indicates if the status has further details
   """
-  icon: String!
+  hasDetails: Boolean
 
   """
-  Label of the pipeline status
+  Icon of the status
   """
-  label: String!
+  icon: String
 
   """
-  Text of the pipeline status
+  Label of the status
   """
-  text: String!
+  label: String
 
   """
-  Tooltip associated with the pipeline status
+  Text of the status
   """
-  tooltip: String!
+  text: String
+
+  """
+  Tooltip associated with the status
+  """
+  tooltip: String
 }
 
 input DiffImagePositionInput {
@@ -5594,7 +5840,7 @@ input DismissVulnerabilityInput {
   """
   ID of the vulnerability to be dismissed
   """
-  id: ID!
+  id: VulnerabilityID!
 }
 
 """
@@ -5668,7 +5914,7 @@ type Environment {
   id: ID!
 
   """
-  The most severe open alert for the environment. If multiple alerts have equal severity, the most recent is returned.
+  The most severe open alert for the environment. If multiple alerts have equal severity, the most recent is returned
   """
   latestOpenedMostSevereAlert: AlertManagementAlert
 
@@ -5686,6 +5932,12 @@ type Environment {
   Human-readable name of the environment
   """
   name: String!
+
+  """
+  The path to the environment. Will always return null if
+  `expose_environment_path_in_alert_details` feature flag is disabled
+  """
+  path: String
 
   """
   State of the environment, for example: available/stopped
@@ -5729,6 +5981,11 @@ type EnvironmentEdge {
 }
 
 """
+Identifier of Environment
+"""
+scalar EnvironmentID
+
+"""
 Represents an epic
 """
 type Epic implements CurrentUserTodos & Noteable {
@@ -5757,8 +6014,8 @@ type Epic implements CurrentUserTodos & Noteable {
     before: String
 
     """
-    List items within a time frame where items.end_date is between startDate and
-    endDate parameters (startDate parameter must be present)
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use timeframe.end
     """
     endDate: Time
 
@@ -5808,8 +6065,9 @@ type Epic implements CurrentUserTodos & Noteable {
     sort: EpicSort
 
     """
-    List items within a time frame where items.start_date is between startDate
-    and endDate parameters (endDate parameter must be present)
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use
+    timeframe.start
     """
     startDate: Time
 
@@ -5817,6 +6075,11 @@ type Epic implements CurrentUserTodos & Noteable {
     Filter epics by state
     """
     state: EpicState
+
+    """
+    List items overlapping the given timeframe
+    """
+    timeframe: Timeframe
   ): EpicConnection
 
   """
@@ -6590,6 +6853,11 @@ type EpicIssue implements CurrentUserTodos & Noteable {
   severity: IssuableSeverity
 
   """
+  Timestamp of when the issue SLA expires. Returns null if `incident_sla_dev` feature flag is disabled.
+  """
+  slaDueAt: Time
+
+  """
   State of the issue
   """
   state: IssueState!
@@ -6856,17 +7124,17 @@ input EpicTreeNodeFieldsInputType {
   """
   The id of the epic_issue or issue that the actual epic or issue is switched with
   """
-  adjacentReferenceId: ID
+  adjacentReferenceId: EpicTreeSortingID
 
   """
   The id of the epic_issue or epic that is being moved
   """
-  id: ID!
+  id: EpicTreeSortingID!
 
   """
   ID of the new parent epic
   """
-  newParentId: ID
+  newParentId: EpicID
 
   """
   The type of the switch, after or before allowed
@@ -6881,7 +7149,7 @@ input EpicTreeReorderInput {
   """
   The id of the base epic of the tree
   """
-  baseEpicId: ID!
+  baseEpicId: EpicID!
 
   """
   A unique identifier for the client performing the mutation.
@@ -6908,6 +7176,11 @@ type EpicTreeReorderPayload {
   """
   errors: [String!]!
 }
+
+"""
+Identifier of EpicTreeSorting
+"""
+scalar EpicTreeSortingID
 
 """
 Epic ID wildcard values
@@ -7146,6 +7419,16 @@ type GrafanaIntegration {
 
 type Group {
   """
+  Size limit for repositories in the namespace in bytes
+  """
+  actualRepositorySizeLimit: Float
+
+  """
+  Additional storage purchased for the root namespace in bytes
+  """
+  additionalPurchasedStorageSize: Float
+
+  """
   Indicates whether Auto DevOps is enabled for all projects within this group
   """
   autoDevopsEnabled: Boolean
@@ -7196,6 +7479,11 @@ type Group {
   ): BoardConnection
 
   """
+  Includes at least one project where the repository size exceeds the limit
+  """
+  containsLockedProjects: Boolean!
+
+  """
   Description of the namespace
   """
   description: String
@@ -7220,8 +7508,8 @@ type Group {
     authorUsername: String
 
     """
-    List items within a time frame where items.end_date is between startDate and
-    endDate parameters (startDate parameter must be present)
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use timeframe.end
     """
     endDate: Time
 
@@ -7261,8 +7549,9 @@ type Group {
     sort: EpicSort
 
     """
-    List items within a time frame where items.start_date is between startDate
-    and endDate parameters (endDate parameter must be present)
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use
+    timeframe.start
     """
     startDate: Time
 
@@ -7270,6 +7559,11 @@ type Group {
     Filter epics by state
     """
     state: EpicState
+
+    """
+    List items overlapping the given timeframe
+    """
+    timeframe: Timeframe
   ): Epic
 
   """
@@ -7292,8 +7586,8 @@ type Group {
     before: String
 
     """
-    List items within a time frame where items.end_date is between startDate and
-    endDate parameters (startDate parameter must be present)
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use timeframe.end
     """
     endDate: Time
 
@@ -7343,8 +7637,9 @@ type Group {
     sort: EpicSort
 
     """
-    List items within a time frame where items.start_date is between startDate
-    and endDate parameters (endDate parameter must be present)
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use
+    timeframe.start
     """
     startDate: Time
 
@@ -7352,6 +7647,11 @@ type Group {
     Filter epics by state
     """
     state: EpicState
+
+    """
+    List items overlapping the given timeframe
+    """
+    timeframe: Timeframe
   ): EpicConnection
 
   """
@@ -7554,8 +7854,8 @@ type Group {
     before: String
 
     """
-    List items within a time frame where items.end_date is between startDate and
-    endDate parameters (startDate parameter must be present)
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use timeframe.end
     """
     endDate: Time
 
@@ -7585,8 +7885,9 @@ type Group {
     last: Int
 
     """
-    List items within a time frame where items.start_date is between startDate
-    and endDate parameters (endDate parameter must be present)
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use
+    timeframe.start
     """
     startDate: Time
 
@@ -7594,6 +7895,11 @@ type Group {
     Filter iterations by state
     """
     state: IterationState
+
+    """
+    List items overlapping the given timeframe
+    """
+    timeframe: Timeframe
 
     """
     Fuzzy search by title
@@ -7751,8 +8057,13 @@ type Group {
     before: String
 
     """
-    List items within a time frame where items.end_date is between startDate and
-    endDate parameters (startDate parameter must be present)
+    A date that the milestone contains
+    """
+    containingDate: Time
+
+    """
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use timeframe.end
     """
     endDate: Time
 
@@ -7777,8 +8088,14 @@ type Group {
     last: Int
 
     """
-    List items within a time frame where items.start_date is between startDate
-    and endDate parameters (endDate parameter must be present)
+    A search string for the title
+    """
+    searchTitle: String
+
+    """
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use
+    timeframe.start
     """
     startDate: Time
 
@@ -7786,6 +8103,16 @@ type Group {
     Filter milestones by state
     """
     state: MilestoneStateEnum
+
+    """
+    List items overlapping the given timeframe
+    """
+    timeframe: Timeframe
+
+    """
+    The title of the milestone
+    """
+    title: String
   ): MilestoneConnection
 
   """
@@ -7852,6 +8179,11 @@ type Group {
     """
     sort: NamespaceProjectSort = null
   ): ProjectConnection!
+
+  """
+  Number of projects in the root namespace where the repository size exceeds the limit
+  """
+  repositorySizeExcessProjectCount: Int!
 
   """
   Indicates if users can request access to namespace
@@ -7932,6 +8264,16 @@ type Group {
     """
     startTime: Time
   ): TimelogConnection!
+
+  """
+  Total repository size of all projects in the root namespace in bytes
+  """
+  totalRepositorySize: Float
+
+  """
+  Total excess repository size of all projects in the root namespace in bytes
+  """
+  totalRepositorySizeExcess: Float
 
   """
   Time before two-factor authentication is enforced
@@ -8708,6 +9050,11 @@ type Issue implements CurrentUserTodos & Noteable {
   Severity level of the incident
   """
   severity: IssuableSeverity
+
+  """
+  Timestamp of when the issue SLA expires. Returns null if `incident_sla_dev` feature flag is disabled.
+  """
+  slaDueAt: Time
 
   """
   State of the issue
@@ -10947,6 +11294,11 @@ type MergeRequestEdge {
 }
 
 """
+Identifier of MergeRequest
+"""
+scalar MergeRequestID
+
+"""
 Check permissions for the current user on a merge request
 """
 type MergeRequestPermissions {
@@ -11716,11 +12068,13 @@ type Mutation {
   configureSast(input: ConfigureSastInput!): ConfigureSastPayload
   createAlertIssue(input: CreateAlertIssueInput!): CreateAlertIssuePayload
   createAnnotation(input: CreateAnnotationInput!): CreateAnnotationPayload
+  createBoard(input: CreateBoardInput!): CreateBoardPayload
   createBranch(input: CreateBranchInput!): CreateBranchPayload
   createClusterAgent(input: CreateClusterAgentInput!): CreateClusterAgentPayload
   createDiffNote(input: CreateDiffNoteInput!): CreateDiffNotePayload
   createEpic(input: CreateEpicInput!): CreateEpicPayload
   createImageDiffNote(input: CreateImageDiffNoteInput!): CreateImageDiffNotePayload
+  createIssue(input: CreateIssueInput!): CreateIssuePayload
   createIteration(input: CreateIterationInput!): CreateIterationPayload
   createNote(input: CreateNoteInput!): CreateNotePayload
   createRequirement(input: CreateRequirementInput!): CreateRequirementPayload
@@ -11839,6 +12193,21 @@ enum MutationOperationMode {
 
 type Namespace {
   """
+  Size limit for repositories in the namespace in bytes
+  """
+  actualRepositorySizeLimit: Float
+
+  """
+  Additional storage purchased for the root namespace in bytes
+  """
+  additionalPurchasedStorageSize: Float
+
+  """
+  Includes at least one project where the repository size exceeds the limit
+  """
+  containsLockedProjects: Boolean!
+
+  """
   Description of the namespace
   """
   description: String
@@ -11929,6 +12298,11 @@ type Namespace {
   ): ProjectConnection!
 
   """
+  Number of projects in the root namespace where the repository size exceeds the limit
+  """
+  repositorySizeExcessProjectCount: Int!
+
+  """
   Indicates if users can request access to namespace
   """
   requestAccessEnabled: Boolean
@@ -11947,6 +12321,16 @@ type Namespace {
   Date until the temporary storage increase is active
   """
   temporaryStorageIncreaseEndsOn: Time
+
+  """
+  Total repository size of all projects in the root namespace in bytes
+  """
+  totalRepositorySize: Float
+
+  """
+  Total excess repository size of all projects in the root namespace in bytes
+  """
+  totalRepositorySizeExcess: Float
 
   """
   Visibility of the namespace
@@ -11990,6 +12374,11 @@ type NamespaceEdge {
 }
 
 """
+Identifier of Namespace
+"""
+scalar NamespaceID
+
+"""
 Autogenerated input type of NamespaceIncreaseStorageTemporarily
 """
 input NamespaceIncreaseStorageTemporarilyInput {
@@ -12001,7 +12390,7 @@ input NamespaceIncreaseStorageTemporarilyInput {
   """
   The global id of the namespace to mutate
   """
-  id: ID!
+  id: NamespaceID!
 }
 
 """
@@ -12198,6 +12587,11 @@ type NoteEdge {
   node: Note
 }
 
+"""
+Identifier of Note
+"""
+scalar NoteID
+
 type NotePermissions {
   """
   Indicates the user can perform `admin_note` on this resource
@@ -12276,6 +12670,11 @@ interface Noteable {
     last: Int
   ): NoteConnection!
 }
+
+"""
+Identifier of Noteable
+"""
+scalar NoteableID
 
 """
 Represents a package
@@ -12459,7 +12858,7 @@ enum PackageTypeEnum {
   MAVEN
 
   """
-  Packages from the Npm package manager
+  Packages from the NPM package manager
   """
   NPM
 
@@ -12469,7 +12868,7 @@ enum PackageTypeEnum {
   NUGET
 
   """
-  Packages from the Pypi package manager
+  Packages from the PyPI package manager
   """
   PYPI
 }
@@ -12803,9 +13202,19 @@ enum PipelineStatusEnum {
 
 type Project {
   """
+  Size limit for the repository in bytes
+  """
+  actualRepositorySizeLimit: Float
+
+  """
   A single Alert Management alert of the project
   """
   alertManagementAlert(
+    """
+    Username of a user assigned to the issue
+    """
+    assigneeUsername: String
+
     """
     IID of the alert. For example, "1"
     """
@@ -12832,6 +13241,11 @@ type Project {
   """
   alertManagementAlertStatusCounts(
     """
+    Username of a user assigned to the issue
+    """
+    assigneeUsername: String
+
+    """
     Search criteria for filtering alerts. This will search on title, description, service, monitoring_tool.
     """
     search: String
@@ -12845,6 +13259,11 @@ type Project {
     Returns the elements in the list that come after the specified cursor.
     """
     after: String
+
+    """
+    Username of a user assigned to the issue
+    """
+    assigneeUsername: String
 
     """
     Returns the elements in the list that come before the specified cursor.
@@ -13508,8 +13927,8 @@ type Project {
     before: String
 
     """
-    List items within a time frame where items.end_date is between startDate and
-    endDate parameters (startDate parameter must be present)
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use timeframe.end
     """
     endDate: Time
 
@@ -13539,8 +13958,9 @@ type Project {
     last: Int
 
     """
-    List items within a time frame where items.start_date is between startDate
-    and endDate parameters (endDate parameter must be present)
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use
+    timeframe.start
     """
     startDate: Time
 
@@ -13548,6 +13968,11 @@ type Project {
     Filter iterations by state
     """
     state: IterationState
+
+    """
+    List items overlapping the given timeframe
+    """
+    timeframe: Timeframe
 
     """
     Fuzzy search by title
@@ -13757,8 +14182,13 @@ type Project {
     before: String
 
     """
-    List items within a time frame where items.end_date is between startDate and
-    endDate parameters (startDate parameter must be present)
+    A date that the milestone contains
+    """
+    containingDate: Time
+
+    """
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use timeframe.end
     """
     endDate: Time
 
@@ -13783,8 +14213,14 @@ type Project {
     last: Int
 
     """
-    List items within a time frame where items.start_date is between startDate
-    and endDate parameters (endDate parameter must be present)
+    A search string for the title
+    """
+    searchTitle: String
+
+    """
+    List items overlapping a time frame defined by startDate..endDate (if one
+    date is provided, both must be present). Deprecated in 14.0: Use
+    timeframe.start
     """
     startDate: Time
 
@@ -13792,6 +14228,16 @@ type Project {
     Filter milestones by state
     """
     state: MilestoneStateEnum
+
+    """
+    List items overlapping the given timeframe
+    """
+    timeframe: Timeframe
+
+    """
+    The title of the milestone
+    """
+    title: String
   ): MilestoneConnection
 
   """
@@ -13989,6 +14435,11 @@ type Project {
   Git repository of the project
   """
   repository: Repository
+
+  """
+  Size of repository that exceeds the limit in bytes
+  """
+  repositorySizeExcess: Float
 
   """
   Indicates if users can request member access to the project
@@ -14470,6 +14921,11 @@ type ProjectEdge {
   """
   node: Project
 }
+
+"""
+Identifier of Project
+"""
+scalar ProjectID
 
 """
 Represents a Project Membership
@@ -15749,7 +16205,7 @@ input RemoveAwardEmojiInput {
   """
   The global id of the awardable resource
   """
-  awardableId: ID!
+  awardableId: AwardableID!
 
   """
   A unique identifier for the client performing the mutation.
@@ -15882,6 +16338,11 @@ type Requirement {
   Internal ID of the requirement
   """
   iid: ID!
+
+  """
+  Indicates if latest test report was created by user
+  """
+  lastTestReportManuallyCreated: Boolean
 
   """
   Latest requirement test report state
@@ -16109,6 +16570,11 @@ type RootStorageStatistics {
   The packages size in bytes
   """
   packagesSize: Float!
+
+  """
+  The CI pipeline artifacts size in bytes
+  """
+  pipelineArtifactsSize: Float!
 
   """
   The Git repository size in bytes
@@ -16620,6 +17086,11 @@ Represents summary of a security report
 """
 type SecurityReportSummary {
   """
+  Aggregated counts for the api_fuzzing scan
+  """
+  apiFuzzing: SecurityReportSummarySection
+
+  """
   Aggregated counts for the container_scanning scan
   """
   containerScanning: SecurityReportSummarySection
@@ -16699,6 +17170,7 @@ type SecurityReportSummarySection {
 The type of the security scanner
 """
 enum SecurityScannerType {
+  API_FUZZING
   CONTAINER_SCANNING
   COVERAGE_FUZZING
   DAST
@@ -17717,6 +18189,33 @@ enum Sort {
   updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5")
 }
 
+type StatusAction {
+  """
+  Title for the button, for example: Retry this job
+  """
+  buttonTitle: String
+
+  """
+  Icon used in the action button
+  """
+  icon: String
+
+  """
+  Method for the action, for example: :post
+  """
+  method: String
+
+  """
+  Path for the action
+  """
+  path: String
+
+  """
+  Title for the action, for example: Retry
+  """
+  title: String
+}
+
 type Submodule implements Entry {
   """
   Flat path of the entry
@@ -18036,6 +18535,21 @@ interface TimeboxBurnupTimeSeriesInterface {
   burnupTimeSeries: [BurnupChartDailyTotals!]
 }
 
+"""
+A time-frame defined as a closed inclusive range of two dates
+"""
+input Timeframe {
+  """
+  The end of the range
+  """
+  end: Date!
+
+  """
+  The start of the range
+  """
+  start: Date!
+}
+
 type Timelog {
   """
   Timestamp of when the time tracked was spent at. Deprecated in 12.10: Use `spentAt`
@@ -18199,6 +18713,11 @@ type TodoEdge {
 }
 
 """
+Identifier of Todo
+"""
+scalar TodoID
+
+"""
 Autogenerated input type of TodoMarkDone
 """
 input TodoMarkDoneInput {
@@ -18260,7 +18779,7 @@ input TodoRestoreManyInput {
   """
   The global ids of the todos to restore (a maximum of 50 is supported at once)
   """
-  ids: [ID!]!
+  ids: [TodoID!]!
 }
 
 """
@@ -18387,7 +18906,7 @@ input ToggleAwardEmojiInput {
   """
   The global id of the awardable resource
   """
-  awardableId: ID!
+  awardableId: AwardableID!
 
   """
   A unique identifier for the client performing the mutation.
@@ -18704,7 +19223,7 @@ input UpdateBoardInput {
   """
   The id of user to be assigned to the board.
   """
-  assigneeId: ID
+  assigneeId: UserID
 
   """
   A unique identifier for the client performing the mutation.
@@ -18724,12 +19243,22 @@ input UpdateBoardInput {
   """
   The board global id.
   """
-  id: ID!
+  id: BoardID!
+
+  """
+  The IDs of labels to be added to the board.
+  """
+  labelIds: [LabelID!]
+
+  """
+  Labels of the issue
+  """
+  labels: [String!]
 
   """
   The id of milestone to be assigned to the board.
   """
-  milestoneId: ID
+  milestoneId: MilestoneID
 
   """
   Name of the board
@@ -19034,7 +19563,7 @@ Autogenerated input type of UpdateIssue
 """
 input UpdateIssueInput {
   """
-  The IDs of labels to be added to the issue.
+  The IDs of labels to be added to the issue
   """
   addLabelIds: [ID!]
 
@@ -19056,17 +19585,12 @@ input UpdateIssueInput {
   """
   Due date of the issue
   """
-  dueDate: Time
+  dueDate: ISO8601Date
 
   """
   The ID of the parent epic. NULL when removing the association
   """
   epicId: ID
-
-  """
-  The desired health status
-  """
-  healthStatus: HealthStatus
 
   """
   The IID of the issue to mutate
@@ -19079,7 +19603,7 @@ input UpdateIssueInput {
   locked: Boolean
 
   """
-  The ID of the milestone to be assigned, milestone will be removed if set to null.
+  The ID of the milestone to assign to the issue. On update milestone will be removed if set to null
   """
   milestoneId: ID
 
@@ -19089,12 +19613,12 @@ input UpdateIssueInput {
   projectPath: ID!
 
   """
-  The IDs of labels to be removed from the issue.
+  The IDs of labels to be removed from the issue
   """
   removeLabelIds: [ID!]
 
   """
-  Close or reopen an issue.
+  Close or reopen an issue
   """
   stateEvent: IssueStateEvent
 
@@ -20101,7 +20625,7 @@ type Vulnerability implements Noteable {
   """
   Type of the security report that found the vulnerability (SAST,
   DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION,
-  COVERAGE_FUZZING)
+  COVERAGE_FUZZING, API_FUZZING)
   """
   reportType: VulnerabilityReportType
 
@@ -20121,7 +20645,7 @@ type Vulnerability implements Noteable {
   severity: VulnerabilitySeverity
 
   """
-  State of the vulnerability (DETECTED, DISMISSED, RESOLVED, CONFIRMED)
+  State of the vulnerability (DETECTED, CONFIRMED, RESOLVED, DISMISSED)
   """
   state: VulnerabilityState
 
@@ -20218,7 +20742,7 @@ input VulnerabilityDismissInput {
   """
   ID of the vulnerability to be dismissed
   """
-  id: ID!
+  id: VulnerabilityID!
 }
 
 """
@@ -20564,6 +21088,7 @@ type VulnerabilityPermissions {
 The type of the security scan that found the vulnerability
 """
 enum VulnerabilityReportType {
+  API_FUZZING
   CONTAINER_SCANNING
   COVERAGE_FUZZING
   DAST
@@ -20782,6 +21307,16 @@ enum VulnerabilitySort {
   Severity in descending order
   """
   severity_desc
+
+  """
+  State in ascending order
+  """
+  state_asc
+
+  """
+  State in descending order
+  """
+  state_desc
 
   """
   Title in ascending order

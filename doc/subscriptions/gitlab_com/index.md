@@ -39,8 +39,7 @@ subscription according to the maximum number of users enabled at once. You can
 add and remove users during the subscription period, as long as the total users
 at any given time is within your subscription count.
 
-Every occupied seat, whether by person, job, or bot is counted in the subscription,
-with the following exception:
+Every occupied seat is counted in the subscription, with the following exception:
 
 - Members with Guest permissions on a Gold subscription.
 
@@ -151,10 +150,11 @@ _true up_ process.
 
 ### Renew or change a GitLab.com subscription
 
-NOTE: **Note:**
-To renew for more users than are currently active in your GitLab.com plan,
-contact our sales team via `renewals@gitlab.com` for assistance as this can't be
-done in the Customers Portal.
+You can adjust the number of users before renewing your GitLab.com subscription.
+
+- To renew for more users than are currently included in your GitLab.com plan, [add users to your subscription](#add-users-to-your-subscription).
+- To renew for fewer users than are currently included in your GitLab.com plan,
+either [disable](../../user/admin_area/activating_deactivating_users.md#deactivating-a-user) or [block](../../user/admin_area/blocking_unblocking_users.md#blocking-a-user) the user accounts you no longer need.
 
 For details on upgrading your subscription tier, see
 [Upgrade your GitLab.com subscription tier](#upgrade-your-gitlabcom-subscription-tier).

@@ -52,7 +52,8 @@ module Issues
                      iid: nil,
                      project: target_project,
                      author: original_entity.author,
-                     assignee_ids: original_entity.assignee_ids
+                     assignee_ids: original_entity.assignee_ids,
+                     moved_issue: true
                    }
 
       new_params = original_entity.serializable_hash.symbolize_keys.merge(new_params)
@@ -63,7 +64,7 @@ module Issues
     end
 
     def queue_copy_designs
-      return unless copy_designs_enabled? && original_entity.designs.present?
+      return unless original_entity.designs.present?
 
       response = DesignManagement::CopyDesignCollection::QueueService.new(
         current_user,
@@ -72,11 +73,6 @@ module Issues
       ).execute
 
       log_error(response.message) if response.error?
-    end
-
-    def copy_designs_enabled?
-      Feature.enabled?(:design_management_copy_designs, old_project) &&
-        Feature.enabled?(:design_management_copy_designs, target_project)
     end
 
     def mark_as_moved
