@@ -4,7 +4,7 @@ import { __ } from '~/locale';
 import getPipelineDetails from '../../graphql/queries/get_pipeline_details.query.graphql';
 import LinkedPipeline from './linked_pipeline.vue';
 import { UPSTREAM, DOWNSTREAM } from './constants';
-import { unwrapPipelineData } from './utils';
+import { unwrapPipelineData, visibilityToggle } from './utils';
 
 export default {
   name: 'LinkedPipelinesColumn',
@@ -58,13 +58,25 @@ export default {
     },
     onPipelineClick(pipeline, index) {
 
-      // if it is expanded already, close it and clear
+      // first, stop the polling on the current pipeline, if it exists
+      // if (this.currentPipeline?.id) {
+      //   this.$apollo.queries.currentPipeline.stopPolling();
+      // }
+
+      // STUB
+      if (this.currentPipelineId) {
+        console.log('called stop polling');
+        this.$apollo.queries.currentPipeline.stopPolling();
+      }
+
+      // if the clicked pipeline has been expanded already, close it and clear
       // REAL VERSION
       // if (this.currentPipeline?.id === pipeline.id) {
       //   this.pipelineExpanded = false;
       //   this.currentPipeline = null;
       //   return;
       // }
+
 
       // STUB VERSION
       if (this.currentPipelineId === pipeline.id) {
@@ -74,7 +86,8 @@ export default {
         return;
       }
 
-      // if it is already showing a different pipeline, then
+      // if this was not a toggle close action, and
+      // this is already showing a different pipeline, then
       // this will be a no-op, but that doesn't matter
 
       this.pipelineExpanded = true;
@@ -83,10 +96,12 @@ export default {
       this.currentPipelineId = pipeline.id;
 
 
+      // now let's get the data!
       // if the pipleine has been loaded before, this will return the cached value
       // otherwise it will make a request to the API
       this.$apollo.addSmartQuery('currentPipeline', {
         query: getPipelineDetails,
+        pollInterval: 10000,
         variables() {
           return {
             projectPath: 'root/kinder-pipe', // pipeline.projectPath
@@ -100,6 +115,10 @@ export default {
           console.error('graphQL error:', err);
         }
       })
+
+      // finally set the check to toggle the polling status when
+      // the tab is not visible because we are kind to our users
+      visibilityToggle(this.$apollo.queries.currentPipeline);
     },
     onDownstreamHovered(jobName) {
       this.$emit('downstreamHovered', jobName);

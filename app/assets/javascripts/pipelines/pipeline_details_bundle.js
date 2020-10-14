@@ -28,6 +28,8 @@ const showNewGraph = true;
 
 const createLegacyPipelinesDetailApp = mediator => {
 
+  console.log(mediator);
+
   if (!document.querySelector(SELECTORS.PIPELINE_GRAPH)) {
     return;
   }
@@ -134,9 +136,16 @@ const createTestDetails = () => {
 };
 
 export default () => {
+
+  let mediator;
   const { dataset } = document.querySelector(SELECTORS.PIPELINE_DETAILS);
-  const mediator = new PipelinesMediator({ endpoint: dataset.endpoint });
-  mediator.fetchPipeline();
+
+  // if we are showing at least one legacy app, setup and call mediator
+  if (!gon.features.graphqlPipelineHeader || !showNewGraph) {
+    // move conditional import here too
+    mediator = new PipelinesMediator({ endpoint: dataset.endpoint });
+    mediator.fetchPipeline();
+  }
 
   if (gon.features.graphqlPipelineHeader) {
     createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER);
@@ -146,7 +155,7 @@ export default () => {
 
   if (showNewGraph) {
     const { pipelineProjectPath, pipelineIid } = dataset;
-    createPipelinesDetailApp(pipelineProjectPath, pipelineIid);
+    createPipelinesDetailApp(SELECTORS.PIPELINE_DETAILS, pipelineProjectPath, pipelineIid);
   } else {
     createLegacyPipelinesDetailApp(mediator);
   }

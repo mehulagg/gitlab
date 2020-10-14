@@ -1,5 +1,7 @@
+import Visibility from 'visibilityjs';
+
 export const unwrapPipelineData = (mainPipelineId, data) => {
-  console.log('in update', data);
+  // console.log('in update', data);
   const {
     upstream: { nodes: upstream },
     downstream: { nodes: downstream },
@@ -12,7 +14,7 @@ export const unwrapPipelineData = (mainPipelineId, data) => {
       return { ...stage, groups }
     });
 
-  console.log('UNG:', unwrappedNestedGroups);
+  // console.log('UNG:', unwrappedNestedGroups);
 
   const nodes = unwrappedNestedGroups.map(({ name, status, groups }) => {
     const groupsWithJobs = groups.map((group => {
@@ -27,7 +29,7 @@ export const unwrapPipelineData = (mainPipelineId, data) => {
     return { name, status, groups: groupsWithJobs }
   });
 
-  console.log('nodes', nodes);
+  // console.log('nodes', nodes);
 
   const addMulti = (pipeline) => {
     return { ...pipeline, multiproject: mainPipelineId !== pipeline.id }
@@ -39,4 +41,18 @@ export const unwrapPipelineData = (mainPipelineId, data) => {
     downstream: downstream.map(addMulti),
   };
 
+}
+
+export const visibilityToggle = (queryRef, interval = 10000) => {
+
+  const stopStartQuery = (query) => {
+    if (!Visibility.hidden()) {
+      query.startPolling(interval)
+    } else {
+      query.stopPolling();
+    }
+  }
+
+  stopStartQuery(queryRef);
+  Visibility.change(stopStartQuery.bind(null, queryRef));
 }

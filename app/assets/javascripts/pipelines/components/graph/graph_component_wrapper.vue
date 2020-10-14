@@ -2,7 +2,7 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import getPipelineDetails from '../../graphql/queries/get_pipeline_details.query.graphql';
 import PipelineGraph from './graph_component.vue';
-import { unwrapPipelineData } from './utils';
+import { unwrapPipelineData, visibilityToggle } from './utils';
 
 export default {
   name: 'PipelineGraphWrapper',
@@ -26,6 +26,7 @@ export default {
   apollo: {
     pipeline: {
       query: getPipelineDetails,
+      pollInterval: 10000,
       variables() {
         return {
           projectPath: this.pipelineProjectPath,
@@ -40,6 +41,11 @@ export default {
       }
     }
   },
+  mounted() {
+    // This sets the watchers to stop and start polling
+    // based on the tab visibility 
+    visibilityToggle(this.$apollo.queries.pipeline);
+  }
 };
 </script>
 <template>
