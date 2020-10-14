@@ -910,14 +910,14 @@ RSpec.describe Notify do
             is_expected.to have_body_text 'new_user_invite=control'
           end
 
-          it 'tracks an event' do
-            expect(Gitlab::Tracking).to receive(:event).with(
-              'Growth::Acquisition::Experiment::InviteEmail',
-              'sent',
+          it 'tracks an event', :snowplow do
+            subject.deliver_now
+
+            expect_snowplow_event(
+              category: 'Growth::Acquisition::Experiment::InviteEmail',
+              action: 'sent',
               property: 'control_group'
             )
-
-            subject.deliver_now
           end
         end
 
@@ -928,10 +928,10 @@ RSpec.describe Notify do
             is_expected.not_to have_body_text 'new_user_invite'
           end
 
-          it 'does not track an event' do
-            expect(Gitlab::Tracking).not_to receive(:event)
-
+          it 'does not track an event', :snowplow do
             subject.deliver_now
+
+            expect_no_snowplow_event
           end
         end
       end
@@ -969,14 +969,14 @@ RSpec.describe Notify do
           is_expected.to have_body_text 'new_user_invite=experiment'
         end
 
-        it 'tracks an event' do
-          expect(Gitlab::Tracking).to receive(:event).with(
-            'Growth::Acquisition::Experiment::InviteEmail',
-            'sent',
+        it 'tracks an event', :snowplow do
+          subject.deliver_now
+
+          expect_snowplow_event(
+            category: 'Growth::Acquisition::Experiment::InviteEmail',
+            action: 'sent',
             property: 'experiment_group'
           )
-
-          subject.deliver_now
         end
       end
     end
@@ -1572,14 +1572,14 @@ RSpec.describe Notify do
             is_expected.to have_body_text 'new_user_invite=control'
           end
 
-          it 'tracks an event' do
-            expect(Gitlab::Tracking).to receive(:event).with(
-              'Growth::Acquisition::Experiment::InviteEmail',
-              'sent',
+          it 'tracks an event', :snowplow do
+            subject.deliver_now
+
+            expect_snowplow_event(
+              category: 'Growth::Acquisition::Experiment::InviteEmail',
+              action: 'sent',
               property: 'control_group'
             )
-
-            subject.deliver_now
           end
         end
 
@@ -1590,10 +1590,10 @@ RSpec.describe Notify do
             is_expected.not_to have_body_text 'new_user_invite'
           end
 
-          it 'does not track an event' do
-            expect(Gitlab::Tracking).not_to receive(:event)
-
+          it 'does not track an event', :snowplow do
             subject.deliver_now
+
+            expect_no_snowplow_event
           end
         end
       end
@@ -1628,14 +1628,14 @@ RSpec.describe Notify do
           is_expected.to have_body_text 'new_user_invite'
         end
 
-        it 'tracks an event' do
-          expect(Gitlab::Tracking).to receive(:event).with(
-            'Growth::Acquisition::Experiment::InviteEmail',
-            'sent',
+        it 'tracks an event', :snowplow do
+          subject.deliver_now
+
+          expect_snowplow_event(
+            category: 'Growth::Acquisition::Experiment::InviteEmail',
+            action: 'sent',
             property: 'experiment_group'
           )
-
-          subject.deliver_now
         end
       end
     end

@@ -307,13 +307,13 @@ RSpec.describe API::ProjectContainerRepositories do
           stub_container_registry_tags(repository: root_repository.path, tags: %w(rootA rootB), with_manifest: true)
         end
 
-        it 'properly removes tag' do
+        it 'properly removes tag', :snowplow do
           expect(service).to receive(:execute).with(root_repository) { { status: :success } }
           expect(Projects::ContainerRepository::DeleteTagsService).to receive(:new).with(root_repository.project, api_user, tags: %w[rootA]) { service }
-          expect(Gitlab::Tracking).to receive(:event).with(described_class.name, 'delete_tag', {})
 
           subject
 
+          expect_snowplow_event(category: described_class.name, action: 'delete_tag')
           expect(response).to have_gitlab_http_status(:ok)
         end
       end
@@ -323,13 +323,13 @@ RSpec.describe API::ProjectContainerRepositories do
           stub_container_registry_tags(repository: root_repository.path, tags: %w(rootA), with_manifest: true)
         end
 
-        it 'properly removes tag' do
+        it 'properly removes tag', :snowplow do
           expect(service).to receive(:execute).with(root_repository) { { status: :success } }
           expect(Projects::ContainerRepository::DeleteTagsService).to receive(:new).with(root_repository.project, api_user, tags: %w[rootA]) { service }
-          expect(Gitlab::Tracking).to receive(:event).with(described_class.name, 'delete_tag', {})
 
           subject
 
+          expect_snowplow_event(category: described_class.name, action: 'delete_tag')
           expect(response).to have_gitlab_http_status(:ok)
         end
       end
