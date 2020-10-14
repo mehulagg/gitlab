@@ -144,7 +144,7 @@ Example responses:
 }
 ```
 
-## Use jq to create and process YAML & JSON Payloads
+## Use jq to create and process YAML & JSON payloads
 
 To `POST` a YAML configuration to the CI Lint endpoint, it must be properly escaped and JSON encoded.
 You can use `jq` and `curl` to escape and upload YAML to the GitLab API.
@@ -154,8 +154,7 @@ You can use `jq` and `curl` to escape and upload YAML to the GitLab API.
 To escape quotes and encode your YAML in a format suitable for embedding within
 a JSON payload, you can use `jq`. For example, create a file named `example-gitlab-ci.yml`:
 
-```shell
-cat >example-gitlab-ci.yml <<EOL
+```yaml
 .api_test:
   rules:
     - if: '$CI_PIPELINE_SOURCE=="merge_request_event"'
@@ -169,16 +168,13 @@ deploy:
       allow_failure: true
   script:
     - echo "hello world"
-EOL
 ```
 
-Next, use `jq` to escape and appropriately JSON ecode this YAML file:
+Next, use `jq` to escape and encode the YAML file into JSON:
 
 ```shell
 jq --raw-input --slurp < example-gitlab-ci.yml
 ```
-
-### Escape, encode and post a YAML file
 
 To escape and encode an input YAML file (`example-gitlab-ci.yml`), and `POST` it to the
 GitLab API using `curl` and `jq` in a one-line command:
@@ -192,7 +188,7 @@ jq --null-input --arg yaml "$(<example-gitlab-ci.yml)" '.content=$yaml' \
 
 ### Parse a CI Lint response
 
-To reformat the CI Lint response, you can use `jq`. You can pipe the CI Lint response to jq,
+To reformat the CI Lint response, you can use `jq`. You can pipe the CI Lint response to `jq`,
 or store the API response as a text file and provide it as an argument:
 
 ```shell
@@ -223,7 +219,8 @@ Becomes:
   - echo "hello world"
 ```
 
-All steps can be combined and run using the below command:
+You can escape YAML, encode it in JSON, POST it to the API with curl, and format the response,
+with a one-line command:
 
 ```shell
 jq --null-input --arg yaml "$(<example-gitlab-ci.yml)" '.content=$yaml' \
