@@ -2751,6 +2751,10 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
   end
 
   describe 'GET /users/:user_id/personal_access_tokens' do
+    before do
+      stub_feature_flags(pat_management_api_for_admin: true)
+    end
+
     let_it_be(:active_personal_access_token) { create(:personal_access_token, user: user) }
     let_it_be(:revoked_personal_access_token) { create(:personal_access_token, :revoked, user: user) }
     let_it_be(:expired_personal_access_token) { create(:personal_access_token, :expired, user: user) }
@@ -2799,6 +2803,10 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
   end
 
   describe 'POST /users/:user_id/personal_access_tokens' do
+    before do
+      stub_feature_flags(pat_management_api_for_admin: true)
+    end
+
     let(:name) { 'new pat' }
     let(:expires_at) { 3.days.from_now.to_date.to_s }
     let(:scopes) { %w(api read_user) }
@@ -2855,6 +2863,10 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
   end
 
   describe 'GET /users/:user_id/personal_access_tokens/:personal_access_tokens_id' do
+    before do
+      stub_feature_flags(pat_management_api_for_admin: true)
+    end
+
     let_it_be(:personal_access_token) { create(:personal_access_token, user: user) }
     let_it_be(:impersonation_token) { create(:personal_access_token, :impersonation, user: user) }
 
@@ -2896,6 +2908,10 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
   end
 
   describe 'DELETE /users/:user_id/personal_access_tokens/:personal_access_tokens_id' do
+    before do
+      stub_feature_flags(pat_management_api_for_admin: true)
+    end
+
     let_it_be(:personal_access_token) { create(:personal_access_token, user: user) }
     let_it_be(:impersonation_token) { create(:personal_access_token, :impersonation, user: user) }
 

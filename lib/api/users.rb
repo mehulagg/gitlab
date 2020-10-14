@@ -725,7 +725,11 @@ module API
             use :pagination
             optional :state, type: String, default: 'all', values: %w[all active inactive], desc: 'Filters (all|active|inactive) personal_access_tokens'
           end
-          get { present paginate(finder(declared_params(include_missing: false)).execute), with: Entities::PersonalAccessToken }
+          get do
+            not_found! unless Feature.enabled?(:pat_management_api_for_admin)
+
+            present paginate(finder(declared_params(include_missing: false)).execute), with: Entities::PersonalAccessToken
+          end
 
           desc 'Create a personal access token. Available only for admins.' do
             detail 'This feature was introduced in GitLab 13.5'
@@ -738,6 +742,8 @@ module API
             optional :expires_at, type: Date, desc: 'The expiration date in the format YEAR-MONTH-DAY of the personal access token'
           end
           post do
+            not_found! unless Feature.enabled?(:pat_management_api_for_admin)
+
             personal_access_token = finder.build(declared_params(include_missing: false))
 
             if personal_access_token.save
@@ -755,6 +761,8 @@ module API
             requires :personal_access_token_id, type: Integer, desc: 'The ID of the personal access token'
           end
           get ':personal_access_token_id' do
+            not_found! unless Feature.enabled?(:pat_management_api_for_admin)
+
             present find_token, with: Entities::PersonalAccessToken
           end
 
@@ -765,6 +773,8 @@ module API
             requires :personal_access_token_id, type: Integer, desc: 'The ID of the personal access token'
           end
           delete ':personal_access_token_id' do
+            not_found! unless Feature.enabled?(:pat_management_api_for_admin)
+
             token = find_token
 
             destroy_conditionally!(token) do
