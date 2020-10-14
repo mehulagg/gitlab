@@ -49,16 +49,22 @@ RSpec.describe 'getting container repositories in a project' do
   context 'with different permissions' do
     let_it_be(:user) { create(:user) }
 
-    where(:role, :access_granted) do
-      :maintainer | true
-      :reporter   | true
-      :developer  | true
-      :guest      | false
-      :anonymous  | false
+    where(:project_visibility, :role, :access_granted, :can_delete) do
+      :private | :maintainer | true  | true
+      :private | :developer  | true  | true
+      :private | :reporter   | true  | false
+      :private | :guest      | false | false
+      :private | :anonymous  | false | false
+      :public  | :maintainer | true  | true
+      :public  | :developer  | true  | true
+      :public  | :reporter   | true  | false
+      :public  | :guest      | true  | false
+      :public  | :anonymous  | true  | false
     end
 
     with_them do
       before do
+        project.update!(visibility_level: Gitlab::VisibilityLevel.const_get(project_visibility.to_s.upcase, false))
         project.add_user(user, role) unless role == :anonymous
       end
 
@@ -67,6 +73,9 @@ RSpec.describe 'getting container repositories in a project' do
 
         if access_granted
           expect(container_repositories_response.size).to eq(container_repositories.size)
+          container_repositories_response.each do |repository_response|
+            expect(repository_response.dig('node', 'canDelete')).to eq(can_delete)
+          end
         else
           expect(container_repositories_response).to eq(nil)
         end

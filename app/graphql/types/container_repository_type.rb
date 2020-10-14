@@ -17,5 +17,10 @@ module Types
     field :expiration_policy_started_at, Types::TimeType, null: true, description: 'Timestamp when the cleanup done by the expiration policy was started on the container repository'
     field :status, Types::ContainerRepositoryStatusEnum, null: true, description: 'Status of the container repository'
     field :tags_count, GraphQL::INT_TYPE, null: false, description: 'Number of tags associated with this image'
+    field :can_delete, GraphQL::BOOLEAN_TYPE, null: false, description: 'Can the current user delete the container repository'
+
+    def can_delete
+      Ability.allowed?(current_user, :update_container_image, object)
+    end
   end
 end
