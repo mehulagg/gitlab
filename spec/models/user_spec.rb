@@ -2882,7 +2882,7 @@ RSpec.describe User do
 
     subject { user.authorized_groups }
 
-    it { is_expected.to contain_exactly private_group, project_group }
+    it { is_expected.to contain_exactly private_group, child_group, project_group }
   end
 
   describe '#membership_groups' do

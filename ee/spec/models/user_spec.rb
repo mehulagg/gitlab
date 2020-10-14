@@ -1165,7 +1165,7 @@ RSpec.describe User do
     subject { user.authorized_groups }
 
     context 'with minimal access role feature unavailable' do
-      it { is_expected.to contain_exactly private_group, project_group }
+      it { is_expected.to contain_exactly private_group, child_group, project_group }
     end
 
     context 'with minimal access feature available' do
@@ -1180,7 +1180,7 @@ RSpec.describe User do
             .and_return(false)
         end
 
-        it { is_expected.to contain_exactly private_group, project_group, minimal_access_group }
+        it { is_expected.to contain_exactly private_group, child_group, project_group, minimal_access_group }
       end
 
       context 'feature available for specific groups only' do
@@ -1192,7 +1192,7 @@ RSpec.describe User do
           create(:group_member, :minimal_access, user: user, source: create(:group))
         end
 
-        it { is_expected.to contain_exactly private_group, project_group, minimal_access_group }
+        it { is_expected.to contain_exactly private_group, child_group, project_group, minimal_access_group }
       end
     end
   end

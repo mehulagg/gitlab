@@ -361,9 +361,8 @@ module EE
     def authorized_groups
       ::Group.unscoped do
         ::Group.from_union([
-          groups,
+          super,
           available_minimal_access_groups,
-          authorized_projects.joins(:namespace).select('namespaces.*')
         ])
       end
     end

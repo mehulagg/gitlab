@@ -893,7 +893,7 @@ class User < ApplicationRecord
   def authorized_groups
     Group.unscoped do
       Group.from_union([
-        groups,
+        membership_groups,
         authorized_projects.joins(:namespace).select('namespaces.*')
       ])
     end
