@@ -226,7 +226,8 @@ This example demonstrates both methods of defining custom rule sets:
 - Custom rules for the **gosec** scanner are contained in a separate file: `gosec-config.json`.
 - Custom rules for the `nodejs-scan` scanner are contained in the file.
 
-An example `sast-ruleset.toml` config:
+An example `sast-ruleset.toml` file:
+
 ```toml
 [gosec]
   description = 'custom ruleset for gosec'
