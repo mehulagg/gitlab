@@ -3,5 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe GitlabSchema.types['Milestone'] do
-  it { expect(described_class).to have_graphql_field(:burnup_time_series) }
+  it 'has the expected fields' do
+    expected_fields = %w[
+      report burnup_time_series
+    ]
+
+    expect(described_class).to have_graphql_fields(*expected_fields).at_least
+  end
 end

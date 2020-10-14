@@ -26709,6 +26709,20 @@
               "deprecationReason": null
             },
             {
+              "name": "report",
+              "description": "Fixed report about the timebox",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "TimeboxReport",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "scopedPath",
               "description": "Web path of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts",
               "args": [
@@ -26845,7 +26859,7 @@
           "interfaces": [
             {
               "kind": "INTERFACE",
-              "name": "TimeboxBurnupTimeSeriesInterface",
+              "name": "TimeboxReportInterface",
               "ofType": null
             }
           ],
@@ -32470,6 +32484,20 @@
               "deprecationReason": null
             },
             {
+              "name": "report",
+              "description": "Fixed report about the timebox",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "TimeboxReport",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "startDate",
               "description": "Timestamp of the milestone start date",
               "args": [
@@ -32592,7 +32620,7 @@
           "interfaces": [
             {
               "kind": "INTERFACE",
-              "name": "TimeboxBurnupTimeSeriesInterface",
+              "name": "TimeboxReportInterface",
               "ofType": null
             }
           ],
@@ -53469,8 +53497,43 @@
           "possibleTypes": null
         },
         {
+          "kind": "OBJECT",
+          "name": "TimeboxReport",
+          "description": "Represents a fixed report about the timebox",
+          "fields": [
+            {
+              "name": "burnupTimeSeries",
+              "description": "Daily scope and completed totals for burnup charts",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "BurnupChartDailyTotals",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "INTERFACE",
-          "name": "TimeboxBurnupTimeSeriesInterface",
+          "name": "TimeboxReportInterface",
           "description": null,
           "fields": [
             {
@@ -53491,6 +53554,20 @@
                     "ofType": null
                   }
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "report",
+              "description": "Fixed report about the timebox",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "TimeboxReport",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null

@@ -1,8 +1,13 @@
 # frozen_string_literal: true
 
 module Types
-  module TimeboxBurnupTimeSeriesInterface
+  module TimeboxReportInterface
     include BaseInterface
+
+    field :report, Types::TimeboxReportType, null: true,
+          resolver: ::Resolvers::TimeboxReportResolver,
+          description: 'Fixed report about the timebox',
+          complexity: 175
 
     field :burnup_time_series, [::Types::BurnupChartDailyTotalsType], null: true,
           resolver: ::Resolvers::TimeboxBurnupTimeSeriesResolver,

@@ -31,7 +31,7 @@ RSpec.shared_examples 'timebox chart' do |timebox_type|
     end
 
     it 'returns an error when the number of events exceeds the limit' do
-      stub_const('TimeboxBurnupChartService::EVENT_COUNT_LIMIT', 1)
+      stub_const('TimeboxReportService::EVENT_COUNT_LIMIT', 1)
 
       create(:"resource_#{timebox_type}_event", issue: issues[0], "#{timebox_type}" => timebox, action: :add, created_at: timebox_start_date - 21.days)
       create(:"resource_#{timebox_type}_event", issue: issues[1], "#{timebox_type}" => timebox, action: :add, created_at: timebox_start_date - 20.days)
@@ -56,7 +56,7 @@ RSpec.shared_examples 'timebox chart' do |timebox_type|
       create(:resource_state_event, issue: issues[3], state: :closed, created_at: timebox_start_date - 6.days)
 
       expect(response.success?).to eq(true)
-      expect(response.payload).to eq([
+      expect(response.payload[:burnup_time_series]).to eq([
                                        {
                                          date: timebox_start_date,
                                          scope_count: 4,
@@ -98,7 +98,7 @@ RSpec.shared_examples 'timebox chart' do |timebox_type|
       create(:"resource_#{timebox_type}_event", issue: issues[0], "#{timebox_type}" => timebox, action: :remove, created_at: timebox_start_date + 21.days)
 
       expect(response.success?).to eq(true)
-      expect(response.payload).to eq([
+      expect(response.payload[:burnup_time_series]).to eq([
                                        {
                                          date: timebox_start_date + 4.days,
                                          scope_count: 2,
@@ -159,7 +159,7 @@ RSpec.shared_examples 'timebox chart' do |timebox_type|
       create(:resource_state_event, issue: issues[1], state: :closed, created_at: timebox_start_date + 9.days)
 
       expect(response.success?).to eq(true)
-      expect(response.payload).to eq([
+      expect(response.payload[:burnup_time_series]).to eq([
                                        {
                                          date: timebox_start_date,
                                          scope_count: 1,
@@ -230,7 +230,7 @@ RSpec.shared_examples 'timebox chart' do |timebox_type|
       create(:resource_weight_event, issue: issues[0], weight: 10, created_at: timebox_start_date + 5.days)
 
       expect(response.success?).to eq(true)
-      expect(response.payload).to eq([
+      expect(response.payload[:burnup_time_series]).to eq([
                                        {
                                          date: timebox_start_date,
                                          scope_count: 1,
@@ -271,7 +271,7 @@ RSpec.shared_examples 'timebox chart' do |timebox_type|
   end
 end
 
-RSpec.describe TimeboxBurnupChartService do
+RSpec.describe TimeboxReportService do
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, group: group) }
   let_it_be(:timebox_start_date) { Date.today }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Resolvers::TimeboxBurnupTimeSeriesResolver do
+RSpec.describe Resolvers::TimeboxReportResolver do
   include GraphqlHelpers
 
   let_it_be(:group) { create(:group) }
@@ -34,22 +34,22 @@ RSpec.describe Resolvers::TimeboxBurnupTimeSeriesResolver do
       end
 
       it 'returns burnup chart data' do
-        expect(subject).to eq([
-                                {
-                                  date: start_date + 4.days,
-                                  scope_count: 1,
-                                  scope_weight: 0,
-                                  completed_count: 0,
-                                  completed_weight: 0
-                                },
-                                {
-                                  date: start_date + 9.days,
-                                  scope_count: 2,
-                                  scope_weight: 0,
-                                  completed_count: 0,
-                                  completed_weight: 0
-                                }
-                              ])
+        expect(subject).to eq(burnup_time_series: [
+          {
+            date: start_date + 4.days,
+            scope_count: 1,
+            scope_weight: 0,
+            completed_count: 0,
+            completed_weight: 0
+          },
+          {
+            date: start_date + 9.days,
+            scope_count: 2,
+            scope_weight: 0,
+            completed_count: 0,
+            completed_weight: 0
+          }
+        ])
       end
 
       context 'when the service returns an error' do
