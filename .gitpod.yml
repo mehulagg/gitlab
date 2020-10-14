@@ -3,7 +3,9 @@ image: registry.gitlab.com/gitlab-org/gitlab-development-kit/gitpod-workspace:gi
 tasks:
 
   - name: GDK
-    command: gp sync-await gdk-copied && cd /workspace/gitlab-development-kit && gdk help
+    command: |
+      export RAILS_HOSTS=$(gp url 3000 | sed -e 's+^http[s]*://++')
+      gp sync-await gdk-copied && cd /workspace/gitlab-development-kit && gdk help
 
   - init: |
       echo "$(date) – Copying GDK" | tee -a /workspace/startup.log
@@ -29,6 +31,8 @@ tasks:
         echo "$(date) – GDK stopped" | tee -a /workspace/startup.log
       )
     command: |
+      echo "export RAILS_HOSTS=$(gp url 3000 | sed -e 's+^http[s]*://++')" > $HOME/.bashrc.d/91-rails-hosts
+      source $HOME/.bashrc.d/91-rails-hosts
       (
         set -e
         gp sync-done gdk-copied
@@ -41,7 +45,6 @@ tasks:
         fi
         # start GDK
         echo "$(date) – Starting GDK" | tee -a /workspace/startup.log
-        export RAILS_HOSTS=$(gp url 3000 | sed -e 's+^http[s]*://++')
         gdk start
         # Run DB migrations
         if [ "$GITLAB_RUN_DB_MIGRATIONS" == true ]; then
