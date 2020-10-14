@@ -28,6 +28,8 @@ RSpec.describe API::Members do
       it_behaves_like 'members response with hidden emails' do
         let(:emails) { member.email }
       end
+
+      context 'when group '
     end
 
     describe "GET /groups/:id/members/:user_id" do
