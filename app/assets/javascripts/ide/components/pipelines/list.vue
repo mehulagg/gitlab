@@ -98,7 +98,7 @@ export default {
         <p class="gl-mb-0 break-word">{{ latestPipeline.yamlError }}</p>
         <p v-safe-html="ciLintText" class="gl-mb-0"></p>
       </div>
-      <gl-tabs v-else class="ide-pipeline-list">
+      <gl-tabs v-else>
         <gl-tab :active="!pipelineFailed">
           <template #title>
             {{ __('Jobs') }}
