@@ -1,6 +1,5 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
-import { GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 
 export default {
   name: 'CollapsedCalendarIcon',
@@ -42,7 +41,7 @@ export default {
 
 <template>
   <div
-    v-tooltip
+    v-gl-tooltip
     :class="containerClass"
     :title="tooltipText"
     data-container="body"
