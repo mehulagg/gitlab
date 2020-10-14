@@ -27,14 +27,18 @@ export default {
       required: false,
       default: false,
     },
-    value: {
-      type: String,
-      required: true,
-    },
   },
+  data: () => ({
+    filterTerm: '',
+  }),
   computed: {
     extraOptionsCount() {
       return Math.max(0, this.selectedOptionsCount - 1);
+    },
+  },
+  watch: {
+    filterTerm(filterTerm) {
+      this.$emit('filter-changed', filterTerm);
     },
   },
   methods: {
@@ -83,19 +87,16 @@ export default {
       <gl-search-box-by-type
         v-if="showSearchBox"
         ref="searchBox"
-        :value="filterTerm"
+        v-model="filterTerm"
         class="gl-m-3"
         :placeholder="__('Filter...')"
-        @input="$emit('input', $event.target.value)"
       />
 
       <div data-qa-selector="filter_dropdown_content">
         <slot name="specialOptions"></slot>
 
         <slot>
-          <button type="button" class="dropdown-item no-pointer-events text-secondary">
-            {{ __('No matching results') }}
-          </button>
+          <div class="dropdown-item text-secondary">{{ __('No matching results') }}</div>
         </slot>
       </div>
     </gl-dropdown>

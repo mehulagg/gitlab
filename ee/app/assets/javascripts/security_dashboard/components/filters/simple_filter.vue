@@ -1,5 +1,4 @@
 <script>
-import { GlDropdown, GlSearchBoxByType, GlIcon } from '@gitlab/ui';
 import FilterOption from './filter_option.vue';
 import CommonFilter from './common_filter.vue';
 
@@ -84,6 +83,9 @@ export default {
     closeDropdown() {
       this.$refs.dropdown.hide(true);
     },
+    updateFilterTerm(newFilterTerm) {
+      this.filterTerm = newFilterTerm;
+    },
   },
 };
 </script>
@@ -94,6 +96,8 @@ export default {
     :name="filter.name"
     :selected-options-count="selectedCount"
     :selected-option="firstSelectedOption"
+    :show-search-box="filter.options.length > 20"
+    @filter-changed="updateFilterTerm"
   >
     <template #specialOptions>
       <filter-option
@@ -116,78 +120,4 @@ export default {
       />
     </template>
   </common-filter>
-  <!--  <div class="dashboard-filter">-->
-  <!--    <strong class="js-name">{{ filter.name }}</strong>-->
-  <!--    <gl-dropdown-->
-  <!--      ref="dropdown"-->
-  <!--      class="d-block mt-1"-->
-  <!--      menu-class="dropdown-extended-height"-->
-  <!--      toggle-class="d-flex w-100 justify-content-between align-items-center"-->
-  <!--    >-->
-  <!--      &lt;!&ndash; Selected dropdown item &ndash;&gt;-->
-  <!--      <template slot="button-content">-->
-  <!--        <span class="text-truncate" :data-qa-selector="qaSelector">-->
-  <!--          {{ firstSelectedOption }}-->
-  <!--        </span>-->
-  <!--        <span v-if="extraOptionCount" class="flex-grow-1 ml-1">-->
-  <!--          {{ n__('+%d more', '+%d more', extraOptionCount) }}-->
-  <!--        </span>-->
-  <!--        <i class="fa fa-chevron-down" aria-hidden="true"></i>-->
-  <!--      </template>-->
-
-  <!--      &lt;!&ndash; Dropdown title that shows at the top of the dropdown &ndash;&gt;-->
-  <!--      <div class="dropdown-title mb-0">-->
-  <!--        {{ filter.name }}-->
-  <!--        <button-->
-  <!--          ref="close"-->
-  <!--          class="btn-blank float-right"-->
-  <!--          type="button"-->
-  <!--          :aria-label="__('Close')"-->
-  <!--          @click="closeDropdown"-->
-  <!--        >-->
-  <!--          <gl-icon name="close" aria-hidden="true" class="vertical-align-middle" />-->
-  <!--        </button>-->
-  <!--      </div>-->
-
-  <!--      <gl-search-box-by-type-->
-  <!--        v-if="filter.options.length >= 4"-->
-  <!--        ref="searchBox"-->
-  <!--        v-model="filterTerm"-->
-  <!--        class="gl-m-3"-->
-  <!--        :placeholder="__('Filter...')"-->
-  <!--      />-->
-
-  <!--      <div-->
-  <!--        data-qa-selector="filter_dropdown_content"-->
-  <!--        :class="{ 'dropdown-content': filter.id === 'project_id' }"-->
-  <!--      >-->
-  <!--        <filter-option-->
-  <!--          v-if="filter.allOption && !filterTerm.length"-->
-  <!--          :display-name="filter.allOption.name"-->
-  <!--          :is-selected="!selectedCount"-->
-  <!--          @click="deselectAllOptions"-->
-  <!--        />-->
-
-  <!--        <slot>-->
-  <!--          <filter-option-->
-  <!--            v-for="option in filteredOptions"-->
-  <!--            :key="option.id"-->
-  <!--            type="button"-->
-  <!--            class="dropdown-item"-->
-  <!--            :display-name="option.name"-->
-  <!--            :is-selected="isSelected(option)"-->
-  <!--            @click="toggleFilter(option)"-->
-  <!--          />-->
-  <!--        </slot>-->
-  <!--      </div>-->
-
-  <!--      <button-->
-  <!--        v-if="filteredOptions.length === 0"-->
-  <!--        type="button"-->
-  <!--        class="dropdown-item no-pointer-events text-secondary"-->
-  <!--      >-->
-  <!--        {{ __('No matching results') }}-->
-  <!--      </button>-->
-  <!--    </gl-dropdown>-->
-  <!--  </div>-->
 </template>
