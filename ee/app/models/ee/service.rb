@@ -9,7 +9,7 @@ module EE
       jenkins
     ].freeze
 
-    EE_DEV_SERVICE_NAMES = %w[
+    EE_PROJECT_SPECIFIC_SERVICE_NAMES = %w[
       gitlab_slack_application
     ].freeze
 
@@ -18,24 +18,14 @@ module EE
 
       override :services_names
       def services_names
-        super + ee_services_names
+        super + EE_SERVICE_NAMES
       end
 
-      override :dev_services_names
-      def dev_services_names
+      override :project_specific_services_names
+      def project_specific_services_names
         return [] unless ::Gitlab.dev_env_or_com?
 
-        super + ee_dev_services_names
-      end
-
-      private
-
-      def ee_services_names
-        EE_SERVICE_NAMES
-      end
-
-      def ee_dev_services_names
-        EE_DEV_SERVICE_NAMES
+        EE_PROJECT_SPECIFIC_SERVICE_NAMES
       end
     end
   end
