@@ -810,11 +810,10 @@ RSpec.describe Issue do
 
     subject { issue.sla_available? }
 
-    where(:feature_enabled, :incident_type, :license_available, :sla_available) do
-      false | true  | true  | false
-      true  | false | true  | false
-      true  | true  | false | false
-      true  | true  | true  | true
+    where(:incident_type, :license_available, :sla_available) do
+      false | true  | false
+      true  | false | false
+      true  | true  | true
     end
 
     with_them do
