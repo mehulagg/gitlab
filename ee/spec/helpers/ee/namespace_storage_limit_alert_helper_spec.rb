@@ -71,47 +71,56 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
       }
     end
 
-    before do
-      allow(helper).to receive(:current_user).and_return(admin)
-      allow_next_instance_of(Namespaces::CheckStorageSizeService, namespace, admin) do |check_storage_size_service|
-        expect(check_storage_size_service).to receive(:execute).and_return(ServiceResponse.success(payload: payload))
-      end
+    where(:feature_flag_enabled, :service_class_name) do
+      true  | Namespaces::CheckStorageSizeService
+      false | Namespaces::CheckExcessStorageSizeService
     end
 
-    context 'when payload is not empty and no cookie is set' do
-      it { is_expected.to eq(payload) }
-    end
-
-    context 'when there is no current_user' do
+    with_them do
       before do
-        allow(helper).to receive(:current_user).and_return(nil)
+        stub_feature_flags(namespace_storage_limit: feature_flag_enabled)
+
+        allow(helper).to receive(:current_user).and_return(admin)
+        allow_next_instance_of(service_class_name, namespace, admin) do |service|
+          expect(service).to receive(:execute).and_return(ServiceResponse.success(payload: payload))
+        end
       end
 
-      it { is_expected.to eq({}) }
-    end
-
-    context 'when payload is empty' do
-      let(:payload) { {} }
-
-      it { is_expected.to eq({}) }
-    end
-
-    context 'when cookie is set' do
-      before do
-        helper.request.cookies["hide_storage_limit_alert_#{namespace.id}_info"] = 'true'
+      context 'when payload is not empty and no cookie is set' do
+        it { is_expected.to eq(payload) }
       end
 
-      it { is_expected.to eq({}) }
-    end
+      context 'when there is no current_user' do
+        before do
+          allow(helper).to receive(:current_user).and_return(nil)
+        end
 
-    context 'when payload is empty and cookie is set' do
-      let(:payload) { {} }
-
-      before do
-        helper.request.cookies["hide_storage_limit_alert_#{namespace.id}_info"] = 'true'
+        it { is_expected.to eq({}) }
       end
 
-      it { is_expected.to eq({}) }
+      context 'when payload is empty' do
+        let(:payload) { {} }
+
+        it { is_expected.to eq({}) }
+      end
+
+      context 'when cookie is set' do
+        before do
+          helper.request.cookies["hide_storage_limit_alert_#{namespace.id}_info"] = 'true'
+        end
+
+        it { is_expected.to eq({}) }
+      end
+
+      context 'when payload is empty and cookie is set' do
+        let(:payload) { {} }
+
+        before do
+          helper.request.cookies["hide_storage_limit_alert_#{namespace.id}_info"] = 'true'
+        end
+
+        it { is_expected.to eq({}) }
+      end
     end
   end
 

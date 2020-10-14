@@ -1770,6 +1770,77 @@ RSpec.describe Namespace do
     end
   end
 
+  describe '#storage_limit_enabled?' do
+    let_it_be(:namespace) { build(:namespace) }
+
+    subject { namespace.storage_limit_enabled? }
+
+    context 'with feature flag :namespace_storage_limit enabled' do
+      it { is_expected.to eq(true) }
+    end
+
+    context 'with feature flag :namespace_storage_limit disabled' do
+      before do
+        stub_feature_flags(namespace_storage_limit: false)
+      end
+
+      it { is_expected.to eq(false) }
+    end
+  end
+
+  describe '#check_storage_size_service' do
+    let_it_be(:namespace) { build(:namespace) }
+    let_it_be(:user) { build(:user) }
+
+    subject { namespace.check_storage_size_service(user) }
+
+    context 'with feature flag :namespace_storage_limit enabled' do
+      it 'initializes a new instance of Namespaces::CheckStorageSizeService' do
+        expect(Namespaces::CheckStorageSizeService).to receive(:new).with(namespace, user)
+
+        subject
+      end
+    end
+
+    context 'with feature flag :namespace_storage_limit disabled' do
+      before do
+        stub_feature_flags(namespace_storage_limit: false)
+      end
+
+      it 'initializes a new instance of Namespaces::CheckExcessStorageSizeService' do
+        expect(Namespaces::CheckExcessStorageSizeService).to receive(:new).with(namespace, user)
+
+        subject
+      end
+    end
+  end
+
+  describe '#root_storage_size' do
+    let_it_be(:namespace) { build(:namespace) }
+
+    subject { namespace.root_storage_size }
+
+    context 'with feature flag :namespace_storage_limit enabled' do
+      it 'initializes a new instance of EE::Namespace::RootStorageSize' do
+        expect(EE::Namespace::RootStorageSize).to receive(:new).with(namespace)
+
+        subject
+      end
+    end
+
+    context 'with feature flag :namespace_storage_limit disabled' do
+      before do
+        stub_feature_flags(namespace_storage_limit: false)
+      end
+
+      it 'initializes a new instance of EE::Namespace::RootExcessStorageSize' do
+        expect(EE::Namespace::RootExcessStorageSize).to receive(:new).with(namespace)
+
+        subject
+      end
+    end
+  end
+
   def create_project(repository_size:, lfs_objects_size:, repository_size_limit:)
     create(:project, namespace: namespace, repository_size_limit: repository_size_limit).tap do |project|
       create(:project_statistics, project: project, repository_size: repository_size, lfs_objects_size: lfs_objects_size)

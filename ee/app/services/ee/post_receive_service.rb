@@ -56,7 +56,8 @@ module EE
     def storage_size_limit_alert
       return unless repository&.repo_type&.project?
 
-      payload = Namespaces::CheckStorageSizeService.new(project.namespace, user).execute.payload
+      check_storage_size_service = project.namespace.check_storage_size_service(user)
+      payload = check_storage_size_service.execute.payload
       return unless payload.present?
 
       alert_level = "##### #{payload[:alert_level].to_s.upcase} #####"

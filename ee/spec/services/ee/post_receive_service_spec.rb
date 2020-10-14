@@ -106,35 +106,53 @@ RSpec.describe PostReceiveService, :geo do
   describe 'storage size limit alerts' do
     let(:check_storage_size_response) { ServiceResponse.success }
 
-    before do
-      expect_next_instance_of(Namespaces::CheckStorageSizeService, project.namespace, user) do |check_storage_size_service|
-        expect(check_storage_size_service).to receive(:execute).and_return(check_storage_size_response)
+    shared_examples 'storage size limit alert examples' do
+      context 'when there is no payload' do
+        it 'adds no alert' do
+          expect(subject.size).to eq(0)
+        end
+      end
+
+      context 'when there is payload' do
+        let(:check_storage_size_response) do
+          ServiceResponse.success(
+            payload: {
+              alert_level: :info,
+              usage_message: "Usage",
+              explanation_message: "Explanation"
+            }
+          )
+        end
+
+        it 'adds an alert' do
+          response = subject
+
+          expect(response.size).to eq(1)
+          expect(response).to include({ 'type' => 'alert', 'message' => "##### INFO #####\nUsage\nExplanation" })
+        end
       end
     end
 
-    context 'when there is no payload' do
-      it 'adds no alert' do
-        expect(subject.size).to eq(0)
+    context 'when feature flag :namespace_storage_limit enabled' do
+      before do
+        expect_next_instance_of(Namespaces::CheckStorageSizeService, project.namespace, user) do |check_storage_size_service|
+          expect(check_storage_size_service).to receive(:execute).and_return(check_storage_size_response)
+        end
       end
+
+      include_examples 'storage size limit alert examples'
     end
 
-    context 'when there is payload' do
-      let(:check_storage_size_response) do
-        ServiceResponse.success(
-          payload: {
-            alert_level: :info,
-            usage_message: "Usage",
-            explanation_message: "Explanation"
-          }
-        )
+    context 'when feature flag :namespace_storage_limit disabled' do
+      before do
+        stub_feature_flags(namespace_storage_limit: false)
+
+        expect_next_instance_of(Namespaces::CheckExcessStorageSizeService, project.namespace, user) do |check_storage_size_service|
+          expect(check_storage_size_service).to receive(:execute).and_return(check_storage_size_response)
+        end
       end
 
-      it 'adds an alert' do
-        response = subject
-
-        expect(response.size).to eq(1)
-        expect(response).to include({ 'type' => 'alert', 'message' => "##### INFO #####\nUsage\nExplanation" })
-      end
+      include_examples 'storage size limit alert examples'
     end
   end
 end

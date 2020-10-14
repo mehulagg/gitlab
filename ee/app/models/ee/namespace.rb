@@ -193,8 +193,8 @@ module EE
 
     def over_storage_limit?
       ::Gitlab::CurrentSettings.enforce_namespace_storage_limit? &&
-        ::Feature.enabled?(:namespace_storage_limit, root_ancestor) &&
-        RootStorageSize.new(root_ancestor).above_size_limit?
+        root_ancestor.storage_limit_enabled? &&
+        root_ancestor.root_storage_size.above_size_limit?
     end
 
     def total_repository_size_excess
@@ -384,6 +384,20 @@ module EE
 
     def enable_temporary_storage_increase!
       update(temporary_storage_increase_ends_on: TEMPORARY_STORAGE_INCREASE_DAYS.days.from_now)
+    end
+
+    def storage_limit_enabled?
+      ::Feature.enabled?(:namespace_storage_limit, self)
+    end
+
+    def check_storage_size_service(user)
+      klass = storage_limit_enabled? ? ::Namespaces::CheckStorageSizeService : ::Namespaces::CheckExcessStorageSizeService
+      klass.new(self, user)
+    end
+
+    def root_storage_size
+      klass = storage_limit_enabled? ? RootStorageSize : RootExcessStorageSize
+      klass.new(self)
     end
 
     private

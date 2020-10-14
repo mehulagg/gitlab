@@ -36,7 +36,7 @@ module Namespaces
     }.freeze
 
     def enforce_limit?
-      ::Feature.enabled?(:namespace_storage_limit, root_namespace)
+      root_namespace.storage_limit_enabled?
     end
 
     def payload

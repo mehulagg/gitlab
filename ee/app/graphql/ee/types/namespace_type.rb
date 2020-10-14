@@ -42,7 +42,7 @@ module EE
               GraphQL::FLOAT_TYPE,
               null: true,
               description: 'Total storage limit of the root namespace in bytes',
-              resolve: -> (obj, _args, _ctx) { EE::Namespace::RootStorageSize.new(obj).limit }
+              resolve: -> (obj, _args, _ctx) { obj.root_storage_size.limit }
 
         field :is_temporary_storage_increase_enabled,
               GraphQL::BOOLEAN_TYPE,

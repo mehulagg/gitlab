@@ -16,7 +16,7 @@ module EE
     def namespace_storage_alert(namespace)
       return {} if current_user.nil?
 
-      payload = Namespaces::CheckStorageSizeService.new(namespace, current_user).execute.payload
+      payload = namespace.check_storage_size_service(current_user).execute.payload
 
       return {} if payload.empty?
 
