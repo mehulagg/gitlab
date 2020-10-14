@@ -4073,7 +4073,8 @@ tags. These options cannot be used together, so choose one:
 
 #### Release assets as Generic packages
 
-You can use [Generic packages](../../user/packages/generic_packages/) to host your release assets. A complete example of how to do this can be found [here](https://gitlab.com/gitlab-org/release-cli/-/tree/master/docs/examples/release-assets-as-generic-package/).
+You can use [Generic packages](../../user/packages/generic_packages/) to host your release assets.
+For a complete example of how to do this, see the [example in the repository](https://gitlab.com/gitlab-org/release-cli/-/tree/master/docs/examples/release-assets-as-generic-package/).
 
 #### `releaser-cli` command line
 
