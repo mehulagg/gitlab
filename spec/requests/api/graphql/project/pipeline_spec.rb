@@ -8,8 +8,8 @@ RSpec.describe 'getting pipeline information nested in a project' do
   let_it_be(:project) { create(:project, :repository, :public) }
   let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
   let_it_be(:current_user) { create(:user) }
-  let_it_be(:build_job) { create(:ci_build, :trace_with_sections, pipeline: pipeline) }
-  let_it_be(:failed_build) { create(:ci_build, :failed, pipeline: pipeline) }
+  let_it_be(:build_job) { create(:ci_build, :trace_with_sections, name: 'some-section', pipeline: pipeline) }
+  let_it_be(:failed_build) { create(:ci_build, :failed, name: 'failed-test', pipeline: pipeline) }
 
   let(:path) { %i[project pipeline] }
   let(:pipeline_graphql_data) { graphql_data_at(*path) }
