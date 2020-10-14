@@ -751,7 +751,29 @@ RSpec.describe Projects::MergeRequestsController do
         .with(::Ci::CompareLicenseScanningReportsService, viewer).and_return(comparison_status)
     end
 
-    it_behaves_like 'pending pipeline response'
+    context 'when the pipeline is running' do
+      before do
+        allow(::Gitlab::PollingInterval).to receive(:set_header)
+        merge_request.head_pipeline.update!(status: :running)
+
+        subject
+      end
+
+      context 'when the report is being parsed' do
+        let(:comparison_status) { { status: :parsing } }
+
+        specify { expect(::Gitlab::PollingInterval).to have_received(:set_header) }
+        specify { expect(response).to have_gitlab_http_status(:no_content) }
+      end
+
+      context 'when the report is ready' do
+        let(:comparison_status) { { status: :parsed, data: { new_licenses: [], existing_licenses: [], removed_licenses: [] } } }
+
+        specify { expect(::Gitlab::PollingInterval).not_to have_received(:set_header) }
+        specify { expect(response).to have_gitlab_http_status(:ok) }
+        specify { expect(json_response).to eq({ "new_licenses" => [], "existing_licenses" => [], "removed_licenses" => [] }) }
+      end
+    end
 
     context 'when comparison is being processed' do
       let(:comparison_status) { { status: :parsing } }

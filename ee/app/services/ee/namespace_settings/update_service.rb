@@ -9,16 +9,14 @@ module EE
 
       override :execute
       def execute
+        super
+
         unless can_update_prevent_forking?
           group.errors.add(
             :prevent_forking_outside_group,
             s_('GroupSettings|Prevent forking setting was not saved')
           )
-
-          return
         end
-
-        super
       end
 
       private

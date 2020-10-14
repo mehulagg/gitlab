@@ -184,11 +184,6 @@ describe('burndown_chart', () => {
       expect(findBurnupChart().props('issuesSelected')).toBe(false);
     });
 
-    it('shows old/new burndown buttons', () => {
-      expect(findOldBurndownChartButton().exists()).toBe(true);
-      expect(findNewBurndownChartButton().exists()).toBe(true);
-    });
-
     it('uses burndown data computed from burnup data', () => {
       createComponent({
         data: {
@@ -204,12 +199,34 @@ describe('burndown_chart', () => {
       expect(openIssuesCount).toEqual([expectedCount]);
       expect(openIssuesWeight).toEqual([expectedWeight]);
     });
+  });
+
+  describe('showNewOldBurndownToggle', () => {
+    it('hides old/new burndown buttons if feature disabled', () => {
+      createComponent({ featureEnabled: false, props: { showNewOldBurndownToggle: true } });
+
+      expect(findOldBurndownChartButton().exists()).toBe(false);
+      expect(findNewBurndownChartButton().exists()).toBe(false);
+    });
+
+    it('hides old/new burndown buttons if props is false', () => {
+      createComponent({ featureEnabled: true, props: { showNewOldBurndownToggle: false } });
+
+      expect(findOldBurndownChartButton().exists()).toBe(false);
+      expect(findNewBurndownChartButton().exists()).toBe(false);
+    });
+
+    it('shows old/new burndown buttons if prop true', () => {
+      createComponent({ featureEnabled: true, props: { showNewOldBurndownToggle: true } });
+
+      expect(findOldBurndownChartButton().exists()).toBe(true);
+      expect(findNewBurndownChartButton().exists()).toBe(true);
+    });
 
     it('calls fetchLegacyBurndownEvents, but only once', () => {
+      createComponent({ featureEnabled: true, props: { showNewOldBurndownToggle: true } });
       jest.spyOn(wrapper.vm, 'fetchLegacyBurndownEvents');
       mock.onGet(defaultProps.burndownEventsPath).reply(200, []);
-
-      findOldBurndownChartButton().vm.$emit('click');
 
       findOldBurndownChartButton().vm.$emit('click');
 

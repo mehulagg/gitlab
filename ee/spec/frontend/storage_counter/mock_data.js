@@ -55,4 +55,17 @@ export const namespaceData = {
   projects,
 };
 
-export const withRootStorageStatistics = { ...projects, totalUsage: 3261070 };
+export const withRootStorageStatistics = {
+  projects,
+  limit: 10000000,
+  totalUsage: 129334601,
+  rootStorageStatistics: {
+    storageSize: 129334601,
+    repositorySize: 46012030,
+    lfsObjectsSize: 4329334601203,
+    buildArtifactsSize: 1272375,
+    packagesSize: 123123120,
+    wikiSize: 1000,
+    snippetsSize: 10000,
+  },
+};

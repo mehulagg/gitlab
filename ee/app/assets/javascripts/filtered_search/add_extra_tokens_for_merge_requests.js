@@ -39,8 +39,8 @@ const approvers = {
   },
 };
 
-export default IssuableTokenKeys => {
-  addExtraTokensForMergeRequests(IssuableTokenKeys);
+export default (IssuableTokenKeys, disableTargetBranchFilter = false) => {
+  addExtraTokensForMergeRequests(IssuableTokenKeys, disableTargetBranchFilter);
   const tokenPosition = 2;
 
   IssuableTokenKeys.tokenKeys.splice(tokenPosition, 0, ...[approvers.token]);

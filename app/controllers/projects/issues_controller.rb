@@ -44,7 +44,6 @@ class Projects::IssuesController < Projects::ApplicationController
     push_frontend_feature_flag(:vue_issuable_sidebar, project.group)
     push_frontend_feature_flag(:tribute_autocomplete, @project)
     push_frontend_feature_flag(:vue_issuables_list, project)
-    push_frontend_feature_flag(:design_management_todo_button, project, default_enabled: true)
     push_frontend_feature_flag(:vue_sidebar_labels, @project)
   end
 
@@ -64,6 +63,17 @@ class Projects::IssuesController < Projects::ApplicationController
   respond_to :html
 
   alias_method :designs, :show
+
+  feature_category :issue_tracking, [
+                     :index, :calendar, :show, :new, :create, :edit, :update,
+                     :destroy, :move, :reorder, :designs, :toggle_subscription,
+                     :discussions, :bulk_update, :realtime_changes,
+                     :toggle_award_emoji, :mark_as_spam, :related_branches,
+                     :can_create_branch, :create_merge_request
+                   ]
+
+  feature_category :service_desk, [:service_desk]
+  feature_category :importers, [:import_csv, :export_csv]
 
   def index
     @issues = @issuables

@@ -40,13 +40,11 @@ in GitLab to examine alerts in action.
 
 ## Enable Alerts
 
-NOTE: **Note:**
-You need at least Maintainer [permissions](../../user/permissions.md) to enable
-the Alerts feature.
-
 There are several ways to accept alerts into your GitLab project. Enabling any
-of these methods enables the Alert list. After configuring alerts, visit
-**Operations > Alerts** in your project's sidebar to view the list of alerts.
+of these methods enables the Alert list. You need at least Maintainer
+[permissions](../../user/permissions.md) to enable the Alerts feature. After
+configuring alerts, visit **Operations > Alerts** in your project's sidebar to view
+the list of alerts.
 
 ### Enable GitLab-managed Prometheus alerts
 
@@ -83,7 +81,6 @@ for requests to the alerts endpoint.
 
 You can monitor alerts using a GitLab integration with [Opsgenie](https://www.atlassian.com/software/opsgenie).
 
-NOTE: **Note:**
 If you enable the Opsgenie integration, you can't have other GitLab alert
 services, such as [Generic Alerts](generic_alerts.md) or Prometheus alerts,
 active at the same time.
@@ -168,13 +165,11 @@ about alert statuses.
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in GitLab 13.1.
 
 The Alert detail view allows users to update the Alert assignee.
+GitLab supports only a single assignee per alert.
 
 In large teams, where there is shared ownership of an alert, it can be
 difficult to track who is investigating and working on it. The Alert detail
 view enables you to update the Alert assignee:
-
-NOTE: **Note:**
-GitLab supports only a single assignee per alert.
 
 1. To display the list of current alerts, navigate to **Operations > Alerts**:
 
@@ -313,3 +308,49 @@ Viewing logs from a metrics panel can be useful if you're triaging an
 application incident and need to [explore logs](../metrics/dashboards/index.md#chart-context-menu)
 from across your application. These logs help you understand what's affecting
 your application's performance and how to resolve any problems.
+
+## View the environment that generated the alert
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232492) in GitLab 13.5.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-environment-link-in-alert-details). **(CORE ONLY)**
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
+
+The environment information and the link are displayed in the Alert Details tab[#alert-details-tab].
+
+### Enable or disable Environment Link in Alert Details **(CORE ONLY)**
+
+Viewing the environment is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:expose_environment_path_in_alert_details)
+```
+
+To enable for just a particular project:
+
+```ruby
+project = Project.find_by_full_path('your-group/your-project')
+Feature.enable(:expose_environment_path_in_alert_details, project)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:expose_environment_path_in_alert_details)
+```
+
+To disable for just a particular project:
+
+```ruby
+project = Project.find_by_full_path('your-group/your-project')
+Feature.disable(:expose_environment_path_in_alert_details, project)
+```

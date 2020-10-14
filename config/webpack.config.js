@@ -79,7 +79,7 @@ function generateEntries() {
 
   const manualEntries = {
     default: defaultEntries,
-    sentry: './sentry/index.js',
+    // sentry: './sentry/index.js', Temporarily commented out to investigate performance: https://gitlab.com/gitlab-org/gitlab/-/issues/251179
     performance_bar: './performance_bar/index.js',
     chrome_84_icon_fix: './lib/chrome_84_icon_fix.js',
   };
@@ -97,6 +97,7 @@ const alias = {
   vue$: 'vue/dist/vue.esm.js',
   spec: path.join(ROOT_PATH, 'spec/javascripts'),
   jest: path.join(ROOT_PATH, 'spec/frontend'),
+  shared_queries: path.join(ROOT_PATH, 'app/graphql/queries'),
 
   // the following resolves files which are different between CE and EE
   ee_else_ce: path.join(ROOT_PATH, 'app/assets/javascripts'),

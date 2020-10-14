@@ -30,10 +30,13 @@ module EE
       has_one :gitlab_subscription
       has_one :elasticsearch_indexed_namespace
 
+      has_many :compliance_management_frameworks, class_name: "ComplianceManagement::Framework"
+
       accepts_nested_attributes_for :gitlab_subscription, update_only: true
       accepts_nested_attributes_for :namespace_limit
 
       scope :include_gitlab_subscription, -> { includes(:gitlab_subscription) }
+      scope :include_gitlab_subscription_with_hosted_plan, -> { includes(gitlab_subscription: :hosted_plan) }
       scope :join_gitlab_subscription, -> { joins("LEFT OUTER JOIN gitlab_subscriptions ON gitlab_subscriptions.namespace_id=namespaces.id") }
 
       scope :eligible_for_trial, -> do

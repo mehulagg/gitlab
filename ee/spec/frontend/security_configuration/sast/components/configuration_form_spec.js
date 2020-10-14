@@ -1,5 +1,4 @@
 import { merge } from 'lodash';
-import * as Sentry from '@sentry/browser';
 import { GlAlert, GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import AnalyzerConfiguration from 'ee/security_configuration/sast/components/analyzer_configuration.vue';
@@ -7,6 +6,7 @@ import ConfigurationForm from 'ee/security_configuration/sast/components/configu
 import DynamicFields from 'ee/security_configuration/sast/components/dynamic_fields.vue';
 import ExpandableSection from 'ee/security_configuration/sast/components/expandable_section.vue';
 import configureSastMutation from 'ee/security_configuration/sast/graphql/configure_sast.mutation.graphql';
+import * as Sentry from '~/sentry/wrapper';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { makeEntities, makeSastCiConfiguration } from './helpers';
 

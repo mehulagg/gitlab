@@ -287,9 +287,8 @@ The table below shows what kind of documentation goes where.
 1. The `doc/topics/` directory holds topic-related technical content. Create
    `doc/topics/topic_name/subtopic_name/index.md` when subtopics become necessary.
    General user- and admin- related documentation, should be placed accordingly.
-1. The directories `/workflow/`, `/university/`, and `/articles/` have been
-   *deprecated* and the majority their documentation has been moved to their
-   correct location in small iterations.
+1. The `/university/` directory is *deprecated* and the majority of its documentation
+   has been moved.
 
 If you are unsure where to place a document or a content addition, this should
 not stop you from authoring and contributing. You can use your best judgment and
@@ -584,6 +583,7 @@ tenses, words, and phrases:
 - Avoid the use of [racially-insensitive terminology or phrases](https://www.marketplace.org/2020/06/17/tech-companies-update-language-to-avoid-offensive-terms/). For example:
   - Use *primary* and *secondary* for database and server relationships.
   - Use *allowlist* and *denylist* to describe access control lists.
+- Avoid the word *please*. For details, see [the Microsoft style guide](https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/p/please).
 
 ### Word usage clarifications
 

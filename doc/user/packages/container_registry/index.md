@@ -469,6 +469,20 @@ Cleanup policies can be run on all projects, with these exceptions:
 
   There are performance risks with enabling it for all projects, especially if you
   are using an [external registry](./index.md#use-with-external-container-registries).
+- For self-managed GitLab instances, you can enable or disable the cleanup policy for a specific
+  project.
+
+  To enable it:
+
+  ```ruby
+  Feature.enable(:container_expiration_policies_historic_entry, Project.find(<project id>))
+  ```
+
+  To disable it:
+
+  ```ruby
+  Feature.disable(:container_expiration_policies_historic_entry, Project.find(<project id>))
+  ```
 
 ### How the cleanup policy works
 
@@ -634,6 +648,14 @@ a Docker Engine version earlier than 17.12. Later versions of Docker Engine use
 
 The images in your GitLab Container Registry must also use the Docker v2 API.
 For information on how to update your images, see the [Docker help](https://docs.docker.com/registry/spec/deprecated-schema-v1).
+
+### `Blob unknown to registry` error when pushing a manifest list
+
+When [pushing a Docker manifest list](https://docs.docker.com/engine/reference/commandline/manifest/#create-and-push-a-manifest-list) to the GitLab Container Registry, you may receive the error `manifest blob unknown: blob unknown to registry`. This issue occurs when the individual child manifests referenced in the manifest list were not pushed to the same repository.
+
+For example, you may have two individual images, one for `amd64` and another for `arm64v8`, and you want to build a multi-arch image with them. The `amd64` and `arm64v8` images must be pushed to the same repository where you want to push the multi-arch image.
+
+As a workaround, you should include the architecture in the tag name of individual images. For example, use `mygroup/myapp:1.0.0-amd64` instead of using sub repositories, like `mygroup/myapp/amd64:1.0.0`. You can then tag the manifest list with `mygroup/myapp:1.0.0`.
 
 ### Troubleshoot as a GitLab server admin
 

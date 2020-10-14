@@ -76,10 +76,38 @@ RSpec.describe Issues::MoveService do
         expect(new_issue.epic_issue).to eq(epic_issue)
       end
 
-      it 'ignores epic issue reference if user can not update the epic' do
-        new_issue = move_service.execute(old_issue, new_project)
+      it 'tracks usage data for changed epic action' do
+        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_changed_epic_action).with(author: user)
 
-        expect(new_issue.epic_issue).to be_nil
+        epic_issue.epic.group.add_reporter(user)
+
+        move_service.execute(old_issue, new_project)
+      end
+
+      context 'user can not update the epic' do
+        it 'ignores epic issue reference' do
+          new_issue = move_service.execute(old_issue, new_project)
+
+          expect(new_issue.epic_issue).to be_nil
+        end
+
+        it 'does not send usage data for changed epic action' do
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_changed_epic_action)
+
+          move_service.execute(old_issue, new_project)
+        end
+      end
+
+      context 'epic update fails' do
+        it 'does not send usage data for changed epic action' do
+          allow_next_instance_of(::EpicIssue) do |epic_issue|
+            allow(epic_issue).to receive(:update).and_return(false)
+          end
+
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_changed_epic_action)
+
+          move_service.execute(old_issue, new_project)
+        end
       end
     end
   end

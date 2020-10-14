@@ -24,6 +24,9 @@ module Gitlab
       ISSUE_MARKED_AS_DUPLICATE = 'g_project_management_issue_marked_as_duplicate'
       ISSUE_LOCKED = 'g_project_management_issue_locked'
       ISSUE_UNLOCKED = 'g_project_management_issue_unlocked'
+      ISSUE_ADDED_TO_EPIC = 'g_project_management_issue_added_to_epic'
+      ISSUE_REMOVED_FROM_EPIC = 'g_project_management_issue_removed_from_epic'
+      ISSUE_CHANGED_EPIC = 'g_project_management_issue_changed_epic'
 
       class << self
         def track_issue_created_action(author:, time: Time.zone.now)
@@ -102,10 +105,22 @@ module Gitlab
           track_unique_action(ISSUE_UNLOCKED, author, time)
         end
 
+        def track_issue_added_to_epic_action(author:, time: Time.zone.now)
+          track_unique_action(ISSUE_ADDED_TO_EPIC, author, time)
+        end
+
+        def track_issue_removed_from_epic_action(author:, time: Time.zone.now)
+          track_unique_action(ISSUE_REMOVED_FROM_EPIC, author, time)
+        end
+
+        def track_issue_changed_epic_action(author:, time: Time.zone.now)
+          track_unique_action(ISSUE_CHANGED_EPIC, author, time)
+        end
+
         private
 
         def track_unique_action(action, author, time)
-          return unless Feature.enabled?(:track_issue_activity_actions)
+          return unless Feature.enabled?(:track_issue_activity_actions, default_enabled: true)
           return unless author
 
           Gitlab::UsageDataCounters::HLLRedisCounter.track_event(author.id, action, time)
