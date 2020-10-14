@@ -11,6 +11,7 @@ module Ci
     include Importable
     include Ci::HasRef
     include IgnorableColumns
+    include FromUnion
 
     BuildArchivedError = Class.new(StandardError)
 

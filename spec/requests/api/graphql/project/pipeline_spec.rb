@@ -43,13 +43,14 @@ RSpec.describe 'getting pipeline information nested in a project' do
   end
 
   context 'When enough data is requested' do
-    let(:depth) { 5 }
+    let(:depth) { 4 }
 
     it 'contains builds' do
       post_graphql(query, current_user: current_user)
 
-      expect(graphql_data_at(*path, :builds, :nodes)).to contain_exactly(
+      expect(graphql_data_at(*path, :builds)).to contain_exactly(
         a_graphql_object_with(
+          id: global_id_of(build_job),
           name: build_job.name,
           status: build_job.status.upcase,
           duration: build_job.duration,
@@ -140,6 +141,73 @@ RSpec.describe 'getting pipeline information nested in a project' do
       post_graphql(query, current_user: current_user, variables: vars)
 
       expect(graphql_data_at(*path)).to match(a_graphql_object_with(build: the_job))
+    end
+  end
+
+  context 'when requesting multiple pipelines in the same query' do
+    let(:pipeline_a) { pipeline }
+    let(:build_job_a) { build_job }
+
+    let_it_be(:pipeline_b) { create(:ci_pipeline, project: project) }
+    let_it_be(:build_job_b) { create(:ci_build, :trace_with_sections, pipeline: pipeline_b) }
+
+    def query(n_pipelines)
+      bindings = (1..).take(n_pipelines).map { |n| "pipeline#{n}" }
+      sig = bindings.map { |b| "$#{b}: ID!" }.join(', ')
+      selections = bindings.each_with_index.map do |b, i|
+        "#{b}: pipeline(iid: $#{b}) { ...builds }"
+      end.join("\n")
+
+      <<~GQL
+      query($path: ID!, #{sig}) {
+        project(fullPath: $path) {
+          #{selections}
+        }
+      }
+
+      fragment builds on Pipeline {
+        builds {
+          #{all_graphql_fields_for('CiBuild', max_depth: 1)}
+        }
+      }
+      GQL
+    end
+
+    let(:variables) do
+      {
+        path: project.full_path,
+        pipeline1: pipeline_a.iid.to_s,
+        pipeline2: pipeline_b.iid.to_s
+      }
+    end
+
+    let(:opts) do
+      { current_user: current_user, variables: variables }
+    end
+
+    it 'can select builds from each pipeline' do
+      post_graphql(query(2), **opts)
+
+      expect(graphql_data_at(:project)).to match(
+        a_graphql_object_with(
+          pipeline1: a_graphql_object_with(
+            builds: contain_exactly(
+              a_graphql_object_with(id: global_id_of(failed_build)),
+              a_graphql_object_with(id: global_id_of(build_job_a))
+            )
+          ),
+          pipeline2: a_graphql_object_with(
+            builds: contain_exactly(a_graphql_object_with(id: global_id_of(build_job_b)))
+          )
+        )
+      )
+    end
+
+    it 'does not suffer from N+1 query performance issues' do
+      post_graphql(query(1), **opts)
+
+      expect { post_graphql(query(2), **opts) }
+        .to issue_same_number_of_queries_as { post_graphql(query(1), **opts) }
     end
   end
 end
