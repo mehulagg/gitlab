@@ -153,4 +153,40 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
       it { is_expected.to eq(result) }
     end
   end
+
+  describe '#namespace_storage_purchase_link' do
+    subject { helper.namespace_storage_purchase_link(namespace) }
+
+    let(:namespace) { build(:namespace) }
+
+    where(:is_dev_or_com, :auto_storage_allocation_enabled, :additional_storage_enabled, :buy_storage_link_enabled, :result) do
+      true  | true  | true  | true  | EE::SUBSCRIPTIONS_MORE_STORAGE_URL
+      true  | true  | true  | false | nil
+      true  | true  | false | true  | nil
+      true  | true  | false | false | nil
+      true  | false | true  | true  | nil
+      true  | false | true  | false | nil
+      true  | false | false | true  | nil
+      true  | false | false | false | nil
+      false | true  | true  | true  | nil
+      false | true  | true  | false | nil
+      false | true  | false | true  | nil
+      false | true  | false | false | nil
+      false | false | true  | true  | nil
+      false | false | true  | false | nil
+      false | false | false | true  | nil
+      false | false | false | false | nil
+    end
+
+    with_them do
+      before do
+        allow(::Gitlab).to receive(:dev_env_or_com?).and_return(is_dev_or_com)
+        stub_application_setting(automatic_purchased_storage_allocation: auto_storage_allocation_enabled)
+        stub_feature_flags(additional_repo_storage_by_namespace: additional_storage_enabled)
+        stub_feature_flags(buy_storage_link: buy_storage_link_enabled)
+      end
+
+      it { is_expected.to eq(result) }
+    end
+  end
 end

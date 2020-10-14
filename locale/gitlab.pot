@@ -21239,6 +21239,9 @@ msgstr ""
 msgid "Purchase more minutes"
 msgstr ""
 
+msgid "Purchase more storage"
+msgstr ""
+
 msgid "Push"
 msgstr ""
 

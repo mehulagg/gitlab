@@ -46,6 +46,15 @@ module EE
       end
     end
 
+    def namespace_storage_purchase_link(namespace)
+      return unless ::Gitlab::CurrentSettings.automatic_purchased_storage_allocation?
+      return unless ::Feature.enabled?(:additional_repo_storage_by_namespace, namespace)
+      return unless ::Gitlab.dev_env_or_com?
+      return unless ::Feature.enabled?(:buy_storage_link)
+
+      EE::SUBSCRIPTIONS_MORE_STORAGE_URL
+    end
+
     def namespace_storage_usage_link(namespace)
       if namespace.group?
         group_usage_quotas_path(namespace, anchor: 'storage-quota-tab')
