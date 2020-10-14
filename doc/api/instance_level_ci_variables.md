@@ -109,7 +109,7 @@ PUT /admin/ci/variables/:key
 | Attribute       | Type    | required | Description             |
 |-----------------|---------|----------|-------------------------|
 | `key`           | string  | yes      | The `key` of a variable.   |
-| `value`         | string  | yes      | The `value` of a variable. [In GitLab 13.3 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/220028), around 10,000 characters allowed. Previously 700 characters. |
+| `value`         | string  | yes      | The `value` of a variable. 10,000 characters allowed ([GitLab 13.3 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/220028)). |
 | `variable_type` | string  | no       | The type of a variable. Available types are: `env_var` (default) and `file`. |
 | `protected`     | boolean | no       | Whether the variable is protected. |
 | `masked`        | boolean | no       | Whether the variable is masked. |
