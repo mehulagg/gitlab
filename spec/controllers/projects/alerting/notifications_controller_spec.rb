@@ -106,7 +106,7 @@ RSpec.describe Projects::Alerting::NotificationsController do
               context 'without integration parameters specified' do
                 let_it_be(:integration) { create(:alert_management_http_integration, :legacy, project: project) }
 
-                it 'extracts and finds the integration' do
+                it 'extracts and finds the legacy integration' do
                   expect(notify_service).to receive(:execute).with('some token', integration)
 
                   make_request

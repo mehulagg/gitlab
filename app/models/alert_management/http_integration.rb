@@ -13,10 +13,9 @@ module AlertManagement
       algorithm: 'aes-256-gcm'
 
     default_value_for(:endpoint_identifier, allows_nil: false) { SecureRandom.hex(8) }
-    default_value_for(:token) { SecureRandom.hex }
+    default_value_for(:token) { generate_token }
 
     validates :project, presence: true
-    validates :project, uniqueness: true, unless: :allows_multiple_integrations?
     validates :active, inclusion: { in: [true, false] }
     validates :token, presence: true, format: { with: /\A\h{32}\z/ }
     validates :name, presence: true, length: { maximum: 255 }
@@ -38,6 +37,10 @@ module AlertManagement
 
     private
 
+    def self.generate_token
+      SecureRandom.hex
+    end
+
     def name_slug
       (name && Gitlab::Utils.slugify(name)) || DEFAULT_NAME_SLUG
     end
@@ -56,7 +59,7 @@ module AlertManagement
     end
 
     def ensure_token
-      self.token = SecureRandom.hex if token.blank?
+      self.token = self.class.generate_token if token.blank?
     end
 
     def prevent_endpoint_identifier_assignment
@@ -64,11 +67,5 @@ module AlertManagement
         self.endpoint_identifier = endpoint_identifier_was
       end
     end
-
-    def allows_multiple_integrations?
-      false
-    end
   end
 end
-
-::AlertManagement::HttpIntegration.prepend_if_ee('EE::AlertManagement::HttpIntegration')
