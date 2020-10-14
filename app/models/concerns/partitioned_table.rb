@@ -6,6 +6,8 @@ module PartitionedTable
   class_methods do
     attr_reader :partitioning_strategy
 
+    delegate :current_partitions, to: :partitioning_strategy
+
     PARTITIONING_STRATEGIES = {
       monthly: Gitlab::Database::Partitioning::MonthlyStrategy
     }.freeze

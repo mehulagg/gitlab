@@ -76,6 +76,19 @@ RSpec.describe Gitlab::Database::Partitioning::TimePartition do
     end
   end
 
+  describe '#qualified_partitition_name' do
+    subject { described_class.new(table, from, to, partition_name: partition_name).qualified_partition_name }
+
+    let(:partition_name) { 'foo_bar' }
+    let(:table) { 'foo' }
+    let(:from) { '2020-04-01 00:00:00' }
+    let(:to) { '2020-05-01 00:00:00' }
+
+    it 'returns the schema-qualified partition name' do
+      expect(subject).to eq("#{Gitlab::Database::DYNAMIC_PARTITIONS_SCHEMA}.#{partition_name}")
+    end
+  end
+
   describe '#to_sql' do
     subject { described_class.new(table, from, to).to_sql }
 

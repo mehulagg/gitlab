@@ -62,6 +62,10 @@ module Gitlab
           partition_name <=> other.partition_name
         end
 
+        def qualified_partition_name
+          "%s.%s" % [Gitlab::Database::DYNAMIC_PARTITIONS_SCHEMA, partition_name]
+        end
+
         private
 
         def date_or_nil(obj)
