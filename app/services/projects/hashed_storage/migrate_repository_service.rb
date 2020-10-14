@@ -21,8 +21,7 @@ module Projects
           project.storage_version = nil
         end
 
-        project.repository_read_only = false
-        project.save!(validate: false)
+        project.set_repository_writable!
 
         if result && block_given?
           yield
