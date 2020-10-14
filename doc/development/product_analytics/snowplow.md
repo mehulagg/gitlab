@@ -372,7 +372,7 @@ Snowplow Micro is a Docker-based solution for testing frontend and backend event
    docker run --mount type=bind,source=$(pwd)/example,destination=/config -p 9090:9090 snowplow/snowplow-micro:latest --collector-config /config/micro.conf --iglu /config/iglu.json
    ```
 
-1. Install snowplow micro by cloning the settings in [this project](https://gitlab.com/gitlab-org/snowplow-micro-configuration):
+1. Install Snowplow Micro by cloning the settings in [this project](https://gitlab.com/gitlab-org/snowplow-micro-configuration):
 
    ```shell
    git clone git@gitlab.com:gitlab-org/snowplow-micro-configuration.git
