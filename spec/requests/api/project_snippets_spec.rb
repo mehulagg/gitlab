@@ -6,15 +6,9 @@ RSpec.describe API::ProjectSnippets do
   include SnippetHelpers
 
   let_it_be(:project) { create(:project, :public) }
-  let_it_be(:user) { create(:user) }
-  let_it_be(:admin) { create(:admin) }
-  let_it_be(:project_no_snippets) do
-    create(:project, :snippets_disabled).tap do |p|
-      p.add_developer(admin)
-      p.add_developer(user)
-    end
-  end
-
+  let_it_be(:project_no_snippets) { create(:project, :snippets_disabled) }
+  let_it_be(:user) { create(:user, developer_projects: [project_no_snippets]) }
+  let_it_be(:admin) { create(:admin, developer_projects: [project_no_snippets]) }
   let_it_be(:public_snippet, reload: true) { create(:project_snippet, :public, :repository, project: project) }
 
   describe "GET /projects/:project_id/snippets/:id/user_agent_detail" do
@@ -138,18 +132,16 @@ RSpec.describe API::ProjectSnippets do
     shared_examples 'project snippet repository actions' do
       let(:snippet) { ProjectSnippet.find(json_response['id']) }
 
-      it 'creates repository' do
-        subject
-
-        expect(snippet.repository.exists?).to be_truthy
-      end
-
       it 'commit the files to the repository' do
         subject
 
-        blob = snippet.repository.blob_at('master', file_path)
+        aggregate_failures do
+          expect(snippet.repository.exists?).to be_truthy
 
-        expect(blob.data).to eq file_content
+          blob = snippet.repository.blob_at('master', file_path)
+
+          expect(blob.data).to eq file_content
+        end
       end
     end
 
@@ -178,8 +170,11 @@ RSpec.describe API::ProjectSnippets do
     context 'with a regular user' do
       let(:actor) { user }
 
+      before_all do
+         project.add_developer(user)
+      end
+
       before do
-        project.add_developer(user)
         stub_application_setting(restricted_visibility_levels: [Gitlab::VisibilityLevel::PUBLIC, Gitlab::VisibilityLevel::PRIVATE])
         params['visibility'] = 'internal'
       end
@@ -371,7 +366,7 @@ RSpec.describe API::ProjectSnippets do
   end
 
   describe 'DELETE /projects/:project_id/snippets/:id/' do
-    let(:snippet) { public_snippet }
+    let_it_be(:snippet, refind: true) { public_snippet }
 
     it 'deletes snippet' do
       delete api("/projects/#{snippet.project.id}/snippets/#{snippet.id}/", admin)

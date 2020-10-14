@@ -63,12 +63,12 @@ RSpec.shared_examples 'raw snippet files' do
     end
 
     with_them do
-      before do
+      it 'returns the proper response code and message' do
         subject
-      end
 
-      it { expect(response).to have_gitlab_http_status(status) }
-      it { expect(json_response[key]).to eq(message) }
+        expect(response).to have_gitlab_http_status(status)
+        expect(json_response[key]).to eq(message)
+      end
     end
   end
 end
