@@ -122,7 +122,6 @@ To view the logs for an alert:
 
 For additional information, see [View logs from metrics panel](#view-logs-from-metrics-panel).
 
-
 ### Activity feed tab
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in GitLab 13.1.
