@@ -4071,6 +4071,10 @@ tags. These options cannot be used together, so choose one:
       released_at: '2020-07-15T08:00:00Z'  # Optional, will auto generate if not defined, or can use a variable.
   ```
 
+#### Release assets as Generic packages
+
+You can use [Generic packages](../../user/packages/generic_packages/) to host your release assets. A complete example of how to do this can be found [here](https://gitlab.com/gitlab-org/release-cli/-/tree/master/docs/examples/release-assets-as-generic-package/).
+
 #### `releaser-cli` command line
 
 The entries under the `:release` node are transformed into a `bash` command line and sent
