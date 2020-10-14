@@ -211,7 +211,9 @@ Customization allows you to exclude rules and add new rules.
 To customize the default scanning rules, you create a file containing custom rules. Theses rules
 are passed through to the analyzer's underlying scanner tool.
 
-#### Use a custom rule set
+#### Create a custom rule set
+
+To create a custom rule set:
 
 1. Create a `.gitlab` directory at the root of your project, if one doesn't already exist.
 1. Create a custom rule set file named `sast-ruleset.toml` in the `.gitlab` directory.
