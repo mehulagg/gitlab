@@ -3,7 +3,8 @@ import Cookies from 'js-cookie';
 import axios from '~/lib/utils/axios_utils';
 import boardsStore from '~/boards/stores/boards_store';
 import { __ } from '~/locale';
-import { parseBoolean } from '~/lib/utils/common_utils';
+import { historyPushState, parseBoolean } from '~/lib/utils/common_utils';
+import { setUrlParams, removeParams } from '~/lib/utils/url_utility';
 import actionsCE from '~/boards/stores/actions';
 import { BoardType, ListType } from '~/boards/constants';
 import { EpicFilterType } from '../constants';
@@ -62,7 +63,7 @@ const fetchAndFormatListIssues = (state, extraVariables) => {
 export default {
   ...actionsCE,
 
-  setFilters: ({ commit }, filters) => {
+  setFilters: ({ commit, dispatch }, filters) => {
     const filterParams = pick(filters, [
       'assigneeUsername',
       'authorUsername',
@@ -73,6 +74,10 @@ export default {
       'search',
       'weight',
     ]);
+
+    if (filters.groupBy === 'epic') {
+      dispatch('setEpicSwimlanes');
+    }
 
     if (filterParams.epicId === EpicFilterType.any || filterParams.epicId === EpicFilterType.none) {
       filterParams.epicWildcardId = filterParams.epicId.toUpperCase();
@@ -194,13 +199,16 @@ export default {
   fetchIssuesForList: ({ state, commit }, { listId, fetchNext = false, noEpicIssues = false }) => {
     commit(types.REQUEST_ISSUES_FOR_LIST, { listId, fetchNext });
 
-    const { filterParams } = state;
+    const { epicId, ...filterParams } = state.filterParams;
+    if (noEpicIssues && epicId !== undefined) {
+      return null;
+    }
 
     const variables = {
       id: listId,
       filters: noEpicIssues
         ? { ...filterParams, epicWildcardId: EpicFilterType.none.toUpperCase() }
-        : filterParams,
+        : { ...filterParams, epicId },
       after: fetchNext ? state.pageInfoByListId[listId].endCursor : undefined,
       first: 20,
     };
@@ -237,11 +245,19 @@ export default {
     commit(types.TOGGLE_EPICS_SWIMLANES);
 
     if (state.isShowingEpicsSwimlanes) {
+      historyPushState(setUrlParams({ group_by: 'epic' }, window.location.href));
       dispatch('fetchEpicsSwimlanes', {}).catch(() => commit(types.RECEIVE_SWIMLANES_FAILURE));
     } else if (!gon.features.graphqlBoardLists) {
+      historyPushState(removeParams(['group_by']));
       boardsStore.create();
       eventHub.$emit('initialBoardLoad');
     }
+  },
+
+  setEpicSwimlanes: ({ commit, dispatch }) => {
+    commit(types.SET_EPICS_SWIMLANES);
+
+    dispatch('fetchEpicsSwimlanes', {}).catch(() => commit(types.RECEIVE_SWIMLANES_FAILURE));
   },
 
   resetEpics: ({ commit }) => {

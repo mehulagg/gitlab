@@ -67,7 +67,10 @@ export default {
       return this.canAdminList ? options : {};
     },
     hasMoreUnassignedIssues() {
-      return this.lists.some(list => this.pageInfoByListId[list.id]?.hasNextPage);
+      return (
+        this.lists.some(list => this.pageInfoByListId[list.id]?.hasNextPage) &&
+        this.unassignedIssuesCount > 0
+      );
     },
   },
   methods: {

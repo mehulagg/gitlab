@@ -110,6 +110,11 @@ export default {
     state.epicsSwimlanesFetchInProgress = true;
   },
 
+  [mutationTypes.SET_EPICS_SWIMLANES]: state => {
+    state.isShowingEpicsSwimlanes = true;
+    state.epicsSwimlanesFetchInProgress = true;
+  },
+
   [mutationTypes.RECEIVE_BOARD_LISTS_SUCCESS]: (state, boardLists) => {
     state.boardLists = boardLists;
     state.epicsSwimlanesFetchInProgress = false;
