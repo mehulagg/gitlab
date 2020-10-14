@@ -48,18 +48,13 @@ export default {
       type: String,
       required: true,
     },
-    selectedTokens: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
   },
   data() {
     return {
       visible: true,
       modalId: 'invite-members-modal',
       selectedAccessLevel: this.defaultAccessLevel,
-      usersToInvite: '',
+      newUsersToInvite: '',
       selectedDate: undefined,
     };
   },
@@ -73,14 +68,13 @@ export default {
       return {
         onComplete: () => {
           this.selectedAccessLevel = this.defaultAccessLevel;
-          this.usersToInvite = '';
-          this.selectedTokens = [];
+          this.newUsersToInvite = '';
         },
       };
     },
     postData() {
       return {
-        user_id: this.usersToInvite,
+        user_id: this.newUsersToInvite,
         access_level: this.selectedAccessLevel,
         expires_at: this.selectedDate,
         format: 'json',
@@ -95,12 +89,9 @@ export default {
   mounted() {
     eventHub.$on('openModal', this.openModal);
   },
-  created() {
-    eventHub.$on('input', this.updateNewUsersToInvite);
-  },
   methods: {
     updateNewUsersToInvite(value) {
-      this.usersToInvite = value;
+      this.newUsersToInvite = value;
     },
     openModal() {
       this.$root.$emit('bv::show::modal', this.modalId);
@@ -115,7 +106,7 @@ export default {
     cancelInvite() {
       this.selectedAccessLevel = this.defaultAccessLevel;
       this.selectedDate = undefined;
-      this.usersToInvite = '';
+      this.newUsersToInvite = '';
       this.closeModal();
     },
     changeSelectedItem(item) {
@@ -161,9 +152,9 @@ export default {
       <label class="gl-font-weight-bold gl-mt-5">{{ $options.labels.userToInvite }}</label>
       <div class="gl-mt-2">
         <members-token-select
-          v-model="selectedTokens"
-          :label="$options.labels.usersToInvite"
-          :aria-labelledby="$options.labels.usersToInvite"
+          v-model="newUsersToInvite"
+          :label="$options.labels.newUsersToInvite"
+          :aria-labelledby="$options.labels.newUsersToInvite"
           :placeholder="$options.labels.userPlaceholder"
         />
       </div>
@@ -226,7 +217,7 @@ export default {
         <div class="gl-mr-3"></div>
         <gl-button
           ref="inviteButton"
-          :disabled="!usersToInvite"
+          :disabled="!newUsersToInvite"
           variant="success"
           @click="sendInvite"
           >{{ $options.labels.inviteButtonText }}</gl-button

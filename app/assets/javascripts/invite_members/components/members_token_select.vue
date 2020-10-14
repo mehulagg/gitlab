@@ -1,6 +1,5 @@
 <script>
 import { GlTokenSelector, GlAvatar } from '@gitlab/ui';
-import eventHub from '../event_hub';
 import Api from '~/api';
 
 export default {
@@ -87,7 +86,6 @@ export default {
         .sort();
     },
     handleTextInput(value) {
-      this.$emit('text-input', value);
       this.query = value;
 
       return this.handleQueryFilter();
@@ -101,7 +99,7 @@ export default {
       return this.retrieveUsers();
     },
     handleInput() {
-      eventHub.$emit('input', this.newUsersToInvite);
+      this.$emit('input', this.newUsersToInvite);
     },
     handleBlur() {
       this.$children.find(() => 'textInput').inputText = '';
