@@ -16089,6 +16089,9 @@ msgstr ""
 msgid "Members|Are you sure you want to leave \"%{source}\"?"
 msgstr ""
 
+msgid "Members|Are you sure you want to remove \"%{groupName}\"?"
+msgstr ""
+
 msgid "Members|Are you sure you want to remove %{usersName} from \"%{source}\""
 msgstr ""
 
@@ -16108,6 +16111,12 @@ msgid "Members|Leave \"%{source}\""
 msgstr ""
 
 msgid "Members|No expiration set"
+msgstr ""
+
+msgid "Members|Remove \"%{groupName}\""
+msgstr ""
+
+msgid "Members|Remove group"
 msgstr ""
 
 msgid "Members|in %{time}"
