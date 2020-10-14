@@ -388,7 +388,7 @@ include:
 ### `include`
 
 > - Introduced in [GitLab Premium](https://about.gitlab.com/pricing/) 10.5.
-> - Available for Starter, Premium and Ultimate in GitLab 10.6 and later.
+> - Available for Starter, Premium, and Ultimate in GitLab 10.6 and later.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/42861) to GitLab Core in 11.4.
 
 Using the `include` keyword allows the inclusion of external YAML files. This helps
@@ -1487,9 +1487,8 @@ job:
         - spec/**.rb
 ```
 
-NOTE: **Note:**
-For performance reasons, using `exists` with patterns is limited to 10000
-checks. After the 10000th check, rules with patterned globs always match.
+For performance reasons, using `exists` with patterns is limited to 10,000
+checks. After the 10,000th check, rules with patterned globs always match.
 
 #### `rules:allow_failure`
 
