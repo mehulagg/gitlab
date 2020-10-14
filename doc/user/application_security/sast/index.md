@@ -76,6 +76,7 @@ You can also [view our language roadmap](https://about.gitlab.com/direction/secu
 | Java ([Ant](https://ant.apache.org/), [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/) and [SBT](https://www.scala-sbt.org/))   | [SpotBugs](https://spotbugs.github.io/) with the [find-sec-bugs](https://find-sec-bugs.github.io/) plugin     | 10.6 (Maven), 10.8 (Gradle) & 11.9 (Ant, SBT) |
 | JavaScript                                                                                                                                       | [ESLint security plugin](https://github.com/nodesecurity/eslint-plugin-security)                              | 11.8                                          |
 | Kubernetes manifests                                                                                                                             | [Kubesec](https://github.com/controlplaneio/kubesec)                                                          | 12.6                                          |
+| MobSF                                                                                                                                            | [MobSF](https://github.com/MobSF/Mobile-Security-Framework-MobSF)                                             | 13.5                                          |
 | Node.js                                                                                                                                          | [NodeJsScan](https://github.com/ajinabraham/NodeJsScan)                                                       | 11.1                                          |
 | PHP                                                                                                                                              | [phpcs-security-audit](https://github.com/FloeDesignTechnologies/phpcs-security-audit)                        | 10.8                                          |
 | Python ([pip](https://pip.pypa.io/en/stable/))                                                                                                   | [bandit](https://github.com/PyCQA/bandit)                                                                     | 10.3                                          |
@@ -154,7 +155,7 @@ page:
 
 1. From the project's home page, go to **Security & Compliance** > **Configuration** in the
    left sidebar.
-1. If the project does not have a `gitlab-ci.yml` file, click **Enable** in the Static Application Security Testing (SAST) row, otherwise click **Configure**.
+1. If the project does not have a `.gitlab-ci.yml` file, click **Enable** in the Static Application Security Testing (SAST) row, otherwise click **Configure**.
 1. Enter the custom SAST values.
 
     Custom values are stored in the `.gitlab-ci.yml` file. For variables not in the SAST Configuration page, their values are left unchanged. Default values are inherited from the GitLab SAST template.
@@ -359,6 +360,22 @@ to the underlying SAST analyzer images if
 CAUTION: **Caution:**
 Variables having names starting with these prefixes will **not** be propagated to the SAST Docker container and/or
 analyzer containers: `DOCKER_`, `CI`, `GITLAB_`, `FF_`, `HOME`, `PWD`, `OLDPWD`, `PATH`, `SHLVL`, `HOSTNAME`.
+
+### Experimental features
+
+Receive early access to experimental features.
+
+Currently, this will enable scanning of iOS and Android apps via the [MobSF analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/mobsf/).
+
+To enable experimental features, add the following to your `.gitlab-ci.yml` file:
+
+```yaml
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
+variables:
+  SAST_EXPERIMENTAL_FEATURES: "true"
+```
 
 ## Reports JSON format
 
