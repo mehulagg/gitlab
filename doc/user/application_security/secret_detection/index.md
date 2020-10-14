@@ -143,6 +143,7 @@ Secret Detection can be customized by defining available variables:
 | `SECRET_DETECTION_HISTORIC_SCAN` | false | Flag to enable a historic Gitleaks scan. |
 
 ### Custom rule sets
+
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211387) in GitLab 13.5.
 You can customize the default secret detection rules provided with GitLab.
 Customization allows you to exclude rules and add new rules.
