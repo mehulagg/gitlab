@@ -14,7 +14,7 @@ export const mapProjects = projects =>
 export const stateFilter = {
   name: s__('SecurityReports|Status'),
   id: 'state',
-  allOption: { id: ALL, name: s__('VulnerabilityStatusTypes|All') },
+  allOption: BASE_FILTERS.state,
   options: parseOptions(VULNERABILITY_STATES),
 };
 
