@@ -139,6 +139,7 @@ The following actions will result in a system note:
 ![Alert Details Activity Feed](./img/alert_detail_activity_feed.png)
 
 ## Alert actions
+
 There are different actions avilable in GitLab to help triage and respond to alerts.
 
 ### Update an alert's status
