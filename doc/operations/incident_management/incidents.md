@@ -100,7 +100,7 @@ in your project's sidebar. The list contains the following metrics:
   - **{severity-low}** **Low - S4**
   - **{severity-unknown}** **Unknown**
 
-  [Editing incident severity](#incident-details) on the incident details page was
+  [Editing incident severity](#change-severity) on the incident details page was
   [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229402) in GitLab 13.4.
 
 - **Incident** - The description of the incident, which attempts to capture the
@@ -189,6 +189,36 @@ incidents display a SLA (Service Level Agreement) timer showing the time remaini
 the SLA period expires. If the incident is not closed before the SLA period ends, GitLab
 adds a `missed::SLA` label to the incident.
 
+## Incident Actions
+
+There are different actions avilable to help triage and respond to incidents.
+
+### Assign incidents
+
+Assign incidents to users that are actively responding. Select **Edit** in the right-hand side bar to select or deselect assignees.
+
+### Change severity
+
+See [Incident List](#incident-list) for a full description of the severities available. Select **Edit** in the right-hand side bar to change the severity of an incident.
+
+### Add a to do
+
+Add a to-do for incidents that you want to track in your to-do list. Clicke the **Add a to do** button at the top of the right-hand side bar to add a to do.
+
+### Manage incidents from Slack
+
+Slack slash commands allow you to control GitLab and view GitLab content without leaving Slack.
+
+Learn how to [set up Slack slash commands](../../user/project/integrations/slack_slash_commands.md)
+and how to [use the available slash commands](../../integration/slash_commands.md).
+
+### Associate Zoom calls
+
+GitLab enables you to [associate a Zoom meeting with an issue](../../user/project/issues/associate_zoom_meeting.md)
+for synchronous communication during incident management. After starting a Zoom
+call for an incident, you can associate the conference call with an issue. Your
+team members can join the Zoom call without requesting a link.
+
 ### Embed metrics in incidents
 
 You can embed metrics anywhere [GitLab Markdown](../../user/markdown.md) is
@@ -201,17 +231,3 @@ any other Markdown text field in GitLab by
 You can embed both [GitLab-hosted metrics](../metrics/embed.md) and
 [Grafana metrics](../metrics/embed_grafana.md) in incidents and issue
 templates.
-
-## Integrate incidents with Slack
-
-Slack slash commands allow you to control GitLab and view GitLab content without leaving Slack.
-
-Learn how to [set up Slack slash commands](../../user/project/integrations/slack_slash_commands.md)
-and how to [use the available slash commands](../../integration/slash_commands.md).
-
-## Integrate issues with Zoom
-
-GitLab enables you to [associate a Zoom meeting with an issue](../../user/project/issues/associate_zoom_meeting.md)
-for synchronous communication during incident management. After starting a Zoom
-call for an incident, you can associate the conference call with an issue. Your
-team members can join the Zoom call without requesting a link.
