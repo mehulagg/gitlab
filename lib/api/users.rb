@@ -718,7 +718,7 @@ module API
           before { authenticated_as_admin! }
 
           desc 'Retrieve personal access tokens. Available only for admins.' do
-            detail 'This feature was introduced in GitLab 13.6'
+            detail 'This feature was introduced in GitLab 13.5'
             success Entities::PersonalAccessToken
           end
           params do
@@ -728,7 +728,7 @@ module API
           get { present paginate(finder(declared_params(include_missing: false)).execute), with: Entities::PersonalAccessToken }
 
           desc 'Create a personal access token. Available only for admins.' do
-            detail 'This feature was introduced in GitLab 13.6'
+            detail 'This feature was introduced in GitLab 13.5'
             success Entities::PersonalAccessTokenWithToken
           end
           params do
@@ -748,7 +748,7 @@ module API
           end
 
           desc 'Retrieve personal access token. Available only for admins.' do
-            detail 'This feature was introduced in GitLab 13.6'
+            detail 'This feature was introduced in GitLab 13.5'
             success Entities::PersonalAccessToken
           end
           params do
@@ -759,7 +759,7 @@ module API
           end
 
           desc 'Revoke a personal access token. Available only for admins.' do
-            detail 'This feature was introduced in GitLab 13.6'
+            detail 'This feature was introduced in GitLab 13.5'
           end
           params do
             requires :personal_access_token_id, type: Integer, desc: 'The ID of the personal access token'
