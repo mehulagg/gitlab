@@ -101,8 +101,8 @@ you can filter the pipeline list by:
 
 - Trigger author
 - Branch name
-- Status ([since GitLab 13.1](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
-- Tag ([since GitLab 13.1](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
+- Status ([in GitLab 13.1 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
+- Tag ([in GitLab 13.1 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
 
 ### Run a pipeline manually
 

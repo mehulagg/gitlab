@@ -448,7 +448,7 @@ To add an instance-level variable:
 1. Click the **Add variable** button, and fill in the details:
 
    - **Key**: Must be one line, using only letters, numbers, or `_` (underscore), with no spaces.
-   - **Value**: [Since GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/220028), 10,000 characters allowed. This is also bounded by the limits of the selected runner operating system. In GitLab 13.0 to 13.2, 700 characters allowed.
+   - **Value**: [In GitLab 13.3 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/220028), 10,000 characters allowed. This is also bounded by the limits of the selected runner operating system. In GitLab 13.0 to 13.2, 700 characters allowed.
    - **Type**: `File` or `Variable`.
    - **Protect variable** (Optional): If selected, the variable is only available in pipelines that run on protected branches or tags.
    - **Mask variable** (Optional): If selected, the variable's **Value** is not shown in job logs. The variable is not saved if the value does not meet the [masking requirements](#masked-variable-requirements).
