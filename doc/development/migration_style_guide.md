@@ -295,13 +295,14 @@ end
 
 Adding foreign key to `projects`:
 
+We can use the `add_concurrenct_foreign_key` method in this case, as this helper method
+has the lock retries built into it.
+
 ```ruby
 include Gitlab::Database::MigrationHelpers
 
 def up
-  with_lock_retries do
-    add_foreign_key :imports, :projects, column: :project_id, on_delete: :cascade
-  end
+  add_concurrent_foreign_key :imports, :projects, column: :project_id, on_delete: :cascade
 end
 
 def down
@@ -317,9 +318,7 @@ Adding foreign key to `users`:
 include Gitlab::Database::MigrationHelpers
 
 def up
-  with_lock_retries do
-    add_foreign_key :imports, :users, column: :user_id, on_delete: :cascade
-  end
+  add_concurrent_foreign_key :imports, :users, column: :user_id, on_delete: :cascade
 end
 
 def down
