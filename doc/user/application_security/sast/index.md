@@ -201,7 +201,7 @@ spotbugs-sast:
     FAIL_NEVER: 1
 ```
 
-### Customize rule sets
+### Custom rule sets
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235382) in GitLab 13.5.
 
