@@ -271,7 +271,7 @@ After the integration is set up on GitLab and Jira, you can:
 
 - Refer to any Jira issue by its ID in GitLab branch names, commit messages, and merge request
   titles.
-- See the linked `branches`, `commits`, and `merge requests` in Jira issues (merge requests are
+- See the linked branches, commits, and merge requests in Jira issues (merge requests are
   called "pull requests" in Jira issues).
 
 Jira issue IDs must be formatted in uppercase for the integration to work.
