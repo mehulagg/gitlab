@@ -20,9 +20,12 @@ RSpec.describe 'User views iteration' do
   let_it_be(:other_issue) { create(:issue, project: project, iteration: other_iteration) }
 
   context 'with license', :js do
+    before do
+      stub_licensed_features(iterations: true)
+    end
+
     shared_examples 'shows iteration info' do
       before do
-        stub_licensed_features(iterations: true)
         sign_in(current_user)
 
         visit group_iteration_path(iteration.group, iteration.iid)
