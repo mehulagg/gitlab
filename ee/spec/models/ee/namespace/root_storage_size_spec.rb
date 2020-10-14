@@ -2,10 +2,9 @@
 
 require 'spec_helper'
 
-RSpec.describe Namespace::RootStorageSize, type: :model do
+RSpec.describe EE::Namespace::RootStorageSize, type: :model do
   let(:namespace) { create(:namespace) }
   let(:current_size) { 50.megabytes }
-  let(:limit) { 100 }
   let(:model) { described_class.new(namespace) }
   let(:create_statistics) { create(:namespace_root_storage_statistics, namespace: namespace, storage_size: current_size)}
   let_it_be(:gold_plan, reload: true) { create(:gold_plan) }
@@ -37,7 +36,10 @@ RSpec.describe Namespace::RootStorageSize, type: :model do
       end
 
       context 'when limit is 0' do
-        let(:limit) { 0 }
+        before do
+          plan_limits.update!(storage_size_limit: 0)
+          namespace.update!(additional_purchased_storage_size: 0)
+        end
 
         it { is_expected.to eq(false) }
       end

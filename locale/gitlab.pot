@@ -630,6 +630,9 @@ msgstr ""
 msgid "%{name_with_link} has run out of Shared Runner Pipeline minutes so no new jobs or pipelines in its projects will run."
 msgstr ""
 
+msgid "%{namespace_name} contains a locked project"
+msgstr ""
+
 msgid "%{namespace_name} is now read-only. You cannot: %{base_message}"
 msgstr ""
 
@@ -29917,6 +29920,9 @@ msgstr ""
 msgid "You have not added any approvers. Start by adding users or groups."
 msgstr ""
 
+msgid "You have reached %{usage_in_percent} of %{namespace_name}'s storage capacity (%{used_storage} of %{storage_limit})"
+msgstr ""
+
 msgid "You have reached your project limit"
 msgstr ""
 
@@ -29990,9 +29996,6 @@ msgid "You need to upload a GitLab project export archive (ending in .gz)."
 msgstr ""
 
 msgid "You need to upload a Google Takeout archive."
-msgstr ""
-
-msgid "You reached %{usage_in_percent} of %{namespace_name}'s storage capacity (%{used_storage} of %{storage_limit})"
 msgstr ""
 
 msgid "You successfully declined the invitation"

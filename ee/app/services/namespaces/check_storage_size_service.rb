@@ -13,7 +13,7 @@ module Namespaces
     end
 
     def execute
-      return ServiceResponse.success unless Feature.enabled?(:namespace_storage_limit, root_namespace)
+      return ServiceResponse.success unless enforce_limit?
       return ServiceResponse.success if alert_level == :none
 
       if root_storage_size.above_size_limit?
@@ -35,6 +35,10 @@ module Namespaces
       error: 1.0
     }.freeze
 
+    def enforce_limit?
+      ::Feature.enabled?(:namespace_storage_limit, root_namespace)
+    end
+
     def payload
       return {} unless can?(user, :admin_namespace, root_namespace)
 
@@ -51,7 +55,7 @@ module Namespaces
     end
 
     def usage_message
-      s_("You reached %{usage_in_percent} of %{namespace_name}'s storage capacity (%{used_storage} of %{storage_limit})" % current_usage_params)
+      s_("You have reached %{usage_in_percent} of %{namespace_name}'s storage capacity (%{used_storage} of %{storage_limit})" % current_usage_params)
     end
 
     def alert_level
