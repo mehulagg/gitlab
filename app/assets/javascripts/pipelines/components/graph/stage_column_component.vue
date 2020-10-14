@@ -4,12 +4,14 @@ import stageColumnMixin from '../../mixins/stage_column_mixin';
 import JobItem from './job_item.vue';
 import JobGroupDropdown from './job_group_dropdown.vue';
 import ActionComponent from './action_component.vue';
+import SfGraph from '../pipeline_graph/sf_graph.vue';
 
 export default {
   components: {
     JobItem,
     JobGroupDropdown,
     ActionComponent,
+    SfGraph,
   },
   mixins: [stageColumnMixin],
   props: {
@@ -63,8 +65,8 @@ export default {
 };
 </script>
 <template>
-  <li :class="stageConnectorClass" class="stage-column">
-    <div class="stage-name position-relative">
+  <sf-graph>
+    <template #stages>
       {{ title }}
       <action-component
         v-if="hasAction"
@@ -74,34 +76,30 @@ export default {
         class="js-stage-action stage-action rounded"
         @pipelineActionRequestComplete="pipelineActionRequestComplete"
       />
-    </div>
+    </template>
+    <template #jobs>
+      <div
+        v-for="(group, index) in groups"
+        :id="groupId(group)"
+        :key="group.id || group.name"
+        :class="buildConnnectorClass(index)"
+        class="build"
+      >
+        <job-item
+          v-if="group.size === 1"
+          :job="group.jobs[0]"
+          :job-hovered="jobHovered"
+          :pipeline-expanded="pipelineExpanded"
+          css-class-job-name="build-content"
+          @pipelineActionRequestComplete="pipelineActionRequestComplete"
+        />
 
-    <div class="builds-container">
-      <ul>
-        <li
-          v-for="(group, index) in groups"
-          :id="groupId(group)"
-          :key="group.id || group.name"
-          :class="buildConnnectorClass(index)"
-          class="build"
-        >
-          <div class="curve"></div>
-          <job-item
-            v-if="group.size === 1"
-            :job="group.jobs[0]"
-            :job-hovered="jobHovered"
-            :pipeline-expanded="pipelineExpanded"
-            css-class-job-name="build-content"
-            @pipelineActionRequestComplete="pipelineActionRequestComplete"
-          />
-
-          <job-group-dropdown
-            v-if="group.size > 1"
-            :group="group"
-            @pipelineActionRequestComplete="pipelineActionRequestComplete"
-          />
-        </li>
-      </ul>
-    </div>
-  </li>
+        <job-group-dropdown
+          v-else
+          :group="group"
+          @pipelineActionRequestComplete="pipelineActionRequestComplete"
+        />
+      </div>
+    </template>
+  </sf-graph>
 </template>

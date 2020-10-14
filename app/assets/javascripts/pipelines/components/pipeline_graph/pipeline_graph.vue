@@ -3,6 +3,7 @@ import { isEmpty } from 'lodash';
 import { GlAlert } from '@gitlab/ui';
 import { __ } from '~/locale';
 import JobPill from './job_pill.vue';
+import SfGraph from './sf_graph.vue';
 import StagePill from './stage_pill.vue';
 import { generateLinksData } from './drawing_utils';
 import { parseData } from '../parsing_utils';
@@ -13,6 +14,7 @@ export default {
   components: {
     GlAlert,
     JobPill,
+    SfGraph,
     StagePill,
   },
   CONTAINER_REF: 'PIPELINE_GRAPH_CONTAINER_REF',
@@ -170,34 +172,24 @@ export default {
           />
         </template>
       </svg>
-      <div
-        v-for="(stage, index) in pipelineData.stages"
-        :key="`${stage.name}-${index}`"
-        class="gl-flex-direction-column"
-      >
-        <div
-          class="gl-display-flex gl-align-items-center gl-bg-white gl-w-full gl-px-8 gl-py-4 gl-mb-5"
-          :class="{
-            'stage-left-rounded': index === 0,
-            'stage-right-rounded': index === pipelineData.stages.length - 1,
-          }"
-        >
-          <stage-pill :stage-name="stage.name" :is-empty="stage.groups.length === 0" />
-        </div>
-        <div
-          class="gl-display-flex gl-flex-direction-column gl-align-items-center gl-w-full gl-px-8"
-        >
-          <job-pill
-            v-for="group in stage.groups"
-            :key="group.name"
-            :job-id="group.id"
-            :job-name="group.name"
-            :is-highlighted="hasHighlightedJob && isJobHighlighted(group.id)"
-            :is-faded-out="hasHighlightedJob && !isJobHighlighted(group.id)"
-            @on-mouse-enter="highlightNeeds"
-            @on-mouse-leave="removeHighlightNeeds"
-          />
-        </div>
+      <div v-for="(stage, index) in pipelineData.stages" :key="`${stage.name}-${index}`">
+        <sf-graph stage-classes="" job-classes="" :stage="stage">
+          <template #stages>
+            <stage-pill :stage-name="stage.name" :is-empty="stage.groups.length === 0" />
+          </template>
+          <template #jobs>
+            <job-pill
+              v-for="group in stage.groups"
+              :key="group.name"
+              :job-id="group.id"
+              :job-name="group.name"
+              :is-highlighted="hasHighlightedJob && isJobHighlighted(group.id)"
+              :is-faded-out="hasHighlightedJob && !isJobHighlighted(group.id)"
+              @on-mouse-enter="highlightNeeds"
+              @on-mouse-leave="removeHighlightNeeds"
+            />
+          </template>
+        </sf-graph>
       </div>
     </div>
   </div>

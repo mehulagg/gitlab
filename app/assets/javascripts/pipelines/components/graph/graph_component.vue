@@ -2,7 +2,7 @@
 import { escape, capitalize } from 'lodash';
 import { GlLoadingIcon } from '@gitlab/ui';
 import StageColumnComponent from './stage_column_component.vue';
-import GraphMixin from '../../mixins/graph_component_mixin.js'
+import GraphMixin from '../../mixins/graph_component_mixin.js';
 import GraphWidthMixin from '../../mixins/graph_width_mixin';
 import LinkedPipelinesColumn from './linked_pipelines_column.vue';
 import GraphBundleMixin from '../../mixins/graph_pipeline_bundle_mixin';
@@ -17,10 +17,7 @@ export default {
     GlLoadingIcon,
     LinkedPipelinesColumn,
   },
-  mixins: [
-    GraphMixin,
-    GraphWidthMixin,
-  ],
+  mixins: [GraphMixin, GraphWidthMixin],
   inject: {
     pipelineIid: {
       default: '',
@@ -66,14 +63,14 @@ export default {
       update(data) {
         return unwrapPipelineData(this.pipelineIid, data);
       },
-      error(err){
+      error(err) {
         console.error('graphQL error:', err);
-      }
-    }
+      },
+    },
   },
   pipelineTypeConstants: {
-     UPSTREAM,
-     DOWNSTREAM,
+    UPSTREAM,
+    DOWNSTREAM,
   },
   computed: {
     downstreamPipelines() {
@@ -90,10 +87,14 @@ export default {
     },
     // The two show checks prevent upstream / downstream from showing redundant linked columns
     showDownstreamPipelines() {
-      return this.hasDownstreamPipelines && this.type !== this.$options.pipelineTypeConstants.UPSTREAM;
+      return (
+        this.hasDownstreamPipelines && this.type !== this.$options.pipelineTypeConstants.UPSTREAM
+      );
     },
     showUpstreamPipelines() {
-      return this.hasUpstreamPipelines && this.type !== this.$options.pipelineTypeConstants.DOWNSTREAM;
+      return (
+        this.hasUpstreamPipelines && this.type !== this.$options.pipelineTypeConstants.DOWNSTREAM
+      );
     },
     stages() {
       return this.pipeline?.stages;
@@ -124,7 +125,7 @@ export default {
         };
       }
     },
-  }
+  },
 };
 </script>
 
@@ -142,21 +143,14 @@ export default {
           }"
           class="gl-display-flex"
         >
+          <linked-pipelines-column
+            v-if="showUpstreamPipelines"
+            :linked-pipelines="upstreamPipelines"
+            :column-title="__('Upstream')"
+            :type="$options.pipelineTypeConstants.UPSTREAM"
+          />
 
-        <linked-pipelines-column
-          v-if="showUpstreamPipelines"
-          :linked-pipelines="upstreamPipelines"
-          :column-title="__('Upstream')"
-          :type="$options.pipelineTypeConstants.UPSTREAM"
-        />
-
-        <ul
-            class="stage-column-list align-top"
-            :class="{
-              'inline js-has-linked-pipelines': hasUpstreamPipelines || hasDownstreamPipelines,
-            }"
-            v-if="!graphLoading"
-          >
+          <template v-if="!graphLoading">
             <stage-column-component
               v-for="(stage, index) in stages"
               :key="stage.name"
@@ -174,7 +168,7 @@ export default {
               :pipeline-expanded="pipelineExpanded"
               @refreshPipelineGraph="refreshPipelineGraph"
             />
-          </ul>
+          </template>
 
           <linked-pipelines-column
             v-if="showDownstreamPipelines"
@@ -184,7 +178,6 @@ export default {
             @downstreamHovered="setJob"
             @pipelineExpandToggle="setPipelineExpanded"
           />
-
         </div>
       </div>
     </div>
