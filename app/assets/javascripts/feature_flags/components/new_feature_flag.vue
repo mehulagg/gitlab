@@ -19,15 +19,7 @@ export default {
     FeatureFlagForm,
   },
   mixins: [featureFlagsMixin()],
-  props: {
-    environmentsEndpoint: {
-      type: String,
-      required: true,
-    },
-    projectId: {
-      type: String,
-      required: true,
-    },
+  inject: {
     showUserCallout: {
       type: Boolean,
       required: true,
@@ -105,12 +97,10 @@ export default {
     </div>
 
     <feature-flag-form
-      :project-id="projectId"
       :cancel-path="path"
       :submit-text="s__('FeatureFlags|Create feature flag')"
       :scopes="scopes"
       :strategies="strategies"
-      :environments-endpoint="environmentsEndpoint"
       :version="version"
       @handleSubmit="data => createFeatureFlag(data)"
     />
