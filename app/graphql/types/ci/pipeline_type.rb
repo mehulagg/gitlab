@@ -56,6 +56,16 @@ module Types
             description: 'Specifies if a pipeline can be canceled',
             method: :cancelable?,
             null: false
+      field :source_job, Types::Ci::JobType, null: true,
+            description: 'Job where pipeline was triggered from'
+      field :downstream, [Types::Ci::PipelineType], null: true,
+            description: 'Pipelines this pipeline will trigger',
+            method: :triggered_pipelines_with_preloads
+      field :upstream, Types::Ci::PipelineType, null: true,
+            description: 'Pipeline that triggerd the pipeline',
+            method: :triggered_by_pipeline
+      field :project, Types::ProjectType, null: true,
+            description: 'Project the pipeline belongs to'
     end
   end
 end

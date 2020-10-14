@@ -12755,6 +12755,11 @@ type Pipeline {
   detailedStatus: DetailedStatus!
 
   """
+  Pipelines this pipeline will trigger
+  """
+  downstream: [Pipeline!]
+
+  """
   Duration of the pipeline in seconds
   """
   duration: Int
@@ -12775,6 +12780,11 @@ type Pipeline {
   iid: String!
 
   """
+  Project the pipeline belongs to
+  """
+  project: Project
+
+  """
   Specifies if a pipeline can be retried
   """
   retryable: Boolean!
@@ -12788,6 +12798,11 @@ type Pipeline {
   SHA of the pipeline's commit
   """
   sha: String!
+
+  """
+  Job where pipeline was triggered from
+  """
+  sourceJob: CiJob
 
   """
   Stages of the pipeline
@@ -12829,6 +12844,11 @@ type Pipeline {
   Timestamp of the pipeline's last activity
   """
   updatedAt: Time!
+
+  """
+  Pipeline that triggerd the pipeline
+  """
+  upstream: Pipeline
 
   """
   Pipeline user

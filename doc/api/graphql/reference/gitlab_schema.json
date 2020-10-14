@@ -37559,6 +37559,28 @@
               "deprecationReason": null
             },
             {
+              "name": "downstream",
+              "description": "Pipelines this pipeline will trigger",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Pipeline",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "duration",
               "description": "Duration of the pipeline in seconds",
               "args": [
@@ -37623,6 +37645,20 @@
               "deprecationReason": null
             },
             {
+              "name": "project",
+              "description": "Project the pipeline belongs to",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Project",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "retryable",
               "description": "Specifies if a pipeline can be retried",
               "args": [
@@ -37668,6 +37704,20 @@
                   "name": "String",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "sourceJob",
+              "description": "Job where pipeline was triggered from",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CiJob",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -37771,6 +37821,20 @@
                   "name": "Time",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "upstream",
+              "description": "Pipeline that triggerd the pipeline",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Pipeline",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null

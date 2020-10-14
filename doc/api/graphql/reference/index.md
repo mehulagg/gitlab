@@ -1846,16 +1846,20 @@ Information about pagination in a connection..
 | `coverage` | Float | Coverage percentage |
 | `createdAt` | Time! | Timestamp of the pipeline's creation |
 | `detailedStatus` | DetailedStatus! | Detailed status of the pipeline |
+| `downstream` | Pipeline! => Array | Pipelines this pipeline will trigger |
 | `duration` | Int | Duration of the pipeline in seconds |
 | `finishedAt` | Time | Timestamp of the pipeline's completion |
 | `id` | ID! | ID of the pipeline |
 | `iid` | String! | Internal ID of the pipeline |
+| `project` | Project | Project the pipeline belongs to |
 | `retryable` | Boolean! | Specifies if a pipeline can be retried |
 | `securityReportSummary` | SecurityReportSummary | Vulnerability and scanned resource counts for each security scanner of the pipeline |
 | `sha` | String! | SHA of the pipeline's commit |
+| `sourceJob` | CiJob | Job where pipeline was triggered from |
 | `startedAt` | Time | Timestamp when the pipeline was started |
 | `status` | PipelineStatusEnum! | Status of the pipeline (CREATED, WAITING_FOR_RESOURCE, PREPARING, PENDING, RUNNING, FAILED, SUCCESS, CANCELED, SKIPPED, MANUAL, SCHEDULED) |
 | `updatedAt` | Time! | Timestamp of the pipeline's last activity |
+| `upstream` | Pipeline | Pipeline that triggerd the pipeline |
 | `user` | User | Pipeline user |
 | `userPermissions` | PipelinePermissions! | Permissions for the current user on the resource |
 
