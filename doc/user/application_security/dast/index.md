@@ -423,7 +423,42 @@ A URL scan allows you to specify which parts of a website are scanned by DAST.
 
 #### Define the URLs to scan
 
-To specify the paths to scan, add a comma-separated list of the paths to the `DAST_PATHS`
+URLs to scan can be specified in either a file by using `DAST_PATHS_FILE` or in the environment variable `DAST_PATHS`.
+
+##### Defining the URLs to scan in a file
+
+To define the URLs to scan in a file, create a plain text file with one path per line.
+
+```txt
+page1.html
+/page2.html
+category/shoes/page1.html
+```
+
+To scan the URLs in that file DAST_PATHS_FILE should be used
+
+```yaml
+include:
+  - template: DAST.gitlab-ci.yml
+
+variables:
+  DAST_PATHS_FILE: relative/path/to/file.txt
+```
+
+By default, DAST scans do not clone the project repository. If the file is checked in to the project, allow DAST to clone the project by setting GIT_STRATEGY to fetch.
+
+```yaml
+include:
+  - template: DAST.gitlab-ci.yml
+
+variables:
+  GIT_STRATEGY: fetch
+  DAST_PATHS_FILE: relative/path/to/file.txt
+```
+
+##### Defining the URLs to scan in an enviroment variable
+
+To specify the paths to scan in an enviroment variable, add a comma-separated list of the paths to the `DAST_PATHS`
 environment variable. Note that you can only scan paths of a single host.
 
 ```yaml
@@ -437,7 +472,7 @@ variables:
 When using `DAST_PATHS`, note the following:
 
 - The `DAST_PATHS` environment variable has a limit of about 130kb. If you have a list or paths
-  greater than this, you should create multiple DAST jobs and split the paths over each job.
+  greater than this, use `DAST_PATHS_FILE`.
 
 #### Full Scan
 
