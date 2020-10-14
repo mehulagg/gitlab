@@ -13598,6 +13598,11 @@ type Project {
   id: ID!
 
   """
+  Internal ID of the project
+  """
+  iid: String!
+
+  """
   Status of import background job of the project
   """
   importStatus: String

@@ -11,6 +11,9 @@ module Types
     field :id, GraphQL::ID_TYPE, null: false,
           description: 'ID of the project'
 
+    field :iid, GraphQL::STRING_TYPE, null: false,
+          description: 'Internal ID of the project'
+
     field :full_path, GraphQL::ID_TYPE, null: false,
           description: 'Full path of the project'
     field :path, GraphQL::STRING_TYPE, null: false,
