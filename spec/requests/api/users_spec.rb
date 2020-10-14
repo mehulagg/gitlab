@@ -2750,6 +2750,196 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
     end
   end
 
+  describe 'GET /users/:user_id/personal_access_tokens' do
+    let_it_be(:active_personal_access_token) { create(:personal_access_token, user: user) }
+    let_it_be(:revoked_personal_access_token) { create(:personal_access_token, :revoked, user: user) }
+    let_it_be(:expired_personal_access_token) { create(:personal_access_token, :expired, user: user) }
+
+    it 'returns a 404 error if user not found' do
+      get api("/users/#{non_existing_record_id}/personal_access_tokens", admin)
+
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(json_response['message']).to eq('404 User Not Found')
+    end
+
+    it 'returns a 403 error when authenticated as normal user' do
+      get api("/users/#{non_existing_record_id}/personal_access_tokens", user)
+
+      expect(response).to have_gitlab_http_status(:forbidden)
+      expect(json_response['message']).to eq('403 Forbidden')
+    end
+
+    it 'returns an array of all personal access tokens' do
+      get api("/users/#{user.id}/personal_access_tokens", admin)
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(response).to include_pagination_headers
+      expect(json_response).to be_an Array
+      expect(json_response.size).to eq(3)
+    end
+
+    it 'returns an array of active personal access tokens if state active' do
+      get api("/users/#{user.id}/personal_access_tokens?state=active", admin)
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(response).to include_pagination_headers
+      expect(json_response).to be_an Array
+      expect(json_response.size).to eq(1)
+      expect(json_response).to all(include('active' => true))
+    end
+
+    it 'returns an array of inactive personal access tokens if active is set to false' do
+      get api("/users/#{user.id}/personal_access_tokens?state=inactive", admin)
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to be_an Array
+      expect(json_response.size).to eq(2)
+      expect(json_response).to all(include('active' => false))
+    end
+  end
+
+  describe 'POST /users/:user_id/personal_access_tokens' do
+    let(:name) { 'new pat' }
+    let(:expires_at) { 3.days.from_now.to_date.to_s }
+    let(:scopes) { %w(api read_user) }
+
+    it 'returns validation error if required attributes are missing' do
+      post api("/users/#{user.id}/personal_access_tokens", admin)
+
+      expect(response).to have_gitlab_http_status(:bad_request)
+      expect(json_response['error']).to eq('name is missing, scopes is missing, scopes does not have a valid value')
+    end
+
+    it 'returns a 404 error if user not found' do
+      post api("/users/#{non_existing_record_id}/personal_access_tokens", admin),
+        params: {
+          name: name,
+          scopes: scopes,
+          expires_at: expires_at
+        }
+
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(json_response['message']).to eq('404 User Not Found')
+    end
+
+    it 'returns a 403 error when authenticated as normal user' do
+      post api("/users/#{user.id}/personal_access_tokens", user),
+        params: {
+          name: name,
+          scopes: scopes,
+          expires_at: expires_at
+        }
+
+      expect(response).to have_gitlab_http_status(:forbidden)
+      expect(json_response['message']).to eq('403 Forbidden')
+    end
+
+    it 'creates a personal access token' do
+      post api("/users/#{user.id}/personal_access_tokens", admin),
+        params: {
+          name: name,
+          expires_at: 3.days.from_now.to_date,
+          scopes: scopes
+        }
+
+      expect(response).to have_gitlab_http_status(:created)
+      expect(json_response['name']).to eq(name)
+      expect(json_response['scopes']).to eq(scopes)
+      expect(json_response['expires_at']).to eq(expires_at)
+      expect(json_response['id']).to be_present
+      expect(json_response['created_at']).to be_present
+      expect(json_response['active']).to be_truthy
+      expect(json_response['revoked']).to be_falsey
+      expect(json_response['token']).to be_present
+    end
+  end
+
+  describe 'GET /users/:user_id/personal_access_tokens/:personal_access_tokens_id' do
+    let_it_be(:personal_access_token) { create(:personal_access_token, user: user) }
+    let_it_be(:impersonation_token) { create(:personal_access_token, :impersonation, user: user) }
+
+    it 'returns 404 error if user not found' do
+      get api("/users/#{non_existing_record_id}/personal_access_tokens/1", admin)
+
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(json_response['message']).to eq('404 User Not Found')
+    end
+
+    it 'returns a 404 error if personal access token not found' do
+      get api("/users/#{user.id}/personal_access_tokens/#{non_existing_record_id}", admin)
+
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(json_response['message']).to eq('404 Personal Access Token Not Found')
+    end
+
+    it 'returns a 404 error if token is not impersonation token' do
+      get api("/users/#{user.id}/personal_access_tokens/#{impersonation_token.id}", admin)
+
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(json_response['message']).to eq('404 Personal Access Token Not Found')
+    end
+
+    it 'returns a 403 error when authenticated as normal user' do
+      get api("/users/#{user.id}/personal_access_tokens/#{personal_access_token.id}", user)
+
+      expect(response).to have_gitlab_http_status(:forbidden)
+      expect(json_response['message']).to eq('403 Forbidden')
+    end
+
+    it 'returns a personal access token' do
+      get api("/users/#{user.id}/personal_access_tokens/#{personal_access_token.id}", admin)
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['id']).to eq(personal_access_token.id)
+      expect(json_response['token']).not_to be_present
+    end
+  end
+
+  describe 'DELETE /users/:user_id/personal_access_tokens/:personal_access_tokens_id' do
+    let_it_be(:personal_access_token) { create(:personal_access_token, user: user) }
+    let_it_be(:impersonation_token) { create(:personal_access_token, :impersonation, user: user) }
+
+    it 'returns a 404 error if user not found' do
+      delete api("/users/#{non_existing_record_id}/personal_access_tokens/1", admin)
+
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(json_response['message']).to eq('404 User Not Found')
+    end
+
+    it 'returns a 404 error if personal access token not found' do
+      delete api("/users/#{user.id}/personal_access_tokens/#{non_existing_record_id}", admin)
+
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(json_response['message']).to eq('404 Personal Access Token Not Found')
+    end
+
+    it 'returns a 404 error if token is not personal access token' do
+      delete api("/users/#{user.id}/personal_access_tokens/#{impersonation_token.id}", admin)
+
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(json_response['message']).to eq('404 Personal Access Token Not Found')
+    end
+
+    it 'returns a 403 error when authenticated as normal user' do
+      delete api("/users/#{user.id}/personal_access_tokens/#{personal_access_token.id}", user)
+
+      expect(response).to have_gitlab_http_status(:forbidden)
+      expect(json_response['message']).to eq('403 Forbidden')
+    end
+
+    it_behaves_like '412 response' do
+      let(:request) { api("/users/#{user.id}/personal_access_tokens/#{personal_access_token.id}", admin) }
+    end
+
+    it 'revokes a personal access token' do
+      delete api("/users/#{user.id}/personal_access_tokens/#{personal_access_token.id}", admin)
+
+      expect(response).to have_gitlab_http_status(:no_content)
+      expect(personal_access_token.revoked).to be_falsey
+      expect(personal_access_token.reload.revoked).to be_truthy
+    end
+  end
+
   describe 'GET /users/:user_id/impersonation_tokens' do
     let_it_be(:active_personal_access_token) { create(:personal_access_token, user: user) }
     let_it_be(:revoked_personal_access_token) { create(:personal_access_token, :revoked, user: user) }

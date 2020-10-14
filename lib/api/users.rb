@@ -63,9 +63,9 @@ module API
 
         params :sort_params do
           optional :order_by, type: String, values: %w[id name username created_at updated_at],
-                              default: 'id', desc: 'Return users ordered by a field'
+            default: 'id', desc: 'Return users ordered by a field'
           optional :sort, type: String, values: %w[asc desc], default: 'desc',
-                          desc: 'Return users sorted in ascending and descending order'
+            desc: 'Return users sorted in ascending and descending order'
         end
       end
 
@@ -211,12 +211,12 @@ module API
         not_found!('User') unless user
 
         conflict!('Email has already been taken') if params[:email] &&
-            User.by_any_email(params[:email].downcase)
-                .where.not(id: user.id).exists?
+          User.by_any_email(params[:email].downcase)
+            .where.not(id: user.id).exists?
 
         conflict!('Username has already been taken') if params[:username] &&
-            User.by_username(params[:username])
-                .where.not(id: user.id).exists?
+          User.by_username(params[:username])
+            .where.not(id: user.id).exists?
 
         user_params = declared_params(include_missing: false)
         admin_making_changes_for_another_user = (current_user != user)
@@ -696,6 +696,76 @@ module API
           end
           delete ':impersonation_token_id' do
             token = find_impersonation_token
+
+            destroy_conditionally!(token) do
+              token.revoke!
+            end
+          end
+        end
+
+        resource :personal_access_tokens do
+          helpers do
+            def finder(options = {})
+              user = find_user_by_id(params)
+              PersonalAccessTokensFinder.new({ user: user, impersonation: false }.merge(options))
+            end
+
+            def find_token
+              finder.find_by_id(declared_params[:personal_access_token_id]) || not_found!('Personal Access Token')
+            end
+          end
+
+          before { authenticated_as_admin! }
+
+          desc 'Retrieve personal access tokens. Available only for admins.' do
+            detail 'This feature was introduced in GitLab 13.6'
+            success Entities::PersonalAccessToken
+          end
+          params do
+            use :pagination
+            optional :state, type: String, default: 'all', values: %w[all active inactive], desc: 'Filters (all|active|inactive) personal_access_tokens'
+          end
+          get { present paginate(finder(declared_params(include_missing: false)).execute), with: Entities::PersonalAccessToken }
+
+          desc 'Create a personal access token. Available only for admins.' do
+            detail 'This feature was introduced in GitLab 13.6'
+            success Entities::PersonalAccessTokenWithToken
+          end
+          params do
+            requires :name, type: String, desc: 'The name of the personal access token'
+            requires :scopes, type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, values: ::Gitlab::Auth.all_available_scopes.map(&:to_s),
+              desc: 'The array of scopes of the personal access token'
+            optional :expires_at, type: Date, desc: 'The expiration date in the format YEAR-MONTH-DAY of the personal access token'
+          end
+          post do
+            personal_access_token = finder.build(declared_params(include_missing: false))
+
+            if personal_access_token.save
+              present personal_access_token, with: Entities::PersonalAccessTokenWithToken
+            else
+              render_validation_error!(personal_access_token)
+            end
+          end
+
+          desc 'Retrieve personal access token. Available only for admins.' do
+            detail 'This feature was introduced in GitLab 13.6'
+            success Entities::PersonalAccessToken
+          end
+          params do
+            requires :personal_access_token_id, type: Integer, desc: 'The ID of the personal access token'
+          end
+          get ':personal_access_token_id' do
+            present find_token, with: Entities::PersonalAccessToken
+          end
+
+          desc 'Revoke a personal access token. Available only for admins.' do
+            detail 'This feature was introduced in GitLab 13.6'
+          end
+          params do
+            requires :personal_access_token_id, type: Integer, desc: 'The ID of the personal access token'
+          end
+          delete ':personal_access_token_id' do
+            token = find_token
 
             destroy_conditionally!(token) do
               token.revoke!

@@ -1435,6 +1435,158 @@ Parameters:
 | `user_id`                | integer | yes      | The ID of the user                |
 | `impersonation_token_id` | integer | yes      | The ID of the impersonation token |
 
+## Get all personal access tokens of a user
+
+> Requires admin permissions.
+
+It retrieves every personal access token of the user. Use the pagination
+parameters `page` and `per_page` to restrict the list of tokens.
+
+```plaintext
+GET /users/:user_id/personal_access_tokens
+```
+
+Parameters:
+
+| Attribute | Type    | Required | Description                                                |
+| --------- | ------- | -------- | ---------------------------------------------------------- |
+| `user_id` | integer | yes      | The ID of the user                                         |
+| `state`   | string  | no       | filter tokens based on state (`all`, `active`, `inactive`) |
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/users/42/personal_access_tokens"
+```
+
+Example response:
+
+```json
+[
+   {
+       "id": 1,
+       "name": "my_pat_1",
+       "revoked": false,
+       "created_at": "2020-10-13T12:12:16.381Z",
+       "scopes": [
+           "api"
+       ],
+       "user_id": 3,
+       "active": true,
+       "expires_at": "2020-08-01"
+   },
+   {
+       "id": 2,
+       "name": "my_pat_2",
+       "revoked": false,
+       "created_at": "2020-10-14T08:56:17.328Z",
+       "scopes": [
+           "read_user"
+       ],
+       "user_id": 3,
+       "active": true,
+       "expires_at": "2020-08-01"
+   }
+]
+```
+
+## Get a personal access token of a user
+
+> Requires admin permissions.
+
+It shows a user's personal access token metadata. The token attribute is not returned.
+
+```plaintext
+GET /users/:user_id/personal_access_tokens/:personal_access_token_id
+```
+
+Parameters:
+
+| Attribute                  | Type    | Required | Description                         |
+| -------------------------- | ------- | -------- | ----------------------------------- |
+| `user_id`                  | integer | yes      | The ID of the user                  |
+| `personal_access_token_id` | integer | yes      | The ID of the personal access token |
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/users/42/personal_access_tokens/1"
+```
+
+Example response:
+
+```json
+{
+    "id": 1,
+    "name": "my_pat_1",
+    "revoked": false,
+    "created_at": "2020-10-13T12:12:16.381Z",
+    "scopes": [
+        "api"
+    ],
+    "user_id": 42,
+    "active": true,
+    "expires_at": "2020-08-01"
+}
+```
+
+## Create a personal access token
+
+> Requires admin permissions.
+> Token values are returned once. Make sure you save it - you won't be able to access it again.
+
+It creates a new personal access token.
+
+```plaintext
+POST /users/:user_id/personal_access_tokens
+```
+
+| Attribute    | Type    | Required | Description                                                                                                              |
+| ------------ | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `user_id`    | integer | yes      | The ID of the user                                                                                                       |
+| `name`       | string  | yes      | The name of the personal access token                                                                                    |
+| `expires_at` | date    | no       | The expiration date of the personal access token in ISO format (`YYYY-MM-DD`)                                            |
+| `scopes`     | array   | yes      | The array of scopes of the personal access token (`api`, `read_user`, `read_api`, `read_repository`, `write_repository`) |
+
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --data "name=mytoken" --data "expires_at=2017-04-04" --data "scopes[]=api" "https://gitlab.example.com/api/v4/users/42/personal_access_tokens"
+```
+
+Example response:
+
+```json
+{
+    "id": 3,
+    "name": "my_pat_3",
+    "revoked": false,
+    "created_at": "2020-10-14T11:58:53.526Z",
+    "scopes": [
+        "api"
+    ],
+    "user_id": 42,
+    "active": true,
+    "expires_at": "2020-12-31",
+    "token": "ggbfKkC4n-Lujy8jwCR2"
+}
+```
+
+## Revoke a personal access token
+
+> Requires admin permissions.
+
+It revokes a personal access token token.
+
+```plaintext
+DELETE /users/:user_id/personal_access_tokens/:personal_access_token_id
+```
+
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/users/42/personal_access_tokens/1"
+```
+
+Parameters:
+
+| Attribute                  | Type    | Required | Description                         |
+| -------------------------- | ------- | -------- | ----------------------------------- |
+| `user_id`                  | integer | yes      | The ID of the user                  |
+| `personal_access_token_id` | integer | yes      | The ID of the personal access token |
+
 ### Get user activities (admin only)
 
 NOTE: **Note:**
