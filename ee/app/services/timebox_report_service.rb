@@ -7,7 +7,7 @@
 # This is implemented by iterating over all relevant resource events ordered by time. We need to do this
 # so that we can keep track of the issue's state during that point in time and handle the events based on that.
 
-class TimeboxBurnupChartService
+class TimeboxReportService
   include Gitlab::Utils::StrongMemoize
 
   EVENT_COUNT_LIMIT = 50_000
@@ -35,7 +35,9 @@ class TimeboxBurnupChartService
       end
     end
 
-    ServiceResponse.success(payload: chart_data)
+    ServiceResponse.success(payload: {
+      burnup_time_series: chart_data
+    })
   end
 
   private

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Resolvers
-  class TimeboxBurnupTimeSeriesResolver < BaseResolver
-    type [Types::BurnupChartDailyTotalsType], null: true
+  class TimeboxReportResolver < BaseResolver
+    type Types::TimeboxReportType, null: true
 
     alias_method :timebox, :synchronized_object
 
@@ -13,7 +13,7 @@ module Resolvers
 
       raise GraphQL::ExecutionError, response.message if response.error?
 
-      response.payload[:burnup_time_series]
+      response.payload
     end
   end
 end
