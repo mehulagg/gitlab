@@ -15,19 +15,7 @@ export default {
     FeatureFlagForm,
   },
   mixins: [glFeatureFlagMixin()],
-  props: {
-    environmentsEndpoint: {
-      type: String,
-      required: true,
-    },
-    projectId: {
-      type: String,
-      required: true,
-    },
-    featureFlagIssuesEndpoint: {
-      type: String,
-      required: true,
-    },
+  inject: {
     showUserCallout: {
       type: Boolean,
       required: true,
@@ -150,13 +138,10 @@ export default {
       <feature-flag-form
         :name="name"
         :description="description"
-        :project-id="projectId"
         :scopes="scopes"
         :strategies="strategies"
         :cancel-path="path"
         :submit-text="__('Save changes')"
-        :environments-endpoint="environmentsEndpoint"
-        :feature-flag-issues-endpoint="featureFlagIssuesEndpoint"
         :active="active"
         :version="version"
         @handleSubmit="data => updateFeatureFlag(data)"
