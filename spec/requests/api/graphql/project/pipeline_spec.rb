@@ -151,44 +151,91 @@ RSpec.describe 'getting pipeline information nested in a project' do
     let_it_be(:pipeline_b) { create(:ci_pipeline, project: project) }
     let_it_be(:build_job_b) { create(:ci_build, :trace_with_sections, pipeline: pipeline_b) }
 
-    def query(n_pipelines)
-      bindings = (1..).take(n_pipelines).map { |n| "pipeline#{n}" }
-      sig = bindings.map { |b| "$#{b}: ID!" }.join(', ')
-      selections = bindings.each_with_index.map do |b, i|
-        "#{b}: pipeline(iid: $#{b}) { ...builds }"
-      end.join("\n")
+    shared_examples 'a query without N+1 performance issues' do
+      let(:opts) do
+        { current_user: current_user, variables: variables }
+      end
 
-      <<~GQL
-      query($path: ID!, #{sig}) {
-        project(fullPath: $path) {
-          #{selections}
+      it 'does not suffer from N+1 query performance issues' do
+        post_graphql(query(1), **opts) # warmup
+
+        expect { post_graphql(query(2), **opts) }
+          .to issue_same_number_of_queries_as { post_graphql(query(1), **opts) }
+      end
+
+      it 'can select builds from each pipeline' do
+        post_graphql(query(2), **opts)
+
+        expect(graphql_data_at(:project)).to match(results_for_both_pipelines)
+      end
+    end
+
+    context 'when we use Project.pipelines' do
+      def query(n_pipelines)
+        graphql_query_for(:project, { full_path: project.full_path },
+          query_graphql_field(:pipelines, { first: n_pipelines },
+            query_graphql_field(:nodes, nil,
+              query_graphql_field(:builds, nil,
+                all_graphql_fields_for('CiBuild', max_depth: 1)))))
+      end
+
+      let(:variables) do
+        nil
+      end
+
+      let(:results_for_both_pipelines) do
+        a_graphql_object_with(
+          pipelines: a_graphql_object_with(nodes: contain_exactly(
+            a_graphql_object_with(
+              builds: contain_exactly(
+                a_graphql_object_with(id: global_id_of(failed_build)),
+                a_graphql_object_with(id: global_id_of(build_job_a))
+              )
+            ),
+            a_graphql_object_with(
+              builds: contain_exactly(
+                a_graphql_object_with(id: global_id_of(build_job_b))
+              )
+            )
+          ))
+        )
+      end
+
+      it_behaves_like 'a query without N+1 performance issues'
+    end
+
+    context 'when we use Project.pipeline' do
+      def query(n_pipelines)
+        bindings = (1..).take(n_pipelines).map { |n| "pipeline#{n}" }
+        sig = bindings.map { |b| "$#{b}: ID!" }.join(', ')
+        selections = bindings.each_with_index.map do |b, i|
+          "#{b}: pipeline(iid: $#{b}) { ...builds }"
+        end.join("\n")
+
+        <<~GQL
+        query($path: ID!, #{sig}) {
+          project(fullPath: $path) {
+            #{selections}
+          }
         }
-      }
 
-      fragment builds on Pipeline {
-        builds {
-          #{all_graphql_fields_for('CiBuild', max_depth: 1)}
+        fragment builds on Pipeline {
+          builds {
+            #{all_graphql_fields_for('CiBuild', max_depth: 1)}
+          }
         }
-      }
-      GQL
-    end
+        GQL
+      end
 
-    let(:variables) do
-      {
-        path: project.full_path,
-        pipeline1: pipeline_a.iid.to_s,
-        pipeline2: pipeline_b.iid.to_s
-      }
-    end
+      let(:variables) do
+        {
+          path: project.full_path,
+          pipeline1: pipeline_a.iid.to_s,
+          pipeline2: pipeline_b.iid.to_s
+        }
+      end
 
-    let(:opts) do
-      { current_user: current_user, variables: variables }
-    end
-
-    it 'can select builds from each pipeline' do
-      post_graphql(query(2), **opts)
-
-      expect(graphql_data_at(:project)).to match(
+      let(:results_for_both_pipelines) do
         a_graphql_object_with(
           pipeline1: a_graphql_object_with(
             builds: contain_exactly(
@@ -200,14 +247,9 @@ RSpec.describe 'getting pipeline information nested in a project' do
             builds: contain_exactly(a_graphql_object_with(id: global_id_of(build_job_b)))
           )
         )
-      )
-    end
+      end
 
-    it 'does not suffer from N+1 query performance issues' do
-      post_graphql(query(1), **opts)
-
-      expect { post_graphql(query(2), **opts) }
-        .to issue_same_number_of_queries_as { post_graphql(query(1), **opts) }
+      it_behaves_like 'a query without N+1 performance issues'
     end
   end
 end
