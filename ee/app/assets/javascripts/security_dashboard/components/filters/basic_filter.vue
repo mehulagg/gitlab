@@ -1,11 +1,11 @@
 <script>
 import FilterOption from './filter_option.vue';
-import CommonFilter from './common_filter.vue';
+import FilterBody from './filter_body.vue';
 
 export default {
   components: {
     FilterOption,
-    CommonFilter,
+    FilterBody,
   },
   props: {
     filter: {
@@ -91,7 +91,7 @@ export default {
 </script>
 
 <template>
-  <common-filter
+  <filter-body
     v-model="filterTerm"
     :name="filter.name"
     :selected-options-count="selectedCount"
@@ -119,5 +119,5 @@ export default {
         @click="toggleFilter(option)"
       />
     </template>
-  </common-filter>
+  </filter-body>
 </template>
