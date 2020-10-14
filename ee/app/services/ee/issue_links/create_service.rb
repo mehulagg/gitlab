@@ -14,8 +14,13 @@ module EE
       private
 
       def set_link_type(link)
-        if params[:link_type].present?
-          link.link_type = params[:link_type]
+        return unless params[:link_type].present?
+
+        link.link_type = params[:link_type]
+
+        if link.is_blocked_by?
+          link.source, link.target = link.target, link.source
+          link.link_type = ::IssueLink::TYPE_BLOCKS
         end
       end
 
