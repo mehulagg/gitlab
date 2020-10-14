@@ -142,15 +142,26 @@ Secret Detection can be customized by defining available variables:
 | `SECRET_DETECTION_EXCLUDED_PATHS` | "" | Exclude vulnerabilities from output based on the paths. This is a comma-separated list of patterns. Patterns can be globs, or file or folder paths (for example, `doc,spec` ). Parent directories also match patterns. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/225273) in GitLab 13.3. |
 | `SECRET_DETECTION_HISTORIC_SCAN` | false | Flag to enable a historic Gitleaks scan. |
 
-### Rulesets
-
-Rulesets were [introduced](https://gitlab.com/gitlab-org/security-products/analyzers/secrets/-/merge_requests/80) in GitLab 13.5. They can be defined in your project by creating a ".gitlab/secret-detection-ruleset.toml".
+### Custom rule sets
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211387) in GitLab 13.5.
+You can customize the default secret detection rules provided with GitLab.
+Customization allows you to exclude rules and add new rules.
 
 #### gitleaks.toml override
 
-It is possible to override gitleaks rules by supplying a relative path to a gitleaks.toml file in your project or embedding the gitleaks configuration in the ".gitlab/secret-detection-ruleset.toml" file directly.
+#### Create a custom rule set
 
-##### Relative path example
+To create a custom rule set:
+
+1. Create a `.gitlab` directory at the root of your project, if one doesn't already exist.
+1. Create a custom rule set file named `secret-detection-ruleset.toml` in the `.gitlab` directory.
+1. In the `secret-detection-ruleset.toml` file, either:
+   - Define a custom rule set.
+   - Provide the name of the file containing a custom rule set.
+
+##### Example rule set in a separate file
+
+This example demonstrates the method of defining custom rule sets in a separate file.
 
 ```toml
 [secrets]
@@ -162,7 +173,9 @@ It is possible to override gitleaks rules by supplying a relative path to a gitl
     value = "config/gitleaks.toml"
 ```
 
-##### Embedded gitleaks.toml example
+##### Example of rule set in the same file
+
+This example demonstrates the method of defining custom rule sets in the same file.
 
 ```toml
 [secrets]
