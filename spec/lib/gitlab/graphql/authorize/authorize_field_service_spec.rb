@@ -41,7 +41,7 @@ RSpec.describe Gitlab::Graphql::Authorize::AuthorizeFieldService do
     let(:type_instance) { type_class.authorized_new(presented_object, context) }
     let(:field) { type_class.fields['testField'].to_graphql }
 
-    subject(:resolved) { service.authorized_resolve.call(type_instance, {}, context) }
+    subject(:resolved) { service.authorized_resolve.call(type_instance, {}, context)&.force }
 
     context 'scalar types' do
       shared_examples 'checking permissions on the presented object' do
