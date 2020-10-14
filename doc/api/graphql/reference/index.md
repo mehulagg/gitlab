@@ -344,14 +344,14 @@ Represents the total number of issues and their weights for a particular day.
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `allowFailure` | Boolean! | Is this build allowed to fail |
-| `createdAt` | Time! | Timestamp of the pipeline's creation |
+| `createdAt` | Time! | Timestamp of the build's creation |
 | `duration` | Int | Duration of the build in seconds |
-| `finishedAt` | Time | Timestamp of the pipeline's completion |
+| `finishedAt` | Time | Timestamp of the build's completion |
 | `id` | CiBuildID! | ID of the build |
-| `name` | String! | Name of the build |
-| `stage` | String! | Stage of the build |
-| `startedAt` | Time | Timestamp when the pipeline was started |
-| `status` | CiBuildStatus! | Status of the build |
+| `name` | String | Name of the build |
+| `stage` | String | Stage of the build |
+| `startedAt` | Time | Timestamp when the build was started |
+| `status` | CiBuildStatus | Status of the build |
 | `trace` | BuildTrace | Output of the build |
 
 ### CiGroup
@@ -1887,7 +1887,8 @@ Information about pagination in a connection..
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `beforeSha` | String | Base SHA of the source branch |
-| `build` | CiBuild | A specific build in this pineline, either by name or ID |
+| `build` | CiBuild | A specific build in this pipeline, either by name or ID |
+| `builds` | CiBuild! => Array | Builds run in this pipeline |
 | `cancelable` | Boolean! | Specifies if a pipeline can be canceled |
 | `committedAt` | Time | Timestamp of the pipeline's commit |
 | `configSource` | PipelineConfigSourceEnum | Config source of the pipeline (UNKNOWN_SOURCE, REPOSITORY_SOURCE, AUTO_DEVOPS_SOURCE, WEBIDE_SOURCE, REMOTE_SOURCE, EXTERNAL_PROJECT_SOURCE, BRIDGE_SOURCE, PARAMETER_SOURCE) |
