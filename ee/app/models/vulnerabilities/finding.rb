@@ -303,7 +303,7 @@ module Vulnerabilities
     end
 
     def assets
-      metadata.dig('assets') || []
+      metadata.fetch('assets', [])
     end
 
     alias_method :==, :eql? # eql? is necessary in some cases like array intersection
