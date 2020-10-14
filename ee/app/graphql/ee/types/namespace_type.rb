@@ -9,7 +9,8 @@ module EE
         field :additional_purchased_storage_size,
               GraphQL::FLOAT_TYPE,
               null: true,
-              description: 'Additional storage purchased for the root namespace in bytes'
+              description: 'Additional storage purchased for the root namespace in bytes',
+              resolve: -> (obj, _args, _ctx) { obj.additional_purchased_storage_size.megabytes }
 
         field :total_repository_size_excess,
               GraphQL::FLOAT_TYPE,
