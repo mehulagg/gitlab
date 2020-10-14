@@ -53,7 +53,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
   def toggle_more_options(stage)
     stage.hover
 
-    stage.find('.more-actions-toggle').click
+    find_stage_actions_btn(stage).click
   end
 
   def select_dropdown_option(name, value = start_event_identifier)
@@ -82,6 +82,10 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
     drag_to(selector: '.stage-nav>ul',
             from_index: from,
             to_index: to)
+  end
+
+  def find_stage_actions_btn(stage)
+    stage.find('[data-testid="more-actions-toggle"]')
   end
 
   before do
@@ -391,9 +395,9 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
       end
 
       it "can be hidden, can't be edited or removed" do
-        expect(first_default_stage.find('.more-actions-dropdown')).to have_text(_('Hide stage'))
-        expect(first_default_stage.find('.more-actions-dropdown')).not_to have_text(_('Edit stage'))
-        expect(first_default_stage.find('.more-actions-dropdown')).not_to have_text(_('Remove stage'))
+        expect(find_stage_actions_btn(first_default_stage)).to have_text(_('Hide stage'))
+        expect(find_stage_actions_btn(first_default_stage)).not_to have_text(_('Edit stage'))
+        expect(find_stage_actions_btn(first_default_stage)).not_to have_text(_('Remove stage'))
       end
 
       context 'Hide stage' do
@@ -445,9 +449,9 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
       end
 
       it 'can not be hidden, can be edited or removed' do
-        expect(first_custom_stage.find('.more-actions-dropdown')).not_to have_text(_('Hide stage'))
-        expect(first_custom_stage.find('.more-actions-dropdown')).to have_text(_('Edit stage'))
-        expect(first_custom_stage.find('.more-actions-dropdown')).to have_text(_('Remove stage'))
+        expect(find_stage_actions_btn(first_custom_stage)).not_to have_text(_('Hide stage'))
+        expect(find_stage_actions_btn(first_custom_stage)).to have_text(_('Edit stage'))
+        expect(find_stage_actions_btn(first_custom_stage)).to have_text(_('Remove stage'))
       end
 
       it 'disappears from the stage table after being removed' do

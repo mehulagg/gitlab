@@ -1582,8 +1582,8 @@ On each node perform the following:
    ```
 
 1. Save the `/etc/gitlab/gitlab-secrets.json` file from one of the two
-   application nodes and install it on the other application node and the
-   [Gitaly node](#configure-gitaly) and
+   application nodes and install it on the other application node, the
+   [Gitaly node](#configure-gitaly) and the [Sidekiq node](#configure-sidekiq) and
    [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
 1. Verify the GitLab services are running:
@@ -1735,7 +1735,7 @@ based on what features you intend to use:
 1. Configure [object storage for merge request diffs](../merge_request_diffs.md#using-object-storage).
 1. Configure [object storage for Container Registry](../packages/container_registry.md#use-object-storage) (optional feature).
 1. Configure [object storage for Mattermost](https://docs.mattermost.com/administration/config-settings.html#file-storage) (optional feature).
-1. Configure [object storage for packages](../packages/index.md#using-object-storage) (optional feature). **(PREMIUM ONLY)**
+1. Configure [object storage for packages](../packages/index.md#using-object-storage) (optional feature).
 1. Configure [object storage for Dependency Proxy](../packages/dependency_proxy.md#using-object-storage) (optional feature). **(PREMIUM ONLY)**
 1. Configure [object storage for Pseudonymizer](../pseudonymizer.md#configuration) (optional feature). **(ULTIMATE ONLY)**
 1. Configure [object storage for autoscale runner caching](https://docs.gitlab.com/runner/configuration/autoscale.html#distributed-runners-caching) (optional - for improved performance).

@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
 constraints(::Constraints::GroupUrlConstrainer.new) do
-  scope(path: 'groups/*id',
-        controller: :groups,
-        constraints: { id: Gitlab::PathRegex.full_namespace_route_regex, format: /(html|json|atom|ics)/ }) do
-    scope(path: '-') do
-      get :subgroups, as: :subgroups_group # rubocop:todo Cop/PutGroupRoutesUnderScope
-    end
-  end
-
   scope(path: 'groups/*group_id/-',
         module: :groups,
         as: :group,
@@ -93,6 +85,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         get 'merge_requests'
         get 'labels'
         get 'epics'
+        get 'vulnerabilities'
         get 'commands'
         get 'milestones'
       end

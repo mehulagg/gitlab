@@ -5,6 +5,12 @@ import {
   filterBySearchTerm,
 } from 'ee/analytics/shared/utils';
 
+const rawValueStream = `{
+  "id": 1,
+  "name": "Custom value stream 1",
+  "is_custom": true
+}`;
+
 const groupDataset = {
   groupId: '1',
   groupName: 'My Group',
@@ -27,13 +33,13 @@ const projectDataset = {
   projectPathWithNamespace: 'my-group/my-project',
 };
 
-const rawProjects = JSON.stringify([
+const rawProjects = `[
   {
-    project_id: '1',
-    project_name: 'My Project',
-    project_path_with_namespace: 'my-group/my-project',
-  },
-]);
+    "project_id": "1",
+    "project_name": "My Project",
+    "project_path_with_namespace": "my-group/my-project"
+  }
+]`;
 
 describe('buildGroupFromDataset', () => {
   it('returns null if groupId is missing', () => {
@@ -87,6 +93,28 @@ describe('buildCycleAnalyticsInitialData', () => {
   `('will set a default value for "$field" if is not present', ({ field, value }) => {
     expect(buildCycleAnalyticsInitialData()).toMatchObject({
       [field]: value,
+    });
+  });
+
+  describe('value stream', () => {
+    it('will be set given an array of projects', () => {
+      expect(buildCycleAnalyticsInitialData({ valueStream: rawValueStream })).toMatchObject({
+        selectedValueStream: {
+          id: 1,
+          name: 'Custom value stream 1',
+          isCustom: true,
+        },
+      });
+    });
+
+    it.each`
+      value
+      ${null}
+      ${''}
+    `('will be null if given a value of `$value`', ({ value }) => {
+      expect(buildCycleAnalyticsInitialData({ valueStream: value })).toMatchObject({
+        selectedValueStream: null,
+      });
     });
   });
 

@@ -10,11 +10,11 @@ import { EpicFilterType } from '../constants';
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
 import { fullEpicId } from '../boards_util';
-import { formatListIssues, fullBoardId } from '~/boards/boards_util';
+import { formatListIssues, formatListsPageInfo, fullBoardId } from '~/boards/boards_util';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '~/boards/eventhub';
 
-import createDefaultClient from '~/lib/graphql';
+import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import epicsSwimlanesQuery from '../queries/epics_swimlanes.query.graphql';
 import issueSetEpic from '../queries/issue_set_epic.mutation.graphql';
 import listsIssuesQuery from '~/boards/queries/lists_issues.query.graphql';
@@ -25,19 +25,24 @@ const notImplemented = () => {
   throw new Error('Not implemented!');
 };
 
-export const gqlClient = createDefaultClient();
+export const gqlClient = createGqClient(
+  {},
+  {
+    fetchPolicy: fetchPolicies.NO_CACHE,
+  },
+);
 
 const fetchAndFormatListIssues = (state, extraVariables) => {
   const { endpoints, boardType, filterParams } = state;
   const { fullPath, boardId } = endpoints;
 
   const variables = {
-    ...extraVariables,
     fullPath,
     boardId: fullBoardId(boardId),
     filters: { ...filterParams },
     isGroup: boardType === BoardType.group,
     isProject: boardType === BoardType.project,
+    ...extraVariables,
   };
 
   return gqlClient
@@ -50,7 +55,7 @@ const fetchAndFormatListIssues = (state, extraVariables) => {
     })
     .then(({ data }) => {
       const { lists } = data[boardType]?.board;
-      return formatListIssues(lists);
+      return { listIssues: formatListIssues(lists), listPageInfo: formatListsPageInfo(lists) };
     });
 };
 
@@ -104,7 +109,22 @@ export default {
         }));
 
         if (!withLists) {
-          commit(types.RECEIVE_EPICS_SUCCESS, { epics: epicsFormatted });
+          commit(types.RECEIVE_EPICS_SUCCESS, epicsFormatted);
+        } else {
+          if (lists) {
+            let boardLists = lists.nodes.map(list =>
+              boardsStore.updateListPosition({ ...list, doNotFetchIssues: true }),
+            );
+            boardLists = sortBy([...boardLists], 'position');
+            commit(types.RECEIVE_BOARD_LISTS_SUCCESS, boardLists);
+          }
+
+          if (epicsFormatted) {
+            commit(types.RECEIVE_FIRST_EPICS_SUCCESS, {
+              epics: epicsFormatted,
+              canAdminEpic: epics.edges[0]?.node?.userPermissions?.adminEpic,
+            });
+          }
         }
 
         if (epics.pageInfo?.hasNextPage) {
@@ -113,12 +133,6 @@ export default {
             endCursor: epics.pageInfo.endCursor,
           });
         }
-
-        return {
-          epics: epicsFormatted,
-          lists: lists?.nodes,
-          canAdminEpic: epics.edges[0]?.node?.userPermissions?.adminEpic,
-        };
       })
       .catch(() => commit(types.RECEIVE_SWIMLANES_FAILURE));
   },
@@ -177,19 +191,28 @@ export default {
     notImplemented();
   },
 
-  fetchIssuesForList: ({ state, commit }, listId, noEpicIssues = false) => {
+  fetchIssuesForList: ({ state, commit }, { listId, fetchNext = false, noEpicIssues = false }) => {
+    commit(types.REQUEST_ISSUES_FOR_LIST, { listId, fetchNext });
+
     const { filterParams } = state;
 
     const variables = {
       id: listId,
       filters: noEpicIssues
-        ? { ...filterParams, epicWildcardId: EpicFilterType.none }
+        ? { ...filterParams, epicWildcardId: EpicFilterType.none.toUpperCase() }
         : filterParams,
+      after: fetchNext ? state.pageInfoByListId[listId].endCursor : undefined,
+      first: 20,
     };
 
     return fetchAndFormatListIssues(state, variables)
-      .then(listIssues => {
-        commit(types.RECEIVE_ISSUES_FOR_LIST_SUCCESS, { listIssues, listId });
+      .then(({ listIssues, listPageInfo }) => {
+        commit(types.RECEIVE_ISSUES_FOR_LIST_SUCCESS, {
+          listIssues,
+          listPageInfo,
+          listId,
+          noEpicIssues,
+        });
       })
       .catch(() => commit(types.RECEIVE_ISSUES_FOR_LIST_FAILURE, listId));
   },
@@ -204,7 +227,7 @@ export default {
     };
 
     return fetchAndFormatListIssues(state, variables)
-      .then(listIssues => {
+      .then(({ listIssues }) => {
         commit(types.RECEIVE_ISSUES_FOR_EPIC_SUCCESS, { ...listIssues, epicId });
       })
       .catch(() => commit(types.RECEIVE_ISSUES_FOR_EPIC_FAILURE, epicId));
@@ -214,21 +237,7 @@ export default {
     commit(types.TOGGLE_EPICS_SWIMLANES);
 
     if (state.isShowingEpicsSwimlanes) {
-      dispatch('fetchEpicsSwimlanes', {})
-        .then(({ lists, epics, canAdminEpic }) => {
-          if (lists) {
-            let boardLists = lists.map(list =>
-              boardsStore.updateListPosition({ ...list, doNotFetchIssues: true }),
-            );
-            boardLists = sortBy([...boardLists], 'position');
-            commit(types.RECEIVE_BOARD_LISTS_SUCCESS, boardLists);
-          }
-
-          if (epics) {
-            commit(types.RECEIVE_EPICS_SUCCESS, { epics, canAdminEpic });
-          }
-        })
-        .catch(() => commit(types.RECEIVE_SWIMLANES_FAILURE));
+      dispatch('fetchEpicsSwimlanes', {}).catch(() => commit(types.RECEIVE_SWIMLANES_FAILURE));
     } else if (!gon.features.graphqlBoardLists) {
       boardsStore.create();
       eventHub.$emit('initialBoardLoad');

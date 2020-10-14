@@ -17,7 +17,7 @@ RSpec.describe GitlabSchema.types['Project'] do
     expected_fields = %w[
       vulnerabilities sast_ci_configuration vulnerability_scanners requirement_states_count
       vulnerability_severities_count packages compliance_frameworks vulnerabilities_count_by_day
-      security_dashboard_path iterations cluster_agents
+      security_dashboard_path iterations cluster_agents repository_size_excess actual_repository_size_limit
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
@@ -89,7 +89,7 @@ RSpec.describe GitlabSchema.types['Project'] do
       expect(secure_analyzers_prefix['label']).to eq('Image prefix')
       expect(secure_analyzers_prefix['defaultValue']).to eq('registry.gitlab.com/gitlab-org/security-products/analyzers')
       expect(secure_analyzers_prefix['value']).to eq('registry.gitlab.com/gitlab-org/security-products/analyzers')
-      expect(secure_analyzers_prefix['size']).to eq('MEDIUM')
+      expect(secure_analyzers_prefix['size']).to eq('LARGE')
       expect(secure_analyzers_prefix['options']).to be_nil
     end
 

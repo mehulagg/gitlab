@@ -8,6 +8,8 @@ module Projects
         push_frontend_feature_flag(:security_on_demand_scans_site_validation, @project)
       end
 
+      feature_category :dynamic_application_security_testing
+
       def new
       end
 

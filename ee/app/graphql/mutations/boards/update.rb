@@ -6,7 +6,7 @@ module Mutations
       graphql_name 'UpdateBoard'
 
       argument :id,
-               GraphQL::ID_TYPE,
+               ::Types::GlobalIDType[::Board],
                required: true,
                description: 'The board global id.'
 
@@ -26,13 +26,13 @@ module Mutations
                description: copy_field_description(Types::BoardType, :hide_closed_list)
 
       argument :assignee_id,
-               GraphQL::ID_TYPE,
+               ::Types::GlobalIDType[::User],
                required: false,
                loads: ::Types::UserType,
                description: 'The id of user to be assigned to the board.'
 
       argument :milestone_id,
-               GraphQL::ID_TYPE,
+               ::Types::GlobalIDType[::Milestone],
                required: false,
                description: 'The id of milestone to be assigned to the board.'
 
@@ -81,16 +81,25 @@ module Mutations
       private
 
       def find_object(id:)
-        GitlabSchema.object_from_id(id)
+        # TODO: remove this line when the compatibility layer is removed
+        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+        id = ::Types::GlobalIDType[::Board].coerce_isolated_input(id)
+        GitlabSchema.find_by_gid(id)
       end
 
       def parse_arguments(args = {})
         if args[:assignee_id]
-          args[:assignee_id] = GitlabSchema.parse_gid(args[:assignee_id], expected_type: ::User).model_id
+          # TODO: remove this line when the compatibility layer is removed
+          # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+          args[:assignee_id] = ::Types::GlobalIDType[::User].coerce_isolated_input(args[:assignee_id])
+          args[:assignee_id] = args[:assignee_id].model_id
         end
 
         if args[:milestone_id]
-          args[:milestone_id] = GitlabSchema.parse_gid(args[:milestone_id], expected_type: ::Milestone).model_id
+          # TODO: remove this line when the compatibility layer is removed
+          # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+          args[:milestone_id] = ::Types::GlobalIDType[::Milestone].coerce_isolated_input(args[:milestone_id])
+          args[:milestone_id] = args[:milestone_id].model_id
         end
 
         args[:label_ids] &&= args[:label_ids].map do |label_id|

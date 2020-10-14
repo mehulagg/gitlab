@@ -14,8 +14,13 @@ module EE
       end
 
       class_methods do
-        def replicables_for_geo_node(node = ::Gitlab::Geo.current_node)
-          selective_sync_scope(node).merge(object_storage_scope(node))
+        # @param primary_key_in [Range, Terraform::StateVersion] arg to pass to primary_key_in scope
+        # @param node [GeoNode] defaults to ::Gitlab::Geo.current_node
+        # @return [ActiveRecord::Relation<Terraform::StateVersion>] everything that should be synced to this node, restricted by primary key
+        def replicables_for_geo_node(primary_key_in, node = ::Gitlab::Geo.current_node)
+          primary_key_in(primary_key_in)
+            .merge(selective_sync_scope(node))
+            .merge(object_storage_scope(node))
         end
 
         private

@@ -7,6 +7,8 @@ class Projects::Iterations::InheritedController < Projects::ApplicationControlle
     push_frontend_feature_flag(:burnup_charts, project)
   end
 
+  feature_category :issue_tracking
+
   def show; end
 
   private

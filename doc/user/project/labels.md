@@ -30,18 +30,25 @@ There are two types of labels in GitLab:
 
 ## Assign and unassign labels
 
-Every issue, merge request and epic can be assigned any number of labels. The labels are
+> Unassigning labels with the **X** button [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216881) in GitLab 13.5.
+
+Every issue, merge request, and epic can be assigned any number of labels. The labels are
 managed in the right sidebar, where you can assign or unassign labels as needed.
 
-To assign a label to an issue, merge request or epic:
+To assign or unassign a label:
 
-1. In the label section of the sidebar, click **Edit**, then:
-   - In the list, click the labels you want. Each label is flagged with a checkmark.
-   - Find labels by entering a search query and clicking search (**{search}**), then
-     click on them. You can search repeatedly and add more labels.
-1. Click **X** or anywhere outside the label section and the labels are applied.
+1. In the **Labels** section of the sidebar, click **Edit**.
+1. In the **Assign labels** list, search for labels by typing their names.
+   You can search repeatedly to add more labels.
+   The selected labels are marked with a checkmark.
+1. Click the labels you want to assign or unassign.
+1. To apply your changes to labels, click **X** next to **Assign labels** or anywhere outside the
+   label section.
 
-You can also assign a label with the [`/label ~label1 ~label2` quick action](quick_actions.md).
+Alternatively, to unassign a label, click the **X** on the label you want to unassign.
+
+You can also assign a label with the `/label` [quick action](quick_actions.md),
+remove labels with `/unlabel`, and reassign labels (remove all and assign new ones) with `/relabel`.
 
 ## Label management
 
@@ -52,8 +59,9 @@ and edit labels.
 
 View the project labels list by going to the project and clicking **Issues > Labels**.
 The list includes all labels that are defined at the project level, as well as all
-labels inherited from the immediate parent group. You can filter the list by entering a search
-query at the top and clicking search (**{search}**).
+labels inherited from the immediate parent group.
+For each label, you can see the project or group path from where it was created.
+You can filter the list by entering a search query at the top and clicking search (**{search}**).
 
 To create a new project label:
 
@@ -147,7 +155,7 @@ by preventing certain labels from being used together.
 A label is scoped when it uses a special double-colon (`::`) syntax in the label’s
 title, for example:
 
-![Sample scoped labels](img/labels_key_value_v12_1.png)
+![Scoped labels](img/labels_key_value_v13_5.png)
 
 An issue, merge request or epic cannot have two scoped labels, of the form `key::value`,
 with the same `key`. Adding a new label with the same `key`, but a different `value` will
@@ -206,7 +214,7 @@ issue, or merge request.
 If you are subscribing to a group label from within a project, you can select to subscribe
 to label notifications for the project only, or the whole group.
 
-![Labels subscriptions](img/labels_subscriptions_v12_1.png)
+![Labels subscriptions](img/labels_subscriptions_v13_5.png)
 
 ## Label priority
 
@@ -220,7 +228,7 @@ from the group label list.
 
 From the project label list page, star a label to indicate that it has a priority.
 
-![Labels prioritized](img/labels_prioritized_v12_1.png)
+![Labels prioritized](img/labels_prioritized_v13_5.png)
 
 Drag starred labels up and down the list to change their priority, where higher in the list
 means higher priority.

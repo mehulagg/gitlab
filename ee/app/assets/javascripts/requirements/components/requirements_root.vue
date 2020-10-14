@@ -1,6 +1,6 @@
 <script>
-import * as Sentry from '@sentry/browser';
 import { GlPagination } from '@gitlab/ui';
+import * as Sentry from '~/sentry/wrapper';
 import { __, sprintf } from '~/locale';
 import Api from '~/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';

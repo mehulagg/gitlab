@@ -162,4 +162,53 @@ RSpec.describe SearchHelper do
       it_behaves_like 'returns old message'
     end
   end
+
+  describe '#highlight_and_truncate_issue' do
+    let(:description) { 'hello world' }
+    let(:issue) { create(:issue, description: description) }
+    let(:user) { create(:user) }
+    let(:search_highlight) { {} }
+
+    before do
+      allow(self).to receive(:current_user).and_return(user)
+      stub_ee_application_setting(search_using_elasticsearch: true)
+    end
+
+    # Elasticsearch returns Elasticsearch::Model::HashWrapper class for the highlighting
+    subject { highlight_and_truncate_issue(issue, 'test', Elasticsearch::Model::HashWrapper.new(search_highlight)) }
+
+    context 'when description is not present' do
+      let(:description) { nil }
+
+      it 'does nothing' do
+        expect(self).not_to receive(:sanitize)
+
+        subject
+      end
+    end
+
+    context 'when description present' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:description, :search_highlight, :expected) do
+        'test'                                                                 | { 1 => { description: ['gitlabelasticsearch→test←gitlabelasticsearch'] } } | "<span class='gl-text-black-normal gl-font-weight-bold'>test</span>"
+        '<span style="color: blue;">this test should not be blue</span>'       | { 1 => { description: ['<span style="color: blue;">this gitlabelasticsearch→test←gitlabelasticsearch should not be blue</span>'] } } | "<span>this <span class='gl-text-black-normal gl-font-weight-bold'>test</span> should not be blue</span>"
+        '<a href="#" onclick="alert(\'XSS\')">Click Me test</a>'               | { 1 => { description: ['<a href="#" onclick="alert(\'XSS\')">Click Me gitlabelasticsearch→test←gitlabelasticsearch</a>'] } } | "<a href='#'>Click Me <span class='gl-text-black-normal gl-font-weight-bold'>test</span></a>"
+        '<script type="text/javascript">alert(\'Another XSS\');</script> test' | { 1 => { description: ['<script type="text/javascript">alert(\'Another XSS\');</script> gitlabelasticsearch→test←gitlabelasticsearch'] } } | "alert(&apos;Another XSS&apos;); <span class='gl-text-black-normal gl-font-weight-bold'>test</span>"
+        'Lorem test ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec.' | { 1 => { description: ['Lorem gitlabelasticsearch→test←gitlabelasticsearch ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec.'] } } | "Lorem <span class='gl-text-black-normal gl-font-weight-bold'>test</span> ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Don..."
+      end
+
+      with_them do
+        before do
+          # table syntax doesn't allow use of calculated fields so we must fake issue.id
+          # to ensure the test goes down the correct path
+          allow(issue).to receive(:id).and_return(1)
+        end
+
+        it 'sanitizes, truncates, and highlights the search term' do
+          expect(subject).to eq(expected)
+        end
+      end
+    end
+  end
 end

@@ -4,12 +4,16 @@ group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Create and manage alerts in GitLab
+# Alerts
+
+Alerts are a critical entity in your incident managment workflow. They represent a notable event that might indicate a service outage or disruption. GitLab provides a list view for triage and detail view for deeper investigation of what happened.
+
+## Alert List
 
 Users with at least Developer [permissions](../../user/permissions.md) can
-access the Alert Management list at **Operations > Alerts** in your project's
-sidebar. The Alert Management list displays alerts sorted by start time, but
-you can change the sort order by clicking the headers in the Alert Management list.
+access the Alert list at **Operations > Alerts** in your project's
+sidebar. The Alert list displays alerts sorted by start time, but
+you can change the sort order by clicking the headers in the Alert list.
 ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217745) in GitLab 13.1.)
 
 The alert list displays the following information:
@@ -37,69 +41,6 @@ TIP: **Tip:**
 Check out a live example available from the
 [`tanuki-inc` project page](https://gitlab-examples-ops-incident-setup-everyone-tanuki-inc.34.69.64.147.nip.io/)
 in GitLab to examine alerts in action.
-
-## Enable Alerts
-
-NOTE: **Note:**
-You need at least Maintainer [permissions](../../user/permissions.md) to enable
-the Alerts feature.
-
-There are several ways to accept alerts into your GitLab project. Enabling any
-of these methods enables the Alert list. After configuring alerts, visit
-**Operations > Alerts** in your project's sidebar to view the list of alerts.
-
-### Enable GitLab-managed Prometheus alerts
-
-You can install the GitLab-managed Prometheus application on your Kubernetes
-cluster. For more information, see
-[Managed Prometheus on Kubernetes](../../user/project/integrations/prometheus.md#managed-prometheus-on-kubernetes).
-When GitLab-managed Prometheus is installed, the Alerts list is also enabled.
-
-To populate the alerts with data, see
-[GitLab-Managed Prometheus instances](../metrics/alerts.md#managed-prometheus-instances).
-
-### Enable external Prometheus alerts
-
-You can configure an externally-managed Prometheus instance to send alerts
-to GitLab. To set up this configuration, read the
-[configuring Prometheus](../metrics/alerts.md#external-prometheus-instances)
-documentation. Activating the external Prometheus configuration also enables
-the Alerts list.
-
-To populate the alerts with data, see [External Prometheus instances](../metrics/alerts.md#external-prometheus-instances).
-
-### Enable a Generic Alerts endpoint
-
-GitLab provides the Generic Alerts endpoint so you can accept alerts from a
-third-party alerts service. Read the [instructions for toggling generic alerts](alert_integrations.md#configuration)
-to add this option. After configuring the endpoint, the Alerts list is enabled.
-
-To populate the alerts with data, see [Customizing the payload](alert_integrations.md#customizing-the-payload)
-for requests to the alerts endpoint.
-
-### Opsgenie integration **(PREMIUM)**
-
-> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
-
-You can monitor alerts using a GitLab integration with [Opsgenie](https://www.atlassian.com/software/opsgenie).
-
-NOTE: **Note:**
-If you enable the Opsgenie integration, you can't have other GitLab alert
-services, such as [Generic Alerts](generic_alerts.md) or Prometheus alerts,
-active at the same time.
-
-To enable Opsgenie integration:
-
-1. Sign in as a user with Maintainer or Owner [permissions](../../user/permissions.md).
-1. Navigate to **Operations > Alerts**.
-1. In the **Integrations** select box, select **Opsgenie**.
-1. Select the **Active** toggle.
-1. In the **API URL** field, enter the base URL for your Opsgenie integration,
-   such as `https://app.opsgenie.com/alert/list`.
-1. Select **Save changes**.
-
-After you enable the integration, navigate to the Alerts list page at
-**Operations > Alerts**, and then select **View alerts in Opsgenie**.
 
 ## Alert severity
 
@@ -168,13 +109,11 @@ about alert statuses.
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in GitLab 13.1.
 
 The Alert detail view allows users to update the Alert assignee.
+GitLab supports only a single assignee per alert.
 
 In large teams, where there is shared ownership of an alert, it can be
 difficult to track who is investigating and working on it. The Alert detail
 view enables you to update the Alert assignee:
-
-NOTE: **Note:**
-GitLab supports only a single assignee per alert.
 
 1. To display the list of current alerts, navigate to **Operations > Alerts**:
 
@@ -313,3 +252,49 @@ Viewing logs from a metrics panel can be useful if you're triaging an
 application incident and need to [explore logs](../metrics/dashboards/index.md#chart-context-menu)
 from across your application. These logs help you understand what's affecting
 your application's performance and how to resolve any problems.
+
+## View the environment that generated the alert
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232492) in GitLab 13.5.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-environment-link-in-alert-details). **(CORE ONLY)**
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
+
+The environment information and the link are displayed in the Alert Details tab[#alert-details-tab].
+
+### Enable or disable Environment Link in Alert Details **(CORE ONLY)**
+
+Viewing the environment is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:expose_environment_path_in_alert_details)
+```
+
+To enable for just a particular project:
+
+```ruby
+project = Project.find_by_full_path('your-group/your-project')
+Feature.enable(:expose_environment_path_in_alert_details, project)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:expose_environment_path_in_alert_details)
+```
+
+To disable for just a particular project:
+
+```ruby
+project = Project.find_by_full_path('your-group/your-project')
+Feature.disable(:expose_environment_path_in_alert_details, project)
+```

@@ -162,7 +162,7 @@ RSpec.describe Ci::JobArtifact do
     end
 
     with_them do
-      subject(:job_artifact_included) { described_class.replicables_for_geo_node.include?(ci_job_artifact) }
+      subject(:job_artifact_included) { described_class.replicables_for_geo_node(ci_job_artifact).exists? }
 
       let(:project) { create(*project_factory) }
       let(:ci_build) { create(:ci_build, project: project) }

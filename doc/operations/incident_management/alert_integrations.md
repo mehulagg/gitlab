@@ -15,6 +15,10 @@ to use this endpoint.
 
 ## Configuration
 
+You can either configure alerts to integrate with an [external Prometheus server](#external-prometheus-integration),
+or provide a [generic HTTP endpoint](#generic-http-endpoint) to receive alerts
+from other services.
+
 ### Generic HTTP Endpoint
 
 Enabling the Generic HTTP Endpoint creates a unique HTTP endpoint that can receive alert payloads in JSON format. You can always
@@ -31,7 +35,7 @@ You will need to activate the endpoint and obtain credentials to set up this int
 
 ### External Prometheus integration
 
-For GitLab versions 13.1 and greater, please see [External Prometheus Instances](../metrics/alerts.md#external-prometheus-instances) to configure alerts for this integration. 
+For GitLab versions 13.1 and greater, please see [External Prometheus Instances](../metrics/alerts.md#external-prometheus-instances) to configure alerts for this integration.
 
 ## Customizing the payload
 
@@ -123,3 +127,26 @@ and details pages.
 If the existing alert is already `resolved`, GitLab creates a new alert instead.
 
 ![Alert Management List](./img/alert_list_v13_1.png)
+
+### Link to your Opsgenie Alerts
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
+
+You can monitor alerts using a GitLab integration with [Opsgenie](https://www.atlassian.com/software/opsgenie).
+
+If you enable the Opsgenie integration, you can't have other GitLab alert
+services, such as [Generic Alerts](generic_alerts.md) or Prometheus alerts,
+active at the same time.
+
+To enable Opsgenie integration:
+
+1. Sign in as a user with Maintainer or Owner [permissions](../../user/permissions.md).
+1. Navigate to **Operations > Alerts**.
+1. In the **Integrations** select box, select **Opsgenie**.
+1. Select the **Active** toggle.
+1. In the **API URL** field, enter the base URL for your Opsgenie integration,
+   such as `https://app.opsgenie.com/alert/list`.
+1. Select **Save changes**.
+
+After you enable the integration, navigate to the Alerts list page at
+**Operations > Alerts**, and then select **View alerts in Opsgenie**.

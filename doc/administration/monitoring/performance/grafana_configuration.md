@@ -17,7 +17,6 @@ or Grafana supplies package repositories (Yum/Apt) for easy installation.
 See [Grafana installation documentation](https://grafana.com/docs/grafana/latest/installation/)
 for detailed steps.
 
-NOTE: **Note:**
 Before starting Grafana for the first time, set the admin user
 and password in `/etc/grafana/grafana.ini`. If you don't, the default password
 is `admin`.
@@ -50,7 +49,6 @@ JSON file individually:
 1. After the dashboard is imported, click the **Save dashboard** icon in the top bar:
    ![Grafana save icon](img/grafana_save_icon.png)
 
-   NOTE: **Note:**
    If you don't save the dashboard after importing it, the dashboard is removed
    when you navigate away from the page.
 

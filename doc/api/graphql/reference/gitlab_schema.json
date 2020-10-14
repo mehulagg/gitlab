@@ -111,7 +111,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -227,7 +227,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "ProjectID",
                   "ofType": null
                 }
               },
@@ -661,6 +661,20 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "environment",
+              "description": "Environment for the alert",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Environment",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -1993,7 +2007,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -2109,7 +2123,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -2225,7 +2239,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -2342,6 +2356,16 @@
           "interfaces": [
 
           ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "AwardableID",
+          "description": "Identifier of Awardable",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
           "enumValues": null,
           "possibleTypes": null
         },
@@ -3157,7 +3181,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items within a time frame where items.start_date is between startDate and endDate parameters (endDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.start",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -3167,10 +3191,20 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items within a time frame where items.end_date is between startDate and endDate parameters (startDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.end",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "timeframe",
+                  "description": "List items overlapping the given timeframe",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "Timeframe",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -5344,6 +5378,20 @@
           "description": null,
           "fields": [
             {
+              "name": "detailedStatus",
+              "description": "Detailed status of the group",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DetailedStatus",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "jobs",
               "description": "Jobs in group",
               "args": [
@@ -5550,6 +5598,20 @@
           "description": null,
           "fields": [
             {
+              "name": "detailedStatus",
+              "description": "Detailed status of the job",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DetailedStatus",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "name",
               "description": "Name of the job",
               "args": [
@@ -5751,6 +5813,20 @@
           "name": "CiStage",
           "description": null,
           "fields": [
+            {
+              "name": "detailedStatus",
+              "description": "Detailed status of the stage",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DetailedStatus",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "groups",
               "description": "Group of jobs for the stage",
@@ -6667,6 +6743,16 @@
           "kind": "SCALAR",
           "name": "ClustersAgentTokenID",
           "description": "Identifier of Clusters::AgentToken",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "ClustersClusterID",
+          "description": "Identifier of Clusters::Cluster",
           "fields": null,
           "inputFields": null,
           "interfaces": null,
@@ -8039,7 +8125,7 @@
               "description": "The global id of the environment to add an annotation to",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "EnvironmentID",
                 "ofType": null
               },
               "defaultValue": null
@@ -8049,7 +8135,7 @@
               "description": "The global id of the cluster to add an annotation to",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "ClustersClusterID",
                 "ofType": null
               },
               "defaultValue": null
@@ -8135,6 +8221,172 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "MetricsDashboardAnnotation",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "CreateBoardInput",
+          "description": "Autogenerated input type of CreateBoard",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "projectPath",
+              "description": "The project full path the board is associated with.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "groupPath",
+              "description": "The group full path the board is associated with.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "name",
+              "description": "The board name.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "assigneeId",
+              "description": "The ID of the user to be assigned to the board.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "milestoneId",
+              "description": "The ID of the milestone to be assigned to the board.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "weight",
+              "description": "The weight of the board.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "labelIds",
+              "description": "The IDs of labels to be added to the board.",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "CreateBoardPayload",
+          "description": "Autogenerated return type of CreateBoard",
+          "fields": [
+            {
+              "name": "board",
+              "description": "The board after mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Board",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -8448,7 +8700,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NoteableID",
                   "ofType": null
                 }
               },
@@ -8796,7 +9048,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NoteableID",
                   "ofType": null
                 }
               },
@@ -9084,7 +9336,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NoteableID",
                   "ofType": null
                 }
               },
@@ -11322,6 +11574,16 @@
               "deprecationReason": null
             }
           ],
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "Date",
+          "description": "Date represented in ISO 8601",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
           "possibleTypes": null
         },
         {
@@ -14068,7 +14330,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NoteID",
                   "ofType": null
                 }
               },
@@ -14279,25 +14541,21 @@
             },
             {
               "name": "detailsPath",
-              "description": "Path of the details for the pipeline status",
+              "description": "Path of the details for the status",
               "args": [
 
               ],
               "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "favicon",
-              "description": "Favicon of the pipeline status",
+              "description": "Favicon of the status",
               "args": [
 
               ],
@@ -14315,7 +14573,7 @@
             },
             {
               "name": "group",
-              "description": "Group of the pipeline status",
+              "description": "Group of the status",
               "args": [
 
               ],
@@ -14333,7 +14591,7 @@
             },
             {
               "name": "hasDetails",
-              "description": "Indicates if the pipeline status has further details",
+              "description": "Indicates if the status has further details",
               "args": [
 
               ],
@@ -14351,7 +14609,7 @@
             },
             {
               "name": "icon",
-              "description": "Icon of the pipeline status",
+              "description": "Icon of the status",
               "args": [
 
               ],
@@ -14369,7 +14627,7 @@
             },
             {
               "name": "label",
-              "description": "Label of the pipeline status",
+              "description": "Label of the status",
               "args": [
 
               ],
@@ -14387,7 +14645,7 @@
             },
             {
               "name": "text",
-              "description": "Text of the pipeline status",
+              "description": "Text of the status",
               "args": [
 
               ],
@@ -14405,7 +14663,7 @@
             },
             {
               "name": "tooltip",
-              "description": "Tooltip associated with the pipeline status",
+              "description": "Tooltip associated with the status",
               "args": [
 
               ],
@@ -15517,7 +15775,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "VulnerabilityID",
                   "ofType": null
                 }
               },
@@ -15804,7 +16062,7 @@
             },
             {
               "name": "latestOpenedMostSevereAlert",
-              "description": "The most severe open alert for the environment. If multiple alerts have equal severity, the most recent is returned.",
+              "description": "The most severe open alert for the environment. If multiple alerts have equal severity, the most recent is returned",
               "args": [
 
               ],
@@ -15857,6 +16115,20 @@
                   "name": "String",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "path",
+              "description": "The path to the environment. Will always return null if `expose_environment_path_in_alert_details` feature flag is disabled",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -16000,6 +16272,16 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "EnvironmentID",
+          "description": "Identifier of Environment",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "Epic",
           "description": "Represents an epic",
@@ -16028,7 +16310,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items within a time frame where items.start_date is between startDate and endDate parameters (endDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.start",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -16038,10 +16320,20 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items within a time frame where items.end_date is between startDate and endDate parameters (startDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.end",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "timeframe",
+                  "description": "List items overlapping the given timeframe",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "Timeframe",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -18271,6 +18563,20 @@
               "deprecationReason": null
             },
             {
+              "name": "slaDueAt",
+              "description": "Timestamp of when the issue SLA expires. Returns null if `incident_sla_dev` feature flag is disabled.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "state",
               "description": "State of the issue",
               "args": [
@@ -19077,7 +19383,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "EpicTreeSortingID",
                   "ofType": null
                 }
               },
@@ -19088,7 +19394,7 @@
               "description": "The id of the epic_issue or issue that the actual epic or issue is switched with",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "EpicTreeSortingID",
                 "ofType": null
               },
               "defaultValue": null
@@ -19108,7 +19414,7 @@
               "description": "ID of the new parent epic",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "EpicID",
                 "ofType": null
               },
               "defaultValue": null
@@ -19132,7 +19438,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "EpicID",
                   "ofType": null
                 }
               },
@@ -19217,6 +19523,16 @@
           "interfaces": [
 
           ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "EpicTreeSortingID",
+          "description": "Identifier of EpicTreeSorting",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
           "enumValues": null,
           "possibleTypes": null
         },
@@ -19867,6 +20183,34 @@
           "description": null,
           "fields": [
             {
+              "name": "actualRepositorySizeLimit",
+              "description": "Size limit for repositories in the namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "additionalPurchasedStorageSize",
+              "description": "Additional storage purchased for the root namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "autoDevopsEnabled",
               "description": "Indicates whether Auto DevOps is enabled for all projects within this group",
               "args": [
@@ -19985,6 +20329,24 @@
               "deprecationReason": null
             },
             {
+              "name": "containsLockedProjects",
+              "description": "Includes at least one project where the repository size exceeds the limit",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "description",
               "description": "Description of the namespace",
               "args": [
@@ -20032,7 +20394,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items within a time frame where items.start_date is between startDate and endDate parameters (endDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.start",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -20042,10 +20404,20 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items within a time frame where items.end_date is between startDate and endDate parameters (startDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.end",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "timeframe",
+                  "description": "List items overlapping the given timeframe",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "Timeframe",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -20171,7 +20543,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items within a time frame where items.start_date is between startDate and endDate parameters (endDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.start",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -20181,10 +20553,20 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items within a time frame where items.end_date is between startDate and endDate parameters (startDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.end",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "timeframe",
+                  "description": "List items overlapping the given timeframe",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "Timeframe",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -20802,7 +21184,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items within a time frame where items.start_date is between startDate and endDate parameters (endDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.start",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -20812,10 +21194,20 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items within a time frame where items.end_date is between startDate and endDate parameters (startDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.end",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "timeframe",
+                  "description": "List items overlapping the given timeframe",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "Timeframe",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -21248,7 +21640,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items within a time frame where items.start_date is between startDate and endDate parameters (endDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.start",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -21258,10 +21650,20 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items within a time frame where items.end_date is between startDate and endDate parameters (startDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.end",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "timeframe",
+                  "description": "List items overlapping the given timeframe",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "Timeframe",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -21290,6 +21692,36 @@
                   "type": {
                     "kind": "ENUM",
                     "name": "MilestoneStateEnum",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "title",
+                  "description": "The title of the milestone",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "searchTitle",
+                  "description": "A search string for the title",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "containingDate",
+                  "description": "A date that the milestone contains",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -21515,6 +21947,24 @@
               "deprecationReason": null
             },
             {
+              "name": "repositorySizeExcessProjectCount",
+              "description": "Number of projects in the root namespace where the repository size exceeds the limit",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "requestAccessEnabled",
               "description": "Indicates if users can request access to namespace",
               "args": [
@@ -21705,6 +22155,34 @@
                   "name": "TimelogConnection",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "totalRepositorySize",
+              "description": "Total repository size of all projects in the root namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "totalRepositorySizeExcess",
+              "description": "Total excess repository size of all projects in the root namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -23851,6 +24329,20 @@
               "type": {
                 "kind": "ENUM",
                 "name": "IssuableSeverity",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "slaDueAt",
+              "description": "Timestamp of when the issue SLA expires. Returns null if `incident_sla_dev` feature flag is disabled.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -32781,6 +33273,33 @@
               "deprecationReason": null
             },
             {
+              "name": "createBoard",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "CreateBoardInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CreateBoardPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "createBranch",
               "description": null,
               "args": [
@@ -34983,6 +35502,52 @@
           "description": null,
           "fields": [
             {
+              "name": "actualRepositorySizeLimit",
+              "description": "Size limit for repositories in the namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "additionalPurchasedStorageSize",
+              "description": "Additional storage purchased for the root namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "containsLockedProjects",
+              "description": "Includes at least one project where the repository size exceeds the limit",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "description",
               "description": "Description of the namespace",
               "args": [
@@ -35230,6 +35795,24 @@
               "deprecationReason": null
             },
             {
+              "name": "repositorySizeExcessProjectCount",
+              "description": "Number of projects in the root namespace where the repository size exceeds the limit",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "requestAccessEnabled",
               "description": "Indicates if users can request access to namespace",
               "args": [
@@ -35280,6 +35863,34 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "totalRepositorySize",
+              "description": "Total repository size of all projects in the root namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "totalRepositorySizeExcess",
+              "description": "Total excess repository size of all projects in the root namespace in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -35420,6 +36031,16 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "NamespaceID",
+          "description": "Identifier of Namespace",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "INPUT_OBJECT",
           "name": "NamespaceIncreaseStorageTemporarilyInput",
           "description": "Autogenerated input type of NamespaceIncreaseStorageTemporarily",
@@ -35433,7 +36054,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NamespaceID",
                   "ofType": null
                 }
               },
@@ -36041,6 +36662,16 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "NoteID",
+          "description": "Identifier of Note",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "NotePermissions",
           "description": null,
@@ -36313,6 +36944,16 @@
               "ofType": null
             }
           ]
+        },
+        {
+          "kind": "SCALAR",
+          "name": "NoteableID",
+          "description": "Identifier of Noteable",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
         },
         {
           "kind": "OBJECT",
@@ -37919,6 +38560,20 @@
           "description": null,
           "fields": [
             {
+              "name": "actualRepositorySizeLimit",
+              "description": "Size limit for the repository in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "alertManagementAlert",
               "description": "A single Alert Management alert of the project",
               "args": [
@@ -37969,6 +38624,16 @@
                     "ofType": null
                   },
                   "defaultValue": null
+                },
+                {
+                  "name": "assigneeUsername",
+                  "description": "Username of a user assigned to the issue",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
                 }
               ],
               "type": {
@@ -37986,6 +38651,16 @@
                 {
                   "name": "search",
                   "description": "Search criteria for filtering alerts. This will search on title, description, service, monitoring_tool.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "assigneeUsername",
+                  "description": "Username of a user assigned to the issue",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -38047,6 +38722,16 @@
                 {
                   "name": "search",
                   "description": "Search criteria for filtering alerts. This will search on title, description, service, monitoring_tool.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "assigneeUsername",
+                  "description": "Username of a user assigned to the issue",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -39580,7 +40265,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items within a time frame where items.start_date is between startDate and endDate parameters (endDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.start",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -39590,10 +40275,20 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items within a time frame where items.end_date is between startDate and endDate parameters (startDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.end",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "timeframe",
+                  "description": "List items overlapping the given timeframe",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "Timeframe",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -40152,7 +40847,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List items within a time frame where items.start_date is between startDate and endDate parameters (endDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.start",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -40162,10 +40857,20 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List items within a time frame where items.end_date is between startDate and endDate parameters (startDate parameter must be present)",
+                  "description": "List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present). Deprecated in 14.0: Use timeframe.end",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "timeframe",
+                  "description": "List items overlapping the given timeframe",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "Timeframe",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -40194,6 +40899,36 @@
                   "type": {
                     "kind": "ENUM",
                     "name": "MilestoneStateEnum",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "title",
+                  "description": "The title of the milestone",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "searchTitle",
+                  "description": "A search string for the title",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "containingDate",
+                  "description": "A date that the milestone contains",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -40724,6 +41459,20 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "Repository",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "repositorySizeExcess",
+              "description": "Size of repository that exceeds the limit in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -41982,6 +42731,16 @@
           "interfaces": [
 
           ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "ProjectID",
+          "description": "Identifier of Project",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
           "enumValues": null,
           "possibleTypes": null
         },
@@ -45596,7 +46355,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -46707,6 +47466,24 @@
             {
               "name": "packagesSize",
               "description": "The packages size in bytes",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Float",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pipelineArtifactsSize",
+              "description": "The CI pipeline artifacts size in bytes",
               "args": [
 
               ],
@@ -52736,6 +53513,45 @@
           ]
         },
         {
+          "kind": "INPUT_OBJECT",
+          "name": "Timeframe",
+          "description": "A time-frame defined as a closed inclusive range of two dates",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "start",
+              "description": "The start of the range",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Date",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "end",
+              "description": "The end of the range",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Date",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "Timelog",
           "description": null,
@@ -53289,6 +54105,16 @@
           "possibleTypes": null
         },
         {
+          "kind": "SCALAR",
+          "name": "TodoID",
+          "description": "Identifier of Todo",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "INPUT_OBJECT",
           "name": "TodoMarkDoneInput",
           "description": "Autogenerated input type of TodoMarkDone",
@@ -53449,7 +54275,7 @@
                     "name": null,
                     "ofType": {
                       "kind": "SCALAR",
-                      "name": "ID",
+                      "name": "TodoID",
                       "ofType": null
                     }
                   }
@@ -53858,7 +54684,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "AwardableID",
                   "ofType": null
                 }
               },
@@ -54776,7 +55602,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "BoardID",
                   "ofType": null
                 }
               },
@@ -54817,7 +55643,7 @@
               "description": "The id of user to be assigned to the board.",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "UserID",
                 "ofType": null
               },
               "defaultValue": null
@@ -54827,7 +55653,7 @@
               "description": "The id of milestone to be assigned to the board.",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "MilestoneID",
                 "ofType": null
               },
               "defaultValue": null
@@ -58883,7 +59709,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "VulnerabilityID",
                   "ofType": null
                 }
               },

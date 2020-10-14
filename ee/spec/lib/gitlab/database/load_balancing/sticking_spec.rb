@@ -127,33 +127,50 @@ RSpec.describe Gitlab::Database::LoadBalancing::Sticking, :redis do
     end
   end
 
-  describe '.stick' do
+  RSpec.shared_examples 'sticking' do
     context 'when sticking is disabled' do
-      it 'does not perform any sticking' do
+      it 'does not perform any sticking', :aggregate_failures do
         expect(described_class).not_to receive(:set_write_location_for)
+        expect(Gitlab::Database::LoadBalancing::Session.current).not_to receive(:use_primary!)
 
-        described_class.stick(:user, 42)
+        described_class.bulk_stick(:user, ids)
       end
     end
 
     context 'when sticking is enabled' do
-      it 'sticks an entity to the primary' do
-        allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
-          .and_return(true)
+      before do
         allow(Gitlab::Database::LoadBalancing).to receive(:configured?).and_return(true)
 
         lb = double(:lb, primary_write_location: 'foo')
 
         allow(described_class).to receive(:load_balancer).and_return(lb)
+      end
 
-        expect(described_class).to receive(:set_write_location_for)
-          .with(:user, 42, 'foo')
+      it 'sticks an entity to the primary', :aggregate_failures do
+        ids.each do |id|
+          expect(described_class).to receive(:set_write_location_for)
+                                       .with(:user, id, 'foo')
+        end
 
         expect(Gitlab::Database::LoadBalancing::Session.current)
           .to receive(:use_primary!)
 
-        described_class.stick(:user, 42)
+        subject
       end
+    end
+  end
+
+  describe '.stick' do
+    it_behaves_like 'sticking' do
+      let(:ids) { [42] }
+      subject { described_class.stick(:user, ids.first) }
+    end
+  end
+
+  describe '.bulk_stick' do
+    it_behaves_like 'sticking' do
+      let(:ids) { [42, 43] }
+      subject { described_class.bulk_stick(:user, ids) }
     end
   end
 

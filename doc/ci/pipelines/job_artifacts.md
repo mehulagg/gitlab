@@ -37,8 +37,8 @@ pdf:
     expire_in: 1 week
 ```
 
-A job named `pdf` calls the `xelatex` command in order to build a PDF file from
-the latex source file `mycv.tex`. We then define the `artifacts` paths which in
+A job named `pdf` calls the `xelatex` command to build a PDF file from the
+latex source file `mycv.tex`. We then define the `artifacts` paths which in
 turn are defined with the `paths` keyword. All paths to files and directories
 are relative to the repository that was cloned during the build.
 
@@ -343,6 +343,11 @@ The latest artifacts are created by jobs in the **most recent** successful pipel
 for the specific ref. If you run two types of pipelines for the same ref, timing determines the latest
 artifact. For example, if a merge request creates a branch pipeline at the same time as a scheduled pipeline, the pipeline that completed most recently creates the latest artifact.
 
+In [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/201784) and later, artifacts
+for [parent and child pipelines](../parent_child_pipelines.md) are searched in hierarchical
+order from parent to child. For example, if both parent and child pipelines have a
+job with the same name, the artifact from the parent pipeline is returned.
+
 Artifacts for other pipelines can be accessed with direct access to them.
 
 The structure of the URL to download the whole artifacts archive is the following:
@@ -429,7 +434,9 @@ To erase a job:
 
 ## Retrieve artifacts of private projects when using GitLab CI
 
-In order to retrieve a job artifact of a different project, you might need to use a private token in order to [authenticate and download](../../api/job_artifacts.md#get-job-artifacts) the artifacts.
+To retrieve a job artifact from a different project, you might need to use a
+private token to [authenticate and download](../../api/job_artifacts.md#get-job-artifacts)
+the artifact.
 
 ## Troubleshooting
 

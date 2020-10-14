@@ -22,6 +22,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :autocomplete_sources, only: [] do
           collection do
             get 'epics'
+            get 'vulnerabilities'
           end
         end
 
@@ -125,8 +126,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           post :toggle
         end
       end
-
-      resource :tracing, only: [:show]
 
       post '/restore' => '/projects#restore', as: :restore
 

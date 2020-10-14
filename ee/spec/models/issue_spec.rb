@@ -12,6 +12,7 @@ RSpec.describe Issue do
 
     it { is_expected.to have_many(:resource_weight_events) }
     it { is_expected.to have_many(:resource_iteration_events) }
+    it { is_expected.to have_one(:issuable_sla) }
   end
 
   describe 'modules' do
@@ -800,6 +801,33 @@ RSpec.describe Issue do
       expect(issue.issue_type_supports?(:epics)).to be(true)
       expect(test_case.issue_type_supports?(:epics)).to be(false)
       expect(incident.issue_type_supports?(:epics)).to be(false)
+    end
+  end
+
+  describe '#sla_available?' do
+    let_it_be(:project) { create(:project) }
+    let_it_be_with_refind(:issue) { create(:incident, project: project) }
+
+    subject { issue.sla_available? }
+
+    where(:feature_enabled, :incident_type, :license_available, :sla_available) do
+      false | true  | true  | false
+      true  | false | true  | false
+      true  | true  | false | false
+      true  | true  | true  | true
+    end
+
+    with_them do
+      before do
+        stub_feature_flags(incident_sla_dev: feature_enabled)
+        stub_licensed_features(incident_sla: license_available)
+        issue_type = incident_type ? 'incident' : 'issue'
+        issue.update(issue_type: issue_type)
+      end
+
+      it 'returns the expected value' do
+        expect(subject).to eq(sla_available)
+      end
     end
   end
 end

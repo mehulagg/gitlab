@@ -38,12 +38,20 @@ RSpec.describe Mutations::Boards::Update do
       end
     end
 
+    context 'with invalid params' do
+      it 'raises an error' do
+        mutation_params[:id] = project.to_global_id
+
+        expect { subject }.to raise_error(::GraphQL::CoercionError)
+      end
+    end
+
     context 'when user can update board' do
       before do
         board.resource_parent.add_reporter(user)
       end
 
-      it 'updates issue with correct values' do
+      it 'updates board with correct values' do
         expected_attributes = {
           name: 'Test board 1',
           hide_backlog_list: true,
@@ -51,7 +59,7 @@ RSpec.describe Mutations::Boards::Update do
           weight: 3,
           assignee: user,
           milestone: milestone,
-          labels: [label1, label2]
+          labels: contain_exactly(label1, label2)
         }
 
         subject
@@ -68,7 +76,7 @@ RSpec.describe Mutations::Boards::Update do
         it 'updates board with correct labels' do
           subject
 
-          expect(board.reload.labels.pluck(:title)).to eq(new_labels)
+          expect(board.reload.labels.pluck(:title)).to match_array(new_labels)
         end
       end
     end

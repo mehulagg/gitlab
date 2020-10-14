@@ -11,6 +11,17 @@ export default {
 export const formattedDate = d => dateFormat(d, dateFormats.defaultDate);
 
 /**
+ * Creates a value stream object from a dataset. Returns null if no valueStreamId is present.
+ *
+ * @param {Object} dataset - The raw value stream object
+ * @returns {Object} - A value stream object
+ */
+export const buildValueStreamFromJson = valueStream => {
+  const { id, name, is_custom: isCustom } = valueStream ? JSON.parse(valueStream) : {};
+  return id ? { id, name, isCustom } : null;
+};
+
+/**
  * Creates a group object from a dataset. Returns null if no groupId is present.
  *
  * @param {Object} dataset - The container's dataset
@@ -71,6 +82,7 @@ const buildProjectsFromJSON = (projects = []) => {
  * @returns {Object} - The initial data to load the app with
  */
 export const buildCycleAnalyticsInitialData = ({
+  valueStream = null,
   groupId = null,
   createdBefore = null,
   createdAfter = null,
@@ -82,6 +94,7 @@ export const buildCycleAnalyticsInitialData = ({
   labelsPath = '',
   milestonesPath = '',
 } = {}) => ({
+  selectedValueStream: buildValueStreamFromJson(valueStream),
   group: groupId
     ? convertObjectPropsToCamelCase(
         buildGroupFromDataset({

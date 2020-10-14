@@ -30,7 +30,7 @@ module EE
       after_update :remove_mirror_repository_reference,
         if: ->(project) { project.mirror? && project.import_url_updated? }
 
-      belongs_to :mirror_user, foreign_key: 'mirror_user_id', class_name: 'User'
+      belongs_to :mirror_user, class_name: 'User'
       belongs_to :deleting_user, foreign_key: 'marked_for_deletion_by_user_id', class_name: 'User'
 
       has_one :repository_state, class_name: 'ProjectRepositoryState', inverse_of: :project
@@ -155,6 +155,15 @@ module EE
 
       scope :with_group_saml_provider, -> { preload(group: :saml_provider) }
 
+      scope :with_total_repository_size_greater_than, -> (value) do
+        statistics = ::ProjectStatistics.arel_table
+
+        joins(:statistics)
+          .where((statistics[:repository_size] + statistics[:lfs_objects_size]).gt(value))
+      end
+      scope :without_unlimited_repository_size_limit, -> { where.not(repository_size_limit: 0) }
+      scope :without_repository_size_limit, -> { where(repository_size_limit: nil) }
+
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
         to: :statistics, allow_nil: true
 
@@ -195,8 +204,11 @@ module EE
     class_methods do
       extend ::Gitlab::Utils::Override
 
-      def replicables_for_geo_node(node = ::Gitlab::Geo.current_node)
-        node.projects
+      # @param primary_key_in [Range, Project] arg to pass to primary_key_in scope
+      # @param node [GeoNode] defaults to ::Gitlab::Geo.current_node
+      # @return [ActiveRecord::Relation<Project>] everything that should be synced to this node, restricted by primary key
+      def replicables_for_geo_node(primary_key_in, node = ::Gitlab::Geo.current_node)
+        node.projects.primary_key_in(primary_key_in)
       end
 
       def search_by_visibility(level)
@@ -507,14 +519,28 @@ module EE
       ::Gitlab::UrlSanitizer.new(bare_url, credentials: { user: import_data&.user }).full_url
     end
 
+    def actual_size_limit
+      strong_memoize(:actual_size_limit) do
+        repository_size_limit || namespace.actual_size_limit
+      end
+    end
+
     def repository_size_checker
       strong_memoize(:repository_size_checker) do
         ::Gitlab::RepositorySizeChecker.new(
           current_size_proc: -> { statistics.total_repository_size },
-          limit: (repository_size_limit || namespace.actual_size_limit),
+          limit: actual_size_limit,
+          total_repository_size_excess: namespace.total_repository_size_excess,
+          additional_purchased_storage: namespace.additional_purchased_storage_size.megabytes,
           enabled: License.feature_available?(:repository_size_limit)
         )
       end
+    end
+
+    def repository_size_excess
+      return 0 unless actual_size_limit.to_i > 0
+
+      [statistics.total_repository_size - actual_size_limit, 0].max
     end
 
     def username_only_import_url=(value)

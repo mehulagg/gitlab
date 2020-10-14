@@ -7,6 +7,8 @@ class Projects::IterationsController < Projects::ApplicationController
     push_frontend_feature_flag(:burnup_charts, project)
   end
 
+  feature_category :issue_tracking
+
   def index; end
 
   private

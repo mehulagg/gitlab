@@ -363,8 +363,7 @@ This file lives in `/var/log/gitlab/gitlab-rails/git_json.log` for
 Omnibus GitLab packages or in `/home/git/gitlab/log/git_json.log` for
 installations from source.
 
-NOTE: **Note:**
-After 12.2, this file was renamed from `githost.log` to
+After GitLab version 12.2, this file was renamed from `githost.log` to
 `git_json.log` and stored in JSON format.
 
 GitLab has to interact with Git repositories, but in some rare cases
@@ -599,7 +598,6 @@ installations from source.
 
 ## Unicorn Logs
 
-NOTE: **Note:**
 Starting with GitLab 13.0, Puma is the default web server used in GitLab
 all-in-one package based installations as well as GitLab Helm chart deployments.
 
@@ -674,10 +672,8 @@ This log records:
 - Information whenever [Rack Attack](../security/rack_attack.md) registers an abusive request.
 - Requests over the [Rate Limit](../user/admin_area/settings/rate_limits_on_raw_endpoints.md) on raw endpoints.
 - [Protected paths](../user/admin_area/settings/protected_paths.md) abusive requests.
-
-NOTE: **Note:**
-In GitLab versions [12.3](https://gitlab.com/gitlab-org/gitlab/-/issues/29239) and greater, user ID and username are also
-recorded on this log, if available.
+- In GitLab versions [12.3](https://gitlab.com/gitlab-org/gitlab/-/issues/29239) and greater,
+  user ID and username, if available.
 
 ## `graphql_json.log`
 
