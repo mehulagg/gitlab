@@ -101,8 +101,8 @@ you can filter the pipeline list by:
 
 - Trigger author
 - Branch name
-- Status ([in GitLab 13.1 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
-- Tag ([in GitLab 13.1 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
+- Status ([GitLab 13.1 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
+- Tag ([GitLab 13.1 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/217617))
 
 ### Run a pipeline manually
 
@@ -114,7 +114,7 @@ operation of the pipeline.
 To execute a pipeline manually:
 
 1. Navigate to your project's **CI/CD > Pipelines**.
-1. Click on the **Run Pipeline** button.
+1. Select the **Run Pipeline** button.
 1. On the **Run Pipeline** page:
     1. Select the branch to run the pipeline for in the **Create for** field.
     1. Enter any [environment variables](../variables/README.md) required for the pipeline run.
