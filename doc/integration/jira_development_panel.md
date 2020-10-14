@@ -274,7 +274,7 @@ Once the integration is set up on GitLab and Jira, you can:
 - See the linked `branches`, `commits`, and `merge requests` in Jira issues (merge requests are
   called "pull requests" in Jira issues).
 
-Jira issue IDs must be specified in uppercase for the integration to work.
+Jira issue IDs must be formatted in uppercase for the integration to work.
 
 ![Branch, Commit and Pull Requests links on Jira issue](img/jira_dev_panel_jira_setup_3.png)
 
