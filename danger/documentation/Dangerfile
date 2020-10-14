@@ -4,9 +4,20 @@ def gitlab_danger
   @gitlab_danger ||= GitlabDanger.new(helper.gitlab_helper)
 end
 
+DOCUMENTATION_UPDATE_MISSING = <<~MSG
+Usually, feature addition or enhancement should come with a documentation change. If you think your change doesn't warrant a documentation update, maybe it'd be better categorized as ~"feature::maintenance".
+
+For more information, see the [Throughput](https://about.gitlab.com/handbook/engineering/management/throughput/#implementation) page in the Handbook and the ["What warrants a changelog entry?"](https://docs.gitlab.com/ee/development/changelog.html#what-warrants-a-changelog-entry) page.
+MSG
+
 docs_paths_to_review = helper.changes_by_category[:docs]
 
-return if docs_paths_to_review.empty?
+# Documentation should be updated for feature::addition and feature::enhancement
+if docs_paths_to_review.empty?
+  warn(DOCUMENTATION_UPDATE_MISSING) if (gitlab.mr_labels & %w[feature::addition feature::enhancement]).any?
+
+  return
+end
 
 message 'This merge request adds or changes documentation files. A review from the Technical Writing team before you merge is **recommended**. Reviews can happen after you merge.'
 
