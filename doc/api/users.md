@@ -1582,7 +1582,8 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://git
 
 Parameters:
 
-| Attribute                  | Type    | Required | Description                         |
+| Attribute                  | Type    | Required |changelogs/unreleased/17176-add-personal-access-token-admin-api.yml
+ Description                         |
 | -------------------------- | ------- | -------- | ----------------------------------- |
 | `user_id`                  | integer | yes      | The ID of the user                  |
 | `personal_access_token_id` | integer | yes      | The ID of the personal access token |
