@@ -2509,6 +2509,10 @@ class Project < ApplicationRecord
     default_branch || 'master'
   end
 
+  def default_branch_ref_path
+    Gitlab::Git::BRANCH_REF_PREFIX + default_branch_or_master
+  end
+
   def ci_config_path_or_default
     ci_config_path.presence || Ci::Pipeline::DEFAULT_CONFIG_PATH
   end

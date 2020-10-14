@@ -186,4 +186,50 @@ RSpec.describe Gitlab::Ci::Reports::TestReports do
       end
     end
   end
+
+  describe '#load_test_failure_history!' do
+    let(:project) do
+      double(
+        default_branch: 'master',
+        default_branch_ref_path: 'refs/heads/master',
+        flipper_id: 'Project:1'
+      )
+    end
+
+    let(:failed_rspec) { create_test_case_rspec_failed }
+    let(:failed_java) { create_test_case_java_failed }
+
+    before do
+      test_reports.get_suite('rspec').add_test_case(failed_rspec)
+      test_reports.get_suite('java').add_test_case(failed_java)
+
+      allow(Ci::TestCaseFailure)
+        .to receive(:recent_failures_count)
+        .with(project: project, ref_path: project.default_branch_ref_path, test_case_keys: [failed_rspec.key, failed_java.key])
+        .and_return(
+          failed_rspec.key => 2,
+          failed_java.key => 1
+        )
+    end
+
+    it 'sets the recent failures for each matching failed test case in all test suites' do
+      test_reports.load_test_failure_history!(project)
+
+      expect(failed_rspec.recent_failures).to eq(count: 2, base_branch: 'master')
+      expect(failed_java.recent_failures).to eq(count: 1, base_branch: 'master')
+    end
+
+    context 'when feature flag is disabled' do
+      before do
+        stub_feature_flags(test_failure_history: false)
+      end
+
+      it 'does nothing' do
+        test_reports.load_test_failure_history!(project)
+
+        expect(failed_rspec.recent_failures).to be_nil
+        expect(failed_java.recent_failures).to be_nil
+      end
+    end
+  end
 end

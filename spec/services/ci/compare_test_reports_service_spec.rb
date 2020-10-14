@@ -44,6 +44,33 @@ RSpec.describe Ci::CompareTestReportsService do
         expect(subject.dig(:data, 'suites', 0, 'status') ).to eq('error')
       end
     end
+
+    context 'test failure history' do
+      let!(:base_pipeline) { nil }
+      let!(:head_pipeline) { create(:ci_pipeline, :with_test_reports, project: project) }
+
+      let(:recent_failures) do
+        subject.dig(:data, 'suites', 0, 'new_failures').map { |f| f['recent_failures'] }
+      end
+
+      # Create test case failure records based on the head pipeline build
+      before do
+        build = head_pipeline.builds.last
+        build.update_column(:finished_at, 1.day.ago) # Just to be sure we are included in the report window
+
+        # The JUnit fixture for the given build has 2 failures.
+        # This service will create 1 test case failure record for each.
+        Ci::TestCasesService.new.execute(build)
+      end
+
+      it 'loads on the report', :aggregate_failures do
+        expect(subject[:data]).to match_schema('entities/test_reports_comparer')
+        expect(recent_failures).to eq([
+          { 'count' => 1, 'base_branch' => 'master' },
+          { 'count' => 1, 'base_branch' => 'master' }
+        ])
+      end
+    end
   end
 
   describe '#latest?' do
