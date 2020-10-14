@@ -1,7 +1,14 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { escape } from 'lodash';
-import { GlLoadingIcon, GlIcon, GlSafeHtmlDirective as SafeHtml, GlTabs, GlTab, GlBadge } from '@gitlab/ui';
+import {
+  GlLoadingIcon,
+  GlIcon,
+  GlSafeHtmlDirective as SafeHtml,
+  GlTabs,
+  GlTab,
+  GlBadge,
+} from '@gitlab/ui';
 import { sprintf, __ } from '../../../locale';
 import CiIcon from '../../../vue_shared/components/ci_icon.vue';
 import Tabs from '../../../vue_shared/components/tabs/tabs';
@@ -95,14 +102,18 @@ export default {
         <gl-tab :active="!pipelineFailed">
           <template #title>
             {{ __('Jobs') }}
-            <gl-badge size="sm" class="gl-tab-counter-badge">{{ jobsCount }}</gl-badge>
+            <gl-badge v-if="jobsCount" size="sm" class="gl-tab-counter-badge">{{
+              jobsCount
+            }}</gl-badge>
           </template>
           <jobs-list :loading="isLoadingJobs" :stages="stages" />
         </gl-tab>
         <gl-tab :active="pipelineFailed">
           <template #title>
             {{ __('Failed Jobs') }}
-            <gl-badge size="sm" class="gl-tab-counter-badge">{{ failedJobsCount }}</gl-badge>
+            <gl-badge v-if="failedJobsCount" size="sm" class="gl-tab-counter-badge">{{
+              failedJobsCount
+            }}</gl-badge>
           </template>
           <jobs-list :loading="isLoadingJobs" :stages="failedStages" />
         </gl-tab>
