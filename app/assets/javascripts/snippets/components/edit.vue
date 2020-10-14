@@ -242,14 +242,14 @@ export default {
       />
       <form-footer-actions>
         <template #prepend>
-          <gl-button
+          <pagination-button
             category="primary"
             type="submit"
             variant="success"
             :disabled="updatePrevented"
             data-qa-selector="submit_button"
             data-testid="snippet-submit-btn"
-            >{{ saveButtonLabel }}</gl-button
+            >{{ saveButtonLabel }}</pagination-button
           >
         </template>
         <template #append>
