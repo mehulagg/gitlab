@@ -27,7 +27,7 @@ module ApiHelpers
     elsif personal_access_token
       query_string = "private_token=#{personal_access_token.token}"
     elsif user
-      personal_access_token = create(:personal_access_token, user: user)
+      personal_access_token = user.personal_access_tokens.take || create(:personal_access_token, user: user)
       query_string = "private_token=#{personal_access_token.token}"
     end
 
