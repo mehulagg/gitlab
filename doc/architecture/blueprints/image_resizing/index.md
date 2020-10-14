@@ -9,7 +9,24 @@ Currently, we are showing all uploaded images 1:1, which is of course not ideal.
 
 ## MVC Avatar Resizing
 
-We will implement a dynamic image resizing solution. This means image should be resized and optimized on the fly so that if we define new targeted sizes later we can add them on the fly. If an image is resized and optimized then we need to cache it. This would mean a huge improvement in performance as some of the measurements suggest that we can save up to 95% of our current load size. Our initial investigations indicate that we have uploaded approximately 1.65 million avatars totaling approximately 80GB in size and averaging approximately 48kb each. Early measurements indicate we can reduce the most common avatar dimensions to between 1-3kb in size, netting us a greater than 90% size reduction. 
+We will implement a dynamic image resizing solution. This means image should be resized and optimized on the fly so that if we define new targeted sizes later we can add them on the fly. This would mean a huge improvement in performance as some of the measurements suggest that we can save up to 95% of our current load size. Our initial investigations indicate that we have uploaded approximately 1.65 million avatars totaling approximately 80GB in size and averaging approximately 48kb each. Early measurements indicate we can reduce the most common avatar dimensions to between 1-3kb in size, netting us a greater than 90% size reduction. 
+
+```mermaid
+sequenceDiagram
+  autonumber
+  Requester->>Workhorse: Incoming request
+  Workhorse->>RailsApp: Incoming request
+    alt All is true: 1.Avatar is requested, 2.Requested Width is allowed, 3.Feature is enabled
+        Note right of RailsApp: Width Allowlist: https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/models/concerns/avatarable.rb#L10
+        RailsApp->>Workhorse: `send-scaled-img:` request
+        Note right of RailsApp: Set `send-scaled-img:` Header
+        Workhorse->>Workhorse: Image resizing using Go lib 
+        Workhorse->>Requester: Serve the resized image
+    else All other cases
+        RailsApp->>Workhorse: Usual request scenario
+        Workhorse->>Requester: Usual request scenario
+    end
+```
 
 ## Content Image Resizing
 
@@ -44,9 +61,8 @@ Proposal:
 | Author                       |    Craig Gomes          |
 | Architecture Evolution Coach |    Grzegorz Bizon       |
 | Engineering Leader           |    Tim Zallmann         |
-| Domain Expert                |    TBD                  |
-| Domain Expert                |    TBD                  |
-| Domain Expert                |    TBD                  |
+| Domain Expert                |    Matthias Kaeppler    |
+| Domain Expert                |    Aleksei Lipniagov    |
 
 DRIs:
 
@@ -55,10 +71,3 @@ DRIs:
 | Product                      |    Josh Lambert        |
 | Leadership                   |    Craig Gomes         |
 | Engineering                  |    Matthias Kaeppler   |
-
-Domain Experts:
-
-| Role                         | Who
-|------------------------------|------------------------|
-| Domain Expert                |    TBD                 |
-| Domain Expert                |    TBD                 |
