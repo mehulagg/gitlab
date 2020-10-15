@@ -120,8 +120,6 @@ To view the logs for an alert:
       the metric chart to view options.
    1. Select **View logs**.
 
-For additional information, see [View logs from metrics panel](#view-logs-from-metrics-panel).
-
 ### Activity feed tab
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in GitLab 13.1.
@@ -132,8 +130,8 @@ timeline of the alert's investigation and assignment history.
 The following actions will result in a system note:
 
 - [Updating the status of an alert](#update-an-alerts-status)
-- [Creating an issue based on an alert](#create-an-issue-from-an-alert)
-- [Assignment of an alert to a user](#update-an-alerts-assignee)
+- [Creating an incident based on an alert](#create-an-incident-from-an-alert)
+- [Assignment of an alert to a user](#assign-an-alert)
 
 ![Alert Details Activity Feed](./img/alert_detail_activity_feed.png)
 
