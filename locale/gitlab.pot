@@ -2509,7 +2509,10 @@ msgstr ""
 msgid "AlertSettings|HTTP endpoint"
 msgstr ""
 
-msgid "AlertSettings|Learn more about our %{linkStart}upcoming integrations%{linkEnd}"
+msgid "AlertSettings|Integration"
+msgstr ""
+
+msgid "AlertSettings|Learn more about our improvements for %{linkStart}integrations%{linkEnd}"
 msgstr ""
 
 msgid "AlertSettings|Opsgenie"

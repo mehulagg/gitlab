@@ -17,7 +17,7 @@ export const i18n = {
   changesSaved: s__('AlertSettings|Your integration was successfully updated.'),
   prometheusInfo: s__('AlertSettings|Add URL and auth key to your Prometheus config file'),
   integrationsInfo: s__(
-    'AlertSettings|Learn more about our %{linkStart}upcoming integrations%{linkEnd}',
+    'AlertSettings|Learn more about our improvements for %{linkStart}integrations%{linkEnd}',
   ),
   resetKey: s__('AlertSettings|Reset key'),
   copyToClipboard: s__('AlertSettings|Copy'),
@@ -37,6 +37,7 @@ export const i18n = {
   authKeyRest: s__(
     'AlertSettings|Authorization key has been successfully reset. Please save your changes now.',
   ),
+  integration: s__('AlertSettings|Integration'),
 };
 
 export const serviceOptions = [
