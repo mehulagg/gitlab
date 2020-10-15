@@ -175,6 +175,12 @@ To use coverage fuzzing in an offline environment, follow these steps:
    `NEW_URL_GITLAB_COV_FUZ` is the URL of the private `gitlab-cov-fuzz` clone that you set up in the
    first step.
 
+### Continuous Fuzzing (long running async fuzzing jobs)
+
+It is also possible to run the fuzzing jobs longer and without blocking your main pipeline. This configuration will use the GitLab [parent-child pipelines](https://docs.gitlab.com/ee/ci/parent_child_pipelines.html) and the full example is available [here](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/go-fuzzing-example/-/tree/continuous_fuzzing) (This example is for Go but the same is applicable for any other supported languages).
+
+The suggested workflow in this scenario is to have long running async fuzzing jobs on a main/development branch and short sync(blocking) fuzzing jobs on all other branches and MRs.
+
 ### Glossary
 
 - Seed corpus: The set of test cases given as initial input to the fuzz target. This usually speeds
