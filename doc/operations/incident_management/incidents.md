@@ -87,7 +87,7 @@ For users with at least Guest [permissions](../../user/permissions.md), the
 Incident list is available at **Operations > Incidents**
 in your project's sidebar. The list contains the following metrics:
 
-![Incident List](img/incident_list_v13_4.png)
+![Incident List](img/incident_list_v13_5.png)
 
 - **Status** - To filter incidents by their status, click **Open**, **Closed**,
   or **All** above the incident list.
