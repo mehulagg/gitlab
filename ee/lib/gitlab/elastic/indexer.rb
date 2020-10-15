@@ -178,6 +178,7 @@ module Gitlab
       # rubocop: disable CodeReuse/ActiveRecord
       def update_index_status(to_sha)
         raise "Invalid sha #{to_sha}" unless to_sha.present?
+        raise "Project with project_id:#{project.id} no longer exists" unless Project.exists?(id: project.id)
 
         # An index_status should always be created,
         # even if the repository is empty, so we know it's been looked at.
