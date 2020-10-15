@@ -21,7 +21,7 @@ By default, a protected branch does four simple things:
 - It prevents **anyone** from force pushing to the branch.
 - It prevents **anyone** from deleting the branch.
 
-NOTE: **Note:**
+**Note:**
 A GitLab admin is allowed to push to the protected branches.
 
 See the [Changelog](#changelog) section for changes over time.
@@ -165,6 +165,9 @@ It is possible to require at least one approval by a
 merge request. You can either set Code Owners approvals
 at the time you protect a new branch, or set it to a branch
 already protected, as described below.
+
+**Note:**
+Users/Groups in the 'Allowed to push' section may push straight to a code owner protected branch.
 
 To protect a new branch and enable Code Owner's approval:
 
