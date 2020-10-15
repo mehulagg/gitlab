@@ -3,7 +3,7 @@
 module Types
   module Ci
     # rubocop: disable Graphql/AuthorizeTypes
-    class RunnerSetup < BaseObject
+    class RunnerSetupType < BaseObject
       graphql_name 'RunnerSetup'
 
       field :install_instructions, GraphQL::STRING_TYPE, null: false,

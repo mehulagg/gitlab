@@ -80,7 +80,7 @@ module Types
           description: 'Get statistics on the instance',
           resolver: Resolvers::Admin::Analytics::InstanceStatistics::MeasurementsResolver
 
-    field :runner_setup, Types::Ci::RunnerSetup, null: true,
+    field :runner_setup, Types::Ci::RunnerSetupType, null: true,
       description: 'Get runner setup instructions',
       resolver: Resolvers::Ci::RunnerSetupResolver
 
