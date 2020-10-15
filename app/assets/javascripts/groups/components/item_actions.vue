@@ -8,7 +8,7 @@ export default {
     GlIcon,
   },
   directives: {
-    GlTooltip: GlTooltipDirective
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     parentGroup: {
