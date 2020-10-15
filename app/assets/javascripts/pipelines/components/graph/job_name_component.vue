@@ -27,7 +27,7 @@ export default {
 <template>
   <span class="ci-job-name-component mw-100">
     <ci-icon :status="status" />
-    <span class="ci-status-text text-truncate mw-70p gl-pl-2 d-inline-block align-bottom">
+    <span class="text-truncate mw-70p gl-pl-2 d-inline-block align-bottom">
       {{ name }}
     </span>
   </span>
