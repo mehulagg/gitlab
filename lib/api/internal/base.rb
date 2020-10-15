@@ -7,14 +7,16 @@ module API
       before { authenticate_by_gitlab_shell_token! }
 
       before do
-        route_path = route.origin
-        route_class = route.app.options[:for]
+        api_endpoint = env['api.endpoint']
+        feature_category = api_endpoint.options[:for].try(:feature_category_for_app, api_endpoint).to_s
+
+        header[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
 
         Gitlab::ApplicationContext.push(
           user: -> { actor&.user },
           project: -> { project },
-          caller_id: route_path,
-          feature_category: route_class.try(:feature_category_for_action, route_path).to_s
+          caller_id: route.origin,
+          feature_category: feature_category
         )
       end
 
