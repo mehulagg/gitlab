@@ -1,8 +1,13 @@
 <script>
 import { mapActions } from 'vuex';
+import { GlBadge } from '@gitlab/ui';
+import { n__ } from '~/locale';
 
 export default {
   name: 'TestIssueBody',
+  components: {
+    GlBadge,
+  },
   props: {
     issue: {
       type: Object,
@@ -21,6 +26,13 @@ export default {
   },
   methods: {
     ...mapActions(['openModal']),
+    recentFailuresText(count) {
+      return n__(
+        'Failed %d time in the last 14 days',
+        'Failed %d times in the last 14 days',
+        count,
+      );
+    },
   },
 };
 </script>
@@ -32,7 +44,10 @@ export default {
         class="btn-link btn-blank text-left break-link vulnerability-name-button"
         @click="openModal({ issue })"
       >
-        <div v-if="isNew" class="badge badge-danger gl-mr-2">{{ s__('New') }}</div>
+        <gl-badge v-if="isNew" variant="danger" class="gl-mr-2">{{ s__('New') }}</gl-badge>
+        <gl-badge v-if="issue.recent_failures" variant="warning" class="gl-mr-2">
+          {{ recentFailuresText(issue.recent_failures) }}
+        </gl-badge>
         {{ issue.name }}
       </button>
     </div>
