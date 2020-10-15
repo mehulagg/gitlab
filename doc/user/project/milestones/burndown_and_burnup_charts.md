@@ -82,13 +82,18 @@ switch between Legacy and Fixed views.
 | ----- | ----- |
 | ![Legacy burndown chart, ](img/burndown_chart_legacy_v13_5.png) | ![Fixed burndown chart, showing a jump when a lot of issues were added to the milestone](img/burndown_chart_fixed_v13_5.png) |
 
-Fixed burndown charts track the full history of milestone activity, from its creation until the milestone expires. After the milestone due date has passed, issues removed from the milestone will
-not affect the chart.
+**Fixed burndown** charts track the full history of milestone activity, from its creation until the
+milestone expires. After the milestone due date passes, issues removed from the milestone no longer
+affect the chart.
 
-Legacy burndown charts track when issues were created and when they were last closed—not their full history. For each day, it takes the number of issues still open and issues created that day and subtracts the number of issues closed that day.
-**Issues that were created and assigned a milestone before its start date—and remain open as of the start date—are considered as having been opened on the start date**. Therefore, when the milestone start date is changed the number of opened issues on each day may change.
-Reopened issues are
-considered as having been opened on the day after they were last closed.
+**Legacy burndown** charts track when issues were created and when they were last closed, not their
+full history. For each day, a legacy burndown chart takes the number of open issues and the issues
+created that day, and subtracts the number of issues closed that day.
+**Issues that were created and assigned a milestone before its start date (and remain open as of the
+start date) are considered as having been opened on the start date**.
+Therefore, when the milestone start date is changed, the number of opened issues on each day may
+change.
+Reopened issues are considered as having been opened on the day after they were last closed.
 
 ## Burnup charts
 
