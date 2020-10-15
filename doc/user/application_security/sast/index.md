@@ -218,8 +218,8 @@ To create a custom rule set:
 1. Create a `.gitlab` directory at the root of your project, if one doesn't already exist.
 1. Create a custom rule set file named `sast-ruleset.toml` in the `.gitlab` directory.
 1. In the `sast-ruleset.toml` file, either:
-   - Define a custom rule set.
-   - Provide the filename of a file containing a custom rule set.
+   - Define a custom analyzer configuration
+   - Provide the filename of a file containing a custom analyzer configuration
 
 #### Example custom rule set
 
