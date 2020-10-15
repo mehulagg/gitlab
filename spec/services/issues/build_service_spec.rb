@@ -3,11 +3,14 @@
 require 'spec_helper.rb'
 
 RSpec.describe Issues::BuildService do
-  let(:project) { create(:project, :repository) }
-  let(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:developer) { create(:user) }
+  let_it_be(:guest) { create(:user) }
+  let(:user) { developer }
 
-  before do
-    project.add_developer(user)
+  before_all do
+    project.add_developer(developer)
+    project.add_guest(guest)
   end
 
   def build_issue(issue_params = {})
@@ -134,31 +137,44 @@ RSpec.describe Issues::BuildService do
   end
 
   describe '#execute' do
-    it 'builds a new issues with given params' do
-      milestone = create(:milestone, project: project)
-      issue = build_issue(milestone_id: milestone.id)
+    context 'as developer' do
+      it 'builds a new issues with given params' do
+        milestone = create(:milestone, project: project)
+        issue = build_issue(milestone_id: milestone.id)
 
-      expect(issue.milestone).to eq(milestone)
-    end
-
-    it 'sets milestone to nil if it is not available for the project' do
-      milestone = create(:milestone, project: create(:project))
-      issue = build_issue(milestone_id: milestone.id)
-
-      expect(issue.milestone).to be_nil
-    end
-
-    context 'setting issue type' do
-      it 'sets the issue_type on the issue' do
-        issue = build_issue(issue_type: 'incident')
-
-        expect(issue.issue_type).to eq('incident')
+        expect(issue.milestone).to eq(milestone)
       end
 
-      it 'defaults to issue if issue_type not given' do
-        issue = build_issue
+      it 'sets milestone to nil if it is not available for the project' do
+        milestone = create(:milestone, project: create(:project))
+        issue = build_issue(milestone_id: milestone.id)
 
-        expect(issue.issue_type).to eq('issue')
+        expect(issue.milestone).to be_nil
+      end
+    end
+
+    context 'as guest' do
+      let(:user) { guest }
+
+      it 'cannot set milestone' do
+        milestone = create(:milestone, project: project)
+        issue = build_issue(milestone_id: milestone.id)
+
+        expect(issue.milestone).to be_nil
+      end
+
+      context 'setting issue type' do
+        it 'sets the issue_type on the issue' do
+          issue = build_issue(issue_type: 'incident')
+
+          expect(issue.issue_type).to eq('incident')
+        end
+
+        it 'defaults to issue if issue_type not given' do
+          issue = build_issue
+
+          expect(issue.issue_type).to eq('issue')
+        end
       end
     end
   end
