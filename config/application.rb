@@ -28,6 +28,7 @@ module Gitlab
     require_dependency Rails.root.join('lib/gitlab/middleware/basic_health_check')
     require_dependency Rails.root.join('lib/gitlab/middleware/same_site_cookies')
     require_dependency Rails.root.join('lib/gitlab/middleware/handle_ip_spoof_attack_error')
+    require_dependency Rails.root.join('lib/gitlab/middleware/handle_null_bytes')
     require_dependency Rails.root.join('lib/gitlab/runtime')
 
     # Settings in config/environments/* take precedence over those specified here.
@@ -295,6 +296,8 @@ module Gitlab
     config.generators do |g|
       g.factory_bot false
     end
+
+    config.middleware.use ::Gitlab::Middleware::HandleNullBytes
 
     # sprocket-rails adds some precompile assets we actually do not need.
     #
