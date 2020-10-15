@@ -4,7 +4,7 @@ import hasSubmittedChanges from '~/static_site_editor/graphql/resolvers/has_subm
 describe('static_site_editor/graphql/resolvers/has_submitted_changes', () => {
   it('updates the cache with the data passed in input', () => {
     const cachedData = { appData: { original: 'foo' } };
-    const newValue = { input: { hasSubmittedChanges: 'bar' } };
+    const newValue = { input: { hasSubmittedChanges: true } };
 
     const cache = {
       readQuery: jest.fn().mockReturnValue(cachedData),
@@ -19,7 +19,7 @@ describe('static_site_editor/graphql/resolvers/has_submitted_changes', () => {
         appData: {
           __typename: 'AppData',
           original: 'foo',
-          hasSubmittedChanges: 'bar',
+          hasSubmittedChanges: true,
         },
       },
     });

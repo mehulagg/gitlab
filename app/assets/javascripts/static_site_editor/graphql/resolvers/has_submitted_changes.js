@@ -9,8 +9,8 @@ const hasSubmittedChangesResolver = (_, { input: { hasSubmittedChanges } }, { ca
     return {
       ...draftState,
       appData: {
-        ...draftState.appData,
         __typename: 'AppData',
+        ...draftState.appData,
         hasSubmittedChanges,
       },
     };
