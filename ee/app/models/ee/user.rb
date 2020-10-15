@@ -341,6 +341,12 @@ module EE
       end
     end
 
+    def gitlab_service_user?
+      strong_memoize(:gitlab_service_user) do
+        non_internal? && ::Gitlab::Com.gitlab_com_group_member_id?(id)
+      end
+    end
+
     def gitlab_bot?
       strong_memoize(:gitlab_bot) do
         bot? && ::Gitlab::Com.gitlab_com_group_member_id?(id)

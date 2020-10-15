@@ -35,6 +35,10 @@ module HasUserType
     end
   end
 
+  def non_internal?
+    NON_INTERNAL_USER_TYPES.include?(user_type)
+  end
+
   def bot?
     BOT_USER_TYPES.include?(user_type)
   end
