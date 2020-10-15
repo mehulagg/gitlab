@@ -304,6 +304,16 @@ export const mockLists = [
   },
 ];
 
+export const mockListsById = Vue.observable(
+  mockLists.reduce(
+    (acc, list) => ({
+      ...acc,
+      [list.id]: list,
+    }),
+    {},
+  ),
+);
+
 export const mockListsWithModel = mockLists.map(listMock =>
   Vue.observable(new List({ ...listMock, doNotFetchIssues: true })),
 );

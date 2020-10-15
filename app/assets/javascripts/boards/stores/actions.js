@@ -191,7 +191,7 @@ export default {
   },
 
   deleteList: ({ state, commit }, listId) => {
-    const listsBackup = [...state.boardLists];
+    const listsBackup = { ...state.boardLists };
 
     commit(types.REMOVE_LIST, listId);
 

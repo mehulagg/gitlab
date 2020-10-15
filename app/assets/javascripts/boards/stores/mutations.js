@@ -91,7 +91,7 @@ export default {
 
   [mutationTypes.REMOVE_LIST_FAILURE](state, listsBackup) {
     state.error = s__('Boards|An error occurred while removing the list. Please try again.');
-    state.lists = listsBackup;
+    state.boardLists = listsBackup;
   },
 
   [mutationTypes.REQUEST_ISSUES_FOR_LIST]: (state, { listId, fetchNext }) => {

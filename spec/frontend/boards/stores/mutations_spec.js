@@ -1,4 +1,3 @@
-import { without } from 'lodash';
 import mutations from '~/boards/stores/mutations';
 import * as types from '~/boards/stores/mutation_types';
 import defaultState from '~/boards/stores/state';
@@ -159,11 +158,13 @@ describe('Board Store Mutations', () => {
 
   describe('REMOVE_LIST', () => {
     it('removes list from boardLists', () => {
-      const list = mockLists[0];
-      const expected = without(mockLists, list.id);
+      const [list, secondList] = mockListsWithModel;
+      const expected = {
+        [secondList.id]: secondList,
+      };
       state = {
         ...state,
-        boardLists: mockLists,
+        boardLists: { ...initialBoardListsState },
       };
 
       mutations[types.REMOVE_LIST](state, list.id);
@@ -174,16 +175,23 @@ describe('Board Store Mutations', () => {
 
   describe('REMOVE_LIST_FAILURE', () => {
     it('restores lists from backup', () => {
-      const list = mockLists[0];
-      const backupLists = mockLists;
-      state = {
-        ...state,
-        boardLists: without(mockLists, list.id),
-      };
+      const backupLists = { ...initialBoardListsState };
 
       mutations[types.REMOVE_LIST_FAILURE](state, backupLists);
 
       expect(state.boardLists).toEqual(backupLists);
+    });
+
+    it('sets error state', () => {
+      const backupLists = { ...initialBoardListsState };
+      state = {
+        ...state,
+        error: undefined,
+      };
+
+      mutations[types.REMOVE_LIST_FAILURE](state, backupLists);
+
+      expect(state.error).toEqual('An error occurred while removing the list. Please try again.');
     });
   });
 
