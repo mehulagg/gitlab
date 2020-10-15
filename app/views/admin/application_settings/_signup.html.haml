@@ -9,7 +9,7 @@
           Sign-up enabled
           .form-text.text-muted
             = _("When enabled, any user visiting %{host} will be able to create an account.") % { host: "#{new_user_session_url(host: Gitlab.config.gitlab.host)}" }
-    - if Feature.enabled?(:admin_approval_for_new_user_signups)
+    - if Feature.enabled?(:admin_approval_for_new_user_signups, default_enabled: true)
       .form-group
         .form-check
           = f.check_box :require_admin_approval_after_user_signup, class: 'form-check-input'
