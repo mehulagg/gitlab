@@ -520,3 +520,9 @@ gem 'webauthn', '~> 2.3'
 
 # IPAddress utilities
 gem 'ipaddress', '~> 0.8.3'
+
+# Secure-related
+gem 'ctags4ruby', '0.0.1',
+  :git => 'git@gitlab.com:gitlab-org/secure/vulnerability-research/pocs/ctags4ruby.git',
+  :branch => 'master'
+  #:tag => 

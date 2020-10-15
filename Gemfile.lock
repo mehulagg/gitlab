@@ -1,3 +1,10 @@
+GIT
+  remote: git@gitlab.com:gitlab-org/secure/vulnerability-research/pocs/ctags4ruby.git
+  revision: f6e98a838a9bab9c9ada961a8113e7fa9cd6b2d4
+  branch: master
+  specs:
+    ctags4ruby (0.0.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -1283,6 +1290,7 @@ DEPENDENCIES
   connection_pool (~> 2.0)
   countries (~> 3.0)
   creole (~> 0.5.0)
+  ctags4ruby (= 0.0.1)!
   danger (~> 8.0.6)
   database_cleaner (~> 1.7.0)
   deckar01-task_list (= 2.3.1)
