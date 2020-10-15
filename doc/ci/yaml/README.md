@@ -3815,7 +3815,7 @@ step-2:
 step-3:
   stage: stage3
   script:
-    - echo "Because step-2 can not be canceled, this step can never be canceled, even though set as interruptible."
+    - echo "Because step-2 can not be canceled, this step can never be canceled, even though it's set as interruptible."
   interruptible: true
 ```
 
