@@ -29,7 +29,7 @@ confidential checkbox and hit **Save changes**.
 
 There are two ways to change an issue's confidentiality.
 
-The first way is to edit the issue and mark/unmark the confidential checkbox.
+The first way is to edit the issue and select or deselect the confidential checkbox.
 Once you save the issue, it will change the confidentiality of the issue.
 
 The second way is to locate the Confidentiality section in the sidebar and click
