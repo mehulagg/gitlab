@@ -56,7 +56,7 @@ RSpec.describe 'User views iteration' do
           expect(page).not_to have_content(other_issue.title)
         end
 
-        if shows_actions == true
+        if shows_actions
           expect(page).to have_button('Actions')
         else
           expect(page).not_to have_button('Actions')
