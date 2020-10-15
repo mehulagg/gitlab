@@ -13815,6 +13815,9 @@ msgstr ""
 msgid "Includes an MVC structure, mvnw and pom.xml to help you get started."
 msgstr ""
 
+msgid "Includes completed merge requests."
+msgstr ""
+
 msgid "Incoming email"
 msgstr ""
 
@@ -29837,6 +29840,9 @@ msgid "You haven't added any issues to your project yet"
 msgstr ""
 
 msgid "You haven't selected any issues yet"
+msgstr ""
+
+msgid "You haven't yet finished a merge request."
 msgstr ""
 
 msgid "You left the \"%{membershipable_human_name}\" %{source_type}."
