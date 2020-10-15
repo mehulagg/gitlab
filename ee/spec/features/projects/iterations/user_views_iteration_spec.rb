@@ -25,7 +25,7 @@ RSpec.describe 'User views iteration' do
       before do
         visit project_iterations_inherited_path(project, iteration.id)
       end
-      
+
       it 'shows iteration info' do
         aggregate_failures 'shows iteration info and dates' do
           expect(page).to have_content(iteration.title)
