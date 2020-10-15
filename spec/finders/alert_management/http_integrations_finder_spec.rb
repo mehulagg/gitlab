@@ -3,6 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe AlertManagement::HttpIntegrationsFinder do
+  let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let_it_be_with_reload(:integration) { create(:alert_management_http_integration, project: project ) }
   let_it_be(:extra_integration) { create(:alert_management_http_integration, project: project ) }
@@ -11,10 +12,44 @@ RSpec.describe AlertManagement::HttpIntegrationsFinder do
   let(:params) { {} }
 
   describe '#execute' do
-    subject(:execute) { described_class.new(project, params).execute }
+    before do
+      project.add_maintainer(user)
+    end
+
+    subject(:execute) { described_class.new(user, project, params).execute }
+
+    context 'without permission' do
+      subject(:execute) { described_class.new(nil, project, params).execute }
+
+      it { is_expected.to be_empty }
+    end
 
     context 'empty params' do
       it { is_expected.to contain_exactly(integration) }
+    end
+
+    context 'id param given' do
+      let(:params) { { id: integration.id } }
+
+      it { is_expected.to contain_exactly(integration) }
+
+      context 'matches and unavailable integration' do
+        let(:params) { { id: extra_integration.id } }
+
+        it { is_expected.to be_empty }
+      end
+
+      context 'but does not match any integration' do
+        let(:params) { { id: -1 } }
+
+        it { is_expected.to be_empty }
+      end
+
+      context 'but blank' do
+        let(:params) { { id: nil } }
+
+        it { is_expected.to contain_exactly(integration) }
+      end
     end
 
     context 'endpoint_identifier param given' do
@@ -62,7 +97,7 @@ RSpec.describe AlertManagement::HttpIntegrationsFinder do
     end
 
     context 'project has no integrations' do
-      subject(:execute) { described_class.new(create(:project), params).execute }
+      subject(:execute) { described_class.new(user, create(:project), params).execute }
 
       it { is_expected.to be_empty }
     end

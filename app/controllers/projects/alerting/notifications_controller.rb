@@ -49,10 +49,11 @@ module Projects
         return unless Feature.enabled?(:multiple_http_integrations, project)
 
         AlertManagement::HttpIntegrationsFinder.new(
+          current_user,
           project,
           endpoint_identifier: endpoint_identifier,
           active: true
-        ).execute.first
+        ).execute(skip_authorization: true).first
       end
 
       def endpoint_identifier

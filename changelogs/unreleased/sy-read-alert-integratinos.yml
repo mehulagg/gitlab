@@ -1,0 +1,5 @@
+---
+title: Add GraphQL query support for alert HTTP Integrations
+merge_request: 45335
+author:
+type: added
