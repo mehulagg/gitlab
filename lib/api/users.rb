@@ -713,7 +713,27 @@ module API
             def find_token
               finder.find_by_id(declared_params[:personal_access_token_id]) || not_found!('Personal Access Token')
             end
+
+            def log_personal_access_token_created_audit_event(token)
+              # extended in EE
+            end
+
+            def log_personal_access_token_deleted_audit_event(token)
+              # extended in EE
+            end
+
+            def log_personal_access_token_created_event(token)
+              Gitlab::AppLogger.info(_("User %{current_user_username} has deleted personal access token with id %{pat_id} for user %{username} via API") %
+                { current_user_username: current_user.username, pat_id: token.id, username: token.user.username })
+            end
+
+            def log_personal_access_token_deleted_event(token)
+              Gitlab::AppLogger.info(_("User %{current_user_username} has deleted personal access token with id %{pat_id} for user %{username} via API") %
+                { current_user_username: current_user.username, pat_id: token.id, username: token.user.username })
+            end
           end
+
+          prepend_if_ee('EE::API::PersonalAccessTokens') # rubocop: disable Cop/InjectEnterpriseEditionModule
 
           before { authenticated_as_admin! }
 
@@ -747,6 +767,8 @@ module API
             personal_access_token = finder.build(declared_params(include_missing: false))
 
             if personal_access_token.save
+              log_personal_access_token_created_event(personal_access_token)
+              log_personal_access_token_created_audit_event(personal_access_token)
               present personal_access_token, with: Entities::PersonalAccessTokenWithToken
             else
               render_validation_error!(personal_access_token)
@@ -775,10 +797,13 @@ module API
           delete ':personal_access_token_id' do
             not_found! unless Feature.enabled?(:pat_management_api_for_admin)
 
-            token = find_token
+            personal_access_token = find_token
 
-            destroy_conditionally!(token) do
-              token.revoke!
+            destroy_conditionally!(personal_access_token) do
+              if personal_access_token.revoke!
+                log_personal_access_token_deleted_event(personal_access_token)
+                log_personal_access_token_deleted_audit_event(personal_access_token)
+              end
             end
           end
         end
