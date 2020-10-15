@@ -43,6 +43,7 @@ import {
   parseBoolean,
   urlParamsToObject,
 } from '~/lib/utils/common_utils';
+import { fixTitle, dispose } from '~/tooltips';
 import mountMultipleBoardsSwitcher from './mount_multiple_boards_switcher';
 
 Vue.use(VueApollo);
@@ -334,9 +335,9 @@ export default () => {
 
           this.$nextTick(() => {
             if (this.disabled) {
-              $tooltip.tooltip();
+              fixTitle($tooltip);
             } else {
-              $tooltip.tooltip('dispose');
+              dispose($tooltip);
             }
           });
         },
