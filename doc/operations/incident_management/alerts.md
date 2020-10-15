@@ -93,10 +93,10 @@ instance.
 
 To view the metrics for an alert:
 
-   1. Sign in as a user with Developer or higher [permissions](../../user/permissions.md).
-   1. Navigate to **Operations > Alerts**.
-   1. Select the alert you want to view.
-   1. Below the title of the alert, select the **Metrics** tab.
+1. Sign in as a user with Developer or higher [permissions](../../user/permissions.md).
+1. Navigate to **Operations > Alerts**.
+1. Select the alert you want to view.
+1. Below the title of the alert, select the **Metrics** tab.
 
 ![Alert Metrics View](img/alert_detail_metrics_v13_2.png)
 
@@ -112,13 +112,13 @@ your application's performance and how to resolve any problems.
 
 To view the logs for an alert:
 
-   1. Sign in as a user with Developer or higher [permissions](../../user/permissions.md).
-   1. Navigate to **Operations > Alerts**.
-   1. Select the alert you want to view.
-   1. Below the title of the alert, select the **Metrics** tab.
-   1. Select the [menu](../metrics/dashboards/index.md#chart-context-menu) of
-      the metric chart to view options.
-   1. Select **View logs**.
+1. Sign in as a user with Developer or higher [permissions](../../user/permissions.md).
+1. Navigate to **Operations > Alerts**.
+1. Select the alert you want to view.
+1. Below the title of the alert, select the **Metrics** tab.
+1. Select the [menu](../metrics/dashboards/index.md#chart-context-menu) of
+   the metric chart to view options.
+1. Select **View logs**.
 
 ### Activity feed tab
 
@@ -133,7 +133,7 @@ The following actions will result in a system note:
 - [Creating an incident based on an alert](#create-an-incident-from-an-alert)
 - [Assignment of an alert to a user](#assign-an-alert)
 
-![Alert Details Activity Feed](./img/alert_detail_activity_feed.png)
+![Alert Details Activity Feed](img/alert_detail_activity_feed_v13_5.png)
 
 ## Alert actions
 
@@ -215,7 +215,7 @@ Select the **To-Do List** **{todo-done}** in the navigation bar to view your cur
 CAUTION: **Warning:**
 This feature might not be available to you. Check the **version history** note above for details.
 
-The environment information and the link are displayed in the Alert Details tab[#alert-details-tab].
+The environment information and the link are displayed in the [Alert Details tab](#alert-details-tab).
 
 ### Enable or disable Environment Link in Alert Details **(CORE ONLY)**
 
