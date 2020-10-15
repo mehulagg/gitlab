@@ -1437,7 +1437,15 @@ Parameters:
 
 ## Get all personal access tokens of a user
 
-> Requires admin permissions.
+> - Requires admin permissions.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17176) in GitLab 13.6.
+> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(CORE ONLY)**
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
 
 It retrieves every personal access token of the user. Use the pagination
 parameters `page` and `per_page` to restrict the list of tokens.
@@ -1490,7 +1498,15 @@ Example response:
 
 ## Get a personal access token of a user
 
-> Requires admin permissions.
+> - Requires admin permissions.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17176) in GitLab 13.6.
+> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(CORE ONLY)**
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
 
 It shows a user's personal access token metadata. The token attribute is not returned.
 
@@ -1528,7 +1544,16 @@ Example response:
 
 ## Create a personal access token
 
-> Requires admin permissions.
+> - Requires admin permissions.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17176) in GitLab 13.6.
+> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(CORE ONLY)**
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
+
 > Token values are returned once. Make sure you save it - you won't be able to access it again.
 
 It creates a new personal access token.
@@ -1568,7 +1593,15 @@ Example response:
 
 ## Revoke a personal access token
 
-> Requires admin permissions.
+> - Requires admin permissions.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17176) in GitLab 13.6.
+> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(CORE ONLY)**
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
 
 It revokes a personal access token token.
 
@@ -1691,4 +1724,22 @@ Example response:
     "access_level": "20"
   },
 ]
+```
+### Enable or disable admin user's ability to manage personal access tokens through the API **(CORE ONLY)**
+
+Admin user's ability to manage personal access tokens through the API is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:pat_management_api_for_admin)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:pat_management_api_for_admin)
 ```
