@@ -65,8 +65,8 @@ module Issues
     private
 
     def whitelisted_issue_params
-      base_params = [:title, :description, :confidential]
-      admin_params = [:milestone_id, :issue_type]
+      base_params = [:title, :description, :confidential, :issue_type]
+      admin_params = [:milestone_id]
 
       if can?(current_user, :admin_issue, project)
         params.slice(*(base_params + admin_params))
