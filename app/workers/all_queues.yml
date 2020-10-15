@@ -1312,6 +1312,46 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: bulk_imports_advance_stage
+  :feature_category: :importers
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
+- :name: bulk_imports_import
+  :feature_category: :importers
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
+- :name: bulk_imports_import_group
+  :feature_category: :importers
+  :has_external_dependencies: true
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
+- :name: bulk_imports_stage_finish_import
+  :feature_category: :importers
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
+- :name: bulk_imports_stage_import_groups
+  :feature_category: :importers
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: chat_notification
   :feature_category: :chatops
   :has_external_dependencies: true

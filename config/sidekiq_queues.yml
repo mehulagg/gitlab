@@ -44,6 +44,16 @@
   - 3
 - - background_migration
   - 1
+- - bulk_imports_advance_stage
+  - 1
+- - bulk_imports_import
+  - 1
+- - bulk_imports_import_group
+  - 1
+- - bulk_imports_stage_finish_import
+  - 1
+- - bulk_imports_stage_import_groups
+  - 1
 - - chaos
   - 2
 - - chat_notification

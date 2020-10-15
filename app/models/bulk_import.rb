@@ -10,7 +10,24 @@ class BulkImport < ApplicationRecord
 
   enum source_type: { gitlab: 0 }
 
+  delegate :top_level_groups, to: :entities
+
   state_machine :status, initial: :created do
     state :created, value: 0
+    state :started, value: 1
+    state :finished, value: 2
+    state :failed, value: -1
+
+    event :start do
+      transition created: :started
+    end
+
+    event :finish do
+      transition started: :finished
+    end
+
+    event :fail_op do
+      transition any => :failed
+    end
   end
 end
