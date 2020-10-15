@@ -231,7 +231,7 @@ module API
 
           verify_package_file(package_file, params[:file])
         when 'md5'
-          nil
+          ''
         else
           track_package_event('push_package', :maven) if jar_file?(format)
 

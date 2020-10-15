@@ -25,5 +25,27 @@ RSpec.describe 'Upload a maven package', :api, :js do
     it { expect(subject.code).to eq(200) }
   end
 
+  RSpec.shared_examples 'for a maven sha1' do
+    let(:dummy_package) { double(Packages::Package) }
+    let(:sha1) { Digest::SHA1.hexdigest('dummy_package') }
+    let(:api_path) { "/projects/#{project.id}/packages/maven/com/example/my-app/1.0/my-app-1.0-20180724.124855-1.jar.sha1" }
+    let(:file) { StringIO.new(sha1) }
+
+    before do
+      expect(::Packages::PackageFileFinder).to receive(:new).and_return(double(execute!: dummy_package))
+      expect(dummy_package).to receive(:file_sha1).and_return(Digest::SHA1.hexdigest(sha1))
+    end
+
+    it { expect(subject.code).to eq(204) }
+  end
+
+  RSpec.shared_examples 'for a maven sha1' do
+    let(:api_path) { "/projects/#{project.id}/packages/maven/com/example/my-app/1.0/my-app-1.0-20180724.124855-1.jar.md5" }
+    let(:file) { StringIO.new('dummy_package') }
+
+    it { expect(subject.code).to eq(200) }
+  end
+
   it_behaves_like 'handling file uploads', 'for a maven package'
+  it_behaves_like 'handling file uploads', 'for a maven sha1'
 end
