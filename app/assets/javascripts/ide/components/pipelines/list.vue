@@ -11,8 +11,6 @@ import {
 } from '@gitlab/ui';
 import { sprintf, __ } from '../../../locale';
 import CiIcon from '../../../vue_shared/components/ci_icon.vue';
-import Tabs from '../../../vue_shared/components/tabs/tabs';
-import Tab from '../../../vue_shared/components/tabs/tab.vue';
 import EmptyState from '../../../pipelines/components/pipelines_list/empty_state.vue';
 import JobsList from '../jobs/list.vue';
 
@@ -22,8 +20,6 @@ export default {
   components: {
     GlIcon,
     CiIcon,
-    Tabs,
-    Tab,
     JobsList,
     EmptyState,
     GlLoadingIcon,
