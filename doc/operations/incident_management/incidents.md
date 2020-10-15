@@ -7,8 +7,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Incidents
 
 Incidents are critical entities in incident management workflows. They represent a service disruption or outage that needs to be restored urgently. GitLab provides tools for the triage, response, and remediation of incidents.
-While no configuration is required to use the [manual features](#create-an-incident-manually)
-of incident management, some simple [configuration](#configure-incidents) is needed to automate incident creation.
 
 ## Incident Creation
 
@@ -166,7 +164,7 @@ Comments are displayed in threads, but can be displayed chronologically
 
 Incidents show the details of linked alerts in a separate tab. To populate this
 tab, the incident must have been created with a linked alert. Incidents
-[created automatically](#configure-incidents) from alerts have this
+created automatically from alerts have this
 field populated.
 
 ![Incident alert details](./img/incident_alert_details_v13_4.png)
