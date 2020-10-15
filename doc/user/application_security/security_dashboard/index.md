@@ -183,8 +183,8 @@ The fields in the export include:
 - Details
 - Additional Info
 - Severity
-- [CVE](https://cve.mitre.org/)
-- [CWE](https://cwe.mitre.org/)
+- [CVE](https://cve.mitre.org/) - Common Vulnerabilities Exposures
+- [CWE](https://cwe.mitre.org/) - Common Weakness Enumeration
 - Other Identifiers
 
 ![Export vulnerabilities](img/instance_security_dashboard_export_csv_v13_4.png)
