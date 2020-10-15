@@ -44,19 +44,13 @@ module Gitlab
           @pipeline ||= @project.ci_pipelines.latest_successful_for_ref(@ref)
         end
 
-        # rubocop: disable CodeReuse/ActiveRecord
         def raw_coverage
-          return unless pipeline
-
-          if @job.blank?
-            pipeline.coverage
+          if @job.present?
+            @project.builds.latest.success.for_ref(@ref).by_name(@job).order_id_desc.first&.coverage
           else
-            pipeline.builds
-              .find_by(name: @job)
-              .try(:coverage)
+            @project.ci_pipelines.latest_successful_for_ref(@ref)&.coverage
           end
         end
-        # rubocop: enable CodeReuse/ActiveRecord
       end
     end
   end

@@ -45,8 +45,8 @@ RSpec.describe Gitlab::Badge::Coverage::Report do
     context 'with no pipeline' do
       let(:pipeline) { nil }
 
-      it 'returns nil' do
-        expect(badge.status).to be_nil
+      it 'returns coverage from that job' do
+        expect(badge.status).to eq(40)
       end
     end
 
