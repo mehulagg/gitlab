@@ -2241,6 +2241,10 @@ PUT /projects/:id/transfer
 | `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
 | `namespace` | integer/string | yes | The ID or path of the namespace to transfer to project to |
 
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/transfer?namespace=14"
+```
+
 ## Branches
 
 Read more in the [Branches](branches.md) documentation.
