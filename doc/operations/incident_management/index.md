@@ -16,4 +16,3 @@ being developed, efficiency and awareness can be increased. Check out the follow
 - Receive [notifications](alert_notifications.md) for triggered alerts
 - Triage [Alerts](alerts.md) & [Incidents](incidents.md)
 - Inform stakeholders with [Status Page](status_page.md)
-
