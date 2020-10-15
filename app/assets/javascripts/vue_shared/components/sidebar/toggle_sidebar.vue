@@ -1,11 +1,11 @@
 <script>
 import { __ } from '~/locale';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlTooltipDirective } from '@gitlab/ui';
 
 export default {
   name: 'ToggleSidebar',
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     collapsed: {
@@ -33,14 +33,11 @@ export default {
 
 <template>
   <button
-    v-tooltip
+    v-gl-tooltip:body.viewport.left
     :title="tooltipLabel"
     :class="cssClasses"
     type="button"
     class="btn btn-blank gutter-toggle btn-sidebar-action js-sidebar-vue-toggle"
-    data-container="body"
-    data-placement="left"
-    data-boundary="viewport"
     @click="toggle"
   >
     <i
