@@ -208,68 +208,65 @@ spotbugs-sast:
 You can customize the default scanning rules provided with SAST's NodeJS-Scan and Gosec analyzers.
 Customization allows you to exclude rules and modify the behavior of existing rules.
 
-To customize the default scanning rules, you create a file containing custom rules. Theses rules
+To customize the default scanning rules, create a file containing custom rules. These rules
 are passed through to the analyzer's underlying scanner tool.
 
-#### Create a custom rule set
-
-To create a custom rule set:
+To create a custom ruleset:
 
 1. Create a `.gitlab` directory at the root of your project, if one doesn't already exist.
-1. Create a custom rule set file named `sast-ruleset.toml` in the `.gitlab` directory.
-1. In the `sast-ruleset.toml` file, either:
-   - Define a custom analyzer configuration
-   - Provide the filename of a file containing a custom analyzer configuration
+1. Create a custom ruleset file named `sast-ruleset.toml` in the `.gitlab` directory.
+1. In the `sast-ruleset.toml` file, do one of the following:
+   - Define a custom analyzer configuration.
 
-#### Example custom rule set
+     In this example, customized rules are defined for the `nodejs-scan` scanner:
 
-This example demonstrates both methods of defining custom rule sets:
+     ```toml
+     [nodejs-scan]
+       description = 'custom ruleset for nodejs-scan'
 
-- Customized rules for the **gosec** scanner are contained in a separate file: `gosec-config.json`.
-- Customized rules for the `nodejs-scan` scanner are contained in the file.
+       [[nodejs-scan.passthrough]]
+         type  = "raw"
+         value = '''
+     - nodejs-extensions:
+       - .js
 
-An example `sast-ruleset.toml` file:
+       template-extensions:
+       - .new
+       - .hbs
+       - ''
 
-```toml
-[gosec]
-  description = 'custom ruleset for gosec'
+       ignore-filenames:
+     - skip.js
 
-  [[gosec.passthrough]]
-    type  = "file"
-    value = "gosec-config.json"
+       ignore-paths:
+       - __MACOSX
+       - skip_dir
+       - node_modules
 
-[nodejs-scan]
-  description = 'custom ruleset for nodejs-scan'
+       ignore-extensions:
+       - .hbs
 
-  [[nodejs-scan.passthrough]]
-    type  = "raw"
-    value = '''
-- nodejs-extensions:
-  - .js
+       ignore-rules:
+       - regex_injection_dos
+       - pug_jade_template
+       - express_xss
 
-  template-extensions:
-  - .new
-  - .hbs
-  - ''
+     '''
+     ```
 
-  ignore-filenames:
-  - skip.js
+   - Provide the name of the file containing a custom analyzer configuration.
 
-  ignore-paths:
-  - __MACOSX
-  - skip_dir
-  - node_modules
+     In this example, customized rules for the `gosec` scanner are contained in the file
+     `gosec-config.json`:
 
-  ignore-extensions:
-  - .hbs
+     ```toml
+     [gosec]
+       description = 'custom ruleset for gosec'
 
-  ignore-rules:
-  - regex_injection_dos
-  - pug_jade_template
-  - express_xss
-
-'''
-```
+       [[gosec.passthrough]]
+         type  = "file"
+         value = "gosec-config.json"
+     ```
 
 ### Using environment variables to pass credentials for private repositories
 
