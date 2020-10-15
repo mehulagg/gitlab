@@ -56,6 +56,11 @@ export default {
       required: false,
       default: '',
     },
+    tooltipSubText: {
+      type: String,
+      required: false,
+      default: '',
+    },
     tooltipPlacement: {
       type: String,
       required: false,
@@ -107,6 +112,8 @@ export default {
       class="js-user-avatar-image-toolip"
     >
       <slot> {{ tooltipText }} </slot>
+      </p>
+      <slot> @{{ tooltipSubText }} </slot>
     </gl-tooltip>
   </span>
 </template>
