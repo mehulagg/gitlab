@@ -75,34 +75,44 @@ With a database in place, the registry will no longer use the storage backend to
 
 ### Database
 
-For GitLab.com, the registry database will be on a separate dedicated cluster. For self-managed instances, the registry database should reside in the same instance as the GitLab database. Please see [#93](https://gitlab.com/gitlab-org/container-registry/-/issues/93) and [GitLab-com/gl-infra/infrastructure#10109](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/10109) for additional context.
-
 Following the GitLab [Go standards and style guidelines](https://docs.gitlab.com/ee/development/go_guide), no ORM is used to manage the database, only the [`database/sql`](https://golang.org/pkg/database/sql/) package from the Go standard library, a PostgreSQL driver ([`lib/pq`](https://pkg.go.dev/github.com/lib/pq?tab=doc)) and raw SQL queries, over a TCP connection pool.
 
 The design and development of the registry database adhere to the GitLab [database guidelines](https://docs.gitlab.com/ee/development/database/). Being a Go application, the required tooling to support the database will have to be developed, such as for running database migrations.
 
-Support for running *online* migrations is already supported by the registry CLI, as described in the [documentation](/container-registry/-/blob/master/docs-gitlab/database-migrations.md). Apart from online migrations, [*post deployment* migrations](/development/post_deployment_migrations.html) are also a requirement to be implemented as outlined in [container-registry#220](https://gitlab.com/gitlab-org/container-registry/-/issues/220).
+Running *online* migrations is already supported by the registry CLI, as described in the [documentation](/container-registry/-/blob/master/docs-gitlab/database-migrations.md). Apart from online migrations, [*post deployment* migrations](/development/post_deployment_migrations.html) are also a requirement to be implemented as outlined in [container-registry#220](https://gitlab.com/gitlab-org/container-registry/-/issues/220).
 
 The registry database will be partitioned from start to achieve greater performance (by limiting the amount of data to act upon and enable parallel execution), easier maintenance (by splitting tables and indexes into smaller units), and high availability (with partition independence). By partitioning the database from start we can also facilitate a sharding implementation later on if necessary.
 
+#### GitLab.com
+
+Due to scale, performance and isolation concerns, for GitLab.com the registry database will be on a separate dedicated PostgreSQL cluster. Please see [#93](https://gitlab.com/gitlab-org/container-registry/-/issues/93) and [GitLab-com/gl-infra/infrastructure#10109](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/10109) for additional context.
+
+The diagram below illustrates the architecture of the database cluster:
+
+![GitLab.com database architecture](https://gitlab.com/gitlab-org/gitlab/uploads/949ae16d993bca6d4813830dfc501aa2/gitlabcom_database_architecture.png)
+
+#### Self-Managed Instances
+
+By default, for self-managed instances, the registry will have a separate logical database in the same PostgreSQL instance/cluster as the GitLab database. However, it will be possible to configure a separate instance/cluster if needed.
+
 #### PostgreSQL 12
 
-PostgreSQL introduced major improvements for partitioning in [version 12](https://www.postgresql.org/docs/12/release-12.html#id-1.11.6.9.5), among which we highlight:
+PostgreSQL introduced significant improvements for partitioning in [version 12](https://www.postgresql.org/docs/12/release-12.html#id-1.11.6.9.5), among which we highlight:
 
-- It's now possible for foreign keys to reference partitioned tables. This is a hard requirement for this project not only to guarantee consistency and integrity, but also to enable cascading deletes at the database level;
+- It's now possible for foreign keys to reference partitioned tables. This is a hard requirement for this project not only to guarantee consistency and integrity but also to enable cascading deletes at the database level;
 - Major performance improvements for inserts, selects, and updates with less locking and consistent performance for a large number of partitions ([benchmarks](https://www.2ndquadrant.com/en/blog/postgresql-12-partitioning));
 - Major improvements to the planning algorithm for tables with a large number of partitions, with some tests finding speedups of up to 10,000 times ([source](https://aws.amazon.com/blogs/database/postgresql-12-a-deep-dive-into-some-new-functionality/));
 - Attaching new partitions to an existing table no longer requires locking the entire table;
 - Bulk load (`COPY`) now uses bulk inserts instead of inserting one row at a time;
 
-To be able to leverage these features and performance improvements we need to use PostgreSQL 12 from start.
+To leverage these features and performance improvements, we need to use PostgreSQL 12 from the start.
 
 GitLab currently ships with PostgreSQL 11 for self-managed instances. That is _likely_ to change in 14.0, with PostgreSQL 12 becoming the minimum required version, which will likely happen before the upgraded registry becomes available for self-managed instances. If not, self-managed instances will have two options:
 
 1. Administrators can manually provision and configure a separate PostgreSQL 12 database for the registry, allowing them to benefit from features provided by the new registry and its metadata database.
-1. Continue to use the current registry without the database, if online garbage collection is not a concern, or provisioning a separate database is not possible. We will continue supporting the current version with security backports and bug fixes for the foreseeable feature.
+1. Continue to use the current registry without the database if online garbage collection is not a concern or provisioning a separate database is not possible. We will continue supporting the current version with security backports and bug fixes for the foreseeable feature.
 
-It's important to note that apart from online garbage collection, the availability of the metadata database will unblock the implementation of many requested features for the GitLab Container Registry, which will only be available for instances using the new version backed by the metadata database.
+It's important to note that apart from online garbage collection, the metadata database's availability will unblock the implementation of many requested features for the GitLab Container Registry, which will only be available for instances using the new version backed by the metadata database.
 
 ## Iterations
 
