@@ -93,7 +93,7 @@ The diagram below illustrates the architecture of the database cluster:
 
 #### Self-Managed Instances
 
-By default, for self-managed instances, the registry will have a separate logical database in the same PostgreSQL instance/cluster as the GitLab database. However, it will be possible to configure a separate instance/cluster if needed.
+By default, for self-managed instances, the registry will have a separate logical database in the same PostgreSQL instance/cluster as the GitLab database. However, it will be possible to configure the registry to use a separate instance/cluster if needed.
 
 #### PostgreSQL 12
 
