@@ -396,25 +396,25 @@ In order to prevent Path Traversal vulnerabilities, user-controlled filenames or
 - [`Gitlab::Utils.check_path_traversal`](https://gitlab.com/gitlab-org/security/gitlab/-/blob/master/lib/gitlab/utils.rb#L12-24) can be used to validate user input against Path Traversal vulnerabilities. Remember to add further validation when setting the `allowed_absolute` option to `true`.
 - [`file_path` API validator](https://gitlab.com/gitlab-org/security/gitlab/-/blob/master/lib/api/validations/validators/file_path.rb) to validate user input when working with the Grape gem.
 
-## OS command injection
+## OS command injection guidelines
 
 ### Description
 
 Command injection is an issue in which an attacker is able to execute arbitrary commands on the host operating system through a vulnerable application.
 
-Command injection attacks do not always provide a user feedback, but simple commands like curl can be used by the attacker to obtain an answer.
+Command injection attacks do not always provide feedback to a user, but simple commands like curl can be used by the attacker to obtain an answer.
 
 ### Impact
 
-The impact of a command injection greatly depends on the user context running the commands, how data is validated and sanitized. It can vary from a low impact because the user running the injected commands has very limited rights to a critical impact if it’s running with the root user.
+The impact of command injection greatly depends on the user context running the commands as well as how data is validated and sanitized. It can vary from low impact because the user running the injected commands has limited rights to critical impact if it’s running as the root user.
 
-### When to consider?
+### When to consider
 
 When working with user-controlled data that are used to run OS commands.
 
-### Mitigations
+### Mitigation and prevention
 
-In order to prevent OS command injections, user supplied data should not be used within os commands. In cases where this cannot be avoided:
+In order to prevent OS command injections, user supplied data should not be used within OS commands. In cases where this cannot be avoided:
 
 - Validate user supplied data against an allowlist
 - Use a case switch
@@ -423,15 +423,15 @@ In order to prevent OS command injections, user supplied data should not be used
 
 ### Ruby
 
-Consider using `system(“command”,”arg0”, “arg1”, ...)` whenever you can, this prevents an attacker from concatenating commands.
+Consider using `system("command", "arg0", "arg1", ...)` whenever you can, this prevents an attacker from concatenating commands.
 
-For more examples on how to use shell commands securely, you can consult our page [Guidelines for shells commands in the GitLab codebase](shell_commands.md) which contains various examples on how to securely call OS commands.
+For more examples on how to use shell commands securely, you can consult our [Guidelines for shells commands in the GitLab codebase](shell_commands.md) page, which contains various examples on how to securely call OS commands.
 
 ### Go
 
-Go has built-in protections that usually prevent an attacker from successfully injection OS commands.
+Go has built-in protections that usually prevent an attacker from successfully injecting OS commands.
 
-Consdier the following example:
+Consider the following example:
 
 ```golang
 package main
@@ -448,7 +448,7 @@ func main() {
 }
 ```
 
-Will echo `"1; cat /etc/passwd"`
+This will echo `"1; cat /etc/passwd"`.
 
 **Do not** use `sh` as this will bypass internal protections:
 
@@ -456,4 +456,4 @@ Will echo `"1; cat /etc/passwd"`
 out, _ = exec.Command("sh", "-c", "echo 1 | cat /etc/passwd").Output()
 ```
 
-Will output `1` followed by the content of `/etc/passwd`.
+This will output `1` followed by the content of `/etc/passwd`.
