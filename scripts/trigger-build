@@ -147,7 +147,7 @@ module Trigger
         'ALTERNATIVE_SOURCES' => 'true',
         'SECURITY_SOURCES' => Trigger.security? ? 'true' : 'false',
         'ee' => Trigger.ee? ? 'true' : 'false',
-        'QA_BRANCH' => ENV['QA_BRANCH'] || 'master'
+        'QA_BRANCH' => 'find-failure-issue-for-test-failure'
       }
     end
   end
