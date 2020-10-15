@@ -5,7 +5,6 @@ import waitForPromises from 'helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';
 import MembersTokenSelect from '~/invite_members/components/members_token_select.vue';
 
-const groupId = 1;
 const label = 'testgroup';
 const placeholder = 'Search for a member';
 const user1 = { id: 1, name: 'Name One', username: 'one_1', avatar_url: '' };
@@ -15,20 +14,20 @@ const allUsers = [user1, user2];
 const createComponent = () => {
   return shallowMount(MembersTokenSelect, {
     propsData: {
-      groupId,
       label,
       placeholder,
     },
   });
 };
 
-describe('InviteMembersModal', () => {
+describe('MembersTokenSelect', () => {
   let wrapper;
   let mock;
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
-    mock.onGet('/api/undefined/users.json').reply(200, allUsers);
+    gon.api_version = 'v4';
+    mock.onGet('/api/v4/users.json').reply(200, allUsers);
 
     wrapper = createComponent();
   });
@@ -39,18 +38,17 @@ describe('InviteMembersModal', () => {
     mock.restore();
   });
 
-  const findDropdown = () => wrapper.find(GlTokenSelector);
+  const findTokenSelector = () => wrapper.find(GlTokenSelector);
 
   describe('rendering the token-selector component', () => {
-    it('renders with the correct attributes', () => {
-      const expectedAttributes = {
-        autocomplete: 'off',
-        loading: 'true',
-        arialabelledby: label,
+    it('renders with the correct props', () => {
+      const expectedProps = {
+        loading: true,
+        ariaLabelledby: label,
         placeholder,
       };
 
-      expect(findDropdown().attributes()).toMatchObject(expectedAttributes);
+      expect(findTokenSelector().props()).toEqual(expect.objectContaining(expectedProps));
     });
   });
 
@@ -64,7 +62,7 @@ describe('InviteMembersModal', () => {
     });
 
     it('returns the users that match the filter query', async () => {
-      wrapper.vm.handleTextInput('One');
+      findTokenSelector().vm.$emit('text-input', 'One');
 
       await waitForPromises();
 

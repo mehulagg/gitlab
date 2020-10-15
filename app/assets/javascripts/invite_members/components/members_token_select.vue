@@ -1,18 +1,14 @@
 <script>
-import { GlTokenSelector, GlAvatar } from '@gitlab/ui';
+import { GlTokenSelector, GlAvatar, GlAvatarLabeled } from '@gitlab/ui';
 import Api from '~/api';
 
 export default {
   components: {
     GlTokenSelector,
     GlAvatar,
+    GlAvatarLabeled,
   },
   props: {
-    groupId: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
     label: {
       type: String,
       required: true,
@@ -27,10 +23,7 @@ export default {
   data() {
     return {
       loading: false,
-      hideErrorMessage: false,
-      allowUserDefined: false,
       query: '',
-      queryOptions: { exclude_internal: true },
       filteredUsers: [],
       selectedTokens: [],
     };
@@ -61,7 +54,7 @@ export default {
     retrieveUsers() {
       this.loading = true;
 
-      return Api.users(this.query, this.queryOptions)
+      return Api.users(this.query, this.$options.queryOptions)
         .then(response => {
           this.filteredUsers = response.data.map(token => ({
             id: token.id,
@@ -76,6 +69,8 @@ export default {
         });
     },
     filterUsers() {
+      if (this.query === '') return this.filteredUsers;
+
       return this.filteredUsers
         .filter(token => {
           return (
@@ -102,9 +97,13 @@ export default {
       this.$emit('input', this.newUsersToInvite);
     },
     handleBlur() {
-      this.$children.find(() => 'textInput').inputText = '';
+      const textInput = this.$el.querySelector('input[type="text"]');
+
+      textInput.value = '';
+      textInput.dispatchEvent(new Event('input'));
     },
   },
+  queryOptions: { exclude_internal: true },
 };
 </script>
 
@@ -113,8 +112,8 @@ export default {
     v-model="selectedTokens"
     :dropdown-items="filteredUsers"
     :loading="loading"
-    :allow-user-defined-tokens="allowUserDefined"
-    :hide-dropdown-with-no-items="hideErrorMessage"
+    :allow-user-defined-tokens="false"
+    :hide-dropdown-with-no-items="false"
     :placeholder="placeholder"
     :aria-labelledby="label"
     @focus="handleQueryFilter"
@@ -129,13 +128,12 @@ export default {
     </template>
 
     <template #dropdown-item-content="{ dropdownItem }">
-      <div class="gl-display-flex">
-        <gl-avatar :src="dropdownItem.avatar_url" :size="32" />
-        <div>
-          <p class="gl-m-0">{{ dropdownItem.name }}</p>
-          <p class="gl-m-0 gl-text-gray-700">{{ dropdownItem.username }}</p>
-        </div>
-      </div>
+      <gl-avatar-labeled
+        :src="dropdownItem.avatar_url"
+        :size="32"
+        :label="dropdownItem.name"
+        :sub-label="dropdownItem.username"
+      />
     </template>
   </gl-token-selector>
 </template>

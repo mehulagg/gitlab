@@ -56,6 +56,7 @@ export default {
       selectedAccessLevel: this.defaultAccessLevel,
       newUsersToInvite: '',
       selectedDate: undefined,
+      ariaLabelledBy: 'invite-members-input',
     };
   },
   computed: {
@@ -132,7 +133,7 @@ export default {
   },
   labels: {
     modalTitle: s__('InviteMembersModal|Invite team members'),
-    userToInvite: s__('InviteMembersModal|GitLab member or Email address'),
+    newUsersToInvite: s__('InviteMembersModal|GitLab member or Email address'),
     userPlaceholder: s__('InviteMembersModal|Search for members to invite'),
     accessLevel: s__('InviteMembersModal|Choose a role permission'),
     accessExpireDate: s__('InviteMembersModal|Access expiration date (optional)'),
@@ -149,24 +150,21 @@ export default {
     <div class="gl-ml-5 gl-mr-5">
       <div>{{ introText }}</div>
 
-      <label class="gl-font-weight-bold gl-mt-5">{{ $options.labels.userToInvite }}</label>
+      <label :id="ariaLabelledBy" class="gl-font-weight-bold gl-mt-5">{{
+        $options.labels.newUsersToInvite
+      }}</label>
       <div class="gl-mt-2">
         <members-token-select
           v-model="newUsersToInvite"
           :label="$options.labels.newUsersToInvite"
-          :aria-labelledby="$options.labels.newUsersToInvite"
+          :aria-labelledby="ariaLabelledBy"
           :placeholder="$options.labels.userPlaceholder"
         />
       </div>
 
       <label class="gl-font-weight-bold gl-mt-5">{{ $options.labels.accessLevel }}</label>
       <div class="gl-mt-2 gl-w-half gl-xs-w-full">
-        <gl-dropdown
-          menu-class="dropdown-menu-selectable"
-          class="gl-shadow-none gl-w-full"
-          v-bind="$attrs"
-          :text="selectedRoleName"
-        >
+        <gl-dropdown class="gl-shadow-none gl-w-full" v-bind="$attrs" :text="selectedRoleName">
           <template v-for="(key, item) in accessLevels">
             <gl-dropdown-item
               :key="key"
