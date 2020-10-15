@@ -45,6 +45,9 @@ export const updateReleaseNotes = ({ commit }, notes) => commit(types.UPDATE_REL
 export const updateReleaseMilestones = ({ commit }, milestones) =>
   commit(types.UPDATE_RELEASE_MILESTONES, milestones);
 
+export const updateReleaseGroupMilestones = ({ commit }, groupMilestones) =>
+  commit(types.UPDATE_RELEASE_GROUP_MILESTONES, groupMilestones);
+
 export const addEmptyAssetLink = ({ commit }) => {
   commit(types.ADD_EMPTY_ASSET_LINK);
 };
@@ -65,9 +68,9 @@ export const removeAssetLink = ({ commit }, linkIdToRemove) => {
   commit(types.REMOVE_ASSET_LINK, linkIdToRemove);
 };
 
-export const receiveSaveReleaseSuccess = ({ commit, state, rootState }, release) => {
+export const receiveSaveReleaseSuccess = ({ commit }, release) => {
   commit(types.RECEIVE_SAVE_RELEASE_SUCCESS);
-  redirectTo(rootState.featureFlags.releaseShowPage ? release._links.self : state.releasesPagePath);
+  redirectTo(release._links.self);
 };
 
 export const saveRelease = ({ commit, dispatch, getters }) => {

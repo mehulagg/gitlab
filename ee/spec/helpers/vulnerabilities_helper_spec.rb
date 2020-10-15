@@ -69,6 +69,16 @@ RSpec.describe VulnerabilitiesHelper do
         can_modify_related_issues: false
       )
     end
+
+    context 'when the issues are disabled for the project' do
+      before do
+        allow(project).to receive(:issues_enabled?).and_return(false)
+      end
+
+      it 'has `create_issue_url` set as nil' do
+        expect(subject).to include(create_issue_url: nil)
+      end
+    end
   end
 
   describe '#vulnerability_details' do

@@ -67,15 +67,15 @@ class MergeRequestWidgetEntity < Grape::Entity
     )
   end
 
-  expose :user_callouts_path, if: -> (*) { Feature.enabled?(:suggest_pipeline) } do |merge_request|
+  expose :user_callouts_path, if: -> (*) { Gitlab::Experimentation.enabled?(:suggest_pipeline) } do |_merge_request|
     user_callouts_path
   end
 
-  expose :suggest_pipeline_feature_id, if: -> (*) { Feature.enabled?(:suggest_pipeline) } do |merge_request|
+  expose :suggest_pipeline_feature_id, if: -> (*) { Gitlab::Experimentation.enabled?(:suggest_pipeline) } do |_merge_request|
     SUGGEST_PIPELINE
   end
 
-  expose :is_dismissed_suggest_pipeline, if: -> (*) { Feature.enabled?(:suggest_pipeline) } do |merge_request|
+  expose :is_dismissed_suggest_pipeline, if: -> (*) { Gitlab::Experimentation.enabled?(:suggest_pipeline) } do |_merge_request|
     current_user && current_user.dismissed_callout?(feature_name: SUGGEST_PIPELINE)
   end
 
@@ -122,6 +122,10 @@ class MergeRequestWidgetEntity < Grape::Entity
     expose :base_path do |merge_request|
       base_pipeline_downloadable_path_for_report_type(:codequality)
     end
+  end
+
+  expose :security_reports_docs_path do |merge_request|
+    help_page_path('user/application_security/sast/index.md', anchor: 'reports-json-format')
   end
 
   private

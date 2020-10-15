@@ -301,6 +301,16 @@ FactoryBot.define do
       end
     end
 
+    trait :common_security_report do
+      file_format { :raw }
+      file_type { :dependency_scanning }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-common-scanning-report.json'), 'application/json')
+      end
+    end
+
     trait :container_scanning_feature_branch do
       file_format { :raw }
       file_type { :container_scanning }
@@ -400,6 +410,17 @@ FactoryBot.define do
       after(:build) do |artifact, _|
         artifact.file = fixture_file_upload(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-coverage-fuzzing-report.json'),
+          'application/json')
+      end
+    end
+
+    trait :api_fuzzing do
+      file_format { :raw }
+      file_type { :api_fuzzing }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-api-fuzzing-report.json'),
           'application/json')
       end
     end

@@ -54,6 +54,7 @@ const Api = {
   releaseLinkPath: '/api/:version/projects/:id/releases/:tag_name/assets/links/:link_id',
   mergeRequestsPipeline: '/api/:version/projects/:id/merge_requests/:merge_request_iid/pipelines',
   adminStatisticsPath: '/api/:version/application/statistics',
+  pipelineJobsPath: '/api/:version/projects/:id/pipelines/:pipeline_id/jobs',
   pipelineSinglePath: '/api/:version/projects/:id/pipelines/:pipeline_id',
   pipelinesPath: '/api/:version/projects/:id/pipelines/',
   createPipelinePath: '/api/:version/projects/:id/pipeline',
@@ -64,6 +65,10 @@ const Api = {
   issuePath: '/api/:version/projects/:id/issues/:issue_iid',
   tagsPath: '/api/:version/projects/:id/repository/tags',
   freezePeriodsPath: '/api/:version/projects/:id/freeze_periods',
+  usageDataIncrementUniqueUsersPath: '/api/:version/usage_data/increment_unique_users',
+  featureFlagUserLists: '/api/:version/projects/:id/feature_flags_user_lists',
+  featureFlagUserList: '/api/:version/projects/:id/feature_flags_user_lists/:list_iid',
+  billableGroupMembersPath: '/api/:version/groups/:id/billable_members',
 
   group(groupId, callback = () => {}) {
     const url = Api.buildUrl(Api.groupPath).replace(':id', groupId);
@@ -109,6 +114,12 @@ const Api = {
         ...options,
       },
     });
+  },
+
+  inviteGroupMember(id, data) {
+    const url = Api.buildUrl(this.groupMembersPath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, data);
   },
 
   groupMilestones(id, options) {
@@ -366,7 +377,7 @@ const Api = {
   },
 
   commitMultiple(id, data) {
-    // see https://docs.gitlab.com/ce/api/commits.html#create-a-commit-with-multiple-files-and-actions
+    // see https://docs.gitlab.com/ee/api/commits.html#create-a-commit-with-multiple-files-and-actions
     const url = Api.buildUrl(Api.commitsPath).replace(':id', encodeURIComponent(id));
     return axios.post(url, JSON.stringify(data), {
       headers: {
@@ -590,6 +601,14 @@ const Api = {
     return axios.get(url);
   },
 
+  pipelineJobs(projectId, pipelineId) {
+    const url = Api.buildUrl(this.pipelineJobsPath)
+      .replace(':id', encodeURIComponent(projectId))
+      .replace(':pipeline_id', encodeURIComponent(pipelineId));
+
+    return axios.get(url);
+  },
+
   // Return all pipelines for a project or filter by query params
   pipelines(id, options = {}) {
     const url = Api.buildUrl(this.pipelinesPath).replace(':id', encodeURIComponent(id));
@@ -686,8 +705,77 @@ const Api = {
     return axios.post(url, freezePeriod);
   },
 
+  trackRedisHllUserEvent(event) {
+    if (!gon.features?.usageDataApi) {
+      return null;
+    }
+
+    const url = Api.buildUrl(this.usageDataIncrementUniqueUsersPath);
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    return axios.post(url, { event }, { headers });
+  },
+
   buildUrl(url) {
     return joinPaths(gon.relative_url_root || '', url.replace(':version', gon.api_version));
+  },
+
+  fetchFeatureFlagUserLists(id, page) {
+    const url = Api.buildUrl(this.featureFlagUserLists).replace(':id', id);
+
+    return axios.get(url, { params: { page } });
+  },
+
+  createFeatureFlagUserList(id, list) {
+    const url = Api.buildUrl(this.featureFlagUserLists).replace(':id', id);
+
+    return axios.post(url, list);
+  },
+
+  fetchFeatureFlagUserList(id, listIid) {
+    const url = Api.buildUrl(this.featureFlagUserList)
+      .replace(':id', id)
+      .replace(':list_iid', listIid);
+
+    return axios.get(url);
+  },
+
+  updateFeatureFlagUserList(id, list) {
+    const url = Api.buildUrl(this.featureFlagUserList)
+      .replace(':id', id)
+      .replace(':list_iid', list.iid);
+
+    return axios.put(url, list);
+  },
+
+  deleteFeatureFlagUserList(id, listIid) {
+    const url = Api.buildUrl(this.featureFlagUserList)
+      .replace(':id', id)
+      .replace(':list_iid', listIid);
+
+    return axios.delete(url);
+  },
+
+  fetchBillableGroupMembersList(namespaceId, options = {}, callback = () => {}) {
+    const url = Api.buildUrl(this.billableGroupMembersPath).replace(':id', namespaceId);
+    const defaults = {
+      per_page: DEFAULT_PER_PAGE,
+      page: 1,
+    };
+
+    return axios
+      .get(url, {
+        params: {
+          ...defaults,
+          ...options,
+        },
+      })
+      .then(({ data, headers }) => {
+        callback(data);
+        return { data, headers };
+      });
   },
 };
 

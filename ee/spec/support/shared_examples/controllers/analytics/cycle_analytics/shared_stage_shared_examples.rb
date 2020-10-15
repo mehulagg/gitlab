@@ -2,7 +2,6 @@
 
 RSpec.shared_examples 'cycle analytics stages controller' do
   before do
-    stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => true)
     stub_licensed_features(cycle_analytics_for_groups: true)
 
     group.add_reporter(user)
@@ -236,18 +235,6 @@ RSpec.shared_examples 'group permission check on the controller level' do
     end
 
     it 'renders `not_found` when group is missing' do
-      subject
-
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
-  end
-
-  context 'when feature flag is disabled' do
-    before do
-      stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => false)
-    end
-
-    it 'renders `not_found` response' do
       subject
 
       expect(response).to have_gitlab_http_status(:not_found)

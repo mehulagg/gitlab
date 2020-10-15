@@ -371,7 +371,7 @@ To create group links via filter:
 
 ### Overriding user permissions **(STARTER ONLY)**
 
-Since GitLab [v8.15](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/822) LDAP user permissions can now be manually overridden by an admin user. To override a user's permissions:
+In GitLab [8.15](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/822) and later, LDAP user permissions can now be manually overridden by an admin user. To override a user's permissions:
 
 1. Go to your group's **Members** page.
 1. Select the pencil icon in the row for the user you are editing.
@@ -395,7 +395,7 @@ milestones.
 
 Get an overview of the vulnerabilities of all the projects in a group and its subgroups.
 
-[Learn more about the Group Security Dashboard.](security_dashboard/index.md)
+[Learn more about the Group Security Dashboard.](../application_security/security_dashboard/index.md)
 
 ## Insights **(ULTIMATE)**
 
@@ -697,6 +697,7 @@ To enable prevent project forking:
 - **Audit Events**: View [Audit Events](../../administration/audit_events.md)
   for the group. **(STARTER ONLY)**
 - **Pipelines quota**: Keep track of the [pipeline quota](../admin_area/settings/continuous_integration.md) for the group.
+- **Integrations**: Configure [integrations](../admin_area/settings/project_integration_management.md) for your group.
 
 #### Storage usage quota **(STARTER)**
 

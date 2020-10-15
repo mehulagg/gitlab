@@ -70,7 +70,7 @@ module Gitlab
 
           def diff_with(other_report)
             base = self.licenses
-            head = other_report.licenses
+            head = other_report&.licenses || []
 
             {
               added: (head - base),

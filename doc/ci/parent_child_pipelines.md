@@ -68,11 +68,22 @@ microservice_a:
   trigger:
     include:
       - local: path/to/microservice_a.yml
-      - template: SAST.gitlab-ci.yml
+      - template: Security/SAST.gitlab-ci.yml
 ```
 
-NOTE: **Note:**
-The max number of entries that are accepted for `trigger:include:` is three.
+In [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/205157) and later,
+you can use [`include:file`](yaml/README.md#includefile) to trigger child pipelines
+with a configuration file in a different project:
+
+```yaml
+microservice_a:
+  trigger:
+    include:
+      - project: 'my-group/my-pipeline-library'
+        file: 'path/to/ci-config.yml'
+```
+
+The maximum number of entries that are accepted for `trigger:include:` is three.
 
 Similar to [multi-project pipelines](multi_project_pipelines.md#mirroring-status-from-triggered-pipeline),
 we can set the parent pipeline to depend on the status of the child pipeline upon completion:
@@ -82,7 +93,7 @@ microservice_a:
   trigger:
     include:
       - local: path/to/microservice_a.yml
-      - template: SAST.gitlab-ci.yml
+      - template: Security/SAST.gitlab-ci.yml
     strategy: depend
 ```
 
@@ -182,3 +193,7 @@ To disable it:
 ```ruby
 Feature.disable(:ci_child_of_child_pipeline)
 ```
+
+## Pass variables to a child pipeline
+
+You can [pass variables to a downstream pipeline](multi_project_pipelines.md#passing-variables-to-a-downstream-pipeline).

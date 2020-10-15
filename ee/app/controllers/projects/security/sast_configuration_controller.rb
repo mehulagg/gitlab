@@ -11,9 +11,7 @@ module Projects
       before_action :ensure_sast_configuration_enabled!, except: [:create]
       before_action :authorize_edit_tree!, only: [:create]
 
-      before_action only: [:show] do
-        push_frontend_feature_flag(:sast_configuration_ui_analyzers, project)
-      end
+      feature_category :static_application_security_testing
 
       def show
       end

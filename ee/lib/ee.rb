@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module EE
-  SUBSCRIPTIONS_URL = ENV.fetch('CUSTOMER_PORTAL_URL', 'https://customers.gitlab.com').freeze
+  SUBSCRIPTIONS_URL = ::Gitlab::SubscriptionPortal::SUBSCRIPTIONS_URL
   SUBSCRIPTIONS_COMPARISON_URL = "https://about.gitlab.com/pricing/gitlab-com/feature-comparison".freeze
   SUBSCRIPTIONS_MORE_MINUTES_URL = "#{SUBSCRIPTIONS_URL}/buy_pipeline_minutes".freeze
   SUBSCRIPTIONS_MORE_STORAGE_URL = "#{SUBSCRIPTIONS_URL}/buy_storage".freeze

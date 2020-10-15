@@ -293,6 +293,14 @@ Gitlab/AvoidFeatureGet:
   Enabled: true
 
 RSpec/TimecopFreeze:
+  Enabled: true
+  AutoCorrect: true
+  Include:
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+    - 'qa/spec/**/*.rb'
+
+RSpec/TimecopTravel:
   Enabled: false
   AutoCorrect: true
   Include:
@@ -327,7 +335,7 @@ Gitlab/Union:
     - 'spec/**/*'
     - 'ee/spec/**/*'
 
-API/GrapeAPIInstance:
+API/Base:
   Enabled: true
   Include:
     - 'lib/**/api/**/*.rb'
@@ -350,6 +358,15 @@ Graphql/AuthorizeTypes:
   Include:
     - 'app/graphql/types/**/*'
     - 'ee/app/graphql/types/**/*'
+  Exclude:
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+
+Graphql/GIDExpectedType:
+  Enabled: true
+  Include:
+    - 'app/graphql/**/*'
+    - 'ee/app/graphql/**/*'
   Exclude:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'

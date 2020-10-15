@@ -2,8 +2,8 @@
 
 These API calls allow you to read and modify GitLab instance
 [application settings](#list-of-settings-that-can-be-accessed-via-api-calls)
-as appear in `/admin/application_settings/general`. You have to be an
-administrator in order to perform this action.
+as they appear in `/admin/application_settings/general`. You must be an
+administrator to perform this action.
 
 ## Get current application settings
 
@@ -185,13 +185,14 @@ Example responses: **(PREMIUM ONLY)**
 
 ## List of settings that can be accessed via API calls
 
-In general, all settings are optional. Certain settings though, if enabled, will
-require other settings to be set in order to function properly. These requirements
-are listed in the descriptions of the relevant settings.
+In general, all settings are optional. Certain settings though, if enabled,
+require other settings to be set to function properly. These requirements are
+listed in the descriptions of the relevant settings.
 
 | Attribute                                | Type             | Required                             | Description |
-|:-----------------------------------------|:-----------------|:-------------------------------------|:------------|
-| `admin_notification_email`               | string           | no                                   | [Abuse reports](../user/admin_area/abuse_reports.md) are sent to this address if set. Abuse reports are always available in the Admin Area. |
+|------------------------------------------|------------------|:------------------------------------:|-------------|
+| `admin_notification_email`               | string           | no                                   | Deprecated: Use `abuse_notification_email` instead. If set, [abuse reports](../user/admin_area/abuse_reports.md) are sent to this address. Abuse reports are always available in the Admin Area.  |
+| `abuse_notification_email`               | string           | no                                   | If set, [abuse reports](../user/admin_area/abuse_reports.md) are sent to this address. Abuse reports are always available in the Admin Area. |
 | `after_sign_out_path`                    | string           | no                                   | Where to redirect users after logout. |
 | `after_sign_up_text`                     | string           | no                                   | Text shown to the user after signing up |
 | `akismet_api_key`                        | string           | required by: `akismet_enabled`       | API key for Akismet spam protection. |
@@ -208,6 +209,7 @@ are listed in the descriptions of the relevant settings.
 | `authorized_keys_enabled`                | boolean          | no                                   | By default, we write to the `authorized_keys` file to support Git over SSH without additional configuration. GitLab can be optimized to authenticate SSH keys via the database file. Only disable this if you have configured your OpenSSH server to use the AuthorizedKeysCommand. |
 | `auto_devops_domain`                     | string           | no                                   | Specify a domain to use by default for every project's Auto Review Apps and Auto Deploy stages. |
 | `auto_devops_enabled`                    | boolean          | no                                   | Enable Auto DevOps for projects by default. It will automatically build, test, and deploy applications based on a predefined CI/CD configuration. |
+| `automatic_purchased_storage_allocation` | boolean          | no                                   | Enabling this permits automatic allocation of purchased storage within a namespace. |
 | `check_namespace_plan`                   | boolean          | no                                   | **(PREMIUM)** Enabling this will make only licensed EE features available to projects if the project namespace's plan includes the feature or if the project is public. |
 | `commit_email_hostname`                  | string           | no                                   | Custom hostname (for private commit emails). |
 | `container_registry_token_expire_delay`  | integer          | no                                   | Container Registry token duration in minutes. |
@@ -321,7 +323,7 @@ are listed in the descriptions of the relevant settings.
 | `receive_max_input_size`                 | integer          | no                                   | Maximum push size (MB). |
 | `repository_checks_enabled`              | boolean          | no                                   | GitLab will periodically run `git fsck` in all project and wiki repositories to look for silent disk corruption issues. |
 | `repository_size_limit`                  | integer          | no                                   | **(PREMIUM)** Size limit per repository (MB) |
-| `repository_storages_weighted`           | hash of strings to integers | no                        | (GitLab 13.1 and later) Hash of names of taken from `gitlab.yml` to weights. New projects are created in one of these stores, chosen by a weighted random selection. |
+| `repository_storages_weighted`           | hash of strings to integers | no                        | (GitLab 13.1 and later) Hash of names of taken from `gitlab.yml` to [weights](../administration/repository_storage_paths.md#choose-where-new-repositories-will-be-stored). New projects are created in one of these stores, chosen by a weighted random selection. |
 | `repository_storages`                    | array of strings | no                                   | (GitLab 13.0 and earlier) List of names of enabled storage paths, taken from `gitlab.yml`. New projects are created in one of these stores, chosen at random. |
 | `require_two_factor_authentication`      | boolean          | no                                   | (**If enabled, requires:** `two_factor_grace_period`) Require all users to set up Two-factor authentication. |
 | `restricted_visibility_levels`           | array of strings | no                                   | Selected levels cannot be used by non-admin users for groups, projects or snippets. Can take `private`, `internal` and `public` as a parameter. Default is `null` which means there is no restriction. |

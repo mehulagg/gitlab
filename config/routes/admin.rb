@@ -81,6 +81,8 @@ namespace :admin do
     post :preview, on: :collection
   end
 
+  get :instance_review, to: 'instance_review#index'
+
   resource :health_check, controller: 'health_check', only: [:show]
   resource :background_jobs, controller: 'background_jobs', only: [:show]
 
@@ -151,6 +153,7 @@ namespace :admin do
 
     collection do
       get :tag_list, format: :json
+      get :runner_setup_scripts, format: :json
     end
   end
 

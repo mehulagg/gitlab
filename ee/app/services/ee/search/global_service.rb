@@ -16,7 +16,8 @@ module EE
           params[:search],
           elastic_projects,
           public_and_internal_projects: elastic_global,
-          filters: { state: params[:state] }
+          sort: params[:sort],
+          filters: { confidential: params[:confidential], state: params[:state] }
         )
       end
 
@@ -52,9 +53,7 @@ module EE
         return super unless use_elasticsearch?
 
         strong_memoize(:ee_allowed_scopes) do
-          super.tap do |ce_scopes|
-            ce_scopes.concat(%w[notes wiki_blobs blobs commits])
-          end
+          super + %w[notes wiki_blobs blobs commits]
         end
       end
     end

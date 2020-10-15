@@ -24,16 +24,7 @@ RSpec.describe ResourceAccessTokens::CreateService do
       end
     end
 
-    shared_examples 'fails when flag is disabled' do
-      before do
-        stub_feature_flags(resource_access_token: false)
-      end
-
-      it 'returns nil' do
-        expect(subject).to be nil
-      end
-    end
-
+    # Remove this shared example when https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43190 merges
     shared_examples 'fails on gitlab.com' do
       before do
         allow(Gitlab).to receive(:com?) { true }
@@ -53,6 +44,7 @@ RSpec.describe ResourceAccessTokens::CreateService do
         access_token = response.payload[:access_token]
 
         expect(access_token.user.reload.user_type).to eq("#{resource_type}_bot")
+        expect(access_token.user.created_by_id).to eq(user.id)
       end
 
       context 'email confirmation status' do
@@ -77,8 +69,8 @@ RSpec.describe ResourceAccessTokens::CreateService do
       end
 
       context 'bot name' do
-        context 'when no value is passed' do
-          it 'uses default value' do
+        context 'when no name is passed' do
+          it 'uses default name' do
             response = subject
             access_token = response.payload[:access_token]
 
@@ -86,10 +78,10 @@ RSpec.describe ResourceAccessTokens::CreateService do
           end
         end
 
-        context 'when user provides value' do
+        context 'when user provides name' do
           let_it_be(:params) { { name: 'Random bot' } }
 
-          it 'overrides the default value' do
+          it 'overrides the default name value' do
             response = subject
             access_token = response.payload[:access_token]
 
@@ -121,7 +113,7 @@ RSpec.describe ResourceAccessTokens::CreateService do
         context 'when user provides scope explicitly' do
           let_it_be(:params) { { scopes: Gitlab::Auth::REPOSITORY_SCOPES } }
 
-          it 'overrides the default value' do
+          it 'overrides the default scope value' do
             response = subject
             access_token = response.payload[:access_token]
 
@@ -130,23 +122,43 @@ RSpec.describe ResourceAccessTokens::CreateService do
         end
 
         context 'expires_at' do
-          context 'when no value is passed' do
-            it 'uses default value' do
+          context 'when no expiration value is passed' do
+            it 'uses nil expiration value' do
               response = subject
               access_token = response.payload[:access_token]
 
               expect(access_token.expires_at).to eq(nil)
             end
+
+            context 'expiry of the project bot member' do
+              it 'project bot membership does not expire' do
+                response = subject
+                access_token = response.payload[:access_token]
+                project_bot = access_token.user
+
+                expect(project.members.find_by(user_id: project_bot.id).expires_at).to eq(nil)
+              end
+            end
           end
 
-          context 'when user provides value' do
+          context 'when user provides expiration value' do
             let_it_be(:params) { { expires_at: Date.today + 1.month } }
 
-            it 'overrides the default value' do
+            it 'overrides the default expiration value' do
               response = subject
               access_token = response.payload[:access_token]
 
               expect(access_token.expires_at).to eq(params[:expires_at])
+            end
+
+            context 'expiry of the project bot member' do
+              it 'sets the project bot to expire on the same day as the token' do
+                response = subject
+                access_token = response.payload[:access_token]
+                project_bot = access_token.user
+
+                expect(project.members.find_by(user_id: project_bot.id).expires_at).to eq(params[:expires_at])
+              end
             end
           end
 
@@ -164,7 +176,7 @@ RSpec.describe ResourceAccessTokens::CreateService do
 
       context 'when access provisioning fails' do
         before do
-          allow(resource).to receive(:add_maintainer).and_return(nil)
+          allow(resource).to receive(:add_user).and_return(nil)
         end
 
         it 'returns error' do
@@ -180,7 +192,6 @@ RSpec.describe ResourceAccessTokens::CreateService do
       let_it_be(:resource) { project }
 
       it_behaves_like 'fails when user does not have the permission to create a Resource Bot'
-      it_behaves_like 'fails when flag is disabled'
       it_behaves_like 'fails on gitlab.com'
 
       context 'user with valid permission' do

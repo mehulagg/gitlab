@@ -15,7 +15,6 @@ import LicenseManagement from 'ee/vue_shared/license_compliance/license_manageme
 import { LICENSE_LIST } from '../store/constants';
 import DetectedLicensesTable from './detected_licenses_table.vue';
 import PipelineInfo from './pipeline_info.vue';
-import DismissibleFeedbackAlert from '~/vue_shared/components/dismissible_feedback_alert.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { getLocationHash } from '~/lib/utils/url_utility';
 
@@ -33,7 +32,6 @@ export default {
     GlBadge,
     GlAlert,
     LicenseManagement,
-    DismissibleFeedbackAlert,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -109,15 +107,6 @@ export default {
   />
 
   <div v-else>
-    <!-- 
-      This is a temporary change to solicit feedback from users
-      and shall be removed in https://gitlab.com/gitlab-org/gitlab/-/issues/232618
-    -->
-    <dismissible-feedback-alert
-      feature-name="License Compliance"
-      feedback-link="https://gitlab.com/gitlab-org/gitlab/-/issues/218521"
-    />
-
     <gl-alert v-if="hasPolicyViolations" class="mt-3" variant="warning" :dismissible="false">
       {{
         s__(

@@ -3,11 +3,14 @@
 module Security
   module CiConfiguration
     class SastBuildActions
+      SAST_DEFAULT_ANALYZERS = 'bandit, brakeman, gosec, spotbugs, flawfinder, phpcs-security-audit, security-code-scan, nodejs-scan, eslint, sobelow, pmd-apex, kubesec'
+
       def initialize(auto_devops_enabled, params, existing_gitlab_ci_content)
         @auto_devops_enabled = auto_devops_enabled
         @variables = variables(params)
         @existing_gitlab_ci_content = existing_gitlab_ci_content || {}
         @default_sast_values = default_sast_values(params)
+        @default_values_overwritten = false
       end
 
       def generate
@@ -15,7 +18,7 @@ module Security
 
         update_existing_content!
 
-        [{ action: action, file_path: '.gitlab-ci.yml', content: prepare_existing_content }]
+        [{ action: action, file_path: '.gitlab-ci.yml', content: prepare_existing_content, default_values_overwritten: @default_values_overwritten }]
       end
 
       private
@@ -34,9 +37,30 @@ module Security
       end
 
       def collect_values(config, key)
-        global_variables = config['global']&.collect {|k| [k['field'], k[key]]}.to_h
-        pipeline_variables = config['pipeline']&.collect {|k| [k['field'], k[key]]}.to_h
-        global_variables.merge!(pipeline_variables)
+        global_variables = config['global']&.to_h { |k| [k['field'], k[key]] } || {}
+        pipeline_variables = config['pipeline']&.to_h { |k| [k['field'], k[key]] } || {}
+
+        analyzer_variables = collect_analyzer_values(config, key)
+
+        global_variables.merge!(pipeline_variables).merge!(analyzer_variables)
+      end
+
+      def collect_analyzer_values(config, key)
+        analyzer_variables = config['analyzers']
+          &.select {|a| a['enabled'] && a['variables'] }
+          &.flat_map {|a| a['variables'] }
+          &.collect {|v| [v['field'], v[key]] }.to_h
+
+        analyzer_variables['SAST_DEFAULT_ANALYZERS'] = if key == 'value'
+                                                         config['analyzers']
+                                                           &.select {|a| a['enabled'] }
+                                                           &.collect {|a| a['name'] }
+                                                           &.join(', ')
+                                                       else
+                                                         SAST_DEFAULT_ANALYZERS
+                                                       end
+
+        analyzer_variables
       end
 
       def update_existing_content!
@@ -77,6 +101,7 @@ module Security
         variables.each do |key|
           if @variables[key].present? && @variables[key].to_s != @default_sast_values[key].to_s
             hash_to_update['variables'][key] = @variables[key]
+            @default_values_overwritten = true
           else
             hash_to_update['variables'].delete(key)
           end
@@ -129,6 +154,11 @@ module Security
           SAST_ANALYZER_IMAGE_TAG
           SAST_EXCLUDED_PATHS
           SEARCH_MAX_DEPTH
+          SAST_DEFAULT_ANALYZERS
+          SAST_BRAKEMAN_LEVEL
+          SAST_BANDIT_EXCLUDED_PATHS
+          SAST_FLAWFINDER_LEVEL
+          SAST_GOSEC_LEVEL
         )
       end
     end

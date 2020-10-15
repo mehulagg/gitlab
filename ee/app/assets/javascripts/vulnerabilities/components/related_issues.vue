@@ -59,6 +59,9 @@ export default {
     isIssueAlreadyCreated() {
       return Boolean(this.state.relatedIssues.find(i => i.lockIssueRemoval));
     },
+    canCreateIssue() {
+      return !this.isIssueAlreadyCreated && !this.isFetching && Boolean(this.createIssueUrl);
+    },
   },
   inject: {
     vulnerabilityId: {
@@ -261,7 +264,7 @@ export default {
       <template #headerText>
         {{ $options.i18n.relatedIssues }}
       </template>
-      <template v-if="!isIssueAlreadyCreated && !isFetching" #headerActions>
+      <template v-if="canCreateIssue" #headerActions>
         <gl-button
           ref="createIssue"
           variant="success"

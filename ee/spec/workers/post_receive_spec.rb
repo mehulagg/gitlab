@@ -100,7 +100,7 @@ RSpec.describe PostReceive do
 
   describe '#process_wiki_changes' do
     let(:wiki) { build(:project_wiki, project: project) }
-    let(:gl_repository) { wiki.repository.repo_type.identifier_for_container(wiki.container) }
+    let(:gl_repository) { wiki.repository.repo_type.identifier_for_container(wiki) }
 
     it 'calls Git::WikiPushService#execute' do
       expect_next_instance_of(::Git::WikiPushService) do |service|
@@ -137,7 +137,8 @@ RSpec.describe PostReceive do
     end
 
     context 'with a group wiki' do
-      let(:wiki) { build(:group_wiki) }
+      let_it_be(:group) { create(:group) }
+      let(:wiki) { build(:group_wiki, group: group) }
 
       it 'calls Git::WikiPushService#execute' do
         expect_next_instance_of(::Git::WikiPushService) do |service|

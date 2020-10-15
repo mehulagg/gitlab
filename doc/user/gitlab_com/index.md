@@ -38,6 +38,14 @@ The IP address for `mg.gitlab.com` is subject to change at any time.
 
 [See our backup strategy](https://about.gitlab.com/handbook/engineering/infrastructure/production/#backups).
 
+There are several ways to perform backups of your content on GitLab.com.
+
+Projects can be backed up in their entirety by exporting them either [through the UI](../project/settings/import_export.md) or [API](../../api/project_import_export.md#schedule-an-export), the latter of which can be used to programmatically upload exports to a storage platform such as AWS S3.
+
+With exports, be sure to take note of [what is and is not](../project/settings/import_export.md#exported-contents), included in a project export.
+
+Since GitLab is built on Git, you can back up **just** the repository of a project by [cloning](../../gitlab-basics/start-using-git.md#clone-a-repository) it to another machine. Similarly, if you need to back up just the wiki of a repository it can also be cloned and all files uploaded to that wiki will come with it [if they were uploaded after 2020-08-22](../project/wiki/index.md#creating-a-new-wiki-page).
+
 ## Alternative SSH port
 
 GitLab.com can be reached via a [different SSH port](https://about.gitlab.com/blog/2016/02/18/gitlab-dot-com-now-supports-an-alternate-git-plus-ssh-port/) for `git+ssh`.
@@ -474,6 +482,10 @@ More information on this particular change can be found at
 of proposed changes can be found at
 <https://gitlab.com/gitlab-com/infrastructure/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=database&label_name[]=change>.
 
+## Puma
+
+GitLab.com uses the default of 60 seconds for [Puma request timeouts](https://docs.gitlab.com/omnibus/settings/puma.html#worker-timeout).
+
 ## Unicorn
 
 GitLab.com adjusts the memory limits for the [unicorn-worker-killer](https://rubygems.org/gems/unicorn-worker-killer) gem.
@@ -595,6 +607,11 @@ dropped and users get
 ### Import/export
 
 To help avoid abuse, project and group imports, exports, and export downloads are rate limited. See [Project import/export rate limits](../../user/project/settings/import_export.md#rate-limits) and [Group import/export rate limits](../../user/group/settings/import_export.md#rate-limits) for details.
+
+### Non-configurable limits
+
+See [non-configurable limits](../../security/rate_limits.md#non-configurable-limits) for information on
+rate limits that are not configurable, and therefore also used on GitLab.com.
 
 ## GitLab.com Logging
 

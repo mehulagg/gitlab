@@ -5,6 +5,10 @@ require 'spec_helper'
 RSpec.describe Groups::WikisController do
   include WikiHelpers
 
+  before do
+    stub_group_wikis(true)
+  end
+
   it_behaves_like 'wiki controller actions' do
     let(:container) { create(:group, :public) }
     let(:routing_params) { { group_id: container } }

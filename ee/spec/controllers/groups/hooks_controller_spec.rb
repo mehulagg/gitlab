@@ -178,6 +178,14 @@ RSpec.describe Groups::HooksController do
     end
   end
 
+  describe 'DELETE #destroy' do
+    let(:hook) { create(:group_hook, group: group) }
+    let!(:log) { create(:web_hook_log, web_hook: hook) }
+    let(:params) { { group_id: group.to_param, id: hook } }
+
+    it_behaves_like 'Web hook destroyer'
+  end
+
   context 'with group_webhooks disabled' do
     before do
       stub_licensed_features(group_webhooks: false)

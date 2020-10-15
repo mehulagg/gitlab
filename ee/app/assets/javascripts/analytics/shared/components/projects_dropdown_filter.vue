@@ -10,9 +10,10 @@ import {
   GlSearchBoxByType,
 } from '@gitlab/ui';
 import { n__, s__, __ } from '~/locale';
-import Api from '~/api';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { DATA_REFETCH_DELAY } from '../constants';
 import { filterBySearchTerm } from '../utils';
+import getProjects from '../graphql/projects.query.graphql';
 
 export default {
   name: 'ProjectsDropdownFilter',
@@ -28,6 +29,10 @@ export default {
   props: {
     groupId: {
       type: Number,
+      required: true,
+    },
+    groupNamespace: {
+      type: String,
       required: true,
     },
     multiSelect: {
@@ -121,13 +126,34 @@ export default {
     },
     fetchData() {
       this.loading = true;
-      return Api.groupProjects(this.groupId, this.searchTerm, this.queryParams, projects => {
-        this.projects = projects;
-        this.loading = false;
-      });
+
+      return this.$apollo
+        .query({
+          query: getProjects,
+          variables: {
+            groupFullPath: this.groupNamespace,
+            search: this.searchTerm,
+            ...this.queryParams,
+          },
+        })
+        .then(response => {
+          const {
+            data: {
+              group: {
+                projects: { nodes },
+              },
+            },
+          } = response;
+
+          this.loading = false;
+          this.projects = nodes;
+        });
     },
     isProjectSelected(id) {
       return this.selectedProjects ? this.selectedProjectIds.includes(id) : false;
+    },
+    getEntityId(project) {
+      return getIdFromGraphQLId(project.id);
     },
   },
 };
@@ -143,8 +169,8 @@ export default {
       <div class="gl-display-flex gl-flex-fill-1">
         <gl-avatar
           v-if="isOnlyOneProjectSelected"
-          :src="selectedProjects[0].avatar_url"
-          :entity-id="selectedProjects[0].id"
+          :src="selectedProjects[0].avatarUrl"
+          :entity-id="getEntityId(selectedProjects[0])"
           :entity-name="selectedProjects[0].name"
           :size="16"
           shape="rect"
@@ -170,12 +196,15 @@ export default {
           class="gl-mr-2 vertical-align-middle"
           :alt="project.name"
           :size="16"
-          :entity-id="project.id"
+          :entity-id="getEntityId(project)"
           :entity-name="project.name"
-          :src="project.avatar_url"
+          :src="project.avatarUrl"
           shape="rect"
         />
-        {{ project.name }}
+        <div>
+          <div data-testid="project-name">{{ project.name }}</div>
+          <div class="gl-text-gray-500" data-testid="project-full-path">{{ project.fullPath }}</div>
+        </div>
       </div>
     </gl-dropdown-item>
     <gl-dropdown-item v-show="noResultsAvailable" class="gl-pointer-events-none text-secondary">{{

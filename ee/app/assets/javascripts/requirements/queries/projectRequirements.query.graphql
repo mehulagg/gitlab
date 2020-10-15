@@ -26,6 +26,8 @@ query projectRequirementsEE(
         createdAt
         updatedAt
         state
+        lastTestReportState
+        lastTestReportManuallyCreated
         testReports(first: 1, sort: created_desc) {
           nodes {
             id

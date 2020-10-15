@@ -161,14 +161,4 @@ RSpec.describe SystemNoteService do
       described_class.publish_issue_to_status_page(noteable, project, author)
     end
   end
-
-  describe '.change_iteration' do
-    it 'calls IssuablesService' do
-      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
-        expect(service).to receive(:change_iteration)
-      end
-
-      described_class.change_iteration(noteable, author, nil)
-    end
-  end
 end

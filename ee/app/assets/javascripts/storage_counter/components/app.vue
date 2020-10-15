@@ -1,25 +1,30 @@
 <script>
 import { GlLink, GlSprintf, GlModalDirective, GlButton, GlIcon } from '@gitlab/ui';
-import Project from './project.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import ProjectsTable from './projects_table.vue';
 import UsageGraph from './usage_graph.vue';
+import UsageStatistics from './usage_statistics.vue';
 import query from '../queries/storage.query.graphql';
 import TemporaryStorageIncreaseModal from './temporary_storage_increase_modal.vue';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { parseBoolean } from '~/lib/utils/common_utils';
 
 export default {
+  name: 'StorageCounterApp',
   components: {
-    Project,
+    ProjectsTable,
     GlLink,
     GlButton,
     GlSprintf,
     GlIcon,
     UsageGraph,
+    UsageStatistics,
     TemporaryStorageIncreaseModal,
   },
   directives: {
     GlModalDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     namespacePath: {
       type: String,
@@ -71,8 +76,14 @@ export default {
     };
   },
   computed: {
+    namespaceProjects() {
+      return this.namespace?.projects ?? [];
+    },
     isStorageIncreaseModalVisible() {
       return parseBoolean(this.isTemporaryStorageIncreaseVisible);
+    },
+    isAdditionalStorageFlagEnabled() {
+      return this.glFeatures.additionalRepoStorageByNamespace;
     },
   },
   methods: {
@@ -85,9 +96,12 @@ export default {
 </script>
 <template>
   <div>
-    <div class="pipeline-quota container-fluid py-4 px-2 m-0">
-      <div class="row py-0 d-flex align-items-center">
-        <div class="col-lg-6">
+    <div v-if="isAdditionalStorageFlagEnabled && namespace.rootStorageStatistics">
+      <usage-statistics :root-storage-statistics="namespace.rootStorageStatistics" />
+    </div>
+    <div v-else class="gl-py-4 gl-px-2 gl-m-0">
+      <div class="gl-display-flex gl-align-items-center">
+        <div class="gl-w-half">
           <gl-sprintf :message="s__('UsageQuota|You used: %{usage} %{limit}')">
             <template #usage>
               <span class="gl-font-weight-bold" data-testid="total-usage">
@@ -113,7 +127,7 @@ export default {
             <gl-icon name="question" :size="12" />
           </gl-link>
         </div>
-        <div class="col-lg-6 text-lg-right">
+        <div class="gl-w-half gl-text-right">
           <gl-button
             v-if="isStorageIncreaseModalVisible"
             v-gl-modal-directive="$options.modalId"
@@ -132,31 +146,14 @@ export default {
           >
         </div>
       </div>
-      <div class="row py-0">
-        <div class="col-sm-12">
-          <usage-graph
-            v-if="namespace.rootStorageStatistics"
-            :root-storage-statistics="namespace.rootStorageStatistics"
-            :limit="namespace.limit"
-          />
-        </div>
+      <div v-if="namespace.rootStorageStatistics" class="gl-w-full">
+        <usage-graph
+          :root-storage-statistics="namespace.rootStorageStatistics"
+          :limit="namespace.limit"
+        />
       </div>
     </div>
-    <div class="ci-table" role="grid">
-      <div
-        class="gl-responsive-table-row table-row-header bg-gray-light pl-2 border-top mt-3 lh-100"
-        role="row"
-      >
-        <div class="table-section section-70 font-weight-bold" role="columnheader">
-          {{ __('Project') }}
-        </div>
-        <div class="table-section section-30 font-weight-bold" role="columnheader">
-          {{ __('Usage') }}
-        </div>
-      </div>
-
-      <project v-for="project in namespace.projects" :key="project.id" :project="project" />
-    </div>
+    <projects-table :projects="namespaceProjects" />
     <temporary-storage-increase-modal
       v-if="isStorageIncreaseModalVisible"
       :limit="formatSize(namespace.limit)"

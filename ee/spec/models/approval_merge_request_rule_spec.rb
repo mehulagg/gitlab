@@ -7,6 +7,12 @@ RSpec.describe ApprovalMergeRequestRule do
 
   subject { create(:approval_merge_request_rule, merge_request: merge_request) }
 
+  describe 'associations' do
+    subject { build_stubbed(:approval_merge_request_rule) }
+
+    it { is_expected.to have_one(:approval_project_rule_project).through(:approval_project_rule) }
+  end
+
   describe 'validations' do
     it 'is valid' do
       expect(build(:approval_merge_request_rule)).to be_valid

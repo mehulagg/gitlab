@@ -1,7 +1,7 @@
 ---
 name: experiment_growth_recaptcha
-introduced_by_url: 
-rollout_issue_url: 
-group: 
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/14019
+rollout_issue_url:
+group: group::acquisition
 type: development
 default_enabled: true

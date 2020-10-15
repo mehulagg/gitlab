@@ -52,6 +52,11 @@ module Gitlab
               # Fetch an already picked backend maintainer, or pick one otherwise
               spin.maintainer = backend_spin&.maintainer || spin_for_category(project, :backend, timezone_experiment: including_timezone).maintainer
             end
+          when :ci_template
+            if spin.maintainer.nil?
+              # Fetch an already picked backend maintainer, or pick one otherwise
+              spin.maintainer = backend_spin&.maintainer || spin_for_category(project, :backend, timezone_experiment: including_timezone).maintainer
+            end
           end
         end
 
@@ -147,6 +152,7 @@ module Gitlab
             spin_role_for_category(team, role, project, category)
           end
         hungry_reviewers = reviewers.select { |member| member.hungry }
+        hungry_traintainers = traintainers.select { |member| member.hungry }
 
         # TODO: take CODEOWNERS into account?
         # https://gitlab.com/gitlab-org/gitlab/issues/26723
@@ -156,7 +162,7 @@ module Gitlab
         # Make hungry traintainers have 4x the chance to be picked as a reviewer
         # Make traintainers have 3x the chance to be picked as a reviewer
         # Make hungry reviewers have 2x the chance to be picked as a reviewer
-        weighted_reviewers = reviewers + hungry_reviewers + traintainers + traintainers
+        weighted_reviewers = reviewers + hungry_reviewers + traintainers + traintainers + traintainers + hungry_traintainers
         reviewer = spin_for_person(weighted_reviewers, random: random, timezone_experiment: timezone_experiment)
         maintainer = spin_for_person(maintainers, random: random, timezone_experiment: timezone_experiment)
 

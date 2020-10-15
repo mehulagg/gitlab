@@ -11,6 +11,13 @@ RSpec.describe ApprovalProjectRule do
     end
   end
 
+  describe 'associations' do
+    subject { build_stubbed(:approval_project_rule) }
+
+    it { is_expected.to have_many(:approval_merge_request_rule_sources) }
+    it { is_expected.to have_many(:approval_merge_request_rules).through(:approval_merge_request_rule_sources) }
+  end
+
   describe '.regular' do
     it 'returns non-report_approver records' do
       rules = create_list(:approval_project_rule, 2)

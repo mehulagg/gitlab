@@ -85,7 +85,7 @@ module QA
       after(:all) do
         page.visit Runtime::Scenario.gitlab_address
 
-        %w[group_managed_accounts sign_up_on_sso group_scim group_administration_nav_item].each do |flag|
+        [:group_managed_accounts, :sign_up_on_sso, :group_scim, :group_administration_nav_item].each do |flag|
           Runtime::Feature.remove(flag)
         end
 
@@ -119,8 +119,8 @@ module QA
     end
 
     def setup_and_enable_group_managed_accounts
-      %w[group_managed_accounts sign_up_on_sso group_scim group_administration_nav_item].each do |flag|
-        Runtime::Feature.enable_and_verify(flag)
+      [:group_managed_accounts, :sign_up_on_sso, :group_scim, :group_administration_nav_item].each do |flag|
+        Runtime::Feature.enable(flag)
       end
 
       Support::Retrier.retry_on_exception do

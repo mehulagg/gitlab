@@ -42,6 +42,7 @@ export default (el, dashboardType) => {
   if (dashboardType === DASHBOARD_TYPES.PROJECT) {
     component = FirstClassProjectSecurityDashboard;
     props.projectFullPath = el.dataset.projectFullPath;
+    provide.autoFixDocumentation = el.dataset.autoFixDocumentation;
   } else if (dashboardType === DASHBOARD_TYPES.GROUP) {
     component = FirstClassGroupSecurityDashboard;
     props.groupFullPath = el.dataset.groupFullPath;

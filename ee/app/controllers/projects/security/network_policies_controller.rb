@@ -8,6 +8,8 @@ module Projects
       before_action :authorize_read_threat_monitoring!
       before_action :set_polling_interval, only: [:summary]
 
+      feature_category :container_network_security
+
       def summary
         return not_found unless environment.has_metrics?
 

@@ -1,4 +1,7 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 comments: false
 description: Read through the GitLab installation methods.
 type: index
@@ -13,12 +16,12 @@ and cost of hosting.
 
 There are many ways you can install GitLab depending on your platform:
 
-1. **Omnibus GitLab**: The official deb/rpm packages that contain a bundle of GitLab
+1. [**Omnibus GitLab**](#installing-gitlab-using-the-omnibus-gitlab-package-recommended): The official deb/rpm packages that contain a bundle of GitLab
    and the various components it depends on, like PostgreSQL, Redis, Sidekiq, etc.
-1. **GitLab Helm chart**: The cloud native Helm chart for installing GitLab and all
-   its components on Kubernetes.
-1. **Docker**: The Omnibus GitLab packages dockerized.
-1. **Source**: Install GitLab and all its components from scratch.
+1. [**GitLab Helm chart**](#installing-gitlab-on-kubernetes-via-the-gitlab-helm-charts): The cloud native Helm chart for installing GitLab and all its components on Kubernetes.
+1. [**Docker**](#installing-gitlab-with-docker): The Omnibus GitLab packages dockerized.
+1. [**Source**](#installing-gitlab-from-source): Install GitLab and all its components from scratch.
+1. [**Cloud provider**](#installing-gitlab-on-cloud-providers): Install directly from platforms like AWS, Azure, GCP.
 
 TIP: **If in doubt, choose Omnibus:**
 The Omnibus GitLab packages are mature,
@@ -68,7 +71,7 @@ GitLab maintains a set of official Docker images based on the Omnibus GitLab pac
 
 If the Omnibus GitLab package is not available in your distribution, you can
 install GitLab from source: Useful for unsupported systems like \*BSD. For an
-overview of the directory structure, read the [structure documentation](structure.md).
+overview of the directory structure, read the [structure documentation](installation.md#gitlab-directory-structure).
 
 [**> Install GitLab from source.**](installation.md)
 

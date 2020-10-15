@@ -33,7 +33,7 @@
             %strong= @license.licensee['Name']
             = "(#{@license.licensee['Email']})"
       %div
-        = link_to 'View details', admin_license_path, class: "btn btn-secondary"
+        = link_to 'View details', admin_license_path, class: "gl-button btn btn-secondary"
   .d-flex.gl-mb-5
     .col-sm-6.d-flex.pl-0
       .info-well.dark-well.gl-mb-0
@@ -53,7 +53,7 @@
       .info-well.dark-well.gl-mb-0
         .well-segment.well-centered
           %h3.center
-            = _('Active Users:')
+            = _('Billable Users:')
             = number_with_delimiter current_active_user_count
           %hr
             %p

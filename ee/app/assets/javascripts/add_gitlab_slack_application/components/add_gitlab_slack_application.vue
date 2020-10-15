@@ -1,16 +1,16 @@
 <script>
-/* eslint-disable @gitlab/vue-require-i18n-strings, vue/no-v-html */
-import { GlButton } from '@gitlab/ui';
+/* eslint-disable @gitlab/vue-require-i18n-strings */
+import { GlButton, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import { redirectTo } from '~/lib/utils/url_utility';
-import { spriteIcon } from '~/lib/utils/common_utils';
 
 import GitlabSlackService from '../services/gitlab_slack_service';
 
 export default {
   components: {
     GlButton,
+    GlIcon,
   },
 
   props: {
@@ -64,14 +64,6 @@ export default {
   },
 
   computed: {
-    doubleHeadedArrowSvg() {
-      return spriteIcon('double-headed-arrow');
-    },
-
-    arrowRightSvg() {
-      return spriteIcon('arrow-right');
-    },
-
     hasProjects() {
       return this.projects.length > 0;
     },
@@ -96,12 +88,9 @@ export default {
     <h1>{{ __('GitLab for Slack') }}</h1>
     <p>{{ __('Track your GitLab projects with GitLab for Slack.') }}</p>
 
-    <div v-once class="prepend-top-20 append-bottom-20">
+    <div v-once class="gl-my-5 gl-display-flex gl-justify-content-center gl-align-items-center">
       <img :src="gitlabLogoPath" class="gitlab-slack-logo" />
-      <div
-        class="gitlab-slack-double-headed-arrow inline prepend-left-20 append-right-20"
-        v-html="doubleHeadedArrowSvg"
-      ></div>
+      <gl-icon name="double-headed-arrow" :size="72" class="gl-mx-5 gl-text-gray-200" />
       <img :src="slackLogoPath" class="gitlab-slack-logo" />
     </div>
 
@@ -159,7 +148,7 @@ export default {
           >/gitlab &lt;project-alias&gt; issue show &lt;id&gt;</code
         >
         <span>
-          <div class="gitlab-slack-right-arrow inline gl-mr-2" v-html="arrowRightSvg"></div>
+          <gl-icon name="arrow-right" class="gl-mr-2 gl-text-gray-200" />
           Shows the issue with id <strong>&lt;id&gt;</strong>
         </span>
 

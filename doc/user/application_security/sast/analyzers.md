@@ -53,7 +53,7 @@ In `.gitlab-ci.yml` define:
 
 ```yaml
 include:
-  - template: SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
 
 variables:
   SECURE_ANALYZERS_PREFIX: my-docker-registry/gl-images
@@ -70,7 +70,7 @@ In `.gitlab-ci.yml` define:
 
 ```yaml
 include:
-  - template: SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
 
 variables:
   SAST_DEFAULT_ANALYZERS: "bandit,flawfinder"
@@ -86,7 +86,7 @@ default analyzers. In `.gitlab-ci.yml` define:
 
 ```yaml
 include:
-  - template: SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
 
 variables:
   SAST_DEFAULT_ANALYZERS: ""
@@ -120,7 +120,7 @@ The [Security Scanner Integration](../../../development/integrations/secure.md) 
 
 | Property / Tool                         | Apex                 | Bandit               | Brakeman             | ESLint security      | SpotBugs             | Flawfinder           | Gosec                | Kubesec Scanner      | NodeJsScan           | PHP CS Security Audit   | Security code Scan (.NET)   | Sobelow            |
 | --------------------------------------- | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :---------------------: | :-------------------------: | :----------------: |
-| Severity                                | ✓                    | ✓                    | 𐄂                    | 𐄂                    | ✓                    | ✓                    | ✓                    | ✓                    | 𐄂                    | ✓                       | 𐄂                           | 𐄂                  |
+| Severity                                | ✓                    | ✓                    | 𐄂                    | 𐄂                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                       | 𐄂                           | 𐄂                  |
 | Title                                   | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                       | ✓                           | ✓                  |
 | Description                             | ✓                    | 𐄂                    | 𐄂                    | ✓                    | ✓                    | 𐄂                    | 𐄂                    | ✓                    | ✓                    | 𐄂                       | 𐄂                           | ✓                  |
 | File                                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                       | ✓                           | ✓                  |

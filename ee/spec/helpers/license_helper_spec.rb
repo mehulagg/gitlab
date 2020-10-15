@@ -24,7 +24,7 @@ RSpec.describe LicenseHelper do
       it 'returns the number of active users' do
         allow(License).to receive(:current).and_return(nil)
 
-        expect(current_active_user_count).to eq(User.active.count)
+        expect(current_active_user_count).to eq(License.current_active_users.count)
       end
     end
   end

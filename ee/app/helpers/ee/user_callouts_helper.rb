@@ -13,7 +13,6 @@ module EE
     ACCOUNT_RECOVERY_REGULAR_CHECK = 'account_recovery_regular_check'
     ACTIVE_USER_COUNT_THRESHOLD = 'active_user_count_threshold'
     PERSONAL_ACCESS_TOKEN_EXPIRY = 'personal_access_token_expiry'
-    FEATURE_FLAGS_NEW_VERISION = 'feature_flags_new_version'
 
     def show_canary_deployment_callout?(project)
       !user_dismissed?(CANARY_DEPLOYMENT) &&
@@ -55,7 +54,6 @@ module EE
     def render_dashboard_gold_trial(user)
       return unless show_gold_trial?(user, GOLD_TRIAL) &&
           user_default_dashboard?(user) &&
-          ::Feature.enabled?(:render_dashboard_gold_trial, default_enabled: true) &&
           !user.owns_paid_namespace? &&
           user.any_namespace_without_trial?
 
@@ -89,10 +87,6 @@ module EE
       !token_expiration_enforced? &&
         current_user.active? &&
         !user_dismissed?(PERSONAL_ACCESS_TOKEN_EXPIRY, 1.week.ago)
-    end
-
-    def show_feature_flags_new_version?
-      !user_dismissed?(FEATURE_FLAGS_NEW_VERISION)
     end
 
     private

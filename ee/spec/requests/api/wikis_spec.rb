@@ -23,6 +23,10 @@ RSpec.describe API::Wikis do
   let(:expected_keys_with_content) { %w(content format slug title) }
   let(:expected_keys_without_content) { %w(format slug title) }
 
+  before do
+    stub_group_wikis(true)
+  end
+
   shared_examples_for 'wiki API 404 Group Not Found' do
     include_examples 'wiki API 404 Not Found', 'Group'
   end

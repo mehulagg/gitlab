@@ -10,23 +10,32 @@ import {
   GlBadge,
   GlEmptyState,
 } from '@gitlab/ui';
+import Tracking from '~/tracking';
 import { visitUrl, joinPaths, mergeUrlParams } from '~/lib/utils/url_utility';
 import IncidentsList from '~/incidents/components/incidents_list.vue';
 import SeverityToken from '~/sidebar/components/severity/severity.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
-import { I18N, INCIDENT_STATUS_TABS } from '~/incidents/constants';
+import {
+  I18N,
+  INCIDENT_STATUS_TABS,
+  TH_CREATED_AT_TEST_ID,
+  TH_SEVERITY_TEST_ID,
+  TH_PUBLISHED_TEST_ID,
+  trackIncidentCreateNewOptions,
+} from '~/incidents/constants';
 import mockIncidents from '../mocks/incidents.json';
 import mockFilters from '../mocks/incidents_filter.json';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn().mockName('visitUrlMock'),
-  joinPaths: jest.fn().mockName('joinPaths'),
-  mergeUrlParams: jest.fn().mockName('mergeUrlParams'),
-  setUrlParams: jest.fn().mockName('setUrlParams'),
-  updateHistory: jest.fn().mockName('updateHistory'),
+  joinPaths: jest.fn(),
+  mergeUrlParams: jest.fn(),
+  setUrlParams: jest.fn(),
+  updateHistory: jest.fn(),
 }));
+jest.mock('~/tracking');
 
 describe('Incidents List', () => {
   let wrapper;
@@ -45,10 +54,8 @@ describe('Incidents List', () => {
   const findAlert = () => wrapper.find(GlAlert);
   const findLoader = () => wrapper.find(GlLoadingIcon);
   const findTimeAgo = () => wrapper.findAll(TimeAgoTooltip);
-  const findDateColumnHeader = () =>
-    wrapper.find('[data-testid="incident-management-created-at-sort"]');
   const findSearch = () => wrapper.find(FilteredSearchBar);
-  const findAssingees = () => wrapper.findAll('[data-testid="incident-assignees"]');
+  const findAssignees = () => wrapper.findAll('[data-testid="incident-assignees"]');
   const findCreateIncidentBtn = () => wrapper.find('[data-testid="createIncidentBtn"]');
   const findClosedIcon = () => wrapper.findAll("[data-testid='incident-closed']");
   const findPagination = () => wrapper.find(GlPagination);
@@ -77,7 +84,7 @@ describe('Incidents List', () => {
         newIssuePath,
         incidentTemplateName,
         incidentType,
-        issuePath: '/project/isssues',
+        issuePath: '/project/issues',
         publishedAvailable: true,
         emptyListSvgPath,
         textQuery: '',
@@ -160,14 +167,14 @@ describe('Incidents List', () => {
     describe('Assignees', () => {
       it('shows Unassigned when there are no assignees', () => {
         expect(
-          findAssingees()
+          findAssignees()
             .at(0)
             .text(),
         ).toBe(I18N.unassigned);
       });
 
       it('renders an avatar component when there is an assignee', () => {
-        const avatar = findAssingees()
+        const avatar = findAssignees()
           .at(1)
           .find(GlAvatar);
         const { src, label } = avatar.attributes();
@@ -176,13 +183,6 @@ describe('Incidents List', () => {
         expect(avatar.exists()).toBe(true);
         expect(label).toBe(name);
         expect(src).toBe(avatarUrl);
-      });
-
-      it('contains a link to the issue details', () => {
-        findTableRows()
-          .at(0)
-          .trigger('click');
-        expect(visitUrl).toHaveBeenCalledWith(joinPaths(`/project/isssues/`, mockIncidents[0].iid));
       });
 
       it('renders a closed icon for closed incidents', () => {
@@ -195,6 +195,15 @@ describe('Incidents List', () => {
     it('renders severity per row', () => {
       expect(findSeverity().length).toBe(mockIncidents.length);
     });
+
+    it('contains a link to the incident details page', async () => {
+      findTableRows()
+        .at(0)
+        .trigger('click');
+      expect(visitUrl).toHaveBeenCalledWith(
+        joinPaths(`/project/issues/incident`, mockIncidents[0].iid),
+      );
+    });
   });
 
   describe('Create Incident', () => {
@@ -205,7 +214,7 @@ describe('Incidents List', () => {
       });
     });
 
-    it('shows the button linking to new incidents page with prefilled incident template when clicked', () => {
+    it('shows the button linking to new incidents page with pre-filled incident template when clicked', () => {
       expect(findCreateIncidentBtn().exists()).toBe(true);
       findCreateIncidentBtn().trigger('click');
       expect(mergeUrlParams).toHaveBeenCalledWith(
@@ -214,11 +223,10 @@ describe('Incidents List', () => {
       );
     });
 
-    it('sets button loading on click', () => {
+    it('sets button loading on click', async () => {
       findCreateIncidentBtn().vm.$emit('click');
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findCreateIncidentBtn().attributes('loading')).toBe('true');
-      });
+      await wrapper.vm.$nextTick();
+      expect(findCreateIncidentBtn().attributes('loading')).toBe('true');
     });
 
     it("doesn't show the button when list is empty", () => {
@@ -227,6 +235,13 @@ describe('Incidents List', () => {
         loading: false,
       });
       expect(findCreateIncidentBtn().exists()).toBe(false);
+    });
+
+    it('should track alert list page views', async () => {
+      findCreateIncidentBtn().vm.$emit('click');
+      await wrapper.vm.$nextTick();
+      const { category, action } = trackIncidentCreateNewOptions;
+      expect(Tracking.event).toHaveBeenCalledWith(category, action);
     });
   });
 
@@ -250,51 +265,47 @@ describe('Incidents List', () => {
     });
 
     describe('prevPage', () => {
-      it('returns prevPage button', () => {
+      it('returns prevPage button', async () => {
         findPagination().vm.$emit('input', 3);
 
-        return wrapper.vm.$nextTick(() => {
-          expect(
-            findPagination()
-              .findAll('.page-item')
-              .at(0)
-              .text(),
-          ).toBe('Prev');
-        });
+        await wrapper.vm.$nextTick();
+        expect(
+          findPagination()
+            .findAll('.page-item')
+            .at(0)
+            .text(),
+        ).toBe('Prev');
       });
 
-      it('returns prevPage number', () => {
+      it('returns prevPage number', async () => {
         findPagination().vm.$emit('input', 3);
 
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.prevPage).toBe(2);
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.prevPage).toBe(2);
       });
 
-      it('returns 0 when it is the first page', () => {
+      it('returns 0 when it is the first page', async () => {
         findPagination().vm.$emit('input', 1);
 
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.prevPage).toBe(0);
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.prevPage).toBe(0);
       });
     });
 
     describe('nextPage', () => {
-      it('returns nextPage button', () => {
+      it('returns nextPage button', async () => {
         findPagination().vm.$emit('input', 3);
 
-        return wrapper.vm.$nextTick(() => {
-          expect(
-            findPagination()
-              .findAll('.page-item')
-              .at(1)
-              .text(),
-          ).toBe('Next');
-        });
+        await wrapper.vm.$nextTick();
+        expect(
+          findPagination()
+            .findAll('.page-item')
+            .at(1)
+            .text(),
+        ).toBe('Next');
       });
 
-      it('returns nextPage number', () => {
+      it('returns nextPage number', async () => {
         mountComponent({
           data: {
             incidents: {
@@ -308,17 +319,15 @@ describe('Incidents List', () => {
         });
         findPagination().vm.$emit('input', 1);
 
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.nextPage).toBe(2);
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.nextPage).toBe(2);
       });
 
-      it('returns `null` when currentPage is already last page', () => {
+      it('returns `null` when currentPage is already last page', async () => {
         findStatusTabs().vm.$emit('input', 1);
         findPagination().vm.$emit('input', 1);
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.nextPage).toBeNull();
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.vm.nextPage).toBeNull();
       });
     });
 
@@ -380,7 +389,7 @@ describe('Incidents List', () => {
         wrapper.vm.handleFilterIncidents(mockFilters);
 
         expect(wrapper.vm.authorUsername).toBe('root');
-        expect(wrapper.vm.assigneeUsernames).toEqual(['root2']);
+        expect(wrapper.vm.assigneeUsernames).toEqual('root2');
         expect(wrapper.vm.searchTerm).toBe(mockFilters[2].value.data);
       });
 
@@ -437,13 +446,25 @@ describe('Incidents List', () => {
       });
     });
 
-    it('updates sort with new direction and column key', () => {
-      expect(findDateColumnHeader().attributes('aria-sort')).toBe('descending');
+    const descSort = 'descending';
+    const ascSort = 'ascending';
+    const noneSort = 'none';
 
-      findDateColumnHeader().trigger('click');
-      return wrapper.vm.$nextTick(() => {
-        expect(findDateColumnHeader().attributes('aria-sort')).toBe('ascending');
-      });
+    it.each`
+      selector                 | initialSort | firstSort   | nextSort
+      ${TH_CREATED_AT_TEST_ID} | ${descSort} | ${ascSort}  | ${descSort}
+      ${TH_SEVERITY_TEST_ID}   | ${noneSort} | ${descSort} | ${ascSort}
+      ${TH_PUBLISHED_TEST_ID}  | ${noneSort} | ${descSort} | ${ascSort}
+    `('updates sort with new direction', async ({ selector, initialSort, firstSort, nextSort }) => {
+      const [[attr, value]] = Object.entries(selector);
+      const columnHeader = () => wrapper.find(`[${attr}="${value}"]`);
+      expect(columnHeader().attributes('aria-sort')).toBe(initialSort);
+      columnHeader().trigger('click');
+      await wrapper.vm.$nextTick();
+      expect(columnHeader().attributes('aria-sort')).toBe(firstSort);
+      columnHeader().trigger('click');
+      await wrapper.vm.$nextTick();
+      expect(columnHeader().attributes('aria-sort')).toBe(nextSort);
     });
   });
 });

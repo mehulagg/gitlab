@@ -7,6 +7,14 @@ mutation updateRequirement($updateRequirementInput: UpdateRequirementInput!) {
       title
       state
       updatedAt
+      lastTestReportState
+      testReports(first: 1, sort: created_desc) {
+        nodes {
+          id
+          state
+          createdAt
+        }
+      }
     }
   }
 }

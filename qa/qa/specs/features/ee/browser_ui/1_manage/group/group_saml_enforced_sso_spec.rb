@@ -51,9 +51,7 @@ module QA
 
       after do
         page.visit Runtime::Scenario.gitlab_address
-        %w[group_administration_nav_item].each do |flag|
-          Runtime::Feature.remove(flag)
-        end
+        Runtime::Feature.remove(:group_administration_nav_item)
 
         @group.remove_via_api!
 
@@ -64,9 +62,7 @@ module QA
     end
 
     def setup_and_enable_enforce_sso
-      %w[group_administration_nav_item].each do |flag|
-        Runtime::Feature.enable_and_verify(flag)
-      end
+      Runtime::Feature.enable(:group_administration_nav_item)
 
       page.visit Runtime::Scenario.gitlab_address
       Page::Main::Login.perform(&:sign_in_using_credentials) unless Page::Main::Menu.perform(&:signed_in?)

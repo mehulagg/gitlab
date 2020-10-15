@@ -10,7 +10,7 @@ RSpec.describe 'registrations/welcome' do
   before do
     allow(view).to receive(:current_user).and_return(user)
     allow(view).to receive(:redirect_path).and_return(redirect_path)
-    allow(view).to receive(:experiment_enabled?).with(:onboarding_issues).and_return(onboarding_issues_experiment_enabled)
+    allow(view).to receive(:onboarding_issues_experiment_enabled?).and_return(onboarding_issues_experiment_enabled)
     allow(Gitlab).to receive(:com?).and_return(true)
 
     render

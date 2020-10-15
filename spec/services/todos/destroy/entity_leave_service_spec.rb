@@ -3,14 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe Todos::Destroy::EntityLeaveService do
-  let_it_be(:group, reload: true)   { create(:group, :private) }
-  let_it_be(:project, reload: true) { create(:project, group: group) }
   let_it_be(:user, reload: true)    { create(:user) }
   let_it_be(:user2, reload: true)   { create(:user) }
-  let_it_be(:issue)                 { create(:issue, project: project) }
-  let_it_be(:issue_c)               { create(:issue, project: project, confidential: true) }
-  let_it_be(:todo_group_user)       { create(:todo, user: user, group: group) }
-  let_it_be(:todo_group_user2)      { create(:todo, user: user2, group: group) }
+
+  let(:group)   { create(:group, :private) }
+  let(:project) { create(:project, :private, group: group) }
+  let(:issue)                 { create(:issue, project: project) }
+  let(:issue_c)               { create(:issue, project: project, confidential: true) }
+  let!(:todo_group_user)       { create(:todo, user: user, group: group) }
+  let!(:todo_group_user2)      { create(:todo, user: user2, group: group) }
 
   let(:mr)                  { create(:merge_request, source_project: project) }
   let!(:todo_mr_user)       { create(:todo, user: user, target: mr, project: project) }
@@ -18,20 +19,14 @@ RSpec.describe Todos::Destroy::EntityLeaveService do
   let!(:todo_issue_c_user)  { create(:todo, user: user, target: issue_c, project: project) }
   let!(:todo_issue_c_user2) { create(:todo, user: user2, target: issue_c, project: project) }
 
-  shared_examples 'using different access permissions' do |access_table|
-    using RSpec::Parameterized::TableSyntax
+  shared_examples 'using different access permissions' do
+    before do
+      set_access(project, user, project_access) if project_access
+      set_access(group, user, group_access) if group_access
+    end
 
-    where(:group_access, :project_access, :c_todos, :mr_todos, :method, &access_table)
-
-    with_them do
-      before do
-        set_access(project, user, project_access) if project_access
-        set_access(group, user, group_access) if group_access
-      end
-
-      it "#{params[:method].to_s.humanize(capitalize: false)}" do
-        send(method)
-      end
+    it "#{params[:method].to_s.humanize(capitalize: false)}" do
+      send(method_name)
     end
   end
 
@@ -41,10 +36,6 @@ RSpec.describe Todos::Destroy::EntityLeaveService do
 
   shared_examples 'removes only confidential issues todos' do
     it { removes_only_confidential_issues_todos }
-  end
-
-  shared_examples 'removes confidential issues and merge request todos' do
-    it { removes_confidential_issues_and_merge_request_todos }
   end
 
   def does_not_remove_any_todos
@@ -75,8 +66,9 @@ RSpec.describe Todos::Destroy::EntityLeaveService do
     describe 'updating a Project' do
       subject { described_class.new(user.id, project.id, 'Project').execute }
 
+      # a private project in a private group is valid
       context 'when project is private' do
-        context 'when a user leaves a project' do
+        context 'when user is not a member of the project' do
           it 'removes project todos for the provided user' do
             expect { subject }.to change { Todo.count }.from(6).to(3)
 
@@ -86,28 +78,60 @@ RSpec.describe Todos::Destroy::EntityLeaveService do
         end
 
         context 'access permissions' do
-          # rubocop:disable RSpec/LeakyConstantDeclaration
-          PROJECT_PRIVATE_ACCESS_TABLE =
-            lambda do |_|
-              [
-                # :group_access, :project_access, :c_todos, :mr_todos, :method
-                [nil,            :reporter,       :keep,    :keep,     :does_not_remove_any_todos],
-                [nil,            :guest,          :delete,  :keep,     :removes_only_confidential_issues_todos],
-                [:reporter,      nil,             :keep,    :keep,     :does_not_remove_any_todos],
-                [:guest,         nil,             :delete,  :keep,     :removes_only_confidential_issues_todos]
-              ]
-            end
-          # rubocop:enable RSpec/LeakyConstantDeclaration
+          where(:group_access, :project_access, :method_name) do
+            [
+              [nil,       :reporter, :does_not_remove_any_todos],
+              [nil,       :guest,    :removes_confidential_issues_and_merge_request_todos],
+              [:reporter, nil,       :does_not_remove_any_todos],
+              [:guest,    nil,       :removes_confidential_issues_and_merge_request_todos],
+              [:guest,    :reporter, :does_not_remove_any_todos],
+              [:guest,    :guest,    :removes_confidential_issues_and_merge_request_todos]
+            ]
+          end
 
-          it_behaves_like 'using different access permissions', PROJECT_PRIVATE_ACCESS_TABLE
+          with_them do
+            it_behaves_like 'using different access permissions'
+          end
         end
       end
 
+      # a private project in an internal/public group is valid
+      context 'when project is private in an internal/public group' do
+        let(:group) { create(:group, :internal) }
+
+        context 'when user is not a member of the project' do
+          it 'removes project todos for the provided user' do
+            expect { subject }.to change { Todo.count }.from(6).to(3)
+
+            expect(user.todos).to match_array([todo_group_user])
+            expect(user2.todos).to match_array([todo_issue_c_user2, todo_group_user2])
+          end
+        end
+
+        context 'access permissions' do
+          where(:group_access, :project_access, :method_name) do
+            [
+              [nil,       :reporter, :does_not_remove_any_todos],
+              [nil,       :guest,    :removes_confidential_issues_and_merge_request_todos],
+              [:reporter, nil,       :does_not_remove_any_todos],
+              [:guest,    nil,       :removes_confidential_issues_and_merge_request_todos],
+              [:guest,    :reporter, :does_not_remove_any_todos],
+              [:guest,    :guest,    :removes_confidential_issues_and_merge_request_todos]
+            ]
+          end
+
+          with_them do
+            it_behaves_like 'using different access permissions'
+          end
+        end
+      end
+
+      # an internal project in an internal/public group is valid
       context 'when project is not private' do
-        let_it_be(:group, reload: true)   { create(:group, :internal) }
-        let_it_be(:project, reload: true) { create(:project, :internal, group: group) }
-        let_it_be(:issue, reload: true)   { create(:issue, project: project) }
-        let_it_be(:issue_c, reload: true) { create(:issue, project: project, confidential: true) }
+        let(:group)   { create(:group, :internal) }
+        let(:project) { create(:project, :internal, group: group) }
+        let(:issue)   { create(:issue, project: project) }
+        let(:issue_c) { create(:issue, project: project, confidential: true) }
 
         it 'enqueues the PrivateFeaturesWorker' do
           expect(TodosDestroyer::PrivateFeaturesWorker)
@@ -138,21 +162,20 @@ RSpec.describe Todos::Destroy::EntityLeaveService do
           end
 
           context 'access permissions' do
-            # rubocop:disable RSpec/LeakyConstantDeclaration
-            PROJECT_NOT_PRIVATE_ACCESS_TABLE =
-              lambda do |_|
-                [
-                  # :group_access, :project_access, :c_todos, :mr_todos, :method
-                  [nil,            :reporter,       :keep,    :keep,     :does_not_remove_any_todos],
-                  [nil,            :guest,          :delete,  :keep,     :removes_only_confidential_issues_todos],
-                  [:reporter,      nil,             :keep,    :keep,     :does_not_remove_any_todos],
-                  [:guest,         nil,             :delete,  :keep,     :removes_only_confidential_issues_todos],
-                  [:reporter,      :guest,          :keep,    :keep,     :does_not_remove_any_todos]
-                ]
-              end
-            # rubocop:enable RSpec/LeakyConstantDeclaration
+            where(:group_access, :project_access, :method_name) do
+              [
+                [nil,       :reporter, :does_not_remove_any_todos],
+                [nil,       :guest,    :removes_only_confidential_issues_todos],
+                [:reporter, nil,       :does_not_remove_any_todos],
+                [:guest,    nil,       :removes_only_confidential_issues_todos],
+                [:guest,    :reporter, :does_not_remove_any_todos],
+                [:guest,    :guest,    :removes_only_confidential_issues_todos]
+              ]
+            end
 
-            it_behaves_like 'using different access permissions', PROJECT_NOT_PRIVATE_ACCESS_TABLE
+            with_them do
+              it_behaves_like 'using different access permissions'
+            end
           end
         end
 
@@ -184,18 +207,20 @@ RSpec.describe Todos::Destroy::EntityLeaveService do
         end
 
         context 'access permissions' do
-          # rubocop:disable RSpec/LeakyConstantDeclaration
-          GROUP_PRIVATE_ACCESS_TABLE =
-            lambda do |_|
-              [
-                # :group_access, :project_access, :c_todos, :mr_todos, :method
-                [nil,            :reporter,       :keep,    :keep,     :does_not_remove_any_todos],
-                [:reporter,      nil,             :keep,    :keep,     :does_not_remove_any_todos]
-              ]
-            end
-          # rubocop:enable RSpec/LeakyConstantDeclaration
+          where(:group_access, :project_access, :method_name) do
+            [
+              [nil,       :reporter, :does_not_remove_any_todos],
+              [nil,       :guest,    :removes_confidential_issues_and_merge_request_todos],
+              [:reporter, nil,       :does_not_remove_any_todos],
+              [:guest,    nil,       :removes_confidential_issues_and_merge_request_todos],
+              [:guest,    :reporter, :does_not_remove_any_todos],
+              [:guest,    :guest,    :removes_confidential_issues_and_merge_request_todos]
+            ]
+          end
 
-          it_behaves_like 'using different access permissions', GROUP_PRIVATE_ACCESS_TABLE
+          with_them do
+            it_behaves_like 'using different access permissions'
+          end
         end
 
         context 'with nested groups' do
@@ -268,10 +293,10 @@ RSpec.describe Todos::Destroy::EntityLeaveService do
       end
 
       context 'when group is not private' do
-        let_it_be(:group, reload: true)   { create(:group, :internal) }
-        let_it_be(:project, reload: true) { create(:project, :internal, group: group) }
-        let_it_be(:issue, reload: true)   { create(:issue, project: project) }
-        let_it_be(:issue_c, reload: true) { create(:issue, project: project, confidential: true) }
+        let(:group)   { create(:group, :internal) }
+        let(:project) { create(:project, :internal, group: group) }
+        let(:issue)   { create(:issue, project: project) }
+        let(:issue_c) { create(:issue, project: project, confidential: true) }
 
         it 'enqueues the PrivateFeaturesWorker' do
           expect(TodosDestroyer::PrivateFeaturesWorker)
@@ -281,19 +306,21 @@ RSpec.describe Todos::Destroy::EntityLeaveService do
         end
 
         context 'access permissions' do
-          # rubocop:disable RSpec/LeakyConstantDeclaration
-          GROUP_NOT_PRIVATE_ACCESS_TABLE =
-            lambda do |_|
-              [
-                # :group_access, :project_access, :c_todos, :mr_todos, :method
-                [nil,            nil,             :delete,  :keep,     :removes_only_confidential_issues_todos],
-                [nil,            :guest,          :delete,  :keep,     :removes_only_confidential_issues_todos],
-                [:reporter,      :guest,          :keep,    :keep,     :does_not_remove_any_todos]
-              ]
-            end
-          # rubocop:enable RSpec/LeakyConstantDeclaration
+          where(:group_access, :project_access, :method_name) do
+            [
+              [nil,       nil,       :removes_only_confidential_issues_todos],
+              [nil,       :reporter, :does_not_remove_any_todos],
+              [nil,       :guest,    :removes_only_confidential_issues_todos],
+              [:reporter, nil,       :does_not_remove_any_todos],
+              [:guest,    nil,       :removes_only_confidential_issues_todos],
+              [:guest,    :reporter, :does_not_remove_any_todos],
+              [:guest,    :guest,    :removes_only_confidential_issues_todos]
+            ]
+          end
 
-          it_behaves_like 'using different access permissions', GROUP_NOT_PRIVATE_ACCESS_TABLE
+          with_them do
+            it_behaves_like 'using different access permissions'
+          end
         end
       end
     end

@@ -5,7 +5,7 @@ import createStore from 'ee/billings/stores';
 import * as types from 'ee/billings/stores/modules/subscription/mutation_types';
 import SubscriptionTable from 'ee/billings/components/subscription_table.vue';
 import SubscriptionTableRow from 'ee/billings/components/subscription_table_row.vue';
-import mockDataSubscription from '../mock_data';
+import { mockDataSubscription } from '../mock_data';
 
 const TEST_NAMESPACE_NAME = 'GitLab.com';
 const CUSTOMER_PORTAL_URL = 'https://customers.gitlab.com/subscriptions';

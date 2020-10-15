@@ -10,7 +10,7 @@ module Groups::GroupMembersHelper
   end
 
   def render_invite_member_for_group(group, default_access_level)
-    render 'shared/members/invite_member', submit_url: group_group_members_path(group), access_levels: GroupMember.access_level_roles, default_access_level: default_access_level
+    render 'shared/members/invite_member', submit_url: group_group_members_path(group), access_levels: group.access_level_roles, default_access_level: default_access_level
   end
 
   def linked_groups_data_json(group_links)
@@ -19,6 +19,22 @@ module Groups::GroupMembersHelper
 
   def members_data_json(group, members)
     members_data(group, members).to_json
+  end
+
+  # Overridden in `ee/app/helpers/ee/groups/group_members_helper.rb`
+  def group_members_list_data_attributes(group, members)
+    {
+      members: members_data_json(group, members),
+      member_path: group_group_member_path(group, ':id'),
+      group_id: group.id
+    }
+  end
+
+  def linked_groups_list_data_attributes(group)
+    {
+      members: linked_groups_data_json(group.shared_with_group_links),
+      group_id: group.id
+    }
   end
 
   private
@@ -35,7 +51,6 @@ module Groups::GroupMembersHelper
         requested_at: member.requested_at,
         can_update: member.can_update?,
         can_remove: member.can_remove?,
-        can_override: member.can_override?,
         access_level: {
           string_value: member.human_access,
           integer_value: member.access_level
@@ -44,7 +59,8 @@ module Groups::GroupMembersHelper
           id: source.id,
           name: source.full_name,
           web_url: Gitlab::UrlBuilder.build(source)
-        }
+        },
+        valid_roles: member.valid_level_roles
       }.merge(member_created_by_data(member.created_by))
 
       if member.invite?

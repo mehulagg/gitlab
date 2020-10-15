@@ -74,14 +74,14 @@ RSpec.describe Gitlab::BackgroundMigration::UserMentions::CreateResourceUserMent
       let(:user_mentions) { merge_request_user_mentions }
       let(:resource) { merge_request }
 
-      it_behaves_like 'resource mentions migration', MigrateMergeRequestMentionsToDb, MergeRequest
+      it_behaves_like 'resource mentions migration', MigrateMergeRequestMentionsToDb, 'MergeRequest'
 
       context 'when FF disabled' do
         before do
           stub_feature_flags(migrate_user_mentions: false)
         end
 
-        it_behaves_like 'resource migration not run', MigrateMergeRequestMentionsToDb, MergeRequest
+        it_behaves_like 'resource migration not run', MigrateMergeRequestMentionsToDb, 'MergeRequest'
       end
     end
 
@@ -96,6 +96,7 @@ RSpec.describe Gitlab::BackgroundMigration::UserMentions::CreateResourceUserMent
 
       # this not does not have actual mentions
       let!(:note4) { notes.create!(commit_id: commit.id, noteable_type: 'Commit', project_id: project.id, author_id: author.id, note: 'note for an email@somesite.com and some other random @ ref' ) }
+
       # this should have pointed to an innexisted commit record in a commits table
       # but because commit is not an AR we'll just make it so that it does not have mentions
       let!(:note5) { notes.create!(commit_id: 'abc', noteable_type: 'Commit', project_id: project.id, author_id: author.id, note: 'note for an email@somesite.com and some other random @ ref') }
@@ -103,14 +104,14 @@ RSpec.describe Gitlab::BackgroundMigration::UserMentions::CreateResourceUserMent
       let(:user_mentions) { commit_user_mentions }
       let(:resource) { commit }
 
-      it_behaves_like 'resource notes mentions migration', MigrateCommitNotesMentionsToDb, Commit
+      it_behaves_like 'resource notes mentions migration', MigrateCommitNotesMentionsToDb, 'Commit'
 
       context 'when FF disabled' do
         before do
           stub_feature_flags(migrate_user_mentions: false)
         end
 
-        it_behaves_like 'resource notes migration not run', MigrateCommitNotesMentionsToDb, Commit
+        it_behaves_like 'resource notes migration not run', MigrateCommitNotesMentionsToDb, 'Commit'
       end
     end
   end

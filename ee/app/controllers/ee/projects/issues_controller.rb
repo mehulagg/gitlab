@@ -10,6 +10,8 @@ module EE
         include DescriptionDiffActions
 
         before_action :whitelist_query_limiting_ee, only: [:update]
+
+        feature_category :issue_tracking, [:delete_description_version, :description_diff]
       end
 
       private

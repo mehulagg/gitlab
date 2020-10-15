@@ -1,9 +1,9 @@
 <script>
-import { GlDrawer, GlFormGroup, GlFormTextarea, GlButton } from '@gitlab/ui';
+import { GlDrawer, GlFormGroup, GlFormTextarea, GlFormCheckbox, GlButton } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { __, sprintf } from '~/locale';
 
-import { MAX_TITLE_LENGTH } from '../constants';
+import { MAX_TITLE_LENGTH, TestReportStatus } from '../constants';
 
 export default {
   titleInvalidMessage: sprintf(__('Requirement title cannot have more than %{limit} characters.'), {
@@ -13,6 +13,7 @@ export default {
     GlDrawer,
     GlFormGroup,
     GlFormTextarea,
+    GlFormCheckbox,
     GlButton,
   },
   props: {
@@ -33,6 +34,7 @@ export default {
   data() {
     return {
       title: this.requirement?.title || '',
+      satisfied: this.requirement?.satisfied || false,
     };
   },
   computed: {
@@ -59,13 +61,15 @@ export default {
     requirement: {
       handler(value) {
         this.title = value?.title || '';
+        this.satisfied = value?.satisfied || false;
       },
       deep: true,
     },
     drawerOpen(value) {
-      // Clear `title` value on drawer close.
+      // Clear `title` and `satisfied` value on drawer close.
       if (!value) {
         this.title = '';
+        this.satisfied = false;
       }
     },
   },
@@ -79,6 +83,23 @@ export default {
 
       return '';
     },
+    newLastTestReportState() {
+      // lastTestReportState determines whether a requirement is satisfied or not.
+      // Only create a new test report when manually marking/unmarking a requirement as satisfied:
+
+      // when 1) manually marking a requirement as satisfied for the first time.
+      const updateCondition1 = this.requirement.lastTestReportState === null && this.satisfied;
+      // or when 2) overriding the status in the latest test report.
+      const updateCondition2 =
+        this.requirement.lastTestReportState !== null &&
+        this.satisfied !== this.requirement.satisfied;
+
+      if (updateCondition1 || updateCondition2) {
+        return this.satisfied ? TestReportStatus.Passed : TestReportStatus.Failed;
+      }
+
+      return null;
+    },
     handleSave() {
       if (this.isCreate) {
         this.$emit('save', this.title);
@@ -86,6 +107,7 @@ export default {
         this.$emit('save', {
           iid: this.requirement.iid,
           title: this.title,
+          lastTestReportState: this.newLastTestReportState(),
         });
       }
     },
@@ -96,12 +118,12 @@ export default {
 <template>
   <gl-drawer :open="drawerOpen" :header-height="getDrawerHeaderHeight()" @close="$emit('cancel')">
     <template #header>
-      <h4 class="m-0">{{ fieldLabel }}</h4>
+      <h4 class="gl-m-0">{{ fieldLabel }}</h4>
     </template>
     <template>
       <div class="requirement-form">
         <span v-if="!isCreate" class="text-muted">{{ reference }}</span>
-        <div class="requirement-form-container" :class="{ 'flex-grow-1 mt-1': !isCreate }">
+        <div class="requirement-form-container" :class="{ 'gl-flex-grow-1 gl-mt-2': !isCreate }">
           <gl-form-group
             :label="__('Title')"
             :invalid-feedback="$options.titleInvalidMessage"
@@ -121,14 +143,17 @@ export default {
               :class="{ 'gl-field-error-outline': titleInvalid }"
               @keyup.escape.exact="$emit('cancel')"
             />
+            <gl-form-checkbox v-if="!isCreate" v-model="satisfied" class="gl-mt-6">{{
+              __('Satisfied')
+            }}</gl-form-checkbox>
           </gl-form-group>
-          <div class="d-flex requirement-form-actions">
+          <div class="gl-display-flex requirement-form-actions gl-mt-6">
             <gl-button
               :disabled="disableSaveButton"
               :loading="requirementRequestActive"
               variant="success"
               category="primary"
-              class="mr-auto js-requirement-save"
+              class="gl-mr-auto js-requirement-save"
               @click="handleSave"
             >
               {{ saveButtonLabel }}

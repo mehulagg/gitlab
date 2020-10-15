@@ -31,7 +31,7 @@ RSpec.describe Members::DestroyService do
         end
 
         it 'cleans up linked SAML identity' do
-          expect { subject.execute(member, {}) }.to change { member_user.reload.identities.count }.by(-1)
+          expect { subject.execute(member) }.to change { member_user.reload.identities.count }.by(-1)
         end
       end
 
@@ -39,14 +39,14 @@ RSpec.describe Members::DestroyService do
         it 'does not attempt to destroy unrelated identities' do
           create(:identity, user: member_user)
 
-          expect { subject.execute(member, {}) }.not_to change(Identity, :count)
+          expect { subject.execute(member) }.not_to change(Identity, :count)
         end
       end
     end
 
     context 'audit events' do
       it_behaves_like 'logs an audit event' do
-        let(:event) { subject.execute(member, {}) }
+        let(:event) { subject.execute(member) }
       end
 
       it 'does not log the audit event as a system event' do
@@ -63,7 +63,11 @@ RSpec.describe Members::DestroyService do
     subject { described_class.new(nil) }
 
     context 'for members with expired access' do
-      let(:member) { create(:project_member, user: member_user, expires_at: 1.day.ago) }
+      let!(:member) { create(:project_member, user: member_user, expires_at: 1.day.from_now) }
+
+      before do
+        travel_to(3.days.from_now)
+      end
 
       context 'audit events' do
         it_behaves_like 'logs an audit event' do

@@ -29,6 +29,14 @@ RSpec.describe Resolvers::BoardGroupings::EpicsResolver do
   let_it_be(:epic_issue2) { create(:epic_issue, epic: epic2, issue: issue2) }
   let_it_be(:epic_issue3) { create(:epic_issue, epic: epic3, issue: issue3) }
 
+  let_it_be(:context) do
+    GraphQL::Query::Context.new(
+      query: OpenStruct.new(schema: nil),
+      values: { current_user: current_user },
+      object: nil
+    )
+  end
+
   describe '#resolve' do
     before do
       stub_licensed_features(epics: true)
@@ -117,7 +125,7 @@ RSpec.describe Resolvers::BoardGroupings::EpicsResolver do
     end
   end
 
-  def resolve_board_epics(object, args = {}, context = { current_user: current_user })
+  def resolve_board_epics(object, args = {})
     resolve(described_class, obj: object, args: args, ctx: context)
   end
 end

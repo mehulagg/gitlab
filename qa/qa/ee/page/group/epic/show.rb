@@ -42,7 +42,7 @@ module QA
             end
 
             def add_comment_to_epic(comment)
-              fill_element :comment_input, comment
+              fill_element :comment_field, comment
               click_element :comment_button
             end
 

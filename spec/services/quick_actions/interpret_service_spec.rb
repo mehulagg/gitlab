@@ -7,7 +7,7 @@ RSpec.describe QuickActions::InterpretService do
   let_it_be(:repository_project) { create(:project, :repository) }
   let_it_be(:project) { public_project }
   let_it_be(:developer) { create(:user) }
-  let(:developer2) { create(:user) }
+  let_it_be(:developer2) { create(:user) }
   let_it_be_with_reload(:issue) { create(:issue, project: project) }
   let(:milestone) { create(:milestone, project: project, title: '9.10') }
   let(:commit) { create(:commit, project: project) }
@@ -228,7 +228,7 @@ RSpec.describe QuickActions::InterpretService do
       it 'returns the todo message' do
         _, _, message = service.execute(content, issuable)
 
-        expect(message).to eq('Added a To Do.')
+        expect(message).to eq('Added a to do.')
       end
     end
 
@@ -244,7 +244,7 @@ RSpec.describe QuickActions::InterpretService do
         TodoService.new.mark_todo(issuable, developer)
         _, _, message = service.execute(content, issuable)
 
-        expect(message).to eq('Marked To Do as done.')
+        expect(message).to eq('Marked to do as done.')
       end
     end
 

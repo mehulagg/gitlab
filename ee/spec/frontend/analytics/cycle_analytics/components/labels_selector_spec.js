@@ -11,7 +11,7 @@ import { groupLabels } from '../mock_data';
 const selectedLabel = groupLabels[groupLabels.length - 1];
 const findActiveItem = wrapper =>
   wrapper
-    .findAll('gl-deprecated-dropdown-item-stub')
+    .findAll('gl-dropdown-item-stub')
     .filter(d => d.attributes('active'))
     .at(0);
 

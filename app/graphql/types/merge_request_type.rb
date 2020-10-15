@@ -152,6 +152,25 @@ module Types
     field :auto_merge_enabled, GraphQL::BOOLEAN_TYPE, null: false,
           description: 'Indicates if auto merge is enabled for the merge request'
 
+    field :approved_by, Types::UserType.connection_type, null: true,
+          description: 'Users who approved the merge request'
+
+    def approved_by
+      object.approved_by_users
+    end
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def user_notes_count
+      BatchLoader::GraphQL.for(object.id).batch(key: :merge_request_user_notes_count) do |ids, loader, args|
+        counts = Note.where(noteable_type: 'MergeRequest', noteable_id: ids).user.group(:noteable_id).count
+
+        ids.each do |id|
+          loader.call(id, counts[id] || 0)
+        end
+      end
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
+
     def diff_stats(path: nil)
       stats = Array.wrap(object.diff_stats&.to_a)
 
@@ -163,6 +182,12 @@ module Types
     end
 
     def diff_stats_summary
+      metrics = object.metrics
+
+      if metrics && metrics.added_lines && metrics.removed_lines
+        return { additions: metrics.added_lines, deletions: metrics.removed_lines, file_count: object.merge_request_diff&.files_count || 0 }
+      end
+
       nil_stats = { additions: 0, deletions: 0, file_count: 0 }
       return nil_stats unless object.diff_stats.present?
 
@@ -173,10 +198,6 @@ module Types
 
     def commit_count
       object&.metrics&.commits_count
-    end
-
-    def approvers
-      object.approver_users
     end
   end
 end

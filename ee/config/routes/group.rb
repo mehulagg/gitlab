@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
 constraints(::Constraints::GroupUrlConstrainer.new) do
-  scope(path: 'groups/*id',
-        controller: :groups,
-        constraints: { id: Gitlab::PathRegex.full_namespace_route_regex, format: /(html|json|atom|ics)/ }) do
-    scope(path: '-') do
-      get :subgroups, as: :subgroups_group # rubocop:todo Cop/PutGroupRoutesUnderScope
-    end
-  end
-
   scope(path: 'groups/*group_id/-',
         module: :groups,
         as: :group,
@@ -23,16 +15,20 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
     resource :contribution_analytics, only: [:show]
 
     namespace :analytics do
-      resource :productivity_analytics, only: :show, constraints: -> (req) { Gitlab::Analytics.productivity_analytics_enabled? }
-      resources :coverage_reports, only: :index, constraints: -> (req) { Gitlab::Analytics.group_coverage_reports_enabled? }
-      resource :merge_request_analytics, only: :show, constraints: -> (req) { Gitlab::Analytics.group_merge_request_analytics_enabled? }
-      resource :repository_analytics, only: :show, constraints: -> (req) { Gitlab::Analytics.group_coverage_reports_enabled? }
-
-      feature_default_enabled = Gitlab::Analytics.feature_enabled_by_default?(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG)
-      constrainer = ::Constraints::FeatureConstrainer.new(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG, default_enabled: feature_default_enabled)
-      constraints(constrainer) do
-        resource :cycle_analytics, only: :show, path: 'value_stream_analytics'
-        scope module: :cycle_analytics, as: 'cycle_analytics', path: 'value_stream_analytics' do
+      resource :productivity_analytics, only: :show
+      resources :coverage_reports, only: :index
+      resource :merge_request_analytics, only: :show
+      resource :repository_analytics, only: :show
+      resource :cycle_analytics, only: :show, path: 'value_stream_analytics'
+      scope module: :cycle_analytics, as: 'cycle_analytics', path: 'value_stream_analytics' do
+        resources :stages, only: [:index, :create, :update, :destroy] do
+          member do
+            get :duration_chart
+            get :median
+            get :records
+          end
+        end
+        resources :value_streams, only: [:index, :create, :destroy] do
           resources :stages, only: [:index, :create, :update, :destroy] do
             member do
               get :duration_chart
@@ -40,20 +36,11 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
               get :records
             end
           end
-          resources :value_streams, only: [:index, :create, :destroy] do
-            resources :stages, only: [:index, :create, :update, :destroy] do
-              member do
-                get :duration_chart
-                get :median
-                get :records
-              end
-            end
-          end
-          resource :summary, controller: :summary, only: :show
-          get '/time_summary' => 'summary#time_summary'
         end
-        get '/cycle_analytics', to: redirect('-/analytics/value_stream_analytics')
+        resource :summary, controller: :summary, only: :show
+        get '/time_summary' => 'summary#time_summary'
       end
+      get '/cycle_analytics', to: redirect('-/analytics/value_stream_analytics')
 
       scope :type_of_work do
         resource :tasks_by_type, controller: :tasks_by_type, only: :show do
@@ -98,6 +85,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         get 'merge_requests'
         get 'labels'
         get 'epics'
+        get 'vulnerabilities'
         get 'commands'
         get 'milestones'
       end

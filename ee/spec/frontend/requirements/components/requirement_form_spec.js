@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 
-import { GlDrawer, GlFormGroup, GlFormTextarea } from '@gitlab/ui';
+import { GlDrawer, GlFormCheckbox, GlFormGroup, GlFormTextarea } from '@gitlab/ui';
 import RequirementForm from 'ee/requirements/components/requirement_form.vue';
-import { MAX_TITLE_LENGTH } from 'ee/requirements/constants';
+import { TestReportStatus, MAX_TITLE_LENGTH } from 'ee/requirements/constants';
 
 import { mockRequirementsOpen } from '../mock_data';
 
@@ -18,6 +18,9 @@ const createComponent = ({
       requirementRequestActive,
     },
   });
+
+const findGlFormTextArea = wrapper => wrapper.find(GlFormTextarea);
+const findGlFormCheckbox = wrapper => wrapper.find(GlFormCheckbox);
 
 describe('RequirementForm', () => {
   let wrapper;
@@ -94,24 +97,48 @@ describe('RequirementForm', () => {
 
   describe('watchers', () => {
     describe('requirement', () => {
-      it('sets `title` to the value of `requirement.title` when requirement is not null', async () => {
-        wrapper.setProps({
-          requirement: mockRequirementsOpen[0],
+      describe('when requirement is not null', () => {
+        it('renders the value of `requirement.title` as title', async () => {
+          wrapper.setProps({
+            requirement: mockRequirementsOpen[0],
+          });
+
+          await wrapper.vm.$nextTick();
+
+          expect(findGlFormTextArea(wrapper).attributes('value')).toBe(
+            mockRequirementsOpen[0].title,
+          );
         });
 
-        await wrapper.vm.$nextTick();
+        it.each`
+          requirement                | satisfied
+          ${mockRequirementsOpen[0]} | ${true}
+          ${mockRequirementsOpen[1]} | ${false}
+        `(
+          `renders the satisfied checkbox according to the value of \`requirement.satisfied\`=$satisfied`,
+          async ({ requirement, satisfied }) => {
+            wrapper = createComponent();
+            wrapper.setProps({ requirement });
 
-        expect(wrapper.vm.title).toBe(mockRequirementsOpen[0].title);
+            await wrapper.vm.$nextTick();
+
+            expect(findGlFormCheckbox(wrapper).vm.$attrs.checked).toBe(satisfied);
+          },
+        );
       });
 
-      it('sets `title` to empty string when requirement is null', async () => {
-        wrapperWithRequirement.setProps({
-          requirement: null,
+      describe('when requirement is null', () => {
+        beforeEach(() => {
+          wrapperWithRequirement.setProps({
+            requirement: null,
+          });
         });
 
-        await wrapperWithRequirement.vm.$nextTick();
+        it('renders empty string as title', async () => {
+          await wrapperWithRequirement.vm.$nextTick();
 
-        expect(wrapperWithRequirement.vm.title).toBe('');
+          expect(findGlFormTextArea(wrapperWithRequirement).attributes('value')).toBe('');
+        });
       });
     });
 
@@ -133,6 +160,33 @@ describe('RequirementForm', () => {
   });
 
   describe('methods', () => {
+    describe.each`
+      lastTestReportState        | requirement                | newLastTestReportState
+      ${TestReportStatus.Passed} | ${mockRequirementsOpen[0]} | ${TestReportStatus.Failed}
+      ${TestReportStatus.Failed} | ${mockRequirementsOpen[1]} | ${TestReportStatus.Passed}
+      ${'null'}                  | ${mockRequirementsOpen[2]} | ${TestReportStatus.Passed}
+    `('newLastTestReportState', ({ lastTestReportState, requirement, newLastTestReportState }) => {
+      describe(`when \`lastTestReportState\` is ${lastTestReportState}`, () => {
+        beforeEach(() => {
+          wrapperWithRequirement = createComponent({ requirement });
+        });
+
+        it("returns null when `satisfied` hasn't changed", () => {
+          expect(wrapperWithRequirement.vm.newLastTestReportState()).toBe(null);
+        });
+
+        it(`returns ${newLastTestReportState} when \`satisfied\` has changed from ${
+          requirement.satisfied
+        } to ${!requirement.satisfied}`, () => {
+          wrapperWithRequirement.setData({
+            satisfied: !requirement.satisfied,
+          });
+
+          expect(wrapperWithRequirement.vm.newLastTestReportState()).toBe(newLastTestReportState);
+        });
+      });
+    });
+
     describe('handleSave', () => {
       it('emits `save` event on component with `title` as param when form is in create mode', () => {
         wrapper.setData({
@@ -147,7 +201,7 @@ describe('RequirementForm', () => {
         });
       });
 
-      it('emits `save` event on component with object as param containing `iid` & `title` when form is in update mode', () => {
+      it('emits `save` event on component with object as param containing `iid` & `title` & `lastTestReportState` when form is in update mode', () => {
         wrapperWithRequirement.vm.handleSave();
 
         return wrapperWithRequirement.vm.$nextTick(() => {
@@ -156,6 +210,7 @@ describe('RequirementForm', () => {
             {
               iid: mockRequirementsOpen[0].iid,
               title: mockRequirementsOpen[0].title,
+              lastTestReportState: wrapperWithRequirement.vm.newLastTestReportState(),
             },
           ]);
         });
@@ -172,6 +227,14 @@ describe('RequirementForm', () => {
       expect(wrapperWithRequirement.find('span').text()).toBe(`REQ-${mockRequirementsOpen[0].iid}`);
     });
 
+    it('does not render gl-form-checkbox when form is in create mode', () => {
+      expect(findGlFormCheckbox(wrapper).exists()).toBe(false);
+    });
+
+    it('renders gl-form-checkbox when form is in edit mode', () => {
+      expect(findGlFormCheckbox(wrapperWithRequirement).exists()).toBe(true);
+    });
+
     it('renders gl-form-group component', () => {
       const glFormGroup = wrapper.find(GlFormGroup);
 
@@ -185,7 +248,7 @@ describe('RequirementForm', () => {
     });
 
     it('renders gl-form-textarea component', () => {
-      const glFormTextarea = wrapper.find(GlFormTextarea);
+      const glFormTextarea = findGlFormTextArea(wrapper);
 
       expect(glFormTextarea.exists()).toBe(true);
       expect(glFormTextarea.attributes('id')).toBe('requirementTitle');
@@ -194,7 +257,7 @@ describe('RequirementForm', () => {
     });
 
     it('renders gl-form-textarea component populated with `requirement.title` when `requirement` prop is defined', () => {
-      expect(wrapperWithRequirement.find(GlFormTextarea).attributes('value')).toBe(
+      expect(findGlFormTextArea(wrapperWithRequirement).attributes('value')).toBe(
         mockRequirementsOpen[0].title,
       );
     });

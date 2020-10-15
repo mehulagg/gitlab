@@ -5,6 +5,7 @@ import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import IssuableTitle from '~/boards/components/issuable_title.vue';
+import BoardSidebarEpicSelect from './sidebar/board_sidebar_epic_select.vue';
 
 export default {
   headerHeight: `${contentTop()}px`,
@@ -12,6 +13,7 @@ export default {
     IssuableAssignees,
     GlDrawer,
     IssuableTitle,
+    BoardSidebarEpicSelect,
   },
   computed: {
     ...mapGetters(['isSidebarOpen', 'getActiveIssue']),
@@ -39,6 +41,7 @@ export default {
 
     <template>
       <issuable-assignees :users="getActiveIssue.assignees" />
+      <board-sidebar-epic-select />
     </template>
   </gl-drawer>
 </template>

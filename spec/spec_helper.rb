@@ -66,7 +66,11 @@ RSpec.configure do |config|
   config.display_try_failure_messages = true
 
   config.infer_spec_type_from_file_location!
-  config.full_backtrace = !!ENV['CI']
+
+  # Add :full_backtrace tag to an example if full_backtrace output is desired
+  config.before(:each, full_backtrace: true) do |example|
+    config.full_backtrace = true
+  end
 
   unless ENV['CI']
     # Re-run failures locally with `--only-failures`
@@ -225,7 +229,7 @@ RSpec.configure do |config|
     end
 
     # Enable Marginalia feature for all specs in the test suite.
-    allow(Gitlab::Marginalia).to receive(:cached_feature_enabled?).and_return(true)
+    Gitlab::Marginalia.enabled = true
 
     # Stub these calls due to being expensive operations
     # It can be reenabled for specific tests via:

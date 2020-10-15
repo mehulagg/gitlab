@@ -25,7 +25,7 @@ RSpec.describe Projects::AuditEventsController do
 
       context 'when audit_events feature is available' do
         let(:level) { Gitlab::Audit::Levels::Project.new(project: project) }
-        let(:audit_logs_params) { ActionController::Parameters.new(sort: '', entity_type: '', entity_id: '').permit! }
+        let(:audit_logs_params) { ActionController::Parameters.new(sort: '', entity_type: '', entity_id: '', created_after: Date.current.beginning_of_month, created_before: Date.current.end_of_day).permit! }
 
         before do
           stub_licensed_features(audit_events: true)
@@ -63,7 +63,7 @@ RSpec.describe Projects::AuditEventsController do
           context 'when the author entity type is specified' do
             let(:entity_type) { 'Author' }
             let(:entity_id) { 1 }
-            let(:audit_logs_params) { ActionController::Parameters.new(sort: '', author_id: '1').permit! }
+            let(:audit_logs_params) { ActionController::Parameters.new(sort: '', author_id: '1', created_after: Date.current.beginning_of_month, created_before: Date.current.end_of_day).permit! }
 
             it_behaves_like 'AuditLogFinder params'
           end

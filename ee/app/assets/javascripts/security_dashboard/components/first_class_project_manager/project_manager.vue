@@ -222,6 +222,8 @@ export default {
           search: searchQuery,
           first: this.$options.PROJECTS_PER_PAGE,
           after: pageInfo.endCursor,
+          searchNamespaces: true,
+          sort: 'similarity',
         },
       });
     },

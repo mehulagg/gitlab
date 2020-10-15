@@ -79,25 +79,63 @@ RSpec.describe Search::GlobalService do
     end
 
     context 'issue' do
-      let!(:issue) { create :issue, project: project }
-      let!(:note) { create :note, project: project, noteable: issue }
+      let(:scope) { 'issues' }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
-        permission_table_for_guest_feature_access
+      context 'visibility' do
+        let!(:issue) { create :issue, project: project }
+        let!(:note) { create :note, project: project, noteable: issue }
+
+        where(:project_level, :feature_access_level, :membership, :expected_count) do
+          permission_table_for_guest_feature_access
+        end
+
+        with_them do
+          it "respects visibility" do
+            update_feature_access_level(project, feature_access_level)
+            ensure_elasticsearch_index!
+
+            expect_search_results(user, 'issues', expected_count: expected_count) do |user|
+              described_class.new(user, search: issue.title).execute
+            end
+
+            expect_search_results(user, 'notes', expected_count: expected_count) do |user|
+              described_class.new(user, search: note.note).execute
+            end
+          end
+        end
       end
 
-      with_them do
-        it "respects visibility" do
-          update_feature_access_level(project, feature_access_level)
+      context 'sort by created_at' do
+        let!(:project) { create(:project, :public) }
+        let!(:old_result) { create(:issue, project: project, title: 'sorted old', created_at: 1.month.ago) }
+        let!(:new_result) { create(:issue, project: project, title: 'sorted recent', created_at: 1.day.ago) }
+        let!(:very_old_result) { create(:issue, project: project, title: 'sorted very old', created_at: 1.year.ago) }
+
+        before do
           ensure_elasticsearch_index!
+        end
 
-          expect_search_results(user, 'issues', expected_count: expected_count) do |user|
-            described_class.new(user, search: issue.title).execute
-          end
+        include_examples 'search results sorted' do
+          let(:results) { described_class.new(nil, search: 'sorted', sort: sort).execute }
+        end
+      end
+    end
 
-          expect_search_results(user, 'notes', expected_count: expected_count) do |user|
-            described_class.new(user, search: note.note).execute
-          end
+    context 'merge_request' do
+      let(:scope) { 'merge_requests' }
+
+      context 'sort by created_at' do
+        let!(:project) { create(:project, :public) }
+        let!(:old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'old-1', title: 'sorted old', created_at: 1.month.ago) }
+        let!(:new_result) { create(:merge_request, :opened, source_project: project, source_branch: 'new-1', title: 'sorted recent', created_at: 1.day.ago) }
+        let!(:very_old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'very-old-1', title: 'sorted very old', created_at: 1.year.ago) }
+
+        before do
+          ensure_elasticsearch_index!
+        end
+
+        include_examples 'search results sorted' do
+          let(:results) { described_class.new(nil, search: 'sorted', sort: sort).execute }
         end
       end
     end

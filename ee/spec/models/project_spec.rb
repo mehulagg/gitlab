@@ -2188,6 +2188,25 @@ RSpec.describe Project do
     end
   end
 
+  describe '#actual_size_limit' do
+    context 'when repository_size_limit is set on the project' do
+      it 'returns the repository_size_limit' do
+        project = build(:project, repository_size_limit: 10)
+
+        expect(project.actual_size_limit).to eq(10)
+      end
+    end
+
+    context 'when repository_size_limit is not set on the project' do
+      it 'returns the actual_size_limit of the namespace' do
+        group = build(:group, repository_size_limit: 20)
+        project = build(:project, namespace: group, repository_size_limit: nil)
+
+        expect(project.actual_size_limit).to eq(20)
+      end
+    end
+  end
+
   describe '#repository_size_checker' do
     let(:project) { build(:project) }
     let(:checker) { project.repository_size_checker }
@@ -2213,6 +2232,22 @@ RSpec.describe Project do
         project.repository_size_limit = 200
 
         expect(checker.limit).to eq(200)
+      end
+    end
+
+    describe '#total_repository_size_excess' do
+      it 'returns the total repository size excess of the namespace' do
+        allow(project.namespace).to receive(:total_repository_size_excess).and_return(50)
+
+        expect(checker.total_repository_size_excess).to eq(50)
+      end
+    end
+
+    describe '#additional_purchased_storage' do
+      it 'returns the additional purchased storage size of the namespace' do
+        allow(project.namespace).to receive(:additional_purchased_storage_size).and_return(100)
+
+        expect(checker.additional_purchased_storage).to eq(100.megabytes)
       end
     end
 
@@ -2254,6 +2289,32 @@ RSpec.describe Project do
           end
         end
       end
+    end
+  end
+
+  describe '#repository_size_excess' do
+    using RSpec::Parameterized::TableSyntax
+
+    subject { project.repository_size_excess }
+
+    let_it_be(:statistics) { create(:project_statistics) }
+    let_it_be(:project) { statistics.project }
+
+    where(:total_repository_size, :size_limit, :result) do
+      50 | nil | 0
+      50 | 0   | 0
+      50 | 60  | 0
+      50 | 50  | 0
+      50 | 10  | 40
+    end
+
+    with_them do
+      before do
+        allow(project).to receive(:actual_size_limit).and_return(size_limit)
+        allow(statistics).to receive(:total_repository_size).and_return(total_repository_size)
+      end
+
+      it { is_expected.to eq(result) }
     end
   end
 
@@ -2582,6 +2643,14 @@ RSpec.describe Project do
         expect(project.jira_import?).to be false
         expect { project.remove_import_data }.not_to change { ProjectImportData.count }
       end
+    end
+  end
+
+  describe '#mark_primary_write_location' do
+    it 'marks the location with project ID' do
+      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:mark_primary_write_location).with(:project, project.id)
+
+      project.mark_primary_write_location
     end
   end
 end

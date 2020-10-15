@@ -26,7 +26,7 @@
                 Elasticsearch indexing
               - unless Gitlab::CurrentSettings.elasticsearch_indexing?
                 .form-text.text-muted
-                  = _('Please create an index before enabling indexing')
+                  = _('An empty index will be created if one does not already exist')
               - if Gitlab::CurrentSettings.elasticsearch_indexing?
                 .form-text
                   = link_to _('Index all projects'), admin_elasticsearch_enqueue_index_path,
@@ -102,7 +102,7 @@
 
         .sub-section
           %h4= _('Elasticsearch zero-downtime reindexing')
-          = link_to _('Trigger cluster reindexing'), admin_elasticsearch_trigger_reindexing_path, class: 'btn btn-primary', data: { confirm: _('Are you sure you want to reindex?') }, method: :post, disabled: @elasticsearch_reindexing_task&.in_progress?
+          = link_to _('Trigger cluster reindexing'), admin_elasticsearch_trigger_reindexing_path, class: 'gl-button btn btn-primary', data: { confirm: _('Are you sure you want to reindex?') }, method: :post, disabled: @elasticsearch_reindexing_task&.in_progress?
           .form-text.text-muted
             = _('This feature should be used with an index that was created after 13.0')
           - Elastic::ReindexingTask.old_indices_scheduled_for_deletion.each do |task|
@@ -174,4 +174,4 @@
             .form-text.text-muted
               = _('AWS Secret Access Key.  Only required if not using role instance credentials')
 
-      = f.submit _('Save changes'), class: "btn btn-success", data: { qa_selector: 'submit_button' }
+      = f.submit _('Save changes'), class: "gl-button btn btn-success", data: { qa_selector: 'submit_button' }

@@ -66,6 +66,8 @@ module EE
     end
 
     def trial_user_namespaces
+      return [] if experiment_enabled?(:group_only_trials)
+
       strong_memoize(:trial_user_namespaces) do
         user_namespace = current_user.namespace
         user_namespace.eligible_for_trial? ? [user_namespace] : []

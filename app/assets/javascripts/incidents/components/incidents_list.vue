@@ -16,6 +16,7 @@ import {
   GlEmptyState,
 } from '@gitlab/ui';
 import Api from '~/api';
+import Tracking from '~/tracking';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
@@ -33,9 +34,17 @@ import getIncidents from '../graphql/queries/get_incidents.query.graphql';
 import getIncidentsCountByStatus from '../graphql/queries/get_count_by_status.query.graphql';
 import SeverityToken from '~/sidebar/components/severity/severity.vue';
 import { INCIDENT_SEVERITY } from '~/sidebar/components/severity/constants';
-import { I18N, DEFAULT_PAGE_SIZE, INCIDENT_STATUS_TABS } from '../constants';
+import {
+  I18N,
+  DEFAULT_PAGE_SIZE,
+  INCIDENT_STATUS_TABS,
+  TH_CREATED_AT_TEST_ID,
+  TH_SEVERITY_TEST_ID,
+  TH_PUBLISHED_TEST_ID,
+  INCIDENT_DETAILS_PATH,
+  trackIncidentCreateNewOptions,
+} from '../constants';
 
-const TH_TEST_ID = { 'data-testid': 'incident-management-created-at-sort' };
 const tdClass =
   'table-col gl-display-flex d-md-table-cell gl-align-items-center gl-white-space-nowrap';
 const thClass = 'gl-hover-bg-blue-50';
@@ -51,14 +60,17 @@ const initialPaginationState = {
 };
 
 export default {
+  trackIncidentCreateNewOptions,
   i18n: I18N,
   statusTabs: INCIDENT_STATUS_TABS,
   fields: [
     {
       key: 'severity',
       label: s__('IncidentManagement|Severity'),
-      thClass: `gl-pointer-events-none`,
-      tdClass,
+      thClass,
+      tdClass: `${tdClass} sortable-cell`,
+      sortable: true,
+      thAttr: TH_SEVERITY_TEST_ID,
     },
     {
       key: 'title',
@@ -72,7 +84,7 @@ export default {
       thClass,
       tdClass: `${tdClass} sortable-cell`,
       sortable: true,
-      thAttr: TH_TEST_ID,
+      thAttr: TH_CREATED_AT_TEST_ID,
     },
     {
       key: 'assignees',
@@ -226,7 +238,10 @@ export default {
               {
                 key: 'published',
                 label: s__('IncidentManagement|Published'),
-                thClass: 'gl-pointer-events-none',
+                thClass,
+                tdClass: `${tdClass} sortable-cell`,
+                sortable: true,
+                thAttr: TH_PUBLISHED_TEST_ID,
               },
             ],
           ]
@@ -312,6 +327,7 @@ export default {
   },
   methods: {
     filterIncidentsByStatus(tabIndex) {
+      this.resetPagination();
       const { filters, status } = this.$options.statusTabs[tabIndex];
       this.statusFilter = filters;
       this.filteredByStatus = status;
@@ -320,7 +336,12 @@ export default {
       return Boolean(assignees.nodes?.length);
     },
     navigateToIncidentDetails({ iid }) {
-      return visitUrl(joinPaths(this.issuePath, iid));
+      return visitUrl(joinPaths(this.issuePath, INCIDENT_DETAILS_PATH, iid));
+    },
+    navigateToCreateNewIncident() {
+      const { category, action } = this.$options.trackIncidentCreateNewOptions;
+      Tracking.event(category, action);
+      this.redirecting = true;
     },
     handlePageChange(page) {
       const { startCursor, endCursor } = this.incidents.pageInfo;
@@ -345,16 +366,20 @@ export default {
       this.pagination = initialPaginationState;
     },
     fetchSortedData({ sortBy, sortDesc }) {
-      const sortingDirection = sortDesc ? 'desc' : 'asc';
-      const sortingColumn = convertToSnakeCase(sortBy).replace(/_.*/, '');
+      const sortingDirection = sortDesc ? 'DESC' : 'ASC';
+      const sortingColumn = convertToSnakeCase(sortBy)
+        .replace(/_.*/, '')
+        .toUpperCase();
 
+      this.resetPagination();
       this.sort = `${sortingColumn}_${sortingDirection}`;
     },
     getSeverity(severity) {
       return INCIDENT_SEVERITY[severity];
     },
     handleFilterIncidents(filters) {
-      const filterParams = { authorUsername: '', assigneeUsername: [], search: '' };
+      this.resetPagination();
+      const filterParams = { authorUsername: '', assigneeUsername: '', search: '' };
 
       filters.forEach(filter => {
         if (typeof filter === 'object') {
@@ -363,7 +388,7 @@ export default {
               filterParams.authorUsername = filter.value.data;
               break;
             case 'assignee_username':
-              filterParams.assigneeUsername.push(filter.value.data);
+              filterParams.assigneeUsername = filter.value.data;
               break;
             case 'filtered-search-term':
               if (filter.value.data !== '') filterParams.search = filter.value.data;
@@ -441,7 +466,7 @@ export default {
         category="primary"
         variant="success"
         :href="newIncidentPath"
-        @click="redirecting = true"
+        @click="navigateToCreateNewIncident"
       >
         {{ $options.i18n.createIncidentBtnLabel }}
       </gl-button>

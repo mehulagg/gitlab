@@ -24,7 +24,7 @@ module ServicesHelper
     when "commit", "commit_events"
       s_("ProjectService|Event will be triggered when a commit is created/updated")
     when "deployment"
-      s_("ProjectService|Event will be triggered when a deployment finishes")
+      s_("ProjectService|Event will be triggered when a deployment starts or finishes")
     when "alert"
       s_("ProjectService|Event will be triggered when a new, unique alert is recorded")
     end
@@ -121,7 +121,11 @@ module ServicesHelper
   end
 
   def group_level_integrations?
-    @group.present? && Feature.enabled?(:group_level_integrations, @group)
+    @group.present? && Feature.enabled?(:group_level_integrations, @group, default_enabled: true)
+  end
+
+  def instance_level_integrations?
+    !Gitlab.com?
   end
 
   extend self

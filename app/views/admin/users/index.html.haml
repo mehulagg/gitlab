@@ -51,7 +51,7 @@
         = search_field_tag :search_query, params[:search_query], placeholder: s_('AdminUsers|Search by name, email or username'), class: 'form-control search-text-input js-search-input', spellcheck: false, data: { qa_selector: 'user_search_field' }
         - if @sort.present?
           = hidden_field_tag :sort, @sort
-        = icon("search", class: "search-icon")
+        = sprite_icon('search', css_class: 'search-icon')
         = button_tag s_('AdminUsers|Search users') if Rails.env.test?
       .dropdown.user-sort-dropdown
         = label_tag 'Sort by', nil, class: 'label-bold'
@@ -72,7 +72,8 @@
   .table-holder
     .thead-white.text-nowrap.gl-responsive-table-row.table-row-header{ role: 'row' }
       .table-section.section-40{ role: 'rowheader' }= _('Name')
-      .table-section.section-25{ role: 'rowheader' }= _('Created on')
+      .table-section.section-10{ role: 'rowheader' }= _('Projects')
+      .table-section.section-15{ role: 'rowheader' }= _('Created on')
       .table-section.section-15{ role: 'rowheader' }= _('Last activity')
 
     = render partial: 'admin/users/user', collection: @users

@@ -9,8 +9,6 @@ type: howto
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20912) in GitLab 12.6.
 
-## Overview
-
 GitLab administrators are responsible for the overall security of their instance. To assist, GitLab provides a Credentials inventory to keep track of all the credentials that can be used to access their self-managed instance.
 
 Using Credentials inventory, you can see all the personal access tokens (PAT) and SSH keys that exist in your GitLab instance. In addition, you can [revoke them](#revoke-a-users-personal-access-token) and see:
@@ -37,7 +35,7 @@ If you see a **Revoke** button, you can revoke that user's PAT. Whether you see 
 |-------------|------------------------|--------------------|----------------------------------------------------------------------------|
 | Active      | Yes                    | Yes                | Allows administrators to revoke the PAT, such as for a compromised account |
 | Active      | No                     | Yes                | Allows administrators to revoke the PAT, such as for a compromised account |
-| Expired     | Yes                    | No                 | PAT expires automatically                                                  |                                      
-| Expired     | No                     | Yes                | The administrator may revoke the PAT to prevent indefinite use             | 
-| Revoked     | Yes                    | No                 | Not applicable; token is already revoked                                   | 
-| Revoked     | No                     | No                 | Not applicable; token is already revoked                                   |                                                               
+| Expired     | Yes                    | No                 | PAT expires automatically                                                  |
+| Expired     | No                     | Yes                | The administrator may revoke the PAT to prevent indefinite use             |
+| Revoked     | Yes                    | No                 | Not applicable; token is already revoked                                   |
+| Revoked     | No                     | No                 | Not applicable; token is already revoked                                   |

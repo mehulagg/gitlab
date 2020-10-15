@@ -27,6 +27,7 @@ RSpec.describe Packages::PackageFile, type: :model do
 
   context 'new file' do
     it 'calls checksum worker' do
+      allow(Gitlab::Geo).to receive(:enabled?).and_return(true)
       allow(Geo::BlobVerificationPrimaryWorker).to receive(:perform_async)
 
       package_file = create(:conan_package_file, :conan_recipe_file)
@@ -36,7 +37,7 @@ RSpec.describe Packages::PackageFile, type: :model do
   end
 
   describe '.replicables_for_geo_node' do
-    subject { described_class.replicables_for_geo_node }
+    subject { described_class.replicables_for_geo_node(1..described_class.last.id) }
 
     it 'returns a package files scope' do
       secondary = create(:geo_node)

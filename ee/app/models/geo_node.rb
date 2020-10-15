@@ -207,6 +207,10 @@ class GeoNode < ApplicationRecord
     url
   end
 
+  def repository_url(repository)
+    Gitlab::Utils.append_path(internal_url, "#{repository.full_path}.git")
+  end
+
   def oauth_callback_url
     Gitlab::Routing.url_helpers.oauth_geo_callback_url(url_helper_args)
   end
@@ -261,23 +265,17 @@ class GeoNode < ApplicationRecord
     designs.where(id: project_id).exists?
   end
 
-  def lfs_objects
-    return LfsObject.all unless selective_sync?
+  # @param primary_key_in [Range, LfsObject] arg to pass to primary_key_in scope
+  # @return [ActiveRecord::Relation<LfsObject>] scope of LfsObject filtered by selective sync settings and primary key arg
+  def lfs_objects(primary_key_in:)
+    return LfsObject.primary_key_in(primary_key_in) unless selective_sync?
 
-    query = LfsObjectsProject.project_id_in(projects).select(:lfs_object_id).distinct
-    cte = Gitlab::SQL::CTE.new(:restricted_lfs_objects, query)
-    lfs_object_table = LfsObject.arel_table
+    ids = LfsObjectsProject.project_id_in(projects)
+                           .where(lfs_object_id: primary_key_in)
+                           .select(:lfs_object_id)
+                           .distinct
 
-    inner_join_restricted_lfs_objects =
-      cte.table
-        .join(lfs_object_table, Arel::Nodes::InnerJoin)
-        .on(cte.table[:lfs_object_id].eq(lfs_object_table[:id]))
-        .join_sources
-
-    LfsObject
-      .with(cte.to_arel)
-      .from(cte.table)
-      .joins(inner_join_restricted_lfs_objects)
+    LfsObject.where(id: ids)
   end
 
   def projects

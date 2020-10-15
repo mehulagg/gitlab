@@ -33,19 +33,6 @@ RSpec.describe EE::MergeRequestMetricsService do
       it 'updates `removed_lines`' do
         expect { subject }.to change { merge_request.metrics.removed_lines }.from(nil).to(expected_removed_lines)
       end
-
-      context 'when `store_merge_request_line_metrics` feature flag is disabled' do
-        before do
-          stub_feature_flags(store_merge_request_line_metrics: false)
-        end
-
-        it 'does not update line counts' do
-          subject
-
-          expect(merge_request.metrics.added_lines).to be_nil
-          expect(merge_request.metrics.removed_lines).to be_nil
-        end
-      end
     end
   end
 end

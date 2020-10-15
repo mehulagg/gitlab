@@ -1,21 +1,235 @@
 /* eslint no-param-reassign: "off" */
 
 import $ from 'jquery';
+import { emojiFixtureMap, initEmojiMock, describeEmojiFields } from 'helpers/emoji';
 import '~/lib/utils/jquery_at_who';
 import GfmAutoComplete, { membersBeforeSave } from 'ee_else_ce/gfm_auto_complete';
 
 import { TEST_HOST } from 'helpers/test_constants';
 import { getJSONFixture } from 'helpers/fixtures';
 
+import waitForPromises from 'jest/helpers/wait_for_promises';
+
+import MockAdapter from 'axios-mock-adapter';
+import AjaxCache from '~/lib/utils/ajax_cache';
+import axios from '~/lib/utils/axios_utils';
+
 const labelsFixture = getJSONFixture('autocomplete_sources/labels.json');
 
 describe('GfmAutoComplete', () => {
-  const gfmAutoCompleteCallbacks = GfmAutoComplete.prototype.getDefaultCallbacks.call({
-    fetchData: () => {},
-  });
+  const fetchDataMock = { fetchData: jest.fn() };
+  let gfmAutoCompleteCallbacks = GfmAutoComplete.prototype.getDefaultCallbacks.call(fetchDataMock);
 
   let atwhoInstance;
   let sorterValue;
+  let filterValue;
+
+  describe('.typesWithBackendFiltering', () => {
+    it('should contain vulnerabilities', () => {
+      expect(GfmAutoComplete.typesWithBackendFiltering).toContain('vulnerabilities');
+    });
+  });
+
+  describe('DefaultOptions.filter', () => {
+    let items;
+
+    beforeEach(() => {
+      jest.spyOn(fetchDataMock, 'fetchData');
+      jest.spyOn($.fn.atwho.default.callbacks, 'filter').mockImplementation(() => {});
+    });
+
+    describe('assets loading', () => {
+      beforeEach(() => {
+        atwhoInstance = { setting: {}, $inputor: 'inputor', at: '+' };
+        items = ['loading'];
+
+        filterValue = gfmAutoCompleteCallbacks.filter.call(atwhoInstance, '', items);
+      });
+
+      it('should call the fetchData function without query', () => {
+        expect(fetchDataMock.fetchData).toHaveBeenCalledWith('inputor', '+');
+      });
+
+      it('should not call the default atwho filter', () => {
+        expect($.fn.atwho.default.callbacks.filter).not.toHaveBeenCalled();
+      });
+
+      it('should return the passed unfiltered items', () => {
+        expect(filterValue).toEqual(items);
+      });
+    });
+
+    describe('backend filtering', () => {
+      beforeEach(() => {
+        atwhoInstance = { setting: {}, $inputor: 'inputor', at: '+' };
+        items = [];
+      });
+
+      describe('when previous query is different from current one', () => {
+        beforeEach(() => {
+          gfmAutoCompleteCallbacks = GfmAutoComplete.prototype.getDefaultCallbacks.call({
+            previousQuery: 'oldquery',
+            ...fetchDataMock,
+          });
+          filterValue = gfmAutoCompleteCallbacks.filter.call(atwhoInstance, 'newquery', items);
+        });
+
+        it('should call the fetchData function with query', () => {
+          expect(fetchDataMock.fetchData).toHaveBeenCalledWith('inputor', '+', 'newquery');
+        });
+
+        it('should not call the default atwho filter', () => {
+          expect($.fn.atwho.default.callbacks.filter).not.toHaveBeenCalled();
+        });
+
+        it('should return the passed unfiltered items', () => {
+          expect(filterValue).toEqual(items);
+        });
+      });
+
+      describe('when previous query is not different from current one', () => {
+        beforeEach(() => {
+          gfmAutoCompleteCallbacks = GfmAutoComplete.prototype.getDefaultCallbacks.call({
+            previousQuery: 'oldquery',
+            ...fetchDataMock,
+          });
+          filterValue = gfmAutoCompleteCallbacks.filter.call(
+            atwhoInstance,
+            'oldquery',
+            items,
+            'searchKey',
+          );
+        });
+
+        it('should not call the fetchData function', () => {
+          expect(fetchDataMock.fetchData).not.toHaveBeenCalled();
+        });
+
+        it('should call the default atwho filter', () => {
+          expect($.fn.atwho.default.callbacks.filter).toHaveBeenCalledWith(
+            'oldquery',
+            items,
+            'searchKey',
+          );
+        });
+      });
+    });
+  });
+
+  describe('fetchData', () => {
+    const { fetchData } = GfmAutoComplete.prototype;
+    let mock;
+
+    beforeEach(() => {
+      mock = new MockAdapter(axios);
+      jest.spyOn(axios, 'get');
+      jest.spyOn(AjaxCache, 'retrieve');
+    });
+
+    afterEach(() => {
+      mock.restore();
+    });
+
+    describe('already loading data', () => {
+      beforeEach(() => {
+        const context = {
+          isLoadingData: { '+': true },
+          dataSources: {},
+          cachedData: {},
+        };
+        fetchData.call(context, {}, '+', '');
+      });
+
+      it('should not call either axios nor AjaxCache', () => {
+        expect(axios.get).not.toHaveBeenCalled();
+        expect(AjaxCache.retrieve).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('backend filtering', () => {
+      describe('data is not in cache', () => {
+        let context;
+
+        beforeEach(() => {
+          context = {
+            isLoadingData: { '+': false },
+            dataSources: { vulnerabilities: 'vulnerabilities_autocomplete_url' },
+            cachedData: {},
+          };
+        });
+
+        it('should call axios with query', () => {
+          fetchData.call(context, {}, '+', 'query');
+
+          expect(axios.get).toHaveBeenCalledWith('vulnerabilities_autocomplete_url', {
+            params: { search: 'query' },
+          });
+        });
+
+        it.each([200, 500])('should set the loading state', async responseStatus => {
+          mock.onGet('vulnerabilities_autocomplete_url').replyOnce(responseStatus);
+
+          fetchData.call(context, {}, '+', 'query');
+
+          expect(context.isLoadingData['+']).toBe(true);
+
+          await waitForPromises();
+
+          expect(context.isLoadingData['+']).toBe(false);
+        });
+      });
+
+      describe('data is in cache', () => {
+        beforeEach(() => {
+          const context = {
+            isLoadingData: { '+': false },
+            dataSources: { vulnerabilities: 'vulnerabilities_autocomplete_url' },
+            cachedData: { '+': [{}] },
+          };
+          fetchData.call(context, {}, '+', 'query');
+        });
+
+        it('should anyway call axios with query ignoring cache', () => {
+          expect(axios.get).toHaveBeenCalledWith('vulnerabilities_autocomplete_url', {
+            params: { search: 'query' },
+          });
+        });
+      });
+    });
+
+    describe('frontend filtering', () => {
+      describe('data is not in cache', () => {
+        beforeEach(() => {
+          const context = {
+            isLoadingData: { '#': false },
+            dataSources: { issues: 'issues_autocomplete_url' },
+            cachedData: {},
+          };
+          fetchData.call(context, {}, '#', 'query');
+        });
+
+        it('should call AjaxCache', () => {
+          expect(AjaxCache.retrieve).toHaveBeenCalledWith('issues_autocomplete_url', true);
+        });
+      });
+
+      describe('data is in cache', () => {
+        beforeEach(() => {
+          const context = {
+            isLoadingData: { '#': false },
+            dataSources: { issues: 'issues_autocomplete_url' },
+            cachedData: { '#': [{}] },
+            loadData: () => {},
+          };
+          fetchData.call(context, {}, '#', 'query');
+        });
+
+        it('should not call AjaxCache', () => {
+          expect(AjaxCache.retrieve).not.toHaveBeenCalled();
+        });
+      });
+    });
+  });
 
   describe('DefaultOptions.sorter', () => {
     describe('assets loading', () => {
@@ -416,8 +630,9 @@ describe('GfmAutoComplete', () => {
     let $textarea;
 
     beforeEach(() => {
+      setFixtures('<textarea></textarea>');
       autocomplete = new GfmAutoComplete(dataSources);
-      $textarea = $('<textarea></textarea>');
+      $textarea = $('textarea');
       autocomplete.setup($textarea, { labels: true });
     });
 
@@ -486,6 +701,116 @@ describe('GfmAutoComplete', () => {
         ${'/relabel ~'} | ${assignedLabels}
         ${'/unlabel ~'} | ${assignedLabels}
       `('$input shows $output.length labels', expectLabels);
+    });
+  });
+
+  describe('emoji', () => {
+    const { atom, heart, star } = emojiFixtureMap;
+    const assertInserted = ({ input, subject, emoji }) =>
+      expect(subject).toBe(`:${emoji?.name || input}:`);
+    const assertTemplated = ({ input, subject, emoji, field }) =>
+      expect(subject.replace(/\s+/g, ' ')).toBe(
+        `<li>${field || input} <gl-emoji data-name="${emoji?.name || input}"></gl-emoji> </li>`,
+      );
+
+    let mock;
+
+    beforeEach(async () => {
+      mock = await initEmojiMock();
+
+      await new GfmAutoComplete({}).loadEmojiData({ atwho() {}, trigger() {} }, ':');
+      if (!GfmAutoComplete.glEmojiTag) throw new Error('emoji not loaded');
+    });
+
+    afterEach(() => {
+      mock.restore();
+    });
+
+    describe.each`
+      name                        | inputFormat           | assert
+      ${'insertTemplateFunction'} | ${name => ({ name })} | ${assertInserted}
+      ${'templateFunction'}       | ${name => name}       | ${assertTemplated}
+    `('Emoji.$name', ({ name, inputFormat, assert }) => {
+      const execute = (accessor, input, emoji) =>
+        assert({
+          input,
+          emoji,
+          field: accessor && accessor(emoji),
+          subject: GfmAutoComplete.Emoji[name](inputFormat(input)),
+        });
+
+      describeEmojiFields('for $field', ({ accessor }) => {
+        it('should work with lowercase', () => {
+          execute(accessor, accessor(atom), atom);
+        });
+
+        it('should work with uppercase', () => {
+          execute(accessor, accessor(atom).toUpperCase(), atom);
+        });
+
+        it('should work with partial value', () => {
+          execute(accessor, accessor(atom).slice(1), atom);
+        });
+      });
+
+      it('should work with unicode value', () => {
+        execute(null, atom.moji, atom);
+      });
+
+      it('should pass through unknown value', () => {
+        execute(null, 'foo bar baz');
+      });
+    });
+
+    const expectEmojiOrder = (first, second) => {
+      const keys = Object.keys(emojiFixtureMap);
+      const firstIndex = keys.indexOf(first);
+      const secondIndex = keys.indexOf(second);
+      expect(firstIndex).toBeGreaterThanOrEqual(0);
+      expect(secondIndex).toBeGreaterThanOrEqual(0);
+      expect(firstIndex).toBeLessThan(secondIndex);
+    };
+
+    describe('Emoji.insertTemplateFunction', () => {
+      it('should map ":heart" to :heart: [regression]', () => {
+        // the bug mapped heart to black_heart because the latter sorted first
+        expectEmojiOrder('black_heart', 'heart');
+
+        const item = GfmAutoComplete.Emoji.insertTemplateFunction({ name: 'heart' });
+        expect(item).toEqual(`:${heart.name}:`);
+      });
+
+      it('should map ":star" to :star: [regression]', () => {
+        // the bug mapped star to custard because the latter sorted first
+        expectEmojiOrder('custard', 'star');
+
+        const item = GfmAutoComplete.Emoji.insertTemplateFunction({ name: 'star' });
+        expect(item).toEqual(`:${star.name}:`);
+      });
+    });
+
+    describe('Emoji.templateFunction', () => {
+      it('should map ":heart" to ❤ [regression]', () => {
+        // the bug mapped heart to black_heart because the latter sorted first
+        expectEmojiOrder('black_heart', 'heart');
+
+        const item = GfmAutoComplete.Emoji.templateFunction('heart')
+          .replace(/(<gl-emoji)\s+(data-name)/, '$1 $2')
+          .replace(/>\s+|\s+</g, s => s.trim());
+        expect(item).toEqual(
+          `<li>${heart.name}<gl-emoji data-name="${heart.name}"></gl-emoji></li>`,
+        );
+      });
+
+      it('should map ":star" to ⭐ [regression]', () => {
+        // the bug mapped star to custard because the latter sorted first
+        expectEmojiOrder('custard', 'star');
+
+        const item = GfmAutoComplete.Emoji.templateFunction('star')
+          .replace(/(<gl-emoji)\s+(data-name)/, '$1 $2')
+          .replace(/>\s+|\s+</g, s => s.trim());
+        expect(item).toEqual(`<li>${star.name}<gl-emoji data-name="${star.name}"></gl-emoji></li>`);
+      });
     });
   });
 });

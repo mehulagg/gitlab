@@ -1,13 +1,11 @@
 <script>
-import { GlButton, GlLink } from '@gitlab/ui';
-import { sprintf, s__ } from '~/locale';
+import { GlButton } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import CreateMergeRequestButton from './create_merge_request_button.vue';
 
 export default {
   components: {
     GlButton,
-    GlLink,
     CreateMergeRequestButton,
   },
   mixins: [glFeatureFlagsMixin()],
@@ -36,11 +34,6 @@ export default {
     canManageProfiles() {
       return this.feature.type === 'dast_profiles';
     },
-    getFeatureDocumentationLinkLabel() {
-      return sprintf(s__('SecurityConfiguration|Feature documentation for %{featureName}'), {
-        featureName: this.feature.name,
-      });
-    },
   },
 };
 </script>
@@ -48,8 +41,6 @@ export default {
 <template>
   <gl-button
     v-if="canManageProfiles"
-    variant="success"
-    category="primary"
     :href="feature.configuration_path"
     data-testid="manageButton"
     >{{ s__('SecurityConfiguration|Manage') }}</gl-button
@@ -77,14 +68,4 @@ export default {
     :auto-devops-enabled="autoDevopsEnabled"
     :endpoint="createSastMergeRequestPath"
   />
-
-  <gl-link
-    v-else
-    target="_blank"
-    :href="feature.link"
-    :aria-label="getFeatureDocumentationLinkLabel"
-    data-testid="docsLink"
-  >
-    {{ s__('SecurityConfiguration|See documentation') }}
-  </gl-link>
 </template>

@@ -11,12 +11,14 @@ module Resolvers
                required: false,
                description: 'Filters applied when selecting issues on the board'
 
-      type Types::EpicType, null: true
+      type Types::Boards::BoardEpicType, null: true
 
       def resolve(**args)
         return Epic.none unless board.present?
         return Epic.none unless group.present?
         return unless ::Feature.enabled?(:boards_with_swimlanes, group)
+
+        context.scoped_set!(:board, board)
 
         Epic.for_ids(board_epic_ids(args[:issue_filters]))
       end

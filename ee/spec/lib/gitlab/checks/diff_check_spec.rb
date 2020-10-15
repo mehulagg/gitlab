@@ -8,6 +8,12 @@ RSpec.describe Gitlab::Checks::DiffCheck do
   include_context 'push rules checks context'
 
   describe '#validate!' do
+    let(:push_allowed) { false }
+
+    before do
+      allow(user_access).to receive(:can_push_to_branch?).and_return(push_allowed)
+    end
+
     shared_examples_for "returns codeowners validation message" do
       it "returns an error message" do
         expect(validation_result).to include("Pushes to protected branches")
@@ -21,6 +27,51 @@ RSpec.describe Gitlab::Checks::DiffCheck do
         expect(subject).not_to receive(:process_commits)
 
         subject.validate!
+      end
+    end
+
+    describe '#validate_code_owners?' do
+      let_it_be(:push_rule) { create(:push_rule, file_name_regex: 'READ*') }
+      let(:validate_code_owners) { subject.send(:validate_code_owners?) }
+      let(:protocol) { 'ssh' }
+      let(:push_allowed) { false }
+
+      context 'when user can not push to the branch' do
+        context 'when not updated from web' do
+          it 'checks if the branch requires code owner approval' do
+            expect(project).to receive(:branch_requires_code_owner_approval?).and_return(true)
+
+            expect(validate_code_owners).to eq(true)
+          end
+        end
+
+        context 'when updated from the web' do
+          let(:protocol) { 'web' }
+
+          it 'returns false' do
+            expect(validate_code_owners).to eq(false)
+          end
+        end
+      end
+
+      context 'when a user can push to the branch' do
+        let(:push_allowed) { true }
+
+        it 'returns false' do
+          expect(validate_code_owners).to eq(false)
+        end
+
+        context 'when push_rules_supersede_code_owners is disabled' do
+          before do
+            stub_feature_flags(push_rules_supersede_code_owners: false)
+          end
+
+          it 'returns branch_requires_code_owner_approval?' do
+            expect(project).to receive(:branch_requires_code_owner_approval?).and_return(true)
+
+            expect(validate_code_owners).to eq(true)
+          end
+        end
       end
     end
 

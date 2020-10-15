@@ -7,6 +7,8 @@ RSpec.describe 'Query.project(fullPath).dastScannerProfiles' do
 
   let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile) }
   let_it_be(:project) { dast_scanner_profile.project }
+  let_it_be(:dast_scanner_profile_different_project) { create(:dast_scanner_profile) }
+  let_it_be(:project_2) { dast_scanner_profile_different_project.project }
   let_it_be(:current_user) { create(:user) }
 
   let(:query) do
@@ -43,12 +45,29 @@ RSpec.describe 'Query.project(fullPath).dastScannerProfiles' do
   context 'when the user can run a dast scan' do
     before do
       project.add_guest(current_user)
+      project_2.add_guest(current_user)
     end
 
     describe 'dast scanner profiles' do
       subject { response_data.dig('project', 'dastScannerProfiles', 'nodes') }
 
       it { is_expected.to be_empty }
+    end
+  end
+
+  context 'when a user has access to multiple projects' do
+    before do
+      project.add_developer(current_user)
+      project_2.add_developer(current_user)
+    end
+
+    describe 'dast scanner profiles' do
+      subject { response_data.dig('project', 'dastScannerProfiles', 'nodes') }
+
+      it 'returns only the dast_scanner_profile for the requested project' do
+        expect(subject.length).to eq(1)
+        expect(subject.first['id']).to eq(Gitlab::GlobalId.build(dast_scanner_profile).to_s)
+      end
     end
   end
 

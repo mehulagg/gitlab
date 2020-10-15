@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Editing file blob', :js do
   include TreeHelper
+  include BlobSpecHelpers
 
   let(:project) { create(:project, :public, :repository) }
   let(:merge_request) { create(:merge_request, source_project: project, source_branch: 'feature', target_branch: 'master') }
@@ -20,22 +21,18 @@ RSpec.describe 'Editing file blob', :js do
       sign_in(user)
     end
 
-    def edit_and_commit(commit_changes: true)
+    def edit_and_commit(commit_changes: true, is_diff: false)
+      set_default_button('edit')
+      refresh
       wait_for_requests
-      find('.js-edit-blob').click
 
-      fill_and_commit(commit_changes)
-    end
+      if is_diff
+        first('.js-diff-more-actions').click
+        click_link('Edit in single-file editor')
+      else
+        click_link('Edit')
+      end
 
-    def mr_edit_and_commit(commit_changes: true)
-      wait_for_requests
-      find('[data-testid="edit_file"]').click
-      click_link 'Edit in single-file editor'
-
-      fill_and_commit(commit_changes)
-    end
-
-    def fill_and_commit(commit_changes)
       fill_editor(content: 'class NextFeature\\nend\\n')
 
       if commit_changes
@@ -51,7 +48,7 @@ RSpec.describe 'Editing file blob', :js do
     context 'from MR diff' do
       before do
         visit diffs_project_merge_request_path(project, merge_request)
-        mr_edit_and_commit
+        edit_and_commit(is_diff: true)
       end
 
       it 'returns me to the mr' do

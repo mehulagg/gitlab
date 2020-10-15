@@ -16,7 +16,7 @@ function decodeUrlParameter(val) {
   return decodeURIComponent(val.replace(/\+/g, '%20'));
 }
 
-function cleanLeadingSeparator(path) {
+export function cleanLeadingSeparator(path) {
   return path.replace(PATH_SEPARATOR_LEADING_REGEX, '');
 }
 
@@ -256,6 +256,15 @@ export function getBaseURL() {
 }
 
 /**
+ * Takes a URL and returns content from the start until the final '/'
+ *
+ * @param {String} url - full url, including protocol and host
+ */
+export function stripFinalUrlSegment(url) {
+  return new URL('.', url).href;
+}
+
+/**
  * Returns true if url is an absolute URL
  *
  * @param {String} url
@@ -280,6 +289,15 @@ export function isRootRelative(url) {
  */
 export function isBase64DataUrl(url) {
   return /^data:[.\w+-]+\/[.\w+-]+;base64,/.test(url);
+}
+
+/**
+ * Returns true if url is a blob: type url
+ *
+ * @param {String} url
+ */
+export function isBlobUrl(url) {
+  return /^blob:/.test(url);
 }
 
 /**
@@ -434,4 +452,25 @@ export function getHTTPProtocol(url) {
   }
   const protocol = url.split(':');
   return protocol.length > 1 ? protocol[0] : undefined;
+}
+
+/**
+ * Strips the filename from the given path by removing every non-slash character from the end of the
+ * passed parameter.
+ * @param {string} path
+ */
+export function stripPathTail(path = '') {
+  return path.replace(/[^/]+$/, '');
+}
+
+export function getURLOrigin(url) {
+  if (!url) {
+    return window.location.origin;
+  }
+
+  try {
+    return new URL(url).origin;
+  } catch (e) {
+    return null;
+  }
 }

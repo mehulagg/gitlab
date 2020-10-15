@@ -20,8 +20,6 @@ describe('AuditEventsApp', () => {
 
   const events = [{ foo: 'bar' }];
   const filterTokenOptions = AVAILABLE_TOKEN_TYPES.map(type => ({ type }));
-  const filterQaSelector = 'filter_qa_selector';
-  const tableQaSelector = 'table_qa_selector';
   const exportUrl = 'http://example.com/audit_log_reports.csv';
 
   const initComponent = (props = {}) => {
@@ -29,8 +27,6 @@ describe('AuditEventsApp', () => {
       store,
       propsData: {
         isLastPage: true,
-        filterQaSelector,
-        tableQaSelector,
         filterTokenOptions,
         events,
         exportUrl,
@@ -70,7 +66,6 @@ describe('AuditEventsApp', () => {
     it('renders audit events table', () => {
       expect(wrapper.find(AuditEventsTable).props()).toEqual({
         events,
-        qaSelector: tableQaSelector,
         isLastPage: true,
       });
     });
@@ -78,7 +73,6 @@ describe('AuditEventsApp', () => {
     it('renders audit events filter', () => {
       expect(wrapper.find(AuditEventsFilter).props()).toEqual({
         filterTokenOptions,
-        qaSelector: filterQaSelector,
         value: TEST_FILTER_VALUE,
       });
     });

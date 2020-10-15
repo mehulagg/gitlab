@@ -27,7 +27,7 @@ module Gitlab
           def add_dependencies(report_hash)
             report_hash[:dependencies].each do |dependency_hash|
               dependency_hash[:licenses].map do |license_id|
-                license_for(license_id).add_dependency(dependency_hash[:name])
+                license_for(license_id).add_dependency(dependency_hash)
               end
             end
           end

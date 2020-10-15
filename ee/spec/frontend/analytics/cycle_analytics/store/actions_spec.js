@@ -1047,7 +1047,7 @@ describe('Cycle analytics actions', () => {
     });
 
     describe('receiveValueStreamsSuccess', () => {
-      it(`commits the ${types.RECEIVE_VALUE_STREAMS_SUCCESS} mutation`, () => {
+      it(`with a selectedValueStream in state commits the ${types.RECEIVE_VALUE_STREAMS_SUCCESS} mutation and dispatches 'fetchValueStreamData'`, () => {
         return testAction(
           actions.receiveValueStreamsSuccess,
           valueStreams,
@@ -1058,7 +1058,25 @@ describe('Cycle analytics actions', () => {
               payload: valueStreams,
             },
           ],
-          [{ type: 'setSelectedValueStream', payload: selectedValueStream.id }],
+          [{ type: 'fetchValueStreamData' }],
+        );
+      });
+
+      it(`commits the ${types.RECEIVE_VALUE_STREAMS_SUCCESS} mutation and dispatches 'setSelectedValueStream'`, () => {
+        return testAction(
+          actions.receiveValueStreamsSuccess,
+          valueStreams,
+          {
+            ...state,
+            selectedValueStream: null,
+          },
+          [
+            {
+              type: types.RECEIVE_VALUE_STREAMS_SUCCESS,
+              payload: valueStreams,
+            },
+          ],
+          [{ type: 'setSelectedValueStream', payload: selectedValueStream }],
         );
       });
     });

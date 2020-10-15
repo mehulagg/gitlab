@@ -7,6 +7,7 @@
     "severity",
     "report_type",
     "scanner",
+    "scan",
     "project"
   ],
   "properties" : {
@@ -30,6 +31,13 @@
     "scanner" : {
       "external_id" : { "type": "string" },
       "name" : { "type": "string" }
+    },
+    "scan" : {
+      "end_time": { "type": "string" },
+      "messages": { "type": "string" },
+      "start_time": { "type": "string" },
+      "status": { "type": "string" },
+      "type": { "type": "string" }
     },
     "project" : {
       "required" : [

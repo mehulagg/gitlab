@@ -4,6 +4,7 @@ class Environment < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
   include ReactiveCaching
   include FastDestroyAll::Helpers
+  include Presentable
 
   self.reactive_cache_refresh_interval = 1.minute
   self.reactive_cache_lifetime = 55.seconds
@@ -86,6 +87,7 @@ class Environment < ApplicationRecord
   scope :with_rank, -> do
     select('environments.*, rank() OVER (PARTITION BY project_id ORDER BY id DESC)')
   end
+  scope :for_id, -> (id) { where(id: id) }
 
   state_machine :state, initial: :available do
     event :start do

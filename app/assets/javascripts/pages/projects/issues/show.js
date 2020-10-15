@@ -10,15 +10,16 @@ import initIncidentApp from '~/issue_show/incident';
 import initIssuableHeaderWarning from '~/vue_shared/components/issuable/init_issuable_header_warning';
 import initSentryErrorStackTraceApp from '~/sentry_error_stack_trace';
 import initRelatedMergeRequestsApp from '~/related_merge_requests';
-import initVueIssuableSidebarApp from '~/issuable_sidebar/sidebar_bundle';
 import { parseIssuableData } from '~/issue_show/utils/parse_data';
+import initInviteMemberTrigger from '~/invite_member/init_invite_member_trigger';
+import initInviteMemberModal from '~/invite_member/init_invite_member_modal';
 
 export default function() {
   const { issueType, ...issuableData } = parseIssuableData();
 
   if (issueType === 'incident') {
     initIncidentApp(issuableData);
-  } else {
+  } else if (issueType === 'issue') {
     initIssueApp(issuableData);
   }
 
@@ -33,11 +34,9 @@ export default function() {
   new Issue(); // eslint-disable-line no-new
   new ShortcutsIssuable(); // eslint-disable-line no-new
   new ZenMode(); // eslint-disable-line no-new
-  if (gon.features && gon.features.vueIssuableSidebar) {
-    initVueIssuableSidebarApp();
-  } else {
-    initIssuableSidebar();
-  }
+  initIssuableSidebar();
 
   loadAwardsHandler();
+  initInviteMemberModal();
+  initInviteMemberTrigger();
 }

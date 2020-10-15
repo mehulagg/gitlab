@@ -68,14 +68,14 @@ RSpec.describe Gitlab::BackgroundMigration::UserMentions::CreateResourceUserMent
         let(:user_mentions) { epic_user_mentions }
         let(:resource) { epic }
 
-        it_behaves_like 'resource mentions migration', MigrateEpicMentionsToDb, Epic
+        it_behaves_like 'resource mentions migration', MigrateEpicMentionsToDb, 'Epic'
 
         context 'when FF disabled' do
           before do
             stub_feature_flags(migrate_user_mentions: false)
           end
 
-          it_behaves_like 'resource migration not run', MigrateEpicMentionsToDb, Epic
+          it_behaves_like 'resource migration not run', MigrateEpicMentionsToDb, 'Epic'
         end
 
         context 'mentions in epic notes' do
@@ -87,14 +87,14 @@ RSpec.describe Gitlab::BackgroundMigration::UserMentions::CreateResourceUserMent
           # this not points to an innexistent noteable record in desigs table
           let!(:note5) { notes.create!(noteable_id: non_existing_record_id, noteable_type: 'Epic', author_id: author.id, note: description_mentions, project_id: project.id) }
 
-          it_behaves_like 'resource notes mentions migration', MigrateEpicNotesMentionsToDb, Epic
+          it_behaves_like 'resource notes mentions migration', MigrateEpicNotesMentionsToDb, 'Epic'
 
           context 'when FF disabled' do
             before do
               stub_feature_flags(migrate_user_mentions: false)
             end
 
-            it_behaves_like 'resource notes migration not run', MigrateEpicNotesMentionsToDb, Epic
+            it_behaves_like 'resource notes migration not run', MigrateEpicNotesMentionsToDb, 'Epic'
           end
         end
       end
@@ -119,14 +119,14 @@ RSpec.describe Gitlab::BackgroundMigration::UserMentions::CreateResourceUserMent
       let(:user_mentions) { design_user_mentions }
       let(:resource) { design }
 
-      it_behaves_like 'resource notes mentions migration', MigrateDesignNotesMentionsToDb, DesignManagement::Design
+      it_behaves_like 'resource notes mentions migration', MigrateDesignNotesMentionsToDb, 'DesignManagement::Design'
 
       context 'when FF disabled' do
         before do
           stub_feature_flags(migrate_user_mentions: false)
         end
 
-        it_behaves_like 'resource notes migration not run', MigrateDesignNotesMentionsToDb, DesignManagement::Design
+        it_behaves_like 'resource notes migration not run', MigrateDesignNotesMentionsToDb, 'DesignManagement::Design'
       end
     end
   end

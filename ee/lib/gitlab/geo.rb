@@ -22,7 +22,7 @@ module Gitlab
     REPLICATOR_CLASSES = [
       ::Geo::MergeRequestDiffReplicator,
       ::Geo::PackageFileReplicator,
-      ::Geo::TerraformStateReplicator,
+      ::Geo::TerraformStateVersionReplicator,
       ::Geo::SnippetRepositoryReplicator
     ].freeze
 

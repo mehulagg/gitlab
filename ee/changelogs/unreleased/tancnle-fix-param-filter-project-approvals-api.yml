@@ -1,0 +1,5 @@
+---
+title: Fix params not filtered on project approval API
+merge_request: 44885
+author:
+type: fixed

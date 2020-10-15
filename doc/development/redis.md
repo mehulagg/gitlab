@@ -68,6 +68,10 @@ which is enabled for the `cache` and `shared_state`
 
 ## Redis in structured logging
 
+For GitLab Team Members: There are [basic](https://www.youtube.com/watch?v=Uhdj19Dc6vU) and
+[advanced](https://youtu.be/jw1Wv2IJxzs) videos that show how you can work with the Redis
+structured logging fields on GitLab.com.
+
 Our [structured logging](logging.md#use-structured-json-logging) for web
 requests and Sidekiq jobs contains fields for the duration, call count,
 bytes written, and bytes read per Redis instance, along with a total for
@@ -117,7 +121,7 @@ passing to fluentd (and ultimately Elasticsearch).
 The [Redis Keyspace
 Analyzer](https://gitlab.com/gitlab-com/gl-infra/redis-keyspace-analyzer)
 project contains tools for dumping the full key list and memory usage of a Redis
-instance, and then analyzing those lists while elimating potentially sensitive
+instance, and then analyzing those lists while eliminating potentially sensitive
 data from the results. It can be used to find the most frequent key patterns, or
 those that use the most memory.
 

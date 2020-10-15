@@ -50,24 +50,8 @@ module EE
           error_response(objects: [user, identity, member])
         end
 
-        def scim_identities_enabled?
-          strong_memoize(:scim_identities_enabled) do
-            ::EE::Gitlab::Scim::Feature.scim_identities_enabled?(@group)
-          end
-        end
-
-        def identity_provider
-          strong_memoize(:identity_provider) do
-            next ::Users::BuildService::GROUP_SCIM_PROVIDER if scim_identities_enabled?
-
-            ::Users::BuildService::GROUP_SAML_PROVIDER
-          end
-        end
-
         def identity
           strong_memoize(:identity) do
-            next saml_identity unless scim_identities_enabled?
-
             identity = @group.scim_identities.with_extern_uid(@parsed_hash[:extern_uid]).first
             next identity if identity
 
@@ -75,14 +59,8 @@ module EE
           end
         end
 
-        def saml_identity
-          ::Identity.with_extern_uid(identity_provider, @parsed_hash[:extern_uid]).first
-        end
-
         def user
           strong_memoize(:user) do
-            next build_user unless scim_identities_enabled?
-
             user = ::User.find_by_any_email(@parsed_hash[:email])
             next user if user
 
@@ -127,7 +105,7 @@ module EE
             hash[:skip_confirmation] = SKIP_EMAIL_CONFIRMATION
             hash[:saml_provider_id] = @group.saml_provider.id
             hash[:group_id] = @group.id
-            hash[:provider] = identity_provider
+            hash[:provider] = ::Users::BuildService::GROUP_SCIM_PROVIDER
             hash[:username] = valid_username
             hash[:password] = hash[:password_confirmation] = random_password
             hash[:password_automatically_set] = PASSWORD_AUTOMATICALLY_SET
@@ -161,7 +139,7 @@ module EE
         end
 
         def create_identity_only?
-          scim_identities_enabled? && existing_user? && existing_member?(user)
+          existing_user? && existing_member?(user)
         end
 
         def existing_identity_and_member?

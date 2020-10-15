@@ -11,7 +11,7 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div class="gl-relative">
     <slot name="title"></slot>
 
     <slot v-if="disabled" name="disabled"></slot>

@@ -48,23 +48,28 @@ module Gitlab
         method = env['REQUEST_METHOD'].downcase
         method = 'INVALID' unless HTTP_METHODS.key?(method)
         started = Time.now.to_f
+        health_endpoint = health_endpoint?(env['PATH_INFO'])
+        status = 'undefined'
 
         begin
-          if health_endpoint?(env['PATH_INFO'])
-            RequestsRackMiddleware.http_health_requests_total.increment(method: method)
-          else
-            RequestsRackMiddleware.http_request_total.increment(method: method)
-          end
-
           status, headers, body = @app.call(env)
 
           elapsed = Time.now.to_f - started
-          RequestsRackMiddleware.http_request_duration_seconds.observe({ method: method, status: status.to_s }, elapsed)
+
+          unless health_endpoint
+            RequestsRackMiddleware.http_request_duration_seconds.observe({ method: method, status: status.to_s }, elapsed)
+          end
 
           [status, headers, body]
         rescue
           RequestsRackMiddleware.rack_uncaught_errors_count.increment
           raise
+        ensure
+          if health_endpoint
+            RequestsRackMiddleware.http_health_requests_total.increment(method: method, status: status)
+          else
+            RequestsRackMiddleware.http_request_total.increment(method: method, status: status)
+          end
         end
       end
 

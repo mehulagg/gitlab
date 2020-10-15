@@ -10,10 +10,10 @@ module EE
           def create_board
             forbidden! unless board_parent.multiple_issue_boards_available?
 
-            board =
+            response =
               ::Boards::CreateService.new(board_parent, current_user, { name: params[:name] }).execute
 
-            present board, with: ::API::Entities::Board
+            present response.payload, with: ::API::Entities::Board
           end
 
           def update_board

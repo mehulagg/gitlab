@@ -16,7 +16,15 @@ RSpec.describe Mutations::Issues::Update do
     let_it_be(:epic) { create(:epic, group: group) }
 
     let(:epic_id) { epic.to_global_id.to_s }
-    let(:params) { { project_path: project.full_path, iid: issue.iid, epic_id: epic_id } }
+    let(:params) do
+      {
+        project_path: project.full_path,
+        iid: issue.iid,
+        epic_id: epic_id,
+        weight: 10
+      }
+    end
+
     let(:mutated_issue) { subject[:issue] }
     let(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
 
@@ -53,6 +61,7 @@ RSpec.describe Mutations::Issues::Update do
 
           it 'returns the updated issue' do
             expect(mutated_issue.epic).to eq(epic)
+            expect(mutated_issue.weight).to eq(10)
           end
         end
 

@@ -22,7 +22,7 @@ RSpec.describe Elastic::Latest::ProjectWikiInstanceProxy do
 
       expect(subject.class).to receive(:elastic_search_as_wiki_page).with('foo', expected_params)
 
-      subject.elastic_search_as_wiki_page('foo', params)
+      subject.elastic_search_as_wiki_page('foo', **params)
     end
 
     it 'uses provided repository_id' do
@@ -30,7 +30,7 @@ RSpec.describe Elastic::Latest::ProjectWikiInstanceProxy do
 
       expect(subject.class).to receive(:elastic_search_as_wiki_page).with('foo', params)
 
-      subject.elastic_search_as_wiki_page('foo', params)
+      subject.elastic_search_as_wiki_page('foo', **params)
     end
   end
 end

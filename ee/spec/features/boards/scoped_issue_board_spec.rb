@@ -245,7 +245,7 @@ RSpec.describe 'Scoped issue boards', :js do
 
           find('.board-card', match: :first)
 
-          expect(page).to have_selector('.board', count: 3)
+          expect(page).to have_selector('.board', count: 4)
           expect(all('.board').first).to have_selector('.board-card', count: 2)
           expect(all('.board').last).to have_selector('.board-card', count: 1)
         end

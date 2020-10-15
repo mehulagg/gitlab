@@ -26,7 +26,6 @@ RSpec.describe 'Requirements list', :js do
 
   before do
     stub_licensed_features(requirements: true)
-    stub_feature_flags(requirements_management: [project])
     project.add_maintainer(user)
     project.add_guest(user_guest)
 

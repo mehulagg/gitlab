@@ -1,11 +1,12 @@
 import mutations from 'ee/boards/stores/mutations';
 import {
-  mockLists,
   mockIssue,
   mockIssue2,
   mockEpics,
   mockEpic,
   mockListsWithModel,
+  mockIssueWithModel,
+  mockIssue2WithModel,
 } from '../mock_data';
 
 const expectNotImplemented = action => {
@@ -16,10 +17,15 @@ const expectNotImplemented = action => {
 
 const epicId = mockEpic.id;
 
+const initialBoardListsState = {
+  'gid://gitlab/List/1': mockListsWithModel[0],
+  'gid://gitlab/List/2': mockListsWithModel[1],
+};
+
 let state = {
   issuesByListId: {},
   issues: {},
-  boardLists: mockListsWithModel,
+  boardLists: initialBoardListsState,
   epicsFlags: {
     [epicId]: { isLoading: true },
   },
@@ -180,10 +186,10 @@ describe('RECEIVE_BOARD_LISTS_SUCCESS', () => {
       boardLists: {},
     };
 
-    mutations.RECEIVE_BOARD_LISTS_SUCCESS(state, mockLists);
+    mutations.RECEIVE_BOARD_LISTS_SUCCESS(state, initialBoardListsState);
 
     expect(state.epicsSwimlanesFetchInProgress).toBe(false);
-    expect(state.boardLists).toEqual(mockLists);
+    expect(state.boardLists).toEqual(initialBoardListsState);
   });
 });
 
@@ -204,8 +210,23 @@ describe('RECEIVE_SWIMLANES_FAILURE', () => {
   });
 });
 
+describe('RECEIVE_FIRST_EPICS_SUCCESS', () => {
+  it('populates epics and canAdminEpic with payload', () => {
+    state = {
+      ...state,
+      epics: {},
+      canAdminEpic: false,
+    };
+
+    mutations.RECEIVE_FIRST_EPICS_SUCCESS(state, { epics: mockEpics, canAdminEpic: true });
+
+    expect(state.epics).toEqual(mockEpics);
+    expect(state.canAdminEpic).toEqual(true);
+  });
+});
+
 describe('RECEIVE_EPICS_SUCCESS', () => {
-  it('populates epics with payload and set epicsFlags loading to true', () => {
+  it('populates epics with payload', () => {
     state = {
       ...state,
       epics: {},
@@ -214,5 +235,87 @@ describe('RECEIVE_EPICS_SUCCESS', () => {
     mutations.RECEIVE_EPICS_SUCCESS(state, mockEpics);
 
     expect(state.epics).toEqual(mockEpics);
+  });
+
+  it("doesn't add duplicate epics", () => {
+    state = {
+      ...state,
+      epics: mockEpics,
+    };
+
+    mutations.RECEIVE_EPICS_SUCCESS(state, mockEpics);
+
+    expect(state.epics).toEqual(mockEpics);
+  });
+});
+
+describe('RESET_EPICS', () => {
+  it('should remove issues from issuesByListId state', () => {
+    state = {
+      ...state,
+      epics: mockEpics,
+    };
+
+    mutations.RESET_EPICS(state);
+
+    expect(state.epics).toEqual([]);
+  });
+});
+
+describe('MOVE_ISSUE', () => {
+  beforeEach(() => {
+    const listIssues = {
+      'gid://gitlab/List/1': [mockListsWithModel.id, mockIssue2WithModel.id],
+      'gid://gitlab/List/2': [],
+    };
+
+    const issues = {
+      '436': mockIssueWithModel,
+      '437': mockIssue2WithModel,
+    };
+
+    state = {
+      ...state,
+      issuesByListId: listIssues,
+      issues,
+    };
+  });
+
+  it('updates issuesByListId, moving issue between lists and updating epic id on issue', () => {
+    expect(state.issues['437'].epic.id).toEqual('gid://gitlab/Epic/40');
+
+    mutations.MOVE_ISSUE(state, {
+      originalIssue: mockIssue2WithModel,
+      fromListId: 'gid://gitlab/List/1',
+      toListId: 'gid://gitlab/List/2',
+      epicId,
+    });
+
+    const updatedListIssues = {
+      'gid://gitlab/List/1': [mockListsWithModel.id],
+      'gid://gitlab/List/2': [mockIssue2WithModel.id],
+    };
+
+    expect(state.issuesByListId).toEqual(updatedListIssues);
+    expect(state.issues['437'].epic.id).toEqual(epicId);
+  });
+
+  it('removes epic id from issue when epicId is null', () => {
+    expect(state.issues['437'].epic.id).toEqual('gid://gitlab/Epic/40');
+
+    mutations.MOVE_ISSUE(state, {
+      originalIssue: mockIssue2WithModel,
+      fromListId: 'gid://gitlab/List/1',
+      toListId: 'gid://gitlab/List/2',
+      epicId: null,
+    });
+
+    const updatedListIssues = {
+      'gid://gitlab/List/1': [mockListsWithModel.id],
+      'gid://gitlab/List/2': [mockIssue2WithModel.id],
+    };
+
+    expect(state.issuesByListId).toEqual(updatedListIssues);
+    expect(state.issues['437'].epic).toEqual(null);
   });
 });

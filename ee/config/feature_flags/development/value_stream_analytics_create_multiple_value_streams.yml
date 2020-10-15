@@ -1,7 +1,7 @@
 ---
 name: value_stream_analytics_create_multiple_value_streams
-introduced_by_url: 
-rollout_issue_url: 
-group: 
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/35822
+rollout_issue_url:
+group: group::analytics
 type: development
 default_enabled: true

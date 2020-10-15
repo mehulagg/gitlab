@@ -72,15 +72,22 @@ RSpec.describe MergeRequests::FfMergeService do
       end
 
       it 'does not update squash_commit_sha if it is not a squash' do
+        expect(merge_request).to receive(:update_and_mark_in_progress_merge_commit_sha).twice.and_call_original
+
         expect { execute_ff_merge }.not_to change { merge_request.squash_commit_sha }
+        expect(merge_request.in_progress_merge_commit_sha).to be_nil
       end
 
       it 'updates squash_commit_sha if it is a squash' do
+        expect(merge_request).to receive(:update_and_mark_in_progress_merge_commit_sha).twice.and_call_original
+
         merge_request.update!(squash: true)
 
         expect { execute_ff_merge }
           .to change { merge_request.squash_commit_sha }
           .from(nil)
+
+        expect(merge_request.in_progress_merge_commit_sha).to be_nil
       end
     end
 
@@ -107,7 +114,7 @@ RSpec.describe MergeRequests::FfMergeService do
         error_message = 'error message'
         raw_message = 'The truth is out there'
 
-        pre_receive_error = Gitlab::Git::PreReceiveError.new(raw_message, "GitLab: #{error_message}")
+        pre_receive_error = Gitlab::Git::PreReceiveError.new(raw_message, fallback_message: error_message)
         allow(service).to receive(:repository).and_raise(pre_receive_error)
         allow(service).to receive(:execute_hooks)
         expect(Gitlab::ErrorTracking).to receive(:track_exception).with(

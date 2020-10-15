@@ -41,5 +41,10 @@ export const computeMonthRangeData = (startDate, endDate, format = dateFormats.i
     });
   }
 
+  if (monthData.length) {
+    monthData[0].mergedAfter = dateFormat(startDate, format); // Set first item to startDate
+    monthData[monthData.length - 1].mergedBefore = dateFormat(endDate, format); // Set last item to endDate
+  }
+
   return monthData;
 };

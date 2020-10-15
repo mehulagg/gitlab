@@ -35,6 +35,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         put :reset_registration_token
         patch :update_auto_devops
         post :create_deploy_token, path: 'deploy_token/create', to: 'repository#create_deploy_token'
+        get :runner_setup_scripts, format: :json
       end
 
       resource :repository, only: [:show], controller: 'repository' do
@@ -86,7 +87,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       delete :leave, on: :collection
     end
 
-    resources :group_links, only: [:create, :update, :destroy], constraints: { id: /\d+/ }
+    resources :group_links, only: [:create, :update, :destroy], constraints: { id: /\d+|:id/ }
 
     resources :uploads, only: [:create] do
       collection do

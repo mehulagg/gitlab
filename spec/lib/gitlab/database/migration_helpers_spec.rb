@@ -699,6 +699,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
           expect(model).to receive(:copy_indexes).with(:users, :old, :new)
           expect(model).to receive(:copy_foreign_keys).with(:users, :old, :new)
+          expect(model).to receive(:copy_check_constraints).with(:users, :old, :new)
 
           model.rename_column_concurrently(:users, :old, :new)
         end
@@ -760,6 +761,9 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           it 'copies the default to the new column' do
             expect(model).to receive(:change_column_default)
               .with(:users, :new, old_column.default)
+
+            expect(model).to receive(:copy_check_constraints)
+              .with(:users, :old, :new)
 
             model.rename_column_concurrently(:users, :old, :new)
           end
@@ -856,6 +860,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
         expect(model).to receive(:copy_indexes).with(:users, :new, :old)
         expect(model).to receive(:copy_foreign_keys).with(:users, :new, :old)
+        expect(model).to receive(:copy_check_constraints).with(:users, :new, :old)
 
         model.undo_cleanup_concurrent_column_rename(:users, :old, :new)
       end
@@ -893,6 +898,9 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         it 'copies the default to the old column' do
           expect(model).to receive(:change_column_default)
             .with(:users, :old, new_column.default)
+
+          expect(model).to receive(:copy_check_constraints)
+            .with(:users, :new, :old)
 
           model.undo_cleanup_concurrent_column_rename(:users, :old, :new)
         end
@@ -1128,7 +1136,65 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
                name: 'index_on_issues_gl_project_id',
                length: [],
                order: [],
-               opclasses: { 'gl_project_id' => 'bar' })
+               opclass: { 'gl_project_id' => 'bar' })
+
+        model.copy_indexes(:issues, :project_id, :gl_project_id)
+      end
+    end
+
+    context 'using an index with multiple columns and custom operator classes' do
+      it 'copies the index' do
+        index = double(:index,
+                       columns: %w(project_id foobar),
+                       name: 'index_on_issues_project_id_foobar',
+                       using: :gin,
+                       where: nil,
+                       opclasses: { 'project_id' => 'bar', 'foobar' => :gin_trgm_ops },
+                       unique: false,
+                       lengths: [],
+                       orders: [])
+
+        allow(model).to receive(:indexes_for).with(:issues, 'project_id')
+          .and_return([index])
+
+        expect(model).to receive(:add_concurrent_index)
+          .with(:issues,
+               %w(gl_project_id foobar),
+               unique: false,
+               name: 'index_on_issues_gl_project_id_foobar',
+               length: [],
+               order: [],
+               opclass: { 'gl_project_id' => 'bar', 'foobar' => :gin_trgm_ops },
+               using: :gin)
+
+        model.copy_indexes(:issues, :project_id, :gl_project_id)
+      end
+    end
+
+    context 'using an index with multiple columns and a custom operator class on the non affected column' do
+      it 'copies the index' do
+        index = double(:index,
+                       columns: %w(project_id foobar),
+                       name: 'index_on_issues_project_id_foobar',
+                       using: :gin,
+                       where: nil,
+                       opclasses: { 'foobar' => :gin_trgm_ops },
+                       unique: false,
+                       lengths: [],
+                       orders: [])
+
+        allow(model).to receive(:indexes_for).with(:issues, 'project_id')
+          .and_return([index])
+
+        expect(model).to receive(:add_concurrent_index)
+          .with(:issues,
+               %w(gl_project_id foobar),
+               unique: false,
+               name: 'index_on_issues_gl_project_id_foobar',
+               length: [],
+               order: [],
+               opclass: { 'foobar' => :gin_trgm_ops },
+               using: :gin)
 
         model.copy_indexes(:issues, :project_id, :gl_project_id)
       end
@@ -1400,13 +1466,30 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         )
       end
 
-      after do
-        'DROP INDEX IF EXISTS test_index;'
-      end
-
       it 'returns true if an index exists' do
         expect(model.index_exists_by_name?(:projects, 'test_index'))
           .to be_truthy
+      end
+    end
+
+    context 'when an index exists for a table with the same name in another schema' do
+      before do
+        ActiveRecord::Base.connection.execute(
+          'CREATE SCHEMA new_test_schema'
+        )
+
+        ActiveRecord::Base.connection.execute(
+          'CREATE TABLE new_test_schema.projects (id integer, name character varying)'
+        )
+
+        ActiveRecord::Base.connection.execute(
+          'CREATE INDEX test_index_on_name ON new_test_schema.projects (LOWER(name));'
+        )
+      end
+
+      it 'returns false if the index does not exist in the current schema' do
+        expect(model.index_exists_by_name?(:projects, 'test_index_on_name'))
+          .to be_falsy
       end
     end
   end
@@ -1863,11 +1946,17 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       ActiveRecord::Base.connection.execute(
         'ALTER TABLE projects ADD CONSTRAINT check_1 CHECK (char_length(path) <= 5) NOT VALID'
       )
-    end
 
-    after do
       ActiveRecord::Base.connection.execute(
-        'ALTER TABLE projects DROP CONSTRAINT IF EXISTS check_1'
+        'CREATE SCHEMA new_test_schema'
+      )
+
+      ActiveRecord::Base.connection.execute(
+        'CREATE TABLE new_test_schema.projects (id integer, name character varying)'
+      )
+
+      ActiveRecord::Base.connection.execute(
+        'ALTER TABLE new_test_schema.projects ADD CONSTRAINT check_2 CHECK (char_length(name) <= 5)'
       )
     end
 
@@ -1883,6 +1972,11 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
     it 'returns false if a constraint with the same name exists in another table' do
       expect(model.check_constraint_exists?(:users, 'check_1'))
+        .to be_falsy
+    end
+
+    it 'returns false if a constraint with the same name exists for the same table in another schema' do
+      expect(model.check_constraint_exists?(:projects, 'check_2'))
         .to be_falsy
     end
   end
@@ -2083,6 +2177,138 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       expect(model).to receive(:execute).with(drop_sql)
 
       model.remove_check_constraint(:test_table, 'check_name')
+    end
+  end
+
+  describe '#copy_check_constraints' do
+    context 'inside a transaction' do
+      it 'raises an error' do
+        expect(model).to receive(:transaction_open?).and_return(true)
+
+        expect do
+          model.copy_check_constraints(:test_table, :old_column, :new_column)
+        end.to raise_error(RuntimeError)
+      end
+    end
+
+    context 'outside a transaction' do
+      before do
+        allow(model).to receive(:transaction_open?).and_return(false)
+        allow(model).to receive(:column_exists?).and_return(true)
+      end
+
+      let(:old_column_constraints) do
+        [
+          {
+            'schema_name' => 'public',
+            'table_name' => 'test_table',
+            'column_name' => 'old_column',
+            'constraint_name' => 'check_d7d49d475d',
+            'constraint_def' => 'CHECK ((old_column IS NOT NULL))'
+          },
+          {
+            'schema_name' => 'public',
+            'table_name' => 'test_table',
+            'column_name' => 'old_column',
+            'constraint_name' => 'check_48560e521e',
+            'constraint_def' => 'CHECK ((char_length(old_column) <= 255))'
+          },
+          {
+            'schema_name' => 'public',
+            'table_name' => 'test_table',
+            'column_name' => 'old_column',
+            'constraint_name' => 'custom_check_constraint',
+            'constraint_def' => 'CHECK (((old_column IS NOT NULL) AND (another_column IS NULL)))'
+          },
+          {
+            'schema_name' => 'public',
+            'table_name' => 'test_table',
+            'column_name' => 'old_column',
+            'constraint_name' => 'not_valid_check_constraint',
+            'constraint_def' => 'CHECK ((old_column IS NOT NULL)) NOT VALID'
+          }
+        ]
+      end
+
+      it 'copies check constraints from one column to another' do
+        allow(model).to receive(:check_constraints_for)
+        .with(:test_table, :old_column, schema: nil)
+          .and_return(old_column_constraints)
+
+        allow(model).to receive(:not_null_constraint_name).with(:test_table, :new_column)
+          .and_return('check_1')
+
+        allow(model).to receive(:text_limit_name).with(:test_table, :new_column)
+          .and_return('check_2')
+
+        allow(model).to receive(:check_constraint_name)
+          .with(:test_table, :new_column, 'copy_check_constraint')
+          .and_return('check_3')
+
+        expect(model).to receive(:add_check_constraint)
+          .with(
+            :test_table,
+            '(new_column IS NOT NULL)',
+            'check_1',
+            validate: true
+          ).once
+
+        expect(model).to receive(:add_check_constraint)
+          .with(
+            :test_table,
+            '(char_length(new_column) <= 255)',
+            'check_2',
+            validate: true
+          ).once
+
+        expect(model).to receive(:add_check_constraint)
+          .with(
+            :test_table,
+            '((new_column IS NOT NULL) AND (another_column IS NULL))',
+            'check_3',
+            validate: true
+          ).once
+
+        expect(model).to receive(:add_check_constraint)
+          .with(
+            :test_table,
+            '(new_column IS NOT NULL)',
+            'check_1',
+            validate: false
+          ).once
+
+        model.copy_check_constraints(:test_table, :old_column, :new_column)
+      end
+
+      it 'does nothing if there are no constraints defined for the old column' do
+        allow(model).to receive(:check_constraints_for)
+        .with(:test_table, :old_column, schema: nil)
+          .and_return([])
+
+        expect(model).not_to receive(:add_check_constraint)
+
+        model.copy_check_constraints(:test_table, :old_column, :new_column)
+      end
+
+      it 'raises an error when the orginating column does not exist' do
+        allow(model).to receive(:column_exists?).with(:test_table, :old_column).and_return(false)
+
+        error_message = /Column old_column does not exist on test_table/
+
+        expect do
+          model.copy_check_constraints(:test_table, :old_column, :new_column)
+        end.to raise_error(RuntimeError, error_message)
+      end
+
+      it 'raises an error when the target column does not exist' do
+        allow(model).to receive(:column_exists?).with(:test_table, :new_column).and_return(false)
+
+        error_message = /Column new_column does not exist on test_table/
+
+        expect do
+          model.copy_check_constraints(:test_table, :old_column, :new_column)
+        end.to raise_error(RuntimeError, error_message)
+      end
     end
   end
 

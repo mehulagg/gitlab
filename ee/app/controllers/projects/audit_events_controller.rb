@@ -6,11 +6,14 @@ class Projects::AuditEventsController < Projects::ApplicationController
   include AuditEvents::EnforcesValidDateParams
   include AuditEvents::AuditLogsParams
   include AuditEvents::Sortable
+  include AuditEvents::DateRange
 
   before_action :authorize_admin_project!
   before_action :check_audit_events_available!
 
   layout 'project_settings'
+
+  feature_category :audit_events
 
   def index
     @is_last_page = events.last_page?

@@ -18,6 +18,7 @@ RSpec.describe Group do
     it { is_expected.to have_many(:value_streams) }
     it { is_expected.to have_many(:ip_restrictions) }
     it { is_expected.to have_many(:allowed_email_domains) }
+    it { is_expected.to have_many(:compliance_management_frameworks) }
     it { is_expected.to have_one(:dependency_proxy_setting) }
     it { is_expected.to have_one(:deletion_schedule) }
     it { is_expected.to have_one(:group_wiki_repository) }
@@ -705,7 +706,7 @@ RSpec.describe Group do
     context 'with `minimal_access_role` not licensed' do
       before do
         stub_licensed_features(minimal_access_role: false)
-        create(:group_member, :minimal_access, user: user, group: group)
+        create(:group_member, :minimal_access, user: user, source: group)
       end
 
       it { is_expected.to be_falsey }

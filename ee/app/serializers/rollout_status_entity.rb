@@ -4,7 +4,11 @@ class RolloutStatusEntity < Grape::Entity
   include RequestAwareEntity
 
   expose :status, as: :status
-  expose :has_legacy_app_label?, as: :has_legacy_app_label
+
+  # To be removed in API v5
+  expose :has_legacy_app_label do |_rollout_status|
+    false
+  end
 
   expose :instances, if: -> (rollout_status, _) { rollout_status.found? }
   expose :completion, if: -> (rollout_status, _) { rollout_status.found? }

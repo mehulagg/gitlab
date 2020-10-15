@@ -21,9 +21,12 @@ module EE
       scope :order_blocking_issues_desc, -> { reorder(blocking_issues_count: :desc) }
       scope :order_weight_desc, -> { reorder ::Gitlab::Database.nulls_last_order('weight', 'DESC') }
       scope :order_weight_asc, -> { reorder ::Gitlab::Database.nulls_last_order('weight') }
+      scope :order_status_page_published_first, -> { includes(:status_page_published_incident).order('status_page_published_incidents.id ASC NULLS LAST') }
+      scope :order_status_page_published_last, -> { includes(:status_page_published_incident).order('status_page_published_incidents.id ASC NULLS FIRST') }
       scope :no_epic, -> { left_outer_joins(:epic_issue).where(epic_issues: { epic_id: nil }) }
       scope :any_epic, -> { joins(:epic_issue) }
       scope :in_epics, ->(epics) { joins(:epic_issue).where(epic_issues: { epic_id: epics }) }
+      scope :not_in_epics, ->(epics) { left_outer_joins(:epic_issue).where('epic_issues.epic_id NOT IN (?) OR epic_issues.epic_id IS NULL', epics) }
       scope :no_iteration, -> { where(sprint_id: nil) }
       scope :any_iteration, -> { where.not(sprint_id: nil) }
       scope :in_iterations, ->(iterations) { where(sprint_id: iterations) }
@@ -47,6 +50,7 @@ module EE
       belongs_to :promoted_to_epic, class_name: 'Epic'
 
       has_one :status_page_published_incident, class_name: 'StatusPage::PublishedIncident', inverse_of: :issue
+      has_one :issuable_sla
 
       has_many :vulnerability_links, class_name: 'Vulnerabilities::IssueLink', inverse_of: :issue
       has_many :related_vulnerabilities, through: :vulnerability_links, source: :vulnerability
@@ -68,7 +72,7 @@ module EE
 
     # override
     def check_for_spam?
-      author.bot? || super
+      author.bot? && (title_changed? || description_changed? || confidential_changed?) || super
     end
 
     # override
@@ -184,6 +188,8 @@ module EE
         when 'blocking_issues_desc' then order_blocking_issues_desc.with_order_id_desc
         when 'weight', 'weight_asc' then order_weight_asc.with_order_id_desc
         when 'weight_desc'          then order_weight_desc.with_order_id_desc
+        when 'published_asc'        then order_status_page_published_last.with_order_id_desc
+        when 'published_desc'       then order_status_page_published_first.with_order_id_desc
         else
           super
         end
@@ -200,6 +206,11 @@ module EE
       update!(blocking_issues_count: blocking_count)
     end
 
+    override :relocation_target
+    def relocation_target
+      super || promoted_to_epic
+    end
+
     private
 
     def blocking_issues_ids
@@ -211,7 +222,7 @@ module EE
     end
 
     def generic_alert_with_default_title?
-      title == ::Gitlab::Alerting::NotificationPayloadParser::DEFAULT_TITLE &&
+      title == ::Gitlab::AlertManagement::Payload::Generic::DEFAULT_TITLE &&
         project.alerts_service_activated? &&
         author == ::User.alert_bot
     end
