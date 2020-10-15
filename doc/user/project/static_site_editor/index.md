@@ -28,8 +28,6 @@ files seamlessly. For example:
 - Temporary collaborators can jump from project to project and quickly edit pages instead
   of having to clone or fork every single project they need to submit changes to.
 
-existing 
-
 ## Requirements
 
 - In order use the Static Site Editor feature, your project needs to be
@@ -68,10 +66,12 @@ easily [edit your content](#edit-content).
 1. To get started, create a new project from the [Static Site Editor - Middleman](https://gitlab.com/gitlab-org/project-templates/static-site-editor-middleman)
    template. You can either [fork it](../repository/forking_workflow.md#creating-a-fork)
    or [create a new project from a template](../../../gitlab-basics/create-project.md#built-in-templates).
-1. Edit the [`data/config.yml`](#configuration-files) configuration file
-   to replace `<username>` and `<project-name>` with the proper values for
-   your project's path. This triggers a CI/CD pipeline to deploy your project
-   with GitLab Pages.
+1. Edit the [`data/config.yml`](#static-site-generator-configuration-files)
+   configuration file to replace `<username>` and `<project-name>` with the
+   proper values for your project's path. This triggers a CI/CD pipeline to
+   deploy your project with GitLab Pages.
+1. (Optional) Edit the [`.gitlab/static-site-editor.yml`](#static-site-editor-configuration-file) file to customize the behavior of the
+   Static Site Editor.
 1. When the pipeline finishes, from your project's left-side menu, go to **Settings > Pages** to find the URL of your new website.
 1. Visit your website and look at the bottom-left corner of the screen to see the new **Edit this page** button.
 
@@ -145,6 +145,16 @@ yet. You can do so by editing the file locally, through the GitLab regular file 
 
 ### Configuration files
 
+You can customize the behavior of a project which uses the Static Site Editor
+with the following configuration files:
+
+- The [`.gitlab/static-site-editor.yml` file](#static-site-editor-configuration-file),
+  which customizes the behavior of the Static Site Editor.
+- [Static Site Generator configuration files](#static-site-generator-configuration-files),
+  which customize the behavior of the project itself.
+
+#### Static Site Generator configuration files
+
 The Static Site Editor uses Middleman's configuration file, `data/config.yml`
 to customize the behavior of the project itself and to control the **Edit this
 page** button, rendered through the file [`layout.erb`](https://gitlab.com/gitlab-org/project-templates/static-site-editor-middleman/-/blob/master/source/layouts/layout.erb).
@@ -156,9 +166,23 @@ file with the proper values for your project's path.
 [Other Static Site Generators](#using-other-static-site-generators) used with
 the Static Site Editor may use different configuration files or approaches.
 
+#### Static Site Editor configuration file
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4267) in GitLab X.Y.
+
+The `.gitlab/static-site-editor.yml` configuration file contains entries you
+can use to customize behavior of the Static Site Editor. If the file does not
+exist default values which support a default Middleman project configuration
+are used.
+
+The [Static Site Editor - Middleman](https://gitlab.com/gitlab-org/project-templates/static-site-editor-middleman)
+project template generates a file pre-populated with these defaults.
+
+_[Explain here what can be done with this file]_
+
 ## Using Other Static Site Generators
 
-Although Middleman is the only Static Site Generator currently officially supported
+Although Middleman is the only Static Site Generator officially supported
 by the Static Site Editor, you can configure your project's build and deployment
 to use a different Static Site Generator. In this case, use the Middleman layout
 as an example, and follow a similar approach to properly render an **Edit this page**
