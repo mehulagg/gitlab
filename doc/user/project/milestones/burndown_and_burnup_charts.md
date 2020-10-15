@@ -20,7 +20,7 @@ Burndown and burnup charts show the progress of completing a milestone.
 
 Burndown charts show the number of issues over the course of a milestone.
 
-![burndown chart](img/burndown_chart.png)
+![burndown chart](img/burndown_chart_v13_5.png)
 
 At a glance, you see the current state for the completion a given milestone.
 Without them, you would have to organize the data from the milestone and plot it
