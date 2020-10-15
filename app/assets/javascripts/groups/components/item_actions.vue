@@ -1,6 +1,5 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import eventHub from '../event_hub';
 import { COMMON_STR } from '../constants';
 
@@ -9,7 +8,7 @@ export default {
     GlIcon,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective
   },
   props: {
     parentGroup: {
@@ -47,7 +46,7 @@ export default {
   <div class="controls d-flex justify-content-end">
     <a
       v-if="group.canLeave"
-      v-tooltip
+      v-gl-tooltip
       :href="group.leavePath"
       :title="leaveBtnTitle"
       :aria-label="leaveBtnTitle"
@@ -61,7 +60,7 @@ export default {
     </a>
     <a
       v-if="group.canEdit"
-      v-tooltip
+      v-gl-tooltip
       :href="group.editPath"
       :title="editBtnTitle"
       :aria-label="editBtnTitle"
