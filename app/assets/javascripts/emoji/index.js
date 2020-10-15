@@ -77,11 +77,9 @@ export function getAllEmoji() {
  * can safely be called.
  *
  * @param {String} query The emoji name
- * @param {Boolean} fallback If true, a fallback emoji will be returned if the
- * named emoji does not exist. Defaults to false.
- * @returns {Object} The matching emoji.
+ * @returns {Object} The matching emoji if found
  */
-export function getEmoji(query, fallback = false) {
+export function getEmoji(query) {
   if (!emojiMap) {
     // eslint-disable-next-line @gitlab/require-i18n-strings
     throw new Error('The emoji map is uninitialized or initialization has not completed');
@@ -90,15 +88,7 @@ export function getEmoji(query, fallback = false) {
   const lowercaseQuery = query.toLowerCase();
   const name = normalizeEmojiName(lowercaseQuery);
 
-  if (name in emojiMap) {
-    return emojiMap[name];
-  }
-
-  if (fallback) {
-    return emojiMap.grey_question;
-  }
-
-  return null;
+  return name in emojiMap ? emojiMap[name] : null;
 }
 
 const searchMatchers = {
@@ -159,8 +149,6 @@ const searchPredicates = {
  * 'contains', or 'fuzzy'. All methods are case-insensitive. Exact matching (the
  * default) compares by equality. Contains matching compares by indexOf. Fuzzy
  * matching compares using a fuzzy matching library.
- * @param {Boolean} opts.fallback If true, a fallback emoji will be returned if
- * the result set is empty. Defaults to false.
  * @param {Boolean} opts.raw Returns the raw match data instead of just the
  * matching emoji.
  * @returns {Object[]} A list of emoji that match the query.
@@ -171,16 +159,12 @@ export function searchEmoji(query, opts) {
     throw new Error('The emoji map is uninitialized or initialization has not completed');
   }
 
-  const {
-    fields = ['name', 'alias', 'description', 'unicode'],
-    match = 'exact',
-    fallback = false,
-    raw = false,
-  } = opts || {};
+  const { fields = ['name', 'alias', 'description', 'unicode'], match = 'exact', raw = false } =
+    opts || {};
 
   // optimization for an exact match in name and alias
   if (match === 'exact' && new Set([...fields, 'name', 'alias']).size === 2) {
-    const emoji = getEmoji(query, fallback);
+    const emoji = getEmoji(query);
     return emoji ? [emoji] : [];
   }
 
@@ -191,18 +175,7 @@ export function searchEmoji(query, opts) {
     .flatMap(emoji => predicates.flatMap(predicate => predicate(emoji)))
     .filter(r => r.success);
 
-  // Fallback to question mark for unknown emojis
-  if (fallback && results.length === 0) {
-    if (raw) {
-      return [{ emoji: emojiMap.grey_question }];
-    }
-    return [emojiMap.grey_question];
-  }
-
-  if (raw) {
-    return results;
-  }
-  return results.map(r => r.emoji);
+  return raw ? results : results.map(r => r.emoji);
 }
 
 let emojiCategoryMap;
@@ -229,10 +202,13 @@ export function getEmojiCategoryMap() {
 }
 
 export function getEmojiInfo(query) {
-  return searchEmoji(query, {
-    fields: ['name', 'alias'],
-    fallback: true,
-  })[0];
+  if (!query) {
+    const fallbackEmojiName = 'grey_question';
+
+    return emojiMap[fallbackEmojiName];
+  }
+
+  return searchEmoji(query, { fields: ['name', 'alias'] })[0];
 }
 
 export function emojiFallbackImageSrc(inputName) {
