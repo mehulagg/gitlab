@@ -9,6 +9,7 @@ module AlertManagement
 
     def execute
       collection = project.alert_management_http_integrations
+      collection = by_id(collection)
       collection = by_availability(collection)
       collection = by_endpoint_identifier(collection)
       by_active(collection)
@@ -22,6 +23,12 @@ module AlertManagement
       return collection if multiple_alert_http_integrations?
 
       collection.id_in(project.alert_management_http_integrations.first&.id)
+    end
+
+    def by_id(collection)
+      return collection unless params[:id]
+
+      collection.id_in(params[:id])
     end
 
     def by_endpoint_identifier(collection)
