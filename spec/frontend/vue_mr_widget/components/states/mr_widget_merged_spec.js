@@ -212,7 +212,7 @@ describe('MRWidgetMerged', () => {
   });
 
   it('should use mergedEvent mergedAt as tooltip title', () => {
-    expect(vm.$el.querySelector('time').getAttribute('data-original-title')).toBe(
+    expect(vm.$el.querySelector('time').getAttribute('title')).toBe(
       'Jan 24, 2018 1:02pm GMT+0000',
     );
   });
