@@ -85,16 +85,18 @@ export default {
     Vue.set(state, 'boardLists', backupList);
   },
 
-  [mutationTypes.REQUEST_REMOVE_LIST]: () => {
-    notImplemented();
+  [mutationTypes.REMOVE_LIST]: (state, listId) => {
+    const index = state.boardLists.findIndex(l => l.id === listId);
+
+    if (index === -1) {
+      return;
+    }
+
+    state.boardLists.splice(index, 1);
   },
 
-  [mutationTypes.RECEIVE_REMOVE_LIST_SUCCESS]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_REMOVE_LIST_ERROR]: () => {
-    notImplemented();
+  [mutationTypes.REMOVE_LIST_FAILURE]: state => {
+    state.error = s__('Boards|An error occurred while removing the list. Please try again.');
   },
 
   [mutationTypes.REQUEST_ISSUES_FOR_LIST]: (state, { listId, fetchNext }) => {

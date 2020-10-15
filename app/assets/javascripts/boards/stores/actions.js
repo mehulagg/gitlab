@@ -19,6 +19,7 @@ import boardListsQuery from '../queries/board_lists.query.graphql';
 import createBoardListMutation from '../queries/board_list_create.mutation.graphql';
 import updateBoardListMutation from '../queries/board_list_update.mutation.graphql';
 import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
+import destroyBoardList from '../queries/board_list_destroy.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -189,8 +190,28 @@ export default {
       });
   },
 
-  deleteList: () => {
-    notImplemented();
+  deleteList: ({ state, commit }, listId) => {
+    const listsBackup = [...state.boardLists];
+
+    commit(types.REMOVE_LIST, listId);
+
+    gqlClient
+      .mutate({
+        mutation: destroyBoardList,
+        variables: {
+          listId,
+        },
+      })
+      .then(errors => {
+        if (errors?.length > 0) {
+          throw new Error();
+        }
+      })
+      .catch(() => {
+        // show error message and re-add the list
+        commit(types.REMOVE_LIST_FAILURE);
+        commit(types.RECEIVE_BOARD_LISTS_SUCCESS, listsBackup);
+      });
   },
 
   fetchIssuesForList: ({ state, commit }, { listId, fetchNext = false }) => {
