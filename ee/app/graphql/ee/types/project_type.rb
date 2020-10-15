@@ -102,6 +102,17 @@ module EE
               description: 'DAST Site Profiles associated with the project',
               resolve: -> (obj, _args, _ctx) { DastSiteProfilesFinder.new(project_id: obj.id).execute }
 
+        field :dast_site_validation,
+              ::Types::DastSiteValidationType,
+              null: true,
+              resolve: -> (obj, args, _ctx) do
+                url_base = DastSiteValidation.get_normalized_url_base(args.target_url)
+                DastSiteValidationsFinder.new(project_id: obj.id, url_base: url_base).execute.first
+              end,
+              description: 'DAST Site Validation associated with the project' do
+                argument :target_url, GraphQL::STRING_TYPE, required: true, description: 'target URL of the DAST Site Validation'
+              end
+
         field :cluster_agent,
               ::Types::Clusters::AgentType,
               null: true,
