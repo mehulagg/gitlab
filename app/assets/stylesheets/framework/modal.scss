@@ -89,10 +89,6 @@
   }
 }
 
-body.modal-open {
-  overflow: hidden;
-}
-
 .modal-no-backdrop {
   @extend .modal-dialog;
 
