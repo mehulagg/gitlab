@@ -181,7 +181,7 @@ To enable or disable the inheritance of all `variables:` or `default:` parameter
 - `variables: true` or `variables: false`
 
 To inherit only a subset of `default:` parameters or `variables:`, specify what
-you wish to inherit. Anything not listed are **not** be inherited. Use
+you wish to inherit. Anything not listed is **not** inherited. Use
 one of the following formats:
 
 ```yaml
