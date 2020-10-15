@@ -5,7 +5,7 @@
 <-- This could be a personal experience, a list of open issues, links to social media posts, or feedback from research-->
 
 ### What are the potential solutions?
-<-- Any ideas you have to make the experience better -->
+<-- Any ideas you have to make the experience better? Include screenshots and examples if possible. -->
 
 /label ~UX
 
