@@ -1225,7 +1225,7 @@ type BoardEpic implements CurrentUserTodos & Noteable {
     List items overlapping a time frame defined by startDate..endDate (if one
     date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
     """
-    endDate: Time
+    endDate: Time @deprecated(reason: "Use timeframe.end. Deprecated in 13.5")
 
     """
     Returns the first _n_ elements from the list.
@@ -1277,7 +1277,7 @@ type BoardEpic implements CurrentUserTodos & Noteable {
     date is provided, both must be present). Deprecated in 13.5: Use
     timeframe.start
     """
-    startDate: Time
+    startDate: Time @deprecated(reason: "Use timeframe.start. Deprecated in 13.5")
 
     """
     Filter epics by state
@@ -6017,7 +6017,7 @@ type Epic implements CurrentUserTodos & Noteable {
     List items overlapping a time frame defined by startDate..endDate (if one
     date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
     """
-    endDate: Time
+    endDate: Time @deprecated(reason: "Use timeframe.end. Deprecated in 13.5")
 
     """
     Returns the first _n_ elements from the list.
@@ -6069,7 +6069,7 @@ type Epic implements CurrentUserTodos & Noteable {
     date is provided, both must be present). Deprecated in 13.5: Use
     timeframe.start
     """
-    startDate: Time
+    startDate: Time @deprecated(reason: "Use timeframe.start. Deprecated in 13.5")
 
     """
     Filter epics by state
@@ -7511,7 +7511,7 @@ type Group {
     List items overlapping a time frame defined by startDate..endDate (if one
     date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
     """
-    endDate: Time
+    endDate: Time @deprecated(reason: "Use timeframe.end. Deprecated in 13.5")
 
     """
     IID of the epic, e.g., "1"
@@ -7553,7 +7553,7 @@ type Group {
     date is provided, both must be present). Deprecated in 13.5: Use
     timeframe.start
     """
-    startDate: Time
+    startDate: Time @deprecated(reason: "Use timeframe.start. Deprecated in 13.5")
 
     """
     Filter epics by state
@@ -7589,7 +7589,7 @@ type Group {
     List items overlapping a time frame defined by startDate..endDate (if one
     date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
     """
-    endDate: Time
+    endDate: Time @deprecated(reason: "Use timeframe.end. Deprecated in 13.5")
 
     """
     Returns the first _n_ elements from the list.
@@ -7641,7 +7641,7 @@ type Group {
     date is provided, both must be present). Deprecated in 13.5: Use
     timeframe.start
     """
-    startDate: Time
+    startDate: Time @deprecated(reason: "Use timeframe.start. Deprecated in 13.5")
 
     """
     Filter epics by state
@@ -7857,7 +7857,7 @@ type Group {
     List items overlapping a time frame defined by startDate..endDate (if one
     date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
     """
-    endDate: Time
+    endDate: Time @deprecated(reason: "Use timeframe.end. Deprecated in 13.5")
 
     """
     Returns the first _n_ elements from the list.
@@ -7889,7 +7889,7 @@ type Group {
     date is provided, both must be present). Deprecated in 13.5: Use
     timeframe.start
     """
-    startDate: Time
+    startDate: Time @deprecated(reason: "Use timeframe.start. Deprecated in 13.5")
 
     """
     Filter iterations by state
@@ -8065,7 +8065,7 @@ type Group {
     List items overlapping a time frame defined by startDate..endDate (if one
     date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
     """
-    endDate: Time
+    endDate: Time @deprecated(reason: "Use timeframe.end. Deprecated in 13.5")
 
     """
     Returns the first _n_ elements from the list.
@@ -8097,7 +8097,7 @@ type Group {
     date is provided, both must be present). Deprecated in 13.5: Use
     timeframe.start
     """
-    startDate: Time
+    startDate: Time @deprecated(reason: "Use timeframe.start. Deprecated in 13.5")
 
     """
     Filter milestones by state
@@ -13930,7 +13930,7 @@ type Project {
     List items overlapping a time frame defined by startDate..endDate (if one
     date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
     """
-    endDate: Time
+    endDate: Time @deprecated(reason: "Use timeframe.end. Deprecated in 13.5")
 
     """
     Returns the first _n_ elements from the list.
@@ -13962,7 +13962,7 @@ type Project {
     date is provided, both must be present). Deprecated in 13.5: Use
     timeframe.start
     """
-    startDate: Time
+    startDate: Time @deprecated(reason: "Use timeframe.start. Deprecated in 13.5")
 
     """
     Filter iterations by state
@@ -14190,7 +14190,7 @@ type Project {
     List items overlapping a time frame defined by startDate..endDate (if one
     date is provided, both must be present). Deprecated in 13.5: Use timeframe.end
     """
-    endDate: Time
+    endDate: Time @deprecated(reason: "Use timeframe.end. Deprecated in 13.5")
 
     """
     Returns the first _n_ elements from the list.
@@ -14222,7 +14222,7 @@ type Project {
     date is provided, both must be present). Deprecated in 13.5: Use
     timeframe.start
     """
-    startDate: Time
+    startDate: Time @deprecated(reason: "Use timeframe.start. Deprecated in 13.5")
 
     """
     Filter milestones by state

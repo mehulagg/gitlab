@@ -505,7 +505,7 @@ GEM
     graphiql-rails (1.4.10)
       railties
       sprockets-rails
-    graphql (1.11.4)
+    graphql (1.11.5)
     graphql-docs (1.6.0)
       commonmarker (~> 0.16)
       escape_utils (~> 1.2)

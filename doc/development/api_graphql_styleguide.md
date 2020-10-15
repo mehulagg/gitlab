@@ -380,15 +380,15 @@ def foo
 end
 ```
 
-## Deprecating fields and enum values
+## Deprecating fields, arguments and enum values
 
 GitLab's GraphQL API is versionless, which means we maintain backwards
 compatibility with older versions of the API with every change. Rather
-than removing a field or [enum value](#enums), we need to _deprecate_ it instead.
+than removing a field, argument or [enum value](#enums), we need to _deprecate_ it instead.
 In future, GitLab
 [may remove deprecated parts of the schema](https://gitlab.com/gitlab-org/gitlab/-/issues/32292).
 
-Fields and enum values are deprecated using the `deprecated` property.
+Fields, arguments and enum values are deprecated using the `deprecated` property.
 The value of the property is a `Hash` of:
 
 - `reason` - Reason for the deprecation.
@@ -408,14 +408,13 @@ be appended to the `description`.
 
 ### Deprecation reason style guide
 
-Where the reason for deprecation is due to the field or enum value being
-replaced, the `reason` must be:
+Where the reason for deprecation is due to thing being replaced, the `reason` must be:
 
 ```plaintext
 Use `otherFieldName`
 ```
 
-Example:
+Examples:
 
 ```ruby
 field :designs, ::Types::DesignManagement::DesignCollectionType, null: true,
@@ -434,8 +433,7 @@ module Types
 end
 ```
 
-If the field is not being replaced by another field, a descriptive
-deprecation `reason` should be given.
+If thing being deprecated is not being replaced, a descriptive deprecation `reason` should be given.
 
 See also [Aliasing and deprecating mutations](#aliasing-and-deprecating-mutations).
 
