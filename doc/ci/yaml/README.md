@@ -3769,8 +3769,8 @@ starting, which reduces parallelization.
 
 #### Trigger a pipeline by API call
 
-You can force a rebuild of a specific branch, tag, or commit, by including
-and API call with a trigger token.
+To force a rebuild of a specific branch, tag, or commit, you can use an API call
+with a trigger token.
 
 The trigger token is different than the [`trigger`](#trigger) parameter.
 
