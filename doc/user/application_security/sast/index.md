@@ -206,7 +206,7 @@ spotbugs-sast:
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235382) in GitLab 13.5.
 
 You can customize the default scanning rules provided with SAST's NodeJS-Scan and Gosec analyzers.
-Customization allows you to exclude rules and add new rules.
+Customization allows you to exclude rules and modify the behavior of existing rules.
 
 To customize the default scanning rules, you create a file containing custom rules. Theses rules
 are passed through to the analyzer's underlying scanner tool.
