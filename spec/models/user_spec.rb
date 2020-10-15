@@ -486,6 +486,26 @@ RSpec.describe User do
           user = build(:user, email: "example@test.com")
           expect(user).to be_invalid
         end
+
+        context 'project bot users' do
+          before do
+            allow(Gitlab).to receive(:com?).and_return(false)
+          end
+
+          let(:project) { create(:project) }
+
+          it 'does not reject project bots' do
+            admin = build(:admin, email: "info@example.com")
+            response = ResourceAccessTokens::CreateService.new(admin, project).execute
+
+            access_token = response.payload[:access_token]
+            binding.pry
+            project_bot = access_token.user
+
+
+            expect(project_bot).to be_valid
+          end
+        end
       end
 
       context 'when a signup domain is whitelisted and subdomains are not allowed' do
