@@ -16,6 +16,7 @@ import { isAbsolute, redirectTo } from '~/lib/utils/url_utility';
 import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
 import { fetchPolicies } from '~/lib/graphql';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import validation from '~/vue_shared/directives/validation';
 import DastSiteValidation from './dast_site_validation.vue';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from '../graphql/dast_site_profile_update.mutation.graphql';
@@ -43,6 +44,9 @@ export default {
     GlModal,
     GlToggle,
     DastSiteValidation,
+  },
+  directives: {
+    validation,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -171,7 +175,7 @@ export default {
   },
   async created() {
     if (this.isEdit) {
-      this.validateTargetUrl();
+      // this.validateTargetUrl();
 
       if (this.glFeatures.securityOnDemandScansSiteValidation) {
         await this.fetchValidationStatus();
@@ -212,17 +216,6 @@ export default {
     },
     validationStatusMatches(status) {
       return this.validationStatus === status;
-    },
-    validateTargetUrl() {
-      if (!isAbsolute(this.form.targetUrl.value)) {
-        this.form.targetUrl.state = false;
-        this.form.targetUrl.feedback = s__(
-          'DastProfiles|Please enter a valid URL format, ex: http://www.example.com/home',
-        );
-        return;
-      }
-      this.form.targetUrl.state = true;
-      this.form.targetUrl.feedback = null;
     },
     async fetchValidationStatus() {
       this.isFetchingValidationStatus = true;
@@ -369,12 +362,18 @@ export default {
       </ul>
     </gl-alert>
 
-    <gl-form-group :label="s__('DastProfiles|Profile name')">
+    <gl-form-group
+      :label="s__('DastProfiles|Profile name')"
+      :invalid-feedback="form.profileName.feedback"
+    >
       <gl-form-input
         v-model="form.profileName.value"
+        v-validation.blur="form.profileName"
         class="mw-460"
         data-testid="profile-name-input"
         type="text"
+        required
+        :state="form.profileName.state"
       />
     </gl-form-group>
 
@@ -392,12 +391,13 @@ export default {
     >
       <gl-form-input
         v-model="form.targetUrl.value"
+        v-validation.blur="form.targetUrl"
         class="mw-460"
         data-testid="target-url-input"
+        required
         type="url"
         :state="form.targetUrl.state"
         :disabled="isSiteValidationActive"
-        @input="validateTargetUrl"
       />
     </gl-form-group>
 
