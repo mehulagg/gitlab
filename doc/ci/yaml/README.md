@@ -1890,7 +1890,7 @@ the `docker build` job is created, but only if changes were made to any of the f
 
 CAUTION: **Warning:**
 If you use `only:changes` with [only allow merge requests to be merged if the pipeline succeeds](../../user/project/merge_requests/merge_when_pipeline_succeeds.md#only-allow-merge-requests-to-be-merged-if-the-pipeline-succeeds),
-you must [also use `only:merge_requests`](#using-onlychanges-with-pipelines-for-merge-requests).
+you should [also use `only:merge_requests`](#using-onlychanges-with-pipelines-for-merge-requests). Otherwise it may not work as expected.
 
 You can also use glob patterns to match multiple files in either the root directory
 of the repository, or in _any_ directory within the repository. However, they must be wrapped
