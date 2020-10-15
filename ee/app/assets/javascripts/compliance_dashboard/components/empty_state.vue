@@ -4,7 +4,7 @@ import { __ } from '~/locale';
 
 export default {
   components: {
-    GlLink
+    GlLink,
   },
   props: {
     imagePath: {
@@ -13,14 +13,13 @@ export default {
     },
   },
   strings: {
-    heading: __(
-      "Includes completed merge requests.",
-    ),
+    heading: __('Includes completed merge requests.'),
     subheading: __("You haven't yet finished a merge request."),
-    documentation: __("View documentation"),
+    documentation: __('View documentation'),
     alt: __('Merge Requests'),
   },
-  documentationPath: "https://docs.gitlab.com/ee/user/compliance/compliance_dashboard/index.html#overview"
+  documentationPath:
+    'https://docs.gitlab.com/ee/user/compliance/compliance_dashboard/index.html#overview',
 };
 </script>
 
