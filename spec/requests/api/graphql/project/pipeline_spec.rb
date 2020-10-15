@@ -9,6 +9,7 @@ RSpec.describe 'getting pipeline information nested in a project' do
   let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
   let_it_be(:current_user) { create(:user) }
   let_it_be(:build_job) { create(:ci_build, :trace_with_sections, pipeline: pipeline) }
+  let_it_be(:failed_build) { create(:ci_build, :failed, pipeline: pipeline) }
 
   let(:path) { %i[project pipeline] }
   let(:pipeline_graphql_data) { graphql_data_at(*path) }
@@ -59,8 +60,43 @@ RSpec.describe 'getting pipeline information nested in a project' do
               a_graphql_object_with(s.merge(content: String))
             end
           )
+        ),
+        a_graphql_object_with(
+          id: global_id_of(failed_build),
+          status: failed_build.status.upcase
         )
       )
+    end
+  end
+
+  context 'when requesting only builds with certain statuses' do
+    let(:variables) do
+      {
+        path: project.full_path,
+        pipelineIID: pipeline.iid.to_s,
+        status: :FAILED
+      }
+    end
+
+    let(:query) do
+      <<~GQL
+      query($path: ID!, $pipelineIID: ID!, $status: CiBuildStatus!) {
+        project(fullPath: $path) {
+          pipeline(iid: $pipelineIID) {
+            builds(statuses: [$status]) {
+              #{all_graphql_fields_for('CiBuild', max_depth: 1)}
+            }
+          }
+        }
+      }
+      GQL
+    end
+
+    it 'can filter build jobs by status' do
+      post_graphql(query, current_user: current_user, variables: variables)
+
+      expect(graphql_data_at(*path, :builds))
+        .to contain_exactly(a_graphql_object_with(id: global_id_of(failed_build)))
     end
   end
 

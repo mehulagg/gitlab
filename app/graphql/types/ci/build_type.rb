@@ -11,22 +11,22 @@ module Types
 
       field :id, ::Types::GlobalIDType[::Ci::Build], null: false,
             description: 'ID of the build'
-      field :name, GraphQL::STRING_TYPE, null: false,
+      field :name, GraphQL::STRING_TYPE, null: true,
             description: 'Name of the build'
-      field :stage, GraphQL::STRING_TYPE, null: false,
+      field :stage, GraphQL::STRING_TYPE, null: true,
             description: 'Stage of the build'
       field :allow_failure, ::GraphQL::BOOLEAN_TYPE, null: false,
             description: 'Is this build allowed to fail'
-      field :status, ::Types::Ci::BuildStatusEnum, null: false,
+      field :status, ::Types::Ci::BuildStatusEnum, null: true,
             description: "Status of the build"
       field :duration, GraphQL::INT_TYPE, null: true,
             description: 'Duration of the build in seconds'
       field :created_at, Types::TimeType, null: false,
-            description: "Timestamp of the pipeline's creation"
+            description: "Timestamp of the build's creation"
       field :started_at, Types::TimeType, null: true,
-            description: 'Timestamp when the pipeline was started'
+            description: 'Timestamp when the build was started'
       field :finished_at, Types::TimeType, null: true,
-            description: "Timestamp of the pipeline's completion"
+            description: "Timestamp of the build's completion"
       field :trace, ::Types::Ci::TraceType, null: true,
             complexity: HIGH_COMPLEXITY,
             description: "Output of the build"
