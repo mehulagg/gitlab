@@ -90,6 +90,7 @@ choose one of these templates:
 - [Scala (`Scala.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Scala.gitlab-ci.yml)
 - [Swift (`Swift.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Swift.gitlab-ci.yml)
 - [Terraform (`Terraform.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform.gitlab-ci.yml)
+- [Waypoint (`Waypoint.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Waypoint.gitlab-ci.yml)
 
 If a programming language or framework template is not in this list, you can contribute
 one. To create a template, submit a merge request
