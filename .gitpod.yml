@@ -45,6 +45,7 @@ tasks:
         fi
         # start GDK
         echo "$(date) – Starting GDK" | tee -a /workspace/startup.log
+        export RAILS_HOSTS=$(gp url 3000 | sed -e 's+^http[s]*://++')
         gdk start
         # Run DB migrations
         if [ "$GITLAB_RUN_DB_MIGRATIONS" == true ]; then
