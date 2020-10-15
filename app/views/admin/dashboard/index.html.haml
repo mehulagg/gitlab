@@ -22,10 +22,20 @@
           = link_to(s_('AdminArea|New project'), new_project_path, class: "btn gl-button btn-success gl-w-full")
     .col-sm-4
       .info-well.dark-well
-        .well-segment.well-centered
+        .well-segment.well-centered.gl-text-center
           = link_to admin_users_path do
-            %h3.text-center
+            %h3.gl-display-inline-block.gl-mb-0
               = s_('AdminArea|Users: %{number_of_users}') % { number_of_users: approximate_count_with_delimiters(@counts, User) }
+
+          %span{ href: "#", tabindex: "0", data: { container: "body",
+            toggle: "popover",
+            placement: "top",
+            html: "true",
+            trigger: "hover",
+            content: "All users created in the instance, including users who are not <a href='#{"billable-users-link"}' target='_blank' rel='noopener noreferrer nofollow'>billable users</a>.",
+          } }
+            = sprite_icon('information', size: 16, css_class: 'gl-text-gray-900 gl-outline-0 gl-mb-1')
+
           %hr
           .btn-group.d-flex{ role: 'group' }
             = link_to s_('AdminArea|New user'), new_admin_user_path, class: "btn gl-button btn-success gl-w-full"

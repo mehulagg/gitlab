@@ -1,1 +1,9 @@
 = s_('AdminArea|Billable users')
+%span{ href: "#", tabindex: "0", role: "button", data: { container: "body",
+  toggle: "popover",
+  placement: "top",
+  html: "true",
+  trigger: "hover",
+  content: "<a href='#{"billable-users-link"}' target='_blank' rel='noopener noreferrer nofollow'>Learn more</a> about what defines a billable user",
+} }
+  = sprite_icon('information', size: 16, css_class: 'gl-text-gray-900 gl-outline-0')
