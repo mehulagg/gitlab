@@ -34,7 +34,7 @@ describe('EmptyState component', () => {
 
     it('renders a message', () => {
       expect(findText().text()).toEqual(
-        "Merge requests are a place to propose changes you've made to a project and discuss those changes with others Interested parties can even contribute by pushing commits if they want to.",
+        "Includes completed merge requests. You haven't yet finished a merge request. View documentation",
       );
     });
   });

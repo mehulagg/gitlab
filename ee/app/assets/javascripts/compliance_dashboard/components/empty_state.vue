@@ -1,7 +1,11 @@
 <script>
+import { GlLink } from '@gitlab/ui';
 import { __ } from '~/locale';
 
 export default {
+  components: {
+    GlLink
+  },
   props: {
     imagePath: {
       type: String,
@@ -10,25 +14,28 @@ export default {
   },
   strings: {
     heading: __(
-      "Merge requests are a place to propose changes you've made to a project and discuss those changes with others",
+      "Includes completed merge requests.",
     ),
-    subheading: __('Interested parties can even contribute by pushing commits if they want to.'),
+    subheading: __("You haven't yet finished a merge request."),
+    documentation: __("View documentation"),
     alt: __('Merge Requests'),
   },
+  documentationPath: "https://docs.gitlab.com/ee/user/compliance/compliance_dashboard/index.html#overview"
 };
 </script>
 
 <template>
-  <div class="row empty-state merge-requests">
-    <div class="col-12">
+  <div class="empty-state gl-display-flex gl-flex-direction-column">
+    <div class="gl-mx-5">
       <div class="svg-content">
         <img :src="imagePath" :alt="$options.strings.alt" />
       </div>
     </div>
-    <div class="col-12">
-      <div class="text-content">
+    <div class="gl-mx-5">
+      <div class="text-content gl-text-center">
         <h4>{{ $options.strings.heading }}</h4>
         <p>{{ $options.strings.subheading }}</p>
+        <gl-link :href="$options.documentationPath">{{ $options.strings.documentation }}</gl-link>
       </div>
     </div>
   </div>
