@@ -12,7 +12,9 @@
   - users_over_license = 0
 
 - true_up_url = 'https://about.gitlab.com/license-faq/'
+- billable_users_url = 'billable-users-link'
 - true_up_link_start = '<a href="%{url}">'.html_safe % { url: true_up_url }
+- billabe_users_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer nofollow">'.html_safe % { url: billable_users_url }
 - link_end = '</a>'.html_safe
 
 .license-panel.gl-mt-5
@@ -57,7 +59,7 @@
             = number_with_delimiter current_active_user_count
           %hr
             %p
-            = _('This is the number of currently active users on your installation, and this is the minimum number you need to purchase when you renew your license.')
+            = _('This is the number of %{billabe_users_link_start}billable users%{link_end} on your installation, and this is the minimum number you need to purchase when you renew your license.').html_safe % { billabe_users_link_start: billabe_users_link_start, link_end: link_end }
   .d-flex.gl-pb-5
     .col-sm-6.d-flex.pl-0
       .info-well.dark-well.flex-fill.gl-mb-0
