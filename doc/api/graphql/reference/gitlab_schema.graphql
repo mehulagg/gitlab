@@ -3906,9 +3906,9 @@ type DastScannerProfile {
   globalId: DastScannerProfileID!
 
   """
-  ID of the DAST scanner profile. Deprecated in 13.4: Use `global_id`
+  ID of the DAST scanner profile. Deprecated in 13.4: Use `globalId`
   """
-  id: ID! @deprecated(reason: "Use `global_id`. Deprecated in 13.4")
+  id: ID! @deprecated(reason: "Use `globalId`. Deprecated in 13.4")
 
   """
   Name of the DAST scanner profile

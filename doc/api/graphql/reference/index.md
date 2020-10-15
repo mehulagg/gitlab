@@ -616,7 +616,7 @@ Represents a DAST scanner profile.
 | ----- | ---- | ----------- |
 | `editPath` | String | Relative web path to the edit page of a scanner profile |
 | `globalId` | DastScannerProfileID! | ID of the DAST scanner profile |
-| `id` **{warning-solid}** | ID! | **Deprecated:** Use `global_id`. Deprecated in 13.4 |
+| `id` **{warning-solid}** | ID! | **Deprecated:** Use `globalId`. Deprecated in 13.4 |
 | `profileName` | String | Name of the DAST scanner profile |
 | `scanType` | DastScanTypeEnum | Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan. |
 | `showDebugMessages` | Boolean! | Indicates if debug messages should be included in DAST console output. True to include the debug messages. |

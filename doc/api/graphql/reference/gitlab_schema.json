@@ -10501,7 +10501,7 @@
             },
             {
               "name": "id",
-              "description": "ID of the DAST scanner profile. Deprecated in 13.4: Use `global_id`",
+              "description": "ID of the DAST scanner profile. Deprecated in 13.4: Use `globalId`",
               "args": [
 
               ],
@@ -10515,7 +10515,7 @@
                 }
               },
               "isDeprecated": true,
-              "deprecationReason": "Use `global_id`. Deprecated in 13.4"
+              "deprecationReason": "Use `globalId`. Deprecated in 13.4"
             },
             {
               "name": "profileName",

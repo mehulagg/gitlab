@@ -9,7 +9,7 @@ module Types
 
     field :id, GraphQL::ID_TYPE, null: false,
           description: 'ID of the DAST scanner profile',
-          deprecated: { reason: 'Use `global_id`', milestone: '13.4' }
+          deprecated: { reason: 'Use `globalId`', milestone: '13.4' }
 
     field :global_id, ::Types::GlobalIDType[::DastScannerProfile], null: false,
           description: 'ID of the DAST scanner profile',
