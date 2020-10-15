@@ -75,7 +75,7 @@ export default {
           type: 'category',
           axisLabel: {
             formatter: value => {
-              return value.split('_')[0]; // Aug_2020 => Aug
+              return value.split(' ')[0]; // Aug 2020 => Aug
             },
           },
         },
@@ -89,7 +89,7 @@ export default {
 
       const data = Object.keys(this.throughputChartData)
         .slice(0, -1) // Remove the __typeName key
-        .map(value => [value, this.throughputChartData[value].count]);
+        .map(value => [value.split('_').join(' '), this.throughputChartData[value].count]); // key: Aug_2020 => Aug 2020
 
       return [
         {
