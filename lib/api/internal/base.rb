@@ -7,10 +7,14 @@ module API
       before { authenticate_by_gitlab_shell_token! }
 
       before do
+        route_path = route.origin
+        route_class = route.app.options[:for]
+
         Gitlab::ApplicationContext.push(
           user: -> { actor&.user },
           project: -> { project },
-          caller_id: route.origin
+          caller_id: route_path,
+          feature_category: route_class.try(:feature_category_for_action, route_path).to_s
         )
       end
 

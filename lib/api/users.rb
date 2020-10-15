@@ -8,6 +8,43 @@ module API
 
     allow_access_with_scope :read_user, if: -> (request) { request.get? }
 
+    feature_category :users, [
+                       '/users',
+                       '/users/:id',
+                       '/users/:id/custom_attributes',
+                       '/users/:id/custom_attributes/:key',
+                       '/users/:user_id/status',
+                       '/users/:id/emails',
+                       '/users/:id/emails/:email_id',
+                       '/users/:user_id/memberships',
+                       '/user',
+                       '/user/emails',
+                       '/user/emails/:email_id',
+                       '/user/activities',
+                       '/user/status'
+                     ]
+
+    feature_category :authentication_and_authorization, [
+                       '/users/:id/identities/:provider',
+                       '/users/:id/keys',
+                       '/users/:user_id/keys',
+                       '/users/:id/keys/:key_id',
+                       '/users/:id/gpg_keys',
+                       '/users/:id/gpg_keys/:key_id',
+                       '/users/:id/gpg_keys/:key_id/revoke',
+                       '/users/:id/activate',
+                       '/users/:id/deactivate',
+                       '/users/:id/block',
+                       '/users/:id/unblock',
+                       '/users/:user_id/impersonation_tokens',
+                       '/users/:user_id/impersonation_tokens/:impersonation_token_id',
+                       '/user/keys',
+                       '/user/keys/:key_id',
+                       '/user/gpg_keys',
+                       '/user/gpg_keys/:key_id',
+                       '/user/gpg_keys/:key_id/revoke'
+                     ]
+
     resource :users, requirements: { uid: /[0-9]*/, id: /[0-9]*/ } do
       include CustomAttributesEndpoints
 
