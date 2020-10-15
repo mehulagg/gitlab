@@ -11,6 +11,8 @@ describe('static_site_editor/services/front_matterify', () => {
   const frontMatterifiedContent = {
     source: content,
     matter: yamlFrontMatterObj,
+    hasMatter: true,
+    isMatterValid: true,
     spacing,
     content: body,
     delimiter: '---',
@@ -19,6 +21,8 @@ describe('static_site_editor/services/front_matterify', () => {
   const frontMatterifiedBody = {
     source: body,
     matter: null,
+    hasMatter: false,
+    isMatterValid: false,
     spacing: null,
     content: body,
     delimiter: null,

@@ -1,5 +1,4 @@
 import jsYaml from 'js-yaml';
-import { noop } from 'lodash';
 
 const NEW_LINE = '\n';
 
@@ -7,6 +6,19 @@ const hasMatter = (firstThreeChars, fourthChar) => {
   const isYamlDelimiter = firstThreeChars === '---';
   const isFourthCharNewline = fourthChar === NEW_LINE;
   return isYamlDelimiter && isFourthCharNewline;
+};
+
+const validateMatter = matterStr => {
+  let isMatterValid = true;
+  let matter;
+
+  try {
+    matter = jsYaml.safeLoad(matterStr);
+  } catch (error) {
+    isMatterValid = false;
+  }
+
+  return { matter, isMatterValid };
 };
 
 export const frontMatterify = source => {
@@ -17,6 +29,8 @@ export const frontMatterify = source => {
   const NO_FRONTMATTER = {
     source,
     matter: null,
+    hasMatter: false,
+    isMatterValid: false,
     spacing: null,
     content: source,
     delimiter: null,
@@ -40,12 +54,7 @@ export const frontMatterify = source => {
   }
 
   const matterStr = source.slice(index, offset);
-  let matter;
-  try {
-    matter = jsYaml.safeLoad(matterStr);
-  } catch (error) {
-    noop();
-  }
+  const { matter, isMatterValid } = validateMatter(matterStr);
 
   let content = source.slice(offset + delimiter.length);
   let spacing = '';
@@ -59,6 +68,8 @@ export const frontMatterify = source => {
   return {
     source,
     matter,
+    hasMatter: true,
+    isMatterValid,
     spacing,
     content,
     delimiter,
