@@ -13,8 +13,8 @@ export default {
     },
   },
   strings: {
-    heading: __('Includes completed merge requests.'),
-    subheading: __("You haven't yet finished a merge request."),
+    heading: __('No recent merged merge requests found'),
+    subheading: __("The Compliance Dashboard gives you the ability to see a group's Merge Request activity by providing a high-level view for all projects in the group."),
     documentation: __('View documentation'),
     alt: __('Merge Requests'),
   },
