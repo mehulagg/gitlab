@@ -48,11 +48,17 @@ module API
     before do
       coerce_nil_params_to_array!
 
+      caller_id = route.origin
+      feature_category = route.app.options[:for].try(:feature_category_for_action, caller_id).to_s
+
+      header[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
+
       Gitlab::ApplicationContext.push(
         user: -> { @current_user },
         project: -> { @project },
         namespace: -> { @group },
-        caller_id: route.origin
+        caller_id: caller_id,
+        feature_category: feature_category
       )
     end
 
