@@ -19,7 +19,7 @@ import boardListsQuery from '../queries/board_lists.query.graphql';
 import createBoardListMutation from '../queries/board_list_create.mutation.graphql';
 import updateBoardListMutation from '../queries/board_list_update.mutation.graphql';
 import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
-import destroyBoardList from '../queries/board_list_destroy.mutation.graphql';
+import destroyBoardListMutation from '../queries/board_list_destroy.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -197,7 +197,7 @@ export default {
 
     return gqlClient
       .mutate({
-        mutation: destroyBoardList,
+        mutation: destroyBoardListMutation,
         variables: {
           listId,
         },
