@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Burndown and burnup charts **(STARTER)**
 
-Burndown and burnup charts show the progress of completing a milestone.
+[Burndown](#burndown-charts) and [burnup](#burnup-charts) charts show the progress of completing a milestone.
 
 ![burndown and burnup chart](img/burndown_and_burnup_charts_v13_5.png)
 
