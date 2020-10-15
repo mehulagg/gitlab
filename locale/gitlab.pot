@@ -23087,6 +23087,12 @@ msgstr ""
 msgid "Seat Link is disabled, and cannot be configured through this form."
 msgstr ""
 
+msgid "SeatUsage|Seat usage"
+msgstr ""
+
+msgid "SeatUsage|Users occupying seats in %{group_name}"
+msgstr ""
+
 msgid "Seats usage data as of %{last_enqueue_time}"
 msgstr ""
 

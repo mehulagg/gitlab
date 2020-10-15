@@ -91,7 +91,12 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       end
     end
 
-    resources :billings, only: [:index]
+    resources :billings, only: [:index] do
+      collection do
+        get :seat_usage, to: 'seat_usage#show'
+      end
+    end
+
     resources :epics, concerns: :awardable, constraints: { id: /\d+/ } do
       member do
         get '/descriptions/:version_id/diff', action: :description_diff, as: :description_diff
