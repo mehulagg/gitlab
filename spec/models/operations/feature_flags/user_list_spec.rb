@@ -92,6 +92,39 @@ RSpec.describe Operations::FeatureFlags::UserList do
     end
   end
 
+  describe '#for_name_like' do
+    subject { project.operations_feature_flags_user_lists.for_name_like(query, limit: limit) }
+
+    let_it_be(:project) { create(:project) }
+    let_it_be(:user_list_one) { create(:operations_feature_flag_user_list, project: project, name: 'one') }
+    let_it_be(:user_list_two) { create(:operations_feature_flag_user_list, project: project, name: 'list_two') }
+    let_it_be(:user_list_three) { create(:operations_feature_flag_user_list, project: project, name: 'list_three') }
+    let_it_be(:limit) { 5 }
+    let_it_be(:query) { 'list' }
+
+    it 'returns a found name' do
+      is_expected.to include(user_list_two)
+      is_expected.to include(user_list_three)
+      is_expected.not_to include(user_list_one)
+    end
+
+    context 'when query is twoA' do
+      let(:query) { 'twoA' }
+
+      it 'returns empty array' do
+        is_expected.to be_empty
+      end
+    end
+
+    context 'when query is nil' do
+      let(:query) { }
+
+      it 'raises an error' do
+        expect { subject }.to raise_error(NoMethodError)
+      end
+    end
+  end
+
   it_behaves_like 'AtomicInternalId' do
     let(:internal_id_attribute) { :iid }
     let(:instance) { build(:operations_feature_flag_user_list) }
