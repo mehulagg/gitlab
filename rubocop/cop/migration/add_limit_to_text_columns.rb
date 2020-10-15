@@ -102,6 +102,8 @@ module RuboCop
         # Check if there is an `add_text_limit` call for the provided
         # table and attribute name
         def text_limit_missing?(node, table_name, attribute_name)
+          return false if encrypted_attribute_name?(attribute_name)
+
           limit_found = false
 
           node.each_descendant(:send) do |send_node|
@@ -117,6 +119,10 @@ module RuboCop
           end
 
           !limit_found
+        end
+
+        def encrypted_attribute_name?(attribute_name)
+          attribute_name.to_s.start_with?('encrypted_')
         end
       end
     end
