@@ -1954,9 +1954,6 @@ In this scenario, if a merge request changes
 files in the `service-one` directory or the `Dockerfile`, GitLab creates
 the `docker build service one` job.
 
-You should not combine [pipelines for merge requests](../merge_request_pipelines/index.md)
-with `only: [change]` if you omit `only: [merge_requests]`.
-
 For example:
 
 ```yaml
