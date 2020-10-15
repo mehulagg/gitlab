@@ -96,8 +96,8 @@ Below are the current settings regarding [GitLab CI/CD](../../ci/README.md).
 | [Max pipeline schedules in projects](../../administration/instance_limits.md#number-of-pipeline-schedules) | `10` for Free tier, `50` for all paid tiers | Unlimited |
 | [Scheduled Job Archival](../../user/admin_area/settings/continuous_integration.md#archive-jobs) | 3 months | Never |
 
-**Note:** 
-GitLab.com uses the default value of the `needs:` job limit, per the defaults specified in the [Requirements and Limitations of the `needs:` keyword](../../ci/yaml/README.html#requirements-and-limitations).
+NOTE: **Note:**
+GitLab.com uses the default value of the `needs:` job limit, per the defaults specified in the [Requirements and Limitations of the `needs:` keyword](../../ci/yaml/README.md#requirements-and-limitations).
 
 ## Account and limit settings
 
