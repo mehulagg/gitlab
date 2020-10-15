@@ -44,6 +44,10 @@ def wip_mr?
   gitlab_danger.ci? ? gitlab.mr_json['work_in_progress'] : false
 end
 
+def documentation_only?
+  helper.changes_by_category.keys == [:documentation]
+end
+
 def danger_job_link
   gitlab_danger.ci? ? "[#{THE_DANGER_JOB_TEXT}](#{ENV['CI_JOB_URL']})" : THE_DANGER_JOB_TEXT
 end
@@ -126,8 +130,7 @@ def warn_or_fail_commits(failed_linters, default_to_fail: true)
 
   Array(failed_linters).each do |linter|
     linter.problems.each do |problem_key, problem_desc|
-      case problem_key
-      when :subject_above_warning
+      if documentation_only?
         warn_commit(linter.commit, problem_desc)
       else
         self.__send__("#{level}_commit", linter.commit, problem_desc) # rubocop:disable GitlabSecurity/PublicSend
