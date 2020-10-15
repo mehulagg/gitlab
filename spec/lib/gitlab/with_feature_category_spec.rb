@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
-require_relative "../../../app/controllers/concerns/controller_with_feature_category"
+require_relative "../../../lib/gitlab/with_feature_category"
 
-RSpec.describe ControllerWithFeatureCategory do
+RSpec.describe Gitlab::WithFeatureCategory do
   describe ".feature_category_for_action" do
     let(:base_controller) do
       Class.new do
-        include ControllerWithFeatureCategory
+        include ::Gitlab::WithFeatureCategory
       end
     end
 

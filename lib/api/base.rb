@@ -2,5 +2,6 @@
 
 module API
   class Base < Grape::API::Instance # rubocop:disable API/Base
+    include ::Gitlab::WithFeatureCategory
   end
 end

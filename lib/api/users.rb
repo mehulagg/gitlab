@@ -8,6 +8,43 @@ module API
 
     allow_access_with_scope :read_user, if: -> (request) { request.get? }
 
+    feature_category :users, [
+                       '/api/:version/users',
+                       '/api/:version/users/:id',
+                       '/api/:version/users/:id/custom_attributes',
+                       '/api/:version/users/:id/custom_attributes/:key',
+                       '/api/:version/users/:user_id/status',
+                       '/api/:version/users/:id/emails',
+                       '/api/:version/users/:id/emails/:email_id',
+                       '/api/:version/users/:user_id/memberships',
+                       '/api/:version/user',
+                       '/api/:version/user/emails',
+                       '/api/:version/user/emails/:email_id',
+                       '/api/:version/user/activities',
+                       '/api/:version/user/status'
+                     ]
+
+    feature_category :authentication_and_authorization, [
+                       '/api/:version/users/:id/identities/:provider',
+                       '/api/:version/users/:id/keys',
+                       '/api/:version/users/:user_id/keys',
+                       '/api/:version/users/:id/keys/:key_id',
+                       '/api/:version/users/:id/gpg_keys',
+                       '/api/:version/users/:id/gpg_keys/:key_id',
+                       '/api/:version/users/:id/gpg_keys/:key_id/revoke',
+                       '/api/:version/users/:id/activate',
+                       '/api/:version/users/:id/deactivate',
+                       '/api/:version/users/:id/block',
+                       '/api/:version/users/:id/unblock',
+                       '/api/:version/users/:user_id/impersonation_tokens',
+                       '/api/:version/users/:user_id/impersonation_tokens/:impersonation_token_id',
+                       '/api/:version/user/keys',
+                       '/api/:version/user/keys/:key_id',
+                       '/api/:version/user/gpg_keys',
+                       '/api/:version/user/gpg_keys/:key_id',
+                       '/api/:version/user/gpg_keys/:key_id/revoke'
+                     ]
+
     resource :users, requirements: { uid: /[0-9]*/, id: /[0-9]*/ } do
       include CustomAttributesEndpoints
 
