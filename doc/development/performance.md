@@ -247,8 +247,10 @@ The following configuration options can be configured:
 
 - `STACKPROF_ENABLED`: Enables stackprof signal handler on SIGUSR2 signal.
   Defaults to `false`.
-- `STACKPROF_INTERVAL_US`: Sampling interval in microseconds. Defaults to
-  `10000` μs (100hz).
+- `STACKPROF_MODE`: See [sampling modes](https://github.com/tmm1/stackprof#sampling).
+  Defaults to `cpu`.
+- `STACKPROF_INTERVAL`: Sampling interval. Defaults to `1` for `object` profiles
+  and `10000` μs (100hz) for other profiles.
 - `STACKPROF_FILE_PREFIX`: File path prefix where profiles are stored. Defaults
   to `$TMPDIR` (often corresponds to `/tmp`).
 - `STACKPROF_TIMEOUT_S`: Profiling timeout in seconds. Profiling will
