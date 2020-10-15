@@ -166,6 +166,9 @@ merge request. You can either set Code Owners approvals
 at the time you protect a new branch, or set it to a branch
 already protected, as described below.
 
+NOTE: **Note:**
+Users/Groups in the 'Allowed to push' section may push straight to a code owner protected branch.
+
 To protect a new branch and enable Code Owner's approval:
 
 1. Navigate to your project's **Settings > Repository** and expand **Protected branches**.
