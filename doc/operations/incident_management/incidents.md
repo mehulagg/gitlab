@@ -43,7 +43,7 @@ If you have at least Guest [permissions](../../user/permissions.md), to create a
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4925) in GitLab Ultimate 11.11.
 
 With Maintainer or higher [permissions](../../user/permissions.md), you can enable
- Gitlab to create incident automatically whenever an alert is triggered:
+ GitLab to create incident automatically whenever an alert is triggered:
 
 1. Navigate to **Settings > Operations > Incidents** and expand
    **Incidents**:
@@ -82,6 +82,7 @@ To confirm the integration is successful, trigger a test incident from PagerDuty
 confirm that a GitLab incident is created from the incident.
 
 ## Incident list
+
 For users with at least Guest [permissions](../../user/permissions.md), the
 Incident list is available at **Operations > Incidents**
 in your project's sidebar. The list contains the following metrics:
