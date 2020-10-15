@@ -649,6 +649,11 @@ RSpec.describe API::MavenPackages do
         let(:dummy_package) { double(Packages::Package) }
 
         it 'checks the sha1' do
+          # The sha verification done by the maven api is between:
+          # - the sha256 set by workhorse helpers
+          # - the sha256 of the sha1 of the uploaded package file
+          # We're going to send `file_upload` for the sha1 and stub the sha1 of the package file so that
+          # both sha256 being the same
           expect(::Packages::PackageFileFinder).to receive(:new).and_return(double(execute!: dummy_package))
           expect(dummy_package).to receive(:file_sha1).and_return(File.read(file_upload.path))
 
