@@ -4,6 +4,26 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Badge::Coverage::Report do
   let(:project) { create(:project, :repository) }
+
+  let(:successful_pipeline) do
+    create(:ci_pipeline, :success, project: project, sha: project.commit.id, ref: 'master').tap do |pipeline|
+      create(:ci_build, :success, pipeline: pipeline, name: 'coverage', coverage: 25)
+    end
+  end
+
+  let(:successful_pipeline_with_two_coverages) do
+    create(:ci_pipeline, :success, project: project, sha: project.commit.id, ref: 'master').tap do |pipeline|
+      create(:ci_build, :success, pipeline: pipeline, name: 'early', coverage: 40)
+      create(:ci_build, :success, pipeline: pipeline, name: 'coverage', coverage: 60)
+    end
+  end
+
+  let(:failing_pipeline) do
+    create(:ci_pipeline, :failed, project: project, sha: project.commit.id, ref: 'master').tap do |pipeline|
+      create(:ci_build, :failed, pipeline: pipeline, name: 'coverage', coverage: 10)
+    end
+  end
+
   let(:job_name) { nil }
 
   let(:badge) do
@@ -28,81 +48,66 @@ RSpec.describe Gitlab::Badge::Coverage::Report do
     end
   end
 
-  shared_examples 'unknown coverage report' do
-    context 'particular job specified' do
-      let(:job_name) { '' }
+  describe '#status' do
+    context 'coverage job name is passed' do
+      before do
+        successful_pipeline
+        successful_pipeline_with_two_coverages
+        failing_pipeline
+      end
 
-      it 'returns nil' do
-        expect(badge.status).to be_nil
+      context 'and matches a passing job' do
+        let(:job_name) { 'early' }
+
+        it 'returns coverage from that job' do
+          expect(badge.status).to eq(40)
+        end
+      end
+
+      context 'and matches a failing job' do
+        let(:job_name) { 'coverage' }
+
+        it 'returns the coverage from the most recent passing job of that name' do
+          expect(badge.status).to eq(60)
+        end
+      end
+
+      context 'and does not match a job' do
+        let(:job_name) { 'unknown' }
+
+        it 'returns coverage of the most recent passing pipeline' do
+          expect(badge.status).to be_nil
+        end
       end
     end
 
-    context 'particular job not specified' do
-      let(:job_name) { nil }
+    context 'coverage job name is not passed' do
+      context 'with a successful pipeline' do
+        before do
+          successful_pipeline
+          failing_pipeline
+        end
 
-      it 'returns nil' do
-        expect(badge.status).to be_nil
-      end
-    end
-  end
-
-  context 'when latest successful pipeline exists' do
-    before do
-      create_pipeline do |pipeline|
-        create(:ci_build, :success, pipeline: pipeline, name: 'first', coverage: 40)
-        create(:ci_build, :success, pipeline: pipeline, coverage: 60)
+        it 'returns coverage from the most recent successful pipeline' do
+          expect(badge.status).to eq(successful_pipeline.coverage.to_f.round(2))
+        end
       end
 
-      create_pipeline do |pipeline|
-        create(:ci_build, :failed, pipeline: pipeline, coverage: 10)
+      context 'with only failing pipelines' do
+        before do
+          failing_pipeline
+        end
+
+        it 'returns nil' do
+          expect(badge.status).to be_nil
+        end
       end
-    end
 
-    context 'when particular job specified' do
-      let(:job_name) { 'first' }
-
-      it 'returns coverage for the particular job' do
-        expect(badge.status).to eq 40
+      context 'with no pipelines' do
+        it 'returns nil' do
+          expect(badge.status).to be_nil
+        end
       end
-    end
-
-    context 'when particular job not specified' do
-      let(:job_name) { '' }
-
-      it 'returns arithemetic mean for the pipeline' do
-        expect(badge.status).to eq 50
-      end
-    end
-  end
-
-  context 'when only failed pipeline exists' do
-    before do
-      create_pipeline do |pipeline|
-        create(:ci_build, :failed, pipeline: pipeline, coverage: 10)
-      end
-    end
-
-    it_behaves_like 'unknown coverage report'
-
-    context 'particular job specified' do
-      let(:job_name) { 'nonexistent' }
-
-      it 'retruns nil' do
-        expect(badge.status).to be_nil
-      end
-    end
-  end
-
-  context 'pipeline does not exist' do
-    it_behaves_like 'unknown coverage report'
-  end
-
-  def create_pipeline
-    opts = { project: project, sha: project.commit.id, ref: 'master' }
-
-    create(:ci_pipeline, opts).tap do |pipeline|
-      yield pipeline
-      ::Ci::ProcessPipelineService.new(pipeline).execute
     end
   end
 end
