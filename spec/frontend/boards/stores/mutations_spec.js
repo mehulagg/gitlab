@@ -1,3 +1,4 @@
+import { without } from 'lodash';
 import mutations from '~/boards/stores/mutations';
 import * as types from '~/boards/stores/mutation_types';
 import defaultState from '~/boards/stores/state';
@@ -156,16 +157,34 @@ describe('Board Store Mutations', () => {
     });
   });
 
-  describe('REQUEST_REMOVE_LIST', () => {
-    expectNotImplemented(mutations.REQUEST_REMOVE_LIST);
+  describe('REMOVE_LIST', () => {
+    it('removes list from boardLists', () => {
+      const list = mockLists[0];
+      const expected = without(mockLists, list.id);
+      state = {
+        ...state,
+        boardLists: mockLists,
+      };
+
+      mutations[types.REMOVE_LIST](state, list.id);
+
+      expect(state.boardLists).toEqual(expected);
+    });
   });
 
-  describe('RECEIVE_REMOVE_LIST_SUCCESS', () => {
-    expectNotImplemented(mutations.RECEIVE_REMOVE_LIST_SUCCESS);
-  });
+  describe('REMOVE_LIST_FAILURE', () => {
+    it('restores lists from backup', () => {
+      const list = mockLists[0];
+      const backupLists = mockLists;
+      state = {
+        ...state,
+        boardLists: without(mockLists, list.id),
+      };
 
-  describe('RECEIVE_REMOVE_LIST_ERROR', () => {
-    expectNotImplemented(mutations.RECEIVE_REMOVE_LIST_ERROR);
+      mutations[types.REMOVE_LIST_FAILURE](state, backupLists);
+
+      expect(state.boardLists).toEqual(backupLists);
+    });
   });
 
   describe('RESET_ISSUES', () => {

@@ -86,17 +86,12 @@ export default {
   },
 
   [mutationTypes.REMOVE_LIST]: (state, listId) => {
-    const index = state.boardLists.findIndex(l => l.id === listId);
-
-    if (index === -1) {
-      return;
-    }
-
-    state.boardLists.splice(index, 1);
+    Vue.delete(state.boardLists, listId);
   },
 
-  [mutationTypes.REMOVE_LIST_FAILURE]: state => {
+  [mutationTypes.REMOVE_LIST_FAILURE](state, listsBackup) {
     state.error = s__('Boards|An error occurred while removing the list. Please try again.');
+    state.lists = listsBackup;
   },
 
   [mutationTypes.REQUEST_ISSUES_FOR_LIST]: (state, { listId, fetchNext }) => {

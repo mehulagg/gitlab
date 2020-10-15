@@ -12,6 +12,7 @@ import actions, { gqlClient } from '~/boards/stores/actions';
 import * as types from '~/boards/stores/mutation_types';
 import { inactiveId, ListType } from '~/boards/constants';
 import issueMoveListMutation from '~/boards/queries/issue_move_list.mutation.graphql';
+import destroyBoardListMutation from '~/boards/queries/board_list_destroy.mutation.graphql';
 import { fullBoardId, formatListIssues } from '~/boards/boards_util';
 
 const expectNotImplemented = action => {
@@ -249,7 +250,55 @@ describe('updateList', () => {
 });
 
 describe('deleteList', () => {
-  expectNotImplemented(actions.deleteList);
+  let state;
+  const list = mockLists[0];
+  const listId = list.id;
+  const mutationVariables = {
+    mutation: destroyBoardListMutation,
+    variables: {
+      listId,
+    },
+  };
+
+  beforeEach(() => {
+    state = {
+      boardLists: mockLists,
+    };
+  });
+
+  it('optimistically deletes the list', () => {
+    const commit = jest.fn();
+    actions.deleteList({ commit, state }, listId);
+
+    expect(commit.mock.calls).toEqual([[types.REMOVE_LIST, listId]]);
+  });
+
+  it('keeps the updated list if delete succeeds', async () => {
+    const commit = jest.fn();
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        errors: [],
+      },
+    });
+
+    await actions.deleteList({ commit, state }, listId);
+
+    expect(gqlClient.mutate).toHaveBeenCalledWith(mutationVariables);
+    expect(commit.mock.calls).toEqual([[types.REMOVE_LIST, listId]]);
+  });
+
+  it('restores the list if update fails', async () => {
+    const commit = jest.fn();
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue(Promise.reject());
+
+    await actions.deleteList({ commit, state }, listId);
+
+    expect(gqlClient.mutate).toHaveBeenCalledWith(mutationVariables);
+    expect(commit.mock.calls).toEqual([
+      [types.REMOVE_LIST, listId],
+      [types.REMOVE_LIST_FAILURE, mockLists],
+    ]);
+  });
 });
 
 describe('fetchIssuesForList', () => {

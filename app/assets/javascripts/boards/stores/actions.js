@@ -195,7 +195,7 @@ export default {
 
     commit(types.REMOVE_LIST, listId);
 
-    gqlClient
+    return gqlClient
       .mutate({
         mutation: destroyBoardList,
         variables: {
@@ -204,13 +204,11 @@ export default {
       })
       .then(errors => {
         if (errors?.length > 0) {
-          throw new Error();
+          commit(types.REMOVE_LIST_FAILURE, listsBackup);
         }
       })
       .catch(() => {
-        // show error message and re-add the list
-        commit(types.REMOVE_LIST_FAILURE);
-        commit(types.RECEIVE_BOARD_LISTS_SUCCESS, listsBackup);
+        commit(types.REMOVE_LIST_FAILURE, listsBackup);
       });
   },
 
