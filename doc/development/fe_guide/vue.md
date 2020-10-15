@@ -67,25 +67,56 @@ which will make the tests easier. See the following example:
 #js-vue-app{ data: { endpoint: 'foo' }}
 
 // index.js
-document.addEventListener('DOMContentLoaded', () => new Vue({
-  el: '#js-vue-app',
-  data() {
-    const dataset = this.$options.el.dataset;
-    return {
-      endpoint: dataset.endpoint,
-    };
-  },
-  render(createElement) {
-    return createElement('my-component', {
-      props: {
-        endpoint: this.endpoint,
-      },
-    });
-  },
-}));
+document.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('js-vue-app');
+
+  if (!el) return false;
+
+  const { endpoint } = el.dataset;
+
+  return new Vue({
+    el,
+    render(createElement) {
+      return createElement('my-component', {
+        props: {
+          endpoint
+        },
+      });
+    },
+  }
+));
 ```
 
 > When adding an `id` attribute to mount a Vue application, please make sure this `id` is unique across the codebase
+
+#### Why not just …spread the dataset?
+
+The astute reader will see an opportunity to cut out a few lines of code from the example above:
+
+```javascript
+  // Don't do this!
+  ...
+  render(createElement) {
+    return createElement('my-component', {
+      props: {
+        ...el.dataset
+      },
+    });
+  },
+  ...
+```
+
+We've made the conscious decision to avoid this pattern to aid in the
+discoverability and searchability of our frontend codebase. The reasoning for
+this is described in [this
+discussion](https://gitlab.com/gitlab-org/frontend/rfcs/-/issues/56#note_302514865):
+
+> Consider a `someStateKey` is being used in the Vue app. You _may_ not be
+> able to grep for it directly if it was provided only by `el.dataset`. Instead,
+> you'd have to grep for `some_state_key`, since it could have come from a rails
+> template. The reverse is also true: if you're looking at a rails template, you
+> might wonder what uses `some_state_key`, but you'd _have_ to grep for
+> `someStateKey`
 
 #### Accessing the `gl` object
 
