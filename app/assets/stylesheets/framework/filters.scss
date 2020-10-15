@@ -355,8 +355,9 @@
     background-color: $white;
   }
 
-  .boards-switcher {
-    margin: 0 0 10px;
+  .filtered-search-block .boards-switcher {
+    margin-right: 0;
+    margin-bottom: 10px;
 
     .boards-selector-wrapper,
     .dropdown {
@@ -376,6 +377,19 @@
 
     .board-labels-toggle-wrapper {
       margin-bottom: $gl-input-padding;
+    }
+
+    .board-swimlanes-toggle-wrapper {
+      display: block;
+      height: auto;
+      margin-bottom: 10px;
+
+      > span,
+      > .dropdown,
+      .gl-dropdown-toggle {
+        width: 100%;
+        margin: 0;
+      }
     }
   }
 
