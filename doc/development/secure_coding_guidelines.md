@@ -408,6 +408,13 @@ Command injection attacks do not always provide feedback to a user, but simple c
 
 The impact of command injection greatly depends on the user context running the commands as well as how data is validated and sanitized. It can vary from low impact because the user running the injected commands has limited rights to critical impact if it’s running as the root user.
 
+Potential impacts include:
+
+* Execution of arbitrary commands on the host machine
+* Unauthorized access to sensitive data including passwords and tokens in secrets or configuration files
+* Exposure of sensitive system files on the host machine such as `/etc/passwd/` or `/etc/shadow`
+* Compromise of related systems and services gained through access to the host machine
+
 ### When to consider
 
 When working with user-controlled data that are used to run OS commands.
