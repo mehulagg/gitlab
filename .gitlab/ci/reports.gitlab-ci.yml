@@ -152,6 +152,13 @@ dependency_scanning:
       dependency_scanning: gl-dependency-scanning-report.json
     expire_in: 1 week  # GitLab-specific
 
+# The job below analysis dependencies for malicous behavior
+package_hunter:
+  # extends:
+  # - .reports:schedule-dast
+  image: registry.hub.docker.com/library/node:12.19-buster-slim
+
+
 license_scanning:
   extends:
     - .default-retry
