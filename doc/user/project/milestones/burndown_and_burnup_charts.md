@@ -31,6 +31,16 @@ GitLab plots it for you and presents it in a clear and beautiful chart.
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, check the video demonstration on [Mapping work versus time with burndown charts](https://www.youtube.com/watch?v=zJU2MuRChzs).
 
+To view a project's burndown chart:
+
+1. In a project, navigate to **Issues > Milestones**.
+1. Select a milestone from the list.
+
+To view a group's burndown chart:
+
+1. In a group, navigate to **Issues > Milestones**.
+1. Select a milestone from the list.
+
 ### Use cases for burndown charts
 
 Burndown charts are generally used for tracking and analyzing the completion of
@@ -55,10 +65,6 @@ and you follow this workflow:
 
 A burndown chart is available for every project or group milestone that has been attributed a **start
 date** and a **due date**.
-
-Find your project's **burndown chart** under **Project > Issues > Milestones**,
-and select a milestone from your current ones, while for group's, access the **Groups** dashboard,
-select a group, and go through **Issues > Milestones** on the sidebar.
 
 NOTE: **Note:**
 You're able to [promote project](index.md#promoting-project-milestones-to-group-milestones) to group milestones and still see the **burndown chart** for them, respecting license limitations.
@@ -89,8 +95,8 @@ affect the chart.
 **Legacy burndown** charts track when issues were created and when they were last closed, not their
 full history. For each day, a legacy burndown chart takes the number of open issues and the issues
 created that day, and subtracts the number of issues closed that day.
-**Issues that were created and assigned a milestone before its start date (and remain open as of the
-start date) are considered as having been opened on the start date**.
+Issues that were created and assigned a milestone before its start date (and remain open as of the
+start date) are considered as having been opened on the start date.
 Therefore, when the milestone start date is changed, the number of opened issues on each day may
 change.
 Reopened issues are considered as having been opened on the day after they were last closed.
@@ -102,6 +108,16 @@ Reopened issues are considered as having been opened on the day after they were 
 Burnup charts show the assigned and completed work for a milestone.
 
 ![burnup chart](img/burnup_chart_v13_5.png)
+
+To view a project's burnup chart:
+
+1. In a project, navigate to **Issues > Milestones**.
+1. Select a milestone from the list.
+
+To view a group's burnup chart:
+
+1. In a group, navigate to **Issues > Milestones**.
+1. Select a milestone from the list.
 
 ### How burnup charts work
 
