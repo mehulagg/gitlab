@@ -3621,6 +3621,10 @@ Job naming style [was improved](https://gitlab.com/gitlab-org/gitlab/-/issues/23
 Use `trigger` to define a downstream pipeline trigger. When GitLab starts a job created
 with a `trigger` definition, a downstream pipeline is created.
 
+Jobs with `trigger` can only use a [limited set of keywords](../multi_project_pipelines.md#limitations).
+For example, you can't run commands with [`script`](#script), [`before_script`](#before-script-and-after-script)
+or [`after_script`](#before-script-and-after-script).
+
 You can use this keyword to create two different types of downstream pipelines:
 
 - [Multi-project pipelines](../multi_project_pipelines.md#creating-multi-project-pipelines-from-gitlab-ciyml)
