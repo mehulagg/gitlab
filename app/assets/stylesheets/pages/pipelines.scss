@@ -1,3 +1,17 @@
+/**
+ * !! NOTE: Do not add more code in this file, as it will
+ * increase the global CSS content size.
+ * 
+ * For new pipeline CSS please consider:
+ * 
+ * For pipelines tables and lists:
+ * - `app/assets/stylesheets/page_bundles/pipelines.scss`
+ * 
+ * For individual pipelines and mini-pipelines:
+ * - `app/assets/stylesheets/page_bundles/pipeline.scss`
+ * 
+**/
+
 @include media-breakpoint-down(md) {
   .content-list {
     &.builds-content-list {
@@ -112,14 +126,6 @@
       }
     }
   }
-}
-
-.pipelines-container .top-area .nav-controls > .btn:last-child {
-  float: none;
-}
-
-.progress-bar.bg-primary {
-  background-color: $blue-500 !important;
 }
 
 .pipeline-stage-pill {
