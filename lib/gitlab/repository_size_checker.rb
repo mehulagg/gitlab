@@ -6,11 +6,12 @@ module Gitlab
     attr_reader :limit, :total_repository_size_excess, :additional_purchased_storage
 
     # @param current_size_proc [Proc] returns repository size in bytes
-    def initialize(current_size_proc:, limit:, total_repository_size_excess:, additional_purchased_storage:, enabled: true)
+    def initialize(current_size_proc:, limit:, namespace:, enabled: true)
       @current_size_proc = current_size_proc
       @limit = limit
-      @total_repository_size_excess = total_repository_size_excess.to_i
-      @additional_purchased_storage = additional_purchased_storage.to_i
+      @namespace = namespace
+      @total_repository_size_excess = namespace&.total_repository_size_excess.to_i
+      @additional_purchased_storage = namespace&.additional_purchased_storage_size&.megabytes.to_i
       @enabled = enabled && limit != 0
     end
 
@@ -44,6 +45,10 @@ module Gitlab
     def error_message
       @error_message_object ||= ::Gitlab::RepositorySizeErrorMessage.new(self)
     end
+
+    private
+
+    attr_reader :namespace
   end
 end
 

@@ -532,8 +532,7 @@ module EE
         ::Gitlab::RepositorySizeChecker.new(
           current_size_proc: -> { statistics.total_repository_size },
           limit: actual_size_limit,
-          total_repository_size_excess: namespace.total_repository_size_excess,
-          additional_purchased_storage: namespace.additional_purchased_storage_size.megabytes,
+          namespace: namespace,
           enabled: License.feature_available?(:repository_size_limit)
         )
       end

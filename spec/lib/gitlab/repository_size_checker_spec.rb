@@ -3,6 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::RepositorySizeChecker do
+  let_it_be(:namespace) { nil }
   let(:current_size) { 0 }
   let(:limit) { 50 }
   let(:enabled) { true }
@@ -11,8 +12,7 @@ RSpec.describe Gitlab::RepositorySizeChecker do
     described_class.new(
       current_size_proc: -> { current_size },
       limit: limit,
-      total_repository_size_excess: 0,
-      additional_purchased_storage: 0,
+      namespace: namespace,
       enabled: enabled
     )
   end
