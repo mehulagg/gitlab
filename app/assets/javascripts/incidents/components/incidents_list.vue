@@ -260,7 +260,7 @@ export default {
       const field = this.availableFields.find(({ key }) => key === sortBy);
       const sortingDirection = sortDesc ? 'DESC' : 'ASC';
 
-      if (field.sortKey) {
+      if (field?.sortKey) {
         sortKey = field.sortKey;
       } else {
         sortKey = convertToSnakeCase(sortBy)
