@@ -157,12 +157,9 @@ package_hunter:
   # extends:
   # - .reports:schedule-dast
   stage: test
-  variables:
-    HTR_USER: $PACKAGE_HUNTER_USER
-    HTR_PASS: $PACKAGE_HUNTER_PASS
   image:
     name: registry.gitlab.com/gitlab-com/gl-security/security-research/package-hunter-cli
-    entrypoint: bash
+    entrypoint: ["/bin/bash"]
   needs: []
   script:
     - find / -name "*gitlab*""
