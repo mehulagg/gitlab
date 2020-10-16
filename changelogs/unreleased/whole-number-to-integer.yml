@@ -1,0 +1,5 @@
+---
+title: Rename "whole number" to "integer" in feature flags strategies
+merge_request: 45444
+author:
+type: changed

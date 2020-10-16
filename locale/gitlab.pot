@@ -9961,7 +9961,10 @@ msgstr ""
 msgid "Enter a number"
 msgstr ""
 
-msgid "Enter a whole number between 0 and 100"
+msgid "Enter an integer between 0 and 100"
+msgstr ""
+
+msgid "Enter an integer number between 0 and 100"
 msgstr ""
 
 msgid "Enter at least three characters to search"
@@ -11322,7 +11325,7 @@ msgstr ""
 msgid "FeatureFlags|Percent rollout (logged in users)"
 msgstr ""
 
-msgid "FeatureFlags|Percent rollout must be a whole number between 0 and 100"
+msgid "FeatureFlags|Percent rollout must be an integer between 0 and 100"
 msgstr ""
 
 msgid "FeatureFlags|Protected"
@@ -19066,7 +19069,7 @@ msgstr ""
 msgid "People without permission will never get a notification."
 msgstr ""
 
-msgid "Percent rollout must be a whole number between 0 and 100"
+msgid "Percent rollout must be an integer between 0 and 100"
 msgstr ""
 
 msgid "Percentage"

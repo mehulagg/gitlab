@@ -497,7 +497,7 @@ export default {
                       :target="rolloutPercentageId(index)"
                     >
                       {{
-                        s__('FeatureFlags|Percent rollout must be a whole number between 0 and 100')
+                        s__('FeatureFlags|Percent rollout must be an integer between 0 and 100')
                       }}
                     </gl-tooltip>
                     <span class="ml-1">%</span>
