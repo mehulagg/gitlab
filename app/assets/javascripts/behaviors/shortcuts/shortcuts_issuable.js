@@ -14,6 +14,7 @@ export default class ShortcutsIssuable extends Shortcuts {
     Mousetrap.bind('l', () => ShortcutsIssuable.openSidebarDropdown('labels'));
     Mousetrap.bind('r', ShortcutsIssuable.replyWithSelectedText);
     Mousetrap.bind('e', ShortcutsIssuable.editIssue);
+    Mousetrap.bind('b', ShortcutsIssuable.copyBranchName);
   }
 
   static replyWithSelectedText() {
@@ -97,5 +98,13 @@ export default class ShortcutsIssuable extends Shortcuts {
   static openSidebarDropdown(name) {
     Sidebar.instance.openDropdown(name);
     return false;
+  }
+
+  static copyBranchName() {
+    // Optional chaining triggers a `no-unused-expressions`
+    // error in the version of ESLint we're using.
+    // See https://github.com/eslint/eslint/issues/12822
+    // eslint-disable-next-line no-unused-expressions
+    document.querySelectorAll('.sidebar-source-branch button')[1]?.click();
   }
 }
