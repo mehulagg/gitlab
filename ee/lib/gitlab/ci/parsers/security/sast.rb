@@ -11,10 +11,12 @@ module Gitlab
 
           private
 
-          def create_location(location_data)
+          def create_location(location_data, report)
             ::Gitlab::Ci::Reports::Security::Tracking::Source.new(
-              file_path: location_data['file'],
-              start_line: location_data['start_line'],
+              report.pipeline.project.repository,
+              report.pipeline.sha,
+              location_data['file'],
+              location_data['start_line'],
               end_line: location_data['end_line'],
             )
           end

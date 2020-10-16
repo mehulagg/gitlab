@@ -14557,9 +14557,9 @@ CREATE TABLE plan_limits (
     nuget_max_file_size bigint DEFAULT 524288000 NOT NULL,
     pypi_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
     generic_packages_max_file_size bigint DEFAULT '5368709120'::bigint NOT NULL,
-    project_feature_flags integer DEFAULT 200 NOT NULL,
     golang_max_file_size bigint DEFAULT 104857600 NOT NULL,
     debian_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
+    project_feature_flags integer DEFAULT 200 NOT NULL,
     ci_max_artifact_size_api_fuzzing integer DEFAULT 0 NOT NULL
 );
 
@@ -15020,7 +15020,8 @@ CREATE TABLE project_security_settings (
     auto_fix_container_scanning boolean DEFAULT true NOT NULL,
     auto_fix_dast boolean DEFAULT true NOT NULL,
     auto_fix_dependency_scanning boolean DEFAULT true NOT NULL,
-    auto_fix_sast boolean DEFAULT true NOT NULL
+    auto_fix_sast boolean DEFAULT true NOT NULL,
+    cve_id_request_enabled boolean DEFAULT true NOT NULL
 );
 
 CREATE SEQUENCE project_security_settings_project_id_seq
@@ -21395,11 +21396,11 @@ CREATE INDEX index_resource_iteration_events_on_issue_id ON resource_iteration_e
 
 CREATE INDEX index_resource_iteration_events_on_iteration_id ON resource_iteration_events USING btree (iteration_id);
 
-CREATE INDEX index_resource_iteration_events_on_iteration_id_and_add_action ON resource_iteration_events USING btree (iteration_id) WHERE (action = 1);
-
 CREATE INDEX index_resource_iteration_events_on_merge_request_id ON resource_iteration_events USING btree (merge_request_id);
 
 CREATE INDEX index_resource_iteration_events_on_user_id ON resource_iteration_events USING btree (user_id);
+
+CREATE INDEX index_resource_iterationn_events_on_iteration_id_and_add_action ON resource_iteration_events USING btree (iteration_id) WHERE (action = 1);
 
 CREATE INDEX index_resource_label_events_issue_id_label_id_action ON resource_label_events USING btree (issue_id, label_id, action);
 
@@ -22195,7 +22196,7 @@ ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_p
 
 ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_partitions_static.product_analytics_events_experimental_63_pkey;
 
-CREATE TRIGGER table_sync_trigger_ee39a25f9d AFTER INSERT OR DELETE OR UPDATE ON audit_events FOR EACH ROW EXECUTE PROCEDURE table_sync_function_2be879775d();
+CREATE TRIGGER table_sync_trigger_ee39a25f9d AFTER INSERT OR DELETE OR UPDATE ON audit_events FOR EACH ROW EXECUTE FUNCTION table_sync_function_2be879775d();
 
 ALTER TABLE ONLY chat_names
     ADD CONSTRAINT fk_00797a2bf9 FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE;

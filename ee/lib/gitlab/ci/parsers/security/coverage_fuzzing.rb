@@ -7,7 +7,7 @@ module Gitlab
         class CoverageFuzzing < Common
           private
 
-          def create_location(location_data)
+          def create_location(location_data, report)
             ::Gitlab::Ci::Reports::Security::Locations::CoverageFuzzing.new(
               crash_address: location_data['crash_address'],
               crash_state: location_data['crash_state'],

@@ -7,7 +7,7 @@ module Gitlab
         class ContainerScanning < Common
           private
 
-          def create_location(location_data)
+          def create_location(location_data, report)
             ::Gitlab::Ci::Reports::Security::Locations::ContainerScanning.new(
               image: location_data['image'],
               operating_system: location_data['operating_system'],

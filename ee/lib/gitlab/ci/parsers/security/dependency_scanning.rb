@@ -11,7 +11,7 @@ module Gitlab
 
           private
 
-          def create_location(location_data)
+          def create_location(location_data, report)
             ::Gitlab::Ci::Reports::Security::Locations::DependencyScanning.new(
               file_path: location_data['file'],
               package_name: location_data.dig('dependency', 'package', 'name'),

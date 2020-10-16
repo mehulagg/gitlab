@@ -61,7 +61,7 @@ module Gitlab
                 report_type: report.type,
                 name: data['message'],
                 compare_key: data['cve'] || '',
-                location: create_location(data['location'] || {}),
+                location: create_location(data['location'] || {}, report),
                 severity: parse_severity_level(data['severity']&.downcase),
                 confidence: parse_confidence_level(data['confidence']&.downcase),
                 scanner: create_scanner(report, data['scanner']),

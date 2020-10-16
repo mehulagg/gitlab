@@ -32,7 +32,7 @@ module Gitlab
             end.compact
           end
 
-          def create_location(location_data)
+          def create_location(location_data, report)
             ::Gitlab::Ci::Reports::Security::Locations::Dast.new(
               hostname: location_data['hostname'],
               method_name: location_data['method'],

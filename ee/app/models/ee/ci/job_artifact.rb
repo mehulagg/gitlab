@@ -118,7 +118,9 @@ module EE
       strong_memoize(:security_report) do
         next unless file_type.in?(SECURITY_REPORT_FILE_TYPES)
 
-        ::Gitlab::Ci::Reports::Security::Report.new(file_type, nil, nil).tap do |report|
+        # TODO - Why was the pipeline not passed in before? Need to track down
+        # the reason for this before merging this code in
+        ::Gitlab::Ci::Reports::Security::Report.new(file_type, job.pipeline, nil).tap do |report|
           each_blob do |blob|
             ::Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, report)
           end

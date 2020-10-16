@@ -11,7 +11,7 @@ module Gitlab
 
           private
 
-          def create_location(location_data)
+          def create_location(location_data, report)
             ::Gitlab::Ci::Reports::Security::Locations::SecretDetection.new(
               file_path: location_data['file'],
               start_line: location_data['start_line'],
