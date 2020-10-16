@@ -9,7 +9,7 @@ Currently, we are showing all uploaded images 1:1, which is of course not ideal.
 
 ## MVC Avatar Resizing
 
-We will implement a dynamic image resizing solution. This means image should be resized and optimized on the fly so that if we define new targeted sizes later we can add them on the fly. This would mean a huge improvement in performance as some of the measurements suggest that we can save up to 95% of our current load size. Our initial investigations indicate that we have uploaded approximately 1.65 million avatars totaling approximately 80GB in size and averaging approximately 48kb each. Early measurements indicate we can reduce the most common avatar dimensions to between 1-3kb in size, netting us a greater than 90% size reduction. For the MVC we will not consider application level caching and rely purely on HTTP based caches as implemented in CDNs and browsers, but might revisit this decision later on.
+We will implement a dynamic image resizing solution. This means image should be resized and optimized on the fly so that if we define new targeted sizes later we can add them dynamically. This would mean a huge improvement in performance as some of the measurements suggest that we can save up to 95% of our current load size. Our initial investigations indicate that we have uploaded approximately 1.65 million avatars totaling approximately 80GB in size and averaging approximately 48kb each. Early measurements indicate we can reduce the most common avatar dimensions to between 1-3kb in size, netting us a greater than 90% size reduction. For the MVC we will not consider application level caching and rely purely on HTTP based caches as implemented in CDNs and browsers, but might revisit this decision later on. To easily mitigate performance issues with avatar resizing, especially in the case of self managed, an operations feature flag will be implemented to disable dynamic image resizing.
 
 ```mermaid
 sequenceDiagram
@@ -59,7 +59,7 @@ Proposal:
 | Role                         | Who
 |------------------------------|-------------------------|
 | Author                       |    Craig Gomes          |
-| Architecture Evolution Coach |    Grzegorz Bizon       |
+| Architecture Evolution Coach |    Kamil Trzciński      |
 | Engineering Leader           |    Tim Zallmann         |
 | Domain Expert                |    Matthias Kaeppler    |
 | Domain Expert                |    Aleksei Lipniagov    |
