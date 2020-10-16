@@ -263,6 +263,21 @@ By clicking the download icon, a dropdown will open with links to download the f
 - **Artifacts:**
   allows users to download the artifacts of the latest CI build.
 
+### Git LFS
+
+> Support for including [Git LFS](../../../../topics/git/lfs/index.md) blobs was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15079) in GitLab 13.5.
+
+Git LFS pointers that reside in the repository will be resolved to the
+actual objects and included in the archive. The
+`include_lfs_blobs_in_archive` [feature flag](../../../../administration/feature_flags.md) must be enabled for
+this to work:
+
+```ruby
+Feature.enable(:include_lfs_blobs_in_archive)
+```
+
+Technical details can be found in the [development documentation for LFS](../../../../development/lfs.md#including-lfs-blobs-in-project-archives).
+
 <!-- ## Troubleshooting
 
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
