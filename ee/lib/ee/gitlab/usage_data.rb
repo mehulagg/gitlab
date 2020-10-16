@@ -346,13 +346,12 @@ module EE
                                                                           finish: user_maximum_id)
           end
 
-          results[prefix + SECURE_PRODUCT_TYPES[:coverage_fuzzing][:name]] = distinct_count(::Ci::Build.where("options ILIKE ?", "%gitlab-cov-fuzz%").or(name: secure_type).where(time_period),
-                                                                                             :userid, start: user_minimum_id, finish: user_maximum_id)
+          # Look at fuzz testing attributes since users won't use a standard job name
+          results[:"#{prefix}unique_users_all_secure_scanners".to_sym] = distinct_count(::Ci::Build.where(name: SECURE_PRODUCT_TYPES.keys).where(time_period), :user_id)
 
           results.merge!(count_secure_pipelines(time_period))
           results.merge!(count_secure_jobs(time_period))
 
-          results[:"#{prefix}unique_users_all_secure_scanners"] = distinct_count(::Ci::Build.where(name: SECURE_PRODUCT_TYPES.keys).where(time_period), :user_id)
 
           # handle license rename https://gitlab.com/gitlab-org/gitlab/issues/8911
           combined_license_key = "#{prefix}license_management_jobs".to_sym
