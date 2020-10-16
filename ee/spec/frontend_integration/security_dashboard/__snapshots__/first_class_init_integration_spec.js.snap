@@ -1,0 +1,2264 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Vulnerability Report runs for the group-level 1`] = `
+<div>
+  <div>
+    <div
+      class="gl-spinner-container gl-mt-6"
+    >
+      <span
+        aria-label="Loading"
+        class="align-text-bottom gl-spinner gl-spinner-orange gl-spinner-lg"
+      />
+    </div>
+    <section
+      class="gl-display-none"
+    >
+      <header>
+        <header
+          class="page-title-holder flex-fill d-flex align-items-center"
+        >
+          <h2
+            class="page-title flex-grow"
+          >
+          Vulnerability Report
+          </h2>
+          <button
+            class="btn gl-align-self-center btn-default btn-md gl-button"
+            title="Export as CSV"
+            type="button"
+          >
+            <svg
+              class="gl-button-icon gl-icon s16"
+              data-testid="export-icon"
+            >
+              <use
+                href="#export"
+              />
+            </svg>
+            <span
+              class="gl-button-text"
+            >
+  Export
+              <div
+                placement="left"
+                show="true"
+                target="function() {
+              return _vm.$refs.csvExportButton.$el
+            }"
+                triggers="manual"
+              >
+                <p
+                  class="gl-font-base"
+                >
+      You can now export your security dashboard to a CSV report.
+                </p>
+                <a
+                  class="gl-link d-flex align-items-center mb-3"
+                  href="https://gitlab.com/gitlab-org/gitlab/issues/197111"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+      More information and share feedback
+                  <svg
+                    class="ml-1 gl-icon s12"
+                    data-testid="external-link-icon"
+                  >
+                    <use
+                      href="#external-link"
+                    />
+                  </svg>
+                </a>
+                <button
+                  class="btn w-100 btn-default btn-md gl-button"
+                  type="button"
+                >
+                  <span
+                    class="gl-button-text"
+                  >
+      Got it!
+                  </span>
+                </button>
+              </div>
+            </span>
+          </button>
+        </header>
+      </header>
+      <section
+        class="position-sticky gl-z-index-2 security-dashboard-filters"
+        data-testid="sticky-section"
+      >
+        <div
+          class="dashboard-filters border-bottom bg-gray-light"
+        >
+          <div
+            class="row mx-0 p-2"
+          >
+            <div
+              class="dashboard-filter col-sm-6 col-md-4 col-lg-2 p-2"
+            >
+              <strong
+                class="js-name"
+              >
+                Status
+              </strong>
+              <div
+                class="dropdown b-dropdown gl-dropdown d-block mt-1 btn-group"
+              >
+                <button
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  class="btn dropdown-toggle btn-secondary d-flex w-100 justify-content-between align-items-center"
+                  type="button"
+                >
+                  <span
+                    class="text-truncate"
+                    data-qa-selector="filter_status_dropdown"
+                  >
+        All
+                  </span>
+                  <i
+                    aria-hidden="true"
+                    class="fa fa-chevron-down"
+                  />
+                </button>
+                <ul
+                  class="dropdown-menu dropdown-extended-height"
+                  role="menu"
+                  tabindex="-1"
+                >
+                  <div
+                    class="dropdown-title mb-0"
+                  >
+      Status
+                    <button
+                      aria-label="Close"
+                      class="btn-blank float-right"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="vertical-align-middle gl-icon s16"
+                        data-testid="close-icon"
+                      >
+                        <use
+                          href="#close"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div
+                    class=""
+                    data-qa-selector="filter_dropdown_content"
+                  >
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <svg
+                          class="flex-shrink-0 js-check gl-icon s16"
+                          data-testid="mobile-issue-close-icon"
+                        >
+                          <use
+                            href="#mobile-issue-close"
+                          />
+                        </svg>
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2"
+                        >
+            All
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Detected
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Confirmed
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Dismissed
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Resolved
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </ul>
+              </div>
+            </div>
+            <div
+              class="dashboard-filter col-sm-6 col-md-4 col-lg-2 p-2"
+            >
+              <strong
+                class="js-name"
+              >
+                Severity
+              </strong>
+              <div
+                class="dropdown b-dropdown gl-dropdown d-block mt-1 btn-group"
+              >
+                <button
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  class="btn dropdown-toggle btn-secondary d-flex w-100 justify-content-between align-items-center"
+                  type="button"
+                >
+                  <span
+                    class="text-truncate"
+                    data-qa-selector="filter_severity_dropdown"
+                  >
+        All severities
+                  </span>
+                  <i
+                    aria-hidden="true"
+                    class="fa fa-chevron-down"
+                  />
+                </button>
+                <ul
+                  class="dropdown-menu dropdown-extended-height"
+                  role="menu"
+                  tabindex="-1"
+                >
+                  <div
+                    class="dropdown-title mb-0"
+                  >
+      Severity
+                    <button
+                      aria-label="Close"
+                      class="btn-blank float-right"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="vertical-align-middle gl-icon s16"
+                        data-testid="close-icon"
+                      >
+                        <use
+                          href="#close"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div
+                    class=""
+                    data-qa-selector="filter_dropdown_content"
+                  >
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <svg
+                          class="flex-shrink-0 js-check gl-icon s16"
+                          data-testid="mobile-issue-close-icon"
+                        >
+                          <use
+                            href="#mobile-issue-close"
+                          />
+                        </svg>
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2"
+                        >
+            All severities
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Critical
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            High
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Medium
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Low
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Unknown
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Info
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </ul>
+              </div>
+            </div>
+            <div
+              class="dashboard-filter col-sm-6 col-md-4 col-lg-2 p-2"
+            >
+              <strong
+                class="js-name"
+              >
+                Scanner
+              </strong>
+              <div
+                class="dropdown b-dropdown gl-dropdown d-block mt-1 btn-group"
+              >
+                <button
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  class="btn dropdown-toggle btn-secondary d-flex w-100 justify-content-between align-items-center"
+                  type="button"
+                >
+                  <span
+                    class="text-truncate"
+                    data-qa-selector="filter_scanner_dropdown"
+                  >
+        All scanners
+                  </span>
+                  <i
+                    aria-hidden="true"
+                    class="fa fa-chevron-down"
+                  />
+                </button>
+                <ul
+                  class="dropdown-menu dropdown-extended-height"
+                  role="menu"
+                  tabindex="-1"
+                >
+                  <div
+                    class="dropdown-title mb-0"
+                  >
+      Scanner
+                    <button
+                      aria-label="Close"
+                      class="btn-blank float-right"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="vertical-align-middle gl-icon s16"
+                        data-testid="close-icon"
+                      >
+                        <use
+                          href="#close"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div
+                    class=""
+                    data-qa-selector="filter_dropdown_content"
+                  >
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <svg
+                          class="flex-shrink-0 js-check gl-icon s16"
+                          data-testid="mobile-issue-close-icon"
+                        >
+                          <use
+                            href="#mobile-issue-close"
+                          />
+                        </svg>
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2"
+                        >
+            All scanners
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Container Scanning
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            DAST
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Dependency Scanning
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            SAST
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Secret Detection
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Coverage Fuzzing
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </ul>
+              </div>
+            </div>
+            <div
+              class="dashboard-filter col-sm-6 col-md-4 col-lg-2 p-2"
+            >
+              <strong
+                class="js-name"
+              >
+                Project
+              </strong>
+              <div
+                class="dropdown b-dropdown gl-dropdown d-block mt-1 btn-group"
+              >
+                <button
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  class="btn dropdown-toggle btn-secondary d-flex w-100 justify-content-between align-items-center"
+                  type="button"
+                >
+                  <span
+                    class="text-truncate"
+                    data-qa-selector="filter_project_dropdown"
+                  >
+        All projects
+                  </span>
+                  <i
+                    aria-hidden="true"
+                    class="fa fa-chevron-down"
+                  />
+                </button>
+                <ul
+                  class="dropdown-menu dropdown-extended-height"
+                  role="menu"
+                  tabindex="-1"
+                >
+                  <div
+                    class="dropdown-title mb-0"
+                  >
+      Project
+                    <button
+                      aria-label="Close"
+                      class="btn-blank float-right"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="vertical-align-middle gl-icon s16"
+                        data-testid="close-icon"
+                      >
+                        <use
+                          href="#close"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div
+                    class=""
+                    data-qa-selector="filter_dropdown_content"
+                  >
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <svg
+                          class="flex-shrink-0 js-check gl-icon s16"
+                          data-testid="mobile-issue-close-icon"
+                        >
+                          <use
+                            href="#mobile-issue-close"
+                          />
+                        </svg>
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2"
+                        >
+            All projects
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div
+        class="row mt-4"
+      >
+        <article
+          class="col"
+        >
+          <div>
+            <div
+              class="vulnerability-list"
+            >
+              <table
+                aria-busy="true"
+                aria-colcount="8"
+                class="table b-table gl-table vulnerability-list b-table-stacked-sm"
+                role="table"
+              >
+                <thead
+                  class=""
+                  role="rowgroup"
+                >
+                  <tr
+                    class=""
+                    role="row"
+                  >
+                    <th
+                      aria-colindex="1"
+                      class="checkbox gl-bg-white!"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      <div
+                        class="gl-form-checkbox gl-m-0 form-check"
+                      >
+                        <input
+                          autocomplete="off"
+                          class="form-check-input position-static"
+                          data-testid="vulnerability-checkbox-all"
+                          type="checkbox"
+                          value="true"
+                        />
+                      </div>
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to clear sorting)
+                      </span>
+                    </th>
+                    <th
+                      aria-colindex="2"
+                      aria-sort="none"
+                      class="detected gl-bg-white! b-table-sort-icon-left"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      Detected
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to sort Ascending)
+                      </span>
+                    </th>
+                    <th
+                      aria-colindex="3"
+                      aria-sort="none"
+                      class="status gl-bg-white! b-table-sort-icon-left"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      Status
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to sort Ascending)
+                      </span>
+                    </th>
+                    <th
+                      aria-colindex="4"
+                      aria-sort="descending"
+                      class="severity gl-bg-white! b-table-sort-icon-left"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      Severity
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to sort Ascending)
+                      </span>
+                    </th>
+                    <th
+                      aria-colindex="5"
+                      aria-sort="none"
+                      class="description gl-bg-white! b-table-sort-icon-left"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      Description
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to sort Ascending)
+                      </span>
+                    </th>
+                    <th
+                      aria-colindex="6"
+                      class="identifier gl-bg-white!"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      Identifier
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to clear sorting)
+                      </span>
+                    </th>
+                    <th
+                      aria-colindex="7"
+                      aria-sort="none"
+                      class="scanner gl-bg-white! b-table-sort-icon-left"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      Scanner
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to sort Ascending)
+                      </span>
+                    </th>
+                    <th
+                      aria-colindex="8"
+                      class="gl-text-right activity gl-bg-white!"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      Activity
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to clear sorting)
+                      </span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  role="rowgroup"
+                >
+                  <tr
+                    class="b-table-busy-slot"
+                    role="row"
+                  >
+                    <td
+                      class=""
+                      colspan="8"
+                      role="cell"
+                    >
+                      <div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</div>
+`;
+
+exports[`Vulnerability Report runs for the instance-level 1`] = `
+<div>
+  <section>
+    <header>
+      <header
+        class="page-title-holder gl-flex-fill-1 gl-display-flex gl-align-items-center"
+      >
+        <h2
+          class="page-title gl-flex-grow-1"
+        >
+          Vulnerability Report
+        </h2>
+      </header>
+    </header>
+    <div
+      class="row mt-4"
+    >
+      <article
+        class="col"
+      />
+    </div>
+  </section>
+</div>
+`;
+
+exports[`Vulnerability Report runs for the project-level 1`] = `
+<div>
+  <div>
+    <section>
+      <header>
+        <div
+          class="mt-4 d-flex"
+        >
+          <h4
+            class="flex-grow mt-0 mb-0"
+          >
+            Vulnerabilities
+          </h4>
+          <button
+            class="btn gl-align-self-center btn-default btn-md gl-button"
+            title="Export as CSV"
+            type="button"
+          >
+            <svg
+              class="gl-button-icon gl-icon s16"
+              data-testid="export-icon"
+            >
+              <use
+                href="#export"
+              />
+            </svg>
+            <span
+              class="gl-button-text"
+            >
+  Export
+              <div
+                placement="left"
+                show="true"
+                target="function() {
+              return _vm.$refs.csvExportButton.$el
+            }"
+                triggers="manual"
+              >
+                <p
+                  class="gl-font-base"
+                >
+      You can now export your security dashboard to a CSV report.
+                </p>
+                <a
+                  class="gl-link d-flex align-items-center mb-3"
+                  href="https://gitlab.com/gitlab-org/gitlab/issues/197111"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+      More information and share feedback
+                  <svg
+                    class="ml-1 gl-icon s12"
+                    data-testid="external-link-icon"
+                  >
+                    <use
+                      href="#external-link"
+                    />
+                  </svg>
+                </a>
+                <button
+                  class="btn w-100 btn-default btn-md gl-button"
+                  type="button"
+                >
+                  <span
+                    class="gl-button-text"
+                  >
+      Got it!
+                  </span>
+                </button>
+              </div>
+            </span>
+          </button>
+        </div>
+        <div
+          class="vulnerabilities-count-list mt-4"
+        >
+          <div
+            class="row"
+          >
+            <div
+              class="mb-5 col-md col-sm-6"
+            >
+              <div
+                class="rounded font-weight-bold border"
+              >
+                <div
+                  class="p-2 bg-gray-light d-flex justify-content-center"
+                >
+                  <div
+                    class="severity-badge text-sm-left text-nowrap gl-text-gray-900"
+                  >
+                    <span
+                      class="text-danger-800"
+                    >
+                      <svg
+                        class="gl-mr-3 gl-icon s12"
+                        data-testid="severity-critical-icon"
+                      >
+                        <use
+                          href="#severity-critical"
+                        />
+                      </svg>
+                    </span>
+  Critical
+                  </div>
+                </div>
+                <div
+                  class="pt-3 pb-3 gl-font-size-h2 text-center"
+                >
+                  <span>
+                    —
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="mb-5 col-md col-sm-6"
+            >
+              <div
+                class="rounded font-weight-bold border"
+              >
+                <div
+                  class="p-2 bg-gray-light d-flex justify-content-center"
+                >
+                  <div
+                    class="severity-badge text-sm-left text-nowrap gl-text-gray-900"
+                  >
+                    <span
+                      class="text-danger-600"
+                    >
+                      <svg
+                        class="gl-mr-3 gl-icon s12"
+                        data-testid="severity-high-icon"
+                      >
+                        <use
+                          href="#severity-high"
+                        />
+                      </svg>
+                    </span>
+  High
+                  </div>
+                </div>
+                <div
+                  class="pt-3 pb-3 gl-font-size-h2 text-center"
+                >
+                  <span>
+                    —
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="mb-5 col-md col-sm-6"
+            >
+              <div
+                class="rounded font-weight-bold border"
+              >
+                <div
+                  class="p-2 bg-gray-light d-flex justify-content-center"
+                >
+                  <div
+                    class="severity-badge text-sm-left text-nowrap gl-text-gray-900"
+                  >
+                    <span
+                      class="text-warning-400"
+                    >
+                      <svg
+                        class="gl-mr-3 gl-icon s12"
+                        data-testid="severity-medium-icon"
+                      >
+                        <use
+                          href="#severity-medium"
+                        />
+                      </svg>
+                    </span>
+  Medium
+                  </div>
+                </div>
+                <div
+                  class="pt-3 pb-3 gl-font-size-h2 text-center"
+                >
+                  <span>
+                    —
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="mb-5 col-md col-sm-6"
+            >
+              <div
+                class="rounded font-weight-bold border"
+              >
+                <div
+                  class="p-2 bg-gray-light d-flex justify-content-center"
+                >
+                  <div
+                    class="severity-badge text-sm-left text-nowrap gl-text-gray-900"
+                  >
+                    <span
+                      class="text-warning-200"
+                    >
+                      <svg
+                        class="gl-mr-3 gl-icon s12"
+                        data-testid="severity-low-icon"
+                      >
+                        <use
+                          href="#severity-low"
+                        />
+                      </svg>
+                    </span>
+  Low
+                  </div>
+                </div>
+                <div
+                  class="pt-3 pb-3 gl-font-size-h2 text-center"
+                >
+                  <span>
+                    —
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="mb-5 col-md col-sm-6"
+            >
+              <div
+                class="rounded font-weight-bold border"
+              >
+                <div
+                  class="p-2 bg-gray-light d-flex justify-content-center"
+                >
+                  <div
+                    class="severity-badge text-sm-left text-nowrap gl-text-gray-900"
+                  >
+                    <span
+                      class="text-primary-400"
+                    >
+                      <svg
+                        class="gl-mr-3 gl-icon s12"
+                        data-testid="severity-info-icon"
+                      >
+                        <use
+                          href="#severity-info"
+                        />
+                      </svg>
+                    </span>
+  Info
+                  </div>
+                </div>
+                <div
+                  class="pt-3 pb-3 gl-font-size-h2 text-center"
+                >
+                  <span>
+                    —
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="mb-5 col-md col-sm-6"
+            >
+              <div
+                class="rounded font-weight-bold border"
+              >
+                <div
+                  class="p-2 bg-gray-light d-flex justify-content-center"
+                >
+                  <div
+                    class="severity-badge text-sm-left text-nowrap gl-text-gray-900"
+                  >
+                    <span
+                      class="text-secondary-400"
+                    >
+                      <svg
+                        class="gl-mr-3 gl-icon s12"
+                        data-testid="severity-unknown-icon"
+                      >
+                        <use
+                          href="#severity-unknown"
+                        />
+                      </svg>
+                    </span>
+  Unknown
+                  </div>
+                </div>
+                <div
+                  class="pt-3 pb-3 gl-font-size-h2 text-center"
+                >
+                  <span>
+                    —
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <section
+        class="position-sticky gl-z-index-2 security-dashboard-filters"
+        data-testid="sticky-section"
+      >
+        <div
+          class="dashboard-filters border-bottom bg-gray-light"
+        >
+          <div
+            class="row mx-0 p-2"
+          >
+            <div
+              class="dashboard-filter col-sm-6 col-md-4 col-lg-2 p-2"
+            >
+              <strong
+                class="js-name"
+              >
+                Status
+              </strong>
+              <div
+                class="dropdown b-dropdown gl-dropdown d-block mt-1 btn-group"
+              >
+                <button
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  class="btn dropdown-toggle btn-secondary d-flex w-100 justify-content-between align-items-center"
+                  type="button"
+                >
+                  <span
+                    class="text-truncate"
+                    data-qa-selector="filter_status_dropdown"
+                  >
+        All
+                  </span>
+                  <i
+                    aria-hidden="true"
+                    class="fa fa-chevron-down"
+                  />
+                </button>
+                <ul
+                  class="dropdown-menu dropdown-extended-height"
+                  role="menu"
+                  tabindex="-1"
+                >
+                  <div
+                    class="dropdown-title mb-0"
+                  >
+      Status
+                    <button
+                      aria-label="Close"
+                      class="btn-blank float-right"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="vertical-align-middle gl-icon s16"
+                        data-testid="close-icon"
+                      >
+                        <use
+                          href="#close"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div
+                    class=""
+                    data-qa-selector="filter_dropdown_content"
+                  >
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <svg
+                          class="flex-shrink-0 js-check gl-icon s16"
+                          data-testid="mobile-issue-close-icon"
+                        >
+                          <use
+                            href="#mobile-issue-close"
+                          />
+                        </svg>
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2"
+                        >
+            All
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Detected
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Confirmed
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Dismissed
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Resolved
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </ul>
+              </div>
+            </div>
+            <div
+              class="dashboard-filter col-sm-6 col-md-4 col-lg-2 p-2"
+            >
+              <strong
+                class="js-name"
+              >
+                Severity
+              </strong>
+              <div
+                class="dropdown b-dropdown gl-dropdown d-block mt-1 btn-group"
+              >
+                <button
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  class="btn dropdown-toggle btn-secondary d-flex w-100 justify-content-between align-items-center"
+                  type="button"
+                >
+                  <span
+                    class="text-truncate"
+                    data-qa-selector="filter_severity_dropdown"
+                  >
+        All severities
+                  </span>
+                  <i
+                    aria-hidden="true"
+                    class="fa fa-chevron-down"
+                  />
+                </button>
+                <ul
+                  class="dropdown-menu dropdown-extended-height"
+                  role="menu"
+                  tabindex="-1"
+                >
+                  <div
+                    class="dropdown-title mb-0"
+                  >
+      Severity
+                    <button
+                      aria-label="Close"
+                      class="btn-blank float-right"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="vertical-align-middle gl-icon s16"
+                        data-testid="close-icon"
+                      >
+                        <use
+                          href="#close"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div
+                    class=""
+                    data-qa-selector="filter_dropdown_content"
+                  >
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <svg
+                          class="flex-shrink-0 js-check gl-icon s16"
+                          data-testid="mobile-issue-close-icon"
+                        >
+                          <use
+                            href="#mobile-issue-close"
+                          />
+                        </svg>
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2"
+                        >
+            All severities
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Critical
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            High
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Medium
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Low
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Unknown
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Info
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </ul>
+              </div>
+            </div>
+            <div
+              class="dashboard-filter col-sm-6 col-md-4 col-lg-2 p-2"
+            >
+              <strong
+                class="js-name"
+              >
+                Scanner
+              </strong>
+              <div
+                class="dropdown b-dropdown gl-dropdown d-block mt-1 btn-group"
+              >
+                <button
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  class="btn dropdown-toggle btn-secondary d-flex w-100 justify-content-between align-items-center"
+                  type="button"
+                >
+                  <span
+                    class="text-truncate"
+                    data-qa-selector="filter_scanner_dropdown"
+                  >
+        All scanners
+                  </span>
+                  <i
+                    aria-hidden="true"
+                    class="fa fa-chevron-down"
+                  />
+                </button>
+                <ul
+                  class="dropdown-menu dropdown-extended-height"
+                  role="menu"
+                  tabindex="-1"
+                >
+                  <div
+                    class="dropdown-title mb-0"
+                  >
+      Scanner
+                    <button
+                      aria-label="Close"
+                      class="btn-blank float-right"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="vertical-align-middle gl-icon s16"
+                        data-testid="close-icon"
+                      >
+                        <use
+                          href="#close"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div
+                    class=""
+                    data-qa-selector="filter_dropdown_content"
+                  >
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <svg
+                          class="flex-shrink-0 js-check gl-icon s16"
+                          data-testid="mobile-issue-close-icon"
+                        >
+                          <use
+                            href="#mobile-issue-close"
+                          />
+                        </svg>
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2"
+                        >
+            All scanners
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Container Scanning
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            DAST
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Dependency Scanning
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            SAST
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Secret Detection
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      class="dropdown-item"
+                      role="menuitem"
+                      type="button"
+                    >
+                      <span
+                        class="d-flex"
+                      >
+                        <span
+                          class="gl-white-space-nowrap gl-ml-2 gl-pl-5"
+                        >
+            Coverage Fuzzing
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div
+        class="row mt-4"
+      >
+        <article
+          class="col"
+        >
+          <div
+            dashboard-documentation="/test/dashboard_page"
+          >
+            <div
+              class="vulnerability-list"
+            >
+              <table
+                aria-busy="true"
+                aria-colcount="8"
+                class="table b-table gl-table vulnerability-list b-table-stacked-sm"
+                role="table"
+              >
+                <thead
+                  class=""
+                  role="rowgroup"
+                >
+                  <tr
+                    class=""
+                    role="row"
+                  >
+                    <th
+                      aria-colindex="1"
+                      class="checkbox gl-bg-white!"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      <div
+                        class="gl-form-checkbox gl-m-0 form-check"
+                      >
+                        <input
+                          autocomplete="off"
+                          class="form-check-input position-static"
+                          data-testid="vulnerability-checkbox-all"
+                          type="checkbox"
+                          value="true"
+                        />
+                      </div>
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to clear sorting)
+                      </span>
+                    </th>
+                    <th
+                      aria-colindex="2"
+                      aria-sort="none"
+                      class="detected gl-bg-white! b-table-sort-icon-left"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      Detected
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to sort Ascending)
+                      </span>
+                    </th>
+                    <th
+                      aria-colindex="3"
+                      aria-sort="none"
+                      class="status gl-bg-white! b-table-sort-icon-left"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      Status
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to sort Ascending)
+                      </span>
+                    </th>
+                    <th
+                      aria-colindex="4"
+                      aria-sort="descending"
+                      class="severity gl-bg-white! b-table-sort-icon-left"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      Severity
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to sort Ascending)
+                      </span>
+                    </th>
+                    <th
+                      aria-colindex="5"
+                      aria-sort="none"
+                      class="description gl-bg-white! b-table-sort-icon-left"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      Description
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to sort Ascending)
+                      </span>
+                    </th>
+                    <th
+                      aria-colindex="6"
+                      class="identifier gl-bg-white!"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      Identifier
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to clear sorting)
+                      </span>
+                    </th>
+                    <th
+                      aria-colindex="7"
+                      aria-sort="none"
+                      class="scanner gl-bg-white! b-table-sort-icon-left"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      Scanner
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to sort Ascending)
+                      </span>
+                    </th>
+                    <th
+                      aria-colindex="8"
+                      class="gl-text-right activity gl-bg-white!"
+                      role="columnheader"
+                      scope="col"
+                      tabindex="0"
+                    >
+                      Activity
+                      <span
+                        class="sr-only"
+                      >
+                         (Click to clear sorting)
+                      </span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  role="rowgroup"
+                >
+                  <tr
+                    class="b-table-busy-slot"
+                    role="row"
+                  >
+                    <td
+                      class=""
+                      colspan="8"
+                      role="cell"
+                    >
+                      <div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                        <div
+                          class="animation-container gl-m-3 js-skeleton-loader"
+                        >
+                          <div
+                            class="skeleton-line-1"
+                          />
+                          <div
+                            class="skeleton-line-2"
+                          />
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</div>
+`;

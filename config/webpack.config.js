@@ -97,6 +97,7 @@ const alias = {
   vue$: 'vue/dist/vue.esm.js',
   spec: path.join(ROOT_PATH, 'spec/javascripts'),
   jest: path.join(ROOT_PATH, 'spec/frontend'),
+  jest_integration: path.join(ROOT_PATH, 'spec/frontend_integration'),
   shared_queries: path.join(ROOT_PATH, 'app/graphql/queries'),
 
   // the following resolves files which are different between CE and EE

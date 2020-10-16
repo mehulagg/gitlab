@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Security Charts runs for the group-level 1`] = `
+<div>
+  <div
+    data-testid="security-charts-layout"
+  >
+    <h2>
+      Security Dashboard
+    </h2>
+    <div
+      class="gl-spinner-container gl-mt-6"
+    >
+      <span
+        aria-label="Loading"
+        class="align-text-bottom gl-spinner gl-spinner-orange gl-spinner-lg"
+      />
+    </div>
+    <div
+      class="security-charts gl-display-flex gl-flex-wrap"
+    />
+  </div>
+</div>
+`;
+
+exports[`Security Charts runs for the instance-level 1`] = `
+<div>
+  <div
+    data-testid="security-charts-layout"
+  >
+    <h2>
+      Security Dashboard
+    </h2>
+    <div
+      class="gl-spinner-container gl-mt-6"
+    >
+      <span
+        aria-label="Loading"
+        class="align-text-bottom gl-spinner gl-spinner-orange gl-spinner-lg"
+      />
+    </div>
+    <div
+      class="security-charts gl-display-flex gl-flex-wrap"
+    />
+  </div>
+</div>
+`;
