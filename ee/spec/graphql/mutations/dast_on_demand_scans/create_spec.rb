@@ -132,11 +132,10 @@ RSpec.describe Mutations::DastOnDemandScans::Create do
           end
 
           context 'when active scan is requested against an unvalidated target' do
+            let(:dast_scanner_profile) { create(:dast_scanner_profile, project: project, scan_type: :active) }
+
             it 'communicates failure' do
-              aggregate_failures do
-                expect(subject.status).to eq(:error)
-                expect(subject.message).to eq('Cannot run active scan against unvalidated target')
-              end
+              expect(subject[:errors]).to include('Cannot run active scan against unvalidated target')
             end
           end
         end

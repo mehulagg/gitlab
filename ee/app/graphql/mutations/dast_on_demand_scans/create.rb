@@ -38,6 +38,18 @@ module Mutations
         dast_site = dast_site_profile.dast_site
         dast_scanner_profile = find_dast_scanner_profile(project: project, dast_scanner_profile_id: args[:dast_scanner_profile_id])
 
+        if dast_scanner_profile.scan_type == 'active'
+          url_base = DastSiteValidation.get_normalized_url_base(dast_site.url)
+
+          dast_site_validation = DastSiteValidationsFinder.new(
+            project_id: project.id,
+            state: :passed,
+            url_base: url_base
+          ).execute.first
+
+          return { errors: ['Cannot run active scan against unvalidated target'] }
+        end
+
         result = ::Ci::RunDastScanService.new(
           project, current_user
         ).execute(
