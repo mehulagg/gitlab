@@ -1,0 +1,13 @@
+.terminal-container {
+  .content-block {
+    border-bottom: 0;
+  }
+
+  #terminal {
+    margin-top: 10px;
+
+    > div {
+      min-height: 450px;
+    }
+  }
+}
