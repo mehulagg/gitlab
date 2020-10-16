@@ -11,5 +11,13 @@ module API
     def self.path_for_app(app)
       "#{app.namespace}/#{app.options[:path].first}".chomp('/').chomp('/')
     end
+
+    def self.route(methods, paths = ['/'], route_options = {}, &block)
+      if category = route_options.delete(:feature_category)
+        feature_category(category, Array(paths).map { |path| "#{namespace}/#{path}".chomp('/').chomp('/') })
+      end
+
+      super
+    end
   end
 end

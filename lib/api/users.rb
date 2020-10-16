@@ -9,11 +9,8 @@ module API
     allow_access_with_scope :read_user, if: -> (request) { request.get? }
 
     feature_category :users, [
-                       '/users',
-                       '/users/:id',
                        '/users/:id/custom_attributes',
                        '/users/:id/custom_attributes/:key',
-                       '/users/:user_id/status',
                        '/users/:id/emails',
                        '/users/:id/emails/:email_id',
                        '/users/:user_id/memberships',
@@ -130,7 +127,7 @@ module API
         use :optional_index_params_ee
       end
       # rubocop: disable CodeReuse/ActiveRecord
-      get do
+      get feature_category: :users do
         authenticated_as_admin! if params[:external].present? || (params[:extern_uid].present? && params[:provider].present?)
 
         unless current_user&.admin?
@@ -171,7 +168,7 @@ module API
         use :with_custom_attributes
       end
       # rubocop: disable CodeReuse/ActiveRecord
-      get ":id" do
+      get ":id", feature_category: :users do
         user = User.find_by(id: params[:id])
         not_found!('User') unless user && can?(current_user, :read_user, user)
 
@@ -186,7 +183,7 @@ module API
       params do
         requires :user_id, type: String, desc: 'The ID or username of the user'
       end
-      get ":user_id/status", requirements: API::USER_REQUIREMENTS do
+      get ":user_id/status", requirements: API::USER_REQUIREMENTS, feature_category: :users do
         user = find_user(params[:user_id])
         not_found!('User') unless user && can?(current_user, :read_user, user)
 
