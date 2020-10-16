@@ -395,7 +395,6 @@ installation has two repository storages: `default` and `storage1`.
 
 To configure the Gitaly server, on the server node you want to use for Gitaly:
 
-
 1. [Download and install](https://about.gitlab.com/install/) the Omnibus GitLab
    package of your choice. Be sure to follow _only_ installation steps 1 and 2
    on the page, and _do not_ provide the `EXTERNAL_URL` value.
