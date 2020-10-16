@@ -156,6 +156,7 @@ dependency_scanning:
 package_hunter:
   # extends:
   # - .reports:schedule-dast
+  stage: test
   image: registry.hub.docker.com/library/node:12.19-buster-slim
   needs: []
   script:
