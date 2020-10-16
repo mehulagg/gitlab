@@ -131,12 +131,8 @@ You can choose between 2 options:
 
 ### Project overview content
 
-The project overview content setting allows you to choose what content you want to
+The **Project overview content** setting allows you to choose what content you want to
 see on a project’s home page.
-
-You can choose between 3 options:
-
-- Files and README (default)
 - README
 - Activity
 
