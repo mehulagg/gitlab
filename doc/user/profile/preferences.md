@@ -133,8 +133,6 @@ You can choose between 2 options:
 
 The **Project overview content** setting allows you to choose what content you want to
 see on a project’s home page.
-- README
-- Activity
 
 ### Tab width
 
