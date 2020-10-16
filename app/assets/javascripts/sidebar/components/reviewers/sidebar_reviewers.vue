@@ -97,7 +97,7 @@ export default {
     />
     <reviewers
       v-if="!store.isFetching.reviewers"
-      :root-path="store.rootPath"
+      :root-path="gon.relative_url_root"
       :users="store.reviewers"
       :editable="store.editable"
       :issuable-type="issuableType"

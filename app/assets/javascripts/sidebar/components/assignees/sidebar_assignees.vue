@@ -119,7 +119,7 @@ export default {
     />
     <assignees
       v-if="!store.isFetching.assignees"
-      :root-path="store.rootPath"
+      :root-path="gon.relative_url_root"
       :users="store.assignees"
       :editable="store.editable"
       :issuable-type="issuableType"

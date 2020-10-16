@@ -57,7 +57,7 @@ export default {
       :human-time-estimate="store.humanTimeEstimate"
       :human-time-spent="store.humanTotalTimeSpent"
       :limit-to-hours="store.timeTrackingLimitToHours"
-      :root-path="store.rootPath"
+      :root-path="gon.relative_url_root"
     />
   </div>
 </template>
