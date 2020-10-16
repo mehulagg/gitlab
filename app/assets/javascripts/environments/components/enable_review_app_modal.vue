@@ -48,7 +48,6 @@ export default {
     :modal-id="modalId"
     :title="$options.modalInfo.title"
     size="lg"
-    class="text-2 ws-normal"
     ok-only
     ok-variant="light"
     :ok-title="$options.modalInfo.closeText"
@@ -75,8 +74,8 @@ export default {
           </template>
         </gl-sprintf>
       </p>
-      <div class="flex align-items-start">
-        <pre class="w-100"> {{ $options.modalInfo.copyString }} </pre>
+      <div class="gl-display-flex align-items-start">
+        <pre class="gl-w-full"> {{ $options.modalInfo.copyString }} </pre>
         <modal-copy-button
           :title="$options.modalInfo.copyToClipboardText"
           :text="$options.modalInfo.copyString"
