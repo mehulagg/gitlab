@@ -267,17 +267,17 @@ module Types
           description: 'Counts of alerts by status for the project',
           resolver: Resolvers::AlertManagement::AlertStatusCountsResolver
 
-    field :alert_management_http_integrations,
-          Types::AlertManagement::HttpIntegrationType.connection_type,
+    field :alert_management_integrations,
+          Types::AlertManagement::IntegrationType.connection_type,
           null: true,
-          description: 'Alert Management alerts of the project',
-          resolver: Resolvers::AlertManagement::HttpIntegrationResolver
+          description: 'Integrations which can receive alerts for the project',
+          resolver: Resolvers::AlertManagement::IntegrationResolver
 
-    field :alert_management_http_integration,
-          Types::AlertManagement::HttpIntegrationType,
+    field :alert_management_integration,
+          Types::AlertManagement::IntegrationType,
           null: true,
-          description: 'A single Alert Management alert of the project',
-          resolver: Resolvers::AlertManagement::HttpIntegrationResolver.single
+          description: 'A single integration which can receive alerts for the project',
+          resolver: Resolvers::AlertManagement::IntegrationResolver.single
 
     field :releases,
           Types::ReleaseType.connection_type,

@@ -6,32 +6,17 @@ module Types
       graphql_name 'AlertManagementHttpIntegration'
       description "Describes an endpoint and credentials used to accept alerts for a project"
 
+      implements(Types::AlertManagement::IntegrationType)
+
       authorize :admin_operations
 
-      field :id,
-            GraphQL::ID_TYPE,
-            null: false,
-            description: 'ID of the integration'
+      def type
+        'HTTP'
+      end
 
-      field :name,
-            GraphQL::STRING_TYPE,
-            null: true,
-            description: 'Name of the integration'
-
-      field :active,
-            GraphQL::BOOLEAN_TYPE,
-            null: true,
-            description: 'Whether the endpoint is currently accepting alerts'
-
-      field :token,
-            GraphQL::STRING_TYPE,
-            null: true,
-            description: 'Token used to authenticate alert notification requests'
-
-      field :url,
-            GraphQL::STRING_TYPE,
-            null: true,
-            description: 'Endpoint which accepts alert notifications'
+      def api_url
+        nil
+      end
     end
   end
 end
