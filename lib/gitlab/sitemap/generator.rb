@@ -7,14 +7,12 @@ module Gitlab
       SITEMAP_INDEX_PATH = File.join(Rails.public_path, 'sitemap.xml')
 
       class << self
-        include Gitlab::Routing
-
         def generate
           clean_sitemaps
 
           index = Sitemap::Index.new(SITEMAP_INDEX_PATH)
 
-          FileGenerator.new(index)
+          FileGenerator.new(index).generate
 
           index.generate
         end
