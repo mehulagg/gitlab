@@ -45,11 +45,14 @@ module Gitlab
         end
 
         def raw_coverage
-          if @job.present?
-            @project.builds.latest.success.for_ref(@ref).by_name(@job).order_id_desc.first&.coverage
-          else
-            @project.ci_pipelines.latest_successful_for_ref(@ref)&.coverage
-          end
+          latest =
+            if @job.present?
+              @project.builds.latest.success.for_ref(@ref).by_name(@job).order_id_desc.first
+            else
+              @project.ci_pipelines.latest_successful_for_ref(@ref)
+            end
+
+          latest&.coverage
         end
       end
     end
