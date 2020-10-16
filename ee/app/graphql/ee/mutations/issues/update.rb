@@ -10,6 +10,10 @@ module EE
           argument :epic_id, GraphQL::ID_TYPE,
                    required: false,
                    description: 'The ID of the parent epic. NULL when removing the association'
+
+          argument :health_status, ::Types::HealthStatusEnum,
+                   required: false,
+                   description: 'The health status to assign to the issue'
         end
 
         def resolve(project_path:, iid:, **args)
