@@ -135,7 +135,7 @@ export default {
   <div>
     <div class="build-content middle-block js-pipeline-graph">
       <div
-        class="pipeline-visualization pipeline-graph gl-overflow-auto gl-bg-gray-10"
+        class="pipeline-visualization pipeline-graph pipeline-min-h gl-overflow-auto gl-bg-gray-10"
         :class="{ 'gl-py-5': !isLinkedPipeline }"
       >
         <sf-graph-linked>

@@ -120,13 +120,11 @@
   }
 }
 
-.pipeline-tab-content {
-  // display: flex;
-  // width: 100%;
+
+// This is a single-value class to use with utility-class style CSS
+// but to still access this variable. Do not add other styles.
+.pipeline-min-h {
   min-height: $dropdown-max-height-lg;
-  // background-color: $gray-light;
-  // padding: $gl-padding 0;
-  // overflow: auto;
 }
 
 // Pipeline graph, used at
