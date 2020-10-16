@@ -2,21 +2,37 @@ import { ApolloLink, Observable } from 'apollo-link';
 import { StartupJSLink } from '~/lib/utils/apollo_startup_js_link';
 
 describe('StartupJSLink', () => {
-  const FORWARDED_RESPONSE = 'FORWARDED_RESPONSE';
+  const FORWARDED_RESPONSE = { data: 'FORWARDED_RESPONSE' };
 
-  const STARTUP_JS_RESPONSE = 'STARTUP_JS_RESPONSE';
+  const STARTUP_JS_RESPONSE = { data: 'STARTUP_JS_RESPONSE' };
   const OPERATION_NAME = 'startupJSQuery';
   const STARTUP_JS_QUERY = `query ${OPERATION_NAME}($id: Int = 3){
     name
     id
   }`;
 
-  const STARTUP_JS_RESPONSE_TWO = 'STARTUP_JS_RESPONSE_TWO';
+  const STARTUP_JS_RESPONSE_TWO = { data: 'STARTUP_JS_RESPONSE_TWO' };
   const OPERATION_NAME_TWO = 'startupJSQueryTwo';
   const STARTUP_JS_QUERY_TWO = `query ${OPERATION_NAME_TWO}($id: Int = 3){
     id
     name
   }`;
+
+  const ERROR_RESPONSE = {
+    data: {
+      user: null,
+    },
+    errors: [
+      {
+        path: ['user'],
+        locations: [{ line: 2, column: 3 }],
+        extensions: {
+          message: 'Object not found',
+          type: 2,
+        },
+      },
+    ],
+  };
 
   let startupLink;
   let link;
@@ -167,6 +183,42 @@ describe('StartupJSLink', () => {
         startup_graphql_calls: [
           {
             fetchCall: Promise.reject(new Error('Parsing failed')),
+            query: STARTUP_JS_QUERY,
+            variables: { id: 3 },
+          },
+        ],
+      };
+      setupLink();
+      link.request(mockOperation()).subscribe(result => {
+        expect(result).toEqual(FORWARDED_RESPONSE);
+        expect(startupLink.startupCalls.size).toBe(0);
+        done();
+      });
+    });
+
+    it('forwards the call if the response contains an error', done => {
+      window.gl = {
+        startup_graphql_calls: [
+          {
+            fetchCall: mockFetchCall(200, ERROR_RESPONSE),
+            query: STARTUP_JS_QUERY,
+            variables: { id: 3 },
+          },
+        ],
+      };
+      setupLink();
+      link.request(mockOperation()).subscribe(result => {
+        expect(result).toEqual(FORWARDED_RESPONSE);
+        expect(startupLink.startupCalls.size).toBe(0);
+        done();
+      });
+    });
+
+    it("forwards the call if the response doesn't contain a data object", done => {
+      window.gl = {
+        startup_graphql_calls: [
+          {
+            fetchCall: mockFetchCall(200, { 'no-data': 'yay' }),
             query: STARTUP_JS_QUERY,
             variables: { id: 3 },
           },

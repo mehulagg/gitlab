@@ -86,6 +86,10 @@ export class StartupJSLink extends ApolloLink {
           return response.json();
         })
         .then(result => {
+          if (result && (result.errors || !result.data)) {
+            throw new Error('Received GraphQL error');
+          }
+
           // we have data and can send it to back up the link chain
           observer.next(result);
           observer.complete();
