@@ -58,6 +58,7 @@ module Types
             null: false
 
       field :builds, [::Types::Ci::BuildType], null: true,
+            resolver: ::Resolvers::Ci::PipelineBuildsResolver,
             description: 'Builds run in this pipeline' do
         argument :statuses, [::Types::Ci::BuildStatusEnum], required: false,
           as: :status,
@@ -72,42 +73,32 @@ module Types
           description: 'The name of the build'
       end
 
-      # This returns arrays because a downstream MR needs them to be so.
-      # This method will be removed when https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45263
-      # is merged.
-      def builds(status: nil)
-        # NOTE: This method should be removed once the ci_jobs_finder_refactor FF is
-        # removed. https://gitlab.com/gitlab-org/gitlab/-/issues/245183
-        # rubocop: disable CodeReuse/ActiveRecord
-        if Feature.enabled?(:ci_jobs_finder_refactor, default_enabled: true)
-          params = { scope: status }
-          ::Ci::JobsFinder
-            .new(current_user: current_user, pipeline: pipeline, params: params)
-            .execute
-            .to_a
-        else
-          return ::Ci::Build.none unless can?(current_user, :read_build, pipeline)
-
-          builds = pipeline.builds
-          builds = builds.where(status: status) if status.present?
-          builds.to_a
-        end
-      end
-
+      # rubocop: disable CodeReuse/ActiveRecord
       def build(id: nil, name: nil)
         raise ::Gitlab::Graphql::Errors::ArgumentError, 'One of id or name is required' unless id || name
 
         id = ::Types::GlobalIDType[::Ci::Build].coerce_isolated_input(id) if id.present?
         args = { id: id&.model_id, name: name }
 
-        pipeline.builds.find_by(args.compact)
+        pipeline.builds.find_by(args.compact).tap { |b| assign_known_attributes(b) }
       end
+      # rubocop: enable CodeReuse/ActiveRecord
 
       alias_method :pipeline, :object
 
       # TODO: remove when the else branch of builds is removed
       def can?(object, action, subject = :global)
         Ability.allowed?(object, action, subject)
+      end
+
+      private
+
+      def assign_known_attributes(build)
+        return unless build
+
+        build.pipeline = pipeline
+        build.project = pipeline.project
+        build
       end
     end
   end
