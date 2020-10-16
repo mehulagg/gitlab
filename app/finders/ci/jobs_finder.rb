@@ -25,11 +25,7 @@ module Ci
     attr_reader :current_user, :pipeline, :project, :params, :type
 
     def init_collection
-      if Feature.enabled?(:ci_jobs_finder_refactor, default_enabled: true)
-        pipeline_jobs || project_jobs || all_jobs
-      else
-        project ? project_builds : all_jobs
-      end
+      pipeline_jobs || project_jobs || all_jobs
     end
 
     def all_jobs
@@ -59,9 +55,7 @@ module Ci
     end
 
     def filter_by_scope(builds)
-      if Feature.enabled?(:ci_jobs_finder_refactor, default_enabled: true)
-        return filter_by_statuses!(params[:scope], builds) if params[:scope].is_a?(Array)
-      end
+      return filter_by_statuses!(params[:scope], builds) if params[:scope].is_a?(Array)
 
       case params[:scope]
       when 'pending'
