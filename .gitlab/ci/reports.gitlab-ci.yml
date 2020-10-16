@@ -157,10 +157,11 @@ package_hunter:
   # extends:
   # - .reports:schedule-dast
   stage: test
-  image: registry.hub.docker.com/library/node:12.19-buster-slim
+  image:
+    name: registry.gitlab.com/gitlab-com/gl-security/security-research/package-hunter-cli
+    entrypoint: ["/bin/bash"]
   needs: []
   script:
-    - CLIENT_REPO="git+ssh://git@gitlab.com/gitlab-com/gl-security/security-research/package-hunter-cli"
     - npx $CLIENT_REPO analyze gitlab.tgz
   artifacts:
     paths:
