@@ -7,7 +7,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Requirements Management **(ULTIMATE)**
 
-> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2703) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.10.
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2703) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.10.
+> - The ability to add and edit a requirement's long description [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/224622) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.5.
 
 With requirements, you can set criteria to check your products against. They can be based on users,
 stakeholders, system, software, or anything else you find important to capture.
