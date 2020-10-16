@@ -88,6 +88,59 @@ describe('StartupJSLink', () => {
         done();
       });
     });
+
+    it('forwards requests if more variables are set in the operation', done => {
+      window.gl = {
+        startup_graphql_calls: [
+          {
+            fetchCall: mockFetchCall(),
+            query: STARTUP_JS_QUERY,
+          },
+        ],
+      };
+      setupLink();
+      link.request(mockOperation()).subscribe(result => {
+        expect(result).toEqual(FORWARDED_RESPONSE);
+        expect(startupLink.startupCalls.size).toBe(0);
+        done();
+      });
+    });
+
+    it('forwards requests if less variables are set in the operation', done => {
+      window.gl = {
+        startup_graphql_calls: [
+          {
+            fetchCall: mockFetchCall(),
+            query: STARTUP_JS_QUERY,
+            variables: { id: 3, name: 'tanuki' },
+          },
+        ],
+      };
+      setupLink();
+      link.request(mockOperation({ variables: { id: 3 } })).subscribe(result => {
+        expect(result).toEqual(FORWARDED_RESPONSE);
+        expect(startupLink.startupCalls.size).toBe(0);
+        done();
+      });
+    });
+
+    it('forwards requests if different variables are set', done => {
+      window.gl = {
+        startup_graphql_calls: [
+          {
+            fetchCall: mockFetchCall(),
+            query: STARTUP_JS_QUERY,
+            variables: { name: 'tanuki' },
+          },
+        ],
+      };
+      setupLink();
+      link.request(mockOperation({ variables: { id: 3 } })).subscribe(result => {
+        expect(result).toEqual(FORWARDED_RESPONSE);
+        expect(startupLink.startupCalls.size).toBe(0);
+        done();
+      });
+    });
   });
 
   describe('error handling', () => {

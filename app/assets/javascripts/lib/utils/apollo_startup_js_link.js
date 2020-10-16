@@ -1,6 +1,27 @@
 import { ApolloLink, Observable } from 'apollo-link';
 import { parse } from 'graphql';
 
+/**
+ * Compares two set of variables, order independent
+ */
+const doVariablesMatch = (var1 = {}, var2 = {}) => {
+  const entries1 = Object.entries(var1);
+  const entries2 = Object.entries(var2);
+  if (entries1.length !== entries2.length) {
+    return false;
+  }
+
+  for (let i = 0; i < entries1.length; i += 1) {
+    const [key, value] = entries1[i];
+
+    if (var2[key] !== value) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
 export class StartupJSLink extends ApolloLink {
   constructor() {
     super();
@@ -50,12 +71,8 @@ export class StartupJSLink extends ApolloLink {
     this.startupCalls.delete(operationName);
 
     // Skip startup call if the variables values do not match
-    const variables = Object.entries(operation.variables || {});
-    for (let i = 0; i < variables.length; i += 1) {
-      const [key, value] = variables[i];
-      if (startupVariables[key] !== value) {
-        return forward(operation);
-      }
+    if (!doVariablesMatch(startupVariables, operation.variables)) {
+      return forward(operation);
     }
 
     return new Observable(observer => {
