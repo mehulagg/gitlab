@@ -114,9 +114,9 @@ export default {
       type="button"
       class="float-right gl-display-block d-sm-none gl-align-self-center gutter-toggle issuable-gutter-toggle"
       data-testid="sidebar-toggle"
+      icon="chevron-double-lg-left"
       @click="toggleSidebar({ sidebarCollapsed })"
     >
-      <i class="fa fa-angle-double-left"></i>
     </gl-button>
     <div
       class="detail-page-header-actions gl-display-flex gl-flex-wrap gl-align-items-center gl-w-full gl-sm-w-auto!"
