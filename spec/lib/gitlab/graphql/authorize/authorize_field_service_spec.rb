@@ -27,6 +27,10 @@ RSpec.describe Gitlab::Graphql::Authorize::AuthorizeFieldService do
     end
   end
 
+  def resolve
+    service.authorized_resolve[type_instance, {}, context]
+  end
+
   subject(:service) { described_class.new(field) }
 
   describe '#authorized_resolve' do
@@ -41,7 +45,67 @@ RSpec.describe Gitlab::Graphql::Authorize::AuthorizeFieldService do
     let(:type_instance) { type_class.authorized_new(presented_object, context) }
     let(:field) { type_class.fields['testField'].to_graphql }
 
-    subject(:resolved) { service.authorized_resolve.call(type_instance, {}, context) }
+    subject(:resolved) { resolve&.force }
+
+    context 'reading the field of a lazy value' do
+      let(:ability) { :read_field }
+      let(:presented_object) { lazy_upcase('a') }
+      let(:type_class) { type_with_field(GraphQL::STRING_TYPE, ability) }
+
+      let(:upcaser) do
+        Module.new do
+          def self.upcase(strs)
+            strs.map(&:upcase)
+          end
+        end
+      end
+
+      def lazy_upcase(str)
+        ::BatchLoader::GraphQL.for(str).batch do |strs, found|
+          strs.zip(upcaser.upcase(strs)).each { |s, us| found[s, us] }
+        end
+      end
+
+      it 'does not run authorizations until we force the resolved value' do
+        expect(Ability).not_to receive(:allowed?)
+
+        expect(resolve).to respond_to(:force)
+      end
+
+      it 'runs authorizations when we force the resolved value' do
+        spy_ability_check_for(ability, 'A')
+
+        expect(resolved).to eq('Resolved value')
+      end
+
+      it 'redacts values that fail the permissions check' do
+        spy_ability_check_for(ability, 'A', passed: false)
+
+        expect(resolved).to be_nil
+      end
+
+      context 'we batch two calls' do
+        def resolve(value)
+          instance = type_class.authorized_new(lazy_upcase(value), context)
+          service.authorized_resolve[instance, {}, context]
+        end
+
+        it 'batches resolution, but authorizes each object separately' do
+          expect(upcaser).to receive(:upcase).once.and_call_original
+          spy_ability_check_for(:read_field, 'A', passed: true)
+          spy_ability_check_for(:read_field, 'B', passed: false)
+          spy_ability_check_for(:read_field, 'C', passed: true)
+
+          a = resolve('a')
+          b = resolve('b')
+          c = resolve('c')
+
+          expect(a.force).to be_present
+          expect(b.force).to be_nil
+          expect(c.force).to be_present
+        end
+      end
+    end
 
     context 'scalar types' do
       shared_examples 'checking permissions on the presented object' do
@@ -106,8 +170,6 @@ RSpec.describe Gitlab::Graphql::Authorize::AuthorizeFieldService do
       let(:type_class) { type_with_field(custom_type, :read_field, object_in_field) }
       let(:type_instance) { type_class.authorized_new(object_in_field, context) }
 
-      subject(:resolved) { service.authorized_resolve.call(type_instance, {}, context) }
-
       it 'checks both field & type permissions' do
         spy_ability_check_for(:read_field, object_in_field, passed: true)
         spy_ability_check_for(:read_type, object_in_field, passed: true)
@@ -156,7 +218,7 @@ RSpec.describe Gitlab::Graphql::Authorize::AuthorizeFieldService do
 
           spy_ability_check_for(:read_type, object_1, passed: false)
 
-          expect(resolved.map(&:object)).to contain_exactly(object_2)
+          expect(resolved).to contain_exactly(have_attributes(object: object_2))
         end
       end
     end
