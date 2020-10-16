@@ -1,6 +1,6 @@
 <script>
-import { __ } from '~/locale';
 import { GlTooltipDirective } from '@gitlab/ui';
+import { __ } from '~/locale';
 
 export default {
   name: 'ToggleSidebar',
