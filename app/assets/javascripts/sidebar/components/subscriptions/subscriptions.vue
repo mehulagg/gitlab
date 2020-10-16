@@ -1,5 +1,5 @@
 <script>
-import { GlIcon, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
 import Tracking from '~/tracking';
 import toggleButton from '~/vue_shared/components/toggle_button.vue';
