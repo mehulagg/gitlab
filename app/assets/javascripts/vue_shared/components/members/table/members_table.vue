@@ -25,6 +25,10 @@ export default {
     MemberActionButtons,
     RoleDropdown,
     RemoveGroupLinkModal,
+    LdapOverrideConfirmationModal: () =>
+      import(
+        'ee_component/vue_shared/components/members/ldap/ldap_override_confirmation_modal.vue'
+      ),
   },
   computed: {
     ...mapState(['members', 'tableFields']),
@@ -106,5 +110,6 @@ export default {
       </template>
     </gl-table>
     <remove-group-link-modal />
+    <ldap-override-confirmation-modal />
   </div>
 </template>

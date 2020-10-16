@@ -9,6 +9,8 @@ export default {
   components: {
     GlDropdown,
     GlDropdownItem,
+    LdapDropdownItem: () =>
+      import('ee_component/vue_shared/components/members/ldap/ldap_dropdown_item.vue'),
   },
   props: {
     member: {
@@ -55,7 +57,7 @@ export default {
     :right="!isDesktop"
     :text="member.accessLevel.stringValue"
     :header-text="__('Change permissions')"
-    :disabled="busy"
+    :disabled="busy || (member.canOverride && !member.isOverridden)"
   >
     <gl-dropdown-item
       v-for="(value, name) in member.validRoles"
@@ -66,5 +68,6 @@ export default {
     >
       {{ name }}
     </gl-dropdown-item>
+    <ldap-dropdown-item v-if="member.canOverride && member.isOverridden" :member-id="member.id" />
   </gl-dropdown>
 </template>
