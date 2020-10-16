@@ -346,6 +346,9 @@ module EE
                                                                           finish: user_maximum_id)
           end
 
+          results[prefix + SECURE_PRODUCT_TYPES[:coverage_fuzzing][:name]] = distinct_count(::Ci::Build.where("options ILIKE ?", "%gitlab-cov-fuzz%").where(time_period),
+                                                                                             :userid, start: user_minimum_id, finish: user_maximum_id)
+
           results.merge!(count_secure_pipelines(time_period))
           results.merge!(count_secure_jobs(time_period))
 
