@@ -102,16 +102,16 @@ module Gitlab
         end
       end
 
-      def user_merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref, allow_conflicts)
+      def user_merge_to_ref(user, payload)
         request = Gitaly::UserMergeToRefRequest.new(
           repository: @gitaly_repo,
-          source_sha: source_sha,
-          branch: encode_binary(branch),
-          target_ref: encode_binary(target_ref),
+          source_sha: payload.source_sha,
+          branch: encode_binary(payload.branch),
+          target_ref: encode_binary(payload.target_ref),
           user: Gitlab::Git::User.from_gitlab(user).to_gitaly,
-          message: encode_binary(message),
-          first_parent_ref: encode_binary(first_parent_ref),
-          allow_conflicts: allow_conflicts
+          message: encode_binary(payload.message),
+          first_parent_ref: encode_binary(payload.first_parent_ref),
+          allow_conflicts: payload.allow_conflicts
         )
 
         response = GitalyClient.call(@repository.storage, :operation_service,
