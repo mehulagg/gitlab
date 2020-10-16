@@ -36,7 +36,7 @@ describe('InstanceStatisticsApp', () => {
     expect(wrapper.find(UsersChart).exists()).toBe(true);
   });
 
-  it('displays the projects and groupsv chart component', () => {
+  it('displays the projects and groups chart component', () => {
     expect(wrapper.find(ProjectsAndGroupsChart).exists()).toBe(true);
   });
 });

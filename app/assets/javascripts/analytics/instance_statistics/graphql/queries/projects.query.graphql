@@ -2,12 +2,12 @@
 #import "../fragments/count.fragment.graphql"
 
 query getProjectsCount($first: Int, $after: String) {
-  groups: instanceStatisticsMeasurements(identifier: GROUPS, first: $first, after: $after) {
+  projects: instanceStatisticsMeasurements(identifier: PROJECTS, first: $first, after: $after) {
     nodes {
       ...Count
     }
     pageInfo {
-      ...pageInfo
+      ...PageInfo
     }
   }
 }

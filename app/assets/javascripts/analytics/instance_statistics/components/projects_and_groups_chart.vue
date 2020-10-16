@@ -2,16 +2,24 @@
 import { GlAlert } from '@gitlab/ui';
 import { GlLineChart } from '@gitlab/ui/dist/charts';
 import produce from 'immer';
-import createFlash from '~/flash';
+import { sortBy } from 'lodash';
+import * as Sentry from '~/sentry/wrapper';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { __ } from '~/locale';
 import { formatDateAsMonth } from '~/lib/utils/datetime_utility';
-import latestGroupsQuery from '../graphql/queries/latest_groups_count.query.graphql';
-import latestProjectsQuery from '../graphql/queries/latest_projects_count.query.graphql';
+import latestGroupsQuery from '../graphql/queries/groups.query.graphql';
+import latestProjectsQuery from '../graphql/queries/projects.query.graphql';
 import { getAverageByMonth } from '../utils';
 
-const unix = d => new Date(d).getTime();
-const sortByDate = data => [...data].sort((a, b) => unix(a[0]) > unix(b[0]));
+const sortByDate = data => sortBy(data, item => new Date(item[0]).getTime());
+
+const averageAndSortData = (data = [], maxDataPoints) => {
+  const averaged = getAverageByMonth(
+    data.length > maxDataPoints ? data.slice(0, maxDataPoints) : data,
+    { shouldRound: true },
+  );
+  return sortByDate(averaged);
+};
 
 export default {
   name: 'ProjectsAndGroupsChart',
@@ -32,6 +40,8 @@ export default {
   },
   data() {
     return {
+      loadingError: false,
+      errorMessage: '',
       groups: [],
       projects: [],
       groupsPageInfo: null,
@@ -59,10 +69,15 @@ export default {
           query: this.$apollo.queries.groups,
           pageInfo: this.groupsPageInfo,
           dataKey: 'groups',
+          errorMessage: this.$options.i18n.loadGroupsDataError,
         });
       },
       error(error) {
-        createFlash({ message: this.$options.i18n.loadUserChartError, captureError: true, error });
+        this.handleError({
+          message: this.$options.i18n.loadGroupsDataError,
+          error,
+          dataKey: 'groups',
+        });
       },
     },
     projects: {
@@ -85,19 +100,26 @@ export default {
           query: this.$apollo.queries.projects,
           pageInfo: this.projectsPageInfo,
           dataKey: 'projects',
+          errorMessage: this.$options.i18n.loadProjectsDataError,
         });
       },
       error(error) {
-        createFlash({ message: this.$options.i18n.loadCharError, captureError: true, error });
+        this.handleError({
+          message: this.$options.i18n.loadProjectsDataError,
+          error,
+          dataKey: 'projects',
+        });
       },
     },
   },
   i18n: {
-    yAxisTitle: __('Projects & Groups'),
+    yAxisTitle: __('Total projects & groups'),
     xAxisTitle: __('Month'),
-    loadCharError: __(
+    loadChartError: __(
       'Could not load the projects and groups chart. Please refresh the page to try again.',
     ),
+    loadProjectsDataError: __('There was an error while loading the projects'),
+    loadGroupsDataError: __('There was an error while loading the groups'),
     noDataMessage: __('There is no data available.'),
   },
   computed: {
@@ -108,25 +130,17 @@ export default {
       return this.$apollo.queries.projects.loading || this.projectsPageInfo?.hasNextPage;
     },
     isLoading() {
-      return this.isLoadingProjects || this.isLoadingGroups;
+      return this.isLoadingProjects && this.isLoadingGroups;
     },
     groupChartData() {
-      const averaged = getAverageByMonth(
-        this.groups.length > this.totalDataPoints
-          ? this.groups.slice(0, this.totalDataPoints)
-          : this.groups,
-        true,
-      );
-      return sortByDate(averaged);
+      return averageAndSortData(this.groups, this.totalDataPoints);
     },
     projectChartData() {
-      const averaged = getAverageByMonth(
-        this.projects.length > this.totalDataPoints
-          ? this.projects.slice(0, this.totalDataPoints)
-          : this.projects,
-        true,
-      );
-      return sortByDate(averaged);
+      return averageAndSortData(this.projects, this.totalDataPoints);
+    },
+    hasNoData() {
+      const { projectChartData, groupChartData } = this;
+      return Boolean(!projectChartData.length && !groupChartData.length);
     },
     options() {
       return {
@@ -146,21 +160,37 @@ export default {
     },
   },
   methods: {
-    fetchNextPage({ pageInfo, query, dataKey }) {
+    handleProjectsError() {},
+    handleError({ error, message = this.$options.i18n.loadChartError, dataKey = null }) {
+      this.loadingError = true;
+      this.errorMessage = message;
+      if (!dataKey) {
+        this.projects = [];
+        this.groups = [];
+      } else {
+        this[dataKey] = [];
+      }
+      Sentry.captureException(error);
+    },
+    fetchNextPage({ pageInfo, query, dataKey, errorMessage }) {
       if (pageInfo?.hasNextPage) {
-        query.fetchMore({
-          variables: { first: this.totalDataPoints, after: pageInfo.endCursor },
-          updateQuery: (previousResult, { fetchMoreResult }) => {
-            const results = produce(fetchMoreResult, newData => {
-              // eslint-disable-next-line no-param-reassign
-              newData[dataKey].nodes = [
-                ...previousResult[dataKey].nodes,
-                ...newData[dataKey].nodes,
-              ];
-            });
-            return results;
-          },
-        });
+        query
+          .fetchMore({
+            variables: { first: this.totalDataPoints, after: pageInfo.endCursor },
+            updateQuery: (previousResult, { fetchMoreResult }) => {
+              const results = produce(fetchMoreResult, newData => {
+                // eslint-disable-next-line no-param-reassign
+                newData[dataKey].nodes = [
+                  ...previousResult[dataKey].nodes,
+                  ...newData[dataKey].nodes,
+                ];
+              });
+              return results;
+            },
+          })
+          .catch(error => {
+            this.handleError({ error, message: errorMessage, dataKey });
+          });
       }
     },
   },
@@ -170,28 +200,27 @@ export default {
   <div>
     <h3>{{ $options.i18n.yAxisTitle }}</h3>
     <chart-skeleton-loader v-if="isLoading" />
-    <gl-alert
-      v-else-if="!projectChartData.length || !groupChartData.length"
-      variant="info"
-      :dismissible="false"
-      class="gl-mt-3"
-    >
+    <gl-alert v-else-if="hasNoData" variant="info" :dismissible="false" class="gl-mt-3">
       {{ $options.i18n.noDataMessage }}
     </gl-alert>
-    <gl-line-chart
-      v-else
-      :option="options"
-      :include-legend-avg-max="true"
-      :data="[
-        {
-          name: 'Projects',
-          data: projectChartData,
-        },
-        {
-          name: 'Groups',
-          data: groupChartData,
-        },
-      ]"
-    />
+    <div v-else>
+      <gl-alert v-if="loadingError" variant="danger" :dismissible="false" class="gl-mt-3">{{
+        errorMessage
+      }}</gl-alert>
+      <gl-line-chart
+        :option="options"
+        :include-legend-avg-max="true"
+        :data="[
+          {
+            name: 'Total projects',
+            data: projectChartData,
+          },
+          {
+            name: 'Total groups',
+            data: groupChartData,
+          },
+        ]"
+      />
+    </div>
   </div>
 </template>

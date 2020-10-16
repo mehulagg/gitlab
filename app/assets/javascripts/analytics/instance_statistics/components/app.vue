@@ -73,7 +73,7 @@ export default {
     />
     <projects-and-groups-chart
       :start-date="$options.START_DATE"
-      :end-date="$options.END_DATE"
+      :end-date="$options.TODAY"
       :total-data-points="$options.TOTAL_DAYS_TO_SHOW"
     />
     <instance-statistics-count-chart
