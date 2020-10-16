@@ -20,7 +20,7 @@ export default {
     GlButton,
   },
   directives: {
-    GlTooltip: GlTooltipDirective
+    GlTooltip: GlTooltipDirective,
   },
   mixins: [glFeatureFlagMixin(), mergeRequestQueryVariablesMixin],
   apollo: {
