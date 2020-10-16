@@ -1,7 +1,7 @@
+import { GlTooltipDirective } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { sprintf, __ } from '~/locale';
 import { formatDate } from '~/lib/utils/datetime_utility';
-import tooltip from '~/vue_shared/directives/tooltip';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 const mixins = {
@@ -100,7 +100,7 @@ const mixins = {
     },
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   mixins: [timeagoMixin],
   computed: {
