@@ -27,6 +27,8 @@ default:
 
 workflow:
   rules:
+    - if: '$CI'
+      when: never
     - if: '$CI_COMMIT_BRANCH'
       when: never
     # If `$FORCE_GITLAB_CI` is set, create a pipeline.
