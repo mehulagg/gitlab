@@ -251,6 +251,28 @@ describe('StartupJSLink', () => {
     });
   });
 
+  it('resolves the request exactly once', done => {
+    window.gl = {
+      startup_graphql_calls: [
+        {
+          fetchCall: mockFetchCall(),
+          query: STARTUP_JS_QUERY,
+          variables: { id: 3 },
+        },
+      ],
+    };
+    setupLink();
+    link.request(mockOperation()).subscribe(result => {
+      expect(result).toEqual(STARTUP_JS_RESPONSE);
+      expect(startupLink.startupCalls.size).toBe(0);
+      done();
+      link.request(mockOperation()).subscribe(result2 => {
+        expect(result2).toEqual(FORWARDED_RESPONSE);
+        done();
+      });
+    });
+  });
+
   it('resolves the request if the variables have a different order', done => {
     window.gl = {
       startup_graphql_calls: [
