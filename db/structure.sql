@@ -16337,6 +16337,7 @@ CREATE TABLE terraform_state_versions (
     verified_at timestamp with time zone,
     verification_checksum bytea,
     verification_failure text,
+    ci_build_id bigint,
     CONSTRAINT check_0824bb7bbd CHECK ((char_length(file) <= 255)),
     CONSTRAINT tf_state_versions_verification_failure_text_limit CHECK ((char_length(verification_failure) <= 255))
 );
@@ -21601,6 +21602,8 @@ CREATE INDEX index_term_agreements_on_term_id ON term_agreements USING btree (te
 
 CREATE INDEX index_term_agreements_on_user_id ON term_agreements USING btree (user_id);
 
+CREATE INDEX index_terraform_state_versions_on_ci_build_id ON terraform_state_versions USING btree (ci_build_id);
+
 CREATE INDEX index_terraform_state_versions_on_created_by_user_id ON terraform_state_versions USING btree (created_by_user_id);
 
 CREATE UNIQUE INDEX index_terraform_state_versions_on_state_id_and_version ON terraform_state_versions USING btree (terraform_state_id, version);
@@ -22208,6 +22211,9 @@ ALTER TABLE ONLY clusters_applications_runners
 
 ALTER TABLE ONLY design_management_designs_versions
     ADD CONSTRAINT fk_03c671965c FOREIGN KEY (design_id) REFERENCES design_management_designs(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY terraform_state_versions
+    ADD CONSTRAINT fk_04b91e4a9f FOREIGN KEY (ci_build_id) REFERENCES ci_builds(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY issues
     ADD CONSTRAINT fk_05f1e72feb FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL;
