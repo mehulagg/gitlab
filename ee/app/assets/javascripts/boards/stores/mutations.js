@@ -67,6 +67,13 @@ export default {
   [mutationTypes.TOGGLE_PROMOTION_STATE]: () => {
     notImplemented();
   },
+  [mutationTypes.UPDATE_LIST_SUCCESS]: (state, { listId, list }) => {
+    Vue.set(state.boardLists, listId, list);
+  },
+
+  [mutationTypes.UPDATE_LIST_FAILURE]: state => {
+    state.error = s__('Boards|An error occurred while update the list. Please try again.');
+  },
 
   [mutationTypes.RECEIVE_ISSUES_FOR_LIST_SUCCESS]: (
     state,

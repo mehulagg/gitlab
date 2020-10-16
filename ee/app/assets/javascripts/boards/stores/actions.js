@@ -26,6 +26,7 @@ import issueSetEpic from '../queries/issue_set_epic.mutation.graphql';
 import issueSetWeight from '../queries/issue_set_weight.mutation.graphql';
 import listsIssuesQuery from '~/boards/queries/lists_issues.query.graphql';
 import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
+import listUpdateLimitMetrics from '../queries/list_update_limit_metrics.mutation.graphql';
 import updateBoardEpicUserPreferencesMutation from '../queries/updateBoardEpicUserPreferences.mutation.graphql';
 
 const notImplemented = () => {
@@ -179,10 +180,33 @@ export default {
     commit(types.SET_SHOW_LABELS, val);
   },
 
-  updateListWipLimit({ state }, { maxIssueCount }) {
-    const { activeId } = state;
+  updateListWipLimit({ commit, getters }, { maxIssueCount, listId }) {
+    if (getters.shouldUseGraphQL) {
+      return gqlClient
+        .mutate({
+          mutation: listUpdateLimitMetrics,
+          variables: {
+            input: {
+              listId,
+              maxIssueCount,
+            },
+          },
+        })
+        .then(({ data }) => {
+          if (data?.boardListUpdateLimitMetrics?.errors.length) {
+            commit(types.UPDATE_LIST_FAILURE);
+          } else {
+            const list = data.boardListUpdateLimitMetrics?.list;
+            commit(types.UPDATE_LIST_SUCCESS, {
+              listId,
+              list: boardsStore.updateListPosition({ ...list, doNotFetchIssues: true }),
+            });
+          }
+        })
+        .catch(() => commit(types.UPDATE_LIST_FAILURE));
+    }
 
-    return axios.put(`${boardsStoreEE.store.state.endpoints.listsEndpoint}/${activeId}`, {
+    return axios.put(`${boardsStoreEE.store.state.endpoints.listsEndpoint}/${listId}`, {
       list: {
         max_issue_count: maxIssueCount,
       },
