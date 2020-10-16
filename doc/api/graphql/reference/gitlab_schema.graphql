@@ -3119,12 +3119,12 @@ input CreateBoardInput {
   """
   The IDs of labels to be added to the board.
   """
-  labelIds: [ID!]
+  labelIds: [LabelID!]
 
   """
   The ID of the milestone to be assigned to the board.
   """
-  milestoneId: ID
+  milestoneId: MilestoneID
 
   """
   The board name.
@@ -9253,7 +9253,7 @@ input IssueMoveListInput {
   """
   Global ID of the board that the issue is in
   """
-  boardId: ID!
+  boardId: BoardID!
 
   """
   A unique identifier for the client performing the mutation.
@@ -9268,7 +9268,7 @@ input IssueMoveListInput {
   """
   ID of the board list that the issue will be moved from
   """
-  fromListId: ID
+  fromListId: ListID
 
   """
   IID of the issue to mutate
@@ -9278,12 +9278,12 @@ input IssueMoveListInput {
   """
   ID of issue that should be placed after the current issue
   """
-  moveAfterId: ID
+  moveAfterId: IssueID
 
   """
   ID of issue that should be placed before the current issue
   """
-  moveBeforeId: ID
+  moveBeforeId: IssueID
 
   """
   Project the issue to mutate is in
@@ -9293,7 +9293,7 @@ input IssueMoveListInput {
   """
   ID of the board list that the issue will be moved to
   """
-  toListId: ID
+  toListId: ListID
 }
 
 """
@@ -9513,7 +9513,7 @@ input IssueSetEpicInput {
   """
   Global ID of the epic to be assigned to the issue, epic will be removed if absent or set to null
   """
-  epicId: ID
+  epicId: EpicID
 
   """
   The IID of the issue to mutate
@@ -19353,7 +19353,7 @@ input UpdateBoardListInput {
   """
   Global ID of the list.
   """
-  listId: ID!
+  listId: ListID!
 
   """
   Position of list within the board
