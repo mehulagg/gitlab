@@ -115,7 +115,7 @@ company and a new feature has been added to the company product.
 1. The file is opened in the Static Site Editor in **WYSIWYG** mode. If you wish to edit the raw Markdown
    instead, you can toggle the **Markdown** mode in the bottom-right corner.
 1. You edit the file right there and click **Submit changes...**.
-1. You're prompted to modify the default title and description of the merge request
+1. (Optional) Adjust the default title and description of the merge request that will be submitted with your changes.
 1. A new merge request is automatically created and you assign it to your colleague for review.
 
 ## Videos
