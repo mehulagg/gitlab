@@ -1260,7 +1260,6 @@ Graphql/IDType:
     - 'app/graphql/mutations/boards/create.rb'
     - 'app/graphql/mutations/boards/issues/issue_move_list.rb'
     - 'app/graphql/mutations/boards/lists/update.rb'
-    - 'app/graphql/mutations/discussions/toggle_resolve.rb'
     - 'app/graphql/mutations/issues/update.rb'
     - 'app/graphql/mutations/merge_requests/set_milestone.rb'
     - 'app/graphql/mutations/metrics/dashboard/annotations/delete.rb'
