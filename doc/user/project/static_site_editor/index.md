@@ -104,6 +104,8 @@ is replicated in the new configuration file, `data/config.yml` will be formally 
 
 ### Use the Static Site Editor to edit your content
 
+> - Support for modifying the default merge request title and description [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216861) in GitLab 13.5.
+
 For instance, suppose you are a recently hired technical writer at a large
 company and a new feature has been added to the company product.
 
@@ -112,7 +114,8 @@ company and a new feature has been added to the company product.
 1. Click the **Edit this page** button on the production site.
 1. The file is opened in the Static Site Editor in **WYSIWYG** mode. If you wish to edit the raw Markdown
    instead, you can toggle the **Markdown** mode in the bottom-right corner.
-1. You edit the file right there and click **Submit changes**.
+1. You edit the file right there and click **Submit changes...**.
+1. You're prompted to modify the default title and description of the merge request
 1. A new merge request is automatically created and you assign it to your colleague for review.
 
 ## Videos
