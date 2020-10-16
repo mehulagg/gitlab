@@ -35,7 +35,7 @@ To create a requirement:
 1. Click **New requirement**.
 1. Enter a descriptive title and click **Create requirement**.
 
-You will see the newly created requirement on the top of the list, as the requirements
+You can see the newly created requirement on the top of the list, as the requirements
 list is sorted by creation date in descending order.
 
 ## Edit a requirement
@@ -48,7 +48,8 @@ list page.
 To edit a requirement:
 
 1. From the requirements list, click **Edit** (**{pencil}**).
-1. Update the title in text input field. You can also mark a requirement as satisfied in the edit form by using the checkbox labeled "Satisfied".
+1. Update the title in text input field. You can also mark a requirement as satisfied in the edit
+   form by using the checkbox **Satisfied**.
 1. Click **Save changes**.
 
 ## Archive a requirement
