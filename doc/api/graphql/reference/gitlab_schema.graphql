@@ -9847,6 +9847,16 @@ enum IssueSort {
   SEVERITY_DESC
 
   """
+  Issues with earliest SLA due time shown first
+  """
+  SLA_DUE_AT_ASC
+
+  """
+  Issues with latest SLA due time shown first
+  """
+  SLA_DUE_AT_DESC
+
+  """
   Updated at ascending order
   """
   UPDATED_ASC

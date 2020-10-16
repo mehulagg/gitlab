@@ -3358,6 +3358,8 @@ Values for sorting issues.
 | `RELATIVE_POSITION_ASC` | Relative position by ascending order |
 | `SEVERITY_ASC` | Severity from less critical to more critical |
 | `SEVERITY_DESC` | Severity from more critical to less critical |
+| `SLA_DUE_AT_ASC` | Issues with earliest SLA due time shown first |
+| `SLA_DUE_AT_DESC` | Issues with latest SLA due time shown first |
 | `UPDATED_ASC` | Updated at ascending order |
 | `UPDATED_DESC` | Updated at descending order |
 | `WEIGHT_ASC` | Weight by ascending order |

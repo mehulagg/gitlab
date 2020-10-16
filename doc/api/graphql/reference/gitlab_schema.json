@@ -26855,6 +26855,18 @@
               "description": "Published issues shown first",
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "SLA_DUE_AT_ASC",
+              "description": "Issues with earliest SLA due time shown first",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "SLA_DUE_AT_DESC",
+              "description": "Issues with latest SLA due time shown first",
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
