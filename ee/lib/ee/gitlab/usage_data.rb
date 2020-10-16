@@ -352,7 +352,6 @@ module EE
           results.merge!(count_secure_pipelines(time_period))
           results.merge!(count_secure_jobs(time_period))
 
-
           # handle license rename https://gitlab.com/gitlab-org/gitlab/issues/8911
           combined_license_key = "#{prefix}license_management_jobs".to_sym
           license_scan_count = results.delete("#{prefix}license_scanning_jobs".to_sym)
