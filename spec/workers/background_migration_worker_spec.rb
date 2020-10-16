@@ -20,21 +20,41 @@ RSpec.describe BackgroundMigrationWorker, :clean_gitlab_redis_shared_state do
       worker.perform('Foo', [10, 20])
     end
 
-    it 'reschedules a migration if it was performed recently' do
-      expect(worker)
-        .to receive(:always_perform?)
-        .and_return(false)
+    context 'when migration of same class was performed recently' do
+      it 'reschedules the migration and decrements the lease_attempt' do
+        expect(worker)
+          .to receive(:always_perform?)
+          .and_return(false)
 
-      worker.lease_for('Foo').try_obtain
+        worker.lease_for('Foo').try_obtain
 
-      expect(Gitlab::BackgroundMigration)
-        .not_to receive(:perform)
+        expect(Gitlab::BackgroundMigration)
+          .not_to receive(:perform)
 
-      expect(described_class)
-        .to receive(:perform_in)
-        .with(a_kind_of(Numeric), 'Foo', [10, 20])
+        expect(described_class)
+          .to receive(:perform_in)
+          .with(a_kind_of(Numeric), 'Foo', [10, 20], 4)
 
-      worker.perform('Foo', [10, 20])
+        worker.perform('Foo', [10, 20], 5)
+      end
+
+      context 'when lease_attempt is 0' do
+        it 'performs a migration' do
+          expect(worker)
+            .to receive(:always_perform?)
+            .and_return(false)
+
+          worker.lease_for('Foo').try_obtain
+
+          expect(Gitlab::BackgroundMigration)
+            .to receive(:perform).with('Foo', [10, 20])
+
+          expect(described_class)
+            .not_to receive(:perform_in)
+
+          worker.perform('Foo', [10, 20], 0)
+        end
+      end
     end
 
     it 'reschedules a migration if the database is not healthy' do
@@ -48,7 +68,7 @@ RSpec.describe BackgroundMigrationWorker, :clean_gitlab_redis_shared_state do
 
       expect(described_class)
         .to receive(:perform_in)
-        .with(a_kind_of(Numeric), 'Foo', [10, 20])
+        .with(a_kind_of(Numeric), 'Foo', [10, 20], 4)
 
       worker.perform('Foo', [10, 20])
     end

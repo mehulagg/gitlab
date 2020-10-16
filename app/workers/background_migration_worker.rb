@@ -23,9 +23,11 @@ class BackgroundMigrationWorker # rubocop:disable Scalability/IdempotentWorker
   #
   # class_name - The class name of the background migration to run.
   # arguments - The arguments to pass to the migration class.
-  def perform(class_name, arguments = [])
+  # least_attempt - The number of times we will try to obtain an exclusive
+  #   lease on the class before running anyway.  Pass 0 to always run.
+  def perform(class_name, arguments = [], lease_attempt = 5)
     with_context(caller_id: class_name.to_s) do
-      should_perform, ttl = perform_and_ttl(class_name)
+      should_perform, ttl = perform_and_ttl(class_name, lease_attempt)
 
       if should_perform
         Gitlab::BackgroundMigration.perform(class_name, arguments)
@@ -35,32 +37,35 @@ class BackgroundMigrationWorker # rubocop:disable Scalability/IdempotentWorker
         # we'll reschedule the job in such a way that it is picked up again around
         # the time the lease expires.
         self.class
-          .perform_in(ttl || self.class.minimum_interval, class_name, arguments)
+          .perform_in(ttl || self.class.minimum_interval, class_name, arguments, [lease_attempt - 1, 0].max)
       end
     end
   end
 
-  def perform_and_ttl(class_name)
-    if always_perform?
-      # In test environments `perform_in` will run right away. This can then
-      # lead to stack level errors in the above `#perform`. To work around this
-      # we'll just perform the migration right away in the test environment.
-      [true, nil]
-    else
-      lease = lease_for(class_name)
-      perform = !!lease.try_obtain
+  def perform_and_ttl(class_name, lease_attempt)
+    # In test environments `perform_in` will run right away. This can then
+    # lead to stack level errors in the above `#perform`. To work around this
+    # we'll just perform the migration right away in the test environment.
+    return [true, nil] if always_perform?
 
-      # If we managed to acquire the lease but the DB is not healthy, then we
-      # want to simply reschedule our job and try again _after_ the lease
-      # expires.
-      if perform && !healthy_database?
-        database_unhealthy_counter.increment
+    # If we've tried several times to get a lease, then just go ahead
+    # and allow it to run.  Otherwise we could end up in an infinite
+    # rescheduling loop.
+    return [true, nil] if lease_attempt <= 0 && healthy_database?
 
-        perform = false
-      end
+    lease = lease_for(class_name)
+    perform = !!lease.try_obtain
 
-      [perform, lease.ttl]
+    # If we managed to acquire the lease but the DB is not healthy, then we
+    # want to simply reschedule our job and try again _after_ the lease
+    # expires.
+    if perform && !healthy_database?
+      database_unhealthy_counter.increment
+
+      perform = false
     end
+
+    [perform, lease.ttl]
   end
 
   def lease_for(class_name)
