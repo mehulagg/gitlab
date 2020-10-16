@@ -260,7 +260,7 @@ export default {
       const field = this.availableFields.find(({ key }) => key === sortBy);
       const sortingDirection = sortDesc ? 'DESC' : 'ASC';
 
-// Use `sortKey` if provided, otherwise fall back to existing algorithm
+      // Use `sortKey` if provided, otherwise fall back to existing algorithm
       if (field?.sortKey) {
         sortKey = field.sortKey;
       } else {
