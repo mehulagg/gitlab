@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+#
+#
+#
+#
 class BulkImport < ApplicationRecord
   belongs_to :user, optional: false
 

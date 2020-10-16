@@ -1,5 +1,18 @@
 # frozen_string_literal: true
 
+#
+# The BulkImport::Entity represents a Group or Project that is to be imported.
+#
+# A full import entity structure might look like this, reflecting the tree
+# structure that is imported during this bulk import.
+#
+#               GroupEntity
+#                |      |
+#       GroupEntity   ProjectEntity
+#            |
+#      ProjectEntity
+#
+#
 class BulkImports::Entity < ApplicationRecord
   self.table_name = 'bulk_import_entities'
 
