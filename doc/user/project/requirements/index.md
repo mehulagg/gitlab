@@ -22,7 +22,7 @@ When a feature is no longer necessary, you can [archive the related requirement]
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, see [GitLab 12.10 Introduces Requirements Management](https://www.youtube.com/watch?v=uSS7oUNSEoU).
 
-![requirements list view](img/requirements_list_v13_1.png)
+![requirements list view](img/requirements_list_v13_5.png)
 
 ## Create a requirement
 
@@ -33,10 +33,21 @@ To create a requirement:
 
 1. From your project page, go to **{requirements}** **Requirements**.
 1. Click **New requirement**.
-1. Enter a descriptive title and click **Create requirement**.
+1. Enter a title and description and click **Create requirement**.
+
+![requirement create view](img/requirement_create_v13_5.png)
 
 You can see the newly created requirement on the top of the list, as the requirements
 list is sorted by creation date in descending order.
+
+## View a requirement
+
+You can view a requirement from the list by clicking on it.
+
+![requirement view](img/requirement_view_v13_5.png)
+
+You can also edit a requirement while viewing it by clicking on **Edit** (**{pencil}**)
+available next to requirement title.
 
 ## Edit a requirement
 
@@ -48,8 +59,8 @@ list page.
 To edit a requirement:
 
 1. From the requirements list, click **Edit** (**{pencil}**).
-1. Update the title in text input field. You can also mark a requirement as satisfied in the edit
-   form by using the checkbox **Satisfied**.
+1. Update the title and/or description in text input field. You can also mark a
+   requirement as satisfied in the edit form by using the checkbox **Satisfied**.
 1. Click **Save changes**.
 
 ## Archive a requirement
