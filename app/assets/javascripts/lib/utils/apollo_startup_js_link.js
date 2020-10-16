@@ -4,58 +4,37 @@ import { parse } from 'graphql';
 export class StartupJSLink extends ApolloLink {
   constructor() {
     super();
-    // FetchResult
-    this.fetchResult = null;
-    this.queryResults = null;
     this.startupCalls = new Map();
-    this.fetchCall = window.gl?.startup_graphql_calls?.fetchCall;
-    this.parseStartupCalls(window.gl?.startup_graphql_calls?.calls || []);
+    this.parseStartupCalls(window.gl?.startup_graphql_calls || []);
   }
 
   // Extract operationNames from the queries and ensure that we can
   // match operationName => element from result array
   parseStartupCalls(calls) {
-    calls.forEach((call, index) => {
-      const { query, variables } = call;
+    calls.forEach(call => {
+      const { query, variables, fetchCall } = call;
       const operationName = parse(query)?.definitions?.find(x => x.kind === 'OperationDefinition')
         ?.name?.value;
 
       if (operationName) {
         this.startupCalls.set(operationName, {
-          index,
           variables,
+          fetchCall,
         });
       }
     });
-  }
-
-  async getResult(index) {
-    if (!this.queryResults) {
-      this.queryResults = this.fetchCall.then(res => {
-        // Handle HTTP errors
-        if (!res.ok) {
-          throw new Error('fetchCall failed');
-        }
-        this.fetchResult = res;
-        return res.json();
-      });
-    }
-
-    return (await this.queryResults)[index];
   }
 
   static noopRequest = (operation, forward) => forward(operation);
 
   disable() {
     this.request = StartupJSLink.noopRequest;
-    this.fetchResult = null;
     this.startupCalls = null;
-    this.queryResults = null;
   }
 
   request(operation, forward) {
     // Disable StartupJSLink in case all calls are done or none are set up
-    if ((this.startupCalls && this.startupCalls.size === 0) || !this.fetchCall) {
+    if (this.startupCalls && this.startupCalls.size === 0) {
       this.disable();
       return forward(operation);
     }
@@ -67,7 +46,7 @@ export class StartupJSLink extends ApolloLink {
       return forward(operation);
     }
 
-    const { variables: startupVariables, index } = this.startupCalls.get(operationName);
+    const { variables: startupVariables, fetchCall } = this.startupCalls.get(operationName);
     this.startupCalls.delete(operationName);
 
     // Skip startup call if the variables values do not match
@@ -80,16 +59,21 @@ export class StartupJSLink extends ApolloLink {
     }
 
     return new Observable(observer => {
-      this.getResult(index)
+      fetchCall
+        .then(response => {
+          // Handle HTTP errors
+          if (!response.ok) {
+            throw new Error('fetchCall failed');
+          }
+          operation.setContext({ response });
+          return response.json();
+        })
         .then(result => {
-          operation.setContext({ response: this.fetchResult });
           // we have data and can send it to back up the link chain
           observer.next(result);
           observer.complete();
         })
         .catch(() => {
-          // StartupJS somehow failed, so let's forward it down the pipe
-          this.disable();
           forward(operation).subscribe({
             next: result => {
               observer.next(result);

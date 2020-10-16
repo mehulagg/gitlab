@@ -21,7 +21,7 @@ describe('StartupJSLink', () => {
   let startupLink;
   let link;
 
-  function mockFetchCall(status = 200, response = [STARTUP_JS_RESPONSE]) {
+  function mockFetchCall(status = 200, response = STARTUP_JS_RESPONSE) {
     const p = {
       ok: status >= 200 && status < 300,
       status,
@@ -54,10 +54,13 @@ describe('StartupJSLink', () => {
 
   it('forwards requests if the operation is not pre-loaded', done => {
     window.gl = {
-      startup_graphql_calls: {
-        fetchCall: mockFetchCall(),
-        calls: [{ query: STARTUP_JS_QUERY, variables: { id: 3 } }],
-      },
+      startup_graphql_calls: [
+        {
+          fetchCall: mockFetchCall(),
+          query: STARTUP_JS_QUERY,
+          variables: { id: 3 },
+        },
+      ],
     };
     setupLink();
     link.request(mockOperation({ operationName: 'notLoaded' })).subscribe(result => {
@@ -67,57 +70,73 @@ describe('StartupJSLink', () => {
     });
   });
 
-  it('forwards requests if the variables are not matching', done => {
-    window.gl = {
-      startup_graphql_calls: {
-        fetchCall: mockFetchCall(),
-        calls: [{ query: STARTUP_JS_QUERY, variables: { id: 4 } }],
-      },
-    };
-    setupLink();
-    link.request(mockOperation()).subscribe(result => {
-      expect(result).toEqual(FORWARDED_RESPONSE);
-      expect(startupLink.startupCalls.size).toBe(0);
-      done();
+  describe('variable match errors: ', () => {
+    it('forwards requests if the variables are not matching', done => {
+      window.gl = {
+        startup_graphql_calls: [
+          {
+            fetchCall: mockFetchCall(),
+            query: STARTUP_JS_QUERY,
+            variables: { id: 'NOT_MATCHING' },
+          },
+        ],
+      };
+      setupLink();
+      link.request(mockOperation()).subscribe(result => {
+        expect(result).toEqual(FORWARDED_RESPONSE);
+        expect(startupLink.startupCalls.size).toBe(0);
+        done();
+      });
     });
   });
 
-  it('forwards the call if the fetchCall is failing with a HTTP Response', done => {
-    window.gl = {
-      startup_graphql_calls: {
-        fetchCall: mockFetchCall(404),
-        calls: [{ query: STARTUP_JS_QUERY, variables: { id: 3 } }],
-      },
-    };
-    setupLink();
-    link.request(mockOperation()).subscribe(result => {
-      expect(result).toEqual(FORWARDED_RESPONSE);
-      expect(startupLink.startupCalls).toBe(null);
-      done();
+  describe('error handling', () => {
+    it('forwards the call if the fetchCall is failing with a HTTP Error', done => {
+      window.gl = {
+        startup_graphql_calls: [
+          {
+            fetchCall: mockFetchCall(404),
+            query: STARTUP_JS_QUERY,
+            variables: { id: 3 },
+          },
+        ],
+      };
+      setupLink();
+      link.request(mockOperation()).subscribe(result => {
+        expect(result).toEqual(FORWARDED_RESPONSE);
+        expect(startupLink.startupCalls.size).toBe(0);
+        done();
+      });
     });
-  });
 
-  it('forwards the call if the errors (e.g. failing JSON)', done => {
-    window.gl = {
-      startup_graphql_calls: {
-        fetchCall: Promise.reject(new Error('Parsing failed')),
-        calls: [{ query: STARTUP_JS_QUERY, variables: { id: 3 } }],
-      },
-    };
-    setupLink();
-    link.request(mockOperation()).subscribe(result => {
-      expect(result).toEqual(FORWARDED_RESPONSE);
-      expect(startupLink.startupCalls).toBe(null);
-      done();
+    it('forwards the call if it errors (e.g. failing JSON)', done => {
+      window.gl = {
+        startup_graphql_calls: [
+          {
+            fetchCall: Promise.reject(new Error('Parsing failed')),
+            query: STARTUP_JS_QUERY,
+            variables: { id: 3 },
+          },
+        ],
+      };
+      setupLink();
+      link.request(mockOperation()).subscribe(result => {
+        expect(result).toEqual(FORWARDED_RESPONSE);
+        expect(startupLink.startupCalls.size).toBe(0);
+        done();
+      });
     });
   });
 
   it('resolves the request if the operation is matching', done => {
     window.gl = {
-      startup_graphql_calls: {
-        fetchCall: mockFetchCall(),
-        calls: [{ query: STARTUP_JS_QUERY, variables: { id: 3 } }],
-      },
+      startup_graphql_calls: [
+        {
+          fetchCall: mockFetchCall(),
+          query: STARTUP_JS_QUERY,
+          variables: { id: 3 },
+        },
+      ],
     };
     setupLink();
     link.request(mockOperation()).subscribe(result => {
@@ -127,15 +146,38 @@ describe('StartupJSLink', () => {
     });
   });
 
+  it('resolves the request if the variables have a different order', done => {
+    window.gl = {
+      startup_graphql_calls: [
+        {
+          fetchCall: mockFetchCall(),
+          query: STARTUP_JS_QUERY,
+          variables: { id: 3, name: 'foo' },
+        },
+      ],
+    };
+    setupLink();
+    link.request(mockOperation({ variables: { name: 'foo', id: 3 } })).subscribe(result => {
+      expect(result).toEqual(STARTUP_JS_RESPONSE);
+      expect(startupLink.startupCalls.size).toBe(0);
+      done();
+    });
+  });
+
   it('resolves multiple requests correctly', done => {
     window.gl = {
-      startup_graphql_calls: {
-        fetchCall: mockFetchCall(200, [STARTUP_JS_RESPONSE, STARTUP_JS_RESPONSE_TWO]),
-        calls: [
-          { query: STARTUP_JS_QUERY, variables: { id: 3 } },
-          { query: STARTUP_JS_QUERY_TWO, variables: { id: 3 } },
-        ],
-      },
+      startup_graphql_calls: [
+        {
+          fetchCall: mockFetchCall(),
+          query: STARTUP_JS_QUERY,
+          variables: { id: 3 },
+        },
+        {
+          fetchCall: mockFetchCall(200, STARTUP_JS_RESPONSE_TWO),
+          query: STARTUP_JS_QUERY_TWO,
+          variables: { id: 3 },
+        },
+      ],
     };
     setupLink();
     link.request(mockOperation({ operationName: OPERATION_NAME_TWO })).subscribe(result => {

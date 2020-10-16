@@ -24,13 +24,13 @@
         headers: { "Content-Type": "application/json", 'X-CSRF-Token': "#{form_authenticity_token}" },
       };
 
-      gl.startup_graphql_calls = {
-        calls: gl.startup_graphql_calls,
+      gl.startup_graphql_calls = gl.startup_graphql_calls.map(call => ({
+        ...call,
         fetchCall: fetch(url, {
           ...opts,
           credentials: 'same-origin',
-          body: JSON.stringify(gl.startup_graphql_calls)
+          body: JSON.stringify(call)
         })
-      }
+      }))
     }
 
