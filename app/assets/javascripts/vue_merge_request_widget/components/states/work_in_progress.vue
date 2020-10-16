@@ -10,7 +10,7 @@ import getStateQuery from '../../queries/get_state.query.graphql';
 import workInProgressQuery from '../../queries/states/work_in_progress.query.graphql';
 import removeWipMutation from '../../queries/toggle_wip.mutation.graphql';
 import StatusIcon from '../mr_widget_status_icon.vue';
-import tooltip from '../../../vue_shared/directives/tooltip';
+import { GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
 import eventHub from '../../event_hub';
 
 export default {
@@ -20,7 +20,7 @@ export default {
     GlButton,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective
   },
   mixins: [glFeatureFlagMixin(), mergeRequestQueryVariablesMixin],
   apollo: {
