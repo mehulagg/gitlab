@@ -161,7 +161,7 @@ package_hunter:
   needs: []
   script:
     - CLIENT_REPO="git+ssh://git@gitlab.com/gitlab-com/gl-security/security-research/package-hunter-cli"
-    - npx $(CLIENT_REPO)
+    - npx $CLIENT_REPO analyze gitlab.tgz
   artifacts:
     paths:
       - gl-dependency-scanning-report.json  # GitLab-specific
