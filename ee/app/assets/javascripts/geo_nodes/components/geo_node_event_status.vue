@@ -47,7 +47,6 @@ export default {
         v-gl-tooltip
         :title="timeStampString"
         class="event-status-timestamp"
-        data-placement="bottom"
       >
         ({{ timeFormatted(timeStamp) }})
       </span>
