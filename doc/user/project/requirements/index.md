@@ -40,7 +40,7 @@ list is sorted by creation date in descending order.
 
 ## Edit a requirement
 
-> - [Added](https://gitlab.com/gitlab-org/gitlab/-/issues/218607) ability to mark a requirement as Satisfied in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.5.
+> The ability to mark a requirement as Satisfied [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218607) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.5.
 
 You can edit a requirement (if you have the necessary privileges) from the requirements
 list page.
