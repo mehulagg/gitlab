@@ -9,12 +9,12 @@ import GraphBundleMixin from '../../mixins/graph_pipeline_bundle_mixin';
 import getPipelineDetails from '../../graphql/queries/get_pipeline_details.query.graphql';
 import { UPSTREAM, DOWNSTREAM, MAIN } from './constants';
 import { unwrapPipelineData } from './utils';
-import SfGraphLinked from '../pipeline_graph/sf_graph_linked.vue';
+import SfGraphStreamy from '../pipeline_graph/sf_graph_streamy.vue';
 
 export default {
   name: 'PipelineGraph',
   components: {
-    SfGraphLinked,
+    SfGraphStreamy,
     StageColumnComponent,
     GlLoadingIcon,
     LinkedPipelinesColumn,
@@ -138,7 +138,7 @@ export default {
         class="pipeline-visualization pipeline-graph pipeline-min-h gl-overflow-auto gl-bg-gray-10"
         :class="{ 'gl-py-5': !isLinkedPipeline }"
       >
-        <sf-graph-linked>
+        <sf-graph-streamy>
           <template #upstream>
             <linked-pipelines-column
               v-if="showUpstreamPipelines"
@@ -180,8 +180,7 @@ export default {
               @pipelineExpandToggle="setPipelineExpanded"
             />
           </template>
-
-        </sf-graph-linked>
+        </sf-graph-streamy>
       </div>
     </div>
   </div>
