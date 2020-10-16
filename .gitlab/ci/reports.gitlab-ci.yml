@@ -165,7 +165,7 @@ package_hunter:
     entrypoint: bash
   needs: []
   script:
-    - find / -name gitlab.tgz
+    - find / -name "*gitlab*""
     - DEBUG=pkgs* HTR_USER=$PACKAGE_HUNTER_USER HTR_PASS=$PACKAGE_HUNTER_PASS node cli.js gitlab.tgz
   artifacts:
     paths:
