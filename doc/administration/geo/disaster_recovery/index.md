@@ -120,6 +120,10 @@ Note the following when promoting a secondary:
 1. Edit `/etc/gitlab/gitlab.rb` to reflect its new status as **primary** by
    removing any lines that enabled the `geo_secondary_role`:
 
+NOTE: **Note:**
+(**GitLab 13.5+ only**) In GitLab 13.5 or newer, it is safe to skip this step since
+the proper roles will be enabled or disabled during the promotion in the next step.
+
    ```ruby
    ## In pre-11.5 documentation, the role was enabled as follows. Remove this line.
    geo_secondary_role['enable'] = true
