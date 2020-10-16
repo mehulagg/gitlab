@@ -265,7 +265,6 @@ describe('StartupJSLink', () => {
     link.request(mockOperation()).subscribe(result => {
       expect(result).toEqual(STARTUP_JS_RESPONSE);
       expect(startupLink.startupCalls.size).toBe(0);
-      done();
       link.request(mockOperation()).subscribe(result2 => {
         expect(result2).toEqual(FORWARDED_RESPONSE);
         done();
