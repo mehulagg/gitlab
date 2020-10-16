@@ -9,10 +9,12 @@ import GraphBundleMixin from '../../mixins/graph_pipeline_bundle_mixin';
 import getPipelineDetails from '../../graphql/queries/get_pipeline_details.query.graphql';
 import { UPSTREAM, DOWNSTREAM, MAIN } from './constants';
 import { unwrapPipelineData } from './utils';
+import SfGraphLinked from '../pipeline_graph/sf_graph_linked.vue';
 
 export default {
   name: 'PipelineGraph',
   components: {
+    SfGraphLinked,
     StageColumnComponent,
     GlLoadingIcon,
     LinkedPipelinesColumn,
@@ -133,52 +135,53 @@ export default {
   <div>
     <div class="build-content middle-block js-pipeline-graph">
       <div
-        class="pipeline-visualization pipeline-graph"
-        :class="{ 'pipeline-tab-content': !isLinkedPipeline }"
+        class="pipeline-visualization pipeline-graph gl-overflow-auto gl-bg-gray-10"
+        :class="{ 'gl-py-5': !isLinkedPipeline }"
       >
-        <div
-          :style="{
-            paddingLeft: `${graphLeftPadding}px`,
-            paddingRight: `${graphRightPadding}px`,
-          }"
-          class="gl-display-flex"
-        >
-          <linked-pipelines-column
-            v-if="showUpstreamPipelines"
-            :linked-pipelines="upstreamPipelines"
-            :column-title="__('Upstream')"
-            :type="$options.pipelineTypeConstants.UPSTREAM"
-          />
-
-          <template v-if="!graphLoading">
-            <stage-column-component
-              v-for="(stage, index) in stages"
-              :key="stage.name"
-              :class="{
-                'has-only-one-job': hasOnlyOneJob(stage),
-                'gl-mr-26': shouldAddRightMargin(index),
-                'has-upstream gl-ml-11': hasUpstreamPipelines,
-              }"
-              :title="capitalizeStageName(stage.name)"
-              :groups="stage.groups"
-              :stage-connector-class="stageConnectorClass(index, stage)"
-              :is-first-column="isFirstColumn(index)"
-              :job-hovered="jobName"
-              :action="stage.status.action"
-              :pipeline-expanded="pipelineExpanded"
-              @refreshPipelineGraph="refreshPipelineGraph"
+        <sf-graph-linked>
+          <template #upstream>
+            <linked-pipelines-column
+              v-if="showUpstreamPipelines"
+              :linked-pipelines="upstreamPipelines"
+              :column-title="__('Upstream')"
+              :type="$options.pipelineTypeConstants.UPSTREAM"
             />
           </template>
 
-          <linked-pipelines-column
-            v-if="showDownstreamPipelines"
-            :linked-pipelines="downstreamPipelines"
-            :column-title="__('Downstream')"
-            :type="$options.pipelineTypeConstants.DOWNSTREAM"
-            @downstreamHovered="setJob"
-            @pipelineExpandToggle="setPipelineExpanded"
-          />
-        </div>
+          <template #main>
+            <template v-if="!graphLoading">
+              <stage-column-component
+                v-for="(stage, index) in stages"
+                :key="stage.name"
+                :class="{
+                  'has-only-one-job': hasOnlyOneJob(stage),
+                  'gl-mr-26': shouldAddRightMargin(index),
+                  'has-upstream gl-ml-11': hasUpstreamPipelines,
+                }"
+                :title="capitalizeStageName(stage.name)"
+                :groups="stage.groups"
+                :stage-connector-class="stageConnectorClass(index, stage)"
+                :is-first-column="isFirstColumn(index)"
+                :job-hovered="jobName"
+                :action="stage.status.action"
+                :pipeline-expanded="pipelineExpanded"
+                @refreshPipelineGraph="refreshPipelineGraph"
+              />
+            </template>
+          </template>
+
+          <template #downstream>
+            <linked-pipelines-column
+              v-if="showDownstreamPipelines"
+              :linked-pipelines="downstreamPipelines"
+              :column-title="__('Downstream')"
+              :type="$options.pipelineTypeConstants.DOWNSTREAM"
+              @downstreamHovered="setJob"
+              @pipelineExpandToggle="setPipelineExpanded"
+            />
+          </template>
+
+        </sf-graph-linked>
       </div>
     </div>
   </div>

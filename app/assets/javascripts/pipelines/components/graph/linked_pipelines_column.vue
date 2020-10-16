@@ -137,7 +137,7 @@ export default {
 
 <template>
   <div class="gl-display-flex">
-    <div :class="columnClass" class="stage-column linked-pipelines-column">
+    <div :class="columnClass" class="linked-pipelines-column">
       <div class="stage-name linked-pipelines-column-title">{{ columnTitle }}</div>
       <ul>
         <li v-for="(pipeline, index) in linkedPipelines" class="gl-display-flex" :class="{'gl-flex-direction-row-reverse': isUpstream}">

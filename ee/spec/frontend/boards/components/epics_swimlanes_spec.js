@@ -1,5 +1,5 @@
 import Vuex from 'vuex';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
 import Draggable from 'vuedraggable';
 import EpicsSwimlanes from 'ee/boards/components/epics_swimlanes.vue';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
@@ -38,14 +38,14 @@ describe('EpicsSwimlanes', () => {
     });
   };
 
-  const createComponent = (props = {}) => {
+  const createComponent = (props = {}, method = shallowMount) => {
     const store = createStore();
     const defaultProps = {
       lists: mockListsWithModel,
       disabled: false,
     };
 
-    wrapper = shallowMount(EpicsSwimlanes, {
+    wrapper = method(EpicsSwimlanes, {
       localVue,
       propsData: { ...defaultProps, ...props },
       store,
@@ -56,6 +56,7 @@ describe('EpicsSwimlanes', () => {
     wrapper.destroy();
   });
 
+<<<<<<< Updated upstream
   describe('computed', () => {
     describe('treeRootWrapper', () => {
       describe('when canAdminList prop is true', () => {
@@ -66,12 +67,85 @@ describe('EpicsSwimlanes', () => {
         it('should return Draggable reference when canAdminList prop is true', () => {
           expect(wrapper.find(Draggable).exists()).toBe(true);
         });
+=======
+  fdescribe('treeRootWrapper', () => {
+
+    describe('when canAdminList prop is true', () => {
+      beforeEach(() => {
+        createComponent({ canAdminList: true });
       });
 
+      it('should return Draggable reference when canAdminList prop is true', () => {
+        expect(wrapper.find(Draggable).exists()).toBe(true)
+>>>>>>> Stashed changes
+      });
+    });
+
+<<<<<<< Updated upstream
       describe('when canAdminList prop is false', () => {
         beforeEach(() => {
           createComponent();
         });
+=======
+
+    describe('when canAdminList prop is false', () => {
+      it('should not return Draggable reference when canAdminList prop is false', () => {
+        expect(wrapper.find(Draggable).exists()).toBe(false)
+      });
+    });
+
+  });
+
+  describe('treeRootOptions', () => {
+    it('should return object containing Vue.Draggable config extended from `defaultSortableConfig` when canAdminList prop is true', () => {
+      wrapper.setProps({ canAdminList: true });
+
+      expect(wrapper.vm.treeRootOptions).toEqual(
+        expect.objectContaining({
+          animation: 200,
+          forceFallback: true,
+          fallbackClass: 'is-dragging',
+          fallbackOnBody: false,
+          ghostClass: 'is-ghost',
+          group: 'board-swimlanes',
+          tag: DRAGGABLE_TAG,
+          draggable: '.is-draggable',
+          'ghost-class': 'swimlane-header-drag-active',
+          value: mockListsWithModel,
+        }),
+      );
+    });
+
+    it('should return an empty object when canAdminList prop is false', () => {
+      expect(wrapper.vm.treeRootOptions).toEqual(expect.objectContaining({}));
+    });
+  });
+
+
+
+  describe('computed', () => {
+
+
+    describe('treeRootOptions', () => {
+      it('should return object containing Vue.Draggable config extended from `defaultSortableConfig` when canAdminList prop is true', () => {
+        wrapper.setProps({ canAdminList: true });
+
+        expect(wrapper.vm.treeRootOptions).toEqual(
+          expect.objectContaining({
+            animation: 200,
+            forceFallback: true,
+            fallbackClass: 'is-dragging',
+            fallbackOnBody: false,
+            ghostClass: 'is-ghost',
+            group: 'board-swimlanes',
+            tag: DRAGGABLE_TAG,
+            draggable: '.is-draggable',
+            'ghost-class': 'swimlane-header-drag-active',
+            value: mockListsWithModel,
+          }),
+        );
+      });
+>>>>>>> Stashed changes
 
         it('should not return Draggable reference when canAdminList prop is false', () => {
           expect(wrapper.find(Draggable).exists()).toBe(false);
