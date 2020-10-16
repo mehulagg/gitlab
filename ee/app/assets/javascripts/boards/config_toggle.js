@@ -9,7 +9,7 @@ export default boardsStore => {
     gl.boardConfigToggle = new Vue({
       el: configEl,
       directives: {
-        GlTooltip: GlTooltipDirective
+        GlTooltip: GlTooltipDirective,
       },
       data() {
         return {
