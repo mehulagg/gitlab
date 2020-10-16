@@ -27,8 +27,10 @@ default:
 
 workflow:
   rules:
+    - if: '$CI_COMMIT_BRANCH'
+      when: never
     # If `$FORCE_GITLAB_CI` is set, create a pipeline.
-    # - if: '$FORCE_GITLAB_CI'
+    - if: '$FORCE_GITLAB_CI'
     # As part of the process of creating RCs automatically, we update stable
     # branches with the changes of the most recent production deployment. The
     # merge requests used for this merge a branch release-tools/X into a stable
