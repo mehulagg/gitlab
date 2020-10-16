@@ -157,6 +157,16 @@ package_hunter:
   # extends:
   # - .reports:schedule-dast
   image: registry.hub.docker.com/library/node:12.19-buster-slim
+  needs: []
+  script:
+    - CLIENT_REPO="git+ssh://git@gitlab.com/gitlab-com/gl-security/security-research/package-hunter-cli"
+    - npx $(CLIENT_REPO)
+  artifacts:
+    paths:
+      - gl-dependency-scanning-report.json  # GitLab-specific
+    reports:
+      dependency_scanning: gl-dependency-scanning-report.json
+    expire_in: 1 week  # GitLab-specific
 
 
 license_scanning:
