@@ -398,41 +398,46 @@ In order to prevent Path Traversal vulnerabilities, user-controlled filenames or
 
 ## OS command injection guidelines
 
-### Description
-
-Command injection is an issue in which an attacker is able to execute arbitrary commands on the host operating system through a vulnerable application.
-
-Command injection attacks do not always provide feedback to a user, but simple commands like curl can be used by the attacker to obtain an answer.
+Command injection is an issue in which an attacker is able to execute arbitrary commands on the host
+operating system through a vulnerable application. Such attacks don't always provide feedback to a
+user, but the attacker can use simple commands like `curl` to obtain an answer.
 
 ### Impact
 
-The impact of command injection greatly depends on the user context running the commands as well as how data is validated and sanitized. It can vary from low impact because the user running the injected commands has limited rights to critical impact if it’s running as the root user.
+The impact of command injection greatly depends on the user context running the commands, as well as
+how data is validated and sanitized. It can vary from low impact because the user running the
+injected commands has limited rights, to critical impact if running as the root user.
 
 Potential impacts include:
 
-* Execution of arbitrary commands on the host machine
-* Unauthorized access to sensitive data including passwords and tokens in secrets or configuration files
-* Exposure of sensitive system files on the host machine such as `/etc/passwd/` or `/etc/shadow`
-* Compromise of related systems and services gained through access to the host machine
+- Execution of arbitrary commands on the host machine.
+- Unauthorized access to sensitive data, including passwords and tokens in secrets or configuration
+  files.
+- Exposure of sensitive system files on the host machine, such as `/etc/passwd/` or `/etc/shadow`.
+- Compromise of related systems and services gained through access to the host machine.
 
-### When to consider
-
-When working with user-controlled data that are used to run OS commands.
+You should be aware of and take steps to prevent command injection when working with user-controlled
+data that are used to run OS commands.
 
 ### Mitigation and prevention
 
-In order to prevent OS command injections, user supplied data should not be used within OS commands. In cases where this cannot be avoided:
+To prevent OS command injections, user-supplied data shouldn't be used within OS commands. In cases
+where you can't avoid this:
 
-- Validate user supplied data against an allowlist
-- Use a case switch
-- Validate that user supplied data only contains alphanumeric characters (and no syntax or whitespace characters for example)
-- Always use `--` to separate options from arguments
+- Validate user-supplied data against an allowlist.
+- Use a case switch.
+- Ensure that user-supplied data only contains alphanumeric characters (and no syntax or whitespace
+  characters, for example).
+- Always use `--` to separate options from arguments.
 
 ### Ruby
 
-Consider using `system("command", "arg0", "arg1", ...)` whenever you can, this prevents an attacker from concatenating commands.
+Consider using `system("command", "arg0", "arg1", ...)` whenever you can. This prevents an attacker
+from concatenating commands.
 
-For more examples on how to use shell commands securely, you can consult our [Guidelines for shells commands in the GitLab codebase](shell_commands.md) page, which contains various examples on how to securely call OS commands.
+For more examples on how to use shell commands securely, consult
+[Guidelines for shell commands in the GitLab codebase](shell_commands.md).
+It contains various examples on how to securely call OS commands.
 
 ### Go
 
@@ -455,12 +460,12 @@ func main() {
 }
 ```
 
-This will echo `"1; cat /etc/passwd"`.
+This echoes `"1; cat /etc/passwd"`.
 
-**Do not** use `sh` as this will bypass internal protections:
+**Do not** use `sh`, as it bypasses internal protections:
 
 ```golang
 out, _ = exec.Command("sh", "-c", "echo 1 | cat /etc/passwd").Output()
 ```
 
-This will output `1` followed by the content of `/etc/passwd`.
+This outputs `1` followed by the content of `/etc/passwd`.
