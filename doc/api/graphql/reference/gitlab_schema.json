@@ -2936,7 +2936,7 @@
                   "description": "Find a list by its global ID",
                   "type": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "ListID",
                     "ofType": null
                   },
                   "defaultValue": null

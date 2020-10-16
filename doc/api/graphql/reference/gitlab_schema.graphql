@@ -1134,7 +1134,7 @@ type Board {
     """
     Find a list by its global ID
     """
-    id: ID
+    id: ListID
 
     """
     Filters applied when getting issue metadata in the board list
