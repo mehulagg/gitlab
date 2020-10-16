@@ -32,8 +32,8 @@ can create a new requirement.
 To create a requirement:
 
 1. From your project page, go to **{requirements}** **Requirements**.
-1. Click **New requirement**.
-1. Enter a title and description and click **Create requirement**.
+1. Select **New requirement**.
+1. Enter a title and description and select **Create requirement**.
 
 ![requirement create view](img/requirement_create_v13_5.png)
 
@@ -42,11 +42,11 @@ list is sorted by creation date in descending order.
 
 ## View a requirement
 
-You can view a requirement from the list by clicking on it.
+You can view a requirement from the list by selecting it.
 
 ![requirement view](img/requirement_view_v13_5.png)
 
-You can also edit a requirement while viewing it by clicking on **Edit** (**{pencil}**)
+To edit a requirement while viewing it, select the **Edit** icon (**{pencil}**)
 available next to requirement title.
 
 ## Edit a requirement
@@ -58,17 +58,17 @@ list page.
 
 To edit a requirement:
 
-1. From the requirements list, click **Edit** (**{pencil}**).
+1. From the requirements list, select the **Edit** icon (**{pencil}**).
 1. Update the title and/or description in text input field. You can also mark a
    requirement as satisfied in the edit form by using the checkbox **Satisfied**.
-1. Click **Save changes**.
+1. Select **Save changes**.
 
 ## Archive a requirement
 
 You can archive an open requirement (if you have the necessary privileges) while
 you're in the **Open** tab.
 
-To archive a requirement, click **Archive** (**{archive}**).
+To archive a requirement, select **Archive** (**{archive}**).
 
 As soon as a requirement is archived, it no longer appears in the **Open** tab.
 
@@ -78,7 +78,7 @@ You can view the list of archived requirements in the **Archived** tab.
 
 ![archived requirements list](img/requirements_archived_list_view_v13_1.png)
 
-To reopen an archived requirement, click **Reopen**.
+To reopen an archived requirement, select **Reopen**.
 
 As soon as a requirement is reopened, it no longer appears in the **Archived** tab.
 
@@ -94,7 +94,7 @@ You can search for a requirement from the requirements list page based on the fo
 To search for a requirement:
 
 1. In a project, go to **{requirements}** **Requirements > List**.
-1. Click the **Search or filter results** field. A dropdown menu appears.
+1. Select the **Search or filter results** field. A dropdown menu appears.
 1. Select the requirement author from the dropdown or enter plain text to search by requirement title.
 1. Press <kbd>Enter</kbd> on your keyboard to filter the list.
 
