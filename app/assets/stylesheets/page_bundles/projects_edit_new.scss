@@ -1,0 +1,126 @@
+@import 'mixins_and_variables_and_functions';
+
+.new_project,
+.edit-project {
+  .form-text.text-muted {
+    margin-bottom: 10px;
+  }
+
+  .project-path .form-control {
+    border-radius: $gl-border-radius-base;
+  }
+
+  .input-group {
+    .select2-container {
+      display: unset;
+      max-width: unset;
+      flex-grow: 1;
+    }
+
+    > div {
+      &:last-child {
+        padding-right: 0;
+      }
+    }
+  }
+
+  @include media-breakpoint-down(xs) {
+    .input-group > div {
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    fieldset > .form-group:first-child {
+      padding-right: 0;
+    }
+  }
+
+  .input-group-prepend,
+  .input-group-append {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: unset;
+    width: unset;
+    max-width: 50%;
+    text-align: left;
+
+    &.static-namespace {
+      height: 35px;
+      border-radius: 3px;
+      border: 1px solid var(--border-color, $border-color);
+      max-width: 100%;
+      flex-grow: 1;
+    }
+
+    + .select2 a,
+    + .btn-default {
+      border-radius: 0 $gl-border-radius-base $gl-border-radius-base 0;
+    }
+  }
+}
+
+.project-template {
+  > .form-group {
+    margin-bottom: 0;
+  }
+
+  .tab-pane {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .template-option {
+    padding: 16px 0;
+
+    &:not(:first-child) {
+      border-top: 1px solid $border-color;
+    }
+
+    .controls {
+      margin-left: auto;
+    }
+  }
+
+  .choose-template {
+    input {
+      position: absolute;
+      clip: rect(0, 0, 0, 0);
+    }
+  }
+
+  .project-fields-form {
+    display: none;
+
+    &.selected {
+      display: block;
+      padding: $gl-padding;
+    }
+  }
+
+  .template-input-group {
+    .input-group-prepend {
+      flex: 1;
+    }
+
+    .input-group-text {
+      width: 100%;
+      background-color: $white;
+    }
+
+    .selected-icon {
+      img {
+        display: none;
+        height: 20px;
+        width: 20px;
+      }
+    }
+  }
+}
+
+.project-tip-command {
+  > .input-group-prepend:first-child,
+  > .input-group-append:first-child {
+    width: auto;
+  }
+}

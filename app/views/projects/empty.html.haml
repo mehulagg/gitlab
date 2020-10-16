@@ -2,6 +2,8 @@
 - default_branch_name = @project.default_branch || "master"
 - breadcrumb_title _("Details")
 - page_title _("Details")
+- add_page_specific_style 'page_bundles/projects_common'
+- add_page_specific_style 'page_bundles/projects_show'
 
 = render partial: 'flash_messages', locals: { project: @project }
 

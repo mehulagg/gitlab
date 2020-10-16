@@ -1,0 +1,278 @@
+@import 'mixins_and_variables_and_functions';
+
+/*
+ * Projects list rendered on dashboard and user page
+ */
+.projects-list {
+  @include basic-list;
+  display: flex;
+  flex-direction: column;
+
+  // Disable Flexbox for admin page
+  &.admin-projects,
+  &.group-settings-projects {
+    display: block;
+
+    .project-row {
+      display: block;
+
+      .description > p {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .project-row {
+    @include basic-list-stats;
+    display: flex;
+    align-items: center;
+    padding: $gl-padding-12 0;
+
+    &.no-description {
+      @include media-breakpoint-up(sm) {
+        .avatar-container {
+          align-self: center;
+        }
+
+        .metadata-info {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+
+  h2 {
+    font-size: $gl-font-size;
+    font-weight: $gl-font-weight-bold;
+    margin-bottom: 0;
+
+    @include media-breakpoint-up(sm) {
+      .namespace-name {
+        font-weight: $gl-font-weight-normal;
+      }
+    }
+  }
+
+  .avatar-container {
+    flex: 0 0 auto;
+    align-self: flex-start;
+  }
+
+  .project-details {
+    min-width: 0;
+    line-height: $gl-line-height;
+
+    .flex-wrapper {
+      min-width: 0;
+      margin-top: -$gl-padding-8; // negative margin required for flex-wrap
+      flex: 1 1 100%;
+
+      .project-title {
+        line-height: 20px;
+      }
+    }
+
+    p,
+    .commit-row-message {
+      @include str-truncated(100%);
+      margin-bottom: 0;
+    }
+
+    .user-access-role {
+      margin: 0;
+    }
+
+    .description {
+      line-height: 1.5;
+      color: $gl-text-color-secondary;
+    }
+
+    @include media-breakpoint-down(md) {
+      .user-access-role {
+        line-height: $gl-line-height-14;
+      }
+    }
+  }
+
+  .ci-status-link {
+    display: inline-block;
+    line-height: 17px;
+    vertical-align: middle;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .controls {
+    @include media-breakpoint-down(xs) {
+      margin-top: $gl-padding-8;
+    }
+
+    @include media-breakpoint-up(sm) {
+      margin-top: 0;
+    }
+
+    @include media-breakpoint-up(lg) {
+      flex: 1 1 40%;
+    }
+
+    .icon-wrapper {
+      color: inherit;
+      margin-right: $gl-padding;
+
+      @include media-breakpoint-down(md) {
+        margin-right: 0;
+        margin-left: $gl-padding-8;
+      }
+
+      @include media-breakpoint-down(xs) {
+        &:first-child {
+          margin-left: 0;
+        }
+      }
+    }
+
+    &:not(.with-pipeline-status) {
+      .icon-wrapper:first-of-type {
+        @include media-breakpoint-up(lg) {
+          margin-left: $gl-padding-32;
+        }
+      }
+    }
+
+    .ci-status-link {
+      display: inline-flex;
+    }
+  }
+
+  .star-button {
+    .icon {
+      top: 0;
+    }
+  }
+
+  .icon-container {
+    @include media-breakpoint-down(xs) {
+      margin-right: $gl-padding-8;
+    }
+  }
+
+  &.compact {
+    .project-row {
+      padding: $gl-padding 0;
+    }
+
+    h2 {
+      font-size: $gl-font-size;
+    }
+
+    .avatar-container {
+      @include avatar-size(40px, 10px);
+      min-height: 40px;
+      min-width: 40px;
+
+      .identicon.s48 {
+        font-size: 16px;
+      }
+    }
+
+    .controls {
+      @include media-breakpoint-up(sm) {
+        margin-top: 0;
+      }
+    }
+
+    .updated-note {
+      @include media-breakpoint-up(sm) {
+        margin-top: $gl-padding-8;
+      }
+    }
+
+    .icon-wrapper {
+      margin-left: $gl-padding-8;
+      margin-right: 0;
+
+      @include media-breakpoint-down(xs) {
+        &:first-child {
+          margin-left: 0;
+        }
+      }
+    }
+
+    .user-access-role {
+      line-height: $gl-line-height-14;
+    }
+  }
+
+  @include media-breakpoint-down(md) {
+    h2 {
+      font-size: $gl-font-size;
+    }
+
+    .avatar-container {
+      @include avatar-size(40px, 10px);
+      min-height: 40px;
+      min-width: 40px;
+
+      .identicon.s64 {
+        font-size: 16px;
+      }
+    }
+  }
+
+  @include media-breakpoint-down(md) {
+    .updated-note {
+      margin-top: $gl-padding-8;
+      text-align: right;
+    }
+  }
+
+  .forks,
+  .pipeline-status,
+  .updated-note {
+    display: flex;
+  }
+
+  @include media-breakpoint-down(md) {
+    &:not(.explore) {
+      .forks {
+        display: none;
+      }
+    }
+
+    &.explore {
+      .pipeline-status,
+      .updated-note {
+        display: none !important;
+      }
+    }
+  }
+
+  @include media-breakpoint-down(xs) {
+    .updated-note {
+      margin-top: 0;
+      text-align: left;
+    }
+  }
+}
+
+.vs-public {
+  color: $blue-500;
+}
+
+.vs-internal {
+  color: $orange-500;
+}
+
+.vs-private {
+  color: $green-500;
+}
+
+.lfs-enabled {
+  color: $green-500;
+}
+
+.lfs-disabled {
+  color: $orange-500;
+}

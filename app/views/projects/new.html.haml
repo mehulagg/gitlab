@@ -3,8 +3,10 @@
 - page_title    _('New Project')
 - header_title  _("Projects"), dashboard_projects_path
 - active_tab = local_assigns.fetch(:active_tab, 'blank')
+- add_page_specific_style 'page_bundles/projects_edit_new'
+- add_page_specific_style 'page_bundles/projects_common'
 
-.project-edit-container.gl-mt-3
+.project-edit-container.gl-pt-5
   .project-edit-errors
     = render 'projects/errors'
 
@@ -66,7 +68,7 @@
                 %div
                   = render 'project_templates', f: f, project: @project
 
-        .tab-pane.import-project-pane.js-toggle-container{ id: 'import-project-pane', class: active_when(active_tab == 'import'), role: 'tabpanel' }
+        .tab-pane.import-project-pane.js-toggle-container.gl-pb-3{ id: 'import-project-pane', class: active_when(active_tab == 'import'), role: 'tabpanel' }
           - if import_sources_enabled?
             = render 'import_project_pane', active_tab: active_tab
           - else

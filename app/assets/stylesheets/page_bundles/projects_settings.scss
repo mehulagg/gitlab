@@ -1,0 +1,9 @@
+@import 'mixins_and_variables_and_functions';
+
+.new-protected-branch,
+.new-protected-tag {
+  label {
+    margin-top: 6px;
+    font-weight: $gl-font-weight-normal;
+  }
+}

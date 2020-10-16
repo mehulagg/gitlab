@@ -3,6 +3,7 @@
 - page_title _("Commits"), @ref
 = content_for :meta_tags do
   = auto_discovery_link_tag(:atom, project_commits_path(@project, @ref, rss_url_options), title: "#{@project.name}:#{@ref} commits")
+- add_page_specific_style 'page_bundles/projects_common'
 
 .js-project-commits-show{ 'data-commits-limit' => @limit }
   .tree-holder

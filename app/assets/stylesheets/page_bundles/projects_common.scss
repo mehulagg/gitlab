@@ -1,0 +1,176 @@
+@import 'mixins_and_variables_and_functions';
+
+.project-filters {
+  .btn svg {
+    color: $gray-700;
+  }
+
+  .button-filter-group {
+    .btn {
+      width: 96px;
+    }
+
+    a {
+      color: $black;
+    }
+
+    .active {
+      background: $btn-active-gray;
+    }
+  }
+
+  .filtered-search-dropdown-label {
+    min-width: 68px;
+
+    @include media-breakpoint-down(xs) {
+      min-width: 60px;
+    }
+  }
+
+  .filtered-search {
+    min-width: 30%;
+    flex-basis: 0;
+
+    .project-filter-form .project-filter-form-field {
+      padding-right: $gl-padding-8;
+    }
+
+    .filtered-search,
+    .filtered-search-nav,
+    .filtered-search-dropdown {
+      flex-basis: 0;
+    }
+
+    @include media-breakpoint-down(lg) {
+      min-width: 15%;
+
+      .project-filter-form-field {
+        min-width: 150px;
+      }
+    }
+
+    @include media-breakpoint-down(md) {
+      min-width: 30%;
+    }
+  }
+
+  .filtered-search-box {
+    border-radius: 3px 0 0 3px;
+  }
+
+  .dropdown-menu-toggle {
+    margin-left: $gl-padding-8;
+  }
+
+  @include media-breakpoint-down(md) {
+    .extended-filtered-search-box {
+      min-width: 55%;
+    }
+
+    .filtered-search-dropdown {
+      width: 50%;
+
+      .dropdown-menu-toggle {
+        width: 100%;
+      }
+    }
+  }
+
+  @include media-breakpoint-down(xs) {
+    .filtered-search-dropdown {
+      width: 100%;
+    }
+  }
+}
+
+@include media-breakpoint-down(xs) {
+  .fork-filtered-search {
+    width: 100%;
+    margin: $gl-spacing-scale-2 0;
+  }
+}
+
+.save-project-loader {
+  margin-top: 50px;
+  margin-bottom: 50px;
+  color: $gray-700;
+}
+
+.breadcrumb.repo-breadcrumb {
+  flex: 1;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  line-height: 34px;
+  margin: 0;
+
+  > li + li::before {
+    padding: 0 3px;
+    color: $gray-300;
+  }
+
+  a {
+    color: $gl-text-color;
+  }
+
+  .dropdown-menu {
+    width: 240px;
+  }
+}
+
+.git-clone-holder {
+  .btn-clipboard {
+    border: 1px solid $border-color;
+  }
+
+  .clone-options {
+    display: table-cell;
+
+    a.btn {
+      width: 100%;
+    }
+  }
+
+  .form-control {
+    @extend .monospace;
+    background-color: $white;
+    border-color: $border-color;
+    font-size: 14px;
+    margin-left: -1px;
+    cursor: auto;
+  }
+}
+
+.git-clone-holder,
+.mobile-git-clone {
+  .btn {
+    .icon {
+      fill: $white;
+    }
+  }
+}
+
+.protected-branches-list,
+.protected-tags-list {
+  margin-bottom: 30px;
+
+  .settings-message {
+    margin: 0;
+    border-radius: 0 0 1px 1px;
+    padding: 20px 0;
+    border: 0;
+  }
+
+  .table-bordered {
+    border-radius: 1px;
+
+    th:not(:last-child),
+    td:not(:last-child) {
+      border-right: solid 1px transparent;
+    }
+  }
+
+  .flash-container {
+    padding: 0;
+  }
+}

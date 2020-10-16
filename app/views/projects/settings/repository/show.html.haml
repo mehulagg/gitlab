@@ -2,6 +2,8 @@
 - page_title _("Repository")
 - @content_class = "limit-container-width" unless fluid_layout
 - deploy_token_description = s_('DeployTokens|Deploy tokens allow access to packages, your repository, and registry images.')
+- add_page_specific_style 'page_bundles/projects_common'
+- add_page_specific_style 'page_bundles/projects_settings'
 
 = render "projects/default_branch/show"
 = render_if_exists "projects/push_rules/index"

@@ -6,6 +6,9 @@
 - if @tree.readme
   - add_page_startup_api_call project_blob_path(@project, tree_join(@ref, @tree.readme.path), viewer: "rich", format: "json")
 
+- add_page_specific_style 'page_bundles/projects_common'
+- add_page_specific_style 'page_bundles/projects_show'
+
 #tree-holder.tree-holder.clearfix
   .nav-block
     = render 'projects/tree/tree_header', tree: @tree
