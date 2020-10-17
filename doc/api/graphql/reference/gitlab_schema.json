@@ -4518,7 +4518,7 @@
               "description": "Filter by epic ID. Incompatible with epicWildcardId",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "EpicID",
                 "ofType": null
               },
               "defaultValue": null
@@ -36748,7 +36748,7 @@
               "description": "Filter by epic ID. Incompatible with epicWildcardId",
               "type": {
                 "kind": "SCALAR",
-                "name": "ID",
+                "name": "EpicID",
                 "ofType": null
               },
               "defaultValue": null

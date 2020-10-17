@@ -1695,7 +1695,7 @@ input BoardIssueInput {
   """
   Filter by epic ID. Incompatible with epicWildcardId
   """
-  epicId: ID
+  epicId: EpicID
 
   """
   Filter by epic ID wildcard. Incompatible with epicId
@@ -12512,7 +12512,7 @@ input NegatedBoardIssueInput {
   """
   Filter by epic ID. Incompatible with epicWildcardId
   """
-  epicId: ID
+  epicId: EpicID
 
   """
   Filter by label name
