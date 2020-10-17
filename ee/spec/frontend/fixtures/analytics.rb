@@ -4,32 +4,32 @@ require 'spec_helper'
 RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
   include JavaScriptFixturesHelpers
 
-  let_it_be(:group) { create(:group) }
-  let_it_be(:value_stream) { create(:cycle_analytics_group_value_stream, group: group) }
-  let_it_be(:project) { create(:project, :repository, namespace: group) }
-  let_it_be(:user) { create(:user, :admin) }
-  let_it_be(:milestone) { create(:milestone, project: project) }
+  let(:group) { create(:group) }
+  let(:value_stream) { create(:cycle_analytics_group_value_stream, group: group) }
+  let(:project) { create(:project, :repository, namespace: group) }
+  let(:user) { create(:user, :admin) }
+  let(:milestone) { create(:milestone, project: project) }
 
-  let_it_be(:issue) { create(:issue, project: project, created_at: 4.days.ago) }
-  let_it_be(:issue_1) { create(:issue, project: project, created_at: 5.days.ago) }
-  let_it_be(:issue_2) { create(:issue, project: project, created_at: 4.days.ago) }
-  let_it_be(:issue_3) { create(:issue, project: project, created_at: 3.days.ago) }
+  let(:issue) { create(:issue, project: project, created_at: 4.days.ago) }
+  let(:issue_1) { create(:issue, project: project, created_at: 5.days.ago) }
+  let(:issue_2) { create(:issue, project: project, created_at: 4.days.ago) }
+  let(:issue_3) { create(:issue, project: project, created_at: 3.days.ago) }
 
-  let_it_be(:label) { create(:group_label, name: 'in-code-review', group: group) }
+  let(:label) { create(:group_label, name: 'in-code-review', group: group) }
 
-  let_it_be(:mr_1) { create(:merge_request, source_project: project, allow_broken: true, created_at: 20.days.ago) }
-  let_it_be(:mr_2) { create(:merge_request, source_project: project, allow_broken: true, created_at: 19.days.ago) }
-  let_it_be(:mr_3) { create(:merge_request, source_project: project, allow_broken: true, created_at: 18.days.ago) }
+  let(:mr_1) { create(:merge_request, source_project: project, allow_broken: true, created_at: 20.days.ago) }
+  let(:mr_2) { create(:merge_request, source_project: project, allow_broken: true, created_at: 19.days.ago) }
+  let(:mr_3) { create(:merge_request, source_project: project, allow_broken: true, created_at: 18.days.ago) }
 
-  let_it_be(:pipeline_1) { create(:ci_empty_pipeline, status: 'created', project: project, ref: mr_1.source_branch, sha: mr_1.source_branch_sha, head_pipeline_of: mr_1) }
-  let_it_be(:pipeline_2) { create(:ci_empty_pipeline, status: 'created', project: project, ref: mr_2.source_branch, sha: mr_2.source_branch_sha, head_pipeline_of: mr_2) }
-  let_it_be(:pipeline_3) { create(:ci_empty_pipeline, status: 'created', project: project, ref: mr_3.source_branch, sha: mr_3.source_branch_sha, head_pipeline_of: mr_3) }
+  let(:pipeline_1) { create(:ci_empty_pipeline, status: 'created', project: project, ref: mr_1.source_branch, sha: mr_1.source_branch_sha, head_pipeline_of: mr_1) }
+  let(:pipeline_2) { create(:ci_empty_pipeline, status: 'created', project: project, ref: mr_2.source_branch, sha: mr_2.source_branch_sha, head_pipeline_of: mr_2) }
+  let(:pipeline_3) { create(:ci_empty_pipeline, status: 'created', project: project, ref: mr_3.source_branch, sha: mr_3.source_branch_sha, head_pipeline_of: mr_3) }
 
-  let_it_be(:build_1) { create(:ci_build, :success, pipeline: pipeline_1, author: user) }
-  let_it_be(:build_2) { create(:ci_build, :success, pipeline: pipeline_2, author: user) }
-  let_it_be(:build_3) { create(:ci_build, :success, pipeline: pipeline_3, author: user) }
+  let(:build_1) { create(:ci_build, :success, pipeline: pipeline_1, author: user) }
+  let(:build_2) { create(:ci_build, :success, pipeline: pipeline_2, author: user) }
+  let(:build_3) { create(:ci_build, :success, pipeline: pipeline_3, author: user) }
 
-  let_it_be(:label_based_stage) do
+  let(:label_based_stage) do
     create(:cycle_analytics_group_stage, {
       name: 'label-based-stage',
       parent: group,
@@ -38,32 +38,6 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
       end_event_identifier: :issue_label_removed,
       end_event_label_id: label.id
     })
-  end
-
-  # Usage:
-  #
-  # context '...' do
-  #   let_it_be(:run_once) { run_once_class.new }
-  #
-  #   it 'runs once' do
-  #     run_once.call do
-  #       # steps to be run only once per context
-  #     end
-  #   end
-  # end
-  let_it_be(:run_once_class) do
-    Class.new do
-      def initialize
-        @run = false
-      end
-
-      def call
-        return if @run
-
-        yield
-        @run = true
-      end
-    end
   end
 
   def prepare_cycle_analytics_data
@@ -152,70 +126,66 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
   describe Groups::Analytics::CycleAnalytics::StagesController, type: :controller do
     render_views
 
-    let_it_be(:run_once) { run_once_class.new }
     let(:params) { { created_after: 3.months.ago, created_before: Time.now, group_id: group.full_path } }
-
-    before_all do
-      # Persist the default stages
-      Gitlab::Analytics::CycleAnalytics::DefaultStages.all.map do |params|
-        group.cycle_analytics_stages.build(params.merge(value_stream: value_stream)).save!
-      end
-    end
 
     before do
       stub_licensed_features(cycle_analytics_for_groups: true)
 
-      run_once.call do
-        create_label_based_cycle_analytics_stage
-
-        prepare_cycle_analytics_data
-        create_deployment
-
-        additional_cycle_analytics_metrics
+      # Persist the default stages
+      Gitlab::Analytics::CycleAnalytics::DefaultStages.all.map do |params|
+        group.cycle_analytics_stages.build(params.merge(value_stream: value_stream)).save!
       end
+
+      create_label_based_cycle_analytics_stage
+
+      prepare_cycle_analytics_data
+      create_deployment
+
+      additional_cycle_analytics_metrics
 
       sign_in(user)
     end
 
-    it 'analytics/value_stream_analytics/stages.json' do
-      get(:index, params: { group_id: group.name }, format: :json)
-
-      expect(response).to be_successful
-    end
-
-    Gitlab::Analytics::CycleAnalytics::DefaultStages.all.each do |stage|
-      it "analytics/value_stream_analytics/stages/#{stage[:name]}/records.json" do
-        stage_id = group.cycle_analytics_stages.find_by(name: stage[:name]).id
-        get(:records, params: params.merge({ id: stage_id }), format: :json)
+    it 'generates fixtures' do
+      aggregate_failures 'analytics/value_stream_analytics/stages.json' do
+        get(:index, params: { group_id: group.name }, format: :json)
 
         expect(response).to be_successful
       end
 
-      it "analytics/value_stream_analytics/stages/#{stage[:name]}/median.json" do
-        stage_id = group.cycle_analytics_stages.find_by(name: stage[:name]).id
-        get(:median, params: params.merge({ id: stage_id }), format: :json)
+      Gitlab::Analytics::CycleAnalytics::DefaultStages.all.each do |stage|
+        aggregate_failures "analytics/value_stream_analytics/stages/#{stage[:name]}/records.json" do
+          stage_id = group.cycle_analytics_stages.find_by(name: stage[:name]).id
+          get(:records, params: params.merge({ id: stage_id }), format: :json)
+
+          expect(response).to be_successful
+        end
+
+        aggregate_failures "analytics/value_stream_analytics/stages/#{stage[:name]}/median.json" do
+          stage_id = group.cycle_analytics_stages.find_by(name: stage[:name]).id
+          get(:median, params: params.merge({ id: stage_id }), format: :json)
+
+          expect(response).to be_successful
+        end
+      end
+
+      aggregate_failures "analytics/value_stream_analytics/stages/label-based-stage/records.json" do
+        get(:records, params: params.merge({ id: label_based_stage.id }), format: :json)
 
         expect(response).to be_successful
       end
-    end
 
-    it "analytics/value_stream_analytics/stages/label-based-stage/records.json" do
-      get(:records, params: params.merge({ id: label_based_stage.id }), format: :json)
+      aggregate_failures "analytics/value_stream_analytics/stages/label-based-stage/median.json" do
+        get(:median, params: params.merge({ id: label_based_stage.id }), format: :json)
 
-      expect(response).to be_successful
-    end
-
-    it "analytics/value_stream_analytics/stages/label-based-stage/median.json" do
-      get(:median, params: params.merge({ id: label_based_stage.id }), format: :json)
-
-      expect(response).to be_successful
+        expect(response).to be_successful
+      end
     end
   end
 
   describe Groups::Analytics::CycleAnalytics::SummaryController, type: :controller do
     render_views
 
-    let_it_be(:run_once) { run_once_class.new }
     let(:params) { { created_after: 3.months.ago, created_before: Time.now, group_id: group.full_path } }
 
     def prepare_cycle_time_data
@@ -231,24 +201,24 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
     before do
       stub_licensed_features(cycle_analytics_for_groups: true)
 
-      run_once.call do
-        prepare_cycle_analytics_data
-        prepare_cycle_time_data
-      end
+      prepare_cycle_analytics_data
+      prepare_cycle_time_data
 
       sign_in(user)
     end
 
-    it 'analytics/value_stream_analytics/summary.json' do
-      get(:show, params: params, format: :json)
+    it 'generates fixtures' do
+      aggregate_failures 'analytics/value_stream_analytics/summary.json' do
+        get(:show, params: params, format: :json)
 
-      expect(response).to be_successful
-    end
+        expect(response).to be_successful
+      end
 
-    it 'analytics/value_stream_analytics/time_summary.json' do
-      get(:time_summary, params: params, format: :json)
+      aggregate_failures 'analytics/value_stream_analytics/time_summary.json' do
+        get(:time_summary, params: params, format: :json)
 
-      expect(response).to be_successful
+        expect(response).to be_successful
+      end
     end
   end
 
@@ -273,12 +243,14 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
       sign_in(user)
     end
 
-    it 'analytics/type_of_work/tasks_by_type.json' do
-      params = { group_id: group.full_path, label_ids: [label.id, label2.id, label3.id], created_after: 10.days.ago, subject: 'Issue' }
+    it 'generates fixtures' do
+      aggregate_failures 'analytics/type_of_work/tasks_by_type.json' do
+        params = { group_id: group.full_path, label_ids: [label.id, label2.id, label3.id], created_after: 10.days.ago, subject: 'Issue' }
 
-      get(:show, params: params, format: :json)
+        get(:show, params: params, format: :json)
 
-      expect(response).to be_successful
+        expect(response).to be_successful
+      end
     end
   end
 end
