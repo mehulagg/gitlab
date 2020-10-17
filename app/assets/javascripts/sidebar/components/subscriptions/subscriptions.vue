@@ -107,7 +107,13 @@ export default {
 
 <template>
   <div>
-    <span ref="tooltip" v-gl-tooltip:body.viewport.left :title="notificationTooltip" class="sidebar-collapsed-icon" @click="onClickCollapsedIcon" >
+    <span
+      ref="tooltip"
+      v-gl-tooltip:body.viewport.left
+      :title="notificationTooltip"
+      class="sidebar-collapsed-icon"
+      @click="onClickCollapsedIcon"
+    >
       <gl-icon
         :name="notificationIcon"
         :size="16"
