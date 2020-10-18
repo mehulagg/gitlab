@@ -1,6 +1,7 @@
+import { GlDropdown } from '@gitlab/ui';
 import Filter from 'ee/security_dashboard/components/filter.vue';
+import FilterOption from 'ee/security_dashboard/components/filters/filter_option.vue';
 import { mount } from '@vue/test-utils';
-import stubChildren from 'helpers/stub_children';
 import { trimText } from 'helpers/text_helper';
 
 const generateOption = index => ({
@@ -16,26 +17,13 @@ describe('Filter component', () => {
   let wrapper;
 
   const createWrapper = propsData => {
-    wrapper = mount(Filter, {
-      stubs: {
-        ...stubChildren(Filter),
-        GlDeprecatedDropdown: false,
-        GlSearchBoxByType: false,
-      },
-      propsData,
-      attachToDocument: true,
-    });
+    wrapper = mount(Filter, { propsData });
   };
 
   const findSearchInput = () =>
     wrapper.find({ ref: 'searchBox' }).exists() && wrapper.find({ ref: 'searchBox' }).find('input');
-  const findDropdownToggle = () => wrapper.find('.dropdown-toggle');
-  const dropdownItemsCount = () => wrapper.findAll('.dropdown-item').length;
-
-  function isDropdownOpen() {
-    const toggleButton = findDropdownToggle();
-    return toggleButton.attributes('aria-expanded') === 'true';
-  }
+  const isDropdownOpen = () => wrapper.find(GlDropdown).classes('show');
+  const dropdownItemsCount = () => wrapper.findAll(FilterOption).length;
 
   afterEach(() => {
     wrapper.destroy();
@@ -60,7 +48,7 @@ describe('Filter component', () => {
     });
 
     it('should display a check next to only the selected items', () => {
-      expect(wrapper.findAll('.dropdown-item .js-check')).toHaveLength(3);
+      expect(wrapper.findAll('[data-testid="mobile-issue-close-icon"]')).toHaveLength(3);
     });
 
     it('should correctly display the selected text', () => {
@@ -83,26 +71,16 @@ describe('Filter component', () => {
 
     describe('when the dropdown is open', () => {
       beforeEach(done => {
-        findDropdownToggle().trigger('click');
-        wrapper.vm.$root.$on('bv::dropdown::shown', () => {
-          done();
-        });
+        wrapper.find('.dropdown-toggle').trigger('click');
+        wrapper.vm.$root.$on('bv::dropdown::shown', () => done());
       });
 
-      it('should keep the menu open after clicking on an item', () => {
+      it('should keep the menu open after clicking on an item', async () => {
         expect(isDropdownOpen()).toBe(true);
         wrapper.find('.dropdown-item').trigger('click');
-        return wrapper.vm.$nextTick().then(() => {
-          expect(isDropdownOpen()).toBe(true);
-        });
-      });
+        await wrapper.vm.$nextTick();
 
-      it('should close the menu when the close button is clicked', () => {
         expect(isDropdownOpen()).toBe(true);
-        wrapper.find({ ref: 'close' }).trigger('click');
-        return wrapper.vm.$nextTick().then(() => {
-          expect(isDropdownOpen()).toBe(false);
-        });
       });
     });
   });
@@ -131,13 +109,13 @@ describe('Filter component', () => {
         expect(dropdownItemsCount()).toBe(LOTS);
       });
 
-      it('should show only matching projects when a search term is entered', () => {
+      it('should show only matching projects when a search term is entered', async () => {
         const input = findSearchInput();
         input.vm.$el.value = '0';
         input.vm.$el.dispatchEvent(new Event('input'));
-        return wrapper.vm.$nextTick().then(() => {
-          expect(dropdownItemsCount()).toBe(3);
-        });
+        await wrapper.vm.$nextTick();
+
+        expect(dropdownItemsCount()).toBe(3);
       });
     });
   });
