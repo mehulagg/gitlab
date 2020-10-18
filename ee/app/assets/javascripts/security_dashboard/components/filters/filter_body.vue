@@ -58,15 +58,17 @@ export default {
       toggle-class="gl-w-full"
     >
       <template #button-content>
-        <gl-truncate
-          :text="firstSelectedOption"
-          class="gl-min-w-0 gl-mr-2"
-          :data-qa-selector="qaSelector"
-        />
-        <span v-if="extraOptionCount" class="gl-mr-2">
-          {{ n__('+%d more', '+%d more', extraOptionCount) }}
-        </span>
-        <gl-icon name="chevron-down" class="gl-flex-shrink-0 gl-ml-auto" />
+        <slot name="button-content">
+          <gl-truncate
+            :text="firstSelectedOption"
+            class="gl-min-w-0 gl-mr-2"
+            :data-qa-selector="qaSelector"
+          />
+          <span v-if="extraOptionCount" class="gl-mr-2">
+            {{ n__('+%d more', '+%d more', extraOptionCount) }}
+          </span>
+          <gl-icon name="chevron-down" class="gl-flex-shrink-0 gl-ml-auto" />
+        </slot>
       </template>
 
       <gl-search-box-by-type
