@@ -6,9 +6,20 @@ export default {
   props: {
     isChecked: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
     text: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    showCheckIcon: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    textClass: {
       type: String,
       required: false,
       default: '',
@@ -19,12 +30,12 @@ export default {
 
 <template>
   <gl-dropdown-item
-    is-check-item
-    :is-checked="isChecked"
+    :is-check-item="showCheckIcon"
+    :is-checked="showCheckIcon && isChecked"
     @click.native.capture.stop="$emit('click')"
   >
     <slot>
-      <gl-truncate :text="text" />
+      <gl-truncate :text="text" :class="textClass" />
     </slot>
   </gl-dropdown-item>
 </template>

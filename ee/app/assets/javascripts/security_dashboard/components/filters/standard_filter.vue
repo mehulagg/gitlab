@@ -1,42 +1,18 @@
 <script>
 import FilterBody from './filter_body.vue';
 import FilterItem from './filter_item.vue';
+import FilterMixin from './filter_mixin';
 
 export default {
   components: {
     FilterBody,
     FilterItem,
   },
+  mixins: [FilterMixin],
   props: {
     filter: {
       type: Object,
       required: true,
-    },
-  },
-  data() {
-    return {
-      searchTerm: '',
-    };
-  },
-  computed: {
-    selection() {
-      return this.filter.selection;
-    },
-    filteredOptions() {
-      return this.filter.options.filter(option =>
-        option.name.toLowerCase().includes(this.searchTerm.toLowerCase()),
-      );
-    },
-    selectedOptionsNames() {
-      return Array.from(this.selection).map(id => this.filter.options.find(x => x.id === id).name);
-    },
-  },
-  methods: {
-    clickFilter(option) {
-      this.$emit('setFilter', { filterId: this.filter.id, optionId: option.id });
-    },
-    isSelected(option) {
-      return this.selection.has(option.id);
     },
   },
 };
@@ -46,15 +22,21 @@ export default {
   <filter-body
     v-model.trim="searchTerm"
     :name="filter.name"
-    :selected-options="selectedOptionsNames"
+    :selected-options="selectedOptionsOrAll"
     :show-search-box="filter.options.length >= 20"
   >
+    <filter-item
+      v-if="filter.allOption && !searchTerm.length"
+      :is-checked="selectedCount <= 0"
+      :text="filter.allOption.name"
+      @click="deselectAllOptions"
+    />
     <filter-item
       v-for="option in filteredOptions"
       :key="option.id"
       :is-checked="isSelected(option)"
       :text="option.name"
-      @click="clickFilter(option)"
+      @click="toggleOption(option)"
     />
   </filter-body>
 </template>
