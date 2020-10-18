@@ -7,8 +7,6 @@ import { file } from '../helpers';
 describe('IDE extra file row component', () => {
   let Component;
   let vm;
-  let unstagedFilesCount = 0;
-  let stagedFilesCount = 0;
   let changesCount = 0;
 
   beforeAll(() => {
@@ -23,8 +21,6 @@ describe('IDE extra file row component', () => {
       dropdownOpen: false,
     });
 
-    jest.spyOn(vm, 'getUnstagedFilesCountForPath', 'get').mockReturnValue(() => unstagedFilesCount);
-    jest.spyOn(vm, 'getStagedFilesCountForPath', 'get').mockReturnValue(() => stagedFilesCount);
     jest.spyOn(vm, 'getChangesInFolder', 'get').mockReturnValue(() => changesCount);
 
     vm.$mount();
@@ -33,8 +29,6 @@ describe('IDE extra file row component', () => {
   afterEach(() => {
     vm.$destroy();
 
-    stagedFilesCount = 0;
-    unstagedFilesCount = 0;
     changesCount = 0;
   });
 
@@ -101,16 +95,6 @@ describe('IDE extra file row component', () => {
 
     it('shows when file is changed', done => {
       vm.file.changed = true;
-
-      vm.$nextTick(() => {
-        expect(vm.$el.querySelector('.file-changed-icon')).not.toBe(null);
-
-        done();
-      });
-    });
-
-    it('shows when file is staged', done => {
-      vm.file.staged = true;
 
       vm.$nextTick(() => {
         expect(vm.$el.querySelector('.file-changed-icon')).not.toBe(null);

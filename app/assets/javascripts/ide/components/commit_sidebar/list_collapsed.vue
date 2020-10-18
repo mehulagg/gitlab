@@ -59,10 +59,10 @@ export default {
       return sprintf(__('%{title} changes'), { title: this.title });
     },
     additionIconName() {
-      return this.title.toLowerCase() === 'staged' ? 'file-addition-solid' : 'file-addition';
+      return 'file-addition';
     },
     modifiedIconName() {
-      return this.title.toLowerCase() === 'staged' ? 'file-modified-solid' : 'file-modified';
+      return 'file-modified';
     },
   },
 };

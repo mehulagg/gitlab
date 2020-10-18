@@ -29,15 +29,15 @@ export default {
     };
   },
   computed: {
-    ...mapState(['changedFiles', 'stagedFiles', 'currentActivityView', 'lastCommitMsg']),
+    ...mapState(['changedFiles', 'currentActivityView', 'lastCommitMsg']),
     ...mapState('commit', ['commitMessage', 'submitCommitLoading', 'commitError']),
     ...mapGetters(['someUncommittedChanges']),
     ...mapGetters('commit', ['discardDraftButtonDisabled', 'preBuiltCommitMessage']),
     overviewText() {
-      return n__('%d changed file', '%d changed files', this.stagedFiles.length);
+      return n__('%d changed file', '%d changed files', this.changedFiles.length);
     },
     commitButtonText() {
-      return this.stagedFiles.length ? __('Commit') : __('Stage & Commit');
+      return __('Commit');
     },
 
     currentViewIsCommitView() {

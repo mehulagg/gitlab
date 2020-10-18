@@ -22,7 +22,7 @@ export default {
     IdeProjectHeader,
   },
   computed: {
-    ...mapState(['loading', 'currentActivityView', 'changedFiles', 'stagedFiles', 'lastCommitMsg']),
+    ...mapState(['loading', 'currentActivityView', 'changedFiles', 'lastCommitMsg']),
     ...mapGetters(['currentProject', 'someUncommittedChanges']),
   },
   SIDEBAR_INIT_WIDTH,

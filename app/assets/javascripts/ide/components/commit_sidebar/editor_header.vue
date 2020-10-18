@@ -25,17 +25,13 @@ export default {
       return sprintf(__('Discard changes to %{path}?'), { path: this.activeFile.path });
     },
     canDiscard() {
-      return this.activeFile.changed || this.activeFile.staged;
+      return this.activeFile.changed;
     },
   },
   methods: {
-    ...mapActions(['unstageChange', 'discardFileChanges']),
+    ...mapActions(['discardFileChanges']),
     showDiscardModal() {
       this.$refs.discardModal.show();
-    },
-    discardChanges(path) {
-      this.unstageChange(path);
-      this.discardFileChanges(path);
     },
   },
 };
@@ -69,7 +65,7 @@ export default {
       :ok-title="__('Discard changes')"
       :modal-id="discardModalId"
       :title="discardModalTitle"
-      @ok="discardChanges(activeFile.path)"
+      @ok="discardFileChanges(activeFile.path)"
     >
       {{ __("You will lose all changes you've made to this file. This action cannot be undone.") }}
     </gl-modal>

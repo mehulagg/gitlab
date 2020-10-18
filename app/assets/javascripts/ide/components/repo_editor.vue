@@ -60,7 +60,6 @@ export default {
     ]),
     ...mapGetters([
       'currentMergeRequest',
-      'getStagedFile',
       'isEditModeActive',
       'isCommitModeActive',
       'currentBranch',
@@ -258,12 +257,7 @@ export default {
     setupEditor() {
       if (!this.file || !this.editor.instance || this.file.loading) return;
 
-      const head = this.getStagedFile(this.file.path);
-
-      this.model = this.editor.createModel(
-        this.file,
-        this.file.staged && this.file.key.indexOf('unstaged-') === 0 ? head : null,
-      );
+      this.model = this.editor.createModel(this.file, null);
 
       if (this.viewer === viewerTypes.mr && this.file.mrChange) {
         this.editor.attachMergeRequestModel(this.model);

@@ -12,9 +12,8 @@ const getDeletedParents = (entries, file) => {
   return [];
 };
 
-const filesWithChanges = ({ stagedFiles = [], changedFiles = [], entries = {} }) => {
-  // We need changed files to overwrite staged, so put them at the end.
-  const changes = stagedFiles.concat(changedFiles).reduce((acc, file) => {
+const filesWithChanges = ({ changedFiles = [], entries = {} }) => {
+  const changes = changedFiles.reduce((acc, file) => {
     const key = file.path;
     const action = commitActionForFile(file);
     const prev = acc[key];

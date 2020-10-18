@@ -60,11 +60,6 @@ export const rightSidebarViews = {
   terminal: { name: 'terminal', keepAlive: true },
 };
 
-export const stageKeys = {
-  unstaged: 'unstaged',
-  staged: 'staged',
-};
-
 export const commitItemIconMap = {
   addition: {
     icon: 'file-addition',

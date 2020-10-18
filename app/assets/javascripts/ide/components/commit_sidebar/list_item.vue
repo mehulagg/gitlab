@@ -1,5 +1,5 @@
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import { GlIcon } from '@gitlab/ui';
 import tooltip from '~/vue_shared/directives/tooltip';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
@@ -19,38 +19,17 @@ export default {
       type: Object,
       required: true,
     },
-    keyPrefix: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    stagedList: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    activeFileKey: {
-      type: String,
-      required: false,
-      default: null,
-    },
   },
   computed: {
+    ...mapGetters(['activeFile']),
     iconName() {
-      // name: '-solid' is a false positive: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/26#possible-false-positives
-      // eslint-disable-next-line @gitlab/require-i18n-strings
-      const suffix = this.stagedList ? '-solid' : '';
-
-      return `${getCommitIconMap(this.file).icon}${suffix}`;
+      return `${getCommitIconMap(this.file).icon}`;
     },
     iconClass() {
       return `${getCommitIconMap(this.file).class} ml-auto mr-auto`;
     },
-    fullKey() {
-      return `${this.keyPrefix}-${this.file.key}`;
-    },
     isActive() {
-      return this.activeFileKey === this.fullKey;
+      return this.activeFile.key === this.file.key;
     },
     tooltipTitle() {
       return this.file.path === this.file.name ? '' : this.file.path;
@@ -61,10 +40,7 @@ export default {
     openFileInEditor() {
       if (this.file.type === 'tree') return null;
 
-      return this.openPendingTab({
-        file: this.file,
-        keyPrefix: this.keyPrefix,
-      }).then(changeViewer => {
+      return this.openPendingTab(this.file).then(changeViewer => {
         if (changeViewer) {
           this.updateViewer(viewerTypes.diff);
         }

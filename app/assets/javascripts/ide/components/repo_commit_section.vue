@@ -3,7 +3,6 @@ import { mapState, mapActions, mapGetters } from 'vuex';
 import tooltip from '~/vue_shared/directives/tooltip';
 import CommitFilesList from './commit_sidebar/list.vue';
 import EmptyState from './commit_sidebar/empty_state.vue';
-import { stageKeys } from '../constants';
 
 export default {
   components: {
@@ -14,15 +13,12 @@ export default {
     tooltip,
   },
   computed: {
-    ...mapState(['changedFiles', 'stagedFiles', 'lastCommitMsg']),
+    ...mapState(['changedFiles', 'lastCommitMsg']),
     ...mapState('commit', ['commitMessage', 'submitCommitLoading']),
     ...mapGetters(['lastOpenedFile', 'someUncommittedChanges', 'activeFile']),
     ...mapGetters('commit', ['discardDraftButtonDisabled']),
-    showStageUnstageArea() {
+    showChangesArea() {
       return Boolean(this.someUncommittedChanges || this.lastCommitMsg);
-    },
-    activeFileKey() {
-      return this.activeFile ? this.activeFile.key : null;
     },
   },
   mounted() {
@@ -41,10 +37,7 @@ export default {
 
       if (!file) return;
 
-      this.openPendingTab({
-        file,
-        keyPrefix: file.staged ? stageKeys.staged : stageKeys.unstaged,
-      })
+      this.openPendingTab(file)
         .then(changeViewer => {
           if (changeViewer) {
             this.updateViewer('diff');
@@ -55,17 +48,14 @@ export default {
         });
     },
   },
-  stageKeys,
 };
 </script>
 
 <template>
   <div class="multi-file-commit-panel-section">
-    <template v-if="showStageUnstageArea">
+    <template v-if="showChangesArea">
       <commit-files-list
-        :key-prefix="$options.stageKeys.staged"
-        :file-list="stagedFiles"
-        :active-file-key="activeFileKey"
+        :file-list="changedFiles"
         :empty-state-text="__('There are no changes')"
         class="is-first"
         icon-name="unstaged"

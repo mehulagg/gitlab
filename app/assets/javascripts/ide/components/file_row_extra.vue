@@ -29,19 +29,9 @@ export default {
     },
   },
   computed: {
-    ...mapGetters([
-      'getChangesInFolder',
-      'getUnstagedFilesCountForPath',
-      'getStagedFilesCountForPath',
-    ]),
+    ...mapGetters(['getChangesInFolder']),
     isTree() {
       return this.file.type === 'tree';
-    },
-    folderUnstagedCount() {
-      return this.getUnstagedFilesCountForPath(this.file.path);
-    },
-    folderStagedCount() {
-      return this.getStagedFilesCountForPath(this.file.path);
     },
     changesCount() {
       return this.getChangesInFolder(this.file.path);
@@ -55,7 +45,7 @@ export default {
       return this.isTree && this.changesCount > 0 && !this.file.opened;
     },
     isModified() {
-      return this.file.changed || this.file.tempFile || this.file.staged || this.file.prevPath;
+      return this.file.changed || this.file.tempFile || this.file.prevPath;
     },
     showChangedFileIcon() {
       return !this.isTree && this.isModified;
@@ -79,12 +69,7 @@ export default {
         class="gl-ml-2 ide-file-modified"
       />
     </span>
-    <changed-file-icon
-      v-else-if="showChangedFileIcon"
-      :file="file"
-      :show-tooltip="true"
-      :show-staged-icon="false"
-    />
+    <changed-file-icon v-else-if="showChangedFileIcon" :file="file" :show-tooltip="true" />
     <new-dropdown
       :type="file.type"
       :path="file.path"

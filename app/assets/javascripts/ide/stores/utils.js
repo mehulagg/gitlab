@@ -20,7 +20,6 @@ export const dataStructure = () => ({
   opened: false,
   active: false,
   changed: false,
-  staged: false,
   lastCommitSha: '',
   rawPath: '',
   raw: '',
@@ -91,8 +90,8 @@ export const commitActionForFile = file => {
   return commitActionTypes.update;
 };
 
-export const getCommitFiles = stagedFiles =>
-  stagedFiles.reduce((acc, file) => {
+export const getCommitFiles = files =>
+  files.reduce((acc, file) => {
     if (file.type === 'tree') return acc;
 
     return acc.concat({
@@ -110,7 +109,7 @@ export const createCommitPayload = ({
 }) => ({
   branch,
   commit_message: state.commitMessage || getters.preBuiltCommitMessage,
-  actions: getCommitFiles(rootState.stagedFiles).map(f => {
+  actions: getCommitFiles(rootState.changedFiles).map(f => {
     const isBlob = isBlobUrl(f.rawPath);
     const content = isBlob ? btoa(f.content) : f.content;
 
@@ -217,7 +216,7 @@ export const removeFromParentTree = (state, oldKey, parentPath) => {
 };
 
 export const updateFileCollections = (state, key, entryPath) => {
-  ['openFiles', 'changedFiles', 'stagedFiles'].forEach(fileCollection => {
+  ['openFiles', 'changedFiles'].forEach(fileCollection => {
     swapInStateArray(state, fileCollection, key, entryPath);
   });
 };

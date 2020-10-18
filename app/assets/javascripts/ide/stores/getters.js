@@ -1,4 +1,4 @@
-import { getChangesCountForFiles, filePathMatches } from './utils';
+import { filePathMatches } from './utils';
 import {
   leftSidebarViews,
   packageJsonPath,
@@ -68,11 +68,10 @@ export const allBlobs = state =>
     .sort((a, b) => b.lastOpenedAt - a.lastOpenedAt);
 
 export const getChangedFile = state => path => state.changedFiles.find(f => f.path === path);
-export const getStagedFile = state => path => state.stagedFiles.find(f => f.path === path);
 export const getOpenFile = state => path => state.openFiles.find(f => f.path === path);
 
 export const lastOpenedFile = state =>
-  [...state.changedFiles, ...state.stagedFiles].sort((a, b) => b.lastOpenedAt - a.lastOpenedAt)[0];
+  state.changedFiles.sort((a, b) => b.lastOpenedAt - a.lastOpenedAt)[0];
 
 export const isEditModeActive = state => state.currentActivityView === leftSidebarViews.edit.name;
 export const isCommitModeActive = state =>
@@ -80,23 +79,10 @@ export const isCommitModeActive = state =>
 export const isReviewModeActive = state =>
   state.currentActivityView === leftSidebarViews.review.name;
 
-export const someUncommittedChanges = state =>
-  Boolean(state.changedFiles.length || state.stagedFiles.length);
+export const someUncommittedChanges = state => Boolean(state.changedFiles.length);
 
-export const getChangesInFolder = state => path => {
-  const changedFilesCount = state.changedFiles.filter(f => filePathMatches(f.path, path)).length;
-  const stagedFilesCount = state.stagedFiles.filter(
-    f => filePathMatches(f.path, path) && !getChangedFile(state)(f.path),
-  ).length;
-
-  return changedFilesCount + stagedFilesCount;
-};
-
-export const getUnstagedFilesCountForPath = state => path =>
-  getChangesCountForFiles(state.changedFiles, path);
-
-export const getStagedFilesCountForPath = state => path =>
-  getChangesCountForFiles(state.stagedFiles, path);
+export const getChangesInFolder = state => path =>
+  state.changedFiles.filter(f => filePathMatches(f.path, path)).length;
 
 export const lastCommit = (state, getters) => {
   const branch = getters.currentProject && getters.currentBranch;
@@ -122,31 +108,6 @@ export const isOnDefaultBranch = (_state, getters) =>
 
 export const canPushToBranch = (_state, getters) => {
   return Boolean(getters.currentBranch ? getters.currentBranch.can_push : getters.canPushCode);
-};
-
-export const isFileDeletedAndReadded = (state, getters) => path => {
-  const stagedFile = getters.getStagedFile(path);
-  const file = state.entries[path];
-  return Boolean(stagedFile && stagedFile.deleted && file.tempFile);
-};
-
-// checks if any diff exists in the staged or unstaged changes for this path
-export const getDiffInfo = (state, getters) => path => {
-  const stagedFile = getters.getStagedFile(path);
-  const file = state.entries[path];
-  const renamed = file.prevPath ? file.path !== file.prevPath : false;
-  const deletedAndReadded = getters.isFileDeletedAndReadded(path);
-  const deleted = deletedAndReadded ? false : file.deleted;
-  const tempFile = deletedAndReadded ? false : file.tempFile;
-  const changed = file.content !== (deletedAndReadded ? stagedFile.raw : file.raw);
-
-  return {
-    exists: changed || renamed || deleted || tempFile,
-    changed,
-    renamed,
-    deleted,
-    tempFile,
-  };
 };
 
 export const findProjectPermissions = (state, getters) => projectId =>

@@ -39,7 +39,7 @@ export default {
       return this.fileHasChanged ? !this.tabMouseOver : false;
     },
     fileHasChanged() {
-      return this.tab.changed || this.tab.tempFile || this.tab.staged || this.tab.deleted;
+      return this.tab.changed || this.tab.tempFile || this.tab.deleted;
     },
   },
 
@@ -51,7 +51,7 @@ export default {
       this.updateDelayViewerUpdated(true);
 
       if (tab.pending) {
-        this.openPendingTab({ file: tab, keyPrefix: tab.staged ? 'staged' : 'unstaged' });
+        this.openPendingTab(tab);
       } else {
         this.$router.push(this.getUrlForPath(tab.path));
       }

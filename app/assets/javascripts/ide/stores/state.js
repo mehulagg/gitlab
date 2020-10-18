@@ -6,7 +6,6 @@ export default () => ({
   currentBranchId: '',
   currentMergeRequestId: '',
   changedFiles: [],
-  stagedFiles: [],
   endpoints: {},
   lastCommitMsg: '',
   loading: false,

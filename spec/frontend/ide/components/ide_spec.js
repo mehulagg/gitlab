@@ -78,7 +78,7 @@ describe('ide component, non-empty repo', () => {
   });
 
   describe('onBeforeUnload', () => {
-    it('returns undefined when no staged files or changed files', () => {
+    it('returns undefined when no changed files', () => {
       expect(vm.onBeforeUnload()).toBe(undefined);
     });
 
@@ -88,15 +88,9 @@ describe('ide component, non-empty repo', () => {
       expect(vm.onBeforeUnload()).toBe('Are you sure you want to lose unsaved changes?');
     });
 
-    it('returns warning text when their are staged files', () => {
-      vm.$store.state.stagedFiles.push(file());
-
-      expect(vm.onBeforeUnload()).toBe('Are you sure you want to lose unsaved changes?');
-    });
-
     it('updates event object', () => {
       const event = {};
-      vm.$store.state.stagedFiles.push(file());
+      vm.$store.state.changedFiles.push(file());
 
       vm.onBeforeUnload(event);
 

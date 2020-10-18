@@ -34,7 +34,7 @@ export const branchName = (state, getters, rootState) => {
 export const preBuiltCommitMessage = (state, _, rootState) => {
   if (state.commitMessage) return state.commitMessage;
 
-  const files = rootState.stagedFiles.length ? rootState.stagedFiles : rootState.changedFiles;
+  const files = rootState.changedFiles;
   const modifiedFiles = files.filter(f => !f.deleted);
   const deletedFiles = files.filter(f => f.deleted);
 

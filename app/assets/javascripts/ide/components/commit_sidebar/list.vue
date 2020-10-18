@@ -23,16 +23,6 @@ export default {
       type: String,
       required: true,
     },
-    stagedList: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    activeFileKey: {
-      type: String,
-      required: false,
-      default: null,
-    },
     keyPrefix: {
       type: String,
       required: true,
@@ -54,13 +44,9 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['unstageAllChanges', 'discardAllChanges']),
+    ...mapActions(['discardAllChanges']),
     openDiscardModal() {
       this.$refs.discardAllModal.show();
-    },
-    unstageAndDiscardAllChanges() {
-      this.unstageAllChanges();
-      this.discardAllChanges();
     },
   },
   discardModalText: __(
@@ -77,7 +63,6 @@ export default {
         <strong> {{ titleText }} </strong>
         <div class="d-flex ml-auto">
           <button
-            v-if="!stagedList"
             v-tooltip
             :title="__('Discard all changes')"
             :aria-label="__('Discard all changes')"
@@ -99,25 +84,19 @@ export default {
     </header>
     <ul v-if="filesLength" class="multi-file-commit-list list-unstyled gl-mb-0">
       <li v-for="file in fileList" :key="file.key">
-        <list-item
-          :file="file"
-          :key-prefix="keyPrefix"
-          :staged-list="stagedList"
-          :active-file-key="activeFileKey"
-        />
+        <list-item :file="file" />
       </li>
     </ul>
     <p v-else class="multi-file-commit-list form-text text-muted text-center">
       {{ emptyStateText }}
     </p>
     <gl-modal
-      v-if="!stagedList"
       ref="discardAllModal"
       ok-variant="danger"
       modal-id="discard-all-changes"
       :ok-title="__('Discard all changes')"
       :title="__('Discard all changes?')"
-      @ok="unstageAndDiscardAllChanges"
+      @ok="discardAllChanges"
     >
       {{ $options.discardModalText }}
     </gl-modal>

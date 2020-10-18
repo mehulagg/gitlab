@@ -4,7 +4,6 @@ import { createRouter } from '~/ide/ide_router';
 import { keepAlive } from '../../helpers/keep_alive_component_helper';
 import RepoCommitSection from '~/ide/components/repo_commit_section.vue';
 import EmptyState from '~/ide/components/commit_sidebar/empty_state.vue';
-import { stageKeys } from '~/ide/constants';
 import { file } from '../helpers';
 
 const TEST_NO_CHANGES_SVG = 'nochangessvg';
@@ -40,12 +39,10 @@ describe('RepoCommitSection', () => {
     );
 
     store.state.currentBranch = 'master';
-    store.state.changedFiles = [];
-    store.state.stagedFiles = [{ ...files[0] }, { ...files[1] }];
-    store.state.stagedFiles.forEach(f =>
+    store.state.changedFiles = [{ ...files[0] }, { ...files[1] }];
+    store.state.changedFiles.forEach(f =>
       Object.assign(f, {
         changed: true,
-        staged: true,
         content: 'testing',
       }),
     );
@@ -105,19 +102,15 @@ describe('RepoCommitSection', () => {
     });
 
     it('calls openPendingTab', () => {
-      expect(store.dispatch).toHaveBeenCalledWith('openPendingTab', {
-        file: store.getters.lastOpenedFile,
-        keyPrefix: stageKeys.staged,
-      });
+      expect(store.dispatch).toHaveBeenCalledWith('openPendingTab', store.getters.lastOpenedFile);
     });
 
     it('renders a commit section', () => {
-      const allFiles = store.state.changedFiles.concat(store.state.stagedFiles);
       const changedFileNames = wrapper
         .findAll('.multi-file-commit-list > li')
         .wrappers.map(x => x.text().trim());
 
-      expect(changedFileNames).toEqual(allFiles.map(x => x.path));
+      expect(changedFileNames).toEqual(store.state.changedFiles.map(x => x.path));
     });
 
     it('does not show empty state', () => {
@@ -125,13 +118,13 @@ describe('RepoCommitSection', () => {
     });
   });
 
-  describe('if nothing is changed or staged', () => {
+  describe('if nothing is changed', () => {
     beforeEach(() => {
       setupDefaultState();
 
       store.state.openFiles = [...Object.values(store.state.entries)];
       store.state.openFiles[0].active = true;
-      store.state.stagedFiles = [];
+      store.state.changedFiles = [];
 
       createComponent();
     });
@@ -140,30 +133,22 @@ describe('RepoCommitSection', () => {
       expect(store.state.openFiles.length).toBe(1);
       expect(store.state.openFiles[0].pending).toBe(true);
 
-      expect(store.dispatch).toHaveBeenCalledWith('openPendingTab', {
-        file: store.state.entries[store.getters.activeFile.path],
-        keyPrefix: stageKeys.unstaged,
-      });
+      expect(store.dispatch).toHaveBeenCalledWith(
+        'openPendingTab',
+        store.state.entries[store.getters.activeFile.path],
+      );
     });
   });
 
-  describe('with unstaged file', () => {
+  describe('with changed file', () => {
     beforeEach(() => {
       setupDefaultState();
-
-      store.state.changedFiles = store.state.stagedFiles.map(x =>
-        Object.assign(x, { staged: false }),
-      );
-      store.state.stagedFiles = [];
 
       createComponent();
     });
 
-    it('calls openPendingTab with unstaged prefix', () => {
-      expect(store.dispatch).toHaveBeenCalledWith('openPendingTab', {
-        file: store.getters.lastOpenedFile,
-        keyPrefix: stageKeys.unstaged,
-      });
+    it('calls openPendingTab', () => {
+      expect(store.dispatch).toHaveBeenCalledWith('openPendingTab', store.getters.lastOpenedFile);
     });
 
     it('does not show empty state', () => {

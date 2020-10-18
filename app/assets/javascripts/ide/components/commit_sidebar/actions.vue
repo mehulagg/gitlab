@@ -18,14 +18,11 @@ export default {
     NewMergeRequestOption,
   },
   computed: {
-    ...mapState(['currentBranchId', 'changedFiles', 'stagedFiles']),
+    ...mapState(['currentBranchId', 'changedFiles']),
     ...mapCommitState(['commitAction']),
     ...mapGetters(['currentBranch', 'emptyRepo', 'canPushToBranch']),
     currentBranchText() {
       return escape(this.currentBranchId);
-    },
-    containsStagedChanges() {
-      return this.changedFiles.length > 0 && this.stagedFiles.length > 0;
     },
     shouldDefaultToCurrentBranch() {
       if (this.emptyRepo) {
@@ -33,11 +30,6 @@ export default {
       }
 
       return this.canPushToBranch && !this.currentBranch?.default;
-    },
-  },
-  watch: {
-    containsStagedChanges() {
-      this.updateSelectedCommitAction();
     },
   },
   mounted() {
