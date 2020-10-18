@@ -1,11 +1,15 @@
 <script>
-import { GlDeprecatedDropdown, GlSearchBoxByType, GlIcon } from '@gitlab/ui';
+import { GlDropdown, GlSearchBoxByType, GlIcon, GlTruncate, GlDropdownText } from '@gitlab/ui';
+import FilterOption from './filters/filter_option.vue';
 
 export default {
   components: {
-    GlDeprecatedDropdown,
+    GlDropdown,
     GlSearchBoxByType,
     GlIcon,
+    GlTruncate,
+    GlDropdownText,
+    FilterOption,
   },
   props: {
     filter: {
@@ -47,9 +51,6 @@ export default {
     isSelected(option) {
       return this.selection.has(option.id);
     },
-    closeDropdown() {
-      this.$refs.dropdown.$children[0].hide(true);
-    },
   },
 };
 </script>
@@ -57,74 +58,37 @@ export default {
 <template>
   <div class="dashboard-filter">
     <strong class="js-name">{{ filter.name }}</strong>
-    <gl-deprecated-dropdown
-      ref="dropdown"
-      class="d-block mt-1"
+    <gl-dropdown
+      class="gl-mt-2 gl-w-full"
       menu-class="dropdown-extended-height"
-      toggle-class="d-flex w-100 justify-content-between align-items-center"
+      :header-text="filter.name"
+      toggle-class="gl-w-full"
     >
-      <template slot="button-content">
-        <span class="text-truncate" :data-qa-selector="qaSelector">
-          {{ firstSelectedOption }}
-        </span>
-        <span v-if="extraOptionCount" class="flex-grow-1 ml-1">
+      <template #button-content>
+        <gl-truncate :text="firstSelectedOption" class="gl-min-w-0 gl-mr-2" />
+        <span v-if="extraOptionCount" class="gl-mr-2">
           {{ n__('+%d more', '+%d more', extraOptionCount) }}
         </span>
-        <i class="fa fa-chevron-down" aria-hidden="true"></i>
+        <gl-icon name="chevron-down" class="gl-flex-shrink-0 gl-ml-auto" />
       </template>
-
-      <div class="dropdown-title mb-0">
-        {{ filter.name }}
-        <button
-          ref="close"
-          class="btn-blank float-right"
-          type="button"
-          :aria-label="__('Close')"
-          @click="closeDropdown"
-        >
-          <gl-icon name="close" aria-hidden="true" class="vertical-align-middle" />
-        </button>
-      </div>
 
       <gl-search-box-by-type
         v-if="filter.options.length >= 20"
-        ref="searchBox"
         v-model="filterTerm"
         :placeholder="__('Filter...')"
       />
 
-      <div
-        data-qa-selector="filter_dropdown_content"
-        :class="{ 'dropdown-content': filterId === 'project_id' }"
-      >
-        <button
-          v-for="option in filteredOptions"
-          :key="option.id"
-          role="menuitem"
-          type="button"
-          class="dropdown-item"
-          @click="clickFilter(option)"
-        >
-          <span class="d-flex">
-            <gl-icon
-              v-if="isSelected(option)"
-              class="flex-shrink-0 js-check"
-              name="mobile-issue-close"
-            />
-            <span class="gl-white-space-nowrap gl-ml-2" :class="{ 'gl-pl-5': !isSelected(option) }">
-              {{ option.name }}
-            </span>
-          </span>
-        </button>
-      </div>
+      <filter-option
+        v-for="option in filteredOptions"
+        :key="option.id"
+        :display-name="option.name"
+        :is-selected="isSelected(option)"
+        @click="clickFilter(option)"
+      />
 
-      <button
-        v-if="filteredOptions.length === 0"
-        type="button"
-        class="dropdown-item no-pointer-events text-secondary"
-      >
-        {{ __('No matching results') }}
-      </button>
-    </gl-deprecated-dropdown>
+      <gl-dropdown-text v-if="filteredOptions.length <= 0">
+        <span class="gl-text-gray-500">{{ __('No matching results') }}</span>
+      </gl-dropdown-text>
+    </gl-dropdown>
   </div>
 </template>
