@@ -104,6 +104,7 @@ Reopened issues are considered as having been opened on the day after they were 
 ## Burnup charts
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/6903) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.5.
+> Available behind a feature flag which is **enabled by default**.
 
 Burnup charts show the assigned and completed work for a milestone.
 
