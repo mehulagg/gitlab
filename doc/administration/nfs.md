@@ -9,7 +9,7 @@ recommended for performance reasons. Note however it is required for [GitLab
 Pages](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/196).
 
 For data objects such as LFS, Uploads, Artifacts, etc., an [Object Storage service](object_storage.md)
-is recommended over NFS where possible, due to better performance.
+is recommended instead of NFS where possible, due to better performance.
 
 CAUTION: **Caution:**
 From GitLab 13.0, using NFS for Git repositories is deprecated. In GitLab 14.0,

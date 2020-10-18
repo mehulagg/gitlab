@@ -5,7 +5,7 @@ type: reference
 # Object Storage
 
 GitLab supports using an object storage service for holding numerous types of data.
-It's recommended over NFS and
+It's recommended in preference to NFS and
 in general it's better in larger setups as object storage is
 typically much more performant, reliable, and scalable.
 
