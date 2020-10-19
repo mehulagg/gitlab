@@ -76,10 +76,10 @@ export default {
         variables,
       })
       .then(({ data }) => {
-        const { lists } = data[boardType]?.board;
+        const { lists, hideBacklogList } = data[boardType]?.board;
         commit(types.RECEIVE_BOARD_LISTS_SUCCESS, formatBoardLists(lists));
-        // Backlog list needs to be created if it doesn't exist
-        if (!lists.nodes.find(l => l.listType === ListType.backlog)) {
+        // Backlog list needs to be created if it doesn't exist and it's not hidden
+        if (!lists.nodes.find(l => l.listType === ListType.backlog) && !hideBacklogList) {
           dispatch('createList', { backlog: true });
         }
         dispatch('showWelcomeList');
