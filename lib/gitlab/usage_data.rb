@@ -53,6 +53,11 @@ module Gitlab
             .merge(compliance_unique_visits_data)
             .merge(search_unique_visits_data)
             .merge(redis_hll_counters)
+            .merge(license_data)
+            .merge(settings_data)
+            .merge(count_7d_data)
+            .merge(count_28d_data)
+            .merge(count_all_data)
         end
       end
 
@@ -704,6 +709,36 @@ module Gitlab
       end
 
       private
+
+      def license_data
+        {
+          license: {}
+        }
+      end
+
+      def settings_data
+        {
+          settings: {}
+        }
+      end
+
+      def count_7d_data
+        {
+          count_7d: {}
+        }
+      end
+
+      def count_28d_data
+        {
+          count_28d: {}
+        }
+      end
+
+      def count_all_data
+        {
+          count_all: {}
+        }
+      end
 
       def event_monthly_active_users(date_range)
         data = {
