@@ -285,30 +285,57 @@ RSpec.describe GroupPolicy do
   end
 
   describe 'per group SAML' do
-    let(:current_user) { maintainer }
+    before do
+      stub_licensed_features(group_saml: true)
+    end
 
-    it { is_expected.to be_disallowed(:admin_group_saml) }
+    context 'maintainer' do
+      let(:current_user) { maintainer }
+
+      it { is_expected.to be_disallowed(:admin_group_saml) }
+      it { is_expected.to be_disallowed(:admin_saml_group_links) }
+    end
 
     context 'owner' do
       let(:current_user) { owner }
 
       it { is_expected.to be_allowed(:admin_group_saml) }
+      it { is_expected.to be_disallowed(:admin_saml_group_links) }
     end
 
     context 'admin' do
       let(:current_user) { admin }
 
       it { is_expected.to be_allowed(:admin_group_saml) }
+      it { is_expected.to be_disallowed(:admin_saml_group_links) }
+    end
+
+    context 'with an enabled SAML provider' do
+      let_it_be(:saml_provider) { create(:saml_provider, group: group, enabled: true) }
+
+      context 'maintainer' do
+        let(:current_user) { maintainer }
+
+        it { is_expected.to be_disallowed(:admin_saml_group_links) }
+      end
+
+      context 'owner' do
+        let(:current_user) { owner }
+
+        it { is_expected.to be_allowed(:admin_saml_group_links) }
+      end
+
+      context 'admin' do
+        let(:current_user) { admin }
+
+        it { is_expected.to be_allowed(:admin_saml_group_links) }
+      end
     end
 
     context 'with sso enforcement enabled' do
       let(:current_user) { guest }
 
       let_it_be(:saml_provider) { create(:saml_provider, group: group, enforced_sso: true) }
-
-      before do
-        stub_licensed_features(group_saml: true)
-      end
 
       context 'when the session has been set globally' do
         around do |example|

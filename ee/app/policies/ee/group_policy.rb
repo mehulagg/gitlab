@@ -69,8 +69,12 @@ module EE
         @subject.feature_available?(:cluster_deployments)
       end
 
+      condition(:group_saml_available) do
+        ::Gitlab::Auth::GroupSaml::Config.enabled? && !group.subgroup? && @subject.feature_available?(:group_saml)
+      end
+
       condition(:group_saml_enabled) do
-        @subject.saml_provider&.enabled?
+        @subject.saml_enabled?
       end
 
       condition(:group_timelogs_available) do
@@ -198,7 +202,9 @@ module EE
         enable :read_group_security_dashboard
       end
 
-      rule { admin | owner }.enable :admin_group_saml
+      rule { group_saml_available & (admin | owner) }.enable :admin_group_saml
+
+      rule { group_saml_enabled & can?(:admin_group_saml) }.enable :admin_saml_group_links
 
       rule { admin | (can_owners_manage_ldap & owner) }.policy do
         enable :admin_ldap_group_links
