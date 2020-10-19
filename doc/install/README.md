@@ -31,7 +31,7 @@ install GitLab:
   from platforms like AWS, Azure, and GCP.
 
 If you're not sure which installation method to use, we recommend you use
-Omnibus Gitlab. The Omnibus GitLab packages are mature,
+Omnibus GitLab. The Omnibus GitLab packages are mature,
 [scalable](../administration/reference_architectures/index.md), and are used
 today on GitLab.com. The Helm charts are recommended for those who are familiar
 with Kubernetes.
