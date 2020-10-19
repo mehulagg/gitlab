@@ -62,6 +62,10 @@ module Gitlab
       def self.manual_bridges_enabled?(project)
         ::Feature.enabled?(:ci_manual_bridges, project, default_enabled: true)
       end
+
+      def self.ci_pipeline_editor_page_enabled?(project)
+        ::Feature.enabled?(:ci_pipeline_editor_page, project, default_enabled: false)
+      end
     end
   end
 end
