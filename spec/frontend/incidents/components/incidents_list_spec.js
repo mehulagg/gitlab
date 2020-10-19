@@ -10,6 +10,7 @@ import {
   TH_CREATED_AT_TEST_ID,
   TH_SEVERITY_TEST_ID,
   TH_PUBLISHED_TEST_ID,
+  TH_INCIDENT_SLA_TEST_ID,
 } from '~/incidents/constants';
 import mockIncidents from '../mocks/incidents.json';
 
@@ -275,10 +276,11 @@ describe('Incidents List', () => {
     const noneSort = 'none';
 
     it.each`
-      selector                 | initialSort | firstSort   | nextSort
-      ${TH_CREATED_AT_TEST_ID} | ${descSort} | ${ascSort}  | ${descSort}
-      ${TH_SEVERITY_TEST_ID}   | ${noneSort} | ${descSort} | ${ascSort}
-      ${TH_PUBLISHED_TEST_ID}  | ${noneSort} | ${descSort} | ${ascSort}
+      selector                   | initialSort | firstSort   | nextSort
+      ${TH_CREATED_AT_TEST_ID}   | ${descSort} | ${ascSort}  | ${descSort}
+      ${TH_SEVERITY_TEST_ID}     | ${noneSort} | ${descSort} | ${ascSort}
+      ${TH_PUBLISHED_TEST_ID}    | ${noneSort} | ${descSort} | ${ascSort}
+      ${TH_INCIDENT_SLA_TEST_ID} | ${noneSort} | ${descSort} | ${ascSort}
     `('updates sort with new direction', async ({ selector, initialSort, firstSort, nextSort }) => {
       const [[attr, value]] = Object.entries(selector);
       const columnHeader = () => wrapper.find(`[${attr}="${value}"]`);
