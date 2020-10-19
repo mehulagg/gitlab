@@ -46,6 +46,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           end
         end
 
+        resources :pipeline_authoring, only: [:index], path: 'pipeline_authoring'
+
         resources :jobs, only: [:index, :show], constraints: { id: /\d+/ } do
           collection do
             resources :artifacts, only: [] do
