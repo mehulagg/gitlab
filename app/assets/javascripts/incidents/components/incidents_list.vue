@@ -74,6 +74,7 @@ export default {
       thAttr: TH_INCIDENT_SLA_TEST_ID,
       sortKey: 'SLA_DUE_AT',
       sortable: true,
+      sortDirection: 'asc',
     },
     {
       key: 'assignees',
