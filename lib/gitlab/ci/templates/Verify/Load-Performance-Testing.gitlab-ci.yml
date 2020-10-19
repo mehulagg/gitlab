@@ -18,6 +18,8 @@ load_performance:
   services:
     - docker:stable-dind
   script:
+    - echo "Will output pwd"
+    - pwd
     - docker run --rm -v "$(pwd)":/k6 -w /k6 $K6_DOCKER_OPTIONS $K6_IMAGE:$K6_VERSION run $K6_TEST_FILE --summary-export=load-performance.json $K6_OPTIONS
   artifacts:
     reports:
