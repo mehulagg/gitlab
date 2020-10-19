@@ -1,6 +1,7 @@
 import Vue from 'vue';
-import PathLastCommitQuery from 'shared_queries/repository/path_last_commit.query.graphql';
+import pathLastCommitQuery from 'shared_queries/repository/path_last_commit.query.graphql';
 import permissionsQuery from 'shared_queries/repository/permissions.query.graphql';
+import filesQuery from 'shared_queries/repository/files.query.graphql';
 import { escapeFileUrl } from '../lib/utils/url_utility';
 import createRouter from './router';
 import App from './components/app.vue';
@@ -57,7 +58,7 @@ export default function setupVueRepositoryList() {
       .then(res => res.json())
       .then(res => {
         apolloProvider.clients.defaultClient.writeQuery({
-          query: PathLastCommitQuery,
+          query: pathLastCommitQuery,
           data: res.data,
           variables: {
             projectPath,
@@ -186,15 +187,38 @@ export default function setupVueRepositoryList() {
     });
   }
 
-  // eslint-disable-next-line no-new
-  new Vue({
-    el,
-    router,
-    apolloProvider,
-    render(h) {
-      return h(App);
-    },
-  });
+  const initTreeListApp = () =>
+    new Vue({
+      el,
+      router,
+      apolloProvider,
+      render(h) {
+        return h(App);
+      },
+    });
+
+  if (window.gl.startup_graphql_calls) {
+    const query = window.gl.startup_graphql_calls.find(call => call.operationName === 'getFiles');
+    query.fetchCall
+      .then(res => res.json())
+      .then(res => {
+        apolloProvider.clients.defaultClient.writeQuery({
+          query: filesQuery,
+          data: res.data,
+          variables: {
+            projectPath,
+            ref,
+            path: currentRoutePath,
+            nextPageCursor: '',
+            pageSize: 100,
+          },
+        });
+      })
+      .catch(() => {})
+      .finally(() => initTreeListApp());
+  } else {
+    initTreeListApp();
+  }
 
   return { router, data: dataset };
 }
