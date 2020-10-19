@@ -194,6 +194,7 @@ module Gitlab
     config.assets.precompile << "page_bundles/todos.css"
     config.assets.precompile << "page_bundles/reports.css"
     config.assets.precompile << "page_bundles/xterm.css"
+    config.assets.precompile << "page_bundles/status.css"
     config.assets.precompile << "lazy_bundles/cropper.css"
     config.assets.precompile << "performance_bar.css"
     config.assets.precompile << "lib/ace.js"
