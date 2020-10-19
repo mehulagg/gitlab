@@ -146,6 +146,7 @@ workflow:
         - project/*.scala
         - .sbt/*.scala
         - project/build.properties
+
     # https://github.com/dokku/buildpack-nginx
     - exists:
         - .static
