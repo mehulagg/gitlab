@@ -38,7 +38,7 @@ with Kubernetes.
 
 ## Requirements
 
-Before installing GitLab, it is of critical importance to review the [system requirements](requirements.md).
+Before you install GitLab, be sure to review the [system requirements](requirements.md).
 The system requirements include details about the minimum hardware, software,
 database, and additional requirements to support GitLab.
 
