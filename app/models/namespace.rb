@@ -284,7 +284,7 @@ class Namespace < ApplicationRecord
   # that belongs to this namespace
   def all_projects
     if Feature.enabled?(:recursive_approach_for_all_projects)
-      Project.where(namespace: self_and_descendants)
+      type.blank? ? Project.where(namespace: self) : Project.where(namespace: self_and_descendants)
     else
       Project.inside_path(full_path)
     end
