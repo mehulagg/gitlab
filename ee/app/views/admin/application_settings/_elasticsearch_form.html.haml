@@ -149,6 +149,42 @@
               = f.text_field :elasticsearch_project_ids, class: 'js-elasticsearch-projects', value: elasticsearch_project_ids, data: { selected: elasticsearch_objects_options(@application_setting.elasticsearch_limited_projects(true)).to_json }
 
         .sub-section
+          %h4= _('Custom analyzers: language support')
+          %h5
+            Chinese language support using
+            %a{href: 'https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-smartcn.html'} smartcn 
+            custom analyzer
+          .form-group
+            .form-check
+              = f.check_box :elasticsearch_analyzers_smartcn_enabled, class: 'form-check-input'
+              = f.label :elasticsearch_indexing, class: 'form-check-label' do
+                = _('smartcn custom analyzer: Indexing')
+          .form-group
+            .form-check
+              = f.check_box :elasticsearch_analyzers_smartcn_search, class: 'form-check-input'
+              = f.label :elasticsearch_indexing, class: 'form-check-label' do
+                = _('smartcn custom analyzer: Search')
+              .form-text.text-muted
+                = _('Please only enable search after installing the plugin, enabling indexing and recreating the index')
+
+          %h5
+            Japanese language support using
+            %a{href: 'https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-kuromoji.html'} kuromoji
+            custom analyzer
+          .form-group
+            .form-check
+              = f.check_box :elasticsearch_analyzers_smartcn_enabled, class: 'form-check-input'
+              = f.label :elasticsearch_indexing, class: 'form-check-label' do
+                = _('kuromoji custom analyzer: Indexing')
+          .form-group
+            .form-check
+              = f.check_box :elasticsearch_analyzers_smartcn_search, class: 'form-check-input'
+              = f.label :elasticsearch_indexing, class: 'form-check-label' do
+                = _('kuromoji custom analyzer: Search')
+              .form-text.text-muted
+                = _('Please only enable search after installing the plugin, enabling indexing and recreating the index')
+
+        .sub-section
           %h4= _('Elasticsearch AWS IAM credentials')
           .form-group
             .form-check

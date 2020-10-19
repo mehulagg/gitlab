@@ -130,28 +130,10 @@ module Elastic
 
         indexes :title, type: :text,
           index_options: 'positions',
-          fields: {
-            kuromoji: {
-              analyzer: 'kuromoji',
-              type: :text
-            },
-            smartcn: {
-              analyzer: 'smartcn',
-              type: :text
-            }
-          }
+          fields: CustomLanguageAnalyzers.custom_analyzers_fields(type: :text)
         indexes :description, type: :text,
           index_options: 'positions',
-          fields: {
-            kuromoji: {
-              analyzer: 'kuromoji',
-              type: :text
-            },
-            smartcn: {
-              analyzer: 'smartcn',
-              type: :text
-            }
-          }
+          fields: CustomLanguageAnalyzers.custom_analyzers_fields(type: :text)
 
         indexes :state, type: :text
         indexes :project_id, type: :integer
