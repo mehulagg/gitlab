@@ -280,7 +280,7 @@ describe('Incidents List', () => {
       ${TH_CREATED_AT_TEST_ID}   | ${descSort} | ${ascSort}  | ${descSort}
       ${TH_SEVERITY_TEST_ID}     | ${noneSort} | ${descSort} | ${ascSort}
       ${TH_PUBLISHED_TEST_ID}    | ${noneSort} | ${descSort} | ${ascSort}
-      ${TH_INCIDENT_SLA_TEST_ID} | ${noneSort} | ${descSort} | ${ascSort}
+      ${TH_INCIDENT_SLA_TEST_ID} | ${noneSort} | ${ascSort}  | ${descSort}
     `('updates sort with new direction', async ({ selector, initialSort, firstSort, nextSort }) => {
       const [[attr, value]] = Object.entries(selector);
       const columnHeader = () => wrapper.find(`[${attr}="${value}"]`);
