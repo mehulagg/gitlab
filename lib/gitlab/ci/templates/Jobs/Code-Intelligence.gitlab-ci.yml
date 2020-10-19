@@ -1,5 +1,6 @@
 code_intelligence_go:
   stage: test
+  needs: []
   allow_failure: true
   image: sourcegraph/lsif-go:v1
   rules:
