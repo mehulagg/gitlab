@@ -767,12 +767,6 @@ RSpec.describe Group do
     end
   end
 
-  describe '#alpha/beta_feature_available?' do
-    it_behaves_like 'an entity with alpha/beta feature support' do
-      let(:entity) { group }
-    end
-  end
-
   describe "#insights_config" do
     context 'when group has no Insights project configured' do
       it 'returns the default config' do

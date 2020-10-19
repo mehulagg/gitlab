@@ -328,40 +328,6 @@ Due to limitations with `feature_available?`, the YAML definition for `licensed`
 flags accepts only `default_enabled: true`. This is under development as per the
 [related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/218667).
 
-#### Alpha/beta licensed feature flags
-
-This is relevant when developing the feature using
-[several smaller merge requests](https://about.gitlab.com/handbook/values/#make-small-merge-requests), or when the feature is considered to be an
-[alpha or beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga), and
-should not be available by default.
-
-As an example, if you were to ship the frontend half of a feature without the
-backend, you'd want to disable the feature entirely until the backend half is
-also ready to be shipped. To make sure this feature is disabled for both
-GitLab.com and self-managed instances, you should use the
-[`Namespace#alpha_feature_available?`](https://gitlab.com/gitlab-org/gitlab/blob/458749872f4a8f27abe8add930dbb958044cb926/ee/app/models/ee/namespace.rb#L113) or
-[`Namespace#beta_feature_available?`](https://gitlab.com/gitlab-org/gitlab/blob/458749872f4a8f27abe8add930dbb958044cb926/ee/app/models/ee/namespace.rb#L100-112)
-method, according to our [definitions](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga). This ensures the feature is disabled unless the feature flag is
-_explicitly_ enabled.
-
-CAUTION: **Caution:**
-If `alpha_feature_available?` or `beta_feature_available?` is used, the YAML definition
-for the feature flag must use `default_enabled: [false, true]`, because the usage
-of the feature flag is undefined. These methods may change, as per the
-[related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/218667).
-
-The resulting YAML should be similar to:
-
-```yaml
-name: scoped_labels
-group: group::memory
-type: licensed
-# The `default_enabled:` is undefined
-# as `feature_available?` uses `default_enabled: true`
-# as `beta_feature_available?` uses `default_enabled: false`
-default_enabled: [false, true]
-```
-
 ### Feature groups
 
 Feature groups must be defined statically in `lib/feature.rb` (in the
