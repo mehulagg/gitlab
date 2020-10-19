@@ -23,7 +23,7 @@ module Vulnerabilities
       projects = include_subgroups ? vulnerables.map(&:all_projects) : vulnerables.map(&:projects)
 
       ::Vulnerabilities::Statistic
-        .for_project(projects)
+        .for_project(projects.reduce(&:or))
         .group(:letter_grade)
         .select(:letter_grade, 'array_agg(project_id) project_ids')
         .then do |statistics|
