@@ -34,10 +34,10 @@ RSpec.describe Projects::Security::VulnerabilitiesController do
         expect(response.body).to have_text(vulnerability.title)
       end
 
-      it 'renders the solution card' do
+      it 'renders the vulnerability component' do
         show_vulnerability
 
-        expect(response.body).to have_css("#js-vulnerability-footer")
+        expect(response.body).to have_css("#js-vulnerability-main")
       end
     end
 

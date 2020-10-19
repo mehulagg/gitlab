@@ -11,9 +11,19 @@ export default {
   },
   computed: {
     message() {
-      return sprintf(s__('mrWidget|In the merge train at position %{mergeTrainPosition}'), {
-        mergeTrainPosition: this.mergeTrainIndex + 1,
-      });
+      const messageBeginningTrainPosition = s__(
+        'mrWidget|A new merge train has started and this merge request is the first of the queue.',
+      );
+      const messageAddedTrainPosition = sprintf(
+        s__(
+          'mrWidget|Added to the merge train. There are %{mergeTrainPosition} merge requests waiting to be merged',
+        ),
+        {
+          mergeTrainPosition: this.mergeTrainIndex + 1,
+        },
+      );
+
+      return this.mergeTrainIndex === 0 ? messageBeginningTrainPosition : messageAddedTrainPosition;
     },
   },
 };

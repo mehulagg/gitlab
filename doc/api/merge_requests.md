@@ -1004,6 +1004,7 @@ order for it to take effect:
    value of zero disables approvals for that project.
 1. The provided value of `approvals_before_merge` must be greater than the
    target project's `approvals_before_merge`.
+1. This API returns 201 (created) for a successful response. 
 
 ```json
 {
@@ -1310,7 +1311,7 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://git
 
 Merge changes submitted with MR using this API.
 
-If merge request is unable to be accepted (ie: Draft, Closed, Pipeline Pending Completion, or Failed while requiring Success) - you'll get a `405` and the error message 'Method Not Allowed'
+If merge request is unable to be accepted (such as Draft, Closed, Pipeline Pending Completion, or Failed while requiring Success) - you'll get a `405` and the error message 'Method Not Allowed'
 
 If it has some conflicts and can not be merged - you'll get a `406` and the error message 'Branch cannot be merged'
 
@@ -2085,10 +2086,10 @@ the `approvals_before_merge` parameter:
 }
 ```
 
-## Create a todo
+## Create a to do
 
-Manually creates a todo for the current user on a merge request.
-If there already exists a todo for the user on that merge request,
+Manually creates a to do for the current user on a merge request.
+If there already exists a to do for the user on that merge request,
 status code `304` is returned.
 
 ```plaintext

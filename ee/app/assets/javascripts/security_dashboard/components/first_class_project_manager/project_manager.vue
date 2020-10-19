@@ -1,5 +1,6 @@
 <script>
 import { GlButton } from '@gitlab/ui';
+import produce from 'immer';
 import getProjects from 'ee/security_dashboard/graphql/get_projects.query.graphql';
 import projectsQuery from 'ee/security_dashboard/graphql/get_instance_security_dashboard_projects.query.graphql';
 import addProjectToSecurityDashboard from 'ee/security_dashboard/graphql/add_project_to_security_dashboard.mutation.graphql';
@@ -73,32 +74,70 @@ export default {
             mutation: addProjectToSecurityDashboard,
             variables: { id: project.id },
             update(store, { data: results }) {
-              const data = store.readQuery({ query: projectsQuery });
+              if (!results.addProjectToSecurityDashboard.project) {
+                return;
+              }
+
+              const sourceData = store.readQuery({ query: projectsQuery });
               const newProject = results.addProjectToSecurityDashboard.project;
-              data.instanceSecurityDashboard.projects.nodes.push({
-                ...newProject,
-                vulnerabilitySeveritiesCount: newProject.vulnerabilitySeveritiesCount || null, // This is required to surpress missing field warning in GraphQL.
+
+              const data = produce(sourceData, draftData => {
+                // eslint-disable-next-line no-param-reassign
+                draftData.instanceSecurityDashboard.projects.nodes = [
+                  ...draftData.instanceSecurityDashboard.projects.nodes,
+                  {
+                    ...newProject,
+                    vulnerabilitySeveritiesCount: newProject.vulnerabilitySeveritiesCount || null,
+                  },
+                ];
               });
+
               store.writeQuery({ query: projectsQuery, data });
             },
           })
+          .then(({ data }) => {
+            return {
+              error: data?.addProjectToSecurityDashboard?.errors?.[0],
+              project: data?.addProjectToSecurityDashboard?.project ?? project,
+            };
+          })
           .catch(() => {
-            return { error: true, project };
+            return {
+              error: s__(
+                'SecurityReports|Project was not found or you do not have permission to add this project to Security Dashboards.',
+              ),
+              project,
+            };
           });
       });
 
       return Promise.all(addProjectsPromises)
         .then(response => {
-          const invalidProjects = response.filter(value => value.error).map(value => value.project);
+          const invalidProjects = response.filter(value => value.error);
           this.$emit('handleProjectManipulation', false);
 
           if (invalidProjects.length) {
-            const invalidProjectsMessage = createInvalidProjectMessage(invalidProjects);
-            createFlash(
-              sprintf(s__('SecurityReports|Unable to add %{invalidProjectsMessage}'), {
-                invalidProjectsMessage,
-              }),
+            const invalidProjectsByErrorMessage = response.reduce((acc, value) => {
+              acc[value.error] = acc[value.error] ?? [];
+              acc[value.error].push(value.project);
+
+              return acc;
+            }, {});
+
+            const errorMessages = Object.entries(invalidProjectsByErrorMessage).map(
+              ([errorMessage, projects]) => {
+                const invalidProjectsMessage = createInvalidProjectMessage(projects);
+                return sprintf(
+                  s__('SecurityReports|Unable to add %{invalidProjectsMessage}: %{errorMessage}'),
+                  {
+                    invalidProjectsMessage,
+                    errorMessage,
+                  },
+                );
+              },
             );
+
+            createFlash(errorMessages.join('<br/>'));
           }
         })
         .finally(() => {
@@ -115,12 +154,15 @@ export default {
           mutation: deleteProjectFromSecurityDashboard,
           variables: { id },
           update(store) {
-            const data = store.readQuery({
-              query: projectsQuery,
+            const sourceData = store.readQuery({ query: projectsQuery });
+
+            const data = produce(sourceData, draftData => {
+              // eslint-disable-next-line no-param-reassign
+              draftData.instanceSecurityDashboard.projects.nodes = draftData.instanceSecurityDashboard.projects.nodes.filter(
+                curr => curr.id !== id,
+              );
             });
-            data.instanceSecurityDashboard.projects.nodes = data.instanceSecurityDashboard.projects.nodes.filter(
-              curr => curr.id !== id,
-            );
+
             store.writeQuery({ query: projectsQuery, data });
           },
         })
@@ -180,6 +222,8 @@ export default {
           search: searchQuery,
           first: this.$options.PROJECTS_PER_PAGE,
           after: pageInfo.endCursor,
+          searchNamespaces: true,
+          sort: 'similarity',
         },
       });
     },
@@ -203,9 +247,16 @@ export default {
   <section class="container">
     <div class="row justify-content-center mt-md-4">
       <div class="col col-lg-7">
-        <h3 class="text-3 font-weight-bold border-bottom mb-4 pb-3">
-          {{ s__('SecurityReports|Add or remove projects from your dashboard') }}
+        <h3 class="gl-font-lg gl-font-weight-bold gl-mt-0">
+          {{ s__('SecurityReports|Monitored projects') }}
         </h3>
+        <p class="gl-mb-4 gl-pb-3">
+          {{
+            s__(
+              'SecurityReports|Add or remove projects to monitor in the security area. Projects included in this list will have their results displayed in the security dashboard and vulnerability report.',
+            )
+          }}
+        </p>
         <div class="d-flex flex-column flex-md-row">
           <project-selector
             class="flex-grow mr-md-2"

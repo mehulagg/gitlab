@@ -64,6 +64,18 @@ RSpec.describe SystemNoteService do
     end
   end
 
+  describe '.change_issuable_reviewers' do
+    let(:reviewers) { [double, double] }
+
+    it 'calls IssuableService' do
+      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
+        expect(service).to receive(:change_issuable_reviewers).with(reviewers)
+      end
+
+      described_class.change_issuable_reviewers(noteable, project, author, reviewers)
+    end
+  end
+
   describe '.close_after_error_tracking_resolve' do
     it 'calls IssuableService' do
       expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
@@ -71,18 +83,6 @@ RSpec.describe SystemNoteService do
       end
 
       described_class.close_after_error_tracking_resolve(noteable, project, author)
-    end
-  end
-
-  describe '.change_milestone' do
-    let(:milestone) { double }
-
-    it 'calls IssuableService' do
-      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
-        expect(service).to receive(:change_milestone).with(milestone)
-      end
-
-      described_class.change_milestone(noteable, project, author, milestone)
     end
   end
 
@@ -347,6 +347,7 @@ RSpec.describe SystemNoteService do
     let(:success_message) { "SUCCESS: Successfully posted to http://jira.example.net." }
 
     before do
+      stub_jira_service_test
       stub_jira_urls(jira_issue.id)
       jira_service_settings
     end
@@ -737,6 +738,31 @@ RSpec.describe SystemNoteService do
       end
 
       described_class.new_alert_issue(alert, alert.issue, author)
+    end
+  end
+
+  describe '.create_new_alert' do
+    let(:alert) { build(:alert_management_alert) }
+    let(:monitoring_tool) { 'Prometheus' }
+
+    it 'calls AlertManagementService' do
+      expect_next_instance_of(SystemNotes::AlertManagementService) do |service|
+        expect(service).to receive(:create_new_alert).with(monitoring_tool)
+      end
+
+      described_class.create_new_alert(alert, monitoring_tool)
+    end
+  end
+
+  describe '.change_incident_severity' do
+    let(:incident) { build(:incident) }
+
+    it 'calls IncidentService' do
+      expect_next_instance_of(SystemNotes::IncidentService) do |service|
+        expect(service).to receive(:change_incident_severity)
+      end
+
+      described_class.change_incident_severity(incident, author)
     end
   end
 end

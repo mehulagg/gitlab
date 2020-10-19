@@ -69,7 +69,7 @@ RSpec.describe Issuable do
 
     it 'returns nil when author is nil' do
       issue.author_id = nil
-      issue.save(validate: false)
+      issue.save!(validate: false)
 
       expect(issue.author_name).to eq nil
     end
@@ -295,20 +295,14 @@ RSpec.describe Issuable do
   end
 
   describe "#new?" do
-    it "returns true when created today and record hasn't been updated" do
-      allow(issue).to receive(:today?).and_return(true)
+    it "returns false when created 30 hours ago" do
+      allow(issue).to receive(:created_at).and_return(Time.current - 30.hours)
+      expect(issue.new?).to be_falsey
+    end
+
+    it "returns true when created 20 hours ago" do
+      allow(issue).to receive(:created_at).and_return(Time.current - 20.hours)
       expect(issue.new?).to be_truthy
-    end
-
-    it "returns false when not created today" do
-      allow(issue).to receive(:today?).and_return(false)
-      expect(issue.new?).to be_falsey
-    end
-
-    it "returns false when record has been updated" do
-      allow(issue).to receive(:today?).and_return(true)
-      issue.update_attribute(:updated_at, 1.hour.ago)
-      expect(issue.new?).to be_falsey
     end
   end
 
@@ -367,13 +361,13 @@ RSpec.describe Issuable do
       end
 
       it 'returns true when a subcription exists and subscribed is true' do
-        issue.subscriptions.create(user: user, project: project, subscribed: true)
+        issue.subscriptions.create!(user: user, project: project, subscribed: true)
 
         expect(issue.subscribed?(user, project)).to be_truthy
       end
 
       it 'returns false when a subcription exists and subscribed is false' do
-        issue.subscriptions.create(user: user, project: project, subscribed: false)
+        issue.subscriptions.create!(user: user, project: project, subscribed: false)
 
         expect(issue.subscribed?(user, project)).to be_falsey
       end
@@ -389,13 +383,13 @@ RSpec.describe Issuable do
       end
 
       it 'returns true when a subcription exists and subscribed is true' do
-        issue.subscriptions.create(user: user, project: project, subscribed: true)
+        issue.subscriptions.create!(user: user, project: project, subscribed: true)
 
         expect(issue.subscribed?(user, project)).to be_truthy
       end
 
       it 'returns false when a subcription exists and subscribed is false' do
-        issue.subscriptions.create(user: user, project: project, subscribed: false)
+        issue.subscriptions.create!(user: user, project: project, subscribed: false)
 
         expect(issue.subscribed?(user, project)).to be_falsey
       end
@@ -443,7 +437,7 @@ RSpec.describe Issuable do
       let(:labels) { create_list(:label, 2) }
 
       before do
-        issue.update(labels: [labels[1]])
+        issue.update!(labels: [labels[1]])
         expect(Gitlab::HookData::IssuableBuilder)
           .to receive(:new).with(issue).and_return(builder)
       end
@@ -462,7 +456,7 @@ RSpec.describe Issuable do
     context 'total_time_spent is updated' do
       before do
         issue.spend_time(duration: 2, user_id: user.id, spent_at: Time.current)
-        issue.save
+        issue.save!
         expect(Gitlab::HookData::IssuableBuilder)
           .to receive(:new).with(issue).and_return(builder)
       end
@@ -503,8 +497,8 @@ RSpec.describe Issuable do
       let(:user2) { create(:user) }
 
       before do
-        merge_request.update(assignees: [user])
-        merge_request.update(assignees: [user, user2])
+        merge_request.update!(assignees: [user])
+        merge_request.update!(assignees: [user, user2])
         expect(Gitlab::HookData::IssuableBuilder)
           .to receive(:new).with(merge_request).and_return(builder)
       end
@@ -560,7 +554,7 @@ RSpec.describe Issuable do
       before do
         label_link = issue.label_links.find_by(label_id: second_label.id)
         label_link.label_id = nil
-        label_link.save(validate: false)
+        label_link.save!(validate: false)
       end
 
       it 'filters out bad labels' do
@@ -830,7 +824,7 @@ RSpec.describe Issuable do
 
     where(:issuable_type, :supports_time_tracking) do
       :issue         | true
-      :incident      | false
+      :incident      | true
       :merge_request | true
     end
 
@@ -840,6 +834,24 @@ RSpec.describe Issuable do
       subject { issuable.supports_time_tracking? }
 
       it { is_expected.to eq(supports_time_tracking) }
+    end
+  end
+
+  describe '#supports_severity?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:issuable_type, :supports_severity) do
+      :issue         | false
+      :incident      | true
+      :merge_request | false
+    end
+
+    with_them do
+      let(:issuable) { build_stubbed(issuable_type) }
+
+      subject { issuable.supports_severity? }
+
+      it { is_expected.to eq(supports_severity) }
     end
   end
 
@@ -858,6 +870,60 @@ RSpec.describe Issuable do
       subject { issuable.incident? }
 
       it { is_expected.to eq(incident) }
+    end
+  end
+
+  describe '#supports_issue_type?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:issuable_type, :supports_issue_type) do
+      :issue         | true
+      :merge_request | false
+    end
+
+    with_them do
+      let(:issuable) { build_stubbed(issuable_type) }
+
+      subject { issuable.supports_issue_type? }
+
+      it { is_expected.to eq(supports_issue_type) }
+    end
+  end
+
+  describe '#severity' do
+    subject { issuable.severity }
+
+    context 'when issuable is not an incident' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:issuable_type, :severity) do
+        :issue         | 'unknown'
+        :merge_request | 'unknown'
+      end
+
+      with_them do
+        let(:issuable) { build_stubbed(issuable_type) }
+
+        it { is_expected.to eq(severity) }
+      end
+    end
+
+    context 'when issuable type is an incident' do
+      let!(:issuable) { build_stubbed(:incident) }
+
+      context 'when incident does not have issuable_severity' do
+        it 'returns default serverity' do
+          is_expected.to eq(IssuableSeverity::DEFAULT)
+        end
+      end
+
+      context 'when incident has issuable_severity' do
+        let!(:issuable_severity) { build_stubbed(:issuable_severity, issue: issuable, severity: 'critical') }
+
+        it 'returns issuable serverity' do
+          is_expected.to eq('critical')
+        end
+      end
     end
   end
 end

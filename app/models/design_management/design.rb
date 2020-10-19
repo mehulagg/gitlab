@@ -79,16 +79,10 @@ module DesignManagement
       joins(join.join_sources).where(actions[:event].not_eq(deletion))
     end
 
-    scope :ordered, -> (project) do
-      # TODO: Always order by relative position after the feature flag is removed
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/34382
-      if Feature.enabled?(:reorder_designs, project, default_enabled: true)
-        # We need to additionally sort by `id` to support keyset pagination.
-        # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17788/diffs#note_230875678
-        order(:relative_position, :id)
-      else
-        in_creation_order
-      end
+    scope :ordered, -> do
+      # We need to additionally sort by `id` to support keyset pagination.
+      # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17788/diffs#note_230875678
+      order(:relative_position, :id)
     end
 
     scope :in_creation_order, -> { reorder(:id) }
@@ -173,6 +167,10 @@ module DesignManagement
       end
     end
 
+    def self.build_full_path(issue, design)
+      File.join(DesignManagement.designs_directory, "issue-#{issue.iid}", design.filename)
+    end
+
     def to_ability_name
       'design'
     end
@@ -186,7 +184,7 @@ module DesignManagement
     end
 
     def full_path
-      @full_path ||= File.join(DesignManagement.designs_directory, "issue-#{issue.iid}", filename)
+      @full_path ||= self.class.build_full_path(issue, self)
     end
 
     def diff_refs
@@ -228,6 +226,10 @@ module DesignManagement
       )
 
       !interloper.exists?
+    end
+
+    def notes_with_associations
+      notes.includes(:author)
     end
 
     private

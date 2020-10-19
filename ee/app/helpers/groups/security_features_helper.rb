@@ -38,7 +38,6 @@ module Groups::SecurityFeaturesHelper
       no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
       empty_state_svg_path: image_path('illustrations/security-dashboard-empty-state.svg'),
       dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),
-      vulnerable_projects_endpoint: group_security_vulnerable_projects_path(group),
       vulnerabilities_export_endpoint: expose_path(api_v4_security_groups_vulnerability_exports_path(id: group.id))
     }
   end

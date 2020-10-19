@@ -1,5 +1,5 @@
 <script>
-import { GlIcon, GlDeprecatedDropdown, GlDeprecatedButton } from '@gitlab/ui';
+import { GlIcon, GlButton, GlDropdown } from '@gitlab/ui';
 import { __, n__ } from '~/locale';
 import { SELECTIVE_SYNC_SHARDS } from '../constants';
 
@@ -7,8 +7,8 @@ export default {
   name: 'GeoNodeFormShards',
   components: {
     GlIcon,
-    GlDeprecatedDropdown,
-    GlDeprecatedButton,
+    GlButton,
+    GlDropdown,
   },
   props: {
     syncShardsOptions: {
@@ -49,13 +49,21 @@ export default {
 </script>
 
 <template>
-  <gl-deprecated-dropdown :text="dropdownTitle">
-    <li v-for="shard in syncShardsOptions" :key="shard.value">
-      <gl-deprecated-button class="d-flex align-items-center" @click="toggleShard(shard)">
-        <gl-icon :class="[{ invisible: !isSelected(shard) }]" name="mobile-issue-close" />
-        <span class="ml-1">{{ shard.label }}</span>
-      </gl-deprecated-button>
+  <gl-dropdown id="node-synchronization-shards-field" :text="dropdownTitle">
+    <li
+      v-for="shard in syncShardsOptions"
+      :key="shard.value"
+      class="gl-display-flex! gl-align-items-center"
+    >
+      <gl-icon
+        class="gl-mx-3"
+        :class="[{ invisible: !isSelected(shard) }]"
+        name="mobile-issue-close"
+      />
+      <gl-button category="tertiary" @click="toggleShard(shard)">
+        <span class="gl-white-space-normal">{{ shard.label }}</span>
+      </gl-button>
     </li>
-    <div v-if="noSyncShards" class="text-secondary p-2">{{ __('Nothing found…') }}</div>
-  </gl-deprecated-dropdown>
+    <div v-if="noSyncShards" class="gl-text-gray-500 gl-p-3">{{ __('Nothing found…') }}</div>
+  </gl-dropdown>
 </template>

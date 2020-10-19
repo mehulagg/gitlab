@@ -86,6 +86,8 @@ describe('Project Manager component', () => {
           search: 'test',
           first: wrapper.vm.$options.PROJECTS_PER_PAGE,
           after: '',
+          searchNamespaces: true,
+          sort: 'similarity',
         },
       });
     });
@@ -161,7 +163,9 @@ describe('Project Manager component', () => {
       findAddProjectsButton().vm.$emit('click');
       return waitForPromises().then(() => {
         expect(createFlash).toHaveBeenCalledTimes(1);
-        expect(createFlash).toHaveBeenCalledWith('Unable to add Sample Project 1');
+        expect(createFlash).toHaveBeenCalledWith(
+          'Unable to add Sample Project 1: Project was not found or you do not have permission to add this project to Security Dashboards.',
+        );
       });
     });
 
@@ -176,7 +180,7 @@ describe('Project Manager component', () => {
       return waitForPromises().then(() => {
         expect(createFlash).toHaveBeenCalledTimes(1);
         expect(createFlash).toHaveBeenCalledWith(
-          'Unable to add Sample Project 2 and Sample Project 3',
+          'Unable to add Sample Project 2 and Sample Project 3: Project was not found or you do not have permission to add this project to Security Dashboards.',
         );
       });
     });

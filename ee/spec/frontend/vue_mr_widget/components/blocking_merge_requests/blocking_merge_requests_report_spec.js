@@ -48,7 +48,7 @@ describe('BlockingMergeRequestsReport', () => {
     props.mr.blockingMergeRequests.visible_merge_requests = {};
     createComponent(props);
 
-    expect(wrapper.isEmpty()).toBe(true);
+    expect(wrapper.html()).toBe('');
   });
 
   it('passes merged MRs as resolved issues and anything else as unresolved ', () => {

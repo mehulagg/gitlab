@@ -24,19 +24,19 @@ RSpec.describe ElasticDeleteProjectWorker, :elastic do
     ensure_elasticsearch_index!
 
     ## All database objects + data from repository. The absolute value does not matter
-    expect(Project.elastic_search('*', search_options).records).to include(project)
-    expect(Issue.elastic_search('*', search_options).records).to include(issue)
-    expect(Milestone.elastic_search('*', search_options).records).to include(milestone)
-    expect(Note.elastic_search('*', search_options).records).to include(note)
-    expect(MergeRequest.elastic_search('*', search_options).records).to include(merge_request)
+    expect(Project.elastic_search('*', **search_options).records).to include(project)
+    expect(Issue.elastic_search('*', **search_options).records).to include(issue)
+    expect(Milestone.elastic_search('*', **search_options).records).to include(milestone)
+    expect(Note.elastic_search('*', **search_options).records).to include(note)
+    expect(MergeRequest.elastic_search('*', **search_options).records).to include(merge_request)
 
     subject.perform(project.id, project.es_id)
     ensure_elasticsearch_index!
 
-    expect(Project.elastic_search('*', search_options).total_count).to be(0)
-    expect(Issue.elastic_search('*', search_options).total_count).to be(0)
-    expect(Milestone.elastic_search('*', search_options).total_count).to be(0)
-    expect(Note.elastic_search('*', search_options).total_count).to be(0)
-    expect(MergeRequest.elastic_search('*', search_options).total_count).to be(0)
+    expect(Project.elastic_search('*', **search_options).total_count).to be(0)
+    expect(Issue.elastic_search('*', **search_options).total_count).to be(0)
+    expect(Milestone.elastic_search('*', **search_options).total_count).to be(0)
+    expect(Note.elastic_search('*', **search_options).total_count).to be(0)
+    expect(MergeRequest.elastic_search('*', **search_options).total_count).to be(0)
   end
 end

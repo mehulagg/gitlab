@@ -5,7 +5,7 @@ module Mutations
     class Create < BaseMutation
       InvalidGlobalID = Class.new(StandardError)
 
-      include ResolvesProject
+      include AuthorizesProject
 
       graphql_name 'DastOnDemandScanCreate'
 
@@ -21,16 +21,34 @@ module Mutations
                required: true,
                description: 'ID of the site profile to be used for the scan.'
 
+      argument :dast_scanner_profile_id, ::Types::GlobalIDType[::DastScannerProfile],
+               required: false,
+               description: 'ID of the scanner profile to be used for the scan.'
+
       authorize :create_on_demand_dast_scan
 
-      def resolve(full_path:, dast_site_profile_id:)
-        project = authorized_find!(full_path: full_path)
+      def resolve(full_path:, dast_site_profile_id:, **args)
+        project = authorized_find_project!(full_path: full_path)
+
+        # TODO: remove explicit coercion once compatibility layer is removed
+        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+        dast_site_profile_id = ::Types::GlobalIDType[::DastSiteProfile].coerce_isolated_input(dast_site_profile_id)
 
         dast_site_profile = find_dast_site_profile(project: project, dast_site_profile_id: dast_site_profile_id)
         dast_site = dast_site_profile.dast_site
+        dast_scanner_profile = find_dast_scanner_profile(project: project, dast_scanner_profile_id: args[:dast_scanner_profile_id])
 
-        service = Ci::RunDastScanService.new(project, current_user)
-        result = service.execute(branch: project.default_branch, target_url: dast_site.url)
+        result = ::Ci::RunDastScanService.new(
+          project, current_user
+        ).execute(
+          branch: project.default_branch,
+          target_url: dast_site.url,
+          spider_timeout: dast_scanner_profile&.spider_timeout,
+          target_timeout: dast_scanner_profile&.target_timeout,
+          full_scan_enabled: dast_scanner_profile&.full_scan_enabled?,
+          use_ajax_spider: dast_scanner_profile&.use_ajax_spider,
+          show_debug_messages: dast_scanner_profile&.show_debug_messages
+        )
 
         if result.success?
           success_response(project: project, pipeline: result.payload)
@@ -41,15 +59,25 @@ module Mutations
 
       private
 
-      def find_object(full_path:)
-        resolve_project(full_path: full_path)
-      end
-
+      # rubocop: disable CodeReuse/ActiveRecord
       def find_dast_site_profile(project:, dast_site_profile_id:)
+        DastSiteProfilesFinder.new(project_id: project.id, id: dast_site_profile_id.model_id)
+          .execute
+          .first!
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
+      def find_dast_scanner_profile(project:, dast_scanner_profile_id:)
+        return unless dast_scanner_profile_id
+
+        # TODO: remove explicit coercion once compatibility layer is removed
+        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+        dast_scanner_profile_id = ::Types::GlobalIDType[::DastScannerProfile]
+          .coerce_isolated_input(dast_scanner_profile_id)
+
         project
-          .dast_site_profiles
-          .with_dast_site
-          .find(dast_site_profile_id.model_id)
+          .dast_scanner_profiles
+          .find(dast_scanner_profile_id.model_id)
       end
 
       def success_response(project:, pipeline:)

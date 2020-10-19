@@ -28,6 +28,15 @@ const TEST_FALLBACK_RULE = {
   isFallback: true,
 };
 const TEST_LOCKED_RULE_NAME = 'LOCKED_RULE';
+const nameTakenError = {
+  response: {
+    data: {
+      message: {
+        name: ['has already been taken'],
+      },
+    },
+  },
+};
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -40,7 +49,7 @@ describe('EE Approvals RuleForm', () => {
   let actions;
 
   const createComponent = (props = {}, options = {}) => {
-    wrapper = shallowMount(localVue.extend(RuleForm), {
+    wrapper = shallowMount(RuleForm, {
       propsData: props,
       store: new Vuex.Store(store),
       localVue,
@@ -167,7 +176,7 @@ describe('EE Approvals RuleForm', () => {
 
           wrapper.vm.submit();
 
-          expect(actions.postRule).toHaveBeenCalledWith(expect.anything(), expected, undefined);
+          expect(actions.postRule).toHaveBeenCalledWith(expect.anything(), expected);
         });
       });
     });
@@ -242,7 +251,7 @@ describe('EE Approvals RuleForm', () => {
           .catch(done.fail);
       });
 
-      it('on submit with data, posts rule', () => {
+      describe('with valid data', () => {
         const users = [1, 2];
         const groups = [2, 3];
         const userRecords = users.map(id => ({ id, type: TYPE_USER }));
@@ -260,14 +269,35 @@ describe('EE Approvals RuleForm', () => {
           protectedBranchIds: branches,
         };
 
-        findNameInput().setValue(expected.name);
-        findApprovalsRequiredInput().setValue(expected.approvalsRequired);
-        wrapper.vm.approvers = groupRecords.concat(userRecords);
-        wrapper.vm.branches = expected.protectedBranchIds;
+        beforeEach(() => {
+          findNameInput().setValue(expected.name);
+          findApprovalsRequiredInput().setValue(expected.approvalsRequired);
+          wrapper.vm.approvers = groupRecords.concat(userRecords);
+          wrapper.vm.branches = expected.protectedBranchIds;
+        });
 
-        wrapper.vm.submit();
+        it('on submit, posts rule', () => {
+          wrapper.vm.submit();
 
-        expect(actions.postRule).toHaveBeenCalledWith(expect.anything(), expected, undefined);
+          expect(actions.postRule).toHaveBeenCalledWith(expect.anything(), expected);
+        });
+
+        it('when submitted with a duplicate name, shows the "taken name" validation', async () => {
+          store.state.settings.prefix = 'project-settings';
+          jest.spyOn(wrapper.vm, 'postRule').mockRejectedValueOnce(nameTakenError);
+
+          wrapper.vm.submit();
+
+          await wrapper.vm.$nextTick();
+          // We have to wait for two ticks because the promise needs to resolve
+          // AND the result has to update into the UI
+          await wrapper.vm.$nextTick();
+
+          expect(findNameValidation()).toEqual({
+            isValid: false,
+            feedback: 'Rule name is already taken.',
+          });
+        });
       });
 
       it('adds selected approvers on selection', () => {
@@ -302,7 +332,7 @@ describe('EE Approvals RuleForm', () => {
         ]);
       });
 
-      it('on submit, puts rule', () => {
+      describe('with valid data', () => {
         const userRecords = TEST_RULE.users.map(x => ({ ...x, type: TYPE_USER }));
         const groupRecords = TEST_RULE.groups.map(x => ({ ...x, type: TYPE_GROUP }));
         const users = userRecords.map(x => x.id);
@@ -318,9 +348,35 @@ describe('EE Approvals RuleForm', () => {
           protectedBranchIds: [],
         };
 
-        wrapper.vm.submit();
+        beforeEach(() => {
+          findNameInput().setValue(expected.name);
+          findApprovalsRequiredInput().setValue(expected.approvalsRequired);
+          wrapper.vm.approvers = groupRecords.concat(userRecords);
+          wrapper.vm.branches = expected.protectedBranchIds;
+        });
 
-        expect(actions.putRule).toHaveBeenCalledWith(expect.anything(), expected, undefined);
+        it('on submit, puts rule', () => {
+          wrapper.vm.submit();
+
+          expect(actions.putRule).toHaveBeenCalledWith(expect.anything(), expected);
+        });
+
+        it('when submitted with a duplicate name, shows the "taken name" validation', async () => {
+          store.state.settings.prefix = 'project-settings';
+          jest.spyOn(wrapper.vm, 'putRule').mockRejectedValueOnce(nameTakenError);
+
+          wrapper.vm.submit();
+
+          await wrapper.vm.$nextTick();
+          // We have to wait for two ticks because the promise needs to resolve
+          // AND the result has to update into the UI
+          await wrapper.vm.$nextTick();
+
+          expect(findNameValidation()).toEqual({
+            isValid: false,
+            feedback: 'Rule name is already taken.',
+          });
+        });
       });
     });
 
@@ -346,11 +402,9 @@ describe('EE Approvals RuleForm', () => {
         });
 
         it('puts fallback rule', () => {
-          expect(actions.putFallbackRule).toHaveBeenCalledWith(
-            expect.anything(),
-            { approvalsRequired: TEST_APPROVALS_REQUIRED },
-            undefined,
-          );
+          expect(actions.putFallbackRule).toHaveBeenCalledWith(expect.anything(), {
+            approvalsRequired: TEST_APPROVALS_REQUIRED,
+          });
         });
 
         it('does not show any validation errors', () => {
@@ -439,7 +493,6 @@ describe('EE Approvals RuleForm', () => {
           expect.objectContaining({
             removeHiddenGroups: false,
           }),
-          undefined,
         );
       });
 
@@ -456,7 +509,6 @@ describe('EE Approvals RuleForm', () => {
             expect.objectContaining({
               removeHiddenGroups: true,
             }),
-            undefined,
           );
         });
       });
@@ -606,7 +658,6 @@ describe('EE Approvals RuleForm', () => {
               approvalsRequired: TEST_APPROVALS_REQUIRED,
               users: TEST_APPROVERS.map(x => x.id),
             }),
-            undefined,
           );
         });
       });
@@ -619,11 +670,9 @@ describe('EE Approvals RuleForm', () => {
         });
 
         it('puts fallback rule', () => {
-          expect(actions.putFallbackRule).toHaveBeenCalledWith(
-            expect.anything(),
-            { approvalsRequired: TEST_APPROVALS_REQUIRED },
-            undefined,
-          );
+          expect(actions.putFallbackRule).toHaveBeenCalledWith(expect.anything(), {
+            approvalsRequired: TEST_APPROVALS_REQUIRED,
+          });
         });
       });
     });
@@ -652,19 +701,13 @@ describe('EE Approvals RuleForm', () => {
         });
 
         it('deletes rule', () => {
-          expect(actions.deleteRule).toHaveBeenCalledWith(
-            expect.anything(),
-            TEST_RULE.id,
-            undefined,
-          );
+          expect(actions.deleteRule).toHaveBeenCalledWith(expect.anything(), TEST_RULE.id);
         });
 
         it('puts fallback rule', () => {
-          expect(actions.putFallbackRule).toHaveBeenCalledWith(
-            expect.anything(),
-            { approvalsRequired: TEST_APPROVALS_REQUIRED },
-            undefined,
-          );
+          expect(actions.putFallbackRule).toHaveBeenCalledWith(expect.anything(), {
+            approvalsRequired: TEST_APPROVALS_REQUIRED,
+          });
         });
       });
 
@@ -686,7 +729,6 @@ describe('EE Approvals RuleForm', () => {
               approvalsRequired: TEST_APPROVALS_REQUIRED,
               users: TEST_APPROVERS.map(x => x.id),
             }),
-            undefined,
           );
         });
       });

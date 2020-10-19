@@ -6,25 +6,13 @@ module Gitlab
     # superclass inside a module, because autoloading can occur in a
     # different order between execution environments.
     class ProjectSearchResults < Gitlab::Elastic::SearchResults
-      attr_reader :project, :repository_ref
+      attr_reader :project, :repository_ref, :filters
 
-      delegate :users, to: :generic_search_results
-      delegate :limited_users_count, to: :generic_search_results
-
-      def initialize(current_user, query, project:, repository_ref: nil)
+      def initialize(current_user, query, project:, repository_ref: nil, sort: nil, filters: {})
         @project = project
         @repository_ref = repository_ref.presence || project.default_branch
 
-        super(current_user, query, [project], public_and_internal_projects: false)
-      end
-
-      def generic_search_results
-        @generic_search_results ||= Gitlab::ProjectSearchResults.new(
-          current_user,
-          query,
-          project: project,
-          repository_ref: repository_ref
-        )
+        super(current_user, query, [project.id], public_and_internal_projects: false, sort: sort, filters: filters)
       end
 
       private

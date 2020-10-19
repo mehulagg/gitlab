@@ -129,7 +129,6 @@ RSpec.describe Groups::SecurityFeaturesHelper do
         vulnerability_feedback_help_path: '/help/user/application_security/index#interacting-with-the-vulnerabilities',
         empty_state_svg_path: '/images/illustrations/security-dashboard-empty-state.svg',
         dashboard_documentation: '/help/user/application_security/security_dashboard/index',
-        vulnerable_projects_endpoint: "/groups/#{group.full_path}/-/security/vulnerable_projects",
         vulnerabilities_export_endpoint: "/api/v4/security/groups/#{group.id}/vulnerability_exports"
       }
     end

@@ -37,8 +37,14 @@ module Gitlab
             yield if healthy_shard_for?(event)
           end
 
-          def replicable_project?(project_id)
-            strong_memoize(:"replicable_project_#{project_id}") do
+          def replicable_project?
+            memoize_and_short_circuit_if_registry_is_persisted(:"replicable_project_#{event.project_id}", registry) do
+              Gitlab::Geo.current_node.projects_include?(event.project_id)
+            end
+          end
+
+          def memoize_and_short_circuit_if_registry_is_persisted(memoize_key, registry, &block)
+            strong_memoize(memoize_key) do
               # If a registry exists, then it *should* be replicated. The
               # registry will be removed by the delete event or
               # RegistryConsistencyWorker if it should no longer be replicated.
@@ -47,7 +53,7 @@ module Gitlab
               # for repository updates which are a large proportion of events.
               next true if registry.persisted?
 
-              Gitlab::Geo.current_node.projects_include?(project_id)
+              yield
             end
           end
 

@@ -39,7 +39,7 @@ RSpec.describe EE::GeoHelper do
     end
 
     it 'includes replicator types' do
-      expected_names = helper.replicator_classes.map { |c| c.replicable_name_plural }
+      expected_names = helper.enabled_replicator_classes.map { |c| c.replicable_name_plural }
 
       expect(names).to include(*expected_names)
     end

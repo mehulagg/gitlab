@@ -3,9 +3,9 @@
 require 'pathname'
 
 module QA
-  RSpec.describe 'Secure', :docker, :runner do
+  RSpec.describe 'Secure', :runner do
     let(:approved_license_name) { "MIT License" }
-    let(:denied_license_name) { "WTFPL" }
+    let(:denied_license_name) { "Apache License 2.0" }
 
     describe 'License Compliance page' do
       after(:all) do
@@ -45,7 +45,7 @@ module QA
         Flow::Login.sign_in_unless_signed_in
       end
 
-      it 'can approve a license in the license compliance page' do
+      it 'can approve a license in the license compliance page', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/964' do
         @project.visit!
         Page::Project::Menu.perform(&:click_on_license_compliance)
 
@@ -57,7 +57,7 @@ module QA
         end
       end
 
-      it 'can deny a license in the settings page' do
+      it 'can deny a license in the settings page', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/963' do
         @project.visit!
         Page::Project::Menu.perform(&:click_on_license_compliance)
 
@@ -107,7 +107,7 @@ module QA
         Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_success)
       end
 
-      it 'can approve and deny licenses in the pipeline' do
+      it 'can approve and deny licenses in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/965' do
         Page::Project::Menu.perform(&:click_ci_cd_pipelines)
         Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
 

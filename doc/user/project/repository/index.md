@@ -86,7 +86,7 @@ according to the markup language.
 | [reStructuredText](https://docutils.sourceforge.io/rst.html) | `rst` |
 | [AsciiDoc](../../asciidoc.md) | `adoc`, `ad`, `asciidoc` |
 | [Textile](https://textile-lang.com/) | `textile` |
-| [rdoc](http://rdoc.sourceforge.net/doc/index.html)  | `rdoc` |
+| [Rdoc](http://rdoc.sourceforge.net/doc/index.html)  | `rdoc` |
 | [Org mode](https://orgmode.org/) | `org` |
 | [creole](http://www.wikicreole.org/) | `creole` |
 | [MediaWiki](https://www.mediawiki.org/wiki/MediaWiki) | `wiki`, `mediawiki` |
@@ -190,7 +190,7 @@ updated every 15 minutes at most, so may not reflect recent activity. The displa
 The project size may differ slightly from one instance to another due to compression, housekeeping, and other factors.
 
 [Repository size limit](../../admin_area/settings/account_and_limit_settings.md) may be set by admins.
-GitLab.com's repository size limit [is set by GitLab](../../gitlab_com/index.md#repository-size-limit).
+GitLab.com's repository size limit [is set by GitLab](../../gitlab_com/index.md#account-and-limit-settings).
 
 ## Contributors
 
@@ -234,7 +234,7 @@ lock your files to prevent any conflicting changes.
 
 ## Repository's API
 
-You can access your repos via [repository API](../../../api/repositories.md).
+You can access your repositories via [repository API](../../../api/repositories.md).
 
 ## Clone in Apple Xcode
 

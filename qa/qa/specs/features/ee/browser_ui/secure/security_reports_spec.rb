@@ -3,7 +3,7 @@
 require 'pathname'
 
 module QA
-  RSpec.describe 'Secure', :docker, :runner do
+  RSpec.describe 'Secure', :runner do
     let(:number_of_dependencies_in_fixture) { 9 }
     let(:dependency_scan_example_vuln) { 'Prototype pollution attack in mixin-deep' }
     let(:container_scan_example_vuln) { 'CVE-2017-18269 in glibc' }
@@ -49,7 +49,7 @@ module QA
         @project.visit!
       end
 
-      it 'displays security reports in the pipeline' do
+      it 'displays security reports in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/565' do
         Page::Project::Menu.perform(&:click_ci_cd_pipelines)
         Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
 
@@ -74,7 +74,7 @@ module QA
         end
       end
 
-      it 'displays security reports in the project security dashboard' do
+      it 'displays security reports in the project security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/566' do
         Page::Project::Menu.perform(&:click_project)
         Page::Project::Menu.perform(&:click_on_security_dashboard)
 
@@ -97,7 +97,7 @@ module QA
         end
       end
 
-      it 'displays security reports in the group security dashboard' do
+      it 'displays security reports in the group security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/567' do
         Page::Main::Menu.perform(&:go_to_groups)
         Page::Dashboard::Groups.perform do |groups|
           groups.click_group @project.group.path
@@ -131,7 +131,7 @@ module QA
         end
       end
 
-      it 'displays the Dependency List' do
+      it 'displays the Dependency List', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/564' do
         Page::Project::Menu.perform(&:click_on_dependency_list)
 
         EE::Page::Project::Secure::DependencyList.perform do |dependency_list|

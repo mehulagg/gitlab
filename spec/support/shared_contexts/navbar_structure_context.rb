@@ -44,7 +44,8 @@ RSpec.shared_context 'project navbar structure' do
           _('Boards'),
           _('Labels'),
           _('Service Desk'),
-          _('Milestones')
+          _('Milestones'),
+          (_('Iterations') if Gitlab.ee?)
         ]
       },
       {
@@ -64,14 +65,16 @@ RSpec.shared_context 'project navbar structure' do
         nav_item: _('Operations'),
         nav_sub_items: [
           _('Metrics'),
+          _('Logs'),
+          _('Tracing'),
+          _('Error Tracking'),
           _('Alerts'),
           _('Incidents'),
-          _('Environments'),
-          _('Error Tracking'),
-          _('Product Analytics'),
           _('Serverless'),
-          _('Logs'),
-          _('Kubernetes')
+          _('Kubernetes'),
+          _('Environments'),
+          _('Feature Flags'),
+          _('Product Analytics')
         ]
       },
       analytics_nav_item,
@@ -119,10 +122,10 @@ RSpec.shared_context 'group navbar structure' do
       nav_item: _('Settings'),
       nav_sub_items: [
         _('General'),
+        _('Integrations'),
         _('Projects'),
         _('Repository'),
         _('CI / CD'),
-        _('Integrations'),
         _('Webhooks'),
         _('Audit Events')
       ]
@@ -135,6 +138,13 @@ RSpec.shared_context 'group navbar structure' do
       nav_sub_items: [
         s_('UsageQuota|Usage Quotas')
       ]
+    }
+  end
+
+  let(:push_rules_nav_item) do
+    {
+      nav_item: _('Push Rules'),
+      nav_sub_items: []
     }
   end
 
@@ -160,6 +170,7 @@ RSpec.shared_context 'group navbar structure' do
         nav_item: _('Merge Requests'),
         nav_sub_items: []
       },
+      (push_rules_nav_item if Gitlab.ee?),
       {
         nav_item: _('Kubernetes'),
         nav_sub_items: []

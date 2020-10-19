@@ -17,6 +17,8 @@ import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import DeleteSnippetMutation from '../mutations/deleteSnippet.mutation.graphql';
 import CanCreatePersonalSnippet from '../queries/userPermissions.query.graphql';
 import CanCreateProjectSnippet from '../queries/projectPermissions.query.graphql';
+import { joinPaths } from '~/lib/utils/url_utility';
+import { fetchPolicies } from '~/lib/graphql';
 
 export default {
   components: {
@@ -36,6 +38,7 @@ export default {
   },
   apollo: {
     canCreateSnippet: {
+      fetchPolicy: fetchPolicies.NO_CACHE,
       query() {
         return this.snippet.project ? CanCreateProjectSnippet : CanCreatePersonalSnippet;
       },
@@ -96,8 +99,8 @@ export default {
           condition: this.canCreateSnippet,
           text: __('New snippet'),
           href: this.snippet.project
-            ? `${this.snippet.project.webUrl}/-/snippets/new`
-            : `${gon.relative_url_root}-/snippets/new`,
+            ? joinPaths(this.snippet.project.webUrl, '-/snippets/new')
+            : joinPaths('/', gon.relative_url_root, '/-/snippets/new'),
           variant: 'success',
           category: 'secondary',
           cssClass: 'ml-2',

@@ -49,14 +49,6 @@ module Gitlab
         rescue URI::InvalidURIError, KeyError
         end
 
-        def environment
-          return unless environment_name
-
-          EnvironmentsFinder.new(project, nil, { name: environment_name })
-            .find
-            &.first
-        end
-
         def metrics_dashboard_url
           return unless environment && full_query && title
 
@@ -67,6 +59,10 @@ module Gitlab
             embedded: true,
             **alert_embed_window_params
           )
+        end
+
+        def has_required_attributes?
+          project && title && starts_at_raw
         end
 
         private

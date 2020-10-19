@@ -8,7 +8,7 @@ module Gitlab
     # other resources. The rollout status sums the Kubernetes deployments
     # together.
     class RolloutStatus
-      attr_reader :deployments, :instances, :completion, :status
+      attr_reader :deployments, :instances, :completion, :status, :canary_ingress
 
       def complete?
         completion == 100
@@ -22,46 +22,57 @@ module Gitlab
         @status == :not_found
       end
 
-      def has_legacy_app_label?
-        legacy_deployments.present?
-      end
-
       def found?
         @status == :found
       end
 
-      def self.from_deployments(*deployments, pods: {}, legacy_deployments: [])
-        return new([], status: :not_found, legacy_deployments: legacy_deployments) if deployments.empty?
+      def canary_ingress_exists?
+        canary_ingress.present?
+      end
 
-        deployments = deployments.map { |deploy| ::Gitlab::Kubernetes::Deployment.new(deploy, pods: pods) }
+      def self.from_deployments(*deployments_attrs, pods_attrs: [], ingresses: [])
+        return new([], status: :not_found) if deployments_attrs.empty?
+
+        deployments = deployments_attrs.map do |attrs|
+          ::Gitlab::Kubernetes::Deployment.new(attrs, pods: pods_attrs)
+        end
         deployments.sort_by!(&:order)
-        new(deployments, legacy_deployments: legacy_deployments)
+
+        pods = pods_attrs.map do |attrs|
+          ::Gitlab::Kubernetes::Pod.new(attrs)
+        end
+
+        ingresses = ingresses.map { |ingress| ::Gitlab::Kubernetes::Ingress.new(ingress) }
+
+        new(deployments, pods: pods, ingresses: ingresses)
       end
 
       def self.loading
         new([], status: :loading)
       end
 
-      def initialize(deployments, status: :found, legacy_deployments: [])
+      def initialize(deployments, pods: [], ingresses: [], status: :found)
         @status       = status
         @deployments  = deployments
-        @instances    = deployments.flat_map(&:instances)
-        @legacy_deployments = legacy_deployments
+
+        @instances = if ::Feature.enabled?(:deploy_boards_dedupe_instances)
+                       RolloutInstances.new(deployments, pods).pod_instances
+                     else
+                       deployments.flat_map(&:instances)
+                     end
+
+        @canary_ingress = ingresses.find(&:canary?)
 
         @completion =
           if @instances.empty?
             100
           else
             # We downcase the pod status in Gitlab::Kubernetes::Deployment#deployment_instance
-            finished = @instances.count { |instance| instance[:status] == Gitlab::Kubernetes::Pod::RUNNING.downcase }
+            finished = @instances.count { |instance| instance[:status] == ::Gitlab::Kubernetes::Pod::RUNNING.downcase }
 
             (finished / @instances.count.to_f * 100).to_i
           end
       end
-
-      private
-
-      attr_reader :legacy_deployments
     end
   end
 end

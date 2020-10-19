@@ -15,7 +15,7 @@ Merge Request Analytics helps you understand the efficiency of your code review 
 
 Merge Request Analytics displays information that will help you evaluate the efficiency and productivity of your merge request process.
 
-The Throughput chart shows the number of completed merge requests, by month. Merge request throughput is
+The Throughput chart shows the number of merge requests merged, by month. Merge request throughput is
 a common measure of productivity in software engineering. Although imperfect, the average throughput can
 be a meaningful benchmark of your team's overall productivity.
 
@@ -40,7 +40,7 @@ The following visualizations and data are available, representing all merge requ
 
 ### Throughput chart
 
-The throughput chart shows the number of completed merge requests per month.
+The throughput chart shows the number of merge requests merged per month.
 
 ![Throughput chart](img/mr_throughput_chart_v13_3.png "Merge Request Analytics - Throughput chart showing merge requests merged in the past 12 months")
 
@@ -50,24 +50,26 @@ Data table displaying a maximum of the 100 most recent merge requests merged for
 
 ![Throughput table](img/mr_throughput_table_v13_3.png "Merge Request Analytics - Throughput table listing the 100 merge requests most recently merged")
 
+## Filter the data
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229266) in GitLab 13.4
+
+You can filter the data that is presented on the page based on the following parameters:
+
+- Author
+- Assignees
+- Labels
+- Milestones
+
+To filter results:
+
+1. Click on the filter bar.
+1. Select a parameter to filter by.
+1. Select a value from the autocompleted results, or enter search text to refine the results.
+
 ## Permissions
 
 The **Merge Request Analytics** feature can be accessed only:
 
 - On [Starter](https://about.gitlab.com/pricing/) and above.
 - By users with [Reporter access](../permissions.md) and above.
-
-## Enable and disable related feature flags
-
-Merge Request Analytics is disabled by default but can be enabled using the following
-[feature flag](../../development/feature_flags/development.md#enabling-a-feature-flag-locally-in-development):
-
-- `project_merge_request_analytics`
-
-A GitLab administrator can:
-
-- Enable this feature by running the following command in a Rails console:
-
-  ```ruby
-  Feature.enable(:project_merge_request_analytics)
-  ```

@@ -39,7 +39,7 @@ module Gitlab
     end
 
     def expired_subject
-      if subscribable.block_changes?
+      if show_downgrade_messaging?
         if auto_renew
           _('Something went wrong with your automatic subscription renewal.')
         else
@@ -63,7 +63,7 @@ module Gitlab
     end
 
     def expired_message
-      return block_changes_message if subscribable.block_changes?
+      return block_changes_message if show_downgrade_messaging?
 
       _('No worries, you can still use all the %{strong}%{plan_name}%{strong_close} features for now. You have %{remaining_days} to renew your subscription.') % { plan_name: plan_name, remaining_days: remaining_days_formatted, strong: strong, strong_close: strong_close }
     end
@@ -71,23 +71,23 @@ module Gitlab
     def block_changes_message
       return namespace_block_changes_message if namespace
 
-      _('You didn\'t renew your %{strong}%{plan_name}%{strong_close} subscription so it was downgraded to the GitLab Core Plan.') % { plan_name: plan_name, strong: strong, strong_close: strong_close }
+      _('You didn\'t renew your subscription so it was downgraded to the GitLab Core Plan.')
     end
 
     def namespace_block_changes_message
       if auto_renew
         support_link = '<a href="mailto:support@gitlab.com">support@gitlab.com</a>'.html_safe
 
-        _('We tried to automatically renew your %{strong}%{plan_name}%{strong_close} subscription for %{strong}%{namespace_name}%{strong_close} on %{expires_on} but something went wrong so your subscription was downgraded to the free plan. Don\'t worry, your data is safe. We suggest you check your payment method and get in touch with our support team (%{support_link}). They\'ll gladly help with your subscription renewal.') % { plan_name: plan_name, strong: strong, strong_close: strong_close, namespace_name: namespace.name, support_link: support_link, expires_on: expires_at_or_cutoff_at.strftime("%Y-%m-%d") }
+        _('We tried to automatically renew your subscription for %{strong}%{namespace_name}%{strong_close} on %{expires_on} but something went wrong so your subscription was downgraded to the free plan. Don\'t worry, your data is safe. We suggest you check your payment method and get in touch with our support team (%{support_link}). They\'ll gladly help with your subscription renewal.') % { strong: strong, strong_close: strong_close, namespace_name: namespace.name, support_link: support_link, expires_on: expires_at_or_cutoff_at.strftime("%Y-%m-%d") }
       else
-        _('You didn\'t renew your %{strong}%{plan_name}%{strong_close} subscription for %{strong}%{namespace_name}%{strong_close} so it was downgraded to the free plan.') % { plan_name: plan_name, strong: strong, strong_close: strong_close, namespace_name: namespace.name }
+        _('You didn\'t renew your subscription for %{strong}%{namespace_name}%{strong_close} so it was downgraded to the free plan.') % { strong: strong, strong_close: strong_close, namespace_name: namespace.name }
       end
     end
 
     def expiring_message
       return namespace_expiring_message if namespace
 
-      _('Your %{strong}%{plan_name}%{strong_close} subscription will expire on %{strong}%{expires_on}%{strong_close}. After that, you will not to be able to create issues or merge requests as well as many other features.') % { expires_on: expires_at_or_cutoff_at.strftime("%Y-%m-%d"), plan_name: plan_name, strong: strong, strong_close: strong_close }
+      _('Your %{strong}%{plan_name}%{strong_close} subscription will expire on %{strong}%{expires_on}%{strong_close}. After that, you will not be able to create issues or merge requests as well as many other features.') % { expires_on: expires_at_or_cutoff_at.strftime("%Y-%m-%d"), plan_name: plan_name, strong: strong, strong_close: strong_close }
     end
 
     def namespace_expiring_message
@@ -103,11 +103,11 @@ module Gitlab
     def expiring_features_message
       case plan_name
       when 'Gold'
-        _('After that, you will not to be able to use merge approvals or epics as well as many security features.')
+        _('After that, you will not be able to use merge approvals or epics as well as many security features.')
       when 'Silver'
-        _('After that, you will not to be able to use merge approvals or epics as well as many other features.')
+        _('After that, you will not be able to use merge approvals or epics as well as many other features.')
       else
-        _('After that, you will not to be able to use merge approvals or code quality as well as many other features.')
+        _('After that, you will not be able to use merge approvals or code quality as well as many other features.')
       end
     end
 
@@ -141,6 +141,14 @@ module Gitlab
 
     def plan_name
       @plan_name ||= subscribable.plan.titleize
+    end
+
+    def plan_downgraded?
+      plan_name.downcase == ::Plan::FREE
+    end
+
+    def show_downgrade_messaging?
+      subscribable.block_changes? && (self_managed? || plan_downgraded?)
     end
 
     def strong
@@ -185,6 +193,8 @@ module Gitlab
                else
                  (expires_at_or_cutoff_at - Date.today).to_i
                end
+
+        days = days < 0 ? 0 : days
 
         pluralize(days, 'day')
       end

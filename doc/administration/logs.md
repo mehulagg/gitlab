@@ -87,7 +87,7 @@ In addition, the log contains the originating IP address,
 (`remote_ip`), the user's ID (`user_id`), and username (`username`).
 
 Some endpoints such as `/search` may make requests to Elasticsearch if using
-[Advanced Global Search](../user/search/advanced_global_search.md). These will
+[Advanced Search](../user/search/advanced_global_search.md). These will
 additionally log `elasticsearch_calls` and `elasticsearch_call_duration_s`,
 which correspond to:
 
@@ -100,9 +100,9 @@ The ActionCable connection or channel class is used as the `controller`.
 
 ```json
 {
-  "method":{},
-  "path":{},
-  "format":{},
+  "method":null,
+  "path":null,
+  "format":null,
   "controller":"IssuesChannel",
   "action":"subscribe",
   "status":200,
@@ -363,8 +363,7 @@ This file lives in `/var/log/gitlab/gitlab-rails/git_json.log` for
 Omnibus GitLab packages or in `/home/git/gitlab/log/git_json.log` for
 installations from source.
 
-NOTE: **Note:**
-After 12.2, this file was renamed from `githost.log` to
+After GitLab version 12.2, this file was renamed from `githost.log` to
 `git_json.log` and stored in JSON format.
 
 GitLab has to interact with Git repositories, but in some rare cases
@@ -599,7 +598,6 @@ installations from source.
 
 ## Unicorn Logs
 
-NOTE: **Note:**
 Starting with GitLab 13.0, Puma is the default web server used in GitLab
 all-in-one package based installations as well as GitLab Helm chart deployments.
 
@@ -674,10 +672,8 @@ This log records:
 - Information whenever [Rack Attack](../security/rack_attack.md) registers an abusive request.
 - Requests over the [Rate Limit](../user/admin_area/settings/rate_limits_on_raw_endpoints.md) on raw endpoints.
 - [Protected paths](../user/admin_area/settings/protected_paths.md) abusive requests.
-
-NOTE: **Note:**
-In GitLab versions [12.3](https://gitlab.com/gitlab-org/gitlab/-/issues/29239) and greater, user ID and username are also
-recorded on this log, if available.
+- In GitLab versions [12.3](https://gitlab.com/gitlab-org/gitlab/-/issues/29239) and greater,
+  user ID and username, if available.
 
 ## `graphql_json.log`
 
@@ -723,10 +719,15 @@ was initiated, such as `1509705644.log`
 
 ## `sidekiq_exporter.log` and `web_exporter.log`
 
-If Prometheus metrics and the Sidekiq Exporter are both enabled, Sidekiq will
-start a Web server and listen to the defined port (default: `8082`). Access logs
-will be generated in `/var/log/gitlab/gitlab-rails/sidekiq_exporter.log` for
-Omnibus GitLab packages or in `/home/git/gitlab/log/sidekiq_exporter.log` for
+If Prometheus metrics and the Sidekiq Exporter are both enabled, Sidekiq
+will start a Web server and listen to the defined port (default:
+`8082`). By default, Sidekiq Exporter access logs are disabled but can
+be enabled via the `sidekiq['exporter_log_enabled'] = true` option in `/etc/gitlab/gitlab.rb`
+for Omnibus installations, or via the `sidekiq_exporter.log_enabled` option
+in `gitlab.yml` for installations from source. When enabled,
+access logs will be generated in
+`/var/log/gitlab/gitlab-rails/sidekiq_exporter.log` for Omnibus GitLab
+packages or in `/home/git/gitlab/log/sidekiq_exporter.log` for
 installations from source.
 
 If Prometheus metrics and the Web Exporter are both enabled, Puma/Unicorn will
@@ -955,3 +956,38 @@ For Omnibus GitLab installations, GitLab Monitor logs reside in `/var/log/gitlab
 ## GitLab Exporter
 
 For Omnibus GitLab installations, GitLab Exporter logs reside in `/var/log/gitlab/gitlab-exporter/`.
+
+## Gathering logs
+
+When [troubleshooting](troubleshooting/index.md) issues that aren't localized to one of the
+previously listed components, it's helpful to simultaneously gather multiple logs and statistics
+from a GitLab instance.
+
+### Briefly tail the main logs
+
+If the bug or error is readily reproducible, save the main GitLab logs
+[to a file](troubleshooting/linux_cheat_sheet.md#files--dirs) while reproducing the
+problem once or more times:
+
+```shell
+sudo gitlab-ctl tail | tee /tmp/<case-ID-and-keywords>.log
+```
+
+Conclude the log gathering with <kbd>Ctrl</kbd> + <kbd>C</kbd>.
+
+### GitLabSOS
+
+If performance degradations or cascading errors occur that can't readily be attributed to one
+of the previously listed GitLab components, [GitLabSOS](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/)
+can provide a perspective spanning all of Omnibus GitLab. For more details and instructions
+to run it, see [the GitLabSOS documentation](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/#gitlabsos).
+
+NOTE: **Note:**
+GitLab Support likes to use this custom-made tool.
+
+### Fast-stats
+
+[Fast-stats](https://gitlab.com/gitlab-com/support/toolbox/fast-stats) is a tool
+for creating and comparing performance statistics from GitLab logs.
+For more details and instructions to run it, see
+[read the documentation for fast-stats](https://gitlab.com/gitlab-com/support/toolbox/fast-stats#usage).

@@ -8,8 +8,9 @@ module Gitlab
           include BaseEvent
 
           def process
-            if should_sync?
+            if replicable_container_repository?
               registry.repository_updated!
+              registry.save
 
               job_id = ::Geo::ContainerRepositorySyncWorker.perform_async(event.container_repository_id)
             end
@@ -19,11 +20,21 @@ module Gitlab
 
           private
 
-          def should_sync?
-            strong_memoize(:should_sync) do
-              ::Geo::ContainerRepositoryRegistry.replication_enabled? &&
-                registry.container_repository &&
-                replicable_project?(registry.container_repository.project_id)
+          def replicable_container_repository?
+            id = event.container_repository_id
+
+            strong_memoize(:"replicable_container_repository_#{id}") do
+              next false unless ::Geo::ContainerRepositoryRegistry.replication_enabled?
+
+              # If a registry exists, then it *should* be replicated. The
+              # registry will be removed by the delete event or
+              # RegistryConsistencyWorker if it should no longer be replicated.
+              #
+              # This early exit helps keep processing of update events
+              # efficient.
+              next true if registry.persisted?
+
+              Gitlab::Geo.current_node.container_repositories_include?(id)
             end
           end
 
@@ -38,10 +49,9 @@ module Gitlab
           def log_event(job_id)
             super(
               'Docker Repository update',
-              container_repository_id: registry.container_repository_id,
-              should_sync: should_sync?,
+              container_repository_id: event.container_repository_id,
               replication_enabled: ::Geo::ContainerRepositoryRegistry.replication_enabled?,
-              replicable_project: replicable_project?(registry.container_repository.project_id),
+              replicable_container_repository: replicable_container_repository?,
               project_id: registry.container_repository.project_id,
               job_id: job_id)
           end

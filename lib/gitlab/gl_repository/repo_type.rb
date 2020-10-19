@@ -29,10 +29,6 @@ module Gitlab
       end
 
       def identifier_for_container(container)
-        if container.is_a?(Group)
-          return "#{container.class.name.underscore}-#{container.id}-#{name}"
-        end
-
         "#{name}-#{container.id}"
       end
 
@@ -57,6 +53,8 @@ module Gitlab
       end
 
       def repository_for(container)
+        return unless container
+
         repository_resolver.call(container)
       end
 
@@ -82,3 +80,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::GlRepository::RepoType.prepend_if_ee('EE::Gitlab::GlRepository::RepoType')

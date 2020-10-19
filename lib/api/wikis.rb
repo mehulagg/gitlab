@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Wikis < Grape::API::Instance
+  class Wikis < ::API::Base
     helpers ::API::Helpers::WikisHelpers
 
     helpers do
@@ -83,11 +83,12 @@ module API
         put ':id/wikis/:slug' do
           authorize! :create_wiki, container
 
-          page = WikiPages::UpdateService
+          response = WikiPages::UpdateService
             .new(container: container, current_user: current_user, params: params)
             .execute(wiki_page)
+          page = response.payload[:page]
 
-          if page.valid?
+          if response.success?
             present page, with: Entities::WikiPage
           else
             render_validation_error!(page)

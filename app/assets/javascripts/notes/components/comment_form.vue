@@ -371,6 +371,7 @@ export default {
               :markdown-docs-path="markdownDocsPath"
               :quick-actions-docs-path="quickActionsDocsPath"
               :add-spacing-classes="false"
+              :textarea-value="note"
             >
               <textarea
                 id="note-body"
@@ -380,7 +381,8 @@ export default {
                 dir="auto"
                 :disabled="isSubmitting"
                 name="note[note]"
-                class="note-textarea js-vue-comment-form js-note-text js-gfm-input js-autosize markdown-area js-vue-textarea qa-comment-input"
+                class="note-textarea js-vue-comment-form js-note-text js-gfm-input js-autosize markdown-area"
+                data-qa-selector="comment_field"
                 data-supports-quick-actions="true"
                 :aria-label="__('Description')"
                 :placeholder="__('Write a comment or drag your files here…')"
@@ -397,7 +399,7 @@ export default {
               :secondary-button-text="__('Cancel')"
               variant="warning"
               :dismissible="false"
-              @primaryAction="forceCloseIssue"
+              @primaryAction="toggleBlockedIssueWarning(false) && forceCloseIssue()"
               @secondaryAction="toggleBlockedIssueWarning(false) && enableButton()"
             >
               <p>
@@ -423,27 +425,30 @@ export default {
               <div
                 class="btn-group gl-mr-3 comment-type-dropdown js-comment-type-dropdown droplab-dropdown"
               >
-                <button
+                <gl-button
                   :disabled="isSubmitButtonDisabled"
-                  class="btn btn-success js-comment-button js-comment-submit-button qa-comment-button"
+                  class="js-comment-button js-comment-submit-button"
+                  data-qa-selector="comment_button"
                   type="submit"
+                  category="primary"
+                  variant="success"
                   :data-track-label="trackingLabel"
                   data-track-event="click_button"
                   @click.prevent="handleSave()"
+                  >{{ commentButtonTitle }}</gl-button
                 >
-                  {{ commentButtonTitle }}
-                </button>
-                <button
+                <gl-button
                   :disabled="isSubmitButtonDisabled"
                   name="button"
-                  type="button"
-                  class="btn btn-success note-type-toggle js-note-new-discussion dropdown-toggle qa-note-dropdown"
+                  category="primary"
+                  variant="success"
+                  class="note-type-toggle js-note-new-discussion dropdown-toggle"
+                  data-qa-selector="note_dropdown"
                   data-display="static"
                   data-toggle="dropdown"
+                  icon="chevron-down"
                   :aria-label="__('Open comment type dropdown')"
-                >
-                  <i aria-hidden="true" class="fa fa-caret-down toggle-icon"></i>
-                </button>
+                />
 
                 <ul class="note-type-dropdown dropdown-open-top dropdown-menu">
                   <li :class="{ 'droplab-item-selected': noteType === 'comment' }">
@@ -468,8 +473,7 @@ export default {
                   <li class="divider droplab-item-ignore"></li>
                   <li :class="{ 'droplab-item-selected': noteType === 'discussion' }">
                     <button
-                      type="button"
-                      class="btn btn-transparent qa-discussion-option"
+                      data-qa-selector="discussion_menu_item"
                       @click.prevent="setNoteType('discussion')"
                     >
                       <i aria-hidden="true" class="fa fa-check icon"></i>

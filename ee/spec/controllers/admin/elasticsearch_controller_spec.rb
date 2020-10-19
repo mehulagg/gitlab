@@ -18,7 +18,7 @@ RSpec.describe Admin::ElasticsearchController do
 
       post :enqueue_index
 
-      expect(controller).to set_flash[:notice].to include('/admin/sidekiq/queues/elastic_full_index')
+      expect(controller).to set_flash[:notice].to include('/admin/sidekiq/queues/elastic_commit_indexer')
       expect(response).to redirect_to general_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
     end
 

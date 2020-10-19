@@ -1,4 +1,5 @@
 <script>
+import { mapActions, mapState } from 'vuex';
 import {
   GlButton,
   GlButtonGroup,
@@ -8,19 +9,18 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import isWipLimitsOn from 'ee_else_ce/boards/mixins/is_wip_limits';
 import { n__, s__ } from '~/locale';
 import AccessorUtilities from '../../lib/utils/accessor';
-import BoardDelete from './board_delete';
 import IssueCount from './issue_count.vue';
 import boardsStore from '../stores/boards_store';
 import eventHub from '../eventhub';
-import { ListType } from '../constants';
+import sidebarEventHub from '~/sidebar/event_hub';
+import { inactiveId, LIST, ListType } from '../constants';
 import { isScopedLabel } from '~/lib/utils/common_utils';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {
-    BoardDelete,
     GlButtonGroup,
     GlButton,
     GlLabel,
@@ -32,7 +32,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [isWipLimitsOn],
+  mixins: [glFeatureFlagMixin()],
   props: {
     list: {
       type: Object,
@@ -43,19 +43,15 @@ export default {
       type: Boolean,
       required: true,
     },
-    boardId: {
-      type: String,
-      required: true,
-    },
-    canAdminList: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     isSwimlanesHeader: {
       type: Boolean,
       required: false,
       default: false,
+    },
+  },
+  inject: {
+    boardId: {
+      default: '',
     },
   },
   data() {
@@ -64,6 +60,7 @@ export default {
     };
   },
   computed: {
+    ...mapState(['activeId']),
     isLoggedIn() {
       return Boolean(gon.current_user_id);
     },
@@ -94,10 +91,11 @@ export default {
     showAssigneeListDetails() {
       return this.list.type === 'assignee' && (this.list.isExpanded || !this.isSwimlanesHeader);
     },
+    issuesCount() {
+      return this.list.issuesSize;
+    },
     issuesTooltipLabel() {
-      const { issuesSize } = this.list;
-
-      return n__(`%d issue`, `%d issues`, issuesSize);
+      return n__(`%d issue`, `%d issues`, this.issuesCount);
     },
     chevronTooltip() {
       return this.list.isExpanded ? s__('Boards|Collapse') : s__('Boards|Expand');
@@ -110,10 +108,7 @@ export default {
     },
     isSettingsShown() {
       return (
-        this.listType !== ListType.backlog &&
-        this.showListHeaderButton &&
-        this.list.isExpanded &&
-        this.isWipLimitsOn
+        this.listType !== ListType.backlog && this.showListHeaderButton && this.list.isExpanded
       );
     },
     showBoardListAndBoardInfo() {
@@ -126,8 +121,19 @@ export default {
     collapsedTooltipTitle() {
       return this.listTitle || this.listAssignee;
     },
+    shouldDisplaySwimlanes() {
+      return this.glFeatures.boardsWithSwimlanes && this.isSwimlanesOn;
+    },
   },
   methods: {
+    ...mapActions(['updateList', 'setActiveId']),
+    openSidebarSettings() {
+      if (this.activeId === inactiveId) {
+        sidebarEventHub.$emit('sidebar.closeAll');
+      }
+
+      this.setActiveId({ id: this.list.id, sidebarType: LIST });
+    },
     showScopedLabels(label) {
       return boardsStore.scopedLabels.enabled && isScopedLabel(label);
     },
@@ -136,20 +142,28 @@ export default {
       eventHub.$emit(`toggle-issue-form-${this.list.id}`);
     },
     toggleExpanded() {
-      if (this.list.isExpandable) {
-        this.list.isExpanded = !this.list.isExpanded;
+      this.list.isExpanded = !this.list.isExpanded;
 
-        if (AccessorUtilities.isLocalStorageAccessSafe() && !this.isLoggedIn) {
-          localStorage.setItem(`${this.uniqueKey}.expanded`, this.list.isExpanded);
-        }
+      if (!this.isLoggedIn) {
+        this.addToLocalStorage();
+      } else {
+        this.updateListFunction();
+      }
 
-        if (this.isLoggedIn) {
-          this.list.update();
-        }
-
-        // When expanding/collapsing, the tooltip on the caret button sometimes stays open.
-        // Close all tooltips manually to prevent dangling tooltips.
-        this.$root.$emit('bv::hide::tooltip');
+      // When expanding/collapsing, the tooltip on the caret button sometimes stays open.
+      // Close all tooltips manually to prevent dangling tooltips.
+      this.$root.$emit('bv::hide::tooltip');
+    },
+    addToLocalStorage() {
+      if (AccessorUtilities.isLocalStorageAccessSafe()) {
+        localStorage.setItem(`${this.uniqueKey}.expanded`, this.list.isExpanded);
+      }
+    },
+    updateListFunction() {
+      if (this.shouldDisplaySwimlanes || this.glFeatures.graphqlBoardLists) {
+        this.updateList({ listId: this.list.id, collapsed: !this.list.isExpanded });
+      } else {
+        this.list.update();
       }
     },
   },
@@ -160,7 +174,6 @@ export default {
   <header
     :class="{
       'has-border': list.label && list.label.color,
-      'gl-relative': list.isExpanded,
       'gl-h-full': !list.isExpanded,
       'board-inner gl-rounded-top-left-base gl-rounded-top-right-base': isSwimlanesHeader,
     }"
@@ -172,7 +185,7 @@ export default {
     <h3
       :class="{
         'user-can-drag': !disabled && !list.preset,
-        'gl-py-3': !list.isExpanded && !isSwimlanesHeader,
+        'gl-py-3 gl-h-full': !list.isExpanded && !isSwimlanesHeader,
         'gl-border-b-0': !list.isExpanded || isSwimlanesHeader,
         'gl-py-2': !list.isExpanded && isSwimlanesHeader,
       }"
@@ -263,22 +276,6 @@ export default {
         </div>
       </gl-tooltip>
 
-      <board-delete
-        v-if="canAdminList && !list.preset && list.id"
-        :list="list"
-        inline-template="true"
-      >
-        <gl-button
-          v-gl-tooltip.hover.bottom
-          :class="{ 'gl-display-none': !list.isExpanded }"
-          :aria-label="__('Delete list')"
-          class="board-delete no-drag gl-pr-0 gl-shadow-none! gl-mr-3"
-          :title="__('Delete list')"
-          icon="remove"
-          size="small"
-          @click.stop="deleteBoard"
-        />
-      </board-delete>
       <div
         v-if="showBoardListAndBoardInfo"
         class="issue-count-badge gl-display-inline-flex gl-pr-0 no-drag text-secondary"
@@ -288,7 +285,7 @@ export default {
           <gl-tooltip :target="() => $refs.issueCount" :title="issuesTooltipLabel" />
           <span ref="issueCount" class="issue-count-badge-count">
             <gl-icon class="gl-mr-2" name="issues" />
-            <issue-count :issues-size="list.issuesSize" :max-issue-count="list.maxIssueCount" />
+            <issue-count :issues-size="issuesCount" :max-issue-count="list.maxIssueCount" />
           </span>
           <!-- The following is only true in EE. -->
           <template v-if="weightFeatureAvailable">

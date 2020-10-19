@@ -2,70 +2,42 @@
 
 module EE
   module Feature
-    module ClassMethods
+    module ActiveSupportCacheStoreAdapter
       extend ::Gitlab::Utils::Override
 
+      override :remove
+      def remove(key)
+        super.tap do |result|
+          log_geo_event(key) if result
+        end
+      end
+
+      override :clear
+      def clear(key)
+        super.tap do |result|
+          log_geo_event(key) if result
+        end
+      end
+
       override :enable
-      def enable(key, thing = true)
-        super
-        log_geo_event(key)
+      def enable(key, *_)
+        super.tap do |result|
+          log_geo_event(key) if result
+        end
       end
 
       override :disable
-      def disable(key, thing = false)
-        super
-        log_geo_event(key)
-      end
-
-      override :enable_group
-      def enable_group(key, group)
-        super
-        log_geo_event(key)
-      end
-
-      override :disable_group
-      def disable_group(key, group)
-        super
-        log_geo_event(key)
-      end
-
-      override :enable_percentage_of_time
-      def enable_percentage_of_time(key, percentage)
-        super
-        log_geo_event(key)
-      end
-
-      override :disable_percentage_of_time
-      def disable_percentage_of_time(key)
-        super
-        log_geo_event(key)
-      end
-
-      override :enable_percentage_of_actors
-      def enable_percentage_of_actors(key, percentage)
-        super
-        log_geo_event(key)
-      end
-
-      override :disable_percentage_of_actors
-      def disable_percentage_of_actors(key)
-        super
-        log_geo_event(key)
+      def disable(key, *_)
+        super.tap do |result|
+          log_geo_event(key) if result
+        end
       end
 
       private
 
       def log_geo_event(key)
-        Geo::CacheInvalidationEventStore.new(cache_store.key_for(key)).create!
+        Geo::CacheInvalidationEventStore.new(key_for(key)).create!
       end
-
-      def cache_store
-        Flipper::Adapters::ActiveSupportCacheStore
-      end
-    end
-
-    def self.prepended(base)
-      base.singleton_class.prepend ClassMethods
     end
   end
 end

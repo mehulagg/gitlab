@@ -126,7 +126,6 @@ describe('EE Approvals LicenseCompliance', () => {
       expect(store.modules.approvalsModal.actions.open).toHaveBeenCalledWith(
         expect.any(Object),
         mockLicenseCheckRule,
-        undefined,
       );
     });
   });

@@ -4,15 +4,17 @@ import { shallowMount } from '@vue/test-utils';
 import IssuesLaneList from 'ee/boards/components/issues_lane_list.vue';
 import { listObj } from 'jest/boards/mock_data';
 import { TEST_HOST } from 'helpers/test_constants';
+import BoardCard from '~/boards/components/board_card_layout.vue';
 import axios from '~/lib/utils/axios_utils';
-import BoardCard from '~/boards/components/board_card.vue';
 import { mockIssues } from '../mock_data';
 import List from '~/boards/models/list';
+import { createStore } from '~/boards/stores';
 import { ListType } from '~/boards/constants';
 
 describe('IssuesLaneList', () => {
   let wrapper;
   let axiosMock;
+  let store;
 
   beforeEach(() => {
     axiosMock = new AxiosMockAdapter(axios);
@@ -48,11 +50,11 @@ describe('IssuesLaneList', () => {
     }
 
     wrapper = shallowMount(IssuesLaneList, {
+      store,
       propsData: {
         list,
         issues: mockIssues,
         disabled: false,
-        rootPath: '/',
       },
     });
   };
@@ -65,6 +67,8 @@ describe('IssuesLaneList', () => {
 
   describe('if list is expanded', () => {
     beforeEach(() => {
+      store = createStore();
+
       createComponent();
     });
 
@@ -79,6 +83,8 @@ describe('IssuesLaneList', () => {
 
   describe('if list is collapsed', () => {
     beforeEach(() => {
+      store = createStore();
+
       createComponent({ collapsed: true });
     });
 

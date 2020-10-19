@@ -124,12 +124,6 @@ RSpec.describe AuditEventPresenter do
     it 'survives a round trip from JSON' do
       expect(Gitlab::Json.parse(presenter.ip_address.to_json)).to eq(presenter.ip_address)
     end
-
-    it 'falls back to the details hash' do
-      audit_event.update(ip_address:  nil)
-
-      expect(presenter.ip_address).to eq('127.0.0.1')
-    end
   end
 
   context 'exposes the object' do

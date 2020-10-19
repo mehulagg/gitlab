@@ -33,7 +33,11 @@ class MergeRequestsFinder < IssuableFinder
   include MergedAtFilter
 
   def self.scalar_params
-    @scalar_params ||= super + [:wip, :draft, :target_branch, :merged_after, :merged_before]
+    @scalar_params ||= super + [:wip, :draft, :target_branch, :merged_after, :merged_before, :approved_by_ids]
+  end
+
+  def self.array_params
+    @array_params ||= super.merge(approved_by_usernames: [])
   end
 
   def klass
@@ -47,6 +51,7 @@ class MergeRequestsFinder < IssuableFinder
     items = by_draft(items)
     items = by_target_branch(items)
     items = by_merged_at(items)
+    items = by_approvals(items)
     by_source_project_id(items)
   end
 
@@ -110,7 +115,9 @@ class MergeRequestsFinder < IssuableFinder
         .or(table[:title].matches('WIP %'))
         .or(table[:title].matches('[WIP]%'))
 
-    return items unless Feature.enabled?(:merge_request_draft_filter)
+    # Let's keep this FF around until https://gitlab.com/gitlab-org/gitlab/-/issues/232999
+    # is implemented
+    return items unless Feature.enabled?(:merge_request_draft_filter, default_enabled: true)
 
     items
       .or(table[:title].matches('Draft - %'))
@@ -128,6 +135,19 @@ class MergeRequestsFinder < IssuableFinder
 
   def deployment_id
     @deployment_id ||= params[:deployment_id].presence
+  end
+
+  # Filter by merge requests that had been approved by specific users
+  # rubocop: disable CodeReuse/Finder
+  def by_approvals(items)
+    MergeRequests::ByApprovalsFinder
+      .new(params[:approved_by_usernames], params[:approved_by_ids])
+      .execute(items)
+  end
+  # rubocop: enable CodeReuse/Finder
+
+  def items_assigned_to(items, user)
+    MergeRequest.from_union([super, items.reviewer_assigned_to(user)])
   end
 end
 

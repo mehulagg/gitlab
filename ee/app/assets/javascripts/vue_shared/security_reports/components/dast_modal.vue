@@ -38,7 +38,7 @@ export default {
         text: __('Download as CSV'),
         attributes: {
           variant: 'success',
-          class: 'btn-secondary gl-button',
+          class: 'gl-button btn-success-secondary',
           href: this.downloadLink,
           download: '',
           'data-testid': 'download-button',

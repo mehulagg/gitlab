@@ -4,7 +4,7 @@ import {
   itemAddFailureTypesMap,
   pathIndeterminateErrorMap,
   relatedIssuesRemoveErrorMap,
-} from 'ee/related_issues/constants';
+} from '~/related_issues/constants';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { s__, __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
@@ -389,6 +389,7 @@ export const createItem = ({ state, dispatch }, { itemTitle }) => {
   dispatch('requestCreateItem');
 
   Api.createChildEpic({
+    confidential: state.parentItem.confidential,
     groupId: state.parentItem.fullPath,
     parentEpicIid: state.parentItem.iid,
     title: itemTitle,

@@ -252,6 +252,44 @@ RSpec.describe Vulnerabilities::Finding do
     end
   end
 
+  describe '.dismissed' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:project2) { create(:project) }
+    let!(:finding1) { create(:vulnerabilities_finding, project: project) }
+    let!(:finding2) { create(:vulnerabilities_finding, project: project, report_type: :dast) }
+    let!(:finding3) { create(:vulnerabilities_finding, project: project2) }
+
+    before do
+      create(
+        :vulnerability_feedback,
+        :dismissal,
+        project: finding1.project,
+        project_fingerprint: finding1.project_fingerprint
+      )
+      create(
+        :vulnerability_feedback,
+        :dismissal,
+        project_fingerprint: finding2.project_fingerprint,
+        project: project2
+      )
+      create(
+        :vulnerability_feedback,
+        :dismissal,
+        category: :sast,
+        project_fingerprint: finding2.project_fingerprint,
+        project: finding2.project
+      )
+    end
+
+    it 'returns all dismissed findings' do
+      expect(described_class.dismissed).to contain_exactly(finding1)
+    end
+
+    it 'returns dismissed findings for project' do
+      expect(project.vulnerability_findings.dismissed).to contain_exactly(finding1)
+    end
+  end
+
   describe '.batch_count_by_project_and_severity' do
     let(:pipeline) { create(:ci_pipeline, :success, project: project) }
     let(:project) { create(:project) }
@@ -631,13 +669,44 @@ RSpec.describe Vulnerabilities::Finding do
     it { is_expected.to eql(expected_message) }
   end
 
-  describe '#cve' do
+  describe '#cve_value' do
     let(:finding) { build(:vulnerabilities_finding) }
-    let(:expected_cve) { finding.metadata['cve'] }
+    let(:expected_cve) { 'CVE-2020-0000' }
 
-    subject { finding.cve }
+    subject { finding.cve_value }
+
+    before do
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'cve', name: expected_cve)
+    end
 
     it { is_expected.to eql(expected_cve) }
+  end
+
+  describe '#cwe_value' do
+    let(:finding) { build(:vulnerabilities_finding) }
+    let(:expected_cwe) { 'CWE-0000' }
+
+    subject { finding.cwe_value }
+
+    before do
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'cwe', name: expected_cwe)
+    end
+
+    it { is_expected.to eql(expected_cwe) }
+  end
+
+  describe '#other_identifier_values' do
+    let(:finding) { build(:vulnerabilities_finding) }
+    let(:expected_values) { ['ID 1', 'ID 2'] }
+
+    subject { finding.other_identifier_values }
+
+    before do
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'foo', name: expected_values.first)
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'bar', name: expected_values.second)
+    end
+
+    it { is_expected.to match_array(expected_values) }
   end
 
   describe "#metadata" do

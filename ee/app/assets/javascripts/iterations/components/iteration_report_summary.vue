@@ -3,6 +3,7 @@ import { GlCard, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import query from '../queries/iteration_issues_summary.query.graphql';
+import { Namespace } from '../constants';
 
 export default {
   cardBodyClass: 'gl-text-center gl-py-3',
@@ -19,9 +20,9 @@ export default {
       },
       update(data) {
         return {
-          open: data?.group?.openIssues?.count || 0,
-          assigned: data?.group?.assignedIssues?.count || 0,
-          closed: data?.group?.closedIssues?.count || 0,
+          open: data[this.namespaceType]?.openIssues?.count || 0,
+          assigned: data[this.namespaceType]?.assignedIssues?.count || 0,
+          closed: data[this.namespaceType]?.closedIssues?.count || 0,
         };
       },
       error() {
@@ -30,13 +31,19 @@ export default {
     },
   },
   props: {
-    groupPath: {
+    fullPath: {
       type: String,
       required: true,
     },
     iterationId: {
       type: String,
       required: true,
+    },
+    namespaceType: {
+      type: String,
+      required: false,
+      default: Namespace.Group,
+      validator: value => Object.values(Namespace).includes(value),
     },
   },
   data() {
@@ -47,8 +54,9 @@ export default {
   computed: {
     queryVariables() {
       return {
-        groupPath: this.groupPath,
+        fullPath: this.fullPath,
         id: getIdFromGraphQLId(this.iterationId),
+        isGroup: this.namespaceType === Namespace.Group,
       };
     },
     completedPercent() {

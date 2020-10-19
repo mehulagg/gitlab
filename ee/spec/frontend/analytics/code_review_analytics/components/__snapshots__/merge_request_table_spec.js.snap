@@ -148,9 +148,9 @@ exports[`MergeRequestTable component template matches the snapshot 1`] = `
         role="cell"
       >
         <div>
-          
-      2 days
-    
+          <span>
+            2 days
+          </span>
         </div>
       </td>
       <td

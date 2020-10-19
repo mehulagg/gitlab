@@ -124,13 +124,12 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
     clean_frontend_fixtures('cycle_analytics/')
   end
 
-  describe Analytics::CycleAnalytics::StagesController, type: :controller do
+  describe Groups::Analytics::CycleAnalytics::StagesController, type: :controller do
     render_views
 
     let(:params) { { created_after: 3.months.ago, created_before: Time.now, group_id: group.full_path } }
 
     before do
-      stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => true)
       stub_licensed_features(cycle_analytics_for_groups: true)
 
       # Persist the default stages
@@ -183,7 +182,7 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
     end
   end
 
-  describe Analytics::CycleAnalytics::SummaryController, type: :controller do
+  describe Groups::Analytics::CycleAnalytics::SummaryController, type: :controller do
     render_views
 
     let(:params) { { created_after: 3.months.ago, created_before: Time.now, group_id: group.full_path } }
@@ -199,7 +198,6 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
     end
 
     before do
-      stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => true)
       stub_licensed_features(cycle_analytics_for_groups: true)
 
       prepare_cycle_analytics_data
@@ -221,7 +219,7 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
     end
   end
 
-  describe Analytics::TasksByTypeController, type: :controller do
+  describe Groups::Analytics::TasksByTypeController, type: :controller do
     render_views
 
     let(:label) { create(:group_label, group: group) }

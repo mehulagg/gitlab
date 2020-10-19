@@ -12,8 +12,10 @@ RSpec.describe DesignManagement::Design do
   let_it_be(:deleted_design) { create(:design, :with_versions, deleted: true) }
 
   it_behaves_like 'a class that supports relative positioning' do
+    let_it_be(:relative_parent) { create(:issue) }
+
     let(:factory) { :design }
-    let(:default_params) { { issue: issue } }
+    let(:default_params) { { issue: relative_parent } }
   end
 
   describe 'relations' do
@@ -161,27 +163,7 @@ RSpec.describe DesignManagement::Design do
       end
 
       it 'sorts by relative position and ID in ascending order' do
-        expect(described_class.ordered(issue.project)).to eq([design2, design1, design3, deleted_design])
-      end
-
-      context 'when the :reorder_designs feature is enabled for the project' do
-        before do
-          stub_feature_flags(reorder_designs: issue.project)
-        end
-
-        it 'sorts by relative position and ID in ascending order' do
-          expect(described_class.ordered(issue.project)).to eq([design2, design1, design3, deleted_design])
-        end
-      end
-
-      context 'when the :reorder_designs feature is disabled' do
-        before do
-          stub_feature_flags(reorder_designs: false)
-        end
-
-        it 'sorts by ID in ascending order' do
-          expect(described_class.ordered(issue.project)).to eq([design1, design2, design3, deleted_design])
-        end
+        expect(described_class.ordered).to eq([design2, design1, design3, deleted_design])
       end
     end
 
@@ -221,6 +203,15 @@ RSpec.describe DesignManagement::Design do
 
         expect(described_class.current).to contain_exactly(design1, design2)
       end
+    end
+  end
+
+  describe ".build_full_path" do
+    it "builds the full path for a design" do
+      design = build(:design, issue: issue, filename: "hello.jpg")
+      expected_path = "#{DesignManagement.designs_directory}/issue-#{design.issue.iid}/hello.jpg"
+
+      expect(described_class.build_full_path(issue, design)).to eq(expected_path)
     end
   end
 

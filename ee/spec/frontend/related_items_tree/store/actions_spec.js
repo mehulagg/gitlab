@@ -5,14 +5,14 @@ import * as types from 'ee/related_items_tree/store/mutation_types';
 
 import * as epicUtils from 'ee/related_items_tree/utils/epic_utils';
 import { ChildType, ChildState } from 'ee/related_items_tree/constants';
+
+import testAction from 'helpers/vuex_action_helper';
+import { TEST_HOST } from 'spec/test_constants';
 import {
   issuableTypesMap,
   itemAddFailureTypesMap,
   PathIdSeparator,
-} from 'ee/related_issues/constants';
-
-import testAction from 'helpers/vuex_action_helper';
-import { TEST_HOST } from 'spec/test_constants';
+} from '~/related_issues/constants';
 import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 

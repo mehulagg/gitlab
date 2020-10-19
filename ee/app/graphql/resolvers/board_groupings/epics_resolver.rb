@@ -3,29 +3,32 @@
 module Resolvers
   module BoardGroupings
     class EpicsResolver < BaseResolver
+      include ::BoardIssueFilterable
+
       alias_method :board, :synchronized_object
 
-      argument :issue_filters, Types::BoardEpicIssueInputType,
+      argument :issue_filters, Types::Boards::BoardIssueInputType,
                required: false,
                description: 'Filters applied when selecting issues on the board'
 
-      type Types::EpicType, null: true
+      type Types::Boards::BoardEpicType, null: true
 
       def resolve(**args)
         return Epic.none unless board.present?
         return Epic.none unless group.present?
         return unless ::Feature.enabled?(:boards_with_swimlanes, group)
 
-        Epic.for_ids(board_epic_ids(args[:issue_filters].to_h))
+        context.scoped_set!(:board, board)
+
+        Epic.for_ids(board_epic_ids(args[:issue_filters]))
       end
 
       private
 
       def board_epic_ids(issue_params)
-        params = issue_params.to_h.merge(all_lists: true, board_id: board.id)
-        params[:not] = params[:not].to_h if params[:not].present?
+        params = issue_filters(issue_params).merge(all_lists: true, board_id: board.id)
 
-        list_service = Boards::Issues::ListService.new(
+        list_service = ::Boards::Issues::ListService.new(
           board.resource_parent,
           current_user,
           params

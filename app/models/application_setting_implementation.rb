@@ -74,12 +74,15 @@ module ApplicationSettingImplementation
         gitaly_timeout_default: 55,
         gitaly_timeout_fast: 10,
         gitaly_timeout_medium: 30,
+        gitpod_enabled: false,
+        gitpod_url: 'https://gitpod.io/',
         gravatar_enabled: Settings.gravatar['enabled'],
         group_download_export_limit: 1,
         group_export_limit: 6,
         group_import_limit: 6,
         help_page_hide_commercial_content: false,
         help_page_text: nil,
+        help_page_documentation_base_url: nil,
         hide_third_party_offers: false,
         housekeeping_bitmaps_enabled: true,
         housekeeping_enabled: true,
@@ -117,6 +120,7 @@ module ApplicationSettingImplementation
         repository_checks_enabled: true,
         repository_storages_weighted: { default: 100 },
         repository_storages: ['default'],
+        require_admin_approval_after_user_signup: false,
         require_two_factor_authentication: false,
         restricted_visibility_levels: Settings.gitlab['restricted_visibility_levels'],
         rsa_key_restriction: 0,
@@ -131,7 +135,6 @@ module ApplicationSettingImplementation
         snowplow_collector_hostname: nil,
         snowplow_cookie_domain: nil,
         snowplow_enabled: false,
-        snowplow_iglu_registry_url: nil,
         sourcegraph_enabled: false,
         sourcegraph_public_only: true,
         sourcegraph_url: nil,
@@ -163,7 +166,8 @@ module ApplicationSettingImplementation
         user_default_external: false,
         user_default_internal_regex: nil,
         user_show_add_ssh_key_message: true,
-        wiki_page_max_content_bytes: 50.megabytes
+        wiki_page_max_content_bytes: 50.megabytes,
+        container_registry_delete_tags_service_timeout: 100
       }
     end
 

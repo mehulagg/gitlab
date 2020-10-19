@@ -96,19 +96,6 @@ RSpec.describe 'Creating an Epic' do
           expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(Epic, :count)
         end
       end
-
-      context 'when confidential_epics is disabled' do
-        before do
-          stub_feature_flags(confidential_epics: false)
-        end
-
-        it 'ignores confidential field' do
-          post_graphql_mutation(mutation, current_user: current_user)
-
-          epic_hash = mutation_response['epic']
-          expect(epic_hash['confidential']).to be_falsey
-        end
-      end
     end
   end
 end

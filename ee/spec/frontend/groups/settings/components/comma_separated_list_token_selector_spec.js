@@ -61,13 +61,14 @@ describe('CommaSeparatedListTokenSelector', () => {
     input.setAttribute('type', 'text');
     input.id = 'comma-separated-list';
     document.body.appendChild(div);
-    div.appendChild(input);
+    document.body.appendChild(input);
   });
 
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
     div.remove();
+    input.remove();
   });
 
   describe('when component is mounted', () => {

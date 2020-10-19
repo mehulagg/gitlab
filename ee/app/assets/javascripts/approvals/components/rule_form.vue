@@ -13,6 +13,10 @@ const DEFAULT_NAME_FOR_LICENSE_REPORT = 'License-Check';
 const DEFAULT_NAME_FOR_VULNERABILITY_CHECK = 'Vulnerability-Check';
 const READONLY_NAMES = [DEFAULT_NAME_FOR_LICENSE_REPORT, DEFAULT_NAME_FOR_VULNERABILITY_CHECK];
 
+function mapServerResponseToValidationErrors(messages) {
+  return Object.entries(messages).flatMap(([key, msgs]) => msgs.map(msg => `${key} ${msg}`));
+}
+
 export default {
   components: {
     ApproversList,
@@ -50,6 +54,7 @@ export default {
       showValidation: false,
       isFallback: false,
       containsHiddenGroups: false,
+      serverValidationErrors: [],
       ...this.getInitialData(),
     };
     // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/235114
@@ -98,11 +103,17 @@ export default {
       return invalidObject;
     },
     invalidName() {
-      if (!this.isMultiSubmission) {
-        return '';
+      let error = '';
+
+      if (this.isMultiSubmission) {
+        if (this.serverValidationErrors.includes('name has already been taken')) {
+          error = __('Rule name is already taken.');
+        } else if (!this.name) {
+          error = __('Please provide a name');
+        }
       }
 
-      return !this.name ? __('Please provide a name') : '';
+      return error;
     },
     invalidApprovalsRequired() {
       if (!isNumber(this.approvalsRequired)) {
@@ -204,15 +215,27 @@ export default {
      * - Multi rule?
      */
     submit() {
+      let submission;
+
+      this.serverValidationErrors = [];
+
       if (!this.validate()) {
-        return Promise.resolve();
+        submission = Promise.resolve();
       } else if (this.isFallbackSubmission) {
-        return this.submitFallback();
+        submission = this.submitFallback();
       } else if (!this.isMultiSubmission) {
-        return this.submitSingleRule();
+        submission = this.submitSingleRule();
+      } else {
+        submission = this.submitRule();
       }
 
-      return this.submitRule();
+      submission.catch(failureResponse => {
+        this.serverValidationErrors = mapServerResponseToValidationErrors(
+          failureResponse?.response?.data?.message || {},
+        );
+      });
+
+      return submission;
     },
     /**
      * Submit the rule, by either put-ing or post-ing.

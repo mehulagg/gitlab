@@ -29,7 +29,7 @@ const CONTAINER_SCANNING_DIFF_ENDPOINT = 'container_scanning.json';
 const DEPENDENCY_SCANNING_DIFF_ENDPOINT = 'dependency_scanning.json';
 const DAST_DIFF_ENDPOINT = 'dast.json';
 const SAST_DIFF_ENDPOINT = 'sast.json';
-const SECRET_SCANNING_DIFF_ENDPOINT = 'secret_scanning.json';
+const SECRET_SCANNING_DIFF_ENDPOINT = 'secret_detection.json';
 const COVERAGE_FUZZING_DIFF_ENDPOINT = 'coverage_fuzzing.json';
 
 describe('Grouped security reports app', () => {
@@ -103,7 +103,7 @@ describe('Grouped security reports app', () => {
         dast: true,
         containerScanning: true,
         dependencyScanning: true,
-        secretScanning: true,
+        secretDetection: true,
         coverageFuzzing: true,
       },
     };
@@ -273,7 +273,7 @@ describe('Grouped security reports app', () => {
 
         // Renders the summary text
         expect(wrapper.vm.$el.querySelector('.js-code-text').textContent.trim()).toEqual(
-          'Security scanning detected 5 critical and 3 high severity vulnerabilities.',
+          'Security scanning detected 6 critical and 4 high severity vulnerabilities.',
         );
 
         // Renders the expand button
@@ -500,7 +500,7 @@ describe('Grouped security reports app', () => {
 
       return waitForMutation(wrapper.vm.$store, types.RECEIVE_DAST_DIFF_SUCCESS).then(() => {
         expect(wrapper.text()).not.toContain('0 URLs scanned');
-        expect(wrapper.contains('[data-qa-selector="dast-ci-job-link"]')).toBe(false);
+        expect(wrapper.find('[data-qa-selector="dast-ci-job-link"]').exists()).toBe(false);
       });
     });
   });
@@ -515,7 +515,7 @@ describe('Grouped security reports app', () => {
       createWrapper({
         ...props,
         enabledReports: {
-          secretScanning: isEnabled,
+          secretDetection: isEnabled,
         },
       });
 
@@ -528,7 +528,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('should render the component', () => {
-        expect(wrapper.contains('[data-qa-selector="secret_scan_report"]')).toBe(true);
+        expect(wrapper.find('[data-qa-selector="secret_scan_report"]').exists()).toBe(true);
       });
 
       it('should set setSecretScanningDiffEndpoint', () => {
@@ -548,7 +548,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('should not render the component', () => {
-        expect(wrapper.contains('[data-qa-selector="secret_scan_report"]')).toBe(false);
+        expect(wrapper.find('[data-qa-selector="secret_scan_report"]').exists()).toBe(false);
       });
     });
   });
@@ -579,6 +579,40 @@ describe('Grouped security reports app', () => {
         'SAST detected 1 critical severity vulnerability.',
       );
     });
+  });
+
+  describe('coverage fuzzing reports', () => {
+    /*
+     * Fixes bug https://gitlab.com/gitlab-org/gitlab/-/issues/255183
+     * For https://gitlab.com/gitlab-org/gitlab/-/issues/210343
+     * replace with updated tests
+     */
+    describe.each`
+      endpoint      | shouldShowFuzzing
+      ${'/fuzzing'} | ${true}
+      ${undefined}  | ${false}
+    `(
+      'given coverage fuzzing comparision enpoint is $endpoint',
+      ({ endpoint, shouldShowFuzzing }) => {
+        beforeEach(() => {
+          gl.mrWidgetData = gl.mrWidgetData || {};
+          gl.mrWidgetData.coverage_fuzzing_comparison_path = endpoint;
+
+          createWrapper({
+            ...props,
+            enabledReports: {
+              coverageFuzzing: true,
+            },
+          });
+        });
+
+        it(`${shouldShowFuzzing ? 'renders' : 'does not render'}`, () => {
+          expect(wrapper.find('[data-qa-selector="coverage_fuzzing_report"]').exists()).toBe(
+            shouldShowFuzzing,
+          );
+        });
+      },
+    );
   });
 
   describe('Out of date report', () => {

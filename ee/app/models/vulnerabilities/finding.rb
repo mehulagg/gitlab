@@ -29,6 +29,7 @@ module Vulnerabilities
     has_many :pipelines, through: :finding_pipelines, class_name: 'Ci::Pipeline'
 
     attr_writer :sha
+    attr_accessor :scan
 
     CONFIDENCE_LEVELS = {
       # undefined: 0, no longer applicable
@@ -58,7 +59,8 @@ module Vulnerabilities
       container_scanning: 2,
       dast: 3,
       secret_detection: 4,
-      coverage_fuzzing: 5
+      coverage_fuzzing: 5,
+      api_fuzzing: 6
     }.with_indifferent_access.freeze
 
     enum confidence: CONFIDENCE_LEVELS, _prefix: :confidence
@@ -147,15 +149,21 @@ module Vulnerabilities
       end
     end
 
+    def self.related_dismissal_feedback
+      Feedback
+      .where(arel_table[:report_type].eq(Feedback.arel_table[:category]))
+      .where(arel_table[:project_id].eq(Feedback.arel_table[:project_id]))
+      .where(Arel::Nodes::NamedFunction.new('ENCODE', [arel_table[:project_fingerprint], Arel::Nodes::SqlLiteral.new("'HEX'")]).eq(Feedback.arel_table[:project_fingerprint]))
+      .for_dismissal
+    end
+    private_class_method :related_dismissal_feedback
+
+    def self.dismissed
+      where('EXISTS (?)', related_dismissal_feedback.select(1))
+    end
+
     def self.undismissed
-      where(
-        "NOT EXISTS (?)",
-        Feedback.select(1)
-        .where("#{table_name}.report_type = vulnerability_feedback.category")
-        .where("#{table_name}.project_id = vulnerability_feedback.project_id")
-        .where("ENCODE(#{table_name}.project_fingerprint, 'HEX') = vulnerability_feedback.project_fingerprint") # rubocop:disable GitlabSecurity/SqlInjection
-        .for_dismissal
-      )
+      where('NOT EXISTS (?)', related_dismissal_feedback.select(1))
     end
 
     def self.batch_count_by_project_and_severity(project_id, severity)
@@ -242,6 +250,10 @@ module Vulnerabilities
       metadata.fetch('location', {})
     end
 
+    def file
+      location.dig('file')
+    end
+
     def links
       metadata.fetch('links', [])
     end
@@ -270,8 +282,16 @@ module Vulnerabilities
       metadata.dig('message')
     end
 
-    def cve
-      metadata.dig('cve')
+    def cve_value
+      identifiers.find(&:cve?)&.name
+    end
+
+    def cwe_value
+      identifiers.find(&:cwe?)&.name
+    end
+
+    def other_identifier_values
+      identifiers.select(&:other?).map(&:name)
     end
 
     alias_method :==, :eql? # eql? is necessary in some cases like array intersection

@@ -23,9 +23,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       get 'archived', action: :show, as: :group_archived # rubocop:disable Cop/PutGroupRoutesUnderScope
     end
 
-    # These routes are legit and the cop rule will be improved in
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/230703
-    get '/', action: :show, as: :group_canonical # rubocop:disable Cop/PutGroupRoutesUnderScope
+    get '/', action: :show, as: :group_canonical
   end
 
   scope(path: 'groups/*group_id/-',
@@ -37,6 +35,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         put :reset_registration_token
         patch :update_auto_devops
         post :create_deploy_token, path: 'deploy_token/create', to: 'repository#create_deploy_token'
+        get :runner_setup_scripts, format: :json
       end
 
       resource :repository, only: [:show], controller: 'repository' do
@@ -63,6 +62,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
 
     resources :milestones, constraints: { id: %r{[^/]+} } do
       member do
+        get :issues
         get :merge_requests
         get :participants
         get :labels
@@ -87,7 +87,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       delete :leave, on: :collection
     end
 
-    resources :group_links, only: [:create, :update, :destroy], constraints: { id: /\d+/ }
+    resources :group_links, only: [:create, :update, :destroy], constraints: { id: /\d+|:id/ }
 
     resources :uploads, only: [:create] do
       collection do
@@ -112,11 +112,9 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         as: :group,
         constraints: { id: Gitlab::PathRegex.full_namespace_route_regex, format: /(html|json|atom)/ },
         controller: :groups) do
-    # These routes are legit and the cop rule will be improved in
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/230703
-    get '/', action: :show # rubocop:disable Cop/PutGroupRoutesUnderScope
-    patch '/', action: :update # rubocop:disable Cop/PutGroupRoutesUnderScope
-    put '/', action: :update # rubocop:disable Cop/PutGroupRoutesUnderScope
-    delete '/', action: :destroy # rubocop:disable Cop/PutGroupRoutesUnderScope
+    get '/', action: :show
+    patch '/', action: :update
+    put '/', action: :update
+    delete '/', action: :destroy
   end
 end

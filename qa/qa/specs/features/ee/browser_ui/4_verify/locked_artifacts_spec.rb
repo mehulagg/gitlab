@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :docker, :runner, :requires_admin do
+  RSpec.describe 'Verify', :runner, :requires_admin do
     describe 'Artifacts' do
       context 'when locked' do
-        let(:ff_keep_latest) { 'keep_latest_artifacts_for_ref' }
-        let(:ff_destroy_unlocked) { 'destroy_only_unlocked_expired_artifacts' }
         let(:file_name) { 'artifact.txt' }
         let(:directory_name) { 'my_artifacts' }
         let(:executor) { "qa-runner-#{Time.now.to_i}" }
@@ -25,12 +23,10 @@ module QA
         end
 
         before do
-          [ff_keep_latest, ff_destroy_unlocked].each { |flag| Runtime::Feature.enable_and_verify(flag) }
           Flow::Login.sign_in
         end
 
         after do
-          [ff_keep_latest, ff_destroy_unlocked].each { |flag| Runtime::Feature.disable_and_verify(flag) }
           runner.remove_via_api!
         end
 

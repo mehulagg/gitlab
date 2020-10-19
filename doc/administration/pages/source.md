@@ -61,7 +61,7 @@ Before proceeding with the Pages configuration, make sure that:
    Pages artifacts.
 1. (Optional) You have a **wildcard certificate** for the Pages domain if you
    decide to serve Pages (`*.example.io`) under HTTPS.
-1. (Optional but recommended) You have configured and enabled the [Shared Runners](../../ci/runners/README.md)
+1. (Optional but recommended) You have configured and enabled the [shared runners](../../ci/runners/README.md)
    so that your users don't have to bring their own.
 
 ### DNS configuration
@@ -421,7 +421,7 @@ Pages access control is disabled by default. To enable it:
      auth-server=<URL of the GitLab instance>
    ```
 
-1. Users can now configure it in their [projects' settings](../../user/project/pages/introduction.md#gitlab-pages-access-control-core).
+1. Users can now configure it in their [projects' settings](../../user/project/pages/introduction.md#gitlab-pages-access-control).
 
 ## Change storage path
 

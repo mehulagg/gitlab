@@ -370,6 +370,22 @@ describe('Api', () => {
       });
     });
 
+    describe('cycleAnalyticsDeleteValueStream', () => {
+      it('delete the custom value stream', done => {
+        const response = {};
+        const expectedUrl = valueStreamBaseUrl({ resource: `value_streams/${valueStreamId}` });
+        mock.onDelete(expectedUrl).reply(httpStatus.OK, response);
+
+        Api.cycleAnalyticsDeleteValueStream(groupId, valueStreamId)
+          .then(({ data, config: { url } }) => {
+            expect(data).toEqual(response);
+            expect(url).toEqual(expectedUrl);
+          })
+          .then(done)
+          .catch(done.fail);
+      });
+    });
+
     describe('cycleAnalyticsGroupStagesAndEvents', () => {
       it('fetches custom stage events and all stages', done => {
         const response = { events: [], stages: [] };
@@ -381,7 +397,7 @@ describe('Api', () => {
         const expectedUrl = valueStreamBaseUrl({ id: valueStreamId, resource: 'stages' });
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
-        Api.cycleAnalyticsGroupStagesAndEvents(groupId, valueStreamId, params)
+        Api.cycleAnalyticsGroupStagesAndEvents({ groupId, valueStreamId, params })
           .then(responseObj =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
@@ -404,7 +420,7 @@ describe('Api', () => {
         });
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
-        Api.cycleAnalyticsStageEvents(groupId, valueStreamId, stageId, params)
+        Api.cycleAnalyticsStageEvents({ groupId, valueStreamId, stageId, params })
           .then(responseObj =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
@@ -427,7 +443,7 @@ describe('Api', () => {
         });
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
-        Api.cycleAnalyticsStageMedian(groupId, valueStreamId, stageId, params)
+        Api.cycleAnalyticsStageMedian({ groupId, valueStreamId, stageId, params })
           .then(responseObj =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
@@ -456,7 +472,7 @@ describe('Api', () => {
         });
         mock.onPost(expectedUrl).reply(httpStatus.OK, response);
 
-        Api.cycleAnalyticsCreateStage(groupId, valueStreamId, customStage)
+        Api.cycleAnalyticsCreateStage({ groupId, valueStreamId, data: customStage })
           .then(({ data, config: { data: reqData, url } }) => {
             expect(data).toEqual(response);
             expect(JSON.parse(reqData)).toMatchObject(customStage);
@@ -478,7 +494,7 @@ describe('Api', () => {
         });
         mock.onPut(expectedUrl).reply(httpStatus.OK, response);
 
-        Api.cycleAnalyticsUpdateStage(groupId, valueStreamId, stageId, stageData)
+        Api.cycleAnalyticsUpdateStage({ groupId, valueStreamId, stageId, data: stageData })
           .then(({ data, config: { data: reqData, url } }) => {
             expect(data).toEqual(response);
             expect(JSON.parse(reqData)).toMatchObject(stageData);
@@ -498,7 +514,7 @@ describe('Api', () => {
         });
         mock.onDelete(expectedUrl).reply(httpStatus.OK, response);
 
-        Api.cycleAnalyticsRemoveStage(groupId, valueStreamId, stageId)
+        Api.cycleAnalyticsRemoveStage({ groupId, valueStreamId, stageId })
           .then(({ data, config: { url } }) => {
             expect(data).toEqual(response);
 
@@ -519,7 +535,7 @@ describe('Api', () => {
         });
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
-        Api.cycleAnalyticsDurationChart(groupId, valueStreamId, stageId, params)
+        Api.cycleAnalyticsDurationChart({ groupId, valueStreamId, stageId, params })
           .then(responseObj =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
@@ -849,6 +865,26 @@ describe('Api', () => {
         return Api.updateApplicationSettings(mockReq).then(({ data }) => {
           expect(data).toEqual(apiResponse);
           expect(axios.put).toHaveBeenCalledWith(expectedUrl, mockReq);
+        });
+      });
+    });
+  });
+
+  describe('Billable members list', () => {
+    let expectedUrl;
+    let namespaceId;
+
+    beforeEach(() => {
+      namespaceId = 1000;
+      expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${namespaceId}/billable_members`;
+    });
+
+    describe('fetchBillableGroupMembersList', () => {
+      it('GETs the right url', () => {
+        mock.onGet(expectedUrl).replyOnce(httpStatus.OK, []);
+
+        return Api.fetchBillableGroupMembersList(namespaceId).then(({ data }) => {
+          expect(data).toEqual([]);
         });
       });
     });

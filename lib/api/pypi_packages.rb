@@ -6,7 +6,7 @@
 # called by the PyPI package manager client when users run commands
 # like `pip install` or `twine upload`.
 module API
-  class PypiPackages < Grape::API::Instance
+  class PypiPackages < ::API::Base
     helpers ::API::Helpers::PackagesManagerClientsHelpers
     helpers ::API::Helpers::RelatedResourcesHelpers
     helpers ::API::Helpers::Packages::BasicAuthHelpers
@@ -33,7 +33,7 @@ module API
 
       def find_package_versions
         packages = packages_finder
-          .with_name(params[:package_name])
+          .with_normalized_pypi_name(params[:package_name])
 
         not_found!('Package') if packages.empty?
 
@@ -64,7 +64,7 @@ module API
           requires :sha256, type: String, desc: 'The PyPi package sha256 check sum'
         end
 
-        route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true
+        route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
         get 'files/:sha256/*file_identifier' do
           project = unauthorized_user_project!
 
@@ -72,7 +72,7 @@ module API
           package = packages_finder(project).by_file_name_and_sha256(filename, params[:sha256])
           package_file = ::Packages::PackageFileFinder.new(package, filename, with_file_name_like: false).execute
 
-          track_event('pull_package')
+          track_package_event('pull_package', :pypi)
 
           present_carrierwave_file!(package_file.file, supports_direct_download: true)
         end
@@ -87,11 +87,11 @@ module API
 
         # An Api entry point but returns an HTML file instead of JSON.
         # PyPi simple API returns the package descriptor as a simple HTML file.
-        route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true
+        route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
         get 'simple/*package_name', format: :txt do
           authorize_read_package!(authorized_user_project)
 
-          track_event('list_package')
+          track_package_event('list_package', :pypi)
 
           packages = find_package_versions
           presenter = ::Packages::Pypi::PackagePresenter.new(packages, authorized_user_project)
@@ -117,12 +117,12 @@ module API
           optional :sha256_digest, type: String
         end
 
-        route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true
+        route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
         post do
           authorize_upload!(authorized_user_project)
           bad_request!('File is too large') if authorized_user_project.actual_limits.exceeded?(:pypi_max_file_size, params[:content].size)
 
-          track_event('push_package')
+          track_package_event('push_package', :pypi)
 
           ::Packages::Pypi::CreatePackageService
             .new(authorized_user_project, current_user, declared_params)
@@ -135,7 +135,7 @@ module API
           forbidden!
         end
 
-        route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true
+        route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
         post 'authorize' do
           authorize_workhorse!(
             subject: authorized_user_project,

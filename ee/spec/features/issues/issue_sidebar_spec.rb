@@ -125,21 +125,6 @@ RSpec.describe 'Issue Sidebar' do
         expect(page).not_to have_selector('.block.health-status')
       end
     end
-
-    it 'pushes frontend feature flag saveIssuableHealthStatus' do
-      visit_issue(project, issue)
-
-      expect(page).to have_pushed_frontend_feature_flags(saveIssuableHealthStatus: true)
-    end
-
-    context 'when save_issuable_health_status feature flag is disabled' do
-      it 'pushes disabled frontend feature flag saveIssuableHealthStatus' do
-        stub_feature_flags(save_issuable_health_status: false)
-        visit_issue(project, issue)
-
-        expect(page).to have_pushed_frontend_feature_flags(saveIssuableHealthStatus: false)
-      end
-    end
   end
 
   context 'Iterations', :js do

@@ -19,7 +19,7 @@ module Types
         project.available_scanners
       end
 
-    field :pipelineRun, [::Types::SecurityScannerTypeEnum], null: true,
+    field :pipeline_run, [::Types::SecurityScannerTypeEnum], null: true,
       description: 'List of analyzers which ran successfully in the latest pipeline.',
       calls_gitaly: true,
       resolve: -> (project, _args, ctx) do

@@ -167,6 +167,31 @@ RSpec.describe Epics::IssuePromoteService do
             expect(epic.notes.user.first.attachment).to be_kind_of(AttachmentUploader)
           end
         end
+
+        context 'on other issue types' do
+          shared_examples_for 'raising error' do
+            before do
+              issue.update(issue_type: issue_type)
+            end
+
+            it 'raises error' do
+              expect { subject.execute(issue) }
+                .to raise_error(Epics::IssuePromoteService::PromoteError, /is not supported/)
+            end
+          end
+
+          context 'on an incident' do
+            let(:issue_type) { :incident }
+
+            it_behaves_like 'raising error'
+          end
+
+          context 'on a test case' do
+            let(:issue_type) { :test_case }
+
+            it_behaves_like 'raising error'
+          end
+        end
       end
     end
   end

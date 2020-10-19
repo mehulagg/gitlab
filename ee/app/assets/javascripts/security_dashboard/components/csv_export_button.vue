@@ -57,6 +57,9 @@ export default {
         .post(this.vulnerabilitiesExportEndpoint)
         .then(({ data }) => pollUntilComplete(data._links.self))
         .then(({ data }) => {
+          if (data.status !== 'finished') {
+            throw new Error();
+          }
           download({
             fileName: `csv-export-${formatDate(new Date(), 'isoDateTime')}.csv`,
             url: data._links.download,

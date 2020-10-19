@@ -8,6 +8,9 @@ module Gitlab
         DEFAULT_TITLE = 'New: Incident'
         DEFAULT_SEVERITY = 'critical'
 
+        attribute :description, paths: 'description'
+        attribute :ends_at, paths: 'end_time', type: :time
+        attribute :environment_name, paths: 'gitlab_environment_name'
         attribute :hosts, paths: 'hosts'
         attribute :monitoring_tool, paths: 'monitoring_tool'
         attribute :runbook, paths: 'runbook'
@@ -22,3 +25,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::AlertManagement::Payload::Generic.prepend_if_ee('EE::Gitlab::AlertManagement::Payload::Generic')

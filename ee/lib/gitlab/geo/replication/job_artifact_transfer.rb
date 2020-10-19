@@ -13,9 +13,9 @@ module Gitlab
         # @param [Ci::JobArtifact] job_artifact
         def initialize(job_artifact)
           if job_artifact.local_store?
-            super(local_job_artifact_attributes(job_artifact))
+            super(**local_job_artifact_attributes(job_artifact))
           else
-            super(remote_job_artifact_attributes(job_artifact))
+            super(**remote_job_artifact_attributes(job_artifact))
           end
         end
 

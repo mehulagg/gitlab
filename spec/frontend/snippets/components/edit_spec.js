@@ -102,6 +102,13 @@ describe('Snippet Edit app', () => {
         markdownDocsPath: 'http://docs.foo.bar',
         ...props,
       },
+      data() {
+        return {
+          snippet: {
+            visibilityLevel: SNIPPET_VISIBILITY_PRIVATE,
+          },
+        };
+      },
     });
   }
 
@@ -141,17 +148,17 @@ describe('Snippet Edit app', () => {
 
   // Ideally we wouldn't call this method directly, but we don't have a way to trigger
   // apollo responses yet.
-  const loadSnippet = (...edges) => {
-    if (edges.length) {
+  const loadSnippet = (...nodes) => {
+    if (nodes.length) {
       wrapper.setData({
-        snippet: edges[0],
+        snippet: nodes[0],
       });
     }
 
     wrapper.vm.onSnippetFetch({
       data: {
         snippets: {
-          edges,
+          nodes,
         },
       },
     });
@@ -168,10 +175,10 @@ describe('Snippet Edit app', () => {
       props => {
         createComponent(props);
 
-        expect(wrapper.contains(TitleField)).toBe(true);
-        expect(wrapper.contains(SnippetDescriptionEdit)).toBe(true);
-        expect(wrapper.contains(SnippetVisibilityEdit)).toBe(true);
-        expect(wrapper.contains(FormFooterActions)).toBe(true);
+        expect(wrapper.find(TitleField).exists()).toBe(true);
+        expect(wrapper.find(SnippetDescriptionEdit).exists()).toBe(true);
+        expect(wrapper.find(SnippetVisibilityEdit).exists()).toBe(true);
+        expect(wrapper.find(FormFooterActions).exists()).toBe(true);
         expect(findBlobActions().exists()).toBe(true);
       },
     );
@@ -183,7 +190,7 @@ describe('Snippet Edit app', () => {
       ${'foo'} | ${[]}                                            | ${false}
       ${'foo'} | ${[TEST_ACTIONS.VALID]}                          | ${false}
       ${'foo'} | ${[TEST_ACTIONS.VALID, TEST_ACTIONS.NO_CONTENT]} | ${true}
-      ${'foo'} | ${[TEST_ACTIONS.VALID, TEST_ACTIONS.NO_PATH]}    | ${true}
+      ${'foo'} | ${[TEST_ACTIONS.VALID, TEST_ACTIONS.NO_PATH]}    | ${false}
     `(
       'should handle submit disable (title=$title, actions=$actions, shouldDisable=$shouldDisable)',
       async ({ title, actions, shouldDisable }) => {
@@ -200,8 +207,8 @@ describe('Snippet Edit app', () => {
 
     it.each`
       projectPath       | snippetArg               | expectation
-      ${''}             | ${[]}                    | ${`${relativeUrlRoot}-/snippets`}
-      ${'project/path'} | ${[]}                    | ${`${relativeUrlRoot}project/path/-/snippets`}
+      ${''}             | ${[]}                    | ${urlUtils.joinPaths('/', relativeUrlRoot, '-', 'snippets')}
+      ${'project/path'} | ${[]}                    | ${urlUtils.joinPaths('/', relativeUrlRoot, 'project/path/-', 'snippets')}
       ${''}             | ${[createTestSnippet()]} | ${TEST_WEB_URL}
       ${'project/path'} | ${[createTestSnippet()]} | ${TEST_WEB_URL}
     `(

@@ -23,7 +23,7 @@ exports[`SidebarDatePicker renders expected template 1`] = `
     <div
       class="float-right d-flex"
     >
-      <icon-stub
+      <gl-icon-stub
         class="help-icon gl-mr-2"
         name="question-o"
         size="16"
@@ -31,6 +31,7 @@ exports[`SidebarDatePicker renders expected template 1`] = `
       />
        
       <gl-button-stub
+        buttontextclasses=""
         category="primary"
         class="btn-sidebar-action"
         icon=""

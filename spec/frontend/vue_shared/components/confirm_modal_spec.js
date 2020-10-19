@@ -1,5 +1,4 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlModal } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
 import ConfirmModal from '~/vue_shared/components/confirm_modal.vue';
 
@@ -21,9 +20,14 @@ describe('vue_shared/components/confirm_modal', () => {
     selector: '.test-button',
   };
 
-  const actionSpies = {
-    openModal: jest.fn(),
-    closeModal: jest.fn(),
+  const popupMethods = {
+    hide: jest.fn(),
+    show: jest.fn(),
+  };
+
+  const GlModalStub = {
+    template: '<div><slot></slot></div>',
+    methods: popupMethods,
   };
 
   let wrapper;
@@ -34,8 +38,8 @@ describe('vue_shared/components/confirm_modal', () => {
         ...defaultProps,
         ...props,
       },
-      methods: {
-        ...actionSpies,
+      stubs: {
+        GlModal: GlModalStub,
       },
     });
   };
@@ -44,7 +48,7 @@ describe('vue_shared/components/confirm_modal', () => {
     wrapper.destroy();
   });
 
-  const findModal = () => wrapper.find(GlModal);
+  const findModal = () => wrapper.find(GlModalStub);
   const findForm = () => wrapper.find('form');
   const findFormData = () =>
     findForm()
@@ -82,6 +86,22 @@ describe('vue_shared/components/confirm_modal', () => {
         expect(findForm().element.submit).not.toHaveBeenCalled();
       });
 
+      describe('with handleSubmit prop', () => {
+        const handleSubmit = jest.fn();
+        beforeEach(() => {
+          createComponent({ handleSubmit });
+          findModal().vm.$emit('primary');
+        });
+
+        it('will call handleSubmit', () => {
+          expect(handleSubmit).toHaveBeenCalled();
+        });
+
+        it('does not submit the form', () => {
+          expect(findForm().element.submit).not.toHaveBeenCalled();
+        });
+      });
+
       describe('when modal submitted', () => {
         beforeEach(() => {
           findModal().vm.$emit('primary');
@@ -103,7 +123,7 @@ describe('vue_shared/components/confirm_modal', () => {
       });
 
       it('does not close modal', () => {
-        expect(actionSpies.closeModal).not.toHaveBeenCalled();
+        expect(popupMethods.hide).not.toHaveBeenCalled();
       });
 
       describe('when modal closed', () => {
@@ -112,7 +132,7 @@ describe('vue_shared/components/confirm_modal', () => {
         });
 
         it('closes modal', () => {
-          expect(actionSpies.closeModal).toHaveBeenCalled();
+          expect(popupMethods.hide).toHaveBeenCalled();
         });
       });
     });

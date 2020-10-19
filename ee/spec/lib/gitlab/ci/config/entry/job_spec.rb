@@ -10,28 +10,11 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
       context 'when has secrets' do
         let(:config) { { script: 'echo', secrets: { DATABASE_PASSWORD: { vault: 'production/db/password' } } } }
 
-        context 'when ci_secrets_syntax feature flag is enabled' do
-          before do
-            stub_feature_flags(ci_secrets_syntax: true)
-            entry.compose!
-          end
-
-          it { expect(entry).to be_valid }
+        before do
+          entry.compose!
         end
 
-        context 'when ci_secrets_syntax feature flag is disabled' do
-          before do
-            stub_feature_flags(ci_secrets_syntax: false)
-            entry.compose!
-          end
-
-          it 'returns an error' do
-            aggregate_failures do
-              expect(entry).not_to be_valid
-              expect(entry.errors).to include 'job secrets feature is disabled'
-            end
-          end
-        end
+        it { expect(entry).to be_valid }
       end
     end
 

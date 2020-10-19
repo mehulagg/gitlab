@@ -378,16 +378,6 @@ module EE
       end
     end
 
-    def wiki_access_level
-      # TODO: Remove this method once we implement group-level features.
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/208412
-      if ::Feature.enabled?(:group_wiki, self)
-        ::ProjectFeature::ENABLED
-      else
-        ::ProjectFeature::DISABLED
-      end
-    end
-
     def owners_emails
       owners.pluck(:email)
     end
@@ -399,6 +389,38 @@ module EE
       return namespace_settings.prevent_forking_outside_group? if namespace_settings
 
       root_ancestor.saml_provider&.prohibited_outer_forks?
+    end
+
+    def minimal_access_role_allowed?
+      feature_available?(:minimal_access_role) && !has_parent?
+    end
+
+    override :member?
+    def member?(user, min_access_level = minimal_member_access_level)
+      if min_access_level == ::Gitlab::Access::MINIMAL_ACCESS && minimal_access_role_allowed?
+        all_group_members.find_by(user_id: user.id).present?
+      else
+        super
+      end
+    end
+
+    def minimal_member_access_level
+      minimal_access_role_allowed? ? ::Gitlab::Access::MINIMAL_ACCESS : ::Gitlab::Access::GUEST
+    end
+
+    override :access_level_roles
+    def access_level_roles
+      levels = ::GroupMember.access_level_roles
+      return levels unless minimal_access_role_allowed?
+
+      levels.merge(::Gitlab::Access::MINIMAL_ACCESS_HASH)
+    end
+
+    override :users_count
+    def users_count
+      return all_group_members.count unless minimal_access_role_allowed?
+
+      members.count
     end
 
     private

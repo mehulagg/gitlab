@@ -1,7 +1,6 @@
 <script>
 import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
-import '~/gl_dropdown';
 import UsersSelect from '~/users_select';
 import UserAvatarImage from '~/vue_shared/components/user_avatar/user_avatar_image.vue';
 

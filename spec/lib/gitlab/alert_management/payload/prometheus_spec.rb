@@ -45,7 +45,7 @@ RSpec.describe Gitlab::AlertManagement::Payload::Prometheus do
     let(:current_time) { Time.current.utc }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     subject { parsed_payload.starts_at }
@@ -202,6 +202,39 @@ RSpec.describe Gitlab::AlertManagement::Payload::Prometheus do
       let(:raw_payload) { payload.except('annotations') }
 
       it { is_expected.to be_nil }
+    end
+  end
+
+  describe '#has_required_attributes?' do
+    let(:starts_at) { Time.current.change(usec: 0).utc }
+    let(:raw_payload) { { 'annotations' => { 'title' => 'title' }, 'startsAt' => starts_at.rfc3339 } }
+
+    subject { parsed_payload.has_required_attributes? }
+
+    it { is_expected.to be_truthy }
+
+    context 'without project' do
+      let(:parsed_payload) { described_class.new(project: nil, payload: raw_payload) }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'without title' do
+      let(:raw_payload) { { 'startsAt' => starts_at.rfc3339 } }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'without startsAt' do
+      let(:raw_payload) { { 'annotations' => { 'title' => 'title' } } }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'without payload' do
+      let(:parsed_payload) { described_class.new(project: project, payload: nil) }
+
+      it { is_expected.to be_falsey }
     end
   end
 end

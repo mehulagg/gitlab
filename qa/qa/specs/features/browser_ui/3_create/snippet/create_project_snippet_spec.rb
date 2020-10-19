@@ -3,7 +3,7 @@
 module QA
   RSpec.describe 'Create' do # to be converted to a smoke test once proved to be stable
     describe 'Project snippet creation' do
-      it 'User creates a project snippet' do
+      it 'User creates a project snippet', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/839' do
         Flow::Login.sign_in
 
         Resource::ProjectSnippet.fabricate_via_browser_ui! do |snippet|
@@ -21,8 +21,8 @@ module QA
           expect(snippet).to have_file_name('markdown_file.md')
           expect(snippet).to have_file_content('Snippet heading')
           expect(snippet).to have_file_content('Gitlab link')
-          expect(snippet).not_to have_file_content('###')
-          expect(snippet).not_to have_file_content('https://gitlab.com/')
+          expect(snippet).to have_no_file_content('###')
+          expect(snippet).to have_no_file_content('https://gitlab.com/')
         end
       end
     end

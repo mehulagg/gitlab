@@ -25,11 +25,17 @@ RSpec.describe StatusPage::PublishService do
 
     describe 'publish details' do
       context 'when upload succeeds' do
-        it 'uploads incident details and list' do
+        before do
           expect_to_publish_details(error?: false, success?: true)
           expect_to_publish_list(error?: false, success?: true)
+        end
 
+        it 'uploads incident details and list' do
           expect(result).to be_success
+        end
+
+        it_behaves_like 'an incident management tracked event', :incident_management_incident_published do
+          let(:current_user) { user }
         end
       end
 
@@ -52,6 +58,8 @@ RSpec.describe StatusPage::PublishService do
 
           expect(result).to be_success
         end
+
+        it_behaves_like 'does not track incident management event', :incident_management_incident_published
       end
 
       context 'when unpublish service responses with error' do

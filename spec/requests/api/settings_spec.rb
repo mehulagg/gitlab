@@ -39,6 +39,7 @@ RSpec.describe API::Settings, 'Settings' do
       expect(json_response['snippet_size_limit']).to eq(50.megabytes)
       expect(json_response['spam_check_endpoint_enabled']).to be_falsey
       expect(json_response['spam_check_endpoint_url']).to be_nil
+      expect(json_response['wiki_page_max_content_bytes']).to be_a(Integer)
     end
   end
 
@@ -95,6 +96,7 @@ RSpec.describe API::Settings, 'Settings' do
             help_page_text: 'custom help text',
             help_page_hide_commercial_content: true,
             help_page_support_url: 'http://example.com/help',
+            help_page_documentation_base_url: 'https://docs.gitlab.com',
             project_export_enabled: false,
             rsa_key_restriction: ApplicationSetting::FORBIDDEN_KEY_VALUE,
             dsa_key_restriction: 2048,
@@ -116,7 +118,8 @@ RSpec.describe API::Settings, 'Settings' do
             spam_check_endpoint_enabled: true,
             spam_check_endpoint_url: 'https://example.com/spam_check',
             disabled_oauth_sign_in_sources: 'unknown',
-            import_sources: 'github,bitbucket'
+            import_sources: 'github,bitbucket',
+            wiki_page_max_content_bytes: 12345
           }
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -136,6 +139,7 @@ RSpec.describe API::Settings, 'Settings' do
         expect(json_response['help_page_text']).to eq('custom help text')
         expect(json_response['help_page_hide_commercial_content']).to be_truthy
         expect(json_response['help_page_support_url']).to eq('http://example.com/help')
+        expect(json_response['help_page_documentation_base_url']).to eq('https://docs.gitlab.com')
         expect(json_response['project_export_enabled']).to be_falsey
         expect(json_response['rsa_key_restriction']).to eq(ApplicationSetting::FORBIDDEN_KEY_VALUE)
         expect(json_response['dsa_key_restriction']).to eq(2048)
@@ -158,6 +162,7 @@ RSpec.describe API::Settings, 'Settings' do
         expect(json_response['spam_check_endpoint_url']).to eq('https://example.com/spam_check')
         expect(json_response['disabled_oauth_sign_in_sources']).to eq([])
         expect(json_response['import_sources']).to match_array(%w(github bitbucket))
+        expect(json_response['wiki_page_max_content_bytes']).to eq(12345)
       end
     end
 
@@ -236,8 +241,7 @@ RSpec.describe API::Settings, 'Settings' do
           snowplow_collector_hostname: "snowplow.example.com",
           snowplow_cookie_domain: ".example.com",
           snowplow_enabled: true,
-          snowplow_app_id: "app_id",
-          snowplow_iglu_registry_url: 'https://example.com'
+          snowplow_app_id: "app_id"
         }
       end
 
@@ -409,6 +413,14 @@ RSpec.describe API::Settings, 'Settings' do
         expect(json_response['domain_blacklist_enabled']).to be(true)
         expect(json_response['domain_blacklist']).to eq(['domain3.com', '*.domain4.com'])
       end
+    end
+
+    it 'supports legacy admin_notification_email' do
+      put api('/application/settings', admin),
+          params: { admin_notification_email: 'test@example.com' }
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['abuse_notification_email']).to eq('test@example.com')
     end
 
     context "missing sourcegraph_url value when sourcegraph_enabled is true" do

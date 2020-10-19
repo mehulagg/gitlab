@@ -13,6 +13,10 @@ class ApplicationRecord < ActiveRecord::Base
     where(id: ids)
   end
 
+  def self.primary_key_in(values)
+    where(primary_key => values)
+  end
+
   def self.iid_in(iids)
     where(iid: iids)
   end
@@ -48,6 +52,16 @@ class ApplicationRecord < ActiveRecord::Base
     end
   end
 
+  # Start a new transaction with a shorter-than-usual statement timeout. This is
+  # currently one third of the default 15-second timeout
+  def self.with_fast_statement_timeout
+    transaction(requires_new: true) do
+      connection.exec_query("SET LOCAL statement_timeout = 5000")
+
+      yield
+    end
+  end
+
   def self.safe_find_or_create_by(*args, &block)
     safe_ensure_unique(retries: 1) do
       find_or_create_by(*args, &block)
@@ -56,5 +70,9 @@ class ApplicationRecord < ActiveRecord::Base
 
   def self.underscore
     Gitlab::SafeRequestStore.fetch("model:#{self}:underscore") { self.to_s.underscore }
+  end
+
+  def self.where_exists(query)
+    where('EXISTS (?)', query.select(1))
   end
 end

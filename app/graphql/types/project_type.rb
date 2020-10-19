@@ -134,7 +134,7 @@ module Types
           null: true,
           description: 'Merge requests of the project',
           extras: [:lookahead],
-          resolver: Resolvers::MergeRequestsResolver
+          resolver: Resolvers::ProjectMergeRequestsResolver
 
     field :merge_request,
           Types::MergeRequestType,
@@ -146,12 +146,14 @@ module Types
           Types::IssueType.connection_type,
           null: true,
           description: 'Issues of the project',
+          extras: [:lookahead],
           resolver: Resolvers::IssuesResolver
 
     field :issue_status_counts,
           Types::IssueStatusCountsType,
           null: true,
           description: 'Counts of issues by status for the project',
+          extras: [:lookahead],
           resolver: Resolvers::IssueStatusCountsResolver
 
     field :milestones, Types::MilestoneType.connection_type, null: true,
@@ -232,7 +234,7 @@ module Types
           Types::BoardType,
           null: true,
           description: 'A single board of the project',
-          resolver: Resolvers::BoardsResolver.single
+          resolver: Resolvers::BoardResolver
 
     field :jira_imports,
           Types::JiraImportType.connection_type,
@@ -291,6 +293,12 @@ module Types
               required: true,
               description: 'Title of the label'
           end
+
+    field :terraform_states,
+          Types::Terraform::StateType.connection_type,
+          null: true,
+          description: 'Terraform states associated with the project',
+          resolver: Resolvers::Terraform::StatesResolver
 
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: project) do |titles, loader, args|

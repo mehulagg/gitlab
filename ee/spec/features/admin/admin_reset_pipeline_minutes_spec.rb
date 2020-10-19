@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Reset namespace pipeline minutes' do
+RSpec.describe 'Reset namespace pipeline minutes', :js do
   let(:admin) { create(:admin) }
 
   before do
@@ -19,10 +19,10 @@ RSpec.describe 'Reset namespace pipeline minutes' do
         time = Time.now
 
         Timecop.freeze(time) do
-          click_link 'Reset pipeline minutes'
+          click_button 'Reset pipeline minutes'
         end
 
-        expect(page).to have_selector('.flash-notice')
+        expect(page).to have_selector('.gl-toast')
         expect(current_path).to include(namespace.path)
 
         expect(namespace.namespace_statistics.reload.shared_runners_seconds).to eq(0)
@@ -38,10 +38,10 @@ RSpec.describe 'Reset namespace pipeline minutes' do
       end
 
       it 'renders edit page with an error' do
-        click_link 'Reset pipeline minutes'
+        click_button 'Reset pipeline minutes'
 
         expect(current_path).to include(namespace.path)
-        expect(page).to have_selector('.flash-error')
+        expect(page).to have_selector('.gl-toast')
       end
     end
   end
@@ -56,7 +56,7 @@ RSpec.describe 'Reset namespace pipeline minutes' do
     end
 
     it 'reset pipeline minutes button is visible' do
-      expect(page).to have_link('Reset pipeline minutes', href: reset_runners_minutes_admin_user_path(user))
+      expect(page).to have_button('Reset pipeline minutes')
     end
 
     include_examples 'resetting pipeline minutes'
@@ -86,7 +86,7 @@ RSpec.describe 'Reset namespace pipeline minutes' do
     end
 
     it 'reset pipeline minutes button is visible' do
-      expect(page).to have_link('Reset pipeline minutes', href: admin_group_reset_runners_minutes_path(group))
+      expect(page).to have_button('Reset pipeline minutes')
     end
 
     include_examples 'resetting pipeline minutes'

@@ -285,7 +285,7 @@ describe('BoardSettingsWipLimit', () => {
             const spy = jest.fn().mockRejectedValue();
             createComponent({
               vuexState: { activeId: listId },
-              actions: { updateListWipLimit: spy, setActiveId: noop },
+              actions: { updateListWipLimit: spy, unsetActiveId: noop },
               localState: { edit: true, currentWipLimit },
             });
 

@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Issuables Close/Reopen/Report toggle' do
+  include IssuablesHelper
+
   let(:user) { create(:user) }
 
   shared_examples 'an issuable close/reopen/report toggle' do
@@ -21,25 +23,25 @@ RSpec.describe 'Issuables Close/Reopen/Report toggle' do
       expect(container).to have_content("Close #{human_model_name}")
       expect(container).to have_content('Report abuse')
       expect(container).to have_content("Report #{human_model_name.pluralize} that are abusive, inappropriate or spam.")
-      expect(container).to have_selector('.close-item.droplab-item-selected')
+
+      if issuable.is_a?(MergeRequest)
+        page.within('.js-issuable-close-dropdown') do
+          expect(page).to have_link('Close merge request')
+        end
+      else
+        expect(container).to have_selector('.close-item.droplab-item-selected')
+      end
+
       expect(container).to have_selector('.report-item')
       expect(container).not_to have_selector('.report-item.droplab-item-selected')
       expect(container).not_to have_selector('.reopen-item')
     end
 
-    it 'changes the button when an item is selected' do
-      button = container.find('.issuable-close-button')
-
+    it 'links to Report Abuse' do
       container.find('.dropdown-toggle').click
-      container.find('.report-item').click
+      container.find('.report-abuse-link').click
 
-      expect(container).not_to have_selector('.dropdown-menu')
-      expect(button).to have_content('Report abuse')
-
-      container.find('.dropdown-toggle').click
-      container.find('.close-item').click
-
-      expect(button).to have_content("Close #{human_model_name}")
+      expect(page).to have_content('Report abuse to admin')
     end
   end
 
@@ -129,7 +131,7 @@ RSpec.describe 'Issuables Close/Reopen/Report toggle' do
 
           it 'shows only the `Edit` button' do
             expect(page).to have_link('Edit')
-            expect(page).not_to have_link('Report abuse')
+            expect(page).to have_link('Report abuse')
             expect(page).not_to have_button('Close merge request')
             expect(page).not_to have_button('Reopen merge request')
           end

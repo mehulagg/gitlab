@@ -2,6 +2,7 @@
 import { GlIcon, GlLink, GlPopover, GlIntersperse } from '@gitlab/ui';
 import { n__ } from '~/locale';
 import DependencyPathViewer from './dependency_path_viewer.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export const VISIBLE_DEPENDENCY_COUNT = 2;
 
@@ -14,6 +15,7 @@ export default {
     GlPopover,
     GlIntersperse,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     location: {
       type: Object,
@@ -25,13 +27,19 @@ export default {
       return this.location.ancestors || [];
     },
     hasAncestors() {
-      return this.ancestors.length > 0;
+      return this.glFeatures.pathToVulnerableDependency && this.ancestors.length > 0;
+    },
+    isTopLevelDependency() {
+      return this.glFeatures.pathToVulnerableDependency && this.location.top_level;
     },
     visibleDependencies() {
       return this.ancestors.slice(0, VISIBLE_DEPENDENCY_COUNT);
     },
     remainingDependenciesCount() {
       return Math.max(0, this.ancestors.length - VISIBLE_DEPENDENCY_COUNT);
+    },
+    showMoreLink() {
+      return this.glFeatures.pathToVulnerableDependency && this.remainingDependenciesCount > 0;
     },
     nMoreMessage() {
       return n__('Dependencies|%d more', 'Dependencies|%d more', this.remainingDependenciesCount);
@@ -48,14 +56,14 @@ export default {
         <gl-icon name="doc-text" class="gl-vertical-align-middle!" />
         {{ location.path }}
       </gl-link>
-      <span v-if="location.top_level">{{ s__('Dependencies|(top level)') }}</span>
+      <span v-if="isTopLevelDependency">{{ s__('Dependencies|(top level)') }}</span>
     </span>
 
     <dependency-path-viewer v-if="hasAncestors" :dependencies="visibleDependencies" />
 
     <!-- We need to put an extra span to avoid separator between link & popover -->
-    <span v-if="remainingDependenciesCount > 0">
-      <gl-link ref="moreLink">{{ nMoreMessage }}</gl-link>
+    <span v-if="showMoreLink">
+      <gl-link ref="moreLink" class="gl-white-space-nowrap">{{ nMoreMessage }}</gl-link>
 
       <gl-popover
         :target="() => $refs.moreLink.$el"

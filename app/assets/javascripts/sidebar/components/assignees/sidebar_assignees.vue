@@ -62,7 +62,7 @@ export default {
     this.addAssignee = this.store.addAssignee.bind(this.store);
     this.removeAllAssignees = this.store.removeAllAssignees.bind(this.store);
 
-    // Get events from glDropdown
+    // Get events from deprecatedJQueryDropdown
     eventHub.$on('sidebar.removeAssignee', this.removeAssignee);
     eventHub.$on('sidebar.addAssignee', this.addAssignee);
     eventHub.$on('sidebar.removeAllAssignees', this.removeAllAssignees);
@@ -89,6 +89,8 @@ export default {
         .saveAssignees(this.field)
         .then(() => {
           this.loading = false;
+          this.store.resetChanging();
+
           refreshUserMergeRequestCounts();
         })
         .catch(() => {
@@ -113,6 +115,7 @@ export default {
       :loading="loading || store.isFetching.assignees"
       :editable="store.editable"
       :show-toggle="!signedIn"
+      :changing="store.changing"
     />
     <assignees
       v-if="!store.isFetching.assignees"

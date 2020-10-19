@@ -6,10 +6,6 @@ export default {
   [types.SET_FEATURE_FLAGS](state, featureFlags) {
     state.featureFlags = featureFlags;
   },
-  [types.SET_SELECTED_GROUP](state, group) {
-    state.selectedGroup = convertObjectPropsToCamelCase(group, { deep: true });
-    state.selectedProjects = [];
-  },
   [types.SET_SELECTED_PROJECTS](state, projects) {
     state.selectedProjects = projects;
   },
@@ -34,6 +30,7 @@ export default {
   [types.REQUEST_STAGE_DATA](state) {
     state.isLoadingStage = true;
     state.isEmptyStage = false;
+    state.selectedStageError = '';
   },
   [types.RECEIVE_STAGE_DATA_SUCCESS](state, events = []) {
     state.currentStageEvents = events.map(fields =>
@@ -41,19 +38,21 @@ export default {
     );
     state.isEmptyStage = !events.length;
     state.isLoadingStage = false;
+    state.selectedStageError = '';
   },
-  [types.RECEIVE_STAGE_DATA_ERROR](state) {
+  [types.RECEIVE_STAGE_DATA_ERROR](state, message) {
     state.isEmptyStage = true;
     state.isLoadingStage = false;
+    state.selectedStageError = message;
   },
   [types.REQUEST_STAGE_MEDIANS](state) {
     state.medians = {};
   },
   [types.RECEIVE_STAGE_MEDIANS_SUCCESS](state, medians = []) {
     state.medians = medians.reduce(
-      (acc, { id, value }) => ({
+      (acc, { id, value, error = null }) => ({
         ...acc,
-        [id]: value,
+        [id]: { value, error },
       }),
       {},
     );
@@ -88,15 +87,17 @@ export default {
   [types.INITIALIZE_CYCLE_ANALYTICS](
     state,
     {
-      group: selectedGroup = null,
+      group = null,
       createdAfter: startDate = null,
       createdBefore: endDate = null,
       selectedProjects = [],
+      selectedValueStream = {},
     } = {},
   ) {
     state.isLoading = true;
-    state.selectedGroup = selectedGroup;
+    state.currentGroup = group;
     state.selectedProjects = selectedProjects;
+    state.selectedValueStream = selectedValueStream;
     state.startDate = startDate;
     state.endDate = endDate;
   },
@@ -115,13 +116,6 @@ export default {
     state.isSavingStageOrder = false;
     state.errorSavingStageOrder = true;
   },
-  [types.SET_SELECTED_FILTERS](state, params) {
-    const { selectedAuthor, selectedAssignees, selectedMilestone, selectedLabels } = params;
-    state.selectedAuthor = selectedAuthor;
-    state.selectedAssignees = selectedAssignees;
-    state.selectedMilestone = selectedMilestone;
-    state.selectedLabels = selectedLabels;
-  },
   [types.REQUEST_CREATE_VALUE_STREAM](state) {
     state.isCreatingValueStream = true;
     state.createValueStreamErrors = {};
@@ -134,21 +128,36 @@ export default {
     state.isCreatingValueStream = false;
     state.createValueStreamErrors = {};
   },
-  [types.SET_SELECTED_VALUE_STREAM](state, streamId) {
-    state.selectedValueStream = state.valueStreams?.find(({ id }) => id === streamId) || null;
+  [types.REQUEST_DELETE_VALUE_STREAM](state) {
+    state.isDeletingValueStream = true;
+    state.deleteValueStreamError = null;
+  },
+  [types.RECEIVE_DELETE_VALUE_STREAM_ERROR](state, message) {
+    state.isDeletingValueStream = false;
+    state.deleteValueStreamError = message;
+  },
+  [types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS](state) {
+    state.isDeletingValueStream = false;
+    state.deleteValueStreamError = null;
+  },
+  [types.SET_SELECTED_VALUE_STREAM](state, valueStream) {
+    state.selectedValueStream = valueStream;
   },
   [types.REQUEST_VALUE_STREAMS](state) {
     state.isLoadingValueStreams = true;
     state.valueStreams = [];
   },
-  [types.RECEIVE_VALUE_STREAMS_ERROR](state) {
+  [types.RECEIVE_VALUE_STREAMS_ERROR](state, errCode) {
+    state.errCode = errCode;
     state.isLoadingValueStreams = false;
     state.valueStreams = [];
   },
   [types.RECEIVE_VALUE_STREAMS_SUCCESS](state, data) {
     state.isLoadingValueStreams = false;
-    state.valueStreams = data.sort(({ name: aName = '' }, { name: bName = '' }) => {
-      return aName.toUpperCase() > bName.toUpperCase() ? 1 : -1;
-    });
+    state.valueStreams = data
+      .map(convertObjectPropsToCamelCase)
+      .sort(({ name: aName = '' }, { name: bName = '' }) => {
+        return aName.toUpperCase() > bName.toUpperCase() ? 1 : -1;
+      });
   },
 };

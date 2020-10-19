@@ -12,6 +12,7 @@ RSpec.describe Issue do
 
     it { is_expected.to have_many(:resource_weight_events) }
     it { is_expected.to have_many(:resource_iteration_events) }
+    it { is_expected.to have_one(:issuable_sla) }
   end
 
   describe 'modules' do
@@ -120,7 +121,7 @@ RSpec.describe Issue do
       describe '.any_epic' do
         it 'returns only issues with an epic assigned' do
           expect(described_class.count).to eq 3
-          expect(described_class.any_epic).to eq [epic_issue1.issue, epic_issue2.issue]
+          expect(described_class.any_epic).to contain_exactly(epic_issue1.issue, epic_issue2.issue)
         end
       end
 
@@ -128,6 +129,13 @@ RSpec.describe Issue do
         it 'returns only issues in selected epics' do
           expect(described_class.count).to eq 3
           expect(described_class.in_epics([epic1])).to eq [epic_issue1.issue]
+        end
+      end
+
+      describe '.not_in_epics' do
+        it 'returns only issues not in selected epics' do
+          expect(described_class.count).to eq 3
+          expect(described_class.not_in_epics([epic1])).to match_array([epic_issue2.issue, issue_no_epic])
         end
       end
 
@@ -180,6 +188,23 @@ RSpec.describe Issue do
           expect(described_class.count).to eq 3
           expect(described_class.in_iterations([iteration1])).to eq [iteration1_issue]
         end
+      end
+    end
+
+    context 'status page published' do
+      let_it_be(:not_published) { create(:issue) }
+      let_it_be(:published)     { create(:issue, :published) }
+
+      describe '.order_status_page_published_first' do
+        subject { described_class.order_status_page_published_first }
+
+        it { is_expected.to eq([published, not_published]) }
+      end
+
+      describe '.order_status_page_published_last' do
+        subject { described_class.order_status_page_published_last }
+
+        it { is_expected.to eq([not_published, published]) }
       end
     end
   end
@@ -329,6 +354,38 @@ RSpec.describe Issue do
     end
   end
 
+  describe '#check_for_spam?' do
+    using RSpec::Parameterized::TableSyntax
+    let_it_be(:reusable_project) { create(:project) }
+    let_it_be(:author) { ::User.support_bot }
+
+    where(:visibility_level, :confidential, :new_attributes, :check_for_spam?) do
+      Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'woo' } | true
+      Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'woo' } | true
+      Gitlab::VisibilityLevel::PUBLIC   | true  | { confidential: false } | true
+      Gitlab::VisibilityLevel::PUBLIC   | true  | { description: 'woo' } | true
+      Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'woo', confidential: true } | true
+      Gitlab::VisibilityLevel::INTERNAL | false | { description: 'woo' } | true
+      Gitlab::VisibilityLevel::PRIVATE  | true  | { description: 'woo' } | true
+      Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'original description' } | false
+      Gitlab::VisibilityLevel::PRIVATE  | true  | { weight: 3 } | false
+    end
+
+    with_them do
+      context 'when author is a bot' do
+        it 'only checks for spam when description, title, or confidential status is updated' do
+          project = reusable_project
+          project.update(visibility_level: visibility_level)
+          issue = create(:issue, project: project, confidential: confidential, description: 'original description', author: author)
+
+          issue.assign_attributes(new_attributes)
+
+          expect(issue.check_for_spam?).to eq(check_for_spam?)
+        end
+      end
+    end
+  end
+
   describe '#weight' do
     where(:license_value, :database_value, :expected) do
       true  | 5   | 5
@@ -419,29 +476,11 @@ RSpec.describe Issue do
     let_it_be_with_reload(:issue1) { create(:issue, project: project1, relative_position: issue.relative_position + RelativePositioning::IDEAL_DISTANCE) }
     let(:new_issue) { build(:issue, project: project1, relative_position: nil) }
 
-    describe '#max_relative_position' do
-      it 'returns maximum position' do
-        expect(issue.max_relative_position).to eq issue1.relative_position
-      end
-    end
+    describe '.relative_positioning_query_base' do
+      it 'includes cross project issues in the same group' do
+        siblings = Issue.relative_positioning_query_base(issue)
 
-    describe '#prev_relative_position' do
-      it 'returns previous position if there is an issue above' do
-        expect(issue1.prev_relative_position).to eq issue.relative_position
-      end
-
-      it 'returns nil if there is no issue above' do
-        expect(issue.prev_relative_position).to eq nil
-      end
-    end
-
-    describe '#next_relative_position' do
-      it 'returns next position if there is an issue below' do
-        expect(issue.next_relative_position).to eq issue1.relative_position
-      end
-
-      it 'returns nil if there is no issue below' do
-        expect(issue1.next_relative_position).to eq nil
+        expect(siblings).to include(issue1)
       end
     end
 
@@ -736,6 +775,63 @@ RSpec.describe Issue do
 
         expect { issue.update_blocking_issues_count! }
           .to change { issue.blocking_issues_count }.from(0).to(3)
+      end
+    end
+  end
+
+  describe '#supports_iterations?' do
+    let(:group) { build_stubbed(:group) }
+    let(:project_with_group) { build_stubbed(:project, group: group) }
+
+    where(:issuable_type, :project, :supports_iterations) do
+      [
+        [:issue, :project_with_group, true],
+        [:incident, :project_with_group, false]
+      ]
+    end
+
+    with_them do
+      let(:issue) { build_stubbed(issuable_type, project: send(project)) }
+
+      subject { issue.supports_iterations? }
+
+      it { is_expected.to eq(supports_iterations) }
+    end
+  end
+
+  describe '#issue_type_supports?' do
+    let_it_be(:issue) { create(:issue) }
+    let_it_be(:test_case) { create(:quality_test_case) }
+    let_it_be(:incident) { create(:incident) }
+
+    it do
+      expect(issue.issue_type_supports?(:epics)).to be(true)
+      expect(test_case.issue_type_supports?(:epics)).to be(false)
+      expect(incident.issue_type_supports?(:epics)).to be(false)
+    end
+  end
+
+  describe '#sla_available?' do
+    let_it_be(:project) { create(:project) }
+    let_it_be_with_refind(:issue) { create(:incident, project: project) }
+
+    subject { issue.sla_available? }
+
+    where(:incident_type, :license_available, :sla_available) do
+      false | true  | false
+      true  | false | false
+      true  | true  | true
+    end
+
+    with_them do
+      before do
+        stub_licensed_features(incident_sla: license_available)
+        issue_type = incident_type ? 'incident' : 'issue'
+        issue.update(issue_type: issue_type)
+      end
+
+      it 'returns the expected value' do
+        expect(subject).to eq(sla_available)
       end
     end
   end

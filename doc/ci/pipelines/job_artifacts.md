@@ -37,8 +37,8 @@ pdf:
     expire_in: 1 week
 ```
 
-A job named `pdf` calls the `xelatex` command in order to build a PDF file from
-the latex source file `mycv.tex`. We then define the `artifacts` paths which in
+A job named `pdf` calls the `xelatex` command to build a PDF file from the
+latex source file `mycv.tex`. We then define the `artifacts` paths which in
 turn are defined with the `paths` keyword. All paths to files and directories
 are relative to the repository that was cloned during the build.
 
@@ -47,7 +47,7 @@ when the job fails, or always, by using [`artifacts:when`](../yaml/README.md#art
 parameter. GitLab keeps these uploaded artifacts for 1 week, as defined
 by the `expire_in` definition. You can keep the artifacts from expiring
 via the [web interface](#browsing-artifacts). If the expiry time is not defined, it defaults
-to the [instance wide setting](../../user/admin_area/settings/continuous_integration.md#default-artifacts-expiration-core-only).
+to the [instance wide setting](../../user/admin_area/settings/continuous_integration.md#default-artifacts-expiration).
 
 For more examples on artifacts, follow the [artifacts reference in
 `.gitlab-ci.yml`](../yaml/README.md#artifacts).
@@ -61,12 +61,10 @@ The `artifacts:reports` keyword is used for collecting test reports, code qualit
 reports, and security reports from jobs. It also exposes these reports in GitLab's
 UI (merge requests, pipeline views, and security dashboards).
 
-NOTE: **Note:**
 The test reports are collected regardless of the job results (success or failure).
 You can use [`artifacts:expire_in`](../yaml/README.md#artifactsexpire_in) to set up an expiration
 date for their artifacts.
 
-NOTE: **Note:**
 If you also want the ability to browse the report output files, include the
 [`artifacts:paths`](../yaml/README.md#artifactspaths) keyword.
 
@@ -96,7 +94,6 @@ rspec:
 
 The collected Unit test reports upload to GitLab as an artifact and display in merge requests.
 
-NOTE: **Note:**
 If the JUnit tool you use exports to multiple XML files, specify
 multiple test report paths within a single job to
 concatenate them into a single file. Use a filename pattern (`junit: rspec-*.xml`),
@@ -221,7 +218,7 @@ dashboards.
 
 CAUTION: **Warning:**
 This artifact is still valid but is **deprecated** in favor of the
-[artifacts:reports:license_scanning](../pipelines/job_artifacts.md#artifactsreportslicense_scanning-ultimate)
+[artifacts:reports:license_scanning](../pipelines/job_artifacts.md#artifactsreportslicense_scanning)
 introduced in GitLab 12.8.
 
 The `license_management` report collects [Licenses](../../user/compliance/license_compliance/index.md)
@@ -343,6 +340,11 @@ The latest artifacts are created by jobs in the **most recent** successful pipel
 for the specific ref. If you run two types of pipelines for the same ref, timing determines the latest
 artifact. For example, if a merge request creates a branch pipeline at the same time as a scheduled pipeline, the pipeline that completed most recently creates the latest artifact.
 
+In [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/201784) and later, artifacts
+for [parent and child pipelines](../parent_child_pipelines.md) are searched in hierarchical
+order from parent to child. For example, if both parent and child pipelines have a
+job with the same name, the artifact from the parent pipeline is returned.
+
 Artifacts for other pipelines can be accessed with direct access to them.
 
 The structure of the URL to download the whole artifacts archive is the following:
@@ -429,7 +431,20 @@ To erase a job:
 
 ## Retrieve artifacts of private projects when using GitLab CI
 
-In order to retrieve a job artifact of a different project, you might need to use a private token in order to [authenticate and download](../../api/job_artifacts.md#get-job-artifacts) the artifacts.
+To retrieve a job artifact from a different project, you might need to use a
+private token to [authenticate and download](../../api/job_artifacts.md#get-job-artifacts)
+the artifact.
+
+## Troubleshooting
+
+### Error message `No files to upload`
+
+This is often preceded by other errors or warnings that specify the filename and why it wasn't
+generated in the first place. Please check the entire job log for such messages.
+
+If you find no helpful messages, please retry the failed job after activating
+[CI debug logging](../variables/README.md#debug-logging).
+This provides useful information to investigate further.
 
 <!-- ## Troubleshooting
 

@@ -20,6 +20,7 @@ module Gitlab
           :alert_markdown,
           :alert_title,
           :annotations,
+          :description,
           :ends_at,
           :environment,
           :environment_name,
@@ -29,11 +30,12 @@ module Gitlab
           :gitlab_fingerprint,
           :gitlab_prometheus_alert_id,
           :gitlab_y_label,
-          :description,
+          :has_required_attributes?,
           :hosts,
           :metric_id,
           :metrics_dashboard_url,
           :monitoring_tool,
+          :resolved?,
           :runbook,
           :service,
           :severity,
@@ -104,8 +106,29 @@ module Gitlab
 
         def gitlab_fingerprint
           strong_memoize(:gitlab_fingerprint) do
-            Gitlab::AlertManagement::Fingerprint.generate(plain_gitlab_fingerprint) if plain_gitlab_fingerprint
+            next unless plain_gitlab_fingerprint
+
+            Gitlab::AlertManagement::Fingerprint.generate(plain_gitlab_fingerprint)
           end
+        end
+
+        def environment
+          strong_memoize(:environment) do
+            next unless environment_name
+
+            EnvironmentsFinder
+              .new(project, nil, { name: environment_name })
+              .find
+              .first
+          end
+        end
+
+        def resolved?
+          status == 'resolved'
+        end
+
+        def has_required_attributes?
+          true
         end
 
         private

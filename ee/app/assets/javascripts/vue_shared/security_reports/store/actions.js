@@ -203,7 +203,7 @@ export const receiveSecretScanningDiffError = ({ commit }) =>
 export const fetchSecretScanningDiff = ({ state, dispatch }) => {
   dispatch('requestSecretScanningDiff');
 
-  return fetchDiffData(state, state.secretScanning.paths.diffEndpoint, 'secret_scanning')
+  return fetchDiffData(state, state.secretScanning.paths.diffEndpoint, 'secret_detection')
     .then(data => {
       dispatch('receiveSecretScanningDiffSuccess', data);
     })

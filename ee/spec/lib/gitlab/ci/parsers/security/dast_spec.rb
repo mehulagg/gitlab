@@ -46,7 +46,6 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
 
       it 'generates expected location' do
         location = report.findings.last.location
-
         expect(location).to be_a(::Gitlab::Ci::Reports::Security::Locations::Dast)
         expect(location).to have_attributes(
           hostname: last_occurrence_hostname,
@@ -69,6 +68,43 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
             expect(occurrence.public_send(attribute)).to eq(value)
           end
         end
+      end
+    end
+
+    describe 'parses scanned_resources' do
+      let(:artifact) { create(:ee_ci_job_artifact, 'dast') }
+
+      before do
+        artifact.each_blob do |blob|
+          parser.parse!(blob, report)
+        end
+      end
+
+      let(:raw_json) do
+        {
+        "vulnerabilities": [],
+        "remediations": [],
+        "dependency_files": [],
+        "scan": {
+          "scanned_resources": [
+            {
+              "method": "GET",
+              "type": "url",
+              "url": "not a URL"
+            }
+          ]
+        }
+      }
+      end
+
+      it 'skips invalid URLs' do
+        parser.parse!(raw_json.to_json, report)
+        expect(report.scanned_resources).to be_empty
+      end
+
+      it 'creates a scanned resource for each URL' do
+        expect(report.scanned_resources.length).to eq(6)
+        expect(report.scanned_resources.first).to be_a(::Gitlab::Ci::Reports::Security::ScannedResource)
       end
     end
   end

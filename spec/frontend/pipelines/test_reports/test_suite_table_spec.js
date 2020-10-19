@@ -1,6 +1,7 @@
 import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { getJSONFixture } from 'helpers/fixtures';
+import { GlButton } from '@gitlab/ui';
 import SuiteTable from '~/pipelines/components/test_reports/test_suite_table.vue';
 import * as getters from '~/pipelines/stores/test_reports/getters';
 import { TestStatus } from '~/pipelines/constants';
@@ -23,8 +24,6 @@ describe('Test reports suite table', () => {
   const noCasesMessage = () => wrapper.find('.js-no-test-cases');
   const allCaseRows = () => wrapper.findAll('.js-case-row');
   const findCaseRowAtIndex = index => wrapper.findAll('.js-case-row').at(index);
-  const allCaseNames = () =>
-    wrapper.findAll('[data-testid="caseName"]').wrappers.map(el => el.attributes('text'));
   const findIconForRow = (row, status) => row.find(`.ci-status-icon-${status}`);
 
   const createComponent = (suite = testSuite) => {
@@ -63,28 +62,27 @@ describe('Test reports suite table', () => {
       expect(allCaseRows().length).toBe(testCases.length);
     });
 
-    it('renders the failed tests first, skipped tests next, then successful tests', () => {
-      const expectedCaseOrder = [
-        ...testCases.filter(x => x.status === TestStatus.FAILED),
-        ...testCases.filter(x => x.status === TestStatus.SKIPPED),
-        ...testCases.filter(x => x.status === TestStatus.SUCCESS),
-      ].map(x => x.name);
+    it.each([
+      TestStatus.ERROR,
+      TestStatus.FAILED,
+      TestStatus.SKIPPED,
+      TestStatus.SUCCESS,
+      'unknown',
+    ])('renders the correct icon for test case with %s status', status => {
+      const test = testCases.findIndex(x => x.status === status);
+      const row = findCaseRowAtIndex(test);
 
-      expect(allCaseNames()).toEqual(expectedCaseOrder);
+      expect(findIconForRow(row, status).exists()).toBe(true);
     });
 
-    it('renders the correct icon for each status', () => {
-      const failedTest = testCases.findIndex(x => x.status === TestStatus.FAILED);
-      const skippedTest = testCases.findIndex(x => x.status === TestStatus.SKIPPED);
-      const successTest = testCases.findIndex(x => x.status === TestStatus.SUCCESS);
+    it('renders the file name for the test with a copy button', () => {
+      const { file } = testCases[0];
+      const row = findCaseRowAtIndex(0);
+      const button = row.find(GlButton);
 
-      const failedRow = findCaseRowAtIndex(failedTest);
-      const skippedRow = findCaseRowAtIndex(skippedTest);
-      const successRow = findCaseRowAtIndex(successTest);
-
-      expect(findIconForRow(failedRow, TestStatus.FAILED).exists()).toBe(true);
-      expect(findIconForRow(skippedRow, TestStatus.SKIPPED).exists()).toBe(true);
-      expect(findIconForRow(successRow, TestStatus.SUCCESS).exists()).toBe(true);
+      expect(row.text()).toContain(file);
+      expect(button.exists()).toBe(true);
+      expect(button.attributes('data-clipboard-text')).toBe(file);
     });
   });
 });

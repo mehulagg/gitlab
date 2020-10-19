@@ -38,7 +38,7 @@ class MigrateCiJobArtifactsToSeparateRegistry < ActiveRecord::Migration[4.2]
           $BODY$
           LANGUAGE 'plpgsql'
           VOLATILE;
-          EOF
+      EOF
 
       execute <<~EOF
           CREATE TRIGGER replicate_job_artifact_registry

@@ -102,12 +102,10 @@ class ProjectPolicy < BasePolicy
   end
 
   with_scope :subject
-  condition(:moving_designs_disabled) do
-    !::Feature.enabled?(:reorder_designs, @subject, default_enabled: true)
-  end
+  condition(:service_desk_enabled) { @subject.service_desk_enabled? }
 
   with_scope :subject
-  condition(:service_desk_enabled) { @subject.service_desk_enabled? }
+  condition(:resource_access_token_available) { resource_access_token_available? }
 
   # We aren't checking `:read_issue` or `:read_merge_request` in this case
   # because it could be possible for a user to see an issuable-iid
@@ -242,7 +240,6 @@ class ProjectPolicy < BasePolicy
     enable :read_merge_request
     enable :read_sentry_issue
     enable :update_sentry_issue
-    enable :read_incidents
     enable :read_prometheus
     enable :read_metrics_dashboard_annotation
     enable :metrics_dashboard
@@ -330,6 +327,12 @@ class ProjectPolicy < BasePolicy
     enable :destroy_design
     enable :read_terraform_state
     enable :read_pod_logs
+    enable :read_feature_flag
+    enable :create_feature_flag
+    enable :update_feature_flag
+    enable :destroy_feature_flag
+    enable :admin_feature_flag
+    enable :admin_feature_flags_user_lists
   end
 
   rule { can?(:developer_access) & user_confirmed? }.policy do
@@ -376,6 +379,7 @@ class ProjectPolicy < BasePolicy
     enable :read_freeze_period
     enable :update_freeze_period
     enable :destroy_freeze_period
+    enable :admin_feature_flags_client
   end
 
   rule { public_project & metrics_dashboard_allowed }.policy do
@@ -452,6 +456,8 @@ class ProjectPolicy < BasePolicy
     prevent :read_pipeline
     prevent :read_pipeline_schedule
     prevent(*create_read_update_admin_destroy(:release))
+    prevent(*create_read_update_admin_destroy(:feature_flag))
+    prevent(:admin_feature_flags_user_lists)
   end
 
   rule { container_registry_disabled }.policy do
@@ -557,10 +563,6 @@ class ProjectPolicy < BasePolicy
     prevent :move_design
   end
 
-  rule { moving_designs_disabled }.policy do
-    prevent :move_design
-  end
-
   rule { read_package_registry_deploy_token }.policy do
     enable :read_package
     enable :read_project
@@ -587,6 +589,10 @@ class ProjectPolicy < BasePolicy
   rule { support_bot & ~service_desk_enabled }.policy do
     prevent :create_note
     prevent :read_project
+  end
+
+  rule { resource_access_token_available & can?(:admin_project) }.policy do
+    enable :admin_resource_access_tokens
   end
 
   private
@@ -661,6 +667,10 @@ class ProjectPolicy < BasePolicy
     else
       true
     end
+  end
+
+  def resource_access_token_available?
+    true
   end
 
   def project

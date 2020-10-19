@@ -47,12 +47,6 @@ export default class AvailableDropdownMappings {
       element: this.container.querySelector('#js-dropdown-approver'),
     };
 
-    ceMappings['approved-by'] = {
-      reference: null,
-      gl: DropdownUser,
-      element: this.container.querySelector('#js-dropdown-approved-by'),
-    };
-
     ceMappings.weight = {
       reference: null,
       gl: DropdownWeight,

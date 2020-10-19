@@ -8,8 +8,7 @@ docs_paths_to_review = helper.changes_by_category[:docs]
 
 return if docs_paths_to_review.empty?
 
-message 'This merge request adds or changes files that require a review ' \
-  'from the Technical Writing team.'
+message 'This merge request adds or changes documentation files. A review from the Technical Writing team before you merge is **recommended**. Reviews can happen after you merge.'
 
 return unless gitlab_danger.ci?
 
@@ -25,9 +24,3 @@ markdown(<<~MARKDOWN)
   - [Technical Writers assignments](https://about.gitlab.com/handbook/engineering/technical-writing/#designated-technical-writers) for the appropriate technical writer for this review.
   - [Documentation workflows](https://docs.gitlab.com/ee/development/documentation/workflow.html) for information on when to assign a merge request for review.
 MARKDOWN
-
-unless gitlab.mr_labels.include?('documentation')
-  gitlab.api.update_merge_request(gitlab.mr_json['project_id'],
-                                  gitlab.mr_json['iid'],
-                                  labels: (gitlab.mr_labels + ['documentation']).join(','))
-end

@@ -49,7 +49,7 @@ export default {
     </div>
     <div class="d-none d-lg-block">
       <div class="append-bottom-20">
-        <h4 class="gl-font-size-20-deprecated-no-really-do-not-use-me">
+        <h4>
           {{ titleWithName }}
         </h4>
       </div>

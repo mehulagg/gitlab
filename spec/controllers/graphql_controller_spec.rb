@@ -98,6 +98,12 @@ RSpec.describe GraphqlController do
         expect(assigns(:context)[:is_sessionless_user]).to be false
       end
     end
+
+    it 'includes request object in context' do
+      post :execute
+
+      expect(assigns(:context)[:request]).to eq request
+    end
   end
 
   describe 'Admin Mode' do
@@ -145,6 +151,26 @@ RSpec.describe GraphqlController do
           expect(json_response['data']['project']['name']).to eq(project.name)
         end
       end
+    end
+  end
+
+  describe '#append_info_to_payload' do
+    let(:graphql_query) { graphql_query_for('project', { 'fullPath' => 'foo' }, %w(id name)) }
+    let(:mock_store) { { graphql_logs: { foo: :bar } } }
+    let(:log_payload) { {} }
+
+    before do
+      allow(RequestStore).to receive(:store).and_return(mock_store)
+      allow(controller).to receive(:append_info_to_payload).and_wrap_original do |method, *|
+        method.call(log_payload)
+      end
+    end
+
+    it 'appends metadata for logging' do
+      post :execute, params: { query: graphql_query, operationName: 'Foo' }
+
+      expect(controller).to have_received(:append_info_to_payload)
+      expect(log_payload.dig(:metadata, :graphql)).to eq({ operation_name: 'Foo', foo: :bar })
     end
   end
 end

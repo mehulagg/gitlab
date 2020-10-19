@@ -36,7 +36,7 @@ describe('Security Dashboard Table Row', () => {
 
   const findLoader = () => wrapper.find('.js-skeleton-loader');
   const findContent = i => wrapper.findAll('.table-mobile-content').at(i);
-  const findAllIssueCreated = () => wrapper.findAll('[data-testid="issue-created-icon"]');
+  const findAllIssueCreated = () => wrapper.findAll('[data-testid="issues-icon"]');
   const hasSelectedClass = () => wrapper.classes('gl-bg-blue-50');
   const findCheckbox = () => wrapper.find(GlFormCheckbox);
 
@@ -173,7 +173,7 @@ describe('Security Dashboard Table Row', () => {
       createComponent(mount, { props: { vulnerability } });
     });
 
-    it('should have a `issue-created` icon', () => {
+    it('should have a `issues` icon', () => {
       expect(findAllIssueCreated()).toHaveLength(1);
     });
   });
@@ -185,7 +185,7 @@ describe('Security Dashboard Table Row', () => {
       createComponent(mount, { props: { vulnerability } });
     });
 
-    it('should not have a `issue-created` icon', () => {
+    it('should not have a `issues` icon', () => {
       expect(findAllIssueCreated()).toHaveLength(0);
     });
   });
@@ -197,7 +197,7 @@ describe('Security Dashboard Table Row', () => {
       createComponent(shallowMount, { props: { vulnerability } });
     });
 
-    it('should not have a `issue-created` icon', () => {
+    it('should not have a `issues` icon', () => {
       expect(findAllIssueCreated()).toHaveLength(0);
     });
 

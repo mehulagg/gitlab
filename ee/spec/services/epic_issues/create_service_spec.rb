@@ -232,6 +232,14 @@ RSpec.describe EpicIssues::CreateService do
             )
           end
         end
+
+        context "when assigning issuable which don't support epics" do
+          let_it_be(:incident) { create(:incident, project: project) }
+
+          subject { assign_issue([incident.to_reference(full: true)]) }
+
+          include_examples 'returns an error'
+        end
       end
 
       context 'when user does not have permissions to link the issue' do

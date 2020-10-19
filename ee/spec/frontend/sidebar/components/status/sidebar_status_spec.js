@@ -73,7 +73,7 @@ describe('SidebarStatus', () => {
     beforeEach(() => {});
 
     it('renders Status component', () => {
-      expect(wrapper.contains(Status)).toBe(true);
+      expect(wrapper.find(Status).exists()).toBe(true);
     });
 
     it('calls handleFormSubmission when receiving an onDropdownClick event from Status component', () => {

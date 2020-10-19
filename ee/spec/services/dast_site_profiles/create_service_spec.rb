@@ -6,7 +6,7 @@ RSpec.describe DastSiteProfiles::CreateService do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, creator: user) }
   let(:name) { FFaker::Company.catch_phrase }
-  let(:target_url) { FFaker::Internet.uri(:http) }
+  let(:target_url) { generate(:url) }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)

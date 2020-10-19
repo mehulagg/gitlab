@@ -14,8 +14,6 @@ import {
   testEvents,
   stagingStage,
   stagingEvents,
-  totalStage,
-  totalEvents,
   codeStage,
   codeEvents,
 } from '../mock_data';
@@ -88,7 +86,6 @@ describe('Stage', () => {
       ${'Test'}    | ${testStage}
       ${'Code'}    | ${codeStage}
       ${'Staging'} | ${stagingStage}
-      ${'Total'}   | ${totalStage}
     `('$name stage will render the stage description', ({ stage }) => {
       wrapper = createComponent({ props: { stage, events: [] } });
       expect(wrapper.find($sel.description).text()).toEqual(stage.description);
@@ -100,7 +97,6 @@ describe('Stage', () => {
       ${'Plan'}   | ${planStage}   | ${planEvents}
       ${'Review'} | ${reviewStage} | ${reviewEvents}
       ${'Code'}   | ${codeStage}   | ${codeEvents}
-      ${'Total'}  | ${totalStage}  | ${totalEvents}
     `('$name stage will render the list of events', ({ stage, eventList }) => {
       // stages generated from fixtures may not have events
       const events = eventList.length ? eventList : generateEvents(5);
@@ -120,7 +116,6 @@ describe('Stage', () => {
       ${'Plan'}   | ${planStage}   | ${planEvents}
       ${'Review'} | ${reviewStage} | ${reviewEvents}
       ${'Code'}   | ${codeStage}   | ${codeEvents}
-      ${'Total'}  | ${totalStage}  | ${totalEvents}
     `('$name stage will render the items as StageEventItems', ({ stage, eventList }) => {
       wrapper = createComponent({ props: { events: eventList, stage }, stubs: mockStubs });
       expect(wrapper.find(StageEventItem).exists()).toBe(true);

@@ -48,7 +48,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['setActiveId', 'updateListWipLimit']),
+    ...mapActions(['unsetActiveId', 'updateListWipLimit']),
     showInput() {
       this.edit = true;
       this.currentWipLimit = this.maxIssueCount > 0 ? this.maxIssueCount : null;
@@ -80,7 +80,7 @@ export default {
             boardsStoreEE.setMaxIssueCountOnList(id, wipLimit);
           })
           .catch(() => {
-            this.setActiveId(0);
+            this.unsetActiveId();
             flash(__('Something went wrong while updating your list settings'));
           })
           .finally(() => {
@@ -96,7 +96,7 @@ export default {
           boardsStoreEE.setMaxIssueCountOnList(this.activeId, inactiveId);
         })
         .catch(() => {
-          this.setActiveId(inactiveId);
+          this.unsetActiveId();
           flash(__('Something went wrong while updating your list settings'));
         })
         .finally(() => {

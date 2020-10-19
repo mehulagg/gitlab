@@ -52,7 +52,7 @@ POST /internal/allowed
 | `username` | string | no      | Username from the certificate used to connect to GitLab Shell |
 | `project`  | string | no (if `gl_repository` is passed) | Path to the project |
 | `gl_repository`  | string | no (if `project` is passed) | Repository identifier (e.g. `project-7`) |
-| `protocol` | string | yes     | SSH when called from GitLab-shell, HTTP or SSH when called from Gitaly |
+| `protocol` | string | yes     | SSH when called from GitLab Shell, HTTP or SSH when called from Gitaly |
 | `action`   | string | yes     | Git command being run (`git-upload-pack`, `git-receive-pack`, `git-upload-archive`) |
 | `changes`  | string | yes     | `<oldrev> <newrev> <refname>` when called from Gitaly, the magic string `_any` when called from GitLab Shell |
 | `check_ip` | string | no     | IP address from which call to GitLab Shell was made |
@@ -223,6 +223,7 @@ Example response:
 
 - GitLab Geo
 - GitLab Shell's `bin/check`
+- Gitaly
 
 ## Get new 2FA recovery codes using an SSH key
 
@@ -369,4 +370,81 @@ Example response:
   ],
   "reference_counter_decreased": true
 }
+```
+
+## Kubernetes agent endpoints
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41045) in GitLab 13.4.
+> - This feature is not deployed on GitLab.com
+> - It's not recommended for production use.
+
+The following endpoints are used by the GitLab Kubernetes Agent Server (kas)
+for various purposes.
+
+These endpoints are all authenticated using JWT. The JWT secret is stored in a file
+specified in `config/gitlab.yml`. By default, the location is in the root of the
+GitLab Rails app in a file called `.gitlab_kas_secret`.
+
+CAUTION: **Caution:**
+The Kubernetes agent is under development and is not recommended for production use.
+
+### Kubernetes agent information
+
+Called from GitLab Kubernetes Agent Server (kas) to retrieve agent
+information for the given agent token. This returns the Gitaly connection
+information for the agent's project in order for kas to fetch and update
+the agent's configuration.
+
+```plaintext
+GET /internal/kubernetes/agent_info
+```
+
+Example Request:
+
+```shell
+curl --request GET --header "Gitlab-Kas-Api-Request: <JWT token>" --header "Authorization: Bearer <agent token>" "http://localhost:3000/api/v4/internal/kubernetes/agent_info"
+```
+
+### Kubernetes agent project information
+
+Called from GitLab Kubernetes Agent Server (kas) to retrieve project
+information for the given agent token. This returns the Gitaly
+connection for the requested project. GitLab kas uses this to configure
+the agent to fetch Kubernetes resources from the project repository to
+sync.
+
+Only public projects are currently supported. For private projects, the ability for the
+agent to be authorized is [not yet implemented](https://gitlab.com/gitlab-org/gitlab/-/issues/220912).
+
+| Attribute | Type   | Required | Description |
+|:----------|:-------|:---------|:------------|
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](../api/README.md#namespaced-path-encoding) |
+
+```plaintext
+GET /internal/kubernetes/project_info
+```
+
+Example Request:
+
+```shell
+curl --request GET --header "Gitlab-Kas-Api-Request: <JWT token>" --header "Authorization: Bearer <agent token>" "http://localhost:3000/api/v4/internal/kubernetes/project_info?id=7"
+```
+
+### Kubernetes agent usage metrics
+
+Called from GitLab Kubernetes Agent Server (kas) to increase the usage
+metric counters.
+
+| Attribute | Type   | Required | Description |
+|:----------|:-------|:---------|:------------|
+| `gitops_sync_count` | integer| yes | The number to increase the `gitops_sync_count` counter by |
+
+```plaintext
+POST /internal/kubernetes/usage_metrics
+```
+
+Example Request:
+
+```shell
+curl --request POST --header "Gitlab-Kas-Api-Request: <JWT token>" --header "Content-Type: application/json" --data '{"gitops_sync_count":1}' "http://localhost:3000/api/v4/internal/kubernetes/usage_metrics"
 ```

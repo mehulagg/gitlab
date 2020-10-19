@@ -10,8 +10,6 @@ type: reference
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/45318) in GitLab 11.2. Requires GitLab Runner 11.2 and above.
 > - [Renamed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39737) from JUnit test reports to Unit test reports in GitLab 13.4.
 
-## Overview
-
 It is very common that a [CI/CD pipeline](pipelines/index.md) contains a
 test job that will verify your code.
 If the tests fail, the pipeline fails and users get notified. The person that
@@ -20,15 +18,13 @@ tests failed so that they can fix them.
 
 You can configure your job to use Unit test reports, and GitLab will display a
 report on the merge request so that it's easier and faster to identify the
-failure without having to check the entire log. Unit test reports currently 
+failure without having to check the entire log. Unit test reports currently
 only support test reports in the JUnit report format.
 
-If you don't use Merge Requests but still want to see the unit test report 
-output without searching through job logs, the full 
-[Unit test reports](#viewing-unit-test-reports-on-gitlab) are available 
+If you don't use Merge Requests but still want to see the unit test report
+output without searching through job logs, the full
+[Unit test reports](#viewing-unit-test-reports-on-gitlab) are available
 in the pipeline detail view.
-
-## Use cases
 
 Consider the following workflow:
 
@@ -44,9 +40,9 @@ Consider the following workflow:
 
 ## How it works
 
-First, GitLab Runner uploads all JUnit report format XML files as artifacts to GitLab. Then,
-when you visit a merge request, GitLab starts comparing the head and base branch's
-JUnit report format XML files, where:
+First, GitLab Runner uploads all [JUnit report format XML files](https://www.ibm.com/support/knowledgecenter/en/SSQ2R2_14.1.0/com.ibm.rsar.analysis.codereview.cobol.doc/topics/cac_useresults_junit.html)
+as [artifacts](pipelines/job_artifacts.md#artifactsreportsjunit) to GitLab. Then, when you visit a merge request, GitLab starts
+comparing the head and base branch's JUnit report format XML files, where:
 
 - The base branch is the target branch (usually `master`).
 - The head branch is the source branch (the latest pipeline in each merge request).
@@ -83,8 +79,9 @@ merge request widget.
 
 To make the Unit test report output files browsable, include them with the
 [`artifacts:paths`](yaml/README.md#artifactspaths) keyword as well, as shown in the [Ruby example](#ruby-example).
+To upload the report even if the job fails (for example if the tests do not pass), use the [`artifacts:when:always`](yaml/README.md#artifactswhen)
+keyword.
 
-NOTE: **Note:**
 You cannot have multiple tests with the same name and class in your JUnit report format XML file.
 
 ### Ruby example
@@ -99,6 +96,7 @@ ruby:
     - bundle install
     - bundle exec rspec --format progress --format RspecJunitFormatter --out rspec.xml
   artifacts:
+    when: always
     paths:
       - rspec.xml
     reports:
@@ -118,6 +116,7 @@ golang:
     - go get -u github.com/jstemmer/go-junit-report
     - go test -v 2>&1 | go-junit-report -set-exit-code > report.xml
   artifacts:
+    when: always
     reports:
       junit: report.xml
 ```
@@ -139,12 +138,13 @@ java:
   script:
     - gradle test
   artifacts:
+    when: always
     reports:
       junit: build/test-results/test/**/TEST-*.xml
 ```
 
-NOTE: **Note:**
-Support for `**` was added in [GitLab Runner 13.0](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2620).
+In [GitLab Runner 13.0](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2620)
+and later, you can use `**`.
 
 #### Maven
 
@@ -158,6 +158,7 @@ java:
   script:
     - mvn verify
   artifacts:
+    when: always
     reports:
       junit:
         - target/surefire-reports/TEST-*.xml
@@ -175,6 +176,7 @@ pytest:
   script:
     - pytest --junitxml=report.xml
   artifacts:
+    when: always
     reports:
       junit: report.xml
 ```
@@ -196,6 +198,7 @@ cpp:
   script:
     - gtest.exe --gtest_output="xml:report.xml"
   artifacts:
+    when: always
     reports:
       junit: report.xml
 ```
@@ -210,6 +213,7 @@ cunit:
   script:
     - ./my-cunit-test
   artifacts:
+    when: always
     reports:
       junit: ./my-cunit-test.xml
 ```
@@ -260,7 +264,7 @@ You can also retrieve the reports via the [GitLab API](../api/pipelines.md#get-a
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/202114) in GitLab 13.0.
 > - It's deployed behind a feature flag, disabled by default.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enabling-the-junit-screenshots-feature-core-only). **(CORE ONLY)**
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enabling-the-junit-screenshots-feature). **(CORE ONLY)**
 
 If JUnit report format XML files contain an `attachment` tag, GitLab parses the attachment.
 

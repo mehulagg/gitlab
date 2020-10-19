@@ -7,10 +7,10 @@ module EE
   # and be prepended in the `ApplicationSetting` model
   module ApplicationSetting
     extend ActiveSupport::Concern
+    extend ::Gitlab::Utils::Override
 
     prepended do
       EMAIL_ADDITIONAL_TEXT_CHARACTER_LIMIT = 10_000
-      INSTANCE_REVIEW_MIN_USERS = 50
       DEFAULT_NUMBER_OF_DAYS_BEFORE_REMOVAL = 7
 
       belongs_to :file_template_project, class_name: "Project"
@@ -74,6 +74,10 @@ module EE
                 presence: true,
                 numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
+      validates :elasticsearch_client_request_timeout,
+                presence: true,
+                numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+
       validates :email_additional_text,
                 allow_blank: true,
                 length: { maximum: EMAIL_ADDITIONAL_TEXT_CHARACTER_LIMIT }
@@ -101,6 +105,7 @@ module EE
       def defaults
         super.merge(
           allow_group_owners_to_manage_ldap: true,
+          automatic_purchased_storage_allocation: false,
           custom_project_templates_group_id: nil,
           default_project_deletion_protection: false,
           deletion_adjourned_period: DEFAULT_NUMBER_OF_DAYS_BEFORE_REMOVAL,
@@ -113,6 +118,7 @@ module EE
           elasticsearch_replicas: 1,
           elasticsearch_shards: 5,
           elasticsearch_url: ENV['ELASTIC_URL'] || 'http://localhost:9200',
+          elasticsearch_client_request_timeout: 0,
           email_additional_text: nil,
           enforce_namespace_storage_limit: false,
           enforce_pat_expiration: true,
@@ -145,22 +151,23 @@ module EE
       return false unless elasticsearch_indexing?
       return true unless elasticsearch_limit_indexing?
 
-      return elasticsearch_limited_project_exists?(project) unless ::Feature.enabled?(:elasticsearch_indexes_project_cache, default_enabled: true)
-
       ::Gitlab::Elastic::ElasticsearchEnabledCache.fetch(:project, project.id) do
         elasticsearch_limited_project_exists?(project)
       end
-    end
-
-    def invalidate_elasticsearch_indexes_project_cache!
-      ::Gitlab::Elastic::ElasticsearchEnabledCache.delete(:project)
     end
 
     def elasticsearch_indexes_namespace?(namespace)
       return false unless elasticsearch_indexing?
       return true unless elasticsearch_limit_indexing?
 
-      elasticsearch_limited_namespaces.exists?(namespace.id)
+      ::Gitlab::Elastic::ElasticsearchEnabledCache.fetch(:namespace, namespace.id) do
+        elasticsearch_limited_namespaces.exists?(namespace.id)
+      end
+    end
+
+    def invalidate_elasticsearch_indexes_cache!
+      ::Gitlab::Elastic::ElasticsearchEnabledCache.delete(:project)
+      ::Gitlab::Elastic::ElasticsearchEnabledCache.delete(:namespace)
     end
 
     def elasticsearch_limited_projects(ignore_namespaces = false)
@@ -239,7 +246,7 @@ module EE
       when Project
         elasticsearch_indexes_project?(scope)
       else
-        false # Never use elasticsearch for the global scope when limiting is on
+        ::Feature.enabled?(:advanced_global_search_for_limited_indexing)
       end
     end
 
@@ -255,14 +262,15 @@ module EE
 
     def elasticsearch_config
       {
-        url:                   elasticsearch_url,
-        aws:                   elasticsearch_aws,
-        aws_access_key:        elasticsearch_aws_access_key,
-        aws_secret_access_key: elasticsearch_aws_secret_access_key,
-        aws_region:            elasticsearch_aws_region,
-        max_bulk_size_bytes:   elasticsearch_max_bulk_size_mb.megabytes,
-        max_bulk_concurrency:  elasticsearch_max_bulk_concurrency
-      }
+        url:                    elasticsearch_url,
+        aws:                    elasticsearch_aws,
+        aws_access_key:         elasticsearch_aws_access_key,
+        aws_secret_access_key:  elasticsearch_aws_secret_access_key,
+        aws_region:             elasticsearch_aws_region,
+        max_bulk_size_bytes:    elasticsearch_max_bulk_size_mb.megabytes,
+        max_bulk_concurrency:   elasticsearch_max_bulk_concurrency,
+        client_request_timeout: (elasticsearch_client_request_timeout if elasticsearch_client_request_timeout > 0)
+      }.compact
     end
 
     def email_additional_text
@@ -291,14 +299,11 @@ module EE
       ::Project.where(namespace_id: group_id)
     end
 
+    override :instance_review_permitted?
     def instance_review_permitted?
-      return if License.current
+      return false if License.current
 
-      users_count = Rails.cache.fetch('limited_users_count', expires_in: 1.day) do
-        ::User.limit(INSTANCE_REVIEW_MIN_USERS + 1).count(:all)
-      end
-
-      users_count >= INSTANCE_REVIEW_MIN_USERS
+      super
     end
 
     def max_personal_access_token_lifetime_from_now
@@ -306,7 +311,7 @@ module EE
     end
 
     def compliance_frameworks=(values)
-      cleaned = Array.wrap(values).sort.uniq
+      cleaned = Array.wrap(values).reject(&:blank?).sort.uniq
 
       write_attribute(:compliance_frameworks, cleaned)
     end

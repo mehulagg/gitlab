@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::AlertManagement::Payload::Base do
-  let_it_be(:project) { build_stubbed(:project) }
+  let_it_be(:project) { create(:project) }
   let(:raw_payload) { {} }
   let(:payload_class) { described_class }
 
@@ -120,16 +120,9 @@ RSpec.describe Gitlab::AlertManagement::Payload::Base do
   end
 
   describe '#alert_params' do
-    let(:payload_class) do
-      Class.new(described_class) do
-        def title
-          'title'
-        end
-
-        def description
-          'description'
-        end
-      end
+    before do
+      allow(parsed_payload).to receive(:title).and_return('title')
+      allow(parsed_payload).to receive(:description).and_return('description')
     end
 
     subject { parsed_payload.alert_params }
@@ -143,17 +136,75 @@ RSpec.describe Gitlab::AlertManagement::Payload::Base do
     it { is_expected.to be_nil }
 
     context 'when plain_gitlab_fingerprint is defined' do
-      let(:payload_class) do
-        Class.new(described_class) do
-          def plain_gitlab_fingerprint
-            'fingerprint'
-          end
-        end
+      before do
+        allow(parsed_payload)
+          .to receive(:plain_gitlab_fingerprint)
+          .and_return('fingerprint')
       end
 
       it 'returns a fingerprint' do
         is_expected.to eq(Digest::SHA1.hexdigest('fingerprint'))
       end
     end
+  end
+
+  describe '#environment' do
+    let_it_be(:environment) { create(:environment, project: project, name: 'production') }
+
+    subject { parsed_payload.environment }
+
+    before do
+      allow(parsed_payload).to receive(:environment_name).and_return(environment_name)
+    end
+
+    context 'without an environment name' do
+      let(:environment_name) { nil }
+
+      it { is_expected.to be_nil }
+    end
+
+    context 'with a non-matching environment name' do
+      let(:environment_name) { 'other_environment' }
+
+      it { is_expected.to be_nil }
+    end
+
+    context 'with a matching environment name' do
+      let(:environment_name) { 'production' }
+
+      it { is_expected.to eq(environment) }
+    end
+  end
+
+  describe '#resolved?' do
+    before do
+      allow(parsed_payload).to receive(:status).and_return(status)
+    end
+
+    subject { parsed_payload.resolved? }
+
+    context 'when status is not defined' do
+      let(:status) { nil }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when status is not resovled' do
+      let(:status) { 'firing' }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when status is resovled' do
+      let(:status) { 'resolved' }
+
+      it { is_expected.to be_truthy }
+    end
+  end
+
+  describe '#has_required_attributes?' do
+    subject { parsed_payload.has_required_attributes? }
+
+    it { is_expected.to be(true) }
   end
 end

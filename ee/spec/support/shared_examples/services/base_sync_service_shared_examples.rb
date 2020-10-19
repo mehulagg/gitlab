@@ -54,7 +54,7 @@ RSpec.shared_examples 'geo base sync fetch' do
   describe '#sync_repository' do
     it 'tells registry that sync will start now' do
       registry = subject.send(:registry)
-      expect(registry).to receive(:start_sync!)
+      allow_any_instance_of(registry.class).to receive(:start_sync!)
 
       subject.send(:sync_repository)
     end

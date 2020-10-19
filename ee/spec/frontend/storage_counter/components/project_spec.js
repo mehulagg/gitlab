@@ -1,66 +1,54 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedButton } from '@gitlab/ui';
 import Project from 'ee/storage_counter/components/project.vue';
+import StorageRow from 'ee/storage_counter/components/storage_row.vue';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
+import { projects } from '../mock_data';
 
 let wrapper;
-const data = {
-  id: '8',
-  fullPath: 'h5bp/html5-boilerplate',
-  nameWithNamespace: 'H5bp / Html5 Boilerplate',
-  avatarUrl: null,
-  webUrl: 'http://localhost:3001/h5bp/html5-boilerplate',
-  name: 'Html5 Boilerplate',
-  statistics: {
-    commitCount: 0,
-    storageSize: 1293346,
-    repositorySize: 0,
-    lfsObjectsSize: 0,
-    buildArtifactsSize: 1272375,
-    packagesSize: 0,
-    wikiSize: 2048,
-    snippetsSize: 1024,
-  },
-};
-
-function factory(project) {
+const createComponent = () => {
   wrapper = shallowMount(Project, {
     propsData: {
-      project,
+      project: projects[1],
     },
   });
-}
+};
+
+const findTableRow = () => wrapper.find('[data-testid="projectTableRow"]');
+const findStorageRow = () => wrapper.find(StorageRow);
 
 describe('Storage Counter project component', () => {
   beforeEach(() => {
-    factory(data);
+    createComponent();
   });
 
   it('renders project avatar', () => {
-    expect(wrapper.contains(ProjectAvatar)).toBe(true);
+    expect(wrapper.find(ProjectAvatar).exists()).toBe(true);
   });
 
   it('renders project name', () => {
-    expect(wrapper.text()).toContain(data.nameWithNamespace);
+    expect(wrapper.text()).toContain(projects[1].nameWithNamespace);
   });
 
   it('renders formatted storage size', () => {
-    expect(wrapper.text()).toContain(numberToHumanSize(data.statistics.storageSize));
+    expect(wrapper.text()).toContain(numberToHumanSize(projects[1].statistics.storageSize));
   });
 
   describe('toggle row', () => {
     describe('on click', () => {
       it('toggles isOpen', () => {
-        expect(wrapper.vm.isOpen).toEqual(false);
+        expect(findStorageRow().exists()).toBe(false);
 
-        wrapper.find(GlDeprecatedButton).vm.$emit('click');
+        findTableRow().trigger('click');
 
-        expect(wrapper.vm.isOpen).toEqual(true);
+        wrapper.vm.$nextTick(() => {
+          expect(findStorageRow().exists()).toBe(true);
+          findTableRow().trigger('click');
 
-        wrapper.find(GlDeprecatedButton).vm.$emit('click');
-
-        expect(wrapper.vm.isOpen).toEqual(false);
+          wrapper.vm.$nextTick(() => {
+            expect(findStorageRow().exists()).toBe(false);
+          });
+        });
       });
     });
   });

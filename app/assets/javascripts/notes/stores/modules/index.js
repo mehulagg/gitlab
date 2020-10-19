@@ -7,11 +7,13 @@ export default () => ({
   state: {
     discussions: [],
     discussionSortOrder: ASC,
+    persistSortOrder: true,
     convertedDisscussionIds: [],
     targetNoteHash: null,
     lastFetchedAt: null,
     currentDiscussionId: null,
     batchSuggestionsInfo: [],
+    currentlyFetchingDiscussions: false,
     /**
      * selectedCommentPosition & selectedCommentPosition structures are the same as `position.line_range`:
      * {
@@ -44,6 +46,7 @@ export default () => ({
     resolvableDiscussionsCount: 0,
     unresolvedDiscussionsCount: 0,
     descriptionVersions: {},
+    isTimelineEnabled: false,
   },
   actions,
   getters,

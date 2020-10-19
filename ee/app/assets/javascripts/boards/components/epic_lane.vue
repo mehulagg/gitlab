@@ -1,6 +1,8 @@
 <script>
-import { GlButton, GlIcon, GlLink, GlPopover, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlIcon, GlLink, GlLoadingIcon, GlPopover, GlTooltipDirective } from '@gitlab/ui';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { __, n__, sprintf } from '~/locale';
+import createFlash from '~/flash';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { statusType } from '../../epic/constants';
@@ -11,6 +13,7 @@ export default {
     GlButton,
     GlIcon,
     GlLink,
+    GlLoadingIcon,
     GlPopover,
     IssuesLaneList,
   },
@@ -27,51 +30,42 @@ export default {
       type: Array,
       required: true,
     },
-    issues: {
-      type: Object,
-      required: true,
-    },
-    isLoadingIssues: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     disabled: {
       type: Boolean,
       required: true,
     },
-    rootPath: {
-      type: String,
-      required: true,
+    canAdminList: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
+    const { userPreferences } = this.epic;
+
+    const { collapsed = false } = userPreferences || {};
+
     return {
-      isExpanded: true,
+      isCollapsed: collapsed,
     };
   },
   computed: {
+    ...mapState(['epicsFlags', 'filterParams']),
+    ...mapGetters(['getIssuesByEpic']),
     isOpen() {
       return this.epic.state === statusType.open;
     },
     chevronTooltip() {
-      return this.isExpanded ? __('Collapse') : __('Expand');
+      return this.isCollapsed ? __('Expand') : __('Collapse');
     },
     chevronIcon() {
-      return this.isExpanded ? 'chevron-down' : 'chevron-right';
-    },
-    stateText() {
-      return this.isOpen ? __('Opened') : __('Closed');
-    },
-    epicIcon() {
-      return this.isOpen ? 'epic' : 'epic-closed';
-    },
-    stateIconClass() {
-      return this.isOpen ? 'gl-text-green-500' : 'gl-text-blue-500';
+      return this.isCollapsed ? 'chevron-right' : 'chevron-down';
     },
     issuesCount() {
-      const { openedIssues, closedIssues } = this.epic.descendantCounts;
-      return openedIssues + closedIssues;
+      return this.lists.reduce(
+        (total, list) => total + this.getIssuesByEpic(list.id, this.epic.id).length,
+        0,
+      );
     },
     issuesCountTooltipText() {
       return n__(`%d issue in this group`, `%d issues in this group`, this.issuesCount);
@@ -88,17 +82,34 @@ export default {
     epicDateString() {
       return formatDate(this.epic.createdAt);
     },
+    isLoading() {
+      return Boolean(this.epicsFlags[this.epic.id]?.isLoading);
+    },
+  },
+  watch: {
+    filterParams: {
+      handler() {
+        if (!this.filterParams.epicId || this.filterParams.epicId === this.epic.id) {
+          this.fetchIssuesForEpic(this.epic.id);
+        }
+      },
+      deep: true,
+    },
+  },
+  mounted() {
+    this.fetchIssuesForEpic(this.epic.id);
   },
   methods: {
-    epicIssuesForList(listId) {
-      if (this.issues[listId]) {
-        return this.issues[listId].filter(issue => issue.epic && issue.epic.id === this.epic.id);
-      }
+    ...mapActions(['fetchIssuesForEpic', 'updateBoardEpicUserPreferences']),
+    toggleCollapsed() {
+      this.isCollapsed = !this.isCollapsed;
 
-      return [];
-    },
-    toggleExpanded() {
-      this.isExpanded = !this.isExpanded;
+      this.updateBoardEpicUserPreferences({
+        collapsed: this.isCollapsed,
+        epicId: this.epic.id,
+      }).catch(() => {
+        createFlash({ message: __('Unable to save your preference'), captureError: true });
+      });
     },
   },
 };
@@ -116,13 +127,7 @@ export default {
           class="gl-mr-2 gl-cursor-pointer"
           variant="link"
           data-testid="epic-lane-chevron"
-          @click="toggleExpanded"
-        />
-        <gl-icon
-          class="gl-mr-2 gl-flex-shrink-0"
-          :class="stateIconClass"
-          :name="epicIcon"
-          :aria-label="stateText"
+          @click="toggleCollapsed"
         />
         <h4
           ref="epicTitle"
@@ -139,6 +144,7 @@ export default {
           <gl-link :href="epic.webUrl" class="gl-font-sm">{{ __('Go to epic') }}</gl-link>
         </gl-popover>
         <span
+          v-if="!isLoading"
           v-gl-tooltip.hover
           :title="issuesCountTooltipText"
           class="gl-display-flex gl-align-items-center gl-text-gray-500"
@@ -149,17 +155,19 @@ export default {
           <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" aria-hidden="true" />
           <span aria-hidden="true">{{ issuesCount }}</span>
         </span>
+        <gl-loading-icon v-if="isLoading" class="gl-p-2" />
       </div>
     </div>
-    <div v-if="isExpanded" class="gl-display-flex">
+    <div v-if="!isCollapsed" class="gl-display-flex" data-testid="board-epic-lane-issues">
       <issues-lane-list
         v-for="list in lists"
         :key="`${list.id}-issues`"
         :list="list"
-        :issues="epicIssuesForList(list.id)"
-        :is-loading="isLoadingIssues"
+        :issues="getIssuesByEpic(list.id, epic.id)"
         :disabled="disabled"
-        :root-path="rootPath"
+        :epic-id="epic.id"
+        :epic-is-confidential="epic.confidential"
+        :can-admin-list="canAdminList"
       />
     </div>
   </div>

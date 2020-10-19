@@ -158,4 +158,36 @@ RSpec.describe Note do
       expect(described_class.count_for_vulnerability_id([vulnerability_1.id, vulnerability_2.id])).to eq(vulnerability_1.id => 1, vulnerability_2.id => 2)
     end
   end
+
+  describe '#skip_notification?' do
+    subject(:skip_notification?) { note.skip_notification? }
+
+    context 'when there is no review' do
+      context 'when the note is not for vulnerability' do
+        let(:note) { build(:note) }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when the note is for vulnerability' do
+        let(:note) { build(:note, :on_vulnerability) }
+
+        it { is_expected.to be_truthy }
+      end
+    end
+
+    context 'when the review exists' do
+      context 'when the note is not for vulnerability' do
+        let(:note) { build(:note, :with_review) }
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when the note is for vulnerability' do
+        let(:note) { build(:note, :with_review, :on_vulnerability) }
+
+        it { is_expected.to be_truthy }
+      end
+    end
+  end
 end

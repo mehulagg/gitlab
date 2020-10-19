@@ -53,7 +53,7 @@ describe('Security Issue Body', () => {
       });
     } else {
       it(`does not show SeverityBadge if severity is not present`, () => {
-        expect(wrapper.contains(SeverityBadge)).toBe(false);
+        expect(wrapper.find(SeverityBadge).exists()).toBe(false);
       });
     }
 

@@ -3,11 +3,13 @@
 require 'spec_helper'
 
 RSpec.describe AuditEventsHelper do
-  using RSpec::Parameterized::TableSyntax
-
   describe '#admin_audit_event_tokens' do
     it 'returns the available tokens' do
-      available_tokens = [{ type: AuditEventsHelper::FILTER_TOKEN_TYPES[:user] }, { type: AuditEventsHelper::FILTER_TOKEN_TYPES[:group] }, { type: AuditEventsHelper::FILTER_TOKEN_TYPES[:project] }]
+      available_tokens = [
+        { type: AuditEventsHelper::FILTER_TOKEN_TYPES[:user] },
+        { type: AuditEventsHelper::FILTER_TOKEN_TYPES[:group] },
+        { type: AuditEventsHelper::FILTER_TOKEN_TYPES[:project] }
+      ]
       expect(admin_audit_event_tokens).to eq(available_tokens)
     end
   end
@@ -89,6 +91,26 @@ RSpec.describe AuditEventsHelper do
 
     it 'returns formatted text with `never expires` if key is expiry_to and the value is blank' do
       expect(select_keys('expiry_to', nil)).to eq 'expiry_to <strong>never expires</strong>'
+    end
+  end
+
+  describe '#export_url' do
+    subject { export_url }
+
+    context 'feature is enabled' do
+      before do
+        stub_feature_flags(audit_log_export_csv: true)
+      end
+
+      it { is_expected.to eq('http://test.host/admin/audit_log_reports.csv') }
+    end
+
+    context 'feature is disabled' do
+      before do
+        stub_feature_flags(audit_log_export_csv: false)
+      end
+
+      it { is_expected.to be_empty }
     end
   end
 end

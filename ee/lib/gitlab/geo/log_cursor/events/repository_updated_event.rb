@@ -8,7 +8,7 @@ module Gitlab
           include BaseEvent
 
           def process
-            if replicable_project?(event.project_id)
+            if replicable_project?
               registry.repository_updated!(event.source, scheduled_at)
 
               job_id = enqueue_job_if_shard_healthy(event) do
@@ -33,7 +33,7 @@ module Gitlab
               resync_repository: registry.resync_repository,
               resync_wiki: registry.resync_wiki,
               scheduled_at: scheduled_at,
-              replicable_project: replicable_project?(event.project_id),
+              replicable_project: replicable_project?,
               job_id: job_id)
           end
 

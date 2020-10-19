@@ -34,7 +34,7 @@ export const APPROVAL_RULE_CONFIGS = {
   [LICENSE_CHECK_NAME]: {
     title: __('License-Check'),
     popoverText: __(
-      'A merge request approval is required when the license compliance report contains a blacklisted license.',
+      'A merge request approval is required when the license compliance report contains a denied license.',
     ),
     documentationText: __('Learn more about License-Check'),
   },

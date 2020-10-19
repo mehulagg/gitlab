@@ -4,9 +4,10 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# GitLab Jira Development Panel integration **(PREMIUM)**
+# GitLab Jira Development Panel integration **(CORE)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2381) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.0.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2381) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.0.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/233149) to [GitLab Core](https://about.gitlab.com/pricing/) in 13.4.
 
 The Jira Development Panel integration allows you to reference Jira issues within GitLab, displaying activity in the [Development panel](https://support.atlassian.com/jira-software-cloud/docs/view-development-information-for-an-issue/) in the issue. It complements the [GitLab Jira integration](../user/project/integrations/jira.md). You may choose to configure both integrations to take advantage of both sets of features. (See a [feature comparison](../user/project/integrations/jira_integrations.md#feature-comparison)).
 
@@ -147,7 +148,7 @@ GitLab. No other error messages appear in any logs.
 
 If there was an issue with SSL/TLS, this error message will be generated.
 
-- The [GitLab Jira integration](jira.md) requires GitLab to connect to Jira. Any
+- The [GitLab Jira integration](../user/project/integrations/jira.md) requires GitLab to connect to Jira. Any
   TLS issues that arise from a private certificate authority or self-signed
   certificate [are resolved on the GitLab server](https://docs.gitlab.com/omnibus/settings/ssl.html#other-certificate-authorities),
   as GitLab is the TLS client.
@@ -183,6 +184,16 @@ The message `Successfully connected` indicates a successful TLS handshake.
 If there are problems, the Java TLS library generates errors that you can
 look up for more detail.
 
+##### Scope error when connecting Jira via DVCS
+
+```plaintext
+The requested scope is invalid, unknown, or malformed.
+```
+
+Potential resolutions:
+
+- Verify the URL includes `scope=api` on the end of the URL.
+
 ##### Jira error adding account and no repositories listed
 
 ```plaintext
@@ -199,13 +210,12 @@ Potential resolutions:
 
 - If you're using GitLab versions 11.10-12.7, upgrade to GitLab 12.8.10 or later
   to resolve an identified [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/37012).
-- The Jira Development Panel integration requires GitLab Premium, GitLab.com Silver,
-  or a higher tier. If you're using a lower tier of GitLab, you'll need to upgrade
-  to use this feature.
+- If you're using GitLab Core or GitLab Starter, be sure you're using
+  GitLab 13.4 or later.
 
 [Contact GitLab Support](https://about.gitlab.com/support) if none of these reasons apply.
 
-#### Fixing synchonization issues
+#### Fixing synchronization issues
 
 If Jira displays incorrect information (such as deleted branches), you may need to
 resynchronize the information. To do so:
@@ -234,12 +244,14 @@ For a walkthrough of the integration with GitLab for Jira, watch [Configure GitL
 1. After installing, click **Get started** to go to the configurations page. This page is always available under **Jira Settings > Apps > Manage apps**.
 
    ![Start GitLab App configuration on Jira](img/jira_dev_panel_setup_com_2.png)
-1. Enter the group or personal namespace in the **Namespace** field and click **Link namespace to Jira**. Make sure you are logged in on GitLab.com and the namespace has a Silver or above license. The user setting up _GitLab for Jira_ must have **Maintainer** access to the GitLab namespace.
+1. In **Namespace**, enter the group or personal namespace, and then click
+   **Link namespace to Jira**. The user setting up *GitLab for Jira* must have
+   *Maintainer* access to the GitLab namespace.
 
 NOTE: **Note:**
 The GitLab user only needs access when adding a new namespace. For syncing with Jira, we do not depend on the user's token.
 
-   ![Confure namespace on GitLab Jira App](img/jira_dev_panel_setup_com_3.png)
+   ![Configure namespace on GitLab Jira App](img/jira_dev_panel_setup_com_3.png)
 
 After a namespace is added, all future commits, branches and merge requests of all projects under that namespace will be synced to Jira. Past data cannot be synced at the moment.
 
@@ -251,13 +263,18 @@ The GitLab for Jira App uses an iframe to add namespaces on the settings page. S
 
 > "You need to sign in or sign up before continuing."
 
-In this case, enable cross-site cookies in your browser.
+In this case, use [Firefox](https://www.mozilla.org/en-US/firefox/), [Google Chrome](https://www.google.com/chrome/index.html) or enable cross-site cookies in your browser.
 
 ## Usage
 
-Once the integration is set up on GitLab and Jira you may refer any Jira issue by its ID in branch names, commit messages and merge request titles on GitLab's side,
-and you will be able to see the linked `branches`, `commits`, and `merge requests` when entering a Jira issue
-(inside the Jira issue, merge requests will be called "pull requests").
+After the integration is set up on GitLab and Jira, you can:
+
+- Refer to any Jira issue by its ID in GitLab branch names, commit messages, and merge request
+  titles.
+- See the linked branches, commits, and merge requests in Jira issues (merge requests are
+  called "pull requests" in Jira issues).
+
+Jira issue IDs must be formatted in uppercase for the integration to work.
 
 ![Branch, Commit and Pull Requests links on Jira issue](img/jira_dev_panel_jira_setup_3.png)
 

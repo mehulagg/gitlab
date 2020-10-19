@@ -672,6 +672,27 @@ describe('Api', () => {
     });
   });
 
+  describe('pipelineJobs', () => {
+    it('fetches the jobs for a given pipeline', done => {
+      const projectId = 123;
+      const pipelineId = 456;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectId}/pipelines/${pipelineId}/jobs`;
+      const payload = [
+        {
+          name: 'test',
+        },
+      ];
+      mock.onGet(expectedUrl).reply(httpStatus.OK, payload);
+
+      Api.pipelineJobs(projectId, pipelineId)
+        .then(({ data }) => {
+          expect(data).toEqual(payload);
+        })
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
   describe('createBranch', () => {
     it('creates new branch', done => {
       const ref = 'master';
@@ -1148,6 +1169,46 @@ describe('Api', () => {
           headers: {
             'Content-Type': 'application/json',
           },
+        });
+      });
+    });
+  });
+
+  describe('trackRedisHllUserEvent', () => {
+    const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/usage_data/increment_unique_users`;
+
+    const event = 'dummy_event';
+    const postData = { event };
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    describe('when usage data increment unique users is called with feature flag disabled', () => {
+      beforeEach(() => {
+        gon.features = { ...gon.features, usageDataApi: false };
+      });
+
+      it('returns null', () => {
+        jest.spyOn(axios, 'post');
+        mock.onPost(expectedUrl).replyOnce(httpStatus.OK, true);
+
+        expect(axios.post).toHaveBeenCalledTimes(0);
+        expect(Api.trackRedisHllUserEvent(event)).toEqual(null);
+      });
+    });
+
+    describe('when usage data increment unique users is called', () => {
+      beforeEach(() => {
+        gon.features = { ...gon.features, usageDataApi: true };
+      });
+
+      it('resolves the Promise', () => {
+        jest.spyOn(axios, 'post');
+        mock.onPost(expectedUrl, { event }).replyOnce(httpStatus.OK, true);
+
+        return Api.trackRedisHllUserEvent(event).then(({ data }) => {
+          expect(data).toEqual(true);
+          expect(axios.post).toHaveBeenCalledWith(expectedUrl, postData, { headers });
         });
       });
     });

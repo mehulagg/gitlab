@@ -18,6 +18,7 @@ module EE
 
         field :epics, ::Types::EpicType.connection_type, null: true,
               description: 'Find epics',
+              extras: [:lookahead],
               max_page_size: 2000,
               resolver: ::Resolvers::EpicsResolver
 
@@ -27,6 +28,7 @@ module EE
 
         field :timelogs, ::Types::TimelogType.connection_type, null: false,
               description: 'Time logged in issues by group members',
+              extras: [:lookahead],
               complexity: 5,
               resolver: ::Resolvers::TimelogResolver
 
@@ -41,6 +43,10 @@ module EE
               null: true,
               description: 'Vulnerability scanners reported on the project vulnerabilties of the group and its subgroups',
               resolver: ::Resolvers::Vulnerabilities::ScannersResolver
+
+        field :vulnerability_severities_count, ::Types::VulnerabilitySeveritiesCountType, null: true,
+              description: 'Counts for each vulnerability severity in the group and its subgroups',
+              resolver: ::Resolvers::VulnerabilitySeveritiesCountResolver
 
         field :vulnerabilities_count_by_day,
               ::Types::VulnerabilitiesCountByDayType.connection_type,

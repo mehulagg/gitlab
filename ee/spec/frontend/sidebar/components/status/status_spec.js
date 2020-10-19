@@ -61,7 +61,7 @@ describe('Status', () => {
 
       shallowMountStatus(props);
 
-      expect(wrapper.contains(GlLoadingIcon)).toBe(true);
+      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
     });
 
     it('is hidden when not retrieving data', () => {
@@ -71,7 +71,7 @@ describe('Status', () => {
 
       shallowMountStatus(props);
 
-      expect(wrapper.contains(GlLoadingIcon)).toBe(false);
+      expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
     });
   });
 

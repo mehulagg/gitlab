@@ -161,10 +161,6 @@ describe('EpicsListSectionComponent', () => {
         jest.spyOn(wrapper.vm, 'scrollToTodayIndicator').mockImplementation(() => {});
       });
 
-      it('sets value of `roadmapShellEl` with root component element', () => {
-        expect(wrapper.vm.roadmapShellEl instanceof HTMLElement).toBe(true);
-      });
-
       it('calls action `setBufferSize` with value based on window.innerHeight and component element position', () => {
         expect(wrapper.vm.bufferSize).toBe(16);
       });

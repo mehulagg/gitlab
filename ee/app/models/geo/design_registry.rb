@@ -10,11 +10,12 @@ class Geo::DesignRegistry < Geo::BaseRegistry
 
   belongs_to :project
 
-  scope :never_synced, -> { with_state(:pending).where(last_synced_at: nil) }
-  scope :pending, -> { with_state(:pending) }
+  scope :dirty, -> { with_state(:pending).where.not(last_synced_at: nil) }
   scope :failed, -> { with_state(:failed) }
-  scope :synced, -> { with_state(:synced) }
+  scope :needs_sync_again, -> { dirty.or(failed.retry_due) }
+  scope :never_attempted_sync, -> { with_state(:pending).where(last_synced_at: nil) }
   scope :retry_due, -> { where(arel_table[:retry_at].eq(nil).or(arel_table[:retry_at].lt(Time.current))) }
+  scope :synced, -> { with_state(:synced) }
 
   state_machine :state, initial: :pending do
     state :started
@@ -50,12 +51,18 @@ class Geo::DesignRegistry < Geo::BaseRegistry
     project_ids
   end
 
-  def self.finder_class
-    ::Geo::DesignRegistryFinder
+  def self.find_registry_differences(range)
+    source_ids = Gitlab::Geo.current_node.designs.id_in(range).pluck_primary_key
+    tracked_ids = self.pluck_model_ids_in_range(range)
+
+    untracked_ids = source_ids - tracked_ids
+    unused_tracked_ids = tracked_ids - source_ids
+
+    [untracked_ids, unused_tracked_ids]
   end
 
-  def self.find_registry_differences(range)
-    finder_class.new(current_node_id: Gitlab::Geo.current_node.id).find_registry_differences(range)
+  def self.find_registries_needs_sync_again(batch_size:, except_ids: [])
+    super.order(Gitlab::Database.nulls_first_order(:last_synced_at))
   end
 
   # Search for a list of projects associated with registries,
@@ -73,10 +80,6 @@ class Geo::DesignRegistry < Geo::BaseRegistry
     designs_repositories = designs_repositories.with_state(params[:sync_status]) if params[:sync_status].present?
     designs_repositories = designs_repositories.with_search_by_project(params[:search]) if params[:search].present?
     designs_repositories
-  end
-
-  def self.updated_recently
-    pending.or(failed.retry_due)
   end
 
   def fail_sync!(message, error, attrs = {})

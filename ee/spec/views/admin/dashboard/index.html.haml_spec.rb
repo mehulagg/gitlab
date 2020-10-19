@@ -33,11 +33,21 @@ RSpec.describe 'admin/dashboard/index.html.haml' do
       expect(rendered).to have_content /An alert.*Users in License/
     end
 
+    it 'includes license overview' do
+      render
+
+      expect(rendered).to have_content "License overview"
+      expect(rendered).to have_content "Plan:"
+      expect(rendered).to have_content "Expires:"
+      expect(rendered).to have_content "Licensed to:"
+      expect(rendered).to have_link 'View details', href: admin_license_path
+    end
+
     it 'includes license breakdown' do
       render
 
       expect(rendered).to have_content "Users in License:"
-      expect(rendered).to have_content "Active Users"
+      expect(rendered).to have_content "Billable Users"
       expect(rendered).to have_content "Maximum Users"
       expect(rendered).to have_content "Users over License"
     end
@@ -47,7 +57,7 @@ RSpec.describe 'admin/dashboard/index.html.haml' do
     it 'does not show content' do
       render
 
-      expect(rendered).not_to have_content('Users in License:')
+      expect(rendered).not_to have_content 'Users in License:'
     end
   end
 end

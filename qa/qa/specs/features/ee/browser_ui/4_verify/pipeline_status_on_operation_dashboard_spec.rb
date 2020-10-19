@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :docker do
+  RSpec.describe 'Verify' do
     describe 'Operations Dashboard' do
       let(:group) { Resource::Group.fabricate_via_api! }
       let!(:runner) do
@@ -9,6 +9,7 @@ module QA
           runner.token = group.reload!.runners_token
           runner.name = group.name
           runner.tags = [group.name]
+          runner.project = project_with_success_run
         end
       end
 
@@ -53,7 +54,7 @@ module QA
         remove_projects
       end
 
-      it 'has many pipelines with appropriate statuses' do
+      it 'has many pipelines with appropriate statuses', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/900' do
         add_projects_to_board
 
         EE::Page::OperationsDashboard.perform do |operation|
@@ -116,34 +117,34 @@ module QA
 
       def ci_file_with_tag
         {
-            file_path: '.gitlab-ci.yml',
-            content: <<~YAML
-              test-success:
-                tags: ["#{group.name}"]
-                script: echo 'OK'
-            YAML
+          file_path: '.gitlab-ci.yml',
+          content: <<~YAML
+            test-success:
+              tags: ["#{group.name}"]
+              script: echo 'OK'
+          YAML
         }
       end
 
       def ci_file_without_existing_tag
         {
-            file_path: '.gitlab-ci.yml',
-            content: <<~YAML
-              test-pending:
-                tags: ['does-not-exist']
-                script: echo 'OK'
-            YAML
+          file_path: '.gitlab-ci.yml',
+          content: <<~YAML
+            test-pending:
+              tags: ['does-not-exist']
+              script: echo 'OK'
+          YAML
         }
       end
 
       def ci_file_failed_run
         {
-            file_path: '.gitlab-ci.yml',
-            content: <<~YAML
-              test-fail:
-                tags: ["#{group.name}"]
-                script: exit 1
-            YAML
+          file_path: '.gitlab-ci.yml',
+          content: <<~YAML
+            test-fail:
+              tags: ["#{group.name}"]
+              script: exit 1
+          YAML
         }
       end
     end

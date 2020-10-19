@@ -1,10 +1,10 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { escape, debounce } from 'lodash';
 import { mapActions, mapState } from 'vuex';
-import { GlLoadingIcon, GlFormInput, GlFormGroup } from '@gitlab/ui';
+import { GlLoadingIcon, GlFormInput, GlFormGroup, GlButton } from '@gitlab/ui';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, sprintf } from '~/locale';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 import createEmptyBadge from '../empty_badge';
 import Badge from './badge.vue';
 
@@ -14,7 +14,7 @@ export default {
   name: 'BadgeForm',
   components: {
     Badge,
-    LoadingButton,
+    GlButton,
     GlLoadingIcon,
     GlFormInput,
     GlFormGroup,
@@ -218,24 +218,24 @@ export default {
       </p>
     </div>
 
-    <div v-if="isEditing" class="row-content-block gl-display-flex gl-justify-content-end">
-      <button class="btn btn-cancel gl-mr-4" type="button" @click="onCancel">
+    <div v-if="isEditing" class="row-content-block">
+      <gl-button class="btn-cancel gl-mr-4" data-testid="cancelEditing" @click="onCancel">
         {{ __('Cancel') }}
-      </button>
-      <loading-button
+      </gl-button>
+      <gl-button
         :loading="isSaving"
-        :label="s__('Badges|Save changes')"
         type="submit"
-        container-class="btn btn-success"
-      />
+        variant="success"
+        category="primary"
+        data-testid="saveEditing"
+      >
+        {{ s__('Badges|Save changes') }}
+      </gl-button>
     </div>
-    <div v-else class="gl-display-flex gl-justify-content-end form-group">
-      <loading-button
-        :loading="isSaving"
-        :label="s__('Badges|Add badge')"
-        type="submit"
-        container-class="btn btn-success"
-      />
+    <div v-else class="form-group">
+      <gl-button :loading="isSaving" type="submit" variant="success" category="primary">
+        {{ s__('Badges|Add badge') }}
+      </gl-button>
     </div>
   </form>
 </template>

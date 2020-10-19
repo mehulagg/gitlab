@@ -7,7 +7,8 @@ import BoardSettingsWipLimit from 'ee_component/boards/components/board_settings
 import BoardSettingsListTypes from 'ee_component/boards/components/board_settings_list_types.vue';
 import BoardSettingsSidebar from '~/boards/components/board_settings_sidebar.vue';
 import boardsStore from '~/boards/stores/boards_store';
-import { inactiveId } from '~/boards/constants';
+import getters from '~/boards/stores/getters';
+import { LIST } from '~/boards/constants';
 
 const localVue = createLocalVue();
 
@@ -21,11 +22,12 @@ describe('ee/BoardSettingsSidebar', () => {
   const listId = 1;
   let mock;
 
-  const createComponent = (state = { activeId: inactiveId }, actions = {}) => {
+  const createComponent = (actions = {}) => {
     storeActions = actions;
 
     const store = new Vuex.Store({
-      state,
+      state: { sidebarType: LIST, activeId: listId },
+      getters,
       actions: storeActions,
     });
 
@@ -57,7 +59,7 @@ describe('ee/BoardSettingsSidebar', () => {
       list_type: 'label',
     });
 
-    createComponent({ activeId: listId });
+    createComponent();
 
     expect(wrapper.find(BoardSettingsWipLimit).exists()).toBe(true);
   });
@@ -73,7 +75,7 @@ describe('ee/BoardSettingsSidebar', () => {
       list_type: 'milestone',
     });
 
-    createComponent({ activeId: listId });
+    createComponent();
 
     expect(wrapper.find(BoardSettingsListTypes).exists()).toBe(true);
   });

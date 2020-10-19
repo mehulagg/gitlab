@@ -74,11 +74,8 @@ module EE
     end
 
     def show_discover_group_security?(group)
-      security_feature_available_at = DateTime.new(2019, 11, 1)
-
       !!current_user &&
         ::Gitlab.com? &&
-        current_user.created_at > security_feature_available_at &&
         !@group.feature_available?(:security_dashboard) &&
         can?(current_user, :admin_group, @group) &&
         current_user.ab_feature_enabled?(:discover_security)
@@ -121,12 +118,10 @@ module EE
     def get_group_sidebar_links
       links = super
 
-      if can?(current_user, :read_group_cycle_analytics, @group)
-        links << :cycle_analytics
-      end
+      resources = [:cycle_analytics, :merge_request_analytics, :repository_analytics]
 
-      if can?(current_user, :read_group_merge_request_analytics, @group)
-        links << :merge_request_analytics
+      links += resources.select do |resource|
+        can?(current_user, "read_group_#{resource}".to_sym, @group)
       end
 
       if can?(current_user, :read_group_contribution_analytics, @group) || show_promotions?

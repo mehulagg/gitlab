@@ -22,6 +22,12 @@ RSpec.describe GroupPolicy do
       it { is_expected.to be_allowed(:read_epic, :create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
     end
 
+    context 'when user is admin' do
+      let(:current_user) { admin }
+
+      it { is_expected.to be_allowed(:read_epic, :create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
+    end
+
     context 'when user is maintainer' do
       let(:current_user) { maintainer }
 
@@ -176,7 +182,6 @@ RSpec.describe GroupPolicy do
     let(:current_user) { developer }
 
     before do
-      stub_feature_flags(group_activity_analytics: true)
       stub_licensed_features(group_activity_analytics: true)
     end
 
@@ -187,11 +192,30 @@ RSpec.describe GroupPolicy do
     let(:current_user) { developer }
 
     before do
-      stub_feature_flags(group_activity_analytics: false)
       stub_licensed_features(group_activity_analytics: false)
     end
 
     it { is_expected.not_to be_allowed(:read_group_activity_analytics) }
+  end
+
+  context 'when group repository analytics is available' do
+    let(:current_user) { guest }
+
+    before do
+      stub_licensed_features(group_repository_analytics: true)
+    end
+
+    it { is_expected.to be_allowed(:read_group_repository_analytics) }
+  end
+
+  context 'when group repository analytics is not available' do
+    let(:current_user) { guest }
+
+    before do
+      stub_licensed_features(group_repository_analytics: false)
+    end
+
+    it { is_expected.not_to be_allowed(:read_group_repository_analytics) }
   end
 
   context 'when timelogs report feature is enabled' do
@@ -525,50 +549,6 @@ RSpec.describe GroupPolicy do
         it { is_expected.not_to be_allowed(:override_group_member) }
         it { is_expected.not_to be_allowed(:update_group_member) }
       end
-    end
-  end
-
-  describe 'create_jira_connect_subscription' do
-    context 'admin' do
-      let(:current_user) { admin }
-
-      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
-    end
-
-    context 'with owner' do
-      let(:current_user) { owner }
-
-      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
-    end
-
-    context 'with maintainer' do
-      let(:current_user) { maintainer }
-
-      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
-    end
-
-    context 'with reporter' do
-      let(:current_user) { reporter }
-
-      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
-    end
-
-    context 'with guest' do
-      let(:current_user) { guest }
-
-      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
-    end
-
-    context 'with non member' do
-      let(:current_user) { create(:user) }
-
-      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
-    end
-
-    context 'with anonymous' do
-      let(:current_user) { nil }
-
-      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
     end
   end
 
@@ -1089,21 +1069,42 @@ RSpec.describe GroupPolicy do
   end
 
   it_behaves_like 'model with wiki policies' do
-    let_it_be(:container) { create(:group) }
+    let_it_be(:container) { create(:group_with_plan, plan: :silver_plan) }
     let_it_be(:user) { owner }
 
-    def set_access_level(access_level)
-      allow(container).to receive(:wiki_access_level).and_return(access_level)
+    before_all do
+      create(:license, plan: License::PREMIUM_PLAN)
     end
 
     before do
-      stub_feature_flags(group_wiki: true)
+      stub_application_setting(check_namespace_plan: true)
     end
 
-    context 'when the feature flag is disabled' do
-      before do
-        stub_feature_flags(group_wiki: false)
+    # We don't have feature toggles on groups yet, so we currently simulate
+    # this by toggling the feature flag instead.
+    def set_access_level(access_level)
+      case access_level
+      when ProjectFeature::ENABLED
+        stub_feature_flags(group_wikis: true)
+      when ProjectFeature::DISABLED
+        stub_feature_flags(group_wikis: false)
+      when ProjectFeature::PRIVATE
+        skip('Access level private is not supported yet for group wikis, see https://gitlab.com/gitlab-org/gitlab/-/issues/208412')
       end
+    end
+
+    context 'when the feature flag is disabled on this group' do
+      before do
+        stub_feature_flags(group_wikis: create(:group))
+      end
+
+      it 'does not include the wiki permissions' do
+        expect_disallowed(*wiki_permissions[:all])
+      end
+    end
+
+    context 'when the feature is not licensed on this group' do
+      let_it_be(:container) { create(:group_with_plan, plan: :bronze_plan) }
 
       it 'does not include the wiki permissions' do
         expect_disallowed(*wiki_permissions[:all])
@@ -1114,4 +1115,36 @@ RSpec.describe GroupPolicy do
   it_behaves_like 'update namespace limit policy'
 
   include_examples 'analytics report embedding'
+
+  context 'group access tokens' do
+    it_behaves_like 'GitLab.com Core resource access tokens'
+
+    context 'on GitLab.com paid' do
+      let_it_be(:group) { create(:group_with_plan, plan: :bronze_plan) }
+
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      context 'with owner' do
+        let(:current_user) { owner }
+
+        before do
+          group.add_owner(owner)
+        end
+
+        it { is_expected.to be_allowed(:admin_resource_access_tokens) }
+      end
+
+      context 'with developer' do
+        let(:current_user) { developer }
+
+        before do
+          group.add_developer(developer)
+        end
+
+        it { is_expected.not_to be_allowed(:admin_resource_access_tokens)}
+      end
+    end
+  end
 end

@@ -2,7 +2,7 @@
 
 module QA
   context 'Create' do
-    describe 'Pull mirror a repository over SSH with a private key', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/216297', type: :investigating } do
+    describe 'Pull mirror a repository over SSH with a private key' do
       let(:source) do
         Resource::Repository::ProjectPush.fabricate! do |project_push|
           project_push.project_name = 'pull-mirror-source-project'
@@ -25,7 +25,7 @@ module QA
         target_project.visit!
       end
 
-      it 'configures and syncs a (pull) mirrored repository' do
+      it 'configures and syncs a (pull) mirrored repository', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/401' do
         # Configure the target project to pull from the source project
         # And get the public key to be used as a deploy key
         Page::Project::Menu.perform(&:go_to_repository_settings)
@@ -58,9 +58,11 @@ module QA
 
         # Check that the target project has the commit from the source
         target_project.visit!
-        expect(page).to have_content('README.md')
-        expect(page).to have_content('This is a pull mirroring test project')
-        expect(page).to have_content("Mirrored from #{masked_url(source_project_uri)}")
+        Page::Project::Show.perform do |project|
+          expect(project).to have_file('README.md')
+          expect(project).to have_readme_content('This is a pull mirroring test project')
+          expect(project).to have_text("Mirrored from #{masked_url(source_project_uri)}")
+        end
       end
 
       def masked_url(url)

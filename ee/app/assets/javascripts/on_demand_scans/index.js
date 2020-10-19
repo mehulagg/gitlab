@@ -13,13 +13,21 @@ export default () => {
     emptyStateSvgPath,
     projectPath,
     defaultBranch,
-    profilesLibraryPath,
+    scannerProfilesLibraryPath,
+    siteProfilesLibraryPath,
     newSiteProfilePath,
+    newScannerProfilePath,
   } = el.dataset;
 
   return new Vue({
     el,
     apolloProvider,
+    provide: {
+      scannerProfilesLibraryPath,
+      siteProfilesLibraryPath,
+      newScannerProfilePath,
+      newSiteProfilePath,
+    },
     render(h) {
       return h(OnDemandScansApp, {
         props: {
@@ -27,8 +35,6 @@ export default () => {
           emptyStateSvgPath,
           projectPath,
           defaultBranch,
-          profilesLibraryPath,
-          newSiteProfilePath,
         },
       });
     },

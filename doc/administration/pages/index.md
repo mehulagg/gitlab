@@ -53,8 +53,14 @@ supporting custom domains a secondary IP is not needed.
 
 Before proceeding with the Pages configuration, you will need to:
 
-1. Have an exclusive root domain for serving GitLab Pages. Note that you cannot
-   use a subdomain of your GitLab's instance domain.
+1. Have a domain for Pages that is not a subdomain of your GitLab's instance domain.
+
+   | GitLab domain | Pages domain | Does it work? |
+   | :---: | :---: | :---: |
+   | `example.com` | `example.io` | **{check-circle}** Yes |
+   | `example.com` | `pages.example.com` | **{dotted-circle}** No |
+   | `gitlab.example.com` | `pages.example.com` | **{check-circle}** Yes |
+
 1. Configure a **wildcard DNS record**.
 1. (Optional) Have a **wildcard certificate** for that domain if you decide to
    serve Pages under HTTPS.
@@ -235,6 +241,7 @@ control over how the Pages daemon runs and serves content in your environment.
 | `pages_path` | The directory on disk where pages are stored, defaults to `GITLAB-RAILS/shared/pages`.
 | `pages_nginx[]` | |
 | `enable` | Include a virtual host `server{}` block for Pages inside NGINX. Needed for NGINX to proxy traffic back to the Pages daemon. Set to `false` if the Pages daemon should directly receive all requests, for example, when using [custom domains](index.md#custom-domains).
+| `FF_ENABLE_REDIRECTS` | Feature flag to disable redirects (enabled by default). Read the [redirects documentation](../../user/project/pages/redirects.md#disable-redirects) for more info. |
 
 ---
 
@@ -369,8 +376,8 @@ Pages access control is disabled by default. To enable it:
 1. Users can now configure it in their [projects' settings](../../user/project/pages/pages_access_control.md).
 
 NOTE: **Important:**
-For multi-node setups, in order for this setting to be effective, it has to be applied
-to all the App nodes as well as the Sidekiq nodes.
+For this setting to be effective with multi-node setups, it has to be applied to
+all the App nodes and Sidekiq nodes.
 
 #### Disabling public access to all Pages websites
 
@@ -396,8 +403,7 @@ redeployed. This issue will be resolved by
 ### Running behind a proxy
 
 Like the rest of GitLab, Pages can be used in those environments where external
-internet connectivity is gated by a proxy. In order to use a proxy for GitLab
-pages:
+internet connectivity is gated by a proxy. To use a proxy for GitLab Pages:
 
 1. Configure in `/etc/gitlab/gitlab.rb`:
 
@@ -503,7 +509,8 @@ To override the global maximum pages size for a specific group:
 
 ## Running GitLab Pages on a separate server
 
-You can run the GitLab Pages daemon on a separate server in order to decrease the load on your main application server.
+You can run the GitLab Pages daemon on a separate server to decrease the load on
+your main application server.
 
 To configure GitLab Pages on a separate server:
 
@@ -588,8 +595,9 @@ database encryption. Proceed with caution.
 1. On the **GitLab server**, make the following changes to `/etc/gitlab/gitlab.rb`:
 
    ```ruby
-   gitlab_pages['enable'] = false
    pages_external_url "http://<pages_server_URL>"
+   gitlab_pages['enable'] = false
+   gitlab_rails['pages_enabled']=false
    gitlab_rails['pages_path'] = "/mnt/pages"
    ```
 
@@ -622,7 +630,7 @@ For more details see this [blog post](https://about.gitlab.com/blog/2020/08/03/h
 GitLab Pages can use an API-based configuration. This replaces disk source configuration, which
 was used prior to GitLab 13.0. Follow these steps to enable it:
 
-1. Add the following to your `/etc/gitlab/gitlab.erb` file:
+1. Add the following to your `/etc/gitlab/gitlab.rb` file:
 
    ```ruby
    gitlab_pages['domain_config_source'] = "gitlab"
@@ -720,6 +728,24 @@ sudo cp /opt/gitlab/embedded/ssl/certs/cacert.pem /var/opt/gitlab/gitlab-rails/s
 sudo cp /opt/gitlab/embedded/ssl/certs/cacert.pem /var/opt/gitlab/gitlab-rails/shared/pages/etc/ssl/ca-bundle.pem
 ```
 
+### 502 error when connecting to GitLab Pages proxy when server does not listen over IPv6
+
+In some cases, NGINX might default to using IPv6 to connect to the GitLab Pages
+service even when the server does not listen over IPv6. You can identify when
+this is happening if you see something similar to the log entry below in the
+`gitlab_pages_error.log`:
+
+```plaintext
+2020/02/24 16:32:05 [error] 112654#0: *4982804 connect() failed (111: Connection refused) while connecting to upstream, client: 123.123.123.123, server: ~^(?<group>.*)\.pages\.example\.com$, request: "GET /-/group/project/-/jobs/1234/artifacts/artifact.txt HTTP/1.1", upstream: "http://[::1]:8090//-/group/project/-/jobs/1234/artifacts/artifact.txt", host: "group.example.com"
+```
+
+To resolve this, set an explicit IP and port for the GitLab Pages `listen_proxy` setting
+to define the explicit address that the GitLab Pages daemon should listen on:
+
+```ruby
+gitlab_pages['listen_proxy'] = '127.0.0.1:8090'
+```
+
 ### 404 error after transferring project to a different group or user
 
 If you encounter a `404 Not Found` error a Pages site after transferring a project to
@@ -755,3 +781,10 @@ For example, if there is a connection timeout:
 ```plaintext
 error="failed to connect to internal Pages API: Get \"https://gitlab.example.com:3000/api/v4/internal/pages/status\": net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)"
 ```
+
+### 500 error with `securecookie: failed to generate random iv` and `Failed to save the session`
+
+This problem most likely results from an [out-dated operating system](https://docs.gitlab.com/omnibus/package-information/deprecated_os.html).
+The [Pages daemon uses the `securecookie` library](https://gitlab.com/search?group_id=9970&project_id=734943&repository_ref=master&scope=blobs&search=securecookie&snippets=false) to get random strings via [crypto/rand in Go](https://golang.org/pkg/crypto/rand/#pkg-variables).
+This requires the `getrandom` syscall or `/dev/urandom` to be available on the host OS.
+Upgrading to an [officially supported operating system](https://about.gitlab.com/install/) is recommended.

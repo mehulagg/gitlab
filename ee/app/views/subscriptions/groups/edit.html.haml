@@ -11,7 +11,7 @@
         %p= _('You have successfully purchased a %{plan} plan subscription for %{seats}. You’ll receive a receipt via email.') % { plan: plan_title, seats: number_of_users }
     .edit-group.d-flex.flex-column.align-items-center.gl-pt-7
       - if params[:new_user]
-        #progress-bar{ data: { is_onboarding_issues_experiment_enabled: experiment_enabled?(:onboarding_issues).to_s } }
+        #progress-bar
       %h2.center= _('Create your group')
       %p
         %div= _('A group represents your organization in GitLab. Groups allow you to manage users and collaborate across multiple projects.')

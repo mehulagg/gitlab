@@ -1,7 +1,7 @@
 import { __ } from '~/locale';
 
 export const DEFAULT_NUMBER_OF_DAYS = 365;
-export const MAX_RECORDS = 100;
+export const PER_PAGE = 20;
 export const ASSIGNEES_VISIBLE = 2;
 export const AVATAR_SIZE = 24;
 
@@ -11,12 +11,16 @@ export const THROUGHPUT_CHART_STRINGS = {
   X_AXIS_TITLE: __('Month'),
   CHART_DESCRIPTION: __('The number of merge requests merged by month.'),
   NO_DATA: __('There is no chart data available.'),
-  ERROR_FETCHING_DATA: __('There was an error while fetching the chart data.'),
+  ERROR_FETCHING_DATA: __(
+    'There was an error while fetching the chart data. Please refresh the page to try again.',
+  ),
 };
 
 export const THROUGHPUT_TABLE_STRINGS = {
   NO_DATA: __('There is no table data available.'),
-  ERROR_FETCHING_DATA: __('There was an error while fetching the table data.'),
+  ERROR_FETCHING_DATA: __(
+    'There was an error while fetching the table data. Please refresh the page to try again.',
+  ),
 };
 
 export const MERGE_REQUEST_ID_PREFIX = '!';
@@ -36,6 +40,9 @@ export const THROUGHPUT_TABLE_TEST_IDS = {
   PIPELINES: 'pipelinesCol',
   LINE_CHANGES: 'lineChangesCol',
   ASSIGNEES: 'assigneesCol',
+  COMMITS: 'commitsCol',
+  COMMENT_COUNT: 'commentCount',
+  APPROVED: 'approvedStatus',
 };
 
 export const PIPELINE_STATUS_ICON_CLASSES = {

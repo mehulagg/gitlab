@@ -2,17 +2,20 @@
 
 module Ci
   class RetryBuildService < ::BaseService
-    CLONE_ACCESSORS = %i[pipeline project ref tag options name
-                         allow_failure stage stage_id stage_idx trigger_request
-                         yaml_variables when environment coverage_regex
-                         description tag_list protected needs_attributes
-                         resource_group scheduling_type].freeze
+    def self.clone_accessors
+      %i[pipeline project ref tag options name
+         allow_failure stage stage_id stage_idx trigger_request
+         yaml_variables when environment coverage_regex
+         description tag_list protected needs_attributes
+         resource_group scheduling_type].freeze
+    end
 
     def execute(build)
       build.ensure_scheduling_type!
 
       reprocess!(build).tap do |new_build|
         mark_subsequent_stages_as_processable(build)
+        build.pipeline.reset_ancestor_bridges!
 
         Gitlab::OptimisticLocking.retry_lock(new_build, &:enqueue)
 
@@ -28,7 +31,7 @@ module Ci
         raise Gitlab::Access::AccessDeniedError
       end
 
-      attributes = CLONE_ACCESSORS.map do |attribute|
+      attributes = self.class.clone_accessors.map do |attribute|
         [attribute, build.public_send(attribute)] # rubocop:disable GitlabSecurity/PublicSend
       end.to_h
 
@@ -55,7 +58,7 @@ module Ci
       build = project.builds.new(attributes)
       build.assign_attributes(::Gitlab::Ci::Pipeline::Seed::Build.environment_attributes_for(build))
       build.retried = false
-      BulkInsertableAssociations.with_bulk_insert(enabled: ::Gitlab::Ci::Features.bulk_insert_on_create?(project)) do
+      BulkInsertableAssociations.with_bulk_insert do
         build.save!
       end
       build
@@ -68,3 +71,5 @@ module Ci
     end
   end
 end
+
+Ci::RetryBuildService.prepend_if_ee('EE::Ci::RetryBuildService')

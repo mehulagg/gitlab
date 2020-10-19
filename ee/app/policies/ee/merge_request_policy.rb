@@ -12,9 +12,27 @@ module EE
 
       condition(:over_storage_limit, scope: :subject) { @subject.target_project&.namespace&.over_storage_limit? }
 
+      condition(:merge_request_group_approver, score: 140) do
+        project = @subject.target_project
+        protected_branch = project
+          .protected_branches
+          .requiring_code_owner_approval
+          .find { |pb| pb.matches?(@subject.target_branch) }
+
+        protected_branch.present? && group_access?(protected_branch)
+      end
+
+      def group_access?(protected_branch)
+        protected_branch.approval_project_rules.for_groups(@user.group_members.reporters.select(:source_id)).exists?
+      end
+
       rule { ~can_override_approvers }.prevent :update_approvers
       rule { can?(:update_merge_request) }.policy do
         enable :update_approvers
+      end
+
+      rule { merge_request_group_approver }.policy do
+        enable :approve_merge_request
       end
 
       rule { over_storage_limit }.policy do

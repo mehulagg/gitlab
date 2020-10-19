@@ -77,7 +77,6 @@ export default {
       const vars = {
         fullPath: this.fullPath,
         isGroup: this.namespaceType === Namespace.Group,
-        isProject: this.namespaceType === Namespace.Project,
         state: this.state,
       };
 
@@ -167,7 +166,13 @@ export default {
     </gl-tab>
     <template v-if="canAdmin" #tabs-end>
       <li class="gl-ml-auto gl-display-flex gl-align-items-center">
-        <gl-button variant="success" :href="newIterationPath">{{ __('New iteration') }}</gl-button>
+        <gl-button
+          variant="success"
+          data-qa-selector="new_iteration_button"
+          :href="newIterationPath"
+        >
+          {{ __('New iteration') }}
+        </gl-button>
       </li>
     </template>
   </gl-tabs>

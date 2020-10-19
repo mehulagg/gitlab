@@ -6,6 +6,8 @@ module Types
       graphql_name 'AlertManagementAlert'
       description "Describes an alert from the project's Alert Management"
 
+      present_using ::AlertManagement::AlertPresenter
+
       implements(Types::Notes::NoteableType)
 
       authorize :read_alert_management_alert
@@ -38,7 +40,8 @@ module Types
       field :status,
             AlertManagement::StatusEnum,
             null: true,
-            description: 'Status of the alert'
+            description: 'Status of the alert',
+            method: :status_name
 
       field :service,
             GraphQL::STRING_TYPE,
@@ -64,6 +67,11 @@ module Types
             Types::TimeType,
             null: true,
             description: 'Timestamp the alert ended'
+
+      field :environment,
+            Types::EnvironmentType,
+            null: true,
+            description: 'Environment for the alert'
 
       field :event_count,
             GraphQL::INT_TYPE,
@@ -119,10 +127,6 @@ module Types
 
       def notes
         object.ordered_notes
-      end
-
-      def runbook
-        object.parsed_payload.runbook
       end
     end
   end

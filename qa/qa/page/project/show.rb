@@ -56,7 +56,7 @@ module QA
           element :new_file_option
         end
 
-        view 'app/assets/javascripts/repository/components/web_ide_link.vue' do
+        view 'app/assets/javascripts/vue_shared/components/web_ide_link.vue' do
           element :web_ide_button
         end
 
@@ -103,6 +103,8 @@ module QA
         end
 
         def click_commit(commit_msg)
+          wait_for_requests
+
           within_element(:file_tree_table) do
             click_on commit_msg
           end

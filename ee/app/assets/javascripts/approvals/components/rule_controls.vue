@@ -1,12 +1,11 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import { GlButton } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlButton, GlIcon } from '@gitlab/ui';
 
 export default {
   components: {
     GlButton,
-    Icon,
+    GlIcon,
   },
   props: {
     rule: {
@@ -34,7 +33,7 @@ export default {
       category="primary"
       @click="requestDeleteRule(rule)"
     >
-      <icon name="remove" :aria-label="__('Remove')" />
+      <gl-icon name="remove" :aria-label="__('Remove')" />
     </gl-button>
   </div>
 </template>

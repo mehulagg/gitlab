@@ -5,6 +5,7 @@ module WikiActions
   include PreviewMarkdown
   include SendsBlob
   include Gitlab::Utils::StrongMemoize
+  include RedisTracking
   extend ActiveSupport::Concern
 
   included do
@@ -31,6 +32,11 @@ module WikiActions
       end
     end
 
+    # NOTE: We want to include wiki page views in the same counter as the other
+    # Event-based wiki actions tracked through TrackUniqueEvents, so we use the same event name.
+    track_redis_hll_event :show, name: Gitlab::UsageDataCounters::TrackUniqueEvents::WIKI_ACTION.to_s,
+      feature: :track_unique_wiki_page_views, feature_default_enabled: true
+
     helper_method :view_file_button, :diff_file_html_data
   end
 
@@ -44,7 +50,7 @@ module WikiActions
       wiki.list_pages(sort: params[:sort], direction: params[:direction])
     ).page(params[:page])
 
-    @wiki_entries = WikiPage.group_by_directory(@wiki_pages)
+    @wiki_entries = WikiDirectory.group_pages(@wiki_pages)
 
     render 'shared/wikis/pages'
   end
@@ -93,9 +99,10 @@ module WikiActions
   def update
     return render('shared/wikis/empty') unless can?(current_user, :create_wiki, container)
 
-    @page = WikiPages::UpdateService.new(container: container, current_user: current_user, params: wiki_params).execute(page)
+    response = WikiPages::UpdateService.new(container: container, current_user: current_user, params: wiki_params).execute(page)
+    @page = response.payload[:page]
 
-    if page.valid?
+    if response.success?
       redirect_to(
         wiki_page_path(wiki, page),
         notice: _('Wiki was successfully updated.')

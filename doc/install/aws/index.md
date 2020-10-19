@@ -1,4 +1,7 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: howto
 ---
 
@@ -68,28 +71,32 @@ As we'll be using [Amazon S3 object storage](#amazon-s3-object-storage), our EC2
 1. Click **Create policy**, select the `JSON` tab, and add a policy. We want to [follow security best practices and grant _least privilege_](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege), giving our role only the permissions needed to perform the required actions.
    1. Assuming you prefix the S3 bucket names with `gl-` as shown in the diagram, add the following policy:
 
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "s3:AbortMultipartUpload",
-                "s3:CompleteMultipartUpload",
-                "s3:ListBucket",
-                "s3:PutObject",
-                "s3:GetObject",
-                "s3:DeleteObject",
-                "s3:PutObjectAcl"
-            ],
-            "Resource": [
-                "arn:aws:s3:::gl-*/*"
-            ]
-        }
-    ]
-}
-```
+   ```json
+   {   "Version": "2012-10-17",
+       "Statement": [
+           {
+               "Effect": "Allow",
+               "Action": [
+                   "s3:PutObject",
+                   "s3:GetObject",
+                   "s3:DeleteObject",
+                   "s3:PutObjectAcl"
+               ],
+               "Resource": "arn:aws:s3:::gl-*/*"
+           },
+           {
+               "Effect": "Allow",
+               "Action": [
+                   "s3:ListBucket",
+                   "s3:AbortMultipartUpload",
+                   "s3:ListMultipartUploadParts",
+                   "s3:ListBucketMultipartUploads"
+               ],
+               "Resource": "arn:aws:s3:::gl-*"
+           }
+       ]
+   }
+   ```
 
 1. Click **Review policy**, give your policy a name (we'll use `gl-s3-policy`), and click **Create policy**.
 
@@ -459,7 +466,7 @@ Connect to your GitLab instance via **Bastion Host A** using [SSH Agent Forwardi
 
 #### Disable Let's Encrypt
 
-Since we're adding our SSL certificate at the load balancer, we do not need GitLab's built-in support for Let's Encrypt. Let's Encrypt [is enabled by default](https://docs.gitlab.com/omnibus/settings/ssl.html#lets-encrypt-integration) when using an `https` domain since GitLab 10.7, so we need to explicitly disable it:
+Since we're adding our SSL certificate at the load balancer, we do not need GitLab's built-in support for Let's Encrypt. Let's Encrypt [is enabled by default](https://docs.gitlab.com/omnibus/settings/ssl.html#lets-encrypt-integration) when using an `https` domain in GitLab 10.7 and later, so we need to explicitly disable it:
 
 1. Open `/etc/gitlab/gitlab.rb` and disable it:
 
@@ -714,10 +721,10 @@ For more information on how to set it up, visit the
 GitLab also has various [health check endpoints](../../user/admin_area/monitoring/health_check.md)
 that you can ping and get reports.
 
-## GitLab Runners
+## GitLab Runner
 
 If you want to take advantage of [GitLab CI/CD](../../ci/README.md), you have to
-set up at least one [GitLab Runner](https://docs.gitlab.com/runner/).
+set up at least one [runner](https://docs.gitlab.com/runner/).
 
 Read more on configuring an
 [autoscaling GitLab Runner on AWS](https://docs.gitlab.com/runner/configuration/runner_autoscale_aws/).
@@ -795,7 +802,7 @@ to request additional material:
 
 - [Scaling GitLab](../../administration/reference_architectures/index.md):
   GitLab supports several different types of clustering.
-- [Geo replication](../../administration/geo/replication/index.md):
+- [Geo replication](../../administration/geo/index.md):
   Geo is the solution for widely distributed development teams.
 - [Omnibus GitLab](https://docs.gitlab.com/omnibus/) - Everything you need to know
   about administering your GitLab instance.

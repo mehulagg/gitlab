@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe GitlabSchema.types['ClusterAgent'] do
-  let(:fields) { %i[created_at id name project updated_at] }
+  let(:fields) { %i[created_at id name project updated_at tokens] }
 
   it { expect(described_class.graphql_name).to eq('ClusterAgent') }
 

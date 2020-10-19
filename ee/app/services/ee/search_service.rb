@@ -19,5 +19,9 @@ module EE
 
       super
     end
+
+    def show_epics?
+      search_service.allowed_scopes.include?('epics')
+    end
   end
 end

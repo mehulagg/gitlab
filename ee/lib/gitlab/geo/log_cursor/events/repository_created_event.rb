@@ -8,7 +8,7 @@ module Gitlab
           include BaseEvent
 
           def process
-            if replicable_project?(event.project_id)
+            if replicable_project?
               registry.repository_created!(event)
 
               job_id = nil
@@ -31,7 +31,7 @@ module Gitlab
               wiki_path: event.wiki_path,
               resync_repository: registry.resync_repository,
               resync_wiki: registry.resync_wiki,
-              replicable_project: replicable_project?(event.project_id),
+              replicable_project: replicable_project?,
               job_id: job_id)
           end
         end

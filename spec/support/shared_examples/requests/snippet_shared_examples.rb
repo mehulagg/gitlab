@@ -2,6 +2,10 @@
 
 RSpec.shared_examples 'update with repository actions' do
   context 'when the repository exists' do
+    before do
+      allow_any_instance_of(Snippet).to receive(:multiple_files?).and_return(false)
+    end
+
     it 'commits the changes to the repository' do
       existing_blob = snippet.blobs.first
       new_file_name = existing_blob.path + '_new'
@@ -92,18 +96,6 @@ RSpec.shared_examples 'snippet blob content' do
 
       expect(response.body).to eq(snippet.content)
     end
-  end
-end
-
-RSpec.shared_examples 'snippet_multiple_files feature disabled' do
-  before do
-    stub_feature_flags(snippet_multiple_files: false)
-
-    subject
-  end
-
-  it 'does not return files attributes' do
-    expect(json_response).not_to have_key('files')
   end
 end
 

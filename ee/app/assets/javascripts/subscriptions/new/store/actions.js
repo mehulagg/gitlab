@@ -120,9 +120,13 @@ export const fetchPaymentFormParams = ({ dispatch }) =>
 export const fetchPaymentFormParamsSuccess = ({ commit }, data) => {
   if (data.errors) {
     createFlash(
-      sprintf(s__('Checkout|Credit card form failed to load: %{message}'), {
-        message: data.errors,
-      }),
+      sprintf(
+        s__('Checkout|Credit card form failed to load: %{message}'),
+        {
+          message: data.errors,
+        },
+        false,
+      ),
     );
   } else {
     commit(types.UPDATE_PAYMENT_FORM_PARAMS, data);
@@ -159,6 +163,7 @@ export const paymentFormSubmittedError = (_, response) => {
         'Checkout|Submitting the credit card form failed with code %{errorCode}: %{errorMessage}',
       ),
       response,
+      false,
     ),
   );
 };

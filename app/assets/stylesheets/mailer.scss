@@ -48,6 +48,35 @@ a {
   font-weight: 500;
 }
 
+.invite-header {
+  margin-top: 0;
+}
+
+.invite-body {
+  width: 360px;
+}
+
+.invite-actions {
+  margin-top: 24px;
+}
+
+.invite-btn-join {
+  border-radius: $border-radius-default;
+  padding: $gl-btn-vert-padding $gl-btn-horz-padding;
+  cursor: pointer;
+  background-color: $purple;
+  color: $white;
+}
+
+.invite-btn-decline {
+  border-radius: $border-radius-default;
+  border: 1px solid $purple;
+  padding: $gl-btn-vert-padding $gl-btn-horz-padding;
+  cursor: pointer;
+  color: $purple;
+  margin-left: 4px;
+}
+
 tr td {
   font-family: $mailer-font;
 }

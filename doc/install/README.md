@@ -1,4 +1,7 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 comments: false
 description: Read through the GitLab installation methods.
 type: index
@@ -13,12 +16,12 @@ and cost of hosting.
 
 There are many ways you can install GitLab depending on your platform:
 
-1. **Omnibus GitLab**: The official deb/rpm packages that contain a bundle of GitLab
+1. [**Omnibus GitLab**](#installing-gitlab-using-the-omnibus-gitlab-package-recommended): The official deb/rpm packages that contain a bundle of GitLab
    and the various components it depends on, like PostgreSQL, Redis, Sidekiq, etc.
-1. **GitLab Helm chart**: The cloud native Helm chart for installing GitLab and all
-   its components on Kubernetes.
-1. **Docker**: The Omnibus GitLab packages dockerized.
-1. **Source**: Install GitLab and all its components from scratch.
+1. [**GitLab Helm chart**](#installing-gitlab-on-kubernetes-via-the-gitlab-helm-charts): The cloud native Helm chart for installing GitLab and all its components on Kubernetes.
+1. [**Docker**](#installing-gitlab-with-docker): The Omnibus GitLab packages dockerized.
+1. [**Source**](#installing-gitlab-from-source): Install GitLab and all its components from scratch.
+1. [**Cloud provider**](#installing-gitlab-on-cloud-providers): Install directly from platforms like AWS, Azure, GCP.
 
 TIP: **If in doubt, choose Omnibus:**
 The Omnibus GitLab packages are mature,
@@ -68,7 +71,7 @@ GitLab maintains a set of official Docker images based on the Omnibus GitLab pac
 
 If the Omnibus GitLab package is not available in your distribution, you can
 install GitLab from source: Useful for unsupported systems like \*BSD. For an
-overview of the directory structure, read the [structure documentation](structure.md).
+overview of the directory structure, read the [structure documentation](installation.md#gitlab-directory-structure).
 
 [**> Install GitLab from source.**](installation.md)
 
@@ -86,6 +89,37 @@ the above methods, provided the cloud provider supports it.
 - _Testing only!_ [DigitalOcean and Docker Machine](digitaloceandocker.md):
   Quickly test any version of GitLab on DigitalOcean using Docker Machine.
 
-## Securing your GitLab installation
+## Next steps
 
-After completing your installation, check out our [recommended practices to secure your GitLab instance](../security/README.md#securing-your-gitlab-installation).
+Here are a few resources you might want to check out after completing the
+installation:
+
+- [Upload a license](../user/admin_area/license.md)  or [start a free trial](https://about.gitlab.com/free-trial/):
+  Activate all GitLab Enterprise Edition functionality with a license.
+- [Set up runners](https://docs.gitlab.com/runner/): Set up one or more GitLab
+  Runners, the agents that are responsible for all of GitLab's CI/CD features.
+- [GitLab Pages](../administration/pages/index.md): Configure GitLab Pages to
+  allow hosting of static sites.
+- [GitLab Registry](../administration/packages/container_registry.md): With the
+  GitLab Container Registry, every project can have its own space to store Docker
+  images.
+- [Secure GitLab](../security/README.md#securing-your-gitlab-installation):
+  Recommended practices to secure your GitLab instance.
+- [SMTP](https://docs.gitlab.com/omnibus/settings/smtp.html): Configure SMTP
+  for proper email notifications support.
+- [LDAP](../administration/auth/ldap/index.md): Configure LDAP to be used as
+  an authentication mechanism for GitLab.
+- [Back up and restore GitLab](../raketasks/backup_restore.md): Learn the different
+  ways you can back up or restore GitLab.
+- [Upgrade GitLab](../update/README.md): Every 22nd of the month, a new feature-rich GitLab version
+  is released. Learn how to upgrade to it, or to an interim release that contains a security fix.
+- [Scaling GitLab](../administration/reference_architectures/index.md):
+  GitLab supports several different types of clustering.
+- [Advanced Search](../integration/elasticsearch.md): Leverage Elasticsearch for
+  faster, more advanced code search across your entire GitLab instance.
+- [Geo replication](../administration/geo/index.md):
+  Geo is the solution for widely distributed development teams.
+- [Release and maintenance policy](../policy/maintenance.md): Learn about GitLab's
+  policies governing version naming, as well as release pace for major, minor, patch,
+  and security releases.
+- [Pricing](https://about.gitlab.com/pricing/): Pricing for the different tiers.

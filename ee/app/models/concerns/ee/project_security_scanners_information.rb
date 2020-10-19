@@ -15,6 +15,8 @@ module EE
 
     def scanners_run_in_last_pipeline
       reports = latest_builds_reports(only_successful_builds: true)
+      return [] if reports.empty?
+
       all_security_scanners.map { |scanner| scanner.upcase.to_s if reports.include?(scanner) }.compact
     end
 

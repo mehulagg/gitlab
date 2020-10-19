@@ -52,6 +52,20 @@ RSpec.describe Notes::QuickActionsService do
         end
       end
 
+      context 'on an incident' do
+        before do
+          issue.update!(issue_type: :incident)
+        end
+
+        it 'leaves the note empty' do
+          expect(execute(note)).to be_empty
+        end
+
+        it 'does not assigns the issue to the epic' do
+          expect { execute(note) }.not_to change { issue.reload.epic }
+        end
+      end
+
       context 'on a merge request' do
         let(:note_mr) { create(:note_on_merge_request, project: project, note: note_text) }
 
@@ -94,6 +108,26 @@ RSpec.describe Notes::QuickActionsService do
 
         it 'creates a system note' do
           expect { execute(note) }.to change { Note.system.count }.from(0).to(2)
+        end
+      end
+
+      context 'on an incident' do
+        before do
+          issue.update!(issue_type: :incident)
+        end
+
+        it 'leaves the note empty' do
+          expect(execute(note)).to be_empty
+        end
+      end
+
+      context 'on a test case' do
+        before do
+          issue.update!(issue_type: :test_case)
+        end
+
+        it 'leaves the note empty' do
+          expect(execute(note)).to be_empty
         end
       end
 
@@ -353,24 +387,33 @@ RSpec.describe Notes::QuickActionsService do
 
         context 'when issue was already promoted' do
           it 'does not promote issue' do
-            issue.update(promoted_to_epic_id: epic.id)
+            issue.update!(promoted_to_epic_id: epic.id)
 
             expect { execute(note) }.not_to change { Epic.count }
           end
         end
 
         context 'when an issue belongs to a project without group' do
-          let(:user_project) { create(:project) }
-          let(:issue) { create(:issue, project: user_project) }
-          let(:note) { create(:note_on_issue, noteable: issue, project: user_project, note: note_text) }
+          let(:project) { create(:project) }
+          let(:issue) { create(:issue, project: project) }
+          let(:note) { create(:note_on_issue, noteable: issue, project: project, note: note_text) }
 
           before do
-            user_project.add_developer(user)
+            project.add_developer(user)
           end
 
           it 'does not promote an issue to an epic' do
-            expect { execute(note) }
-              .to raise_error(Epics::IssuePromoteService::PromoteError)
+            expect { execute(note) }.not_to change { Epic.count }
+          end
+        end
+
+        context 'on an incident' do
+          before do
+            issue.update!(issue_type: :incident)
+          end
+
+          it 'does not promote to an epic' do
+            expect { execute(note) }.not_to change { Epic.count }
           end
         end
       end

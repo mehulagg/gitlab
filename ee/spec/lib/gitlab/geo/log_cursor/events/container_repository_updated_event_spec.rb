@@ -30,25 +30,11 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::ContainerRepositoryUpdatedEvent, 
         stub_config(geo: { registry_replication: { enabled: true } })
       end
 
-      context "when the container repository's project is not excluded by selective sync" do
-        # TODO: Fix https://gitlab.com/gitlab-org/gitlab/-/issues/233514 and
-        # use this test, and remove the other tests in this context.
-        # it_behaves_like 'event should trigger a sync'
-
-        context 'when a registry does not yet exist' do
-          it_behaves_like 'event schedules a sync worker'
-          it_behaves_like 'logs event source info'
-        end
-
-        context 'when a registry exists' do
-          let!(:registry) { create(registry_factory, *registry_factory_args) }
-
-          it_behaves_like 'event schedules a sync worker'
-          it_behaves_like 'logs event source info'
-        end
+      context "when the container repository is not excluded by selective sync" do
+        it_behaves_like 'event should trigger a sync'
       end
 
-      context "when the container repository's project is excluded by selective sync" do
+      context "when the container repository is excluded by selective sync" do
         before do
           stub_current_geo_node(secondary_excludes_all_projects)
         end

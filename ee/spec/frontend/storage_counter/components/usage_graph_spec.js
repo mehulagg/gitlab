@@ -27,7 +27,8 @@ describe('Storage Counter usage graph component', () => {
         repositorySize: 4000,
         packagesSize: 3000,
         lfsObjectsSize: 2000,
-        buildArtifactsSize: 1000,
+        buildArtifactsSize: 500,
+        pipelineArtifactsSize: 500,
         snippetsSize: 2000,
         storageSize: 17000,
       },
@@ -45,6 +46,7 @@ describe('Storage Counter usage graph component', () => {
 
     const {
       buildArtifactsSize,
+      pipelineArtifactsSize,
       lfsObjectsSize,
       packagesSize,
       repositorySize,
@@ -66,7 +68,7 @@ describe('Storage Counter usage graph component', () => {
       `Snippets ${numberToHumanSize(snippetsSize)}`,
     );
     expect(types.at(5).text()).toMatchInterpolatedText(
-      `Build Artifacts ${numberToHumanSize(buildArtifactsSize)}`,
+      `Artifacts ${numberToHumanSize(buildArtifactsSize + pipelineArtifactsSize)}`,
     );
   });
 

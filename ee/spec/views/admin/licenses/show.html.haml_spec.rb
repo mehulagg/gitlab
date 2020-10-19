@@ -5,10 +5,6 @@ require 'spec_helper'
 RSpec.describe 'admin/licenses/show.html.haml' do
   let_it_be(:license) { create(:license) }
 
-  before do
-    stub_feature_flags(licenses_app: false)
-  end
-
   context 'when trial license is present' do
     before do
       trial_license = create(:license, trial: true)

@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Issues::MoveService do
+  include DesignManagementTestHelpers
+
   let_it_be(:user) { create(:user) }
   let_it_be(:author) { create(:user) }
   let_it_be(:title) { 'Some issue' }
@@ -101,6 +103,41 @@ RSpec.describe Issues::MoveService do
         end
       end
 
+      context 'issue with milestone' do
+        let(:milestone) { create(:milestone, group: sub_group_1) }
+        let(:new_project) { create(:project, namespace: sub_group_1) }
+
+        let(:old_issue) do
+          create(:issue, title: title, description: description, project: old_project, author: author, milestone: milestone)
+        end
+
+        before do
+          create(:resource_milestone_event, issue: old_issue, milestone: milestone, action: :add)
+        end
+
+        it 'does not create extra milestone events' do
+          new_issue = move_service.execute(old_issue, new_project)
+
+          expect(new_issue.resource_milestone_events.count).to eq(old_issue.resource_milestone_events.count)
+        end
+      end
+
+      context 'issue with due date' do
+        let(:old_issue) do
+          create(:issue, title: title, description: description, project: old_project, author: author, due_date: '2020-01-10')
+        end
+
+        before do
+          SystemNoteService.change_due_date(old_issue, old_project, author, old_issue.due_date)
+        end
+
+        it 'does not create extra system notes' do
+          new_issue = move_service.execute(old_issue, new_project)
+
+          expect(new_issue.notes.count).to eq(old_issue.notes.count)
+        end
+      end
+
       context 'issue with assignee' do
         let_it_be(:assignee) { create(:user) }
 
@@ -164,6 +201,47 @@ RSpec.describe Issues::MoveService do
 
         it 'copies existing notes in order' do
           expect(copied_notes.order('id ASC').pluck(:note)).to eq(notes.map(&:note))
+        end
+      end
+
+      context 'issue with a design', :clean_gitlab_redis_shared_state do
+        let_it_be(:new_project) { create(:project) }
+        let!(:design) { create(:design, :with_lfs_file, issue: old_issue) }
+        let!(:note) { create(:diff_note_on_design, noteable: design, issue: old_issue, project: old_issue.project) }
+        let(:subject) { move_service.execute(old_issue, new_project) }
+
+        before do
+          enable_design_management
+        end
+
+        it 'calls CopyDesignCollection::QueueService' do
+          expect(DesignManagement::CopyDesignCollection::QueueService).to receive(:new)
+            .with(user, old_issue, kind_of(Issue))
+            .and_call_original
+
+          subject
+        end
+
+        it 'logs if QueueService returns an error', :aggregate_failures do
+          error_message = 'error'
+
+          expect_next_instance_of(DesignManagement::CopyDesignCollection::QueueService) do |service|
+            expect(service).to receive(:execute).and_return(
+              ServiceResponse.error(message: error_message)
+            )
+          end
+          expect(Gitlab::AppLogger).to receive(:error).with(error_message)
+
+          subject
+        end
+
+        # Perform a small integration test to ensure the services and worker
+        # can correctly create designs.
+        it 'copies the design and its notes', :sidekiq_inline, :aggregate_failures do
+          new_issue = subject
+
+          expect(new_issue.designs.size).to eq(1)
+          expect(new_issue.designs.first.notes.size).to eq(1)
         end
       end
     end

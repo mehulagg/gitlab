@@ -4,11 +4,14 @@ class Environment < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
   include ReactiveCaching
   include FastDestroyAll::Helpers
+  include Presentable
 
   self.reactive_cache_refresh_interval = 1.minute
   self.reactive_cache_lifetime = 55.seconds
   self.reactive_cache_hard_limit = 10.megabytes
   self.reactive_cache_work_type = :external_dependency
+
+  PRODUCTION_ENVIRONMENT_IDENTIFIERS = %w[prod production].freeze
 
   belongs_to :project, required: true
 
@@ -86,6 +89,7 @@ class Environment < ApplicationRecord
   scope :with_rank, -> do
     select('environments.*, rank() OVER (PARTITION BY project_id ORDER BY id DESC)')
   end
+  scope :for_id, -> (id) { where(id: id) }
 
   state_machine :state, initial: :available do
     event :start do
@@ -211,7 +215,7 @@ class Environment < ApplicationRecord
   end
 
   def update_merge_request_metrics?
-    folder_name == "production"
+    PRODUCTION_ENVIRONMENT_IDENTIFIERS.include?(folder_name.downcase)
   end
 
   def ref_path
@@ -371,7 +375,7 @@ class Environment < ApplicationRecord
   end
 
   def elastic_stack_available?
-    !!deployment_platform&.cluster&.application_elastic_stack&.available?
+    !!deployment_platform&.cluster&.application_elastic_stack_available?
   end
 
   private

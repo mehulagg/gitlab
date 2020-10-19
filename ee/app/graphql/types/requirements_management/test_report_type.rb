@@ -4,7 +4,7 @@ module Types
   module RequirementsManagement
     class TestReportType < BaseObject
       graphql_name 'TestReport'
-      description 'Represents a requirement test report.'
+      description 'Represents a requirement test report'
 
       authorize :read_requirement
 

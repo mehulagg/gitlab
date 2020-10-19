@@ -5,7 +5,7 @@
 import $ from 'jquery';
 import { template, escape } from 'lodash';
 import { __, sprintf } from '~/locale';
-import '~/gl_dropdown';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 import Api from '~/api';
 import axios from './lib/utils/axios_utils';
 import { timeFor, parsePikadayDate, dateInWords } from './lib/utils/datetime_utility';
@@ -69,17 +69,21 @@ export default class MilestoneSelect {
         );
         milestoneLinkNoneTemplate = `<span class="no-value">${__('None')}</span>`;
       }
-      return $dropdown.glDropdown({
+      return initDeprecatedJQueryDropdown($dropdown, {
         showMenuAbove,
         data: (term, callback) => {
-          let contextId = $dropdown.get(0).dataset.projectId;
-          let getMilestones = Api.projectMilestones;
+          let contextId = parseInt($dropdown.get(0).dataset.projectId, 10);
+          let getMilestones = Api.projectMilestones.bind(Api);
           const reqParams = { state: 'active', include_parent_milestones: true };
+
+          if (term) {
+            reqParams.search = term.trim();
+          }
 
           if (!contextId) {
             contextId = $dropdown.get(0).dataset.groupId;
             delete reqParams.include_parent_milestones;
-            getMilestones = Api.groupMilestones;
+            getMilestones = Api.groupMilestones.bind(Api);
           }
 
           // We don't use $.data() as it caches initial value and never updates!
@@ -138,7 +142,7 @@ export default class MilestoneSelect {
 
               callback(extraOptions.concat(data));
               if (showMenuAbove) {
-                $dropdown.data('glDropdown').positionMenuAbove();
+                $dropdown.data('deprecatedJQueryDropdown').positionMenuAbove();
               }
               $(`[data-milestone-id="${selectedMilestone}"] > a`).addClass('is-active');
             });
@@ -162,6 +166,7 @@ export default class MilestoneSelect {
         `;
         },
         filterable: true,
+        filterRemote: true,
         search: {
           fields: ['title'],
         },

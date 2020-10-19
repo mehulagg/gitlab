@@ -3,7 +3,7 @@
 module Mutations
   module DastSiteProfiles
     class Update < BaseMutation
-      include ResolvesProject
+      include AuthorizesProject
 
       graphql_name 'DastSiteProfileUpdate'
 
@@ -29,23 +29,20 @@ module Mutations
 
       authorize :create_on_demand_dast_scan
 
-      def resolve(full_path:, **service_args)
-        project = authorized_find!(full_path: full_path)
+      def resolve(full_path:, id:, **service_args)
+        # TODO: remove explicit coercion once compatibility layer has been removed
+        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+        service_args[:id] = ::Types::GlobalIDType[::DastSiteProfile].coerce_isolated_input(id).model_id
+        project = authorized_find_project!(full_path: full_path)
 
         service = ::DastSiteProfiles::UpdateService.new(project, current_user)
-        result = service.execute(service_args)
+        result = service.execute(**service_args)
 
         if result.success?
           { id: result.payload.to_global_id, errors: [] }
         else
           { errors: result.errors }
         end
-      end
-
-      private
-
-      def find_object(full_path:)
-        resolve_project(full_path: full_path)
       end
     end
   end

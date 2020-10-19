@@ -1,7 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 
 const buttons = [
   {
@@ -21,8 +20,8 @@ const buttons = [
 describe('Split Button', () => {
   let wrapper;
 
-  const findDropdown = () => wrapper.find(GlDeprecatedDropdown);
-  const findDropdownItems = () => wrapper.findAll(GlDeprecatedDropdownItem);
+  const findDropdown = () => wrapper.find(GlDropdown);
+  const findDropdownItems = () => wrapper.findAll(GlDropdownItem);
 
   const createComponent = props => {
     wrapper = shallowMount(SplitButton, {
@@ -81,8 +80,7 @@ describe('Split Button', () => {
     expect(
       findDropdownItems()
         .at(0)
-        .find(Icon)
-        .exists(),
+        .props('isChecked'),
     ).toBe(true);
   });
 });

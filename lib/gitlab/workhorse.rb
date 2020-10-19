@@ -156,10 +156,11 @@ module Gitlab
         ]
       end
 
-      def send_scaled_image(location, width)
+      def send_scaled_image(location, width, content_type)
         params = {
           'Location' => location,
-          'Width' => width
+          'Width' => width,
+          'ContentType' => content_type
         }
 
         [
@@ -268,7 +269,8 @@ module Gitlab
               commit_id: metadata['CommitId'],
               prefix: metadata['ArchivePrefix'],
               format: format,
-              path: path.presence || ""
+              path: path.presence || "",
+              include_lfs_blobs: Feature.enabled?(:include_lfs_blobs_in_archive)
             ).to_proto
           )
         }

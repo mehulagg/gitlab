@@ -1,15 +1,21 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import { GlAlert, GlDeprecatedDropdown, GlDeprecatedDropdownItem, GlLoadingIcon } from '@gitlab/ui';
+import {
+  GlAlert,
+  GlDeprecatedDropdown,
+  GlDeprecatedDropdownItem,
+  GlEmptyState,
+  GlLoadingIcon,
+} from '@gitlab/ui';
+import { EMPTY_STATE_TITLE, EMPTY_STATE_DESCRIPTION, EMPTY_STATE_SVG_PATH } from '../constants';
 import InsightsPage from './insights_page.vue';
-import InsightsConfigWarning from './insights_config_warning.vue';
 
 export default {
   components: {
     GlAlert,
     GlLoadingIcon,
     InsightsPage,
-    InsightsConfigWarning,
+    GlEmptyState,
     GlDeprecatedDropdown,
     GlDeprecatedDropdownItem,
   },
@@ -36,15 +42,22 @@ export default {
       'activePage',
       'chartData',
     ]),
-    pageLoading() {
+    emptyState() {
+      return {
+        title: EMPTY_STATE_TITLE,
+        description: EMPTY_STATE_DESCRIPTION,
+        svgPath: EMPTY_STATE_SVG_PATH,
+      };
+    },
+    hasAllChartsLoaded() {
       const requestedChartKeys = this.activePage?.charts?.map(chart => chart.title) || [];
-      const storeChartKeys = Object.keys(this.chartData);
-      const loadedCharts = storeChartKeys.filter(key => this.chartData[key].loaded);
-      const chartsLoaded =
-        Boolean(requestedChartKeys.length) &&
-        requestedChartKeys.every(key => loadedCharts.includes(key));
-      const chartsErrored = storeChartKeys.some(key => this.chartData[key].error);
-      return !chartsLoaded && !chartsErrored;
+      return requestedChartKeys.every(key => this.chartData[key]?.loaded);
+    },
+    hasChartsError() {
+      return Object.values(this.chartData).some(data => data.error);
+    },
+    pageLoading() {
+      return !this.hasChartsError && !this.hasAllChartsLoaded;
     },
     pages() {
       const { configData, activeTab } = this;
@@ -138,15 +151,11 @@ export default {
       </gl-alert>
       <insights-page :query-endpoint="queryEndpoint" :page-config="activePage" />
     </div>
-    <insights-config-warning
+    <gl-empty-state
       v-else
-      :title="__('Invalid Insights config file detected')"
-      :summary="
-        __(
-          'Please check the configuration file to ensure that it is available and the YAML is valid',
-        )
-      "
-      image="illustrations/monitoring/getting_started.svg"
+      :title="emptyState.title"
+      :description="emptyState.description"
+      :svg-path="emptyState.svgPath"
     />
   </div>
 </template>

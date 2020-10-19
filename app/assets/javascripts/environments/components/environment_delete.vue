@@ -4,15 +4,12 @@
  * Used in the environments table.
  */
 
-import $ from 'jquery';
 import { GlTooltipDirective, GlButton } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
 import { s__ } from '~/locale';
 import eventHub from '../event_hub';
 
 export default {
   components: {
-    Icon,
     GlButton,
   },
   directives: {
@@ -42,7 +39,7 @@ export default {
   },
   methods: {
     onClick() {
-      $(this.$el).tooltip('dispose');
+      this.$root.$emit('bv::hide::tooltip', this.$options.deleteEnvironmentTooltipId);
       eventHub.$emit('requestDeleteEnvironment', this.environment);
     },
     onDeleteEnvironment(environment) {
@@ -51,6 +48,7 @@ export default {
       }
     },
   },
+  deleteEnvironmentTooltipId: 'delete-environment-button-tooltip',
 };
 </script>
 <template>
@@ -62,9 +60,6 @@ export default {
     variant="danger"
     category="primary"
     icon="remove"
-    variant = "danger"
-    category = "primary"
-    icon = "remove"
     data-toggle="modal"
     data-target="#delete-environment-modal"
     @click="onClick"

@@ -56,7 +56,7 @@ exports[`Project Header matches the snapshot 1`] = `
       title="More actions"
       type="button"
     >
-      <icon-stub
+      <gl-icon-stub
         class="text-secondary"
         name="ellipsis_v"
         size="16"
@@ -68,6 +68,7 @@ exports[`Project Header matches the snapshot 1`] = `
     >
       <li>
         <gl-button-stub
+          buttontextclasses=""
           category="primary"
           class="js-remove-button"
           icon=""

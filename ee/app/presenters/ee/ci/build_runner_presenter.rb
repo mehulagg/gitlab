@@ -19,7 +19,7 @@ module EE
           'url' => variable_value('VAULT_SERVER_URL'),
           'auth' => {
             'name' => 'jwt',
-            'path' => 'jwt',
+            'path' => variable_value('VAULT_AUTH_PATH', 'jwt'),
             'data' => {
               'jwt' => '${CI_JOB_JWT}',
               'role' => variable_value('VAULT_AUTH_ROLE')

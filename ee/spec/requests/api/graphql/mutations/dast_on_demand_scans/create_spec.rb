@@ -6,13 +6,16 @@ RSpec.describe 'Running a DAST Scan' do
   include GraphqlHelpers
 
   let(:dast_site_profile) { create(:dast_site_profile, project: project) }
+  let(:dast_site_profile_id) { dast_site_profile.to_global_id.to_s }
+  let(:dast_scanner_profile_id) { nil }
 
   let(:mutation_name) { :dast_on_demand_scan_create }
   let(:mutation) do
     graphql_mutation(
       mutation_name,
       full_path: full_path,
-      dast_site_profile_id: dast_site_profile.to_global_id.to_s
+      dast_site_profile_id: dast_site_profile_id,
+      dast_scanner_profile_id: dast_scanner_profile_id
     )
   end
 
@@ -26,6 +29,17 @@ RSpec.describe 'Running a DAST Scan' do
         pipeline
       )
       expect(mutation_response['pipelineUrl']).to eq(expected_url)
+    end
+
+    context 'when dast_scanner_profile_id is provided' do
+      let(:dast_scanner_profile) { create(:dast_scanner_profile, project: project, target_timeout: 200, spider_timeout: 5000) }
+      let(:dast_scanner_profile_id) { dast_scanner_profile.to_global_id.to_s }
+
+      it 'returns an empty errors array' do
+        subject
+
+        expect(mutation_response["errors"]).to be_empty
+      end
     end
 
     context 'when wrong type of global id is passed' do

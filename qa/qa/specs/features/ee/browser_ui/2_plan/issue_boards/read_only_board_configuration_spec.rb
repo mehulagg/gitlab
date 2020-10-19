@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Plan', :reliable do
+  RSpec.describe 'Plan' do
     describe 'Read-only board configuration' do
       let(:qa_user) do
         Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1)
@@ -24,7 +24,7 @@ module QA
         Page::Project::Menu.perform(&:go_to_boards)
       end
 
-      it 'shows board configuration to user without edit permission' do
+      it 'shows board configuration to user without edit permission', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/636' do
         Page::Component::IssueBoard::Show.perform do |show|
           show.click_boards_config_button
 

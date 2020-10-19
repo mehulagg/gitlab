@@ -26,7 +26,7 @@
     = render_if_exists "projects/pipelines/tabs_holder", pipeline: @pipeline, project: @project
 
 .tab-content
-  #js-tab-pipeline.tab-pane.w-1000
+  #js-tab-pipeline.tab-pane.gl-absolute.gl-left-0.gl-w-full
     #js-pipeline-graph-vue
 
   #js-tab-builds.tab-pane
@@ -68,7 +68,7 @@
               %td.responsive-table-cell.build-failure{ data: { column: _('Failure')} }
                 = build.present.callout_failure_message
               %td.responsive-table-cell.build-actions
-                - if can?(current_user, :update_build, job)
+                - if can?(current_user, :update_build, job) && job.retryable?
                   = link_to retry_project_job_path(build.project, build, return_to: request.original_url), method: :post, title: _('Retry'), class: 'btn btn-build gl-button btn-icon btn-default' do
                     = sprite_icon('repeat', css_class: 'gl-icon')
             - if can?(current_user, :read_build, job)

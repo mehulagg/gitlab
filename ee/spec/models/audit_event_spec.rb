@@ -16,7 +16,7 @@ RSpec.describe AuditEvent, type: :model do
   describe 'callbacks' do
     context 'parallel_persist' do
       let_it_be(:details) do
-        { author_name: 'Kungfu Panda', entity_path: 'gitlab-org/gitlab', target_details: 'Project X' }
+        { author_name: 'Kungfu Panda', entity_path: 'gitlab-org/gitlab', target_details: 'Project X', target_type: 'User' }
       end
       let_it_be(:event) { create(:project_audit_event, details: details, entity_path: nil, target_details: nil) }
 
@@ -202,6 +202,26 @@ RSpec.describe AuditEvent, type: :model do
     end
   end
 
+  describe '#ip_address' do
+    context 'when ip_address exists in both details hash and ip_address column' do
+      subject(:event) do
+        described_class.new(ip_address: '10.2.1.1', details: { ip_address: '192.168.0.1' })
+      end
+
+      it 'returns the value from ip_address column' do
+        expect(event.ip_address).to eq('10.2.1.1')
+      end
+    end
+
+    context 'when ip_address exists in details hash but not in ip_address column' do
+      subject(:event) { described_class.new(details: { ip_address: '192.168.0.1' }) }
+
+      it 'returns the value from details hash' do
+        expect(event.ip_address).to eq('192.168.0.1')
+      end
+    end
+  end
+
   describe '#entity_path' do
     context 'when entity_path exists in both details hash and entity_path column' do
       subject(:event) do
@@ -218,6 +238,26 @@ RSpec.describe AuditEvent, type: :model do
 
       it 'returns the value from details hash' do
         expect(event.entity_path).to eq('gitlab-org/gitlab-foss')
+      end
+    end
+  end
+
+  describe '#target_type' do
+    context 'when target_type exists in both details hash and target_type column' do
+      subject(:event) do
+        described_class.new(target_type: 'Group', details: { target_type: 'Project' })
+      end
+
+      it 'returns the value from target_type column' do
+        expect(event.target_type).to eq('Group')
+      end
+    end
+
+    context 'when target_type exists in details hash but not in target_type column' do
+      subject(:event) { described_class.new(details: { target_type: 'Project' }) }
+
+      it 'returns the value from details hash' do
+        expect(event.target_type).to eq('Project')
       end
     end
   end

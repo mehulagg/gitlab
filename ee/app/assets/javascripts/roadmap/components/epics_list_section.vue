@@ -95,7 +95,7 @@ export default {
   methods: {
     ...mapActions(['setBufferSize', 'toggleEpic']),
     initMounted() {
-      this.roadmapShellEl = this.$root.$el && this.$root.$el.firstChild;
+      this.roadmapShellEl = this.$root.$el && this.$root.$el.querySelector('.js-roadmap-shell');
       this.setBufferSize(Math.ceil((window.innerHeight - this.$el.offsetTop) / EPIC_ITEM_HEIGHT));
 
       // Wait for component render to complete

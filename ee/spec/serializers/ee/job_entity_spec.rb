@@ -19,7 +19,7 @@ RSpec.describe JobEntity do
 
     subject { entity.as_json[:playable] }
 
-    it_behaves_like 'protected environments access'
+    it_behaves_like 'protected environments access', direct_access: true
   end
 
   describe '#retryable?' do
@@ -27,6 +27,6 @@ RSpec.describe JobEntity do
 
     subject { entity.as_json.include?(:retry_path) }
 
-    it_behaves_like 'protected environments access'
+    it_behaves_like 'protected environments access', direct_access: true
   end
 end

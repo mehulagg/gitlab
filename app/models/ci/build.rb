@@ -38,13 +38,16 @@ module Ci
 
     has_one :deployment, as: :deployable, class_name: 'Deployment'
     has_one :resource, class_name: 'Ci::Resource', inverse_of: :build
+    has_one :pending_state, class_name: 'Ci::BuildPendingState', inverse_of: :build
     has_many :trace_sections, class_name: 'Ci::BuildTraceSection'
-    has_many :trace_chunks, class_name: 'Ci::BuildTraceChunk', foreign_key: :build_id
+    has_many :trace_chunks, class_name: 'Ci::BuildTraceChunk', foreign_key: :build_id, inverse_of: :build
     has_many :report_results, class_name: 'Ci::BuildReportResult', inverse_of: :build
 
     has_many :job_artifacts, class_name: 'Ci::JobArtifact', foreign_key: :job_id, dependent: :destroy, inverse_of: :job # rubocop:disable Cop/ActiveRecordDependent
     has_many :job_variables, class_name: 'Ci::JobVariable', foreign_key: :job_id
     has_many :sourced_pipelines, class_name: 'Ci::Sources::Pipeline', foreign_key: :source_job_id
+
+    has_many :pages_deployments, inverse_of: :ci_build
 
     Ci::JobArtifact.file_types.each do |key, value|
       has_one :"job_artifacts_#{key}", -> { where(file_type: value) }, class_name: 'Ci::JobArtifact', inverse_of: :job, foreign_key: :job_id
@@ -90,9 +93,9 @@ module Ci
         Ci::BuildMetadata.scoped_build.with_interruptible.select(:id))
     end
 
-    scope :unstarted, ->() { where(runner_id: nil) }
-    scope :ignore_failures, ->() { where(allow_failure: false) }
-    scope :with_downloadable_artifacts, ->() do
+    scope :unstarted, -> { where(runner_id: nil) }
+    scope :ignore_failures, -> { where(allow_failure: false) }
+    scope :with_downloadable_artifacts, -> do
       where('EXISTS (?)',
         Ci::JobArtifact.select(1)
           .where('ci_builds.id = ci_job_artifacts.job_id')
@@ -104,11 +107,11 @@ module Ci
       where('EXISTS (?)', ::Ci::JobArtifact.select(1).where('ci_builds.id = ci_job_artifacts.job_id').merge(query))
     end
 
-    scope :with_archived_trace, ->() do
+    scope :with_archived_trace, -> do
       with_existing_job_artifacts(Ci::JobArtifact.trace)
     end
 
-    scope :without_archived_trace, ->() do
+    scope :without_archived_trace, -> do
       where('NOT EXISTS (?)', Ci::JobArtifact.select(1).where('ci_builds.id = ci_job_artifacts.job_id').trace)
     end
 
@@ -139,11 +142,11 @@ module Ci
         .includes(:metadata, :job_artifacts_metadata)
     end
 
-    scope :with_artifacts_not_expired, ->() { with_downloadable_artifacts.where('artifacts_expire_at IS NULL OR artifacts_expire_at > ?', Time.current) }
-    scope :with_expired_artifacts, ->() { with_downloadable_artifacts.where('artifacts_expire_at < ?', Time.current) }
-    scope :last_month, ->() { where('created_at > ?', Date.today - 1.month) }
-    scope :manual_actions, ->() { where(when: :manual, status: COMPLETED_STATUSES + %i[manual]) }
-    scope :scheduled_actions, ->() { where(when: :delayed, status: COMPLETED_STATUSES + %i[scheduled]) }
+    scope :with_artifacts_not_expired, -> { with_downloadable_artifacts.where('artifacts_expire_at IS NULL OR artifacts_expire_at > ?', Time.current) }
+    scope :with_expired_artifacts, -> { with_downloadable_artifacts.where('artifacts_expire_at < ?', Time.current) }
+    scope :last_month, -> { where('created_at > ?', Date.today - 1.month) }
+    scope :manual_actions, -> { where(when: :manual, status: COMPLETED_STATUSES + %i[manual]) }
+    scope :scheduled_actions, -> { where(when: :delayed, status: COMPLETED_STATUSES + %i[scheduled]) }
     scope :ref_protected, -> { where(protected: true) }
     scope :with_live_trace, -> { where('EXISTS (?)', Ci::BuildTraceChunk.where('ci_builds.id = ci_build_trace_chunks.build_id').select(1)) }
     scope :with_stale_live_trace, -> { with_live_trace.finished_before(12.hours.ago) }
@@ -175,7 +178,6 @@ module Ci
     end
 
     scope :queued_before, ->(time) { where(arel_table[:queued_at].lt(time)) }
-    scope :order_id_desc, -> { order('ci_builds.id DESC') }
 
     scope :preload_project_and_pipeline_project, -> do
       preload(Ci::Pipeline::PROJECT_ROUTE_AND_NAMESPACE_ROUTE,
@@ -212,6 +214,10 @@ module Ci
           .new(build.project, current_user)
           .execute(build)
         # rubocop: enable CodeReuse/ServiceClass
+      end
+
+      def with_preloads
+        preload(:job_artifacts_archive, :job_artifacts, project: [:namespace])
       end
     end
 
@@ -321,6 +327,8 @@ module Ci
 
       after_transition any => [:success, :failed, :canceled] do |build|
         build.run_after_commit do
+          build.run_status_commit_hooks!
+
           BuildFinishedWorker.perform_async(id)
         end
       end
@@ -518,7 +526,6 @@ module Ci
           .concat(job_jwt_variables)
           .concat(scoped_variables)
           .concat(job_variables)
-          .concat(environment_changed_page_variables)
           .concat(persisted_environment_variables)
           .to_runner_variables
       end
@@ -552,15 +559,6 @@ module Ci
         # and we need to make sure that CI_ENVIRONMENT_NAME and
         # CI_ENVIRONMENT_SLUG so on are available for the URL be expanded.
         variables.append(key: 'CI_ENVIRONMENT_URL', value: environment_url) if environment_url
-      end
-    end
-
-    def environment_changed_page_variables
-      Gitlab::Ci::Variables::Collection.new.tap do |variables|
-        break variables unless environment_status && Feature.enabled?(:modifed_path_ci_variables, project)
-
-        variables.append(key: 'CI_MERGE_REQUEST_CHANGED_PAGE_PATHS', value: environment_status.changed_paths.join(','))
-        variables.append(key: 'CI_MERGE_REQUEST_CHANGED_PAGE_URLS', value: environment_status.changed_urls.join(','))
       end
     end
 
@@ -645,6 +643,10 @@ module Ci
 
     def artifacts?
       !artifacts_expired? && artifacts_file&.exists?
+    end
+
+    def locked_artifacts?
+      pipeline.artifacts_locked? && artifacts_file&.exists?
     end
 
     # This method is similar to #artifacts? but it includes the artifacts
@@ -770,6 +772,11 @@ module Ci
         end
     end
 
+    def has_expired_locked_archive_artifacts?
+      locked_artifacts? &&
+        artifacts_expire_at.present? && artifacts_expire_at < Time.current
+    end
+
     def has_expiring_archive_artifacts?
       has_expiring_artifacts? && job_artifacts_archive.present?
     end
@@ -867,13 +874,17 @@ module Ci
       options.dig(:release)&.any?
     end
 
-    def hide_secrets(trace)
+    def hide_secrets(data, metrics = ::Gitlab::Ci::Trace::Metrics.new)
       return unless trace
 
-      trace = trace.dup
-      Gitlab::Ci::MaskSecret.mask!(trace, project.runners_token) if project
-      Gitlab::Ci::MaskSecret.mask!(trace, token) if token
-      trace
+      data.dup.tap do |trace|
+        Gitlab::Ci::MaskSecret.mask!(trace, project.runners_token) if project
+        Gitlab::Ci::MaskSecret.mask!(trace, token) if token
+
+        if trace != data
+          metrics.increment_trace_operation(operation: :mutated)
+        end
+      end
     end
 
     def serializable_hash(options = {})
@@ -887,7 +898,11 @@ module Ci
     def collect_test_reports!(test_reports)
       test_reports.get_suite(group_name).tap do |test_suite|
         each_report(Ci::JobArtifact::TEST_REPORT_FILE_TYPES) do |file_type, blob|
-          Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, test_suite, job: self)
+          Gitlab::Ci::Parsers.fabricate!(file_type).parse!(
+            blob,
+            test_suite,
+            job: self
+          )
         end
       end
     end
@@ -945,7 +960,33 @@ module Ci
       var[:value]&.to_i if var
     end
 
+    def remove_pending_state!
+      pending_state.try(:delete)
+    end
+
+    def run_on_status_commit(&block)
+      status_commit_hooks.push(block)
+    end
+
+    def max_test_cases_per_report
+      # NOTE: This is temporary and will be replaced later by a value
+      # that would come from an actual application limit.
+      ::Gitlab.com? ? 500_000 : 0
+    end
+
+    protected
+
+    def run_status_commit_hooks!
+      status_commit_hooks.reverse_each do |hook|
+        instance_eval(&hook)
+      end
+    end
+
     private
+
+    def status_commit_hooks
+      @status_commit_hooks ||= []
+    end
 
     def auto_retry
       strong_memoize(:auto_retry) do

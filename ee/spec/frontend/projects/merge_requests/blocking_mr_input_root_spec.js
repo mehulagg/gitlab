@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import BlockingMrInputRoot from 'ee/projects/merge_requests/blocking_mr_input_root.vue';
-import RelatedIssuableInput from 'ee/related_issues/components/related_issuable_input.vue';
+import RelatedIssuableInput from '~/related_issues/components/related_issuable_input.vue';
 
 describe('blocking mr input root', () => {
   let wrapper;

@@ -1,9 +1,0 @@
-fragment Iteration on Iteration {
-  dueDate
-  id
-  scopedPath
-  startDate
-  state
-  title
-  webPath
-}

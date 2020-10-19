@@ -50,7 +50,7 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
 
           wait_for_requests
 
-          expect(page.find('.js-run-mr-pipeline')).to have_text('Run Pipeline')
+          expect(page.find('[data-testid="run_pipeline_button"]')).to have_text('Run Pipeline')
         end
       end
 
@@ -66,7 +66,7 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
 
           wait_for_requests
 
-          expect(page.find('.js-run-mr-pipeline')).to have_text('Run Pipeline')
+          expect(page.find('[data-testid="run_pipeline_button"]')).to have_text('Run Pipeline')
         end
       end
     end
@@ -122,6 +122,10 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
 
     context 'when actor is a developer in parent project' do
       let(:actor) { developer_in_parent }
+
+      before do
+        stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: false)
+      end
 
       it 'creates a pipeline in the parent project when user proceeds with the warning' do
         visit project_merge_request_path(parent_project, merge_request)

@@ -3,7 +3,8 @@ import { mockIntegrationProps } from 'jest/integrations/edit/mock_data';
 import { createStore } from '~/integrations/edit/store';
 import IntegrationForm from '~/integrations/edit/components/integration_form.vue';
 import OverrideDropdown from '~/integrations/edit/components/override_dropdown.vue';
-import ActiveToggle from '~/integrations/edit/components/active_toggle.vue';
+import ActiveCheckbox from '~/integrations/edit/components/active_checkbox.vue';
+import ConfirmationModal from '~/integrations/edit/components/confirmation_modal.vue';
 import JiraTriggerFields from '~/integrations/edit/components/jira_trigger_fields.vue';
 import JiraIssuesFields from '~/integrations/edit/components/jira_issues_fields.vue';
 import TriggerFields from '~/integrations/edit/components/trigger_fields.vue';
@@ -21,7 +22,8 @@ describe('IntegrationForm', () => {
       }),
       stubs: {
         OverrideDropdown,
-        ActiveToggle,
+        ActiveCheckbox,
+        ConfirmationModal,
         JiraTriggerFields,
         TriggerFields,
       },
@@ -39,27 +41,48 @@ describe('IntegrationForm', () => {
   });
 
   const findOverrideDropdown = () => wrapper.find(OverrideDropdown);
-  const findActiveToggle = () => wrapper.find(ActiveToggle);
+  const findActiveCheckbox = () => wrapper.find(ActiveCheckbox);
+  const findConfirmationModal = () => wrapper.find(ConfirmationModal);
   const findJiraTriggerFields = () => wrapper.find(JiraTriggerFields);
   const findJiraIssuesFields = () => wrapper.find(JiraIssuesFields);
   const findTriggerFields = () => wrapper.find(TriggerFields);
 
   describe('template', () => {
     describe('showActive is true', () => {
-      it('renders ActiveToggle', () => {
+      it('renders ActiveCheckbox', () => {
         createComponent();
 
-        expect(findActiveToggle().exists()).toBe(true);
+        expect(findActiveCheckbox().exists()).toBe(true);
       });
     });
 
     describe('showActive is false', () => {
-      it('does not render ActiveToggle', () => {
+      it('does not render ActiveCheckbox', () => {
         createComponent({
           showActive: false,
         });
 
-        expect(findActiveToggle().exists()).toBe(false);
+        expect(findActiveCheckbox().exists()).toBe(false);
+      });
+    });
+
+    describe('integrationLevel is instance', () => {
+      it('renders ConfirmationModal', () => {
+        createComponent({
+          integrationLevel: 'instance',
+        });
+
+        expect(findConfirmationModal().exists()).toBe(true);
+      });
+    });
+
+    describe('integrationLevel is not instance', () => {
+      it('does not render ConfirmationModal', () => {
+        createComponent({
+          integrationLevel: 'project',
+        });
+
+        expect(findConfirmationModal().exists()).toBe(false);
       });
     });
 
@@ -137,13 +160,13 @@ describe('IntegrationForm', () => {
       });
     });
 
-    describe('adminState state is null', () => {
+    describe('defaultState state is null', () => {
       it('does not render OverrideDropdown', () => {
         createComponent(
           {},
           {},
           {
-            adminState: null,
+            defaultState: null,
           },
         );
 
@@ -151,13 +174,13 @@ describe('IntegrationForm', () => {
       });
     });
 
-    describe('adminState state is an object', () => {
+    describe('defaultState state is an object', () => {
       it('renders OverrideDropdown', () => {
         createComponent(
           {},
           {},
           {
-            adminState: {
+            defaultState: {
               ...mockIntegrationProps,
             },
           },

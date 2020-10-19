@@ -1,7 +1,7 @@
 <script>
 import { camelCase } from 'lodash';
 import { mapState, mapActions } from 'vuex';
-import { GlSkeletonLoading } from '@gitlab/ui';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import { LICENSE_CHECK_NAME, VULNERABILITY_CHECK_NAME, JOB_TYPES } from 'ee/approvals/constants';
 import { s__ } from '~/locale';
 import UnconfiguredSecurityRule from './unconfigured_security_rule.vue';
@@ -49,7 +49,7 @@ export default {
             'SecurityApprovals|One or more of the security scanners must be enabled. %{linkStart}More information%{linkEnd}',
           ),
           enableDescription: s__(
-            'SecurityApprovals|Requires approval for vulnerabilties of Critical, High, or Unknown severity. %{linkStart}More information%{linkEnd}',
+            'SecurityApprovals|Requires approval for vulnerabilities of Critical, High, or Unknown severity. %{linkStart}More information%{linkEnd}',
           ),
           docsPath: this.vulnerabilityCheckHelpPagePath,
         },
@@ -59,7 +59,7 @@ export default {
             'SecurityApprovals|License Scanning must be enabled. %{linkStart}More information%{linkEnd}',
           ),
           enableDescription: s__(
-            'SecurityApprovals|Requires license policy rules for licenses of Allowed, or Denied. %{linkStart}More information%{linkEnd}',
+            'SecurityApprovals|Requires approval for Denied licenses. %{linkStart}More information%{linkEnd}',
           ),
           docsPath: this.licenseCheckHelpPagePath,
         },

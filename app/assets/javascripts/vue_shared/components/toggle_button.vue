@@ -59,7 +59,7 @@ export default {
 </script>
 
 <template>
-  <label class="toggle-wrapper">
+  <label class="gl-mt-2">
     <input v-if="name" :name="name" :value="value" type="hidden" />
     <button
       type="button"
@@ -73,7 +73,7 @@ export default {
         'is-disabled': disabledInput,
         'is-loading': isLoading,
       }"
-      @click="toggleFeature"
+      @click.prevent="toggleFeature"
     >
       <gl-loading-icon class="loading-icon" />
       <span class="toggle-icon">

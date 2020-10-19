@@ -237,7 +237,7 @@ li.note {
 }
 
 .warning_message {
-  @include message($orange-100, $orange-200, $orange-800);
+  @include message($orange-50, $orange-200, $gray-900);
 }
 
 .danger_message {
@@ -324,15 +324,8 @@ img.emoji {
 }
 
 .project-item-select-holder {
-  display: inline-block;
-  position: relative;
-
   .project-item-select {
-    position: absolute;
-    top: 0;
-    right: 0;
     min-width: 250px;
-    visibility: hidden;
   }
 }
 
@@ -416,7 +409,6 @@ img.emoji {
 .flex-no-shrink { flex-shrink: 0; }
 .ws-initial { white-space: initial; }
 .ws-normal { white-space: normal; }
-.ws-pre-wrap { white-space: pre-wrap; }
 .overflow-auto { overflow: auto; }
 .overflow-visible { overflow: visible; }
 
@@ -429,7 +421,6 @@ img.emoji {
 /** COMMON SIZING CLASSES **/
 .w-0 { width: 0; }
 .w-8em { width: 8em; }
-.w-3rem { width: 3rem; }
 .w-15p { width: 15%; }
 .w-30p { width: 30%; }
 .w-60p { width: 60%; }
@@ -528,4 +519,3 @@ img.emoji {
 See https://gitlab.com/gitlab-org/gitlab/issues/36857 for more details.
 **/
 .gl-line-height-14 { line-height: $gl-line-height-14; }
-.gl-font-size-20 { font-size: $gl-font-size-20; }

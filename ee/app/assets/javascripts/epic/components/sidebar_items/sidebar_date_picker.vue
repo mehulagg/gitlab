@@ -1,13 +1,12 @@
 <script>
 import { uniqueId } from 'lodash';
-import { GlLoadingIcon, GlButton } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton, GlIcon } from '@gitlab/ui';
 
 import { __, s__ } from '~/locale';
 import { dateInWords } from '~/lib/utils/datetime_utility';
 
 import tooltip from '~/vue_shared/directives/tooltip';
 import popover from '~/vue_shared/directives/popover';
-import Icon from '~/vue_shared/components/icon.vue';
 import DatePicker from '~/vue_shared/components/pikaday.vue';
 import CollapsedCalendarIcon from '~/vue_shared/components/sidebar/collapsed_calendar_icon.vue';
 import ToggleSidebar from '~/vue_shared/components/sidebar/toggle_sidebar.vue';
@@ -21,7 +20,7 @@ export default {
     popover,
   },
   components: {
-    Icon,
+    GlIcon,
     DatePicker,
     CollapsedCalendarIcon,
     ToggleSidebar,
@@ -200,7 +199,12 @@ export default {
       {{ label }}
       <gl-loading-icon v-if="dateSaveInProgress" :inline="true" />
       <div class="float-right d-flex">
-        <icon v-popover="popoverOptions" name="question-o" class="help-icon gl-mr-2" tabindex="0" />
+        <gl-icon
+          v-popover="popoverOptions"
+          name="question-o"
+          class="help-icon gl-mr-2"
+          tabindex="0"
+        />
         <gl-button
           v-show="canUpdate && !editing"
           ref="editButton"
@@ -241,7 +245,7 @@ export default {
         <span v-else class="d-flex value-content gl-ml-1">
           <template v-if="dateFixed">
             <span>{{ dateFixedWords }}</span>
-            <icon
+            <gl-icon
               v-if="isDateInvalid && selectedDateIsFixed"
               v-popover="dateInvalidPopoverOptions"
               name="warning"
@@ -280,7 +284,7 @@ export default {
         />
         <span class="gl-ml-2">{{ __('Inherited:') }}</span>
         <span class="value-content gl-ml-1">{{ dateFromMilestonesWords }}</span>
-        <icon
+        <gl-icon
           v-if="isDateInvalid && !selectedDateIsFixed"
           v-popover="dateInvalidPopoverOptions"
           name="warning"

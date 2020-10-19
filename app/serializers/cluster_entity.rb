@@ -6,6 +6,8 @@ class ClusterEntity < Grape::Entity
   expose :cluster_type
   expose :enabled
   expose :environment_scope
+  expose :id
+  expose :namespace_per_environment
   expose :name
   expose :nodes
   expose :provider_type
@@ -23,5 +25,9 @@ class ClusterEntity < Grape::Entity
 
   expose :kubernetes_errors do |cluster|
     ClusterErrorEntity.new(cluster)
+  end
+
+  expose :enable_advanced_logs_querying do |cluster|
+    cluster.application_elastic_stack_available?
   end
 end

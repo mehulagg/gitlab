@@ -6,7 +6,7 @@ RSpec.describe Projects::IterationsController do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
 
-  context 'index' do
+  describe 'index' do
     context 'when iterations license is not available' do
       before do
         stub_licensed_features(iterations: false)

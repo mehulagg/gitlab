@@ -87,15 +87,15 @@ describe('RoadmapApp', () => {
       });
 
       it(`loading icon is${showLoading ? '' : ' not'} shown`, () => {
-        expect(wrapper.contains(GlLoadingIcon)).toBe(showLoading);
+        expect(wrapper.find(GlLoadingIcon).exists()).toBe(showLoading);
       });
 
       it(`roadmap is${showRoadmapShell ? '' : ' not'} shown`, () => {
-        expect(wrapper.contains(RoadmapShell)).toBe(showRoadmapShell);
+        expect(wrapper.find(RoadmapShell).exists()).toBe(showRoadmapShell);
       });
 
       it(`empty state view is${showEpicsListEmpty ? '' : ' not'} shown`, () => {
-        expect(wrapper.contains(EpicsListEmpty)).toBe(showEpicsListEmpty);
+        expect(wrapper.find(EpicsListEmpty).exists()).toBe(showEpicsListEmpty);
       });
     },
   );
@@ -146,7 +146,7 @@ describe('RoadmapApp', () => {
     });
 
     it('contains roadmap filters UI', () => {
-      expect(wrapper.contains(RoadmapFilters)).toBe(true);
+      expect(wrapper.find(RoadmapFilters).exists()).toBe(true);
     });
 
     it('contains the current group id', () => {

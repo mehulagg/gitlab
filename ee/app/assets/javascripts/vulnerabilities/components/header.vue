@@ -1,5 +1,5 @@
 <script>
-import { GlLoadingIcon, GlButton } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton, GlBadge } from '@gitlab/ui';
 import Api from 'ee/api';
 import { CancelToken } from 'axios';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
@@ -13,7 +13,6 @@ import ResolutionAlert from './resolution_alert.vue';
 import VulnerabilityStateDropdown from './vulnerability_state_dropdown.vue';
 import StatusDescription from './status_description.vue';
 import { VULNERABILITY_STATE_OBJECTS, FEEDBACK_TYPES, HEADER_ACTION_BUTTONS } from '../constants';
-import VulnerabilitiesEventBus from './vulnerabilities_event_bus';
 
 export default {
   name: 'VulnerabilityHeader',
@@ -21,6 +20,7 @@ export default {
   components: {
     GlLoadingIcon,
     GlButton,
+    GlBadge,
     ResolutionAlert,
     VulnerabilityStateDropdown,
     SplitButton,
@@ -39,13 +39,24 @@ export default {
       isProcessingAction: false,
       isLoadingVulnerability: false,
       isLoadingUser: false,
-      vulnerability: this.initialVulnerability,
+      // Spread operator because the header could modify the `project`
+      // prop leading to an error in the footer component.
+      vulnerability: { ...this.initialVulnerability },
       user: undefined,
       refreshVulnerabilitySource: undefined,
     };
   },
 
+  badgeVariants: {
+    confirmed: 'danger',
+    resolved: 'success',
+    detected: 'warning',
+  },
+
   computed: {
+    stateVariant() {
+      return this.$options.badgeVariants[this.vulnerability.state] || 'neutral';
+    },
     actionButtons() {
       const buttons = [];
 
@@ -80,10 +91,6 @@ export default {
         this.hasRemediation
       );
     },
-    statusBoxStyle() {
-      // Get the badge variant based on the vulnerability state, defaulting to 'expired'.
-      return VULNERABILITY_STATE_OBJECTS[this.vulnerability.state]?.statusBoxStyle || 'expired';
-    },
     showResolutionAlert() {
       return (
         this.vulnerability.resolved_on_default_branch &&
@@ -116,14 +123,6 @@ export default {
     },
   },
 
-  created() {
-    VulnerabilitiesEventBus.$on('VULNERABILITY_STATE_CHANGED', this.refreshVulnerability);
-  },
-
-  destroyed() {
-    VulnerabilitiesEventBus.$off('VULNERABILITY_STATE_CHANGED', this.refreshVulnerability);
-  },
-
   methods: {
     triggerClick(action) {
       const fn = this[action];
@@ -135,6 +134,7 @@ export default {
       Api.changeVulnerabilityState(this.vulnerability.id, newState)
         .then(({ data }) => {
           Object.assign(this.vulnerability, data);
+          this.$emit('vulnerability-state-change');
         })
         .catch(() => {
           createFlash(
@@ -145,7 +145,6 @@ export default {
         })
         .finally(() => {
           this.isLoadingVulnerability = false;
-          VulnerabilitiesEventBus.$emit('VULNERABILITY_STATE_CHANGE');
         });
     },
     createMergeRequest() {
@@ -231,15 +230,9 @@ export default {
     <div class="detail-page-header">
       <div class="detail-page-header-body align-items-center">
         <gl-loading-icon v-if="isLoadingVulnerability" class="mr-2" />
-        <span
-          v-else
-          ref="badge"
-          :class="
-            `text-capitalize align-self-center issuable-status-box status-box status-box-${statusBoxStyle}`
-          "
-        >
+        <gl-badge v-else class="gl-mr-4 text-capitalize" :variant="stateVariant">
           {{ vulnerability.state }}
-        </span>
+        </gl-badge>
 
         <status-description
           class="issuable-meta"

@@ -3,12 +3,26 @@
 module Ci
   module Minutes
     class BatchResetService
-      BatchNotResetError = Class.new(StandardError)
+      class BatchNotResetError < StandardError
+        def initialize(failed_batches)
+          @failed_batches = failed_batches
+        end
+
+        def message
+          'Some namespace shared runner minutes were not reset'
+        end
+
+        def sentry_extra_data
+          {
+            failed_batches: @failed_batches
+          }
+        end
+      end
 
       BATCH_SIZE = 1000.freeze
 
       def initialize
-        @errors = []
+        @failed_batches = []
       end
 
       def execute!(ids_range: nil, batch_size: BATCH_SIZE)
@@ -18,10 +32,7 @@ module Ci
           reset_ci_minutes!(namespaces)
         end
 
-        if @errors.any?
-          exception = BatchNotResetError.new('Some namespace shared runner minutes were not reset.')
-          Gitlab::ErrorTracking.track_and_raise_exception(exception, namespace_ranges: @errors)
-        end
+        raise BatchNotResetError.new(@failed_batches) if @failed_batches.any?
       end
 
       private
@@ -35,8 +46,16 @@ module Ci
           reset_shared_runners_seconds!(namespaces)
           reset_ci_minutes_notifications!(namespaces)
         end
-      rescue ActiveRecord::ActiveRecordError
-        @errors << { count: namespaces.size, first_id: namespaces.first.id, last_id: namespaces.last.id }
+      rescue ActiveRecord::ActiveRecordError => e
+        # We cleanup the backtrace for intermediate errors so they remain compact and
+        # relevant due to the possibility of having many failed batches.
+        @failed_batches << {
+          count: namespaces.size,
+          first_namespace_id: namespaces.first.id,
+          last_namespace_id: namespaces.last.id,
+          error_message: e.message,
+          error_backtrace: ::Gitlab::BacktraceCleaner.clean_backtrace(e.backtrace)
+        }
       end
 
       # This service is responsible for the logic that recalculates the extra shared runners
@@ -81,11 +100,9 @@ module Ci
 
       def reset_shared_runners_seconds!(namespaces)
         namespace_relation = NamespaceStatistics.for_namespaces(namespaces)
-        namespace_relation = namespace_relation.with_any_ci_minutes_used unless ::Gitlab::Ci::Features.reset_ci_minutes_for_all_namespaces?
         namespace_relation.update_all(shared_runners_seconds: 0, shared_runners_seconds_last_reset: Time.current)
 
         project_relation = ::ProjectStatistics.for_namespaces(namespaces)
-        project_relation = project_relation.with_any_ci_minutes_used unless ::Gitlab::Ci::Features.reset_ci_minutes_for_all_namespaces?
         project_relation.update_all(shared_runners_seconds: 0, shared_runners_seconds_last_reset: Time.current)
       end
 

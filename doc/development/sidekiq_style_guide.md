@@ -215,6 +215,85 @@ From the rails console:
 Feature.enable!(:disable_authorized_projects_deduplication)
 ```
 
+## Limited capacity worker
+
+It is possible to limit the number of concurrent running jobs for a worker class
+by using the `LimitedCapacity::Worker` concern.
+
+The worker must implement three methods:
+
+- `perform_work` - the concern implements the usual `perform` method and calls
+`perform_work` if there is any capacity available.
+- `remaining_work_count` - number of jobs that will have work to perform.
+- `max_running_jobs` - maximum number of jobs allowed to run concurrently.
+
+```ruby
+class MyDummyWorker
+  include ApplicationWorker
+  include LimitedCapacity::Worker
+
+  def perform_work(*args)
+  end
+
+  def remaining_work_count(*args)
+    5
+  end
+
+  def max_running_jobs
+    25
+  end
+end
+```
+
+Additional to the regular worker, a cron worker must be defined as well to
+backfill the queue with jobs. the arguments passed to `perform_with_capacity`
+will be passed along to the `perform_work` method.
+
+```ruby
+class ScheduleMyDummyCronWorker
+  include ApplicationWorker
+  include CronjobQueue
+
+  def perform(*args)
+    MyDummyWorker.perform_with_capacity(*args)
+  end
+end
+```
+
+### How many jobs are running?
+
+It will be running `max_running_jobs` at almost all times.
+
+The cron worker will check the remaining capacity on each execution and it
+will schedule at most `max_running_jobs` jobs. Those jobs on completion will
+re-enqueue themselves immediately, but not on failure. The cron worker is in
+charge of replacing those failed jobs.
+
+### Handling errors and idempotence
+
+This concern disables Sidekiq retries, logs the errors, and sends the job to the
+dead queue. This is done to have only one source that produces jobs and because
+the retry would occupy a slot with a job that will be performed in the distant future.
+
+We let the cron worker enqueue new jobs, this could be seen as our retry and
+back off mechanism because the job might fail again if executed immediately.
+This means that for every failed job, we will be running at a lower capacity
+until the cron worker fills the capacity again. If it is important for the
+worker not to get a backlog, exceptions must be handled in `#perform_work` and
+the job should not raise.
+
+The jobs are deduplicated using the `:none` strategy, but the worker is not
+marked as `idempotent!`.
+
+### Metrics
+
+This concern exposes three Prometheus metrics of gauge type with the worker class
+name as label:
+
+- `limited_capacity_worker_running_jobs`
+- `limited_capacity_worker_max_running_jobs`
+- `limited_capacity_worker_remaining_work_count`
+
 ## Job urgency
 
 Jobs can have an `urgency` attribute set, which can be `:high`,
@@ -615,42 +694,51 @@ Jobs need to be backward and forward compatible between consecutive versions
 of the application. Adding or removing an argument may cause problems
 during deployment before all Rails and Sidekiq nodes have the updated code.
 
-#### Remove an argument
+#### Deprecate and remove an argument
 
-**Do not remove arguments from the `perform` function.**. Instead, use the
-following approach:
+**Before you remove arguments from the `perform_async` and `perform` methods.**, deprecate them. The
+following example deprecates and then removes `arg2` from the `perform_async` method:
 
 1. Provide a default value (usually `nil`) and use a comment to mark the
-   argument as deprecated
-1. Stop using the argument in `perform_async`.
-1. Ignore the value in the worker class, but do not remove it until the next
-   major release.
+   argument as deprecated in the coming minor release. (Release M)
 
-In the following example, if you want to remove `arg2`, first set a `nil` default value,
-and then update locations where `ExampleWorker.perform_async` is called.
+    ```ruby
+    class ExampleWorker
+      # Keep arg2 parameter for backwards compatibility.
+      def perform(object_id, arg1, arg2 = nil)
+        # ...
+      end
+    end
+    ```
 
-```ruby
-class ExampleWorker
-  def perform(object_id, arg1, arg2 = nil)
-    # ...
-  end
-end
-```
+1. One minor release later, stop using the argument in `perform_async`. (Release M+1)
+
+    ```ruby
+    ExampleWorker.perform_async(object_id, arg1)
+    ```
+
+1. At the next major release, remove the value from the worker class. (Next major release)
+
+    ```ruby
+    class ExampleWorker
+      def perform(object_id, arg1)
+        # ...
+      end
+    end
+    ```
 
 #### Add an argument
 
 There are two options for safely adding new arguments to Sidekiq workers:
 
-1. Set up a [multi-step deployment](#multi-step-deployment) in which the new argument is first added to the worker
+1. Set up a [multi-step deployment](#multi-step-deployment) in which the new argument is first added to the worker.
 1. Use a [parameter hash](#parameter-hash) for additional arguments. This is perhaps the most flexible option.
 
 ##### Multi-step deployment
 
-This approach requires multiple merge requests and for the first merge request
-to be merged and deployed before additional changes are merged.
+This approach requires multiple releases.
 
-1. In an initial merge request, add the argument to the worker with a default
-   value:
+1. Add the argument to the worker with a default value (Release M).
 
     ```ruby
     class ExampleWorker
@@ -660,16 +748,28 @@ to be merged and deployed before additional changes are merged.
     end
     ```
 
-1. Merge and deploy the worker with the new argument.
-1. In a further merge request, update `ExampleWorker.perform_async` calls to
-   use the new argument.
+1. Add the new argument to all the invocations of the worker (Release M+1).
+
+    ```ruby
+    ExampleWorker.perform_async(object_id, new_arg)
+    ```
+
+1. Remove the default value (Release M+2).
+
+    ```ruby
+    class ExampleWorker
+      def perform(object_id, new_arg)
+        # ...
+      end
+    end
+    ```
 
 ##### Parameter hash
 
-This approach will not require multiple deployments if an existing worker already
+This approach will not require multiple releases if an existing worker already
 utilizes a parameter hash.
 
-1. Use a parameter hash in the worker to allow for future flexibility:
+1. Use a parameter hash in the worker to allow future flexibility.
 
     ```ruby
     class ExampleWorker

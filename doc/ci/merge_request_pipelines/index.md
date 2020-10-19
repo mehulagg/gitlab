@@ -13,7 +13,7 @@ last_update: 2019-07-03
 In a [basic configuration](../pipelines/pipeline_architectures.md#basic-pipelines), GitLab runs a pipeline each time
 changes are pushed to a branch.
 
-If you want the pipeline to run jobs **only** when merge requests are created or updated,
+If you want the pipeline to run jobs **only** on commits to a branch that is associated with a merge request,
 you can use *pipelines for merge requests*.
 
 In the UI, these pipelines are labeled as `detached`. Otherwise, these pipelines appear the same
@@ -24,7 +24,6 @@ can run a pipeline for merge requests.
 
 ![Merge request page](img/merge_request.png)
 
-NOTE: **Note:**
 If you use this feature with [merge when pipeline succeeds](../../user/project/merge_requests/merge_when_pipeline_succeeds.md),
 pipelines for merge requests take precedence over the other regular pipelines.
 
@@ -125,8 +124,9 @@ Therefore:
 - Since `C` specifies that it should only run for merge requests, it will not run for any pipeline
   except a merge request pipeline.
 
-This helps you avoid having to add the `only:` rule to all of your jobs
-in order to make them always run. You can use this format to set up a Review App, helping to save resources.
+This helps you avoid having to add the `only:` rule to all of your jobs to make
+them always run. You can use this format to set up a Review App, helping to
+save resources.
 
 #### Excluding certain branches
 
@@ -179,7 +179,7 @@ coming from a fork:
 
 Sometimes parent project members want the pipeline to run in the parent
 project. This could be to ensure that the post-merge pipeline passes in the parent project.
-For example, a fork project could try to use a corrupted Runner that doesn't execute
+For example, a fork project could try to use a corrupted runner that doesn't execute
 test scripts properly, but reports a passed pipeline. Reviewers in the parent project
 could mistakenly trust the merge request because it passed a faked pipeline.
 

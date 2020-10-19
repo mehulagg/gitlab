@@ -10,7 +10,7 @@ import StateTooltip from 'ee/related_items_tree/components/state_tooltip.vue';
 import createDefaultStore from 'ee/related_items_tree/store';
 import * as epicUtils from 'ee/related_items_tree/utils/epic_utils';
 import { ChildType, ChildState } from 'ee/related_items_tree/constants';
-import { PathIdSeparator } from 'ee/related_issues/constants';
+import { PathIdSeparator } from '~/related_issues/constants';
 import ItemAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
 import ItemDueDate from '~/boards/components/issue_due_date.vue';
 import ItemMilestone from '~/vue_shared/components/issue/issue_milestone.vue';

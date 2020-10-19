@@ -32,7 +32,7 @@ module Mutations
       def resolve(project_path:, target_url:, branch:, scan_type:)
         project = authorized_find!(full_path: project_path)
 
-        service = Ci::RunDastScanService.new(project, current_user)
+        service = ::Ci::RunDastScanService.new(project, current_user)
         result = service.execute(branch: branch, target_url: target_url)
 
         if result.success?

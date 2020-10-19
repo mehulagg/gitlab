@@ -6,6 +6,7 @@ RSpec.describe 'Display approaching user count limit banner', :js do
   let_it_be(:admin) { create(:admin) }
   let_it_be(:user) { create(:user) }
   let_it_be(:license_seats_limit) { 10 }
+  let_it_be(:visit_path) { root_dashboard_path }
 
   let_it_be(:license) do
     create(:license, data: build(:gitlab_license, restrictions: { active_user_count: license_seats_limit }).export)
@@ -13,7 +14,7 @@ RSpec.describe 'Display approaching user count limit banner', :js do
 
   shared_examples_for 'a visible banner' do
     it 'shows the banner' do
-      visit root_dashboard_path
+      visit visit_path
 
       expect(page).to have_content('Your instance is approaching its licensed user count')
       expect(page).to have_link('View users statistics', href: admin_users_path)
@@ -23,7 +24,7 @@ RSpec.describe 'Display approaching user count limit banner', :js do
 
   shared_examples_for 'a hidden banner' do
     it 'does not show the banner' do
-      visit root_dashboard_path
+      visit visit_path
 
       expect(page).not_to have_content('Your instance is approaching its licensed user count')
       expect(page).not_to have_link('View users statistics', href: admin_users_path)
@@ -32,24 +33,35 @@ RSpec.describe 'Display approaching user count limit banner', :js do
   end
 
   before do
-    create(:historical_data, date: license.created_at + 1.month, active_user_count: active_user_count)
+    create_list(:user, active_user_count)
   end
 
   context 'with reached user count threshold' do
-    let(:active_user_count) { license_seats_limit - 1 }
+    let(:active_user_count) { license_seats_limit - 3 }
 
     context 'when admin is logged in' do
       before do
         gitlab_sign_in(admin)
       end
 
-      it_behaves_like 'a visible banner'
+      context 'in admin area' do
+        let(:visit_path) { admin_root_path }
 
-      context 'when banner was dismissed' do
+        it_behaves_like 'a visible banner'
+
+        context 'when banner was dismissed' do
+          before do
+            visit admin_root_path
+            find('.gl-alert-dismiss').click
+          end
+
+          it_behaves_like 'a hidden banner'
+        end
+      end
+
+      context 'in regular area' do
         before do
           visit root_dashboard_path
-
-          find('.gl-alert-dismiss').click
         end
 
         it_behaves_like 'a hidden banner'

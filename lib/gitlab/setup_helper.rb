@@ -38,8 +38,7 @@ module Gitlab
         end
 
         def redis_url
-          data = YAML.load_file(Rails.root.join('config/resque.yml'))
-          data.dig(Rails.env, 'url')
+          Gitlab::Redis::SharedState.url
         end
 
         def get_config_path(dir)

@@ -55,7 +55,12 @@ export const fetchReplicableItemsGraphQl = ({ state, dispatch }, direction) => {
       variables: { first, last, before, after },
     })
     .then(res => {
-      const registries = res.data.geoNode.packageFileRegistries;
+      if (!res.data.geoNode || !(state.graphqlFieldName in res.data.geoNode)) {
+        dispatch('receiveReplicableItemsSuccess', { data: [], pagination: null });
+        return;
+      }
+
+      const registries = res.data.geoNode[state.graphqlFieldName];
       const data = registries.nodes;
       const pagination = {
         ...registries.pageInfo,

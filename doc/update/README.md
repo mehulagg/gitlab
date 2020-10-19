@@ -123,7 +123,7 @@ If using GitLab 12.9 and newer, run:
 sudo gitlab-rails runner -e production 'puts Gitlab::BackgroundMigration.remaining'
 ```
 
-If using GitLab 12.8 and older, run the following using a [Rails console](../administration/troubleshooting/debug.md#starting-a-rails-console-session):
+If using GitLab 12.8 and older, run the following using a [Rails console](../administration/operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 puts Sidekiq::Queue.new("background_migration").size
@@ -141,7 +141,7 @@ cd /home/git/gitlab
 sudo -u git -H bundle exec rails runner -e production 'puts Gitlab::BackgroundMigration.remaining'
 ```
 
-If using GitLab 12.8 and older, run the following using a [Rails console](../administration/troubleshooting/debug.md#starting-a-rails-console-session):
+If using GitLab 12.8 and older, run the following using a [Rails console](../administration/operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 puts Sidekiq::Queue.new("background_migration").size
@@ -310,3 +310,4 @@ for more information.
 - [Restoring from backup after a failed upgrade](restore_after_failure.md)
 - [Upgrading PostgreSQL Using Slony](upgrading_postgresql_using_slony.md), for
   upgrading a PostgreSQL database with minimal downtime.
+- [Managing PostgreSQL extensions](../install/postgresql_extensions.md)

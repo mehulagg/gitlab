@@ -81,6 +81,26 @@ RSpec.describe UserCalloutsHelper do
     end
   end
 
+  describe '.show_service_templates_deprecated?' do
+    subject { helper.show_service_templates_deprecated? }
+
+    context 'when user has not dismissed' do
+      before do
+        allow(helper).to receive(:user_dismissed?).with(described_class::SERVICE_TEMPLATES_DEPRECATED) { false }
+      end
+
+      it { is_expected.to be true }
+    end
+
+    context 'when user dismissed' do
+      before do
+        allow(helper).to receive(:user_dismissed?).with(described_class::SERVICE_TEMPLATES_DEPRECATED) { true }
+      end
+
+      it { is_expected.to be false }
+    end
+  end
+
   describe '.show_customize_homepage_banner?' do
     let(:customize_homepage) { true }
 
@@ -117,6 +137,28 @@ RSpec.describe UserCalloutsHelper do
         .with(/flash_user_callout/, flash_type: :warning, message: 'foo', feature_name: 'bar')
 
       helper.render_flash_user_callout(:warning, 'foo', 'bar')
+    end
+  end
+
+  describe '.show_feature_flags_new_version?' do
+    subject { helper.show_feature_flags_new_version? }
+
+    let(:user) { create(:user) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    context 'when the feature flags new version info has not been dismissed' do
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when the feature flags new version has been dismissed' do
+      before do
+        create(:user_callout, user: user, feature_name: described_class::FEATURE_FLAGS_NEW_VERSION)
+      end
+
+      it { is_expected.to be_falsy }
     end
   end
 end

@@ -27,7 +27,7 @@ describe('ee/epic/components/epic_form.vue', () => {
       },
       stubs: {
         ApolloMutation,
-        MarkdownField: '<div><slot name="textarea"></slot></div>',
+        MarkdownField: { template: '<div><slot name="textarea"></slot></div>' },
       },
       mocks: {
         $apollo: {
