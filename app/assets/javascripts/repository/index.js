@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import PathLastCommitQuery from 'shared_queries/repository/path_last_commit.query.graphql';
+import permissionsQuery from 'shared_queries/repository/permissions.query.graphql';
 import { escapeFileUrl } from '../lib/utils/url_utility';
 import createRouter from './router';
 import App from './components/app.vue';
@@ -96,27 +97,48 @@ export default function setupVueRepositoryList() {
       updateFormAction('.js-create-dir-form', newDirPath, path);
     });
 
-    // eslint-disable-next-line no-new
-    new Vue({
-      el: breadcrumbEl,
-      router,
-      apolloProvider,
-      render(h) {
-        return h(Breadcrumbs, {
-          props: {
-            currentPath: this.$route.params.path,
-            canCollaborate: parseBoolean(canCollaborate),
-            canEditTree: parseBoolean(canEditTree),
-            newBranchPath,
-            newTagPath,
-            newBlobPath,
-            forkNewBlobPath,
-            forkNewDirectoryPath,
-            forkUploadBlobPath,
-          },
-        });
-      },
-    });
+    const initBreadcrumbsApp = () =>
+      new Vue({
+        el: breadcrumbEl,
+        router,
+        apolloProvider,
+        render(h) {
+          return h(Breadcrumbs, {
+            props: {
+              currentPath: this.$route.params.path,
+              canCollaborate: parseBoolean(canCollaborate),
+              canEditTree: parseBoolean(canEditTree),
+              newBranchPath,
+              newTagPath,
+              newBlobPath,
+              forkNewBlobPath,
+              forkNewDirectoryPath,
+              forkUploadBlobPath,
+            },
+          });
+        },
+      });
+
+    if (window.gl.startup_graphql_calls) {
+      const query = window.gl.startup_graphql_calls.find(
+        call => call.operationName === 'getPermissions',
+      );
+      query.fetchCall
+        .then(res => res.json())
+        .then(res => {
+          apolloProvider.clients.defaultClient.writeQuery({
+            query: permissionsQuery,
+            data: res.data,
+            variables: {
+              projectPath,
+            },
+          });
+        })
+        .catch(() => {})
+        .finally(() => initBreadcrumbsApp());
+    } else {
+      initBreadcrumbsApp();
+    }
   }
 
   const treeHistoryLinkEl = document.getElementById('js-tree-history-link');
