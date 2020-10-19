@@ -14651,6 +14651,20 @@ CREATE VIEW postgres_partitioned_tables AS
             ELSE NULL::text
         END;
 
+CREATE VIEW postgres_partitions AS
+ SELECT DISTINCT (((pg_namespace.nspname)::text || '.'::text) || (pg_class.relname)::text) AS identifier,
+    pg_class.oid,
+    pg_namespace.nspname AS schema,
+    pg_class.relname AS name,
+    (((parent_namespace.nspname)::text || '.'::text) || (parent_class.relname)::text) AS parent_identifier,
+    pg_get_expr(pg_class.relpartbound, pg_inherits.inhrelid) AS condition
+   FROM ((((pg_class
+     JOIN pg_namespace ON ((pg_namespace.oid = pg_class.relnamespace)))
+     JOIN pg_inherits ON ((pg_class.oid = pg_inherits.inhrelid)))
+     JOIN pg_class parent_class ON ((pg_inherits.inhparent = parent_class.oid)))
+     JOIN pg_namespace parent_namespace ON ((parent_class.relnamespace = parent_namespace.oid)))
+  WHERE (pg_namespace.nspname = ANY (ARRAY["current_schema"(), 'gitlab_partitions_dynamic'::name, 'gitlab_partitions_static'::name]));
+
 CREATE TABLE postgres_reindex_actions (
     id bigint NOT NULL,
     action_start timestamp with time zone NOT NULL,
