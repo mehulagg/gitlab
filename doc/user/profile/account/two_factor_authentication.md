@@ -36,7 +36,7 @@ if you lose your U2F device.
 There are two ways to enable two-factor authentication: via a one time password authenticator
 or a U2F device.
 
-### Enable 2FA via one time password authenticator
+### One-time password
 
 To enable 2FA:
 
@@ -66,7 +66,72 @@ two-factor authentication has been enabled, and you'll be presented with a list
 of [recovery codes](#recovery-codes). Make sure you download them and keep them
 in a safe place.
 
-### Enable 2FA via U2F device
+### One-time password via FortiAuthenticator
+
+> - Introduced in [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/212312)
+> - It's deployed behind a feature flag, disabled by default.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enabling-fortiauthenticator-integration).
+
+You can use FortiAuthenticator as an OTP provider in GitLab. Users must exist in
+both FortiAuthenticator and GitLab with the exact same username.
+
+First configure FortiAuthenticator in GitLab. On your GitLab server:
+
+1. Open the configuration file.
+
+   For Omnibus GitLab:
+
+   ```shell
+   sudo editor /etc/gitlab/gitlab.rb
+   ```
+
+   For installations from source:
+
+   ```shell
+   cd /home/git/gitlab
+   sudo -u git -H editor config/gitlab.yml
+   ```
+
+1. Add the provider configuration:
+
+   For Omnibus package:
+
+   ```ruby
+   gitlab_rails['forti_authenticator_enabled'] = true
+   gitlab_rails['forti_authenticator_host'] = 'forti_authenticator.example.com'
+   gitlab_rails['forti_authenticator_port'] = 443
+   gitlab_rails['forti_authenticator_username'] = 'janedoe'
+   gitlab_rails['forti_authenticator_access_token'] = 's3cr3t'
+   ```
+
+   For installations from source:
+
+   ```yaml
+   forti_authenticator:
+     enabled: true
+     host: forti_authenticator.example.com
+     port: 443
+     username: janedoe
+     access_token: s3cr3t
+   ```
+
+1. Save the configuration file.
+1. [Reconfigure](../administration/restart_gitlab.md#omnibus-gitlab-reconfigure) or [restart GitLab](../administration/restart_gitlab.md#installations-from-source) for the changes to take effect if you
+   installed GitLab via Omnibus or from source respectively.
+
+#### Enabling FortiAuthenticator integration
+
+This feature comes with the `:forti_authenticator` feature flag disabled by
+default.
+
+To enable this feature, ask a GitLab administrator with [Rails console access](../administration/feature_flags.md#how-to-enable-and-disable-features-behind-flags)
+to run the following command:
+
+```ruby
+Feature.enable(:forti_authenticator, User.find(<user ID>))
+```
+
+### U2F device
 
 > Introduced in [GitLab 8.9](https://about.gitlab.com/blog/2016/06/22/gitlab-adds-support-for-u2f/).
 
