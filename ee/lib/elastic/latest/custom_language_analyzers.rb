@@ -5,6 +5,8 @@ module Elastic
     module CustomLanguageAnalyzers
       extend self
 
+      SUPPORTED_FIELDS = %w(title description).freeze
+
       def custom_analyzers_fields(type:)
         {}.tap do |hash|
           custom_analyzers_enabled.each do |analyzer|
@@ -16,17 +18,27 @@ module Elastic
         end
       end
 
-      def custom_analyzers_enabled
-        [].tap do |enabled|
-          enabled << 'smartcn' if ApplicationSetting.current.elasticsearch_analyzers_smartcn_enabled
-          enabled << 'kuromoji' if ApplicationSetting.current.elasticsearch_analyzers_kuromiji_enabled
+      def add_custom_analyzers_fields(fields)
+        return fields if custom_analyzers_search.blank?
+
+        fields_names = fields.map { |m| m[/\w+/] }
+
+        SUPPORTED_FIELDS.each do |field|
+          next unless fields_names.include?(field)
+
+          fields << "#{field}.smartcn" if ::Gitlab::CurrentSettings.elasticsearch_analyzers_smartcn_search
+          fields << "#{field}.kuromoji" if ::Gitlab::CurrentSettings.elasticsearch_analyzers_kuromoji_search
         end
+
+        fields
       end
 
-      def custom_analyzers_search
+      private
+
+      def custom_analyzers_enabled
         [].tap do |enabled|
-          enabled << 'smartcn' if ApplicationSetting.current.elasticsearch_analyzers_smartcn_search
-          enabled << 'kuromoji' if ApplicationSetting.current.elasticsearch_analyzers_kuromiji_search
+          enabled << 'smartcn' if ::Gitlab::CurrentSettings.elasticsearch_analyzers_smartcn_enabled
+          enabled << 'kuromoji' if ::Gitlab::CurrentSettings.elasticsearch_analyzers_kuromoji_enabled
         end
       end
     end

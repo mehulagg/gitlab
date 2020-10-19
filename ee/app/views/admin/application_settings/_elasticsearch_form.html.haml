@@ -173,12 +173,12 @@
             custom analyzer
           .form-group
             .form-check
-              = f.check_box :elasticsearch_analyzers_smartcn_enabled, class: 'form-check-input'
+              = f.check_box :elasticsearch_analyzers_kuromoji_enabled, class: 'form-check-input'
               = f.label :elasticsearch_indexing, class: 'form-check-label' do
                 = _('kuromoji custom analyzer: Indexing')
           .form-group
             .form-check
-              = f.check_box :elasticsearch_analyzers_smartcn_search, class: 'form-check-input'
+              = f.check_box :elasticsearch_analyzers_kuromoji_search, class: 'form-check-input'
               = f.label :elasticsearch_indexing, class: 'form-check-label' do
                 = _('kuromoji custom analyzer: Search')
               .form-text.text-muted

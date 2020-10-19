@@ -42,6 +42,8 @@ module EE
         :elasticsearch_client_request_timeout,
         :elasticsearch_analyzers_smartcn_enabled,
         :elasticsearch_analyzers_smartcn_search,
+        :elasticsearch_analyzers_kuromoji_enabled,
+        :elasticsearch_analyzers_kuromoji_search,
         :enforce_namespace_storage_limit,
         :geo_status_timeout,
         :geo_node_allowed_ips,

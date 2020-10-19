@@ -54,23 +54,8 @@ module Elastic
         }
       end
 
-      def add_fields_for_other_languages(fields)
-        return fields if false
-
-        fields_names = fields.map { |m| m[/\w+/] }
-
-        %w(title description).each do |field|
-          next unless fields_names.include?(field)
-
-          fields << "#{field}.kuromoji" if true
-          fields << "#{field}.smartcn" if true
-        end
-
-        fields
-      end
-
       def basic_query_hash(fields, query)
-        fields = add_fields_for_other_languages(fields)
+        fields = CustomLanguageAnalyzers.add_custom_analyzers_fields(fields)
 
         query_hash =
           if query.present?
