@@ -1437,4 +1437,32 @@ RSpec.describe ProjectsController do
   def project_moved_message(redirect_route, project)
     "Project '#{redirect_route.path}' was moved to '#{project.full_path}'. Please update any links and bookmarks that may still have the old path."
   end
+
+  describe 'GET #unfoldered_environment_names' do
+    it 'allows anonymous users to view the environment names of a public project' do
+      create(:environment, project: public_project, name: 'foo')
+
+      get(
+        :unfoldered_environment_names,
+        params: { namespace_id: public_project.namespace, id: public_project, format: :json }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to eq(%w[foo])
+    end
+
+    it 'allows logged-in users to view the environment names' do
+      create(:environment, project: project, name: 'foo')
+      project.add_developer(user)
+      sign_in(user)
+
+      get(
+        :unfoldered_environment_names,
+        params: { namespace_id: project.namespace, id: project, format: :json }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to eq(%w[foo])
+    end
+  end
 end

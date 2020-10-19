@@ -59,5 +59,13 @@ RSpec.describe EnvironmentNamesFinder do
         expect(names).to be_empty
       end
     end
+
+    context 'using a public project without a user' do
+      it 'returns all the unique environment names' do
+        names = described_class.new(project1).execute
+
+        expect(names).to eq(%w[gprd gstg])
+      end
+    end
   end
 end

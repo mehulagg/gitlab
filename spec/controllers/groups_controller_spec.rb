@@ -1213,4 +1213,34 @@ RSpec.describe GroupsController, factory_default: :keep do
       it_behaves_like 'disabled when using an external authorization service'
     end
   end
+
+  describe 'GET #unfoldered_environment_names' do
+    it 'allows anonymous users to view the environment names of a public group' do
+      public_project = create(:project, :public, namespace: group)
+
+      create(:environment, project: public_project, name: 'foo')
+
+      get(
+        :unfoldered_environment_names,
+        params: { id: group, format: :json }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to eq(%w[foo])
+    end
+
+    it 'allows logged-in users to view the environment names' do
+      create(:environment, project: project, name: 'foo')
+      project.add_developer(user)
+      sign_in(user)
+
+      get(
+        :unfoldered_environment_names,
+        params: { id: group, format: :json }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to eq(%w[foo])
+    end
+  end
 end
