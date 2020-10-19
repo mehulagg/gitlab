@@ -1,13 +1,13 @@
 <script>
 import { GlIcon } from '@gitlab/ui';
+import ServiceLevelAgreement from 'ee_component/vue_shared/components/incidents/service_level_agreement.vue';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
 import { formatTime, calculateRemainingMilliseconds } from '~/lib/utils/datetime_utility';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import getSlaDueAt from './graphql/queries/get_sla_due_at.graphql';
 
 export default {
-  components: { GlIcon, TimeAgoTooltip },
+  components: { GlIcon, ServiceLevelAgreement },
   inject: ['fullPath', 'iid', 'slaFeatureAvailable'],
   apollo: {
     slaDueAt: {
@@ -19,11 +19,8 @@ export default {
         };
       },
       update(data) {
+        console.log('data', data?.project?.issue?.slaDueAt);
         return data?.project?.issue?.slaDueAt;
-      },
-      result({ data } = {}) {
-        const slaDueAt = data?.project?.issue?.slaDueAt;
-        this.$emit('update', Boolean(slaDueAt));
       },
       error() {
         createFlash({
@@ -35,6 +32,7 @@ export default {
   data() {
     return {
       slaDueAt: null,
+      hasData: false,
     };
   },
   computed: {
@@ -45,17 +43,21 @@ export default {
       return time.substring(0, time.length - 3);
     },
   },
+  methods: {
+    update(value) {
+      this.hasData = value;
+      this.$emit('update', value);
+    },
+  },
 };
 </script>
 
 <template>
-  <div v-if="slaFeatureAvailable && slaDueAt">
+  <div v-show="slaFeatureAvailable && hasData">
     <span class="gl-font-weight-bold">{{ s__('HighlightBar|Time to SLA:') }}</span>
     <span class="gl-white-space-nowrap">
       <gl-icon name="timer" />
-      <time-ago-tooltip :time="slaDueAt">
-        {{ displayValue }}
-      </time-ago-tooltip>
+      <service-level-agreement :sla-due-at="slaDueAt" @update="update" />
     </span>
   </div>
 </template>

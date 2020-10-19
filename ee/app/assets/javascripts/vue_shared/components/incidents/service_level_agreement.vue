@@ -5,15 +5,16 @@ import { formatTime, calculateRemainingMilliseconds } from '~/lib/utils/datetime
 
 export default {
   i18n: {
-    longText: s__('IncidentManagement|%{hours} hours, %{minutes} minutes remaining'),
-    shortText: s__('IncidentManagement|%{minutes} minutes remaining'),
+    longTitle: s__('IncidentManagement|%{hours} hours, %{minutes} minutes remaining'),
+    shortTitle: s__('IncidentManagement|%{minutes} minutes remaining'),
+    missedSla: s__('IncidentManagement|Missed SLA'),
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
   props: {
     slaDueAt: {
-      type: String,
+      type: String, // ISODateString
       required: false,
       default: null,
     },
@@ -21,25 +22,38 @@ export default {
   computed: {
     shouldShow() {
       // Checks for a valid date string
-      return this.slaDueAt && !Number.isNaN(Date.parse(this.slaDueAt));
+      return Boolean(this.slaDueAt) && !Number.isNaN(Date.parse(this.slaDueAt));
     },
     remainingTime() {
       return calculateRemainingMilliseconds(this.slaDueAt);
     },
     slaText() {
+      if (this.remainingTime === 0) {
+        return this.$options.i18n.missedSla;
+      }
+
       const remainingDuration = formatTime(this.remainingTime);
 
       // remove the seconds portion of the string
       return remainingDuration.substring(0, remainingDuration.length - 3);
     },
     slaTitle() {
+      if (this.remainingTime === 0) {
+        return null;
+      }
+
       const minutes = Math.floor(this.remainingTime / 1000 / 60) % 60;
       const hours = Math.floor(this.remainingTime / 1000 / 60 / 60);
 
       if (hours > 0) {
-        return sprintf(this.$options.i18n.longText, { hours, minutes });
+        return sprintf(this.$options.i18n.longTitle, { hours, minutes });
       }
-      return sprintf(this.$options.i18n.shortText, { hours, minutes });
+      return sprintf(this.$options.i18n.shortTitle, { hours, minutes });
+    },
+  },
+  watch: {
+    shouldShow(value) {
+      this.$emit('update', value);
     },
   },
 };
