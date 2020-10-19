@@ -65,9 +65,14 @@ module EE
               [::Types::VulnerableProjectsByGradeType],
               null: false,
               description: 'Represents vulnerable project counts for each grade',
-              resolve: -> (obj, _args, ctx) {
-                ::Gitlab::Graphql::Aggregations::VulnerabilityStatistics::LazyAggregate.new(ctx, obj)
-              }
+              resolve: -> (obj, args, ctx) {
+                ::Gitlab::Graphql::Aggregations::VulnerabilityStatistics::LazyAggregate.new(ctx, obj, include_subgroups: args.include_subgroups)
+              } do
+          argument :include_subgroups, GraphQL::BOOLEAN_TYPE,
+                    required: false,
+                    default_value: false,
+                    description: 'Load grades for all groups'
+        end
       end
     end
   end

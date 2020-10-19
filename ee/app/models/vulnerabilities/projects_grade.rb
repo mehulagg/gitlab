@@ -19,9 +19,11 @@ module Vulnerabilities
       vulnerable.projects.with_vulnerability_statistics.inc_routes.where(id: project_ids)
     end
 
-    def self.grades_for(vulnerables)
+    def self.grades_for(vulnerables, include_subgroups: false)
+      projects = include_subgroups ? vulnerables.map(&:all_projects) : vulnerables.map(&:projects)
+
       ::Vulnerabilities::Statistic
-        .for_project(vulnerables.map(&:projects).reduce(&:or))
+        .for_project(projects)
         .group(:letter_grade)
         .select(:letter_grade, 'array_agg(project_id) project_ids')
         .then do |statistics|
