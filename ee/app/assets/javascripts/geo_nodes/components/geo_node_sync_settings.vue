@@ -1,13 +1,12 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { sprintf, s__, __ } from '~/locale';
 import { timeIntervalInWords } from '~/lib/utils/datetime_utility';
-import tooltip from '~/vue_shared/directives/tooltip';
 import { TIME_DIFF } from '../constants';
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
     GlIcon,
@@ -113,13 +112,7 @@ export default {
 <template>
   <div class="mt-1 node-sync-settings">
     <strong v-if="syncStatusUnavailable"> {{ __('Unknown') }} </strong>
-    <span
-      v-else
-      v-tooltip
-      :title="syncStatusTooltip"
-      class="d-flex align-items-center"
-      data-placement="bottom"
-    >
+    <span v-else v-gl-tooltip :title="syncStatusTooltip" class="d-flex align-items-center">
       <strong data-testid="syncType">{{ syncType }}</strong>
       <gl-icon name="retry" class="ml-2" />
       <span v-if="!eventTimestampEmpty" class="ml-2">
