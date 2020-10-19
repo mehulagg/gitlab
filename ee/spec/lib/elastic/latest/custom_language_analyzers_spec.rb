@@ -66,7 +66,7 @@ RSpec.describe Elastic::Latest::CustomLanguageAnalyzers do
       let(:kuromoji_search) { true }
 
       it 'returns correct fields' do
-        expect(described_class.add_custom_analyzers_fields(%w(title^2 description))).to match_array(%w(title^2 description title.kuromoji title.smartcn description.kuromoji description.smartcn))
+        expect(described_class.add_custom_analyzers_fields(%w(title^2 description confidential))).to match_array(%w(title^2 description confidential title.kuromoji title.smartcn description.kuromoji description.smartcn))
       end
     end
   end
