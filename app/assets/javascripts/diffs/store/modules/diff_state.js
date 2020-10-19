@@ -39,6 +39,7 @@ export default () => ({
   highlightedRow: null,
   renderTreeList: true,
   showWhitespace: getDefaultWhitespace(whiteSpaceFromQueryString, whiteSpaceFromCookie),
+  viewDiffsFileByFile: false,
   fileFinderVisible: false,
   dismissEndpoint: '',
   showSuggestPopover: true,
