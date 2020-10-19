@@ -49,6 +49,7 @@ import {
   moveToNeighboringCommit,
   setCurrentDiffFileIdFromNote,
   navigateToDiffFileIndex,
+  setFileByFile,
 } from '~/diffs/store/actions';
 import eventHub from '~/notes/event_hub';
 import * as types from '~/diffs/store/mutation_types';
@@ -1462,6 +1463,22 @@ describe('DiffsStoreActions', () => {
         [{ type: types.VIEW_DIFF_FILE, payload: '123' }],
         [],
         done,
+      );
+    });
+  });
+
+  describe('setFileByFile', () => {
+    it.each`
+      value    | opposite
+      ${true}  | ${false}
+      ${false} | ${true}
+    `('commits SET_FILE_BY_FILE with the new value $value', async ({ value, opposite }) => {
+      await testAction(
+        setFileByFile,
+        value,
+        { viewDiffsFileByFile: opposite },
+        [{ type: types.SET_FILE_BY_FILE, payload: value }],
+        [],
       );
     });
   });

@@ -52,6 +52,7 @@ export const setBaseConfig = ({ commit }, options) => {
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
+    viewDiffsFileByFile,
   } = options;
   commit(types.SET_BASE_CONFIG, {
     endpoint,
@@ -61,6 +62,7 @@ export const setBaseConfig = ({ commit }, options) => {
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
+    viewDiffsFileByFile,
   });
 };
 
@@ -716,4 +718,8 @@ export const navigateToDiffFileIndex = ({ commit, state }, index) => {
   document.location.hash = fileHash;
 
   commit(types.VIEW_DIFF_FILE, fileHash);
+};
+
+export const setFileByFile = ({ commit }, newFileByFileSetting) => {
+  commit(types.SET_FILE_BY_FILE, newFileByFileSetting);
 };
