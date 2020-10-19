@@ -156,7 +156,7 @@ RSpec.describe GraphqlController do
 
   describe '#append_info_to_payload' do
     let(:graphql_query) { graphql_query_for('project', { 'fullPath' => 'foo' }, %w(id name)) }
-    let(:mock_store) { { graphql_logs: { foo: :bar } } }
+    let(:mock_store) { { graphql_logs: { foo: :bar }, graphql_exception: exception_data } }
     let(:log_payload) { {} }
 
     before do
@@ -166,11 +166,32 @@ RSpec.describe GraphqlController do
       end
     end
 
-    it 'appends metadata for logging' do
-      post :execute, params: { query: graphql_query, operationName: 'Foo' }
+    context 'with no error' do
+      let(:exception_data) { nil }
 
-      expect(controller).to have_received(:append_info_to_payload)
-      expect(log_payload.dig(:metadata, :graphql)).to eq({ operation_name: 'Foo', foo: :bar })
+      before do
+        allow(RequestStore.store).to receive(:[]).with(:graphql_exception).and_return(exception_data)
+        allow(RequestStore.store).to receive(:[]).and_call_original
+      end
+
+      it 'appends metadata for logging and empty error' do
+        post :execute, params: { query: graphql_query, operationName: 'Foo' }
+
+        expect(controller).to have_received(:append_info_to_payload)
+        expect(log_payload.dig(:metadata, :graphql)).to eq({ operation_name: 'Foo', foo: :bar })
+        expect(log_payload.dig(:metadata, :error)).to eq({})
+      end
+    end
+
+    context 'with error' do
+      let(:exception_data) { { exception_class: :Klass, exception_message: "oh noes!", exception_backtrace: "some backtrace" } }
+
+      it 'appends metadata for logging and an error' do
+        post :execute, params: { query: graphql_query, operationName: 'Foo' }
+
+        expect(controller).to have_received(:append_info_to_payload)
+        expect(log_payload.dig(:metadata, :error)).to eq(exception_data)
+      end
     end
   end
 end

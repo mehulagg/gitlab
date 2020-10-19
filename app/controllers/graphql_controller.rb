@@ -36,6 +36,11 @@ class GraphqlController < ApplicationController
 
   rescue_from StandardError do |exception|
     log_exception(exception)
+    RequestStore.store[:graphql_exception] = {
+      exception_class: exception.class.name,
+      exception_backtrace: exception.backtrace,
+      exception_message: exception.message
+    }
 
     render_error("Internal server error")
   end
@@ -119,12 +124,21 @@ class GraphqlController < ApplicationController
 
     # Merging to :metadata will ensure these are logged as top level keys
     payload[:metadata] ||= {}
-    payload[:metadata].merge!(graphql: logs)
+    payload[:metadata]
+      .merge!(graphql: logs)
+      .merge!(error: exception_data)
   end
 
   def logs
     RequestStore.store[:graphql_logs].to_h
                 .except(:duration_s, :query_string)
                 .merge(operation_name: params[:operationName])
+  end
+
+  def exception_data
+    data = RequestStore.store[:graphql_exception]
+    return {} unless data
+
+    data.to_h
   end
 end
