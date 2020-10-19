@@ -16,19 +16,12 @@ export default {
   },
   mixins: [glFeatureFlagMixin()],
   inject: {
-    showUserCallout: {
-      type: Boolean,
-      required: true,
-    },
+    showUserCallout: {},
     userCalloutId: {
       default: '',
-      type: String,
-      required: false,
     },
     userCalloutsPath: {
       default: '',
-      type: String,
-      required: false,
     },
   },
   data() {

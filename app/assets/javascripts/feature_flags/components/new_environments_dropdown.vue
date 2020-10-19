@@ -21,12 +21,7 @@ export default {
     GlIcon,
     GlLoadingIcon,
   },
-  inject: {
-    environmentsEndpoint: {
-      type: String,
-      required: true,
-    },
-  },
+  inject: ['environmentsEndpoint'],
   data() {
     return {
       environmentSearch: '',

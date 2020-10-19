@@ -24,14 +24,7 @@ export default {
     NewEnvironmentsDropdown,
     StrategyParameters,
   },
-  inject: {
-    strategyTypeDocsPagePath: {
-      type: String,
-    },
-    environmentsScopeDocsPath: {
-      type: String,
-    },
-  },
+  inject: ['strategyTypeDocsPagePath', 'environmentsScopeDocsPath'],
   props: {
     strategy: {
       type: Object,

@@ -89,13 +89,8 @@ export default {
     },
   },
   inject: {
-    projectId: {
-      type: String,
-      required: true,
-    },
+    projectId: {},
     featureFlagIssuesEndpoint: {
-      type: String,
-      required: false,
       default: '',
     },
   },

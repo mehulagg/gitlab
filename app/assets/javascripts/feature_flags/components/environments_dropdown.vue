@@ -53,12 +53,7 @@ export default {
       required: false,
     },
   },
-  inject: {
-    environmentsEndpoint: {
-      type: String,
-      required: true,
-    },
-  },
+  inject: ['environmentsEndpoint'],
   data() {
     return {
       environmentSearch: this.value,
