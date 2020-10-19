@@ -1,7 +1,7 @@
 <script>
 import { debounce } from 'lodash';
-import { USER_SEARCH_DELAY } from '../constants';
 import { GlTokenSelector, GlAvatar, GlAvatarLabeled } from '@gitlab/ui';
+import { USER_SEARCH_DELAY } from '../constants';
 import Api from '~/api';
 
 export default {
@@ -26,8 +26,8 @@ export default {
     return {
       loading: false,
       query: '',
-      filteredUsers: [],
       users: [],
+      filteredUsers: [],
       selectedTokens: [],
     };
   },
@@ -39,8 +39,11 @@ export default {
         })
         .join(',');
     },
-    debouncedHandleTextInput() {
-      return debounce(this.handleTextInput, USER_SEARCH_DELAY);
+    placeholderText() {
+      if (this.selectedTokens.length === 0) {
+        return this.placeholder;
+      }
+      return '';
     },
   },
   watch: {
@@ -54,13 +57,16 @@ export default {
     },
   },
   created() {
-    this.retrieveUsers('');
+    this.retrieveUsers();
   },
   methods: {
-    retrieveUsers(query) {
+    debouncedHandleTextInput() {
+      return debounce(this.handleTextInput, USER_SEARCH_DELAY);
+    },
+    retrieveUsers() {
       this.loading = true;
 
-      return Api.users(query, this.$options.queryOptions)
+      return Api.users('', this.$options.queryOptions)
         .then(response => {
           this.users = response.data.map(token => ({
             id: token.id,
@@ -70,15 +76,15 @@ export default {
           }));
           this.loading = false;
         })
-        .catch((error) => {
+        .catch(error => {
           this.loading = false;
           throw error;
         });
     },
     filterUsers() {
-      if (this.query === '') return this.users;
+      if (!this.query) return this.retrieveUsers();
 
-      return this.users
+      this.filteredUsers = this.users
         .filter(token => {
           return (
             token.name.toLowerCase().includes(this.query.toLowerCase()) ||
@@ -86,28 +92,24 @@ export default {
           );
         })
         .sort();
+
+      return this.filteredUsers;
     },
     handleTextInput(value) {
       this.query = value;
-
-      if (this.query === '') {
-        this.users = this.retrieveUsers('');
-      } else {
-        this.users = this.filterUsers(this.query);
-      }
-
-      return this.users;
+      this.handleQueryFilter();
     },
     handleQueryFilter() {
+      this.retrieveUsers();
+
       if (this.query) {
-        return this.filterUsers();
+        this.filterUsers();
       }
 
-      return this.users;
+      return this.filteredUusers;
     },
     handleInput() {
       this.$emit('input', this.newUsersToInvite);
-      this.filteredUsers = this.retrieveUsers(this.query);
     },
     handleBlur() {
       const textInput = this.$el.querySelector('input[type="text"]');
@@ -126,8 +128,8 @@ export default {
     :dropdown-items="users"
     :loading="loading"
     :allow-user-defined-tokens="false"
-    :hide-dropdown-with-no-items="false"
-    :placeholder="placeholder"
+    :hide-dropdown-with-no-items="true"
+    :placeholder="placeholderText"
     :aria-labelledby="label"
     @focus="handleQueryFilter"
     @blur="handleBlur"

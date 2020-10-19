@@ -43,7 +43,6 @@ describe('MembersTokenSelect', () => {
   describe('rendering the token-selector component', () => {
     it('renders with the correct props', () => {
       const expectedProps = {
-        loading: true,
         ariaLabelledby: label,
         placeholder,
       };
@@ -52,17 +51,18 @@ describe('MembersTokenSelect', () => {
     });
   });
 
-  describe('.filterUsers', () => {
-    const expectedFilteredUsers = [user1];
-
-    it('returns all of the Api users when query is empty', async () => {
+  describe('.users', () => {
+    it('returns all of the Api users', async () => {
       await waitForPromises();
 
-      expect(wrapper.vm.filterUsers()).toMatchObject(allUsers);
+      expect(wrapper.vm.users).toMatchObject(allUsers);
     });
 
     it('returns the users that match the filter query', async () => {
-      findTokenSelector().vm.$emit('text-input', 'One');
+      const expectedFilteredUsers = [user1];
+
+      // findTokenSelector().vm.$emit('text-input', 'One');
+      wrapper.vm.query = 'One';
 
       await waitForPromises();
 
