@@ -12,7 +12,7 @@ import {
 } from '@gitlab/ui';
 import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
-import { isAbsolute, redirectTo } from '~/lib/utils/url_utility';
+import { redirectTo } from '~/lib/utils/url_utility';
 import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
 import { fetchPolicies } from '~/lib/graphql';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -68,6 +68,7 @@ export default {
     const { name = '', targetUrl = '' } = this.siteProfile || {};
 
     const form = {
+      showValidation: false,
       profileName: initField(name),
       targetUrl: initField(targetUrl),
     };
@@ -173,9 +174,9 @@ export default {
         : defaultDescription;
     },
   },
-  async created() {
+  async mounted() {
     if (this.isEdit) {
-      // this.validateTargetUrl();
+      this.form.showValidation = true;
 
       if (this.glFeatures.securityOnDemandScansSiteValidation) {
         await this.fetchValidationStatus();
@@ -277,6 +278,12 @@ export default {
       }
     },
     onSubmit() {
+      this.form.showValidation = true;
+
+      if (!this.form.isValid) {
+        return;
+      }
+
       this.isLoading = true;
       this.hideErrors();
       const { errorMessage } = this.i18n;
@@ -344,7 +351,7 @@ export default {
 </script>
 
 <template>
-  <gl-form @submit.prevent="onSubmit">
+  <gl-form novalidate @submit.prevent="onSubmit" ref="form">
     <h2 class="gl-mb-6">
       {{ i18n.title }}
     </h2>
@@ -368,7 +375,8 @@ export default {
     >
       <gl-form-input
         v-model="form.profileName.value"
-        v-validation.blur="form.profileName"
+        v-validation.blur
+        name="profileName"
         class="mw-460"
         data-testid="profile-name-input"
         type="text"
@@ -391,7 +399,8 @@ export default {
     >
       <gl-form-input
         v-model="form.targetUrl.value"
-        v-validation.blur="form.targetUrl"
+        v-validation.blur
+        name="targetUrl"
         class="mw-460"
         data-testid="target-url-input"
         required
@@ -443,7 +452,7 @@ export default {
         variant="success"
         class="js-no-auto-disable"
         data-testid="dast-site-profile-form-submit-button"
-        :disabled="isSubmitDisabled"
+        :disabled="form.showValidation && !form.isValid"
         :loading="isLoading"
       >
         {{ s__('DastProfiles|Save profile') }}

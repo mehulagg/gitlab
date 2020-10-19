@@ -8,24 +8,29 @@ const getFeedback = el => {
     : el.validationMessage;
 };
 
-let handler;
-
 export default {
-  // called once, when the directive is first bound to the element, one-time setup
-  bind(el, binding) {
-    const { value, modifiers } = binding;
+  bind(el, binding, vnode) {
+    const { modifiers } = binding;
+    const { context } = vnode;
 
-    handler = () => {
-      value.state = el.checkValidity();
-      value.feedback = getFeedback(el);
+    const handler = () => {
+      const { name, form: formEl } = el;
+      if (formEl) {
+        context.form.isValid = formEl.checkValidity();
+      }
+      context.form[name].state = el.checkValidity();
+      context.form[name].feedback = getFeedback(el);
     };
 
-    // el will be form element
-    // attach event listener (input or blur? or customizable?)
+    context.$watch(
+      'form.showValidation',
+      showValidation => {
+        if (showValidation) {
+          handler();
+        }
+      },
+      { immediate: true },
+    );
     el.addEventListener(modifiers.blur ? 'blur' : 'input', handler);
-  },
-  // called once, cleanup work
-  unbind(el) {
-    el.removeEventListener('input', handler);
   },
 };
