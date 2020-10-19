@@ -149,7 +149,7 @@ export default {
         <gl-dropdown-section-header>{{ __('Select a label') }} </gl-dropdown-section-header>
       </slot>
       <div class="mb-3 px-3">
-        <gl-search-box-by-type v-model.trim="searchTerm" class="mb-2" />
+        <gl-search-box-by-type v-model.trim="searchTerm" />
       </div>
       <div class="mb-3 px-3">
         <gl-dropdown-item

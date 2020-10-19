@@ -34,7 +34,7 @@ RSpec.describe 'epics swimlanes filtering', :js do
       project.add_maintainer(user)
       project.add_maintainer(user2)
 
-      stub_licensed_features(epics: true)
+      stub_licensed_features(epics: true, swimlanes: true)
       sign_in(user)
       visit_board_page
 

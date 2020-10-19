@@ -134,7 +134,7 @@ export default {
       <gl-icon class="gl-ml-2" name="chevron-down" />
     </template>
     <gl-dropdown-section-header>{{ __('Groups') }}</gl-dropdown-section-header>
-    <gl-search-box-by-type v-model.trim="searchTerm" class="gl-m-3" />
+    <gl-search-box-by-type v-model.trim="searchTerm" />
     <gl-dropdown-item
       v-for="group in availableGroups"
       :key="group.id"

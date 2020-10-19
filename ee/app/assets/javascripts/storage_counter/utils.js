@@ -130,7 +130,7 @@ export const parseGetStorageResults = data => {
     repositorySizeExcessProjectCount,
     totalRepositorySize,
     totalRepositorySizeExcess,
-    totalUsage: rootStorageStatistics.storageSize
+    totalUsage: rootStorageStatistics?.storageSize
       ? numberToHumanSize(rootStorageStatistics.storageSize)
       : 'N/A',
     rootStorageStatistics,

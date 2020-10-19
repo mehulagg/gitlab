@@ -3,12 +3,14 @@ import Cookies from 'js-cookie';
 import axios from '~/lib/utils/axios_utils';
 import boardsStore from '~/boards/stores/boards_store';
 import { __ } from '~/locale';
-import { parseBoolean } from '~/lib/utils/common_utils';
+import { historyPushState, parseBoolean } from '~/lib/utils/common_utils';
+import { setUrlParams, removeParams } from '~/lib/utils/url_utility';
 import actionsCE from '~/boards/stores/actions';
 import { BoardType, ListType } from '~/boards/constants';
-import { EpicFilterType } from '../constants';
+import { EpicFilterType, GroupByParamType } from '../constants';
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
+import * as typesCE from '~/boards/stores/mutation_types';
 import { fullEpicId } from '../boards_util';
 import {
   formatBoardLists,
@@ -22,8 +24,11 @@ import eventHub from '~/boards/eventhub';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import epicsSwimlanesQuery from '../queries/epics_swimlanes.query.graphql';
 import issueSetEpic from '../queries/issue_set_epic.mutation.graphql';
+import issueSetWeight from '../queries/issue_set_weight.mutation.graphql';
 import listsIssuesQuery from '~/boards/queries/lists_issues.query.graphql';
 import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
+import listUpdateLimitMetrics from '../queries/list_update_limit_metrics.mutation.graphql';
+import updateBoardEpicUserPreferencesMutation from '../queries/updateBoardEpicUserPreferences.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -67,7 +72,7 @@ const fetchAndFormatListIssues = (state, extraVariables) => {
 export default {
   ...actionsCE,
 
-  setFilters: ({ commit }, filters) => {
+  setFilters: ({ commit, dispatch }, filters) => {
     const filterParams = pick(filters, [
       'assigneeUsername',
       'authorUsername',
@@ -78,6 +83,10 @@ export default {
       'search',
       'weight',
     ]);
+
+    if (filters.groupBy === GroupByParamType.epic) {
+      dispatch('setEpicSwimlanes');
+    }
 
     if (filterParams.epicId === EpicFilterType.any || filterParams.epicId === EpicFilterType.none) {
       filterParams.epicWildcardId = filterParams.epicId.toUpperCase();
@@ -138,14 +147,71 @@ export default {
       .catch(() => commit(types.RECEIVE_SWIMLANES_FAILURE));
   },
 
+  updateBoardEpicUserPreferences({ commit, state }, { epicId, collapsed }) {
+    const {
+      endpoints: { boardId },
+    } = state;
+
+    const variables = {
+      boardId: fullBoardId(boardId),
+      epicId,
+      collapsed,
+    };
+
+    return gqlClient
+      .mutate({
+        mutation: updateBoardEpicUserPreferencesMutation,
+        variables,
+      })
+      .then(({ data }) => {
+        if (data?.updateBoardEpicUserPreferences?.errors.length) {
+          throw new Error();
+        }
+
+        const { epicUserPreferences: userPreferences } = data?.updateBoardEpicUserPreferences;
+        commit(types.SET_BOARD_EPIC_USER_PREFERENCES, { epicId, userPreferences });
+      })
+      .catch(() => {
+        commit(types.SET_BOARD_EPIC_USER_PREFERENCES, {
+          epicId,
+          userPreferences: {
+            collapsed: !collapsed,
+          },
+        });
+      });
+  },
+
   setShowLabels({ commit }, val) {
     commit(types.SET_SHOW_LABELS, val);
   },
 
-  updateListWipLimit({ state }, { maxIssueCount }) {
-    const { activeId } = state;
+  updateListWipLimit({ commit, getters }, { maxIssueCount, listId }) {
+    if (getters.shouldUseGraphQL) {
+      return gqlClient
+        .mutate({
+          mutation: listUpdateLimitMetrics,
+          variables: {
+            input: {
+              listId,
+              maxIssueCount,
+            },
+          },
+        })
+        .then(({ data }) => {
+          if (data?.boardListUpdateLimitMetrics?.errors.length) {
+            commit(types.UPDATE_LIST_FAILURE);
+          } else {
+            const list = data.boardListUpdateLimitMetrics?.list;
+            commit(types.UPDATE_LIST_SUCCESS, {
+              listId,
+              list: boardsStore.updateListPosition({ ...list, doNotFetchIssues: true }),
+            });
+          }
+        })
+        .catch(() => commit(types.UPDATE_LIST_FAILURE));
+    }
 
-    return axios.put(`${boardsStoreEE.store.state.endpoints.listsEndpoint}/${activeId}`, {
+    return axios.put(`${boardsStoreEE.store.state.endpoints.listsEndpoint}/${listId}`, {
       list: {
         max_issue_count: maxIssueCount,
       },
@@ -195,13 +261,16 @@ export default {
   fetchIssuesForList: ({ state, commit }, { listId, fetchNext = false, noEpicIssues = false }) => {
     commit(types.REQUEST_ISSUES_FOR_LIST, { listId, fetchNext });
 
-    const { filterParams } = state;
+    const { epicId, ...filterParams } = state.filterParams;
+    if (noEpicIssues && epicId !== undefined) {
+      return null;
+    }
 
     const variables = {
       id: listId,
       filters: noEpicIssues
         ? { ...filterParams, epicWildcardId: EpicFilterType.none.toUpperCase() }
-        : filterParams,
+        : { ...filterParams, epicId },
       after: fetchNext ? state.pageInfoByListId[listId].endCursor : undefined,
       first: 20,
     };
@@ -238,11 +307,21 @@ export default {
     commit(types.TOGGLE_EPICS_SWIMLANES);
 
     if (state.isShowingEpicsSwimlanes) {
-      dispatch('fetchEpicsSwimlanes', {}).catch(() => commit(types.RECEIVE_SWIMLANES_FAILURE));
+      historyPushState(setUrlParams({ group_by: GroupByParamType.epic }, window.location.href));
+      dispatch('fetchEpicsSwimlanes', {});
     } else if (!gon.features.graphqlBoardLists) {
+      historyPushState(removeParams(['group_by']));
       boardsStore.create();
       eventHub.$emit('initialBoardLoad');
+    } else {
+      historyPushState(removeParams(['group_by']));
     }
+  },
+
+  setEpicSwimlanes: ({ commit, dispatch }) => {
+    commit(types.SET_EPICS_SWIMLANES);
+
+    dispatch('fetchEpicsSwimlanes', {});
   },
 
   resetEpics: ({ commit }) => {
@@ -266,6 +345,29 @@ export default {
     }
 
     return data.issueSetEpic.issue.epic;
+  },
+
+  setActiveIssueWeight: async ({ commit, getters }, input) => {
+    const { data } = await gqlClient.mutate({
+      mutation: issueSetWeight,
+      variables: {
+        input: {
+          iid: String(getters.getActiveIssue.iid),
+          weight: input.weight,
+          projectPath: input.projectPath,
+        },
+      },
+    });
+
+    if (!data.issueSetWeight || data.issueSetWeight?.errors?.length > 0) {
+      throw new Error(data.issueSetWeight?.errors);
+    }
+
+    commit(typesCE.UPDATE_ISSUE_BY_ID, {
+      issueId: getters.getActiveIssue.id,
+      prop: 'weight',
+      value: data.issueSetWeight.issue.weight,
+    });
   },
 
   moveIssue: (

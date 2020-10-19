@@ -1,11 +1,31 @@
 <script>
-import { GlDrawer, GlFormGroup, GlFormTextarea, GlFormCheckbox, GlButton } from '@gitlab/ui';
+import '~/behaviors/markdown/render_gfm';
+import $ from 'jquery';
+import {
+  GlDrawer,
+  GlFormGroup,
+  GlFormTextarea,
+  GlButton,
+  GlFormCheckbox,
+  GlTooltipDirective,
+  GlSafeHtmlDirective as SafeHtml,
+} from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { __, sprintf } from '~/locale';
+import ZenMode from '~/zen_mode';
+import MarkdownField from '~/vue_shared/components/markdown/field.vue';
 
+import RequirementStatusBadge from './requirement_status_badge.vue';
+
+import RequirementMeta from '../mixins/requirement_meta';
 import { MAX_TITLE_LENGTH, TestReportStatus } from '../constants';
 
 export default {
+  events: {
+    drawerClose: 'drawer-close',
+    disableEdit: 'disable-edit',
+    enableEdit: 'enable-edit',
+  },
   titleInvalidMessage: sprintf(__('Requirement title cannot have more than %{limit} characters.'), {
     limit: MAX_TITLE_LENGTH,
   }),
@@ -15,7 +35,15 @@ export default {
     GlFormTextarea,
     GlFormCheckbox,
     GlButton,
+    MarkdownField,
+    RequirementStatusBadge,
   },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+    SafeHtml,
+  },
+  mixins: [RequirementMeta],
+  inject: ['descriptionPreviewPath', 'descriptionHelpPath'],
   props: {
     drawerOpen: {
       type: Boolean,
@@ -26,6 +54,11 @@ export default {
       required: false,
       default: null,
     },
+    enableRequirementEdit: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     requirementRequestActive: {
       type: Boolean,
       required: true,
@@ -33,8 +66,10 @@ export default {
   },
   data() {
     return {
+      zenModeEnabled: false,
       title: this.requirement?.title || '',
       satisfied: this.requirement?.satisfied || false,
+      description: this.requirement?.description || '',
     };
   },
   computed: {
@@ -48,19 +83,17 @@ export default {
       return this.isCreate ? __('Create requirement') : __('Save changes');
     },
     titleInvalid() {
-      return this.title.length > MAX_TITLE_LENGTH;
+      return this.title?.length > MAX_TITLE_LENGTH;
     },
     disableSaveButton() {
       return this.title === '' || this.titleInvalid || this.requirementRequestActive;
-    },
-    reference() {
-      return `REQ-${this.requirement?.iid}`;
     },
   },
   watch: {
     requirement: {
       handler(value) {
         this.title = value?.title || '';
+        this.description = value?.description || '';
         this.satisfied = value?.satisfied || false;
       },
       deep: true,
@@ -69,9 +102,24 @@ export default {
       // Clear `title` and `satisfied` value on drawer close.
       if (!value) {
         this.title = '';
+        this.description = '';
         this.satisfied = false;
       }
     },
+  },
+  mounted() {
+    this.zenMode = new ZenMode();
+    $(this.$refs.gfmContainer).renderGFM();
+    $(document).on('zen_mode:enter', () => {
+      this.zenModeEnabled = true;
+    });
+    $(document).on('zen_mode:leave', () => {
+      this.zenModeEnabled = false;
+    });
+  },
+  beforeDestroy() {
+    $(document).off('zen_mode:enter');
+    $(document).off('zen_mode:leave');
   },
   methods: {
     getDrawerHeaderHeight() {
@@ -100,31 +148,83 @@ export default {
 
       return null;
     },
-    handleSave() {
-      if (this.isCreate) {
-        this.$emit('save', this.title);
+    handleFormInputKeyDown() {
+      if (this.zenModeEnabled) {
+        // Exit Zen mode, don't close the drawer.
+        this.zenModeEnabled = false;
+        this.zenMode.exit();
       } else {
-        this.$emit('save', {
-          iid: this.requirement.iid,
-          title: this.title,
-          lastTestReportState: this.newLastTestReportState(),
-        });
+        this.$emit(this.$options.events.disableEdit);
       }
+    },
+    handleSave() {
+      const { title, description } = this;
+      const eventParams = {
+        title,
+        description,
+      };
+
+      if (!this.isCreate) {
+        eventParams.iid = this.requirement.iid;
+        eventParams.lastTestReportState = this.newLastTestReportState();
+      }
+
+      this.$emit('save', eventParams);
+    },
+    handleCancel() {
+      this.$emit(
+        this.isCreate ? this.$options.events.drawerClose : this.$options.events.disableEdit,
+      );
     },
   },
 };
 </script>
 
 <template>
-  <gl-drawer :open="drawerOpen" :header-height="getDrawerHeaderHeight()" @close="$emit('cancel')">
+  <gl-drawer
+    :open="drawerOpen"
+    :header-height="getDrawerHeaderHeight()"
+    :class="{ 'zen-mode gl-absolute': zenModeEnabled }"
+    class="requirement-form-drawer"
+    @close="$emit($options.events.drawerClose)"
+  >
     <template #header>
-      <h4 class="gl-m-0">{{ fieldLabel }}</h4>
+      <h4 v-if="isCreate" class="gl-m-0">{{ __('New Requirement') }}</h4>
+      <div v-else class="gl-display-flex gl-align-items-center">
+        <strong class="gl-text-gray-500">{{ reference }}</strong>
+        <requirement-status-badge
+          v-if="testReport"
+          :test-report="testReport"
+          :last-test-report-manually-created="requirement.lastTestReportManuallyCreated"
+          class="gl-ml-3"
+        />
+      </div>
     </template>
     <template>
-      <div class="requirement-form">
-        <span v-if="!isCreate" class="text-muted">{{ reference }}</span>
+      <div v-if="!enableRequirementEdit && !isCreate" class="requirement-details">
+        <div
+          class="title-container gl-display-flex gl-border-b-1 gl-border-b-solid gl-border-gray-100"
+        >
+          <h3 v-safe-html="titleHtml" class="title qa-title gl-flex-grow-1 gl-m-0 gl-mb-3"></h3>
+          <gl-button
+            v-if="canUpdate && !isArchived"
+            v-gl-tooltip.bottom
+            data-testid="edit"
+            :title="__('Edit title and description')"
+            icon="pencil"
+            class="btn-edit gl-align-self-start"
+            @click="$emit($options.events.enableEdit, $event)"
+          />
+        </div>
+        <div data-testid="descriptionContainer" class="description-container gl-mt-3">
+          <div ref="gfmContainer" v-safe-html="descriptionHtml" class="md"></div>
+        </div>
+      </div>
+      <div v-else class="requirement-form">
         <div class="requirement-form-container" :class="{ 'gl-flex-grow-1 gl-mt-2': !isCreate }">
+          <div data-testid="form-error-container" class="flash-container"></div>
           <gl-form-group
+            data-testid="title"
             :label="__('Title')"
             :invalid-feedback="$options.titleInvalidMessage"
             :state="!titleInvalid"
@@ -137,12 +237,39 @@ export default {
               autofocus
               resize
               :disabled="requirementRequestActive"
-              :placeholder="__('Describe the requirement here')"
+              :placeholder="__('Requirement title')"
               max-rows="25"
               class="requirement-form-textarea"
               :class="{ 'gl-field-error-outline': titleInvalid }"
-              @keyup.escape.exact="$emit('cancel')"
+              @keydown.escape.exact.stop="handleFormInputKeyDown"
+              @keydown.meta.enter="handleSave"
+              @keydown.ctrl.enter="handleSave"
             />
+          </gl-form-group>
+          <gl-form-group data-testid="description" class="common-note-form">
+            <label for="requirementDescription" class="d-block col-form-label gl-pb-0!">
+              {{ __('Description') }}
+            </label>
+            <markdown-field
+              :markdown-preview-path="descriptionPreviewPath"
+              :markdown-docs-path="descriptionHelpPath"
+              :enable-autocomplete="false"
+              :textarea-value="description"
+            >
+              <template #textarea>
+                <textarea
+                  id="requirementDescription"
+                  v-model="description"
+                  :data-supports-quick-actions="false"
+                  :aria-label="__('Description')"
+                  :placeholder="__('Describe the requirement here')"
+                  class="note-textarea js-gfm-input js-autosize markdown-area qa-description-textarea"
+                  @keydown.escape.exact.stop="handleFormInputKeyDown"
+                  @keydown.meta.enter="handleSave"
+                  @keydown.ctrl.enter="handleSave"
+                ></textarea>
+              </template>
+            </markdown-field>
             <gl-form-checkbox v-if="!isCreate" v-model="satisfied" class="gl-mt-6">{{
               __('Satisfied')
             }}</gl-form-checkbox>
@@ -162,7 +289,7 @@ export default {
               variant="default"
               category="primary"
               class="js-requirement-cancel"
-              @click="$emit('cancel')"
+              @click="handleCancel"
             >
               {{ __('Cancel') }}
             </gl-button>

@@ -67,7 +67,10 @@ export default {
       return this.canAdminList ? options : {};
     },
     hasMoreUnassignedIssues() {
-      return this.lists.some(list => this.pageInfoByListId[list.id]?.hasNextPage);
+      return (
+        this.unassignedIssuesCount > 0 &&
+        this.lists.some(list => this.pageInfoByListId[list.id]?.hasNextPage)
+      );
     },
   },
   methods: {
@@ -98,6 +101,7 @@ export default {
 <template>
   <div
     class="board-swimlanes gl-white-space-nowrap gl-pb-5 gl-px-3"
+    data-testid="board-swimlanes"
     data_qa_selector="board_epics_swimlanes"
   >
     <component

@@ -178,6 +178,21 @@ describe('TOGGLE_EPICS_SWIMLANES', () => {
   });
 });
 
+describe('SET_EPICS_SWIMLANES', () => {
+  it('set isShowingEpicsSwimlanes and epicsSwimlanesFetchInProgress to true', () => {
+    state = {
+      ...state,
+      isShowingEpicsSwimlanes: false,
+      epicsSwimlanesFetchInProgress: false,
+    };
+
+    mutations.SET_EPICS_SWIMLANES(state);
+
+    expect(state.isShowingEpicsSwimlanes).toBe(true);
+    expect(state.epicsSwimlanesFetchInProgress).toBe(true);
+  });
+});
+
 describe('RECEIVE_BOARD_LISTS_SUCCESS', () => {
   it('sets epicsSwimlanesFetchInProgress to false and populates boardLists with payload', () => {
     state = {
@@ -317,5 +332,21 @@ describe('MOVE_ISSUE', () => {
 
     expect(state.issuesByListId).toEqual(updatedListIssues);
     expect(state.issues['437'].epic).toEqual(null);
+  });
+});
+
+describe('SET_BOARD_EPIC_USER_PREFERENCES', () => {
+  it('should replace userPreferences on the given epic', () => {
+    state = {
+      ...state,
+      epics: mockEpics,
+    };
+
+    const epic = mockEpics[0];
+    const userPreferences = { collapsed: false };
+
+    mutations.SET_BOARD_EPIC_USER_PREFERENCES(state, { epicId: epic.id, userPreferences });
+
+    expect(state.epics[0].userPreferences).toEqual(userPreferences);
   });
 });

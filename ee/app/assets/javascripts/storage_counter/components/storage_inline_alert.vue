@@ -1,11 +1,26 @@
 <script>
 import { GlAlert } from '@gitlab/ui';
-import { n__, __ } from '~/locale';
-import { getFormatter, SUPPORTED_FORMATS } from '~/lib/utils/unit_format';
-import { usageRatioToThresholdLevel } from '../utils';
+import { n__, s__, sprintf } from '~/locale';
+import { formatUsageSize, usageRatioToThresholdLevel } from '../utils';
 import { ALERT_THRESHOLD, ERROR_THRESHOLD, WARNING_THRESHOLD } from '../constants';
 
 export default {
+  i18n: {
+    lockedWithNoPurchasedStorageTitle: s__('UsageQuota|This namespace contains locked projects'),
+    lockedWithNoPurchasedStorageText: s__(
+      'UsageQuota|You have reached the free storage limit of %{actualRepositorySizeLimit} on %{projectsLockedText}. To unlock them, please purchase additional storage.',
+    ),
+    storageUsageText: s__('UsageQuota|%{percentageLeft} of purchased storage is available'),
+    lockedWithPurchaseText: s__(
+      'UsageQuota|You have consumed all of your additional storage, please purchase more to unlock your projects over the free %{actualRepositorySizeLimit} limit.',
+    ),
+    warningWithPurchaseText: s__(
+      'UsageQuota|Your purchased storage is running low. To avoid locked projects, please purchase more storage.',
+    ),
+    infoWithPurchaseText: s__(
+      'UsageQuota|When you purchase additional storage, we automatically unlock projects that were locked when you reached the %{actualRepositorySizeLimit} limit.',
+    ),
+  },
   components: {
     GlAlert,
   },
@@ -30,7 +45,7 @@ export default {
       type: Number,
       required: true,
     },
-    repositoryFreeSizeLimit: {
+    actualRepositorySizeLimit: {
       type: Number,
       required: true,
     },
@@ -46,9 +61,11 @@ export default {
     },
     alertTitle() {
       if (!this.hasPurchasedStorage() && this.containsLockedProjects) {
-        return __('UsageQuota|This namespace contains locked projects');
+        return this.$options.i18n.lockedWithNoPurchasedStorageTitle;
       }
-      return `${this.excessStoragePercentageLeft}% of purchased storage is available`;
+      return sprintf(this.$options.i18n.storageUsageText, {
+        percentageLeft: `${this.excessStoragePercentageLeft}%`,
+      });
     },
     excessStorageRatio() {
       return this.totalRepositorySizeExcess / this.additionalPurchasedStorageSize;
@@ -86,37 +103,29 @@ export default {
       return this.additionalPurchasedStorageSize > 0;
     },
     formatSize(size) {
-      const formatter = getFormatter(SUPPORTED_FORMATS.decimalBytes);
-      return formatter(size);
+      return formatUsageSize(size);
     },
     hasPurchasedStorageText() {
       if (this.thresholdLevel === ERROR_THRESHOLD) {
-        return __(
-          `You have consumed all of your additional storage, please purchase more to unlock your projects over the free ${this.formatSize(
-            this.repositoryFreeSizeLimit,
-          )} limit`,
-        );
+        return sprintf(this.$options.i18n.lockedWithPurchaseText, {
+          actualRepositorySizeLimit: this.formatSize(this.actualRepositorySizeLimit),
+        });
       } else if (
         this.thresholdLevel === WARNING_THRESHOLD ||
         this.thresholdLevel === ALERT_THRESHOLD
       ) {
-        __(
-          `Your purchased storage is running low. To avoid locked projects, please purchase more storage.`,
-        );
+        return this.$options.i18n.warningWithPurchaseText;
       }
-      return __(
-        `When you purchase additional storage, we automatically unlock projects that were locked when you reached the ${this.formatSize(
-          this.repositoryFreeSizeLimit,
-        )} limit.`,
-      );
+      return sprintf(this.$options.i18n.infoWithPurchaseText, {
+        actualRepositorySizeLimit: this.formatSize(this.actualRepositorySizeLimit),
+      });
     },
     hasNotPurchasedStorageText() {
       if (this.thresholdLevel === ERROR_THRESHOLD) {
-        return __(
-          `You have reached the free storage limit of ${this.formatSize(
-            this.repositoryFreeSizeLimit,
-          )} on ${this.projectsLockedText}. To unlock them, please purchase additional storage.`,
-        );
+        return sprintf(this.$options.i18n.lockedWithNoPurchasedStorageText, {
+          actualRepositorySizeLimit: this.formatSize(this.actualRepositorySizeLimit),
+          projectsLockedText: this.projectsLockedText,
+        });
       }
       return '';
     },

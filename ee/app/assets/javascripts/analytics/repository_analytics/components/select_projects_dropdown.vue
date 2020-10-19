@@ -135,7 +135,7 @@ export default {
     <gl-dropdown-section-header>
       {{ $options.text.projectDropdownHeader }}
     </gl-dropdown-section-header>
-    <gl-search-box-by-type v-model.trim="projectSearchTerm" class="gl-my-2 gl-mx-3" />
+    <gl-search-box-by-type v-model.trim="projectSearchTerm" />
     <gl-dropdown-item
       :is-check-item="true"
       :is-checked="selectAllProjects"

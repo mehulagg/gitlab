@@ -4,6 +4,7 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProjectsTable from './projects_table.vue';
 import UsageGraph from './usage_graph.vue';
 import UsageStatistics from './usage_statistics.vue';
+import StorageInlineAlert from './storage_inline_alert.vue';
 import query from '../queries/storage.query.graphql';
 import TemporaryStorageIncreaseModal from './temporary_storage_increase_modal.vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
@@ -17,6 +18,7 @@ export default {
     GlButton,
     GlSprintf,
     GlIcon,
+    StorageInlineAlert,
     UsageGraph,
     UsageStatistics,
     TemporaryStorageIncreaseModal,
@@ -72,6 +74,7 @@ export default {
     isAdditionalStorageFlagEnabled() {
       return this.glFeatures.additionalRepoStorageByNamespace;
     },
+
     formattedNamespaceLimit() {
       return formatUsageSize(this.namespace.limit);
     },
@@ -86,12 +89,25 @@ export default {
         additionalPurchasedStorageSize: this.namespace.additionalPurchasedStorageSize,
       };
     },
+    shouldShowStorageInlineAlert() {
+      return this.isAdditionalStorageFlagEnabled && !this.$apollo.queries.namespace.loading;
+    },
   },
+
   modalId: 'temporary-increase-storage-modal',
 };
 </script>
 <template>
   <div>
+    <storage-inline-alert
+      v-if="shouldShowStorageInlineAlert"
+      :contains-locked-projects="namespace.containsLockedProjects"
+      :repository-size-excess-project-count="namespace.repositorySizeExcessProjectCount"
+      :total-repository-size-excess="namespace.totalRepositorySizeExcess"
+      :total-repository-size="namespace.totalRepositorySize"
+      :additional-purchased-storage-size="namespace.additionalPurchasedStorageSize"
+      :actual-repository-size-limit="namespace.actualRepositorySizeLimit"
+    />
     <div v-if="isAdditionalStorageFlagEnabled && storageStatistics">
       <usage-statistics :root-storage-statistics="storageStatistics" />
     </div>

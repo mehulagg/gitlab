@@ -387,7 +387,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
 
    Increment unique users count using Redis HLL, for given event name.
 
-   Tracking events using the `UsageData` API requires the `usage_data_api` feature flag to be enabled, which is disabled by default.
+   Tracking events using the `UsageData` API requires the `usage_data_api` feature flag to be enabled, which is enabled by default.
 
    API requests are protected by checking for a valid CSRF token.
 
@@ -750,7 +750,8 @@ The following is example content of the Usage Ping payload.
   },
   "database": {
     "adapter": "postgresql",
-    "version": "9.6.15"
+    "version": "9.6.15",
+    "pg_system_id": 6842684531675334351
   },
   "avg_cycle_analytics": {
     "issue": {
@@ -909,6 +910,10 @@ The following is example content of the Usage Ping payload.
   }
 }
 ```
+
+## Notable changes
+
+In GitLab 13.5, `pg_system_id` was added to send the [PostgreSQL system identifier](https://www.2ndquadrant.com/en/blog/support-for-postgresqls-system-identifier-in-barman/).
 
 ## Exporting Usage Ping SQL queries and definitions
 

@@ -8,9 +8,13 @@ module Gitlab
     GITLAB_COM_GROUP = 'gitlab-com'
 
     def self.gitlab_com_group_member_id?(user_id = nil)
-      return false unless Gitlab.com? && user_id && ::Feature.enabled?(:gitlab_employee_badge)
+      ::Feature.enabled?(:gitlab_employee_badge) && gitlab_com_group_member?(user_id)
+    end
 
-      gitlab_com_user_ids.include?(user_id)
+    def self.gitlab_com_group_member?(user_id)
+      return false unless user_id
+
+      Gitlab.dev_env_or_com? && gitlab_com_user_ids.include?(user_id)
     end
 
     # rubocop: disable CodeReuse/ActiveRecord

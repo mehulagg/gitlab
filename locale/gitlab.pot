@@ -185,6 +185,11 @@ msgid_plural "%d failed"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "%d failed security job"
+msgid_plural "%d failed security jobs"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "%d fixed test result"
 msgid_plural "%d fixed test results"
 msgstr[0] ""
@@ -1044,6 +1049,9 @@ msgid "0 for unlimited"
 msgstr ""
 
 msgid "0 for unlimited, only effective with remote storage enabled."
+msgstr ""
+
+msgid "0t1DgySidms"
 msgstr ""
 
 msgid "1 %{type} addition"
@@ -2692,6 +2700,9 @@ msgstr ""
 msgid "Allow requests to the local network from web hooks and services"
 msgstr ""
 
+msgid "Allow subgroups to set up their own two-factor authentication rules"
+msgstr ""
+
 msgid "Allow this key to push to repository as well? (Default only allows pull access.)"
 msgstr ""
 
@@ -2813,6 +2824,9 @@ msgid "An error occurred fetching the project authors."
 msgstr ""
 
 msgid "An error occurred previewing the blob"
+msgstr ""
+
+msgid "An error occurred when removing the label."
 msgstr ""
 
 msgid "An error occurred when toggling the notification subscription"
@@ -3008,9 +3022,6 @@ msgid "An error occurred while loading the merge request."
 msgstr ""
 
 msgid "An error occurred while loading the pipelines jobs."
-msgstr ""
-
-msgid "An error occurred while loading the subscription details."
 msgstr ""
 
 msgid "An error occurred while making the request."
@@ -3412,6 +3423,9 @@ msgid "Archive jobs"
 msgstr ""
 
 msgid "Archive project"
+msgstr ""
+
+msgid "Archive test case"
 msgstr ""
 
 msgid "Archived"
@@ -3909,7 +3923,7 @@ msgstr ""
 msgid "AutoDevOps|Learn more in the %{link_to_documentation}"
 msgstr ""
 
-msgid "AutoDevOps|The Auto DevOps pipeline has been enabled and will be used if no alternative CI configuration file is found. %{more_information_link}"
+msgid "AutoDevOps|The Auto DevOps pipeline has been enabled and will be used if no alternative CI configuration file is found."
 msgstr ""
 
 msgid "AutoRemediation|If you're using dependency and/or container scanning, and auto-fix is enabled, auto-fix automatically creates merge requests with fixes to vulnerabilities."
@@ -4014,9 +4028,6 @@ msgstr ""
 msgid "Badges|Badge image preview"
 msgstr ""
 
-msgid "Badges|Delete badge"
-msgstr ""
-
 msgid "Badges|Delete badge?"
 msgstr ""
 
@@ -4099,6 +4110,9 @@ msgid "BambooService|You must set up automatic revision labeling and a repositor
 msgstr ""
 
 msgid "Based on"
+msgstr ""
+
+msgid "Basic Sample Data template with Issues, Merge Requests and Milestones."
 msgstr ""
 
 msgid "Be careful. Changing the project's namespace can have unintended side effects."
@@ -4186,6 +4200,15 @@ msgid "BillingPlan|Upgrade"
 msgstr ""
 
 msgid "Billing|An error occurred while loading billable members list"
+msgstr ""
+
+msgid "Billing|No users to display."
+msgstr ""
+
+msgid "Billing|Updated live"
+msgstr ""
+
+msgid "Billing|Users occupying seats in %{namespaceName} Group (%{total})"
 msgstr ""
 
 msgid "Bitbucket Server Import"
@@ -8544,6 +8567,9 @@ msgstr ""
 msgid "Delete artifacts"
 msgstr ""
 
+msgid "Delete badge"
+msgstr ""
+
 msgid "Delete board"
 msgstr ""
 
@@ -8956,6 +8982,12 @@ msgid "Deployed"
 msgstr ""
 
 msgid "Deployed to"
+msgstr ""
+
+msgid "Deployed-after"
+msgstr ""
+
+msgid "Deployed-before"
 msgstr ""
 
 msgid "Deploying to"
@@ -12685,7 +12717,7 @@ msgstr ""
 msgid "Group avatar"
 msgstr ""
 
-msgid "Group by:"
+msgid "Group by"
 msgstr ""
 
 msgid "Group description"
@@ -13538,6 +13570,9 @@ msgstr ""
 msgid "If enabled, access to projects will be validated on an external service using their classification label."
 msgstr ""
 
+msgid "If the YouTube URL is https://www.youtube.com/watch?v=0t1DgySidms then the video ID is %{id}"
+msgstr ""
+
 msgid "If the number of active users exceeds the user limit, you will be charged for the number of %{users_over_license_link} at your next license reconciliation."
 msgstr ""
 
@@ -14010,6 +14045,9 @@ msgstr ""
 msgid "Insert a quote"
 msgstr ""
 
+msgid "Insert a video"
+msgstr ""
+
 msgid "Insert an image"
 msgstr ""
 
@@ -14023,6 +14061,9 @@ msgid "Insert inline code"
 msgstr ""
 
 msgid "Insert suggestion"
+msgstr ""
+
+msgid "Insert video"
 msgstr ""
 
 msgid "Insights"
@@ -14070,6 +14111,36 @@ msgid "Instance Statistics"
 msgstr ""
 
 msgid "Instance administrators group already exists"
+msgstr ""
+
+msgid "InstanceAnalytics|Canceled"
+msgstr ""
+
+msgid "InstanceAnalytics|Could not load the pipelines chart. Please refresh the page to try again."
+msgstr ""
+
+msgid "InstanceAnalytics|Failed"
+msgstr ""
+
+msgid "InstanceAnalytics|Items"
+msgstr ""
+
+msgid "InstanceAnalytics|Month"
+msgstr ""
+
+msgid "InstanceAnalytics|Pipelines"
+msgstr ""
+
+msgid "InstanceAnalytics|Skipped"
+msgstr ""
+
+msgid "InstanceAnalytics|Succeeded"
+msgstr ""
+
+msgid "InstanceAnalytics|There is no data available."
+msgstr ""
+
+msgid "InstanceAnalytics|Total"
 msgstr ""
 
 msgid "InstanceStatistics|Groups"
@@ -14138,6 +14209,9 @@ msgstr ""
 msgid "Integrations|Projects using custom settings will not be impacted unless the project owner chooses to use instance-level defaults."
 msgstr ""
 
+msgid "Integrations|Return to GitLab for Jira"
+msgstr ""
+
 msgid "Integrations|Save settings?"
 msgstr ""
 
@@ -14160,6 +14234,9 @@ msgid "Integrations|Use the GitLab Slack application"
 msgstr ""
 
 msgid "Integrations|When a Jira issue is mentioned in a commit or merge request a remote link and comment (if enabled) will be created."
+msgstr ""
+
+msgid "Integrations|You can now close this window and return to the GitLab for Jira application."
 msgstr ""
 
 msgid "Interested parties can even contribute by pushing commits if they want to."
@@ -15244,6 +15321,9 @@ msgstr ""
 msgid "Learn more"
 msgstr ""
 
+msgid "Learn more about %{username}"
+msgstr ""
+
 msgid "Learn more about Auto DevOps"
 msgstr ""
 
@@ -16161,6 +16241,9 @@ msgstr ""
 msgid "Members|Are you sure you want to leave \"%{source}\"?"
 msgstr ""
 
+msgid "Members|Are you sure you want to remove \"%{groupName}\"?"
+msgstr ""
+
 msgid "Members|Are you sure you want to remove %{usersName} from \"%{source}\""
 msgstr ""
 
@@ -16180,6 +16263,15 @@ msgid "Members|Leave \"%{source}\""
 msgstr ""
 
 msgid "Members|No expiration set"
+msgstr ""
+
+msgid "Members|Remove \"%{groupName}\""
+msgstr ""
+
+msgid "Members|Remove group"
+msgstr ""
+
+msgid "Members|Role updated successfully."
 msgstr ""
 
 msgid "Members|in %{time}"
@@ -17952,6 +18044,9 @@ msgstr ""
 msgid "None"
 msgstr ""
 
+msgid "None of the group milestones have the same project as the release"
+msgstr ""
+
 msgid "Not Implemented"
 msgstr ""
 
@@ -19523,6 +19618,9 @@ msgstr ""
 msgid "Please provide a valid URL"
 msgstr ""
 
+msgid "Please provide a valid YouTube URL or ID"
+msgstr ""
+
 msgid "Please provide a valid email address."
 msgstr ""
 
@@ -20726,6 +20824,9 @@ msgstr ""
 msgid "ProjectTemplates|Android"
 msgstr ""
 
+msgid "ProjectTemplates|Basic"
+msgstr ""
+
 msgid "ProjectTemplates|GitLab Cluster Management"
 msgstr ""
 
@@ -20778,6 +20879,9 @@ msgid "ProjectTemplates|Ruby on Rails"
 msgstr ""
 
 msgid "ProjectTemplates|SalesforceDX"
+msgstr ""
+
+msgid "ProjectTemplates|Serenity Valley"
 msgstr ""
 
 msgid "ProjectTemplates|Serverless Framework/JS"
@@ -21236,7 +21340,7 @@ msgstr ""
 msgid "ProtectedBranch|Code owner approval"
 msgstr ""
 
-msgid "ProtectedBranch|Does not apply to users allowed to merge or push."
+msgid "ProtectedBranch|Does not apply to users allowed to push."
 msgstr ""
 
 msgid "ProtectedBranch|Protect"
@@ -21363,6 +21467,9 @@ msgid "Puma is running with a thread count above 1 and the Rugged service is ena
 msgstr ""
 
 msgid "Purchase more minutes"
+msgstr ""
+
+msgid "Purchase more storage"
 msgstr ""
 
 msgid "Push"
@@ -21966,6 +22073,9 @@ msgstr ""
 msgid "Reopen milestone"
 msgstr ""
 
+msgid "Reopen test case"
+msgstr ""
+
 msgid "Reopen this %{quick_action_target}"
 msgstr ""
 
@@ -22259,7 +22369,7 @@ msgstr ""
 msgid "Require admin approval for new sign-ups"
 msgstr ""
 
-msgid "Require all users in this group to setup Two-factor authentication"
+msgid "Require all users in this group to setup two-factor authentication"
 msgstr ""
 
 msgid "Require all users to accept Terms of Service and Privacy Policy when they access GitLab."
@@ -22290,6 +22400,9 @@ msgid "Requirement %{reference} has been reopened"
 msgstr ""
 
 msgid "Requirement %{reference} has been updated"
+msgstr ""
+
+msgid "Requirement title"
 msgstr ""
 
 msgid "Requirement title cannot have more than %{limit} characters."
@@ -22753,6 +22866,9 @@ msgstr ""
 msgid "SSL Verification:"
 msgstr ""
 
+msgid "Sample Data"
+msgstr ""
+
 msgid "Satisfied"
 msgstr ""
 
@@ -23087,7 +23203,7 @@ msgstr ""
 msgid "Seat Link is disabled, and cannot be configured through this form."
 msgstr ""
 
-msgid "Seats usage data as of %{last_enqueue_time}"
+msgid "Seats usage data as of %{last_enqueue_time} (Updated daily)"
 msgstr ""
 
 msgid "Seats usage data is updated every day at 12:00pm UTC"
@@ -23686,6 +23802,9 @@ msgstr ""
 msgid "September"
 msgstr ""
 
+msgid "Serenity Valley Sample Data template."
+msgstr ""
+
 msgid "SeriesFinalConjunction|and"
 msgstr ""
 
@@ -24218,6 +24337,9 @@ msgstr ""
 msgid "Sign in to \"%{group_name}\""
 msgstr ""
 
+msgid "Sign in to GitLab"
+msgstr ""
+
 msgid "Sign in using smart card"
 msgstr ""
 
@@ -24261,6 +24383,9 @@ msgid "SignUp|Username is too short (minimum is %{min_length} characters)."
 msgstr ""
 
 msgid "Signed in"
+msgstr ""
+
+msgid "Signed in to GitLab as %{user_link}"
 msgstr ""
 
 msgid "Signed in with %{authentication} authentication"
@@ -25262,6 +25387,12 @@ msgstr ""
 msgid "Subscription successfully deleted."
 msgstr ""
 
+msgid "SubscriptionTable|An error occurred while loading billable members list"
+msgstr ""
+
+msgid "SubscriptionTable|An error occurred while loading the subscription details."
+msgstr ""
+
 msgid "SubscriptionTable|Billing"
 msgstr ""
 
@@ -25772,13 +25903,28 @@ msgstr ""
 msgid "TestCases|Search test cases"
 msgstr ""
 
+msgid "TestCases|Something went wrong while adding test case to Todo."
+msgstr ""
+
 msgid "TestCases|Something went wrong while creating a test case."
 msgstr ""
 
 msgid "TestCases|Something went wrong while fetching count of test cases."
 msgstr ""
 
+msgid "TestCases|Something went wrong while fetching test case."
+msgstr ""
+
 msgid "TestCases|Something went wrong while fetching test cases list."
+msgstr ""
+
+msgid "TestCases|Something went wrong while marking test case todo as done."
+msgstr ""
+
+msgid "TestCases|Something went wrong while updating the test case labels."
+msgstr ""
+
+msgid "TestCases|Something went wrong while updating the test case."
 msgstr ""
 
 msgid "TestCases|Submit test case"
@@ -25865,7 +26011,7 @@ msgstr ""
 msgid "Thanks! Don't show me this again"
 msgstr ""
 
-msgid "That's it, well done!%{celebrate}"
+msgid "That's it, well done!"
 msgstr ""
 
 msgid "The \"%{group_path}\" group allows you to sign in with your Single Sign-On Account"
@@ -25898,6 +26044,9 @@ msgid "The Issue Tracker is the place to add things that need to be improved or 
 msgstr ""
 
 msgid "The Prometheus server responded with \"bad request\". Please check your queries are correct and are supported in your Prometheus version. %{documentationLink}"
+msgstr ""
+
+msgid "The Security Dashboard shows the results of the last successful pipeline run on the default branch."
 msgstr ""
 
 msgid "The URL defined on the primary node that secondary nodes should use to contact it."
@@ -26631,7 +26780,13 @@ msgstr ""
 msgid "This application will be able to:"
 msgstr ""
 
+msgid "This attachment has been truncated to avoid exceeding the maximum allowed attachment size of 15MB. %{written_count} of %{count} issues have been included. Consider re-exporting with a narrower selection of issues."
+msgstr ""
+
 msgid "This attachment has been truncated to avoid exceeding the maximum allowed attachment size of 15MB. %{written_count} of %{issues_count} issues have been included. Consider re-exporting with a narrower selection of issues."
+msgstr ""
+
+msgid "This attachment has been truncated to avoid exceeding the maximum allowed attachment size of 15MB. %{written_count} of %{merge_requests_count} issues have been included. Consider re-exporting with a narrower selection of issues."
 msgstr ""
 
 msgid "This block is self-referential"
@@ -27550,6 +27705,9 @@ msgstr ""
 msgid "Toggle navigation"
 msgstr ""
 
+msgid "Toggle project select"
+msgstr ""
+
 msgid "Toggle sidebar"
 msgstr ""
 
@@ -27961,6 +28119,9 @@ msgstr ""
 msgid "Unable to save your changes. Please try again."
 msgstr ""
 
+msgid "Unable to save your preference"
+msgstr ""
+
 msgid "Unable to schedule a pipeline to run immediately"
 msgstr ""
 
@@ -28324,6 +28485,9 @@ msgstr ""
 msgid "UsageQuota|%{help_link_start}Shared runners%{help_link_end} are disabled, so there are no limits set on pipeline usage"
 msgstr ""
 
+msgid "UsageQuota|%{percentageLeft} of purchased storage is available"
+msgstr ""
+
 msgid "UsageQuota|Artifacts"
 msgstr ""
 
@@ -28414,13 +28578,25 @@ msgstr ""
 msgid "UsageQuota|Usage since"
 msgstr ""
 
+msgid "UsageQuota|When you purchase additional storage, we automatically unlock projects that were locked when you reached the %{actualRepositorySizeLimit} limit."
+msgstr ""
+
 msgid "UsageQuota|Wiki"
 msgstr ""
 
 msgid "UsageQuota|Wikis"
 msgstr ""
 
+msgid "UsageQuota|You have consumed all of your additional storage, please purchase more to unlock your projects over the free %{actualRepositorySizeLimit} limit."
+msgstr ""
+
+msgid "UsageQuota|You have reached the free storage limit of %{actualRepositorySizeLimit} on %{projectsLockedText}. To unlock them, please purchase additional storage."
+msgstr ""
+
 msgid "UsageQuota|You used: %{usage} %{limit}"
+msgstr ""
+
+msgid "UsageQuota|Your purchased storage is running low. To avoid locked projects, please purchase more storage."
 msgstr ""
 
 msgid "UsageQuota|out of %{formattedLimit} of your namespace storage"
@@ -28595,6 +28771,9 @@ msgid "UserProfile|Already reported for abuse"
 msgstr ""
 
 msgid "UserProfile|Blocked user"
+msgstr ""
+
+msgid "UserProfile|Bot activity"
 msgstr ""
 
 msgid "UserProfile|Contributed projects"
@@ -29827,6 +30006,9 @@ msgstr ""
 msgid "You are receiving this message because you are a GitLab administrator for %{url}."
 msgstr ""
 
+msgid "You are signed into GitLab as %{user_link}"
+msgstr ""
+
 msgid "You are trying to upload something other than an image. Please upload a .png, .jpg, .jpeg, .gif, .bmp, .tiff or .ico."
 msgstr ""
 
@@ -30253,6 +30435,9 @@ msgstr ""
 msgid "YouTube"
 msgstr ""
 
+msgid "YouTube URL or ID"
+msgstr ""
+
 msgid "Your %{host} account was signed in to from a new location"
 msgstr ""
 
@@ -30265,7 +30450,7 @@ msgstr ""
 msgid "Your CSV export has started. It will be emailed to %{email} when complete."
 msgstr ""
 
-msgid "Your CSV export of %{issues_count} from project %{project_link} has been added to this email as an attachment."
+msgid "Your CSV export of %{count} from project %{project_link} has been added to this email as an attachment."
 msgstr ""
 
 msgid "Your CSV export of %{written_count} from project %{project_name} (%{project_url}) has been added to this email as an attachment."
@@ -30458,9 +30643,6 @@ msgid "Your project limit is %{limit} projects! Please contact your administrato
 msgstr ""
 
 msgid "Your projects"
-msgstr ""
-
-msgid "Your purchased storage is running low. To avoid locked projects, please purchase more storage."
 msgstr ""
 
 msgid "Your request for access could not be processed: %{error_meesage}"
@@ -31212,6 +31394,9 @@ msgid "metric_id must be unique across a project"
 msgstr ""
 
 msgid "missing"
+msgstr ""
+
+msgid "more information"
 msgstr ""
 
 msgid "most recent deployment"

@@ -7,6 +7,8 @@ module EE
         extend ActiveSupport::Concern
 
         prepended do
+          include ::Mutations::Issues::CommonEEMutationArguments
+
           argument :epic_id, ::Types::GlobalIDType[::Epic],
                    required: false,
                    description: 'The ID of an epic to associate the issue with'

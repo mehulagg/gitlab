@@ -1,5 +1,7 @@
 import Cookies from 'js-cookie';
 import { pick } from 'lodash';
+
+import boardListsQuery from 'ee_else_ce/boards/queries/board_lists.query.graphql';
 import { __ } from '~/locale';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
@@ -15,10 +17,10 @@ import {
 import boardStore from '~/boards/stores/boards_store';
 
 import listsIssuesQuery from '../queries/lists_issues.query.graphql';
-import boardListsQuery from '../queries/board_lists.query.graphql';
 import createBoardListMutation from '../queries/board_list_create.mutation.graphql';
 import updateBoardListMutation from '../queries/board_list_update.mutation.graphql';
 import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
+import issueSetLabels from '../queries/issue_set_labels.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -75,10 +77,10 @@ export default {
         variables,
       })
       .then(({ data }) => {
-        const { lists } = data[boardType]?.board;
+        const { lists, hideBacklogList } = data[boardType]?.board;
         commit(types.RECEIVE_BOARD_LISTS_SUCCESS, formatBoardLists(lists));
-        // Backlog list needs to be created if it doesn't exist
-        if (!lists.nodes.find(l => l.listType === ListType.backlog)) {
+        // Backlog list needs to be created if it doesn't exist and it's not hidden
+        if (!lists.nodes.find(l => l.listType === ListType.backlog) && !hideBacklogList) {
           dispatch('createList', { backlog: true });
         }
         dispatch('showWelcomeList');
@@ -279,6 +281,31 @@ export default {
 
   addListIssueFailure: ({ commit }, { list, issue }) => {
     commit(types.ADD_ISSUE_TO_LIST_FAILURE, { list, issue });
+  },
+
+  setActiveIssueLabels: async ({ commit, getters }, input) => {
+    const activeIssue = getters.getActiveIssue;
+    const { data } = await gqlClient.mutate({
+      mutation: issueSetLabels,
+      variables: {
+        input: {
+          iid: String(activeIssue.iid),
+          addLabelIds: input.addLabelIds ?? [],
+          removeLabelIds: input.removeLabelIds ?? [],
+          projectPath: input.projectPath,
+        },
+      },
+    });
+
+    if (data.updateIssue?.errors?.length > 0) {
+      throw new Error(data.updateIssue.errors);
+    }
+
+    commit(types.UPDATE_ISSUE_BY_ID, {
+      issueId: activeIssue.id,
+      prop: 'labels',
+      value: data.updateIssue.issue.labels.nodes,
+    });
   },
 
   fetchBacklog: () => {

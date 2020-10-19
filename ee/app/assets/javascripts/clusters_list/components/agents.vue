@@ -1,6 +1,5 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
-import { sortBy } from 'lodash';
 import AgentEmptyState from './agent_empty_state.vue';
 import AgentTable from './agent_table.vue';
 import getAgentsQuery from '../graphql/queries/get_agents.query.graphql';
@@ -26,7 +25,7 @@ export default {
           });
         }
 
-        return sortBy(agentList, 'name');
+        return agentList;
       },
     },
   },

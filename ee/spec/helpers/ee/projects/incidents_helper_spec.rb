@@ -29,8 +29,8 @@ RSpec.describe Projects::IncidentsHelper do
         'published-available' => 'false',
         'sla-feature-available' => 'false',
         'text-query': 'search text',
-        'author-usernames-query': 'root',
-        'assignee-usernames-query': 'max.power'
+        'author-username-query': 'root',
+        'assignee-username-query': 'max.power'
       }
     end
 

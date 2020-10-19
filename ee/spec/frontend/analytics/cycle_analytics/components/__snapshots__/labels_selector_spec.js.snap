@@ -4,7 +4,7 @@ exports[`Value Stream Analytics LabelsSelector with no item selected will render
 "<gl-dropdown-stub headertext=\\"\\" text=\\"\\" category=\\"tertiary\\" variant=\\"default\\" size=\\"medium\\" toggleclass=\\"gl-overflow-hidden\\" class=\\"gl-w-full\\">
   <gl-dropdown-section-header-stub>Select a label </gl-dropdown-section-header-stub>
   <div class=\\"mb-3 px-3\\">
-    <gl-search-box-by-type-stub value=\\"\\" clearbuttontitle=\\"Clear\\" class=\\"mb-2\\"></gl-search-box-by-type-stub>
+    <gl-search-box-by-type-stub value=\\"\\" clearbuttontitle=\\"Clear\\"></gl-search-box-by-type-stub>
   </div>
   <div class=\\"mb-3 px-3\\">
     <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">
@@ -33,7 +33,7 @@ exports[`Value Stream Analytics LabelsSelector with selectedLabelId set will ren
 "<gl-dropdown-stub headertext=\\"\\" text=\\"\\" category=\\"tertiary\\" variant=\\"default\\" size=\\"medium\\" toggleclass=\\"gl-overflow-hidden\\" class=\\"gl-w-full\\">
   <gl-dropdown-section-header-stub>Select a label </gl-dropdown-section-header-stub>
   <div class=\\"mb-3 px-3\\">
-    <gl-search-box-by-type-stub value=\\"\\" clearbuttontitle=\\"Clear\\" class=\\"mb-2\\"></gl-search-box-by-type-stub>
+    <gl-search-box-by-type-stub value=\\"\\" clearbuttontitle=\\"Clear\\"></gl-search-box-by-type-stub>
   </div>
   <div class=\\"mb-3 px-3\\">
     <gl-dropdown-item-stub avatarurl=\\"\\" iconcolor=\\"\\" iconname=\\"\\" iconrightname=\\"\\" secondarytext=\\"\\" class=\\"\\">

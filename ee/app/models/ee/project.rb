@@ -135,6 +135,7 @@ module EE
       scope :with_github_service_pipeline_events, -> { joins(:github_service).merge(GithubService.pipeline_hooks) }
       scope :with_active_prometheus_service, -> { joins(:prometheus_service).merge(PrometheusService.active) }
       scope :with_enabled_error_tracking, -> { joins(:error_tracking_setting).where(project_error_tracking_settings: { enabled: true }) }
+      scope :with_enabled_incident_sla, -> { joins(:incident_management_setting).where(project_incident_management_settings: { sla_timer: true }) }
       scope :mirrored_with_enabled_pipelines, -> do
         joins(:project_feature).mirror.where(mirror_trigger_builds: true,
                                              project_features: { builds_access_level: ::ProjectFeature::ENABLED })
@@ -205,9 +206,10 @@ module EE
       extend ::Gitlab::Utils::Override
 
       # @param primary_key_in [Range, Project] arg to pass to primary_key_in scope
-      # @param node [GeoNode] defaults to ::Gitlab::Geo.current_node
       # @return [ActiveRecord::Relation<Project>] everything that should be synced to this node, restricted by primary key
-      def replicables_for_geo_node(primary_key_in, node = ::Gitlab::Geo.current_node)
+      def replicables_for_current_secondary(primary_key_in)
+        node = ::Gitlab::Geo.current_node
+
         node.projects.primary_key_in(primary_key_in)
       end
 
@@ -530,8 +532,7 @@ module EE
         ::Gitlab::RepositorySizeChecker.new(
           current_size_proc: -> { statistics.total_repository_size },
           limit: actual_size_limit,
-          total_repository_size_excess: namespace.total_repository_size_excess,
-          additional_purchased_storage: namespace.additional_purchased_storage_size.megabytes,
+          namespace: namespace,
           enabled: License.feature_available?(:repository_size_limit)
         )
       end

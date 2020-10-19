@@ -437,9 +437,11 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(count_data[:projects_slack_slash_commands_active]).to eq(1)
       expect(count_data[:projects_custom_issue_tracker_active]).to eq(1)
       expect(count_data[:projects_mattermost_active]).to eq(1)
+      expect(count_data[:groups_mattermost_active]).to eq(1)
       expect(count_data[:templates_mattermost_active]).to eq(1)
       expect(count_data[:instances_mattermost_active]).to eq(1)
-      expect(count_data[:projects_inheriting_instance_mattermost_active]).to eq(1)
+      expect(count_data[:projects_inheriting_mattermost_active]).to eq(1)
+      expect(count_data[:groups_inheriting_slack_active]).to eq(1)
       expect(count_data[:projects_with_repositories_enabled]).to eq(3)
       expect(count_data[:projects_with_error_tracking_enabled]).to eq(1)
       expect(count_data[:projects_with_tracing_enabled]).to eq(1)
@@ -721,6 +723,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         expect(subject[:git][:version]).to eq(Gitlab::Git.version)
         expect(subject[:database][:adapter]).to eq(Gitlab::Database.adapter_name)
         expect(subject[:database][:version]).to eq(Gitlab::Database.version)
+        expect(subject[:database][:pg_system_id]).to eq(Gitlab::Database.system_id)
         expect(subject[:mail][:smtp_server]).to eq(ActionMailer::Base.smtp_settings[:address])
         expect(subject[:gitaly][:version]).to be_present
         expect(subject[:gitaly][:servers]).to be >= 1

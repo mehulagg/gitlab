@@ -68,6 +68,12 @@ export const withRootStorageStatistics = {
   projects,
   limit: 10000000,
   totalUsage: 129334601,
+  containsLockedProjects: true,
+  repositorySizeExcessProjectCount: 1,
+  totalRepositorySizeExcess: 2321,
+  totalRepositorySize: 1002321,
+  additionalPurchasedStorageSize: 321,
+  actualRepositorySizeLimit: 1002321,
   rootStorageStatistics: {
     storageSize: 129334601,
     repositorySize: 46012030,

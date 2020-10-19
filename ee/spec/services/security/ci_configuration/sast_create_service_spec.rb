@@ -38,6 +38,12 @@ RSpec.describe Security::CiConfiguration::SastCreateService, :snowplow do
         )
       end
 
+      it 'raises exception if the user does not have permission to create a new branch' do
+        allow(project).to receive(:repository).and_raise(Gitlab::Git::PreReceiveError, "You are not allowed to create protected branches on this project.")
+
+        expect { subject }.to raise_error(Gitlab::Git::PreReceiveError)
+      end
+
       context 'with no parameters' do
         it 'returns the path to create a new merge request' do
           expect(result[:status]).to eq(:success)

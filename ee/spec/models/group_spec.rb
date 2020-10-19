@@ -23,6 +23,7 @@ RSpec.describe Group do
     it { is_expected.to have_one(:deletion_schedule) }
     it { is_expected.to have_one(:group_wiki_repository) }
     it { is_expected.to belong_to(:push_rule) }
+    it { is_expected.to have_many(:saml_group_links) }
 
     it_behaves_like 'model with wiki' do
       let(:container) { create(:group, :nested, :wiki_repo) }
@@ -764,6 +765,30 @@ RSpec.describe Group do
           expect(group.saml_discovery_token).not_to be_blank
         end
       end
+    end
+  end
+
+  describe '#saml_enabled?' do
+    subject { group.saml_enabled? }
+
+    context 'when a SAML provider does not exist' do
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when a SAML provider exists and is persisted' do
+      before do
+        create(:saml_provider, group: group)
+      end
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when a SAML provider is not persisted' do
+      before do
+        build(:saml_provider, group: group)
+      end
+
+      it { is_expected.to eq(false) }
     end
   end
 

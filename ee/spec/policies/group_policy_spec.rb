@@ -199,17 +199,25 @@ RSpec.describe GroupPolicy do
   end
 
   context 'when group repository analytics is available' do
-    let(:current_user) { guest }
-
     before do
       stub_licensed_features(group_repository_analytics: true)
     end
 
-    it { is_expected.to be_allowed(:read_group_repository_analytics) }
+    context 'for guests' do
+      let(:current_user) { guest }
+
+      it { is_expected.not_to be_allowed(:read_group_repository_analytics) }
+    end
+
+    context 'for reporter+' do
+      let(:current_user) { reporter }
+
+      it { is_expected.to be_allowed(:read_group_repository_analytics) }
+    end
   end
 
   context 'when group repository analytics is not available' do
-    let(:current_user) { guest }
+    let(:current_user) { admin }
 
     before do
       stub_licensed_features(group_repository_analytics: false)

@@ -333,11 +333,19 @@ module EE
 
     def gitlab_employee?
       strong_memoize(:gitlab_employee) do
-        if ::Gitlab.com? && ::Feature.enabled?(:gitlab_employee_badge)
-          human? && ::Gitlab::Com.gitlab_com_group_member_id?(id)
-        else
-          false
-        end
+        ::Gitlab.com? && ::Feature.enabled?(:gitlab_employee_badge) && gitlab_team_member?
+      end
+    end
+
+    def gitlab_team_member?
+      strong_memoize(:gitlab_team_member) do
+        ::Gitlab::Com.gitlab_com_group_member?(id) && human?
+      end
+    end
+
+    def gitlab_service_user?
+      strong_memoize(:gitlab_service_user) do
+        service_user? && ::Gitlab::Com.gitlab_com_group_member_id?(id)
       end
     end
 

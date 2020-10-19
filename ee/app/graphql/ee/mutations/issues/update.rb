@@ -7,6 +7,8 @@ module EE
         extend ActiveSupport::Concern
 
         prepended do
+          include ::Mutations::Issues::CommonEEMutationArguments
+
           argument :epic_id, GraphQL::ID_TYPE,
                    required: false,
                    description: 'The ID of the parent epic. NULL when removing the association'
