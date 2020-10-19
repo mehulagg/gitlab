@@ -8,32 +8,35 @@ module AlertManagement
     end
 
     def execute
-      collection = project.alert_management_http_integrations
-      collection = by_availability(collection)
-      collection = by_endpoint_identifier(collection)
-      by_active(collection)
+      @collection = project.alert_management_http_integrations
+
+      filter_by_availability
+      filter_by_endpoint_identifier
+      filter_by_active
+
+      collection
     end
 
     private
 
-    attr_reader :project, :params
+    attr_reader :project, :params, :collection
 
-    def by_availability(collection)
-      return collection if multiple_alert_http_integrations?
+    def filter_by_availability
+      return if multiple_alert_http_integrations?
 
-      collection.id_in(project.alert_management_http_integrations.first&.id)
+      @collection = collection.id_in(project.alert_management_http_integrations.first&.id)
     end
 
-    def by_endpoint_identifier(collection)
-      return collection unless params[:endpoint_identifier]
+    def filter_by_endpoint_identifier
+      return unless params[:endpoint_identifier]
 
-      collection.for_endpoint_identifier(params[:endpoint_identifier])
+      @collection = collection.for_endpoint_identifier(params[:endpoint_identifier])
     end
 
-    def by_active(collection)
-      return collection unless params[:active]
+    def filter_by_active
+      return unless params[:active]
 
-      collection.active
+      @collection = collection.active
     end
 
     # Overridden in EE
