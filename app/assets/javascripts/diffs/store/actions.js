@@ -40,6 +40,9 @@ import {
   DIFF_WHITESPACE_COOKIE_NAME,
   SHOW_WHITESPACE,
   NO_SHOW_WHITESPACE,
+  SINGLE_FILE_MODE,
+  ALL_FILE_MODE,
+  DIFF_FILE_BY_FILE_COOKIE_NAME,
 } from '../constants';
 import { diffViewerModes } from '~/ide/constants';
 
@@ -720,6 +723,13 @@ export const navigateToDiffFileIndex = ({ commit, state }, index) => {
   commit(types.VIEW_DIFF_FILE, fileHash);
 };
 
-export const setFileByFile = ({ commit }, newFileByFileSetting) => {
-  commit(types.SET_FILE_BY_FILE, newFileByFileSetting);
+export const setFileByFile = ({ commit }, { fileByFile, pushState = false }) => {
+  const fbf = fileByFile ? SINGLE_FILE_MODE : ALL_FILE_MODE;
+
+  commit(types.SET_FILE_BY_FILE, fileByFile);
+  Cookies.set(DIFF_FILE_BY_FILE_COOKIE_NAME, fbf);
+
+  if (pushState) {
+    historyPushState(mergeUrlParams({ singleFile: fbf }, window.location.href));
+  }
 };

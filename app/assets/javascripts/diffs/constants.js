@@ -68,6 +68,11 @@ export const DIFFS_PER_PAGE = 20;
 export const DIFF_COMPARE_BASE_VERSION_INDEX = -1;
 export const DIFF_COMPARE_HEAD_VERSION_INDEX = -2;
 
+// File by File view
+export const DIFF_FILE_BY_FILE_COOKIE_NAME = 'single_file';
+export const SINGLE_FILE_MODE = '1';
+export const ALL_FILE_MODE = '0';
+
 // Diff View Alerts
 export const ALERT_OVERFLOW_HIDDEN = 'overflow';
 export const ALERT_MERGE_CONFLICT = 'merge-conflict';

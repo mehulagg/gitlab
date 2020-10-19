@@ -10,6 +10,8 @@ import {
   DIFFS_PER_PAGE,
   DIFF_WHITESPACE_COOKIE_NAME,
   SHOW_WHITESPACE,
+  DIFF_FILE_BY_FILE_COOKIE_NAME,
+  SINGLE_FILE_MODE
 } from '~/diffs/constants';
 import {
   setBaseConfig,
@@ -1469,17 +1471,41 @@ describe('DiffsStoreActions', () => {
 
   describe('setFileByFile', () => {
     it.each`
-      value    | opposite
-      ${true}  | ${false}
-      ${false} | ${true}
-    `('commits SET_FILE_BY_FILE with the new value $value', async ({ value, opposite }) => {
+      value
+      ${true}
+      ${false}
+    `('commits SET_FILE_BY_FILE with the new value $value', async ({ value }) => {
       await testAction(
         setFileByFile,
-        value,
-        { viewDiffsFileByFile: opposite },
+        { fileByFile: value },
+        { viewDiffsFileByFile: null },
         [{ type: types.SET_FILE_BY_FILE, payload: value }],
         [],
       );
+    });
+
+    it('sets cookie', () => {
+      setFileByFile({ commit() {} }, { fileByFile: true });
+
+      expect(Cookies.get(DIFF_FILE_BY_FILE_COOKIE_NAME)).toEqual(SINGLE_FILE_MODE);
+    });
+
+    it('calls history pushState', () => {
+      setFileByFile({ commit() {} }, { fileByFile: true, pushState: true });
+
+      expect(window.history.pushState).toHaveBeenCalled();
+    });
+
+    it('calls history pushState with merged params', () => {
+      window.history.pushState({}, '', '?test=1');
+
+      setFileByFile({ commit() {} }, { fileByFile: true, pushState: true });
+
+      expect(
+        window.history.pushState.mock.calls[window.history.pushState.mock.calls.length - 1][2],
+      ).toMatch(/(.*)\?test=1&singleFile=1/);
+
+      window.history.pushState({}, '', '?');
     });
   });
 });
