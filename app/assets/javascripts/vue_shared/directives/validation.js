@@ -8,29 +8,37 @@ const getFeedback = el => {
     : el.validationMessage;
 };
 
+const createValidator = (el, context) => () => {
+  const { form } = context;
+  const { name, form: formEl } = el;
+  if (formEl) {
+    form.state = formEl.checkValidity();
+  }
+  form[name].state = el.checkValidity();
+  form[name].feedback = getFeedback(el);
+};
+
 export default {
-  bind(el, binding, vnode) {
-    const { modifiers } = binding;
-    const { context } = vnode;
+  bind(el, binding, { context }) {
+    const {
+      modifiers,
+      value: { showValidation },
+    } = binding;
 
-    const handler = () => {
-      const { name, form: formEl } = el;
-      if (formEl) {
-        context.form.isValid = formEl.checkValidity();
-      }
-      context.form[name].state = el.checkValidity();
-      context.form[name].feedback = getFeedback(el);
-    };
+    const validate = createValidator(el, context);
 
-    context.$watch(
-      'form.showValidation',
-      showValidation => {
-        if (showValidation) {
-          handler();
-        }
-      },
-      { immediate: true },
-    );
-    el.addEventListener(modifiers.blur ? 'blur' : 'input', handler);
+    if (showValidation) {
+      validate();
+    }
+    el.addEventListener(modifiers.blur ? 'blur' : 'input', validate);
+  },
+  update(el, binding, { context }) {
+    const {
+      value: { showValidation },
+    } = binding;
+
+    if (showValidation) {
+      createValidator(el, context)();
+    }
   },
 };

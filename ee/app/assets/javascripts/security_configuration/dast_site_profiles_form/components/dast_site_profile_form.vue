@@ -68,6 +68,7 @@ export default {
     const { name = '', targetUrl = '' } = this.siteProfile || {};
 
     const form = {
+      state: false,
       showValidation: false,
       profileName: initField(name),
       targetUrl: initField(targetUrl),
@@ -76,6 +77,7 @@ export default {
     return {
       fetchValidationTimeout: null,
       form,
+      showValidation: false,
       initialFormValues: serializeFormObject(form),
       isFetchingValidationStatus: false,
       isValidatingSite: false,
@@ -126,18 +128,14 @@ export default {
     formTouched() {
       return !isEqual(serializeFormObject(this.form), this.initialFormValues);
     },
-    formHasErrors() {
-      return Object.values(this.form).some(({ state }) => state === false);
-    },
     someFieldEmpty() {
       return Object.values(this.form).some(({ value }) => isEmptyValue(value));
     },
     isSubmitDisabled() {
       return (
         (this.isSiteValidationActive && !this.validationStatusMatches(PASSED)) ||
-        this.formHasErrors ||
-        this.someFieldEmpty ||
-        this.validationStatusMatches(INPROGRESS)
+        this.validationStatusMatches(INPROGRESS) ||
+        (this.form.showValidation && !this.form.state)
       );
     },
     showValidationSection() {
@@ -176,8 +174,6 @@ export default {
   },
   async mounted() {
     if (this.isEdit) {
-      this.form.showValidation = true;
-
       if (this.glFeatures.securityOnDemandScansSiteValidation) {
         await this.fetchValidationStatus();
 
@@ -280,7 +276,7 @@ export default {
     onSubmit() {
       this.form.showValidation = true;
 
-      if (!this.form.isValid) {
+      if (!this.form.state) {
         return;
       }
 
@@ -375,7 +371,7 @@ export default {
     >
       <gl-form-input
         v-model="form.profileName.value"
-        v-validation.blur
+        v-validation.blur="{ showValidation: form.showValidation }"
         name="profileName"
         class="mw-460"
         data-testid="profile-name-input"
@@ -399,7 +395,7 @@ export default {
     >
       <gl-form-input
         v-model="form.targetUrl.value"
-        v-validation.blur
+        v-validation.blur="{ showValidation: form.showValidation }"
         name="targetUrl"
         class="mw-460"
         data-testid="target-url-input"
@@ -452,7 +448,7 @@ export default {
         variant="success"
         class="js-no-auto-disable"
         data-testid="dast-site-profile-form-submit-button"
-        :disabled="form.showValidation && !form.isValid"
+        :disabled="isSubmitDisabled"
         :loading="isLoading"
       >
         {{ s__('DastProfiles|Save profile') }}
