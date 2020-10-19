@@ -1,0 +1,5 @@
+---
+title: Fix typos when deleting a project repository
+merge_request: 45599
+author: @Edstub207
+type: fixed
