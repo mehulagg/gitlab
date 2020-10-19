@@ -53,7 +53,7 @@ export default {
 </script>
 <template>
   <gl-button
-    v-gl-tooltip
+    v-gl-tooltip="{ id: $options.deleteEnvironmentTooltipId }"
     :loading="isLoading"
     :title="title"
     :aria-label="title"
