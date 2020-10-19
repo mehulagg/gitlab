@@ -1,6 +1,13 @@
-#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+fragment PageInfoShared on PageInfo {
+  __typename
+  hasNextPage
+  hasPreviousPage
+  startCursor
+  endCursor
+}
 
-fragment TreeEntry on Entry {
+fragment TreeEntryShared on Entry {
+  __typename
   id
   sha
   name
@@ -16,42 +23,51 @@ query getFiles(
   $nextPageCursor: String
 ) {
   project(fullPath: $projectPath) {
+    __typename
     repository {
+      __typename
       tree(path: $path, ref: $ref) {
+        __typename
         trees(first: $pageSize, after: $nextPageCursor) {
+          __typename
           edges {
+            __typename
             node {
-              ...TreeEntry
+              ...TreeEntryShared
               webPath
             }
           }
           pageInfo {
-            ...PageInfo
+            ...PageInfoShared
           }
         }
         submodules(first: $pageSize, after: $nextPageCursor) {
+          __typename
           edges {
+            __typename
             node {
-              ...TreeEntry
+              ...TreeEntryShared
               webUrl
               treeUrl
             }
           }
           pageInfo {
-            ...PageInfo
+            ...PageInfoShared
           }
         }
         blobs(first: $pageSize, after: $nextPageCursor) {
+          __typename
           edges {
+            __typename
             node {
-              ...TreeEntry
+              ...TreeEntryShared
               mode
               webPath
               lfsOid
             }
           }
           pageInfo {
-            ...PageInfo
+            ...PageInfoShared
           }
         }
       }
