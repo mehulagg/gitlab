@@ -16,6 +16,7 @@ import {
   PARALLEL_DIFF_VIEW_TYPE,
   SHOW_WHITESPACE,
   NO_SHOW_WHITESPACE,
+  SINGLE_FILE_MODE,
 } from '../constants';
 import { prepareRawDiffFile } from '../diff_file';
 
@@ -785,3 +786,19 @@ export const getDefaultWhitespace = (queryString, cookie) => {
   if (cookie === NO_SHOW_WHITESPACE) return false;
   return true;
 };
+
+export function getDefaultFileByFile(search, cookie) {
+  let viewFileByFile = false;
+
+  // use the cookie first, if it exists
+  if (cookie) {
+    viewFileByFile = cookie === SINGLE_FILE_MODE;
+  }
+
+  // the search parameter of the URL should override, if it exists
+  if (search) {
+    viewFileByFile = search === SINGLE_FILE_MODE;
+  }
+
+  return viewFileByFile;
+}
