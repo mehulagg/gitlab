@@ -81,6 +81,10 @@ they must be manually replicated to the **secondary** node.
 
 ### Step 2. Manually replicate the **primary** node's SSH host keys
 
+NOTE: **Note:**
+Be sure to test SSH connection in a separate terminal to
+verify SSH is still functional after this change.
+
 GitLab integrates with the system-installed SSH daemon, designating a user
 (typically named `git`) through which all access requests are handled.
 
