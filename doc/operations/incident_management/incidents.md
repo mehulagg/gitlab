@@ -10,13 +10,13 @@ Incidents are critical entities in incident management workflows. They represent
 
 ## Incident Creation
 
-You can create an incident manually or automatically. 
+You can create an incident manually or automatically.
 
 ### Create incidents manually
 
 If you have at least Guest [permissions](../../user/permissions.md), to create an Incident, you have two options to do this manually.
 
-**From the Incidents List:** 
+**From the Incidents List:**
 
 > [Moved](https://gitlab.com/gitlab-org/monitor/health/-/issues/24) to GitLab core in 13.3.
 
@@ -56,7 +56,7 @@ With Maintainer or higher [permissions](../../user/permissions.md), you can enab
    **Send a separate email notification to Developers**. Email notifications will also be sent to users with **Maintainer** and **Owner** permissions.
 1. Click **Save changes**.
 
-### Create incidents via the PagerDuty webhook 
+### Create incidents via the PagerDuty webhook
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/119018) in GitLab 13.3.
 
