@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :terraform_state, class: 'Terraform::State' do
-    project { create(:project) }
+    project { association(:project) }
 
     sequence(:name) { |n| "state-#{n}" }
 
