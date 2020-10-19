@@ -1,8 +1,11 @@
 <script>
 import { GlModal } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
+import AccessorUtilities from '~/lib/utils/accessor';
 
 import EditMetaControls from './edit_meta_controls.vue';
+
+import { MR_META_LOCAL_STORAGE_KEY } from '../constants';
 
 export default {
   components: {
@@ -16,13 +19,22 @@ export default {
     },
   },
   data() {
+    let mergeRequestMeta = {
+      title: sprintf(s__(`StaticSiteEditor|Update %{sourcePath} file`), {
+        sourcePath: this.sourcePath,
+      }),
+      description: s__('StaticSiteEditor|Copy update'),
+    };
+
+    if (
+      AccessorUtilities.isLocalStorageAccessSafe() &&
+      localStorage.getItem(MR_META_LOCAL_STORAGE_KEY)
+    ) {
+      mergeRequestMeta = JSON.parse(localStorage.getItem(MR_META_LOCAL_STORAGE_KEY));
+    }
+
     return {
-      mergeRequestMeta: {
-        title: sprintf(s__(`StaticSiteEditor|Update %{sourcePath} file`), {
-          sourcePath: this.sourcePath,
-        }),
-        description: s__('StaticSiteEditor|Copy update'),
-      },
+      mergeRequestMeta,
     };
   },
   computed: {
@@ -51,13 +63,20 @@ export default {
     },
     onPrimary() {
       this.$emit('primary', this.mergeRequestMeta);
-      this.$refs.editMetaControls.resetCachedEditable();
+
+      if (AccessorUtilities.isLocalStorageAccessSafe()) {
+        window.localStorage.removeItem(MR_META_LOCAL_STORAGE_KEY);
+      }
     },
     onSecondary() {
       this.hide();
     },
     onUpdateSettings(mergeRequestMeta) {
       this.mergeRequestMeta = { ...mergeRequestMeta };
+
+      if (AccessorUtilities.isLocalStorageAccessSafe()) {
+        window.localStorage.setItem(MR_META_LOCAL_STORAGE_KEY, JSON.stringify(mergeRequestMeta));
+      }
     },
   },
 };
