@@ -787,7 +787,7 @@ export const getDefaultWhitespace = (queryString, cookie) => {
   return true;
 };
 
-export function getDefaultFileByFile(search, cookie) {
+export function getInitialFileByFile(search, cookie) {
   let viewFileByFile = false;
 
   // use the cookie first, if it exists
