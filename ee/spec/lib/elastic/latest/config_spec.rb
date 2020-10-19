@@ -19,15 +19,5 @@ RSpec.describe Elastic::Latest::Config do
     it 'returns config' do
       expect(described_class.mapping).to be_a(Elasticsearch::Model::Indexing::Mappings)
     end
-
-    context 'custom analyzers' do
-      before do
-        stub_ee_application_setting(elasticsearch_analyzers_smartcn_enabled: true)
-      end
-
-      it 'sets correct fields for title' do
-        expect(Elastic::Latest::Config.mapping.to_hash[:doc][:properties][:title]).to eq({ fields: {}, type: :text, index_options: 'positions' })
-      end
-    end
   end
 end
