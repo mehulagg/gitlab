@@ -41,6 +41,13 @@ module Elastic
           enabled << 'kuromoji' if ::Gitlab::CurrentSettings.elasticsearch_analyzers_kuromoji_enabled
         end
       end
+
+      def custom_analyzers_search
+        [].tap do |analyzers|
+          analyzers << 'smartcn' if ::Gitlab::CurrentSettings.elasticsearch_analyzers_smartcn_search
+          analyzers << 'kuromoji' if ::Gitlab::CurrentSettings.elasticsearch_analyzers_kuromoji_search
+        end
+      end
     end
   end
 end
