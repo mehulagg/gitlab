@@ -92,7 +92,12 @@ with [domain expertise](#domain-experts).
 1. If your merge request includes UX changes (*1*), it must be
    **approved by a [UX team member](https://about.gitlab.com/company/team/)**.
 1. If your merge request includes adding a new JavaScript library (*1*), it must be
-   **approved by a [frontend lead](https://about.gitlab.com/company/team/)**.
+   **approved by a [frontend foundations member](https://about.gitlab.com/direction/create/ecosystem/frontend-ux-foundations/)**
+   for its impact on our JavaScript bundle sizes.
+   - If the license used by the new library hasn't been approved for use in
+     GitLab, the license must be **approved by a [legal department member](https://about.gitlab.com/handbook/legal/)**.
+     More information about license compatiblity can be found in our
+     [GitLab Licensing and Compatibility documentation](https://docs.gitlab.com/ce/development/licensing).
 1. If your merge request includes adding a new UI/UX paradigm (*1*), it must be
    **approved by a [UX lead](https://about.gitlab.com/company/team/)**.
 1. If your merge request includes a new dependency or a filesystem change, it must be
