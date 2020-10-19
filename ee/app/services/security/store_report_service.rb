@@ -54,7 +54,9 @@ module Security
 
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
 
-      finding.identifiers.map do |identifier|
+      # The maximum number of identifiers is not used in validation
+      # we just want to ignore the rest if a finding has more than that.
+      finding.identifiers.take(Vulnerabilities::Finding::MAX_NUMBER_OF_IDENTIFIERS).map do |identifier|
         create_or_update_vulnerability_identifier_object(vulnerability_finding, identifier)
       end
 

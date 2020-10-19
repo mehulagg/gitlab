@@ -11,6 +11,7 @@ module Vulnerabilities
     self.table_name = "vulnerability_occurrences"
 
     FINDINGS_PER_PAGE = 20
+    MAX_NUMBER_OF_IDENTIFIERS = 20
 
     paginates_per FINDINGS_PER_PAGE
 
