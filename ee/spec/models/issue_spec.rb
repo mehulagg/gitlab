@@ -207,6 +207,30 @@ RSpec.describe Issue do
         it { is_expected.to eq([not_published, published]) }
       end
     end
+
+    context 'sla due at' do
+      let_it_be(:project) { create(:project) }
+      let_it_be(:sla_due_first) { create(:issue, project: project) }
+      let_it_be(:sla_due_last)  { create(:issue, project: project) }
+      let_it_be(:no_sla) { create(:issue, project: project) }
+
+      before_all do
+        create(:issuable_sla, :exceeded, issue: sla_due_first)
+        create(:issuable_sla, issue: sla_due_last)
+      end
+
+      describe '.order_sla_due_at_asc' do
+        subject { described_class.order_sla_due_at_asc }
+
+        it { is_expected.to eq([no_sla, sla_due_first, sla_due_last]) }
+      end
+
+      describe '.order_sla_due_at_desc' do
+        subject { described_class.order_sla_due_at_desc }
+
+        it { is_expected.to eq([sla_due_last, sla_due_first, no_sla]) }
+      end
+    end
   end
 
   describe 'validations' do
