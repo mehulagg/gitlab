@@ -20,6 +20,12 @@ RSpec.describe Security::CiConfiguration::SastCreateService do
         expect(result[:status]).to eq(:success)
         expect(result[:success_path]).to match(/#{Gitlab::Routing.url_helpers.project_new_merge_request_url(project, {})}(.*)description(.*)source_branch/)
       end
+
+      it 'raises exception if the user does not have permission to create a new branch' do
+        allow(project).to receive(:repository).and_raise(Gitlab::Git::PreReceiveError, "You are not allowed to create protected branches on this project.")
+
+        expect { subject  }.to raise_error(Gitlab::Git::PreReceiveError)
+      end
     end
 
     context 'with parameters' do
