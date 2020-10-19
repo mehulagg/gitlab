@@ -16350,7 +16350,7 @@ input RemoveProjectFromSecurityDashboardInput {
   """
   ID of the project to remove from the Instance Security Dashboard
   """
-  id: ID!
+  id: ProjectID!
 }
 
 """
