@@ -10129,7 +10129,8 @@ CREATE TABLE ci_daily_build_group_report_results (
     last_pipeline_id bigint NOT NULL,
     ref_path text NOT NULL,
     group_name text NOT NULL,
-    data jsonb NOT NULL
+    data jsonb NOT NULL,
+    default_branch boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE ci_daily_build_group_report_results_id_seq
