@@ -5,7 +5,7 @@
 .dropdown.form-group.mb-lg-0.mx-lg-1.col-lg-2.gl-p-0{ data: { testid: "group-filter" } }
   %label.d-block{ for: "dashboard_search_group" }
     = _("Group")
-  #js-search-group-dropdown{ 'v-cloak': true }
+  %input#js-search-group-dropdown{ class: "dropdown-menu-toggle gl-w-full!", value: "Loading...", data: { "initial-group-data": @group.to_json } }
 .dropdown.project-filter.form-group.mb-lg-0.mx-lg-1
   %label.d-block{ for: "dashboard_search_project" }
     = _("Project")

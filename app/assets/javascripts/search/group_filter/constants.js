@@ -1,9 +1,9 @@
 import { __ } from '~/locale';
 
-export const ANY = {
+export const ANY = Object.freeze({
   id: null,
   name: __('Any'),
-};
+});
 
 export const GROUP_QUERY_PARAM = 'group_id';
 

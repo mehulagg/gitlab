@@ -20,10 +20,13 @@ describe('Global Search Group Filter', () => {
 
   const actionSpies = {
     fetchGroups: jest.fn(),
-    fetchInitialGroup: jest.fn(),
   };
 
-  const createComponent = (initialState, mountFn = shallowMount) => {
+  const defaultProps = {
+    initialGroup: null,
+  };
+
+  const createComponent = (initialState, props = {}, mountFn = shallowMount) => {
     const store = new Vuex.Store({
       state: {
         query: MOCK_QUERY,
@@ -35,6 +38,10 @@ describe('Global Search Group Filter', () => {
     wrapper = mountFn(GroupFilter, {
       localVue,
       store,
+      propsData: {
+        ...defaultProps,
+        ...props,
+      },
     });
   };
 
@@ -115,19 +122,9 @@ describe('Global Search Group Filter', () => {
     });
 
     describe('Dropdown Text', () => {
-      describe('when fetchingInitialGroup is true', () => {
+      describe('when initialGroup is null', () => {
         beforeEach(() => {
-          createComponent({ fetchingInitialGroup: true }, mount);
-        });
-
-        it('sets dropdown text to Loading...', () => {
-          expect(findDropdownText().text()).toBe('Loading...');
-        });
-      });
-
-      describe('when fetchingInitialGroup is false and initialGroup is null', () => {
-        beforeEach(() => {
-          createComponent({}, mount);
+          createComponent({}, {}, mount);
         });
 
         it('sets dropdown text to Any', () => {
@@ -135,9 +132,9 @@ describe('Global Search Group Filter', () => {
         });
       });
 
-      describe('when fetchingInitialGroup is false and initialGroup is set', () => {
+      describe('initialGroup is set', () => {
         beforeEach(() => {
-          createComponent({ initialGroup: MOCK_GROUP }, mount);
+          createComponent({}, { initialGroup: MOCK_GROUP }, mount);
         });
 
         it('sets dropdown text to group name', () => {
@@ -170,28 +167,6 @@ describe('Global Search Group Filter', () => {
         [PROJECT_QUERY_PARAM]: null,
       });
       expect(urlUtils.visitUrl).toHaveBeenCalled();
-    });
-  });
-
-  describe('created', () => {
-    describe('when group_id is set', () => {
-      beforeEach(() => {
-        createComponent({ query: { group_id: MOCK_GROUP.id } });
-      });
-
-      it('calls fetchInitialGroup with group id', () => {
-        expect(actionSpies.fetchInitialGroup).toBeCalledWith(expect.any(Object), MOCK_GROUP.id);
-      });
-    });
-
-    describe('when group_id is null', () => {
-      beforeEach(() => {
-        createComponent();
-      });
-
-      it('calls fetchInitialGroup with group id', () => {
-        expect(actionSpies.fetchInitialGroup).not.toBeCalled();
-      });
     });
   });
 });

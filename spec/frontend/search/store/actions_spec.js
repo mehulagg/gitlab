@@ -5,7 +5,7 @@ import * as types from '~/search/store/mutation_types';
 import state from '~/search/store/state';
 import axios from '~/lib/utils/axios_utils';
 import createFlash from '~/flash';
-import { MOCK_GROUP, MOCK_GROUPS } from '../mock_data';
+import { MOCK_GROUPS } from '../mock_data';
 
 jest.mock('~/flash');
 
@@ -27,11 +27,9 @@ describe('Global Search Store Actions', () => {
   });
 
   describe.each`
-    action                       | axiosMock                                           | type         | mutationCalls                                                                                                  | callback
-    ${actions.fetchInitialGroup} | ${{ method: 'onGet', code: 200, res: MOCK_GROUP }}  | ${'success'} | ${[{ type: types.REQUEST_INITIAL_GROUP }, { type: types.RECEIVE_INITIAL_GROUP_SUCCESS, payload: MOCK_GROUP }]} | ${noCallback}
-    ${actions.fetchInitialGroup} | ${{ method: 'onGet', code: 500, res: null }}        | ${'error'}   | ${[{ type: types.REQUEST_INITIAL_GROUP }, { type: types.RECEIVE_INITIAL_GROUP_ERROR }]}                        | ${flashCallback}
-    ${actions.fetchGroups}       | ${{ method: 'onGet', code: 200, res: MOCK_GROUPS }} | ${'success'} | ${[{ type: types.REQUEST_GROUPS }, { type: types.RECEIVE_GROUPS_SUCCESS, payload: MOCK_GROUPS }]}              | ${noCallback}
-    ${actions.fetchGroups}       | ${{ method: 'onGet', code: 500, res: null }}        | ${'error'}   | ${[{ type: types.REQUEST_GROUPS }, { type: types.RECEIVE_GROUPS_ERROR }]}                                      | ${flashCallback}
+    action                 | axiosMock                                           | type         | mutationCalls                                                                                     | callback
+    ${actions.fetchGroups} | ${{ method: 'onGet', code: 200, res: MOCK_GROUPS }} | ${'success'} | ${[{ type: types.REQUEST_GROUPS }, { type: types.RECEIVE_GROUPS_SUCCESS, payload: MOCK_GROUPS }]} | ${noCallback}
+    ${actions.fetchGroups} | ${{ method: 'onGet', code: 500, res: null }}        | ${'error'}   | ${[{ type: types.REQUEST_GROUPS }, { type: types.RECEIVE_GROUPS_ERROR }]}                         | ${flashCallback}
   `(`axios calls`, ({ action, axiosMock, type, mutationCalls, callback }) => {
     describe(action.name, () => {
       describe(`on ${type}`, () => {
