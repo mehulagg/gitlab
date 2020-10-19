@@ -14623,6 +14623,34 @@ CREATE VIEW postgres_indexes AS
      JOIN pg_indexes ON ((pg_class.relname = pg_indexes.indexname)))
   WHERE ((pg_namespace.nspname <> 'pg_catalog'::name) AND (pg_namespace.nspname = ANY (ARRAY["current_schema"(), 'gitlab_partitions_dynamic'::name, 'gitlab_partitions_static'::name])));
 
+CREATE VIEW postgres_partitioned_tables AS
+ SELECT (((pg_namespace.nspname)::text || '.'::text) || (pg_class.relname)::text) AS identifier,
+    pg_class.oid,
+    pg_namespace.nspname AS schema,
+    pg_class.relname AS name,
+        CASE partitioned_tables.partstrat
+            WHEN 'l'::"char" THEN 'list'::text
+            WHEN 'r'::"char" THEN 'range'::text
+            WHEN 'h'::"char" THEN 'hash'::text
+            ELSE NULL::text
+        END AS strategy,
+    array_agg(pg_attribute.attname) AS key_columns
+   FROM (((( SELECT pg_partitioned_table.partrelid,
+            pg_partitioned_table.partstrat,
+            unnest(pg_partitioned_table.partattrs) AS column_position
+           FROM pg_partitioned_table) partitioned_tables
+     JOIN pg_class ON ((partitioned_tables.partrelid = pg_class.oid)))
+     JOIN pg_namespace ON ((pg_class.relnamespace = pg_namespace.oid)))
+     JOIN pg_attribute ON (((pg_attribute.attrelid = pg_class.oid) AND (pg_attribute.attnum = partitioned_tables.column_position))))
+  WHERE (pg_namespace.nspname = "current_schema"())
+  GROUP BY (((pg_namespace.nspname)::text || '.'::text) || (pg_class.relname)::text), pg_class.oid, pg_namespace.nspname, pg_class.relname,
+        CASE partitioned_tables.partstrat
+            WHEN 'l'::"char" THEN 'list'::text
+            WHEN 'r'::"char" THEN 'range'::text
+            WHEN 'h'::"char" THEN 'hash'::text
+            ELSE NULL::text
+        END;
+
 CREATE TABLE postgres_reindex_actions (
     id bigint NOT NULL,
     action_start timestamp with time zone NOT NULL,
