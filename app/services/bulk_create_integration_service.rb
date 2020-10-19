@@ -49,7 +49,7 @@ class BulkCreateIntegrationService
     if integration.template?
       integration.to_service_hash
     else
-      integration.to_service_hash.tap { |json| json['inherit_from_id'] = integration.id }
+      integration.to_service_hash.tap { |json| json['inherit_from_id'] = integration.inherit_from_id || integration.id }
     end
   end
 

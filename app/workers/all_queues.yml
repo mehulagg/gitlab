@@ -1823,6 +1823,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: propagate_integration_descendant
+  :feature_category: :integrations
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: propagate_integration_group
   :feature_category: :integrations
   :has_external_dependencies:

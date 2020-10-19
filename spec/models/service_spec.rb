@@ -599,6 +599,18 @@ RSpec.describe Service do
     end
   end
 
+  describe '.descendant_integrations_for' do
+    let(:subgroup) { create(:group, parent: group) }
+    let(:project) { create(:project, group: subgroup) }
+    let!(:group_integration) { create(:prometheus_service, group: group, project: nil) }
+    let!(:subgroup_integration) { create(:prometheus_service, group: subgroup, project: nil) }
+    let!(:project_integration) { create(:prometheus_service, group: nil, project: project) }
+
+    it 'returns the groups and projects belonging to the integration' do
+      expect(described_class.descendant_integrations_for(group_integration)).to eq([subgroup_integration, project_integration])
+    end
+  end
+
   describe "{property}_changed?" do
     let(:service) do
       BambooService.create(

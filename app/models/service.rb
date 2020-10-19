@@ -273,6 +273,13 @@ class Service < ApplicationRecord
     end
   end
 
+  def self.descendant_integrations_for(integration)
+    by_type(integration.type).from_union([
+      where(group: integration.group.descendants),
+      where(project: Project.in_namespace(integration.group.self_and_descendants))
+    ])
+  end
+
   def activated?
     active
   end

@@ -248,6 +248,8 @@
   - 1
 - - propagate_integration
   - 1
+- - propagate_integration_descendant
+  - 1
 - - propagate_integration_group
   - 1
 - - propagate_integration_inherit
