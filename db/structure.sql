@@ -71,15 +71,13 @@ CREATE TABLE audit_events_part_5fc467ac26 (
     details text,
     ip_address inet,
     author_name text,
-    entity_path text,
     target_details text,
+    entity_path text,
     created_at timestamp without time zone NOT NULL,
     target_type text,
     target_id bigint,
-    CONSTRAINT check_492aaa021d CHECK ((char_length(entity_path) <= 5500)),
     CONSTRAINT check_83ff8406e2 CHECK ((char_length(author_name) <= 255)),
-    CONSTRAINT check_97a8c868e7 CHECK ((char_length(target_type) <= 255)),
-    CONSTRAINT check_d493ec90b5 CHECK ((char_length(target_details) <= 5500))
+    CONSTRAINT check_97a8c868e7 CHECK ((char_length(target_type) <= 255))
 )
 PARTITION BY RANGE (created_at);
 
@@ -9283,16 +9281,16 @@ CREATE TABLE application_settings (
     group_download_export_limit integer DEFAULT 1 NOT NULL,
     maintenance_mode boolean DEFAULT false NOT NULL,
     maintenance_mode_message text,
+    container_registry_delete_tags_service_timeout integer DEFAULT 250 NOT NULL,
     wiki_page_max_content_bytes bigint DEFAULT 52428800 NOT NULL,
     elasticsearch_indexed_file_size_limit_kb integer DEFAULT 1024 NOT NULL,
     enforce_namespace_storage_limit boolean DEFAULT false NOT NULL,
-    container_registry_delete_tags_service_timeout integer DEFAULT 250 NOT NULL,
-    elasticsearch_client_request_timeout integer DEFAULT 0 NOT NULL,
     gitpod_enabled boolean DEFAULT false NOT NULL,
     gitpod_url text DEFAULT 'https://gitpod.io/'::text,
+    elasticsearch_client_request_timeout integer DEFAULT 0 NOT NULL,
     abuse_notification_email character varying,
-    require_admin_approval_after_user_signup boolean DEFAULT false NOT NULL,
     help_page_documentation_base_url text,
+    require_admin_approval_after_user_signup boolean DEFAULT false NOT NULL,
     automatic_purchased_storage_allocation boolean DEFAULT false NOT NULL,
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
@@ -9544,8 +9542,8 @@ CREATE TABLE audit_events (
     created_at timestamp without time zone,
     ip_address inet,
     author_name text,
-    entity_path text,
     target_details text,
+    entity_path text,
     target_type text,
     target_id bigint,
     CONSTRAINT check_492aaa021d CHECK ((char_length(entity_path) <= 5500)),
@@ -12954,8 +12952,8 @@ CREATE TABLE issues (
     health_status smallint,
     external_key character varying(255),
     sprint_id bigint,
-    issue_type smallint DEFAULT 0 NOT NULL,
     blocking_issues_count integer DEFAULT 0 NOT NULL,
+    issue_type smallint DEFAULT 0 NOT NULL,
     CONSTRAINT check_fba63f706d CHECK ((lock_version IS NOT NULL))
 );
 
@@ -14523,7 +14521,6 @@ CREATE TABLE plan_limits (
     ci_pipeline_schedules integer DEFAULT 10 NOT NULL,
     offset_pagination_limit integer DEFAULT 50000 NOT NULL,
     ci_instance_level_variables integer DEFAULT 25 NOT NULL,
-    storage_size_limit integer DEFAULT 0 NOT NULL,
     ci_max_artifact_size_lsif integer DEFAULT 20 NOT NULL,
     ci_max_artifact_size_archive integer DEFAULT 0 NOT NULL,
     ci_max_artifact_size_metadata integer DEFAULT 0 NOT NULL,
@@ -14548,6 +14545,7 @@ CREATE TABLE plan_limits (
     ci_max_artifact_size_secret_detection integer DEFAULT 0 NOT NULL,
     ci_max_artifact_size_requirements integer DEFAULT 0 NOT NULL,
     ci_max_artifact_size_coverage_fuzzing integer DEFAULT 0 NOT NULL,
+    storage_size_limit integer DEFAULT 0 NOT NULL,
     ci_max_artifact_size_browser_performance integer DEFAULT 0 NOT NULL,
     ci_max_artifact_size_load_performance integer DEFAULT 0 NOT NULL,
     ci_needs_size_limit integer DEFAULT 50 NOT NULL,
@@ -16362,12 +16360,12 @@ CREATE TABLE terraform_states (
     locked_by_user_id bigint,
     uuid character varying(32) NOT NULL,
     name character varying(255),
+    versioning_enabled boolean DEFAULT false NOT NULL,
     verification_retry_at timestamp with time zone,
     verified_at timestamp with time zone,
     verification_retry_count smallint,
     verification_checksum bytea,
     verification_failure text,
-    versioning_enabled boolean DEFAULT false NOT NULL,
     CONSTRAINT check_21a47163ea CHECK ((char_length(verification_failure) <= 255))
 );
 
@@ -16561,9 +16559,9 @@ CREATE TABLE user_details (
     user_id bigint NOT NULL,
     job_title character varying(200) DEFAULT ''::character varying NOT NULL,
     bio character varying(255) DEFAULT ''::character varying NOT NULL,
+    webauthn_xid text,
     bio_html text,
     cached_markdown_version integer,
-    webauthn_xid text,
     CONSTRAINT check_245664af82 CHECK ((char_length(webauthn_xid) <= 100))
 );
 
@@ -19572,7 +19570,7 @@ CREATE INDEX backup_labels_group_id_title_idx ON backup_labels USING btree (grou
 
 CREATE INDEX backup_labels_project_id_idx ON backup_labels USING btree (project_id);
 
-CREATE UNIQUE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
+CREATE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
 
 CREATE INDEX backup_labels_template_idx ON backup_labels USING btree (template) WHERE template;
 

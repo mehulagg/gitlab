@@ -346,7 +346,6 @@ module EE
                                                                           finish: user_maximum_id)
           end
 
-
           results.merge!(count_secure_pipelines(time_period))
           results.merge!(count_secure_jobs(time_period))
 
