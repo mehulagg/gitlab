@@ -80,5 +80,30 @@ RSpec.describe Ci::DailyBuildGroupReportResult do
         expect { described_class.upsert_reports([]) }.not_to raise_error
       end
     end
+
+    describe 'scopes' do
+      let_it_be(:project) { create(:project) }
+      let(:recent_build_group_report_result) { create(:ci_daily_build_group_report_result, project: project) }
+
+      describe '.with_default_branch' do
+        subject { described_class.with_default_branch }
+
+        context 'when coverage for the default branch exist' do
+          let(:coverage_default_branch) do
+            create(:ci_daily_build_group_report_result, :with_default_branch, project: project)
+          end
+
+          it 'returns coverage with the default branch' do
+            expect(subject).to contain_exactly(coverage_default_branch)
+          end
+        end
+
+        context 'when coverage for the default branch does not exist' do
+          it 'returns an empty collection' do
+            expect(subject).to be_empty
+          end
+        end
+      end
+    end
   end
 end

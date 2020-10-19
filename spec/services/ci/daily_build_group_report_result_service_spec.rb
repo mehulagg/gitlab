@@ -158,4 +158,35 @@ RSpec.describe Ci::DailyBuildGroupReportResultService, '#execute' do
       expect { described_class.new.execute(new_pipeline) }.not_to raise_error
     end
   end
+
+  context 'when pipeline ref_path is the project default branch' do
+    let(:default_branch) { 'master' }
+
+    before do
+      allow(pipeline.project).to receive(:default_branch).and_return(default_branch)
+      described_class.new.execute(pipeline)
+    end
+
+    it 'sets default branch to true' do
+      coverages = Ci::DailyBuildGroupReportResult.all
+
+      coverages.each do |coverage|
+        expect(coverage.default_branch).to be_truthy
+      end
+    end
+  end
+
+  context 'when pipeline ref_path is not the project default branch' do
+    before do
+      described_class.new.execute(pipeline)
+    end
+
+    it 'sets default branch to false' do
+      coverages = Ci::DailyBuildGroupReportResult.all
+
+      coverages.each do |coverage|
+        expect(coverage.default_branch).to be_falsey
+      end
+    end
+  end
 end

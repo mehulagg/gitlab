@@ -10,5 +10,10 @@ FactoryBot.define do
     data do
       { 'coverage' => 77.0 }
     end
+    default_branch { false }
+
+    trait :with_default_branch do
+      default_branch { true }
+    end
   end
 end
