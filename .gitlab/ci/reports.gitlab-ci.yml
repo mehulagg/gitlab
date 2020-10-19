@@ -163,7 +163,8 @@ package_hunter:
   needs: []
   script:
     - du -hcs ./*
-    - cd .. && tar -czf gitlab.tgz --exclude=".git/" --exclude="node_modules/" --exclude="doc/" ./gitlab
+    - cd .. && tar -zczf gitlab.tgz --exclude=".git/" --exclude="node_modules/" --exclude="doc/" ./gitlab
+    - du -k gitlab.tgz
     - DEBUG=pkgs* HTR_USER=$PACKAGE_HUNTER_USER HTR_PASS=$PACKAGE_HUNTER_PASS node /usr/src/app/cli.js analyze gitlab.tgz
   artifacts:
     paths:
