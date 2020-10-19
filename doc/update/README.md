@@ -224,7 +224,7 @@ possible.
 
 ### 13.5.0
 
-The path for the Workhorse socket changed in 13.5. If you have created a custom socket path you will need to reconfigure this to ... If you are using the SELinux distribution of GitLab with the default location for the Workhorse socket, run a `gitlab-ctl reconfigure` to automatically move the workhorse socket to the new location. 
+The path for the Workhorse socket changed in 13.5. Users who set a custom socket with `gitlab_workhorse['listen_addr']` will have that setting honored. Users with this customization who are using SELinux should also add `gitlab_workhorse['sockets_directory'] set to the directory containing hte customized socket.  Running `gitlab-ctl reconfigure` will apply this setting and Omnibus will manage the SELinux contexts. SELinux users who have not customized their socket can just run `gitlab-ctl reconfigure` for Omnibus to move the socket and apply the proper SELinux context. 
 
 ### 13.3.0
 
