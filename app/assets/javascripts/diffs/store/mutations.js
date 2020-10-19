@@ -26,6 +26,7 @@ export default {
       projectPath,
       dismissEndpoint,
       showSuggestPopover,
+      viewDiffsFileByFile,
     } = options;
     Object.assign(state, {
       endpoint,
@@ -35,6 +36,7 @@ export default {
       projectPath,
       dismissEndpoint,
       showSuggestPopover,
+      viewDiffsFileByFile,
     });
   },
 
@@ -391,5 +393,8 @@ export default {
   },
   [types.SET_SHOW_SUGGEST_POPOVER](state) {
     state.showSuggestPopover = false;
+  },
+  [types.SET_FILE_BY_FILE](state, fileByFile) {
+    state.viewDiffsFileByFile = fileByFile;
   },
 };
