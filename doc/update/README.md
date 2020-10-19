@@ -224,7 +224,11 @@ possible.
 
 ### 13.5.0
 
-The path for the Workhorse socket changed in 13.5. Users who set a custom socket with `gitlab_workhorse['listen_addr']` will have that setting honored. Users with this customization who are using SELinux should also add `gitlab_workhorse['sockets_directory'] set to the directory containing hte customized socket.  Running `gitlab-ctl reconfigure` will apply this setting and Omnibus will manage the SELinux contexts. SELinux users who have not customized their socket can just run `gitlab-ctl reconfigure` for Omnibus to move the socket and apply the proper SELinux context. 
+The path for the Workhorse socket changed from `/var/opt/gitlab/workhorse/socket` to `/var/opt/gitlab/workhorse/sockets/socket` in 13.5. This change will automatically get applied and Workhorse will be restarted during an upgrade, unless you have set your system to skip `reconfigure` (`/etc/gitlab/skip-auto-reconfigure`). 
+
+If you use SELinux and you you have set `gitlab_workhorse['listen_addr']` to a custom socket path, you will need to take some manual steps. If you want Omnibus to manage SELinux Contexts, set `gitlab_workhorse['sockets_directory'] = /path/to/directory/with/socket"/var/opt/my_workhorse_socket_home"` and run `gitlab-ctl reconfigure`. Alternatively, if you want to manage the SELinux Context yourself, run `semanage fcontext -a -t gitlab_shell_t '/var/opt/my_workhorse_socket_home'` and then `restorecon -v '/var/opt/my_workhorse_socket_home'`. Note that if you are managing the SELinux Context yourself, you will need to repeat these steps if you move the directory. 
+
+If you are using a custom listen address but you are not using SELinux, you will not be affected by this change.
 
 ### 13.3.0
 
