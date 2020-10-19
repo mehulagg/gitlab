@@ -30,6 +30,6 @@
     - if show_storage_banner_actions
       .gl-alert-actions
         - if show_purchase_link
-          = link_to(_('Purchase more storage'), purchase_link, class: "btn gl-alert-action btn-md gl-button btn-success")
+          = link_to(_('Purchase more storage'), purchase_link, class: "gl-button btn gl-alert-action btn-md gl-button btn-success")
         - if usage_link
-          = link_to(_('Manage storage usage'), usage_link, class: "btn gl-alert-action btn-md gl-button btn-#{style}")
+          = link_to(_('Manage storage usage'), usage_link, class: "gl-button btn gl-alert-action btn-md gl-button btn-#{style}")
