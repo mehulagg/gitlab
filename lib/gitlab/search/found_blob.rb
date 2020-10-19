@@ -26,6 +26,7 @@ module Gitlab
         @binary_basename = opts.fetch(:basename, nil)
         @ref = opts.fetch(:ref, nil)
         @startline = opts.fetch(:startline, nil)
+        @highlight_line = opts.fetch(:highlight_line, nil)
         @binary_data = opts.fetch(:data, nil)
         @per_page = opts.fetch(:per_page, 20)
         @project = opts.fetch(:project, nil)
@@ -49,6 +50,10 @@ module Gitlab
 
       def startline
         @startline ||= parsed_content[:startline]
+      end
+
+      def highlight_line
+        @highlight_line ||= parsed_content[:highlight_line]
       end
 
       # binary_path is used for running filters on all matches.

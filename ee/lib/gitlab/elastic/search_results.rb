@@ -173,6 +173,7 @@ module Gitlab
           basename: basename,
           ref: ref,
           startline: from + 1,
+          highlight_line: found_line_number + 1,
           data: data.join,
           project: project,
           project_id: project_id

@@ -1,16 +1,23 @@
 #blob-content.file-content.code.js-syntax-highlight
+  -  offset = defined?(first_line_number) ? first_line_number : 1
   .line-numbers
     - if blob.data.present?
       - link_icon = sprite_icon('link', size: 12)
       - link = blob_link if defined?(blob_link)
       - blob.data.each_line.each_with_index do |_, index|
-        - offset = defined?(first_line_number) ? first_line_number : 1
         - i = index + offset
         -# We're not using `link_to` because it is too slow once we get to thousands of lines.
         %a.diff-line-num{ href: "#{link}#L#{i}", id: "L#{i}", 'data-line-number' => i }
           = link_icon
           = i
-  .blob-content{ data: { blob_id: blob.id, path: blob.path } }
+  .blob-content{ data: { blob_id: blob.id, path: blob.path, highlight_line: highlight_line - offset } }
     %pre.code.highlight
       %code
+        -# - offset = defined?(first_line_number) ? first_line_number : 1
+        -# - highlighted_text = blob.present.highlight
+        -# - if defined?(highlight_line)
+        -#   - highlighted_line = highlight_line - offset
+        -#   - highlighted_text.lines[highlighted_line].sub!('line', 'line hll')
+        -# - binding.pry
+        -# = highlighted_text
         = blob.present.highlight
