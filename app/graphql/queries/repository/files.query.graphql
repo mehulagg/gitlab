@@ -1,0 +1,76 @@
+fragment PageInfoShared on PageInfo {
+  __typename
+  hasNextPage
+  hasPreviousPage
+  startCursor
+  endCursor
+}
+
+fragment TreeEntryShared on Entry {
+  __typename
+  id
+  sha
+  name
+  flatPath
+  type
+}
+
+query getFiles(
+  $projectPath: ID!
+  $path: String
+  $ref: String!
+  $pageSize: Int!
+  $nextPageCursor: String
+) {
+  project(fullPath: $projectPath) {
+    __typename
+    repository {
+      __typename
+      tree(path: $path, ref: $ref) {
+        __typename
+        trees(first: $pageSize, after: $nextPageCursor) {
+          __typename
+          edges {
+            __typename
+            node {
+              ...TreeEntryShared
+              webPath
+            }
+          }
+          pageInfo {
+            ...PageInfoShared
+          }
+        }
+        submodules(first: $pageSize, after: $nextPageCursor) {
+          __typename
+          edges {
+            __typename
+            node {
+              ...TreeEntryShared
+              webUrl
+              treeUrl
+            }
+          }
+          pageInfo {
+            ...PageInfoShared
+          }
+        }
+        blobs(first: $pageSize, after: $nextPageCursor) {
+          __typename
+          edges {
+            __typename
+            node {
+              ...TreeEntryShared
+              mode
+              webPath
+              lfsOid
+            }
+          }
+          pageInfo {
+            ...PageInfoShared
+          }
+        }
+      }
+    }
+  }
+}
