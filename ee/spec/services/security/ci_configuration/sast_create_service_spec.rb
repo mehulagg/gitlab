@@ -26,7 +26,6 @@ RSpec.describe Security::CiConfiguration::SastCreateService do
 
         expect { subject  }.to raise_error(Gitlab::Git::PreReceiveError)
       end
-
     end
   end
 end
