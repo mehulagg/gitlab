@@ -222,6 +222,10 @@ possible.
 
 ## Version specific upgrading instructions
 
+### 13.5.0
+
+The path for the Workhorse socket changed in 13.5. If you have created a custom socket path you will need to reconfigure this to ... If you are using the SELinux distribution of GitLab with the default location for the Workhorse socket, run a `gitlab-ctl reconfigure` to automatically move the workhorse socket to the new location. 
+
 ### 13.3.0
 
 The recommended Git version is Git v2.28. The minimum required version of Git
