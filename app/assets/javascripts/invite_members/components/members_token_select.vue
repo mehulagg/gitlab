@@ -1,4 +1,6 @@
 <script>
+import { debounce } from 'lodash';
+import { USER_SEARCH_DELAY } from '../constants';
 import { GlTokenSelector, GlAvatar, GlAvatarLabeled } from '@gitlab/ui';
 import Api from '~/api';
 
@@ -25,6 +27,7 @@ export default {
       loading: false,
       query: '',
       filteredUsers: [],
+      users: [],
       selectedTokens: [],
     };
   },
@@ -35,6 +38,9 @@ export default {
           return obj.id;
         })
         .join(',');
+    },
+    debouncedHandleTextInput() {
+      return debounce(this.handleTextInput, USER_SEARCH_DELAY);
     },
   },
   watch: {
@@ -48,15 +54,15 @@ export default {
     },
   },
   created() {
-    this.retrieveUsers();
+    this.retrieveUsers('');
   },
   methods: {
-    retrieveUsers() {
+    retrieveUsers(query) {
       this.loading = true;
 
-      return Api.users(this.query, this.$options.queryOptions)
+      return Api.users(query, this.$options.queryOptions)
         .then(response => {
-          this.filteredUsers = response.data.map(token => ({
+          this.users = response.data.map(token => ({
             id: token.id,
             name: token.name,
             username: token.username,
@@ -64,14 +70,15 @@ export default {
           }));
           this.loading = false;
         })
-        .catch(() => {
-          return this.filteredUsers;
+        .catch((error) => {
+          this.loading = false;
+          throw error;
         });
     },
     filterUsers() {
-      if (this.query === '') return this.filteredUsers;
+      if (this.query === '') return this.users;
 
-      return this.filteredUsers
+      return this.users
         .filter(token => {
           return (
             token.name.toLowerCase().includes(this.query.toLowerCase()) ||
@@ -83,18 +90,24 @@ export default {
     handleTextInput(value) {
       this.query = value;
 
-      return this.handleQueryFilter();
+      if (this.query === '') {
+        this.users = this.retrieveUsers('');
+      } else {
+        this.users = this.filterUsers(this.query);
+      }
+
+      return this.users;
     },
     handleQueryFilter() {
       if (this.query) {
-        this.filteredUsers = this.filterUsers();
-        return this.filteredUsers;
+        return this.filterUsers();
       }
 
-      return this.retrieveUsers();
+      return this.users;
     },
     handleInput() {
       this.$emit('input', this.newUsersToInvite);
+      this.filteredUsers = this.retrieveUsers(this.query);
     },
     handleBlur() {
       const textInput = this.$el.querySelector('input[type="text"]');
@@ -103,14 +116,14 @@ export default {
       textInput.dispatchEvent(new Event('input'));
     },
   },
-  queryOptions: { exclude_internal: true },
+  queryOptions: { exclude_internal: true, active: true },
 };
 </script>
 
 <template>
   <gl-token-selector
     v-model="selectedTokens"
-    :dropdown-items="filteredUsers"
+    :dropdown-items="users"
     :loading="loading"
     :allow-user-defined-tokens="false"
     :hide-dropdown-with-no-items="false"
@@ -119,7 +132,7 @@ export default {
     @focus="handleQueryFilter"
     @blur="handleBlur"
     @keydown.enter="handleQueryFilter"
-    @text-input="handleTextInput"
+    @text-input="debouncedHandleTextInput"
     @input="handleInput"
   >
     <template #token-content="{ token }">
