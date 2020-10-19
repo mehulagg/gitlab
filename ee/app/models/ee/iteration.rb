@@ -47,7 +47,7 @@ module EE
     end
 
     def burnup_charts_available?
-      ::Feature.enabled?(:iteration_charts, resource_parent)
+      ::Feature.enabled?(:iteration_charts, resource_parent, default_enabled: true)
     end
 
     private
