@@ -34,7 +34,7 @@ Access the default page for admin area settings by navigating to **Admin Area > 
 | [PlantUML](../../../administration/integration/plantuml.md#gitlab) | Allow rendering of PlantUML diagrams in AsciiDoc documents. |
 | [Slack application](../../../user/project/integrations/gitlab_slack_application.md#configuration) **(FREE ONLY)** | Slack integration allows you to interact with GitLab via slash commands in a chat window. This option is only available on GitLab.com, though it may be [available for self-managed instances in the future](https://gitlab.com/gitlab-org/gitlab/-/issues/28164). |
 | [Third party offers](third_party_offers.md) | Control the display of third party offers. |
-| [Snowplow](../../../development/telemetry/snowplow.md) | Configure the Snowplow integration. |
+| [Snowplow](../../../development/product_analytics/snowplow.md) | Configure the Snowplow integration. |
 | [Google GKE](../../project/clusters/add_gke_clusters.md) | Google GKE integration allows you to provision GKE clusters from GitLab. |
 | [Amazon EKS](../../project/clusters/add_eks_clusters.md) | Amazon EKS integration allows you to provision EKS clusters from GitLab. |
 
@@ -61,7 +61,7 @@ Access the default page for admin area settings by navigating to **Admin Area > 
 | ------ | ----------- |
 | [Continuous Integration and Deployment](continuous_integration.md) | Auto DevOps, runners and job artifacts. |
 | [Required pipeline configuration](continuous_integration.md#required-pipeline-configuration) **(PREMIUM ONLY)** | Set an instance-wide auto included [pipeline configuration](../../../ci/yaml/README.md). This pipeline configuration will be run after the project's own configuration. |
-| [Package Registry](continuous_integration.md#package-registry-configuration) | Settings related to the use and experience of using GitLab's Package Registry. Note there are [risks involved](./../../packages/container_registry/index.md#use-with-external-container-registries) in enabling some of these settings. |
+| [Package Registry](continuous_integration.md#package-registry-configuration) | Settings related to the use and experience of using GitLab's Package Registry. Note there are [risks involved](../../packages/container_registry/index.md#use-with-external-container-registries) in enabling some of these settings. |
 
 ## Reporting
 

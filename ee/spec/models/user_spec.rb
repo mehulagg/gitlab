@@ -1422,6 +1422,68 @@ RSpec.describe User do
     end
   end
 
+  describe '#gitlab_service_user?' do
+    subject { user.gitlab_service_user? }
+
+    let_it_be(:gitlab_group) { create(:group, name: 'gitlab-com') }
+    let_it_be(:random_group) { create(:group, name: 'random-group') }
+
+    context 'based on group membership' do
+      context 'when user belongs to gitlab-com group' do
+        let(:user) { create(:user, user_type: :service_user) }
+
+        before do
+          allow(Gitlab).to receive(:com?).and_return(true)
+          gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
+        end
+
+        it { is_expected.to be true }
+      end
+
+      context 'when user does not belong to gitlab-com group' do
+        let(:user) { create(:user, user_type: :service_user) }
+
+        before do
+          allow(Gitlab).to receive(:com?).and_return(true)
+          random_group.add_user(user, Gitlab::Access::DEVELOPER)
+        end
+
+        it { is_expected.to be false }
+      end
+    end
+
+    context 'based on user type' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:is_com, :user_type, :answer) do
+        true  | :service_user | true
+        true  | :alert_bot    | false
+        true  | :human        | false
+        true  | :ghost        | false
+        false | :service_user | false
+        false | :alert_bot    | false
+        false | :human        | false
+        false | :ghost        | false
+      end
+
+      with_them do
+        before do
+          allow(Gitlab).to receive(:com?).and_return(is_com)
+        end
+
+        let(:user) do
+          user = create(:user, user_type: user_type)
+          gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
+          user
+        end
+
+        it "returns if the user is a GitLab-owned service user" do
+          expect(subject).to be answer
+        end
+      end
+    end
+  end
+
   describe '#security_dashboard' do
     let(:user) { create(:user) }
 

@@ -13,6 +13,8 @@ module Projects
 
         before_action :authorize_create_note!, only: [:create]
 
+        feature_category :vulnerability_management
+
         private
 
         alias_method :vulnerable, :project

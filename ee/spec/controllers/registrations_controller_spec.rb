@@ -59,44 +59,50 @@ RSpec.describe RegistrationsController do
   end
 
   describe '#update_registration' do
-    before do
-      sign_in(user)
-    end
-
     subject(:update_registration) { patch :update_registration, params: { user: { role: 'software_developer', setup_for_company: 'false' } } }
 
-    describe 'redirection' do
-      it { is_expected.to redirect_to dashboard_projects_path }
+    context 'without a signed in user' do
+      it { is_expected.to redirect_to new_user_registration_path }
+    end
 
-      context 'when part of the onboarding issues experiment' do
-        before do
-          stub_experiment_for_user(onboarding_issues: true)
-        end
+    context 'with a signed in user' do
+      before do
+        sign_in(user)
+      end
 
-        it { is_expected.to redirect_to new_users_sign_up_group_path }
+      describe 'redirection' do
+        it { is_expected.to redirect_to dashboard_projects_path }
 
-        context 'when in subscription flow' do
+        context 'when part of the onboarding issues experiment' do
           before do
-            allow(controller.helpers).to receive(:in_subscription_flow?).and_return(true)
+            stub_experiment_for_user(onboarding_issues: true)
           end
 
-          it { is_expected.not_to redirect_to new_users_sign_up_group_path }
-        end
+          it { is_expected.to redirect_to new_users_sign_up_group_path }
 
-        context 'when in invitation flow' do
-          before do
-            allow(controller.helpers).to receive(:in_invitation_flow?).and_return(true)
+          context 'when in subscription flow' do
+            before do
+              allow(controller.helpers).to receive(:in_subscription_flow?).and_return(true)
+            end
+
+            it { is_expected.not_to redirect_to new_users_sign_up_group_path }
           end
 
-          it { is_expected.not_to redirect_to new_users_sign_up_group_path }
-        end
+          context 'when in invitation flow' do
+            before do
+              allow(controller.helpers).to receive(:in_invitation_flow?).and_return(true)
+            end
 
-        context 'when in trial flow' do
-          before do
-            allow(controller.helpers).to receive(:in_trial_flow?).and_return(true)
+            it { is_expected.not_to redirect_to new_users_sign_up_group_path }
           end
 
-          it { is_expected.not_to redirect_to new_users_sign_up_group_path }
+          context 'when in trial flow' do
+            before do
+              allow(controller.helpers).to receive(:in_trial_flow?).and_return(true)
+            end
+
+            it { is_expected.not_to redirect_to new_users_sign_up_group_path }
+          end
         end
       end
     end
@@ -113,6 +119,7 @@ RSpec.describe RegistrationsController do
       let(:in_trial_flow) { false }
 
       before do
+        sign_in(user)
         allow(::Gitlab).to receive(:com?).and_return(on_gitlab_com)
         stub_experiment(onboarding_issues: experiment_enabled)
         stub_experiment_for_user(onboarding_issues: experiment_enabled_for_user)

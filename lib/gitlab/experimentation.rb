@@ -48,11 +48,11 @@ module Gitlab
       invite_members_version_a: {
         tracking_category: 'Growth::Expansion::Experiment::InviteMembersVersionA'
       },
+      invite_members_version_b: {
+        tracking_category: 'Growth::Expansion::Experiment::InviteMembersVersionB'
+      },
       new_create_project_ui: {
         tracking_category: 'Manage::Import::Experiment::NewCreateProjectUi'
-      },
-      terms_opt_in: {
-        tracking_category: 'Growth::Acquisition::Experiment::TermsOptIn'
       },
       contact_sales_btn_in_app: {
         tracking_category: 'Growth::Conversion::Experiment::ContactSalesInApp'
@@ -68,6 +68,9 @@ module Gitlab
       },
       group_only_trials: {
         tracking_category: 'Growth::Conversion::Experiment::GroupOnlyTrials'
+      },
+      default_to_issues_board: {
+        tracking_category: 'Growth::Conversion::Experiment::DefaultToIssuesBoard'
       }
     }.freeze
 

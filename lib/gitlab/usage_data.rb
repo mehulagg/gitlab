@@ -12,6 +12,19 @@
 #   redis_usage_data { ::Gitlab::UsageCounters::PodLogs.usage_totals[:total] }
 module Gitlab
   class UsageData
+    CE_MEMOIZED_VALUES = %i(
+        issue_minimum_id
+        issue_maximum_id
+        project_minimum_id
+        project_maximum_id
+        user_minimum_id
+        user_maximum_id
+        unique_visit_service
+        deployment_minimum_id
+        deployment_maximum_id
+        auth_providers
+      ).freeze
+
     class << self
       include Gitlab::Utils::UsageData
       include Gitlab::Utils::StrongMemoize
@@ -201,7 +214,7 @@ module Gitlab
             personal_snippets: count(PersonalSnippet.where(last_28_days_time_period)),
             project_snippets: count(ProjectSnippet.where(last_28_days_time_period))
           }.merge(
-            snowplow_event_counts(time_period: last_28_days_time_period(column: :collector_tstamp))
+            snowplow_event_counts(last_28_days_time_period(column: :collector_tstamp))
           ).tap do |data|
             data[:snippets] = data[:personal_snippets] + data[:project_snippets]
           end
@@ -266,7 +279,8 @@ module Gitlab
           Gitlab::UsageDataCounters::SourceCodeCounter,
           Gitlab::UsageDataCounters::MergeRequestCounter,
           Gitlab::UsageDataCounters::DesignsCounter,
-          Gitlab::UsageDataCounters::KubernetesAgentCounter
+          Gitlab::UsageDataCounters::KubernetesAgentCounter,
+          Gitlab::UsageDataCounters::StaticSiteEditorCounter
         ]
       end
 
@@ -289,7 +303,8 @@ module Gitlab
           },
           database: {
             adapter: alt_usage_data { Gitlab::Database.adapter_name },
-            version: alt_usage_data { Gitlab::Database.version }
+            version: alt_usage_data { Gitlab::Database.version },
+            pg_system_id: alt_usage_data { Gitlab::Database.system_id }
           },
           mail: {
             smtp_server: alt_usage_data { ActionMailer::Base.smtp_settings[:address] }
@@ -387,10 +402,12 @@ module Gitlab
       def services_usage
         # rubocop: disable UsageData/LargeTable:
         Service.available_services_names.each_with_object({}) do |service_name, response|
-          response["projects_#{service_name}_active".to_sym] = count(Service.active.where(template: false, instance: false, type: "#{service_name}_service".camelize))
+          response["projects_#{service_name}_active".to_sym] = count(Service.active.where.not(project: nil).where(type: "#{service_name}_service".camelize))
+          response["groups_#{service_name}_active".to_sym] = count(Service.active.where.not(group: nil).where(type: "#{service_name}_service".camelize))
           response["templates_#{service_name}_active".to_sym] = count(Service.active.where(template: true, type: "#{service_name}_service".camelize))
           response["instances_#{service_name}_active".to_sym] = count(Service.active.where(instance: true, type: "#{service_name}_service".camelize))
-          response["projects_inheriting_instance_#{service_name}_active".to_sym] = count(Service.active.where.not(inherit_from_id: nil).where(type: "#{service_name}_service".camelize))
+          response["projects_inheriting_#{service_name}_active".to_sym] = count(Service.active.where.not(project: nil).where.not(inherit_from_id: nil).where(type: "#{service_name}_service".camelize))
+          response["groups_inheriting_#{service_name}_active".to_sym] = count(Service.active.where.not(group: nil).where.not(inherit_from_id: nil).where(type: "#{service_name}_service".camelize))
         end.merge(jira_usage, jira_import_usage)
         # rubocop: enable UsageData/LargeTable:
       end
@@ -809,16 +826,7 @@ module Gitlab
       end
 
       def clear_memoized
-        clear_memoization(:issue_minimum_id)
-        clear_memoization(:issue_maximum_id)
-        clear_memoization(:user_minimum_id)
-        clear_memoization(:user_maximum_id)
-        clear_memoization(:unique_visit_service)
-        clear_memoization(:deployment_minimum_id)
-        clear_memoization(:deployment_maximum_id)
-        clear_memoization(:project_minimum_id)
-        clear_memoization(:project_maximum_id)
-        clear_memoization(:auth_providers)
+        CE_MEMOIZED_VALUES.each { |v| clear_memoization(v) }
       end
 
       # rubocop: disable CodeReuse/ActiveRecord

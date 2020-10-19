@@ -14,14 +14,11 @@ import { createUniqueJobId } from '../../utils';
 
 export const generateLinksData = ({ links }, jobs, containerID) => {
   const containerEl = document.getElementById(containerID);
-
   return links.map(link => {
     const path = d3.path();
 
-    // We can only have one unique job name per stage, so our selector
-    // is: ${stageName}-${jobName}
-    const sourceId = createUniqueJobId(jobs[link.source].stage, link.source);
-    const targetId = createUniqueJobId(jobs[link.target].stage, link.target);
+    const sourceId = jobs[link.source].id;
+    const targetId = jobs[link.target].id;
 
     const sourceNodeEl = document.getElementById(sourceId);
     const targetNodeEl = document.getElementById(targetId);
@@ -67,10 +64,18 @@ export const generateLinksData = ({ links }, jobs, containerID) => {
     // Start point
     path.moveTo(sourceNodeX, sourceNodeY);
 
+    // Make cross-stages lines a straight line all the way
+    // until we can safely draw the bezier to look nice.
+    const straightLineDestinationX = targetNodeX - 100;
+    const controlPointX = straightLineDestinationX + (targetNodeX - straightLineDestinationX) / 2;
+
+    if (straightLineDestinationX > 0) {
+      path.lineTo(straightLineDestinationX, sourceNodeY);
+    }
+
     // Add bezier curve. The first 4 coordinates are the 2 control
     // points to create the curve, and the last one is the end point (x, y).
     // We want our control points to be in the middle of the line
-    const controlPointX = sourceNodeX + (targetNodeX - sourceNodeX) / 2;
     path.bezierCurveTo(
       controlPointX,
       sourceNodeY,
@@ -80,6 +85,12 @@ export const generateLinksData = ({ links }, jobs, containerID) => {
       targetNodeY,
     );
 
-    return { ...link, path: path.toString() };
+    return {
+      ...link,
+      source: sourceId,
+      target: targetId,
+      ref: createUniqueJobId(sourceId, targetId),
+      path: path.toString(),
+    };
   });
 };

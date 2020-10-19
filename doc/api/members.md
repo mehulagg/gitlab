@@ -180,6 +180,7 @@ Example response:
   "web_url": "http://192.168.1.8:3000/root",
   "access_level": 30,
   "email": "john@example.com",
+  "created_at": "2012-10-22T14:13:35Z",
   "expires_at": null,
   "group_saml_identity": null
 }
@@ -227,7 +228,10 @@ Example response:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217384) in GitLab 13.5.
 
-Gets a list of group members who counts as billable, including members in the sub group/project.
+Gets a list of group members that count as billable. The list includes members in the subgroup or subproject.
+
+NOTE:
+Unlike other API endpoints, billable members is updated once per day at 12:00 UTC.
 
 This function takes [pagination](README.md#pagination) parameters `page` and `per_page` to restrict the list of users.
 
@@ -287,7 +291,7 @@ POST /projects/:id/members
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
 | `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](README.md#namespaced-path-encoding) owned by the authenticated user |
-| `user_id` | integer         | yes | The user ID of the new member |
+| `user_id` | integer/string | yes | The user ID of the new member or multiple IDs separated by commas |
 | `access_level` | integer | yes | A valid access level |
 | `expires_at` | string | no | A date string in the format YEAR-MONTH-DAY |
 

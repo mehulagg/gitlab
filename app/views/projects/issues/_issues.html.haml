@@ -20,4 +20,4 @@
       = render empty_state_path
 
   - if @issues.present?
-    = paginate @issues, theme: "gitlab", total_pages: @total_pages
+    = paginate_collection @issues, total_pages: @total_pages

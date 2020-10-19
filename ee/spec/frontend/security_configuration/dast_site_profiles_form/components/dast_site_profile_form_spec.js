@@ -443,7 +443,7 @@ describe('DastSiteProfileForm', () => {
   describe.each`
     givenValidationStatus                     | expectedDescription                                                                          | shouldShowDefaultDescriptionAfterToggle | shouldHaveSiteValidationActivated | shouldHaveSiteValidationDisabled | shouldPoll
     ${DAST_SITE_VALIDATION_STATUS.PENDING}    | ${'Site must be validated to run an active scan.'}                                           | ${false}                                | ${false}                          | ${false}                         | ${false}
-    ${DAST_SITE_VALIDATION_STATUS.INPROGRESS} | ${'Validation is in progress...'}                                                            | ${false}                                | ${true}                           | ${true}                          | ${true}
+    ${DAST_SITE_VALIDATION_STATUS.INPROGRESS} | ${'Validation is in progress...'}                                                            | ${false}                                | ${false}                          | ${true}                          | ${true}
     ${DAST_SITE_VALIDATION_STATUS.PASSED}     | ${'Validation succeeded. Both active and passive scans can be run against the target site.'} | ${false}                                | ${true}                           | ${false}                         | ${false}
     ${DAST_SITE_VALIDATION_STATUS.FAILED}     | ${'Validation failed. Please try again.'}                                                    | ${true}                                 | ${false}                          | ${false}                         | ${false}
   `(

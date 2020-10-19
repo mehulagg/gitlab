@@ -3,6 +3,8 @@
 class Projects::ApproverGroupsController < Projects::ApplicationController
   before_action :authorize_for_subject!
 
+  feature_category :code_review
+
   def destroy
     subject.approver_groups.find(params[:id]).destroy
 

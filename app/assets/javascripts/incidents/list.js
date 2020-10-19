@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import IncidentsList from './components/incidents_list.vue';
 
 Vue.use(VueApollo);
@@ -17,8 +18,9 @@ export default () => {
     publishedAvailable,
     emptyListSvgPath,
     textQuery,
-    authorUsernamesQuery,
-    assigneeUsernamesQuery,
+    authorUsernameQuery,
+    assigneeUsernameQuery,
+    slaFeatureAvailable,
   } = domEl.dataset;
 
   const apolloProvider = new VueApollo({
@@ -33,11 +35,12 @@ export default () => {
       incidentType,
       newIssuePath,
       issuePath,
-      publishedAvailable,
+      publishedAvailable: parseBoolean(publishedAvailable),
       emptyListSvgPath,
       textQuery,
-      authorUsernamesQuery,
-      assigneeUsernamesQuery,
+      authorUsernameQuery,
+      assigneeUsernameQuery,
+      slaFeatureAvailable: parseBoolean(slaFeatureAvailable),
     },
     apolloProvider,
     components: {

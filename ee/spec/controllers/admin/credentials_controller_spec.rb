@@ -95,6 +95,12 @@ RSpec.describe Admin::CredentialsController do
     end
   end
 
+  describe 'POST #destroy' do
+    let(:credentials_path) { admin_credentials_path(filter: 'ssh_keys') }
+
+    it_behaves_like 'credentials inventory controller delete SSH key'
+  end
+
   describe 'PUT #revoke' do
     context 'admin user' do
       before do

@@ -295,13 +295,16 @@ end
 
 Adding foreign key to `projects`:
 
+We can use the `add_concurrenct_foreign_key` method in this case, as this helper method
+has the lock retries built into it.
+
 ```ruby
 include Gitlab::Database::MigrationHelpers
 
+disable_ddl_transaction!
+
 def up
-  with_lock_retries do
-    add_foreign_key :imports, :projects, column: :project_id, on_delete: :cascade
-  end
+  add_concurrent_foreign_key :imports, :projects, column: :project_id, on_delete: :cascade
 end
 
 def down
@@ -316,10 +319,10 @@ Adding foreign key to `users`:
 ```ruby
 include Gitlab::Database::MigrationHelpers
 
+disable_ddl_transaction!
+
 def up
-  with_lock_retries do
-    add_foreign_key :imports, :users, column: :user_id, on_delete: :cascade
-  end
+  add_concurrent_foreign_key :imports, :users, column: :user_id, on_delete: :cascade
 end
 
 def down
@@ -602,7 +605,7 @@ See the style guide on [`NOT NULL` constraints](database/not_null_constraints.md
 
 ## Adding Columns With Default Values
 
-With PostgreSQL 11 being the minimum version since GitLab 13.0, adding columns with default values has become much easier and
+With PostgreSQL 11 being the minimum version in GitLab 13.0 and later, adding columns with default values has become much easier and
 the standard `add_column` helper should be used in all cases.
 
 Before PostgreSQL 11, adding a column with a default was problematic as it would

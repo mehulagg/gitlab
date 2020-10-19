@@ -42,9 +42,8 @@ knowledge. In particular, you should be familiar with:
 - [Kubernetes canary deployments](https://kubernetes.io/docs/concepts/cluster-administration/manage-deployment/#canary-deployments)
 
 NOTE: **Note:**
-In GitLab 13.4 and earlier, apps that consist of multiple deployments are shown as
-duplicates on the deploy board. This is [fixed](https://gitlab.com/gitlab-org/gitlab/-/issues/8463)
-in GitLab 13.5.
+Apps that consist of multiple deployments are shown as duplicates on the deploy board.
+Follow [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/8463) for details.
 
 ## Use cases
 
@@ -86,7 +85,7 @@ To display the Deploy Boards for a specific [environment](../../ci/environments/
    [`kubernetes`](https://docs.gitlab.com/runner/executors/kubernetes.html) executor.
 1. Configure the [Kubernetes integration](clusters/index.md) in your project for the
    cluster. The Kubernetes namespace is of particular note as you will need it
-   for your deployment scripts (exposed by the `KUBE_NAMESPACE` env variable).
+   for your deployment scripts (exposed by the `KUBE_NAMESPACE` environment variable).
 1. Ensure Kubernetes annotations of `app.gitlab.com/env: $CI_ENVIRONMENT_SLUG`
    and `app.gitlab.com/app: $CI_PROJECT_PATH_SLUG` are applied to the
    deployments, replica sets, and pods, where `$CI_ENVIRONMENT_SLUG` and

@@ -60,3 +60,23 @@
   </details>
 <% end %>
 <% end %>
+
+<% if vulnerability.try(:scan).present? && vulnerability.try(:scanner).present? %>
+### <%= _("Scanner") %>:
+
+<% if vulnerability&.scanner[:name].present? %>
+* <%= _("Name") %>: <%= vulnerability.scanner[:name] %>
+<% end %>
+<% if vulnerability&.scan[:type].present? %>
+* <%= _("Type") %>: <%= vulnerability.scan[:type] %>
+<% end %>
+<% if vulnerability&.scan[:status].present? %>
+* <%= _("Status") %>: <%= vulnerability.scan[:status] %>
+<% end %>
+<% if vulnerability&.scan[:start_time].present? %>
+* <%= _("Start Time") %>: <%= vulnerability.scan[:start_time] %>
+<% end %>
+<% if vulnerability&.scan[:end_time].present? %>
+* <%= _("End Time") %>: <%= vulnerability.scan[:end_time] %>
+<% end %>
+<% end %>

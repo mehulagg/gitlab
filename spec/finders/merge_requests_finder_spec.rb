@@ -333,6 +333,8 @@ RSpec.describe MergeRequestsFinder do
       end
 
       context 'assignee filtering' do
+        let_it_be(:user3) { create(:user) }
+
         let(:issuables) { described_class.new(user, params).execute }
 
         it_behaves_like 'assignee ID filter' do
@@ -351,7 +353,6 @@ RSpec.describe MergeRequestsFinder do
             merge_request3.assignees = [user2, user3]
           end
 
-          let_it_be(:user3) { create(:user) }
           let(:params) { { assignee_username: [user2.username, user3.username] } }
           let(:expected_issuables) { [merge_request3] }
         end
@@ -366,7 +367,6 @@ RSpec.describe MergeRequestsFinder do
         end
 
         it_behaves_like 'no assignee filter' do
-          let_it_be(:user3) { create(:user) }
           let(:expected_issuables) { [merge_request4, merge_request5] }
         end
 
@@ -374,30 +374,54 @@ RSpec.describe MergeRequestsFinder do
           let(:expected_issuables) { [merge_request1, merge_request2, merge_request3] }
         end
 
-        context 'filtering by group milestone' do
-          let(:group_milestone) { create(:milestone, group: group) }
+        context 'with just reviewers' do
+          it_behaves_like 'assignee username filter' do
+            before do
+              merge_request4.reviewers = [user3]
+              merge_request4.assignees = []
+            end
 
-          before do
-            merge_request1.update!(milestone: group_milestone)
-            merge_request2.update!(milestone: group_milestone)
+            let(:params) { { assignee_username: [user3.username] } }
+            let(:expected_issuables) { [merge_request4] }
           end
+        end
 
-          it 'returns merge requests assigned to that group milestone' do
-            params = { milestone_title: group_milestone.title }
+        context 'with an additional reviewer' do
+          it_behaves_like 'assignee username filter' do
+            before do
+              merge_request3.assignees = [user3]
+              merge_request4.reviewers = [user3]
+            end
 
+            let(:params) { { assignee_username: [user3.username] } }
+            let(:expected_issuables) { [merge_request3, merge_request4] }
+          end
+        end
+      end
+
+      context 'filtering by group milestone' do
+        let(:group_milestone) { create(:milestone, group: group) }
+
+        before do
+          merge_request1.update!(milestone: group_milestone)
+          merge_request2.update!(milestone: group_milestone)
+        end
+
+        it 'returns merge requests assigned to that group milestone' do
+          params = { milestone_title: group_milestone.title }
+
+          merge_requests = described_class.new(user, params).execute
+
+          expect(merge_requests).to contain_exactly(merge_request1, merge_request2)
+        end
+
+        context 'using NOT' do
+          let(:params) { { not: { milestone_title: group_milestone.title } } }
+
+          it 'returns MRs not assigned to that group milestone' do
             merge_requests = described_class.new(user, params).execute
 
-            expect(merge_requests).to contain_exactly(merge_request1, merge_request2)
-          end
-
-          context 'using NOT' do
-            let(:params) { { not: { milestone_title: group_milestone.title } } }
-
-            it 'returns MRs not assigned to that group milestone' do
-              merge_requests = described_class.new(user, params).execute
-
-              expect(merge_requests).to contain_exactly(merge_request3, merge_request4, merge_request5)
-            end
+            expect(merge_requests).to contain_exactly(merge_request3, merge_request4, merge_request5)
           end
         end
       end
@@ -486,6 +510,83 @@ RSpec.describe MergeRequestsFinder do
           expect(merge_requests).to contain_exactly(old_merge_request, new_merge_request)
         end
       end
+
+      context 'filtering by the merge request deployments' do
+        let(:gstg) { create(:environment, project: project4, name: 'gstg') }
+        let(:gprd) { create(:environment, project: project4, name: 'gprd') }
+
+        let(:mr1) do
+          create(
+            :merge_request,
+            :simple,
+            :merged,
+            author: user,
+            source_project: project4,
+            target_project: project4
+          )
+        end
+
+        let(:mr2) do
+          create(
+            :merge_request,
+            :simple,
+            :merged,
+            author: user,
+            source_project: project4,
+            target_project: project4
+          )
+        end
+
+        let(:deploy1) do
+          create(
+            :deployment,
+            :success,
+            deployable: nil,
+            environment: gstg,
+            project: project4,
+            sha: mr1.diff_head_sha,
+            finished_at: Time.utc(2020, 10, 1, 12, 0)
+          )
+        end
+
+        let(:deploy2) do
+          create(
+            :deployment,
+            :success,
+            deployable: nil,
+            environment: gprd,
+            project: project4,
+            sha: mr2.diff_head_sha,
+            finished_at: Time.utc(2020, 10, 2, 15, 0)
+          )
+        end
+
+        before do
+          deploy1.link_merge_requests(MergeRequest.where(id: mr1.id))
+          deploy2.link_merge_requests(MergeRequest.where(id: mr2.id))
+        end
+
+        it 'filters merge requests deployed to a given environment' do
+          mrs = described_class.new(user, environment: 'gstg').execute
+
+          expect(mrs).to eq([mr1])
+        end
+
+        it 'filters merge requests deployed before a given date' do
+          mrs =
+            described_class.new(user, deployed_before: '2020-10-02').execute
+
+          expect(mrs).to eq([mr1])
+        end
+
+        it 'filters merge requests deployed after a given date' do
+          mrs = described_class
+            .new(user, deployed_after: '2020-10-01 12:00')
+            .execute
+
+          expect(mrs).to eq([mr2])
+        end
+      end
     end
 
     describe '#row_count', :request_store do
@@ -499,6 +600,16 @@ RSpec.describe MergeRequestsFinder do
         finder = described_class.new(user, state: 'closed')
 
         expect(finder.row_count).to eq(1)
+      end
+
+      it 'returns -1 if the query times out' do
+        finder = described_class.new(user)
+
+        expect_next_instance_of(described_class) do |subfinder|
+          expect(subfinder).to receive(:execute).and_raise(ActiveRecord::QueryCanceled)
+        end
+
+        expect(finder.row_count).to eq(-1)
       end
     end
 

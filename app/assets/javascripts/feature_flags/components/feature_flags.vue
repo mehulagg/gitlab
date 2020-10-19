@@ -1,88 +1,44 @@
 <script>
-import { createNamespacedHelpers } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import { isEmpty } from 'lodash';
-import { GlButton, GlModalDirective, GlTabs } from '@gitlab/ui';
+import { GlAlert, GlButton, GlModalDirective, GlSprintf, GlTabs } from '@gitlab/ui';
+
 import { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE } from '../constants';
 import FeatureFlagsTab from './feature_flags_tab.vue';
 import FeatureFlagsTable from './feature_flags_table.vue';
 import UserListsTable from './user_lists_table.vue';
-import store from '../store';
 import { s__ } from '~/locale';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
 import {
+  buildUrlWithCurrentLocation,
   getParameterByName,
   historyPushState,
-  buildUrlWithCurrentLocation,
 } from '~/lib/utils/common_utils';
 
 import ConfigureFeatureFlagsModal from './configure_feature_flags_modal.vue';
 
-const { mapState, mapActions } = createNamespacedHelpers('index');
-
 const SCOPES = { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE };
 
 export default {
-  store,
   components: {
-    FeatureFlagsTable,
-    UserListsTable,
-    TablePagination,
-    GlButton,
-    GlTabs,
-    FeatureFlagsTab,
     ConfigureFeatureFlagsModal,
+    FeatureFlagsTab,
+    FeatureFlagsTable,
+    GlAlert,
+    GlButton,
+    GlSprintf,
+    GlTabs,
+    TablePagination,
+    UserListsTable,
   },
   directives: {
     GlModal: GlModalDirective,
   },
-  props: {
-    endpoint: {
-      type: String,
-      required: true,
-    },
-    projectId: {
-      type: String,
-      required: true,
-    },
-    csrfToken: {
-      type: String,
-      required: true,
-    },
-    featureFlagsClientLibrariesHelpPagePath: {
-      type: String,
-      required: true,
-    },
-    featureFlagsClientExampleHelpPagePath: {
-      type: String,
-      required: true,
-    },
-    rotateInstanceIdPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    unleashApiUrl: {
-      type: String,
-      required: true,
-    },
-    unleashApiInstanceId: {
-      type: String,
-      required: true,
-    },
-    canUserConfigure: {
-      type: Boolean,
-      required: true,
-    },
-    newFeatureFlagPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    newUserListPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
+  inject: {
+    newUserListPath: { default: '' },
+    newFeatureFlagPath: { default: '' },
+    canUserConfigure: { required: true },
+    featureFlagsLimitExceeded: { required: true },
   },
   data() {
     const scope = getParameterByName('scope') || SCOPES.FEATURE_FLAG_SCOPE;
@@ -90,6 +46,7 @@ export default {
       scope,
       page: getParameterByName('page') || '1',
       isUserListAlertDismissed: false,
+      shouldShowFeatureFlagsLimitWarning: this.featureFlagsLimitExceeded,
       selectedTab: Object.values(SCOPES).indexOf(scope),
     };
   },
@@ -144,23 +101,15 @@ export default {
     },
   },
   created() {
-    this.setFeatureFlagsEndpoint(this.endpoint);
     this.setFeatureFlagsOptions({ scope: this.scope, page: this.page });
-    this.setProjectId(this.projectId);
     this.fetchFeatureFlags();
     this.fetchUserLists();
-    this.setInstanceId(this.unleashApiInstanceId);
-    this.setInstanceIdEndpoint(this.rotateInstanceIdPath);
   },
   methods: {
     ...mapActions([
-      'setFeatureFlagsEndpoint',
       'setFeatureFlagsOptions',
       'fetchFeatureFlags',
       'fetchUserLists',
-      'setInstanceIdEndpoint',
-      'setInstanceId',
-      'setProjectId',
       'rotateInstanceId',
       'toggleFeatureFlag',
       'deleteUserList',
@@ -213,16 +162,38 @@ export default {
     dataForScope(scope) {
       return this[scope];
     },
+    onDismissFeatureFlagsLimitWarning() {
+      this.shouldShowFeatureFlagsLimitWarning = false;
+    },
+    onNewFeatureFlagCLick() {
+      if (this.featureFlagsLimitExceeded) {
+        this.shouldShowFeatureFlagsLimitWarning = true;
+      }
+    },
   },
 };
 </script>
 <template>
   <div>
+    <gl-alert
+      v-if="shouldShowFeatureFlagsLimitWarning"
+      variant="warning"
+      @dismiss="onDismissFeatureFlagsLimitWarning"
+    >
+      <gl-sprintf
+        :message="
+          s__(
+            'FeatureFlags|Feature flags limit reached (%{featureFlagsLimit}). Delete one or more feature flags before adding new ones.',
+          )
+        "
+      >
+        <template #featureFlagsLimit>
+          <span>{{ featureFlagsLimit }}</span>
+        </template>
+      </gl-sprintf>
+    </gl-alert>
     <configure-feature-flags-modal
       v-if="canUserConfigure"
-      :help-client-libraries-path="featureFlagsClientLibrariesHelpPagePath"
-      :help-client-example-path="featureFlagsClientExampleHelpPagePath"
-      :api-url="unleashApiUrl"
       :instance-id="instanceId"
       :is-rotating="isRotating"
       :has-rotate-error="hasRotateError"
@@ -257,9 +228,10 @@ export default {
 
         <gl-button
           v-if="hasNewPath"
-          :href="newFeatureFlagPath"
+          :href="featureFlagsLimitExceeded ? '' : newFeatureFlagPath"
           variant="success"
           data-testid="ff-new-button"
+          @click="onNewFeatureFlagCLick"
         >
           {{ s__('FeatureFlags|New feature flag') }}
         </gl-button>
@@ -281,7 +253,6 @@ export default {
         >
           <feature-flags-table
             v-if="shouldRenderFeatureFlags"
-            :csrf-token="csrfToken"
             :feature-flags="featureFlags"
             @toggle-flag="toggleFeatureFlag"
           />
@@ -335,9 +306,10 @@ export default {
 
             <gl-button
               v-if="hasNewPath"
-              :href="newFeatureFlagPath"
+              :href="featureFlagsLimitExceeded ? '' : newFeatureFlagPath"
               variant="success"
               data-testid="ff-new-button"
+              @click="onNewFeatureFlagCLick"
             >
               {{ s__('FeatureFlags|New feature flag') }}
             </gl-button>

@@ -17,7 +17,7 @@ RSpec.describe Groups::Analytics::RepositoryAnalyticsController do
     subject { get :show, params: { group_id: group } }
 
     before do
-      group.add_guest(current_user)
+      group.add_reporter(current_user)
     end
 
     specify { is_expected.to have_gitlab_http_status(:success) }

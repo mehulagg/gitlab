@@ -869,4 +869,24 @@ describe('Api', () => {
       });
     });
   });
+
+  describe('Billable members list', () => {
+    let expectedUrl;
+    let namespaceId;
+
+    beforeEach(() => {
+      namespaceId = 1000;
+      expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${namespaceId}/billable_members`;
+    });
+
+    describe('fetchBillableGroupMembersList', () => {
+      it('GETs the right url', () => {
+        mock.onGet(expectedUrl).replyOnce(httpStatus.OK, []);
+
+        return Api.fetchBillableGroupMembersList(namespaceId).then(({ data }) => {
+          expect(data).toEqual([]);
+        });
+      });
+    });
+  });
 });

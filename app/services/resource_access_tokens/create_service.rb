@@ -10,7 +10,6 @@ module ResourceAccessTokens
     end
 
     def execute
-      return unless feature_enabled?
       return error("User does not have permission to create #{resource_type} Access Token") unless has_permission_to_create?
 
       user = create_user
@@ -30,10 +29,6 @@ module ResourceAccessTokens
     private
 
     attr_reader :resource_type, :resource
-
-    def feature_enabled?
-      return true unless ::Gitlab.com?
-    end
 
     def has_permission_to_create?
       %w(project group).include?(resource_type) && can?(current_user, :admin_resource_access_tokens, resource)
@@ -94,7 +89,7 @@ module ResourceAccessTokens
     end
 
     def provision_access(resource, user)
-      resource.add_maintainer(user)
+      resource.add_user(user, :maintainer, expires_at: params[:expires_at])
     end
 
     def error(message)

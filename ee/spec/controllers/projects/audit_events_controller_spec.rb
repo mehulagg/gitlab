@@ -140,6 +140,15 @@ RSpec.describe Projects::AuditEventsController do
           expect(response).to have_gitlab_http_status(:not_found)
         end
       end
+
+      it 'tracks search event', :snowplow do
+        request
+
+        expect_snowplow_event(
+          category: 'Projects::AuditEventsController',
+          action: 'search_audit_event'
+        )
+      end
     end
 
     context 'unauthorized' do

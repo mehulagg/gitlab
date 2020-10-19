@@ -8,6 +8,13 @@ module EE::Groups::GroupMembersHelper
     super.merge(skip_ldap: @group.ldap_synced?)
   end
 
+  override :group_members_list_data_attributes
+  def group_members_list_data_attributes(group, _members)
+    super.merge!({
+      ldap_override_path: override_group_group_member_path(group, ':id')
+    })
+  end
+
   private
 
   override :members_data
@@ -18,7 +25,9 @@ module EE::Groups::GroupMembersHelper
       ce_members[index].merge({
         using_license: can?(current_user, :owner_access, group) && member.user&.using_gitlab_com_seat?(group),
         group_sso: member.user&.group_sso?(group),
-        group_managed_account: member.user&.group_managed_account?
+        group_managed_account: member.user&.group_managed_account?,
+        can_override: member.can_override?,
+        is_overridden: member.override
       })
     end
   end

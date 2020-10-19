@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { union } from 'lodash';
+import { union, unionBy } from 'lodash';
 import mutationsCE, { addIssueToList, removeIssueFromList } from '~/boards/stores/mutations';
 import { moveIssueListHelper } from '~/boards/boards_util';
 import { s__ } from '~/locale';
@@ -67,6 +67,13 @@ export default {
   [mutationTypes.TOGGLE_PROMOTION_STATE]: () => {
     notImplemented();
   },
+  [mutationTypes.UPDATE_LIST_SUCCESS]: (state, { listId, list }) => {
+    Vue.set(state.boardLists, listId, list);
+  },
+
+  [mutationTypes.UPDATE_LIST_FAILURE]: state => {
+    state.error = s__('Boards|An error occurred while updating the list. Please try again.');
+  },
 
   [mutationTypes.RECEIVE_ISSUES_FOR_LIST_SUCCESS]: (
     state,
@@ -110,6 +117,11 @@ export default {
     state.epicsSwimlanesFetchInProgress = true;
   },
 
+  [mutationTypes.SET_EPICS_SWIMLANES]: state => {
+    state.isShowingEpicsSwimlanes = true;
+    state.epicsSwimlanesFetchInProgress = true;
+  },
+
   [mutationTypes.RECEIVE_BOARD_LISTS_SUCCESS]: (state, boardLists) => {
     state.boardLists = boardLists;
     state.epicsSwimlanesFetchInProgress = false;
@@ -130,7 +142,7 @@ export default {
   },
 
   [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, epics) => {
-    Vue.set(state, 'epics', union(state.epics || [], epics));
+    Vue.set(state, 'epics', unionBy(state.epics || [], epics, 'id'));
   },
 
   [mutationTypes.RESET_EPICS]: state => {
@@ -141,8 +153,8 @@ export default {
     state,
     { originalIssue, fromListId, toListId, moveBeforeId, moveAfterId, epicId },
   ) => {
-    const fromList = state.boardLists.find(l => l.id === fromListId);
-    const toList = state.boardLists.find(l => l.id === toListId);
+    const fromList = state.boardLists[fromListId];
+    const toList = state.boardLists[toListId];
 
     const issue = moveIssueListHelper(originalIssue, fromList, toList);
 
@@ -154,5 +166,15 @@ export default {
 
     removeIssueFromList({ state, listId: fromListId, issueId: issue.id });
     addIssueToList({ state, listId: toListId, issueId: issue.id, moveBeforeId, moveAfterId });
+  },
+
+  [mutationTypes.SET_BOARD_EPIC_USER_PREFERENCES]: (state, val) => {
+    const { userPreferences, epicId } = val;
+
+    const epic = state.epics.filter(currentEpic => currentEpic.id === epicId)[0];
+
+    if (epic) {
+      Vue.set(epic, 'userPreferences', userPreferences);
+    }
   },
 };

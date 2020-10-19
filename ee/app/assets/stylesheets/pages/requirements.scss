@@ -20,6 +20,12 @@
       overflow-y: auto !important;
     }
   }
+
+  .requirement-form-drawer.zen-mode {
+    // We need to override `z-index` provided to GlDrawer
+    // in Zen mode to enable full-screen editing.
+    z-index: auto !important;
+  }
 }
 
 .requirements-list-container {
@@ -73,7 +79,11 @@
   }
 
   .gl-drawer {
-    width: 480px;
+    // Both width & min-width
+    // are defined as per Pajamas
+    // See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/44902#note_429056182
+    width: 28%;
+    min-width: 400px;
     padding-left: $gl-padding;
     padding-right: $gl-padding;
     box-shadow: none;

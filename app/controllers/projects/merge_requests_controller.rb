@@ -29,7 +29,6 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   before_action only: [:show] do
     push_frontend_experiment(:suggest_pipeline)
     push_frontend_feature_flag(:widget_visibility_polling, @project, default_enabled: true)
-    push_frontend_feature_flag(:merge_ref_head_comments, @project, default_enabled: true)
     push_frontend_feature_flag(:mr_commit_neighbor_nav, @project, default_enabled: true)
     push_frontend_feature_flag(:multiline_comments, @project, default_enabled: true)
     push_frontend_feature_flag(:file_identifier_hash)
@@ -40,10 +39,15 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:unified_diff_lines, @project, default_enabled: true)
     push_frontend_feature_flag(:highlight_current_diff_row, @project)
     push_frontend_feature_flag(:default_merge_ref_for_diffs, @project)
+    push_frontend_feature_flag(:core_security_mr_widget, @project, default_enabled: true)
+
+    record_experiment_user(:invite_members_version_a)
+    record_experiment_user(:invite_members_version_b)
   end
 
   before_action do
     push_frontend_feature_flag(:vue_issuable_sidebar, @project.group)
+    push_frontend_feature_flag(:deployment_filters)
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:index, :show, :discussions]

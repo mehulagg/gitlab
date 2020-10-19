@@ -159,5 +159,59 @@ RSpec.describe IterationsFinder do
         expect(finder.find_by(iid: iteration_from_project_1.iid)).to eq(iteration_from_project_1)
       end
     end
+
+    describe '.params_for_parent' do
+      let_it_be(:parent_group) { create(:group) }
+      let_it_be(:group) { create(:group, parent: parent_group) }
+      let_it_be(:project) { create(:project, group: group) }
+
+      context 'when parent is a project' do
+        subject { described_class.params_for_parent(project, include_ancestors: include_ancestors) }
+
+        context 'when include_ancestors is true' do
+          let(:include_ancestors) { true }
+
+          it 'returns project and ancestor group ids' do
+            expect(subject).to match(group_ids: contain_exactly(group, parent_group), project_ids: project.id)
+          end
+        end
+
+        context 'when include_ancestors is false' do
+          let(:include_ancestors) { false }
+
+          it 'returns project id' do
+            expect(subject).to eq(project_ids: project.id)
+          end
+        end
+      end
+
+      context 'when parent is a group' do
+        subject { described_class.params_for_parent(group, include_ancestors: include_ancestors) }
+
+        context 'when include_ancestors is true' do
+          let(:include_ancestors) { true }
+
+          it 'returns group and ancestor ids' do
+            expect(subject).to match(group_ids: contain_exactly(group, parent_group))
+          end
+        end
+
+        context 'when include_ancestors is false' do
+          let(:include_ancestors) { false }
+
+          it 'returns group id' do
+            expect(subject).to eq(group_ids: group.id)
+          end
+        end
+      end
+
+      context 'when parent is invalid' do
+        subject { described_class.params_for_parent(double(User)) }
+
+        it 'raises an ArgumentError' do
+          expect { subject }.to raise_error(ArgumentError, 'Invalid parent class. Only Project and Group are supported.')
+        end
+      end
+    end
   end
 end

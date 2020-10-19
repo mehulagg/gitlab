@@ -11,7 +11,7 @@ module QA
       shared_examples 'only user with access pushes and merges' do
         it 'unselected maintainer user fails to push' do
           expect { push_new_file(branch_name, as_user: user_maintainer) }.to raise_error(
-            QA::Git::Repository::RepositoryCommandError,
+            QA::Support::Run::CommandError,
             /remote: GitLab: You are not allowed to push code to protected branches on this project\.([\s\S]+)\[remote rejected\] #{branch_name} -> #{branch_name} \(pre-receive hook declined\)/)
         end
 

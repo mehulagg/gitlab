@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Releases < Grape::API::Instance
+  class Releases < ::API::Base
     include PaginationParams
 
     RELEASE_ENDPOINT_REQUIREMENTS = API::NAMESPACE_OR_PROJECT_REQUIREMENTS
@@ -19,9 +19,13 @@ module API
       end
       params do
         use :pagination
+        optional :order_by, type: String, values: %w[released_at created_at], default: 'released_at',
+                            desc: 'Return releases ordered by `released_at` or `created_at`.'
+        optional :sort, type: String, values: %w[asc desc], default: 'desc',
+                        desc: 'Return releases sorted in `asc` or `desc` order.'
       end
       get ':id/releases' do
-        releases = ::ReleasesFinder.new(user_project, current_user).execute
+        releases = ::ReleasesFinder.new(user_project, current_user, declared_params.slice(:order_by, :sort)).execute
 
         present paginate(releases), with: Entities::Release, current_user: current_user
       end

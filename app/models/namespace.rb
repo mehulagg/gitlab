@@ -83,6 +83,7 @@ class Namespace < ApplicationRecord
 
   scope :for_user, -> { where('type IS NULL') }
   scope :sort_by_type, -> { order(Gitlab::Database.nulls_first_order(:type)) }
+  scope :include_route, -> { includes(:route) }
 
   scope :with_statistics, -> do
     joins('LEFT JOIN project_statistics ps ON ps.namespace_id = namespaces.id')
@@ -282,7 +283,11 @@ class Namespace < ApplicationRecord
   # Includes projects from this namespace and projects from all subgroups
   # that belongs to this namespace
   def all_projects
-    Project.inside_path(full_path)
+    if Feature.enabled?(:recursive_approach_for_all_projects)
+      Project.where(namespace: self_and_descendants)
+    else
+      Project.inside_path(full_path)
+    end
   end
 
   # Includes pipelines from this namespace and pipelines from all subgroups

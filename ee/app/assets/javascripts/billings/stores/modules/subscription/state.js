@@ -1,8 +1,10 @@
 import { s__ } from '~/locale';
 
 export default () => ({
-  isLoading: false,
-  hasError: false,
+  isLoadingSubscription: false,
+  hasErrorSubscription: false,
+  isLoadingBillableMembers: false,
+  hasErrorBillableMembers: false,
   namespaceId: null,
   plan: {
     code: null,
@@ -167,4 +169,5 @@ export default () => ({
       ],
     },
   },
+  hasBillableGroupMembers: false,
 });

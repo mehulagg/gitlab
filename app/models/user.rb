@@ -167,6 +167,8 @@ class User < ApplicationRecord
   has_many :assigned_issues, class_name: "Issue", through: :issue_assignees, source: :issue
   has_many :assigned_merge_requests, class_name: "MergeRequest", through: :merge_request_assignees, source: :merge_request
 
+  has_many :bulk_imports
+
   has_many :custom_attributes, class_name: 'UserCustomAttribute'
   has_many :callouts, class_name: 'UserCallout'
   has_many :term_agreements
@@ -293,6 +295,7 @@ class User < ApplicationRecord
       transition active: :blocked
       transition deactivated: :blocked
       transition ldap_blocked: :blocked
+      transition blocked_pending_approval: :blocked
     end
 
     event :ldap_block do
@@ -338,7 +341,8 @@ class User < ApplicationRecord
 
   # Scopes
   scope :admins, -> { where(admin: true) }
-  scope :blocked, -> { with_states(:blocked, :ldap_blocked, :blocked_pending_approval) }
+  scope :blocked, -> { with_states(:blocked, :ldap_blocked) }
+  scope :blocked_pending_approval, -> { with_states(:blocked_pending_approval) }
   scope :external, -> { where(external: true) }
   scope :confirmed, -> { where.not(confirmed_at: nil) }
   scope :active, -> { with_state(:active).non_internal }
@@ -538,6 +542,8 @@ class User < ApplicationRecord
         admins
       when 'blocked'
         blocked
+      when 'blocked_pending_approval'
+        blocked_pending_approval
       when 'two_factor_disabled'
         without_two_factor
       when 'two_factor_enabled'
@@ -690,6 +696,17 @@ class User < ApplicationRecord
       end
     end
 
+    def security_bot
+      email_pattern = "security-bot%s@#{Settings.gitlab.host}"
+
+      unique_internal(where(user_type: :security_bot), 'GitLab-Security-Bot', email_pattern) do |u|
+        u.bio = 'System bot that monitors detected vulnerabilities for solutions and creates merge requests with the fixes.'
+        u.name = 'GitLab Security Bot'
+        u.website_url = Gitlab::Routing.url_helpers.help_page_url('user/application_security/security_bot/index.md')
+        u.avatar = bot_avatar(image: 'security-bot.png')
+      end
+    end
+
     def support_bot
       email_pattern = "support%s@#{Settings.gitlab.host}"
 
@@ -776,7 +793,7 @@ class User < ApplicationRecord
   end
 
   def two_factor_otp_enabled?
-    otp_required_for_login?
+    otp_required_for_login? || Feature.enabled?(:forti_authenticator, self)
   end
 
   def two_factor_u2f_enabled?
@@ -1711,7 +1728,7 @@ class User < ApplicationRecord
   end
 
   def can_be_deactivated?
-    active? && no_recent_activity?
+    active? && no_recent_activity? && !internal?
   end
 
   def last_active_at

@@ -24,4 +24,18 @@ RSpec.describe DastScannerProfile, type: :model do
       end
     end
   end
+
+  describe 'full_scan_enabled?' do
+    describe 'when is active scan' do
+      subject { create(:dast_scanner_profile, scan_type: :active).full_scan_enabled? }
+
+      it { is_expected.to eq(true) }
+    end
+
+    describe 'when is passive scan' do
+      subject { create(:dast_scanner_profile, scan_type: :passive).full_scan_enabled? }
+
+      it { is_expected.to eq(false) }
+    end
+  end
 end

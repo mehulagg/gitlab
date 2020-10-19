@@ -7,6 +7,7 @@ class Admin::AuditLogsController < Admin::ApplicationController
   include AuditEvents::Sortable
   include AuditEvents::DateRange
   include Analytics::UniqueVisitsHelper
+  include Gitlab::Tracking
 
   before_action :check_license_admin_audit_log_available!
 
@@ -30,6 +31,8 @@ class Admin::AuditLogsController < Admin::ApplicationController
               else
                 nil
               end
+
+    Gitlab::Tracking.event(self.class.name, 'search_audit_event')
   end
 
   private

@@ -8,8 +8,9 @@
 import { GlLink, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
-import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { formatUsageSize, usageRatioToThresholdLevel } from '../utils';
+import { ALERT_THRESHOLD, ERROR_THRESHOLD, WARNING_THRESHOLD } from '../constants';
 
 export default {
   components: {
@@ -40,29 +41,29 @@ export default {
       return this.project.nameWithNamespace;
     },
     storageSize() {
-      return numberToHumanSize(this.project.statistics.storageSize);
+      return formatUsageSize(this.project.totalCalculatedUsedStorage);
     },
     excessStorageSize() {
-      return numberToHumanSize(this.project.statistics?.excessStorageSize ?? 0);
+      return formatUsageSize(this.project.repositorySizeExcess);
+    },
+    excessStorageRatio() {
+      return this.project.totalCalculatedUsedStorage / this.project.totalCalculatedStorageLimit;
+    },
+    thresholdLevel() {
+      return usageRatioToThresholdLevel(this.excessStorageRatio);
     },
     status() {
-      // The project default limit will be sent by backend.
-      // This is being added here just for testing purposes.
-      // This entire component is rendered behind the
-      // additional_repo_storage_by_namespace feature flag. This
-      // piece will be removed along with the flag and the logic
-      // will be mostly on the backend.
-      const PROJECT_DEFAULT_LIMIT = 10000000000;
-      const PROJECT_DEFAULT_WARNING_LIMIT = 9000000000;
-
-      if (this.project.statistics.storageSize > PROJECT_DEFAULT_LIMIT) {
+      if (this.thresholdLevel === ERROR_THRESHOLD) {
         return {
           bgColor: { 'gl-bg-red-50': true },
           iconClass: { 'gl-text-red-500': true },
           linkClass: 'gl-text-red-500!',
           tooltipText: s__('UsageQuota|This project is locked.'),
         };
-      } else if (this.project.statistics.storageSize > PROJECT_DEFAULT_WARNING_LIMIT) {
+      } else if (
+        this.thresholdLevel === WARNING_THRESHOLD ||
+        this.thresholdLevel === ALERT_THRESHOLD
+      ) {
         return {
           bgColor: { 'gl-bg-orange-50': true },
           iconClass: 'gl-text-orange-500',

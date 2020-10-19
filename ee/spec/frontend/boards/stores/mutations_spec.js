@@ -1,6 +1,5 @@
 import mutations from 'ee/boards/stores/mutations';
 import {
-  mockLists,
   mockIssue,
   mockIssue2,
   mockEpics,
@@ -18,10 +17,15 @@ const expectNotImplemented = action => {
 
 const epicId = mockEpic.id;
 
+const initialBoardListsState = {
+  'gid://gitlab/List/1': mockListsWithModel[0],
+  'gid://gitlab/List/2': mockListsWithModel[1],
+};
+
 let state = {
   issuesByListId: {},
   issues: {},
-  boardLists: mockListsWithModel,
+  boardLists: initialBoardListsState,
   epicsFlags: {
     [epicId]: { isLoading: true },
   },
@@ -174,6 +178,21 @@ describe('TOGGLE_EPICS_SWIMLANES', () => {
   });
 });
 
+describe('SET_EPICS_SWIMLANES', () => {
+  it('set isShowingEpicsSwimlanes and epicsSwimlanesFetchInProgress to true', () => {
+    state = {
+      ...state,
+      isShowingEpicsSwimlanes: false,
+      epicsSwimlanesFetchInProgress: false,
+    };
+
+    mutations.SET_EPICS_SWIMLANES(state);
+
+    expect(state.isShowingEpicsSwimlanes).toBe(true);
+    expect(state.epicsSwimlanesFetchInProgress).toBe(true);
+  });
+});
+
 describe('RECEIVE_BOARD_LISTS_SUCCESS', () => {
   it('sets epicsSwimlanesFetchInProgress to false and populates boardLists with payload', () => {
     state = {
@@ -182,10 +201,10 @@ describe('RECEIVE_BOARD_LISTS_SUCCESS', () => {
       boardLists: {},
     };
 
-    mutations.RECEIVE_BOARD_LISTS_SUCCESS(state, mockLists);
+    mutations.RECEIVE_BOARD_LISTS_SUCCESS(state, initialBoardListsState);
 
     expect(state.epicsSwimlanesFetchInProgress).toBe(false);
-    expect(state.boardLists).toEqual(mockLists);
+    expect(state.boardLists).toEqual(initialBoardListsState);
   });
 });
 
@@ -232,6 +251,17 @@ describe('RECEIVE_EPICS_SUCCESS', () => {
 
     expect(state.epics).toEqual(mockEpics);
   });
+
+  it("doesn't add duplicate epics", () => {
+    state = {
+      ...state,
+      epics: mockEpics,
+    };
+
+    mutations.RECEIVE_EPICS_SUCCESS(state, mockEpics);
+
+    expect(state.epics).toEqual(mockEpics);
+  });
 });
 
 describe('RESET_EPICS', () => {
@@ -262,7 +292,6 @@ describe('MOVE_ISSUE', () => {
     state = {
       ...state,
       issuesByListId: listIssues,
-      boardLists: mockListsWithModel,
       issues,
     };
   });
@@ -303,5 +332,21 @@ describe('MOVE_ISSUE', () => {
 
     expect(state.issuesByListId).toEqual(updatedListIssues);
     expect(state.issues['437'].epic).toEqual(null);
+  });
+});
+
+describe('SET_BOARD_EPIC_USER_PREFERENCES', () => {
+  it('should replace userPreferences on the given epic', () => {
+    state = {
+      ...state,
+      epics: mockEpics,
+    };
+
+    const epic = mockEpics[0];
+    const userPreferences = { collapsed: false };
+
+    mutations.SET_BOARD_EPIC_USER_PREFERENCES(state, { epicId: epic.id, userPreferences });
+
+    expect(state.epics[0].userPreferences).toEqual(userPreferences);
   });
 });

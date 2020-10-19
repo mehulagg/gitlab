@@ -14,10 +14,13 @@ describe('EpicLane', () => {
 
   const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
 
+  const updateBoardEpicUserPreferencesSpy = jest.fn();
+
   const createStore = isLoading => {
     return new Vuex.Store({
       actions: {
         fetchIssuesForEpic: jest.fn(),
+        updateBoardEpicUserPreferences: updateBoardEpicUserPreferencesSpy,
       },
       state: {
         issuesByListId: mockIssuesByListId,
@@ -76,13 +79,13 @@ describe('EpicLane', () => {
 
     it('hides issues when collapsing', () => {
       expect(wrapper.findAll(IssuesLaneList)).toHaveLength(wrapper.props('lists').length);
-      expect(wrapper.vm.isExpanded).toBe(true);
+      expect(wrapper.vm.isCollapsed).toBe(false);
 
       findByTestId('epic-lane-chevron').vm.$emit('click');
 
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.findAll(IssuesLaneList)).toHaveLength(0);
-        expect(wrapper.vm.isExpanded).toBe(false);
+        expect(wrapper.vm.isCollapsed).toBe(true);
       });
     });
 
@@ -94,6 +97,27 @@ describe('EpicLane', () => {
       createComponent({ isLoading: true });
       expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
       expect(findByTestId('epic-lane-issue-count').exists()).toBe(false);
+    });
+
+    it('invokes `updateBoardEpicUserPreferences` method on collapse', () => {
+      const collapsedValue = false;
+
+      expect(wrapper.vm.isCollapsed).toBe(collapsedValue);
+
+      findByTestId('epic-lane-chevron').vm.$emit('click');
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(updateBoardEpicUserPreferencesSpy).toHaveBeenCalled();
+
+        const payload = updateBoardEpicUserPreferencesSpy.mock.calls[0][1];
+
+        expect(payload).toEqual({
+          collapsed: !collapsedValue,
+          epicId: mockEpic.id,
+        });
+
+        expect(wrapper.vm.isCollapsed).toBe(true);
+      });
     });
   });
 });

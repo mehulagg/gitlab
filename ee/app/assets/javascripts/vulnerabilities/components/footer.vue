@@ -67,7 +67,6 @@ export default {
         remediation,
         hasDownload,
         hasMr,
-        isStandaloneVulnerability: true,
       };
     },
     hasSolution() {

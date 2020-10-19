@@ -232,7 +232,7 @@ This allows you to create unique boards according to your team's need.
 ![Create scoped board](img/issue_board_creation.png)
 
 You can define the scope of your board when creating it or by clicking the "Edit board" button.
-Once a milestone, assignee or weight is assigned to an issue board, you can no longer 
+Once a milestone, assignee or weight is assigned to an issue board, you can no longer
 filter through these in the search bar. In order to do that, you need to remove the desired scope
 (for example, milestone, assignee, or weight) from the issue board.
 
@@ -368,7 +368,7 @@ If you're not able to do some of the things above, make sure you have the right
 
 ### First time using an issue board
 
-> The automatic creation of the **To Do** and **Doing** lists was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/202144) in GitLab 13.4.
+> The automatic creation of the **To Do** and **Doing** lists was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/202144) in GitLab 13.5.
 
 The first time you open an issue board, you are presented with the default lists
 (**Open**, **To Do**, **Doing**, and **Closed**).

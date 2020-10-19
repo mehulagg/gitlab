@@ -22,6 +22,9 @@ module Security
         end
 
         result
+
+      rescue Gitlab::Git::PreReceiveError => e
+        { status: :error, errors: e.message }
       end
 
       private

@@ -282,7 +282,8 @@ class Snippet < ApplicationRecord
     strong_memoize(:repository_size_checker) do
       ::Gitlab::RepositorySizeChecker.new(
         current_size_proc: -> { repository.size.megabytes },
-        limit: Gitlab::CurrentSettings.snippet_size_limit
+        limit: Gitlab::CurrentSettings.snippet_size_limit,
+        namespace: nil
       )
     end
   end

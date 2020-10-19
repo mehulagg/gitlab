@@ -6,6 +6,8 @@ module Projects
       before_action :authorize_read_vulnerability!
       before_action :scanned_resources
 
+      feature_category :dynamic_application_security_testing
+
       def index
         respond_to do |format|
           format.csv do

@@ -416,6 +416,9 @@ Settings.cron_jobs['pipeline_schedule_worker']['job_class'] = 'PipelineScheduleW
 Settings.cron_jobs['expire_build_artifacts_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['expire_build_artifacts_worker']['cron'] ||= '50 * * * *'
 Settings.cron_jobs['expire_build_artifacts_worker']['job_class'] = 'ExpireBuildArtifactsWorker'
+Settings.cron_jobs['ci_schedule_delete_objects_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['ci_schedule_delete_objects_worker']['cron'] ||= '*/16 * * * *'
+Settings.cron_jobs['ci_schedule_delete_objects_worker']['job_class'] = 'Ci::ScheduleDeleteObjectsCronWorker'
 Settings.cron_jobs['environments_auto_stop_cron_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['environments_auto_stop_cron_worker']['cron'] ||= '24 * * * *'
 Settings.cron_jobs['environments_auto_stop_cron_worker']['job_class'] = 'Environments::AutoStopCronWorker'
@@ -571,6 +574,9 @@ Gitlab.ee do
   Settings.cron_jobs['historical_data_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['historical_data_worker']['cron'] ||= '0 12 * * *'
   Settings.cron_jobs['historical_data_worker']['job_class'] = 'HistoricalDataWorker'
+  Settings.cron_jobs['incident_sla_exceeded_check_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['incident_sla_exceeded_check_worker']['cron'] ||= '*/2 * * * *'
+  Settings.cron_jobs['incident_sla_exceeded_check_worker']['job_class'] = 'IncidentManagement::IncidentSlaExceededCheckWorker'
   Settings.cron_jobs['import_software_licenses_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['import_software_licenses_worker']['cron'] ||= '0 3 * * 0'
   Settings.cron_jobs['import_software_licenses_worker']['job_class'] = 'ImportSoftwareLicensesWorker'
@@ -759,6 +765,13 @@ Gitlab.ee do
   Settings.smartcard['required_for_git_access'] = false if Settings.smartcard['required_for_git_access'].nil?
   Settings.smartcard['san_extensions'] = false if Settings.smartcard['san_extensions'].nil?
 end
+
+#
+# FortiAuthenticator
+#
+Settings['forti_authenticator'] ||= Settingslogic.new({})
+Settings.forti_authenticator['enabled'] = false if Settings.forti_authenticator['enabled'].nil?
+Settings.forti_authenticator['port'] = 443 if Settings.forti_authenticator['port'].to_i == 0
 
 #
 # Extra customization

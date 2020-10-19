@@ -30,6 +30,7 @@ class GroupsController < Groups::ApplicationController
 
   before_action do
     push_frontend_feature_flag(:vue_issuables_list, @group)
+    push_frontend_feature_flag(:deployment_filters)
   end
 
   before_action do
@@ -53,7 +54,7 @@ class GroupsController < Groups::ApplicationController
 
   feature_category :audit_events, [:activity]
   feature_category :issue_tracking, [:issues, :issues_calendar, :preview_markdown]
-  feature_category :code_review, [:merge_requests]
+  feature_category :code_review, [:merge_requests, :unfoldered_environment_names]
   feature_category :projects, [:projects]
   feature_category :importers, [:export, :download_export]
 
@@ -179,6 +180,16 @@ class GroupsController < Groups::ApplicationController
     end
   end
 
+  def unfoldered_environment_names
+    return render_404 unless Feature.enabled?(:deployment_filters)
+
+    respond_to do |format|
+      format.json do
+        render json: EnvironmentNamesFinder.new(@group, current_user).execute
+      end
+    end
+  end
+
   protected
 
   def render_show_html
@@ -241,7 +252,9 @@ class GroupsController < Groups::ApplicationController
       :two_factor_grace_period,
       :project_creation_level,
       :subgroup_creation_level,
-      :default_branch_protection
+      :default_branch_protection,
+      :default_branch_name,
+      :allow_mfa_for_subgroups
     ]
   end
 

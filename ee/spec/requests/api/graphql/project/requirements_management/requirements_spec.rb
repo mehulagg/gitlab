@@ -63,6 +63,30 @@ RSpec.describe 'getting a requirement list for a project' do
       end
     end
 
+    context 'query performance with test reports' do
+      let_it_be(:test_report) { create(:test_report, requirement: requirement, state: "passed") }
+      let(:fields) do
+        <<~QUERY
+        edges {
+          node {
+            lastTestReportState
+            lastTestReportManuallyCreated
+          }
+        }
+        QUERY
+      end
+
+      it 'avoids N+1 queries' do
+        control = ActiveRecord::QueryRecorder.new { post_graphql(query, current_user: current_user) }
+
+        create_list(:requirement, 3, project: project) do |requirement|
+          create(:test_report, requirement: requirement, state: "passed")
+        end
+
+        expect { post_graphql(query, current_user: current_user) }.not_to exceed_query_limit(control)
+      end
+    end
+
     describe 'filtering' do
       let_it_be(:filter_project) { create(:project, :public) }
       let_it_be(:other_project) { create(:project, :public) }

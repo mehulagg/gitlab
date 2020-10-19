@@ -1,0 +1,5 @@
+---
+title: Hide issues badge when there are no issues
+merge_request: 44663
+author:
+type: fixed

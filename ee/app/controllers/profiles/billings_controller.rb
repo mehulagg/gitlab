@@ -3,6 +3,8 @@
 class Profiles::BillingsController < Profiles::ApplicationController
   before_action :verify_namespace_plan_check_enabled
 
+  feature_category :purchase
+
   def index
     @plans_data = FetchSubscriptionPlansService
       .new(plan: current_user.namespace.plan_name_for_upgrading)

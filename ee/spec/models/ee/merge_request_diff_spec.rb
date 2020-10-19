@@ -61,7 +61,7 @@ RSpec.describe MergeRequestDiff do
     end
   end
 
-  describe '.replicables_for_geo_node' do
+  describe '.replicables_for_current_secondary' do
     context 'without selective sync or object storage' do
       let(:secondary) { create(:geo_node) }
 
@@ -74,13 +74,13 @@ RSpec.describe MergeRequestDiff do
 
         create(:merge_request, source_project: project)
 
-        expect(described_class.replicables_for_geo_node).to be_empty
+        expect(described_class.replicables_for_current_secondary(1..described_class.last.id)).to be_empty
       end
 
       it 'excludes empty diffs' do
         create(:merge_request, source_project: create(:project))
 
-        expect(described_class.replicables_for_geo_node).to be_empty
+        expect(described_class.replicables_for_current_secondary(1..described_class.last.id)).to be_empty
       end
     end
 
@@ -119,7 +119,7 @@ RSpec.describe MergeRequestDiff do
       end
 
       it 'returns the proper number of merge request diff states' do
-        expect(described_class.replicables_for_geo_node).to have_attributes(count: synced_states)
+        expect(described_class.replicables_for_current_secondary(1..described_class.last.id)).to have_attributes(count: synced_states)
       end
     end
   end

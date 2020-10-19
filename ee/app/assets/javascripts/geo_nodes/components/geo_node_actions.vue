@@ -98,7 +98,7 @@ export default {
     >
       <span class="gl-display-flex gl-align-items-center">
         <gl-icon v-if="!node.current" name="external-link" class="gl-mr-2" />
-        {{ __('Open projects') }}
+        {{ __('Replication details') }}
       </span>
     </gl-button>
     <template v-if="nodeActionsAllowed">

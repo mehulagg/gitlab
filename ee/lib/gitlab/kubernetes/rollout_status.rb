@@ -8,7 +8,7 @@ module Gitlab
     # other resources. The rollout status sums the Kubernetes deployments
     # together.
     class RolloutStatus
-      attr_reader :deployments, :instances, :completion, :status
+      attr_reader :deployments, :instances, :completion, :status, :canary_ingress
 
       def complete?
         completion == 100
@@ -26,7 +26,11 @@ module Gitlab
         @status == :found
       end
 
-      def self.from_deployments(*deployments_attrs, pods_attrs: [])
+      def canary_ingress_exists?
+        canary_ingress.present?
+      end
+
+      def self.from_deployments(*deployments_attrs, pods_attrs: [], ingresses: [])
         return new([], status: :not_found) if deployments_attrs.empty?
 
         deployments = deployments_attrs.map do |attrs|
@@ -38,14 +42,16 @@ module Gitlab
           ::Gitlab::Kubernetes::Pod.new(attrs)
         end
 
-        new(deployments, pods: pods)
+        ingresses = ingresses.map { |ingress| ::Gitlab::Kubernetes::Ingress.new(ingress) }
+
+        new(deployments, pods: pods, ingresses: ingresses)
       end
 
       def self.loading
         new([], status: :loading)
       end
 
-      def initialize(deployments, pods: [], status: :found)
+      def initialize(deployments, pods: [], ingresses: [], status: :found)
         @status       = status
         @deployments  = deployments
 
@@ -54,6 +60,8 @@ module Gitlab
                      else
                        deployments.flat_map(&:instances)
                      end
+
+        @canary_ingress = ingresses.find(&:canary?)
 
         @completion =
           if @instances.empty?

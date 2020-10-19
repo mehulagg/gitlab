@@ -212,6 +212,10 @@ RSpec.configure do |config|
       # for now whilst we migrate as much as we can over the GraphQL
       stub_feature_flags(merge_request_widget_graphql: false)
 
+      # Using FortiAuthenticator as OTP provider is disabled by default in
+      # tests, until we introduce it in user settings
+      stub_feature_flags(forti_authenticator: false)
+
       enable_rugged = example.metadata[:enable_rugged].present?
 
       # Disable Rugged features by default
@@ -229,7 +233,7 @@ RSpec.configure do |config|
     end
 
     # Enable Marginalia feature for all specs in the test suite.
-    allow(Gitlab::Marginalia).to receive(:cached_feature_enabled?).and_return(true)
+    Gitlab::Marginalia.enabled = true
 
     # Stub these calls due to being expensive operations
     # It can be reenabled for specific tests via:

@@ -83,10 +83,12 @@ class License < ApplicationRecord
     group_forking_protection
     group_ip_restriction
     group_merge_request_analytics
+    group_milestone_project_releases
     group_project_templates
     group_repository_analytics
     group_saml
     group_wikis
+    incident_sla
     ide_schema_config
     issues_analytics
     jira_issues_integration
@@ -150,7 +152,6 @@ class License < ApplicationRecord
     status_page
     subepics
     threat_monitoring
-    tracing
     quality_management
   ]
   EEU_FEATURES.freeze

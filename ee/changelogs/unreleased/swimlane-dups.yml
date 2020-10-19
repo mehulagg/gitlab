@@ -1,0 +1,5 @@
+---
+title: Fix swimlanes duplicate epics
+merge_request: 44728
+author:
+type: fixed

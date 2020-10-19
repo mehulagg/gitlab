@@ -48,7 +48,7 @@ export default {
 
 <template>
   <gl-dropdown :text="dropdownTitle" @show="fetchSyncNamespaces('')">
-    <gl-search-box-by-type class=".gl-m-3" :debounce="500" @input="fetchSyncNamespaces" />
+    <gl-search-box-by-type :debounce="500" @input="fetchSyncNamespaces" />
     <button
       v-for="namespace in synchronizationNamespaces"
       :key="namespace.id"

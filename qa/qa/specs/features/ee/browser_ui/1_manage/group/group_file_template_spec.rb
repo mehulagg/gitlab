@@ -99,9 +99,11 @@ module QA
 
           Page::Project::Show.perform(&:create_new_file!)
           Page::File::Form.perform do |form|
-            form.select_template template[:file_name], template[:template]
+            Support::Retrier.retry_until do
+              form.select_template template[:file_name], template[:template]
 
-            expect(form).to have_normalized_ws_text(template[:content])
+              form.has_normalized_ws_text?(template[:content])
+            end
 
             form.add_name("#{SecureRandom.hex(8)}/#{template[:file_name]}")
             form.commit_changes

@@ -4,6 +4,7 @@ import GroupedMetricsReportsApp from 'ee/vue_shared/metrics_reports/grouped_metr
 import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
 import { componentNames } from 'ee/reports/components/issue_body';
 import MrWidgetLicenses from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
+import { GlSafeHtmlDirective } from '@gitlab/ui';
 import ReportSection from '~/reports/components/report_section.vue';
 import BlockingMergeRequestsReport from './components/blocking_merge_requests/blocking_merge_requests_report.vue';
 
@@ -21,6 +22,9 @@ export default {
     GroupedSecurityReportsApp,
     GroupedMetricsReportsApp,
     ReportSection,
+  },
+  directives: {
+    SafeHtml: GlSafeHtmlDirective,
   },
   extends: CEWidgetOptions,
   mixins: [reportsMixin],
@@ -384,7 +388,7 @@ export default {
           </mr-widget-alert-message>
 
           <mr-widget-alert-message v-if="mr.mergeError" type="danger">
-            {{ mergeError }}
+            <span v-safe-html="mergeError"></span>
           </mr-widget-alert-message>
 
           <source-branch-removal-status v-if="shouldRenderSourceBranchRemovalStatus" />

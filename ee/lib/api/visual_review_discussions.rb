@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class VisualReviewDiscussions < Grape::API::Instance
+  class VisualReviewDiscussions < ::API::Base
     include PaginationParams
     helpers ::API::Helpers::NotesHelpers
     helpers ::RendersNotes

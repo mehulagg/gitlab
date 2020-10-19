@@ -1,6 +1,13 @@
 <script>
 import { mapActions } from 'vuex';
-import { GlDropdown, GlDropdownItem, GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import {
+  GlTooltipDirective,
+  GlDropdown,
+  GlDropdownItem,
+  GlLoadingIcon,
+  GlIcon,
+  GlButton,
+} from '@gitlab/ui';
 import { getIssueStatusFromLicenseStatus } from 'ee/vue_shared/license_compliance/store/utils';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import { s__ } from '~/locale';
@@ -16,10 +23,15 @@ export default {
   components: {
     GlDropdown,
     GlDropdownItem,
+    GlButton,
     GlLoadingIcon,
     GlIcon,
     IssueStatusIcon,
   },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
+
   props: {
     license: {
       type: Object,
@@ -85,16 +97,18 @@ export default {
             {{ $options[$options.LICENSE_APPROVAL_ACTION.DENY] }}
           </gl-dropdown-item>
         </gl-dropdown>
-        <button
+        <gl-button
+          v-gl-tooltip
+          :title="__('Remove license')"
+          :aria-label="__('Remove license')"
           :disabled="loading"
-          class="btn btn-blank js-remove-button"
-          type="button"
+          icon="remove"
+          class="js-remove-button gl-ml-3"
+          category="tertiary"
           data-toggle="modal"
           data-target="#modal-license-delete-confirmation"
           @click="setLicenseInModal(license)"
-        >
-          <gl-icon name="remove" />
-        </button>
+        />
       </div>
     </div>
   </div>
