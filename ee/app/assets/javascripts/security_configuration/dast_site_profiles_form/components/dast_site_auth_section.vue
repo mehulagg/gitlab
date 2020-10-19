@@ -18,8 +18,16 @@ export default {
   directives: {
     validation,
   },
+  props: {
+    showValidation: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
   data() {
     const form = {
+      state: false,
       authenticationUrl: initField(),
       userName: initField(),
       password: initField(),
@@ -35,27 +43,19 @@ export default {
       isAuthEnabled: true,
     };
   },
-  computed: {
-    isFormValid() {
-      return !this.isAuthEnabled || Object.values(this.form).every(({ state }) => state);
-    },
-  },
   watch: {
-    isFormValid: { handler: 'emitUpdate', immediate: true },
+    form: { handler: 'emitUpdate', immediate: true, deep: true },
   },
   methods: {
     emitUpdate() {
-      this.$emit('update', {
-        form: this.form,
-        isValid: this.isFormValid,
-      });
+      this.$emit('input', this.form);
     },
   },
 };
 </script>
 
 <template>
-  <section>
+  <form>
     <gl-form-group :label="s__('DastProfiles|Authentication')">
       <gl-toggle v-model="isAuthEnabled" />
     </gl-form-group>
@@ -68,7 +68,7 @@ export default {
         >
           <gl-form-input
             v-model="form.authenticationUrl.value"
-            v-validation.blur
+            v-validation.blur="{ showValidation }"
             name="authenticationUrl"
             type="url"
             required
@@ -84,7 +84,8 @@ export default {
         >
           <gl-form-input
             v-model="form.userName.value"
-            v-validation.blur
+            v-validation.blur="{ showValidation }"
+            autocomplete="off"
             name="userName"
             type="text"
             required
@@ -98,7 +99,8 @@ export default {
         >
           <gl-form-input
             v-model="form.password.value"
-            v-validation.blur
+            v-validation.blur="{ showValidation }"
+            autocomplete="off"
             name="password"
             type="password"
             required
@@ -114,7 +116,7 @@ export default {
         >
           <gl-form-input
             v-model="form.userNameFormField.value"
-            v-validation.blur
+            v-validation.blur="{ showValidation }"
             name="userNameFormField"
             type="text"
             required
@@ -128,7 +130,7 @@ export default {
         >
           <gl-form-input
             v-model="form.passwordFormField.value"
-            v-validation.blur
+            v-validation.blur="{ showValidation }"
             name="passwordFormField"
             type="password"
             required
@@ -148,5 +150,5 @@ export default {
         </gl-form-group>
       </div>
     </div>
-  </section>
+  </form>
 </template>

@@ -79,6 +79,7 @@ export default {
     return {
       fetchValidationTimeout: null,
       form,
+      authForm: {},
       showValidation: false,
       initialFormValues: serializeFormObject(form),
       isFetchingValidationStatus: false,
@@ -343,106 +344,113 @@ export default {
       this.errors = [];
       this.hasAlert = false;
     },
+    handleAuthSectionUpdate(authSectionForm) {
+      const { state } = authSectionForm;
+      this.authIsValid = state;
+    },
   },
   modalId: 'deleteDastProfileModal',
 };
 </script>
 
 <template>
-  <gl-form novalidate @submit.prevent="onSubmit" ref="form">
-    <h2 class="gl-mb-6">
-      {{ i18n.title }}
-    </h2>
+  <div>
+    <gl-form novalidate>
+      {{ authForm.state ? 'valid' : 'invalid' }}
+      <h2 class="gl-mb-6">
+        {{ i18n.title }}
+      </h2>
 
-    <gl-alert
-      v-if="hasAlert"
-      variant="danger"
-      class="gl-mb-5"
-      data-testid="dast-site-profile-form-alert"
-      @dismiss="hideErrors"
-    >
-      {{ errorMessage }}
-      <ul v-if="errors.length" class="gl-mt-3 gl-mb-0">
-        <li v-for="error in errors" :key="error" v-text="error"></li>
-      </ul>
-    </gl-alert>
+      <gl-alert
+        v-if="hasAlert"
+        variant="danger"
+        class="gl-mb-5"
+        data-testid="dast-site-profile-form-alert"
+        @dismiss="hideErrors"
+      >
+        {{ errorMessage }}
+        <ul v-if="errors.length" class="gl-mt-3 gl-mb-0">
+          <li v-for="error in errors" :key="error" v-text="error"></li>
+        </ul>
+      </gl-alert>
 
-    <gl-form-group
-      :label="s__('DastProfiles|Profile name')"
-      :invalid-feedback="form.profileName.feedback"
-    >
-      <gl-form-input
-        v-model="form.profileName.value"
-        v-validation.blur="{ showValidation: form.showValidation }"
-        name="profileName"
-        class="mw-460"
-        data-testid="profile-name-input"
-        type="text"
-        required
-        :state="form.profileName.state"
-      />
-    </gl-form-group>
-
-    <hr />
-
-    <gl-form-group
-      data-testid="target-url-input-group"
-      :invalid-feedback="form.targetUrl.feedback"
-      :description="
-        isSiteValidationActive && !isValidatingSite
-          ? s__('DastProfiles|Validation must be turned off to change the target URL')
-          : null
-      "
-      :label="s__('DastProfiles|Target URL')"
-    >
-      <gl-form-input
-        v-model="form.targetUrl.value"
-        v-validation.blur="{ showValidation: form.showValidation }"
-        name="targetUrl"
-        class="mw-460"
-        data-testid="target-url-input"
-        required
-        type="url"
-        :state="form.targetUrl.state"
-        :disabled="isSiteValidationActive"
-      />
-    </gl-form-group>
-
-    <template v-if="glFeatures.securityOnDemandScansSiteValidation">
-      <gl-form-group :label="s__('DastProfiles|Validate target site')">
-        <template #description>
-          <p
-            v-if="siteValidationStatusDescription.text"
-            class="gl-mt-3"
-            :class="siteValidationStatusDescription.cssClass"
-            data-testid="siteValidationStatusDescription"
-          >
-            {{ siteValidationStatusDescription.text }}
-          </p>
-        </template>
-        <gl-toggle
-          data-testid="dast-site-validation-toggle"
-          :value="isSiteValidationActive"
-          :disabled="isSiteValidationDisabled"
-          :is-loading="
-            !isSiteValidationDisabled && (isFetchingValidationStatus || isValidatingSite)
-          "
-          @change="validateSite"
+      <gl-form-group
+        :label="s__('DastProfiles|Profile name')"
+        :invalid-feedback="form.profileName.feedback"
+      >
+        <gl-form-input
+          v-model="form.profileName.value"
+          v-validation.blur="{ showValidation: form.showValidation }"
+          name="profileName"
+          class="mw-460"
+          data-testid="profile-name-input"
+          type="text"
+          required
+          :state="form.profileName.state"
         />
       </gl-form-group>
 
-      <gl-collapse :visible="showValidationSection">
-        <dast-site-validation
-          :full-path="fullPath"
-          :token-id="tokenId"
-          :token="token"
-          :target-url="form.targetUrl.value"
-          @success="onValidationSuccess"
-        />
-      </gl-collapse>
-    </template>
+      <hr />
 
-    <dast-site-auth-section />
+      <gl-form-group
+        data-testid="target-url-input-group"
+        :invalid-feedback="form.targetUrl.feedback"
+        :description="
+          isSiteValidationActive && !isValidatingSite
+            ? s__('DastProfiles|Validation must be turned off to change the target URL')
+            : null
+        "
+        :label="s__('DastProfiles|Target URL')"
+      >
+        <gl-form-input
+          v-model="form.targetUrl.value"
+          v-validation.blur="{ showValidation: form.showValidation }"
+          name="targetUrl"
+          class="mw-460"
+          data-testid="target-url-input"
+          required
+          type="url"
+          :state="form.targetUrl.state"
+          :disabled="isSiteValidationActive"
+        />
+      </gl-form-group>
+
+      <template v-if="glFeatures.securityOnDemandScansSiteValidation">
+        <gl-form-group :label="s__('DastProfiles|Validate target site')">
+          <template #description>
+            <p
+              v-if="siteValidationStatusDescription.text"
+              class="gl-mt-3"
+              :class="siteValidationStatusDescription.cssClass"
+              data-testid="siteValidationStatusDescription"
+            >
+              {{ siteValidationStatusDescription.text }}
+            </p>
+          </template>
+          <gl-toggle
+            data-testid="dast-site-validation-toggle"
+            :value="isSiteValidationActive"
+            :disabled="isSiteValidationDisabled"
+            :is-loading="
+              !isSiteValidationDisabled && (isFetchingValidationStatus || isValidatingSite)
+            "
+            @change="validateSite"
+          />
+        </gl-form-group>
+
+        <gl-collapse :visible="showValidationSection">
+          <dast-site-validation
+            :full-path="fullPath"
+            :token-id="tokenId"
+            :token="token"
+            :target-url="form.targetUrl.value"
+            @success="onValidationSuccess"
+          />
+        </gl-collapse>
+      </template>
+    </gl-form>
+
+    <dast-site-auth-section v-model="authForm" :show-validation="form.showValidation" />
 
     <hr />
 
@@ -454,6 +462,7 @@ export default {
         data-testid="dast-site-profile-form-submit-button"
         :disabled="isSubmitDisabled"
         :loading="isLoading"
+        @click="onSubmit"
       >
         {{ s__('DastProfiles|Save profile') }}
       </gl-button>
@@ -473,5 +482,5 @@ export default {
       data-testid="dast-site-profile-form-cancel-modal"
       @ok="discard()"
     />
-  </gl-form>
+  </div>
 </template>
