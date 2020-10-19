@@ -70,7 +70,6 @@ RSpec.describe Security::CiConfiguration::SastCreateService, :snowplow do
 
         expect { subject  }.to raise_error(Gitlab::Git::PreReceiveError)
       end
-
     end
   end
 end
