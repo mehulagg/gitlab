@@ -8,7 +8,7 @@ namespace :explore do
 
   resources :groups, only: [:index]
   resources :snippets, only: [:index]
-  root to: 'projects#index'
+  root to: redirect('explore/projects')
 end
 
 # Compatibility with old routing
