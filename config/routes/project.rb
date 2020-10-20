@@ -264,6 +264,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :functions, only: [:index]
         end
 
+        resources :terraform, only: [:index]
+
         resources :environments, except: [:destroy] do
           member do
             post :stop
