@@ -152,7 +152,7 @@ RSpec.describe EE::Namespace::RootStorageSize do
     subject { model.enforce_limit? }
 
     around do |example|
-      Timecop.travel(current_date) { example.run }
+      travel_to(current_date) { example.run }
     end
 
     context 'when current date is before enforcement date' do

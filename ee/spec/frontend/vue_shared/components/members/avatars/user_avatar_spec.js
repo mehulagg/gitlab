@@ -25,6 +25,7 @@ describe('UserAvatar', () => {
       ${{ ...memberMock, usingLicense: true }}        | ${'Is using seat'}
       ${{ ...memberMock, groupSso: true }}            | ${'SAML'}
       ${{ ...memberMock, groupManagedAccount: true }} | ${'Managed Account'}
+      ${{ ...memberMock, canOverride: true }}         | ${'LDAP'}
     `('renders the "$badgeText" badge', ({ member, badgeText }) => {
       createComponent({ member });
 

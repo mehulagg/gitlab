@@ -32,18 +32,18 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
     end
   end
 
-  describe '#purchase_storage_url' do
-    subject { helper.purchase_storage_url }
+  describe '#can_purchase_storage?' do
+    subject { helper.can_purchase_storage? }
 
     where(:is_dot_com, :enforcement_setting_enabled, :feature_enabled, :result) do
-      false | false | false | nil
-      false | false | true  | nil
-      false | true  | false | nil
-      true  | false | false | nil
-      false | true  | true  | nil
-      true  | true  | false | nil
-      true  | false | true  | nil
-      true  | true  | true  | EE::SUBSCRIPTIONS_MORE_STORAGE_URL
+      false | false | false | false
+      false | false | true  | false
+      false | true  | false | false
+      true  | false | false | false
+      false | true  | true  | false
+      true  | true  | false | false
+      true  | false | true  | false
+      true  | true  | true  | true
     end
 
     with_them do
@@ -55,6 +55,12 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
 
       it { is_expected.to eq(result) }
     end
+  end
+
+  describe '#purchase_storage_url' do
+    subject { helper.purchase_storage_url }
+
+    it { is_expected.to eq(EE::SUBSCRIPTIONS_MORE_STORAGE_URL) }
   end
 
   describe '#namespace_storage_alert' do
@@ -157,28 +163,28 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
     end
   end
 
-  describe '#namespace_storage_purchase_link' do
-    subject { helper.namespace_storage_purchase_link(namespace) }
+  describe '#can_purchase_storage_for_namespace?' do
+    subject { helper.can_purchase_storage_for_namespace?(namespace) }
 
     let(:namespace) { build(:namespace) }
 
     where(:is_dev_or_com, :auto_storage_allocation_enabled, :buy_storage_link_enabled, :additional_storage_enabled, :result) do
-      true  | true  | true  | true  | EE::SUBSCRIPTIONS_MORE_STORAGE_URL
-      true  | true  | true  | false | nil
-      true  | true  | false | true  | nil
-      true  | true  | false | false | nil
-      true  | false | true  | true  | nil
-      true  | false | true  | false | nil
-      true  | false | false | true  | nil
-      true  | false | false | false | nil
-      false | true  | true  | true  | nil
-      false | true  | true  | false | nil
-      false | true  | false | true  | nil
-      false | true  | false | false | nil
-      false | false | true  | true  | nil
-      false | false | true  | false | nil
-      false | false | false | true  | nil
-      false | false | false | false | nil
+      true  | true  | true  | true  | true
+      true  | true  | true  | false | false
+      true  | true  | false | true  | false
+      true  | true  | false | false | false
+      true  | false | true  | true  | false
+      true  | false | true  | false | false
+      true  | false | false | true  | false
+      true  | false | false | false | false
+      false | true  | true  | true  | false
+      false | true  | true  | false | false
+      false | true  | false | true  | false
+      false | true  | false | false | false
+      false | false | true  | true  | false
+      false | false | true  | false | false
+      false | false | false | true  | false
+      false | false | false | false | false
     end
 
     with_them do

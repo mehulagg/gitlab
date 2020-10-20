@@ -15,7 +15,8 @@
       - if github_import_enabled?
         %div
           = link_to new_import_github_path, class: 'btn js-import-github', **tracking_attrs(track_label, 'click_button', 'github') do
-            = icon('github', text: 'GitHub')
+            = sprite_icon('github')
+            GitHub
 
       - if bitbucket_import_enabled?
         %div
@@ -43,7 +44,8 @@
       - if google_code_import_enabled?
         %div
           = link_to new_import_google_code_path, class: 'btn import_google_code', **tracking_attrs(track_label, 'click_button', 'google_code') do
-            = icon('google', text: 'Google Code')
+            = sprite_icon('google')
+            Google Code
 
       - if fogbugz_import_enabled?
         %div

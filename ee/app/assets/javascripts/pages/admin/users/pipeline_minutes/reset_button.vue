@@ -10,7 +10,6 @@ export default {
   },
   inject: {
     resetMinutesPath: {
-      type: String,
       default: '',
     },
   },

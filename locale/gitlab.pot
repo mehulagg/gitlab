@@ -2514,7 +2514,10 @@ msgstr ""
 msgid "AlertSettings|HTTP endpoint"
 msgstr ""
 
-msgid "AlertSettings|Learn more about our %{linkStart}upcoming integrations%{linkEnd}"
+msgid "AlertSettings|Integration"
+msgstr ""
+
+msgid "AlertSettings|Learn more about our improvements for %{linkStart}integrations%{linkEnd}"
 msgstr ""
 
 msgid "AlertSettings|Opsgenie"
@@ -2538,7 +2541,7 @@ msgstr ""
 msgid "AlertSettings|Test failed. Do you still want to save your changes anyway?"
 msgstr ""
 
-msgid "AlertSettings|There was an error updating the alert settings"
+msgid "AlertSettings|There was an error updating the alert settings."
 msgstr ""
 
 msgid "AlertSettings|There was an error while trying to reset the key. Please refresh the page to try again."
@@ -5498,6 +5501,9 @@ msgstr ""
 msgid "Cluster type must be specificed for Stages::ClusterEndpointInserter"
 msgstr ""
 
+msgid "ClusterAgents|An error occurred while loading your GitLab Agents"
+msgstr ""
+
 msgid "ClusterAgents|Configuration"
 msgstr ""
 
@@ -7508,6 +7514,9 @@ msgid "Could not find iteration"
 msgstr ""
 
 msgid "Could not load instance counts. Please refresh the page to try again."
+msgstr ""
+
+msgid "Could not load the user chart. Please refresh the page to try again."
 msgstr ""
 
 msgid "Could not remove the trigger."
@@ -9976,7 +9985,10 @@ msgstr ""
 msgid "Enter a number"
 msgstr ""
 
-msgid "Enter a whole number between 0 and 100"
+msgid "Enter an integer number between 0 and 100"
+msgstr ""
+
+msgid "Enter an integer number number between 0 and 100"
 msgstr ""
 
 msgid "Enter at least three characters to search"
@@ -11337,7 +11349,7 @@ msgstr ""
 msgid "FeatureFlags|Percent rollout (logged in users)"
 msgstr ""
 
-msgid "FeatureFlags|Percent rollout must be a whole number between 0 and 100"
+msgid "FeatureFlags|Percent rollout must be an integer number between 0 and 100"
 msgstr ""
 
 msgid "FeatureFlags|Protected"
@@ -12295,6 +12307,12 @@ msgid "GitLab export"
 msgstr ""
 
 msgid "GitLab for Slack"
+msgstr ""
+
+msgid "GitLab is a complete DevOps platform, delivered as a single application, fundamentally changing the way Development, Security, and Ops teams collaborate"
+msgstr ""
+
+msgid "GitLab is a complete DevOps platform, delivered as a single application, fundamentally changing the way%{br_tag}Development, Security, and Ops teams collaborate"
 msgstr ""
 
 msgid "GitLab is a single application for the entire software development lifecycle. From project planning and source code management to CI/CD, monitoring, and security."
@@ -14383,25 +14401,22 @@ msgstr ""
 msgid "Invite teammates (optional)"
 msgstr ""
 
-msgid "InviteEmail|%{inviter} invited you"
+msgid "InviteEmail|%{inviter} invited you to join the %{project_or_group_name} %{project_or_group} as a %{role}"
 msgstr ""
 
-msgid "InviteEmail|%{project_or_group} as a %{role}"
+msgid "InviteEmail|%{inviter} invited you to join the %{strong_start}%{project_or_group_name}%{strong_end}%{br_tag}%{project_or_group} as a %{role}"
 msgstr ""
 
 msgid "InviteEmail|Join now"
 msgstr ""
 
+msgid "InviteEmail|You are invited to join the %{strong_start}%{project_or_group_name}%{strong_end}%{br_tag}%{project_or_group} as a %{role}"
+msgstr ""
+
 msgid "InviteEmail|You are invited!"
 msgstr ""
 
-msgid "InviteEmail|You have been invited"
-msgstr ""
-
-msgid "InviteEmail|to join the %{project_or_group_name} %{project_or_group} as a %{role}"
-msgstr ""
-
-msgid "InviteEmail|to join the %{strong_start}%{project_or_group_name}%{strong_end}"
+msgid "InviteEmail|You have been invited to join the %{project_or_group_name} %{project_or_group} as a %{role}"
 msgstr ""
 
 msgid "InviteMembersBanner|Collaborate with your team"
@@ -15176,9 +15191,6 @@ msgid "Labels|Promote Label"
 msgstr ""
 
 msgid "Labels|Promoting %{labelTitle} will make it available for all projects inside %{groupName}. Existing project labels with the same title will be merged. If a group label with the same title exists, it will also be merged. This action cannot be reversed."
-msgstr ""
-
-msgid "Labels|and %{count} more"
 msgstr ""
 
 msgid "Language"
@@ -16205,6 +16217,12 @@ msgstr ""
 msgid "Member since %{date}"
 msgstr ""
 
+msgid "MemberInviteEmail|%{member_name} invited you to join GitLab"
+msgstr ""
+
+msgid "MemberInviteEmail|Invitation to join the %{project_or_group} %{project_or_group_name}"
+msgstr ""
+
 msgid "Members"
 msgstr ""
 
@@ -16232,6 +16250,9 @@ msgstr ""
 msgid "Members|%{time} by %{user}"
 msgstr ""
 
+msgid "Members|An error occurred while updating the member's expiration date, please try again."
+msgstr ""
+
 msgid "Members|An error occurred while updating the member's role, please try again."
 msgstr ""
 
@@ -16254,6 +16275,12 @@ msgid "Members|Are you sure you want to revoke the invitation for %{inviteEmail}
 msgstr ""
 
 msgid "Members|Are you sure you want to withdraw your access request for \"%{source}\""
+msgstr ""
+
+msgid "Members|Expiration date removed successfully."
+msgstr ""
+
+msgid "Members|Expiration date updated successfully."
 msgstr ""
 
 msgid "Members|Expired"
@@ -19081,7 +19108,7 @@ msgstr ""
 msgid "People without permission will never get a notification."
 msgstr ""
 
-msgid "Percent rollout must be a whole number between 0 and 100"
+msgid "Percent rollout must be an integer number between 0 and 100"
 msgstr ""
 
 msgid "Percentage"
@@ -19820,9 +19847,6 @@ msgid "Prevent project forking outside current group"
 msgstr ""
 
 msgid "Prevent users from changing their profile name"
-msgstr ""
-
-msgid "Prevent users from modifying merge request approvers list"
 msgstr ""
 
 msgid "Prevent users from performing write operations on GitLab while performing maintenance."
@@ -26510,6 +26534,9 @@ msgstr ""
 msgid "There is no chart data available."
 msgstr ""
 
+msgid "There is no data available."
+msgstr ""
+
 msgid "There is no data available. Please change your selection."
 msgstr ""
 
@@ -27778,6 +27805,9 @@ msgid "Total memory (GB)"
 msgstr ""
 
 msgid "Total test time for all commits/merges"
+msgstr ""
+
+msgid "Total users"
 msgstr ""
 
 msgid "Total weight"

@@ -46,13 +46,11 @@ module EE
       end
     end
 
-    def namespace_storage_purchase_link(namespace)
-      return unless ::Gitlab.dev_env_or_com?
-      return unless ::Gitlab::CurrentSettings.automatic_purchased_storage_allocation?
-      return unless ::Feature.enabled?(:buy_storage_link)
-      return unless ::Feature.enabled?(:additional_repo_storage_by_namespace, namespace)
-
-      EE::SUBSCRIPTIONS_MORE_STORAGE_URL
+    def can_purchase_storage_for_namespace?(namespace)
+      ::Gitlab.dev_env_or_com? &&
+        ::Gitlab::CurrentSettings.automatic_purchased_storage_allocation? &&
+        ::Feature.enabled?(:buy_storage_link) &&
+        ::Feature.enabled?(:additional_repo_storage_by_namespace, namespace)
     end
 
     def namespace_storage_usage_link(namespace)
@@ -63,11 +61,13 @@ module EE
       end
     end
 
-    def purchase_storage_url
-      return unless ::Gitlab.dev_env_or_com?
-      return unless ::Gitlab::CurrentSettings.enforce_namespace_storage_limit?
-      return unless ::Feature.enabled?(:buy_storage_link)
+    def can_purchase_storage?
+      ::Gitlab.dev_env_or_com? &&
+        ::Gitlab::CurrentSettings.enforce_namespace_storage_limit? &&
+        ::Feature.enabled?(:buy_storage_link)
+    end
 
+    def purchase_storage_url
       EE::SUBSCRIPTIONS_MORE_STORAGE_URL
     end
 

@@ -55,7 +55,7 @@ RSpec.describe 'Rack Attack EE throttles' do
 
           expect_rejection { post(path, **post_args) }
 
-          Timecop.travel(period.from_now) do
+          travel_to(period.from_now) do
             requests_per_period.times do
               post(path, **post_args)
               expect(response).to have_gitlab_http_status(:ok)

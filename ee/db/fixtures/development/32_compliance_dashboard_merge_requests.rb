@@ -10,7 +10,7 @@ class Gitlab::Seeder::ComplianceDashboardMergeRequests
   end
 
   def admin
-    @admin ||= create(:user, :admin)
+    @admin ||= FactoryBot.create(:user, :admin)
   end
 
   def seed!
