@@ -101,6 +101,23 @@ RSpec.shared_examples_for 'credentials inventory SSH keys' do |group_managed_acc
       expect(first_row.text).to include('2019-12-10')
       expect(first_row.text).to include('Never')
     end
+
+    it 'shows the delete button' do
+      expect(first_row).to have_selector('.js-confirm-modal-button[value="Delete"]')
+    end
+
+    context 'and the user clicks the delete button', :js do
+      it 'deletes the key' do
+        click_button('Delete')
+
+        page.within('.modal') do
+          page.click_button('Delete')
+        end
+
+        expect(page).to have_content('User key was successfully removed.')
+        expect(page).to have_content('No credentials found')
+      end
+    end
   end
 
   context 'when a SSH key has an expiry' do

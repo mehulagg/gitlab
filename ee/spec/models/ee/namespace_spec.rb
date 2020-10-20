@@ -1770,6 +1770,32 @@ RSpec.describe Namespace do
     end
   end
 
+  describe '#root_storage_size' do
+    let_it_be(:namespace) { build(:namespace) }
+
+    subject { namespace.root_storage_size }
+
+    context 'with feature flag :namespace_storage_limit enabled' do
+      it 'initializes a new instance of EE::Namespace::RootStorageSize' do
+        expect(EE::Namespace::RootStorageSize).to receive(:new).with(namespace)
+
+        subject
+      end
+    end
+
+    context 'with feature flag :namespace_storage_limit disabled' do
+      before do
+        stub_feature_flags(namespace_storage_limit: false)
+      end
+
+      it 'initializes a new instance of EE::Namespace::RootExcessStorageSize' do
+        expect(EE::Namespace::RootExcessStorageSize).to receive(:new).with(namespace)
+
+        subject
+      end
+    end
+  end
+
   def create_project(repository_size:, lfs_objects_size:, repository_size_limit:)
     create(:project, namespace: namespace, repository_size_limit: repository_size_limit).tap do |project|
       create(:project_statistics, project: project, repository_size: repository_size, lfs_objects_size: lfs_objects_size)

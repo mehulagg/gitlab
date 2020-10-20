@@ -96,6 +96,7 @@ Below are the current settings regarding [GitLab CI/CD](../../ci/README.md).
 | [Max pipeline schedules in projects](../../administration/instance_limits.md#number-of-pipeline-schedules) | `10` for Free tier, `50` for all paid tiers | Unlimited |
 | [Max number of instance level variables](../../administration/instance_limits.md#number-of-instance-level-variables) | `25` | `25` |
 | [Scheduled Job Archival](../../user/admin_area/settings/continuous_integration.md#archive-jobs) | 3 months | Never |
+| Max test cases per [unit test report](../../ci/unit_test_reports.md) | `500_000` | Unlimited |
 
 ## Account and limit settings
 
@@ -541,9 +542,9 @@ Source:
 For performance reasons, if a query returns more than 10,000 records, GitLab
 doesn't return the following headers:
 
-- `X-Total`.
-- `X-Total-Pages`.
-- `rel="last"` `Link`.
+- `x-total`.
+- `x-total-pages`.
+- `rel="last"` `link`.
 
 ### Rack Attack initializer
 

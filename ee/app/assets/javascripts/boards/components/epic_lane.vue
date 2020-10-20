@@ -2,6 +2,7 @@
 import { GlButton, GlIcon, GlLink, GlLoadingIcon, GlPopover, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { __, n__, sprintf } from '~/locale';
+import createFlash from '~/flash';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { statusType } from '../../epic/constants';
@@ -40,8 +41,12 @@ export default {
     },
   },
   data() {
+    const { userPreferences } = this.epic;
+
+    const { collapsed = false } = userPreferences || {};
+
     return {
-      isExpanded: true,
+      isCollapsed: collapsed,
     };
   },
   computed: {
@@ -51,10 +56,10 @@ export default {
       return this.epic.state === statusType.open;
     },
     chevronTooltip() {
-      return this.isExpanded ? __('Collapse') : __('Expand');
+      return this.isCollapsed ? __('Expand') : __('Collapse');
     },
     chevronIcon() {
-      return this.isExpanded ? 'chevron-down' : 'chevron-right';
+      return this.isCollapsed ? 'chevron-right' : 'chevron-down';
     },
     issuesCount() {
       return this.lists.reduce(
@@ -95,9 +100,16 @@ export default {
     this.fetchIssuesForEpic(this.epic.id);
   },
   methods: {
-    ...mapActions(['fetchIssuesForEpic']),
-    toggleExpanded() {
-      this.isExpanded = !this.isExpanded;
+    ...mapActions(['fetchIssuesForEpic', 'updateBoardEpicUserPreferences']),
+    toggleCollapsed() {
+      this.isCollapsed = !this.isCollapsed;
+
+      this.updateBoardEpicUserPreferences({
+        collapsed: this.isCollapsed,
+        epicId: this.epic.id,
+      }).catch(() => {
+        createFlash({ message: __('Unable to save your preference'), captureError: true });
+      });
     },
   },
 };
@@ -115,7 +127,7 @@ export default {
           class="gl-mr-2 gl-cursor-pointer"
           variant="link"
           data-testid="epic-lane-chevron"
-          @click="toggleExpanded"
+          @click="toggleCollapsed"
         />
         <h4
           ref="epicTitle"
@@ -146,7 +158,7 @@ export default {
         <gl-loading-icon v-if="isLoading" class="gl-p-2" />
       </div>
     </div>
-    <div v-if="isExpanded" class="gl-display-flex" data-testid="board-epic-lane-issues">
+    <div v-if="!isCollapsed" class="gl-display-flex" data-testid="board-epic-lane-issues">
       <issues-lane-list
         v-for="list in lists"
         :key="`${list.id}-issues`"

@@ -35,6 +35,11 @@ export default {
       required: false,
       default: '',
     },
+    iterationId: {
+      type: String,
+      required: false,
+      default: '',
+    },
     burndownEventsPath: {
       type: String,
       required: false,
@@ -49,16 +54,17 @@ export default {
   apollo: {
     burnupData: {
       skip() {
-        return !this.glFeatures.burnupCharts || !this.milestoneId;
+        return !this.glFeatures.burnupCharts || (!this.milestoneId && !this.iterationId);
       },
       query: BurnupQuery,
       variables() {
         return {
-          milestoneId: this.milestoneId,
+          id: this.iterationId || this.milestoneId,
+          isIteration: Boolean(this.iterationId),
         };
       },
       update(data) {
-        const sparseBurnupData = data?.milestone?.burnupTimeSeries || [];
+        const sparseBurnupData = data?.[this.parent]?.burnupTimeSeries || [];
 
         return this.padSparseBurnupData(sparseBurnupData);
       },
@@ -79,6 +85,9 @@ export default {
     };
   },
   computed: {
+    parent() {
+      return this.iterationId ? 'iteration' : 'milestone';
+    },
     title() {
       return this.glFeatures.burnupCharts ? __('Charts') : __('Burndown chart');
     },

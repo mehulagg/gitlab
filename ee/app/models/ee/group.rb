@@ -27,6 +27,7 @@ module EE
       has_one :scim_oauth_access_token
 
       has_many :ldap_group_links, foreign_key: 'group_id', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+      has_many :saml_group_links, foreign_key: 'group_id'
       has_many :hooks, dependent: :destroy, class_name: 'GroupHook' # rubocop:disable Cop/ActiveRecordDependent
 
       has_one :dependency_proxy_setting, class_name: 'DependencyProxy::GroupSetting'
@@ -220,6 +221,12 @@ module EE
     # Used to avoid revealing that a group exists on a given path
     def saml_discovery_token
       ensure_saml_discovery_token!
+    end
+
+    def saml_enabled?
+      return false unless saml_provider
+
+      saml_provider.persisted? && saml_provider.enabled?
     end
 
     override :multiple_issue_boards_available?

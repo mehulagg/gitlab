@@ -18,6 +18,9 @@ module EE
           expose :billable_members_count do |namespace, options|
             namespace.billable_members_count(options[:requested_hosted_plan])
           end
+          expose :seats_in_use, if: has_gitlab_subscription do |namespace, _|
+            namespace.gitlab_subscription.seats_in_use
+          end
           expose :max_seats_used, if: has_gitlab_subscription do |namespace, _|
             namespace.gitlab_subscription.max_seats_used
           end

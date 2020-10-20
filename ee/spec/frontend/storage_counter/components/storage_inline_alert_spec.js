@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import StorageInlineAlert from 'ee/storage_counter/components/storage_inline_alert.vue';
 import { GlAlert } from '@gitlab/ui';
 
-const GB_IN_BYTES = 1_000_000_000;
+const GB_IN_BYTES = 1_074_000_000;
 const THIRTEEN_GB_IN_BYTES = 13 * GB_IN_BYTES;
 const TEN_GB_IN_BYTES = 10 * GB_IN_BYTES;
 const FIVE_GB_IN_BYTES = 5 * GB_IN_BYTES;
@@ -27,7 +27,7 @@ describe('StorageInlineAlert', () => {
         totalRepositorySizeExcess: 0,
         totalRepositorySize: FIVE_GB_IN_BYTES,
         additionalPurchasedStorageSize: 0,
-        repositoryFreeSizeLimit: TEN_GB_IN_BYTES,
+        actualRepositorySizeLimit: TEN_GB_IN_BYTES,
       });
     });
 
@@ -44,7 +44,7 @@ describe('StorageInlineAlert', () => {
         totalRepositorySizeExcess: THREE_GB_IN_BYTES,
         totalRepositorySize: THIRTEEN_GB_IN_BYTES,
         additionalPurchasedStorageSize: 0,
-        repositoryFreeSizeLimit: TEN_GB_IN_BYTES,
+        actualRepositorySizeLimit: TEN_GB_IN_BYTES,
       });
     });
 
@@ -55,7 +55,7 @@ describe('StorageInlineAlert', () => {
 
     it('renders human readable repositoryFreeLimit', () => {
       expect(findAlert().text()).toBe(
-        'You have reached the free storage limit of 10GB on 1 project. To unlock them, please purchase additional storage.',
+        'You have reached the free storage limit of 10.0GiB on 1 project. To unlock them, please purchase additional storage.',
       );
     });
   });
@@ -68,7 +68,7 @@ describe('StorageInlineAlert', () => {
         totalRepositorySizeExcess: THREE_GB_IN_BYTES,
         totalRepositorySize: THIRTEEN_GB_IN_BYTES,
         additionalPurchasedStorageSize: FIVE_GB_IN_BYTES,
-        repositoryFreeSizeLimit: TEN_GB_IN_BYTES,
+        actualRepositorySizeLimit: TEN_GB_IN_BYTES,
       });
     });
 
@@ -79,7 +79,7 @@ describe('StorageInlineAlert', () => {
 
     it('renders text explaining storage', () => {
       expect(findAlert().text()).toBe(
-        'When you purchase additional storage, we automatically unlock projects that were locked when you reached the 10GB limit.',
+        'When you purchase additional storage, we automatically unlock projects that were locked when you reached the 10.0GiB limit.',
       );
     });
   });
@@ -92,7 +92,7 @@ describe('StorageInlineAlert', () => {
         totalRepositorySizeExcess: THREE_GB_IN_BYTES,
         totalRepositorySize: THIRTEEN_GB_IN_BYTES,
         additionalPurchasedStorageSize: THREE_GB_IN_BYTES,
-        repositoryFreeSizeLimit: TEN_GB_IN_BYTES,
+        actualRepositorySizeLimit: TEN_GB_IN_BYTES,
       });
     });
 

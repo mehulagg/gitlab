@@ -4,7 +4,9 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Cluster cost management
+# Cluster cost management **(ULTIMATE)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216737) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.5.
 
 Cluster cost management provides insights into cluster resource usage. GitLab provides an example
 [`kubecost-cost-model`](https://gitlab.com/gitlab-examples/kubecost-cost-model/)
@@ -66,7 +68,7 @@ Metrics contain both instance and node labels. The instance label will be deprec
 - `container_gpu_allocation` - Average number of GPUs requested over the previous minute.
 - `container_memory_allocation_bytes` - Average bytes of RAM requested/used over the previous minute.
 - `pod_pvc_allocation` - Bytes provisioned for a PVC attached to a pod.
-- `pv_hourly_cost` - Hourly cost per GP on a persistent volume.
+- `pv_hourly_cost` - Hourly cost per GB on a persistent volume.
 
 Some examples are provided in the
 [`kubecost-cost-model` repository](https://gitlab.com/gitlab-examples/kubecost-cost-model/-/blob/master/PROMETHEUS.md#example-queries).

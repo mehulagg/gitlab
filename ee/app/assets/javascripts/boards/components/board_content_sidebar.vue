@@ -5,7 +5,10 @@ import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import IssuableTitle from '~/boards/components/issuable_title.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import BoardSidebarEpicSelect from './sidebar/board_sidebar_epic_select.vue';
+import BoardSidebarWeightInput from './sidebar/board_sidebar_weight_input.vue';
+import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 
 export default {
   headerHeight: `${contentTop()}px`,
@@ -14,7 +17,10 @@ export default {
     GlDrawer,
     IssuableTitle,
     BoardSidebarEpicSelect,
+    BoardSidebarWeightInput,
+    BoardSidebarLabelsSelect,
   },
+  mixins: [glFeatureFlagsMixin()],
   computed: {
     ...mapGetters(['isSidebarOpen', 'getActiveIssue']),
     ...mapState(['sidebarType']),
@@ -42,6 +48,8 @@ export default {
     <template>
       <issuable-assignees :users="getActiveIssue.assignees" />
       <board-sidebar-epic-select />
+      <board-sidebar-weight-input v-if="glFeatures.issueWeights" />
+      <board-sidebar-labels-select />
     </template>
   </gl-drawer>
 </template>

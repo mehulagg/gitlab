@@ -1,0 +1,5 @@
+---
+title: Improve audit events preloading logic for CSV export
+merge_request: 44958
+author:
+type: performance

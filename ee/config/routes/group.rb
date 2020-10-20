@@ -85,7 +85,6 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         get 'merge_requests'
         get 'labels'
         get 'epics'
-        get 'vulnerabilities'
         get 'commands'
         get 'milestones'
       end
@@ -139,7 +138,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       resources :vulnerabilities, only: [:index]
       resource :compliance_dashboard, only: [:show]
       resource :discover, only: [:show], controller: :discover
-      resources :credentials, only: [:index]
+      resources :credentials, only: [:index, :destroy]
       resources :merge_commit_reports, only: [:index], constraints: { format: :csv }
     end
 

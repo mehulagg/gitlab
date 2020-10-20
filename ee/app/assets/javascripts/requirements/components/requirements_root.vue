@@ -1,9 +1,8 @@
 <script>
 import { GlPagination } from '@gitlab/ui';
-import * as Sentry from '~/sentry/wrapper';
 import { __, sprintf } from '~/locale';
 import Api from '~/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 
@@ -153,9 +152,11 @@ export default {
           pageInfo: requirementsRoot?.pageInfo || {},
         };
       },
-      error: e => {
-        createFlash(__('Something went wrong while fetching requirements list.'));
-        Sentry.captureException(e);
+      error() {
+        createFlash({
+          message: __('Something went wrong while fetching requirements list.'),
+          captureError: true,
+        });
       },
     },
     requirementsCount: {
@@ -174,9 +175,11 @@ export default {
           ALL: opened + archived,
         };
       },
-      error: e => {
-        createFlash(__('Something went wrong while fetching requirements count.'));
-        Sentry.captureException(e);
+      error() {
+        createFlash({
+          message: __('Something went wrong while fetching requirements count.'),
+          captureError: true,
+        });
       },
     },
   },
@@ -186,8 +189,9 @@ export default {
       textSearch: this.initialTextSearch,
       authorUsernames: this.initialAuthorUsernames,
       sortBy: this.initialSortBy,
-      showCreateForm: false,
-      showEditForm: false,
+      showRequirementCreateDrawer: false,
+      showRequirementViewDrawer: false,
+      enableRequirementEdit: false,
       editedRequirement: null,
       createRequirementRequestActive: false,
       stateChangeRequestActiveFor: 0,
@@ -225,7 +229,7 @@ export default {
       return this.requirementsCount[this.filterBy];
     },
     showEmptyState() {
-      return this.requirementsListEmpty && !this.showCreateForm;
+      return this.requirementsListEmpty && !this.showRequirementCreateDrawer;
     },
     showPaginationControls() {
       const { hasPreviousPage, hasNextPage } = this.requirements.pageInfo;
@@ -337,7 +341,8 @@ export default {
         replace: true,
       });
     },
-    updateRequirement({ iid, title, state, lastTestReportState, errorFlashMessage }) {
+    updateRequirement(requirement = {}, { errorFlashMessage, flashMessageContainer } = {}) {
+      const { iid, title, description, state, lastTestReportState } = requirement;
       const updateRequirementInput = {
         projectPath: this.projectPath,
         iid,
@@ -345,6 +350,9 @@ export default {
 
       if (title) {
         updateRequirementInput.title = title;
+      }
+      if (description) {
+        updateRequirementInput.description = description;
       }
       if (state) {
         updateRequirementInput.state = state;
@@ -361,8 +369,12 @@ export default {
           },
         })
         .catch(e => {
-          createFlash(errorFlashMessage);
-          Sentry.captureException(e);
+          createFlash({
+            message: errorFlashMessage,
+            parent: flashMessageContainer,
+            captureError: true,
+          });
+          throw e;
         });
     },
     handleTabClick({ filterBy }) {
@@ -382,13 +394,18 @@ export default {
       this.$nextTick(() => this.$apollo.queries.requirements.refetch());
     },
     handleNewRequirementClick() {
-      this.showCreateForm = true;
+      this.showRequirementCreateDrawer = true;
     },
-    handleEditRequirementClick(requirement) {
-      this.showEditForm = true;
+    handleShowRequirementClick(requirement) {
+      this.showRequirementViewDrawer = true;
       this.editedRequirement = requirement;
     },
-    handleNewRequirementSave(title) {
+    handleEditRequirementClick(requirement) {
+      this.showRequirementViewDrawer = true;
+      this.enableRequirementEdit = true;
+      this.editedRequirement = requirement;
+    },
+    handleNewRequirementSave({ title, description }) {
       this.createRequirementRequestActive = true;
       return this.$apollo
         .mutate({
@@ -397,87 +414,105 @@ export default {
             createRequirementInput: {
               projectPath: this.projectPath,
               title,
+              description,
             },
           },
         })
-        .then(({ data }) => {
-          if (!data.createRequirement.errors.length) {
+        .then(res => {
+          const createReqMutation = res?.data?.createRequirement || {};
+
+          if (createReqMutation.errors?.length === 0) {
             this.$apollo.queries.requirementsCount.refetch();
             this.$apollo.queries.requirements.refetch();
             this.$toast.show(
               sprintf(__('Requirement %{reference} has been added'), {
-                reference: `REQ-${data.createRequirement.requirement.iid}`,
+                reference: `REQ-${createReqMutation.requirement.iid}`,
               }),
             );
-            this.showCreateForm = false;
+            this.showRequirementCreateDrawer = false;
           } else {
-            throw new Error(`Error creating a requirement`);
+            throw new Error(`Error creating a requirement ${res.message}`);
           }
         })
         .catch(e => {
-          createFlash(__('Something went wrong while creating a requirement.'));
-          Sentry.captureException(e);
+          createFlash({
+            message: __('Something went wrong while creating a requirement.'),
+            parent: this.$el,
+            captureError: true,
+          });
+          throw new Error(`Error creating a requirement ${e.message}`);
         })
         .finally(() => {
           this.createRequirementRequestActive = false;
         });
     },
-    handleNewRequirementCancel() {
-      this.showCreateForm = false;
+    handleRequirementEdit(enableRequirementEdit) {
+      this.enableRequirementEdit = enableRequirementEdit;
     },
-    handleUpdateRequirementSave(params) {
+    handleNewRequirementCancel() {
+      this.showRequirementCreateDrawer = false;
+    },
+    handleUpdateRequirementSave(requirement) {
       this.createRequirementRequestActive = true;
-      return this.updateRequirement({
-        ...params,
+      return this.updateRequirement(requirement, {
         errorFlashMessage: __('Something went wrong while updating a requirement.'),
+        flashMessageContainer: this.$el,
       })
-        .then(({ data }) => {
-          if (!data.updateRequirement.errors.length) {
-            this.showEditForm = false;
-            this.editedRequirement = null;
+        .then(res => {
+          const updateReqMutation = res?.data?.updateRequirement || {};
+
+          if (updateReqMutation.errors?.length === 0) {
+            this.enableRequirementEdit = false;
+            this.editedRequirement = updateReqMutation.requirement;
             this.$toast.show(
               sprintf(__('Requirement %{reference} has been updated'), {
-                reference: `REQ-${data.updateRequirement.requirement.iid}`,
+                reference: `REQ-${this.editedRequirement.iid}`,
               }),
             );
           } else {
-            throw new Error(`Error updating a requirement`);
+            throw new Error(`Error updating a requirement ${res.message}`);
           }
         })
         .finally(() => {
           this.createRequirementRequestActive = false;
         });
     },
-    handleRequirementStateChange(params) {
-      this.stateChangeRequestActiveFor = params.iid;
-      return this.updateRequirement({
-        ...params,
+    handleRequirementStateChange(requirement) {
+      this.stateChangeRequestActiveFor = requirement.iid;
+      return this.updateRequirement(requirement, {
         errorFlashMessage:
-          params.state === FilterState.opened
+          requirement.state === FilterState.opened
             ? __('Something went wrong while reopening a requirement.')
             : __('Something went wrong while archiving a requirement.'),
-      }).then(({ data }) => {
-        if (!data.updateRequirement.errors.length) {
-          this.$apollo.queries.requirementsCount.refetch();
-          this.stateChangeRequestActiveFor = 0;
-          let toastMessage;
-          if (params.state === FilterState.opened) {
-            toastMessage = sprintf(__('Requirement %{reference} has been reopened'), {
-              reference: `REQ-${data.updateRequirement.requirement.iid}`,
-            });
+      })
+        .then(res => {
+          const updateReqMutation = res?.data?.updateRequirement || {};
+
+          if (updateReqMutation.errors?.length === 0) {
+            this.$apollo.queries.requirementsCount.refetch();
+            const reference = `REQ-${updateReqMutation.requirement.iid}`;
+            let toastMessage;
+            if (requirement.state === FilterState.opened) {
+              toastMessage = sprintf(__('Requirement %{reference} has been reopened'), {
+                reference,
+              });
+            } else {
+              toastMessage = sprintf(__('Requirement %{reference} has been archived'), {
+                reference,
+              });
+            }
+            this.$toast.show(toastMessage);
           } else {
-            toastMessage = sprintf(__('Requirement %{reference} has been archived'), {
-              reference: `REQ-${data.updateRequirement.requirement.iid}`,
-            });
+            throw new Error(`Error archiving a requirement ${res.message}`);
           }
-          this.$toast.show(toastMessage);
-        } else {
-          throw new Error(`Error archiving a requirement`);
-        }
-      });
+        })
+        .finally(() => {
+          this.stateChangeRequestActiveFor = 0;
+        });
     },
-    handleUpdateRequirementCancel() {
-      this.showEditForm = false;
+    handleUpdateRequirementDrawerClose() {
+      this.enableRequirementEdit = false;
+      this.showRequirementViewDrawer = false;
       this.editedRequirement = null;
     },
     handleFilterRequirements(filters = []) {
@@ -532,10 +567,10 @@ export default {
     <requirements-tabs
       :filter-by="filterBy"
       :requirements-count="requirementsCount"
-      :show-create-form="showCreateForm"
+      :show-create-form="showRequirementCreateDrawer"
       :can-create-requirement="canCreateRequirement"
-      @clickTab="handleTabClick"
-      @clickNewRequirement="handleNewRequirementClick"
+      @click-tab="handleTabClick"
+      @click-new-requirement="handleNewRequirementClick"
     />
     <filtered-search-bar
       :namespace="projectPath"
@@ -550,17 +585,20 @@ export default {
       @onSort="handleSortRequirements"
     />
     <requirement-create-form
-      :drawer-open="showCreateForm"
+      :drawer-open="showRequirementCreateDrawer"
       :requirement-request-active="createRequirementRequestActive"
       @save="handleNewRequirementSave"
-      @cancel="handleNewRequirementCancel"
+      @drawer-close="handleNewRequirementCancel"
     />
     <requirement-edit-form
-      :drawer-open="showEditForm"
+      :drawer-open="showRequirementViewDrawer"
       :requirement="editedRequirement"
+      :enable-requirement-edit="enableRequirementEdit"
       :requirement-request-active="createRequirementRequestActive"
       @save="handleUpdateRequirementSave"
-      @cancel="handleUpdateRequirementCancel"
+      @enable-edit="handleRequirementEdit(true)"
+      @disable-edit="handleRequirementEdit(false)"
+      @drawer-close="handleUpdateRequirementDrawerClose"
     />
     <requirements-empty-state
       v-if="showEmptyState"
@@ -568,7 +606,7 @@ export default {
       :empty-state-path="emptyStatePath"
       :requirements-count="requirementsCount"
       :can-create-requirement="canCreateRequirement"
-      @clickNewRequirement="handleNewRequirementClick"
+      @click-new-requirement="handleNewRequirementClick"
     />
     <requirements-loading
       v-show="requirementsListLoading"
@@ -585,7 +623,9 @@ export default {
         :key="requirement.iid"
         :requirement="requirement"
         :state-change-request-active="stateChangeRequestActiveFor === requirement.iid"
-        @editClick="handleEditRequirementClick"
+        :active="editedRequirement && editedRequirement.iid === requirement.iid"
+        @show-click="handleShowRequirementClick"
+        @edit-click="handleEditRequirementClick"
         @archiveClick="handleRequirementStateChange"
         @reopenClick="handleRequirementStateChange"
       />

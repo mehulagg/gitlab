@@ -29,12 +29,12 @@ describe('EE billings subscription module mutations', () => {
       mutations[types.REQUEST_SUBSCRIPTION](state);
     });
 
-    it('sets isLoading to true', () => {
-      expect(state.isLoading).toBeTruthy();
+    it('sets isLoadingSubscription to true', () => {
+      expect(state.isLoadingSubscription).toBeTruthy();
     });
 
-    it('sets hasError to false', () => {
-      expect(state.hasError).toBeFalsy();
+    it('sets hasErrorSubscription to false', () => {
+      expect(state.hasErrorSubscription).toBeFalsy();
     });
   });
 
@@ -57,12 +57,12 @@ describe('EE billings subscription module mutations', () => {
       ${'with Gold trial'}        | ${mockDataSubscription.trial} | ${TABLE_TYPE_TRIAL}
     `('$desc', ({ subscription, tableKey }) => {
       beforeEach(() => {
-        state.isLoading = true;
+        state.isLoadingSubscription = true;
         mutations[types.RECEIVE_SUBSCRIPTION_SUCCESS](state, subscription);
       });
 
-      it('sets isLoading to false', () => {
-        expect(state.isLoading).toBeFalsy();
+      it('sets isLoadingSubscription to false', () => {
+        expect(state.isLoadingSubscription).toBeFalsy();
       });
 
       it('sets plan', () => {
@@ -82,12 +82,12 @@ describe('EE billings subscription module mutations', () => {
       mutations[types.RECEIVE_SUBSCRIPTION_ERROR](state);
     });
 
-    it('sets isLoading to false', () => {
-      expect(state.isLoading).toBeFalsy();
+    it('sets isLoadingSubscription to false', () => {
+      expect(state.isLoadingSubscription).toBeFalsy();
     });
 
-    it('sets hasError to true', () => {
-      expect(state.hasError).toBeTruthy();
+    it('sets hasErrorSubscription to true', () => {
+      expect(state.hasErrorSubscription).toBeTruthy();
     });
   });
 });

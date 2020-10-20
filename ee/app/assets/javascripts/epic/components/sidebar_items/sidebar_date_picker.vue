@@ -1,11 +1,10 @@
 <script>
 import { uniqueId } from 'lodash';
-import { GlLoadingIcon, GlButton, GlIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 
 import { __, s__ } from '~/locale';
 import { dateInWords } from '~/lib/utils/datetime_utility';
 
-import tooltip from '~/vue_shared/directives/tooltip';
 import popover from '~/vue_shared/directives/popover';
 import DatePicker from '~/vue_shared/components/pikaday.vue';
 import CollapsedCalendarIcon from '~/vue_shared/components/sidebar/collapsed_calendar_icon.vue';
@@ -16,7 +15,7 @@ const pickerLabel = __('Fixed date');
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
     popover,
   },
   components: {
@@ -268,12 +267,10 @@ export default {
         </span>
       </div>
       <abbr
-        v-tooltip
+        v-gl-tooltip.bottom.html
         :title="dateFromMilestonesTooltip"
         :class="{ 'is-option-selected': !selectedDateIsFixed }"
         class="value-type-dynamic text-secondary d-flex gl-mt-3"
-        data-placement="bottom"
-        data-html="true"
       >
         <input
           v-if="canUpdate"

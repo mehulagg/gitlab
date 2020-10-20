@@ -137,4 +137,10 @@ RSpec.describe Groups::Security::CredentialsController do
       end
     end
   end
+
+  describe 'POST #destroy' do
+    let(:credentials_path) { group_security_credentials_path(filter: 'ssh_keys') }
+
+    it_behaves_like 'credentials inventory controller delete SSH key', group_managed_account: true
+  end
 end

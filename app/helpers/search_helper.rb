@@ -100,7 +100,7 @@ module SearchHelper
   end
 
   def search_service
-    @search_service ||= ::SearchService.new(current_user, params)
+    @search_service ||= ::SearchService.new(current_user, params.merge(confidential: Gitlab::Utils.to_boolean(params[:confidential])))
   end
 
   private
@@ -262,11 +262,15 @@ module SearchHelper
       opts[:data]['labels-endpoint'] = project_labels_path(@project)
       opts[:data]['milestones-endpoint'] = project_milestones_path(@project)
       opts[:data]['releases-endpoint'] = project_releases_path(@project)
+      opts[:data]['environments-endpoint'] =
+        unfoldered_environment_names_project_path(@project)
     elsif @group.present?
       opts[:data]['group-id'] = @group.id
       opts[:data]['labels-endpoint'] = group_labels_path(@group)
       opts[:data]['milestones-endpoint'] = group_milestones_path(@group)
       opts[:data]['releases-endpoint'] = group_releases_path(@group)
+      opts[:data]['environments-endpoint'] =
+        unfoldered_environment_names_group_path(@group)
     else
       opts[:data]['labels-endpoint'] = dashboard_labels_path
       opts[:data]['milestones-endpoint'] = dashboard_milestones_path

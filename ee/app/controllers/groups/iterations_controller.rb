@@ -4,6 +4,9 @@ class Groups::IterationsController < Groups::ApplicationController
   before_action :check_iterations_available!
   before_action :authorize_show_iteration!, only: [:index, :show]
   before_action :authorize_create_iteration!, only: [:new, :edit]
+  before_action do
+    push_frontend_feature_flag(:burnup_charts, group)
+  end
 
   feature_category :issue_tracking
 

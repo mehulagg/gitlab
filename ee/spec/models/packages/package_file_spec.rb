@@ -36,8 +36,8 @@ RSpec.describe Packages::PackageFile, type: :model do
     end
   end
 
-  describe '.replicables_for_geo_node' do
-    subject { described_class.replicables_for_geo_node(1..described_class.last.id) }
+  describe '.replicables_for_current_secondary' do
+    subject { described_class.replicables_for_current_secondary(1..described_class.last.id) }
 
     it 'returns a package files scope' do
       secondary = create(:geo_node)

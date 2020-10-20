@@ -44,7 +44,10 @@ module Mutations
           branch: project.default_branch,
           target_url: dast_site.url,
           spider_timeout: dast_scanner_profile&.spider_timeout,
-          target_timeout: dast_scanner_profile&.target_timeout
+          target_timeout: dast_scanner_profile&.target_timeout,
+          full_scan_enabled: dast_scanner_profile&.full_scan_enabled?,
+          use_ajax_spider: dast_scanner_profile&.use_ajax_spider,
+          show_debug_messages: dast_scanner_profile&.show_debug_messages
         )
 
         if result.success?

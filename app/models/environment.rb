@@ -11,6 +11,8 @@ class Environment < ApplicationRecord
   self.reactive_cache_hard_limit = 10.megabytes
   self.reactive_cache_work_type = :external_dependency
 
+  PRODUCTION_ENVIRONMENT_IDENTIFIERS = %w[prod production].freeze
+
   belongs_to :project, required: true
 
   use_fast_destroy :all_deployments
@@ -68,6 +70,7 @@ class Environment < ApplicationRecord
   scope :order_by_last_deployed_at_desc, -> do
     order(Gitlab::Database.nulls_last_order("(#{max_deployment_id_sql})", 'DESC'))
   end
+  scope :order_by_name, -> { order('environments.name ASC') }
 
   scope :in_review_folder, -> { where(environment_type: "review") }
   scope :for_name, -> (name) { where(name: name) }
@@ -118,6 +121,10 @@ class Environment < ApplicationRecord
 
   def self.pluck_names
     pluck(:name)
+  end
+
+  def self.pluck_unique_names
+    pluck('DISTINCT(environments.name)')
   end
 
   def self.find_or_create_by_name(name)
@@ -213,7 +220,7 @@ class Environment < ApplicationRecord
   end
 
   def update_merge_request_metrics?
-    folder_name == "production"
+    PRODUCTION_ENVIRONMENT_IDENTIFIERS.include?(folder_name.downcase)
   end
 
   def ref_path

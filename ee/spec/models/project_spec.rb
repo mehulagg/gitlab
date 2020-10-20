@@ -195,6 +195,16 @@ RSpec.describe Project do
       end
     end
 
+    describe '.with_enabled_incident_sla' do
+      it 'returns the correct project' do
+        project_with_enabled_incident_sla = create(:project_incident_management_setting, :sla_enabled).project
+        project_without_enabled_incident_sla = create(:project_incident_management_setting).project
+
+        expect(described_class.with_enabled_incident_sla).to include(project_with_enabled_incident_sla)
+        expect(described_class.with_enabled_incident_sla).not_to include(project_without_enabled_incident_sla)
+      end
+    end
+
     describe '.with_shared_runners_limit_enabled' do
       let(:public_cost_factor) { 1.0 }
 
@@ -2232,22 +2242,6 @@ RSpec.describe Project do
         project.repository_size_limit = 200
 
         expect(checker.limit).to eq(200)
-      end
-    end
-
-    describe '#total_repository_size_excess' do
-      it 'returns the total repository size excess of the namespace' do
-        allow(project.namespace).to receive(:total_repository_size_excess).and_return(50)
-
-        expect(checker.total_repository_size_excess).to eq(50)
-      end
-    end
-
-    describe '#additional_purchased_storage' do
-      it 'returns the additional purchased storage size of the namespace' do
-        allow(project.namespace).to receive(:additional_purchased_storage_size).and_return(100)
-
-        expect(checker.additional_purchased_storage).to eq(100.megabytes)
       end
     end
 

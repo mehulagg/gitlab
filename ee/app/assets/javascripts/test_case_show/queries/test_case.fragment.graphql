@@ -1,0 +1,30 @@
+#import "~/graphql_shared/fragments/author.fragment.graphql"
+#import "~/graphql_shared/fragments/label.fragment.graphql"
+
+fragment TestCase on Issue {
+  id
+  title
+  titleHtml
+  description
+  descriptionHtml
+  state
+  createdAt
+  updatedAt
+  webUrl
+  blocked
+  confidential
+  author {
+    ...Author
+  }
+  labels {
+    nodes {
+      ...Label
+    }
+  }
+  currentUserTodos(first: 1) {
+    nodes {
+      id
+      state
+    }
+  }
+}

@@ -7,12 +7,13 @@ import {
   mockIssue2WithModel,
   rawIssue,
   mockIssues,
+  labels,
 } from '../mock_data';
 import actions, { gqlClient } from '~/boards/stores/actions';
 import * as types from '~/boards/stores/mutation_types';
 import { inactiveId, ListType } from '~/boards/constants';
 import issueMoveListMutation from '~/boards/queries/issue_move_list.mutation.graphql';
-import { fullBoardId, formatListIssues } from '~/boards/boards_util';
+import { fullBoardId, formatListIssues, formatBoardLists } from '~/boards/boards_util';
 
 const expectNotImplemented = action => {
   it('is not implemented', () => {
@@ -72,6 +73,80 @@ describe('setActiveId', () => {
       state,
       [{ type: types.SET_ACTIVE_ID, payload: { id: 1, sidebarType: 'something' } }],
       [],
+      done,
+    );
+  });
+});
+
+describe('fetchLists', () => {
+  const state = {
+    endpoints: {
+      fullPath: 'gitlab-org',
+      boardId: 1,
+    },
+    filterParams: {},
+    boardType: 'group',
+  };
+
+  let queryResponse = {
+    data: {
+      group: {
+        board: {
+          hideBacklogList: true,
+          lists: {
+            nodes: [mockLists[1]],
+          },
+        },
+      },
+    },
+  };
+
+  const formattedLists = formatBoardLists(queryResponse.data.group.board.lists);
+
+  it('should commit mutations RECEIVE_BOARD_LISTS_SUCCESS on success', done => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    testAction(
+      actions.fetchLists,
+      {},
+      state,
+      [
+        {
+          type: types.RECEIVE_BOARD_LISTS_SUCCESS,
+          payload: formattedLists,
+        },
+      ],
+      [{ type: 'showWelcomeList' }],
+      done,
+    );
+  });
+
+  it('dispatch createList action when backlog list does not exist and is not hidden', done => {
+    queryResponse = {
+      data: {
+        group: {
+          board: {
+            hideBacklogList: false,
+            lists: {
+              nodes: [mockLists[1]],
+            },
+          },
+        },
+      },
+    };
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    testAction(
+      actions.fetchLists,
+      {},
+      state,
+      [
+        {
+          type: types.RECEIVE_BOARD_LISTS_SUCCESS,
+          payload: formattedLists,
+        },
+      ],
+      [{ type: 'createList', payload: { backlog: true } }, { type: 'showWelcomeList' }],
       done,
     );
   });
@@ -523,6 +598,51 @@ describe('addListIssueFailure', () => {
       [],
       done,
     );
+  });
+});
+
+describe('setActiveIssueLabels', () => {
+  const state = { issues: { [mockIssue.id]: mockIssue } };
+  const getters = { getActiveIssue: mockIssue };
+  const testLabelIds = labels.map(label => label.id);
+  const input = {
+    addLabelIds: testLabelIds,
+    removeLabelIds: [],
+    projectPath: 'h/b',
+  };
+
+  it('should assign labels on success', done => {
+    jest
+      .spyOn(gqlClient, 'mutate')
+      .mockResolvedValue({ data: { updateIssue: { issue: { labels: { nodes: labels } } } } });
+
+    const payload = {
+      issueId: getters.getActiveIssue.id,
+      prop: 'labels',
+      value: labels,
+    };
+
+    testAction(
+      actions.setActiveIssueLabels,
+      input,
+      { ...state, ...getters },
+      [
+        {
+          type: types.UPDATE_ISSUE_BY_ID,
+          payload,
+        },
+      ],
+      [],
+      done,
+    );
+  });
+
+  it('throws error if fails', async () => {
+    jest
+      .spyOn(gqlClient, 'mutate')
+      .mockResolvedValue({ data: { updateIssue: { errors: ['failed mutation'] } } });
+
+    await expect(actions.setActiveIssueLabels({ getters }, input)).rejects.toThrow(Error);
   });
 });
 

@@ -6,6 +6,10 @@ export const EpicFilterType = {
   none: 'None',
 };
 
+export const GroupByParamType = {
+  epic: 'epic',
+};
+
 export default {
   DRAGGABLE_TAG,
   EpicFilterType,

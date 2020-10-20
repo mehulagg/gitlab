@@ -6,13 +6,14 @@ describe('initGroupMembersApp', () => {
   let vm;
 
   const createVm = () => {
-    vm = initGroupMembersApp(el, ['account']);
+    vm = initGroupMembersApp(el, ['account'], () => ({}));
   };
 
   beforeEach(() => {
     el = document.createElement('div');
     el.setAttribute('data-members', membersJsonString);
     el.setAttribute('data-group-id', '234');
+    el.setAttribute('data-member-path', '/groups/foo-bar/-/group_members/:id');
     el.setAttribute('data-ldap-override-path', '/groups/ldap-group/-/group_members/:id/override');
   });
 

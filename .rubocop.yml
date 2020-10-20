@@ -301,7 +301,7 @@ RSpec/TimecopFreeze:
     - 'qa/spec/**/*.rb'
 
 RSpec/TimecopTravel:
-  Enabled: false
+  Enabled: true
   AutoCorrect: true
   Include:
     - 'spec/**/*.rb'
@@ -370,6 +370,12 @@ Graphql/GIDExpectedType:
   Exclude:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
+
+Graphql/IDType:
+  Enabled: true
+  Include:
+    - 'app/graphql/**/*'
+    - 'ee/app/graphql/**/*'
 
 Graphql/JSONType:
   Enabled: true
@@ -565,3 +571,9 @@ Gitlab/RailsLogger:
   Exclude:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
+
+# WIP See https://gitlab.com/gitlab-org/gitlab/-/issues/267606
+FactoryBot/InlineAssociation:
+  Include:
+    - 'spec/factories/**/*.rb'
+    - 'ee/spec/factories/**/*.rb'

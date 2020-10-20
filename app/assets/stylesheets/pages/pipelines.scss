@@ -89,11 +89,6 @@
   }
 }
 
-.ci-build-text,
-.ci-status-text {
-  font-weight: 200;
-}
-
 /**
  * Terminal
  */
@@ -114,21 +109,6 @@
   }
 }
 
-/**
- * Pipelines / Jobs header
- */
-[data-page='projects:pipelines:show'],
-[data-page='projects:jobs:show'] {
-  .ci-header-container {
-    min-height: $gl-spacing-scale-7;
-    display: flex;
-
-    .text-center {
-      padding-top: 12px;
-    }
-  }
-}
-
 .pipelines-container .top-area .nav-controls > .btn:last-child {
   float: none;
 }
@@ -143,6 +123,10 @@
 
 .pipeline-job-pill {
   width: 8rem;
+}
+
+.stage-rounded {
+  border-radius: 2rem;
 }
 
 .stage-left-rounded {

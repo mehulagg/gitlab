@@ -167,6 +167,8 @@ class User < ApplicationRecord
   has_many :assigned_issues, class_name: "Issue", through: :issue_assignees, source: :issue
   has_many :assigned_merge_requests, class_name: "MergeRequest", through: :merge_request_assignees, source: :merge_request
 
+  has_many :bulk_imports
+
   has_many :custom_attributes, class_name: 'UserCustomAttribute'
   has_many :callouts, class_name: 'UserCallout'
   has_many :term_agreements
@@ -293,6 +295,7 @@ class User < ApplicationRecord
       transition active: :blocked
       transition deactivated: :blocked
       transition ldap_blocked: :blocked
+      transition blocked_pending_approval: :blocked
     end
 
     event :ldap_block do
@@ -338,7 +341,8 @@ class User < ApplicationRecord
 
   # Scopes
   scope :admins, -> { where(admin: true) }
-  scope :blocked, -> { with_states(:blocked, :ldap_blocked, :blocked_pending_approval) }
+  scope :blocked, -> { with_states(:blocked, :ldap_blocked) }
+  scope :blocked_pending_approval, -> { with_states(:blocked_pending_approval) }
   scope :external, -> { where(external: true) }
   scope :confirmed, -> { where.not(confirmed_at: nil) }
   scope :active, -> { with_state(:active).non_internal }
@@ -538,6 +542,8 @@ class User < ApplicationRecord
         admins
       when 'blocked'
         blocked
+      when 'blocked_pending_approval'
+        blocked_pending_approval
       when 'two_factor_disabled'
         without_two_factor
       when 'two_factor_enabled'
@@ -787,7 +793,7 @@ class User < ApplicationRecord
   end
 
   def two_factor_otp_enabled?
-    otp_required_for_login?
+    otp_required_for_login? || Feature.enabled?(:forti_authenticator, self)
   end
 
   def two_factor_u2f_enabled?

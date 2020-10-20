@@ -1,5 +1,12 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.4.4 (2020-10-15)
+
+### Fixed (1 change)
+
+- Geo: Fix "Project repo not able to resync after storage move". !44172
+
+
 ## 13.4.3 (2020-10-06)
 
 ### Fixed (5 changes)

@@ -198,7 +198,7 @@ export default {
       <gl-dropdown-section-header class="d-flex justify-content-center">{{
         __('Assign Iteration')
       }}</gl-dropdown-section-header>
-      <gl-search-box-by-type ref="search" v-model="searchTerm" class="gl-m-3" />
+      <gl-search-box-by-type ref="search" v-model="searchTerm" />
       <gl-dropdown-item
         v-for="iterationItem in iterations"
         :key="iterationItem.id"
