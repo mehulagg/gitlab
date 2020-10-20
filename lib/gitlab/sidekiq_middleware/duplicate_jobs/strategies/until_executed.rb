@@ -7,7 +7,7 @@ module Gitlab
         # This strategy takes a lock before scheduling the job in a queue and
         # removes the lock after the job has executed preventing a new job to be queued
         # while a job is still executing.
-        class UntilExecuted < UntilExecuting
+        class UntilExecuted < Base
           def perform(_job)
             yield
 
