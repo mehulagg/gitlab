@@ -18389,6 +18389,9 @@ msgstr ""
 msgid "Once the exported file is ready, you will receive a notification email with a download link, or you can download it from this page."
 msgstr ""
 
+msgid "Once the instance reaches the user cap, any user who is added or requests access will have to be approved by an admin. Leave field empty for unlimited."
+msgstr ""
+
 msgid "Once you confirm and press \"Reduce project visibility\":"
 msgstr ""
 
@@ -28642,6 +28645,9 @@ msgid "User Settings"
 msgstr ""
 
 msgid "User and IP Rate Limits"
+msgstr ""
+
+msgid "User cap"
 msgstr ""
 
 msgid "User identity was successfully created."
