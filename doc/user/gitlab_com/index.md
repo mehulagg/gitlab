@@ -97,9 +97,6 @@ Any settings or feature limits not listed here are using the defaults listed in 
 | [Max pipeline schedules in projects](../../administration/instance_limits.md#number-of-pipeline-schedules) | `10` for Free tier, `50` for all paid tiers | Unlimited |
 | [Scheduled Job Archival](../../user/admin_area/settings/continuous_integration.md#archive-jobs) | 3 months | Never |
 
-NOTE: **Note:**
-GitLab.com uses the default value of the `needs:` job limit, per the defaults specified in the [Requirements and Limitations of the `needs:` keyword](../../ci/yaml/README.md#requirements-and-limitations).
-
 ## Account and limit settings
 
 GitLab.com has the following [account limits](../admin_area/settings/account_and_limit_settings.md) enabled. If a setting is not listed, it is set to the default value.
