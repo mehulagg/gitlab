@@ -15,7 +15,8 @@ localVue.use(VueApollo);
 
 describe('ProjectsAndGroupChart', () => {
   let wrapper;
-  let projectsQueryResponse;
+  let queryResponses = { projects: null, groups: null }
+  const mockAdditionalData = [{ recordedAt: '2020-07-21', count: 5 }]
 
   const mockApolloResponse = ({ loading = false, hasNextPage = false, key, data }) => ({
     data: {
@@ -27,33 +28,40 @@ describe('ProjectsAndGroupChart', () => {
     },
   });
 
-  const mockQueryResponse = ({ key, data = [], loading = false, hasNextPage = false }) => {
-    const projectsApolloQueryResponse = mockApolloResponse({ loading, hasNextPage, key, data });
+  const mockQueryResponse = ({ key, data = [], loading = false, hasNextPage = false, additionalData = [] }) => {
+    const response = mockApolloResponse({ loading, hasNextPage, key, data });
     if (loading) {
       return jest.fn().mockReturnValue(new Promise(() => {}));
     }
     if (hasNextPage) {
       return jest
         .fn()
-        .mockResolvedValueOnce(projectsApolloQueryResponse)
+        .mockResolvedValueOnce(response)
         .mockResolvedValueOnce(
           mockApolloResponse({
             loading,
             hasNextPage: false,
-            projects: [{ recordedAt: '2020-07-21', count: 5 }],
+            key,
+            data: additionalData,
           }),
         );
     }
-    return jest.fn().mockResolvedValue(projectsApolloQueryResponse);
+    return jest.fn().mockResolvedValue(response);
   };
 
   const createComponent = ({
     loadingError = false,
-    loading = false,
     projects = [],
-    hasNextPage = false,
+    groups = [],
+    projectsLoading = false,
+    groupsLoading = false,
+    projectsHasNextPage = false,
+    groupsHasNextPage = false,
   } = {}) => {
-    projectsQueryResponse = mockQueryResponse({ key:'projects', data: projects, loading, hasNextPage });
+    queryResponses = {
+      projects: mockQueryResponse({ key:'projects', data: projects, loading: projectsLoading, hasNextPage: projectsHasNextPage, additionalData: mockAdditionalData }),
+      groups: mockQueryResponse({ key:'groups', data: groups, loading: groupsLoading, hasNextPage: groupsHasNextPage, additionalData: mockAdditionalData })
+    }
 
     return shallowMount(ProjectsAndGroupChart, {
       props: {
@@ -63,8 +71,8 @@ describe('ProjectsAndGroupChart', () => {
       },
       localVue,
       apolloProvider: createMockApollo([
-        [projectsQuery, projectsQueryResponse],
-        [groupsQuery, mockQueryResponse({ loading, hasNextPage: false, key:'groups', data: [] })]
+        [projectsQuery, queryResponses.projects],
+        [groupsQuery, queryResponses.groups]
       ]),
       data() {
         return { loadingError };
@@ -75,6 +83,10 @@ describe('ProjectsAndGroupChart', () => {
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
+    queryResponses = {
+      projects: null,
+      groups: null
+    }
   });
 
   const findLoader = () => wrapper.find(ChartSkeletonLoader);
@@ -83,7 +95,7 @@ describe('ProjectsAndGroupChart', () => {
 
   describe('while loading', () => {
     beforeEach(() => {
-      wrapper = createComponent({ loading: true });
+      wrapper = createComponent({ projectsLoading: true, groupsLoading: true });
     });
 
     it('displays the skeleton loader', () => {
@@ -95,14 +107,14 @@ describe('ProjectsAndGroupChart', () => {
     });
   });
 
-  describe('without data', () => {
+  describe('while loading 1 data set', () => {
     beforeEach(async () => {
-      wrapper = createComponent({ projects: [] });
-      await wrapper.vm.$nextTick();
-    });
+      wrapper = createComponent({
+        projects: mockCountsData2,
+        groupsLoading: true
+      });
 
-    it('renders an no data message', () => {
-      expect(findAlert().text()).toBe('There is no data available.');
+      await wrapper.vm.$nextTick();
     });
 
     it('hides the skeleton loader', () => {
@@ -110,6 +122,25 @@ describe('ProjectsAndGroupChart', () => {
     });
 
     it('renders the chart', () => {
+      expect(findChart().exists()).toBe(true);
+    });
+  });
+
+  describe('without data', () => {
+    beforeEach(async () => {
+      wrapper = createComponent({ projects: [] });
+      await wrapper.vm.$nextTick();
+    });
+
+    it('renders a no data message', () => {
+      expect(findAlert().text()).toBe('There is no data available.');
+    });
+
+    it('hides the skeleton loader', () => {
+      expect(findLoader().exists()).toBe(false);
+    });
+
+    it('does not render the chart', () => {
       expect(findChart().exists()).toBe(false);
     });
   });
@@ -155,42 +186,47 @@ describe('ProjectsAndGroupChart', () => {
     });
   });
 
-  describe('when fetching more data', () => {
+  describe.each`
+  metric | loadingState | newData
+  ${'projects'}| ${{ projectsHasNextPage: true }} | ${{projects: mockCountsData2}}
+  ${'groups'}| ${{ groupsHasNextPage: true }} | ${{groups: mockCountsData2}}
+  `
+  ('$metric - fetchMore', ({ metric, loadingState, newData }) => {
     describe('when the fetchMore query returns data', () => {
       beforeEach(async () => {
         wrapper = createComponent({
-          projects: mockCountsData2,
-          hasNextPage: true,
+          ...loadingState,
+          ...newData,
         });
 
-        jest.spyOn(wrapper.vm.$apollo.queries.projects, 'fetchMore');
+        jest.spyOn(wrapper.vm.$apollo.queries[metric], 'fetchMore');
         await wrapper.vm.$nextTick();
       });
 
       it('requests data twice', () => {
-        expect(projectsQueryResponse).toBeCalledTimes(2);
+        expect(queryResponses[metric]).toBeCalledTimes(2);
       });
 
       it('calls fetchMore', () => {
-        expect(wrapper.vm.$apollo.queries.projects.fetchMore).toHaveBeenCalledTimes(1);
+        expect(wrapper.vm.$apollo.queries[metric].fetchMore).toHaveBeenCalledTimes(1);
       });
     });
 
     describe('when the fetchMore query throws an error', () => {
       beforeEach(() => {
         wrapper = createComponent({
-          projects: mockCountsData2,
-          hasNextPage: true,
+          ...loadingState,
+          ...newData,
         });
 
         jest
-          .spyOn(wrapper.vm.$apollo.queries.projects, 'fetchMore')
+          .spyOn(wrapper.vm.$apollo.queries[metric], 'fetchMore')
           .mockImplementation(jest.fn().mockRejectedValue());
         return wrapper.vm.$nextTick();
       });
 
       it('calls fetchMore', () => {
-        expect(wrapper.vm.$apollo.queries.projects.fetchMore).toHaveBeenCalledTimes(1);
+        expect(wrapper.vm.$apollo.queries[metric].fetchMore).toHaveBeenCalledTimes(1);
       });
 
       it('renders an error message', () => {
