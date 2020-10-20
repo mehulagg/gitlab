@@ -17,6 +17,7 @@ import {
 import boardStore from '~/boards/stores/boards_store';
 
 import listsIssuesQuery from '../queries/lists_issues.query.graphql';
+import boardLabelsQuery from '../queries/board_labels.query.graphql';
 import createBoardListMutation from '../queries/board_list_create.mutation.graphql';
 import updateBoardListMutation from '../queries/board_list_update.mutation.graphql';
 import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
@@ -146,8 +147,33 @@ export default {
 
   showPromotionList: () => {},
 
-  generateDefaultLists: () => {
-    notImplemented();
+  generateDefaultLists: ({ state }) => {
+    const { endpoints, boardType } = state;
+    const { fullPath, boardId } = endpoints;
+
+    const variables = {
+      fullPath,
+      boardId: fullBoardId(boardId),
+      isGroup: boardType === BoardType.group,
+      isProject: boardType === BoardType.project,
+    };
+
+    return gqlClient
+      .query({
+        query: boardLabelsQuery,
+        variables,
+      })
+      .then(({ data }) => {
+        console.log('DATA', data);
+      })
+      .catch(e => console.log('ERROR', e));
+
+    // dispatch('createList', {
+    //   id: 'blank',
+    //   listType: ListType.blank,
+    //   title: __('Welcome to your issue board!'),
+    //   position: 0,
+    // });
   },
 
   moveList: (

@@ -41,9 +41,10 @@ export default {
       this.fetchLists();
       this.showPromotionList();
     }
+    this.generateDefaultLists();
   },
   methods: {
-    ...mapActions(['fetchLists', 'showPromotionList']),
+    ...mapActions(['fetchLists', 'showPromotionList', 'generateDefaultLists']),
   },
 };
 </script>
