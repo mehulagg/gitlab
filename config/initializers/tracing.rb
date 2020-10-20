@@ -17,7 +17,8 @@ if Labkit::Tracing.enabled?
   # start tracing until the worker processes are spawned. This works
   # around issues when the opentracing implementation spawns threads
   Gitlab::Cluster::LifecycleEvents.on_worker_start do
-    tracer = Labkit::Tracing::Factory.create_tracer(Gitlab.process_name, Labkit::Tracing.connection_string)
+    service_name = Labkit::Tracing.service_name || Gitlab.process_name
+    tracer = Labkit::Tracing::Factory.create_tracer(service_name, Labkit::Tracing.connection_string)
     OpenTracing.global_tracer = tracer if tracer
   end
 end
