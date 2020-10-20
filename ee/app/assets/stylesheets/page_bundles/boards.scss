@@ -1,3 +1,5 @@
+@import '../../../../../app/assets/stylesheets/page_bundles/boards';
+
 .boards-add-list {
   &.show {
     .dropdown-menu-tabs {
@@ -8,15 +10,15 @@
   }
 
   .dropdown-tabs-list {
-    box-shadow: 0 0 0 1px $border-color;
+    box-shadow: 0 0 0 1px var(--border-color, $border-color);
   }
 
   .dropdown-tab-item {
-    border-left: 1px solid $border-color;
+    border-left: 1px solid var(--border-color, $border-color);
 
     a {
       border-bottom: 2px solid transparent;
-      background-color: $gray-light;
+      background-color: var(--gray-50, $gray-50);
 
       &:focus,
       &.active {
@@ -25,7 +27,7 @@
 
       &.active {
         font-weight: bold;
-        border-bottom-color: $indigo-500;
+        border-bottom-color: var(--indigo-500, $indigo-500);
       }
     }
   }
@@ -34,7 +36,7 @@
     margin: 0;
     padding: $gl-padding;
     border-bottom: 0;
-    color: $gl-text-color-secondary;
+    color: var(--gl-text-color-secondary, $gl-text-color-secondary);
   }
 }
 
@@ -69,7 +71,7 @@
 
 .board-type-assignee {
   .board-title-sub-text {
-    color: $gl-text-color-secondary;
+    color: var(--gl-text-color-secondary, $gl-text-color-secondary);
     font-weight: normal;
   }
 }
@@ -97,7 +99,7 @@
 
     // add a border between all items, but not at the start or end
     + .block {
-      border-top: solid 1px $border-color;
+      border-top: solid 1px var(--border-color, $border-color);
     }
   }
 }
