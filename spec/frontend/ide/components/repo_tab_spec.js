@@ -100,6 +100,16 @@ describe('RepoTab', () => {
     expect(wrapper.find('.file-modified').exists()).toBe(true);
   });
 
+  it.each`
+    tab | closeLabel
+    ${file('foo.txt')} | ${'Close foo.txt'}
+    ${{ ...file('foo.txt'), changed: true }} | ${'foo.txt changed'}
+  `('close button has label $closeLabel', ({ tab, closeLabel }) => {
+    createComponent({ tab });
+
+    expect(wrapper.find('button').attributes('aria-label')).toBe(closeLabel);
+  });
+
   describe('locked file', () => {
     let f;
 
