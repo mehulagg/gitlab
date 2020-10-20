@@ -22,7 +22,7 @@ module Gitlab
             file.add_elements(gitlab_org_projects)
             file.save
           else
-            return "The namespace '#{GITLAB_ORG_NAMESPACE}' group was not found"
+            "The namespace '#{GITLAB_ORG_NAMESPACE}' group was not found"
           end
         end
 
@@ -35,9 +35,11 @@ module Gitlab
            help_url]
         end
 
+        # rubocop: disable CodeReuse/ActiveRecord
         def gitlab_org_group
-          @gitlab_org_group ||= Group.find_by(path: 'gitlab-org', parent_id: nil)
+          @gitlab_org_group ||= Group.find_by(path: 'gitlab-org', parent_id: nil, visibility_level: Gitlab::VisibilityLevel::PUBLIC)
         end
+        # rubocop: enable CodeReuse/ActiveRecord
 
         def gitlab_org_subgroups
           GroupsFinder.new(
@@ -53,7 +55,7 @@ module Gitlab
             group: gitlab_org_group,
             params: { non_archived: true },
             options: { include_subgroups: true }
-          ).execute.includes(:project_feature, namespace: :route)
+          ).execute.include_project_feature.inc_routes
         end
       end
     end

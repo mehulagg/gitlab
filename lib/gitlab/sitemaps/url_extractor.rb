@@ -9,13 +9,11 @@ module Gitlab
         def extract(element)
           case element
           when String
-            return element
+            element
           when Group
-            return extract_from_group(element)
+            extract_from_group(element)
           when Project
-            return extract_from_project(element)
-          else
-            return
+            extract_from_project(element)
           end
         end
 
@@ -33,7 +31,7 @@ module Gitlab
           [
            project_url(project),
            project_issues_url(project),
-           project_merge_requests_url(project),
+           project_merge_requests_url(project)
           ].tap do |urls|
             urls << project_snippets_url(project) if project.snippets_enabled?
             urls << project_wiki_url(project, Wiki::HOMEPAGE) if project.wiki_enabled?

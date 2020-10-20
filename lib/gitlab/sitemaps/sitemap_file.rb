@@ -3,7 +3,7 @@
 module Gitlab
   module Sitemaps
     class SitemapFile
-      SITEMAP_INDEX_PATH = File.join(Rails.public_path, 'sitemap.xml').freeze
+      SITEMAP_FILE_PATH = File.join(Rails.public_path, 'sitemap.xml').freeze
 
       attr_accessor :urls
 
@@ -22,15 +22,23 @@ module Gitlab
       def save
         return if urls.empty?
 
-        File.write(SITEMAP_INDEX_PATH, render)
+        File.write(SITEMAP_FILE_PATH, render)
       end
 
       def render
-        lastmod = Date.today.iso8601
-        xml = Builder::XmlMarkup.new(:indent => 2)
-        fragment = File.read(File.expand_path("../fragments/sitemap_file.xml.builder", __FILE__))
+        fragment = File.read(File.expand_path("fragments/sitemap_file.xml.builder", __dir__))
 
         instance_eval fragment
+      end
+
+      private
+
+      def xml_builder
+        @xml_builder ||= Builder::XmlMarkup.new(indent: 2)
+      end
+
+      def lastmod
+        @lastmod ||= Date.today.iso8601
       end
     end
   end
