@@ -17,6 +17,7 @@ module QA
           merge_request.file_content = 'This exists on the source branch only'
         end
       end
+
       let(:new_file_name) { "added_file-#{SecureRandom.hex(8)}.txt" }
 
       context 'when the feature flag default_merge_ref_for_diffs is enabled' do
