@@ -1,6 +1,7 @@
 <script>
 import { GlAlert, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import getStatesQuery from '../graphql/queries/get_states.query.graphql';
+import EmptyState from './empty_state.vue';
 
 export default {
   apollo: {
@@ -15,6 +16,7 @@ export default {
     },
   },
   components: {
+    EmptyState,
     GlAlert,
     GlLoadingIcon,
     GlTab,
@@ -45,7 +47,11 @@ export default {
         <gl-loading-icon v-if="isLoading" size="md" class="gl-mt-3" />
 
         <div v-else-if="states" class="gl-mt-3">
-          {{ s__('Terraform|States') }}
+          <div v-if="states.length">
+            {{ s__('Terraform|States') }}
+          </div>
+
+          <empty-state v-else :image="emptyStateImage" />
         </div>
 
         <gl-alert v-else variant="danger" :dismissible="false">
