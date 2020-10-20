@@ -14,6 +14,8 @@ The whitepaper ["A Seismic Shift in Application Security"](https://about.gitlab.
 explains how 4 of the top 6 attacks were application based. Download it to learn how to protect your
 organization.
 
+## Overview
+
 If you're using [GitLab CI/CD](../../../ci/README.md), you can analyze your source code for known
 vulnerabilities using Static Application Security Testing (SAST). GitLab checks the SAST report and
 compares the found vulnerabilities between the source and target branches.
