@@ -405,7 +405,7 @@ of using YAML anchors, you can use the [`extends` keyword](#extends).
 
 `include` supports the following inclusion methods:
 
-| Method                          | Description                                                       |
+| Keyword                          | Method                                                       |
 |:--------------------------------|:------------------------------------------------------------------|
 | [`local`](#includelocal)        | Include a file from the local project repository.                 |
 | [`file`](#includefile)          | Include a file from a different project repository.               |
