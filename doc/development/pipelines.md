@@ -618,7 +618,7 @@ each pipeline includes default variables defined in
 
 Most of the jobs [extend from a few CI definitions](../ci/yaml/README.md#extends)
 defined in [`.gitlab/ci/global.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/global.gitlab-ci.yml)
-that are scoped to a single [configuration keyword](../ci/yaml/README.md#configuration-keywords).
+that are scoped to a single [configuration keyword](../ci/yaml/README.md#job-keywords).
 
 | Job definitions  | Description |
 |------------------|-------------|
