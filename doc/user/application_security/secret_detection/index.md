@@ -49,7 +49,7 @@ Encrpytion Keys:
   - GitHub API
   - Slack Token
   - Stripe API
-  - Generic API key strings starting with 'api-'
+  - Generic API key strings starting with `api-`
 
 You can also customize the secret detection patterns using [custom rulesets](#custom-rulesets)
 
