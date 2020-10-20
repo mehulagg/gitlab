@@ -253,7 +253,7 @@ with merge request" button, then select the "Download patch to resolve" option:
 
 In certain cases, GitLab allows you to create a merge request that automatically remediates the
 vulnerability. Any vulnerability that has a
-[solution](#solutions-for-vulnerabilities-auto-remediation) can have a merge
+[solution](#automatic-remediation-for-vulnerabilities) can have a merge
 request created to automatically solve the issue.
 
 If this action is available, the vulnerability modal contains a **Create merge request** button.
