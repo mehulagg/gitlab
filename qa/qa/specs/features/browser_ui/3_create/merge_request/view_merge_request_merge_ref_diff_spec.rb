@@ -8,6 +8,7 @@ module QA
           project.name = 'merge-ref-diff'
         end
       end
+
       let(:merge_request) do
         Resource::MergeRequest.fabricate_via_api! do |merge_request|
           merge_request.project = project
