@@ -723,13 +723,6 @@ export const navigateToDiffFileIndex = ({ commit, state }, index) => {
   commit(types.VIEW_DIFF_FILE, fileHash);
 };
 
-export const setFileByFile = ({ commit }, { fileByFile, pushState = false }) => {
-  const fbf = fileByFile ? SINGLE_FILE_MODE : ALL_FILE_MODE;
-
+export const setFileByFile = ({ commit }, { fileByFile }) => {
   commit(types.SET_FILE_BY_FILE, fileByFile);
-  Cookies.set(DIFF_FILE_BY_FILE_COOKIE_NAME, fbf);
-
-  if (pushState) {
-    historyPushState(mergeUrlParams({ singleFile: fbf }, window.location.href));
-  }
 };

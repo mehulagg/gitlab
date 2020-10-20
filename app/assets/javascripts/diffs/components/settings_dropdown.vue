@@ -3,6 +3,9 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlButtonGroup, GlButton, GlDropdown } from '@gitlab/ui';
 import { __ } from '~/locale';
 
+import eventHub from "../event_hub";
+import { TOGGLE_FILE_BY_FILE_EVENT } from '../constants';
+
 export default {
   components: {
     GlButtonGroup,
@@ -11,7 +14,7 @@ export default {
   },
   computed: {
     ...mapGetters('diffs', ['isInlineView', 'isParallelView']),
-    ...mapState('diffs', ['renderTreeList', 'showWhitespace']),
+    ...mapState('diffs', ['renderTreeList', 'showWhitespace', 'viewDiffsFileByFile']),
   },
   mounted() {
     this.patchAriaLabel();
@@ -24,13 +27,16 @@ export default {
       'setInlineDiffViewType',
       'setParallelDiffViewType',
       'setRenderTreeList',
-      'setShowWhitespace',
+      'setShowWhitespace'
     ]),
     patchAriaLabel() {
       this.$el
         .querySelector('.js-show-diff-settings')
         .setAttribute('aria-label', __('Diff view settings'));
     },
+    changeFileByFileSetting( newSetting ){
+      eventHub.$emit(TOGGLE_FILE_BY_FILE_EVENT, { force: newSetting } );
+    }
   },
 };
 </script>
@@ -80,7 +86,7 @@ export default {
       </gl-button-group>
     </div>
     <div class="gl-mt-3 gl-px-3">
-      <label class="gl-mb-0">
+      <label class="gl-display-block">
         <input
           id="show-whitespace"
           type="checkbox"
@@ -88,6 +94,15 @@ export default {
           @change="setShowWhitespace({ showWhitespace: $event.target.checked, pushState: true })"
         />
         {{ __('Show whitespace changes') }}
+      </label>
+      <label class="gl-mb-0 gl-display-block">
+        <input
+          id="file-by-file"
+          type="checkbox"
+          :checked="viewDiffsFileByFile"
+          @change="setFileByFile({ fileByFile: $event.target.checked, pushState: true })"
+        />
+        {{ __('Show one file at a time') }}
       </label>
     </div>
   </gl-dropdown>

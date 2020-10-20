@@ -142,6 +142,7 @@ export default {
       plainDiffPath: state => state.diffs.plainDiffPath,
       emailPatchPath: state => state.diffs.emailPatchPath,
       retrievingBatches: state => state.diffs.retrievingBatches,
+      fileByFile: state => state.diffs.viewDiffsFileByFile,
     }),
     ...mapState('diffs', [
       'showTreeList',
@@ -156,7 +157,7 @@ export default {
     ...mapGetters('diffs', ['hasCollapsedFile', 'isParallelView', 'currentDiffIndex']),
     ...mapGetters(['isNotesFetched', 'getNoteableData']),
     diffs() {
-      if (!this.viewDiffsFileByFile) {
+      if (!this.fileByFile) {
         return this.diffFiles;
       }
 
@@ -184,7 +185,7 @@ export default {
       return parseBoolean(getParameterByName('diff_head'));
     },
     showFileByFileNavigation() {
-      return this.diffFiles.length > 1 && this.viewDiffsFileByFile;
+      return this.diffFiles.length > 1 && this.fileByFile;
     },
     currentFileNumber() {
       return this.currentDiffIndex + 1;
@@ -206,11 +207,7 @@ export default {
         visible = this.$options.alerts.ALERT_OVERFLOW_HIDDEN;
       } else if (this.isDiffHead && this.hasConflicts) {
         visible = this.$options.alerts.ALERT_MERGE_CONFLICT;
-      } else if (
-        this.hasCollapsedFile &&
-        !this.collapsedWarningDismissed &&
-        !this.viewDiffsFileByFile
-      ) {
+      } else if (this.hasCollapsedFile && !this.collapsedWarningDismissed && !this.fileByFile) {
         visible = this.$options.alerts.ALERT_COLLAPSED_FILES;
       }
 
@@ -501,7 +498,7 @@ export default {
               :file="file"
               :help-page-path="helpPagePath"
               :can-current-user-fork="canCurrentUserFork"
-              :view-diffs-file-by-file="viewDiffsFileByFile"
+              :view-diffs-file-by-file="fileByFile"
             />
             <div
               v-if="showFileByFileNavigation"

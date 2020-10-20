@@ -69,6 +69,7 @@ export const DIFF_COMPARE_BASE_VERSION_INDEX = -1;
 export const DIFF_COMPARE_HEAD_VERSION_INDEX = -2;
 
 // File by File view
+export const TOGGLE_FILE_BY_FILE_EVENT = 'diffs:file-by-file:toggle';
 export const DIFF_FILE_BY_FILE_COOKIE_NAME = 'single_file';
 export const SINGLE_FILE_MODE = '1';
 export const ALL_FILE_MODE = '0';

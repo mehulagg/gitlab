@@ -788,17 +788,15 @@ export const getDefaultWhitespace = (queryString, cookie) => {
 };
 
 export function getInitialFileByFile(search, cookie) {
-  let viewFileByFile = false;
-
   // use the cookie first, if it exists
   if (cookie) {
-    viewFileByFile = cookie === SINGLE_FILE_MODE;
+    return cookie === SINGLE_FILE_MODE;
   }
 
   // the search parameter of the URL should override, if it exists
   if (search) {
-    viewFileByFile = search === SINGLE_FILE_MODE;
+    return search === SINGLE_FILE_MODE;
   }
 
-  return viewFileByFile;
+  return false;
 }
