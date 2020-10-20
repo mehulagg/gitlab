@@ -272,6 +272,50 @@ RSpec.describe 'Admin updates EE-only settings' do
     end
   end
 
+  context 'sign up settings' do
+    before do
+      visit general_admin_application_settings_path
+    end
+
+    it 'disallows entering user cap greater then license allows' do
+      allow(License.current).to receive(:restricted_user_count).and_return(5)
+
+      page.within('#js-signup-settings') do
+        fill_in 'User cap', with: 5
+
+        click_button 'Save'
+      end
+
+      wait_for_requests
+    end
+
+    it 'changes the user cap from unlimited to 5' do
+      expect(current_settings.new_user_signups_cap).to be_nil
+
+      page.within('#js-signup-settings') do
+        fill_in 'User cap', with: 5
+
+        click_button 'Save'
+      end
+
+      wait_for_requests
+
+      expect(current_settings.new_user_signups_cap).to eq(5)
+    end
+
+    it 'changes the user cap to unlimited' do
+      page.within('#js-signup-settings') do
+        fill_in 'User cap', with: nil
+
+        click_button 'Save'
+      end
+
+      wait_for_requests
+
+      expect(current_settings.new_user_signups_cap).to be_nil
+    end
+  end
+
   def current_settings
     ApplicationSetting.current_without_cache
   end
