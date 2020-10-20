@@ -118,7 +118,8 @@ class Namespace < ApplicationRecord
     #
     # Returns an ActiveRecord::Relation.
     def search(query)
-      fuzzy_search(query, [:name, :path])
+      joins(:route)
+        .fuzzy_search(query, [:name, :path, Route.arel_table[:path]])
     end
 
     def clean_path(path)
