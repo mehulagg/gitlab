@@ -3,7 +3,7 @@
 module Gitlab
   module Sitemaps
     class SitemapFile
-      SITEMAP_INDEX_PATH = File.join(Rails.public_path, 'sitemap.xml')
+      SITEMAP_INDEX_PATH = File.join(Rails.public_path, 'sitemap.xml').freeze
 
       attr_accessor :urls
 
@@ -26,8 +26,10 @@ module Gitlab
       end
 
       def render
+        lastmod = Date.today.iso8601
         xml = Builder::XmlMarkup.new(:indent => 2)
         fragment = File.read(File.expand_path("../fragments/sitemap_file.xml.builder", __FILE__))
+
         instance_eval fragment
       end
     end

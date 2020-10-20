@@ -9,9 +9,9 @@ module Gitlab
         GITLAB_ORG_NAMESPACE = 'gitlab-org'.freeze
 
         def execute
-          # unless Gitlab.com?
-          #   return "The sitemap can only be generated for the Gitlab.com"
-          # end
+          unless Gitlab.com?
+            return "The sitemap can only be generated for the Gitlab.com"
+          end
 
           file = Sitemaps::SitemapFile.new
 
@@ -30,8 +30,6 @@ module Gitlab
 
         def generic_urls
           [explore_projects_url,
-           starred_explore_projects_url,
-           trending_explore_projects_url,
            explore_snippets_url,
            explore_groups_url,
            help_url]
