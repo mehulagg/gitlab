@@ -32,7 +32,7 @@ GitLab displays identified secrets visibly in a few places:
 
 ## Supported secrets
 
-Out of the box, Secret Detection detects a variety of common secrets. The [default ruleset provided by GitLeaks]](https://gitlab.com/gitlab-org/security-products/analyzers/secrets/-/blob/master/gitleaks/gitleaks.toml) includes the following key types: 
+Out of the box, Secret Detection detects a variety of common secrets. The [default ruleset provided by GitLeaks](https://gitlab.com/gitlab-org/security-products/analyzers/secrets/-/blob/master/gitleaks/gitleaks.toml) includes the following key types: 
 
 - Cloud Services:
   - Amazon Web Services (AWS)
