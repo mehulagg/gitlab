@@ -93,7 +93,7 @@ If you get validation error when using specific values (for example, `true` or `
 - Quote them.
 - Change them to a different form. For example, `/bin/true`.
 
-## Configuration keywords
+## Job keywords
 
 A job is defined as a list of keywords that define the job's behavior.
 
