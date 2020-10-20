@@ -1,2 +1,4 @@
 ---
 - title: bright
+  self-managed: true
+  gitlab-com: false

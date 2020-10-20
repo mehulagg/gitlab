@@ -17,7 +17,10 @@ module Gitlab
 
           items = YAML.safe_load(file, permitted_classes: [Date])
 
-          items if items.is_a?(Array)
+          if items.is_a?(Array)
+            filter =  Gitlab.com? ? 'gitlab-com' : 'self-managed'
+            items.select {|item| item[filter] }
+          end
         end
       end
     rescue => e

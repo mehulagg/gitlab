@@ -1,2 +1,4 @@
 ---
 - title: It's gonna be a bright
+  self-managed: true
+  gitlab-com: false
