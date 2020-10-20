@@ -14,7 +14,8 @@ module Gitlab
       end
 
       def call(env)
-        return [400, {}, ["Bad Request"]] if request_has_null_byte?(env)
+        # Return an `ActionController::BadRequest` so ActionDispatch can deal with it
+        raise ActionController::BadRequest if request_has_null_byte?(env)
 
         app.call(env)
       end
@@ -22,9 +23,9 @@ module Gitlab
       private
 
       def request_has_null_byte?(request)
-        return false if ENV['REJECT_NULL_BYTES'] == "1"
-
         request = Rack::Request.new(request)
+
+        return true if string_contains_null_byte?(request.path)
 
         request.params.values.any? do |value|
           param_has_null_byte?(value)
@@ -55,6 +56,9 @@ module Gitlab
 
       def string_contains_null_byte?(string)
         string.match?(NULL_BYTE_REGEX)
+      rescue ArgumentError
+        # Catch malformed strings and turn it into an `ActionController::BadRequest` so ActionDispatch can deal with it
+        raise ActionController::BadRequest
       end
     end
   end

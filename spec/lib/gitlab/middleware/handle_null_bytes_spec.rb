@@ -5,7 +5,7 @@ require "rack/test"
 
 RSpec.describe Gitlab::Middleware::HandleNullBytes do
   let(:null_byte) { "\u0000" }
-  let(:error_400) { [400, {}, ["Bad Request"]] }
+  let(:invalid_string) { "mal\xC0formed" }
   let(:app) { double(:app) }
 
   subject { described_class.new(app) }
@@ -20,69 +20,89 @@ RSpec.describe Gitlab::Middleware::HandleNullBytes do
     Rack::MockRequest.env_for('/', { params: params })
   end
 
-  context 'with null bytes in params' do
-    it 'rejects null bytes in a top level param' do
-      env = env_for(name: "null#{null_byte}byte")
+  context 'in the URL' do
+    it 'rejects null bytes' do
+      # We have to create the env separately or Rack::MockRequest complains about invalid URI
+      env = env_for
+      env['PATH_INFO'] = "/someplace/witha#{null_byte}nullbyte"
 
-      expect(subject.call(env)).to eq error_400
+      expect { subject.call(env) }.to raise_error ActionController::BadRequest
     end
 
-    it "responds with 400 BadRequest for hashes with strings" do
-      env = env_for(name: { inner_key: "I am #{null_byte} bad" })
+    it 'rejects malformed strings' do
+      # We have to create the env separately or Rack::MockRequest complains about invalid URI
+      env = env_for
+      env['PATH_INFO'] = "/someplace/with_an/#{invalid_string}"
 
-      expect(subject.call(env)).to eq error_400
-    end
-
-    it "responds with 400 BadRequest for arrays with strings" do
-      env = env_for(name: ["I am #{null_byte} bad"])
-
-      expect(subject.call(env)).to eq error_400
-    end
-
-    it "responds with 400 BadRequest for arrays containing hashes with string values" do
-      env = env_for(name: [
-        {
-          inner_key: "I am #{null_byte} bad"
-        }
-      ])
-
-      expect(subject.call(env)).to eq error_400
-    end
-
-    it "gives up and does not 400 with too deeply nested params" do
-      env = env_for(name: [
-        {
-          inner_key: { deeper_key: [{ hash_inside_array_key: "I am #{null_byte} bad" }] }
-        }
-      ])
-
-      expect(subject.call(env)).not_to eq error_400
+      expect { subject.call(env) }.to raise_error ActionController::BadRequest
     end
   end
 
-  context 'without null bytes in params' do
-    it "does not respond with a 400 for strings" do
+  context 'in params' do
+    shared_examples_for 'checks params' do
+      it 'rejects bad params in a top level param' do
+        env = env_for(name: "null#{problematic_input}byte")
+
+        expect { subject.call(env) }.to raise_error ActionController::BadRequest
+      end
+
+      it "rejects bad params for hashes with strings" do
+        env = env_for(name: { inner_key: "I am #{problematic_input} bad" })
+
+        expect { subject.call(env) }.to raise_error ActionController::BadRequest
+      end
+
+      it "rejects bad params for arrays with strings" do
+        env = env_for(name: ["I am #{problematic_input} bad"])
+
+        expect { subject.call(env) }.to raise_error ActionController::BadRequest
+      end
+
+      it "rejects bad params for arrays containing hashes with string values" do
+        env = env_for(name: [
+          {
+            inner_key: "I am #{problematic_input} bad"
+          }
+        ])
+
+        expect { subject.call(env) }.to raise_error ActionController::BadRequest
+      end
+
+      it "gives up and does not reject too deeply nested params" do
+        env = env_for(name: [
+          {
+            inner_key: { deeper_key: [{ hash_inside_array_key: "I am #{problematic_input} bad" }] }
+          }
+        ])
+
+        expect { subject.call(env) }.not_to raise_error
+      end
+    end
+
+    context 'with null byte' do
+      it_behaves_like 'checks params' do
+        let(:problematic_input) { null_byte }
+      end
+    end
+
+    context 'with malformed strings' do
+      it_behaves_like 'checks params' do
+        let(:problematic_input) { invalid_string }
+      end
+    end
+  end
+
+  context 'without problematic input' do
+    it "does not error for strings" do
       env = env_for(name: "safe name")
 
-      expect(subject.call(env)).not_to eq error_400
+      expect { subject.call(env) }.not_to raise_error
     end
 
-    it "does not respond with a 400 with no params" do
+    it "does not error with no params" do
       env = env_for
 
-      expect(subject.call(env)).not_to eq error_400
-    end
-  end
-
-  context 'when disabled via env flag' do
-    before do
-      stub_env('REJECT_NULL_BYTES', '1')
-    end
-
-    it 'does not respond with a 400 no matter what' do
-      env = env_for(name: "null#{null_byte}byte")
-
-      expect(subject.call(env)).not_to eq error_400
+      expect { subject.call(env) }.not_to raise_error
     end
   end
 end

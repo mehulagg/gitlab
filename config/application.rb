@@ -252,7 +252,9 @@ module Gitlab
 
     config.middleware.insert_before ActionDispatch::RemoteIp, ::Gitlab::Middleware::HandleIpSpoofAttackError
 
-    config.middleware.use ::Gitlab::Middleware::HandleNullBytes
+    # Deal with malformed requests
+    config.middleware.insert_after ActionDispatch::ActionableExceptions, ::Gitlab::Middleware::HandleNullBytes
+    config.action_dispatch[:rescue_responses]["ActionController::BadRequest"] = :bad_request
 
     # Allow access to GitLab API from other domains
     config.middleware.insert_before Warden::Manager, Rack::Cors do
