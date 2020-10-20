@@ -4,6 +4,11 @@ require "spec_helper"
 
 RSpec.describe Gitlab::EncryptedConfiguration do
   subject(:configuration) { described_class.new }
+  let!(:config_tmp_dir) { Dir.mktmpdir('config-') }
+
+  after do
+    FileUtils.rm_f(config_tmp_dir)
+  end
 
   describe '#initialize' do
     it 'accepts all args as optional fields' do
@@ -30,14 +35,23 @@ RSpec.describe Gitlab::EncryptedConfiguration do
     end
   end
 
+  context 'when provided a config file but no key' do
+    let(:config_path) { File.join(config_tmp_dir, 'credentials.yml.enc') }
+
+    it 'throws an error when writing without a key' do
+      expect { described_class.new(content_path: config_path).write('test') }.to raise_error Gitlab::EncryptedConfiguration::MissingKeyError
+    end
+
+    it 'throws an error when reading without a key' do
+      config = described_class.new(content_path: config_path)
+      File.write(config_path, 'test')
+      expect { config.read }.to raise_error Gitlab::EncryptedConfiguration::MissingKeyError
+    end
+  end
+
   context 'when provided key and config file' do
-    let!(:config_tmp_dir) { Dir.mktmpdir('config-') }
     let(:credentials_config_path) { File.join(config_tmp_dir, 'credentials.yml.enc') }
     let(:credentials_key) { SecureRandom.hex(64) }
-
-    after do
-      FileUtils.rm_f(config_tmp_dir)
-    end
 
     describe '#write' do
       it 'encrypts the file using the provided key' do
@@ -63,6 +77,13 @@ RSpec.describe Gitlab::EncryptedConfiguration do
         config.write({ foo: { bar: true } }.to_yaml)
         expect(config.foo[:bar]).to be true
       end
+
+      it 'throws a custom error when deferencing an invalid key map config' do
+        config = described_class.new(content_path: credentials_config_path, base_key: credentials_key)
+
+        config.write("stringcontent")
+        expect{ config[:foo] }.to raise_error Gitlab::EncryptedConfiguration::InvalidConfigError
+      end
     end
 
     describe '#change' do
@@ -80,15 +101,10 @@ RSpec.describe Gitlab::EncryptedConfiguration do
     end
 
     context 'when provided previous_keys for rotation' do
-      let!(:config_tmp_dir) { Dir.mktmpdir('config-') }
       let(:credential_key_original) { SecureRandom.hex(64) }
       let(:credential_key_latest) { SecureRandom.hex(64) }
       let(:config_path_original) { File.join(config_tmp_dir, 'credentials-orig.yml.enc') }
       let(:config_path_latest) { File.join(config_tmp_dir, 'credentials-latest.yml.enc') }
-
-      after do
-        FileUtils.rm_f(config_tmp_dir)
-      end
 
       def encryptor(key)
         ActiveSupport::MessageEncryptor.new(Gitlab::EncryptedConfiguration.generate_key(key), cipher: 'aes-256-gcm')
