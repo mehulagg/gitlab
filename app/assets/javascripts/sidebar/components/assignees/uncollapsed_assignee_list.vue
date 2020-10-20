@@ -66,7 +66,6 @@ export default {
 <template>
   <assignee-avatar-link
     v-if="hasOneUser"
-    #default="{ user }"
     tooltip-placement="left"
     :tooltip-has-name="false"
     :user="firstUser"
@@ -74,7 +73,7 @@ export default {
     :issuable-type="issuableType"
   >
     <div class="ml-2 gl-line-height-normal">
-      <div>{{ user.name }}</div>
+      <div>{{ firstUser.name }}</div>
       <div>{{ username }}</div>
     </div>
   </assignee-avatar-link>
