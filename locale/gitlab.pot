@@ -25883,6 +25883,9 @@ msgstr ""
 msgid "Terraform|Reported Resource Changes: %{addNum} to add, %{changeNum} to change, %{deleteNum} to delete"
 msgstr ""
 
+msgid "Terraform|States"
+msgstr ""
+
 msgid "Terraform|The Terraform report %{name} failed to generate."
 msgstr ""
 
