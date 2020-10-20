@@ -26,16 +26,16 @@ module SystemNotes
       create_note(NoteSummary.new(noteable, project, author, body, action: 'merge'))
     end
 
-    def handle_merge_request_wip
+    def handle_merge_request_draft
       prefix = noteable.work_in_progress? ? "marked" : "unmarked"
 
-      body = "#{prefix} as a **Work In Progress**"
+      body = "#{prefix} as a **Draft**"
 
       create_note(NoteSummary.new(noteable, project, author, body, action: 'title'))
     end
 
-    def add_merge_request_wip_from_commit(commit)
-      body = "marked as a **Work In Progress** from #{commit.to_reference(project)}"
+    def add_merge_request_draft_from_commit(commit)
+      body = "marked as a **Draft** from #{commit.to_reference(project)}"
 
       create_note(NoteSummary.new(noteable, project, author, body, action: 'title'))
     end
