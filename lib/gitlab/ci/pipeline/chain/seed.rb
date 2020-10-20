@@ -20,11 +20,6 @@ module Gitlab
             pipeline.protected = @command.protected_ref?
 
             ##
-            # Populate pipeline with block argument of CreatePipelineService#execute.
-            #
-            @command.seeds_block&.call(pipeline)
-
-            ##
             # Gather all runtime build/stage errors
             #
             if stage_seeds_errors
