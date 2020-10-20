@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Create' do
+  RSpec.describe 'Create', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/270626', type: :stale } do
     describe 'Files management' do
       it 'user creates, edits and deletes a file via the Web', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/451' do
         Runtime::Browser.visit(:gitlab, Page::Main::Login)

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Manage' do
+  RSpec.describe 'Manage', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/270592', type: :stale } do
     describe 'Project transfer between groups' do
       let(:source_group) do
         Resource::Group.fabricate_via_api! do |group|
