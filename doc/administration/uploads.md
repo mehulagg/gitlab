@@ -111,7 +111,7 @@ See [the available connection settings for different providers](object_storage.m
 **In Omnibus installations:**
 
 _The uploads are stored by default in
-`/var/opt/gitlab/gitlab-rails/public/uploads/-/system`._
+`/var/opt/gitlab/gitlab-rails/public/uploads`._
 
 1. Edit `/etc/gitlab/gitlab.rb` and add the following lines by replacing with
    the values you want:
