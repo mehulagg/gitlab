@@ -46,11 +46,10 @@ export default {
   <div class="controls d-flex justify-content-end">
     <a
       v-if="group.canLeave"
-      v-gl-tooltip
+      v-gl-tooltip.bottom
       :href="group.leavePath"
       :title="leaveBtnTitle"
       :aria-label="leaveBtnTitle"
-      data-placement="v-gl-tooltip.bottom"
       data-testid="leave-group-btn"
       class="leave-group btn btn-xs no-expand gl-text-gray-500 gl-ml-5"
       @click.prevent="onLeaveGroup"
@@ -59,11 +58,11 @@ export default {
     </a>
     <a
       v-if="group.canEdit"
-      v-gl-tooltip
+      v-gl-tooltip.bottom
       :href="group.editPath"
       :title="editBtnTitle"
       :aria-label="editBtnTitle"
-      data-placement="v-gl-tooltip.bottom"
+      
       data-testid="edit-group-btn"
       class="edit-group btn btn-xs no-expand gl-text-gray-500 gl-ml-5"
     >
