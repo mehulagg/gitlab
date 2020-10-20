@@ -5,6 +5,7 @@ inherit_gem:
 require:
   - ./rubocop/rubocop
   - rubocop-rspec
+  - rubocop-i18n
 
 inherit_from:
   - .rubocop_todo.yml
@@ -577,3 +578,9 @@ FactoryBot/InlineAssociation:
   Include:
     - 'spec/factories/**/*.rb'
     - 'ee/spec/factories/**/*.rb'
+
+# rubocop-i18n configuration
+GetText:
+  Enabled: true
+RailsI18n:
+  Enabled: false
