@@ -85,6 +85,7 @@ which is part of [GitLab CI/CD](#gitlab-cicd).
 ## GitLab CI/CD
 
 Below are the current settings regarding [GitLab CI/CD](../../ci/README.md).
+Any settings or feature limits not listed here are using the defaults listed in the related documentation.
 
 | Setting                 | GitLab.com        | Default       |
 | -----------             | ----------------- | ------------- |
