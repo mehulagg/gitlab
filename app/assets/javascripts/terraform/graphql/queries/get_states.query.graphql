@@ -1,0 +1,17 @@
+query getStates($projectPath: ID!) {
+  project(fullPath: $projectPath) {
+    terraformStates {
+      nodes {
+        id
+        name
+        lockedAt
+        createdAt
+        updatedAt
+
+        lockedByUser {
+          id
+        }
+      }
+    }
+  }
+}
