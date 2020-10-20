@@ -25858,6 +25858,9 @@ msgstr ""
 msgid "Terms of Service and Privacy Policy"
 msgstr ""
 
+msgid "Terraform"
+msgstr ""
+
 msgid "Terraform|%{number} Terraform report failed to generate"
 msgid_plural "Terraform|%{number} Terraform reports failed to generate"
 msgstr[0] ""
