@@ -13,9 +13,8 @@
 - style = namespace_storage_alert_style(alert_level)
 - icon = namespace_storage_alert_icon(alert_level)
 - purchase_link = namespace_storage_purchase_link(root_namespace)
-- show_purchase_link = purchase_link && alert_level == :error
 - usage_link = namespace_storage_usage_link(root_namespace)
-- show_storage_banner_actions = show_purchase_link || usage_link
+- show_storage_banner_actions = purchase_link || usage_link
 
 .gl-py-5
   .gl-alert.js-namespace-storage-alert{ class: "gl-alert-#{style}", role: 'alert' }
