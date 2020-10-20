@@ -141,7 +141,7 @@ Proposal:
 
 | Role                         | Who
 |------------------------------|-------------------------|
-| Author                       |                         |
+| Author                       |      João Pereira       |
 | Architecture Evolution Coach |                         |
 | Engineering Leader           |                         |
 | Domain Expert                |                         |
