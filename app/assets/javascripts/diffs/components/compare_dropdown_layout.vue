@@ -24,57 +24,30 @@ export default {
 </script>
 
 <template>
-  <span class="dropdown inline">
-    <gl-dropdown
-      class="dropdown-menu-toggle btn btn-default w-100"
-      data-toggle="dropdown"
-      aria-expanded="false"
-    >
-      <span> {{ selectedVersionName }} </span>
-      <gl-icon :size="12" name="angle-down" class="position-absolute" />
-    </gl-dropdown>
-    <div class="dropdown-menu dropdown-select dropdown-menu-selectable">
-      <div class="dropdown-content" data-qa-selector="dropdown_content">
-        <ul>
-          <li v-for="version in versions" :key="version.id">
-            <a :class="{ 'is-active': version.selected }" :href="version.href">
-              <div>
-                <strong>
-                  {{ version.versionName }}
-                  <template v-if="version.isHead">{{
-                    s__('DiffsCompareBaseBranch|(HEAD)')
-                  }}</template>
-                  <template v-else-if="version.isBase">{{
-                    s__('DiffsCompareBaseBranch|(base)')
-                  }}</template>
-                </strong>
-              </div>
-              <div>
-                <small class="commit-sha"> {{ version.short_commit_sha }} </small>
-              </div>
-              <div>
-                <small>
-                  <template v-if="version.commitsText">
-                    {{ version.commitsText }}
-                  </template>
-                  <time-ago
-                    v-if="version.created_at"
-                    :time="version.created_at"
-                    class="js-timeago"
-                  />
-                </small>
-              </div>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </span>
+  <gl-dropdown :text="selectedVersionName" class="inline">
+    <gl-dropdown-item v-for="version in versions" :key="version.id">
+      <a :class="{ 'is-active': version.selected }" :href="version.href">
+        <div>
+          <strong>
+            {{ version.versionName }}
+            <template v-if="version.isHead">{{ s__('DiffsCompareBaseBranch|(HEAD)') }}</template>
+            <template v-else-if="version.isBase">{{
+              s__('DiffsCompareBaseBranch|(base)')
+            }}</template>
+          </strong>
+        </div>
+        <div>
+          <small class="commit-sha"> {{ version.short_commit_sha }} </small>
+        </div>
+        <div>
+          <small>
+            <template v-if="version.commitsText">
+              {{ version.commitsText }}
+            </template>
+            <time-ago v-if="version.created_at" :time="version.created_at" class="js-timeago" />
+          </small>
+        </div>
+      </a>
+    </gl-dropdown-item>
+  </gl-dropdown>
 </template>
-
-<style>
-.dropdown {
-  min-width: 0;
-  max-height: 170px;
-}
-</style>
