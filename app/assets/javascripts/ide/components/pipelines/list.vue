@@ -98,7 +98,7 @@ export default {
         <gl-tab :active="!pipelineFailed">
           <template #title>
             {{ __('Jobs') }}
-            <gl-badge v-if="jobsCount" size="sm" class="gl-tab-counter-badge">{{
+            <gl-badge v-if="jobsCount" size="sm">{{
               jobsCount
             }}</gl-badge>
           </template>
@@ -107,7 +107,7 @@ export default {
         <gl-tab :active="pipelineFailed">
           <template #title>
             {{ __('Failed Jobs') }}
-            <gl-badge v-if="failedJobsCount" size="sm" class="gl-tab-counter-badge">{{
+            <gl-badge v-if="failedJobsCount" size="sm">{{
               failedJobsCount
             }}</gl-badge>
           </template>
