@@ -4,6 +4,7 @@
     - .docs:rules:review-docs
   image: ruby:2.6-alpine
   stage: review
+  needs: []
   dependencies: []
   variables:
     # We're cloning the repo instead of downloading the script for now
