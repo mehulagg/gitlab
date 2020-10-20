@@ -164,11 +164,6 @@ for instructions on validating your YAML file with the Lint tool included with G
 
 The following topics show other examples of other options you can add to your CI/CD file.
 
-NOTE: **Note:**
-After successfull execution of this `pages` job a special `pages:deploy` job will appear in the pipeline view.
-It prepares the content of web-site for GitLab Pages daemon.
-It is executed by GitLab in background and does not use runner.
-
 ## Deploy specific branches to a Pages site
 
 You may want to deploy to a Pages site only from specific branches.
