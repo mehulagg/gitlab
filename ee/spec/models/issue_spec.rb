@@ -228,7 +228,7 @@ RSpec.describe Issue do
       describe '.order_sla_due_at_desc' do
         subject { described_class.order_sla_due_at_desc }
 
-        it { is_expected.to eq([no_sla, sla_due_last, sla_due_first]) }
+        it { is_expected.to eq([sla_due_last, sla_due_first, no_sla]) }
       end
     end
   end

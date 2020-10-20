@@ -24,7 +24,7 @@ module EE
       scope :order_status_page_published_first, -> { includes(:status_page_published_incident).order('status_page_published_incidents.id ASC NULLS LAST') }
       scope :order_status_page_published_last, -> { includes(:status_page_published_incident).order('status_page_published_incidents.id ASC NULLS FIRST') }
       scope :order_sla_due_at_asc, -> { includes(:issuable_sla).order('issuable_slas.due_at ASC NULLS LAST') }
-      scope :order_sla_due_at_desc, -> { includes(:issuable_sla).order('issuable_slas.due_at DESC NULLS FIRST') }
+      scope :order_sla_due_at_desc, -> { includes(:issuable_sla).order('issuable_slas.due_at DESC NULLS LAST') }
       scope :no_epic, -> { left_outer_joins(:epic_issue).where(epic_issues: { epic_id: nil }) }
       scope :any_epic, -> { joins(:epic_issue) }
       scope :in_epics, ->(epics) { joins(:epic_issue).where(epic_issues: { epic_id: epics }) }
