@@ -265,7 +265,7 @@ sentry_dsn = "X"
 ### Windows shared runners (beta)
 
 The Windows shared runners are currently in
-[beta](https://about.gitlab.com/handbook/product/#beta) and should not be used
+[beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#beta) and should not be used
 for production workloads.
 
 During the beta period, the
@@ -283,7 +283,7 @@ vCPUs and 7.5GB RAM. You can find a full list of available Windows packages in t
 [package documentation](https://gitlab.com/gitlab-org/ci-cd/shared-runners/images/gcp/windows-containers/blob/master/cookbooks/preinstalled-software/README.md).
 
 We want to keep iterating to get Windows shared runners in a stable state and
-[generally available](https://about.gitlab.com/handbook/product/#generally-available-ga).
+[generally available](https://about.gitlab.com/handbook/product/gitlab-the-product/#generally-available-ga).
 You can follow our work towards this goal in the
 [related epic](https://gitlab.com/groups/gitlab-org/-/epics/2162).
 
