@@ -132,7 +132,6 @@ RSpec.describe GroupsHelper do
     where(
       gitlab_com?: [true, false],
       user?: [true, false],
-      discover_security_feature_enabled?: [true, false],
       security_dashboard_feature_available?: [true, false],
       can_admin_group?: [true, false]
     )
@@ -141,7 +140,6 @@ RSpec.describe GroupsHelper do
       it 'returns the expected value' do
         allow(helper).to receive(:current_user) { user? ? owner : nil }
         allow(::Gitlab).to receive(:com?) { gitlab_com? }
-        allow(::Feature).to receive(:enabled?).with(:discover_security) { discover_security_feature_enabled? }
         allow(group).to receive(:feature_available?) { security_dashboard_feature_available? }
         allow(helper).to receive(:can?) { can_admin_group? }
 
