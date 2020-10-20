@@ -163,7 +163,7 @@ package_hunter:
   needs: []
   script:
     - pwd
-    - rm -r spec locale .git node_modules app/assets/images doc/
+    - rm -r spec locale .git app/assets/images doc/
     - du -hcs ./*
     - cd .. && tar -I "gzip --best" -cf gitlab.tgz ./gitlab
     # - tar -cjf gitlab.tar.bz2 --exclude=".git/" --exclude="node_modules/" --exclude="app/assets/images" --exclude="doc/" --exclude="gitlab.tar.bz2" .
