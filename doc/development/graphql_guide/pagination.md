@@ -96,7 +96,9 @@ To keep our API consistent we manually set the pagination cursors based on value
 
 This allows us to keep the GraphQL and client using pagination that works consistently across the GitLab API, even though pagination is actually occurring outside GitLab.
 
-You can see an example of how to implement this by looking at [`error__tracking/sentry_error_collection_type.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/types/error_tracking/sentry_error_collection_type.rb#L16).
+You can see an example of how to implement this by looking at 
+- [`types/error__tracking/sentry_error_collection_type.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/types/error_tracking/sentry_error_collection_type.rb) which adds an extension to  `field :errors`
+- [`resolvers/error_tracking/sentry_errors_resolver.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/app/graphql/resolvers/error_tracking/sentry_errors_resolver.rb) which returns the data from the resolver
 
 ## Testing
 
