@@ -23720,9 +23720,6 @@ msgstr ""
 msgid "SeatUsage|Seat usage"
 msgstr ""
 
-msgid "SeatUsage|Users occupying seats in %{group_name}"
-msgstr ""
-
 msgid "Seats usage data as of %{last_enqueue_time} (Updated daily)"
 msgstr ""
 
@@ -25959,6 +25956,9 @@ msgid "SubscriptionTable|Seats in subscription"
 msgstr ""
 
 msgid "SubscriptionTable|Seats owed"
+msgstr ""
+
+msgid "SubscriptionTable|See usage"
 msgstr ""
 
 msgid "SubscriptionTable|Subscription end date"

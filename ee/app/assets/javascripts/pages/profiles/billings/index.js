@@ -1,4 +1,4 @@
-import initSubscriptions from 'ee/billings';
+import initSubscriptions from 'ee/billings/subscriptions';
 import PersistentUserCallout from '~/persistent_user_callout';
 
 document.addEventListener('DOMContentLoaded', () => {

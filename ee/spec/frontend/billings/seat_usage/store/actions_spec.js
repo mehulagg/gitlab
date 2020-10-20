@@ -5,7 +5,7 @@ import * as types from 'ee/billings/stores/modules/seats/mutation_types';
 import * as actions from 'ee/billings/stores/modules/seats/actions';
 import axios from '~/lib/utils/axios_utils';
 import createFlash from '~/flash';
-import { mockDataSeats } from '../../../mock_data';
+import { mockDataSeats } from '../../mock_data';
 
 jest.mock('~/flash');
 

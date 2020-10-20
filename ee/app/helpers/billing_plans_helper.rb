@@ -16,7 +16,8 @@ module BillingPlansHelper
       namespace_id: group.id,
       namespace_name: group.name,
       plan_upgrade_href: plan_upgrade_url(group, plan),
-      customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions"
+      customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions",
+      billable_seats_href: seat_usage_group_billings_path(group)
     }
   end
 

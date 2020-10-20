@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import SubscriptionApp from './components/app.vue';
-import store from './stores';
+import SubscriptionSeats from './components/subscription_seats.vue';
+import store from '../stores/index_seat_usage';
 
-export default (containerId = 'js-billing-plans') => {
+export default (containerId = 'js-seat-usage') => {
   const containerEl = document.getElementById(containerId);
 
   if (!containerEl) {
@@ -13,26 +13,22 @@ export default (containerId = 'js-billing-plans') => {
     el: containerEl,
     store,
     components: {
-      SubscriptionApp,
+      SubscriptionSeats,
     },
     data() {
       const { dataset } = this.$options.el;
-      const { namespaceId, namespaceName, planUpgradeHref, customerPortalUrl } = dataset;
+      const { namespaceId, namespaceName } = dataset;
 
       return {
         namespaceId,
         namespaceName,
-        planUpgradeHref,
-        customerPortalUrl,
       };
     },
     render(createElement) {
-      return createElement('subscription-app', {
+      return createElement('subscription-seats', {
         props: {
           namespaceId: this.namespaceId,
           namespaceName: this.namespaceName,
-          planUpgradeHref: this.planUpgradeHref,
-          customerPortalUrl: this.customerPortalUrl,
         },
       });
     },

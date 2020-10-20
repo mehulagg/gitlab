@@ -1,14 +1,18 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
+import { GlIcon, GlButton } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
 import { dateInWords } from '~/lib/utils/datetime_utility';
 import Popover from '~/vue_shared/components/help_popover.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   name: 'SubscriptionTableRow',
   components: {
+    GlButton,
     GlIcon,
     Popover,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     header: {
       type: Object,
@@ -23,8 +27,25 @@ export default {
       required: false,
       default: false,
     },
+    billableSeatsHref: {
+      type: String,
+      required: false,
+      default: '',
+    },
+  },
+  computed: {
+    ...mapState('subscription', ['hasBillableGroupMembers']),
+    isFeatureFlagEnabled() {
+      return this.glFeatures?.apiBillableMemberList;
+    },
+  },
+  created() {
+    if (this.isFeatureFlagEnabled) {
+      this.fetchHasBillableGroupMembers();
+    }
   },
   methods: {
+    ...mapActions('subscription', ['fetchHasBillableGroupMembers']),
     getPopoverOptions(col) {
       const defaults = {
         placement: 'bottom',
@@ -46,13 +67,21 @@ export default {
 
       return typeof col.value !== 'undefined' && col.value !== null ? col.value : ' - ';
     },
+    isSeatsUsageButtonShown(col) {
+      return (
+        this.isFeatureFlagEnabled &&
+        this.billableSeatsHref &&
+        col.id === 'seatsInUse' &&
+        this.hasBillableGroupMembers
+      );
+    },
   },
 };
 </script>
 
 <template>
   <div class="grid-row d-flex flex-grow-1 flex-column flex-sm-column flex-md-column flex-lg-row">
-    <div class="grid-cell header-cell">
+    <div class="grid-cell header-cell" data-testid="header-cell">
       <span class="icon-wrapper">
         <gl-icon v-if="header.icon" class="gl-mr-3" :name="header.icon" aria-hidden="true" />
         {{ header.title }}
@@ -62,13 +91,26 @@ export default {
       <div
         :key="`subscription-col-${i}`"
         class="grid-cell"
+        data-testid="content-cell"
         :class="[col.hideContent ? 'no-value' : '']"
       >
-        <span class="property-label"> {{ col.label }} </span>
+        <span data-testid="property-label" class="property-label"> {{ col.label }} </span>
         <popover v-if="col.popover" :options="getPopoverOptions(col)" />
-        <p class="property-value gl-mt-2 gl-mb-0" :class="[col.colClass ? col.colClass : '']">
+        <p
+          data-testid="property-value"
+          class="property-value gl-mt-2 gl-mb-0"
+          :class="[col.colClass ? col.colClass : '']"
+        >
           {{ getDisplayValue(col) }}
         </p>
+        <gl-button
+          v-if="isSeatsUsageButtonShown(col)"
+          :href="billableSeatsHref"
+          data-testid="seats-usage-button"
+          size="small"
+          class="gl-mt-3"
+          >{{ s__('SubscriptionTable|See usage') }}</gl-button
+        >
       </div>
     </template>
   </div>
