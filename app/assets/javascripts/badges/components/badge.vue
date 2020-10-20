@@ -8,7 +8,7 @@ export default {
   components: {
     GlIcon,
     GlLoadingIcon,
-    GlButton
+    GlButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
