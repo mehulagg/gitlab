@@ -548,7 +548,7 @@ for resolving all files is 30 seconds.
 
 There is a list of [additional `includes` examples](includes.md) available.
 
-## keyword details
+## Keyword details
 
 The following are detailed explanations for keywords used to configure CI/CD pipelines.
 
@@ -3304,7 +3304,7 @@ It also exposes these reports in GitLab's UI (merge requests, pipeline views, an
 
 These are the available report types:
 
-| keyword                                                                                                                            | Description |
+| Keyword                                                                                                                            | Description |
 |--------------------------------------------------------------------------------------------------------------------------------------|-------------|
 | [`artifacts:reports:cobertura`](../pipelines/job_artifacts.md#artifactsreportscobertura)                                             | The `cobertura` report collects Cobertura coverage XML files.                    |
 | [`artifacts:reports:codequality`](../pipelines/job_artifacts.md#artifactsreportscodequality)                                         | The `codequality` report collects CodeQuality issues.                            |
