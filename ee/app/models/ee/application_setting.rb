@@ -100,7 +100,7 @@ module EE
                                 greater_than: 0 }
       validates :new_user_signups_cap,
                 numericality: { less_than_or_equal_to: proc { License.current&.restricted_user_count } },
-                if: proc { License.current&.restricted_user_count.to_i.positive? }
+                if: proc { License.current&.restricted_user_count.to_i > 0 }
 
       after_commit :update_personal_access_tokens_lifetime, if: :saved_change_to_max_personal_access_token_lifetime?
       after_commit :resume_elasticsearch_indexing
