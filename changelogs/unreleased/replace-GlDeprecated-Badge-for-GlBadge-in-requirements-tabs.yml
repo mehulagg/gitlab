@@ -1,5 +1,5 @@
 ---
 title: replaced GlDeprecatedBadge for GlBadge in requirements tabs
-merge_request:
+merge_request: 45647
 author: Jannik Lehmann
 type: changed
