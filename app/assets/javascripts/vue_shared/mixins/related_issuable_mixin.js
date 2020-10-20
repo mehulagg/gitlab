@@ -1,4 +1,3 @@
-import { GlTooltipDirective } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { sprintf, __ } from '~/locale';
 import { formatDate } from '~/lib/utils/datetime_utility';
@@ -98,9 +97,6 @@ const mixins = {
       required: false,
       default: () => ({}),
     },
-  },
-  directives: {
-    GlTooltip: GlTooltipDirective,
   },
   mixins: [timeagoMixin],
   computed: {
