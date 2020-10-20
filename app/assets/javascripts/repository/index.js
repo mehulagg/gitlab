@@ -208,7 +208,7 @@ export default function setupVueRepositoryList() {
           variables: {
             projectPath,
             ref,
-            path: currentRoutePath,
+            path: currentRoutePath || '/',
             nextPageCursor: '',
             pageSize: 100,
           },
