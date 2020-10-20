@@ -25877,6 +25877,9 @@ msgstr ""
 msgid "Terraform|A Terraform report was generated in your pipelines."
 msgstr ""
 
+msgid "Terraform|An error occurred while loading your Terraform States"
+msgstr ""
+
 msgid "Terraform|Generating the report caused an error."
 msgstr ""
 

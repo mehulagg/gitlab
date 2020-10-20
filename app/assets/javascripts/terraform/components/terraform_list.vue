@@ -1,5 +1,5 @@
 <script>
-import { GlTab, GlTabs } from '@gitlab/ui';
+import { GlAlert, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import getStatesQuery from '../graphql/queries/get_states.query.graphql';
 
 export default {
@@ -15,6 +15,8 @@ export default {
     },
   },
   components: {
+    GlAlert,
+    GlLoadingIcon,
     GlTab,
     GlTabs,
   },
@@ -28,6 +30,11 @@ export default {
       type: String,
     },
   },
+  computed: {
+    isLoading() {
+      return this.$apollo.queries.states.loading;
+    },
+  },
 };
 </script>
 
@@ -35,7 +42,15 @@ export default {
   <section>
     <gl-tabs>
       <gl-tab :title="s__('Terraform|States')">
-        <p>{{ s__('Terraform|Table Content') }}</p>
+        <gl-loading-icon v-if="isLoading" size="md" class="gl-mt-3" />
+
+        <div v-else-if="states" class="gl-mt-3">
+          {{ s__('Terraform|States') }}
+        </div>
+
+        <gl-alert v-else variant="danger" :dismissible="false">
+          {{ s__('Terraform|An error occurred while loading your Terraform States') }}
+        </gl-alert>
       </gl-tab>
     </gl-tabs>
   </section>
