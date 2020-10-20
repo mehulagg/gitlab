@@ -347,7 +347,7 @@ export default () => {
               v-if="canAdminList"
               @click="openModal">
               Add issues
-            </button>
+            </gl-button>
           </span>
           <gl-tooltip
             v-if="disabled"
