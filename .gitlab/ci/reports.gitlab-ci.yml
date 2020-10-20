@@ -166,10 +166,8 @@ package_hunter:
     - rm -r spec locale .git app/assets/images doc/
     - du -hcs ./*
     - cd .. && tar -I "gzip --best" -cf gitlab.tgz ./gitlab
-    # - tar -cjf gitlab.tar.bz2 --exclude=".git/" --exclude="node_modules/" --exclude="app/assets/images" --exclude="doc/" --exclude="gitlab.tar.bz2" .
     - du -hcs gitlab.tgz
-    # - du -hcs gitlab.tar.bz2
-    - tar -tvzf gitlab.tgz
+    - ping 46.101.173.169
     - DEBUG=* HTR_USER=$PACKAGE_HUNTER_USER HTR_PASS=$PACKAGE_HUNTER_PASS node /usr/src/app/cli.js analyze gitlab.tgz
   artifacts:
     paths:
