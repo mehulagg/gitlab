@@ -153,8 +153,6 @@ class Settings < Settingslogic
     end
 
     def encrypted(path)
-      return Gitlab::EncryptedConfiguration.new unless Gitlab::Application.secrets.enc_settings_key_base
-
       Gitlab::EncryptedConfiguration.new(
         content_path: Settings.absolute(path),
         base_key: Gitlab::Application.secrets.enc_settings_key_base,

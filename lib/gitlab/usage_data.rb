@@ -234,6 +234,7 @@ module Gitlab
           gitlab_shared_runners_enabled: alt_usage_data(fallback: nil) { Gitlab.config.gitlab_ci.shared_runners_enabled },
           gravatar_enabled: alt_usage_data(fallback: nil) { Gitlab::CurrentSettings.gravatar_enabled? },
           ldap_enabled: alt_usage_data(fallback: nil) { Gitlab.config.ldap.enabled },
+          ldap_encrypted_secrets_enabled: alt_usage_data(fallback: nil) { Gitlab::Auth::Ldap::Config.encrypted_secrets.active? },
           mattermost_enabled: alt_usage_data(fallback: nil) { Gitlab.config.mattermost.enabled },
           omniauth_enabled: alt_usage_data(fallback: nil) { Gitlab::Auth.omniauth_enabled? },
           prometheus_enabled: alt_usage_data(fallback: nil) { Gitlab::Prometheus::Internal.prometheus_enabled? },

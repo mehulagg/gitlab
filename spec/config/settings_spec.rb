@@ -151,8 +151,7 @@ RSpec.describe Settings do
 
     it 'returns empty encrypted config when a key has not been set' do
       allow(Gitlab::Application.secrets).to receive(:enc_settings_key_base).and_return(nil)
-      expect(Gitlab::EncryptedConfiguration).to receive(:new).with(no_args)
-      Settings.encrypted('tmp/tests/test.enc')
+      expect(Settings.encrypted('tmp/tests/test.enc').read).to be_empty
     end
   end
 end

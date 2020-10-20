@@ -9,6 +9,18 @@ module Gitlab
     CIPHER = "aes-256-gcm"
     SALT = "GitLabEncryptedConfigSalt"
 
+    class MissingKeyError < RuntimeError
+      def initialize(msg = "Missing encryption key to encrypt/decrypt file with.")
+        super
+      end
+    end
+
+    class InvalidConfigError < RuntimeError
+      def initialize(msg = "Content was not a valid yml config file")
+        super
+      end
+    end
+
     def self.generate_key(base_key)
       # Because the salt is static, we want uniqueness to be coming from the base_key
       # Error if the base_key is empty or suspiciously short
@@ -23,8 +35,12 @@ module Gitlab
       @previous_keys = previous_keys
     end
 
+    def active?
+      content_path&.exist?
+    end
+
     def read
-      if !key.nil? && content_path&.exist?
+      if active?
         decrypt content_path.binread
       else
         ""
@@ -45,7 +61,13 @@ module Gitlab
     end
 
     def config
-      @config ||= deserialize(read).deep_symbolize_keys
+      return @config if @config
+
+      contents = deserialize(read)
+
+      raise InvalidConfigError.new unless contents.is_a?(Hash)
+
+      @config = contents.deep_symbolize_keys
     end
 
     def change(&block)
@@ -61,10 +83,12 @@ module Gitlab
     end
 
     def encrypt(contents)
+      handle_missing_key
       encryptor.encrypt_and_sign contents
     end
 
     def decrypt(contents)
+      handle_missing_key
       encryptor.decrypt_and_verify contents
     end
 
@@ -88,6 +112,10 @@ module Gitlab
 
     def deserialize(contents)
       YAML.safe_load(contents, permitted_classes: [Symbol]).presence || {}
+    end
+
+    def handle_missing_key
+      raise MissingKeyError.new if @key.nil?
     end
   end
 end
