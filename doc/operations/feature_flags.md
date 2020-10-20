@@ -161,9 +161,9 @@ Enables the feature for a list of target users. It is implemented
 using the Unleash [`userWithId`](https://unleash.github.io/docs/activation_strategy#userwithid)
 activation strategy.
 
-Enter user IDs as a comma-separated list of values. For example,
-`user@example.com, user2@example.com`, or `username1,username2,username3`, and so on. Note that user
-IDs are identifiers for your application users. They do not need to be GitLab users.
+Enter user IDs as a comma-separated list of values (for example,
+`user@example.com, user2@example.com`, or `username1,username2,username3`, and so on). Note that
+user IDs are identifiers for your application users. They do not need to be GitLab users.
 
 CAUTION: **Caution:**
 The Unleash client **must** be given a user ID for the feature to be enabled for
