@@ -35,6 +35,10 @@ module AlertManagement
       ::Gitlab::Routing.url_helpers.project_alert_http_integration_url(project, name_slug, endpoint_identifier, format: :json)
     end
 
+    def reset_token
+      update(token: nil)
+    end
+
     private
 
     def self.generate_token
