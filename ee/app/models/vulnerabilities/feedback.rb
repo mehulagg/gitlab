@@ -83,5 +83,13 @@ module Vulnerabilities
         project_fingerprint: project_fingerprint
       }
     end
+
+    def finding
+      Finding.find_by(
+        project_id: project_id,
+        report_type: category,
+        project_fingerprint: project_fingerprint
+      )
+    end
   end
 end
