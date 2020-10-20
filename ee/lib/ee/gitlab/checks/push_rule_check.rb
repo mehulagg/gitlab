@@ -7,13 +7,21 @@ module EE
         def validate!
           return unless push_rule
 
-          if tag_name
-            PushRules::TagCheck.new(change_access).validate!
-          else
-            PushRules::BranchCheck.new(change_access).validate!
+          checks = []
+
+          checks << Thread.new do
+            if tag_name
+              PushRules::TagCheck.new(change_access).validate!
+            else
+              PushRules::BranchCheck.new(change_access).validate!
+            end
           end
 
-          PushRules::FileSizeCheck.new(change_access).validate!
+          checks << Thread.new do
+            PushRules::FileSizeCheck.new(change_access).validate!
+          end
+
+          checks.each(&:join)
         end
       end
     end
