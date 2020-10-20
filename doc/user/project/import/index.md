@@ -63,7 +63,10 @@ The process is essentially the same as for [migrating from self-managed GitLab t
 The best method for migrating from one GitLab instance to another,
 perhaps from an old server to a new server for example, is to
 [back up the instance](../../../raketasks/backup_restore.md),
-then restore it on the new server.
+then [restore](../../../raketasks/backup_restore.md#restore-gitlab) it on the new server.
+
+NOTE: **Note:**
+When using backup and restore as a migration method between two self-hosted GitLab instances, the GitLab and PostgreSQL versions should exactly match between the two instances.  GitLab and/or PostgreSQL upgrades can be done before or after the instance to instance migration.
 
 In the event of merging two GitLab instances together (for example, both instances have existing data on them and one can't be wiped),
 refer to the instructions in [Migrating from self-managed GitLab to GitLab.com](#migrating-from-self-managed-gitlab-to-gitlabcom).
