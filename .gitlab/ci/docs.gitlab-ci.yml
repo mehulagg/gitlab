@@ -5,7 +5,6 @@
   image: ruby:2.6-alpine
   stage: review
   needs: []
-  dependencies: []
   variables:
     # We're cloning the repo instead of downloading the script for now
     # because some repos are private and CI_JOB_TOKEN cannot access files.
