@@ -86,6 +86,18 @@ sorting by label priority in issues, due to the complexity of the sort.
 
 <!-- ### External pagination -->
 
+### External pagination
+
+There may be times where you need to return data via the GitLab API that is stored in another system. In these cases you may be forced to perform pagination on a third-party's API, rather than in GitLab itself.
+
+An example of this is with our Error Tracking implementation, where we proxy Sentry errors though the GitLab API. We do this by calling the Sentry API which enforces it's own pagination rules. This means we cannot access the collection within GitLab to perform our own custom pagination.
+
+To keep our API consistent we manually set the pagination cursors based on values returned by the external API, using `Gitlab::Graphql::ExternallyPaginatedArray.new(previous_cursor, next_cursor, *items)`.
+
+This allows us to keep the GraphQL and client using pagination that works consistently across the GitLab API, even though pagination is actually occurring outside GitLab.
+
+You can see an example of how to implement this by looking at [`error__tracking/sentry_error_collection_type.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/types/error_tracking/sentry_error_collection_type.rb#L16).
+
 ## Testing
 
 Any GraphQL field that supports pagination and sorting should be tested
