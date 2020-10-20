@@ -137,8 +137,7 @@ module Gitlab
       def self.parse_search_result(result, project)
         ref = result["_source"]["blob"]["commit_sha"]
         path = result["_source"]["blob"]["path"]
-        extname = File.extname(path)
-        basename = path.sub(/#{extname}$/, '')
+        basename = File.join(File.dirname(path), File.basename(path, '.*'))
         content = result["_source"]["blob"]["content"]
         project_id = result['_source']['project_id'].to_i
         total_lines = content.lines.size
