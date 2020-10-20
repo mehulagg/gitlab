@@ -57,7 +57,8 @@ module EE
         :slack_app_verification_token,
         :throttle_incident_management_notification_enabled,
         :throttle_incident_management_notification_period_in_seconds,
-        :throttle_incident_management_notification_per_period
+        :throttle_incident_management_notification_per_period,
+        :new_user_signups_cap
       ]
     end
 

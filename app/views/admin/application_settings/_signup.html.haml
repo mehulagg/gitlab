@@ -17,6 +17,9 @@
             = _('Require admin approval for new sign-ups')
             .form-text.text-muted
               = _("When enabled, any user visiting %{host} and creating an account will have to be explicitly approved by an admin before they can sign in. This setting is effective only if sign-ups are enabled.") % { host: "#{new_user_session_url(host: Gitlab.config.gitlab.host)}" }
+
+    = render_if_exists 'admin/application_settings/new_user_signups_cap', form: f
+
     .form-group
       .form-check
         = f.check_box :send_user_confirmation_email, class: 'form-check-input'
