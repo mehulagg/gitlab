@@ -1,5 +1,5 @@
 ---
 title: Rename Piwik config items and layout file after rebranding to Matomo
-merge_request:
+merge_request: 45658
 author:
 type: changed
