@@ -1,32 +1,26 @@
+# frozen_string_literal: true
+
 module Gitlab
   module Sitemaps
     class SitemapFile
       SITEMAP_INDEX_PATH = File.join(Rails.public_path, 'sitemap.xml')
 
-      attr_accessor :sitemap_urls
+      attr_accessor :urls
 
       def initialize
-        @sitemap_urls = []
+        @urls = []
       end
 
-      def add_urls(urls = [])
-        urls = Array(urls)
+      def add_elements(elements = [])
+        elements = Array(elements)
 
-        return if urls.empty?
+        return if elements.empty?
 
-        @sitemap_urls << urls
-      end
-
-      def add_groups(groups = [])
-        groups = Array(groups)
-
-        return if groups.empty?
-
-        @sitemap_urls << groups.map { |group| Sitemaps::UrlExtractor.extract_from_group(group) }
+        urls << elements.map! { |element| Sitemaps::UrlExtractor.extract(element) }
       end
 
       def save
-        return if sitemap_urls.empty?
+        return if urls.empty?
 
         File.write(SITEMAP_INDEX_PATH, render)
       end

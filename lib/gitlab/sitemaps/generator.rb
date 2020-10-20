@@ -1,8 +1,12 @@
+# frozen_string_literal: true
+
 module Gitlab
   module Sitemaps
     class Generator
       class << self
         include Gitlab::Routing
+
+        GITLAB_ORG_NAMESPACE = 'gitlab-org'.freeze
 
         def execute
           # unless Gitlab.com?
@@ -12,13 +16,13 @@ module Gitlab
           file = Sitemaps::SitemapFile.new
 
           if gitlab_org_group
-            file.add_urls(generic_urls)
-            file.add_groups(gitlab_org_group)
-            # file.add_urls(gitlab_org_subgroups)
-            # file.add_urls(gitlab_org_projects)
+            file.add_elements(generic_urls)
+            file.add_elements(gitlab_org_group)
+            file.add_elements(gitlab_org_subgroups)
+            file.add_elements(gitlab_org_projects)
             file.save
           else
-            return "The namespace `gitlab-org` group was not found"
+            return "The namespace '#{GITLAB_ORG_NAMESPACE}' group was not found"
           end
         end
 
@@ -38,11 +42,20 @@ module Gitlab
         end
 
         def gitlab_org_subgroups
-          GroupsFinder.new(nil, parent: gitlab_org_group, include_parent_descendants: true).execute
+          GroupsFinder.new(
+            nil,
+            parent: gitlab_org_group,
+            include_parent_descendants: true
+          ).execute
         end
 
         def gitlab_org_projects
-          GroupProjectsFinder.new(current_user: nil, group: gitlab_org_group, params: { non_archived: true}).execute
+          GroupProjectsFinder.new(
+            current_user: nil,
+            group: gitlab_org_group,
+            params: { non_archived: true },
+            options: { include_subgroups: true }
+          ).execute.includes(:project_feature, namespace: :route)
         end
       end
     end
