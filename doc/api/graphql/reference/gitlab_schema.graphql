@@ -8505,7 +8505,7 @@ type Group {
   """
   vulnerabilityGrades(
     """
-    Load grades for all groups
+    Include grades belonging to subgroups
     """
     includeSubgroups: Boolean = false
   ): [VulnerableProjectsByGrade!]!

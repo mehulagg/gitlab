@@ -23020,7 +23020,7 @@
               "args": [
                 {
                   "name": "includeSubgroups",
-                  "description": "Load grades for all groups",
+                  "description": "Include grades belonging to subgroups",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
