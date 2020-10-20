@@ -12,6 +12,7 @@ export default (IssuableTokenKeys, disableTargetBranchFilter = false) => {
       tag: __('Yes or No'),
       lowercaseValueOnSubmit: true,
       capitalizeTokenValue: true,
+      hideNotEqual: true,
     },
     conditions: [
       {
@@ -21,28 +22,6 @@ export default (IssuableTokenKeys, disableTargetBranchFilter = false) => {
         tokenKey: 'draft',
         value: __('Yes'),
         operator: '=',
-      },
-      {
-        url: 'wip=no',
-        // eslint-disable-next-line @gitlab/require-i18n-strings
-        replacementUrl: 'draft=no',
-        tokenKey: 'draft',
-        value: __('No'),
-        operator: '=',
-      },
-      {
-        url: 'not[wip]=yes',
-        replacementUrl: 'not[draft]=yes',
-        tokenKey: 'draft',
-        value: __('Yes'),
-        operator: '!=',
-      },
-      {
-        url: 'not[wip]=no',
-        replacementUrl: 'not[draft]=no',
-        tokenKey: 'draft',
-        value: __('No'),
-        operator: '!=',
       },
     ],
   };
