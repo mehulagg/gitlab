@@ -57,6 +57,16 @@ RSpec.describe Members::DestroyService do
         expect(details[:reason]).to be_nil
       end
     end
+
+    context 'when member user has a scheduled deletion for the group' do
+      let(:group_deletion_schedule) { create(:group_deletion_schedule, group: group, user: member_user, marked_for_deletion_on: 2.days.ago) }
+
+      it 'deletes the group deletion schedule' do
+        subject.execute(member)
+
+        expect(group.deletion_schedule).to be nil
+      end
+    end
   end
 
   context 'when current user is not present' do # ie, when the system initiates the destroy
