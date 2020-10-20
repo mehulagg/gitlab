@@ -4,6 +4,7 @@ require "spec_helper"
 
 RSpec.describe Gitlab::EncryptedConfiguration do
   subject(:configuration) { described_class.new }
+
   let!(:config_tmp_dir) { Dir.mktmpdir('config-') }
 
   after do
@@ -82,7 +83,7 @@ RSpec.describe Gitlab::EncryptedConfiguration do
         config = described_class.new(content_path: credentials_config_path, base_key: credentials_key)
 
         config.write("stringcontent")
-        expect{ config[:foo] }.to raise_error Gitlab::EncryptedConfiguration::InvalidConfigError
+        expect { config[:foo] }.to raise_error Gitlab::EncryptedConfiguration::InvalidConfigError
       end
     end
 

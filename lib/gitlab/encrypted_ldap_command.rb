@@ -6,13 +6,23 @@ module Gitlab
     class << self
       def write(contents)
         encrypted = Gitlab::Auth::Ldap::Config.encrypted_secrets
-        validate_config(encrypted)
+        return unless validate_config(encrypted)
+
         encrypted.write(contents)
+
+        puts "File encrypted and saved."
+      rescue Interrupt
+        puts "Aborted changing file: nothing saved."
+      rescue Gitlab::EncryptedConfiguration::MissingKeyError
+        puts "Missing encryption key enc_settings_key_base."
+      rescue ActiveSupport::MessageEncryptor::InvalidMessage
+        puts "Couldn't decrypt #{encrypted.content_path}. Perhaps you passed the wrong key?"
       end
 
       def edit
         encrypted = Gitlab::Auth::Ldap::Config.encrypted_secrets
-        validate_config(encrypted)
+        return unless validate_config(encrypted)
+
         editor = ENV['EDITOR'] || 'editor'
         temp_file = Tempfile.new(File.basename(encrypted.content_path))
 
@@ -50,8 +60,11 @@ module Gitlab
         dir_path = File.dirname(encrypted.content_path)
 
         unless File.exist?(dir_path)
-          abort "Directory #{dir_path} does not exist. Create the directory and try again."
+          puts "Directory #{dir_path} does not exist. Create the directory and try again."
+          return false
         end
+
+        true
       end
 
       def encrypted_file_template
