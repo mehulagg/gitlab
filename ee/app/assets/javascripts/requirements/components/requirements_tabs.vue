@@ -1,5 +1,5 @@
 <script>
-import { GlLink, GlDeprecatedBadge as GlBadge, GlButton } from '@gitlab/ui';
+import { GlLink, GlBadge, GlButton } from '@gitlab/ui';
 
 import { FilterState } from '../constants';
 
