@@ -19,11 +19,8 @@ These figures can be useful for understanding how much data your instance contai
 
 ## Past year trend charts
 
-Instance Statistics also displays line charts that show total counts per month, over the past 12 months, for the following:
-
-- Users
-- Projects
-- Groups
+Instance Statistics also displays line charts that show total counts per month, over the past 12 months,
+in the categories shown in [Total counts](#total-counts).
 
 These charts help you visualize how rapidly these records are being created on your instance.
 
