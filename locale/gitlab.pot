@@ -10456,9 +10456,6 @@ msgstr ""
 msgid "Error fetching payload data."
 msgstr ""
 
-msgid "Error fetching projects"
-msgstr ""
-
 msgid "Error fetching refs"
 msgstr ""
 
@@ -26595,6 +26592,9 @@ msgid "There was an error deleting the To Do."
 msgstr ""
 
 msgid "There was an error fetching Groups"
+msgstr ""
+
+msgid "There was an error fetching Projects"
 msgstr ""
 
 msgid "There was an error fetching configuration for charts"

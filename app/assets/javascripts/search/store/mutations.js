@@ -12,4 +12,15 @@ export default {
     state.fetchingGroups = false;
     state.groups = [];
   },
+  [types.REQUEST_PROJECTS](state) {
+    state.fetchingProjects = true;
+  },
+  [types.RECEIVE_PROJECTS_SUCCESS](state, data) {
+    state.fetchingProjects = false;
+    state.projects = data;
+  },
+  [types.RECEIVE_PROJECTS_ERROR](state) {
+    state.fetchingProjects = false;
+    state.projects = [];
+  },
 };
