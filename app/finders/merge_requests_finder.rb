@@ -65,6 +65,11 @@ class MergeRequestsFinder < IssuableFinder
 
     by_source_project_id(items)
   end
+  
+  def filter_negated_items(items)
+    items = super(items)
+    items = by_negated_target_branch(items)
+  end
 
   private
 
@@ -95,6 +100,14 @@ class MergeRequestsFinder < IssuableFinder
     return items unless target_branch
 
     items.where(target_branch: target_branch)
+  end
+  # rubocop: enable CodeReuse/ActiveRecord
+
+  # rubocop: disable CodeReuse/ActiveRecord
+  def by_negated_target_branch(items)
+    return items unless not_params[:target_branch]
+
+    items.where.not(target_branch: not_params[:target_branch])
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
