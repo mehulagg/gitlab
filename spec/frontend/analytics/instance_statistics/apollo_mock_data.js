@@ -1,4 +1,9 @@
-const defaultPageInfo = { hasPreviousPage: false, startCursor: null, endCursor: null };
+const defaultPageInfo = {
+  hasNextPage: false,
+  hasPreviousPage: false,
+  startCursor: null,
+  endCursor: null,
+};
 
 export function getApolloResponse(options = {}) {
   const {
@@ -28,3 +33,40 @@ export function getApolloResponse(options = {}) {
     },
   };
 }
+
+const mockApolloResponse = ({ loading = false, hasNextPage = false, key, data }) => ({
+  data: {
+    [key]: {
+      pageInfo: { ...defaultPageInfo, hasNextPage },
+      nodes: data,
+      loading,
+    },
+  },
+});
+
+export const mockQueryResponse = ({
+  key,
+  data = [],
+  loading = false,
+  hasNextPage = false,
+  additionalData = [],
+}) => {
+  const response = mockApolloResponse({ loading, hasNextPage, key, data });
+  if (loading) {
+    return jest.fn().mockReturnValue(new Promise(() => {}));
+  }
+  if (hasNextPage) {
+    return jest
+      .fn()
+      .mockResolvedValueOnce(response)
+      .mockResolvedValueOnce(
+        mockApolloResponse({
+          loading,
+          hasNextPage: false,
+          key,
+          data: additionalData,
+        }),
+      );
+  }
+  return jest.fn().mockResolvedValue(response);
+};

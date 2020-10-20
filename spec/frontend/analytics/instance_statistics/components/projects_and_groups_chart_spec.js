@@ -8,46 +8,16 @@ import ProjectsAndGroupChart from '~/analytics/instance_statistics/components/pr
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import projectsQuery from '~/analytics/instance_statistics/graphql/queries/projects.query.graphql';
 import groupsQuery from '~/analytics/instance_statistics/graphql/queries/groups.query.graphql';
-import { mockCountsData2, roundedSortedCountsMonthlyChartData2, mockPageInfo } from '../mock_data';
+import { mockCountsData2, roundedSortedCountsMonthlyChartData2 } from '../mock_data';
+import { mockQueryResponse } from '../apollo_mock_data';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
 
 describe('ProjectsAndGroupChart', () => {
   let wrapper;
-  let queryResponses = { projects: null, groups: null }
-  const mockAdditionalData = [{ recordedAt: '2020-07-21', count: 5 }]
-
-  const mockApolloResponse = ({ loading = false, hasNextPage = false, key, data }) => ({
-    data: {
-      [key]: {
-        pageInfo: { ...mockPageInfo, hasNextPage },
-        nodes: data,
-        loading,
-      },
-    },
-  });
-
-  const mockQueryResponse = ({ key, data = [], loading = false, hasNextPage = false, additionalData = [] }) => {
-    const response = mockApolloResponse({ loading, hasNextPage, key, data });
-    if (loading) {
-      return jest.fn().mockReturnValue(new Promise(() => {}));
-    }
-    if (hasNextPage) {
-      return jest
-        .fn()
-        .mockResolvedValueOnce(response)
-        .mockResolvedValueOnce(
-          mockApolloResponse({
-            loading,
-            hasNextPage: false,
-            key,
-            data: additionalData,
-          }),
-        );
-    }
-    return jest.fn().mockResolvedValue(response);
-  };
+  let queryResponses = { projects: null, groups: null };
+  const mockAdditionalData = [{ recordedAt: '2020-07-21', count: 5 }];
 
   const createComponent = ({
     loadingError = false,
@@ -59,9 +29,21 @@ describe('ProjectsAndGroupChart', () => {
     groupsHasNextPage = false,
   } = {}) => {
     queryResponses = {
-      projects: mockQueryResponse({ key:'projects', data: projects, loading: projectsLoading, hasNextPage: projectsHasNextPage, additionalData: mockAdditionalData }),
-      groups: mockQueryResponse({ key:'groups', data: groups, loading: groupsLoading, hasNextPage: groupsHasNextPage, additionalData: mockAdditionalData })
-    }
+      projects: mockQueryResponse({
+        key: 'projects',
+        data: projects,
+        loading: projectsLoading,
+        hasNextPage: projectsHasNextPage,
+        additionalData: mockAdditionalData,
+      }),
+      groups: mockQueryResponse({
+        key: 'groups',
+        data: groups,
+        loading: groupsLoading,
+        hasNextPage: groupsHasNextPage,
+        additionalData: mockAdditionalData,
+      }),
+    };
 
     return shallowMount(ProjectsAndGroupChart, {
       props: {
@@ -72,7 +54,7 @@ describe('ProjectsAndGroupChart', () => {
       localVue,
       apolloProvider: createMockApollo([
         [projectsQuery, queryResponses.projects],
-        [groupsQuery, queryResponses.groups]
+        [groupsQuery, queryResponses.groups],
       ]),
       data() {
         return { loadingError };
@@ -85,8 +67,8 @@ describe('ProjectsAndGroupChart', () => {
     wrapper = null;
     queryResponses = {
       projects: null,
-      groups: null
-    }
+      groups: null,
+    };
   });
 
   const findLoader = () => wrapper.find(ChartSkeletonLoader);
@@ -111,7 +93,7 @@ describe('ProjectsAndGroupChart', () => {
     beforeEach(async () => {
       wrapper = createComponent({
         projects: mockCountsData2,
-        groupsLoading: true
+        groupsLoading: true,
       });
 
       await wrapper.vm.$nextTick();
@@ -187,11 +169,10 @@ describe('ProjectsAndGroupChart', () => {
   });
 
   describe.each`
-  metric | loadingState | newData
-  ${'projects'}| ${{ projectsHasNextPage: true }} | ${{projects: mockCountsData2}}
-  ${'groups'}| ${{ groupsHasNextPage: true }} | ${{groups: mockCountsData2}}
-  `
-  ('$metric - fetchMore', ({ metric, loadingState, newData }) => {
+    metric        | loadingState                     | newData
+    ${'projects'} | ${{ projectsHasNextPage: true }} | ${{ projects: mockCountsData2 }}
+    ${'groups'}   | ${{ groupsHasNextPage: true }}   | ${{ groups: mockCountsData2 }}
+  `('$metric - fetchMore', ({ metric, loadingState, newData }) => {
     describe('when the fetchMore query returns data', () => {
       beforeEach(async () => {
         wrapper = createComponent({

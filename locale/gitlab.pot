@@ -7513,6 +7513,9 @@ msgstr ""
 msgid "Could not load instance counts. Please refresh the page to try again."
 msgstr ""
 
+msgid "Could not load the projects and groups chart. Please refresh the page to try again."
+msgstr ""
+
 msgid "Could not load the user chart. Please refresh the page to try again."
 msgstr ""
 
@@ -26717,6 +26720,12 @@ msgstr ""
 msgid "There was an error while fetching value stream analytics duration data."
 msgstr ""
 
+msgid "There was an error while loading the groups"
+msgstr ""
+
+msgid "There was an error while loading the projects"
+msgstr ""
+
 msgid "There was an error with the reCAPTCHA. Please solve the reCAPTCHA again."
 msgstr ""
 
@@ -27793,6 +27802,9 @@ msgid "Total issues"
 msgstr ""
 
 msgid "Total memory (GB)"
+msgstr ""
+
+msgid "Total projects & groups"
 msgstr ""
 
 msgid "Total test time for all commits/merges"
