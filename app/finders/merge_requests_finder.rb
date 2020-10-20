@@ -65,10 +65,10 @@ class MergeRequestsFinder < IssuableFinder
 
     by_source_project_id(items)
   end
-  
+
   def filter_negated_items(items)
     items = super(items)
-    items = by_negated_target_branch(items)
+    by_negated_target_branch(items)
   end
 
   private
