@@ -169,6 +169,7 @@ package_hunter:
     - du -hcs gitlab.tgz
     - ping 46.101.173.169
     - DEBUG=* HTR_USER=$PACKAGE_HUNTER_USER HTR_PASS=$PACKAGE_HUNTER_PASS node /usr/src/app/cli.js analyze gitlab.tgz
+    - echo $?
   artifacts:
     paths:
       - gl-dependency-scanning-report.json  # GitLab-specific
