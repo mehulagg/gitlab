@@ -29,10 +29,12 @@ module Gitlab
         private
 
         def generic_urls
-          [explore_projects_url,
-           explore_snippets_url,
-           explore_groups_url,
-           help_url]
+          [
+            explore_projects_url,
+            explore_snippets_url,
+            explore_groups_url,
+            help_url
+          ]
         end
 
         # rubocop: disable CodeReuse/ActiveRecord
