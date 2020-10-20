@@ -121,18 +121,17 @@ export const commitChanges = ({ commit, state, getters, dispatch, rootState, roo
   commit(types.UPDATE_LOADING, true);
 
   return stageFilesPromise
-    .then(() => {
-      const payload = createCommitPayload({
+    .then(() =>
+      createCommitPayload({
         branch: branchName,
         newBranch,
         getters,
         state,
         rootState,
         rootGetters,
-      });
-
-      return service.commit(rootState.currentProjectId, payload);
-    })
+      }),
+    )
+    .then(payload => service.commit(rootState.currentProjectId, payload))
     .catch(e => {
       commit(types.UPDATE_LOADING, false);
       commit(types.SET_ERROR, parseCommitError(e));

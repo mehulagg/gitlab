@@ -5,6 +5,7 @@ import {
   isRootRelative,
   isBlobUrl,
 } from '~/lib/utils/url_utility';
+import { blobUrlToDataUrl } from '~/ide/utils';
 
 export const dataStructure = () => ({
   id: '',
@@ -107,24 +108,32 @@ export const createCommitPayload = ({
   state,
   rootState,
   rootGetters,
-}) => ({
-  branch,
-  commit_message: state.commitMessage || getters.preBuiltCommitMessage,
-  actions: getCommitFiles(rootState.stagedFiles).map(f => {
-    const isBlob = isBlobUrl(f.rawPath);
-    const content = isBlob ? btoa(f.content) : f.content;
+}) => {
+  const actionsPromise = Promise.all(
+    getCommitFiles(rootState.stagedFiles).map(f => {
+      const isBlob = isBlobUrl(f.rawPath);
+      const contentPromise = isBlob
+        ? blobUrlToDataUrl(f.rawPath).then(url => url.split('base64,')[1])
+        : Promise.resolve(f.content);
 
-    return {
-      action: commitActionForFile(f),
-      file_path: f.path,
-      previous_path: f.prevPath || undefined,
-      content: f.prevPath && !f.changed ? null : content || undefined,
-      encoding: isBlob ? 'base64' : 'text',
-      last_commit_id: newBranch || f.deleted || f.prevPath ? undefined : f.lastCommitSha,
-    };
-  }),
-  start_sha: newBranch ? rootGetters.lastCommit.id : undefined,
-});
+      return contentPromise.then(content => ({
+        action: commitActionForFile(f),
+        file_path: f.path,
+        previous_path: f.prevPath || undefined,
+        content: f.prevPath && !f.changed ? null : content || undefined,
+        encoding: isBlob ? 'base64' : 'text',
+        last_commit_id: newBranch || f.deleted || f.prevPath ? undefined : f.lastCommitSha,
+      }));
+    }),
+  );
+
+  return actionsPromise.then(actions => ({
+    branch,
+    commit_message: state.commitMessage || getters.preBuiltCommitMessage,
+    actions,
+    start_sha: newBranch ? rootGetters.lastCommit.id : undefined,
+  }));
+};
 
 export const createNewMergeRequestUrl = (projectUrl, source, target) =>
   `${projectUrl}/-/merge_requests/new?merge_request[source_branch]=${source}&merge_request[target_branch]=${target}&nav_source=webide`;

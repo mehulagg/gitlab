@@ -2,6 +2,10 @@ import * as utils from '~/ide/stores/utils';
 import { commitActionTypes } from '~/ide/constants';
 import { file } from '../helpers';
 
+jest.mock('~/ide/utils', () => ({
+  blobUrlToDataUrl: jest.fn().mockResolvedValue('data:image/png;base64,bmV3IGZpbGUgY29udGVudA=='),
+}));
+
 describe('Multi-file store utils', () => {
   describe('setPageTitle', () => {
     it('sets the document page title', () => {
@@ -29,7 +33,7 @@ describe('Multi-file store utils', () => {
   });
 
   describe('createCommitPayload', () => {
-    it('returns API payload', () => {
+    it('returns API payload', async () => {
       const state = {
         commitMessage: 'commit message',
       };
@@ -54,7 +58,7 @@ describe('Multi-file store utils', () => {
         ],
         currentBranchId: 'master',
       };
-      const payload = utils.createCommitPayload({
+      const payload = await utils.createCommitPayload({
         branch: 'master',
         newBranch: false,
         state,
@@ -77,7 +81,7 @@ describe('Multi-file store utils', () => {
           {
             action: commitActionTypes.create,
             file_path: 'added',
-            // atob("new file content")
+            // result of mocked blobUrlToDataUrl above
             content: 'bmV3IGZpbGUgY29udGVudA==',
             encoding: 'base64',
             last_commit_id: '123456789',
@@ -104,7 +108,7 @@ describe('Multi-file store utils', () => {
       });
     });
 
-    it('uses prebuilt commit message when commit message is empty', () => {
+    it('uses prebuilt commit message when commit message is empty', async () => {
       const rootState = {
         stagedFiles: [
           {
@@ -124,7 +128,7 @@ describe('Multi-file store utils', () => {
         ],
         currentBranchId: 'master',
       };
-      const payload = utils.createCommitPayload({
+      const payload = await utils.createCommitPayload({
         branch: 'master',
         newBranch: false,
         state: {},
@@ -149,7 +153,7 @@ describe('Multi-file store utils', () => {
           {
             action: commitActionTypes.create,
             file_path: 'added',
-            // atob("new file content")
+            // result of mocked blobUrlToDataUrl above
             content: 'bmV3IGZpbGUgY29udGVudA==',
             encoding: 'base64',
             last_commit_id: '123456789',
