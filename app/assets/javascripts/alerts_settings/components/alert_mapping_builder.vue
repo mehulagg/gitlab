@@ -1,10 +1,7 @@
 <script>
-  import {__} from '~/locale';
+  import {s__, __} from '~/locale';
   import {
-    GlTabs,
-    GlTab,
-    GlPath,
-    GlFormTextarea,
+    GlIcon,
     GlButton,
     GlFormGroup,
     GlFormInput,
@@ -17,27 +14,16 @@
   import {i18n} from '../constants';
 
   export default {
-    i18n,
-    items: [
-      {
-        title: __('Select Type (Custom)'),
-        step: 'select',
+    i18n: {
+      columns: {
+        gitlabKeyTitle: s__('AlertMappingBuilder|GitLab alert key'),
+        payloadKeyTitle: s__('AlertMappingBuilder|Payload alert key'),
+        substituteKeyTitle: s__('AlertMappingBuilder|Define substitute'),
       },
-      {
-        title: __('Configure'),
-        step: 'configure',
-        selected: true,
-      },
-      {
-        title: __('Finalize'),
-        step: 'finalize',
-      },
-    ],
+      selectMapping: __('Select mapping'),
+    },
     components: {
-      GlTabs,
-      GlTab,
-      GlPath,
-      GlFormTextarea,
+      GlIcon,
       GlButton,
       GlFormGroup,
       GlFormInput,
@@ -49,24 +35,62 @@
 
     data() {
       return {
-        activeStep: this.$options.items[1].step,
         testAlert: null,
         gitlabFields: [
           {
             key: 'title',
-            title: __('Title (Text)'),
+            title: __('Title'),
+            type: 'String',
             mapping: null,
           },
           {
-            key: 'startDate',
-            title: __('Start time (Date)'),
+            key: 'title',
+            title: __('Description'),
+            type: 'String',
+            mapping: null,
+          },
+          {
+            key: 'startTime',
+            title: __('Start time'),
+            type: 'DateTime',
+            mapping: null,
+          },
+          {
+            key: 'service',
+            title: __('Service'),
+            type: 'String',
+            mapping: null,
+          },
+          {
+            key: 'monitoringTool',
+            title: __('Monitoring tool'),
+            type: 'String',
+            mapping: null,
+          },
+          {
+            key: 'hosts',
+            title: __('Monitoring tool'),
+            type: 'String or Array',
             mapping: null,
           },
           {
             key: 'severity',
-            title: __('Severity (Text)'),
+            title: __('Severity'),
+            type: 'String',
             mapping: null,
-          }
+          },
+          {
+            key: 'fingerprint',
+            title: __('Fingerprint'),
+            type: 'String',
+            mapping: null,
+          },
+          {
+            key: 'environment',
+            title: __('Environment'),
+            type: 'String',
+            mapping: null,
+          },
         ],
         mappingKeys: null,
       };
@@ -95,35 +119,34 @@
 </script>
 
 <template>
-  <div class="mapping">
-    <div class="gl-display-inline-flex gl-justify-content-space-between gl-flex-direction-row">
-      <h5>Gitlab alert key</h5>
-      <h5>Payload alert key</h5>
-      <h5>Define substitute</h5>
+  <div class="gl-display-flex gl-flex-direction-column">
+    <div class="gl-display-inline-flex gl-justify-content-space-between">
+      <h5>{{$options.i18n.columns.gitlabKeyTitle}}</h5>
+      <h5>{{$options.i18n.columns.payloadKeyTitle}}</h5>
+      <h5>{{$options.i18n.columns.substituteKeyTitle}}</h5>
     </div>
     <div v-for="gitlabField in gitlabFields"
-         class="mapping-row gl-mb-5 gl-display-inline-flex gl-justify-content-space-between gl-flex-direction-row">
-      <gl-form-input disabled :value="gitlabField.title" class="gl-display-inline-flex" style="width: 200px;"/>
-      <gl-dropdown :text="gitlabField.mapping || __('Select mapping')"
-                   style="width: 200px;">
+         :key="gitlabField.key"
+         class="gl-mb-5 gl-display-inline-flex">
+      <gl-form-input disabled :value="`${gitlabField.title} (${gitlabField.type})`" class="gl-mr-2"/>
+
+      <gl-icon name="arrow-right" />
+      <gl-dropdown :text="gitlabField.mapping || $options.i18n.selectMappiing" class="gl-mr-5">
         <gl-dropdown-item v-for="mappingKey in mappingKeys"
+                          :key="mappingKey"
                           @click="selectMapping(gitlabField.key, mappingKey)">
           {{mappingKey}}
         </gl-dropdown-item>
       </gl-dropdown>
 
-      <gl-dropdown style="width: 200px;">
-        <gl-dropdown-item v-for="key in mappingKeys">{{key}}</gl-dropdown-item>
+      <gl-dropdown>
+        <gl-dropdown-item v-for="key in mappingKeys" :key="key">{{key}}</gl-dropdown-item>
       </gl-dropdown>
     </div>
-
   </div>
 
 </template>
 
 <style scoped lang="scss">
-  .mapping {
-    display: flex;
-    flex-direction: column;
-  }
+
 </style>
