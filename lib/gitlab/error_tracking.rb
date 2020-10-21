@@ -153,7 +153,7 @@ module Gitlab
       def inject_sql_query_into_extra(exception, extra)
         return unless exception.is_a?(ActiveRecord::StatementInvalid)
 
-        extra[:sql] = exception.sql
+        extra[:sql] = PgQuery.normalize(exception.sql)
       end
 
       def sentry_dsn

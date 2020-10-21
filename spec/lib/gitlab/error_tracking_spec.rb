@@ -284,13 +284,13 @@ RSpec.describe Gitlab::ErrorTracking do
     end
 
     context 'when the error is kind of an `ActiveRecord::StatementInvalid`' do
-      let(:exception) { ActiveRecord::StatementInvalid.new(sql: :foo) }
+      let(:exception) { ActiveRecord::StatementInvalid.new(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = 1 AND "users"."foo" = $1') }
 
-      it 'injects the sql query into extra' do
+      it 'injects the normalized sql query into extra' do
         track_exception
 
         expect(Raven).to have_received(:capture_exception)
-          .with(exception, a_hash_including(extra: a_hash_including(sql: :foo)))
+          .with(exception, a_hash_including(extra: a_hash_including(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = $2 AND "users"."foo" = $1')))
       end
     end
   end
