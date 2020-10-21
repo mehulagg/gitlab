@@ -1,0 +1,29 @@
+- if auto_rollback_enabled?(@project)
+  %section.settings.no-animate#auto-rollback-settings{ class: ('expanded' if expanded) }
+    .settings-header
+      %h4
+        = _("Automatic deployment rollbacks")
+      %button.btn.js-settings-toggle{ type: 'button' }
+        = expanded ? _('Collapse') : _('Expand')
+      %p
+        = html_escape(s_('AutoRollback|Automatically roll back to the last successful deployment when a critical problem is detected.'))
+
+    .settings-content
+      .row
+        .col-lg-12
+          = form_for @project, url: project_settings_ci_cd_path(@project, anchor: 'auto-rollback-settings') do |f|
+            = form_errors(@project)
+            %fieldset.builds-feature.js-auto-rollback-settings
+              .form-group
+                = f.fields_for :auto_rollback_attributes, @auto_rollback do |form|
+                  .card
+                    .card-body
+                      .form-check
+                        = form.check_box :enabled, class: 'form-check-input js-toggle-extra-settings', checked: false
+                        = form.label :enabled, class: 'form-check-label' do
+                          %strong= s_('AutoRollback|Enable automatic rollbacks')
+                        .form-text.text-muted
+                          = s_('AutoRollback|Automatic rollbacks start when a critical alert is triggered. If the last successful deployment fails to roll back automatically, it can still be done manually.')
+                          = link_to _('More information'), help_page_path('topics/auto_rollback/index.md'), target: '_blank'
+
+                = f.submit _('Save changes'), class: "gl-button btn btn-success gl-mt-5", data: { qa_selector: 'save_changes_button' }

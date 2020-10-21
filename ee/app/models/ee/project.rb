@@ -83,6 +83,8 @@ module EE
       has_many :dast_site_tokens
       has_many :dast_sites
 
+      has_one :auto_rollback
+
       has_many :protected_environments
       has_many :software_license_policies, inverse_of: :project, class_name: 'SoftwareLicensePolicy'
       has_many :software_licenses, through: :software_license_policies
@@ -628,6 +630,10 @@ module EE
 
     def protected_environments_feature_available?
       feature_available?(:protected_environments)
+    end
+
+    def auto_rollback_feature_available?
+      feature_available?(:auto_rollback)
     end
 
     # Update the default branch querying the remote to determine its HEAD
