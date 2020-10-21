@@ -61,6 +61,8 @@ RSpec.describe PageLayoutHelper do
           object = double(avatar_url: 'http://example.com/uploads/-/system/avatar.png')
           assign(type, object)
 
+          expect(object).to receive(:avatar_url).with({ only_path: false })
+
           expect(helper.page_image).to eq object.avatar_url
         end
 
@@ -75,6 +77,18 @@ RSpec.describe PageLayoutHelper do
       context "with no assignments" do
         it 'falls back to the default' do
           expect(helper.page_image).to match_asset_path 'assets/gitlab_logo.png'
+        end
+      end
+
+      context 'if avatar_with_host is disabled' do
+        it "uses #{type.titlecase} avatar path" do
+          stub_feature_flags(avatar_with_host: false)
+          object = double(avatar_url: 'http://example.com/uploads/-/system/avatar.png')
+          assign(type, object)
+
+          expect(object).to receive(:avatar_url).with({})
+
+          helper.page_image
         end
       end
     end
