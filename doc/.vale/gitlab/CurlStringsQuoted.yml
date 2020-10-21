@@ -5,7 +5,7 @@
 #
 # For a list of all options, see https://errata-ai.gitbook.io/vale/getting-started/styles
 extends: existence
-message: 'When there are spaces in the URL, `curl` commands must wrap URLs in quotes (") or (\'): %s'
+message: 'When there are spaces in the URL, `curl` commands must wrap URLs in single or double-quotes: %s'
 link: https://docs.gitlab.com/ee/development/documentation/restful_api_styleguide.html#curl-commands
 level: suggestion
 scope: code
