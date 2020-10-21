@@ -132,6 +132,8 @@ graph LR
 
 With a database in place, the registry will no longer use the storage backend to write and read metadata. Instead, metadata will be stored and manipulated on the PostgreSQL database. The storage backend will then be used only for uploading and downloading blobs.
 
+The interaction between the registry and its clients, including GitLab Rails and the Docker client, will remain unchanged, as documented in the [Current Architecture](#current-architecture) section. The architectural changes and the database are internal only. The registry HTTP API and webhook notifications will also remain unchanged.
+
 ### Database
 
 Following the GitLab [Go standards and style guidelines](https://docs.gitlab.com/ee/development/go_guide), no ORM is used to manage the database, only the [`database/sql`](https://golang.org/pkg/database/sql/) package from the Go standard library, a PostgreSQL driver ([`lib/pq`](https://pkg.go.dev/github.com/lib/pq?tab=doc)) and raw SQL queries, over a TCP connection pool.
