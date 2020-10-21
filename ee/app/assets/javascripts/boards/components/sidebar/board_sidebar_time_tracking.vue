@@ -16,10 +16,10 @@ export default {
 <template>
   <div class="block">
     <issuable-time-tracker
-      :time-estimate="this.issue.timeEstimate"
-      :time-spent="this.issue.totalTimeSpent"
-      :human-time-estimate="this.issue.humanTimeEstimate"
-      :human-time-spent="this.issue.humanTotalTimeSpent"
+      :time-estimate="issue.timeEstimate"
+      :time-spent="issue.totalTimeSpent"
+      :human-time-estimate="issue.humanTimeEstimate"
+      :human-time-spent="issue.humanTotalTimeSpent"
       :limit-to-hours="timeTrackingLimitToHours"
       :collapsible="false"
     />
