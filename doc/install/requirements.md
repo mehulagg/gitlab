@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Requirements
+# Requirements **(CORE ONLY)**
 
 This page includes useful information on the supported Operating Systems as well
 as the hardware requirements that are needed to install and use GitLab.
@@ -83,6 +83,10 @@ GitLab 13.0 and later requires Redis version 4.0 or higher.
 
 Redis version 5.0 or higher is recommended, as this is what ships with
 [Omnibus GitLab](https://docs.gitlab.com/omnibus/) packages starting with GitLab 12.7.
+
+### Perl
+
+Omnibus GitLab [requires a perl interpreter](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates) to support additional TLS certificate authorities. The default Perl 5 package in your Linux distribution is usually sufficient.
 
 ## Hardware requirements
 
