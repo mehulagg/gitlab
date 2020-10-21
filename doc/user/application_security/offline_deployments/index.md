@@ -66,7 +66,7 @@ external links exposed in the UI. These links might not be accessible within an 
 
 ### Suggested Solutions for vulnerabilities
 
-The [suggested solutions](../index.md#solutions-for-vulnerabilities-auto-remediation) feature
+The [suggested solutions](../index.md#automatic-remediation-for-vulnerabilities) feature
 (auto-remediation) is available for Dependency Scanning and Container Scanning, but may not work
 depending on your instance's configuration. We can only suggest solutions, which are generally more
 current versions that have been patched, when we are able to access up-to-date registry services
