@@ -32,18 +32,6 @@ framework needed to provide a consistent experience for users to easily bring th
 security tools into GitLab. We ask that our integration partners focus their work on those license
 tiers so that we can provide the most value to our mutual customers.
 
-
-
-Step 1: do they fill a gap?
-- [ ] 1. mobile scanning
-- [ ] 1. iaas
-- [ ] 1. dependency scanning
-
-Step 2: do they remove a barrier?
-
-Step 3: did they integrate with ultimate - yes or no?
-
-
 ## What is the GitLab Developer Workflow?
 
 This workflow is how GitLab users interact with our product and expect it to
