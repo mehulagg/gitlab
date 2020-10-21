@@ -8,8 +8,9 @@ users are already familiar with.
 
 ## Criteria for Partnership
 
-Do you fill a one of the below product/feature gaps?
-- mobile scanning
+Do you fill one of these product or feature gaps?
+
+- Mobile scanning
 - IaaS
 - Dependency scanning
 
