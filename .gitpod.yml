@@ -28,6 +28,11 @@ tasks:
         gdk stop
         echo "$(date) – GDK stopped" | tee -a /workspace/startup.log
       )
+      (
+        # install and setup overcommit
+        gem install overcommit
+        make -C tooling/overcommit
+      )
     command: |
       (
         set -e
