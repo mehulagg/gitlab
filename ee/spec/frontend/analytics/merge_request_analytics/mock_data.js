@@ -5,10 +5,19 @@ export const endDate = new Date('2020-08-01');
 
 export const fullPath = 'gitlab-org/gitlab';
 
+// We should update our tests to use fixtures instead of hardcoded mock data.
+// https://gitlab.com/gitlab-org/gitlab/-/issues/270544
 export const throughputChartData = {
   May_2020: { count: 2, __typename: 'MergeRequestConnection' },
   Jun_2020: { count: 4, __typename: 'MergeRequestConnection' },
   Jul_2020: { count: 3, __typename: 'MergeRequestConnection' },
+  __typename: 'Project',
+};
+
+export const throughputChartNoData = {
+  May_2020: { count: 0, __typename: 'MergeRequestConnection' },
+  Jun_2020: { count: 0, __typename: 'MergeRequestConnection' },
+  Jul_2020: { count: 0, __typename: 'MergeRequestConnection' },
   __typename: 'Project',
 };
 

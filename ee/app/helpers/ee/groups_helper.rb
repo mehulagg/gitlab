@@ -77,8 +77,7 @@ module EE
       !!current_user &&
         ::Gitlab.com? &&
         !@group.feature_available?(:security_dashboard) &&
-        can?(current_user, :admin_group, @group) &&
-        current_user.ab_feature_enabled?(:discover_security)
+        can?(current_user, :admin_group, @group)
     end
 
     def show_group_activity_analytics?

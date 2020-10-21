@@ -4,7 +4,7 @@ require 'faker'
 
 module QA
   RSpec.describe 'Verify' do
-    describe 'Merge train', :runner do
+    describe 'Merge train', :runner, :requires_admin do
       let(:file_name) { 'custom_file.txt' }
       let(:mr_title) { Faker::Lorem.sentence }
       let(:executor) { "qa-runner-#{Faker::Alphanumeric.alphanumeric(8)}" }
@@ -47,8 +47,14 @@ module QA
         end
       end
 
-      let(:user) { Resource::User.fabricate_via_api! }
+      let(:user) do
+        Resource::User.fabricate_via_api! do |resource|
+          resource.api_client = admin_api_client
+        end
+      end
+
       let(:user_api_client) { Runtime::API::Client.new(:gitlab, user: user) }
+      let(:admin_api_client) { Runtime::API::Client.as_admin }
 
       let(:merge_request) do
         Resource::MergeRequest.fabricate_via_api! do |merge_request|

@@ -1,5 +1,0 @@
----
-title: Update the audit events filter to have a fallback starting date
-merge_request: 44005
-author:
-type: changed

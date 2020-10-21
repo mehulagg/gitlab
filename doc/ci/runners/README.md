@@ -16,6 +16,10 @@ the coordinator API of GitLab CI/CD, runs the job, and sends the result back to 
 Runners are created by an administrator and are visible in the GitLab UI.
 Runners can be specific to certain projects or available to all projects.
 
+This documentation is focused on using runners in GitLab.
+If you need to install and configure GitLab Runner, see
+[the GitLab Runner documentation](https://docs.gitlab.com/runner/).
+
 ## Types of runners
 
 In the GitLab UI there are three types of runners, based on who you want to have access:
@@ -388,7 +392,10 @@ you must have Owner [permissions](../../user/permissions.md#project-members-perm
 
 You must set up a runner to be able to run all the different types of jobs
 that it may encounter on the projects it's shared over. This would be
-problematic for large amounts of projects, if it weren't for tags.
+problematic for large amounts of projects, if it weren't for tags. 
+
+GitLab CI tags are not the same as Git tags. GitLab CI tags are associated with runners.
+Git tags are associated with commits.
 
 By tagging a runner for the types of jobs it can handle, you can make sure
 shared runners will [only run the jobs they are equipped to run](../yaml/README.md#tags).
