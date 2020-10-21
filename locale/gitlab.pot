@@ -25639,6 +25639,9 @@ msgstr ""
 msgid "Sync information"
 msgstr ""
 
+msgid "Sync now"
+msgstr ""
+
 msgid "Synced"
 msgstr ""
 
