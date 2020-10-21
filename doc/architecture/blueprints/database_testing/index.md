@@ -37,3 +37,23 @@ In parallel we would work on an automated solution to replace the manual review 
 - Automate the creation of snapshots, whether they are trigger or time based
 - Create a private CI Runner to test migrations automatically and safely without triggering any unintended consequences
 - Automate scrubbing/obfuscation of data
+
+Proposal:
+
+| Role                         | Who
+|------------------------------|-------------------------|
+| Author                       |    Craig Gomes          |
+| Architecture Evolution Coach | Gerardo Lopez-Fernandez |
+| Engineering Leader           |    Craig Gomes          |
+| Domain Expert                |    Andreas Brandl       |
+| Domain Expert                |    Jose Finotto         |
+| Domain Expert                |    Yannis Roussos       |
+| Domain Expert                |    Pat Bair             |
+
+DRIs:
+
+| Role                         | Who
+|------------------------------|------------------------|
+| Product                      |    Josh Lambert        |
+| Leadership                   |    Craig Gomes         |
+| Engineering                  |    Andreas Brandl      |
