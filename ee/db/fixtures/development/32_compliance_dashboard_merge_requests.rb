@@ -66,7 +66,7 @@ class Gitlab::Seeder::ComplianceDashboardMergeRequests
 
       merge_request
     end
-  rescue AccessDeniedError => e
+  rescue AccessDeniedError
     raise AccessDeniedError.new("If you are re-creating your GitLab database, you should also delete your old repositories located at $GDK/repositories/@hashed")
   end
 
