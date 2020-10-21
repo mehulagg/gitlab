@@ -13,6 +13,7 @@ RSpec.describe 'Robots.txt Requests', :aggregate_failures do
 
   it 'allows the requests' do
     requests = [
+      '/users/foo/snippets',
       '/users/sign_in'
     ]
 
