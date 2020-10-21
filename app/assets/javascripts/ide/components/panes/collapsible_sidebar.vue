@@ -1,12 +1,12 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlTooltipDirective } from '@gitlab/ui';
 import IdeSidebarNav from '../ide_sidebar_nav.vue';
 
 export default {
   name: 'CollapsibleSidebar',
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective
   },
   components: {
     IdeSidebarNav,
