@@ -528,7 +528,7 @@ NGINX has an Ingress port for all HTTP requests and routes them to the appropria
 
 - [Project Page](https://github.com/zalando/patroni)
 - Configuration:
-  - [Omnibus](../administration/postgresql/patroni.md)
+  - [Omnibus](../administration/postgresql/replication_and_failover.md#patroni)
 - Layer: Core Service (Data)
 - Process: `patroni`
 - Gitlab.com: [Database Architecture](https://about.gitlab.com/handbook/engineering/infrastructure/production/architecture/#database-architecture)
