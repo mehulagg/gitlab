@@ -31,7 +31,7 @@ module Gitlab
           end
 
           def dates
-            return unless relation_reader.legacy?
+            return if relation_reader.legacy?
 
             DATE_MODELS.flat_map do |tag|
               relation_reader.consume_relation(@importable_path, tag, mark_as_consumed: false).map do |model|
