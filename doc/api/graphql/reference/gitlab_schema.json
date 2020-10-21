@@ -20738,7 +20738,7 @@
                   "description": "Find a board by its ID",
                   "type": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "BoardID",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -39593,7 +39593,7 @@
                   "description": "Find a board by its ID",
                   "type": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "BoardID",
                     "ofType": null
                   },
                   "defaultValue": null
