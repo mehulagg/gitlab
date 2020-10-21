@@ -30,4 +30,10 @@ RSpec.describe 'Root explore' do
 
     include_examples 'shows public projects'
   end
+
+  it "includes canonical link to explore projects url" do
+    visit explore_path
+
+    
+  end
 end
