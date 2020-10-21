@@ -15,8 +15,8 @@
 #          |                                 |
 #    ProjectEntity                        Project
 #
-# The tree structure of the entities results in the same structure for
-# imported Groups and Projects.
+# The tree structure of the entities results in the same structure for imported
+# Groups and Projects.
 class BulkImports::Entity < ApplicationRecord
   self.table_name = 'bulk_import_entities'
 
