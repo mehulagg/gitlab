@@ -8,7 +8,7 @@ require 'zlib'
 # Experiment options:
 # - environment (optional, defaults to enabled for development and GitLab.com)
 # - tracking_category (optional, used to set the category when tracking an experiment event)
-# - calculate_subject_index_from_uuid_only (optional, set this to true if you need backwards compatibility)
+# - use_backwards_compatible_subject_index (optional, set this to true if you need backwards compatibility)
 #
 # The experiment is controlled by a Feature Flag (https://docs.gitlab.com/ee/development/feature_flags/controls.html),
 # which is named "#{experiment_key}_experiment_percentage" and *must* be set with a percentage and not be used for other purposes.
@@ -35,59 +35,59 @@ module Gitlab
     EXPERIMENTS = {
       signup_flow: {
         tracking_category: 'Growth::Acquisition::Experiment::SignUpFlow',
-        calculate_subject_index_from_uuid_only: true
+        use_backwards_compatible_subject_index: true
       },
       onboarding_issues: {
         tracking_category: 'Growth::Conversion::Experiment::OnboardingIssues',
-        calculate_subject_index_from_uuid_only: true
+        use_backwards_compatible_subject_index: true
       },
       suggest_pipeline: {
         tracking_category: 'Growth::Expansion::Experiment::SuggestPipeline',
-        calculate_subject_index_from_uuid_only: true
+        use_backwards_compatible_subject_index: true
       },
       ci_notification_dot: {
         tracking_category: 'Growth::Expansion::Experiment::CiNotificationDot',
-        calculate_subject_index_from_uuid_only: true
+        use_backwards_compatible_subject_index: true
       },
       upgrade_link_in_user_menu_a: {
         tracking_category: 'Growth::Expansion::Experiment::UpgradeLinkInUserMenuA',
-        calculate_subject_index_from_uuid_only: true
+        use_backwards_compatible_subject_index: true
       },
       invite_members_version_a: {
         tracking_category: 'Growth::Expansion::Experiment::InviteMembersVersionA',
-        calculate_subject_index_from_uuid_only: true
+        use_backwards_compatible_subject_index: true
       },
       invite_members_version_b: {
         tracking_category: 'Growth::Expansion::Experiment::InviteMembersVersionB',
-        calculate_subject_index_from_uuid_only: true
+        use_backwards_compatible_subject_index: true
       },
       new_create_project_ui: {
         tracking_category: 'Manage::Import::Experiment::NewCreateProjectUi',
-        calculate_subject_index_from_uuid_only: true
+        use_backwards_compatible_subject_index: true
       },
       contact_sales_btn_in_app: {
         tracking_category: 'Growth::Conversion::Experiment::ContactSalesInApp',
-        calculate_subject_index_from_uuid_only: true
+        use_backwards_compatible_subject_index: true
       },
       customize_homepage: {
         tracking_category: 'Growth::Expansion::Experiment::CustomizeHomepage',
-        calculate_subject_index_from_uuid_only: true
+        use_backwards_compatible_subject_index: true
       },
       invite_email: {
         tracking_category: 'Growth::Acquisition::Experiment::InviteEmail',
-        calculate_subject_index_from_uuid_only: true
+        use_backwards_compatible_subject_index: true
       },
       invitation_reminders: {
         tracking_category: 'Growth::Acquisition::Experiment::InvitationReminders',
-        calculate_subject_index_from_uuid_only: true
+        use_backwards_compatible_subject_index: true
       },
       group_only_trials: {
         tracking_category: 'Growth::Conversion::Experiment::GroupOnlyTrials',
-        calculate_subject_index_from_uuid_only: true
+        use_backwards_compatible_subject_index: true
       },
       default_to_issues_board: {
         tracking_category: 'Growth::Conversion::Experiment::DefaultToIssuesBoard',
-        calculate_subject_index_from_uuid_only: true
+        use_backwards_compatible_subject_index: true
       }
     }.freeze
 
@@ -127,8 +127,7 @@ module Gitlab
       def experiment_enabled?(experiment_key)
         return false if dnt_enabled?
 
-        return true if Experimentation.enabled_for_value?(experiment_key,
-          experimentation_subject_index(experiment_key))
+        return true if Experimentation.enabled_for_value?(experiment_key, experimentation_subject_index(experiment_key))
         return true if forced_enabled?(experiment_key)
 
         false
@@ -174,7 +173,7 @@ module Gitlab
       def experimentation_subject_index(experiment_key)
         return if experimentation_subject_id.blank?
 
-        if Experimentation.experiment(experiment_key).calculate_subject_index_from_uuid_only
+        if Experimentation.experiment(experiment_key).use_backwards_compatible_subject_index
           experimentation_subject_id.delete('-').hex % 100
         else
           Zlib.crc32("#{experiment_key}#{experimentation_subject_id}") % 100
@@ -240,7 +239,7 @@ module Gitlab
       :key,
       :environment,
       :tracking_category,
-      :calculate_subject_index_from_uuid_only,
+      :use_backwards_compatible_subject_index,
       keyword_init: true
     ) do
       def enabled?

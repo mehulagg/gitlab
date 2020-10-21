@@ -8,7 +8,7 @@ RSpec.describe Gitlab::Experimentation, :snowplow do
       backwards_compatible_test_experiment: {
         environment: environment,
         tracking_category: 'Team',
-        calculate_subject_index_from_uuid_only: true
+        use_backwards_compatible_subject_index: true
       },
       test_experiment: {
         environment: environment,
