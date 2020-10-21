@@ -519,6 +519,9 @@ deploy:
       artifacts: true
 ```
 
+NOTE: **Note:**
+A maximum of twenty (20) environment variables can be inherited through the use of a `dotenv` artifact.
+
 ## Priority of environment variables
 
 Variables of different types can take precedence over other
