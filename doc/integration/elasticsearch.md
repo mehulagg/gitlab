@@ -23,7 +23,8 @@ and the advantage of the following special searches:
 
 | GitLab version                              | Elasticsearch version         |
 |---------------------------------------------|-------------------------------|
-| GitLab Enterprise Edition 12.7 or greater   | Elasticsearch 6.x through 7.x |
+| GitLab Enterprise Edition 13.3 or higher    | Elasticsearch 6.8 through 8.x |
+| GitLab Enterprise Edition 12.7 througb 13.3 | Elasticsearch 6.x through 6.7 |
 | GitLab Enterprise Edition 11.5 through 12.6 | Elasticsearch 5.6 through 6.x |
 | GitLab Enterprise Edition 9.0 through 11.4  | Elasticsearch 5.1 through 5.5 |
 | GitLab Enterprise Edition 8.4 through 8.17  | Elasticsearch 2.4 with [Delete By Query Plugin](https://www.elastic.co/guide/en/elasticsearch/plugins/2.4/plugins-delete-by-query.html) installed |
