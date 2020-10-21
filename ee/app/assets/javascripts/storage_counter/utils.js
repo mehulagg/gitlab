@@ -86,7 +86,7 @@ export const parseProjects = ({
     additionalPurchasedStorageSize - totalRepositorySizeExcess,
   );
 
-  return projects.edges.map(({ node: project }) =>
+  return projects.nodes.map(project =>
     calculateUsedAndRemStorage(project, purchasedStorageRemaining),
   );
 };
@@ -119,11 +119,14 @@ export const parseGetStorageResults = data => {
   } = data || {};
 
   return {
-    projects: parseProjects({
-      projects,
-      additionalPurchasedStorageSize,
-      totalRepositorySizeExcess,
-    }),
+    projects: {
+      data: parseProjects({
+        projects,
+        additionalPurchasedStorageSize,
+        totalRepositorySizeExcess,
+      }),
+      pageInfo: projects.pageInfo,
+    },
     additionalPurchasedStorageSize,
     actualRepositorySizeLimit,
     containsLockedProjects,

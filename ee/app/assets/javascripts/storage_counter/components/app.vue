@@ -1,5 +1,12 @@
 <script>
-import { GlLink, GlSprintf, GlModalDirective, GlButton, GlIcon } from '@gitlab/ui';
+import {
+  GlLink,
+  GlSprintf,
+  GlModalDirective,
+  GlButton,
+  GlIcon,
+  GlKeysetPagination,
+} from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProjectsTable from './projects_table.vue';
 import UsageGraph from './usage_graph.vue';
@@ -9,18 +16,20 @@ import query from '../queries/storage.query.graphql';
 import TemporaryStorageIncreaseModal from './temporary_storage_increase_modal.vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { formatUsageSize, parseGetStorageResults } from '../utils';
+import { PROJECTS_PER_PAGE } from '../constants';
 
 export default {
   name: 'StorageCounterApp',
   components: {
-    ProjectsTable,
     GlLink,
+    GlIcon,
     GlButton,
     GlSprintf,
-    GlIcon,
-    StorageInlineAlert,
     UsageGraph,
+    ProjectsTable,
     UsageStatistics,
+    StorageInlineAlert,
+    GlKeysetPagination,
     TemporaryStorageIncreaseModal,
   },
   directives: {
@@ -54,19 +63,36 @@ export default {
         return {
           fullPath: this.namespacePath,
           withExcessStorageData: this.isAdditionalStorageFlagEnabled,
+          first: PROJECTS_PER_PAGE,
         };
       },
       update: parseGetStorageResults,
+      result({ data }) {
+        this.pageInfo = data?.namespace?.projects?.pageInfo;
+        this.initialLoad = false;
+      },
     },
   },
   data() {
     return {
       namespace: {},
+      /**
+       * Graphql query returns namespace data and projects.
+       * All queries after the initial load with have different
+       * projects but same namespace data. This flag is to prevent
+       * the UI from re-rendering components showing namespace data.
+       * Having this flag prevents UI from flickering and re-rendering
+       * same data (storage-inline-alert component)
+       */
+      initialLoad: true,
+      pageInfo: {
+        endCursor: '',
+      },
     };
   },
   computed: {
     namespaceProjects() {
-      return this.namespace?.projects ?? [];
+      return this.namespace?.projects?.data ?? [];
     },
     isStorageIncreaseModalVisible() {
       return parseBoolean(this.isTemporaryStorageIncreaseVisible);
@@ -89,8 +115,58 @@ export default {
         additionalPurchasedStorageSize: this.namespace.additionalPurchasedStorageSize,
       };
     },
+    isQueryLoading() {
+      return this.$apollo.queries.namespace.loading;
+    },
     shouldShowStorageInlineAlert() {
-      return this.isAdditionalStorageFlagEnabled && !this.$apollo.queries.namespace.loading;
+      if (this.initialLoad) {
+        // for initial load check if the data fetch is done (isQueryLoading)
+        return this.isAdditionalStorageFlagEnabled && !this.isQueryLoading;
+      }
+      // for all sub-sequent queries the storage inline alert doesn't
+      // have to be re-rendered as the data from graphql will remain
+      // the same.
+      return this.isAdditionalStorageFlagEnabled;
+    },
+    showPagination() {
+      return (
+        !this.isQueryLoading &&
+        (this.namespace.projects?.pageInfo?.hasPreviousPage ||
+          this.namespace.projects?.pageInfo?.hasNextPage)
+      );
+    },
+  },
+
+  methods: {
+    onPrev(before) {
+      if (this.pageInfo?.hasPreviousPage) {
+        this.$apollo.queries.namespace.fetchMore({
+          variables: {
+            fullPath: this.namespacePath,
+            withExcessStorageData: this.isAdditionalStorageFlagEnabled,
+            first: PROJECTS_PER_PAGE,
+            before,
+          },
+          updateQuery(previousResult, { fetchMoreResult }) {
+            return fetchMoreResult;
+          },
+        });
+      }
+    },
+    onNext(after) {
+      if (this.pageInfo?.hasNextPage) {
+        this.$apollo.queries.namespace.fetchMore({
+          variables: {
+            fullPath: this.namespacePath,
+            withExcessStorageData: this.isAdditionalStorageFlagEnabled,
+            first: PROJECTS_PER_PAGE,
+            after,
+          },
+          updateQuery(previousResult, { fetchMoreResult }) {
+            return fetchMoreResult;
+          },
+        });
+      }
     },
   },
 
@@ -165,7 +241,10 @@ export default {
         />
       </div>
     </div>
-    <projects-table :projects="namespaceProjects" />
+    <projects-table :projects="namespaceProjects" :is-loading="isQueryLoading" />
+    <div class="gl-display-flex gl-justify-content-center gl-mt-5">
+      <gl-keyset-pagination v-if="showPagination" v-bind="pageInfo" @prev="onPrev" @next="onNext" />
+    </div>
     <temporary-storage-increase-modal
       v-if="isStorageIncreaseModalVisible"
       :limit="formattedNamespaceLimit"

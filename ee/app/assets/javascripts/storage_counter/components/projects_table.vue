@@ -2,10 +2,12 @@
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import Project from './project.vue';
 import ProjectWithExcessStorage from './project_with_excess_storage.vue';
+import ProjectsSkeletonLoader from './projects_skeleton_loader.vue';
 
 export default {
   components: {
     Project,
+    ProjectsSkeletonLoader,
     ProjectWithExcessStorage,
   },
   mixins: [glFeatureFlagsMixin()],
@@ -14,6 +16,16 @@ export default {
       type: Array,
       required: true,
     },
+    isLoading: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
+  data() {
+    return {
+      isLoading2: false,
+    };
   },
   computed: {
     isAdditionalStorageFlagEnabled() {
@@ -56,11 +68,14 @@ export default {
       </template>
     </div>
 
-    <component
-      :is="projectRowComponent"
-      v-for="project in projects"
-      :key="project.id"
-      :project="project"
-    />
+    <projects-skeleton-loader v-if="isLoading2" />
+    <template v-else>
+      <component
+        :is="projectRowComponent"
+        v-for="project in projects"
+        :key="project.id"
+        :project="project"
+      />
+    </template>
   </div>
 </template>
