@@ -10,7 +10,7 @@ RSpec.describe Gitlab::ImportExport::Project::RelationFactory do
   let(:importer_user) { admin }
   let(:excluded_keys) { [] }
   let(:created_object) do
-    described_class.create(
+    described_class.create!(
       relation_sym: relation_sym,
       relation_hash: relation_hash,
       object_builder: Gitlab::ImportExport::Project::ObjectBuilder,
