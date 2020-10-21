@@ -8,11 +8,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/6995) in [GitLab Core](https://about.gitlab.com/pricing/) 11.3.
 
-If you are running a medium size instance (50+ users) of
-[GitLab Core](https://about.gitlab.com/pricing/) edition, either FOSS or unlicensed
-Enterprise Edition, you are qualified for a free Instance Review.
+If you run a medium-sized self-managed instance (50+ users) of a free version of GitLab,
+[either Community Edition or unlicensed Enterprise Edition](https://about.gitlab.com/install/ce-or-ee/),
+you qualify for a free Instance Review.
 
-1. Sign in as a user with Administrator [permissions](../user/permissions.md).
+1. Sign in as a user with administrator [permissions](../user/permissions.md).
 1. In the top menu, click your user icon, and select
    **Get a free instance review**:
 
