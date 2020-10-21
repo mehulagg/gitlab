@@ -2488,6 +2488,24 @@ msgstr ""
 msgid "AlertManagement|You have enabled the Opsgenie integration. Your alerts will be visible directly in Opsgenie."
 msgstr ""
 
+msgid "AlertMappingBuilder|Define fallback"
+msgstr ""
+
+msgid "AlertMappingBuilder|GitLab alert key"
+msgstr ""
+
+msgid "AlertMappingBuilder|Make selection"
+msgstr ""
+
+msgid "AlertMappingBuilder|Payload alert key"
+msgstr ""
+
+msgid "AlertMappingBuilder|Select key"
+msgstr ""
+
+msgid "AlertMappingBuilder|Title is a required field for alerts in GitLab. Should the payload field you specified not be available, specifiy which field we should use instead. "
+msgstr ""
+
 msgid "AlertService|Review your external service's documentation to learn where to provide this information to your external service, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint."
 msgstr ""
 
