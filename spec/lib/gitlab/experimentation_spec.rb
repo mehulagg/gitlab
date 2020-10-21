@@ -5,12 +5,18 @@ require 'spec_helper'
 RSpec.describe Gitlab::Experimentation, :snowplow do
   before do
     stub_const('Gitlab::Experimentation::EXPERIMENTS', {
+      backwards_compatible_test_experiment: {
+        environment: environment,
+        tracking_category: 'Team',
+        calculate_subject_index_from_uuid_only: true
+      },
       test_experiment: {
         environment: environment,
         tracking_category: 'Team'
       }
     })
 
+    Feature.enable_percentage_of_time(:backwards_compatible_test_experiment_experiment_percentage, enabled_percentage)
     Feature.enable_percentage_of_time(:test_experiment_experiment_percentage, enabled_percentage)
   end
 
@@ -89,20 +95,28 @@ RSpec.describe Gitlab::Experimentation, :snowplow do
       context 'cookie is not present' do
         it 'calls Gitlab::Experimentation.enabled_for_value? with the name of the experiment and an experimentation_subject_index of nil' do
           expect(Gitlab::Experimentation).to receive(:enabled_for_value?).with(:test_experiment, nil)
-          controller.experiment_enabled?(:test_experiment)
+          subject
         end
       end
 
       context 'cookie is present' do
+        using RSpec::Parameterized::TableSyntax
+
         before do
           cookies.permanent.signed[:experimentation_subject_id] = 'abcd-1234'
           get :index
         end
 
-        it 'calls Gitlab::Experimentation.enabled_for_value? with the name of the experiment and an experimentation_subject_index of the modulo 100 of the hex value of the uuid' do
-          # 'abcd1234'.hex % 100 = 76
-          expect(Gitlab::Experimentation).to receive(:enabled_for_value?).with(:test_experiment, 76)
-          controller.experiment_enabled?(:test_experiment)
+        where(:experiment_key, :index_value) do
+          :test_experiment | 40 # Zlib.crc32('test_experimentabcd-1234') % 100 = 40
+          :backwards_compatible_test_experiment | 76 # 'abcd1234'.hex % 100 = 76
+        end
+
+        with_them do
+          it 'calls Gitlab::Experimentation.enabled_for_value? with the name of the experiment and the calculated experimentation_subject_index based on the uuid' do
+            expect(Gitlab::Experimentation).to receive(:enabled_for_value?).with(experiment_key, index_value)
+            controller.experiment_enabled?(experiment_key)
+          end
         end
       end
 
