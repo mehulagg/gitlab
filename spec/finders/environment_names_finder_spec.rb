@@ -16,7 +16,7 @@ RSpec.describe EnvironmentNamesFinder do
       create(:environment, name: 'gcny', project: project2)
     end
 
-    context 'using a group and a group member' do
+    context 'using a group and a group developer' do
       it 'returns environment names for all projects' do
         group.add_developer(user)
 
@@ -26,7 +26,37 @@ RSpec.describe EnvironmentNamesFinder do
       end
     end
 
-    context 'using a group and a guest' do
+    context 'using a group and a group reporter' do
+      it 'returns environment names for all projects' do
+        group.add_reporter(user)
+
+        names = described_class.new(group, user).execute
+
+        expect(names).to eq(%w[gcny gprd gstg])
+      end
+    end
+
+    context 'using a group and a public project reporter' do
+      it 'returns environment names for all projects' do
+        project1.add_reporter(user)
+
+        names = described_class.new(group, user).execute
+
+        expect(names).to eq(%w[gprd gstg])
+      end
+    end
+
+    context 'using a group and a group guest' do
+      it 'does not return environment names for private projects' do
+        group.add_guest(user)
+
+        names = described_class.new(group, user).execute
+
+        expect(names).to eq(%w[gprd gstg])
+      end
+    end
+
+    context 'using a group and a non-member' do
       it 'returns environment names for all public projects' do
         names = described_class.new(group, user).execute
 
@@ -34,9 +64,17 @@ RSpec.describe EnvironmentNamesFinder do
       end
     end
 
-    context 'using a public project and a project member' do
+    context 'using a group without a user' do
+      it 'returns environment names for all public projects' do
+        names = described_class.new(group).execute
+
+        expect(names).to eq(%w[gprd gstg])
+      end
+    end
+
+    context 'using a public project and a project developer' do
       it 'returns all the unique environment names' do
-        project1.team.add_developer(user)
+        project1.add_developer(user)
 
         names = described_class.new(project1, user).execute
 
@@ -44,7 +82,17 @@ RSpec.describe EnvironmentNamesFinder do
       end
     end
 
-    context 'using a public project and a guest' do
+    context 'using a public project and a project guest' do
+      it 'returns all the unique environment names' do
+        project1.add_guest(user)
+
+        names = described_class.new(project1, user).execute
+
+        expect(names).to eq(%w[gprd gstg])
+      end
+    end
+
+    context 'using a public project and a non-member' do
       it 'returns all the unique environment names' do
         names = described_class.new(project1, user).execute
 
@@ -52,7 +100,37 @@ RSpec.describe EnvironmentNamesFinder do
       end
     end
 
-    context 'using a private project and a guest' do
+    context 'using a private project and a project developer' do
+      it 'returns all the unique environment names' do
+        project2.add_developer(user)
+
+        names = described_class.new(project2, user).execute
+
+        expect(names).to eq(%w[gcny gprd])
+      end
+    end
+
+    context 'using a private project and a project reporter' do
+      it 'returns all the unique environment names' do
+        project2.add_reporter(user)
+
+        names = described_class.new(project2, user).execute
+
+        expect(names).to eq(%w[gcny gprd])
+      end
+    end
+
+    context 'using a private project and a project guest' do
+      it 'returns all the unique environment names' do
+        project2.add_guest(user)
+
+        names = described_class.new(project2, user).execute
+
+        expect(names).to be_empty
+      end
+    end
+
+    context 'using a private project and a non-member' do
       it 'returns all the unique environment names' do
         names = described_class.new(project2, user).execute
 

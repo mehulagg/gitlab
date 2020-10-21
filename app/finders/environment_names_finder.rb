@@ -31,8 +31,9 @@ class EnvironmentNamesFinder
   end
 
   def namespace_environments
-    projects =
-      project_or_group.all_projects.public_or_visible_to_user(current_user)
+    projects = project_or_group
+      .all_projects
+      .public_or_visible_to_user(current_user, Gitlab::Access::REPORTER)
 
     Environment.for_project(projects)
   end
