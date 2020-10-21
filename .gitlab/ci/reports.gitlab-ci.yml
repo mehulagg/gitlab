@@ -167,6 +167,7 @@ package_hunter:
     - du -hcs ./*
     - cd .. && tar -I "gzip --best" -cf gitlab.tgz ./gitlab
     - du -hcs gitlab.tgz
+    - DEBUG=* node /usr/src/app/cli.js --help
     - DEBUG=* HTR_USER=$PACKAGE_HUNTER_USER HTR_PASS=$PACKAGE_HUNTER_PASS node /usr/src/app/cli.js analyze gitlab.tgz
     - echo $?
   artifacts:
