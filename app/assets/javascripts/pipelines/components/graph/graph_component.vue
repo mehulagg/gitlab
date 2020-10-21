@@ -10,10 +10,13 @@ import getPipelineDetails from '../../graphql/queries/get_pipeline_details.query
 import { UPSTREAM, DOWNSTREAM, MAIN } from './constants';
 import { unwrapPipelineData } from './utils';
 import SfGraphStreamy from '../pipeline_graph/sf_graph_streamy.vue';
+import SfGraphLinks from '../pipeline_graph/sf_graph_links.vue';
+import { parseData } from '../parsing_utils';
 
 export default {
   name: 'PipelineGraph',
   components: {
+    SfGraphLinks,
     SfGraphStreamy,
     StageColumnComponent,
     GlLoadingIcon,
@@ -51,6 +54,8 @@ export default {
         jobName: '',
         expanded: false,
       },
+      highlightedJob: '',
+      highlightedJobs: [],
     };
   },
   apollo: {
@@ -74,6 +79,8 @@ export default {
     UPSTREAM,
     DOWNSTREAM,
   },
+  CONTAINER_REF: 'PIPELINE_GRAPH_CONTAINER_REF',
+  CONTAINER_ID: 'pipeline-graph-container',
   computed: {
     downstreamPipelines() {
       return this.hasDownstreamPipelines ? this.pipeline.downstream : [];
@@ -86,6 +93,33 @@ export default {
     },
     hasUpstreamPipelines() {
       return Boolean(this.pipeline?.upstream?.length > 0);
+    },
+    linksData(){
+      // obviously this is gross and needs to be better rectified
+      const makeDAGstyleNodes = (pipeline) => {
+        const { stages } = pipeline;
+
+        const unwrappedGroups = stages
+          .map(({ name, groups }) => {
+            return groups.map(group => {
+              return { category: name, ...group };
+            });
+          })
+          .flat(2);
+
+        const nodes = unwrappedGroups.map(group => {
+          const jobs = group.jobs.map(({ name, needs }) => {
+            return { name, needs: needs.map(need => need.name) };
+          });
+
+          return { ...group, jobs };
+        });
+
+        return nodes;
+      }
+
+      const { nodeDict } = parseData(makeDAGstyleNodes(this.pipeline));
+      return { jobs: nodeDict, stages: this.pipeline.stages };
     },
     // The two show checks prevent upstream / downstream from showing redundant linked columns
     showDownstreamPipelines() {
@@ -110,8 +144,20 @@ export default {
       return stage.groups.length === 1;
     },
 
+    highlightNeeds(uniqueJobId) {
+      this.highlightedJob = uniqueJobId;
+    },
+
+    removeHighlightNeeds() {
+      this.highlightedJob = '';
+    },
+
     setJob(jobName) {
       this.jobName = jobName;
+    },
+
+    setHighlightedJobs(highlightedJobs) {
+      this.highlightedJobs = highlightedJobs;
     },
 
     setPipelineExpanded(jobName, expanded) {
@@ -138,7 +184,10 @@ export default {
         class="pipeline-visualization pipeline-graph pipeline-min-h gl-overflow-auto gl-bg-gray-10"
         :class="{ 'gl-py-5': !isLinkedPipeline }"
       >
-        <sf-graph-streamy>
+        <sf-graph-streamy
+          :id="$options.CONTAINER_ID"
+          :ref="$options.CONTAINER_REF"
+        >
           <template #upstream>
             <linked-pipelines-column
               v-if="showUpstreamPipelines"
@@ -150,23 +199,33 @@ export default {
 
           <template #main>
             <template v-if="!graphLoading">
-              <stage-column-component
-                v-for="(stage, index) in stages"
-                :key="stage.name"
-                :class="{
-                  'has-only-one-job': hasOnlyOneJob(stage),
-                  'gl-mr-26': shouldAddRightMargin(index),
-                  'has-upstream gl-ml-11': hasUpstreamPipelines,
-                }"
-                :title="capitalizeStageName(stage.name)"
-                :groups="stage.groups"
-                :stage-connector-class="stageConnectorClass(index, stage)"
-                :is-first-column="isFirstColumn(index)"
-                :job-hovered="jobName"
-                :action="stage.status.action"
-                :pipeline-expanded="pipelineExpanded"
-                @refreshPipelineGraph="refreshPipelineGraph"
-              />
+              <sf-graph-links
+                :pipeline-data="linksData"
+                :highlighted-job="highlightedJob"
+                :container-id="$options.CONTAINER_ID"
+                :container-ref="$options.CONTAINER_REF"
+                @on-highlighted-jobs-change="setHighlightedJobs"
+              >
+                <stage-column-component
+                  v-for="(stage, index) in stages"
+                  :key="stage.name"
+                  :class="{
+                    'has-only-one-job': hasOnlyOneJob(stage),
+                    'gl-mr-26': shouldAddRightMargin(index),
+                    'has-upstream gl-ml-11': hasUpstreamPipelines,
+                  }"
+                  :title="capitalizeStageName(stage.name)"
+                  :groups="stage.groups"
+                  :stage-connector-class="stageConnectorClass(index, stage)"
+                  :is-first-column="isFirstColumn(index)"
+                  :job-hovered="jobName"
+                  :action="stage.status.action"
+                  :pipeline-expanded="pipelineExpanded"
+                  @refreshPipelineGraph="refreshPipelineGraph"
+                  @job-for-link-mouseenter="highlightNeeds"
+                  @job-for-link-mouseoff="removeHighlightNeeds"
+                />
+                </sf-graph-links>
             </template>
           </template>
 

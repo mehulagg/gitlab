@@ -7,6 +7,7 @@ import { generateJobNeedsDict } from '../../utils';
 import { DRAW_FAILURE } from '../../constants';
 
 export default {
+  name: 'SfGraphLinks',
   STROKE_WIDTH: 2,
   props: {
     pipelineData: {
@@ -85,11 +86,15 @@ export default {
   },
   methods: {
     getGraphDimensions() {
-      this.width = `${this.$parent.$refs[this.containerRef].scrollWidth}px`;
-      this.height = `${this.$parent.$refs[this.containerRef].scrollHeight}px`;
+      // TODO: Do this better
+      const graphContainer = this.$parent.$refs[this.containerRef] || document.getElementById(this.containerId);
+
+      this.width = graphContainer.scrollWidth;
+      this.height = graphContainer.scrollHeight;
     },
     drawJobLinks() {
       const { stages, jobs } = this.pipelineData;
+      console.log("%%%%%%%", stages, jobs, this.pipelineData);
       const unwrappedGroups = this.unwrapPipelineData(stages);
 
       try {
@@ -131,7 +136,7 @@ export default {
 </script>
 <template>
   <div class="gl-display-flex">
-    <svg :viewBox="viewBox" :width="width" :height="height" class="gl-absolute">
+    <svg :viewBox="viewBox" :width="`${width}px`" :height="`${height}px`" class="gl-absolute" id="link-svg">
       <template>
         <path
           v-for="link in links"

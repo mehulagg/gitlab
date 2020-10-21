@@ -12,6 +12,9 @@ import { createUniqueJobId } from '../../utils';
  * @returns {Array} Links that contain all the information about them
  */
 
+// Rather than destructure links here, we can pass them separately —
+// or maybe it is better to have parseData also return the nodeDict
+// and then here links & jobs can be part of one arg
 export const generateLinksData = ({ links }, jobs, containerID) => {
   const containerEl = document.getElementById(containerID);
   return links.map(link => {

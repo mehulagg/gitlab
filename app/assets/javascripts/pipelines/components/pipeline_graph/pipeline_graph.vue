@@ -19,7 +19,6 @@ export default {
   },
   CONTAINER_REF: 'PIPELINE_GRAPH_CONTAINER_REF',
   CONTAINER_ID: 'pipeline-graph-container',
-  STROKE_WIDTH: 2,
   errorTexts: {
     [DRAW_FAILURE]: __('Could not draw the lines for job relationships'),
     [DEFAULT]: __('An unknown error occurred.'),

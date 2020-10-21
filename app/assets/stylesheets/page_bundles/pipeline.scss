@@ -284,57 +284,57 @@
     }
 
     // Connect first build in each stage with right horizontal line
-    &:first-child {
-      &::after {
-        content: '';
-        position: absolute;
-        top: 48%;
-        right: -48px;
-        border-top: 2px solid $border-color;
-        width: 48px;
-        height: 1px;
-      }
-    }
+    // &:first-child {
+    //   &::after {
+    //     content: '';
+    //     position: absolute;
+    //     top: 48%;
+    //     right: -48px;
+    //     border-top: 2px solid $border-color;
+    //     width: 48px;
+    //     height: 1px;
+    //   }
+    // }
 
     // Connect each build (except for first) with curved lines
-    &:not(:first-child) {
-      &::after,
-      &::before {
-        content: '';
-        top: -49px;
-        position: absolute;
-        border-bottom: 2px solid $border-color;
-        width: 25px;
-        height: 69px;
-      }
-
-      // Right connecting curves
-      &::after {
-        right: -25px;
-        border-right: 2px solid $border-color;
-        border-radius: 0 0 20px;
-      }
-
-      // Left connecting curves
-      &::before {
-        left: -25px;
-        border-left: 2px solid $border-color;
-        border-radius: 0 0 0 20px;
-      }
-    }
+    // &:not(:first-child) {
+    //   &::after,
+    //   &::before {
+    //     content: '';
+    //     top: -49px;
+    //     position: absolute;
+    //     border-bottom: 2px solid $border-color;
+    //     width: 25px;
+    //     height: 69px;
+    //   }
+    //
+    //   // Right connecting curves
+    //   &::after {
+    //     right: -25px;
+    //     border-right: 2px solid $border-color;
+    //     border-radius: 0 0 20px;
+    //   }
+    //
+    //   // Left connecting curves
+    //   &::before {
+    //     left: -25px;
+    //     border-left: 2px solid $border-color;
+    //     border-radius: 0 0 0 20px;
+    //   }
+    // }
 
     // Connect second build to first build with smaller curved line
-    &:nth-child(2) {
-      &::after,
-      &::before {
-        height: 29px;
-        top: -9px;
-      }
-
-      .curve {
-        display: block;
-      }
-    }
+    // &:nth-child(2) {
+    //   &::after,
+    //   &::before {
+    //     height: 29px;
+    //     top: -9px;
+    //   }
+    //
+    //   .curve {
+    //     display: block;
+    //   }
+    // }
   }
 
   .ci-action-icon-container {
