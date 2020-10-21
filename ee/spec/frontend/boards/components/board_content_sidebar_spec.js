@@ -20,6 +20,7 @@ describe('ee/BoardContentSidebar', () => {
       stubs: {
         'board-sidebar-epic-select': '<div></div>',
         'board-sidebar-weight-input': '<div></div>',
+        'board-sidebar-time-tracking': '<div></div>',
         'board-sidebar-labels-select': '<div></div>',
       },
     });
