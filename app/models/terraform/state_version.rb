@@ -18,6 +18,10 @@ module Terraform
     def local?
       file_store == ObjectStorage::Store::LOCAL
     end
+
+    def content
+      file.read
+    end
   end
 end
 

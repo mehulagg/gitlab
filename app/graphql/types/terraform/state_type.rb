@@ -25,6 +25,10 @@ module Types
             null: true,
             description: 'Timestamp the Terraform state was locked'
 
+      field :latest_version, Types::Terraform::StateVersionType,
+            null: true,
+            description: 'The latest version of the Terraform state'
+
       field :created_at, Types::TimeType,
             null: false,
             description: 'Timestamp the Terraform state was created'

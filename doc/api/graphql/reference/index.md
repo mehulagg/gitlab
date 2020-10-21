@@ -2582,10 +2582,21 @@ Completion status of tasks.
 | ----- | ---- | ----------- |
 | `createdAt` | Time! | Timestamp the Terraform state was created |
 | `id` | ID! | ID of the Terraform state |
+| `latestVersion` | TerraformStateVersion | The latest version of the Terraform state |
 | `lockedAt` | Time | Timestamp the Terraform state was locked |
 | `lockedByUser` | User | The user currently holding a lock on the Terraform state |
 | `name` | String! | Name of the Terraform state |
 | `updatedAt` | Time! | Timestamp the Terraform state was updated |
+
+### TerraformStateVersion
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `createdAt` | Time! | Timestamp the version was created |
+| `createdByUser` | User | The user that created this version |
+| `file` | JSON! | The contents of the Terraform state file for this version |
+| `id` | ID! | ID of the Terraform state version |
+| `updatedAt` | Time! | Timestamp the version was updated |
 
 ### TerraformStateVersionRegistry
 

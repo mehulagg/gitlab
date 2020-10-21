@@ -73,4 +73,12 @@ RSpec.describe Terraform::StateVersion do
       end
     end
   end
+
+  describe '#content' do
+    let(:terraform_state_version) { create(:terraform_state_version) }
+
+    subject { terraform_state_version.content }
+
+    it { is_expected.to eq(terraform_state_version.file.read) }
+  end
 end
