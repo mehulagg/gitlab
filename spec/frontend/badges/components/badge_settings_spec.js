@@ -58,7 +58,7 @@ describe('BadgeSettings component', () => {
     const button = form.querySelector('.btn-success');
 
     expect(button).not.toBe(null);
-    expect(button).toHaveText(/Add badge/);
+    expect(button).toHaveText('');
   });
 
   it('displays badge list', () => {
