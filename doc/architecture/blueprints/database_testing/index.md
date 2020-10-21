@@ -5,11 +5,11 @@ description: 'Shift Left in testing database migrations'
 
 # Shift Left in testing database migrations
 
-We have undertaken an effort to identify [common themes of reverted migrations](https://gitlab.com/gitlab-org/gitlab/-/issues/233391) and discovered a theme of migrations breaking when they are tested against staging and production evironments even though they have passed in the developer environment. The goal of this blueprint is to outline the steps we will be taking to provide developers the access to be able to test their data migrations against production-like data earlier in the software development lifecycle. Failures in staging and production are quite expensive as they raise incident escalations. These escalations must be triaged and either reverted or fix it forward. Often this can take place without the original author's involvement due to timezones and/or criticality of the escalation.  By providing the ability to test against production-like data in the developers environment, we can catch defects (e.g. failed migrations) much earlier in the process (shift left).
+We have undertaken an effort to identify [common themes of reverted migrations](https://gitlab.com/gitlab-org/gitlab/-/issues/233391) and discovered a theme of migrations breaking when they are tested against staging and production evironments even though they have passed in the developer environment. The goal of this blueprint is to outline the steps we will be taking to provide developers the access to be able to test their data migrations against production-like data earlier in the software development lifecycle. Failures in staging and production are quite expensive as they raise incident escalations. These escalations must be triaged and either reverted or fix it forward. Often this can take place without the original author's involvement due to timezones and/or criticality of the escalation. By providing the ability to test against production-like data in the developers environment, we can catch defects (e.g. failed migrations) much earlier in the process (shift left).
 
 ## Current Situation
 
-It is expected that developers test their migrations prior to deploying to any environment.  However, there is no requirement to test against a minimum data set.  These migration tests can pass structurally, but fail when a database is fully populated
+It is expected that developers test their migrations prior to deploying to any environment. However, there is no requirement to test against a minimum data set. These migration tests can pass structurally, but fail when a database is fully populated
 TODO - better explanation of current state
 
 ## Moving Forward
@@ -27,10 +27,10 @@ Ideally this would reduce our migration incidents to zero.
 
 ### Long Term
 
-Manual processes don't scale so we will need to automate this process.  Additionally, we will need to evaluate the vendor solution through the typical build vs. buy lens.  Our long term plans would include
+Manual processes don't scale so we will need to automate this process. Additionally, we will need to evaluate the vendor solution through the typical build vs. buy lens. Our long term plans would include
 
 - Evaluate efficiency gains from vendor solution
-- Determine roadmap for in-house solution.  Some ideas and supporting technologies around an in-house solution are already taking place in this [ZFS Filesystem](https://gitlab.com/gitlab-com/gl-infra/readiness/-/tree/master/library/zfs-filesystem) page.
+- Determine roadmap for in-house solution. Some ideas and supporting technologies around an in-house solution are already taking place in this [ZFS Filesystem](https://gitlab.com/gitlab-com/gl-infra/readiness/-/tree/master/library/zfs-filesystem) page.
 
 In parallel we would work on an automated solution to replace the manual review process
 
