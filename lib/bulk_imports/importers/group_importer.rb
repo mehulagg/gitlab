@@ -19,11 +19,12 @@ module BulkImports
 
         context = BulkImports::Pipeline::Context.new(
           current_user: bulk_import.user,
-          entities: [entity],
+          entity: entity,
           configuration: configuration
         )
 
         BulkImports::Groups::Pipelines::GroupPipeline.new.run(context)
+        BulkImports::Groups::Pipelines::EpicsPipeline.new.run(context)
       end
 
       def entity
