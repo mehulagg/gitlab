@@ -109,7 +109,7 @@ module Projects
       end
 
       def define_runners_variables
-        @project_runners = @project.runners.ordered
+        @project_runners = @project.runners.ordered.page(params[:page]).per(20)
 
         @assignable_runners = current_user
           .ci_owned_runners
