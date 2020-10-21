@@ -140,7 +140,7 @@ module SearchHelper
     if @project && @project.repository.root_ref
       ref = @ref || @project.repository.root_ref
 
-      [
+      select_autocomplete([
         { category: "In this project", label: _("Files"),          url: project_tree_path(@project, ref) },
         { category: "In this project", label: _("Commits"),        url: project_commits_path(@project, ref) },
         { category: "In this project", label: _("Network"),        url: project_network_path(@project, ref) },
@@ -150,11 +150,21 @@ module SearchHelper
         { category: "In this project", label: _("Milestones"),     url: project_milestones_path(@project) },
         { category: "In this project", label: _("Snippets"),       url: project_snippets_path(@project) },
         { category: "In this project", label: _("Members"),        url: project_project_members_path(@project) },
-        { category: "In this project", label: _("Wiki"),           url: project_wikis_path(@project) }
-      ]
+        { category: "In this project", label: _("Wiki"),           url: project_wikis_path(@project) },
+        { category: "In this project", label: _("Feature Flags"),  url: project_feature_flags_path(@project), if: can?(current_user, :read_feature_flag, @project) }
+      ])
     else
       []
     end
+  end
+
+  def select_autocomplete(list)
+    list
+      .select { |item| item.fetch(:if, true) == true }
+      .map do |item|
+        item.delete(:if)
+        item
+      end
   end
 
   # Autocomplete results for the current user's groups
