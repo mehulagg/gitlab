@@ -1,8 +1,7 @@
 - return unless current_user
-- return unless display_namespace_storage_limit_alert?
-
 - namespace = @project&.namespace || @group
 - return unless namespace.present?
+- return unless display_namespace_storage_limit_alert?(namespace)
 
 - payload = namespace_storage_alert(namespace)
 - return if payload.empty?
