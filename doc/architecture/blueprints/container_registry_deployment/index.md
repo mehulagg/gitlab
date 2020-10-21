@@ -29,6 +29,65 @@ The registry supports multiple [storage backends](https://gitlab.com/gitlab-org/
 
 The name and hierarchy of repositories, as well as image manifests and tags are also stored in the storage backend, represented by a nested structure of folders and files. [This video](https://www.youtube.com/watch?v=i5mbF2bgWoM&feature=youtu.be) gives a practical overview of the registry storage structure.
 
+### Clients
+
+The Container Registry has two main clients: the GitLab Rails application and the Docker client/CLI.
+
+#### Docker
+
+The Docker client (`docker` CLI) interacts with the GitLab Container Registry mainly using the [login](https://docs.docker.com/engine/reference/commandline/login/), [push](https://docs.docker.com/engine/reference/commandline/push/) and [pull](https://docs.docker.com/engine/reference/commandline/pull/) commands.
+
+##### Login and Authentication
+
+GitLab Rails is the default token-based authentication provider for the GitLab Container Registry.
+
+Once the registry receives a request sent by an unauthenticated Docker client, it will reply with `401 Unauthorized` and instruct the client to obtain a token from the GitLab Rails API. The Docker client will then request a Bearer token and embed it in the `Authorization` header of all requests. The registry is responsible for determining if the user is authentication/authorized to perform those requests based on the provided token.
+
+```mermaid
+sequenceDiagram
+  participant C as Docker client
+  participant R as GitLab Container Registry
+  participant G as GitLab Rails
+
+	C->>R: docker login gitlab.example.com
+  R->>C: 401 Unauthorized
+  Note left of R: The response includes the realm (e.g., https://gitlab.example.com/jwt/auth)<br> from where a token should be obtained
+  C->>G: Obtain Bearer token
+  G->>C: 200 OK
+  C-->>R: Push/pull requests
+  Note right of C: Bearer token included in the Authorization header
+```
+
+Please refer to the [Docker documentation](https://docs.docker.com/registry/spec/auth/token/) for more details.
+
+##### Push and Pull
+
+Push and pull commands are used to upload and download images, more precisely manifests and blobs. The push/pull flow is described in the [documentation](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs-gitlab/push-pull-request-flow.md).
+
+#### GitLab Rails
+
+GitLab Rails interacts with the registry through the HTTP API and consumes its webhook notifications.
+
+##### GitLab Rails > Registry
+
+The single entrypoint for the registry is the [HTTP API](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/spec/api.md). GitLab Rails invokes the API to perform all operations, which include:
+
+| Operation                                                    | UI                 | Background               | Observations                                                 |
+| ------------------------------------------------------------ | ------------------ | ------------------------ | ------------------------------------------------------------ |
+| [API version check](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/spec/api.md#api-version-check) | :heavy_check_mark: | :heavy_check_mark:       | Used globally to ensure that the registry supports the Docker Distribution V2 API, as well as for identifying whether GitLab Rails is talking to the GitLab Container Registry or a third-party one (used to toggle features only available in the former). |
+| [Listing image tags](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/spec/api.md#listing-image-tags) | :heavy_check_mark: | :heavy_check_mark:       | Used to list and show tags in the UI. Used to list tags in the background for [cleanup policies](https://docs.gitlab.com/ee/user/packages/container_registry/#cleanup-policy) and [Geo replication](https://docs.gitlab.com/ee/administration/geo/replication/docker_registry.html). |
+| [Pulling an image manifest](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/spec/api.md#pulling-an-image-manifest) | :heavy_check_mark: | :heavy_multiplication_x: | Used to show the image size and the manifest digest in the tag details UI. |
+| [Pulling an image configuration](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/spec/api.md#pulling-a-layer) | :heavy_check_mark: | :heavy_multiplication_x: | Used to show the configuration digest and the creation date in the tag details UI. |
+| [Deleting a tag](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/spec/api.md#deleting-a-tag) | :heavy_check_mark: | :heavy_check_mark:       | Used to delete a tag from the UI and in background (cleanup policies). |
+
+A valid authentication token is generated in GitLab Rails and embedded in all these requests before sending them to the registry.
+
+##### Registry > GitLab Rails
+
+The registry supports [webhook notifications](https://docs.docker.com/registry/notifications/) to notify external applications when an event occurs, such as an image push.
+
+For GitLab, the registry is currently [configured](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/configuration.md#notifications) to deliver notifications for image push events to the GitLab Rails API. These notifications are currently used for Snowplow metrics and Geo replication.
+
 ### Challenges
 
 #### Garbage Collection
