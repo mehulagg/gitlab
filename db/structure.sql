@@ -20880,6 +20880,8 @@ CREATE INDEX index_merge_requests_on_target_branch ON merge_requests USING btree
 
 CREATE INDEX index_merge_requests_on_target_project_id_and_created_at_and_id ON merge_requests USING btree (target_project_id, created_at, id);
 
+CREATE INDEX index_merge_requests_on_target_project_id_and_id ON merge_requests USING btree (target_project_id, id);
+
 CREATE UNIQUE INDEX index_merge_requests_on_target_project_id_and_iid ON merge_requests USING btree (target_project_id, iid);
 
 CREATE INDEX index_merge_requests_on_target_project_id_and_iid_and_state_id ON merge_requests USING btree (target_project_id, iid, state_id);
