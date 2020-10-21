@@ -6,7 +6,7 @@ import IdeSidebarNav from '../ide_sidebar_nav.vue';
 export default {
   name: 'CollapsibleSidebar',
   directives: {
-    GlTooltip: GlTooltipDirective
+    GlTooltip: GlTooltipDirective,
   },
   components: {
     IdeSidebarNav,
