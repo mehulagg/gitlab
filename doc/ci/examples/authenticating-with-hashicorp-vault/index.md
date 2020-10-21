@@ -16,7 +16,8 @@ This tutorial assumes you are familiar with GitLab CI/CD and Vault.
 To follow along, you will need:
 
 - An account on GitLab.
-- A running Vault server and access to it is required in order to configure authentication and create roles and policies. For HashiCorp Vaults, this can be the Open Source or Enterprise version.
+- A running Vault server and access to it is required to configure authentication and create roles
+  and policies. For HashiCorp Vaults, this can be the Open Source or Enterprise version.
 
 NOTE: **Note:**
 You will need to replace the `vault.example.com` URL below with the URL of your Vault server and `gitlab.example.com` with the URL of your GitLab instance.
