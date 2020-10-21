@@ -22,6 +22,7 @@ export default () => {
     id,
     iid,
     fullPath,
+    groupId,
     autoCompleteEpics,
     autoCompleteIssues,
     userSignedIn,
@@ -40,6 +41,7 @@ export default () => {
     created() {
       this.setInitialParentItem({
         fullPath,
+        groupId: Number(groupId),
         id,
         iid: Number(iid),
         title: initialData.initialTitleText,

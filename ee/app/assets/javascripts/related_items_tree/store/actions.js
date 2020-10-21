@@ -385,12 +385,12 @@ export const receiveCreateItemFailure = ({ commit }) => {
   commit(types.RECEIVE_CREATE_ITEM_FAILURE);
   flash(s__('Epics|Something went wrong while creating child epics.'));
 };
-export const createItem = ({ state, dispatch }, { itemTitle }) => {
+export const createItem = ({ state, dispatch }, { itemTitle, groupFullPath }) => {
   dispatch('requestCreateItem');
 
   Api.createChildEpic({
     confidential: state.parentItem.confidential,
-    groupId: state.parentItem.fullPath,
+    groupId: groupFullPath || state.parentItem.fullPath,
     parentEpicIid: state.parentItem.iid,
     title: itemTitle,
   })
@@ -589,4 +589,25 @@ export const fetchProjects = ({ state, dispatch }, searchKey = '') => {
       dispatch('receiveProjectsSuccess', data);
     })
     .catch(() => dispatch('receiveProjectsFailure'));
+};
+
+export const fetchDescendantGroups = ({ commit }, { groupId, search = '' }) => {
+  const params = {};
+
+  if (search) {
+    params.search = search;
+  }
+
+  commit(types.REQUEST_DESCENDANT_GROUPS);
+
+  return axios
+    .get(`/api/v4/groups/${groupId}/descendant_groups`, {
+      params,
+    })
+    .then(({ data }) => {
+      commit(types.RECEIVE_DESCENDANT_GROUPS_SUCCESS, data);
+    })
+    .catch(() => {
+      commit(types.RECEIVE_DESCENDANT_GROUPS_FAILURE);
+    });
 };
