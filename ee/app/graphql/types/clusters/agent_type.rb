@@ -7,6 +7,8 @@ module Types
 
       authorize :admin_cluster
 
+      connection_type_class(Types::CountableConnectionType)
+
       field :created_at,
             Types::TimeType,
             null: true,

@@ -2308,6 +2308,11 @@ The connection type for ClusterAgent.
 """
 type ClusterAgentConnection {
   """
+  Total count of collection
+  """
+  count: Int!
+
+  """
   A list of edges.
   """
   edges: [ClusterAgentEdge]
@@ -2389,6 +2394,11 @@ type ClusterAgentToken {
 The connection type for ClusterAgentToken.
 """
 type ClusterAgentTokenConnection {
+  """
+  Total count of collection
+  """
+  count: Int!
+
   """
   A list of edges.
   """
@@ -18619,6 +18629,11 @@ type TerraformState {
 The connection type for TerraformState.
 """
 type TerraformStateConnection {
+  """
+  Total count of collection
+  """
+  count: Int!
+
   """
   A list of edges.
   """
