@@ -44,6 +44,17 @@ export default {
         false,
       );
     },
+    primaryProps() {
+      return {
+        text: s__('WikiPageConfirmDelete|Delete page'),
+        attributes: { variant: 'danger', 'data-qa-selector': 'confirm_deletion_button' },
+      };
+    },
+    cancelProps() {
+      return {
+        text: s__('Cancel'),
+      };
+    },
   },
   methods: {
     onSubmit() {
@@ -58,20 +69,18 @@ export default {
   <div class="d-inline-block">
     <gl-button
       v-gl-modal="modalId"
-      category="primary"
+      category="secondary"
       variant="danger"
       data-qa-selector="delete_button"
     >
-      {{ __('Delete') }}
+      {{ __('Delete page') }}
     </gl-button>
     <gl-modal
       :title="title"
-      :action-primary="{
-        text: s__('WikiPageConfirmDelete|Delete page'),
-        attributes: { variant: 'danger', 'data-qa-selector': 'confirm_deletion_button' },
-      }"
+      :action-primary="primaryProps"
+      :action-cancel="cancelProps"
       :modal-id="modalId"
-      title-tag="h4"
+      size="sm"
       @ok="onSubmit"
     >
       {{ message }}
