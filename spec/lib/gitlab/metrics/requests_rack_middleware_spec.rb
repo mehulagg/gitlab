@@ -134,14 +134,14 @@ RSpec.describe Gitlab::Metrics::RequestsRackMiddleware do
       end
     end
 
-    describe '.initialize_http_request_duration_seconds' do
+    describe '.initialize_metrics' do
       it "sets labels" do
         expected_labels = []
         described_class::HTTP_METHODS.each do |method|
           expected_labels << { method: method }
         end
 
-        described_class.initialize_http_request_duration_seconds
+        described_class.initialize_metrics
         expect(described_class.http_request_duration_seconds.values.keys).to include(*expected_labels)
       end
     end
