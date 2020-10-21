@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# The BulkImport::Entity represents a Group or Project to be
-# imported during the bulk import process. An entity is nested under the
-# parent group when it is not a top level group.
+# The BulkImport::Entity represents a Group or Project to be imported during the
+# bulk import process. An entity is nested under the parent group when it is not
+# a top level group.
 #
 # A full bulk import entity structure might look like this, where the links are
 # parents:
