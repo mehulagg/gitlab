@@ -24,8 +24,8 @@ export default {
 </script>
 
 <template>
-  <gl-dropdown :text="selectedVersionName" class="inline">
-    <gl-dropdown-item v-for="version in versions" :key="version.id">
+  <gl-dropdown :text="selectedVersionName" category="tertiary" variant="default" size="medium" block="true">
+    <gl-dropdown-item v-for="version in versions" :key="version.id" :is-check-item="true" :is-checked="true">
       <a :class="{ 'is-active': version.selected }" :href="version.href">
         <div>
           <strong>
