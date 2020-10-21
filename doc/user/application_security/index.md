@@ -567,10 +567,10 @@ This can be useful for offline setups or anyone wishing to use [Auto DevOps](../
 
 Instructions are available in the [legacy template project](https://gitlab.com/gitlab-org/auto-devops-v12-10).
 
-#### Vulnerabilities are found, but the job succeeds. How can I fail a pipeline instead?
+#### Vulnerabilities are found, but the job succeeds. How can I have a pipeline fail instead?
 
-This is the current default behaviur, because job status indicates success or failure of the analyzer itself.
+This is the current default behavior, because the job's status indicates success or failure of the analyzer itself.
 Analyzer results are displayed in the [job logs](../../ci/pipelines/#expand-and-collapse-job-log-sections),
 [Merge Request widget](sast/index.md#overview)
 or [Security Dashboard](security_dashboard/index.md).
-There is [an open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/235772) dicussing to change this behavior.
+There is [an open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/235772) in which changes to this behavior are being discussed.
