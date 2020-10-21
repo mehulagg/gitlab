@@ -101,7 +101,6 @@ export default {
       icon="retry"
       size="small"
       @click="reloadImage"
-    >
-    </gl-button>
+    />
   </div>
 </template>
