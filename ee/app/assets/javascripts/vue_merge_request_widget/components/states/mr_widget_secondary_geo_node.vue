@@ -29,7 +29,6 @@ export default {
         :title="__('About this feature')"
         target="_blank"
         rel="noopener noreferrer nofollow"
-        data-container="body"
       >
         <gl-icon name="question-o" />
       </a>
