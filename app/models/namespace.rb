@@ -117,9 +117,12 @@ class Namespace < ApplicationRecord
     # query - The search query as a String.
     #
     # Returns an ActiveRecord::Relation.
-    def search(query)
-      joins(:route)
-        .fuzzy_search(query, [:name, :path, Route.arel_table[:path]])
+    def search(query, include_namespace: false)
+      if include_namespace
+        joins(:route).fuzzy_search(query, [Route.arel_table[:path], Route.arel_table[:name]])
+      else
+        fuzzy_search(query, [:path, :name])
+      end
     end
 
     def clean_path(path)
