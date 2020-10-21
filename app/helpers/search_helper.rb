@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module SearchHelper
-  SEARCH_PERMITTED_PARAMS = [:search, :scope, :project_id, :group_id, :repository_ref, :snippets, :sort, :state, :confidential].freeze
+  SEARCH_GENERIC_PARAMS = [:search, :scope, :project_id, :group_id, :repository_ref, :snippets, :sort].freeze
 
   def search_autocomplete_opts(term)
     return unless current_user
@@ -225,7 +225,7 @@ module SearchHelper
     search_params = params
       .merge(search)
       .merge({ scope: scope })
-      .permit(SEARCH_PERMITTED_PARAMS)
+      .permit(SEARCH_GENERIC_PARAMS)
 
     if @scope == scope
       li_class = 'active'
