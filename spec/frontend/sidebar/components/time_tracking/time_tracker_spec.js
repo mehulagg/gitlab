@@ -1,11 +1,26 @@
 import Vue from 'vue';
 
+import { shallowMount } from '@vue/test-utils';
 import mountComponent from 'helpers/vue_mount_component_helper';
 import TimeTracker from '~/sidebar/components/time_tracking/time_tracker.vue';
 
 describe('Issuable Time Tracker', () => {
   let initialData;
   let vm;
+  let wrapper;
+
+  const findTimeTrackingCollapsedState = () =>
+    wrapper.find({ ref: 'time-tracking-collapsed-state' });
+  const createComponent = props => {
+    wrapper = shallowMount(TimeTracker, {
+      propsData: {
+        ...props,
+      },
+      stubs: {
+        'time-tracking-collapsed-state': '<div></div>',
+      },
+    });
+  };
 
   const initTimeTrackingComponent = ({
     timeEstimate,
@@ -79,6 +94,25 @@ describe('Issuable Time Tracker', () => {
 
   describe('Content Display', () => {
     describe('Panes', () => {
+      it('should render "time-tracking-collapsed-state" when "collapsible" prop is true by default', () => {
+        createComponent({
+          timeEstimate: 1,
+          timeSpent: 1,
+        });
+
+        expect(findTimeTrackingCollapsedState().exists()).toBe(true);
+      });
+
+      it('should not render "time-tracking-collapsed-state" when not "collapsible" is false', () => {
+        createComponent({
+          timeEstimate: 1,
+          timeSpent: 1,
+          collapsible: false,
+        });
+
+        expect(findTimeTrackingCollapsedState().exists()).toBe(false);
+      });
+
       describe('Comparison pane', () => {
         beforeEach(() => {
           initTimeTrackingComponent({

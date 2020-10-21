@@ -44,6 +44,13 @@ export default {
       default: false,
       required: false,
     },
+    // Checkout the use of "time-tracking-collapsed-state" component
+    // to see why this prop is necessary.
+    collapsible: {
+      type: Boolean,
+      default: true,
+      required: false,
+    },
   },
   data() {
     return {
@@ -94,7 +101,23 @@ export default {
 
 <template>
   <div v-cloak class="time_tracker time-tracking-component-wrap">
+    <!--  Note on v-if="collapsible"
+      When "time_tracker" component is used in issue list:
+      "time-tracking-collapsed-state" is always rendered even if the sidebar isn't collapsed.
+      The actual hiding is controlled with css classes:
+        Hide "time-tracking-collapsed-state" 
+          if .right-sidebar .right-sidebar-collapsed .sidebar-collapsed-icon
+        Show "time-tracking-collapsed-state"
+          if .right-sidebar .right-sidebar-expanded .sidebar-collapsed-icon
+      
+      When "time_tracker" component is used in the Boards sidebar:
+        collapse/expand functionality hasn't been implemented for the Boards sidebar
+        and the Boards sidebar doesn't use css classes such as right-sidebar, right-sidebar-collapse.
+        Thus we need to omit rendering "time-tracking-collapsed-state" altogether through "collapsible" prop. 
+    -->
     <time-tracking-collapsed-state
+      v-if="collapsible"
+      ref="time-tracking-collapsed-state"
       :show-comparison-state="showComparisonState"
       :show-no-time-tracking-state="showNoTimeTrackingState"
       :show-help-state="showHelpState"
@@ -103,7 +126,7 @@ export default {
       :time-spent-human-readable="humanTimeSpent"
       :time-estimate-human-readable="humanTimeEstimate"
     />
-    <div class="title hide-collapsed">
+    <div class="title hide-collapsed gl-mb-3">
       {{ __('Time tracking') }}
       <div v-if="!showHelpState" class="help-button float-right" @click="toggleHelpState(true)">
         <gl-icon name="question-o" />
