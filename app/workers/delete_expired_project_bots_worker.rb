@@ -4,8 +4,8 @@ class DeleteExpiredProjectBotsWorker # rubocop:disable Scalability/IdempotentWor
   include ApplicationWorker
   include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
-  #feature_category :authentication_and_authorization
- # worker_resource_boundary :cpu
+  feature_category :authentication_and_authorization
+  worker_resource_boundary :cpu
 
   def perform
     User.where(user_type: 'project_bot') do |bots|
