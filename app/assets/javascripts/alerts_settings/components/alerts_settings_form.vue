@@ -19,6 +19,7 @@ import { doesHashExistInUrl } from '~/lib/utils/url_utility';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import ToggleButton from '~/vue_shared/components/toggle_button.vue';
 import IntegrationsList from './alerts_integrations_list.vue';
+import MappingBuilder from './alert_mapping_builder.vue';
 import csrf from '~/lib/utils/csrf';
 import service from '../services';
 import {
@@ -51,6 +52,7 @@ export default {
     ClipboardButton,
     ToggleButton,
     IntegrationsList,
+    MappingBuilder,
   },
   directives: {
     'gl-modal': GlModalDirective,
@@ -500,6 +502,8 @@ export default {
             max-rows="10"
           />
         </gl-form-group>
+
+        <mapping-builder :json="{}"/>
         <gl-button :disabled="!canTestAlert" @click="validateTestAlert">{{
           $options.i18n.testAlertInfo
         }}</gl-button>
