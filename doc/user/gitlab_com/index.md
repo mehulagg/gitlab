@@ -624,6 +624,10 @@ You can view more information in our runbooks such as:
 - Our [current log retention policies](https://gitlab.com/gitlab-com/runbooks/-/tree/master/docs/logging#retention)
 - A [diagram of our logging infrastructure](https://gitlab.com/gitlab-com/runbooks/-/tree/master/docs/logging#logging-infrastructure-overview)
 
+### Job Logs
+
+By default, GitLab does not expire job logs. Job logs are retained indefinitely and cannot be configured on GitLab.com to expire. Job logs can be erased manually via our [Jobs API](https://docs.gitlab.com/ee/api/jobs.html#erase-a-job) or by [deleting a pipeline](https://docs.gitlab.com/ee/ci/pipelines/index.html#delete-a-pipeline). 
+
 ## GitLab.com at scale
 
 In addition to the GitLab Enterprise Edition Omnibus install, GitLab.com uses
