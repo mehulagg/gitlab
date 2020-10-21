@@ -99,6 +99,10 @@ To change your company details, including company name and VAT number:
 1. Edit the company details.
 1. Click **Save changes**.
 
+### See your billable users list
+
+To see a list of your billable users on your GitLab group page navigate to your group **settings** then click on **billing**; this page will provide information about your plan subscription and occupying seats for your group which is the list of billable users for that particular group.
+
 ### Change your payment method
 
 Purchases in the Customers Portal require a credit card on record as a payment method. You can add
