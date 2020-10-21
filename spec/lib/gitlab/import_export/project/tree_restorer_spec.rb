@@ -1056,22 +1056,22 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
           allow(project).to receive_message_chain(:import_data, :data, :dig).with('sample_data') { true }
         end
 
-        it 'initialize SampleDataRelationTreeRestorer' do
-          expect_next_instance_of(Gitlab::ImportExport::Project::Sample::SampleDataRelationTreeRestorer) do |restorer|
-            expect(restorer).to receive(:restore).and_return(true)
-          end
+        it 'initialize Sample::SampleDataRelationTreeRestorer' do
+          expect(described_class).to receive(:relation_tree_restorer_class).and_return(Gitlab::ImportExport::Project::Sample::SampleDataRelationTreeRestorer)
+        end
 
-          expect(project_tree_restorer.restore).to eq(true)
+        it 'initialize Sample::RelationFactory' do
+          expect(described_class).to receive(:relation_factory).and_return(Gitlab::ImportExport::Project::Sample::RelationFactory)
         end
       end
 
       context 'without sample_data_template' do
         it 'initialize RelationTreeRestorer' do
-          expect_next_instance_of(Gitlab::ImportExport::RelationTreeRestorer) do |restorer|
-            expect(restorer).to receive(:restore).and_return(true)
-          end
+          expect(described_class).to receive(:relation_tree_restorer_class).and_return(Gitlab::ImportExport::RelationTreeRestorer)
+        end
 
-          expect(project_tree_restorer.restore).to eq(true)
+        it 'initialize Project::RelationFactory' do
+          expect(described_class).to receive(:relation_factory).and_return(Gitlab::ImportExport::Project::RelationFactory)
         end
       end
     end
