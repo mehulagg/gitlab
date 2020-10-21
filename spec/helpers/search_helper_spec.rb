@@ -143,6 +143,7 @@ RSpec.describe SearchHelper do
       context "with a current project" do
         before do
           @project = create(:project, :repository)
+          allow(self).to receive(:can?).with(user, :read_feature_flag, @project).and_return(true)
         end
 
         it "includes project-specific sections" do
