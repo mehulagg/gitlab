@@ -14,7 +14,7 @@ RSpec.describe 'Merge request > User resolves diff notes and threads', :js do
           file: path, old_line: nil, new_line: 9,
           diff_refs: merge_request.diff_refs)
   end
-  
+
   before do
     stub_feature_flags(remove_resolve_note: false)
   end
