@@ -14,6 +14,7 @@ RSpec.describe 'Robots.txt Requests', :aggregate_failures do
   it 'allows the requests' do
     requests = [
       '/users/foo/snippets',
+      '/users/foo/snippets/1',
       '/users/sign_in'
     ]
 
@@ -60,7 +61,8 @@ RSpec.describe 'Robots.txt Requests', :aggregate_failures do
       '/foo/bar/protected_branches',
       '/foo/bar/uploads/foo',
       '/foo/bar/project_members',
-      '/foo/bar/settings'
+      '/foo/bar/settings',
+      '/users/foo/snippetsfoo',
     ]
 
     requests.each do |request|
