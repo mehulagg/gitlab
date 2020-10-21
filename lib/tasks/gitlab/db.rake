@@ -189,6 +189,7 @@ namespace :gitlab do
     task :reindex, [:index_name] => :environment do |_, args|
       unless Feature.enabled?(:database_reindexing, type: :ops)
         puts "This feature (database_reindexing) is currently disabled.".color(:yellow)
+        Gitlab::AppLogger.info(message: "Attempted to start database reindexing, but the feature database_reindexing is currently disabled rendering this a no-op.")
         exit
       end
 
