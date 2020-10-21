@@ -29,6 +29,14 @@ RSpec.describe Resolvers::BoardGroupings::EpicsResolver do
   let_it_be(:epic_issue2) { create(:epic_issue, epic: epic2, issue: issue2) }
   let_it_be(:epic_issue3) { create(:epic_issue, epic: epic3, issue: issue3) }
 
+  let_it_be(:context) do
+    GraphQL::Query::Context.new(
+      query: OpenStruct.new(schema: nil),
+      values: { current_user: current_user },
+      object: nil
+    )
+  end
+
   describe '#resolve' do
     before do
       stub_licensed_features(epics: true)
@@ -78,6 +86,13 @@ RSpec.describe Resolvers::BoardGroupings::EpicsResolver do
         expect(result).to match_array([epic1])
       end
 
+      it 'finds only epics for issues matching search param' do
+        result = resolve_board_epics(
+          group_board, { issue_filters: { search: issue1.title } })
+
+        expect(result).to match_array([epic1])
+      end
+
       it 'accepts negated issue params' do
         expect(Boards::Issues::ListService).to receive(:new).with(
           group_board.resource_parent,
@@ -87,10 +102,30 @@ RSpec.describe Resolvers::BoardGroupings::EpicsResolver do
 
         resolve_board_epics(group_board, { issue_filters: { label_name: 'foo', not: { label_name: %w(foo bar) } } })
       end
+
+      it 'raises an exception if both epic_id and epic_wildcard_id are present' do
+        expect do
+          resolve_board_epics(group_board, { issue_filters: { epic_id: epic1.to_global_id, epic_wildcard_id: 'NONE' } })
+        end.to raise_error(Gitlab::Graphql::Errors::ArgumentError)
+      end
+
+      it 'accepts epic global id' do
+        result = resolve_board_epics(
+          group_board, { issue_filters: { epic_id: epic1.to_global_id } })
+
+        expect(result).to match_array([epic1])
+      end
+
+      it 'accepts epic wildcard id' do
+        result = resolve_board_epics(
+          group_board, { issue_filters: { epic_wildcard_id: 'NONE' } })
+
+        expect(result).to match_array([])
+      end
     end
   end
 
-  def resolve_board_epics(object, args = {}, context = { current_user: current_user })
+  def resolve_board_epics(object, args = {})
     resolve(described_class, obj: object, args: args, ctx: context)
   end
 end

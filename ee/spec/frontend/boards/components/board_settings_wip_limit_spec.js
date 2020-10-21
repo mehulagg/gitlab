@@ -6,9 +6,9 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlFormInput } from '@gitlab/ui';
 import { noop } from 'lodash';
 import BoardSettingsWipLimit from 'ee_component/boards/components/board_settings_wip_limit.vue';
-import boardsStore from '~/boards/stores/boards_store';
-import flash from '~/flash';
 import waitForPromises from 'helpers/wait_for_promises';
+import boardsStore from '~/boards/stores/boards_store';
+import { deprecatedCreateFlash as flash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -49,6 +49,7 @@ describe('BoardSettingsWipLimit', () => {
     const store = new Vuex.Store({
       state: vuexState,
       actions: storeActions,
+      getters: { shouldUseGraphQL: () => false },
     });
 
     wrapper = shallowMount(BoardSettingsWipLimit, {
@@ -285,7 +286,7 @@ describe('BoardSettingsWipLimit', () => {
             const spy = jest.fn().mockRejectedValue();
             createComponent({
               vuexState: { activeId: listId },
-              actions: { updateListWipLimit: spy, setActiveId: noop },
+              actions: { updateListWipLimit: spy, unsetActiveId: noop },
               localState: { edit: true, currentWipLimit },
             });
 

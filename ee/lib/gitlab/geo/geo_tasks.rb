@@ -17,6 +17,22 @@ module Gitlab
         end
       end
 
+      def set_secondary_as_primary
+        ActiveRecord::Base.transaction do
+          primary_node = GeoNode.primary_node
+          current_node = GeoNode.current_node
+
+          abort 'The primary is not set' unless primary_node
+          abort 'Current node is not identified' unless current_node
+          abort 'This is not a secondary node' unless current_node.secondary?
+
+          primary_node.destroy
+          current_node.update!(primary: true, enabled: true)
+
+          $stdout.puts "#{current_node.url} is now the primary Geo node".color(:green)
+        end
+      end
+
       def update_primary_geo_node_url
         node = Gitlab::Geo.primary_node
 

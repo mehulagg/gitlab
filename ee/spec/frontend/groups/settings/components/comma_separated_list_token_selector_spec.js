@@ -12,13 +12,16 @@ describe('CommaSeparatedListTokenSelector', () => {
   const defaultProps = {
     hiddenInputId: 'comma-separated-list',
     ariaLabelledby: 'comma-separated-list-label',
-    errorMessage: 'The value entered is invalid',
+    regexErrorMessage: 'The value entered is invalid',
     disallowedValueErrorMessage: 'The value entered is not allowed',
   };
 
   const createComponent = options => {
     wrapper = mount(CommaSeparatedListTokenSelector, {
       attachTo: div,
+      scopedSlots: {
+        'user-defined-token-content': '<span>Add "{{props.inputText}}"</span>',
+      },
       ...options,
       propsData: {
         ...defaultProps,
@@ -58,13 +61,14 @@ describe('CommaSeparatedListTokenSelector', () => {
     input.setAttribute('type', 'text');
     input.id = 'comma-separated-list';
     document.body.appendChild(div);
-    div.appendChild(input);
+    document.body.appendChild(input);
   });
 
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
     div.remove();
+    input.remove();
   });
 
   describe('when component is mounted', () => {
@@ -132,6 +136,16 @@ describe('CommaSeparatedListTokenSelector', () => {
     });
   });
 
+  describe('when text input is typed in', () => {
+    it('emits `text-input` event', async () => {
+      createComponent();
+
+      await setTokenSelectorInputValue('foo bar');
+
+      expect(wrapper.emitted('text-input')[0]).toEqual(['foo bar']);
+    });
+  });
+
   describe('when enter key is pressed', () => {
     it('does not submit the form if token selector text input has a value', async () => {
       createComponent();
@@ -145,7 +159,7 @@ describe('CommaSeparatedListTokenSelector', () => {
     });
 
     describe('when `regexValidator` prop is set', () => {
-      it('displays `errorMessage` if regex fails', async () => {
+      it('displays `regexErrorMessage` if regex fails', async () => {
         createComponent({
           propsData: {
             regexValidator: /baz/,
@@ -176,8 +190,22 @@ describe('CommaSeparatedListTokenSelector', () => {
       });
     });
 
-    describe('when `regexValidator` and `disallowedValues` props are set', () => {
-      it('displays `errorMessage` if regex fails', async () => {
+    describe('when `customErrorMessage` prop is set', () => {
+      it('displays `customErrorMessage`', () => {
+        createComponent({
+          propsData: {
+            customErrorMessage: 'Value is invalid',
+          },
+        });
+
+        tokenSelectorTriggerEnter();
+
+        expect(findErrorMessageText()).toBe('Value is invalid');
+      });
+    });
+
+    describe('when `regexValidator`, `disallowedValues` and `customErrorMessage` props are set', () => {
+      it('displays `regexErrorMessage` if regex fails', async () => {
         createComponent({
           propsData: {
             regexValidator: /baz/,
@@ -206,6 +234,22 @@ describe('CommaSeparatedListTokenSelector', () => {
 
         expect(findErrorMessageText()).toBe('The value entered is not allowed');
       });
+
+      it('displays `customErrorMessage` if regex passes and value is not in the disallowed list', async () => {
+        createComponent({
+          propsData: {
+            regexValidator: /foo bar/,
+            disallowedValues: ['foo', 'bar', 'baz'],
+            customErrorMessage: 'Value is invalid',
+          },
+        });
+
+        await setTokenSelectorInputValue('foo bar');
+
+        tokenSelectorTriggerEnter();
+
+        expect(findErrorMessageText()).toBe('Value is invalid');
+      });
     });
   });
 
@@ -216,38 +260,21 @@ describe('CommaSeparatedListTokenSelector', () => {
           regexValidator: /foo/,
           disallowedValues: ['bar', 'baz'],
         },
-        scopedSlots: {
-          'user-defined-token-content': '<span>Add "{{props.inputText}}"</span>',
-        },
       });
 
       await setTokenSelectorInputValue('foo');
 
-      tokenSelectorTriggerEnter();
-
-      expect(
-        findTokenSelector()
-          .find('[role="menuitem"]')
-          .text(),
-      ).toBe('Add "foo"');
+      expect(findTokenSelectorDropdown().text()).toBe('Add "foo"');
     });
   });
 
-  describe('when `regexValidator` and `disallowedValues` props are not set', () => {
+  describe('when `regexValidator`, `disallowedValues` and `customErrorMessage` props are not set', () => {
     it('allows any value to be added', async () => {
-      createComponent({
-        scopedSlots: {
-          'user-defined-token-content': '<span>Add "{{props.inputText}}"</span>',
-        },
-      });
+      createComponent();
 
       await setTokenSelectorInputValue('foo');
 
-      expect(
-        findTokenSelector()
-          .find('[role="menuitem"]')
-          .text(),
-      ).toBe('Add "foo"');
+      expect(findTokenSelectorDropdown().text()).toBe('Add "foo"');
     });
   });
 

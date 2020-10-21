@@ -2,7 +2,7 @@
 
 module API
   module Ci
-    class Pipelines < Grape::API::Instance
+    class Pipelines < ::API::Base
       include PaginationParams
 
       before { authenticate_non_get! }
@@ -15,6 +15,24 @@ module API
           detail 'This feature was introduced in GitLab 8.11.'
           success Entities::Ci::PipelineBasic
         end
+
+        helpers do
+          params :optional_scope do
+            optional :scope, types: [String, Array[String]], desc: 'The scope of builds to show',
+                            values: ::CommitStatus::AVAILABLE_STATUSES,
+                           coerce_with: ->(scope) {
+                             case scope
+                             when String
+                               [scope]
+                             when ::Array
+                               scope
+                             else
+                               ['unknown']
+                             end
+                           }
+          end
+        end
+
         params do
           use :pagination
           optional :scope,    type: String, values: %w[running pending finished branches tags],
@@ -94,6 +112,51 @@ module API
           authorize! :read_pipeline, pipeline
 
           present pipeline, with: Entities::Ci::Pipeline
+        end
+
+        desc 'Get pipeline jobs' do
+          success Entities::Ci::Job
+        end
+        params do
+          requires :pipeline_id, type: Integer, desc: 'The pipeline ID'
+          use :optional_scope
+          use :pagination
+        end
+
+        get ':id/pipelines/:pipeline_id/jobs' do
+          authorize!(:read_pipeline, user_project)
+
+          pipeline = user_project.all_pipelines.find(params[:pipeline_id])
+
+          builds = ::Ci::JobsFinder
+            .new(current_user: current_user, pipeline: pipeline, params: params)
+            .execute
+
+          builds = builds.with_preloads
+
+          present paginate(builds), with: Entities::Ci::Job
+        end
+
+        desc 'Get pipeline bridge jobs' do
+          success Entities::Ci::Bridge
+        end
+        params do
+          requires :pipeline_id, type: Integer, desc: 'The pipeline ID'
+          use :optional_scope
+          use :pagination
+        end
+
+        get ':id/pipelines/:pipeline_id/bridges' do
+          authorize!(:read_build, user_project)
+
+          pipeline = user_project.all_pipelines.find(params[:pipeline_id])
+
+          bridges = ::Ci::JobsFinder
+            .new(current_user: current_user, pipeline: pipeline, params: params, type: ::Ci::Bridge)
+            .execute
+          bridges = bridges.with_preloads
+
+          present paginate(bridges), with: Entities::Ci::Bridge
         end
 
         desc 'Gets the variables for a given pipeline' do
@@ -178,7 +241,7 @@ module API
 
         def latest_pipeline
           strong_memoize(:latest_pipeline) do
-            user_project.latest_pipeline_for_ref(params[:ref])
+            user_project.latest_pipeline(params[:ref])
           end
         end
       end

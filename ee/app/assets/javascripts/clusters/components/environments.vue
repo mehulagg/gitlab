@@ -1,16 +1,17 @@
 <script>
-import { GlTable, GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlTable, GlEmptyState, GlLoadingIcon, GlIcon, GlLink, GlSprintf } from '@gitlab/ui';
+import { __ } from '~/locale';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 
 export default {
   components: {
     GlEmptyState,
     GlTable,
-    Icon,
+    GlIcon,
     TimeAgo,
+    GlLink,
     GlLoadingIcon,
+    GlSprintf,
     deploymentInstance: () => import('ee_component/vue_shared/components/deployment_instance.vue'),
   },
   props: {
@@ -38,24 +39,6 @@ export default {
   computed: {
     isEmpty() {
       return !this.isFetching && this.environments.length === 0;
-    },
-    tableEmptyStateText() {
-      const text = __(
-        'Ensure your %{linkStart}environment is part of the deploy stage%{linkEnd} of your CI pipeline to track deployments to your cluster.',
-      );
-      const linkStart = `<a href="${this.environmentsHelpPath}">`;
-      const linkEnd = `</a>`;
-
-      return sprintf(text, { linkStart, linkEnd }, false);
-    },
-    deploymentsEmptyStateText() {
-      const text = __(
-        'Deploy progress not found. To see pods, ensure your environment matches %{linkStart}deploy board criteria%{linkEnd}.',
-      );
-      const linkStart = `<a href="${this.deployBoardsHelpPath}">`;
-      const linkEnd = `</a>`;
-
-      return sprintf(text, { linkStart, linkEnd }, false);
     },
     podsInUseCount() {
       let podsInUse = 0;
@@ -97,7 +80,19 @@ export default {
       :primary-button-link="clustersHelpPath"
       :primary-button-text="__('Learn more about deploying to a cluster')"
     >
-      <div slot="description" v-html="tableEmptyStateText"></div>
+      <div slot="description">
+        <gl-sprintf
+          :message="
+            __(
+              'Ensure your %{linkStart}environment is part of the deploy stage%{linkEnd} of your CI pipeline to track deployments to your cluster.',
+            )
+          "
+        >
+          <template #link="{ content }">
+            <gl-link :href="environmentsHelpPath">{{ content }}</gl-link>
+          </template>
+        </gl-sprintf>
+      </div>
     </gl-empty-state>
 
     <gl-table
@@ -153,12 +148,24 @@ export default {
 
         <!-- Empty state -->
         <div v-else class="deployments-empty d-flex">
-          <icon
+          <gl-icon
             name="warning"
             :size="18"
             class="cluster-deployments-warning mr-2 align-self-center flex-shrink-0"
           />
-          <span v-html="deploymentsEmptyStateText"></span>
+          <span>
+            <gl-sprintf
+              :message="
+                __(
+                  'Deploy progress not found. To see pods, ensure your environment matches %{linkStart}deploy board criteria%{linkEnd}.',
+                )
+              "
+            >
+              <template #link="{ content }">
+                <gl-link :href="deployBoardsHelpPath">{{ content }}</gl-link>
+              </template>
+            </gl-sprintf>
+          </span>
         </div>
       </template>
 

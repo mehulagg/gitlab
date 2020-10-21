@@ -68,6 +68,7 @@ RSpec.describe 'Admin updates EE-only settings' do
         fill_in 'Maximum field length', with: '100000'
         fill_in 'Maximum bulk request size (MiB)', with: '17'
         fill_in 'Bulk request concurrency', with: '23'
+        fill_in 'Client request timeout', with: '30'
 
         click_button 'Save changes'
       end
@@ -81,6 +82,7 @@ RSpec.describe 'Admin updates EE-only settings' do
         expect(current_settings.elasticsearch_indexed_field_length_limit).to eq(100000)
         expect(current_settings.elasticsearch_max_bulk_size_mb).to eq(17)
         expect(current_settings.elasticsearch_max_bulk_concurrency).to eq(23)
+        expect(current_settings.elasticsearch_client_request_timeout).to eq(30)
         expect(page).to have_content 'Application settings saved successfully'
       end
     end
@@ -159,6 +161,17 @@ RSpec.describe 'Admin updates EE-only settings' do
       expect(ElasticsearchIndexedNamespace.count).to eq(0)
       expect(ElasticsearchIndexedProject.count).to eq(0)
       expect(page).to have_content 'Application settings saved successfully'
+    end
+
+    it 'zero-downtime reindexing shows popup', :js do
+      page.within('.as-elasticsearch') do
+        expect(page).to have_content 'Trigger cluster reindexing'
+        click_link 'Trigger cluster reindexing'
+      end
+
+      text = page.driver.browser.switch_to.alert.text
+      expect(text).to eq 'Are you sure you want to reindex?'
+      page.driver.browser.switch_to.alert.accept
     end
   end
 

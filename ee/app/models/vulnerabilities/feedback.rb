@@ -15,7 +15,7 @@ module Vulnerabilities
     attr_accessor :vulnerability_data
 
     enum feedback_type: { dismissal: 0, issue: 1, merge_request: 2 }, _prefix: :for
-    enum category: { sast: 0, dependency_scanning: 1, container_scanning: 2, dast: 3, secret_detection: 4, coverage_fuzzing: 5 }
+    enum category: ::Vulnerabilities::Finding::REPORT_TYPES
 
     validates :project, presence: true
     validates :author, presence: true

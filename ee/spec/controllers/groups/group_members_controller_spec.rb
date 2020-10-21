@@ -206,4 +206,28 @@ RSpec.describe Groups::GroupMembersController do
       end
     end
   end
+
+  describe 'POST #resend_invite' do
+    context 'when user has minimal access' do
+      let(:membership) { create(:group_member, :minimal_access, source: group, user: create(:user)) }
+
+      it 'is not successful' do
+        post :resend_invite, params: { group_id: group, id: membership }
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+
+      context 'when minimal_access_role feature is available' do
+        before do
+          stub_licensed_features(minimal_access_role: true)
+        end
+
+        it 'is successful' do
+          post :resend_invite, params: { group_id: group, id: membership }
+
+          expect(response).to have_gitlab_http_status(:found)
+        end
+      end
+    end
+  end
 end

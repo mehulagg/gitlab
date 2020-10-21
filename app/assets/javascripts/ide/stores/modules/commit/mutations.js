@@ -10,9 +10,7 @@ export default {
     Object.assign(state, { commitAction });
   },
   [types.UPDATE_NEW_BRANCH_NAME](state, newBranchName) {
-    Object.assign(state, {
-      newBranchName,
-    });
+    Object.assign(state, { newBranchName });
   },
   [types.UPDATE_LOADING](state, submitCommitLoading) {
     Object.assign(state, {
@@ -23,5 +21,11 @@ export default {
     Object.assign(state, {
       shouldCreateMR: shouldCreateMR === undefined ? !state.shouldCreateMR : shouldCreateMR,
     });
+  },
+  [types.CLEAR_ERROR](state) {
+    state.commitError = null;
+  },
+  [types.SET_ERROR](state, error) {
+    state.commitError = error;
   },
 };

@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlAlert, GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import { GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import SASTConfigurationApp from 'ee/security_configuration/sast/components/app.vue';
 import ConfigurationForm from 'ee/security_configuration/sast/components/configuration_form.vue';
-import { makeEntities } from './helpers';
+import { makeSastCiConfiguration } from './helpers';
 
 const sastDocumentationPath = '/help/sast';
 const projectPath = 'namespace/project';
@@ -11,11 +11,10 @@ describe('SAST Configuration App', () => {
   let wrapper;
 
   const createComponent = ({
-    provide = {},
     stubs = {},
-    loading = false,
+    loading = true,
     hasLoadingError = false,
-    sastConfigurationEntities = [],
+    sastCiConfiguration = null,
   } = {}) => {
     wrapper = shallowMount(SASTConfigurationApp, {
       mocks: { $apollo: { loading } },
@@ -23,16 +22,16 @@ describe('SAST Configuration App', () => {
       provide: {
         sastDocumentationPath,
         projectPath,
-        ...provide,
       },
-    });
-
-    // While setData is usually frowned upon, it is the documented way of
-    // mocking GraphQL response data:
-    // https://docs.gitlab.com/ee/development/fe_guide/graphql.html#testing
-    wrapper.setData({
-      hasLoadingError,
-      sastConfigurationEntities,
+      // While setting data is usually frowned upon, it is the documented way
+      // of mocking GraphQL response data:
+      // https://docs.gitlab.com/ee/development/fe_guide/graphql.html#testing
+      data() {
+        return {
+          hasLoadingError,
+          sastCiConfiguration,
+        };
+      },
     });
   };
 
@@ -41,11 +40,43 @@ describe('SAST Configuration App', () => {
   const findLink = (container = wrapper) => container.find(GlLink);
   const findConfigurationForm = () => wrapper.find(ConfigurationForm);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
-  const findErrorAlert = () => wrapper.find(GlAlert);
+  const findErrorAlert = () => wrapper.find('[data-testid="error-alert"]');
+  const findFeedbackAlert = () => wrapper.find('[data-testid="feedback-alert"]');
 
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
+  });
+
+  describe('feedback alert', () => {
+    beforeEach(() => {
+      createComponent({
+        stubs: { GlSprintf },
+      });
+    });
+
+    it('should be displayed', () => {
+      expect(findFeedbackAlert().exists()).toBe(true);
+    });
+
+    it('links to the feedback issue', () => {
+      const link = findFeedbackAlert().find(GlLink);
+      expect(link.attributes()).toMatchObject({
+        href: SASTConfigurationApp.feedbackIssue,
+        target: '_blank',
+      });
+    });
+
+    describe('when it is dismissed', () => {
+      beforeEach(() => {
+        findFeedbackAlert().vm.$emit('dismiss');
+        return wrapper.vm.$nextTick();
+      });
+
+      it('should not be displayed', () => {
+        expect(findFeedbackAlert().exists()).toBe(false);
+      });
+    });
   });
 
   describe('header', () => {
@@ -87,6 +118,7 @@ describe('SAST Configuration App', () => {
   describe('when loading failed', () => {
     beforeEach(() => {
       createComponent({
+        loading: false,
         hasLoadingError: true,
       });
     });
@@ -105,12 +137,13 @@ describe('SAST Configuration App', () => {
   });
 
   describe('when loaded', () => {
-    let entities;
+    let sastCiConfiguration;
 
     beforeEach(() => {
-      entities = makeEntities(3);
+      sastCiConfiguration = makeSastCiConfiguration();
       createComponent({
-        sastConfigurationEntities: entities,
+        loading: false,
+        sastCiConfiguration,
       });
     });
 
@@ -122,8 +155,8 @@ describe('SAST Configuration App', () => {
       expect(findConfigurationForm().exists()).toBe(true);
     });
 
-    it('passes the sastConfigurationEntities to the entities prop', () => {
-      expect(findConfigurationForm().props('entities')).toBe(entities);
+    it('passes the sastCiConfiguration to the sastCiConfiguration prop', () => {
+      expect(findConfigurationForm().props('sastCiConfiguration')).toBe(sastCiConfiguration);
     });
 
     it('does not display an alert message', () => {

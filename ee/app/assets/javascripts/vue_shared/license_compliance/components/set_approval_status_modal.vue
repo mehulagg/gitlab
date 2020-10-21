@@ -1,11 +1,11 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import { GlLink } from '@gitlab/ui';
+import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import { s__ } from '~/locale';
 import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 import LicensePackages from './license_packages.vue';
 import { LICENSE_APPROVAL_STATUS } from '../constants';
-import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 
 export default {
   name: 'LicenseSetApprovalStatusModal',

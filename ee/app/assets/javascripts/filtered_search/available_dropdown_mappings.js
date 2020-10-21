@@ -11,6 +11,7 @@ export default class AvailableDropdownMappings {
     milestonesEndpoint,
     epicsEndpoint,
     releasesEndpoint,
+    environmentsEndpoint,
     groupsOnly,
     includeAncestorGroups,
     includeDescendantGroups,
@@ -21,6 +22,7 @@ export default class AvailableDropdownMappings {
     this.milestonesEndpoint = milestonesEndpoint;
     this.epicsEndpoint = epicsEndpoint;
     this.releasesEndpoint = releasesEndpoint;
+    this.environmentsEndpoint = environmentsEndpoint;
     this.groupsOnly = groupsOnly;
     this.includeAncestorGroups = includeAncestorGroups;
     this.includeDescendantGroups = includeDescendantGroups;
@@ -45,12 +47,6 @@ export default class AvailableDropdownMappings {
       reference: null,
       gl: DropdownUser,
       element: this.container.querySelector('#js-dropdown-approver'),
-    };
-
-    ceMappings['approved-by'] = {
-      reference: null,
-      gl: DropdownUser,
-      element: this.container.querySelector('#js-dropdown-approved-by'),
     };
 
     ceMappings.weight = {

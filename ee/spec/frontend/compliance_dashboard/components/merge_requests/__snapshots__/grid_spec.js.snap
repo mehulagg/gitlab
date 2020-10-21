@@ -47,13 +47,12 @@ exports[`MergeRequestsGrid component when intialized matches the snapshot 1`] = 
        
       <!---->
        
-      <span
-        class="gl-text-gray-700"
-      >
-        <time>
-          merged 2 days ago
-        </time>
-      </span>
+      <time-ago-tooltip-stub
+        class="gl-text-gray-500"
+        cssclass=""
+        time="2020-01-01T00:00:00.000Z"
+        tooltipplacement="bottom"
+      />
     </div>
     <div
       data-testid="merge-request"
@@ -78,13 +77,12 @@ exports[`MergeRequestsGrid component when intialized matches the snapshot 1`] = 
        
       <!---->
        
-      <span
-        class="gl-text-gray-700"
-      >
-        <time>
-          merged 2 days ago
-        </time>
-      </span>
+      <time-ago-tooltip-stub
+        class="gl-text-gray-500"
+        cssclass=""
+        time="2020-01-01T00:00:00.000Z"
+        tooltipplacement="bottom"
+      />
     </div>
   </div>
    

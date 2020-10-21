@@ -1,6 +1,6 @@
 <script>
-import { __, sprintf } from '~/locale';
 import { GlFormGroup, GlFormInput, GlButton } from '@gitlab/ui';
+import { __, sprintf } from '~/locale';
 
 export default {
   components: {

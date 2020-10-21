@@ -15,7 +15,7 @@ RSpec.describe Resolvers::VulnerabilitiesHistoryResolver do
     let(:args) { { start_date: Date.parse('2019-10-15'), end_date: Date.parse('2019-10-21') } }
 
     it "fetches historical vulnerability data from the start date to the end date" do
-      Timecop.freeze(Date.parse('2019-10-31')) do
+      travel_to(Date.parse('2019-10-31')) do
         create(:vulnerability, :critical, created_at: 15.days.ago, dismissed_at: 10.days.ago, project: project)
         create(:vulnerability, :high, created_at: 15.days.ago, dismissed_at: 11.days.ago, project: project)
         create(:vulnerability, :critical, created_at: 14.days.ago, resolved_at: 12.days.ago, project: project)

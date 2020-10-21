@@ -29,6 +29,7 @@ RSpec.describe Groups::BillingsController do
         allow_next_instance_of(FetchSubscriptionPlansService) do |instance|
           allow(instance).to receive(:execute)
         end
+        allow(controller).to receive(:track_experiment_event)
       end
 
       it 'renders index with 200 status code' do
@@ -47,6 +48,12 @@ RSpec.describe Groups::BillingsController do
         get_index
 
         expect(assigns(:plans_data)).to eq(data)
+      end
+
+      it 'tracks the page view for the contact_sales_btn_in_app experiment' do
+        expect(controller).to receive(:track_experiment_event).with(:contact_sales_btn_in_app, 'page_view:billing_plans:group')
+
+        get_index
       end
 
       it 'records user for the contact_sales_btn_in_app experiment' do

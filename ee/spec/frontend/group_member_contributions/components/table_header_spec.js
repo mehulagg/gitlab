@@ -87,9 +87,7 @@ describe('TableHeaderComponent', () => {
 
       expect(headerItemEl).not.toBeNull();
       expect(headerItemEl.innerText.trim()).toBe('Name');
-      expect(headerItemEl.querySelector('svg use').getAttribute('xlink:href')).toContain(
-        'angle-up',
-      );
+      expect(headerItemEl.querySelector('svg').getAttribute('data-testid')).toBe('angle-up-icon');
     });
   });
 });

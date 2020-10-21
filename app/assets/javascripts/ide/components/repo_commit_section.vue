@@ -26,28 +26,34 @@ export default {
     },
   },
   mounted() {
-    const file =
-      this.lastOpenedFile && this.lastOpenedFile.type !== 'tree'
-        ? this.lastOpenedFile
-        : this.activeFile;
-
-    if (!file) return;
-
-    this.openPendingTab({
-      file,
-      keyPrefix: file.staged ? stageKeys.staged : stageKeys.unstaged,
-    })
-      .then(changeViewer => {
-        if (changeViewer) {
-          this.updateViewer('diff');
-        }
-      })
-      .catch(e => {
-        throw e;
-      });
+    this.initialize();
+  },
+  activated() {
+    this.initialize();
   },
   methods: {
     ...mapActions(['openPendingTab', 'updateViewer', 'updateActivityBarView']),
+    initialize() {
+      const file =
+        this.lastOpenedFile && this.lastOpenedFile.type !== 'tree'
+          ? this.lastOpenedFile
+          : this.activeFile;
+
+      if (!file) return;
+
+      this.openPendingTab({
+        file,
+        keyPrefix: file.staged ? stageKeys.staged : stageKeys.unstaged,
+      })
+        .then(changeViewer => {
+          if (changeViewer) {
+            this.updateViewer('diff');
+          }
+        })
+        .catch(e => {
+          throw e;
+        });
+    },
   },
   stageKeys,
 };
@@ -62,7 +68,6 @@ export default {
         :active-file-key="activeFileKey"
         :empty-state-text="__('There are no changes')"
         class="is-first"
-        icon-name="unstaged"
       />
     </template>
     <empty-state v-else />

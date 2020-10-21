@@ -52,9 +52,7 @@ module EE
 
       def build_cross_dependency_relationship_fragment(dependency, search_scope)
         args = dependency.values_at(:job, :ref, :project)
-        if ::Gitlab::Ci::Features.expand_names_for_cross_pipeline_artifacts?(project)
-          args = args.map { |value| ExpandVariables.expand(value, processable_variables) }
-        end
+        args = args.map { |value| ExpandVariables.expand(value, processable_variables) }
 
         dep_id = search_scope.max_build_id_by(*args)
         model_class.id_in(dep_id)

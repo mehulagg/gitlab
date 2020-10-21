@@ -8,7 +8,7 @@ import {
   GlFormInput,
 } from '@gitlab/ui';
 import { visitUrl } from '~/lib/utils/url_utility';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
 import LabelsSelectVue from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';

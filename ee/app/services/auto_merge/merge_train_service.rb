@@ -47,7 +47,7 @@ module AutoMerge
     def available_for?(merge_request)
       super do
         merge_request.project.merge_trains_enabled? &&
-          (Gitlab::Ci::Features.allow_to_create_merge_request_pipelines_in_target_project?(merge_request.target_project) || merge_request.for_same_project?) &&
+          can_add_to_merge_train?(merge_request) &&
           merge_request.actual_head_pipeline&.complete?
       end
     end

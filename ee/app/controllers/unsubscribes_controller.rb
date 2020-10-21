@@ -3,6 +3,8 @@
 class UnsubscribesController < ApplicationController
   skip_before_action :authenticate_user!
 
+  feature_category :users
+
   def show
     @user = get_user
   end

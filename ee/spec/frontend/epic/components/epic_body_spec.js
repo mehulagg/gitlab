@@ -7,9 +7,9 @@ import createStore from 'ee/epic/store';
 import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { initialRequest } from 'jest/issue_show/mock_data';
 import { TEST_HOST } from 'spec/test_constants';
+import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
 import axios from '~/lib/utils/axios_utils';
 import { mockEpicMeta, mockEpicData } from '../mock_data';
-import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
 
 describe('EpicBodyComponent', () => {
   useMockIntersectionObserver();
@@ -29,6 +29,8 @@ describe('EpicBodyComponent', () => {
     vm = mountComponentWithStore(Component, {
       store,
     });
+
+    jest.advanceTimersByTime(5);
   });
 
   afterEach(() => {

@@ -6,10 +6,10 @@ exports[`NetworkPolicyList component renders policies table 1`] = `
 <table
   aria-busy="false"
   aria-colcount="3"
-  aria-describedby="__BVID__151__caption_"
+  aria-describedby="__BVID__432__caption_"
   aria-multiselectable="false"
   class="table b-table gl-table table-hover b-table-stacked-md b-table-selectable b-table-select-single"
-  id="__BVID__151"
+  id="__BVID__432"
   role="table"
 >
   <!---->
@@ -25,7 +25,7 @@ exports[`NetworkPolicyList component renders policies table 1`] = `
     >
       <th
         aria-colindex="1"
-        class="w-75 font-weight-bold"
+        class="w-50 font-weight-bold"
         role="columnheader"
         scope="col"
       >
@@ -90,48 +90,7 @@ exports[`NetworkPolicyList component renders policies table 1`] = `
       >
         <div>
           
-      4 months ago
-    
-        </div>
-      </td>
-    </tr>
-    <tr
-      aria-selected="false"
-      class=""
-      role="row"
-      tabindex="0"
-    >
-      <td
-        aria-colindex="1"
-        class=""
-        data-label="Name"
-        role="cell"
-      >
-        <div>
-          cilium_policy
-        </div>
-      </td>
-      <td
-        aria-colindex="2"
-        class=""
-        data-label="Status"
-        role="cell"
-      >
-        <div>
-          
-      Enabled
-    
-        </div>
-      </td>
-      <td
-        aria-colindex="3"
-        class=""
-        data-label="Last modified"
-        role="cell"
-      >
-        <div>
-          
-      
+      2 months ago
     
         </div>
       </td>

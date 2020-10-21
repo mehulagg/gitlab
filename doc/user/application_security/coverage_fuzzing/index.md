@@ -14,18 +14,22 @@ behavior, such as a crash. Such behavior indicates a bug that you should address
 
 We recommend that you use fuzz testing in addition to the other security scanners in [GitLab Secure](../index.md)
 and your own test processes. If you're using [GitLab CI/CD](../../../ci/README.md),
-you can run your coverage guided fuzz tests as part your CI/CD workflow. You can take advantage of
-Coverage Guided Fuzzing by including the CI job in your existing `.gitlab-ci.yml` file.
+you can run your coverage-guided fuzz tests as part your CI/CD workflow. You can take advantage of
+coverage-guided fuzzing by including the CI job in your existing `.gitlab-ci.yml` file.
 
 ## Supported fuzzing engines and languages
 
-GitLab supports these languages through the fuzzing engine listed for each. We currently provide a Docker image for apps written in Go, but you can test the other languages below by providing a Docker image with the fuzz engine to run your app.
+GitLab supports these languages through the fuzzing engine listed for each. We currently provide a
+Docker image for apps written in Go, but you can test the other languages below by providing a
+Docker image with the fuzz engine to run your app.
 
 | Language | Fuzzing Engine | Example |
 |----------|----------------|---------|
-| C/C++    | [libFuzzer](https://llvm.org/docs/LibFuzzer.html) | [c-cpp-example](https://gitlab.com/gitlab-org/security-products/demos/c-cpp-fuzzing-example) |
-| GoLang   | [go-fuzz (libFuzzer support)](https://github.com/dvyukov/go-fuzz) | [go-fuzzing-example](https://gitlab.com/gitlab-org/security-products/demos/go-fuzzing-example) |
-| Rust     | [cargo-fuzz (libFuzzer support)](https://github.com/rust-fuzz/cargo-fuzz) |         |
+| C/C++    | [libFuzzer](https://llvm.org/docs/LibFuzzer.html) | [c-cpp-example](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/c-cpp-fuzzing-example) |
+| GoLang   | [go-fuzz (libFuzzer support)](https://github.com/dvyukov/go-fuzz) | [go-fuzzing-example](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/go-fuzzing-example) |
+| Swift    | [libfuzzer](https://github.com/apple/swift/blob/master/docs/libFuzzerIntegration.md) | [swift-fuzzing-example](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/swift-fuzzing-example) |
+| Rust     | [cargo-fuzz (libFuzzer support)](https://github.com/rust-fuzz/cargo-fuzz) | [rust-fuzzing-example](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/rust-fuzzing-example) |
+| Java     | [JQF](https://github.com/rohanpadhye/JQF) | [java-fuzzing-example](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/java-fuzzing-example) |
 
 ## Configuration
 
@@ -65,8 +69,8 @@ The `my_fuzz_target` job (the separate job for your fuzz target) does the follow
 
 The `gitlab-cov-fuzz` is a command-line tool that runs the instrumented application. It parses and
 analyzes the exception information that the fuzzer outputs. It also downloads the [corpus](#glossary)
-and crash events from previous pipelines automatically. This helps your fuzz targets build on the progress of
-previous fuzzing jobs. The parsed crash events and data are written to
+and crash events from previous pipelines automatically. This helps your fuzz targets build on the
+progress of previous fuzzing jobs. The parsed crash events and data are written to
 `gl-coverage-fuzzing-report.json`.
 
 ### Artifacts
@@ -125,7 +129,7 @@ The `gitlab-cov-fuzz` tool emits a JSON report file. For more information, see t
 You can download the JSON report file from the CI pipelines page. For more information, see
 [Downloading artifacts](../../../ci/pipelines/job_artifacts.md#downloading-artifacts).
 
-Here's an example Coverage Fuzzing report:
+Here's an example coverage fuzzing report:
 
 ```json-doc
 {
@@ -170,6 +174,52 @@ To use coverage fuzzing in an offline environment, follow these steps:
 1. For each fuzzing step, set `COVFUZZ_URL_PREFIX` to `${NEW_URL_GITLAB_COV_FUZ}/-/raw`, where
    `NEW_URL_GITLAB_COV_FUZ` is the URL of the private `gitlab-cov-fuzz` clone that you set up in the
    first step.
+
+### Continuous fuzzing (long-running async fuzzing jobs)
+
+It's also possible to run the fuzzing jobs longer and without blocking your main pipeline. This
+configuration uses the GitLab [parent-child pipelines](../../../ci/parent_child_pipelines.md).
+The full example is available in the [repository](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/go-fuzzing-example/-/tree/continuous_fuzzing#running-go-fuzz-from-ci).
+This example uses Go, but is applicable for any other supported languages.
+
+The suggested workflow in this scenario is to have long-running, async fuzzing jobs on a
+main/development branch, and short, blocking sync fuzzing jobs on all other branches and MRs. This
+is a good way to balance the needs of letting a developer's per-commit pipeline complete quickly,
+and also giving the fuzzer a large amount of time to fully explore and test the app.
+
+Long-running fuzzing jobs are usually necessary for the coverage guided fuzzer to find deeper bugs
+in your latest code base. THe following is an example of what `.gitlab-ci.yml` looks like in this
+workflow (for the full example, see the [repository](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/go-fuzzing-example/-/tree/continuous_fuzzing)):
+
+```yaml
+
+sync_fuzzing:
+  variables:
+    COVFUZZ_ADDITIONAL_ARGS: '-max_total_time=300'
+  trigger:
+    include: .covfuzz-ci.yml
+    strategy: depend
+  rules:
+    - if: $CI_COMMIT_BRANCH != 'continuous_fuzzing' && $CI_PIPELINE_SOURCE != 'merge_request_event'
+
+async_fuzzing:
+  variables:
+    COVFUZZ_ADDITIONAL_ARGS: '-max_total_time=3600'  
+  trigger:
+    include: .covfuzz-ci.yml
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'continuous_fuzzing' && $CI_PIPELINE_SOURCE != 'merge_request_event'
+```
+
+This essentially creates two steps:
+
+1. `sync_fuzzing`: Runs all your fuzz targets for a short period of time in a blocking
+   configuration. This finds simple bugs and allows you to be confident that your MRs aren't
+   introducing new bugs or causing old bugs to reappear.
+1. `async_fuzzing`: Runs on your branch and finds deep bugs in your code without blocking your
+   development cycle and MRs.
+
+The `covfuzz-ci.yml` is the same as that in the [original synchronous example](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/go-fuzzing-example#running-go-fuzz-from-ci).
 
 ### Glossary
 

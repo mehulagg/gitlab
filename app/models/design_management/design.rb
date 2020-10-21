@@ -79,17 +79,13 @@ module DesignManagement
       joins(join.join_sources).where(actions[:event].not_eq(deletion))
     end
 
-    scope :ordered, -> (project) do
-      # TODO: Always order by relative position after the feature flag is removed
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/34382
-      if Feature.enabled?(:reorder_designs, project)
-        # We need to additionally sort by `id` to support keyset pagination.
-        # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17788/diffs#note_230875678
-        order(:relative_position, :id)
-      else
-        order(:id)
-      end
+    scope :ordered, -> do
+      # We need to additionally sort by `id` to support keyset pagination.
+      # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17788/diffs#note_230875678
+      order(:relative_position, :id)
     end
+
+    scope :in_creation_order, -> { reorder(:id) }
 
     scope :with_filename, -> (filenames) { where(filename: filenames) }
     scope :on_issue, ->(issue) { where(issue_id: issue) }
@@ -101,7 +97,7 @@ module DesignManagement
     scope :current, -> { visible_at_version(nil) }
 
     def self.relative_positioning_query_base(design)
-      on_issue(design.issue_id)
+      default_scoped.on_issue(design.issue_id)
     end
 
     def self.relative_positioning_parent_column
@@ -171,6 +167,10 @@ module DesignManagement
       end
     end
 
+    def self.build_full_path(issue, design)
+      File.join(DesignManagement.designs_directory, "issue-#{issue.iid}", design.filename)
+    end
+
     def to_ability_name
       'design'
     end
@@ -184,7 +184,7 @@ module DesignManagement
     end
 
     def full_path
-      @full_path ||= File.join(DesignManagement.designs_directory, "issue-#{issue.iid}", filename)
+      @full_path ||= self.class.build_full_path(issue, self)
     end
 
     def diff_refs
@@ -226,6 +226,10 @@ module DesignManagement
       )
 
       !interloper.exists?
+    end
+
+    def notes_with_associations
+      notes.includes(:author)
     end
 
     private

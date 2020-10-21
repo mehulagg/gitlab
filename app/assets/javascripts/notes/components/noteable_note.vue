@@ -2,12 +2,12 @@
 import $ from 'jquery';
 import { mapGetters, mapActions } from 'vuex';
 import { escape } from 'lodash';
-import { GlSprintf } from '@gitlab/ui';
+import { GlSprintf, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { truncateSha } from '~/lib/utils/text_utility';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import { __, s__, sprintf } from '../../locale';
-import Flash from '../../flash';
+import { deprecatedCreateFlash as Flash } from '../../flash';
 import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import noteHeader from './note_header.vue';
 import noteActions from './note_actions.vue';
@@ -33,6 +33,9 @@ export default {
     noteActions,
     NoteBody,
     TimelineEntryItem,
+  },
+  directives: {
+    SafeHtml,
   },
   mixins: [noteable, resolvable, glFeatureFlagsMixin()],
   props: {
@@ -347,7 +350,7 @@ export default {
     <div
       v-if="showMultiLineComment"
       data-testid="multiline-comment"
-      class="gl-mb-3 gl-text-gray-700 gl-border-gray-200 gl-border-b-solid gl-border-b-1 gl-pb-3"
+      class="gl-mb-3 gl-text-gray-500 gl-border-gray-200 gl-border-b-solid gl-border-b-1 gl-pb-3"
     >
       <gl-sprintf :message="__('Comment on lines %{startLine} to %{endLine}')">
         <template #startLine>
@@ -358,7 +361,7 @@ export default {
         </template>
       </gl-sprintf>
     </div>
-    <div v-once class="timeline-icon">
+    <div class="timeline-icon">
       <user-avatar-link
         :link-href="author.path"
         :img-src="author.avatar_url"
@@ -371,14 +374,13 @@ export default {
     <div class="timeline-content">
       <div class="note-header">
         <note-header
-          v-once
           :author="author"
           :created-at="note.created_at"
           :note-id="note.id"
           :is-confidential="note.confidential"
         >
           <slot slot="note-header-info" name="note-header-info"></slot>
-          <span v-if="commit" v-html="actionText"></span>
+          <span v-if="commit" v-safe-html="actionText"></span>
           <span v-else-if="note.created_at" class="d-none d-sm-inline">&middot;</span>
         </note-header>
         <note-actions
@@ -387,6 +389,10 @@ export default {
           :note-id="note.id"
           :note-url="note.noteable_note_url"
           :access-level="note.human_access"
+          :is-contributor="note.is_contributor"
+          :is-author="note.is_noteable_author"
+          :project-name="note.project_name"
+          :noteable-type="note.noteable_type"
           :show-reply="showReplyButton"
           :can-edit="note.current_user.can_edit"
           :can-award-emoji="note.current_user.can_award_emoji"

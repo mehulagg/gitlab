@@ -34,7 +34,7 @@ This section is for links to information elsewhere in the GitLab documentation.
 
 - [More about external PostgreSQL](../postgresql/external.md)
 
-- [Running Geo with external PostgreSQL](../geo/replication/external_database.md)
+- [Running Geo with external PostgreSQL](../geo/setup/external_database.md)
 
 - [Upgrades when running PostgreSQL configured for HA.](https://docs.gitlab.com/omnibus/settings/database.html#upgrading-a-gitlab-ha-cluster)
 
@@ -58,7 +58,6 @@ This section is for links to information elsewhere in the GitLab documentation.
   - Support for MySQL was removed in GitLab 12.1; [migrate to PostgreSQL](../../update/mysql_to_postgresql.md)
   - required extension `pg_trgm`
   - required extension `btree_gist`
-  - required extension `postgres_fdw` for Geo
 
 - Errors like this in the `production/sidekiq` log; see: [Set default_transaction_isolation into read committed](https://docs.gitlab.com/omnibus/settings/database.html#set-default_transaction_isolation-into-read-committed):
 
@@ -85,7 +84,7 @@ This section is for links to information elsewhere in the GitLab documentation.
   PANIC: could not write to file ‘pg_xlog/xlogtemp.123’: No space left on device
   ```
 
-- [Checking Geo configuration](../geo/replication/troubleshooting.md#checking-configuration) including
+- [Checking Geo configuration](../geo/replication/troubleshooting.md) including
   - reconfiguring hosts/ports
   - checking and fixing user/password mappings
 

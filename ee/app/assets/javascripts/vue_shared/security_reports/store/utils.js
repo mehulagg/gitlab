@@ -1,5 +1,5 @@
-import { __, n__, sprintf } from '~/locale';
 import { CRITICAL, HIGH } from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
+import { __, n__, sprintf } from '~/locale';
 
 /**
  * Returns the index of an issue in given list

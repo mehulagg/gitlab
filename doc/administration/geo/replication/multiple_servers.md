@@ -13,7 +13,7 @@ described, it is possible to adapt these instructions to your needs.
 
 ## Architecture overview
 
-![Geo multi-node diagram](../../high_availability/img/geo-ha-diagram.png)
+![Geo multi-node diagram](img/geo-ha-diagram.png)
 
 _[diagram source - GitLab employees only](https://docs.google.com/drawings/d/1z0VlizKiLNXVVVaERFwgsIOuEgjcUqDTWPdQYsE7Z4c/edit)_
 
@@ -133,7 +133,7 @@ Configure the following services, again using the non-Geo multi-node
 documentation:
 
 - [Configuring Redis for GitLab](../../redis/replication_and_failover.md#example-configuration-for-the-gitlab-application) for multiple nodes.
-- [Gitaly](../../high_availability/gitaly.md), which will store data that is
+- [Gitaly](../../gitaly/index.md), which will store data that is
   synchronized from the **primary** node.
 
 NOTE: **Note:**
@@ -147,7 +147,7 @@ The following documentation assumes the database will be run on
 a single node only. Multi-node PostgreSQL on **secondary** nodes is
 [not currently supported](https://gitlab.com/groups/gitlab-org/-/epics/2536).
 
-Configure the [**secondary** database](database.md) as a read-only replica of
+Configure the [**secondary** database](../setup/database.md) as a read-only replica of
 the **primary** database. Use the following as a guide.
 
 1. Generate an MD5 hash of the desired password for the database user that the
@@ -222,7 +222,7 @@ the **primary** database. Use the following as a guide.
 After making these changes, [reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) so the changes take effect.
 
 If using an external PostgreSQL instance, refer also to
-[Geo with external PostgreSQL instances](external_database.md).
+[Geo with external PostgreSQL instances](../setup/external_database.md).
 
 ### Step 3: Configure the tracking database on the **secondary** node
 
@@ -260,10 +260,8 @@ Configure the tracking database.
    geo_postgresql['sql_user_password'] = '<tracking_database_password_md5_hash>'
 
    ##
-   ## Configure FDW connection to the replica database
+   ## Configure PostgreSQL connection to the replica database
    ##
-   geo_secondary['db_fdw'] = true
-   geo_postgresql['fdw_external_password'] = '<replica_database_password_plaintext>'
    geo_postgresql['md5_auth_cidr_addresses'] = ['<replica_database_ip>/32']
    gitlab_rails['db_host'] = '<replica_database_ip>'
 
@@ -296,7 +294,7 @@ Configure the tracking database.
 After making these changes, [reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) so the changes take effect.
 
 If using an external PostgreSQL instance, refer also to
-[Geo with external PostgreSQL instances](external_database.md).
+[Geo with external PostgreSQL instances](../setup/external_database.md).
 
 ### Step 4: Configure the frontend application servers on the **secondary** node
 
@@ -424,7 +422,6 @@ application servers above, with some changes to run only the `sidekiq` service:
    ##
    alertmanager['enable'] = false
    consul['enable'] = false
-   geo_logcursor['enable'] = false
    gitaly['enable'] = false
    gitlab_exporter['enable'] = false
    gitlab_workhorse['enable'] = false

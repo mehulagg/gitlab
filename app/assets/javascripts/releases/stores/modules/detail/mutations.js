@@ -1,5 +1,5 @@
-import * as types from './mutation_types';
 import { uniqueId, cloneDeep } from 'lodash';
+import * as types from './mutation_types';
 import { DEFAULT_ASSET_LINK_TYPE } from '../../../constants';
 
 const findReleaseLink = (release, id) => {
@@ -13,6 +13,7 @@ export default {
       name: '',
       description: '',
       milestones: [],
+      groupMilestones: [],
       assets: {
         links: [],
       },
@@ -49,6 +50,10 @@ export default {
 
   [types.UPDATE_RELEASE_MILESTONES](state, milestones) {
     state.release.milestones = milestones;
+  },
+
+  [types.UPDATE_RELEASE_GROUP_MILESTONES](state, groupMilestones) {
+    state.release.groupMilestones = groupMilestones;
   },
 
   [types.REQUEST_SAVE_RELEASE](state) {

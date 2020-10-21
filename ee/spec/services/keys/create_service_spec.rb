@@ -12,9 +12,9 @@ RSpec.describe Keys::CreateService do
   it 'creates' do
     stub_licensed_features(extended_audit_events: true)
 
-    expect { subject.execute }.to change { SecurityEvent.count }.by(1)
+    expect { subject.execute }.to change { AuditEvent.count }.by(1)
 
-    event = SecurityEvent.last
+    event = AuditEvent.last
 
     expect(event.author_name).to eq(admin.name)
     expect(event.entity_id).to eq(user.id)

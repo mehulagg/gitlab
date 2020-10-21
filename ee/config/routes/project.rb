@@ -15,13 +15,9 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :requirements, only: [:index]
         end
 
-        resources :feature_flags, param: :iid do
-          resources :feature_flag_issues, only: [:index, :create, :destroy], as: 'issues', path: 'issues'
+        namespace :quality do
+          resources :test_cases, only: [:index, :new]
         end
-        resource :feature_flags_client, only: [] do
-          post :reset_token
-        end
-        resources :feature_flags_user_lists, param: :iid, only: [:new, :edit, :show]
 
         resources :autocomplete_sources, only: [] do
           collection do
@@ -38,7 +34,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :subscriptions, only: [:create, :destroy]
 
         resource :threat_monitoring, only: [:show], controller: :threat_monitoring do
-          resources :policies, only: [:new], controller: :threat_monitoring
+          resources :policies, only: [:new, :edit], controller: :threat_monitoring
         end
 
         resources :protected_environments, only: [:create, :update, :destroy], constraints: { id: /\d+/ } do
@@ -63,6 +59,10 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resource :configuration, only: [:show], controller: :configuration do
             post :auto_fix, on: :collection
             resource :sast, only: [:show, :create], controller: :sast_configuration
+            resource :dast_profiles, only: [:show] do
+              resources :dast_site_profiles, only: [:new, :edit]
+              resources :dast_scanner_profiles, only: [:new, :edit]
+            end
           end
 
           resource :discover, only: [:show], controller: :discover
@@ -72,6 +72,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :vulnerabilities, only: [:show] do
             member do
               get :discussions, format: :json
+              post :create_issue, format: :json
             end
 
             scope module: :vulnerabilities do
@@ -83,7 +84,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         namespace :analytics do
           resources :code_reviews, only: [:index]
           resource :issues_analytics, only: [:show]
-          resource :merge_request_analytics, only: :show, constraints: -> (req) { Gitlab::Analytics.project_merge_request_analytics_enabled? }
+          resource :merge_request_analytics, only: :show
         end
 
         resources :approvers, only: :destroy
@@ -93,12 +94,12 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :dependencies, only: [:index]
         resources :licenses, only: [:index, :create, :update]
 
+        resources :feature_flags, param: :iid do
+          resources :feature_flag_issues, only: [:index, :create, :destroy], as: 'issues', path: 'issues'
+        end
+
         scope :on_demand_scans do
           root 'on_demand_scans#index', as: 'on_demand_scans'
-          scope :profiles do
-            root 'dast_profiles#index', as: 'profiles'
-            resources :dast_site_profiles, only: [:new, :edit]
-          end
         end
 
         namespace :integrations do
@@ -107,7 +108,11 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           end
         end
 
-        resources :iterations, only: [:index, :show], constraints: { id: /\d+/ }
+        resources :iterations, only: [:index]
+
+        namespace :iterations do
+          resources :inherited, only: [:show], constraints: { id: /\d+/ }
+        end
       end
       # End of the /-/ scope.
 
@@ -120,8 +125,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           post :toggle
         end
       end
-
-      resource :tracing, only: [:show]
 
       post '/restore' => '/projects#restore', as: :restore
 
@@ -137,37 +140,3 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
     end
   end
 end
-
-# It's under /-/jira scope but cop is only checking /-/
-# rubocop: disable Cop/PutProjectRoutesUnderScope
-scope path: '(/-/jira)', constraints: ::Constraints::JiraEncodedUrlConstrainer.new, as: :jira do
-  scope path: '*namespace_id/:project_id',
-        namespace_id: Gitlab::Jira::Dvcs::ENCODED_ROUTE_REGEX,
-        project_id: Gitlab::Jira::Dvcs::ENCODED_ROUTE_REGEX do
-    get '/', to: redirect { |params, req|
-      ::Gitlab::Jira::Dvcs.restore_full_path(
-        namespace: params[:namespace_id],
-        project: params[:project_id]
-      )
-    }
-
-    get 'commit/:id', constraints: { id: /\h{7,40}/ }, to: redirect { |params, req|
-      project_full_path = ::Gitlab::Jira::Dvcs.restore_full_path(
-        namespace: params[:namespace_id],
-        project: params[:project_id]
-      )
-
-      "/#{project_full_path}/commit/#{params[:id]}"
-    }
-
-    get 'tree/*id', as: nil, to: redirect { |params, req|
-      project_full_path = ::Gitlab::Jira::Dvcs.restore_full_path(
-        namespace: params[:namespace_id],
-        project: params[:project_id]
-      )
-
-      "/#{project_full_path}/-/tree/#{params[:id]}"
-    }
-  end
-end
-# rubocop: enable Cop/PutProjectRoutesUnderScope

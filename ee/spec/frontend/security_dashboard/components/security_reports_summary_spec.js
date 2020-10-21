@@ -1,10 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlSprintf } from '@gitlab/ui';
 import { trimText } from 'helpers/text_helper';
-import AccessorUtilities from '~/lib/utils/accessor';
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 import SecurityReportsSummary from 'ee/security_dashboard/components/security_reports_summary.vue';
 import Modal from 'ee/vue_shared/security_reports/components/dast_modal.vue';
+import AccessorUtilities from '~/lib/utils/accessor';
 
 describe('Security reports summary component', () => {
   useLocalStorageSpy();

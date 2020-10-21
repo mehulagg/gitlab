@@ -43,7 +43,7 @@ RSpec.describe Projects::PipelinesController do
         end
       end
 
-      it 'executes N+1 queries' do
+      it 'does not execute N+1 queries' do
         get_pipelines_index_json
 
         control_count = ActiveRecord::QueryRecorder.new do
@@ -53,7 +53,7 @@ RSpec.describe Projects::PipelinesController do
         create_all_pipeline_types
 
         # There appears to be one extra query for Pipelines#has_warnings? for some reason
-        expect { get_pipelines_index_json }.not_to exceed_query_limit(control_count + 7)
+        expect { get_pipelines_index_json }.not_to exceed_query_limit(control_count + 1)
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['pipelines'].count).to eq 12
       end
@@ -763,6 +763,71 @@ RSpec.describe Projects::PipelinesController do
     end
   end
 
+  describe 'POST create.json' do
+    let(:project) { create(:project, :public, :repository) }
+
+    subject do
+      post :create, params: {
+                      namespace_id: project.namespace,
+                      project_id: project,
+                      pipeline: { ref: 'master' }
+                    },
+                    format: :json
+    end
+
+    before do
+      project.add_developer(user)
+      project.project_feature.update(builds_access_level: feature)
+    end
+
+    context 'with a valid .gitlab-ci.yml file' do
+      before do
+        stub_ci_pipeline_yaml_file(YAML.dump({
+          test: {
+            stage: 'test',
+            script: 'echo'
+          }
+        }))
+      end
+
+      it 'creates a pipeline' do
+        expect { subject }.to change { project.ci_pipelines.count }.by(1)
+
+        expect(response).to have_gitlab_http_status(:created)
+        expect(json_response['id']).to eq(project.ci_pipelines.last.id)
+      end
+    end
+
+    context 'with an invalid .gitlab-ci.yml file' do
+      before do
+        stub_ci_pipeline_yaml_file(YAML.dump({
+          build: {
+            stage: 'build',
+            script: 'echo',
+            rules: [{ when: 'always' }]
+          },
+          test: {
+            stage: 'invalid',
+            script: 'echo'
+          }
+        }))
+      end
+
+      it 'does not create a pipeline' do
+        expect { subject }.not_to change { project.ci_pipelines.count }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response['errors']).to eq([
+          'test job: chosen stage does not exist; available stages are .pre, build, test, deploy, .post'
+        ])
+        expect(json_response['warnings'][0]).to include(
+          'jobs:build may allow multiple pipelines to run for a single action due to `rules:when`'
+        )
+        expect(json_response['total_warnings']).to eq(1)
+      end
+    end
+  end
+
   describe 'POST retry.json' do
     let!(:pipeline) { create(:ci_pipeline, :failed, project: project) }
     let!(:build) { create(:ci_build, :failed, pipeline: pipeline) }
@@ -1081,6 +1146,86 @@ RSpec.describe Projects::PipelinesController do
                          project_id: project,
                          id: pipeline.id
                        }
+    end
+  end
+
+  describe 'GET config_variables.json' do
+    let(:result) { YAML.dump(ci_config) }
+
+    before do
+      stub_gitlab_ci_yml_for_sha(sha, result)
+    end
+
+    context 'when sending a valid sha' do
+      let(:sha) { 'master' }
+      let(:ci_config) do
+        {
+          variables: {
+            KEY1: { value: 'val 1', description: 'description 1' }
+          },
+          test: {
+            stage: 'test',
+            script: 'echo'
+          }
+        }
+      end
+
+      it 'returns variable list' do
+        get_config_variables
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['KEY1']).to eq({ 'value' => 'val 1', 'description' => 'description 1' })
+      end
+    end
+
+    context 'when sending an invalid sha' do
+      let(:sha) { 'invalid-sha' }
+      let(:ci_config) { nil }
+
+      it 'returns empty json' do
+        get_config_variables
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to eq({})
+      end
+    end
+
+    context 'when sending an invalid config' do
+      let(:sha) { 'master' }
+      let(:ci_config) do
+        {
+          variables: {
+            KEY1: { value: 'val 1', description: 'description 1' }
+          },
+          test: {
+            stage: 'invalid',
+            script: 'echo'
+          }
+        }
+      end
+
+      it 'returns empty result' do
+        get_config_variables
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to eq({})
+      end
+    end
+
+    private
+
+    def stub_gitlab_ci_yml_for_sha(sha, result)
+      allow_any_instance_of(Repository)
+          .to receive(:gitlab_ci_yml_for)
+          .with(sha, '.gitlab-ci.yml')
+          .and_return(result)
+    end
+
+    def get_config_variables
+      get :config_variables, params: { namespace_id: project.namespace,
+                                       project_id: project,
+                                       sha: sha },
+                             format: :json
     end
   end
 end

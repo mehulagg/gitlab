@@ -21,7 +21,6 @@ cannot be used to authenticate with GitHub as an external CI/CD repository.
 
 ## Connect with Personal Access Token
 
-NOTE: **Note:**
 Personal access tokens can only be used to connect GitHub.com
 repositories to GitLab, and the GitHub user must have the [owner role](https://docs.github.com/en/github/getting-started-with-github/access-permissions-on-github).
 
@@ -47,13 +46,12 @@ repositories:
 GitLab will:
 
 1. Import the project.
-1. Enable [Pull Mirroring](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository-starter)
+1. Enable [Pull Mirroring](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository)
 1. Enable [GitHub project integration](../../user/project/integrations/github.md)
 1. Create a web hook on GitHub to notify GitLab of new commits.
 
 ## Connect manually
 
-NOTE: **Note:**
 To use **GitHub Enterprise** with **GitLab.com**, use this method.
 
 To manually enable GitLab CI/CD for your repository:
@@ -85,7 +83,7 @@ To manually enable GitLab CI/CD for your repository:
    new commits.
 
    The web hook URL should be set to the GitLab API to
-   [trigger pull mirroring](../../api/projects.md#start-the-pull-mirroring-process-for-a-project-starter),
+   [trigger pull mirroring](../../api/projects.md#start-the-pull-mirroring-process-for-a-project),
    using the GitLab personal access token we just created:
 
    ```plaintext

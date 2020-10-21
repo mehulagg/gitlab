@@ -1,12 +1,12 @@
 <script>
 import { GlBadge, GlLoadingIcon, GlModalDirective, GlIcon, GlTooltip, GlSprintf } from '@gitlab/ui';
+import { values, get } from 'lodash';
 import { s__ } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import AlertWidgetForm from './alert_widget_form.vue';
 import AlertsService from '../services/alerts_service';
 import { alertsValidator, queriesValidator } from '../validators';
 import { OPERATORS } from '../constants';
-import { values, get } from 'lodash';
 
 export default {
   components: {
@@ -236,7 +236,7 @@ export default {
     >
       <gl-badge :variant="isFiring ? 'danger' : 'neutral'" class="d-flex-center text-truncate">
         <gl-icon name="warning" :size="16" class="flex-shrink-0" />
-        <span class="text-truncate gl-pl-1-deprecated-no-really-do-not-use-me">
+        <span class="text-truncate gl-pl-2">
           <gl-sprintf
             :message="
               hasMultipleAlerts ? multipleAlertsSummary.message : singleAlertSummary.message

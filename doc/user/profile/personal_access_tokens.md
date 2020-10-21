@@ -14,43 +14,25 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 If you're unable to use [OAuth2](../../api/oauth2.md), you can use a personal access token to authenticate with the [GitLab API](../../api/README.md#personalproject-access-tokens).
 
-You can also use personal access tokens with Git to authenticate over HTTP or SSH. Personal access tokens are required when [Two-Factor Authentication (2FA)](../account/two_factor_authentication.md) is enabled. In both cases, you can authenticate with a token in place of your password.
+You can also use personal access tokens with Git to authenticate over HTTP or SSH. Personal access tokens are required when [Two-Factor Authentication (2FA)](account/two_factor_authentication.md) is enabled. In both cases, you can authenticate with a token in place of your password.
 
 Personal access tokens expire on the date you define, at midnight UTC.
 
 - GitLab runs a check at 01:00 AM UTC every day to identify personal access tokens that expire in under seven days. The owners of these tokens are notified by email.
 - GitLab runs a check at 02:00 AM UTC every day to identify personal access tokens that expired on the current date. The owners of these tokens are notified by email.
-To turn on the notification for expired personal access tokens in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-notification-for-expired-personal-access-token-core-only). **(CORE ONLY)**
-- In GitLab Ultimate, administrators may [limit the lifetime of personal access tokens](../admin_area/settings/account_and_limit_settings.md#limiting-lifetime-of-personal-access-tokens-ultimate-only).
-- In GitLab Ultimate, administrators may [toggle enforcement of personal access token expiry](../admin_area/settings/account_and_limit_settings.md#optional-enforcement-of-personal-access-token-expiry-ultimate-only).
+- In GitLab Ultimate, administrators may [limit the lifetime of personal access tokens](../admin_area/settings/account_and_limit_settings.md#limiting-lifetime-of-personal-access-tokens).
+- In GitLab Ultimate, administrators may [toggle enforcement of personal access token expiry](../admin_area/settings/account_and_limit_settings.md#optional-enforcement-of-personal-access-token-expiry).
 
 For examples of how you can use a personal access token to authenticate with the API, see the following section from our [API Docs](../../api/README.md#personalproject-access-tokens).
 
 GitLab also offers [impersonation tokens](../../api/README.md#impersonation-tokens) which are created by administrators via the API. They're a great fit for automated authentication as a specific user.
-
-## Enable or disable notification for Expired personal access token **(CORE ONLY)**
-
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it for your instance.
-
-To enable it:
-
-```ruby
-Feature.enable(:expired_pat_email_notification)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:expired_pat_email_notification)
-```
 
 ## Creating a personal access token
 
 You can create as many personal access tokens as you like from your GitLab
 profile.
 
-1. Log in to GitLab.
+1. Sign in to GitLab.
 1. In the upper-right corner, click your avatar and select **Settings**.
 1. On the  **User Settings** menu, select **Access Tokens**.
 1. Choose a name and optional expiry date for the token.
@@ -89,7 +71,7 @@ the following table.
 
 You can programmatically create a predetermined personal access token for use in
 automation or tests. You need sufficient access to run a
-[Rails console session](../../administration/troubleshooting/debug.md#starting-a-rails-console-session)
+[Rails console session](../../administration/operations/rails_console.md#starting-a-rails-console-session)
 for your GitLab instance.
 
 To create a token belonging to a user with username `automation-bot`, run the
@@ -103,7 +85,7 @@ token.save!
 ```
 
 This can be shortened into a single-line shell command using the
-[GitLab Rails Runner](../../administration/troubleshooting/debug.md#using-the-rails-runner):
+[Rails runner](../../administration/troubleshooting/debug.md#using-the-rails-runner):
 
 ```shell
 sudo gitlab-rails runner "token = User.find_by_username('automation-bot').personal_access_tokens.create(scopes: [:read_user, :read_repository], name: 'Automation token'); token.set_token('token-string-here123'); token.save!"
@@ -119,7 +101,7 @@ The list of valid scopes and what they do can be found
 ## Programmatically revoking a personal access token
 
 You can programmatically revoke a personal access token. You need
-sufficient access to run a [Rails console session](../../administration/troubleshooting/debug.md#starting-a-rails-console-session)
+sufficient access to run a [Rails console session](../../administration/operations/rails_console.md#starting-a-rails-console-session)
 for your GitLab instance.
 
 To revoke a known token `token-string-here123`, run the following in the Rails
@@ -131,7 +113,7 @@ token.revoke!
 ```
 
 This can be shorted into a single-line shell command using the
-[GitLab Rails Runner](../../administration/troubleshooting/debug.md#using-the-rails-runner):
+[Rails runner](../../administration/troubleshooting/debug.md#using-the-rails-runner):
 
 ```shell
 sudo gitlab-rails runner "PersonalAccessToken.find_by_token('token-string-here123').revoke!"

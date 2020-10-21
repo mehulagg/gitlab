@@ -1,10 +1,9 @@
 #import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
-#import "./iteration.fragment.graphql"
+#import "./iteration_list_item.fragment.graphql"
 
 query Iterations(
   $fullPath: ID!
-  $isGroup: Boolean = false
-  $isProject: Boolean = false
+  $isGroup: Boolean = true
   $state: IterationState!
   $beforeCursor: String = ""
   $afterCursor: String = ""
@@ -14,21 +13,20 @@ query Iterations(
   group(fullPath: $fullPath) @include(if: $isGroup) {
     iterations(
       state: $state
-      includeAncestors: false
       before: $beforeCursor
       after: $afterCursor
       first: $firstPageSize
       last: $lastPageSize
     ) {
       nodes {
-        ...Iteration
+        ...IterationListItem
       }
       pageInfo {
         ...PageInfo
       }
     }
   }
-  project(fullPath: $fullPath) @include(if: $isProject) {
+  project(fullPath: $fullPath) @skip(if: $isGroup) {
     iterations(
       state: $state
       before: $beforeCursor
@@ -37,7 +35,7 @@ query Iterations(
       last: $lastPageSize
     ) {
       nodes {
-        ...Iteration
+        ...IterationListItem
       }
       pageInfo {
         ...PageInfo

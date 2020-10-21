@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { removeBreakLine } from 'helpers/text_helper';
-import ConflictsComponent from '~/vue_merge_request_widget/components/states/mr_widget_conflicts.vue';
 import { TEST_HOST } from 'helpers/test_constants';
+import ConflictsComponent from '~/vue_merge_request_widget/components/states/mr_widget_conflicts.vue';
 
 describe('MRWidgetConflicts', () => {
   let vm;
@@ -148,8 +148,8 @@ describe('MRWidgetConflicts', () => {
         },
       });
 
-      expect(vm.contains('.js-resolve-conflicts-button')).toBe(false);
-      expect(vm.contains('.js-merge-locally-button')).toBe(false);
+      expect(vm.find('.js-resolve-conflicts-button').exists()).toBe(false);
+      expect(vm.find('.js-merge-locally-button').exists()).toBe(false);
     });
 
     it('should not have resolve button when no conflict resolution path', () => {
@@ -161,7 +161,7 @@ describe('MRWidgetConflicts', () => {
         },
       });
 
-      expect(vm.contains('.js-resolve-conflicts-button')).toBe(false);
+      expect(vm.find('.js-resolve-conflicts-button').exists()).toBe(false);
     });
   });
 

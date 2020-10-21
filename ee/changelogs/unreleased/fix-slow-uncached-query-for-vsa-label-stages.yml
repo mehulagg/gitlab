@@ -1,5 +1,0 @@
----
-title: Fix slow Value Stream label stage query
-merge_request: 38252
-author:
-type: performance

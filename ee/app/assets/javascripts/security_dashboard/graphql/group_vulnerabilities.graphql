@@ -10,6 +10,7 @@ query group(
   $reportType: [VulnerabilityReportType!]
   $scanner: [String!]
   $state: [VulnerabilityState!]
+  $sort: VulnerabilitySort
 ) {
   group(fullPath: $fullPath) {
     vulnerabilities(
@@ -20,6 +21,7 @@ query group(
       scanner: $scanner
       state: $state
       projectId: $projectId
+      sort: $sort
     ) {
       nodes {
         ...Vulnerability

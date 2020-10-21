@@ -1,5 +1,0 @@
----
-title: Add confirmation message when regenerating feature flags instance ID
-merge_request: 38497
-author:
-type: changed

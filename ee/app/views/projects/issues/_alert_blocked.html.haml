@@ -11,5 +11,5 @@
     .gl-alert-actions
       %button{ class: "btn btn-close-anyway gl-alert-action btn-warning btn-md gl-button", data: { endpoint: close_issuable_path(@issue) } }
         = _("Yes, close issue")
-      %button.btn.gl-alert-action.btn-warning.btn-md.gl-button.btn-secondary
+      %button.btn.gl-alert-action.btn-warning.btn-md.gl-button.btn-warning-secondary.js-cancel-blocked-issue-warning
         = s_('Cancel')

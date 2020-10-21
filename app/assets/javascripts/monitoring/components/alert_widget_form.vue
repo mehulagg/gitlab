@@ -3,20 +3,20 @@ import { isEmpty, findKey } from 'lodash';
 import Vue from 'vue';
 import {
   GlLink,
-  GlDeprecatedButton,
+  GlButton,
   GlButtonGroup,
   GlFormGroup,
   GlFormInput,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
   GlModal,
   GlTooltipDirective,
+  GlIcon,
 } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import Translate from '~/vue_shared/translate';
 import TrackEventDirective from '~/vue_shared/directives/track_event';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import Icon from '~/vue_shared/components/icon.vue';
 import { alertsValidator, queriesValidator } from '../validators';
 import { OPERATORS } from '../constants';
 
@@ -36,15 +36,15 @@ const SUBMIT_BUTTON_CLASS = {
 
 export default {
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlButtonGroup,
     GlFormGroup,
     GlFormInput,
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     GlModal,
     GlLink,
-    Icon,
+    GlIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -242,7 +242,7 @@ export default {
         <template #description>
           <div class="d-flex align-items-center">
             {{ __('Single or combined queries') }}
-            <icon
+            <gl-icon
               v-gl-tooltip="$options.alertQueryText.descriptionTooltip"
               name="question"
               class="gl-ml-2"
@@ -251,46 +251,43 @@ export default {
         </template>
       </gl-form-group>
       <gl-form-group v-else label-for="alert-query-dropdown" :label="$options.alertQueryText.label">
-        <gl-deprecated-dropdown
+        <gl-dropdown
           id="alert-query-dropdown"
           :text="queryDropdownLabel"
-          toggle-class="dropdown-menu-toggle qa-alert-query-dropdown"
+          toggle-class="dropdown-menu-toggle gl-border-1! qa-alert-query-dropdown"
         >
-          <gl-deprecated-dropdown-item
+          <gl-dropdown-item
             v-for="query in relevantQueries"
             :key="query.metricId"
             data-qa-selector="alert_query_option"
             @click="selectQuery(query.metricId)"
           >
             {{ query.label }}
-          </gl-deprecated-dropdown-item>
-        </gl-deprecated-dropdown>
+          </gl-dropdown-item>
+        </gl-dropdown>
       </gl-form-group>
       <gl-button-group class="mb-3" :label="s__('PrometheusAlerts|Operator')">
-        <gl-deprecated-button
+        <gl-button
           :class="{ active: operator === operators.greaterThan }"
           :disabled="formDisabled"
-          type="button"
           @click="operator = operators.greaterThan"
         >
           {{ operators.greaterThan }}
-        </gl-deprecated-button>
-        <gl-deprecated-button
+        </gl-button>
+        <gl-button
           :class="{ active: operator === operators.equalTo }"
           :disabled="formDisabled"
-          type="button"
           @click="operator = operators.equalTo"
         >
           {{ operators.equalTo }}
-        </gl-deprecated-button>
-        <gl-deprecated-button
+        </gl-button>
+        <gl-button
           :class="{ active: operator === operators.lessThan }"
           :disabled="formDisabled"
-          type="button"
           @click="operator = operators.lessThan"
         >
           {{ operators.lessThan }}
-        </gl-deprecated-button>
+        </gl-button>
       </gl-button-group>
       <gl-form-group :label="s__('PrometheusAlerts|Threshold')" label-for="alerts-threshold">
         <gl-form-input

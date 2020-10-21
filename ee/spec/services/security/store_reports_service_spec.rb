@@ -34,7 +34,7 @@ RSpec.describe Security::StoreReportsService do
       end
 
       context 'when StoreReportService returns an error for a report' do
-        let(:reports) { Gitlab::Ci::Reports::Security::Reports.new(pipeline.sha) }
+        let(:reports) { Gitlab::Ci::Reports::Security::Reports.new(pipeline) }
         let(:sast_report) { reports.get_report('sast', sast_artifact) }
         let(:dast_report) { reports.get_report('dast', dast_artifact) }
         let(:success) { { status: :success } }

@@ -16,7 +16,8 @@ FactoryBot.define do
         raw_metadata.delete('solution')
         raw_metadata['remediations'] = [
           {
-            summary: evaluator.summary
+            summary: evaluator.summary,
+            diff: Base64.encode64("This ain't a diff")
           }
         ]
         finding.raw_metadata = raw_metadata.to_json
@@ -71,9 +72,15 @@ FactoryBot.define do
       }.to_json
     end
 
-    trait :confirmed do
+    trait :detected do
       after(:create) do |finding|
         create(:vulnerability, :detected, project: finding.project, findings: [finding])
+      end
+    end
+
+    trait :confirmed do
+      after(:create) do |finding|
+        create(:vulnerability, :confirmed, project: finding.project, findings: [finding])
       end
     end
 
@@ -85,6 +92,7 @@ FactoryBot.define do
 
     trait :dismissed do
       after(:create) do |finding|
+        create(:vulnerability, :dismissed, project: finding.project, findings: [finding])
         create(:vulnerability_feedback,
                :dismissal,
                project: finding.project,
@@ -107,10 +115,23 @@ FactoryBot.define do
         raw_metadata.delete(:solution)
         raw_metadata[:remediations] = [
           {
-            summary: 'Use GCM mode which includes HMAC in the resulting encrypted data, providing integrity of the result.'
+            summary: 'Use GCM mode which includes HMAC in the resulting encrypted data, providing integrity of the result.',
+            diff: Base64.encode64("This is a diff")
           }
         ]
         finding.raw_metadata = raw_metadata.to_json
+      end
+    end
+
+    trait :identifier do
+      after(:build) do |finding|
+        identifier = build(
+          :vulnerabilities_identifier,
+          fingerprint: SecureRandom.hex(20),
+          project: finding.project
+        )
+
+        finding.identifiers = [identifier]
       end
     end
 

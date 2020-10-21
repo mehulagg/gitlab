@@ -1,11 +1,5 @@
 <script>
-import {
-  GlIcon,
-  GlDeprecatedButton,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
-  GlFormGroup,
-} from '@gitlab/ui';
+import { GlIcon, GlButton, GlDropdown, GlDropdownItem, GlFormGroup } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 
 import { convertToFixedRange, isEqualTimeRanges, findTimeRange } from '~/lib/utils/datetime_range';
@@ -28,9 +22,9 @@ const events = {
 export default {
   components: {
     GlIcon,
-    GlDeprecatedButton,
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlButton,
+    GlDropdown,
+    GlDropdownItem,
     GlFormGroup,
     TooltipOnTruncate,
     DateTimePickerInput,
@@ -212,7 +206,8 @@ export default {
     placement="top"
     class="d-inline-block"
   >
-    <gl-deprecated-dropdown
+    <gl-dropdown
+      ref="dropdown"
       :text="timeWindowText"
       v-bind="$attrs"
       class="date-time-picker w-100"
@@ -227,15 +222,15 @@ export default {
         <gl-icon class="gl-dropdown-caret" name="chevron-down" aria-hidden="true" />
       </template>
 
-      <div class="d-flex justify-content-between gl-p-2-deprecated-no-really-do-not-use-me">
+      <div class="d-flex justify-content-between gl-p-2">
         <gl-form-group
           v-if="customEnabled"
           :label="customLabel"
           label-for="custom-from-time"
-          label-class="gl-pb-1-deprecated-no-really-do-not-use-me"
-          class="custom-time-range-form-group col-md-7 gl-pl-1-deprecated-no-really-do-not-use-me gl-pr-0 m-0"
+          label-class="gl-pb-2"
+          class="custom-time-range-form-group col-md-7 gl-pl-2 gl-pr-0 m-0"
         >
-          <div class="gl-pt-2-deprecated-no-really-do-not-use-me">
+          <div class="gl-pt-3">
             <date-time-picker-input
               id="custom-time-from"
               v-model="startInput"
@@ -250,21 +245,25 @@ export default {
             />
           </div>
           <gl-form-group>
-            <gl-deprecated-button @click="closeDropdown">{{ __('Cancel') }}</gl-deprecated-button>
-            <gl-deprecated-button variant="success" :disabled="!isValid" @click="setFixedRange()">
+            <gl-button data-testid="cancelButton" @click="closeDropdown">{{
+              __('Cancel')
+            }}</gl-button>
+            <gl-button
+              variant="success"
+              category="primary"
+              :disabled="!isValid"
+              @click="setFixedRange()"
+            >
               {{ __('Apply') }}
-            </gl-deprecated-button>
+            </gl-button>
           </gl-form-group>
         </gl-form-group>
-        <gl-form-group
-          label-for="group-id-dropdown"
-          class="col-md-5 gl-pl-1-deprecated-no-really-do-not-use-me gl-pr-1-deprecated-no-really-do-not-use-me m-0"
-        >
+        <gl-form-group label-for="group-id-dropdown" class="col-md-5 gl-px-2 m-0">
           <template #label>
-            <span class="gl-pl-5-deprecated-no-really-do-not-use-me">{{ __('Quick range') }}</span>
+            <span class="gl-pl-7">{{ __('Quick range') }}</span>
           </template>
 
-          <gl-deprecated-dropdown-item
+          <gl-dropdown-item
             v-for="(option, index) in options"
             :key="index"
             data-qa-selector="quick_range_item"
@@ -278,9 +277,9 @@ export default {
               :class="{ invisible: !isOptionActive(option) }"
             />
             {{ option.label }}
-          </gl-deprecated-dropdown-item>
+          </gl-dropdown-item>
         </gl-form-group>
       </div>
-    </gl-deprecated-dropdown>
+    </gl-dropdown>
   </tooltip-on-truncate>
 </template>

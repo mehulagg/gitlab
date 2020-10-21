@@ -10,6 +10,11 @@ module QA
 
           view 'app/assets/javascripts/ide/components/activity_bar.vue' do
             element :commit_mode_tab
+            element :edit_mode_tab
+          end
+
+          view 'app/assets/javascripts/ide/components/ide_status_bar.vue' do
+            element :commit_sha_content
           end
 
           view 'app/assets/javascripts/ide/components/ide_tree.vue' do
@@ -68,6 +73,10 @@ module QA
             element :project_path_content
           end
 
+          view 'app/assets/javascripts/ide/components/commit_sidebar/message_field.vue' do
+            element :ide_commit_message_field
+          end
+
           def has_file?(file_name)
             within_element(:file_list) do
               page.has_content? file_name
@@ -76,6 +85,10 @@ module QA
 
           def has_project_path?(project_path)
             has_element?(:project_path_content, project_path: project_path)
+          end
+
+          def go_to_project
+            click_element(:project_path_content, Page::Project::Show)
           end
 
           def create_new_file_from_template(file_name, template)
@@ -104,11 +117,19 @@ module QA
             end
           end
 
-          def commit_changes(open_merge_request: false)
+          def commit_sha
+            return unless has_element?(:commit_sha_content, wait: 0)
+
+            find_element(:commit_sha_content).text
+          end
+
+          def commit_changes(commit_message = nil, open_merge_request: false)
             # Clicking :begin_commit_button switches from the
             # edit to the commit view
-            click_element :begin_commit_button
-            active_element? :commit_mode_tab
+            click_element(:begin_commit_button)
+            active_element?(:commit_mode_tab)
+
+            original_commit = commit_sha
 
             # After clicking :begin_commit_button, there is an animation
             # that hides :begin_commit_button and shows :commit_button
@@ -120,22 +141,27 @@ module QA
                 has_element?(:commit_button)
             end
 
+            if commit_message
+              fill_element(:ide_commit_message_field, commit_message)
+            end
+
             if open_merge_request
               click_element(:commit_button, Page::MergeRequest::New)
             else
               # Click :commit_button and keep retrying just in case part of the
               # animation is still in process even when the buttons have the
               # expected visibility.
-              commit_success_msg_shown = retry_until(sleep_interval: 5) do
+              commit_success = retry_until(sleep_interval: 5) do
                 click_element(:commit_to_current_branch_radio) if has_element?(:commit_to_current_branch_radio)
                 click_element(:commit_button) if has_element?(:commit_button)
 
-                wait_until(reload: false) do
-                  has_text?('Your changes have been committed')
+                # If this is the first commit, the commit SHA only appears after reloading
+                wait_until(reload: true) do
+                  active_element?(:edit_mode_tab) && commit_sha != original_commit
                 end
               end
 
-              raise "The changes do not appear to have been committed successfully." unless commit_success_msg_shown
+              raise "The changes do not appear to have been committed successfully." unless commit_success
             end
           end
 

@@ -1,14 +1,14 @@
 <script>
 import $ from 'jquery';
-import { GlLoadingIcon } from '@gitlab/ui';
-import { __, sprintf } from '../../../locale';
-import Flash from '~/flash';
-import eventHub from '../../event_hub';
+import { GlButton } from '@gitlab/ui';
 import { mapActions } from 'vuex';
+import { __, sprintf } from '../../../locale';
+import { deprecatedCreateFlash as Flash } from '~/flash';
+import eventHub from '../../event_hub';
 
 export default {
   components: {
-    GlLoadingIcon,
+    GlButton,
   },
   inject: ['fullPath'],
   props: {
@@ -65,19 +65,19 @@ export default {
 
 <template>
   <div class="sidebar-item-warning-message-actions">
-    <button type="button" class="btn btn-default gl-mr-3" @click="closeForm">
+    <gl-button class="gl-mr-3" @click="closeForm">
       {{ __('Cancel') }}
-    </button>
+    </gl-button>
 
-    <button
-      type="button"
+    <gl-button
       data-testid="lock-toggle"
-      class="btn btn-close"
+      category="secondary"
+      variant="warning"
       :disabled="isLoading"
+      :loading="isLoading"
       @click.prevent="submitForm"
     >
-      <gl-loading-icon v-if="isLoading" inline />
       {{ buttonText }}
-    </button>
+    </gl-button>
   </div>
 </template>

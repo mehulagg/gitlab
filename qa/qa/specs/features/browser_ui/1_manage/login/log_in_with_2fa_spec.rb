@@ -18,7 +18,7 @@ module QA
         QA::Resource::Group.fabricate_via_api! do |group|
           group.sandbox = sandbox_group
           group.api_client = owner_api_client
-          group.name = 'group-with-2fa'
+          group.path = "group-with-2fa-#{SecureRandom.hex(8)}"
         end
       end
 
@@ -34,7 +34,7 @@ module QA
         group.add_member(developer_user, Resource::Members::AccessLevel::DEVELOPER)
       end
 
-      it 'allows enforcing 2FA via UI and logging in with 2FA' do
+      it 'allows enforcing 2FA via UI and logging in with 2FA', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/898' do
         enforce_two_factor_authentication_on_group(group)
 
         enable_two_factor_authentication_for_user(developer_user)

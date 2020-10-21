@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Variables < Grape::API::Instance
+  class Variables < ::API::Base
     include PaginationParams
 
     before { authenticate! }
@@ -17,7 +17,6 @@ module API
       def find_variable(params)
         variables = ::Ci::VariablesFinder.new(user_project, params).execute.to_a
 
-        return variables.first unless ::Gitlab::Ci::Features.variables_api_filter_environment_scope?
         return variables.first unless variables.many? # rubocop: disable CodeReuse/ActiveRecord
 
         conflict!("There are multiple variables with provided parameters. Please use 'filter[environment_scope]'")
@@ -67,10 +66,11 @@ module API
         optional :environment_scope, type: String, desc: 'The environment_scope of the variable'
       end
       post ':id/variables' do
-        variable_params = declared_params(include_missing: false)
-        variable_params = filter_variable_parameters(variable_params)
-
-        variable = user_project.variables.create(variable_params)
+        variable = ::Ci::ChangeVariableService.new(
+          container: user_project,
+          current_user: current_user,
+          params: { action: :create, variable_params: filter_variable_parameters(declared_params(include_missing: false)) }
+        ).execute
 
         if variable.valid?
           present variable, with: Entities::Ci::Variable
@@ -96,10 +96,17 @@ module API
         variable = find_variable(params)
         not_found!('Variable') unless variable
 
-        variable_params = declared_params(include_missing: false).except(:key, :filter)
-        variable_params = filter_variable_parameters(variable_params)
+        variable_params = filter_variable_parameters(
+          declared_params(include_missing: false)
+            .except(:key, :filter)
+        )
+        variable = ::Ci::ChangeVariableService.new(
+          container: user_project,
+          current_user: current_user,
+          params: { action: :update, variable: variable, variable_params: variable_params }
+        ).execute
 
-        if variable.update(variable_params)
+        if variable.valid?
           present variable, with: Entities::Ci::Variable
         else
           render_validation_error!(variable)
@@ -119,8 +126,11 @@ module API
         variable = find_variable(params)
         not_found!('Variable') unless variable
 
-        # Variables don't have a timestamp. Therefore, destroy unconditionally.
-        variable.destroy
+        ::Ci::ChangeVariableService.new(
+          container: user_project,
+          current_user: current_user,
+          params: { action: :destroy, variable: variable }
+        ).execute
 
         no_content!
       end

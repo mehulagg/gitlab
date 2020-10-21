@@ -1,14 +1,13 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { GlLink } from '@gitlab/ui';
+import { GlLink, GlIcon } from '@gitlab/ui';
 import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
-import ReportItem from '~/reports/components/report_item.vue';
-import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
 import SetLicenseApprovalModal from 'ee/vue_shared/license_compliance/components/set_approval_status_modal.vue';
 import { componentNames } from 'ee/reports/components/issue_body';
-import Icon from '~/vue_shared/components/icon.vue';
-import ReportSection from '~/reports/components/report_section.vue';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
+import ReportItem from '~/reports/components/report_item.vue';
+import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
+import ReportSection from '~/reports/components/report_section.vue';
 import createStore from './store';
 
 const store = createStore();
@@ -23,7 +22,7 @@ export default {
     ReportSection,
     SetLicenseApprovalModal,
     SmartVirtualList,
-    Icon,
+    GlIcon,
   },
   mixins: [reportsMixin],
   props: {
@@ -176,7 +175,7 @@ export default {
             class="js-security-approval-help-link"
             target="_blank"
           >
-            <icon :size="12" name="question" />
+            <gl-icon :size="12" name="question" />
           </gl-link>
         </div>
       </template>
@@ -195,7 +194,7 @@ export default {
           target="_blank"
           class="btn btn-default btn-sm js-full-report"
         >
-          {{ s__('ciReport|View full report') }} <icon :size="16" name="external-link" />
+          {{ s__('ciReport|View full report') }} <gl-icon :size="16" name="external-link" />
         </a>
       </div>
     </report-section>

@@ -6,19 +6,19 @@ class RegistrationsController < Devise::RegistrationsController
   include RecaptchaExperimentHelper
   include InvisibleCaptchaOnSignup
 
+  BLOCKED_PENDING_APPROVAL_STATE = 'blocked_pending_approval'.freeze
+
   layout :choose_layout
 
   skip_before_action :required_signup_info, :check_two_factor_requirement, only: [:welcome, :update_registration]
   prepend_before_action :check_captcha, only: :create
-  before_action :whitelist_query_limiting, only: [:destroy]
-  before_action :ensure_terms_accepted,
-    if: -> { action_name == 'create' && Gitlab::CurrentSettings.current_application_settings.enforce_terms? }
+  before_action :whitelist_query_limiting, :ensure_destroy_prerequisites_met, only: [:destroy]
   before_action :load_recaptcha, only: :new
+
+  feature_category :authentication_and_authorization
 
   def new
     if experiment_enabled?(:signup_flow)
-      track_experiment_event(:terms_opt_in, 'start')
-
       @resource = build_resource
     else
       redirect_to new_user_session_path(anchor: 'register-pane')
@@ -26,7 +26,7 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def create
-    track_experiment_event(:terms_opt_in, 'end')
+    set_user_state
     accept_pending_invitations
 
     super do |new_user|
@@ -35,9 +35,9 @@ class RegistrationsController < Devise::RegistrationsController
       yield new_user if block_given?
     end
 
-    # Do not show the signed_up notice message when the signup_flow experiment is enabled.
-    # Instead, show it after successfully updating the role.
-    flash[:notice] = nil if experiment_enabled?(:signup_flow)
+    # Devise sets a flash message on both successful & failed signups,
+    # but we only want to show a message if the resource is blocked by a pending approval.
+    flash[:notice] = nil unless resource.blocked_pending_approval?
   rescue Gitlab::Access::AccessDeniedError
     redirect_to(new_user_session_path)
   end
@@ -58,6 +58,8 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def update_registration
+    return redirect_to new_user_registration_path unless current_user
+
     user_params = params.require(:user).permit(:role, :setup_for_company)
     result = ::Users::SignupService.new(current_user, user_params).execute
 
@@ -69,7 +71,6 @@ class RegistrationsController < Devise::RegistrationsController
 
       return redirect_to new_users_sign_up_group_path if experiment_enabled?(:onboarding_issues) && show_onboarding_issues_experiment?
 
-      set_flash_message! :notice, :signed_up
       redirect_to path_for_signed_in_user(current_user)
     else
       render :welcome
@@ -82,14 +83,12 @@ class RegistrationsController < Devise::RegistrationsController
     return unless new_user.persisted?
     return unless Gitlab::CurrentSettings.current_application_settings.enforce_terms?
 
-    if terms_accepted?
-      terms = ApplicationSetting::Term.latest
-      Users::RespondToTermsService.new(new_user, terms).execute(accepted: true)
-    end
+    terms = ApplicationSetting::Term.latest
+    Users::RespondToTermsService.new(new_user, terms).execute(accepted: true)
   end
 
   def set_role_required(new_user)
-    new_user.set_role_required! if new_user.persisted? && experiment_enabled?(:signup_flow)
+    new_user.set_role_required! if new_user.persisted?
   end
 
   def destroy_confirmation_valid?
@@ -115,17 +114,25 @@ class RegistrationsController < Devise::RegistrationsController
   def after_sign_up_path_for(user)
     Gitlab::AppLogger.info(user_created_message(confirmed: user.confirmed?))
 
-    return users_sign_up_welcome_path if experiment_enabled?(:signup_flow)
-
-    path_for_signed_in_user(user)
+    users_sign_up_welcome_path
   end
 
   def after_inactive_sign_up_path_for(resource)
     Gitlab::AppLogger.info(user_created_message)
+    return new_user_session_path(anchor: 'login-pane') if resource.blocked_pending_approval?
+
     Feature.enabled?(:soft_email_confirmation) ? dashboard_projects_path : users_almost_there_path
   end
 
   private
+
+  def ensure_destroy_prerequisites_met
+    if current_user.solo_owned_groups.present?
+      redirect_to profile_account_path,
+        status: :see_other,
+        alert: s_('Profiles|You must transfer ownership or delete groups you are an owner of before you can delete your account')
+    end
+  end
 
   def user_created_message(confirmed: false)
     "User Created: username=#{resource.username} email=#{resource.email} ip=#{request.remote_ip} confirmed:#{confirmed}"
@@ -154,7 +161,7 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def sign_up_params
-    params.require(:user).permit(:username, :email, :email_confirmation, :name, :first_name, :last_name, :password)
+    params.require(:user).permit(:username, :email, :name, :first_name, :last_name, :password)
   end
 
   def resource_name
@@ -171,18 +178,6 @@ class RegistrationsController < Devise::RegistrationsController
 
   def whitelist_query_limiting
     Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42380')
-  end
-
-  def ensure_terms_accepted
-    return if terms_accepted?
-
-    redirect_to new_user_session_path, alert: _('You must accept our Terms of Service and privacy policy in order to register an account')
-  end
-
-  def terms_accepted?
-    return true if experiment_enabled?(:terms_opt_in)
-
-    Gitlab::Utils.to_boolean(params[:terms_opt_in])
   end
 
   def path_for_signed_in_user(user)
@@ -208,7 +203,7 @@ class RegistrationsController < Devise::RegistrationsController
   # Part of an experiment to build a new sign up flow. Will be resolved
   # with https://gitlab.com/gitlab-org/growth/engineering/issues/64
   def choose_layout
-    if experiment_enabled?(:signup_flow)
+    if %w(welcome update_registration).include?(action_name) || experiment_enabled?(:signup_flow)
       'devise_experimental_separate_sign_up_flow'
     else
       'devise'
@@ -216,7 +211,17 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def show_onboarding_issues_experiment?
-    !helpers.in_subscription_flow? && !helpers.in_invitation_flow? && !helpers.in_oauth_flow?
+    !helpers.in_subscription_flow? &&
+      !helpers.in_invitation_flow? &&
+      !helpers.in_oauth_flow? &&
+      !helpers.in_trial_flow?
+  end
+
+  def set_user_state
+    return unless Feature.enabled?(:admin_approval_for_new_user_signups, default_enabled: true)
+    return unless Gitlab::CurrentSettings.require_admin_approval_after_user_signup
+
+    resource.state = BLOCKED_PENDING_APPROVAL_STATE
   end
 end
 

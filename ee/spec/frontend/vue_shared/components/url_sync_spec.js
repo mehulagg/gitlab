@@ -1,11 +1,11 @@
 import { shallowMount } from '@vue/test-utils';
-import { historyPushState } from '~/lib/utils/common_utils';
-import { setUrlParams } from '~/lib/utils/url_utility';
-import UrlSyncComponent from '~/vue_shared/components/url_sync.vue';
 import setWindowLocation from 'helpers/set_window_location_helper';
+import { historyPushState } from '~/lib/utils/common_utils';
+import { mergeUrlParams } from '~/lib/utils/url_utility';
+import UrlSyncComponent from '~/vue_shared/components/url_sync.vue';
 
 jest.mock('~/lib/utils/url_utility', () => ({
-  setUrlParams: jest.fn(val => `urlParams: ${val}`),
+  mergeUrlParams: jest.fn((query, url) => `urlParams: ${query} ${url}`),
 }));
 
 jest.mock('~/lib/utils/common_utils', () => ({
@@ -27,12 +27,12 @@ describe('url sync component', () => {
   };
 
   function expectUrlSync(query) {
-    expect(setUrlParams).toHaveBeenCalledTimes(1);
-    expect(setUrlParams).toHaveBeenCalledWith(query, TEST_HOST, true);
+    expect(mergeUrlParams).toHaveBeenCalledTimes(1);
+    expect(mergeUrlParams).toHaveBeenCalledWith(query, TEST_HOST, { spreadArrays: true });
 
-    const setUrlParamsReturnValue = setUrlParams.mock.results[0].value;
+    const mergeUrlParamsReturnValue = mergeUrlParams.mock.results[0].value;
     expect(historyPushState).toHaveBeenCalledTimes(1);
-    expect(historyPushState).toHaveBeenCalledWith(setUrlParamsReturnValue);
+    expect(historyPushState).toHaveBeenCalledWith(mergeUrlParamsReturnValue);
   }
 
   beforeEach(() => {
@@ -44,7 +44,7 @@ describe('url sync component', () => {
   describe('when the query is modified', () => {
     const newQuery = { foo: true };
     beforeEach(() => {
-      setUrlParams.mockClear();
+      mergeUrlParams.mockClear();
       historyPushState.mockClear();
       wrapper.setProps({ query: newQuery });
     });

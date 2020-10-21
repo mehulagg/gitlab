@@ -38,6 +38,14 @@ The IP address for `mg.gitlab.com` is subject to change at any time.
 
 [See our backup strategy](https://about.gitlab.com/handbook/engineering/infrastructure/production/#backups).
 
+There are several ways to perform backups of your content on GitLab.com.
+
+Projects can be backed up in their entirety by exporting them either [through the UI](../project/settings/import_export.md) or [API](../../api/project_import_export.md#schedule-an-export), the latter of which can be used to programmatically upload exports to a storage platform such as AWS S3.
+
+With exports, be sure to take note of [what is and is not](../project/settings/import_export.md#exported-contents), included in a project export.
+
+Since GitLab is built on Git, you can back up **just** the repository of a project by [cloning](../../gitlab-basics/start-using-git.md#clone-a-repository) it to another machine. Similarly, if you need to back up just the wiki of a repository it can also be cloned and all files uploaded to that wiki will come with it [if they were uploaded after 2020-08-22](../project/wiki/index.md#creating-a-new-wiki-page).
+
 ## Alternative SSH port
 
 GitLab.com can be reached via a [different SSH port](https://about.gitlab.com/blog/2016/02/18/gitlab-dot-com-now-supports-an-alternate-git-plus-ssh-port/) for `git+ssh`.
@@ -68,7 +76,7 @@ Below are the settings for [GitLab Pages](https://about.gitlab.com/stages-devops
 | IP address                  | `35.185.44.232`   | -             |
 | Custom domains support      | yes               | no            |
 | TLS certificates support    | yes               | no            |
-| Maximum size (uncompressed) | 1G                | 100M          |
+| Maximum size (compressed) | 1G                | 100M          |
 
 NOTE: **Note:**
 The maximum size of your Pages site is regulated by the artifacts maximum size
@@ -80,16 +88,17 @@ Below are the current settings regarding [GitLab CI/CD](../../ci/README.md).
 
 | Setting                 | GitLab.com        | Default       |
 | -----------             | ----------------- | ------------- |
-| Artifacts maximum size (uncompressed) | 1G                | 100M          |
+| Artifacts maximum size (compressed) | 1G                | 100M          |
 | Artifacts [expiry time](../../ci/yaml/README.md#artifactsexpire_in)   | From June 22, 2020, deleted after 30 days unless otherwise specified (artifacts created before that date have no expiry).           | deleted after 30 days unless otherwise specified    |
 | Scheduled Pipeline Cron | `*/5 * * * *` | `19 * * * *` |
 | [Max jobs in active pipelines](../../administration/instance_limits.md#number-of-jobs-in-active-pipelines) | `500` for Free tier, unlimited otherwise | Unlimited
 | [Max CI/CD subscriptions to a project](../../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project) | `2` | Unlimited |
 | [Max pipeline schedules in projects](../../administration/instance_limits.md#number-of-pipeline-schedules) | `10` for Free tier, `50` for all paid tiers | Unlimited |
 | [Max number of instance level variables](../../administration/instance_limits.md#number-of-instance-level-variables) | `25` | `25` |
-| [Scheduled Job Archival](../../user/admin_area/settings/continuous_integration.md#archive-jobs-core-only) | 3 months | Never |
+| [Scheduled Job Archival](../../user/admin_area/settings/continuous_integration.md#archive-jobs) | 3 months | Never |
+| Max test cases per [unit test report](../../ci/unit_test_reports.md) | `500_000` | Unlimited |
 
-## Repository size limit
+## Account and limit settings
 
 GitLab.com has the following [account limits](../admin_area/settings/account_and_limit_settings.md) enabled. If a setting is not listed, it is set to the default value.
 
@@ -99,6 +108,7 @@ or over the repository size limit, you can [reduce your repository size with Git
 | Setting                       | GitLab.com  | Default       |
 | -----------                   | ----------- | ------------- |
 | Repository size including LFS | 10 GB       | Unlimited     |
+| Maximum import size           | 5 GB        | 50 MB         |
 
 NOTE: **Note:**
 `git push` and GitLab project imports are limited to 5 GB per request through Cloudflare. Git LFS and imports other than a file upload are not affected by this limit.
@@ -124,20 +134,20 @@ A limit of:
 - 50 webhooks applies to groups. **(BRONZE ONLY)**
 - Payload is limited to 25MB
 
-## Shared Runners
+## Shared runners
 
 GitLab offers Linux and Windows shared runners hosted on GitLab.com for executing your pipelines.
 
 NOTE: **Note:**
-Shared Runners provided by GitLab are **not** configurable. Consider [installing your own Runner](https://docs.gitlab.com/runner/install/) if you have specific configuration needs.
+Shared runners provided by GitLab are **not** configurable. Consider [installing your own runner](https://docs.gitlab.com/runner/install/) if you have specific configuration needs.
 
-### Linux Shared Runners
+### Linux shared runners
 
-Linux Shared Runners on GitLab.com run in [autoscale mode](https://docs.gitlab.com/runner/configuration/autoscale.html) and are powered by Google Cloud Platform.
+Linux shared runners on GitLab.com run in [autoscale mode](https://docs.gitlab.com/runner/configuration/autoscale.html) and are powered by Google Cloud Platform.
 Autoscaling means reduced waiting times to spin up CI/CD jobs, and isolated VMs for each project,
 thus maximizing security. They're free to use for public open source projects and limited
 to 2000 CI minutes per month per group for private projects. More minutes
-[can be purchased](../../subscriptions/index.md#purchasing-additional-ci-minutes), if
+[can be purchased](../../subscriptions/gitlab_com/index.md#purchase-additional-ci-minutes), if
 needed. Read about all [GitLab.com plans](https://about.gitlab.com/pricing/).
 
 All your CI/CD jobs run on [n1-standard-1 instances](https://cloud.google.com/compute/docs/machine-types) with 3.75GB of RAM, CoreOS and the latest Docker Engine
@@ -145,13 +155,13 @@ installed. Instances provide 1 vCPU and 25GB of HDD disk space. The default
 region of the VMs is US East1.
 Each instance is used only for one job, this ensures any sensitive data left on the system can't be accessed by other people their CI jobs.
 
-The `gitlab-shared-runners-manager-X.gitlab.com` fleet of Runners are dedicated for GitLab projects as well as community forks of them. They use a slightly larger machine type (n1-standard-2) and have a bigger SSD disk size. They will not run untagged jobs and unlike the general fleet of shared Runners, the instances are re-used up to 40 times.
+The `gitlab-shared-runners-manager-X.gitlab.com` fleet of runners are dedicated for GitLab projects as well as community forks of them. They use a slightly larger machine type (n1-standard-2) and have a bigger SSD disk size. They will not run untagged jobs and unlike the general fleet of shared runners, the instances are re-used up to 40 times.
 
-Jobs handled by the shared Runners on GitLab.com (`shared-runners-manager-X.gitlab.com`),
+Jobs handled by the shared runners on GitLab.com (`shared-runners-manager-X.gitlab.com`),
 **will be timed out after 3 hours**, regardless of the timeout configured in a
 project. Check the issues [4010](https://gitlab.com/gitlab-com/infrastructure/-/issues/4010) and [4070](https://gitlab.com/gitlab-com/infrastructure/-/issues/4070) for the reference.
 
-Below are the shared Runners settings.
+Below are the shared runners settings.
 
 | Setting                               | GitLab.com                                        | Default    |
 | -----------                           | -----------------                                 | ---------- |
@@ -162,8 +172,8 @@ Below are the shared Runners settings.
 
 #### Pre-clone script
 
-Linux Shared Runners on GitLab.com provide a way to run commands in a CI
-job before the Runner attempts to run `git init` and `git fetch` to
+Linux shared runners on GitLab.com provide a way to run commands in a CI
+job before the runner attempts to run `git init` and `git fetch` to
 download a GitLab repository. The
 [`pre_clone_script`](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runners-section)
 can be used for:
@@ -252,28 +262,25 @@ sentry_dsn = "X"
       BucketName = "bucket-name"
 ```
 
-### Windows Shared Runners (beta)
+### Windows shared runners (beta)
 
-The Windows Shared Runners are currently in
-[beta](https://about.gitlab.com/handbook/product/#beta) and should not be used
-for production workloads.
+The Windows shared runners are in [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#beta)
+and shouldn't be used for production workloads.
 
-During the beta period, the
-[shared runner pipeline quota](../admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota-starter-only)
-will apply for groups and projects in the same way as Linux Runners.
-This may change when the beta period ends, as discussed in this
-[related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/30834).
+During this beta period, the [shared runner pipeline quota](../admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota)
+applies for groups and projects in the same manner as Linux runners. This may
+change when the beta period ends, as discussed in this [related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/30834).
 
-Windows Shared Runners on GitLab.com automatically autoscale by
-launching virtual machines on the Google Cloud Platform. This solution uses
-a new [autoscaling driver](https://gitlab.com/gitlab-org/ci-cd/custom-executor-drivers/autoscaler/tree/master/docs/readme.md)
+Windows shared runners on GitLab.com autoscale by launching virtual machines on
+the Google Cloud Platform. This solution uses an
+[autoscaling driver](https://gitlab.com/gitlab-org/ci-cd/custom-executor-drivers/autoscaler/tree/master/docs/readme.md)
 developed by GitLab for the [custom executor](https://docs.gitlab.com/runner/executors/custom.html).
-Windows Shared Runners execute your CI/CD jobs on `n1-standard-2` instances with 2
-vCPUs and 7.5GB RAM. You can find a full list of available Windows packages in the
-[package documentation](https://gitlab.com/gitlab-org/ci-cd/shared-runners/images/gcp/windows-containers/blob/master/cookbooks/preinstalled-software/README.md).
+Windows shared runners execute your CI/CD jobs on `n1-standard-2` instances with
+2 vCPUs and 7.5 GB RAM. You can find a full list of available Windows packages in
+the [package documentation](https://gitlab.com/gitlab-org/ci-cd/shared-runners/images/gcp/windows-containers/blob/master/cookbooks/preinstalled-software/README.md).
 
-We want to keep iterating to get Windows Shared Runners in a stable state and
-[generally available](https://about.gitlab.com/handbook/product/#generally-available-ga).
+We want to keep iterating to get Windows shared runners in a stable state and
+[generally available](https://about.gitlab.com/handbook/product/gitlab-the-product/#generally-available-ga).
 You can follow our work towards this goal in the
 [related epic](https://gitlab.com/groups/gitlab-org/-/epics/2162).
 
@@ -282,7 +289,7 @@ You can follow our work towards this goal in the
 The full contents of our `config.toml` are:
 
 NOTE: **Note:**
-Settings that are not public are shown as `X`.
+Settings that aren't public are shown as `X`.
 
 ```toml
 concurrent = X
@@ -343,7 +350,7 @@ VMTag = "windows"
 #### Example
 
 Below is a simple `.gitlab-ci.yml` file to show how to start using the
-Windows Shared Runners:
+Windows shared runners:
 
 ```yaml
 .shared_windows_runners:
@@ -382,14 +389,14 @@ test:
   definition](https://about.gitlab.com/handbook/product/#beta).
 - The average provisioning time for a new Windows VM is 5 minutes.
   This means that you may notice slower build start times
-  on the Windows Shared Runner fleet during the beta. In a future
+  on the Windows shared runner fleet during the beta. In a future
   release we will update the autoscaler to enable
   the pre-provisioning of virtual machines. This will significantly reduce
   the time it takes to provision a VM on the Windows fleet. You can
   follow along in the [related issue](https://gitlab.com/gitlab-org/ci-cd/custom-executor-drivers/autoscaler/-/issues/32).
-- The Windows Shared Runner fleet may be unavailable occasionally
+- The Windows shared runner fleet may be unavailable occasionally
   for maintenance or updates.
-- The Windows Shared Runner virtual machine instances do not use the
+- The Windows shared runner virtual machine instances do not use the
   GitLab Docker executor. This means that you will not be able to specify
   [`image`](../../ci/yaml/README.md#image) or [`services`](../../ci/yaml/README.md#services) in
   your pipeline configuration.
@@ -401,9 +408,9 @@ test:
   installation of additional software packages needs to be repeated for
   each job in your pipeline.
 - The job may stay in a pending state for longer than the
-  Linux shared Runners.
+  Linux shared runners.
 - There is the possibility that we introduce breaking changes which will
-  require updates to pipelines that are using the Windows Shared Runner
+  require updates to pipelines that are using the Windows shared runner
   fleet.
 
 ## Sidekiq
@@ -413,7 +420,7 @@ and the following environment variables:
 
 | Setting                                    | GitLab.com | Default   |
 |--------                                    |----------- |--------   |
-| `SIDEKIQ_DAEMON_MEMORY_KILLER`             | -          | -         |
+| `SIDEKIQ_DAEMON_MEMORY_KILLER`             | -          | `1`       |
 | `SIDEKIQ_MEMORY_KILLER_MAX_RSS`            | `2000000`  | `2000000` |
 | `SIDEKIQ_MEMORY_KILLER_HARD_LIMIT_RSS`     | -          | -         |
 | `SIDEKIQ_MEMORY_KILLER_CHECK_INTERVAL`     | -          | `3`       |
@@ -473,6 +480,10 @@ More information on this particular change can be found at
 of proposed changes can be found at
 <https://gitlab.com/gitlab-com/infrastructure/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=database&label_name[]=change>.
 
+## Puma
+
+GitLab.com uses the default of 60 seconds for [Puma request timeouts](https://docs.gitlab.com/omnibus/settings/puma.html#worker-timeout).
+
 ## Unicorn
 
 GitLab.com adjusts the memory limits for the [unicorn-worker-killer](https://rubygems.org/gems/unicorn-worker-killer) gem.
@@ -522,6 +533,15 @@ RateLimit-ResetTime: Wed, 17 Jul 2019 00:58:57 GMT
 Source:
 
 - Search for `rate_limit_http_rate_per_minute` and `rate_limit_sessions_per_second` in [GitLab.com's current HAProxy settings](https://gitlab.com/gitlab-cookbooks/gitlab-haproxy/blob/master/attributes/default.rb).
+
+### Pagination response headers
+
+For performance reasons, if a query returns more than 10,000 records, GitLab
+doesn't return the following headers:
+
+- `x-total`.
+- `x-total-pages`.
+- `rel="last"` `link`.
 
 ### Rack Attack initializer
 
@@ -585,6 +605,11 @@ dropped and users get
 ### Import/export
 
 To help avoid abuse, project and group imports, exports, and export downloads are rate limited. See [Project import/export rate limits](../../user/project/settings/import_export.md#rate-limits) and [Group import/export rate limits](../../user/group/settings/import_export.md#rate-limits) for details.
+
+### Non-configurable limits
+
+See [non-configurable limits](../../security/rate_limits.md#non-configurable-limits) for information on
+rate limits that are not configurable, and therefore also used on GitLab.com.
 
 ## GitLab.com Logging
 

@@ -1,5 +1,0 @@
----
-title: SCIM provisioning to avoid creating SCIM identity without membership
-merge_request: 39259
-author:
-type: fixed

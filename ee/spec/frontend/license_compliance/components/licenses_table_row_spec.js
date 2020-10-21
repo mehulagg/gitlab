@@ -1,14 +1,14 @@
 import { shallowMount } from '@vue/test-utils';
 import {
   GlLink,
-  GlSkeletonLoading,
-  GlDeprecatedBadge as GlBadge,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlBadge,
   GlFriendlyWrap,
 } from '@gitlab/ui';
 import LicenseComponentLinks from 'ee/license_compliance/components/license_component_links.vue';
 import LicensesTableRow from 'ee/license_compliance/components/licenses_table_row.vue';
-import { makeLicense } from './utils';
 import { LICENSE_APPROVAL_CLASSIFICATION } from 'ee/vue_shared/license_compliance/constants';
+import { makeLicense } from './utils';
 
 describe('LicensesTableRow component', () => {
   let wrapper;

@@ -1,0 +1,5 @@
+---
+title: Send email reminder when approaching active user limit
+merge_request: 42453
+author:
+type: added

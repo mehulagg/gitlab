@@ -63,6 +63,24 @@ RSpec.describe GroupPolicy do
     end
   end
 
+  shared_examples 'deploy token does not get confused with user' do
+    before do
+      deploy_token.update!(id: user_id)
+    end
+
+    let(:deploy_token) { create(:deploy_token) }
+    let(:current_user) { deploy_token }
+
+    it do
+      expect_disallowed(*read_group_permissions)
+      expect_disallowed(*guest_permissions)
+      expect_disallowed(*reporter_permissions)
+      expect_disallowed(*developer_permissions)
+      expect_disallowed(*maintainer_permissions)
+      expect_disallowed(*owner_permissions)
+    end
+  end
+
   context 'guests' do
     let(:current_user) { guest }
 
@@ -73,6 +91,10 @@ RSpec.describe GroupPolicy do
       expect_disallowed(*developer_permissions)
       expect_disallowed(*maintainer_permissions)
       expect_disallowed(*owner_permissions)
+    end
+
+    it_behaves_like 'deploy token does not get confused with user' do
+      let(:user_id) { guest.id }
     end
   end
 
@@ -87,6 +109,10 @@ RSpec.describe GroupPolicy do
       expect_disallowed(*maintainer_permissions)
       expect_disallowed(*owner_permissions)
     end
+
+    it_behaves_like 'deploy token does not get confused with user' do
+      let(:user_id) { reporter.id }
+    end
   end
 
   context 'developer' do
@@ -99,6 +125,10 @@ RSpec.describe GroupPolicy do
       expect_allowed(*developer_permissions)
       expect_disallowed(*maintainer_permissions)
       expect_disallowed(*owner_permissions)
+    end
+
+    it_behaves_like 'deploy token does not get confused with user' do
+      let(:user_id) { developer.id }
     end
   end
 
@@ -136,6 +166,10 @@ RSpec.describe GroupPolicy do
         expect_disallowed(*owner_permissions)
       end
     end
+
+    it_behaves_like 'deploy token does not get confused with user' do
+      let(:user_id) { maintainer.id }
+    end
   end
 
   context 'owner' do
@@ -148,6 +182,10 @@ RSpec.describe GroupPolicy do
       expect_allowed(*developer_permissions)
       expect_allowed(*maintainer_permissions)
       expect_allowed(*owner_permissions)
+    end
+
+    it_behaves_like 'deploy token does not get confused with user' do
+      let(:user_id) { owner.id }
     end
   end
 
@@ -165,6 +203,14 @@ RSpec.describe GroupPolicy do
 
     context 'with admin mode', :enable_admin_mode do
       specify { expect_allowed(*admin_permissions) }
+    end
+
+    it_behaves_like 'deploy token does not get confused with user' do
+      let(:user_id) { admin.id }
+
+      context 'with admin mode', :enable_admin_mode do
+        it { expect_disallowed(*admin_permissions) }
+      end
     end
   end
 
@@ -722,4 +768,118 @@ RSpec.describe GroupPolicy do
       end
     end
   end
+
+  describe 'create_jira_connect_subscription' do
+    context 'admin' do
+      let(:current_user) { admin }
+
+      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
+    end
+
+    context 'with owner' do
+      let(:current_user) { owner }
+
+      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
+    end
+
+    context 'with maintainer' do
+      let(:current_user) { maintainer }
+
+      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
+    end
+
+    context 'with reporter' do
+      let(:current_user) { reporter }
+
+      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
+    end
+
+    context 'with guest' do
+      let(:current_user) { guest }
+
+      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
+    end
+
+    context 'with non member' do
+      let(:current_user) { create(:user) }
+
+      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
+    end
+
+    context 'with anonymous' do
+      let(:current_user) { nil }
+
+      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
+    end
+  end
+
+  describe 'read_package' do
+    context 'admin' do
+      let(:current_user) { admin }
+
+      it { is_expected.to be_allowed(:read_package) }
+    end
+
+    context 'with owner' do
+      let(:current_user) { owner }
+
+      it { is_expected.to be_allowed(:read_package) }
+    end
+
+    context 'with maintainer' do
+      let(:current_user) { maintainer }
+
+      it { is_expected.to be_allowed(:read_package) }
+    end
+
+    context 'with reporter' do
+      let(:current_user) { reporter }
+
+      it { is_expected.to be_allowed(:read_package) }
+    end
+
+    context 'with guest' do
+      let(:current_user) { guest }
+
+      it { is_expected.to be_disallowed(:read_package) }
+    end
+
+    context 'with non member' do
+      let(:current_user) { create(:user) }
+
+      it { is_expected.to be_disallowed(:read_package) }
+    end
+
+    context 'with anonymous' do
+      let(:current_user) { nil }
+
+      it { is_expected.to be_disallowed(:read_package) }
+    end
+  end
+
+  context 'deploy token access' do
+    let!(:group_deploy_token) do
+      create(:group_deploy_token, group: group, deploy_token: deploy_token)
+    end
+
+    subject { described_class.new(deploy_token, group) }
+
+    context 'a deploy token with read_package_registry scope' do
+      let(:deploy_token) { create(:deploy_token, :group, read_package_registry: true) }
+
+      it { is_expected.to be_allowed(:read_package) }
+      it { is_expected.to be_allowed(:read_group) }
+      it { is_expected.to be_disallowed(:create_package) }
+    end
+
+    context 'a deploy token with write_package_registry scope' do
+      let(:deploy_token) { create(:deploy_token, :group, write_package_registry: true) }
+
+      it { is_expected.to be_allowed(:create_package) }
+      it { is_expected.to be_allowed(:read_group) }
+      it { is_expected.to be_disallowed(:destroy_package) }
+    end
+  end
+
+  it_behaves_like 'Self-managed Core resource access tokens'
 end

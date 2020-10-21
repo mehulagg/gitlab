@@ -22,13 +22,24 @@ module BillingPlansHelper
 
   def use_new_purchase_flow?(namespace)
     namespace.group? &&
-      namespace.actual_plan_name == Plan::FREE &&
-      Feature.enabled?(:free_group_new_purchase_flow, current_user)
+      namespace.actual_plan_name == Plan::FREE
   end
 
   def show_contact_sales_button?(purchase_link_action)
     experiment_enabled?(:contact_sales_btn_in_app) &&
       purchase_link_action == 'upgrade'
+  end
+
+  def experiment_tracking_data_for_button_click(button_label)
+    return {} unless Gitlab::Experimentation.enabled?(:contact_sales_btn_in_app)
+
+    {
+      track: {
+        event: 'click_button',
+        label: button_label,
+        property: experiment_tracking_category_and_group(:contact_sales_btn_in_app)
+      }
+    }
   end
 
   def plan_feature_short_list(plan)
@@ -58,6 +69,13 @@ module BillingPlansHelper
 
   def namespace_for_user?(namespace)
     namespace == current_user.namespace
+  end
+
+  def seats_data_last_update_info
+    last_enqueue_time = UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker.last_enqueue_time&.utc
+    return _("Seats usage data as of %{last_enqueue_time} (Updated daily)" % { last_enqueue_time: last_enqueue_time }) if last_enqueue_time
+
+    _('Seats usage data is updated every day at 12:00pm UTC')
   end
 
   private

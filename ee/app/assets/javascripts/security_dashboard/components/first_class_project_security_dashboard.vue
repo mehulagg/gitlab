@@ -1,4 +1,8 @@
 <script>
+import Cookies from 'js-cookie';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import AutoFixUserCallout from './auto_fix_user_callout.vue';
+import ProjectPipelineStatus from './project_pipeline_status.vue';
 import ProjectVulnerabilitiesApp from './project_vulnerabilities.vue';
 import ReportsNotConfigured from './empty_states/reports_not_configured.vue';
 import SecurityDashboardLayout from './security_dashboard_layout.vue';
@@ -10,6 +14,8 @@ export const BANNER_COOKIE_KEY = 'hide_vulnerabilities_introduction_banner';
 
 export default {
   components: {
+    AutoFixUserCallout,
+    ProjectPipelineStatus,
     ProjectVulnerabilitiesApp,
     ReportsNotConfigured,
     SecurityDashboardLayout,
@@ -17,10 +23,16 @@ export default {
     CsvExportButton,
     Filters,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     securityDashboardHelpPath: {
       type: String,
       required: true,
+    },
+    pipeline: {
+      type: Object,
+      required: false,
+      default: () => ({}),
     },
     projectFullPath: {
       type: String,
@@ -39,14 +51,26 @@ export default {
     },
   },
   data() {
+    const shoudShowAutoFixUserCallout =
+      this.glFeatures.securityAutoFix && !Cookies.get('auto_fix_user_callout_dismissed');
     return {
       filters: {},
+      shoudShowAutoFixUserCallout,
     };
   },
-  inject: ['dashboardDocumentation'],
+  inject: ['dashboardDocumentation', 'autoFixDocumentation'],
+  computed: {
+    shouldShowPipelineStatus() {
+      return Object.values(this.pipeline).every(Boolean);
+    },
+  },
   methods: {
     handleFilterChange(filters) {
       this.filters = filters;
+    },
+    handleAutoFixUserCalloutClose() {
+      Cookies.set('auto_fix_user_callout_dismissed', 'true');
+      this.shoudShowAutoFixUserCallout = false;
     },
   },
 };
@@ -55,13 +79,19 @@ export default {
 <template>
   <div>
     <template v-if="hasVulnerabilities">
+      <auto-fix-user-callout
+        v-if="shoudShowAutoFixUserCallout"
+        :help-page-path="autoFixDocumentation"
+        @close="handleAutoFixUserCalloutClose"
+      />
       <security-dashboard-layout>
         <template #header>
           <div class="mt-4 d-flex">
             <h4 class="flex-grow mt-0 mb-0">{{ __('Vulnerabilities') }}</h4>
             <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
           </div>
-          <vulnerabilities-count-list :project-full-path="projectFullPath" />
+          <project-pipeline-status v-if="shouldShowPipelineStatus" :pipeline="pipeline" />
+          <vulnerabilities-count-list :project-full-path="projectFullPath" :filters="filters" />
         </template>
         <template #sticky>
           <filters @filterChange="handleFilterChange" />

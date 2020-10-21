@@ -5,7 +5,7 @@ module EE
     module Entities
       class GitlabLicenseWithActiveUsers < GitlabLicense
         expose :active_users do |license, options|
-          ::User.active.count
+          ::License.current_active_users.count
         end
       end
     end

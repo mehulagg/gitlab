@@ -4,14 +4,15 @@
 
 import $ from 'jquery';
 import { difference, isEqual, escape, sortBy, template, union } from 'lodash';
-import { sprintf, s__, __ } from './locale';
+import { sprintf, __ } from './locale';
 import axios from './lib/utils/axios_utils';
 import IssuableBulkUpdateActions from './issuable_bulk_update_actions';
 import CreateLabelDropdown from './create_label';
-import flash from './flash';
+import { deprecatedCreateFlash as flash } from './flash';
 import ModalStore from './boards/stores/modal_store';
 import boardsStore from './boards/stores/boards_store';
 import { isScopedLabel } from '~/lib/utils/common_utils';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 export default class LabelsSelect {
   constructor(els, options = {}) {
@@ -42,7 +43,6 @@ export default class LabelsSelect {
       const $block = $selectbox.closest('.block');
       const $form = $dropdown.closest('form, .js-issuable-update');
       const $sidebarCollapsedValue = $block.find('.sidebar-collapsed-icon span');
-      const $sidebarLabelTooltip = $block.find('.js-sidebar-labels-tooltip');
       const $value = $block.find('.value');
       const $dropdownMenu = $dropdown.parent().find('.dropdown-menu');
       // eslint-disable-next-line no-jquery/no-fade
@@ -56,7 +56,6 @@ export default class LabelsSelect {
         .get();
       const scopedLabels = $dropdown.data('scopedLabels');
       const { handleClick } = options;
-      $sidebarLabelTooltip.tooltip();
 
       if ($dropdown.closest('.dropdown').find('.dropdown-new-label').length) {
         new CreateLabelDropdown(
@@ -90,7 +89,6 @@ export default class LabelsSelect {
         axios
           .put(issueUpdateURL, data)
           .then(({ data }) => {
-            let labelTooltipTitle;
             let template;
             // eslint-disable-next-line no-jquery/no-fade
             $loading.fadeOut();
@@ -150,30 +148,13 @@ export default class LabelsSelect {
             $value.removeAttr('style').html(template);
             $sidebarCollapsedValue.text(labelCount);
 
-            if (data.labels.length) {
-              let labelTitles = data.labels.map(label => label.title);
-
-              if (labelTitles.length > 5) {
-                labelTitles = labelTitles.slice(0, 5);
-                labelTitles.push(
-                  sprintf(s__('Labels|and %{count} more'), { count: data.labels.length - 5 }),
-                );
-              }
-
-              labelTooltipTitle = labelTitles.join(', ');
-            } else {
-              labelTooltipTitle = __('Labels');
-            }
-
-            $sidebarLabelTooltip.attr('title', labelTooltipTitle).tooltip('_fixTitle');
-
             $('.has-tooltip', $value).tooltip({
               container: 'body',
             });
           })
           .catch(() => flash(__('Error saving label update.')));
       };
-      $dropdown.glDropdown({
+      initDeprecatedJQueryDropdown($dropdown, {
         showMenuAbove,
         data(term, callback) {
           const labelUrl = $dropdown.attr('data-labels');
@@ -203,7 +184,7 @@ export default class LabelsSelect {
 
               callback(data);
               if (showMenuAbove) {
-                $dropdown.data('glDropdown').positionMenuAbove();
+                $dropdown.data('deprecatedJQueryDropdown').positionMenuAbove();
               }
             })
             .catch(() => flash(__('Error fetching labels.')));
@@ -348,7 +329,7 @@ export default class LabelsSelect {
             } else {
               if (!$dropdown.hasClass('js-filter-bulk-update')) {
                 saveLabelData();
-                $dropdown.data('glDropdown').clearMenu();
+                $dropdown.data('deprecatedJQueryDropdown').clearMenu();
               }
             }
           }
@@ -455,7 +436,7 @@ export default class LabelsSelect {
           if ($dropdown.hasClass('js-issue-board-sidebar')) {
             const previousSelection = $dropdown.attr('data-selected');
             this.selected = previousSelection ? previousSelection.split(',') : [];
-            $dropdown.data('glDropdown').updateLabel();
+            $dropdown.data('deprecatedJQueryDropdown').updateLabel();
           }
         },
         preserveContext: true,

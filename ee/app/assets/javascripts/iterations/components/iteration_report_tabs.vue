@@ -14,6 +14,7 @@ import {
 import { __, sprintf } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import query from '../queries/iteration_issues.query.graphql';
+import { Namespace } from '../constants';
 
 const states = {
   opened: 'opened',
@@ -63,7 +64,7 @@ export default {
         return this.queryVariables;
       },
       update(data) {
-        const { nodes: issues = [], count, pageInfo = {} } = data?.group?.issues || {};
+        const { nodes: issues = [], count, pageInfo = {} } = data[this.namespaceType]?.issues || {};
 
         const list = issues.map(issue => ({
           ...issue,
@@ -83,13 +84,19 @@ export default {
     },
   },
   props: {
-    groupPath: {
+    fullPath: {
       type: String,
       required: true,
     },
     iterationId: {
       type: String,
       required: true,
+    },
+    namespaceType: {
+      type: String,
+      required: false,
+      default: Namespace.Group,
+      validator: value => Object.values(Namespace).includes(value),
     },
   },
   data() {
@@ -110,8 +117,9 @@ export default {
   computed: {
     queryVariables() {
       const vars = {
-        groupPath: this.groupPath,
+        fullPath: this.fullPath,
         id: getIdFromGraphQLId(this.iterationId),
+        isGroup: this.namespaceType === Namespace.Group,
       };
 
       if (this.pagination.beforeCursor) {
@@ -185,12 +193,17 @@ export default {
         :show-empty="true"
         fixed
         stacked="sm"
+        data-qa-selector="iteration_issues_container"
       >
         <template #cell(title)="{ item: { iid, title, webUrl } }">
           <div class="gl-text-truncate">
-            <gl-link class="gl-text-gray-900 gl-font-weight-bold" :href="webUrl">{{
-              title
-            }}</gl-link>
+            <gl-link
+              class="gl-text-gray-900 gl-font-weight-bold"
+              :href="webUrl"
+              data-qa-selector="iteration_issue_link"
+              :data-qa-issue-title="title"
+              >{{ title }}</gl-link
+            >
             <!-- TODO: add references.relative (project name) -->
             <!-- Depends on https://gitlab.com/gitlab-org/gitlab/-/issues/222763 -->
             <div class="gl-text-secondary">#{{ iid }}</div>

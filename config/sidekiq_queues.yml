@@ -30,6 +30,8 @@
   - 1
 - - analytics_code_review_metrics
   - 1
+- - analytics_instance_statistics_counter_job
+  - 1
 - - authorized_keys
   - 2
 - - authorized_project_update
@@ -48,6 +50,8 @@
   - 2
 - - ci_batch_reset_minutes
   - 1
+- - ci_delete_objects
+  - 1
 - - container_repository
   - 1
 - - create_commit_signature
@@ -59,6 +63,8 @@
 - - create_note_diff_file
   - 1
 - - cronjob
+  - 1
+- - dast_site_validation
   - 1
 - - default
   - 1
@@ -74,9 +80,15 @@
   - 1
 - - deployment
   - 3
+- - design_management_copy_design_collection
+  - 1
 - - design_management_new_version
   - 1
 - - detect_repository_languages
+  - 1
+- - disallow_two_factor_for_group
+  - 1
+- - disallow_two_factor_for_subgroups
   - 1
 - - elastic_commit_indexer
   - 1
@@ -134,9 +146,17 @@
   - 2
 - - incident_management
   - 2
+- - incident_management_apply_incident_sla_exceeded_label
+  - 1
 - - invalid_gpg_signature_update
   - 2
 - - irker
+  - 1
+- - issuable_export_csv
+  - 1
+- - issue_placement
+  - 2
+- - issue_rebalancing
   - 1
 - - jira_connect
   - 1
@@ -150,9 +170,15 @@
   - 2
 - - merge
   - 5
+- - merge_request_cleanup_refs
+  - 1
 - - merge_request_mergeability_check
   - 1
+- - merge_request_reset_approvals
+  - 1
 - - metrics_dashboard_prune_old_annotations
+  - 1
+- - metrics_dashboard_sync_dashboards
   - 1
 - - migrate_external_diffs
   - 1
@@ -177,6 +203,10 @@
 - - pages_domain_ssl_renewal
   - 1
 - - pages_domain_verification
+  - 1
+- - pages_remove
+  - 1
+- - pages_transfer
   - 1
 - - pages_update_configuration
   - 1
@@ -217,6 +247,12 @@
 - - prometheus_create_default_alerts
   - 1
 - - propagate_integration
+  - 1
+- - propagate_integration_group
+  - 1
+- - propagate_integration_inherit
+  - 1
+- - propagate_integration_project
   - 1
 - - propagate_service_template
   - 1
@@ -283,6 +319,8 @@
 - - vulnerability_exports_export_deletion
   - 1
 - - web_hook
+  - 1
+- - web_hooks_destroy
   - 1
 - - x509_certificate_revoke
   - 1

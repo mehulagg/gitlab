@@ -164,12 +164,16 @@ FactoryBot.define do
       target_branch { generate(:branch) }
     end
 
+    trait :unique_author do
+      author { association(:user) }
+    end
+
     trait :with_coverage_reports do
       after(:build) do |merge_request|
         merge_request.head_pipeline = build(
           :ci_pipeline,
           :success,
-          :with_coverage_reports,
+          :with_coverage_report_artifact,
           project: merge_request.source_project,
           ref: merge_request.source_branch,
           sha: merge_request.diff_head_sha)
@@ -286,5 +290,7 @@ FactoryBot.define do
         merge_request.update!(labels: evaluator.labels)
       end
     end
+
+    factory :merge_request_without_merge_request_diff, class: 'MergeRequestWithoutMergeRequestDiff'
   end
 end

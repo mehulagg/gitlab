@@ -14,7 +14,7 @@ GET /projects/:id/jobs/:job_id/artifacts
 |-------------|----------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------|
 | `id`        | integer/string | yes      | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user.                                |
 | `job_id`    | integer        | yes      | ID of a job.                                                                                                                                |
-| `job_token` **(PREMIUM)** | string         | no       | To be used with [triggers](../ci/triggers/README.md#when-a-pipeline-depends-on-the-artifacts-of-another-pipeline-premium) for multi-project pipelines. It should be invoked only inside `.gitlab-ci.yml`. Its value is always `$CI_JOB_TOKEN`. |
+| `job_token` **(PREMIUM)** | string         | no       | To be used with [triggers](../ci/triggers/README.md#when-a-pipeline-depends-on-the-artifacts-of-another-pipeline) for multi-project pipelines. It should be invoked only inside `.gitlab-ci.yml`. Its value is always `$CI_JOB_TOKEN`. |
 
 Example request using the `PRIVATE-TOKEN` header:
 
@@ -63,6 +63,11 @@ the given reference name and job, provided the job finished successfully. This
 is the same as [getting the job's artifacts](#get-job-artifacts), but by
 defining the job's name instead of its ID.
 
+NOTE: **Note:**
+If a pipeline is [parent of other child pipelines](../ci/parent_child_pipelines.md), artifacts
+are searched in hierarchical order from parent to child. For example, if both parent and
+child pipelines have a job with the same name, the artifact from the parent pipeline will be returned.
+
 ```plaintext
 GET /projects/:id/jobs/artifacts/:ref_name/download?job=name
 ```
@@ -74,7 +79,7 @@ Parameters
 | `id`        | integer/string | yes      | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user.                                |
 | `ref_name`  | string         | yes      | Branch or tag name in repository. HEAD or SHA references are not supported.                                                                     |
 | `job`       | string         | yes      | The name of the job.                                                                                                                            |
-| `job_token` **(PREMIUM)** | string         | no       | To be used with [triggers](../ci/triggers/README.md#when-a-pipeline-depends-on-the-artifacts-of-another-pipeline-premium) for multi-project pipelines. It should be invoked only inside `.gitlab-ci.yml`. Its value is always `$CI_JOB_TOKEN`. |
+| `job_token` **(PREMIUM)** | string         | no       | To be used with [triggers](../ci/triggers/README.md#when-a-pipeline-depends-on-the-artifacts-of-another-pipeline) for multi-project pipelines. It should be invoked only inside `.gitlab-ci.yml`. Its value is always `$CI_JOB_TOKEN`. |
 
 Example request using the `PRIVATE-TOKEN` header:
 
@@ -156,6 +161,11 @@ Possible response status codes:
 Download a single artifact file for a specific job of the latest successful
 pipeline for the given reference name from within the job's artifacts archive.
 The file is extracted from the archive and streamed to the client.
+
+In [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/201784) and later, artifacts
+for [parent and child pipelines](../ci/parent_child_pipelines.md) are searched in hierarchical
+order from parent to child. For example, if both parent and child pipelines have a
+job with the same name, the artifact from the parent pipeline is returned.
 
 ```plaintext
 GET /projects/:id/jobs/artifacts/:ref_name/raw/*artifact_path?job=name

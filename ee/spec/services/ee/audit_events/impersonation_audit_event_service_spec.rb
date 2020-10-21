@@ -24,8 +24,8 @@ RSpec.describe EE::AuditEvents::ImpersonationAuditEventService do
                                             ip_address: ip_address,
                                             custom_message: message)
 
-      expect { service.security_event }.to change(SecurityEvent, :count).by(1)
-      security_event = SecurityEvent.last
+      expect { service.security_event }.to change(AuditEvent, :count).by(1)
+      security_event = AuditEvent.last
 
       expect(security_event.details).to eq(custom_message: message,
                                            ip_address: ip_address,

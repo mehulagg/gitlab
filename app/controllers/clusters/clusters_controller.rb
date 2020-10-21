@@ -38,8 +38,7 @@ class Clusters::ClustersController < Clusters::BaseController
 
   def new
     if params[:provider] == 'aws'
-      @aws_role = current_user.aws_role || Aws::Role.new
-      @aws_role.ensure_role_external_id!
+      @aws_role = Aws::Role.create_or_find_by!(user: current_user)
       @instance_types = load_instance_types.to_json
 
     elsif params[:provider] == 'gcp'
@@ -181,13 +180,20 @@ class Clusters::ClustersController < Clusters::BaseController
     params.permit(:cleanup)
   end
 
+  def base_permitted_cluster_params
+    [
+      :enabled,
+      :environment_scope,
+      :managed,
+      :namespace_per_environment
+    ]
+  end
+
   def update_params
     if cluster.provided_by_user?
       params.require(:cluster).permit(
-        :enabled,
+        *base_permitted_cluster_params,
         :name,
-        :environment_scope,
-        :managed,
         :base_domain,
         :management_project_id,
         platform_kubernetes_attributes: [
@@ -199,9 +205,7 @@ class Clusters::ClustersController < Clusters::BaseController
       )
     else
       params.require(:cluster).permit(
-        :enabled,
-        :environment_scope,
-        :managed,
+        *base_permitted_cluster_params,
         :base_domain,
         :management_project_id,
         platform_kubernetes_attributes: [
@@ -213,10 +217,8 @@ class Clusters::ClustersController < Clusters::BaseController
 
   def create_gcp_cluster_params
     params.require(:cluster).permit(
-      :enabled,
+      *base_permitted_cluster_params,
       :name,
-      :environment_scope,
-      :managed,
       provider_gcp_attributes: [
         :gcp_project_id,
         :zone,
@@ -233,11 +235,10 @@ class Clusters::ClustersController < Clusters::BaseController
 
   def create_aws_cluster_params
     params.require(:cluster).permit(
-      :enabled,
+      *base_permitted_cluster_params,
       :name,
-      :environment_scope,
-      :managed,
       provider_aws_attributes: [
+        :kubernetes_version,
         :key_name,
         :role_arn,
         :region,
@@ -255,10 +256,8 @@ class Clusters::ClustersController < Clusters::BaseController
 
   def create_user_cluster_params
     params.require(:cluster).permit(
-      :enabled,
+      *base_permitted_cluster_params,
       :name,
-      :environment_scope,
-      :managed,
       platform_kubernetes_attributes: [
         :namespace,
         :api_url,
@@ -273,7 +272,7 @@ class Clusters::ClustersController < Clusters::BaseController
   end
 
   def aws_role_params
-    params.require(:cluster).permit(:role_arn, :role_external_id)
+    params.require(:cluster).permit(:role_arn)
   end
 
   def generate_gcp_authorize_url

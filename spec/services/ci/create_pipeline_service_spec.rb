@@ -223,7 +223,7 @@ RSpec.describe Ci::CreatePipelineService do
 
       context 'auto-cancel enabled' do
         before do
-          project.update(auto_cancel_pending_pipelines: 'enabled')
+          project.update!(auto_cancel_pending_pipelines: 'enabled')
         end
 
         it 'does not cancel HEAD pipeline' do
@@ -248,7 +248,7 @@ RSpec.describe Ci::CreatePipelineService do
         end
 
         it 'cancel created outdated pipelines', :sidekiq_might_not_need_inline do
-          pipeline_on_previous_commit.update(status: 'created')
+          pipeline_on_previous_commit.update!(status: 'created')
           pipeline
 
           expect(pipeline_on_previous_commit.reload).to have_attributes(status: 'canceled', auto_canceled_by_id: pipeline.id)
@@ -439,7 +439,7 @@ RSpec.describe Ci::CreatePipelineService do
 
       context 'auto-cancel disabled' do
         before do
-          project.update(auto_cancel_pending_pipelines: 'disabled')
+          project.update!(auto_cancel_pending_pipelines: 'disabled')
         end
 
         it 'does not auto cancel pending non-HEAD pipelines' do
@@ -513,7 +513,7 @@ RSpec.describe Ci::CreatePipelineService do
         it 'pull it from Auto-DevOps' do
           pipeline = execute_service
           expect(pipeline).to be_auto_devops_source
-          expect(pipeline.builds.map(&:name)).to match_array(%w[build code_quality eslint-sast secret_detection_default_branch secrets-sast test])
+          expect(pipeline.builds.map(&:name)).to match_array(%w[build code_quality eslint-sast secret_detection_default_branch test])
         end
       end
 
@@ -731,30 +731,11 @@ RSpec.describe Ci::CreatePipelineService do
             .and_call_original
         end
 
-        context 'when ci_pipeline_rewind_iid is enabled' do
-          before do
-            stub_feature_flags(ci_pipeline_rewind_iid: true)
-          end
+        it 'rewinds iid' do
+          result = execute_service
 
-          it 'rewinds iid' do
-            result = execute_service
-
-            expect(result).not_to be_persisted
-            expect(internal_id.last_value).to eq(0)
-          end
-        end
-
-        context 'when ci_pipeline_rewind_iid is disabled' do
-          before do
-            stub_feature_flags(ci_pipeline_rewind_iid: false)
-          end
-
-          it 'does not rewind iid' do
-            result = execute_service
-
-            expect(result).not_to be_persisted
-            expect(internal_id.last_value).to eq(1)
-          end
+          expect(result).not_to be_persisted
+          expect(internal_id.last_value).to eq(0)
         end
       end
     end

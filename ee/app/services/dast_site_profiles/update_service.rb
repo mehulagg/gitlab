@@ -25,12 +25,12 @@ module DastSiteProfiles
     private
 
     def allowed?
-      Ability.allowed?(current_user, :run_ondemand_dast_scan, project)
+      Ability.allowed?(current_user, :create_on_demand_dast_scan, project)
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
     def find_dast_site_profile!(id)
-      DastSiteProfilesFinder.new(project_id: project.id, id: id.model_id).execute.first!
+      DastSiteProfilesFinder.new(project_id: project.id, id: id).execute.first!
     end
     # rubocop: enable CodeReuse/ActiveRecord
   end

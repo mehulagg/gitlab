@@ -1,11 +1,11 @@
 import MockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
 import { TEST_HOST } from 'spec/test_constants';
 import testAction from 'helpers/vuex_action_helper';
 
 import createState from 'ee/security_dashboard/store/modules/pipeline_jobs/state';
 import * as types from 'ee/security_dashboard/store/modules/pipeline_jobs/mutation_types';
 import * as actions from 'ee/security_dashboard/store/modules/pipeline_jobs/actions';
+import axios from '~/lib/utils/axios_utils';
 
 describe('pipeling jobs actions', () => {
   let state;

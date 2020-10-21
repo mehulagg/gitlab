@@ -1,18 +1,17 @@
 <script>
 import { isEmpty } from 'lodash';
-import { GlDeprecatedDropdown, GlDeprecatedDropdownItem, GlLoadingIcon, GlAlert } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlLoadingIcon, GlAlert, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import httpStatusCodes from '~/lib/utils/http_status';
 
 export default {
   name: 'MetricChart',
   components: {
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     GlLoadingIcon,
     GlAlert,
-    Icon,
+    GlIcon,
   },
   props: {
     title: {
@@ -91,14 +90,14 @@ export default {
     <template v-else>
       <gl-alert v-if="infoMessage" :dismissible="false">{{ infoMessage }}</gl-alert>
       <template v-else>
-        <gl-deprecated-dropdown
+        <gl-dropdown
           v-if="hasMetricTypes"
           class="mb-4 metric-dropdown"
           toggle-class="dropdown-menu-toggle w-100"
           menu-class="w-100 mw-100"
           :text="metricDropdownLabel"
         >
-          <gl-deprecated-dropdown-item
+          <gl-dropdown-item
             v-for="metric in metricTypes"
             :key="metric.key"
             active-class="is-active"
@@ -106,7 +105,7 @@ export default {
             @click="$emit('metricTypeChange', metric.key)"
           >
             <span class="d-flex">
-              <icon
+              <gl-icon
                 :title="s__('MetricChart|Selected')"
                 class="flex-shrink-0 gl-mr-2"
                 :class="{
@@ -117,8 +116,8 @@ export default {
               />
               {{ metric.label }}
             </span>
-          </gl-deprecated-dropdown-item>
-        </gl-deprecated-dropdown>
+          </gl-dropdown-item>
+        </gl-dropdown>
         <p v-if="description" class="text-muted">{{ description }}</p>
         <div ref="chart">
           <slot v-if="hasChartData"></slot>

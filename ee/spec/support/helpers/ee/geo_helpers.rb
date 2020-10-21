@@ -83,8 +83,8 @@ module EE
 
         with_replicator Geo::DummyReplicator
 
-        def self.replicables_for_geo_node
-          self.all
+        def self.replicables_for_current_secondary(primary_key_in)
+          self.primary_key_in(primary_key_in)
         end
       end
 

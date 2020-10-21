@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Fast lookup of authorized SSH keys in the database
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1631) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.3.
@@ -32,10 +38,10 @@ feature for CentOS 6, follow [the instructions on how to build and install a cus
 
 By default, GitLab manages an `authorized_keys` file, which contains all the
 public SSH keys for users allowed to access GitLab. However, to maintain a
-single source of truth, [Geo](../geo/replication/index.md) needs to be configured to perform SSH fingerprint
+single source of truth, [Geo](../geo/index.md) needs to be configured to perform SSH fingerprint
 lookups via database lookup.
 
-As part of [setting up Geo](../geo/replication/index.md#setup-instructions),
+As part of [setting up Geo](../geo/index.md#setup-instructions),
 you will be required to follow the steps outlined below for both the primary and
 secondary nodes, but note that the `Write to "authorized keys" file` checkbox
 only needs to be unchecked on the primary node since it will be reflected
@@ -114,7 +120,6 @@ This is a brief overview. Please refer to the above instructions for more contex
 1. Enable writes to the `authorized_keys` file in Application Settings
 1. Remove the `AuthorizedKeysCommand` lines from `/etc/ssh/sshd_config` or from `/assets/sshd_config` if you are using Omnibus Docker.
 1. Reload `sshd`: `sudo service sshd reload`
-1. Remove the `/opt/gitlab-shell/authorized_keys` file
 
 ## Compiling a custom version of OpenSSH for CentOS 6
 

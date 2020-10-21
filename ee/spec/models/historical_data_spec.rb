@@ -29,7 +29,7 @@ RSpec.describe HistoricalData do
 
   describe ".track!" do
     before do
-      allow(User).to receive(:active).and_return([1, 2, 3, 4, 5])
+      allow(License).to receive(:current_active_users).and_return([1, 2, 3, 4, 5])
     end
 
     it "creates a new historical data record" do
@@ -133,6 +133,46 @@ RSpec.describe HistoricalData do
         it 'returns max value for active_user_count' do
           expect(described_class.max_historical_user_count).to eq(15)
         end
+      end
+    end
+  end
+
+  describe '.in_license_term' do
+    let_it_be(:now) { DateTime.new(2014, 12, 15) }
+    let_it_be(:license) do
+      create_current_license(
+        starts_at: Date.new(2014, 7, 1),
+        expires_at: Date.new(2014, 12, 31)
+      )
+    end
+
+    before_all do
+      described_class.create!(date: license.starts_at - 1.day, active_user_count: 1)
+      described_class.create!(date: license.expires_at + 1.day, active_user_count: 2)
+      described_class.create!(date: now - 1.year - 1.day, active_user_count: 3)
+      described_class.create!(date: now + 1.day, active_user_count: 4)
+    end
+
+    around do |example|
+      travel_to(now) { example.run }
+    end
+
+    context 'with a license that has a start and end date' do
+      it 'returns correct number of records within the license range' do
+        expect(described_class.in_license_term(license).count).to eq(7)
+      end
+    end
+
+    context 'with a license that has no end date' do
+      let_it_be(:license) do
+        create_current_license(
+          starts_at: Date.new(2014, 7, 1),
+          expires_at: nil
+        )
+      end
+
+      it 'returns correct number of records within the past year' do
+        expect(described_class.in_license_term(license).count).to eq(6)
       end
     end
   end

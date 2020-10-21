@@ -97,6 +97,6 @@ describe('Approvals ModalRuleRemove', () => {
     const modal = wrapper.find(GlModalVuex);
     modal.vm.$emit('ok', new Event('submit'));
 
-    expect(actions.deleteRule).toHaveBeenCalledWith(expect.anything(), TEST_RULE.id, undefined);
+    expect(actions.deleteRule).toHaveBeenCalledWith(expect.anything(), TEST_RULE.id);
   });
 });

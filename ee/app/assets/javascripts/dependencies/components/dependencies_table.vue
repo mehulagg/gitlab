@@ -1,7 +1,16 @@
 <script>
 import { cloneDeep } from 'lodash';
-import { GlBadge, GlIcon, GlButton, GlSkeletonLoading, GlTable } from '@gitlab/ui';
+import {
+  GlBadge,
+  GlIcon,
+  GlButton,
+  GlSkeletonLoader,
+  GlTable,
+  GlPopover,
+  GlLink,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import DependencyLicenseLinks from './dependency_license_links.vue';
 import DependencyVulnerabilities from './dependency_vulnerabilities.vue';
 import DependencyLocation from './dependency_location.vue';
@@ -31,9 +40,12 @@ export default {
     GlBadge,
     GlIcon,
     GlButton,
-    GlSkeletonLoading,
+    GlSkeletonLoader,
     GlTable,
+    GlPopover,
+    GlLink,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     dependencies: {
       type: Array,
@@ -81,12 +93,18 @@ export default {
     { key: 'isVulnerable', label: '', tdClass },
   ],
   DEPENDENCIES_PER_PAGE: 20,
+  DEPENDENCY_PATH_LINK:
+    'https://docs.gitlab.com/ee/user/application_security/dependency_list/#dependency-paths',
+  i18n: {
+    tooltipText: s__(
+      'Dependencies|The component dependency path is based on the lock file. There may be several paths. In these cases, the longest path is displayed.',
+    ),
+    tooltipMoreText: s__('Dependencies|Learn more about dependency paths'),
+  },
 };
 </script>
 
 <template>
-  <!-- tbody- and thead-class props can be removed when
-    https://gitlab.com/gitlab-org/gitlab/-/issues/213324 is fixed -->
   <gl-table
     :fields="$options.fields"
     :items="localDependencies"
@@ -94,9 +112,30 @@ export default {
     data-qa-selector="dependencies_table_content"
     details-td-class="pt-0"
     stacked="md"
-    thead-class="gl-text-gray-900"
-    tbody-class="gl-text-gray-900"
   >
+    <template #head(location)="data">
+      {{ data.label }}
+      <template v-if="glFeatures.pathToVulnerableDependency">
+        <gl-icon id="location-info" name="information" class="gl-text-blue-600" />
+        <gl-popover
+          target="location-info"
+          triggers="hover focus"
+          placement="top"
+          :title="s__('Dependencies|Location and dependency path')"
+        >
+          {{ $options.i18n.tooltipText }}
+          <div class="gl-mt-4">
+            <gl-link
+              :href="$options.DEPENDENCY_PATH_LINK"
+              target="_blank"
+              class="font-size-inherit"
+              >{{ $options.i18n.tooltipMoreText }}</gl-link
+            >
+          </div>
+        </gl-popover>
+      </template>
+    </template>
+
     <!-- toggleDetails and detailsShowing are scoped slot props provided by
       GlTable; they mutate/read the item's _showDetails property, which GlTable
       uses to show/hide the row-details slot -->
@@ -150,7 +189,7 @@ export default {
 
     <template #table-busy>
       <div class="mt-2">
-        <gl-skeleton-loading v-for="n in $options.DEPENDENCIES_PER_PAGE" :key="n" :lines="1" />
+        <gl-skeleton-loader v-for="n in $options.DEPENDENCIES_PER_PAGE" :key="n" :lines="1" />
       </div>
     </template>
   </gl-table>

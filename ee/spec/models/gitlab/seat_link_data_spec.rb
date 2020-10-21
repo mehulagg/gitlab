@@ -35,7 +35,7 @@ RSpec.describe Gitlab::SeatLinkData do
     end
 
     around do |example|
-      Timecop.travel(utc_time) { example.run }
+      travel_to(utc_time) { example.run }
     end
 
     context 'when passing no params' do

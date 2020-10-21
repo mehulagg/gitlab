@@ -1,8 +1,8 @@
 <script>
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
+import { GlResizeObserverDirective } from '@gitlab/ui';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import { truncateWidth } from '~/lib/utils/text_utility';
-import { GlResizeObserverDirective } from '@gitlab/ui';
 
 import {
   CHART_HEIGHT,

@@ -1,6 +1,0 @@
----
-title: Utilize `resolvedOnDefaultBranch` field to show the remediated badge on vulnerabilities
-  list
-merge_request: 38478
-author:
-type: fixed

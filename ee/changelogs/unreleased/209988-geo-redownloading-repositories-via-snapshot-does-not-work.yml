@@ -1,5 +1,0 @@
----
-title: 'Geo: Fix not working redownloading of repositories via snapshot'
-merge_request: 38464
-author:
-type: fixed

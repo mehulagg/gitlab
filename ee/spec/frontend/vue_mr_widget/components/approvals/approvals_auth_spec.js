@@ -52,7 +52,7 @@ describe('Approval auth component', () => {
     });
 
     it('does not emit anything', () => {
-      expect(wrapper.emittedByOrder()).toEqual([]);
+      expect(wrapper.emitted()).toEqual({});
     });
   });
 
@@ -67,7 +67,7 @@ describe('Approval auth component', () => {
       wrapper.find(GlModal).vm.$emit('ok', { preventDefault: () => null });
       waitForTick(done);
 
-      expect(wrapper.emittedByOrder()).toEqual([{ name: 'approve', args: [TEST_PASSWORD] }]);
+      expect(wrapper.emitted().approve).toEqual([[TEST_PASSWORD]]);
     });
   });
 

@@ -1,9 +1,8 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import { sprintf, s__, __ } from '~/locale';
 import { timeIntervalInWords } from '~/lib/utils/datetime_utility';
 import tooltip from '~/vue_shared/directives/tooltip';
-import icon from '~/vue_shared/components/icon.vue';
-
 import { TIME_DIFF } from '../constants';
 
 export default {
@@ -11,7 +10,7 @@ export default {
     tooltip,
   },
   components: {
-    icon,
+    GlIcon,
   },
   props: {
     syncStatusUnavailable: {
@@ -122,7 +121,7 @@ export default {
       data-placement="bottom"
     >
       <strong data-testid="syncType">{{ syncType }}</strong>
-      <icon name="retry" class="ml-2" />
+      <gl-icon name="retry" class="ml-2" />
       <span v-if="!eventTimestampEmpty" class="ml-2">
         {{ syncStatusEventInfo }}
       </span>

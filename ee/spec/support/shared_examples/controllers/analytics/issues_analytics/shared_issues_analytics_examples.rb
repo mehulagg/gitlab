@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'issues analytics controller' do
+RSpec.shared_examples 'issue analytics controller' do
   describe 'GET #show' do
     subject { get :show, params: params }
 
-    context 'when issues analytics is not available for license' do
+    context 'when issue analytics is not available for license' do
       it 'renders 404' do
         subject
 
@@ -26,7 +26,7 @@ RSpec.shared_examples 'issues analytics controller' do
       end
     end
 
-    context 'when issues analytics is available for license' do
+    context 'when issue analytics is available for license' do
       before do
         stub_licensed_features(issues_analytics: true)
       end

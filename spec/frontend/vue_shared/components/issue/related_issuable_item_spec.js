@@ -1,9 +1,9 @@
 import { mount } from '@vue/test-utils';
+import { TEST_HOST } from 'jest/helpers/test_constants';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import RelatedIssuableItem from '~/vue_shared/components/issue/related_issuable_item.vue';
 import IssueDueDate from '~/boards/components/issue_due_date.vue';
 import { defaultAssignees, defaultMilestone } from './related_issuable_mock_data';
-import { TEST_HOST } from 'jest/helpers/test_constants';
 
 describe('RelatedIssuableItem', () => {
   let wrapper;
@@ -34,6 +34,9 @@ describe('RelatedIssuableItem', () => {
     dueDate: '<div class="js-due-date-slot"></div>',
     weight: '<div class="js-weight-slot"></div>',
   };
+
+  const findRemoveButton = () => wrapper.find({ ref: 'removeButton' });
+  const findLockIcon = () => wrapper.find({ ref: 'lockIcon' });
 
   beforeEach(() => {
     mountComponent({ props, slots });
@@ -121,10 +124,10 @@ describe('RelatedIssuableItem', () => {
     });
 
     it('renders milestone icon and name', () => {
-      const milestoneIcon = tokenMetadata().find('.item-milestone svg use');
+      const milestoneIcon = tokenMetadata().find('.item-milestone svg');
       const milestoneTitle = tokenMetadata().find('.item-milestone .milestone-title');
 
-      expect(milestoneIcon.attributes('href')).toContain('clock');
+      expect(milestoneIcon.attributes('data-testid')).toBe('clock-icon');
       expect(milestoneTitle.text()).toContain('Milestone title');
     });
 
@@ -143,30 +146,51 @@ describe('RelatedIssuableItem', () => {
   });
 
   describe('remove button', () => {
-    const removeButton = () => wrapper.find({ ref: 'removeButton' });
-
     beforeEach(() => {
       wrapper.setProps({ canRemove: true });
     });
 
     it('renders if canRemove', () => {
-      expect(removeButton().exists()).toBe(true);
+      expect(findRemoveButton().exists()).toBe(true);
+    });
+
+    it('does not render the lock icon', () => {
+      expect(findLockIcon().exists()).toBe(false);
     });
 
     it('renders disabled button when removeDisabled', async () => {
       wrapper.setData({ removeDisabled: true });
       await wrapper.vm.$nextTick();
 
-      expect(removeButton().attributes('disabled')).toEqual('disabled');
+      expect(findRemoveButton().attributes('disabled')).toEqual('disabled');
     });
 
     it('triggers onRemoveRequest when clicked', async () => {
-      removeButton().trigger('click');
+      findRemoveButton().trigger('click');
       await wrapper.vm.$nextTick();
       const { relatedIssueRemoveRequest } = wrapper.emitted();
 
       expect(relatedIssueRemoveRequest.length).toBe(1);
       expect(relatedIssueRemoveRequest[0]).toEqual([props.idKey]);
+    });
+  });
+
+  describe('when issue is locked', () => {
+    const lockedMessage = 'Issues created from a vulnerability cannot be removed';
+
+    beforeEach(() => {
+      wrapper.setProps({
+        isLocked: true,
+        lockedMessage,
+      });
+    });
+
+    it('does not render the remove button', () => {
+      expect(findRemoveButton().exists()).toBe(false);
+    });
+
+    it('renders the lock icon with the correct title', () => {
+      expect(findLockIcon().attributes('title')).toBe(lockedMessage);
     });
   });
 });

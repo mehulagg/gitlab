@@ -105,14 +105,6 @@ RSpec.describe Ci::BuildDependencies do
         end
 
         it { is_expected.to contain_exactly(dependency) }
-
-        context 'with the feature flag disabled' do
-          before do
-            stub_feature_flags(ci_expand_names_for_cross_pipeline_artifacts: false)
-          end
-
-          it { is_expected.to be_empty }
-        end
       end
     end
 

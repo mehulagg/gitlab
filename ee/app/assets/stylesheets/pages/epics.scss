@@ -12,6 +12,11 @@
   }
 }
 
+.is-ghost {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
 .epic-discussion-separator {
   border-color: $border-color;
 }
@@ -96,9 +101,15 @@
   }
 }
 
-.labels-select-wrapper.is-embedded {
+.new-epic-form .labels-select-wrapper.is-embedded {
   width: $gl-dropdown-width;
 
+  .labels-select-dropdown-contents {
+    min-height: 335px;
+  }
+}
+
+.labels-select-wrapper.is-embedded {
   .labels-select-dropdown-button {
     @include gl-bg-white;
     @include gl-font-regular;
@@ -114,7 +125,7 @@
     @include gl-white-space-nowrap;
 
     .gl-button-text {
-      @include gl-text-gray-700;
+      @include gl-text-gray-500;
       @include gl-display-flex;
       @include gl-justify-content-space-between;
       @include gl-w-full;
@@ -130,7 +141,7 @@
     @include gl-shadow-x0-y2-b4-s0;
 
     width: 300px !important;
-    min-height: 335px;
+    min-height: none;
     max-height: none;
     margin-bottom: $gl-spacing-scale-6 !important;
 

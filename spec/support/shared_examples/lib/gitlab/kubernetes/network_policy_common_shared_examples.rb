@@ -5,17 +5,10 @@ RSpec.shared_examples 'network policy common specs' do
   let(:namespace) { 'example-namespace' }
   let(:labels) { nil }
 
-  describe 'generate' do
-    let(:resource) do
-      ::Kubeclient::Resource.new(
-        metadata: { name: name, namespace: namespace },
-        spec: spec
-      )
-    end
-
+  describe '#generate' do
     subject { policy.generate }
 
-    it { is_expected.to eq(resource) }
+    it { is_expected.to eq(Kubeclient::Resource.new(policy.resource)) }
   end
 
   describe 'as_json' do
@@ -24,12 +17,7 @@ RSpec.shared_examples 'network policy common specs' do
         name: name,
         namespace: namespace,
         creation_timestamp: nil,
-        manifest: YAML.dump(
-          {
-            metadata: { name: name, namespace: namespace },
-            spec: spec
-          }.deep_stringify_keys
-        ),
+        manifest: YAML.dump(policy.resource.deep_stringify_keys),
         is_autodevops: false,
         is_enabled: true
       }

@@ -1,9 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlTooltip } from '@gitlab/ui';
 
-import { mockEpic1 } from '../mock_data';
-
 import EpicHealthStatus from 'ee/related_items_tree/components/epic_health_status.vue';
+import { mockEpic1 } from '../mock_data';
 
 const createComponent = ({ healthStatus = mockEpic1.healthStatus } = {}) => {
   return shallowMount(EpicHealthStatus, {

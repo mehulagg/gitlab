@@ -30,12 +30,17 @@ export default {
       required: false,
       default: () => [],
     },
-    errorMessage: {
+    regexErrorMessage: {
       type: String,
       required: false,
       default: '',
     },
     disallowedValueErrorMessage: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    customErrorMessage: {
       type: String,
       required: false,
       default: '',
@@ -54,14 +59,14 @@ export default {
     },
     computedErrorMessage() {
       if (this.regexValidator !== null && this.textInputValue.match(this.regexValidator) === null) {
-        return this.errorMessage;
+        return this.regexErrorMessage;
       }
 
       if (!isEmpty(this.disallowedValues) && this.disallowedValues.includes(this.textInputValue)) {
         return this.disallowedValueErrorMessage;
       }
 
-      return '';
+      return this.customErrorMessage;
     },
   },
   watch: {
@@ -111,6 +116,7 @@ export default {
     handleTextInput(value) {
       this.hideErrorMessage = true;
       this.textInputValue = value;
+      this.$emit('text-input', value);
     },
     handleBlur() {
       this.hideErrorMessage = true;

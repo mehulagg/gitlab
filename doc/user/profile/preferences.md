@@ -84,7 +84,7 @@ The default syntax theme is White, and you can choose among 5 different themes:
 [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2389) in 13.0, the theme
 you choose also applies to the [Web IDE](../project/web_ide/index.md)'s code editor and [Snippets](../snippets.md).
 The themes are available only in the Web IDE file editor, except for the [dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/209808) and
-the [solarized dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/219228),
+the [Solarized dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/219228),
 which apply to the entire Web IDE screen.
 
 ## Behavior
@@ -114,7 +114,7 @@ You have 8 options here that you can use for your default dashboard view:
 - Your projects' activity
 - Starred projects' activity
 - Your groups
-- Your [Todos](../todos.md)
+- Your [to-dos](../todos.md)
 - Assigned Issues
 - Assigned Merge Requests
 - Operations Dashboard **(PREMIUM)**
@@ -131,14 +131,8 @@ You can choose between 2 options:
 
 ### Project overview content
 
-The project overview content setting allows you to choose what content you want to
+The **Project overview content** setting allows you to choose what content you want to
 see on a project’s home page.
-
-You can choose between 3 options:
-
-- Files and Readme (default)
-- Readme
-- Activity
 
 ### Tab width
 
@@ -181,6 +175,12 @@ This setting is only visible if Sourcegraph has been enabled by a GitLab adminis
 Manage the availability of integrated code intelligence features powered by
 Sourcegraph. View [the Sourcegraph feature documentation](../../integration/sourcegraph.md#enable-sourcegraph-in-user-preferences)
 for more information.
+
+### Gitpod
+
+Enable and disable the [GitLab-Gitpod integration](../../integration/gitpod.md). This is only
+visible after the integration is configured by a GitLab administrator. View
+[the Gitpod feature documentation](../../integration/gitpod.md) for more information.
 
 <!-- ## Troubleshooting
 

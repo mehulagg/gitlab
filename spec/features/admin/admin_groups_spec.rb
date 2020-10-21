@@ -11,6 +11,8 @@ RSpec.describe 'Admin Groups' do
   let!(:current_user) { create(:admin) }
 
   before do
+    stub_feature_flags(vue_group_members_list: false)
+
     sign_in(current_user)
     stub_application_setting(default_group_visibility: internal)
   end
@@ -192,7 +194,7 @@ RSpec.describe 'Admin Groups' do
         expect(page).to have_content('Developer')
       end
 
-      accept_confirm { find(:css, 'li', text: current_user.name).find(:css, 'a.btn-remove').click }
+      accept_confirm { find(:css, 'li', text: current_user.name).find(:css, 'a.btn-danger').click }
 
       visit group_group_members_path(group)
 

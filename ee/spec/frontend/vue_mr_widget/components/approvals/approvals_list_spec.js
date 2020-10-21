@@ -350,7 +350,7 @@ describe('EE MRWidget approvals list', () => {
     it('renders the name in a monospace font', () => {
       const codeOwnerRow = findRowElement(row, 'name');
 
-      expect(codeOwnerRow.find('.monospace').exists()).toEqual(true);
+      expect(codeOwnerRow.find('.gl-font-monospace').exists()).toEqual(true);
       expect(codeOwnerRow.text()).toContain(rule.name);
     });
 

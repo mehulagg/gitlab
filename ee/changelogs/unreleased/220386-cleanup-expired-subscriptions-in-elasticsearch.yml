@@ -1,5 +1,0 @@
----
-title: Add cron worker to clean up expired subscriptions from Elasticsearch
-merge_request: 38551
-author:
-type: added

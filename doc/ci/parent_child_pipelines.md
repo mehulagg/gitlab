@@ -68,11 +68,22 @@ microservice_a:
   trigger:
     include:
       - local: path/to/microservice_a.yml
-      - template: SAST.gitlab-ci.yml
+      - template: Security/SAST.gitlab-ci.yml
 ```
 
-NOTE: **Note:**
-The max number of entries that are accepted for `trigger:include:` is three.
+In [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/205157) and later,
+you can use [`include:file`](yaml/README.md#includefile) to trigger child pipelines
+with a configuration file in a different project:
+
+```yaml
+microservice_a:
+  trigger:
+    include:
+      - project: 'my-group/my-pipeline-library'
+        file: 'path/to/ci-config.yml'
+```
+
+The maximum number of entries that are accepted for `trigger:include:` is three.
 
 Similar to [multi-project pipelines](multi_project_pipelines.md#mirroring-status-from-triggered-pipeline),
 we can set the parent pipeline to depend on the status of the child pipeline upon completion:
@@ -82,7 +93,7 @@ microservice_a:
   trigger:
     include:
       - local: path/to/microservice_a.yml
-      - template: SAST.gitlab-ci.yml
+      - template: Security/SAST.gitlab-ci.yml
     strategy: depend
 ```
 
@@ -150,8 +161,16 @@ We also have an [example project using Dynamic Child Pipelines with Jsonnet](htt
 In GitLab 12.9, the child pipeline could fail to be created in certain cases, causing the parent pipeline to fail.
 This is [resolved in GitLab 12.10](https://gitlab.com/gitlab-org/gitlab/-/issues/209070).
 
-## Limitations
+## Nested child pipelines
 
-A parent pipeline can trigger many child pipelines, but a child pipeline cannot trigger
-further child pipelines. See the [related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/29651)
-for discussion on possible future improvements.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/29651) in GitLab 13.4.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/243747) in GitLab 13.5.
+
+Parent and child pipelines were introduced with a maximum depth of one level of child
+pipelines, which was later increased to two. A parent pipeline can trigger many child
+pipelines, and these child pipelines can trigger their own child pipelines. It's not
+possible to trigger another level of child pipelines.
+
+## Pass variables to a child pipeline
+
+You can [pass variables to a downstream pipeline](multi_project_pipelines.md#passing-variables-to-a-downstream-pipeline).

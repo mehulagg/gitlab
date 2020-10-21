@@ -10,22 +10,25 @@ module Mutations
 
         argument :project_path, GraphQL::ID_TYPE,
           required: true,
-          description: 'Full path of the project.'
+          description: 'Full path of the project'
 
-        argument :configuration, GraphQL::Types::JSON,
+        argument :configuration, ::Types::CiConfiguration::Sast::InputType,
           required: true,
-          description: 'Payload containing SAST variable values (https://docs.gitlab.com/ee/user/application_security/sast/#available-variables).'
+          description: 'SAST CI configuration for the project'
 
-        field :result,
-          GraphQL::Types::JSON,
-          null: true,
-          description: 'JSON containing the status of MR creation.'
+        field :status, GraphQL::STRING_TYPE, null: false,
+          description: 'Status of creating the commit for the supplied SAST CI configuration'
+
+        field :success_path, GraphQL::STRING_TYPE, null: true,
+          description: 'Redirect path to use when the response is successful'
 
         authorize :push_code
 
         def resolve(project_path:, configuration:)
           project = authorized_find!(full_path: project_path)
-          format_json(::Security::CiConfiguration::SastCreateService.new(project, current_user, configuration).execute)
+
+          result = ::Security::CiConfiguration::SastCreateService.new(project, current_user, configuration).execute
+          prepare_response(result)
         end
 
         private
@@ -34,13 +37,11 @@ module Mutations
           resolve_project(full_path: full_path)
         end
 
-        def format_json(result)
+        def prepare_response(result)
           {
-            result: {
-              status: result[:status],
-              success_path: result[:success_path],
-              errors: result[:errors]
-            }
+            status: result[:status],
+            success_path: result[:success_path],
+            errors: Array(result[:errors])
           }
         end
       end

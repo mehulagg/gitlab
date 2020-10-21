@@ -50,7 +50,9 @@ module EpicIssues
         return [] unless can?(current_user, :admin_epic, issuable.group)
 
         issues.select do |issue|
-          issuable_group_descendants.include?(issue.project.group) && !previous_related_issuables.include?(issue)
+          issue.supports_epic? &&
+            issuable_group_descendants.include?(issue.project.group) &&
+            !previous_related_issuables.include?(issue)
         end
       end
     end

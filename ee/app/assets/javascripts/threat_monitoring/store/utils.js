@@ -1,5 +1,5 @@
-import { getTimeWindow, defaultTimeRange } from '~/vue_shared/constants';
 import { pick } from 'lodash';
+import { getTimeWindow, defaultTimeRange } from '~/vue_shared/constants';
 
 export const getTimeWindowConfig = timeWindow => {
   const timeWindowObj = pick(getTimeWindow(timeWindow) || defaultTimeRange, 'duration', 'interval');

@@ -1,0 +1,5 @@
+---
+title: Change stubbed DastSiteProfile#status for calculated status
+merge_request: 44133
+author:
+type: changed

@@ -32,8 +32,9 @@ When using Vuex at GitLab, separate these concerns into different files to impro
   └── mutation_types.js # mutation types
 ```
 
-The following example shows an application that lists and adds users to the state.
-(For a more complex example implementation take a look at the security applications store in [here](https://gitlab.com/gitlab-org/gitlab/tree/master/ee/app/assets/javascripts/vue_shared/security_reports/store))
+The following example shows an application that lists and adds users to the
+state. (For a more complex example implementation, review the security
+applications stored in this [repository](https://gitlab.com/gitlab-org/gitlab/tree/master/ee/app/assets/javascripts/vue_shared/security_reports/store)).
 
 ### `index.js`
 
@@ -54,10 +55,6 @@ export const createStore = () =>
     state,
   });
 ```
-
-_Note:_ Until this
-[RFC](https://gitlab.com/gitlab-org/frontend/rfcs/-/issues/20) is implemented,
-the above will need to disable the `import/prefer-default-export` ESLint rule.
 
 ### `state.js`
 
@@ -220,12 +217,15 @@ A mutation written like this is harder to maintain and more error prone. We shou
 // Good
 export default {
   [types.MARK_AS_CLOSED](state, itemId) {
-    const item = state.items.find(i => i.id == itemId);
-    Vue.set(item, 'closed', true)
+    const item = state.items.find(x => x.id === itemId);
 
-    state.items.splice(index, 1, item)
-  }
-}
+    if (!item) {
+      return;
+    }
+
+    Vue.set(item, 'closed', true);
+  },
+};
 ```
 
 This approach is better because:

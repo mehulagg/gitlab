@@ -92,6 +92,7 @@ module Gitlab
       # group client
       delegate :create_network_policy,
         :get_network_policies,
+        :get_network_policy,
         :update_network_policy,
         :delete_network_policy,
         to: :networking_client
@@ -100,6 +101,7 @@ module Gitlab
       # group client
       delegate :create_cilium_network_policy,
         :get_cilium_network_policies,
+        :get_cilium_network_policy,
         :update_cilium_network_policy,
         :delete_cilium_network_policy,
         to: :cilium_networking_client
@@ -162,6 +164,21 @@ module Gitlab
           extensions_client.get_deployments(**args)
         else
           apps_client.get_deployments(**args)
+        end
+      end
+
+      # Ingresses resource is currently on the apis/extensions api group
+      # until Kubernetes 1.21. Kubernetest 1.22+ has ingresses resources in
+      # the networking.k8s.io/v1 api group.
+      #
+      # As we still support Kubernetes 1.12+, we will need to support both.
+      def get_ingresses(**args)
+        extensions_client.discover unless extensions_client.discovered
+
+        if extensions_client.respond_to?(:get_ingresses)
+          extensions_client.get_ingresses(**args)
+        else
+          networking_client.get_ingresses(**args)
         end
       end
 

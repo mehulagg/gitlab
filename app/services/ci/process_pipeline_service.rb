@@ -31,16 +31,18 @@ module Ci
     # rubocop: disable CodeReuse/ActiveRecord
     def update_retried
       # find the latest builds for each name
-      latest_statuses = pipeline.statuses.latest
+      latest_statuses = pipeline.latest_statuses
         .group(:name)
         .having('count(*) > 1')
         .pluck(Arel.sql('MAX(id)'), 'name')
 
       # mark builds that are retried
-      pipeline.statuses.latest
-        .where(name: latest_statuses.map(&:second))
-        .where.not(id: latest_statuses.map(&:first))
-        .update_all(retried: true) if latest_statuses.any?
+      if latest_statuses.any?
+        pipeline.latest_statuses
+          .where(name: latest_statuses.map(&:second))
+          .where.not(id: latest_statuses.map(&:first))
+          .update_all(retried: true)
+      end
     end
     # rubocop: enable CodeReuse/ActiveRecord
 

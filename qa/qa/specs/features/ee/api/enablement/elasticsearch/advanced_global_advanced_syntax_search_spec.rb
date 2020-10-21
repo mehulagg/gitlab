@@ -44,11 +44,11 @@ module QA
       end
 
       context 'when searching for projects using advanced syntax' do
-        it 'searches in the project name' do
+        it 'searches in the project name', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/747' do
           expect_search_to_find_project("es-adv-*#{project_name_suffix}")
         end
 
-        it 'searches in the project description' do
+        it 'searches in the project description', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/748' do
           expect_search_to_find_project("unique +#{project_name_suffix}")
         end
       end

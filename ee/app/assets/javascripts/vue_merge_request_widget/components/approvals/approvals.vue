@@ -1,5 +1,5 @@
 <script>
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Approvals from '~/vue_merge_request_widget/components/approvals/approvals.vue';
 import approvalsMixin from '~/vue_merge_request_widget/mixins/approvals';
 import ApprovalsAuth from './approvals_auth.vue';

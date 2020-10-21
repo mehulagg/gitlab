@@ -64,7 +64,7 @@ $mr-widget-min-height: 69px;
   background-color: $gray-light;
 
   &.clickable:hover {
-    background-color: $gl-gray-100;
+    background-color: $gray-100;
     cursor: pointer;
   }
 }
@@ -311,7 +311,7 @@ $mr-widget-min-height: 69px;
 
     .bold {
       font-weight: $gl-font-weight-bold;
-      color: $gl-gray-light;
+      color: $gray-600;
       margin-left: 10px;
     }
 
@@ -469,12 +469,6 @@ $mr-widget-min-height: 69px;
 
     .issuable-info-container {
       flex: 1;
-    }
-
-    .issuable-meta {
-      .author-link {
-        display: inline-block;
-      }
     }
 
     .merge-request-title {
@@ -770,8 +764,14 @@ $mr-widget-min-height: 69px;
     position: -webkit-sticky;
     position: sticky;
     top: $header-height + $mr-tabs-height;
-    margin-left: -16px;
-    width: calc(100% + 32px);
+
+    .with-system-header & {
+      top: $header-height + $mr-tabs-height + $system-header-height;
+    }
+
+    .with-system-header.with-performance-bar & {
+      top: $header-height + $mr-tabs-height + $system-header-height + $performance-bar-height;
+    }
 
     .mr-version-menus-container {
       flex-wrap: nowrap;
@@ -789,6 +789,14 @@ $mr-widget-min-height: 69px;
   z-index: 250;
   background-color: $white;
   border-bottom: 1px solid $border-color;
+
+  .with-system-header & {
+    top: $header-height + $system-header-height;
+  }
+
+  .with-system-header.with-performance-bar & {
+    top: $header-height + $system-header-height + $performance-bar-height;
+  }
 
   @include media-breakpoint-up(sm) {
     position: -webkit-sticky;
@@ -868,12 +876,18 @@ $mr-widget-min-height: 69px;
   }
 }
 
+.container-fluid {
+  // Negative margins for mobile/tablet screen
+  .diffs.tab-pane {
+    margin: 0 (-$gl-padding);
+  }
+}
+
 // Wrap MR tabs/buttons so you don't have to scroll on desktop
 @include media-breakpoint-down(md) {
   .merge-request-tabs-container,
   .epic-tabs-container {
     flex-direction: column-reverse;
-    padding-top: $gl-padding-8;
   }
 }
 
@@ -883,7 +897,6 @@ $mr-widget-min-height: 69px;
     .epic-tabs-container {
       flex-direction: column-reverse;
       align-items: flex-start;
-      padding-top: $gl-padding-8;
     }
   }
 }
@@ -980,7 +993,7 @@ $mr-widget-min-height: 69px;
     opacity: 0.65;
 
     &:hover {
-      color: $gl-gray-500;
+      color: $gray-500;
       text-decoration: none;
     }
   }
@@ -1005,7 +1018,7 @@ $mr-widget-min-height: 69px;
 
   .coverage {
     font-size: 12px;
-    color: $gray-700;
+    color: $gray-500;
     line-height: initial;
   }
 
@@ -1034,4 +1047,10 @@ $mr-widget-min-height: 69px;
 
 .diff-file-row.is-active {
   background-color: $gray-50;
+}
+
+.merge-request-container {
+  .flash-container {
+    @include gl-mb-4;
+  }
 }

@@ -15,13 +15,13 @@ exports[`MergeRequest component when there is a merge request matches the snapsh
   </a>
    
   <span
-    class="gl-text-gray-700"
+    class="gl-text-gray-500"
   >
     !1
   </span>
    
   <span
-    class="issuable-authored gl-text-gray-700 gl-display-inline-flex gl-align-items-center"
+    class="issuable-authored gl-text-gray-500 gl-display-inline-flex gl-align-items-center"
   >
     
     - created by:

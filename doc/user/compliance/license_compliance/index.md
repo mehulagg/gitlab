@@ -16,7 +16,7 @@ is incompatible with yours, then you can deny the use of that license.
 
 You can take advantage of License Compliance by either [including the job](#configuration)
 in your existing `.gitlab-ci.yml` file or by implicitly using
-[Auto License Compliance](../../../topics/autodevops/stages.md#auto-license-compliance-ultimate)
+[Auto License Compliance](../../../topics/autodevops/stages.md#auto-license-compliance)
 that is provided by [Auto DevOps](../../../topics/autodevops/index.md).
 
 GitLab checks the License Compliance report, compares the licenses between the
@@ -75,15 +75,15 @@ which means that the reported licenses might be incomplete or inaccurate.
 
 | Language   | Package managers                                                  | Scan Tool                                                |
 |------------|-------------------------------------------------------------------|----------------------------------------------------------|
-| JavaScript | [yarn](https://yarnpkg.com/)|[License Finder](https://github.com/pivotal/LicenseFinder)|
+| JavaScript | [Yarn](https://yarnpkg.com/)|[License Finder](https://github.com/pivotal/LicenseFinder)|
 | Go         | go get, gvt, glide, dep, trash, govendor |[License Finder](https://github.com/pivotal/LicenseFinder)|
-| Erlang     | [rebar](https://www.rebar3.org/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
+| Erlang     | [Rebar](https://www.rebar3.org/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
 | Objective-C, Swift | [CocoaPods](https://cocoapods.org/) v0.39 and below |[License Finder](https://github.com/pivotal/LicenseFinder)|
-| Elixir     | [mix](https://elixir-lang.org/getting-started/mix-otp/introduction-to-mix.html) |[License Finder](https://github.com/pivotal/LicenseFinder)|
-| C++/C      | [conan](https://conan.io/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
+| Elixir     | [Mix](https://elixir-lang.org/getting-started/mix-otp/introduction-to-mix.html) |[License Finder](https://github.com/pivotal/LicenseFinder)|
+| C++/C      | [Conan](https://conan.io/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
 | Scala      | [sbt](https://www.scala-sbt.org/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
-| Rust       | [cargo](https://crates.io) |[License Finder](https://github.com/pivotal/LicenseFinder)|
-| PHP        | [composer](https://getcomposer.org/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
+| Rust       | [Cargo](https://crates.io) |[License Finder](https://github.com/pivotal/LicenseFinder)|
+| PHP        | [Composer](https://getcomposer.org/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
 
 ## Requirements
 
@@ -118,14 +118,19 @@ the `license_management` job, so you must migrate to the `license_scanning` job 
 `License-Scanning.gitlab-ci.yml` template.
 
 The results will be saved as a
-[License Compliance report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportslicense_scanning-ultimate)
+[License Compliance report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportslicense_scanning)
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest License Compliance artifact available. Behind the scenes, the
-[GitLab License Compliance Docker image](https://gitlab.com/gitlab-org/security-products/license-management)
+[GitLab License Compliance Docker image](https://gitlab.com/gitlab-org/security-products/analyzers/license-finder)
 is used to detect the languages/frameworks and in turn analyzes the licenses.
 
 The License Compliance settings can be changed through [environment variables](#available-variables) by using the
 [`variables`](../../../ci/yaml/README.md#variables) parameter in `.gitlab-ci.yml`.
+
+### When License Compliance runs
+
+When using the GitLab `License-Scanning.gitlab-ci.yml` template, the License Compliance job doesn't
+wait for other stages to complete.
 
 ### Available variables
 
@@ -265,37 +270,10 @@ license_scanning:
 You can supply a custom root certificate to complete TLS verification by using the
 `ADDITIONAL_CA_CERT_BUNDLE` [environment variable](#available-variables).
 
-To bypass TLS verification, you can use a custom [`pip.conf`](https://pip.pypa.io/en/stable/user_guide/#config-file)
-file to configure trusted hosts.
-
-The following `gitlab-ci.yml` file uses a [`before_script`](../../../ci/yaml/README.md#before_script-and-after_script)
-to inject a custom [`pip.conf`](https://pip.pypa.io/en/stable/user_guide/#config-file):
-
-```yaml
-include:
-  - template: Security/License-Scanning.gitlab-ci.yml
-
-license_scanning:
-  variables:
-    PIP_INDEX_URL: 'https://pypi.example.com/simple/'
-  before_script:
-    - mkdir -p ~/.config/pip/
-    - cp pip.conf ~/.config/pip/pip.conf
-```
-
-The [`pip.conf`](https://pip.pypa.io/en/stable/reference/pip/) allows you to specify a list of
-[trusted hosts](https://pip.pypa.io/en/stable/reference/pip/#cmdoption-trusted-host):
-
-```plaintext
-[global]
-trusted-host = pypi.example.com
-```
-
 #### Using private Python repos
 
 If you have a private Python repository you can use the `PIP_INDEX_URL` [environment variable](#available-variables)
-to specify its location. It's also possible to provide a custom `pip.conf` for
-[additional configuration](#custom-root-certificates-for-python).
+to specify its location.
 
 ### Configuring NPM projects
 
@@ -330,13 +308,13 @@ strict-ssl = false
 
 ### Configuring Yarn projects
 
-You can configure Yarn projects by using a [`.yarnrc.yml`](https://yarnpkg.com/configuration/yarnrc)
+You can configure Yarn projects by using a [`.yarnrc.yml`](https://yarnpkg.com/configuration/yarnrc/)
 file.
 
 #### Using private Yarn registries
 
 If you have a private Yarn registry you can use the
-[`npmRegistryServer`](https://yarnpkg.com/configuration/yarnrc#npmRegistryServer)
+[`npmRegistryServer`](https://yarnpkg.com/configuration/yarnrc/#npmRegistryServer)
 setting to specify its location.
 
 For example:
@@ -473,7 +451,7 @@ package manager. For a comprehensive list, consult [the Conan documentation](htt
 The default [Conan](https://conan.io/) configuration sets [`CONAN_LOGIN_USERNAME`](https://docs.conan.io/en/latest/reference/env_vars.html#conan-login-username-conan-login-username-remote-name)
 to `ci_user`, and binds [`CONAN_PASSWORD`](https://docs.conan.io/en/latest/reference/env_vars.html#conan-password-conan-password-remote-name)
 to the [`CI_JOB_TOKEN`](../../../ci/variables/predefined_variables.md)
-for the running job. This allows Conan projects to fetch packages from a [GitLab Conan Repository](../../packages/conan_repository/#fetching-conan-package-information-from-the-gitlab-package-registry)
+for the running job. This allows Conan projects to fetch packages from a [GitLab Conan Repository](../../packages/conan_repository/#fetch-conan-package-information-from-the-package-registry)
 if a GitLab remote is specified in the `.conan/remotes.json` file.
 
 To override the default credentials specify a [`CONAN_LOGIN_USERNAME_{REMOTE_NAME}`](https://docs.conan.io/en/latest/reference/env_vars.html#conan-login-username-conan-login-username-remote-name)
@@ -643,8 +621,8 @@ To use License Compliance in an offline environment, you need:
 
 NOTE: **Note:**
 GitLab Runner has a [default `pull policy` of `always`](https://docs.gitlab.com/runner/executors/docker.html#using-the-always-pull-policy),
-meaning the Runner tries to pull Docker images from the GitLab container registry even if a local
-copy is available. GitLab Runner's [`pull_policy` can be set to `if-not-present`](https://docs.gitlab.com/runner/executors/docker.html#using-the-if-not-present-pull-policy)
+meaning the runner tries to pull Docker images from the GitLab container registry even if a local
+copy is available. The GitLab Runner [`pull_policy` can be set to `if-not-present`](https://docs.gitlab.com/runner/executors/docker.html#using-the-if-not-present-pull-policy)
 in an offline environment if you prefer using only locally available Docker images. However, we
 recommend keeping the pull policy setting to `always` if not in an offline environment, as this
 enables the use of updated scanners in your CI/CD pipelines.
@@ -656,7 +634,7 @@ import the following default License Compliance analyzer images from `registry.g
 offline [local Docker container registry](../../packages/container_registry/index.md):
 
 ```plaintext
-registry.gitlab.com/gitlab-org/security-products/license-management:latest
+registry.gitlab.com/gitlab-org/security-products/analyzers/license-finder:latest
 ```
 
 The process for importing Docker images into a local offline Docker registry depends on
@@ -695,8 +673,15 @@ Additional configuration may be needed for connecting to
 [private Python repositories](#using-private-python-repos),
 and [private Yarn registries](#using-private-yarn-registries).
 
-Exact name matches are required for [project policies](#policies)
-when running in an offline environment ([see related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/212388)).
+### SPDX license list name matching
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/212388) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.3.
+
+Prior to GitLab 13.3, offline environments required an exact name match for [project policies](#policies).
+In GitLab 13.3 and later, GitLab matches the name of [project policies](#policies)
+with identifiers from the [SPDX license list](https://spdx.org/licenses/).
+A local copy of the SPDX license list is distributed with the GitLab instance. If needed, the GitLab
+instance's administrator can manually update it with a [Rake task](../../../raketasks/spdx.md).
 
 ## License list
 
@@ -743,17 +728,21 @@ Developers of the project can view the policies configured in a project.
 
 ![View Policies](img/policies_v13_0.png)
 
-### Enabling License Approvals within a project
+## Enabling License Approvals within a project
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13067) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.3.
 
-`License-Check` is an approval rule you can enable to allow an approver, individual, or group to
-approve a merge request that contains a `denied` license.
+`License-Check` is a [security approval](../../application_security/index.md#enabling-security-approvals-within-a-project) rule you can enable to allow an individual or group to approve a
+merge request that contains a `denied` license.
 
 You can enable `License-Check` one of two ways:
 
-- Create a [project approval rule](../../project/merge_requests/merge_request_approvals.md#multiple-approval-rules-premium)
-  with the case-sensitive name `License-Check`.
+1. Navigate to your project's **Settings > General** and expand **Merge request approvals**.
+1. Click **Enable** or **Edit**.
+1. Add or change the **Rule name** to `License-Check` (case sensitive).
+
+![License Check Approver Rule](img/license-check_v13_4.png)
+
 - Create an approval group in the [project policies section for License Compliance](#policies).
   You must set this approval group's number of approvals required to greater than zero. Once you
   enable this group in your project, the approval rule is enabled for all merge requests.

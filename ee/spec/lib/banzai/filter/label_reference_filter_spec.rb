@@ -18,7 +18,7 @@ RSpec.describe Banzai::Filter::LabelReferenceFilter do
       let(:doc) { reference_filter("See #{scoped_label.to_reference}") }
 
       it 'renders scoped label' do
-        expect(doc.css('.gl-label-scoped .gl-label-text').map(&:text)).to eq([scoped_label.scoped_label_key, scoped_label.scoped_label_value])
+        expect(doc.css('.gl-label-scoped').text).to eq(scoped_label.scoped_label_key + scoped_label.scoped_label_value)
       end
 
       it 'renders HTML tooltips' do

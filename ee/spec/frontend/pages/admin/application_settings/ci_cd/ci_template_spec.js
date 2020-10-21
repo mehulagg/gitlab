@@ -1,6 +1,5 @@
 import CiTemplate from 'ee/pages/admin/application_settings/ci_cd/ci_template';
 import { setHTMLFixture } from 'helpers/fixtures';
-import '~/gl_dropdown';
 
 const DROPDOWN_DATA = {
   Instance: [{ name: 'test', id: 'test' }],

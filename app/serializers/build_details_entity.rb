@@ -27,15 +27,15 @@ class BuildDetailsEntity < JobEntity
   end
 
   expose :artifact, if: -> (*) { can?(current_user, :read_build, build) } do
-    expose :download_path, if: -> (*) { build.pipeline.artifacts_locked? || build.artifacts? } do |build|
+    expose :download_path, if: -> (*) { build.locked_artifacts? || build.artifacts? } do |build|
       download_project_job_artifacts_path(project, build)
     end
 
-    expose :browse_path, if: -> (*) { build.pipeline.artifacts_locked? || build.browsable_artifacts? } do |build|
+    expose :browse_path, if: -> (*) { build.locked_artifacts? || build.browsable_artifacts? } do |build|
       browse_project_job_artifacts_path(project, build)
     end
 
-    expose :keep_path, if: -> (*) { build.has_expiring_archive_artifacts? && can?(current_user, :update_build, build) } do |build|
+    expose :keep_path, if: -> (*) { (build.has_expired_locked_archive_artifacts? || build.has_expiring_archive_artifacts?) && can?(current_user, :update_build, build) } do |build|
       keep_project_job_artifacts_path(project, build)
     end
 
@@ -133,7 +133,7 @@ class BuildDetailsEntity < JobEntity
   def callout_message
     return super unless build.failure_reason.to_sym == :missing_dependency_failure
 
-    docs_url = "https://docs.gitlab.com/ce/ci/yaml/README.html#dependencies"
+    docs_url = "https://docs.gitlab.com/ee/ci/yaml/README.html#dependencies"
 
     [
       failure_message.html_safe,

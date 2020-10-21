@@ -141,7 +141,7 @@ RSpec.describe Projects::UpdateService do
         let(:group) { create(:group, visibility_level: Gitlab::VisibilityLevel::INTERNAL) }
 
         before do
-          project.update(namespace: group, visibility_level: group.visibility_level)
+          project.update!(namespace: group, visibility_level: group.visibility_level)
         end
 
         it 'does not update project visibility level' do
@@ -149,6 +149,32 @@ RSpec.describe Projects::UpdateService do
 
           expect(result).to eq({ status: :error, message: 'Visibility level public is not allowed in a internal group.' })
           expect(project.reload).to be_internal
+        end
+      end
+
+      context 'when updating shared runners' do
+        context 'can enable shared runners' do
+          let(:group) { create(:group, shared_runners_enabled: true) }
+          let(:project) { create(:project, namespace: group, shared_runners_enabled: false) }
+
+          it 'enables shared runners' do
+            result = update_project(project, user, shared_runners_enabled: true)
+
+            expect(result).to eq({ status: :success })
+            expect(project.reload.shared_runners_enabled).to be_truthy
+          end
+        end
+
+        context 'cannot enable shared runners' do
+          let(:group) { create(:group, :shared_runners_disabled) }
+          let(:project) { create(:project, namespace: group, shared_runners_enabled: false) }
+
+          it 'does not enable shared runners' do
+            result = update_project(project, user, shared_runners_enabled: true)
+
+            expect(result).to eq({ status: :error, message: 'Shared runners enabled cannot be enabled because parent group does not allow it' })
+            expect(project.reload.shared_runners_enabled).to be_falsey
+          end
         end
       end
     end
@@ -230,7 +256,7 @@ RSpec.describe Projects::UpdateService do
       end
 
       it 'handles empty project feature attributes' do
-        project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+        project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
 
         result = update_project(project, user, { name: 'test1' })
 
@@ -241,7 +267,7 @@ RSpec.describe Projects::UpdateService do
 
     context 'when enabling a wiki' do
       it 'creates a wiki' do
-        project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+        project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
         TestEnv.rm_storage_dir(project.repository_storage, project.wiki.path)
 
         result = update_project(project, user, project_feature_attributes: { wiki_access_level: ProjectFeature::ENABLED })
@@ -252,7 +278,7 @@ RSpec.describe Projects::UpdateService do
       end
 
       it 'logs an error and creates a metric when wiki can not be created' do
-        project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+        project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
 
         expect_any_instance_of(ProjectWiki).to receive(:wiki).and_raise(Wiki::CouldNotCreateWikiError)
         expect_any_instance_of(described_class).to receive(:log_error).with("Could not create wiki for #{project.full_name}")
@@ -272,7 +298,7 @@ RSpec.describe Projects::UpdateService do
 
         result = update_project(project, user, project_feature_attributes:
                                  { issues_access_level: ProjectFeature::PRIVATE }
-                               )
+        )
 
         expect(result).to eq({ status: :success })
         expect(project.project_feature.issues_access_level).to be(ProjectFeature::PRIVATE)
@@ -325,20 +351,9 @@ RSpec.describe Projects::UpdateService do
           expect(project.errors.messages[:base]).to include('There is already a repository with that name on disk')
         end
 
-        it 'renames the project without upgrading it' do
-          result = update_project(project, admin, path: 'new-path')
-
-          expect(result).not_to include(status: :error)
-          expect(project).to be_valid
-          expect(project.errors).to be_empty
-          expect(project.disk_path).to include('new-path')
-          expect(project.reload.hashed_storage?(:repository)).to be_falsey
-        end
-
         context 'when hashed storage is enabled' do
           before do
             stub_application_setting(hashed_storage_enabled: true)
-            stub_feature_flags(skip_hashed_storage_upgrade: false)
           end
 
           it 'migrates project to a hashed storage instead of renaming the repo to another legacy name' do
@@ -348,22 +363,6 @@ RSpec.describe Projects::UpdateService do
             expect(project).to be_valid
             expect(project.errors).to be_empty
             expect(project.reload.hashed_storage?(:repository)).to be_truthy
-          end
-
-          context 'when skip_hashed_storage_upgrade feature flag is enabled' do
-            before do
-              stub_feature_flags(skip_hashed_storage_upgrade: true)
-            end
-
-            it 'renames the project without upgrading it' do
-              result = update_project(project, admin, path: 'new-path')
-
-              expect(result).not_to include(status: :error)
-              expect(project).to be_valid
-              expect(project.errors).to be_empty
-              expect(project.disk_path).to include('new-path')
-              expect(project.reload.hashed_storage?(:repository)).to be_falsey
-            end
           end
         end
       end
@@ -411,32 +410,6 @@ RSpec.describe Projects::UpdateService do
         expect(PagesUpdateConfigurationWorker).not_to receive(:perform_async).with(project.id)
 
         subject
-      end
-
-      context 'when `async_update_pages_config` is disabled' do
-        before do
-          stub_feature_flags(async_update_pages_config: false)
-        end
-
-        it 'calls Projects::UpdatePagesConfigurationService when pages are deployed' do
-          project.mark_pages_as_deployed
-
-          expect(Projects::UpdatePagesConfigurationService)
-            .to receive(:new)
-                  .with(project)
-                  .and_call_original
-
-          subject
-        end
-
-        it "does not update pages config when pages aren't deployed" do
-          project.mark_pages_as_not_deployed
-
-          expect(Projects::UpdatePagesConfigurationService)
-            .not_to receive(:new)
-
-          subject
-        end
       end
     end
 
@@ -532,14 +505,14 @@ RSpec.describe Projects::UpdateService do
           attributes_for(:prometheus_service,
                          project: project,
                          properties: { api_url: "http://new.prometheus.com", manual_configuration: "0" }
-          )
+                        )
         end
 
         let!(:prometheus_service) do
           create(:prometheus_service,
                  project: project,
                  properties: { api_url: "http://old.prometheus.com", manual_configuration: "0" }
-          )
+                )
         end
 
         it 'updates existing record' do
@@ -556,7 +529,7 @@ RSpec.describe Projects::UpdateService do
             attributes_for(:prometheus_service,
                            project: project,
                            properties: { api_url: "http://example.prometheus.com", manual_configuration: "0" }
-            )
+                          )
           end
 
           it 'creates new record' do
@@ -572,7 +545,7 @@ RSpec.describe Projects::UpdateService do
             attributes_for(:prometheus_service,
                            project: project,
                            properties: { api_url: nil, manual_configuration: "1" }
-            )
+                          )
           end
 
           it 'does not create new record' do

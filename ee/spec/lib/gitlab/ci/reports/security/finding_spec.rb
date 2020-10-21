@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Reports::Security::Finding do
+  using RSpec::Parameterized::TableSyntax
+
   describe '#initialize' do
     subject { described_class.new(**params) }
 
@@ -22,6 +24,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         raw_metadata: 'I am a stringified json object',
         report_type: :sast,
         scanner: scanner,
+        scan: nil,
         severity: :high,
         uuid: 'cadf8cf0a8228fa92a0f4897a0314083bb38'
       }
@@ -88,6 +91,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         raw_metadata: occurrence.raw_metadata,
         report_type: occurrence.report_type,
         scanner: occurrence.scanner,
+        scan: occurrence.scan,
         severity: occurrence.severity,
         uuid: occurrence.uuid
       })
@@ -127,5 +131,166 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
 
       expect(occurrence.old_location).to eq(old_location)
     end
+  end
+
+  describe '#unsafe?' do
+    where(:severity, :unsafe?) do
+      'critical' | true
+      'high'     | true
+      'medium'   | false
+      'low'      | false
+      'info'     | false
+      'unknown'  | true
+    end
+
+    with_them do
+      let(:finding) { create(:ci_reports_security_finding, severity: severity) }
+
+      subject { finding.unsafe? }
+
+      it { is_expected.to be(unsafe?) }
+    end
+  end
+
+  describe '#eql?' do
+    let(:identifier) { build(:ci_reports_security_identifier) }
+    let(:location) { build(:ci_reports_security_locations_sast) }
+    let(:finding) { build(:ci_reports_security_finding, severity: 'low', report_type: :sast, identifiers: [identifier], location: location) }
+
+    let(:report_type) { :secret_detection }
+    let(:identifier_external_id) { 'foo' }
+    let(:location_start_line) { 0 }
+    let(:other_identifier) { build(:ci_reports_security_identifier, external_id: identifier_external_id) }
+    let(:other_location) { build(:ci_reports_security_locations_sast, start_line: location_start_line) }
+    let(:other_finding) do
+      build(:ci_reports_security_finding,
+            severity: 'low',
+            report_type: report_type,
+            identifiers: [other_identifier],
+            location: other_location)
+    end
+
+    subject { finding.eql?(other_finding) }
+
+    context 'when the primary_identifier is nil' do
+      let(:identifier) { nil }
+
+      it 'does not raise an exception' do
+        expect { subject }.not_to raise_error
+      end
+    end
+
+    context 'when the other finding has same `report_type`' do
+      let(:report_type) { :sast }
+
+      context 'when the other finding has same primary identifier fingerprint' do
+        let(:identifier_external_id) { identifier.external_id }
+
+        context 'when the other finding has same location fingerprint' do
+          let(:location_start_line) { location.start_line }
+
+          it { is_expected.to be(true) }
+        end
+
+        context 'when the other finding does not have same location fingerprint' do
+          it { is_expected.to be(false) }
+        end
+      end
+
+      context 'when the other finding does not have same primary identifier fingerprint' do
+        context 'when the other finding has same location fingerprint' do
+          let(:location_start_line) { location.start_line }
+
+          it { is_expected.to be(false) }
+        end
+
+        context 'when the other finding does not have same location fingerprint' do
+          it { is_expected.to be(false) }
+        end
+      end
+    end
+
+    context 'when the other finding does not have same `report_type`' do
+      context 'when the other finding has same primary identifier fingerprint' do
+        let(:identifier_external_id) { identifier.external_id }
+
+        context 'when the other finding has same location fingerprint' do
+          let(:location_start_line) { location.start_line }
+
+          it { is_expected.to be(false) }
+        end
+
+        context 'when the other finding does not have same location fingerprint' do
+          it { is_expected.to be(false) }
+        end
+      end
+
+      context 'when the other finding does not have same primary identifier fingerprint' do
+        context 'when the other finding has same location fingerprint' do
+          let(:location_start_line) { location.start_line }
+
+          it { is_expected.to be(false) }
+        end
+
+        context 'when the other finding does not have same location fingerprint' do
+          it { is_expected.to be(false) }
+        end
+      end
+    end
+  end
+
+  describe '#valid?' do
+    let(:scanner) { build(:ci_reports_security_scanner) }
+    let(:identifiers) { [build(:ci_reports_security_identifier)] }
+    let(:location) { build(:ci_reports_security_locations_sast) }
+
+    let(:finding) do
+      build(:ci_reports_security_finding,
+            scanner: scanner,
+            identifiers: identifiers,
+            location: location,
+            compare_key: '')
+    end
+
+    subject { finding.valid? }
+
+    context 'when the scanner is missing' do
+      let(:scanner) { nil }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when there is no identifier' do
+      let(:identifiers) { [] }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when the location is missing' do
+      let(:location) { nil }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when all required attributes present' do
+      it { is_expected.to be_truthy }
+    end
+  end
+
+  describe '#keys' do
+    let(:identifier_1) { build(:ci_reports_security_identifier) }
+    let(:identifier_2) { build(:ci_reports_security_identifier) }
+    let(:location) { build(:ci_reports_security_locations_sast) }
+    let(:finding) { build(:ci_reports_security_finding, identifiers: [identifier_1, identifier_2], location: location) }
+    let(:expected_keys) do
+      [
+        build(:ci_reports_security_finding_key, location_fingerprint: location.fingerprint, identifier_fingerprint: identifier_1.fingerprint),
+        build(:ci_reports_security_finding_key, location_fingerprint: location.fingerprint, identifier_fingerprint: identifier_2.fingerprint)
+      ]
+    end
+
+    subject { finding.keys }
+
+    it { is_expected.to match_array(expected_keys) }
   end
 end

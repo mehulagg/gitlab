@@ -10,9 +10,13 @@ RSpec.describe Mutations::DastSiteProfiles::Update do
   let!(:dast_site_profile) { create(:dast_site_profile, project: project) }
 
   let(:new_profile_name) { SecureRandom.hex }
-  let(:new_target_url) { FFaker::Internet.uri(:https) }
+  let(:new_target_url) { generate(:url) }
 
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
+
+  before do
+    stub_licensed_features(security_on_demand_scans: true)
+  end
 
   describe '#resolve' do
     subject do
@@ -96,6 +100,14 @@ RSpec.describe Mutations::DastSiteProfiles::Update do
         context 'when on demand scan feature is not enabled' do
           it 'raises an exception' do
             stub_feature_flags(security_on_demand_scans_feature_flag: false)
+
+            expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
+          end
+        end
+
+        context 'when on demand scan licensed feature is not available' do
+          it 'raises an exception' do
+            stub_licensed_features(security_on_demand_scans: false)
 
             expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
           end

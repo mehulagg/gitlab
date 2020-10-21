@@ -6,7 +6,7 @@ exports[`NodeDetailsSectionMain template node url section renders section correc
   data-testid="nodeUrl"
 >
   <span
-    class="gl-text-gray-700"
+    class="gl-text-gray-500"
   >
     Node URL
   </span>
@@ -36,7 +36,7 @@ exports[`NodeDetailsSectionMain template node version section renders section co
   data-testid="nodeVersion"
 >
   <span
-    class="gl-text-gray-700"
+    class="gl-text-gray-500"
   >
     GitLab version
   </span>

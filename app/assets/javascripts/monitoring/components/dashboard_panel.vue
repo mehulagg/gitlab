@@ -1,23 +1,23 @@
 <script>
 import { mapState } from 'vuex';
 import { mapValues, pickBy } from 'lodash';
-import invalidUrl from '~/lib/utils/invalid_url';
-import { convertToFixedRange } from '~/lib/utils/datetime_range';
-import { relativePathToAbsolute, getBaseURL, visitUrl, isSafeURL } from '~/lib/utils/url_utility';
 import {
   GlResizeObserverDirective,
   GlIcon,
   GlLink,
   GlLoadingIcon,
-  GlNewDropdown as GlDropdown,
-  GlNewDropdownItem as GlDropdownItem,
-  GlNewDropdownDivider as GlDropdownDivider,
+  GlDropdown,
+  GlDropdownItem,
+  GlDropdownDivider,
   GlModal,
   GlModalDirective,
   GlSprintf,
   GlTooltip,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import invalidUrl from '~/lib/utils/invalid_url';
+import { convertToFixedRange } from '~/lib/utils/datetime_range';
+import { relativePathToAbsolute, getBaseURL, visitUrl, isSafeURL } from '~/lib/utils/url_utility';
 import { __, n__ } from '~/locale';
 import { panelTypes } from '../constants';
 
@@ -394,15 +394,21 @@ export default {
         data-qa-selector="prometheus_graph_widgets"
       >
         <div data-testid="dropdown-wrapper" class="d-flex align-items-center">
+          <!-- 
+            This component should be replaced with a variant developed
+            as part of https://gitlab.com/gitlab-org/gitlab-ui/-/issues/936
+            The variant will create a dropdown with an icon, no text and no caret    
+           -->
           <gl-dropdown
             v-gl-tooltip
-            toggle-class="shadow-none border-0"
+            toggle-class="gl-px-3!"
+            no-caret
             data-qa-selector="prometheus_widgets_dropdown"
             right
             :title="__('More actions')"
           >
-            <template slot="button-content">
-              <gl-icon name="ellipsis_v" class="dropdown-icon text-secondary" />
+            <template #button-content>
+              <gl-icon class="gl-mr-0!" name="ellipsis_v" />
             </template>
             <gl-dropdown-item
               v-if="expandBtnAvailable"

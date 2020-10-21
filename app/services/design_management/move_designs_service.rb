@@ -13,7 +13,6 @@ module DesignManagement
 
     def execute
       return error(:no_focus) unless current_design.present?
-      return error(:cannot_move) unless ::Feature.enabled?(:reorder_designs, project)
       return error(:cannot_move) unless current_user.can?(:move_design, current_design)
       return error(:no_neighbors) unless neighbors.present?
       return error(:not_distinct) unless all_distinct?
@@ -39,9 +38,12 @@ module DesignManagement
     delegate :issue, :project, to: :current_design
 
     def move_nulls_to_end
-      current_design.class.move_nulls_to_end(issue.designs)
-      next_design.reset if next_design && next_design.relative_position.nil?
-      previous_design.reset if previous_design && previous_design.relative_position.nil?
+      moved_records = current_design.class.move_nulls_to_end(issue.designs.in_creation_order)
+      return if moved_records == 0
+
+      current_design.reset
+      next_design&.reset
+      previous_design&.reset
     end
 
     def neighbors

@@ -12,6 +12,10 @@ module EE
       expose :policy_violation do |merge_request|
         presenter(merge_request).has_denied_policies?
       end
+
+      expose :missing_security_scan_types do |merge_request|
+        presenter(merge_request).missing_security_scan_types
+      end
     end
   end
 end

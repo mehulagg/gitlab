@@ -32,13 +32,10 @@ Rails.application.routes.draw do
   # This prefixless path is required because Jira gets confused if we set it up with a path
   # More information: https://gitlab.com/gitlab-org/gitlab/issues/6752
   scope path: '/login/oauth', controller: 'oauth/jira/authorizations', as: :oauth_jira do
-    Gitlab.ee do
-      get :authorize, action: :new
-      get :callback
-      post :access_token
-    end
+    get :authorize, action: :new
+    get :callback
+    post :access_token
 
-    # This helps minimize merge conflicts with CE for this scope block
     match '*all', via: [:get, :post], to: proc { [404, {}, ['']] }
   end
 
@@ -86,11 +83,15 @@ Rails.application.routes.draw do
       get '/autocomplete/namespace_routes' => 'autocomplete#namespace_routes'
     end
 
+    get '/whats_new' => 'whats_new#index'
+
     # '/-/health' implemented by BasicHealthCheck middleware
     get 'liveness' => 'health#liveness'
     get 'readiness' => 'health#readiness'
     resources :metrics, only: [:index]
     mount Peek::Railtie => '/peek', as: 'peek_routes'
+
+    get 'runner_setup/platforms' => 'runner_setup#platforms'
 
     # Boards resources shared between group and projects
     resources :boards, only: [] do
@@ -121,21 +122,20 @@ Rails.application.routes.draw do
 
     get 'ide' => 'ide#index'
     get 'ide/*vueroute' => 'ide#index', format: false
+    get 'ide/project/:namespace/:project/merge_requests/:id' => 'ide#index', format: false, as: :ide_merge_request
 
     draw :operations
-    draw :instance_statistics
+    draw :jira_connect
 
     Gitlab.ee do
       draw :security
       draw :smartcard
-      draw :jira_connect
       draw :username
       draw :trial
       draw :trial_registration
       draw :country
       draw :country_state
       draw :subscription
-      draw :analytics
 
       scope '/push_from_secondary/:geo_node_id' do
         draw :git_http
@@ -180,6 +180,7 @@ Rails.application.routes.draw do
     get 'jwks' => 'doorkeeper/openid_connect/discovery#keys'
 
     draw :snippets
+    draw :profile
 
     # Product analytics collector
     match '/collector/i', to: ProductAnalytics::CollectorApp.new, via: :all
@@ -266,7 +267,6 @@ Rails.application.routes.draw do
   draw :uploads
   draw :explore
   draw :admin
-  draw :profile
   draw :dashboard
   draw :user
   draw :project
@@ -274,6 +274,7 @@ Rails.application.routes.draw do
   # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/210024
   scope as: 'deprecated' do
     draw :snippets
+    draw :profile
   end
 
   root to: "root#index"

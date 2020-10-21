@@ -118,6 +118,22 @@ describe('SidebarLabelsComponent', () => {
       });
     });
 
+    describe('handleLabelRemove', () => {
+      it('calls action `updateEpicLabels` with the label ID to remove', () => {
+        const labelIdToRemove = 9;
+
+        jest.spyOn(wrapper.vm, 'updateEpicLabels').mockImplementation();
+
+        store.state.labels = mockLabels;
+
+        wrapper.vm.handleLabelRemove(labelIdToRemove);
+
+        expect(wrapper.vm.updateEpicLabels).toHaveBeenCalledWith(
+          expect.arrayContaining([{ id: labelIdToRemove, set: false }]),
+        );
+      });
+    });
+
     describe('handleUpdateSelectedLabels', () => {
       const updatingLabel = {
         id: 1,

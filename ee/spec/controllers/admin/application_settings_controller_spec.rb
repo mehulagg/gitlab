@@ -11,6 +11,26 @@ RSpec.describe Admin::ApplicationSettingsController do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
   end
 
+  describe 'GET #general' do
+    before do
+      sign_in(admin)
+    end
+
+    context 'zero-downtime elasticsearch reindexing' do
+      render_views
+
+      let!(:task) { create(:elastic_reindexing_task) }
+
+      it 'assigns elasticsearch reindexing task' do
+        get :general
+
+        expect(assigns(:elasticsearch_reindexing_task)).to eq(task)
+        expect(response.body).to include('Reindexing status')
+        expect(response.body).to include("State: #{task.state}")
+      end
+    end
+  end
+
   describe 'PUT #update' do
     before do
       sign_in(admin)

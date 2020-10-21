@@ -229,8 +229,8 @@ beforeEach(() => {
 it('exists', () => {
   // Best
 
-  // NOTE: both mount and shallowMount work as long as a DOM element is available  
-  // Finds a properly formatted link with an accessable name of "Click Me"
+  // NOTE: both mount and shallowMount work as long as a DOM element is available
+  // Finds a properly formatted link with an accessible name of "Click Me"
   getByRole(el, 'link', { name: /Click Me/i })
   getByRole(el, 'link', { name: 'Click Me' })
   // Finds any element with the text "Click Me"
@@ -321,80 +321,56 @@ it('tests a promise', async () => {
 });
 
 it('tests a promise rejection', async () => {
-  expect.assertions(1);
-  try {
-    await user.getUserName(1);
-  } catch (e) {
-    expect(e).toEqual({
-      error: 'User with 1 not found.',
-    });
-  }
+  await expect(user.getUserName(1)).rejects.toThrow('User with 1 not found.');
 });
 ```
 
-You can also work with Promise chains. In this case, you can make use of the `done` callback and `done.fail` in case an error occurred. Following are some examples:
+You can also simply return a promise from the test function.
+
+NOTE: **Note:**
+Using the `done` and `done.fail` callbacks is discouraged when working with
+promises. They should only be used when testing callback-based code.
 
 **Bad**:
 
 ```javascript
-// missing done callback
+// missing return
 it('tests a promise', () => {
   promise.then(data => {
     expect(data).toBe(asExpected);
   });
 });
 
-// missing catch
-it('tests a promise', done => {
-  promise
-    .then(data => {
-      expect(data).toBe(asExpected);
-    })
-    .then(done);
-});
-
-// use done.fail in asynchronous tests
+// uses done/done.fail
 it('tests a promise', done => {
   promise
     .then(data => {
       expect(data).toBe(asExpected);
     })
     .then(done)
-    .catch(fail);
-});
-
-// missing catch
-it('tests a promise rejection', done => {
-  promise
-    .catch(error => {
-      expect(error).toBe(expectedError);
-    })
-    .then(done);
+    .catch(done.fail);
 });
 ```
 
 **Good**:
 
 ```javascript
-// handling success
-it('tests a promise', done => {
-  promise
+// verifying a resolved promise
+it('tests a promise', () => {
+  return promise
     .then(data => {
       expect(data).toBe(asExpected);
-    })
-    .then(done)
-    .catch(done.fail);
+    });
 });
 
-// failure case
-it('tests a promise rejection', done => {
-  promise
-    .then(done.fail)
-    .catch(error => {
-      expect(error).toBe(expectedError);
-    })
-    .then(done)
-    .catch(done.fail);
+// verifying a resolved promise using Jest's `resolves` matcher
+it('tests a promise', () => {
+  return expect(promise).resolves.toBe(asExpected);
+});
+
+// verifying a rejected promise using Jest's `rejects` matcher
+it('tests a promise rejection', () => {
+  return expect(promise).rejects.toThrow(expectedError);
 });
 ```
 
@@ -690,6 +666,38 @@ unit tests.
 
 Instead of `setImmediate`, use `jest.runAllTimers` or `jest.runOnlyPendingTimers` to run pending timers.
 The latter is useful when you have `setInterval` in the code. **Remember:** our Jest configuration uses fake timers.
+
+## Avoid non-deterministic specs
+
+Non-determinism is the breeding ground for flaky and brittle specs. Such specs end up breaking the CI pipeline, interrupting the work flow of other contributors.
+
+1. Make sure your test subject's collaborators (e.g., axios, apollo, lodash helpers) and test environment (e.g., Date) behave consistently across systems and over time.
+1. Make sure tests are focused and not doing "extra work" (e.g., needlessly creating the test subject more than once in an individual test)
+
+### Faking `Date` for determinism
+
+Consider using `useFakeDate` to ensure a consistent value is returned with every `new Date()` or `Date.now()`.
+
+```javascript
+import { useFakeDate } from 'helpers/fake_date';
+
+describe('cool/component', () => {
+  useFakeDate();
+
+  // ...
+});
+```
+
+### Faking `Math.random` for determinism
+
+Consider replacing `Math.random` with a fake when the test subject depends on it.
+
+```javascript
+beforeEach(() => {
+  // https://xkcd.com/221/
+  jest.spyOn(Math, 'random').mockReturnValue(0.4);
+});
+```
 
 ## Factories
 

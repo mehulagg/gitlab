@@ -31,7 +31,7 @@ RSpec.describe 'Show trial banner', :js do
     it 'renders congratulations banner for user in profile billing page' do
       visit profile_billings_path + '?trial=true'
 
-      expect(page).to have_content('Congratulations, your new trial is activated')
+      expect(page).to have_content('Congratulations, your free trial is activated.')
     end
   end
 
@@ -39,13 +39,13 @@ RSpec.describe 'Show trial banner', :js do
     it 'renders congratulations banner for group in group details page' do
       visit group_path(group, trial: true)
 
-      expect(find('.user-callout').text).to have_content('Congratulations, your new trial is activated')
+      expect(find('.user-callout').text).to have_content('Congratulations, your free trial is activated.')
     end
 
     it 'does not render congratulations banner for group in group billing page' do
       visit group_billings_path(group, trial: true)
 
-      expect(page).not_to have_content('Congratulations, your new trial is activated')
+      expect(page).not_to have_content('Congratulations, your free trial is activated.')
     end
   end
 end

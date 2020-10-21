@@ -1,12 +1,12 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import { GlLoadingIcon } from '@gitlab/ui';
-import showToast from '~/vue_shared/plugins/global_toast';
 import App from 'ee/approvals/components/app.vue';
 import ModalRuleCreate from 'ee/approvals/components/modal_rule_create.vue';
 import ModalRuleRemove from 'ee/approvals/components/modal_rule_remove.vue';
 import { createStoreOptions } from 'ee/approvals/stores';
 import settingsModule from 'ee/approvals/stores/modules/project_settings';
+import showToast from '~/vue_shared/plugins/global_toast';
 
 jest.mock('~/vue_shared/plugins/global_toast');
 
@@ -60,11 +60,9 @@ describe('EE Approvals App', () => {
       store.state.settings.mrSettingsPath = null;
       factory();
 
-      expect(store.modules.approvals.actions.fetchRules).toHaveBeenCalledWith(
-        expect.anything(),
-        { targetBranch: targetBranchName },
-        undefined,
-      );
+      expect(store.modules.approvals.actions.fetchRules).toHaveBeenCalledWith(expect.anything(), {
+        targetBranch: targetBranchName,
+      });
     });
 
     it('passes the target branch name in fetchRules for MR edit path', () => {
@@ -72,11 +70,9 @@ describe('EE Approvals App', () => {
       store.state.settings.mrSettingsPath = 'some/path';
       factory();
 
-      expect(store.modules.approvals.actions.fetchRules).toHaveBeenCalledWith(
-        expect.anything(),
-        { targetBranch: targetBranchName },
-        undefined,
-      );
+      expect(store.modules.approvals.actions.fetchRules).toHaveBeenCalledWith(expect.anything(), {
+        targetBranch: targetBranchName,
+      });
     });
 
     it('does not pass the target branch name in fetchRules for project settings path', () => {
@@ -84,11 +80,9 @@ describe('EE Approvals App', () => {
       store.modules.approvals.state.targetBranch = null;
       factory();
 
-      expect(store.modules.approvals.actions.fetchRules).toHaveBeenCalledWith(
-        expect.anything(),
-        { targetBranch: null },
-        undefined,
-      );
+      expect(store.modules.approvals.actions.fetchRules).toHaveBeenCalledWith(expect.anything(), {
+        targetBranch: null,
+      });
     });
   });
 
@@ -188,7 +182,6 @@ describe('EE Approvals App', () => {
         expect(store.modules.createModal.actions.open).toHaveBeenCalledWith(
           expect.anything(),
           null,
-          undefined,
         );
       });
     });
@@ -226,7 +219,6 @@ describe('EE Approvals App', () => {
         expect(store.modules.approvals.actions.fetchRules).toHaveBeenLastCalledWith(
           expect.anything(),
           { targetBranch, resetToDefault: true },
-          undefined,
         );
         expect(showToast).toHaveBeenCalledWith('Approval rules reset to project defaults', {
           action: {

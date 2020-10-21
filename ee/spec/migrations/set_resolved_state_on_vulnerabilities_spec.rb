@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20191114173624_set_resolved_state_on_vulnerabilities.rb')
+require_migration!
 
 RSpec.describe SetResolvedStateOnVulnerabilities do
   let(:confidence_levels) do

@@ -1,14 +1,13 @@
 <script>
 import { mapActions } from 'vuex';
+import { GlModal, GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
-import { GlModal } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
 import tooltip from '~/vue_shared/directives/tooltip';
 import ListItem from './list_item.vue';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     ListItem,
     GlModal,
   },
@@ -18,10 +17,6 @@ export default {
   props: {
     fileList: {
       type: Array,
-      required: true,
-    },
-    iconName: {
-      type: String,
       required: true,
     },
     stagedList: {
@@ -74,7 +69,6 @@ export default {
   <div class="ide-commit-list-container">
     <header class="multi-file-commit-panel-header d-flex mb-0">
       <div class="d-flex align-items-center flex-fill">
-        <icon v-once :name="iconName" :size="18" class="gl-mr-3" />
         <strong> {{ titleText }} </strong>
         <div class="d-flex ml-auto">
           <button
@@ -93,7 +87,7 @@ export default {
             data-boundary="viewport"
             @click="openDiscardModal"
           >
-            <icon :size="16" name="remove-all" class="ml-auto mr-auto position-top-0" />
+            <gl-icon :size="16" name="remove-all" class="ml-auto mr-auto position-top-0" />
           </button>
         </div>
       </div>

@@ -44,4 +44,94 @@ RSpec.describe 'Querying an Iteration' do
       expect(graphql_errors).to include(a_hash_including('message' => "Field 'iteration' is missing required arguments: id"))
     end
   end
+
+  describe 'scoped path' do
+    let_it_be(:project) { create(:project, :private, group: group) }
+    let_it_be(:project_iteration) { create(:iteration, :skip_project_validation, project: project) }
+
+    shared_examples 'scoped path' do
+      let(:iteration_nodes) do
+        nodes = <<~NODES
+          nodes {
+            scopedPath
+            scopedUrl
+          }
+        NODES
+
+        query_graphql_field('iterations', { id: queried_iteration.id }, nodes)
+      end
+
+      before_all do
+        group.add_guest(current_user)
+      end
+
+      specify do
+        expect(subject).to include('scopedPath' => expected_scope_path, 'scopedUrl' => expected_scope_url)
+      end
+    end
+
+    context 'inside a project context' do
+      subject { graphql_data['project']['iterations']['nodes'].first }
+
+      let(:query) do
+        graphql_query_for('project', { full_path: project.full_path }, iteration_nodes)
+      end
+
+      describe 'group-owned iteration' do
+        it_behaves_like 'scoped path' do
+          let(:queried_iteration) { iteration }
+          let(:expected_scope_path) { project_iterations_inherited_path(project, iteration.id) }
+          let(:expected_scope_url) { /#{expected_scope_path}$/ }
+        end
+      end
+
+      describe 'project-owned iteration' do
+        it_behaves_like 'scoped path' do
+          let(:queried_iteration) { project_iteration }
+          let(:expected_scope_path) { nil }
+          let(:expected_scope_url) { nil }
+        end
+      end
+    end
+
+    context 'inside a group context' do
+      subject { graphql_data['group']['iterations']['nodes'].first }
+
+      let(:query) do
+        graphql_query_for('group', { full_path: group.full_path }, iteration_nodes)
+      end
+
+      describe 'group-owned iteration' do
+        it_behaves_like 'scoped path' do
+          let(:queried_iteration) { iteration }
+          let(:expected_scope_path) { nil }
+          let(:expected_scope_url) { nil }
+        end
+      end
+    end
+
+    context 'root context' do
+      subject { graphql_data['iteration'] }
+
+      let(:query) do
+        graphql_query_for('iteration', { id: iteration.to_global_id.to_s }, [:scoped_path, :scoped_url])
+      end
+
+      describe 'group-owned iteration' do
+        it_behaves_like 'scoped path' do
+          let(:queried_iteration) { iteration }
+          let(:expected_scope_path) { nil }
+          let(:expected_scope_url) { nil }
+        end
+      end
+
+      describe 'project-owned iteration' do
+        it_behaves_like 'scoped path' do
+          let(:queried_iteration) { project_iteration }
+          let(:expected_scope_path) { nil }
+          let(:expected_scope_url) { nil }
+        end
+      end
+    end
+  end
 end

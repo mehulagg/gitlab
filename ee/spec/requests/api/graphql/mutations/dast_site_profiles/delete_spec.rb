@@ -5,52 +5,19 @@ require 'spec_helper'
 RSpec.describe 'Creating a DAST Site Profile' do
   include GraphqlHelpers
 
-  let(:project) { create(:project) }
-  let(:current_user) { create(:user) }
-  let(:full_path) { project.full_path }
   let!(:dast_site_profile) { create(:dast_site_profile, project: project) }
 
+  let(:mutation_name) { :dast_site_profile_delete }
   let(:mutation) do
     graphql_mutation(
-      :dast_site_profile_delete,
+      mutation_name,
       full_path: full_path,
       id: dast_site_profile.to_global_id.to_s
     )
   end
 
-  def mutation_response
-    graphql_mutation_response(:dast_site_profile_delete)
-  end
-
-  subject { post_graphql_mutation(mutation, current_user: current_user) }
-
-  context 'when a user does not have access to the project' do
-    it_behaves_like 'a mutation that returns top-level errors',
-                    errors: ['The resource that you are attempting to access does not ' \
-                             'exist or you don\'t have permission to perform this action']
-  end
-
-  context 'when a user does not have access to run a dast scan on the project' do
-    before do
-      project.add_guest(current_user)
-    end
-
-    it_behaves_like 'a mutation that returns top-level errors',
-                    errors: ['The resource that you are attempting to access does not ' \
-                             'exist or you don\'t have permission to perform this action']
-  end
-
-  context 'when a user has access to run a dast scan on the project' do
-    before do
-      project.add_developer(current_user)
-    end
-
-    it 'returns an empty errors array' do
-      subject
-
-      expect(mutation_response["errors"]).to be_empty
-    end
-
+  it_behaves_like 'an on-demand scan mutation when user cannot run an on-demand scan'
+  it_behaves_like 'an on-demand scan mutation when user can run an on-demand scan' do
     it 'deletes the dast_site_profile' do
       expect { subject }.to change { DastSiteProfile.count }.by(-1)
     end
@@ -77,41 +44,33 @@ RSpec.describe 'Creating a DAST Site Profile' do
     context 'when wrong type of global id is passed' do
       let(:mutation) do
         graphql_mutation(
-          :dast_site_profile_delete,
+          mutation_name,
           full_path: full_path,
           id: dast_site_profile.dast_site.to_global_id.to_s
         )
       end
 
-      it 'returns a top-level error' do
-        subject
+      it_behaves_like 'a mutation that returns top-level errors' do
+        let(:match_errors) do
+          gid = dast_site_profile.dast_site.to_global_id
 
-        expect(graphql_errors.dig(0, 'message')).to include('does not represent an instance of DastSiteProfile')
+          eq(["Variable $dastSiteProfileDeleteInput of type DastSiteProfileDeleteInput! " \
+              "was provided invalid value for id (\"#{gid}\" does not represent an instance " \
+              "of DastSiteProfile)"])
+        end
       end
     end
 
     context 'when the dast_site_profile belongs to a different project' do
       let(:mutation) do
         graphql_mutation(
-          :dast_site_profile_delete,
+          mutation_name,
           full_path: create(:project).full_path,
           id: dast_site_profile.to_global_id.to_s
         )
       end
 
-      it_behaves_like 'a mutation that returns top-level errors',
-                      errors: ['The resource that you are attempting to access does not ' \
-                               'exist or you don\'t have permission to perform this action']
+      it_behaves_like 'a mutation that returns a top-level access error'
     end
-  end
-
-  context 'when on demand scan feature is disabled' do
-    before do
-      stub_feature_flags(security_on_demand_scans_feature_flag: false)
-    end
-
-    it_behaves_like 'a mutation that returns top-level errors',
-                    errors: ['The resource that you are attempting to access does not ' \
-                             'exist or you don\'t have permission to perform this action']
   end
 end

@@ -7,7 +7,17 @@ RSpec.describe AuditEventPartitioned do
   let(:partitioned_table) { described_class }
 
   it 'has the same columns as the source table' do
-    expect(partitioned_table.column_names).to match_array(source_table.column_names)
+    column_names_from_source_table = column_names(source_table)
+    column_names_from_partioned_table = column_names(partitioned_table)
+
+    expect(column_names_from_partioned_table).to match_array(column_names_from_source_table)
+  end
+
+  it 'has the same null constraints as the source table' do
+    constraints_from_source_table = null_constraints(source_table)
+    constraints_from_partitioned_table = null_constraints(partitioned_table)
+
+    expect(constraints_from_partitioned_table.to_a).to match_array(constraints_from_source_table.to_a)
   end
 
   it 'inserts the same record as the one in the source table', :aggregate_failures do
@@ -21,5 +31,22 @@ RSpec.describe AuditEventPartitioned do
     )
 
     expect(event_from_partitioned_table).to eq(event_from_source_table)
+  end
+
+  def column_names(table)
+    table.connection.select_all(<<~SQL)
+      SELECT c.column_name
+      FROM information_schema.columns c
+      WHERE c.table_name = '#{table.table_name}'
+    SQL
+  end
+
+  def null_constraints(table)
+    table.connection.select_all(<<~SQL)
+      SELECT c.column_name, c.is_nullable
+      FROM information_schema.columns c
+      WHERE c.table_name = '#{table.table_name}'
+      AND c.column_name != 'created_at'
+    SQL
   end
 end

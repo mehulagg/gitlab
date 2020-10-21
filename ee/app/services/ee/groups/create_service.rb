@@ -44,7 +44,7 @@ module EE
       end
 
       def create_push_rule_for_group
-        return unless ::Feature.enabled?(:group_push_rules, group.root_ancestor) && group.feature_available?(:push_rules)
+        return unless group.feature_available?(:push_rules)
 
         push_rule = group.predefined_push_rule
         return unless push_rule

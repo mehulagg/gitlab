@@ -1,5 +1,0 @@
----
-title: Change IssueSetEpic mutation to make epic_id argument not required
-merge_request: 39451
-author:
-type: changed

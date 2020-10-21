@@ -1,5 +1,5 @@
-import * as Sentry from '@sentry/browser';
 import { escape } from 'lodash';
+import * as Sentry from '~/sentry/wrapper';
 import { spriteIcon } from './lib/utils/common_utils';
 
 const FLASH_TYPES = {
@@ -75,7 +75,7 @@ const removeFlashClickListener = (flashEl, fadeTransition) => {
  *    @param {Function} clickHandler  Method to call when action is clicked on
  *  @param {Boolean} fadeTransition   Boolean to determine whether to fade the alert out
  */
-const createFlash = function createFlash(
+const deprecatedCreateFlash = function deprecatedCreateFlash(
   message,
   type = FLASH_TYPES.ALERT,
   parent = document,
@@ -127,7 +127,7 @@ const createFlash = function createFlash(
  *  @param {Boolean} options.captureError     Boolean to determine whether to send error to sentry
  *  @param {Object} options.error              Error to be captured in sentry
  */
-const newCreateFlash = function newCreateFlash({
+const createFlash = function createFlash({
   message,
   type = FLASH_TYPES.ALERT,
   parent = document,
@@ -168,7 +168,7 @@ const newCreateFlash = function newCreateFlash({
 
 export {
   createFlash as default,
-  newCreateFlash,
+  deprecatedCreateFlash,
   createFlashEl,
   createAction,
   hideFlash,

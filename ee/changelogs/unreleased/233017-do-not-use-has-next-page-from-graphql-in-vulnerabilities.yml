@@ -1,5 +1,0 @@
----
-title: Disable loading hasNextPage value for Security Dashboards
-merge_request: 39261
-author:
-type: performance

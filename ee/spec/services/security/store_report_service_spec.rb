@@ -3,8 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe Security::StoreReportService, '#execute' do
-  let(:user) { create(:user) }
-  let(:artifact) { create(:ee_ci_job_artifact, report_type) }
+  let_it_be(:user) { create(:user) }
+  let(:artifact) { create(:ee_ci_job_artifact, trait) }
+  let(:report_type) { artifact.file_type }
   let(:project) { artifact.project }
   let(:pipeline) { artifact.job.pipeline }
   let(:report) { pipeline.security_reports.get_report(report_type.to_s, artifact) }
@@ -23,10 +24,11 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     using RSpec::Parameterized::TableSyntax
 
-    where(:case_name, :report_type, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines) do
-      'with SAST report'                | :sast                | 3 | 17 | 33 | 39 | 33
-      'with Dependency Scanning report' | :dependency_scanning | 2 | 7  | 4  | 7  | 4
-      'with Container Scanning report'  | :container_scanning  | 1 | 8  | 8  | 8  | 8
+    where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines) do
+      'with SAST report'                | :sast                       | 3 | 17 | 33 | 39 | 33
+      'with exceeding identifiers'      | :with_exceeding_identifiers | 1 | 20 | 1  | 20 | 1
+      'with Dependency Scanning report' | :dependency_scanning        | 2 | 7  | 4  | 7  | 4
+      'with Container Scanning report'  | :container_scanning         | 1 | 8  | 8  | 8  | 8
     end
 
     with_them do
@@ -52,6 +54,10 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
       it 'inserts all vulnerabilties' do
         expect { subject }.to change { Vulnerability.count }.by(findings)
+      end
+
+      it 'calculates UUIDv5 for all findings' do
+        expect(Vulnerabilities::Finding.pluck(:uuid)).to all(be_a(String))
       end
     end
 
@@ -79,13 +85,13 @@ RSpec.describe Security::StoreReportService, '#execute' do
   end
 
   context 'with existing data from previous pipeline' do
-    let(:scanner) { create(:vulnerabilities_scanner, project: project, external_id: 'bandit', name: 'Bandit') }
-    let(:identifier) { create(:vulnerabilities_identifier, project: project, fingerprint: 'e6dd15eda2137be0034977a85b300a94a4f243a3') }
+    let(:scanner) { build(:vulnerabilities_scanner, project: project, external_id: 'bandit', name: 'Bandit') }
+    let(:identifier) { build(:vulnerabilities_identifier, project: project, fingerprint: 'e6dd15eda2137be0034977a85b300a94a4f243a3') }
     let!(:new_artifact) { create(:ee_ci_job_artifact, :sast, job: new_build) }
     let(:new_build) { create(:ci_build, pipeline: new_pipeline) }
     let(:new_pipeline) { create(:ci_pipeline, project: project) }
     let(:new_report) { new_pipeline.security_reports.get_report(report_type.to_s, artifact) }
-    let(:report_type) { :sast }
+    let(:trait) { :sast }
 
     let!(:finding) do
       create(:vulnerabilities_finding,
@@ -116,6 +122,10 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     it 'inserts only new findings and reuse existing ones' do
       expect { subject }.to change { Vulnerabilities::Finding.count }.by(32)
+    end
+
+    it 'calculates UUIDv5 for all findings' do
+      expect(Vulnerabilities::Finding.pluck(:uuid)).to all(be_a(String))
     end
 
     it 'inserts all finding pipelines (join model) for this new pipeline' do
@@ -153,11 +163,34 @@ RSpec.describe Security::StoreReportService, '#execute' do
         expect { subject }.to change { vulnerability.reload[:resolved_on_default_branch] }.from(true).to(false)
       end
     end
+
+    context 'when the finding is not valid' do
+      before do
+        allow(Gitlab::AppLogger).to receive(:warn)
+        allow_next_instance_of(::Gitlab::Ci::Reports::Security::Finding) do |finding|
+          allow(finding).to receive(:valid?).and_return(false)
+        end
+      end
+
+      it 'does not create a new finding' do
+        expect { subject }.not_to change { Vulnerabilities::Finding.count }
+      end
+
+      it 'does not raise an error' do
+        expect { subject }.not_to raise_error
+      end
+
+      it 'puts a warning log' do
+        subject
+
+        expect(Gitlab::AppLogger).to have_received(:warn).exactly(new_report.findings.length).times
+      end
+    end
   end
 
   context 'with existing data from same pipeline' do
     let!(:finding) { create(:vulnerabilities_finding, project: project, pipelines: [pipeline]) }
-    let(:report_type) { :sast }
+    let(:trait) { :sast }
 
     it 'skips report' do
       expect(subject).to eq({

@@ -1,6 +1,0 @@
----
-title: 'Geo: Remove rake task to refresh foreign tables definition in Geo Secondary
-  node'
-merge_request: 38632
-author:
-type: removed

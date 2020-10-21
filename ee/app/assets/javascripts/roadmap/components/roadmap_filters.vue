@@ -3,9 +3,9 @@ import { mapState, mapActions } from 'vuex';
 import {
   GlFormGroup,
   GlSegmentedControl,
-  GlNewDropdown as GlDropdown,
-  GlNewDropdownItem as GlDropdownItem,
-  GlNewDropdownDivider as GlDropdownDivider,
+  GlDropdown,
+  GlDropdownItem,
+  GlDropdownDivider,
 } from '@gitlab/ui';
 
 import { __ } from '~/locale';

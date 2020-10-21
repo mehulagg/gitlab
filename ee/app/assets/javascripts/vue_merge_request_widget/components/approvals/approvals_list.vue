@@ -46,7 +46,7 @@ export default {
           rules: orderBy(
             this.approvalRules
               .filter(rule => rule.rule_type === RULE_TYPE_CODE_OWNER)
-              .map(rule => ({ ...rule, nameClass: 'monospace' })),
+              .map(rule => ({ ...rule, nameClass: 'gl-font-monospace gl-word-break-all' })),
             [o => o.section === 'codeowners', 'name', 'section'],
             ['desc', 'asc', 'asc'],
           ),

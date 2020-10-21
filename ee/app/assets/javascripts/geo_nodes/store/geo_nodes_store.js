@@ -1,3 +1,5 @@
+import { isNil } from 'lodash';
+
 export default class GeoNodesStore {
   constructor(primaryVersion, primaryRevision, replicableTypes) {
     this.state = {};
@@ -84,11 +86,17 @@ export default class GeoNodesStore {
       };
     });
 
+    // Adds replicable to array as long as value is defined
     const verificationStatuses = syncStatuses.filter(s =>
-      Boolean(s.itemValue.verificationSuccessCount || s.itemValue.verificationFailureCount),
+      Boolean(
+        !isNil(s.itemValue.verificationSuccessCount) ||
+          !isNil(s.itemValue.verificationFailureCount),
+      ),
     );
+
+    // Adds replicable to array as long as value is defined
     const checksumStatuses = syncStatuses.filter(s =>
-      Boolean(s.itemValue.checksumSuccessCount || s.itemValue.checksumFailureCount),
+      Boolean(!isNil(s.itemValue.checksumSuccessCount) || !isNil(s.itemValue.checksumFailureCount)),
     );
 
     return {

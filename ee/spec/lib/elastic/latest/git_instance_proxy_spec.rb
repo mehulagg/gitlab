@@ -39,7 +39,7 @@ RSpec.describe Elastic::Latest::GitInstanceProxy do
 
       expect(subject.class).to receive(:elastic_search).with('foo', expected_params)
 
-      subject.elastic_search('foo', params)
+      subject.elastic_search('foo', **params)
     end
 
     it 'uses provided repository_id' do
@@ -47,7 +47,7 @@ RSpec.describe Elastic::Latest::GitInstanceProxy do
 
       expect(subject.class).to receive(:elastic_search).with('foo', params)
 
-      subject.elastic_search('foo', params)
+      subject.elastic_search('foo', **params)
     end
   end
 
@@ -66,7 +66,7 @@ RSpec.describe Elastic::Latest::GitInstanceProxy do
 
       expect(subject.class).to receive(:elastic_search_as_found_blob).with('foo', expected_params)
 
-      subject.elastic_search_as_found_blob('foo', params)
+      subject.elastic_search_as_found_blob('foo', **params)
     end
 
     it 'uses provided repository_id' do
@@ -74,7 +74,7 @@ RSpec.describe Elastic::Latest::GitInstanceProxy do
 
       expect(subject.class).to receive(:elastic_search_as_found_blob).with('foo', params)
 
-      subject.elastic_search_as_found_blob('foo', params)
+      subject.elastic_search_as_found_blob('foo', **params)
     end
   end
 

@@ -1,0 +1,9 @@
+fragment IterationListItem on Iteration {
+  dueDate
+  id
+  scopedPath
+  startDate
+  state
+  title
+  webPath
+}

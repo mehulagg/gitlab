@@ -25,7 +25,7 @@ function factory(routeArg) {
     mocks: {
       $apollo: {
         queries: {
-          designs: { loading: true },
+          designCollection: { loading: true },
           design: { loading: true },
           permissions: { loading: true },
         },
@@ -34,11 +34,6 @@ function factory(routeArg) {
     },
   });
 }
-
-jest.mock('mousetrap', () => ({
-  bind: jest.fn(),
-  unbind: jest.fn(),
-}));
 
 describe('Design management router', () => {
   afterEach(() => {

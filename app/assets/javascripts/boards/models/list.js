@@ -1,8 +1,8 @@
-/* eslint-disable no-underscore-dangle, class-methods-use-this */
+/* eslint-disable class-methods-use-this */
 import { __ } from '~/locale';
 import ListLabel from './label';
 import ListAssignee from './assignee';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import boardsStore from '../stores/boards_store';
 import ListMilestone from './milestone';
 import 'ee_else_ce/boards/models/issue';
@@ -34,7 +34,6 @@ const TYPES = {
 class List {
   constructor(obj) {
     this.id = obj.id;
-    this._uid = this.guid();
     this.position = obj.position;
     this.title = (obj.list_type || obj.listType) === 'backlog' ? __('Open') : obj.title;
     this.type = obj.list_type || obj.listType;
@@ -47,7 +46,7 @@ class List {
     this.loading = true;
     this.loadingMore = false;
     this.issues = obj.issues || [];
-    this.issuesSize = obj.issuesSize ? obj.issuesSize : 0;
+    this.issuesSize = obj.issuesSize || obj.issuesCount || 0;
     this.maxIssueCount = obj.maxIssueCount || obj.max_issue_count || 0;
 
     if (obj.label) {

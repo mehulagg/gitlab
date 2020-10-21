@@ -31,7 +31,7 @@ RSpec.describe StartPullMirroringService do
 
     context 'when project mirror has been updated in the last 5 minutes' do
       it 'schedules next execution' do
-        Timecop.freeze(Time.current) do
+        travel_to(Time.current) do
           import_state.update(last_update_at: 3.minutes.ago, last_successful_update_at: 10.minutes.ago)
 
           expect { execute }

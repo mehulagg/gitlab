@@ -18,10 +18,12 @@ RSpec.describe Group do
     it { is_expected.to have_many(:value_streams) }
     it { is_expected.to have_many(:ip_restrictions) }
     it { is_expected.to have_many(:allowed_email_domains) }
+    it { is_expected.to have_many(:compliance_management_frameworks) }
     it { is_expected.to have_one(:dependency_proxy_setting) }
     it { is_expected.to have_one(:deletion_schedule) }
     it { is_expected.to have_one(:group_wiki_repository) }
     it { is_expected.to belong_to(:push_rule) }
+    it { is_expected.to have_many(:saml_group_links) }
 
     it_behaves_like 'model with wiki' do
       let(:container) { create(:group, :nested, :wiki_repo) }
@@ -661,8 +663,73 @@ RSpec.describe Group do
           stub_licensed_features(group_project_templates: false)
         end
 
-        it 'returns false unlicensed instance' do
+        it 'returns false for unlicensed instance' do
           is_expected.to be false
+        end
+      end
+    end
+  end
+
+  describe '#minimal_access_role_allowed?' do
+    subject { group.minimal_access_role_allowed? }
+
+    context 'licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: true)
+      end
+
+      it 'returns true for licensed instance' do
+        is_expected.to be true
+      end
+
+      it 'returns false for subgroup in licensed instance' do
+        expect(create(:group, parent: group).minimal_access_role_allowed?).to be false
+      end
+    end
+
+    context 'unlicensed' do
+      before do
+        stub_licensed_features(minimal_access_role: false)
+      end
+
+      it 'returns false unlicensed instance' do
+        is_expected.to be false
+      end
+    end
+  end
+
+  describe '#member?' do
+    subject { group.member?(user) }
+
+    let(:group) { create(:group) }
+    let(:user) { create(:user) }
+
+    context 'with `minimal_access_role` not licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: false)
+        create(:group_member, :minimal_access, user: user, source: group)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'with `minimal_access_role` licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: true)
+        create(:group_member, :minimal_access, user: user, source: group)
+      end
+
+      context 'when group is a subgroup' do
+        let(:group) { create(:group, parent: create(:group)) }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when group is a top-level group' do
+        it { is_expected.to be_truthy }
+
+        it 'accepts higher level as argument' do
+          expect(group.member?(user, ::Gitlab::Access::DEVELOPER)).to be_falsey
         end
       end
     end
@@ -698,6 +765,30 @@ RSpec.describe Group do
           expect(group.saml_discovery_token).not_to be_blank
         end
       end
+    end
+  end
+
+  describe '#saml_enabled?' do
+    subject { group.saml_enabled? }
+
+    context 'when a SAML provider does not exist' do
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when a SAML provider exists and is persisted' do
+      before do
+        create(:saml_provider, group: group)
+      end
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when a SAML provider is not persisted' do
+      before do
+        build(:saml_provider, group: group)
+      end
+
+      it { is_expected.to eq(false) }
     end
   end
 

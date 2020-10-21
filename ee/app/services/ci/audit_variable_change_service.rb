@@ -5,7 +5,7 @@ module Ci
     include ::Audit::Changes
 
     def execute
-      return unless License.feature_available?(:extended_audit_events)
+      return unless container.feature_available?(:audit_events)
 
       case params[:action]
       when :create, :destroy
@@ -23,6 +23,12 @@ module Ci
 
     def log_audit_event(action, variable)
       case variable.class.to_s
+      when ::Ci::Variable.to_s
+        ::AuditEventService.new(
+          current_user,
+          container,
+          action: action
+        ).for_project_variable(variable.key).security_event
       when ::Ci::GroupVariable.to_s
         ::AuditEventService.new(
           current_user,

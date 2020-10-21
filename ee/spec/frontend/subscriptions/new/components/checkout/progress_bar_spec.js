@@ -10,8 +10,8 @@ describe('Progress Bar', () => {
     });
   };
 
-  const firstStep = () => wrapper.find('.bar div:nth-child(1)');
-  const secondStep = () => wrapper.find('.bar div:nth-child(2)');
+  const firstStep = () => wrapper.find('.bar li:nth-child(1)');
+  const secondStep = () => wrapper.find('.bar li:nth-child(2)');
 
   beforeEach(() => {
     createComponent({ currentStep: 'b', steps: ['a', 'b'] });

@@ -76,6 +76,9 @@ Version specific changes in Omnibus GitLab Linux packages can be found in [the O
 NOTE: **Note:**
 Instructions are available for downloading an Omnibus GitLab Linux package locally and [manually installing](https://docs.gitlab.com/omnibus/manual_install.html) it.
 
+NOTE: **Note:**
+A step-by-step guide to [upgrading the Omnibus-bundled PostgreSQL is documented separately](https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server).
+
 ### Upgrading major versions
 
 Upgrading the *major* version requires more attention.
@@ -90,8 +93,8 @@ It's also important to ensure that any background migrations have been fully com
 before upgrading to a new major version. To see the current size of the `background_migration` queue,
 [Check for background migrations before upgrading](../update/README.md#checking-for-background-migrations-before-upgrading).
 
-If your GitLab instance has any GitLab Runners associated with it, it is very
-important to upgrade the GitLab Runners to match the GitLab minor version that was
+If your GitLab instance has any runners associated with it, it is very
+important to upgrade GitLab Runner to match the GitLab minor version that was
 upgraded to. This is to ensure [compatibility with GitLab versions](https://docs.gitlab.com/runner/#compatibility-with-gitlab-versions).
 
 ### Version 12 onward: Extra step for major upgrades
@@ -112,9 +115,9 @@ Please see the table below for some examples:
 
 | Target version | Your version | Recommended upgrade path | Note |
 | --------------------- | ------------ | ------------------------ | ---- |
-| `13.2.3`                | `11.5.0`      | `11.5.0` -> `11.11.8` -> `12.0.12` -> `12.10.14` -> `13.0.12` -> `13.2.3` | Four intermediate versions are required: the final `11.11`, `12.0`, and `12.10` releases, plus `13.0`. |
-| `13.0.12`              | `11.10.8`      | `11.10.5` -> `11.11.8` -> `12.0.12` -> `12.10.14` -> `13.0.12` | Three intermediate versions are required: `11.11`, `12.0`, and `12.10`. |
-| `12.10.14`             | `11.3.4`       | `11.3.4` -> `11.11.8` -> `12.0.12` -> `12.10.14`             |  Two intermediate versions are required: `11.11` and `12.0` |
+| `13.4.3`                | `12.9.2`      | `12.9.2` -> `12.10.14` -> `13.0.14` -> `13.4.3` | Two intermediate versions are required: the final `12.10` release, plus `13.0`. |
+| `13.2.10`                | `11.5.0`      | `11.5.0` -> `11.11.8` -> `12.0.12` -> `12.10.14` -> `13.0.14` -> `13.2.10` | Four intermediate versions are required: the final `11.11`, `12.0`, and `12.10` releases, plus `13.0`. |
+| `12.10.14`             | `11.3.4`       | `11.3.4` -> `11.11.8` -> `12.0.12` -> `12.10.14`             |  Two intermediate versions are required: the final `11.11` release and `12.0.12` |
 | `12.9.5`             | `10.4.5`       | `10.4.5` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.9.5`   | Three intermediate versions are required: `10.8`, `11.11`, and `12.0`, then `12.9.5` |
 | `12.2.5`              | `9.2.6`        | `9.2.6` -> `9.5.10` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.2.5` | Four intermediate versions are required: `9.5`, `10.8`, `11.11`, `12.0`, then `12.2`. |
 | `11.3.4`              | `8.13.4`       | `8.13.4` -> `8.17.7` -> `9.5.10` -> `10.8.7` -> `11.3.4` | `8.17.7` is the last version in version 8, `9.5.10` is the last version in version 9, `10.8.7` is the last version in version 10. |

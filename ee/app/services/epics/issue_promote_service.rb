@@ -24,6 +24,7 @@ module Epics
       raise PromoteError, _('Cannot promote issue because it does not belong to a group.') if parent_group.nil?
       raise PromoteError, _('Cannot promote issue due to insufficient permissions.') unless can_promote?
       raise PromoteError, _('Issue already promoted to epic.') if issue.promoted?
+      raise PromoteError, _('Promotion is not supported.') unless issue.supports_epic?
     end
 
     def can_promote?
@@ -32,6 +33,10 @@ module Epics
 
     def track_event
       ::Gitlab::Tracking.event(
+        'epics', 'promote', property: 'issue_id', value: original_entity.id
+      )
+
+      ::ProductAnalytics::Tracker.event(
         'epics', 'promote', property: 'issue_id', value: original_entity.id
       )
     end

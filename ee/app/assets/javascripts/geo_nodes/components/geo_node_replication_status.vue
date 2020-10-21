@@ -38,7 +38,7 @@ export default {
 
 <template>
   <div class="mt-2 detail-section-item">
-    <div class="gl-text-gray-700 node-detail-title">{{ s__('GeoNodes|Replication status') }}</div>
+    <div class="gl-text-gray-500 node-detail-title">{{ s__('GeoNodes|Replication status') }}</div>
     <div class="gl-display-flex gl-align-items-center">
       <div
         :class="replicationStatusCssClass"

@@ -39,9 +39,7 @@ RSpec.describe Mutations::Epics::Update do
       stub_licensed_features(epics: true)
     end
 
-    it_behaves_like 'a mutation that returns top-level errors',
-      errors: ['The resource that you are attempting to access does not exist '\
-               'or you don\'t have permission to perform this action']
+    it_behaves_like 'a mutation that returns a top-level access error'
 
     it 'does not update the epic' do
       post_graphql_mutation(mutation, current_user: current_user)
@@ -133,19 +131,6 @@ RSpec.describe Mutations::Epics::Update do
 
         it_behaves_like 'a mutation that returns top-level errors',
           errors: ['The list of epic attributes is empty']
-      end
-
-      context 'when confidential_epics is disabled' do
-        before do
-          stub_feature_flags(confidential_epics: false)
-        end
-
-        it 'ignores confidential field' do
-          post_graphql_mutation(mutation, current_user: current_user)
-
-          epic_hash = mutation_response['epic']
-          expect(epic_hash['confidential']).to be_falsey
-        end
       end
     end
   end

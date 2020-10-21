@@ -17,7 +17,7 @@ module QA
         Page::Group::Menu.perform(&:go_to_issue_boards)
       end
 
-      it 'creates a group issue board via the GUI' do
+      it 'creates a group issue board via the GUI', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/576' do
         Page::Component::IssueBoard::Show.perform do |show|
           new_board = "Board-#{SecureRandom.hex(4)}"
 

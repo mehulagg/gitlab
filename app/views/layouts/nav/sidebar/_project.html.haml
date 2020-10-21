@@ -1,6 +1,5 @@
-.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?) }
+.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?), **tracking_attrs('projects_side_navigation', 'render', 'projects_side_navigation') }
   .nav-sidebar-inner-scroll
-    - can_edit = can?(current_user, :admin_project, @project)
     .context-header
       = link_to project_path(@project), title: @project.name do
         .avatar-container.rect-avatar.s40.project-avatar
@@ -168,7 +167,7 @@
       = render_if_exists "layouts/nav/requirements_link", project: @project
 
       - if project_nav_tab? :pipelines
-        = nav_link(controller: [:pipelines, :builds, :jobs, :pipeline_schedules, :artifacts], unless: -> { current_path?('projects/pipelines#charts') }) do
+        = nav_link(controller: [:pipelines, :builds, :jobs, :pipeline_schedules, :artifacts, :test_cases], unless: -> { current_path?('projects/pipelines#charts') }) do
           = link_to project_pipelines_path(@project), class: 'shortcuts-pipelines qa-link-pipelines rspec-link-pipelines', data: { qa_selector: 'ci_cd_link' } do
             .nav-icon-container
               = sprite_icon('rocket')
@@ -176,7 +175,7 @@
               = _('CI / CD')
 
           %ul.sidebar-sub-level-items
-            = nav_link(controller: [:pipelines, :builds, :jobs, :pipeline_schedules, :artifacts], html_options: { class: "fly-out-top-item" }) do
+            = nav_link(controller: [:pipelines, :builds, :jobs, :pipeline_schedules, :artifacts, :test_cases], html_options: { class: "fly-out-top-item" }) do
               = link_to project_pipelines_path(@project) do
                 %strong.fly-out-top-item-name
                   =  _('CI / CD')
@@ -205,6 +204,8 @@
                   %span
                     = _('Schedules')
 
+            = render_if_exists "layouts/nav/test_cases_link", project: @project
+
       = render_if_exists 'layouts/nav/sidebar/project_security_link' # EE-specific
 
       - if project_nav_tab? :operations
@@ -228,25 +229,14 @@
                   %span
                     = _('Metrics')
 
-            - if project_nav_tab?(:alert_management)
-              = nav_link(controller: :alert_management) do
-                = link_to project_alert_management_index_path(@project), title: _('Alerts') do
+            - if project_nav_tab?(:environments) && can?(current_user, :read_pod_logs, @project)
+              = nav_link(controller: :logs, action: [:index]) do
+                = link_to project_logs_path(@project), title: _('Logs') do
                   %span
-                    = _('Alerts')
-
-              - if project_nav_tab?(:incidents)
-                = nav_link(controller: :incidents) do
-                  = link_to project_incidents_path(@project), title: _('Incidents'), data: { qa_selector: 'operations_incidents_link' } do
-                    %span
-                      = _('Incidents')
+                    = _('Logs')
 
             - if project_nav_tab? :environments
-              = render_if_exists "layouts/nav/sidebar/tracing_link"
-
-              = nav_link(controller: :environments, action: [:index, :folder, :show, :new, :edit, :create, :update, :stop, :terminal]) do
-                = link_to project_environments_path(@project), title: _('Environments'), class: 'shortcuts-environments qa-operations-environments-link' do
-                  %span
-                    = _('Environments')
+              = render "layouts/nav/sidebar/tracing_link"
 
             - if project_nav_tab?(:error_tracking)
               = nav_link(controller: :error_tracking) do
@@ -254,23 +244,23 @@
                   %span
                     = _('Error Tracking')
 
-            - if project_nav_tab?(:product_analytics)
-              = nav_link(controller: :product_analytics) do
-                = link_to project_product_analytics_path(@project), title: _('Product Analytics') do
+            - if project_nav_tab?(:alert_management)
+              = nav_link(controller: :alert_management) do
+                = link_to project_alert_management_index_path(@project), title: _('Alerts') do
                   %span
-                    = _('Product Analytics')
+                    = _('Alerts')
+
+            - if project_nav_tab?(:incidents)
+              = nav_link(controller: :incidents) do
+                = link_to project_incidents_path(@project), title: _('Incidents'), data: { qa_selector: 'operations_incidents_link' } do
+                  %span
+                    = _('Incidents')
 
             - if project_nav_tab? :serverless
               = nav_link(controller: :functions) do
                 = link_to project_serverless_functions_path(@project), title: _('Serverless') do
                   %span
                     = _('Serverless')
-
-            - if project_nav_tab?(:environments) && can?(current_user, :read_pod_logs, @project)
-              = nav_link(controller: :logs, action: [:index]) do
-                = link_to project_logs_path(@project), title: _('Logs') do
-                  %span
-                    = _('Logs')
 
             - if project_nav_tab? :clusters
               - show_cluster_hint = show_gke_cluster_integration_callout?(@project)
@@ -301,7 +291,23 @@
                         %span= _("Got it!")
                         = sprite_icon('thumb-up')
 
-            = render_if_exists 'layouts/nav/sidebar/project_feature_flags_link'
+            - if project_nav_tab? :environments
+              = nav_link(controller: :environments, action: [:index, :folder, :show, :new, :edit, :create, :update, :stop, :terminal]) do
+                = link_to project_environments_path(@project), title: _('Environments'), class: 'shortcuts-environments qa-operations-environments-link' do
+                  %span
+                    = _('Environments')
+
+            - if project_nav_tab? :feature_flags
+              = nav_link(controller: :feature_flags) do
+                = link_to project_feature_flags_path(@project), title: _('Feature Flags'), class: 'shortcuts-feature-flags' do
+                  %span
+                    = _('Feature Flags')
+
+            - if project_nav_tab?(:product_analytics)
+              = nav_link(controller: :product_analytics) do
+                = link_to project_product_analytics_path(@project), title: _('Product Analytics') do
+                  %span
+                    = _('Product Analytics')
 
       = render_if_exists 'layouts/nav/sidebar/project_packages_link'
 

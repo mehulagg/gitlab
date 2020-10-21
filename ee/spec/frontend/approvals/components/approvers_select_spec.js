@@ -173,10 +173,7 @@ describe('Approvals ApproversSelect', () => {
       { ...TEST_USERS[0], type: TYPE_USER },
       { ...TEST_GROUPS[0], type: TYPE_GROUP },
     ];
-    const expected = expectedFinal.map((x, idx) => ({
-      name: 'input',
-      args: [expectedFinal.slice(0, idx + 1)],
-    }));
+    const expected = expectedFinal.map((x, idx) => [expectedFinal.slice(0, idx + 1)]);
 
     waitForEvent($input, 'select2-loaded')
       .then(() => {
@@ -191,7 +188,7 @@ describe('Approvals ApproversSelect', () => {
     waitForEvent($input, 'change')
       .then(jest.runOnlyPendingTimers)
       .then(() => {
-        expect(wrapper.emittedByOrder()).toEqual(expected);
+        expect(wrapper.emitted().input).toEqual(expected);
       })
       .then(done)
       .catch(done.fail);

@@ -1,10 +1,9 @@
 import { __ } from '~/locale';
 import Api from '~/api';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import * as types from './mutation_types';
 
-// eslint-disable-next-line import/prefer-default-export
 export function fetchPage({ commit, state }, newPage) {
   return Api.groupMembers(state.groupId, {
     with_saml_identity: 'true',

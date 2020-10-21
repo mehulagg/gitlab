@@ -1,5 +1,5 @@
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { FETCH_ERROR_MESSAGE } from './constants';
 import { isValidResponse } from './utils';
 import * as types from './mutation_types';

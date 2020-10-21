@@ -5,7 +5,7 @@ $draft-actions-left-margin: 40px + $gl-padding;
   background: $orange-50;
 
   .referenced-commands.draft-note-commands {
-    background: $orange-100;
+    background: $orange-50;
     font-size: $label-font-size;
     margin: 0 0 $gl-padding $draft-actions-left-margin;
   }
@@ -28,14 +28,14 @@ button[disabled] {
   &:focus,
   &:hover {
     .gl-badge {
-      background: $gl-gray-100;
-      color: $gl-gray-500;
+      background: $gray-100;
+      color: $gray-500;
     }
   }
 }
 
 .draft-pending-label {
-  background: $orange-600;
+  background: $orange-500;
   color: $white;
   vertical-align: text-top;
 }
@@ -72,6 +72,6 @@ button[disabled] {
 .frame,
 .diff-discussions {
   .badge.is-draft {
-    background-color: $orange-600;
+    background-color: $orange-500;
   }
 }

@@ -2,9 +2,9 @@
 import { mapState, mapGetters, mapActions } from 'vuex';
 import {
   GlDeprecatedButton,
-  GlNewDropdown,
-  GlNewDropdownDivider,
-  GlNewDropdownItem,
+  GlDropdown,
+  GlDropdownDivider,
+  GlDropdownItem,
   GlModal,
   GlIcon,
   GlModalDirective,
@@ -23,9 +23,9 @@ import { getAddMetricTrackingOptions } from '../utils';
 export default {
   components: {
     GlDeprecatedButton,
-    GlNewDropdown,
-    GlNewDropdownDivider,
-    GlNewDropdownItem,
+    GlDropdown,
+    GlDropdownDivider,
+    GlDropdownItem,
     GlModal,
     GlIcon,
     DuplicateDashboardModal,
@@ -138,7 +138,12 @@ export default {
 </script>
 
 <template>
-  <gl-new-dropdown
+  <!-- 
+    This component should be replaced with a variant developed
+    as part of https://gitlab.com/gitlab-org/gitlab-ui/-/issues/936
+    The variant will create a dropdown with an icon, no text and no caret    
+  -->
+  <gl-dropdown
     v-gl-tooltip
     data-testid="actions-menu"
     data-qa-selector="actions_menu_dropdown"
@@ -152,13 +157,13 @@ export default {
     </template>
 
     <template v-if="addingMetricsAvailable">
-      <gl-new-dropdown-item
+      <gl-dropdown-item
         v-gl-modal="$options.modalIds.addMetric"
         data-qa-selector="add_metric_button"
         data-testid="add-metric-item"
       >
         {{ $options.i18n.addMetric }}
-      </gl-new-dropdown-item>
+      </gl-dropdown-item>
       <gl-modal
         ref="addMetricModal"
         :modal-id="$options.modalIds.addMetric"
@@ -189,20 +194,20 @@ export default {
       </gl-modal>
     </template>
 
-    <gl-new-dropdown-item
+    <gl-dropdown-item
       v-if="isMenuItemEnabled.addPanel"
       data-testid="add-panel-item-enabled"
       :to="newPanelPageLocation"
     >
       {{ $options.i18n.addPanel }}
-    </gl-new-dropdown-item>
+    </gl-dropdown-item>
 
     <!--
       wrapper for tooltip as button can be `disabled`
       https://bootstrap-vue.org/docs/components/tooltip#disabled-elements
     -->
     <div v-else v-gl-tooltip :title="$options.i18n.addPanelInfo">
-      <gl-new-dropdown-item
+      <gl-dropdown-item
         :alt="$options.i18n.addPanelInfo"
         :to="newPanelPageLocation"
         data-testid="add-panel-item-disabled"
@@ -210,24 +215,24 @@ export default {
         class="gl-cursor-not-allowed"
       >
         <span class="gl-text-gray-400">{{ $options.i18n.addPanel }}</span>
-      </gl-new-dropdown-item>
+      </gl-dropdown-item>
     </div>
 
-    <gl-new-dropdown-item
+    <gl-dropdown-item
       v-if="isMenuItemEnabled.editDashboard"
       :href="selectedDashboard ? selectedDashboard.project_blob_path : null"
       data-qa-selector="edit_dashboard_button_enabled"
       data-testid="edit-dashboard-item-enabled"
     >
       {{ $options.i18n.editDashboard }}
-    </gl-new-dropdown-item>
+    </gl-dropdown-item>
 
     <!--
       wrapper for tooltip as button can be `disabled`
       https://bootstrap-vue.org/docs/components/tooltip#disabled-elements
     -->
     <div v-else v-gl-tooltip :title="$options.i18n.editDashboardInfo">
-      <gl-new-dropdown-item
+      <gl-dropdown-item
         :alt="$options.i18n.editDashboardInfo"
         :href="selectedDashboard ? selectedDashboard.project_blob_path : null"
         data-testid="edit-dashboard-item-disabled"
@@ -235,16 +240,16 @@ export default {
         class="gl-cursor-not-allowed"
       >
         <span class="gl-text-gray-400">{{ $options.i18n.editDashboard }}</span>
-      </gl-new-dropdown-item>
+      </gl-dropdown-item>
     </div>
 
     <template v-if="isMenuItemShown.duplicateDashboard">
-      <gl-new-dropdown-item
+      <gl-dropdown-item
         v-gl-modal="$options.modalIds.duplicateDashboard"
         data-testid="duplicate-dashboard-item"
       >
         {{ $options.i18n.duplicateDashboard }}
-      </gl-new-dropdown-item>
+      </gl-dropdown-item>
 
       <duplicate-dashboard-modal
         :default-branch="defaultBranch"
@@ -254,25 +259,25 @@ export default {
       />
     </template>
 
-    <gl-new-dropdown-item
+    <gl-dropdown-item
       v-if="selectedDashboard"
       data-testid="star-dashboard-item"
       :disabled="isUpdatingStarredValue"
       @click="toggleStarredValue()"
     >
       {{ selectedDashboard.starred ? $options.i18n.unstarDashboard : $options.i18n.starDashboard }}
-    </gl-new-dropdown-item>
+    </gl-dropdown-item>
 
-    <gl-new-dropdown-divider />
+    <gl-dropdown-divider />
 
-    <gl-new-dropdown-item
+    <gl-dropdown-item
       v-gl-modal="$options.modalIds.createDashboard"
       data-testid="create-dashboard-item"
       :disabled="!isMenuItemEnabled.createDashboard"
       :class="{ 'monitoring-actions-item-disabled': !isMenuItemEnabled.createDashboard }"
     >
       {{ $options.i18n.createDashboard }}
-    </gl-new-dropdown-item>
+    </gl-dropdown-item>
 
     <template v-if="isMenuItemEnabled.createDashboard">
       <create-dashboard-modal
@@ -282,5 +287,5 @@ export default {
         :project-path="projectPath"
       />
     </template>
-  </gl-new-dropdown>
+  </gl-dropdown>
 </template>

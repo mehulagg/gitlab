@@ -4,7 +4,7 @@ import download from '~/lib/utils/downloader';
 import axios from '~/lib/utils/axios_utils';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 import { s__, n__, sprintf } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import toast from '~/vue_shared/plugins/global_toast';
 import * as types from './mutation_types';
 

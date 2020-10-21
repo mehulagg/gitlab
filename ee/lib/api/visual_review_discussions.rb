@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class VisualReviewDiscussions < Grape::API::Instance
+  class VisualReviewDiscussions < ::API::Base
     include PaginationParams
     helpers ::API::Helpers::NotesHelpers
     helpers ::RendersNotes
@@ -41,10 +41,8 @@ module API
         note = ::Notes::CreateVisualReviewService.new(
           merge_request,
           current_user,
-          {
-            body: params[:body],
-            position: params[:position]
-          }
+          body: params[:body],
+          position: params[:position]
         ).execute
 
         if note.valid?

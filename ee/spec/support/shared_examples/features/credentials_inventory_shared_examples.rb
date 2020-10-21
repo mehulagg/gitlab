@@ -24,6 +24,10 @@ RSpec.shared_examples_for 'credentials inventory personal access tokens' do |gro
       expect(first_row.text).to include('2019-12-10')
       expect(first_row.text).to include('Never')
       expect(first_row.text).not_to include('2020-06-22')
+
+      unless group_managed_account
+        expect(first_row).to have_selector('a.btn', text: 'Revoke')
+      end
     end
   end
 
@@ -67,6 +71,10 @@ RSpec.shared_examples_for 'credentials inventory personal access tokens' do |gro
 
     it 'shows the details with a revoked date', :aggregate_failures do
       expect(first_row.text).to include('2020-06-22')
+
+      unless group_managed_account
+        expect(first_row).not_to have_selector('a.btn', text: 'Revoke')
+      end
     end
   end
 end
@@ -92,6 +100,23 @@ RSpec.shared_examples_for 'credentials inventory SSH keys' do |group_managed_acc
       expect(first_row.text).to include('2019-12-09')
       expect(first_row.text).to include('2019-12-10')
       expect(first_row.text).to include('Never')
+    end
+
+    it 'shows the delete button' do
+      expect(first_row).to have_selector('.js-confirm-modal-button[value="Delete"]')
+    end
+
+    context 'and the user clicks the delete button', :js do
+      it 'deletes the key' do
+        click_button('Delete')
+
+        page.within('.modal') do
+          page.click_button('Delete')
+        end
+
+        expect(page).to have_content('User key was successfully removed.')
+        expect(page).to have_content('No credentials found')
+      end
     end
   end
 

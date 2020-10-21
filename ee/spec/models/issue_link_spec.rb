@@ -3,54 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe IssueLink do
-  describe 'Associations' do
-    it { is_expected.to belong_to(:source).class_name('Issue') }
-    it { is_expected.to belong_to(:target).class_name('Issue') }
-  end
-
-  describe 'link_type' do
-    it { is_expected.to define_enum_for(:link_type).with_values(relates_to: 0, blocks: 1, is_blocked_by: 2) }
-
-    it 'provides the "related" as default link_type' do
-      expect(create(:issue_link).link_type).to eq 'relates_to'
-    end
-  end
-
-  describe 'Validation' do
-    subject { create :issue_link }
-
-    it { is_expected.to validate_presence_of(:source) }
-    it { is_expected.to validate_presence_of(:target) }
-    it do
-      is_expected.to validate_uniqueness_of(:source)
-        .scoped_to(:target_id)
-        .with_message(/already related/)
-    end
-
-    context 'self relation' do
-      let(:issue) { create :issue }
-
-      context 'cannot be validated' do
-        it 'does not invalidate object with self relation error' do
-          issue_link = build :issue_link, source: issue, target: nil
-
-          issue_link.valid?
-
-          expect(issue_link.errors[:source]).to be_empty
-        end
-      end
-
-      context 'can be invalidated' do
-        it 'invalidates object' do
-          issue_link = build :issue_link, source: issue, target: issue
-
-          expect(issue_link).to be_invalid
-          expect(issue_link.errors[:source]).to include('cannot be related to itself')
-        end
-      end
-    end
-  end
-
   context 'callbacks' do
     let_it_be(:target) { create(:issue) }
     let_it_be(:source) { create(:issue) }
@@ -61,7 +13,7 @@ RSpec.describe IssueLink do
           expect(source).to receive(:update_blocking_issues_count!)
           expect(target).not_to receive(:update_blocking_issues_count!)
 
-          create(:issue_link, target: target, source: source, link_type: described_class::TYPE_BLOCKS)
+          create(:issue_link, target: target, source: source, link_type: ::IssueLink::TYPE_BLOCKS)
         end
       end
 
@@ -70,7 +22,7 @@ RSpec.describe IssueLink do
           expect(source).not_to receive(:update_blocking_issues_count!)
           expect(target).to receive(:update_blocking_issues_count!)
 
-          create(:issue_link, target: target, source: source, link_type: described_class::TYPE_IS_BLOCKED_BY)
+          create(:issue_link, target: target, source: source, link_type: ::IssueLink::TYPE_IS_BLOCKED_BY)
         end
       end
 
@@ -79,7 +31,7 @@ RSpec.describe IssueLink do
           expect(source).not_to receive(:update_blocking_issues_count!)
           expect(target).not_to receive(:update_blocking_issues_count!)
 
-          create(:issue_link, target: target, source: source, link_type: described_class::TYPE_RELATES_TO)
+          create(:issue_link, target: target, source: source, link_type: ::IssueLink::TYPE_RELATES_TO)
         end
       end
     end
@@ -87,7 +39,7 @@ RSpec.describe IssueLink do
     describe '.after_destroy_commit' do
       context 'with TYPE_BLOCKS relation' do
         it 'updates blocking issues count' do
-          link = create(:issue_link, target: target, source: source, link_type: described_class::TYPE_BLOCKS)
+          link = create(:issue_link, target: target, source: source, link_type: ::IssueLink::TYPE_BLOCKS)
 
           expect(source).to receive(:update_blocking_issues_count!)
           expect(target).not_to receive(:update_blocking_issues_count!)
@@ -98,7 +50,7 @@ RSpec.describe IssueLink do
 
       context 'with TYPE_IS_BLOCKED_BY' do
         it 'updates blocking issues count' do
-          link = create(:issue_link, target: target, source: source, link_type: described_class::TYPE_IS_BLOCKED_BY)
+          link = create(:issue_link, target: target, source: source, link_type: ::IssueLink::TYPE_IS_BLOCKED_BY)
 
           expect(source).not_to receive(:update_blocking_issues_count!)
           expect(target).to receive(:update_blocking_issues_count!)
@@ -109,7 +61,7 @@ RSpec.describe IssueLink do
 
       context 'with TYPE_RELATES_TO' do
         it 'does not update blocking_issues_count' do
-          link = create(:issue_link, target: target, source: source, link_type: described_class::TYPE_RELATES_TO)
+          link = create(:issue_link, target: target, source: source, link_type: ::IssueLink::TYPE_RELATES_TO)
 
           expect(source).not_to receive(:update_blocking_issues_count!)
           expect(target).not_to receive(:update_blocking_issues_count!)
@@ -122,10 +74,10 @@ RSpec.describe IssueLink do
 
   describe '.blocked_issue_ids' do
     it 'returns only ids of issues which are blocked' do
-      link1 = create(:issue_link, link_type: described_class::TYPE_BLOCKS)
-      link2 = create(:issue_link, link_type: described_class::TYPE_IS_BLOCKED_BY)
-      link3 = create(:issue_link, link_type: described_class::TYPE_RELATES_TO)
-      link4 = create(:issue_link, source: create(:issue, :closed), link_type: described_class::TYPE_BLOCKS)
+      link1 = create(:issue_link, link_type: ::IssueLink::TYPE_BLOCKS)
+      link2 = create(:issue_link, link_type: ::IssueLink::TYPE_IS_BLOCKED_BY)
+      link3 = create(:issue_link, link_type: ::IssueLink::TYPE_RELATES_TO)
+      link4 = create(:issue_link, source: create(:issue, :closed), link_type: ::IssueLink::TYPE_BLOCKS)
 
       expect(described_class.blocked_issue_ids([link1.target_id, link2.source_id, link3.source_id, link4.target_id]))
         .to match_array([link1.target_id, link2.source_id])
@@ -137,8 +89,8 @@ RSpec.describe IssueLink do
       issue = create(:issue)
       blocking_issue = create(:issue, project: issue.project)
       blocked_by_issue = create(:issue, project: issue.project)
-      create(:issue_link, source: blocking_issue, target: issue, link_type: IssueLink::TYPE_BLOCKS)
-      create(:issue_link, source: issue, target: blocked_by_issue, link_type: IssueLink::TYPE_IS_BLOCKED_BY)
+      create(:issue_link, source: blocking_issue, target: issue, link_type: ::IssueLink::TYPE_BLOCKS)
+      create(:issue_link, source: issue, target: blocked_by_issue, link_type: ::IssueLink::TYPE_IS_BLOCKED_BY)
 
       blocking_ids = described_class.blocking_issue_ids_for(issue)
 
@@ -163,9 +115,9 @@ RSpec.describe IssueLink do
     let_it_be(:blocking_issue_2) { create(:issue, project: project) }
 
     before :all do
-      create(:issue_link, source: blocking_issue_1, target: blocked_issue_1, link_type: IssueLink::TYPE_BLOCKS)
-      create(:issue_link, source: blocked_issue_2, target: blocking_issue_1, link_type: IssueLink::TYPE_IS_BLOCKED_BY)
-      create(:issue_link, source: blocking_issue_2, target: blocked_issue_3, link_type: IssueLink::TYPE_BLOCKS)
+      create(:issue_link, source: blocking_issue_1, target: blocked_issue_1, link_type: ::IssueLink::TYPE_BLOCKS)
+      create(:issue_link, source: blocked_issue_2, target: blocking_issue_1, link_type: ::IssueLink::TYPE_IS_BLOCKED_BY)
+      create(:issue_link, source: blocking_issue_2, target: blocked_issue_3, link_type: ::IssueLink::TYPE_BLOCKS)
     end
 
     describe '.blocking_issues_for_collection' do

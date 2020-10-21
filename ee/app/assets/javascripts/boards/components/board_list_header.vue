@@ -1,10 +1,8 @@
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import BoardListHeaderFoss from '~/boards/components/board_list_header.vue';
 import { __, sprintf, s__ } from '~/locale';
 import boardsStore from '~/boards/stores/boards_store';
-import { inactiveId } from '~/boards/constants';
-import eventHub from '~/sidebar/event_hub';
 
 export default {
   extends: BoardListHeaderFoss,
@@ -14,13 +12,14 @@ export default {
     };
   },
   computed: {
-    ...mapState(['activeId']),
+    ...mapState(['issuesByListId']),
+    ...mapGetters(['isSwimlanesOn']),
     issuesTooltip() {
-      const { issuesSize, maxIssueCount } = this.list;
+      const { maxIssueCount } = this.list;
 
       if (maxIssueCount > 0) {
-        return sprintf(__('%{issuesSize} issues with a limit of %{maxIssueCount}'), {
-          issuesSize,
+        return sprintf(__('%{issuesCount} issues with a limit of %{maxIssueCount}'), {
+          issuesCount: this.issuesCount,
           maxIssueCount,
         });
       }
@@ -36,16 +35,6 @@ export default {
       }
 
       return null;
-    },
-  },
-  methods: {
-    ...mapActions(['setActiveId']),
-    openSidebarSettings() {
-      if (this.activeId === inactiveId) {
-        eventHub.$emit('sidebar.closeAll');
-      }
-
-      this.setActiveId(this.list.id);
     },
   },
 };

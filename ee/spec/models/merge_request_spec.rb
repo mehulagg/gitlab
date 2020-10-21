@@ -24,6 +24,9 @@ RSpec.describe MergeRequest do
     it { is_expected.to have_many(:approver_groups).dependent(:delete_all) }
     it { is_expected.to have_many(:approved_by_users) }
     it { is_expected.to have_one(:merge_train) }
+    it { is_expected.to have_many(:approval_rules) }
+    it { is_expected.to have_many(:approval_merge_request_rule_sources).through(:approval_rules) }
+    it { is_expected.to have_many(:approval_project_rules).through(:approval_merge_request_rule_sources) }
   end
 
   it_behaves_like 'an editable mentionable with EE-specific mentions' do
@@ -48,6 +51,24 @@ RSpec.describe MergeRequest do
       merge_request = build(:merge_request)
 
       expect(merge_request.allows_multiple_assignees?).to be(true)
+    end
+  end
+
+  describe '#allows_multiple_reviewers?' do
+    it 'returns false without license' do
+      stub_licensed_features(multiple_merge_request_reviewers: false)
+
+      merge_request = build_stubbed(:merge_request)
+
+      expect(merge_request.allows_multiple_reviewers?).to be(false)
+    end
+
+    it 'returns true when licensed' do
+      stub_licensed_features(multiple_merge_request_reviewers: true)
+
+      merge_request = build(:merge_request)
+
+      expect(merge_request.allows_multiple_reviewers?).to be(true)
     end
   end
 
@@ -153,6 +174,7 @@ RSpec.describe MergeRequest do
       :dependency_scanning | :with_dependency_scanning_reports | :dependency_scanning
       :license_scanning    | :with_license_management_reports  | :license_scanning
       :license_scanning    | :with_license_scanning_reports    | :license_scanning
+      :coverage_fuzzing    | :with_coverage_fuzzing_reports    | :coverage_fuzzing
     end
 
     with_them do
@@ -353,6 +375,28 @@ RSpec.describe MergeRequest do
     end
 
     context 'when head pipeline does not have license scanning reports' do
+      let(:merge_request) { create(:ee_merge_request, source_project: project) }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#has_coverage_fuzzing_reports?' do
+    subject { merge_request.has_coverage_fuzzing_reports? }
+
+    let_it_be(:project) { create(:project, :repository) }
+
+    before do
+      stub_licensed_features(coverage_fuzzing: true)
+    end
+
+    context 'when head pipeline has coverage fuzzing reports' do
+      let(:merge_request) { create(:ee_merge_request, :with_coverage_fuzzing_reports, source_project: project) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when head pipeline does not have coverage fuzzing reports' do
       let(:merge_request) { create(:ee_merge_request, source_project: project) }
 
       it { is_expected.to be_falsey }
@@ -641,6 +685,40 @@ RSpec.describe MergeRequest do
         expect(subject[:status_reason]).to eq('This merge request does not have license scanning reports')
       end
     end
+
+    context "when a license scan report is produced from the head pipeline" do
+      where(:pipeline_status, :build_types, :expected_status) do
+        [
+          [:blocked, [:license_scan_v2_1], :parsed],
+          [:blocked, [:container_scanning], :error],
+          [:blocked, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:blocked, [], :error],
+          [:failed, [:container_scanning], :error],
+          [:failed, [:license_scan_v2_1], :parsed],
+          [:failed, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:failed, [], :error],
+          [:running, [:container_scanning], :error],
+          [:running, [:license_scan_v2_1], :parsed],
+          [:running, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:running, [], :error],
+          [:success, [:container_scanning], :error],
+          [:success, [:license_scan_v2_1], :parsed],
+          [:success, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:success, [], :error]
+        ]
+      end
+
+      with_them do
+        let!(:head_pipeline) { create(:ci_pipeline, pipeline_status, project: project, ref: merge_request.source_branch, sha: merge_request.diff_head_sha, builds: builds) }
+        let(:builds) { build_types.map { |build_type| create(:ee_ci_build, build_type) } }
+
+        before do
+          synchronous_reactive_cache(merge_request)
+        end
+
+        specify { expect(subject[:status]).to eq(expected_status) }
+      end
+    end
   end
 
   describe '#compare_metrics_reports' do
@@ -712,6 +790,66 @@ RSpec.describe MergeRequest do
       it 'returns status and error message' do
         expect(subject[:status]).to eq(:error)
         expect(subject[:status_reason]).to eq('This merge request does not have metrics reports')
+      end
+    end
+  end
+
+  describe '#compare_coverage_fuzzing_reports' do
+    subject { merge_request.compare_coverage_fuzzing_reports(current_user) }
+
+    let_it_be(:project) { create(:project, :repository) }
+    let(:current_user) { project.users.first }
+    let(:merge_request) { create(:merge_request, source_project: project) }
+
+    let!(:base_pipeline) do
+      create(:ee_ci_pipeline,
+             :with_coverage_fuzzing_report,
+             project: project,
+             ref: merge_request.target_branch,
+             sha: merge_request.diff_base_sha)
+    end
+
+    before do
+      merge_request.update!(head_pipeline_id: head_pipeline.id)
+    end
+
+    context 'when head pipeline has coverage fuzzing reports' do
+      let!(:head_pipeline) do
+        create(:ee_ci_pipeline,
+               :with_coverage_fuzzing_report,
+               project: project,
+               ref: merge_request.source_branch,
+               sha: merge_request.diff_head_sha)
+      end
+
+      context 'when reactive cache worker is parsing asynchronously' do
+        it 'returns status' do
+          expect(subject[:status]).to eq(:parsing)
+        end
+      end
+
+      context 'when reactive cache worker is inline' do
+        before do
+          synchronous_reactive_cache(merge_request)
+        end
+
+        it 'returns status and data' do
+          expect_any_instance_of(Ci::CompareSecurityReportsService)
+            .to receive(:execute).with(base_pipeline, head_pipeline).and_call_original
+
+          subject
+        end
+
+        context 'when cached results is not latest' do
+          before do
+            allow_any_instance_of(Ci::CompareSecurityReportsService)
+                .to receive(:latest?).and_return(false)
+          end
+
+          it 'raises and InvalidateReactiveCache error' do
+            expect { subject }.to raise_error(ReactiveCaching::InvalidateReactiveCache)
+          end
+        end
       end
     end
   end
@@ -878,6 +1016,116 @@ RSpec.describe MergeRequest do
 
       expect(described_class.order_review_time_desc).to match([mr3, mr4, mr2, mr1, mr5])
       expect(described_class.sort_by_attribute('review_time_desc')).to match([mr3, mr4, mr2, mr1, mr5])
+    end
+  end
+
+  describe '#missing_security_scan_types' do
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:merge_request) { create(:ee_merge_request, source_project: project) }
+
+    subject { merge_request.missing_security_scan_types }
+
+    context 'when there is no head pipeline' do
+      context 'when there is no base pipeline' do
+        it { is_expected.to be_empty }
+      end
+
+      context 'when there is a base pipeline' do
+        let_it_be(:base_pipeline) do
+          create(:ee_ci_pipeline,
+                 project: project,
+                 ref: merge_request.target_branch,
+                 sha: merge_request.diff_base_sha)
+        end
+
+        context 'when there is no security scan for the base pipeline' do
+          it { is_expected.to be_empty }
+        end
+
+        context 'when there are security scans for the base_pipeline' do
+          before do
+            build = create(:ci_build, :success, pipeline: base_pipeline, project: project)
+            create(:security_scan, build: build)
+          end
+
+          it { is_expected.to be_empty }
+        end
+      end
+    end
+
+    context 'when there is a head pipeline' do
+      let_it_be(:head_pipeline) { create(:ee_ci_pipeline, project: project, sha: merge_request.diff_head_sha) }
+
+      before do
+        merge_request.update_head_pipeline
+      end
+
+      context 'when there is no base pipeline' do
+        it { is_expected.to be_empty }
+      end
+
+      context 'when there is a base pipeline' do
+        let_it_be(:base_pipeline) do
+          create(:ee_ci_pipeline,
+                 project: project,
+                 ref: merge_request.target_branch,
+                 sha: merge_request.diff_base_sha)
+        end
+
+        let_it_be(:base_pipeline_build) { create(:ci_build, :success, pipeline: base_pipeline, project: project) }
+        let_it_be(:head_pipeline_build) { create(:ci_build, :success, pipeline: head_pipeline, project: project) }
+
+        context 'when the head pipeline does not have security scans' do
+          context 'when the base pipeline does not have security scans' do
+            it { is_expected.to be_empty }
+          end
+
+          context 'when the base pipeline has security scans' do
+            before do
+              create(:security_scan, build: base_pipeline_build, scan_type: 'sast')
+            end
+
+            it { is_expected.to eq(['sast']) }
+          end
+        end
+
+        context 'when the head pipeline has security scans' do
+          before do
+            create(:security_scan, build: head_pipeline_build, scan_type: 'dast')
+          end
+
+          context 'when the base pipeline does not have security scans' do
+            it { is_expected.to be_empty }
+          end
+
+          context 'when the base pipeline has security scans' do
+            before do
+              create(:security_scan, build: base_pipeline_build, scan_type: 'dast')
+            end
+
+            context 'when there are no missing security scans for the head pipeline' do
+              it { is_expected.to be_empty }
+            end
+
+            context 'when there are missing security scans for the head pipeline' do
+              before do
+                create(:security_scan, build: base_pipeline_build, scan_type: 'sast')
+              end
+
+              it { is_expected.to eq(['sast']) }
+
+              context 'when there are multiple scans for the same type for base pipeline' do
+                before do
+                  build = create(:ci_build, :success, pipeline: base_pipeline, project: project)
+                  create(:security_scan, build: build, scan_type: 'sast')
+                end
+
+                it { is_expected.to eq(['sast']) }
+              end
+            end
+          end
+        end
+      end
     end
   end
 end

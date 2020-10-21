@@ -2,8 +2,6 @@ export default () => ({
   // API Calls
   basePath: '',
   epicsState: '',
-  filterQueryString: '',
-  initialEpicsPath: '',
   filterParams: null,
   groupLabelsEndpoint: '',
   groupMilestonesEndpoint: '',

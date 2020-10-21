@@ -32,6 +32,7 @@ RSpec.describe Issues::MoveService do
     end
 
     context 'resource weight events' do
+      let(:old_issue) { create(:issue, project: old_project, author: user, weight: 5) }
       let!(:event1) { create(:resource_weight_event, issue: old_issue, weight: 1) }
       let!(:event2) { create(:resource_weight_event, issue: old_issue, weight: 42) }
       let!(:event3) { create(:resource_weight_event, issue: old_issue, weight: 5) }
@@ -43,45 +44,6 @@ RSpec.describe Issues::MoveService do
         new_issue = move_service.execute(old_issue, new_project)
 
         expect(new_issue.resource_weight_events.map(&:weight)).to contain_exactly(1, 42, 5)
-      end
-    end
-  end
-
-  describe '#rewrite_related_issues' do
-    let(:user) { create(:user) }
-    let(:admin) { create(:admin) }
-    let(:authorized_project) { create(:project) }
-    let(:authorized_project2) { create(:project) }
-    let(:unauthorized_project) { create(:project) }
-
-    let(:authorized_issue_b) { create(:issue, project: authorized_project) }
-    let(:authorized_issue_c) { create(:issue, project: authorized_project2) }
-    let(:authorized_issue_d) { create(:issue, project: authorized_project2) }
-    let(:unauthorized_issue) { create(:issue, project: unauthorized_project) }
-
-    let!(:issue_link_a) { create(:issue_link, source: old_issue, target: authorized_issue_b) }
-    let!(:issue_link_b) { create(:issue_link, source: old_issue, target: unauthorized_issue) }
-    let!(:issue_link_c) { create(:issue_link, source: old_issue, target: authorized_issue_c) }
-    let!(:issue_link_d) { create(:issue_link, source: authorized_issue_d, target: old_issue) }
-
-    before do
-      stub_licensed_features(related_issues: true)
-      authorized_project.add_developer(user)
-      authorized_project2.add_developer(user)
-    end
-
-    context 'multiple related issues' do
-      it 'moves all related issues and retains permissions' do
-        new_issue = move_service.execute(old_issue, new_project)
-
-        expect(new_issue.related_issues(admin))
-          .to match_array([authorized_issue_b, authorized_issue_c, authorized_issue_d, unauthorized_issue])
-
-        expect(new_issue.related_issues(user))
-          .to match_array([authorized_issue_b, authorized_issue_c, authorized_issue_d])
-
-        expect(authorized_issue_d.related_issues(user))
-          .to match_array([new_issue])
       end
     end
   end
@@ -114,10 +76,38 @@ RSpec.describe Issues::MoveService do
         expect(new_issue.epic_issue).to eq(epic_issue)
       end
 
-      it 'ignores epic issue reference if user can not update the epic' do
-        new_issue = move_service.execute(old_issue, new_project)
+      it 'tracks usage data for changed epic action' do
+        expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_changed_epic_action).with(author: user)
 
-        expect(new_issue.epic_issue).to be_nil
+        epic_issue.epic.group.add_reporter(user)
+
+        move_service.execute(old_issue, new_project)
+      end
+
+      context 'user can not update the epic' do
+        it 'ignores epic issue reference' do
+          new_issue = move_service.execute(old_issue, new_project)
+
+          expect(new_issue.epic_issue).to be_nil
+        end
+
+        it 'does not send usage data for changed epic action' do
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_changed_epic_action)
+
+          move_service.execute(old_issue, new_project)
+        end
+      end
+
+      context 'epic update fails' do
+        it 'does not send usage data for changed epic action' do
+          allow_next_instance_of(::EpicIssue) do |epic_issue|
+            allow(epic_issue).to receive(:update).and_return(false)
+          end
+
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_changed_epic_action)
+
+          move_service.execute(old_issue, new_project)
+        end
       end
     end
   end

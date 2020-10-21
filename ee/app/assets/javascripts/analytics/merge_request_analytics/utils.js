@@ -1,16 +1,12 @@
+import dateFormat from 'dateformat';
 import { getMonthNames, dateFromParams } from '~/lib/utils/datetime_utility';
 import { dateFormats } from '../shared/constants';
-import dateFormat from 'dateformat';
+import { THROUGHPUT_CHART_STRINGS } from './constants';
 
 /**
  * A utility function which accepts a date range and returns
  * computed month data which is required to build the GraphQL
  * query for the Throughput Analytics chart
- *
- * This does not currently support days;
- *
- * `mergedAfter` will always be the first day of the month
- * `mergedBefore` will always be the first day of the following month
  *
  * @param {Date} startDate the startDate for the data range
  * @param {Date} endDate the endDate for the data range
@@ -18,7 +14,6 @@ import dateFormat from 'dateformat';
  *
  * @return {Array} the computed month data
  */
-// eslint-disable-next-line import/prefer-default-export
 export const computeMonthRangeData = (startDate, endDate, format = dateFormats.isoDate) => {
   const monthData = [];
   const monthNames = getMonthNames(true);
@@ -26,7 +21,7 @@ export const computeMonthRangeData = (startDate, endDate, format = dateFormats.i
   for (
     let dateCursor = new Date(endDate);
     dateCursor >= startDate;
-    dateCursor.setMonth(dateCursor.getMonth() - 1)
+    dateCursor.setMonth(dateCursor.getMonth(), 0)
   ) {
     const monthIndex = dateCursor.getMonth();
     const year = dateCursor.getFullYear();
@@ -42,5 +37,33 @@ export const computeMonthRangeData = (startDate, endDate, format = dateFormats.i
     });
   }
 
+  if (monthData.length) {
+    monthData[0].mergedAfter = dateFormat(startDate, format); // Set first item to startDate
+    monthData[monthData.length - 1].mergedBefore = dateFormat(endDate, format); // Set last item to endDate
+  }
+
   return monthData;
+};
+
+/**
+ * A utility function which accepts the raw throughput chart data
+ * and transforms it into the format required for the area chart.
+ *
+ * @param {Object} chartData the raw chart data
+ *
+ * @return {Array} the formatted chart data
+ */
+export const formatThroughputChartData = chartData => {
+  if (!chartData) return [];
+
+  const data = Object.keys(chartData)
+    .slice(0, -1) // Remove the __typeName key
+    .map(value => [value.split('_').join(' '), chartData[value].count]); // key: Aug_2020 => Aug 2020
+
+  return [
+    {
+      name: THROUGHPUT_CHART_STRINGS.Y_AXIS_TITLE,
+      data,
+    },
+  ];
 };

@@ -1,4 +1,5 @@
 import { TEST_HOST } from 'spec/test_constants';
+import { differenceInMilliseconds } from '~/lib/utils/datetime_utility';
 
 const AVATAR_URL = `${TEST_HOST}/dummy.jpg`;
 
@@ -21,7 +22,7 @@ export const mockHeaders = {
 export function mockPipelineData(
   status = 'success',
   id = 1,
-  finishedTimeStamp = new Date(Date.now() - 86400000).toISOString(),
+  finishedTimeStamp = new Date(differenceInMilliseconds(86400000)).toISOString(),
   isTag = false,
 ) {
   return {

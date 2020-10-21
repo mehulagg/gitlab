@@ -2,7 +2,7 @@
 
 module API
   module Ci
-    class Runner < Grape::API::Instance
+    class Runner < ::API::Base
       helpers ::API::Helpers::Runner
 
       resource :runners do
@@ -72,6 +72,7 @@ module API
         post '/verify' do
           authenticate_runner!
           status 200
+          body "200"
         end
       end
 
@@ -159,29 +160,31 @@ module API
         end
 
         desc 'Updates a job' do
-          http_codes [[200, 'Job was updated'], [403, 'Forbidden']]
+          http_codes [[200, 'Job was updated'],
+                      [202, 'Update accepted'],
+                      [400, 'Unknown parameters'],
+                      [403, 'Forbidden']]
         end
         params do
           requires :token, type: String, desc: %q(Runners's authentication token)
           requires :id, type: Integer, desc: %q(Job's ID)
           optional :trace, type: String, desc: %q(Job's full trace)
           optional :state, type: String, desc: %q(Job's status: success, failed)
+          optional :checksum, type: String, desc: %q(Job's trace CRC32 checksum)
           optional :failure_reason, type: String, desc: %q(Job's failure_reason)
         end
         put '/:id' do
           job = authenticate_job!
 
-          job.trace.set(params[:trace]) if params[:trace]
-
           Gitlab::Metrics.add_event(:update_build)
 
-          case params[:state].to_s
-          when 'running'
-            job.touch if job.needs_touch?
-          when 'success'
-            job.success!
-          when 'failed'
-            job.drop!(params[:failure_reason] || :unknown_failure)
+          service = ::Ci::UpdateBuildStateService
+            .new(job, declared_params(include_missing: false))
+
+          service.execute.then do |result|
+            header 'X-GitLab-Trace-Update-Interval', result.backoff
+            status result.status
+            body result.status.to_s
           end
         end
 
@@ -292,6 +295,7 @@ module API
 
           if result[:status] == :success
             status :created
+            body "201"
           else
             render_api_error!(result[:message], result[:http_status])
           end

@@ -1,9 +1,9 @@
 import isPlainObject from 'lodash/isPlainObject';
-import { s__ } from '~/locale';
-import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { ALL, BASE_FILTERS } from 'ee/security_dashboard/store/modules/filters/constants';
 import { REPORT_TYPES, SEVERITY_LEVELS } from 'ee/security_dashboard/store/constants';
 import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
+import { s__, __ } from '~/locale';
 
 const parseOptions = obj =>
   Object.entries(obj).map(([id, name]) => ({ id: id.toUpperCase(), name }));
@@ -106,5 +106,7 @@ export const getFormattedSummary = (rawSummary = {}) => {
 export const preparePageInfo = pageInfo => {
   return { ...pageInfo, hasNextPage: Boolean(pageInfo?.endCursor) };
 };
+
+export const createProjectLoadingError = () => __('An error occurred while retrieving projects.');
 
 export default () => ({});

@@ -10,13 +10,8 @@ class Projects::IssuesController < Projects::ApplicationController
   include SpammableActions
   include RecordUserLastActivity
 
-  def issue_except_actions
-    %i[index calendar new create bulk_update import_csv export_csv service_desk]
-  end
-
-  def set_issuables_index_only_actions
-    %i[index calendar service_desk]
-  end
+  ISSUES_EXCEPT_ACTIONS = %i[index calendar new create bulk_update import_csv export_csv service_desk].freeze
+  SET_ISSUEABLES_INDEX_ONLY_ACTIONS = %i[index calendar service_desk].freeze
 
   prepend_before_action(only: [:index]) { authenticate_sessionless_user!(:rss) }
   prepend_before_action(only: [:calendar]) { authenticate_sessionless_user!(:ics) }
@@ -25,9 +20,10 @@ class Projects::IssuesController < Projects::ApplicationController
 
   before_action :whitelist_query_limiting, only: [:create, :create_merge_request, :move, :bulk_update]
   before_action :check_issues_available!
-  before_action :issue, unless: ->(c) { c.issue_except_actions.include?(c.action_name.to_sym) }
+  before_action :issue, unless: ->(c) { ISSUES_EXCEPT_ACTIONS.include?(c.action_name.to_sym) }
+  after_action :log_issue_show, unless: ->(c) { ISSUES_EXCEPT_ACTIONS.include?(c.action_name.to_sym) }
 
-  before_action :set_issuables_index, if: ->(c) { c.set_issuables_index_only_actions.include?(c.action_name.to_sym) }
+  before_action :set_issuables_index, if: ->(c) { SET_ISSUEABLES_INDEX_ONLY_ACTIONS.include?(c.action_name.to_sym) }
 
   # Allow write(create) issue
   before_action :authorize_create_issue!, only: [:new, :create]
@@ -55,10 +51,13 @@ class Projects::IssuesController < Projects::ApplicationController
     real_time_enabled = Gitlab::ActionCable::Config.in_app? || Feature.enabled?(real_time_feature_flag, @project)
 
     gon.push({ features: { real_time_feature_flag.to_s.camelize(:lower) => real_time_enabled } }, true)
+
+    record_experiment_user(:invite_members_version_a)
+    record_experiment_user(:invite_members_version_b)
   end
 
   before_action only: :index do
-    push_frontend_feature_flag(:scoped_labels, @project)
+    push_frontend_feature_flag(:scoped_labels, @project, type: :licensed)
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:discussions]
@@ -66,6 +65,17 @@ class Projects::IssuesController < Projects::ApplicationController
   respond_to :html
 
   alias_method :designs, :show
+
+  feature_category :issue_tracking, [
+                     :index, :calendar, :show, :new, :create, :edit, :update,
+                     :destroy, :move, :reorder, :designs, :toggle_subscription,
+                     :discussions, :bulk_update, :realtime_changes,
+                     :toggle_award_emoji, :mark_as_spam, :related_branches,
+                     :can_create_branch, :create_merge_request
+                   ]
+
+  feature_category :service_desk, [:service_desk]
+  feature_category :importers, [:import_csv, :export_csv]
 
   def index
     @issues = @issuables
@@ -95,7 +105,7 @@ class Projects::IssuesController < Projects::ApplicationController
       discussion_to_resolve: params[:discussion_to_resolve],
       confidential: !!Gitlab::Utils.to_boolean(params[:issue][:confidential])
     )
-    service = Issues::BuildService.new(project, current_user, build_params)
+    service = ::Issues::BuildService.new(project, current_user, build_params)
 
     @issue = @noteable = service.execute
 
@@ -115,7 +125,7 @@ class Projects::IssuesController < Projects::ApplicationController
       discussion_to_resolve: params[:discussion_to_resolve]
     )
 
-    service = Issues::CreateService.new(project, current_user, create_params)
+    service = ::Issues::CreateService.new(project, current_user, create_params)
     @issue = service.execute
 
     if service.discussions_to_resolve.count(&:resolved?) > 0
@@ -143,7 +153,7 @@ class Projects::IssuesController < Projects::ApplicationController
       new_project = Project.find(params[:move_to_project_id])
       return render_404 unless issue.can_move?(current_user, new_project)
 
-      @issue = Issues::UpdateService.new(project, current_user, target_project: new_project).execute(issue)
+      @issue = ::Issues::UpdateService.new(project, current_user, target_project: new_project).execute(issue)
     end
 
     respond_to do |format|
@@ -157,7 +167,7 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def reorder
-    service = Issues::ReorderService.new(project, current_user, reorder_params)
+    service = ::Issues::ReorderService.new(project, current_user, reorder_params)
 
     if service.execute(issue)
       head :ok
@@ -167,7 +177,7 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def related_branches
-    @related_branches = Issues::RelatedBranchesService
+    @related_branches = ::Issues::RelatedBranchesService
       .new(project, current_user)
       .execute(issue)
       .map { |branch| branch.merge(link: branch_link(branch)) }
@@ -206,7 +216,7 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def export_csv
-    ExportCsvWorker.perform_async(current_user.id, project.id, finder_options.to_h) # rubocop:disable CodeReuse/Worker
+    IssuableExportCsvWorker.perform_async(:issue, current_user.id, project.id, finder_options.to_h) # rubocop:disable CodeReuse/Worker
 
     index_path = project_issues_path(project)
     message = _('Your CSV export has started. It will be emailed to %{email} when complete.') % { email: current_user.notification_email }
@@ -241,7 +251,7 @@ class Projects::IssuesController < Projects::ApplicationController
     return @issue if defined?(@issue)
 
     # The Sortable default scope causes performance issues when used with find_by
-    @issuable = @noteable = @issue ||= @project.issues.includes(author: :status).where(iid: params[:id]).reorder(nil).take!
+    @issuable = @noteable = @issue ||= @project.issues.inc_relations_for_view.iid_in(params[:id]).without_order.take!
     @note = @project.notes.new(noteable: @issuable)
 
     return render_404 unless can?(current_user, :read_issue, @issue)
@@ -249,6 +259,13 @@ class Projects::IssuesController < Projects::ApplicationController
     @issue
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def log_issue_show
+    return unless current_user && @issue
+
+    ::Gitlab::Search::RecentIssues.new(user: current_user).log_view(@issue)
+  end
+
   alias_method :subscribable_resource, :issue
   alias_method :issuable, :issue
   alias_method :awardable, :issue
@@ -308,7 +325,7 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def store_uri
-    if request.get? && !request.xhr?
+    if request.get? && request.format.html?
       store_location_for :user, request.fullpath
     end
   end
@@ -319,7 +336,7 @@ class Projects::IssuesController < Projects::ApplicationController
 
   def update_service
     update_params = issue_params.merge(spammable_params)
-    Issues::UpdateService.new(project, current_user, update_params)
+    ::Issues::UpdateService.new(project, current_user, update_params)
   end
 
   def finder_type
@@ -340,10 +357,12 @@ class Projects::IssuesController < Projects::ApplicationController
   def finder_options
     options = super
 
-    return options unless service_desk?
+    options[:issue_types] = Issue::TYPES_FOR_LIST
 
-    options.reject! { |key| key == 'author_username' || key == 'author_id' }
-    options[:author_id] = User.support_bot
+    if service_desk?
+      options.reject! { |key| key == 'author_username' || key == 'author_id' }
+      options[:author_id] = User.support_bot
+    end
 
     options
   end

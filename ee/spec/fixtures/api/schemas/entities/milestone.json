@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "properties" : {
+  "properties": {
     "id": { "type": "integer" },
     "iid": { "type": "integer" },
     "project_id": { "type": ["integer", "null"] },
@@ -12,6 +12,7 @@
     "updated_at": { "type": "string" },
     "start_date": { "type": ["date", "null"] },
     "due_date": { "type": ["date", "null"] },
+    "expired": { "type": ["boolean", "null"] },
     "web_url": { "type": "string" }
   },
   "additionalProperties": false

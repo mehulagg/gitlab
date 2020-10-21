@@ -33,12 +33,6 @@ module EE
         end
         # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
-        def load_gon_index
-          super
-
-          gon.push(current_project_id: project.id) if project
-        end
-
         def render_show
           push_rule
 

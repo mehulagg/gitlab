@@ -66,8 +66,7 @@ RSpec.describe Gitlab::Geo::HealthCheck, :geo do
 
         context 'streaming replication' do
           it 'returns an error when replication is not working' do
-            allow(Gitlab::Database).to receive(:pg_last_wal_receive_lsn).and_return('pg_last_xlog_receive_location')
-            allow(ActiveRecord::Base).to receive_message_chain('connection.execute').with(no_args).with('SELECT * FROM pg_last_xlog_receive_location() as result').and_return(['result' => 'fake'])
+            allow(ActiveRecord::Base).to receive_message_chain('connection.execute').with(no_args).with('SELECT * FROM pg_last_wal_receive_lsn() as result').and_return(['result' => 'fake'])
             allow(ActiveRecord::Base).to receive_message_chain('connection.select_values').with(no_args).with('SELECT pid FROM pg_stat_wal_receiver').and_return([])
 
             expect(subject.perform_checks).to match(/Geo node does not appear to be replicating the database from the primary node/)
@@ -78,7 +77,6 @@ RSpec.describe Gitlab::Geo::HealthCheck, :geo do
           it 'returns an error when replication is not working' do
             allow(subject).to receive(:streaming_replication_enabled?).and_return(false)
             allow(subject).to receive(:archive_recovery_replication_enabled?).and_return(true)
-            allow(Gitlab::Database).to receive(:pg_last_xact_replay_timestamp).and_return('pg_last_xact_replay_timestamp')
             allow(ActiveRecord::Base).to receive_message_chain('connection.execute').with(no_args).with('SELECT * FROM pg_last_xact_replay_timestamp() as result').and_return([{ 'result' => nil }])
 
             expect(subject.perform_checks).to match(/Geo node does not appear to be replicating the database from the primary node/)

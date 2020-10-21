@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class GeoReplication < Grape::API::Instance
+  class GeoReplication < ::API::Base
     include PaginationParams
     include APIGuard
     include ::Gitlab::Utils::StrongMemoize

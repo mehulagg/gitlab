@@ -1,4 +1,4 @@
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { s__ } from '~/locale';
 
 import * as epicUtils from '../utils/epic_utils';

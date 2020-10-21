@@ -1,14 +1,15 @@
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
-import flash from '~/flash';
+import { GlModal, GlButton } from '@gitlab/ui';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __, sprintf, s__ } from '~/locale';
-import { GlModal } from '@gitlab/ui';
 import { modalTypes } from '../../constants';
 import { trimPathComponents, getPathParent } from '../../utils';
 
 export default {
   components: {
     GlModal,
+    GlButton,
   },
   data() {
     return {
@@ -151,18 +152,20 @@ export default {
           v-model.trim="entryName"
           type="text"
           class="form-control"
+          data-testid="file-name-field"
           data-qa-selector="file_name_field"
           :placeholder="placeholder"
         />
         <ul v-if="isCreatingNewFile" class="file-templates gl-mt-3 list-inline qa-template-list">
           <li v-for="(template, index) in templateTypes" :key="index" class="list-inline-item">
-            <button
-              type="button"
-              class="btn btn-missing p-1 pr-2 pl-2"
+            <gl-button
+              variant="dashed"
+              category="secondary"
+              class="p-1 pr-2 pl-2"
               @click="createFromTemplate(template)"
             >
               {{ template.name }}
-            </button>
+            </gl-button>
           </li>
         </ul>
       </div>

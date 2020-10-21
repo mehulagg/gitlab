@@ -3,7 +3,7 @@ import * as types from 'ee/billings/stores/modules/subscription/mutation_types';
 import mutations from 'ee/billings/stores/modules/subscription/mutations';
 import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import mockSubscriptionData from '../../../mock_data';
+import { mockDataSubscription } from '../../../mock_data';
 
 describe('EE billings subscription module mutations', () => {
   let state;
@@ -29,12 +29,12 @@ describe('EE billings subscription module mutations', () => {
       mutations[types.REQUEST_SUBSCRIPTION](state);
     });
 
-    it('sets isLoading to true', () => {
-      expect(state.isLoading).toBeTruthy();
+    it('sets isLoadingSubscription to true', () => {
+      expect(state.isLoadingSubscription).toBeTruthy();
     });
 
-    it('sets hasError to false', () => {
-      expect(state.hasError).toBeFalsy();
+    it('sets hasErrorSubscription to false', () => {
+      expect(state.hasErrorSubscription).toBeFalsy();
     });
   });
 
@@ -52,17 +52,17 @@ describe('EE billings subscription module mutations', () => {
 
     describe.each`
       desc                        | subscription                  | tableKey
-      ${'with Gold subscription'} | ${mockSubscriptionData.gold}  | ${TABLE_TYPE_DEFAULT}
-      ${'with Free plan'}         | ${mockSubscriptionData.free}  | ${TABLE_TYPE_FREE}
-      ${'with Gold trial'}        | ${mockSubscriptionData.trial} | ${TABLE_TYPE_TRIAL}
+      ${'with Gold subscription'} | ${mockDataSubscription.gold}  | ${TABLE_TYPE_DEFAULT}
+      ${'with Free plan'}         | ${mockDataSubscription.free}  | ${TABLE_TYPE_FREE}
+      ${'with Gold trial'}        | ${mockDataSubscription.trial} | ${TABLE_TYPE_TRIAL}
     `('$desc', ({ subscription, tableKey }) => {
       beforeEach(() => {
-        state.isLoading = true;
+        state.isLoadingSubscription = true;
         mutations[types.RECEIVE_SUBSCRIPTION_SUCCESS](state, subscription);
       });
 
-      it('sets isLoading to false', () => {
-        expect(state.isLoading).toBeFalsy();
+      it('sets isLoadingSubscription to false', () => {
+        expect(state.isLoadingSubscription).toBeFalsy();
       });
 
       it('sets plan', () => {
@@ -82,12 +82,12 @@ describe('EE billings subscription module mutations', () => {
       mutations[types.RECEIVE_SUBSCRIPTION_ERROR](state);
     });
 
-    it('sets isLoading to false', () => {
-      expect(state.isLoading).toBeFalsy();
+    it('sets isLoadingSubscription to false', () => {
+      expect(state.isLoadingSubscription).toBeFalsy();
     });
 
-    it('sets hasError to true', () => {
-      expect(state.hasError).toBeTruthy();
+    it('sets hasErrorSubscription to true', () => {
+      expect(state.hasErrorSubscription).toBeTruthy();
     });
   });
 });

@@ -1,7 +1,7 @@
 <script>
 import { GlLoadingIcon, GlModal } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import SmartInterval from '~/smart_interval';
 
 import eventHub from '../event_hub';

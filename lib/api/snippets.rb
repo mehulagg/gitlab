@@ -2,10 +2,8 @@
 
 module API
   # Snippets API
-  class Snippets < Grape::API::Instance
+  class Snippets < ::API::Base
     include PaginationParams
-
-    before { authenticate! }
 
     resource :snippets do
       helpers Helpers::SnippetsHelpers
@@ -23,7 +21,7 @@ module API
         end
       end
 
-      desc 'Get a snippets list for authenticated user' do
+      desc 'Get a snippets list for an authenticated user' do
         detail 'This feature was introduced in GitLab 8.15.'
         success Entities::Snippet
       end
@@ -31,6 +29,8 @@ module API
         use :pagination
       end
       get do
+        authenticate!
+
         present paginate(snippets_for_current_user), with: Entities::Snippet, current_user: current_user
       end
 
@@ -42,6 +42,8 @@ module API
         use :pagination
       end
       get 'public' do
+        authenticate!
+
         present paginate(public_snippets), with: Entities::PersonalSnippet, current_user: current_user
       end
 
@@ -74,14 +76,11 @@ module API
         use :create_file_params
       end
       post do
+        authenticate!
+
         authorize! :create_snippet
 
-        attrs = declared_params(include_missing: false).tap do |create_args|
-          create_args[:request] = request
-          create_args[:api] = true
-
-          process_file_args(create_args)
-        end
+        attrs = process_create_params(declared_params(include_missing: false))
 
         service_response = ::Snippets::CreateService.new(nil, current_user, attrs).execute
         snippet = service_response.payload[:snippet]
@@ -99,25 +98,34 @@ module API
         detail 'This feature was introduced in GitLab 8.15.'
         success Entities::PersonalSnippet
       end
+
       params do
         requires :id, type: Integer, desc: 'The ID of a snippet'
-        optional :title, type: String, allow_blank: false, desc: 'The title of a snippet'
-        optional :file_name, type: String, desc: 'The name of a snippet file'
         optional :content, type: String, allow_blank: false, desc: 'The content of a snippet'
         optional :description, type: String, desc: 'The description of a snippet'
+        optional :file_name, type: String, desc: 'The name of a snippet file'
+        optional :title, type: String, allow_blank: false, desc: 'The title of a snippet'
         optional :visibility, type: String,
                               values: Gitlab::VisibilityLevel.string_values,
                               desc: 'The visibility of the snippet'
-        at_least_one_of :title, :file_name, :content, :visibility
+
+        use :update_file_params
+        use :minimum_update_params
       end
       put ':id' do
+        authenticate!
+
         snippet = snippets_for_current_user.find_by_id(params.delete(:id))
         break not_found!('Snippet') unless snippet
 
         authorize! :update_snippet, snippet
 
-        attrs = declared_params(include_missing: false).merge(request: request, api: true)
+        validate_params_for_multiple_files(snippet)
+
+        attrs = process_update_params(declared_params(include_missing: false))
+
         service_response = ::Snippets::UpdateService.new(nil, current_user, attrs).execute(snippet)
+
         snippet = service_response.payload[:snippet]
 
         if service_response.success?
@@ -137,6 +145,8 @@ module API
         requires :id, type: Integer, desc: 'The ID of a snippet'
       end
       delete ':id' do
+        authenticate!
+
         snippet = snippets_for_current_user.find_by_id(params.delete(:id))
         break not_found!('Snippet') unless snippet
 

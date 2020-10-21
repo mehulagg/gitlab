@@ -1,8 +1,9 @@
 import { shallowMount, mount } from '@vue/test-utils';
-import { ESC_KEY, ESC_KEY_IE11 } from '~/lib/utils/keys';
-import { objectToQuery } from '~/lib/utils/url_utility';
 import VueDraggable from 'vuedraggable';
 import MockAdapter from 'axios-mock-adapter';
+import { TEST_HOST } from 'helpers/test_constants';
+import { ESC_KEY } from '~/lib/utils/keys';
+import { objectToQuery } from '~/lib/utils/url_utility';
 import axios from '~/lib/utils/axios_utils';
 import { dashboardEmptyStates, metricStates } from '~/monitoring/constants';
 import Dashboard from '~/monitoring/components/dashboard.vue';
@@ -29,8 +30,7 @@ import {
   metricsDashboardPanelCount,
   dashboardProps,
 } from '../fixture_data';
-import createFlash from '~/flash';
-import { TEST_HOST } from 'helpers/test_constants';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -566,15 +566,6 @@ describe('Dashboard', () => {
           undefined,
         );
       });
-
-      it('restores dashboard from full screen by typing the Escape key on IE11', () => {
-        mockKeyup(ESC_KEY_IE11);
-
-        expect(store.dispatch).toHaveBeenCalledWith(
-          `monitoringDashboard/clearExpandedPanel`,
-          undefined,
-        );
-      });
     });
   });
 
@@ -654,7 +645,7 @@ describe('Dashboard', () => {
 
         it('it enables draggables', () => {
           expect(findRearrangeButton().attributes('pressed')).toBeTruthy();
-          expect(findEnabledDraggables()).toEqual(findDraggables());
+          expect(findEnabledDraggables().wrappers).toEqual(findDraggables().wrappers);
         });
 
         it('metrics can be swapped', () => {
@@ -677,7 +668,11 @@ describe('Dashboard', () => {
         });
 
         it('shows a remove button, which removes a panel', () => {
-          expect(findFirstDraggableRemoveButton().isEmpty()).toBe(false);
+          expect(
+            findFirstDraggableRemoveButton()
+              .find('a')
+              .exists(),
+          ).toBe(true);
 
           expect(findDraggablePanels().length).toEqual(metricsDashboardPanelCount);
           findFirstDraggableRemoveButton().trigger('click');
@@ -712,8 +707,7 @@ describe('Dashboard', () => {
     });
 
     it('renders correctly', () => {
-      expect(wrapper.isVueInstance()).toBe(true);
-      expect(wrapper.exists()).toBe(true);
+      expect(wrapper.html()).not.toBe('');
     });
   });
 

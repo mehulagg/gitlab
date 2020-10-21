@@ -1,7 +1,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import { getLocationHash, doesHashExistInUrl } from '../../lib/utils/url_utility';
-import Flash from '../../flash';
+import { deprecatedCreateFlash as Flash } from '../../flash';
 import * as constants from '../constants';
 import eventHub from '../event_hub';
 import noteableNote from './noteable_note.vue';
@@ -73,6 +73,7 @@ export default {
       'userCanReply',
       'discussionTabCounter',
       'sortDirection',
+      'timelineEnabled',
     ]),
     sortDirDesc() {
       return this.sortDirection === constants.DESC;
@@ -95,7 +96,7 @@ export default {
       return this.discussions;
     },
     canReply() {
-      return this.userCanReply && !this.commentsDisabled;
+      return this.userCanReply && !this.commentsDisabled && !this.timelineEnabled;
     },
     slotKeys() {
       return this.sortDirDesc ? ['form', 'comments'] : ['comments', 'form'];
@@ -252,7 +253,7 @@ export default {
     <ordered-layout :slot-keys="slotKeys">
       <template #form>
         <comment-form
-          v-if="!commentsDisabled"
+          v-if="!(commentsDisabled || timelineEnabled)"
           class="js-comment-form"
           :noteable-type="noteableType"
         />

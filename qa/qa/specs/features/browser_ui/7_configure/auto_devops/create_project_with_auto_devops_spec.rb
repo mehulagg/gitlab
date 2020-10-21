@@ -15,7 +15,7 @@ module QA
       disable_optional_jobs(project)
     end
 
-    describe 'Auto DevOps support', :orchestrated, :kubernetes, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/230927', type: :stale } do
+    describe 'Auto DevOps support', :orchestrated, :kubernetes, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/251090', type: :stale } do
       context 'when rbac is enabled' do
         let(:cluster) { Service::KubernetesCluster.new.create! }
 
@@ -23,7 +23,9 @@ module QA
           cluster&.remove!
         end
 
-        it 'runs auto devops' do
+        it 'runs auto devops', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/702' do
+          skip('Test requires tunnel: see https://gitlab.com/gitlab-org/gitlab/-/issues/251090')
+
           Flow::Login.sign_in
 
           # Set an application secret CI variable (prefixed with K8S_SECRET_)
@@ -116,7 +118,7 @@ module QA
         end
       end
 
-      it 'runs an AutoDevOps pipeline' do
+      it 'runs an AutoDevOps pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/444' do
         Page::Project::Menu.perform(&:click_ci_cd_pipelines)
         Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
 

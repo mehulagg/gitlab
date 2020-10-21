@@ -1,8 +1,8 @@
 <script>
-import { GlTooltipDirective } from '@gitlab/ui';
+import { GlSprintf } from '@gitlab/ui';
 
-import { sprintf, __ } from '~/locale';
-import timeagoMixin from '~/vue_shared/mixins/timeago';
+import { __ } from '~/locale';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 import Approvers from './approvers.vue';
 import BranchDetails from './branch_details.vue';
@@ -12,18 +12,16 @@ import Pagination from '../shared/pagination.vue';
 import Status from './status.vue';
 
 export default {
-  directives: {
-    GlTooltip: GlTooltipDirective,
-  },
   components: {
     Approvers,
     BranchDetails,
+    GlSprintf,
     GridColumnHeading,
     MergeRequest,
     Pagination,
     Status,
+    TimeAgoTooltip,
   },
-  mixins: [timeagoMixin],
   props: {
     mergeRequests: {
       type: Array,
@@ -39,21 +37,14 @@ export default {
     key(id, value) {
       return `${id}-${value}`;
     },
-    timeAgoString(mergedAt) {
-      return sprintf(__('merged %{timeAgo}'), {
-        timeAgo: this.timeFormatted(mergedAt),
-      });
-    },
-    timeTooltip(mergedAt) {
-      return this.tooltipTitle(mergedAt);
-    },
     hasBranchDetails(mergeRequest) {
       return mergeRequest.target_branch && mergeRequest.source_branch;
     },
   },
   strings: {
-    mergeRequestLabel: __('Merge Request'),
     approvalStatusLabel: __('Approval Status'),
+    mergedAtText: __('merged %{timeAgo}'),
+    mergeRequestLabel: __('Merge Request'),
     pipelineStatusLabel: __('Pipeline'),
     updatesLabel: __('Updates'),
   },
@@ -106,11 +97,17 @@ export default {
               uri: mergeRequest.target_branch_uri,
             }"
           />
-          <span class="gl-text-gray-700">
-            <time v-gl-tooltip.bottom="timeTooltip(mergeRequest.merged_at)">{{
-              timeAgoString(mergeRequest.merged_at)
-            }}</time>
-          </span>
+          <time-ago-tooltip
+            :time="mergeRequest.merged_at"
+            tooltip-placement="bottom"
+            class="gl-text-gray-500"
+          >
+            <template #default="{ timeAgo }">
+              <gl-sprintf :message="$options.strings.mergedAtText">
+                <template #timeAgo>{{ timeAgo }}</template>
+              </gl-sprintf>
+            </template>
+          </time-ago-tooltip>
         </div>
       </template>
     </div>

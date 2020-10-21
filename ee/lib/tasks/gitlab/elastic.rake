@@ -91,11 +91,7 @@ namespace :gitlab do
 
     desc "GitLab | Elasticsearch | Zero-downtime cluster reindexing"
     task reindex_cluster: :environment do
-      Elastic::ReindexingTask.create!
-
-      ElasticClusterReindexingCronWorker.perform_async
-
-      puts "Reindexing job was successfully scheduled".color(:green)
+      trigger_cluster_reindexing
     end
 
     desc "GitLab | Elasticsearch | Clear indexing status"
@@ -135,6 +131,16 @@ namespace :gitlab do
       end
 
       count
+    end
+
+    def trigger_cluster_reindexing
+      Elastic::ReindexingTask.create!
+
+      ElasticClusterReindexingCronWorker.perform_async
+
+      puts 'Reindexing job was successfully scheduled'.color(:green)
+    rescue PG::UniqueViolation, ActiveRecord::RecordNotUnique
+      puts 'There is another task in progress. Please wait for it to finish.'.color(:red)
     end
 
     def display_unindexed(projects)

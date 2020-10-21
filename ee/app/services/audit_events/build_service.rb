@@ -11,7 +11,7 @@ module AuditEvents
     end
 
     def execute
-      SecurityEvent.new(payload)
+      AuditEvent.new(payload)
     end
 
     private

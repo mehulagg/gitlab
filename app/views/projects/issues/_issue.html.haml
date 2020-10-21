@@ -6,7 +6,7 @@
         = check_box_tag dom_id(issue, "selected"), nil, false, 'data-id' => issue.id, class: "selected-issuable"
     .issuable-info-container
       .issuable-main-info
-        .issue-title.title.d-flex.align-items-center
+        .issue-title.title
           %span.issue-title-text.js-onboarding-issue-item{ dir: "auto" }
             - if issue.confidential?
               %span.has-tooltip{ title: _('Confidential') }
@@ -35,14 +35,17 @@
           - if issue.due_date
             %span.issuable-due-date.d-none.d-sm-inline-block.has-tooltip{ class: "#{'cred' if issue.overdue?}", title: _('Due date') }
               &nbsp;
-              = icon('calendar')
+              = sprite_icon('calendar')
               = issue.due_date.to_s(:medium)
+
+          = render_if_exists "projects/issues/issue_weight", issue: issue
+          = render_if_exists "projects/issues/health_status", issue: issue
+
           - if issue.labels.any?
             &nbsp;
             - presented_labels_sorted_by_title(issue.labels, issue.project).each do |label|
               = link_to_label(label, small: true)
 
-          = render_if_exists "projects/issues/issue_weight", issue: issue
           = render "projects/issues/issue_estimate", issue: issue
 
       .issuable-meta
@@ -54,7 +57,7 @@
             %li.issuable-status
               = _('CLOSED')
           - if issue.assignees.any?
-            %li
+            %li.gl-display-flex
               = render 'shared/issuable/assignees', project: @project, issuable: issue
 
           = render 'shared/issuable_meta_data', issuable: issue

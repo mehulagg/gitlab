@@ -3,7 +3,7 @@ import {
   relativePathToAbsolute,
   isAbsolute,
   isRootRelative,
-  isBase64DataUrl,
+  isBlobUrl,
 } from '~/lib/utils/url_utility';
 
 export const dataStructure = () => ({
@@ -12,10 +12,7 @@ export const dataStructure = () => ({
   // it can also contain a prefix `pending-` for files opened in review mode
   key: '',
   type: '',
-  projectId: '',
-  branchId: '',
   name: '',
-  url: '',
   path: '',
   tempFile: false,
   tree: [],
@@ -26,7 +23,6 @@ export const dataStructure = () => ({
   staged: false,
   lastCommitSha: '',
   rawPath: '',
-  binary: false,
   raw: '',
   content: '',
   editorRow: 1,
@@ -44,10 +40,7 @@ export const dataStructure = () => ({
 export const decorateData = entity => {
   const {
     id,
-    projectId,
-    branchId,
     type,
-    url,
     name,
     path,
     content = '',
@@ -55,7 +48,6 @@ export const decorateData = entity => {
     active = false,
     opened = false,
     changed = false,
-    binary = false,
     rawPath = '',
     file_lock,
     parentPath = '',
@@ -63,19 +55,15 @@ export const decorateData = entity => {
 
   return Object.assign(dataStructure(), {
     id,
-    projectId,
-    branchId,
     key: `${name}-${type}-${id}`,
     type,
     name,
-    url,
     path,
     tempFile,
     opened,
     active,
     changed,
     content,
-    binary,
     rawPath,
     file_lock,
     parentPath,
@@ -122,14 +110,19 @@ export const createCommitPayload = ({
 }) => ({
   branch,
   commit_message: state.commitMessage || getters.preBuiltCommitMessage,
-  actions: getCommitFiles(rootState.stagedFiles).map(f => ({
-    action: commitActionForFile(f),
-    file_path: f.path,
-    previous_path: f.prevPath || undefined,
-    content: f.prevPath && !f.changed ? null : f.content || undefined,
-    encoding: isBase64DataUrl(f.rawPath) ? 'base64' : 'text',
-    last_commit_id: newBranch || f.deleted || f.prevPath ? undefined : f.lastCommitSha,
-  })),
+  actions: getCommitFiles(rootState.stagedFiles).map(f => {
+    const isBlob = isBlobUrl(f.rawPath);
+    const content = isBlob ? btoa(f.content) : f.content;
+
+    return {
+      action: commitActionForFile(f),
+      file_path: f.path,
+      previous_path: f.prevPath || undefined,
+      content: f.prevPath && !f.changed ? null : content || undefined,
+      encoding: isBlob ? 'base64' : 'text',
+      last_commit_id: newBranch || f.deleted || f.prevPath ? undefined : f.lastCommitSha,
+    };
+  }),
   start_sha: newBranch ? rootGetters.lastCommit.id : undefined,
 });
 
@@ -187,11 +180,6 @@ export const mergeTrees = (fromTree, toTree) => {
   }
 
   return toTree;
-};
-
-export const replaceFileUrl = (url, oldPath, newPath) => {
-  // Add `/-/` so that we don't accidentally replace project path
-  return url.replace(`/-/${oldPath}`, `/-/${newPath}`);
 };
 
 export const swapInStateArray = (state, arr, key, entryPath) =>

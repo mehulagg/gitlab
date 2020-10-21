@@ -25,7 +25,6 @@ RSpec.describe Projects::IssueLinksController do
     end
 
     before do
-      stub_licensed_features(related_issues: true)
       project.add_developer(user)
     end
 
@@ -55,33 +54,30 @@ RSpec.describe Projects::IssueLinksController do
       post :create, params: post_params, as: :json
     end
 
-    context 'when related issues are available on the project' do
-      before do
-        project.add_developer(user)
-        stub_licensed_features(related_issues: true)
-        stub_feature_flags(link_types: true)
-      end
-
-      it 'returns success response' do
-        create_link(user, issue1, issue2)
-
-        expect(response).to have_gitlab_http_status(:ok)
-
-        link = json_response['issuables'].first
-        expect(link['id']).to eq(issue2.id)
-        expect(link['link_type']).to eq('is_blocked_by')
-      end
+    before do
+      project.add_developer(user)
     end
 
-    context 'when related issues are not available on the project' do
+    it 'returns success response' do
+      create_link(user, issue1, issue2)
+
+      expect(response).to have_gitlab_http_status(:ok)
+
+      link = json_response['issuables'].first
+      expect(link['id']).to eq(issue2.id)
+      expect(link['link_type']).to eq('is_blocked_by')
+    end
+
+    context 'when blocked issues is disabled' do
       before do
-        stub_licensed_features(related_issues: false)
+        stub_licensed_features(blocked_issues: false)
       end
 
-      it 'returns 403' do
+      it 'returns failure response' do
         create_link(user, issue1, issue2)
 
         expect(response).to have_gitlab_http_status(:forbidden)
+        expect(json_response['message']).to eq('Blocked issues not available for current license')
       end
     end
   end

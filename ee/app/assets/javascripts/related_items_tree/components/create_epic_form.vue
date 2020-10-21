@@ -1,14 +1,13 @@
 <script>
 import { mapState } from 'vuex';
 
-import { GlDeprecatedButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 
 import { __ } from '~/locale';
 
 export default {
   components: {
-    GlDeprecatedButton,
-    GlLoadingIcon,
+    GlButton,
   },
   props: {
     isSubmitting: {
@@ -62,18 +61,17 @@ export default {
       @keyup.escape.exact="onFormCancel"
     />
     <div class="add-issuable-form-actions clearfix">
-      <gl-deprecated-button
+      <gl-button
         :disabled="isSubmitButtonDisabled"
+        :loading="isSubmitting"
         variant="success"
+        category="primary"
         type="submit"
         class="float-left"
       >
         {{ buttonLabel }}
-        <gl-loading-icon v-if="isSubmitting" :inline="true" />
-      </gl-deprecated-button>
-      <gl-deprecated-button class="float-right" @click="onFormCancel">{{
-        __('Cancel')
-      }}</gl-deprecated-button>
+      </gl-button>
+      <gl-button class="float-right" @click="onFormCancel">{{ __('Cancel') }}</gl-button>
     </div>
   </form>
 </template>

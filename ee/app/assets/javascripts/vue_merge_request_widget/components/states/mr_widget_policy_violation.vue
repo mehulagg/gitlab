@@ -19,7 +19,7 @@ export default {
       </gl-button>
     </div>
     <div class="media-body">
-      <strong class="gl-font-weight-bold gl-text-gray-800 gl-pl-2">
+      <strong class="gl-font-weight-bold gl-text-gray-700 gl-pl-2">
         {{ s__('mrWidget|You can merge after removing denied licenses') }}
       </strong>
     </div>

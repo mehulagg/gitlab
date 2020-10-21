@@ -3,7 +3,7 @@ import $ from 'jquery';
 import Visibility from 'visibilityjs';
 import axios from '~/lib/utils/axios_utils';
 import TaskList from '../../task_list';
-import Flash from '../../flash';
+import { deprecatedCreateFlash as Flash } from '../../flash';
 import Poll from '../../lib/utils/poll';
 import * as types from './mutation_types';
 import * as utils from './utils';
@@ -87,6 +87,7 @@ export const fetchDiscussions = ({ commit, dispatch }, { path, filter, persistFi
 
   return axios.get(path, config).then(({ data }) => {
     commit(types.SET_INITIAL_DISCUSSIONS, data);
+    commit(types.SET_FETCHING_DISCUSSIONS, false);
 
     dispatch('updateResolvableDiscussionsCounts');
   });
@@ -98,8 +99,12 @@ export const updateDiscussion = ({ commit, state }, discussion) => {
   return utils.findNoteObjectById(state.discussions, discussion.id);
 };
 
-export const setDiscussionSortDirection = ({ commit }, direction) => {
-  commit(types.SET_DISCUSSIONS_SORT, direction);
+export const setDiscussionSortDirection = ({ commit }, { direction, persist = true }) => {
+  commit(types.SET_DISCUSSIONS_SORT, { direction, persist });
+};
+
+export const setTimelineView = ({ commit }, enabled) => {
+  commit(types.SET_TIMELINE_VIEW, enabled);
 };
 
 export const setSelectedCommentPosition = ({ commit }, position) => {
@@ -136,6 +141,23 @@ export const updateNote = ({ commit, dispatch }, { endpoint, note }) =>
 
 export const updateOrCreateNotes = ({ commit, state, getters, dispatch }, notes) => {
   const { notesById } = getters;
+  const debouncedFetchDiscussions = isFetching => {
+    if (!isFetching) {
+      commit(types.SET_FETCHING_DISCUSSIONS, true);
+      dispatch('fetchDiscussions', { path: state.notesData.discussionsPath });
+    } else {
+      if (isFetching !== true) {
+        clearTimeout(state.currentlyFetchingDiscussions);
+      }
+
+      commit(
+        types.SET_FETCHING_DISCUSSIONS,
+        setTimeout(() => {
+          dispatch('fetchDiscussions', { path: state.notesData.discussionsPath });
+        }, constants.DISCUSSION_FETCH_TIMEOUT),
+      );
+    }
+  };
 
   notes.forEach(note => {
     if (notesById[note.id]) {
@@ -146,7 +168,7 @@ export const updateOrCreateNotes = ({ commit, state, getters, dispatch }, notes)
       if (discussion) {
         commit(types.ADD_NEW_REPLY_TO_DISCUSSION, note);
       } else if (note.type === constants.DIFF_NOTE) {
-        dispatch('fetchDiscussions', { path: state.notesData.discussionsPath });
+        debouncedFetchDiscussions(state.currentlyFetchingDiscussions);
       } else {
         commit(types.ADD_NEW_NOTE, note);
       }
@@ -457,7 +479,7 @@ export const poll = ({ commit, state, getters, dispatch }) => {
   });
 
   if (!Visibility.hidden()) {
-    eTagPoll.makeRequest();
+    eTagPoll.makeDelayedRequest(2500);
   } else {
     dispatch('fetchData');
   }

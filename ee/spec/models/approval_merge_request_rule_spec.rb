@@ -7,6 +7,12 @@ RSpec.describe ApprovalMergeRequestRule do
 
   subject { create(:approval_merge_request_rule, merge_request: merge_request) }
 
+  describe 'associations' do
+    subject { build_stubbed(:approval_merge_request_rule) }
+
+    it { is_expected.to have_one(:approval_project_rule_project).through(:approval_project_rule) }
+  end
+
   describe 'validations' do
     it 'is valid' do
       expect(build(:approval_merge_request_rule)).to be_valid
@@ -130,9 +136,9 @@ RSpec.describe ApprovalMergeRequestRule do
       end
     end
 
-    describe '.security_report' do
+    describe '.vulnerability_report' do
       it 'returns the correct rules' do
-        expect(described_class.security_report)
+        expect(described_class.vulnerability_report)
           .to contain_exactly(report_approver_rule)
       end
     end
@@ -191,70 +197,6 @@ RSpec.describe ApprovalMergeRequestRule do
 
       it "creates a new rule and saves section when present" do
         expect(subject.section).to eq(entry.section)
-      end
-    end
-  end
-
-  describe '.applicable_to_branch' do
-    let!(:rule) { create(:approval_merge_request_rule, merge_request: merge_request) }
-    let(:branch) { 'stable' }
-
-    subject { described_class.applicable_to_branch(branch) }
-
-    shared_examples_for 'with applicable rules to specified branch' do
-      it { is_expected.to eq([rule]) }
-    end
-
-    context 'when there are no associated source rules' do
-      it_behaves_like 'with applicable rules to specified branch'
-    end
-
-    context 'when there are associated source rules' do
-      let(:source_rule) { create(:approval_project_rule, project: merge_request.target_project) }
-
-      before do
-        rule.update!(approval_project_rule: source_rule)
-      end
-
-      context 'and rule is not overridden' do
-        before do
-          rule.update!(
-            name: source_rule.name,
-            approvals_required: source_rule.approvals_required,
-            users: source_rule.users,
-            groups: source_rule.groups
-          )
-        end
-
-        context 'and there are no associated protected branches to source rule' do
-          it_behaves_like 'with applicable rules to specified branch'
-        end
-
-        context 'and there are associated protected branches to source rule' do
-          before do
-            source_rule.update!(protected_branches: protected_branches)
-          end
-
-          context 'and branch matches' do
-            let(:protected_branches) { [create(:protected_branch, name: branch)] }
-
-            it_behaves_like 'with applicable rules to specified branch'
-          end
-
-          context 'but branch does not match anything' do
-            let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
-
-            it { is_expected.to be_empty }
-          end
-        end
-      end
-
-      context 'but rule is overridden' do
-        before do
-          rule.update!(name: 'Overridden Rule')
-        end
-
-        it_behaves_like 'with applicable rules to specified branch'
       end
     end
   end

@@ -8,6 +8,8 @@ module EE
       expose :scoped_labels_available do |issuable|
         issuable.project&.feature_available?(:scoped_labels)
       end
+
+      expose :supports_weight?, as: :supports_weight
     end
   end
 end

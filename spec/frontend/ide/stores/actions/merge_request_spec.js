@@ -1,7 +1,7 @@
 import MockAdapter from 'axios-mock-adapter';
 import axios from '~/lib/utils/axios_utils';
 import { createStore } from '~/ide/stores';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   getMergeRequestData,
   getMergeRequestChanges,
@@ -453,11 +453,9 @@ describe('IDE store merge request actions', () => {
 
     it('updates activity bar view and gets file data, if changes are found', done => {
       store.state.entries.foo = {
-        url: 'test',
         type: 'blob',
       };
       store.state.entries.bar = {
-        url: 'test',
         type: 'blob',
       };
 

@@ -17,6 +17,10 @@ class MergeRequestDiff < ApplicationRecord
   # diffs to external storage
   EXTERNAL_DIFF_CUTOFF = 7.days.freeze
 
+  # The files_count column is a 2-byte signed integer. Look up the true value
+  # from the database if this sentinel is seen
+  FILES_COUNT_SENTINEL = 2**15 - 1
+
   belongs_to :merge_request
 
   manual_inverse_association :merge_request, :merge_request_diff
@@ -51,14 +55,16 @@ class MergeRequestDiff < ApplicationRecord
   scope :by_commit_sha, ->(sha) do
     joins(:merge_request_diff_commits).where(merge_request_diff_commits: { sha: sha }).reorder(nil)
   end
-  scope :has_diff_files, -> { where(id: MergeRequestDiffFile.select(:merge_request_diff_id)) }
 
   scope :by_project_id, -> (project_id) do
     joins(:merge_request).where(merge_requests: { target_project_id: project_id })
   end
 
   scope :recent, -> { order(id: :desc).limit(100) }
-  scope :files_in_database, -> { where(stored_externally: [false, nil]) }
+
+  scope :files_in_database, -> do
+    where(stored_externally: [false, nil]).where(arel_table[:files_count].gt(0))
+  end
 
   scope :not_latest_diffs, -> do
     merge_requests = MergeRequest.arel_table
@@ -100,6 +106,17 @@ class MergeRequestDiff < ApplicationRecord
     joins(merge_request: :metrics).where(condition)
   end
 
+  scope :latest_diff_for_merge_requests, -> (merge_requests) do
+    inner_select = MergeRequestDiff
+      .default_scoped
+      .distinct
+      .select("FIRST_VALUE(id) OVER (PARTITION BY merge_request_id ORDER BY created_at DESC) as id")
+      .where(merge_request: merge_requests)
+
+    joins("INNER JOIN (#{inner_select.to_sql}) latest_diffs ON latest_diffs.id = merge_request_diffs.id")
+      .includes(:merge_request_diff_commits)
+  end
+
   class << self
     def ids_for_external_storage_migration(limit:)
       return [] unless Gitlab.config.external_diffs.enabled
@@ -115,29 +132,28 @@ class MergeRequestDiff < ApplicationRecord
     end
 
     def ids_for_external_storage_migration_strategy_always(limit:)
-      has_diff_files.files_in_database.limit(limit).pluck(:id)
+      files_in_database.limit(limit).pluck(:id)
     end
 
     def ids_for_external_storage_migration_strategy_outdated(limit:)
       # Outdated is too complex to be a single SQL query, so split into three
       before = EXTERNAL_DIFF_CUTOFF.ago
-      potentials = has_diff_files.files_in_database
 
-      ids = potentials
+      ids = files_in_database
         .old_merged_diffs(before)
         .limit(limit)
         .pluck(:id)
 
       return ids if ids.size >= limit
 
-      ids += potentials
+      ids += files_in_database
         .old_closed_diffs(before)
         .limit(limit - ids.size)
         .pluck(:id)
 
       return ids if ids.size >= limit
 
-      ids + potentials
+      ids + files_in_database
         .not_latest_diffs
         .limit(limit - ids.size)
         .pluck(:id)
@@ -149,10 +165,10 @@ class MergeRequestDiff < ApplicationRecord
   # All diff information is collected from repository after object is created.
   # It allows you to override variables like head_commit_sha before getting diff.
   after_create :save_git_content, unless: :importing?
-  after_create :set_count_columns
   after_create_commit :set_as_latest_diff, unless: :importing?
 
   after_save :update_external_diff_store
+  after_save :set_count_columns
 
   def self.find_by_diff_refs(diff_refs)
     find_by(start_commit_sha: diff_refs.start_sha, head_commit_sha: diff_refs.head_sha, base_commit_sha: diff_refs.base_sha)
@@ -198,6 +214,17 @@ class MergeRequestDiff < ApplicationRecord
       last_commit_sha
     else
       super
+    end
+  end
+
+  def files_count
+    db_value = read_attribute(:files_count)
+
+    case db_value
+    when nil, FILES_COUNT_SENTINEL
+      merge_request_diff_files.count
+    else
+      db_value
     end
   end
 
@@ -264,7 +291,13 @@ class MergeRequestDiff < ApplicationRecord
   end
 
   def commit_shas(limit: nil)
-    merge_request_diff_commits.limit(limit).pluck(:sha)
+    if association(:merge_request_diff_commits).loaded?
+      sorted_diff_commits = merge_request_diff_commits.sort_by { |diff_commit| [diff_commit.id, diff_commit.relative_order] }
+      sorted_diff_commits = sorted_diff_commits.take(limit) if limit
+      sorted_diff_commits.map(&:sha)
+    else
+      merge_request_diff_commits.limit(limit).pluck(:sha)
+    end
   end
 
   def includes_any_commits?(shas)
@@ -422,7 +455,7 @@ class MergeRequestDiff < ApplicationRecord
   # external storage. If external storage isn't an option for this diff, the
   # method is a no-op.
   def migrate_files_to_external_storage!
-    return if stored_externally? || !use_external_diff? || merge_request_diff_files.count == 0
+    return if stored_externally? || !use_external_diff? || files_count == 0
 
     rows = build_merge_request_diff_files(merge_request_diff_files)
     rows = build_external_merge_request_diff_files(rows)
@@ -448,7 +481,7 @@ class MergeRequestDiff < ApplicationRecord
   # If this diff isn't in external storage, the method is a no-op.
   def migrate_files_to_database!
     return unless stored_externally?
-    return if merge_request_diff_files.count == 0
+    return if files_count == 0
 
     rows = convert_external_diffs_to_database
 
@@ -493,6 +526,8 @@ class MergeRequestDiff < ApplicationRecord
   end
 
   def encode_in_base64?(diff_text)
+    return false if diff_text.nil?
+
     (diff_text.encoding == Encoding::BINARY && !diff_text.ascii_only?) ||
       diff_text.include?("\0")
   end
@@ -520,7 +555,7 @@ class MergeRequestDiff < ApplicationRecord
       rows.each do |row|
         data = row.delete(:diff)
         row[:external_diff_offset] = file.pos
-        row[:external_diff_size] = data.bytesize
+        row[:external_diff_size] = data&.bytesize || 0
 
         file.write(data)
       end
@@ -635,7 +670,7 @@ class MergeRequestDiff < ApplicationRecord
     if compare.commits.empty?
       new_attributes[:state] = :empty
     else
-      diff_collection = compare.diffs(Commit.max_diff_options)
+      diff_collection = compare.diffs(Commit.max_diff_options(project: merge_request.project))
       new_attributes[:real_size] = diff_collection.real_size
 
       if diff_collection.any?
@@ -665,7 +700,7 @@ class MergeRequestDiff < ApplicationRecord
   def set_count_columns
     update_columns(
       commits_count: merge_request_diff_commits.size,
-      files_count: merge_request_diff_files.size
+      files_count: [FILES_COUNT_SENTINEL, merge_request_diff_files.size].min
     )
   end
 

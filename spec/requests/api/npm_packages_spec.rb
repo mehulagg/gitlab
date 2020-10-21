@@ -12,7 +12,7 @@ RSpec.describe API::NpmPackages do
   let_it_be(:package, reload: true) { create(:npm_package, project: project) }
   let_it_be(:token) { create(:oauth_access_token, scopes: 'api', resource_owner: user) }
   let_it_be(:personal_access_token) { create(:personal_access_token, user: user) }
-  let_it_be(:job) { create(:ci_build, user: user) }
+  let_it_be(:job, reload: true) { create(:ci_build, user: user, status: :running) }
   let_it_be(:deploy_token) { create(:deploy_token, read_package_registry: true, write_package_registry: true) }
   let_it_be(:project_deploy_token) { create(:project_deploy_token, deploy_token: deploy_token, project: project) }
 
@@ -27,10 +27,17 @@ RSpec.describe API::NpmPackages do
       expect_a_valid_package_response
     end
 
-    it 'returns the package info with job token' do
+    it 'returns the package info with running job token' do
       get_package_with_job_token(package)
 
       expect_a_valid_package_response
+    end
+
+    it 'denies request without running job token' do
+      job.update!(status: :success)
+      get_package_with_job_token(package)
+
+      expect(response).to have_gitlab_http_status(:unauthorized)
     end
 
     it 'denies request without oauth token' do
@@ -81,12 +88,16 @@ RSpec.describe API::NpmPackages do
         it_behaves_like 'returning the npm package info'
 
         context 'with unknown package' do
+          subject { get api("/packages/npm/unknown") }
+
           it 'returns a redirect' do
-            get api("/packages/npm/unknown")
+            subject
 
             expect(response).to have_gitlab_http_status(:found)
             expect(response.headers['Location']).to eq('https://registry.npmjs.org/unknown')
           end
+
+          it_behaves_like 'a gitlab tracking event', described_class.name, 'npm_request_forward'
         end
       end
 
@@ -186,7 +197,7 @@ RSpec.describe API::NpmPackages do
         expect(response.media_type).to eq('application/octet-stream')
       end
 
-      it_behaves_like 'a gitlab tracking event', described_class.name, 'pull_package'
+      it_behaves_like 'a package tracking event', described_class.name, 'pull_package'
     end
 
     context 'private project' do
@@ -294,7 +305,7 @@ RSpec.describe API::NpmPackages do
         context 'with access token' do
           subject { upload_package_with_token(package_name, params) }
 
-          it_behaves_like 'a gitlab tracking event', described_class.name, 'push_package'
+          it_behaves_like 'a package tracking event', described_class.name, 'push_package'
 
           it 'creates npm package with file' do
             expect { subject }

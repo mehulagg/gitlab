@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Secure', :docker, :runner do
+  RSpec.describe 'Secure', :runner do
     describe 'Security Dashboard in a Project' do
       let(:vulnerability_name) { "CVE-2017-18269 in glibc" }
       let(:vulnerability_description) { "Short description to match in specs" }
@@ -59,7 +59,7 @@ module QA
         @runner.remove_via_api!
       end
 
-      it 'shows vulnerability details' do
+      it 'shows vulnerability details', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/949' do
         Flow::Login.sign_in_unless_signed_in
         @project.visit!
         Page::Project::Menu.perform(&:click_on_security_dashboard)

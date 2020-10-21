@@ -1,6 +1,6 @@
 <script>
-import { sprintf, __ } from '~/locale';
 import { GlAvatarLink, GlAvatar, GlAvatarsInline, GlTooltipDirective } from '@gitlab/ui';
+import { sprintf, __ } from '~/locale';
 import { PRESENTABLE_APPROVERS_LIMIT } from '../../constants';
 
 export default {
@@ -47,7 +47,7 @@ export default {
 
 <template>
   <div class="gl-display-flex gl-align-items-center gl-justify-content-end" data-testid="approvers">
-    <span class="gl-text-gray-700">
+    <span class="gl-text-gray-500">
       <template v-if="hasApprovers">
         {{ $options.strings.approvedBy }}
       </template>

@@ -1,7 +1,7 @@
 <script>
 import { GlTable, GlButton, GlModalDirective, GlIcon } from '@gitlab/ui';
-import { s__, __ } from '~/locale';
 import { mapState, mapActions } from 'vuex';
+import { s__, __ } from '~/locale';
 import { ADD_CI_VARIABLE_MODAL_ID } from '../constants';
 import CiVariablePopover from './ci_variable_popover.vue';
 
@@ -46,6 +46,7 @@ export default {
     {
       key: 'actions',
       label: '',
+      tdClass: 'text-right',
       customStyle: { width: '35px' },
     },
   ],
@@ -162,10 +163,7 @@ export default {
         </p>
       </template>
     </gl-table>
-    <div
-      class="ci-variable-actions d-flex justify-content-end"
-      :class="{ 'justify-content-center': !tableIsNotEmpty }"
-    >
+    <div class="ci-variable-actions" :class="{ 'justify-content-center': !tableIsNotEmpty }">
       <gl-button
         v-if="tableIsNotEmpty"
         ref="secret-value-reveal-button"

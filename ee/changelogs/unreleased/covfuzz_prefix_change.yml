@@ -1,5 +1,0 @@
----
-title: Change prefix to COVFUZZ for CI variables related to coverage fuzzing
-merge_request: 38441
-author:
-type: changed

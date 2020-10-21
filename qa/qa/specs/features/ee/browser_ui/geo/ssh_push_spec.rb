@@ -5,12 +5,17 @@ module QA
     describe 'GitLab SSH push' do
       let(:file_name) { 'README.md' }
 
+      key = nil
+
+      after do
+        key&.remove_via_api!
+      end
+
       context 'regular git commit' do
-        it "is replicated to the secondary" do
+        it "is replicated to the secondary", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/686' do
           key_title = "Geo SSH #{Time.now.to_f}"
           file_content = 'This is a Geo project! Commit from primary.'
           project = nil
-          key = nil
 
           QA::Flow::Login.while_signed_in(address: :geo_primary) do
             # Create a new SSH key for the user
@@ -69,11 +74,10 @@ module QA
       end
 
       context 'git-lfs commit' do
-        it "is replicated to the secondary" do
+        it "is replicated to the secondary", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/687' do
           key_title = "Geo SSH LFS #{Time.now.to_f}"
           file_content = 'The rendered file could not be displayed because it is stored in LFS.'
           project = nil
-          key = nil
 
           QA::Flow::Login.while_signed_in(address: :geo_primary) do
             # Create a new SSH key for the user

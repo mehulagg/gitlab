@@ -2,7 +2,7 @@ import $ from 'jquery';
 import AccessDropdown from '~/projects/settings/access_dropdown';
 import axios from '~/lib/utils/axios_utils';
 import AccessorUtilities from '~/lib/utils/accessor';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import CreateItemDropdown from '~/create_item_dropdown';
 import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
 import { __ } from '~/locale';
@@ -107,6 +107,10 @@ export default class ProtectedBranchCreate {
         } else if (item.type === LEVEL_TYPES.GROUP) {
           levelAttributes.push({
             group_id: item.group_id,
+          });
+        } else if (item.type === LEVEL_TYPES.DEPLOY_KEY) {
+          levelAttributes.push({
+            deploy_key_id: item.deploy_key_id,
           });
         }
       });

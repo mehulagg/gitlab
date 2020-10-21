@@ -1,0 +1,9 @@
+query projectIssueCounts($projectPath: ID!, $types: [IssueType!]) {
+  project(fullPath: $projectPath) {
+    issueStatusCounts(types: $types) {
+      opened
+      closed
+      all
+    }
+  }
+}

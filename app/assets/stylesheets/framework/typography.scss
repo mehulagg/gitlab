@@ -84,7 +84,7 @@
     padding: 3px 5px;
     font-size: 11px;
     line-height: 10px;
-    color: $gl-gray-700;
+    color: $gray-700;
     vertical-align: middle;
     background-color: $gray-10;
     border-width: 1px;
@@ -437,10 +437,6 @@
       text-rendering: auto;
       -webkit-font-smoothing: antialiased;
       content: '\f0c6';
-    }
-
-    &:hover::before {
-      text-decoration: none;
     }
 
     &.no-attachment-icon {

@@ -11,7 +11,7 @@ module Audit
     # @option options [Object] :model object being audited
     # @option options [Boolean] :skip_changes whether to record from/to values
     #
-    # @return [SecurityEvent, nil] the resulting object or nil if there is no
+    # @return [AuditEvent, nil] the resulting object or nil if there is no
     #   change detected
     def audit_changes(column, options = {})
       column = options[:column] || column

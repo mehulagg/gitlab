@@ -17,28 +17,6 @@ module EE
         end
       end
 
-      override :log_destroy_event
-      def log_destroy_event
-        super
-
-        log_geo_event(project)
-        log_audit_event(project)
-      end
-
-      def mirror_cleanup(project)
-        return unless project.mirror?
-
-        ::Gitlab::Mirror.decrement_capacity(project.id)
-      end
-
-      def log_geo_event(project)
-        ::Geo::RepositoryDeletedEventStore.new(
-          project,
-          repo_path: project.disk_path,
-          wiki_path: project.wiki.disk_path
-        ).create!
-      end
-
       # Removes physical repository in a Geo replicated secondary node
       # There is no need to do any database operation as it will be
       # replicated by itself.
@@ -56,6 +34,30 @@ module EE
       end
 
       private
+
+      override :destroy_project_related_records
+      def destroy_project_related_records(project)
+        super && log_destroy_events
+      end
+
+      def log_destroy_events
+        log_geo_event(project)
+        log_audit_event(project)
+      end
+
+      def mirror_cleanup(project)
+        return unless project.mirror?
+
+        ::Gitlab::Mirror.decrement_capacity(project.id)
+      end
+
+      def log_geo_event(project)
+        ::Geo::RepositoryDeletedEventStore.new(
+          project,
+          repo_path: project.disk_path,
+          wiki_path: project.wiki.disk_path
+        ).create!
+      end
 
       def log_audit_event(project)
         ::AuditEventService.new(

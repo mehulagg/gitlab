@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
+require 'rspec-parameterized'
+require 'fog/core'
 
 RSpec.describe ObjectStorage::Config do
+  using RSpec::Parameterized::TableSyntax
+
   let(:region) { 'us-east-1' }
   let(:bucket_name) { 'test-bucket' }
-  let(:path_style) { false }
-  let(:use_iam_profile) { false }
   let(:credentials) do
     {
       provider: 'AWS',
       aws_access_key_id: 'AWS_ACCESS_KEY_ID',
       aws_secret_access_key: 'AWS_SECRET_ACCESS_KEY',
-      region: region,
-      path_style: path_style,
-      use_iam_profile: use_iam_profile
+      region: region
     }
   end
 
@@ -36,6 +36,46 @@ RSpec.describe ObjectStorage::Config do
 
   subject { described_class.new(raw_config.as_json) }
 
+  describe '#load_provider' do
+    before do
+      subject.load_provider
+    end
+
+    context 'with AWS' do
+      it 'registers AWS as a provider' do
+        expect(Fog.providers.keys).to include(:aws)
+      end
+    end
+
+    context 'with Google' do
+      let(:credentials) do
+        {
+          provider: 'Google',
+          google_storage_access_key_id: 'GOOGLE_ACCESS_KEY_ID',
+          google_storage_secret_access_key: 'GOOGLE_SECRET_ACCESS_KEY'
+        }
+      end
+
+      it 'registers Google as a provider' do
+        expect(Fog.providers.keys).to include(:google)
+      end
+    end
+
+    context 'with Azure' do
+      let(:credentials) do
+        {
+          provider: 'AzureRM',
+          azure_storage_account_name: 'azuretest',
+          azure_storage_access_key: 'ABCD1234'
+        }
+      end
+
+      it 'registers AzureRM as a provider' do
+        expect(Fog.providers.keys).to include(:azurerm)
+      end
+    end
+  end
+
   describe '#credentials' do
     it { expect(subject.credentials).to eq(credentials) }
   end
@@ -50,6 +90,14 @@ RSpec.describe ObjectStorage::Config do
 
   describe '#bucket' do
     it { expect(subject.bucket).to eq(bucket_name) }
+  end
+
+  describe '#use_iam_profile' do
+    it { expect(subject.use_iam_profile?).to be false }
+  end
+
+  describe '#use_path_style' do
+    it { expect(subject.use_path_style?).to be false }
   end
 
   context 'with unconsolidated settings' do
@@ -68,25 +116,47 @@ RSpec.describe ObjectStorage::Config do
     end
   end
 
-  context 'with IAM profile in use' do
-    let(:use_iam_profile) { true }
+  context 'with IAM profile configured' do
+    where(:value, :expected) do
+      true    | true
+      "true"  | true
+      "yes"   | true
+      false   | false
+      "false" | false
+      "no"    | false
+      nil     | false
+    end
 
-    it '#use_iam_profile? returns true' do
-      expect(subject.use_iam_profile?).to be true
+    with_them do
+      before do
+        credentials[:use_iam_profile] = value
+      end
+
+      it 'coerces the value to a boolean' do
+        expect(subject.use_iam_profile?).to be expected
+      end
     end
   end
 
-  context 'with IAM profile not in use' do
-    it '#use_iam_profile? returns false' do
-      expect(subject.use_iam_profile?).to be false
+  context 'with path style configured' do
+    where(:value, :expected) do
+      true    | true
+      "true"  | true
+      "yes"   | true
+      false   | false
+      "false" | false
+      "no"    | false
+      nil     | false
     end
-  end
 
-  context 'with path style' do
-    let(:path_style) { true }
+    with_them do
+      before do
+        credentials[:path_style] = value
+      end
 
-    it '#use_path_style? returns true' do
-      expect(subject.use_path_style?).to be true
+      it 'coerces the value to a boolean' do
+        expect(subject.use_path_style?).to be expected
+      end
     end
   end
 

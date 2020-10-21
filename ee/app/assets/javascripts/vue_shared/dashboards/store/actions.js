@@ -3,7 +3,7 @@ import { find } from 'lodash';
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
 import Poll from '~/lib/utils/poll';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__, n__, sprintf } from '~/locale';
 import * as types from './mutation_types';
 
@@ -95,17 +95,23 @@ export const receiveAddProjectsToDashboardError = ({ state }) => {
   );
 };
 
-export const fetchProjects = ({ state, dispatch }) => {
+export const fetchProjects = ({ state, dispatch, commit }, page) => {
   if (eTagPoll) return;
 
   dispatch('requestProjects');
 
   eTagPoll = new Poll({
     resource: {
-      fetchProjects: () => axios.get(state.projectEndpoints.list),
+      fetchProjects: () => axios.get(state.projectEndpoints.list, { params: { page } }),
     },
     method: 'fetchProjects',
-    successCallback: ({ data }) => dispatch('receiveProjectsSuccess', data),
+    successCallback: response => {
+      const {
+        data: { projects },
+        headers,
+      } = response;
+      commit(types.RECEIVE_PROJECTS_SUCCESS, { projects, headers });
+    },
     errorCallback: () => dispatch('receiveProjectsError'),
   });
 
@@ -124,10 +130,6 @@ export const fetchProjects = ({ state, dispatch }) => {
 
 export const requestProjects = ({ commit }) => {
   commit(types.REQUEST_PROJECTS);
-};
-
-export const receiveProjectsSuccess = ({ commit }, data) => {
-  commit(types.RECEIVE_PROJECTS_SUCCESS, data.projects);
 };
 
 export const receiveProjectsError = ({ commit }) => {
@@ -197,4 +199,12 @@ export const minimumQueryMessage = ({ commit }) => {
 
 export const setProjects = ({ commit }, projects) => {
   commit(types.SET_PROJECTS, projects);
+};
+
+export const paginateDashboard = ({ dispatch }, newPage) => {
+  return Promise.all([
+    dispatch('stopProjectsPolling'),
+    dispatch('clearProjectsEtagPoll'),
+    dispatch('fetchProjects', newPage),
+  ]);
 };

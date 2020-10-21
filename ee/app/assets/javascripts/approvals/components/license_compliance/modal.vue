@@ -1,8 +1,8 @@
 <script>
 import { mapState } from 'vuex';
 import { GlButton, GlIcon, GlLink, GlSprintf } from '@gitlab/ui';
-import { __ } from '~/locale';
 import { APPROVALS_MODAL } from 'ee/approvals/stores/modules/license_compliance';
+import { __ } from '~/locale';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
 import RuleForm from '../rule_form.vue';
 

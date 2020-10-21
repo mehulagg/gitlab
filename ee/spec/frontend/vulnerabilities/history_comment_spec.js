@@ -3,7 +3,7 @@ import MockAdapter from 'axios-mock-adapter';
 import HistoryComment from 'ee/vulnerabilities/components/history_comment.vue';
 import HistoryCommentEditor from 'ee/vulnerabilities/components/history_comment_editor.vue';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 const mockAxios = new MockAdapter(axios);
@@ -24,6 +24,7 @@ describe('History Comment', () => {
   const comment = {
     id: 'id',
     note: 'note',
+    note_html: '<p>note</p>',
     author: {},
     updated_at: new Date().toISOString(),
     current_user: {
@@ -63,7 +64,7 @@ describe('History Comment', () => {
   // whichever one exists and click it to show the editor.
   const showEditView = () => {
     if (addCommentButton().exists()) {
-      addCommentButton().vm.$emit('click');
+      addCommentButton().trigger('click');
     } else {
       editButton().vm.$emit('click');
     }
@@ -142,7 +143,7 @@ describe('History Comment', () => {
       expectExistingCommentView();
       expect(eventItem().props('author')).toBe(comment.author);
       expect(eventItem().props('createdAt')).toBe(comment.updated_at);
-      expect(eventItem().element.innerHTML).toContain(comment.note);
+      expect(eventItem().element.innerHTML).toContain(comment.note_html);
     });
 
     it('shows the comment editor when the edit button is clicked', () => {
@@ -160,7 +161,7 @@ describe('History Comment', () => {
         })
         .then(() => {
           expectExistingCommentView();
-          expect(eventItem().element.innerHTML).toContain(comment.note);
+          expect(eventItem().element.innerHTML).toContain(comment.note_html);
         });
     });
 
@@ -181,7 +182,7 @@ describe('History Comment', () => {
         })
         .then(() => {
           expectExistingCommentView();
-          expect(eventItem().element.innerHTML).toContain(comment.note);
+          expect(eventItem().element.innerHTML).toContain(comment.note_html);
         });
     });
 
@@ -196,8 +197,8 @@ describe('History Comment', () => {
           return wrapper.vm.$nextTick();
         })
         .then(() => {
-          expect(confirmDeleteButton().attributes('disabled')).toBeTruthy();
-          expect(cancelDeleteButton().attributes('disabled')).toBeTruthy();
+          expect(confirmDeleteButton().props('loading')).toBe(true);
+          expect(cancelDeleteButton().props('disabled')).toBe(true);
           return axios.waitForAll();
         })
         .then(() => {

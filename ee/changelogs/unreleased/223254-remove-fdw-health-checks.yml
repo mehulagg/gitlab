@@ -1,5 +1,0 @@
----
-title: 'Geo: Remove FDW warnings from health checks'
-merge_request: 38620
-author:
-type: removed

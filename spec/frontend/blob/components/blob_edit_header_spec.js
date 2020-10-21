@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import BlobEditHeader from '~/blob/components/blob_edit_header.vue';
 import { GlFormInput, GlButton } from '@gitlab/ui';
+import BlobEditHeader from '~/blob/components/blob_edit_header.vue';
 
 describe('Blob Header Editing', () => {
   let wrapper;
@@ -31,7 +31,7 @@ describe('Blob Header Editing', () => {
     });
 
     it('contains a form input field', () => {
-      expect(wrapper.contains(GlFormInput)).toBe(true);
+      expect(wrapper.find(GlFormInput).exists()).toBe(true);
     });
 
     it('does not show delete button', () => {
@@ -56,9 +56,9 @@ describe('Blob Header Editing', () => {
   });
 
   describe.each`
-    props                                    | expectedDisabled
-    ${{ showDelete: true }}                  | ${true}
-    ${{ showDelete: true, canDelete: true }} | ${false}
+    props                                     | expectedDisabled
+    ${{ showDelete: true }}                   | ${false}
+    ${{ showDelete: true, canDelete: false }} | ${true}
   `('with $props', ({ props, expectedDisabled }) => {
     beforeEach(() => {
       createComponent(props);

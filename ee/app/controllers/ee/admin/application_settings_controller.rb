@@ -9,7 +9,10 @@ module EE
       include ::Admin::MergeRequestApprovalSettingsHelper
 
       prepended do
-        before_action :elasticsearch_reindexing_task, only: [:integrations]
+        before_action :elasticsearch_reindexing_task, only: [:general]
+
+        feature_category :provision, [:seat_link_payload]
+        feature_category :source_code_management, [:templates]
 
         def elasticsearch_reindexing_task
           @elasticsearch_reindexing_task = Elastic::ReindexingTask.last

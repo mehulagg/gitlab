@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class Groups::Analytics::CoverageReportsController < Groups::Analytics::ApplicationController
-  check_feature_flag Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG
-
   COVERAGE_PARAM = 'coverage'.freeze
 
   before_action :load_group
@@ -10,7 +8,10 @@ class Groups::Analytics::CoverageReportsController < Groups::Analytics::Applicat
 
   def index
     respond_to do |format|
-      format.csv { send_data(render_csv(report_results), type: 'text/csv; charset=utf-8') }
+      format.csv do
+        track_event(:download_code_coverage_csv, download_tracker_params)
+        send_data(render_csv(report_results), type: 'text/csv; charset=utf-8')
+      end
     end
   end
 
@@ -36,9 +37,17 @@ class Groups::Analytics::CoverageReportsController < Groups::Analytics::Applicat
     {
       current_user: current_user,
       group: @group,
+      project_ids: params.permit(project_ids: [])[:project_ids],
       ref_path: params.require(:ref_path),
       start_date: Date.parse(params.require(:start_date)),
       end_date: Date.parse(params.require(:end_date))
+    }
+  end
+
+  def download_tracker_params
+    {
+      label: 'group_id',
+      value: @group.id
     }
   end
 end

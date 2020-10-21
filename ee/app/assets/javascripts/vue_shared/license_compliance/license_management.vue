@@ -1,9 +1,9 @@
 <script>
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { GlButton, GlLoadingIcon, GlIcon, GlPopover } from '@gitlab/ui';
-import { s__ } from '~/locale';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
+import { s__ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import AddLicenseForm from './components/add_license_form.vue';
 import AdminLicenseManagementRow from './components/admin_license_management_row.vue';
 import LicenseManagementRow from './components/license_management_row.vue';

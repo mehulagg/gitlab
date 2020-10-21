@@ -7,6 +7,7 @@ module Types
     connection_type_class(Types::CountableConnectionType)
 
     implements(Types::Notes::NoteableType)
+    implements(Types::CurrentUserTodos)
 
     authorize :read_merge_request
 
@@ -79,7 +80,7 @@ module Types
           description: 'Error message due to a merge error'
     field :allow_collaboration, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates if members of the target project can push to the fork'
-    field :should_be_rebased, GraphQL::BOOLEAN_TYPE, method: :should_be_rebased?, null: false,
+    field :should_be_rebased, GraphQL::BOOLEAN_TYPE, method: :should_be_rebased?, null: false, calls_gitaly: true,
           description: 'Indicates if the merge request will be rebased'
     field :rebase_commit_sha, GraphQL::STRING_TYPE, null: true,
           description: 'Rebase commit SHA of the merge request'
@@ -112,6 +113,7 @@ module Types
     field :head_pipeline, Types::Ci::PipelineType, null: true, method: :actual_head_pipeline,
           description: 'The pipeline running on the branch HEAD of the merge request'
     field :pipelines, Types::Ci::PipelineType.connection_type,
+          null: true,
           description: 'Pipelines for the merge request',
           resolver: Resolvers::MergeRequestPipelinesResolver
 
@@ -145,6 +147,29 @@ module Types
           description: Types::TaskCompletionStatus.description
     field :commit_count, GraphQL::INT_TYPE, null: true,
           description: 'Number of commits in the merge request'
+    field :conflicts, GraphQL::BOOLEAN_TYPE, null: false, method: :cannot_be_merged?,
+          description: 'Indicates if the merge request has conflicts'
+    field :auto_merge_enabled, GraphQL::BOOLEAN_TYPE, null: false,
+          description: 'Indicates if auto merge is enabled for the merge request'
+
+    field :approved_by, Types::UserType.connection_type, null: true,
+          description: 'Users who approved the merge request'
+
+    def approved_by
+      object.approved_by_users
+    end
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def user_notes_count
+      BatchLoader::GraphQL.for(object.id).batch(key: :merge_request_user_notes_count) do |ids, loader, args|
+        counts = Note.where(noteable_type: 'MergeRequest', noteable_id: ids).user.group(:noteable_id).count
+
+        ids.each do |id|
+          loader.call(id, counts[id] || 0)
+        end
+      end
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     def diff_stats(path: nil)
       stats = Array.wrap(object.diff_stats&.to_a)
@@ -157,20 +182,11 @@ module Types
     end
 
     def diff_stats_summary
-      nil_stats = { additions: 0, deletions: 0, file_count: 0 }
-      return nil_stats unless object.diff_stats.present?
-
-      object.diff_stats.each_with_object(nil_stats) do |status, hash|
-        hash.merge!(additions: status.additions, deletions: status.deletions, file_count: 1) { |_, x, y| x + y }
-      end
+      BatchLoaders::MergeRequestDiffSummaryBatchLoader.load_for(object)
     end
 
     def commit_count
       object&.metrics&.commits_count
-    end
-
-    def approvers
-      object.approver_users
     end
   end
 end

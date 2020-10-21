@@ -6,9 +6,11 @@ class Admin::ServicesController < Admin::ApplicationController
   before_action :service, only: [:edit, :update]
   before_action :whitelist_query_limiting, only: [:index]
 
+  feature_category :integrations
+
   def index
     @services = Service.find_or_create_templates.sort_by(&:title)
-    @existing_instance_types = Service.instances.pluck(:type) # rubocop: disable CodeReuse/ActiveRecord
+    @existing_instance_types = Service.for_instance.pluck(:type) # rubocop: disable CodeReuse/ActiveRecord
   end
 
   def edit

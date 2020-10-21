@@ -3,9 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe Groups::AuditEventsController do
-  let(:user) { create(:user) }
-  let(:owner) { create(:user) }
-  let(:group) { create(:group, :private) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:owner) { create(:user) }
+  let_it_be(:group) { create(:group, :private) }
+  let_it_be(:events) { create_list(:group_audit_event, 5, entity_id: group.id) }
 
   describe 'GET #index' do
     let(:sort) { nil }
@@ -25,7 +26,7 @@ RSpec.describe Groups::AuditEventsController do
 
         context 'when audit_events feature is available' do
           let(:level) { Gitlab::Audit::Levels::Group.new(group: group) }
-          let(:audit_logs_params) { ActionController::Parameters.new(sort: '', entity_type: '', entity_id: '').permit! }
+          let(:audit_logs_params) { ActionController::Parameters.new(sort: '', entity_type: '', entity_id: '', created_after: Date.current.beginning_of_month, created_before: Date.current.end_of_day).permit! }
 
           before do
             stub_licensed_features(audit_events: true)
@@ -63,7 +64,7 @@ RSpec.describe Groups::AuditEventsController do
             context 'when the author entity type is specified' do
               let(:entity_type) { 'Author' }
               let(:entity_id) { 1 }
-              let(:audit_logs_params) { ActionController::Parameters.new(sort: '', author_id: '1').permit! }
+              let(:audit_logs_params) { ActionController::Parameters.new(sort: '', author_id: '1', created_after: Date.current.beginning_of_month, created_before: Date.current.end_of_day).permit! }
 
               it_behaves_like 'AuditLogFinder params'
             end
@@ -74,12 +75,11 @@ RSpec.describe Groups::AuditEventsController do
               it 'orders by id descending' do
                 request
 
-                expect(assigns(:events)).to eq(group.audit_events.order(id: :desc))
-              end
-            end
+                actual_event_ids = assigns(:events).map { |event| event[:id] }
+                expected_event_ids = events.map(&:id).reverse
 
-            before do
-              create_list(:group_audit_event, 5, entity_id: group.id)
+                expect(actual_event_ids).to eq(expected_event_ids)
+              end
             end
 
             context 'when no sort order is specified' do
@@ -98,7 +98,10 @@ RSpec.describe Groups::AuditEventsController do
               it 'orders by id ascending' do
                 request
 
-                expect(assigns(:events)).to eq(group.audit_events.order(id: :asc))
+                actual_event_ids = assigns(:events).map { |event| event[:id] }
+                expected_event_ids = events.map(&:id)
+
+                expect(actual_event_ids).to eq(expected_event_ids)
               end
             end
 
@@ -110,11 +113,29 @@ RSpec.describe Groups::AuditEventsController do
           end
 
           context 'pagination' do
-            it 'paginates audit events, without casting a count query' do
+            it 'sets instance variables' do
               request
 
-              expect(assigns(:events)).to be_kind_of(Kaminari::PaginatableWithoutCount)
+              expect(assigns(:is_last_page)).to be(true)
             end
+
+            it 'paginates audit events, without casting a count query' do
+              serializer = instance_spy(AuditEventSerializer)
+              allow(AuditEventSerializer).to receive(:new).and_return(serializer)
+
+              request
+
+              expect(serializer).to have_received(:represent).with(kind_of(Kaminari::PaginatableWithoutCount))
+            end
+          end
+
+          it 'tracks search event', :snowplow do
+            request
+
+            expect_snowplow_event(
+              category: 'Groups::AuditEventsController',
+              action: 'search_audit_event'
+            )
           end
         end
       end

@@ -13,24 +13,24 @@ RSpec.describe Gitlab::Geo::GeoNodeStatusCheck do
   describe '#replication_verification_complete?' do
     before do
       allow(Gitlab.config.geo.registry_replication).to receive(:enabled).and_return(true)
-
-      stub_feature_flags(geo_terraform_state_replication: false)
     end
 
     it 'prints messages for all verification checks' do
-      [
-        /Repositories/,
-        /Verified Repositories/,
-        /Wikis/,
-        /Verified Wikis/,
-        /LFS Objects/,
-        /Attachments/,
-        /CI job artifacts/,
-        /Container repositories/,
-        /Design repositories/,
-        /Repositories Checked/,
-        /Package Files Checked/
-      ].each do |text|
+      checks = [
+        /Repositories: /,
+        /Verified Repositories: /,
+        /Wikis: /,
+        /Verified Wikis: /,
+        /LFS Objects: /,
+        /Attachments: /,
+        /CI job artifacts: /,
+        /Container repositories: /,
+        /Design repositories: /,
+        /Repositories Checked: /
+      ] + Gitlab::Geo.enabled_replicator_classes.map { |k| /#{k.replicable_title_plural} Checked:/ } +
+          Gitlab::Geo.enabled_replicator_classes.map { |k| /#{k.replicable_title_plural}:/ }
+
+      checks.each do |text|
         expect { subject.print_replication_verification_status }.to output(text).to_stdout
       end
     end

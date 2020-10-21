@@ -85,5 +85,47 @@ describe('GeoNodesStore', () => {
 
       expect(syncStatusNames).toEqual(replicableTypesNames);
     });
+
+    describe.each`
+      description          | hasReplicable | mockVerificationDetails
+      ${'null values'}     | ${false}      | ${{ test_type_count: null, test_type_verified_count: null, test_type_verification_failed_count: null }}
+      ${'string values'}   | ${true}       | ${{ test_type_count: '10', test_type_verified_count: '5', test_type_verification_failed_count: '5' }}
+      ${'number values'}   | ${true}       | ${{ test_type_count: 10, test_type_verified_count: 5, test_type_verification_failed_count: 5 }}
+      ${'0 string values'} | ${true}       | ${{ test_type_count: '0', test_type_verified_count: '0', test_type_verification_failed_count: '0' }}
+      ${'0 number values'} | ${true}       | ${{ test_type_count: 0, test_type_verified_count: 0, test_type_verification_failed_count: 0 }}
+    `(`verificationStatuses`, ({ description, hasReplicable, mockVerificationDetails }) => {
+      describe(`when node verification details contains ${description}`, () => {
+        it(`does ${hasReplicable ? '' : 'not'} contain replicable test_type`, () => {
+          const nodeDetails = GeoNodesStore.formatNodeDetails(mockVerificationDetails, [
+            { namePlural: 'test_type' },
+          ]);
+
+          expect(
+            nodeDetails.verificationStatuses.some(({ namePlural }) => namePlural === 'test_type'),
+          ).toBe(hasReplicable);
+        });
+      });
+    });
+
+    describe.each`
+      description          | hasReplicable | mockChecksumDetails
+      ${'null values'}     | ${false}      | ${{ test_type_count: null, test_type_checksummed_count: null, test_type_checksum_failed_count: null }}
+      ${'string values'}   | ${true}       | ${{ test_type_count: '10', test_type_checksummed_count: '5', test_type_checksum_failed_count: '5' }}
+      ${'number values'}   | ${true}       | ${{ test_type_count: 10, test_type_checksummed_count: 5, test_type_checksum_failed_count: 5 }}
+      ${'0 string values'} | ${true}       | ${{ test_type_count: '0', test_type_checksummed_count: '0', test_type_checksum_failed_count: '0' }}
+      ${'0 number values'} | ${true}       | ${{ test_type_count: 0, test_type_checksummed_count: 0, test_type_checksum_failed_count: 0 }}
+    `(`checksumStatuses`, ({ description, hasReplicable, mockChecksumDetails }) => {
+      describe(`when node checksum details contains ${description}`, () => {
+        it(`does ${hasReplicable ? '' : 'not'} contain replicable test_type`, () => {
+          const nodeDetails = GeoNodesStore.formatNodeDetails(mockChecksumDetails, [
+            { namePlural: 'test_type' },
+          ]);
+
+          expect(
+            nodeDetails.checksumStatuses.some(({ namePlural }) => namePlural === 'test_type'),
+          ).toBe(hasReplicable);
+        });
+      });
+    });
   });
 });

@@ -21,14 +21,17 @@ class MergeRequest < ApplicationRecord
   include MilestoneEventable
   include StateEventable
   include ApprovableBase
+  include IdInOrdered
 
   extend ::Gitlab::Utils::Override
 
   sha_attribute :squash_commit_sha
+  sha_attribute :merge_ref_sha
 
   self.reactive_cache_key = ->(model) { [model.project.id, model.iid] }
   self.reactive_cache_refresh_interval = 10.minutes
   self.reactive_cache_lifetime = 10.minutes
+  self.reactive_cache_work_type = :no_dependency
 
   SORTING_PREFERENCE_FIELD = :merge_requests_sort
 
@@ -80,6 +83,8 @@ class MergeRequest < ApplicationRecord
 
   has_many :merge_request_assignees
   has_many :assignees, class_name: "User", through: :merge_request_assignees
+  has_many :merge_request_reviewers
+  has_many :reviewers, class_name: "User", through: :merge_request_reviewers
   has_many :user_mentions, class_name: "MergeRequestUserMention", dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
   has_many :deployment_merge_requests
@@ -105,7 +110,6 @@ class MergeRequest < ApplicationRecord
 
   after_create :ensure_merge_request_diff
   after_update :clear_memoized_shas
-  after_update :clear_memoized_source_branch_exists
   after_update :reload_diff_if_branch_changed
   after_commit :ensure_metrics, on: [:create, :update], unless: :importing?
   after_commit :expire_etag_cache, unless: :importing?
@@ -117,6 +121,8 @@ class MergeRequest < ApplicationRecord
   # Temporary fields to store compare vars
   # when creating new merge request
   attr_accessor :can_be_created, :compare_commits, :diff_options, :compare
+
+  participant :reviewers
 
   # Keep states definition to be evaluated before the state_machine block to avoid spec failures.
   # If this gets evaluated after, the `merged` and `locked` states which are overrided can be nil.
@@ -250,6 +256,11 @@ class MergeRequest < ApplicationRecord
     joins(:notes).where(notes: { commit_id: sha })
   end
   scope :join_project, -> { joins(:target_project) }
+  scope :join_metrics, -> do
+    query = joins(:metrics)
+    query = query.where(MergeRequest.arel_table[:target_project_id].eq(MergeRequest::Metrics.arel_table[:target_project_id]))
+    query
+  end
   scope :references_project, -> { references(:target_project) }
   scope :with_api_entity_associations, -> {
     preload_routables
@@ -259,10 +270,20 @@ class MergeRequest < ApplicationRecord
                metrics: [:latest_closed_by, :merged_by])
   }
 
+  scope :with_csv_entity_associations, -> { preload(:assignees, :approved_by_users, :author, :milestone, metrics: [:merged_by]) }
+
   scope :by_target_branch_wildcard, ->(wildcard_branch_name) do
     where("target_branch LIKE ?", ApplicationRecord.sanitize_sql_like(wildcard_branch_name).tr('*', '%'))
   end
   scope :by_target_branch, ->(branch_name) { where(target_branch: branch_name) }
+  scope :order_merged_at, ->(direction) do
+    query = join_metrics.order(Gitlab::Database.nulls_last_order('merge_request_metrics.merged_at', direction))
+
+    # Add `merge_request_metrics.merged_at` to the `SELECT` in order to make the keyset pagination work.
+    query.select(*query.arel.projections, MergeRequest::Metrics.arel_table[:merged_at].as('"merge_request_metrics.merged_at"'))
+  end
+  scope :order_merged_at_asc, -> { order_merged_at('ASC') }
+  scope :order_merged_at_desc, -> { order_merged_at('DESC') }
   scope :preload_source_project, -> { preload(:source_project) }
   scope :preload_target_project, -> { preload(:target_project) }
   scope :preload_routables, -> do
@@ -294,7 +315,7 @@ class MergeRequest < ApplicationRecord
   alias_attribute :auto_merge_enabled, :merge_when_pipeline_succeeds
   alias_method :issuing_parent, :target_project
 
-  delegate :active?, to: :head_pipeline, prefix: true, allow_nil: true
+  delegate :active?, :builds_with_coverage, to: :head_pipeline, prefix: true, allow_nil: true
   delegate :success?, :active?, to: :actual_head_pipeline, prefix: true, allow_nil: true
 
   RebaseLockTimeout = Class.new(StandardError)
@@ -319,6 +340,15 @@ class MergeRequest < ApplicationRecord
       .pluck(:target_branch)
   end
 
+  def self.sort_by_attribute(method, excluded_labels: [])
+    case method.to_s
+    when 'merged_at', 'merged_at_asc' then order_merged_at_asc.with_order_id_desc
+    when 'merged_at_desc' then order_merged_at_desc.with_order_id_desc
+    else
+      super
+    end
+  end
+
   def rebase_in_progress?
     rebase_jid.present? && Gitlab::SidekiqStatus.running?(rebase_jid)
   end
@@ -333,7 +363,11 @@ class MergeRequest < ApplicationRecord
   def merge_pipeline
     return unless merged?
 
-    target_project.pipeline_for(target_branch, merge_commit_sha)
+    # When the merge_method is :merge there will be a merge_commit_sha, however
+    # when it is fast-forward there is no merge commit, so we must fall back to
+    # either the squash commit (if the MR was squashed) or the diff head commit.
+    sha = merge_commit_sha || squash_commit_sha || diff_head_sha
+    target_project.latest_pipeline(target_branch, sha)
   end
 
   # Pattern used to extract `!123` merge request references from text
@@ -596,7 +630,7 @@ class MergeRequest < ApplicationRecord
   def diff_size
     # Calling `merge_request_diff.diffs.real_size` will also perform
     # highlighting, which we don't need here.
-    merge_request_diff&.real_size || diff_stats&.real_size || diffs.real_size
+    merge_request_diff&.real_size || diff_stats&.real_size(project: project) || diffs.real_size
   end
 
   def modified_paths(past_merge_request_diff: nil, fallback_on_overflow: false)
@@ -867,10 +901,6 @@ class MergeRequest < ApplicationRecord
     clear_memoization(:target_branch_head)
   end
 
-  def clear_memoized_source_branch_exists
-    clear_memoization(:source_branch_exists)
-  end
-
   def reload_diff_if_branch_changed
     if (saved_change_to_source_branch? || saved_change_to_target_branch?) &&
         (source_branch_head && target_branch_head)
@@ -899,7 +929,7 @@ class MergeRequest < ApplicationRecord
   # rubocop: enable CodeReuse/ServiceClass
 
   def diffable_merge_ref?
-    can_be_merged? && merge_ref_head.present?
+    merge_ref_head.present? && (Feature.enabled?(:display_merge_conflicts_in_diff, project) || can_be_merged?)
   end
 
   # Returns boolean indicating the merge_status should be rechecked in order to
@@ -928,8 +958,9 @@ class MergeRequest < ApplicationRecord
     self.class.wip_title(self.title)
   end
 
-  def mergeable?(skip_ci_check: false)
-    return false unless mergeable_state?(skip_ci_check: skip_ci_check)
+  def mergeable?(skip_ci_check: false, skip_discussions_check: false)
+    return false unless mergeable_state?(skip_ci_check: skip_ci_check,
+                                         skip_discussions_check: skip_discussions_check)
 
     check_mergeability
 
@@ -1122,11 +1153,9 @@ class MergeRequest < ApplicationRecord
   end
 
   def source_branch_exists?
-    strong_memoize(:source_branch_exists) do
-      next false unless self.source_project
+    return false unless self.source_project
 
-      self.source_project.repository.branch_exists?(self.source_branch)
-    end
+    self.source_project.repository.branch_exists?(self.source_branch)
   end
 
   def target_branch_exists?
@@ -1232,6 +1261,8 @@ class MergeRequest < ApplicationRecord
   # Returns the current merge-ref HEAD commit.
   #
   def merge_ref_head
+    return project.repository.commit(merge_ref_sha) if merge_ref_sha
+
     project.repository.commit(merge_ref_path)
   end
 
@@ -1269,6 +1300,14 @@ class MergeRequest < ApplicationRecord
     yield
   ensure
     unlock_mr
+  end
+
+  def update_and_mark_in_progress_merge_commit_sha(commit_id)
+    self.update(in_progress_merge_commit_sha: commit_id)
+    # Since another process checks for matching merge request, we need
+    # to make it possible to detect whether the query should go to the
+    # primary.
+    target_project.mark_primary_write_location
   end
 
   def diverged_commits_count
@@ -1345,9 +1384,7 @@ class MergeRequest < ApplicationRecord
   end
 
   def has_coverage_reports?
-    return false unless Feature.enabled?(:coverage_report_view, project)
-
-    actual_head_pipeline&.has_reports?(Ci::JobArtifact.coverage_reports)
+    actual_head_pipeline&.has_coverage_reports?
   end
 
   def has_terraform_reports?
@@ -1447,6 +1484,19 @@ class MergeRequest < ApplicationRecord
     Commit.truncate_sha(merge_commit_sha) if merge_commit_sha
   end
 
+  def merged_commit_sha
+    return unless merged?
+
+    sha = merge_commit_sha || squash_commit_sha || diff_head_sha
+    sha.presence
+  end
+
+  def short_merged_commit_sha
+    if sha = merged_commit_sha
+      Commit.truncate_sha(sha)
+    end
+  end
+
   def can_be_reverted?(current_user)
     return false unless merge_commit
     return false unless merged_at
@@ -1468,6 +1518,7 @@ class MergeRequest < ApplicationRecord
 
       metrics&.merged_at ||
         merge_event&.created_at ||
+        resource_state_events.find_by(state: :merged)&.created_at ||
         notes.system.reorder(nil).find_by(note: 'merged')&.created_at
     end
   end
@@ -1548,6 +1599,12 @@ class MergeRequest < ApplicationRecord
       .find_by(sha: diff_base_sha, ref: target_branch)
   end
 
+  def merge_base_pipeline
+    @merge_base_pipeline ||= project.ci_pipelines
+      .order(id: :desc)
+      .find_by(sha: actual_head_pipeline.target_sha, ref: target_branch)
+  end
+
   def discussions_rendered_on_frontend?
     true
   end
@@ -1561,7 +1618,7 @@ class MergeRequest < ApplicationRecord
   def first_contribution?
     return false if project.team.max_member_access(author_id) > Gitlab::Access::GUEST
 
-    project.merge_requests.merged.where(author_id: author_id).empty?
+    !project.merge_requests.merged.exists?(author_id: author_id)
   end
 
   # TODO: remove once production database rename completes
@@ -1631,6 +1688,14 @@ class MergeRequest < ApplicationRecord
       metrics_record.association(:merge_request).target = self
       association(:metrics).target = metrics_record
     end
+  end
+
+  def allows_reviewers?
+    Feature.enabled?(:merge_request_reviewers, project)
+  end
+
+  def allows_multiple_reviewers?
+    false
   end
 
   private

@@ -6,7 +6,7 @@ exports[`MergeRequest component when there are approvers matches snapshot 1`] = 
   data-testid="approvers"
 >
   <span
-    class="gl-text-gray-700"
+    class="gl-text-gray-500"
   >
     
       approved by: 

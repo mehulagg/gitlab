@@ -16,8 +16,9 @@ RSpec.describe ElasticClusterReindexingCronWorker do
       subject.perform
     end
 
-    it 'does nothing if no task is found' do
+    it 'removes old indices if no task is found' do
       expect(Elastic::ReindexingTask).to receive(:current).and_return(nil)
+      expect(Elastic::ReindexingTask).to receive(:drop_old_indices!)
 
       expect(subject.perform).to eq(false)
     end

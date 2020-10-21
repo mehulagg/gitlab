@@ -32,12 +32,20 @@ RSpec.describe ::EE::ProjectSecurityScannersInformation do
   end
 
   describe '#scanners_run_by_last_pipeline' do
+    subject(:scanners_run_in_last_pipeline) { project.scanners_run_in_last_pipeline }
+
+    context 'when pipeline has no build reports' do
+      let!(:new_pipeline) { create(:ci_pipeline, project: project, sha: project.commit.id, ref: project.default_branch) }
+
+      it { is_expected.to be_empty }
+    end
+
     it 'returns a list of all scanners which were run successfully in the latest pipeline' do
-      expect(project.scanners_run_in_last_pipeline).to match_array(%w(DAST SAST))
+      expect(scanners_run_in_last_pipeline).to match_array(%w(DAST SAST))
     end
 
     it 'does not include non-security scanners' do
-      expect(project.scanners_run_in_last_pipeline).not_to include(%w(LICENSE_SCANNING))
+      expect(scanners_run_in_last_pipeline).not_to include(%w(LICENSE_SCANNING))
     end
   end
 end

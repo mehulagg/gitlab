@@ -63,6 +63,24 @@ RSpec.describe Ci::BuildRunnerPresenter do
           end
         end
       end
+
+      context 'Vault auth path' do
+        let(:vault_auth) { presenter.secrets_configuration.dig('DATABASE_PASSWORD', 'vault', 'server', 'auth') }
+
+        context 'VAULT_AUTH_PATH CI variable is present' do
+          it 'contains user defined auth path' do
+            create(:ci_variable, project: ci_build.project, key: 'VAULT_AUTH_PATH', value: 'custom/path')
+
+            expect(vault_auth.fetch('path')).to eq('custom/path')
+          end
+        end
+
+        context 'VAULT_AUTH_PATH CI variable is not present' do
+          it 'contains the default auth path' do
+            expect(vault_auth.fetch('path')).to eq('jwt')
+          end
+        end
+      end
     end
   end
 end

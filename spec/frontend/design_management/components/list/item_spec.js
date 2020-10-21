@@ -1,6 +1,5 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlIcon, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
 import VueRouter from 'vue-router';
 import Item from '~/design_management/components/list/item.vue';
 
@@ -20,7 +19,7 @@ describe('Design management list item component', () => {
   let wrapper;
 
   const findDesignEvent = () => wrapper.find('[data-testid="designEvent"]');
-  const findEventIcon = () => findDesignEvent().find(Icon);
+  const findEventIcon = () => findDesignEvent().find(GlIcon);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
   function createComponent({

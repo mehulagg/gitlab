@@ -14,27 +14,50 @@ RSpec.describe 'admin/dashboard/index.html.haml' do
     assign(:projects, create_list(:project, 1))
     assign(:users, create_list(:user, 1))
     assign(:groups, create_list(:group, 1))
-    assign(:license, create(:license))
 
     allow(view).to receive(:admin?).and_return(true)
     allow(view).to receive(:current_application_settings).and_return(Gitlab::CurrentSettings.current_application_settings)
     allow(view).to receive(:show_license_breakdown?).and_return(true)
   end
 
-  it 'includes notices above license breakdown' do
-    assign(:notices, [{ type: :alert, message: 'An alert' }])
+  context 'when license is present' do
+    before do
+      assign(:license, create(:license))
+    end
 
-    render
+    it 'includes notices above license breakdown' do
+      assign(:notices, [{ type: :alert, message: 'An alert' }])
 
-    expect(rendered).to have_content /An alert.*Users in License/
+      render
+
+      expect(rendered).to have_content /An alert.*Users in License/
+    end
+
+    it 'includes license overview' do
+      render
+
+      expect(rendered).to have_content "License overview"
+      expect(rendered).to have_content "Plan:"
+      expect(rendered).to have_content "Expires:"
+      expect(rendered).to have_content "Licensed to:"
+      expect(rendered).to have_link 'View details', href: admin_license_path
+    end
+
+    it 'includes license breakdown' do
+      render
+
+      expect(rendered).to have_content "Users in License:"
+      expect(rendered).to have_content "Billable Users"
+      expect(rendered).to have_content "Maximum Users"
+      expect(rendered).to have_content "Users over License"
+    end
   end
 
-  it 'includes license breakdown' do
-    render
+  context 'when license is not present' do
+    it 'does not show content' do
+      render
 
-    expect(rendered).to have_content "Users in License"
-    expect(rendered).to have_content "Active Users"
-    expect(rendered).to have_content "Maximum Users"
-    expect(rendered).to have_content "Users over License"
+      expect(rendered).not_to have_content 'Users in License:'
+    end
   end
 end

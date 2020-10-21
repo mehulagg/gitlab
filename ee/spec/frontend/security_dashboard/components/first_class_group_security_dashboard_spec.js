@@ -13,7 +13,6 @@ describe('First Class Group Dashboard Component', () => {
   const dashboardDocumentation = 'dashboard-documentation';
   const emptyStateSvgPath = 'empty-state-path';
   const groupFullPath = 'group-full-path';
-  const vulnerableProjectsEndpoint = '/vulnerable/projects';
   const vulnerabilitiesExportEndpoint = '/vulnerabilities/exports';
 
   const findDashboardLayout = () => wrapper.find(SecurityDashboardLayout);
@@ -29,7 +28,6 @@ describe('First Class Group Dashboard Component', () => {
         dashboardDocumentation,
         emptyStateSvgPath,
         groupFullPath,
-        vulnerableProjectsEndpoint,
         vulnerabilitiesExportEndpoint,
       },
       data,

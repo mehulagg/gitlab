@@ -6,10 +6,7 @@ module Gitlab
       DISABLED_BY_LABEL = :'network-policy.gitlab.com/disabled_by'
 
       def generate
-        ::Kubeclient::Resource.new.tap do |resource|
-          resource.metadata = metadata
-          resource.spec = spec
-        end
+        ::Kubeclient::Resource.new(resource)
       end
 
       def as_json(opts = nil)
@@ -53,18 +50,12 @@ module Gitlab
 
       private
 
-      def metadata
-        meta = { name: name, namespace: namespace }
-        meta[:labels] = labels if labels
-        meta
-      end
-
-      def spec
+      def resource
         raise NotImplementedError
       end
 
       def manifest
-        YAML.dump({ metadata: metadata, spec: spec }.deep_stringify_keys)
+        YAML.dump(resource.deep_stringify_keys)
       end
     end
   end

@@ -1,9 +1,9 @@
 <script>
 import { GlLink, GlSprintf } from '@gitlab/ui';
-import { s__ } from '~/locale';
-import CodeInstruction from './code_instruction.vue';
-import { TrackingActions } from '../constants';
 import { mapGetters, mapState } from 'vuex';
+import { s__ } from '~/locale';
+import CodeInstruction from '~/vue_shared/components/registry/code_instruction.vue';
+import { TrackingActions, TrackingLabels } from '../constants';
 
 export default {
   name: 'ComposerInstallation',
@@ -14,40 +14,42 @@ export default {
   },
   computed: {
     ...mapState(['composerHelpPath']),
-    ...mapGetters(['composerRegistryInclude', 'composerPackageInclude']),
+    ...mapGetters(['composerRegistryInclude', 'composerPackageInclude', 'groupExists']),
   },
   i18n: {
-    registryInclude: s__('PackageRegistry|composer.json registry include'),
+    registryInclude: s__('PackageRegistry|Add composer registry'),
     copyRegistryInclude: s__('PackageRegistry|Copy registry include'),
-    packageInclude: s__('PackageRegistry|composer.json require package include'),
+    packageInclude: s__('PackageRegistry|Install package version'),
     copyPackageInclude: s__('PackageRegistry|Copy require package include'),
     infoLine: s__(
       'PackageRegistry|For more information on Composer packages in GitLab, %{linkStart}see the documentation.%{linkEnd}',
     ),
   },
   trackingActions: { ...TrackingActions },
+  TrackingLabels,
 };
 </script>
 
 <template>
-  <div>
+  <div v-if="groupExists" data-testid="root-node">
     <h3 class="gl-font-lg">{{ __('Installation') }}</h3>
-    <h4 class="gl-font-base" data-testid="registry-include-title">
-      {{ $options.i18n.registryInclude }}
-    </h4>
 
     <code-instruction
+      :label="$options.i18n.registryInclude"
       :instruction="composerRegistryInclude"
       :copy-text="$options.i18n.copyRegistryInclude"
       :tracking-action="$options.trackingActions.COPY_COMPOSER_REGISTRY_INCLUDE_COMMAND"
+      :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
+      data-testid="registry-include"
     />
-    <h4 class="gl-font-base" data-testid="package-include-title">
-      {{ $options.i18n.packageInclude }}
-    </h4>
+
     <code-instruction
+      :label="$options.i18n.packageInclude"
       :instruction="composerPackageInclude"
       :copy-text="$options.i18n.copyPackageInclude"
       :tracking-action="$options.trackingActions.COPY_COMPOSER_PACKAGE_INCLUDE_COMMAND"
+      :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
+      data-testid="package-include"
     />
     <span data-testid="help-text">
       <gl-sprintf :message="$options.i18n.infoLine">

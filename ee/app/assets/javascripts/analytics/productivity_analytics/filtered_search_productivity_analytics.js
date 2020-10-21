@@ -1,5 +1,5 @@
-import ProductivityAnalyticsFilteredSearchTokenKeys from './productivity_analytics_filtered_search_token_keys';
 import FilteredSearchManager from 'ee_else_ce/filtered_search/filtered_search_manager';
+import ProductivityAnalyticsFilteredSearchTokenKeys from './productivity_analytics_filtered_search_token_keys';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import store from './store';

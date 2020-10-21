@@ -5,7 +5,20 @@
 
   // these styles need to be deleted once GlTable component looks in GitLab same as in @gitlab/ui
   table {
-    @include gl-text-gray-700;
+    @include gl-text-gray-500;
+
+    tbody {
+      tr:not(.b-table-busy-slot) {
+        // TODO replace with gitlab/ui utilities: https://gitlab.com/gitlab-org/gitlab-ui/-/merge_requests/1791
+        &:hover {
+          border-top-style: double;
+
+          td {
+            border-bottom-style: initial;
+          }
+        }
+      }
+    }
 
     tr {
       &:focus {
@@ -108,7 +121,7 @@
     border-bottom-width: 0;
 
     .gl-tab-nav-item {
-      color: $gl-gray-600;
+      color: $gray-500;
 
       > .gl-tab-counter-badge {
         color: inherit;
@@ -119,17 +132,12 @@
   }
 
   @include media-breakpoint-down(xs) {
-    .incident-management-list-header {
+    .list-header {
       flex-direction: column-reverse;
     }
 
     .create-incident-button {
       @include gl-w-full;
     }
-  }
-
-  // TODO: Abstract to `@gitlab/ui` utility set: https://gitlab.com/gitlab-org/gitlab-ui/-/issues/921
-  .gl-fill-green-500 {
-    fill: $green-500;
   }
 }

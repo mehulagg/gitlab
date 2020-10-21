@@ -22,6 +22,11 @@ FactoryBot.define do
     trait :local_storage_only do
       sync_object_storage { false }
     end
+
+    trait :selective_sync_excludes_all_projects do
+      selective_sync_type { 'shards' }
+      selective_sync_shards { ['non-existent'] }
+    end
   end
 
   factory :geo_node_with_selective_sync_for, parent: :geo_node do

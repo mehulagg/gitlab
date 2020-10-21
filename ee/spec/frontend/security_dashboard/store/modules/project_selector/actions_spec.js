@@ -4,7 +4,7 @@ import waitForPromises from 'helpers/wait_for_promises';
 import createState from 'ee/security_dashboard/store/modules/project_selector/state';
 import * as types from 'ee/security_dashboard/store/modules/project_selector/mutation_types';
 import * as actions from 'ee/security_dashboard/store/modules/project_selector/actions';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/flash');

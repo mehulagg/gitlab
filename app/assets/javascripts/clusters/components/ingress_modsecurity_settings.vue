@@ -1,19 +1,19 @@
 <script>
 import { escape } from 'lodash';
-import { s__, __ } from '../../locale';
-import { APPLICATION_STATUS, INGRESS, LOGGING_MODE, BLOCKING_MODE } from '~/clusters/constants';
 import {
   GlAlert,
   GlSprintf,
   GlLink,
   GlToggle,
-  GlDeprecatedButton,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
+  GlButton,
+  GlDropdown,
+  GlDropdownItem,
   GlIcon,
 } from '@gitlab/ui';
-import eventHub from '~/clusters/event_hub';
 import modSecurityLogo from 'images/cluster_app_logos/gitlab.png';
+import { s__, __ } from '../../locale';
+import { APPLICATION_STATUS, INGRESS, LOGGING_MODE, BLOCKING_MODE } from '~/clusters/constants';
+import eventHub from '~/clusters/event_hub';
 
 const { UPDATING, UNINSTALLING, INSTALLING, INSTALLED, UPDATED } = APPLICATION_STATUS;
 
@@ -25,9 +25,9 @@ export default {
     GlSprintf,
     GlLink,
     GlToggle,
-    GlDeprecatedButton,
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlButton,
+    GlDropdown,
+    GlDropdownItem,
     GlIcon,
   },
   props: {
@@ -221,29 +221,31 @@ export default {
                   </strong>
                 </p>
               </div>
-              <gl-deprecated-dropdown :text="modSecurityModeName" :disabled="saveButtonDisabled">
-                <gl-deprecated-dropdown-item
-                  v-for="(mode, key) in modes"
-                  :key="key"
-                  @click="selectMode(key)"
-                >
+              <gl-dropdown :text="modSecurityModeName" :disabled="saveButtonDisabled">
+                <gl-dropdown-item v-for="(mode, key) in modes" :key="key" @click="selectMode(key)">
                   {{ mode.name }}
-                </gl-deprecated-dropdown-item>
-              </gl-deprecated-dropdown>
+                </gl-dropdown-item>
+              </gl-dropdown>
             </div>
           </div>
-          <div v-if="showButtons" class="mt-3">
-            <gl-deprecated-button
-              class="btn-success inline mr-1"
+          <div v-if="showButtons" class="gl-mt-5 gl-display-flex">
+            <gl-button
+              variant="success"
+              category="primary"
+              data-qa-selector="save_ingress_modsecurity_settings"
               :loading="saving"
               :disabled="saveButtonDisabled"
               @click="updateApplication"
             >
               {{ saveButtonLabel }}
-            </gl-deprecated-button>
-            <gl-deprecated-button :disabled="saveButtonDisabled" @click="resetStatus">
+            </gl-button>
+            <gl-button
+              data-qa-selector="cancel_ingress_modsecurity_settings"
+              :disabled="saveButtonDisabled"
+              @click="resetStatus"
+            >
               {{ __('Cancel') }}
-            </gl-deprecated-button>
+            </gl-button>
           </div>
         </div>
       </div>

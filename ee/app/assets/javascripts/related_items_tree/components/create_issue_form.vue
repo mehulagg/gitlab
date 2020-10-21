@@ -1,7 +1,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import {
-  GlDeprecatedButton,
+  GlButton,
   GlDeprecatedDropdown,
   GlDeprecatedDropdownItem,
   GlFormInput,
@@ -16,7 +16,7 @@ import { SEARCH_DEBOUNCE } from '../constants';
 
 export default {
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlDeprecatedDropdown,
     GlDeprecatedDropdownItem,
     GlFormInput,
@@ -171,19 +171,18 @@ export default {
 
     <div class="row my-1">
       <div class="col-sm flex-sm-grow-0 mb-2 mb-sm-0">
-        <gl-deprecated-button
+        <gl-button
           class="w-100"
           variant="success"
+          category="primary"
           :disabled="!selectedProject || itemCreateInProgress"
           :loading="itemCreateInProgress"
           @click="createIssue"
-          >{{ __('Create issue') }}</gl-deprecated-button
+          >{{ __('Create issue') }}</gl-button
         >
       </div>
       <div class="col-sm flex-sm-grow-0 ml-auto">
-        <gl-deprecated-button class="w-100" @click="cancel">{{
-          __('Cancel')
-        }}</gl-deprecated-button>
+        <gl-button class="w-100" @click="cancel">{{ __('Cancel') }}</gl-button>
       </div>
     </div>
   </div>

@@ -22,4 +22,10 @@ RSpec.describe Plan do
       end
     end
   end
+
+  describe '::PLANS_ELIGIBLE_FOR_TRIAL' do
+    subject { ::Plan::PLANS_ELIGIBLE_FOR_TRIAL }
+
+    it { is_expected.to eq(%w[default free]) }
+  end
 end

@@ -5,8 +5,8 @@ require 'spec_helper'
 RSpec.describe Projects::TransferService do
   include GitHelpers
 
-  let(:user) { create(:user) }
-  let(:group) { create(:group) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
   let(:project) { create(:project, :repository, :legacy_storage, namespace: user.namespace) }
 
   subject(:execute_transfer) { described_class.new(project, user).execute(group) }
@@ -314,6 +314,37 @@ RSpec.describe Projects::TransferService do
     end
   end
 
+  context 'shared Runners group level configurations' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:project_shared_runners_enabled, :shared_runners_setting, :expected_shared_runners_enabled) do
+      true  | 'disabled_and_unoverridable' | false
+      false | 'disabled_and_unoverridable' | false
+      true  | 'disabled_with_override'     | true
+      false | 'disabled_with_override'     | false
+      true  | 'enabled'                    | true
+      false | 'enabled'                    | false
+    end
+
+    with_them do
+      let(:project) { create(:project, :public, :repository, namespace: user.namespace, shared_runners_enabled: project_shared_runners_enabled) }
+      let(:group) { create(:group) }
+
+      before do
+        group.add_owner(user)
+        expect_next_found_instance_of(Group) do |group|
+          expect(group).to receive(:shared_runners_setting).and_return(shared_runners_setting)
+        end
+
+        execute_transfer
+      end
+
+      it 'updates shared runners based on the parent group' do
+        expect(project.shared_runners_enabled).to eq(expected_shared_runners_enabled)
+      end
+    end
+  end
+
   context 'missing group labels applied to issues or merge requests' do
     it 'delegates transfer to Labels::TransferService' do
       group.add_owner(user)
@@ -486,6 +517,29 @@ RSpec.describe Projects::TransferService do
           )
         end
       end
+    end
+  end
+
+  context 'moving pages' do
+    let_it_be(:project) { create(:project, namespace: user.namespace) }
+
+    before do
+      group.add_owner(user)
+    end
+
+    it 'schedules a job  when pages are deployed' do
+      project.mark_pages_as_deployed
+
+      expect(PagesTransferWorker).to receive(:perform_async)
+                                       .with("move_project", [project.path, user.namespace.full_path, group.full_path])
+
+      execute_transfer
+    end
+
+    it 'does not schedule a job when no pages are deployed' do
+      expect(PagesTransferWorker).not_to receive(:perform_async)
+
+      execute_transfer
     end
   end
 

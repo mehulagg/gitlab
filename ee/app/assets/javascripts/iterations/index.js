@@ -49,10 +49,16 @@ export function initIterationForm() {
   });
 }
 
-export function initIterationReport() {
+export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
   const el = document.querySelector('.js-iteration');
 
-  const { fullPath, iterationIid, editIterationPath, previewMarkdownPath } = el.dataset;
+  const {
+    fullPath,
+    iterationId,
+    iterationIid,
+    editIterationPath,
+    previewMarkdownPath,
+  } = el.dataset;
   const canEdit = parseBoolean(el.dataset.canEdit);
 
   return new Vue({
@@ -62,10 +68,13 @@ export function initIterationReport() {
       return createElement(IterationReport, {
         props: {
           fullPath,
+          iterationId,
           iterationIid,
           canEdit,
           editIterationPath,
+          namespaceType,
           previewMarkdownPath,
+          initiallyEditing,
         },
       });
     },

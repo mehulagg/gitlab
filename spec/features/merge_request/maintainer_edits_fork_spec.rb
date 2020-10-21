@@ -20,15 +20,18 @@ RSpec.describe 'a maintainer edits files on a source-branch of an MR from a fork
   end
 
   before do
-    stub_feature_flags(single_mr_diff_view: false)
-
     target_project.add_maintainer(user)
     sign_in(user)
 
     visit project_merge_request_path(target_project, merge_request)
     click_link 'Changes'
     wait_for_requests
-    first('.js-file-title').find('.js-edit-blob').click
+
+    page.within(first('.js-file-title')) do
+      find('.js-diff-more-actions').click
+      find('.js-edit-blob').click
+    end
+
     wait_for_requests
   end
 

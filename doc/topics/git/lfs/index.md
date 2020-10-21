@@ -109,70 +109,51 @@ To remove objects from LFS:
 
 ## File Locking
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/35856) in GitLab 10.5.
+See the documentation on [File Locking](../../../user/project/file_lock.md).
 
-The first thing to do before using File Locking is to tell Git LFS which
-kind of files are lockable. The following command will store PNG files
-in LFS and flag them as lockable:
+## LFS objects in project archives
 
-```shell
-git lfs track "*.png" --lockable
+> - Support for including Git LFS blobs inside [project source downloads](../../../user/project/repository/index.md) was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15079) in GitLab 13.5.
+> - It's [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-lfs-objects-in-project-archives). **(CORE ONLY)**
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
+
+Prior to GitLab 13.5, [project source
+downloads](../../../user/project/repository/index.md) would include Git
+LFS pointers instead of the actual objects. For example, LFS pointers
+look like the following:
+
+```markdown
+version https://git-lfs.github.com/spec/v1
+oid sha256:3ea5dd307f195f449f0e08234183b82e92c3d5f4cff11c2a6bb014f9e0de12aa
+size 177735
 ```
 
-After executing the above command a file named `.gitattributes` will be
-created or updated with the following content:
+Starting with GitLab 13.5, these pointers are converted to the uploaded
+LFS object if the `include_lfs_blobs_in_archive` feature flag is
+enabled.
 
-```shell
-*.png filter=lfs diff=lfs merge=lfs -text lockable
+Technical details about how this works can be found in the [development documentation for LFS](../../../development/lfs.md#including-lfs-blobs-in-project-archives).
+
+### Enable or disable LFS objects in project archives
+
+_LFS objects in project archives_ is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:include_lfs_blobs_in_archive)
 ```
 
-You can also register a file type as lockable without using LFS
-(In order to be able to lock/unlock a file you need a remote server that implements the LFS File Locking API),
-in order to do that you can edit the `.gitattributes` file manually:
+To disable it:
 
-```shell
-*.pdf lockable
-```
-
-After a file type has been registered as lockable, Git LFS will make
-them read-only on the file system automatically. This means you will
-need to lock the file before editing it.
-
-### Managing Locked Files
-
-Once you're ready to edit your file you need to lock it first:
-
-```shell
-git lfs lock images/banner.png
-Locked images/banner.png
-```
-
-This will register the file as locked in your name on the server:
-
-```shell
-git lfs locks
-images/banner.png  joe   ID:123
-```
-
-Once you have pushed your changes, you can unlock the file so others can
-also edit it:
-
-```shell
-git lfs unlock images/banner.png
-```
-
-You can also unlock by ID:
-
-```shell
-git lfs unlock --id=123
-```
-
-If for some reason you need to unlock a file that was not locked by you,
-you can use the `--force` flag as long as you have a `maintainer` access on
-the project:
-
-```shell
-git lfs unlock --id=123 --force
+```ruby
+Feature.disable(:include_lfs_blobs_in_archive)
 ```
 
 ## Troubleshooting

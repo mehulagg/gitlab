@@ -1,5 +1,5 @@
 import Api from 'ee/api';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, sprintf } from '~/locale';
 import httpStatusCodes from '~/lib/utils/http_status';
 import * as types from './mutation_types';
@@ -71,7 +71,11 @@ export const createStage = ({ dispatch, rootGetters }, data) => {
   dispatch('clearFormErrors');
   dispatch('setSavingCustomStage');
 
-  return Api.cycleAnalyticsCreateStage(currentGroupPath, currentValueStreamId, data)
+  return Api.cycleAnalyticsCreateStage({
+    groupId: currentGroupPath,
+    valueStreamId: currentValueStreamId,
+    data,
+  })
     .then(response => {
       const { status, data: responseData } = response;
       return dispatch('receiveCreateStageSuccess', { status, data: responseData });

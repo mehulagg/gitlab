@@ -1,8 +1,8 @@
 /* eslint-disable no-new */
-import ProtectedBranchCreate from '~/protected_branches/protected_branch_create';
 import ProtectedBranchEditList from 'ee/protected_branches/protected_branch_edit_list';
 import ProtectedTagCreate from 'ee/protected_tags/protected_tag_create';
 import ProtectedTagEditList from 'ee/protected_tags/protected_tag_edit_list';
+import ProtectedBranchCreate from '~/protected_branches/protected_branch_create';
 
 import UsersSelect from '~/users_select';
 import UserCallout from '~/user_callout';

@@ -2,8 +2,9 @@ import state from 'ee/vue_shared/dashboards/store/state';
 import mutations from 'ee/vue_shared/dashboards/store/mutations';
 import * as types from 'ee/vue_shared/dashboards/store/mutation_types';
 import { mockProjectData } from 'ee_jest/vue_shared/dashboards/mock_data';
-import createFlash from '~/flash';
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 
 jest.mock('~/flash');
 
@@ -121,14 +122,14 @@ describe('mutations', () => {
     });
 
     it('sets the project list and clears the loading status', () => {
-      mutations[types.RECEIVE_PROJECTS_SUCCESS](localState, projects);
+      mutations[types.RECEIVE_PROJECTS_SUCCESS](localState, { projects });
 
       expect(localState.projects).toEqual(projects);
       expect(localState.isLoadingProjects).toBe(false);
     });
 
     it('saves projects to localStorage', () => {
-      mutations[types.RECEIVE_PROJECTS_SUCCESS](localState, projects);
+      mutations[types.RECEIVE_PROJECTS_SUCCESS](localState, { projects });
 
       expect(window.localStorage.setItem).toHaveBeenCalledWith(projectListEndpoint, projectIds);
     });
@@ -142,7 +143,7 @@ describe('mutations', () => {
       });
       const expectedOrder = [projects[2], projects[0], projects[1]];
 
-      mutations[types.RECEIVE_PROJECTS_SUCCESS](localState, projects);
+      mutations[types.RECEIVE_PROJECTS_SUCCESS](localState, { projects });
 
       expect(localState.projects).toEqual(expectedOrder);
     });
@@ -156,9 +157,25 @@ describe('mutations', () => {
       });
       const expectedOrder = [projects[1], projects[2], projects[0]];
 
-      mutations[types.RECEIVE_PROJECTS_SUCCESS](localState, projects);
+      mutations[types.RECEIVE_PROJECTS_SUCCESS](localState, { projects });
 
       expect(localState.projects).toEqual(expectedOrder);
+    });
+
+    it('sets dashbpard pagination state', () => {
+      const headers = {
+        'x-page': 1,
+        'x-per-page': 20,
+        'x-next-page': 2,
+        'x-total': 22,
+        'x-total-pages': 2,
+        'x-prev-page': null,
+      };
+
+      mutations[types.RECEIVE_PROJECTS_SUCCESS](localState, { projects, headers });
+
+      const expectedHeaders = parseIntPagination(normalizeHeaders(headers));
+      expect(localState.projectsPage.pageInfo).toEqual(expectedHeaders);
     });
   });
 

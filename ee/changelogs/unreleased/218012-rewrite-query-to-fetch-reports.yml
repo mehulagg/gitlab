@@ -1,6 +1,0 @@
----
-title: Fetch latest successful pipeline with security jobs to check if vulnerability
-  was resolved
-merge_request: 38452
-author:
-type: changed

@@ -63,7 +63,7 @@ export default {
     title: s__('DesignManagement|Are you sure you want to archive the selected designs?'),
     actionPrimary: {
       text: s__('DesignManagement|Archive designs'),
-      attributes: { variant: 'warning' },
+      attributes: { variant: 'warning', 'data-qa-selector': 'confirm_archiving_button' },
     },
     actionCancel: {
       text: __('Cancel'),
@@ -95,11 +95,10 @@ export default {
       :category="buttonCategory"
       :size="buttonSize"
       :class="buttonClass"
-      :disabled="isDeleting || !hasSelectedDesigns"
       :loading="loading"
       :icon="buttonIcon"
-    >
-      <slot></slot>
-    </gl-button>
+      :disabled="isDeleting || !hasSelectedDesigns"
+      ><slot></slot
+    ></gl-button>
   </div>
 </template>

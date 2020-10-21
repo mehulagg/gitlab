@@ -3,8 +3,8 @@ import * as types from './mutation_types';
 import { isProjectImportable } from '../utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import Poll from '~/lib/utils/poll';
-import { visitUrl } from '~/lib/utils/url_utility';
-import createFlash from '~/flash';
+import { visitUrl, objectToQuery } from '~/lib/utils/url_utility';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, sprintf } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 
@@ -12,7 +12,13 @@ let eTagPoll;
 
 const hasRedirectInError = e => e?.response?.data?.error?.redirect;
 const redirectToUrlInError = e => visitUrl(e.response.data.error.redirect);
-const pathWithFilter = ({ path, filter = '' }) => (filter ? `${path}?filter=${filter}` : path);
+const pathWithParams = ({ path, ...params }) => {
+  const filteredParams = Object.fromEntries(
+    Object.entries(params).filter(([, value]) => value !== ''),
+  );
+  const queryString = objectToQuery(filteredParams);
+  return queryString ? `${path}?${queryString}` : path;
+};
 
 const isRequired = () => {
   // eslint-disable-next-line @gitlab/require-i18n-strings
@@ -44,19 +50,27 @@ const importAll = ({ state, dispatch }) => {
   );
 };
 
-const fetchReposFactory = (reposPath = isRequired()) => ({ state, dispatch, commit }) => {
-  dispatch('stopJobsPolling');
+const fetchReposFactory = ({ reposPath = isRequired() }) => ({ state, commit }) => {
+  const nextPage = state.pageInfo.page + 1;
+  commit(types.SET_PAGE, nextPage);
   commit(types.REQUEST_REPOS);
 
   const { provider, filter } = state;
 
   return axios
-    .get(pathWithFilter({ path: reposPath, filter }))
-    .then(({ data }) =>
-      commit(types.RECEIVE_REPOS_SUCCESS, convertObjectPropsToCamelCase(data, { deep: true })),
+    .get(
+      pathWithParams({
+        path: reposPath,
+        filter: filter ?? '',
+        page: nextPage === 1 ? '' : nextPage.toString(),
+      }),
     )
-    .then(() => dispatch('fetchJobs'))
+    .then(({ data }) => {
+      commit(types.RECEIVE_REPOS_SUCCESS, convertObjectPropsToCamelCase(data, { deep: true }));
+    })
     .catch(e => {
+      commit(types.SET_PAGE, nextPage - 1);
+
       if (hasRedirectInError(e)) {
         redirectToUrlInError(e);
       } else {
@@ -85,12 +99,12 @@ const fetchImportFactory = (importPath = isRequired()) => ({ state, commit, gett
       new_name: newName,
       target_namespace: targetNamespace,
     })
-    .then(({ data }) =>
+    .then(({ data }) => {
       commit(types.RECEIVE_IMPORT_SUCCESS, {
         importedProject: convertObjectPropsToCamelCase(data, { deep: true }),
         repoId,
-      }),
-    )
+      });
+    })
     .catch(e => {
       const serverErrorMessage = e?.response?.data?.errors;
       const flashMessage = serverErrorMessage
@@ -110,8 +124,6 @@ const fetchImportFactory = (importPath = isRequired()) => ({ state, commit, gett
 };
 
 export const fetchJobsFactory = (jobsPath = isRequired()) => ({ state, commit, dispatch }) => {
-  const { filter } = state;
-
   if (eTagPoll) {
     stopJobsPolling();
     clearJobsEtagPoll();
@@ -119,7 +131,7 @@ export const fetchJobsFactory = (jobsPath = isRequired()) => ({ state, commit, d
 
   eTagPoll = new Poll({
     resource: {
-      fetchJobs: () => axios.get(pathWithFilter({ path: jobsPath, filter })),
+      fetchJobs: () => axios.get(pathWithParams({ path: jobsPath, filter: state.filter })),
     },
     method: 'fetchJobs',
     successCallback: ({ data }) =>
@@ -131,7 +143,6 @@ export const fetchJobsFactory = (jobsPath = isRequired()) => ({ state, commit, d
         createFlash(s__('ImportProjects|Update of imported projects with realtime changes failed'));
       }
     },
-    data: { filter },
   });
 
   if (!Visibility.hidden()) {
@@ -161,6 +172,15 @@ const fetchNamespacesFactory = (namespacesPath = isRequired()) => ({ commit }) =
     });
 };
 
+const setPage = ({ state, commit, dispatch }, page) => {
+  if (page === state.pageInfo.page) {
+    return null;
+  }
+
+  commit(types.SET_PAGE, page);
+  return dispatch('fetchRepos');
+};
+
 export default ({ endpoints = isRequired() }) => ({
   clearJobsEtagPoll,
   stopJobsPolling,
@@ -168,7 +188,8 @@ export default ({ endpoints = isRequired() }) => ({
   setFilter,
   setImportTarget,
   importAll,
-  fetchRepos: fetchReposFactory(endpoints.reposPath),
+  setPage,
+  fetchRepos: fetchReposFactory({ reposPath: endpoints.reposPath }),
   fetchImport: fetchImportFactory(endpoints.importPath),
   fetchJobs: fetchJobsFactory(endpoints.jobsPath),
   fetchNamespaces: fetchNamespacesFactory(endpoints.namespacesPath),

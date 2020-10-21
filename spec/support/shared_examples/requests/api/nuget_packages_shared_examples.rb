@@ -26,7 +26,7 @@ RSpec.shared_examples 'process nuget service index request' do |user_type, statu
 
     it_behaves_like 'returning response status', status
 
-    it_behaves_like 'a gitlab tracking event', described_class.name, 'nuget_service_index'
+    it_behaves_like 'a package tracking event', described_class.name, 'cli_metadata'
 
     it 'returns a valid json response' do
       subject
@@ -169,13 +169,13 @@ RSpec.shared_examples 'process nuget upload' do |user_type, status, add_member =
       context 'with correct params' do
         it_behaves_like 'package workhorse uploads'
         it_behaves_like 'creates nuget package files'
-        it_behaves_like 'a gitlab tracking event', described_class.name, 'push_package'
+        it_behaves_like 'a package tracking event', described_class.name, 'push_package'
       end
     end
 
     context 'with object storage enabled' do
       let(:tmp_object) do
-        fog_connection.directories.new(key: 'packages').files.create(
+        fog_connection.directories.new(key: 'packages').files.create( # rubocop:disable Rails/SaveBang
           key: "tmp/uploads/#{file_name}",
           body: 'content'
         )
@@ -286,7 +286,7 @@ RSpec.shared_examples 'process nuget download content request' do |user_type, st
 
     it_behaves_like 'returning response status', status
 
-    it_behaves_like 'a gitlab tracking event', described_class.name, 'pull_package'
+    it_behaves_like 'a package tracking event', described_class.name, 'pull_package'
 
     it 'returns a valid package archive' do
       subject
@@ -336,7 +336,7 @@ RSpec.shared_examples 'process nuget search request' do |user_type, status, add_
 
     it_behaves_like 'returns a valid json search response', status, 4, [1, 5, 5, 1]
 
-    it_behaves_like 'a gitlab tracking event', described_class.name, 'search_package'
+    it_behaves_like 'a package tracking event', described_class.name, 'search_package'
 
     context 'with skip set to 2' do
       let(:skip) { 2 }

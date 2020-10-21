@@ -9,6 +9,7 @@
   }
 }
 
+.ci-status-icon-error,
 .ci-status-icon-failed {
   svg {
     fill: $red-500;
@@ -98,5 +99,5 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: $gray-700;
+  color: $gray-500;
 }

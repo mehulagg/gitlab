@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -309,6 +312,10 @@ attribute. As a prerequisite, you must use an LDAP server that:
 
 1. Save the file and [restart](../restart_gitlab.md#installations-from-source)
    GitLab for the changes to take effect.
+
+## Passwords for users created via smartcard authentication
+
+The [Generated passwords for users created through integrated authentication](../../security/passwords_for_integrated_authentication_methods.md) guide provides an overview of how GitLab generates and sets passwords for users created via smartcard authentication.
 
 <!-- ## Troubleshooting
 

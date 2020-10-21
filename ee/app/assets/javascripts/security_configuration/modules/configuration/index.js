@@ -1,10 +1,10 @@
-import state from './state';
+import createState from './state';
 import mutations from './mutations';
 import * as actions from './actions';
 
-export default {
+export default ({ securityConfigurationPath = '' }) => ({
   namespaced: true,
-  state,
+  state: createState({ securityConfigurationPath }),
   mutations,
   actions,
-};
+});

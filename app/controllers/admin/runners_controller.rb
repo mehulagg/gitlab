@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 class Admin::RunnersController < Admin::ApplicationController
-  before_action :runner, except: [:index, :tag_list]
+  include RunnerSetupScripts
+
+  before_action :runner, except: [:index, :tag_list, :runner_setup_scripts]
+
+  feature_category :continuous_integration
 
   def index
     finder = Ci::RunnersFinder.new(current_user: current_user, params: params)
@@ -17,7 +21,6 @@ class Admin::RunnersController < Admin::ApplicationController
   def update
     if Ci::UpdateRunnerService.new(@runner).update(runner_params)
       respond_to do |format|
-        format.js
         format.html { redirect_to admin_runner_path(@runner) }
       end
     else
@@ -52,6 +55,10 @@ class Admin::RunnersController < Admin::ApplicationController
     tags = Autocomplete::ActsAsTaggableOn::TagsFinder.new(params: params).execute
 
     render json: ActsAsTaggableOn::TagSerializer.new.represent(tags)
+  end
+
+  def runner_setup_scripts
+    private_runner_setup_scripts
   end
 
   private

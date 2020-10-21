@@ -39,9 +39,9 @@ module Gitlab
 
       FALLBACK = -1
 
-      def count(relation, column = nil, batch: true, start: nil, finish: nil)
+      def count(relation, column = nil, batch: true, batch_size: nil, start: nil, finish: nil)
         if batch
-          Gitlab::Database::BatchCount.batch_count(relation, column, start: start, finish: finish)
+          Gitlab::Database::BatchCount.batch_count(relation, column, batch_size: batch_size, start: start, finish: finish)
         else
           relation.count
         end
@@ -55,6 +55,12 @@ module Gitlab
         else
           relation.distinct_count_by(column)
         end
+      rescue ActiveRecord::StatementInvalid
+        FALLBACK
+      end
+
+      def sum(relation, column, batch_size: nil, start: nil, finish: nil)
+        Gitlab::Database::BatchCount.batch_sum(relation, column, batch_size: batch_size, start: start, finish: finish)
       rescue ActiveRecord::StatementInvalid
         FALLBACK
       end
@@ -77,11 +83,11 @@ module Gitlab
         end
       end
 
-      def with_prometheus_client(fallback: nil)
-        return fallback unless Gitlab::Prometheus::Internal.prometheus_enabled?
+      def with_prometheus_client(fallback: nil, verify: true)
+        client = prometheus_client(verify: verify)
+        return fallback unless client
 
-        prometheus_address = Gitlab::Prometheus::Internal.uri
-        yield Gitlab::PrometheusClient.new(prometheus_address, allow_local_requests: true)
+        yield client
       end
 
       def measure_duration
@@ -93,10 +99,42 @@ module Gitlab
       end
 
       def with_finished_at(key, &block)
-        yield.merge(key => Time.now)
+        yield.merge(key => Time.current)
+      end
+
+      # @param event_name [String] the event name
+      # @param values [Array|String] the values counted
+      def track_usage_event(event_name, values)
+        return unless Feature.enabled?(:"usage_data_#{event_name}", default_enabled: true)
+
+        Gitlab::UsageDataCounters::HLLRedisCounter.track_event(values, event_name.to_s)
       end
 
       private
+
+      def prometheus_client(verify:)
+        server_address = prometheus_server_address
+
+        return unless server_address
+
+        # There really is not a way to discover whether a Prometheus connection is using TLS or not
+        # Try TLS first because HTTPS will return fast if failed.
+        %w[https http].find do |scheme|
+          api_url = "#{scheme}://#{server_address}"
+          client = Gitlab::PrometheusClient.new(api_url, allow_local_requests: true, verify: verify)
+          break client if client.ready?
+        rescue
+          nil
+        end
+      end
+
+      def prometheus_server_address
+        if Gitlab::Prometheus::Internal.prometheus_enabled?
+          Gitlab::Prometheus::Internal.server_address
+        elsif Gitlab::Consul::Internal.api_url
+          Gitlab::Consul::Internal.discover_prometheus_server_address
+        end
+      end
 
       def redis_usage_counter
         yield

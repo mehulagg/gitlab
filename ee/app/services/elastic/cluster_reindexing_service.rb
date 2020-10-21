@@ -10,6 +10,8 @@ module Elastic
         translog: { durability: 'async' }
     }.freeze
 
+    DELETE_ORIGINAL_INDEX_AFTER = 14.days
+
     def execute
       case current_task.state.to_sym
       when :initial
@@ -124,7 +126,7 @@ module Elastic
     def finalize_reindexing
       Gitlab::CurrentSettings.update!(elasticsearch_pause_indexing: false)
 
-      current_task.update!(state: :success)
+      current_task.update!(state: :success, delete_original_index_at: DELETE_ORIGINAL_INDEX_AFTER.from_now)
     end
 
     def reindexing!

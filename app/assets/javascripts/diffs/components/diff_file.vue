@@ -1,10 +1,10 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { escape } from 'lodash';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __, sprintf } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { hasDiff } from '~/helpers/diffs_helper';
 import eventHub from '../../notes/event_hub';
 import DiffFileHeader from './diff_file_header.vue';
@@ -16,6 +16,9 @@ export default {
     DiffFileHeader,
     DiffContent,
     GlLoadingIcon,
+  },
+  directives: {
+    SafeHtml,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -41,7 +44,7 @@ export default {
     return {
       isLoadingCollapsedDiff: false,
       forkMessageVisible: false,
-      isCollapsed: this.file.viewer.collapsed || false,
+      isCollapsed: this.file.viewer.automaticallyCollapsed || false,
     };
   },
   computed: {
@@ -93,21 +96,17 @@ export default {
     },
     'file.file_hash': {
       handler: function watchFileHash() {
-        if (
-          this.glFeatures.autoExpandCollapsedDiffs &&
-          this.viewDiffsFileByFile &&
-          this.file.viewer.collapsed
-        ) {
+        if (this.viewDiffsFileByFile && this.file.viewer.automaticallyCollapsed) {
           this.isCollapsed = false;
           this.handleLoadCollapsedDiff();
         } else {
-          this.isCollapsed = this.file.viewer.collapsed || false;
+          this.isCollapsed = this.file.viewer.automaticallyCollapsed || false;
         }
       },
       immediate: true,
     },
-    'file.viewer.collapsed': function setIsCollapsed(newVal) {
-      if (!this.viewDiffsFileByFile && !this.glFeatures.autoExpandCollapsedDiffs) {
+    'file.viewer.automaticallyCollapsed': function setIsCollapsed(newVal) {
+      if (!this.viewDiffsFileByFile) {
         this.isCollapsed = newVal;
       }
     },
@@ -167,6 +166,7 @@ export default {
     :id="file.file_hash"
     :class="{
       'is-active': currentDiffFileId === file.file_hash,
+      'comments-disabled': Boolean(file.brokenSymlink),
     }"
     :data-path="file.new_path"
     class="diff-file file-holder"
@@ -184,7 +184,7 @@ export default {
     />
 
     <div v-if="forkMessageVisible" class="js-file-fork-suggestion-section file-fork-suggestion">
-      <span class="file-fork-suggestion-note" v-html="forkMessage"></span>
+      <span v-safe-html="forkMessage" class="file-fork-suggestion-note"></span>
       <a
         :href="file.fork_path"
         class="js-fork-suggestion-button btn btn-grouped btn-inverted btn-success"
@@ -202,7 +202,7 @@ export default {
     <template v-else>
       <div :id="`diff-content-${file.file_hash}`">
         <div v-if="errorMessage" class="diff-viewer">
-          <div class="nothing-here-block" v-html="errorMessage"></div>
+          <div v-safe-html="errorMessage" class="nothing-here-block"></div>
         </div>
         <template v-else>
           <div v-show="isCollapsed" class="nothing-here-block diff-collapsed">

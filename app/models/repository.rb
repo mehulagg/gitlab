@@ -26,6 +26,7 @@ class Repository
 
   delegate :ref_name_for_sha, to: :raw_repository
   delegate :bundle_to_disk, to: :raw_repository
+  delegate :lfs_enabled?, to: :container
 
   CreateTreeError = Class.new(StandardError)
   AmbiguousRefError = Class.new(StandardError)
@@ -214,12 +215,13 @@ class Repository
     return false if with_slash.empty?
 
     prefixes = no_slash.map { |ref| Regexp.escape(ref) }.join('|')
-    prefix_regex = %r{^#{prefixes}/}
+    prefix_regex = %r{^(#{prefixes})/}
 
     with_slash.any? do |ref|
       prefix_regex.match?(ref)
     end
   end
+  cache_method :has_ambiguous_refs?
 
   def expand_ref(ref)
     if tag_exists?(ref)
@@ -311,14 +313,16 @@ class Repository
   end
 
   def expire_tags_cache
-    expire_method_caches(%i(tag_names tag_count))
+    expire_method_caches(%i(tag_names tag_count has_ambiguous_refs?))
     @tags = nil
+    @tag_names_include = nil
   end
 
   def expire_branches_cache
-    expire_method_caches(%i(branch_names merged_branch_names branch_count has_visible_content?))
+    expire_method_caches(%i(branch_names merged_branch_names branch_count has_visible_content? has_ambiguous_refs?))
     @local_branches = nil
     @branch_exists_memo = nil
+    @branch_names_include = nil
   end
 
   def expire_statistics_caches
@@ -850,16 +854,16 @@ class Repository
   def merge(user, source_sha, merge_request, message)
     with_cache_hooks do
       raw_repository.merge(user, source_sha, merge_request.target_branch, message) do |commit_id|
-        merge_request.update(in_progress_merge_commit_sha: commit_id)
+        merge_request.update_and_mark_in_progress_merge_commit_sha(commit_id)
         nil # Return value does not matter.
       end
     end
   end
 
-  def merge_to_ref(user, source_sha, merge_request, target_ref, message, first_parent_ref)
+  def merge_to_ref(user, source_sha, merge_request, target_ref, message, first_parent_ref, allow_conflicts = false)
     branch = merge_request.target_branch
 
-    raw.merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref)
+    raw.merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref, allow_conflicts)
   end
 
   def delete_refs(*ref_names)
@@ -870,7 +874,7 @@ class Repository
     their_commit_id = commit(source)&.id
     raise 'Invalid merge source' if their_commit_id.nil?
 
-    merge_request&.update(in_progress_merge_commit_sha: their_commit_id)
+    merge_request&.update_and_mark_in_progress_merge_commit_sha(their_commit_id)
 
     with_cache_hooks { raw.ff_merge(user, their_commit_id, target_branch) }
   end
@@ -1139,21 +1143,10 @@ class Repository
   end
 
   def project
-    if repo_type.snippet?
-      container.project
-    elsif container.is_a?(Project)
-      container
-    end
-  end
-
-  # TODO: pass this in directly to `Blob` rather than delegating it to here
-  #
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/201886
-  def lfs_enabled?
     if container.is_a?(Project)
-      container.lfs_enabled?
+      container
     else
-      false # LFS is not supported for snippet or group repositories
+      container.try(:project)
     end
   end
 

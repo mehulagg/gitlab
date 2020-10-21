@@ -49,7 +49,7 @@ describe('Filter component', () => {
   describe('buttons slot', () => {
     it('should exist', () => {
       createWrapper();
-      expect(wrapper.contains('.button-slot')).toBe(true);
+      expect(wrapper.find('.button-slot').exists()).toBe(true);
     });
   });
 });

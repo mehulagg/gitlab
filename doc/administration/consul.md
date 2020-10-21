@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -235,5 +238,5 @@ Shortly after that, the client agents should rejoin as well.
 
 If you have taken advantage of Consul to store other data and want to restore
 the failed node, follow the
-[Consul guide](https://learn.hashicorp.com/consul/day-2-operations/outage)
+[Consul guide](https://learn.hashicorp.com/tutorials/consul/recovery-outage)
 to recover a failed cluster.

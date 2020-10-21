@@ -2,7 +2,7 @@ import Vue from 'vue';
 import { __, sprintf } from '~/locale';
 import CommaSeparatedListTokenSelector from '../components/comma_separated_list_token_selector.vue';
 
-export default (el, props = {}, qaSelector) => {
+export default (el, props = {}, qaSelector, customValidator) => {
   // eslint-disable-next-line no-new
   new Vue({
     el,
@@ -20,7 +20,13 @@ export default (el, props = {}, qaSelector) => {
         regexValidator,
         ...(regexValidator ? { regexValidator: new RegExp(regexValidator) } : {}),
         ...(disallowedValues ? { disallowedValues: JSON.parse(disallowedValues) } : {}),
+        customErrorMessage: '',
       };
+    },
+    methods: {
+      handleTextInput(value) {
+        this.customErrorMessage = customValidator(value);
+      },
     },
     render(createElement) {
       return createElement('comma-separated-list-token-selector', {
@@ -32,8 +38,10 @@ export default (el, props = {}, qaSelector) => {
           ariaLabelledby: this.labelId,
           regexValidator: this.regexValidator,
           disallowedValues: this.disallowedValues,
+          customErrorMessage: this.customErrorMessage,
           ...props,
         },
+        on: customValidator ? { 'text-input': this.handleTextInput } : {},
         scopedSlots: {
           'user-defined-token-content': ({ inputText: value }) => {
             return sprintf(__('Add "%{value}"'), { value });

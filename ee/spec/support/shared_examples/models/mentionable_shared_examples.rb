@@ -54,7 +54,7 @@ RSpec.shared_examples 'an editable mentionable with EE-specific mentions' do
   let(:new_epic) { create(:epic, group: group) }
 
   it 'creates new cross-reference notes when the mentionable text is edited' do
-    subject.save
+    subject.save!
     subject.create_cross_references!
 
     new_text = <<-MSG.strip_heredoc

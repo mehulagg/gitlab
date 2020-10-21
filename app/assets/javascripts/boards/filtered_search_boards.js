@@ -1,6 +1,6 @@
 import IssuableFilteredSearchTokenKeys from 'ee_else_ce/filtered_search/issuable_filtered_search_token_keys';
-import FilteredSearchContainer from '../filtered_search/container';
 import FilteredSearchManager from 'ee_else_ce/filtered_search/filtered_search_manager';
+import FilteredSearchContainer from '../filtered_search/container';
 import boardsStore from './stores/boards_store';
 
 export default class FilteredSearchBoards extends FilteredSearchManager {
@@ -25,7 +25,13 @@ export default class FilteredSearchBoards extends FilteredSearchManager {
   }
 
   updateObject(path) {
-    this.store.path = path.substr(1);
+    const groupByParam = new URLSearchParams(window.location.search).get('group_by');
+    this.store.path = `${path.substr(1)}${groupByParam ? `&group_by=${groupByParam}` : ''}`;
+
+    if (gon.features.boardsWithSwimlanes || gon.features.graphqlBoardLists) {
+      boardsStore.updateFiltersUrl();
+      boardsStore.performSearch();
+    }
 
     if (this.updateUrl) {
       boardsStore.updateFiltersUrl();

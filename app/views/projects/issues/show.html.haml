@@ -2,8 +2,12 @@
 - add_to_breadcrumbs _("Issues"), project_issues_path(@project)
 - breadcrumb_title @issue.to_reference
 - page_title           "#{@issue.title} (#{@issue.to_reference})", _("Issues")
-- page_description     @issue.description
+- page_description     @issue.description_html
 - page_card_attributes @issue.card_attributes
+- if @issue.relocation_target
+  - page_canonical_link @issue.relocation_target.present(current_user: current_user).web_url
+- if @issue.sentry_issue.present?
+  - add_page_specific_style 'page_bundles/error_tracking_details'
 
 - can_update_issue = can?(current_user, :update_issue, @issue)
 - can_reopen_issue = can?(current_user, :reopen_issue, @issue)
@@ -54,29 +58,26 @@
     = render 'shared/issuable/close_reopen_button', issuable: @issue, can_update: can_update_issue, can_reopen: can_reopen_issue, warn_before_close: defined?(@issue.blocked?) && @issue.blocked?
 
     - if can_report_spam
-      = link_to 'Submit as spam', mark_as_spam_project_issue_path(@project, @issue), method: :post, class: 'd-none d-sm-none d-md-block btn btn-grouped btn-spam', title: 'Submit as spam'
+      = link_to 'Submit as spam', mark_as_spam_project_issue_path(@project, @issue), method: :post, class: 'd-none d-sm-none d-md-block gl-button btn btn-grouped btn-spam', title: 'Submit as spam'
     - if can_create_issue
-      = link_to new_project_issue_path(@project), class: 'd-none d-sm-none d-md-block btn btn-grouped btn-success btn-inverted', title: 'New issue', id: 'new_issue_link' do
+      = link_to new_project_issue_path(@project), class: 'd-none d-sm-none d-md-block gl-button btn btn-grouped btn-success btn-inverted', title: 'New issue', id: 'new_issue_link' do
         New issue
 
 .issue-details.issuable-details
   .detail-page-description.content-block
-    -# haml-lint:disable InlineJavaScript
-    %script#js-issuable-app-initial-data{ type: "application/json" }= issuable_initial_data(@issue).to_json
-    #js-issuable-app
-      %h2.title= markdown_field(@issue, :title)
+    #js-issuable-app{ data: { initial: issuable_initial_data(@issue).to_json} }
+      .title-container
+        %h2.title= markdown_field(@issue, :title)
       - if @issue.description.present?
-        .description{ class: can?(current_user, :update_issue, @issue) ? 'js-task-list-container' : '' }
+        .description
           .md= markdown_field(@issue, :description)
-          %textarea.hidden.js-task-list-field= @issue.description
 
       = edited_time_ago_with_tooltip(@issue, placement: 'bottom', html_class: 'issue-edited-ago js-issue-edited-ago')
 
     - if @issue.sentry_issue.present?
       #js-sentry-error-stack-trace{ data: error_details_data(@project, @issue.sentry_issue.sentry_issue_identifier) }
 
-    - if Feature.enabled?(:design_management_moved, @project, default_enabled: true)
-      = render 'projects/issues/design_management'
+    = render 'projects/issues/design_management'
 
     = render_if_exists 'projects/issues/related_issues'
 
@@ -92,13 +93,11 @@
       .js-noteable-awards
         = render 'award_emoji/awards_block', awardable: @issue, inline: true
       .new-branch-col
+        = render_if_exists "projects/issues/timeline_toggle", issue: @issue
         #js-vue-sort-issue-discussions
         #js-vue-discussion-filter{ data: { default_filter: current_user&.notes_filter_for(@issue), notes_filters: UserPreference.notes_filters.to_json } }
         = render 'new_branch' if show_new_branch_button?
 
-  - if Feature.enabled?(:design_management_moved, @project, default_enabled: true)
-    = render 'projects/issues/discussion'
-  - else
-    = render 'projects/issues/tabs'
+  = render 'projects/issues/discussion'
 
 = render 'shared/issuable/sidebar', issuable_sidebar: @issuable_sidebar, assignees: @issue.assignees

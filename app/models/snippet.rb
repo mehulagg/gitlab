@@ -19,7 +19,6 @@ class Snippet < ApplicationRecord
   extend ::Gitlab::Utils::Override
 
   MAX_FILE_COUNT = 10
-  MAX_SINGLE_FILE_COUNT = 1
 
   cache_markdown_field :title, pipeline: :single_line
   cache_markdown_field :description
@@ -175,8 +174,8 @@ class Snippet < ApplicationRecord
     Snippet.find_by(id: id, project: project)
   end
 
-  def self.max_file_limit(user)
-    Feature.enabled?(:snippet_multiple_files, user) ? MAX_FILE_COUNT : MAX_SINGLE_FILE_COUNT
+  def self.max_file_limit
+    MAX_FILE_COUNT
   end
 
   def initialize(attributes = {})
@@ -214,7 +213,7 @@ class Snippet < ApplicationRecord
   def blobs
     return [] unless repository_exists?
 
-    repository.ls_files(repository.root_ref).map { |file| Blob.lazy(repository, repository.root_ref, file) }
+    repository.ls_files(default_branch).map { |file| Blob.lazy(repository, default_branch, file) }
   end
 
   def hook_attrs
@@ -275,7 +274,7 @@ class Snippet < ApplicationRecord
 
   override :repository
   def repository
-    @repository ||= Repository.new(full_path, self, shard: repository_storage, disk_path: disk_path, repo_type: Gitlab::GlRepository::SNIPPET)
+    @repository ||= Gitlab::GlRepository::SNIPPET.repository_for(self)
   end
 
   override :repository_size_checker
@@ -283,7 +282,8 @@ class Snippet < ApplicationRecord
     strong_memoize(:repository_size_checker) do
       ::Gitlab::RepositorySizeChecker.new(
         current_size_proc: -> { repository.size.megabytes },
-        limit: Gitlab::CurrentSettings.snippet_size_limit
+        limit: Gitlab::CurrentSettings.snippet_size_limit,
+        namespace: nil
       )
     end
   end
@@ -307,6 +307,11 @@ class Snippet < ApplicationRecord
       components << self.id
       components.join('/')
     end
+  end
+
+  override :default_branch
+  def default_branch
+    super || 'master'
   end
 
   def repository_storage
@@ -336,13 +341,17 @@ class Snippet < ApplicationRecord
   def file_name_on_repo
     return if repository.empty?
 
-    list_files(repository.root_ref).first
+    list_files(default_branch).first
   end
 
   def list_files(ref = nil)
     return [] if repository.empty?
 
-    repository.ls_files(ref)
+    repository.ls_files(ref || default_branch)
+  end
+
+  def multiple_files?
+    list_files.size > 1
   end
 
   class << self

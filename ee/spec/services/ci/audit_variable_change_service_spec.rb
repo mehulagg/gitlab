@@ -20,9 +20,9 @@ RSpec.describe Ci::AuditVariableChangeService do
     group.variables << variable
   end
 
-  context 'when extended audits are available' do
+  context 'when audits are available' do
     before do
-      stub_licensed_features(extended_audit_events: true)
+      stub_licensed_features(audit_events: true)
     end
 
     context 'when creating variable' do
@@ -81,9 +81,9 @@ RSpec.describe Ci::AuditVariableChangeService do
     end
   end
 
-  context 'when extended audits are not available' do
+  context 'when audits are not available' do
     before do
-      stub_licensed_features(extended_audit_events: false)
+      stub_licensed_features(audit_events: false)
     end
 
     context 'when creating variable' do

@@ -18,6 +18,7 @@ module QA
     autoload :Project, 'qa/flow/project'
     autoload :Saml, 'qa/flow/saml'
     autoload :User, 'qa/flow/user'
+    autoload :MergeRequest, 'qa/flow/merge_request'
   end
 
   ##
@@ -91,6 +92,7 @@ module QA
     autoload :UserGPG, 'qa/resource/user_gpg'
     autoload :Visibility, 'qa/resource/visibility'
     autoload :ProjectSnippet, 'qa/resource/project_snippet'
+    autoload :Design, 'qa/resource/design'
 
     module KubernetesCluster
       autoload :Base, 'qa/resource/kubernetes_cluster/base'
@@ -107,10 +109,6 @@ module QA
       autoload :Push, 'qa/resource/repository/push'
       autoload :ProjectPush, 'qa/resource/repository/project_push'
       autoload :WikiPush, 'qa/resource/repository/wiki_push'
-    end
-
-    module Settings
-      autoload :HashedStorage, 'qa/resource/settings/hashed_storage'
     end
 
     module Wiki
@@ -194,6 +192,7 @@ module QA
       autoload :Projects, 'qa/page/dashboard/projects'
       autoload :Groups, 'qa/page/dashboard/groups'
       autoload :Welcome, 'qa/page/dashboard/welcome'
+      autoload :Todos, 'qa/page/dashboard/todos'
 
       module Snippet
         autoload :New, 'qa/page/dashboard/snippet/new'
@@ -264,6 +263,7 @@ module QA
       module Pipeline
         autoload :Index, 'qa/page/project/pipeline/index'
         autoload :Show, 'qa/page/project/pipeline/show'
+        autoload :New, 'qa/page/project/pipeline/new'
       end
 
       module Tag
@@ -375,6 +375,7 @@ module QA
       module Snippet
         autoload :New, 'qa/page/project/snippet/new'
         autoload :Show, 'qa/page/project/snippet/show'
+        autoload :Index, 'qa/page/project/snippet/index'
       end
     end
 
@@ -419,7 +420,6 @@ module QA
       autoload :NewSession, 'qa/page/admin/new_session'
 
       module Settings
-        autoload :Repository, 'qa/page/admin/settings/repository'
         autoload :General, 'qa/page/admin/settings/general'
         autoload :MetricsAndProfiling, 'qa/page/admin/settings/metrics_and_profiling'
         autoload :Network, 'qa/page/admin/settings/network'
@@ -427,7 +427,6 @@ module QA
         module Component
           autoload :IpLimits, 'qa/page/admin/settings/component/ip_limits'
           autoload :OutboundRequests, 'qa/page/admin/settings/component/outbound_requests'
-          autoload :RepositoryStorage, 'qa/page/admin/settings/component/repository_storage'
           autoload :AccountAndLimit, 'qa/page/admin/settings/component/account_and_limit'
           autoload :PerformanceBar, 'qa/page/admin/settings/component/performance_bar'
         end
@@ -596,10 +595,12 @@ module QA
     autoload :Api, 'qa/support/api'
     autoload :Dates, 'qa/support/dates'
     autoload :Repeater, 'qa/support/repeater'
+    autoload :Run, 'qa/support/run'
     autoload :Retrier, 'qa/support/retrier'
     autoload :Waiter, 'qa/support/waiter'
     autoload :WaitForRequests, 'qa/support/wait_for_requests'
     autoload :OTP, 'qa/support/otp'
+    autoload :SSH, 'qa/support/ssh'
   end
 end
 

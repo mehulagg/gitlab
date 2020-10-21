@@ -1,12 +1,11 @@
 <script>
-import { GlLink, GlDeprecatedBadge as GlBadge, GlTooltipDirective } from '@gitlab/ui';
+import { GlLink, GlDeprecatedBadge as GlBadge, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import ReviewAppLink from '~/vue_merge_request_widget/components/review_app_link.vue';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     ReviewAppLink,
     GlBadge,
     GlLink,
@@ -64,7 +63,7 @@ export default {
         environment.size
       }}</gl-badge>
     </div>
-    <icon
+    <gl-icon
       v-if="environment.within_folder"
       v-gl-tooltip
       :title="$options.tooltips.information"

@@ -1,5 +1,0 @@
----
-title: Fix Elasticsearch sorting incorrectly from DB
-merge_request: 37665
-author:
-type: fixed

@@ -1,5 +1,4 @@
 import $ from 'jquery';
-import '~/gl_dropdown';
 import AccessDropdown from '~/projects/settings/access_dropdown';
 import { LEVEL_TYPES } from '~/projects/settings/constants';
 
@@ -15,6 +14,7 @@ describe('AccessDropdown', () => {
     `);
     const $dropdown = $('#dummy-dropdown');
     $dropdown.data('defaultLabel', defaultLabel);
+    gon.features = { deployKeysOnProtectedBranches: true };
     const options = {
       $dropdown,
       accessLevelsData: {
@@ -38,6 +38,9 @@ describe('AccessDropdown', () => {
       { type: LEVEL_TYPES.GROUP },
       { type: LEVEL_TYPES.GROUP },
       { type: LEVEL_TYPES.GROUP },
+      { type: LEVEL_TYPES.DEPLOY_KEY },
+      { type: LEVEL_TYPES.DEPLOY_KEY },
+      { type: LEVEL_TYPES.DEPLOY_KEY },
     ];
 
     beforeEach(() => {
@@ -50,7 +53,7 @@ describe('AccessDropdown', () => {
 
       const label = dropdown.toggleLabel();
 
-      expect(label).toBe('1 role, 2 users, 3 groups');
+      expect(label).toBe('1 role, 2 users, 3 deploy keys, 3 groups');
       expect($dropdownToggleText).not.toHaveClass('is-default');
     });
 
@@ -120,6 +123,21 @@ describe('AccessDropdown', () => {
         const label = dropdown.toggleLabel();
 
         expect(label).toBe('2 users, 3 groups');
+        expect($dropdownToggleText).not.toHaveClass('is-default');
+      });
+    });
+
+    describe('with users and deploy keys', () => {
+      beforeEach(() => {
+        const selectedTypes = [LEVEL_TYPES.DEPLOY_KEY, LEVEL_TYPES.USER];
+        dropdown.setSelectedItems(dummyItems.filter(item => selectedTypes.includes(item.type)));
+        $dropdownToggleText.addClass('is-default');
+      });
+
+      it('displays number of deploy keys', () => {
+        const label = dropdown.toggleLabel();
+
+        expect(label).toBe('2 users, 3 deploy keys');
         expect($dropdownToggleText).not.toHaveClass('is-default');
       });
     });

@@ -8,10 +8,8 @@
     = _('Events in %{project_path}') % { project_path: @project.full_path }
 
   #js-project-audit-events-app{ data: { form_path: project_audit_events_path(@project),
-  events: @table_events.to_json,
-  is_last_page: @events.last_page?.to_json,
-  filter_qa_selector: 'project_audit_log_filter',
-  table_qa_selector: 'project_audit_log_table',
+  events: @events.to_json,
+  is_last_page: @is_last_page.to_json,
   filter_token_options: project_audit_event_tokens(@project.full_path).to_json } }
 
 - elsif show_promotions?

@@ -1,17 +1,24 @@
 <script>
 import axios from 'axios';
-import RelatedIssuesStore from 'ee/related_issues/stores/related_issues_store';
-import RelatedIssuesBlock from 'ee/related_issues/components/related_issues_block.vue';
-import { issuableTypesMap, PathIdSeparator } from 'ee/related_issues/constants';
-import { sprintf, __ } from '~/locale';
-import { joinPaths } from '~/lib/utils/url_utility';
+import { GlButton, GlAlert, GlSprintf, GlLink } from '@gitlab/ui';
+import RelatedIssuesStore from '~/related_issues/stores/related_issues_store';
+import RelatedIssuesBlock from '~/related_issues/components/related_issues_block.vue';
+import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
+import { sprintf, __, s__ } from '~/locale';
+import { joinPaths, redirectTo } from '~/lib/utils/url_utility';
 import { RELATED_ISSUES_ERRORS } from '../constants';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { getFormattedIssue, getAddRelatedIssueRequestParams } from '../helpers';
 
 export default {
   name: 'VulnerabilityRelatedIssues',
-  components: { RelatedIssuesBlock },
+  components: {
+    RelatedIssuesBlock,
+    GlButton,
+    GlAlert,
+    GlSprintf,
+    GlLink,
+  },
   props: {
     endpoint: {
       type: String,
@@ -34,11 +41,14 @@ export default {
   },
   data() {
     this.store = new RelatedIssuesStore();
+
     return {
+      isProcessingAction: false,
       state: this.store.state,
       isFetching: false,
       isSubmitting: false,
       isFormVisible: false,
+      errorCreatingIssue: false,
       inputValue: '',
     };
   },
@@ -46,11 +56,51 @@ export default {
     vulnerabilityProjectId() {
       return this.projectPath.replace(/^\//, ''); // Remove the leading slash, i.e. '/root/test' -> 'root/test'.
     },
+    isIssueAlreadyCreated() {
+      return Boolean(this.state.relatedIssues.find(i => i.lockIssueRemoval));
+    },
+    canCreateIssue() {
+      return !this.isIssueAlreadyCreated && !this.isFetching && Boolean(this.createIssueUrl);
+    },
+  },
+  inject: {
+    vulnerabilityId: {
+      type: Number,
+    },
+    projectFingerprint: {
+      type: String,
+    },
+    createIssueUrl: {
+      type: String,
+    },
+    reportType: {
+      type: String,
+    },
+    issueTrackingHelpPath: {
+      type: String,
+    },
+    permissionsHelpPath: {
+      type: String,
+    },
   },
   created() {
     this.fetchRelatedIssues();
   },
   methods: {
+    createIssue() {
+      this.isProcessingAction = true;
+      this.errorCreatingIssue = false;
+
+      return axios
+        .post(this.createIssueUrl)
+        .then(({ data: { web_url } }) => {
+          redirectTo(web_url);
+        })
+        .catch(() => {
+          this.isProcessingAction = false;
+          this.errorCreatingIssue = true;
+        });
+    },
     toggleFormVisibility() {
       this.isFormVisible = !this.isFormVisible;
     },
@@ -119,7 +169,19 @@ export default {
         .get(this.endpoint)
         .then(({ data }) => {
           const issues = data.map(getFormattedIssue);
-          this.store.setRelatedIssues(issues);
+          this.store.setRelatedIssues(
+            issues.map(i => {
+              const lockIssueRemoval = i.vulnerability_link_type === 'created';
+
+              return {
+                ...i,
+                lockIssueRemoval,
+                lockedMessage: lockIssueRemoval
+                  ? s__('SecurityReports|Issues created from a vulnerability cannot be removed.')
+                  : undefined,
+              };
+            }),
+          );
         })
         .catch(() => {
           createFlash(__('An error occurred while fetching issues.'));
@@ -143,31 +205,76 @@ export default {
   autoCompleteSources: gl?.GfmAutoComplete?.dataSources,
   issuableType: issuableTypesMap.ISSUE,
   pathIdSeparator: PathIdSeparator.Issue,
+  i18n: {
+    relatedIssues: __('Related issues'),
+    createIssue: __('Create issue'),
+    createIssueErrorTitle: __('Could not create issue'),
+    createIssueErrorBody: s__(
+      'SecurityReports|Ensure that %{trackingStart}issue tracking%{trackingEnd} is enabled for this project and you have %{permissionsStart}permission to create new issues%{permissionsEnd}.',
+    ),
+  },
 };
 </script>
 
 <template>
-  <related-issues-block
-    :help-path="helpPath"
-    :is-fetching="isFetching"
-    :is-submitting="isSubmitting"
-    :related-issues="state.relatedIssues"
-    :can-admin="canModifyRelatedIssues"
-    :pending-references="state.pendingReferences"
-    :is-form-visible="isFormVisible"
-    :input-value="inputValue"
-    :auto-complete-sources="$options.autoCompleteSources"
-    :issuable-type="$options.issuableType"
-    :path-id-separator="$options.pathIdSeparator"
-    :show-categorized-issues="false"
-    @toggleAddRelatedIssuesForm="toggleFormVisibility"
-    @addIssuableFormInput="addPendingReferences"
-    @addIssuableFormBlur="processAllReferences"
-    @addIssuableFormSubmit="addRelatedIssue"
-    @addIssuableFormCancel="resetForm"
-    @pendingIssuableRemoveRequest="removePendingReference"
-    @relatedIssueRemoveRequest="removeRelatedIssue"
-  >
-    <template #headerText>{{ __('Related issues') }}</template>
-  </related-issues-block>
+  <div>
+    <gl-alert
+      v-if="errorCreatingIssue"
+      variant="danger"
+      class="gl-mt-5"
+      @dismiss="errorCreatingIssue = false"
+    >
+      <p class="gl-font-weight-bold gl-mb-2">{{ $options.i18n.createIssueErrorTitle }}</p>
+      <p class="gl-mb-0">
+        <gl-sprintf :message="$options.i18n.createIssueErrorBody">
+          <template #tracking="{ content }">
+            <gl-link class="gl-display-inline-block" :href="issueTrackingHelpPath" target="_blank">
+              {{ content }}
+            </gl-link>
+          </template>
+          <template #permissions="{ content }">
+            <gl-link class="gl-display-inline-block" :href="permissionsHelpPath" target="_blank">
+              {{ content }}
+            </gl-link>
+          </template>
+        </gl-sprintf>
+      </p>
+    </gl-alert>
+    <related-issues-block
+      :help-path="helpPath"
+      :is-fetching="isFetching"
+      :is-submitting="isSubmitting"
+      :related-issues="state.relatedIssues"
+      :can-admin="canModifyRelatedIssues"
+      :pending-references="state.pendingReferences"
+      :is-form-visible="isFormVisible"
+      :input-value="inputValue"
+      :auto-complete-sources="$options.autoCompleteSources"
+      :issuable-type="$options.issuableType"
+      :path-id-separator="$options.pathIdSeparator"
+      :show-categorized-issues="false"
+      @toggleAddRelatedIssuesForm="toggleFormVisibility"
+      @addIssuableFormInput="addPendingReferences"
+      @addIssuableFormBlur="processAllReferences"
+      @addIssuableFormSubmit="addRelatedIssue"
+      @addIssuableFormCancel="resetForm"
+      @pendingIssuableRemoveRequest="removePendingReference"
+      @relatedIssueRemoveRequest="removeRelatedIssue"
+    >
+      <template #headerText>
+        {{ $options.i18n.relatedIssues }}
+      </template>
+      <template v-if="canCreateIssue" #headerActions>
+        <gl-button
+          ref="createIssue"
+          variant="success"
+          category="secondary"
+          :loading="isProcessingAction"
+          @click="createIssue"
+        >
+          {{ $options.i18n.createIssue }}
+        </gl-button>
+      </template>
+    </related-issues-block>
+  </div>
 </template>

@@ -33,4 +33,19 @@ RSpec.describe Resolvers::ProjectPipelineResolver do
   it 'errors when no iid is passed' do
     expect { resolve_pipeline(project, {}) }.to raise_error(ArgumentError)
   end
+
+  context 'when the pipeline is a dangling pipeline' do
+    let(:pipeline) do
+      dangling_source = ::Enums::Ci::Pipeline.dangling_sources.each_value.first
+      create(:ci_pipeline, source: dangling_source, project: project)
+    end
+
+    it 'resolves pipeline for the passed iid' do
+      result = batch_sync do
+        resolve_pipeline(project, { iid: pipeline.iid.to_s })
+      end
+
+      expect(result).to eq(pipeline)
+    end
+  end
 end

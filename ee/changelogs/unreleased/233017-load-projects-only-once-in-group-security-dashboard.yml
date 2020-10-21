@@ -1,5 +1,0 @@
----
-title: Load project list only during loading the Security Dashboard
-merge_request: 39263
-author:
-type: performance

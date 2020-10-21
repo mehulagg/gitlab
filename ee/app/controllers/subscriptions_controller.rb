@@ -4,6 +4,8 @@ class SubscriptionsController < ApplicationController
   layout 'checkout'
   skip_before_action :authenticate_user!, only: :new
 
+  feature_category :purchase
+
   content_security_policy do |p|
     next if p.directives.blank?
 
@@ -44,9 +46,9 @@ class SubscriptionsController < ApplicationController
     if params[:selected_group]
       group = current_user.manageable_groups_eligible_for_subscription.find(params[:selected_group])
     else
-      group_name = params[:setup_for_company] ? customer_params[:company] : "#{current_user.name}'s Group"
-      path = Namespace.clean_path(group_name)
-      group = Groups::CreateService.new(current_user, name: group_name, path: path).execute
+      name = Namespace.clean_name(params[:setup_for_company] ? customer_params[:company] : current_user.name)
+      path = Namespace.clean_path(name)
+      group = Groups::CreateService.new(current_user, name: name, path: path).execute
       return render json: group.errors.to_json unless group.persisted?
     end
 

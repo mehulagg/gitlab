@@ -13,17 +13,21 @@ module EE
     def read_only_message
       return super unless ::Gitlab::Geo.secondary?
 
-      if @limited_actions_message
-        html_escape(s_('Geo|You are on a secondary, %{b_open}read-only%{b_close} Geo node. You may be able to make a limited amount of changes or perform a limited amount of actions on this page.')) %
-          { b_open: '<b>'.html_safe, b_close: '</b>'.html_safe }
-      else
-        message = html_escape(s_('Geo|You are on a secondary, %{b_open}read-only%{b_close} Geo node. If you want to make changes, you must visit this page on the %{node_link_open}primary node%{node_link_close}.')) %
-          { node_link_open: "<a href=\"#{::Gitlab::Geo.primary_node&.url || '#'}\">".html_safe, node_link_close: "</a>".html_safe, b_open: '<b>'.html_safe, b_close: '</b>'.html_safe }
+      message = @limited_actions_message ? s_('Geo|You may be able to make a limited amount of changes or perform a limited amount of actions on this page.') : s_('Geo|If you want to make changes, you must visit the primary site.')
 
-        return "#{message} #{lag_message}".html_safe if lag_message
+      message = "#{message} #{lag_message}".html_safe if lag_message
 
-        message
+      html = tag.div do
+        tag.p(class: 'gl-mb-3') do
+          concat(sprite_icon('information-o', css_class: 'gl-icon gl-mr-3'))
+          concat(s_('Geo|You are on a secondary, %{b_open}read-only%{b_close} Geo node.').html_safe % { b_open: '<b>'.html_safe, b_close: '</b>'.html_safe })
+          concat(" #{message}")
+        end
       end
+
+      html.concat(tag.a(s_('Geo|Go to the primary site'), class: 'btn', href: ::Gitlab::Geo.primary_node.url, target: '_blank')) if ::Gitlab::Geo.primary_node.present?
+
+      html
     end
 
     def lag_message
@@ -70,13 +74,6 @@ module EE
       ::Gitlab.config.smartcard.client_certificate_required_port
     end
 
-    def page_class
-      class_names = super
-      class_names += system_message_class
-
-      class_names
-    end
-
     override :autocomplete_data_sources
     def autocomplete_data_sources(object, noteable_type)
       return {} unless object && noteable_type
@@ -96,10 +93,6 @@ module EE
       else
         super
       end
-    end
-
-    def instance_review_permitted?
-      ::Gitlab::CurrentSettings.instance_review_permitted? && current_user&.admin?
     end
 
     override :show_last_push_widget?

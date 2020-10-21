@@ -1,23 +1,17 @@
 <script>
-import { throttle } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { GlButton, GlLoadingIcon } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
-import ImportedProjectTableRow from './imported_project_table_row.vue';
+import { GlButton, GlLoadingIcon, GlIntersectionObserver, GlModal } from '@gitlab/ui';
+import { n__, __, sprintf } from '~/locale';
 import ProviderRepoTableRow from './provider_repo_table_row.vue';
-import IncompatibleRepoTableRow from './incompatible_repo_table_row.vue';
-import { isProjectImportable } from '../utils';
-
-const reposFetchThrottleDelay = 1000;
 
 export default {
   name: 'ImportProjectsTable',
   components: {
-    ImportedProjectTableRow,
     ProviderRepoTableRow,
-    IncompatibleRepoTableRow,
     GlLoadingIcon,
     GlButton,
+    GlModal,
+    GlIntersectionObserver,
   },
   props: {
     providerTitle: {
@@ -29,6 +23,11 @@ export default {
       required: false,
       default: true,
     },
+    paginatable: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
 
   computed: {
@@ -38,7 +37,12 @@ export default {
       'isImportingAnyRepo',
       'hasImportableRepos',
       'hasIncompatibleRepos',
+      'importAllCount',
     ]),
+
+    pagePaginationStateKey() {
+      return `${this.filter}-${this.repositories.length}`;
+    },
 
     availableNamespaces() {
       const serializedNamespaces = this.namespaces.map(({ fullPath }) => ({
@@ -57,8 +61,12 @@ export default {
 
     importAllButtonText() {
       return this.hasIncompatibleRepos
-        ? __('Import all compatible repositories')
-        : __('Import all repositories');
+        ? n__(
+            'Import %d compatible repository',
+            'Import %d compatible repositories',
+            this.importAllCount,
+          )
+        : n__('Import %d repository', 'Import %d repositories', this.importAllCount);
     },
 
     emptyStateText() {
@@ -74,7 +82,11 @@ export default {
 
   mounted() {
     this.fetchNamespaces();
-    this.fetchRepos();
+    this.fetchJobs();
+
+    if (!this.paginatable) {
+      this.fetchRepos();
+    }
   },
 
   beforeDestroy() {
@@ -85,22 +97,13 @@ export default {
   methods: {
     ...mapActions([
       'fetchRepos',
+      'fetchJobs',
       'fetchNamespaces',
       'stopJobsPolling',
       'clearJobsEtagPoll',
       'setFilter',
       'importAll',
     ]),
-
-    handleFilterInput({ target }) {
-      this.setFilter(target.value);
-    },
-
-    throttledFetchRepos: throttle(function fetch() {
-      this.fetchRepos();
-    }, reposFetchThrottleDelay),
-
-    isProjectImportable,
   },
 };
 </script>
@@ -108,41 +111,50 @@ export default {
 <template>
   <div>
     <p class="light text-nowrap mt-2">
-      {{ s__('ImportProjects|Select the projects you want to import') }}
+      {{ s__('ImportProjects|Select the repositories you want to import') }}
     </p>
     <template v-if="hasIncompatibleRepos">
       <slot name="incompatible-repos-warning"></slot>
     </template>
-    <div v-if="!isLoading" class="d-flex justify-content-between align-items-end flex-wrap mb-3">
+    <div class="d-flex justify-content-between align-items-end flex-wrap mb-3">
       <gl-button
         variant="success"
         :loading="isImportingAnyRepo"
         :disabled="!hasImportableRepos"
         type="button"
-        @click="importAll"
+        @click="$refs.importAllModal.show()"
         >{{ importAllButtonText }}</gl-button
       >
+      <gl-modal
+        ref="importAllModal"
+        modal-id="import-all-modal"
+        :title="s__('ImportProjects|Import repositories')"
+        :ok-title="__('Import')"
+        @ok="importAll"
+      >
+        {{
+          n__(
+            'Are you sure you want to import %d repository?',
+            'Are you sure you want to import %d repositories?',
+            importAllCount,
+          )
+        }}
+      </gl-modal>
+
       <slot name="actions"></slot>
       <form v-if="filterable" class="gl-ml-auto" novalidate @submit.prevent>
         <input
-          :value="filter"
           data-qa-selector="githubish_import_filter_field"
           class="form-control"
           name="filter"
-          :placeholder="__('Filter your projects by name')"
+          :placeholder="__('Filter your repositories by name')"
           autofocus
           size="40"
-          @input="handleFilterInput($event)"
-          @keyup.enter="throttledFetchRepos"
+          @keyup.enter="setFilter($event.target.value)"
         />
       </form>
     </div>
-    <gl-loading-icon
-      v-if="isLoading"
-      class="js-loading-button-icon import-projects-loading-icon"
-      size="md"
-    />
-    <div v-else-if="repositories.length" class="table-responsive">
+    <div v-if="repositories.length" class="table-responsive">
       <table class="table import-table">
         <thead>
           <th class="import-jobs-from-col">{{ fromHeaderText }}</th>
@@ -152,23 +164,27 @@ export default {
         </thead>
         <tbody>
           <template v-for="repo in repositories">
-            <incompatible-repo-table-row
-              v-if="repo.importSource.incompatible"
-              :key="repo.importSource.id"
-              :repo="repo"
-            />
             <provider-repo-table-row
-              v-else-if="isProjectImportable(repo)"
-              :key="repo.importSource.id"
+              :key="repo.importSource.providerLink"
               :repo="repo"
               :available-namespaces="availableNamespaces"
             />
-            <imported-project-table-row v-else :key="repo.importSource.id" :project="repo" />
           </template>
         </tbody>
       </table>
     </div>
-    <div v-else class="text-center">
+    <gl-intersection-observer
+      v-if="paginatable"
+      :key="pagePaginationStateKey"
+      @appear="fetchRepos"
+    />
+    <gl-loading-icon
+      v-if="isLoading"
+      class="js-loading-button-icon import-projects-loading-icon"
+      size="md"
+    />
+
+    <div v-if="!isLoading && repositories.length === 0" class="text-center">
       <strong>{{ emptyStateText }}</strong>
     </div>
   </div>

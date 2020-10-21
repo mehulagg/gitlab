@@ -19,10 +19,11 @@ module Gitlab
       attr_reader :model_record_id
 
       delegate :model, to: :class
-      delegate :in_replicables_for_geo_node?, to: :model_record
+      delegate :replication_enabled_feature_key, to: :class
+      delegate :in_replicables_for_current_secondary?, to: :model_record
 
       class << self
-        delegate :find_unsynced_registries, :find_failed_registries, to: :registry_class
+        delegate :find_registries_never_attempted_sync, :find_registries_needs_sync_again, to: :registry_class
       end
 
       # Declare supported event
@@ -188,6 +189,10 @@ module Gitlab
         const_get("::Geo::#{name}Replicator", false)
       end
 
+      def self.replication_enabled_feature_key
+        :"geo_#{replicable_name}_replication"
+      end
+
       # @param [ActiveRecord::Base] model_record
       # @param [Integer] model_record_id
       def initialize(model_record: nil, model_record_id: nil)
@@ -236,11 +241,6 @@ module Gitlab
         consume_method = "consume_event_#{event_name}".to_sym
         raise NotImplementedError, "Consume method not implemented: '#{consume_method}'" unless self.methods.include?(consume_method)
 
-        # Inject model_record based on included class
-        if model_record
-          event_data[:model_record] = model_record
-        end
-
         send(consume_method, **event_data) # rubocop:disable GitlabSecurity/PublicSend
       end
 
@@ -284,11 +284,47 @@ module Gitlab
         { replicable_name: replicable_name, replicable_id: model_record_id }
       end
 
-      protected
+      def handle_after_destroy
+        return false unless Gitlab::Geo.enabled?
+        return unless self.class.enabled?
 
-      def self.replication_enabled_feature_key
-        :"geo_#{replicable_name}_replication"
+        publish(:deleted, **deleted_params)
       end
+
+      def handle_after_update
+        return false unless Gitlab::Geo.enabled?
+        return unless self.class.enabled?
+
+        publish(:updated, **updated_params)
+      end
+
+      def schedule_checksum_calculation
+        raise NotImplementedError
+      end
+
+      def created_params
+        event_params
+      end
+
+      def deleted_params
+        event_params
+      end
+
+      def updated_params
+        event_params
+      end
+
+      def event_params
+        { model_record_id: model_record.id }
+      end
+
+      def needs_checksum?
+        return true unless model_record.respond_to?(:needs_checksum?)
+
+        model_record.needs_checksum?
+      end
+
+      protected
 
       # Store an event on the database
       #

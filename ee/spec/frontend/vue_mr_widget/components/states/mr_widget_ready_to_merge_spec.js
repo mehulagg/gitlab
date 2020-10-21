@@ -2,6 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import { MERGE_DISABLED_TEXT_UNAPPROVED } from 'ee/vue_merge_request_widget/mixins/ready_to_merge';
 import MergeImmediatelyConfirmationDialog from 'ee/vue_merge_request_widget/components/merge_immediately_confirmation_dialog.vue';
 import MergeTrainHelperText from 'ee/vue_merge_request_widget/components/merge_train_helper_text.vue';
+import { GlLink, GlSprintf } from '@gitlab/ui';
 import ReadyToMerge from '~/vue_merge_request_widget/components/states/ready_to_merge.vue';
 import {
   MWPS_MERGE_STRATEGY,
@@ -12,7 +13,6 @@ import {
   MERGE_DISABLED_TEXT,
   PIPELINE_MUST_SUCCEED_CONFLICT_TEXT,
 } from '~/vue_merge_request_widget/mixins/ready_to_merge';
-import { GlLink, GlSprintf } from '@gitlab/ui';
 
 describe('ReadyToMerge', () => {
   let wrapper;

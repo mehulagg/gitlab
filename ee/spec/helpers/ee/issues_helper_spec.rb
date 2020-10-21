@@ -69,4 +69,24 @@ RSpec.describe EE::IssuesHelper do
       expect(helper.issue_in_subepic?(issue, 'subepic_id')).to be_truthy
     end
   end
+
+  describe '#show_timeline_view_toggle?' do
+    subject { helper.show_timeline_view_toggle?(issue) }
+
+    it { is_expected.to be_falsy }
+
+    context 'issue is an incident' do
+      let(:issue) { build_stubbed(:incident) }
+
+      it { is_expected.to be_falsy }
+
+      context 'with license' do
+        before do
+          stub_licensed_features(incident_timeline_view: true)
+        end
+
+        it { is_expected.to be_truthy }
+      end
+    end
+  end
 end

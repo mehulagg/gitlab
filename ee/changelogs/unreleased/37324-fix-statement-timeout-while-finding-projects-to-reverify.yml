@@ -1,5 +1,0 @@
----
-title: Geo - Optimize the query to return reverifiable projects on Geo primary node
-merge_request: 38732
-author:
-type: performance

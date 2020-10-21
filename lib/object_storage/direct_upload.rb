@@ -62,8 +62,16 @@ module ObjectStorage
     end
 
     def workhorse_client_hash
-      return {} unless config.aws?
+      if config.aws?
+        workhorse_aws_hash
+      elsif config.azure?
+        workhorse_azure_hash
+      else
+        {}
+      end
+    end
 
+    def workhorse_aws_hash
       {
         UseWorkhorseClient: use_workhorse_s3_client?,
         RemoteTempObjectID: object_name,
@@ -80,6 +88,27 @@ module ObjectStorage
           }.compact
         }
       }
+    end
+
+    def workhorse_azure_hash
+      {
+        # Azure requires Workhorse client because direct uploads can't
+        # use pre-signed URLs without buffering the whole file to disk.
+        UseWorkhorseClient: true,
+        RemoteTempObjectID: object_name,
+        ObjectStorage: {
+          Provider: 'AzureRM',
+          GoCloudConfig: {
+            URL: azure_gocloud_url
+          }
+        }
+      }
+    end
+
+    def azure_gocloud_url
+      url = "azblob://#{bucket_name}"
+      url += "?domain=#{config.azure_storage_domain}" if config.azure_storage_domain.present?
+      url
     end
 
     def use_workhorse_s3_client?

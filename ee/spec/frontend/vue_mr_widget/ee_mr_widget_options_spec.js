@@ -6,6 +6,14 @@ import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
 import { trimText } from 'helpers/text_helper';
 
+import {
+  sastDiffSuccessMock,
+  dastDiffSuccessMock,
+  containerScanningDiffSuccessMock,
+  dependencyScanningDiffSuccessMock,
+  secretScanningDiffSuccessMock,
+  coverageFuzzingDiffSuccessMock,
+} from 'ee_jest/vue_shared/security_reports/mock_data';
 import mockData, {
   baseBrowserPerformance,
   headBrowserPerformance,
@@ -16,14 +24,6 @@ import mockData, {
 import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import axios from '~/lib/utils/axios_utils';
-import {
-  sastDiffSuccessMock,
-  dastDiffSuccessMock,
-  containerScanningDiffSuccessMock,
-  dependencyScanningDiffSuccessMock,
-  secretScanningDiffSuccessMock,
-  coverageFuzzingDiffSuccessMock,
-} from 'ee_jest/vue_shared/security_reports/mock_data';
 
 const SAST_SELECTOR = '.js-sast-widget';
 const DAST_SELECTOR = '.js-dast-widget';
@@ -110,6 +110,7 @@ describe('ee merge request widget options', () => {
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
 
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+        vm.loading = false;
 
         expect(
           findSecurityWidget()
@@ -810,13 +811,13 @@ describe('ee merge request widget options', () => {
   });
 
   describe('Secret Scanning', () => {
-    const SECRET_SCANNING_ENDPOINT = 'secret_scanning';
+    const SECRET_SCANNING_ENDPOINT = 'secret_detection_report';
 
     beforeEach(() => {
       gl.mrWidgetData = {
         ...mockData,
         enabled_reports: {
-          secret_scanning: true,
+          secret_detection: true,
           // The below property needs to exist until
           // secret scanning is implemented in backend
           // Or for some other reason I'm yet to find
@@ -958,10 +959,10 @@ describe('ee merge request widget options', () => {
       vm.mr.state = 'readyToMerge';
 
       vm.$nextTick(() => {
-        const tooltip = vm.$el.querySelector('.fa-question-circle');
+        const tooltip = vm.$el.querySelector('[data-testid="question-o-icon"]');
 
         expect(vm.$el.textContent).toContain('Deletes source branch');
-        expect(tooltip.getAttribute('data-original-title')).toBe(
+        expect(tooltip.getAttribute('title')).toBe(
           'A user with write access to the source branch selected this option',
         );
 
@@ -1070,7 +1071,7 @@ describe('ee merge request widget options', () => {
         sast: false,
         container_scanning: false,
         dependency_scanning: false,
-        secret_scanning: false,
+        secret_detection: false,
       },
     ];
 

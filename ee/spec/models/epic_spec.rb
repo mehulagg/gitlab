@@ -16,7 +16,8 @@ RSpec.describe Epic do
     it { is_expected.to belong_to(:parent) }
     it { is_expected.to have_many(:epic_issues) }
     it { is_expected.to have_many(:children) }
-    it { is_expected.to have_many(:user_mentions).class_name("EpicUserMention") }
+    it { is_expected.to have_many(:user_mentions).class_name('EpicUserMention') }
+    it { is_expected.to have_many(:boards_epic_user_preferences).class_name('Boards::EpicUserPreference') }
   end
 
   describe 'scopes' do
@@ -616,9 +617,25 @@ RSpec.describe Epic do
   end
 
   context "relative positioning" do
-    it_behaves_like "a class that supports relative positioning" do
-      let(:factory) { :epic }
-      let(:default_params) { {} }
+    let_it_be(:parent) { create(:epic) }
+    let_it_be(:group) { create(:group) }
+
+    context 'there is no parent' do
+      let_it_be(:factory) { :epic }
+      let_it_be(:default_params) { { group: group } }
+
+      it_behaves_like "no-op relative positioning"
+    end
+
+    context 'there is a parent' do
+      it_behaves_like "a class that supports relative positioning" do
+        let(:factory) { :epic_tree_node }
+        let(:default_params) { { parent: parent, group: parent.group } }
+
+        def as_item(item)
+          item.epic_tree_node_identity
+        end
+      end
     end
   end
 

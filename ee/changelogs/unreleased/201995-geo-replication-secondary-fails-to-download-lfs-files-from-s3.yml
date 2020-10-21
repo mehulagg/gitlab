@@ -1,5 +1,0 @@
----
-title: 'Geo: Fix LFS file downloads from S3 to secondary'
-merge_request: 37008
-author:
-type: fixed

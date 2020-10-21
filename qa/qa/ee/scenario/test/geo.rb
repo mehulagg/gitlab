@@ -23,11 +23,11 @@ module QA
             # Alias QA::Runtime::Scenario.gitlab_address to @address since
             # some components depends on QA::Runtime::Scenario.gitlab_address.
             QA::Runtime::Scenario.define(:gitlab_address, QA::Runtime::Scenario.geo_primary_address)
+            QA::Runtime::Scenario.define(:network, 'geo')
 
             unless options[:geo_skip_setup?]
               Geo::Primary.act do
                 add_license
-                enable_hashed_storage
                 set_replication_password
                 set_primary_node
                 add_secondary_node
@@ -61,14 +61,6 @@ module QA
 
               QA::Runtime::Browser.visit(:geo_primary, QA::Page::Main::Login) do
                 Resource::License.fabricate!(ENV['EE_LICENSE'])
-              end
-            end
-
-            def enable_hashed_storage
-              puts 'Enabling hashed repository storage setting ...'
-
-              QA::Runtime::Browser.visit(:geo_primary, QA::Page::Main::Login) do
-                QA::Resource::Settings::HashedStorage.fabricate!(:enabled)
               end
             end
 

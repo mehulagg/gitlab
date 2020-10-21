@@ -32,40 +32,27 @@ module Resolvers
 
       iterations = IterationsFinder.new(context[:current_user], iterations_finder_params(args)).execute
 
+      # Necessary for scopedPath computation in IterationPresenter
+      context[:parent_object] = parent
+
       Gitlab::Graphql::Pagination::OffsetActiveRecordRelationConnection.new(iterations)
     end
 
     private
 
     def iterations_finder_params(args)
-      {
+      IterationsFinder.params_for_parent(parent, include_ancestors: args[:include_ancestors]).merge!(
         id: args[:id],
         iid: args[:iid],
         state: args[:state] || 'all',
         start_date: args[:start_date],
         end_date: args[:end_date],
         search_title: args[:title]
-      }.merge(parent_id_parameter(args[:include_ancestors]))
+      )
     end
 
     def parent
       @parent ||= object.respond_to?(:sync) ? object.sync : object
-    end
-
-    def parent_id_parameter(include_ancestors)
-      if parent.is_a?(Group)
-        if include_ancestors
-          { group_ids: parent.self_and_ancestors.select(:id) }
-        else
-          { group_ids: parent.id }
-        end
-      elsif parent.is_a?(Project)
-        if include_ancestors && parent.parent_id.present?
-          { group_ids: parent.parent.self_and_ancestors.select(:id), project_ids: parent.id }
-        else
-          { project_ids: parent.id }
-        end
-      end
     end
 
     def authorize!

@@ -4,7 +4,7 @@ module Types
   module DesignManagement
     class DesignCollectionType < BaseObject
       graphql_name 'DesignCollection'
-      description 'A collection of designs.'
+      description 'A collection of designs'
 
       authorize :read_design
 
@@ -39,6 +39,10 @@ module Types
             null: true,
             resolver: ::Resolvers::DesignManagement::DesignResolver,
             description: 'Find a specific design'
+
+      field :copy_state, ::Types::DesignManagement::DesignCollectionCopyStateEnum,
+            null: true,
+            description: 'Copy state of the design collection'
     end
   end
 end

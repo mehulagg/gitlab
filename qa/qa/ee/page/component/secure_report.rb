@@ -33,7 +33,9 @@ module QA
           end
 
           def has_vulnerability?(name)
-            has_element?(:vulnerability, text: name)
+            retry_until(reload: true, sleep_interval: 0.5) do
+              has_element?(:vulnerability, text: name)
+            end
           end
 
           def has_vulnerability_info_content?(name)
