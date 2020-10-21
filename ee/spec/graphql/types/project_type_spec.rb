@@ -276,7 +276,7 @@ RSpec.describe GitlabSchema.types['Project'] do
       expect(tokens.first['id']).to eq(agent_token.to_global_id.to_s)
     end
 
-    it 'returns count of cluster agents' do
+    it 'returns count of agent tokens' do
       agent = subject.dig('data', 'project', 'clusterAgent')
       count = agent.dig('tokens', 'count')
 
