@@ -6785,6 +6785,61 @@
         },
         {
           "kind": "OBJECT",
+          "name": "CodeCoverageActivity",
+          "description": "Represents the code coverage activity for a group",
+          "fields": [
+            {
+              "name": "averageCoverage",
+              "description": "Average percentage of the different code coverage results available for the group.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "coverageCount",
+              "description": "Number of different code coverage results available for the group.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "projectCount",
+              "description": "Number of projects with code coverage results for the group.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
           "name": "Commit",
           "description": null,
           "fields": [
@@ -20787,6 +20842,20 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "BoardConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "codeCoverageActivity",
+              "description": "Represents the code coverage activity for this group",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CodeCoverageActivity",
                 "ofType": null
               },
               "isDeprecated": false,

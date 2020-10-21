@@ -2505,6 +2505,26 @@ Identifier of Clusters::Cluster
 """
 scalar ClustersClusterID
 
+"""
+Represents the code coverage activity for a group
+"""
+type CodeCoverageActivity {
+  """
+  Average percentage of the different code coverage results available for the group.
+  """
+  averageCoverage: Float
+
+  """
+  Number of different code coverage results available for the group.
+  """
+  coverageCount: Int
+
+  """
+  Number of projects with code coverage results for the group.
+  """
+  projectCount: Int
+}
+
 type Commit {
   """
   Author of the commit
@@ -7556,6 +7576,11 @@ type Group {
     """
     last: Int
   ): BoardConnection
+
+  """
+  Represents the code coverage activity for this group
+  """
+  codeCoverageActivity: CodeCoverageActivity
 
   """
   Includes at least one project where the repository size exceeds the limit

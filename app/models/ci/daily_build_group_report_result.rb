@@ -12,6 +12,30 @@ module Ci
     validates :data, json_schema: { filename: "daily_build_group_report_result_data" }
 
     scope :with_included_projects, -> { includes(:project) }
+    scope :by_projects, -> (ids) { where(project_id: ids) }
+    scope :with_coverage, -> { where("(data->'coverage') IS NOT NULL") }
+    scope :latest, -> do
+      with(
+        latest_by_project: select(:project_id, 'MAX(date) AS date').group(:project_id)
+      )
+      .joins(
+        'JOIN latest_by_project ON ci_daily_build_group_report_results.date = latest_by_project.date
+        AND ci_daily_build_group_report_results.project_id = latest_by_project.project_id'
+      )
+    end
+
+    # Move this to EE
+    def self.activity_per_group
+      pluck(
+        Arel.sql("AVG(cast(data ->> 'coverage' AS FLOAT))"),
+        Arel.sql("COUNT(*)"),
+        Arel.sql("COUNT(DISTINCT ci_daily_build_group_report_results.project_id)")
+      ).each_with_object({}) do |(average_coverage, coverage_count, project_count), result|
+        result[:average_coverage] = average_coverage
+        result[:coverage_count] = coverage_count
+        result[:project_count] = project_count
+      end
+    end
 
     def self.upsert_reports(data)
       upsert_all(data, unique_by: :index_daily_build_group_report_results_unique_columns) if data.any?

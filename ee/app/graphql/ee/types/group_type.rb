@@ -68,7 +68,24 @@ module EE
               resolve: -> (obj, _args, ctx) {
                 ::Gitlab::Graphql::Aggregations::VulnerabilityStatistics::LazyAggregate.new(ctx, obj)
               }
-      end
+
+        field :code_coverage_activity,
+          ::Types::Ci::CodeCoverageActivityType,
+          null: true,
+          description: 'Represents the code coverage activity for this group'
+          # add feature_flag here
+
+        # move this to a dedicated resolver
+        def code_coverage_activity
+          project_ids = group.projects.pluck(:id)
+
+          results = ::Ci::DailyBuildGroupReportResult
+            .by_projects(project_ids)
+            .with_coverage
+            .latest
+            .activity_per_group
+          end
+        end
     end
   end
 end
