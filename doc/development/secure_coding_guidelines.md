@@ -425,7 +425,6 @@ To prevent OS command injections, user-supplied data shouldn't be used within OS
 where you can't avoid this:
 
 - Validate user-supplied data against an allowlist.
-- Use a case switch.
 - Ensure that user-supplied data only contains alphanumeric characters (and no syntax or whitespace
   characters, for example).
 - Always use `--` to separate options from arguments.
