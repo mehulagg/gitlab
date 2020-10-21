@@ -72,7 +72,7 @@ RSpec.describe BulkCreateIntegrationService do
     context 'with a project association' do
       let!(:project) { create(:project) }
       let(:created_integration) { project.jira_service }
-      let(:batch) { Project.all }
+      let(:batch) { Project.without_integration(integration) }
       let(:association) { 'project' }
 
       it_behaves_like 'creates integration from batch ids'
