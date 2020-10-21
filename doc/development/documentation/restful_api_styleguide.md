@@ -87,7 +87,7 @@ Rendered example:
 - Wherever needed use this personal access token: `<your_access_token>`.
 - Always put the request first. `GET` is the default so you don't have to
   include it.
-- Wrap the URL in double quotes (`"`).
+- When there are spaces in the URL, wrap the URL in quotes (`"` or `'`).
 - Prefer to use examples using the personal access token and don't pass data of
   username and password.
 

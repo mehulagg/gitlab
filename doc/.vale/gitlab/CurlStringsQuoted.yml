@@ -5,9 +5,9 @@
 #
 # For a list of all options, see https://errata-ai.gitbook.io/vale/getting-started/styles
 extends: existence
-message: 'Curl commands must wrap URLs in double quotes ("): %s'
+message: 'When there are spaces in the URL, `curl` commands must wrap URLs in quotes (") or ('): %s'
 link: https://docs.gitlab.com/ee/development/documentation/styleguide.html#curl-commands
-level: warning
+level: suggestion
 scope: code
 raw:
   - 'curl.*[^"=]https?://.*'
