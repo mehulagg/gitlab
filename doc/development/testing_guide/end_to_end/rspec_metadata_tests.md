@@ -19,3 +19,20 @@ This is a partial list of the [RSpec metadata](https://relishapp.com/rspec/rspec
 | `:runner`         | The test depends on and will set up a GitLab Runner instance, typically to run a pipeline. |
 | `:skip_live_env`  | The test will be excluded when run against live deployed environments such as Staging, Canary, and Production. |
 | `:testcase`       | The link to the test case issue in the [Quality Testcases project](https://gitlab.com/gitlab-org/quality/testcases/). |
+| `:mattermost`     | The test requires a GitLab Mattermost service on the GitLab instance |
+| `:ldap_no_server` | The test requires a GitLab instance to be configured to use LDAP. To be used with the `:orchestrated` tag. Uses a docker LDAP server image. |
+| `:ldap_no_tls`    | The test requires a GitLab instance to be configured to use an external LDAP server with TLS not enabled. |
+| `:ldap_tls`       | The test requires a GitLab instance to be configured to use an external LDAP server with TLS enabled. |
+| `:object_storage` | The test requires a GitLab instance to be configured to use multiple [object storage types](https://docs.gitlab.com/ee/administration/object_storage.html). Uses MinIO as the object storage server. |
+| `:smtp`           | The test requires a GitLab instance to be configured to use an SMTP server.  Tests SMTP notification email delivery from Gitlab by using MailHog. |
+| `:group_saml`     | The test requires a GitLab instance that has SAML SSO enabled. Interacts with an external SAML identity provider. This is configured at the group-level. Paired with the `:orchestrated` tag.  |
+| `:saml`           | The test requires a GitLab instance that has SAML enabled. Interacts with an external SAML identity provider. This is configured at the instance-level. Paired with the `:orchestrated` tag. |
+| `:skip_signup_disabled` | - |
+| `:smoke`          | The test belongs to the test suite which verifies basic functionality of a GitLab instance.   |
+| `:github`         | The test requires a GitHub personal access token. |
+| `:repository_storage` |  The test requires a GitLab instance to be configured to use multiple [repository storage paths](https://docs.gitlab.com/ee/administration/repository_storage_paths.html). Paired with the `:orchestrated` tag. |
+| `:geo`            | The test requires two GitLab Geo instances - a primary and a secondary - to be spun up. |
+| `:relative_url`   | The test requires a GitLab instance to be installed under a [relative URL](https://docs.gitlab.com/ee/install/relative_url.html). |
+| `:requires_git_protocol_v2`   | - |
+| `:requires_praefect`   | - |
+| `:packages`   | The test requires a GitLab instance that has the [Package Registry](https://docs.gitlab.com/ee/administration/packages/#gitlab-package-registry-administration) enabled. |
