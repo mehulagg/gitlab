@@ -6,6 +6,13 @@ class Projects::StaticSiteEditorController < Projects::ApplicationController
 
   layout 'fullscreen'
 
+  content_security_policy do |p|
+    next if p.directives.blank?
+
+    frame_src_values = Array.wrap(p.directives['frame-src']) | ['https://www.youtube.com']
+    p.frame_src(*frame_src_values)
+  end
+
   prepend_before_action :authenticate_user!, only: [:show]
   before_action :assign_ref_and_path, only: [:show]
   before_action :authorize_edit_tree!, only: [:show]
