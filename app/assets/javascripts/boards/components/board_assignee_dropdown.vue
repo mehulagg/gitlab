@@ -1,19 +1,22 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import { GlDropdownItem, GlDropdownDivider } from '@gitlab/ui';
+import { GlDropdownItem, GlDropdownDivider, GlAvatarLabeled, GlAvatarLink } from '@gitlab/ui';
+import { __ } from '~/locale';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import AssigneesDropdown from '~/vue_shared/components/sidebar/assignees_dropdown.vue';
-import AssigneeAvatarLink from '~/sidebar/components/assignees/assignee_avatar_link.vue';
 
 export default {
+  unassignText: __('Unassign'),
+  assigneeText: __('Assignee'),
   components: {
     BoardEditableItem,
     IssuableAssignees,
     AssigneesDropdown,
     GlDropdownItem,
-    AssigneeAvatarLink,
     GlDropdownDivider,
+    GlAvatarLabeled,
+    GlAvatarLink,
   },
   data() {
     return {
@@ -24,8 +27,8 @@ export default {
   computed: {
     ...mapGetters(['getActiveIssue']),
     unSelectedFiltered() {
-      return this.list.filter(x => {
-        return !this.selectedUserNames.includes(x.username);
+      return this.list.filter(({ username }) => {
+        return !this.selectedUserNames.includes(username);
       });
     },
     selectedUserNames() {
@@ -73,7 +76,7 @@ export default {
 </script>
 
 <template>
-  <board-editable-item @close="saveAssignees" :title="'Assignee'">
+  <board-editable-item @close="saveAssignees" :title="$options.assigneeText">
     <template #collapsed>
       <issuable-assignees :users="getActiveIssue.assignees" />
     </template>
@@ -82,7 +85,7 @@ export default {
       <assignees-dropdown class="w-100" text="Assignees" header-text="Assign To">
         <template #items>
           <gl-dropdown-item :is-checked="selectedIsEmpty" class="mt-2" @click="selectAssignee()"
-            ><li>Unassigned</li></gl-dropdown-item
+            ><li>{{ $options.unassignText }}</li></gl-dropdown-item
           >
           <gl-dropdown-divider />
           <gl-dropdown-item
@@ -92,31 +95,30 @@ export default {
             :is-checked="isChecked(item.username)"
             @click="unSelect(item.username)"
           >
-            <assignee-avatar-link :user="item" rootPath="''">
-              <span class="d-flex gl-flex-direction-column gl-overflow-hidden">
-                <strong class="dropdown-menu-user-full-name">
-                  {{ item.name }}
-                </strong>
-                <span class="dropdown-menu-user-username">@{{ item.username }}</span>
-              </span>
-            </assignee-avatar-link>
+            <gl-avatar-link>
+              <gl-avatar-labeled
+                :size="32"
+                :label="item.name"
+                :sub-label="item.username"
+                :src="item.avatarUrl || item.avatar"
+              />
+            </gl-avatar-link>
           </gl-dropdown-item>
           <gl-dropdown-divider v-if="selected.length > 0" />
           <gl-dropdown-item
-            v-for="x in unSelectedFiltered"
-            :key="x.id"
-            :user="x"
-            @click="selectAssignee(x)"
+            v-for="unselectedUser in unSelectedFiltered"
+            :key="unselectedUser.id"
+            :user="unselectedUser"
+            @click="selectAssignee(unselectedUser)"
           >
-            <assignee-avatar-link :user="x" rootPath="''">
-              <!-- Abstract this out its being used in a few places -->
-              <span class="d-flex gl-flex-direction-column gl-overflow-hidden">
-                <strong class="dropdown-menu-user-full-name">
-                  {{ x.name }}
-                </strong>
-                <span class="dropdown-menu-user-username">@{{ x.username }}</span>
-              </span>
-            </assignee-avatar-link>
+            <gl-avatar-link>
+              <gl-avatar-labeled
+                :size="32"
+                :label="unselectedUser.name"
+                :sub-label="unselectedUser.username"
+                :src="unselectedUser.avatarUrl || unselectedUser.avatar"
+              />
+            </gl-avatar-link>
           </gl-dropdown-item>
         </template>
       </assignees-dropdown>
