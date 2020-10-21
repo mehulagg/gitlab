@@ -646,6 +646,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         expect(subject[:mattermost_enabled]).to eq(Gitlab.config.mattermost.enabled)
         expect(subject[:signup_enabled]).to eq(Gitlab::CurrentSettings.allow_signup?)
         expect(subject[:ldap_enabled]).to eq(Gitlab.config.ldap.enabled)
+        expect(subject[:ldap_encrypted_secrets_enabled]).to eq(Gitlab::Auth::Ldap::Config.encrypted_secrets.active?)
         expect(subject[:gravatar_enabled]).to eq(Gitlab::CurrentSettings.gravatar_enabled?)
         expect(subject[:omniauth_enabled]).to eq(Gitlab::Auth.omniauth_enabled?)
         expect(subject[:reply_by_email_enabled]).to eq(Gitlab::IncomingEmail.enabled?)
