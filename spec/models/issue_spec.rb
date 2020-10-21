@@ -154,6 +154,25 @@ RSpec.describe Issue do
     end
   end
 
+  describe '.with_feature_available' do
+    let_it_be(:issue) { create(:issue, project: reusable_project) }
+    let_it_be(:incident) { create(:incident, project: reusable_project) }
+    let_it_be(:test_case) { create(:quality_test_case, project: reusable_project) }
+
+    it 'gives issues that support the given feature', :aggregate_failures do
+      expect(described_class.with_feature('epics'))
+        .to contain_exactly(issue)
+
+      expect(described_class.with_feature('sla'))
+        .to contain_exactly(incident)
+    end
+
+    it 'returns an empty collection when given an unknown feature' do
+      expect(described_class.with_feature('something-unknown'))
+        .to be_empty
+    end
+  end
+
   describe '.order_severity' do
     let_it_be(:issue_high_severity) { create(:issuable_severity, severity: :high).issue }
     let_it_be(:issue_low_severity) { create(:issuable_severity, severity: :low).issue }

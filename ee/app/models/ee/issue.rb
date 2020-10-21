@@ -192,8 +192,8 @@ module EE
         when 'weight_desc'          then order_weight_desc.with_order_id_desc
         when 'published_asc'        then order_status_page_published_last.with_order_id_desc
         when 'published_desc'       then order_status_page_published_first.with_order_id_desc
-        when 'sla_due_at_asc'       then order_sla_due_at_asc.with_order_id_desc
-        when 'sla_due_at_desc'      then order_sla_due_at_desc.with_order_id_desc
+        when 'sla_due_at_asc'       then with_feature(:sla).order_sla_due_at_asc.with_order_id_desc
+        when 'sla_due_at_desc'      then with_feature(:sla).order_sla_due_at_desc.with_order_id_desc
         else
           super
         end

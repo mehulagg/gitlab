@@ -45,8 +45,8 @@ RSpec.describe Resolvers::IssuesResolver do
         end
 
         context 'when sorting by sla due at' do
-          let_it_be(:sla_due_first) { create(:issue, project: project) }
-          let_it_be(:sla_due_last)  { create(:issue, project: project) }
+          let_it_be(:sla_due_first) { create(:incident, project: project) }
+          let_it_be(:sla_due_last)  { create(:incident, project: project) }
 
           before_all do
             create(:issuable_sla, :exceeded, issue: sla_due_first)
