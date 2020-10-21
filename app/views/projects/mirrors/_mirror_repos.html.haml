@@ -56,7 +56,7 @@
           %tbody.js-mirrors-table-body
             = render_if_exists 'projects/mirrors/table_pull_row'
             - @project.remote_mirrors.each_with_index do |mirror, index|
-            - next if mirror.new_record?
+              - next if mirror.new_record?
               %tr.rspec-mirrored-repository-row{ class: ('bg-secondary' if mirror.disabled?), data: { qa_selector: 'mirrored_repository_row' } }
                 %td{ data: { qa_selector: 'mirror_repository_url_cell' } }= mirror.safe_url || _('Invalid URL')
                 %td= _('Push')
