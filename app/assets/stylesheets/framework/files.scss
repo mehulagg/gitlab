@@ -352,6 +352,10 @@ span.idiff {
     position: relative;
     width: auto;
 
+    @include media-breakpoint-up(lg) {
+      max-width: 60%;
+    }
+
     @media (max-width: map-get($grid-breakpoints, sm)-1) {
       width: 100%;
     }
@@ -389,10 +393,7 @@ span.idiff {
 
     .file-actions {
       white-space: normal;
-
-      .btn-group {
-        padding-top: 5px;
-      }
+      padding-top: 5px;
     }
   }
 }

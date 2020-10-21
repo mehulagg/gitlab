@@ -1,15 +1,17 @@
-.file-header-content
-  = blob_icon blob.mode, blob.name
+.file-header-content.gl-display-flex.gl-align-items-center
+  %span
+    = blob_icon blob.mode, blob.name
 
-  %strong.file-title-name
+  %strong.file-title-name.gl-text-truncate
     = blob.name
 
   = copy_file_path_button(blob.path)
 
-  %small.mr-1
-    - if blob.mode == Blob::MODE_SYMLINK
-      = _('Symbolic link') << ' ·'
-    = number_to_human_size(blob.raw_size)
+  %span.ml-1
+    %small.mr-1
+      - if blob.mode == Blob::MODE_SYMLINK
+        = _('Symbolic link') << ' ·'
+      = number_to_human_size(blob.raw_size)
 
-  - if blob.stored_externally? && blob.external_storage == :lfs
-    %span.badge.label-lfs.gl-mr-2 LFS
+    - if blob.stored_externally? && blob.external_storage == :lfs
+      %span.badge.label-lfs.gl-mr-2 LFS
