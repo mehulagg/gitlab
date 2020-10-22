@@ -11,19 +11,25 @@ RSpec.describe DeleteExpiredProjectBotsWorker do
       let_it_be(:expired_project_bot) { create(:user, :project_bot) }
       let_it_be(:other_project_bot) { create(:user, :project_bot) }
 
-      context 'expired project bot' do
+      context 'expired project bot', :sidekiq_inline do
         before do
           project.add_user(expired_project_bot, :maintainer, expires_at: 1.day.from_now)
-          travel_to(3.days.from_now)
+          travel_to(5.days.from_now)
+        end
+
+        it 'calls delete user worker' do
+          expect(DeleteExpiredProjectBotsWorker).to receive(:perform)
+
+          DeleteExpiredProjectBotsWorker.new.perform
         end
 
         it 'removes expired project bot membership' do
-          expect { worker.perform }.to change { Member.count }.by(-1)
+          expect { DeleteExpiredProjectBotsWorker.new.perform }.to change { Member.count }.by(-1)
           expect(Member.find_by(user_id: expired_project_bot.id)).to be_nil
         end
 
         it 'deletes expired project bot' do
-          worker.perform
+          DeleteExpiredProjectBotsWorker.new.perform
 
           expect(User.exists?(expired_project_bot.id)).to be(false)
         end
