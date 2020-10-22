@@ -292,19 +292,20 @@ export default {
               :disabled="isMergeButtonDisabled"
               :loading="isMakingRequest"
               @click="handleMergeButtonClick(isAutoMergeAvailable)"
-              >{{ mergeButtonText }}</gl-button
             >
-            <button
+              {{ mergeButtonText }}
+            </gl-button>
+            <gl-button
               v-if="shouldShowMergeImmediatelyDropdown"
               :disabled="isMergeButtonDisabled"
-              type="button"
-              class="btn btn-sm btn-info dropdown-toggle js-merge-moment"
+              category="primary"
+              variant="info"
+              size="medium"
+              icon="chevron-down"
               data-toggle="dropdown"
               data-qa-selector="merge_moment_dropdown"
               :aria-label="__('Select merge moment')"
-            >
-              <i class="fa fa-chevron-down" aria-hidden="true"></i>
-            </button>
+            />
             <ul
               v-if="shouldShowMergeImmediatelyDropdown"
               class="dropdown-menu dropdown-menu-right"
