@@ -10,6 +10,7 @@ import {
   GlDropdownSectionHeader,
   GlDropdownItem,
   GlSprintf,
+  GlButton,
 } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
@@ -80,6 +81,7 @@ export default {
     GlDropdownSectionHeader,
     GlDropdownItem,
     GlSprintf,
+    GlButton,
   },
   props: {
     events: {
@@ -363,23 +365,13 @@ export default {
       </div>
     </div>
     <div class="custom-stage-form-actions">
-      <button
-        :disabled="!isDirty"
-        class="btn btn-cancel js-save-stage-cancel"
-        type="button"
-        @click="handleCancel"
-      >
+      <gl-button :disabled="!isDirty" type="gl-button" @click="handleCancel">
         {{ __('Cancel') }}
-      </button>
-      <button
-        :disabled="!isComplete || !isDirty"
-        type="button"
-        class="js-save-stage btn btn-success"
-        @click="handleSave"
-      >
+      </gl-button>
+      <gl-button :disabled="!isComplete || !isDirty" type="gl-button" @click="handleSave">
         <gl-loading-icon v-if="isSavingCustomStage" size="sm" inline />
         {{ saveStageText }}
-      </button>
+      </gl-button>
     </div>
     <div class="mt-2">
       <gl-sprintf
