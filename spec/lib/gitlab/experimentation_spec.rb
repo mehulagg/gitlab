@@ -90,12 +90,16 @@ RSpec.describe Gitlab::Experimentation, :snowplow do
     end
 
     describe '#experiment_enabled?' do
-      subject { controller.experiment_enabled?(:test_experiment) }
+      def check_experiment(exp_key = :test_experiment)
+        controller.experiment_enabled?(exp_key)
+      end
+
+      subject { check_experiment }
 
       context 'cookie is not present' do
         it 'calls Gitlab::Experimentation.enabled_for_value? with the name of the experiment and an experimentation_subject_index of nil' do
           expect(Gitlab::Experimentation).to receive(:enabled_for_value?).with(:test_experiment, nil)
-          subject
+          check_experiment
         end
       end
 
@@ -115,7 +119,7 @@ RSpec.describe Gitlab::Experimentation, :snowplow do
         with_them do
           it 'calls Gitlab::Experimentation.enabled_for_value? with the name of the experiment and the calculated experimentation_subject_index based on the uuid' do
             expect(Gitlab::Experimentation).to receive(:enabled_for_value?).with(experiment_key, index_value)
-            controller.experiment_enabled?(experiment_key)
+            check_experiment(experiment_key)
           end
         end
       end
