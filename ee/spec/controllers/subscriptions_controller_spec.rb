@@ -211,7 +211,7 @@ RSpec.describe SubscriptionsController do
         it 'returns the selected group location in JSON format' do
           subject
 
-          expect(response.body).to eq({ location: "/#{selected_group.path}" }.to_json)
+          expect(response.body).to eq({ location: "/#{selected_group.path}?purchased_quantity=#{params[:subscription][:quantity]}" }.to_json)
         end
 
         context 'when selected group is a sub group' do
