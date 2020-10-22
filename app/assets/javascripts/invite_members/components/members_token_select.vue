@@ -2,6 +2,7 @@
 import { debounce } from 'lodash';
 import { GlTokenSelector, GlAvatar, GlAvatarLabeled } from '@gitlab/ui';
 import { USER_SEARCH_DELAY } from '../constants';
+import axios from '~/lib/utils/axios_utils';
 import Api from '~/api';
 
 export default {
@@ -46,27 +47,17 @@ export default {
       return '';
     },
   },
-  watch: {
-    selectedTokens(newValue) {
-      this.filteredUsers = newValue.map(token => ({
-        id: token.id,
-        name: token.name,
-        username: token.username,
-        avatar_url: token.avatar_url,
-      }));
-    },
-  },
-  created() {
-    this.retrieveUsers();
-  },
   methods: {
-    debouncedHandleTextInput() {
-      return debounce(this.handleTextInput, USER_SEARCH_DELAY);
-    },
-    retrieveUsers() {
+    handleTextInput(query) {
+      this.query = query;
       this.loading = true;
-
-      return Api.users('', this.$options.queryOptions)
+      this.retrieveUsers(query);
+    },
+    retrieveUsers: debounce(function debouncedRetrieveUsers() {
+      return axios
+        .get(this.$options.apiUrl, {
+          params: { ...this.$options.queryOptions, search: this.query },
+        })
         .then(response => {
           this.users = response.data.map(token => ({
             id: token.id,
@@ -80,34 +71,7 @@ export default {
           this.loading = false;
           throw error;
         });
-    },
-    filterUsers() {
-      if (!this.query) return this.retrieveUsers();
-
-      this.filteredUsers = this.users
-        .filter(token => {
-          return (
-            token.name.toLowerCase().includes(this.query.toLowerCase()) ||
-            token.username.toLowerCase().includes(this.query.toLowerCase())
-          );
-        })
-        .sort();
-
-      return this.filteredUsers;
-    },
-    handleTextInput(value) {
-      this.query = value;
-      this.handleQueryFilter();
-    },
-    handleQueryFilter() {
-      this.retrieveUsers();
-
-      if (this.query) {
-        this.filterUsers();
-      }
-
-      return this.filteredUusers;
-    },
+    }, USER_SEARCH_DELAY),
     handleInput() {
       this.$emit('input', this.newUsersToInvite);
     },
@@ -117,8 +81,13 @@ export default {
       textInput.value = '';
       textInput.dispatchEvent(new Event('input'));
     },
+    handleFocus() {
+      this.loading = true;
+      this.retrieveUsers();
+    },
   },
   queryOptions: { exclude_internal: true, active: true },
+  apiUrl: `${gon.relative_url_root.replace(/\/$/, '')}/-/autocomplete/users.json`,
 };
 </script>
 
@@ -128,14 +97,12 @@ export default {
     :dropdown-items="users"
     :loading="loading"
     :allow-user-defined-tokens="false"
-    :hide-dropdown-with-no-items="true"
     :placeholder="placeholderText"
     :aria-labelledby="label"
-    @focus="handleQueryFilter"
     @blur="handleBlur"
-    @keydown.enter="handleQueryFilter"
-    @text-input="debouncedHandleTextInput"
+    @text-input="handleTextInput"
     @input="handleInput"
+    @focus="handleFocus"
   >
     <template #token-content="{ token }">
       <gl-avatar v-if="token.avatar_url" :src="token.avatar_url" :size="16" />
