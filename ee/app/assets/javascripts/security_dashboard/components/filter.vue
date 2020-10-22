@@ -53,10 +53,10 @@ export default {
   methods: {
     clickFilter(option) {
       this.$emit('setFilter', { filterId: this.filterId, optionId: option.id });
-      // b-dropdown-item, which is used by GlDropdownItem, is hard-coded to always close the dropdown:
+      // b-dropdown-item, which is used by GlDropdownItem, is hard-coded to always close the dropdown on click:
       // https://github.com/bootstrap-vue/bootstrap-vue/blob/dev/src/components/dropdown/dropdown-item.js#L49-L52
-      // We'll work around this be re-opening the dropdown when the GlDropdownItem is clicked.
-      this.$refs.dropdown.$refs.dropdown.show();
+      // We'll work around this be re-opening the dropdown, to keep it shown and allow multi-selecting.
+      this.$refs.glDropdown.$refs.dropdown.show();
     },
     isSelected(option) {
       return this.selection.has(option.id);
@@ -69,7 +69,7 @@ export default {
   <div class="dashboard-filter">
     <strong class="js-name">{{ filter.name }}</strong>
     <gl-dropdown
-      ref="dropdown"
+      ref="glDropdown"
       class="gl-mt-2 gl-w-full"
       menu-class="dropdown-extended-height"
       :header-text="filter.name"
