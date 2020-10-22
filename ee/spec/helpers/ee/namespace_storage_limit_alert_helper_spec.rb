@@ -16,6 +16,46 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
     end
   end
 
+  describe '#display_namespace_storage_limit_alert?' do
+    let_it_be(:namespace) { build_stubbed(:namespace) }
+
+    before do
+      assign(:display_namespace_storage_limit_alert, display_namespace_storage_limit_alert)
+    end
+
+    context 'when display_namespace_storage_limit_alert is true' do
+      let(:display_namespace_storage_limit_alert) { true }
+
+      it 'returns false when in profile usage quota path' do
+        allow(@request).to receive(:path) { profile_usage_quotas_path }
+
+        expect(helper.display_namespace_storage_limit_alert?(namespace)).to eq(false)
+      end
+
+      it 'returns false when in namespace usage quota path' do
+        allow(@request).to receive(:path) { group_usage_quotas_path(namespace) }
+
+        expect(helper.display_namespace_storage_limit_alert?(namespace)).to eq(false)
+      end
+
+      it 'returns true when in other namespace path' do
+        allow(@request).to receive(:path) { group_path(namespace) }
+
+        expect(helper.display_namespace_storage_limit_alert?(namespace)).to eq(true)
+      end
+    end
+
+    context 'when display_namespace_storage_limit_alert is false' do
+      let(:display_namespace_storage_limit_alert) { false }
+
+      it 'returns false' do
+        allow(@request).to receive(:path) { group_path(namespace) }
+
+        expect(helper.display_namespace_storage_limit_alert?(namespace)).to eq(false)
+      end
+    end
+  end
+
   describe '#namespace_storage_usage_link' do
     subject { helper.namespace_storage_usage_link(namespace) }
 
