@@ -17,7 +17,7 @@ RSpec.describe DeleteExpiredProjectBotsWorker do
           travel_to(5.days.from_now)
         end
 
-        it 'calls delete user worker' do
+        it 'calls delete bot worker' do
           expect(DeleteExpiredProjectBotsWorker).to receive(:perform)
 
           DeleteExpiredProjectBotsWorker.new.perform
