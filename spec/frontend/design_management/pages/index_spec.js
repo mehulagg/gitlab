@@ -4,6 +4,7 @@ import VueDraggable from 'vuedraggable';
 import VueRouter from 'vue-router';
 import { GlEmptyState } from '@gitlab/ui';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import Index from '~/design_management/pages/index.vue';
 import uploadDesignQuery from '~/design_management/graphql/mutations/upload_design.mutation.graphql';
 import DesignDestroyer from '~/design_management/components/design_destroyer.vue';
@@ -18,9 +19,10 @@ import {
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import createRouter from '~/design_management/router';
 import * as utils from '~/design_management/utils/design_management_utils';
-import { DESIGN_DETAIL_LAYOUT_CLASSLIST } from '~/design_management/constants';
 import {
   designListQueryResponse,
+  designUploadMutationCreatedResponse,
+  designUploadMutationUpdatedResponse,
   permissionsQueryResponse,
   moveDesignMutationResponse,
   reorderedDesigns,
@@ -29,6 +31,7 @@ import {
 import getDesignListQuery from '~/design_management/graphql/queries/get_design_list.query.graphql';
 import permissionsQuery from '~/design_management/graphql/queries/design_permissions.query.graphql';
 import moveDesignMutation from '~/design_management/graphql/mutations/move_design.mutation.graphql';
+import { DESIGN_TRACKING_PAGE_NAME } from '~/design_management/utils/tracking';
 
 jest.mock('~/flash.js');
 const mockPageEl = {
@@ -370,7 +373,7 @@ describe('Design management index page', () => {
       createComponent({ stubs: { GlEmptyState } });
       wrapper.setData({ filesToBeSaved: [{ name: 'test' }] });
 
-      wrapper.vm.onUploadDesignDone();
+      wrapper.vm.onUploadDesignDone(designUploadMutationCreatedResponse);
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.vm.filesToBeSaved).toEqual([]);
         expect(wrapper.vm.isSaving).toBeFalsy();
@@ -480,6 +483,34 @@ describe('Design management index page', () => {
 
         expect(createFlash).toHaveBeenCalledTimes(1);
         expect(createFlash).toHaveBeenCalledWith(message);
+      });
+    });
+
+    describe('tracking', () => {
+      let trackingSpy;
+
+      beforeEach(() => {
+        trackingSpy = mockTracking('_category_', undefined, jest.spyOn);
+
+        createComponent({ stubs: { GlEmptyState } });
+      });
+
+      afterEach(() => {
+        unmockTracking();
+      });
+
+      it('tracks design creation', () => {
+        wrapper.vm.onUploadDesignDone(designUploadMutationCreatedResponse);
+
+        expect(trackingSpy).toHaveBeenCalledTimes(1);
+        expect(trackingSpy).toHaveBeenCalledWith(DESIGN_TRACKING_PAGE_NAME, 'create_design');
+      });
+
+      it('tracks design modification', () => {
+        wrapper.vm.onUploadDesignDone(designUploadMutationUpdatedResponse);
+
+        expect(trackingSpy).toHaveBeenCalledTimes(1);
+        expect(trackingSpy).toHaveBeenCalledWith(DESIGN_TRACKING_PAGE_NAME, 'update_design');
       });
     });
   });
@@ -650,13 +681,6 @@ describe('Design management index page', () => {
   });
 
   describe('when navigating', () => {
-    it('ensures fullscreen layout is not applied', () => {
-      createComponent({ loading: true });
-
-      expect(mockPageEl.classList.remove).toHaveBeenCalledTimes(1);
-      expect(mockPageEl.classList.remove).toHaveBeenCalledWith(...DESIGN_DETAIL_LAYOUT_CLASSLIST);
-    });
-
     it('should trigger a scrollIntoView method if designs route is detected', () => {
       router.replace({
         path: '/designs',

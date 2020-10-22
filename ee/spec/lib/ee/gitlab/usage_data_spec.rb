@@ -7,6 +7,7 @@ RSpec.describe Gitlab::UsageData do
 
   before do
     stub_usage_data_connections
+    clear_memoized_values(described_class::EE_MEMOIZED_VALUES + described_class::CE_MEMOIZED_VALUES)
   end
 
   describe '.data' do
@@ -436,17 +437,20 @@ RSpec.describe Gitlab::UsageData do
         create(:users_ops_dashboard_project, user: user)
         create(:prometheus_service, project: project)
         create(:project_error_tracking_setting, project: project)
+        create(:project_incident_management_setting, :sla_enabled, project: project)
       end
 
       expect(described_class.usage_activity_by_stage_monitor({})).to include(
         operations_dashboard_users_with_projects_added: 2,
         projects_prometheus_active: 2,
-        projects_with_error_tracking_enabled: 2
+        projects_with_error_tracking_enabled: 2,
+        projects_incident_sla_enabled: 2
       )
       expect(described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)).to include(
         operations_dashboard_users_with_projects_added: 1,
         projects_prometheus_active: 1,
-        projects_with_error_tracking_enabled: 1
+        projects_with_error_tracking_enabled: 1,
+        projects_incident_sla_enabled: 2
       )
     end
   end
@@ -715,20 +719,12 @@ RSpec.describe Gitlab::UsageData do
   end
 
   it 'clears memoized values' do
-    values = %i(issue_minimum_id issue_maximum_id
-                project_minimum_id project_maximum_id
-                user_minimum_id user_maximum_id unique_visit_service
-                deployment_minimum_id deployment_maximum_id
-                auth_providers
-                approval_merge_request_rule_minimum_id
-                approval_merge_request_rule_maximum_id
-                merge_request_minimum_id
-                merge_request_maximum_id)
-
-    values.each do |key|
-      expect(described_class).to receive(:clear_memoization).with(key)
-    end
+    allow(described_class).to receive(:clear_memoization)
 
     described_class.uncached_data
+
+    described_class::EE_MEMOIZED_VALUES.each do |key|
+      expect(described_class).to have_received(:clear_memoization).with(key)
+    end
   end
 end

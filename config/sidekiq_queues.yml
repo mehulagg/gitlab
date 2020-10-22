@@ -50,6 +50,8 @@
   - 2
 - - ci_batch_reset_minutes
   - 1
+- - ci_delete_objects
+  - 1
 - - container_repository
   - 1
 - - create_commit_signature
@@ -83,6 +85,10 @@
 - - design_management_new_version
   - 1
 - - detect_repository_languages
+  - 1
+- - disallow_two_factor_for_group
+  - 1
+- - disallow_two_factor_for_subgroups
   - 1
 - - elastic_commit_indexer
   - 1
@@ -140,9 +146,13 @@
   - 2
 - - incident_management
   - 2
+- - incident_management_apply_incident_sla_exceeded_label
+  - 1
 - - invalid_gpg_signature_update
   - 2
 - - irker
+  - 1
+- - issuable_export_csv
   - 1
 - - issue_placement
   - 2

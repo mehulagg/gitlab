@@ -6,7 +6,7 @@ import { TEST_HOST } from 'spec/test_constants';
 import { mockTracking } from 'helpers/tracking_helper';
 import { LEGACY_FLAG, NEW_VERSION_FLAG, NEW_FLAG_ALERT } from '~/feature_flags/constants';
 import Form from '~/feature_flags/components/form.vue';
-import editModule from '~/feature_flags/store/modules/edit';
+import createStore from '~/feature_flags/store/edit';
 import EditFeatureFlag from '~/feature_flags/components/edit_feature_flag.vue';
 import axios from '~/lib/utils/axios_utils';
 
@@ -20,10 +20,9 @@ describe('Edit feature flag form', () => {
   let wrapper;
   let mock;
 
-  const store = new Vuex.Store({
-    modules: {
-      edit: editModule,
-    },
+  const store = createStore({
+    path: '/feature_flags',
+    endpoint: `${TEST_HOST}/feature_flags.json`,
   });
 
   const factory = (opts = {}) => {
@@ -33,23 +32,16 @@ describe('Edit feature flag form', () => {
     }
     wrapper = shallowMount(EditFeatureFlag, {
       localVue,
-      propsData: {
-        endpoint: `${TEST_HOST}/feature_flags.json`,
-        path: '/feature_flags',
-        environmentsEndpoint: 'environments.json',
-        projectId: '8',
-        featureFlagIssuesEndpoint: `${TEST_HOST}/feature_flags/5/issues`,
+      store,
+      provide: {
         showUserCallout: true,
         userCalloutId,
         userCalloutsPath,
-      },
-      store,
-      provide: {
         glFeatures: {
           featureFlagsNewVersion: true,
         },
+        ...opts,
       },
-      ...opts,
     });
   };
 
@@ -105,7 +97,7 @@ describe('Edit feature flag form', () => {
 
   describe('with error', () => {
     it('should render the error', () => {
-      store.dispatch('edit/receiveUpdateFeatureFlagError', { message: ['The name is required'] });
+      store.dispatch('receiveUpdateFeatureFlagError', { message: ['The name is required'] });
       return wrapper.vm.$nextTick(() => {
         expect(wrapper.find('.alert-danger').exists()).toEqual(true);
         expect(wrapper.find('.alert-danger').text()).toContain('The name is required');
@@ -148,12 +140,6 @@ describe('Edit feature flag form', () => {
       });
     });
 
-    it('renders the related issues widget', () => {
-      const expected = `${TEST_HOST}/feature_flags/5/issues`;
-
-      expect(wrapper.find(Form).props('featureFlagIssuesEndpoint')).toBe(expected);
-    });
-
     it('should track when the toggle is clicked', () => {
       const toggle = wrapper.find(GlToggle);
       const spy = mockTracking('_category_', toggle.element, jest.spyOn);
@@ -167,7 +153,7 @@ describe('Edit feature flag form', () => {
   });
 
   describe('without new version flags', () => {
-    beforeEach(() => factory({ provide: { glFeatures: { featureFlagsNewVersion: false } } }));
+    beforeEach(() => factory({ glFeatures: { featureFlagsNewVersion: false } }));
 
     it('should alert users that feature flags are changing soon', () => {
       expect(findAlert().text()).toBe(NEW_FLAG_ALERT);
@@ -176,7 +162,7 @@ describe('Edit feature flag form', () => {
 
   describe('dismissing new version alert', () => {
     beforeEach(() => {
-      factory({ provide: { glFeatures: { featureFlagsNewVersion: false } } });
+      factory({ glFeatures: { featureFlagsNewVersion: false } });
       mock.onPost(userCalloutsPath, { feature_name: userCalloutId }).reply(200);
       findAlert().vm.$emit('dismiss');
       return wrapper.vm.$nextTick();

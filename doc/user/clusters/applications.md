@@ -6,13 +6,14 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # GitLab Managed Apps
 
-GitLab provides **GitLab Managed Apps**, a one-click install for various
+GitLab provides **GitLab Managed Apps** for various
 applications which can be added directly to your configured cluster. These
 applications are needed for [Review Apps](../../ci/review_apps/index.md) and
 [deployments](../../ci/environments/index.md) when using [Auto DevOps](../../topics/autodevops/index.md).
-You can install them after you [create a cluster](../project/clusters/add_remove_clusters.md).
+You can install them after you [create a cluster](../project/clusters/add_remove_clusters.md). GitLab provides
+GitLab Managed Apps that can installed with [one-click](#install-with-one-click) or [using CI/CD](#install-using-gitlab-cicd-alpha).
 
-## Installing applications
+## Install with one click
 
 Applications managed by GitLab are installed onto the `gitlab-managed-apps`
 namespace. This namespace:
@@ -28,7 +29,7 @@ To view a list of available applications to install for a:
 - [Group-level cluster](../group/clusters/index.md), navigate to your group's
   **Kubernetes** page.
 
-You can install the following applications:
+You can install the following applications with one click:
 
 - [Helm](#helm)
 - [Ingress](#ingress)
@@ -62,7 +63,7 @@ supported by GitLab before installing any of the applications.
 
 > - Introduced in GitLab 10.2 for project-level clusters.
 > - Introduced in GitLab 11.6 for group-level clusters.
-> - [Uses a local Tiller](https://gitlab.com/gitlab-org/gitlab/-/issues/209736) since GitLab 13.2.
+> - [Uses a local Tiller](https://gitlab.com/gitlab-org/gitlab/-/issues/209736) in GitLab 13.2 and later.
 
 [Helm](https://helm.sh/docs/) is a package manager for Kubernetes and is
 used to install the GitLab-managed apps. GitLab runs each `helm` command
@@ -126,7 +127,11 @@ before deploying one.
 The [`runner/gitlab-runner`](https://gitlab.com/gitlab-org/charts/gitlab-runner)
 chart is used to install this application, using
 [a preconfigured `values.yaml`](https://gitlab.com/gitlab-org/charts/gitlab-runner/-/blob/master/values.yaml)
-file. Customizing the installation by modifying this file is not supported.
+file. Customizing the installation by modifying this file is not supported. This
+also means you cannot modify `config.toml` file for this Runner. If you want to
+have that possibility and still deploy Runner in Kubernetes, consider using the
+[Cluster management project](management_project.md) or installing Runner manually
+via [GitLab Runner Helm Chart](https://docs.gitlab.com/runner/install/kubernetes.html).
 
 ### Ingress
 
@@ -142,7 +147,6 @@ The Ingress Controller installed is
 [Ingress-NGINX](https://kubernetes.io/docs/concepts/services-networking/ingress/),
 which is supported by the Kubernetes community.
 
-NOTE: **Note:**
 With the following procedure, a load balancer must be installed in your cluster
 to obtain the endpoint. You can use either
 Ingress, or Knative's own load balancer ([Istio](https://istio.io)) if using Knative.
@@ -643,6 +647,23 @@ applications you have configured. In case of pipeline failure, the
 output of the [Helm Tiller](https://v2.helm.sh/docs/install/#running-tiller-locally) binary
 is saved as a [CI job artifact](../../ci/pipelines/job_artifacts.md).
 
+For GitLab versions 13.5 and below, the Ingress, Fluentd, Prometheus,
+and Sentry apps are fetched from the central Helm [stable
+repository](https://kubernetes-charts.storage.googleapis.com/), which
+will be [deleted](https://github.com/helm/charts#deprecation-timeline)
+on November 13, 2020. This will cause the installation CI/CD pipeline to
+fail. Upgrade to GitLab 13.6, or alternatively, you can
+use the following `.gitlab-ci.yml`, which has been tested on GitLab
+13.5:
+
+```yaml
+include:
+  - template: Managed-Cluster-Applications.gitlab-ci.yml
+
+apply:
+  image: "registry.gitlab.com/gitlab-org/cluster-integration/cluster-applications:v0.34.1"
+```
+
 ### Important notes
 
 Note the following:
@@ -724,8 +745,8 @@ least 2 people from the
 
 ### Install Sentry using GitLab CI/CD
 
-NOTE: **Note:**
-The Sentry Helm chart [recommends](https://github.com/helm/charts/blob/f6e5784f265dd459c5a77430185d0302ed372665/stable/sentry/values.yaml#L284-L285) at least 3GB of available RAM for database migrations.
+The Sentry Helm chart [recommends](https://github.com/helm/charts/blob/f6e5784f265dd459c5a77430185d0302ed372665/stable/sentry/values.yaml#L284-L285)
+at least 3 GB of available RAM for database migrations.
 
 To install Sentry, define the `.gitlab/managed-apps/config.yaml` file
 with:

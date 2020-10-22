@@ -586,6 +586,79 @@ RSpec.describe Projects::MergeRequestsController do
     it_behaves_like 'authorize read pipeline'
   end
 
+  describe 'GET #coverage_fuzzing_reports' do
+    let(:merge_request) { create(:ee_merge_request, :with_coverage_fuzzing_reports, source_project: project, author: create(:user)) }
+
+    let(:params) do
+      {
+        namespace_id: project.namespace.to_param,
+        project_id: project,
+        id: merge_request.iid
+      }
+    end
+
+    subject { get :coverage_fuzzing_reports, params: params, format: :json }
+
+    before do
+      allow_any_instance_of(::MergeRequest).to receive(:compare_reports)
+        .with(::Ci::CompareSecurityReportsService, viewer, 'coverage_fuzzing').and_return(comparison_status)
+    end
+
+    it_behaves_like 'pending pipeline response'
+
+    context 'when comparison is being processed' do
+      let(:comparison_status) { { status: :parsing } }
+
+      it 'sends polling interval' do
+        expect(::Gitlab::PollingInterval).to receive(:set_header)
+
+        subject
+      end
+
+      it 'returns 204 HTTP status' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:no_content)
+      end
+    end
+
+    context 'when comparison is done' do
+      let(:comparison_status) { { status: :parsed, data: { added: [], fixed: [], existing: [] } } }
+
+      it 'does not send polling interval' do
+        expect(::Gitlab::PollingInterval).not_to receive(:set_header)
+
+        subject
+      end
+
+      it 'returns 200 HTTP status' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to eq({ "added" => [], "fixed" => [], "existing" => [] })
+      end
+    end
+
+    context 'when user created corrupted vulnerability reports' do
+      let(:comparison_status) { { status: :error, status_reason: 'Failed to parse coverage fuzzing reports' } }
+
+      it 'does not send polling interval' do
+        expect(::Gitlab::PollingInterval).not_to receive(:set_header)
+
+        subject
+      end
+
+      it 'returns 400 HTTP status' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response).to eq({ 'status_reason' => 'Failed to parse coverage fuzzing reports' })
+      end
+    end
+
+    it_behaves_like 'authorize read pipeline'
+  end
+
   describe 'GET #secret_detection_reports' do
     let(:merge_request) { create(:ee_merge_request, :with_secret_detection_reports, source_project: project, author: create(:user)) }
     let(:params) do
@@ -751,7 +824,29 @@ RSpec.describe Projects::MergeRequestsController do
         .with(::Ci::CompareLicenseScanningReportsService, viewer).and_return(comparison_status)
     end
 
-    it_behaves_like 'pending pipeline response'
+    context 'when the pipeline is running' do
+      before do
+        allow(::Gitlab::PollingInterval).to receive(:set_header)
+        merge_request.head_pipeline.update!(status: :running)
+
+        subject
+      end
+
+      context 'when the report is being parsed' do
+        let(:comparison_status) { { status: :parsing } }
+
+        specify { expect(::Gitlab::PollingInterval).to have_received(:set_header) }
+        specify { expect(response).to have_gitlab_http_status(:no_content) }
+      end
+
+      context 'when the report is ready' do
+        let(:comparison_status) { { status: :parsed, data: { new_licenses: [], existing_licenses: [], removed_licenses: [] } } }
+
+        specify { expect(::Gitlab::PollingInterval).not_to have_received(:set_header) }
+        specify { expect(response).to have_gitlab_http_status(:ok) }
+        specify { expect(json_response).to eq({ "new_licenses" => [], "existing_licenses" => [], "removed_licenses" => [] }) }
+      end
+    end
 
     context 'when comparison is being processed' do
       let(:comparison_status) { { status: :parsing } }

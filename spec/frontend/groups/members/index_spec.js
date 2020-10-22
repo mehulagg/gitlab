@@ -9,7 +9,7 @@ describe('initGroupMembersApp', () => {
   let wrapper;
 
   const setup = () => {
-    vm = initGroupMembersApp(el, ['account']);
+    vm = initGroupMembersApp(el, ['account'], () => ({}));
     wrapper = createWrapper(vm);
   };
 
@@ -20,12 +20,9 @@ describe('initGroupMembersApp', () => {
     el.setAttribute('data-member-path', '/groups/foo-bar/-/group_members/:id');
 
     window.gon = { current_user_id: 123 };
-
-    document.body.appendChild(el);
   });
 
   afterEach(() => {
-    document.body.innerHTML = '';
     el = null;
 
     wrapper.destroy();
@@ -69,6 +66,12 @@ describe('initGroupMembersApp', () => {
     setup();
 
     expect(vm.$store.state.tableFields).toEqual(['account']);
+  });
+
+  it('sets `requestFormatter` in Vuex store', () => {
+    setup();
+
+    expect(vm.$store.state.requestFormatter()).toEqual({});
   });
 
   it('sets `memberPath` in Vuex store', () => {

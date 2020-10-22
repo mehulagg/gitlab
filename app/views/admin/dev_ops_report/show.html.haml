@@ -1,5 +1,6 @@
 - page_title _('DevOps Report')
 - usage_ping_enabled = Gitlab::CurrentSettings.usage_ping_enabled
+- add_page_specific_style 'page_bundles/dev_ops_report'
 
 .container
   - if usage_ping_enabled && show_callout?('dev_ops_report_intro_callout_dismissed')
@@ -25,7 +26,7 @@
         - @metric.cards.each do |card|
           = render 'card', card: card
 
-      .devops-steps.d-none.d-lg-block.d-xl-block
+      .devops-steps.d-none.d-lg-block
         - @metric.idea_to_production_steps.each_with_index do |step, index|
           .devops-step{ class: "devops-#{score_level(step.percentage_score)}-score" }
             = custom_icon("i2p_step_#{index + 1}")

@@ -20,7 +20,7 @@ module Gitlab
 
       delegate :model, to: :class
       delegate :replication_enabled_feature_key, to: :class
-      delegate :in_replicables_for_geo_node?, to: :model_record
+      delegate :in_replicables_for_current_secondary?, to: :model_record
 
       class << self
         delegate :find_registries_never_attempted_sync, :find_registries_needs_sync_again, to: :registry_class

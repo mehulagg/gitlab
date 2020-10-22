@@ -6,7 +6,7 @@
 # called by the PyPI package manager client when users run commands
 # like `pip install` or `twine upload`.
 module API
-  class PypiPackages < Grape::API::Instance
+  class PypiPackages < ::API::Base
     helpers ::API::Helpers::PackagesManagerClientsHelpers
     helpers ::API::Helpers::RelatedResourcesHelpers
     helpers ::API::Helpers::Packages::BasicAuthHelpers
@@ -33,7 +33,7 @@ module API
 
       def find_package_versions
         packages = packages_finder
-          .with_name(params[:package_name])
+          .with_normalized_pypi_name(params[:package_name])
 
         not_found!('Package') if packages.empty?
 

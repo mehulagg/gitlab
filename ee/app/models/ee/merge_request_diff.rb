@@ -29,8 +29,13 @@ module EE
     end
 
     class_methods do
-      def replicables_for_geo_node(node = ::Gitlab::Geo.current_node)
-        has_external_diffs.merge(selective_sync_scope(node))
+      # @param primary_key_in [Range, MergeRequestDiff] arg to pass to primary_key_in scope
+      # @return [ActiveRecord::Relation<MergeRequestDiff>] everything that should be synced to this node, restricted by primary key
+      def replicables_for_current_secondary(primary_key_in)
+        node = ::Gitlab::Geo.current_node
+
+        has_external_diffs.primary_key_in(primary_key_in)
+                          .merge(selective_sync_scope(node))
                           .merge(object_storage_scope(node))
       end
 

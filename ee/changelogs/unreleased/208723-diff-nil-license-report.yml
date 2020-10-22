@@ -1,5 +1,0 @@
----
-title: Check if HEAD report is nil when diffing license_scanning reports
-merge_request: 43210
-author:
-type: fixed

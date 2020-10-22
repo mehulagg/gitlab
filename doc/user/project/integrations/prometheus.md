@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: APM
+group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -173,10 +173,7 @@ one of them will be used:
 > - GitLab 9.3 added the [numeric comparison](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/27439) of the 30 minute averages.
 
 Developers can view the performance impact of their changes within the merge
-request workflow.
-
-NOTE: **Note:**
-Requires [Kubernetes](prometheus_library/kubernetes.md) metrics.
+request workflow. This feature requires [Kubernetes](prometheus_library/kubernetes.md) metrics.
 
 When a source branch has been deployed to an environment, a sparkline and
 numeric comparison of the average memory consumption will appear. On the

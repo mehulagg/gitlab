@@ -44,7 +44,7 @@ are relative to the repository that was cloned during the build.
 
 By default, the artifacts upload when the job succeeds. You can also set artifacts to upload
 when the job fails, or always, by using [`artifacts:when`](../yaml/README.md#artifactswhen)
-parameter. GitLab keeps these uploaded artifacts for 1 week, as defined
+keyword. GitLab keeps these uploaded artifacts for 1 week, as defined
 by the `expire_in` definition. You can keep the artifacts from expiring
 via the [web interface](#browsing-artifacts). If the expiry time is not defined, it defaults
 to the [instance wide setting](../../user/admin_area/settings/continuous_integration.md#default-artifacts-expiration).
@@ -61,12 +61,10 @@ The `artifacts:reports` keyword is used for collecting test reports, code qualit
 reports, and security reports from jobs. It also exposes these reports in GitLab's
 UI (merge requests, pipeline views, and security dashboards).
 
-NOTE: **Note:**
 The test reports are collected regardless of the job results (success or failure).
 You can use [`artifacts:expire_in`](../yaml/README.md#artifactsexpire_in) to set up an expiration
 date for their artifacts.
 
-NOTE: **Note:**
 If you also want the ability to browse the report output files, include the
 [`artifacts:paths`](../yaml/README.md#artifactspaths) keyword.
 
@@ -96,7 +94,6 @@ rspec:
 
 The collected Unit test reports upload to GitLab as an artifact and display in merge requests.
 
-NOTE: **Note:**
 If the JUnit tool you use exports to multiple XML files, specify
 multiple test report paths within a single job to
 concatenate them into a single file. Use a filename pattern (`junit: rspec-*.xml`),
@@ -343,6 +340,11 @@ The latest artifacts are created by jobs in the **most recent** successful pipel
 for the specific ref. If you run two types of pipelines for the same ref, timing determines the latest
 artifact. For example, if a merge request creates a branch pipeline at the same time as a scheduled pipeline, the pipeline that completed most recently creates the latest artifact.
 
+In [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/201784) and later, artifacts
+for [parent and child pipelines](../parent_child_pipelines.md) are searched in hierarchical
+order from parent to child. For example, if both parent and child pipelines have a
+job with the same name, the artifact from the parent pipeline is returned.
+
 Artifacts for other pipelines can be accessed with direct access to them.
 
 The structure of the URL to download the whole artifacts archive is the following:
@@ -412,7 +414,7 @@ information in the UI.
 
 ## Erasing artifacts
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 This is a destructive action that leads to data loss. Use with caution.
 
 You can erase a single job via the UI, which also removes the job's

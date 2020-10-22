@@ -929,7 +929,7 @@ class MergeRequest < ApplicationRecord
   # rubocop: enable CodeReuse/ServiceClass
 
   def diffable_merge_ref?
-    can_be_merged? && merge_ref_head.present?
+    merge_ref_head.present? && (Feature.enabled?(:display_merge_conflicts_in_diff, project) || can_be_merged?)
   end
 
   # Returns boolean indicating the merge_status should be rechecked in order to
@@ -1597,6 +1597,12 @@ class MergeRequest < ApplicationRecord
     @base_pipeline ||= project.ci_pipelines
       .order(id: :desc)
       .find_by(sha: diff_base_sha, ref: target_branch)
+  end
+
+  def merge_base_pipeline
+    @merge_base_pipeline ||= project.ci_pipelines
+      .order(id: :desc)
+      .find_by(sha: actual_head_pipeline.target_sha, ref: target_branch)
   end
 
   def discussions_rendered_on_frontend?

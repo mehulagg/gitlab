@@ -67,7 +67,7 @@ Images follow this naming convention:
 ```
 
 If your project is `gitlab.example.com/mynamespace/myproject`, for example,
-then your image must be named `gitlab.example.com/mynamespace/myproject/my-app` at a mimimum.
+then your image must be named `gitlab.example.com/mynamespace/myproject/my-app` at a minimum.
 
 You can append additional names to the end of an image name, up to three levels deep.
 
@@ -461,7 +461,7 @@ Cleanup policies can be run on all projects, with these exceptions:
   for all projects (even those created before 12.8) in
   [GitLab application settings](../../../api/settings.md#change-application-settings)
   by setting `container_expiration_policies_enable_historic_entries` to true.
-  Alternatively, you can execute the following command in the [Rails console](../../../administration/troubleshooting/navigating_gitlab_via_rails_console.md#starting-a-rails-console-session):
+  Alternatively, you can execute the following command in the [Rails console](../../../administration/operations/rails_console.md#starting-a-rails-console-session):
 
   ```ruby
   ApplicationSetting.last.update(container_expiration_policies_enable_historic_entries: true)
@@ -469,6 +469,20 @@ Cleanup policies can be run on all projects, with these exceptions:
 
   There are performance risks with enabling it for all projects, especially if you
   are using an [external registry](./index.md#use-with-external-container-registries).
+- For self-managed GitLab instances, you can enable or disable the cleanup policy for a specific
+  project.
+
+  To enable it:
+
+  ```ruby
+  Feature.enable(:container_expiration_policies_historic_entry, Project.find(<project id>))
+  ```
+
+  To disable it:
+
+  ```ruby
+  Feature.disable(:container_expiration_policies_historic_entry, Project.find(<project id>))
+  ```
 
 ### How the cleanup policy works
 

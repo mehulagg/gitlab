@@ -18,6 +18,7 @@ module QA
     autoload :Project, 'qa/flow/project'
     autoload :Saml, 'qa/flow/saml'
     autoload :User, 'qa/flow/user'
+    autoload :MergeRequest, 'qa/flow/merge_request'
   end
 
   ##
@@ -191,6 +192,7 @@ module QA
       autoload :Projects, 'qa/page/dashboard/projects'
       autoload :Groups, 'qa/page/dashboard/groups'
       autoload :Welcome, 'qa/page/dashboard/welcome'
+      autoload :Todos, 'qa/page/dashboard/todos'
 
       module Snippet
         autoload :New, 'qa/page/dashboard/snippet/new'
@@ -593,10 +595,12 @@ module QA
     autoload :Api, 'qa/support/api'
     autoload :Dates, 'qa/support/dates'
     autoload :Repeater, 'qa/support/repeater'
+    autoload :Run, 'qa/support/run'
     autoload :Retrier, 'qa/support/retrier'
     autoload :Waiter, 'qa/support/waiter'
     autoload :WaitForRequests, 'qa/support/wait_for_requests'
     autoload :OTP, 'qa/support/otp'
+    autoload :SSH, 'qa/support/ssh'
   end
 end
 

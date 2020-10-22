@@ -56,7 +56,7 @@ RSpec.describe Projects::Settings::OperationsController do
 
     context 'with a license' do
       before do
-        stub_licensed_features(status_page: true)
+        stub_licensed_features(status_page: true, incident_sla: true)
       end
 
       context 'with maintainer role' do
@@ -87,7 +87,7 @@ RSpec.describe Projects::Settings::OperationsController do
 
     context 'without license' do
       before do
-        stub_licensed_features(status_page: false)
+        stub_licensed_features(status_page: false, incident_sla: false)
       end
 
       it_behaves_like 'user with read access', :public
@@ -115,7 +115,7 @@ RSpec.describe Projects::Settings::OperationsController do
 
     context 'with a license' do
       before do
-        stub_licensed_features(status_page: true)
+        stub_licensed_features(status_page: true, incident_sla: true)
       end
 
       context 'with non maintainer roles' do
@@ -181,24 +181,96 @@ RSpec.describe Projects::Settings::OperationsController do
           expect(project.status_page_setting).to be_nil
         end
       end
+
+      context 'indident management settings' do
+        let(:project) { create(:project) }
+
+        let(:params) { attributes_for(:project_incident_management_setting) }
+
+        subject(:incident_management_setting) do
+          update_project(project, incident_management_params: params)
+
+          project.incident_management_setting
+        end
+
+        before do
+          project.add_maintainer(user)
+        end
+
+        shared_examples 'can set the sla timer settings' do
+          let(:sla_settings) do
+            {
+              sla_timer: 'true',
+              sla_timer_minutes: 60
+            }
+          end
+
+          before do
+            params.merge!(sla_settings)
+          end
+
+          it 'updates the sla settings' do
+            setting = incident_management_setting
+
+            expect(setting.sla_timer).to eq(true)
+            expect(setting.sla_timer_minutes).to eq(60)
+          end
+        end
+
+        context 'without existing incident management setting' do
+          it { is_expected.to be_a(IncidentManagement::ProjectIncidentManagementSetting) }
+
+          it_behaves_like 'can set the sla timer settings'
+        end
+
+        context 'with existing incident management setting' do
+          before do
+            create(:project_incident_management_setting, project: project)
+          end
+
+          it { is_expected.to be_a(IncidentManagement::ProjectIncidentManagementSetting) }
+
+          it_behaves_like 'can set the sla timer settings'
+        end
+      end
     end
 
     context 'without a license' do
+      let(:project) { create(:project) }
+
       before do
-        stub_licensed_features(status_page: false)
+        project.add_maintainer(user)
+        stub_licensed_features(status_page: false, incident_sla: false)
       end
 
       it_behaves_like 'user without write access', :public, :maintainer
       it_behaves_like 'user without write access', :private, :maintainer
       it_behaves_like 'user without write access', :internal, :maintainer
+
+      it 'cannot update sla timer settings', :aggregate_failures do
+        default_attributes = attributes_for(:project_incident_management_setting)
+
+        sla_settings = {
+          sla_timer: 'true',
+          sla_timer_minutes: 60
+        }
+
+        update_project(project, incident_management_params: default_attributes.merge(sla_settings) )
+
+        setting = project.incident_management_setting
+
+        expect(setting.sla_timer).to eq(default_attributes[:sla_timer])
+        expect(setting.sla_timer_minutes).to eq(default_attributes[:sla_timer_minutes])
+      end
     end
 
     private
 
-    def update_project(project, status_page_params: nil)
+    def update_project(project, incident_management_params: nil, status_page_params: nil)
       patch :update, params: project_params(
         project,
-        status_page_params: status_page_params
+        status_page_params: status_page_params,
+        incident_management_params: incident_management_params
       )
 
       project.reload
@@ -207,12 +279,13 @@ RSpec.describe Projects::Settings::OperationsController do
 
   private
 
-  def project_params(project, status_page_params: nil)
+  def project_params(project, incident_management_params: nil, status_page_params: nil)
     {
       namespace_id: project.namespace,
       project_id: project,
       project: {
-        status_page_setting_attributes: status_page_params
+        status_page_setting_attributes: status_page_params,
+        incident_management_setting_attributes: incident_management_params
       }
     }
   end

@@ -91,8 +91,15 @@ FactoryBot.define do
     end
 
     trait :dismissed do
+      with_dismissal_feedback
+
       after(:create) do |finding|
         create(:vulnerability, :dismissed, project: finding.project, findings: [finding])
+      end
+    end
+
+    trait :with_dismissal_feedback do
+      after(:create) do |finding|
         create(:vulnerability_feedback,
                :dismissal,
                project: finding.project,

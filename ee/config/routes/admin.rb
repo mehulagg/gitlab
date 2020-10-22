@@ -15,13 +15,11 @@ namespace :admin do
     end
   end
 
-  get :instance_review, to: 'instance_review#index'
-
   resource :push_rule, only: [:show, :update]
   resource :email, only: [:show, :create]
   resources :audit_logs, controller: 'audit_logs', only: [:index]
   resources :audit_log_reports, only: [:index], constraints: { format: :csv }
-  resources :credentials, only: [:index] do
+  resources :credentials, only: [:index, :destroy] do
     member do
       put :revoke
     end

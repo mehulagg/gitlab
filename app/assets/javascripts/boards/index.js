@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import Vue from 'vue';
 import { mapActions, mapState } from 'vuex';
 
@@ -19,6 +18,7 @@ import {
 
 import VueApollo from 'vue-apollo';
 import BoardContent from '~/boards/components/board_content.vue';
+import BoardExtraActions from '~/boards/components/board_extra_actions.vue';
 import createDefaultClient from '~/lib/graphql';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import { __ } from '~/locale';
@@ -87,6 +87,9 @@ export default () => {
       groupId: Number($boardApp.dataset.groupId),
       rootPath: $boardApp.dataset.rootPath,
       canUpdate: $boardApp.dataset.canUpdate,
+      labelsFetchPath: $boardApp.dataset.labelsFetchPath,
+      labelsManagePath: $boardApp.dataset.labelsManagePath,
+      labelsFilterBasePath: $boardApp.dataset.labelsFilterBasePath,
     },
     store,
     apolloProvider,
@@ -312,63 +315,32 @@ export default () => {
           }
           return !this.store.lists.filter(list => !list.preset).length;
         },
-        tooltipTitle() {
-          if (this.disabled) {
-            return __('Please add a list to your board first');
-          }
-
-          return '';
-        },
-      },
-      watch: {
-        disabled() {
-          this.updateTooltip();
-        },
-      },
-      mounted() {
-        this.updateTooltip();
       },
       methods: {
-        updateTooltip() {
-          const $tooltip = $(this.$refs.addIssuesButton);
-
-          this.$nextTick(() => {
-            if (this.disabled) {
-              $tooltip.tooltip();
-            } else {
-              $tooltip.tooltip('dispose');
-            }
-          });
-        },
         openModal() {
           if (!this.disabled) {
             this.toggleModal(true);
           }
         },
       },
-      template: `
-        <div class="board-extra-actions">
-          <button
-            class="btn btn-success gl-ml-3"
-            type="button"
-            data-placement="bottom"
-            data-track-event="click_button"
-            data-track-label="board_add_issues"
-            ref="addIssuesButton"
-            :class="{ 'disabled': disabled }"
-            :title="tooltipTitle"
-            :aria-disabled="disabled"
-            v-if="canAdminList"
-            @click="openModal">
-            Add issues
-          </button>
-        </div>
-      `,
+      render(createElement) {
+        return createElement(BoardExtraActions, {
+          props: {
+            canAdminList: this.$options.el.hasAttribute('data-can-admin-list'),
+            openModal: this.openModal,
+            disabled: this.disabled,
+          },
+        });
+      },
     });
   }
 
   toggleFocusMode(ModalStore, boardsStore);
   toggleLabels();
-  toggleEpicsSwimlanes();
+
+  if (gon.features?.swimlanes) {
+    toggleEpicsSwimlanes();
+  }
+
   mountMultipleBoardsSwitcher();
 };

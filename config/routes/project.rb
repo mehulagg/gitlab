@@ -368,7 +368,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resource :jira, only: [:show], controller: :jira
         end
 
-        resources :snippets, concerns: :awardable, constraints: { id: /\d+/ } do
+        resources :snippets, except: [:create, :update, :destroy], concerns: :awardable, constraints: { id: /\d+/ } do
           member do
             get :raw
             post :mark_as_spam
@@ -436,6 +436,10 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       end
 
       post 'alerts/notify', to: 'alerting/notifications#create' # rubocop:todo Cop/PutProjectRoutesUnderScope
+      post 'alerts/notify/:name/:endpoint_identifier', # rubocop:todo Cop/PutProjectRoutesUnderScope
+            to: 'alerting/notifications#create',
+            as: :alert_http_integration,
+            constraints: { endpoint_identifier: /[A-Za-z0-9]+/ }
 
       draw :legacy_builds
 
@@ -578,6 +582,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         get :activity
         get :refs
         put :new_issuable_address
+        get :unfoldered_environment_names
       end
     end
     # rubocop: enable Cop/PutProjectRoutesUnderScope

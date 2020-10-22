@@ -67,17 +67,22 @@ export default {
       return this.canAdminList ? options : {};
     },
     hasMoreUnassignedIssues() {
-      return this.lists.some(list => this.pageInfoByListId[list.id]?.hasNextPage);
+      return (
+        this.unassignedIssuesCount > 0 &&
+        this.lists.some(list => this.pageInfoByListId[list.id]?.hasNextPage)
+      );
     },
   },
   methods: {
     ...mapActions(['moveList', 'fetchIssuesForList']),
     handleDragOnEnd(params) {
-      const { newIndex, oldIndex, item } = params;
+      const { newIndex, oldIndex, item, to } = params;
       const { listId } = item.dataset;
+      const replacedListId = to.children[newIndex].dataset.listId;
 
       this.moveList({
         listId,
+        replacedListId,
         newIndex,
         adjustmentValue: newIndex < oldIndex ? 1 : -1,
       });
@@ -96,6 +101,7 @@ export default {
 <template>
   <div
     class="board-swimlanes gl-white-space-nowrap gl-pb-5 gl-px-3"
+    data-testid="board-swimlanes"
     data_qa_selector="board_epics_swimlanes"
   >
     <component

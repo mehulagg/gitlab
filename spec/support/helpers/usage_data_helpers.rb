@@ -173,6 +173,10 @@ module UsageDataHelpers
     allow(Gitlab::Prometheus::Internal).to receive(:prometheus_enabled?).and_return(false)
   end
 
+  def clear_memoized_values(values)
+    values.each { |v| described_class.clear_memoization(v) }
+  end
+
   def stub_object_store_settings
     allow(Settings).to receive(:[]).with('artifacts')
       .and_return(
@@ -232,7 +236,7 @@ module UsageDataHelpers
 
   def for_defined_days_back(days: [31, 3])
     days.each do |n|
-      Timecop.travel(n.days.ago) do
+      travel_to(n.days.ago) do
         yield
       end
     end

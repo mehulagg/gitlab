@@ -93,7 +93,7 @@ When running Gitaly on its own server, note the following regarding GitLab versi
   NFS. To use Elasticsearch in these versions, the
   [repository indexer](../../integration/elasticsearch.md#elasticsearch-repository-indexer)
   must be enabled in your GitLab configuration.
-- [Since GitLab 12.3](https://gitlab.com/gitlab-org/gitlab/-/issues/6481), the new indexer is
+- [In GitLab 12.3 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/6481), the new indexer is
   the default and no configuration is required.
 
 ### Network architecture
@@ -121,7 +121,7 @@ The following list depicts the network architecture of Gitaly:
 - Authentication is done through a static token which is shared among the Gitaly and GitLab Rails
   nodes.
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 Gitaly servers must not be exposed to the public internet as Gitaly's network traffic is unencrypted
 by default. The use of firewall is highly recommended to restrict access to the Gitaly server.
 Another option is to [use TLS](#enable-tls-support).
@@ -450,7 +450,7 @@ server (with `gitaly_address`) unless you setup with special
 When you tail the Gitaly logs on your Gitaly server, you should see requests coming in. One sure way
 to trigger a Gitaly request is to clone a repository from GitLab over HTTP or HTTPS.
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 If you have [server hooks](../server_hooks.md) configured, either per repository or globally, you
 must move these to the Gitaly servers. If you have multiple Gitaly servers, copy your server hooks
 to all Gitaly servers.

@@ -1,32 +1,39 @@
 import Vue from 'vue';
-import NewFeatureFlag from '~/feature_flags/components/new_feature_flag.vue';
+import Vuex from 'vuex';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import createStore from './store/new';
+import NewFeatureFlag from './components/new_feature_flag.vue';
+
+Vue.use(Vuex);
 
 export default () => {
   const el = document.querySelector('#js-new-feature-flag');
-  const { environmentsScopeDocsPath, strategyTypeDocsPagePath } = el.dataset;
+  const {
+    environmentsScopeDocsPath,
+    strategyTypeDocsPagePath,
+    endpoint,
+    featureFlagsPath,
+    environmentsEndpoint,
+    projectId,
+    userCalloutsPath,
+    userCalloutId,
+    showUserCallout,
+  } = el.dataset;
 
   return new Vue({
     el,
-    components: {
-      NewFeatureFlag,
-    },
+    store: createStore({ endpoint, path: featureFlagsPath }),
     provide: {
       environmentsScopeDocsPath,
       strategyTypeDocsPagePath,
+      environmentsEndpoint,
+      projectId,
+      userCalloutsPath,
+      userCalloutId,
+      showUserCallout: parseBoolean(showUserCallout),
     },
     render(createElement) {
-      return createElement('new-feature-flag', {
-        props: {
-          endpoint: el.dataset.endpoint,
-          path: el.dataset.featureFlagsPath,
-          environmentsEndpoint: el.dataset.environmentsEndpoint,
-          projectId: el.dataset.projectId,
-          userCalloutsPath: el.dataset.userCalloutsPath,
-          userCalloutId: el.dataset.userCalloutId,
-          showUserCallout: parseBoolean(el.dataset.showUserCallout),
-        },
-      });
+      return createElement(NewFeatureFlag);
     },
   });
 };

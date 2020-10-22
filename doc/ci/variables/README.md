@@ -243,7 +243,7 @@ Some variables are listed in the UI so you can choose them more quickly.
 | `AWS_DEFAULT_REGION`    | Any                                                | 12.10         |
 | `AWS_SECRET_ACCESS_KEY` | Any                                                | 12.10         |
 
-NOTE: **Note:**
+CAUTION: **Caution:**
 When you store credentials, there are security implications. If you are using AWS keys,
 for example, follow their [best practices](https://docs.aws.amazon.com/general/latest/gr/aws-access-keys-best-practices.html).
 
@@ -371,9 +371,6 @@ export GITLAB_USER_ID="42"
 
 ## `.gitlab-ci.yml` defined variables
 
-NOTE: **Note:**
-This feature requires GitLab Runner 0.5.0 or higher and GitLab 7.14 or higher.
-
 You can add variables that are set in the build environment to `.gitlab-ci.yml`.
 These variables are saved in the repository, and they
 are meant to store non-sensitive project configuration, like `RAILS_ENV` or
@@ -413,10 +410,12 @@ script:
 
 > Introduced in GitLab 9.4.
 
-You can define per-project or per-group variables
-that are set in the pipeline environment. Group-level variables are stored out of
-the repository (not in `.gitlab-ci.yml`) and are securely passed to GitLab Runner,
-which makes them available during a pipeline run. For Premium users who do **not** use an external key store or who use GitLab's [integration with HashiCorp Vault](../secrets/index.md), we recommend using group environment variables to store secrets like passwords, SSH keys, and credentials.
+You can define per-project or per-group variables that are set in the pipeline environment. Group-level variables are stored out of the repository (not in `.gitlab-ci.yml`). They are securely passed to GitLab Runner, which makes them available during a pipeline run.
+
+We recommend using group environment variables to store secrets (like passwords, SSH keys, and credentials) for Premium users who:
+
+- Do **not** use an external key store.
+- Use GitLab's [integration with HashiCorp Vault](../secrets/index.md).
 
 Group-level variables can be added by:
 
@@ -437,8 +436,7 @@ Once you set them, they are available for all subsequent pipelines. Any group-le
 
 Instance variables are useful for no longer needing to manually enter the same credentials repeatedly for all your projects. Instance-level variables are available to all projects and groups on the instance.
 
-NOTE: **Note:**
-The maximum number of instance-level variables is [planned to be 25](https://gitlab.com/gitlab-org/gitlab/-/issues/216097).
+In GitLab 13.1 and later, the [maximum number of instance-level variables is 25](https://gitlab.com/gitlab-org/gitlab/-/issues/216097).
 
 You can define instance-level variables via the UI or [API](../../api/instance_level_ci_variables.md).
 
@@ -448,7 +446,7 @@ To add an instance-level variable:
 1. Click the **Add variable** button, and fill in the details:
 
    - **Key**: Must be one line, using only letters, numbers, or `_` (underscore), with no spaces.
-   - **Value**: [Since GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/220028), 10,000 characters allowed. This is also bounded by the limits of the selected runner operating system. In GitLab 13.0 to 13.2, 700 characters allowed.
+   - **Value**: [In GitLab 13.3 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/220028), 10,000 characters allowed. This is also bounded by the limits of the selected runner operating system. In GitLab 13.0 to 13.2, 700 characters allowed.
    - **Type**: `File` or `Variable`.
    - **Protect variable** (Optional): If selected, the variable is only available in pipelines that run on protected branches or tags.
    - **Mask variable** (Optional): If selected, the variable's **Value** is not shown in job logs. The variable is not saved if the value does not meet the [masking requirements](#masked-variable-requirements).
@@ -551,8 +549,7 @@ variables take precedence over those defined in `.gitlab-ci.yml`.
 
 Variable names are limited by the underlying shell used to execute scripts (see [available shells](https://docs.gitlab.com/runner/shells/index.html).
 Each shell has its own unique set of reserved variable names.
-You also want to keep in mind the [scope of environment variables](where_variables_can_be_used.md) to ensure a variable is defined in the scope
-in which you wish to use it.
+Keep in mind the [scope of environment variables](where_variables_can_be_used.md) to ensure a variable is defined in the scope in which you wish to use it.
 
 ## Where variables can be used
 
@@ -686,9 +683,10 @@ Examples:
 - `$VARIABLE == ""`
 - `$VARIABLE != ""` (introduced in GitLab 11.11)
 
-If you want to check whether a variable is defined, but is empty, you can
-simply compare it against an empty string, like `$VAR == ''` or non-empty
-string `$VARIABLE != ""`.
+To check if a variable is defined but empty, compare it to:
+
+- An empty string: `$VARIABLE == ''`
+- A non-empty string: `$VARIABLE != ""`
 
 #### Comparing two variables
 
@@ -704,9 +702,8 @@ of these variables.
 
 Example: `$STAGING`
 
-If you only want to create a job when there is some variable present,
-which means that it is defined and non-empty, you can simply use
-variable name as an expression, like `$STAGING`. If `$STAGING` variable
+To create a job when there is some variable present, meaning it is defined and non-empty,
+use the variable name as an expression, like `$STAGING`. If the `$STAGING` variable
 is defined, and is non empty, expression evaluates to `true`.
 `$STAGING` value needs to be a string, with length higher than zero.
 Variable that contains only whitespace characters is not an empty variable.
@@ -840,9 +837,7 @@ from being leaked into the log unless your script writes them to the screen.
 
 If a job isn't working as expected, this can make the problem difficult to
 investigate; in these cases, you can enable debug tracing in `.gitlab-ci.yml`.
-Available on GitLab Runner v1.7+, this feature enables the shell's execution
-log, resulting in a verbose job log listing all commands that were run,
-variables that were set, and so on.
+Available on GitLab Runner v1.7+, this feature enables the shell's execution log. This results in a verbose job log listing all commands that were run, variables that were set, and so on.
 
 Before enabling this, you should ensure jobs are visible to
 [team members only](../../user/permissions.md#project-features). You should

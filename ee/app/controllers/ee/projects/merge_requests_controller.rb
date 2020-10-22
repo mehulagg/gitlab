@@ -23,6 +23,7 @@ module EE
         feature_category :code_review, [:delete_description_version, :description_diff]
         feature_category :container_scanning, [:container_scanning_reports]
         feature_category :dependency_scanning, [:dependency_scanning_reports]
+        feature_category :fuzz_testing, [:coverage_fuzzing_reports]
         feature_category :license_compliance, [:license_scanning_reports]
         feature_category :static_application_security_testing, [:sast_reports]
         feature_category :secret_detection, [:secret_detection_reports]
@@ -31,7 +32,7 @@ module EE
       end
 
       def license_scanning_reports
-        reports_response(merge_request.compare_license_scanning_reports(current_user), head_pipeline)
+        reports_response(merge_request.compare_license_scanning_reports(current_user))
       end
 
       def container_scanning_reports

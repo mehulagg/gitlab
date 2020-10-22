@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import { GlFormRadio, GlFormRadioGroup } from '@gitlab/ui';
 import { shallowMount, mount } from '@vue/test-utils';
 import LicenseIssueBody from 'ee/vue_shared/license_compliance/components/add_license_form.vue';
 import { LICENSE_APPROVAL_STATUS } from 'ee/vue_shared/license_compliance/constants';
@@ -16,6 +17,7 @@ const createComponent = (props = {}, mountFn = shallowMount) => {
 describe('AddLicenseForm', () => {
   const findSubmitButton = () => wrapper.find('.js-submit');
   const findCancelButton = () => wrapper.find('.js-cancel');
+  const findRadioInputs = () => wrapper.find(GlFormRadioGroup).findAll(GlFormRadio);
 
   beforeEach(() => {
     createComponent();
@@ -102,23 +104,11 @@ describe('AddLicenseForm', () => {
     });
 
     it('renders the license approval radio buttons dropdown', () => {
-      const radioButtonParents = wrapper.findAll('.form-check');
+      const approvalOptions = findRadioInputs();
 
-      expect(radioButtonParents).toHaveLength(2);
-      expect(radioButtonParents.at(0).text()).toBe('Allow');
-      expect(
-        radioButtonParents
-          .at(0)
-          .find('.form-check-input')
-          .exists(),
-      ).toBe(true);
-      expect(radioButtonParents.at(1).text()).toBe('Deny');
-      expect(
-        radioButtonParents
-          .at(1)
-          .find('.form-check-input')
-          .exists(),
-      ).toBe(true);
+      expect(approvalOptions).toHaveLength(2);
+      expect(approvalOptions.at(0).text()).toBe('Allow');
+      expect(approvalOptions.at(1).text()).toBe('Deny');
     });
 
     it('renders error text, if there is a duplicate license', async () => {
@@ -159,10 +149,8 @@ describe('AddLicenseForm', () => {
       createComponent({ managedLicenses: [{ name: 'FOO' }] });
       wrapper.setData({ licenseName: 'FOO' });
       return Vue.nextTick().then(() => {
-        const formCheckElements = wrapper.findAll('.form-check');
-
-        expect(formCheckElements.at(0).element).toMatchSnapshot();
-        expect(formCheckElements.at(1).element).toMatchSnapshot();
+        expect(findRadioInputs().at(0).element).toMatchSnapshot();
+        expect(findRadioInputs().at(1).element).toMatchSnapshot();
       });
     });
 

@@ -16,18 +16,18 @@ the coordinator API of GitLab CI/CD, runs the job, and sends the result back to 
 Runners are created by an administrator and are visible in the GitLab UI.
 Runners can be specific to certain projects or available to all projects.
 
+This documentation is focused on using runners in GitLab.
+If you need to install and configure GitLab Runner, see
+[the GitLab Runner documentation](https://docs.gitlab.com/runner/).
+
 ## Types of runners
 
-There are three types of runners:
+In the GitLab UI there are three types of runners, based on who you want to have access:
 
-- [Shared](#shared-runners) (for all projects)
-- [Group](#group-runners) (for all projects in a group)
-- [Specific](#specific-runners) (for specific projects)
-
-If you are running self-managed GitLab, you can create your own runners.
-
-If you are using GitLab.com, you can use the shared runners provided by GitLab or
-create your own group or specific runners.
+- [Shared runners](#shared-runners) are available to all groups and projects in a GitLab instance.
+- [Group runners](#group-runners) are available to all projects and subgroups in a group.
+- [Specific runners](#specific-runners) are associated with specific projects.
+  Typically, specific runners are used for one project at a time.
 
 ### Shared runners
 
@@ -122,21 +122,20 @@ To enable shared runners:
 
 #### Disable shared runners
 
-You can disable shared runners for individual projects<!-- or for groups-->.
-You must have Owner permissions for the project<!-- or group-->.
+You can disable shared runners for individual projects or for groups.
+You must have Owner permissions for the project or group.
 
 To disable shared runners for a project:
 
 1. Go to the project's **Settings > CI/CD** and expand the **Runners** section.
 1. In the **Shared runners** area, click **Disable shared runners**.
 
-<!--To disable shared runners for a group:
+To disable shared runners for a group:
 
 1. Go to the group's **Settings > CI/CD** and expand the **Runners** section.
-1. In the **Shared runners** area, click **Disable shared runners globally**.
+1. In the **Shared runners** area, click **Enable shared runners for this group**.
 1. Optionally, to allow shared runners to be enabled for individual projects or subgroups,
-   click **Allow projects/subgroups to override the global setting**.
--->
+   click **Allow projects and subgroups to override the group setting**.
 
 ### Group runners
 
@@ -393,7 +392,10 @@ you must have Owner [permissions](../../user/permissions.md#project-members-perm
 
 You must set up a runner to be able to run all the different types of jobs
 that it may encounter on the projects it's shared over. This would be
-problematic for large amounts of projects, if it weren't for tags.
+problematic for large amounts of projects, if it weren't for tags. 
+
+GitLab CI tags are not the same as Git tags. GitLab CI tags are associated with runners.
+Git tags are associated with commits.
 
 By tagging a runner for the types of jobs it can handle, you can make sure
 shared runners will [only run the jobs they are equipped to run](../yaml/README.md#tags).

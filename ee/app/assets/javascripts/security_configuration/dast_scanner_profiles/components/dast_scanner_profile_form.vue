@@ -1,5 +1,4 @@
 <script>
-import * as Sentry from '@sentry/browser';
 import { isEqual } from 'lodash';
 import {
   GlAlert,
@@ -9,17 +8,17 @@ import {
   GlFormInput,
   GlFormInputGroup,
   GlModal,
-  GlIcon,
-  GlTooltipDirective,
   GlInputGroupText,
   GlFormCheckbox,
   GlFormRadioGroup,
 } from '@gitlab/ui';
+import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
 import dastScannerProfileCreateMutation from '../graphql/dast_scanner_profile_create.mutation.graphql';
 import dastScannerProfileUpdateMutation from '../graphql/dast_scanner_profile_update.mutation.graphql';
+import tooltipIcon from './tooltip_icon.vue';
 import { SCAN_TYPE, SCAN_TYPE_OPTIONS } from '../constants';
 
 const initField = (value, isRequired = true) => ({
@@ -44,13 +43,10 @@ export default {
     GlFormInput,
     GlFormInputGroup,
     GlModal,
-    GlIcon,
     GlInputGroupText,
     GlFormCheckbox,
     GlFormRadioGroup,
-  },
-  directives: {
-    GlTooltip: GlTooltipDirective,
+    tooltipIcon,
   },
   props: {
     projectFullPath: {
@@ -130,14 +126,12 @@ export default {
             'DastProfiles|The maximum number of seconds allowed for the site under test to respond to a request.',
           ),
           scanMode: s__(
-            'DastProfiles|Active scan will make active attacks against the target site while Passive scan will not',
+            'DastProfiles|A passive scan monitors all HTTP messages (requests and responses) sent to the target. An active scan attacks the target to find potential vulnerabilities.',
           ),
           ajaxSpider: s__(
-            'DastProfiles|Enable it to run the AJAX spider (in addition to the traditional spider) to crawl the target site',
+            'DastProfiles|Run the AJAX spider, in addition to the traditional spider, to crawl the target site.',
           ),
-          debugMessage: s__(
-            'DastProfiles|Enable it to include the debug messages in DAST console output',
-          ),
+          debugMessage: s__('DastProfiles|Include debug messages in the DAST console output.'),
         },
       };
     },
@@ -267,12 +261,7 @@ export default {
     <gl-form-group>
       <template #label>
         {{ s__('DastProfiles|Scan mode') }}
-        <gl-icon
-          v-gl-tooltip.hover
-          name="information-o"
-          class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
-          :title="i18n.tooltips.scanMode"
-        />
+        <tooltip-icon :title="i18n.tooltips.scanMode" />
       </template>
 
       <gl-form-radio-group
@@ -290,12 +279,7 @@ export default {
       >
         <template #label>
           {{ s__('DastProfiles|Spider timeout') }}
-          <gl-icon
-            v-gl-tooltip.hover
-            name="information-o"
-            class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
-            :title="i18n.tooltips.spiderTimeout"
-          />
+          <tooltip-icon :title="i18n.tooltips.spiderTimeout" />
         </template>
         <gl-form-input-group
           v-model.number="form.spiderTimeout.value"
@@ -322,12 +306,7 @@ export default {
       >
         <template #label>
           {{ s__('DastProfiles|Target timeout') }}
-          <gl-icon
-            v-gl-tooltip.hover
-            name="information-o"
-            class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
-            :title="i18n.tooltips.targetTimeout"
-          />
+          <tooltip-icon :title="i18n.tooltips.targetTimeout" />
         </template>
         <gl-form-input-group
           v-model.number="form.targetTimeout.value"
@@ -354,12 +333,7 @@ export default {
       <gl-form-group class="col-md-6 mb-0">
         <template #label>
           {{ s__('DastProfiles|AJAX spider') }}
-          <gl-icon
-            v-gl-tooltip.hover
-            name="information-o"
-            class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
-            :title="i18n.tooltips.ajaxSpider"
-          />
+          <tooltip-icon :title="i18n.tooltips.ajaxSpider" />
         </template>
         <gl-form-checkbox v-model="form.useAjaxSpider.value">{{
           s__('DastProfiles|Turn on AJAX spider')
@@ -369,12 +343,7 @@ export default {
       <gl-form-group class="col-md-6 mb-0">
         <template #label>
           {{ s__('DastProfiles|Debug messages') }}
-          <gl-icon
-            v-gl-tooltip.hover
-            name="information-o"
-            class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
-            :title="i18n.tooltips.debugMessage"
-          />
+          <tooltip-icon :title="i18n.tooltips.debugMessage" />
         </template>
         <gl-form-checkbox v-model="form.showDebugMessages.value">{{
           s__('DastProfiles|Show debug messages')

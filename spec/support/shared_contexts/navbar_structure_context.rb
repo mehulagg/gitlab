@@ -44,7 +44,8 @@ RSpec.shared_context 'project navbar structure' do
           _('Boards'),
           _('Labels'),
           _('Service Desk'),
-          _('Milestones')
+          _('Milestones'),
+          (_('Iterations') if Gitlab.ee?)
         ]
       },
       {
@@ -65,12 +66,14 @@ RSpec.shared_context 'project navbar structure' do
         nav_sub_items: [
           _('Metrics'),
           _('Logs'),
+          _('Tracing'),
           _('Error Tracking'),
           _('Alerts'),
           _('Incidents'),
           _('Serverless'),
           _('Kubernetes'),
           _('Environments'),
+          _('Feature Flags'),
           _('Product Analytics')
         ]
       },

@@ -223,6 +223,14 @@ in an offline environment if you prefer using only locally available Docker imag
 recommend keeping the pull policy setting to `always` if not in an offline environment, as this
 enables the use of updated scanners in your CI/CD pipelines.
 
+##### Support for Custom Certificate Authorities
+
+Support for custom certificate authorities was introduced in the following versions:
+
+| Analyzer | Version |
+| -------- | ------- |
+| `klar` | [v2.3.0](https://gitlab.com/gitlab-org/security-products/analyzers/klar/-/releases/v2.3.0) |
+
 #### Make GitLab container scanning analyzer images available inside your Docker registry
 
 For container scanning, import the following default images from `registry.gitlab.com` into your
@@ -411,7 +419,7 @@ file, it's necessary to set [`GIT_STRATEGY: fetch`](../../../ci/yaml/README.md#g
 your `.gitlab-ci.yml` file by following the instructions described in this document's
 [overriding the container scanning template](#overriding-the-container-scanning-template) section.
 
-Read more about the [solutions for vulnerabilities](../index.md#solutions-for-vulnerabilities-auto-remediation).
+Read more about the [solutions for vulnerabilities](../index.md#automatic-remediation-for-vulnerabilities).
 
 ## Troubleshooting
 

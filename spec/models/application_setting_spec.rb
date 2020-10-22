@@ -647,6 +647,23 @@ RSpec.describe ApplicationSetting do
           end
         end
       end
+
+      describe '#ci_jwt_signing_key' do
+        it { is_expected.not_to allow_value('').for(:ci_jwt_signing_key) }
+        it { is_expected.not_to allow_value('invalid RSA key').for(:ci_jwt_signing_key) }
+        it { is_expected.to allow_value(nil).for(:ci_jwt_signing_key) }
+        it { is_expected.to allow_value(OpenSSL::PKey::RSA.new(1024).to_pem).for(:ci_jwt_signing_key) }
+
+        it 'is encrypted' do
+          subject.ci_jwt_signing_key = OpenSSL::PKey::RSA.new(1024).to_pem
+
+          aggregate_failures do
+            expect(subject.encrypted_ci_jwt_signing_key).to be_present
+            expect(subject.encrypted_ci_jwt_signing_key_iv).to be_present
+            expect(subject.encrypted_ci_jwt_signing_key).not_to eq(subject.ci_jwt_signing_key)
+          end
+        end
+      end
     end
 
     context 'static objects external storage' do
@@ -804,6 +821,23 @@ RSpec.describe ApplicationSetting do
 
         expect(setting.sourcegraph_url_is_com?).to eq(is_com)
       end
+    end
+  end
+
+  describe '#instance_review_permitted?', :request_store do
+    subject { setting.instance_review_permitted? }
+
+    before do
+      RequestStore.store[:current_license] = nil
+      expect(Rails.cache).to receive(:fetch).and_return(
+        ::ApplicationSetting::INSTANCE_REVIEW_MIN_USERS + users_over_minimum
+      )
+    end
+
+    where(users_over_minimum: [-1, 0, 1])
+
+    with_them do
+      it { is_expected.to be(users_over_minimum >= 0) }
     end
   end
 

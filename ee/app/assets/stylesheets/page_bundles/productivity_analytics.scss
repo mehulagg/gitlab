@@ -1,0 +1,129 @@
+@import 'page_bundles/mixins_and_variables_and_functions';
+
+.dropdown-container {
+  flex: 0 0 25%;
+  width: 25%;
+
+  @include media-breakpoint-down(md) {
+    width: 100%;
+
+    .dropdown-projects {
+      margin-top: $gl-padding-8;
+      margin-bottom: $gl-padding-8;
+    }
+  }
+
+  @include media-breakpoint-up(lg) {
+    .group-select,
+    .project-select {
+      margin-right: $gl-padding;
+      flex: 1;
+      width: inherit;
+    }
+  }
+}
+
+.filter-container {
+  flex: 1 1 35%;
+  width: 35%;
+
+  @include media-breakpoint-down(md) {
+    width: 100%;
+
+    .filtered-search-box {
+      margin-bottom: 10px;
+    }
+
+    .issues-details-filters {
+      padding: 0;
+      background: transparent;
+    }
+  }
+}
+
+.daterange-container {
+  flex: 1 1 30%;
+  width: 30%;
+
+  @include media-breakpoint-down(md) {
+    width: 100%;
+  }
+
+  .gl-daterange-picker {
+    .gl-datepicker-input {
+      width: 140px;
+
+      @include media-breakpoint-down(md) {
+        width: 100%;
+      }
+    }
+
+    label {
+      @include media-breakpoint-up(lg) {
+        margin-right: $gl-padding-4;
+      }
+    }
+  }
+}
+
+.metric-dropdown {
+  @include media-breakpoint-down(sm) {
+    width: 100%;
+  }
+}
+
+.mr-table {
+  @include media-breakpoint-down(md) {
+    .gl-responsive-table-row {
+      border: 0;
+      margin-top: 10px;
+
+      &:not(:last-child) {
+        border-bottom: 1px solid $border-color;
+      }
+    }
+
+    .table-section {
+      border: 0;
+      min-height: auto;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .metric-col {
+      flex: 1;
+    }
+
+    .metric-label {
+      white-space: pre-wrap;
+    }
+
+    .avatar {
+      margin-right: 0;
+    }
+  }
+
+  .metric-col {
+    flex: 0 0 50%;
+    max-width: 50%;
+
+    .time {
+      font-size: $gl-font-size-large;
+
+      span {
+        font-size: $gl-font-size;
+      }
+    }
+  }
+
+  .card-header {
+    background-color: transparent;
+    font-weight: $gl-font-weight-bold;
+  }
+
+  .mr-title {
+    a {
+      color: var(--gl-text-color, $gl-text-color);
+    }
+  }
+}

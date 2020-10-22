@@ -2,7 +2,7 @@
 
 # PHP composer support (https://getcomposer.org/)
 module API
-  class ComposerPackages < Grape::API::Instance
+  class ComposerPackages < ::API::Base
     helpers ::API::Helpers::PackagesManagerClientsHelpers
     helpers ::API::Helpers::RelatedResourcesHelpers
     helpers ::API::Helpers::Packages::BasicAuthHelpers
@@ -24,6 +24,10 @@ module API
 
     rescue_from ActiveRecord::RecordInvalid do |e|
       render_api_error!(e.message, 400)
+    end
+
+    rescue_from Packages::Composer::ComposerJsonService::InvalidJson do |e|
+      render_api_error!(e.message, 422)
     end
 
     helpers do

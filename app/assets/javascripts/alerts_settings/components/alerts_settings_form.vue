@@ -191,9 +191,12 @@ export default {
     this.authKey = this.selectedService.authKey ?? '';
   },
   methods: {
-    createUserErrorMessage(errors = { error: [''] }) {
-      // eslint-disable-next-line prefer-destructuring
-      this.serverError = errors.error[0];
+    createUserErrorMessage(errors = {}) {
+      const error = Object.entries(errors)?.[0];
+      if (error) {
+        const [field, [msg]] = error;
+        this.serverError = `${field} ${msg}`;
+      }
     },
     setOpsgenieAsDefault() {
       this.options = this.options.map(el => {
@@ -267,7 +270,7 @@ export default {
         .catch(({ response: { data: { errors } = {} } = {} }) => {
           this.createUserErrorMessage(errors);
           this.setFeedback({
-            feedbackMessage: `${this.$options.i18n.errorMsg}.`,
+            feedbackMessage: this.$options.i18n.errorMsg,
             variant: 'danger',
           });
         })
@@ -298,7 +301,7 @@ export default {
         .catch(({ response: { data: { errors } = {} } = {} }) => {
           this.createUserErrorMessage(errors);
           this.setFeedback({
-            feedbackMessage: `${this.$options.i18n.errorMsg}.`,
+            feedbackMessage: this.$options.i18n.errorMsg,
             variant: 'danger',
           });
         })
@@ -368,48 +371,50 @@ export default {
 
 <template>
   <div>
-    <gl-alert v-if="showFeedbackMsg" :variant="feedback.variant" @dismiss="dismissFeedback">
-      {{ feedback.feedbackMessage }}
-      <br />
-      <i v-if="serverError">{{ __('Error message:') }} {{ serverError }}</i>
-      <gl-button
-        v-if="showAlertSave"
-        variant="danger"
-        category="primary"
-        class="gl-display-block gl-mt-3"
-        @click="toggle(active)"
-      >
-        {{ __('Save anyway') }}
-      </gl-button>
-    </gl-alert>
-
     <integrations-list :integrations="integrations" />
 
     <gl-form @submit.prevent="onSubmit" @reset.prevent="onReset">
-      <h5 class="gl-font-lg">{{ $options.i18n.integrationsLabel }}</h5>
+      <h5 class="gl-font-lg gl-my-5">{{ $options.i18n.integrationsLabel }}</h5>
 
-      <gl-form-group label-for="integrations" label-class="gl-font-weight-bold">
-        <div data-testid="alert-settings-description" class="gl-mt-5">
-          <p v-for="section in sections" :key="section.text">
-            <gl-sprintf :message="section.text">
-              <template #link="{ content }">
-                <gl-link :href="section.url" target="_blank">{{ content }}</gl-link>
-              </template>
-            </gl-sprintf>
-          </p>
-        </div>
+      <gl-alert v-if="showFeedbackMsg" :variant="feedback.variant" @dismiss="dismissFeedback">
+        {{ feedback.feedbackMessage }}
+        <br />
+        <i v-if="serverError">{{ __('Error message:') }} {{ serverError }}</i>
+        <gl-button
+          v-if="showAlertSave"
+          variant="danger"
+          category="primary"
+          class="gl-display-block gl-mt-3"
+          @click="toggle(active)"
+        >
+          {{ __('Save anyway') }}
+        </gl-button>
+      </gl-alert>
+
+      <div data-testid="alert-settings-description">
+        <p v-for="section in sections" :key="section.text">
+          <gl-sprintf :message="section.text">
+            <template #link="{ content }">
+              <gl-link :href="section.url" target="_blank">{{ content }}</gl-link>
+            </template>
+          </gl-sprintf>
+        </p>
+      </div>
+
+      <gl-form-group label-for="integration-type" :label="$options.i18n.integration">
         <gl-form-select
+          id="integration-type"
           v-model="selectedEndpoint"
           :options="options"
           data-testid="alert-settings-select"
           @change="resetFormValues"
         />
-        <span class="gl-text-gray-200">
+        <span class="gl-text-gray-500">
           <gl-sprintf :message="$options.i18n.integrationsInfo">
             <template #link="{ content }">
               <gl-link
                 class="gl-display-inline-block"
-                href="https://gitlab.com/groups/gitlab-org/-/epics/3362"
+                href="https://gitlab.com/groups/gitlab-org/-/epics/4390"
                 target="_blank"
                 >{{ content }}</gl-link
               >
@@ -417,11 +422,7 @@ export default {
           </gl-sprintf>
         </span>
       </gl-form-group>
-      <gl-form-group
-        :label="$options.i18n.activeLabel"
-        label-for="activated"
-        label-class="gl-font-weight-bold"
-      >
+      <gl-form-group :label="$options.i18n.activeLabel" label-for="activated">
         <toggle-button
           id="activated"
           :disabled-input="loading"
@@ -434,7 +435,6 @@ export default {
         v-if="isOpsgenie || isPrometheus"
         :label="$options.i18n.apiBaseUrlLabel"
         label-for="api-url"
-        label-class="gl-font-weight-bold"
       >
         <gl-form-input
           id="api-url"
@@ -443,16 +443,12 @@ export default {
           :placeholder="baseUrlPlaceholder"
           :disabled="!active"
         />
-        <span class="gl-text-gray-200">
+        <span class="gl-text-gray-500">
           {{ $options.i18n.apiBaseUrlHelpText }}
         </span>
       </gl-form-group>
       <template v-if="!isOpsgenie">
-        <gl-form-group
-          :label="$options.i18n.urlLabel"
-          label-for="url"
-          label-class="gl-font-weight-bold"
-        >
+        <gl-form-group :label="$options.i18n.urlLabel" label-for="url">
           <gl-form-input-group id="url" readonly :value="selectedService.url">
             <template #append>
               <clipboard-button
@@ -462,15 +458,11 @@ export default {
               />
             </template>
           </gl-form-input-group>
-          <span class="gl-text-gray-200">
+          <span class="gl-text-gray-500">
             {{ prometheusInfo }}
           </span>
         </gl-form-group>
-        <gl-form-group
-          :label="$options.i18n.authKeyLabel"
-          label-for="authorization-key"
-          label-class="gl-font-weight-bold"
-        >
+        <gl-form-group :label="$options.i18n.authKeyLabel" label-for="authorization-key">
           <gl-form-input-group id="authorization-key" class="gl-mb-2" readonly :value="authKey">
             <template #append>
               <clipboard-button
@@ -496,7 +488,6 @@ export default {
         <gl-form-group
           :label="$options.i18n.alertJson"
           label-for="alert-json"
-          label-class="gl-font-weight-bold"
           :invalid-feedback="testAlert.error"
         >
           <gl-form-textarea

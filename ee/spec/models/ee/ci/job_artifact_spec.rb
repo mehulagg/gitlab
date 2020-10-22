@@ -133,7 +133,7 @@ RSpec.describe Ci::JobArtifact do
     end
   end
 
-  describe '#replicables_for_geo_node' do
+  describe '#replicables_for_current_secondary' do
     # Selective sync is configured relative to the job artifact's project.
     #
     # Permutations of sync_object_storage combined with object-stored-artifacts
@@ -162,7 +162,7 @@ RSpec.describe Ci::JobArtifact do
     end
 
     with_them do
-      subject(:job_artifact_included) { described_class.replicables_for_geo_node.include?(ci_job_artifact) }
+      subject(:job_artifact_included) { described_class.replicables_for_current_secondary(ci_job_artifact).exists? }
 
       let(:project) { create(*project_factory) }
       let(:ci_build) { create(:ci_build, project: project) }
@@ -256,7 +256,9 @@ RSpec.describe Ci::JobArtifact do
       clear_security_report
       job_artifact.security_report
 
-      expect(::Gitlab::Ci::Reports::Security::Report).to have_received(:new).once
+      # This entity class receives the call twice
+      # because of the way MergeReportsService is implemented.
+      expect(::Gitlab::Ci::Reports::Security::Report).to have_received(:new).twice
     end
   end
 end

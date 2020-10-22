@@ -30,7 +30,6 @@ export default {
   },
   inject: {
     groupAnalyticsCoverageReportsPath: {
-      type: String,
       default: '',
     },
   },
@@ -100,11 +99,11 @@ export default {
       this.allProjectsSelected = true;
       this.selectedProjectIds = [];
     },
-    selectProject(id) {
+    selectProject({ parsedId }) {
       this.allProjectsSelected = false;
-      const index = this.selectedProjectIds.indexOf(id);
+      const index = this.selectedProjectIds.indexOf(parsedId);
       if (index < 0) {
-        this.selectedProjectIds.push(id);
+        this.selectedProjectIds.push(parsedId);
         return;
       }
       this.selectedProjectIds.splice(index, 1);

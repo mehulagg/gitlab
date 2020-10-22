@@ -1,9 +1,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import Sortable from 'sortablejs';
-import isWipLimitsOn from 'ee_else_ce/boards/mixins/is_wip_limits';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
-import Tooltip from '~/vue_shared/directives/tooltip';
 import EmptyComponent from '~/vue_shared/components/empty_component';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import BoardList from './board_list.vue';
@@ -19,10 +17,7 @@ export default {
     BoardListHeader,
     BoardList: gon.features?.graphqlBoardLists ? BoardListNew : BoardList,
   },
-  directives: {
-    Tooltip,
-  },
-  mixins: [isWipLimitsOn, glFeatureFlagMixin()],
+  mixins: [glFeatureFlagMixin()],
   props: {
     list: {
       type: Object,

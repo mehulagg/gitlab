@@ -69,6 +69,34 @@ describe('Date time utils', () => {
     });
   });
 
+  describe('formatDateAsMonth', () => {
+    it('should format dash cased date properly', () => {
+      const formattedMonth = datetimeUtility.formatDateAsMonth(new Date('2020-06-28'));
+
+      expect(formattedMonth).toBe('Jun');
+    });
+
+    it('should format return the non-abbreviated month', () => {
+      const formattedMonth = datetimeUtility.formatDateAsMonth(new Date('2020-07-28'), {
+        abbreviated: false,
+      });
+
+      expect(formattedMonth).toBe('July');
+    });
+
+    it('should format date with slashes properly', () => {
+      const formattedMonth = datetimeUtility.formatDateAsMonth(new Date('07/23/2016'));
+
+      expect(formattedMonth).toBe('Jul');
+    });
+
+    it('should format ISO date properly', () => {
+      const formattedMonth = datetimeUtility.formatDateAsMonth('2016-07-23T00:00:00.559Z');
+
+      expect(formattedMonth).toBe('Jul');
+    });
+  });
+
   describe('formatDate', () => {
     it('should format date properly', () => {
       const formattedDate = datetimeUtility.formatDate(new Date('07/23/2016'));
@@ -651,6 +679,20 @@ describe('differenceInSeconds', () => {
     ${new Date('2019-07-18T00:00:00.000Z')} | ${startDateTime}                        | ${-86400}
   `('returns $expected for $endDate - $startDate', ({ startDate, endDate, expected }) => {
     expect(datetimeUtility.differenceInSeconds(startDate, endDate)).toBe(expected);
+  });
+});
+
+describe('differenceInMonths', () => {
+  const startDateTime = new Date('2019-07-17T00:00:00.000Z');
+
+  it.each`
+    startDate                               | endDate                                 | expected
+    ${startDateTime}                        | ${startDateTime}                        | ${0}
+    ${startDateTime}                        | ${new Date('2019-12-17T12:00:00.000Z')} | ${5}
+    ${startDateTime}                        | ${new Date('2021-02-18T00:00:00.000Z')} | ${19}
+    ${new Date('2021-02-18T00:00:00.000Z')} | ${startDateTime}                        | ${-19}
+  `('returns $expected for $endDate - $startDate', ({ startDate, endDate, expected }) => {
+    expect(datetimeUtility.differenceInMonths(startDate, endDate)).toBe(expected);
   });
 });
 

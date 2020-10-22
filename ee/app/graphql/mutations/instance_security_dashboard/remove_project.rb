@@ -7,7 +7,7 @@ module Mutations
 
       authorize :read_instance_security_dashboard
 
-      argument :id, GraphQL::ID_TYPE,
+      argument :id, Types::GlobalIDType[::Project],
                required: true,
                description: 'ID of the project to remove from the Instance Security Dashboard'
 
@@ -31,7 +31,9 @@ module Mutations
       def extract_project_id(gid)
         return unless gid.present?
 
-        GitlabSchema.parse_gid(gid, expected_type: ::Project).model_id
+        # TODO: remove explicit coercion once compatibility layer has been removed
+        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+        Types::GlobalIDType[::Project].coerce_isolated_input(gid).model_id
       end
 
       def remove_project(project_id)

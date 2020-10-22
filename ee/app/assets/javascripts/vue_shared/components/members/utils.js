@@ -18,4 +18,9 @@ export const generateBadges = (member, isCurrentUser) => [
     text: __('Managed Account'),
     variant: 'info',
   },
+  {
+    show: member.canOverride,
+    text: __('LDAP'),
+    variant: 'info',
+  },
 ];

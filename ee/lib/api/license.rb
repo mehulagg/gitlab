@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class License < Grape::API::Instance
+  class License < ::API::Base
     before { authenticated_as_admin! }
 
     resource :license do

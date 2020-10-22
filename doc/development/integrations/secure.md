@@ -384,6 +384,9 @@ reported for the same commit, except for `CWE` and `WASC`.
 Not all vulnerabilities have CVEs, and a CVE can be identified multiple times. As a result, a CVE
 isn't a stable identifier and you shouldn't assume it as such when tracking vulnerabilities.
 
+The maximum number of identifiers for a vulnerability is set as 20. If a vulnerability has more than 20 identifiers,
+the system will save only the first 20 of them.
+
 ### Location
 
 The `location` indicates where the vulnerability has been detected.
@@ -529,7 +532,7 @@ of the available SAST Analyzers and what data is currently available.
 
 The `remediations` field of the report is an array of remediation objects.
 Each remediation describes a patch that can be applied to
-[automatically fix](../../user/application_security/#solutions-for-vulnerabilities-auto-remediation)
+[automatically fix](../../user/application_security/#automatic-remediation-for-vulnerabilities)
 a set of vulnerabilities.
 
 Here is an example of a report that contains remediations.

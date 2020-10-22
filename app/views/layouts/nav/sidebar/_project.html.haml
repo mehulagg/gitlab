@@ -236,7 +236,7 @@
                     = _('Logs')
 
             - if project_nav_tab? :environments
-              = render_if_exists "layouts/nav/sidebar/tracing_link"
+              = render "layouts/nav/sidebar/tracing_link"
 
             - if project_nav_tab?(:error_tracking)
               = nav_link(controller: :error_tracking) do
@@ -272,7 +272,6 @@
                     .feature-highlight.js-feature-highlight{ disabled: true,
                       data: { trigger: 'manual',
                         container: 'body',
-                        toggle: 'popover',
                         placement: 'right',
                         highlight: UserCalloutsHelper::GKE_CLUSTER_INTEGRATION,
                         highlight_priority: UserCallout.feature_names[:GKE_CLUSTER_INTEGRATION],
@@ -297,7 +296,11 @@
                   %span
                     = _('Environments')
 
-            = render_if_exists 'layouts/nav/sidebar/project_feature_flags_link'
+            - if project_nav_tab? :feature_flags
+              = nav_link(controller: :feature_flags) do
+                = link_to project_feature_flags_path(@project), title: _('Feature Flags'), class: 'shortcuts-feature-flags' do
+                  %span
+                    = _('Feature Flags')
 
             - if project_nav_tab?(:product_analytics)
               = nav_link(controller: :product_analytics) do

@@ -35,25 +35,36 @@ export default {
       required: false,
       default: '',
     },
+    iterationId: {
+      type: String,
+      required: false,
+      default: '',
+    },
     burndownEventsPath: {
       type: String,
       required: false,
       default: '',
     },
+    showNewOldBurndownToggle: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   apollo: {
     burnupData: {
       skip() {
-        return !this.glFeatures.burnupCharts || !this.milestoneId;
+        return !this.glFeatures.burnupCharts || (!this.milestoneId && !this.iterationId);
       },
       query: BurnupQuery,
       variables() {
         return {
-          milestoneId: this.milestoneId,
+          id: this.iterationId || this.milestoneId,
+          isIteration: Boolean(this.iterationId),
         };
       },
       update(data) {
-        const sparseBurnupData = data?.milestone?.burnupTimeSeries || [];
+        const sparseBurnupData = data?.[this.parent]?.burnupTimeSeries || [];
 
         return this.padSparseBurnupData(sparseBurnupData);
       },
@@ -69,11 +80,14 @@ export default {
       issuesSelected: true,
       burnupData: [],
       useLegacyBurndown: !this.glFeatures.burnupCharts,
-      showInfo: true,
+      showInfo: this.showNewOldBurndownToggle,
       error: '',
     };
   },
   computed: {
+    parent() {
+      return this.iterationId ? 'iteration' : 'milestone';
+    },
     title() {
       return this.glFeatures.burnupCharts ? __('Charts') : __('Burndown chart');
     },
@@ -258,7 +272,7 @@ export default {
         </gl-button>
       </gl-button-group>
 
-      <gl-button-group v-if="glFeatures.burnupCharts">
+      <gl-button-group v-if="glFeatures.burnupCharts && showNewOldBurndownToggle">
         <gl-button
           ref="oldBurndown"
           :category="useLegacyBurndown ? 'primary' : 'secondary'"

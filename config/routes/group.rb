@@ -17,6 +17,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       put :transfer, as: :transfer_group # rubocop:disable Cop/PutGroupRoutesUnderScope
       post :export, as: :export_group # rubocop:disable Cop/PutGroupRoutesUnderScope
       get :download_export, as: :download_export_group # rubocop:disable Cop/PutGroupRoutesUnderScope
+      get :unfoldered_environment_names, as: :unfoldered_environment_names_group # rubocop:disable Cop/PutGroupRoutesUnderScope
 
       # TODO: Remove as part of refactor in https://gitlab.com/gitlab-org/gitlab-foss/issues/49693
       get 'shared', action: :show, as: :group_shared # rubocop:disable Cop/PutGroupRoutesUnderScope
@@ -87,7 +88,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       delete :leave, on: :collection
     end
 
-    resources :group_links, only: [:create, :update, :destroy], constraints: { id: /\d+/ }
+    resources :group_links, only: [:create, :update, :destroy], constraints: { id: /\d+|:id/ }
 
     resources :uploads, only: [:create] do
       collection do

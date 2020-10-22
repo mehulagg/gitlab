@@ -222,6 +222,36 @@ RSpec.describe Group do
         end
       end
     end
+
+    describe '#two_factor_authentication_allowed' do
+      let_it_be(:group) { create(:group) }
+
+      context 'for a parent group' do
+        it 'is valid' do
+          group.require_two_factor_authentication = true
+
+          expect(group).to be_valid
+        end
+      end
+
+      context 'for a child group' do
+        let(:sub_group) { create(:group, parent: group) }
+
+        it 'is valid when parent group allows' do
+          sub_group.require_two_factor_authentication = true
+
+          expect(sub_group).to be_valid
+        end
+
+        it 'is invalid when parent group blocks' do
+          group.namespace_settings.update!(allow_mfa_for_subgroups: false)
+          sub_group.require_two_factor_authentication = true
+
+          expect(sub_group).to be_invalid
+          expect(sub_group.errors[:require_two_factor_authentication]).to include('is forbidden by a top-level group')
+        end
+      end
+    end
   end
 
   describe '.without_integration' do
@@ -1476,6 +1506,28 @@ RSpec.describe Group do
     end
   end
 
+  describe "#default_branch_name" do
+    context "group.namespace_settings does not have a default branch name" do
+      it "returns nil" do
+        expect(group.default_branch_name).to be_nil
+      end
+    end
+
+    context "group.namespace_settings has a default branch name" do
+      let(:example_branch_name) { "example_branch_name" }
+
+      before do
+        expect(group.namespace_settings)
+          .to receive(:default_branch_name)
+          .and_return(example_branch_name)
+      end
+
+      it "returns the default branch name" do
+        expect(group.default_branch_name).to eq(example_branch_name)
+      end
+    end
+  end
+
   describe '#default_owner' do
     let(:group) { build(:group) }
 
@@ -1516,6 +1568,26 @@ RSpec.describe Group do
         expect(group.default_owner)
           .to eq(group.owner)
           .and be_a(User)
+      end
+    end
+  end
+
+  describe '#parent_allows_two_factor_authentication?' do
+    it 'returns true for top-level group' do
+      expect(group.parent_allows_two_factor_authentication?).to eq(true)
+    end
+
+    context 'for subgroup' do
+      let(:subgroup) { create(:group, parent: group) }
+
+      it 'returns true if parent group allows two factor authentication for its descendants' do
+        expect(subgroup.parent_allows_two_factor_authentication?).to eq(true)
+      end
+
+      it 'returns true if parent group allows two factor authentication for its descendants' do
+        group.namespace_settings.update!(allow_mfa_for_subgroups: false)
+
+        expect(subgroup.parent_allows_two_factor_authentication?).to eq(false)
       end
     end
   end

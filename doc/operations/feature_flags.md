@@ -56,6 +56,20 @@ To create and enable a feature flag:
 You can change these settings by clicking the **{pencil}** (edit) button
 next to any feature flag in the list.
 
+## Maximum number of feature flags
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/254379) in GitLab 13.5.
+
+The maximum number of feature flags per project on self-managed GitLab instances
+is 200. On GitLab.com, the maximum number is determined by [GitLab.com tier](https://about.gitlab.com/pricing/):
+
+| Tier     | Number of feature flags per project |
+|----------|-------------------------------------|
+| Free     | 50                                  |
+| Bronze   | 100                                 |
+| Silver   | 150                                 |
+| Gold     | 200                                 |
+
 ## Feature flag strategies
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/35555) in GitLab 13.0.
@@ -87,21 +101,55 @@ and clicking **{pencil}** (edit).
 Enables the feature for all users. It uses the [`default`](https://unleash.github.io/docs/activation_strategy#default)
 Unleash activation strategy.
 
+### Percent Rollout
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43340) in GitLab 13.5.
+
+Enables the feature for a percentage of page views, with configurable consistency
+of behavior. This consistency is also known as stickiness. It uses the
+[`flexibleRollout`](https://unleash.github.io/docs/activation_strategy#flexiblerollout)
+Unleash activation strategy.
+
+You can configure the consistency to be based on:
+
+- **User IDs**: Each user ID has a consistent behavior, ignoring session IDs.
+- **Session IDs**: Each session ID has a consistent behavior, ignoring user IDs.
+- **Random**: Consistent behavior is not guaranteed. The feature is enabled for the
+  selected percentage of page views randomly. User IDs and session IDs are ignored.
+- **Available ID**: Consistent behavior is attempted based on the status of the user:
+  - If the user is logged in, make behavior consistent based on user ID.
+  - If the user is anonymous, make the behavior consistent based on the session ID.
+  - If there is no user ID or session ID, then the feature is enabled for the selected
+    percentage of page view randomly.
+
+For example, set a value of 15% based on **Available ID** to enable the feature for 15% of page views. For
+authenticated users this is based on their user ID. For anonymous users with a session ID it would be based on their
+session ID instead as they do not have a user ID. Then if no session ID is provided, it falls back to random.
+
+The rollout percentage can be from 0% to 100%.
+
+Selecting a consistency based on User IDs functions the same as the [percent of Users](#percent-of-users) rollout.
+
+CAUTION: **Caution:**
+Selecting **Random** provides inconsistent application behavior for individual users.
+
 ### Percent of Users
 
-Enables the feature for a percentage of authenticated users. It uses the
-[`gradualRolloutUserId`](https://unleash.github.io/docs/activation_strategy#gradualrolloutuserid)
-Unleash activation strategy.
+Enables the feature for a percentage of authenticated users. It uses the Unleash activation strategy
+[`gradualRolloutUserId`](https://unleash.github.io/docs/activation_strategy#gradualrolloutuserid).
 
 For example, set a value of 15% to enable the feature for 15% of authenticated users.
 
 The rollout percentage can be from 0% to 100%.
 
-NOTE: **Note:**
-Stickiness (consistent application behavior for the same user) is guaranteed for logged-in users, but not anonymous users.
+Stickiness (consistent application behavior for the same user) is guaranteed for logged-in users,
+but not anonymous users.
+
+Note that [percent rollout](#percent-rollout) with a consistency based on **User IDs** has the same
+behavior. We recommend using percent rollout because it's more flexible than percent of users
 
 CAUTION: **Caution:**
-If this strategy is selected, then the Unleash client **must** be given a user
+If the percent of users strategy is selected, then the Unleash client **must** be given a user
 ID for the feature to be enabled. See the [Ruby example](#ruby-application-example) below.
 
 ### User IDs
@@ -113,11 +161,9 @@ Enables the feature for a list of target users. It is implemented
 using the Unleash [`userWithId`](https://unleash.github.io/docs/activation_strategy#userwithid)
 activation strategy.
 
-Enter user IDs as a comma-separated list of values. For example,
-`user@example.com, user2@example.com`, or `username1,username2,username3`, and so on.
-
-NOTE: **Note:**
-User IDs are identifiers for your application users. They do not need to be GitLab users.
+Enter user IDs as a comma-separated list of values (for example,
+`user@example.com, user2@example.com`, or `username1,username2,username3`, and so on). Note that
+user IDs are identifiers for your application users. They do not need to be GitLab users.
 
 CAUTION: **Caution:**
 The Unleash client **must** be given a user ID for the feature to be enabled for
@@ -255,11 +301,9 @@ To get the access credentials that your application needs to communicate with Gi
      For example, if the application runs for a production server, the **Application name**
      could be `production` or similar. This value is used for the environment spec evaluation.
 
-NOTE: **Note:**
-The meaning of these fields might change over time. For example, we are not sure
-if **Instance ID** will be single token or multiple tokens, assigned to the
-**Environment**. Also, **Application name** could describe the version of
-application instead of the running environment.
+Note that the meaning of these fields might change over time. For example, we're not sure if
+**Instance ID** will be single token or multiple tokens, assigned to the **Environment**. Also,
+**Application name** could describe the application version instead of the running environment.
 
 ### Choose a client library
 

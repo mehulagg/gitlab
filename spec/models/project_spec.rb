@@ -2,11 +2,13 @@
 
 require 'spec_helper'
 
-RSpec.describe Project do
+RSpec.describe Project, factory_default: :keep do
   include ProjectForksHelper
   include GitHelpers
   include ExternalAuthorizationServiceHelpers
   using RSpec::Parameterized::TableSyntax
+
+  let_it_be(:namespace) { create_default(:namespace) }
 
   it_behaves_like 'having unique enum values'
 
@@ -3003,14 +3005,23 @@ RSpec.describe Project do
   describe '#set_repository_read_only!' do
     let(:project) { create(:project) }
 
-    it 'returns true when there is no existing git transfer in progress' do
-      expect(project.set_repository_read_only!).to be_truthy
+    it 'makes the repository read-only' do
+      expect { project.set_repository_read_only! }
+        .to change(project, :repository_read_only?)
+        .from(false)
+        .to(true)
     end
 
-    it 'returns false when there is an existing git transfer in progress' do
+    it 'raises an error if the project is already read-only' do
+      project.set_repository_read_only!
+
+      expect { project.set_repository_read_only! }.to raise_error(described_class::RepositoryReadOnlyError, /already read-only/)
+    end
+
+    it 'raises an error when there is an existing git transfer in progress' do
       allow(project).to receive(:git_transfer_in_progress?) { true }
 
-      expect(project.set_repository_read_only!).to be_falsey
+      expect { project.set_repository_read_only! }.to raise_error(described_class::RepositoryReadOnlyError, /in progress/)
     end
   end
 
@@ -4979,15 +4990,21 @@ RSpec.describe Project do
     context "with an empty repository" do
       let_it_be(:project) { create(:project_empty_repo) }
 
-      context "Gitlab::CurrentSettings.default_branch_name is unavailable" do
+      context "group.default_branch_name is available" do
+        let(:project_group) { create(:group) }
+        let(:project) { create(:project, path: 'avatar', namespace: project_group) }
+
         before do
           expect(Gitlab::CurrentSettings)
+            .not_to receive(:default_branch_name)
+
+          expect(project.group)
             .to receive(:default_branch_name)
-            .and_return(nil)
+            .and_return('example_branch')
         end
 
-        it "returns that value" do
-          expect(project.default_branch).to be_nil
+        it "returns the group default value" do
+          expect(project.default_branch).to eq("example_branch")
         end
       end
 
@@ -4995,11 +5012,23 @@ RSpec.describe Project do
         before do
           expect(Gitlab::CurrentSettings)
             .to receive(:default_branch_name)
-            .and_return('example_branch')
+            .and_return(example_branch_name)
         end
 
-        it "returns that value" do
-          expect(project.default_branch).to eq("example_branch")
+        context "is missing or nil" do
+          let(:example_branch_name) { nil }
+
+          it "returns nil" do
+            expect(project.default_branch).to be_nil
+          end
+        end
+
+        context "is present" do
+          let(:example_branch_name) { "example_branch_name" }
+
+          it "returns the expected branch name" do
+            expect(project.default_branch).to eq(example_branch_name)
+          end
         end
       end
     end
@@ -5491,12 +5520,13 @@ RSpec.describe Project do
   describe '#find_or_initialize_services' do
     it 'returns only enabled services' do
       allow(Service).to receive(:available_services_names).and_return(%w[prometheus pushover teamcity])
+      allow(Service).to receive(:project_specific_services_names).and_return(%w[asana])
       allow(subject).to receive(:disabled_services).and_return(%w[prometheus])
 
       services = subject.find_or_initialize_services
 
-      expect(services.count).to eq(2)
-      expect(services.map(&:title)).to eq(['JetBrains TeamCity CI', 'Pushover'])
+      expect(services.count).to eq(3)
+      expect(services.map(&:title)).to eq(['Asana', 'JetBrains TeamCity CI', 'Pushover'])
     end
   end
 

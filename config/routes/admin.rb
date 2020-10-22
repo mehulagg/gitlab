@@ -17,6 +17,7 @@ namespace :admin do
       put :activate
       put :unlock
       put :confirm
+      put :approve
       post :impersonate
       patch :disable_two_factor
       delete 'remove/:email_id', action: 'remove_email', as: 'remove_email'
@@ -80,6 +81,8 @@ namespace :admin do
   resources :broadcast_messages, only: [:index, :edit, :create, :update, :destroy] do
     post :preview, on: :collection
   end
+
+  get :instance_review, to: 'instance_review#index'
 
   resource :health_check, controller: 'health_check', only: [:show]
   resource :background_jobs, controller: 'background_jobs', only: [:show]

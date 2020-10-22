@@ -80,6 +80,14 @@ module Types
           description: 'Get statistics on the instance',
           resolver: Resolvers::Admin::Analytics::InstanceStatistics::MeasurementsResolver
 
+    field :runner_platforms, Types::Ci::RunnerPlatformType.connection_type,
+      null: true, description: 'Supported runner platforms',
+      resolver: Resolvers::Ci::RunnerPlatformsResolver
+
+    field :runner_setup, Types::Ci::RunnerSetupType, null: true,
+      description: 'Get runner setup instructions',
+      resolver: Resolvers::Ci::RunnerSetupResolver
+
     def design_management
       DesignManagementObject.new(nil)
     end

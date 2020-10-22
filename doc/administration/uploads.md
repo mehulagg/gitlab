@@ -2,6 +2,35 @@
 
 Uploads represent all user data that may be sent to GitLab as a single file. As an example, avatars and notes' attachments are uploads. Uploads are integral to GitLab functionality, and therefore cannot be disabled.
 
+## Upload parameters
+
+> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/214785) in GitLab 13.5.
+> - It's [deployed behind a feature flag](../user/feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to disable it. **(CORE ONLY)**
+
+In 13.5 and later, upload parameters are passed [between Workhorse and GitLab Rails](../development/architecture.md#simplified-component-overview) differently than they
+were before.
+
+This change is deployed behind a feature flag that is **enabled by default**.
+
+If you experience any issues with upload,
+[GitLab administrators with access to the GitLab Rails console](./feature_flags.md)
+can opt to disable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:upload_middleware_jwt_params_handler)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:upload_middleware_jwt_params_handler)
+```
+
 ## Using local storage
 
 NOTE: **Note:**
@@ -58,7 +87,7 @@ This configuration relies on valid AWS credentials to be configured already.
 [Read more about using object storage with GitLab](object_storage.md).
 
 NOTE: **Note:**
-We recommend using the [consolidated object storage settings](object_storage.md#consolidated-object-storage-configuration). The following instructions apply to the original config format.
+We recommend using the [consolidated object storage settings](object_storage.md#consolidated-object-storage-configuration). The following instructions apply to the original configuration format.
 
 ## Object Storage Settings
 

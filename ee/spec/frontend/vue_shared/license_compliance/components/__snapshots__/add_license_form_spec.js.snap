@@ -1,53 +1,25 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AddLicenseForm template does not show radio button descriptions, if licenseComplianceDeniesMr feature flag is disabled 1`] = `
-<div
-  class="form-check"
+<gl-form-radio-stub
+  aria-describedby="js-approved-license-radio"
+  class=""
+  data-qa-selector="approved_license_radio"
+  value="approved"
 >
-  <input
-    aria-describedby="js-approved-license-radio"
-    class="form-check-input"
-    data-qa-selector="approved_license_radio"
-    id="js-approved-license-radio"
-    type="radio"
-    value="approved"
-  />
-   
-  <label
-    class="form-check-label pt-1"
-    for="js-approved-license-radio"
-  >
-    
-        Allow
-      
-  </label>
-   
+  Allow 
   <!---->
-</div>
+</gl-form-radio-stub>
 `;
 
 exports[`AddLicenseForm template does not show radio button descriptions, if licenseComplianceDeniesMr feature flag is disabled 2`] = `
-<div
-  class="form-check"
+<gl-form-radio-stub
+  aria-describedby="js-blacklisted-license-radio"
+  class=""
+  data-qa-selector="blacklisted_license_radio"
+  value="blacklisted"
 >
-  <input
-    aria-describedby="js-blacklisted-license-radio"
-    class="form-check-input"
-    data-qa-selector="blacklisted_license_radio"
-    id="js-blacklisted-license-radio"
-    type="radio"
-    value="blacklisted"
-  />
-   
-  <label
-    class="form-check-label pt-1"
-    for="js-blacklisted-license-radio"
-  >
-    
-        Deny
-      
-  </label>
-   
+  Deny 
   <!---->
-</div>
+</gl-form-radio-stub>
 `;

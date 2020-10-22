@@ -46,10 +46,6 @@ module Gitlab
         Feature.enabled?(:project_transactionless_destroy, project, default_enabled: false)
       end
 
-      def self.child_of_child_pipeline_enabled?(project)
-        ::Feature.enabled?(:ci_child_of_child_pipeline, project, default_enabled: true)
-      end
-
       def self.trace_overwrite?
         ::Feature.enabled?(:ci_trace_overwrite, type: :ops, default_enabled: false)
       end
@@ -63,12 +59,8 @@ module Gitlab
         ::Feature.enabled?(:ci_trace_log_invalid_chunks, project, type: :ops, default_enabled: false)
       end
 
-      def self.new_artifact_file_reader_enabled?(project)
-        ::Feature.enabled?(:ci_new_artifact_file_reader, project, default_enabled: true)
-      end
-
-      def self.one_dimensional_matrix_enabled?
-        ::Feature.enabled?(:one_dimensional_matrix, default_enabled: false)
+      def self.manual_bridges_enabled?(project)
+        ::Feature.enabled?(:ci_manual_bridges, project, default_enabled: true)
       end
     end
   end

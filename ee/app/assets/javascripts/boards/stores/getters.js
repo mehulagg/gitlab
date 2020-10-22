@@ -14,4 +14,11 @@ export default {
   getEpicById: state => epicId => {
     return state.epics.find(epic => epic.id === epicId);
   },
+
+  shouldUseGraphQL: state => {
+    return (
+      (gon?.features?.boardsWithSwimlanes && state.isShowingEpicsSwimlanes) ||
+      gon?.features?.graphqlBoardLists
+    );
+  },
 };

@@ -353,6 +353,7 @@
 .frontend:rules:compile-test-assets:
   rules:
     - changes: *code-backstage-qa-patterns
+    - <<: *if-merge-request-title-run-all-rspec
 
 .frontend:rules:compile-test-assets-as-if-foss:
   rules:
@@ -500,6 +501,7 @@
   rules:
     - <<: *if-default-refs
       changes: *code-backstage-qa-patterns
+    - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:ee-only-migration:
   rules:
@@ -645,6 +647,13 @@
     - <<: *if-master-schedule-2-hourly
     - <<: *if-merge-request-title-run-all-rspec
 
+.rails:rules:rspec-feature-flags:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - <<: *if-master-schedule-2-hourly
+    - <<: *if-merge-request-title-run-all-rspec
+
 .rails:rules:master-schedule-nightly--code-backstage:
   rules:
     - <<: *if-master-schedule-nightly
@@ -717,6 +726,14 @@
     - if: '$DAST_DISABLED || $GITLAB_FEATURES !~ /\bdast\b/'
       when: never
     - <<: *if-master-schedule-nightly
+      allow_failure: true
+
+.reports:rules:license_scanning:
+  rules:
+    - if: '$LICENSE_SCANNING_DISABLED || $GITLAB_FEATURES !~ /\blicense_scanning\b/'
+      when: never
+    - <<: *if-default-refs
+      changes: *code-backstage-qa-patterns
       allow_failure: true
 
 ################
@@ -876,6 +893,7 @@
     - <<: *if-default-refs
       changes: *code-backstage-patterns
       when: on_success
+    - <<: *if-merge-request-title-run-all-rspec
 
 .test-metadata:rules:update-tests-metadata:
   rules:

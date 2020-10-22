@@ -9,8 +9,8 @@ class ApplicationSetting < ApplicationRecord
 
   ignore_column :namespace_storage_size_limit, remove_with: '13.5', remove_after: '2020-09-22'
   ignore_column :instance_statistics_visibility_private, remove_with: '13.6', remove_after: '2020-10-22'
-  ignore_column :snowplow_iglu_registry_url, remove_with: '13.6', remove_after: '2020-11-22'
 
+  INSTANCE_REVIEW_MIN_USERS = 50
   GRAFANA_URL_ERROR_MESSAGE = 'Please check your Grafana URL setting in ' \
     'Admin Area > Settings > Metrics and profiling > Metrics - Grafana'
 
@@ -384,6 +384,9 @@ class ApplicationSetting < ApplicationRecord
   validates :raw_blob_request_limit,
             numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
+  validates :ci_jwt_signing_key,
+            rsa_key: true, allow_nil: true
+
   attr_encrypted :asset_proxy_secret_key,
                  mode: :per_attribute_iv,
                  key: Settings.attr_encrypted_db_key_base_truncated,
@@ -409,6 +412,7 @@ class ApplicationSetting < ApplicationRecord
   attr_encrypted :recaptcha_site_key, encryption_options_base_truncated_aes_256_gcm
   attr_encrypted :slack_app_secret, encryption_options_base_truncated_aes_256_gcm
   attr_encrypted :slack_app_verification_token, encryption_options_base_truncated_aes_256_gcm
+  attr_encrypted :ci_jwt_signing_key, encryption_options_base_truncated_aes_256_gcm
 
   before_validation :ensure_uuid!
 
@@ -435,6 +439,14 @@ class ApplicationSetting < ApplicationRecord
 
   def sourcegraph_url_is_com?
     !!(sourcegraph_url =~ /\Ahttps:\/\/(www\.)?sourcegraph\.com/)
+  end
+
+  def instance_review_permitted?
+    users_count = Rails.cache.fetch('limited_users_count', expires_in: 1.day) do
+      ::User.limit(INSTANCE_REVIEW_MIN_USERS + 1).count(:all)
+    end
+
+    users_count >= INSTANCE_REVIEW_MIN_USERS
   end
 
   def self.create_from_defaults

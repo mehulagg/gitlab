@@ -1,14 +1,32 @@
+import { THROUGHPUT_CHART_STRINGS } from 'ee/analytics/merge_request_analytics/constants';
+
 export const startDate = new Date('2020-05-01');
 export const endDate = new Date('2020-08-01');
 
 export const fullPath = 'gitlab-org/gitlab';
 
+// We should update our tests to use fixtures instead of hardcoded mock data.
+// https://gitlab.com/gitlab-org/gitlab/-/issues/270544
 export const throughputChartData = {
-  May: { count: 2, __typename: 'MergeRequestConnection' },
-  Jun: { count: 4, __typename: 'MergeRequestConnection' },
-  Jul: { count: 3, __typename: 'MergeRequestConnection' },
+  May_2020: { count: 2, __typename: 'MergeRequestConnection' },
+  Jun_2020: { count: 4, __typename: 'MergeRequestConnection' },
+  Jul_2020: { count: 3, __typename: 'MergeRequestConnection' },
   __typename: 'Project',
 };
+
+export const throughputChartNoData = {
+  May_2020: { count: 0, __typename: 'MergeRequestConnection' },
+  Jun_2020: { count: 0, __typename: 'MergeRequestConnection' },
+  Jul_2020: { count: 0, __typename: 'MergeRequestConnection' },
+  __typename: 'Project',
+};
+
+export const formattedThroughputChartData = [
+  {
+    data: [['May 2020', 2], ['Jun 2020', 4], ['Jul 2020', 3]],
+    name: THROUGHPUT_CHART_STRINGS.Y_AXIS_TITLE,
+  },
+];
 
 export const expectedMonthData = [
   {

@@ -705,22 +705,31 @@ RSpec.describe User do
   end
 
   describe "scopes" do
-    describe '.blocked' do
-      subject { described_class.blocked }
+    context 'blocked users' do
+      let_it_be(:active_user) { create(:user) }
+      let_it_be(:blocked_user) { create(:user, :blocked) }
+      let_it_be(:ldap_blocked_user) { create(:omniauth_user, :ldap_blocked) }
+      let_it_be(:blocked_pending_approval_user) { create(:user, :blocked_pending_approval) }
 
-      it 'returns only blocked users' do
-        active_user = create(:user)
-        blocked_user = create(:user, :blocked)
-        blocked_pending_approval_user = create(:user, :blocked_pending_approval)
-        ldap_blocked_user = create(:omniauth_user, :ldap_blocked)
+      describe '.blocked' do
+        subject { described_class.blocked }
 
-        expect(subject).to include(
-          blocked_user,
-          blocked_pending_approval_user,
-          ldap_blocked_user
-        )
+        it 'returns only blocked users' do
+          expect(subject).to include(
+            blocked_user,
+            ldap_blocked_user
+          )
 
-        expect(subject).not_to include(active_user)
+          expect(subject).not_to include(active_user, blocked_pending_approval_user)
+        end
+      end
+
+      describe '.blocked_pending_approval' do
+        subject { described_class.blocked_pending_approval }
+
+        it 'returns only pending approval users' do
+          expect(subject).to contain_exactly(blocked_pending_approval_user)
+        end
       end
     end
 
@@ -1752,6 +1761,12 @@ RSpec.describe User do
       expect(described_class.filter_items('blocked')).to include user
     end
 
+    it 'filters by blocked pending approval' do
+      expect(described_class).to receive(:blocked_pending_approval).and_return([user])
+
+      expect(described_class.filter_items('blocked_pending_approval')).to include user
+    end
+
     it 'filters by deactivated' do
       expect(described_class).to receive(:deactivated).and_return([user])
 
@@ -2780,6 +2795,14 @@ RSpec.describe User do
       let(:activity) { { current_sign_in_at: day_outside_minium_inactive_days_threshold } }
 
       it_behaves_like 'eligible for deactivation'
+    end
+
+    context 'a user who is internal' do
+      it 'returns false' do
+        internal_user = create(:user, :bot)
+
+        expect(internal_user.can_be_deactivated?).to be_falsey
+      end
     end
   end
 
@@ -4859,7 +4882,8 @@ RSpec.describe User do
             { state: 'blocked' },
             { user_type: :ghost },
             { user_type: :alert_bot },
-            { user_type: :support_bot }
+            { user_type: :support_bot },
+            { user_type: :security_bot }
           ]
         end
 
@@ -4914,6 +4938,7 @@ RSpec.describe User do
         'human'             | true
         'alert_bot'         | false
         'support_bot'       | false
+        'security_bot'      | false
       end
 
       with_them do
@@ -5025,9 +5050,11 @@ RSpec.describe User do
     it_behaves_like 'bot users', :alert_bot
     it_behaves_like 'bot users', :support_bot
     it_behaves_like 'bot users', :migration_bot
+    it_behaves_like 'bot users', :security_bot
     it_behaves_like 'bot users', :ghost
 
     it_behaves_like 'bot user avatars', :alert_bot, 'alert-bot.png'
     it_behaves_like 'bot user avatars', :support_bot, 'support-bot.png'
+    it_behaves_like 'bot user avatars', :security_bot, 'security-bot.png'
   end
 end

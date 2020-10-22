@@ -425,7 +425,7 @@ Check the [Troubleshooting section](#troubleshooting) before proceeding.
 
 1. Make sure you collect [`CONSUL_SERVER_NODES`](#consul-information), [`CONSUL_PASSWORD_HASH`](#consul-information), and [`PGBOUNCER_PASSWORD_HASH`](#pgbouncer-information) before executing the next step.
 
-1. One each node, edit the `/etc/gitlab/gitlab.rb` config file and replace values noted in the `# START user configuration` section as below:
+1. One each node, edit the `/etc/gitlab/gitlab.rb` configuration file and replace values noted in the `# START user configuration` section as below:
 
    ```ruby
    # Disable all components except PgBouncer and Consul agent
@@ -1445,7 +1445,7 @@ Considering these, you should carefully plan your PostgreSQL upgrade:
    sudo gitlab-ctl pg-upgrade -V 12
    ```
 
-CAUTION: **Warning:**
+NOTE: **Note:**
 Reverting PostgreSQL upgrade with `gitlab-ctl revert-pg-upgrade` has the same considerations as
-`gitlab-ctl pg-upgrade`. It can be complicated and may involve deletion of the data directory.
-If you need to do that, please contact GitLab support.
+`gitlab-ctl pg-upgrade`. You should follow the same procedure by first stopping the replicas,
+then reverting the leader, and finally reverting the replicas.

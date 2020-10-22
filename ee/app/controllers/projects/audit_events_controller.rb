@@ -18,6 +18,8 @@ class Projects::AuditEventsController < Projects::ApplicationController
   def index
     @is_last_page = events.last_page?
     @events = AuditEventSerializer.new.represent(events)
+
+    Gitlab::Tracking.event(self.class.name, 'search_audit_event')
   end
 
   private

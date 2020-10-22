@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Epics < Grape::API::Instance
+  class Epics < ::API::Base
     include PaginationParams
 
     before do

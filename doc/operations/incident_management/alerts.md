@@ -4,12 +4,16 @@ group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Create and manage alerts in GitLab
+# Alerts
+
+Alerts are a critical entity in your incident managment workflow. They represent a notable event that might indicate a service outage or disruption. GitLab provides a list view for triage and detail view for deeper investigation of what happened.
+
+## Alert List
 
 Users with at least Developer [permissions](../../user/permissions.md) can
-access the Alert Management list at **Operations > Alerts** in your project's
-sidebar. The Alert Management list displays alerts sorted by start time, but
-you can change the sort order by clicking the headers in the Alert Management list.
+access the Alert list at **Operations > Alerts** in your project's
+sidebar. The Alert list displays alerts sorted by start time, but
+you can change the sort order by clicking the headers in the Alert list.
 ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217745) in GitLab 13.1.)
 
 The alert list displays the following information:
@@ -37,69 +41,6 @@ TIP: **Tip:**
 Check out a live example available from the
 [`tanuki-inc` project page](https://gitlab-examples-ops-incident-setup-everyone-tanuki-inc.34.69.64.147.nip.io/)
 in GitLab to examine alerts in action.
-
-## Enable Alerts
-
-NOTE: **Note:**
-You need at least Maintainer [permissions](../../user/permissions.md) to enable
-the Alerts feature.
-
-There are several ways to accept alerts into your GitLab project. Enabling any
-of these methods enables the Alert list. After configuring alerts, visit
-**Operations > Alerts** in your project's sidebar to view the list of alerts.
-
-### Enable GitLab-managed Prometheus alerts
-
-You can install the GitLab-managed Prometheus application on your Kubernetes
-cluster. For more information, see
-[Managed Prometheus on Kubernetes](../../user/project/integrations/prometheus.md#managed-prometheus-on-kubernetes).
-When GitLab-managed Prometheus is installed, the Alerts list is also enabled.
-
-To populate the alerts with data, see
-[GitLab-Managed Prometheus instances](../metrics/alerts.md#managed-prometheus-instances).
-
-### Enable external Prometheus alerts
-
-You can configure an externally-managed Prometheus instance to send alerts
-to GitLab. To set up this configuration, read the
-[configuring Prometheus](../metrics/alerts.md#external-prometheus-instances)
-documentation. Activating the external Prometheus configuration also enables
-the Alerts list.
-
-To populate the alerts with data, see [External Prometheus instances](../metrics/alerts.md#external-prometheus-instances).
-
-### Enable a Generic Alerts endpoint
-
-GitLab provides the Generic Alerts endpoint so you can accept alerts from a
-third-party alerts service. Read the [instructions for toggling generic alerts](alert_integrations.md#configuration)
-to add this option. After configuring the endpoint, the Alerts list is enabled.
-
-To populate the alerts with data, see [Customizing the payload](alert_integrations.md#customizing-the-payload)
-for requests to the alerts endpoint.
-
-### Opsgenie integration **(PREMIUM)**
-
-> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
-
-You can monitor alerts using a GitLab integration with [Opsgenie](https://www.atlassian.com/software/opsgenie).
-
-NOTE: **Note:**
-If you enable the Opsgenie integration, you can't have other GitLab alert
-services, such as [Generic Alerts](generic_alerts.md) or Prometheus alerts,
-active at the same time.
-
-To enable Opsgenie integration:
-
-1. Sign in as a user with Maintainer or Owner [permissions](../../user/permissions.md).
-1. Navigate to **Operations > Alerts**.
-1. In the **Integrations** select box, select **Opsgenie**.
-1. Select the **Active** toggle.
-1. In the **API URL** field, enter the base URL for your Opsgenie integration,
-   such as `https://app.opsgenie.com/alert/list`.
-1. Select **Save changes**.
-
-After you enable the integration, navigate to the Alerts list page at
-**Operations > Alerts**, and then select **View alerts in Opsgenie**.
 
 ## Alert severity
 
@@ -135,22 +76,75 @@ page.
 Alerts provide **Overview** and **Alert details** tabs to give you the right
 amount of information you need.
 
-### Alert overview tab
-
-The **Overview** tab provides basic information about the alert:
-
-![Alert Detail Overview](./img/alert_detail_overview_v13_1.png)
-
 ### Alert details tab
 
-![Alert Full Details](./img/alert_detail_full_v13_1.png)
+The **Alert details** tab has two sections. The top section provides a short list of critical details such as the severity, start time, number of events, and originating monitorting tool. The second section displays the full alert payload.
 
-#### Update an alert's status
+### Metrics tab
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217768) in GitLab 13.2.
+
+The **Metrics** tab will display a metrics chart for alerts coming from Prometheus. If the alert originated from any other tool, the **Metrics** tab will be empty. To set up alerts for GitLab-managed Prometheus instances, see [Managed Prometheus instances](../metrics/alerts.md#managed-prometheus-instances). For externally-managed Prometheus instances, you will need to configure your alerting
+rules to display a chart in the alert. For information about how to configure
+your alerting rules, see [Embedding metrics based on alerts in incident issues](../metrics/embed.md#embedding-metrics-based-on-alerts-in-incident-issues). See
+[External Prometheus instances](../metrics/alerts.md#external-prometheus-instances)
+for information about setting up alerts for your self-managed Prometheus
+instance.
+
+To view the metrics for an alert:
+
+1. Sign in as a user with Developer or higher [permissions](../../user/permissions.md).
+1. Navigate to **Operations > Alerts**.
+1. Select the alert you want to view.
+1. Below the title of the alert, select the **Metrics** tab.
+
+![Alert Metrics View](img/alert_detail_metrics_v13_2.png)
+
+#### View an alert's logs
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/201846) in GitLab Ultimate 12.8. and [improved](https://gitlab.com/gitlab-org/gitlab/-/issues/217768) in GitLab 13.3.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/25455) to [GitLab Core](https://about.gitlab.com/pricing/) 12.9.
+
+Viewing logs from a metrics panel can be useful if you're triaging an
+application incident and need to [explore logs](../metrics/dashboards/index.md#chart-context-menu)
+from across your application. These logs help you understand what's affecting
+your application's performance and how to resolve any problems.
+
+To view the logs for an alert:
+
+1. Sign in as a user with Developer or higher [permissions](../../user/permissions.md).
+1. Navigate to **Operations > Alerts**.
+1. Select the alert you want to view.
+1. Below the title of the alert, select the **Metrics** tab.
+1. Select the [menu](../metrics/dashboards/index.md#chart-context-menu) of
+   the metric chart to view options.
+1. Select **View logs**.
+
+### Activity feed tab
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in GitLab 13.1.
+
+The **Activity feed** tab is a log of activity on the alert. When you take action on an alert, this is logged as a system note. This gives you a linear
+timeline of the alert's investigation and assignment history.
+
+The following actions will result in a system note:
+
+- [Updating the status of an alert](#update-an-alerts-status)
+- [Creating an incident based on an alert](#create-an-incident-from-an-alert)
+- [Assignment of an alert to a user](#assign-an-alert)
+
+![Alert Details Activity Feed](img/alert_detail_activity_feed_v13_5.png)
+
+## Alert actions
+
+There are different actions avilable in GitLab to help triage and respond to alerts.
+
+### Update an alert's status
 
 The Alert detail view enables you to update the Alert Status.
 See [Create and manage alerts in GitLab](./alerts.md) for more details.
 
-#### Create an issue from an alert
+### Create an incident from an alert
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217745) in GitLab 13.1.
 
@@ -163,18 +157,14 @@ Closing a GitLab issue associated with an alert changes the alert's status to
 Resolved. See [Create and manage alerts in GitLab](alerts.md) for more details
 about alert statuses.
 
-#### Update an alert's assignee
+### Assign an alert
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in GitLab 13.1.
 
-The Alert detail view allows users to update the Alert assignee.
-
 In large teams, where there is shared ownership of an alert, it can be
-difficult to track who is investigating and working on it. The Alert detail
-view enables you to update the Alert assignee:
+difficult to track who is investigating and working on it. Assigning alerts eases collaboration and delegation by indicating which user is owning the alert. GitLab supports only a single assignee per alert.
 
-NOTE: **Note:**
-GitLab supports only a single assignee per alert.
+To assign an alert:
 
 1. To display the list of current alerts, navigate to **Operations > Alerts**:
 
@@ -192,26 +182,11 @@ GitLab supports only a single assignee per alert.
 
    ![Alert Details View Assignee(s)](./img/alert_todo_assignees_v13_1.png)
 
-To remove an assignee, select **Edit** next to the **Assignee** dropdown menu
+After completing their portion of investigating or fixing the alert, users can
+unassign themselves from the alert. To remove an assignee, select **Edit** next to the **Assignee** dropdown menu
 and deselect the user from the list of assignees, or select **Unassigned**.
 
-#### Alert system notes
-
-> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in GitLab 13.1.
-
-When you take action on an alert, this is logged as a system note,
-which is visible in the Alert Details view. This gives you a linear
-timeline of the alert's investigation and assignment history.
-
-The following actions will result in a system note:
-
-- [Updating the status of an alert](#update-an-alerts-status)
-- [Creating an issue based on an alert](#create-an-issue-from-an-alert)
-- [Assignment of an alert to a user](#update-an-alerts-assignee)
-
-![Alert Details View System Notes](./img/alert_detail_system_notes_v13_1.png)
-
-#### Create a to do from an alert
+### Create a to do from an alert
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in GitLab 13.1.
 
@@ -229,87 +204,61 @@ Select the **To-Do List** **{todo-done}** in the navigation bar to view your cur
 
 ![Alert Details Added to do](./img/alert_detail_added_todo_v13_1.png)
 
-#### View an alert's metrics data
+## Link runbooks to alerts
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217768) in GitLab 13.2.
+> Runbook URLs [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39315) in GitLab 13.3.
 
-To view the metrics for an alert:
+When creating alerts from the metrics dashboard for
+[managed Prometheus instances](../metrics/alerts.md#managed-prometheus-instances),
+you can link a runbook. When the alert triggers, you can access the runbook through
+the [chart context menu](../metrics/dashboards/index.md#chart-context-menu) in the
+upper-right corner of the metrics chart, making it easy for you to locate and access
+the correct runbook:
 
-   1. Sign in as a user with Developer or higher [permissions](../../user/permissions.md).
-   1. Navigate to **Operations > Alerts**.
-   1. Select the alert you want to view.
-   1. Below the title of the alert, select the **Metrics** tab.
+![Linked Runbook in charts](img/link_runbooks_to_alerts_v13_5.png)
 
-![Alert Metrics View](img/alert_detail_metrics_v13_2.png)
+## View the environment that generated the alert
 
-For GitLab-managed Prometheus instances, metrics data is available for the
-alert, making it easy to see surrounding behavior. For information about
-setting up alerts, see [Managed Prometheus instances](../metrics/alerts.md#managed-prometheus-instances).
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232492) in GitLab 13.5.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-environment-link-in-alert-details). **(CORE ONLY)**
 
-For externally-managed Prometheus instances, you can configure your alerting
-rules to display a chart in the alert. For information about how to configure
-your alerting rules, see [Embedding metrics based on alerts in incident issues](../metrics/embed.md#embedding-metrics-based-on-alerts-in-incident-issues). See
-[External Prometheus instances](../metrics/alerts.md#external-prometheus-instances)
-for information about setting up alerts for your self-managed Prometheus
-instance.
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
 
-### Use cases for assigning alerts
+The environment information and the link are displayed in the [Alert Details tab](#alert-details-tab).
 
-Consider a team formed by different sections of monitoring, collaborating on a
-single application. After an alert surfaces, it's extremely important to route
-the alert to the team members who can address and resolve the alert.
+### Enable or disable Environment Link in Alert Details **(CORE ONLY)**
 
-Assigning Alerts eases collaboration and delegation. All assignees are shown in
-your team's work-flows, and all assignees receive notifications, simplifying
-communication and ownership of the alert.
+Viewing the environment is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
 
-After completing their portion of investigating or fixing the alert, users can
-unassign their account from the alert when their role is complete. You can
-update the alert on the [Alert list](./alerts.md) to reflect if the alert has
-been resolved.
+To enable it:
 
-### View an alert's logs
+```ruby
+Feature.enable(:expose_environment_path_in_alert_details)
+```
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217768) in GitLab 13.3.
+To enable for just a particular project:
 
-To view the logs for an alert:
+```ruby
+project = Project.find_by_full_path('your-group/your-project')
+Feature.enable(:expose_environment_path_in_alert_details, project)
+```
 
-   1. Sign in as a user with Developer or higher [permissions](../../user/permissions.md).
-   1. Navigate to **Operations > Alerts**.
-   1. Select the alert you want to view.
-   1. Below the title of the alert, select the **Metrics** tab.
-   1. Select the [menu](../metrics/dashboards/index.md#chart-context-menu) of
-      the metric chart to view options.
-   1. Select **View logs**.
+To disable it:
 
-For additional information, see [View logs from metrics panel](#view-logs-from-metrics-panel).
+```ruby
+Feature.disable(:expose_environment_path_in_alert_details)
+```
 
-### Embed metrics in incidents and issues
+To disable for just a particular project:
 
-You can embed metrics anywhere [GitLab Markdown](../../user/markdown.md) is
-used, such as descriptions, comments on issues, and merge requests. Embedding
-metrics helps you share them when discussing incidents or performance issues.
-You can output the dashboard directly into any issue, merge request, epic, or
-any other Markdown text field in GitLab by
-[copying and pasting the link to the metrics dashboard](../metrics/embed.md#embedding-gitlab-managed-kubernetes-metrics).
-
-You can embed both [GitLab-hosted metrics](../metrics/embed.md) and
-[Grafana metrics](../metrics/embed_grafana.md) in incidents and issue
-templates.
-
-#### Context menu
-
-You can view more details about an embedded metrics panel from the context
-menu. To access the context menu, select the **{ellipsis_v}** **More actions**
-dropdown box above the upper right corner of the panel. For a list of options,
-see [Chart context menu](../metrics/dashboards/index.md#chart-context-menu).
-
-##### View logs from metrics panel
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/201846) in GitLab Ultimate 12.8.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/25455) to [GitLab Core](https://about.gitlab.com/pricing/) 12.9.
-
-Viewing logs from a metrics panel can be useful if you're triaging an
-application incident and need to [explore logs](../metrics/dashboards/index.md#chart-context-menu)
-from across your application. These logs help you understand what's affecting
-your application's performance and how to resolve any problems.
+```ruby
+project = Project.find_by_full_path('your-group/your-project')
+Feature.disable(:expose_environment_path_in_alert_details, project)
+```

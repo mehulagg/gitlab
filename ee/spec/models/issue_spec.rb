@@ -12,6 +12,7 @@ RSpec.describe Issue do
 
     it { is_expected.to have_many(:resource_weight_events) }
     it { is_expected.to have_many(:resource_iteration_events) }
+    it { is_expected.to have_one(:issuable_sla) }
   end
 
   describe 'modules' do
@@ -128,6 +129,13 @@ RSpec.describe Issue do
         it 'returns only issues in selected epics' do
           expect(described_class.count).to eq 3
           expect(described_class.in_epics([epic1])).to eq [epic_issue1.issue]
+        end
+      end
+
+      describe '.not_in_epics' do
+        it 'returns only issues not in selected epics' do
+          expect(described_class.count).to eq 3
+          expect(described_class.not_in_epics([epic1])).to match_array([epic_issue2.issue, issue_no_epic])
         end
       end
 
@@ -800,6 +808,31 @@ RSpec.describe Issue do
       expect(issue.issue_type_supports?(:epics)).to be(true)
       expect(test_case.issue_type_supports?(:epics)).to be(false)
       expect(incident.issue_type_supports?(:epics)).to be(false)
+    end
+  end
+
+  describe '#sla_available?' do
+    let_it_be(:project) { create(:project) }
+    let_it_be_with_refind(:issue) { create(:incident, project: project) }
+
+    subject { issue.sla_available? }
+
+    where(:incident_type, :license_available, :sla_available) do
+      false | true  | false
+      true  | false | false
+      true  | true  | true
+    end
+
+    with_them do
+      before do
+        stub_licensed_features(incident_sla: license_available)
+        issue_type = incident_type ? 'incident' : 'issue'
+        issue.update(issue_type: issue_type)
+      end
+
+      it 'returns the expected value' do
+        expect(subject).to eq(sla_available)
+      end
     end
   end
 end

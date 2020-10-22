@@ -1,33 +1,41 @@
 import Vue from 'vue';
-import EditFeatureFlag from '~/feature_flags/components/edit_feature_flag.vue';
+import Vuex from 'vuex';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import createStore from './store/edit';
+import EditFeatureFlag from './components/edit_feature_flag.vue';
+
+Vue.use(Vuex);
 
 export default () => {
   const el = document.querySelector('#js-edit-feature-flag');
-  const { environmentsScopeDocsPath, strategyTypeDocsPagePath } = el.dataset;
+  const {
+    environmentsScopeDocsPath,
+    strategyTypeDocsPagePath,
+    endpoint,
+    featureFlagsPath,
+    environmentsEndpoint,
+    projectId,
+    featureFlagIssuesEndpoint,
+    userCalloutsPath,
+    userCalloutId,
+    showUserCallout,
+  } = el.dataset;
 
   return new Vue({
+    store: createStore({ endpoint, path: featureFlagsPath }),
     el,
-    components: {
-      EditFeatureFlag,
-    },
     provide: {
       environmentsScopeDocsPath,
       strategyTypeDocsPagePath,
+      environmentsEndpoint,
+      projectId,
+      featureFlagIssuesEndpoint,
+      userCalloutsPath,
+      userCalloutId,
+      showUserCallout: parseBoolean(showUserCallout),
     },
     render(createElement) {
-      return createElement('edit-feature-flag', {
-        props: {
-          endpoint: el.dataset.endpoint,
-          path: el.dataset.featureFlagsPath,
-          environmentsEndpoint: el.dataset.environmentsEndpoint,
-          projectId: el.dataset.projectId,
-          featureFlagIssuesEndpoint: el.dataset.featureFlagIssuesEndpoint,
-          userCalloutsPath: el.dataset.userCalloutsPath,
-          userCalloutId: el.dataset.userCalloutId,
-          showUserCallout: parseBoolean(el.dataset.showUserCallout),
-        },
-      });
+      return createElement(EditFeatureFlag);
     },
   });
 };

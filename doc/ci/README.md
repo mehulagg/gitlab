@@ -16,7 +16,7 @@ through the [continuous methodologies](introduction/index.md#introduction-to-cic
 - Continuous Delivery (CD)
 - Continuous Deployment (CD)
 
-NOTE: **Note:**
+TIP: **Tip:**
 Out-of-the-box management systems can decrease hours spent on maintaining toolchains by 10% or more.
 Watch our ["Mastering continuous software development"](https://about.gitlab.com/webcast/mastering-ci-cd/)
 webcast to learn about continuous methods and how GitLab’s built-in CI can help you simplify and scale software development.
@@ -24,7 +24,7 @@ webcast to learn about continuous methods and how GitLab’s built-in CI can hel
 ## Overview
 
 Continuous Integration works by pushing small code chunks to your
-application's code base hosted in a Git repository, and to every
+application's codebase hosted in a Git repository, and to every
 push, run a pipeline of scripts to build, test, and validate the
 code changes before merging them into the main branch.
 
@@ -73,13 +73,14 @@ to your needs:
 
 ![Use a `.gitlab-ci.yml` template](img/add_file_template_11_10.png)
 
+While building your `.gitlab-ci.yml`, you can use the [CI/CD configuration visualization](yaml/visualization.md) to facilate your writing experience.
+
 For a broader overview, see the [CI/CD getting started](quick_start/README.md) guide.
 
 Once you're familiar with how GitLab CI/CD works, see the
 [`.gitlab-ci.yml` full reference](yaml/README.md)
 for all the attributes you can set and use.
 
-NOTE: **Note:**
 GitLab CI/CD and [shared runners](runners/README.md#shared-runners) are enabled on GitLab.com and available for all users, limited only by the [pipeline quota](../user/gitlab_com/index.md#shared-runners).
 
 ## Concepts

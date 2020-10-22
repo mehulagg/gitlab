@@ -83,7 +83,11 @@ There are several ways to authenticate with the GitLab API:
 
 1. [OAuth2 tokens](#oauth2-tokens)
 1. [Personal access tokens](../user/profile/personal_access_tokens.md)
-1. [Project access tokens](../user/project/settings/project_access_tokens.md) **(CORE ONLY)**
+1. [Project access tokens](../user/project/settings/project_access_tokens.md)
+
+NOTE: **Note:**
+Project access tokens are supported for self-managed instances on Core and above. They are also supported on GitLab.com Bronze and above.
+
 1. [Session cookie](#session-cookie)
 1. [GitLab CI/CD job token](#gitlab-ci-job-token) **(Specific endpoints only)**
 
@@ -163,10 +167,11 @@ to authenticate with the API:
   - [Conan Repository](../user/packages/conan_repository/index.md)
   - [Container Registry](../user/packages/container_registry/index.md) (`$CI_REGISTRY_PASSWORD` is actually `$CI_JOB_TOKEN`, but this may change in the future)
   - [Go Proxy](../user/packages/go_proxy/index.md)
-  - [Maven Repository](../user/packages/maven_repository/index.md#authenticating-with-a-ci-job-token)
+  - [Maven Repository](../user/packages/maven_repository/index.md#authenticate-with-a-ci-job-token)
   - [NPM Repository](../user/packages/npm_registry/index.md#authenticating-with-a-ci-job-token)
   - [Nuget Repository](../user/packages/nuget_repository/index.md)
   - [PyPI Repository](../user/packages/pypi_repository/index.md#using-gitlab-ci-with-pypi-packages)
+  - [Generic packages](../user/packages/generic_packages/index.md#publish-a-generic-package-by-using-cicd)
 - [Get job artifacts](job_artifacts.md#get-job-artifacts)
 - [Pipeline triggers](pipeline_triggers.md) (via `token=` parameter)
 - [Release creation](releases/index.md#create-a-release)
@@ -373,22 +378,22 @@ curl --head --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.exampl
 The response will then be:
 
 ```http
-HTTP/1.1 200 OK
-Cache-Control: no-cache
-Content-Length: 1103
-Content-Type: application/json
-Date: Mon, 18 Jan 2016 09:43:18 GMT
-Link: <https://gitlab.example.com/api/v4/projects/8/issues/8/notes?page=1&per_page=3>; rel="prev", <https://gitlab.example.com/api/v4/projects/8/issues/8/notes?page=3&per_page=3>; rel="next", <https://gitlab.example.com/api/v4/projects/8/issues/8/notes?page=1&per_page=3>; rel="first", <https://gitlab.example.com/api/v4/projects/8/issues/8/notes?page=3&per_page=3>; rel="last"
-Status: 200 OK
-Vary: Origin
-X-Next-Page: 3
-X-Page: 2
-X-Per-Page: 3
-X-Prev-Page: 1
-X-Request-Id: 732ad4ee-9870-4866-a199-a9db0cde3c86
-X-Runtime: 0.108688
-X-Total: 8
-X-Total-Pages: 3
+HTTP/2 200 OK
+cache-control: no-cache
+content-length: 1103
+content-type: application/json
+date: Mon, 18 Jan 2016 09:43:18 GMT
+link: <https://gitlab.example.com/api/v4/projects/8/issues/8/notes?page=1&per_page=3>; rel="prev", <https://gitlab.example.com/api/v4/projects/8/issues/8/notes?page=3&per_page=3>; rel="next", <https://gitlab.example.com/api/v4/projects/8/issues/8/notes?page=1&per_page=3>; rel="first", <https://gitlab.example.com/api/v4/projects/8/issues/8/notes?page=3&per_page=3>; rel="last"
+status: 200 OK
+vary: Origin
+x-next-page: 3
+x-page: 2
+x-per-page: 3
+x-prev-page: 1
+x-request-id: 732ad4ee-9870-4866-a199-a9db0cde3c86
+x-runtime: 0.108688
+x-total: 8
+x-total-pages: 3
 ```
 
 #### Other pagination headers
@@ -397,12 +402,12 @@ GitLab also returns the following additional pagination headers:
 
 | Header          | Description                                   |
 | --------------- | --------------------------------------------- |
-| `X-Total`       | The total number of items                     |
-| `X-Total-Pages` | The total number of pages                     |
-| `X-Per-Page`    | The number of items per page                  |
-| `X-Page`        | The index of the current page (starting at 1) |
-| `X-Next-Page`   | The index of the next page                    |
-| `X-Prev-Page`   | The index of the previous page                |
+| `x-total`       | The total number of items                     |
+| `x-total-pages` | The total number of pages                     |
+| `x-per-page`    | The number of items per page                  |
+| `x-page`        | The index of the current page (starting at 1) |
+| `x-next-page`   | The index of the next page                    |
+| `X-prev-page`   | The index of the previous page                |
 
 NOTE: **Note:**
 For GitLab.com users, [some pagination headers may not be returned](../user/gitlab_com/index.md#pagination-response-headers).

@@ -30,6 +30,7 @@ const Api = {
   projectProtectedBranchesPath: '/api/:version/projects/:id/protected_branches',
   projectSearchPath: '/api/:version/projects/:id/search',
   projectMilestonesPath: '/api/:version/projects/:id/milestones',
+  projectIssuePath: '/api/:version/projects/:id/issues/:issue_iid',
   mergeRequestsPath: '/api/:version/merge_requests',
   groupLabelsPath: '/groups/:namespace_path/-/labels',
   issuableTemplatePath: '/:namespace_path/:project_path/templates/:type/:key',
@@ -54,6 +55,7 @@ const Api = {
   releaseLinkPath: '/api/:version/projects/:id/releases/:tag_name/assets/links/:link_id',
   mergeRequestsPipeline: '/api/:version/projects/:id/merge_requests/:merge_request_iid/pipelines',
   adminStatisticsPath: '/api/:version/application/statistics',
+  pipelineJobsPath: '/api/:version/projects/:id/pipelines/:pipeline_id/jobs',
   pipelineSinglePath: '/api/:version/projects/:id/pipelines/:pipeline_id',
   pipelinesPath: '/api/:version/projects/:id/pipelines/',
   createPipelinePath: '/api/:version/projects/:id/pipeline',
@@ -67,6 +69,7 @@ const Api = {
   usageDataIncrementUniqueUsersPath: '/api/:version/usage_data/increment_unique_users',
   featureFlagUserLists: '/api/:version/projects/:id/feature_flags_user_lists',
   featureFlagUserList: '/api/:version/projects/:id/feature_flags_user_lists/:list_iid',
+  billableGroupMembersPath: '/api/:version/groups/:id/billable_members',
 
   group(groupId, callback = () => {}) {
     const url = Api.buildUrl(Api.groupPath).replace(':id', groupId);
@@ -326,6 +329,14 @@ const Api = {
     });
   },
 
+  addProjectIssueAsTodo(projectId, issueIid) {
+    const url = Api.buildUrl(Api.projectIssuePath)
+      .replace(':id', encodeURIComponent(projectId))
+      .replace(':issue_iid', encodeURIComponent(issueIid));
+
+    return axios.post(`${url}/todo`);
+  },
+
   mergeRequests(params = {}) {
     const url = Api.buildUrl(Api.mergeRequestsPath);
 
@@ -375,7 +386,7 @@ const Api = {
   },
 
   commitMultiple(id, data) {
-    // see https://docs.gitlab.com/ce/api/commits.html#create-a-commit-with-multiple-files-and-actions
+    // see https://docs.gitlab.com/ee/api/commits.html#create-a-commit-with-multiple-files-and-actions
     const url = Api.buildUrl(Api.commitsPath).replace(':id', encodeURIComponent(id));
     return axios.post(url, JSON.stringify(data), {
       headers: {
@@ -599,6 +610,14 @@ const Api = {
     return axios.get(url);
   },
 
+  pipelineJobs(projectId, pipelineId) {
+    const url = Api.buildUrl(this.pipelineJobsPath)
+      .replace(':id', encodeURIComponent(projectId))
+      .replace(':pipeline_id', encodeURIComponent(pipelineId));
+
+    return axios.get(url);
+  },
+
   // Return all pipelines for a project or filter by query params
   pipelines(id, options = {}) {
     const url = Api.buildUrl(this.pipelinesPath).replace(':id', encodeURIComponent(id));
@@ -746,6 +765,26 @@ const Api = {
       .replace(':list_iid', listIid);
 
     return axios.delete(url);
+  },
+
+  fetchBillableGroupMembersList(namespaceId, options = {}, callback = () => {}) {
+    const url = Api.buildUrl(this.billableGroupMembersPath).replace(':id', namespaceId);
+    const defaults = {
+      per_page: DEFAULT_PER_PAGE,
+      page: 1,
+    };
+
+    return axios
+      .get(url, {
+        params: {
+          ...defaults,
+          ...options,
+        },
+      })
+      .then(({ data, headers }) => {
+        callback(data);
+        return { data, headers };
+      });
   },
 };
 

@@ -15,19 +15,20 @@ export default {
       type: Object,
     },
   },
-  translations: {
-    rolloutPercentageDescription: __('Enter a whole number between 0 and 100'),
+  i18n: {
+    rolloutPercentageDescription: __('Enter an integer number between 0 and 100'),
     rolloutPercentageInvalid: s__(
-      'FeatureFlags|Percent rollout must be a whole number between 0 and 100',
+      'FeatureFlags|Percent rollout must be an integer number between 0 and 100',
     ),
     rolloutPercentageLabel: s__('FeatureFlag|Percentage'),
   },
   computed: {
     isValid() {
-      return Number(this.percentage) >= 0 && Number(this.percentage) <= 100;
+      const percentageNum = Number(this.percentage);
+      return Number.isInteger(percentageNum) && percentageNum >= 0 && percentageNum <= 100;
     },
     percentage() {
-      return this.strategy?.parameters?.percentage ?? '';
+      return this.strategy?.parameters?.percentage ?? '100';
     },
   },
   methods: {
@@ -44,9 +45,9 @@ export default {
 </script>
 <template>
   <parameter-form-group
-    :label="$options.translations.rolloutPercentageLabel"
-    :description="$options.translations.rolloutPercentageDescription"
-    :invalid-feedback="$options.translations.rolloutPercentageInvalid"
+    :label="$options.i18n.rolloutPercentageLabel"
+    :description="isValid ? $options.i18n.rolloutPercentageDescription : ''"
+    :invalid-feedback="$options.i18n.rolloutPercentageInvalid"
     :state="isValid"
   >
     <template #default="{ inputId }">

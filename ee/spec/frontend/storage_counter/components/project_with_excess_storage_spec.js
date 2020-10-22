@@ -2,8 +2,8 @@ import { shallowMount } from '@vue/test-utils';
 import { GlLink } from '@gitlab/ui';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import ProjectWithExcessStorage from 'ee/storage_counter/components/project_with_excess_storage.vue';
+import { formatUsageSize } from 'ee/storage_counter/utils';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
-import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { projects } from '../mock_data';
 
 let wrapper;
@@ -43,7 +43,7 @@ describe('Storage Counter project component', () => {
   });
 
   it('renders formatted storage size', () => {
-    expect(wrapper.text()).toContain(numberToHumanSize(projects[0].statistics.storageSize));
+    expect(wrapper.text()).toContain(formatUsageSize(projects[0].statistics.storageSize));
   });
 
   it('does not render the warning icon if project is not in error state', () => {
@@ -81,7 +81,7 @@ describe('Storage Counter project component', () => {
       createComponent({ project: projects[1] });
     });
 
-    it('with error state background', () => {
+    it('with warning state background', () => {
       expect(findTableRow().classes('gl-bg-orange-50')).toBe(true);
     });
 

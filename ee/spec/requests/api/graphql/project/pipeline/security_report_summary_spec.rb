@@ -10,7 +10,6 @@ RSpec.describe 'Query.project(fullPath).pipeline(iid).securityReportSummary' do
   before_all do
     create(:ci_build, :success, name: 'dast_job', pipeline: pipeline, project: project) do |job|
       create(:ee_ci_job_artifact, :dast_large_scanned_resources_field, job: job, project: project)
-      create(:security_scan, scan_type: 'dast', scanned_resources_count: 26, build: job)
     end
     create(:ci_build, :success, name: 'sast_job', pipeline: pipeline, project: project) do |job|
       create(:ee_ci_job_artifact, :sast, job: job, project: project)

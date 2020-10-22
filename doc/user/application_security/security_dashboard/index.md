@@ -69,12 +69,15 @@ At the project level, the Security Dashboard displays the vulnerabilities merged
 to **Security & Compliance > Security Dashboard**. By default, the Security Dashboard displays all
 detected and confirmed vulnerabilities.
 
-The Security Dashboard first displays the total number of vulnerabilities by severity (for example,
+The Security Dashboard first displays the time at which the last pipeline completed on the project's
+default branch. There's also a link to view this in more detail.
+
+The Security Dashboard next displays the total number of vulnerabilities by severity (for example,
 Critical, High, Medium, Low, Info, Unknown). Below this, a table shows each vulnerability's status, severity,
 and description. Clicking a vulnerability takes you to its [Vulnerability Details](../vulnerabilities)
 page to view more information about that vulnerability.
 
-![Project Security Dashboard](img/project_security_dashboard_v13_4.png)
+![Project Security Dashboard](img/project_security_dashboard_v13_5.png)
 
 You can filter the vulnerabilities by one or more of the following:
 
@@ -183,8 +186,8 @@ The fields in the export include:
 - Details
 - Additional Info
 - Severity
-- [CVE](https://cve.mitre.org/)
-- [CWE](https://cwe.mitre.org/)
+- [CVE](https://cve.mitre.org/) (Common Vulnerabilities and Exposures)
+- [CWE](https://cwe.mitre.org/) (Common Weakness Enumeration)
 - Other Identifiers
 
 ![Export vulnerabilities](img/instance_security_dashboard_export_csv_v13_4.png)
@@ -243,11 +246,7 @@ To create an issue associated with the vulnerability, click the **Create Issue**
 Once you create the issue, the linked issue icon in the vulnerability list:
 
 - Indicates that an issue has been created for that vulnerability.
-- Shows a tooltip that contains a link to the issue and an icon whose
-  color indicates the issue's status:
-
-  - Open issues: green
-  - Closed issues: blue
+- Shows a tooltip that contains a link to the issue.
 
 ![Display attached issues](img/vulnerability_list_table_v13_4.png)
 
