@@ -167,9 +167,9 @@ RSpec.describe ApplicationSetting do
     end
 
     context 'when license presented' do
-      let(:max_active_user_count) { 20 }
+      let_it_be(:max_active_user_count) { 20 }
 
-      before do
+      before_all do
         create_current_license({ restrictions: { active_user_count: max_active_user_count } })
       end
 
