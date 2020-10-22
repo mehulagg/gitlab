@@ -115,6 +115,7 @@ class License < ApplicationRecord
     smartcard_auth
     swimlanes
     group_timelogs
+    terraform_state_history
     type_of_work_analytics
     minimal_access_role
     unprotection_restrictions

@@ -18660,6 +18660,31 @@ type TerraformState {
   Timestamp the Terraform state was updated
   """
   updatedAt: Time!
+
+  """
+  Version history of the Terraform state file
+  """
+  versions(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): TerraformStateVersionConnection!
 }
 
 """
@@ -18722,6 +18747,41 @@ type TerraformStateVersion {
   Timestamp the version was updated
   """
   updatedAt: Time!
+}
+
+"""
+The connection type for TerraformStateVersion.
+"""
+type TerraformStateVersionConnection {
+  """
+  A list of edges.
+  """
+  edges: [TerraformStateVersionEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [TerraformStateVersion]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type TerraformStateVersionEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: TerraformStateVersion
 }
 
 """
