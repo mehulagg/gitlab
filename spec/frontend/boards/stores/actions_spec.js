@@ -326,6 +326,10 @@ describe('updateList', () => {
 
 describe('deleteList', () => {
   let state;
+  const initialBoardListsState = {
+    'gid://gitlab/List/1': mockListsWithModel[0],
+    'gid://gitlab/List/2': mockListsWithModel[1],
+  };
   const list = mockLists[0];
   const listId = list.id;
   const mutationVariables = {
@@ -337,7 +341,7 @@ describe('deleteList', () => {
 
   beforeEach(() => {
     state = {
-      boardLists: mockLists,
+      boardLists: initialBoardListsState,
     };
   });
 
@@ -371,7 +375,7 @@ describe('deleteList', () => {
     expect(gqlClient.mutate).toHaveBeenCalledWith(mutationVariables);
     expect(commit.mock.calls).toEqual([
       [types.REMOVE_LIST, listId],
-      [types.REMOVE_LIST_FAILURE, mockLists],
+      [types.REMOVE_LIST_FAILURE, initialBoardListsState],
     ]);
   });
 });
