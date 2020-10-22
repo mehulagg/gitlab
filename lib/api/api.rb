@@ -7,7 +7,9 @@ module API
     LOG_FILENAME = Rails.root.join("log", "api_json.log")
 
     NO_SLASH_URL_PART_REGEX = %r{[^/]+}.freeze
+    EMAIL_OR_EMAIL_LIST_REGEX = %r{^([\w+-.%]+@[\w.-]+\.[A-Za-z]{2,4})(,[\w+-.%]+@[\w.-]+\.[A-Za-z]{2,4})*$}.freeze
     NAMESPACE_OR_PROJECT_REQUIREMENTS = { id: NO_SLASH_URL_PART_REGEX }.freeze
+    EMAIL_OR_EMAIL_LIST_REQUIREMENTS = { email: EMAIL_OR_EMAIL_LIST_REGEX }.freeze
     COMMIT_ENDPOINT_REQUIREMENTS = NAMESPACE_OR_PROJECT_REQUIREMENTS.merge(sha: NO_SLASH_URL_PART_REGEX).freeze
     USER_REQUIREMENTS = { user_id: NO_SLASH_URL_PART_REGEX }.freeze
     LOG_FILTERS = ::Rails.application.config.filter_parameters + [/^output$/]
@@ -171,6 +173,7 @@ module API
       mount ::API::ImportBitbucketServer
       mount ::API::ImportGithub
       mount ::API::IssueLinks
+      mount ::API::Invitations
       mount ::API::Issues
       mount ::API::JobArtifacts
       mount ::API::Jobs
