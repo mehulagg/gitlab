@@ -12,10 +12,13 @@ module EE
 
     override :read_only_message
     def read_only_message
-      return maintenance_mode_message if maintenance_mode?
-      return geo_secondary_read_only_message if ::Gitlab::Geo.secondary?
+      message = ::Gitlab::Geo.secondary? ? geo_secondary_read_only_message : super
 
-      super
+      return message unless maintenance_mode?
+
+      return maintenance_mode_message.concat(message) if message
+
+      maintenance_mode_message
     end
 
     def maintenance_mode_message

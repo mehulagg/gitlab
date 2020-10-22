@@ -33,6 +33,15 @@ RSpec.describe ApplicationHelper do
 
             expect(helper.read_only_message).to match(/#{custom_message}/)
           end
+
+          context 'when database is read-only' do
+            it 'stacks read-only and maintenance mode messages' do
+              expect(Gitlab::Database).to receive(:read_only?).twice { true }
+
+              expect(helper.read_only_message).to match('You are on a read-only GitLab instance')
+              expect(helper.read_only_message).to match(/#{described_class::DEFAULT_MAINTENANCE_MODE_MESSAGE}/)
+            end
+          end
         end
 
         context 'disabled' do
@@ -41,6 +50,18 @@ RSpec.describe ApplicationHelper do
 
             expect(helper.read_only_message).to be_nil
           end
+        end
+      end
+    end
+
+    context 'on a geo secondary' do
+      context 'maintenance mode on' do
+        it 'returns messages for both' do
+          expect(Gitlab::Geo).to receive(:secondary?).twice { true }
+          stub_application_setting(maintenance_mode: true)
+
+          expect(helper.read_only_message).to match(/you must visit the primary site/)
+          expect(helper.read_only_message).to match(/#{described_class::DEFAULT_MAINTENANCE_MODE_MESSAGE}/)
         end
       end
     end
