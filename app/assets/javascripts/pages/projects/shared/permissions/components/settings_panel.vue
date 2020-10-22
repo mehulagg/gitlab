@@ -68,6 +68,11 @@ export default {
       required: false,
       default: false,
     },
+    analyticsAvailable: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     visibilityHelpPath: {
       type: String,
       required: false,
@@ -132,6 +137,7 @@ export default {
       snippetsAccessLevel: featureAccessLevel.EVERYONE,
       pagesAccessLevel: featureAccessLevel.EVERYONE,
       metricsDashboardAccessLevel: featureAccessLevel.PROJECT_MEMBERS,
+      analyticsAccessLevel: featureAccessLevel.EVERYONE,
       containerRegistryEnabled: true,
       lfsEnabled: true,
       requestAccessEnabled: true,
@@ -234,6 +240,10 @@ export default {
           featureAccessLevel.PROJECT_MEMBERS,
           this.metricsDashboardAccessLevel,
         );
+        this.analyticsAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.analyticsAccessLevel,
+        );
         if (this.pagesAccessLevel === featureAccessLevel.EVERYONE) {
           // When from Internal->Private narrow access for only members
           this.pagesAccessLevel = featureAccessLevel.PROJECT_MEMBERS;
@@ -255,6 +265,8 @@ export default {
           this.snippetsAccessLevel = featureAccessLevel.EVERYONE;
         if (this.pagesAccessLevel === featureAccessLevel.PROJECT_MEMBERS)
           this.pagesAccessLevel = featureAccessLevel.EVERYONE;
+        if (this.analyticsAccessLevel === featureAccessLevel.PROJECT_MEMBERS)
+          this.analyticsAccessLevel = featureAccessLevel.EVERYONE;
         if (this.metricsDashboardAccessLevel === featureAccessLevel.PROJECT_MEMBERS)
           this.metricsDashboardAccessLevel = featureAccessLevel.EVERYONE;
         this.highlightChanges();
@@ -481,6 +493,17 @@ export default {
           />
         </project-setting-row>
       </div>
+      <project-setting-row
+        ref="analytics-settings"
+        :label="s__('ProjectSettings|Analytics')"
+        :help-text="s__('ProjectSettings|???')"
+      >
+        <project-feature-setting
+          v-model="analyticsAccessLevel"
+          :options="featureAccessLevelOptions"
+          name="project[project_feature_attributes][analytics_access_level]"
+        />
+      </project-setting-row>
       <project-setting-row
         ref="wiki-settings"
         :label="s__('ProjectSettings|Wiki')"

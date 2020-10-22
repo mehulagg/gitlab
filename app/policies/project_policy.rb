@@ -147,6 +147,7 @@ class ProjectPolicy < BasePolicy
     builds
     pages
     metrics_dashboard
+    analytics
   ]
 
   features.each do |f|
@@ -422,6 +423,10 @@ class ProjectPolicy < BasePolicy
 
   rule { snippets_disabled }.policy do
     prevent(*create_read_update_admin_destroy(:snippet))
+  end
+
+  rule { analytics_disabled }.policy do
+    prevent(:read_product_analytics)
   end
 
   rule { wiki_disabled }.policy do
