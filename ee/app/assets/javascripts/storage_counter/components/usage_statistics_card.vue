@@ -11,7 +11,7 @@ export default {
     link: {
       type: Object,
       required: false,
-      default: () => ({ text: '', url: '' }),
+      default: null,
     },
     description: {
       type: String,
@@ -60,7 +60,7 @@ export default {
     <p class="gl-border-b-2 gl-border-b-solid gl-border-b-gray-100 gl-font-weight-bold gl-pb-3">
       {{ description }}
     </p>
-    <p class="gl-mb-0">
+    <p v-if="link" class="gl-mb-0">
       <slot v-bind="{ link }" name="link">
         <gl-link target="_blank" :href="link.url">
           <span class="text-truncate">{{ link.text }}</span>

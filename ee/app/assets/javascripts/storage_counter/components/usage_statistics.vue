@@ -20,20 +20,12 @@ export default {
       return {
         usage: this.formatSize(this.rootStorageStatistics.totalRepositorySize),
         description: s__('UsageQuota|Total namespace storage used'),
-        link: {
-          text: s__('UsageQuota|Learn more about usage quotas'),
-          url: '#',
-        },
       };
     },
     excessUsage() {
       return {
         usage: this.formatSize(this.rootStorageStatistics.totalRepositorySizeExcess),
         description: s__('UsageQuota|Total excess storage used'),
-        link: {
-          text: s__('UsageQuota|Learn more about excess storage usage'),
-          url: '#',
-        },
       };
     },
     purchasedUsage() {
