@@ -256,41 +256,41 @@ Put files for a specific product area into the related folder:
 
 Refer to the following items when working with directories and files:
 
-- When you create a new directory, always start with an `index.md` file.
-  Don't use another file name and _do not_ create `README.md` files.
-- _Do not_ use special characters and spaces, or capital letters in file
-  names, directory names, branch names, and anything that generates a path.
-- When creating or renaming a file or directory and it has more than one word
-  in its name, use underscores (`_`) instead of spaces or dashes. For example,
-  proper naming would be `import_project/import_from_github.md`. This applies
-  to both image files and Markdown files.
-- For image files, do not exceed 100KB.
-- Do not upload video files to the product repositories.
-  [Link or embed videos](#videos) instead.
-- There are four main directories: `user`, `administration`, `api`, and
-  `development`.
-- The `doc/user/` directory has five main subdirectories: `project/`, `group/`,
-  `profile/`, `dashboard/` and `admin_area/`.
-  - `doc/user/project/` should contain all project related documentation.
-  - `doc/user/group/` should contain all group related documentation.
-  - `doc/user/profile/` should contain all profile related documentation.
-    Every page you would navigate under `/profile` should have its own document,
-    for example, `account.md`, `applications.md`, or `emails.md`.
-  - `doc/user/dashboard/` should contain all dashboard related documentation.
-  - `doc/user/admin_area/` should contain all admin related documentation
-    describing what can be achieved by accessing GitLab's admin interface
-    (_not to be confused with `doc/administration` where server access is
-    required_).
-    - Every category under `/admin/application_settings/` should have its
+1. When you create a new directory, always start with an `index.md` file.
+   Don't use another file name and _do not_ create `README.md` files.
+1.  _Do not_ use special characters and spaces, or capital letters in file
+   names, directory names, branch names, and anything that generates a path.
+1.  When creating or renaming a file or directory and it has more than one word
+   in its name, use underscores (`_`) instead of spaces or dashes. For example,
+   proper naming would be `import_project/import_from_github.md`. This applies
+   to both image files and Markdown files.
+1. For image files, do not exceed 100KB.
+1. Do not upload video files to the product repositories.
+   [Link or embed videos](#videos) instead.
+1. There are four main directories: `user`, `administration`, `api`, and
+   `development`.
+1. The `doc/user/` directory has five main subdirectories: `project/`, `group/`,
+   `profile/`, `dashboard/` and `admin_area/`.
+   - `doc/user/project/` should contain all project related documentation.
+   - `doc/user/group/` should contain all group related documentation.
+   - `doc/user/profile/` should contain all profile related documentation.
+     Every page you would navigate under `/profile` should have its own document,
+     for example, `account.md`, `applications.md`, or `emails.md`.
+   - `doc/user/dashboard/` should contain all dashboard related documentation.
+   - `doc/user/admin_area/` should contain all admin related documentation
+     describing what can be achieved by accessing GitLab's admin interface
+     (_not to be confused with `doc/administration` where server access is
+     required_).
+     - Every category under `/admin/application_settings/` should have its
       own document located at `doc/user/admin_area/settings/`. For example,
       the **Visibility and Access Controls** category should have a document
       located at `doc/user/admin_area/settings/visibility_and_access_controls.md`.
-- The `doc/topics/` directory holds topic-related technical content. Create
-  `doc/topics/topic_name/subtopic_name/index.md` when subtopics become necessary.
-  General user- and admin- related documentation, should be placed accordingly.
-- The directories `/workflow/`, `/university/`, and `/articles/` have been
-  _deprecated_ and the majority their documentation has been moved to their
-  correct location in small iterations.
+1. The `doc/topics/` directory holds topic-related technical content. Create
+   `doc/topics/topic_name/subtopic_name/index.md` when subtopics become necessary.
+   General user- and admin- related documentation, should be placed accordingly.
+1. The directories `/workflow/`, `/university/`, and `/articles/` have been
+   _deprecated_ and the majority their documentation has been moved to their
+   correct location in small iterations.
 
 If you're unsure where to place a document or a content addition, this shouldn't
 stop you from authoring and contributing. Use your best judgment, and then ask
