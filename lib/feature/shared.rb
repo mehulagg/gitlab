@@ -6,6 +6,7 @@
 
 class Feature
   module Shared
+    # TODO: defines if a feature flag type is a draft, and should be hidden from all interfaces, TODOs are meant to be removed
     # optional: defines if a on-disk definition is required for this feature flag type
     # rollout_issue: defines if `bin/feature-flag` asks for rollout issue
     # default_enabled: defines a default state of a feature flag when created by `bin/feature-flag`
@@ -37,6 +38,7 @@ class Feature
       },
       licensed: {
         description: 'Permanent feature flags used to temporarily disable licensed features.',
+        TODO: true,
         optional: true,
         rollout_issue: false,
         ee_only: true,
