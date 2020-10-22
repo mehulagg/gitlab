@@ -30,6 +30,13 @@ repository is too large the import can timeout.
 
 There is also the option of [connecting your external repository to get CI/CD benefits](../../../ci/ci_cd_for_external_repos/index.md). **(PREMIUM)**
 
+
+## LFS authentication
+
+When importing a project that contains LFS objects, if the project has an
+`.lfsconfig` file with an URL host different from the repository URL host,
+LFS files wont be downloaded.
+
 ## Migrating from self-managed GitLab to GitLab.com
 
 If you only need to migrate Git repositories, you can [import each project by URL](repo_by_url.md). Issues and merge requests can't be imported.
