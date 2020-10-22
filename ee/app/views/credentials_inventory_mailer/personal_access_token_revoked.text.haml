@@ -1,0 +1,12 @@
+The following Personal Access Token was revoked by an administrator, #{ @revoked_by.username }.
+
+= @token.name
+
+Created on #{ @token.created_at.to_date.to_s(:medium) }
+
+- if @token.last_used_at
+  Last used #{ time_ago_in_words(@token.last_used_at) } ago
+
+Scopes: #{ @token.scopes.join(', ') }
+
+You can create a new Personal Access Token by visiting #{ profile_personal_access_tokens_url }

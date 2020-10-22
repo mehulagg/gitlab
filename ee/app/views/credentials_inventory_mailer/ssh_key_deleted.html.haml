@@ -1,0 +1,14 @@
+%p
+  The following SSH key was deleted by an administrator, #{ @deleted_by.username }.
+
+%ul
+  %li
+    = @key.title
+  %li
+    Created on #{ @key.created_at.to_date.to_s(:medium) }
+  - if @key.last_used_at
+    %li
+      Last used #{ time_ago_in_words(@key.last_used_at) } ago
+
+%p
+  You can create a new #{ link_to 'SSH key', profile_keys_url }.

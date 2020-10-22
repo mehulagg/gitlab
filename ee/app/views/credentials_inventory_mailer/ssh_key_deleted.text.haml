@@ -1,0 +1,10 @@
+The following SSH key was deleted by an administrator, #{ @deleted_by.username }.
+
+= @key.title
+
+Created on #{ @key.created_at.to_date.to_s(:medium) }
+
+- if @key.last_used_at
+  Last used #{ time_ago_in_words(@key.last_used_at) } ago
+
+You can create a new SSH key by visiting #{ profile_keys_url }

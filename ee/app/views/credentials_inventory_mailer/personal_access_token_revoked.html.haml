@@ -1,0 +1,16 @@
+%p
+  The following Personal Access Token was revoked by an administrator, #{ @revoked_by.username }.
+
+%ul
+  %li
+    = @token.name
+  %li
+    Created on #{ @token.created_at.to_date.to_s(:medium) }
+  - if @token.last_used_at
+    %li
+      Last used #{ time_ago_in_words(@token.last_used_at) } ago
+  %li
+    Scopes: #{ @token.scopes.join(', ') }
+
+%p
+  You can create a new #{ link_to 'Personal Access Token', profile_personal_access_tokens_url }.
