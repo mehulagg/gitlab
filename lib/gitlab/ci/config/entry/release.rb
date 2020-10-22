@@ -12,8 +12,9 @@ module Gitlab
           include ::Gitlab::Config::Entry::Validatable
           include ::Gitlab::Config::Entry::Attributable
 
-          ALLOWED_KEYS = %i[tag_name name description ref released_at milestones assets].freeze
-          attributes %i[tag_name name ref milestones assets].freeze
+          ALLOWED_KEYS = %i[tag_name name description ref package_name upload_dir released_at milestones assets].freeze
+          PACKAGE_NAME_ERROR_MESSAGE = "can contain only lowercase letters (a-z), uppercase letter (A-Z), numbers (0-9), dots (.), hyphens (-), or underscores (_)"
+          attributes %i[tag_name name ref package_name milestones assets].freeze
           attr_reader :released_at
 
           # Attributable description conflicts with
@@ -32,6 +33,7 @@ module Gitlab
             validates :config, allowed_keys: ALLOWED_KEYS
             validates :tag_name, type: String, presence: true
             validates :description, type: String, presence: true
+            validates :package_name, format: { with: API::API::NO_SLASH_URL_PART_REGEX, message: PACKAGE_NAME_ERROR_MESSAGE }, allow_blank: true
             validates :milestones, array_of_strings_or_string: true, allow_blank: true
             validate do
               next unless config[:released_at]

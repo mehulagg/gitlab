@@ -88,6 +88,32 @@ RSpec.describe Gitlab::Ci::Config::Entry::Release do
       it_behaves_like 'a valid entry'
     end
 
+    context "when value includes 'package_name' keyword" do
+      let(:config) do
+        {
+          tag_name: 'v0.06',
+          description: "./release_changelog.txt",
+          name: "Release $CI_TAG_NAME",
+          package_name: 'myawesomepackage'
+        }
+      end
+
+      it_behaves_like 'a valid entry'
+    end
+
+    context "when value includes 'upload_dir' keyword" do
+      let(:config) do
+        {
+          tag_name: 'v0.06',
+          description: "./release_changelog.txt",
+          name: "Release $CI_TAG_NAME",
+          upload_dir: "./bin/"
+        }
+      end
+
+      it_behaves_like 'a valid entry'
+    end
+
     context "when value includes 'milestones' keyword" do
       let(:config) do
         {
@@ -224,6 +250,12 @@ RSpec.describe Gitlab::Ci::Config::Entry::Release do
           let(:config) { { ref: 'invalid\branch' } }
 
           it_behaves_like 'reports error', 'release ref must be a valid ref'
+        end
+
+        context 'when `package_name` is not valid' do
+          let(:config) { { package_name: 'with a space' } }
+
+          it_behaves_like 'reports error', 'can contain only lowercase letters (a-z), uppercase letter (A-Z), numbers (0-9), dots (.), hyphens (-), or underscores (_)'
         end
 
         context 'when `milestones` is not an array of strings' do

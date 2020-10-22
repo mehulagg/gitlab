@@ -1,0 +1,5 @@
+---
+title: Extend the `release:` keyword to support the Generic Package registry
+merge_request: 45876
+author:
+type: added
