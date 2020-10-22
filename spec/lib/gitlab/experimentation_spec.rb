@@ -2,6 +2,31 @@
 
 require 'spec_helper'
 
+# This is temporary while https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45733 gets rolled out.
+# TODO: clean this up once the MR has been merged.
+RSpec.describe Gitlab::Experimentation::EXPERIMENTS do
+  it 'temporarily ensures we know what experiments exist for backwards compatibility' do
+    known_experiments = [
+      :signup_flow,
+      :onboarding_issues,
+      :suggest_pipeline,
+      :ci_notification_dot,
+      :upgrade_link_in_user_menu_a,
+      :invite_members_version_a,
+      :invite_members_version_b,
+      :new_create_project_ui,
+      :contact_sales_btn_in_app,
+      :customize_homepage,
+      :invite_email,
+      :invitation_reminders,
+      :group_only_trials,
+      :default_to_issues_board
+    ]
+
+    expect(described_class.keys).to match(known_experiments)
+  end
+end
+
 RSpec.describe Gitlab::Experimentation, :snowplow do
   before do
     stub_const('Gitlab::Experimentation::EXPERIMENTS', {
