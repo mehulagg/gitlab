@@ -118,7 +118,7 @@ Your custom dashboard is available at `https://example.com/project/-/metrics/cus
 
 Users with project Maintainer or Administrator
 [permissions](../../../user/permissions.md#project-members-permissions)
-can manage [the settings](dashboards/settings.md) for your metrics dashboard.
+can manage [the settings](settings.md) for your metrics dashboard.
 
 ## Chart Context Menu
 
