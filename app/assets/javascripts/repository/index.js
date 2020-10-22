@@ -54,21 +54,25 @@ export default function setupVueRepositoryList() {
     const query = window.gl.startup_graphql_calls.find(
       call => call.operationName === 'pathLastCommit',
     );
-    query.fetchCall
-      .then(res => res.json())
-      .then(res => {
-        apolloProvider.clients.defaultClient.writeQuery({
-          query: pathLastCommitQuery,
-          data: res.data,
-          variables: {
-            projectPath,
-            ref,
-            path: currentRoutePath,
-          },
-        });
-      })
-      .catch(() => {})
-      .finally(() => initLastCommitApp());
+    if (query) {
+      query.fetchCall
+        .then(res => res.json())
+        .then(res => {
+          apolloProvider.clients.defaultClient.writeQuery({
+            query: pathLastCommitQuery,
+            data: res.data,
+            variables: {
+              projectPath,
+              ref,
+              path: currentRoutePath,
+            },
+          });
+        })
+        .catch(() => {})
+        .finally(() => initLastCommitApp());
+    } else {
+      initLastCommitApp();
+    }
   } else {
     initLastCommitApp();
   }
@@ -124,19 +128,23 @@ export default function setupVueRepositoryList() {
       const query = window.gl.startup_graphql_calls.find(
         call => call.operationName === 'getPermissions',
       );
-      query.fetchCall
-        .then(res => res.json())
-        .then(res => {
-          apolloProvider.clients.defaultClient.writeQuery({
-            query: permissionsQuery,
-            data: res.data,
-            variables: {
-              projectPath,
-            },
-          });
-        })
-        .catch(() => {})
-        .finally(() => initBreadcrumbsApp());
+      if (query) {
+        query.fetchCall
+          .then(res => res.json())
+          .then(res => {
+            apolloProvider.clients.defaultClient.writeQuery({
+              query: permissionsQuery,
+              data: res.data,
+              variables: {
+                projectPath,
+              },
+            });
+          })
+          .catch(() => {})
+          .finally(() => initBreadcrumbsApp());
+      } else {
+        initBreadcrumbsApp();
+      }
     } else {
       initBreadcrumbsApp();
     }
@@ -199,23 +207,27 @@ export default function setupVueRepositoryList() {
 
   if (window.gl.startup_graphql_calls) {
     const query = window.gl.startup_graphql_calls.find(call => call.operationName === 'getFiles');
-    query.fetchCall
-      .then(res => res.json())
-      .then(res => {
-        apolloProvider.clients.defaultClient.writeQuery({
-          query: filesQuery,
-          data: res.data,
-          variables: {
-            projectPath,
-            ref,
-            path: currentRoutePath || '/',
-            nextPageCursor: '',
-            pageSize: 100,
-          },
-        });
-      })
-      .catch(() => {})
-      .finally(() => initTreeListApp());
+    if (query) {
+      query.fetchCall
+        .then(res => res.json())
+        .then(res => {
+          apolloProvider.clients.defaultClient.writeQuery({
+            query: filesQuery,
+            data: res.data,
+            variables: {
+              projectPath,
+              ref,
+              path: currentRoutePath || '/',
+              nextPageCursor: '',
+              pageSize: 100,
+            },
+          });
+        })
+        .catch(() => {})
+        .finally(() => initTreeListApp());
+    } else {
+      initTreeListApp();
+    }
   } else {
     initTreeListApp();
   }
