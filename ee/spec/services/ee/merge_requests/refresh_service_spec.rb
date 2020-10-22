@@ -75,13 +75,11 @@ RSpec.describe MergeRequests::RefreshService do
       subject { service.execute(oldrev, newrev, "refs/heads/master") }
 
       let(:enable_code_owner) { true }
-      let(:enable_target_approvers) { true }
       let!(:protected_branch) { create(:protected_branch, name: 'master', project: project, code_owner_approval_required: true) }
       let(:newrev) { TestEnv::BRANCH_SHA['with-codeowners'] }
 
       before do
-        stub_feature_flags(update_target_approvers: enable_target_approvers, code_owners: enable_code_owner)
-        stub_licensed_features(code_owner_approval_required: true)
+        stub_licensed_features(code_owner_approval_required: true, code_owners: enable_code_owner)
       end
 
       context 'when the feature flags are enabled' do
@@ -133,14 +131,8 @@ RSpec.describe MergeRequests::RefreshService do
         end
       end
 
-      context 'when update_target_approvers is disabled' do
-        let(:enable_code_owner) { false }
-
-        it_behaves_like 'does not refresh the code owner rules'
-      end
-
       context 'when code_owners is disabled' do
-        let(:enable_target_approvers) { false }
+        let(:enable_code_owner) { false }
 
         it_behaves_like 'does not refresh the code owner rules'
       end

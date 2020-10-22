@@ -67,6 +67,13 @@ export default {
   [mutationTypes.TOGGLE_PROMOTION_STATE]: () => {
     notImplemented();
   },
+  [mutationTypes.UPDATE_LIST_SUCCESS]: (state, { listId, list }) => {
+    Vue.set(state.boardLists, listId, list);
+  },
+
+  [mutationTypes.UPDATE_LIST_FAILURE]: state => {
+    state.error = s__('Boards|An error occurred while updating the list. Please try again.');
+  },
 
   [mutationTypes.RECEIVE_ISSUES_FOR_LIST_SUCCESS]: (
     state,
@@ -107,6 +114,11 @@ export default {
 
   [mutationTypes.TOGGLE_EPICS_SWIMLANES]: state => {
     state.isShowingEpicsSwimlanes = !state.isShowingEpicsSwimlanes;
+    state.epicsSwimlanesFetchInProgress = true;
+  },
+
+  [mutationTypes.SET_EPICS_SWIMLANES]: state => {
+    state.isShowingEpicsSwimlanes = true;
     state.epicsSwimlanesFetchInProgress = true;
   },
 
@@ -154,5 +166,15 @@ export default {
 
     removeIssueFromList({ state, listId: fromListId, issueId: issue.id });
     addIssueToList({ state, listId: toListId, issueId: issue.id, moveBeforeId, moveAfterId });
+  },
+
+  [mutationTypes.SET_BOARD_EPIC_USER_PREFERENCES]: (state, val) => {
+    const { userPreferences, epicId } = val;
+
+    const epic = state.epics.filter(currentEpic => currentEpic.id === epicId)[0];
+
+    if (epic) {
+      Vue.set(epic, 'userPreferences', userPreferences);
+    }
   },
 };

@@ -40,8 +40,11 @@ module Gitlab
 
         with_finished_at(:recording_ce_finished_at) do
           license_usage_data
+            .merge(system_usage_data_license)
+            .merge(system_usage_data_settings)
             .merge(system_usage_data)
             .merge(system_usage_data_monthly)
+            .merge(system_usage_data_weekly)
             .merge(features_usage_data)
             .merge(components_usage_data)
             .merge(cycle_analytics_usage_data)
@@ -222,6 +225,24 @@ module Gitlab
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
+      def system_usage_data_license
+        {
+          license: {}
+        }
+      end
+
+      def system_usage_data_settings
+        {
+          settings: {}
+        }
+      end
+
+      def system_usage_data_weekly
+        {
+          counts_weekly: {}
+        }
+      end
+
       def cycle_analytics_usage_data
         Gitlab::CycleAnalytics::UsageData.new.to_json
       rescue ActiveRecord::StatementInvalid
@@ -303,7 +324,8 @@ module Gitlab
           },
           database: {
             adapter: alt_usage_data { Gitlab::Database.adapter_name },
-            version: alt_usage_data { Gitlab::Database.version }
+            version: alt_usage_data { Gitlab::Database.version },
+            pg_system_id: alt_usage_data { Gitlab::Database.system_id }
           },
           mail: {
             smtp_server: alt_usage_data { ActionMailer::Base.smtp_settings[:address] }
@@ -401,10 +423,12 @@ module Gitlab
       def services_usage
         # rubocop: disable UsageData/LargeTable:
         Service.available_services_names.each_with_object({}) do |service_name, response|
-          response["projects_#{service_name}_active".to_sym] = count(Service.active.where(template: false, instance: false, type: "#{service_name}_service".camelize))
+          response["projects_#{service_name}_active".to_sym] = count(Service.active.where.not(project: nil).where(type: "#{service_name}_service".camelize))
+          response["groups_#{service_name}_active".to_sym] = count(Service.active.where.not(group: nil).where(type: "#{service_name}_service".camelize))
           response["templates_#{service_name}_active".to_sym] = count(Service.active.where(template: true, type: "#{service_name}_service".camelize))
           response["instances_#{service_name}_active".to_sym] = count(Service.active.where(instance: true, type: "#{service_name}_service".camelize))
-          response["projects_inheriting_instance_#{service_name}_active".to_sym] = count(Service.active.where.not(inherit_from_id: nil).where(type: "#{service_name}_service".camelize))
+          response["projects_inheriting_#{service_name}_active".to_sym] = count(Service.active.where.not(project: nil).where.not(inherit_from_id: nil).where(type: "#{service_name}_service".camelize))
+          response["groups_inheriting_#{service_name}_active".to_sym] = count(Service.active.where.not(group: nil).where.not(inherit_from_id: nil).where(type: "#{service_name}_service".camelize))
         end.merge(jira_usage, jira_import_usage)
         # rubocop: enable UsageData/LargeTable:
       end
@@ -574,7 +598,8 @@ module Gitlab
           issues_imported: {
             jira: distinct_count(::JiraImportState.where(time_period), :user_id),
             fogbugz: projects_imported_count('fogbugz', time_period),
-            phabricator: projects_imported_count('phabricator', time_period)
+            phabricator: projects_imported_count('phabricator', time_period),
+            csv: distinct_count(CsvIssueImport.where(time_period), :user_id)
           },
           groups_imported: distinct_count(::GroupImportState.where(time_period), :user_id)
         }
@@ -823,7 +848,7 @@ module Gitlab
       end
 
       def clear_memoized
-        CE_MEMOIZED_VALUES.each { |v| clear_memoization(v) } # rubocop:disable UsageData/LargeTable
+        CE_MEMOIZED_VALUES.each { |v| clear_memoization(v) }
       end
 
       # rubocop: disable CodeReuse/ActiveRecord

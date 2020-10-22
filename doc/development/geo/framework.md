@@ -199,13 +199,18 @@ For example, to add support for files referenced by a `Widget` model with a
 
      # @param primary_key_in [Range, Widget] arg to pass to primary_key_in scope
      # @return [ActiveRecord::Relation<Widget>] everything that should be synced to this node, restricted by primary key
-     def self.replicables_for_geo_node(primary_key_in)
+     def self.replicables_for_current_secondary(primary_key_in)
        # Should be implemented. The idea of the method is to restrict
        # the set of synced items depending on synchronization settings
      end
      ...
    end
    ```
+
+   NOTE: **Note:**
+
+   If there is a common constraint for records to be available for replication,
+   make sure to also overwrite the `available_replicables` scope.
 
 1. Create `ee/app/replicators/geo/widget_replicator.rb`. Implement the
    `#carrierwave_uploader` method which should return a `CarrierWave::Uploader`.
@@ -559,6 +564,10 @@ Metrics are gathered by `Geo::MetricsUpdateWorker`, persisted in
      verification_failure { 'Could not calculate the checksum' }
    end
    ```
+
+1. Make sure the factory also allows setting a `project` attribute. If the model
+   does not have a direct relation to a project, you can use a `transient`
+   attribute. Check out `spec/factories/merge_request_diffs.rb` for an example.
 
 Widget replication and verification metrics should now be available in the API,
 the Admin Area UI, and Prometheus!

@@ -55,12 +55,12 @@ class ApprovalMergeRequestRule < ApplicationRecord
   alias_method :code_owner, :code_owner?
 
   enum report_type: {
-    security: 1,
+    vulnerability: 1,
     license_scanning: 2
   }
 
-  scope :security_report, -> { report_approver.where(report_type: :security) }
-  scope :license_compliance, -> { report_approver.where(report_type: :license_scanning) }
+  scope :vulnerability_report, -> { report_approver.vulnerability }
+  scope :license_compliance, -> { report_approver.license_scanning }
   scope :with_head_pipeline, -> { includes(merge_request: [:head_pipeline]) }
   scope :open_merge_requests, -> { merge(MergeRequest.opened) }
   scope :for_checks_that_can_be_refreshed, -> { license_compliance.open_merge_requests.with_head_pipeline }

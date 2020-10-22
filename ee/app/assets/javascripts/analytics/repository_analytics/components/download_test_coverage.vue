@@ -30,7 +30,6 @@ export default {
   },
   inject: {
     groupAnalyticsCoverageReportsPath: {
-      type: String,
       default: '',
     },
   },

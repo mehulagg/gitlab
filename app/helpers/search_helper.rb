@@ -1,7 +1,18 @@
 # frozen_string_literal: true
 
 module SearchHelper
-  SEARCH_PERMITTED_PARAMS = [:search, :scope, :project_id, :group_id, :repository_ref, :snippets, :sort, :state, :confidential].freeze
+  SEARCH_PERMITTED_PARAMS = [
+    :search,
+    :scope,
+    :project_id,
+    :group_id,
+    :repository_ref,
+    :snippets,
+    :sort,
+    :state,
+    :confidential,
+    :force_search_results
+  ].freeze
 
   def search_autocomplete_opts(term)
     return unless current_user
@@ -9,7 +20,8 @@ module SearchHelper
     resources_results = [
       recent_items_autocomplete(term),
       groups_autocomplete(term),
-      projects_autocomplete(term)
+      projects_autocomplete(term),
+      issue_autocomplete(term)
     ].flatten
 
     search_pattern = Regexp.new(Regexp.escape(term), "i")
@@ -100,7 +112,7 @@ module SearchHelper
   end
 
   def search_service
-    @search_service ||= ::SearchService.new(current_user, params)
+    @search_service ||= ::SearchService.new(current_user, params.merge(confidential: Gitlab::Utils.to_boolean(params[:confidential])))
   end
 
   private
@@ -171,6 +183,24 @@ module SearchHelper
     end
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def issue_autocomplete(term)
+    return [] unless @project.present? && current_user && term =~ /\A#{Issue.reference_prefix}\d+\z/
+
+    iid = term.sub(Issue.reference_prefix, '').to_i
+    issue = @project.issues.find_by_iid(iid)
+    return [] unless issue && Ability.allowed?(current_user, :read_issue, issue)
+
+    [
+        {
+            category: 'In this project',
+            id: issue.id,
+            label: search_result_sanitize("#{issue.title} (#{issue.to_reference})"),
+            url: issue_path(issue),
+            avatar_url: issue.project.avatar_url || ''
+        }
+    ]
+  end
 
   # Autocomplete results for the current user's projects
   # rubocop: disable CodeReuse/ActiveRecord
@@ -262,11 +292,15 @@ module SearchHelper
       opts[:data]['labels-endpoint'] = project_labels_path(@project)
       opts[:data]['milestones-endpoint'] = project_milestones_path(@project)
       opts[:data]['releases-endpoint'] = project_releases_path(@project)
+      opts[:data]['environments-endpoint'] =
+        unfoldered_environment_names_project_path(@project)
     elsif @group.present?
       opts[:data]['group-id'] = @group.id
       opts[:data]['labels-endpoint'] = group_labels_path(@group)
       opts[:data]['milestones-endpoint'] = group_milestones_path(@group)
       opts[:data]['releases-endpoint'] = group_releases_path(@group)
+      opts[:data]['environments-endpoint'] =
+        unfoldered_environment_names_group_path(@group)
     else
       opts[:data]['labels-endpoint'] = dashboard_labels_path
       opts[:data]['milestones-endpoint'] = dashboard_milestones_path

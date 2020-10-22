@@ -18,20 +18,25 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      editable: {
-        title: this.title,
-        description: this.description,
-      },
-    };
+  mounted() {
+    this.preSelect();
   },
   methods: {
     getId(type, key) {
       return `sse-merge-request-meta-${type}-${key}`;
     },
-    onUpdate() {
-      this.$emit('updateSettings', { ...this.editable });
+    preSelect() {
+      this.$nextTick(() => {
+        this.$refs.title.$el.select();
+      });
+    },
+    onUpdate(field, value) {
+      const payload = {
+        title: this.title,
+        description: this.description,
+        [field]: value,
+      };
+      this.$emit('updateSettings', payload);
     },
   },
 };
@@ -46,9 +51,10 @@ export default {
     >
       <gl-form-input
         :id="getId('control', 'title')"
-        v-model.lazy="editable.title"
+        ref="title"
+        :value="title"
         type="text"
-        @input="onUpdate"
+        @input="onUpdate('title', $event)"
       />
     </gl-form-group>
 
@@ -59,8 +65,8 @@ export default {
     >
       <gl-form-textarea
         :id="getId('control', 'description')"
-        v-model.lazy="editable.description"
-        @input="onUpdate"
+        :value="description"
+        @input="onUpdate('description', $event)"
       />
     </gl-form-group>
   </gl-form>

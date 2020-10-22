@@ -26,10 +26,10 @@ export default {
   },
   inject: {
     strategyTypeDocsPagePath: {
-      type: String,
+      default: '',
     },
     environmentsScopeDocsPath: {
-      type: String,
+      default: '',
     },
   },
   props: {
@@ -40,11 +40,6 @@ export default {
     index: {
       type: Number,
       required: true,
-    },
-    endpoint: {
-      type: String,
-      required: false,
-      default: '',
     },
     userLists: {
       type: Array,
@@ -182,7 +177,6 @@ export default {
         >
           <new-environments-dropdown
             :id="environmentsDropdownId"
-            :endpoint="endpoint"
             class="gl-mr-3"
             @add="addEnvironment"
           />

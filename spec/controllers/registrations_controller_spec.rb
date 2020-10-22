@@ -75,7 +75,7 @@ RSpec.describe RegistrationsController do
 
             expect(response).to redirect_to(new_user_session_path(anchor: 'login-pane'))
             expect(flash[:notice])
-              .to eq('You have signed up successfully. However, we could not sign you in because your account is awaiting approval from your administrator.')
+              .to eq('You have signed up successfully. However, we could not sign you in because your account is awaiting approval from your GitLab administrator.')
           end
 
           context 'email confirmation' do
@@ -477,10 +477,16 @@ RSpec.describe RegistrationsController do
       patch :update_registration, params: { user: { role: 'software_developer', setup_for_company: 'false' } }
     end
 
-    before do
-      sign_in(create(:user))
+    context 'without a signed in user' do
+      it { is_expected.to redirect_to new_user_registration_path }
     end
 
-    it { is_expected.to redirect_to(dashboard_projects_path)}
+    context 'with a signed in user' do
+      before do
+        sign_in(create(:user))
+      end
+
+      it { is_expected.to redirect_to(dashboard_projects_path)}
+    end
   end
 end

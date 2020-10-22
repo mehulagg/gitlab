@@ -14,6 +14,7 @@ module Gitlab
 
         scope :checksummed, -> { where.not(verification_checksum: nil) }
         scope :checksum_failed, -> { where.not(verification_failure: nil) }
+        scope :available_replicables, -> { all }
 
         sha_attribute :verification_checksum
       end
@@ -83,8 +84,8 @@ module Gitlab
         end
       end
 
-      def in_replicables_for_geo_node?
-        self.class.replicables_for_geo_node(self).exists?
+      def in_replicables_for_current_secondary?
+        self.class.replicables_for_current_secondary(self).exists?
       end
     end
   end

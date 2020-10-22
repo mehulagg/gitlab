@@ -13,6 +13,7 @@ import {
 import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
 import { isAbsolute, redirectTo } from '~/lib/utils/url_utility';
+import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
 import { fetchPolicies } from '~/lib/graphql';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import DastSiteValidation from './dast_site_validation.vue';
@@ -29,9 +30,6 @@ const initField = value => ({
   state: null,
   feedback: null,
 });
-
-const extractFormValues = form =>
-  Object.fromEntries(Object.entries(form).map(([key, { value }]) => [key, value]));
 
 export default {
   name: 'DastSiteProfileForm',
@@ -73,7 +71,7 @@ export default {
     return {
       fetchValidationTimeout: null,
       form,
-      initialFormValues: extractFormValues(form),
+      initialFormValues: serializeFormObject(form),
       isFetchingValidationStatus: false,
       isValidatingSite: false,
       isLoading: false,
@@ -121,13 +119,13 @@ export default {
       };
     },
     formTouched() {
-      return !isEqual(extractFormValues(this.form), this.initialFormValues);
+      return !isEqual(serializeFormObject(this.form), this.initialFormValues);
     },
     formHasErrors() {
       return Object.values(this.form).some(({ state }) => state === false);
     },
     someFieldEmpty() {
-      return Object.values(this.form).some(({ value }) => !value);
+      return Object.values(this.form).some(({ value }) => isEmptyValue(value));
     },
     isSubmitDisabled() {
       return (
@@ -178,9 +176,7 @@ export default {
       if (this.glFeatures.securityOnDemandScansSiteValidation) {
         await this.fetchValidationStatus();
 
-        if ([PASSED, INPROGRESS].some(this.validationStatusMatches)) {
-          this.isSiteValidationActive = true;
-        }
+        this.isSiteValidationActive = this.validationStatusMatches(PASSED);
       }
     }
   },
@@ -249,10 +245,10 @@ export default {
         this.validationStatus = status;
 
         if (this.validationStatusMatches(INPROGRESS)) {
-          this.fetchValidationTimeout = setTimeout(
-            this.fetchValidationStatus,
-            DAST_SITE_VALIDATION_POLL_INTERVAL,
-          );
+          await new Promise(resolve => {
+            this.fetchValidationTimeout = setTimeout(resolve, DAST_SITE_VALIDATION_POLL_INTERVAL);
+          });
+          await this.fetchValidationStatus();
         }
       } catch (exception) {
         this.showErrors({
@@ -295,7 +291,7 @@ export default {
       const variables = {
         fullPath: this.fullPath,
         ...(this.isEdit ? { id: this.siteProfile.id } : {}),
-        ...extractFormValues(this.form),
+        ...serializeFormObject(this.form),
       };
 
       this.$apollo

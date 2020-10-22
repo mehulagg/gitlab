@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: APM
+group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -40,7 +40,7 @@ of memory and CPU usage.
 
 GitLab is committed to support at least two production-ready Kubernetes minor
 versions at any given time. We regularly review the versions we support, and
-provide a four-month deprecation period before we remove support of a specific
+provide a three-month deprecation period before we remove support of a specific
 version. The range of supported versions is based on the evaluation of:
 
 - Our own needs.
@@ -52,7 +52,7 @@ Currently, GitLab supports the following Kubernetes versions:
 - 1.17
 - 1.16
 - 1.15
-- 1.14
+- 1.14 (deprecated, support ends on December 22, 2020)
 - 1.13 (deprecated, support ends on November 22, 2020)
 
 Some GitLab features may support versions outside the range provided here.
@@ -252,7 +252,7 @@ GitLab CI/CD build environment.
 | `KUBE_NAMESPACE` | The namespace associated with the project's deployment service account. In the format `<project_name>-<project_id>-<environment>`. For GitLab-managed clusters, a matching namespace is automatically created by GitLab in the cluster. If your cluster was created before GitLab 12.2, the default `KUBE_NAMESPACE` is set to `<project_name>-<project_id>`. |
 | `KUBE_CA_PEM_FILE` | Path to a file containing PEM data. Only present if a custom CA bundle was specified. |
 | `KUBE_CA_PEM` | (**deprecated**) Raw PEM data. Only if a custom CA bundle was specified. |
-| `KUBECONFIG` | Path to a file containing `kubeconfig` for this deployment. CA bundle would be embedded if specified. This config also embeds the same token defined in `KUBE_TOKEN` so you likely will only need this variable. This variable name is also automatically picked up by `kubectl` so you won't actually need to reference it explicitly if using `kubectl`. |
+| `KUBECONFIG` | Path to a file containing `kubeconfig` for this deployment. CA bundle would be embedded if specified. This configuration also embeds the same token defined in `KUBE_TOKEN` so you likely will only need this variable. This variable name is also automatically picked up by `kubectl` so you won't actually need to reference it explicitly if using `kubectl`. |
 | `KUBE_INGRESS_BASE_DOMAIN` | From GitLab 11.8, this variable can be used to set a domain per cluster. See [cluster domains](#base-domain) for more information. |
 
 ### Custom namespace

@@ -1,6 +1,6 @@
 ---
 type: reference, howto
-stage: Defend
+stage: Protect
 group: Container Security
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
@@ -419,7 +419,7 @@ file, it's necessary to set [`GIT_STRATEGY: fetch`](../../../ci/yaml/README.md#g
 your `.gitlab-ci.yml` file by following the instructions described in this document's
 [overriding the container scanning template](#overriding-the-container-scanning-template) section.
 
-Read more about the [solutions for vulnerabilities](../index.md#solutions-for-vulnerabilities-auto-remediation).
+Read more about the [solutions for vulnerabilities](../index.md#automatic-remediation-for-vulnerabilities).
 
 ## Troubleshooting
 

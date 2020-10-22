@@ -294,7 +294,8 @@ module EE
           super.merge({
             operations_dashboard_users_with_projects_added: distinct_count(UsersOpsDashboardProject.joins(:user).merge(::User.active).where(time_period), :user_id),
             projects_prometheus_active: distinct_count(::Project.with_active_prometheus_service.where(time_period), :creator_id),
-            projects_with_error_tracking_enabled: distinct_count(::Project.with_enabled_error_tracking.where(time_period), :creator_id)
+            projects_with_error_tracking_enabled: distinct_count(::Project.with_enabled_error_tracking.where(time_period), :creator_id),
+            projects_incident_sla_enabled: count(::Project.with_enabled_incident_sla)
           })
         end
 
@@ -492,7 +493,7 @@ module EE
         def clear_memoized
           super
 
-          EE_MEMOIZED_VALUES.each { |v| clear_memoization(v) } # rubocop:disable UsageData/LargeTable
+          EE_MEMOIZED_VALUES.each { |v| clear_memoization(v) }
         end
       end
     end

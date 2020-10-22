@@ -1,4 +1,8 @@
-import { getAverageByMonth } from '~/analytics/instance_statistics/utils';
+import {
+  getAverageByMonth,
+  extractValues,
+  sortByDate,
+} from '~/analytics/instance_statistics/utils';
 import {
   mockCountsData1,
   mockCountsData2,
@@ -37,5 +41,58 @@ describe('getAverageByMonth', () => {
       expect(getAverageByMonth(mockCountsData1, options)).toStrictEqual(roundedData1);
       expect(getAverageByMonth(mockCountsData2, options)).toStrictEqual(roundedData2);
     });
+  });
+});
+
+describe('extractValues', () => {
+  it('extracts only requested values', () => {
+    const data = { fooBar: { baz: 'quis' }, ignored: 'ignored' };
+    expect(extractValues(data, ['bar'], 'foo', 'baz')).toEqual({ bazBar: 'quis' });
+  });
+
+  it('it renames with the `renameKey` if provided', () => {
+    const data = { fooBar: { baz: 'quis' }, ignored: 'ignored' };
+    expect(extractValues(data, ['bar'], 'foo', 'baz', { renameKey: 'renamed' })).toEqual({
+      renamedBar: 'quis',
+    });
+  });
+
+  it('is able to get nested data', () => {
+    const data = { fooBar: { even: [{ further: 'nested' }] }, ignored: 'ignored' };
+    expect(extractValues(data, ['bar'], 'foo', 'even[0].further')).toEqual({
+      'even[0].furtherBar': 'nested',
+    });
+  });
+
+  it('is able to extract multiple values', () => {
+    const data = {
+      fooBar: { baz: 'quis' },
+      fooBaz: { baz: 'quis' },
+      fooQuis: { baz: 'quis' },
+    };
+    expect(extractValues(data, ['bar', 'baz', 'quis'], 'foo', 'baz')).toEqual({
+      bazBar: 'quis',
+      bazBaz: 'quis',
+      bazQuis: 'quis',
+    });
+  });
+
+  it('returns empty data set when keys are not found', () => {
+    const data = { foo: { baz: 'quis' }, ignored: 'ignored' };
+    expect(extractValues(data, ['bar'], 'foo', 'baz')).toEqual({});
+  });
+
+  it('returns empty data when params are missing', () => {
+    expect(extractValues()).toEqual({});
+  });
+});
+
+describe('sortByDate', () => {
+  it('sorts the array by date', () => {
+    expect(sortByDate(mockCountsData1)).toStrictEqual([...mockCountsData1].reverse());
+  });
+
+  it('does not modify the original array', () => {
+    expect(sortByDate(countsMonthlyChartData1)).not.toBe(countsMonthlyChartData1);
   });
 });

@@ -39,6 +39,14 @@ RSpec.describe Gitlab::Geo::GeoTasks do
       expect { subject.set_secondary_as_primary }.to raise_error('aborted')
     end
 
+    it 'aborts if current node is not identified' do
+      secondary.destroy!
+
+      expect(subject).to receive(:abort).with('Current node is not identified').and_raise('aborted')
+
+      expect { subject.set_secondary_as_primary }.to raise_error('aborted')
+    end
+
     it 'aborts if run on a node that is not a secondary' do
       primary.update_column(:primary, false)
       secondary.update!(primary: true)

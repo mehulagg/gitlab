@@ -180,6 +180,18 @@ RSpec.describe Boards::Issues::ListService, services: true do
           expect(issues).to contain_exactly(opened_issue1, opened_issue2, reopened_issue1)
         end
       end
+
+      context 'when test cases are present' do
+        it 'filters out test cases' do
+          create(:quality_test_case, project: project, milestone: m1, title: 'Test Case 1', labels: [development])
+          incident = create(:incident, project: project, milestone: m1, title: 'Incident 1', labels: [development])
+          params = { board_id: board.id, id: list1.id }
+
+          issues = described_class.new(parent, user, params).execute
+
+          expect(issues).to match_array([list1_issue1, list1_issue2, list1_issue3, incident])
+        end
+      end
     end
   end
 end

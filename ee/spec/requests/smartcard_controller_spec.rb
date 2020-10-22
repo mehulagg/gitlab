@@ -168,7 +168,7 @@ RSpec.describe SmartcardController, type: :request do
 
           expect(AuditEventService).to(
             receive(:new)
-              .with(instance_of(User), instance_of(User), with: auth_method)
+              .with(instance_of(User), instance_of(User), with: auth_method, ip_address: '127.0.0.1')
               .and_return(audit_event_service))
           expect(audit_event_service).to receive_message_chain(:for_authentication, :security_event)
 

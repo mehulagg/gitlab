@@ -8,7 +8,10 @@ type: howto
 # Cloud deployment
 
 Interacting with a major cloud provider may have become a much needed task that's
-part of your delivery process. GitLab is making this process less painful by providing Docker images
+part of your delivery process. With GitLab you can
+[deploy your application anywhere](https://about.gitlab.com/stages-devops-lifecycle/deploy-targets/).
+
+For some specific deployment targets, GitLab makes this process less painful by providing Docker images
 that come with the needed libraries and tools pre-installed.
 By referencing them in your CI/CD pipeline, you'll be able to interact with your chosen
 cloud provider more easily.
@@ -278,3 +281,11 @@ When running your project pipeline at this point:
 - Your built application is pushed to your S3 bucket then and deployed to your EC2 instance, based
   on the related JSON object's content. The deployment job finishes whenever the deployment to EC2
   is done or has failed.
+
+#### Deploy Amazon EKS 
+
+- [How to deploy your application to a GitLab-managed Amazon EKS cluster with Auto DevOps](https://about.gitlab.com/blog/2020/05/05/deploying-application-eks/)
+
+#### Deploy to Google Cloud
+
+- [Deploying with GitLab on Google Cloud](https://about.gitlab.com/solutions/google-cloud-platform/)

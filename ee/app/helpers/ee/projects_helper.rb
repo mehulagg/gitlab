@@ -244,8 +244,7 @@ module EE
       !!current_user &&
         ::Gitlab.com? &&
         !project.feature_available?(:security_dashboard) &&
-        can?(current_user, :admin_namespace, project.root_ancestor) &&
-        current_user.ab_feature_enabled?(:discover_security)
+        can?(current_user, :admin_namespace, project.root_ancestor)
     end
 
     override :can_import_members?

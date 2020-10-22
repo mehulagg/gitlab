@@ -54,7 +54,9 @@ module Security
 
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
 
-      finding.identifiers.map do |identifier|
+      # The maximum number of identifiers is not used in validation
+      # we just want to ignore the rest if a finding has more than that.
+      finding.identifiers.take(Vulnerabilities::Finding::MAX_NUMBER_OF_IDENTIFIERS).map do |identifier| # rubocop: disable CodeReuse/ActiveRecord
         create_or_update_vulnerability_identifier_object(vulnerability_finding, identifier)
       end
 
@@ -72,15 +74,37 @@ module Security
       }
 
       begin
-        project
+        vulnerability_finding = project
           .vulnerability_findings
           .create_with(create_params)
-          .find_or_create_by!(find_params)
+          .find_or_initialize_by(find_params)
+
+        vulnerability_finding.uuid = calculcate_uuid_v5(vulnerability_finding, find_params)
+
+        vulnerability_finding.save!
+        vulnerability_finding
       rescue ActiveRecord::RecordNotUnique
         project.vulnerability_findings.find_by!(find_params)
       rescue ActiveRecord::RecordInvalid => e
         Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
       end
+    end
+
+    def calculcate_uuid_v5(vulnerability_finding, finding_params)
+      uuid_v5_name_components = {
+        report_type: vulnerability_finding.report_type,
+        primary_identifier_fingerprint: vulnerability_finding.primary_identifier&.fingerprint || finding_params.dig(:primary_identifier, :fingerprint),
+        location_fingerprint: vulnerability_finding.location_fingerprint,
+        project_id: project.id
+      }
+
+      if uuid_v5_name_components.values.any?(&:nil?)
+        Gitlab::AppLogger.warn(message: "One or more UUID name components are nil", components: uuid_v5_name_components)
+      end
+
+      name = uuid_v5_name_components.values.join('-')
+
+      Gitlab::Vulnerabilities::CalculateFindingUUID.call(name)
     end
 
     def update_vulnerability_scanner(finding)

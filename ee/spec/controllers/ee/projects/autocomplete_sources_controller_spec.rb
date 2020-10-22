@@ -8,67 +8,34 @@ RSpec.describe Projects::AutocompleteSourcesController do
   let_it_be(:project) { create(:project, :public, group: group) }
   let_it_be(:epic) { create(:epic, group: group) }
   let_it_be(:epic2) { create(:epic, group: group2) }
-  let_it_be(:vulnerability) { create(:vulnerability, project: project) }
 
   before do
     sign_in(user)
   end
 
-  describe '#epics' do
-    context 'when epics feature is disabled' do
-      it 'returns 404 status' do
-        get :epics, params: { namespace_id: project.namespace, project_id: project }
+  context 'when epics feature is disabled' do
+    it 'returns 404 status' do
+      get :epics, params: { namespace_id: project.namespace, project_id: project }
 
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-
-    context 'when epics feature is enabled' do
-      before do
-        stub_licensed_features(epics: true)
-      end
-
-      describe '#epics' do
-        it 'returns the correct response' do
-          get :epics, params: { namespace_id: project.namespace, project_id: project }
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response).to be_an(Array)
-          expect(json_response.count).to eq(1)
-          expect(json_response.first).to include(
-            'iid' => epic.iid, 'title' => epic.title
-          )
-        end
-      end
+      expect(response).to have_gitlab_http_status(:not_found)
     end
   end
 
-  describe '#vulnerabilities' do
-    context 'when vulnerabilities feature is disabled' do
-      it 'returns 404 status' do
-        get :vulnerabilities, params: { namespace_id: project.namespace, project_id: project }
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
+  context 'when epics feature is enabled' do
+    before do
+      stub_licensed_features(epics: true)
     end
 
-    context 'when vulnerabilities feature is enabled' do
-      before do
-        stub_licensed_features(security_dashboard: true)
-        project.add_developer(user)
-      end
+    describe '#epics' do
+      it 'returns the correct response' do
+        get :epics, params: { namespace_id: project.namespace, project_id: project }
 
-      describe '#vulnerabilities' do
-        it 'returns the correct response', :aggregate_failures do
-          get :vulnerabilities, params: { namespace_id: project.namespace, project_id: project }
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response).to be_an(Array)
-          expect(json_response.count).to eq(1)
-          expect(json_response.first).to include(
-            'id' => vulnerability.id, 'title' => vulnerability.title
-          )
-        end
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to be_an(Array)
+        expect(json_response.count).to eq(1)
+        expect(json_response.first).to include(
+          'iid' => epic.iid, 'title' => epic.title
+        )
       end
     end
   end

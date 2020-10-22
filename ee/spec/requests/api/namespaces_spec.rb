@@ -120,7 +120,7 @@ RSpec.describe API::Namespaces do
       before do
         group1.add_guest(user)
 
-        create(:gitlab_subscription, namespace: group1, max_seats_used: 1)
+        create(:gitlab_subscription, namespace: group1, max_seats_used: 1, seats_in_use: 1)
       end
 
       it "avoids additional N+1 database queries" do
@@ -146,6 +146,12 @@ RSpec.describe API::Namespaces do
 
         expect(json_response.first['max_seats_used']).to eq(1)
       end
+
+      it 'includes seats_in_use' do
+        get api("/namespaces", user)
+
+        expect(json_response.first['seats_in_use']).to eq(1)
+      end
     end
 
     context 'without gitlab subscription' do
@@ -154,6 +160,14 @@ RSpec.describe API::Namespaces do
 
         json_response.each do |resp|
           expect(resp.keys).not_to include('max_seats_used')
+        end
+      end
+
+      it 'does not include seats_in_use' do
+        get api("/namespaces", user)
+
+        json_response.each do |resp|
+          expect(resp.keys).not_to include('seats_in_use')
         end
       end
     end

@@ -20,17 +20,16 @@ module EE
       has_many :approver_users, through: :approvers, source: :user
       has_many :approver_groups, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
       has_many :approval_rules, class_name: 'ApprovalMergeRequestRule', inverse_of: :merge_request do
-        def applicable_to_branch(branch)
+        def preload_users
           ActiveRecord::Associations::Preloader.new.preload(
             self,
             [:users, :groups, approval_project_rule: [:users, :groups, :protected_branches]]
           )
 
           self.select do |rule|
-            next true unless rule.approval_project_rule.present?
             next true if rule.overridden?
 
-            rule.approval_project_rule.applies_to_branch?(branch)
+            rule
           end
         end
       end

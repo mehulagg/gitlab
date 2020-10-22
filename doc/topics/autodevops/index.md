@@ -95,6 +95,7 @@ project in a simple and automatic way:
 1. [Auto Deploy](stages.md#auto-deploy)
 1. [Auto Browser Performance Testing](stages.md#auto-browser-performance-testing) **(PREMIUM)**
 1. [Auto Monitoring](stages.md#auto-monitoring)
+1. [Auto Code Intelligence](stages.md#auto-code-intelligence)
 
 As Auto DevOps relies on many different components, you should have a basic
 knowledge of the following:
@@ -400,7 +401,7 @@ If you receive this error, you can do one of the following actions:
   database by setting `AUTO_DEVOPS_POSTGRES_DELETE_V1` to a non-empty value and
   redeploying.
 
-  DANGER: **Danger:**
+  DANGER: **Warning:**
   Deleting the channel 1 PostgreSQL database permanently deletes the existing
   channel 1 database and all its data. See
   [Upgrading PostgreSQL](upgrading_postgresql.md)
@@ -414,7 +415,7 @@ If you receive this error, you can do one of the following actions:
   and persisted by Helm, regardless of whether or not your chart uses the
   variable.
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 Setting `POSTGRES_ENABLED` to `false` permanently deletes any existing
 channel 1 database for your environment.
 

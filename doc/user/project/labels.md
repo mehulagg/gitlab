@@ -57,9 +57,11 @@ and edit labels.
 
 ### Project labels
 
+> Showing all inherited labels [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241990) in 13.5.
+
 To view the project labels list, navigate to the project and click **Issues > Labels**.
 The list includes all labels that are defined at the project level, as well as all
-labels inherited from the immediate parent group.
+labels defined by its ancestor groups.
 For each label, you can see the project or group path from where it was created.
 You can filter the list by entering a search query at the top and clicking search (**{search}**).
 
@@ -96,7 +98,7 @@ If you delete a label, it is permanently deleted. All references to the label ar
 If you previously created a project label and now want to make it available for other
 projects within the same group, you can promote it to a group label.
 
-If other projects in the same group have a label with the same title, they are all 
+If other projects in the same group have a label with the same title, they are all
 merged with the new group label. If a group label with the same title exists, it is
 also merged.
 
@@ -124,7 +126,7 @@ follow the same process as [creating a project label](#project-labels).
 
 #### Create group labels from epics **(ULTIMATE)**
 
-You can create group labels from the epic sidebar. The labels you create 
+You can create group labels from the epic sidebar. The labels you create
 belong to the immediate group to which the epic belongs. The process is the same as
 creating a [project label from an issue or merge request](#project-labels).
 
@@ -158,7 +160,7 @@ title, for example:
 ![Scoped labels](img/labels_key_value_v13_5.png)
 
 An issue, merge request or epic cannot have two scoped labels, of the form `key::value`,
-with the same `key`. Adding a new label with the same `key`, but a different `value` 
+with the same `key`. Adding a new label with the same `key`, but a different `value`
 causes the previous `key` label to be replaced with the new label.
 
 For example:

@@ -400,7 +400,7 @@ class Project < ApplicationRecord
   delegate :external_dashboard_url, to: :metrics_setting, allow_nil: true, prefix: true
   delegate :dashboard_timezone, to: :metrics_setting, allow_nil: true, prefix: true
   delegate :default_git_depth, :default_git_depth=, to: :ci_cd_settings, prefix: :ci
-  delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings
+  delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
     :allow_merge_on_skipped_pipeline=, :has_confluence?,
@@ -1340,7 +1340,8 @@ class Project < ApplicationRecord
   end
 
   def find_or_initialize_services
-    available_services_names = Service.available_services_names - disabled_services
+    available_services_names =
+      Service.available_services_names + Service.project_specific_services_names - disabled_services
 
     available_services_names.map do |service_name|
       find_or_initialize_service(service_name)
@@ -2089,21 +2090,36 @@ class Project < ApplicationRecord
     (auto_devops || build_auto_devops)&.predefined_variables
   end
 
-  # Tries to set repository as read_only, checking for existing Git transfers in progress beforehand
+  RepositoryReadOnlyError = Class.new(StandardError)
+
+  # Tries to set repository as read_only, checking for existing Git transfers in
+  # progress beforehand. Setting a repository read-only will fail if it is
+  # already in that state.
   #
-  # @return [Boolean] true when set to read_only or false when an existing git transfer is in progress
+  # @return nil. Failures will raise an exception
   def set_repository_read_only!
     with_lock do
-      break false if git_transfer_in_progress?
+      raise RepositoryReadOnlyError, _('Git transfer in progress') if
+        git_transfer_in_progress?
 
-      update_column(:repository_read_only, true)
+      raise RepositoryReadOnlyError, _('Repository already read-only') if
+        self.class.where(id: id).pick(:repository_read_only)
+
+      raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
+        update_column(:repository_read_only, true)
+
+      nil
     end
   end
 
-  # Set repository as writable again
+  # Set repository as writable again. Unlike setting it read-only, this will
+  # succeed if the repository is already writable.
   def set_repository_writable!
     with_lock do
-      update_column(:repository_read_only, false)
+      raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
+        update_column(:repository_read_only, false)
+
+      nil
     end
   end
 
@@ -2512,6 +2528,10 @@ class Project < ApplicationRecord
 
   def ci_config_path_or_default
     ci_config_path.presence || Ci::Pipeline::DEFAULT_CONFIG_PATH
+  end
+
+  def ci_config_for(sha)
+    repository.gitlab_ci_yml_for(sha, ci_config_path_or_default)
   end
 
   def enabled_group_deploy_keys

@@ -817,16 +817,14 @@ RSpec.describe Issue do
 
     subject { issue.sla_available? }
 
-    where(:feature_enabled, :incident_type, :license_available, :sla_available) do
-      false | true  | true  | false
-      true  | false | true  | false
-      true  | true  | false | false
-      true  | true  | true  | true
+    where(:incident_type, :license_available, :sla_available) do
+      false | true  | false
+      true  | false | false
+      true  | true  | true
     end
 
     with_them do
       before do
-        stub_feature_flags(incident_sla_dev: feature_enabled)
         stub_licensed_features(incident_sla: license_available)
         issue_type = incident_type ? 'incident' : 'issue'
         issue.update(issue_type: issue_type)

@@ -206,7 +206,7 @@ export default {
         >
           <projects-dropdown-filter
             :key="currentGroup.id"
-            class="js-projects-dropdown-filter project-select"
+            class="js-projects-dropdown-filter project-select gl-mb-2 gl-lg-mb-0"
             :group-id="currentGroup.id"
             :group-namespace="currentGroupPath"
             :query-params="projectsQueryParams"

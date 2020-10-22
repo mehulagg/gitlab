@@ -36,10 +36,9 @@ module Elastic
       def confidentiality_filter(query_hash, options)
         current_user = options[:current_user]
         project_ids = options[:project_ids]
-        confidential_filter = options[:confidential]
 
-        if Feature.enabled?(:search_filter_by_confidential) && confidential_filter.present? && %w(yes no).include?(confidential_filter)
-          query_hash[:query][:bool][:filter] << { term: { confidential: confidential_filter == 'yes' } }
+        if [true, false].include?(options[:confidential]) && Feature.enabled?(:search_filter_by_confidential)
+          query_hash[:query][:bool][:filter] << { term: { confidential: options[:confidential] } }
         end
 
         return query_hash if current_user&.can_read_all_resources?

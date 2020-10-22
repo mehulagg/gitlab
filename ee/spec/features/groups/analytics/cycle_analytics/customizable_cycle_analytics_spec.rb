@@ -74,7 +74,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
     end
   end
 
-  def select_dropdown_label(field, index = 2)
+  def select_dropdown_label(field, index = 1)
     page.find("[name=#{field}] .dropdown-menu").all('.dropdown-item')[index].click
   end
 
@@ -263,10 +263,10 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
           context 'with all required fields set' do
             before do
               wait_for_labels(start_field)
-              select_dropdown_label start_field, 1
+              select_dropdown_label start_field, 0
 
               wait_for_labels(end_field)
-              select_dropdown_label end_field, 2
+              select_dropdown_label end_field, 1
             end
 
             include_examples 'submits custom stage form successfully', custom_stage_with_labels_name

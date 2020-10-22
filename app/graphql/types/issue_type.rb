@@ -4,7 +4,7 @@ module Types
   class IssueType < BaseObject
     graphql_name 'Issue'
 
-    connection_type_class(Types::CountableConnectionType)
+    connection_type_class(Types::IssueConnectionType)
 
     implements(Types::Notes::NoteableType)
     implements(Types::CurrentUserTodos)
@@ -74,6 +74,10 @@ module Types
           description: 'Time estimate of the issue'
     field :total_time_spent, GraphQL::INT_TYPE, null: false,
           description: 'Total time reported as spent on the issue'
+    field :human_time_estimate, GraphQL::STRING_TYPE, null: true,
+          description: 'Human-readable time estimate of the issue'
+    field :human_total_time_spent, GraphQL::STRING_TYPE, null: true,
+          description: 'Human-readable total time reported as spent on the issue'
 
     field :closed_at, Types::TimeType, null: true,
           description: 'Timestamp of when the issue was closed'

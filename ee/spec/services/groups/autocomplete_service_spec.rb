@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Groups::AutocompleteService do
-  let_it_be(:group, refind: true) { create(:group, :nested, :private, avatar: fixture_file_upload('spec/fixtures/dk.png')) }
-  let_it_be(:sub_group) { create(:group, :private, parent: group) }
+  let!(:group) { create(:group, :nested, :private, avatar: fixture_file_upload('spec/fixtures/dk.png')) }
+  let!(:sub_group) { create(:group, :private, parent: group) }
   let(:user) { create(:user) }
   let!(:epic) { create(:epic, group: group, author: user) }
 
@@ -115,28 +115,6 @@ RSpec.describe Groups::AutocompleteService do
 
       expect(epics.map(&:iid)).to contain_exactly(confidential_epic.iid)
       expect(epics.map(&:title)).to contain_exactly(confidential_epic.title)
-    end
-  end
-
-  describe '#vulnerability' do
-    let_it_be(:project) { create(:project, group: group) }
-    let_it_be(:vulnerability) { create(:vulnerability, project: project) }
-
-    before do
-      stub_licensed_features(security_dashboard: true)
-      project.add_developer(user)
-    end
-
-    it 'returns nothing if not allowed' do
-      guest = create(:user)
-
-      vulnerabilities = described_class.new(group, guest).vulnerabilities
-
-      expect(vulnerabilities).to be_empty
-    end
-
-    it 'returns vulnerabilities from group' do
-      expect(subject.vulnerabilities.map(&:id)).to contain_exactly(vulnerability.id)
     end
   end
 

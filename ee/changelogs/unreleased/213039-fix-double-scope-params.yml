@@ -1,5 +1,0 @@
----
-title: Send only one scope query when requesting pipeline findings
-merge_request: 43535
-author:
-type: fixed

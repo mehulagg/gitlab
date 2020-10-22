@@ -158,7 +158,7 @@ gem 'wikicloth', '0.8.1'
 gem 'asciidoctor', '~> 2.0.10'
 gem 'asciidoctor-include-ext', '~> 0.3.1', require: false
 gem 'asciidoctor-plantuml', '~> 0.0.12'
-gem 'rouge', '~> 3.21.0'
+gem 'rouge', '~> 3.24.0'
 gem 'truncato', '~> 0.7.11'
 gem 'bootstrap_form', '~> 4.2.0'
 gem 'nokogiri', '~> 1.10.9'
@@ -310,7 +310,7 @@ gem 'sentry-raven', '~> 3.0'
 gem 'premailer-rails', '~> 1.10.3'
 
 # LabKit: Tracing and Correlation
-gem 'gitlab-labkit', '0.12.1'
+gem 'gitlab-labkit', '0.13.1'
 
 # I18n
 gem 'ruby_parser', '~> 3.8', require: false
@@ -466,7 +466,7 @@ group :ed25519 do
 end
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 13.3.0-rc1'
+gem 'gitaly', '~> 13.5.0-rc2'
 
 gem 'grpc', '~> 1.30.2'
 

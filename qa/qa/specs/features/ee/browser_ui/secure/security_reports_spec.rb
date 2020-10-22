@@ -23,6 +23,7 @@ module QA
         @project = Resource::Project.fabricate_via_api! do |p|
           p.name = Runtime::Env.auto_devops_project_name || 'project-with-secure'
           p.description = 'Project with Secure'
+          p.group = Resource::Group.fabricate_via_api!
         end
 
         @runner = Resource::Runner.fabricate! do |runner|

@@ -435,6 +435,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: deployment:deployments_drop_older_deployments
+  :feature_category: :continuous_delivery
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 3
+  :idempotent:
+  :tags: []
 - :name: deployment:deployments_execute_hooks
   :feature_category: :continuous_delivery
   :has_external_dependencies:
@@ -1409,6 +1417,22 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: disallow_two_factor_for_group
+  :feature_category: :subgroups
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: disallow_two_factor_for_subgroups
+  :feature_category: :subgroups
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: email_receiver
   :feature_category: :issue_tracking
   :has_external_dependencies:
@@ -1544,6 +1568,14 @@
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
+- :name: issuable_export_csv
+  :feature_category: :issue_tracking
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :cpu
   :weight: 1
   :idempotent:
   :tags: []

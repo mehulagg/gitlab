@@ -48,7 +48,7 @@ export default {
     <div
       class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between gl-bg-gray-10 gl-border-t-solid gl-border-t-1 gl-border-t-gray-100 gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-py-3"
     >
-      <filter-bar class="gl-flex-grow-1 gl-lg-ml-3" />
+      <filter-bar class="gl-flex-grow-1 gl-lg-ml-3 gl-mb-2 gl-lg-mb-0" />
       <date-range
         :start-date="startDate"
         :end-date="endDate"

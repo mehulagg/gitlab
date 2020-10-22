@@ -57,6 +57,7 @@ module EE
 
         field :requirements, ::Types::RequirementsManagement::RequirementType.connection_type, null: true,
               description: 'Find requirements',
+              extras: [:lookahead],
               resolver: ::Resolvers::RequirementsManagement::RequirementsResolver
 
         field :requirement_states_count, ::Types::RequirementsManagement::RequirementStatesCountType, null: true,

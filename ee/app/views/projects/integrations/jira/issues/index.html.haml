@@ -10,5 +10,4 @@
   'empty-state-meta': { svg_path: image_path('illustrations/issues.svg') },
   'sort-key': @sort,
   type: 'jira',
-  'project-path': @project.full_path,
-  'scoped-labels': @project.feature_available?(:scoped_labels).to_json } }
+  project_path: @project.full_path, } }

@@ -41,7 +41,7 @@ describe('SubscriptionTable component', () => {
         },
       });
 
-      Object.assign(store.state.subscription, { isLoading: true });
+      Object.assign(store.state.subscription, { isLoadingSubscription: true });
 
       return wrapper.vm.$nextTick();
     });
@@ -63,7 +63,7 @@ describe('SubscriptionTable component', () => {
     beforeEach(() => {
       factory({ propsData: { namespaceName: TEST_NAMESPACE_NAME } });
 
-      store.state.subscription.isLoading = false;
+      store.state.subscription.isLoadingSubscription = false;
       store.commit(`subscription/${types.RECEIVE_SUBSCRIPTION_SUCCESS}`, mockDataSubscription.gold);
 
       return wrapper.vm.$nextTick();
@@ -104,7 +104,7 @@ describe('SubscriptionTable component', () => {
         });
 
         Object.assign(store.state.subscription, {
-          isLoading: false,
+          isLoadingSubscription: false,
           isFreePlan,
           plan: {
             code: planName,
