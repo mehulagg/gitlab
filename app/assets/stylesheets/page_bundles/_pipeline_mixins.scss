@@ -12,7 +12,7 @@
 
 @mixin build-content($border-radius: 30px) {
   display: inline-block;
-  padding: 8px 10px 9px;
+  padding: 8px 10px;
   width: 100%;
   border: 1px solid $border-color;
   border-radius: $border-radius;
@@ -137,14 +137,15 @@
 
   .ci-action-icon-container {
     position: absolute;
-    right: 8px;
-    top: 8px;
+    right: 10px;
+    top: 10px;
 
     &.ci-action-icon-wrapper {
       height: $ci-action-dropdown-button-size;
       width: $ci-action-dropdown-button-size;
       border-radius: 50%;
       display: block;
+      vertical-align: middle;
 
       &:hover {
         box-shadow: inset 0 0 0 0.0625rem $dropdown-toggle-active-border-color;
