@@ -26,8 +26,8 @@ This is a partial list of the [RSpec metadata](https://relishapp.com/rspec/rspec
 | `:object_storage` | The test requires a GitLab instance to be configured to use multiple [object storage types](https://docs.gitlab.com/ee/administration/object_storage.html). Uses MinIO as the object storage server. |
 | `:smtp`           | The test requires a GitLab instance to be configured to use an SMTP server.  Tests SMTP notification email delivery from Gitlab by using MailHog. |
 | `:group_saml`     | The test requires a GitLab instance that has SAML SSO enabled at the group level. Interacts with an external SAML identity provider. Paired with the `:orchestrated` tag.  |
-| `:saml`           | The test requires a GitLab instance that has SAML enabled. Interacts with an external SAML identity provider. This is configured at the instance-level. Paired with the `:orchestrated` tag. |
-| `:skip_signup_disabled` | - |
+| `:instance_saml`  | The test requires a GitLab instance that has SAML SSO enabled at the instance level. Interacts with an external SAML identity provider. Paired with the :orchestrated` tag. |
+| `:skip_signup_disabled` | The test uses UI to sign up a new user and will be skipped in any environment that does not allow new user registration via the UI. |
 | `:smoke`          | The test belongs to the test suite which verifies basic functionality of a GitLab instance.   |
 | `:github`         | The test requires a GitHub personal access token. |
 | `:repository_storage` |  The test requires a GitLab instance to be configured to use multiple [repository storage paths](https://docs.gitlab.com/ee/administration/repository_storage_paths.html). Paired with the `:orchestrated` tag. |
@@ -35,4 +35,4 @@ This is a partial list of the [RSpec metadata](https://relishapp.com/rspec/rspec
 | `:relative_url`   | The test requires a GitLab instance to be installed under a [relative URL](https://docs.gitlab.com/ee/install/relative_url.html). |
 | `:requires_git_protocol_v2`   | - |
 | `:requires_praefect`   | - |
-| `:packages`   | The test requires a GitLab instance that has the [Package Registry](https://docs.gitlab.com/ee/administration/packages/#gitlab-package-registry-administration) enabled. |
+| `:packages`       | The test requires a GitLab instance that has the [Package Registry](https://docs.gitlab.com/ee/administration/packages/#gitlab-package-registry-administration) enabled. |
