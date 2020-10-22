@@ -20,7 +20,7 @@ This is a partial list of the [RSpec metadata](https://relishapp.com/rspec/rspec
 | `:skip_live_env`  | The test will be excluded when run against live deployed environments such as Staging, Canary, and Production. |
 | `:testcase`       | The link to the test case issue in the [Quality Testcases project](https://gitlab.com/gitlab-org/quality/testcases/). |
 | `:mattermost`     | The test requires a GitLab Mattermost service on the GitLab instance |
-| `:ldap_no_server` | The test requires a GitLab instance to be configured to use LDAP. To be used with the `:orchestrated` tag. Uses a docker LDAP server image. |
+| `:ldap_no_server` | The test requires a GitLab instance to be configured to use LDAP. To be used with the `:orchestrated` tag. It does not spin up an LDAP server at orchestration time. Instead, it creates the LDAP server at runtime. |
 | `:ldap_no_tls`    | The test requires a GitLab instance to be configured to use an external LDAP server with TLS not enabled. |
 | `:ldap_tls`       | The test requires a GitLab instance to be configured to use an external LDAP server with TLS enabled. |
 | `:object_storage` | The test requires a GitLab instance to be configured to use multiple [object storage types](https://docs.gitlab.com/ee/administration/object_storage.html). Uses MinIO as the object storage server. |
