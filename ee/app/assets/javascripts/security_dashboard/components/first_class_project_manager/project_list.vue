@@ -1,6 +1,6 @@
 <script>
 import {
-  GlDeprecatedBadge as GlBadge,
+  GlBadge,
   GlButton,
   GlLoadingIcon,
   GlTooltipDirective,
@@ -40,7 +40,7 @@ export default {
     <div>
       <h4 class="h5 font-weight-bold text-secondary border-bottom mb-3 pb-2">
         {{ s__('SecurityReports|Projects added') }}
-        <gl-badge pill class="font-weight-bold">{{ projects.length }}</gl-badge>
+        <gl-badge class="font-weight-bold">{{ projects.length }}</gl-badge>
         <gl-loading-icon v-if="showLoadingIndicator" size="sm" class="float-right" />
       </h4>
       <ul v-if="projects.length" class="list-unstyled">
