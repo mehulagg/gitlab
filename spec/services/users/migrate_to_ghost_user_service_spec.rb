@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Users::MigrateToGhostUserService do
+RSpec.describe Users::MigrateToGhostUserService do
   let!(:user)      { create(:user) }
   let!(:project)   { create(:project, :repository) }
   let(:service)    { described_class.new(user) }
@@ -81,6 +81,15 @@ describe Users::MigrateToGhostUserService do
     context 'snippets' do
       include_examples "migrating a deleted user's associated records to the ghost user", Snippet do
         let(:created_record) { create(:snippet, project: project, author: user) }
+      end
+    end
+
+    context 'reviews' do
+      let!(:user)   { create(:user) }
+      let(:service) { described_class.new(user) }
+
+      include_examples "migrating a deleted user's associated records to the ghost user", Review, [:author] do
+        let(:created_record) { create(:review, author: user) }
       end
     end
 

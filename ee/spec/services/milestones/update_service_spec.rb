@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Milestones::UpdateService do
+RSpec.describe Milestones::UpdateService do
   describe '#execute' do
     context 'refresh related epic dates' do
       it 'updates milestone sourced dates' do

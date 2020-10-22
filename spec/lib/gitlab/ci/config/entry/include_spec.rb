@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::Gitlab::Ci::Config::Entry::Include do
+RSpec.describe ::Gitlab::Ci::Config::Entry::Include do
   subject(:include_entry) { described_class.new(config) }
 
   describe 'validations' do
@@ -58,6 +58,31 @@ describe ::Gitlab::Ci::Config::Entry::Include do
           it 'has specific error' do
             expect(include_entry.errors)
               .to include('include config must specify the job where to fetch the artifact from')
+          end
+        end
+      end
+
+      context 'when using "project"' do
+        context 'and specifying "ref" and "file"' do
+          let(:config) { { project: 'my-group/my-pipeline-library', ref: 'master', file: 'test.yml' } }
+
+          it { is_expected.to be_valid }
+        end
+
+        context 'without "ref"' do
+          let(:config) { { project: 'my-group/my-pipeline-library', file: 'test.yml' } }
+
+          it { is_expected.to be_valid }
+        end
+
+        context 'without "file"' do
+          let(:config) { { project: 'my-group/my-pipeline-library' } }
+
+          it { is_expected.not_to be_valid }
+
+          it 'has specific error' do
+            expect(include_entry.errors)
+              .to include('include config must specify the file where to fetch the config from')
           end
         end
       end

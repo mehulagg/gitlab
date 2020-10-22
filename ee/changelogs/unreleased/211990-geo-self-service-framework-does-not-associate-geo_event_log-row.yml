@@ -1,5 +1,0 @@
----
-title: 'Geo: Self-service framework does not associate geo_event_log row to geo_event'
-merge_request: 28457
-author:
-type: fixed

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20191008143850_fix_any_approver_rule_for_projects.rb')
+require_migration!
 
-describe FixAnyApproverRuleForProjects do
+RSpec.describe FixAnyApproverRuleForProjects do
   let(:namespaces) { table(:namespaces) }
   let(:namespace) { namespaces.create(name: 'gitlab', path: 'gitlab-org') }
   let(:projects) { table(:projects) }

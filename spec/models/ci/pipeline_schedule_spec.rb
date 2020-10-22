@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::PipelineSchedule do
+RSpec.describe Ci::PipelineSchedule do
   subject { build(:ci_pipeline_schedule) }
 
   it { is_expected.to belong_to(:project) }
@@ -22,13 +22,13 @@ describe Ci::PipelineSchedule do
   end
 
   describe 'validations' do
-    it 'does not allow invalid cron patters' do
+    it 'does not allow invalid cron patterns' do
       pipeline_schedule = build(:ci_pipeline_schedule, cron: '0 0 0 * *')
 
       expect(pipeline_schedule).not_to be_valid
     end
 
-    it 'does not allow invalid cron patters' do
+    it 'does not allow invalid cron patterns' do
       pipeline_schedule = build(:ci_pipeline_schedule, cron_timezone: 'invalid')
 
       expect(pipeline_schedule).not_to be_valid
@@ -56,7 +56,7 @@ describe Ci::PipelineSchedule do
     subject { described_class.runnable_schedules }
 
     let!(:pipeline_schedule) do
-      Timecop.freeze(1.day.ago) do
+      travel_to(1.day.ago) do
         create(:ci_pipeline_schedule, :hourly)
       end
     end
@@ -118,7 +118,7 @@ describe Ci::PipelineSchedule do
       let(:pipeline_schedule) { create(:ci_pipeline_schedule, :every_minute) }
 
       it "updates next_run_at to the sidekiq worker's execution time" do
-        Timecop.freeze(Time.parse("2019-06-01 12:18:00+0000")) do
+        travel_to(Time.zone.parse("2019-06-01 12:18:00+0000")) do
           expect(pipeline_schedule.next_run_at).to eq(cron_worker_next_run_at)
         end
       end

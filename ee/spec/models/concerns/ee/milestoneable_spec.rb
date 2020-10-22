@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Milestoneable do
+RSpec.describe EE::Milestoneable do
   describe '#milestone_available?' do
     context 'no Epic' do
       let(:issue) { create(:issue) }

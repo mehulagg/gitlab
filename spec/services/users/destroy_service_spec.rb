@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Users::DestroyService do
+RSpec.describe Users::DestroyService do
   describe "Deletes a user and all their personal projects" do
     let!(:user)      { create(:user) }
     let!(:admin)     { create(:admin) }
@@ -67,6 +67,18 @@ describe Users::DestroyService do
         end
       end
 
+      it 'calls the bulk snippet destroy service with hard delete option if it is present' do
+        # this avoids getting into Projects::DestroyService as it would
+        # call Snippets::BulkDestroyService first!
+        allow(user).to receive(:personal_projects).and_return([])
+
+        expect_next_instance_of(Snippets::BulkDestroyService) do |bulk_destroy_service|
+          expect(bulk_destroy_service).to receive(:execute).with(hard_delete: true).and_call_original
+        end
+
+        service.execute(user, hard_delete: true)
+      end
+
       it 'does not delete project snippets that the user is the author of' do
         repo = create(:project_snippet, :repository, author: user).snippet_repository
         service.execute(user)
@@ -96,7 +108,7 @@ describe Users::DestroyService do
     context 'projects in pending_delete' do
       before do
         project.pending_delete = true
-        project.save
+        project.save!
       end
 
       it 'destroys a project in pending_delete' do
@@ -222,6 +234,14 @@ describe Users::DestroyService do
 
         expect(User.exists?(user.id)).to be(false)
       end
+
+      it 'allows user to be deleted if skip_authorization: true' do
+        other_user = create(:user)
+
+        described_class.new(user).execute(other_user, skip_authorization: true)
+
+        expect(User.exists?(other_user.id)).to be(false)
+      end
     end
 
     context "migrating associated records" do
@@ -290,7 +310,7 @@ describe Users::DestroyService do
 
       it 'of group_members' do
         group_member = create(:group_member)
-        group_member.group.group_members.create(user: user, access_level: 40)
+        group_member.group.group_members.create!(user: user, access_level: 40)
 
         expect_any_instance_of(GroupMember).to receive(:run_callbacks).with(:find).once
         expect_any_instance_of(GroupMember).to receive(:run_callbacks).with(:initialize).once

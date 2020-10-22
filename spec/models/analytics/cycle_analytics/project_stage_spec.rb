@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Analytics::CycleAnalytics::ProjectStage do
+RSpec.describe Analytics::CycleAnalytics::ProjectStage do
   describe 'associations' do
     it { is_expected.to belong_to(:project) }
   end
@@ -23,7 +23,7 @@ describe Analytics::CycleAnalytics::ProjectStage do
 
   context 'relative positioning' do
     it_behaves_like 'a class that supports relative positioning' do
-      let(:project) { build(:project) }
+      let_it_be(:project) { create(:project) }
       let(:factory) { :cycle_analytics_project_stage }
       let(:default_params) { { project: project } }
     end

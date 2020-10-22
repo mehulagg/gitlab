@@ -4,7 +4,7 @@ require 'spec_helper'
 
 # We stub Gitaly in `spec/support/gitaly.rb` for other tests. We don't want
 # those stubs while testing the GitalyClient itself.
-describe Gitlab::GitalyClient do
+RSpec.describe Gitlab::GitalyClient do
   let(:sample_cert) { Rails.root.join('spec/fixtures/clusters/sample_cert.pem').to_s }
 
   before do
@@ -21,10 +21,10 @@ describe Gitlab::GitalyClient do
 
   describe '.query_time', :request_store do
     it 'increments query times' do
-      subject.query_time += 0.451
-      subject.query_time += 0.322
+      subject.add_query_time(0.4510004)
+      subject.add_query_time(0.3220004)
 
-      expect(subject.query_time).to eq(0.773)
+      expect(subject.query_time).to eq(0.773001)
     end
   end
 
@@ -521,8 +521,6 @@ describe Gitlab::GitalyClient do
 
     context 'when the request store is active', :request_store do
       it 'records call details if a RPC is called' do
-        expect(described_class).to receive(:measure_timings).and_call_original
-
         gitaly_server.server_version
 
         expect(described_class.list_call_details).not_to be_empty

@@ -28,61 +28,6 @@ describe('Multi-file store utils', () => {
     });
   });
 
-  describe('findIndexOfFile', () => {
-    let localState;
-
-    beforeEach(() => {
-      localState = [
-        {
-          path: '1',
-        },
-        {
-          path: '2',
-        },
-      ];
-    });
-
-    it('finds in the index of an entry by path', () => {
-      const index = utils.findIndexOfFile(localState, {
-        path: '2',
-      });
-
-      expect(index).toBe(1);
-    });
-  });
-
-  describe('findEntry', () => {
-    let localState;
-
-    beforeEach(() => {
-      localState = {
-        tree: [
-          {
-            type: 'tree',
-            name: 'test',
-          },
-          {
-            type: 'blob',
-            name: 'file',
-          },
-        ],
-      };
-    });
-
-    it('returns an entry found by name', () => {
-      const foundEntry = utils.findEntry(localState.tree, 'tree', 'test');
-
-      expect(foundEntry.type).toBe('tree');
-      expect(foundEntry.name).toBe('test');
-    });
-
-    it('returns undefined when no entry found', () => {
-      const foundEntry = utils.findEntry(localState.tree, 'blob', 'test');
-
-      expect(foundEntry).toBeUndefined();
-    });
-  });
-
   describe('createCommitPayload', () => {
     it('returns API payload', () => {
       const state = {
@@ -101,12 +46,11 @@ describe('Multi-file store utils', () => {
             path: 'added',
             tempFile: true,
             content: 'new file content',
-            base64: true,
+            rawPath: 'blob:https://gitlab.com/048c7ac1-98de-4a37-ab1b-0206d0ea7e1b',
             lastCommitSha: '123456789',
           },
           { ...file('deletedFile'), path: 'deletedFile', deleted: true },
           { ...file('renamedFile'), path: 'renamedFile', prevPath: 'prevPath' },
-          { ...file('replacingFile'), path: 'replacingFile', replaces: true },
         ],
         currentBranchId: 'master',
       };
@@ -133,7 +77,8 @@ describe('Multi-file store utils', () => {
           {
             action: commitActionTypes.create,
             file_path: 'added',
-            content: 'new file content',
+            // atob("new file content")
+            content: 'bmV3IGZpbGUgY29udGVudA==',
             encoding: 'base64',
             last_commit_id: '123456789',
             previous_path: undefined,
@@ -154,14 +99,6 @@ describe('Multi-file store utils', () => {
             last_commit_id: undefined,
             previous_path: 'prevPath',
           },
-          {
-            action: commitActionTypes.update,
-            file_path: 'replacingFile',
-            content: undefined,
-            encoding: 'text',
-            last_commit_id: undefined,
-            previous_path: undefined,
-          },
         ],
         start_sha: undefined,
       });
@@ -181,7 +118,7 @@ describe('Multi-file store utils', () => {
             path: 'added',
             tempFile: true,
             content: 'new file content',
-            base64: true,
+            rawPath: 'blob:https://gitlab.com/048c7ac1-98de-4a37-ab1b-0206d0ea7e1b',
             lastCommitSha: '123456789',
           },
         ],
@@ -212,7 +149,8 @@ describe('Multi-file store utils', () => {
           {
             action: commitActionTypes.create,
             file_path: 'added',
-            content: 'new file content',
+            // atob("new file content")
+            content: 'bmV3IGZpbGUgY29udGVudA==',
             encoding: 'base64',
             last_commit_id: '123456789',
             previous_path: undefined,
@@ -661,27 +599,73 @@ describe('Multi-file store utils', () => {
     });
   });
 
-  describe('addFinalNewlineIfNeeded', () => {
-    it('adds a newline if it doesnt already exist', () => {
-      [
-        {
-          input: 'some text',
-          output: 'some text\n',
-        },
-        {
-          input: 'some text\n',
-          output: 'some text\n',
-        },
-        {
-          input: 'some text\n\n',
-          output: 'some text\n\n',
-        },
-        {
-          input: 'some\n text',
-          output: 'some\n text\n',
-        },
-      ].forEach(({ input, output }) => {
-        expect(utils.addFinalNewlineIfNeeded(input)).toEqual(output);
+  describe('extractMarkdownImagesFromEntries', () => {
+    let mdFile;
+    let entries;
+
+    beforeEach(() => {
+      const img = { content: '/base64/encoded/image+' };
+      mdFile = { path: 'path/to/some/directory/myfile.md' };
+      entries = {
+        // invalid (or lack of) extensions are also supported as long as there's
+        // a real image inside and can go into an <img> tag's `src` and the browser
+        // can render it
+        img,
+        'img.js': img,
+        'img.png': img,
+        'img.with.many.dots.png': img,
+        'path/to/img.gif': img,
+        'path/to/some/img.jpg': img,
+        'path/to/some/img 1/img.png': img,
+        'path/to/some/directory/img.png': img,
+        'path/to/some/directory/img 1.png': img,
+      };
+    });
+
+    it.each`
+      markdownBefore                          | ext       | imgAlt           | imgTitle
+      ${'* ![img](/img)'}                     | ${'jpeg'} | ${'img'}         | ${undefined}
+      ${'* ![img](/img.js)'}                  | ${'js'}   | ${'img'}         | ${undefined}
+      ${'* ![img](img.png)'}                  | ${'png'}  | ${'img'}         | ${undefined}
+      ${'* ![img](./img.png)'}                | ${'png'}  | ${'img'}         | ${undefined}
+      ${'* ![with spaces](../img 1/img.png)'} | ${'png'}  | ${'with spaces'} | ${undefined}
+      ${'* ![img](../../img.gif " title ")'}  | ${'gif'}  | ${'img'}         | ${' title '}
+      ${'* ![img](../img.jpg)'}               | ${'jpg'}  | ${'img'}         | ${undefined}
+      ${'* ![img](/img.png "title")'}         | ${'png'}  | ${'img'}         | ${'title'}
+      ${'* ![img](/img.with.many.dots.png)'}  | ${'png'}  | ${'img'}         | ${undefined}
+      ${'* ![img](img 1.png)'}                | ${'png'}  | ${'img'}         | ${undefined}
+      ${'* ![img](img.png "title here")'}     | ${'png'}  | ${'img'}         | ${'title here'}
+    `(
+      'correctly transforms markdown with uncommitted images: $markdownBefore',
+      ({ markdownBefore, ext, imgAlt, imgTitle }) => {
+        mdFile.content = markdownBefore;
+
+        expect(utils.extractMarkdownImagesFromEntries(mdFile, entries)).toEqual({
+          content: '* {{gl_md_img_1}}',
+          images: {
+            '{{gl_md_img_1}}': {
+              src: `data:image/${ext};base64,/base64/encoded/image+`,
+              alt: imgAlt,
+              title: imgTitle,
+            },
+          },
+        });
+      },
+    );
+
+    it.each`
+      markdown
+      ${'* ![img](i.png)'}
+      ${'* ![img](img.png invalid title)'}
+      ${'* ![img](img.png "incorrect" "markdown")'}
+      ${'* ![img](https://gitlab.com/logo.png)'}
+      ${'* ![img](https://gitlab.com/some/deep/nested/path/logo.png)'}
+    `("doesn't touch invalid or non-existant images in markdown: $markdown", ({ markdown }) => {
+      mdFile.content = markdown;
+
+      expect(utils.extractMarkdownImagesFromEntries(mdFile, entries)).toEqual({
+        content: markdown,
+        images: {},
       });
     });
   });

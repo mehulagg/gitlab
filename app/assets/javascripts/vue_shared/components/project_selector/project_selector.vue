@@ -1,6 +1,7 @@
 <script>
 import { debounce } from 'lodash';
 import { GlLoadingIcon, GlSearchBoxByType, GlInfiniteScroll } from '@gitlab/ui';
+import { __, n__, sprintf } from '~/locale';
 import ProjectListItem from './project_list_item.vue';
 
 const SEARCH_INPUT_TIMEOUT_MS = 500;
@@ -24,23 +25,19 @@ export default {
     },
     showNoResultsMessage: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     showMinimumSearchQueryMessage: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     showLoadingIndicator: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     showSearchErrorMessage: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     totalResults: {
       type: Number,
@@ -52,6 +49,20 @@ export default {
     return {
       searchQuery: '',
     };
+  },
+  computed: {
+    legendText() {
+      const count = this.projectSearchResults.length;
+      const total = this.totalResults;
+
+      if (total > 0) {
+        return sprintf(__('Showing %{count} of %{total} projects'), { count, total });
+      }
+
+      return sprintf(n__('Showing %{count} project', 'Showing %{count} projects', count), {
+        count,
+      });
+    },
   },
   methods: {
     projectClicked(project) {
@@ -77,6 +88,7 @@ export default {
       type="search"
       class="mb-3"
       autofocus
+      data-qa-selector="project_search_field"
       @input="onInput"
     />
     <div class="d-flex flex-column">
@@ -87,17 +99,24 @@ export default {
         :total-items="totalResults"
         @bottomReached="bottomReached"
       >
-        <div v-if="!showLoadingIndicator" slot="items" class="d-flex flex-column">
-          <project-list-item
-            v-for="project in projectSearchResults"
-            :key="project.id"
-            :selected="isSelected(project)"
-            :project="project"
-            :matcher="searchQuery"
-            class="js-project-list-item"
-            @click="projectClicked(project)"
-          />
-        </div>
+        <template v-if="!showLoadingIndicator" #items>
+          <div class="gl-display-flex gl-flex-direction-column gl-p-3">
+            <project-list-item
+              v-for="project in projectSearchResults"
+              :key="project.id"
+              :selected="isSelected(project)"
+              :project="project"
+              :matcher="searchQuery"
+              class="js-project-list-item"
+              data-qa-selector="project_list_item"
+              @click="projectClicked(project)"
+            />
+          </div>
+        </template>
+
+        <template #default>
+          {{ legendText }}
+        </template>
       </gl-infinite-scroll>
       <div v-if="showNoResultsMessage" class="text-muted ml-2 js-no-results-message">
         {{ __('Sorry, no projects matched your search') }}

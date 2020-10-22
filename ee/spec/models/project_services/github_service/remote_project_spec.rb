@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GithubService::RemoteProject do
+RSpec.describe GithubService::RemoteProject do
   let(:owner) { 'MyUser' }
   let(:repository_name) { 'my-project' }
   let(:repo_full_path) { "#{owner}/#{repository_name}" }

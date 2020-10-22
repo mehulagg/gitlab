@@ -1,6 +1,12 @@
+---
+stage: Monitor
+group: Health
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Distributed Tracing - development guidelines
 
-GitLab is instrumented for distributed tracing.
+GitLab is instrumented for distributed tracing. Distributed Tracing in GitLab is currently considered **experimental**, as it has not yet been tested at scale on GitLab.com.
 
 According to [Open Tracing](https://opentracing.io/docs/overview/what-is-tracing/):
 
@@ -27,7 +33,7 @@ process boundaries, the correlation ID is injected into the outgoing request. Th
 the propagation of the correlation ID to each downstream subsystem.
 
 Correlation IDs are normally generated in the Rails application in response to
-certain webrequests. Some user facing systems don't generate correlation IDs in
+certain web requests. Some user facing systems don't generate correlation IDs in
 response to user requests (for example, Git pushes over SSH).
 
 ### Developer guidelines for working with correlation IDs
@@ -66,7 +72,7 @@ GITLAB_TRACING=opentracing://<driver>?<param_name>=<param_value>&<param_name_2>=
 In this example, we have the following hypothetical values:
 
 - `driver`: the driver. [GitLab supports
-  `jaeger`](../user/project/operations/tracing.md). In future, other
+  `jaeger`](../operations/tracing.md). In future, other
   tracing implementations may also be supported.
 - `param_name`, `param_value`: these are driver specific configuration values. Configuration
   parameters for Jaeger are documented [further on in this

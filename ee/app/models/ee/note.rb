@@ -10,14 +10,14 @@ module EE
       include Elastic::ApplicationVersionedSearch
       include UsageStatistics
 
-      belongs_to :review, inverse_of: :notes
-
       scope :searchable, -> { where(system: false).includes(:noteable) }
       scope :by_humans, -> { user.joins(:author).merge(::User.humans) }
       scope :with_suggestions, -> { joins(:suggestions) }
-
-      after_commit :notify_after_create, on: :create
-      after_commit :notify_after_destroy, on: :destroy
+      scope :count_for_vulnerability_id, ->(vulnerability_id) do
+        where(noteable_type: ::Vulnerability.name, noteable_id: vulnerability_id)
+          .group(:noteable_id)
+          .count
+      end
     end
 
     # Original method in Elastic::ApplicationSearch
@@ -62,14 +62,6 @@ module EE
       for_epic? ? noteable.group : super
     end
 
-    def notify_after_create
-      noteable&.after_note_created(self)
-    end
-
-    def notify_after_destroy
-      noteable&.after_note_destroyed(self)
-    end
-
     override :system_note_with_references_visible_for?
     def system_note_with_references_visible_for?(user)
       return false unless super
@@ -77,6 +69,11 @@ module EE
       return true unless system_note_for_epic? && created_before_noteable?
 
       group_reporter?(user, noteable.group)
+    end
+
+    override :skip_notification?
+    def skip_notification?
+      for_vulnerability? || super
     end
 
     private

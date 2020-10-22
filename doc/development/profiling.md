@@ -10,7 +10,8 @@ There is a `Gitlab::Profiler.profile` method, and corresponding
 `bin/profile-url` script, that enable profiling a GET or POST request to a
 specific URL, either as an anonymous user (the default) or as a specific user.
 
-NOTE: **Note:** The first argument to the profiler is either a full URL
+NOTE: **Note:**
+The first argument to the profiler is either a full URL
 (including the instance hostname) or an absolute path, including the
 leading slash.
 
@@ -90,9 +91,6 @@ that builds on this to add some additional niceties, such as allowing
 configuration with a single YAML file for multiple URLs, and uploading of the
 profile and log output to S3.
 
-For GitLab.com, you can find the latest results here (restricted to GitLab Team members only):
-`https://redash.gitlab.com/dashboard/gitlab-profiler-statistics`
-
 ## Sherlock
 
 Sherlock is a custom profiling tool built into GitLab. Sherlock is _only_
@@ -107,9 +105,13 @@ Recorded transactions can be found by navigating to `/sherlock/transactions`.
 
 ## Bullet
 
-Bullet is a Gem that can be used to track down N+1 query problems. Because
-Bullet adds quite a bit of logging noise it's disabled by default. To enable
-Bullet, set the environment variable `ENABLE_BULLET` to a non-empty value before
+Bullet is a Gem that can be used to track down N+1 query problems. Bullet section is
+displayed on the [performance-bar](../administration/monitoring/performance/performance_bar.md).
+
+![Bullet](img/bullet_v13_0.png)
+
+Because Bullet adds quite a bit of logging noise the logging is disabled by default.
+To enable the logging, set the environment variable `ENABLE_BULLET` to a non-empty value before
 starting GitLab. For example:
 
 ```shell

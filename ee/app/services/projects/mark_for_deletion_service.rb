@@ -10,7 +10,7 @@ module Projects
         project,
         current_user,
         { archived: true,
-          marked_for_deletion_at: Time.now.utc,
+          marked_for_deletion_at: Time.current.utc,
           deleting_user: current_user }
       ).execute
       log_event if result[:status] == :success

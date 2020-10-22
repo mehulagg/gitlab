@@ -1,19 +1,20 @@
 <script>
-import { GlDeprecatedButton, GlButton, GlLoadingIcon } from '@gitlab/ui';
-import createFlash from '~/flash';
+import { GlButton, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
-import { joinPaths } from '~/lib/utils/url_utility';
 import HistoryCommentEditor from './history_comment_editor.vue';
 
 export default {
   components: {
-    GlDeprecatedButton,
     GlButton,
     EventItem,
     HistoryCommentEditor,
-    GlLoadingIcon,
+  },
+
+  directives: {
+    SafeHtml,
   },
 
   props: {
@@ -27,6 +28,10 @@ export default {
       required: false,
       default: undefined,
     },
+    notesUrl: {
+      type: String,
+      required: true,
+    },
   },
 
   data() {
@@ -39,9 +44,6 @@ export default {
   },
 
   computed: {
-    commentNote() {
-      return this.comment?.note;
-    },
     actionButtons() {
       return [
         {
@@ -56,6 +58,9 @@ export default {
         },
       ];
     },
+    initialComment() {
+      return this.comment && this.comment.note;
+    },
   },
 
   methods: {
@@ -65,14 +70,12 @@ export default {
     getSaveConfig(note) {
       const isUpdatingComment = Boolean(this.comment);
       const method = isUpdatingComment ? 'put' : 'post';
-      let url = joinPaths(window.location.pathname, 'notes');
+      const url = isUpdatingComment ? this.comment.path : this.notesUrl;
       const data = { note: { note } };
       const emitName = isUpdatingComment ? 'onCommentUpdated' : 'onCommentAdded';
 
-      // If we're updating the comment, use the comment ID in the URL. Otherwise, use the discussion ID in the request data.
-      if (isUpdatingComment) {
-        url = joinPaths(url, this.comment.id);
-      } else {
+      // If we're saving a new comment, use the discussion ID in the request data.
+      if (!isUpdatingComment) {
         data.in_reply_to_discussion_id = this.discussionId;
       }
 
@@ -100,7 +103,7 @@ export default {
     },
     deleteComment() {
       this.isDeletingComment = true;
-      const deleteUrl = joinPaths(window.location.pathname, 'notes', this.comment.id);
+      const deleteUrl = this.comment.path;
 
       axios
         .delete(deleteUrl)
@@ -134,8 +137,8 @@ export default {
 <template>
   <history-comment-editor
     v-if="isEditingComment"
-    class="discussion-reply-holder m-3"
-    :initial-comment="commentNote"
+    class="discussion-reply-holder"
+    :initial-comment="initialComment"
     :is-saving="isSavingComment"
     @onSave="saveComment"
     @onCancel="cancelEditingComment"
@@ -153,16 +156,15 @@ export default {
     icon-class="timeline-icon m-0"
     class="m-3"
   >
-    <div v-html="comment.note"></div>
+    <div v-safe-html="comment.note_html" class="md"></div>
 
     <template #right-content>
       <gl-button
         ref="confirmDeleteButton"
         variant="danger"
-        :disabled="isDeletingComment"
+        :loading="isDeletingComment"
         @click="deleteComment"
       >
-        <gl-loading-icon v-if="isDeletingComment" class="mr-1" />
         {{ __('Delete') }}
       </gl-button>
       <gl-button
@@ -177,8 +179,13 @@ export default {
   </event-item>
 
   <div v-else class="discussion-reply-holder">
-    <gl-deprecated-button ref="addCommentButton" class="btn-text-field" @click="showCommentInput">
+    <button
+      ref="addCommentButton"
+      class="btn btn-text-field"
+      type="button"
+      @click="showCommentInput"
+    >
       {{ s__('vulnerability|Add a comment') }}
-    </gl-deprecated-button>
+    </button>
   </div>
 </template>

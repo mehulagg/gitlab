@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Gitlab::Auth::GroupSaml::TokenActor do
+RSpec.describe Gitlab::Auth::GroupSaml::TokenActor do
   let(:saml_provider) { create(:saml_provider) }
   let(:group) { saml_provider.group }
 

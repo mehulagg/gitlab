@@ -1,55 +1,96 @@
 <script>
-import BlobHeaderEdit from '~/blob/components/blob_edit_header.vue';
-import BlobContentEdit from '~/blob/components/blob_edit_content.vue';
 import { GlLoadingIcon } from '@gitlab/ui';
+import BlobHeaderEdit from '~/blob/components/blob_edit_header.vue';
+import EditorLite from '~/vue_shared/components/editor_lite.vue';
+import { getBaseURL, joinPaths } from '~/lib/utils/url_utility';
+import axios from '~/lib/utils/axios_utils';
+import { SNIPPET_BLOB_CONTENT_FETCH_ERROR } from '~/snippets/constants';
+import { deprecatedCreateFlash as Flash } from '~/flash';
+import { sprintf } from '~/locale';
 
 export default {
   components: {
     BlobHeaderEdit,
-    BlobContentEdit,
     GlLoadingIcon,
+    EditorLite,
   },
   inheritAttrs: false,
   props: {
-    value: {
-      type: String,
-      required: false,
-      default: '',
+    blob: {
+      type: Object,
+      required: true,
     },
-    fileName: {
-      type: String,
+    canDelete: {
+      type: Boolean,
       required: false,
-      default: '',
+      default: true,
     },
-    isLoading: {
+    showDelete: {
       type: Boolean,
       required: false,
       default: true,
     },
   },
+  computed: {
+    inputId() {
+      return `${this.blob.id}_file_path`;
+    },
+  },
+  mounted() {
+    if (!this.blob.isLoaded) {
+      this.fetchBlobContent();
+    }
+  },
+  methods: {
+    onDelete() {
+      this.$emit('delete');
+    },
+    notifyAboutUpdates(args = {}) {
+      this.$emit('blob-updated', args);
+    },
+    fetchBlobContent() {
+      const baseUrl = getBaseURL();
+      const url = joinPaths(baseUrl, this.blob.rawPath);
+
+      axios
+        .get(url, {
+          // This prevents axios from automatically JSON.parse response
+          transformResponse: [f => f],
+        })
+        .then(res => {
+          this.notifyAboutUpdates({ content: res.data });
+        })
+        .catch(e => this.flashAPIFailure(e));
+    },
+    flashAPIFailure(err) {
+      Flash(sprintf(SNIPPET_BLOB_CONTENT_FETCH_ERROR, { err }));
+    },
+  },
 };
 </script>
 <template>
-  <div class="form-group file-editor">
-    <label>{{ s__('Snippets|File') }}</label>
-    <div class="file-holder snippet">
-      <blob-header-edit
-        :value="fileName"
-        data-qa-selector="snippet_file_name"
-        @input="$emit('name-change', $event)"
-      />
-      <gl-loading-icon
-        v-if="isLoading"
-        :label="__('Loading snippet')"
-        size="lg"
-        class="loading-animation prepend-top-20 append-bottom-20"
-      />
-      <blob-content-edit
-        v-else
-        :value="value"
-        :file-name="fileName"
-        @input="$emit('input', $event)"
-      />
-    </div>
+  <div class="file-holder snippet" data-qa-selector="file_holder_container">
+    <blob-header-edit
+      :id="inputId"
+      :value="blob.path"
+      data-qa-selector="file_name_field"
+      :can-delete="canDelete"
+      :show-delete="showDelete"
+      @input="notifyAboutUpdates({ path: $event })"
+      @delete="onDelete"
+    />
+    <gl-loading-icon
+      v-if="!blob.isLoaded"
+      :label="__('Loading snippet')"
+      size="lg"
+      class="loading-animation prepend-top-20 gl-mb-6"
+    />
+    <editor-lite
+      v-else
+      :value="blob.content"
+      :file-global-id="blob.id"
+      :file-name="blob.path"
+      @input="notifyAboutUpdates({ content: $event })"
+    />
   </div>
 </template>

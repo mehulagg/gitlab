@@ -14,8 +14,6 @@
 }
 
 .broadcast-banner-message {
-  @extend .broadcast-message;
-  @extend .alert-warning;
   text-align: center;
 
   .broadcast-message-dismiss {
@@ -24,15 +22,13 @@
 }
 
 .broadcast-notification-message {
-  @extend .broadcast-message;
-
   position: fixed;
   bottom: $gl-padding;
   right: $gl-padding;
   max-width: 300px;
   width: auto;
   background: $white;
-  border: 1px solid $gray-200;
+  border: 1px solid $gray-100;
   box-shadow: 0 1px 2px 0 rgba($black, 0.1);
   border-radius: $border-radius-default;
   z-index: 999;
@@ -42,8 +38,7 @@
   }
 
   .broadcast-message-dismiss {
-    height: 100%;
-    color: $gray-800;
+    color: $gray-700;
   }
 }
 

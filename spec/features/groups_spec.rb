@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Group' do
+RSpec.describe 'Group' do
   let(:user) { create(:admin) }
 
   before do
@@ -34,7 +34,7 @@ describe 'Group' do
 
         expect(group.visibility_level).to eq(Gitlab::VisibilityLevel::PUBLIC)
         expect(current_path).to eq(group_path(group))
-        expect(page).to have_selector '.visibility-icon .fa-globe'
+        expect(page).to have_selector '.visibility-icon [data-testid="earth-icon"]'
       end
     end
 
@@ -65,6 +65,35 @@ describe 'Group' do
 
         expect(current_path).to eq(groups_path)
         expect(page).to have_namespace_error_message
+      end
+    end
+
+    describe 'real-time group url validation', :js do
+      it 'shows a message if group url is available' do
+        fill_in 'group_path', with: 'az'
+        wait_for_requests
+
+        expect(page).to have_content('Group path is available')
+      end
+
+      it 'shows an error if group url is taken' do
+        fill_in 'group_path', with: user.username
+        wait_for_requests
+
+        expect(page).to have_content('Group path is already taken')
+      end
+
+      it 'does not break after an invalid form submit' do
+        fill_in 'group_name', with: 'MyGroup'
+        fill_in 'group_path', with: 'z'
+        click_button 'Create group'
+
+        expect(page).to have_content('Group URL is too short')
+
+        fill_in 'group_path', with: 'az'
+        wait_for_requests
+
+        expect(page).to have_content('Group path is available')
       end
     end
 

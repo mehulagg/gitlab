@@ -4,6 +4,7 @@ class Notify < ApplicationMailer
   include ActionDispatch::Routing::PolymorphicRoutes
   include GitlabRoutingHelper
   include EmailsHelper
+  include ReminderEmailsHelper
   include IssuablesHelper
 
   include Emails::Issues
@@ -17,12 +18,16 @@ class Notify < ApplicationMailer
   include Emails::AutoDevops
   include Emails::RemoteMirrors
   include Emails::Releases
+  include Emails::Groups
+  include Emails::Reviews
+  include Emails::ServiceDesk
 
-  helper MilestonesHelper
+  helper TimeboxesHelper
   helper MergeRequestsHelper
   helper DiffHelper
   helper BlobHelper
   helper EmailsHelper
+  helper ReminderEmailsHelper
   helper MembersHelper
   helper AvatarsHelper
   helper GitlabRoutingHelper

@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 # rubocop:disable RSpec/FactoriesInMigrationSpecs
-describe Gitlab::BackgroundMigration::BackfillVersionDataFromGitaly do
+RSpec.describe Gitlab::BackgroundMigration::BackfillVersionDataFromGitaly do
   let(:issue) { create(:issue) }
 
   def perform_worker

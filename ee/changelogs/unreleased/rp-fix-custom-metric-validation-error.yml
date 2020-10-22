@@ -1,6 +1,0 @@
----
-title: Display error message in custom metric form validation when prometheus URL
-  is blocked
-merge_request: 27863
-author:
-type: fixed

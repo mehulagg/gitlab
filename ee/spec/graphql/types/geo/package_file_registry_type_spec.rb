@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['PackageFileRegistry'] do
+RSpec.describe GitlabSchema.types['PackageFileRegistry'] do
   it_behaves_like 'a Geo registry type'
 
   it 'has the expected fields (other than those included in RegistryType)' do

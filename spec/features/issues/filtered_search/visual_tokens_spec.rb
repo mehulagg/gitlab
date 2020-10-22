@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Visual tokens', :js do
+RSpec.describe 'Visual tokens', :js do
   include FilteredSearchHelpers
 
   let!(:project) { create(:project) }
@@ -53,7 +53,7 @@ describe 'Visual tokens', :js do
     end
 
     it 'ends editing mode when document is clicked' do
-      find('#content-body').click
+      find('.js-navbar').click
 
       expect_filtered_search_input_empty
       expect(page).to have_css('#js-dropdown-author', visible: false)
@@ -142,7 +142,7 @@ describe 'Visual tokens', :js do
     it 'does not tokenize incomplete token' do
       filtered_search.send_keys('author:=')
 
-      find('body').click
+      find('.js-navbar').click
       token = page.all('.tokens-container .js-visual-token')[1]
 
       expect_filtered_search_input_empty
@@ -174,5 +174,21 @@ describe 'Visual tokens', :js do
 
     expect(token.find('.name').text).to eq('Label')
     expect(token.find('.operator').text).to eq('=')
+  end
+
+  describe 'Any/None option' do
+    it 'hidden when NOT operator is selected' do
+      input_filtered_search('milestone:!=', extra_space: false, submit: false)
+
+      expect(page).not_to have_selector("#js-dropdown-milestone", text: 'Any')
+      expect(page).not_to have_selector("#js-dropdown-milestone", text: 'None')
+    end
+
+    it 'shown when EQUAL operator is selected' do
+      input_filtered_search('milestone:=', extra_space: false, submit: false)
+
+      expect(page).to have_selector("#js-dropdown-milestone", text: 'Any')
+      expect(page).to have_selector("#js-dropdown-milestone", text: 'None')
+    end
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::GroupSaml::FailureHandler do
+RSpec.describe Gitlab::Auth::GroupSaml::FailureHandler do
   include Gitlab::Routing
 
   let(:parent_handler) { double }
@@ -18,9 +18,13 @@ describe Gitlab::Auth::GroupSaml::FailureHandler do
       'omniauth.error.strategy' => strategy,
       'devise.mapping' => Devise.mappings[:user],
       'warden' => warden,
-      'action_dispatch.key_generator' => ActiveSupport::KeyGenerator.new('b2efbaccbdb9548217eebc73a896db73'), # necessary for setting signed cookies in lib/gitlab/experimentation.rb
-      'action_dispatch.signed_cookie_salt' => 'a4fb52b0ccb302eaef92bda18fedf5c3', # necessary for setting signed cookies in lib/gitlab/experimentation.rb
-      'action_dispatch.cookies_rotations' => OpenStruct.new(signed: []) # necessary for setting signed cookies in lib/gitlab/experimentation.rb
+      # The following are necessary for setting signed/encrypted cookies such as in
+      # lib/gitlab/experimentation.rb or app/controllers/concerns/known_sign_in.rb
+      'action_dispatch.key_generator' => ActiveSupport::KeyGenerator.new('b2efbaccbdb9548217eebc73a896db73'),
+      'action_dispatch.signed_cookie_salt' => 'a4fb52b0ccb302eaef92bda18fedf5c3',
+      'action_dispatch.encrypted_signed_cookie_salt' => 'a4fb52b0ccb302eaef92bda18fedf5c3',
+      'action_dispatch.encrypted_cookie_salt' => 'a4fb52b0ccb302eaef92bda18fedf5c3',
+      'action_dispatch.cookies_rotations' => OpenStruct.new(signed: [], encrypted: [])
     }
     Rack::MockRequest.env_for(path, params)
   end

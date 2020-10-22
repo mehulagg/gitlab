@@ -1,5 +1,0 @@
----
-title: Allow SCIM to create an identity for an existing user
-merge_request: 28379
-author:
-type: fixed

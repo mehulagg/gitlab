@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Kubernetes::Helm::BaseCommand do
+RSpec.describe Gitlab::Kubernetes::Helm::BaseCommand do
   subject(:base_command) do
     test_class.new(rbac)
   end
@@ -11,25 +11,13 @@ describe Gitlab::Kubernetes::Helm::BaseCommand do
   let(:rbac) { false }
 
   let(:test_class) do
-    Class.new do
-      include Gitlab::Kubernetes::Helm::BaseCommand
-
+    Class.new(Gitlab::Kubernetes::Helm::BaseCommand) do
       def initialize(rbac)
-        @rbac = rbac
-      end
-
-      def name
-        "test-class-name"
-      end
-
-      def rbac?
-        @rbac
-      end
-
-      def files
-        {
-          some: 'value'
-        }
+        super(
+          name: 'test-class-name',
+          rbac: rbac,
+          files: { some: 'value' }
+        )
       end
     end
   end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe TreeHelper do
+RSpec.describe TreeHelper do
   let(:project) { create(:project, :repository) }
 
   describe '#tree_content_data' do

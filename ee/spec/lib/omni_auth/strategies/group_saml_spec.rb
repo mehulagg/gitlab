@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe OmniAuth::Strategies::GroupSaml, type: :strategy do
+RSpec.describe OmniAuth::Strategies::GroupSaml, type: :strategy do
   include Gitlab::Routing
 
   let(:strategy) { [OmniAuth::Strategies::GroupSaml, {}] }

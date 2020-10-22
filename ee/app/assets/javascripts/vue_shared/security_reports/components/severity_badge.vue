@@ -1,20 +1,15 @@
 <script>
 import { SEVERITY_LEVELS } from 'ee/security_dashboard/store/constants';
-import { GlIcon } from '@gitlab/ui';
-
-export const CLASS_NAME_MAP = {
-  critical: 'text-danger-800',
-  high: 'text-danger-600',
-  medium: 'text-warning-400',
-  low: 'text-warning-300',
-  info: 'text-primary-400',
-  unknown: 'text-secondary-400',
-};
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { SEVERITY_CLASS_NAME_MAP, SEVERITY_TOOLTIP_TITLE_MAP } from './constants';
 
 export default {
   name: 'SeverityBadge',
   components: {
     GlIcon,
+  },
+  directives: {
+    tooltip: GlTooltipDirective,
   },
   props: {
     severity: {
@@ -24,13 +19,13 @@ export default {
   },
   computed: {
     hasSeverityBadge() {
-      return Object.keys(CLASS_NAME_MAP).includes(this.severityKey);
+      return Object.keys(SEVERITY_CLASS_NAME_MAP).includes(this.severityKey);
     },
     severityKey() {
       return this.severity.toLowerCase();
     },
     className() {
-      return CLASS_NAME_MAP[this.severityKey];
+      return SEVERITY_CLASS_NAME_MAP[this.severityKey];
     },
     iconName() {
       return `severity-${this.severityKey}`;
@@ -38,13 +33,18 @@ export default {
     severityTitle() {
       return SEVERITY_LEVELS[this.severityKey] || this.severity;
     },
+    tooltipTitle() {
+      return SEVERITY_TOOLTIP_TITLE_MAP[this.severityKey];
+    },
   },
 };
 </script>
 
 <template>
-  <div v-if="hasSeverityBadge" class="severity-badge text-left text-nowrap gl-text-gray-900">
-    <span :class="className"><gl-icon :name="iconName" :size="12" class="append-right-8"/></span
-    >{{ severityTitle }}
+  <div v-if="hasSeverityBadge" class="severity-badge text-sm-left text-nowrap gl-text-gray-900">
+    <span :class="className"
+      ><gl-icon v-tooltip="tooltipTitle" :name="iconName" :size="12" class="gl-mr-3"
+    /></span>
+    {{ severityTitle }}
   </div>
 </template>

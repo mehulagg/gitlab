@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'GitlabSchema configurations' do
+RSpec.describe 'GitlabSchema configurations' do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project) }
@@ -190,7 +190,9 @@ describe 'GitlabSchema configurations' do
         variables: {}.to_s,
         complexity: 181,
         depth: 13,
-        duration: 7
+        duration_s: 7,
+        used_fields: an_instance_of(Array),
+        used_deprecated_fields: an_instance_of(Array)
       }
 
       expect_any_instance_of(Gitlab::Graphql::QueryAnalyzers::LoggerAnalyzer).to receive(:duration).and_return(7)

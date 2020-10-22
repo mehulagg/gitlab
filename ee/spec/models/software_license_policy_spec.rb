@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SoftwareLicensePolicy do
+RSpec.describe SoftwareLicensePolicy do
   subject { build(:software_license_policy) }
 
   describe 'validations' do

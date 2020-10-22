@@ -72,7 +72,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/events?target_type=issue&action=created&after=2017-01-31&before=2017-03-01&scope=all
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/events?target_type=issue&action=created&after=2017-01-31&before=2017-03-01&scope=all"
 ```
 
 Example response:
@@ -80,6 +80,7 @@ Example response:
 ```json
 [
   {
+    "id": 1,
     "title":null,
     "project_id":1,
     "action_name":"opened",
@@ -99,6 +100,7 @@ Example response:
     "author_username":"user3"
   },
   {
+    "id": 2,
     "title":null,
     "project_id":1,
     "action_name":"opened",
@@ -144,7 +146,7 @@ Parameters:
 | `sort` | string | no | Sort events in `asc` or `desc` order by `created_at`. Default is `desc` |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/users/:id/events
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/users/:id/events"
 ```
 
 Example response:
@@ -152,6 +154,7 @@ Example response:
 ```json
 [
   {
+    "id": 3,
     "title": null,
     "project_id": 15,
     "action_name": "closed",
@@ -170,6 +173,7 @@ Example response:
     "author_username": "root"
   },
   {
+    "id": 4,
     "title": null,
     "project_id": 15,
     "action_name": "pushed",
@@ -197,6 +201,7 @@ Example response:
     "target_title": null
   },
   {
+    "id": 5,
     "title": null,
     "project_id": 15,
     "action_name": "closed",
@@ -215,6 +220,7 @@ Example response:
     "author_username": "root"
   },
   {
+    "id": 7,
     "title": null,
     "project_id": 15,
     "action_name": "commented on",
@@ -255,7 +261,8 @@ Example response:
 
 ## List a Project's visible events
 
->**Note:** This endpoint has been around longer than the others. Documentation was formerly located in the [Projects API pages](projects.md).
+NOTE: **Note:**
+This endpoint has been around longer than the others. Documentation was formerly located in the [Projects API pages](projects.md).
 
 Get a list of visible events for a particular project.
 
@@ -277,7 +284,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/:project_id/events?target_type=issue&action=created&after=2017-01-31&before=2017-03-01
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:project_id/events?target_type=issue&action=created&after=2017-01-31&before=2017-03-01"
 ```
 
 Example response:
@@ -285,6 +292,7 @@ Example response:
 ```json
 [
   {
+    "id": 8
     "title":null,
     "project_id":1,
     "action_name":"opened",
@@ -305,6 +313,7 @@ Example response:
     "author_username":"user3"
   },
   {
+    "id": 9,
     "title":null,
     "project_id":1,
     "action_name":"opened",
@@ -325,6 +334,7 @@ Example response:
     "author_username":"ted"
   },
   {
+    "id": 10,
     "title": null,
     "project_id": 1,
     "action_name": "commented on",

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe CredentialsInventoryHelper do
+RSpec.describe CredentialsInventoryHelper do
   let(:filter) { nil }
 
   before do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupMemberPresenter do
+RSpec.describe GroupMemberPresenter do
   let(:user) { double(:user) }
   let(:group) { double(:group) }
   let(:group_member) { double(:group_member, source: group, user: user) }
@@ -58,6 +58,28 @@ describe GroupMemberPresenter do
       end
 
       it { expect(presenter.can_update?).to eq(false) }
+    end
+  end
+
+  describe '#valid_level_roles?' do
+    context 'with minimal access role feature switched on' do
+      before do
+        allow(group_member).to receive(:highest_group_member)
+        allow(group_member).to receive_message_chain(:class, :access_level_roles).and_return(::Gitlab::Access.options_with_owner)
+        expect(group).to receive(:access_level_roles).and_return(::Gitlab::Access.options_with_minimal_access)
+      end
+
+      it { expect(presenter.valid_level_roles).to eq(::Gitlab::Access.options_with_minimal_access) }
+    end
+
+    context 'with minimal access role feature switched off' do
+      it_behaves_like '#valid_level_roles', :group do
+        let(:expected_roles) { { 'Developer' => 30, 'Maintainer' => 40, 'Owner' => 50, 'Reporter' => 20 } }
+
+        before do
+          entity.parent = group
+        end
+      end
     end
   end
 end

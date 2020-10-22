@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::LdapSettingsController do
+RSpec.describe Groups::LdapSettingsController do
   include LdapHelpers
 
   let(:group) { create(:group) }

@@ -1,33 +1,73 @@
 <script>
-import { throttle } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
-import { __, sprintf } from '~/locale';
-import ImportedProjectTableRow from './imported_project_table_row.vue';
+import { GlButton, GlLoadingIcon, GlIntersectionObserver, GlModal } from '@gitlab/ui';
+import { n__, __, sprintf } from '~/locale';
 import ProviderRepoTableRow from './provider_repo_table_row.vue';
-import eventHub from '../event_hub';
-
-const reposFetchThrottleDelay = 1000;
 
 export default {
   name: 'ImportProjectsTable',
   components: {
-    ImportedProjectTableRow,
     ProviderRepoTableRow,
-    LoadingButton,
     GlLoadingIcon,
+    GlButton,
+    GlModal,
+    GlIntersectionObserver,
   },
   props: {
     providerTitle: {
       type: String,
       required: true,
     },
+    filterable: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    paginatable: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
 
   computed: {
-    ...mapState(['importedProjects', 'providerRepos', 'isLoadingRepos', 'filter']),
-    ...mapGetters(['isImportingAnyRepo', 'hasProviderRepos', 'hasImportedProjects']),
+    ...mapState(['filter', 'repositories', 'namespaces', 'defaultTargetNamespace']),
+    ...mapGetters([
+      'isLoading',
+      'isImportingAnyRepo',
+      'hasImportableRepos',
+      'hasIncompatibleRepos',
+      'importAllCount',
+    ]),
+
+    pagePaginationStateKey() {
+      return `${this.filter}-${this.repositories.length}`;
+    },
+
+    availableNamespaces() {
+      const serializedNamespaces = this.namespaces.map(({ fullPath }) => ({
+        id: fullPath,
+        text: fullPath,
+      }));
+
+      return [
+        { text: __('Groups'), children: serializedNamespaces },
+        {
+          text: __('Users'),
+          children: [{ id: this.defaultTargetNamespace, text: this.defaultTargetNamespace }],
+        },
+      ];
+    },
+
+    importAllButtonText() {
+      return this.hasIncompatibleRepos
+        ? n__(
+            'Import %d compatible repository',
+            'Import %d compatible repositories',
+            this.importAllCount,
+          )
+        : n__('Import %d repository', 'Import %d repositories', this.importAllCount);
+    },
 
     emptyStateText() {
       return sprintf(__('No %{providerTitle} repositories found'), {
@@ -41,7 +81,12 @@ export default {
   },
 
   mounted() {
-    return this.fetchRepos();
+    this.fetchNamespaces();
+    this.fetchJobs();
+
+    if (!this.paginatable) {
+      this.fetchRepos();
+    }
   },
 
   beforeDestroy() {
@@ -52,25 +97,13 @@ export default {
   methods: {
     ...mapActions([
       'fetchRepos',
-      'fetchReposFiltered',
       'fetchJobs',
+      'fetchNamespaces',
       'stopJobsPolling',
       'clearJobsEtagPoll',
       'setFilter',
+      'importAll',
     ]),
-
-    importAll() {
-      eventHub.$emit('importAll');
-    },
-
-    handleFilterInput({ target }) {
-      this.setFilter(target.value);
-    },
-
-    throttledFetchRepos: throttle(function fetch() {
-      eventHub.$off('importAll');
-      this.fetchRepos();
-    }, reposFetchThrottleDelay),
   },
 };
 </script>
@@ -78,38 +111,50 @@ export default {
 <template>
   <div>
     <p class="light text-nowrap mt-2">
-      {{ s__('ImportProjects|Select the projects you want to import') }}
+      {{ s__('ImportProjects|Select the repositories you want to import') }}
     </p>
-
+    <template v-if="hasIncompatibleRepos">
+      <slot name="incompatible-repos-warning"></slot>
+    </template>
     <div class="d-flex justify-content-between align-items-end flex-wrap mb-3">
-      <loading-button
-        container-class="btn btn-success js-import-all"
+      <gl-button
+        variant="success"
         :loading="isImportingAnyRepo"
-        :label="__('Import all repositories')"
-        :disabled="!hasProviderRepos"
+        :disabled="!hasImportableRepos"
         type="button"
-        @click="importAll"
-      />
-      <form novalidate @submit.prevent>
+        @click="$refs.importAllModal.show()"
+        >{{ importAllButtonText }}</gl-button
+      >
+      <gl-modal
+        ref="importAllModal"
+        modal-id="import-all-modal"
+        :title="s__('ImportProjects|Import repositories')"
+        :ok-title="__('Import')"
+        @ok="importAll"
+      >
+        {{
+          n__(
+            'Are you sure you want to import %d repository?',
+            'Are you sure you want to import %d repositories?',
+            importAllCount,
+          )
+        }}
+      </gl-modal>
+
+      <slot name="actions"></slot>
+      <form v-if="filterable" class="gl-ml-auto" novalidate @submit.prevent>
         <input
-          :value="filter"
           data-qa-selector="githubish_import_filter_field"
           class="form-control"
           name="filter"
-          :placeholder="__('Filter your projects by name')"
+          :placeholder="__('Filter your repositories by name')"
           autofocus
           size="40"
-          @input="handleFilterInput($event)"
-          @keyup.enter="throttledFetchRepos"
+          @keyup.enter="setFilter($event.target.value)"
         />
       </form>
     </div>
-    <gl-loading-icon
-      v-if="isLoadingRepos"
-      class="js-loading-button-icon import-projects-loading-icon"
-      size="md"
-    />
-    <div v-else-if="hasProviderRepos || hasImportedProjects" class="table-responsive">
+    <div v-if="repositories.length" class="table-responsive">
       <table class="table import-table">
         <thead>
           <th class="import-jobs-from-col">{{ fromHeaderText }}</th>
@@ -118,16 +163,28 @@ export default {
           <th class="import-jobs-cta-col"></th>
         </thead>
         <tbody>
-          <imported-project-table-row
-            v-for="project in importedProjects"
-            :key="project.id"
-            :project="project"
-          />
-          <provider-repo-table-row v-for="repo in providerRepos" :key="repo.id" :repo="repo" />
+          <template v-for="repo in repositories">
+            <provider-repo-table-row
+              :key="repo.importSource.providerLink"
+              :repo="repo"
+              :available-namespaces="availableNamespaces"
+            />
+          </template>
         </tbody>
       </table>
     </div>
-    <div v-else class="text-center">
+    <gl-intersection-observer
+      v-if="paginatable"
+      :key="pagePaginationStateKey"
+      @appear="fetchRepos"
+    />
+    <gl-loading-icon
+      v-if="isLoading"
+      class="js-loading-button-icon import-projects-loading-icon"
+      size="md"
+    />
+
+    <div v-if="!isLoading && repositories.length === 0" class="text-center">
       <strong>{{ emptyStateText }}</strong>
     </div>
   </div>

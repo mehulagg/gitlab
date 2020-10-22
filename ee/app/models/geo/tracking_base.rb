@@ -14,9 +14,9 @@ module Geo
     end
 
     def self.connected?
-      super if ::Gitlab::Geo.geo_database_configured?
+      return false unless ::Gitlab::Geo.geo_database_configured?
 
-      false
+      connection_handler.connected?(connection_specification_name)
     end
 
     def self.connection

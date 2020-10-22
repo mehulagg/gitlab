@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::LogCursor::Events::ResetChecksumEvent, :clean_gitlab_redis_shared_state do
+RSpec.describe Gitlab::Geo::LogCursor::Events::ResetChecksumEvent, :clean_gitlab_redis_shared_state do
   let(:logger) { Gitlab::Geo::LogCursor::Logger.new(described_class, Logger::INFO) }
   let(:event_log) { create(:geo_event_log, :reset_checksum_event) }
   let!(:event_log_state) { create(:geo_event_log_state, event_id: event_log.id - 1) }
@@ -44,6 +44,8 @@ describe Gitlab::Geo::LogCursor::Events::ResetChecksumEvent, :clean_gitlab_redis
         subject.process
 
         expect(registry.reload).to have_attributes(
+          primary_repository_checksummed: true,
+          primary_wiki_checksummed: true,
           repository_verification_checksum_sha: nil,
           wiki_verification_checksum_sha: nil
         )

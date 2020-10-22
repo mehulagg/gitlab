@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Oauth::GeoAuthController, :geo do
+RSpec.describe Oauth::GeoAuthController, :geo do
   include EE::GeoHelpers
 
   # The Geo OAuth workflow depends on the OAuth application and the URL

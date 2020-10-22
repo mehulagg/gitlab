@@ -14,5 +14,3 @@ export const createStore = () =>
     actions,
     mutations,
   });
-
-export default createStore();

@@ -23,9 +23,24 @@ const determineSelectedPlan = (planId, plans) => {
   return plans[0] && plans[0].value;
 };
 
+const determineNumberOfUsers = (groupId, groups) => {
+  if (!groupId || !groups) {
+    return 1;
+  }
+
+  const chosenGroup = groups.find(group => group.value === groupId);
+
+  if (chosenGroup?.numberOfUsers > 1) {
+    return chosenGroup.numberOfUsers;
+  }
+
+  return 1;
+};
+
 export default ({
   planData = '[]',
   planId,
+  namespaceId,
   setupForCompany,
   fullName,
   newUser,
@@ -33,6 +48,8 @@ export default ({
 }) => {
   const availablePlans = parsePlanData(planData);
   const isNewUser = parseBoolean(newUser);
+  const groupId = parseInt(namespaceId, 10) || null;
+  const groups = parseGroupData(groupData);
 
   return {
     currentStep: STEPS[0],
@@ -41,10 +58,10 @@ export default ({
     selectedPlan: determineSelectedPlan(planId, availablePlans),
     isNewUser,
     fullName,
-    groupData: parseGroupData(groupData),
-    selectedGroup: null,
+    groupData: groups,
+    selectedGroup: groupId,
     organizationName: null,
-    numberOfUsers: 1,
+    numberOfUsers: determineNumberOfUsers(groupId, groups),
     country: null,
     streetAddressLine1: null,
     streetAddressLine2: null,

@@ -1,5 +1,0 @@
----
-title: Fix incorrect repositioning of design comment pins when mouse leaves viewport
-merge_request: 29464
-author:
-type: fixed

@@ -17,6 +17,7 @@ eslint-report.html
 .rbx/
 /.ruby-gemset
 /.ruby-version
+/.tool-versions
 /.rvmrc
 .sass-cache/
 /.secret
@@ -35,7 +36,6 @@ eslint-report.html
 /config/gitlab.yml
 /config/gitlab_ci.yml
 /config/Gitlab.gitlab-license
-/config/initializers/rack_attack.rb
 /config/initializers/smtp_settings.rb
 /config/initializers/relative_url.rb
 /config/resque.yml
@@ -71,13 +71,13 @@ eslint-report.html
 /builds*
 /.gitlab_workhorse_secret
 /.gitlab_pages_secret
+/.gitlab_kas_secret
 /webpack-report/
 /knapsack/
 /rspec_flaky/
 /locale/**/LC_MESSAGES
 /locale/**/*.time_stamp
 /.rspec
-/.gitlab_pages_secret
 /.gitlab_smime_key
 /.gitlab_smime_cert
 package-lock.json
@@ -92,3 +92,8 @@ jsdoc/
 webpack-dev-server.json
 /.nvimrc
 .solargraph.yml
+apollo.config.js
+/tmp/matching_foss_tests.txt
+/tmp/matching_tests.txt
+ee/changelogs/unreleased-ee
+/sitespeed-result

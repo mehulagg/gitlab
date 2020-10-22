@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DesignManagement::DesignAtVersion do
+RSpec.describe DesignManagement::DesignAtVersion do
   include DesignManagementTestHelpers
 
   let_it_be(:issue, reload: true) { create(:issue) }
@@ -78,18 +78,23 @@ describe DesignManagement::DesignAtVersion do
     let!(:version_a) do
       create(:design_version, designs: [design_a])
     end
+
     let!(:version_b) do
       create(:design_version, designs: [design_b])
     end
+
     let!(:version_mod) do
       create(:design_version, modified_designs: [design_a, design_b])
     end
+
     let!(:version_c) do
       create(:design_version, deleted_designs: [design_a])
     end
+
     let!(:version_d) do
       create(:design_version, deleted_designs: [design_b])
     end
+
     let!(:version_e) do
       create(:design_version, designs: [design_a])
     end
@@ -269,36 +274,15 @@ describe DesignManagement::DesignAtVersion do
     build(:design_at_version, design: design, version: version).id
   end
 
-  describe '.instantiate' do
-    context 'when attrs are valid' do
-      subject do
-        described_class.instantiate(design: design, version: version)
-      end
-
-      it { is_expected.to be_a(described_class).and(be_valid) }
-    end
-
-    context 'when attrs are invalid' do
-      subject do
-        described_class.instantiate(
-          design: create(:design),
-          version: create(:design_version)
-        )
-      end
-
-      it 'raises a validation error' do
-        expect { subject }.to raise_error(ActiveModel::ValidationError)
-      end
-    end
-  end
-
   describe '.lazy_find' do
     let!(:version_a) do
       create(:design_version, designs: create_list(:design, 3, issue: issue))
     end
+
     let!(:version_b) do
       create(:design_version, designs: create_list(:design, 1, issue: issue))
     end
+
     let!(:version_c) do
       create(:design_version, designs: create_list(:design, 1, issue: issue_b))
     end
@@ -346,10 +330,12 @@ describe DesignManagement::DesignAtVersion do
     let!(:version_a) do
       create(:design_version, designs: create_list(:design, 3, issue: issue))
     end
+
     let!(:version_b) do
       create(:design_version, designs: create_list(:design, 2, issue: issue))
     end
     # 1 version, with 3 designs on issue B, so 1*3 = 3
+
     let!(:version_c) do
       create(:design_version, designs: create_list(:design, 3, issue: issue_b))
     end

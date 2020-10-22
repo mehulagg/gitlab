@@ -13,7 +13,7 @@ module StatusPage
     def process(issues)
       json = serialize(issues)
 
-      upload(object_key, json)
+      upload_json(object_key, json)
     end
 
     def serialize(issues)
@@ -21,7 +21,7 @@ module StatusPage
     end
 
     def object_key
-      StatusPage::Storage.list_path
+      Gitlab::StatusPage::Storage.list_path
     end
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EpicPolicy do
+RSpec.describe EpicPolicy do
   include ExternalAuthorizationServiceHelpers
 
   let(:user) { create(:user) }

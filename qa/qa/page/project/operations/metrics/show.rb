@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'securerandom'
+
 module QA
   module Page
     module Project
@@ -11,10 +13,17 @@ module QA
 
             view 'app/assets/javascripts/monitoring/components/dashboard.vue' do
               element :prometheus_graphs
+            end
+
+            view 'app/assets/javascripts/monitoring/components/dashboard_header.vue' do
               element :dashboards_filter_dropdown
               element :environments_dropdown
-              element :edit_dashboard_button
-              element :show_last_dropdown
+              element :range_picker_dropdown
+            end
+
+            view 'app/assets/javascripts/monitoring/components/dashboard_actions_menu.vue' do
+              element :actions_menu_dropdown
+              element :edit_dashboard_button_enabled
             end
 
             view 'app/assets/javascripts/monitoring/components/duplicate_dashboard_form.vue' do
@@ -25,6 +34,16 @@ module QA
               element :prometheus_graph_widgets
               element :prometheus_widgets_dropdown
               element :alert_widget_menu_item
+              element :generate_chart_link_menu_item
+            end
+
+            view 'app/assets/javascripts/vue_shared/components/date_time_picker/date_time_picker.vue' do
+              element :quick_range_item
+            end
+
+            view 'app/assets/javascripts/monitoring/components/variables_section.vue' do
+              element :variables_content
+              element :variable_item
             end
 
             def wait_for_metrics
@@ -44,17 +63,27 @@ module QA
             end
 
             def has_edit_dashboard_enabled?
-              within_element :prometheus_graphs do
-                has_element? :edit_dashboard_button
+              click_element :actions_menu_dropdown
+
+              within_element :actions_menu_dropdown do
+                has_element? :edit_dashboard_button_enabled
               end
             end
 
             def duplicate_dashboard(save_as = 'test_duplication.yml', commit_option = 'Commit to master branch')
-              click_element :dashboards_filter_dropdown
-              click_on 'Duplicate dashboard'
-              fill_element :duplicate_dashboard_filename_field, save_as
+              click_element :actions_menu_dropdown
+              click_on 'Duplicate current dashboard'
+              fill_element :duplicate_dashboard_filename_field, "#{SecureRandom.hex(8)}-#{save_as}"
               choose commit_option
               within('.modal-content') { click_button(class: 'btn-success') }
+            end
+
+            def select_dashboard(dashboard_name)
+              click_element :dashboards_filter_dropdown
+
+              within_element :dashboards_filter_dropdown do
+                click_on dashboard_name
+              end
             end
 
             def filter_environment(environment = 'production')
@@ -66,9 +95,30 @@ module QA
             end
 
             def show_last(range = '8 hours')
-              click_element :show_last_dropdown
-              within_element :show_last_dropdown do
-                click_on range
+              all_elements(:range_picker_dropdown, minimum: 1).first.click
+              click_element :quick_range_item, text: range
+            end
+
+            def copy_link_to_first_chart
+              all_elements(:prometheus_widgets_dropdown, minimum: 1).first.click
+              find_element(:generate_chart_link_menu_item)['data-clipboard-text']
+            end
+
+            def has_custom_metric?(metric)
+              within_element :prometheus_graphs do
+                has_text?(metric)
+              end
+            end
+
+            def has_templating_variable?(variable)
+              within_element :variables_content do
+                has_element?(:variable_item, text: variable)
+              end
+            end
+
+            def has_template_metric?(metric)
+              within_element :prometheus_graphs do
+                has_text?(metric)
               end
             end
 

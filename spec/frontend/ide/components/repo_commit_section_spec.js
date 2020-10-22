@@ -1,7 +1,9 @@
 import { mount } from '@vue/test-utils';
 import { createStore } from '~/ide/stores';
-import router from '~/ide/ide_router';
+import { createRouter } from '~/ide/ide_router';
+import { keepAlive } from '../../helpers/keep_alive_component_helper';
 import RepoCommitSection from '~/ide/components/repo_commit_section.vue';
+import EmptyState from '~/ide/components/commit_sidebar/empty_state.vue';
 import { stageKeys } from '~/ide/constants';
 import { file } from '../helpers';
 
@@ -9,10 +11,11 @@ const TEST_NO_CHANGES_SVG = 'nochangessvg';
 
 describe('RepoCommitSection', () => {
   let wrapper;
+  let router;
   let store;
 
   function createComponent() {
-    wrapper = mount(RepoCommitSection, { store });
+    wrapper = mount(keepAlive(RepoCommitSection), { store });
   }
 
   function setupDefaultState() {
@@ -36,7 +39,6 @@ describe('RepoCommitSection', () => {
       }),
     );
 
-    store.state.rightPanelCollapsed = false;
     store.state.currentBranch = 'master';
     store.state.changedFiles = [];
     store.state.stagedFiles = [{ ...files[0] }, { ...files[1] }];
@@ -55,6 +57,7 @@ describe('RepoCommitSection', () => {
 
   beforeEach(() => {
     store = createStore();
+    router = createRouter(store);
 
     jest.spyOn(store, 'dispatch');
     jest.spyOn(router, 'push').mockImplementation();
@@ -62,9 +65,10 @@ describe('RepoCommitSection', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
-  describe('empty Stage', () => {
+  describe('empty state', () => {
     beforeEach(() => {
       store.state.noChangesStateSvgPath = TEST_NO_CHANGES_SVG;
       store.state.committedStateSvgPath = 'svg';
@@ -75,11 +79,16 @@ describe('RepoCommitSection', () => {
     it('renders no changes text', () => {
       expect(
         wrapper
-          .find('.js-empty-state')
+          .find(EmptyState)
           .text()
           .trim(),
       ).toContain('No changes');
-      expect(wrapper.find('.js-empty-state img').attributes('src')).toBe(TEST_NO_CHANGES_SVG);
+      expect(
+        wrapper
+          .find(EmptyState)
+          .find('img')
+          .attributes('src'),
+      ).toBe(TEST_NO_CHANGES_SVG);
     });
   });
 
@@ -110,6 +119,32 @@ describe('RepoCommitSection', () => {
 
       expect(changedFileNames).toEqual(allFiles.map(x => x.path));
     });
+
+    it('does not show empty state', () => {
+      expect(wrapper.find(EmptyState).exists()).toBe(false);
+    });
+  });
+
+  describe('if nothing is changed or staged', () => {
+    beforeEach(() => {
+      setupDefaultState();
+
+      store.state.openFiles = [...Object.values(store.state.entries)];
+      store.state.openFiles[0].active = true;
+      store.state.stagedFiles = [];
+
+      createComponent();
+    });
+
+    it('opens currently active file', () => {
+      expect(store.state.openFiles.length).toBe(1);
+      expect(store.state.openFiles[0].pending).toBe(true);
+
+      expect(store.dispatch).toHaveBeenCalledWith('openPendingTab', {
+        file: store.state.entries[store.getters.activeFile.path],
+        keyPrefix: stageKeys.unstaged,
+      });
+    });
   });
 
   describe('with unstaged file', () => {
@@ -129,6 +164,27 @@ describe('RepoCommitSection', () => {
         file: store.getters.lastOpenedFile,
         keyPrefix: stageKeys.unstaged,
       });
+    });
+
+    it('does not show empty state', () => {
+      expect(wrapper.find(EmptyState).exists()).toBe(false);
+    });
+  });
+
+  describe('activated', () => {
+    let inititializeSpy;
+
+    beforeEach(async () => {
+      createComponent();
+
+      inititializeSpy = jest.spyOn(wrapper.find(RepoCommitSection).vm, 'initialize');
+      store.state.viewer = 'diff';
+
+      await wrapper.vm.reactivate();
+    });
+
+    it('re initializes the component', () => {
+      expect(inititializeSpy).toHaveBeenCalled();
     });
   });
 });

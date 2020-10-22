@@ -77,6 +77,12 @@ export default {
       <div class="table-section flex-grow-1" role="rowheader">
         {{ s__('Reports|Vulnerability') }}
       </div>
+      <div class="table-section section-15" role="rowheader">
+        {{ s__('Reports|Identifier') }}
+      </div>
+      <div class="table-section section-15" role="rowheader">
+        {{ s__('Reports|Scanner') }}
+      </div>
       <div class="table-section section-20" role="rowheader"></div>
     </div>
 
@@ -85,7 +91,7 @@ export default {
         <div class="flash-text container-fluid container-limited limit-container-width">
           {{
             s__(
-              'Security Dashboard|Error fetching the vulnerability list. Please check your network connection and try again.',
+              'SecurityReports|Error fetching the vulnerability list. Please check your network connection and try again.',
             )
           }}
         </div>
@@ -119,7 +125,7 @@ export default {
         v-if="showPagination"
         :change="fetchPage"
         :page-info="pageInfo"
-        class="justify-content-center prepend-top-default"
+        class="justify-content-center gl-mt-3"
       />
     </template>
   </div>

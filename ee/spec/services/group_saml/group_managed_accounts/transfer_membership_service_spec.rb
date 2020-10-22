@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupSaml::GroupManagedAccounts::TransferMembershipService do
+RSpec.describe GroupSaml::GroupManagedAccounts::TransferMembershipService do
   subject(:service) { described_class.new(current_user, group, session) }
 
   let(:group) { create(:group) }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::EpicIssuesController do
+RSpec.describe Groups::EpicIssuesController do
   let(:group) { create(:group, :public) }
   let(:project) { create(:project, group: group) }
   let(:milestone) { create(:milestone, project: project) }
@@ -55,7 +55,7 @@ describe Groups::EpicIssuesController do
 
       context 'when user does not have access to epic' do
         it 'returns 404 status' do
-          group.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+          group.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
 
           subject
 

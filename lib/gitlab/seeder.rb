@@ -18,6 +18,7 @@ module Gitlab
 
     MASS_INSERT_PROJECT_START = 'mass_insert_project_'
     MASS_INSERT_USER_START = 'mass_insert_user_'
+    REPORTED_USER_START = 'reported_user_'
     ESTIMATED_INSERT_PER_MINUTE = 2_000_000
     MASS_INSERT_ENV = 'MASS_INSERT'
 
@@ -36,7 +37,7 @@ module Gitlab
 
       included do
         scope :not_mass_generated, -> do
-          where.not("username LIKE '#{MASS_INSERT_USER_START}%'")
+          where.not("username LIKE '#{MASS_INSERT_USER_START}%' OR username LIKE '#{REPORTED_USER_START}%'")
         end
       end
     end
@@ -65,7 +66,7 @@ module Gitlab
       estimated_minutes = (size.to_f / ESTIMATED_INSERT_PER_MINUTE).round
       humanized_minutes = 'minute'.pluralize(estimated_minutes)
 
-      if estimated_minutes.zero?
+      if estimated_minutes == 0
         "Rough estimated time: less than a minute ⏰"
       else
         "Rough estimated time: #{estimated_minutes} #{humanized_minutes} ⏰"
@@ -86,7 +87,9 @@ module Gitlab
 
       SeedFu.quiet = true
 
-      yield
+      without_statement_timeout do
+        yield
+      end
 
       SeedFu.quiet = false
       ActiveRecord::Base.logger = old_logger
@@ -112,6 +115,13 @@ module Gitlab
 
     def self.mute_mailer
       ActionMailer::MessageDelivery.prepend(DeliverNever)
+    end
+
+    def self.without_statement_timeout
+      ActiveRecord::Base.connection.execute('SET statement_timeout=0')
+      yield
+    ensure
+      ActiveRecord::Base.connection.execute('RESET statement_timeout')
     end
   end
 end

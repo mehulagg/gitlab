@@ -1,8 +1,15 @@
+---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: howto
+---
+
 # Geo Frequently Asked Questions **(PREMIUM ONLY)**
 
 ## What are the minimum requirements to run Geo?
 
-The requirements are listed [on the index page](index.md#requirements-for-running-geo)
+The requirements are listed [on the index page](../index.md#requirements-for-running-geo)
 
 ## How does Geo know which projects to sync?
 
@@ -60,3 +67,7 @@ That's totally fine. We use HTTP(s) to fetch repository changes from the **prima
 ## Is this possible to set up a Docker Registry for a **secondary** node that mirrors the one on the **primary** node?
 
 Yes. See [Docker Registry for a **secondary** node](docker_registry.md).
+
+## Can I login to a secondary node?
+
+Yes, but secondary nodes receive all authentication data (like user accounts and logins) from the primary instance. This means you will be re-directed to the primary for authentication and routed back afterwards.

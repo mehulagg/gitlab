@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Note do
+RSpec.describe Note do
   include ::EE::GeoHelpers
 
   it_behaves_like 'an editable mentionable with EE-specific mentions' do
@@ -91,10 +91,6 @@ describe Note do
     end
   end
 
-  describe 'associations' do
-    it { is_expected.to belong_to(:review).inverse_of(:notes) }
-  end
-
   describe 'scopes' do
     describe '.with_suggestions' do
       it 'returns the correct note' do
@@ -103,38 +99,6 @@ describe Note do
 
         expect(described_class.with_suggestions).to include(note_with_suggestion)
         expect(described_class.with_suggestions).not_to include(note_without_suggestion)
-      end
-    end
-  end
-
-  describe 'callbacks' do
-    describe '#notify_after_create' do
-      it 'calls #after_note_created on the noteable' do
-        note = build(:note)
-
-        expect(note).to receive(:notify_after_create).and_call_original
-        expect(note.noteable).to receive(:after_note_created).with(note)
-
-        note.save!
-      end
-    end
-
-    describe '#notify_after_destroy' do
-      it 'calls #after_note_destroyed on the noteable' do
-        note = create(:note)
-
-        expect(note).to receive(:notify_after_destroy).and_call_original
-        expect(note.noteable).to receive(:after_note_destroyed).with(note)
-
-        note.destroy
-      end
-
-      it 'does not error if noteable is nil' do
-        note = create(:note)
-
-        expect(note).to receive(:notify_after_destroy).and_call_original
-        expect(note).to receive(:noteable).at_least(:once).and_return(nil)
-        expect { note.destroy }.not_to raise_error
       end
     end
   end
@@ -179,6 +143,51 @@ describe Note do
       create(:note, author: create(:user, :service_user))
 
       expect(described_class.by_humans).to match_array([user_note])
+    end
+  end
+
+  describe '.count_for_vulnerability_id' do
+    it 'counts notes by vulnerability id' do
+      vulnerability_1 = create(:vulnerability)
+      vulnerability_2 = create(:vulnerability)
+
+      create(:note, noteable: vulnerability_1, project: vulnerability_1.project)
+      create(:note, noteable: vulnerability_2, project: vulnerability_2.project)
+      create(:note, noteable: vulnerability_2, project: vulnerability_2.project)
+
+      expect(described_class.count_for_vulnerability_id([vulnerability_1.id, vulnerability_2.id])).to eq(vulnerability_1.id => 1, vulnerability_2.id => 2)
+    end
+  end
+
+  describe '#skip_notification?' do
+    subject(:skip_notification?) { note.skip_notification? }
+
+    context 'when there is no review' do
+      context 'when the note is not for vulnerability' do
+        let(:note) { build(:note) }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when the note is for vulnerability' do
+        let(:note) { build(:note, :on_vulnerability) }
+
+        it { is_expected.to be_truthy }
+      end
+    end
+
+    context 'when the review exists' do
+      context 'when the note is not for vulnerability' do
+        let(:note) { build(:note, :with_review) }
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when the note is for vulnerability' do
+        let(:note) { build(:note, :with_review, :on_vulnerability) }
+
+        it { is_expected.to be_truthy }
+      end
     end
   end
 end

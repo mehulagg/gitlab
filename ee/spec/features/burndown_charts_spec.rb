@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Burndown charts', :js do
+RSpec.describe 'Burndown charts', :js do
   let(:current_user) { create(:user) }
   let(:milestone) do
     create(:milestone, project: project,
@@ -24,7 +24,7 @@ describe 'Burndown charts', :js do
     end
 
     it 'presents burndown charts when available' do
-      stub_licensed_features(burndown_charts: true)
+      stub_licensed_features(milestone_charts: true)
 
       visit project_milestone_path(milestone.project, milestone)
 
@@ -33,7 +33,7 @@ describe 'Burndown charts', :js do
     end
 
     it 'presents burndown charts promotion correctly' do
-      stub_licensed_features(burndown_charts: false)
+      stub_licensed_features(milestone_charts: false)
       allow(License).to receive(:current) { nil }
 
       visit project_milestone_path(milestone.project, milestone)
@@ -52,7 +52,7 @@ describe 'Burndown charts', :js do
     end
 
     it 'presents burndown charts when available' do
-      stub_licensed_features(group_burndown_charts: true)
+      stub_licensed_features(milestone_charts: true)
 
       visit group_milestone_path(milestone.group, milestone)
 
@@ -61,32 +61,13 @@ describe 'Burndown charts', :js do
     end
 
     it 'presents burndown charts promotion correctly' do
-      stub_licensed_features(group_burndown_charts: false)
+      stub_licensed_features(milestone_charts: false)
       allow(License).to receive(:current) { nil }
 
       visit group_milestone_path(milestone.group, milestone)
 
       expect(page).not_to have_css('.burndown-chart')
       expect(page).to have_content('Improve milestones with Burndown Charts')
-    end
-  end
-
-  describe 'grouped by title milestones' do
-    let(:group) { nil }
-    let(:project) { create(:project) }
-
-    before do
-      project.add_maintainer(current_user)
-    end
-
-    it 'does not present burndown chart or promotion' do
-      allow(License).to receive(:current) { nil }
-      allow(Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?) { true }
-
-      visit dashboard_milestone_path(milestone.safe_title, title: milestone.title)
-
-      expect(page).not_to have_css('.burndown-chart')
-      expect(page).not_to have_content('Improve milestones with Burndown Charts')
     end
   end
 end

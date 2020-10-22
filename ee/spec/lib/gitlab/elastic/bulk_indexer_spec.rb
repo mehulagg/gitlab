@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Elastic::BulkIndexer, :elastic do
+RSpec.describe Gitlab::Elastic::BulkIndexer, :elastic do
   let_it_be(:issue) { create(:issue) }
   let_it_be(:other_issue) { create(:issue, project: issue.project) }
 
@@ -31,15 +31,31 @@ describe Gitlab::Elastic::BulkIndexer, :elastic do
       indexer.process(issue_as_ref)
     end
 
-    it 'sends a bulk request if the max bulk request size is reached' do
+    it 'sends the action and source in the same request' do
       set_bulk_limit(indexer, 1)
-
-      expect(es_client)
-        .to receive(:bulk)
-        .with(body: [kind_of(String), kind_of(String)])
-        .and_return({})
+      indexer.process(issue_as_ref)
+      allow(es_client).to receive(:bulk).and_return({})
 
       indexer.process(issue_as_ref)
+
+      expect(es_client)
+        .to have_received(:bulk)
+        .with(body: [kind_of(String), kind_of(String)])
+      expect(indexer.failures).to be_empty
+    end
+
+    it 'sends a bulk request before adding an item that exceeds the bulk limit' do
+      bulk_limit_bytes = (issue_as_json_with_times.to_json.bytesize * 1.5).to_i
+      set_bulk_limit(indexer, bulk_limit_bytes)
+      indexer.process(issue_as_ref)
+      allow(es_client).to receive(:bulk).and_return({})
+
+      indexer.process(issue_as_ref)
+
+      expect(es_client).to have_received(:bulk) do |args|
+        body_bytesize = args[:body].map(&:bytesize).reduce(:+)
+        expect(body_bytesize).to be <= bulk_limit_bytes
+      end
 
       expect(indexer.failures).to be_empty
     end
@@ -82,6 +98,25 @@ describe Gitlab::Elastic::BulkIndexer, :elastic do
 
       expect(indexer.flush).to contain_exactly(issue_as_ref, other_issue_as_ref)
       expect(indexer.failures).to contain_exactly(issue_as_ref, other_issue_as_ref)
+    end
+
+    it 'fails a document correctly on exception after adding an item that exceeded the bulk limit' do
+      bulk_limit_bytes = (issue_as_json_with_times.to_json.bytesize * 1.5).to_i
+      set_bulk_limit(indexer, bulk_limit_bytes)
+      indexer.process(issue_as_ref)
+      allow(es_client).to receive(:bulk).and_return({})
+
+      indexer.process(issue_as_ref)
+
+      expect(es_client).to have_received(:bulk) do |args|
+        body_bytesize = args[:body].map(&:bytesize).reduce(:+)
+        expect(body_bytesize).to be <= bulk_limit_bytes
+      end
+
+      expect(es_client).to receive(:bulk) { raise 'An exception' }
+
+      expect(indexer.flush).to contain_exactly(issue_as_ref)
+      expect(indexer.failures).to contain_exactly(issue_as_ref)
     end
 
     context 'indexing an issue' do

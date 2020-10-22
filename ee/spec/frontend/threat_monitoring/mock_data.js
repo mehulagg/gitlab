@@ -15,6 +15,32 @@ export const mockEnvironmentsResponse = {
   stopped_count: 5,
 };
 
+export const mockPoliciesResponse = [
+  {
+    name: 'policy',
+    namespace: 'production',
+    manifest: `---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: example-name
+  namespace: example-namespace
+spec:
+  podSelector:
+    matchLabels:
+      role: db
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          project: myproject`,
+    creation_timestamp: '2020-04-14T00:08:30Z',
+    is_enabled: true,
+  },
+];
+
 export const mockNominalHistory = [
   ['2019-12-04T00:00:00.000Z', 56],
   ['2019-12-05T00:00:00.000Z', 2647],

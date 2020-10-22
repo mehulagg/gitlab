@@ -1,5 +1,6 @@
 <script>
-import { GlIcon, GlPopover, GlLink } from '@gitlab/ui';
+import { GlIcon, GlPopover, GlLink, GlSprintf } from '@gitlab/ui';
+import { s__ } from '~/locale';
 import popover from '~/vue_shared/directives/popover';
 
 import { VALUE_TYPE, CUSTOM_TYPE, REPLICATION_HELP_URL } from '../constants';
@@ -16,6 +17,7 @@ export default {
     GlIcon,
     GlPopover,
     GlLink,
+    GlSprintf,
   },
   directives: {
     popover,
@@ -41,7 +43,8 @@ export default {
     },
     itemValueType: {
       type: String,
-      required: true,
+      required: false,
+      default: VALUE_TYPE.GRAPH,
     },
     customType: {
       type: String,
@@ -77,6 +80,7 @@ export default {
     },
   },
   replicationHelpUrl: REPLICATION_HELP_URL,
+  disabledText: s__('Geo|Synchronization of %{itemTitle} is disabled.'),
 };
 </script>
 
@@ -124,7 +128,9 @@ export default {
         :css-classes="['w-100']"
       >
         <section>
-          <p>{{ __('Synchronization of container repositories is disabled.') }}</p>
+          <gl-sprintf :message="$options.disabledText">
+            <template #itemTitle>{{ itemTitle.toLowerCase() }}</template>
+          </gl-sprintf>
           <div class="mt-3">
             <gl-link class="gl-font-sm" :href="$options.replicationHelpUrl" target="_blank">{{
               __('Learn how to enable synchronization')

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProtectedBranches::DestroyService do
+RSpec.describe ProtectedBranches::DestroyService do
   let(:protected_branch) { create(:protected_branch) }
   let(:branch_name) { protected_branch.name }
   let(:project) { protected_branch.project }
@@ -12,7 +12,7 @@ describe ProtectedBranches::DestroyService do
     subject(:service) { described_class.new(project, user) }
 
     it 'adds a security audit event entry' do
-      expect { service.execute(protected_branch) }.to change(::SecurityEvent, :count).by(1)
+      expect { service.execute(protected_branch) }.to change(::AuditEvent, :count).by(1)
     end
 
     context 'when destroy fails' do
@@ -21,7 +21,7 @@ describe ProtectedBranches::DestroyService do
       end
 
       it "doesn't add a security audit event entry" do
-        expect { service.execute(protected_branch) }.not_to change(::SecurityEvent, :count)
+        expect { service.execute(protected_branch) }.not_to change(::AuditEvent, :count)
       end
     end
   end

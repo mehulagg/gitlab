@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::LogCursor::Daemon, :clean_gitlab_redis_shared_state do
+RSpec.describe Gitlab::Geo::LogCursor::Daemon, :clean_gitlab_redis_shared_state do
   include ::EE::GeoHelpers
   include ExclusiveLeaseHelpers
 

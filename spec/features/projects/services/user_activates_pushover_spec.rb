@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User activates Pushover' do
+RSpec.describe 'User activates Pushover' do
   include_context 'project service activation'
 
   before do
@@ -17,8 +17,8 @@ describe 'User activates Pushover' do
     select('High Priority', from: 'Priority')
     select('Bike', from: 'Sound')
 
-    click_test_integration
+    click_test_then_save_integration(expect_test_to_fail: false)
 
-    expect(page).to have_content('Pushover activated.')
+    expect(page).to have_content('Pushover settings saved and active.')
   end
 end

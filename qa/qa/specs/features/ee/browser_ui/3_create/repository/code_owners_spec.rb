@@ -28,14 +28,14 @@ module QA
         end
         @project.visit!
 
-        Page::Project::Menu.perform(&:go_to_members_settings)
-        Page::Project::Settings::Members.perform do |members_page|
+        Page::Project::Menu.perform(&:click_members)
+        Page::Project::Members.perform do |members_page|
           members_page.add_member(@user.username)
           members_page.add_member(@user2.username)
         end
       end
 
-      it 'displays owners specified in CODEOWNERS file' do
+      it 'displays owners specified in CODEOWNERS file', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/519' do
         codeowners_file_content =
           <<-CONTENT
             * @#{@user2.username}

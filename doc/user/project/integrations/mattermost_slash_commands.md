@@ -1,3 +1,9 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Mattermost slash commands
 
 > Introduced in GitLab 8.14
@@ -17,21 +23,21 @@ If you have the Omnibus GitLab package installed, Mattermost is already bundled
 in it. All you have to do is configure it. Read more in the
 [Omnibus GitLab Mattermost documentation](https://docs.gitlab.com/omnibus/gitlab-mattermost/).
 
-## Automated Configuration
+## Automated configuration
 
 If Mattermost is installed on the same server as GitLab, the configuration process can be
 done for you by GitLab.
 
 Go to the Mattermost Slash Command service on your project and click the 'Add to Mattermost' button.
 
-## Manual Configuration
+## Manual configuration
 
 The configuration consists of two parts. First you need to enable the slash
 commands in Mattermost and then enable the service in GitLab.
 
 ### Step 1. Enable custom slash commands in Mattermost
 
-This step is only required when using a source install, omnibus installs will be
+This step is only required when using a source install, Omnibus installs will be
 preconfigured with the right settings.
 
 The first thing to do in Mattermost is to enable custom slash commands from
@@ -42,9 +48,9 @@ the administrator console.
 
    ![Mattermost go to console](img/mattermost_goto_console.png)
 
-1. Click **Custom integrations** and set **Enable Custom Slash Commands**,
-   **Enable custom integrations to override usernames**, and **Override
-   custom integrations to override profile picture icons** to true
+1. Click **Integration Management** and set **Enable Custom Slash Commands**,
+   **Enable integrations to override usernames**, and **Enable
+   integrations to override profile picture icons** to true
 
    ![Mattermost console](img/mattermost_console_integrations.png)
 
@@ -144,6 +150,15 @@ trigger word followed by <kbd>help</kbd>. Example: `/gitlab help`
 
 The permissions to run the [available commands](#available-slash-commands) derive from
 the [permissions you have on the project](../../permissions.md#project-members-permissions).
+
+## Troubleshooting
+
+If an event is not being triggered, confirm that the channel you're using is a public one, as
+Mattermost webhooks do not have access to private channels.
+
+If a private channel is required, you can edit the webhook's channel in Mattermost and
+select a private channel. It is not possible to use different channels for
+different types of notifications - all events will be sent to the specified channel.
 
 ## Further reading
 

@@ -20,13 +20,13 @@ export default {
 <template>
   <gl-empty-state
     :svg-path="svgPath"
-    :title="s__('Security Reports|Oops, something doesn\'t seem right.')"
+    :title="s__('SecurityReports|Oops, something doesn\'t seem right.')"
     :description="
       s__(
-        'Security Reports|Either you don\'t have permission to view this dashboard or the dashboard has not been setup. Please check your permission settings with your administrator or check your dashboard configurations to proceed.',
+        'SecurityReports|Either you don\'t have permission to view this dashboard or the dashboard has not been setup. Please check your permission settings with your administrator or check your dashboard configurations to proceed.',
       )
     "
     :primary-button-link="link"
-    :primary-button-text="s__('Security Reports|Learn more about setting up your dashboard')"
+    :primary-button-text="s__('SecurityReports|Learn more about setting up your dashboard')"
   />
 </template>

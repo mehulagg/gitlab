@@ -2,6 +2,6 @@
 
 require 'spec_helper'
 
-describe Gitlab::UsageCounters::PodLogs, :clean_gitlab_redis_shared_state do
+RSpec.describe Gitlab::UsageCounters::PodLogs, :clean_gitlab_redis_shared_state do
   it_behaves_like 'a usage counter'
 end

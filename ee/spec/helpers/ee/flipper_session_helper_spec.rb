@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::FlipperSessionHelper do
+RSpec.describe EE::FlipperSessionHelper do
   describe '.flipper_session' do
     let(:session) { {} }
 

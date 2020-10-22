@@ -1,7 +1,7 @@
 <script>
 import {
-  GlNewDropdown,
-  GlNewDropdownHeader,
+  GlDropdown,
+  GlDropdownSectionHeader,
   GlFormInputGroup,
   GlButton,
   GlTooltipDirective,
@@ -11,8 +11,8 @@ import { getHTTPProtocol } from '~/lib/utils/url_utility';
 
 export default {
   components: {
-    GlNewDropdown,
-    GlNewDropdownHeader,
+    GlDropdown,
+    GlDropdownSectionHeader,
     GlFormInputGroup,
     GlButton,
   },
@@ -45,10 +45,10 @@ export default {
 };
 </script>
 <template>
-  <gl-new-dropdown :text="$options.labels.defaultLabel" category="primary" variant="info">
+  <gl-dropdown right :text="$options.labels.defaultLabel" category="primary" variant="info">
     <div class="pb-2 mx-1">
       <template v-if="sshLink">
-        <gl-new-dropdown-header>{{ $options.labels.ssh }}</gl-new-dropdown-header>
+        <gl-dropdown-section-header>{{ $options.labels.ssh }}</gl-dropdown-section-header>
 
         <div class="mx-3">
           <gl-form-input-group :value="sshLink" readonly select-on-click>
@@ -57,6 +57,7 @@ export default {
                 v-gl-tooltip.hover
                 :title="$options.copyURLTooltip"
                 :data-clipboard-text="sshLink"
+                data-qa-selector="copy_ssh_url_button"
                 icon="copy-to-clipboard"
                 class="d-inline-flex"
               />
@@ -66,7 +67,7 @@ export default {
       </template>
 
       <template v-if="httpLink">
-        <gl-new-dropdown-header>{{ httpLabel }}</gl-new-dropdown-header>
+        <gl-dropdown-section-header>{{ httpLabel }}</gl-dropdown-section-header>
 
         <div class="mx-3">
           <gl-form-input-group :value="httpLink" readonly select-on-click>
@@ -75,6 +76,7 @@ export default {
                 v-gl-tooltip.hover
                 :title="$options.copyURLTooltip"
                 :data-clipboard-text="httpLink"
+                data-qa-selector="copy_http_url_button"
                 icon="copy-to-clipboard"
                 class="d-inline-flex"
               />
@@ -83,5 +85,5 @@ export default {
         </div>
       </template>
     </div>
-  </gl-new-dropdown>
+  </gl-dropdown>
 </template>

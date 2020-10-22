@@ -1,8 +1,10 @@
 <script>
+import { merge } from 'lodash';
 import { GlLineChart } from '@gitlab/ui/dist/charts';
 import dateFormat from 'dateformat';
 import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
-import { s__, __, sprintf } from '~/locale';
+import { __, n__, s__, sprintf } from '~/locale';
+import commonChartOptions from './common_chart_options';
 
 export default {
   components: {
@@ -63,13 +65,13 @@ export default {
       const series = [
         {
           name,
-          data: data.map(d => [new Date(d[0]), d[1]]),
+          data,
         },
       ];
 
       if (series[0] && series[0].data.length >= 2) {
-        const idealStart = [new Date(this.startDate), data[0][1]];
-        const idealEnd = [new Date(this.dueDate), 0];
+        const idealStart = [this.startDate, data[0][1]];
+        const idealEnd = [this.dueDate, 0];
         const idealData = [idealStart, idealEnd];
 
         series.push({
@@ -87,39 +89,28 @@ export default {
       return series;
     },
     options() {
-      return {
+      return merge({}, commonChartOptions, {
         xAxis: {
-          name: '',
-          type: 'time',
-          axisLine: {
-            show: true,
-          },
+          min: this.startDate,
+          max: this.dueDate,
         },
         yAxis: {
           name: this.issuesSelected ? __('Total issues') : __('Total weight'),
-          axisLine: {
-            show: true,
-          },
-          splitLine: {
-            show: false,
-          },
         },
-        tooltip: {
-          trigger: 'item',
-          formatter: () => '',
-        },
-      };
+      });
     },
   },
   methods: {
     formatTooltipText(params) {
       const [seriesData] = params.seriesData;
+      if (!seriesData) {
+        return;
+      }
+
       this.tooltip.title = dateFormat(params.value, 'dd mmm yyyy');
 
       if (this.issuesSelected) {
-        this.tooltip.content = sprintf(__('%{total} open issues'), {
-          total: seriesData.value[1],
-        });
+        this.tooltip.content = n__('%d open issue', '%d open issues', seriesData.value[1]);
       } else {
         this.tooltip.content = sprintf(__('%{total} open issue weight'), {
           total: seriesData.value[1],
@@ -141,13 +132,14 @@ export default {
     <div v-if="showTitle" class="burndown-header d-flex align-items-center">
       <h3>{{ __('Burndown chart') }}</h3>
     </div>
-    <resizable-chart-container class="burndown-chart">
+    <resizable-chart-container class="burndown-chart js-burndown-chart">
       <gl-line-chart
         slot-scope="{ width }"
         :width="width"
         :data="dataSeries"
         :option="options"
         :format-tooltip-text="formatTooltipText"
+        :include-legend-avg-max="false"
       >
         <template slot="tooltipTitle">{{ tooltip.title }}</template>
         <template slot="tooltipContent">{{ tooltip.content }}</template>

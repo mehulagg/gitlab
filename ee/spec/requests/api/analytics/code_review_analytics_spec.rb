@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Analytics::CodeReviewAnalytics do
+RSpec.describe API::Analytics::CodeReviewAnalytics do
   let_it_be(:group) { create(:group, :private) }
   let_it_be(:project) { create(:project, namespace: group) }
   let(:current_user) { reporter }
@@ -52,6 +52,26 @@ describe API::Analytics::CodeReviewAnalytics do
           api_call
 
           expect(json_response.map { |mr| mr['id']}).to match_array([merge_request_3.id])
+        end
+      end
+
+      context 'with negation filters' do
+        let(:query_params) { super().merge(not: { label_name: [label.title] }) }
+
+        it 'applies filter' do
+          api_call
+
+          expect(json_response.map { |mr| mr['id'] }).to match_array([merge_request_1.id])
+        end
+      end
+
+      context 'with any label filter present' do
+        let(:query_params) { super().merge(label_name: ['Any']) }
+
+        it 'applies filter' do
+          api_call
+
+          expect(json_response.map { |mr| mr['id'] }).to match_array([merge_request_2.id, merge_request_3.id])
         end
       end
     end

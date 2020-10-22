@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PrometheusService, :use_clean_rails_memory_store_caching do
+RSpec.describe PrometheusService, :use_clean_rails_memory_store_caching, :snowplow do
   include PrometheusHelpers
   include ReactiveCachingHelpers
 
@@ -23,7 +23,7 @@ describe PrometheusService, :use_clean_rails_memory_store_caching do
 
       # result = { success: false, result: error }
       expect(result[:success]).to be_falsy
-      expect(result[:result]).to be_instance_of(Gitlab::PrometheusClient::Error)
+      expect(result[:result]).to be_instance_of(Gitlab::PrometheusClient::UnexpectedResponseError)
 
       expect(redirect_req_stub).to have_been_requested
       expect(redirected_req_stub).not_to have_been_requested
@@ -252,6 +252,24 @@ describe PrometheusService, :use_clean_rails_memory_store_caching do
         end
       end
     end
+
+    context 'behind IAP' do
+      let(:manual_configuration) { true }
+
+      before do
+        # dummy private key generated only for this test to pass openssl validation
+        service.google_iap_service_account_json = '{"type":"service_account","private_key":"-----BEGIN RSA PRIVATE KEY-----\nMIIBOAIBAAJAU85LgUY5o6j6j/07GMLCNUcWJOBA1buZnNgKELayA6mSsHrIv31J\nY8kS+9WzGPQninea7DcM4hHA7smMgQD1BwIDAQABAkAqKxMy6PL3tn7dFL43p0ex\nJyOtSmlVIiAZG1t1LXhE/uoLpYi5DnbYqGgu0oih+7nzLY/dXpNpXUmiRMOUEKmB\nAiEAoTi2rBXbrLSi2C+H7M/nTOjMQQDuZ8Wr4uWpKcjYJTMCIQCFEskL565oFl/7\nRRQVH+cARrAsAAoJSbrOBAvYZ0PI3QIgIEFwis10vgEF86rOzxppdIG/G+JL0IdD\n9IluZuXAGPECIGUo7qSaLr75o2VEEgwtAFH5aptIPFjrL5LFCKwtdB4RAiAYZgFV\nHCMmaooAw/eELuMoMWNYmujZ7VaAnOewGDW0uw==\n-----END RSA PRIVATE KEY-----\n"}'
+        service.google_iap_audience_client_id = "IAP_CLIENT_ID.apps.googleusercontent.com"
+
+        stub_request(:post, "https://oauth2.googleapis.com/token").to_return(status: 200, body: '{"id_token": "FOO"}', headers: { 'Content-Type': 'application/json; charset=UTF-8' })
+      end
+
+      it 'includes the authorization header' do
+        expect(service.prometheus_client).not_to be_nil
+        expect(service.prometheus_client.send(:options)).to have_key(:headers)
+        expect(service.prometheus_client.send(:options)[:headers]).to eq(authorization: "Bearer FOO")
+      end
+    end
   end
 
   describe '#prometheus_available?' do
@@ -403,18 +421,16 @@ describe PrometheusService, :use_clean_rails_memory_store_caching do
     context "enabling manual_configuration" do
       it "tracks enable event" do
         service.update!(manual_configuration: false)
-
-        expect(Gitlab::Tracking).to receive(:event).with('cluster:services:prometheus', 'enabled_manual_prometheus')
-
         service.update!(manual_configuration: true)
+
+        expect_snowplow_event(category: 'cluster:services:prometheus', action: 'enabled_manual_prometheus')
       end
 
       it "tracks disable event" do
         service.update!(manual_configuration: true)
-
-        expect(Gitlab::Tracking).to receive(:event).with('cluster:services:prometheus', 'disabled_manual_prometheus')
-
         service.update!(manual_configuration: false)
+
+        expect_snowplow_event(category: 'cluster:services:prometheus', action: 'disabled_manual_prometheus')
       end
     end
   end
@@ -454,6 +470,21 @@ describe PrometheusService, :use_clean_rails_memory_store_caching do
           title: 'API URL',
           placeholder: s_('PrometheusService|Prometheus API Base URL, like http://prometheus.example.com/'),
           required: true
+        },
+        {
+          type: 'text',
+          name: 'google_iap_audience_client_id',
+          title: 'Google IAP Audience Client ID',
+          placeholder: s_('PrometheusService|Client ID of the IAP secured resource (looks like IAP_CLIENT_ID.apps.googleusercontent.com)'),
+          autocomplete: 'off',
+          required: false
+        },
+        {
+          type: 'textarea',
+          name: 'google_iap_service_account_json',
+          title: 'Google IAP Service Account JSON',
+          placeholder: s_('PrometheusService|Contents of the credentials.json file of your service account, like: { "type": "service_account", "project_id": ... }'),
+          required: false
         }
       ]
     end

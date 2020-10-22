@@ -1,15 +1,9 @@
-import * as monitoringUtils from '~/monitoring/utils';
-import { queryToObject, mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
 import { TEST_HOST } from 'jest/helpers/test_constants';
-import {
-  mockProjectDir,
-  singleStatMetricsResult,
-  anomalyMockGraphData,
-  barMockData,
-} from './mock_data';
-import { graphData } from './fixture_data';
-
-jest.mock('~/lib/utils/url_utility');
+import * as monitoringUtils from '~/monitoring/utils';
+import * as urlUtils from '~/lib/utils/url_utility';
+import { mockProjectDir, barMockData } from './mock_data';
+import { singleStatGraphData, anomalyGraphData } from './graph_data';
+import { metricsDashboardViewModel, graphData } from './fixture_data';
 
 const mockPath = `${TEST_HOST}${mockProjectDir}/-/environments/29/metrics`;
 
@@ -27,11 +21,6 @@ const rollingRange = {
 };
 
 describe('monitoring/utils', () => {
-  afterEach(() => {
-    mergeUrlParams.mockReset();
-    queryToObject.mockReset();
-  });
-
   describe('trackGenerateLinkToChartEventOptions', () => {
     it('should return Cluster Monitoring options if located on Cluster Health Dashboard', () => {
       document.body.dataset.page = 'groups:clusters:show';
@@ -89,7 +78,7 @@ describe('monitoring/utils', () => {
     it('validates data with the query format', () => {
       const validGraphData = monitoringUtils.graphDataValidatorForValues(
         true,
-        singleStatMetricsResult,
+        singleStatGraphData(),
       );
 
       expect(validGraphData).toBe(true);
@@ -112,13 +101,13 @@ describe('monitoring/utils', () => {
     let threeMetrics;
     let fourMetrics;
     beforeEach(() => {
-      oneMetric = singleStatMetricsResult;
-      threeMetrics = anomalyMockGraphData;
+      oneMetric = singleStatGraphData();
+      threeMetrics = anomalyGraphData();
 
       const metrics = [...threeMetrics.metrics];
       metrics.push(threeMetrics.metrics[0]);
       fourMetrics = {
-        ...anomalyMockGraphData,
+        ...anomalyGraphData(),
         metrics,
       };
     });
@@ -139,18 +128,25 @@ describe('monitoring/utils', () => {
   });
 
   describe('timeRangeFromUrl', () => {
+    beforeEach(() => {
+      jest.spyOn(urlUtils, 'queryToObject');
+    });
+
+    afterEach(() => {
+      urlUtils.queryToObject.mockRestore();
+    });
+
     const { timeRangeFromUrl } = monitoringUtils;
 
-    it('returns a fixed range when query contains `start` and `end` paramters are given', () => {
-      queryToObject.mockReturnValueOnce(range);
-
+    it('returns a fixed range when query contains `start` and `end` parameters are given', () => {
+      urlUtils.queryToObject.mockReturnValueOnce(range);
       expect(timeRangeFromUrl()).toEqual(range);
     });
 
-    it('returns a rolling range when query contains `duration_seconds` paramters are given', () => {
+    it('returns a rolling range when query contains `duration_seconds` parameters are given', () => {
       const { seconds } = rollingRange.duration;
 
-      queryToObject.mockReturnValueOnce({
+      urlUtils.queryToObject.mockReturnValueOnce({
         dashboard: '.gitlab/dashboard/my_dashboard.yml',
         duration_seconds: `${seconds}`,
       });
@@ -158,23 +154,59 @@ describe('monitoring/utils', () => {
       expect(timeRangeFromUrl()).toEqual(rollingRange);
     });
 
-    it('returns null when no time range paramters are given', () => {
-      const params = {
+    it('returns null when no time range parameters are given', () => {
+      urlUtils.queryToObject.mockReturnValueOnce({
         dashboard: '.gitlab/dashboards/custom_dashboard.yml',
         param1: 'value1',
         param2: 'value2',
-      };
+      });
 
-      expect(timeRangeFromUrl(params, mockPath)).toBe(null);
+      expect(timeRangeFromUrl()).toBe(null);
+    });
+  });
+
+  describe('templatingVariablesFromUrl', () => {
+    const { templatingVariablesFromUrl } = monitoringUtils;
+
+    beforeEach(() => {
+      jest.spyOn(urlUtils, 'queryToObject');
+    });
+
+    afterEach(() => {
+      urlUtils.queryToObject.mockRestore();
+    });
+
+    it('returns an object with only the custom variables', () => {
+      urlUtils.queryToObject.mockReturnValueOnce({
+        dashboard: '.gitlab/dashboards/custom_dashboard.yml',
+        y_label: 'memory usage',
+        group: 'kubernetes',
+        title: 'Kubernetes memory total',
+        start: '2020-05-06',
+        end: '2020-05-07',
+        duration_seconds: '86400',
+        direction: 'left',
+        anchor: 'top',
+        pod: 'POD',
+        'var-pod': 'POD',
+      });
+
+      expect(templatingVariablesFromUrl()).toEqual(expect.objectContaining({ pod: 'POD' }));
+    });
+
+    it('returns an empty object when no custom variables are present', () => {
+      urlUtils.queryToObject.mockReturnValueOnce({
+        dashboard: '.gitlab/dashboards/custom_dashboard.yml',
+      });
+
+      expect(templatingVariablesFromUrl()).toStrictEqual({});
     });
   });
 
   describe('removeTimeRangeParams', () => {
     const { removeTimeRangeParams } = monitoringUtils;
 
-    it('returns when query contains `start` and `end` paramters are given', () => {
-      removeParams.mockReturnValueOnce(mockPath);
-
+    it('returns when query contains `start` and `end` parameters are given', () => {
       expect(removeTimeRangeParams(`${mockPath}?start=${range.start}&end=${range.end}`)).toEqual(
         mockPath,
       );
@@ -184,28 +216,126 @@ describe('monitoring/utils', () => {
   describe('timeRangeToUrl', () => {
     const { timeRangeToUrl } = monitoringUtils;
 
-    it('returns a fixed range when query contains `start` and `end` paramters are given', () => {
+    beforeEach(() => {
+      jest.spyOn(urlUtils, 'mergeUrlParams');
+      jest.spyOn(urlUtils, 'removeParams');
+    });
+
+    afterEach(() => {
+      urlUtils.mergeUrlParams.mockRestore();
+      urlUtils.removeParams.mockRestore();
+    });
+
+    it('returns a fixed range when query contains `start` and `end` parameters are given', () => {
       const toUrl = `${mockPath}?start=${range.start}&end=${range.end}`;
       const fromUrl = mockPath;
 
-      removeParams.mockReturnValueOnce(fromUrl);
-      mergeUrlParams.mockReturnValueOnce(toUrl);
+      urlUtils.removeParams.mockReturnValueOnce(fromUrl);
+      urlUtils.mergeUrlParams.mockReturnValueOnce(toUrl);
 
       expect(timeRangeToUrl(range)).toEqual(toUrl);
-      expect(mergeUrlParams).toHaveBeenCalledWith(range, fromUrl);
+      expect(urlUtils.mergeUrlParams).toHaveBeenCalledWith(range, fromUrl);
     });
 
-    it('returns a rolling range when query contains `duration_seconds` paramters are given', () => {
+    it('returns a rolling range when query contains `duration_seconds` parameters are given', () => {
       const { seconds } = rollingRange.duration;
 
       const toUrl = `${mockPath}?duration_seconds=${seconds}`;
       const fromUrl = mockPath;
 
-      removeParams.mockReturnValueOnce(fromUrl);
-      mergeUrlParams.mockReturnValueOnce(toUrl);
+      urlUtils.removeParams.mockReturnValueOnce(fromUrl);
+      urlUtils.mergeUrlParams.mockReturnValueOnce(toUrl);
 
       expect(timeRangeToUrl(rollingRange)).toEqual(toUrl);
-      expect(mergeUrlParams).toHaveBeenCalledWith({ duration_seconds: `${seconds}` }, fromUrl);
+      expect(urlUtils.mergeUrlParams).toHaveBeenCalledWith(
+        { duration_seconds: `${seconds}` },
+        fromUrl,
+      );
+    });
+  });
+
+  describe('expandedPanelPayloadFromUrl', () => {
+    const { expandedPanelPayloadFromUrl } = monitoringUtils;
+    const [panelGroup] = metricsDashboardViewModel.panelGroups;
+    const [panel] = panelGroup.panels;
+
+    const { group } = panelGroup;
+    const { title, y_label: yLabel } = panel;
+
+    it('returns payload for a panel when query parameters are given', () => {
+      const search = `?group=${group}&title=${title}&y_label=${yLabel}`;
+
+      expect(expandedPanelPayloadFromUrl(metricsDashboardViewModel, search)).toEqual({
+        group: panelGroup.group,
+        panel,
+      });
+    });
+
+    it('returns null when no parameters are given', () => {
+      expect(expandedPanelPayloadFromUrl(metricsDashboardViewModel, '')).toBe(null);
+    });
+
+    it('throws an error when no group is provided', () => {
+      const search = `?title=${panel.title}&y_label=${yLabel}`;
+      expect(() => expandedPanelPayloadFromUrl(metricsDashboardViewModel, search)).toThrow();
+    });
+
+    it('throws an error when no title is provided', () => {
+      const search = `?title=${title}&y_label=${yLabel}`;
+      expect(() => expandedPanelPayloadFromUrl(metricsDashboardViewModel, search)).toThrow();
+    });
+
+    it('throws an error when no y_label group is provided', () => {
+      const search = `?group=${group}&title=${title}`;
+      expect(() => expandedPanelPayloadFromUrl(metricsDashboardViewModel, search)).toThrow();
+    });
+
+    test.each`
+      group            | title            | yLabel             | missingField
+      ${'NOT_A_GROUP'} | ${title}         | ${yLabel}          | ${'group'}
+      ${group}         | ${'NOT_A_TITLE'} | ${yLabel}          | ${'title'}
+      ${group}         | ${title}         | ${'NOT_A_Y_LABEL'} | ${'y_label'}
+    `('throws an error when $missingField is incorrect', params => {
+      const search = `?group=${params.group}&title=${params.title}&y_label=${params.yLabel}`;
+      expect(() => expandedPanelPayloadFromUrl(metricsDashboardViewModel, search)).toThrow();
+    });
+  });
+
+  describe('panelToUrl', () => {
+    const { panelToUrl } = monitoringUtils;
+
+    const dashboard = 'metrics.yml';
+    const [panelGroup] = metricsDashboardViewModel.panelGroups;
+    const [panel] = panelGroup.panels;
+
+    const getUrlParams = url => urlUtils.queryToObject(url.split('?')[1]);
+
+    it('returns URL for a panel when query parameters are given', () => {
+      const params = getUrlParams(panelToUrl(dashboard, {}, panelGroup.group, panel));
+
+      expect(params).toEqual(
+        expect.objectContaining({
+          dashboard,
+          group: panelGroup.group,
+          title: panel.title,
+          y_label: panel.y_label,
+        }),
+      );
+    });
+
+    it('returns a dashboard only URL if group is missing', () => {
+      const params = getUrlParams(panelToUrl(dashboard, {}, null, panel));
+      expect(params).toEqual(expect.objectContaining({ dashboard: 'metrics.yml' }));
+    });
+
+    it('returns a dashboard only URL if panel is missing', () => {
+      const params = getUrlParams(panelToUrl(dashboard, {}, panelGroup.group, null));
+      expect(params).toEqual(expect.objectContaining({ dashboard: 'metrics.yml' }));
+    });
+
+    it('returns URL for a panel when query paramters are given including custom variables', () => {
+      const params = getUrlParams(panelToUrl(dashboard, { pod: 'pod' }, panelGroup.group, null));
+      expect(params).toEqual(expect.objectContaining({ dashboard: 'metrics.yml', pod: 'pod' }));
     });
   });
 
@@ -270,5 +400,66 @@ describe('monitoring/utils', () => {
         );
       });
     });
+  });
+
+  describe('removePrefixFromLabel', () => {
+    it.each`
+      input               | expected
+      ${undefined}        | ${''}
+      ${null}             | ${''}
+      ${''}               | ${''}
+      ${'    '}           | ${'    '}
+      ${'pod-1'}          | ${'pod-1'}
+      ${'pod-var-1'}      | ${'pod-var-1'}
+      ${'pod-1-var'}      | ${'pod-1-var'}
+      ${'podvar--1'}      | ${'podvar--1'}
+      ${'povar-d-1'}      | ${'povar-d-1'}
+      ${'var-pod-1'}      | ${'pod-1'}
+      ${'var-var-pod-1'}  | ${'var-pod-1'}
+      ${'varvar-pod-1'}   | ${'varvar-pod-1'}
+      ${'var-pod-1-var-'} | ${'pod-1-var-'}
+    `('removePrefixFromLabel returns $expected with input $input', ({ input, expected }) => {
+      expect(monitoringUtils.removePrefixFromLabel(input)).toEqual(expected);
+    });
+  });
+
+  describe('convertVariablesForURL', () => {
+    it.each`
+      input                                                               | expected
+      ${[]}                                                               | ${{}}
+      ${[{ name: 'env', value: 'prod' }]}                                 | ${{ 'var-env': 'prod' }}
+      ${[{ name: 'env1', value: 'prod' }, { name: 'env2', value: null }]} | ${{ 'var-env1': 'prod' }}
+      ${[{ name: 'var-env', value: 'prod' }]}                             | ${{ 'var-var-env': 'prod' }}
+    `('convertVariablesForURL returns $expected with input $input', ({ input, expected }) => {
+      expect(monitoringUtils.convertVariablesForURL(input)).toEqual(expected);
+    });
+  });
+
+  describe('setCustomVariablesFromUrl', () => {
+    beforeEach(() => {
+      jest.spyOn(urlUtils, 'updateHistory');
+    });
+
+    afterEach(() => {
+      urlUtils.updateHistory.mockRestore();
+    });
+
+    it.each`
+      input                                                               | urlParams
+      ${[]}                                                               | ${''}
+      ${[{ name: 'env', value: 'prod' }]}                                 | ${'?var-env=prod'}
+      ${[{ name: 'env1', value: 'prod' }, { name: 'env2', value: null }]} | ${'?var-env=prod&var-env1=prod'}
+    `(
+      'setCustomVariablesFromUrl updates history with query "$urlParams" with input $input',
+      ({ input, urlParams }) => {
+        monitoringUtils.setCustomVariablesFromUrl(input);
+
+        expect(urlUtils.updateHistory).toHaveBeenCalledTimes(1);
+        expect(urlUtils.updateHistory).toHaveBeenCalledWith({
+          url: `${TEST_HOST}/${urlParams}`,
+          title: '',
+        });
+      },
+    );
   });
 });

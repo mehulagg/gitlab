@@ -1,10 +1,13 @@
 ---
+stage: Create
+group: Source Code
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference, concepts
 ---
 
 # Merge Request dependencies **(PREMIUM)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/9688) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.2.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9688) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.2.
 > - [Renamed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17291) from "Cross-project dependencies" to "Merge Requests dependencies" in [GitLab Premium](https://about.gitlab.com/pricing/) 12.4.
 > - Intra-project MR dependencies were [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/16799) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.4.
 
@@ -38,15 +41,15 @@ the `awesome-project` merge request before the `awesome-lib` one would
 break the `master`branch.
 
 The `awesome-project` merge request could be [marked as
-WIP](work_in_progress_merge_requests.md),
-and the reason for the WIP stated included in the comments. However, this
+**Draft**](work_in_progress_merge_requests.md),
+and the reason for the draft stated included in the comments. However, this
 requires the state of the `awesome-lib` merge request to be manually
 tracked, and doesn't scale well if the `awesome-project` merge request
 depends on changes to **several** other projects.
 
 By making the `awesome-project` merge request depend on the
 `awesome-lib` merge request instead, this relationship is
-automatically tracked by GitLab, and the WIP state can be used to
+automatically tracked by GitLab, and the draft state can be used to
 communicate the readiness of the code in each individual merge request
 instead.
 
@@ -94,9 +97,9 @@ merge.
 
 ## Limitations
 
-- API support: [issue #12551](https://gitlab.com/gitlab-org/gitlab/issues/12551)
-- Dependencies are not preserved across project export/import: [issue #12549](https://gitlab.com/gitlab-org/gitlab/issues/12549)
-- Complex merge order dependencies are not supported: [issue #11393](https://gitlab.com/gitlab-org/gitlab/issues/11393)
+- API support: [issue #12551](https://gitlab.com/gitlab-org/gitlab/-/issues/12551)
+- Dependencies are not preserved across project export/import: [issue #12549](https://gitlab.com/gitlab-org/gitlab/-/issues/12549)
+- Complex merge order dependencies are not supported: [issue #11393](https://gitlab.com/gitlab-org/gitlab/-/issues/11393)
 
 The last item merits a little more explanation. Dependencies between merge
 requests can be described as a graph of relationships. The simplest possible

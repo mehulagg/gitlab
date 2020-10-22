@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Elastic::DocumentReference do
+RSpec.describe Gitlab::Elastic::DocumentReference do
   let_it_be(:issue) { create(:issue) }
   let(:project) { issue.project }
 

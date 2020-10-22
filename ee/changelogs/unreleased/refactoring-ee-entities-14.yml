@@ -1,5 +1,0 @@
----
-title: Separate group, member, group_detail and identity modules into own class files
-merge_request: 27797
-author: Rajendra Kadam
-type: added

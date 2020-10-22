@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::SlackApplicationInstallService do
+RSpec.describe Projects::SlackApplicationInstallService do
   let!(:user) { create(:user) }
   let!(:project) { create(:project) }
 

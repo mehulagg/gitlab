@@ -1,4 +1,4 @@
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __, s__, sprintf } from '~/locale';
 
 import axios from '~/lib/utils/axios_utils';
@@ -194,6 +194,36 @@ export const saveDate = ({ state, dispatch }, { dateType, dateTypeIsFixed, newDa
     });
 };
 
+export const updateConfidentialityOnIssuable = ({ state, commit }, { confidential }) => {
+  const updateEpicInput = {
+    iid: `${state.epicIid}`,
+    groupPath: state.fullPath,
+    confidential,
+  };
+
+  return epicUtils.gqClient
+    .mutate({
+      mutation: updateEpic,
+      variables: {
+        updateEpicInput,
+      },
+    })
+    .then(({ data }) => {
+      if (!data?.updateEpic?.errors.length) {
+        commit(types.SET_EPIC_CONFIDENTIAL, confidential);
+      } else {
+        const errMsg =
+          data?.updateEpic?.errors[0]?.replace(/Confidential /, '') ||
+          s__('Epics|Unable to perform this action');
+        throw errMsg;
+      }
+    })
+    .catch(error => {
+      flash(error);
+      throw error;
+    });
+};
+
 /**
  * Methods to handle Epic labels selection from sidebar
  */
@@ -282,6 +312,8 @@ export const toggleEpicSubscription = ({ state, dispatch }) => {
  * Methods to handle Epic create from Epics index page
  */
 export const setEpicCreateTitle = ({ commit }, data) => commit(types.SET_EPIC_CREATE_TITLE, data);
+export const setEpicCreateConfidential = ({ commit }, data) =>
+  commit(types.SET_EPIC_CREATE_CONFIDENTIAL, data);
 export const requestEpicCreate = ({ commit }) => commit(types.REQUEST_EPIC_CREATE);
 export const requestEpicCreateSuccess = (_, webUrl) => visitUrl(webUrl);
 export const requestEpicCreateFailure = ({ commit }) => {
@@ -293,6 +325,7 @@ export const createEpic = ({ state, dispatch }) => {
   axios
     .post(state.endpoint, {
       title: state.newEpicTitle,
+      confidential: state.newEpicConfidential,
     })
     .then(({ data }) => {
       dispatch('requestEpicCreateSuccess', data.web_url);
@@ -301,6 +334,3 @@ export const createEpic = ({ state, dispatch }) => {
       dispatch('requestEpicCreateFailure');
     });
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

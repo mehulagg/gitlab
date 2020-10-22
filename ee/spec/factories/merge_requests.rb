@@ -31,7 +31,7 @@ FactoryBot.modify do
 
       after(:create) do |merge_request, evaluator|
         merge_request.pipelines_for_merge_request.last
-          .update(ref: merge_request.train_ref_path)
+          .update!(ref: merge_request.train_ref_path)
       end
     end
 
@@ -62,7 +62,7 @@ FactoryBot.modify do
     after :create do |merge_request, evaluator|
       next if evaluator.approval_users.blank? && evaluator.approval_groups.blank?
 
-      rule = merge_request.approval_rules.first_or_create(attributes_for(:approval_merge_request_rule))
+      rule = merge_request.approval_rules.first_or_create!(attributes_for(:approval_merge_request_rule))
       rule.users = evaluator.approval_users if evaluator.approval_users.present?
       rule.groups = evaluator.approval_groups if evaluator.approval_groups.present?
     end
@@ -127,6 +127,30 @@ FactoryBot.define do
           :ee_ci_pipeline,
           :success,
           :with_sast_report,
+          project: merge_request.source_project,
+          ref: merge_request.source_branch,
+          sha: merge_request.diff_head_sha)
+      end
+    end
+
+    trait :with_secret_detection_reports do
+      after(:build) do |merge_request|
+        merge_request.head_pipeline = build(
+          :ee_ci_pipeline,
+          :success,
+          :with_secret_detection_report,
+          project: merge_request.source_project,
+          ref: merge_request.source_branch,
+          sha: merge_request.diff_head_sha)
+      end
+    end
+
+    trait :with_coverage_fuzzing_reports do
+      after(:build) do |merge_request|
+        merge_request.head_pipeline = build(
+          :ee_ci_pipeline,
+          :success,
+          :with_coverage_fuzzing_report,
           project: merge_request.source_project,
           ref: merge_request.source_branch,
           sha: merge_request.diff_head_sha)

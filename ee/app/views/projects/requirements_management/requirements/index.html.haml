@@ -1,0 +1,51 @@
+- page_title _('Requirements')
+- add_page_specific_style 'page_bundles/issues_list'
+- @content_wrapper_class = 'js-requirements-container-wrapper'
+- @content_class = 'requirements-container'
+
+-# We'd prefer to have following declarations be part of
+-# helpers in some way but given that they're very frontend-centeric,
+-# keeping them in HAML view makes more sense.
+- page_size = 20
+- requirements_count = Hash.new(0).merge(@project.requirements.counts_by_state)
+- total_requirements = requirements_count['opened'] + requirements_count['archived']
+- is_open_tab = params[:state].nil? || params[:state] == 'opened'
+
+- if is_open_tab
+  - current_tab_count = requirements_count['opened'] > page_size ? page_size : requirements_count['opened']
+- elsif params[:state] == 'archived'
+  - current_tab_count = requirements_count['archived'] > page_size ? page_size : requirements_count['archived']
+- else
+  - current_tab_count = total_requirements > page_size ? page_size : total_requirements
+
+#js-requirements-app{ data: { filter_by: params[:state],
+  page: params[:page],
+  prev: params[:prev],
+  next: params[:next],
+  text_search: params[:search],
+  author_usernames: params[:author_username],
+  sort_by: params[:sort],
+  project_path: @project.full_path,
+  opened: requirements_count['opened'],
+  archived: requirements_count['archived'],
+  all: total_requirements,
+  requirements_web_url: project_requirements_management_requirements_path(@project),
+  can_create_requirement: "#{can?(current_user, :create_requirement, @project)}",
+  description_preview_path: preview_markdown_path(@project),
+  description_help_path: help_page_path('user/markdown'),
+  empty_state_path: image_path('illustrations/empty-state/empty-requirements-lg.svg') } }
+  - if current_tab_count == 0
+    -# Show regular spinner only when there will be no
+    -# requirements to show for current tab.
+    .gl-spinner-container.mt-3
+      %span.align-text-bottom.gl-spinner.gl-spinner-orange.gl-spinner-md{ aria: { label: _('Loading'), hidden: 'true' } }
+  - else
+    -# Following block shows skeleton loading same as mounted Vue app so while
+    -# app is being loaded and initialized, user continues to see skeleton loading.
+    .requirements-list-container
+      %ul.content-list.issuable-list.issues-list.requirements-list-loading
+        - Array.new(current_tab_count).each do |i|
+          %li.issue.requirement
+            .animation-container.pt-2
+              .skeleton-line-1
+              .skeleton-line-2

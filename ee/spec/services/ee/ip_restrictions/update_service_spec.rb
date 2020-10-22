@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::IpRestrictions::UpdateService do
+RSpec.describe EE::IpRestrictions::UpdateService do
   let(:group) { create(:group) }
 
   subject { described_class.new(group, comma_separated_ranges).execute }

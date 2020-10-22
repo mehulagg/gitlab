@@ -1,13 +1,28 @@
 ---
 comments: false
-description: 'Learn how to contribute to GitLab.'
+type: index, dev
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+description: "Development Guidelines: learn how to contribute to GitLab."
 ---
 
 # Contributor and Development Docs
 
+Learn the processes and technical information needed for contributing to GitLab.
+
+This content is intended for members of the GitLab Team as well as community contributors.
+Content specific to the GitLab Team should instead be included in the [Handbook](https://about.gitlab.com/handbook/).
+
+For information on using GitLab to work on your own software projects, see the [GitLab user documentation](../user/index.md).
+
+For information on working with GitLab's API, see the [API documentation](../api/README.md).
+
+For information on how to install, configure, update, and upgrade your own GitLab instance, see the [administration documentation](../administration/index.md).
+
 ## Get started
 
-- Set up GitLab's development environment with [GitLab Development Kit (GDK)](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/README.md)
+- Set up GitLab's development environment with [GitLab Development Kit (GDK)](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/README.md)
 - [GitLab contributing guide](contributing/index.md)
   - [Issues workflow](contributing/issue_workflow.md) for more information on:
     - Issue tracker guidelines.
@@ -32,6 +47,7 @@ description: 'Learn how to contribute to GitLab.'
 
 **Must-reads:**
 
+- [Guide on adapting existing and introducing new components](architecture.md#adapting-existing-and-introducing-new-components)
 - [Code review guidelines](code_review.md) for reviewing code and having code reviewed
 - [Database review guidelines](database_review.md) for reviewing database-related changes and complex SQL queries, and having them reviewed
 - [Secure coding guidelines](secure_coding_guidelines.md)
@@ -45,6 +61,21 @@ Complementary reads:
 - [Danger bot](dangerbot.md)
 - [Generate a changelog entry with `bin/changelog`](changelog.md)
 - [Requesting access to Chatops on GitLab.com](chatops_on_gitlabcom.md#requesting-access) (for GitLab team members)
+- [Patch release process for developers](https://gitlab.com/gitlab-org/release/docs/blob/master/general/patch/process.md#process-for-developers)
+- [Adding a new service component to GitLab](adding_service_component.md)
+
+### Development guidelines review
+
+When you submit a change to GitLab's development guidelines, request a review
+from:
+
+- A member of your team or group, to check for technical accuracy.
+- For **significant** changes or proposals, request review from:
+  - Engineering managers (FE, BE, DB, Security, UX, and others), according to the subject or process you're proposing.
+  - The VP of Development (DRI) ([@clefelhocz1](https://gitlab.com/clefelhocz1)), for
+  final approval of the new or changed guidelines.
+- The [Technical Writer assigned to dev guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines),
+  to review the content for consistency and adherence to documentation guidelines.
 
 ## UX and Frontend guides
 
@@ -57,13 +88,13 @@ Complementary reads:
 - [GitLab utilities](utilities.md)
 - [Issuable-like Rails models](issuable-like-models.md)
 - [Logging](logging.md)
-- [API styleguide](api_styleguide.md) for contributing to the API
-- [GraphQL API styleguide](api_graphql_styleguide.md) for contributing to the [GraphQL API](../api/graphql/index.md)
+- [API style guide](api_styleguide.md) for contributing to the API
+- [GraphQL API style guide](api_graphql_styleguide.md) for contributing to the [GraphQL API](../api/graphql/index.md)
 - [Sidekiq guidelines](sidekiq_style_guide.md) for working with Sidekiq workers
 - [Working with Gitaly](gitaly.md)
 - [Manage feature flags](feature_flags/index.md)
 - [Licensed feature availability](licensed_feature_availability.md)
-- [View sent emails or preview mailers](emails.md)
+- [Dealing with email/mailers](emails.md)
 - [Shell commands](shell_commands.md) in the GitLab codebase
 - [`Gemfile` guidelines](gemfile.md)
 - [Pry debugging](pry_debugging.md)
@@ -98,6 +129,11 @@ Complementary reads:
 - [Rails initializers](rails_initializers.md)
 - [Code comments](code_comments.md)
 - [Renaming features](renaming_features.md)
+- [Windows Development on GCP](windows.md)
+- [Code Intelligence](code_intelligence/index.md)
+- [Approval Rules](approval_rules.md)
+- [Feature categorization](feature_categorization/index.md)
+- [Wikis development guide](wikis.md)
 
 ## Performance guides
 
@@ -112,50 +148,7 @@ Complementary reads:
 
 ## Database guides
 
-### Tooling
-
-- [Understanding EXPLAIN plans](understanding_explain_plans.md)
-- [explain.depesz.com](https://explain.depesz.com/) for visualizing the output
-  of `EXPLAIN`
-- [pgFormatter](http://sqlformat.darold.net/) a PostgreSQL SQL syntax beautifier
-
-### Migrations
-
-- [What requires downtime?](what_requires_downtime.md)
-- [SQL guidelines](sql.md) for working with SQL queries
-- [Migrations style guide](migration_style_guide.md) for creating safe SQL migrations
-- [Testing Rails migrations](testing_guide/testing_migrations_guide.md) guide
-- [Post deployment migrations](post_deployment_migrations.md)
-- [Background migrations](background_migrations.md)
-- [Swapping tables](swapping_tables.md)
-- [Deleting migrations](deleting_migrations.md)
-
-### Debugging
-
-- Tracing the source of an SQL query using query comments with [Marginalia](database_query_comments.md)
-- Tracing the source of an SQL query in Rails console using [Verbose Query Logs](https://guides.rubyonrails.org/debugging_rails_applications.html#verbose-query-logs)
-
-### Best practices
-
-- [Adding database indexes](adding_database_indexes.md)
-- [Foreign keys & associations](foreign_keys.md)
-- [Single table inheritance](single_table_inheritance.md)
-- [Polymorphic associations](polymorphic_associations.md)
-- [Serializing data](serializing_data.md)
-- [Hash indexes](hash_indexes.md)
-- [Storing SHA1 hashes as binary](sha1_as_binary.md)
-- [Iterating tables in batches](iterating_tables_in_batches.md)
-- [Insert into tables in batches](insert_into_tables_in_batches.md)
-- [Ordering table columns](ordering_table_columns.md)
-- [Verifying database capabilities](verifying_database_capabilities.md)
-- [Database Debugging and Troubleshooting](database_debugging.md)
-- [Query Count Limits](query_count_limits.md)
-- [Creating enums](creating_enums.md)
-
-### Case studies
-
-- [Database case study: Filtering by label](filtering_by_label.md)
-- [Database case study: Namespaces storage statistics](namespaces_storage_statistics.md)
+See [database guidelines](database/index.md).
 
 ## Integration guides
 
@@ -173,10 +166,14 @@ Complementary reads:
 
 - [Refactoring guidelines](refactoring_guide/index.md)
 
+## Deprecation guides
+
+- [Deprecation guidelines](deprecation_guidelines/index.md)
+
 ## Documentation guides
 
 - [Writing documentation](documentation/index.md)
-- [Documentation styleguide](documentation/styleguide.md)
+- [Documentation style guide](documentation/styleguide.md)
 - [Markdown](../user/markdown.md)
 
 ## Internationalization (i18n) guides
@@ -185,12 +182,13 @@ Complementary reads:
 - [Externalization](i18n/externalization.md)
 - [Translation](i18n/translation.md)
 
-## Telemetry guides
+## Product Analytics guides
 
-- [Introduction](../telemetry/index.md)
-- [Snowplow tracking guide](../telemetry/snowplow.md)
+- [Product Analytics guide](product_analytics/index.md)
+- [Usage Ping guide](product_analytics/usage_ping.md)
+- [Snowplow guide](product_analytics/snowplow.md)
 
-## Experiment Guide
+## Experiment guide
 
 - [Introduction](experiment_guide/index.md)
 
@@ -218,6 +216,8 @@ Complementary reads:
 
 - [Defining relations between files using projections](projections.md)
 - [Reference processing](./reference_processing.md)
+- [Compatibility with multiple versions of the application running at the same time](multi_version_compatibility.md)
+- [Features inside `.gitlab/`](./features_inside_dot_gitlab.md)
 
 ## Other GitLab Development Kit (GDK) guides
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::LogCursor::Events::CacheInvalidationEvent, :clean_gitlab_redis_shared_state do
+RSpec.describe Gitlab::Geo::LogCursor::Events::CacheInvalidationEvent, :clean_gitlab_redis_shared_state do
   let(:logger) { Gitlab::Geo::LogCursor::Logger.new(described_class, Logger::INFO) }
   let(:event_log) { create(:geo_event_log, :cache_invalidation_event) }
   let!(:event_log_state) { create(:geo_event_log_state, event_id: event_log.id - 1) }
@@ -33,7 +33,7 @@ describe Gitlab::Geo::LogCursor::Events::CacheInvalidationEvent, :clean_gitlab_r
 
       expect(::Gitlab::Logger)
         .to receive(:info)
-        .with(hash_including(data))
+        .with(hash_including(:event_id, data))
 
       subject.process
     end

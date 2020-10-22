@@ -37,7 +37,7 @@ describe('QuartersPresetMixin', () => {
     describe('hasStartDateForQuarter', () => {
       it('returns true when Epic.startDate falls within timeframeItem', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, { startDate: mockTimeframeQuarters[1].range[0] }),
+          epic: { ...mockEpic, startDate: mockTimeframeQuarters[1].range[0] },
           timeframeItem: mockTimeframeQuarters[1],
         });
 
@@ -46,7 +46,7 @@ describe('QuartersPresetMixin', () => {
 
       it('returns false when Epic.startDate does not fall within timeframeItem', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, { startDate: mockTimeframeQuarters[0].range[0] }),
+          epic: { ...mockEpic, startDate: mockTimeframeQuarters[0].range[0] },
           timeframeItem: mockTimeframeQuarters[1],
         });
 
@@ -65,9 +65,7 @@ describe('QuartersPresetMixin', () => {
         const epicEndDate = mockTimeframeQuarters[1].range[2];
 
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, {
-            endDate: epicEndDate,
-          }),
+          epic: { ...mockEpic, endDate: epicEndDate },
         });
 
         expect(vm.isTimeframeUnderEndDateForQuarter(timeframeItem)).toBe(true);
@@ -77,9 +75,7 @@ describe('QuartersPresetMixin', () => {
         const epicEndDate = mockTimeframeQuarters[2].range[1];
 
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, {
-            endDate: epicEndDate,
-          }),
+          epic: { ...mockEpic, endDate: epicEndDate },
         });
 
         expect(vm.isTimeframeUnderEndDateForQuarter(timeframeItem)).toBe(false);
@@ -99,7 +95,7 @@ describe('QuartersPresetMixin', () => {
     describe('getTimelineBarStartOffsetForQuarters', () => {
       it('returns empty string when Epic startDate is out of range', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, { startDateOutOfRange: true }),
+          epic: { ...mockEpic, startDateOutOfRange: true },
         });
 
         expect(vm.getTimelineBarStartOffsetForQuarters(vm.epic)).toBe('');
@@ -107,10 +103,7 @@ describe('QuartersPresetMixin', () => {
 
       it('returns empty string when Epic startDate is undefined and endDate is out of range', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, {
-            startDateUndefined: true,
-            endDateOutOfRange: true,
-          }),
+          epic: { ...mockEpic, startDateUndefined: true, endDateOutOfRange: true },
         });
 
         expect(vm.getTimelineBarStartOffsetForQuarters(vm.epic)).toBe('');
@@ -118,9 +111,7 @@ describe('QuartersPresetMixin', () => {
 
       it('return `left: 0;` when Epic startDate is first day of the quarter', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, {
-            startDate: mockTimeframeQuarters[0].range[0],
-          }),
+          epic: { ...mockEpic, startDate: mockTimeframeQuarters[0].range[0] },
         });
 
         expect(vm.getTimelineBarStartOffsetForQuarters(vm.epic)).toBe('left: 0;');
@@ -128,9 +119,7 @@ describe('QuartersPresetMixin', () => {
 
       it('returns proportional `left` value based on Epic startDate and days in the quarter', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, {
-            startDate: mockTimeframeQuarters[0].range[1],
-          }),
+          epic: { ...mockEpic, startDate: mockTimeframeQuarters[0].range[1] },
         });
 
         expect(vm.getTimelineBarStartOffsetForQuarters(vm.epic)).toContain('left: 34');
@@ -141,10 +130,11 @@ describe('QuartersPresetMixin', () => {
       it('returns calculated width value based on Epic.startDate and Epic.endDate', () => {
         vm = createComponent({
           timeframeItem: mockTimeframeQuarters[0],
-          epic: Object.assign({}, mockEpic, {
+          epic: {
+            ...mockEpic,
             startDate: mockTimeframeQuarters[0].range[1],
             endDate: mockTimeframeQuarters[1].range[1],
-          }),
+          },
         });
 
         expect(Math.floor(vm.getTimelineBarWidthForQuarters(vm.epic))).toBe(180);

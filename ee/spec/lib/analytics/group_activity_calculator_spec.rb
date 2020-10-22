@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Analytics::GroupActivityCalculator do
+RSpec.describe Analytics::GroupActivityCalculator do
   subject { described_class.new(group, current_user) }
 
   let_it_be(:group) { create(:group) }
@@ -74,7 +74,7 @@ describe Analytics::GroupActivityCalculator do
       let(:old_member) { create(:user, created_at: 102.days.ago) }
 
       before do
-        Timecop.freeze(100.days.ago) do
+        travel_to(100.days.ago) do
           subgroup.add_developer old_member
         end
       end

@@ -2,7 +2,7 @@
 
 require 'rake_helper'
 
-describe 'gitlab:uploads:migrate and migrate_to_local rake tasks' do
+RSpec.describe 'gitlab:uploads:migrate and migrate_to_local rake tasks' do
   let(:model_class) { nil }
   let(:uploader_class) { nil }
   let(:mounted_as) { nil }
@@ -115,6 +115,18 @@ describe 'gitlab:uploads:migrate and migrate_to_local rake tasks' do
         uploader_class.new(model)
           .store!(fixture_file_upload('spec/fixtures/doc_sample.txt'))
       end
+    end
+
+    it_behaves_like 'enqueue upload migration jobs in batch', batch: 4
+  end
+
+  context 'for DesignManagement::DesignV432x230Uploader' do
+    let(:uploader_class) { DesignManagement::DesignV432x230Uploader }
+    let(:model_class) {  DesignManagement::Action }
+    let(:mounted_as) { :image_v432x230 }
+
+    before do
+      create_list(:design_action, 10, :with_image_v432x230)
     end
 
     it_behaves_like 'enqueue upload migration jobs in batch', batch: 4

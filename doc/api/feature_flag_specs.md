@@ -1,16 +1,25 @@
+---
+stage: Release
+group: Progressive Delivery
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Feature Flag Specs API **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/9566) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.5.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9566) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.5.
 
-The API for creating, updating, reading and deleting [Feature Flag Specs](../user/project/operations/feature_flags.md#define-environment-specs).
+CAUTION: **Deprecation:**
+This API is deprecated and [scheduled for removal in GitLab 14.0](https://gitlab.com/gitlab-org/gitlab/-/issues/213369).
+
+The API for creating, updating, reading and deleting Feature Flag Specs.
 Automation engineers benefit from this API by being able to modify Feature Flag Specs without accessing user interface.
-To manage the [Feature Flag](../user/project/operations/feature_flags.md) resources via public API, please refer to the [Feature Flags API](feature_flags.md) document.
+To manage the [Feature Flag](../operations/feature_flags.md) resources via public API, please refer to the [Feature Flags API](feature_flags.md) document.
 
 Users with Developer or higher [permissions](../user/permissions.md) can access Feature Flag Specs API.
 
 ## List all effective feature flag specs under the specified environment
 
-Get all effective feature flag specs under the specified [environment](../ci/environments.md).
+Get all effective feature flag specs under the specified [environment](../ci/environments/index.md).
 
 For instance, there are two specs, `staging` and `production`, for a feature flag.
 When you pass `production` as a parameter to this endpoint, the system returns
@@ -23,10 +32,10 @@ GET /projects/:id/feature_flag_scopes
 | Attribute           | Type             | Required   | Description                                                                                                                 |
 | ------------------- | ---------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding).       |
-| `environment`       | string           | yes        | The [environment](../ci/environments.md) name |
+| `environment`       | string           | yes        | The [environment](../ci/environments/index.md) name |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/feature_flag_scopes?environment=production
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/feature_flag_scopes?environment=production"
 ```
 
 Example response:
@@ -94,7 +103,7 @@ GET /projects/:id/feature_flags/:name/scopes
 | `name`              | string           | yes        | The name of the feature flag. |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/feature_flags/new_live_trace/scopes
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/feature_flags/new_live_trace/scopes"
 ```
 
 Example response:
@@ -155,12 +164,12 @@ POST /projects/:id/feature_flags/:name/scopes
 | ------------------- | ---------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding).       |
 | `name`              | string           | yes        | The name of the feature flag. |
-| `environment_scope` | string           | yes        | The [environment spec](../ci/environments.md#scoping-environments-with-specs) of the feature flag. |
+| `environment_scope` | string           | yes        | The [environment spec](../ci/environments/index.md#scoping-environments-with-specs) of the feature flag. |
 | `active`            | boolean          | yes        | Whether the spec is active. |
-| `strategies`        | json             | yes        | The [strategies](../user/project/operations/feature_flags.md#feature-flag-strategies) of the feature flag spec. |
+| `strategies`        | JSON             | yes        | The [strategies](../operations/feature_flags.md#feature-flag-strategies) of the feature flag spec. |
 
 ```shell
-curl https://gitlab.example.com/api/v4/projects/1/feature_flags/new_live_trace/scopes \
+curl "https://gitlab.example.com/api/v4/projects/1/feature_flags/new_live_trace/scopes" \
      --header "PRIVATE-TOKEN: <your_access_token>" \
      --header "Content-type: application/json" \
      --data @- << EOF
@@ -202,10 +211,10 @@ GET /projects/:id/feature_flags/:name/scopes/:environment_scope
 | ------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------|
 | `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding).       |
 | `name`              | string           | yes        | The name of the feature flag.  |
-| `environment_scope` | string           | yes        | The URL-encoded [environment spec](../ci/environments.md#scoping-environments-with-specs) of the feature flag.  |
+| `environment_scope` | string           | yes        | The URL-encoded [environment spec](../ci/environments/index.md#scoping-environments-with-specs) of the feature flag.  |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/:id/feature_flags/new_live_trace/scopes/production
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/feature_flags/new_live_trace/scopes/production"
 ```
 
 Example response:
@@ -238,12 +247,12 @@ PUT /projects/:id/feature_flags/:name/scopes/:environment_scope
 | ------------------- | ---------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding).       |
 | `name`              | string           | yes        | The name of the feature flag. |
-| `environment_scope` | string           | yes        | The URL-encoded [environment spec](../ci/environments.md#scoping-environments-with-specs) of the feature flag.  |
+| `environment_scope` | string           | yes        | The URL-encoded [environment spec](../ci/environments/index.md#scoping-environments-with-specs) of the feature flag.  |
 | `active`            | boolean          | yes        | Whether the spec is active. |
-| `strategies`        | json             | yes        | The [strategies](../user/project/operations/feature_flags.md#feature-flag-strategies) of the feature flag spec. |
+| `strategies`        | JSON             | yes        | The [strategies](../operations/feature_flags.md#feature-flag-strategies) of the feature flag spec. |
 
 ```shell
-curl https://gitlab.example.com/api/v4/projects/1/feature_flags/new_live_trace/scopes/production \
+curl "https://gitlab.example.com/api/v4/projects/1/feature_flags/new_live_trace/scopes/production" \
      --header "PRIVATE-TOKEN: <your_access_token>" \
      --header "Content-type: application/json" \
      --data @- << EOF
@@ -284,8 +293,8 @@ DELETE /projects/:id/feature_flags/:name/scopes/:environment_scope
 | ------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------|
 | `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding).       |
 | `name`              | string           | yes        | The name of the feature flag.  |
-| `environment_scope` | string           | yes        | The URL-encoded [environment spec](../ci/environments.md#scoping-environments-with-specs) of the feature flag.  |
+| `environment_scope` | string           | yes        | The URL-encoded [environment spec](../ci/environments/index.md#scoping-environments-with-specs) of the feature flag.  |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" --request DELETE https://gitlab.example.com/api/v4/projects/1/feature_flags/new_live_trace/scopes/production
+curl --header "PRIVATE-TOKEN: <your_access_token>" --request DELETE "https://gitlab.example.com/api/v4/projects/1/feature_flags/new_live_trace/scopes/production"
 ```

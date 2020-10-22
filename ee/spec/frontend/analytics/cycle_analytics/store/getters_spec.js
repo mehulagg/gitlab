@@ -1,7 +1,32 @@
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
-import { startDate, endDate, allowedStages, selectedProjects } from '../mock_data';
+import {
+  filterMilestones,
+  filterUsers,
+  filterLabels,
+} from 'jest/vue_shared/components/filtered_search_bar/store/modules/filters/mock_data';
+import {
+  getFilterParams,
+  getFilterValues,
+} from 'jest/vue_shared/components/filtered_search_bar/store/modules/filters/test_helper';
+import {
+  startDate,
+  endDate,
+  allowedStages,
+  selectedProjects,
+  transformedStagePathData,
+  issueStage,
+  stageMedians,
+} from '../mock_data';
 
 let state = null;
+
+const selectedMilestoneParams = getFilterParams(filterMilestones);
+const selectedLabelParams = getFilterParams(filterLabels);
+const selectedUserParams = getFilterParams(filterUsers, { prop: 'name' });
+
+const milestoneValues = getFilterValues(filterMilestones);
+const labelValues = getFilterValues(filterLabels);
+const userValues = getFilterValues(filterUsers, { prop: 'name' });
 
 describe('Cycle analytics getters', () => {
   describe('hasNoAccessError', () => {
@@ -41,11 +66,11 @@ describe('Cycle analytics getters', () => {
   });
 
   describe('currentGroupPath', () => {
-    describe('with selectedGroup set', () => {
+    describe('with currentGroup set', () => {
       it('returns the `fullPath` value of the group', () => {
         const fullPath = 'cool-beans';
         state = {
-          selectedGroup: {
+          currentGroup: {
             fullPath,
           },
         };
@@ -54,9 +79,9 @@ describe('Cycle analytics getters', () => {
       });
     });
 
-    describe('without a selectedGroup set', () => {
-      it.each([[''], [{}], [null]])('given %s will return null', value => {
-        state = { selectedGroup: value };
+    describe('without a currentGroup set', () => {
+      it.each([[''], [{}], [null]])('given "%s" will return null', value => {
+        state = { currentGroup: value };
         expect(getters.currentGroupPath(state)).toEqual(null);
       });
     });
@@ -66,26 +91,49 @@ describe('Cycle analytics getters', () => {
     beforeEach(() => {
       const fullPath = 'cool-beans';
       state = {
-        selectedGroup: {
+        currentGroup: {
           fullPath,
         },
         startDate,
         endDate,
         selectedProjects,
+        filters: {
+          authors: { selected: selectedUserParams[0] },
+          milestones: { selected: selectedMilestoneParams[1] },
+          assignees: { selectedList: selectedUserParams[1] },
+          labels: { selectedList: selectedLabelParams },
+        },
       };
     });
 
     it.each`
-      param               | value
-      ${'created_after'}  | ${'2018-12-15'}
-      ${'created_before'} | ${'2019-01-14'}
-      ${'project_ids'}    | ${[1, 2]}
+      param                  | value
+      ${'created_after'}     | ${'2018-12-15'}
+      ${'created_before'}    | ${'2019-01-14'}
+      ${'project_ids'}       | ${[1, 2]}
+      ${'author_username'}   | ${userValues[0]}
+      ${'milestone_title'}   | ${milestoneValues[1]}
+      ${'assignee_username'} | ${userValues[1]}
+      ${'label_name'}        | ${labelValues}
     `('should return the $param with value $value', ({ param, value }) => {
       expect(
         getters.cycleAnalyticsRequestParams(state, { selectedProjectIds: [1, 2] }),
       ).toMatchObject({
         [param]: value,
       });
+    });
+
+    it.each`
+      param                  | stateKey         | value
+      ${'assignee_username'} | ${'userValues'}  | ${[]}
+      ${'label_name'}        | ${'labelValues'} | ${[]}
+    `('should not return the $param when $stateKey=$value', ({ param, stateKey, value }) => {
+      expect(
+        getters.cycleAnalyticsRequestParams(
+          { ...state, [stateKey]: value },
+          { selectedProjectIds: [1, 2] },
+        ),
+      ).not.toContain(param);
     });
   });
 
@@ -140,6 +188,34 @@ describe('Cycle analytics getters', () => {
         state.stages = [{ id: 'one' }, { id: 'two' }];
         expect(getters.enableCustomOrdering(state)).toEqual(false);
       });
+    });
+  });
+
+  describe.each`
+    isEditingCustomStage | isCreatingCustomStage | result
+    ${true}              | ${true}               | ${true}
+    ${true}              | ${false}              | ${true}
+    ${false}             | ${true}               | ${true}
+    ${null}              | ${true}               | ${true}
+    ${true}              | ${null}               | ${true}
+    ${null}              | ${null}               | ${false}
+    ${false}             | ${false}              | ${false}
+  `('customStageFormActive', ({ isEditingCustomStage, isCreatingCustomStage, result }) => {
+    it(`returns ${result} when isEditingCustomStage=${isEditingCustomStage} and isCreatingCustomStage=${isCreatingCustomStage}`, () => {
+      const resp = getters.customStageFormActive({ isCreatingCustomStage, isEditingCustomStage });
+      expect(resp).toEqual(result);
+    });
+  });
+
+  describe('pathNavigationData', () => {
+    it('returns the transformed data', () => {
+      state = {
+        stages: allowedStages,
+        medians: stageMedians,
+        selectedStage: issueStage,
+      };
+
+      expect(getters.pathNavigationData(state)).toEqual(transformedStagePathData);
     });
   });
 });

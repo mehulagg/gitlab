@@ -1,7 +1,14 @@
-# GitLab Developers Guide to Working with Gitaly
+---
+stage: Create
+group: Gitaly
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: reference
+---
 
-[Gitaly](https://gitlab.com/gitlab-org/gitaly) is a high-level Git RPC service used by GitLab CE/EE,
-Workhorse and GitLab-Shell.
+# Gitaly developers guide
+
+[Gitaly](https://gitlab.com/gitlab-org/gitaly) is a high-level Git RPC service used by GitLab Rails,
+Workhorse and GitLab Shell.
 
 ## Deep Dive
 
@@ -54,7 +61,7 @@ The process for adding new Gitaly features is:
 These steps often overlap. It is possible to use an unreleased version
 of Gitaly and `gitaly-proto` during testing and development.
 
-- See the [Gitaly repo](https://gitlab.com/gitlab-org/gitaly/blob/master/CONTRIBUTING.md#development-and-testing-with-a-custom-gitaly-proto) for instructions on writing server side code with an unreleased protocol.
+- See the [Gitaly repository](https://gitlab.com/gitlab-org/gitaly/blob/master/CONTRIBUTING.md#development-and-testing-with-a-custom-gitaly-proto) for instructions on writing server side code with an unreleased protocol.
 - See [below](#running-tests-with-a-locally-modified-version-of-gitaly) for instructions on running GitLab CE tests with a modified version of Gitaly.
 - In GDK run `gdk install` and restart `gdk run` (or `gdk run app`) to use a locally modified Gitaly version for development
 
@@ -67,7 +74,7 @@ This should make it easier to contribute for developers who are less
 comfortable writing Go code.
 
 There is documentation for this approach in [the Gitaly
-repo](https://gitlab.com/gitlab-org/gitaly/blob/master/doc/ruby_endpoint.md).
+repository](https://gitlab.com/gitlab-org/gitaly/blob/master/doc/ruby_endpoint.md).
 
 ## Gitaly-Related Test Failures
 
@@ -85,7 +92,7 @@ While Gitaly can handle all Git access, many of GitLab customers still
 run Gitaly atop NFS. The legacy Rugged implementation for Git calls may
 be faster than the Gitaly RPC due to N+1 Gitaly calls and other
 reasons. See [the
-issue](https://gitlab.com/gitlab-org/gitlab-foss/issues/57317) for more
+issue](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/57317) for more
 details.
 
 Until GitLab has eliminated most of these inefficiencies or the use of
@@ -114,7 +121,8 @@ bundle exec rake gitlab:features:disable_rugged
 
 Most of this code exists in the `lib/gitlab/git/rugged_impl` directory.
 
-NOTE: **Note:** You should NOT need to add or modify code related to
+NOTE: **Note:**
+You should NOT need to add or modify code related to
 Rugged unless explicitly discussed with the [Gitaly
 Team](https://gitlab.com/groups/gl-gitaly/group_members). This code will
 NOT work on GitLab.com or other GitLab instances that do not use NFS.
@@ -323,8 +331,8 @@ the integration by using GDK:
    1. Navigate to GDK's root directory.
    1. Make sure you have the proper branch checked out for Gitaly.
    1. Recompile it with `make gitaly-setup` and restart the service with `gdk restart gitaly`.
-   1. Make sure your setup is runnig: `gdk status | grep praefect`.
-   1. Check what config file is used: `cat ./services/praefect/run | grep praefect` value of the `-config` flag
+   1. Make sure your setup is running: `gdk status | grep praefect`.
+   1. Check what configuration file is used: `cat ./services/praefect/run | grep praefect` value of the `-config` flag
    1. Uncomment `prometheus_listen_addr` in the configuration file and run `gdk restart gitaly`.
 
 1. Make sure that the flag is not enabled yet:

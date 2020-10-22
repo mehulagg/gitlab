@@ -1,15 +1,17 @@
 <script>
 import { mapActions } from 'vuex';
-import icon from '~/vue_shared/components/icon.vue';
+import { GlIcon } from '@gitlab/ui';
 import upload from './upload.vue';
 import ItemButton from './button.vue';
 import { modalTypes } from '../../constants';
+import NewModal from './modal.vue';
 
 export default {
   components: {
-    icon,
+    GlIcon,
     upload,
     ItemButton,
+    NewModal,
   },
   props: {
     type: {
@@ -37,9 +39,9 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['createTempEntry', 'openNewEntryModal', 'deleteEntry']),
+    ...mapActions(['createTempEntry', 'deleteEntry']),
     createNewItem(type) {
-      this.openNewEntryModal({ type, path: this.path });
+      this.$refs.newModal.open(type, this.path);
       this.$emit('toggle', false);
     },
     openDropdown() {
@@ -62,9 +64,10 @@ export default {
         :aria-label="__('Create new file or directory')"
         type="button"
         class="rounded border-0 d-flex ide-entry-dropdown-toggle"
+        data-qa-selector="dropdown_button"
         @click.stop="openDropdown()"
       >
-        <icon name="ellipsis_v" /> <icon name="chevron-down" />
+        <gl-icon name="ellipsis_v" /> <gl-icon name="chevron-down" />
       </button>
       <ul ref="dropdownMenu" class="dropdown-menu dropdown-menu-right">
         <template v-if="type === 'tree'">
@@ -95,6 +98,7 @@ export default {
             class="d-flex"
             icon="pencil"
             icon-classes="mr-2"
+            data-qa-selector="rename_move_button"
             @click="createNewItem($options.modalTypes.rename)"
           />
         </li>
@@ -109,5 +113,6 @@ export default {
         </li>
       </ul>
     </div>
+    <new-modal ref="newModal" />
   </div>
 </template>

@@ -12,7 +12,7 @@ When you create an OAuth 2 app in GitHub, you'll need the following information:
 - The authorization callback URL; in this case, `https://gitlab.example.com/users/auth`. Include the port number if your GitLab instance uses a non-default port.
 
 NOTE: **Note:**
-To prevent an [OAuth2 covert redirect](http://tetraph.com/covert_redirect/) vulnerability, append `/users/auth` to the end of the GitHub authorization callback URL.
+To prevent an [OAuth2 covert redirect](https://oauth.net/advisories/2014-1-covert-redirect/) vulnerability, append `/users/auth` to the end of the GitHub authorization callback URL.
 
 See [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration) for initial settings.
 
@@ -71,17 +71,18 @@ Follow these steps to incorporate the GitHub OAuth 2 app in your GitLab server:
 
    ```yaml
    - { name: 'github', app_id: 'YOUR_APP_ID',
-     app_secret: 'YOUR_APP_SECRET',
-     args: { scope: 'user:email' } }
+       app_secret: 'YOUR_APP_SECRET',
+       args: { scope: 'user:email' } }
    ```
 
    For GitHub Enterprise:
 
    ```yaml
-   - { name: 'github', app_id: 'YOUR_APP_ID',
-     app_secret: 'YOUR_APP_SECRET',
-     url: "https://github.example.com/",
-     args: { scope: 'user:email' } }
+   - { name: 'github',
+       app_id: 'YOUR_APP_ID',
+       app_secret: 'YOUR_APP_SECRET',
+       url: "https://github.example.com/",
+       args: { scope: 'user:email' } }
    ```
 
    **Replace `https://github.example.com/` with your GitHub URL.**
@@ -125,11 +126,12 @@ omnibus_gitconfig['system'] = { "http" => ["sslVerify = false"] }
 For installation from source:
 
 ```yaml
-- { name: 'github', app_id: 'YOUR_APP_ID',
-  app_secret: 'YOUR_APP_SECRET',
-  url: "https://github.example.com/",
-  verify_ssl: false,
-  args: { scope: 'user:email' } }
+- { name: 'github',
+    app_id: 'YOUR_APP_ID',
+    app_secret: 'YOUR_APP_SECRET',
+    url: "https://github.example.com/",
+    verify_ssl: false,
+    args: { scope: 'user:email' } }
 ```
 
 You will also need to disable Git SSL verification on the server hosting GitLab.
@@ -148,7 +150,7 @@ via Omnibus, or [restart GitLab](../administration/restart_gitlab.md#installatio
 Check the [`production.log`](../administration/logs.md#productionlog)
 on your GitLab server to obtain further details. If you are getting the error like
 `Faraday::ConnectionFailed (execution expired)` in the log, there may be a connectivity issue
-between your GitLab instance and GitHub Enterprise. To verify it, [start the rails console](../administration/troubleshooting/debug.md#starting-a-rails-console-session)
+between your GitLab instance and GitHub Enterprise. To verify it, [start the rails console](../administration/operations/rails_console.md#starting-a-rails-console-session)
 and run the commands below replacing `<github_url>` with the URL of your GitHub Enterprise instance:
 
 ```ruby

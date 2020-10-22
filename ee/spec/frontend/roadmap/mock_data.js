@@ -129,6 +129,9 @@ export const mockRawEpic = {
     openedEpics: 3,
     closedEpics: 2,
   },
+  group: {
+    fullPath: '/groups/gitlab-org/marketing/',
+  },
 };
 
 export const mockFormattedChildEpic1 = {
@@ -203,6 +206,9 @@ export const mockFormattedEpic = {
     closedEpics: 2,
   },
   isChildEpic: false,
+  group: {
+    fullPath: '/groups/gitlab-org/marketing/',
+  },
 };
 
 export const rawEpics = [
@@ -615,3 +621,34 @@ export const mockGroupMilestonesQueryResponse = {
     },
   },
 };
+
+export const mockEpicsWithParents = [
+  {
+    id: 'gid://gitlab-org/subgroup/Epic/1',
+    hasParent: true,
+    parent: {
+      id: 'gid://gitlab-org/Epic/1',
+    },
+  },
+  {
+    id: 'gid://gitlab-org/subgroup/Epic/2',
+    hasParent: true,
+    parent: {
+      id: 'gid://gitlab-org/subgroup/Epic/1',
+    },
+  },
+  {
+    id: 'gid://gitlab-org/subgroup/Epic/3',
+    hasParent: true,
+    parent: {
+      id: 'gid://gitlab-org/subgroup/Epic/1',
+    },
+  },
+  {
+    id: 'gid://gitlab-org/subgroup/Epic/4',
+    hasParent: true,
+    parent: {
+      id: 'gid://gitlab-org/subgroup/Epic/1',
+    },
+  },
+];

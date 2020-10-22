@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Snippets::CreateService do
+RSpec.describe Snippets::CreateService do
   describe '#execute' do
     let_it_be(:user) { create(:user) }
     let_it_be(:admin) { create(:user, :admin) }
@@ -15,6 +15,7 @@ describe Snippets::CreateService do
         visibility_level: Gitlab::VisibilityLevel::PRIVATE
       }
     end
+
     let(:extra_opts) { {} }
     let(:creator) { admin }
 
@@ -74,47 +75,6 @@ describe Snippets::CreateService do
       end
     end
 
-    shared_examples 'spam check is performed' do
-      shared_examples 'marked as spam' do
-        it 'marks a snippet as spam' do
-          expect(snippet).to be_spam
-        end
-
-        it 'invalidates the snippet' do
-          expect(snippet).to be_invalid
-        end
-
-        it 'creates a new spam_log' do
-          expect { snippet }
-            .to have_spam_log(title: snippet.title, noteable_type: snippet.class.name)
-        end
-
-        it 'assigns a spam_log to an issue' do
-          expect(snippet.spam_log).to eq(SpamLog.last)
-        end
-      end
-
-      let(:extra_opts) do
-        { visibility_level: Gitlab::VisibilityLevel::PUBLIC, request: double(:request, env: {}) }
-      end
-
-      before do
-        expect_next_instance_of(Spam::AkismetService) do |akismet_service|
-          expect(akismet_service).to receive_messages(spam?: true)
-        end
-      end
-
-      [true, false, nil].each do |allow_possible_spam|
-        context "when recaptcha_disabled flag is #{allow_possible_spam.inspect}" do
-          before do
-            stub_feature_flags(allow_possible_spam: allow_possible_spam) unless allow_possible_spam.nil?
-          end
-
-          it_behaves_like 'marked as spam'
-        end
-      end
-    end
-
     shared_examples 'snippet create data is tracked' do
       let(:counter) { Gitlab::UsageDataCounters::SnippetCounter }
 
@@ -150,7 +110,7 @@ describe Snippets::CreateService do
         expect(snippet.repository.exists?).to be_truthy
       end
 
-      it 'commit the files to the repository' do
+      it 'commits the files to the repository' do
         subject
 
         blob = snippet.repository.blob_at('master', base_opts[:file_name])
@@ -169,12 +129,20 @@ describe Snippets::CreateService do
           expect { subject }.not_to change { Snippet.count }
         end
 
-        it 'returns the error' do
-          expect(snippet.errors.full_messages).to include('Repository could not be created')
+        it 'returns a generic creation error' do
+          expect(snippet.errors[:repository]).to eq ['Error creating the snippet - Repository could not be created']
         end
 
         it 'does not return a snippet with an id' do
           expect(snippet.id).to be_nil
+        end
+      end
+
+      context 'when repository creation fails with invalid file name' do
+        let(:extra_opts) { { file_name: 'invalid://file/name/here' } }
+
+        it 'returns an appropriate error' do
+          expect(snippet.errors[:repository]).to eq ['Error creating the snippet - Invalid file name']
         end
       end
 
@@ -209,11 +177,9 @@ describe Snippets::CreateService do
           subject
         end
 
-        it 'returns the error' do
-          response = subject
-
-          expect(response).to be_error
-          expect(response.payload[:snippet].errors.full_messages).to eq ['foobar']
+        it 'returns a generic error' do
+          expect(subject).to be_error
+          expect(snippet.errors[:repository]).to eq ['Error creating the snippet']
         end
       end
 
@@ -263,6 +229,75 @@ describe Snippets::CreateService do
       end
     end
 
+    shared_examples 'when snippet_actions param is present' do
+      let(:file_path) { 'snippet_file_path.rb' }
+      let(:content) { 'snippet_content' }
+      let(:snippet_actions) { [{ action: 'create', file_path: file_path, content: content }] }
+      let(:base_opts) do
+        {
+          title: 'Test snippet',
+          visibility_level: Gitlab::VisibilityLevel::PRIVATE,
+          snippet_actions: snippet_actions
+        }
+      end
+
+      it 'creates a snippet with the provided attributes' do
+        expect(snippet.title).to eq(opts[:title])
+        expect(snippet.visibility_level).to eq(opts[:visibility_level])
+        expect(snippet.file_name).to eq(file_path)
+        expect(snippet.content).to eq(content)
+      end
+
+      it 'commit the files to the repository' do
+        expect(subject).to be_success
+
+        blob = snippet.repository.blob_at('master', file_path)
+
+        expect(blob.data).to eq content
+      end
+
+      context 'when content or file_name params are present' do
+        let(:extra_opts) { { content: 'foo', file_name: 'path' } }
+
+        it 'a validation error is raised' do
+          expect(subject).to be_error
+          expect(snippet.errors.full_messages_for(:content)).to eq ['Content and snippet files cannot be used together']
+          expect(snippet.errors.full_messages_for(:file_name)).to eq ['File name and snippet files cannot be used together']
+          expect(snippet.repository.exists?).to be_falsey
+        end
+      end
+
+      context 'when snippet_actions param is invalid' do
+        let(:snippet_actions) { [{ action: 'invalid_action', file_path: 'snippet_file_path.rb', content: 'snippet_content' }] }
+
+        it 'a validation error is raised' do
+          expect(subject).to be_error
+          expect(snippet.errors.full_messages_for(:snippet_actions)).to eq ['Snippet actions have invalid data']
+          expect(snippet.repository.exists?).to be_falsey
+        end
+      end
+
+      context 'when snippet_actions contain an action different from "create"' do
+        let(:snippet_actions) { [{ action: 'delete', file_path: 'snippet_file_path.rb' }] }
+
+        it 'a validation error is raised' do
+          expect(subject).to be_error
+          expect(snippet.errors.full_messages_for(:snippet_actions)).to eq ['Snippet actions have invalid data']
+          expect(snippet.repository.exists?).to be_falsey
+        end
+      end
+
+      context 'when "create" operation does not have file_path or is empty' do
+        let(:snippet_actions) { [{ action: 'create', content: content }, { action: 'create', content: content, file_path: '' }] }
+
+        it 'generates the file path for the files' do
+          expect(subject).to be_success
+          expect(snippet.repository.blob_at('master', 'snippetfile1.txt').data).to eq content
+          expect(snippet.repository.blob_at('master', 'snippetfile2.txt').data).to eq content
+        end
+      end
+    end
+
     context 'when ProjectSnippet' do
       let_it_be(:project) { create(:project) }
 
@@ -272,11 +307,27 @@ describe Snippets::CreateService do
 
       it_behaves_like 'a service that creates a snippet'
       it_behaves_like 'public visibility level restrictions apply'
-      it_behaves_like 'spam check is performed'
+      it_behaves_like 'snippets spam check is performed'
       it_behaves_like 'snippet create data is tracked'
       it_behaves_like 'an error service response when save fails'
       it_behaves_like 'creates repository and files'
       it_behaves_like 'after_save callback to store_mentions', ProjectSnippet
+      it_behaves_like 'when snippet_actions param is present'
+      it_behaves_like 'invalid params error response'
+
+      context 'when uploaded files are passed to the service' do
+        let(:extra_opts) { { files: ['foo'] } }
+
+        it 'does not move uploaded files to the snippet' do
+          expect_next_instance_of(described_class) do |instance|
+            expect(instance).to receive(:move_temporary_files).and_call_original
+          end
+
+          expect_any_instance_of(FileMover).not_to receive(:execute)
+
+          subject
+        end
+      end
     end
 
     context 'when PersonalSnippet' do
@@ -284,11 +335,58 @@ describe Snippets::CreateService do
 
       it_behaves_like 'a service that creates a snippet'
       it_behaves_like 'public visibility level restrictions apply'
-      it_behaves_like 'spam check is performed'
+      it_behaves_like 'snippets spam check is performed'
       it_behaves_like 'snippet create data is tracked'
       it_behaves_like 'an error service response when save fails'
       it_behaves_like 'creates repository and files'
       it_behaves_like 'after_save callback to store_mentions', PersonalSnippet
+      it_behaves_like 'when snippet_actions param is present'
+      it_behaves_like 'invalid params error response'
+
+      context 'when the snippet description contains files' do
+        include FileMoverHelpers
+
+        let(:title) { 'Title' }
+        let(:picture_secret) { SecureRandom.hex }
+        let(:text_secret) { SecureRandom.hex }
+        let(:picture_file) { "/-/system/user/#{creator.id}/#{picture_secret}/picture.jpg" }
+        let(:text_file) { "/-/system/user/#{creator.id}/#{text_secret}/text.txt" }
+        let(:files) { [picture_file, text_file] }
+        let(:description) do
+          "Description with picture: ![picture](/uploads#{picture_file}) and "\
+          "text: [text.txt](/uploads#{text_file})"
+        end
+
+        before do
+          allow(FileUtils).to receive(:mkdir_p)
+          allow(FileUtils).to receive(:move)
+        end
+
+        let(:extra_opts) { { description: description, title: title, files: files } }
+
+        it 'stores the snippet description correctly' do
+          stub_file_mover(text_file)
+          stub_file_mover(picture_file)
+
+          snippet = subject.payload[:snippet]
+
+          expected_description = "Description with picture: "\
+            "![picture](/uploads/-/system/personal_snippet/#{snippet.id}/#{picture_secret}/picture.jpg) and "\
+            "text: [text.txt](/uploads/-/system/personal_snippet/#{snippet.id}/#{text_secret}/text.txt)"
+
+          expect(snippet.description).to eq(expected_description)
+        end
+
+        context 'when there is a validation error' do
+          let(:title) { nil }
+
+          it 'does not move uploaded files to the snippet' do
+            expect_any_instance_of(described_class).not_to receive(:move_temporary_files)
+
+            subject
+          end
+        end
+      end
     end
   end
 end

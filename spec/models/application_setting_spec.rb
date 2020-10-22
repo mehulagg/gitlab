@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApplicationSetting do
+RSpec.describe ApplicationSetting do
   using RSpec::Parameterized::TableSyntax
 
   subject(:setting) { described_class.create_from_defaults }
@@ -71,7 +71,10 @@ describe ApplicationSetting do
     it { is_expected.not_to allow_value('three').for(:push_event_activities_limit) }
     it { is_expected.not_to allow_value(nil).for(:push_event_activities_limit) }
 
+    it { is_expected.to validate_numericality_of(:container_registry_delete_tags_service_timeout).only_integer.is_greater_than_or_equal_to(0) }
+
     it { is_expected.to validate_numericality_of(:snippet_size_limit).only_integer.is_greater_than(0) }
+    it { is_expected.to validate_numericality_of(:wiki_page_max_content_bytes).only_integer.is_greater_than_or_equal_to(1024) }
     it { is_expected.to validate_presence_of(:max_artifacts_size) }
     it { is_expected.to validate_numericality_of(:max_artifacts_size).only_integer.is_greater_than(0) }
     it { is_expected.to validate_presence_of(:max_pages_size) }
@@ -86,11 +89,6 @@ describe ApplicationSetting do
     it { is_expected.not_to allow_value('abc').for(:minimum_password_length) }
     it { is_expected.to allow_value(10).for(:minimum_password_length) }
 
-    it { is_expected.to allow_value(0).for(:namespace_storage_size_limit) }
-    it { is_expected.to allow_value(1).for(:namespace_storage_size_limit) }
-    it { is_expected.not_to allow_value(nil).for(:namespace_storage_size_limit) }
-    it { is_expected.not_to allow_value(-1).for(:namespace_storage_size_limit) }
-
     it { is_expected.to allow_value(300).for(:issues_create_limit) }
     it { is_expected.not_to allow_value('three').for(:issues_create_limit) }
     it { is_expected.not_to allow_value(nil).for(:issues_create_limit) }
@@ -102,6 +100,46 @@ describe ApplicationSetting do
     it { is_expected.not_to allow_value(nil).for(:raw_blob_request_limit) }
     it { is_expected.not_to allow_value(10.5).for(:raw_blob_request_limit) }
     it { is_expected.not_to allow_value(-1).for(:raw_blob_request_limit) }
+
+    it { is_expected.not_to allow_value(false).for(:hashed_storage_enabled) }
+
+    it { is_expected.not_to allow_value(101).for(:repository_storages_weighted_default) }
+    it { is_expected.to allow_value('90').for(:repository_storages_weighted_default) }
+    it { is_expected.not_to allow_value(-1).for(:repository_storages_weighted_default) }
+    it { is_expected.to allow_value(100).for(:repository_storages_weighted_default) }
+    it { is_expected.to allow_value(0).for(:repository_storages_weighted_default) }
+    it { is_expected.to allow_value(50).for(:repository_storages_weighted_default) }
+    it { is_expected.to allow_value(nil).for(:repository_storages_weighted_default) }
+    it { is_expected.not_to allow_value({ default: 100, shouldntexist: 50 }).for(:repository_storages_weighted) }
+
+    context 'help_page_documentation_base_url validations' do
+      it { is_expected.to allow_value(nil).for(:help_page_documentation_base_url) }
+      it { is_expected.to allow_value('https://docs.gitlab.com').for(:help_page_documentation_base_url) }
+      it { is_expected.to allow_value('http://127.0.0.1').for(:help_page_documentation_base_url) }
+      it { is_expected.not_to allow_value('docs.gitlab.com').for(:help_page_documentation_base_url) }
+
+      context 'when url length validation' do
+        let(:value) { 'http://'.ljust(length, 'A') }
+
+        context 'when value string length is 255 characters' do
+          let(:length) { 255 }
+
+          it 'allows the value' do
+            is_expected.to allow_value(value).for(:help_page_documentation_base_url)
+          end
+        end
+
+        context 'when value string length exceeds 255 characters' do
+          let(:length) { 256 }
+
+          it 'does not allow the value' do
+            is_expected.not_to allow_value(value)
+                                 .for(:help_page_documentation_base_url)
+                                 .with_message('is too long (maximum is 255 characters)')
+          end
+        end
+      end
+    end
 
     context 'grafana_url validations' do
       before do
@@ -150,6 +188,30 @@ describe ApplicationSetting do
       end
     end
 
+    describe 'spam_check_endpoint' do
+      context 'when spam_check_endpoint is enabled' do
+        before do
+          setting.spam_check_endpoint_enabled = true
+        end
+
+        it { is_expected.to allow_value('https://example.org/spam_check').for(:spam_check_endpoint_url) }
+        it { is_expected.not_to allow_value('nonsense').for(:spam_check_endpoint_url) }
+        it { is_expected.not_to allow_value(nil).for(:spam_check_endpoint_url) }
+        it { is_expected.not_to allow_value('').for(:spam_check_endpoint_url) }
+      end
+
+      context 'when spam_check_endpoint is NOT enabled' do
+        before do
+          setting.spam_check_endpoint_enabled = false
+        end
+
+        it { is_expected.to allow_value('https://example.org/spam_check').for(:spam_check_endpoint_url) }
+        it { is_expected.not_to allow_value('nonsense').for(:spam_check_endpoint_url) }
+        it { is_expected.to allow_value(nil).for(:spam_check_endpoint_url) }
+        it { is_expected.to allow_value('').for(:spam_check_endpoint_url) }
+      end
+    end
+
     context 'when snowplow is enabled' do
       before do
         setting.snowplow_enabled = true
@@ -158,14 +220,10 @@ describe ApplicationSetting do
       it { is_expected.not_to allow_value(nil).for(:snowplow_collector_hostname) }
       it { is_expected.to allow_value("snowplow.gitlab.com").for(:snowplow_collector_hostname) }
       it { is_expected.not_to allow_value('/example').for(:snowplow_collector_hostname) }
-      it { is_expected.to allow_value('https://example.org').for(:snowplow_iglu_registry_url) }
-      it { is_expected.not_to allow_value('not-a-url').for(:snowplow_iglu_registry_url) }
-      it { is_expected.to allow_value(nil).for(:snowplow_iglu_registry_url) }
     end
 
     context 'when snowplow is not enabled' do
       it { is_expected.to allow_value(nil).for(:snowplow_collector_hostname) }
-      it { is_expected.to allow_value(nil).for(:snowplow_iglu_registry_url) }
     end
 
     context "when user accepted let's encrypt terms of service" do
@@ -249,6 +307,14 @@ describe ApplicationSetting do
         .is_greater_than(0)
     end
 
+    it { is_expected.to validate_presence_of(:max_import_size) }
+
+    it do
+      is_expected.to validate_numericality_of(:max_import_size)
+        .only_integer
+        .is_greater_than_or_equal_to(0)
+    end
+
     it do
       is_expected.to validate_numericality_of(:local_markdown_version)
         .only_integer
@@ -283,7 +349,7 @@ describe ApplicationSetting do
       end
     end
 
-    it_behaves_like 'an object with email-formated attributes', :admin_notification_email do
+    it_behaves_like 'an object with email-formated attributes', :abuse_notification_email do
       subject { setting }
     end
 
@@ -601,6 +667,29 @@ describe ApplicationSetting do
         is_expected.to be_invalid
       end
     end
+
+    context 'gitpod settings' do
+      it 'is invalid if gitpod is enabled and no url is provided' do
+        allow(subject).to receive(:gitpod_enabled).and_return(true)
+        allow(subject).to receive(:gitpod_url).and_return(nil)
+
+        is_expected.to be_invalid
+      end
+
+      it 'is invalid if gitpod is enabled and an empty url is provided' do
+        allow(subject).to receive(:gitpod_enabled).and_return(true)
+        allow(subject).to receive(:gitpod_url).and_return('')
+
+        is_expected.to be_invalid
+      end
+
+      it 'is invalid if gitpod is enabled and an invalid url is provided' do
+        allow(subject).to receive(:gitpod_enabled).and_return(true)
+        allow(subject).to receive(:gitpod_url).and_return('javascript:alert("test")//')
+
+        is_expected.to be_invalid
+      end
+    end
   end
 
   context 'restrict creating duplicates' do
@@ -608,6 +697,16 @@ describe ApplicationSetting do
 
     it 'returns the current settings' do
       expect(described_class.create_from_defaults).to eq(current_settings)
+    end
+  end
+
+  context 'when ApplicationSettings does not have a primary key' do
+    before do
+      allow(ActiveRecord::Base.connection).to receive(:primary_key).with(described_class.table_name).and_return(nil)
+    end
+
+    it 'raises an exception' do
+      expect { described_class.create_from_defaults }.to raise_error(/table is missing a primary key constraint/)
     end
   end
 
@@ -708,6 +807,23 @@ describe ApplicationSetting do
     end
   end
 
+  describe '#instance_review_permitted?', :request_store do
+    subject { setting.instance_review_permitted? }
+
+    before do
+      RequestStore.store[:current_license] = nil
+      expect(Rails.cache).to receive(:fetch).and_return(
+        ::ApplicationSetting::INSTANCE_REVIEW_MIN_USERS + users_over_minimum
+      )
+    end
+
+    where(users_over_minimum: [-1, 0, 1])
+
+    with_them do
+      it { is_expected.to be(users_over_minimum >= 0) }
+    end
+  end
+
   describe 'email_restrictions' do
     context 'when email restrictions are enabled' do
       before do
@@ -760,4 +876,17 @@ describe ApplicationSetting do
   end
 
   it_behaves_like 'application settings examples'
+
+  describe 'repository_storages_weighted_attributes' do
+    it 'returns the keys for repository_storages_weighted' do
+      expect(subject.class.repository_storages_weighted_attributes).to eq([:repository_storages_weighted_default])
+    end
+  end
+
+  it 'does not allow to set weight for non existing storage' do
+    setting.repository_storages_weighted = { invalid_storage: 100 }
+
+    expect(setting).not_to be_valid
+    expect(setting.errors.messages[:repository_storages_weighted]).to match_array(["can't include: invalid_storage"])
+  end
 end

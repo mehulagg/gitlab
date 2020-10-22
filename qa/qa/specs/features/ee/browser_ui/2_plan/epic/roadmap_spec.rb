@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan', :reliable do
+  RSpec.describe 'Plan', :reliable do
     describe 'Epics roadmap' do
       include Support::Dates
 
@@ -19,7 +19,7 @@ module QA
         Flow::Login.sign_in
       end
 
-      it 'presents epic on roadmap' do
+      it 'presents epic on roadmap', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/536' do
         page.visit("#{epic.group.web_url}/-/roadmap")
 
         EE::Page::Group::Roadmap.perform do |roadmap|

@@ -6,8 +6,8 @@ import { mockNode, mockNodeDetails } from '../../mock_data';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 
 const createComponent = (
-  node = Object.assign({}, mockNode),
-  nodeDetails = Object.assign({}, mockNodeDetails),
+  node = { ...mockNode },
+  nodeDetails = { ...mockNodeDetails },
   nodeTypePrimary = false,
 ) => {
   const Component = Vue.extend(NodeDetailsSectionOtherComponent);

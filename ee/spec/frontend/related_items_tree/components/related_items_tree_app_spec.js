@@ -5,14 +5,11 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import RelatedItemsTreeApp from 'ee/related_items_tree/components/related_items_tree_app.vue';
 import RelatedItemsTreeHeader from 'ee/related_items_tree/components/related_items_tree_header.vue';
 import createDefaultStore from 'ee/related_items_tree/store';
-import { issuableTypesMap } from 'ee/related_issues/constants';
-import AddItemForm from 'ee/related_issues/components/add_issuable_form.vue';
 import CreateIssueForm from 'ee/related_items_tree/components/create_issue_form.vue';
-import IssueActionsSplitButton from 'ee/related_items_tree/components/issue_actions_split_button.vue';
-import { TEST_HOST } from 'spec/test_constants';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
 import { getJSONFixture } from 'helpers/fixtures';
+import { issuableTypesMap } from '~/related_issues/constants';
+import axios from '~/lib/utils/axios_utils';
 
 import { mockInitialConfig, mockParentItem, mockEpics, mockIssues } from '../mock_data';
 
@@ -41,12 +38,7 @@ describe('RelatedItemsTreeApp', () => {
   let axiosMock;
   let wrapper;
 
-  const findAddItemForm = () => wrapper.find(AddItemForm);
   const findCreateIssueForm = () => wrapper.find(CreateIssueForm);
-  const findIssueActionsSplitButton = () => wrapper.find(IssueActionsSplitButton);
-  const showCreateIssueForm = () => {
-    findIssueActionsSplitButton().vm.$emit('showCreateIssueForm');
-  };
 
   beforeEach(() => {
     axiosMock = new AxiosMockAdapter(axios);
@@ -247,75 +239,6 @@ describe('RelatedItemsTreeApp', () => {
 
     it('does not render create issue form', () => {
       expect(findCreateIssueForm().exists()).toBe(false);
-    });
-  });
-
-  describe('issue actions split button', () => {
-    beforeEach(() => {
-      wrapper = createComponent();
-      wrapper.vm.$store.state.itemsFetchInProgress = false;
-      return wrapper.vm.$nextTick();
-    });
-
-    it('renders issue actions split button', () => {
-      expect(findIssueActionsSplitButton().exists()).toBe(true);
-    });
-
-    describe('after split button emitted showAddIssueForm event', () => {
-      it('shows add item form', () => {
-        expect(findAddItemForm().exists()).toBe(false);
-
-        findIssueActionsSplitButton().vm.$emit('showAddIssueForm');
-
-        return wrapper.vm.$nextTick().then(() => {
-          expect(findAddItemForm().exists()).toBe(true);
-        });
-      });
-    });
-
-    describe('after split button emitted showCreateIssueForm event', () => {
-      it('shows create item form', () => {
-        expect(findCreateIssueForm().exists()).toBe(false);
-
-        showCreateIssueForm();
-
-        return wrapper.vm.$nextTick(() => {
-          expect(findCreateIssueForm().exists()).toBe(true);
-        });
-      });
-    });
-
-    describe('after create issue form emitted cancel event', () => {
-      beforeEach(() => showCreateIssueForm());
-
-      it('hides the form', () => {
-        expect(findCreateIssueForm().exists()).toBe(true);
-
-        findCreateIssueForm().vm.$emit('cancel');
-
-        return wrapper.vm.$nextTick().then(() => {
-          expect(findCreateIssueForm().exists()).toBe(false);
-        });
-      });
-    });
-
-    describe('after create issue form emitted submit event', () => {
-      beforeEach(() => showCreateIssueForm());
-
-      it('dispatches createNewIssue action', () => {
-        const issuesEndpoint = `${TEST_HOST}/issues`;
-        axiosMock.onPost(issuesEndpoint).replyOnce(200, {});
-
-        const params = {
-          issuesEndpoint,
-          title: 'some new issue',
-        };
-        findCreateIssueForm().vm.$emit('submit', params);
-
-        return axios.waitFor(issuesEndpoint).then(({ data }) => {
-          expect(JSON.parse(data).title).toBe(params.title);
-        });
-      });
     });
   });
 });

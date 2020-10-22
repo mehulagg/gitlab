@@ -18,9 +18,9 @@ automatically create merge requests for updating dependencies of several project
 up-to-date list of projects managed by the renovate bot in the project’s README. Some key dependencies
 updated using renovate are:
 
-- [`@gitlab/ui`](https://gitlab.com/gitlab-org/gitlab-ui/)
-- [`@gitlab/svgs`](https://gitlab.com/gitlab-org/gitlab-svgs/)
-- [`@gitlab/eslint-config`](https://gitlab.com/gitlab-org/gitlab-eslint-config)
+- [`@gitlab/ui`](https://gitlab.com/gitlab-org/gitlab-ui)
+- [`@gitlab/svgs`](https://gitlab.com/gitlab-org/gitlab-svgs)
+- [`@gitlab/eslint-plugin`](https://gitlab.com/gitlab-org/frontend/eslint-plugin)
 
 ### Blocked dependencies
 
@@ -32,7 +32,7 @@ because they can create conflicts in the dependency tree. Blocked dependencies a
 
 ### BootstrapVue
 
-[BootstrapVue](https://bootstrap-vue.js.org/) is a component library built with Vue.js and Bootstrap.
+[BootstrapVue](https://bootstrap-vue.org/) is a component library built with Vue.js and Bootstrap.
 We wrap BootstrapVue components in [GitLab UI](https://gitlab.com/gitlab-org/gitlab-ui/) with the
 purpose of applying visual styles and usage guidelines specified in the
 [Pajamas Design System](https://design.gitlab.com/). For this reason, we recommend not installing

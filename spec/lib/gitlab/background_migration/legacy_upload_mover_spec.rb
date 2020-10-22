@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 # rubocop: disable RSpec/FactoriesInMigrationSpecs
-describe Gitlab::BackgroundMigration::LegacyUploadMover do
+RSpec.describe Gitlab::BackgroundMigration::LegacyUploadMover do
   let(:test_dir) { FileUploader.options['storage_path'] }
   let(:filename) { 'image.png' }
 
@@ -264,6 +264,7 @@ describe Gitlab::BackgroundMigration::LegacyUploadMover do
     let(:remote_file) do
       { key: "#{legacy_upload.path}" }
     end
+
     let(:connection) { ::Fog::Storage.new(FileUploader.object_store_credentials) }
     let(:bucket) { connection.directories.create(key: 'uploads') }
 

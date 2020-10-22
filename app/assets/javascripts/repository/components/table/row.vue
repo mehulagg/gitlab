@@ -1,9 +1,10 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { escapeRegExp } from 'lodash';
 import {
   GlBadge,
   GlLink,
-  GlSkeletonLoading,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlTooltipDirective,
   GlLoadingIcon,
   GlIcon,
@@ -12,7 +13,7 @@ import { escapeFileUrl } from '~/lib/utils/url_utility';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import getRefMixin from '../../mixins/get_ref';
-import getCommit from '../../queries/getCommit.query.graphql';
+import commitQuery from '../../queries/commit.query.graphql';
 
 export default {
   components: {
@@ -29,7 +30,7 @@ export default {
   },
   apollo: {
     commit: {
-      query: getCommit,
+      query: commitQuery,
       variables() {
         return {
           fileName: this.name,
@@ -65,6 +66,11 @@ export default {
     path: {
       type: String,
       required: true,
+    },
+    mode: {
+      type: String,
+      required: false,
+      default: '',
     },
     type: {
       type: String,
@@ -140,6 +146,7 @@ export default {
       >
         <file-icon
           :file-name="fullPath"
+          :file-mode="mode"
           :folder="isFolder"
           :submodule="isSubmodule"
           :loading="path === loadingPath"
@@ -147,8 +154,11 @@ export default {
           class="mr-1 position-relative text-secondary"
         /><span class="position-relative">{{ fullPath }}</span>
       </component>
-      <!-- eslint-disable-next-line @gitlab/vue-require-i18n-strings -->
-      <gl-badge v-if="lfsOid" variant="default" class="label-lfs ml-1">LFS</gl-badge>
+      <!-- eslint-disable @gitlab/vue-require-i18n-strings -->
+      <gl-badge v-if="lfsOid" variant="muted" size="sm" class="ml-1" data-qa-selector="label-lfs"
+        >LFS</gl-badge
+      >
+      <!-- eslint-enable @gitlab/vue-require-i18n-strings -->
       <template v-if="isSubmodule">
         @ <gl-link :href="submoduleTreeUrl" class="commit-sha">{{ shortSha }}</gl-link>
       </template>
@@ -167,9 +177,8 @@ export default {
         :href="commit.commitPath"
         :title="commit.message"
         class="str-truncated-100 tree-commit-link"
-      >
-        {{ commit.message }}
-      </gl-link>
+        v-html="commit.titleHtml"
+      />
       <gl-skeleton-loading v-else :lines="1" class="h-auto" />
     </td>
     <td class="tree-time-ago text-right cursor-default">

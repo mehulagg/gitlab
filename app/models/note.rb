@@ -5,6 +5,7 @@
 # A note of this type is never resolvable.
 class Note < ApplicationRecord
   extend ActiveModel::Naming
+  include Gitlab::Utils::StrongMemoize
   include Participable
   include Mentionable
   include Awardable
@@ -18,20 +19,6 @@ class Note < ApplicationRecord
   include Gitlab::SQL::Pattern
   include ThrottledTouch
   include FromUnion
-
-  module SpecialRole
-    FIRST_TIME_CONTRIBUTOR = :first_time_contributor
-
-    class << self
-      def values
-        constants.map {|const| self.const_get(const, false)}
-      end
-
-      def value?(val)
-        values.include?(val)
-      end
-    end
-  end
 
   cache_markdown_field :note, pipeline: :note, issuable_state_filter_enabled: true
 
@@ -59,9 +46,6 @@ class Note < ApplicationRecord
   # Attribute used to store the attributes that have been changed by quick actions.
   attr_accessor :commands_changes
 
-  # A special role that may be displayed on issuable's discussions
-  attr_accessor :special_role
-
   default_value_for :system, false
 
   attr_mentionable :note, pipeline: :note
@@ -72,6 +56,7 @@ class Note < ApplicationRecord
   belongs_to :author, class_name: "User"
   belongs_to :updated_by, class_name: "User"
   belongs_to :last_edited_by, class_name: 'User'
+  belongs_to :review, inverse_of: :notes
 
   has_many :todos
 
@@ -121,6 +106,8 @@ class Note < ApplicationRecord
   scope :common, -> { where(noteable_type: ["", nil]) }
   scope :fresh, -> { order(created_at: :asc, id: :asc) }
   scope :updated_after, ->(time) { where('updated_at > ?', time) }
+  scope :with_updated_at, ->(time) { where(updated_at: time) }
+  scope :by_updated_at, -> { reorder(:updated_at, :id) }
   scope :inc_author_project, -> { includes(:project, :author) }
   scope :inc_author, -> { includes(:author) }
   scope :inc_relations_for_view, -> do
@@ -159,6 +146,8 @@ class Note < ApplicationRecord
   after_save :touch_noteable, unless: :importing?
   after_destroy :expire_etag_cache
   after_save :store_mentions!, if: :any_mentionable_attributes_changed?
+  after_commit :notify_after_create, on: :create
+  after_commit :notify_after_destroy, on: :destroy
 
   class << self
     def model_name
@@ -214,10 +203,6 @@ class Note < ApplicationRecord
         .where(noteable_type: type, noteable_id: ids)
     end
 
-    def has_special_role?(role, note)
-      note.special_role == role
-    end
-
     def search(query)
       fuzzy_search(query, [:note])
     end
@@ -269,6 +254,10 @@ class Note < ApplicationRecord
 
   def for_snippet?
     noteable_type == "Snippet"
+  end
+
+  def for_alert_mangement_alert?
+    noteable_type == 'AlertManagement::Alert'
   end
 
   def for_personal_snippet?
@@ -332,24 +321,24 @@ class Note < ApplicationRecord
     noteable.author_id == user.id
   end
 
-  def special_role=(role)
-    raise "Role is undefined, #{role} not found in #{SpecialRole.values}" unless SpecialRole.value?(role)
-
-    @special_role = role
+  def contributor?
+    project&.team&.contributor?(self.author_id)
   end
 
-  def has_special_role?(role)
-    self.class.has_special_role?(role, self)
+  def noteable_author?(noteable)
+    return false unless ::Feature.enabled?(:show_author_on_note, project)
+
+    noteable.author == self.author
   end
 
-  def specialize_for_first_contribution!(noteable)
-    return unless noteable.author_id == self.author_id
-
-    self.special_role = Note::SpecialRole::FIRST_TIME_CONTRIBUTOR
+  def project_name
+    project&.name
   end
 
-  def confidential?
-    confidential || noteable.try(:confidential?)
+  def confidential?(include_noteable: false)
+    return true if confidential
+
+    include_noteable && noteable.try(:confidential?)
   end
 
   def editable?
@@ -391,7 +380,13 @@ class Note < ApplicationRecord
   end
 
   def noteable_ability_name
-    for_snippet? ? 'snippet' : noteable_type.demodulize.underscore
+    if for_snippet?
+      'snippet'
+    elsif for_alert_mangement_alert?
+      'alert_management_alert'
+    else
+      noteable_type.demodulize.underscore
+    end
   end
 
   def can_be_discussion_note?
@@ -399,7 +394,7 @@ class Note < ApplicationRecord
   end
 
   def can_create_todo?
-    # Skip system notes, and notes on project snippet
+    # Skip system notes, and notes on snippets
     !system? && !for_snippet?
   end
 
@@ -431,8 +426,10 @@ class Note < ApplicationRecord
   # Consider using `#to_discussion` if we do not need to render the discussion
   # and all its notes and if we don't care about the discussion's resolvability status.
   def discussion
-    full_discussion = self.noteable.notes.find_discussion(self.discussion_id) if part_of_discussion?
-    full_discussion || to_discussion
+    strong_memoize(:discussion) do
+      full_discussion = self.noteable.notes.find_discussion(self.discussion_id) if part_of_discussion?
+      full_discussion || to_discussion
+    end
   end
 
   def start_of_discussion?
@@ -509,8 +506,16 @@ class Note < ApplicationRecord
     noteable_object
   end
 
+  def notify_after_create
+    noteable&.after_note_created(self)
+  end
+
+  def notify_after_destroy
+    noteable&.after_note_destroyed(self)
+  end
+
   def banzai_render_context(field)
-    super.merge(noteable: noteable, system_note: system?)
+    super.merge(noteable: noteable, system_note: system?, label_url_method: noteable_label_url_method)
   end
 
   def retrieve_upload(_identifier, paths)
@@ -528,7 +533,17 @@ class Note < ApplicationRecord
   end
 
   def system_note_with_references_visible_for?(user)
+    return true unless system?
+
     (!system_note_with_references? || all_referenced_mentionables_allowed?(user)) && system_note_viewable_by?(user)
+  end
+
+  def parent_user
+    noteable.author if for_personal_snippet?
+  end
+
+  def skip_notification?
+    review.present?
   end
 
   private
@@ -592,6 +607,10 @@ class Note < ApplicationRecord
     return unless noteable
 
     errors.add(:base, _('Maximum number of comments exceeded')) if noteable.notes.count >= Noteable::MAX_NOTES_LIMIT
+  end
+
+  def noteable_label_url_method
+    for_merge_request? ? :project_merge_requests_url : :project_issues_url
   end
 end
 

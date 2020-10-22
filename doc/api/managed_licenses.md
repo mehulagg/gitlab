@@ -13,7 +13,7 @@ GET /projects/:id/managed_licenses
 | `id`      | integer/string    | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/managed_licenses
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/managed_licenses"
 ```
 
 Example response:
@@ -90,7 +90,7 @@ Example response:
 
 ## Delete a managed license
 
-Deletes a managed license with a given id.
+Deletes a managed license with a given ID.
 
 ```plaintext
 DELETE /projects/:id/managed_licenses/:managed_license_id

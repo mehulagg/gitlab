@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Profile account page', :js do
+RSpec.describe 'Profile account page', :js do
   let(:user) { create(:user) }
 
   before do
@@ -101,10 +101,10 @@ describe 'Profile account page', :js do
     it 'changes my username' do
       fill_in 'username-change-input', with: 'new-username'
 
-      page.find('[data-target="#username-change-confirmation-modal"]').click
+      page.find('[data-testid="username-change-confirmation-modal"]').click
 
       page.within('.modal') do
-        find('.js-modal-primary-action').click
+        find('.js-modal-action-primary').click
       end
 
       expect(page).to have_content('new-username')

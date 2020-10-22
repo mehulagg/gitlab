@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ImportExport::JSON::NdjsonReader do
+RSpec.describe Gitlab::ImportExport::JSON::NdjsonReader do
   include ImportExport::CommonUtil
 
   let(:fixture) { 'spec/fixtures/lib/gitlab/import_export/light/tree' }
@@ -100,6 +100,16 @@ describe Gitlab::ImportExport::JSON::NdjsonReader do
           expect(subject.to_a).to eq([[attr_1, 0], [attr_2, 1]])
         end
       end
+    end
+  end
+
+  describe '#clear_consumed_relations' do
+    let(:dir_path) { fixture }
+
+    subject { ndjson_reader.clear_consumed_relations }
+
+    it 'returns empty set' do
+      expect(subject).to be_empty
     end
   end
 end

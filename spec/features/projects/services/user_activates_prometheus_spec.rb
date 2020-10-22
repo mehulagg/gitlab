@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User activates Prometheus' do
+RSpec.describe 'User activates Prometheus' do
   include_context 'project service activation'
 
   before do
@@ -16,7 +16,7 @@ describe 'User activates Prometheus' do
 
     click_button('Save changes')
 
-    expect(page).not_to have_content('Prometheus activated.')
+    expect(page).not_to have_content('Prometheus settings saved and active.')
     expect(page).to have_content('Fields on this page has been deprecated.')
   end
 end

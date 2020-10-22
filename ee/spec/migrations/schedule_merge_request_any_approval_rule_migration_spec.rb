@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20190905091831_schedule_merge_request_any_approval_rule_migration.rb')
+require_migration!
 
-describe ScheduleMergeRequestAnyApprovalRuleMigration do
+RSpec.describe ScheduleMergeRequestAnyApprovalRuleMigration do
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
   let(:namespace) { namespaces.create(name: 'gitlab', path: 'gitlab-org') }

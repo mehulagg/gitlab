@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Milestone, 'Milestoneish' do
+RSpec.describe Milestone, 'Milestoneish' do
   let(:author) { create(:user) }
   let(:assignee) { create(:user) }
   let(:non_member) { create(:user) }
@@ -102,7 +102,7 @@ describe Milestone, 'Milestoneish' do
 
       with_them do
         before do
-          project.update(visibility_level: project_visibility_levels[visibility])
+          project.update!(visibility_level: project_visibility_levels[visibility])
         end
 
         it 'returns the proper participants' do
@@ -139,7 +139,7 @@ describe Milestone, 'Milestoneish' do
 
       with_them do
         before do
-          project.update(visibility_level: project_visibility_levels[visibility])
+          project.update!(visibility_level: project_visibility_levels[visibility])
         end
 
         it 'returns the proper participants' do
@@ -171,7 +171,7 @@ describe Milestone, 'Milestoneish' do
 
     context 'when project is private' do
       before do
-        project.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+        project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
       end
 
       it 'does not return any merge request for a non member' do
@@ -195,7 +195,7 @@ describe Milestone, 'Milestoneish' do
 
       context 'when merge requests are available to project members' do
         before do
-          project.project_feature.update(merge_requests_access_level: ProjectFeature::PRIVATE)
+          project.project_feature.update!(merge_requests_access_level: ProjectFeature::PRIVATE)
         end
 
         it 'does not return any merge request for a non member' do
@@ -290,13 +290,13 @@ describe Milestone, 'Milestoneish' do
     end
 
     it 'shows 0 if start_date is a future' do
-      milestone = build_stubbed(:milestone, start_date: Time.now + 2.days)
+      milestone = build_stubbed(:milestone, start_date: Time.current + 2.days)
 
       expect(milestone.elapsed_days).to eq(0)
     end
 
     it 'shows correct amount of days' do
-      milestone = build_stubbed(:milestone, start_date: Time.now - 2.days)
+      milestone = build_stubbed(:milestone, start_date: Time.current - 2.days)
 
       expect(milestone.elapsed_days).to eq(2)
     end

@@ -41,7 +41,7 @@ class AlertsService < Service
   end
 
   def description
-    _('Receive alerts on GitLab from any source')
+    _('Authorize external services to send alerts to GitLab')
   end
 
   def detailed_description
@@ -78,3 +78,5 @@ class AlertsService < Service
     Gitlab::Routing.url_helpers
   end
 end
+
+AlertsService.prepend_if_ee('EE::AlertsService')

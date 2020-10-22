@@ -1,17 +1,18 @@
 <script>
-import { mapGetters } from 'vuex';
-import draftCommentsMixin from 'ee_else_ce/diffs/mixins/draft_comments';
+import { mapGetters, mapState } from 'vuex';
+import draftCommentsMixin from '~/diffs/mixins/draft_comments';
+import ParallelDraftCommentRow from '~/batch_comments/components/parallel_draft_comment_row.vue';
 import parallelDiffTableRow from './parallel_diff_table_row.vue';
 import parallelDiffCommentRow from './parallel_diff_comment_row.vue';
 import parallelDiffExpansionRow from './parallel_diff_expansion_row.vue';
+import { getCommentedLines } from '~/notes/components/multiline_comment_utils';
 
 export default {
   components: {
     parallelDiffExpansionRow,
     parallelDiffTableRow,
     parallelDiffCommentRow,
-    ParallelDraftCommentRow: () =>
-      import('ee_component/batch_comments/components/parallel_draft_comment_row.vue'),
+    ParallelDraftCommentRow,
   },
   mixins: [draftCommentsMixin],
   props: {
@@ -31,8 +32,18 @@ export default {
   },
   computed: {
     ...mapGetters('diffs', ['commitId']),
+    ...mapState({
+      selectedCommentPosition: ({ notes }) => notes.selectedCommentPosition,
+      selectedCommentPositionHover: ({ notes }) => notes.selectedCommentPositionHover,
+    }),
     diffLinesLength() {
       return this.diffLines.length;
+    },
+    commentedLines() {
+      return getCommentedLines(
+        this.selectedCommentPosition || this.selectedCommentPositionHover,
+        this.diffLines,
+      );
     },
   },
   userColorScheme: window.gon.user_color_scheme,
@@ -67,9 +78,9 @@ export default {
           :key="line.line_code"
           :file-hash="diffFile.file_hash"
           :file-path="diffFile.file_path"
-          :context-lines-path="diffFile.context_lines_path"
           :line="line"
           :is-bottom="index + 1 === diffLinesLength"
+          :is-commented="index >= commentedLines.startLine && index <= commentedLines.endLine"
         />
         <parallel-diff-comment-row
           :key="`dcr-${line.line_code || index}`"

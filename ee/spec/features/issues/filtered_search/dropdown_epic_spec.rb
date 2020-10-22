@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Dropdown epic', :js do
+RSpec.describe 'Dropdown epic', :js do
   include FilteredSearchHelpers
 
   let(:group) { create(:group) }

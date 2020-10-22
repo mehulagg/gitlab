@@ -2,10 +2,12 @@
 
 require 'spec_helper'
 
-describe Gitlab::Metrics::Dashboard::Processor do
+RSpec.describe Gitlab::Metrics::Dashboard::Processor do
+  include MetricsDashboardHelpers
+
   let(:project) { build(:project) }
   let(:environment) { create(:environment, project: project) }
-  let(:dashboard_yml) { YAML.load_file('spec/fixtures/lib/gitlab/metrics/dashboard/sample_dashboard.yml') }
+  let(:dashboard_yml) { load_sample_dashboard }
 
   describe 'process' do
     let(:sequence) do
@@ -13,21 +15,15 @@ describe Gitlab::Metrics::Dashboard::Processor do
         Gitlab::Metrics::Dashboard::Stages::CommonMetricsInserter,
         Gitlab::Metrics::Dashboard::Stages::CustomMetricsInserter,
         Gitlab::Metrics::Dashboard::Stages::CustomMetricsDetailsInserter,
-        Gitlab::Metrics::Dashboard::Stages::EndpointInserter,
-        Gitlab::Metrics::Dashboard::Stages::Sorter,
+        Gitlab::Metrics::Dashboard::Stages::MetricEndpointInserter,
         Gitlab::Metrics::Dashboard::Stages::AlertsInserter,
-        Gitlab::Metrics::Dashboard::Stages::PanelIdsInserter
+        Gitlab::Metrics::Dashboard::Stages::PanelIdsInserter,
+        Gitlab::Metrics::Dashboard::Stages::UrlValidator
       ]
     end
 
     let(:process_params) { [project, dashboard_yml, sequence, { environment: environment }] }
     let(:dashboard) { described_class.new(*process_params).process }
-
-    it 'includes a path for the prometheus endpoint with each metric' do
-      expect(all_metrics).to satisfy_all do |metric|
-        metric[:prometheus_endpoint_path] == prometheus_path(metric[:query_range])
-      end
-    end
 
     it 'includes an id for each dashboard panel' do
       expect(all_panels).to satisfy_all do |panel|
@@ -69,14 +65,14 @@ describe Gitlab::Metrics::Dashboard::Processor do
         expect(all_metrics).to include get_metric_details(project_business_metric)
       end
 
-      it 'orders groups by priority and panels by weight' do
+      it 'display groups and panels in the order they are defined' do
         expected_metrics_order = [
-          'metric_b', # group priority 10, panel weight 1
-          'metric_a2', # group priority 1, panel weight 2
-          'metric_a1', # group priority 1, panel weight 1
-          project_business_metric.id, # group priority 0, panel weight nil (0)
-          project_response_metric.id, # group priority -5, panel weight nil (0)
-          project_system_metric.id # group priority -10, panel weight nil (0)
+          'metric_b',
+          'metric_a2',
+          'metric_a1',
+          project_business_metric.id,
+          project_response_metric.id,
+          project_system_metric.id
         ]
         actual_metrics_order = all_metrics.map { |m| m[:id] || m[:metric_id] }
 
@@ -97,10 +93,10 @@ describe Gitlab::Metrics::Dashboard::Processor do
         let(:sequence) do
           [
             Gitlab::Metrics::Dashboard::Stages::CommonMetricsInserter,
-            Gitlab::Metrics::Dashboard::Stages::EndpointInserter,
-            Gitlab::Metrics::Dashboard::Stages::Sorter
+            Gitlab::Metrics::Dashboard::Stages::MetricEndpointInserter
           ]
         end
+
         let(:dashboard) { described_class.new(*process_params).process }
 
         it 'includes only dashboard metrics' do

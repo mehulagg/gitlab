@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'File blob > Code owners', :js do
+RSpec.describe 'File blob > Code owners', :js do
   let(:project) { create(:project, :private, :repository) }
   let(:user) { project.owner }
   let(:code_owner) { create(:user, username: 'documentation-owner') }
@@ -22,7 +22,6 @@ describe 'File blob > Code owners', :js do
     context 'when the feature is available' do
       before do
         stub_licensed_features(code_owners: true)
-        stub_feature_flags(sectional_codeowners: false)
       end
 
       it 'shows the code owners related to a file' do

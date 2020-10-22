@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function retrieve_tests_metadata() {
   mkdir -p knapsack/ rspec_flaky/ rspec_profiling/
@@ -53,8 +53,6 @@ function rspec_simple_job() {
 
   export NO_KNAPSACK="1"
 
-  scripts/gitaly-test-spawn
-
   bin/rspec --color --format documentation --format RspecJunitFormatter --out junit_rspec.xml ${rspec_opts}
 }
 
@@ -72,6 +70,12 @@ function rspec_paralellized_job() {
 
   export KNAPSACK_LOG_LEVEL="debug"
   export KNAPSACK_REPORT_PATH="knapsack/${report_name}_report.json"
+
+  # There's a bug where artifacts are sometimes not downloaded. Since specs can run without the Knapsack report, we can
+  # handle the missing artifact gracefully here. See https://gitlab.com/gitlab-org/gitlab/-/issues/212349.
+  if [[ ! -f "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" ]]; then
+    echo "{}" > "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}"
+  fi
 
   cp "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" "${KNAPSACK_REPORT_PATH}"
 
@@ -98,8 +102,6 @@ function rspec_paralellized_job() {
     fi
   fi
 
-  scripts/gitaly-test-spawn
-
   mkdir -p tmp/memory_test
 
   export MEMORY_TEST_PATH="tmp/memory_test/${report_name}_memory.csv"
@@ -107,4 +109,49 @@ function rspec_paralellized_job() {
   knapsack rspec "-Ispec --color --format documentation --format RspecJunitFormatter --out junit_rspec.xml ${rspec_opts}"
 
   date
+}
+
+function rspec_fail_fast() {
+  local test_file_count_threshold=${RSPEC_FAIL_FAST_TEST_FILE_COUNT_THRESHOLD:-10}
+  local matching_tests_file=${1}
+  local rspec_opts=${2}
+  local test_files="$(cat "${matching_tests_file}")"
+  local test_file_count=$(wc -w "${matching_tests_file}" | awk {'print $1'})
+
+  if [[ "${test_file_count}" -gt "${test_file_count_threshold}" ]]; then
+    echo "This job is intentionally skipped because there are more than ${test_file_count_threshold} test files matched,"
+    echo "which would take too long to run in this job."
+    echo "All the tests would be run in other rspec jobs."
+    exit 0
+  fi
+
+  if [[ -n $test_files ]]; then
+    rspec_simple_job "${rspec_opts} ${test_files}"
+  else
+    echo "No rspec fail-fast tests to run"
+  fi
+}
+
+function rspec_matched_foss_tests() {
+  local test_file_count_threshold=20
+  local matching_tests_file=${1}
+  local rspec_opts=${2}
+  local test_files="$(cat "${matching_tests_file}")"
+  local test_file_count=$(wc -w "${matching_tests_file}" | awk {'print $1'})
+
+  if [[ "${test_file_count}" -gt "${test_file_count_threshold}" ]]; then
+    echo "This job is intentionally failed because there are more than ${test_file_count_threshold} FOSS test files matched,"
+    echo "which would take too long to run in this job."
+    echo "To reduce the likelihood of breaking FOSS pipelines,"
+    echo "please add [RUN AS-IF-FOSS] to the MR title and restart the pipeline."
+    echo "This would run all as-if-foss jobs in this merge request"
+    echo "and remove this failing job from the pipeline."
+    exit 1
+  fi
+
+  if [[ -n $test_files ]]; then
+    rspec_simple_job "${rspec_opts} ${test_files}"
+  else
+    echo "No impacted FOSS rspec tests to run"
+  fi
 }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApprovalRules::GroupFinder do
+RSpec.describe ApprovalRules::GroupFinder do
   let(:rule) { create(:approval_project_rule) }
   let(:user) { create(:user) }
 

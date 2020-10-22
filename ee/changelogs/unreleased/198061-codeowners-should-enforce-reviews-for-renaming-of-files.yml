@@ -1,5 +1,0 @@
----
-title: Enforce CODEOWNER rules for renaming of files
-merge_request: 26513
-author:
-type: fixed

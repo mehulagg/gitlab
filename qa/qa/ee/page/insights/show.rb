@@ -8,6 +8,7 @@ module QA
           view 'ee/app/assets/javascripts/insights/components/insights.vue' do
             element :insights_dashboard_dropdown
           end
+
           view 'ee/app/assets/javascripts/insights/components/insights_page.vue' do
             element :insights_charts
             element :insights_page

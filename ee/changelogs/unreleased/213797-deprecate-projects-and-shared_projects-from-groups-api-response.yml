@@ -1,6 +1,0 @@
----
-title: Document planned deprecation of 'projects' and 'shared_projects' attributes
-  in Groups API in GitLab 13.0
-merge_request: 29113
-author:
-type: deprecated

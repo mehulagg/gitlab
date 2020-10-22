@@ -5,7 +5,12 @@ import {
   parseAnnotationsResponse,
   removeLeadingSlash,
   mapToDashboardViewModel,
+  normalizeQueryResponseData,
+  convertToGrafanaTimeRange,
+  addDashboardMetaDataToLink,
+  normalizeCustomDashboardPath,
 } from '~/monitoring/stores/utils';
+import * as urlUtils from '~/lib/utils/url_utility';
 import { annotationsData } from '../mock_data';
 import { NOT_IN_DB_PREFIX } from '~/monitoring/constants';
 
@@ -16,6 +21,8 @@ describe('mapToDashboardViewModel', () => {
     expect(mapToDashboardViewModel({})).toEqual({
       dashboard: '',
       panelGroups: [],
+      links: [],
+      variables: [],
     });
   });
 
@@ -44,6 +51,8 @@ describe('mapToDashboardViewModel', () => {
 
     expect(mapToDashboardViewModel(response)).toEqual({
       dashboard: 'Dashboard Name',
+      links: [],
+      variables: [],
       panelGroups: [
         {
           group: 'Group 1',
@@ -63,6 +72,7 @@ describe('mapToDashboardViewModel', () => {
                 format: 'engineering',
                 precision: 2,
               },
+              links: [],
               metrics: [],
             },
           ],
@@ -75,6 +85,8 @@ describe('mapToDashboardViewModel', () => {
     it('key', () => {
       const response = {
         dashboard: 'Dashboard Name',
+        links: [],
+        variables: {},
         panel_groups: [
           {
             group: 'Group A',
@@ -147,6 +159,7 @@ describe('mapToDashboardViewModel', () => {
           format: SUPPORTED_FORMATS.engineering,
           precision: 2,
         },
+        links: [],
         metrics: [],
       });
     });
@@ -170,6 +183,7 @@ describe('mapToDashboardViewModel', () => {
           format: SUPPORTED_FORMATS.engineering,
           precision: 2,
         },
+        links: [],
         metrics: [],
       });
     });
@@ -237,6 +251,77 @@ describe('mapToDashboardViewModel', () => {
       });
 
       expect(getMappedPanel().maxValue).toBe(100);
+    });
+
+    describe('panel with links', () => {
+      const title = 'Example';
+      const url = 'https://example.com';
+
+      it('maps an empty link collection', () => {
+        setupWithPanel({
+          links: undefined,
+        });
+
+        expect(getMappedPanel().links).toEqual([]);
+      });
+
+      it('maps a link', () => {
+        setupWithPanel({ links: [{ title, url }] });
+
+        expect(getMappedPanel().links).toEqual([{ title, url }]);
+      });
+
+      it('maps a link without a title', () => {
+        setupWithPanel({
+          links: [{ url }],
+        });
+
+        expect(getMappedPanel().links).toEqual([{ title: url, url }]);
+      });
+
+      it('maps a link without a url', () => {
+        setupWithPanel({
+          links: [{ title }],
+        });
+
+        expect(getMappedPanel().links).toEqual([{ title, url: '#' }]);
+      });
+
+      it('maps a link without a url or title', () => {
+        setupWithPanel({
+          links: [{}],
+        });
+
+        expect(getMappedPanel().links).toEqual([{ title: 'null', url: '#' }]);
+      });
+
+      it('maps a link with an unsafe url safely', () => {
+        // eslint-disable-next-line no-script-url
+        const unsafeUrl = 'javascript:alert("XSS")';
+
+        setupWithPanel({
+          links: [
+            {
+              title,
+              url: unsafeUrl,
+            },
+          ],
+        });
+
+        expect(getMappedPanel().links).toEqual([{ title, url: '#' }]);
+      });
+
+      it('maps multple links', () => {
+        setupWithPanel({
+          links: [{ title, url }, { url }, { title }],
+        });
+
+        expect(getMappedPanel().links).toEqual([
+          { title, url },
+          { title: url, url },
+          { title, url: '#' },
+        ]);
+      });
     });
   });
 
@@ -313,6 +398,112 @@ describe('mapToDashboardViewModel', () => {
         x_label: 'Another label',
         unkown_option: 'unkown_data',
       });
+    });
+  });
+
+  describe('templating variables mapping', () => {
+    beforeEach(() => {
+      jest.spyOn(urlUtils, 'queryToObject');
+    });
+
+    afterEach(() => {
+      urlUtils.queryToObject.mockRestore();
+    });
+
+    it('sets variables as-is from yml file if URL has no variables', () => {
+      const response = {
+        dashboard: 'Dashboard Name',
+        links: [],
+        templating: {
+          variables: {
+            pod: 'kubernetes',
+            pod_2: 'kubernetes-2',
+          },
+        },
+      };
+
+      urlUtils.queryToObject.mockReturnValueOnce();
+
+      expect(mapToDashboardViewModel(response).variables).toEqual([
+        {
+          name: 'pod',
+          label: 'pod',
+          type: 'text',
+          value: 'kubernetes',
+        },
+        {
+          name: 'pod_2',
+          label: 'pod_2',
+          type: 'text',
+          value: 'kubernetes-2',
+        },
+      ]);
+    });
+
+    it('sets variables as-is from yml file if URL has no matching variables', () => {
+      const response = {
+        dashboard: 'Dashboard Name',
+        links: [],
+        templating: {
+          variables: {
+            pod: 'kubernetes',
+            pod_2: 'kubernetes-2',
+          },
+        },
+      };
+
+      urlUtils.queryToObject.mockReturnValueOnce({
+        'var-environment': 'POD',
+      });
+
+      expect(mapToDashboardViewModel(response).variables).toEqual([
+        {
+          label: 'pod',
+          name: 'pod',
+          type: 'text',
+          value: 'kubernetes',
+        },
+        {
+          label: 'pod_2',
+          name: 'pod_2',
+          type: 'text',
+          value: 'kubernetes-2',
+        },
+      ]);
+    });
+
+    it('merges variables from URL with the ones from yml file', () => {
+      const response = {
+        dashboard: 'Dashboard Name',
+        links: [],
+        templating: {
+          variables: {
+            pod: 'kubernetes',
+            pod_2: 'kubernetes-2',
+          },
+        },
+      };
+
+      urlUtils.queryToObject.mockReturnValueOnce({
+        'var-environment': 'POD',
+        'var-pod': 'POD1',
+        'var-pod_2': 'POD2',
+      });
+
+      expect(mapToDashboardViewModel(response).variables).toEqual([
+        {
+          label: 'pod',
+          name: 'pod',
+          type: 'text',
+          value: 'POD1',
+        },
+        {
+          label: 'pod_2',
+          name: 'pod_2',
+          type: 'text',
+          value: 'POD2',
+        },
+      ]);
     });
   });
 });
@@ -417,5 +608,272 @@ describe('removeLeadingSlash', () => {
     it(`removeLeadingSlash returns ${output} with input ${input}`, () => {
       expect(removeLeadingSlash(input)).toEqual(output);
     });
+  });
+});
+
+describe('user-defined links utils', () => {
+  const mockRelativeTimeRange = {
+    metricsDashboard: {
+      duration: {
+        seconds: 86400,
+      },
+    },
+    grafana: {
+      from: 'now-86400s',
+      to: 'now',
+    },
+  };
+  const mockAbsoluteTimeRange = {
+    metricsDashboard: {
+      start: '2020-06-08T16:13:01.995Z',
+      end: '2020-06-08T21:12:32.243Z',
+    },
+    grafana: {
+      from: 1591632781995,
+      to: 1591650752243,
+    },
+  };
+  describe('convertToGrafanaTimeRange', () => {
+    it('converts relative timezone to grafana timezone', () => {
+      expect(convertToGrafanaTimeRange(mockRelativeTimeRange.metricsDashboard)).toEqual(
+        mockRelativeTimeRange.grafana,
+      );
+    });
+
+    it('converts absolute timezone to grafana timezone', () => {
+      expect(convertToGrafanaTimeRange(mockAbsoluteTimeRange.metricsDashboard)).toEqual(
+        mockAbsoluteTimeRange.grafana,
+      );
+    });
+  });
+
+  describe('addDashboardMetaDataToLink', () => {
+    const link = { title: 'title', url: 'https://gitlab.com' };
+    const grafanaLink = { ...link, type: 'grafana' };
+
+    it('adds relative time range to link w/o type for metrics dashboards', () => {
+      const adder = addDashboardMetaDataToLink({
+        timeRange: mockRelativeTimeRange.metricsDashboard,
+      });
+      expect(adder(link)).toMatchObject({
+        title: 'title',
+        url: 'https://gitlab.com?duration_seconds=86400',
+      });
+    });
+
+    it('adds relative time range to Grafana type links', () => {
+      const adder = addDashboardMetaDataToLink({
+        timeRange: mockRelativeTimeRange.metricsDashboard,
+      });
+      expect(adder(grafanaLink)).toMatchObject({
+        title: 'title',
+        url: 'https://gitlab.com?from=now-86400s&to=now',
+      });
+    });
+
+    it('adds absolute time range to link w/o type for metrics dashboard', () => {
+      const adder = addDashboardMetaDataToLink({
+        timeRange: mockAbsoluteTimeRange.metricsDashboard,
+      });
+      expect(adder(link)).toMatchObject({
+        title: 'title',
+        url:
+          'https://gitlab.com?start=2020-06-08T16%3A13%3A01.995Z&end=2020-06-08T21%3A12%3A32.243Z',
+      });
+    });
+
+    it('adds absolute time range to Grafana type links', () => {
+      const adder = addDashboardMetaDataToLink({
+        timeRange: mockAbsoluteTimeRange.metricsDashboard,
+      });
+      expect(adder(grafanaLink)).toMatchObject({
+        title: 'title',
+        url: 'https://gitlab.com?from=1591632781995&to=1591650752243',
+      });
+    });
+  });
+});
+
+describe('normalizeQueryResponseData', () => {
+  // Data examples from
+  // https://prometheus.io/docs/prometheus/latest/querying/api/#expression-queries
+
+  it('processes a string result', () => {
+    const mockScalar = {
+      resultType: 'string',
+      result: [1435781451.781, '1'],
+    };
+
+    expect(normalizeQueryResponseData(mockScalar)).toEqual([
+      {
+        metric: {},
+        value: ['2015-07-01T20:10:51.781Z', '1'],
+        values: [['2015-07-01T20:10:51.781Z', '1']],
+      },
+    ]);
+  });
+
+  it('processes a scalar result', () => {
+    const mockScalar = {
+      resultType: 'scalar',
+      result: [1435781451.781, '1'],
+    };
+
+    expect(normalizeQueryResponseData(mockScalar)).toEqual([
+      {
+        metric: {},
+        value: ['2015-07-01T20:10:51.781Z', 1],
+        values: [['2015-07-01T20:10:51.781Z', 1]],
+      },
+    ]);
+  });
+
+  it('processes a vector result', () => {
+    const mockVector = {
+      resultType: 'vector',
+      result: [
+        {
+          metric: {
+            __name__: 'up',
+            job: 'prometheus',
+            instance: 'localhost:9090',
+          },
+          value: [1435781451.781, '1'],
+        },
+        {
+          metric: {
+            __name__: 'up',
+            job: 'node',
+            instance: 'localhost:9100',
+          },
+          value: [1435781451.781, '0'],
+        },
+      ],
+    };
+
+    expect(normalizeQueryResponseData(mockVector)).toEqual([
+      {
+        metric: { __name__: 'up', job: 'prometheus', instance: 'localhost:9090' },
+        value: ['2015-07-01T20:10:51.781Z', 1],
+        values: [['2015-07-01T20:10:51.781Z', 1]],
+      },
+      {
+        metric: { __name__: 'up', job: 'node', instance: 'localhost:9100' },
+        value: ['2015-07-01T20:10:51.781Z', 0],
+        values: [['2015-07-01T20:10:51.781Z', 0]],
+      },
+    ]);
+  });
+
+  it('processes a matrix result', () => {
+    const mockMatrix = {
+      resultType: 'matrix',
+      result: [
+        {
+          metric: {
+            __name__: 'up',
+            job: 'prometheus',
+            instance: 'localhost:9090',
+          },
+          values: [[1435781430.781, '1'], [1435781445.781, '2'], [1435781460.781, '3']],
+        },
+        {
+          metric: {
+            __name__: 'up',
+            job: 'node',
+            instance: 'localhost:9091',
+          },
+          values: [[1435781430.781, '4'], [1435781445.781, '5'], [1435781460.781, '6']],
+        },
+      ],
+    };
+
+    expect(normalizeQueryResponseData(mockMatrix)).toEqual([
+      {
+        metric: { __name__: 'up', instance: 'localhost:9090', job: 'prometheus' },
+        value: ['2015-07-01T20:11:00.781Z', 3],
+        values: [
+          ['2015-07-01T20:10:30.781Z', 1],
+          ['2015-07-01T20:10:45.781Z', 2],
+          ['2015-07-01T20:11:00.781Z', 3],
+        ],
+      },
+      {
+        metric: { __name__: 'up', instance: 'localhost:9091', job: 'node' },
+        value: ['2015-07-01T20:11:00.781Z', 6],
+        values: [
+          ['2015-07-01T20:10:30.781Z', 4],
+          ['2015-07-01T20:10:45.781Z', 5],
+          ['2015-07-01T20:11:00.781Z', 6],
+        ],
+      },
+    ]);
+  });
+
+  it('processes a scalar result with a NaN result', () => {
+    // Queries may return "NaN" string values.
+    // e.g. when Prometheus cannot find a metric the query
+    // `scalar(does_not_exist)` will return a "NaN" value.
+
+    const mockScalar = {
+      resultType: 'scalar',
+      result: [1435781451.781, 'NaN'],
+    };
+
+    expect(normalizeQueryResponseData(mockScalar)).toEqual([
+      {
+        metric: {},
+        value: ['2015-07-01T20:10:51.781Z', NaN],
+        values: [['2015-07-01T20:10:51.781Z', NaN]],
+      },
+    ]);
+  });
+
+  it('processes a matrix result with a "NaN" value', () => {
+    // Queries may return "NaN" string values.
+    const mockMatrix = {
+      resultType: 'matrix',
+      result: [
+        {
+          metric: {
+            __name__: 'up',
+            job: 'prometheus',
+            instance: 'localhost:9090',
+          },
+          values: [[1435781430.781, '1'], [1435781460.781, 'NaN']],
+        },
+      ],
+    };
+
+    expect(normalizeQueryResponseData(mockMatrix)).toEqual([
+      {
+        metric: { __name__: 'up', instance: 'localhost:9090', job: 'prometheus' },
+        value: ['2015-07-01T20:11:00.781Z', NaN],
+        values: [['2015-07-01T20:10:30.781Z', 1], ['2015-07-01T20:11:00.781Z', NaN]],
+      },
+    ]);
+  });
+});
+
+describe('normalizeCustomDashboardPath', () => {
+  it.each`
+    input                                                               | expected
+    ${[undefined]}                                                      | ${''}
+    ${[null]}                                                           | ${''}
+    ${[]}                                                               | ${''}
+    ${['links.yml']}                                                    | ${'links.yml'}
+    ${['links.yml', '.gitlab/dashboards']}                              | ${'.gitlab/dashboards/links.yml'}
+    ${['config/prometheus/common_metrics.yml']}                         | ${'config/prometheus/common_metrics.yml'}
+    ${['config/prometheus/common_metrics.yml', '.gitlab/dashboards']}   | ${'config/prometheus/common_metrics.yml'}
+    ${['dir1/links.yml', '.gitlab/dashboards']}                         | ${'.gitlab/dashboards/dir1/links.yml'}
+    ${['dir1/dir2/links.yml', '.gitlab/dashboards']}                    | ${'.gitlab/dashboards/dir1/dir2/links.yml'}
+    ${['.gitlab/dashboards/links.yml']}                                 | ${'.gitlab/dashboards/links.yml'}
+    ${['.gitlab/dashboards/links.yml', '.gitlab/dashboards']}           | ${'.gitlab/dashboards/links.yml'}
+    ${['.gitlab/dashboards/dir1/links.yml', '.gitlab/dashboards']}      | ${'.gitlab/dashboards/dir1/links.yml'}
+    ${['.gitlab/dashboards/dir1/dir2/links.yml', '.gitlab/dashboards']} | ${'.gitlab/dashboards/dir1/dir2/links.yml'}
+    ${['config/prometheus/pod_metrics.yml', '.gitlab/dashboards']}      | ${'config/prometheus/pod_metrics.yml'}
+    ${['config/prometheus/pod_metrics.yml']}                            | ${'config/prometheus/pod_metrics.yml'}
+  `(`normalizeCustomDashboardPath returns $expected for $input`, ({ input, expected }) => {
+    expect(normalizeCustomDashboardPath(...input)).toEqual(expected);
   });
 });

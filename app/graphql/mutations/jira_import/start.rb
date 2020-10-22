@@ -3,7 +3,7 @@
 module Mutations
   module JiraImport
     class Start < BaseMutation
-      include Mutations::ResolvesProject
+      include ResolvesProject
 
       graphql_name 'JiraImportStart'
 
@@ -21,30 +21,27 @@ module Mutations
       argument :jira_project_name, GraphQL::STRING_TYPE,
                required: false,
                description: 'Project name of the importer Jira project'
+      argument :users_mapping,
+               [Types::JiraUsersMappingInputType],
+               required: false,
+               description: 'The mapping of Jira to GitLab users'
 
-      def resolve(project_path:, jira_project_key:)
-        project = find_project!(project_path: project_path)
-
-        raise_resource_not_available_error! unless project
+      def resolve(project_path:, jira_project_key:, users_mapping:)
+        project = authorized_find!(full_path: project_path)
+        mapping = users_mapping.to_ary.map { |map| map.to_hash }
 
         service_response = ::JiraImport::StartImportService
-                             .new(context[:current_user], project, jira_project_key)
+                             .new(context[:current_user], project, jira_project_key, mapping)
                              .execute
         jira_import = service_response.success? ? service_response.payload[:import_data] : nil
-        errors = service_response.error? ? [service_response.message] : []
+
         {
           jira_import: jira_import,
-          errors: errors
+          errors: service_response.errors
         }
       end
 
       private
-
-      def find_project!(project_path:)
-        return unless project_path.present?
-
-        authorized_find!(full_path: project_path)
-      end
 
       def find_object(full_path:)
         resolve_project(full_path: full_path)

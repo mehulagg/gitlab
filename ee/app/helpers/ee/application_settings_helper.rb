@@ -20,15 +20,18 @@ module EE
     def visible_attributes
       super + [
         :allow_group_owners_to_manage_ldap,
+        :automatic_purchased_storage_allocation,
         :check_namespace_plan,
         :elasticsearch_aws,
         :elasticsearch_aws_access_key,
         :elasticsearch_aws_region,
         :elasticsearch_aws_secret_access_key,
         :elasticsearch_indexing,
+        :elasticsearch_pause_indexing,
         :elasticsearch_max_bulk_concurrency,
         :elasticsearch_max_bulk_size_mb,
         :elasticsearch_replicas,
+        :elasticsearch_indexed_file_size_limit_kb,
         :elasticsearch_indexed_field_length_limit,
         :elasticsearch_search,
         :elasticsearch_shards,
@@ -36,11 +39,14 @@ module EE
         :elasticsearch_limit_indexing,
         :elasticsearch_namespace_ids,
         :elasticsearch_project_ids,
+        :elasticsearch_client_request_timeout,
+        :enforce_namespace_storage_limit,
         :geo_status_timeout,
         :geo_node_allowed_ips,
         :help_text,
         :lock_memberships_to_ldap,
         :max_personal_access_token_lifetime,
+        :enforce_pat_expiration,
         :pseudonymizer_enabled,
         :repository_size_limit,
         :seat_link_enabled,
@@ -97,6 +103,8 @@ module EE
         deletion_adjourned_period
         updating_name_disabled_for_users
         npm_package_requests_forwarding
+        maintenance_mode
+        maintenance_mode_message
       ]
     end
 

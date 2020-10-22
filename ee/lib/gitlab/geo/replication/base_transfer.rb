@@ -6,15 +6,20 @@ module Gitlab
       class BaseTransfer
         include LogHelpers
 
-        attr_reader :file_type, :file_id, :filename, :uploader, :expected_checksum, :request_data
+        attr_reader :file_type, :file_id, :filename, :expected_checksum, :request_data, :resource
 
-        TEMP_PREFIX = 'tmp_'.freeze
+        TEMP_PREFIX = 'tmp_'
+        DOWNLOAD_TIMEOUT = {
+          connect: 60,
+          write: 60,
+          read: 60
+        }.freeze
 
-        def initialize(file_type:, file_id:, request_data:, expected_checksum: nil, filename: nil, uploader: nil)
+        def initialize(resource:, file_type:, file_id:, request_data:, expected_checksum: nil, filename: nil)
+          @resource = resource
           @file_type = file_type
           @file_id = file_id
           @filename = filename
-          @uploader = uploader
           @expected_checksum = expected_checksum
           @request_data = request_data
         end
@@ -46,7 +51,7 @@ module Gitlab
 
         # @return [String] URL to download the resource from
         def resource_url
-          Gitlab::Geo.primary_node.geo_transfers_url(file_type, file_id.to_s)
+          Gitlab::Geo.primary_node.geo_transfers_url(url_encode(file_type), file_id.to_s)
         end
 
         # Returns Result object with success boolean and number of bytes downloaded.
@@ -84,6 +89,10 @@ module Gitlab
         end
 
         private
+
+        def uploader
+          raise NotImplementedError, "#{self.class} does not implement #{__method__}"
+        end
 
         def skipped_result
           Result.new(success: false, bytes_downloaded: 0, skipped: true)
@@ -124,7 +133,7 @@ module Gitlab
 
           begin
             # Make the request
-            response = ::HTTP.get(url, headers: req_headers)
+            response = ::HTTP.timeout(DOWNLOAD_TIMEOUT.dup).get(url, headers: req_headers)
 
             # Check for failures
             unless response.status.success?
@@ -179,7 +188,11 @@ module Gitlab
 
           begin
             # Make the request
-            response = ::HTTP.follow.get(url, headers: req_headers)
+            response = ::HTTP.timeout(DOWNLOAD_TIMEOUT.dup).get(url, headers: req_headers)
+
+            if response.status.redirect?
+              response = ::HTTP.timeout(DOWNLOAD_TIMEOUT.dup).get(response['Location'])
+            end
 
             # Check for failures
             unless response.status.success?

@@ -1,31 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DependenciesApp component given the dependencyListUi feature flag is enabled on creation given the dependency list job has not yet run shows only the empty state 1`] = `
-Object {
-  "compact": false,
-  "description": "The dependency list details information about the components used within your project.",
-  "primaryButtonLink": null,
-  "primaryButtonText": null,
-  "secondaryButtonLink": null,
-  "secondaryButtonText": null,
-  "svgPath": "/bar.svg",
-  "title": "View dependency details for your project",
-}
-`;
-
-exports[`DependenciesApp component given the dependencyListUi feature flag is enabled on creation given there are no dependencies detected shows only the empty state 1`] = `
-Object {
-  "compact": false,
-  "description": "It seems like the Dependency Scanning job ran successfully, but no dependencies have been detected in your project.",
-  "primaryButtonLink": null,
-  "primaryButtonText": null,
-  "secondaryButtonLink": null,
-  "secondaryButtonText": null,
-  "svgPath": "/bar.svg",
-  "title": "Dependency List has no entries",
-}
-`;
-
 exports[`DependenciesApp component on creation given the dependency list job has not yet run shows only the empty state 1`] = `
 Object {
   "compact": false,
@@ -34,6 +8,7 @@ Object {
   "primaryButtonText": null,
   "secondaryButtonLink": null,
   "secondaryButtonText": null,
+  "svgHeight": null,
   "svgPath": "/bar.svg",
   "title": "View dependency details for your project",
 }
@@ -47,6 +22,7 @@ Object {
   "primaryButtonText": null,
   "secondaryButtonLink": null,
   "secondaryButtonText": null,
+  "svgHeight": null,
   "svgPath": "/bar.svg",
   "title": "Dependency List has no entries",
 }

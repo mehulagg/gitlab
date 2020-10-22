@@ -14,6 +14,10 @@ module EE
         params[:epic_id].to_s.downcase == ::IssuableFinder::Params::FILTER_NONE
       end
 
+      def filter_by_any_epic?
+        params[:epic_id].to_s.downcase == ::IssuableFinder::Params::FILTER_ANY
+      end
+
       def weights?
         params[:weight].present? && params[:weight] != ::Issue::WEIGHT_ALL
       end
@@ -45,6 +49,10 @@ module EE
         else
           params[:epic_id]
         end
+      end
+
+      def iterations
+        params[:iteration_id]
       end
     end
   end

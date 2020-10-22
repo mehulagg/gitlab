@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AwardEmojis::DestroyService do
+RSpec.describe AwardEmojis::DestroyService do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let_it_be(:awardable) { create(:note_on_issue, project: project) }
@@ -20,7 +20,7 @@ describe AwardEmojis::DestroyService do
       end
 
       context 'with recognized emoji' do
-        let(:name) { StatusPage::AWARD_EMOJI }
+        let(:name) { Gitlab::StatusPage::AWARD_EMOJI }
 
         include_examples 'trigger status page publish'
       end

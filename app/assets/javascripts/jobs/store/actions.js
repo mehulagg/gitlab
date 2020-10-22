@@ -3,7 +3,7 @@ import * as types from './mutation_types';
 import axios from '~/lib/utils/axios_utils';
 import Poll from '~/lib/utils/poll';
 import { setFaviconOverlay, resetFavicon } from '~/lib/utils/common_utils';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
 import {
   canScroll,
@@ -195,7 +195,7 @@ export const receiveTraceError = ({ dispatch }) => {
   flash(__('An error occurred while fetching the job log.'));
 };
 /**
- * When the user clicks a collpasible line in the job
+ * When the user clicks a collapsible line in the job
  * log, we commit a mutation to update the state
  *
  * @param {Object} section
@@ -220,7 +220,7 @@ export const fetchJobsForStage = ({ dispatch }, stage = {}) => {
       },
     })
     .then(({ data }) => {
-      const retriedJobs = data.retried.map(job => Object.assign({}, job, { retried: true }));
+      const retriedJobs = data.retried.map(job => ({ ...job, retried: true }));
       const jobs = data.latest_statuses.concat(retriedJobs);
 
       dispatch('receiveJobsForStageSuccess', jobs);
@@ -236,7 +236,7 @@ export const receiveJobsForStageError = ({ commit }) => {
 
 export const triggerManualJob = ({ state }, variables) => {
   const parsedVariables = variables.map(variable => {
-    const copyVar = Object.assign({}, variable);
+    const copyVar = { ...variable };
     delete copyVar.id;
     return copyVar;
   });
@@ -247,6 +247,3 @@ export const triggerManualJob = ({ state }, variables) => {
     })
     .catch(() => flash(__('An error occurred while triggering the job.')));
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

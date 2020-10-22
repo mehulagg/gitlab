@@ -1,7 +1,8 @@
 <script>
 import $ from 'jquery';
 import Vue from 'vue';
-import Vuex, { mapState, mapActions } from 'vuex';
+import Vuex, { mapState, mapActions, mapGetters } from 'vuex';
+import { isInViewport } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 
 import DropdownValueCollapsed from '~/vue_shared/components/sidebar/labels_select/dropdown_value_collapsed.vue';
@@ -12,6 +13,8 @@ import DropdownTitle from './dropdown_title.vue';
 import DropdownValue from './dropdown_value.vue';
 import DropdownButton from './dropdown_button.vue';
 import DropdownContents from './dropdown_contents.vue';
+
+import { DropdownVariant } from './constants';
 
 Vue.use(Vuex);
 
@@ -25,6 +28,11 @@ export default {
     DropdownValueCollapsed,
   },
   props: {
+    allowLabelRemove: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     allowLabelEdit: {
       type: Boolean,
       required: true,
@@ -33,14 +41,19 @@ export default {
       type: Boolean,
       required: true,
     },
+    allowMultiselect: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     allowScopedLabels: {
       type: Boolean,
       required: true,
     },
-    dropdownOnly: {
-      type: Boolean,
+    variant: {
+      type: String,
       required: false,
-      default: false,
+      default: DropdownVariant.Sidebar,
     },
     selectedLabels: {
       type: Array,
@@ -67,6 +80,11 @@ export default {
       required: false,
       default: '',
     },
+    dropdownButtonText: {
+      type: String,
+      required: false,
+      default: __('Label'),
+    },
     labelsListTitle: {
       type: String,
       required: false,
@@ -88,8 +106,21 @@ export default {
       default: __('Manage group labels'),
     },
   },
+  data() {
+    return {
+      contentIsOnViewport: true,
+    };
+  },
   computed: {
     ...mapState(['showDropdownButton', 'showDropdownContents']),
+    ...mapGetters([
+      'isDropdownVariantSidebar',
+      'isDropdownVariantStandalone',
+      'isDropdownVariantEmbedded',
+    ]),
+    dropdownButtonVisible() {
+      return this.isDropdownVariantSidebar ? this.showDropdownButton : true;
+    },
   },
   watch: {
     selectedLabels(selectedLabels) {
@@ -97,13 +128,19 @@ export default {
         selectedLabels,
       });
     },
+    showDropdownContents(showDropdownContents) {
+      this.setContentIsOnViewport(showDropdownContents);
+    },
   },
   mounted() {
     this.setInitialState({
-      dropdownOnly: this.dropdownOnly,
+      variant: this.variant,
+      allowLabelRemove: this.allowLabelRemove,
       allowLabelEdit: this.allowLabelEdit,
       allowLabelCreate: this.allowLabelCreate,
+      allowMultiselect: this.allowMultiselect,
       allowScopedLabels: this.allowScopedLabels,
+      dropdownButtonText: this.dropdownButtonText,
       selectedLabels: this.selectedLabels,
       labelsFetchPath: this.labelsFetchPath,
       labelsManagePath: this.labelsManagePath,
@@ -135,7 +172,11 @@ export default {
         !state.showDropdownButton &&
         !state.showDropdownContents
       ) {
-        this.handleDropdownClose(state.labels.filter(label => label.touched));
+        let filterFn = label => label.touched;
+        if (this.isDropdownVariantEmbedded) {
+          filterFn = label => label.set;
+        }
+        this.handleDropdownClose(state.labels.filter(filterFn));
       }
     },
     /**
@@ -148,13 +189,24 @@ export default {
       // as the dropdown wrapper is not using `GlDropdown` as
       // it will also require us to use `BDropdownForm`
       // which is yet to be implemented in GitLab UI.
+      const hasExceptionClass = [
+        'js-dropdown-button',
+        'js-btn-cancel-create',
+        'js-sidebar-dropdown-toggle',
+      ].some(
+        className =>
+          target?.classList.contains(className) ||
+          target?.parentElement?.classList.contains(className),
+      );
+
+      const hadExceptionParent = ['.js-btn-back', '.js-labels-list'].some(
+        className => $(target).parents(className).length,
+      );
+
       if (
-        this.showDropdownButton &&
         this.showDropdownContents &&
-        !$(target).parents('.js-btn-back').length &&
-        !$(target).parents('.js-labels-list').length &&
-        !target?.classList.contains('js-btn-cancel-create') &&
-        !target?.classList.contains('js-sidebar-dropdown-toggle') &&
+        !hadExceptionParent &&
+        !hasExceptionClass &&
         !this.$refs.dropdownButtonCollapsed?.$el.contains(target) &&
         !this.$refs.dropdownContents?.$el.contains(target)
       ) {
@@ -170,15 +222,34 @@ export default {
     handleCollapsedValueClick() {
       this.$emit('toggleCollapse');
     },
+    setContentIsOnViewport(showDropdownContents) {
+      if (!this.isDropdownVariantEmbedded || !showDropdownContents) {
+        this.contentIsOnViewport = true;
+
+        return;
+      }
+
+      this.$nextTick(() => {
+        if (this.$refs.dropdownContents) {
+          const offset = { top: 100 };
+          this.contentIsOnViewport = isInViewport(this.$refs.dropdownContents.$el, offset);
+        }
+      });
+    },
   },
 };
 </script>
 
 <template>
-  <div class="labels-select-wrapper position-relative">
-    <div v-if="!dropdownOnly">
+  <div
+    class="labels-select-wrapper position-relative"
+    :class="{
+      'is-standalone': isDropdownVariantStandalone,
+      'is-embedded': isDropdownVariantEmbedded,
+    }"
+  >
+    <template v-if="isDropdownVariantSidebar">
       <dropdown-value-collapsed
-        v-if="allowLabelCreate"
         ref="dropdownButtonCollapsed"
         :labels="selectedLabels"
         @onValueClick="handleCollapsedValueClick"
@@ -187,11 +258,25 @@ export default {
         :allow-label-edit="allowLabelEdit"
         :labels-select-in-progress="labelsSelectInProgress"
       />
-      <dropdown-value v-show="!showDropdownButton">
+      <dropdown-value
+        :disable-labels="labelsSelectInProgress"
+        @onLabelRemove="$emit('onLabelRemove', $event)"
+      >
         <slot></slot>
       </dropdown-value>
-      <dropdown-button v-show="showDropdownButton" />
-      <dropdown-contents v-if="showDropdownButton && showDropdownContents" ref="dropdownContents" />
-    </div>
+      <dropdown-button v-show="dropdownButtonVisible" class="gl-mt-2" />
+      <dropdown-contents
+        v-if="dropdownButtonVisible && showDropdownContents"
+        ref="dropdownContents"
+      />
+    </template>
+    <template v-if="isDropdownVariantStandalone || isDropdownVariantEmbedded">
+      <dropdown-button v-show="dropdownButtonVisible" />
+      <dropdown-contents
+        v-if="dropdownButtonVisible && showDropdownContents"
+        ref="dropdownContents"
+        :render-on-top="!contentIsOnViewport"
+      />
+    </template>
   </div>
 </template>

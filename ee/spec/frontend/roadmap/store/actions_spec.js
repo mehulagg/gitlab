@@ -9,7 +9,7 @@ import { PRESET_TYPES, EXTEND_AS } from 'ee/roadmap/constants';
 import groupMilestones from 'ee/roadmap/queries/groupMilestones.query.graphql';
 import testAction from 'helpers/vuex_action_helper';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   mockGroupId,
   basePath,
@@ -40,7 +40,8 @@ describe('Roadmap Vuex Actions', () => {
   let state;
 
   beforeEach(() => {
-    state = Object.assign({}, defaultState(), {
+    state = {
+      ...defaultState(),
       groupId: mockGroupId,
       timeframe: mockTimeframeMonths,
       presetType: PRESET_TYPES.MONTHS,
@@ -50,7 +51,7 @@ describe('Roadmap Vuex Actions', () => {
       basePath,
       timeframeStartDate,
       timeframeEndDate,
-    });
+    };
   });
 
   describe('setInitialData', () => {
@@ -70,43 +71,14 @@ describe('Roadmap Vuex Actions', () => {
     });
   });
 
-  describe('setWindowResizeInProgress', () => {
-    it('should set value of `state.windowResizeInProgress` based on provided value', () => {
-      return testAction(
-        actions.setWindowResizeInProgress,
-        true,
-        state,
-        [{ type: types.SET_WINDOW_RESIZE_IN_PROGRESS, payload: true }],
-        [],
-      );
-    });
-  });
-
-  describe('requestEpics', () => {
-    it('should set `epicsFetchInProgress` to true', () => {
-      return testAction(actions.requestEpics, {}, state, [{ type: 'REQUEST_EPICS' }], []);
-    });
-  });
-
-  describe('requestEpicsForTimeframe', () => {
-    it('should set `epicsFetchForTimeframeInProgress` to true', () => {
-      return testAction(
-        actions.requestEpicsForTimeframe,
-        {},
-        state,
-        [{ type: types.REQUEST_EPICS_FOR_TIMEFRAME }],
-        [],
-      );
-    });
-  });
-
   describe('receiveEpicsSuccess', () => {
     it('should set formatted epics array and epicId to IDs array in state based on provided epics list', () => {
       return testAction(
         actions.receiveEpicsSuccess,
         {
           rawEpics: [
-            Object.assign({}, mockRawEpic, {
+            {
+              ...mockRawEpic,
               start_date: '2017-12-31',
               end_date: '2018-2-15',
               descendantWeightSum: {
@@ -117,23 +89,24 @@ describe('Roadmap Vuex Actions', () => {
                 openedEpics: 3,
                 closedEpics: 2,
               },
-            }),
+            },
           ],
         },
         state,
         [
-          { type: types.UPDATE_EPIC_IDS, payload: mockRawEpic.id },
+          { type: types.UPDATE_EPIC_IDS, payload: [mockRawEpic.id] },
           {
             type: types.RECEIVE_EPICS_SUCCESS,
             payload: [
-              Object.assign({}, mockFormattedEpic, {
+              {
+                ...mockFormattedEpic,
                 startDateOutOfRange: false,
                 endDateOutOfRange: false,
                 startDate: new Date(2017, 11, 31),
                 originalStartDate: new Date(2017, 11, 31),
                 endDate: new Date(2018, 1, 15),
                 originalEndDate: new Date(2018, 1, 15),
-              }),
+              },
             ],
           },
         ],
@@ -142,14 +115,15 @@ describe('Roadmap Vuex Actions', () => {
             type: 'initItemChildrenFlags',
             payload: {
               epics: [
-                Object.assign({}, mockFormattedEpic, {
+                {
+                  ...mockFormattedEpic,
                   startDateOutOfRange: false,
                   endDateOutOfRange: false,
                   startDate: new Date(2017, 11, 31),
                   originalStartDate: new Date(2017, 11, 31),
                   endDate: new Date(2018, 1, 15),
                   originalEndDate: new Date(2018, 1, 15),
-                }),
+                },
               ],
             },
           },
@@ -175,13 +149,27 @@ describe('Roadmap Vuex Actions', () => {
         },
         state,
         [
-          { type: types.UPDATE_EPIC_IDS, payload: mockRawEpic.id },
+          { type: types.UPDATE_EPIC_IDS, payload: [mockRawEpic.id] },
           {
             type: types.RECEIVE_EPICS_FOR_TIMEFRAME_SUCCESS,
-            payload: [Object.assign({}, mockFormattedEpic, { newEpic: true })],
+            payload: [{ ...mockFormattedEpic, newEpic: true }],
           },
         ],
-        [],
+        [
+          {
+            type: 'initItemChildrenFlags',
+            payload: {
+              epics: [
+                {
+                  ...mockFormattedEpic,
+                  startDateOutOfRange: true,
+                  endDateOutOfRange: false,
+                  newEpic: true,
+                },
+              ],
+            },
+          },
+        ],
       );
     });
   });
@@ -216,7 +204,7 @@ describe('Roadmap Vuex Actions', () => {
     });
 
     describe('success', () => {
-      it('should dispatch requestEpics and receiveEpicsSuccess when request is successful', () => {
+      it('should perform REQUEST_EPICS mutation dispatch receiveEpicsSuccess action when request is successful', () => {
         jest.spyOn(epicUtils.gqClient, 'query').mockReturnValue(
           Promise.resolve({
             data: mockGroupEpicsQueryResponse.data,
@@ -227,11 +215,12 @@ describe('Roadmap Vuex Actions', () => {
           actions.fetchEpics,
           null,
           state,
-          [],
           [
             {
-              type: 'requestEpics',
+              type: types.REQUEST_EPICS,
             },
+          ],
+          [
             {
               type: 'receiveEpicsSuccess',
               payload: { rawEpics: mockGroupEpicsQueryResponseFormatted },
@@ -242,18 +231,19 @@ describe('Roadmap Vuex Actions', () => {
     });
 
     describe('failure', () => {
-      it('should dispatch requestEpics and receiveEpicsFailure when request fails', () => {
+      it('should perform REQUEST_EPICS mutation and dispatch receiveEpicsFailure action when request fails', () => {
         jest.spyOn(epicUtils.gqClient, 'query').mockRejectedValue(new Error('error message'));
 
         return testAction(
           actions.fetchEpics,
           null,
           state,
-          [],
           [
             {
-              type: 'requestEpics',
+              type: types.REQUEST_EPICS,
             },
+          ],
+          [
             {
               type: 'receiveEpicsFailure',
             },
@@ -265,7 +255,7 @@ describe('Roadmap Vuex Actions', () => {
 
   describe('fetchEpicsForTimeframe', () => {
     describe('success', () => {
-      it('should dispatch requestEpicsForTimeframe and receiveEpicsSuccess when request is successful', () => {
+      it('should perform REQUEST_EPICS_FOR_TIMEFRAME mutation and dispatch receiveEpicsSuccess action when request is successful', () => {
         jest.spyOn(epicUtils.gqClient, 'query').mockReturnValue(
           Promise.resolve({
             data: mockGroupEpicsQueryResponse.data,
@@ -276,11 +266,12 @@ describe('Roadmap Vuex Actions', () => {
           actions.fetchEpicsForTimeframe,
           { timeframe: mockTimeframeMonths },
           state,
-          [],
           [
             {
-              type: 'requestEpicsForTimeframe',
+              type: types.REQUEST_EPICS_FOR_TIMEFRAME,
             },
+          ],
+          [
             {
               type: 'receiveEpicsSuccess',
               payload: {
@@ -295,18 +286,19 @@ describe('Roadmap Vuex Actions', () => {
     });
 
     describe('failure', () => {
-      it('should dispatch requestEpicsForTimeframe and requestEpicsFailure when request fails', () => {
+      it('should perform REQUEST_EPICS_FOR_TIMEFRAME mutation and dispatch requestEpicsFailure action when request fails', () => {
         jest.spyOn(epicUtils.gqClient, 'query').mockRejectedValue();
 
         return testAction(
           actions.fetchEpicsForTimeframe,
           { timeframe: mockTimeframeMonths },
           state,
-          [],
           [
             {
-              type: 'requestEpicsForTimeframe',
+              type: types.REQUEST_EPICS_FOR_TIMEFRAME,
             },
+          ],
+          [
             {
               type: 'receiveEpicsFailure',
             },
@@ -378,7 +370,8 @@ describe('Roadmap Vuex Actions', () => {
         {
           parentItemId: '41',
           rawChildren: [
-            Object.assign({}, mockRawEpic, {
+            {
+              ...mockRawEpic,
               start_date: '2017-12-31',
               end_date: '2018-2-15',
               descendantWeightSum: {
@@ -389,7 +382,7 @@ describe('Roadmap Vuex Actions', () => {
                 openedEpics: 3,
                 closedEpics: 2,
               },
-            }),
+            },
           ],
         },
         state,
@@ -399,7 +392,8 @@ describe('Roadmap Vuex Actions', () => {
             payload: {
               parentItemId: '41',
               children: [
-                Object.assign({}, mockFormattedEpic, {
+                {
+                  ...mockFormattedEpic,
                   startDateOutOfRange: false,
                   endDateOutOfRange: false,
                   startDate: new Date(2017, 11, 31),
@@ -407,7 +401,7 @@ describe('Roadmap Vuex Actions', () => {
                   endDate: new Date(2018, 1, 15),
                   originalEndDate: new Date(2018, 1, 15),
                   isChildEpic: true,
-                }),
+                },
               ],
             },
           },
@@ -421,7 +415,8 @@ describe('Roadmap Vuex Actions', () => {
             type: 'initItemChildrenFlags',
             payload: {
               epics: [
-                Object.assign({}, mockFormattedEpic, {
+                {
+                  ...mockFormattedEpic,
                   startDateOutOfRange: false,
                   endDateOutOfRange: false,
                   startDate: new Date(2017, 11, 31),
@@ -429,7 +424,7 @@ describe('Roadmap Vuex Actions', () => {
                   endDate: new Date(2018, 1, 15),
                   originalEndDate: new Date(2018, 1, 15),
                   isChildEpic: true,
-                }),
+                },
               ],
             },
           },
@@ -627,6 +622,7 @@ describe('Roadmap Vuex Actions', () => {
         state: mockState.milestonessState,
         startDate: '2017-11-1',
         dueDate: '2018-6-30',
+        includeDescendants: true,
       };
     });
 
@@ -706,12 +702,7 @@ describe('Roadmap Vuex Actions', () => {
       return testAction(
         actions.receiveMilestonesSuccess,
         {
-          rawMilestones: [
-            Object.assign({}, mockMilestone, {
-              start_date: '2017-12-31',
-              end_date: '2018-2-15',
-            }),
-          ],
+          rawMilestones: [{ ...mockMilestone, start_date: '2017-12-31', end_date: '2018-2-15' }],
         },
         state,
         [
@@ -719,14 +710,15 @@ describe('Roadmap Vuex Actions', () => {
           {
             type: types.RECEIVE_MILESTONES_SUCCESS,
             payload: [
-              Object.assign({}, mockFormattedMilestone, {
+              {
+                ...mockFormattedMilestone,
                 startDateOutOfRange: false,
                 endDateOutOfRange: false,
                 startDate: new Date(2017, 11, 31),
                 originalStartDate: new Date(2017, 11, 31),
                 endDate: new Date(2018, 1, 15),
                 originalEndDate: new Date(2018, 1, 15),
-              }),
+              },
             ],
           },
         ],

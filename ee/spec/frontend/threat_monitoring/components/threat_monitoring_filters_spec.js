@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import createStore from 'ee/threat_monitoring/store';
 import ThreatMonitoringFilters from 'ee/threat_monitoring/components/threat_monitoring_filters.vue';
-import { INVALID_CURRENT_ENVIRONMENT_NAME } from 'ee/threat_monitoring/constants';
+import EnvironmentPicker from 'ee/threat_monitoring/components/environment_picker.vue';
 import { mockEnvironmentsResponse } from '../mock_data';
 import DateTimePicker from '~/vue_shared/components/date_time_picker/date_time_picker.vue';
 import { timeRanges, defaultTimeRange } from '~/vue_shared/constants';
@@ -23,61 +23,20 @@ describe('ThreatMonitoringFilters component', () => {
     });
   };
 
-  const findEnvironmentsDropdown = () => wrapper.find({ ref: 'environmentsDropdown' });
-  const findEnvironmentsDropdownItems = () => wrapper.findAll({ ref: 'environmentsDropdownItem' });
+  const findEnvironmentsPicker = () => wrapper.find(EnvironmentPicker);
   const findShowLastDropdown = () => wrapper.find(DateTimePicker);
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  describe('the environments dropdown', () => {
-    describe('given there are no environments', () => {
-      beforeEach(() => {
-        factory();
-      });
-
-      it('has text set to the INVALID_CURRENT_ENVIRONMENT_NAME', () => {
-        expect(findEnvironmentsDropdown().attributes().text).toBe(INVALID_CURRENT_ENVIRONMENT_NAME);
-      });
-
-      it('has no dropdown items', () => {
-        expect(findEnvironmentsDropdownItems()).toHaveLength(0);
-      });
+  describe('the environments picker', () => {
+    beforeEach(() => {
+      factory();
     });
 
-    describe('given there are environments', () => {
-      const currentEnvironment = mockEnvironments[1];
-
-      beforeEach(() => {
-        factory({
-          environments: mockEnvironments,
-          currentEnvironmentId: currentEnvironment.id,
-        });
-      });
-
-      it('is not disabled', () => {
-        expect(findEnvironmentsDropdown().attributes().disabled).toBe(undefined);
-      });
-
-      it('has text set to the current environment', () => {
-        expect(findEnvironmentsDropdown().attributes().text).toBe(currentEnvironment.name);
-      });
-
-      it('has dropdown items for each environment', () => {
-        const dropdownItems = findEnvironmentsDropdownItems();
-
-        mockEnvironments.forEach((environment, i) => {
-          const dropdownItem = dropdownItems.at(i);
-          expect(dropdownItem.text()).toBe(environment.name);
-
-          dropdownItem.vm.$emit('click');
-          expect(store.dispatch).toHaveBeenCalledWith(
-            'threatMonitoring/setCurrentEnvironmentId',
-            environment.id,
-          );
-        });
-      });
+    it('renders EnvironmentPicker', () => {
+      expect(findEnvironmentsPicker().exists()).toBe(true);
     });
   });
 
@@ -107,27 +66,33 @@ describe('ThreatMonitoringFilters component', () => {
   });
 
   describe.each`
-    context                         | isLoadingEnvironments | isLoadingWafStatistics | environments
-    ${'environments are loading'}   | ${true}               | ${false}               | ${mockEnvironments}
-    ${'WAF statistics are loading'} | ${false}              | ${true}                | ${mockEnvironments}
-    ${'there are no environments'}  | ${false}              | ${false}               | ${[]}
-  `('given $context', ({ isLoadingEnvironments, isLoadingWafStatistics, environments }) => {
-    beforeEach(() => {
-      factory({
-        environments,
-        isLoadingEnvironments,
-        isLoadingWafStatistics,
+    context                            | isLoadingEnvironments | isLoadingWafStatistics | isLoadingNetworkPolicyStatistics | environments
+    ${'environments are loading'}      | ${true}               | ${false}               | ${false}                         | ${mockEnvironments}
+    ${'WAF statistics are loading'}    | ${false}              | ${true}                | ${false}                         | ${mockEnvironments}
+    ${'NetPol statistics are loading'} | ${false}              | ${false}               | ${true}                          | ${mockEnvironments}
+    ${'there are no environments'}     | ${false}              | ${false}               | ${false}                         | ${[]}
+  `(
+    'given $context',
+    ({
+      isLoadingEnvironments,
+      isLoadingWafStatistics,
+      isLoadingNetworkPolicyStatistics,
+      environments,
+    }) => {
+      beforeEach(() => {
+        factory({
+          environments,
+          isLoadingEnvironments,
+          isLoadingWafStatistics,
+          isLoadingNetworkPolicyStatistics,
+        });
+
+        return wrapper.vm.$nextTick();
       });
 
-      return wrapper.vm.$nextTick();
-    });
-
-    it('disables the environments dropdown', () => {
-      expect(findEnvironmentsDropdown().attributes('disabled')).toBe('true');
-    });
-
-    it('disables the "show last" dropdown', () => {
-      expect(findShowLastDropdown().attributes('disabled')).toBe('true');
-    });
-  });
+      it('disables the "show last" dropdown', () => {
+        expect(findShowLastDropdown().attributes('disabled')).toBe('true');
+      });
+    },
+  );
 });

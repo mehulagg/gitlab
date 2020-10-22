@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Setting weight of an issue' do
+RSpec.describe 'Setting weight of an issue' do
   include GraphqlHelpers
 
   let(:current_user) { create(:user) }

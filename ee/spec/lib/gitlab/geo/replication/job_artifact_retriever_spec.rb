@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::Replication::JobArtifactRetriever, :geo do
+RSpec.describe Gitlab::Geo::Replication::JobArtifactRetriever, :geo do
   describe '#execute' do
     let(:retriever) { described_class.new(job_artifact.id, {}) }
 

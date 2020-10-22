@@ -1,12 +1,19 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { mapActions } from 'vuex';
+import { GlIcon, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
 import timeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import GitlabTeamMemberBadge from '~/vue_shared/components/user_avatar/badges/gitlab_team_member_badge.vue';
 
 export default {
   components: {
     timeAgoTooltip,
-    GitlabTeamMemberBadge,
+    GitlabTeamMemberBadge: () =>
+      import('ee_component/vue_shared/components/user_avatar/badges/gitlab_team_member_badge.vue'),
+    GlIcon,
+    GlLoadingIcon,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     author: {
@@ -44,6 +51,11 @@ export default {
       required: false,
       default: true,
     },
+    isConfidential: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -61,9 +73,6 @@ export default {
     },
     hasAuthor() {
       return this.author && Object.keys(this.author).length;
-    },
-    showGitlabTeamMemberBadge() {
-      return this.author?.is_gitlab_employee;
     },
     authorLinkClasses() {
       return {
@@ -156,7 +165,7 @@ export default {
           @mouseleave="handleUsernameMouseLeave"
           ><span class="note-headline-light">@{{ author.username }}</span>
         </a>
-        <gitlab-team-member-badge v-if="showGitlabTeamMemberBadge" />
+        <gitlab-team-member-badge v-if="author && author.is_gitlab_employee" />
       </span>
     </template>
     <span v-else>{{ __('A deleted user') }}</span>
@@ -177,14 +186,22 @@ export default {
         </a>
         <time-ago-tooltip v-else ref="noteTimestamp" :time="createdAt" tooltip-placement="bottom" />
       </template>
+      <gl-icon
+        v-if="isConfidential"
+        v-gl-tooltip:tooltipcontainer.bottom
+        data-testid="confidentialIndicator"
+        name="eye-slash"
+        :size="14"
+        :title="s__('Notes|Private comments are accessible by internal staff only')"
+        class="gl-ml-1 gl-text-gray-700 align-middle"
+      />
       <slot name="extra-controls"></slot>
-      <i
+      <gl-loading-icon
         v-if="showSpinner"
         ref="spinner"
-        class="fa fa-spinner fa-spin editing-spinner"
-        :aria-label="__('Comment is being updated')"
-        aria-hidden="true"
-      ></i>
+        class="editing-spinner"
+        :label="__('Comment is being updated')"
+      />
     </span>
   </div>
 </template>

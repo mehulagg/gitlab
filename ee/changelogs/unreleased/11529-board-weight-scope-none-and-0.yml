@@ -1,5 +1,0 @@
----
-title: Fix board edit weight values 0 or None
-merge_request: 29606
-author:
-type: fixed

@@ -9,16 +9,8 @@
 
 require 'spec_helper'
 
-describe Gitlab::ImportExport::RelationTreeRestorer do
-  include ImportExport::CommonUtil
-
-  let(:user) { create(:user) }
-  let(:shared) { Gitlab::ImportExport::Shared.new(importable) }
-  let(:attributes) { relation_reader.consume_attributes(importable_name) }
-
-  let(:members_mapper) do
-    Gitlab::ImportExport::MembersMapper.new(exported_members: {}, user: user, importable: importable)
-  end
+RSpec.describe Gitlab::ImportExport::RelationTreeRestorer do
+  include_context 'relation tree restorer shared context'
 
   let(:relation_tree_restorer) do
     described_class.new(
@@ -64,7 +56,7 @@ describe Gitlab::ImportExport::RelationTreeRestorer do
   shared_examples 'logging of relations creation' do
     context 'when log_import_export_relation_creation feature flag is enabled' do
       before do
-        stub_feature_flags(log_import_export_relation_creation: { enabled: true, thing: group })
+        stub_feature_flags(log_import_export_relation_creation: group)
       end
 
       it 'logs top-level relation creation' do
@@ -79,7 +71,7 @@ describe Gitlab::ImportExport::RelationTreeRestorer do
 
     context 'when log_import_export_relation_creation feature flag is disabled' do
       before do
-        stub_feature_flags(log_import_export_relation_creation: { enabled: false, thing: group })
+        stub_feature_flags(log_import_export_relation_creation: false)
       end
 
       it 'does not log top-level relation creation' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::GitlabRoutingHelper do
+RSpec.describe EE::GitlabRoutingHelper do
   include ProjectsHelper
   include ApplicationSettingsHelper
 
@@ -87,6 +87,14 @@ describe EE::GitlabRoutingHelper do
     end
   end
 
+  describe '#license_management_settings_path' do
+    it 'generates a path to the license compliance page' do
+      result = helper.license_management_settings_path(project)
+
+      expect(result).to eq('/foo/bar/-/licenses#policies')
+    end
+  end
+
   describe '#user_group_saml_omniauth_metadata_path' do
     subject do
       helper.user_group_saml_omniauth_metadata_path(group)
@@ -132,6 +140,16 @@ describe EE::GitlabRoutingHelper do
       it "returns the profile billing path" do
         expect(subject).to eq(profile_billings_path)
       end
+    end
+  end
+
+  describe '#vulnerability_url' do
+    let_it_be(:vulnerability) { create(:vulnerability) }
+
+    subject { vulnerability_url(vulnerability) }
+
+    it 'returns the full url of the vulnerability' do
+      expect(subject).to eq "http://localhost/#{vulnerability.project.namespace.path}/#{vulnerability.project.name}/-/security/vulnerabilities/#{vulnerability.id}"
     end
   end
 end

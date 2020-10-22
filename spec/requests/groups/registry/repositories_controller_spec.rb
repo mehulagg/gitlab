@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Groups::Registry::RepositoriesController do
+RSpec.describe Groups::Registry::RepositoriesController do
   let_it_be(:group, reload: true) { create(:group) }
   let_it_be(:user) { create(:user) }
 
   before do
     stub_container_registry_config(enabled: true)
-
+    stub_container_registry_tags(repository: :any, tags: [])
     group.add_reporter(user)
     login_as(user)
   end

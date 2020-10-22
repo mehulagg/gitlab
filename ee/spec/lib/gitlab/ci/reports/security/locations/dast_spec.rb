@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Reports::Security::Locations::Dast do
+RSpec.describe Gitlab::Ci::Reports::Security::Locations::Dast do
   let(:params) do
     {
       hostname: 'my-app.com',

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Pseudonymizer::Dumper do
+RSpec.describe Pseudonymizer::Dumper do
   let!(:project) { create(:project) }
   let(:base_dir) { Dir.mktmpdir }
   let(:options) do
@@ -95,7 +95,7 @@ describe Pseudonymizer::Dumper do
           }
         }
 
-        expect(Rails.logger).to receive(:warn).with(/extraneous/)
+        expect(Gitlab::AppLogger).to receive(:warn).with(/extraneous/)
 
         pseudo.tables_to_csv
       end

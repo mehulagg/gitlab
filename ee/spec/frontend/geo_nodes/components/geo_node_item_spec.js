@@ -50,10 +50,7 @@ describe('GeoNodeItemComponent', () => {
     describe('handleNodeDetails', () => {
       describe('with matching ID', () => {
         beforeEach(() => {
-          const mockNodeSecondary = Object.assign({}, mockNode, {
-            id: mockNodeDetails.id,
-            primary: false,
-          });
+          const mockNodeSecondary = { ...mockNode, id: mockNodeDetails.id, primary: false };
 
           createComponent({ node: mockNodeSecondary });
         });

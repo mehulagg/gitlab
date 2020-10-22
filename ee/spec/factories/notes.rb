@@ -10,10 +10,6 @@ FactoryBot.modify do
     trait :on_vulnerability do
       noteable { association(:vulnerability, project: project) }
     end
-
-    trait :with_review do
-      review
-    end
   end
 end
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::SystemHooksService do
+RSpec.describe EE::SystemHooksService do
   context 'when group member' do
     let(:group) { create(:group) }
     let(:group_member) { create(:group_member, group: group) }

@@ -1,12 +1,12 @@
 - parsed_with_gfm = "Content parsed with #{link_to('GitLab Flavored Markdown', help_page_path('user/markdown'), target: '_blank')}.".html_safe
 
-= form_for @appearance, url: admin_appearances_path, html: { class: 'prepend-top-default' } do |f|
+= form_for @appearance, url: admin_appearances_path, html: { class: 'gl-mt-3' } do |f|
   = form_errors(@appearance)
 
 
   .row
     .col-lg-4.profile-settings-sidebar
-      %h4.prepend-top-0 Navigation bar
+      %h4.gl-mt-0 Navigation bar
 
     .col-lg-8
       .form-group
@@ -16,7 +16,7 @@
             = image_tag @appearance.header_logo_path, class: 'appearance-light-logo-preview'
             - if @appearance.persisted?
               %br
-              = link_to 'Remove header logo', header_logos_admin_appearances_path, data: { confirm: "Header logo will be removed. Are you sure?"}, method: :delete, class: "btn btn-inverted btn-remove btn-sm remove-logo"
+              = link_to 'Remove header logo', header_logos_admin_appearances_path, data: { confirm: "Header logo will be removed. Are you sure?"}, method: :delete, class: "btn gl-button btn-danger btn-danger-secondary btn-sm"
             %hr
           = f.hidden_field :header_logo_cache
           = f.file_field :header_logo, class: ""
@@ -25,7 +25,7 @@
   %hr
   .row
     .col-lg-4.profile-settings-sidebar
-      %h4.prepend-top-0 Favicon
+      %h4.gl-mt-0 Favicon
 
     .col-lg-8
       .form-group
@@ -35,7 +35,7 @@
             = image_tag @appearance.favicon_path, class: 'appearance-light-logo-preview'
             - if @appearance.persisted?
               %br
-              = link_to 'Remove favicon', favicon_admin_appearances_path, data: { confirm: "Favicon will be removed. Are you sure?"}, method: :delete, class: "btn btn-inverted btn-remove btn-sm remove-logo"
+              = link_to 'Remove favicon', favicon_admin_appearances_path, data: { confirm: "Favicon will be removed. Are you sure?"}, method: :delete, class: "btn gl-button btn-danger btn-danger-secondary btn-sm"
             %hr
           = f.hidden_field :favicon_cache
           = f.file_field :favicon, class: ''
@@ -49,7 +49,7 @@
   %hr
   .row
     .col-lg-4.profile-settings-sidebar
-      %h4.prepend-top-0 Sign in/Sign up pages
+      %h4.gl-mt-0 Sign in/Sign up pages
 
     .col-lg-8
       .form-group
@@ -67,7 +67,7 @@
             = image_tag @appearance.logo_path, class: 'appearance-logo-preview'
             - if @appearance.persisted?
               %br
-              = link_to 'Remove logo', logo_admin_appearances_path, data: { confirm: "Logo will be removed. Are you sure?"}, method: :delete, class: "btn btn-inverted btn-remove btn-sm remove-logo"
+              = link_to 'Remove logo', logo_admin_appearances_path, data: { confirm: "Logo will be removed. Are you sure?"}, method: :delete, class: "btn gl-button btn-danger btn-danger-secondary btn-sm remove-logo"
             %hr
           = f.hidden_field :logo_cache
           = f.file_field :logo, class: ""
@@ -77,7 +77,7 @@
   %hr
   .row
     .col-lg-4.profile-settings-sidebar
-      %h4.prepend-top-0 New project pages
+      %h4.gl-mt-0 New project pages
 
     .col-lg-8
       .form-group
@@ -90,7 +90,7 @@
   %hr
   .row
     .col-lg-4.profile-settings-sidebar
-      %h4.prepend-top-0 Profile image guideline
+      %h4.gl-mt-0 Profile image guideline
 
     .col-lg-8
       .form-group
@@ -100,8 +100,8 @@
           .hint
             = parsed_with_gfm
 
-      .prepend-top-default.append-bottom-default
-        = f.submit 'Update appearance settings', class: 'btn btn-success'
+      .gl-mt-3.gl-mb-3
+        = f.submit 'Update appearance settings', class: 'btn gl-button btn-success'
         - if @appearance.persisted? || @appearance.updated_at
           .mt-4
             - if @appearance.persisted?

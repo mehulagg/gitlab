@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe 'Git HTTP requests' do
+RSpec.describe 'Git HTTP requests' do
   include GitHttpHelpers
   include WorkhorseHelpers
 
   shared_examples_for 'pulls are allowed' do
-    it do
-      download(path, env) do |response|
+    specify do
+      download(path, **env) do |response|
         expect(response).to have_gitlab_http_status(:ok)
         expect(response.media_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
       end
@@ -16,8 +16,8 @@ describe 'Git HTTP requests' do
   end
 
   shared_examples_for 'pushes are allowed' do
-    it do
-      upload(path, env) do |response|
+    specify do
+      upload(path, **env) do |response|
         expect(response).to have_gitlab_http_status(:ok)
         expect(response.media_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
       end
@@ -42,7 +42,7 @@ describe 'Git HTTP requests' do
         end
 
         it "responds with status 401 Unauthorized" do
-          download(path, env) do |response|
+          download(path, **env) do |response|
             expect(response).to have_gitlab_http_status(:unauthorized)
           end
         end
@@ -54,7 +54,7 @@ describe 'Git HTTP requests' do
         end
 
         it "responds with status 401 Unauthorized" do
-          download(path, env) do |response|
+          download(path, **env) do |response|
             expect(response).to have_gitlab_http_status(:unauthorized)
           end
         end
@@ -78,7 +78,7 @@ describe 'Git HTTP requests' do
             end
 
             it "responds with status 403 Forbidden" do
-              download(path, env) do |response|
+              download(path, **env) do |response|
                 expect(response).to have_gitlab_http_status(:forbidden)
               end
             end
@@ -86,7 +86,7 @@ describe 'Git HTTP requests' do
 
           context "when the user isn't blocked", :redis do
             it "responds with status 200 OK" do
-              download(path, env) do |response|
+              download(path, **env) do |response|
                 expect(response).to have_gitlab_http_status(:ok)
               end
             end
@@ -94,7 +94,7 @@ describe 'Git HTTP requests' do
             it 'updates the user last activity' do
               expect(user.last_activity_on).to be_nil
 
-              download(path, env) do |_response|
+              download(path, **env) do |_response|
                 expect(user.reload.last_activity_on).to eql(Date.today)
               end
             end
@@ -102,7 +102,7 @@ describe 'Git HTTP requests' do
 
           it "complies with RFC4559" do
             allow_any_instance_of(Repositories::GitHttpController).to receive(:spnego_response_token).and_return("opaque_response_token")
-            download(path, env) do |response|
+            download(path, **env) do |response|
               expect(response.headers['WWW-Authenticate'].split("\n")).to include("Negotiate #{::Base64.strict_encode64('opaque_response_token')}")
             end
           end
@@ -110,14 +110,14 @@ describe 'Git HTTP requests' do
 
         context "when the user doesn't have access to the project" do
           it "responds with status 404 Not Found" do
-            download(path, env) do |response|
+            download(path, **env) do |response|
               expect(response).to have_gitlab_http_status(:not_found)
             end
           end
 
           it "complies with RFC4559" do
             allow_any_instance_of(Repositories::GitHttpController).to receive(:spnego_response_token).and_return("opaque_response_token")
-            download(path, env) do |response|
+            download(path, **env) do |response|
               expect(response.headers['WWW-Authenticate'].split("\n")).to include("Negotiate #{::Base64.strict_encode64('opaque_response_token')}")
             end
           end

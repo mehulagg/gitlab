@@ -1,6 +1,5 @@
 <script>
 import { s__ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 const HEADERS = {
   name: s__('ApprovalRule|Name'),
@@ -10,16 +9,10 @@ const HEADERS = {
 };
 
 export default {
-  mixins: [glFeatureFlagsMixin()],
   props: {
     rules: {
       type: Array,
       required: true,
-    },
-  },
-  computed: {
-    scopedApprovalRules() {
-      return this.glFeatures.scopedApprovalRules;
     },
   },
   HEADERS,
@@ -29,18 +22,10 @@ export default {
 <template>
   <table class="table m-0">
     <thead class="thead-white text-nowrap">
-      <slot
-        name="thead"
-        v-bind="$options.HEADERS"
-        :gl-features-scoped-approval-rules="scopedApprovalRules"
-      ></slot>
+      <slot name="thead" v-bind="$options.HEADERS"></slot>
     </thead>
     <tbody>
-      <slot
-        name="tbody"
-        :rules="rules"
-        :gl-features-scoped-approval-rules="scopedApprovalRules"
-      ></slot>
+      <slot name="tbody" :rules="rules"></slot>
     </tbody>
   </table>
 </template>

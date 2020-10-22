@@ -2,8 +2,8 @@ import '~/flash';
 import $ from 'jquery';
 import Vue from 'vue';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
 import waitForPromises from 'helpers/wait_for_promises';
+import axios from '~/lib/utils/axios_utils';
 import appComponent from '~/groups/components/app.vue';
 import groupFolderComponent from '~/groups/components/group_folder.vue';
 import groupItemComponent from '~/groups/components/group_item.vue';
@@ -216,7 +216,7 @@ describe('AppComponent', () => {
       let groupItem;
 
       beforeEach(() => {
-        groupItem = Object.assign({}, mockParentGroupItem);
+        groupItem = { ...mockParentGroupItem };
         groupItem.isOpen = false;
         groupItem.isChildrenLoading = false;
       });
@@ -271,7 +271,7 @@ describe('AppComponent', () => {
 
     describe('showLeaveGroupModal', () => {
       it('caches candidate group (as props) which is to be left', () => {
-        const group = Object.assign({}, mockParentGroupItem);
+        const group = { ...mockParentGroupItem };
 
         expect(vm.targetGroup).toBe(null);
         expect(vm.targetParentGroup).toBe(null);
@@ -282,7 +282,7 @@ describe('AppComponent', () => {
       });
 
       it('updates props which show modal confirmation dialog', () => {
-        const group = Object.assign({}, mockParentGroupItem);
+        const group = { ...mockParentGroupItem };
 
         expect(vm.showModal).toBe(false);
         expect(vm.groupLeaveConfirmationMessage).toBe('');
@@ -297,7 +297,7 @@ describe('AppComponent', () => {
 
     describe('hideLeaveGroupModal', () => {
       it('hides modal confirmation which is shown before leaving the group', () => {
-        const group = Object.assign({}, mockParentGroupItem);
+        const group = { ...mockParentGroupItem };
         vm.showLeaveGroupModal(group, mockParentGroupItem);
 
         expect(vm.showModal).toBe(true);
@@ -312,7 +312,7 @@ describe('AppComponent', () => {
       let childGroupItem;
 
       beforeEach(() => {
-        groupItem = Object.assign({}, mockParentGroupItem);
+        groupItem = { ...mockParentGroupItem };
         groupItem.children = mockChildren;
         [childGroupItem] = groupItem.children;
         groupItem.isChildrenLoading = false;

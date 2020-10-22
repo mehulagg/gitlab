@@ -19,8 +19,8 @@ module EE
 
     def delete_member_branch_protection
       if user.present? && project.present?
-        project.protected_branches.merge_access_by_user(user).destroy_all # rubocop: disable DestroyAll
-        project.protected_branches.push_access_by_user(user).destroy_all # rubocop: disable DestroyAll
+        project.protected_branches.merge_access_by_user(user).destroy_all # rubocop: disable Cop/DestroyAll
+        project.protected_branches.push_access_by_user(user).destroy_all # rubocop: disable Cop/DestroyAll
       end
     end
 

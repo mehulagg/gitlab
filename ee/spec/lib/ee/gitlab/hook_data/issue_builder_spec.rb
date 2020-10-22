@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Gitlab::HookData::IssueBuilder do
+RSpec.describe Gitlab::HookData::IssueBuilder do
   let_it_be(:issue) { create(:issue) }
   let(:builder) { described_class.new(issue) }
 

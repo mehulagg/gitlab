@@ -10,6 +10,8 @@ module PodLogs
     CACHE_KEY_GET_POD_LOG = 'get_pod_log'
     K8S_NAME_MAX_LENGTH = 253
 
+    self.reactive_cache_work_type = :external_dependency
+
     def id
       cluster.id
     end
@@ -57,6 +59,9 @@ module PodLogs
 
       result[:pod_name] = params['pod_name'].presence
       result[:container_name] = params['container_name'].presence
+
+      return error(_('Invalid pod_name')) if result[:pod_name] && !result[:pod_name].is_a?(String)
+      return error(_('Invalid container_name')) if result[:container_name] && !result[:container_name].is_a?(String)
 
       success(result)
     end

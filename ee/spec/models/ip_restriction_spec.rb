@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe IpRestriction do
+RSpec.describe IpRestriction do
   describe 'relations' do
     it { is_expected.to belong_to(:group) }
   end

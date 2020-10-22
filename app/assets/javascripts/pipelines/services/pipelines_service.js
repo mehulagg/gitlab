@@ -1,5 +1,6 @@
 import axios from '../../lib/utils/axios_utils';
 import Api from '~/api';
+import { validateParams } from '../utils';
 
 export default class PipelinesService {
   /**
@@ -22,10 +23,12 @@ export default class PipelinesService {
     const { scope, page } = data;
     const { CancelToken } = axios;
 
+    const queryParams = { scope, page, ...validateParams(data) };
+
     this.cancelationSource = CancelToken.source();
 
     return axios.get(this.endpoint, {
-      params: { scope, page },
+      params: queryParams,
       cancelToken: this.cancelationSource.token,
     });
   }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe User do
+RSpec.describe User do
   subject(:user) { described_class.new }
 
   describe 'user creation' do
@@ -21,11 +21,12 @@ describe User do
   describe 'associations' do
     subject { build(:user) }
 
-    it { is_expected.to have_many(:reviews) }
     it { is_expected.to have_many(:vulnerability_feedback) }
     it { is_expected.to have_many(:path_locks).dependent(:destroy) }
     it { is_expected.to have_many(:users_security_dashboard_projects) }
     it { is_expected.to have_many(:security_dashboard_projects) }
+    it { is_expected.to have_many(:board_preferences) }
+    it { is_expected.to have_many(:boards_epic_user_preferences).class_name('Boards::EpicUserPreference') }
   end
 
   describe 'nested attributes' do
@@ -236,7 +237,7 @@ describe User do
   end
 
   describe '#forget_me!' do
-    subject { create(:user, remember_created_at: Time.now) }
+    subject { create(:user, remember_created_at: Time.current) }
 
     it 'clears remember_created_at' do
       subject.forget_me!
@@ -315,8 +316,8 @@ describe User do
       context 'when group has custom project templates' do
         let!(:private_project) { create :project, :private, namespace: group, name: 'private_project' }
         let!(:internal_project) { create :project, :internal, namespace: group, name: 'internal_project' }
-        let!(:public_project) { create :project, :public, namespace: group, name: 'public_project' }
-        let!(:public_project_two) { create :project, :public, namespace: group, name: 'public_project_second' }
+        let!(:public_project) { create :project, :metrics_dashboard_enabled, :public, namespace: group, name: 'public_project' }
+        let!(:public_project_two) { create :project, :metrics_dashboard_enabled, :public, namespace: group, name: 'public_project_second' }
 
         it 'returns public projects' do
           expect(user.available_custom_project_templates).to include public_project
@@ -340,8 +341,22 @@ describe User do
           end
         end
 
-        it 'returns internal projects' do
-          expect(user.available_custom_project_templates).to include internal_project
+        context 'returns internal projects if user' do
+          it 'is a member of the project' do
+            expect(user.available_custom_project_templates).not_to include internal_project
+
+            internal_project.add_developer(user)
+
+            expect(user.available_custom_project_templates).to include internal_project
+          end
+
+          it 'is a member of the group' do
+            expect(user.available_custom_project_templates).not_to include internal_project
+
+            group.add_developer(user)
+
+            expect(user.available_custom_project_templates).to include internal_project
+          end
         end
 
         it 'allows to search available project templates by name' do
@@ -368,6 +383,22 @@ describe User do
 
           expect(projects.count).to eq 0
         end
+      end
+
+      it 'returns project with disabled features' do
+        public_project = create(:project, :public, :metrics_dashboard_enabled, namespace: group)
+        disabled_issues_project = create(:project, :public, :metrics_dashboard_enabled, :issues_disabled, namespace: group)
+
+        expect(user.available_custom_project_templates).to include public_project
+        expect(user.available_custom_project_templates).to include disabled_issues_project
+      end
+
+      it 'does not return project with private issues' do
+        accessible_project = create(:project, :public, :metrics_dashboard_enabled, namespace: group)
+        restricted_features_project = create(:project, :public, :metrics_dashboard_enabled, :issues_private, namespace: group)
+
+        expect(user.available_custom_project_templates).to include accessible_project
+        expect(user.available_custom_project_templates).not_to include restricted_features_project
       end
     end
   end
@@ -454,12 +485,10 @@ describe User do
           end
 
           it 'returns groups on gold or silver plans' do
-            Timecop.freeze(GroupsWithTemplatesFinder::CUT_OFF_DATE + 1.day) do
-              groups = user.available_subgroups_with_custom_project_templates
+            groups = user.available_subgroups_with_custom_project_templates
 
-              expect(groups.size).to eq(1)
-              expect(groups.map(&:name)).to include('subgroup-2')
-            end
+            expect(groups.size).to eq(1)
+            expect(groups.map(&:name)).to include('subgroup-2')
           end
         end
       end
@@ -564,6 +593,42 @@ describe User do
 
     context 'when user has no linked managing group' do
       it { is_expected.to eq false }
+    end
+  end
+
+  describe '#managed_by?' do
+    let(:group) { create :group }
+    let(:owner) { create :user }
+    let(:member1) { create :user }
+    let(:member2) { create :user }
+
+    before do
+      group.add_owner(owner)
+      group.add_developer(member1)
+      group.add_developer(member2)
+    end
+
+    context 'when a normal user account' do
+      it 'returns false' do
+        expect(member1.managed_by?(owner)).to be_falsey
+        expect(member1.managed_by?(member2)).to be_falsey
+      end
+    end
+
+    context 'when a group managed account' do
+      let(:group) { create :group_with_managed_accounts }
+
+      before do
+        member1.update(managing_group: group)
+      end
+
+      it 'returns true with group managed account owner' do
+        expect(member1.managed_by?(owner)).to be_truthy
+      end
+
+      it 'returns false with a regular user account' do
+        expect(member1.managed_by?(member2)).to be_falsey
+      end
     end
   end
 
@@ -842,123 +907,14 @@ describe User do
     end
   end
 
-  describe '#ab_feature_enabled?' do
-    let(:experiment_user) { create(:user) }
-    let(:new_user) { create(:user) }
-    let(:new_fresh_user) { create(:user) }
-    let(:control_user) { create(:user) }
-    let(:users_of_different_groups) { [experiment_user, new_user, new_fresh_user, control_user] }
-
-    before do
-      create(:user_preference, user: experiment_user, feature_filter_type: UserPreference::FEATURE_FILTER_EXPERIMENT)
-      create(:user_preference, user: new_user, feature_filter_type: UserPreference::FEATURE_FILTER_UNKNOWN)
-      create(:user_preference, user: new_fresh_user, feature_filter_type: nil)
-      create(:user_preference, user: control_user, feature_filter_type: UserPreference::FEATURE_FILTER_CONTROL)
-    end
-
-    context 'when not on Gitlab.com' do
-      before do
-        allow(Gitlab).to receive(:com?).and_return(false)
-      end
-
-      it 'returns false' do
-        users_of_different_groups.each do |user|
-          expect(user.ab_feature_enabled?(:discover_security, percentage: 100)).to eq(false)
-        end
-      end
-    end
-
-    context 'when on Gitlab.com' do
-      before do
-        allow(Gitlab).to receive(:com?).and_return(true)
-      end
-
-      context 'when on a secondary Geo' do
-        before do
-          allow(Gitlab::Geo).to receive(:secondary?).and_return(true)
-        end
-
-        it 'returns false' do
-          users_of_different_groups.each do |user|
-            expect(user.ab_feature_enabled?(:discover_security, percentage: 100)).to eq(false)
-          end
-        end
-      end
-
-      context 'when not on a secondary Geo' do
-        before do
-          allow(Gitlab::Geo).to receive(:secondary?).and_return(false)
-        end
-
-        context 'for any feature except discover_security' do
-          it 'raises runtime error' do
-            users_of_different_groups.each do |user|
-              expect do
-                user.ab_feature_enabled?(:any_other_feature, percentage: 100)
-              end.to raise_error(RuntimeError, 'Currently only discover_security feature is supported')
-            end
-          end
-        end
-
-        context 'when discover_security feature flag is disabled' do
-          before do
-            stub_feature_flags(discover_security: false)
-          end
-
-          it 'returns false' do
-            users_of_different_groups.each do |user|
-              expect(user.ab_feature_enabled?(:discover_security, percentage: 100)).to eq(false)
-            end
-          end
-        end
-
-        context 'when discover_security feature flag is enabled' do
-          it 'returns false when in control group' do
-            expect(control_user.ab_feature_enabled?(:discover_security, percentage: 100)).to eq(false)
-          end
-
-          it 'returns true for experiment group' do
-            expect(experiment_user.ab_feature_enabled?(:discover_security, percentage: 100)).to eq(true)
-          end
-
-          it 'assigns to control or experiment group when feature_filter_type is nil' do
-            new_fresh_user.ab_feature_enabled?(:discover_security, percentage: 100)
-
-            expect(new_fresh_user.user_preference.feature_filter_type).not_to eq(UserPreference::FEATURE_FILTER_UNKNOWN)
-          end
-
-          it 'assigns to control or experiment group when feature_filter_type is zero' do
-            new_user.ab_feature_enabled?(:discover_security, percentage: 100)
-
-            expect(new_user.user_preference.feature_filter_type).not_to eq(UserPreference::FEATURE_FILTER_UNKNOWN)
-          end
-
-          it 'returns false for zero percentage' do
-            expect(experiment_user.ab_feature_enabled?(:discover_security, percentage: 0)).to eq(false)
-          end
-
-          it 'returns false when no percentage is provided' do
-            expect(experiment_user.ab_feature_enabled?(:discover_security)).to eq(false)
-          end
-
-          it 'returns true when 100% control percentage is provided' do
-            Feature.get(:discover_security_control).enable_percentage_of_time(100)
-
-            expect(experiment_user.ab_feature_enabled?(:discover_security)).to eq(true)
-            expect(experiment_user.user_preference.feature_filter_type).to eq(UserPreference::FEATURE_FILTER_EXPERIMENT)
-          end
-        end
-      end
-    end
-  end
-
-  describe '#managed_free_namespaces' do
+  describe '#manageable_groups_eligible_for_subscription' do
     let_it_be(:user) { create(:user) }
     let_it_be(:licensed_group) { create(:group, gitlab_subscription: create(:gitlab_subscription, :bronze)) }
-    let_it_be(:free_group_z) { create(:group, name: 'Z', gitlab_subscription: create(:gitlab_subscription, :free)) }
-    let_it_be(:free_group_a) { create(:group, name: 'A', gitlab_subscription: create(:gitlab_subscription, :free)) }
+    let_it_be(:free_group_z) { create(:group, name: 'AZ', gitlab_subscription: create(:gitlab_subscription, :free)) }
+    let_it_be(:free_group_a) { create(:group, name: 'AA', gitlab_subscription: create(:gitlab_subscription, :free)) }
+    let_it_be(:sub_group) { create(:group, name: 'SubGroup', parent: free_group_a) }
 
-    subject { user.managed_free_namespaces }
+    subject { user.manageable_groups_eligible_for_subscription }
 
     context 'user with no groups' do
       it { is_expected.to eq [] }
@@ -1003,6 +959,121 @@ describe User do
       end
 
       it { is_expected.to eq [free_group_a, free_group_z] }
+
+      it { is_expected.not_to include(sub_group) }
+    end
+  end
+
+  describe '#manageable_groups_eligible_for_trial' do
+    let_it_be(:user) { create :user }
+    let_it_be(:non_trialed_group_z) { create :group, name: 'Zeta', gitlab_subscription: create(:gitlab_subscription, :free) }
+    let_it_be(:non_trialed_group_a) { create :group, name: 'Alpha', gitlab_subscription: create(:gitlab_subscription, :free) }
+    let_it_be(:trialed_group) { create :group, name: 'Omitted', gitlab_subscription: create(:gitlab_subscription, :free, trial: true) }
+    let_it_be(:non_trialed_subgroup) { create :group, name: 'Sub-group', gitlab_subscription: create(:gitlab_subscription, :free), parent: non_trialed_group_a }
+
+    subject { user.manageable_groups_eligible_for_trial }
+
+    context 'user with no groups' do
+      it { is_expected.to eq [] }
+    end
+
+    context 'owner of an already-trialed group' do
+      before do
+        trialed_group.add_owner(user)
+      end
+
+      it { is_expected.not_to include trialed_group }
+    end
+
+    context 'guest of a non-trialed group' do
+      before do
+        non_trialed_group_a.add_guest(user)
+      end
+
+      it { is_expected.not_to include non_trialed_group_a }
+    end
+
+    context 'developer of a non-trialed group' do
+      before do
+        non_trialed_group_a.add_developer(user)
+      end
+
+      it { is_expected.not_to include non_trialed_group_a }
+    end
+
+    context 'maintainer of a non-trialed group' do
+      before do
+        non_trialed_group_a.add_maintainer(user)
+      end
+
+      it { is_expected.to include non_trialed_group_a }
+    end
+
+    context 'owner of 2 non-trialed groups' do
+      before do
+        non_trialed_group_z.add_owner(user)
+        non_trialed_group_a.add_owner(user)
+      end
+
+      it { is_expected.to eq [non_trialed_group_a, non_trialed_group_z] }
+    end
+
+    context 'owner of a top-level group with a sub-group' do
+      before do
+        non_trialed_group_a.add_owner(user)
+      end
+
+      it { is_expected.to eq [non_trialed_group_a] }
+    end
+  end
+
+  describe '#authorized_groups' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:private_group) { create(:group) }
+    let_it_be(:child_group) { create(:group, parent: private_group) }
+    let_it_be(:minimal_access_group) { create(:group) }
+
+    let_it_be(:project_group) { create(:group) }
+    let_it_be(:project) { create(:project, group: project_group) }
+
+    before do
+      private_group.add_user(user, Gitlab::Access::MAINTAINER)
+      project.add_maintainer(user)
+      create(:group_member, :minimal_access, user: user, source: minimal_access_group)
+    end
+
+    subject { user.authorized_groups }
+
+    context 'with minimal access role feature unavailable' do
+      it { is_expected.to contain_exactly private_group, project_group }
+    end
+
+    context 'with minimal access feature available' do
+      before do
+        stub_licensed_features(minimal_access_role: true)
+      end
+
+      context 'feature turned on for all groups' do
+        before do
+          allow(Gitlab::CurrentSettings)
+            .to receive(:should_check_namespace_plan?)
+            .and_return(false)
+        end
+
+        it { is_expected.to contain_exactly private_group, project_group, minimal_access_group }
+      end
+
+      context 'feature available for specific groups only' do
+        before do
+          allow(Gitlab::CurrentSettings)
+            .to receive(:should_check_namespace_plan?)
+            .and_return(true)
+          create(:gitlab_subscription, :gold, namespace: minimal_access_group)
+          create(:group_member, :minimal_access, user: user, source: create(:group))
+        end
+
+        it { is_expected.to contain_exactly private_group, project_group, minimal_access_group }
+      end
     end
   end
 
@@ -1016,7 +1087,6 @@ describe User do
 
       where(:user_type, :expected_result) do
         'service_user'      | true
-        'support_bot'       | false
         'visual_review_bot' | false
       end
 
@@ -1101,70 +1171,196 @@ describe User do
 
     subject { user.gitlab_employee? }
 
-    where(:email, :is_com, :expected_result) do
-      'test@gitlab.com'   | true  | true
-      'test@example.com'  | true  | false
-      'test@gitlab.com'   | false | false
-      'test@example.com'  | false | false
-    end
+    let_it_be(:gitlab_group) { create(:group, name: 'gitlab-com') }
+    let_it_be(:random_group) { create(:group, name: 'random-group') }
 
-    with_them do
-      let(:user) { build(:user, email: email) }
-
+    context 'based on group membership' do
       before do
         allow(Gitlab).to receive(:com?).and_return(is_com)
       end
 
-      it { is_expected.to be expected_result }
+      context 'when user belongs to gitlab-com group' do
+        where(:is_com, :expected_result) do
+          true  | true
+          false | false
+        end
+
+        with_them do
+          let(:user) { create(:user) }
+
+          before do
+            gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
+          end
+
+          it { is_expected.to be expected_result }
+        end
+      end
+
+      context 'when user does not belongs to gitlab-com group' do
+        where(:is_com, :expected_result) do
+          true  | false
+          false | false
+        end
+
+        with_them do
+          let(:user) { create(:user) }
+
+          before do
+            random_group.add_user(user, Gitlab::Access::DEVELOPER)
+          end
+
+          it { is_expected.to be expected_result }
+        end
+      end
     end
 
-    context 'when email is of Gitlab and is not confirmed' do
-      let(:user) { build(:user, email: 'test@gitlab.com', confirmed_at: nil) }
+    context 'based on user type' do
+      before do
+        allow(Gitlab).to receive(:com?).and_return(true)
+        gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
+      end
 
-      it { is_expected.to be false }
-    end
+      context 'when user is a bot' do
+        let(:user) { create(:user, user_type: :alert_bot) }
 
-    context 'when user is a bot' do
-      let(:user) { build(:user, email: 'test@gitlab.com', user_type: :alert_bot) }
+        it { is_expected.to be false }
+      end
 
-      it { is_expected.to be false }
-    end
+      context 'when user is ghost' do
+        let(:user) { create(:user, :ghost) }
 
-    context 'when user is ghost' do
-      let(:user) { build(:user, :ghost, email: 'test@gitlab.com') }
-
-      it { is_expected.to be false }
+        it { is_expected.to be false }
+      end
     end
 
     context 'when `:gitlab_employee_badge` feature flag is disabled' do
-      let(:user) { build(:user, email: 'test@gitlab.com') }
+      let(:user) { create(:user) }
 
       before do
+        allow(Gitlab).to receive(:com?).and_return(true)
         stub_feature_flags(gitlab_employee_badge: false)
+        gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
       end
 
       it { is_expected.to be false }
     end
   end
 
-  describe '#organization' do
-    using RSpec::Parameterized::TableSyntax
+  describe '#gitlab_bot?' do
+    subject { user.gitlab_bot? }
 
-    let(:user) { build(:user, organization: 'ACME') }
+    let_it_be(:gitlab_group) { create(:group, name: 'gitlab-com') }
+    let_it_be(:random_group) { create(:group, name: 'random-group') }
 
-    subject { user.organization }
+    context 'based on group membership' do
+      context 'when user belongs to gitlab-com group' do
+        let(:user) { create(:user, user_type: :alert_bot) }
 
-    where(:gitlab_employee?, :expected_result) do
-      true  | 'GitLab'
-      false | 'ACME'
-    end
+        before do
+          allow(Gitlab).to receive(:com?).and_return(true)
+          gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
+        end
 
-    with_them do
-      before do
-        allow(user).to receive(:gitlab_employee?).and_return(gitlab_employee?)
+        it { is_expected.to be true }
       end
 
-      it { is_expected.to eql(expected_result) }
+      context 'when user does not belongs to gitlab-com group' do
+        let(:user) { create(:user, user_type: :alert_bot) }
+
+        before do
+          allow(Gitlab).to receive(:com?).and_return(true)
+          random_group.add_user(user, Gitlab::Access::DEVELOPER)
+        end
+
+        it { is_expected.to be false }
+      end
+    end
+
+    context 'based on user type' do
+      before do
+        allow(Gitlab).to receive(:com?).and_return(true)
+        gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
+      end
+
+      context 'when user is a bot' do
+        let(:user) { create(:user, user_type: :alert_bot) }
+
+        it { is_expected.to be true }
+      end
+
+      context 'when user is a human' do
+        let(:user) { create(:user, user_type: :human) }
+
+        it { is_expected.to be false }
+      end
+
+      context 'when user is ghost' do
+        let(:user) { create(:user, :ghost) }
+
+        it { is_expected.to be false }
+      end
+    end
+  end
+
+  describe '#gitlab_service_user?' do
+    subject { user.gitlab_service_user? }
+
+    let_it_be(:gitlab_group) { create(:group, name: 'gitlab-com') }
+    let_it_be(:random_group) { create(:group, name: 'random-group') }
+
+    context 'based on group membership' do
+      context 'when user belongs to gitlab-com group' do
+        let(:user) { create(:user, user_type: :service_user) }
+
+        before do
+          allow(Gitlab).to receive(:com?).and_return(true)
+          gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
+        end
+
+        it { is_expected.to be true }
+      end
+
+      context 'when user does not belong to gitlab-com group' do
+        let(:user) { create(:user, user_type: :service_user) }
+
+        before do
+          allow(Gitlab).to receive(:com?).and_return(true)
+          random_group.add_user(user, Gitlab::Access::DEVELOPER)
+        end
+
+        it { is_expected.to be false }
+      end
+    end
+
+    context 'based on user type' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:is_com, :user_type, :answer) do
+        true  | :service_user | true
+        true  | :alert_bot    | false
+        true  | :human        | false
+        true  | :ghost        | false
+        false | :service_user | false
+        false | :alert_bot    | false
+        false | :human        | false
+        false | :ghost        | false
+      end
+
+      with_them do
+        before do
+          allow(Gitlab).to receive(:com?).and_return(is_com)
+        end
+
+        let(:user) do
+          user = create(:user, user_type: user_type)
+          gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
+          user
+        end
+
+        it "returns if the user is a GitLab-owned service user" do
+          expect(subject).to be answer
+        end
+      end
     end
   end
 
@@ -1175,6 +1371,73 @@ describe User do
 
     it 'returns an instance of InstanceSecurityDashboard for the user' do
       expect(security_dashboard).to be_a(InstanceSecurityDashboard)
+    end
+  end
+
+  describe '#owns_upgradeable_namespace?' do
+    let_it_be(:user) { create(:user) }
+
+    subject { user.owns_upgradeable_namespace? }
+
+    using RSpec::Parameterized::TableSyntax
+
+    where(:hosted_plan, :result) do
+      :bronze_plan    | true
+      :silver_plan    | true
+      :gold_plan      | false
+      :free_plan      | false
+      :default_plan   | false
+    end
+
+    with_them do
+      it 'returns the correct result for each plan on a personal namespace' do
+        plan = create(hosted_plan)
+        create(:gitlab_subscription, namespace: user.namespace, hosted_plan: plan)
+
+        expect(subject).to be result
+      end
+
+      it 'returns the correct result for each plan on a group owned by the user' do
+        create(:group_with_plan, plan: hosted_plan).add_owner(user)
+
+        expect(subject).to be result
+      end
+    end
+
+    it 'returns false when there is no subscription for the personal namespace' do
+      expect(subject).to be false
+    end
+
+    it 'returns false when the user has multiple groups and any group has gold' do
+      create(:group_with_plan, plan: :bronze_plan).add_owner(user)
+      create(:group_with_plan, plan: :silver_plan).add_owner(user)
+      create(:group_with_plan, plan: :gold_plan).add_owner(user)
+
+      user.namespace.plans.reload
+
+      expect(subject).to be false
+    end
+  end
+
+  describe '#find_or_init_board_epic_preference' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:board) { create(:board) }
+    let_it_be(:epic) { create(:epic) }
+
+    subject(:preference) { user.find_or_init_board_epic_preference(board_id: board.id, epic_id: epic.id) }
+
+    it 'returns new board epic user preference' do
+      expect(preference.persisted?).to be_falsey
+      expect(preference.user).to eq(user)
+    end
+
+    context 'when preference already exists' do
+      let_it_be(:epic_user_preference) { create(:epic_user_preference, board: board, epic: epic, user: user) }
+
+      it 'returns the existing board' do
+        expect(preference.persisted?).to be_truthy
+        expect(preference).to eq(epic_user_preference)
+      end
     end
   end
 end

@@ -2,8 +2,10 @@
 
 require 'spec_helper'
 
-describe Dashboard::ProjectsController do
+RSpec.describe Dashboard::ProjectsController, :aggregate_failures do
   include ExternalAuthorizationServiceHelpers
+
+  let_it_be(:user) { create(:user) }
 
   describe '#index' do
     context 'user not logged in' do
@@ -11,9 +13,9 @@ describe Dashboard::ProjectsController do
     end
 
     context 'user logged in' do
-      let_it_be(:user) { create(:user) }
       let_it_be(:project) { create(:project) }
       let_it_be(:project2) { create(:project) }
+      let(:projects) { [project, project2] }
 
       before_all do
         project.add_developer(user)
@@ -40,7 +42,7 @@ describe Dashboard::ProjectsController do
 
         get :index
 
-        expect(assigns(:projects)).to eq([project, project2])
+        expect(assigns(:projects)).to eq(projects)
       end
 
       context 'project sorting' do
@@ -65,13 +67,25 @@ describe Dashboard::ProjectsController do
           it_behaves_like 'search and sort parameters', sort
         end
       end
+
+      context 'with deleted project' do
+        let!(:pending_delete_project) do
+          project.tap { |p| p.update!(pending_delete: true) }
+        end
+
+        it 'does not display deleted project' do
+          get :index
+          projects_result = assigns(:projects)
+
+          expect(projects_result).not_to include(pending_delete_project)
+          expect(projects_result).to include(project2)
+        end
+      end
     end
   end
 
   context 'json requests' do
     render_views
-
-    let(:user) { create(:user) }
 
     before do
       sign_in(user)
@@ -114,16 +128,14 @@ describe Dashboard::ProjectsController do
   end
 
   context 'atom requests' do
-    let(:user) { create(:user) }
-
     before do
       sign_in(user)
     end
 
     describe '#index' do
-      context 'project pagination' do
-        let(:projects) { create_list(:project, 2, creator: user) }
+      let_it_be(:projects) { create_list(:project, 2, creator: user) }
 
+      context 'project pagination' do
         before do
           allow(Kaminari.config).to receive(:default_per_page).and_return(1)
 
@@ -136,6 +148,52 @@ describe Dashboard::ProjectsController do
           get :index, format: :atom
 
           expect(assigns(:events).count).to eq(2)
+        end
+      end
+
+      describe 'rendering' do
+        include DesignManagementTestHelpers
+        render_views
+
+        let(:project) { projects.first }
+        let!(:design_event) { create(:design_event, project: project) }
+        let!(:wiki_page_event) { create(:wiki_page_event, project: project) }
+        let!(:issue_event) { create(:closed_issue_event, project: project) }
+        let(:design) { design_event.design }
+        let(:wiki_page) { wiki_page_event.wiki_page }
+        let(:issue) { issue_event.issue }
+
+        before do
+          enable_design_management
+          project.add_developer(user)
+        end
+
+        it 'renders all kinds of event without error' do
+          get :index, format: :atom
+
+          expect(assigns(:events)).to include(design_event, wiki_page_event, issue_event)
+          expect(response).to render_template('dashboard/projects/index')
+          expect(response.body).to include(
+            "uploaded design #{design.to_reference}",
+            "created wiki page #{wiki_page.title}",
+            "joined project #{project.full_name}",
+            "closed issue #{issue.to_reference}"
+          )
+        end
+
+        context 'with deleted project' do
+          let(:pending_deleted_project) { projects.last.tap { |p| p.update!(pending_delete: true) } }
+
+          before do
+            pending_deleted_project.add_developer(user)
+          end
+
+          it 'does not display deleted project' do
+            get :index, format: :atom
+
+            expect(response.body).not_to include(pending_deleted_project.full_name)
+            expect(response.body).to include(project.full_name)
+          end
         end
       end
     end

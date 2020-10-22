@@ -2,11 +2,12 @@
 
 require 'spec_helper'
 
-describe StatusPage::UnpublishDetailsService do
+RSpec.describe StatusPage::UnpublishDetailsService do
   let_it_be(:project, refind: true) { create(:project) }
   let(:issue) { instance_double(Issue, iid: incident_id) }
   let(:incident_id) { 1 }
-  let(:key) { StatusPage::Storage.details_path(incident_id) }
+  let(:key) { Gitlab::StatusPage::Storage.details_path(incident_id) }
+  let(:image_uploads_path) { Gitlab::StatusPage::Storage.uploads_path(issue.iid) }
 
   let(:service) { described_class.new(project: project) }
 
@@ -14,7 +15,7 @@ describe StatusPage::UnpublishDetailsService do
 
   describe '#execute' do
     let(:status_page_setting_enabled) { true }
-    let(:storage_client) { instance_double(StatusPage::Storage::S3Client) }
+    let(:storage_client) { instance_double(Gitlab::StatusPage::Storage::S3Client) }
 
     let(:status_page_setting) do
       instance_double(StatusPage::ProjectSetting, enabled?: status_page_setting_enabled,
@@ -26,34 +27,68 @@ describe StatusPage::UnpublishDetailsService do
 
       allow(project).to receive(:status_page_setting)
         .and_return(status_page_setting)
+
+      allow(StatusPage::PublishedIncident).to receive(:find_by)
+        .with(issue: issue)
+        .and_return(nil)
     end
 
     context 'when deletion succeeds' do
       before do
         allow(storage_client).to receive(:delete_object).with(key)
+        allow(storage_client).to receive(:recursive_delete).with(image_uploads_path)
       end
 
-      it 'removes details from CDN' do
+      it 'removes files from the CDN (incident first)' do
+        expect(storage_client).to receive(:delete_object).ordered
+        expect(storage_client).to receive(:recursive_delete).with(image_uploads_path).ordered
+
+        result
+      end
+
+      it 'returns service success' do
         expect(result).to be_success
         expect(result.payload).to eq(object_key: key)
       end
+
+      it 'untracks the issue' do
+        expect(StatusPage::PublishedIncident).to receive(:untrack).with(issue)
+        expect(Gitlab::StatusPage::UsageDataCounters::IncidentCounter).to receive(:count).with(:unpublishes).once
+
+        result
+      end
     end
 
-    context 'when upload fails due to exception' do
+    context 'when delete fails due to exception' do
       let(:bucket) { 'bucket_name' }
       let(:error) { StandardError.new }
 
       let(:exception) do
-        StatusPage::Storage::Error.new(bucket: bucket, error: error)
+        Gitlab::StatusPage::Storage::Error.new(bucket: bucket, error: error)
       end
 
-      before do
-        allow(storage_client).to receive(:delete_object).with(key)
-          .and_raise(exception)
+      context 'when json delete fails' do
+        before do
+          allow(storage_client).to receive(:delete_object).with(key)
+            .and_raise(exception)
+          allow(storage_client).to receive(:recursive_delete)
+        end
+
+        it 'propagates the exception' do
+          expect { result }.to raise_error(exception)
+        end
       end
 
-      it 'propagates the exception' do
-        expect { result }.to raise_error(exception)
+      context 'when image delete fails' do
+        before do
+          allow(storage_client).to receive(:delete_object)
+          allow(storage_client).to receive(:recursive_delete).with(image_uploads_path)
+            .and_raise(exception)
+        end
+
+        it 'propagates the exception' do
+          expect { result }.to raise_error(exception)
+        end
       end
     end
 

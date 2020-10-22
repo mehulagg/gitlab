@@ -2,16 +2,31 @@
 
 require 'spec_helper'
 
-describe GeoRepositoryDestroyWorker do
+RSpec.describe GeoRepositoryDestroyWorker, :geo do
   describe '#perform' do
-    it 'delegates project removal to Geo::RepositoryDestroyService' do
-      project = create(:project)
+    let(:project) { create(:project) }
 
-      expect_next_instance_of(Geo::RepositoryDestroyService) do |instance|
-        expect(instance).to receive(:execute)
+    context 'with an existing project' do
+      it 'delegates project removal to Geo::RepositoryDestroyService' do
+        expect_next_instance_of(Geo::RepositoryDestroyService) do |instance|
+          expect(instance).to receive(:execute)
+        end
+
+        subject.perform(project.id, project.name, project.path, 'default')
       end
+    end
 
-      described_class.new.perform(project.id, project.name, project.path, 'default')
+    context 'with project ID from an orphaned registry' do
+      it 'delegates project removal to Geo::RepositoryDestroyService' do
+        registry = create(:geo_project_registry, project_id: project.id)
+        project.delete
+
+        expect_next_instance_of(Geo::RepositoryDestroyService) do |instance|
+          expect(instance).to receive(:execute)
+        end
+
+        subject.perform(registry.project_id)
+      end
     end
   end
 end

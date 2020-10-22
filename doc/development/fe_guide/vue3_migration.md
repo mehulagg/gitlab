@@ -12,11 +12,11 @@ Filters [are removed](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0015
 
 Component's computed properties / methods or external helpers.
 
-## Event bus
+## Event hub
 
 **Why?**
 
-`$on` and `$off` methods [are removed](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0020-events-api-change.md) from the Vue instance, so in Vue 3 it can't be used to create an event bus.
+`$on`, `$once`, and `$off` methods [are removed](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0020-events-api-change.md) from the Vue instance, so in Vue 3 it can't be used to create an event hub.
 
 **What to use instead**
 
@@ -43,7 +43,22 @@ emitter.on('foo', onFoo)   // listen
 emitter.off('foo', onFoo)  // unlisten
 ```
 
-## <template functional>
+**Event hub factory**
+
+To make it easier for you to migrate existing event hubs to the new recommended approach, or simply
+to create new ones, we have created a factory that you can use to instantiate a new mitt-based
+event hub.
+
+```javascript
+import createEventHub from '~/helpers/event_hub_factory';
+
+export default createEventHub();
+```
+
+Event hubs created with the factory expose the same methods as Vue 2 event hubs (`$on`, `$once`, `$off` and
+`$emit`), making them backward compatible with our previous approach.
+
+## \<template functional>
 
 **Why?**
 
@@ -60,6 +75,9 @@ const FunctionalComp = (props, slots) => {
   return h('div', `Hello! ${props.name}`)
 }
 ```
+
+NOTE: **Note:**
+It is not recommended to replace stateful components with functional components unless you absolutely need a performance improvement right now. In Vue 3, performance gains for functional components will be negligible.
 
 ## Old slots syntax with `slot` attribute
 
@@ -96,7 +114,7 @@ export default {
 </template>
 ```
 
-```js
+```javascript
 // MyAwesomeComponent.spec.js
 
 import SomeChildComponent from '~/some_child_component.vue'

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApprovalRules::ProjectRuleDestroyService do
+RSpec.describe ApprovalRules::ProjectRuleDestroyService do
   let(:project) { create(:project, :repository) }
   let(:merge_request) { create(:merge_request, source_project: project, target_project: project) }
 

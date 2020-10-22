@@ -8,6 +8,7 @@ FactoryBot.define do
   factory :vulnerabilities_scanner, class: 'Vulnerabilities::Scanner' do
     sequence(:external_id) { generate(:vulnerability_scanner_external_id) }
     name { 'Find Security Bugs' }
+    vendor { 'Security Vendor' }
     project
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Commit do
+RSpec.describe Commit do
   it_behaves_like 'a mentionable with EE-specific mentions' do
     subject { create(:project, :repository).commit }
 

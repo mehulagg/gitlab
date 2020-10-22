@@ -1,5 +1,0 @@
----
-title: Move Clusters Application Ingress to batch counting
-merge_request: 28999
-author:
-type: performance

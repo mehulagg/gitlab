@@ -12,29 +12,29 @@ module Gitlab
       def clean(io)
         structure = original_schema.dup
 
-        # Postgres compat fix for PG 9.6 (which doesn't support (AS datatype) syntax for sequences)
-        structure.gsub!(/CREATE SEQUENCE [^.]+\.\S+\n(\s+AS integer\n)/) { |m| m.gsub(Regexp.last_match[1], '') }
-
-        # Also a PG 9.6 compatibility fix, see below.
-        structure.gsub!(/^CREATE EXTENSION IF NOT EXISTS plpgsql.*/, '')
-        structure.gsub!(/^COMMENT ON EXTENSION.*/, '')
-
         # Remove noise
+        structure.gsub!(/^COMMENT ON EXTENSION.*/, '')
         structure.gsub!(/^SET.+/, '')
         structure.gsub!(/^SELECT pg_catalog\.set_config\('search_path'.+/, '')
         structure.gsub!(/^--.*/, "\n")
+
+        # We typically don't assume we're working with the public schema.
+        # pg_dump uses fully qualified object names though, since we have multiple schemas
+        # in the database.
+        #
+        # The intention here is to not introduce an assumption about the standard schema,
+        # unless we have a good reason to do so.
+        structure.gsub!(/public\.(\w+)/, '\1')
+        structure.gsub!(/CREATE EXTENSION IF NOT EXISTS (\w+) WITH SCHEMA public;/, 'CREATE EXTENSION IF NOT EXISTS \1;')
+
         structure.gsub!(/\n{3,}/, "\n\n")
 
-        io << "SET search_path=public;\n\n"
-
-        # Adding plpgsql explicitly is again a compatibility fix for PG 9.6
-        # In more recent versions of pg_dump, the extension isn't explicitly dumped anymore.
-        # We use PG 9.6 still on CI and for schema checks - here this is still the case.
-        io << <<~SQL.strip
-          CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-        SQL
-
-        io << structure
+        io << structure.strip
+        io << <<~MSG
+          -- schema_migrations.version information is no longer stored in this file,
+          -- but instead tracked in the db/schema_migrations directory
+          -- see https://gitlab.com/gitlab-org/gitlab/-/issues/218590 for details
+        MSG
 
         nil
       end

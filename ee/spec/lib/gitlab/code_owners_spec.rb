@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::CodeOwners do
+RSpec.describe Gitlab::CodeOwners do
   include FakeBlobHelpers
 
   let!(:code_owner) { create(:user, username: 'owner-1') }
@@ -26,7 +26,6 @@ describe Gitlab::CodeOwners do
     context 'when the feature is available' do
       before do
         stub_licensed_features(code_owners: true)
-        stub_feature_flags(sectional_codeowners: false)
       end
 
       it 'returns users for a blob' do
@@ -60,7 +59,6 @@ describe Gitlab::CodeOwners do
 
     before do
       stub_licensed_features(code_owners: true)
-      stub_feature_flags(sectional_codeowners: false)
     end
 
     it "return equivalent results" do
@@ -91,7 +89,6 @@ describe Gitlab::CodeOwners do
     context 'when the feature is available' do
       before do
         stub_licensed_features(code_owners: true)
-        stub_feature_flags(sectional_codeowners: false)
       end
 
       it 'returns owners for merge request' do

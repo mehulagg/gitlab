@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'admin/groups/_form' do
+RSpec.describe 'admin/groups/_form' do
   let_it_be(:admin) { create(:admin) }
 
   before do

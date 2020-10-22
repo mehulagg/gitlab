@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'issue boards', :js do
+RSpec.describe 'issue boards', :js do
   include DragTo
 
   let(:user) { create(:user) }
@@ -10,19 +10,6 @@ describe 'issue boards', :js do
   let!(:board) { create(:board, project: project) }
   let(:milestone) { create(:milestone, title: "v2.2", project: project) }
   let!(:board_with_milestone) { create(:board, project: project, milestone: milestone) }
-
-  context 'issue board focus mode' do
-    before do
-      project.add_developer(user)
-      login_as(user)
-    end
-
-    it 'shows the button' do
-      visit_board_page
-
-      expect(page).to have_link('Toggle focus mode')
-    end
-  end
 
   context 'with group and reporter' do
     let(:group) { create(:group) }
@@ -83,6 +70,50 @@ describe 'issue boards', :js do
         expect(page).to have_css('.dropdown-menu.js-tab-container-labels')
         expect(page).to have_content('Create lists from labels. Issues with that label appear in that list.')
         expect(page).not_to have_css('.js-tab-button-assignees')
+      end
+    end
+  end
+
+  context 'swimlanes dropdown' do
+    context 'feature flag on' do
+      before do
+        stub_licensed_features(swimlanes: true)
+        stub_feature_flags(boards_with_swimlanes: true, swimlanes: true)
+      end
+
+      it 'does not show Group by dropdown when user is not logged in' do
+        visit_board_page
+
+        expect(page).to have_css('.filtered-search-block')
+        expect(page).not_to have_css('.board-swimlanes-toggle-wrapper')
+      end
+
+      it 'shows Group by dropdown when user is logged in' do
+        login_as(user)
+        visit_board_page
+
+        expect(page).to have_css('.board-swimlanes-toggle-wrapper')
+      end
+    end
+
+    context 'feature flag off' do
+      before do
+        stub_feature_flags(boards_with_swimlanes: false, swimlanes: false)
+      end
+
+      it 'does not show Group by dropdown when user is not logged in' do
+        visit_board_page
+
+        expect(page).to have_css('.filtered-search-block')
+        expect(page).not_to have_css('.board-swimlanes-toggle-wrapper')
+      end
+
+      it 'does not show Group by dropdown when user is logged in' do
+        login_as(user)
+        visit_board_page
+
+        expect(page).to have_css('.filtered-search-block')
+        expect(page).not_to have_css('.board-swimlanes-toggle-wrapper')
       end
     end
   end

@@ -54,7 +54,7 @@ module Gitlab
         end
 
         def ndjson_relation_reader
-          return unless Feature.enabled?(:project_import_ndjson, project.namespace)
+          return unless Feature.enabled?(:project_import_ndjson, project.namespace, default_enabled: true)
 
           ImportExport::JSON::NdjsonReader.new(
             File.join(shared.export_path, 'tree')
@@ -70,7 +70,7 @@ module Gitlab
         end
 
         def relation_tree_restorer
-          @relation_tree_restorer ||= RelationTreeRestorer.new(
+          @relation_tree_restorer ||= relation_tree_restorer_class.new(
             user: @user,
             shared: @shared,
             relation_reader: relation_reader,
@@ -82,6 +82,14 @@ module Gitlab
             importable_attributes: @project_attributes,
             importable_path: importable_path
           )
+        end
+
+        def relation_tree_restorer_class
+          sample_data_template? ? Sample::SampleDataRelationTreeRestorer : RelationTreeRestorer
+        end
+
+        def sample_data_template?
+          @project&.import_data&.data&.dig('sample_data')
         end
 
         def members_mapper

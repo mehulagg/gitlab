@@ -2,94 +2,85 @@
 
 require 'spec_helper'
 
-describe IncidentManagement::ProcessAlertWorker do
+RSpec.describe IncidentManagement::ProcessAlertWorker do
   let_it_be(:project) { create(:project) }
+  let_it_be(:settings) { create(:project_incident_management_setting, project: project, create_issue: true) }
 
   describe '#perform' do
-    let(:alert_management_alert_id) { nil }
-    let(:alert_payload) { { alert: 'payload' } }
-    let(:new_issue) { create(:issue, project: project) }
-    let(:create_issue_service) { instance_double(IncidentManagement::CreateIssueService, execute: new_issue) }
+    let_it_be(:started_at) { Time.now.rfc3339 }
+    let_it_be(:payload) { { 'title' => 'title', 'start_time' => started_at } }
+    let_it_be(:alert) { create(:alert_management_alert, project: project, payload: payload, started_at: started_at) }
+    let(:created_issue) { Issue.last! }
 
-    subject { described_class.new.perform(project.id, alert_payload, alert_management_alert_id) }
+    subject { described_class.new.perform(nil, nil, alert.id) }
 
     before do
-      allow(IncidentManagement::CreateIssueService)
-        .to receive(:new).with(project, alert_payload)
-        .and_return(create_issue_service)
+      allow(Gitlab::AppLogger).to receive(:warn).and_call_original
+
+      allow(AlertManagement::CreateAlertIssueService)
+        .to receive(:new).with(alert, User.alert_bot)
+        .and_call_original
     end
 
-    it 'calls create issue service' do
-      expect(Project).to receive(:find_by_id).and_call_original
+    shared_examples 'creates issue successfully' do
+      it 'creates an issue' do
+        expect(AlertManagement::CreateAlertIssueService)
+          .to receive(:new).with(alert, User.alert_bot)
 
-      expect(IncidentManagement::CreateIssueService)
-        .to receive(:new).with(project, alert_payload)
-        .and_return(create_issue_service)
+        expect { subject }.to change { Issue.count }.by(1)
+      end
 
-      expect(create_issue_service).to receive(:execute)
-
-      subject
-    end
-
-    context 'with invalid project' do
-      let(:invalid_project_id) { 0 }
-
-      subject { described_class.new.perform(invalid_project_id, alert_payload) }
-
-      it 'does not create issues' do
-        expect(Project).to receive(:find_by_id).and_call_original
-        expect(IncidentManagement::CreateIssueService).not_to receive(:new)
-
+      it 'updates AlertManagement::Alert#issue_id' do
         subject
+
+        expect(alert.reload.issue_id).to eq(created_issue.id)
+      end
+
+      it 'does not write a warning to log' do
+        subject
+
+        expect(Gitlab::AppLogger).not_to have_received(:warn)
       end
     end
 
-    context 'when alert_management_alert_id is present' do
-      let!(:alert) { create(:alert_management_alert, project: project) }
-      let(:alert_management_alert_id) { alert.id }
-
-      before do
-        allow(AlertManagement::Alert)
-          .to receive(:find_by_id)
-          .with(alert_management_alert_id)
-          .and_return(alert)
-
-        allow(Gitlab::GitLogger).to receive(:warn).and_call_original
-      end
-
-      context 'when alert can be updated' do
-        it 'updates AlertManagement::Alert#issue_id' do
-          expect { subject }.to change { alert.reload.issue_id }.to(new_issue.id)
-        end
-
-        it 'does not write a warning to log' do
-          subject
-
-          expect(Gitlab::GitLogger).not_to have_received(:warn)
-        end
-      end
+    context 'with valid alert' do
+      it_behaves_like 'creates issue successfully'
 
       context 'when alert cannot be updated' do
-        before do
-          # invalidate alert
-          too_many_hosts = Array.new(AlertManagement::Alert::HOSTS_MAX_LENGTH + 1) { |_| 'host' }
-          alert.update_columns(hosts: too_many_hosts)
-        end
+        let_it_be(:alert) { create(:alert_management_alert, :with_validation_errors, project: project, payload: payload) }
 
         it 'updates AlertManagement::Alert#issue_id' do
           expect { subject }.not_to change { alert.reload.issue_id }
         end
 
-        it 'writes a worning to log' do
+        it 'logs a warning' do
           subject
 
-          expect(Gitlab::GitLogger).to have_received(:warn).with(
-            message: 'Cannot link an Issue with Alert',
-            issue_id: new_issue.id,
-            alert_id: alert_management_alert_id,
-            alert_errors: { hosts: ['hosts array is over 255 chars'] }
+          expect(Gitlab::AppLogger).to have_received(:warn).with(
+            message: 'Cannot process an Incident',
+            issue_id: created_issue.id,
+            alert_id: alert.id,
+            errors: 'Hosts hosts array is over 255 chars'
           )
         end
+      end
+
+      context 'prometheus alert' do
+        let_it_be(:alert) { create(:alert_management_alert, :prometheus, project: project, started_at: started_at) }
+
+        it_behaves_like 'creates issue successfully'
+      end
+    end
+
+    context 'with invalid alert' do
+      let(:invalid_alert_id) { non_existing_record_id }
+
+      subject { described_class.new.perform(nil, nil, invalid_alert_id) }
+
+      it 'does not create issues' do
+        expect(AlertManagement::CreateAlertIssueService).not_to receive(:new)
+
+        expect { subject }.not_to change { Issue.count }
       end
     end
   end

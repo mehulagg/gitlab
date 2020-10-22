@@ -1,5 +1,11 @@
-import { editor as monacoEditor } from 'monaco-editor';
+import {
+  editor as monacoEditor,
+  languages as monacoLanguages,
+  Range,
+  Selection,
+} from 'monaco-editor';
 import Editor from '~/ide/lib/editor';
+import { createStore } from '~/ide/stores';
 import { defaultEditorOptions } from '~/ide/lib/editor_options';
 import { file } from '../helpers';
 
@@ -7,6 +13,7 @@ describe('Multi-file editor library', () => {
   let instance;
   let el;
   let holder;
+  let store;
 
   const setNodeOffsetWidth = val => {
     Object.defineProperty(instance.instance.getDomNode(), 'offsetWidth', {
@@ -17,13 +24,14 @@ describe('Multi-file editor library', () => {
   };
 
   beforeEach(() => {
+    store = createStore();
     el = document.createElement('div');
     holder = document.createElement('div');
     el.appendChild(holder);
 
     document.body.appendChild(el);
 
-    instance = Editor.create();
+    instance = Editor.create(store);
   });
 
   afterEach(() => {
@@ -39,7 +47,7 @@ describe('Multi-file editor library', () => {
   });
 
   it('creates instance returns cached instance', () => {
-    expect(Editor.create()).toEqual(instance);
+    expect(Editor.create(store)).toEqual(instance);
   });
 
   describe('createInstance', () => {
@@ -72,12 +80,13 @@ describe('Multi-file editor library', () => {
 
       expect(monacoEditor.createDiffEditor).toHaveBeenCalledWith(holder, {
         ...defaultEditorOptions,
+        ignoreTrimWhitespace: false,
         quickSuggestions: false,
         occurrencesHighlight: false,
         renderSideBySide: false,
-        readOnly: true,
-        renderLineHighlight: 'all',
-        hideCursorInOverviewRuler: false,
+        readOnly: false,
+        renderLineHighlight: 'none',
+        hideCursorInOverviewRuler: true,
       });
     });
   });
@@ -178,6 +187,50 @@ describe('Multi-file editor library', () => {
       instance.clearEditor();
 
       expect(instance.instance.setModel).toHaveBeenCalledWith(null);
+    });
+  });
+
+  describe('languages', () => {
+    it('registers custom languages defined with Monaco', () => {
+      expect(monacoLanguages.getLanguages()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'vue',
+          }),
+        ]),
+      );
+    });
+  });
+
+  describe('replaceSelectedText', () => {
+    let model;
+    let editor;
+
+    beforeEach(() => {
+      instance.createInstance(holder);
+
+      model = instance.createModel({
+        ...file(),
+        key: 'index.md',
+        path: 'index.md',
+      });
+
+      instance.attachModel(model);
+
+      editor = instance.instance;
+      editor.getModel().setValue('foo bar baz');
+      editor.setSelection(new Range(1, 5, 1, 8));
+
+      instance.replaceSelectedText('hello');
+    });
+
+    it('replaces the text selected in editor with the one provided', () => {
+      expect(editor.getModel().getValue()).toBe('foo hello baz');
+    });
+
+    it('sets cursor to end of the replaced string', () => {
+      const selection = editor.getSelection();
+      expect(selection).toEqual(new Selection(1, 10, 1, 10));
     });
   });
 

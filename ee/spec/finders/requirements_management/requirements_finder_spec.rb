@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe RequirementsManagement::RequirementsFinder do
+RSpec.describe RequirementsManagement::RequirementsFinder do
   let_it_be(:project) { create(:project) }
-  let_it_be(:project_user) { create(:user).tap { |u| project.add_developer(u) } }
-  let_it_be(:requirement1) { create(:requirement, project: project, state: 'opened', updated_at: 3.days.ago) }
-  let_it_be(:requirement2) { create(:requirement, project: project, state: 'opened', updated_at: 1.day.ago) }
-  let_it_be(:requirement3) { create(:requirement, project: project, state: 'archived', updated_at: 2.days.ago) }
-  let_it_be(:requirement4) { create(:requirement, state: 'opened') }
+  let_it_be(:project_user) { create(:user, username: 'projectusername').tap { |u| project.add_developer(u) } }
+  let_it_be(:other_user) { create(:user, username: 'otheruser123') }
+  let_it_be(:requirement1) { create(:requirement, project: project, state: 'opened', author: project_user, updated_at: 3.days.ago, title: 'make it better with serverless') }
+  let_it_be(:requirement2) { create(:requirement, project: project, state: 'opened', author: project_user, updated_at: 1.day.ago, title: 'make it not crash') }
+  let_it_be(:requirement3) { create(:requirement, project: project, state: 'archived', author: other_user, updated_at: 2.days.ago, title: 'good with memory') }
+  let_it_be(:requirement4) { create(:requirement, state: 'opened', title: 'mystery requirement') }
 
   subject { described_class.new(project_user, params).execute }
 
@@ -56,6 +57,46 @@ describe RequirementsManagement::RequirementsFinder do
 
         it 'does not return any requirements' do
           expect(described_class.new(user, params).execute).to be_empty
+        end
+      end
+
+      describe 'filter by author' do
+        using RSpec::Parameterized::TableSyntax
+
+        let(:params) { { project_id: project.id, author_username: author_username } }
+
+        where(:author_username, :filtered_requirements) do
+          'projectusername'                | [:requirement1, :requirement2]
+          'nonexistent_user'               | []
+          nil                              | [:requirement3, :requirement2, :requirement1]
+          %w[projectusername otheruser123] | [:requirement3, :requirement2, :requirement1]
+          %w[nonexistentuser nonsense]     | []
+        end
+
+        with_them do
+          it 'returns the requirements filtered' do
+            expect(subject).to match_array(filtered_requirements.map { |name| public_send(name) })
+          end
+        end
+      end
+
+      describe 'filter by search' do
+        using RSpec::Parameterized::TableSyntax
+
+        let(:params) { { project_id: project.id, search: query } }
+
+        where(:query, :filtered_requirements) do
+          'nonsense'    | []
+          'serverless'  | [:requirement1]
+          'with'        | [:requirement1, :requirement3]
+          nil           | [:requirement3, :requirement2, :requirement1]
+          ""            | [:requirement3, :requirement2, :requirement1]
+        end
+
+        with_them do
+          it 'returns the requirements filtered' do
+            expect(subject).to match_array(filtered_requirements.map { |name| public_send(name) })
+          end
         end
       end
 

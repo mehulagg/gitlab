@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::ListService do
+RSpec.describe Boards::ListService do
   it_behaves_like 'multiple boards list service' do
     let(:parent) { create(:project, :empty_repo) }
 

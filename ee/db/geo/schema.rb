@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_21_194300) do
+ActiveRecord::Schema.define(version: 2020_09_24_184638) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -91,6 +91,19 @@ ActiveRecord::Schema.define(version: 2020_01_21_194300) do
     t.index ["success"], name: "index_lfs_object_registry_on_success"
   end
 
+  create_table "merge_request_diff_registry", force: :cascade do |t|
+    t.datetime_with_timezone "created_at", null: false
+    t.datetime_with_timezone "retry_at"
+    t.datetime_with_timezone "last_synced_at"
+    t.bigint "merge_request_diff_id", null: false
+    t.integer "state", limit: 2, default: 0, null: false
+    t.integer "retry_count", limit: 2, default: 0
+    t.text "last_sync_failure"
+    t.index ["merge_request_diff_id"], name: "index_merge_request_diff_registry_on_mr_diff_id"
+    t.index ["retry_at"], name: "index_merge_request_diff_registry_on_retry_at"
+    t.index ["state"], name: "index_merge_request_diff_registry_on_state"
+  end
+
   create_table "package_file_registry", id: :serial, force: :cascade do |t|
     t.integer "package_file_id", null: false
     t.integer "state", default: 0, null: false
@@ -99,6 +112,13 @@ ActiveRecord::Schema.define(version: 2020_01_21_194300) do
     t.datetime_with_timezone "retry_at"
     t.datetime_with_timezone "last_synced_at"
     t.datetime_with_timezone "created_at", null: false
+    t.string "verification_failure", limit: 255
+    t.binary "verification_checksum"
+    t.boolean "checksum_mismatch"
+    t.binary "verification_checksum_mismatched"
+    t.integer "verification_retry_count"
+    t.datetime_with_timezone "verified_at"
+    t.datetime_with_timezone "verification_retry_at"
     t.index ["package_file_id"], name: "index_package_file_registry_on_repository_id"
     t.index ["retry_at"], name: "index_package_file_registry_on_retry_at"
     t.index ["state"], name: "index_package_file_registry_on_state"
@@ -139,6 +159,8 @@ ActiveRecord::Schema.define(version: 2020_01_21_194300) do
     t.datetime_with_timezone "last_wiki_verification_ran_at"
     t.binary "repository_verification_checksum_mismatched"
     t.binary "wiki_verification_checksum_mismatched"
+    t.boolean "primary_repository_checksummed", default: false, null: false
+    t.boolean "primary_wiki_checksummed", default: false, null: false
     t.index ["last_repository_successful_sync_at"], name: "idx_project_registry_synced_repositories_partial", where: "((resync_repository = false) AND (repository_retry_count IS NULL) AND (repository_verification_checksum_sha IS NOT NULL))"
     t.index ["last_repository_successful_sync_at"], name: "index_project_registry_on_last_repository_successful_sync_at"
     t.index ["last_repository_synced_at"], name: "index_project_registry_on_last_repository_synced_at"
@@ -157,6 +179,34 @@ ActiveRecord::Schema.define(version: 2020_01_21_194300) do
     t.index ["resync_wiki"], name: "index_project_registry_on_resync_wiki"
     t.index ["wiki_retry_at"], name: "index_project_registry_on_wiki_retry_at"
     t.index ["wiki_verification_checksum_sha"], name: "idx_project_registry_on_wiki_checksum_sha_partial", where: "(wiki_verification_checksum_sha IS NULL)"
+  end
+
+  create_table "snippet_repository_registry", force: :cascade do |t|
+    t.datetime_with_timezone "retry_at"
+    t.datetime_with_timezone "last_synced_at"
+    t.datetime_with_timezone "created_at", null: false
+    t.bigint "snippet_repository_id", null: false
+    t.integer "state", limit: 2, default: 0, null: false
+    t.integer "retry_count", limit: 2, default: 0
+    t.text "last_sync_failure"
+    t.boolean "force_to_redownload"
+    t.boolean "missing_on_primary"
+    t.index ["retry_at"], name: "index_snippet_repository_registry_on_retry_at"
+    t.index ["snippet_repository_id"], name: "index_snippet_repository_registry_on_snippet_repository_id", unique: true
+    t.index ["state"], name: "index_snippet_repository_registry_on_state"
+  end
+
+  create_table "terraform_state_version_registry", force: :cascade do |t|
+    t.bigint "terraform_state_version_id", null: false
+    t.integer "state", limit: 2, default: 0, null: false
+    t.integer "retry_count", limit: 2, default: 0, null: false
+    t.datetime_with_timezone "retry_at"
+    t.datetime_with_timezone "last_synced_at"
+    t.datetime_with_timezone "created_at", null: false
+    t.text "last_sync_failure"
+    t.index ["retry_at"], name: "index_terraform_state_version_registry_on_retry_at"
+    t.index ["state"], name: "index_terraform_state_version_registry_on_state"
+    t.index ["terraform_state_version_id"], name: "index_tf_state_versions_registry_on_tf_state_versions_id"
   end
 
 end

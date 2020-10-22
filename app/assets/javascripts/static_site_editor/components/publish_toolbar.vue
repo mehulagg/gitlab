@@ -1,12 +1,16 @@
 <script>
-import { GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 
 export default {
   components: {
     GlButton,
-    GlLoadingIcon,
   },
   props: {
+    hasSettings: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     returnUrl: {
       type: String,
       required: false,
@@ -26,14 +30,27 @@ export default {
 };
 </script>
 <template>
-  <div class="d-flex bg-light border-top justify-content-between align-items-center py-3 px-4">
-    <gl-loading-icon :class="{ invisible: !savingChanges }" size="md" />
+  <div class="d-flex bg-light border-top justify-content-end align-items-center py-3 px-4">
     <div>
       <gl-button v-if="returnUrl" ref="returnUrlLink" :href="returnUrl">{{
         s__('StaticSiteEditor|Return to site')
       }}</gl-button>
-      <gl-button variant="success" :disabled="!saveable || savingChanges" @click="$emit('submit')">
-        {{ __('Submit Changes') }}
+      <gl-button
+        v-if="hasSettings"
+        ref="settings"
+        :disabled="savingChanges"
+        @click="$emit('editSettings')"
+      >
+        {{ __('Page settings') }}
+      </gl-button>
+      <gl-button
+        ref="submit"
+        variant="success"
+        :disabled="!saveable"
+        :loading="savingChanges"
+        @click="$emit('submit')"
+      >
+        {{ __('Submit changes...') }}
       </gl-button>
     </div>
   </div>

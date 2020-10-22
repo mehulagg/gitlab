@@ -3,7 +3,19 @@ import * as types from 'ee/roadmap/store/mutation_types';
 
 import defaultState from 'ee/roadmap/store/state';
 
-import { mockGroupId, basePath, epicsPath, mockSortedBy } from 'ee_jest/roadmap/mock_data';
+import {
+  mockGroupId,
+  basePath,
+  epicsPath,
+  mockSortedBy,
+  mockEpic,
+} from 'ee_jest/roadmap/mock_data';
+
+const setEpicMockData = state => {
+  state.epics = [mockEpic];
+  state.childrenFlags = { 'gid://gitlab/Epic/1': {} };
+  state.epicIds = ['gid://gitlab/Epic/1'];
+};
 
 describe('Roadmap Store Mutations', () => {
   let state;
@@ -15,7 +27,6 @@ describe('Roadmap Store Mutations', () => {
   describe('SET_INITIAL_DATA', () => {
     it('Should set initial Roadmap data to state', () => {
       const initialData = {
-        windowResizeInProgress: false,
         epicsFetchInProgress: false,
         epicsFetchForTimeframeInProgress: false,
         epicsFetchFailure: false,
@@ -48,17 +59,9 @@ describe('Roadmap Store Mutations', () => {
     });
   });
 
-  describe('SET_WINDOW_RESIZE_IN_PROGRESS', () => {
-    it('Should set value of `state.windowResizeInProgress` based on provided value', () => {
-      mutations[types.SET_WINDOW_RESIZE_IN_PROGRESS](state, true);
-
-      expect(state.windowResizeInProgress).toEqual(true);
-    });
-  });
-
   describe('UPDATE_EPIC_IDS', () => {
     it('Should insert provided epicId to epicIds array in state', () => {
-      mutations[types.UPDATE_EPIC_IDS](state, 22);
+      mutations[types.UPDATE_EPIC_IDS](state, [22]);
 
       expect(state.epicIds).toHaveLength(1);
       expect(state.epicIds[0]).toBe(22);
@@ -264,6 +267,55 @@ describe('Roadmap Store Mutations', () => {
       mutations[types.SET_BUFFER_SIZE](state, bufferSize);
 
       expect(state.bufferSize).toBe(bufferSize);
+    });
+  });
+
+  describe('SET_FILTER_PARAMS', () => {
+    it('Should set `filterParams` and `hasFiltersApplied` to the state and reset existing epics', () => {
+      const filterParams = [{ foo: 'bar' }, { bar: 'baz' }];
+      setEpicMockData(state);
+
+      mutations[types.SET_FILTER_PARAMS](state, filterParams);
+
+      expect(state).toMatchObject({
+        filterParams,
+        hasFiltersApplied: true,
+        epics: [],
+        childrenFlags: {},
+        epicIds: [],
+      });
+    });
+  });
+
+  describe('SET_EPICS_STATE', () => {
+    it('Should set `epicsState` to the state and reset existing epics', () => {
+      const epicsState = 'all';
+      setEpicMockData(state);
+
+      mutations[types.SET_EPICS_STATE](state, epicsState);
+
+      expect(state).toMatchObject({
+        epicsState,
+        epics: [],
+        childrenFlags: {},
+        epicIds: [],
+      });
+    });
+  });
+
+  describe('SET_SORTED_BY', () => {
+    it('Should set `sortedBy` to the state and reset existing epics', () => {
+      const sortedBy = 'start_date_asc';
+      setEpicMockData(state);
+
+      mutations[types.SET_SORTED_BY](state, sortedBy);
+
+      expect(state).toMatchObject({
+        sortedBy,
+        epics: [],
+        childrenFlags: {},
+        epicIds: [],
+      });
     });
   });
 });

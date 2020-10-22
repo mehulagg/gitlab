@@ -1,10 +1,9 @@
 <script>
-import { GlTooltipDirective, GlDeprecatedButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlTooltipDirective, GlButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import { dasherize } from '~/lib/utils/text_utility';
 import { __ } from '~/locale';
-import createFlash from '~/flash';
-import Icon from '~/vue_shared/components/icon.vue';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 /**
  * Renders either a cancel, retry or play icon button and handles the post request
@@ -18,8 +17,8 @@ import Icon from '~/vue_shared/components/icon.vue';
  */
 export default {
   components: {
-    Icon,
-    GlDeprecatedButton,
+    GlIcon,
+    GlButton,
     GlLoadingIcon,
   },
   directives: {
@@ -82,16 +81,16 @@ export default {
 };
 </script>
 <template>
-  <gl-deprecated-button
+  <gl-button
     :id="`js-ci-action-${link}`"
     v-gl-tooltip="{ boundary: 'viewport' }"
     :title="tooltipText"
     :class="cssClass"
     :disabled="isDisabled"
-    class="js-ci-action btn btn-blank btn-transparent ci-action-icon-container ci-action-icon-wrapper d-flex align-items-center justify-content-center"
-    @click="onClickAction"
+    class="js-ci-action ci-action-icon-container ci-action-icon-wrapper gl-display-flex gl-align-items-center gl-justify-content-center"
+    @click.stop="onClickAction"
   >
     <gl-loading-icon v-if="isLoading" class="js-action-icon-loading" />
-    <icon v-else :name="actionIcon" />
-  </gl-deprecated-button>
+    <gl-icon v-else :name="actionIcon" class="gl-mr-0!" />
+  </gl-button>
 </template>

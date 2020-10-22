@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Analytics::CycleAnalytics::EventEntity do
+RSpec.describe Analytics::CycleAnalytics::EventEntity do
   describe '#type' do
     it 'returns `simple` for non-label based events' do
       event = Gitlab::Analytics::CycleAnalytics::StageEvents::IssueCreated

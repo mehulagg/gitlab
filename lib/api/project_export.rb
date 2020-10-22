@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectExport < Grape::API
+  class ProjectExport < ::API::Base
     helpers Helpers::RateLimiter
 
     before do
@@ -25,7 +25,7 @@ module API
         detail 'This feature was introduced in GitLab 10.6.'
       end
       get ':id/export/download' do
-        check_rate_limit! :project_download_export, [current_user, :project_download_export, user_project]
+        check_rate_limit! :project_download_export, [current_user, user_project]
 
         if user_project.export_file_exists?
           present_carrierwave_file!(user_project.export_file)
@@ -45,7 +45,9 @@ module API
         end
       end
       post ':id/export' do
-        check_rate_limit! :project_export, [current_user, :project_export, user_project]
+        check_rate_limit! :project_export, [current_user]
+
+        user_project.remove_exports
 
         project_export_params = declared_params(include_missing: false)
         after_export_params = project_export_params.delete(:upload) || {}
@@ -53,7 +55,7 @@ module API
         export_strategy = if after_export_params[:url].present?
                             params = after_export_params.slice(:url, :http_method).symbolize_keys
 
-                            Gitlab::ImportExport::AfterExportStrategies::WebUploadStrategy.new(params)
+                            Gitlab::ImportExport::AfterExportStrategies::WebUploadStrategy.new(**params)
                           end
 
         if export_strategy&.invalid?

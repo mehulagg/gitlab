@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'issue resource weight events', :js do
+RSpec.describe 'issue resource weight events', :js do
   let(:user)     { create(:user) }
   let(:project)  { create(:project, :public) }
   let(:issue)    { create(:issue, project: project, author: user) }

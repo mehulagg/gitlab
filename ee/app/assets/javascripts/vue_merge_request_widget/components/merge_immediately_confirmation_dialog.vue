@@ -1,5 +1,6 @@
 <script>
-import { GlModal, GlDeprecatedButton } from '@gitlab/ui';
+/* eslint-disable vue/no-v-html */
+import { GlModal, GlButton } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { __, sprintf } from '~/locale';
 
@@ -7,7 +8,7 @@ export default {
   name: 'MergeImmediatelyConfirmationDialog',
   components: {
     GlModal,
-    GlDeprecatedButton,
+    GlButton,
   },
   props: {
     docsUrl: {
@@ -60,15 +61,13 @@ export default {
   >
     <p v-html="bodyText"></p>
     <p>{{ __('Are you sure you want to merge immediately?') }}</p>
-    <template v-slot:modal-footer>
-      <gl-deprecated-button ref="cancelButton" @click="cancel">{{
-        __('Cancel')
-      }}</gl-deprecated-button>
-      <gl-deprecated-button
+    <template #modal-footer>
+      <gl-button ref="cancelButton" @click="cancel">{{ __('Cancel') }}</gl-button>
+      <gl-button
         variant="danger"
         data-qa-selector="merge_immediately_button"
         @click="mergeImmediately"
-        >{{ __('Merge immediately') }}</gl-deprecated-button
+        >{{ __('Merge immediately') }}</gl-button
       >
     </template>
   </gl-modal>

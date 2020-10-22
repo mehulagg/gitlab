@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PagesDomain do
+RSpec.describe PagesDomain do
   using RSpec::Parameterized::TableSyntax
 
   subject(:pages_domain) { described_class.new }
@@ -97,8 +97,8 @@ describe PagesDomain do
     it 'saves validity time' do
       domain.save
 
-      expect(domain.certificate_valid_not_before).to be_like_time(Time.parse("2020-03-16 14:20:34 UTC"))
-      expect(domain.certificate_valid_not_after).to be_like_time(Time.parse("2220-01-28 14:20:34 UTC"))
+      expect(domain.certificate_valid_not_before).to be_like_time(Time.zone.parse("2020-03-16 14:20:34 UTC"))
+      expect(domain.certificate_valid_not_after).to be_like_time(Time.zone.parse("2220-01-28 14:20:34 UTC"))
     end
   end
 
@@ -328,9 +328,11 @@ describe PagesDomain do
   end
 
   describe '#update_daemon' do
+    let_it_be(:project) { create(:project).tap(&:mark_pages_as_deployed) }
+
     context 'when usage is serverless' do
       it 'does not call the UpdatePagesConfigurationService' do
-        expect(Projects::UpdatePagesConfigurationService).not_to receive(:new)
+        expect(PagesUpdateConfigurationWorker).not_to receive(:perform_async)
 
         create(:pages_domain, usage: :serverless)
       end
@@ -352,12 +354,20 @@ describe PagesDomain do
       domain.destroy!
     end
 
-    it 'delegates to Projects::UpdatePagesConfigurationService' do
-      service = instance_double('Projects::UpdatePagesConfigurationService')
-      expect(Projects::UpdatePagesConfigurationService).to receive(:new) { service }
-      expect(service).to receive(:execute)
+    it "schedules a PagesUpdateConfigurationWorker" do
+      expect(PagesUpdateConfigurationWorker).to receive(:perform_async).with(project.id)
 
-      create(:pages_domain)
+      create(:pages_domain, project: project)
+    end
+
+    context "when the pages aren't deployed" do
+      let_it_be(:project) { create(:project).tap(&:mark_pages_as_not_deployed) }
+
+      it "does not schedule a PagesUpdateConfigurationWorker" do
+        expect(PagesUpdateConfigurationWorker).not_to receive(:perform_async).with(project.id)
+
+        create(:pages_domain, project: project)
+      end
     end
 
     context 'configuration updates when attributes change' do
@@ -366,7 +376,7 @@ describe PagesDomain do
       let_it_be(:domain) { create(:pages_domain) }
 
       where(:attribute, :old_value, :new_value, :update_expected) do
-        now = Time.now
+        now = Time.current
         future = now + 1.day
 
         :project | nil       | :project1 | true
@@ -548,7 +558,7 @@ describe PagesDomain do
 
       it 'does not clear failure on unrelated updates' do
         expect do
-          domain.update!(verified_at: Time.now)
+          domain.update!(verified_at: Time.current)
         end.not_to change { domain.auto_ssl_failed }.from(true)
       end
     end
@@ -611,6 +621,7 @@ describe PagesDomain do
     let!(:domain_with_expired_user_provided_certificate) do
       create(:pages_domain, :with_expired_certificate)
     end
+
     let!(:domain_with_user_provided_certificate_and_auto_ssl) do
       create(:pages_domain, auto_ssl_enabled: true)
     end

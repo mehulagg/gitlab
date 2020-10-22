@@ -19,19 +19,20 @@ export default {
     }
   },
   [types.TOGGLE_FILE_OPEN](state, path) {
-    Object.assign(state.entries[path], {
-      opened: !state.entries[path].opened,
-    });
+    const entry = state.entries[path];
 
-    if (state.entries[path].opened) {
+    entry.opened = !entry.opened;
+    if (entry.opened && !entry.tempFile) {
+      entry.loading = true;
+    }
+
+    if (entry.opened) {
       Object.assign(state, {
         openFiles: state.openFiles.filter(f => f.path !== path).concat(state.entries[path]),
       });
     } else {
-      const file = state.entries[path];
-
       Object.assign(state, {
-        openFiles: state.openFiles.filter(f => f.key !== file.key),
+        openFiles: state.openFiles.filter(f => f.key !== entry.key),
       });
     }
   },
@@ -99,11 +100,6 @@ export default {
       fileLanguage,
     });
   },
-  [types.SET_FILE_EOL](state, { file, eol }) {
-    Object.assign(state.entries[file.path], {
-      eol,
-    });
-  },
   [types.SET_FILE_POSITION](state, { file, editorRow, editorColumn }) {
     Object.assign(state.entries[file.path], {
       editorRow,
@@ -153,13 +149,11 @@ export default {
   [types.ADD_FILE_TO_CHANGED](state, path) {
     Object.assign(state, {
       changedFiles: state.changedFiles.concat(state.entries[path]),
-      unusedSeal: false,
     });
   },
   [types.REMOVE_FILE_FROM_CHANGED](state, path) {
     Object.assign(state, {
       changedFiles: state.changedFiles.filter(f => f.path !== path),
-      unusedSeal: false,
     });
   },
   [types.STAGE_CHANGE](state, { path, diffInfo }) {
@@ -175,7 +169,6 @@ export default {
           deleted: diffInfo.deleted,
         }),
       }),
-      unusedSeal: false,
     });
 
     if (stagedFile) {

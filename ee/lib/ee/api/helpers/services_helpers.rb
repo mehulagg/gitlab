@@ -57,26 +57,6 @@ module EE
                   type: String,
                   desc: 'The password of the user'
                 }
-              ],
-              'jenkins-deprecated' => [
-                {
-                  required: true,
-                  name: :project_url,
-                  type: String,
-                  desc: 'Jenkins project URL like http://jenkins.example.com/job/my-project/'
-                },
-                {
-                  required: false,
-                  name: :pass_unstable,
-                  type: ::API::Services::Boolean,
-                  desc: 'Multi-project setup enabled?'
-                },
-                {
-                  required: false,
-                  name: :multiproject_enabled,
-                  type: ::API::Services::Boolean,
-                  desc: 'Should unstable builds be treated as passing?'
-                }
               ]
             )
           end
@@ -86,7 +66,6 @@ module EE
             [
               ::GithubService,
               ::JenkinsService,
-              ::JenkinsDeprecatedService,
               *super
             ]
           end

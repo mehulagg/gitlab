@@ -9,6 +9,7 @@ module DesignManagement
     include Referable
     include Mentionable
     include WhereComposite
+    include RelativePositioning
 
     belongs_to :project, inverse_of: :designs
     belongs_to :issue
@@ -20,9 +21,11 @@ module DesignManagement
     has_many :notes, as: :noteable, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
     has_many :user_mentions, class_name: 'DesignUserMention', dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
+    has_many :events, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
+
     validates :project, :filename, presence: true
     validates :issue, presence: true, unless: :importing?
-    validates :filename, uniqueness: { scope: :issue_id }
+    validates :filename, uniqueness: { scope: :issue_id }, length: { maximum: 255 }
     validate :validate_file_is_image
 
     alias_attribute :title, :filename
@@ -73,8 +76,16 @@ module DesignManagement
       join = designs.join(actions)
         .on(actions[:design_id].eq(designs[:id]))
 
-      joins(join.join_sources).where(actions[:event].not_eq(deletion)).order(:id)
+      joins(join.join_sources).where(actions[:event].not_eq(deletion))
     end
+
+    scope :ordered, -> do
+      # We need to additionally sort by `id` to support keyset pagination.
+      # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17788/diffs#note_230875678
+      order(:relative_position, :id)
+    end
+
+    scope :in_creation_order, -> { reorder(:id) }
 
     scope :with_filename, -> (filenames) { where(filename: filenames) }
     scope :on_issue, ->(issue) { where(issue_id: issue) }
@@ -84,6 +95,14 @@ module DesignManagement
 
     # A design is current if the most recent event is not a deletion
     scope :current, -> { visible_at_version(nil) }
+
+    def self.relative_positioning_query_base(design)
+      default_scoped.on_issue(design.issue_id)
+    end
+
+    def self.relative_positioning_parent_column
+      :issue_id
+    end
 
     def status
       if new_design?
@@ -126,71 +145,30 @@ module DesignManagement
     #   #12["filename with [] in it.jpg"]
     def to_reference(from = nil, full: false)
       infix = full ? '/designs' : ''
-      totally_simple = %r{ \A #{self.class.simple_file_name} \z }x
-      safe_name = if totally_simple.match?(filename)
-                    filename
-                  elsif filename =~ /[<>]/
-                    %Q{base64:#{Base64.strict_encode64(filename)}}
-                  else
-                    escaped = filename.gsub(%r{[\\"]}) { |x| "\\#{x}" }
-                    %Q{"#{escaped}"}
-                  end
+      safe_name = Sanitize.fragment(filename)
 
       "#{issue.to_reference(from, full: full)}#{infix}[#{safe_name}]"
     end
 
     def self.reference_pattern
-      @reference_pattern ||= begin
-        # Filenames can be escaped with double quotes to name filenames
-        # that include square brackets, or other special characters
-        %r{
-          #{Issue.reference_pattern}
-          (\/designs)?
-          \[
-            (?<design> #{simple_file_name} | #{quoted_file_name} | #{base_64_encoded_name})
-          \]
-        }x
-      end
-    end
-
-    def self.simple_file_name
-      %r{
-          (?<simple_file_name>
-           ( \w | [_:,'-] | \. | \s )+
-           \.
-           \w+
-          )
-      }x
-    end
-
-    def self.base_64_encoded_name
-      %r{
-          base64:
-          (?<base_64_encoded_name>
-           [A-Za-z0-9+\n]+
-           =?
-          )
-      }x
-    end
-
-    def self.quoted_file_name
-      %r{
-          "
-          (?<escaped_filename>
-            (\\ \\ | \\ " | [^"\\])+
-          )
-          "
-      }x
+      # no-op: We only support link_reference_pattern parsing
     end
 
     def self.link_reference_pattern
       @link_reference_pattern ||= begin
-        exts = SAFE_IMAGE_EXT + DANGEROUS_IMAGE_EXT
         path_segment = %r{issues/#{Gitlab::Regex.issue}/designs}
-        filename_pattern = %r{(?<simple_file_name>[a-z0-9_=-]+\.(#{exts.join('|')}))}i
+        ext = Regexp.new(Regexp.union(SAFE_IMAGE_EXT + DANGEROUS_IMAGE_EXT).source, Regexp::IGNORECASE)
+        valid_char = %r{[^/\s]} # any char that is not a forward slash or whitespace
+        filename_pattern = %r{
+          (?<url_filename> #{valid_char}+ \. #{ext})
+        }x
 
         super(path_segment, filename_pattern)
       end
+    end
+
+    def self.build_full_path(issue, design)
+      File.join(DesignManagement.designs_directory, "issue-#{issue.iid}", design.filename)
     end
 
     def to_ability_name
@@ -206,7 +184,7 @@ module DesignManagement
     end
 
     def full_path
-      @full_path ||= File.join(DesignManagement.designs_directory, "issue-#{issue.iid}", filename)
+      @full_path ||= self.class.build_full_path(issue, self)
     end
 
     def diff_refs
@@ -233,6 +211,26 @@ module DesignManagement
     end
     alias_method :after_note_created,   :after_note_changed
     alias_method :after_note_destroyed, :after_note_changed
+
+    # Part of the interface of objects we can create events about
+    def resource_parent
+      project
+    end
+
+    def immediately_before?(next_design)
+      return false if next_design.relative_position <= relative_position
+
+      interloper = self.class.on_issue(issue).where(
+        "relative_position <@ int4range(?, ?, '()')",
+        *[self, next_design].map(&:relative_position)
+      )
+
+      !interloper.exists?
+    end
+
+    def notes_with_associations
+      notes.includes(:author)
+    end
 
     private
 

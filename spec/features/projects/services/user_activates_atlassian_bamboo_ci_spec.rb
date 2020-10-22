@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User activates Atlassian Bamboo CI' do
+RSpec.describe 'User activates Atlassian Bamboo CI' do
   include_context 'project service activation'
 
   before do
@@ -16,13 +16,13 @@ describe 'User activates Atlassian Bamboo CI' do
     fill_in('Username', with: 'user')
     fill_in('Password', with: 'verySecret')
 
-    click_test_integration
+    click_test_then_save_integration(expect_test_to_fail: false)
 
-    expect(page).to have_content('Atlassian Bamboo CI activated.')
+    expect(page).to have_content('Atlassian Bamboo CI settings saved and active.')
 
     # Password field should not be filled in.
     click_link('Atlassian Bamboo CI')
 
-    expect(find_field('Enter new password').value).to be_blank
+    expect(find_field('Enter new Password').value).to be_blank
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::RefsController do
+RSpec.describe Projects::RefsController do
   let(:project) { create(:project, :repository) }
   let(:user)    { create(:user) }
 
@@ -41,17 +41,10 @@ describe Projects::RefsController do
       expect { xhr_get }.not_to raise_error
     end
 
-    it 'renders 404 for non-JS requests' do
+    it 'renders 404 for HTML requests' do
       xhr_get
 
       expect(response).to be_not_found
-    end
-
-    it 'renders JS' do
-      expect(::Gitlab::GitalyClient).to receive(:allow_ref_name_caching).and_call_original
-
-      xhr_get(:js)
-      expect(response).to be_successful
     end
 
     context 'when json is requested' do
@@ -73,7 +66,7 @@ describe Projects::RefsController do
 
         cache_key = "projects/#{project.id}/logs/#{project.commit.id}/#{path}/25"
         expect(Rails.cache.fetch(cache_key)).to eq(['logs', 50])
-        expect(response.headers['More-Logs-Offset']).to eq(50)
+        expect(response.headers['More-Logs-Offset']).to eq("50")
       end
     end
   end

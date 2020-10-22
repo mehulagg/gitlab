@@ -1,10 +1,14 @@
 - page_title _('Pipelines')
+- add_page_specific_style 'page_bundles/pipelines'
 
 = render_if_exists "shared/shared_runners_minutes_limit_flash_message"
 
 #pipelines-list-vue{ data: { endpoint: project_pipelines_path(@project, format: :json),
+  project_id: @project.id,
+  params: params.to_json,
   "help-page-path" => help_page_path('ci/quick_start/README'),
   "help-auto-devops-path" => help_page_path('topics/autodevops/index.md'),
+  "pipeline-schedule-url" => pipeline_schedules_path(@project),
   "empty-state-svg-path" => image_path('illustrations/pipelines_empty.svg'),
   "error-state-svg-path" => image_path('illustrations/pipelines_failed.svg'),
   "no-pipelines-svg-path" => image_path('illustrations/pipelines_pending.svg'),

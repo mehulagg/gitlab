@@ -43,4 +43,11 @@ describe('GeoNodeForm Store Mutations', () => {
       expect(state.synchronizationNamespaces).toEqual([]);
     });
   });
+
+  describe('SET_ERROR', () => {
+    it('sets error for field', () => {
+      mutations[types.SET_ERROR](state, { key: 'name', error: 'error' });
+      expect(state.formErrors.name).toBe('error');
+    });
+  });
 });

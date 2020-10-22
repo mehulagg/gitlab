@@ -1,6 +1,0 @@
----
-title: Improve design management image loads by avoiding refetching image urls for
-  designs
-merge_request: 30280
-author:
-type: changed

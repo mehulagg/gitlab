@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe World do
+RSpec.describe World do
   describe '.all_countries' do
     it 'does not return countries that are in the denied list' do
       result = described_class.all_countries

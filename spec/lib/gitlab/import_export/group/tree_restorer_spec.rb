@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ImportExport::Group::TreeRestorer do
+RSpec.describe Gitlab::ImportExport::Group::TreeRestorer do
   include ImportExport::CommonUtil
 
   describe 'restore group tree' do
@@ -22,10 +22,6 @@ describe Gitlab::ImportExport::Group::TreeRestorer do
 
         expect(group_tree_restorer.restore).to be_truthy
       end
-    end
-
-    after(:context) do
-      cleanup_artifacts_from_extract_archive('group_exports/complex')
     end
 
     it 'has the group description' do
@@ -83,10 +79,6 @@ describe Gitlab::ImportExport::Group::TreeRestorer do
       expect(group_tree_restorer.restore).to be_falsey
     end
 
-    after do
-      cleanup_artifacts_from_extract_archive('group_exports/child_with_no_parent')
-    end
-
     it 'fails when a child group does not have a valid parent_id' do
       expect(shared.errors).to include('Parent group not found')
     end
@@ -122,10 +114,6 @@ describe Gitlab::ImportExport::Group::TreeRestorer do
 
         group_tree_restorer.restore
         group.reload
-      end
-
-      after do
-        cleanup_artifacts_from_extract_archive('group_exports/complex')
       end
 
       it 'does not import root group name' do
@@ -178,17 +166,13 @@ describe Gitlab::ImportExport::Group::TreeRestorer do
       group_tree_restorer.restore
     end
 
-    after do
-      cleanup_artifacts_from_extract_archive(filepath)
-    end
-
     shared_examples 'with visibility level' do |visibility_level, expected_visibilities|
       context "when visibility level is #{visibility_level}" do
         let(:group) { create(:group, visibility_level) }
         let(:filepath) { "group_exports/visibility_levels/#{visibility_level}" }
 
         it "imports all subgroups as #{visibility_level}" do
-          expect(group.children.map(&:visibility_level)).to eq(expected_visibilities)
+          expect(group.children.map(&:visibility_level)).to match_array(expected_visibilities)
         end
       end
     end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'projects/pipelines/_tabs_content' do
+RSpec.describe 'projects/pipelines/_tabs_content' do
   let_it_be(:user) { create(:user) }
   let(:pipeline) { create(:ci_pipeline).present(current_user: user) }
   let(:locals) { { pipeline: pipeline, project: pipeline.project } }

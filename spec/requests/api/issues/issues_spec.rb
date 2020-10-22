@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Issues do
+RSpec.describe API::Issues do
   let_it_be(:user) { create(:user) }
   let_it_be(:project, reload: true) { create(:project, :public, :repository, creator_id: user.id, namespace: user.namespace) }
   let_it_be(:private_mrs_project) do
@@ -28,6 +28,7 @@ describe API::Issues do
            updated_at: 3.hours.ago,
            closed_at: 1.hour.ago
   end
+
   let!(:confidential_issue) do
     create :issue,
            :confidential,
@@ -37,6 +38,7 @@ describe API::Issues do
            created_at: generate(:past_time),
            updated_at: 2.hours.ago
   end
+
   let!(:issue) do
     create :issue,
            author: user,
@@ -48,6 +50,7 @@ describe API::Issues do
            title: issue_title,
            description: issue_description
   end
+
   let_it_be(:label) do
     create(:label, title: 'label', color: '#FFAABB', project: project)
   end
@@ -81,6 +84,46 @@ describe API::Issues do
       expect(json_response['statistics']['counts']['all']).to eq counts[:all]
       expect(json_response['statistics']['counts']['closed']).to eq counts[:closed]
       expect(json_response['statistics']['counts']['opened']).to eq counts[:opened]
+    end
+  end
+
+  describe 'GET /issues/:id' do
+    context 'when unauthorized' do
+      it 'returns unauthorized' do
+        get api("/issues/#{issue.id}" )
+
+        expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+    end
+
+    context 'when authorized' do
+      context 'as a normal user' do
+        it 'returns forbidden' do
+          get api("/issues/#{issue.id}", user )
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+      end
+
+      context 'as an admin' do
+        context 'when issue exists' do
+          it 'returns the issue' do
+            get api("/issues/#{issue.id}", admin)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response.dig('author', 'id')).to eq(issue.author.id)
+            expect(json_response['description']).to eq(issue.description)
+          end
+        end
+
+        context 'when issue does not exist' do
+          it 'returns 404' do
+            get api("/issues/0", admin)
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
+        end
+      end
     end
   end
 
@@ -123,6 +166,11 @@ describe API::Issues do
 
         expect(response).to have_gitlab_http_status(:ok)
         expect_paginated_array_response([issue.id, closed_issue.id])
+      end
+
+      it 'responds with a 401 instead of the specified issue' do
+        get api("/issues/#{issue.id}")
+        expect(response).to have_gitlab_http_status(:unauthorized)
       end
 
       context 'issues_statistics' do
@@ -381,6 +429,60 @@ describe API::Issues do
           get api("/issues?updated_after=#{issue2.updated_at}", user)
 
           expect_paginated_array_response(issue2.id)
+        end
+      end
+
+      context 'filtering by due date' do
+        # This date chosen because it is the beginning of a week + near the beginning of a month
+        let_it_be(:frozen_time) { DateTime.parse('2020-08-03 12:00') }
+
+        let_it_be(:issue2) { create(:issue, project: project, author: user, due_date: frozen_time + 3.days) }
+        let_it_be(:issue3) { create(:issue, project: project, author: user, due_date: frozen_time + 10.days) }
+        let_it_be(:issue4) { create(:issue, project: project, author: user, due_date: frozen_time + 34.days) }
+        let_it_be(:issue5) { create(:issue, project: project, author: user, due_date: frozen_time - 8.days) }
+
+        before do
+          travel_to(frozen_time)
+        end
+
+        after do
+          travel_back
+        end
+
+        it 'returns them all when argument is empty' do
+          get api('/issues?due_date=', user)
+
+          expect_paginated_array_response(issue5.id, issue4.id, issue3.id, issue2.id, issue.id, closed_issue.id)
+        end
+
+        it 'returns issues without due date' do
+          get api('/issues?due_date=0', user)
+
+          expect_paginated_array_response(issue.id, closed_issue.id)
+        end
+
+        it 'returns issues due for this week' do
+          get api('/issues?due_date=week', user)
+
+          expect_paginated_array_response(issue2.id)
+        end
+
+        it 'returns issues due for this month' do
+          get api('/issues?due_date=month', user)
+
+          expect_paginated_array_response(issue3.id, issue2.id)
+        end
+
+        it 'returns issues that are due previous two weeks and next month' do
+          get api('/issues?due_date=next_month_and_previous_two_weeks', user)
+
+          expect_paginated_array_response(issue5.id, issue4.id, issue3.id, issue2.id)
+        end
+
+        it 'returns issues that are overdue' do
+          get api('/issues?due_date=overdue', user)
+
+          expect_paginated_array_response(issue5.id)
         end
       end
 
@@ -807,6 +909,7 @@ describe API::Issues do
                target_project: private_mrs_project,
                description: "closes #{issue.to_reference(private_mrs_project)}")
       end
+
       let!(:merge_request2) do
         create(:merge_request,
                :simple,
@@ -831,6 +934,12 @@ describe API::Issues do
       expect(json_response['references']['short']).to eq("##{issue.iid}")
       expect(json_response['references']['relative']).to eq("##{issue.iid}")
       expect(json_response['references']['full']).to eq("#{project.parent.path}/#{project.path}##{issue.iid}")
+    end
+  end
+
+  describe 'PUT /projects/:id/issues/:issue_id' do
+    it_behaves_like 'issuable update endpoint' do
+      let(:entity) { issue }
     end
   end
 
@@ -879,5 +988,54 @@ describe API::Issues do
     let(:issuable) { issue }
 
     include_examples 'time tracking endpoints', 'issue'
+  end
+
+  describe 'PUT /projects/:id/issues/:issue_iid/reorder' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:issue1) { create(:issue, project: project, relative_position: 10) }
+    let_it_be(:issue2) { create(:issue, project: project, relative_position: 20) }
+    let_it_be(:issue3) { create(:issue, project: project, relative_position: 30) }
+
+    context 'when user has access' do
+      before do
+        project.add_developer(user)
+      end
+
+      context 'with valid params' do
+        it 'reorders issues and returns a successful 200 response' do
+          put api("/projects/#{project.id}/issues/#{issue1.iid}/reorder", user), params: { move_after_id: issue2.id, move_before_id: issue3.id }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(issue1.reload.relative_position)
+                .to be_between(issue2.reload.relative_position, issue3.reload.relative_position)
+        end
+      end
+
+      context 'with invalid params' do
+        it 'returns a unprocessable entity 422 response for invalid move ids' do
+          put api("/projects/#{project.id}/issues/#{issue1.iid}/reorder", user), params: { move_after_id: issue2.id, move_before_id: non_existing_record_id }
+
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
+        end
+
+        it 'returns a not found 404 response for invalid issue id' do
+          put api("/projects/#{project.id}/issues/#{non_existing_record_iid}/reorder", user), params: { move_after_id: issue2.id, move_before_id: issue3.id }
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+    end
+
+    context 'with unauthorized user' do
+      before do
+        project.add_guest(user)
+      end
+
+      it 'responds with 403 forbidden' do
+        put api("/projects/#{project.id}/issues/#{issue1.iid}/reorder", user), params: { move_after_id: issue2.id, move_before_id: issue3.id }
+
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
   end
 end

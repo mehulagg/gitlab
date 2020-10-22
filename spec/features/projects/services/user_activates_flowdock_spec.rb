@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User activates Flowdock' do
+RSpec.describe 'User activates Flowdock' do
   include_context 'project service activation' do
     let(:project) { create(:project, :repository) }
   end
@@ -15,8 +15,8 @@ describe 'User activates Flowdock' do
     visit_project_integration('Flowdock')
     fill_in('Token', with: 'verySecret')
 
-    click_test_integration
+    click_test_then_save_integration(expect_test_to_fail: false)
 
-    expect(page).to have_content('Flowdock activated.')
+    expect(page).to have_content('Flowdock settings saved and active.')
   end
 end

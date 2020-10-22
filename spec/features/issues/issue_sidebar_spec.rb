@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe 'Issue Sidebar' do
+RSpec.describe 'Issue Sidebar' do
   include MobileHelpers
 
   let(:group) { create(:group, :nested) }
   let(:project) { create(:project, :public, namespace: group) }
-  let!(:user) { create(:user)}
+  let!(:user) { create(:user) }
   let!(:label) { create(:label, project: project, title: 'bug') }
   let(:issue) { create(:labeled_issue, project: project, labels: [label]) }
   let!(:xss_label) { create(:label, project: project, title: '&lt;script&gt;alert("xss");&lt;&#x2F;script&gt;') }
@@ -16,66 +16,83 @@ describe 'Issue Sidebar' do
     sign_in(user)
   end
 
-  context 'assignee', :js do
+  context 'when concerning the assignee', :js do
     let(:user2) { create(:user) }
     let(:issue2) { create(:issue, project: project, author: user2) }
 
-    before do
+    include_examples 'issuable invite members experiments' do
+      let(:issuable_path) { project_issue_path(project, issue2) }
+    end
+
+    context 'when user is a developer' do
+      before do
+        project.add_developer(user)
+        visit_issue(project, issue2)
+
+        find('.block.assignee .edit-link').click
+
+        wait_for_requests
+      end
+
+      it 'shows author in assignee dropdown' do
+        page.within '.dropdown-menu-user' do
+          expect(page).to have_content(user2.name)
+        end
+      end
+
+      it 'shows author when filtering assignee dropdown' do
+        page.within '.dropdown-menu-user' do
+          find('.dropdown-input-field').set(user2.name)
+
+          wait_for_requests
+
+          expect(page).to have_content(user2.name)
+        end
+      end
+
+      it 'assigns yourself' do
+        find('.block.assignee .dropdown-menu-toggle').click
+
+        click_button 'assign yourself'
+
+        wait_for_requests
+
+        find('.block.assignee .edit-link').click
+
+        page.within '.dropdown-menu-user' do
+          expect(page.find('.dropdown-header')).to be_visible
+          expect(page.find('.dropdown-menu-user-link.is-active')).to have_content(user.name)
+        end
+      end
+
+      it 'keeps your filtered term after filtering and dismissing the dropdown' do
+        find('.dropdown-input-field').set(user2.name)
+
+        wait_for_requests
+
+        page.within '.dropdown-menu-user' do
+          expect(page).not_to have_content 'Unassigned'
+          click_link user2.name
+        end
+
+        find('.js-right-sidebar').click
+        find('.block.assignee .edit-link').click
+
+        expect(page.all('.dropdown-menu-user li').length).to eq(1)
+        expect(find('.dropdown-input-field').value).to eq(user2.name)
+      end
+    end
+
+    it 'shows label text as "Apply" when assignees are changed' do
       project.add_developer(user)
       visit_issue(project, issue2)
 
       find('.block.assignee .edit-link').click
-
-      wait_for_requests
-    end
-
-    it 'shows author in assignee dropdown' do
-      page.within '.dropdown-menu-user' do
-        expect(page).to have_content(user2.name)
-      end
-    end
-
-    it 'shows author when filtering assignee dropdown' do
-      page.within '.dropdown-menu-user' do
-        find('.dropdown-input-field').native.send_keys user2.name
-        sleep 1 # Required to wait for end of input delay
-
-        wait_for_requests
-
-        expect(page).to have_content(user2.name)
-      end
-    end
-
-    it 'assigns yourself' do
-      find('.block.assignee .dropdown-menu-toggle').click
-
-      click_button 'assign yourself'
-
       wait_for_requests
 
-      find('.block.assignee .edit-link').click
+      click_on 'Unassigned'
 
-      page.within '.dropdown-menu-user' do
-        expect(page.find('.dropdown-header')).to be_visible
-        expect(page.find('.dropdown-menu-user-link.is-active')).to have_content(user.name)
-      end
-    end
-
-    it 'keeps your filtered term after filtering and dismissing the dropdown' do
-      find('.dropdown-input-field').native.send_keys user2.name
-
-      wait_for_requests
-
-      page.within '.dropdown-menu-user' do
-        expect(page).not_to have_content 'Unassigned'
-        click_link user2.name
-      end
-
-      find('.js-right-sidebar').click
-      find('.block.assignee .edit-link').click
-
-      expect(page.all('.dropdown-menu-user li').length).to eq(1)
-      expect(find('.dropdown-input-field').value).to eq(user2.name)
+      expect(page).to have_link('Apply')
     end
   end
 
@@ -105,7 +122,7 @@ describe 'Issue Sidebar' do
 
       it 'escapes XSS when viewing issue labels' do
         page.within('.block.labels') do
-          find('.edit-link').click
+          click_on 'Edit'
 
           expect(page).to have_content '<script>alert("xss");</script>'
         end
@@ -116,7 +133,7 @@ describe 'Issue Sidebar' do
       before do
         issue.update(labels: [label])
         page.within('.block.labels') do
-          find('.edit-link').click
+          click_on 'Edit'
         end
       end
 
@@ -132,7 +149,7 @@ describe 'Issue Sidebar' do
         end
       end
 
-      context 'creating a project label', :js, :quarantine do
+      context 'creating a project label', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/27992' do
         before do
           page.within('.block.labels') do
             click_link 'Create project'
@@ -223,7 +240,7 @@ describe 'Issue Sidebar' do
     end
 
     it 'does not have a option to edit labels' do
-      expect(page).not_to have_selector('.block.labels .edit-link')
+      expect(page).not_to have_selector('.block.labels .js-sidebar-dropdown-toggle')
     end
 
     context 'interacting with collapsed sidebar', :js do

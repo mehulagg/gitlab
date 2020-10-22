@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'resource with requirement permissions' do
-  let(:all_permissions) { [:read_requirement, :create_requirement, :admin_requirement, :update_requirement, :destroy_requirement] }
+  let(:all_permissions) do
+    [:read_requirement, :create_requirement, :admin_requirement,
+     :update_requirement, :destroy_requirement,
+     :create_requirement_test_report]
+  end
+
   let(:manage_permissions) { all_permissions - [:destroy_requirement] }
   let(:non_read_permissions) { all_permissions - [:read_requirement] }
 

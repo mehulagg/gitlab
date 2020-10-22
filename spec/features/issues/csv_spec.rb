@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Issues csv' do
+RSpec.describe 'Issues csv' do
   let(:user) { create(:user) }
   let(:project) { create(:project, :public) }
   let(:milestone) { create(:milestone, title: 'v1.0', project: project) }
@@ -31,13 +31,13 @@ describe 'Issues csv' do
   end
 
   it 'triggers an email export' do
-    expect(ExportCsvWorker).to receive(:perform_async).with(user.id, project.id, hash_including("project_id" => project.id))
+    expect(IssuableExportCsvWorker).to receive(:perform_async).with(:issue, user.id, project.id, hash_including("project_id" => project.id))
 
     request_csv
   end
 
   it "doesn't send request params to ExportCsvWorker" do
-    expect(ExportCsvWorker).to receive(:perform_async).with(anything, anything, hash_excluding("controller" => anything, "action" => anything))
+    expect(IssuableExportCsvWorker).to receive(:perform_async).with(:issue, anything, anything, hash_excluding("controller" => anything, "action" => anything))
 
     request_csv
   end

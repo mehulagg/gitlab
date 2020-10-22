@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::ExpirePipelineCacheService do
+RSpec.describe Ci::ExpirePipelineCacheService do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
@@ -10,9 +10,9 @@ describe Ci::ExpirePipelineCacheService do
 
   describe '#execute' do
     it 'invalidates Etag caching for project pipelines path' do
-      pipelines_path = "/#{project.full_path}/pipelines.json"
+      pipelines_path = "/#{project.full_path}/-/pipelines.json"
       new_mr_pipelines_path = "/#{project.full_path}/-/merge_requests/new.json"
-      pipeline_path = "/#{project.full_path}/pipelines/#{pipeline.id}.json"
+      pipeline_path = "/#{project.full_path}/-/pipelines/#{pipeline.id}.json"
 
       expect_any_instance_of(Gitlab::EtagCaching::Store).to receive(:touch).with(pipelines_path)
       expect_any_instance_of(Gitlab::EtagCaching::Store).to receive(:touch).with(new_mr_pipelines_path)
@@ -26,9 +26,11 @@ describe Ci::ExpirePipelineCacheService do
       project = merge_request.target_project
 
       merge_request_pipelines_path = "/#{project.full_path}/-/merge_requests/#{merge_request.iid}/pipelines.json"
+      merge_request_widget_path = "/#{project.full_path}/-/merge_requests/#{merge_request.iid}/cached_widget.json"
 
       allow_any_instance_of(Gitlab::EtagCaching::Store).to receive(:touch)
       expect_any_instance_of(Gitlab::EtagCaching::Store).to receive(:touch).with(merge_request_pipelines_path)
+      expect_any_instance_of(Gitlab::EtagCaching::Store).to receive(:touch).with(merge_request_widget_path)
 
       subject.execute(merge_request.all_pipelines.last)
     end

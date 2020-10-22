@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'mail_room.yml' do
+RSpec.describe 'mail_room.yml' do
   include StubENV
 
   let(:mailroom_config_path) { 'config/mail_room.yml' }
@@ -17,7 +17,7 @@ describe 'mail_room.yml' do
     cmd = "puts ERB.new(File.read(#{absolute_path(mailroom_config_path).inspect})).result"
 
     output, status = Gitlab::Popen.popen(%W(ruby -rerb -e #{cmd}), absolute_path('config'), vars)
-    raise "Error interpreting #{mailroom_config_path}: #{output}" unless status.zero?
+    raise "Error interpreting #{mailroom_config_path}: #{output}" unless status == 0
 
     YAML.load(output)
   end
@@ -53,7 +53,8 @@ describe 'mail_room.yml' do
         email: 'gitlab-incoming@gmail.com',
         password: '[REDACTED]',
         name: 'inbox',
-        idle_timeout: 60
+        idle_timeout: 60,
+        expunge_deleted: true
       }
       expected_options = {
         redis_url: gitlab_redis_queues.url,

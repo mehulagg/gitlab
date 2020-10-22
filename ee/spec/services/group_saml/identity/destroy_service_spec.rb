@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupSaml::Identity::DestroyService do
+RSpec.describe GroupSaml::Identity::DestroyService do
   let(:identity) { create(:group_saml_identity) }
 
   subject { described_class.new(identity) }
@@ -50,6 +50,6 @@ describe GroupSaml::Identity::DestroyService do
   it 'logs an audit event' do
     expect do
       subject.execute
-    end.to change { SecurityEvent.count }.by(1)
+    end.to change { AuditEvent.count }.by(1)
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe UsersHelper do
+RSpec.describe UsersHelper do
   let(:user) { create(:user) }
 
   describe '#current_user_menu_items' do

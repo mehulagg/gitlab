@@ -1,15 +1,15 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import SafeLink from 'ee/vue_shared/components/safe_link.vue';
+import { GlLink } from '@gitlab/ui';
+import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import { s__ } from '~/locale';
 import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 import LicensePackages from './license_packages.vue';
 import { LICENSE_APPROVAL_STATUS } from '../constants';
-import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 
 export default {
   name: 'LicenseSetApprovalStatusModal',
-  components: { SafeLink, LicensePackages, GlModal: DeprecatedModal2 },
+  components: { GlLink, LicensePackages, GlModal: DeprecatedModal2 },
   computed: {
     ...mapState(LICENSE_MANAGEMENT, ['currentLicenseInModal', 'canManageLicenses']),
     headerTitleText() {
@@ -47,29 +47,23 @@ export default {
     @cancel="resetLicenseInModal"
   >
     <slot v-if="currentLicenseInModal">
-      <div class="row prepend-top-10 append-bottom-10 js-license-name">
+      <div class="row gl-mt-3 gl-mb-3 js-license-name">
         <label class="col-sm-3 text-right font-weight-bold">
           {{ s__('LicenseCompliance|License') }}:
         </label>
         <div class="col-sm-9 text-secondary">{{ currentLicenseInModal.name }}</div>
       </div>
-      <div
-        v-if="currentLicenseInModal.url"
-        class="row prepend-top-10 append-bottom-10 js-license-url"
-      >
+      <div v-if="currentLicenseInModal.url" class="row gl-mt-3 gl-mb-3 js-license-url">
         <label class="col-sm-3 text-right font-weight-bold">
           {{ s__('LicenseCompliance|URL') }}:
         </label>
         <div class="col-sm-9 text-secondary">
-          <safe-link
-            :href="currentLicenseInModal.url"
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-            >{{ currentLicenseInModal.url }}</safe-link
-          >
+          <gl-link :href="currentLicenseInModal.url" target="_blank" rel="nofollow">{{
+            currentLicenseInModal.url
+          }}</gl-link>
         </div>
       </div>
-      <div class="row prepend-top-10 append-bottom-10 js-license-packages">
+      <div class="row gl-mt-3 gl-mb-3 js-license-packages">
         <label class="col-sm-3 text-right font-weight-bold">
           {{ s__('LicenseCompliance|Packages') }}:
         </label>
@@ -92,7 +86,7 @@ export default {
         v-if="canBlacklist"
         class="btn btn-remove btn-inverted js-modal-secondary-action"
         data-dismiss="modal"
-        data-qa-selector="blacklist_license_button"
+        data-qa-selector="deny_license_button"
         @click="denyLicense(currentLicenseInModal)"
       >
         {{ s__('LicenseCompliance|Deny') }}

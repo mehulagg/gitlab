@@ -1,5 +1,0 @@
----
-title: Add spentAt field to TimelogType and deprecate date field
-merge_request: 29024
-author:
-type: added

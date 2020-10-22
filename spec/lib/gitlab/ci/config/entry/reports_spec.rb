@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Config::Entry::Reports do
+RSpec.describe Gitlab::Ci::Config::Entry::Reports do
   let(:entry) { described_class.new(config) }
 
   describe 'validates ALLOWED_KEYS' do
@@ -37,17 +37,22 @@ describe Gitlab::Ci::Config::Entry::Reports do
         :junit | 'junit.xml'
         :codequality | 'gl-code-quality-report.json'
         :sast | 'gl-sast-report.json'
+        :secret_detection | 'gl-secret-detection-report.json'
         :dependency_scanning | 'gl-dependency-scanning-report.json'
         :container_scanning | 'gl-container-scanning-report.json'
         :dast | 'gl-dast-report.json'
         :license_management | 'gl-license-management-report.json'
         :license_scanning | 'gl-license-scanning-report.json'
         :performance | 'performance.json'
+        :browser_performance | 'browser-performance.json'
+        :browser_performance | 'performance.json'
+        :load_performance | 'load-performance.json'
         :lsif | 'lsif.json'
         :dotenv | 'build.dotenv'
         :cobertura | 'cobertura-coverage.xml'
         :terraform | 'tfplan.json'
         :accessibility | 'gl-accessibility.json'
+        :cluster_applications | 'gl-cluster-applications.json'
       end
 
       with_them do

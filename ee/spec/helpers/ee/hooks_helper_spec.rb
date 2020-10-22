@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe HooksHelper do
+RSpec.describe HooksHelper do
   let(:group) { create(:group) }
   let(:group_hook) { create(:group_hook, group: group) }
   let(:trigger) { 'push_events' }

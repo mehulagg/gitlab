@@ -11,9 +11,7 @@ module EE
 
     override :page_has_markdown?
     def page_has_markdown?
-      super ||
-        current_path?('epics#show') ||
-        current_path?('issues#designs')
+      super || current_path?('epics#show')
     end
 
     override :admin_monitoring_nav_links
@@ -25,6 +23,11 @@ module EE
     override :group_issues_sub_menu_items
     def group_issues_sub_menu_items
       controllers = %w(issues_analytics#show)
+
+      if @group&.feature_available?(:iterations)
+        controllers = %w(iterations#index)
+      end
+
       super.concat(controllers)
     end
   end

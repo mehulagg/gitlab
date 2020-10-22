@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Path Locks', :js do
+RSpec.describe 'Path Locks', :js do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, namespace: user.namespace) }
   let(:tree_path) { project_tree_path(project, project.repository.root_ref) }

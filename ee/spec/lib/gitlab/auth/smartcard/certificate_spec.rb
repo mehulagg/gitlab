@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::Smartcard::Certificate do
+RSpec.describe Gitlab::Auth::Smartcard::Certificate do
   let(:subject_dn) { '/O=Random Corp Ltd/CN=gitlab-user/emailAddress=gitlab-user@random-corp.org' }
   let(:issuer_dn) { '/O=Random Corp Ltd/CN=Random Corp' }
   let(:certificate_header) { 'certificate' }

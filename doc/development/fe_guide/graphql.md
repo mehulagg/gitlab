@@ -1,7 +1,79 @@
+---
+type: reference, dev
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+---
+
 # GraphQL
 
+## Getting Started
+
+### Helpful Resources
+
+**General resources**:
+
+- [📚 Official Introduction to GraphQL](https://graphql.org/learn/)
+- [📚 Official Introduction to Apollo](https://www.apollographql.com/docs/tutorial/introduction/)
+
+**GraphQL at GitLab**:
+
+- [🎬 GitLab Unfiltered GraphQL playlist](https://www.youtube.com/watch?v=wHPKZBDMfxE&list=PL05JrBw4t0KpcjeHjaRMB7IGB2oDWyJzv)
+- [🎬 GraphQL at GitLab: Deep Dive](../api_graphql_styleguide.md#deep-dive) (video) by Nick Thomas
+  - An overview of the history of GraphQL at GitLab (not frontend-specific)
+- [🎬 GitLab Feature Walkthrough with GraphQL and Vue Apollo](https://www.youtube.com/watch?v=6yYp2zB7FrM) (video) by Natalia Tepluhina
+  - A real-life example of implementing a frontend feature in GitLab using GraphQL
+- [🎬 History of client-side GraphQL at GitLab](https://www.youtube.com/watch?v=mCKRJxvMnf0) (video) Illya Klymov and Natalia Tepluhina
+- [🎬 From Vuex to Apollo](https://www.youtube.com/watch?v=9knwu87IfU8) (video) by Natalia Tepluhina
+  - A useful overview of when Apollo might be a better choice than Vuex, and how one could go about the transition
+- [🛠 Vuex -> Apollo Migration: a proof-of-concept project](https://gitlab.com/ntepluhina/vuex-to-apollo/blob/master/README.md)
+  - A collection of examples that show the possible approaches for state management with Vue+GraphQL+(Vuex or Apollo) apps
+
+### Libraries
+
+We use [Apollo](https://www.apollographql.com/) (specifically [Apollo Client](https://www.apollographql.com/docs/react/)) and [Vue Apollo](https://github.com/vuejs/vue-apollo)
+when using GraphQL for frontend development.
+
+If you are using GraphQL within a Vue application, the [Usage in Vue](#usage-in-vue) section
+can help you learn how to integrate Vue Apollo.
+
+For other use cases, check out the [Usage outside of Vue](#usage-outside-of-vue) section.
+
+We use [Immer](https://immerjs.github.io/immer/docs/introduction) for immutable cache updates;
+see [Immutability and cache updates](#immutability-and-cache-updates) for more information.
+
+### Tooling
+
+- [Apollo Client Devtools](https://github.com/apollographql/apollo-client-devtools)
+
+#### [Apollo GraphQL VS Code extension](https://marketplace.visualstudio.com/items?itemName=apollographql.vscode-apollo)
+
+If you use VS Code, the Apollo GraphQL extension supports autocompletion in `.graphql` files. To set up
+the GraphQL extension, follow these steps:
+
+1. Add an `apollo.config.js` file to the root of your `gitlab` local directory.
+1. Populate the file with the following content:
+
+    ```javascript
+    module.exports = {
+      client: {
+        includes: ['./app/assets/javascripts/**/*.graphql', './ee/app/assets/javascripts/**/*.graphql'],
+        service: {
+          name: 'GitLab',
+          localSchemaFile: './doc/api/graphql/reference/gitlab_schema.graphql',
+        },
+      },
+    };
+    ```
+
+1. Restart VS Code.
+
+### Exploring the GraphQL API
+
 Our GraphQL API can be explored via GraphiQL at your instance's
-`/-/graphql-explorer` or at [GitLab.com](https://gitlab.com/-/graphql-explorer).
+`/-/graphql-explorer` or at [GitLab.com](https://gitlab.com/-/graphql-explorer). Consult the
+[GitLab GraphQL API Reference documentation](../../api/graphql/reference)
+where needed.
 
 You can check all existing queries and mutations on the right side
 of GraphiQL in its **Documentation explorer**. It's also possible to
@@ -10,13 +82,10 @@ their execution by clicking **Execute query** button on the top left:
 
 ![GraphiQL interface](img/graphiql_explorer_v12_4.png)
 
-We use [Apollo](https://www.apollographql.com/) and [Vue Apollo](https://github.com/vuejs/vue-apollo) for working with GraphQL
-on the frontend.
-
 ## Apollo Client
 
 To save duplicated clients getting created in different apps, we have a
-[default client](https://gitlab.com/gitlab-org/gitlab/blob/master/app/assets/javascripts/lib/graphql.js) that should be used. This setups the
+[default client](https://gitlab.com/gitlab-org/gitlab/blob/master/app/assets/javascripts/lib/graphql.js) that should be used. This sets up the
 Apollo client with the correct URL and also sets the CSRF headers.
 
 Default client accepts two parameters: `resolvers` and `config`.
@@ -26,11 +95,12 @@ Default client accepts two parameters: `resolvers` and `config`.
   - `cacheConfig` field accepts an optional object of settings to [customize Apollo cache](https://www.apollographql.com/docs/react/caching/cache-configuration/#configuring-the-cache)
   - `baseUrl` allows us to pass a URL for GraphQL endpoint different from our main endpoint (i.e.`${gon.relative_url_root}/api/graphql`)
   - `assumeImmutableResults` (set to `false` by default) - this setting, when set to `true`, will assume that every single operation on updating Apollo Cache is immutable. It also sets `freezeResults` to `true`, so any attempt on mutating Apollo Cache will throw a console warning in development environment. Please ensure you're following the immutability pattern on cache update operations before setting this option to `true`.
+  - `fetchPolicy` determines how you want your component to interact with the Apollo cache. Defaults to "cache-first".
 
 ## GraphQL Queries
 
 To save query compilation at runtime, webpack can directly import `.graphql`
-files. This allows webpack to preprocess the query at compile time instead
+files. This allows webpack to pre-process the query at compile time instead
 of the client doing compilation of queries.
 
 To distinguish queries from mutations and fragments, the following naming convention is recommended:
@@ -41,7 +111,7 @@ To distinguish queries from mutations and fragments, the following naming conven
 
 ### Fragments
 
-Fragments are a way to make your complex GraphQL queries more readable and re-usable. Here is an example of GraphQL fragment:
+[Fragments](https://graphql.org/learn/queries/#fragments) are a way to make your complex GraphQL queries more readable and re-usable. Here is an example of GraphQL fragment:
 
 ```javascript
 fragment DesignListItem on Design {
@@ -71,6 +141,56 @@ fragment DesignItem on Design {
 More about fragments:
 [GraphQL Docs](https://graphql.org/learn/queries/#fragments)
 
+## Global IDs
+
+GitLab's GraphQL API expresses `id` fields as Global IDs rather than the PostgreSQL
+primary key `id`. Global ID is [a convention](https://graphql.org/learn/global-object-identification/)
+used for caching and fetching in client-side libraries.
+
+To convert a Global ID to the primary key `id`, you can use `getIdFromGraphQLId`:
+
+```javascript
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+
+const primaryKeyId = getIdFromGraphQLId(data.id);
+```
+
+## Immutability and cache updates
+
+From Apollo version 3.0.0 all the cache updates need to be immutable; it needs to be replaced entirely
+with a **new and updated** object.
+
+To facilitate the process of updating the cache and returning the new object we use the library [Immer](https://immerjs.github.io/immer/docs/introduction).
+When possible, follow these conventions:
+
+- The updated cache is named `data`.
+- The original cache data is named `sourceData`.
+
+A typical update process looks like this:
+
+```javascript
+...
+const sourceData = client.readQuery({ query });
+
+const data = produce(sourceData, draftState => {
+  draftState.commits.push(newCommit);
+});
+
+client.writeQuery({
+  query,
+  data,
+});
+...
+```
+
+As shown in the code example by using `produce`, we can perform any kind of direct manipulation of the
+`draftState`. Besides, `immer` guarantees that a new state which includes the changes to `draftState` will be generated.
+
+Finally, to verify whether the immutable cache update is working properly, we need to change
+`assumeImmutableResults` to `true` in the `default client config` (see [Apollo Client](#apollo-client) for more info).
+
+If everything is working properly `assumeImmutableResults` should remain set to `true`.
+
 ## Usage in Vue
 
 To use Vue Apollo, import the [Vue Apollo](https://github.com/vuejs/vue-apollo) plugin as well
@@ -94,7 +214,7 @@ new Vue({
 });
 ```
 
-Read more about [Vue Apollo](https://github.com/vuejs/vue-apollo) in the [Vue Apollo documentation](https://vue-apollo.netlify.com/guide/).
+Read more about [Vue Apollo](https://github.com/vuejs/vue-apollo) in the [Vue Apollo documentation](https://vue-apollo.netlify.app/guide/).
 
 ### Local state with Apollo
 
@@ -108,9 +228,7 @@ import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 Vue.use(VueApollo);
 
-const defaultClient = createDefaultClient({
-  resolvers: {}
-});
+const defaultClient = createDefaultClient();
 
 defaultClient.cache.writeData({
   data: {
@@ -190,7 +308,7 @@ const resolvers = {
 export default resolvers;
 ```
 
-We need to pass resolvers object to our existing Apollo Client:
+We need to pass a resolvers object to our existing Apollo Client:
 
 ```javascript
 // graphql.js
@@ -198,21 +316,18 @@ We need to pass resolvers object to our existing Apollo Client:
 import createDefaultClient from '~/lib/graphql';
 import resolvers from './graphql/resolvers';
 
-const defaultClient = createDefaultClient(
-  {},
-  resolvers,
-);
+const defaultClient = createDefaultClient(resolvers);
 ```
 
-Now every single time on attempt to fetch a version, our client will fetch `id` and `sha` from the remote API endpoint and will assign our hardcoded values to `author` and `createdAt` version properties. With this data, frontend developers are able to work on UI part without being blocked by backend. When actual response is added to the API, a custom local resolver can be removed fast and the only change to query/fragment is `@client` directive removal.
+For each attempt to fetch a version, our client will fetch `id` and `sha` from the remote API endpoint and will assign our hardcoded values to the `author` and `createdAt` version properties. With this data, frontend developers are able to work on their UI without being blocked by backend. When the actual response is added to the API, our custom local resolver can be removed and the only change to the query/fragment is to remove the `@client` directive.
 
-Read more about local state management with Apollo in the [Vue Apollo documentation](https://vue-apollo.netlify.com/guide/local-state.html#local-state).
+Read more about local state management with Apollo in the [Vue Apollo documentation](https://vue-apollo.netlify.app/guide/local-state.html#local-state).
 
 ### Using with Vuex
 
-When Apollo Client is used within Vuex and fetched data is stored in the Vuex store, there is no need in keeping Apollo Client cache enabled. Otherwise we would have data from the API stored in two places - Vuex store and Apollo Client cache. More to say, with Apollo default settings, a subsequent fetch from the GraphQL API could result in fetching data from Apollo cache (in the case where we have the same query and variables). To prevent this behavior, we need to disable Apollo Client cache passing a valid `fetchPolicy` option to its constructor:
+When Apollo Client is used within Vuex and fetched data is stored in the Vuex store, there is no need to keep Apollo Client cache enabled. Otherwise we would have data from the API stored in two places - Vuex store and Apollo Client cache. With Apollo's default settings, a subsequent fetch from the GraphQL API could result in fetching data from Apollo cache (in the case where we have the same query and variables). To prevent this behavior, we need to disable Apollo Client cache by passing a valid `fetchPolicy` option to its constructor:
 
-```js
+```javascript
 import fetchPolicies from '~/graphql_shared/fetch_policy_constants';
 
 export const gqClient = createGqClient(
@@ -411,17 +526,27 @@ fetchNextPage() {
 Please note we don't have to save `pageInfo` one more time; `fetchMore` triggers a query
 `result` hook as well.
 
-#### Limitations
+### Managing performance
 
-Currently, bidirectional pagination doesn't work:
+The Apollo client will batch queries by default. This means that if you have 3 queries defined,
+Apollo will group them into one request, send the single request off to the server and only
+respond once all 3 queries have completed.
 
-- `hasNextPage` returns a correct value only when we paginate forward using `endCursor`
-  and `first` parameters.
-- `hasPreviousPage` returns a correct value only when we paginate backward using
-  `startCursor` and `last` parameters.
+If you need to have queries sent as individual requests, additional context can be provided
+to tell Apollo to do this.
 
-This should be resolved in the scope of the issue
-[Bi-directional Pagination in GraphQL doesn't work as expected](https://gitlab.com/gitlab-org/gitlab/-/issues/208301).
+```javascript
+export default {
+  apollo: {
+    user: {
+      query: QUERY_IMPORT,
+      context: {
+        isSingleRequest: true,
+      }
+    }
+  },
+};
+```
 
 ### Testing
 
@@ -454,6 +579,7 @@ If we need to test how our component renders when results from the GraphQL API a
         designs: {
           loading,
         },
+      },
     };
 
     wrapper = shallowMount(Index, {
@@ -536,6 +662,174 @@ it('calls mutation on submitting form ', () => {
 });
 ```
 
+### Testing with mocked Apollo Client
+
+To test the logic of Apollo cache updates, we might want to mock an Apollo Client in our unit tests. To separate tests with mocked client from 'usual' unit tests, it's recommended to create an additional component factory. This way we only create Apollo Client instance when it's necessary:
+
+```javascript
+function createComponent() {...}
+
+function createComponentWithApollo() {...}
+```
+
+We use [`mock-apollo-client`](https://www.npmjs.com/package/mock-apollo-client) library to mock Apollo client in tests.
+
+```javascript
+import { createMockClient } from 'mock-apollo-client';
+```
+
+Then we need to inject `VueApollo` to Vue local instance (`localVue.use()` can also be called within `createComponentWithApollo()`)
+
+```javascript
+import VueApollo from 'vue-apollo';
+import { createLocalVue } from '@vue/test-utils';
+
+const localVue = createLocalVue();
+localVue.use(VueApollo);
+```
+
+After this, on the global `describe`, we should create a variable for `fakeApollo`:
+
+```javascript
+describe('Some component with Apollo mock', () => {
+  let wrapper;
+  let fakeApollo
+})
+```
+
+Within component factory, we need to define an array of _handlers_ for every query or mutation:
+
+```javascript
+import getDesignListQuery from '~/design_management/graphql/queries/get_design_list.query.graphql';
+import permissionsQuery from '~/design_management/graphql/queries/design_permissions.query.graphql';
+import moveDesignMutation from '~/design_management/graphql/mutations/move_design.mutation.graphql';
+
+describe('Some component with Apollo mock', () => {
+  let wrapper;
+  let fakeApollo;
+
+  function createComponentWithApollo() {
+    const requestHandlers = [
+      [getDesignListQuery, jest.fn().mockResolvedValue(designListQueryResponse)],
+      [permissionsQuery, jest.fn().mockResolvedValue(permissionsQueryResponse)],
+    ];
+  }
+})
+```
+
+After this, we need to create a mock Apollo Client instance using a helper:
+
+```javascript
+import createMockApollo from 'jest/helpers/mock_apollo_helper';
+
+describe('Some component with Apollo mock', () => {
+  let wrapper;
+  let fakeApollo;
+
+  function createComponentWithApollo() {
+    const requestHandlers = [
+      [getDesignListQuery, jest.fn().mockResolvedValue(designListQueryResponse)],
+      [permissionsQuery, jest.fn().mockResolvedValue(permissionsQueryResponse)],
+    ];
+
+    fakeApollo = createMockApollo(requestHandlers);
+    wrapper = shallowMount(Index, {
+      localVue,
+      apolloProvider: fakeApollo,
+    });
+  }
+})
+```
+
+NOTE: **Note:**
+When mocking resolved values, make sure the structure of the response is the same as actual API response: i.e. root property should be `data` for example
+
+When testing queries, please keep in mind they are promises, so they need to be _resolved_ to render a result. Without resolving, we can check the `loading` state of the query:
+
+```javascript
+it('renders a loading state', () => {
+  createComponentWithApollo();
+
+  expect(wrapper.find(LoadingSpinner).exists()).toBe(true)
+});
+
+it('renders designs list', async () => {
+  createComponentWithApollo();
+
+  jest.runOnlyPendingTimers();
+  await wrapper.vm.$nextTick();
+
+  expect(findDesigns()).toHaveLength(3);
+});
+```
+
+If we need to test a query error, we need to mock a rejected value as request handler:
+
+```javascript
+function createComponentWithApollo() {
+  ...
+  const requestHandlers = [
+    [getDesignListQuery, jest.fn().mockRejectedValue(new Error('GraphQL error')],
+  ];
+  ...
+}
+...
+
+it('renders error if query fails', async () => {
+  createComponent()
+
+  jest.runOnlyPendingTimers();
+  await wrapper.vm.$nextTick();
+
+  expect(wrapper.find('.test-error').exists()).toBe(true)
+})
+```
+
+Request handlers can also be passed to component factory as a parameter.
+
+Mutations could be tested the same way with a few additional `nextTick`s to get the updated result:
+
+```javascript
+function createComponentWithApollo({
+  moveHandler = jest.fn().mockResolvedValue(moveDesignMutationResponse),
+}) {
+  moveDesignHandler = moveHandler;
+
+  const requestHandlers = [
+    [getDesignListQuery, jest.fn().mockResolvedValue(designListQueryResponse)],
+    [permissionsQuery, jest.fn().mockResolvedValue(permissionsQueryResponse)],
+    [moveDesignMutation, moveDesignHandler],
+  ];
+
+  fakeApollo = createMockApollo(requestHandlers);
+  wrapper = shallowMount(Index, {
+    localVue,
+    apolloProvider: fakeApollo,
+  });
+}
+...
+it('calls a mutation with correct parameters and reorders designs', async () => {
+  createComponentWithApollo({});
+
+  wrapper.find(VueDraggable).vm.$emit('change', {
+    moved: {
+      newIndex: 0,
+      element: designToMove,
+    },
+  });
+
+  expect(moveDesignHandler).toHaveBeenCalled();
+
+  await wrapper.vm.$nextTick();
+
+  expect(
+    findDesigns()
+      .at(0)
+      .props('id'),
+  ).toBe('2');
+});
+```
+
 ## Handling errors
 
 GitLab's GraphQL mutations currently have two distinct error modes: [Top-level](#top-level-errors) and [errors-as-data](#errors-as-data).
@@ -548,7 +842,7 @@ These errors are located at the "top level" of a GraphQL response. These are non
 
 #### Handling top-level errors
 
-Apollo is aware of top-level errors, so we are able to leverage Apollo's various error-handling mechanisms to handle these errors (e.g. handling Promise rejections after invoking the [`mutate`](https://www.apollographql.com/docs/react/api/apollo-client/#ApolloClient.mutate) method, or handling the `error` event emitted from the [`ApolloMutation`](https://apollo.vuejs.org/api/apollo-mutation.html#events) component).
+Apollo is aware of top-level errors, so we are able to leverage Apollo's various error-handling mechanisms to handle these errors (e.g. handling Promise rejections after invoking the [`mutate`](https://www.apollographql.com/docs/react/api/core/ApolloClient/#ApolloClient.mutate) method, or handling the `error` event emitted from the [`ApolloMutation`](https://apollo.vuejs.org/api/apollo-mutation.html#events) component).
 
 Because these errors are not intended for users, error messages for top-level errors should be defined client-side.
 
@@ -599,4 +893,20 @@ defaultClient.query({ query })
   .then(result => console.log(result));
 ```
 
-Read more about the [Apollo](https://www.apollographql.com/) client in the [Apollo documentation](https://www.apollographql.com/docs/tutorial/client/).
+When [using Vuex](#using-with-vuex), disable the cache when:
+
+- The data is being cached elsewhere
+- The use case does not need caching
+if the data is being cached elsewhere, or if there is simply no need for it for the given use case.
+
+```javascript
+import createDefaultClient from '~/lib/graphql';
+import fetchPolicies from '~/graphql_shared/fetch_policy_constants';
+
+const defaultClient = createDefaultClient(
+  {},
+  {
+    fetchPolicy: fetchPolicies.NO_CACHE,
+  },
+);
+```

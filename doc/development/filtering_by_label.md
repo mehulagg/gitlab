@@ -1,3 +1,8 @@
+---
+stage: Plan
+group: Project Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
 # Filtering by label
 
 ## Introduction
@@ -40,13 +45,13 @@ In particular, note that:
 
 This is more complicated than is ideal. It makes the query construction more
 prone to errors (such as
-[issue #15557](https://gitlab.com/gitlab-org/gitlab-foss/issues/15557)).
+[issue #15557](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/15557)).
 
 ## Attempt A: WHERE EXISTS
 
 ### Attempt A1: use multiple subqueries with WHERE EXISTS
 
-In [issue #37137](https://gitlab.com/gitlab-org/gitlab-foss/issues/37137)
+In [issue #37137](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/37137)
 and its associated [merge request](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/14022),
 we tried to replace the `GROUP BY` with multiple uses of `WHERE EXISTS`. For the
 example above, this would give:
@@ -80,10 +85,10 @@ it did not improve query performance.
 ## Attempt B: Denormalize using an array column
 
 Having [removed MySQL support in GitLab 12.1](https://about.gitlab.com/blog/2019/06/27/removing-mysql-support/),
-using [PostgreSQL's arrays](https://www.postgresql.org/docs/9.6/arrays.html) became more
+using [PostgreSQL's arrays](https://www.postgresql.org/docs/11/arrays.html) became more
 tractable as we didn't have to support two databases. We discussed denormalizing
 the `label_links` table for querying in
-[issue #49651](https://gitlab.com/gitlab-org/gitlab-foss/issues/49651),
+[issue #49651](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/49651),
 with two options: label IDs and titles.
 
 We can think of both of those as array columns on `issues`, `merge_requests`,
@@ -91,7 +96,7 @@ and `epics`: `issues.label_ids` would be an array column of label IDs, and
 `issues.label_titles` would be an array of label titles.
 
 These array columns can be complemented with [GIN
-indexes](https://www.postgresql.org/docs/9.6/gin-intro.html) to improve
+indexes](https://www.postgresql.org/docs/11/gin-intro.html) to improve
 matching.
 
 ### Attempt B1: store label IDs for each object
@@ -147,7 +152,7 @@ WHERE
     label_titles @> ARRAY['Plan', 'backend']
 ```
 
-And our [tests in issue #49651](https://gitlab.com/gitlab-org/gitlab-foss/issues/49651#note_188777346)
+And our [tests in issue #49651](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/49651#note_188777346)
 showed that this could be fast.
 
 However, at present, the disadvantages outweigh the advantages.

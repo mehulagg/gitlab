@@ -17,6 +17,10 @@ module Gitlab
                       merge_access_levels: 'ProtectedBranch::MergeAccessLevel',
                       push_access_levels: 'ProtectedBranch::PushAccessLevel',
                       create_access_levels: 'ProtectedTag::CreateAccessLevel',
+                      design: 'DesignManagement::Design',
+                      designs: 'DesignManagement::Design',
+                      design_versions: 'DesignManagement::Version',
+                      actions: 'DesignManagement::Action',
                       labels: :project_labels,
                       priorities: :label_priorities,
                       auto_devops: :project_auto_devops,
@@ -51,6 +55,7 @@ module Gitlab
           container_expiration_policy
           external_pull_request
           external_pull_requests
+          DesignManagement::Design
         ].freeze
 
         def create
@@ -65,10 +70,8 @@ module Gitlab
         private
 
         def invalid_relation?
-          # Do not create relation if it is:
-          #   - An unknown service
-          #   - A legacy trigger
-          unknown_service? || legacy_trigger?
+          # Do not create relation if it is a legacy trigger
+          legacy_trigger?
         end
 
         def setup_models
@@ -130,11 +133,6 @@ module Gitlab
               status.pipeline = imported_object
             end
           end
-        end
-
-        def unknown_service?
-          @relation_name == :services && parsed_relation_hash['type'] &&
-            !Object.const_defined?(parsed_relation_hash['type'])
         end
 
         def legacy_trigger?

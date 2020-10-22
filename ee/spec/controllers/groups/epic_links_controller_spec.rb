@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::EpicLinksController do
+RSpec.describe Groups::EpicLinksController do
   let(:group) { create(:group, :public) }
   let(:parent_epic) { create(:epic, group: group) }
   let(:epic1) { create(:epic, group: group) }
@@ -31,7 +31,7 @@ describe Groups::EpicLinksController do
     let(:features_when_forbidden) { { epics: false } }
 
     before do
-      epic1.update(parent: parent_epic)
+      epic1.update!(parent: parent_epic)
     end
 
     subject { get :index, params: { group_id: group, epic_id: parent_epic.to_param } }
@@ -60,7 +60,7 @@ describe Groups::EpicLinksController do
 
       context 'when user does not have access to epic' do
         it 'returns 404 status' do
-          group.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+          group.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
 
           subject
 
@@ -118,8 +118,8 @@ describe Groups::EpicLinksController do
 
   describe 'PUT #update' do
     before do
-      epic1.update(parent: parent_epic)
-      epic2.update(parent: parent_epic)
+      epic1.update!(parent: parent_epic)
+      epic2.update!(parent: parent_epic)
     end
 
     let(:move_before_epic) { epic2 }
@@ -173,7 +173,7 @@ describe Groups::EpicLinksController do
 
   describe 'DELETE #destroy' do
     before do
-      epic1.update(parent: parent_epic)
+      epic1.update!(parent: parent_epic)
     end
 
     let(:features_when_forbidden) { { epics: false } }
@@ -182,9 +182,9 @@ describe Groups::EpicLinksController do
 
     it_behaves_like 'unlicensed subepics action'
 
-    context 'when subepics are enabled' do
+    context 'when epics are enabled' do
       before do
-        stub_licensed_features(epics: true, subepics: true)
+        stub_licensed_features(epics: true)
       end
 
       context 'when user has permissions to update the parent epic' do
@@ -221,6 +221,19 @@ describe Groups::EpicLinksController do
 
           expect(response).to have_gitlab_http_status(:forbidden)
         end
+      end
+    end
+
+    context 'when user has permissions to update the parent epic but epics feature is disabled' do
+      before do
+        stub_licensed_features(epics: false)
+        group.add_developer(user)
+      end
+
+      it 'does not destroy the link' do
+        expect { subject }.not_to change { epic1.reload.parent }.from(parent_epic)
+
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
   end

@@ -6,26 +6,30 @@
     %button.btn.js-settings-toggle{ type: 'button' }
       = expanded_by_default? ? _('Collapse') : _('Expand')
     %p
-      = _('Settings to prevent self-approval across all projects in the instance. Only an administrator can modify these settings.')
+      - if show_compliance_merge_request_approval_settings?
+        = _('Regulate approvals by authors/committers, based on compliance frameworks. Can be changed only at the instance level.')
+      - else
+        = _('Settings to prevent self-approval across all projects in the instance. Only an administrator can modify these settings.')
+
   .settings-content
     %hr.clearfix.mt-0
 
     = form_for @application_setting, url: general_admin_application_settings_path(anchor: 'merge-request-approval-settings'), html: { class: 'fieldset-form' } do |f|
       = form_errors(@application_setting)
 
-      %fieldset
-        .form-group
-          .form-check
-            = f.check_box :prevent_merge_requests_author_approval, class: 'form-check-input'
-            = f.label :prevent_merge_requests_author_approval, class: 'form-check-label' do
-              = _('Prevent approval of merge requests by merge request author')
-          .form-check
-            = f.check_box :prevent_merge_requests_committers_approval, class: 'form-check-input'
-            = f.label :prevent_merge_requests_committers_approval, class: 'form-check-label' do
-              = _('Prevent approval of merge requests by merge request committers')
-          .form-check
-            = f.check_box :disable_overriding_approvers_per_merge_request , class: 'form-check-input'
-            = f.label :disable_overriding_approvers_per_merge_request , class: 'form-check-label' do
-              = _('Prevent users from modifying merge request approvers list')
+      = render 'merge_request_approvals_fields', f: f
 
-      = f.submit _('Save changes'), class: "btn btn-success"
+      - if show_compliance_merge_request_approval_settings?
+        .sub-section
+          %h5
+            = _('Compliance frameworks')
+          .form-group
+            .form-text.text-muted.mb-2
+              = _('The above settings apply to all projects with the selected compliance framework(s).')
+
+            = f.collection_check_boxes(:compliance_frameworks, compliance_framework_checkboxes, :first, :last) do |b|
+              .form-check
+                = b.check_box(class: "form-check-input")
+                = b.label(class: "form-check-label")
+
+      = f.submit _('Save changes'), class: "gl-button btn btn-success"

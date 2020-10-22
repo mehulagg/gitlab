@@ -2,16 +2,17 @@
 
 export SETUP_DB=${SETUP_DB:-true}
 export USE_BUNDLE_INSTALL=${USE_BUNDLE_INSTALL:-true}
-export BUNDLE_INSTALL_FLAGS="--without=production --jobs=$(nproc) --path=vendor --retry=3 --quiet"
+export BUNDLE_INSTALL_FLAGS=${BUNDLE_INSTALL_FLAGS:-"--without=production development --jobs=$(nproc) --path=vendor --retry=3 --quiet"}
 
 if [ "$USE_BUNDLE_INSTALL" != "false" ]; then
   bundle --version
-  bundle install --clean $BUNDLE_INSTALL_FLAGS && bundle check
+  run_timed_command "bundle install --clean ${BUNDLE_INSTALL_FLAGS}"
+  run_timed_command "bundle check"
+  # When we test multiple versions of PG in the same pipeline, we have a single `setup-test-env`
+  # job but the `pg` gem needs to be rebuilt since it includes extensions (https://guides.rubygems.org/gems-with-extensions).
+  # Uncomment the following line if multiple versions of PG are tested in the same pipeline.
+  run_timed_command "bundle pristine pg"
 fi
-
-# Only install knapsack after bundle install! Otherwise oddly some native
-# gems could not be found under some circumstance. No idea why, hours wasted.
-retry gem install knapsack --no-document
 
 cp config/gitlab.yml.example config/gitlab.yml
 sed -i 's/bin_path: \/usr\/bin\/git/bin_path: \/usr\/local\/bin\/git/' config/gitlab.yml

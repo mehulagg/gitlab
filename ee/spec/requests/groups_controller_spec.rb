@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupsController, type: :request do
+RSpec.describe GroupsController, type: :request do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
 
@@ -10,8 +10,6 @@ describe GroupsController, type: :request do
     before do
       group.add_owner(user)
       login_as(user)
-
-      stub_licensed_features(group_ip_restriction: true)
     end
 
     subject do
@@ -19,7 +17,6 @@ describe GroupsController, type: :request do
     end
 
     context 'setting ip_restriction' do
-      let(:group) { create(:group) }
       let(:params) { { group: { ip_restriction_ranges: range } } }
       let(:range) { '192.168.0.0/24' }
 
@@ -182,6 +179,156 @@ describe GroupsController, type: :request do
         it 'does not create ip restriction' do
           expect { subject }
             .not_to change { group.reload.ip_restrictions.count }.from(0)
+          expect(response).to have_gitlab_http_status(:found)
+        end
+      end
+    end
+
+    context 'setting email domain restrictions' do
+      let(:params) { { group: { allowed_email_domains_list: domains } } }
+
+      before do
+        stub_licensed_features(group_allowed_email_domains: true)
+      end
+
+      context 'top-level group' do
+        context 'when email domain restriction does not exist' do
+          context 'valid param' do
+            shared_examples 'creates email domain restrictions' do
+              it 'creates email domain restrictions' do
+                subject
+
+                expect(response).to have_gitlab_http_status(:found)
+                expect(group.reload.allowed_email_domains.domain_names).to match_array(domains.split(","))
+              end
+            end
+
+            context 'single domain' do
+              let(:domains) { 'gitlab.com' }
+
+              it_behaves_like 'creates email domain restrictions'
+            end
+
+            context 'multiple domains' do
+              let(:domains) { 'gitlab.com,acme.com' }
+
+              it_behaves_like 'creates email domain restrictions'
+            end
+          end
+
+          context 'invalid param' do
+            let(:domains) { 'boom!' }
+
+            it 'adds error message' do
+              expect { subject }
+                .not_to(change { group.reload.allowed_email_domains.count }.from(0))
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(response.body).to include('The domain you entered is misformatted')
+            end
+          end
+        end
+
+        context 'when email domain restrictions already exists' do
+          let!(:allowed_email_domain) { create(:allowed_email_domain, group: group, domain: 'gitlab.com') }
+
+          context 'allowed email domain param set' do
+            context 'valid param' do
+              shared_examples 'updates allowed email domain restrictions' do
+                it 'updates allowed email domain restrictions' do
+                  subject
+
+                  expect(response).to have_gitlab_http_status(:found)
+                  expect(group.reload.allowed_email_domains.domain_names).to match_array(domains.split(","))
+                end
+              end
+
+              context 'single domain' do
+                let(:domains) { 'hey.com' }
+
+                it_behaves_like 'updates allowed email domain restrictions'
+              end
+
+              context 'multiple domains' do
+                context 'a new domain along with the existing one' do
+                  let(:domains) { 'gitlab.com,hey.com' }
+
+                  it_behaves_like 'updates allowed email domain restrictions'
+                end
+
+                context 'completely new set of domains' do
+                  let(:domains) { 'hey.com,google.com' }
+
+                  it_behaves_like 'updates allowed email domain restrictions'
+                end
+              end
+            end
+
+            context 'invalid param' do
+              shared_examples 'does not update existing email domain restrictions' do
+                it 'does not change allowed_email_domains records' do
+                  expect { subject }
+                    .not_to(change { group.reload.allowed_email_domains.domain_names }
+                      .from(['gitlab.com']))
+                end
+
+                it 'adds error message' do
+                  subject
+
+                  expect(response).to have_gitlab_http_status(:ok)
+                  expect(response.body).to include('The domain you entered is misformatted')
+                end
+              end
+
+              context 'not a valid domain' do
+                let(:domains) { 'boom!' }
+
+                it_behaves_like 'does not update existing email domain restrictions'
+              end
+
+              context 'multiple domains' do
+                context 'any one of them being not a valid' do
+                  let(:domains) { 'acme.com,boom!' }
+
+                  it_behaves_like 'does not update existing email domain restrictions'
+                end
+              end
+            end
+          end
+
+          context 'empty param' do
+            let(:domains) { '' }
+
+            it 'deletes all email domain restrictions' do
+              expect { subject }
+                .to(change { group.reload.allowed_email_domains.count }.to(0))
+              expect(response).to have_gitlab_http_status(:found)
+            end
+          end
+        end
+      end
+
+      context 'subgroup' do
+        let(:group) { create(:group, :nested) }
+        let(:domains) { 'gitlab.com' }
+
+        it 'does not create email domain restriction' do
+          expect { subject }
+            .not_to change { group.reload.allowed_email_domains.count }.from(0)
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.body).to include('Allowed email domain restriction only permitted for top-level groups')
+        end
+      end
+
+      context 'feature is disabled' do
+        let(:domains) { 'gitlab.com' }
+
+        before do
+          stub_licensed_features(group_allowed_email_domains: false)
+        end
+
+        it 'does not create email domain restrictions' do
+          expect { subject }
+            .not_to change { group.reload.allowed_email_domains.count }.from(0)
           expect(response).to have_gitlab_http_status(:found)
         end
       end

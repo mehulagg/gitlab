@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Status::Success do
+RSpec.describe Gitlab::Ci::Status::Success do
   subject do
     described_class.new(double('subject'), double('user'))
   end
@@ -25,5 +25,9 @@ describe Gitlab::Ci::Status::Success do
 
   describe '#group' do
     it { expect(subject.group).to eq 'success' }
+  end
+
+  describe '#details_path' do
+    it { expect(subject.details_path).to be_nil }
   end
 end

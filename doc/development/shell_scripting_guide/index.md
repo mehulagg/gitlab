@@ -1,7 +1,5 @@
 # Shell scripting standards and style guidelines
 
-## Overview
-
 GitLab consists of many various services and sub-projects. The majority of
 their backend code is written in [Ruby](https://www.ruby-lang.org) and
 [Go](https://golang.org). However, some of them use shell scripts for
@@ -15,7 +13,7 @@ should be eventually harmonized with this guide. If there are any per-project
 deviations from this guide, they should be described in the
 `README.md` or `PROCESS.md` file for such a project.
 
-### Avoid using shell scripts
+## Avoid using shell scripts
 
 CAUTION: **Caution:**
 This is a must-read section.
@@ -65,7 +63,7 @@ shell check:
   before_script:
     - shellcheck --version
   script:
-    - shellcheck scripts/**/*.sh # path to your shell scripts
+    - shellcheck scripts/**/*.sh  # path to your shell scripts
 ```
 
 TIP: **Tip:**
@@ -93,7 +91,7 @@ shfmt:
   before_script:
     - shfmt -version
   script:
-    - shfmt -i 2 -ci -d scripts # path to your shell scripts
+    - shfmt -i 2 -ci -d scripts  # path to your shell scripts
 ```
 
 TIP: **Tip:**
@@ -106,7 +104,7 @@ and ignore files starting with a period. To override this, use `-ln` flag to spe
 NOTE: **Note:**
 This is a work in progress.
 
-It is an [ongoing effort](https://gitlab.com/gitlab-org/gitlab-foss/issues/64016) to evaluate different tools for the
+It is an [ongoing effort](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/64016) to evaluate different tools for the
 automated testing of shell scripts (like [BATS](https://github.com/bats-core/bats-core)).
 
 ## Code Review

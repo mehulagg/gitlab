@@ -4,50 +4,9 @@ module IssuesHelper
   def issue_css_classes(issue)
     classes = ["issue"]
     classes << "closed" if issue.closed?
-    classes << "today" if issue.today?
+    classes << "today" if issue.new?
     classes << "user-can-drag" if @sort == 'relative_position'
     classes.join(' ')
-  end
-
-  # Returns an OpenStruct object suitable for use by <tt>options_from_collection_for_select</tt>
-  # to allow filtering issues by an unassigned User or Milestone
-  def unassigned_filter
-    # Milestone uses :title, Issue uses :name
-    OpenStruct.new(id: 0, title: 'None (backlog)', name: 'Unassigned')
-  end
-
-  def url_for_issue(issue_iid, project = @project, options = {})
-    return '' if project.nil?
-
-    url =
-      if options[:internal]
-        url_for_internal_issue(issue_iid, project, options)
-      else
-        url_for_tracker_issue(issue_iid, project, options)
-      end
-
-    # Ensure we return a valid URL to prevent possible XSS.
-    URI.parse(url).to_s
-  rescue URI::InvalidURIError
-    ''
-  end
-
-  def url_for_tracker_issue(issue_iid, project, options)
-    if options[:only_path]
-      project.issues_tracker.issue_path(issue_iid)
-    else
-      project.issues_tracker.issue_url(issue_iid)
-    end
-  end
-
-  def url_for_internal_issue(issue_iid, project = @project, options = {})
-    helpers = Gitlab::Routing.url_helpers
-
-    if options[:only_path]
-      helpers.namespace_project_issue_path(namespace_id: project.namespace, project_id: project, id: issue_iid)
-    else
-      helpers.namespace_project_issue_url(namespace_id: project.namespace, project_id: project, id: issue_iid)
-    end
   end
 
   def status_box_class(item)
@@ -82,7 +41,7 @@ module IssuesHelper
   end
 
   def confidential_icon(issue)
-    icon('eye-slash') if issue.confidential?
+    sprite_icon('eye-slash', css_class: 'gl-vertical-align-text-bottom') if issue.confidential?
   end
 
   def award_user_list(awards, current_user, limit: 10)
@@ -145,17 +104,12 @@ module IssuesHelper
     can?(current_user, :create_issue, project)
   end
 
-  def create_confidential_merge_request_enabled?
-    Feature.enabled?(:create_confidential_merge_request, @project, default_enabled: true)
-  end
-
   def show_new_branch_button?
     can_create_confidential_merge_request? || !@issue.confidential?
   end
 
   def can_create_confidential_merge_request?
     @issue.confidential? && !@project.private? &&
-      create_confidential_merge_request_enabled? &&
       can?(current_user, :create_merge_request_in, @project)
   end
 
@@ -178,13 +132,26 @@ module IssuesHelper
   end
 
   def show_moved_service_desk_issue_warning?(issue)
-    false
+    return false unless issue.moved_from
+    return false unless issue.from_service_desk?
+
+    issue.moved_from.project.service_desk_enabled? && !issue.project.service_desk_enabled?
   end
 
-  # Required for Banzai::Filter::IssueReferenceFilter
-  module_function :url_for_issue
-  module_function :url_for_internal_issue
-  module_function :url_for_tracker_issue
+  def use_startup_call?
+    request.query_parameters.empty? && @sort == 'created_date'
+  end
+
+  def startup_call_params
+    {
+      state: 'opened',
+      with_labels_details: 'true',
+      page: 1,
+      per_page: 20,
+      order_by: 'created_at',
+      sort: 'desc'
+    }
+  end
 end
 
 IssuesHelper.prepend_if_ee('EE::IssuesHelper')

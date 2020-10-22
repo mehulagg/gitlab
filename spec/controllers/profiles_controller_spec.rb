@@ -2,7 +2,7 @@
 
 require('spec_helper')
 
-describe ProfilesController, :request_store do
+RSpec.describe ProfilesController, :request_store do
   let(:user) { create(:user) }
 
   describe 'POST update' do
@@ -98,6 +98,19 @@ describe ProfilesController, :request_store do
 
       expect(user.reload.job_title).to eq(title)
       expect(response).to have_gitlab_http_status(:found)
+    end
+  end
+
+  describe 'GET audit_log' do
+    it 'tracks search event', :snowplow do
+      sign_in(user)
+
+      get :audit_log
+
+      expect_snowplow_event(
+        category: 'ProfilesController',
+        action: 'search_audit_event'
+      )
     end
   end
 

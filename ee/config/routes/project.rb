@@ -11,24 +11,12 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       # Begin of the /-/ scope.
       # Use this scope for all new project routes.
       scope '-' do
-        resources :requirements, only: [:index]
-        resources :packages, only: [:index, :show, :destroy], module: :packages
-        resources :package_files, only: [], module: :packages do
-          member do
-            get :download
-          end
+        namespace :requirements_management do
+          resources :requirements, only: [:index]
         end
 
-        resources :jobs, only: [], constraints: { id: /\d+/ } do
-          member do
-            get '/proxy.ws/authorize', to: 'jobs#proxy_websocket_authorize', format: false
-            get :proxy
-          end
-        end
-
-        resources :feature_flags, param: :iid
-        resource :feature_flags_client, only: [] do
-          post :reset_token
+        namespace :quality do
+          resources :test_cases, only: [:index, :new]
         end
 
         resources :autocomplete_sources, only: [] do
@@ -43,30 +31,11 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           end
         end
 
-        # DEPRECATED: Remove this redirection in GitLab 13.0.
-        # This redirection supports old (pre-12.9) routes to Design Management raw images.
-        # https://gitlab.com/gitlab-org/gitlab/issues/208256
-        get '/designs/:id(/*ref)',
-          as: :design,
-          contraints: { id: /\d+/, ref: Gitlab::PathRegex.git_reference_regex },
-          to: redirect { |params|
-            namespace_id, project_id, id, ref = params.values_at(:namespace_id, :project_id, :id, :ref)
-            # The :ref route segment is optional in both this route, and the route
-            # we redirect to (where it is called :sha).
-            ref_path = "/#{ref}" if ref
-            "#{namespace_id}/#{project_id}/-/design_management/designs/#{id}#{ref_path}/raw_image"
-          }
-
-        namespace :design_management do
-          namespace :designs, path: 'designs/:design_id(/:sha)', constraints: -> (params) { params[:sha].nil? || Gitlab::Git.commit_id?(params[:sha]) } do
-            resource :raw_image, only: :show
-            resources :resized_image, only: :show, constraints: -> (params) { DesignManagement::DESIGN_IMAGE_SIZES.include?(params[:id]) }
-          end
-        end
-
         resources :subscriptions, only: [:create, :destroy]
 
-        resource :threat_monitoring, only: [:show], controller: :threat_monitoring
+        resource :threat_monitoring, only: [:show], controller: :threat_monitoring do
+          resources :policies, only: [:new, :edit], controller: :threat_monitoring
+        end
 
         resources :protected_environments, only: [:create, :update, :destroy], constraints: { id: /\d+/ } do
           collection do
@@ -81,23 +50,29 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
             get :summary, on: :collection
           end
 
-          resource :network_policies, only: [] do
+          resources :network_policies, only: [:index, :create, :update, :destroy] do
             get :summary, on: :collection
           end
 
           resources :dashboard, only: [:index], controller: :dashboard
-          resource :configuration, only: [:show], controller: :configuration
-          resource :discover, only: [:show], controller: :discover
 
-          resources :vulnerability_findings, only: [:index] do
-            collection do
-              get :summary
+          resource :configuration, only: [:show], controller: :configuration do
+            post :auto_fix, on: :collection
+            resource :sast, only: [:show, :create], controller: :sast_configuration
+            resource :dast_profiles, only: [:show] do
+              resources :dast_site_profiles, only: [:new, :edit]
+              resources :dast_scanner_profiles, only: [:new, :edit]
             end
           end
 
-          resources :vulnerabilities, only: [:show, :index] do
+          resource :discover, only: [:show], controller: :discover
+
+          resources :scanned_resources, only: [:index]
+
+          resources :vulnerabilities, only: [:show] do
             member do
               get :discussions, format: :json
+              post :create_issue, format: :json
             end
 
             scope module: :vulnerabilities do
@@ -109,6 +84,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         namespace :analytics do
           resources :code_reviews, only: [:index]
           resource :issues_analytics, only: [:show]
+          resource :merge_request_analytics, only: :show
         end
 
         resources :approvers, only: :destroy
@@ -117,6 +93,26 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :vulnerability_feedback, only: [:index, :create, :update, :destroy], constraints: { id: /\d+/ }
         resources :dependencies, only: [:index]
         resources :licenses, only: [:index, :create, :update]
+
+        resources :feature_flags, param: :iid do
+          resources :feature_flag_issues, only: [:index, :create, :destroy], as: 'issues', path: 'issues'
+        end
+
+        scope :on_demand_scans do
+          root 'on_demand_scans#index', as: 'on_demand_scans'
+        end
+
+        namespace :integrations do
+          namespace :jira do
+            resources :issues, only: [:index]
+          end
+        end
+
+        resources :iterations, only: [:index]
+
+        namespace :iterations do
+          resources :inherited, only: [:show], constraints: { id: /\d+/ }
+        end
       end
       # End of the /-/ scope.
 
@@ -130,63 +126,17 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         end
       end
 
-      resource :tracing, only: [:show]
-
-      resources :web_ide_terminals, path: :ide_terminals, only: [:create, :show], constraints: { id: /\d+/, format: :json } do
-        member do
-          post :cancel
-          post :retry
-        end
-
-        collection do
-          post :check_config
-        end
-      end
-
-      get '/service_desk' => 'service_desk#show', as: :service_desk
-      put '/service_desk' => 'service_desk#update', as: :service_desk_refresh
-
       post '/restore' => '/projects#restore', as: :restore
 
       resource :insights, only: [:show], trailing_slash: true do
         collection do
           post :query
+          get :embedded
         end
       end
       # All new routes should go under /-/ scope.
       # Look for scope '-' at the top of the file.
       # rubocop: enable Cop/PutProjectRoutesUnderScope
     end
-  end
-end
-
-scope path: '(/-/jira)', constraints: ::Constraints::JiraEncodedUrlConstrainer.new, as: :jira do
-  scope path: '*namespace_id/:project_id',
-        namespace_id: Gitlab::Jira::Dvcs::ENCODED_ROUTE_REGEX,
-        project_id: Gitlab::Jira::Dvcs::ENCODED_ROUTE_REGEX do
-    get '/', to: redirect { |params, req|
-      ::Gitlab::Jira::Dvcs.restore_full_path(
-        namespace: params[:namespace_id],
-        project: params[:project_id]
-      )
-    }
-
-    get 'commit/:id', constraints: { id: /\h{7,40}/ }, to: redirect { |params, req|
-      project_full_path = ::Gitlab::Jira::Dvcs.restore_full_path(
-        namespace: params[:namespace_id],
-        project: params[:project_id]
-      )
-
-      "/#{project_full_path}/commit/#{params[:id]}"
-    }
-
-    get 'tree/*id', as: nil, to: redirect { |params, req|
-      project_full_path = ::Gitlab::Jira::Dvcs.restore_full_path(
-        namespace: params[:namespace_id],
-        project: params[:project_id]
-      )
-
-      "/#{project_full_path}/-/tree/#{params[:id]}"
-    }
   end
 end

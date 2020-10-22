@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequestBlock do
+RSpec.describe MergeRequestBlock do
   describe 'associations' do
     it { is_expected.to belong_to(:blocking_merge_request).class_name('MergeRequest') }
     it { is_expected.to belong_to(:blocked_merge_request).class_name('MergeRequest') }

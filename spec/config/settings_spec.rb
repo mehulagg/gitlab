@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Settings do
+RSpec.describe Settings do
   describe 'omniauth' do
     it 'defaults to enabled' do
       expect(described_class.omniauth.enabled).to be true
@@ -109,6 +109,28 @@ describe Settings do
 
         expect(db_key_base).to eq(('❤' * 10) + ('0' * 2))
         expect(db_key_base.bytesize).to eq 32
+      end
+    end
+  end
+
+  describe '.cron_for_usage_ping' do
+    it 'returns correct crontab for some manually calculated example' do
+      allow(Gitlab::CurrentSettings)
+        .to receive(:uuid) { 'd9e2f4e8-db1f-4e51-b03d-f427e1965c4a'}
+
+      expect(described_class.send(:cron_for_usage_ping)).to eq('21 18 * * 4')
+    end
+
+    it 'returns min, hour, day in the valid range' do
+      allow(Gitlab::CurrentSettings)
+        .to receive(:uuid) { SecureRandom.uuid }
+
+      10.times do
+        cron = described_class.send(:cron_for_usage_ping).split(/\s/)
+
+        expect(cron[0].to_i).to be_between(0, 59)
+        expect(cron[1].to_i).to be_between(0, 23)
+        expect(cron[4].to_i).to be_between(0, 6)
       end
     end
   end

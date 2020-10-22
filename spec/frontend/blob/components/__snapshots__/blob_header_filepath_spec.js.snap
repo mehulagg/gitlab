@@ -8,12 +8,14 @@ exports[`Blob Header Filepath rendering matches the snapshot 1`] = `
   <file-icon-stub
     aria-hidden="true"
     cssclasses="mr-2"
+    filemode=""
     filename="foo/bar/dummy.md"
     size="18"
   />
    
   <strong
-    class="file-title-name qa-file-title-name mr-1 js-blob-header-filepath"
+    class="file-title-name mr-1 js-blob-header-filepath"
+    data-qa-selector="file_title_content"
   >
     foo/bar/dummy.md
   </strong>
@@ -25,8 +27,10 @@ exports[`Blob Header Filepath rendering matches the snapshot 1`] = `
   </small>
    
   <clipboard-button-stub
+    category="tertiary"
     cssclass="btn-clipboard btn-transparent lh-100 position-static"
     gfm="\`foo/bar/dummy.md\`"
+    size="medium"
     text="foo/bar/dummy.md"
     title="Copy file path"
     tooltipplacement="top"

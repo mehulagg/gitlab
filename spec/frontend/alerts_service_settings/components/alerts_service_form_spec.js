@@ -4,7 +4,7 @@ import { shallowMount } from '@vue/test-utils';
 import { GlModal } from '@gitlab/ui';
 import AlertsServiceForm from '~/alerts_service_settings/components/alerts_service_form.vue';
 import ToggleButton from '~/vue_shared/components/toggle_button.vue';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -12,8 +12,10 @@ const defaultProps = {
   initialAuthorizationKey: 'abcedfg123',
   formPath: 'http://invalid',
   url: 'https://gitlab.com/endpoint-url',
-  learnMoreUrl: 'https://docs.gitlab.com/ee/user/project/integrations/generic_alerts.md',
+  alertsSetupUrl: 'http://invalid',
+  alertsUsageUrl: 'http://invalid',
   initialActivated: false,
+  isDisabled: false,
 };
 
 describe('AlertsServiceForm', () => {
@@ -32,7 +34,7 @@ describe('AlertsServiceForm', () => {
 
   const findUrl = () => wrapper.find('#url');
   const findAuthorizationKey = () => wrapper.find('#authorization-key');
-  const findDescription = () => wrapper.find('p');
+  const findDescription = () => wrapper.find('[data-testid="description"');
   const findActiveStatusIcon = val =>
     document.querySelector(`.js-service-active-status[data-value=${val.toString()}]`);
 
@@ -67,7 +69,7 @@ describe('AlertsServiceForm', () => {
       expect(wrapper.find(ToggleButton).html()).toMatchSnapshot();
     });
 
-    it('shows description and "Learn More" link', () => {
+    it('shows description and docs links', () => {
       expect(findDescription().element.innerHTML).toMatchSnapshot();
     });
   });
@@ -162,6 +164,19 @@ describe('AlertsServiceForm', () => {
         return wrapper.vm.toggleActivated(true).then(() => {
           expect(wrapper.find(ToggleButton).props('value')).toBe(false);
         });
+      });
+    });
+  });
+
+  describe('form is disabled', () => {
+    beforeEach(() => {
+      createComponent({ isDisabled: true });
+    });
+
+    it('cannot be toggled', () => {
+      wrapper.find(ToggleButton).vm.$emit('change');
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.find(ToggleButton).props('disabledInput')).toBe(true);
       });
     });
   });

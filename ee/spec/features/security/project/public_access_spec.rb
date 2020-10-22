@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe '[EE] Public Project Access' do
+RSpec.describe '[EE] Public Project Access' do
   include AccessMatchers
 
   let_it_be(:project) { create(:project, :public, :repository) }
@@ -56,8 +56,8 @@ describe '[EE] Public Project Access' do
     it { is_expected.to be_allowed_for(:auditor) }
   end
 
-  describe "GET /:project_path/-/settings/members" do
-    subject { project_settings_members_path(project) }
+  describe "GET /:project_path/-/project_members" do
+    subject { project_project_members_path(project) }
 
     it { is_expected.to be_allowed_for(:auditor) }
   end
@@ -81,7 +81,7 @@ describe '[EE] Public Project Access' do
 
     context "when allowed for public" do
       before do
-        project.update(public_builds: true)
+        project.update!(public_builds: true)
       end
 
       it { is_expected.to be_allowed_for(:auditor) }
@@ -89,7 +89,7 @@ describe '[EE] Public Project Access' do
 
     context "when disallowed for public" do
       before do
-        project.update(public_builds: false)
+        project.update!(public_builds: false)
       end
 
       it { is_expected.to be_allowed_for(:auditor) }
@@ -104,7 +104,7 @@ describe '[EE] Public Project Access' do
 
     context "when allowed for public" do
       before do
-        project.update(public_builds: true)
+        project.update!(public_builds: true)
       end
 
       it { is_expected.to be_allowed_for(:auditor) }
@@ -112,7 +112,7 @@ describe '[EE] Public Project Access' do
 
     context "when disallowed for public" do
       before do
-        project.update(public_builds: false)
+        project.update!(public_builds: false)
       end
 
       it { is_expected.to be_allowed_for(:auditor) }

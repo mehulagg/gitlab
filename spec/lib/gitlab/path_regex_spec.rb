@@ -2,7 +2,12 @@
 
 require 'spec_helper'
 
-describe Gitlab::PathRegex do
+RSpec.describe Gitlab::PathRegex do
+  let(:starting_with_namespace) { %r{^/\*namespace_id/:(project_)?id} }
+  let(:non_param_parts) { %r{[^:*][a-z\-_/]*} }
+  let(:any_other_path_part) { %r{[a-z\-_/:]*} }
+  let(:wildcard_segment) { /\*/ }
+
   # Pass in a full path to remove the format segment:
   # `/ci/lint(.:format)` -> `/ci/lint`
   def without_format(path)
@@ -14,7 +19,7 @@ describe Gitlab::PathRegex do
   # `/*namespace_id/:project_id/builds/artifacts/*ref_name_and_path`
   #    -> 'builds/artifacts'
   def path_before_wildcard(path)
-    path = path.gsub(STARTING_WITH_NAMESPACE, "")
+    path = path.gsub(starting_with_namespace, "")
     path_segments = path.split('/').reject(&:empty?)
     wildcard_index = path_segments.index { |segment| parameter?(segment) }
 
@@ -96,8 +101,13 @@ describe Gitlab::PathRegex do
       .concat(ee_top_level_words)
       .concat(files_in_public)
       .concat(Array(API::API.prefix.to_s))
+      .concat(sitemap_words)
       .compact
       .uniq
+  end
+
+  let(:sitemap_words) do
+    %w(sitemap.xml sitemap.xml.gz)
   end
 
   let(:ee_top_level_words) do
@@ -121,13 +131,9 @@ describe Gitlab::PathRegex do
   # - Followed by one or more path-parts not starting with `:` or `*`
   # - Followed by a path-part that includes a wildcard parameter `*`
   # At the time of writing these routes match: http://rubular.com/r/Rv2pDE5Dvw
-  STARTING_WITH_NAMESPACE = %r{^/\*namespace_id/:(project_)?id}.freeze
-  NON_PARAM_PARTS = %r{[^:*][a-z\-_/]*}.freeze
-  ANY_OTHER_PATH_PART = %r{[a-z\-_/:]*}.freeze
-  WILDCARD_SEGMENT = /\*/.freeze
   let(:namespaced_wildcard_routes) do
     routes_without_format.select do |p|
-      p =~ %r{#{STARTING_WITH_NAMESPACE}/#{NON_PARAM_PARTS}/#{ANY_OTHER_PATH_PART}#{WILDCARD_SEGMENT}}
+      p =~ %r{#{starting_with_namespace}/#{non_param_parts}/#{any_other_path_part}#{wildcard_segment}}
     end
   end
 
@@ -145,16 +151,14 @@ describe Gitlab::PathRegex do
     end.uniq
   end
 
-  STARTING_WITH_GROUP = %r{^/groups/\*(group_)?id/}.freeze
+  let(:starting_with_group) { %r{^/groups/\*(group_)?id/} }
   let(:group_routes) do
-    routes_without_format.select do |path|
-      path =~ STARTING_WITH_GROUP
-    end
+    routes_without_format.grep(starting_with_group)
   end
 
   let(:paths_after_group_id) do
     group_routes.map do |route|
-      route.gsub(STARTING_WITH_GROUP, '').split('/').first
+      route.gsub(starting_with_group, '').split('/').first
     end.uniq
   end
 
@@ -173,7 +177,7 @@ describe Gitlab::PathRegex do
 
     # We ban new items in this list, see https://gitlab.com/gitlab-org/gitlab/-/issues/215362
     it 'does not allow expansion' do
-      expect(described_class::TOP_LEVEL_ROUTES.size).to eq(41)
+      expect(described_class::TOP_LEVEL_ROUTES.size).to eq(43)
     end
   end
 
@@ -219,6 +223,8 @@ describe Gitlab::PathRegex do
       expect(subject).not_to match('admin/')
       expect(subject).not_to match('api/')
       expect(subject).not_to match('.well-known/')
+      expect(subject).not_to match('sitemap.xml/')
+      expect(subject).not_to match('sitemap.xml.gz/')
     end
 
     it 'accepts project wildcard routes' do

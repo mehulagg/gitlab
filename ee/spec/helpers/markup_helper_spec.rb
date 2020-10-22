@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MarkupHelper do
+RSpec.describe MarkupHelper do
   let(:project) { create(:project, :public) }
 
   describe '#first_line_in_markdown' do

@@ -10,16 +10,42 @@ class Geo::UploadRegistry < Geo::BaseRegistry
 
   belongs_to :upload, foreign_key: :file_id
 
-  scope :failed, -> { where(success: false).where.not(retry_count: nil) }
   scope :fresh, -> { order(created_at: :desc) }
-  scope :never, -> { where(success: false, retry_count: nil) }
 
-  def self.registry_consistency_worker_enabled?
-    Feature.enabled?(:geo_file_registry_ssot_sync)
-  end
+  # Returns untracked uploads as well as tracked uploads that are unused.
+  #
+  # Untracked uploads is an array where each item is a tuple of [id, file_type]
+  # that is supposed to be synced but don't yet have a registry entry.
+  #
+  # Unused uploads is an array where each item is a tuple of [id, file_type]
+  # that is not supposed to be synced but already have a registry entry. For
+  # example:
+  #
+  #   - orphaned registries
+  #   - records that became excluded from selective sync
+  #   - records that are in object storage, and `sync_object_storage` became
+  #     disabled
+  #
+  # We compute both sets in this method to reduce the number of DB queries
+  # performed.
+  #
+  # @return [Array] the first element is an Array of untracked uploads, and the
+  #                 second element is an Array of tracked uploads that are unused.
+  #                 For example: [[[1, 'avatar'], [5, 'file']], [[3, 'attachment']]]
+  def self.find_registry_differences(range)
+    source =
+      self::MODEL_CLASS.replicables_for_current_secondary(range)
+          .pluck(self::MODEL_CLASS.arel_table[:id], self::MODEL_CLASS.arel_table[:uploader])
+          .map! { |id, uploader| [id, uploader.sub(/Uploader\z/, '').underscore] }
 
-  def self.finder_class
-    ::Geo::AttachmentRegistryFinder
+    tracked =
+      self.model_id_in(range)
+          .pluck(:file_id, :file_type)
+
+    untracked = source - tracked
+    unused_tracked = tracked - source
+
+    [untracked, unused_tracked]
   end
 
   # If false, RegistryConsistencyService will frequently check the end of the
@@ -36,23 +62,27 @@ class Geo::UploadRegistry < Geo::BaseRegistry
     bulk_insert!(records, returns: :ids)
   end
 
+  def self.delete_for_model_ids(attrs)
+    attrs.map do |file_id, file_type|
+      delete_worker_class.perform_async(file_type, file_id)
+    end
+  end
+
   def self.with_search(query)
     return all if query.nil?
 
-    where(file_id: Geo::Fdw::Upload.search(query))
+    where(file_id: Upload.search(query).limit(1000).pluck_primary_key)
   end
 
   def self.with_status(status)
     case status
-    when 'synced', 'never', 'failed'
+    when 'synced', 'failed'
       self.public_send(status) # rubocop: disable GitlabSecurity/PublicSend
+    when 'pending'
+      never_attempted_sync
     else
       all
     end
-  end
-
-  def self.replication_enabled?
-    FileUploader.object_store_enabled? ? Gitlab::Geo.current_node.sync_object_storage? : true
   end
 
   def file

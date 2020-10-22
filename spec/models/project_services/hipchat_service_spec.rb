@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe HipchatService do
+RSpec.describe HipchatService do
   describe "Associations" do
     it { is_expected.to belong_to :project }
     it { is_expected.to have_one :service_hook }
@@ -327,8 +327,8 @@ describe HipchatService do
           user_name = data[:user][:name]
 
           expect(message).to eq("<a href=\"#{project_url}\">#{project_name}</a>: " \
-            "Pipeline <a href=\"#{project_url}/pipelines/#{pipeline.id}\">##{pipeline.id}</a> " \
-            "of <a href=\"#{project_url}/commits/#{ref}\">#{ref}</a> #{ref_type} " \
+            "Pipeline <a href=\"#{project_url}/-/pipelines/#{pipeline.id}\">##{pipeline.id}</a> " \
+            "of <a href=\"#{project_url}/-/commits/#{ref}\">#{ref}</a> #{ref_type} " \
             "by #{user_name} failed in #{duration} second(s)")
         end
       end

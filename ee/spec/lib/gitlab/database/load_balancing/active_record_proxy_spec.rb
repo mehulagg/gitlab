@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::LoadBalancing::ActiveRecordProxy do
+RSpec.describe Gitlab::Database::LoadBalancing::ActiveRecordProxy do
   describe '#connection' do
     it 'returns a connection proxy' do
       dummy = Class.new do

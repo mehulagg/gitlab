@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20200220115023_fix_projects_without_prometheus_service.rb')
 
-describe FixProjectsWithoutPrometheusService, :migration do
+RSpec.describe FixProjectsWithoutPrometheusService, :migration do
   let(:namespace) { table(:namespaces).create(name: 'gitlab', path: 'gitlab-org') }
 
   let!(:projects) do
@@ -20,7 +20,7 @@ describe FixProjectsWithoutPrometheusService, :migration do
 
   around do |example|
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         example.call
       end
     end

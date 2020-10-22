@@ -18,6 +18,8 @@ module Geo
       OPERATIONS = [:resync_repositories, :reverify_repositories].freeze
       DELAY_INTERVAL = 10.seconds.to_i # base delay for scheduling batch execution
 
+      loggable_arguments 0
+
       def perform(operation)
         return fail_invalid_operation!(operation) unless OPERATIONS.include?(operation.to_sym)
 

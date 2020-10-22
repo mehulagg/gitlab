@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EpicEntity do
+RSpec.describe EpicEntity do
   let(:group) { create(:group) }
   let(:resource) { create(:epic, group: group) }
   let(:user)     { create(:user) }

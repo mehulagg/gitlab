@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MarkupHelper do
+RSpec.describe MarkupHelper do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) do
     user = create(:user, username: 'gfm')
@@ -95,12 +95,13 @@ describe MarkupHelper do
     context 'when text contains a relative link to an image in the repository' do
       let(:image_file) { "logo-white.png" }
       let(:text_with_relative_path) { "![](./#{image_file})\n" }
-      let(:generated_html) { helper.markdown(text_with_relative_path, requested_path: requested_path) }
+      let(:generated_html) { helper.markdown(text_with_relative_path, requested_path: requested_path, ref: ref) }
 
       subject { Nokogiri::HTML.parse(generated_html) }
 
-      context 'when requested_path is provided in the context' do
+      context 'when requested_path is provided, but ref isn\'t' do
         let(:requested_path) { 'files/images/README.md' }
+        let(:ref) { nil }
 
         it 'returns the correct HTML for the image' do
           expanded_path = "/#{project.full_path}/-/raw/master/files/images/#{image_file}"
@@ -110,13 +111,43 @@ describe MarkupHelper do
         end
       end
 
-      context 'when requested_path parameter is not provided' do
+      context 'when requested_path and ref parameters are both provided' do
+        let(:requested_path) { 'files/images/README.md' }
+        let(:ref) { 'other_branch' }
+
+        it 'returns the correct HTML for the image' do
+          project.repository.create_branch('other_branch')
+
+          expanded_path = "/#{project.full_path}/-/raw/#{ref}/files/images/#{image_file}"
+
+          expect(subject.css('a')[0].attr('href')).to eq(expanded_path)
+          expect(subject.css('img')[0].attr('data-src')).to eq(expanded_path)
+        end
+      end
+
+      context 'when ref is provided, but requested_path isn\'t' do
+        let(:ref) { 'other_branch' }
         let(:requested_path) { nil }
 
-        it 'returns the link to the image path as a relative path' do
+        it 'returns the correct HTML for the image' do
+          project.repository.create_branch('other_branch')
+
+          expanded_path = "/#{project.full_path}/-/blob/#{ref}/./#{image_file}"
+
+          expect(subject.css('a')[0].attr('href')).to eq(expanded_path)
+          expect(subject.css('img')[0].attr('data-src')).to eq(expanded_path)
+        end
+      end
+
+      context 'when neither requested_path, nor ref parameter is provided' do
+        let(:ref) { nil }
+        let(:requested_path) { nil }
+
+        it 'returns the correct HTML for the image' do
           expanded_path = "/#{project.full_path}/-/blob/master/./#{image_file}"
 
           expect(subject.css('a')[0].attr('href')).to eq(expanded_path)
+          expect(subject.css('img')[0].attr('data-src')).to eq(expanded_path)
         end
       end
     end
@@ -286,7 +317,7 @@ describe MarkupHelper do
     let(:wiki_repository) { double('Repository') }
     let(:context) do
       {
-        pipeline: :wiki, project: project, project_wiki: wiki,
+        pipeline: :wiki, project: project, wiki: wiki,
         page_slug: 'nested/page', issuable_state_filter_enabled: true,
         repository: wiki_repository
       }
@@ -296,7 +327,7 @@ describe MarkupHelper do
       expect(wiki).to receive(:content).and_return('wiki content')
       expect(wiki).to receive(:slug).and_return('nested/page')
       expect(wiki).to receive(:repository).and_return(wiki_repository)
-      helper.instance_variable_set(:@project_wiki, wiki)
+      helper.instance_variable_set(:@wiki, wiki)
     end
 
     context 'when file is Markdown' do

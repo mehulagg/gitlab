@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::ProtectedEnvironments do
+RSpec.describe API::ProtectedEnvironments do
   include AccessMatchersForRequest
 
   let(:user) { create(:user) }

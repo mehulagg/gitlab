@@ -13,7 +13,7 @@ describe('Blob Header Default Actions', () => {
     const method = shouldMount ? mount : shallowMount;
     wrapper = method.call(this, BlobHeader, {
       propsData: {
-        blob: Object.assign({}, Blob, blobProps),
+        blob: { ...Blob, ...blobProps },
         ...propsData,
       },
       ...options,
@@ -86,6 +86,17 @@ describe('Blob Header Default Actions', () => {
         );
         expect(wrapper.text()).toContain(slotContent);
       });
+    });
+
+    it('passes information about render error down to default actions', () => {
+      createComponent(
+        {},
+        {},
+        {
+          hasRenderError: true,
+        },
+      );
+      expect(wrapper.find(DefaultActions).props('hasRenderError')).toBe(true);
     });
   });
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::Serverless::FunctionsFinder do
+RSpec.describe Projects::Serverless::FunctionsFinder do
   include KubernetesHelpers
   include PrometheusHelpers
   include ReactiveCachingHelpers
@@ -48,6 +48,7 @@ describe Projects::Serverless::FunctionsFinder do
           expect(function_finder.knative_installed).to be false
         end
       end
+
       context 'when project level cluster is present and enabled' do
         it_behaves_like 'before first deployment' do
           let(:cluster) { create(:cluster, :project, :provided_by_gcp, enabled: true) }

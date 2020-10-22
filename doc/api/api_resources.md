@@ -9,7 +9,7 @@ Available resources for the [GitLab API](README.md) can be grouped in the follow
 See also:
 
 - [V3 to V4](v3_to_v4.md).
-- Adding [deploy keys for multiple projects](deploy_key_multiple_projects.md).
+- Adding [deploy keys for multiple projects](deploy_keys.md#adding-deploy-keys-to-multiple-projects).
 - [API Resources for various templates](#templates-api-resources).
 
 ## Project resources
@@ -26,6 +26,7 @@ The following API resources are available in the project context:
 | [Custom attributes](custom_attributes.md)                           | `/projects/:id/custom_attributes` (also available for groups and users)                                                                                                                               |
 | [Dependencies](dependencies.md) **(ULTIMATE)**                      | `/projects/:id/dependencies`                                                                                                                                                                          |
 | [Deploy keys](deploy_keys.md)                                       | `/projects/:id/deploy_keys` (also available standalone)                                                                                                                                               |
+| [Freeze Periods](freeze_periods.md)                                 | `/projects/:id/freeze_periods`                                                                                                                                                                        |
 | [Deployments](deployments.md)                                       | `/projects/:id/deployments`                                                                                                                                                                           |
 | [Discussions](discussions.md) (threaded comments)                   | `/projects/:id/issues/.../discussions`, `/projects/:id/snippets/.../discussions`, `/projects/:id/merge_requests/.../discussions`, `/projects/:id/commits/.../discussions` (also available for groups) |
 | [Environments](environments.md)                                     | `/projects/:id/environments`                                                                                                                                                                          |
@@ -37,15 +38,17 @@ The following API resources are available in the project context:
 | [Issues Statistics](issues_statistics.md)                           | `/projects/:id/issues_statistics` (also available for groups and standalone)                                                                                                                          |
 | [Issue boards](boards.md)                                           | `/projects/:id/boards`                                                                                                                                                                                |
 | [Issue links](issue_links.md) **(STARTER)**                         | `/projects/:id/issues/.../links`                                                                                                                                                                      |
+| [Iterations](iterations.md) **(STARTER)**                           | `/projects/:id/iterations` (also available for groups)                                                                                                                                                                     |
 | [Jobs](jobs.md)                                                     | `/projects/:id/jobs`, `/projects/:id/pipelines/.../jobs`                                                                                                                                              |
 | [Labels](labels.md)                                                 | `/projects/:id/labels`                                                                                                                                                                                |
 | [Managed licenses](managed_licenses.md) **(ULTIMATE)**              | `/projects/:id/managed_licenses`                                                                                                                                                                      |
 | [Members](members.md)                                               | `/projects/:id/members` (also available for groups)                                                                                                                                                   |
 | [Merge request approvals](merge_request_approvals.md) **(STARTER)** | `/projects/:id/approvals`, `/projects/:id/merge_requests/.../approvals`                                                                                                                               |
 | [Merge requests](merge_requests.md)                                 | `/projects/:id/merge_requests` (also available for groups and standalone)                                                                                                                             |
+| [Merge trains](merge_trains.md)                                     | `/projects/:id/merge_trains`                                                                                                                                                                          |
 | [Notes](notes.md) (comments)                                        | `/projects/:id/issues/.../notes`, `/projects/:id/snippets/.../notes`, `/projects/:id/merge_requests/.../notes` (also available for groups)                                                            |
 | [Notification settings](notification_settings.md)                   | `/projects/:id/notification_settings` (also available for groups and standalone)                                                                                                                      |
-| [Packages](packages.md) **(PREMIUM)**                               | `/projects/:id/packages`                                                                                                                                                                              |
+| [Packages](packages.md)                                             | `/projects/:id/packages`                                                                                                                                                                              |
 | [Pages domains](pages_domains.md)                                   | `/projects/:id/pages` (also available standalone)                                                                                                                                                     |
 | [Pipelines](pipelines.md)                                           | `/projects/:id/pipelines`                                                                                                                                                                             |
 | [Pipeline schedules](pipeline_schedules.md)                         | `/projects/:id/pipeline_schedules`                                                                                                                                                                    |
@@ -72,12 +75,13 @@ The following API resources are available in the project context:
 | [Search](search.md)                                                 | `/projects/:id/search` (also available for groups and standalone)                                                                                                                                     |
 | [Services](services.md)                                             | `/projects/:id/services`                                                                                                                                                                              |
 | [Tags](tags.md)                                                     | `/projects/:id/repository/tags`                                                                                                                                                                       |
+| [User-starred metrics dashboards](metrics_user_starred_dashboards.md ) | `/projects/:id/metrics/user_starred_dashboards`                                                                                                                             |
 | [Visual Review discussions](visual_review_discussions.md) **(STARTER)** | `/projects/:id/merge_requests/:merge_request_id/visual_review_discussions`                                                                                                                        |
 | [Vulnerabilities](vulnerabilities.md) **(ULTIMATE)**                | `/vulnerabilities/:id`                                                                                                                                                                       |
 | [Vulnerability exports](vulnerability_exports.md) **(ULTIMATE)**    | `/projects/:id/vulnerability_exports`                                                                                                                                                                       |
 | [Project vulnerabilities](project_vulnerabilities.md) **(ULTIMATE)**   | `/projects/:id/vulnerabilities`                                                                                                                                                                            |
 | [Vulnerability findings](vulnerability_findings.md) **(ULTIMATE)**  | `/projects/:id/vulnerability_findings`                                                                                                                                                                |
-| [Wikis](wikis.md)                                                   | `/projects/:id/wikis`                                                                                                                                                                                 |
+| [Project wikis](wikis.md)                                           | `/projects/:id/wikis`                                                                                                                                                                                 |
 
 ## Group resources
 
@@ -94,6 +98,7 @@ The following API resources are available in the group context:
 | [Groups](groups.md)                                              | `/groups`, `/groups/.../subgroups`                                               |
 | [Group badges](group_badges.md)                                  | `/groups/:id/badges`                                                             |
 | [Group issue boards](group_boards.md)                            | `/groups/:id/boards`                                                             |
+| [Group iterations](group_iterations.md) **(STARTER)**            | `/groups/:id/iterations` (also available for projects)                           |
 | [Group labels](group_labels.md)                                  | `/groups/:id/labels`                                                             |
 | [Group-level variables](group_level_variables.md)                | `/groups/:id/variables`                                                          |
 | [Group milestones](group_milestones.md)                          | `/groups/:id/milestones`                                                         |
@@ -105,6 +110,7 @@ The following API resources are available in the group context:
 | [Notification settings](notification_settings.md)                | `/groups/:id/notification_settings` (also available for projects and standalone) |
 | [Resource label events](resource_label_events.md)                | `/groups/:id/epics/.../resource_label_events` (also available for projects)      |
 | [Search](search.md)                                              | `/groups/:id/search` (also available for projects and standalone)                |
+| [Group wikis](group_wikis.md) **(PREMIUM)**                      | `/groups/:id/wikis`                                                              |
 
 ## Standalone resources
 
@@ -112,7 +118,8 @@ The following API resources are available outside of project and group contexts 
 
 | Resource                                           | Available endpoints                                                     |
 |:---------------------------------------------------|:------------------------------------------------------------------------|
-| [Admin Sidekiq queues](admin_sidekiq_queues.md)    | `/admin/sidekiq/queues/:queue_name`                                               |
+| [Instance-level CI/CD variables](instance_level_ci_variables.md) | `/admin/ci/variables`                                     |
+| [Sidekiq queues administration](admin_sidekiq_queues.md) **(CORE ONLY)** | `/admin/sidekiq/queues/:queue_name`               |
 | [Appearance](appearance.md) **(CORE ONLY)**        | `/application/appearance`                                               |
 | [Applications](applications.md)                    | `/applications`                                                         |
 | [Audit Events](audit_events.md) **(PREMIUM ONLY)** | `/audit_events`                                                         |
@@ -126,6 +133,7 @@ The following API resources are available outside of project and group contexts 
 | [Geo Nodes](geo_nodes.md) **(PREMIUM ONLY)**       | `/geo_nodes`                                                            |
 | [Group Activity Analytics](group_activity_analytics.md) **(STARTER)**  | `/analytics/group_activity/{issues_count | merge_requests_count | new_members_count }`  |
 | [Import repository from GitHub](import.md)         | `/import/github`                                                        |
+| [Instance clusters](instance_clusters.md)          | `/admin/clusters`                                                       |
 | [Issues](issues.md)                                | `/issues` (also available for groups and projects)                      |
 | [Issues Statistics](issues_statistics.md)          | `/issues_statistics` (also available for groups and projects)           |
 | [Keys](keys.md)                                    | `/keys`                                                                 |
@@ -136,15 +144,17 @@ The following API resources are available outside of project and group contexts 
 | [Namespaces](namespaces.md)                        | `/namespaces`                                                           |
 | [Notification settings](notification_settings.md)  | `/notification_settings` (also available for groups and projects)       |
 | [Pages domains](pages_domains.md)                  | `/pages/domains` (also available for projects)                          |
+| [Personal access tokens](personal_access_tokens.md) | `/personal_access_tokens`                                              |
 | [Projects](projects.md)                            | `/users/:id/projects` (also available for projects)                     |
+| [Project repository storage moves](project_repository_storage_moves.md) **(CORE ONLY)** | `/project_repository_storage_moves` |
 | [Runners](runners.md)                              | `/runners` (also available for projects)                                |
 | [Search](search.md)                                | `/search` (also available for groups and projects)                      |
 | [Settings](settings.md) **(CORE ONLY)**            | `/application/settings`                                                 |
 | [Statistics](statistics.md)                        | `/application/statistics`                                               |
-| [Sidekiq metrics](sidekiq_metrics.md)              | `/sidekiq`                                                              |
+| [Sidekiq metrics](sidekiq_metrics.md) **(CORE ONLY)** | `/sidekiq`                                                           |
 | [Suggestions](suggestions.md)                      | `/suggestions`                                                          |
 | [System hooks](system_hooks.md)                    | `/hooks`                                                                |
-| [Todos](todos.md)                                  | `/todos`                                                                |
+| [To-dos](todos.md)                                  | `/todos`                                                                |
 | [Users](users.md)                                  | `/users`                                                                |
 | [Validate `.gitlab-ci.yml` file](lint.md)          | `/lint`                                                                 |
 | [Version](version.md)                              | `/version`                                                              |

@@ -1,7 +1,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import { RULE_TYPE_ANY_APPROVER } from '../../constants';
 import { debounce } from 'lodash';
+import { RULE_TYPE_ANY_APPROVER } from '../../constants';
 
 const ANY_RULE_NAME = 'All Members';
 
@@ -47,6 +47,7 @@ export default {
     class="form-control mw-6em"
     type="number"
     :min="rule.minApprovalsRequired || 0"
+    data-qa-selector="approvals_number_field"
     @input="onInputChange"
   />
 </template>

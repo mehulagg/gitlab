@@ -31,21 +31,13 @@ module EE
       !current_user.has_current_license? && current_user.admin?
     end
 
-    def analytics_nav_url
-      if can?(current_user, :read_instance_statistics)
-        instance_statistics_root_path
-      else
-        'errors/not_found'
-      end
-    end
-
     private
 
     override :get_dashboard_nav_links
     def get_dashboard_nav_links
       super.tap do |links|
         if can?(current_user, :read_operations_dashboard)
-          links << :environments if ::Feature.enabled?(:environments_dashboard, current_user, default_enabled: true)
+          links << :environments
           links << :operations
         end
 

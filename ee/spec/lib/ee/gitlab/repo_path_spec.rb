@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::RepoPath do
+RSpec.describe Gitlab::RepoPath do
   describe '.find_project' do
     let(:project) { create(:project) }
 

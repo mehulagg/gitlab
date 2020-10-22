@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeTrains::RefreshMergeRequestService do
+RSpec.describe MergeTrains::RefreshMergeRequestService do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:maintainer) { create(:user) }
   let(:service) { described_class.new(project, maintainer, require_recreate: require_recreate) }
@@ -27,7 +27,7 @@ describe MergeTrains::RefreshMergeRequestService do
     shared_examples_for 'drops the merge request from the merge train' do
       let(:expected_reason) { 'unknown' }
 
-      it do
+      specify do
         expect_next_instance_of(AutoMerge::MergeTrainService) do |service|
           expect(service).to receive(:abort).with(merge_request, expected_reason, hash_including(process_next: false))
         end
@@ -39,7 +39,7 @@ describe MergeTrains::RefreshMergeRequestService do
     shared_examples_for 'creates a pipeline for merge train' do
       let(:previous_ref) { 'refs/heads/master' }
 
-      it do
+      specify do
         expect_next_instance_of(MergeTrains::CreatePipelineService, project, maintainer) do |pipeline_service|
           allow(pipeline_service).to receive(:execute) { { status: :success, pipeline: pipeline } }
           expect(pipeline_service).to receive(:execute).with(merge_request, previous_ref)
@@ -73,7 +73,7 @@ describe MergeTrains::RefreshMergeRequestService do
     end
 
     shared_examples_for 'does not create a pipeline' do
-      it do
+      specify do
         expect(service).not_to receive(:create_pipeline!)
 
         result = subject
@@ -203,7 +203,7 @@ describe MergeTrains::RefreshMergeRequestService do
           expect(merge_request.merge_train).to receive(:start_merge!).and_call_original
           expect(merge_request.merge_train).to receive(:finish_merge!).and_call_original
           expect_next_instance_of(MergeRequests::MergeService, project, maintainer, anything) do |service|
-            expect(service).to receive(:execute).with(merge_request).and_call_original
+            expect(service).to receive(:execute).with(merge_request, skip_discussions_check: true).and_call_original
           end
 
           expect { subject }

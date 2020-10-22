@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ExpireJobCacheWorker do
+RSpec.describe ExpireJobCacheWorker do
   let_it_be(:pipeline) { create(:ci_empty_pipeline) }
   let(:project) { pipeline.project }
 
@@ -13,7 +13,7 @@ describe ExpireJobCacheWorker do
 
       include_examples 'an idempotent worker' do
         it 'invalidates Etag caching for the job path' do
-          pipeline_path = "/#{project.full_path}/pipelines/#{pipeline.id}.json"
+          pipeline_path = "/#{project.full_path}/-/pipelines/#{pipeline.id}.json"
           job_path = "/#{project.full_path}/builds/#{job.id}.json"
 
           spy_store = Gitlab::EtagCaching::Store.new

@@ -11,8 +11,9 @@ module Projects
         include NotesHelper
         include ToggleAwardEmoji
 
-        before_action :not_found, unless: -> { project.first_class_vulnerabilities_enabled? }
         before_action :authorize_create_note!, only: [:create]
+
+        feature_category :vulnerability_management
 
         private
 

@@ -4,6 +4,8 @@ textarea {
 
 input {
   border-radius: $border-radius-base;
+  color: $gl-text-color;
+  background-color: $input-bg;
 }
 
 input[type='text'].danger {
@@ -126,10 +128,6 @@ label {
   display: inline;
 }
 
-.wiki-content {
-  margin-top: 35px;
-}
-
 .form-control::placeholder {
   color: $gl-text-color-tertiary;
 }
@@ -229,7 +227,7 @@ label {
   right: 0.8em;
   top: 50%;
   transform: translateY(-50%);
-  color: $gray-600;
+  color: $gray-400;
 }
 
 .input-md {

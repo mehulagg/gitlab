@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan', :reliable do
+  RSpec.describe 'Plan', :reliable do
     describe 'Editing scoped labels on issues' do
       let(:initial_label) { 'animal::fox' }
       let(:new_label_same_scope) { 'animal::dolphin' }
@@ -33,7 +33,7 @@ module QA
         issue.visit!
       end
 
-      it 'correctly applies simple and multiple colon scoped pairs labels' do
+      it 'correctly applies simple and multiple colon scoped pairs labels', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/595' do
         Page::Project::Issue::Show.perform do |show|
           show.select_labels_and_refresh([
             new_label_same_scope,
@@ -42,15 +42,15 @@ module QA
             new_label_different_scope_multi_colon
           ])
 
-          show.select_all_activities_filter
+          aggregate_failures do
+            expect(show).to have_label(new_label_same_scope)
+            expect(show).to have_label(new_label_different_scope)
+            expect(show).to have_label(new_label_same_scope_multi_colon)
+            expect(show).to have_label(new_label_different_scope_multi_colon)
 
-          expect(show.text_of_labels_block).to have_content(new_label_same_scope.gsub('::', ' '))
-          expect(show.text_of_labels_block).to have_content(new_label_different_scope.gsub('::', ' '))
-          expect(show.text_of_labels_block).to have_content('group::car porsche')
-          expect(show.text_of_labels_block).to have_content('group::truck mercedes-bens')
-
-          expect(show.text_of_labels_block).not_to have_content(initial_label.gsub('::', ' '))
-          expect(show.text_of_labels_block).not_to have_content('group::car ferrari')
+            expect(show).not_to have_label(initial_label)
+            expect(show).not_to have_label(initial_label_multi_colon)
+          end
         end
       end
     end

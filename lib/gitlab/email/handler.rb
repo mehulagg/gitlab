@@ -9,10 +9,11 @@ module Gitlab
 
       def self.load_handlers
         [
-          UnsubscribeHandler,
           CreateNoteHandler,
+          CreateIssueHandler,
+          UnsubscribeHandler,
           CreateMergeRequestHandler,
-          CreateIssueHandler
+          ServiceDeskHandler
         ]
       end
 
@@ -25,5 +26,3 @@ module Gitlab
     end
   end
 end
-
-Gitlab::Email::Handler.prepend_if_ee('::EE::Gitlab::Email::Handler')

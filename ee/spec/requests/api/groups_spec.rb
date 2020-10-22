@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Groups do
+RSpec.describe API::Groups do
   include GroupAPIHelpers
 
   let_it_be(:group, reload: true) { create(:group) }
@@ -243,6 +243,36 @@ describe API::Groups do
 
             expect(response).to have_gitlab_http_status(:ok)
             expect(json_response['default_branch_protection']).to eq(default_branch_protection)
+          end
+        end
+      end
+    end
+
+    context 'prevent_forking_outside_group' do
+      using RSpec::Parameterized::TableSyntax
+
+      context 'authenticated as group owner' do
+        where(:feature_enabled, :prevent_forking_outside_group, :result) do
+          false | false | nil
+          false | true  | nil
+          true  | false | false
+          true  | true  | true
+        end
+
+        with_them do
+          let(:params) { { prevent_forking_outside_group: prevent_forking_outside_group } }
+
+          before do
+            group.add_owner(user)
+
+            stub_licensed_features(group_forking_protection: feature_enabled)
+          end
+
+          it 'updates the attribute as expected' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['prevent_forking_outside_group']).to eq(result)
           end
         end
       end
@@ -646,7 +676,7 @@ describe API::Groups do
     subject { delete api("/groups/#{group.id}", user) }
 
     shared_examples_for 'immediately enqueues the job to delete the group' do
-      it do
+      specify do
         Sidekiq::Testing.fake! do
           expect { subject }.to change(GroupDestroyWorker.jobs, :size).by(1)
         end
@@ -660,13 +690,13 @@ describe API::Groups do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
 
-      context 'period for adjourned deletion is greater than 0' do
+      context 'period for delayed deletion is greater than 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 1)
         end
 
         context 'success' do
-          it 'marks the group for adjourned deletion' do
+          it 'marks the group for delayed deletion' do
             subject
             group.reload
 
@@ -694,7 +724,7 @@ describe API::Groups do
         end
       end
 
-      context 'period of adjourned deletion is set to 0' do
+      context 'period of delayed deletion is set to 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 0)
         end

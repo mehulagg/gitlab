@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe 'Creation of a new branch' do
+RSpec.describe 'Creation of a new branch' do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
-  let(:project) { create(:project, :public, :repository) }
+  let_it_be(:project) { create(:project, :public, :empty_repo) }
   let(:input) { { project_path: project.full_path, name: new_branch, ref: ref } }
   let(:new_branch) { 'new_branch' }
   let(:ref) { 'master' }
@@ -15,8 +15,7 @@ describe 'Creation of a new branch' do
   let(:mutation_response) { graphql_mutation_response(:create_branch) }
 
   context 'the user is not allowed to create a branch' do
-    it_behaves_like 'a mutation that returns top-level errors',
-      errors: ['The resource that you are attempting to access does not exist or you don\'t have permission to perform this action']
+    it_behaves_like 'a mutation that returns a top-level access error'
   end
 
   context 'when user has permissions to create a branch' do
@@ -35,10 +34,11 @@ describe 'Creation of a new branch' do
     end
 
     context 'when ref is not correct' do
+      let(:new_branch) { 'another_branch' }
       let(:ref) { 'unknown' }
 
       it_behaves_like 'a mutation that returns errors in the response',
-                      errors: ['Invalid reference name: new_branch']
+                      errors: ['Invalid reference name: unknown']
     end
   end
 end

@@ -19,7 +19,7 @@ If you're also using Auto Review Apps and Auto Deploy, and you choose to provide
 your own `Dockerfile`, you must either:
 
 - Expose your application to port `5000`, as the
-  [default Helm chart](https://gitlab.com/gitlab-org/charts/auto-deploy-app)
+  [default Helm chart](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/tree/master/assets/auto-deploy-app)
   assumes this port is available.
 - Override the default values by
   [customizing the Auto Deploy Helm chart](customize.md#custom-helm-chart).
@@ -53,7 +53,9 @@ troubleshoot.
 
 Auto Build supports building your application using [Cloud Native Buildpacks](https://buildpacks.io)
 through the [`pack` command](https://github.com/buildpacks/pack). To use Cloud Native Buildpacks,
-set the CI variable `AUTO_DEVOPS_BUILD_IMAGE_CNB_ENABLED` to a non-empty value.
+set the CI variable `AUTO_DEVOPS_BUILD_IMAGE_CNB_ENABLED` to a non-empty
+value. The default builder is `heroku/buildpacks:18` but a different builder
+can be selected using the CI variable `AUTO_DEVOPS_BUILD_IMAGE_CNB_BUILDER`.
 
 Cloud Native Buildpacks (CNBs) are an evolution of Heroku buildpacks, and
 will eventually supersede Herokuish-based builds within Auto DevOps. For more
@@ -70,7 +72,8 @@ Heroku buildpacks, with the following caveats:
 - The `/bin/herokuish` command is not present in the resulting image, and prefixing
   commands with `/bin/herokuish procfile exec` is no longer required (nor possible).
 
-NOTE: **Note**: Auto Test still uses Herokuish, as test suite detection is not
+NOTE: **Note:**
+Auto Test still uses Herokuish, as test suite detection is not
 yet part of the Cloud Native Buildpack specification. For more information, see
 [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/212689).
 
@@ -82,12 +85,49 @@ Auto Test runs the appropriate tests for your application using
 your project to detect the language and framework. Several languages and
 frameworks are detected automatically, but if your language is not detected,
 you may be able to create a [custom buildpack](customize.md#custom-buildpacks).
-Check the [currently supported languages](index.md#currently-supported-languages).
+Check the [currently supported languages](#currently-supported-languages).
 
 Auto Test uses tests you already have in your application. If there are no
 tests, it's up to you to add them.
 
-## Auto Code Quality **(STARTER)**
+NOTE: **Note:**
+Not all buildpacks supported by [Auto Build](#auto-build) are supported by Auto Test.
+Auto Test uses [Herokuish](https://gitlab.com/gitlab-org/gitlab/-/issues/212689), *not*
+Cloud Native Buildpacks, and only buildpacks that implement the
+[Testpack API](https://devcenter.heroku.com/articles/testpack-api) are supported.
+
+### Currently supported languages
+
+Note that not all buildpacks support Auto Test yet, as it's a relatively new
+enhancement. All of Heroku's
+[officially supported languages](https://devcenter.heroku.com/articles/heroku-ci#supported-languages)
+support Auto Test. The languages supported by Heroku's Herokuish buildpacks all
+support Auto Test, but notably the multi-buildpack does not.
+
+The supported buildpacks are:
+
+```plaintext
+- heroku-buildpack-multi
+- heroku-buildpack-ruby
+- heroku-buildpack-nodejs
+- heroku-buildpack-clojure
+- heroku-buildpack-python
+- heroku-buildpack-java
+- heroku-buildpack-gradle
+- heroku-buildpack-scala
+- heroku-buildpack-play
+- heroku-buildpack-php
+- heroku-buildpack-go
+- buildpack-nginx
+```
+
+If your application needs a buildpack that is not in the above list, you
+might want to use a [custom buildpack](customize.md#custom-buildpacks).
+
+## Auto Code Quality
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.3.
+> - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in GitLab 13.2.
 
 Auto Code Quality uses the
 [Code Quality image](https://gitlab.com/gitlab-org/ci-cd/codequality) to run
@@ -96,9 +136,10 @@ report, it's uploaded as an artifact which you can later download and check
 out. The merge request widget also displays any
 [differences between the source and target branches](../../user/project/merge_requests/code_quality.md).
 
-## Auto SAST **(ULTIMATE)**
+## Auto SAST
 
-> Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.3.
+> - Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.3.
+> - Select functionality made available in all tiers beginning in 13.1
 
 Static Application Security Testing (SAST) uses the
 [SAST Docker image](https://gitlab.com/gitlab-org/security-products/sast) to run static
@@ -113,6 +154,23 @@ warnings.
 
 To learn more about [how SAST works](../../user/application_security/sast/index.md),
 see the documentation.
+
+## Auto Secret Detection
+
+> - Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
+> - [Select functionality made available in all tiers](../../user/application_security/secret_detection/#making-secret-detection-available-to-all-gitlab-tiers) in 13.3
+
+Secret Detection uses the
+[Secret Detection Docker image](https://gitlab.com/gitlab-org/security-products/analyzers/secrets) to run Secret Detection on the current code, and checks for leaked secrets. The
+Auto Secret Detection stage runs only on the
+[Ultimate](https://about.gitlab.com/pricing/) tier, and requires
+[GitLab Runner](https://docs.gitlab.com/runner/) 11.5 or above.
+
+After creating the report, it's uploaded as an artifact which you can later
+download and evaluate. The merge request widget also displays any security
+warnings.
+
+To learn more, see [Secret Detection](../../user/application_security/secret_detection/index.md).
 
 ## Auto Dependency Scanning **(ULTIMATE)**
 
@@ -137,7 +195,7 @@ see the documentation.
 > Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.0.
 
 License Compliance uses the
-[License Compliance Docker image](https://gitlab.com/gitlab-org/security-products/license-management)
+[License Compliance Docker image](https://gitlab.com/gitlab-org/security-products/analyzers/license-finder)
 to search the project dependencies for their license. The Auto License Compliance stage
 is skipped on licenses other than [Ultimate](https://about.gitlab.com/pricing/).
 
@@ -166,7 +224,7 @@ see the documentation.
 ## Auto Review Apps
 
 This is an optional step, since many projects don't have a Kubernetes cluster
-available. If the [requirements](index.md#requirements) are not met, the job is
+available. If the [requirements](requirements.md) are not met, the job is
 silently skipped.
 
 [Review Apps](../../ci/review_apps/index.md) are temporary application environments based on the
@@ -184,12 +242,12 @@ a link to the Review App for easy discovery. When the branch or tag is deleted,
 such as after merging a merge request, the Review App is also deleted.
 
 Review apps are deployed using the
-[auto-deploy-app](https://gitlab.com/gitlab-org/charts/auto-deploy-app) chart with
+[auto-deploy-app](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/tree/master/assets/auto-deploy-app) chart with
 Helm, which you can [customize](customize.md#custom-helm-chart). The application deploys
 into the [Kubernetes namespace](../../user/project/clusters/index.md#deployment-variables)
 for the environment.
 
-Since GitLab 11.4, [local Tiller](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22036) is
+In GitLab 11.4 and later, [local Tiller](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22036) is
 used. Previous versions of GitLab had a Tiller installed in the project
 namespace.
 
@@ -227,7 +285,7 @@ see the documentation.
 To use a custom target instead of the auto-deployed review apps,
 set a `DAST_WEBSITE` environment variable to the URL for DAST to scan.
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 If [DAST Full Scan](../../user/application_security/dast/index.md#full-scan) is
 enabled, GitLab strongly advises **not**
 to set `DAST_WEBSITE` to any staging or production environment. DAST Full Scan
@@ -241,12 +299,15 @@ You can disable DAST:
 - On all branches by setting the `DAST_DISABLED` environment variable to `"true"`.
 - Only on the default branch by setting the `DAST_DISABLED_FOR_DEFAULT_BRANCH`
   environment variable to `"true"`.
+- Only on feature branches by setting `REVIEW_DISABLED` environment variable to
+  `"true"`. This also disables the Review App.
 
 ## Auto Browser Performance Testing **(PREMIUM)**
 
 > Introduced in [GitLab Premium](https://about.gitlab.com/pricing/) 10.4.
 
-Auto Browser Performance Testing measures the performance of a web page with the
+Auto [Browser Performance Testing](../../user/project/merge_requests/browser_performance_testing.md)
+measures the browser performance of a web page with the
 [Sitespeed.io container](https://hub.docker.com/r/sitespeedio/sitespeed.io/),
 creates a JSON report including the overall performance score for each page, and
 uploads the report as an artifact. By default, it tests the root page of your Review and
@@ -259,13 +320,30 @@ file named `.gitlab-urls.txt` in the root directory, one file per line. For exam
 /direction
 ```
 
-Any performance differences between the source and target branches are also
+Any browser performance differences between the source and target branches are also
 [shown in the merge request widget](../../user/project/merge_requests/browser_performance_testing.md).
+
+## Auto Load Performance Testing **(PREMIUM)**
+
+> Introduced in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
+
+Auto [Load Performance Testing](../../user/project/merge_requests/load_performance_testing.md)
+measures the server performance of an application with the
+[k6 container](https://hub.docker.com/r/loadimpact/k6/),
+creates a JSON report including several key result metrics, and
+uploads the report as an artifact.
+
+Some initial setup is required. A [k6](https://k6.io/) test needs to be
+written that's tailored to your specific application. The test also needs to be
+configured so it can pick up the environment's dynamic URL via an environment variable.
+
+Any load performance test result differences between the source and target branches are also
+[shown in the merge request widget](../../user/project/merge_requests/load_performance_testing.md).
 
 ## Auto Deploy
 
 This is an optional step, since many projects don't have a Kubernetes cluster
-available. If the [requirements](index.md#requirements) are not met, the job is skipped.
+available. If the [requirements](requirements.md) are not met, the job is skipped.
 
 After a branch or merge request is merged into the project's default branch (usually
 `master`), Auto Deploy deploys the application to a `production` environment in
@@ -282,12 +360,12 @@ scale your pod replicas, and to apply custom arguments to the Auto DevOps `helm 
 commands. This is an easy way to
 [customize the Auto Deploy Helm chart](customize.md#custom-helm-chart).
 
-Helm uses the [auto-deploy-app](https://gitlab.com/gitlab-org/charts/auto-deploy-app)
+Helm uses the [auto-deploy-app](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/tree/master/assets/auto-deploy-app)
 chart to deploy the application into the
 [Kubernetes namespace](../../user/project/clusters/index.md#deployment-variables)
 for the environment.
 
-Since GitLab 11.4, a
+In GitLab 11.4 and later, a
 [local Tiller](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22036) is
 used. Previous versions of GitLab had a Tiller installed in the project
 namespace.
@@ -322,34 +400,41 @@ as it attempts to fetch the image using `CI_REGISTRY_PASSWORD`.
 
 > - [Introduced](https://gitlab.com/gitlab-org/charts/auto-deploy-app/-/merge_requests/51) in GitLab 12.8.
 > - Support for deploying a PostgreSQL version that supports Kubernetes 1.16+ was [introduced](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/merge_requests/49) in GitLab 12.9.
+> - Supported out of the box for new deployments as of GitLab 13.0.
 
-CAUTION: **Deprecation**
-The default value of `extensions/v1beta1` for the `deploymentApiVersion` setting is
-deprecated, and is scheduled to be changed to a new default of `apps/v1` in
-[GitLab 13.0](https://gitlab.com/gitlab-org/charts/auto-deploy-app/issues/47).
+CAUTION: **Deprecation:**
+The default value for the `deploymentApiVersion` setting was changed from
+`extensions/v1beta` to `apps/v1` in [GitLab 13.0](https://gitlab.com/gitlab-org/charts/auto-deploy-app/-/issues/47).
 
 In Kubernetes 1.16 and later, a number of
 [APIs were removed](https://kubernetes.io/blog/2019/07/18/api-deprecations-in-1-16/),
 including support for `Deployment` in the `extensions/v1beta1` version.
 
-To use Auto Deploy on a Kubernetes 1.16+ cluster, you must opt-in to using a
-version of the PostgreSQL chart that supports Kubernetes 1.16 and higher:
+To use Auto Deploy on a Kubernetes 1.16+ cluster:
 
-1. Set the following in the [`.gitlab/auto-deploy-values.yaml` file](customize.md#customize-values-for-helm-chart):
+1. If you are deploying your application for the first time on GitLab 13.0 or
+   newer, no configuration should be required.
 
-   ```yml
+1. On GitLab 12.10 or older, set the following in the [`.gitlab/auto-deploy-values.yaml` file](customize.md#customize-values-for-helm-chart):
+
+   ```yaml
    deploymentApiVersion: apps/v1
    ```
 
-1. Set the:
+1. If you have an in-cluster PostgreSQL database installed with
+   `AUTO_DEVOPS_POSTGRES_CHANNEL` set to `1`, follow the [guide to upgrade
+   PostgreSQL](upgrading_postgresql.md).
 
-   - `AUTO_DEVOPS_POSTGRES_CHANNEL` variable to `2`.
-   - `POSTGRES_VERSION` variable to `9.6.16` or higher.
+1. If you are deploying your application for the first time and are using
+   GitLab 12.9 or 12.10, set `AUTO_DEVOPS_POSTGRES_CHANNEL` to `2`.
 
-DANGER: **Danger:** Opting into `AUTO_DEVOPS_POSTGRES_CHANNEL` version `2` deletes
-the version `1` PostgreSQL database. Follow the
-[guide to upgrading PostgreSQL](upgrading_postgresql.md) to back up and restore
-your database before opting into version `2`.
+DANGER: **Warning:**
+On GitLab 12.9 and 12.10, opting into
+`AUTO_DEVOPS_POSTGRES_CHANNEL` version `2` deletes the version `1` PostgreSQL
+database. Follow the [guide to upgrading PostgreSQL](upgrading_postgresql.md)
+to back up and restore your database before opting into version `2` (On
+GitLab 13.0, an additional variable is required to trigger the database
+deletion).
 
 ### Migrations
 
@@ -380,8 +465,13 @@ For example, in a Rails application in an image built with
 
 Unless your repository contains a `Dockerfile`, your image is built with
 Herokuish, and you must prefix commands run in these images with
-`/bin/herokuish procfile exec` to replicate the environment where your application
-will run.
+`/bin/herokuish procfile exec` (for Herokuish) or `/cnb/lifecycle/launcher`
+(for Cloud Native Buildpacks) to replicate the environment where your
+application runs.
+
+### Upgrade auto-deploy-app Chart
+
+You can upgrade the auto-deploy-app chart by following the [upgrade guide](upgrading_auto_deploy_dependencies.md).
 
 ### Workers
 
@@ -389,7 +479,7 @@ Some web applications must run extra deployments for "worker processes". For
 example, Rails applications commonly use separate worker processes
 to run background tasks like sending emails.
 
-The [default Helm chart](https://gitlab.com/gitlab-org/charts/auto-deploy-app)
+The [default Helm chart](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/tree/master/assets/auto-deploy-app)
 used in Auto Deploy
 [has support for running worker processes](https://gitlab.com/gitlab-org/charts/auto-deploy-app/-/merge_requests/9).
 
@@ -415,16 +505,16 @@ workers:
   sidekiq:
     replicaCount: 1
     command:
-    - /bin/herokuish
-    - procfile
-    - exec
-    - sidekiq
+      - /bin/herokuish
+      - procfile
+      - exec
+      - sidekiq
     preStopCommand:
-    - /bin/herokuish
-    - procfile
-    - exec
-    - sidekiqctl
-    - quiet
+      - /bin/herokuish
+      - procfile
+      - exec
+      - sidekiqctl
+      - quiet
     terminationGracePeriodSeconds: 60
 ```
 
@@ -459,7 +549,7 @@ traffic within a local namespace, and from the `gitlab-managed-apps`
 namespace. All other inbound connections are blocked. Outbound
 traffic (for example, to the Internet) is not affected by the default policy.
 
-You can also provide a custom [policy specification](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.16/#networkpolicyspec-v1-networking-k8s-io)
+You can also provide a custom [policy specification](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 in the `.gitlab/auto-deploy-values.yaml` file, for example:
 
 ```yaml
@@ -470,12 +560,12 @@ networkPolicy:
       matchLabels:
         app.gitlab.com/env: staging
     ingress:
-    - from:
-      - podSelector:
-          matchLabels: {}
-      - namespaceSelector:
-          matchLabels:
-            app.gitlab.com/managed_by: gitlab
+      - from:
+        - podSelector:
+            matchLabels: {}
+        - namespaceSelector:
+            matchLabels:
+              app.gitlab.com/managed_by: gitlab
 ```
 
 For more information on installing Network Policies, see
@@ -530,12 +620,18 @@ may require commands to be wrapped as follows:
 Some of the reasons you may need to wrap commands:
 
 - Attaching using `kubectl exec`.
-- Using GitLab's [Web Terminal](../../ci/environments.md#web-terminals).
+- Using GitLab's [Web Terminal](../../ci/environments/index.md#web-terminals).
 
 For example, to start a Rails console from the application root directory, run:
 
 ```shell
 /bin/herokuish procfile exec bin/rails c
+```
+
+When using Cloud Native Buildpacks, instead of `/bin/herokuish procfile exec`, use
+
+```shell
+/cnb/lifecycle/launcher $COMMAND
 ```
 
 ## Auto Monitoring
@@ -560,12 +656,16 @@ GitLab provides some initial alerts for you after you install Prometheus:
 
 To use Auto Monitoring:
 
-1. [Install and configure the requirements](index.md#requirements).
+1. [Install and configure the Auto DevOps requirements](requirements.md).
 1. [Enable Auto DevOps](index.md#enablingdisabling-auto-devops), if you haven't done already.
 1. Navigate to your project's **{rocket}** **CI/CD > Pipelines** and click **Run Pipeline**.
 1. After the pipeline finishes successfully, open the
-   [monitoring dashboard for a deployed environment](../../ci/environments.md#monitoring-environments)
+   [monitoring dashboard for a deployed environment](../../ci/environments/index.md#monitoring-environments)
    to view the metrics of your deployed application. To view the metrics of the
-   whole Kubernetes cluster, navigate to **{cloud-gear}** **Operations > Metrics**.
+   whole Kubernetes cluster, navigate to **Operations > Metrics**.
 
 ![Auto Metrics](img/auto_monitoring.png)
+
+## Auto Code Intelligence
+
+Code Intelligence is powered by [LSIF](https://lsif.dev/) and available for Go at this stage. We'll support more languages as they become available.

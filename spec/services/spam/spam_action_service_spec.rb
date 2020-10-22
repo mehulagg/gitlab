@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Spam::SpamActionService do
+RSpec.describe Spam::SpamActionService do
   include_context 'includes Spam constants'
 
   let(:fake_ip) { '1.2.3.4' }
@@ -13,6 +13,7 @@ describe Spam::SpamActionService do
       'HTTP_USER_AGENT' => fake_user_agent,
       'HTTP_REFERRER' => fake_referrer }
   end
+
   let(:request) { double(:request, env: env) }
 
   let_it_be(:project) { create(:project, :public) }
@@ -24,7 +25,7 @@ describe Spam::SpamActionService do
   end
 
   describe '#initialize' do
-    subject { described_class.new(spammable: issue, request: request) }
+    subject { described_class.new(spammable: issue, request: request, user: user) }
 
     context 'when the request is nil' do
       let(:request) { nil }
@@ -53,7 +54,7 @@ describe Spam::SpamActionService do
 
   shared_examples 'only checks for spam if a request is provided' do
     context 'when request is missing' do
-      subject { described_class.new(spammable: issue, request: nil) }
+      subject { described_class.new(spammable: issue, request: nil, user: user) }
 
       it "doesn't check as spam" do
         subject
@@ -73,12 +74,14 @@ describe Spam::SpamActionService do
   describe '#execute' do
     let(:request) { double(:request, env: env) }
     let(:fake_verdict_service) { double(:spam_verdict_service) }
+    let(:allowlisted) { false }
 
     let_it_be(:existing_spam_log) { create(:spam_log, user: user, recaptcha_verified: false) }
 
     subject do
-      described_service = described_class.new(spammable: issue, request: request)
-      described_service.execute(user: user, api: nil, recaptcha_verified: recaptcha_verified, spam_log_id: existing_spam_log.id)
+      described_service = described_class.new(spammable: issue, request: request, user: user)
+      allow(described_service).to receive(:allowlisted?).and_return(allowlisted)
+      described_service.execute(api: nil, recaptcha_verified: recaptcha_verified, spam_log_id: existing_spam_log.id)
     end
 
     before do
@@ -121,6 +124,16 @@ describe Spam::SpamActionService do
           issue.description = 'SPAM!'
         end
 
+        context 'if allowlisted' do
+          let(:allowlisted) { true }
+
+          it 'does not perform spam check' do
+            expect(Spam::SpamVerdictService).not_to receive(:new)
+
+            subject
+          end
+        end
+
         context 'when disallowed by the spam verdict service' do
           before do
             allow(fake_verdict_service).to receive(:execute).and_return(DISALLOW)
@@ -151,9 +164,9 @@ describe Spam::SpamActionService do
           end
         end
 
-        context 'when spam verdict service requires reCAPTCHA' do
+        context 'when spam verdict service conditionally allows' do
           before do
-            allow(fake_verdict_service).to receive(:execute).and_return(REQUIRE_RECAPTCHA)
+            allow(fake_verdict_service).to receive(:execute).and_return(CONDITIONAL_ALLOW)
           end
 
           context 'when allow_possible_spam feature flag is false' do

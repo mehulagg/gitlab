@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectApprovalRules < ::Grape::API
+  class ProjectApprovalRules < ::API::Base
     before { authenticate! }
 
     helpers ::API::Helpers::ProjectApprovalRulesHelpers

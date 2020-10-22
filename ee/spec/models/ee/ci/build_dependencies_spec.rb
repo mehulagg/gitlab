@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::BuildDependencies do
+RSpec.describe Ci::BuildDependencies do
   describe '#cross_pipeline' do
     let_it_be(:user) { create(:user) }
     let_it_be(:project, refind: true) { create(:project, :repository) }
@@ -85,6 +85,26 @@ describe Ci::BuildDependencies do
         let(:artifacts) { false }
 
         it { is_expected.to be_empty }
+      end
+
+      context 'with dependency names from environment variables' do
+        before do
+          job.yaml_variables.push(key: 'DEPENDENCY_NAME', value: 'dependency', public: true)
+          job.save!
+        end
+
+        let(:dependencies) do
+          [
+            {
+              project: '$CI_PROJECT_PATH',
+              job: '$DEPENDENCY_NAME',
+              ref: '$CI_COMMIT_BRANCH',
+              artifacts: true
+            }
+          ]
+        end
+
+        it { is_expected.to contain_exactly(dependency) }
       end
     end
 

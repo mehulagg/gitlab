@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Notes::UpdateService do
+RSpec.describe Notes::UpdateService do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
 
@@ -18,7 +18,7 @@ describe Notes::UpdateService do
     describe 'publish to status page' do
       let(:execute) { service.execute(note) }
       let(:issue_id) { note.noteable_id }
-      let(:emoji_name) { StatusPage::AWARD_EMOJI }
+      let(:emoji_name) { Gitlab::StatusPage::AWARD_EMOJI }
 
       before do
         create(:award_emoji, user: user, name: emoji_name, awardable: note)

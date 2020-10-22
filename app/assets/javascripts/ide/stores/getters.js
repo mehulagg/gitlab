@@ -6,6 +6,8 @@ import {
   PERMISSION_CREATE_MR,
   PERMISSION_PUSH_CODE,
 } from '../constants';
+import { addNumericSuffix } from '~/ide/utils';
+import Api from '~/api';
 
 export const activeFile = state => state.openFiles.find(file => file.active) || null;
 
@@ -49,9 +51,6 @@ export const emptyRepo = state =>
 
 export const currentTree = state =>
   state.trees[`${state.currentProjectId}/${state.currentBranchId}`];
-
-export const hasChanges = state =>
-  Boolean(state.changedFiles.length) || Boolean(state.stagedFiles.length);
 
 export const hasMergeRequest = state => Boolean(state.currentMergeRequestId);
 
@@ -162,5 +161,33 @@ export const canCreateMergeRequests = (state, getters) =>
 export const canPushCode = (state, getters) =>
   Boolean(getters.findProjectPermissions(state.currentProjectId)[PERMISSION_PUSH_CODE]);
 
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};
+export const entryExists = state => path =>
+  Boolean(state.entries[path] && !state.entries[path].deleted);
+
+export const getAvailableFileName = (state, getters) => path => {
+  let newPath = path;
+
+  while (getters.entryExists(newPath)) {
+    newPath = addNumericSuffix(newPath);
+  }
+
+  return newPath;
+};
+
+export const getUrlForPath = state => path =>
+  `/project/${state.currentProjectId}/tree/${state.currentBranchId}/-/${path}/`;
+
+export const getJsonSchemaForPath = (state, getters) => path => {
+  const [namespace, ...project] = state.currentProjectId.split('/');
+  return {
+    uri:
+      // eslint-disable-next-line no-restricted-globals
+      location.origin +
+      Api.buildUrl(Api.projectFileSchemaPath)
+        .replace(':namespace_path', namespace)
+        .replace(':project_path', project.join('/'))
+        .replace(':ref', getters.currentBranch?.commit.id || state.currentBranchId)
+        .replace(':filename', path),
+    fileMatch: [`*${path}`],
+  };
+};

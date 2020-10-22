@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Group active tab' do
+RSpec.describe 'Group active tab' do
   let(:user) { create :user }
   let(:group) { create(:group) }
 
@@ -36,7 +36,7 @@ describe 'Group active tab' do
     end
 
     it_behaves_like 'page has active tab', _('Analytics')
-    it_behaves_like 'page has active sub tab', _('Issues')
+    it_behaves_like 'page has active sub tab', _('Issue')
   end
 
   context 'on group Contribution Analytics' do

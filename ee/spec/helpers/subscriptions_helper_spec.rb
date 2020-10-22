@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SubscriptionsHelper do
+RSpec.describe SubscriptionsHelper do
   using RSpec::Parameterized::TableSyntax
 
   let_it_be(:raw_plan_data) do
@@ -22,7 +22,7 @@ describe SubscriptionsHelper do
   end
 
   before do
-    allow(helper).to receive(:params).and_return(plan_id: 'bronze_id')
+    allow(helper).to receive(:params).and_return(plan_id: 'bronze_id', namespace_id: nil)
     allow_next_instance_of(FetchSubscriptionPlansService) do |instance|
       allow(instance).to receive(:execute).and_return(raw_plan_data)
     end
@@ -33,6 +33,7 @@ describe SubscriptionsHelper do
     let_it_be(:group) { create(:group, name: 'My Namespace') }
 
     before do
+      allow(helper).to receive(:params).and_return(plan_id: 'bronze_id', namespace_id: group.id.to_s)
       allow(helper).to receive(:current_user).and_return(user)
       group.add_owner(user)
     end
@@ -43,6 +44,7 @@ describe SubscriptionsHelper do
     it { is_expected.to include(full_name: 'First Last') }
     it { is_expected.to include(plan_data: '[{"id":"bronze_id","code":"bronze","price_per_year":48.0}]') }
     it { is_expected.to include(plan_id: 'bronze_id') }
+    it { is_expected.to include(namespace_id: group.id.to_s) }
     it { is_expected.to include(group_data: %Q{[{"id":#{group.id},"name":"My Namespace","users":1}]}) }
 
     describe 'new_user' do

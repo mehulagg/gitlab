@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Issue, :elastic do
+RSpec.describe Issue, :elastic do
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
@@ -73,6 +73,14 @@ describe Issue, :elastic do
     expect(described_class.elastic_search('(term1 | term2 | term3) +bla-bla', options: options).total_count).to eq(2)
     expect(described_class.elastic_search(Issue.last.to_reference, options: options).total_count).to eq(1)
     expect(described_class.elastic_search('bla-bla', options: { project_ids: :any, public_and_internal_projects: true }).total_count).to eq(3)
+  end
+
+  it "names elasticsearch queries" do
+    described_class.elastic_search('*').total_count
+
+    assert_named_queries('doc:is_a:issue',
+                         'issue:match:search_terms',
+                         'issue:authorized:project')
   end
 
   it "searches by iid and scopes to type: issue only" do

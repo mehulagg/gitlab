@@ -1,5 +1,0 @@
----
-title: Migrate project snippets to the ghost user when the user is deleted
-merge_request: 28870
-author: George Thomas @thegeorgeous
-type: added

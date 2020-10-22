@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Git::Wiki do
+RSpec.describe Gitlab::Git::Wiki do
   using RSpec::Parameterized::TableSyntax
 
   let(:project) { create(:project) }
@@ -50,6 +50,11 @@ describe Gitlab::Git::Wiki do
     it 'returns the right page' do
       expect(subject.page(title: 'page1', dir: '').url_path).to eq 'page1'
       expect(subject.page(title: 'page1', dir: 'foo').url_path).to eq 'foo/page1'
+    end
+
+    it 'returns nil for invalid arguments' do
+      expect(subject.page(title: '')).to be_nil
+      expect(subject.page(title: 'foo', version: ':')).to be_nil
     end
   end
 

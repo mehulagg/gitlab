@@ -1,0 +1,7 @@
+---
+name: missing_mr_security_scan_types
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40171
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/241154
+group: group::threat insights
+type: development
+default_enabled: false

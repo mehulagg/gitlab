@@ -1,9 +1,7 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { __ } from '~/locale';
-import createFlash from '~/flash';
 import {
-  GlDeprecatedButton,
+  GlButton,
   GlLoadingIcon,
   GlLink,
   GlBadge,
@@ -11,6 +9,8 @@ import {
   GlAlert,
   GlSprintf,
 } from '@gitlab/ui';
+import { __ } from '~/locale';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Stacktrace from '~/error_tracking/components/stacktrace.vue';
 import ErrorDetails from '~/error_tracking/components/error_details.vue';
 import {
@@ -18,6 +18,12 @@ import {
   severityLevelVariant,
   errorStatus,
 } from '~/error_tracking/components/constants';
+import Tracking from '~/tracking';
+import {
+  trackClickErrorLinkToSentryOptions,
+  trackErrorDetailsViewsOptions,
+  trackErrorStatusUpdateOptions,
+} from '~/error_tracking/utils';
 
 jest.mock('~/flash');
 
@@ -30,15 +36,23 @@ describe('ErrorDetails', () => {
   let actions;
   let getters;
   let mocks;
+  const externalUrl = 'https://sentry.io/organizations/test-sentry-nk/issues/1/?project=1';
 
   const findInput = name => {
     const inputs = wrapper.findAll(GlFormInput).filter(c => c.attributes('name') === name);
     return inputs.length ? inputs.at(0) : inputs;
   };
 
+  const findUpdateIgnoreStatusButton = () =>
+    wrapper.find('[data-testid="update-ignore-status-btn"]');
+  const findUpdateResolveStatusButton = () =>
+    wrapper.find('[data-testid="update-resolve-status-btn"]');
+  const findExternalUrl = () => wrapper.find('[data-testid="external-url-link"]');
+  const findAlert = () => wrapper.find(GlAlert);
+
   function mountComponent() {
     wrapper = shallowMount(ErrorDetails, {
-      stubs: { GlDeprecatedButton, GlSprintf },
+      stubs: { GlButton, GlSprintf },
       localVue,
       store,
       mocks,
@@ -57,7 +71,7 @@ describe('ErrorDetails', () => {
   beforeEach(() => {
     actions = {
       startPollingStacktrace: () => {},
-      updateIgnoreStatus: jest.fn(),
+      updateIgnoreStatus: jest.fn().mockResolvedValue({}),
       updateResolveStatus: jest.fn().mockResolvedValue({ closed_issue_iid: 1 }),
     };
 
@@ -170,6 +184,9 @@ describe('ErrorDetails', () => {
           count: 12,
           userCount: 2,
         },
+        stacktraceData: {
+          date_received: '2020-05-20',
+        },
       });
     });
 
@@ -178,7 +195,7 @@ describe('ErrorDetails', () => {
       expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
       expect(wrapper.find(Stacktrace).exists()).toBe(false);
       expect(wrapper.find(GlBadge).exists()).toBe(false);
-      expect(wrapper.findAll(GlDeprecatedButton).length).toBe(3);
+      expect(wrapper.findAll(GlButton)).toHaveLength(3);
     });
 
     describe('unsafe chars for culprit field', () => {
@@ -235,7 +252,7 @@ describe('ErrorDetails', () => {
             },
           });
           return wrapper.vm.$nextTick().then(() => {
-            expect(wrapper.find(GlBadge).attributes('variant')).toEqual(
+            expect(wrapper.find(GlBadge).props('variant')).toEqual(
               severityLevelVariant[severityLevel[level]],
             );
           });
@@ -249,7 +266,7 @@ describe('ErrorDetails', () => {
           },
         });
         return wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.find(GlBadge).attributes('variant')).toEqual(
+          expect(wrapper.find(GlBadge).props('variant')).toEqual(
             severityLevelVariant[severityLevel.ERROR],
           );
         });
@@ -262,15 +279,17 @@ describe('ErrorDetails', () => {
         return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
           expect(wrapper.find(Stacktrace).exists()).toBe(true);
+          expect(findAlert().exists()).toBe(false);
         });
       });
 
-      it('should NOT show stacktrace if no entries', () => {
+      it('should NOT show stacktrace if no entries and show Alert message', () => {
         store.state.details.loadingStacktrace = false;
         store.getters = { 'details/sentryUrl': () => 'sentry.io', 'details/stacktrace': () => [] };
         return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
           expect(wrapper.find(Stacktrace).exists()).toBe(false);
+          expect(findAlert().text()).toBe('No stack trace for this error');
         });
       });
     });
@@ -302,11 +321,6 @@ describe('ErrorDetails', () => {
     });
 
     describe('Status update', () => {
-      const findUpdateIgnoreStatusButton = () =>
-        wrapper.find('[data-qa-selector="update_ignore_status_button"]');
-      const findUpdateResolveStatusButton = () =>
-        wrapper.find('[data-qa-selector="update_resolve_status_button"]');
-
       afterEach(() => {
         actions.updateIgnoreStatus.mockClear();
         actions.updateResolveStatus.mockClear();
@@ -393,7 +407,6 @@ describe('ErrorDetails', () => {
         });
 
         it('should show alert with closed issueId', () => {
-          const findAlert = () => wrapper.find(GlAlert);
           const closedIssueId = 123;
           wrapper.setData({
             isAlertVisible: true,
@@ -488,6 +501,51 @@ describe('ErrorDetails', () => {
         return wrapper.vm.$nextTick().then(() => {
           expect(findGitLabCommitLink().exists()).toBe(false);
         });
+      });
+    });
+  });
+
+  describe('Snowplow tracking', () => {
+    beforeEach(() => {
+      jest.spyOn(Tracking, 'event');
+      mocks.$apollo.queries.error.loading = false;
+      mountComponent();
+      wrapper.setData({
+        error: { externalUrl },
+      });
+    });
+
+    it('should track detail page views', () => {
+      const { category, action } = trackErrorDetailsViewsOptions;
+      expect(Tracking.event).toHaveBeenCalledWith(category, action);
+    });
+
+    it('should track IGNORE status update', () => {
+      Tracking.event.mockClear();
+      findUpdateIgnoreStatusButton().vm.$emit('click');
+      setImmediate(() => {
+        const { category, action } = trackErrorStatusUpdateOptions('ignored');
+        expect(Tracking.event).toHaveBeenCalledWith(category, action);
+      });
+    });
+
+    it('should track RESOLVE status update', () => {
+      Tracking.event.mockClear();
+      findUpdateResolveStatusButton().vm.$emit('click');
+      setImmediate(() => {
+        const { category, action } = trackErrorStatusUpdateOptions('resolved');
+        expect(Tracking.event).toHaveBeenCalledWith(category, action);
+      });
+    });
+
+    it('should track external Sentry link views', () => {
+      Tracking.event.mockClear();
+      findExternalUrl().trigger('click');
+      setImmediate(() => {
+        const { category, action, label, property } = trackClickErrorLinkToSentryOptions(
+          externalUrl,
+        );
+        expect(Tracking.event).toHaveBeenCalledWith(category, action, { label, property });
       });
     });
   });

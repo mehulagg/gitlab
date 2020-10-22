@@ -5,7 +5,7 @@ module Clusters
     class Prometheus < ApplicationRecord
       include PrometheusAdapter
 
-      VERSION = '9.5.2'
+      VERSION = '10.4.1'
 
       self.table_name = 'clusters_applications_prometheus'
 
@@ -16,6 +16,9 @@ module Clusters
       include AfterCommitQueue
 
       default_value_for :version, VERSION
+
+      scope :preload_cluster_platform, -> { preload(cluster: [:platform_kubernetes]) }
+      scope :with_clusters_with_cilium, -> { joins(:cluster).merge(Clusters::Cluster.with_available_cilium) }
 
       attr_encrypted :alert_manager_token,
         mode: :per_attribute_iv,
@@ -37,7 +40,7 @@ module Clusters
         end
 
         after_transition any => :updating do |application|
-          application.update(last_update_started_at: Time.now)
+          application.update(last_update_started_at: Time.current)
         end
       end
 
@@ -48,7 +51,11 @@ module Clusters
       end
 
       def chart
-        'stable/prometheus'
+        "#{name}/prometheus"
+      end
+
+      def repository
+        'https://gitlab-org.gitlab.io/cluster-integration/helm-stable-archive'
       end
 
       def service_name
@@ -62,6 +69,7 @@ module Clusters
       def install_command
         Gitlab::Kubernetes::Helm::InstallCommand.new(
           name: name,
+          repository: repository,
           version: VERSION,
           rbac: cluster.platform_kubernetes_rbac?,
           chart: chart,
@@ -73,6 +81,7 @@ module Clusters
       def patch_command(values)
         ::Gitlab::Kubernetes::Helm::PatchCommand.new(
           name: name,
+          repository: repository,
           version: version,
           rbac: cluster.platform_kubernetes_rbac?,
           chart: chart,
@@ -103,7 +112,9 @@ module Clusters
         proxy_url = kube_client.proxy_url('service', service_name, service_port, Gitlab::Kubernetes::Helm::NAMESPACE)
 
         # ensures headers containing auth data are appended to original k8s client options
-        options = kube_client.rest_client.options.merge(headers: kube_client.headers)
+        options = kube_client.rest_client.options
+          .merge(prometheus_client_default_options)
+          .merge(headers: kube_client.headers)
         Gitlab::PrometheusClient.new(proxy_url, options)
       rescue Kubeclient::HttpError, Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::ENETUNREACH
         # If users have mistakenly set parameters or removed the depended clusters,

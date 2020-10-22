@@ -6,6 +6,8 @@ module GoogleApi
 
     before_action :validate_session_key!
 
+    feature_category :kubernetes_management
+
     def callback
       token, expires_at = GoogleApi::CloudPlatform::Client
         .new(nil, callback_google_api_auth_url)
@@ -15,6 +17,9 @@ module GoogleApi
       session[GoogleApi::CloudPlatform::Client.session_key_for_expires_at] =
         expires_at.to_s
 
+    rescue ::Faraday::TimeoutError, ::Faraday::ConnectionFailed
+      flash[:alert] = _('Timeout connecting to the Google API. Please try again.')
+    ensure
       redirect_to redirect_uri_from_session
     end
 

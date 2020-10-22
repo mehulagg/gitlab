@@ -8,10 +8,6 @@ RSpec.shared_examples 'member validations' do
       let(:group) { identity.saml_provider.group }
       let(:entity) { group }
 
-      before do
-        stub_feature_flags(enforced_sso: true)
-      end
-
       context 'enforced SSO enabled' do
         before do
           allow_any_instance_of(SamlProvider).to receive(:enforced_sso?).and_return(true)
@@ -34,20 +30,10 @@ RSpec.shared_examples 'member validations' do
           let!(:subgroup) { create(:group, parent: group) }
 
           before do
-            entity.update(group: subgroup) if entity.is_a?(Project)
-          end
-
-          it 'allows adding a group member without SSO enforced on subgroup' do
-            stub_feature_flags(enforced_sso: false, group: subgroup)
-
-            member = described_class.add_user(entity, create(:user), ProjectMember::DEVELOPER)
-
-            expect(member).to be_valid
+            entity.update!(group: subgroup) if entity.is_a?(Project)
           end
 
           it 'does not allow adding a group member with SSO enforced on subgroup' do
-            stub_feature_flags(enforced_sso: true, group: subgroup)
-
             member = described_class.add_user(entity, create(:user), ProjectMember::DEVELOPER)
 
             expect(member).not_to be_valid

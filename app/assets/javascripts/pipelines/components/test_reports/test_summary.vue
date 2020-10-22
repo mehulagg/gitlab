@@ -1,15 +1,13 @@
 <script>
-import { GlDeprecatedButton, GlProgressBar } from '@gitlab/ui';
+import { GlButton, GlProgressBar } from '@gitlab/ui';
 import { __ } from '~/locale';
-import { formatTime, secondsToMilliseconds } from '~/lib/utils/datetime_utility';
-import Icon from '~/vue_shared/components/icon.vue';
+import { formattedTime } from '../../stores/test_reports/utils';
 
 export default {
   name: 'TestSummary',
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlProgressBar,
-    Icon,
   },
   props: {
     report: {
@@ -29,10 +27,17 @@ export default {
     successPercentage() {
       // Returns a full number when the decimals equal .00.
       // Otherwise returns a float to two decimal points
-      return Number(((this.report.success_count / this.report.total_count) * 100 || 0).toFixed(2));
+      // Do not include skipped tests as part of the total when doing success calculations.
+
+      const totalCompletedCount = this.report.total_count - this.report.skipped_count;
+
+      if (totalCompletedCount > 0) {
+        return Number(((this.report.success_count / totalCompletedCount) * 100 || 0).toFixed(2));
+      }
+      return 0;
     },
     formattedDuration() {
-      return formatTime(secondsToMilliseconds(this.report.total_time));
+      return formattedTime(this.report.total_time);
     },
     progressBarVariant() {
       if (this.successPercentage < 33) {
@@ -61,15 +66,14 @@ export default {
 <template>
   <div>
     <div class="row">
-      <div class="col-12 d-flex prepend-top-8 align-items-center">
-        <gl-deprecated-button
+      <div class="col-12 d-flex gl-mt-3 align-items-center">
+        <gl-button
           v-if="showBack"
-          size="sm"
-          class="append-right-default js-back-button"
+          size="small"
+          class="gl-mr-3 js-back-button"
+          icon="angle-left"
           @click="onBackClick"
-        >
-          <icon name="angle-left" />
-        </gl-deprecated-button>
+        />
 
         <h4>{{ heading }}</h4>
       </div>
@@ -78,7 +82,7 @@ export default {
     <div class="row mt-2">
       <div class="col-4 col-md">
         <span class="js-total-tests">{{
-          sprintf(s__('TestReports|%{count} jobs'), { count: report.total_count })
+          sprintf(s__('TestReports|%{count} tests'), { count: report.total_count })
         }}</span>
       </div>
 

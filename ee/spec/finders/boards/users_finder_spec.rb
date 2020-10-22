@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::UsersFinder do
+RSpec.describe Boards::UsersFinder do
   describe '#execute' do
     subject { described_class.new(board) }
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::EE::API::Entities::Scim::UserName do
+RSpec.describe ::EE::API::Entities::Scim::UserName do
   let(:user) { build(:user) }
 
   subject { described_class.new(user).as_json }

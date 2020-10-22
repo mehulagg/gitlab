@@ -14,8 +14,8 @@ module Elastic
       end
     end
 
-    def index_commits_and_blobs(from_rev: nil, to_rev: nil)
-      ::ElasticCommitIndexerWorker.perform_async(project.id, from_rev, to_rev)
+    def index_commits_and_blobs
+      ::ElasticCommitIndexerWorker.perform_async(project.id)
     end
   end
 end

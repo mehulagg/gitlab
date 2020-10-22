@@ -8,14 +8,10 @@ module Projects
       alias_method :vulnerable, :project
 
       before_action only: [:index] do
-        push_frontend_feature_flag(:hide_dismissed_vulnerabilities)
-        push_frontend_feature_flag(:first_class_vulnerabilities, @project)
+        push_frontend_feature_flag(:security_auto_fix, project, default_enabled: false)
       end
 
-      def index
-        @pipeline = @project.latest_pipeline_with_security_reports
-          &.present(current_user: current_user)
-      end
+      feature_category :static_application_security_testing
     end
   end
 end

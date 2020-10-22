@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::SystemNotes::VulnerabilitiesService do
+RSpec.describe EE::SystemNotes::VulnerabilitiesService do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:author) { create(:user) }
 

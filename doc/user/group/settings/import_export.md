@@ -1,3 +1,9 @@
+---
+type: reference
+stage: Manage
+group: Import
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
 # Group Import/Export
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2888) in GitLab 13.0 as an experimental feature. May change in future releases.
@@ -15,7 +21,7 @@ See also:
 
 To enable GitLab import/export:
 
-1. Navigate to **{admin}** **Admin Area >** **{settings}** **Settings > Visibility and access controls**.
+1. Navigate to **Admin Area > Settings > Visibility and access controls**.
 1. Scroll to **Import sources**
 1. Enable desired **Import sources**
 
@@ -27,13 +33,13 @@ Note the following:
 - To preserve group-level relationships from imported projects, run the Group Import/Export first, to allow projects to
 be imported into the desired group structure.
 - Imported groups are given a `private` visibility level, unless imported into a parent group.
-- If imported into a parent group, subgroups will inherit the same level of visibility unless otherwise restricted.
+- If imported into a parent group, a subgroup inherits the same level of visibility unless otherwise restricted.
 - To preserve the member list and their respective permissions on imported groups, review the users in these groups. Make
 sure these users exist before importing the desired groups.
 
 ### Exported Contents
 
-The following items will be exported:
+The following items are exported:
 
 - Milestones
 - Labels
@@ -43,10 +49,10 @@ The following items will be exported:
 - Epics
 - Events
 
-The following items will NOT be exported:
+The following items are **not** exported:
 
 - Projects
-- Runners token
+- Runner tokens
 - SAML discovery tokens
 
 NOTE: **Note:**
@@ -57,20 +63,68 @@ For more details on the specific data persisted in a group export, see the
 
 1. Navigate to your group's homepage.
 
-1. Click **{settings}** **Settings** in the sidebar.
+1. Click **Settings** in the sidebar.
 
 1. In the **Advanced** section, click the **Export Group** button.
 
-   ![Export group panel](img/export_panel.png)
+   ![Export group panel](img/export_panel_v13_0.png)
 
-1. Once the export is generated, you can click **Download export** to download the [exported contents](#exported-contents)
-in a compressed tar archive, with contents in JSON format. You can also return to this page to regenerate the export data.
+1. Once the export is generated, you should receive an e-mail with a link to the [exported contents](#exported-contents)
+   in a compressed tar archive, with contents in JSON format.
+
+1. Alternatively, you can come back to the project settings and download the
+   file from there by clicking **Download export**, or generate a new file by clicking **Regenerate export**.
+
+NOTE: **Note:**
+The maximum import file size can be set by the Administrator, default is 50MB.
+As an administrator, you can modify the maximum import file size. To do so, use the `max_import_size` option in the [Application settings API](../../../api/settings.md#change-application-settings) or the [Admin UI](../../admin_area/settings/account_and_limit_settings.md).
+
+### Between CE and EE
+
+You can export groups from the [Community Edition to the Enterprise Edition](https://about.gitlab.com/install/ce-or-ee/) and vice versa.
+
+The Enterprise Edition retains some group data that isn't part of the Community Edition. If you're exporting a group from the Enterprise Edition to the Community Edition, you may lose this data. For more information, see [downgrading from EE to CE](../../../README.md).
+
+## Importing the group
+
+1. Navigate to the New Group page, either via the `+` button in the top navigation bar, or the **New subgroup** button
+on an existing group's page.
+
+   ![Navigation paths to create a new group](img/new_group_navigation_v13_1.png)
+
+1. On the New Group page, select the **Import group** tab.
+
+   ![Fill in group details](img/import_panel_v13_4.png)
+
+1. Enter your group name.
+
+1. Accept or modify the associated group URL.
+
+1. Click **Choose file**
+
+1. Select the file that you exported in the [exporting a group](#exporting-a-group) section.
+
+1. Click **Import group** to begin importing. Your newly imported group page appears after the operation completes.
+
+## Version history
+
+GitLab can import bundles that were exported from a different GitLab deployment.
+This ability is limited to two previous GitLab [minor](../../../policy/maintenance.md#versioning)
+releases, which is similar to our process for [Security Releases](../../../policy/maintenance.md#security-releases).
+
+For example:
+
+| Current version | Can import bundles exported from |
+|-----------------|----------------------------------|
+| 13.0            | 13.0, 12.10, 12.9                |
+| 13.1            | 13.1, 13.0, 12.10                |
 
 ## Rate Limits
 
 To help avoid abuse, users are rate limited to:
 
-| Request Type     | Limit                          |
-| ---------------- | ------------------------------ |
-| Export           | 1 group every 5 minutes        |
-| Download export  | 10 downloads every 10 minutes  |
+| Request Type     | Limit                                    |
+| ---------------- | ---------------------------------------- |
+| Export           | 30 groups every 5 minutes                |
+| Download export  | 10 downloads per group every 10 minutes  |
+| Import           | 30 groups every 5 minutes                |

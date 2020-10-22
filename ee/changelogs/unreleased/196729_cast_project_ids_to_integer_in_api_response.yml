@@ -1,5 +1,0 @@
----
-title: Fix the error message on Security & Operations dashboard by fixing the API response
-merge_request: 30047
-author:
-type: fixed

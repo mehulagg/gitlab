@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User resolves diff notes and threads', :js do
+RSpec.describe 'Merge request > User resolves diff notes and threads', :js do
   let(:project)       { create(:project, :public, :repository) }
   let(:user)          { project.creator }
   let(:guest)         { create(:user) }
@@ -15,15 +15,11 @@ describe 'Merge request > User resolves diff notes and threads', :js do
           diff_refs: merge_request.diff_refs)
   end
 
-  before do
-    stub_feature_flags(diffs_batch_load: false)
-  end
-
   context 'no threads' do
     before do
       project.add_maintainer(user)
       sign_in(user)
-      note.destroy
+      note.destroy!
       visit_merge_request
     end
 
@@ -146,17 +142,16 @@ describe 'Merge request > User resolves diff notes and threads', :js do
         describe 'reply form' do
           before do
             click_button 'Toggle thread'
-
-            page.within '.diff-content' do
-              click_button 'Reply...'
-            end
           end
 
           it 'allows user to comment' do
             page.within '.diff-content' do
+              click_button 'Reply...'
+
+              find(".js-unresolve-checkbox").set false
               find('.js-note-text').set 'testing'
 
-              click_button 'Comment'
+              click_button 'Add comment now'
 
               wait_for_requests
             end
@@ -181,9 +176,11 @@ describe 'Merge request > User resolves diff notes and threads', :js do
 
           it 'allows user to comment & unresolve thread' do
             page.within '.diff-content' do
+              click_button 'Reply...'
+
               find('.js-note-text').set 'testing'
 
-              click_button 'Comment & unresolve thread'
+              click_button 'Add comment now'
 
               wait_for_requests
             end
@@ -197,8 +194,6 @@ describe 'Merge request > User resolves diff notes and threads', :js do
 
       it 'allows user to resolve from reply form without a comment' do
         page.within '.diff-content' do
-          click_button 'Reply...'
-
           click_button 'Resolve thread'
         end
 
@@ -214,7 +209,9 @@ describe 'Merge request > User resolves diff notes and threads', :js do
 
           find('.js-note-text').set 'testing'
 
-          click_button 'Comment & resolve thread'
+          find('.js-resolve-checkbox').set(true)
+
+          click_button 'Add comment now'
         end
 
         page.within '.line-resolve-all-container' do
@@ -445,7 +442,9 @@ describe 'Merge request > User resolves diff notes and threads', :js do
 
           find('.js-note-text').set 'testing'
 
-          click_button 'Comment & resolve thread'
+          find('.js-resolve-checkbox').set(true)
+
+          click_button 'Add comment now'
         end
 
         page.within '.line-resolve-all-container' do
@@ -462,7 +461,7 @@ describe 'Merge request > User resolves diff notes and threads', :js do
 
           find('.js-note-text').set 'testing'
 
-          click_button 'Comment & unresolve thread'
+          click_button 'Add comment now'
         end
 
         page.within '.line-resolve-all-container' do

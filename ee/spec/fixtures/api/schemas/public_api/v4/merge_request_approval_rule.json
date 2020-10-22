@@ -6,6 +6,7 @@
     "approvals_required": { "type": "integer" },
     "contains_hidden_groups": { "type": "boolean" },
     "rule_type": { "type": "string" },
+    "section": { "type": ["null", "string"] },
     "source_rule": {
       "type":["null", "object"],
       "properties": {}

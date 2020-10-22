@@ -1,5 +1,4 @@
 - import_data = @project.import_data || @project.build_import_data
-- is_one_user_option = default_mirror_users.count == 1
 - protocols = Gitlab::UrlSanitizer::ALLOWED_SCHEMES.join('|')
 - direction_options = [[_('Push'), 'push']]
 - has_existing_pull_mirror = @project.mirror.present?
@@ -29,15 +28,10 @@
     = render partial: 'projects/mirrors/authentication_method', locals: { f: import_form }
 
   .form-group
-    = f.label :mirror_user_id, _('Mirror user'), class: 'label-light'
-    - if is_one_user_option
-      = select_tag(:mirror_user_id_select, options_for_mirror_user, class: 'js-mirror-user select2 lg append-bottom-5', required: true, disabled: true)
-      = f.hidden_field :mirror_user_id, value: default_mirror_users.first.id if is_one_user_option
-    - else
-      = f.select(:mirror_user_id, options_for_mirror_user, {}, class: 'js-mirror-user select2 lg append-bottom-5', required: true)
-
+    = f.label :mirror_user_id_select, _('Mirror user'), class: 'label-light'
+    = select_tag(:mirror_user_id_select, options_for_mirror_user, class: 'js-mirror-user select2 lg gl-mb-2', required: true, disabled: true)
     .help-block
-      = _('This user will be the author of all events in the activity feed that are the result of an update, like new branches being created or new commits being pushed to existing branches. Upon creation or when reassigning you can only assign yourself to be the mirror user.')
+      = _('You will be the author of all events in the activity feed that are the result of an update, like new branches being created or new commits being pushed to existing branches.')
 
   - if Feature.enabled?(:pull_mirror_branch_prefix, @project)
     .form-group
@@ -46,7 +40,7 @@
       .help-block
         = _("Mirrored branches will have this prefix. If you enabled 'Only mirror protected branches' you need to include this prefix on protected branches in this project or nothing will be mirrored.")
 
-  .form-check.append-bottom-10
+  .form-check.gl-mb-3
     = f.check_box :mirror_overwrites_diverged_branches, class: 'form-check-input', checked: false
     = f.label :mirror_overwrites_diverged_branches, _('Overwrite diverged branches'), class: 'form-check-label'
     .form-text.text-muted

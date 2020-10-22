@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LabelNote do
+RSpec.describe LabelNote do
   include Gitlab::Routing.url_helpers
 
   let_it_be(:group)  { create(:group) }

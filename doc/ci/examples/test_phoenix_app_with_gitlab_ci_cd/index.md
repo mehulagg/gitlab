@@ -1,11 +1,8 @@
 ---
-author: Alexandre S Hostert
-author_gitlab: Hostert
-level: beginner
-article_type: tutorial
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: tutorial
-date: 2018-02-20
-last_updated: 2019-03-06
 ---
 
 # Testing a Phoenix application with GitLab CI/CD
@@ -43,9 +40,9 @@ Phoenix can run in any OS where Erlang is supported:
 - Debian
 - Windows
 - Fedora
-- Raspbian
+- Raspberry Pi OS
 
-Check the [Phoenix learning guide](https://hexdocs.pm/phoenix/learning.html) for more information.
+Check the [Phoenix learning guide](https://hexdocs.pm/phoenix/overview.html) for more information.
 
 ### What is Elixir?
 
@@ -120,7 +117,6 @@ Generated hello_gitlab_ci app
 The database for HelloGitlabCi.Repo has been created
 ```
 
-> **Note:**
 Phoenix assumes that our PostgreSQL database will have a `postgres` user account with the correct
 permissions and a password of `postgres`. If it's not your case, check
 [Ecto's instructions](https://hexdocs.pm/ecto/Ecto.html#module-repositories).
@@ -151,7 +147,7 @@ point `localhost` to `127.0.0.1`.
 
 Great, now we have a local Phoenix Server running our app.
 
-Locally, our application is running in an `iex` session. [iex](https://elixir-lang.org/getting-started/introduction.html#interactive-mode) stands for Interactive Elixir.
+Locally, our application is running in an [`iex`](https://elixir-lang.org/getting-started/introduction.html#interactive-mode) session, which stands for Interactive Elixir.
 In this interactive mode, we can type any Elixir expression and get its result. To exit `iex`, we
 need to press `Ctrl+C` twice. So, when we need to stop the Phoenix server, we have to hit `Ctrl+C`
 twice.
@@ -161,7 +157,7 @@ twice.
 With GitLab, we can manage our development workflow, improve our productivity, track issues,
 perform code review, and much more from a single platform. With GitLab CI/CD, we can be much more
 productive, because every time we, or our co-workers push any code, GitLab CI/CD will build and
-test the changes, telling us in realtime if anything goes wrong.
+test the changes, telling us in real time if anything goes wrong.
 
 Certainly, when our application starts to grow, we'll need more developers working on the same
 project and this process of building and testing can easily become a mess without proper management.
@@ -179,10 +175,10 @@ environment it can run. Since we will work with a single environment, we'll edit
 configuration file (`test.exs`).
 
 But, why do we need to adjust our configuration? Well, GitLab CI/CD builds and tests our code in one
-isolated virtual machine, called [Runner](../../runners/README.md), using Docker technology. In this Runner,
+isolated virtual machine, called a [runner](../../runners/README.md), using Docker technology. In this runner,
 GitLab CI/CD has access to everything our Phoenix application need to run, exactly as we have in our
 `localhost`, but we have to tell GitLab CI/CD where to create and find this database using system
-variables. This way, GitLab CI/CD will create our test database inside the Runner, just like we do
+variables. This way, GitLab CI/CD will create our test database inside the runner, just like we do
 when running our Phoenix in our `localhost`.
 
 - Open `hello_gitlab_ci/config/test.exs` on your favorite code editor
@@ -208,7 +204,7 @@ when running our Phoenix in our `localhost`.
   Without `.gitkeep`, Git will not upload this empty directory and we'll got an error when running our
   test on GitLab.
 
-  > **Note:** If we add a folder via the GitLab UI, GitLab itself will add the `.gitkeep` to that new dir.
+  If we add a folder via the GitLab UI, GitLab itself will add the `.gitkeep` to that new dir.
 
 Now, let's run a local test and see if everything we did didn't break anything.
 
@@ -258,11 +254,11 @@ project.
 
 - The first line tells GitLab what Docker image will be used.
 
-  Remember when we learn about Runners, the isolated virtual machine where GitLab CI/CD build and test
+  Remember when we learned about runners, the isolated virtual machine where GitLab CI/CD builds and tests
   our application? This virtual machine must have all dependencies to run our application. This is
   where a Docker image is needed. The correct image will provide the entire system for us.
 
-  As we are focusing on testing (not deploying), you can use the [elixir:latest](https://hub.docker.com/_/elixir) docker image, which already has the
+  As we are focusing on testing (not deploying), you can use the [elixir:latest](https://hub.docker.com/_/elixir) Docker image, which already has the
   dependencies for running Phoenix tests installed, such as Elixir and Erlang:
 
   ```yaml
@@ -397,5 +393,5 @@ using GitLab CI/CD. The benefits to our teams will be huge!
 
 - [GitLab CI/CD introductory guide](https://about.gitlab.com/blog/2015/12/14/getting-started-with-gitlab-and-gitlab-ci/)
 - [GitLab CI/CD full Documentation](../../README.md)
-- [GitLab Runners documentation](../../runners/README.md)
+- [GitLab Runner documentation](../../runners/README.md)
 - [Using Docker images documentation](../../docker/using_docker_images.md)

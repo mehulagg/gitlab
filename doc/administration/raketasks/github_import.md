@@ -2,15 +2,19 @@
 
 > [Introduced]( https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10308) in GitLab 9.1.
 
-In order to retrieve and import GitHub repositories, you will need a
-[GitHub personal access token](https://github.com/settings/tokens).
-A username should be passed as the second argument to the Rake task
+To retrieve and import GitHub repositories, you need a [GitHub personal access token](https://github.com/settings/tokens).
+A username should be passed as the second argument to the Rake task,
 which will become the owner of the project. You can resume an import
 with the same command.
 
 Bear in mind that the syntax is very specific. Remove any spaces within the argument block and
 before/after the brackets. Also, some shells (for example, `zsh`) can interpret the open/close brackets
 (`[]`) separately. You may need to either escape the brackets or use double quotes.
+
+## Caveats
+
+If the GitHub [rate limit](https://developer.github.com/v3/#rate-limiting) is reached while importing,
+the importing process will wait (`sleep()`) until it can continue importing.
 
 ## Importing multiple projects
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SoftwareLicense do
+RSpec.describe SoftwareLicense do
   subject { build(:software_license) }
 
   describe 'validations' do
@@ -83,6 +83,29 @@ describe SoftwareLicense do
 
     context "when an SPDX identifier is not available" do
       it { expect(build(:software_license, name: 'MIT License', spdx_identifier: nil).canonical_id).to eq('mit license') }
+    end
+  end
+
+  describe '.unclassified_licenses_for' do
+    subject { described_class.unclassified_licenses_for(project) }
+
+    let_it_be(:mit_license) { create(:software_license, :mit) }
+    let_it_be(:apache_license) { create(:software_license, :apache_2_0) }
+    let_it_be(:nonstandard_license) { create(:software_license, :user_entered) }
+    let_it_be(:project) { create(:project) }
+
+    context 'when a project has not classified licenses' do
+      it 'returns each license in the SPDX catalogue ordered by name' do
+        expect(subject.to_a).to eql([apache_license, mit_license])
+      end
+    end
+
+    context 'when some of the licenses are classified' do
+      let_it_be(:mit_policy) { create(:software_license_policy, project: project, software_license: mit_license) }
+
+      it 'returns each license in the SPDX catalogue that has not been classified' do
+        expect(subject).to contain_exactly(apache_license)
+      end
     end
   end
 end

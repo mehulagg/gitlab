@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Reports::Security::Locations::DependencyScanning do
+RSpec.describe Gitlab::Ci::Reports::Security::Locations::DependencyScanning do
   let(:params) do
     {
       file_path: 'app/pom.xml',

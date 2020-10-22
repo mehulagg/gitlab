@@ -10,23 +10,26 @@ export default () => ({
   isEmptyStage: false,
   errorCode: null,
 
-  isSavingCustomStage: false,
-  isCreatingCustomStage: false,
-  isEditingCustomStage: false,
   isSavingStageOrder: false,
   errorSavingStageOrder: false,
 
-  selectedGroup: null,
+  currentGroup: null,
   selectedProjects: [],
   selectedStage: null,
+  selectedValueStream: null,
 
   currentStageEvents: [],
 
+  isLoadingValueStreams: false,
+  isCreatingValueStream: false,
+  isDeletingValueStream: false,
+
+  createValueStreamErrors: {},
+  deleteValueStreamError: null,
+
   stages: [],
+  selectedStageError: '',
   summary: [],
   medians: {},
-
-  customStageFormEvents: [],
-  customStageFormErrors: null,
-  customStageFormInitialData: null,
+  valueStreams: [],
 });

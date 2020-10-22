@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BroadcastMessage do
+RSpec.describe BroadcastMessage do
   subject { build(:broadcast_message) }
 
   describe '.current', :use_clean_rails_memory_store_caching do

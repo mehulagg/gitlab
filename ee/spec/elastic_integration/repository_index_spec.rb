@@ -2,14 +2,13 @@
 
 require 'spec_helper'
 
-describe 'Repository index', :elastic do
+RSpec.describe 'Repository index', :elastic do
   context 'when fresh master branch is first pushed, followed by another update, then indexed' do
     let(:project) { create(:project_empty_repo) }
     let(:user) { project.owner }
 
     before do
       stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
-      ElasticIndexerWorker.new.perform("index", "Project", project.id, project.es_id)
     end
 
     it 'indexes initial push' do

@@ -1,15 +1,28 @@
 <script>
-import { GlDeprecatedButton, GlIcon, GlTooltip } from '@gitlab/ui';
+import { GlIcon, GlTooltipDirective, GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { __ } from '~/locale';
 import { approximateDuration } from '~/lib/utils/datetime_utility';
 import StageCardListItem from './stage_card_list_item.vue';
+
+const ERROR_MESSAGES = {
+  tooMuchData: __('There is too much data to calculate. Please change your selection.'),
+};
+
+const ERROR_NAV_ITEM_CONTENT = {
+  [ERROR_MESSAGES.tooMuchData]: __('Too much data'),
+  fallback: __('Not enough data'),
+};
 
 export default {
   name: 'StageNavItem',
   components: {
     StageCardListItem,
     GlIcon,
-    GlDeprecatedButton,
-    GlTooltip,
+    GlDropdown,
+    GlDropdownItem,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     isDefaultStage: {
@@ -31,16 +44,16 @@ export default {
       default: 0,
       required: false,
     },
-    canEdit: {
-      type: Boolean,
-      default: false,
-      required: false,
-    },
     id: {
       // The IDs of stages are strings until custom stages have been added.
       // Only at this point the IDs become numbers, so we have to allow both.
       type: [String, Number],
       required: true,
+    },
+    errorMessage: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   data() {
@@ -56,17 +69,20 @@ export default {
     median() {
       return approximateDuration(this.value);
     },
-    editable() {
-      return this.canEdit;
-    },
-    menuOpen() {
-      return this.canEdit && this.isHover;
-    },
     openMenuClasses() {
-      return this.menuOpen ? 'd-flex justify-content-end' : '';
+      return this.isHover ? 'gl-display-flex gl-justify-content-end' : '';
+    },
+    error() {
+      return ERROR_NAV_ITEM_CONTENT[this.errorMessage] || ERROR_NAV_ITEM_CONTENT.fallback;
+    },
+    stageTitleTooltip() {
+      return this.isTitleOverflowing ? this.title : null;
     },
   },
   mounted() {
+    this.checkIfTitleOverflows();
+  },
+  updated() {
     this.checkIfTitleOverflows();
   },
   methods: {
@@ -100,55 +116,62 @@ export default {
     @mouseover="handleHover(true)"
     @mouseleave="handleHover()"
   >
-    <stage-card-list-item
-      :is-active="isActive"
-      :can-edit="editable"
-      class="d-flex justify-space-between"
-    >
+    <stage-card-list-item :is-active="isActive" class="gl-display-flex gl-justify-space-between">
       <div
         ref="title"
         class="stage-nav-item-cell stage-name text-truncate w-50 pr-2"
         :class="{ 'font-weight-bold': isActive }"
       >
-        <gl-tooltip v-if="isTitleOverflowing" :target="() => $refs.titleSpan">
-          {{ title }}
-        </gl-tooltip>
-        <span ref="titleSpan">{{ title }}</span>
+        <span v-gl-tooltip="{ title: stageTitleTooltip }" data-testid="stage-title">{{
+          title
+        }}</span>
       </div>
-      <div class="stage-nav-item-cell w-50 d-flex justify-content-between">
+      <div class="stage-nav-item-cell w-50 gl-display-flex gl-justify-content-between">
         <div ref="median" class="stage-median w-75 align-items-start">
           <span v-if="hasValue">{{ median }}</span>
-          <span v-else class="stage-empty">{{ __('Not enough data') }}</span>
+          <span v-else v-gl-tooltip="{ title: errorMessage }" class="stage-empty">{{ error }}</span>
         </div>
-        <div v-show="menuOpen" ref="dropdown" :class="[openMenuClasses]" class="dropdown w-25">
-          <gl-deprecated-button
-            :title="__('More actions')"
-            class="more-actions-toggle btn btn-transparent p-0"
-            data-toggle="dropdown"
+        <div v-show="isHover" ref="dropdown" :class="[openMenuClasses]" class="dropdown w-25">
+          <gl-dropdown
+            toggle-class="gl-p-0! gl-bg-transparent! gl-shadow-none!"
+            data-testid="more-actions-toggle"
           >
-            <gl-icon class="icon" name="ellipsis_v" />
-          </gl-deprecated-button>
-          <ul class="more-actions-dropdown dropdown-menu dropdown-open-left">
+            <template #button-content>
+              <span
+                v-gl-tooltip
+                category="tertiary"
+                :title="__('More actions')"
+                data-toggle="dropdown"
+              >
+                <gl-icon name="ellipsis_v" />
+              </span>
+            </template>
             <template v-if="isDefaultStage">
-              <li>
-                <gl-deprecated-button @click="handleDropdownAction('hide', $event)">
-                  {{ __('Hide stage') }}
-                </gl-deprecated-button>
-              </li>
+              <gl-dropdown-item
+                category="tertiary"
+                data-testid="hide-btn"
+                @click="handleDropdownAction('hide', $event)"
+              >
+                {{ __('Hide stage') }}
+              </gl-dropdown-item>
             </template>
             <template v-else>
-              <li>
-                <gl-deprecated-button @click="handleDropdownAction('edit', $event)">
-                  {{ __('Edit stage') }}
-                </gl-deprecated-button>
-              </li>
-              <li>
-                <gl-deprecated-button @click="handleDropdownAction('remove', $event)">
-                  {{ __('Remove stage') }}
-                </gl-deprecated-button>
-              </li>
+              <gl-dropdown-item
+                category="tertiary"
+                data-testid="edit-btn"
+                @click="handleDropdownAction('edit', $event)"
+              >
+                {{ __('Edit stage') }}
+              </gl-dropdown-item>
+              <gl-dropdown-item
+                category="tertiary"
+                data-testid="remove-btn"
+                @click="handleDropdownAction('remove', $event)"
+              >
+                {{ __('Remove stage') }}
+              </gl-dropdown-item>
             </template>
-          </ul>
+          </gl-dropdown>
         </div>
       </div>
     </stage-card-list-item>

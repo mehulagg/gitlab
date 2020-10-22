@@ -6,7 +6,7 @@ type: concepts
 
 Team Foundation Server (TFS), renamed [Azure DevOps Server](https://azure.microsoft.com/en-us/services/devops/server/)
 in 2019, is a set of tools developed by Microsoft which also includes
-[Team Foundation Version Control](https://docs.microsoft.com/en-us/azure/devops/repos/tfvc/overview?view=azure-devops)
+[Team Foundation Version Control](https://docs.microsoft.com/en-us/azure/devops/repos/tfvc/what-is-tfvc?view=azure-devops)
 (TFVC), a centralized version control system similar to Git.
 
 In this document, we focus on the TFVC to Git migration.
@@ -41,6 +41,14 @@ Advantages of migrating to Git/GitLab:
 
 ## How to migrate
 
-The best option to migrate from TFVC to Git is to use the [`git-tfs`](https://github.com/git-tfs/git-tfs)
-tool. Read the [Migrate TFS to Git](https://github.com/git-tfs/git-tfs/blob/master/doc/usecases/migrate_tfs_to_git.md)
-guide for more details.
+Migration options from TFVC to Git depend on your operating system.
+
+- If you're migrating on Microsoft Windows:
+
+  Use the [`git-tfs`](https://github.com/git-tfs/git-tfs)
+tool.
+  Read the [Migrate TFS to Git](https://github.com/git-tfs/git-tfs/blob/master/doc/usecases/migrate_tfs_to_git.md) guide for details.
+
+- If you're on a Unix-based system:
+
+  Follow the procedures described with this [TFVC to Git migration tool](https://github.com/turbo/gtfotfs).

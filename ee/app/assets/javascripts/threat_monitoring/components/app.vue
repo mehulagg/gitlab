@@ -1,11 +1,11 @@
 <script>
 import { mapActions } from 'vuex';
-import { GlAlert, GlEmptyState, GlIcon, GlLink, GlPopover } from '@gitlab/ui';
+import { GlAlert, GlEmptyState, GlIcon, GlLink, GlPopover, GlTabs, GlTab } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ThreatMonitoringFilters from './threat_monitoring_filters.vue';
 import ThreatMonitoringSection from './threat_monitoring_section.vue';
+import NetworkPolicyList from './network_policy_list.vue';
 
 export default {
   name: 'ThreatMonitoring',
@@ -15,10 +15,12 @@ export default {
     GlIcon,
     GlLink,
     GlPopover,
+    GlTabs,
+    GlTab,
     ThreatMonitoringFilters,
     ThreatMonitoringSection,
+    NetworkPolicyList,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     defaultEnvironmentId: {
       type: Number,
@@ -53,6 +55,10 @@ export default {
       required: true,
     },
     userCalloutsPath: {
+      type: String,
+      required: true,
+    },
+    newPolicyPath: {
       type: String,
       required: true,
     },
@@ -154,38 +160,48 @@ export default {
       </h2>
     </header>
 
-    <threat-monitoring-filters />
+    <gl-tabs>
+      <gl-tab ref="networkPolicyTab" :title="s__('ThreatMonitoring|Policies')">
+        <network-policy-list
+          :documentation-path="documentationPath"
+          :new-policy-path="newPolicyPath"
+        />
+      </gl-tab>
+      <gl-tab :title="s__('ThreatMonitoring|Statistics')">
+        <threat-monitoring-filters />
 
-    <threat-monitoring-section
-      ref="wafSection"
-      store-namespace="threatMonitoringWaf"
-      :title="s__('ThreatMonitoring|Web Application Firewall')"
-      :subtitle="s__('ThreatMonitoring|Requests')"
-      :anomalous-title="s__('ThreatMonitoring|Anomalous Requests')"
-      :nominal-title="s__('ThreatMonitoring|Total Requests')"
-      :y-legend="s__('ThreatMonitoring|Requests')"
-      :chart-empty-state-title="s__('ThreatMonitoring|Application firewall not detected')"
-      :chart-empty-state-text="$options.wafChartEmptyStateDescription"
-      :chart-empty-state-svg-path="wafNoDataSvgPath"
-      :documentation-path="documentationPath"
-      documentation-anchor="web-application-firewall"
-    />
+        <threat-monitoring-section
+          ref="wafSection"
+          store-namespace="threatMonitoringWaf"
+          :title="s__('ThreatMonitoring|Web Application Firewall')"
+          :subtitle="s__('ThreatMonitoring|Requests')"
+          :anomalous-title="s__('ThreatMonitoring|Anomalous Requests')"
+          :nominal-title="s__('ThreatMonitoring|Total Requests')"
+          :y-legend="s__('ThreatMonitoring|Requests')"
+          :chart-empty-state-title="s__('ThreatMonitoring|Application firewall not detected')"
+          :chart-empty-state-text="$options.wafChartEmptyStateDescription"
+          :chart-empty-state-svg-path="wafNoDataSvgPath"
+          :documentation-path="documentationPath"
+          documentation-anchor="web-application-firewall"
+        />
 
-    <hr />
+        <hr />
 
-    <threat-monitoring-section
-      ref="networkPolicySection"
-      store-namespace="threatMonitoringNetworkPolicy"
-      :title="s__('ThreatMonitoring|Container Network Policy')"
-      :subtitle="s__('ThreatMonitoring|Packet Activity')"
-      :anomalous-title="s__('ThreatMonitoring|Dropped Packets')"
-      :nominal-title="s__('ThreatMonitoring|Total Packets')"
-      :y-legend="s__('ThreatMonitoring|Operations Per Second')"
-      :chart-empty-state-title="s__('ThreatMonitoring|Container NetworkPolicies not detected')"
-      :chart-empty-state-text="$options.networkPolicyChartEmptyStateDescription"
-      :chart-empty-state-svg-path="networkPolicyNoDataSvgPath"
-      :documentation-path="documentationPath"
-      documentation-anchor="container-network-policy"
-    />
+        <threat-monitoring-section
+          ref="networkPolicySection"
+          store-namespace="threatMonitoringNetworkPolicy"
+          :title="s__('ThreatMonitoring|Container Network Policy')"
+          :subtitle="s__('ThreatMonitoring|Packet Activity')"
+          :anomalous-title="s__('ThreatMonitoring|Dropped Packets')"
+          :nominal-title="s__('ThreatMonitoring|Total Packets')"
+          :y-legend="s__('ThreatMonitoring|Operations Per Second')"
+          :chart-empty-state-title="s__('ThreatMonitoring|Container NetworkPolicies not detected')"
+          :chart-empty-state-text="$options.networkPolicyChartEmptyStateDescription"
+          :chart-empty-state-svg-path="networkPolicyNoDataSvgPath"
+          :documentation-path="documentationPath"
+          documentation-anchor="container-network-policy"
+        />
+      </gl-tab>
+    </gl-tabs>
   </section>
 </template>

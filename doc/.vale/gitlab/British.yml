@@ -1,9 +1,11 @@
 ---
-# Checks for use of some of the top misused terms at GitLab.
+# Error: gitlab.British
 #
-# For a list of all options, see https://errata-ai.github.io/vale/styles/
+# Checks that US spelling is used over British spelling.
+#
+# For a list of all options, see https://errata-ai.gitbook.io/vale/getting-started/styles
 extends: substitution
-message: 'Use the American spelling "%s" instead of the British "%s".'
+message: 'Use the US spelling "%s" instead of the British "%s".'
 link: https://about.gitlab.com/handbook/communication/#top-misused-terms
 level: error
 ignorecase: true
@@ -65,7 +67,6 @@ swap:
   matt: matte
   meagre: meager
   metre: meter
-  mitre: miter
   modelling: modeling
   moustache: mustache
   neighbour: neighbor
@@ -96,6 +97,8 @@ swap:
   speciality: specialty
   spectre: specter
   splendour: splendor
+  standardise: standardize
+  standardised: standardized
   sulphur: sulfur
   theatre: theater
   travelled: traveled

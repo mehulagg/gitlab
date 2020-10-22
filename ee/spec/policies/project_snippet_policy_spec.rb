@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 # Snippet visibility scenarios are included in more details in spec/support/snippet_visibility.rb
-describe ProjectSnippetPolicy do
+RSpec.describe ProjectSnippetPolicy do
   let(:project) { create(:project, :public) }
   let(:snippet) { create(:project_snippet, snippet_visibility, project: project) }
   let(:author_permissions) do

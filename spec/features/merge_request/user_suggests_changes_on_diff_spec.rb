@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User comments on a diff', :js do
+RSpec.describe 'User comments on a diff', :js do
   include MergeRequestDiffHelpers
   include RepoHelpers
 
@@ -22,6 +22,7 @@ describe 'User comments on a diff', :js do
   let(:merge_request) do
     create(:merge_request_with_diffs, source_project: project, target_project: project, source_branch: 'merge-test')
   end
+
   let(:user) { create(:user) }
 
   before do
@@ -49,7 +50,7 @@ describe 'User comments on a diff', :js do
 
       page.within('.js-discussion-note-form') do
         fill_in('note_note', with: "```suggestion\n# change to a comment\n```")
-        click_button('Comment')
+        click_button('Add comment now')
       end
 
       wait_for_requests
@@ -77,7 +78,7 @@ describe 'User comments on a diff', :js do
 
       page.within('.js-discussion-note-form') do
         fill_in('note_note', with: "```suggestion\n# change to a comment\n```")
-        click_button('Comment')
+        click_button('Add comment now')
       end
 
       wait_for_requests
@@ -93,9 +94,105 @@ describe 'User comments on a diff', :js do
     end
   end
 
+  context 'applying suggestions in batches' do
+    def hash(path)
+      diff_file = merge_request.diffs(paths: [path]).diff_files.first
+      Digest::SHA1.hexdigest(diff_file.file_path)
+    end
+
+    file1 = 'files/ruby/popen.rb'
+    file2 = 'files/ruby/regex.rb'
+
+    let(:files) do
+      [
+        {
+          hash: hash(file1),
+          line_code: "#{hash(file1)}_12_12"
+        },
+        {
+          hash: hash(file2),
+          line_code: "#{hash(file2)}_21_21"
+        }
+      ]
+    end
+
+    it 'can add and remove suggestions from a batch' do
+      files.each_with_index do |file, index|
+        page.within("[id='#{file[:hash]}']") do
+          find('.js-diff-more-actions').click
+          click_button 'Show full file'
+          wait_for_requests
+
+          click_diff_line(find("[id='#{file[:line_code]}']"))
+
+          page.within('.js-discussion-note-form') do
+            fill_in('note_note', with: "```suggestion\n# change to a comment\n```")
+            click_button('Add comment now')
+            wait_for_requests
+          end
+        end
+      end
+
+      files.each_with_index do |file, index|
+        page.within("[id='#{file[:hash]}']") do
+          expect(page).not_to have_content('Applied')
+
+          click_button('Add suggestion to batch')
+          wait_for_requests
+
+          expect(page).to have_content('Remove from batch')
+          expect(page).to have_content("Apply suggestions #{index + 1}")
+        end
+      end
+
+      page.within("[id='#{files[0][:hash]}']") do
+        click_button('Remove from batch')
+        wait_for_requests
+
+        expect(page).to have_content('Apply suggestion')
+        expect(page).to have_content('Add suggestion to batch')
+      end
+
+      page.within("[id='#{files[1][:hash]}']") do
+        expect(page).to have_content('Remove from batch')
+        expect(page).to have_content('Apply suggestions 1')
+      end
+    end
+
+    it 'can apply multiple suggestions as a batch', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/224100' do
+      files.each_with_index do |file, index|
+        page.within("[id='#{file[:hash]}']") do
+          find("button[title='Show full file']").click
+          wait_for_requests
+
+          click_diff_line(find("[id='#{file[:line_code]}']"))
+
+          page.within('.js-discussion-note-form') do
+            fill_in('note_note', with: "```suggestion\n# change to a comment\n```")
+            click_button('Add comment now')
+            wait_for_requests
+          end
+        end
+
+        page.within("[id='#{file[:hash]}']") do
+          click_button('Add suggestion to batch')
+          wait_for_requests
+        end
+      end
+
+      expect(page).not_to have_content('Applied')
+
+      page.within("[id='#{files[0][:hash]}']") do
+        click_button('Apply suggestions 2')
+        wait_for_requests
+      end
+
+      expect(page).to have_content('Applied').twice
+    end
+  end
+
   context 'multiple suggestions in expanded lines' do
-    # https://gitlab.com/gitlab-org/gitlab/issues/38277
-    it 'suggestions are appliable', :quarantine do
+    it 'suggestions are appliable', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/38277' do
       diff_file = merge_request.diffs(paths: ['files/ruby/popen.rb']).diff_files.first
       hash = Digest::SHA1.hexdigest(diff_file.file_path)
 
@@ -119,7 +216,7 @@ describe 'User comments on a diff', :js do
 
         page.within('.js-discussion-note-form') do
           fill_in('note_note', with: "```suggestion\n# change to a comment\n```")
-          click_button('Comment')
+          click_button('Add comment now')
           wait_for_requests
         end
 
@@ -127,7 +224,7 @@ describe 'User comments on a diff', :js do
 
         page.within('.js-discussion-note-form') do
           fill_in('note_note', with: "```suggestion\n# 2nd change to a comment\n```")
-          click_button('Comment')
+          click_button('Add comment now')
           wait_for_requests
         end
 
@@ -153,12 +250,12 @@ describe 'User comments on a diff', :js do
   end
 
   context 'multiple suggestions in a single note' do
-    it 'suggestions are presented' do
+    it 'suggestions are presented', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/258989' do
       click_diff_line(find("[id='#{sample_compare.changes[1][:line_code]}']"))
 
       page.within('.js-discussion-note-form') do
         fill_in('note_note', with: "```suggestion\n# change to a comment\n```\n```suggestion:-2\n# or that\n# heh\n```")
-        click_button('Comment')
+        click_button('Add comment now')
       end
 
       wait_for_requests
@@ -201,7 +298,7 @@ describe 'User comments on a diff', :js do
 
       page.within('.js-discussion-note-form') do
         fill_in('note_note', with: "```suggestion:-3+5\n# change to a\n# comment\n# with\n# broken\n# lines\n```")
-        click_button('Comment')
+        click_button('Add comment now')
       end
 
       wait_for_requests

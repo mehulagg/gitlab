@@ -1,4 +1,6 @@
 import { mount, createLocalVue } from '@vue/test-utils';
+import mockDiffFile from 'jest/diffs/mock_data/diff_file';
+import { trimText } from 'helpers/text_helper';
 import createStore from '~/notes/stores';
 import noteableDiscussion from '~/notes/components/noteable_discussion.vue';
 import ReplyPlaceholder from '~/notes/components/discussion_reply_placeholder.vue';
@@ -12,8 +14,6 @@ import {
   loggedOutnoteableData,
   userDataMock,
 } from '../mock_data';
-import mockDiffFile from 'jest/diffs/mock_data/diff_file';
-import { trimText } from 'helpers/text_helper';
 
 const discussionWithTwoUnresolvedNotes = 'merge_requests/resolved_diff_discussion.json';
 
@@ -89,6 +89,23 @@ describe('noteable_discussion component', () => {
         });
     });
 
+    it('should expand discussion', async () => {
+      const expandDiscussion = jest.fn();
+      const discussion = { ...discussionMock };
+      discussion.expanded = false;
+
+      wrapper.setProps({ discussion });
+      wrapper.setMethods({ expandDiscussion });
+
+      await wrapper.vm.$nextTick();
+
+      wrapper.vm.showReplyForm();
+
+      await wrapper.vm.$nextTick();
+
+      expect(expandDiscussion).toHaveBeenCalledWith({ discussionId: discussion.id });
+    });
+
     it('does not render jump to thread button', () => {
       expect(wrapper.find('*[data-original-title="Jump to next unresolved thread"]').exists()).toBe(
         false,
@@ -138,7 +155,7 @@ describe('noteable_discussion component', () => {
 
   describe('signout widget', () => {
     beforeEach(() => {
-      originalGon = Object.assign({}, window.gon);
+      originalGon = { ...window.gon };
       window.gon = window.gon || {};
     });
 

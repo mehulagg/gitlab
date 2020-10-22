@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::PruneEventLogWorker, :geo do
+RSpec.describe Geo::PruneEventLogWorker, :geo do
   include ::EE::GeoHelpers
 
   subject(:worker) { described_class.new }

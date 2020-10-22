@@ -6,5 +6,3 @@ export const triggerDOMEvent = type => {
     }),
   );
 };
-
-export default () => {};

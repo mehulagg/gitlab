@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Project badges API
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17082) in GitLab 10.6.
@@ -7,9 +14,9 @@
 Badges support placeholders that will be replaced in real time in both the link and image URL. The allowed placeholders are:
 
 - **%{project_path}**: will be replaced by the project path.
-- **%{project_id}**: will be replaced by the project id.
+- **%{project_id}**: will be replaced by the project ID.
 - **%{default_branch}**: will be replaced by the project default branch.
-- **%{commit_sha}**: will be replaced by the last project's commit sha.
+- **%{commit_sha}**: will be replaced by the last project's commit SHA.
 
 ## List all badges of a project
 
@@ -25,7 +32,7 @@ GET /projects/:id/badges
 | `name`    | string         | no  | Name of the badges to return (case-sensitive). |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/:id/badges
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/badges"
 ```
 
 Example response:
@@ -67,7 +74,7 @@ GET /projects/:id/badges/:badge_id
 | `badge_id` | integer | yes   | The badge ID |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/:id/badges/:badge_id
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/badges/:badge_id"
 ```
 
 Example response:
@@ -98,7 +105,7 @@ POST /projects/:id/badges
 | `image_url` | string | yes | URL of the badge image |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --data "link_url=https://gitlab.com/gitlab-org/gitlab-foss/commits/master&image_url=https://shields.io/my/badge1&position=0" https://gitlab.example.com/api/v4/projects/:id/badges
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --data "link_url=https://gitlab.com/gitlab-org/gitlab-foss/commits/master&image_url=https://shields.io/my/badge1&position=0" "https://gitlab.example.com/api/v4/projects/:id/badges"
 ```
 
 Example response:
@@ -130,7 +137,7 @@ PUT /projects/:id/badges/:badge_id
 | `image_url` | string | no | URL of the badge image |
 
 ```shell
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/:id/badges/:badge_id
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/badges/:badge_id"
 ```
 
 Example response:
@@ -160,7 +167,7 @@ DELETE /projects/:id/badges/:badge_id
 | `badge_id` | integer | yes   | The badge ID |
 
 ```shell
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/:id/badges/:badge_id
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/badges/:badge_id"
 ```
 
 ## Preview a badge from a project
@@ -178,7 +185,7 @@ GET /projects/:id/badges/render
 | `image_url` | string | yes | URL of the badge image |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/:id/badges/render?link_url=http%3A%2F%2Fexample.com%2Fci_status.svg%3Fproject%3D%25%7Bproject_path%7D%26ref%3D%25%7Bdefault_branch%7D&image_url=https%3A%2F%2Fshields.io%2Fmy%2Fbadge
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/badges/render?link_url=http%3A%2F%2Fexample.com%2Fci_status.svg%3Fproject%3D%25%7Bproject_path%7D%26ref%3D%25%7Bdefault_branch%7D&image_url=https%3A%2F%2Fshields.io%2Fmy%2Fbadge"
 ```
 
 Example response:

@@ -12,16 +12,16 @@ module QA
               element :close_reopen_epic_button
             end
 
-            view 'ee/app/assets/javascripts/related_issues/components/add_issuable_form.vue' do
+            view 'app/assets/javascripts/related_issues/components/add_issuable_form.vue' do
               element :add_issue_button
             end
 
-            view 'ee/app/assets/javascripts/related_issues/components/related_issuable_input.vue' do
-              element :add_issue_input
+            view 'app/assets/javascripts/related_issues/components/related_issuable_input.vue' do
+              element :add_issue_field
             end
 
-            view 'ee/app/assets/javascripts/related_items_tree/components/issue_actions_split_button.vue' do
-              element :issue_actions_split_button
+            view 'ee/app/assets/javascripts/related_items_tree/components/epic_issue_actions_split_button.vue' do
+              element :epic_issue_actions_split_button
             end
 
             view 'ee/app/assets/javascripts/related_items_tree/components/tree_item.vue' do
@@ -33,15 +33,16 @@ module QA
             end
 
             def add_issue_to_epic(issue_url)
-              find_element(:issue_actions_split_button).find('button', text: 'Add an issue').click
-              fill_element :add_issue_input, issue_url
+              click_element(:epic_issue_actions_split_button)
+              find('button', text: 'Add an existing issue').click
+              fill_element :add_issue_field, issue_url
               # Clicking the title blurs the input
               click_element :title
               click_element :add_issue_button
             end
 
             def add_comment_to_epic(comment)
-              fill_element :comment_input, comment
+              fill_element :comment_field, comment
               click_element :comment_button
             end
 

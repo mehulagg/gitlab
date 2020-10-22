@@ -3,39 +3,38 @@
 require 'base64'
 
 module API
-  class Geo < Grape::API
+  class Geo < ::API::Base
     resource :geo do
       helpers do
         def sanitized_node_status_params
-          allowed_attributes = GeoNodeStatus.attribute_names - ['id']
-          valid_attributes = params.keys & allowed_attributes
-          params.slice(*valid_attributes)
-        end
+          valid_attributes = GeoNodeStatus.attribute_names - GeoNodeStatus::RESOURCE_STATUS_FIELDS - ['id']
+          sanitized_params = params.slice(*valid_attributes)
 
-        def jwt_decoder
-          ::Gitlab::Geo::JwtRequestDecoder.new(headers['Authorization'])
+          # sanitize status field
+          sanitized_params['status'] = sanitized_params['status'].slice(*GeoNodeStatus::RESOURCE_STATUS_FIELDS) if sanitized_params['status']
+
+          sanitized_params
         end
 
         # Check if a Geo request is legit or fail the flow
         #
         # @param [Hash] attributes to be matched against JWT
         def authorize_geo_transfer!(**attributes)
-          unauthorized! unless jwt_decoder.valid_attributes?(**attributes)
+          unauthorized! unless geo_jwt_decoder.valid_attributes?(**attributes)
         end
       end
 
       params do
         requires :replicable_name, type: String, desc: 'Replicable name (eg. package_file)'
-        requires :id, type: Integer, desc: 'The model ID that needs to be transferred'
+        requires :replicable_id, type: Integer, desc: 'The replicable ID that needs to be transferred'
       end
-      get 'retrieve/:replicable_name/:id' do
+      get 'retrieve/:replicable_name/:replicable_id' do
         check_gitlab_geo_request_ip!
-        authorize_geo_transfer!(replicable_name: params[:replicable_name], id: params[:id])
+        params_sym = params.symbolize_keys
+        authorize_geo_transfer!(**params_sym)
 
-        decoded_params = jwt_decoder.decode
-        service = ::Geo::BlobUploadService.new(replicable_name: params[:replicable_name],
-                                               blob_id: params[:id],
-                                               decoded_params: decoded_params)
+        decoded_params = geo_jwt_decoder.decode
+        service = ::Geo::BlobUploadService.new(**params_sym, decoded_params: decoded_params)
         response = service.execute
 
         if response[:code] == :ok
@@ -62,7 +61,7 @@ module API
         check_gitlab_geo_request_ip!
         authorize_geo_transfer!(file_type: params[:type], file_id: params[:id])
 
-        decoded_params = jwt_decoder.decode
+        decoded_params = geo_jwt_decoder.decode
         service = ::Geo::FileUploadService.new(params, decoded_params)
         response = service.execute
 

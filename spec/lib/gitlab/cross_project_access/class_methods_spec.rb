@@ -2,12 +2,13 @@
 
 require 'spec_helper'
 
-describe Gitlab::CrossProjectAccess::ClassMethods do
+RSpec.describe Gitlab::CrossProjectAccess::ClassMethods do
   let(:dummy_class) do
     Class.new do
       extend Gitlab::CrossProjectAccess::ClassMethods
     end
   end
+
   let(:dummy_proc) { lambda { false } }
 
   describe '#requires_cross_project_access' do

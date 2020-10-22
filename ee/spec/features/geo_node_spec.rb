@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'GEO Nodes', :geo do
+RSpec.describe 'GEO Nodes', :geo do
   include ::EE::GeoHelpers
 
   let_it_be(:user) { create(:user) }
@@ -22,12 +22,14 @@ describe 'GEO Nodes', :geo do
     describe "showing Flash Info Message" do
       it 'on dashboard' do
         visit root_dashboard_path
-        expect(page).to have_content 'You are on a secondary, read-only Geo node. If you want to make changes, you must visit this page on the primary node.'
+        expect(page).to have_content 'You are on a secondary, read-only Geo node. If you want to make changes, you must visit the primary site.'
+        expect(page).to have_content 'Go to the primary site'
       end
 
       it 'on project overview' do
         visit project_path(project)
-        expect(page).to have_content 'You are on a secondary, read-only Geo node. If you want to make changes, you must visit this page on the primary node.'
+        expect(page).to have_content 'You are on a secondary, read-only Geo node. If you want to make changes, you must visit the primary site.'
+        expect(page).to have_content 'Go to the primary site'
       end
     end
   end
@@ -43,7 +45,7 @@ describe 'GEO Nodes', :geo do
     end
 
     describe 'Geo Nodes admin screen' do
-      it "has a 'Open projects' button on listed secondary geo nodes pointing to correct URL", :js do
+      it "has a 'Replication details' button on listed secondary geo nodes pointing to correct URL", :js do
         visit admin_geo_nodes_path
 
         expect(page).to have_content(geo_primary.url)
@@ -51,10 +53,10 @@ describe 'GEO Nodes', :geo do
 
         wait_for_requests
 
-        geo_node_actions = all('div.geo-node-actions')
+        geo_node_actions = all('[data-testid="nodeActions"]')
         expected_url = File.join(geo_secondary.url, '/admin/geo/projects')
 
-        expect(geo_node_actions.last).to have_link('Open projects', href: expected_url)
+        expect(geo_node_actions.last).to have_link('Replication details', href: expected_url)
       end
     end
   end

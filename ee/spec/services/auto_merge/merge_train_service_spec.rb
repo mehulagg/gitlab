@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AutoMerge::MergeTrainService do
+RSpec.describe AutoMerge::MergeTrainService do
   include ExclusiveLeaseHelpers
 
   let_it_be(:project) { create(:project, :repository) }
@@ -20,6 +20,7 @@ describe AutoMerge::MergeTrainService do
 
     allow(AutoMergeProcessWorker).to receive(:perform_async) { }
 
+    stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: false)
     stub_feature_flags(disable_merge_trains: false)
     stub_licensed_features(merge_trains: true, merge_pipelines: true)
     project.update!(merge_pipelines_enabled: true)
@@ -58,11 +59,37 @@ describe AutoMerge::MergeTrainService do
 
     context 'when failed to save the record' do
       before do
-        allow(merge_request).to receive(:save) { false }
+        allow(merge_request).to receive(:save!) { raise PG::QueryCanceled.new }
       end
 
       it 'returns result code' do
         is_expected.to eq(:failed)
+      end
+    end
+
+    context 'when statement timeout happened on system note creation' do
+      before do
+        allow(SystemNoteService).to receive(:merge_train) { raise PG::QueryCanceled.new }
+      end
+
+      it 'returns failed status' do
+        is_expected.to eq(:failed)
+      end
+
+      it 'rollback the transaction' do
+        expect { subject }.not_to change { Note.count }
+
+        merge_request.reload
+        expect(merge_request).not_to be_auto_merge_enabled
+        expect(merge_request.merge_train).not_to be_present
+      end
+
+      it 'tracks the exception' do
+        expect(Gitlab::ErrorTracking)
+          .to receive(:track_exception).with(kind_of(PG::QueryCanceled),
+                                             merge_request_id: merge_request.id)
+
+        subject
       end
     end
   end
@@ -187,6 +214,33 @@ describe AutoMerge::MergeTrainService do
         end
       end
     end
+
+    context 'when statement timeout happened on system note creation' do
+      before do
+        allow(SystemNoteService).to receive(:cancel_merge_train) { raise PG::QueryCanceled.new }
+      end
+
+      it 'returns error' do
+        expect(subject[:status]).to eq(:error)
+        expect(subject[:message]).to eq("Can't cancel the automatic merge")
+      end
+
+      it 'rollback the transaction' do
+        expect { subject }.not_to change { Note.count }
+
+        merge_request.reload
+        expect(merge_request).to be_auto_merge_enabled
+        expect(merge_request.merge_train).to be_present
+      end
+
+      it 'tracks the exception' do
+        expect(Gitlab::ErrorTracking)
+          .to receive(:track_exception).with(kind_of(PG::QueryCanceled),
+                                             merge_request_id: merge_request.id)
+
+        subject
+      end
+    end
   end
 
   describe '#abort' do
@@ -246,6 +300,33 @@ describe AutoMerge::MergeTrainService do
         end
       end
     end
+
+    context 'when statement timeout happened on system note creation' do
+      before do
+        allow(SystemNoteService).to receive(:abort_merge_train) { raise PG::QueryCanceled.new }
+      end
+
+      it 'returns error' do
+        expect(subject[:status]).to eq(:error)
+        expect(subject[:message]).to eq("Can't abort the automatic merge")
+      end
+
+      it 'rollback the transaction' do
+        expect { subject }.not_to change { Note.count }
+
+        merge_request.reload
+        expect(merge_request).to be_auto_merge_enabled
+        expect(merge_request.merge_train).to be_present
+      end
+
+      it 'tracks the exception' do
+        expect(Gitlab::ErrorTracking)
+          .to receive(:track_exception).with(kind_of(PG::QueryCanceled),
+                                             merge_request_id: merge_request.id)
+
+        subject
+      end
+    end
   end
 
   describe '#available_for?' do
@@ -293,11 +374,14 @@ describe AutoMerge::MergeTrainService do
     end
 
     context 'when merge request is submitted from a forked project' do
-      before do
-        allow(merge_request).to receive(:for_fork?) { true }
-      end
+      context 'when ci_disallow_to_create_merge_request_pipelines_in_target_project feature flag is enabled' do
+        before do
+          stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: true)
+          allow(merge_request).to receive(:for_same_project?) { false }
+        end
 
-      it { is_expected.to be_falsy }
+        it { is_expected.to be_falsy }
+      end
     end
 
     context 'when the head pipeline of the merge request has not finished' do

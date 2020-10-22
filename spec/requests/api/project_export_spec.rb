@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::ProjectExport, :clean_gitlab_redis_cache do
+RSpec.describe API::ProjectExport, :clean_gitlab_redis_cache do
   let_it_be(:project) { create(:project) }
   let_it_be(:project_none) { create(:project) }
   let_it_be(:project_started) { create(:project) }
@@ -42,19 +42,6 @@ describe API::ProjectExport, :clean_gitlab_redis_cache do
     end
 
     it_behaves_like '404 response'
-  end
-
-  shared_examples_for 'when rate limit is exceeded' do
-    before do
-      allow(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).and_return(true)
-    end
-
-    it 'prevents requesting project export' do
-      request
-
-      expect(response).to have_gitlab_http_status(:too_many_requests)
-      expect(json_response['message']['error']).to eq('This endpoint has been requested too many times. Try again later.')
-    end
   end
 
   describe 'GET /projects/:project_id/export' do
@@ -247,7 +234,18 @@ describe API::ProjectExport, :clean_gitlab_redis_cache do
         context 'when rate limit is exceeded' do
           let(:request) { get api(download_path, admin) }
 
-          include_examples 'when rate limit is exceeded'
+          before do
+            allow(Gitlab::ApplicationRateLimiter)
+              .to receive(:increment)
+              .and_return(Gitlab::ApplicationRateLimiter.rate_limits[:project_download_export][:threshold].call + 1)
+          end
+
+          it 'prevents requesting project export' do
+            request
+
+            expect(response).to have_gitlab_http_status(:too_many_requests)
+            expect(json_response['message']['error']).to eq('This endpoint has been requested too many times. Try again later.')
+          end
         end
       end
 
@@ -340,12 +338,28 @@ describe API::ProjectExport, :clean_gitlab_redis_cache do
       end
 
       context 'with download strategy' do
+        before do
+          Grape::Endpoint.before_each do |endpoint|
+            allow(endpoint).to receive(:user_project).and_return(project)
+          end
+        end
+
+        after do
+          Grape::Endpoint.before_each nil
+        end
+
         it 'starts' do
           expect_any_instance_of(Gitlab::ImportExport::AfterExportStrategies::WebUploadStrategy).not_to receive(:send_file)
 
           post api(path, user)
 
           expect(response).to have_gitlab_http_status(:accepted)
+        end
+
+        it 'removes previously exported archive file' do
+          expect(project).to receive(:remove_exports).once
+
+          post api(path, user)
         end
       end
     end
@@ -360,10 +374,19 @@ describe API::ProjectExport, :clean_gitlab_redis_cache do
 
         it_behaves_like 'post project export start'
 
-        context 'when rate limit is exceeded' do
-          let(:request) { post api(path, admin) }
+        context 'when rate limit is exceeded across projects' do
+          before do
+            allow(Gitlab::ApplicationRateLimiter)
+              .to receive(:increment)
+              .and_return(Gitlab::ApplicationRateLimiter.rate_limits[:project_export][:threshold].call + 1)
+          end
 
-          include_examples 'when rate limit is exceeded'
+          it 'prevents requesting project export' do
+            post api(path, admin)
+
+            expect(response).to have_gitlab_http_status(:too_many_requests)
+            expect(json_response['message']['error']).to eq('This endpoint has been requested too many times. Try again later.')
+          end
         end
       end
 
@@ -411,7 +434,9 @@ describe API::ProjectExport, :clean_gitlab_redis_cache do
         it 'starts', :sidekiq_might_not_need_inline do
           params = { description: "Foo" }
 
-          expect_any_instance_of(Projects::ImportExport::ExportService).to receive(:execute)
+          expect_next_instance_of(Projects::ImportExport::ExportService) do |service|
+            expect(service).to receive(:execute)
+          end
           post api(path, project.owner), params: params
 
           expect(response).to have_gitlab_http_status(:accepted)

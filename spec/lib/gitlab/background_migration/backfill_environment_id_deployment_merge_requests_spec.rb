@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::BackgroundMigration::BackfillEnvironmentIdDeploymentMergeRequests, schema: 20200312134637 do
+RSpec.describe Gitlab::BackgroundMigration::BackfillEnvironmentIdDeploymentMergeRequests, schema: 20200312134637 do
   let(:environments)              { table(:environments) }
   let(:merge_requests)            { table(:merge_requests) }
   let(:deployments)               { table(:deployments) }
@@ -32,7 +32,7 @@ describe Gitlab::BackgroundMigration::BackfillEnvironmentIdDeploymentMergeReques
 
     expect(deployment_merge_requests.where(environment_id: nil).count).to eq(3)
 
-    migration.perform(1, mr.id)
+    migration.backfill_range(1, mr.id)
 
     expect(deployment_merge_requests.where(environment_id: nil).count).to be_zero
     expect(deployment_merge_requests.count).to eq(2)

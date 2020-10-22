@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectMirrorEntity do
+RSpec.describe ProjectMirrorEntity do
   subject(:entity) { described_class.new(project).as_json.deep_symbolize_keys }
 
   describe 'pull mirror' do

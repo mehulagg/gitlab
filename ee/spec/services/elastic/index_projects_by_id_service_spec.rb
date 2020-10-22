@@ -2,20 +2,23 @@
 
 require 'spec_helper'
 
-describe Elastic::IndexProjectsByIdService do
+RSpec.describe Elastic::IndexProjectsByIdService do
   describe '#execute' do
     it 'schedules index workers' do
+      project1 = create(:project)
+      project2 = create(:project)
+
+      expect(Elastic::ProcessInitialBookkeepingService).to receive(:backfill_projects!).with(project1, project2)
+
       Sidekiq::Testing.fake! do
-        described_class.new.execute(project_ids: [1, 2], namespace_ids: [3, 4])
+        described_class.new.execute(project_ids: [project1.id, project2.id], namespace_ids: [3, 4])
       end
 
-      jobs = Sidekiq::Queues[ElasticFullIndexWorker.queue]
+      jobs = Sidekiq::Queues[ElasticNamespaceIndexerWorker.queue]
 
-      expect(jobs.size).to eq(4)
-      expect(jobs[0]['args']).to eq(['index', 'Project', 1, nil])
-      expect(jobs[1]['args']).to eq(['index', 'Project', 2, nil])
-      expect(jobs[2]['args']).to eq([3, 'index'])
-      expect(jobs[3]['args']).to eq([4, 'index'])
+      expect(jobs.size).to eq(2)
+      expect(jobs[0]['args']).to eq([3, 'index'])
+      expect(jobs[1]['args']).to eq([4, 'index'])
     end
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Repositories do
+RSpec.describe API::Repositories do
   let(:project) { create(:project, :repository) }
 
   describe "GET /projects/:id/repository/archive(.:format)?:sha" do
@@ -16,7 +16,7 @@ describe API::Repositories do
       it 'logs the audit event' do
         expect do
           get api(route, current_user)
-        end.to change { SecurityEvent.count }.by(1)
+        end.to change { AuditEvent.count }.by(1)
       end
 
       it 'sends the archive' do

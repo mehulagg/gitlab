@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe Types::Tree::TreeEntryType do
-  it { expect(described_class.graphql_name).to eq('TreeEntry') }
+RSpec.describe Types::Tree::TreeEntryType do
+  specify { expect(described_class.graphql_name).to eq('TreeEntry') }
 
-  it { expect(described_class).to have_graphql_fields(:id, :sha, :name, :type, :path, :flat_path, :web_url) }
+  specify { expect(described_class).to have_graphql_fields(:id, :sha, :name, :type, :path, :flat_path, :web_url, :web_path) }
 end

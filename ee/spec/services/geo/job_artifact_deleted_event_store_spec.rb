@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::JobArtifactDeletedEventStore do
+RSpec.describe Geo::JobArtifactDeletedEventStore do
   include EE::GeoHelpers
 
   let_it_be(:secondary_node) { create(:geo_node) }

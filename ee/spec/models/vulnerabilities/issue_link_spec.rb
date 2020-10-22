@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Vulnerabilities::IssueLink do
+RSpec.describe Vulnerabilities::IssueLink do
   describe 'associations and fields' do
     it { is_expected.to belong_to(:vulnerability) }
     it { is_expected.to belong_to(:issue) }
@@ -77,5 +77,40 @@ describe Vulnerabilities::IssueLink do
         end.not_to raise_error
       end
     end
+  end
+
+  describe '.by_link_type' do
+    let_it_be(:created_issue_link) { create(:vulnerabilities_issue_link, :created) }
+    let_it_be(:related_issue_link) { create(:vulnerabilities_issue_link, :related) }
+
+    subject { described_class.by_link_type(link_type).to_a }
+
+    context 'when the given argument is `nil`' do
+      let(:link_type) { nil }
+
+      it { is_expected.to match_array([created_issue_link, related_issue_link]) }
+    end
+
+    context 'when the given argument is an uppercase string enum value' do
+      let(:link_type) { 'CREATED' }
+
+      it { is_expected.to match_array([created_issue_link]) }
+    end
+
+    context 'when the given argument is an uppercase symbol enum value' do
+      let(:link_type) { :RELATED }
+
+      it { is_expected.to match_array([related_issue_link]) }
+    end
+  end
+
+  describe '.for_issue' do
+    let_it_be(:issue) { create(:issue) }
+    let_it_be(:created_issue_link) { create(:vulnerabilities_issue_link, :created, issue: issue) }
+    let_it_be(:related_issue_link) { create(:vulnerabilities_issue_link, :related, issue: issue) }
+
+    subject { described_class.for_issue(issue).to_a }
+
+    it { is_expected.to match_array([created_issue_link, related_issue_link]) }
   end
 end

@@ -10,8 +10,6 @@
   %span
     - if show_project_name
       %strong #{project.name} &middot;
-    - elsif show_full_project_name
-      %strong #{project.full_name} &middot;
     - if issuable.is_a?(Issue)
       = confidential_icon(issuable)
     = link_to issuable.title, issuable_url_args, title: issuable.title
@@ -25,5 +23,5 @@
     %span.assignee-icon
       - assignees.each do |assignee|
         = link_to polymorphic_path(issuable_type_args, { milestone_title: @milestone.title, assignee_id: assignee.id, state: 'all' }),
-                  class: 'has-tooltip', title: "Assigned to #{assignee.name}", data: { container: 'body' } do
+                  class: 'has-tooltip', title: _("Assigned to %{assignee_name}") % { assignee_name: assignee.name }, data: { container: 'body' } do
           - image_tag(avatar_icon_for_user(assignee, 16), class: "avatar s16", alt: '')

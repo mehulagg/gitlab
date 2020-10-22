@@ -13,14 +13,14 @@ As of GitLab 12.8, GET requests do not require authentication. All other broadca
 
 List all broadcast messages.
 
-```text
+```plaintext
 GET /broadcast_messages
 ```
 
 Example request:
 
 ```shell
-curl https://gitlab.example.com/api/v4/broadcast_messages
+curl "https://gitlab.example.com/api/v4/broadcast_messages"
 ```
 
 Example response:
@@ -46,7 +46,7 @@ Example response:
 
 Get a specific broadcast message.
 
-```text
+```plaintext
 GET /broadcast_messages/:id
 ```
 
@@ -59,7 +59,7 @@ Parameters:
 Example request:
 
 ```shell
-curl https://gitlab.example.com/api/v4/broadcast_messages/1
+curl "https://gitlab.example.com/api/v4/broadcast_messages/1"
 ```
 
 Example response:
@@ -83,7 +83,7 @@ Example response:
 
 Create a new broadcast message.
 
-```text
+```plaintext
 POST /broadcast_messages
 ```
 
@@ -103,7 +103,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --data "message=Deploy in progress&color=#cecece" --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/broadcast_messages
+curl --data "message=Deploy in progress&color=#cecece" --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/broadcast_messages"
 ```
 
 Example response:
@@ -127,7 +127,7 @@ Example response:
 
 Update an existing broadcast message.
 
-```text
+```plaintext
 PUT /broadcast_messages/:id
 ```
 
@@ -148,7 +148,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --request PUT --data "message=Update message&color=#000" --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/broadcast_messages/1
+curl --request PUT --data "message=Update message&color=#000" --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/broadcast_messages/1"
 ```
 
 Example response:
@@ -185,5 +185,5 @@ Parameters:
 Example request:
 
 ```shell
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/broadcast_messages/1
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/broadcast_messages/1"
 ```

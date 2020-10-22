@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::RepositoryVerification::Primary::SingleWorker, :clean_gitlab_redis_cache do
+RSpec.describe Geo::RepositoryVerification::Primary::SingleWorker, :clean_gitlab_redis_cache do
   include ::EE::GeoHelpers
   include ExclusiveLeaseHelpers
 
@@ -14,8 +14,9 @@ describe Geo::RepositoryVerification::Primary::SingleWorker, :clean_gitlab_redis
   end
 
   it 'disables retrying of failed jobs' do
-    expect(subject.sidekiq_options_hash).to eq(
+    expect(subject.sidekiq_options_hash).to match(
       'retry' => false,
+      'version' => an_instance_of(Integer),
       'queue' => 'geo:geo_repository_verification_primary_single',
       'queue_namespace' => :geo
     )

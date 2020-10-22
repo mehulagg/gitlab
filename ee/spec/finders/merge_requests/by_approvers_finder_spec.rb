@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::ByApproversFinder do
+RSpec.describe MergeRequests::ByApproversFinder do
   let(:group_user) { create(:user) }
   let(:second_group_user) { create(:user) }
   let(:group) do
@@ -32,6 +32,7 @@ describe MergeRequests::ByApproversFinder do
       merge_request.approval_rules << rule
     end
   end
+
   let!(:merge_request_with_project_group_approver) do
     rule = create(:approval_project_rule, groups: [group])
     create(:merge_request, source_project: create(:project, approval_rules: [rule]))

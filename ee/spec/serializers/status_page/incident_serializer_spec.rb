@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe StatusPage::IncidentSerializer do
+RSpec.describe StatusPage::IncidentSerializer do
   let_it_be(:issue) { create(:issue) }
 
   shared_examples 'valid JSON schema' do |schema:|

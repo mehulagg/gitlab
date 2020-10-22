@@ -2,6 +2,7 @@ export default {
   data() {
     return {
       isDescriptionVersionExpanded: false,
+      deleteInProgress: false,
     };
   },
   computed: {
@@ -12,8 +13,12 @@ export default {
           !this.note.description_version_deleted,
       );
     },
-    canDeleteDescriptionVersion() {
-      return this.note.can_delete_description_version;
+    displayDeleteButton() {
+      return (
+        this.note.can_delete_description_version &&
+        !this.deleteInProgress &&
+        !this.note.description_version_deleted
+      );
     },
     shouldShowDescriptionVersion() {
       return this.canSeeDescriptionVersion && this.isDescriptionVersionExpanded;
@@ -40,8 +45,12 @@ export default {
       const endpoint = this.note.delete_description_version_path;
       const startingVersion = this.note.start_description_version_id;
       const versionId = this.note.description_version_id;
-
-      return this.softDeleteDescriptionVersion({ endpoint, startingVersion, versionId });
+      this.deleteInProgress = true;
+      return this.softDeleteDescriptionVersion({ endpoint, startingVersion, versionId }).catch(
+        () => {
+          this.deleteInProgress = false;
+        },
+      );
     },
   },
 };

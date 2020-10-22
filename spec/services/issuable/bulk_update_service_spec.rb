@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Issuable::BulkUpdateService do
+RSpec.describe Issuable::BulkUpdateService do
   let(:user)    { create(:user) }
   let(:project) { create(:project, :repository, namespace: user.namespace) }
 
@@ -18,8 +18,8 @@ describe Issuable::BulkUpdateService do
     it 'succeeds' do
       result = bulk_update(issuables, milestone_id: milestone.id)
 
-      expect(result[:success]).to be_truthy
-      expect(result[:count]).to eq(issuables.count)
+      expect(result.success?).to be_truthy
+      expect(result.payload[:count]).to eq(issuables.count)
     end
 
     it 'updates the issuables milestone' do
@@ -42,13 +42,11 @@ describe Issuable::BulkUpdateService do
     let(:issue_no_labels) { create(:issue, project: project) }
     let(:issues) { [issue_all_labels, issue_bug_and_regression, issue_bug_and_merge_requests, issue_no_labels] }
 
-    let(:labels) { [] }
     let(:add_labels) { [] }
     let(:remove_labels) { [] }
 
     let(:bulk_update_params) do
       {
-        label_ids:        labels.map(&:id),
         add_label_ids:    add_labels.map(&:id),
         remove_label_ids: remove_labels.map(&:id)
       }
@@ -56,27 +54,6 @@ describe Issuable::BulkUpdateService do
 
     before do
       bulk_update(issues, bulk_update_params)
-    end
-
-    context 'when label_ids are passed' do
-      let(:issues) { [issue_all_labels, issue_no_labels] }
-      let(:labels) { [bug, regression] }
-
-      it 'updates the labels of all issues passed to the labels passed' do
-        expect(issues.map(&:reload).map(&:label_ids)).to all(match_array(labels.map(&:id)))
-      end
-
-      it 'does not update issues not passed in' do
-        expect(issue_bug_and_regression.label_ids).to contain_exactly(bug.id, regression.id)
-      end
-
-      context 'when those label IDs are empty' do
-        let(:labels) { [] }
-
-        it 'updates the issues passed to have no labels' do
-          expect(issues.map(&:reload).map(&:label_ids)).to all(be_empty)
-        end
-      end
     end
 
     context 'when add_label_ids are passed' do
@@ -122,69 +99,21 @@ describe Issuable::BulkUpdateService do
         expect(issue_bug_and_regression.label_ids).to contain_exactly(bug.id, regression.id)
       end
     end
-
-    context 'when add_label_ids and label_ids are passed' do
-      let(:issues) { [issue_all_labels, issue_bug_and_regression, issue_bug_and_merge_requests] }
-      let(:labels) { [merge_requests] }
-      let(:add_labels) { [regression] }
-
-      it 'adds the label IDs to all issues passed' do
-        expect(issues.map(&:reload).map(&:label_ids)).to all(include(regression.id))
-      end
-
-      it 'ignores the label IDs parameter' do
-        expect(issues.map(&:reload).map(&:label_ids)).to all(include(bug.id))
-      end
-
-      it 'does not update issues not passed in' do
-        expect(issue_no_labels.label_ids).to be_empty
-      end
-    end
-
-    context 'when remove_label_ids and label_ids are passed' do
-      let(:issues) { [issue_no_labels, issue_bug_and_regression] }
-      let(:labels) { [merge_requests] }
-      let(:remove_labels) { [regression] }
-
-      it 'removes the label IDs from all issues passed' do
-        expect(issues.map(&:reload).flat_map(&:label_ids)).not_to include(regression.id)
-      end
-
-      it 'ignores the label IDs parameter' do
-        expect(issues.map(&:reload).flat_map(&:label_ids)).not_to include(merge_requests.id)
-      end
-
-      it 'does not update issues not passed in' do
-        expect(issue_all_labels.label_ids).to contain_exactly(bug.id, regression.id, merge_requests.id)
-      end
-    end
-
-    context 'when add_label_ids, remove_label_ids, and label_ids are passed' do
-      let(:issues) { [issue_bug_and_merge_requests, issue_no_labels] }
-      let(:labels) { [regression] }
-      let(:add_labels) { [bug] }
-      let(:remove_labels) { [merge_requests] }
-
-      it 'adds the label IDs to all issues passed' do
-        expect(issues.map(&:reload).map(&:label_ids)).to all(include(bug.id))
-      end
-
-      it 'removes the label IDs from all issues passed' do
-        expect(issues.map(&:reload).flat_map(&:label_ids)).not_to include(merge_requests.id)
-      end
-
-      it 'ignores the label IDs parameter' do
-        expect(issues.map(&:reload).flat_map(&:label_ids)).not_to include(regression.id)
-      end
-
-      it 'does not update issues not passed in' do
-        expect(issue_bug_and_regression.label_ids).to contain_exactly(bug.id, regression.id)
-      end
-    end
   end
 
   context 'with issuables at a project level' do
     let(:parent) { project }
+
+    context 'with unpermitted attributes' do
+      let(:issues) { create_list(:issue, 2, project: project) }
+      let(:label) { create(:label, project: project) }
+
+      it 'does not update the issues' do
+        bulk_update(issues, label_ids: [label.id])
+
+        expect(issues.map(&:reload).map(&:label_ids)).not_to include(label.id)
+      end
+    end
 
     describe 'close issues' do
       let(:issues) { create_list(:issue, 2, project: project) }
@@ -192,8 +121,8 @@ describe Issuable::BulkUpdateService do
       it 'succeeds and returns the correct number of issues updated' do
         result = bulk_update(issues, state_event: 'close')
 
-        expect(result[:success]).to be_truthy
-        expect(result[:count]).to eq(issues.count)
+        expect(result.success?).to be_truthy
+        expect(result.payload[:count]).to eq(issues.count)
       end
 
       it 'closes all the issues passed' do
@@ -210,8 +139,8 @@ describe Issuable::BulkUpdateService do
       it 'succeeds and returns the correct number of issues updated' do
         result = bulk_update(issues, state_event: 'reopen')
 
-        expect(result[:success]).to be_truthy
-        expect(result[:count]).to eq(issues.count)
+        expect(result.success?).to be_truthy
+        expect(result.payload[:count]).to eq(issues.count)
       end
 
       it 'reopens all the issues passed' do
@@ -232,8 +161,8 @@ describe Issuable::BulkUpdateService do
 
           result = bulk_update(merge_request, assignee_ids: [user.id, new_assignee.id])
 
-          expect(result[:success]).to be_truthy
-          expect(result[:count]).to eq(1)
+          expect(result.success?).to be_truthy
+          expect(result.payload[:count]).to eq(1)
         end
 
         it 'updates the assignee to the user ID passed' do
@@ -270,8 +199,8 @@ describe Issuable::BulkUpdateService do
 
           result = bulk_update(issue, assignee_ids: [new_assignee.id])
 
-          expect(result[:success]).to be_truthy
-          expect(result[:count]).to eq(1)
+          expect(result.success?).to be_truthy
+          expect(result.payload[:count]).to eq(1)
         end
 
         it 'updates the assignee to the user ID passed' do
@@ -325,7 +254,7 @@ describe Issuable::BulkUpdateService do
     describe 'unsubscribe from issues' do
       let(:issues) do
         create_list(:closed_issue, 2, project: project) do |issue|
-          issue.subscriptions.create(user: user, project: project, subscribed: true)
+          issue.subscriptions.create!(user: user, project: project, subscribed: true)
         end
       end
 
@@ -344,8 +273,8 @@ describe Issuable::BulkUpdateService do
         issue2 = create(:issue, project: create(:project))
         result = bulk_update([issue1, issue2], assignee_ids: [user.id])
 
-        expect(result[:success]).to be_truthy
-        expect(result[:count]).to eq(1)
+        expect(result.success?).to be_truthy
+        expect(result.payload[:count]).to eq(1)
 
         expect(issue1.reload.assignees).to eq([user])
         expect(issue2.reload.assignees).to be_empty
@@ -403,8 +332,8 @@ describe Issuable::BulkUpdateService do
         milestone = create(:milestone, group: group)
         result = bulk_update([issue1, issue2, issue3], milestone_id: milestone.id)
 
-        expect(result[:success]).to be_truthy
-        expect(result[:count]).to eq(2)
+        expect(result.success?).to be_truthy
+        expect(result.payload[:count]).to eq(2)
 
         expect(issue1.reload.milestone).to eq(milestone)
         expect(issue2.reload.milestone).to be_nil

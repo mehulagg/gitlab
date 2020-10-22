@@ -1,15 +1,15 @@
-import { uniq } from 'lodash';
+import { uniqWith, isEqual } from 'lodash';
+
+import { MAX_HISTORY_SIZE } from '../constants';
 
 class RecentSearchesStore {
   constructor(initialState = {}, allowedKeys) {
-    this.state = Object.assign(
-      {
-        isLocalStorageAvailable: true,
-        recentSearches: [],
-        allowedKeys,
-      },
-      initialState,
-    );
+    this.state = {
+      isLocalStorageAvailable: true,
+      recentSearches: [],
+      allowedKeys,
+      ...initialState,
+    };
   }
 
   addRecentSearch(newSearch) {
@@ -19,8 +19,12 @@ class RecentSearchesStore {
   }
 
   setRecentSearches(searches = []) {
-    const trimmedSearches = searches.map(search => search.trim());
-    this.state.recentSearches = uniq(trimmedSearches).slice(0, 5);
+    const trimmedSearches = searches.map(search =>
+      typeof search === 'string' ? search.trim() : search,
+    );
+
+    // Do object equality check to remove duplicates.
+    this.state.recentSearches = uniqWith(trimmedSearches, isEqual).slice(0, MAX_HISTORY_SIZE);
     return this.state.recentSearches;
   }
 }

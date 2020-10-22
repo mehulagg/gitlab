@@ -19,8 +19,7 @@ module Gitlab
           end
 
           def log_cache_invalidation_event(expired)
-            logger.event_info(
-              created_at,
+            log_event(
               'Cache invalidation',
               cache_key: event.key,
               cache_expired: expired,

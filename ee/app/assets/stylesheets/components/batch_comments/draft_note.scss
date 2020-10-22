@@ -4,20 +4,8 @@ $draft-actions-left-margin: 40px + $gl-padding;
   margin: 0;
   background: $orange-50;
 
-  .drafts-count-component {
-    @include transition(background-color);
-    background: rgba($green-500, 0.2);
-  }
-
-  button:focus,
-  button:hover {
-    .drafts-count-component {
-      background: $black-transparent;
-    }
-  }
-
   .referenced-commands.draft-note-commands {
-    background: $orange-100;
+    background: $orange-50;
     font-size: $label-font-size;
     margin: 0 0 $gl-padding $draft-actions-left-margin;
   }
@@ -39,14 +27,15 @@ button[disabled] {
   &,
   &:focus,
   &:hover {
-    .drafts-count-component {
-      background: $gl-gray-100;
+    .gl-badge {
+      background: $gray-100;
+      color: $gray-500;
     }
   }
 }
 
 .draft-pending-label {
-  background: $orange-600;
+  background: $orange-500;
   color: $white;
   vertical-align: text-top;
 }
@@ -83,6 +72,6 @@ button[disabled] {
 .frame,
 .diff-discussions {
   .badge.is-draft {
-    background-color: $orange-600;
+    background-color: $orange-500;
   }
 }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::MarkForDeletionService do
+RSpec.describe Groups::MarkForDeletionService do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
 
@@ -54,7 +54,7 @@ describe Groups::MarkForDeletionService do
                  deleting_user: user)
         end
 
-        it 'does not change the attributes associated with adjourned deletion' do
+        it 'does not change the attributes associated with delayed deletion' do
           subject
 
           expect(group.marked_for_deletion_on).to eq(deletion_date.to_date)

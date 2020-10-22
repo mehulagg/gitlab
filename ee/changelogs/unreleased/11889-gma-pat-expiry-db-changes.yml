@@ -1,5 +1,0 @@
----
-title: Add a DB column to allow GMA groups to specify their PAT expiry setting
-merge_request: 27769
-author:
-type: added

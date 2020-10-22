@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   queryToObject,
   redirectTo,
@@ -9,9 +9,11 @@ import {
   updateHistory,
 } from '~/lib/utils/url_utility';
 import axios from '~/lib/utils/axios_utils';
-import { mockProjectDir, propsData } from '../mock_data';
+import { mockProjectDir } from '../mock_data';
+import { dashboardProps } from '../fixture_data';
 
 import Dashboard from '~/monitoring/components/dashboard.vue';
+import DashboardHeader from '~/monitoring/components/dashboard_header.vue';
 import { createStore } from '~/monitoring/stores';
 import { defaultTimeRange } from '~/vue_shared/constants';
 
@@ -25,14 +27,14 @@ describe('dashboard invalid url parameters', () => {
 
   const createMountedWrapper = (props = { hasMetrics: true }, options = {}) => {
     wrapper = mount(Dashboard, {
-      propsData: { ...propsData, ...props },
+      propsData: { ...dashboardProps, ...props },
       store,
-      stubs: ['graph-group', 'dashboard-panel'],
+      stubs: { 'graph-group': true, 'dashboard-panel': true, 'dashboard-header': DashboardHeader },
       ...options,
     });
   };
 
-  const findDateTimePicker = () => wrapper.find({ ref: 'dateTimePicker' });
+  const findDateTimePicker = () => wrapper.find(DashboardHeader).find({ ref: 'dateTimePicker' });
 
   beforeEach(() => {
     store = createStore();

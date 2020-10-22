@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Reports::LicenseScanning::License do
+RSpec.describe Gitlab::Ci::Reports::LicenseScanning::License do
   describe 'equality' do
     let(:blank) { described_class.new(id: nil, name: nil, url: nil) }
     let(:v1_mit) { described_class.new(id: nil, name: 'MIT', url: '') }

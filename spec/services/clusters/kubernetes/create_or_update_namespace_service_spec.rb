@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Kubernetes::CreateOrUpdateNamespaceService, '#execute' do
+RSpec.describe Clusters::Kubernetes::CreateOrUpdateNamespaceService, '#execute' do
   include KubernetesHelpers
 
   let(:cluster) { create(:cluster, :project, :provided_by_gcp) }
@@ -28,7 +28,6 @@ describe Clusters::Kubernetes::CreateOrUpdateNamespaceService, '#execute' do
     stub_kubeclient_get_secret_error(api_url, 'gitlab-token')
     stub_kubeclient_create_secret(api_url)
 
-    stub_kubeclient_get_role_binding(api_url, "gitlab-#{namespace}", namespace: namespace)
     stub_kubeclient_put_role_binding(api_url, "gitlab-#{namespace}", namespace: namespace)
     stub_kubeclient_get_namespace(api_url, namespace: namespace)
     stub_kubeclient_get_service_account_error(api_url, "#{namespace}-service-account", namespace: namespace)
@@ -42,11 +41,9 @@ describe Clusters::Kubernetes::CreateOrUpdateNamespaceService, '#execute' do
 
     stub_kubeclient_get_secret(
       api_url,
-      {
-        metadata_name: "#{namespace}-token",
-        token: Base64.encode64('sample-token'),
-        namespace: namespace
-      }
+      metadata_name: "#{namespace}-token",
+      token: Base64.encode64('sample-token'),
+      namespace: namespace
     )
   end
 

@@ -2,29 +2,39 @@
 
 require 'spec_helper'
 
-describe 'Project' do
+RSpec.describe 'Project' do
   include ProjectForksHelper
   include MobileHelpers
 
-  describe 'creating from template' do
+  describe 'template' do
     let(:user) { create(:user) }
-    let(:template) { Gitlab::ProjectTemplate.find(:rails) }
 
     before do
       sign_in user
       visit new_project_path
     end
 
-    it "allows creation from templates", :js do
-      find('#create-from-template-tab').click
-      find("label[for=#{template.name}]").click
-      fill_in("project_name", with: template.name)
+    shared_examples 'creates from template' do |template, sub_template_tab = nil|
+      it "is created from template", :js do
+        find('#create-from-template-tab').click
+        find(".project-template #{sub_template_tab}").click if sub_template_tab
+        find("label[for=#{template.name}]").click
+        fill_in("project_name", with: template.name)
 
-      page.within '#content-body' do
-        click_button "Create project"
+        page.within '#content-body' do
+          click_button "Create project"
+        end
+
+        expect(page).to have_content template.name
       end
+    end
 
-      expect(page).to have_content template.name
+    context 'create with project template' do
+      it_behaves_like 'creates from template', Gitlab::ProjectTemplate.find(:rails)
+    end
+
+    context 'create with sample data template' do
+      it_behaves_like 'creates from template', Gitlab::SampleDataTemplate.find(:basic), '.sample-data-templates-tab'
     end
   end
 
@@ -99,6 +109,15 @@ describe 'Project' do
         expect(page).to have_css('.home-panel-description .is-expanded')
       end
     end
+
+    context 'page description' do
+      before do
+        project.update_attribute(:description, '**Lorem** _ipsum_ dolor sit [amet](https://example.com)')
+        visit path
+      end
+
+      it_behaves_like 'page meta description', 'Lorem ipsum dolor sit amet'
+    end
   end
 
   describe 'project topics' do
@@ -159,7 +178,7 @@ describe 'Project' do
 
   describe 'remove forked relationship', :js do
     let(:user)    { create(:user) }
-    let(:project) { fork_project(create(:project, :public), user, namespace_id: user.namespace) }
+    let(:project) { fork_project(create(:project, :public), user, namespace: user.namespace) }
 
     before do
       sign_in user
@@ -254,13 +273,13 @@ describe 'Project' do
     end
 
     it 'focuses on the confirmation field' do
-      click_button 'Remove project'
+      click_button 'Delete project'
 
       expect(page).to have_selector '#confirm_name_input:focus'
     end
 
-    it 'removes a project', :sidekiq_might_not_need_inline do
-      expect { remove_with_confirm('Remove project', project.path) }.to change { Project.count }.by(-1)
+    it 'deletes a project', :sidekiq_might_not_need_inline do
+      expect { remove_with_confirm('Delete project', "Delete #{project.full_name}", 'Yes, delete project') }.to change { Project.count }.by(-1)
       expect(page).to have_content "Project '#{project.full_name}' is in the process of being deleted."
       expect(Project.all.count).to be_zero
       expect(project.issues).to be_empty
@@ -386,9 +405,9 @@ describe 'Project' do
                                           { form: '.rspec-merge-request-settings', input: '#project_printing_merge_request_link_enabled' }]
   end
 
-  def remove_with_confirm(button_text, confirm_with)
+  def remove_with_confirm(button_text, confirm_with, confirm_button_text = 'Confirm')
     click_button button_text
     fill_in 'confirm_name_input', with: confirm_with
-    click_button 'Confirm'
+    click_button confirm_button_text
   end
 end

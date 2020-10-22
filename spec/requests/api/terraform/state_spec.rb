@@ -2,28 +2,30 @@
 
 require 'spec_helper'
 
-describe API::Terraform::State do
+RSpec.describe API::Terraform::State do
+  include HttpBasicAuthHelpers
+
   let_it_be(:project) { create(:project) }
   let_it_be(:developer) { create(:user, developer_projects: [project]) }
   let_it_be(:maintainer) { create(:user, maintainer_projects: [project]) }
 
-  let!(:state) { create(:terraform_state, :with_file, project: project) }
+  let!(:state) { create(:terraform_state, :with_version, project: project) }
 
   let(:current_user) { maintainer }
-  let(:auth_header) { basic_auth_header(current_user) }
+  let(:auth_header) { user_basic_auth_header(current_user) }
   let(:project_id) { project.id }
   let(:state_name) { state.name }
   let(:state_path) { "/projects/#{project_id}/terraform/state/#{state_name}" }
 
   before do
-    stub_terraform_state_object_storage(Terraform::StateUploader)
+    stub_terraform_state_object_storage
   end
 
   describe 'GET /projects/:id/terraform/state/:name' do
     subject(:request) { get api(state_path), headers: auth_header }
 
     context 'without authentication' do
-      let(:auth_header) { basic_auth_header('failing_token') }
+      let(:auth_header) { basic_auth_header('bad', 'token') }
 
       it 'returns 401 if user is not authenticated' do
         request
@@ -32,40 +34,86 @@ describe API::Terraform::State do
       end
     end
 
-    context 'with maintainer permissions' do
-      let(:current_user) { maintainer }
+    context 'personal acceess token authentication' do
+      context 'with maintainer permissions' do
+        let(:current_user) { maintainer }
 
-      it 'returns terraform state belonging to a project of given state name' do
-        request
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response.body).to eq(state.file.read)
-      end
-
-      context 'for a project that does not exist' do
-        let(:project_id) { '0000' }
-
-        it 'returns not found' do
+        it 'returns terraform state belonging to a project of given state name' do
           request
 
-          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.body).to eq(state.reload.latest_file.read)
+        end
+
+        context 'for a project that does not exist' do
+          let(:project_id) { '0000' }
+
+          it 'returns not found' do
+            request
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
+        end
+      end
+
+      context 'with developer permissions' do
+        let(:current_user) { developer }
+
+        it 'returns terraform state belonging to a project of given state name' do
+          request
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.body).to eq(state.reload.latest_file.read)
         end
       end
     end
 
-    context 'with developer permissions' do
-      let(:current_user) { developer }
+    context 'job token authentication' do
+      let(:auth_header) { job_basic_auth_header(job) }
 
-      it 'returns forbidden if the user cannot access the state' do
-        request
+      context 'with maintainer permissions' do
+        let(:job) { create(:ci_build, status: :running, project: project, user: maintainer) }
 
-        expect(response).to have_gitlab_http_status(:forbidden)
+        it 'returns terraform state belonging to a project of given state name' do
+          request
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.body).to eq(state.reload.latest_file.read)
+        end
+
+        it 'returns unauthorized if the the job is not running' do
+          job.update!(status: :failed)
+          request
+
+          expect(response).to have_gitlab_http_status(:unauthorized)
+        end
+
+        context 'for a project that does not exist' do
+          let(:project_id) { '0000' }
+
+          it 'returns not found' do
+            request
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
+        end
+      end
+
+      context 'with developer permissions' do
+        let(:job) { create(:ci_build, status: :running, project: project, user: developer) }
+
+        it 'returns terraform state belonging to a project of given state name' do
+          request
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.body).to eq(state.reload.latest_file.read)
+        end
       end
     end
   end
 
   describe 'POST /projects/:id/terraform/state/:name' do
-    let(:params) { { 'instance': 'example-instance' } }
+    let(:params) { { 'instance': 'example-instance', 'serial': '1' } }
 
     subject(:request) { post api(state_path), headers: auth_header, as: :json, params: params }
 
@@ -196,9 +244,43 @@ describe API::Terraform::State do
 
       expect(response).to have_gitlab_http_status(:ok)
     end
+
+    context 'state is already locked' do
+      before do
+        state.update!(lock_xid: 'locked', locked_by_user: current_user)
+      end
+
+      it 'returns an error' do
+        request
+
+        expect(response).to have_gitlab_http_status(:conflict)
+      end
+    end
+
+    context 'user does not have permission to lock the state' do
+      let(:current_user) { developer }
+
+      it 'returns an error' do
+        request
+
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
   end
 
   describe 'DELETE /projects/:id/terraform/state/:name/lock' do
+    let(:params) do
+      {
+        ID: lock_id,
+        Version: '0.1',
+        Operation: 'OperationTypePlan',
+        Info: '',
+        Who: "#{current_user.username}",
+        Created: Time.now.utc.iso8601(6),
+        Path: ''
+      }
+    end
+
     before do
       state.lock_xid = '123-456'
       state.save!
@@ -207,7 +289,7 @@ describe API::Terraform::State do
     subject(:request) { delete api("#{state_path}/lock"), headers: auth_header, params: params }
 
     context 'with the correct lock id' do
-      let(:params) { { ID: '123-456' } }
+      let(:lock_id) { '123-456' }
 
       it 'removes the terraform state lock' do
         request
@@ -227,7 +309,7 @@ describe API::Terraform::State do
     end
 
     context 'with an incorrect lock id' do
-      let(:params) { { ID: '456-789' } }
+      let(:lock_id) { '456-789' }
 
       it 'returns an error' do
         request
@@ -237,12 +319,23 @@ describe API::Terraform::State do
     end
 
     context 'with a longer than 255 character lock id' do
-      let(:params) { { ID: '0' * 256 } }
+      let(:lock_id) { '0' * 256 }
 
       it 'returns an error' do
         request
 
         expect(response).to have_gitlab_http_status(:bad_request)
+      end
+    end
+
+    context 'user does not have permission to unlock the state' do
+      let(:lock_id) { '123-456' }
+      let(:current_user) { developer }
+
+      it 'returns an error' do
+        request
+
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
   end

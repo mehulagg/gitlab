@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Mini Pipeline Graph in Commit View', :js do
+RSpec.describe 'Mini Pipeline Graph in Commit View', :js do
   let(:project) { create(:project, :public, :repository) }
 
   context 'when commit has pipelines' do
@@ -12,6 +12,7 @@ describe 'Mini Pipeline Graph in Commit View', :js do
               ref: project.default_branch,
               sha: project.commit.sha)
     end
+
     let(:build) { create(:ci_build, pipeline: pipeline) }
 
     it 'display icon with status' do

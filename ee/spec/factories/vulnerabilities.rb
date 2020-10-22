@@ -9,6 +9,7 @@ FactoryBot.define do
     severity { :high }
     confidence { :medium }
     report_type { :sast }
+    description { "Description of #{title}" }
 
     trait :detected do
       state { Vulnerability.states[:detected] }
@@ -29,40 +30,101 @@ FactoryBot.define do
       confirmed_at { Time.current }
     end
 
-    ::Vulnerabilities::Occurrence::SEVERITY_LEVELS.keys.each do |severity_level|
+    trait :critical_severity do
+      severity { :critical }
+    end
+
+    trait :high_severity do
+      severity { :high }
+    end
+
+    trait :medium_severity do
+      severity { :medium }
+    end
+
+    trait :low_severity do
+      severity { :low }
+    end
+
+    ::Vulnerabilities::Finding::SEVERITY_LEVELS.keys.each do |severity_level|
       trait severity_level do
         severity { severity_level }
       end
     end
 
-    ::Vulnerabilities::Occurrence::REPORT_TYPES.keys.each do |report_type|
+    ::Vulnerabilities::Finding::REPORT_TYPES.keys.each do |report_type|
       trait report_type do
         report_type { report_type }
       end
     end
 
+    trait :with_notes do
+      transient do
+        notes_count { 3 }
+      end
+
+      after(:create) do |vulnerability, evaluator|
+        create_list(
+          :note_on_vulnerability,
+          evaluator.notes_count,
+          noteable: vulnerability,
+          project: vulnerability.project)
+      end
+    end
+
+    trait :with_finding do
+      after(:build) do |vulnerability|
+        finding = build(
+          :vulnerabilities_finding,
+          :identifier,
+          vulnerability: vulnerability,
+          report_type: vulnerability.report_type,
+          project: vulnerability.project
+        )
+
+        vulnerability.findings = [finding]
+      end
+    end
+
+    trait :with_remediation do
+      after(:build) do |vulnerability|
+        finding = build(
+          :vulnerabilities_finding,
+          :identifier,
+          :with_remediation,
+          vulnerability: vulnerability,
+          report_type: vulnerability.report_type,
+          project: vulnerability.project
+        )
+
+        vulnerability.findings = [finding]
+      end
+    end
+
     trait :with_findings do
       after(:build) do |vulnerability|
-        occurrences_with_solution = build_list(
-          :vulnerabilities_occurrence,
+        findings_with_solution = build_list(
+          :vulnerabilities_finding,
           2,
+          :identifier,
           vulnerability: vulnerability,
           report_type: vulnerability.report_type,
           project: vulnerability.project)
-        occurrences_with_remediation = build_list(
-          :vulnerabilities_occurrence,
+        findings_with_remediation = build_list(
+          :vulnerabilities_finding,
           2,
+          :identifier,
           :with_remediation,
           vulnerability: vulnerability,
           report_type: vulnerability.report_type,
           project: vulnerability.project)
-        vulnerability.findings = occurrences_with_solution + occurrences_with_remediation
+        vulnerability.findings = findings_with_solution + findings_with_remediation
       end
     end
 
     trait :with_issue_links do
       after(:create) do |vulnerability|
-        create_list(:issue, 2).each do |issue|
+        create_list(:issue, 2, project: vulnerability.project).each do |issue|
           create(:vulnerabilities_issue_link, vulnerability: vulnerability, issue: issue)
         end
       end

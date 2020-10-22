@@ -3,7 +3,7 @@
     = user_avatar_without_link(user: user, size: 32, css_class: 'avatar s32 d-none d-md-flex')
     .row-main-content
       .row-title.str-truncated-100
-        = user_avatar_without_link(user: user, size: 16, css_class: 'avatar s16 d-xs-flex d-md-none mr-1 prepend-top-2')
+        = user_avatar_without_link(user: user, size: 16, css_class: 'avatar s16 d-xs-flex d-md-none mr-1 gl-mt-2')
         = link_to user.name, user_detail_path(user), class: 'text-plain js-user-link', data: { user_id: user.id, qa_selector: 'username_link' }
 
       .row-second-line.str-truncated-100

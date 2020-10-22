@@ -3,8 +3,7 @@
 module Pages
   class DeleteService < BaseService
     def execute
-      project.remove_pages
-      project.pages_domains.destroy_all # rubocop: disable DestroyAll
+      PagesRemoveWorker.perform_async(project.id)
     end
   end
 end

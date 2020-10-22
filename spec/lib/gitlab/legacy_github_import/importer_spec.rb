@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::LegacyGithubImport::Importer do
+RSpec.describe Gitlab::LegacyGithubImport::Importer do
   shared_examples 'Gitlab::LegacyGithubImport::Importer#execute' do
     let(:expected_not_called) { [] }
 
@@ -238,6 +238,7 @@ describe Gitlab::LegacyGithubImport::Importer do
       labels: [double(name: 'Label #2')]
     )
   end
+
   let(:closed_pull_request) do
     double(
       number: 1347,
@@ -294,6 +295,7 @@ describe Gitlab::LegacyGithubImport::Importer do
     it_behaves_like 'Gitlab::LegacyGithubImport::Importer#execute' do
       let(:expected_not_called) { [:import_releases, [:import_comments, :pull_requests]] }
     end
+
     it_behaves_like 'Gitlab::LegacyGithubImport::Importer#execute an error occurs'
     it_behaves_like 'Gitlab::LegacyGithubImport unit-testing'
 

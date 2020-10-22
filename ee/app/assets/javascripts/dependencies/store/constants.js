@@ -1,7 +1,6 @@
 import { s__ } from '~/locale';
 import { FILTER } from './modules/list/constants';
 
-// eslint-disable-next-line import/prefer-default-export
 export const DEPENDENCY_LIST_TYPES = {
   all: {
     namespace: 'allDependencies',
@@ -10,6 +9,8 @@ export const DEPENDENCY_LIST_TYPES = {
       filter: FILTER.all,
     },
   },
+  // This is only used in tests, and will be removed in
+  // https://gitlab.com/gitlab-org/gitlab/-/issues/217734
   vulnerable: {
     namespace: 'vulnerableDependencies',
     label: s__('Dependencies|Vulnerable components'),

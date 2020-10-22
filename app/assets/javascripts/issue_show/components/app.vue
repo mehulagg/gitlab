@@ -1,9 +1,10 @@
 <script>
+import { GlIcon, GlIntersectionObserver } from '@gitlab/ui';
 import Visibility from 'visibilityjs';
 import { __, s__, sprintf } from '~/locale';
-import createFlash from '~/flash';
-import { visitUrl } from '../../lib/utils/url_utility';
-import Poll from '../../lib/utils/poll';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { visitUrl } from '~/lib/utils/url_utility';
+import Poll from '~/lib/utils/poll';
 import eventHub from '../event_hub';
 import Service from '../services/index';
 import Store from '../stores';
@@ -12,11 +13,13 @@ import descriptionComponent from './description.vue';
 import editedComponent from './edited.vue';
 import formComponent from './form.vue';
 import PinnedLinks from './pinned_links.vue';
-import recaptchaModalImplementor from '../../vue_shared/mixins/recaptcha_modal_implementor';
+import recaptchaModalImplementor from '~/vue_shared/mixins/recaptcha_modal_implementor';
+import { IssuableStatus, IssuableStatusText, IssuableType } from '../constants';
 
 export default {
   components: {
-    descriptionComponent,
+    GlIcon,
+    GlIntersectionObserver,
     titleComponent,
     editedComponent,
     formComponent,
@@ -58,11 +61,21 @@ export default {
     zoomMeetingUrl: {
       type: String,
       required: false,
-      default: null,
+      default: '',
+    },
+    publishedIncidentUrl: {
+      type: String,
+      required: false,
+      default: '',
     },
     issuableRef: {
       type: String,
       required: true,
+    },
+    issuableStatus: {
+      type: String,
+      required: false,
+      default: '',
     },
     initialTitleHtml: {
       type: String,
@@ -138,6 +151,18 @@ export default {
       required: false,
       default: 0,
     },
+    descriptionComponent: {
+      type: Object,
+      required: false,
+      default: () => {
+        return descriptionComponent;
+      },
+    },
+    showTitleBorder: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   data() {
     const store = new Store({
@@ -157,6 +182,7 @@ export default {
       state: store.state,
       showForm: false,
       templatesRequested: false,
+      isStickyHeaderShowing: false,
     };
   },
   computed: {
@@ -191,6 +217,23 @@ export default {
     defaultErrorMessage() {
       return sprintf(s__('Error updating %{issuableType}'), { issuableType: this.issuableType });
     },
+    isOpenStatus() {
+      return this.issuableStatus === IssuableStatus.Open;
+    },
+    pinnedLinkClasses() {
+      return this.showTitleBorder
+        ? 'gl-border-b-1 gl-border-b-gray-100 gl-border-b-solid gl-mb-6'
+        : '';
+    },
+    statusIcon() {
+      return this.isOpenStatus ? 'issue-open-m' : 'mobile-issue-close';
+    },
+    statusText() {
+      return IssuableStatusText[this.issuableStatus];
+    },
+    shouldShowStickyHeader() {
+      return this.isStickyHeaderShowing && this.issuableType === IssuableType.Issue;
+    },
   },
   created() {
     this.service = new Service(this.endpoint);
@@ -204,7 +247,7 @@ export default {
     });
 
     if (!Visibility.hidden()) {
-      this.poll.makeRequest();
+      this.poll.makeDelayedRequest(2000);
     }
 
     Visibility.change(() => {
@@ -295,7 +338,7 @@ export default {
         .then(res => res.data)
         .then(data => this.checkForSpam(data))
         .then(data => {
-          if (window.location.pathname !== data.web_url) {
+          if (!window.location.pathname.includes(data.web_url)) {
             visitUrl(data.web_url);
           }
         })
@@ -329,7 +372,7 @@ export default {
     },
 
     deleteIssuable(payload) {
-      this.service
+      return this.service
         .deleteIssuable(payload)
         .then(res => res.data)
         .then(data => {
@@ -340,9 +383,17 @@ export default {
         })
         .catch(() => {
           createFlash(
-            sprintf(s__('Error deleting  %{issuableType}'), { issuableType: this.issuableType }),
+            sprintf(s__('Error deleting %{issuableType}'), { issuableType: this.issuableType }),
           );
         });
+    },
+
+    hideStickyHeader() {
+      this.isStickyHeaderShowing = false;
+    },
+
+    showStickyHeader() {
+      this.isStickyHeaderShowing = true;
     },
   },
 };
@@ -365,7 +416,12 @@ export default {
         :issuable-type="issuableType"
       />
 
-      <recaptcha-modal v-show="showRecaptcha" :html="recaptchaHTML" @close="closeRecaptchaModal" />
+      <recaptcha-modal
+        v-show="showRecaptcha"
+        ref="recaptchaModal"
+        :html="recaptchaHTML"
+        @close="closeRecaptchaModal"
+      />
     </div>
     <div v-else>
       <title-component
@@ -375,9 +431,43 @@ export default {
         :title-text="state.titleText"
         :show-inline-edit-button="showInlineEditButton"
       />
-      <pinned-links :zoom-meeting-url="zoomMeetingUrl" />
-      <description-component
-        v-if="state.descriptionHtml"
+
+      <gl-intersection-observer @appear="hideStickyHeader" @disappear="showStickyHeader">
+        <transition name="issuable-header-slide">
+          <div
+            v-if="shouldShowStickyHeader"
+            class="issue-sticky-header gl-fixed gl-z-index-3 gl-bg-white gl-border-1 gl-border-b-solid gl-border-b-gray-100 gl-py-3"
+            data-testid="issue-sticky-header"
+          >
+            <div
+              class="issue-sticky-header-text gl-display-flex gl-align-items-center gl-mx-auto gl-px-5"
+            >
+              <p
+                class="issuable-status-box status-box gl-my-0"
+                :class="[isOpenStatus ? 'status-box-open' : 'status-box-issue-closed']"
+              >
+                <gl-icon :name="statusIcon" class="gl-display-block d-sm-none gl-h-6!" />
+                <span class="gl-display-none d-sm-block">{{ statusText }}</span>
+              </p>
+              <p
+                class="gl-font-weight-bold gl-overflow-hidden gl-white-space-nowrap gl-text-overflow-ellipsis gl-my-0"
+                :title="state.titleText"
+              >
+                {{ state.titleText }}
+              </p>
+            </div>
+          </div>
+        </transition>
+      </gl-intersection-observer>
+
+      <pinned-links
+        :zoom-meeting-url="zoomMeetingUrl"
+        :published-incident-url="publishedIncidentUrl"
+        :class="pinnedLinkClasses"
+      />
+
+      <component
+        :is="descriptionComponent"
         :can-update="canUpdate"
         :description-html="state.descriptionHtml"
         :description-text="state.descriptionText"
@@ -388,6 +478,7 @@ export default {
         :lock-version="state.lock_version"
         @taskListUpdateFailed="updateStoreState"
       />
+
       <edited-component
         v-if="hasUpdated"
         :updated-at="state.updatedAt"

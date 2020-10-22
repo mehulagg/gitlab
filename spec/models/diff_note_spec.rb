@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DiffNote do
+RSpec.describe DiffNote do
   include RepoHelpers
 
   let_it_be(:merge_request) { create(:merge_request) }
@@ -35,7 +35,9 @@ describe DiffNote do
   subject { create(:diff_note_on_merge_request, project: project, position: position, noteable: merge_request) }
 
   describe 'validations' do
-    it_behaves_like 'a valid diff positionable note', :diff_note_on_commit
+    it_behaves_like 'a valid diff positionable note' do
+      subject { build(:diff_note_on_commit, project: project, commit_id: commit_id, position: position) }
+    end
   end
 
   describe "#position=" do
@@ -238,12 +240,32 @@ describe DiffNote do
     end
 
     context 'when the discussion was created in the diff' do
-      it 'returns correct diff file' do
-        diff_file = subject.diff_file
+      context 'when file_identifier_hash is disabled' do
+        before do
+          stub_feature_flags(file_identifier_hash: false)
+        end
 
-        expect(diff_file.old_path).to eq(position.old_path)
-        expect(diff_file.new_path).to eq(position.new_path)
-        expect(diff_file.diff_refs).to eq(position.diff_refs)
+        it 'returns correct diff file' do
+          diff_file = subject.diff_file
+
+          expect(diff_file.old_path).to eq(position.old_path)
+          expect(diff_file.new_path).to eq(position.new_path)
+          expect(diff_file.diff_refs).to eq(position.diff_refs)
+        end
+      end
+
+      context 'when file_identifier_hash is enabled' do
+        before do
+          stub_feature_flags(file_identifier_hash: true)
+        end
+
+        it 'returns correct diff file' do
+          diff_file = subject.diff_file
+
+          expect(diff_file.old_path).to eq(position.old_path)
+          expect(diff_file.new_path).to eq(position.new_path)
+          expect(diff_file.diff_refs).to eq(position.diff_refs)
+        end
       end
     end
 

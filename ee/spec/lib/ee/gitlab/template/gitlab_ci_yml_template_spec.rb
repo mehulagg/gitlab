@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Template::GitlabCiYmlTemplate do
+RSpec.describe Gitlab::Template::GitlabCiYmlTemplate do
   describe '.all' do
     let(:templates) { described_class.all.map(&:name) }
 

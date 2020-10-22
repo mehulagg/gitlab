@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Epic aggregates (count and weight)' do
+RSpec.describe 'Epic aggregates (count and weight)' do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
@@ -13,6 +13,7 @@ describe 'Epic aggregates (count and weight)' do
   let(:query) do
     graphql_query_for('group', { fullPath: target_epic.group.full_path }, query_graphql_field('epics', { iid: target_epic.iid }, epic_aggregates_query))
   end
+
   let(:epic_aggregates_query) do
     <<~QUERY
       nodes {

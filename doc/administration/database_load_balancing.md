@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Database Load Balancing **(PREMIUM ONLY)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1283) in [GitLab Premium](https://about.gitlab.com/pricing/) 9.0.
@@ -26,9 +32,9 @@ sent to the primary (unless necessary), the primary (`db3`) hardly has any load.
 
 ## Requirements
 
-For load balancing to work you will need at least PostgreSQL 9.2 or newer,
+For load balancing to work you will need at least PostgreSQL 11 or newer,
 [**MySQL is not supported**](../install/requirements.md#database). You also need to make sure that you have
-at least 1 secondary in [hot standby](https://www.postgresql.org/docs/9.6/hot-standby.html) mode.
+at least 1 secondary in [hot standby](https://www.postgresql.org/docs/11/hot-standby.html) mode.
 
 Load balancing also requires that the configured hosts **always** point to the
 primary, even after a database failover. Furthermore, the additional hosts to
@@ -128,7 +134,7 @@ production:
       disconnect_timeout: 120
 ```
 
-Here the `discover:` section specifies the configuration details to use for
+Here, the `discover:` section specifies the configuration details to use for
 service discovery.
 
 ### Configuration
@@ -139,7 +145,7 @@ The following options can be set:
 |----------------------|---------------------------------------------------------------------------------------------------|-----------|
 | `nameserver`         | The nameserver to use for looking up the DNS record.                                              | localhost |
 | `record`             | The record to look up. This option is required for service discovery to work.                     |           |
-| `record_type`        | Optional record type to look up, this can be either A or SRV (since GitLab 12.3)                  | A         |
+| `record_type`        | Optional record type to look up, this can be either A or SRV (GitLab 12.3 and later)              | A         |
 | `port`               | The port of the nameserver.                                                                       | 8600      |
 | `interval`           | The minimum time in seconds between checking the DNS record.                                      | 60        |
 | `disconnect_timeout` | The time in seconds after which an old connection is closed, after the list of hosts was updated. | 120       |
@@ -166,6 +172,10 @@ queried over UDP. To overcome this issue, you can use TCP for querying by settin
 `use_tcp` to `true`.
 
 ### Forking
+
+NOTE: **Note:**
+Starting with GitLab 13.0, Puma is the default web server used in GitLab
+all-in-one package based installations as well as GitLab Helm chart deployments.
 
 If you use an application server that forks, such as Unicorn, you _have to_
 update your Unicorn configuration to start service discovery _after_ a fork.
@@ -217,7 +227,7 @@ without it immediately leading to errors being presented to the users.
 ## Logging
 
 The load balancer logs various events in
-[`database_load_balancing.log`](logs.md#database_load_balancinglog-premium-only), such as
+[`database_load_balancing.log`](logs.md#database_load_balancinglog), such as
 
 - When a host is marked as offline
 - When a host comes back online

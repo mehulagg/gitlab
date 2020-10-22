@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::PrometheusClient do
+RSpec.describe Gitlab::PrometheusClient do
   include PrometheusHelpers
 
   subject { described_class.new('https://prometheus.example.com') }
@@ -32,7 +32,29 @@ describe Gitlab::PrometheusClient do
     it 'raises error when status code not 200' do
       stub_request(:get, subject.health_url).to_return(status: 500, body: '')
 
-      expect { subject.healthy? }.to raise_error(Gitlab::PrometheusClient::Error)
+      expect { subject.healthy? }.to raise_error(Gitlab::PrometheusClient::UnexpectedResponseError)
+    end
+  end
+
+  describe '#ready?' do
+    it 'returns true when status code is 200' do
+      stub_request(:get, subject.ready_url).to_return(status: 200, body: 'Prometheus is Ready.\n')
+
+      expect(subject.ready?).to eq(true)
+    end
+
+    it 'returns false when status code is not 200' do
+      [503, 500].each do |code|
+        stub_request(:get, subject.ready_url).to_return(status: code, body: 'Service Unavailable')
+
+        expect(subject.ready?).to eq(false)
+      end
+    end
+
+    it 'raises error when ready api throws exception' do
+      stub_request(:get, subject.ready_url).to_raise(Net::OpenTimeout)
+
+      expect { subject.ready? }.to raise_error(Gitlab::PrometheusClient::UnexpectedResponseError)
     end
   end
 
@@ -41,41 +63,41 @@ describe Gitlab::PrometheusClient do
   # - execute_query: A query call
   shared_examples 'failure response' do
     context 'when request returns 400 with an error message' do
-      it 'raises a Gitlab::PrometheusClient::Error error' do
+      it 'raises a Gitlab::PrometheusClient::QueryError error' do
         req_stub = stub_prometheus_request(query_url, status: 400, body: { error: 'bar!' })
 
         expect { execute_query }
-          .to raise_error(Gitlab::PrometheusClient::Error, 'bar!')
+          .to raise_error(Gitlab::PrometheusClient::QueryError, 'bar!')
         expect(req_stub).to have_been_requested
       end
     end
 
     context 'when request returns 400 without an error message' do
-      it 'raises a Gitlab::PrometheusClient::Error error' do
+      it 'raises a Gitlab::PrometheusClient::QueryError error' do
         req_stub = stub_prometheus_request(query_url, status: 400)
 
         expect { execute_query }
-          .to raise_error(Gitlab::PrometheusClient::Error, 'Bad data received')
+          .to raise_error(Gitlab::PrometheusClient::QueryError, 'Bad data received')
         expect(req_stub).to have_been_requested
       end
     end
 
     context 'when request returns 500' do
-      it 'raises a Gitlab::PrometheusClient::Error error' do
+      it 'raises a Gitlab::PrometheusClient::UnexpectedResponseError error' do
         req_stub = stub_prometheus_request(query_url, status: 500, body: { message: 'FAIL!' })
 
         expect { execute_query }
-          .to raise_error(Gitlab::PrometheusClient::Error, '500 - {"message":"FAIL!"}')
+          .to raise_error(Gitlab::PrometheusClient::UnexpectedResponseError, '500 - {"message":"FAIL!"}')
         expect(req_stub).to have_been_requested
       end
     end
 
     context 'when request returns non json data' do
-      it 'raises a Gitlab::PrometheusClient::Error error' do
+      it 'raises a Gitlab::PrometheusClient::UnexpectedResponseError error' do
         req_stub = stub_prometheus_request(query_url, status: 200, body: 'not json')
 
         expect { execute_query }
-          .to raise_error(Gitlab::PrometheusClient::Error, 'Parsing response failed')
+          .to raise_error(Gitlab::PrometheusClient::UnexpectedResponseError, 'Parsing response failed')
         expect(req_stub).to have_been_requested
       end
     end
@@ -85,35 +107,35 @@ describe Gitlab::PrometheusClient do
     let(:prometheus_url) {"https://prometheus.invalid.example.com/api/v1/query?query=1"}
 
     shared_examples 'exceptions are raised' do
-      it 'raises a Gitlab::PrometheusClient::Error error when a SocketError is rescued' do
+      it 'raises a Gitlab::PrometheusClient::ConnectionError error when a SocketError is rescued' do
         req_stub = stub_prometheus_request_with_exception(prometheus_url, SocketError)
 
         expect { subject }
-          .to raise_error(Gitlab::PrometheusClient::Error, "Can't connect to #{prometheus_url}")
+          .to raise_error(Gitlab::PrometheusClient::ConnectionError, "Can't connect to #{prometheus_url}")
         expect(req_stub).to have_been_requested
       end
 
-      it 'raises a Gitlab::PrometheusClient::Error error when a SSLError is rescued' do
+      it 'raises a Gitlab::PrometheusClient::ConnectionError error when a SSLError is rescued' do
         req_stub = stub_prometheus_request_with_exception(prometheus_url, OpenSSL::SSL::SSLError)
 
         expect { subject }
-          .to raise_error(Gitlab::PrometheusClient::Error, "#{prometheus_url} contains invalid SSL data")
+          .to raise_error(Gitlab::PrometheusClient::ConnectionError, "#{prometheus_url} contains invalid SSL data")
         expect(req_stub).to have_been_requested
       end
 
-      it 'raises a Gitlab::PrometheusClient::Error error when a Gitlab::HTTP::ResponseError is rescued' do
+      it 'raises a Gitlab::PrometheusClient::ConnectionError error when a Gitlab::HTTP::ResponseError is rescued' do
         req_stub = stub_prometheus_request_with_exception(prometheus_url, Gitlab::HTTP::ResponseError)
 
         expect { subject }
-          .to raise_error(Gitlab::PrometheusClient::Error, "Network connection error")
+          .to raise_error(Gitlab::PrometheusClient::ConnectionError, "Network connection error")
         expect(req_stub).to have_been_requested
       end
 
-      it 'raises a Gitlab::PrometheusClient::Error error when a Gitlab::HTTP::ResponseError with a code is rescued' do
+      it 'raises a Gitlab::PrometheusClient::ConnectionError error when a Gitlab::HTTP::ResponseError with a code is rescued' do
         req_stub = stub_prometheus_request_with_exception(prometheus_url, Gitlab::HTTP::ResponseError.new(code: 400))
 
         expect { subject }
-          .to raise_error(Gitlab::PrometheusClient::Error, "Network connection error")
+          .to raise_error(Gitlab::PrometheusClient::ConnectionError, "Network connection error")
         expect(req_stub).to have_been_requested
       end
     end
@@ -136,7 +158,7 @@ describe Gitlab::PrometheusClient do
     let(:query_url) { prometheus_query_with_time_url(prometheus_query, Time.now.utc) }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     context 'when request returns vector results' do
@@ -171,11 +193,64 @@ describe Gitlab::PrometheusClient do
     end
   end
 
+  describe '#aggregate' do
+    let(:query) { 'avg (metric) by (job)' }
+    let(:prometheus_response) do
+      {
+        "status": "success",
+        "data": {
+          "resultType": "vector",
+          "result": [
+            {
+              "metric": { "job" => "gitlab-rails" },
+              "value": [1488758662.506, "1"]
+            },
+            {
+              "metric": { "job" => "gitlab-sidekiq" },
+              "value": [1488758662.506, "2"]
+            }
+          ]
+        }
+      }
+    end
+
+    let(:query_url) { prometheus_query_with_time_url(query, Time.now.utc) }
+
+    around do |example|
+      freeze_time { example.run }
+    end
+
+    context 'when request returns vector results' do
+      it 'returns data from the API call grouped by labels' do
+        req_stub = stub_prometheus_request(query_url, body: prometheus_response)
+
+        expect(subject.aggregate(query)).to eq({
+          { "job" => "gitlab-rails" } => 1,
+          { "job" => "gitlab-sidekiq" } => 2
+        })
+        expect(req_stub).to have_been_requested
+      end
+    end
+
+    context 'when request returns no data' do
+      it 'returns {}' do
+        req_stub = stub_prometheus_request(query_url, body: prometheus_empty_body('vector'))
+
+        expect(subject.aggregate(query)).to eq({})
+        expect(req_stub).to have_been_requested
+      end
+    end
+
+    it_behaves_like 'failure response' do
+      let(:execute_query) { subject.aggregate(query) }
+    end
+  end
+
   describe '#series' do
     let(:query_url) { prometheus_series_url('series_name', 'other_service') }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     it 'calls endpoint and returns list of series' do
@@ -206,7 +281,7 @@ describe Gitlab::PrometheusClient do
     let(:query_url) { prometheus_query_range_url(prometheus_query) }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     context 'when non utc time is passed' do
@@ -305,7 +380,7 @@ describe Gitlab::PrometheusClient do
       let(:query_url) { prometheus_query_url(prometheus_query) }
 
       around do |example|
-        Timecop.freeze { example.run }
+        freeze_time { example.run }
       end
 
       context 'when response status code is 200' do
@@ -348,9 +423,9 @@ describe Gitlab::PrometheusClient do
         context "without response code" do
           let(:response_error) { Gitlab::HTTP::ResponseError }
 
-          it 'raises PrometheusClient::Error' do
+          it 'raises PrometheusClient::ConnectionError' do
             expect { subject.proxy('query', { query: prometheus_query }) }.to(
-              raise_error(Gitlab::PrometheusClient::Error, 'Network connection error')
+              raise_error(Gitlab::PrometheusClient::ConnectionError, 'Network connection error')
             )
           end
         end

@@ -3,7 +3,7 @@ import Vue from 'vue';
 import mountComponent from 'helpers/vue_mount_component_helper';
 import dropdownCreateLabelComponent from '~/vue_shared/components/sidebar/labels_select/dropdown_create_label.vue';
 
-import { mockSuggestedColors } from '../../../../../javascripts/vue_shared/components/sidebar/labels_select/mock_data';
+import { mockSuggestedColors } from './mock_data';
 
 const createComponent = headerTitle => {
   const Component = Vue.extend(dropdownCreateLabelComponent);
@@ -14,6 +14,7 @@ const createComponent = headerTitle => {
 };
 
 describe('DropdownCreateLabelComponent', () => {
+  const colorsCount = Object.keys(mockSuggestedColors).length;
   let vm;
 
   beforeEach(() => {
@@ -27,7 +28,7 @@ describe('DropdownCreateLabelComponent', () => {
 
   describe('created', () => {
     it('initializes `suggestedColors` prop on component from `gon.suggested_color_labels` object', () => {
-      expect(vm.suggestedColors.length).toBe(mockSuggestedColors.length);
+      expect(vm.suggestedColors.length).toBe(colorsCount);
     });
   });
 
@@ -37,12 +38,10 @@ describe('DropdownCreateLabelComponent', () => {
     });
 
     it('renders `Go back` button on component header', () => {
-      const backButtonEl = vm.$el.querySelector(
-        '.dropdown-title button.dropdown-title-button.dropdown-menu-back',
-      );
+      const backButtonEl = vm.$el.querySelector('.dropdown-title .dropdown-menu-back');
 
       expect(backButtonEl).not.toBe(null);
-      expect(backButtonEl.querySelector('.fa-arrow-left')).not.toBe(null);
+      expect(backButtonEl.querySelector('[data-testid="arrow-left-icon"]')).not.toBe(null);
     });
 
     it('renders component header element as `Create new label` when `headerTitle` prop is not provided', () => {
@@ -61,12 +60,9 @@ describe('DropdownCreateLabelComponent', () => {
     });
 
     it('renders `Close` button on component header', () => {
-      const closeButtonEl = vm.$el.querySelector(
-        '.dropdown-title button.dropdown-title-button.dropdown-menu-close',
-      );
+      const closeButtonEl = vm.$el.querySelector('.dropdown-title .dropdown-menu-close');
 
       expect(closeButtonEl).not.toBe(null);
-      expect(closeButtonEl.querySelector('.fa-times.dropdown-menu-close-icon')).not.toBe(null);
     });
 
     it('renders `Name new label` input element', () => {
@@ -78,11 +74,11 @@ describe('DropdownCreateLabelComponent', () => {
       const colorsListContainerEl = vm.$el.querySelector('.suggest-colors.suggest-colors-dropdown');
 
       expect(colorsListContainerEl).not.toBe(null);
-      expect(colorsListContainerEl.querySelectorAll('a').length).toBe(mockSuggestedColors.length);
+      expect(colorsListContainerEl.querySelectorAll('a').length).toBe(colorsCount);
 
       const colorItemEl = colorsListContainerEl.querySelectorAll('a')[0];
 
-      expect(colorItemEl.dataset.color).toBe(vm.suggestedColors[0]);
+      expect(colorItemEl.dataset.color).toBe(vm.suggestedColors[0].colorCode);
       expect(colorItemEl.getAttribute('style')).toBe('background-color: rgb(0, 51, 204);');
     });
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectWiki do
+RSpec.describe ProjectWiki do
   it_behaves_like 'EE wiki model' do
     let(:wiki_container) { create(:project, :wiki_repo, namespace: user.namespace) }
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Notes::DestroyService do
+RSpec.describe Notes::DestroyService do
   let_it_be(:project, refind: true) { create(:project) }
   let_it_be(:user) { create(:user) }
 

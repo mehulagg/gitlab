@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::RepositoryVerificationPrimaryService do
+RSpec.describe Geo::RepositoryVerificationPrimaryService do
   include EE::GeoHelpers
 
   let(:project) { create(:project) }
@@ -76,8 +76,8 @@ describe Geo::RepositoryVerificationPrimaryService do
       subject.execute
 
       expect(project.repository_state).to have_attributes(
-        last_repository_verification_ran_at: be_within(100.seconds).of(Time.now),
-        last_wiki_verification_ran_at: be_within(100.seconds).of(Time.now)
+        last_repository_verification_ran_at: be_within(100.seconds).of(Time.current),
+        last_wiki_verification_ran_at: be_within(100.seconds).of(Time.current)
       )
     end
 
@@ -221,7 +221,7 @@ describe Geo::RepositoryVerificationPrimaryService do
   def stub_wiki_repository(wiki, repository)
     allow(Repository).to receive(:new).with(
       project.wiki.full_path,
-      project,
+      project.wiki,
       shard: project.repository_storage,
       disk_path: project.wiki.disk_path,
       repo_type: Gitlab::GlRepository::WIKI

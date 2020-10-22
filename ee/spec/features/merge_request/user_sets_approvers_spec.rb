@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User sets approvers', :js do
+RSpec.describe 'Merge request > User sets approvers', :js do
   include ProjectForksHelper
   include FeatureApprovalHelper
 

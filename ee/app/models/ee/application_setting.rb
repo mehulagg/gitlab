@@ -7,10 +7,10 @@ module EE
   # and be prepended in the `ApplicationSetting` model
   module ApplicationSetting
     extend ActiveSupport::Concern
+    extend ::Gitlab::Utils::Override
 
     prepended do
       EMAIL_ADDITIONAL_TEXT_CHARACTER_LIMIT = 10_000
-      INSTANCE_REVIEW_MIN_USERS = 100
       DEFAULT_NUMBER_OF_DAYS_BEFORE_REMOVAL = 7
 
       belongs_to :file_template_project, class_name: "Project"
@@ -66,7 +66,15 @@ module EE
                 presence: { message: "can't be blank when using aws hosted elasticsearch" },
                 if: ->(setting) { setting.elasticsearch_indexing? && setting.elasticsearch_aws? }
 
+      validates :elasticsearch_indexed_file_size_limit_kb,
+                presence: true,
+                numericality: { only_integer: true, greater_than: 0 }
+
       validates :elasticsearch_indexed_field_length_limit,
+                presence: true,
+                numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+
+      validates :elasticsearch_client_request_timeout,
                 presence: true,
                 numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
@@ -84,7 +92,10 @@ module EE
                 allow_blank: true,
                 numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 365 }
 
+      validate :allowed_frameworks, if: :compliance_frameworks_changed?
+
       after_commit :update_personal_access_tokens_lifetime, if: :saved_change_to_max_personal_access_token_lifetime?
+      after_commit :resume_elasticsearch_indexing
     end
 
     class_methods do
@@ -94,31 +105,36 @@ module EE
       def defaults
         super.merge(
           allow_group_owners_to_manage_ldap: true,
+          automatic_purchased_storage_allocation: false,
+          custom_project_templates_group_id: nil,
           default_project_deletion_protection: false,
-          elasticsearch_aws: false,
+          deletion_adjourned_period: DEFAULT_NUMBER_OF_DAYS_BEFORE_REMOVAL,
           elasticsearch_aws_region: ENV['ELASTIC_REGION'] || 'us-east-1',
+          elasticsearch_aws: false,
+          elasticsearch_indexed_field_length_limit: 0,
+          elasticsearch_indexed_file_size_limit_kb: 1024, # 1 MiB (units in KiB)
+          elasticsearch_max_bulk_concurrency: 10,
+          elasticsearch_max_bulk_size_bytes: 10.megabytes,
           elasticsearch_replicas: 1,
           elasticsearch_shards: 5,
-          elasticsearch_indexed_field_length_limit: 0,
-          elasticsearch_max_bulk_size_bytes: 10.megabytes,
-          elasticsearch_max_bulk_concurrency: 10,
           elasticsearch_url: ENV['ELASTIC_URL'] || 'http://localhost:9200',
+          elasticsearch_client_request_timeout: 0,
           email_additional_text: nil,
+          enforce_namespace_storage_limit: false,
+          enforce_pat_expiration: true,
+          geo_node_allowed_ips: '0.0.0.0/0, ::/0',
           lock_memberships_to_ldap: false,
           max_personal_access_token_lifetime: nil,
           mirror_capacity_threshold: Settings.gitlab['mirror_capacity_threshold'],
           mirror_max_capacity: Settings.gitlab['mirror_max_capacity'],
           mirror_max_delay: Settings.gitlab['mirror_max_delay'],
-          deletion_adjourned_period: DEFAULT_NUMBER_OF_DAYS_BEFORE_REMOVAL,
           pseudonymizer_enabled: false,
           repository_size_limit: 0,
+          seat_link_enabled: Settings.gitlab['seat_link_enabled'],
           slack_app_enabled: false,
           slack_app_id: nil,
           slack_app_secret: nil,
-          slack_app_verification_token: nil,
-          custom_project_templates_group_id: nil,
-          geo_node_allowed_ips: '0.0.0.0/0, ::/0',
-          seat_link_enabled: Settings.gitlab['seat_link_enabled']
+          slack_app_verification_token: nil
         )
       end
     end
@@ -135,22 +151,23 @@ module EE
       return false unless elasticsearch_indexing?
       return true unless elasticsearch_limit_indexing?
 
-      return optimized_elasticsearch_indexes_project?(project) unless ::Feature.enabled?(:elasticsearch_indexes_project_cache, default_enabled: true)
-
       ::Gitlab::Elastic::ElasticsearchEnabledCache.fetch(:project, project.id) do
-        optimized_elasticsearch_indexes_project?(project)
+        elasticsearch_limited_project_exists?(project)
       end
-    end
-
-    def invalidate_elasticsearch_indexes_project_cache!
-      ::Gitlab::Elastic::ElasticsearchEnabledCache.delete(:project)
     end
 
     def elasticsearch_indexes_namespace?(namespace)
       return false unless elasticsearch_indexing?
       return true unless elasticsearch_limit_indexing?
 
-      elasticsearch_limited_namespaces.exists?(namespace.id)
+      ::Gitlab::Elastic::ElasticsearchEnabledCache.fetch(:namespace, namespace.id) do
+        elasticsearch_limited_namespaces.exists?(namespace.id)
+      end
+    end
+
+    def invalidate_elasticsearch_indexes_cache!
+      ::Gitlab::Elastic::ElasticsearchEnabledCache.delete(:project)
+      ::Gitlab::Elastic::ElasticsearchEnabledCache.delete(:namespace)
     end
 
     def elasticsearch_limited_projects(ignore_namespaces = false)
@@ -203,6 +220,13 @@ module EE
     end
     alias_method :elasticsearch_indexing?, :elasticsearch_indexing
 
+    def elasticsearch_pause_indexing
+      return false unless elasticsearch_pause_indexing_column_exists?
+
+      super
+    end
+    alias_method :elasticsearch_pause_indexing?, :elasticsearch_pause_indexing
+
     def elasticsearch_search
       return false unless elasticsearch_search_column_exists?
 
@@ -222,7 +246,7 @@ module EE
       when Project
         elasticsearch_indexes_project?(scope)
       else
-        false # Never use elasticsearch for the global scope when limiting is on
+        ::Feature.enabled?(:advanced_global_search_for_limited_indexing)
       end
     end
 
@@ -238,14 +262,15 @@ module EE
 
     def elasticsearch_config
       {
-        url:                   elasticsearch_url,
-        aws:                   elasticsearch_aws,
-        aws_access_key:        elasticsearch_aws_access_key,
-        aws_secret_access_key: elasticsearch_aws_secret_access_key,
-        aws_region:            elasticsearch_aws_region,
-        max_bulk_size_bytes:   elasticsearch_max_bulk_size_mb.megabytes,
-        max_bulk_concurrency:  elasticsearch_max_bulk_concurrency
-      }
+        url:                    elasticsearch_url,
+        aws:                    elasticsearch_aws,
+        aws_access_key:         elasticsearch_aws_access_key,
+        aws_secret_access_key:  elasticsearch_aws_secret_access_key,
+        aws_region:             elasticsearch_aws_region,
+        max_bulk_size_bytes:    elasticsearch_max_bulk_size_mb.megabytes,
+        max_bulk_concurrency:   elasticsearch_max_bulk_concurrency,
+        client_request_timeout: (elasticsearch_client_request_timeout if elasticsearch_client_request_timeout > 0)
+      }.compact
     end
 
     def email_additional_text
@@ -274,40 +299,44 @@ module EE
       ::Project.where(namespace_id: group_id)
     end
 
+    override :instance_review_permitted?
     def instance_review_permitted?
-      return if License.current
+      return false if License.current
 
-      users_count = Rails.cache.fetch('limited_users_count', expires_in: 1.day) do
-        ::User.limit(INSTANCE_REVIEW_MIN_USERS + 1).count(:all)
-      end
-
-      users_count >= INSTANCE_REVIEW_MIN_USERS
+      super
     end
 
     def max_personal_access_token_lifetime_from_now
       max_personal_access_token_lifetime&.days&.from_now
     end
 
+    def compliance_frameworks=(values)
+      cleaned = Array.wrap(values).reject(&:blank?).sort.uniq
+
+      write_attribute(:compliance_frameworks, cleaned)
+    end
+
     private
 
-    def optimized_elasticsearch_indexes_project?(project)
-      if ::Feature.enabled?(:optimized_elasticsearch_indexes_project, default_enabled: true)
-        indexed_namespaces = ::Gitlab::ObjectHierarchy
-          .new(::Namespace.where(id: project.namespace_id))
-          .base_and_ancestors
-          .joins(:elasticsearch_indexed_namespace)
+    def elasticsearch_limited_project_exists?(project)
+      indexed_namespaces = ::Gitlab::ObjectHierarchy
+        .new(::Namespace.where(id: project.namespace_id))
+        .base_and_ancestors
+        .joins(:elasticsearch_indexed_namespace)
 
-        indexed_namespaces = ::Project.where('EXISTS (?)', indexed_namespaces)
-        indexed_projects = ::Project.where('EXISTS (?)', ElasticsearchIndexedProject.where(project_id: project.id))
+      indexed_namespaces = ::Project.where('EXISTS (?)', indexed_namespaces)
+      indexed_projects = ::Project.where('EXISTS (?)', ElasticsearchIndexedProject.where(project_id: project.id))
 
-        ::Project
-          .from("(SELECT) as projects") # SELECT from "nothing" since the EXISTS queries have all the conditions.
-          .merge(indexed_namespaces.or(indexed_projects))
-          .exists?
-      else
-        # old behavior
-        elasticsearch_limited_projects.exists?(project.id)
-      end
+      ::Project
+        .from("(SELECT) as projects") # SELECT from "nothing" since the EXISTS queries have all the conditions.
+        .merge(indexed_namespaces.or(indexed_projects))
+        .exists?
+    end
+
+    def resume_elasticsearch_indexing
+      return false unless saved_changes['elasticsearch_pause_indexing'] == [true, false]
+
+      ElasticIndexingControlWorker.perform_async
     end
 
     def update_personal_access_tokens_lifetime
@@ -330,6 +359,10 @@ module EE
 
     def elasticsearch_indexing_column_exists?
       ::Gitlab::Database.cached_column_exists?(:application_settings, :elasticsearch_indexing)
+    end
+
+    def elasticsearch_pause_indexing_column_exists?
+      ::Gitlab::Database.cached_column_exists?(:application_settings, :elasticsearch_pause_indexing)
     end
 
     def elasticsearch_search_column_exists?
@@ -357,6 +390,12 @@ module EE
       end
     rescue ::Gitlab::UrlBlocker::BlockedUrlError
       errors.add(:elasticsearch_url, "only supports valid HTTP(S) URLs.")
+    end
+
+    def allowed_frameworks
+      if Array.wrap(compliance_frameworks).any? { |value| !::ComplianceManagement::ComplianceFramework::FRAMEWORKS.value?(value) }
+        errors.add(:compliance_frameworks, _('must contain only valid frameworks'))
+      end
     end
   end
 end

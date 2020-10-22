@@ -2,11 +2,15 @@
 
 require 'spec_helper'
 
-describe ProtectedBranch do
+RSpec.describe ProtectedBranch do
   subject { create(:protected_branch) }
 
   let(:project) { subject.project }
   let(:user) { create(:user) }
+
+  describe 'associations' do
+    it { is_expected.to have_many(:required_code_owners_sections).class_name('ProtectedBranch::RequiredCodeOwnersSection') }
+  end
 
   shared_examples 'uniqueness validation' do |access_level_class|
     let(:factory_name) { access_level_class.to_s.underscore.sub('/', '_').to_sym }

@@ -3,7 +3,12 @@
 class GraphqlController < ApplicationController
   # Unauthenticated users have access to the API for public data
   skip_before_action :authenticate_user!
-  skip_around_action :set_session_storage
+
+  # If a user is using their session to access GraphQL, we need to have session
+  # storage, since the admin-mode check is session wide.
+  # We can't enable this for anonymous users because that would cause users using
+  # enforced SSO from using an auth token to access the API.
+  skip_around_action :set_session_storage, unless: :current_user
 
   # Allow missing CSRF tokens, this would mean that if a CSRF is invalid or missing,
   # the user won't be authenticated but can proceed as an anonymous user.
@@ -14,11 +19,14 @@ class GraphqlController < ApplicationController
 
   before_action :authorize_access_api!
   before_action(only: [:execute]) { authenticate_sessionless_user!(:api) }
+  before_action :set_user_last_activity
 
   # Since we deactivate authentication from the main ApplicationController and
   # defer it to :authorize_access_api!, we need to override the bypass session
   # callback execution order here
   around_action :sessionless_bypass_admin_mode!, if: :sessionless_user?
+
+  feature_category :not_owned
 
   def execute
     result = multiplex? ? execute_multiplex : execute_query
@@ -40,7 +48,17 @@ class GraphqlController < ApplicationController
     render_error(exception.message, status: :unprocessable_entity)
   end
 
+  rescue_from ::GraphQL::CoercionError do |exception|
+    render_error(exception.message, status: :unprocessable_entity)
+  end
+
   private
+
+  def set_user_last_activity
+    return unless current_user
+
+    Users::ActivityService.new(current_user).execute
+  end
 
   def execute_multiplex
     GitlabSchema.multiplex(multiplex_queries, context: context)
@@ -69,7 +87,7 @@ class GraphqlController < ApplicationController
   end
 
   def context
-    @context ||= { current_user: current_user }
+    @context ||= { current_user: current_user, is_sessionless_user: !!sessionless_user?, request: request }
   end
 
   def build_variables(variable_info)
@@ -94,5 +112,19 @@ class GraphqlController < ApplicationController
     error = { errors: [message: message] }
 
     render json: error, status: status
+  end
+
+  def append_info_to_payload(payload)
+    super
+
+    # Merging to :metadata will ensure these are logged as top level keys
+    payload[:metadata] ||= {}
+    payload[:metadata].merge!(graphql: logs)
+  end
+
+  def logs
+    RequestStore.store[:graphql_logs].to_h
+                .except(:duration_s, :query_string)
+                .merge(operation_name: params[:operationName])
   end
 end

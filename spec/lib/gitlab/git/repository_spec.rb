@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe Gitlab::Git::Repository, :seed_helper do
+RSpec.describe Gitlab::Git::Repository, :seed_helper do
   include Gitlab::EncodingHelper
   include RepoHelpers
   using RSpec::Parameterized::TableSyntax
@@ -120,7 +120,7 @@ describe Gitlab::Git::Repository, :seed_helper do
 
     let(:expected_extension) { 'tar.gz' }
     let(:expected_filename) { "#{expected_prefix}.#{expected_extension}" }
-    let(:expected_path) { File.join(storage_path, cache_key, expected_filename) }
+    let(:expected_path) { File.join(storage_path, cache_key, "@v2", expected_filename) }
     let(:expected_prefix) { "gitlab-git-test-#{ref}-#{SeedRepo::LastCommit::ID}" }
 
     subject(:metadata) { repository.archive_metadata(ref, storage_path, 'gitlab-git-test', format, append_sha: append_sha, path: path) }
@@ -133,12 +133,32 @@ describe Gitlab::Git::Repository, :seed_helper do
       expect(metadata['ArchivePrefix']).to eq(expected_prefix)
     end
 
-    it 'sets ArchivePath to the expected globally-unique path' do
-      # This is really important from a security perspective. Think carefully
-      # before changing it: https://gitlab.com/gitlab-org/gitlab-foss/issues/45689
-      expect(expected_path).to include(File.join(repository.gl_repository, SeedRepo::LastCommit::ID))
+    context 'when :include_lfs_blobs_in_archive feature flag is disabled' do
+      let(:expected_path) { File.join(storage_path, cache_key, expected_filename) }
 
-      expect(metadata['ArchivePath']).to eq(expected_path)
+      before do
+        stub_feature_flags(include_lfs_blobs_in_archive: false)
+      end
+
+      it 'sets ArchivePath to the expected globally-unique path' do
+        # This is really important from a security perspective. Think carefully
+        # before changing it: https://gitlab.com/gitlab-org/gitlab-foss/issues/45689
+        expect(expected_path).to include(File.join(repository.gl_repository, SeedRepo::LastCommit::ID))
+
+        expect(metadata['ArchivePath']).to eq(expected_path)
+      end
+    end
+
+    context 'when :include_lfs_blobs_in_archive feature flag is enabled' do
+      before do
+        stub_feature_flags(include_lfs_blobs_in_archive: true)
+      end
+
+      it 'sets ArchivePath to the expected globally-unique path' do
+        expect(expected_path).to include(File.join(repository.gl_repository, SeedRepo::LastCommit::ID))
+
+        expect(metadata['ArchivePath']).to eq(expected_path)
+      end
     end
 
     context 'path is set' do
@@ -579,9 +599,11 @@ describe Gitlab::Git::Repository, :seed_helper do
       let(:commit_with_old_name) do
         Gitlab::Git::Commit.find(repository, @commit_with_old_name_id)
       end
+
       let(:commit_with_new_name) do
         Gitlab::Git::Commit.find(repository, @commit_with_new_name_id)
       end
+
       let(:rename_commit) do
         Gitlab::Git::Commit.find(repository, @rename_commit_id)
       end
@@ -1628,13 +1650,14 @@ describe Gitlab::Git::Repository, :seed_helper do
     let(:right_branch) { 'test-master' }
     let(:first_parent_ref) { 'refs/heads/test-master' }
     let(:target_ref) { 'refs/merge-requests/999/merge' }
+    let(:allow_conflicts) { false }
 
     before do
       repository.create_branch(right_branch, branch_head) unless repository.ref_exists?(first_parent_ref)
     end
 
     def merge_to_ref
-      repository.merge_to_ref(user, left_sha, right_branch, target_ref, 'Merge message', first_parent_ref)
+      repository.merge_to_ref(user, left_sha, right_branch, target_ref, 'Merge message', first_parent_ref, allow_conflicts)
     end
 
     it 'generates a commit in the target_ref' do
@@ -2077,7 +2100,7 @@ describe Gitlab::Git::Repository, :seed_helper do
     let(:object_pool_rugged) { Rugged::Repository.new(object_pool_path) }
 
     before do
-      object_pool.create
+      object_pool.create # rubocop:disable Rails/SaveBang
     end
 
     it 'does not raise an error when disconnecting a non-linked repository' do
@@ -2178,6 +2201,7 @@ describe Gitlab::Git::Repository, :seed_helper do
     let(:new_repository) do
       Gitlab::Git::Repository.new('test_second_storage', TEST_REPO_PATH, '', 'group/project')
     end
+
     let(:new_repository_path) { File.join(TestEnv::SECOND_STORAGE_PATH, new_repository.relative_path) }
 
     subject { new_repository.replicate(repository) }
@@ -2187,34 +2211,47 @@ describe Gitlab::Git::Repository, :seed_helper do
         'gitaly_address' => Gitlab.config.repositories.storages.default.gitaly_address,
         'path' => TestEnv::SECOND_STORAGE_PATH
       })
-      new_repository.create_repository
     end
 
     after do
       new_repository.remove
     end
 
-    it 'mirrors the source repository' do
-      subject
-
-      expect(refs(new_repository_path)).to eq(refs(repository_path))
-    end
-
-    context 'with keep-around refs' do
-      let(:sha) { SeedRepo::Commit::ID }
-      let(:keep_around_ref) { "refs/keep-around/#{sha}" }
-      let(:tmp_ref) { "refs/tmp/#{SecureRandom.hex}" }
-
-      before do
-        repository.write_ref(keep_around_ref, sha)
-        repository.write_ref(tmp_ref, sha)
-      end
-
-      it 'includes the temporary and keep-around refs' do
+    context 'destination does not exist' do
+      it 'mirrors the source repository' do
         subject
 
-        expect(refs(new_repository_path)).to include(keep_around_ref)
-        expect(refs(new_repository_path)).to include(tmp_ref)
+        expect(refs(new_repository_path)).to eq(refs(repository_path))
+      end
+    end
+
+    context 'destination exists' do
+      before do
+        new_repository.create_repository
+      end
+
+      it 'mirrors the source repository' do
+        subject
+
+        expect(refs(new_repository_path)).to eq(refs(repository_path))
+      end
+
+      context 'with keep-around refs' do
+        let(:sha) { SeedRepo::Commit::ID }
+        let(:keep_around_ref) { "refs/keep-around/#{sha}" }
+        let(:tmp_ref) { "refs/tmp/#{SecureRandom.hex}" }
+
+        before do
+          repository.write_ref(keep_around_ref, sha)
+          repository.write_ref(tmp_ref, sha)
+        end
+
+        it 'includes the temporary and keep-around refs' do
+          subject
+
+          expect(refs(new_repository_path)).to include(keep_around_ref)
+          expect(refs(new_repository_path)).to include(tmp_ref)
+        end
       end
     end
   end

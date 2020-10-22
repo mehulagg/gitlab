@@ -1,12 +1,17 @@
 import mutations from 'ee/geo_replicable/store/mutations';
 import createState from 'ee/geo_replicable/store/state';
 import * as types from 'ee/geo_replicable/store/mutation_types';
-import { MOCK_BASIC_FETCH_DATA_MAP } from '../mock_data';
+import {
+  MOCK_BASIC_FETCH_DATA_MAP,
+  MOCK_REPLICABLE_TYPE,
+  MOCK_RESTFUL_PAGINATION_DATA,
+  MOCK_GRAPHQL_PAGINATION_DATA,
+} from '../mock_data';
 
 describe('GeoReplicable Store Mutations', () => {
   let state;
   beforeEach(() => {
-    state = createState();
+    state = createState({ replicableType: MOCK_REPLICABLE_TYPE, graphqlFieldName: null });
   });
 
   describe('SET_FILTER', () => {
@@ -14,7 +19,7 @@ describe('GeoReplicable Store Mutations', () => {
 
     beforeEach(() => {
       state.currentFilterIndex = 1;
-      state.currentPage = 2;
+      state.paginationData.page = 2;
 
       mutations[types.SET_FILTER](state, testValue);
     });
@@ -24,7 +29,7 @@ describe('GeoReplicable Store Mutations', () => {
     });
 
     it('resets the page to 1', () => {
-      expect(state.currentPage).toEqual(1);
+      expect(state.paginationData.page).toEqual(1);
     });
   });
 
@@ -32,7 +37,7 @@ describe('GeoReplicable Store Mutations', () => {
     const testValue = 'test search';
 
     beforeEach(() => {
-      state.currentPage = 2;
+      state.paginationData.page = 2;
 
       mutations[types.SET_SEARCH](state, testValue);
     });
@@ -42,16 +47,16 @@ describe('GeoReplicable Store Mutations', () => {
     });
 
     it('resets the page to 1', () => {
-      expect(state.currentPage).toEqual(1);
+      expect(state.paginationData.page).toEqual(1);
     });
   });
 
   describe('SET_PAGE', () => {
-    it('sets the currentPage state key', () => {
+    it('sets the page state key', () => {
       const testValue = 2;
 
       mutations[types.SET_PAGE](state, testValue);
-      expect(state.currentPage).toEqual(testValue);
+      expect(state.paginationData.page).toEqual(testValue);
     });
   });
 
@@ -64,27 +69,76 @@ describe('GeoReplicable Store Mutations', () => {
 
   describe('RECEIVE_REPLICABLE_ITEMS_SUCCESS', () => {
     let mockData = {};
+    let mockPaginationData = {};
 
-    beforeEach(() => {
-      mockData = MOCK_BASIC_FETCH_DATA_MAP;
+    describe('with RESTful pagination', () => {
+      beforeEach(() => {
+        mockData = MOCK_BASIC_FETCH_DATA_MAP;
+        mockPaginationData = MOCK_RESTFUL_PAGINATION_DATA;
+      });
+
+      it('sets isLoading to false', () => {
+        state.isLoading = true;
+
+        mutations[types.RECEIVE_REPLICABLE_ITEMS_SUCCESS](state, {
+          data: mockData,
+          pagination: mockPaginationData,
+        });
+        expect(state.isLoading).toEqual(false);
+      });
+
+      it('sets replicableItems array with data', () => {
+        mutations[types.RECEIVE_REPLICABLE_ITEMS_SUCCESS](state, {
+          data: mockData,
+          pagination: mockPaginationData,
+        });
+        expect(state.replicableItems).toBe(mockData);
+      });
+
+      it('sets perPage and total', () => {
+        mutations[types.RECEIVE_REPLICABLE_ITEMS_SUCCESS](state, {
+          data: mockData,
+          pagination: mockPaginationData,
+        });
+        expect(state.paginationData.perPage).toEqual(mockPaginationData.perPage);
+        expect(state.paginationData.total).toEqual(mockPaginationData.total);
+      });
     });
 
-    it('sets isLoading to false', () => {
-      state.isLoading = true;
+    describe('with GraphQL pagination', () => {
+      beforeEach(() => {
+        mockData = MOCK_BASIC_FETCH_DATA_MAP;
+        mockPaginationData = MOCK_GRAPHQL_PAGINATION_DATA;
+      });
 
-      mutations[types.RECEIVE_REPLICABLE_ITEMS_SUCCESS](state, mockData);
-      expect(state.isLoading).toEqual(false);
-    });
+      it('sets isLoading to false', () => {
+        state.isLoading = true;
 
-    it('sets replicableItems array with data', () => {
-      mutations[types.RECEIVE_REPLICABLE_ITEMS_SUCCESS](state, mockData);
-      expect(state.replicableItems).toBe(mockData.data);
-    });
+        mutations[types.RECEIVE_REPLICABLE_ITEMS_SUCCESS](state, {
+          data: mockData,
+          pagination: mockPaginationData,
+        });
+        expect(state.isLoading).toEqual(false);
+      });
 
-    it('sets pageSize and totalReplicableItems', () => {
-      mutations[types.RECEIVE_REPLICABLE_ITEMS_SUCCESS](state, mockData);
-      expect(state.pageSize).toEqual(mockData.perPage);
-      expect(state.totalReplicableItems).toEqual(mockData.total);
+      it('sets replicableItems array with data', () => {
+        mutations[types.RECEIVE_REPLICABLE_ITEMS_SUCCESS](state, {
+          data: mockData,
+          pagination: mockPaginationData,
+        });
+        expect(state.replicableItems).toBe(mockData);
+      });
+
+      it('sets hasNextPage, hasPreviousPage, startCursor, and endCursor', () => {
+        mutations[types.RECEIVE_REPLICABLE_ITEMS_SUCCESS](state, {
+          data: mockData,
+          pagination: mockPaginationData,
+        });
+        expect(state.paginationData.hasNextPage).toEqual(mockPaginationData.hasNextPage);
+        expect(state.paginationData.hasPreviousPage).toEqual(mockPaginationData.hasPreviousPage);
+        expect(state.paginationData.startCursor).toEqual(mockPaginationData.startCursor);
+        expect(state.paginationData.endCursor).toEqual(mockPaginationData.endCursor);
+      });
     });
   });
 
@@ -110,12 +164,8 @@ describe('GeoReplicable Store Mutations', () => {
     });
 
     it('resets pagination data', () => {
-      state.pageSize = mockData.perPage;
-      state.totalReplicableItems = mockData.total;
-
       mutations[types.RECEIVE_REPLICABLE_ITEMS_ERROR](state);
-      expect(state.pageSize).toEqual(0);
-      expect(state.totalReplicableItems).toEqual(0);
+      expect(state.paginationData).toEqual({});
     });
   });
 

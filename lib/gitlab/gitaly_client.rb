@@ -8,8 +8,6 @@ require 'grpc/health/v1/health_services_pb'
 
 module Gitlab
   module GitalyClient
-    include Gitlab::Metrics::Methods
-
     class TooManyInvocationsError < StandardError
       attr_reader :call_site, :invocation_count, :max_call_stack
 
@@ -166,20 +164,7 @@ module Gitlab
     # "gitaly-2 is at network address tcp://10.0.1.2:8075".
     #
     def self.call(storage, service, rpc, request, remote_storage: nil, timeout: default_timeout, &block)
-      self.measure_timings(service, rpc, request) do
-        self.execute(storage, service, rpc, request, remote_storage: remote_storage, timeout: timeout, &block)
-      end
-    end
-
-    # This method is like GitalyClient.call but should be used with
-    # Gitaly streaming RPCs. It measures how long the the RPC took to
-    # produce the full response, not just the initial response.
-    def self.streaming_call(storage, service, rpc, request, remote_storage: nil, timeout: default_timeout)
-      self.measure_timings(service, rpc, request) do
-        response = self.execute(storage, service, rpc, request, remote_storage: remote_storage, timeout: timeout)
-
-        yield(response)
-      end
+      Gitlab::GitalyClient::Call.new(storage, service, rpc, request, remote_storage, timeout).call(&block)
     end
 
     def self.execute(storage, service, rpc, request, remote_storage:, timeout:)
@@ -192,35 +177,17 @@ module Gitlab
       stub(service, storage).__send__(rpc, request, kwargs) # rubocop:disable GitlabSecurity/PublicSend
     end
 
-    def self.measure_timings(service, rpc, request)
-      start = Gitlab::Metrics::System.monotonic_time
-
-      yield
-    ensure
-      duration = Gitlab::Metrics::System.monotonic_time - start
-      request_hash = request.is_a?(Google::Protobuf::MessageExts) ? request.to_h : {}
-
-      # Keep track, separately, for the performance bar
-      self.query_time += duration
-      if Gitlab::PerformanceBar.enabled_for_request?
-        add_call_details(feature: "#{service}##{rpc}", duration: duration, request: request_hash, rpc: rpc,
-                         backtrace: Gitlab::BacktraceCleaner.clean_backtrace(caller))
-      end
-    end
-
     def self.query_time
-      query_time = SafeRequestStore[:gitaly_query_time] ||= 0
+      query_time = Gitlab::SafeRequestStore[:gitaly_query_time] || 0
       query_time.round(Gitlab::InstrumentationHelper::DURATION_PRECISION)
     end
 
-    def self.query_time=(duration)
-      SafeRequestStore[:gitaly_query_time] = duration
-    end
+    def self.add_query_time(duration)
+      return unless Gitlab::SafeRequestStore.active?
 
-    def self.current_transaction_labels
-      Gitlab::Metrics::Transaction.current&.labels || {}
+      Gitlab::SafeRequestStore[:gitaly_query_time] ||= 0
+      Gitlab::SafeRequestStore[:gitaly_query_time] += duration
     end
-    private_class_method :current_transaction_labels
 
     # For some time related tasks we can't rely on `Time.now` since it will be
     # affected by Timecop in some tests, and the clock of some gitaly-related
@@ -483,7 +450,7 @@ module Gitlab
 
       stack_string = Gitlab::BacktraceCleaner.clean_backtrace(caller).drop(1).join("\n")
 
-      Gitlab::SafeRequestStore[:stack_counter] ||= Hash.new
+      Gitlab::SafeRequestStore[:stack_counter] ||= {}
 
       count = Gitlab::SafeRequestStore[:stack_counter][stack_string] || 0
       Gitlab::SafeRequestStore[:stack_counter][stack_string] = count + 1
@@ -509,7 +476,7 @@ module Gitlab
       return unless stack_counter
 
       max = max_call_count
-      return if max.zero?
+      return if max == 0
 
       stack_counter.select { |_, v| v == max }.keys
     end

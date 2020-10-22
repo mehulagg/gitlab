@@ -27,7 +27,7 @@ module Groups
     end
 
     def deletion_schedule_params
-      { marked_for_deletion_on: Time.now.utc, deleting_user: current_user }
+      { marked_for_deletion_on: Time.current.utc, deleting_user: current_user }
     end
 
     def log_audit_event

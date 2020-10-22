@@ -3,8 +3,10 @@
 require 'mime/types'
 
 module API
-  class Repositories < Grape::API
+  class Repositories < ::API::Base
     include PaginationParams
+
+    helpers ::API::Helpers::HeadersHelpers
 
     before { authorize! :download_code, user_project }
 
@@ -66,6 +68,8 @@ module API
       end
       get ':id/repository/blobs/:sha/raw' do
         assign_blob_vars!
+
+        no_cache_headers
 
         send_git_blob @repo, @blob
       end
@@ -139,7 +143,7 @@ module API
         success Entities::Commit
       end
       params do
-        requires :refs, type: Array[String]
+        requires :refs, type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce
       end
       get ':id/repository/merge_base' do
         refs = params[:refs]

@@ -4,10 +4,20 @@ require 'digest/md5'
 require 'uri'
 
 module ApplicationHelper
-  # See https://docs.gitlab.com/ee/development/ee_features.html#code-in-app-views
+  include StartupCssHelper
+
+  # See https://docs.gitlab.com/ee/development/ee_features.html#code-in-appviews
   # rubocop: disable CodeReuse/ActiveRecord
-  def render_if_exists(partial, locals = {})
-    render(partial, locals) if partial_exists?(partial)
+  # We allow partial to be nil so that collection views can be passed in
+  # `render partial: 'some/view', collection: @some_collection`
+  def render_if_exists(partial = nil, **options)
+    return unless partial_exists?(partial || options[:partial])
+
+    if partial.nil?
+      render(**options)
+    else
+      render(partial, options)
+    end
   end
 
   def partial_exists?(partial)
@@ -52,6 +62,10 @@ module ApplicationHelper
   #   current_action?(:new, :create)  # => true
   def current_action?(*args)
     args.any? { |v| v.to_s.downcase == action_name }
+  end
+
+  def admin_section?
+    controller.class.ancestors.include?(Admin::ApplicationController)
   end
 
   def last_commit(project)
@@ -99,7 +113,7 @@ module ApplicationHelper
       page: body_data_page,
       page_type_id: controller.params[:id],
       find_file: find_file_path,
-      group: "#{@group&.path}"
+      group: @group&.path
     }.merge(project_data)
   end
 
@@ -109,6 +123,7 @@ module ApplicationHelper
     {
       project_id: @project.id,
       project: @project.path,
+      group: @project.group&.path,
       namespace_id: @project.namespace&.id
     }
   end
@@ -189,8 +204,16 @@ module ApplicationHelper
     'https://' + promo_host
   end
 
+  def contact_sales_url
+    promo_url + '/sales'
+  end
+
   def support_url
     Gitlab::CurrentSettings.current_application_settings.help_page_support_url.presence || promo_url + '/getting-help/'
+  end
+
+  def instance_review_permitted?
+    ::Gitlab::CurrentSettings.instance_review_permitted? && current_user&.admin?
   end
 
   def static_objects_external_storage_enabled?
@@ -224,6 +247,14 @@ module ApplicationHelper
     end
 
     "#{request.path}?#{options.compact.to_param}"
+  end
+
+  def stylesheet_link_tag_defer(path)
+    if use_startup_css?
+      stylesheet_link_tag(path, media: "print", crossorigin: ActionController::Base.asset_host ? 'anonymous' : nil)
+    else
+      stylesheet_link_tag(path, media: "all")
+    end
   end
 
   def outdated_browser?
@@ -328,6 +359,21 @@ module ApplicationHelper
       "is#{browser.id.to_s.titlecase}": true,
       "is#{browser.platform.id.to_s.titlecase}": true
     }
+  end
+
+  def add_page_specific_style(path)
+    content_for :page_specific_styles do
+      stylesheet_link_tag_defer path
+    end
+  end
+
+  def page_startup_api_calls
+    @api_startup_calls
+  end
+
+  def add_page_startup_api_call(api_path, options: {})
+    @api_startup_calls ||= {}
+    @api_startup_calls[api_path] = options
   end
 
   def autocomplete_data_sources(object, noteable_type)

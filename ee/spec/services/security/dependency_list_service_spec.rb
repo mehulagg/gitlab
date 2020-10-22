@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Security::DependencyListService do
+RSpec.describe Security::DependencyListService do
   describe '#execute' do
     let!(:pipeline) { create(:ee_ci_pipeline, :with_dependency_list_report) }
 

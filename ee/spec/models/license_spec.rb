@@ -2,9 +2,11 @@
 
 require "spec_helper"
 
-describe License do
-  let(:gl_license)  { build(:gitlab_license) }
-  let(:license)     { build(:license, data: gl_license.export) }
+RSpec.describe License do
+  using RSpec::Parameterized::TableSyntax
+
+  let(:gl_license) { build(:gitlab_license) }
+  let(:license)    { build(:license, data: gl_license.export) }
 
   describe "Validation" do
     describe "Valid license" do
@@ -26,8 +28,6 @@ describe License do
     end
 
     describe '#check_users_limit' do
-      using RSpec::Parameterized::TableSyntax
-
       before do
         create(:group_member, :guest)
         create(:group_member, :reporter)
@@ -66,7 +66,7 @@ describe License do
     end
 
     describe "Historical active user count" do
-      let(:active_user_count) { User.active.count + 10 }
+      let(:active_user_count) { described_class.current_active_users.count + 10 }
       let(:date)              { described_class.current.starts_at }
       let!(:historical_data)  { HistoricalData.create!(date: date, active_user_count: active_user_count) }
 
@@ -82,7 +82,7 @@ describe License do
 
           gl_license.restrictions = {
             previous_user_count: 1,
-            active_user_count: User.active.count - 1
+            active_user_count: described_class.current_active_users.count - 1
           }
 
           HistoricalData.delete_all
@@ -116,7 +116,7 @@ describe License do
         end
 
         context "after the license started" do
-          let(:date) { Date.today }
+          let(:date) { Date.current }
 
           it "is valid" do
             expect(license).to be_valid
@@ -249,7 +249,7 @@ describe License do
     describe 'downgrade' do
       context 'when more users were added in previous period' do
         before do
-          HistoricalData.create!(date: 6.months.ago, active_user_count: 15)
+          HistoricalData.create!(date: described_class.current.starts_at - 6.months, active_user_count: 15)
 
           set_restrictions(restricted_user_count: 5, previous_user_count: 10)
         end
@@ -273,12 +273,37 @@ describe License do
     end
   end
 
-  describe "Class methods" do
-    let!(:license) { described_class.last }
+  describe 'Callbacks' do
+    describe '#reset_future_dated', :request_store do
+      let!(:future_dated_license) { create(:license, data: create(:gitlab_license, starts_at: Date.current + 1.month).export) }
 
+      before do
+        described_class.future_dated
+
+        expect(Gitlab::SafeRequestStore.read(:future_dated_license)).to be_present
+      end
+
+      context 'when a license is created' do
+        it 'deletes the future_dated_license value in Gitlab::SafeRequestStore' do
+          create(:license)
+
+          expect(Gitlab::SafeRequestStore.read(:future_dated_license)).to be_nil
+        end
+      end
+
+      context 'when a license is destroyed' do
+        it 'deletes the future_dated_license value in Gitlab::SafeRequestStore' do
+          future_dated_license.destroy
+
+          expect(Gitlab::SafeRequestStore.read(:future_dated_license)).to be_nil
+        end
+      end
+    end
+  end
+
+  describe "Class methods" do
     before do
       described_class.reset_current
-      allow(described_class).to receive(:last).and_return(license)
     end
 
     describe '.features_for_plan' do
@@ -289,12 +314,7 @@ describe License do
 
       it 'returns features for premium plan' do
         expect(described_class.features_for_plan('premium'))
-          .to include(:multiple_issue_assignees, :deploy_board, :file_locks)
-      end
-
-      it 'returns features for early adopter plan' do
-        expect(described_class.features_for_plan('premium'))
-          .to include(:deploy_board, :file_locks)
+          .to include(:multiple_issue_assignees, :deploy_board, :file_locks, :group_wikis)
       end
 
       it 'returns empty array if no features for given plan' do
@@ -341,47 +361,141 @@ describe License do
       end
     end
 
-    describe ".current" do
+    describe '.current' do
       context 'when licenses table does not exist' do
-        before do
-          allow(described_class).to receive(:table_exists?).and_return(false)
-        end
-
         it 'returns nil' do
+          allow(described_class).to receive(:table_exists?).and_return(false)
+
           expect(described_class.current).to be_nil
         end
       end
 
-      context "when there is no license" do
-        let!(:license) { nil }
+      context 'when there is no license' do
+        it 'returns nil' do
+          allow(described_class).to receive(:last_hundred).and_return([])
 
-        it "returns nil" do
           expect(described_class.current).to be_nil
         end
       end
 
-      context "when the license is invalid" do
-        before do
+      context 'when the license is invalid' do
+        it 'returns nil' do
+          allow(described_class).to receive(:last_hundred).and_return([license])
           allow(license).to receive(:valid?).and_return(false)
-        end
 
-        it "returns nil" do
           expect(described_class.current).to be_nil
         end
       end
 
-      context "when the license is valid" do
-        it "returns the license" do
-          expect(described_class.current).to be_present
+      context 'when the license is valid' do
+        it 'returns the license' do
+          current_license = create_list(:license, 2).last
+          create(:license, data: create(:gitlab_license, starts_at: Date.current + 1.month).export)
+
+          expect(described_class.current).to eq(current_license)
+        end
+      end
+    end
+
+    describe '.future_dated_only?' do
+      before do
+        described_class.reset_future_dated
+      end
+
+      context 'when licenses table does not exist' do
+        it 'returns false' do
+          allow(described_class).to receive(:table_exists?).and_return(false)
+
+          expect(described_class.future_dated_only?).to be_falsey
+        end
+      end
+
+      context 'when there is no license' do
+        it 'returns false' do
+          allow(described_class).to receive(:last_hundred).and_return([])
+
+          expect(described_class.future_dated_only?).to be_falsey
+        end
+      end
+
+      context 'when the license is invalid' do
+        it 'returns false' do
+          license = build(:license, data: build(:gitlab_license, starts_at: Date.current + 1.month).export)
+
+          allow(described_class).to receive(:last_hundred).and_return([license])
+          allow(license).to receive(:valid?).and_return(false)
+
+          expect(described_class.future_dated_only?).to be_falsey
+        end
+      end
+
+      context 'when the license is valid' do
+        context 'when there is a current license' do
+          it 'returns the false' do
+            expect(described_class.future_dated_only?).to be_falsey
+          end
+        end
+
+        context 'when the license is future-dated' do
+          it 'returns the true' do
+            create(:license, data: create(:gitlab_license, starts_at: Date.current + 1.month).export)
+
+            allow(described_class).to receive(:current).and_return(nil)
+
+            expect(described_class.future_dated_only?).to be_truthy
+          end
+        end
+      end
+    end
+
+    describe '.future_dated' do
+      before do
+        described_class.reset_future_dated
+      end
+
+      context 'when licenses table does not exist' do
+        it 'returns nil' do
+          allow(described_class).to receive(:table_exists?).and_return(false)
+
+          expect(described_class.future_dated).to be_nil
+        end
+      end
+
+      context 'when there is no license' do
+        it 'returns nil' do
+          allow(described_class).to receive(:last_hundred).and_return([])
+
+          expect(described_class.future_dated).to be_nil
+        end
+      end
+
+      context 'when the license is invalid' do
+        it 'returns false' do
+          license = build(:license, data: build(:gitlab_license, starts_at: Date.current + 1.month).export)
+
+          allow(described_class).to receive(:last_hundred).and_return([license])
+          allow(license).to receive(:valid?).and_return(false)
+
+          expect(described_class.future_dated).to be_nil
+        end
+      end
+
+      context 'when the license is valid' do
+        it 'returns the true' do
+          future_dated_license = create(:license, data: create(:gitlab_license, starts_at: Date.current + 1.month).export)
+
+          expect(described_class.future_dated).to eq(future_dated_license)
         end
       end
     end
 
     describe ".block_changes?" do
+      before do
+        allow(License).to receive(:current).and_return(license)
+      end
+
       context "when there is no current license" do
-        before do
-          allow(described_class).to receive(:current).and_return(nil)
-        end
+        let(:license) { nil }
 
         it "returns false" do
           expect(described_class.block_changes?).to be_falsey
@@ -434,6 +548,54 @@ describe License do
         let(:feature) { :sast }
 
         it { is_expected.to be(false) }
+      end
+    end
+
+    describe '.with_valid_license' do
+      context 'when license trial' do
+        before do
+          allow(license).to receive(:trial?).and_return(true)
+          allow(License).to receive(:current).and_return(license)
+        end
+
+        it 'does not yield block' do
+          expect { |b| License.with_valid_license(&b) }.not_to yield_control
+        end
+      end
+
+      context 'when license nil' do
+        before do
+          allow(License).to receive(:current).and_return(nil)
+        end
+
+        it 'does not yield block' do
+          expect { |b| License.with_valid_license(&b) }.not_to yield_control
+        end
+      end
+
+      context 'when license is valid' do
+        before do
+          allow(License).to receive(:current).and_return(license)
+        end
+
+        it 'yields block' do
+          expect { |b| License.with_valid_license(&b) }.to yield_with_args(license)
+        end
+      end
+    end
+
+    describe '.current_active_users' do
+      before do
+        create(:group_member)
+        create(:group_member, user: create(:admin))
+        create(:group_member, user: create(:user, :bot))
+        create(:group_member, user: create(:user, :project_bot))
+        create(:group_member, user: create(:user, :ghost))
+        create(:group_member).user.deactivate!
+      end
+
+      it 'includes guests in the count' do
+        expect(license.current_active_users_count).to eq(2)
       end
     end
   end
@@ -563,7 +725,7 @@ describe License do
         let(:license) { create(:license, trial: true, expired: true) }
 
         before(:all) do
-          described_class.destroy_all # rubocop: disable DestroyAll
+          described_class.delete_all
         end
 
         ::License::EES_FEATURES.each do |feature|
@@ -600,6 +762,34 @@ describe License do
     end
   end
 
+  describe '#current_active_users_count' do
+    before_all do
+      create(:group_member)
+      create(:group_member, user: create(:admin))
+      create(:group_member, :guest)
+      create(:group_member, user: create(:user, :bot))
+      create(:group_member, user: create(:user, :project_bot))
+      create(:group_member, user: create(:user, :ghost))
+      create(:group_member).user.deactivate!
+    end
+
+    context 'when license is not for Ultimate plan' do
+      it 'includes guests in the count' do
+        expect(license.current_active_users_count).to eq(3)
+      end
+    end
+
+    context 'when license is for Ultimate plan' do
+      before do
+        allow(license).to receive(:plan).and_return(License::ULTIMATE_PLAN)
+      end
+
+      it 'excludes guests in the count' do
+        expect(license.current_active_users_count).to eq(2)
+      end
+    end
+  end
+
   describe '#overage' do
     it 'returns 0 if restricted_user_count is nil' do
       allow(license).to receive(:restricted_user_count) { nil }
@@ -628,8 +818,6 @@ describe License do
   end
 
   describe '#maximum_user_count' do
-    using RSpec::Parameterized::TableSyntax
-
     subject { license.maximum_user_count }
 
     where(:current_active_users_count, :historical_max, :expected) do
@@ -644,6 +832,25 @@ describe License do
         allow(license).to receive(:historical_max) { historical_max }
       end
 
+      it { is_expected.to eq(expected) }
+    end
+  end
+
+  describe '#ultimate?' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:license) { build(:license, plan: plan) }
+
+    subject { license.ultimate? }
+
+    where(:plan, :expected) do
+      nil | false
+      described_class::STARTER_PLAN | false
+      described_class::PREMIUM_PLAN | false
+      described_class::ULTIMATE_PLAN | true
+    end
+
+    with_them do
       it { is_expected.to eq(expected) }
     end
   end
@@ -711,35 +918,18 @@ describe License do
     end
   end
 
-  describe '#promo_feature_available?' do
-    subject { described_class.promo_feature_available?(feature) }
-
-    shared_examples 'CI CD trial features' do |status|
-      before do
-        stub_feature_flags(free_period_for_pull_mirroring: status)
-      end
-
-      License::ANY_PLAN_FEATURES.each do |feature_name|
-        context "with #{feature_name}" do
-          let(:feature) { feature_name }
-
-          it { is_expected.to eq(status) }
-        end
-      end
-    end
-
-    context 'with free_period_for_pull_mirroring enabled' do
-      it_behaves_like 'CI CD trial features', true
-    end
-
-    context 'with free_period_for_pull_mirroring disabled' do
-      it_behaves_like 'CI CD trial features', false
-    end
-  end
-
   describe '.history' do
     before(:all) do
       described_class.delete_all
+    end
+
+    it 'does not include the undecryptable license' do
+      undecryptable_license = create(:license)
+      allow(undecryptable_license).to receive(:license).and_return(nil)
+
+      allow(License).to receive(:all).and_return([undecryptable_license])
+
+      expect(described_class.history.map(&:id)).to be_empty
     end
 
     it 'returns the licenses sorted by created_at, starts_at and expires_at descending' do
@@ -779,18 +969,18 @@ describe License do
   end
 
   def set_restrictions(opts)
+    date = described_class.current.starts_at
+
     gl_license.restrictions = {
       active_user_count: opts[:restricted_user_count],
       previous_user_count: opts[:previous_user_count],
       trueup_quantity: opts[:trueup_quantity],
-      trueup_from: (Date.today - 1.year).to_s,
-      trueup_to: Date.today.to_s
+      trueup_from: (date - 1.year).to_s,
+      trueup_to: date.to_s
     }
   end
 
   describe '#paid?' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:plan, :paid_result) do
       License::STARTER_PLAN  | true
       License::PREMIUM_PLAN  | true
@@ -810,8 +1000,6 @@ describe License do
   end
 
   describe '#started?' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:starts_at, :result) do
       Date.current - 1.month | true
       Date.current           | true
@@ -826,6 +1014,80 @@ describe License do
       it do
         is_expected.to eq(result)
       end
+    end
+  end
+
+  describe '#future_dated?' do
+    where(:starts_at, :result) do
+      Date.current - 1.month | false
+      Date.current           | false
+      Date.current + 1.month | true
+    end
+
+    with_them do
+      let(:gl_license) { build(:gitlab_license, starts_at: starts_at) }
+
+      subject { license.future_dated? }
+
+      it do
+        is_expected.to eq(result)
+      end
+    end
+  end
+
+  describe '#auto_renew' do
+    it 'is false' do
+      expect(license.auto_renew).to be false
+    end
+  end
+
+  describe '#active_user_count_threshold' do
+    subject { license.active_user_count_threshold }
+
+    it 'returns nil for license with unlimited user count' do
+      allow(license).to receive(:restricted_user_count).and_return(nil)
+
+      expect(subject).to be_nil
+    end
+
+    context 'for license with users' do
+      where(:restricted_user_count, :active_user_count, :percentage, :threshold_value) do
+        3    | 2    | false | 1
+        20   | 18   | false | 2
+        90   | 80   | true  | 10
+        300  | 275  | true  | 8
+        1200 | 1100 | true  | 5
+      end
+
+      with_them do
+        before do
+          allow(license).to receive(:restricted_user_count).and_return(restricted_user_count)
+          allow(license).to receive(:current_active_users_count).and_return(active_user_count)
+        end
+
+        it { is_expected.not_to be_nil }
+        it { is_expected.to include(value: threshold_value, percentage: percentage) }
+      end
+    end
+  end
+
+  describe '#active_user_count_threshold_reached?' do
+    subject { license.active_user_count_threshold_reached? }
+
+    where(:restricted_user_count, :current_active_users_count, :result) do
+      10   | 9   | true
+      nil  | 9   | false
+      10   | 15  | false
+      100  | 95  | true
+    end
+
+    with_them do
+      before do
+        allow(license).to receive(:current_active_users_count).and_return(current_active_users_count)
+        allow(license).to receive(:restricted_user_count).and_return(restricted_user_count)
+      end
+
+      it { is_expected.to eq(result) }
     end
   end
 end

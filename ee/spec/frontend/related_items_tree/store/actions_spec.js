@@ -1,20 +1,20 @@
 import MockAdapter from 'axios-mock-adapter';
-import createFlash from '~/flash';
 import createDefaultState from 'ee/related_items_tree/store/state';
 import * as actions from 'ee/related_items_tree/store/actions';
 import * as types from 'ee/related_items_tree/store/mutation_types';
 
 import * as epicUtils from 'ee/related_items_tree/utils/epic_utils';
 import { ChildType, ChildState } from 'ee/related_items_tree/constants';
+
+import testAction from 'helpers/vuex_action_helper';
+import { TEST_HOST } from 'spec/test_constants';
 import {
   issuableTypesMap,
   itemAddFailureTypesMap,
   PathIdSeparator,
-} from 'ee/related_issues/constants';
-
-import testAction from 'helpers/vuex_action_helper';
+} from '~/related_issues/constants';
 import axios from '~/lib/utils/axios_utils';
-import { TEST_HOST } from 'spec/test_constants';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 import {
   mockInitialConfig,
@@ -101,17 +101,9 @@ describe('RelatedItemTree', () => {
       });
 
       describe('updateChildrenCount', () => {
-        const mockEpicsWithType = mockEpics.map(item =>
-          Object.assign({}, item, {
-            type: ChildType.Epic,
-          }),
-        );
+        const mockEpicsWithType = mockEpics.map(item => ({ ...item, type: ChildType.Epic }));
 
-        const mockIssuesWithType = mockIssues.map(item =>
-          Object.assign({}, item, {
-            type: ChildType.Issue,
-          }),
-        );
+        const mockIssuesWithType = mockIssues.map(item => ({ ...item, type: ChildType.Issue }));
 
         it('should update openedEpics, by incrementing it', () => {
           testAction(
@@ -681,10 +673,7 @@ describe('RelatedItemTree', () => {
         let mock;
         const data = {
           parentItem: mockParentItem,
-          item: Object.assign({}, mockParentItem, {
-            iid: 2,
-            relationPath: '/foo/bar',
-          }),
+          item: { ...mockParentItem, iid: 2, relationPath: '/foo/bar' },
         };
 
         beforeEach(() => {
@@ -837,12 +826,11 @@ describe('RelatedItemTree', () => {
           state.issuableType = issuableTypesMap.EPIC;
           state.isEpic = true;
 
-          const mockEpicsWithoutPerm = mockEpics.map(item =>
-            Object.assign({}, item, {
-              pathIdSeparator: PathIdSeparator.Epic,
-              userPermissions: { adminEpic: undefined },
-            }),
-          );
+          const mockEpicsWithoutPerm = mockEpics.map(item => ({
+            ...item,
+            pathIdSeparator: PathIdSeparator.Epic,
+            userPermissions: { adminEpic: undefined },
+          }));
 
           testAction(
             actions.receiveAddItemSuccess,
@@ -996,11 +984,12 @@ describe('RelatedItemTree', () => {
 
       describe('receiveCreateItemSuccess', () => {
         it('should set `state.itemCreateInProgress` to false', () => {
-          const createdEpic = Object.assign({}, mockEpics[0], {
+          const createdEpic = {
+            ...mockEpics[0],
             id: `gid://gitlab/Epic/${mockEpics[0].id}`,
             reference: `${mockEpics[0].group.fullPath}${mockEpics[0].reference}`,
             pathIdSeparator: PathIdSeparator.Epic,
-          });
+          };
           state.parentItem = {
             fullPath: createdEpic.group.fullPath,
           };
@@ -1090,11 +1079,7 @@ describe('RelatedItemTree', () => {
               {
                 type: 'receiveCreateItemSuccess',
                 payload: {
-                  rawItem: Object.assign({}, mockEpic1, {
-                    path: '',
-                    state: ChildState.Open,
-                    created_at: '',
-                  }),
+                  rawItem: { ...mockEpic1, path: '', state: ChildState.Open, created_at: '' },
                 },
               },
             ],

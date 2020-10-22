@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module AuthHelper
-  PROVIDERS_WITH_ICONS = %w(twitter github gitlab bitbucket google_oauth2 facebook azure_oauth2 authentiq salesforce).freeze
+  PROVIDERS_WITH_ICONS = %w(twitter github gitlab bitbucket google_oauth2 facebook azure_oauth2 authentiq salesforce atlassian_oauth2).freeze
   LDAP_PROVIDER = /\Aldap/.freeze
 
   def ldap_enabled?
@@ -133,6 +133,8 @@ module AuthHelper
 
   # rubocop: disable CodeReuse/ActiveRecord
   def auth_active?(provider)
+    return current_user.atlassian_identity.present? if provider == :atlassian_oauth2
+
     current_user.identities.exists?(provider: provider.to_s)
   end
   # rubocop: enable CodeReuse/ActiveRecord
@@ -152,7 +154,7 @@ module AuthHelper
   extend self
 end
 
-AuthHelper.prepend_if_ee('EE::AuthHelper') # rubocop: disable Cop/InjectEnterpriseEditionModule
+AuthHelper.prepend_if_ee('EE::AuthHelper')
 
 # The methods added in EE should be available as both class and instance
 # methods, just like the methods provided by `AuthHelper` itself.

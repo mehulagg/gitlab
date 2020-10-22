@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::GroupSaml::XmlResponse do
+RSpec.describe Gitlab::Auth::GroupSaml::XmlResponse do
   let(:saml_provider) { create(:saml_provider) }
   let(:group) { saml_provider.group }
   let(:raw_response) do

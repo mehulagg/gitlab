@@ -8,14 +8,16 @@ module Gitlab
           include BaseEvent
 
           def process
-            registry.repository_updated!(event.source, scheduled_at)
+            if replicable_project?
+              registry.repository_updated!(event.source, scheduled_at)
 
-            job_id = enqueue_job_if_shard_healthy(event) do
-              ::Geo::ProjectSyncWorker.perform_async(
-                event.project_id,
-                sync_repository: event.repository?,
-                sync_wiki: event.wiki?
-              )
+              job_id = enqueue_job_if_shard_healthy(event) do
+                ::Geo::ProjectSyncWorker.perform_async(
+                  event.project_id,
+                  sync_repository: event.repository?,
+                  sync_wiki: event.wiki?
+                )
+              end
             end
 
             log_event(job_id)
@@ -24,14 +26,14 @@ module Gitlab
           private
 
           def log_event(job_id)
-            logger.event_info(
-              created_at,
+            super(
               'Repository update',
               project_id: event.project_id,
               source: event.source,
               resync_repository: registry.resync_repository,
               resync_wiki: registry.resync_wiki,
               scheduled_at: scheduled_at,
+              replicable_project: replicable_project?,
               job_id: job_id)
           end
 

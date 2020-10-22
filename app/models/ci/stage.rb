@@ -4,15 +4,16 @@ module Ci
   class Stage < ApplicationRecord
     extend Gitlab::Ci::Model
     include Importable
-    include HasStatus
+    include Ci::HasStatus
     include Gitlab::OptimisticLocking
 
-    enum status: HasStatus::STATUSES_ENUM
+    enum status: Ci::HasStatus::STATUSES_ENUM
 
     belongs_to :project
     belongs_to :pipeline
 
     has_many :statuses, class_name: 'CommitStatus', foreign_key: :stage_id
+    has_many :latest_statuses, -> { ordered.latest }, class_name: 'CommitStatus', foreign_key: :stage_id
     has_many :processables, class_name: 'Ci::Processable', foreign_key: :stage_id
     has_many :builds, foreign_key: :stage_id
     has_many :bridges, foreign_key: :stage_id
@@ -42,8 +43,7 @@ module Ci
 
     state_machine :status, initial: :created do
       event :enqueue do
-        transition [:created, :waiting_for_resource, :preparing] => :pending
-        transition [:success, :failed, :canceled, :skipped] => :running
+        transition any - [:pending] => :pending
       end
 
       event :request_resource do
@@ -98,7 +98,7 @@ module Ci
         when 'scheduled' then delay
         when 'skipped', nil then skip
         else
-          raise HasStatus::UnknownStatusError,
+          raise Ci::HasStatus::UnknownStatusError,
                 "Unknown status `#{new_status}`"
         end
       end
@@ -113,7 +113,7 @@ module Ci
     end
 
     def has_warnings?
-      number_of_warnings.positive?
+      number_of_warnings > 0
     end
 
     def number_of_warnings
@@ -138,7 +138,7 @@ module Ci
     end
 
     def latest_stage_status
-      statuses.latest.slow_composite_status(project: project) || 'skipped'
+      statuses.latest.composite_status || 'skipped'
     end
   end
 end

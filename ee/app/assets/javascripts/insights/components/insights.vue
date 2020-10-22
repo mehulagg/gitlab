@@ -1,14 +1,15 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import { GlDropdown, GlDropdownItem, GlLoadingIcon } from '@gitlab/ui';
+import { GlAlert, GlDropdown, GlDropdownItem, GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
+import { EMPTY_STATE_TITLE, EMPTY_STATE_DESCRIPTION, EMPTY_STATE_SVG_PATH } from '../constants';
 import InsightsPage from './insights_page.vue';
-import InsightsConfigWarning from './insights_config_warning.vue';
 
 export default {
   components: {
+    GlAlert,
     GlLoadingIcon,
     InsightsPage,
-    InsightsConfigWarning,
+    GlEmptyState,
     GlDropdown,
     GlDropdownItem,
   },
@@ -21,6 +22,11 @@ export default {
       type: String,
       required: true,
     },
+    notice: {
+      type: String,
+      default: '',
+      required: false,
+    },
   },
   computed: {
     ...mapState('insights', [
@@ -28,8 +34,25 @@ export default {
       'configLoading',
       'activeTab',
       'activePage',
-      'pageLoading',
+      'chartData',
     ]),
+    emptyState() {
+      return {
+        title: EMPTY_STATE_TITLE,
+        description: EMPTY_STATE_DESCRIPTION,
+        svgPath: EMPTY_STATE_SVG_PATH,
+      };
+    },
+    hasAllChartsLoaded() {
+      const requestedChartKeys = this.activePage?.charts?.map(chart => chart.title) || [];
+      return requestedChartKeys.every(key => this.chartData[key]?.loaded);
+    },
+    hasChartsError() {
+      return Object.values(this.chartData).some(data => data.error);
+    },
+    pageLoading() {
+      return !this.hasChartsError && !this.hasAllChartsLoaded;
+    },
     pages() {
       const { configData, activeTab } = this;
 
@@ -53,6 +76,9 @@ export default {
         scope: key,
         isActive: this.activeTab === key,
       }));
+    },
+    allItemsAreFilteredOut() {
+      return this.configPresent && Object.keys(this.configData).length === 0;
     },
     configPresent() {
       return !this.configLoading && this.configData != null;
@@ -81,41 +107,47 @@ export default {
 };
 </script>
 <template>
-  <div class="insights-container prepend-top-default">
+  <div class="insights-container gl-mt-3">
     <div class="mb-3">
       <h3>{{ __('Insights') }}</h3>
     </div>
     <div v-if="configLoading" class="insights-config-loading text-center">
       <gl-loading-icon :inline="true" size="lg" />
     </div>
+    <div v-else-if="allItemsAreFilteredOut" class="insights-wrapper">
+      <gl-alert>
+        {{
+          s__(
+            'Insights|This project is filtered out in the insights.yml file (see the projects.only config for more information).',
+          )
+        }}
+      </gl-alert>
+    </div>
     <div v-else-if="configPresent" class="insights-wrapper">
       <gl-dropdown
-        class="js-insights-dropdown w-100"
+        class="js-insights-dropdown gl-w-full"
         data-qa-selector="insights_dashboard_dropdown"
-        menu-class="w-100 mw-100"
-        toggle-class="dropdown-menu-toggle w-100 gl-field-error-outline"
+        toggle-class="dropdown-menu-toggle gl-w-full gl-field-error-outline"
         :text="__('Select Page')"
         :disabled="pageLoading"
       >
         <gl-dropdown-item
           v-for="page in pages"
           :key="page.scope"
-          class="w-100"
           @click="onChangePage(page.scope)"
           >{{ page.name }}</gl-dropdown-item
         >
       </gl-dropdown>
+      <gl-alert v-if="notice != ''">
+        {{ notice }}
+      </gl-alert>
       <insights-page :query-endpoint="queryEndpoint" :page-config="activePage" />
     </div>
-    <insights-config-warning
+    <gl-empty-state
       v-else
-      :title="__('Invalid Insights config file detected')"
-      :summary="
-        __(
-          'Please check the configuration file to ensure that it is available and the YAML is valid',
-        )
-      "
-      image="illustrations/monitoring/getting_started.svg"
+      :title="emptyState.title"
+      :description="emptyState.description"
+      :svg-path="emptyState.svgPath"
     />
   </div>
 </template>

@@ -1,25 +1,21 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlLink } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import PinnedLinks from '~/issue_show/components/pinned_links.vue';
+import { STATUS_PAGE_PUBLISHED, JOIN_ZOOM_MEETING } from '~/issue_show/constants';
 
 const plainZoomUrl = 'https://zoom.us/j/123456789';
+const plainStatusUrl = 'https://status.com';
 
 describe('PinnedLinks', () => {
   let wrapper;
 
-  const link = {
-    get text() {
-      return wrapper.find(GlLink).text();
-    },
-    get href() {
-      return wrapper.find(GlLink).attributes('href');
-    },
-  };
+  const findButtons = () => wrapper.findAll(GlButton);
 
   const createComponent = props => {
     wrapper = shallowMount(PinnedLinks, {
       propsData: {
-        zoomMeetingUrl: null,
+        zoomMeetingUrl: '',
+        publishedIncidentUrl: '',
         ...props,
       },
     });
@@ -30,14 +26,31 @@ describe('PinnedLinks', () => {
       zoomMeetingUrl: `<a href="${plainZoomUrl}">Zoom</a>`,
     });
 
-    expect(link.text).toBe('Join Zoom meeting');
+    expect(
+      findButtons()
+        .at(0)
+        .text(),
+    ).toBe(JOIN_ZOOM_MEETING);
+  });
+
+  it('displays Status link', () => {
+    createComponent({
+      publishedIncidentUrl: `<a href="${plainStatusUrl}">Status</a>`,
+    });
+
+    expect(
+      findButtons()
+        .at(0)
+        .text(),
+    ).toBe(STATUS_PAGE_PUBLISHED);
   });
 
   it('does not render if there are no links', () => {
     createComponent({
-      zoomMeetingUrl: null,
+      zoomMeetingUrl: '',
+      publishedIncidentUrl: '',
     });
 
-    expect(wrapper.find(GlLink).exists()).toBe(false);
+    expect(findButtons()).toHaveLength(0);
   });
 });

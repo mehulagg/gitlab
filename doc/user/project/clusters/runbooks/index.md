@@ -1,3 +1,9 @@
+---
+stage: Configure
+group: Configure
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Runbooks
 
 Runbooks are a collection of documented procedures that explain how to
@@ -17,7 +23,7 @@ pre-written code blocks or database queries against a given environment.
 
 ## Executable Runbooks
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/45912) in GitLab 11.4.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/45912) in GitLab 11.4.
 
 The JupyterHub app offered via GitLab’s Kubernetes integration now ships
 with Nurtch’s Rubix library, providing a simple way to create DevOps
@@ -36,9 +42,6 @@ To create an executable runbook, you will need:
 - **Kubernetes** - A Kubernetes cluster is required to deploy the rest of the
   applications. The simplest way to get started is to add a cluster using one
   of [GitLab's integrations](../add_remove_clusters.md#create-new-cluster).
-- **Helm Tiller** - Helm is a package manager for Kubernetes and is required to
-  install all the other applications. It's installed in its own pod inside the
-  cluster which can run the Helm CLI in a safe environment.
 - **Ingress** - Ingress can provide load balancing, SSL termination, and name-based
   virtual hosting. It acts as a web proxy for your applications.
 - **JupyterHub** - [JupyterHub](https://jupyterhub.readthedocs.io/) is a multi-user
@@ -62,13 +65,8 @@ the components outlined above and the pre-loaded demo runbook.
 
 1. Add a Kubernetes cluster to your project by following the steps outlined in
    [Create new cluster](../add_remove_clusters.md#create-new-cluster).
-1. After the cluster has been provisioned in GKE, click the **Install** button
-   next to the **Helm Tiller** application to install Helm Tiller.
 
-   ![install helm](img/helm-install.png)
-
-1. After Helm Tiller has been installed successfully, click the **Install** button next
-   to the **Ingress** application.
+1. Click the **Install** button next to the **Ingress** application to install Ingress.
 
    ![install ingress](img/ingress-install.png)
 
@@ -117,9 +115,7 @@ the components outlined above and the pre-loaded demo runbook.
       VARIABLE_VALUE = project.variables.get('PRIVATE_TOKEN').value
       ```
 
-1. To configure the operation of a runbook, create and configure variables:
-
-   NOTE: **Note:**
+1. To configure the operation of a runbook, create and configure variables.
    For this example, we are using the **Run SQL queries in Notebook** section in the
    sample runbook to query a PostgreSQL database. The first four lines of the following
    code block define the variables that are required for this query to function:
@@ -131,10 +127,10 @@ the components outlined above and the pre-loaded demo runbook.
    %env DB_NAME={project.variables.get('DB_NAME').value}
    ```
 
-   1. Navigate to **{settings}** **Settings >> CI/CD >> Variables** to create
+   1. Navigate to **Settings > CI/CD > Variables** to create
       the variables in your project.
 
-     ![GitLab variables](img/gitlab-variables.png)
+      ![GitLab variables](img/gitlab-variables.png)
 
    1. Click **Save variables**.
 

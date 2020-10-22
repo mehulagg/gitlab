@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GeoNodeNamespaceLink, models: true do
+RSpec.describe GeoNodeNamespaceLink, models: true do
   describe 'relationships' do
     it { is_expected.to belong_to(:geo_node) }
     it { is_expected.to belong_to(:namespace) }

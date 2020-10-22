@@ -1,4 +1,11 @@
-# Background Migrations
+---
+type: reference, dev
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+---
+
+# Background migrations
 
 Background migrations can be used to perform data migrations that would
 otherwise take a very long time (hours, days, years, etc) to complete. For
@@ -29,10 +36,10 @@ Some examples where background migrations can be useful:
 - Populating one column based on JSON stored in another column.
 - Migrating data that depends on the output of external services (e.g. an API).
 
-> **Note:**
-> If the background migration is part of an important upgrade, make sure it's announced
-> in the release post. Discuss with your Project Manager if you're not sure the migration falls
-> into this category.
+NOTE: **Note:**
+If the background migration is part of an important upgrade, make sure it's announced
+in the release post. Discuss with your Project Manager if you're not sure the migration falls
+into this category.
 
 ## Isolation
 
@@ -92,6 +99,20 @@ bulk_migrate_async(
 )
 ```
 
+Note that this will queue a Sidekiq job immediately: if you have a large number
+of records, this may not be what you want. You can use the function
+`queue_background_migration_jobs_by_range_at_intervals` to split the job into
+batches:
+
+```ruby
+queue_background_migration_jobs_by_range_at_intervals(
+  ClassName,
+  BackgroundMigrationClassName,
+  2.minutes,
+  batch_size: 10_000
+  )
+```
+
 You'll also need to make sure that newly created data is either migrated, or
 saved in both the old and new version upon creation. For complex and time
 consuming migrations it's best to schedule a background job using an
@@ -123,7 +144,7 @@ once.
 
 ## Cleaning Up
 
->**Note:**
+NOTE: **Note:**
 Cleaning up any remaining background migrations _must_ be done in either a major
 or minor release, you _must not_ do this in a patch release.
 
@@ -283,7 +304,7 @@ end
 The final step runs for any un-migrated rows after all of the jobs have been
 processed. This is in case a Sidekiq process running the background migrations
 received SIGKILL, leading to the jobs being lost. (See
-[more reliable Sidekiq queue](https://gitlab.com/gitlab-org/gitlab-foss/issues/36791) for more information.)
+[more reliable Sidekiq queue](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/36791) for more information.)
 
 If the application does not depend on the data being 100% migrated (for
 instance, the data is advisory, and not mission-critical), then this final step
@@ -312,7 +333,7 @@ to migrate you database down and up, which can result in other background
 migrations being called. That means that using `spy` test doubles with
 `have_received` is encouraged, instead of using regular test doubles, because
 your expectations defined in a `it` block can conflict with what is being
-called in RSpec hooks. See [issue #35351](https://gitlab.com/gitlab-org/gitlab/issues/18839)
+called in RSpec hooks. See [issue #35351](https://gitlab.com/gitlab-org/gitlab/-/issues/18839)
 for more details.
 
 ## Best practices
@@ -322,10 +343,32 @@ for more details.
 1. Make sure that tests you write are not false positives.
 1. Make sure that if the data being migrated is critical and cannot be lost, the
    clean-up migration also checks the final state of the data before completing.
-1. Make sure to know how much time it'll take to run all scheduled migrations.
 1. When migrating many columns, make sure it won't generate too many
    dead tuples in the process (you may need to directly query the number of dead tuples
    and adjust the scheduling according to this piece of data).
 1. Make sure to discuss the numbers with a database specialist, the migration may add
    more pressure on DB than you expect (measure on staging,
    or ask someone to measure on production).
+1. Make sure to know how much time it'll take to run all scheduled migrations.
+1. Provide an estimation section in the description, explaining timings from the
+   linked query plans and batches as described in the migration.
+
+   For example, assuming a migration that deletes data, include information similar to
+   the following section:
+
+   ```ruby
+   Background Migration Details:
+
+   47600 items to delete
+   batch size = 1000
+   47600 / 1000 = 48 loops
+
+   Estimated times per batch:
+   - 900ms for select statement with 1000 items
+   - 2100ms for delete statement with 1000 items
+   Total: ~3sec per batch
+
+   2 mins delay per loop (safe for the given total time per batch)
+
+   48 * ( 120 + 3)  = ~98.4 mins to run all the scheduled jobs
+   ```

@@ -3,14 +3,15 @@
 - **Write the code and the tests.**: As with any code, EE features should have
   good test coverage to prevent regressions.
 - **Write documentation.**: Add documentation to the `doc/` directory. Describe
-  the feature and include screenshots, if applicable.
+  the feature and include screenshots, if applicable. Indicate [what editions](documentation/styleguide.md#product-badges)
+  the feature applies to.
 - **Submit a MR to the `www-gitlab-com` project.**: Add the new feature to the
   [EE features list](https://about.gitlab.com/features/).
 
 ## Act as CE when unlicensed
 
 Since the implementation of
-[GitLab CE features to work with unlicensed EE instance](https://gitlab.com/gitlab-org/gitlab/issues/2500)
+[GitLab CE features to work with unlicensed EE instance](https://gitlab.com/gitlab-org/gitlab/-/issues/2500)
 GitLab Enterprise Edition should work like GitLab Community Edition
 when no license is active. So EE features always should be guarded by
 `project.feature_available?` or `group.feature_available?` (or
@@ -24,6 +25,16 @@ You can force GitLab to act as CE by either deleting the `ee/` directory or by
 setting the [`FOSS_ONLY` environment variable](https://gitlab.com/gitlab-org/gitlab/blob/master/config/helpers/is_ee_env.js)
 to something that evaluates as `true`. The same works for running tests
 (for example `FOSS_ONLY=1 yarn jest`).
+
+## CI pipelines in a FOSS context
+
+By default, merge request pipelines for development run in an EE-context only. If you are
+developing features that differ between FOSS and EE, you may wish to run pipelines in a
+FOSS context as well.
+
+To run pipelines in both contexts, include `RUN AS-IF-FOSS` in the merge request title.
+
+See the [As-if-FOSS jobs](pipelines.md#as-if-foss-jobs) pipelines documentation for more information.
 
 ## Separation of EE code
 
@@ -54,6 +65,12 @@ is applied not only to models. Here's a list of other examples:
 This works because for every path that is present in CE's eager-load/auto-load
 paths, we add the same `ee/`-prepended path in [`config/application.rb`](https://gitlab.com/gitlab-org/gitlab/blob/925d3d4ebc7a2c72964ce97623ae41b8af12538d/config/application.rb#L42-52).
 This also applies to views.
+
+#### Testing EE-only features
+
+To test an EE class that doesn't exist in CE, create the spec file as you normally
+would in the `ee/spec` directory, but without the second `ee/` subdirectory.
+For example, a class `ee/app/models/vulnerability.rb` would have its tests in `ee/spec/models/vulnerability_spec.rb`.
 
 ### EE features based on CE features
 
@@ -94,6 +111,21 @@ This is also not just applied to models. Here's a list of other examples:
 - `ee/app/services/ee/foo/create_service.rb`
 - `ee/app/validators/ee/foo_attr_validator.rb`
 - `ee/app/workers/ee/foo_worker.rb`
+
+#### Testing EE features based on CE features
+
+To test an `EE` namespaced module that extends a CE class with EE features,
+create the spec file as you normally would in the `ee/spec` directory, including the second `ee/` subdirectory.
+For example, an extension `ee/app/models/ee/user.rb` would have its tests in `ee/app/models/ee/user_spec.rb`.
+
+In the `RSpec.describe` call, use the CE class name where the EE module would be used.
+For example, in `ee/app/models/ee/user_spec.rb`, the test would start with:
+
+```ruby
+RSpec.describe User do
+  describe 'ee feature added through extension'
+end
+```
 
 #### Overriding CE methods
 
@@ -163,8 +195,6 @@ There are a few gotchas with it:
       end
     end
   ```
-
-  This would require updating CE first, or make sure this is back ported to CE.
 
 When prepending, place them in the `ee/` specific sub-directory, and
 wrap class or module in `module EE` to avoid naming conflicts.
@@ -513,12 +543,12 @@ do that, so we'll follow regular object-oriented practices that we define the
 interface first here.
 
 For example, suppose we have a few more optional parameters for EE. We can move the
-paramters out of the `Grape::API` class to a helper module, so we can inject it
+parameters out of the `Grape::API::Instance` class to a helper module, so we can inject it
 before it would be used in the class.
 
 ```ruby
 module API
-  class Projects < Grape::API
+  class Projects < Grape::API::Instance
     helpers Helpers::ProjectsHelpers
   end
 end
@@ -579,7 +609,7 @@ class definition to make it easy and clear:
 
 ```ruby
 module API
-  class JobArtifacts < Grape::API
+  class JobArtifacts < Grape::API::Instance
     # EE::API::JobArtifacts would override the following helpers
     helpers do
       def authorize_download_artifacts!
@@ -623,7 +653,7 @@ route. Something like this:
 
 ```ruby
 module API
-  class MergeRequests < Grape::API
+  class MergeRequests < Grape::API::Instance
     helpers do
       # EE::API::MergeRequests would override the following helpers
       def update_merge_request_ee(merge_request)
@@ -692,7 +722,7 @@ least argument. We would approach this as follows:
 ```ruby
 # api/merge_requests/parameters.rb
 module API
-  class MergeRequests < Grape::API
+  class MergeRequests < Grape::API::Instance
     module Parameters
       def self.update_params_at_least_one_of
         %i[
@@ -708,7 +738,7 @@ API::MergeRequests::Parameters.prepend_if_ee('EE::API::MergeRequests::Parameters
 
 # api/merge_requests.rb
 module API
-  class MergeRequests < Grape::API
+  class MergeRequests < Grape::API::Instance
     params do
       at_least_one_of(*Parameters.update_params_at_least_one_of)
     end
@@ -901,27 +931,79 @@ export default {
 </template>
 ```
 
-#### For JS code that is EE only, like props, computed properties, methods, etc, we will keep the current approach
+#### For JS code that is EE only, like props, computed properties, methods, etc
 
-- Since we [can't async load a mixin](https://github.com/vuejs/vue-loader/issues/418#issuecomment-254032223) we will use the [`ee_else_ce`](../development/ee_features.md#javascript-code-in-assetsjavascripts) alias we already have for webpack.
-  - This means all the EE specific props, computed properties, methods, etc that are EE only should be in a mixin in the `ee/` folder and we need to create a CE counterpart of the mixin
+- Please do not use mixins unless ABSOLUTELY NECESSARY. Please try to find an alternative pattern.
 
-##### Example
+##### Recommended alternative approach (named/scoped slots)
 
-```javascript
-import mixin from 'ee_else_ce/path/mixin';
+- We can use slots and/or scoped slots to achieve the same thing as we did with mixins. If you only need an EE component there is no need to create the CE component.
 
-{
-    mixins: [mixin]
+1. First, we have a CE component that can render a slot in case we need EE template and functionality to be decorated on top of the CE base.
+
+```vue
+// ./ce/my_component.vue
+
+<script>
+export default {
+  props: {
+    tooltipDefaultText: {
+      type: String,
+    },
+  },
+  computed: {
+    tooltipText() {
+      return this.tooltipDefaultText || "5 issues please";
+    }
+  },
 }
+</script>
+
+<template>
+  <span v-gl-tooltip :title="tooltipText" class="ce-text">Community Edition Only Text</span>
+  <slot name="ee-specific-component">
+</template>
 ```
 
-- Computed Properties/methods and getters only used in the child import still need a counterpart in CE
+1. Next, we render the EE component, and inside of the EE component we render the CE component and add additional content in the slot.
 
-- For store modules, we will need a CE counterpart too.
-- You can see an MR with an example [here](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9762)
+```vue
+// ./ee/my_component.vue
 
-#### `template` tag
+<script>
+export default {
+  computed: {
+    tooltipText() {
+      if (this.weight) {
+        return "5 issues with weight 10";
+      }
+    }
+  },
+  methods: {
+    submit() {
+      // do something.
+    }
+  },
+}
+</script>
+
+<template>
+  <my-component :tooltipDefaultText="tooltipText">
+    <template #ee-specific-component>
+      <span class="some-ee-specific">EE Specific Value</span>
+      <button @click="submit">Click Me</button>
+    </template>
+  </my-component>
+</template>
+```
+
+1. Finally, wherever the component is needed we can require it like so
+
+`import MyComponent from 'ee_else_ce/path/my_component'.vue`
+
+- this way the correct component will be included for either the ce or ee implementation
+
+**For EE components that need different results for the same computed values, we can pass in props to the CE wrapper as seen in the example.**
 
 - **EE Child components**
   - Since we are using the async loading to check which component to load, we'd still use the component's name, check [this example](#child-component-only-used-in-ee).
@@ -958,7 +1040,7 @@ separate SCSS file in an appropriate directory within `app/assets/stylesheets`.
 
 In some cases, this is not entirely possible or creating dedicated SCSS file is an overkill,
 e.g. a text style of some component is different for EE. In such cases,
-styles are usually kept in stylesheet that is common for both CE and EE, and it is wise
+styles are usually kept in a stylesheet that is common for both CE and EE, and it is wise
 to isolate such ruleset from rest of CE rules (along with adding comment describing the same)
 to avoid conflicts during CE to EE merge.
 

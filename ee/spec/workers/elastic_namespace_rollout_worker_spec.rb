@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ElasticNamespaceRolloutWorker do
+RSpec.describe ElasticNamespaceRolloutWorker do
   before do
     stub_const('ROLLOUT', described_class::ROLLOUT)
     stub_const('ROLLBACK', described_class::ROLLBACK)

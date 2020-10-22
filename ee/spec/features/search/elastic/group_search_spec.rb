@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_inline do
+RSpec.describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_inline do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:project) { create(:project, :repository, :wiki_repo, namespace: group) }
@@ -92,7 +92,7 @@ describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_inline d
   end
 end
 
-describe 'Group elastic search redactions', :elastic do
+RSpec.describe 'Group elastic search redactions', :elastic do
   it_behaves_like 'a redacted search results page' do
     let(:search_path) { group_path(public_group) }
   end

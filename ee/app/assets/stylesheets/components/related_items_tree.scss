@@ -30,8 +30,13 @@
       }
 
       &.item-closed {
-        background-color: $gray-50;
+        background-color: $gray-10;
       }
+    }
+
+    .item-meta {
+      line-height: $gl-line-height-18;
+      border-top: 1px solid $gray-50;
     }
 
     .btn-tree-item-chevron {

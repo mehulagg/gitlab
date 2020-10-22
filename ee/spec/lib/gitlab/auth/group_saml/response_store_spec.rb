@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::GroupSaml::ResponseStore do
+RSpec.describe Gitlab::Auth::GroupSaml::ResponseStore do
   let(:raw_response) { '<xml></xml>' }
   let(:session_id) { '123-456-789' }
 

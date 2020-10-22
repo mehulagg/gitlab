@@ -45,5 +45,3 @@ export const isSelectingVulnerabilities = (state, getters) =>
 export const hasSelectedAllVulnerabilities = (state, getters) =>
   getters.isSelectingVulnerabilities &&
   getters.selectedVulnerabilitiesCount === state.vulnerabilities.length;
-
-export default () => {};

@@ -1,7 +1,7 @@
 # Geo Nodes API **(PREMIUM ONLY)**
 
-In order to interact with Geo node endpoints, you need to authenticate yourself
-as an admin.
+To interact with Geo node endpoints, you need to authenticate yourself as an
+admin.
 
 ## Create a new Geo node
 
@@ -12,7 +12,7 @@ POST /geo_nodes
 ```
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://primary.example.com/api/v4/geo_nodes \
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://primary.example.com/api/v4/geo_nodes" \
      --request POST \
      -d "name=himynameissomething" \
      -d "url=https://another-node.example.com/"
@@ -73,7 +73,7 @@ GET /geo_nodes
 ```
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://primary.example.com/api/v4/geo_nodes
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://primary.example.com/api/v4/geo_nodes"
 ```
 
 Example response:
@@ -140,7 +140,7 @@ GET /geo_nodes/:id
 ```
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://primary.example.com/api/v4/geo_nodes/1
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://primary.example.com/api/v4/geo_nodes/1"
 ```
 
 Example response:
@@ -287,7 +287,7 @@ GET /geo_nodes/status
 ```
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://primary.example.com/api/v4/geo_nodes/status
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://primary.example.com/api/v4/geo_nodes/status"
 ```
 
 Example response:
@@ -325,9 +325,11 @@ Example response:
     "design_repositories_failed_count": nil,
     "design_repositories_synced_in_percentage": "0.00%",
     "projects_count": 41,
+    "repositories_count": 41,
     "repositories_failed_count": nil,
     "repositories_synced_count": nil,
     "repositories_synced_in_percentage": "0.00%",
+    "wikis_count": 41,
     "wikis_failed_count": nil,
     "wikis_synced_count": nil,
     "wikis_synced_in_percentage": "0.00%",
@@ -366,7 +368,16 @@ Example response:
     "revision": "33d33a096a",
     "package_files_count": 10,
     "package_files_checksummed_count": 10,
-    "package_files_checksum_failed_count": 0
+    "package_files_checksum_failed_count": 0,
+    "package_files_registry_count": 10,
+    "package_files_synced_count": 6,
+    "package_files_failed_count": 3,
+    "snippet_repositories_count": 10,
+    "snippet_repositories_checksummed_count": 10,
+    "snippet_repositories_checksum_failed_count": 0,
+    "snippet_repositories_registry_count": 10,
+    "snippet_repositories_synced_count": 6,
+    "snippet_repositories_failed_count": 3
   },
   {
     "geo_node_id": 2,
@@ -399,9 +410,11 @@ Example response:
     "design_repositories_failed_count": nil,
     "design_repositories_synced_in_percentage": "0.00%",
     "projects_count": 41,
+    "repositories_count": 41,
     "repositories_failed_count": 1,
     "repositories_synced_count": 40,
     "repositories_synced_in_percentage": "97.56%",
+    "wikis_count": 41,
     "wikis_failed_count": 0,
     "wikis_synced_count": 41,
     "wikis_synced_in_percentage": "100.00%",
@@ -435,15 +448,33 @@ Example response:
     "last_successful_status_check_timestamp": 1510125024,
     "version": "10.3.0",
     "revision": "33d33a096a",
+    "merge_request_diffs_count": 12,
+    "merge_request_diffs_checksummed_count": 8,
+    "merge_request_diffs_checksum_failed_count": 0,
+    "merge_request_diffs_registry_count": 12,
+    "merge_request_diffs_synced_count": 9,
+    "merge_request_diffs_failed_count": 3,
     "package_files_count": 10,
     "package_files_checksummed_count": 10,
-    "package_files_checksum_failed_count": 0
+    "package_files_checksum_failed_count": 0,
+    "package_files_registry_count": 10,
+    "package_files_synced_count": 6,
+    "package_files_failed_count": 3,
+    "terraform_state_versions_count": 10,
+    "terraform_state_versions_checksummed_count": 10,
+    "terraform_state_versions_checksum_failed_count": 0,
+    "terraform_state_versions_registry_count": 10,
+    "terraform_state_versions_synced_count": 6,
+    "terraform_state_versions_failed_count": 3,
+    "snippet_repositories_count": 10,
+    "snippet_repositories_checksummed_count": 10,
+    "snippet_repositories_checksum_failed_count": 0,
+    "snippet_repositories_registry_count": 10,
+    "snippet_repositories_synced_count": 6,
+    "snippet_repositories_failed_count": 3
   }
 ]
 ```
-
-NOTE: **Note:**
-In GitLab 12.0, deprecated fields `wikis_count` and `repositories_count` were removed. Use `projects_count` instead.
 
 ## Retrieve status about a specific Geo node
 
@@ -452,7 +483,7 @@ GET /geo_nodes/:id/status
 ```
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://primary.example.com/api/v4/geo_nodes/2/status
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://primary.example.com/api/v4/geo_nodes/2/status"
 ```
 
 Example response:
@@ -489,9 +520,11 @@ Example response:
   "design_repositories_failed_count": nil,
   "design_repositories_synced_in_percentage": "0.00%",
   "projects_count": 41,
+  "repositories_count": 41,
   "repositories_failed_count": 1,
   "repositories_synced_count": 40,
   "repositories_synced_in_percentage": "97.56%",
+  "wikis_count": 41,
   "wikis_failed_count": 0,
   "wikis_synced_count": 41,
   "wikis_synced_in_percentage": "100.00%",
@@ -511,9 +544,6 @@ Example response:
 
 Note: The `health_status` parameter can only be in an "Healthy" or "Unhealthy" state, while the `health` parameter can be empty, "Healthy", or contain the actual error message.
 
-NOTE: **Note:**
-In GitLab 12.0, deprecated fields `wikis_count` and `repositories_count` were removed. Use `projects_count` instead.
-
 ## Retrieve project sync or verification failures that occurred on the current node
 
 This only works on a secondary node.
@@ -530,7 +560,7 @@ GET /geo_nodes/current/failures
 This endpoint uses [Pagination](README.md#pagination).
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://primary.example.com/api/v4/geo_nodes/current/failures
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://primary.example.com/api/v4/geo_nodes/current/failures"
 ```
 
 Example response:

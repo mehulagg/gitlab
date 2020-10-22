@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'label issues', :js do
+RSpec.describe 'label issues', :js do
   include BoardHelpers
 
   let(:user) { create(:user) }
@@ -15,6 +15,8 @@ describe 'label issues', :js do
 
   before do
     stub_licensed_features(multiple_group_issue_boards: true)
+    # stubbing until sidebar work is done: https://gitlab.com/gitlab-org/gitlab/-/issues/230711
+    stub_feature_flags(graphql_board_lists: false)
     group.add_maintainer(user)
 
     sign_in(user)

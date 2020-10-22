@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe EE::LockHelper do
+RSpec.describe EE::LockHelper do
   describe '#lock_file_link' do
     let!(:path_lock) { create :path_lock, path: 'app/models' }
     let(:path) { path_lock.path }

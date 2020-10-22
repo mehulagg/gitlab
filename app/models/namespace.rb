@@ -13,17 +13,18 @@ class Namespace < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
   include IgnorableColumns
 
-  ignore_column :plan_id, remove_with: '13.1', remove_after: '2020-06-22'
-
   # Prevent users from creating unreasonably deep level of nesting.
   # The number 20 was taken based on maximum nesting level of
   # Android repo (15) + some extra backup.
   NUMBER_OF_ANCESTORS_ALLOWED = 20
 
+  SHARED_RUNNERS_SETTINGS = %w[disabled_and_unoverridable disabled_with_override enabled].freeze
+
   cache_markdown_field :description, pipeline: :description
 
   has_many :projects, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_many :project_statistics
+  has_one :namespace_settings, inverse_of: :namespace, class_name: 'NamespaceSetting', autosave: true
 
   has_many :runner_namespaces, inverse_of: :namespace, class_name: 'Ci::RunnerNamespace'
   has_many :runners, through: :runner_namespaces, source: :runner, class_name: 'Ci::Runner'
@@ -34,6 +35,7 @@ class Namespace < ApplicationRecord
 
   belongs_to :parent, class_name: "Namespace"
   has_many :children, class_name: "Namespace", foreign_key: :parent_id
+  has_many :custom_emoji, inverse_of: :namespace
   has_one :chat_team, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_one :root_storage_statistics, class_name: 'Namespace::RootStorageStatistics'
   has_one :aggregation_schedule, class_name: 'Namespace::AggregationSchedule'
@@ -49,9 +51,18 @@ class Namespace < ApplicationRecord
     length: { maximum: 255 },
     namespace_path: true
 
+  # Introduce minimal path length of 2 characters.
+  # Allow change of other attributes without forcing users to
+  # rename their user or group. At the same time prevent changing
+  # the path without complying with new 2 chars requirement.
+  # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/225214
+  validates :path, length: { minimum: 2 }, if: :path_changed?
+
   validates :max_artifacts_size, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
 
   validate :nesting_level_allowed
+  validate :changing_shared_runners_enabled_is_allowed
+  validate :changing_allow_descendants_override_disabled_shared_runners_is_allowed
 
   validates_associated :runners
 
@@ -72,6 +83,7 @@ class Namespace < ApplicationRecord
 
   scope :for_user, -> { where('type IS NULL') }
   scope :sort_by_type, -> { order(Gitlab::Database.nulls_first_order(:type)) }
+  scope :include_route, -> { includes(:route) }
 
   scope :with_statistics, -> do
     joins('LEFT JOIN project_statistics ps ON ps.namespace_id = namespaces.id')
@@ -81,6 +93,7 @@ class Namespace < ApplicationRecord
         'COALESCE(SUM(ps.storage_size), 0) AS storage_size',
         'COALESCE(SUM(ps.repository_size), 0) AS repository_size',
         'COALESCE(SUM(ps.wiki_size), 0) AS wiki_size',
+        'COALESCE(SUM(ps.snippets_size), 0) AS snippets_size',
         'COALESCE(SUM(ps.lfs_objects_size), 0) AS lfs_objects_size',
         'COALESCE(SUM(ps.build_artifacts_size), 0) AS build_artifacts_size',
         'COALESCE(SUM(ps.packages_size), 0) AS packages_size'
@@ -99,11 +112,11 @@ class Namespace < ApplicationRecord
 
     # Searches for namespaces matching the given query.
     #
-    # This method uses ILIKE on PostgreSQL and LIKE on MySQL.
+    # This method uses ILIKE on PostgreSQL.
     #
-    # query - The search query as a String
+    # query - The search query as a String.
     #
-    # Returns an ActiveRecord::Relation
+    # Returns an ActiveRecord::Relation.
     def search(query)
       fuzzy_search(query, [:name, :path])
     end
@@ -125,6 +138,10 @@ class Namespace < ApplicationRecord
 
       uniquify = Uniquify.new
       uniquify.string(path) { |s| Namespace.find_by_path_or_name(s) }
+    end
+
+    def clean_name(value)
+      value.scan(Gitlab::Regex.group_name_regex_chars).join(' ')
     end
 
     def find_by_pages_host(host)
@@ -175,6 +192,10 @@ class Namespace < ApplicationRecord
     kind == 'user'
   end
 
+  def group?
+    type == 'Group'
+  end
+
   def find_fork_of(project)
     return unless project.fork_network
 
@@ -207,7 +228,7 @@ class Namespace < ApplicationRecord
     Gitlab.config.lfs.enabled
   end
 
-  def shared_runners_enabled?
+  def any_project_with_shared_runners_enabled?
     projects.with_shared_runners.any?
   end
 
@@ -262,7 +283,12 @@ class Namespace < ApplicationRecord
   # Includes projects from this namespace and projects from all subgroups
   # that belongs to this namespace
   def all_projects
-    Project.inside_path(full_path)
+    if Feature.enabled?(:recursive_approach_for_all_projects)
+      namespace = user? ? self : self_and_descendants
+      Project.where(namespace: namespace)
+    else
+      Project.inside_path(full_path)
+    end
   end
 
   # Includes pipelines from this namespace and pipelines from all subgroups
@@ -272,10 +298,12 @@ class Namespace < ApplicationRecord
   end
 
   def has_parent?
-    parent.present?
+    parent_id.present? || parent.present?
   end
 
   def root_ancestor
+    return self if persisted? && parent_id.nil?
+
     strong_memoize(:root_ancestor) do
       self_and_ancestors.reorder(nil).find_by(parent_id: nil)
     end
@@ -335,6 +363,10 @@ class Namespace < ApplicationRecord
     )
   end
 
+  def any_project_with_pages_deployed?
+    all_projects.with_pages_deployed.any?
+  end
+
   def closest_setting(name)
     self_and_ancestors(hierarchy_order: :asc)
       .find { |n| !n.read_attribute(name).nil? }
@@ -349,11 +381,57 @@ class Namespace < ApplicationRecord
     # We default to PlanLimits.new otherwise a lot of specs would fail
     # On production each plan should already have associated limits record
     # https://gitlab.com/gitlab-org/gitlab/issues/36037
-    actual_plan.limits || PlanLimits.new
+    actual_plan.actual_limits
   end
 
   def actual_plan_name
     actual_plan.name
+  end
+
+  def changing_shared_runners_enabled_is_allowed
+    return unless Feature.enabled?(:disable_shared_runners_on_group, default_enabled: true)
+    return unless new_record? || changes.has_key?(:shared_runners_enabled)
+
+    if shared_runners_enabled && has_parent? && parent.shared_runners_setting == 'disabled_and_unoverridable'
+      errors.add(:shared_runners_enabled, _('cannot be enabled because parent group has shared Runners disabled'))
+    end
+  end
+
+  def changing_allow_descendants_override_disabled_shared_runners_is_allowed
+    return unless Feature.enabled?(:disable_shared_runners_on_group, default_enabled: true)
+    return unless new_record? || changes.has_key?(:allow_descendants_override_disabled_shared_runners)
+
+    if shared_runners_enabled && !new_record?
+      errors.add(:allow_descendants_override_disabled_shared_runners, _('cannot be changed if shared runners are enabled'))
+    end
+
+    if allow_descendants_override_disabled_shared_runners && has_parent? && parent.shared_runners_setting == 'disabled_and_unoverridable'
+      errors.add(:allow_descendants_override_disabled_shared_runners, _('cannot be enabled because parent group does not allow it'))
+    end
+  end
+
+  def shared_runners_setting
+    if shared_runners_enabled
+      'enabled'
+    else
+      if allow_descendants_override_disabled_shared_runners
+        'disabled_with_override'
+      else
+        'disabled_and_unoverridable'
+      end
+    end
+  end
+
+  def shared_runners_setting_higher_than?(other_setting)
+    if other_setting == 'enabled'
+      false
+    elsif other_setting == 'disabled_with_override'
+      shared_runners_setting == 'enabled'
+    elsif other_setting == 'disabled_and_unoverridable'
+      shared_runners_setting == 'enabled' || shared_runners_setting == 'disabled_with_override'
+    else
+      raise ArgumentError
+    end
   end
 
   private

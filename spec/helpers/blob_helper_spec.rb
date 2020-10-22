@@ -2,18 +2,8 @@
 
 require 'spec_helper'
 
-describe BlobHelper do
+RSpec.describe BlobHelper do
   include TreeHelper
-
-  describe '#highlight' do
-    it 'wraps highlighted content' do
-      expect(helper.highlight('test.rb', '52')).to eq(%q[<pre class="code highlight"><code><span id="LC1" class="line" lang="ruby"><span class="mi">52</span></span></code></pre>])
-    end
-
-    it 'handles plain version' do
-      expect(helper.highlight('test.rb', '52', plain: true)).to eq(%q[<pre class="code highlight"><code><span id="LC1" class="line" lang="">52</span></code></pre>])
-    end
-  end
 
   describe "#sanitize_svg_data" do
     let(:input_svg_path) { File.join(Rails.root, 'spec', 'fixtures', 'unsanitized.svg') }
@@ -29,6 +19,8 @@ describe BlobHelper do
   describe "#edit_blob_link" do
     let(:namespace) { create(:namespace, name: 'gitlab') }
     let(:project) { create(:project, :repository, namespace: namespace) }
+
+    subject(:link) { helper.edit_blob_button(project, 'master', 'README.md') }
 
     before do
       allow(helper).to receive(:current_user).and_return(nil)
@@ -53,23 +45,49 @@ describe BlobHelper do
     end
 
     it 'returns a link with the proper route' do
-      stub_feature_flags(web_ide_default: false)
-      link = helper.edit_blob_button(project, 'master', 'README.md')
-
       expect(Capybara.string(link).find_link('Edit')[:href]).to eq("/#{project.full_path}/-/edit/master/README.md")
     end
 
-    it 'returns a link with a Web IDE route' do
-      link = helper.edit_blob_button(project, 'master', 'README.md')
+    it 'returns a link with the passed link_opts on the expected route' do
+      link_with_mr = helper.edit_blob_button(project, 'master', 'README.md', link_opts: { mr_id: 10 })
 
-      expect(Capybara.string(link).find_link('Edit')[:href]).to eq("/-/ide/project/#{project.full_path}/edit/master/-/README.md")
+      expect(Capybara.string(link_with_mr).find_link('Edit')[:href]).to eq("/#{project.full_path}/-/edit/master/README.md?mr_id=10")
     end
 
-    it 'returns a link with the passed link_opts on the expected route' do
-      stub_feature_flags(web_ide_default: false)
-      link = helper.edit_blob_button(project, 'master', 'README.md', link_opts: { mr_id: 10 })
+    context 'when edit is the primary button' do
+      before do
+        stub_feature_flags(web_ide_primary_edit: false)
+      end
 
-      expect(Capybara.string(link).find_link('Edit')[:href]).to eq("/#{project.full_path}/-/edit/master/README.md?mr_id=10")
+      it 'is rendered as primary' do
+        expect(link).not_to match(/btn-inverted/)
+      end
+
+      it 'passes on primary tracking attributes' do
+        parsed_link = Capybara.string(link).find_link('Edit')
+
+        expect(parsed_link[:'data-track-event']).to eq("click_edit")
+        expect(parsed_link[:'data-track-label']).to eq("Edit")
+        expect(parsed_link[:'data-track-property']).to eq(nil)
+      end
+    end
+
+    context 'when Web IDE is the primary button' do
+      before do
+        stub_feature_flags(web_ide_primary_edit: true)
+      end
+
+      it 'is rendered as inverted' do
+        expect(link).to match(/btn-inverted/)
+      end
+
+      it 'passes on secondary tracking attributes' do
+        parsed_link = Capybara.string(link).find_link('Edit')
+
+        expect(parsed_link[:'data-track-event']).to eq("click_edit")
+        expect(parsed_link[:'data-track-label']).to eq("Edit")
+        expect(parsed_link[:'data-track-property']).to eq("secondary")
+      end
     end
   end
 
@@ -254,6 +272,16 @@ describe BlobHelper do
               expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
             end
           end
+
+          context 'blob does not have auxiliary view' do
+            before do
+              allow(blob).to receive(:auxiliary_viewer).and_return(nil)
+            end
+
+            it 'is false' do
+              expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
+            end
+          end
         end
 
         context 'experiment disabled' do
@@ -290,6 +318,62 @@ describe BlobHelper do
       assign(:project, project)
 
       expect(helper.suggest_pipeline_commit_cookie_name).to eq "suggest_gitlab_ci_yml_commit_#{project.id}"
+    end
+  end
+
+  describe `#ide_edit_button` do
+    let_it_be(:namespace) { create(:namespace, name: 'gitlab') }
+    let_it_be(:project) { create(:project, :repository, namespace: namespace) }
+    let_it_be(:current_user) { create(:user) }
+    let(:can_push_code) { true }
+    let(:blob) { project.repository.blob_at('refs/heads/master', 'README.md') }
+
+    subject(:link) { helper.ide_edit_button(project, 'master', 'README.md', blob: blob) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(current_user)
+      allow(helper).to receive(:can?).with(current_user, :push_code, project).and_return(can_push_code)
+      allow(helper).to receive(:can_collaborate_with_project?).and_return(true)
+    end
+
+    it 'returns a link with a Web IDE route' do
+      expect(Capybara.string(link).find_link('Web IDE')[:href]).to eq("/-/ide/project/#{project.full_path}/edit/master/-/README.md")
+    end
+
+    context 'when edit is the primary button' do
+      before do
+        stub_feature_flags(web_ide_primary_edit: false)
+      end
+
+      it 'is rendered as inverted' do
+        expect(link).to match(/btn-inverted/)
+      end
+
+      it 'passes on secondary tracking attributes' do
+        parsed_link = Capybara.string(link).find_link('Web IDE')
+
+        expect(parsed_link[:'data-track-event']).to eq("click_edit_ide")
+        expect(parsed_link[:'data-track-label']).to eq("Web IDE")
+        expect(parsed_link[:'data-track-property']).to eq("secondary")
+      end
+    end
+
+    context 'when Web IDE is the primary button' do
+      before do
+        stub_feature_flags(web_ide_primary_edit: true)
+      end
+
+      it 'is rendered as primary' do
+        expect(link).not_to match(/btn-inverted/)
+      end
+
+      it 'passes on primary tracking attributes' do
+        parsed_link = Capybara.string(link).find_link('Web IDE')
+
+        expect(parsed_link[:'data-track-event']).to eq("click_edit_ide")
+        expect(parsed_link[:'data-track-label']).to eq("Web IDE")
+        expect(parsed_link[:'data-track-property']).to eq(nil)
+      end
     end
   end
 
@@ -361,13 +445,14 @@ describe BlobHelper do
   end
 
   describe '#ide_fork_and_edit_path' do
-    let(:project) { create(:project) }
-    let(:current_user) { create(:user) }
-    let(:can_push_code) { true }
+    let_it_be(:project) { create(:project) }
+    let_it_be(:user) { create(:user) }
+
+    let(:current_user) { user }
 
     before do
       allow(helper).to receive(:current_user).and_return(current_user)
-      allow(helper).to receive(:can?).and_return(can_push_code)
+      allow(helper).to receive(:can?).and_return(true)
     end
 
     it 'returns path to fork the repo with a redirect param to the full IDE path' do
@@ -385,6 +470,90 @@ describe BlobHelper do
       it 'returns nil' do
         expect(helper.ide_fork_and_edit_path(project, "master", "")).to be_nil
       end
+    end
+  end
+
+  describe '#fork_and_edit_path' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:user) { create(:user) }
+
+    let(:current_user) { user }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(current_user)
+      allow(helper).to receive(:can?).and_return(true)
+    end
+
+    it 'returns path to fork the repo with a redirect param to the full edit path' do
+      uri = URI(helper.fork_and_edit_path(project, "master", ""))
+      params = CGI.unescape(uri.query)
+
+      expect(uri.path).to eq("/#{project.namespace.path}/#{project.path}/-/forks")
+      expect(params).to include("continue[to]=/#{project.namespace.path}/#{project.path}/-/edit/master/")
+      expect(params).to include("namespace_key=#{current_user.namespace.id}")
+    end
+
+    context 'when user is not logged in' do
+      let(:current_user) { nil }
+
+      it 'returns nil' do
+        expect(helper.ide_fork_and_edit_path(project, "master", "")).to be_nil
+      end
+    end
+  end
+
+  describe '#editing_ci_config?' do
+    let(:project) { build(:project) }
+
+    subject { helper.editing_ci_config? }
+
+    before do
+      assign(:project, project)
+      assign(:path, path)
+    end
+
+    context 'when path is nil' do
+      let(:path) { nil }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when path is not a ci file' do
+      let(:path) { 'some-file.txt' }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when path ends is gitlab-ci.yml' do
+      let(:path) { '.gitlab-ci.yml' }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when path ends with gitlab-ci.yml' do
+      let(:path) { 'template.gitlab-ci.yml' }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'with custom ci paths' do
+      let(:path) { 'path/to/ci.yaml' }
+
+      before do
+        project.ci_config_path = 'path/to/ci.yaml'
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'with custom ci config and path' do
+      let(:path) { 'path/to/template.gitlab-ci.yml' }
+
+      before do
+        project.ci_config_path = 'ci/path/.gitlab-ci.yml@another-group/another-project'
+      end
+
+      it { is_expected.to be_truthy }
     end
   end
 end

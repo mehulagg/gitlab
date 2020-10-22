@@ -2,62 +2,102 @@
 
 module Resolvers
   class TimelogResolver < BaseResolver
+    include LooksAhead
+
     argument :start_date, Types::TimeType,
-              required: true,
-              description: 'List time logs within a time range where the logged date is after start_date parameter.'
+              required: false,
+              description: 'List time logs within a date range where the logged date is equal to or after startDate'
 
     argument :end_date, Types::TimeType,
-              required: true,
-              description: 'List time logs within a time range where the logged date is before end_date parameter.'
+              required: false,
+              description: 'List time logs within a date range where the logged date is equal to or before endDate'
 
-    def resolve(**args)
-      validate_date_params!(args)
-      authorize_group_timelogs!
+    argument :start_time, Types::TimeType,
+              required: false,
+              description: 'List time-logs within a time range where the logged time is equal to or after startTime'
 
-      find_timelogs(args)
+    argument :end_time, Types::TimeType,
+              required: false,
+              description: 'List time-logs within a time range where the logged time is equal to or before endTime'
+
+    def resolve_with_lookahead(**args)
+      return Timelog.none unless timelogs_available_for_user?
+
+      validate_params_presence!(args)
+      transformed_args = transform_args(args)
+      validate_time_difference!(transformed_args)
+
+      find_timelogs(transformed_args)
     end
 
     private
 
+    def preloads
+      {
+        note: [:note]
+      }
+    end
+
     def find_timelogs(args)
-      group.timelogs(args[:start_date], args[:end_date])
+      apply_lookahead(group.timelogs(args[:start_time], args[:end_time]))
     end
 
-    def validate_date_params!(args)
-      validate_dates_present!(args[:start_date], args[:end_date])
-      validate_dates_difference!(args[:start_date], args[:end_date])
-      validate_date_range!(args[:start_date], args[:end_date])
-    end
-
-    def valid_object?
-      group.present? &&
-        group&.feature_available?(:group_timelogs) &&
+    def timelogs_available_for_user?
+      group&.feature_available?(:group_timelogs) &&
         group&.user_can_access_group_timelogs?(context[:current_user])
     end
 
-    def authorize_group_timelogs!
-      unless valid_object?
-        raise Gitlab::Graphql::Errors::ResourceNotAvailable,
-          "The resource is not available or you don't have permission to perform this action"
+    def validate_params_presence!(args)
+      message = case time_params_count(args)
+                when 0
+                  'Start and End arguments must be present'
+                when 1
+                  'Both Start and End arguments must be present'
+                when 2
+                  validate_duplicated_args(args)
+                when 3 || 4
+                  'Only Time or Date arguments must be present'
+                end
+
+      raise_argument_error(message) if message
+    end
+
+    def validate_time_difference!(args)
+      message = if args[:end_time] < args[:start_time]
+                  'Start argument must be before End argument'
+                elsif args[:end_time] - args[:start_time] > 60.days
+                  'The time range period cannot contain more than 60 days'
+                end
+
+      raise_argument_error(message) if message
+    end
+
+    def transform_args(args)
+      return args if args.keys == [:start_time, :end_time]
+
+      time_args = args.except(:start_date, :end_date)
+
+      if time_args.empty?
+        time_args[:start_time] = args[:start_date].beginning_of_day
+        time_args[:end_time] = args[:end_date].end_of_day
+      elsif time_args.key?(:start_time)
+        time_args[:end_time] = args[:end_date].end_of_day
+      elsif time_args.key?(:end_time)
+        time_args[:start_time] = args[:start_date].beginning_of_day
       end
+
+      time_args
     end
 
-    def validate_dates_present!(start_date, end_date)
-      return if start_date.present? && end_date.present?
-
-      raise_argument_error('Both start_date and end_date must be present.')
+    def time_params_count(args)
+      [:start_time, :end_time, :start_date, :end_date].count { |param| args.key?(param) }
     end
 
-    def validate_dates_difference!(start_date, end_date)
-      return if end_date > start_date
-
-      raise_argument_error('start_date must be earlier than end_date.')
-    end
-
-    def validate_date_range!(start_date, end_date)
-      return if end_date - start_date <= 60.days
-
-      raise_argument_error('The date range period cannot contain more than 60 days')
+    def validate_duplicated_args(args)
+      if args.key?(:start_time) && args.key?(:start_date) ||
+        args.key?(:end_time) && args.key?(:end_date)
+        'Both Start and End arguments must be present'
+      end
     end
 
     def raise_argument_error(message)

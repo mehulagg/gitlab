@@ -1,8 +1,7 @@
-import Vue from 'vue';
 import Vuex from 'vuex';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import createStore from 'ee/analytics/cycle_analytics/store';
+import customStagesStore from 'ee/analytics/cycle_analytics/store/modules/custom_stages';
 import { createLocalVue, mount } from '@vue/test-utils';
 import waitForPromises from 'helpers/wait_for_promises';
 import CustomStageForm, {
@@ -20,7 +19,7 @@ import {
   customStageFormErrors,
 } from '../mock_data';
 
-const initData = {
+const formInitialData = {
   id: 74,
   name: 'Cool stage pre',
   startEventIdentifier: labelStartEvent.identifier,
@@ -32,16 +31,37 @@ const initData = {
 const MERGE_REQUEST_CREATED = 'merge_request_created';
 const MERGE_REQUEST_CLOSED = 'merge_request_closed';
 
-let store = null;
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
+const fakeStore = ({ initialState, initialRootGetters }) =>
+  new Vuex.Store({
+    getters: {
+      currentGroupPath: () => 'fake',
+      hiddenStages: () => [],
+      ...initialRootGetters,
+    },
+    modules: {
+      customStages: {
+        ...customStagesStore,
+        state: {
+          isLoading: false,
+          ...initialState,
+        },
+      },
+    },
+  });
+
 describe('CustomStageForm', () => {
-  function createComponent(props = {}, stubs = {}) {
-    store = createStore();
+  function createComponent({
+    initialState = {},
+    initialRootGetters = {},
+    stubs = {},
+    props = {},
+  } = {}) {
     return mount(CustomStageForm, {
       localVue,
-      store,
+      store: fakeStore({ initialState, initialRootGetters }),
       propsData: {
         events,
         ...props,
@@ -98,7 +118,7 @@ describe('CustomStageForm', () => {
     stopEventDropdownIndex = mergeRequestClosedDropdownIndex,
   } = {}) {
     selectDropdownOption(wrapper, sel.startEvent, startEventDropdownIndex);
-    return Vue.nextTick().then(() => {
+    return wrapper.vm.$nextTick().then(() => {
       selectDropdownOption(wrapper, sel.endEvent, stopEventDropdownIndex);
     });
   }
@@ -117,7 +137,7 @@ describe('CustomStageForm', () => {
 
   beforeEach(() => {
     mock = mockGroupLabelsRequest();
-    wrapper = createComponent({});
+    wrapper = createComponent();
   });
 
   afterEach(() => {
@@ -155,7 +175,7 @@ describe('CustomStageForm', () => {
   describe('Name', () => {
     describe('with a reserved name', () => {
       beforeEach(() => {
-        wrapper = createComponent({});
+        wrapper = createComponent();
         return setNameField(wrapper, 'issue');
       });
 
@@ -174,7 +194,7 @@ describe('CustomStageForm', () => {
   describe('Start event', () => {
     describe('with events', () => {
       beforeEach(() => {
-        wrapper = createComponent({});
+        wrapper = createComponent();
       });
 
       afterEach(() => {
@@ -229,7 +249,7 @@ describe('CustomStageForm', () => {
           },
         });
 
-        return Vue.nextTick().then(() => {
+        return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.find(sel.startEventLabel).exists()).toEqual(true);
         });
       });
@@ -244,9 +264,9 @@ describe('CustomStageForm', () => {
             wrapper
               .find(sel.startEventLabel)
               .findAll('.dropdown-item')
-              .at(1) // item at index 0 is 'select a label'
+              .at(0)
               .trigger('click');
-            return Vue.nextTick();
+            return wrapper.vm.$nextTick();
           })
           .then(() => {
             expect(wrapper.vm.fields.startEventLabelId).toEqual(selectedLabelId);
@@ -265,12 +285,14 @@ describe('CustomStageForm', () => {
     });
 
     it('notifies that a start event needs to be selected first', () => {
-      expect(wrapper.text()).toContain('Please select a start event first');
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.text()).toContain('Please select a start event first');
+      });
     });
 
     it('clears notification when a start event is selected', () => {
       selectDropdownOption(wrapper, sel.startEvent, startEventDropdownIndex);
-      return Vue.nextTick().then(() => {
+      return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.text()).not.toContain('Please select a start event first');
       });
     });
@@ -280,7 +302,7 @@ describe('CustomStageForm', () => {
       expect(el.attributes('disabled')).toEqual('disabled');
 
       selectDropdownOption(wrapper, sel.startEvent, startEventDropdownIndex);
-      return Vue.nextTick().then(() => {
+      return wrapper.vm.$nextTick().then(() => {
         expect(el.attributes('disabled')).toBeUndefined();
       });
     });
@@ -292,7 +314,7 @@ describe('CustomStageForm', () => {
 
       selectDropdownOption(wrapper, sel.startEvent, startEventDropdownIndex);
 
-      return Vue.nextTick().then(() => {
+      return wrapper.vm.$nextTick().then(() => {
         stopOptions = wrapper.find(sel.endEvent);
         selectedStartEvent.allowedEndEvents.forEach(identifier => {
           expect(stopOptions.html()).toContain(identifier);
@@ -308,7 +330,7 @@ describe('CustomStageForm', () => {
 
       selectDropdownOption(wrapper, sel.startEvent, startEventDropdownIndex);
 
-      return Vue.nextTick().then(() => {
+      return wrapper.vm.$nextTick().then(() => {
         stopOptions = wrapper.find(sel.endEvent);
 
         possibleEndEvents.forEach(({ name, identifier }) => {
@@ -325,7 +347,7 @@ describe('CustomStageForm', () => {
 
       selectDropdownOption(wrapper, sel.startEvent, startEventArrayIndex + 1);
 
-      return Vue.nextTick().then(() => {
+      return wrapper.vm.$nextTick().then(() => {
         stopOptions = wrapper.find(sel.endEvent);
 
         excludedEndEvents.forEach(({ name, identifier }) => {
@@ -355,10 +377,16 @@ describe('CustomStageForm', () => {
         wrapper.destroy();
       });
 
+      it('notifies that a start event needs to be selected first', () => {
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.text()).toContain('Please select a start event first');
+        });
+      });
+
       it('will notify if the current start and stop event pair is not valid', () => {
         selectDropdownOption(wrapper, sel.startEvent, 2);
 
-        return Vue.nextTick().then(() => {
+        return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.find(sel.invalidFeedback).exists()).toEqual(true);
           expect(wrapper.find(sel.invalidFeedback).text()).toContain(
             'Start event changed, please select a valid stop event',
@@ -369,14 +397,14 @@ describe('CustomStageForm', () => {
       it('will update the list of stop events', () => {
         const se = wrapper.vm.endEventOptions;
         selectDropdownOption(wrapper, sel.startEvent, 2);
-        return Vue.nextTick().then(() => {
+        return wrapper.vm.$nextTick().then(() => {
           expect(se[1].value).not.toEqual(wrapper.vm.endEventOptions[1].value);
         });
       });
 
       it('will disable the submit button until a valid endEvent is selected', () => {
         selectDropdownOption(wrapper, sel.startEvent, 2);
-        return Vue.nextTick().then(() => {
+        return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.find(sel.submit).attributes('disabled')).toEqual('disabled');
         });
       });
@@ -384,7 +412,7 @@ describe('CustomStageForm', () => {
 
     describe('Stop event label', () => {
       beforeEach(() => {
-        wrapper = createComponent({});
+        wrapper = createComponent();
       });
 
       afterEach(() => {
@@ -405,7 +433,7 @@ describe('CustomStageForm', () => {
           },
         });
 
-        return Vue.nextTick().then(() => {
+        return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.find(sel.endEventLabel).exists()).toEqual(true);
         });
       });
@@ -426,10 +454,10 @@ describe('CustomStageForm', () => {
             wrapper
               .find(sel.endEventLabel)
               .findAll('.dropdown-item')
-              .at(2) // item at index 0 is 'select a label'
+              .at(1)
               .trigger('click');
 
-            return Vue.nextTick();
+            return wrapper.vm.$nextTick();
           })
           .then(() => {
             expect(wrapper.vm.fields.endEventLabelId).toEqual(selectedLabelId);
@@ -440,7 +468,7 @@ describe('CustomStageForm', () => {
 
   describe('Add stage button', () => {
     beforeEach(() => {
-      wrapper = createComponent({});
+      wrapper = createComponent();
     });
 
     afterEach(() => {
@@ -468,11 +496,11 @@ describe('CustomStageForm', () => {
       const stopEventDropdownIndex = 1;
 
       beforeEach(() => {
-        wrapper = createComponent({});
+        wrapper = createComponent();
         wrapper.find(sel.name).setValue('Cool stage');
-        return Vue.nextTick().then(() =>
-          setEventDropdowns({ startEventDropdownIndex, stopEventDropdownIndex }),
-        );
+        return wrapper.vm
+          .$nextTick()
+          .then(() => setEventDropdowns({ startEventDropdownIndex, stopEventDropdownIndex }));
       });
 
       afterEach(() => {
@@ -485,7 +513,7 @@ describe('CustomStageForm', () => {
 
         wrapper.find(sel.submit).trigger('click');
 
-        return Vue.nextTick().then(() => {
+        return wrapper.vm.$nextTick().then(() => {
           event = findEvent(STAGE_ACTIONS.CREATE);
           expect(event).toBeTruthy();
           expect(event).toHaveLength(1);
@@ -510,7 +538,7 @@ describe('CustomStageForm', () => {
         ];
 
         wrapper.find(sel.submit).trigger('click');
-        return Vue.nextTick().then(() => {
+        return wrapper.vm.$nextTick().then(() => {
           event = findEvent(STAGE_ACTIONS.CREATE);
           expect(event[0]).toEqual(res);
         });
@@ -520,7 +548,7 @@ describe('CustomStageForm', () => {
 
   describe('Cancel button', () => {
     beforeEach(() => {
-      wrapper = createComponent({});
+      wrapper = createComponent();
     });
 
     afterEach(() => {
@@ -533,7 +561,7 @@ describe('CustomStageForm', () => {
       expect(btn.attributes('disabled')).toEqual('disabled');
       wrapper.find(sel.name).setValue('Cool stage');
 
-      return Vue.nextTick().then(() => {
+      return wrapper.vm.$nextTick().then(() => {
         expect(btn.attributes('disabled')).toBeUndefined();
       });
     });
@@ -547,11 +575,12 @@ describe('CustomStageForm', () => {
         },
       });
 
-      return Vue.nextTick()
+      return wrapper.vm
+        .$nextTick()
         .then(() => {
           wrapper.find(sel.cancel).trigger('click');
 
-          return Vue.nextTick();
+          return wrapper.vm.$nextTick();
         })
         .then(() => {
           expect(wrapper.vm.fields).toEqual({
@@ -575,10 +604,11 @@ describe('CustomStageForm', () => {
         },
       });
 
-      return Vue.nextTick()
+      return wrapper.vm
+        .$nextTick()
         .then(() => {
           wrapper.find(sel.cancel).trigger('click');
-          return Vue.nextTick();
+          return wrapper.vm.$nextTick();
         })
         .then(() => {
           ev = findEvent('cancel');
@@ -590,12 +620,12 @@ describe('CustomStageForm', () => {
 
   describe('isSavingCustomStage=true', () => {
     beforeEach(() => {
-      wrapper = createComponent(
-        {
+      wrapper = createComponent({
+        initialState: {
           isSavingCustomStage: true,
         },
-        false,
-      );
+      });
+      return wrapper.vm.$nextTick();
     });
 
     it('displays a loading icon', () => {
@@ -606,19 +636,13 @@ describe('CustomStageForm', () => {
   describe('Editing a custom stage', () => {
     beforeEach(() => {
       wrapper = createComponent({
-        isEditingCustomStage: true,
-        initialFields: {
-          ...initData,
+        initialState: {
+          isEditingCustomStage: true,
+          formInitialData,
         },
       });
 
-      wrapper.setData({
-        fields: {
-          ...initData,
-        },
-      });
-
-      return Vue.nextTick();
+      return wrapper.vm.$nextTick();
     });
 
     afterEach(() => {
@@ -635,13 +659,14 @@ describe('CustomStageForm', () => {
           },
         });
 
-        return Vue.nextTick()
+        return wrapper.vm
+          .$nextTick()
           .then(() => {
             wrapper.find(sel.cancel).trigger('click');
-            return Vue.nextTick();
+            return wrapper.vm.$nextTick();
           })
           .then(() => {
-            expect(wrapper.vm.fields).toEqual({ ...initData });
+            expect(wrapper.vm.fields).toEqual({ ...formInitialData });
           });
       });
     });
@@ -662,7 +687,7 @@ describe('CustomStageForm', () => {
           },
         });
 
-        return Vue.nextTick().then(() => {
+        return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.find(sel.submit).attributes('disabled')).toBeUndefined();
         });
       });
@@ -674,7 +699,7 @@ describe('CustomStageForm', () => {
           },
         });
 
-        return Vue.nextTick().then(() => {
+        return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.find(sel.submit).attributes('disabled')).toEqual('disabled');
         });
       });
@@ -689,10 +714,11 @@ describe('CustomStageForm', () => {
           },
         });
 
-        return Vue.nextTick()
+        return wrapper.vm
+          .$nextTick()
           .then(() => {
             wrapper.find(sel.submit).trigger('click');
-            return Vue.nextTick();
+            return wrapper.vm.$nextTick();
           })
           .then(() => {
             ev = findEvent(STAGE_ACTIONS.UPDATE);
@@ -708,17 +734,18 @@ describe('CustomStageForm', () => {
           },
         });
 
-        return Vue.nextTick()
+        return wrapper.vm
+          .$nextTick()
           .then(() => {
             wrapper.find(sel.submit).trigger('click');
-            return Vue.nextTick();
+            return wrapper.vm.$nextTick();
           })
           .then(() => {
             const submitted = findEvent(STAGE_ACTIONS.UPDATE)[0];
-            expect(submitted).not.toEqual([initData]);
+            expect(submitted).not.toEqual([formInitialData]);
             expect(submitted).toEqual([
               {
-                id: initData.id,
+                id: formInitialData.id,
                 start_event_identifier: labelStartEvent.identifier,
                 start_event_label_id: groupLabels[0].id,
                 end_event_identifier: labelStopEvent.identifier,
@@ -733,11 +760,10 @@ describe('CustomStageForm', () => {
     describe('isSavingCustomStage=true', () => {
       beforeEach(() => {
         wrapper = createComponent({
-          isEditingCustomStage: true,
-          initialFields: {
-            ...initData,
+          initialState: {
+            isEditingCustomStage: true,
+            isSavingCustomStage: true,
           },
-          isSavingCustomStage: true,
         });
       });
       it('displays a loading icon', () => {
@@ -749,11 +775,12 @@ describe('CustomStageForm', () => {
   describe('With errors', () => {
     beforeEach(() => {
       wrapper = createComponent({
-        initialFields: initData,
-        errors: customStageFormErrors,
+        initialState: {
+          formErrors: customStageFormErrors,
+        },
       });
 
-      return Vue.nextTick();
+      return wrapper.vm.$nextTick();
     });
 
     afterEach(() => {
@@ -775,7 +802,9 @@ describe('CustomStageForm', () => {
     };
 
     beforeEach(() => {
-      wrapper = createComponent({}, formFieldStubs);
+      wrapper = createComponent({
+        stubs: formFieldStubs,
+      });
     });
 
     describe('without hidden stages', () => {
@@ -795,8 +824,12 @@ describe('CustomStageForm', () => {
 
     describe('with hidden stages', () => {
       beforeEach(() => {
-        wrapper = createComponent({}, formFieldStubs);
-        store.state.stages = [{ id: 'my-stage', title: 'My default stage', hidden: true }];
+        wrapper = createComponent({
+          stubs: formFieldStubs,
+          initialRootGetters: {
+            hiddenStages: () => [{ id: 'my-stage', title: 'My default stage', hidden: true }],
+          },
+        });
       });
 
       it('has stages available to recover', () => {
@@ -825,26 +858,46 @@ describe('CustomStageForm', () => {
   });
 
   describe('initializeFormData', () => {
+    const emptyFieldState = {
+      id: null,
+      name: null,
+      startEventIdentifier: null,
+      startEventLabelId: null,
+      endEventIdentifier: null,
+      endEventLabelId: null,
+    };
+
+    const emptyErrorsState = {
+      id: [],
+      name: [],
+      startEventIdentifier: [],
+      startEventLabelId: [],
+      endEventIdentifier: [],
+      endEventLabelId: [],
+    };
+
     describe('without a startEventIdentifier', () => {
       it('with no errors', () => {
         const res = initializeFormData({
-          initialFields: {},
+          emptyFieldState,
+          fields: {},
         });
-        expect(res.fields).toEqual({});
-        expect(res.fieldErrors).toEqual({
+        expect(res.fields).toEqual(emptyFieldState);
+        expect(res.errors).toMatchObject({
           endEventIdentifier: ['Please select a start event first'],
         });
       });
 
       it('with field errors', () => {
         const res = initializeFormData({
-          initialFields: {},
+          emptyFieldState,
+          fields: {},
           errors: {
             name: ['is reserved'],
           },
         });
-        expect(res.fields).toEqual({});
-        expect(res.fieldErrors).toEqual({
+        expect(res.fields).toEqual(emptyFieldState);
+        expect(res.errors).toMatchObject({
           endEventIdentifier: ['Please select a start event first'],
           name: ['is reserved'],
         });
@@ -854,29 +907,31 @@ describe('CustomStageForm', () => {
     describe('with a startEventIdentifier', () => {
       it('with no errors', () => {
         const res = initializeFormData({
-          initialFields: {
+          emptyFieldState,
+          fields: {
             startEventIdentifier: 'start-event',
           },
           errors: {},
         });
-        expect(res.fields).toEqual({ startEventIdentifier: 'start-event' });
-        expect(res.fieldErrors).toEqual({
-          endEventIdentifier: null,
+        expect(res.fields).toEqual({ ...emptyFieldState, startEventIdentifier: 'start-event' });
+        expect(res.errors).toMatchObject({
+          endEventIdentifier: [],
         });
       });
 
       it('with field errors', () => {
         const res = initializeFormData({
-          initialFields: {
+          emptyFieldState,
+          fields: {
             startEventIdentifier: 'start-event',
           },
           errors: {
             name: ['is reserved'],
           },
         });
-        expect(res.fields).toEqual({ startEventIdentifier: 'start-event' });
-        expect(res.fieldErrors).toEqual({
-          endEventIdentifier: null,
+        expect(res.fields).toEqual({ ...emptyFieldState, startEventIdentifier: 'start-event' });
+        expect(res.errors).toMatchObject({
+          endEventIdentifier: [],
           name: ['is reserved'],
         });
       });
@@ -885,7 +940,8 @@ describe('CustomStageForm', () => {
     describe('with all fields set', () => {
       it('with no errors', () => {
         const res = initializeFormData({
-          initialFields: {
+          emptyFieldState,
+          fields: {
             id: 1,
             name: 'cool-stage',
             startEventIdentifier: 'start-event',
@@ -903,14 +959,13 @@ describe('CustomStageForm', () => {
           startEventLabelId: 10,
           endEventLabelId: 20,
         });
-        expect(res.fieldErrors).toEqual({
-          endEventIdentifier: null,
-        });
+        expect(res.errors).toEqual(emptyErrorsState);
       });
 
       it('with field errors', () => {
         const res = initializeFormData({
-          initialFields: {
+          emptyFieldState,
+          fields: {
             id: 1,
             name: 'cool-stage',
             startEventIdentifier: 'start-event',
@@ -922,6 +977,7 @@ describe('CustomStageForm', () => {
             name: ['is reserved'],
           },
         });
+
         expect(res.fields).toEqual({
           id: 1,
           name: 'cool-stage',
@@ -930,8 +986,7 @@ describe('CustomStageForm', () => {
           startEventLabelId: 10,
           endEventLabelId: 20,
         });
-        expect(res.fieldErrors).toEqual({
-          endEventIdentifier: null,
+        expect(res.errors).toMatchObject({
           name: ['is reserved'],
         });
       });

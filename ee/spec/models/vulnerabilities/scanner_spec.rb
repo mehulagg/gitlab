@@ -2,10 +2,11 @@
 
 require 'spec_helper'
 
-describe Vulnerabilities::Scanner do
+RSpec.describe Vulnerabilities::Scanner do
   describe 'associations' do
-    it { is_expected.to have_many(:occurrences).class_name('Vulnerabilities::Occurrence') }
     it { is_expected.to belong_to(:project) }
+    it { is_expected.to have_many(:findings).class_name('Vulnerabilities::Finding') }
+    it { is_expected.to have_many(:security_findings).class_name('Security::Finding') }
   end
 
   describe 'validations' do
@@ -15,6 +16,7 @@ describe Vulnerabilities::Scanner do
     it { is_expected.to validate_presence_of(:project) }
     it { is_expected.to validate_presence_of(:external_id) }
     it { is_expected.to validate_uniqueness_of(:external_id).scoped_to(:project_id) }
+    it { is_expected.to validate_length_of(:vendor).is_at_most(255) }
   end
 
   describe '.with_external_id' do

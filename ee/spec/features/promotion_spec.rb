@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Promotions', :js do
+RSpec.describe 'Promotions', :js do
   let(:admin) { create(:admin) }
   let(:user) { create(:user) }
   let(:otherdeveloper) { create(:user, name: 'TheOtherDeveloper') }
@@ -12,97 +12,9 @@ describe 'Promotions', :js do
   let!(:issue) { create(:issue, project: project, author: user) }
   let(:otherproject) { create(:project, :repository, namespace: otherdeveloper.namespace) }
 
-  describe 'if you have a license' do
-    before do
-      project.add_maintainer(user)
-    end
-
-    it 'shows no promotion at all' do
-      sign_in(user)
-      visit edit_project_path(project)
-
-      expect(page).not_to have_selector('#promote_service_desk')
-    end
-  end
-
-  describe 'for project features in general on premise' do
-    context 'no license installed' do
-      before do
-        allow(License).to receive(:current).and_return(nil)
-        stub_application_setting(check_namespace_plan: false)
-        project.add_maintainer(user)
-      end
-
-      it 'has the contact admin line' do
-        sign_in(user)
-        visit edit_project_path(project)
-
-        expect(find('#promote_service_desk')).to have_content 'Contact your Administrator to upgrade your license.'
-      end
-
-      it 'has the start trial button' do
-        sign_in(admin)
-        visit edit_project_path(project)
-
-        expect(find('#promote_service_desk')).to have_content 'Start GitLab Ultimate trial'
-      end
-    end
-  end
-
-  describe 'for project features in general', :js do
-    context 'for .com' do
-      before do
-        project.add_maintainer(user)
-        otherproject.add_maintainer(user)
-
-        stub_application_setting(check_namespace_plan: true)
-        allow(Gitlab).to receive(:com?) { true }
-
-        sign_in(user)
-      end
-
-      it "has the 'Upgrade your plan' button" do
-        visit edit_project_path(project)
-
-        expect(find('#promote_service_desk')).to have_content 'Upgrade your plan'
-      end
-
-      it 'has the contact owner line' do
-        visit edit_project_path(otherproject)
-
-        expect(find('#promote_service_desk')).to have_content 'Contact owner'
-      end
-    end
-  end
-
-  describe 'for service desk', :js do
-    before do
-      allow(License).to receive(:current).and_return(nil)
-      stub_application_setting(check_namespace_plan: false)
-
-      project.add_maintainer(user)
-      sign_in(user)
-    end
-
-    it 'appears in project edit page' do
-      visit edit_project_path(project)
-
-      expect(find('#promote_service_desk')).to have_content 'Improve customer support with GitLab Service Desk.'
-    end
-
-    it 'does not show when cookie is set' do
-      visit edit_project_path(project)
-
-      within('#promote_service_desk') do
-        find('.close').click
-      end
-
-      wait_for_requests
-
-      visit edit_project_path(project)
-
-      expect(page).not_to have_selector('#promote_service_desk')
-    end
+  before do
+    stub_feature_flags promotion_issue_weight_trial_cta: false,
+                       promotion_issue_weight_session_dismiss: false
   end
 
   describe 'for merge request improve', :js do
@@ -306,12 +218,14 @@ describe 'Promotions', :js do
       expect(find('.promotion-issue-weight-sidebar-message')).to have_content 'Improve issues management with Issue weight and GitLab Enterprise Edition'
     end
 
-    it 'is removed after dismissal' do
+    it 'is removed after dismissal', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/222518' do
       visit project_issue_path(project, issue)
       wait_for_requests
 
-      find('.btn-link.js-toggle-button.js-weight-sidebar-callout').click
-      find('.js-weight-sidebar-callout .js-close-callout').click
+      within 'div.js-weight-sidebar-callout' do
+        find('.btn-link.js-toggle-button.js-weight-sidebar-callout').click
+        click_link "Don't show me this again"
+      end
 
       expect(page).not_to have_selector('.js-weight-sidebar-callout')
     end
@@ -336,6 +250,41 @@ describe 'Promotions', :js do
 
       expect(page).to have_selector('.js-weight-sidebar-callout')
       expect(page).to have_selector('.promotion-issue-sidebar-message', visible: false)
+    end
+
+    context 'when checking namespace plans' do
+      before do
+        stub_application_setting(check_namespace_plan: true)
+
+        group.add_owner(user)
+      end
+
+      it 'appears on the page', :js do
+        visit project_issue_path(project, issue)
+        wait_for_requests
+
+        find('.btn-link.js-toggle-button.js-weight-sidebar-callout').click
+
+        expect(find('.issue-weights-upgrade-cta')).to have_content 'Upgrade your plan'
+        expect(find('.js-close.js-close-callout.tr-issue-weights-dont-show-me-again')).to have_content "Don't show me this again"
+      end
+
+      context 'when promotion feature flags are enabled' do
+        before do
+          stub_feature_flags promotion_issue_weight_trial_cta: true,
+                             promotion_issue_weight_session_dismiss: true
+        end
+
+        it 'appears on the page', :js do
+          visit project_issue_path(project, issue)
+          wait_for_requests
+
+          find('.btn-link.js-toggle-button.js-weight-sidebar-callout').click
+
+          expect(page).to have_link 'Try it for free', href: new_trial_registration_path(glm_source: 'gitlab.com', glm_content: 'discover-issue-weights'), class: 'issue-weights-trial-cta'
+          expect(find('.js-close-callout.js-close-session.tr-issue-weights-not-now-cta')).to have_content 'Not now, thanks!'
+        end
+      end
     end
   end
 
@@ -419,7 +368,7 @@ describe 'Promotions', :js do
 
       submit_search('chosen')
 
-      expect(find('#promote_advanced_search')).to have_content 'Improve search with Advanced Global Search and GitLab Enterprise Edition.'
+      expect(find('#promote_advanced_search')).to have_content 'Improve search with Advanced Search and GitLab Enterprise Edition.'
     end
 
     it 'does not show when cookie is set' do

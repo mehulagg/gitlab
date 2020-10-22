@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::OAuth::User do
+RSpec.describe Gitlab::Auth::OAuth::User do
   include LdapHelpers
 
   describe 'login through kerberos with linkable LDAP user' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::EE::API::Entities::Scim::Error do
+RSpec.describe ::EE::API::Entities::Scim::Error do
   let(:params) { { detail: 'error' } }
   let(:entity) do
     described_class.new(params)

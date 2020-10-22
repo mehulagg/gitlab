@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Gitlab::CodeOwners::Entry do
+RSpec.describe Gitlab::CodeOwners::Entry do
   subject(:entry) do
     described_class.new(
       "/**/file",
@@ -92,7 +92,7 @@ describe Gitlab::CodeOwners::Entry do
 
     it 'only adds users mentioned in the owner line' do
       other_user = create(:user)
-      other_user.emails
+      other_user.emails.load
 
       entry.add_matching_users_from([other_user, user])
 
@@ -109,7 +109,7 @@ describe Gitlab::CodeOwners::Entry do
 
     it 'adds users by primary email, case-insensitively' do
       second_user = create(:user, email: 'JANE@GITLAB.ORG')
-      second_user.emails
+      second_user.emails.load
 
       entry.add_matching_users_from([second_user, user])
 
@@ -119,7 +119,7 @@ describe Gitlab::CodeOwners::Entry do
     it 'adds users by secondary email, case-insensitively' do
       second_user = create(:user)
       second_user.emails.create!(email: 'JaNe@GitLab.org')
-      second_user.emails
+      second_user.emails.load
 
       entry.add_matching_users_from([second_user, user])
 

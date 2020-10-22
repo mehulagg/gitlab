@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DashboardEnvironmentsSerializer do
+RSpec.describe DashboardEnvironmentsSerializer do
   describe '.represent' do
     it 'returns an empty array when there are no projects' do
       current_user = create(:user)

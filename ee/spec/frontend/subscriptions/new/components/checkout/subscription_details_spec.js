@@ -23,12 +23,16 @@ describe('Subscription Details', () => {
     { id: 483, name: 'My second group', users: 12 },
   ];
 
-  const initialData = {
-    planData: JSON.stringify(planData),
-    groupData: JSON.stringify(groupData),
-    planId: 'secondPlanId',
-    setupForCompany: 'true',
-    fullName: 'Full Name',
+  let initialNamespaceId = null;
+  const initialData = namespaceId => {
+    return {
+      planData: JSON.stringify(planData),
+      groupData: JSON.stringify(groupData),
+      planId: 'secondPlanId',
+      namespaceId,
+      setupForCompany: 'true',
+      fullName: 'Full Name',
+    };
   };
 
   const createComponent = () => {
@@ -44,7 +48,7 @@ describe('Subscription Details', () => {
   const companyLink = () => wrapper.find({ ref: 'company-link' });
 
   beforeEach(() => {
-    store = createStore(initialData);
+    store = createStore(initialData(initialNamespaceId));
     createComponent();
   });
 
@@ -187,6 +191,55 @@ describe('Subscription Details', () => {
 
       it('should set the min number of users to 1', () => {
         expect(numberOfUsersInput().attributes('min')).toBe('1');
+      });
+    });
+  });
+
+  describe('An existing user coming from group billing page', () => {
+    beforeEach(() => {
+      initialNamespaceId = '132';
+      store.state.isNewUser = false;
+    });
+
+    it('should not display an input field for the company or group name', () => {
+      expect(organizationNameInput().exists()).toBe(false);
+    });
+
+    it('should display the group select', () => {
+      expect(groupSelect().exists()).toBe(true);
+    });
+
+    it('should enable the number of users input field', () => {
+      expect(numberOfUsersInput().attributes('disabled')).toBeUndefined();
+    });
+
+    it('should set the min number of users to 3', () => {
+      expect(numberOfUsersInput().attributes('min')).toBe('3');
+    });
+
+    it('should set the selected group to initial namespace id', () => {
+      expect(groupSelect().element.value).toBe('132');
+    });
+
+    it('should not show a link to change to setting up for a company', () => {
+      expect(companyLink().exists()).toBe(false);
+    });
+
+    describe('selecting an existing group', () => {
+      beforeEach(() => {
+        store.commit(types.UPDATE_SELECTED_GROUP, 483);
+      });
+
+      it('should display the correct description', () => {
+        expect(wrapper.text()).toContain('Your subscription will be applied to this group');
+      });
+
+      it('should set the min number of users to 12', () => {
+        expect(numberOfUsersInput().attributes('min')).toBe('12');
+      });
+
+      it('should set the selected group to the user selected namespace id', () => {
+        expect(groupSelect().element.value).toBe('483');
       });
     });
   });

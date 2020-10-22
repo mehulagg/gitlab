@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Admin Groups' do
+RSpec.describe 'Admin Groups' do
   include Select2Helper
 
   let(:internal) { Gitlab::VisibilityLevel::INTERNAL }
@@ -11,6 +11,8 @@ describe 'Admin Groups' do
   let!(:current_user) { create(:admin) }
 
   before do
+    stub_feature_flags(vue_group_members_list: false)
+
     sign_in(current_user)
     stub_application_setting(default_group_visibility: internal)
   end
@@ -181,7 +183,7 @@ describe 'Admin Groups' do
     end
   end
 
-  describe 'admin remove himself from a group', :js do
+  describe 'admin remove themself from a group', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/222342' do
     it 'removes admin from the group' do
       group.add_user(current_user, Gitlab::Access::DEVELOPER)
 
@@ -192,7 +194,7 @@ describe 'Admin Groups' do
         expect(page).to have_content('Developer')
       end
 
-      accept_confirm { find(:css, 'li', text: current_user.name).find(:css, 'a.btn-remove').click }
+      accept_confirm { find(:css, 'li', text: current_user.name).find(:css, 'a.btn-danger').click }
 
       visit group_group_members_path(group)
 

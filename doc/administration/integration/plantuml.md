@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, howto
+---
+
 # PlantUML & GitLab
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/8537) in GitLab 8.16.
@@ -70,7 +77,7 @@ sudo service tomcat8 restart
 Once the Tomcat service restarts the PlantUML service will be ready and
 listening for requests on port 8080:
 
-```text
+```plaintext
 http://localhost:8080/plantuml
 ```
 
@@ -105,15 +112,44 @@ To activate the changes, run the following command:
 sudo gitlab-ctl reconfigure
 ```
 
+### Security
+
+PlantUML has features that allows fetching network resources.
+
+```plaintext
+@startuml
+start
+    ' ...
+    !include http://localhost/
+stop;
+@enduml
+```
+
+**If you self-host the PlantUML server, network controls should be put in place to isolate it.**
+
 ## GitLab
 
 You need to enable PlantUML integration from Settings under Admin Area. To do
 that, login with an Admin account and do following:
 
-- In GitLab, go to **Admin Area > Settings > Integrations**.
+- In GitLab, go to **Admin Area > Settings > General**.
 - Expand the **PlantUML** section.
 - Check **Enable PlantUML** checkbox.
 - Set the PlantUML instance as `https://gitlab.example.com/-/plantuml/`.
+
+NOTE: **Note:**
+If you are using a PlantUML server running v1.2020.9 and
+above (for example, [plantuml.com](https://plantuml.com)), set the `PLANTUML_ENCODING`
+environment variable to enable the `deflate` compression. On Omnibus,
+this can be done set in `/etc/gitlab.rb`:
+
+```ruby
+gitlab_rails['env'] = { 'PLANTUML_ENCODING' => 'deflate' }
+```
+
+From GitLab 13.1 and later, PlantUML integration now
+[requires a header prefix in the URL](https://github.com/plantuml/plantuml/issues/117#issuecomment-6235450160)
+to distinguish different encoding types.
 
 ## Creating Diagrams
 
@@ -131,7 +167,7 @@ our AsciiDoc snippets, wikis, and repositories using delimited blocks:
 
 - **AsciiDoc**
 
-  ```text
+  ```plaintext
   [plantuml, format="png", id="myDiagram", width="200px"]
   ----
   Bob->Alice : hello
@@ -141,7 +177,7 @@ our AsciiDoc snippets, wikis, and repositories using delimited blocks:
 
 - **reStructuredText**
 
-  ```text
+  ```plaintext
   .. plantuml::
      :caption: Caption with **bold** and *italic*
 
@@ -169,10 +205,10 @@ diagram delimiters `@startuml`/`@enduml` as these are replaced by the AsciiDoc `
 
 Some parameters can be added to the AsciiDoc block definition:
 
-- *format*: Can be either `png` or `svg`. Note that `svg` is not supported by
+- `format`: Can be either `png` or `svg`. Note that `svg` is not supported by
   all browsers so use with care. The default is `png`.
-- *id*: A CSS id added to the diagram HTML tag.
-- *width*: Width attribute added to the image tag.
-- *height*: Height attribute added to the image tag.
+- `id`: A CSS ID added to the diagram HTML tag.
+- `width`: Width attribute added to the image tag.
+- `height`: Height attribute added to the image tag.
 
 Markdown does not support any parameters and will always use PNG format.

@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'html/pipeline'
 
-describe Banzai::Filter::LabelReferenceFilter do
+RSpec.describe Banzai::Filter::LabelReferenceFilter do
   include FilterSpecHelper
 
   let(:project)   { create(:project, :public, name: 'sample-project') }
@@ -31,6 +31,19 @@ describe Banzai::Filter::LabelReferenceFilter do
     expect(doc.css('a').first.attr('class')).to eq 'gfm gfm-label has-tooltip gl-link gl-label-link'
   end
 
+  it 'avoids N+1 cached queries', :use_sql_query_cache, :request_store do
+    # Run this once to establish a baseline
+    reference_filter("Label #{reference}")
+
+    control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
+      reference_filter("Label #{reference}")
+    end
+
+    labels_markdown = Array.new(10, "Label #{reference}").join('\n')
+
+    expect { reference_filter(labels_markdown) }.not_to exceed_all_query_limit(control_count.count)
+  end
+
   it 'includes a data-project attribute' do
     doc = reference_filter("Label #{reference}")
     link = doc.css('a').first
@@ -47,12 +60,32 @@ describe Banzai::Filter::LabelReferenceFilter do
     expect(link.attr('data-label')).to eq label.id.to_s
   end
 
-  it 'supports an :only_path context' do
+  it 'includes protocol when :only_path not present' do
+    doc = reference_filter("Label #{reference}")
+    link = doc.css('a').first.attr('href')
+
+    expect(link).to match %r(https?://)
+  end
+
+  it 'does not include protocol when :only_path true' do
     doc = reference_filter("Label #{reference}", only_path: true)
     link = doc.css('a').first.attr('href')
 
     expect(link).not_to match %r(https?://)
+  end
+
+  it 'links to issue list when :label_url_method is not present' do
+    doc = reference_filter("Label #{reference}", only_path: true)
+    link = doc.css('a').first.attr('href')
+
     expect(link).to eq urls.project_issues_path(project, label_name: label.name)
+  end
+
+  it 'links to merge request list when `label_url_method: :project_merge_requests_url`' do
+    doc = reference_filter("Label #{reference}", { only_path: true, label_url_method: "project_merge_requests_url" })
+    link = doc.css('a').first.attr('href')
+
+    expect(link).to eq urls.project_merge_requests_path(project, label_name: label.name)
   end
 
   context 'project that does not exist referenced' do

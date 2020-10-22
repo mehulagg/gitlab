@@ -1,6 +1,13 @@
-# Feature Flag User Lists API **(PREMIUM)**
+---
+stage: Release
+group: Progressive Delivery
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/205409) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.10.
+# Feature flag user lists API **(CORE)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/205409) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.10.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212318) to GitLab Core in 13.5.
 
 API for accessing GitLab Feature Flag User Lists.
 
@@ -23,7 +30,7 @@ GET /projects/:id/feature_flags_user_lists
 | `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding).                                            |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/feature_flags_user_lists
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/feature_flags_user_lists"
 ```
 
 Example response:
@@ -63,10 +70,10 @@ POST /projects/:id/feature_flags_user_lists
 | ------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------|
 | `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding).       |
 | `name`              | string           | yes        | The name of the feature flag. |
-| `user_xids`         | string           | yes        | A comma separated list of user ids. |
+| `user_xids`         | string           | yes        | A comma separated list of user IDs. |
 
 ```shell
-curl https://gitlab.example.com/api/v4/projects/1/feature_flags_user_lists \
+curl "https://gitlab.example.com/api/v4/projects/1/feature_flags_user_lists" \
      --header "PRIVATE-TOKEN: <your_access_token>" \
      --header "Content-type: application/json" \
      --data @- << EOF
@@ -105,7 +112,7 @@ GET /projects/:id/feature_flags_user_lists/:iid
 | `iid`               | integer/string   | yes        | The internal ID of the project's feature flag user list.                               |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/feature_flags_user_lists/1
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/feature_flags_user_lists/1"
 ```
 
 Example response:
@@ -119,6 +126,47 @@ Example response:
    "project_id": 1,
    "created_at": "2020-02-04T08:13:10.507Z",
    "updated_at": "2020-02-04T08:13:10.507Z",
+}
+```
+
+## Update a feature flag user list
+
+Updates a feature flag user list.
+
+```plaintext
+PUT /projects/:id/feature_flags_user_lists/:iid
+```
+
+| Attribute           | Type             | Required   | Description                                                                            |
+| ------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------|
+| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding).       |
+| `iid`               | integer/string   | yes        | The internal ID of the project's feature flag user list.                               |
+| `name`              | string           | no         | The name of the feature flag.                                                          |
+| `user_xids`         | string           | no         | A comma separated list of user IDs.                                                    |
+
+```shell
+curl "https://gitlab.example.com/api/v4/projects/1/feature_flags_user_lists/1" \
+     --header "PRIVATE-TOKEN: <your_access_token>" \
+     --header "Content-type: application/json" \
+     --request PUT \
+     --data @- << EOF
+{
+    "user_xids": "user2,user3,user4"
+}
+EOF
+```
+
+Example response:
+
+```json
+{
+   "name": "my_user_list",
+   "user_xids": "user2,user3,user4",
+   "id": 1,
+   "iid": 1,
+   "project_id": 1,
+   "created_at": "2020-02-04T08:32:27.288Z",
+   "updated_at": "2020-02-05T09:33:17.179Z"
 }
 ```
 
@@ -136,5 +184,5 @@ DELETE /projects/:id/feature_flags_user_lists/:iid
 | `iid`               | integer/string   | yes        | The internal ID of the project's feature flag user list                                |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" --request DELETE https://gitlab.example.com/api/v4/projects/1/feature_flags_user_lists/1
+curl --header "PRIVATE-TOKEN: <your_access_token>" --request DELETE "https://gitlab.example.com/api/v4/projects/1/feature_flags_user_lists/1"
 ```

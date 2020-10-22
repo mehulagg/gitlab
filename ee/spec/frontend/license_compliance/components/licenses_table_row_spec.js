@@ -1,9 +1,14 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlLink, GlSkeletonLoading, GlBadge } from '@gitlab/ui';
+import {
+  GlLink,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlBadge,
+  GlFriendlyWrap,
+} from '@gitlab/ui';
 import LicenseComponentLinks from 'ee/license_compliance/components/license_component_links.vue';
 import LicensesTableRow from 'ee/license_compliance/components/licenses_table_row.vue';
-import { makeLicense } from './utils';
 import { LICENSE_APPROVAL_CLASSIFICATION } from 'ee/vue_shared/license_compliance/constants';
+import { makeLicense } from './utils';
 
 describe('LicensesTableRow component', () => {
   let wrapper;
@@ -17,7 +22,7 @@ describe('LicensesTableRow component', () => {
 
   const findLoading = () => wrapper.find(GlSkeletonLoading);
   const findContent = () => wrapper.find('.js-license-row');
-  const findNameSeciton = () => findContent().find('.section-30');
+  const findNameSection = () => findContent().find('.section-30');
   const findComponentSection = () => findContent().find('.section-70');
 
   beforeEach(() => {
@@ -61,7 +66,7 @@ describe('LicensesTableRow component', () => {
     });
 
     it('shows name', () => {
-      const nameLink = findNameSeciton().find(GlLink);
+      const nameLink = findNameSection().find(GlLink);
 
       expect(nameLink.exists()).toBe(true);
       expect(nameLink.attributes('href')).toEqual(license.url);
@@ -81,6 +86,26 @@ describe('LicensesTableRow component', () => {
     });
   });
 
+  describe('when a license has a url in name field', () => {
+    beforeEach(() => {
+      license.url = null;
+      license.name = 'https://github.com/dotnet/corefx/blob/master/LICENSE.TXT';
+
+      factory({
+        isLoading: false,
+        license,
+      });
+    });
+
+    it('renders the GlFriendlyWrap and GlLink components', () => {
+      const nameSection = findNameSection();
+
+      expect(nameSection.find(GlLink).exists()).toBe(true);
+      expect(nameSection.find(GlFriendlyWrap).exists()).toBe(true);
+      expect(nameSection.find(GlFriendlyWrap).props().text).toBe(license.name);
+    });
+  });
+
   describe('with a license without a url', () => {
     beforeEach(() => {
       license.url = null;
@@ -92,7 +117,7 @@ describe('LicensesTableRow component', () => {
     });
 
     it('does not show url link for name', () => {
-      const nameSection = findNameSeciton();
+      const nameSection = findNameSection();
 
       expect(nameSection.text()).toContain(license.name);
       expect(nameSection.find(GlLink).exists()).toBe(false);

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApprovalRuleLike do
+RSpec.describe ApprovalRuleLike do
   let(:user1) { create(:user) }
   let(:user2) { create(:user) }
   let(:user3) { create(:user) }

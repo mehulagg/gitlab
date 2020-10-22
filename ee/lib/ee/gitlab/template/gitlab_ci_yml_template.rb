@@ -14,8 +14,8 @@ module EE
             super.merge(categories_ee)
           end
 
-          override :disabled_templates
-          def disabled_templates
+          override :additional_excluded_patterns
+          def additional_excluded_patterns
             []
           end
 

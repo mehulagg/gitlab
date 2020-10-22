@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Root explore' do
+RSpec.describe 'Root explore' do
   let_it_be(:public_project) { create(:project, :public) }
   let_it_be(:archived_project) { create(:project, :archived) }
   let_it_be(:internal_project) { create(:project, :internal) }
@@ -29,5 +29,13 @@ describe 'Root explore' do
     end
 
     include_examples 'shows public projects'
+  end
+
+  it 'includes canonical link to explore projects url' do
+    visit explore_root_path
+
+    canonial_link = page.find("head link[rel='canonical']", visible: false)
+
+    expect(canonial_link[:href]).to eq explore_projects_url
   end
 end

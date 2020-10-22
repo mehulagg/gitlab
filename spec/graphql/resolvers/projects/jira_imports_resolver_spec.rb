@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Resolvers::Projects::JiraImportsResolver do
+RSpec.describe Resolvers::Projects::JiraImportsResolver do
   include GraphqlHelpers
 
   describe '#resolve' do
@@ -39,16 +39,6 @@ describe Resolvers::Projects::JiraImportsResolver do
       let_it_be(:current_user) { user }
       let_it_be(:jira_import1) { create(:jira_import_state, :finished, project: project, jira_project_key: 'AA', created_at: 2.days.ago) }
       let_it_be(:jira_import2) { create(:jira_import_state, :finished, project: project, jira_project_key: 'BB', created_at: 5.days.ago) }
-
-      context 'when feature flag disabled' do
-        let(:current_user) { user }
-
-        before do
-          stub_feature_flags(jira_issue_import: false)
-        end
-
-        it_behaves_like 'no Jira import access'
-      end
 
       context 'when user cannot read Jira imports' do
         context 'when anonymous user' do

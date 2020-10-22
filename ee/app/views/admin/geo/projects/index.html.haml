@@ -1,7 +1,5 @@
-- page_title 'Geo Projects'
-- params[:sync_status] ||= []
-
-= render 'admin/geo/shared/filter_nav', replicable_type: _('projects'), replicable_controller: 'admin/geo/projects', action_buttons: @action_buttons
+= render 'admin/geo/shared/replication_nav'
+= render 'admin/geo/shared/filter_nav', replicable_name: _('projects'), replicable_controller: 'admin/geo/projects', action_buttons: @action_buttons
 - case params[:sync_status]
 - when 'failed'
   = render(partial: 'failed')

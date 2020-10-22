@@ -1,31 +1,31 @@
 <script>
 import { escape } from 'lodash';
-import { s__, __ } from '../../locale';
-import { APPLICATION_STATUS, INGRESS, LOGGING_MODE, BLOCKING_MODE } from '~/clusters/constants';
 import {
   GlAlert,
   GlSprintf,
   GlLink,
   GlToggle,
-  GlDeprecatedButton,
+  GlButton,
   GlDropdown,
   GlDropdownItem,
   GlIcon,
 } from '@gitlab/ui';
+import modSecurityLogo from 'images/cluster_app_logos/gitlab.png';
+import { s__, __ } from '../../locale';
+import { APPLICATION_STATUS, INGRESS, LOGGING_MODE, BLOCKING_MODE } from '~/clusters/constants';
 import eventHub from '~/clusters/event_hub';
-import modSecurityLogo from 'images/cluster_app_logos/modsecurity.png';
 
 const { UPDATING, UNINSTALLING, INSTALLING, INSTALLED, UPDATED } = APPLICATION_STATUS;
 
 export default {
-  title: 'ModSecurity Web Application Firewall',
+  title: __('Web Application Firewall'),
   modsecurityUrl: 'https://modsecurity.org/about.html',
   components: {
     GlAlert,
     GlSprintf,
     GlLink,
     GlToggle,
-    GlDeprecatedButton,
+    GlButton,
     GlDropdown,
     GlDropdownItem,
     GlIcon,
@@ -168,7 +168,7 @@ export default {
       }}
     </gl-alert>
     <div class="gl-responsive-table-row-layout" role="row">
-      <div class="table-section append-right-8 section-align-top" role="gridcell">
+      <div class="table-section gl-mr-3 section-align-top" role="gridcell">
         <img
           :src="modSecurityLogo"
           :alt="`${$options.title} logo`"
@@ -198,13 +198,7 @@ export default {
             </strong>
           </p>
           <div class="form-check form-check-inline mt-3">
-            <gl-toggle
-              v-model="modSecurityEnabled"
-              :label-on="__('Enabled')"
-              :label-off="__('Disabled')"
-              :disabled="saveButtonDisabled"
-              label-position="right"
-            />
+            <gl-toggle v-model="modSecurityEnabled" :disabled="saveButtonDisabled" />
           </div>
           <div
             v-if="ingress.modsecurity_enabled"
@@ -234,18 +228,24 @@ export default {
               </gl-dropdown>
             </div>
           </div>
-          <div v-if="showButtons" class="mt-3">
-            <gl-deprecated-button
-              class="btn-success inline mr-1"
+          <div v-if="showButtons" class="gl-mt-5 gl-display-flex">
+            <gl-button
+              variant="success"
+              category="primary"
+              data-qa-selector="save_ingress_modsecurity_settings"
               :loading="saving"
               :disabled="saveButtonDisabled"
               @click="updateApplication"
             >
               {{ saveButtonLabel }}
-            </gl-deprecated-button>
-            <gl-deprecated-button :disabled="saveButtonDisabled" @click="resetStatus">
+            </gl-button>
+            <gl-button
+              data-qa-selector="cancel_ingress_modsecurity_settings"
+              :disabled="saveButtonDisabled"
+              @click="resetStatus"
+            >
               {{ __('Cancel') }}
-            </gl-deprecated-button>
+            </gl-button>
           </div>
         </div>
       </div>

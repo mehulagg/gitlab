@@ -1,6 +1,6 @@
 - @can_bulk_update = can?(current_user, :admin_epic, @group) && @group.feature_available?(:group_bulk_edit)
 
-- page_title "Epics"
+- page_title _("Epics")
 
 .top-area
   = render 'shared/issuable/epic_nav', type: :epics

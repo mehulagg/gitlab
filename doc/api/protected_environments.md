@@ -1,6 +1,13 @@
+---
+stage: Release
+group: Release Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: concepts, howto
+---
+
 # Protected environments API **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/30595) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.8.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30595) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.8.
 
 ## Valid access levels
 
@@ -26,7 +33,7 @@ GET /projects/:id/protected_environments
 | `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/projects/5/protected_environments/'
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/protected_environments/"
 ```
 
 Example response:
@@ -61,7 +68,7 @@ GET /projects/:id/protected_environments/:name
 | `name` | string | yes | The name of the protected environment |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/projects/5/protected_environments/production'
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/protected_environments/production"
 ```
 
 Example response:
@@ -89,7 +96,7 @@ POST /projects/:id/protected_environments
 ```
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/projects/5/protected_environments?name=staging&deploy_access_levels%5B%5D%5Buser_id%5D=1'
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/protected_environments?name=staging&deploy_access_levels%5B%5D%5Buser_id%5D=1"
 ```
 
 | Attribute | Type | Required | Description |
@@ -127,7 +134,7 @@ DELETE /projects/:id/protected_environments/:name
 ```
 
 ```shell
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/projects/5/protected_environments/staging'
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/protected_environments/staging"
 ```
 
 | Attribute | Type | Required | Description |

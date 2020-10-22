@@ -5,16 +5,12 @@ module Projects
     class CreatePolicyService < ::BaseService
       def execute
         policy = create_policy(find_software_license, params[:classification])
-        success(software_license_policy: license_compliance.report_for(policy))
+        success(software_license_policy: project.license_compliance.report_for(policy))
       rescue ActiveRecord::RecordInvalid => exception
         error(exception.record.errors, :unprocessable_entity)
       end
 
       private
-
-      def license_compliance
-        @license_compliance ||= ::SCA::LicenseCompliance.new(project)
-      end
 
       def create_policy(software_license, classification)
         raise error_for(:classification, :invalid) unless known?(classification)

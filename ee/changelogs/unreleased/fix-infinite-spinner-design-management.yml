@@ -1,5 +1,0 @@
----
-title: Fix infinte loading spinner when visiting non-existent design
-merge_request: 30263
-author:
-type: fixed

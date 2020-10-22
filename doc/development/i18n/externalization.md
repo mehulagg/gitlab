@@ -7,6 +7,9 @@ For working with internationalization (i18n),
 used tool for this task and there are a lot of applications that will help us to
 work with it.
 
+TIP: **Tip:**
+All `rake` commands described on this page must be run on a GitLab instance, usually GDK.
+
 ## Setting up GitLab Development Kit (GDK)
 
 In order to be able to work on the [GitLab Community Edition](https://gitlab.com/gitlab-org/gitlab-foss)
@@ -95,7 +98,8 @@ Active Record's `:message` option accepts a `Proc`, so we can do this instead:
 validates :group_id, uniqueness: { scope: [:project_id], message: -> (object, data) { _("already shared with this group") } }
 ```
 
-NOTE: **Note:** Messages in the API (`lib/api/` or `app/graphql`) do
+NOTE: **Note:**
+Messages in the API (`lib/api/` or `app/graphql`) do
 not need to be externalised.
 
 ### HAML files
@@ -131,13 +135,96 @@ You can mark that content for translation with:
 In JavaScript we added the `__()` (double underscore parenthesis) function that
 you can import from the `~/locale` file. For instance:
 
-```js
+```javascript
 import { __ } from '~/locale';
 const label = __('Subscribe');
 ```
 
 In order to test JavaScript translations you have to change the GitLab
-localization to other language than English and you have to generate JSON files
+localization to another language than English and you have to generate JSON files
+using `bin/rake gettext:po_to_json` or `bin/rake gettext:compile`.
+
+### Vue files
+
+In Vue files we make both the `__()` (double underscore parenthesis) function and the `s__()` (namespaced double underscore parenthesis) function available that you can import from the `~/locale` file. For instance:
+
+```javascript
+import { __, s__ } from '~/locale';
+const label = __('Subscribe');
+const nameSpacedlabel = __('Plan|Subscribe');
+```
+
+For the static text strings we suggest two patterns for using these translations in Vue files:
+
+- External constants file:
+
+  ```javascript
+  javascripts
+  │
+  └───alert_settings
+  │   │   constants.js
+  │   └───components
+  │       │   alert_settings_form.vue
+
+
+  // constants.js
+
+  import { s__ } from '~/locale';
+
+  /* Integration constants */
+
+  export const I18N_ALERT_SETTINGS_FORM = {
+    saveBtnLabel: __('Save changes'),
+  };
+
+
+  // alert_settings_form.vue
+
+  import {
+    I18N_ALERT_SETTINGS_FORM,
+  } from '../constants';
+
+  <script>
+    export default {
+      i18n: {
+        I18N_ALERT_SETTINGS_FORM,
+      }
+    }
+  </script>
+
+  <template>
+    <gl-button
+      ref="submitBtn"
+      variant="success"
+      type="submit"
+    >
+      {{ $options.i18n.I18N_ALERT_SETTINGS_FORM }}
+    </gl-button>
+  </template>
+  ```
+
+  When possible, you should opt for this pattern, as this allows you to import these strings directly into your component specs for re-use during testing.
+
+- Internal component `$options` object:
+
+  ```javascript
+  <script>
+    export default {
+      i18n: {
+        buttonLabel: s__('Plan|Button Label')
+      }
+    },
+  </script>
+
+  <template>
+    <gl-button :aria-label="$options.i18n.buttonLabel">
+      {{ $options.i18n.buttonLabel }}
+    </gl-button>
+  </template>
+  ```
+
+In order to visually test the Vue translations you have to change the GitLab
+localization to another language than English and you have to generate JSON files
 using `bin/rake gettext:po_to_json` or `bin/rake gettext:compile`.
 
 ### Dynamic translations
@@ -167,7 +254,7 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
 
 - In JavaScript (when Vue cannot be used):
 
-  ```js
+  ```javascript
   import { __, sprintf } from '~/locale';
 
   sprintf(__('Hello %{username}'), { username: 'Joe' }); // => 'Hello Joe'
@@ -180,7 +267,7 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
   escape any interpolated dynamic values yourself, for instance using
   `escape` from `lodash`.
 
-  ```js
+  ```javascript
   import { escape } from 'lodash';
   import { __, sprintf } from '~/locale';
 
@@ -195,7 +282,7 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
   // => 'This is &lt;strong&gt;&lt;script&gt;alert(&#x27;evil&#x27;)&lt;/script&gt;&lt;/strong&gt;'
 
   // OK:
-  sprintf(__('This is %{value}'), { value: `<strong>${escape(someDynamicValue)}</strong>`, false);
+  sprintf(__('This is %{value}'), { value: `<strong>${escape(someDynamicValue)}</strong>` }, false);
   // => 'This is <strong>&lt;script&gt;alert(&#x27;evil&#x27;)&lt;/script&gt;</strong>'
   ```
 
@@ -220,14 +307,14 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
 
 - In JavaScript:
 
-  ```js
+  ```javascript
   n__('Apple', 'Apples', 3)
   // => 'Apples'
   ```
 
   Using interpolation:
 
-  ```js
+  ```javascript
   n__('Last day', 'Last %d days', x)
   // => When x == 1: 'Last day'
   // => When x == 2: 'Last 2 days'
@@ -260,8 +347,22 @@ n_("%{project_name}", "%d projects selected", count) % { project_name: 'GitLab' 
 
 ### Namespaces
 
-Sometimes you need to add some context to the text that you want to translate
-(if the word occurs in a sentence and/or the word is ambiguous).
+A namespace is a way to group translations that belong together. They provide context to our translators by adding a prefix followed by the bar symbol (`|`). For example:
+
+```ruby
+'Namespace|Translated string'
+```
+
+A namespace provide the following benefits:
+
+- It addresses ambiguity in words, for example: `Promotions|Promote` vs `Epic|Promote`
+- It allows translators to focus on translating externalized strings that belong to the same product area rather than arbitrary ones.
+- It gives a linguistic context to help the translator.
+
+In some cases, namespaces don't make sense, for example,
+for ubiquitous UI words and phrases such as "Cancel" or phrases like "Save changes" a namespace could
+be counterproductive.
+
 Namespaces should be PascalCase.
 
 - In Ruby/HAML:
@@ -274,25 +375,93 @@ Namespaces should be PascalCase.
 
 - In JavaScript:
 
-  ```js
+  ```javascript
   s__('OpenedNDaysAgo|Opened')
   ```
 
 Note: The namespace should be removed from the translation. See the [translation
 guidelines for more details](translation.md#namespaced-strings).
 
+### HTML
+
+We no longer include HTML directly in the strings that are submitted for translation. This is for a couple of reasons:
+
+1. It introduces a chance for the translated string to accidentally include invalid HTML.
+1. It introduces a security risk where translated strings become an attack vector for XSS, as noted by the
+   [Open Web Application Security Project (OWASP)](https://owasp.org/www-community/attacks/xss/).
+
+To include formatting in the translated string, we can do the following:
+
+- In Ruby/HAML:
+
+  ```ruby
+    html_escape(_('Some %{strongOpen}bold%{strongClose} text.')) % { strongOpen: '<strong>'.html_safe, strongClose: '</strong>'.html_safe }
+
+    # => 'Some <strong>bold</strong> text.'
+  ```
+
+- In JavaScript:
+
+  ```javascript
+    sprintf(__('Some %{strongOpen}bold%{strongClose} text.'), { strongOpen: '<strong>', strongClose: '</strong>'}, false);
+
+    // => 'Some <strong>bold</strong> text.'
+  ```
+
+- In Vue
+
+  See the section on [interpolation](#interpolation).
+
+When [this translation helper issue](https://gitlab.com/gitlab-org/gitlab/-/issues/217935) is complete, we'll update the
+process of including formatting in translated strings.
+
+#### Including Angle Brackets
+
+If a string contains angles brackets (`<`/`>`) that are not used for HTML, it will still be flagged by the
+`rake gettext:lint` linter.
+To avoid this error, use the applicable HTML entity code (`&lt;` or `&gt;`) instead:
+
+- In Ruby/HAML:
+
+   ```ruby
+   html_escape_once(_('In &lt; 1 hour')).html_safe
+
+   # => 'In < 1 hour'
+   ```
+
+- In JavaScript:
+
+  ```javascript
+  import { sanitize } from '~/lib/dompurify';
+
+  const i18n = { LESS_THAN_ONE_HOUR: sanitize(__('In &lt; 1 hour'), { ALLOWED_TAGS: [] }) };
+
+  // ... using the string
+  element.innerHTML = i18n.LESS_THAN_ONE_HOUR;
+
+  // => 'In < 1 hour'
+  ```
+
+- In Vue:
+
+  ```vue
+  <gl-sprintf :message="s__('In &lt; 1 hours')"/>
+
+  // => 'In < 1 hour'
+  ```
+
 ### Dates / times
 
 - In JavaScript:
 
-```js
+```javascript
 import { createDateTimeFormat } from '~/locale';
 
 const dateFormat = createDateTimeFormat({ year: 'numeric', month: 'long', day: 'numeric' });
 console.log(dateFormat.format(new Date('2063-04-05'))) // April 5, 2063
 ```
 
-This makes use of [`Intl.DateTimeFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat).
+This makes use of [`Intl.DateTimeFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat).
 
 - In Ruby/HAML, we have two ways of adding format to dates and times:
 
@@ -372,7 +541,7 @@ structure is the same in all languages.
 
 For instance, the following:
 
-```js
+```javascript
 {{ s__("mrWidget|Set by") }}
 {{ author.name }}
 {{ s__("mrWidget|to be merged automatically when the pipeline succeeds") }}
@@ -380,7 +549,7 @@ For instance, the following:
 
 should be externalized as follows:
 
-```js
+```javascript
 {{ sprintf(s__("mrWidget|Set by %{author} to be merged automatically when the pipeline succeeds"), { author: author.name }) }}
 ```
 
@@ -439,7 +608,7 @@ This also applies when using links in between translated sentences, otherwise th
 
 - In JavaScript (when Vue cannot be used), instead of:
 
-  ```js
+  ```javascript
   {{
       sprintf(s__("ClusterIntegration|Learn more about %{link}"), {
           link: '<a href="https://cloud.google.com/compute/docs/regions-zones/regions-zones" target="_blank" rel="noopener noreferrer">zones</a>'
@@ -449,7 +618,7 @@ This also applies when using links in between translated sentences, otherwise th
 
   Set the link starting and ending HTML fragments as placeholders like so:
 
-  ```js
+  ```javascript
   {{
       sprintf(s__("ClusterIntegration|Learn more about %{linkStart}zones%{linkEnd}"), {
           linkStart: '<a href="https://cloud.google.com/compute/docs/regions-zones/regions-zones" target="_blank" rel="noopener noreferrer">',
@@ -536,10 +705,11 @@ The linter will take the following into account:
 - Variable usage
   - Only one unnamed (`%d`) variable, since the order of variables might change
     in different languages
-  - All variables used in the message-id are used in the translation
+  - All variables used in the message ID are used in the translation
   - There should be no variables used in a translation that aren't in the
-    message-id
+    message ID
 - Errors during translation.
+- Presence of angle brackets (`<` or `>`)
 
 The errors are grouped per file, and per message ID:
 
@@ -552,7 +722,7 @@ Errors in `locale/zh_HK/gitlab.po`:
     Syntax error in msgstr
     Syntax error in message_line
     There should be only whitespace until the end of line after the double quote character of a message text.
-    Parsing result before error: '{:msgid=>["", "You are going to remove %{project_name_with_namespace}.\\n", "Removed project CANNOT be restored!\\n", "Are you ABSOLUTELY sure?"]}'
+    Parsing result before error: '{:msgid=>["", "You are going to delete %{project_name_with_namespace}.\\n", "Deleted projects CANNOT be restored!\\n", "Are you ABSOLUTELY sure?"]}'
     SimplePoParser filtered backtrace: SimplePoParser::ParserError
 Errors in `locale/zh_TW/gitlab.po`:
   1 pipeline
@@ -562,9 +732,13 @@ Errors in `locale/zh_TW/gitlab.po`:
 
 In this output the `locale/zh_HK/gitlab.po` has syntax errors.
 The `locale/zh_TW/gitlab.po` has variables that are used in the translation that
-aren't in the message with id `1 pipeline`.
+aren't in the message with ID `1 pipeline`.
 
 ## Adding a new language
+
+NOTE: **Note:**
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/221012) in GitLab 13.3:
+Languages with less than 2% of translations won't be available in the UI.
 
 Let's suppose you want to add translations for a new language, let's say French.
 

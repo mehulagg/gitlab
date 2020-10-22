@@ -208,6 +208,18 @@
   }
 }
 
+.commit-nav-buttons {
+  a.btn,
+  button {
+    // See: https://gitlab.com/gitlab-org/gitlab-ui/-/issues/730
+    &:last-child > svg {
+      margin-left: 0.25rem;
+      margin-right: 0;
+    }
+  }
+}
+
+
 .clipboard-group,
 .commit-sha-group {
   display: inline-flex;
@@ -294,7 +306,6 @@
 .commit,
 .generic-commit-status,
 .branch-commit {
-  .autodevops-link,
   .commit-sha {
     color: $blue-600;
   }
@@ -375,4 +386,10 @@
 .commit .gpg-popover-help-link {
   display: block;
   color: $link-color;
+}
+
+.add-review-item {
+  .gl-tab-nav-item {
+    height: 100%;
+  }
 }

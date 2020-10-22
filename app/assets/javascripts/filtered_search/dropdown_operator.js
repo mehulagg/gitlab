@@ -39,7 +39,7 @@ export default class DropdownOperator extends FilteredSearchDropdown {
     this.dispatchInputEvent();
   }
 
-  renderContent(forceShowList = false) {
+  renderContent(forceShowList = false, dropdownName = '') {
     const dropdownData = [
       {
         tag: 'equal',
@@ -47,13 +47,18 @@ export default class DropdownOperator extends FilteredSearchDropdown {
         title: '=',
         help: __('is'),
       },
-      {
+    ];
+    const dropdownToken = this.tokenKeys.searchByKey(dropdownName.toLowerCase());
+
+    if (gon.features?.notIssuableQueries && !dropdownToken?.hideNotEqual) {
+      dropdownData.push({
         tag: 'not-equal',
         type: 'string',
         title: '!=',
         help: __('is not'),
-      },
-    ];
+      });
+    }
+
     this.droplab.changeHookList(this.hookId, this.dropdown, [Filter], this.config);
     this.droplab.setData(this.hookId, dropdownData);
     super.renderContent(forceShowList);

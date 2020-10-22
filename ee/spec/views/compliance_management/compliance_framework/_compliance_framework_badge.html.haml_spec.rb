@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'compliance_management/compliance_framework/_compliance_framework_badge.html.haml' do
+RSpec.describe 'compliance_management/compliance_framework/_compliance_framework_badge.html.haml' do
   let_it_be(:project) { build(:project, :with_compliance_framework) }
 
   before do

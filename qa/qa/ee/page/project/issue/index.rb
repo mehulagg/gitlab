@@ -6,21 +6,25 @@ module QA
       module Project
         module Issue
           module Index
-            def self.prepended(page)
-              page.module_eval do
+            extend QA::Page::PageConcern
+
+            def self.prepended(base)
+              super
+
+              base.class_eval do
                 view 'app/views/shared/issuable/_search_bar.html.haml' do
                   element :issue_filter_form, /form_tag.+class: 'filter-form / # rubocop:disable QA/ElementWithPattern
                   element :issue_filter_input, /%input.form-control.filtered-search/ # rubocop:disable QA/ElementWithPattern
                 end
 
-                view 'ee/app/views/projects/issues/_issue_weight.html.haml' do
-                  element :issuable_weight
+                view 'app/assets/javascripts/issues_list/components/issuable.vue' do
+                  element :issuable_weight_content
                 end
               end
             end
 
             def issuable_weight
-              find_element(:issuable_weight)
+              find_element(:issuable_weight_content)
             end
 
             def wait_for_issue_replication(issue)

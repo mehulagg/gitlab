@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RemoveUnreferencedLfsObjectsWorker do
+RSpec.describe RemoveUnreferencedLfsObjectsWorker do
   include EE::GeoHelpers
 
   describe '#perform' do

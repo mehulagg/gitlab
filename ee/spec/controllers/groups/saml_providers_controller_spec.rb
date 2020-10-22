@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::SamlProvidersController do
+RSpec.describe Groups::SamlProvidersController do
   let(:saml_provider) { create(:saml_provider, group: group) }
   let(:group) { create(:group, :private, parent_id: nil) }
   let(:user) { create(:user) }
@@ -116,36 +116,27 @@ describe Groups::SamlProvidersController do
     end
 
     describe 'PUT #update' do
-      subject { put :update, params: { group_id: group, saml_provider: { enforced_sso: 'true' } } }
+      subject do
+        put :update, params:
+          {
+            group_id: group,
+            saml_provider: {
+              enforced_sso: 'true',
+              default_membership_role: Gitlab::Access::MAINTAINER
+            }
+          }
+      end
 
       before do
         group.add_owner(user)
       end
 
-      context 'enforced_sso feature flag enabled' do
-        before do
-          stub_feature_flags(enforced_sso: true)
-        end
-
-        it 'updates the flags' do
-          expect do
-            subject
-            saml_provider.reload
-          end.to change { saml_provider.enforced_sso? }.to(true)
-        end
-      end
-
-      context 'enforced_sso feature flag disabled' do
-        before do
-          stub_feature_flags(enforced_sso: false)
-        end
-
-        it 'does not update the setting' do
-          expect do
-            subject
-            saml_provider.reload
-          end.not_to change { saml_provider.enforced_sso? }.from(false)
-        end
+      it 'updates the settings' do
+        expect do
+          subject
+          saml_provider.reload
+        end.to change { saml_provider.enforced_sso? }.to(true)
+        .and change { saml_provider.default_membership_role }.to(Gitlab::Access::MAINTAINER)
       end
 
       context 'enabling group managed when owner has linked identity' do
@@ -189,7 +180,7 @@ describe Groups::SamlProvidersController do
           stub_feature_flags(group_managed_accounts: true)
         end
 
-        it 'does not update update the flags' do
+        it 'does not update the flags' do
           expect do
             subject
             saml_provider.reload

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Pseudonymizer::Pager do
+RSpec.describe Pseudonymizer::Pager do
   let(:page_size) { 1 }
   let!(:projects) { create_list(:project, 10) }
 

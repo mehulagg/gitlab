@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe HipchatService do
+RSpec.describe HipchatService do
   let(:hipchat) { described_class.new }
   let(:user)    { create(:user) }
   let(:project) { create(:project, :repository) }

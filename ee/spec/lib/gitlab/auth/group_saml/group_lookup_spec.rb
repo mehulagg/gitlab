@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::GroupSaml::GroupLookup do
+RSpec.describe Gitlab::Auth::GroupSaml::GroupLookup do
   let(:query_string) { 'group_path=the-group' }
   let(:path_info) { double }
 

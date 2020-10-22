@@ -1,4 +1,7 @@
 ---
+stage: Verify
+group: Runner
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -25,9 +28,8 @@ Each guideline is described in more detail in the sections below:
 
 > Introduced in GitLab Runner 8.9.
 
-GitLab and GitLab Runner always perform a full clone by default.
-While it means that all changes from GitLab are received,
-it often results in receiving extra commit logs.
+GitLab and GitLab Runner perform a [shallow clone](../pipelines/settings.md#git-shallow-clone)
+by default.
 
 Ideally, you should always use `GIT_DEPTH` with a small number
 like 10. This will instruct GitLab Runner to perform shallow clones.
@@ -38,7 +40,7 @@ This significantly speeds up fetching of changes from Git repositories,
 especially if the repository has a very long backlog consisting of number
 of big files as we effectively reduce amount of data transfer.
 
-The following example makes GitLab Runner shallow clone to fetch only a given branch;
+The following example makes the runner shallow clone to fetch only a given branch;
 it does not fetch any other branches nor tags.
 
 ```yaml
@@ -114,6 +116,20 @@ For exact parameters accepted by
 for [`git clean`](https://git-scm.com/docs/git-clean). The available parameters
 are dependent on Git version.
 
+## Git fetch extra flags
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/4142) in GitLab Runner 13.1.
+
+[`GIT_FETCH_EXTRA_FLAGS`](../yaml/README.md#git-fetch-extra-flags) allows you
+to modify `git fetch` behavior by passing extra flags.
+
+For example, if your project contains a large number of tags that your CI jobs don't rely on,
+you could add [`--no-tags`](https://git-scm.com/docs/git-fetch#Documentation/git-fetch.txt---no-tags)
+to the extra flags to make your fetches faster and more compact.
+
+See the [`GIT_FETCH_EXTRA_FLAGS` documentation](../yaml/README.md#git-fetch-extra-flags)
+for more information.
+
 ## Fork-based workflow
 
 > Introduced in GitLab Runner 11.10.
@@ -130,7 +146,7 @@ other using `docker` executor.
 
 ### `shell` executor example
 
-Let's assume that you have the following [config.toml](https://docs.gitlab.com/runner/configuration/advanced-configuration.html).
+Let's assume that you have the following [`config.toml`](https://docs.gitlab.com/runner/configuration/advanced-configuration.html).
 
 ```toml
 concurrent = 4
@@ -155,7 +171,7 @@ This `config.toml`:
 
 ### `docker` executor example
 
-Let's assume that you have the following [config.toml](https://docs.gitlab.com/runner/configuration/advanced-configuration.html).
+Let's assume that you have the following [`config.toml`](https://docs.gitlab.com/runner/configuration/advanced-configuration.html).
 
 ```toml
 concurrent = 4
@@ -209,15 +225,15 @@ with other concurrent jobs running.
 ### Store custom clone options in `config.toml`
 
 Ideally, all job-related configuration should be stored in `.gitlab-ci.yml`.
-However, sometimes it is desirable to make these schemes part of Runner configuration.
+However, sometimes it is desirable to make these schemes part of the runner's configuration.
 
 In the above example of Forks, making this configuration discoverable for users may be preferred,
 but this brings administrative overhead as the `.gitlab-ci.yml` needs to be updated for each branch.
 In such cases, it might be desirable to keep the `.gitlab-ci.yml` clone path agnostic, but make it
-a configuration of Runner.
+a configuration of the runner.
 
-We can extend our [config.toml](https://docs.gitlab.com/runner/configuration/advanced-configuration.html)
-with the following specification that will be used by Runner if `.gitlab-ci.yml` will not override it:
+We can extend our [`config.toml`](https://docs.gitlab.com/runner/configuration/advanced-configuration.html)
+with the following specification that will be used by the runner if `.gitlab-ci.yml` will not override it:
 
 ```toml
 concurrent = 4
@@ -238,5 +254,13 @@ concurrent = 4
     volumes = ["/builds:/builds", "/cache:/cache"]
 ```
 
-This makes the cloning configuration to be part of given Runner
+This makes the cloning configuration to be part of the given runner
 and does not require us to update each `.gitlab-ci.yml`.
+
+## Pre-clone step
+
+For very active repositories with a large number of references and files, you can also
+optimize your CI jobs by seeding repository data with GitLab Runner's [`pre_clone_script`](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runners-section).
+
+See [our development documentation](../../development/pipelines.md#pre-clone-step) for
+an overview of how we implemented this approach on GitLab.com for the main GitLab repository.

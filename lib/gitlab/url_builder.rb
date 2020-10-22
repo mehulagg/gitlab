@@ -11,6 +11,10 @@ module Gitlab
     class << self
       include ActionView::RecordIdentifier
 
+      # Using a case statement here is preferable for readability and maintainability.
+      # See discussion in https://gitlab.com/gitlab-org/gitlab/-/issues/217397
+      #
+      # rubocop:disable Metrics/CyclomaticComplexity
       def build(object, **options)
         # Objects are sometimes wrapped in a BatchLoader instance
         case object.itself
@@ -37,11 +41,14 @@ module Gitlab
         when Wiki
           wiki_url(object, **options)
         when WikiPage
-          instance.project_wiki_url(object.wiki.project, object.slug, **options)
+          wiki_page_url(object.wiki, object, **options)
+        when ::DesignManagement::Design
+          design_url(object, **options)
         else
           raise NotImplementedError.new("No URL builder defined for #{object.inspect}")
         end
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
 
       def commit_url(commit, **options)
         return '' unless commit.project
@@ -64,23 +71,44 @@ module Gitlab
       end
 
       def snippet_url(snippet, **options)
-        if options.delete(:raw).present?
+        if options[:file].present?
+          file, ref = options.values_at(:file, :ref)
+
+          instance.gitlab_raw_snippet_blob_url(snippet, file, ref)
+        elsif options.delete(:raw).present?
           instance.gitlab_raw_snippet_url(snippet, **options)
         else
           instance.gitlab_snippet_url(snippet, **options)
         end
       end
 
-      def wiki_url(object, **options)
-        case object.container
-        when Project
-          instance.project_wiki_url(object.container, Wiki::HOMEPAGE, **options)
-        when Group
-          # TODO: Use the new route for group wikis once we add it.
-          # https://gitlab.com/gitlab-org/gitlab/-/issues/211360
-          instance.group_canonical_url(object.container, **options) + "/-/wikis/#{Wiki::HOMEPAGE}"
+      def wiki_url(wiki, **options)
+        return wiki_page_url(wiki, Wiki::HOMEPAGE, **options) unless options[:action]
+
+        if wiki.container.is_a?(Project)
+          options[:controller] = 'projects/wikis'
+          options[:namespace_id] = wiki.container.namespace
+          options[:project_id] = wiki.container
+        end
+
+        instance.url_for(**options)
+      end
+
+      def wiki_page_url(wiki, page, **options)
+        options[:action] ||= :show
+        options[:id] = page
+
+        wiki_url(wiki, **options)
+      end
+
+      def design_url(design, **options)
+        size, ref = options.values_at(:size, :ref)
+        options.except!(:size, :ref)
+
+        if size
+          instance.project_design_management_designs_resized_image_url(design.project, design, ref, size, **options)
         else
-          raise NotImplementedError.new("No URL builder defined for #{object.inspect}")
+          instance.project_design_management_designs_raw_image_url(design.project, design, ref, **options)
         end
       end
     end

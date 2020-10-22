@@ -2,7 +2,7 @@
 #
 require 'spec_helper'
 
-describe EE::AuthHelper do
+RSpec.describe EE::AuthHelper do
   describe "button_based_providers" do
     it 'excludes group_saml' do
       allow(helper).to receive(:auth_providers) { [:group_saml] }

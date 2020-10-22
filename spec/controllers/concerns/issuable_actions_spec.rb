@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe IssuableActions do
+RSpec.describe IssuableActions do
   let(:project) { double('project') }
   let(:user) { double('user') }
   let(:issuable) { double('issuable') }
@@ -14,7 +14,7 @@ describe IssuableActions do
     klass = Class.new do
       attr_reader :current_user, :project, :issuable
 
-      def self.before_action(action, params = nil)
+      def self.before_action(action = nil, params = nil)
       end
 
       include IssuableActions

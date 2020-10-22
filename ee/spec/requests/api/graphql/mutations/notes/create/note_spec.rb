@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Adding a Note to an Epic' do
+RSpec.describe 'Adding a Note to an Epic' do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }

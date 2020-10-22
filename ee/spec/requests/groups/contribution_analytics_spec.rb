@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'contribution analytics' do
+RSpec.describe 'contribution analytics' do
   let(:user) { create(:user) }
   let(:group) { create(:group)}
 

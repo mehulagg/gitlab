@@ -2,50 +2,35 @@
 
 require 'spec_helper'
 
-describe Elastic::MetricsUpdateService, :prometheus do
+RSpec.describe Elastic::MetricsUpdateService, :prometheus do
   subject { described_class.new }
 
-  before do
-    stub_ee_application_setting(elasticsearch_indexing: true)
-    allow(Gitlab::Metrics).to receive(:prometheus_metrics_enabled?).and_return(true)
-  end
-
   describe '#execute' do
-    it 'sets a gauge for global_search_bulk_cron_queue_size' do
+    it 'sets gauges' do
       expect(Elastic::ProcessBookkeepingService).to receive(:queue_size).and_return(4)
+      expect(Elastic::ProcessInitialBookkeepingService).to receive(:queue_size).and_return(6)
+      expect(Elastic::IndexingControlService).to receive(:queue_size).and_return(2)
 
-      gauge_double = instance_double(Prometheus::Client::Gauge)
+      incremental_gauge_double = instance_double(Prometheus::Client::Gauge)
       expect(Gitlab::Metrics).to receive(:gauge)
         .with(:global_search_bulk_cron_queue_size, anything, {}, :max)
-        .and_return(gauge_double)
+        .and_return(incremental_gauge_double)
 
-      expect(gauge_double).to receive(:set).with({}, 4)
+      initial_gauge_double = instance_double(Prometheus::Client::Gauge)
+      expect(Gitlab::Metrics).to receive(:gauge)
+        .with(:global_search_bulk_cron_initial_queue_size, anything, {}, :max)
+        .and_return(initial_gauge_double)
+
+      awaiting_indexing_gauge = instance_double(Prometheus::Client::Gauge)
+      expect(Gitlab::Metrics).to receive(:gauge)
+        .with(:global_search_awaiting_indexing_queue_size, anything, {}, :max)
+        .and_return(awaiting_indexing_gauge)
+
+      expect(incremental_gauge_double).to receive(:set).with({}, 4)
+      expect(initial_gauge_double).to receive(:set).with({}, 6)
+      expect(awaiting_indexing_gauge).to receive(:set).with({}, 2)
 
       subject.execute
-    end
-
-    context 'when prometheus metrics is disabled' do
-      before do
-        allow(Gitlab::Metrics).to receive(:prometheus_metrics_enabled?).and_return(false)
-      end
-
-      it 'does not set a gauge' do
-        expect(Gitlab::Metrics).not_to receive(:gauge)
-
-        subject.execute
-      end
-    end
-
-    context 'when elasticsearch indexing and search is disabled' do
-      before do
-        stub_ee_application_setting(elasticsearch_indexing: false)
-      end
-
-      it 'does not set a gauge' do
-        expect(Gitlab::Metrics).not_to receive(:gauge)
-
-        subject.execute
-      end
     end
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupExportWorker do
+RSpec.describe GroupExportWorker do
   let!(:user) { create(:user) }
   let!(:group) { create(:group) }
 
@@ -24,6 +24,16 @@ describe GroupExportWorker do
         expect { subject.perform(non_existing_record_id, group.id, {}) }.to raise_exception(ActiveRecord::RecordNotFound)
         expect { subject.perform(user.id, non_existing_record_id, {}) }.to raise_exception(ActiveRecord::RecordNotFound)
       end
+    end
+  end
+
+  describe 'sidekiq options' do
+    it 'disables retry' do
+      expect(described_class.sidekiq_options['retry']).to eq(false)
+    end
+
+    it 'disables dead' do
+      expect(described_class.sidekiq_options['dead']).to eq(false)
     end
   end
 end

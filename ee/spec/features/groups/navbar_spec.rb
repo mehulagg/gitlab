@@ -2,9 +2,10 @@
 
 require 'spec_helper'
 
-describe 'Group navbar' do
+RSpec.describe 'Group navbar' do
   include NavbarStructureHelper
   include WaitForRequests
+  include WikiHelpers
 
   include_context 'group navbar structure'
 
@@ -13,7 +14,11 @@ describe 'Group navbar' do
 
   before do
     group.add_maintainer(user)
+    stub_feature_flags(group_iterations: false)
+    stub_group_wikis(false)
     sign_in(user)
+
+    insert_package_nav(_('Kubernetes'))
   end
 
   context 'when productivity analytics is available' do
@@ -127,7 +132,8 @@ describe 'Group navbar' do
         new_nav_item: {
           nav_item: _('Security & Compliance'),
           nav_sub_items: [
-            _('Security'),
+            _('Security Dashboard'),
+            _('Vulnerability Report'),
             _('Compliance')
           ]
         }
@@ -140,5 +146,74 @@ describe 'Group navbar' do
     end
 
     it_behaves_like 'verified navigation bar'
+  end
+
+  context 'when packages are available' do
+    before do
+      stub_config(packages: { enabled: true }, registry: { enabled: false })
+
+      visit group_path(group)
+    end
+
+    context 'when container registry is available' do
+      before do
+        stub_config(registry: { enabled: true })
+
+        insert_after_sub_nav_item(
+          _('Package Registry'),
+          within: _('Packages & Registries'),
+          new_sub_nav_item_name: _('Container Registry')
+        )
+
+        visit group_path(group)
+      end
+
+      it_behaves_like 'verified navigation bar'
+    end
+  end
+
+  context 'when iterations are available' do
+    before do
+      stub_licensed_features(iterations: true)
+      stub_feature_flags(group_iterations: true)
+
+      insert_after_sub_nav_item(
+        _('Milestones'),
+        within: _('Issues'),
+        new_sub_nav_item_name: _('Iterations')
+      )
+
+      visit group_path(group)
+    end
+
+    it_behaves_like 'verified navigation bar'
+  end
+
+  context 'when group wiki is available' do
+    before do
+      stub_group_wikis(true)
+
+      insert_after_nav_item(
+        _('Analytics'),
+        new_nav_item: {
+          nav_item: _('Wiki'),
+          nav_sub_items: []
+        }
+      )
+      visit group_path(group)
+    end
+
+    it_behaves_like 'verified navigation bar'
+  end
+
+  context 'when invite team members is available' do
+    it 'includes the div for js-invite-members-trigger' do
+      stub_feature_flags(invite_members_group_modal: true)
+      allow_any_instance_of( InviteMembersHelper ).to receive(:invite_members_allowed?).and_return(true)
+
+      visit group_path(group)
+
+      expect(page).to have_selector('.js-invite-members-trigger')
+    end
   end
 end

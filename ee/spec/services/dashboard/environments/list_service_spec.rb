@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Dashboard::Environments::ListService do
+RSpec.describe Dashboard::Environments::ListService do
   describe '#execute' do
     def setup
       user = create(:user)

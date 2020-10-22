@@ -1,3 +1,4 @@
+import { TEST_HOST } from 'helpers/test_constants';
 import * as getters from '~/ide/stores/getters';
 import { createStore } from '~/ide/stores';
 import { file } from '../helpers';
@@ -415,6 +416,115 @@ describe('IDE store getters', () => {
       localState.currentProjectId = TEST_PROJECT_ID;
 
       expect(localStore.getters[getterName]).toBe(val);
+    });
+  });
+
+  describe('entryExists', () => {
+    beforeEach(() => {
+      localState.entries = {
+        foo: file('foo', 'foo', 'tree'),
+        'foo/bar.png': file(),
+      };
+    });
+
+    it.each`
+      path             | deleted  | value
+      ${'foo/bar.png'} | ${false} | ${true}
+      ${'foo/bar.png'} | ${true}  | ${false}
+      ${'foo'}         | ${false} | ${true}
+    `(
+      'returns $value for an existing entry path: $path (deleted: $deleted)',
+      ({ path, deleted, value }) => {
+        localState.entries[path].deleted = deleted;
+
+        expect(localStore.getters.entryExists(path)).toBe(value);
+      },
+    );
+
+    it('returns false for a non existing entry path', () => {
+      expect(localStore.getters.entryExists('bar.baz')).toBe(false);
+    });
+  });
+
+  describe('getAvailableFileName', () => {
+    it.each`
+      path                                          | newPath
+      ${'foo'}                                      | ${'foo-1'}
+      ${'foo__93.png'}                              | ${'foo__94.png'}
+      ${'foo/bar.png'}                              | ${'foo/bar-1.png'}
+      ${'foo/bar--34.png'}                          | ${'foo/bar--35.png'}
+      ${'foo/bar 2.png'}                            | ${'foo/bar 3.png'}
+      ${'foo/bar-621.png'}                          | ${'foo/bar-622.png'}
+      ${'jquery.min.js'}                            | ${'jquery-1.min.js'}
+      ${'my_spec_22.js.snap'}                       | ${'my_spec_23.js.snap'}
+      ${'subtitles5.mp4.srt'}                       | ${'subtitles-6.mp4.srt'}
+      ${'sample-file.mp3'}                          | ${'sample-file-1.mp3'}
+      ${'Screenshot 2020-05-26 at 10.53.08 PM.png'} | ${'Screenshot 2020-05-26 at 11.53.08 PM.png'}
+    `('suffixes the path with a number if the path already exists', ({ path, newPath }) => {
+      localState.entries[path] = file();
+
+      expect(localStore.getters.getAvailableFileName(path)).toBe(newPath);
+    });
+
+    it('loops through all incremented entries and keeps trying until a file path that does not exist is found', () => {
+      localState.entries = {
+        'bar/baz_1.png': file(),
+        'bar/baz_2.png': file(),
+        'bar/baz_3.png': file(),
+        'bar/baz_4.png': file(),
+        'bar/baz_5.png': file(),
+        'bar/baz_72.png': file(),
+      };
+
+      expect(localStore.getters.getAvailableFileName('bar/baz_1.png')).toBe('bar/baz_6.png');
+    });
+
+    it('returns the entry path as is if the path does not exist', () => {
+      expect(localStore.getters.getAvailableFileName('foo-bar1.jpg')).toBe('foo-bar1.jpg');
+    });
+  });
+
+  describe('getUrlForPath', () => {
+    it('returns a route url for the given path', () => {
+      localState.currentProjectId = 'test/test';
+      localState.currentBranchId = 'master';
+
+      expect(localStore.getters.getUrlForPath('path/to/foo/bar-1.jpg')).toBe(
+        `/project/test/test/tree/master/-/path/to/foo/bar-1.jpg/`,
+      );
+    });
+  });
+
+  describe('getJsonSchemaForPath', () => {
+    beforeEach(() => {
+      localState.currentProjectId = 'path/to/some/project';
+      localState.currentBranchId = 'master';
+    });
+
+    it('returns a json schema uri and match config for a json/yaml file that can be loaded by monaco', () => {
+      expect(localStore.getters.getJsonSchemaForPath('.gitlab-ci.yml')).toEqual({
+        fileMatch: ['*.gitlab-ci.yml'],
+        uri: `${TEST_HOST}/path/to/some/project/-/schema/master/.gitlab-ci.yml`,
+      });
+    });
+
+    it('returns a path containing sha if branch details are present in state', () => {
+      localState.projects['path/to/some/project'] = {
+        name: 'project',
+        branches: {
+          master: {
+            name: 'master',
+            commit: {
+              id: 'abcdef123456',
+            },
+          },
+        },
+      };
+
+      expect(localStore.getters.getJsonSchemaForPath('.gitlab-ci.yml')).toEqual({
+        fileMatch: ['*.gitlab-ci.yml'],
+        uri: `${TEST_HOST}/path/to/some/project/-/schema/abcdef123456/.gitlab-ci.yml`,
+      });
     });
   });
 });

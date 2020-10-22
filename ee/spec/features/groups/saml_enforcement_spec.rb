@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'SAML access enforcement' do
+RSpec.describe 'SAML access enforcement' do
   let(:group) { create(:group, :private, name: 'The Group Name') }
   let(:sub_group) { create(:group, :private, name: 'The Subgroup Name', parent: group) }
   let(:project) { create(:project, :private, name: 'The Project Name', namespace: group) }

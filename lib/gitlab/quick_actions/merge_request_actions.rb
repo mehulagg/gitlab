@@ -104,6 +104,37 @@ module Gitlab
         command :target_branch do |branch_name|
           @updates[:target_branch] = branch_name if project.repository.branch_exists?(branch_name)
         end
+
+        desc _('Submit a review')
+        explanation _('Submit the current review.')
+        types MergeRequest
+        condition do
+          quick_action_target.persisted?
+        end
+        command :submit_review do
+          next if params[:review_id]
+
+          result = DraftNotes::PublishService.new(quick_action_target, current_user).execute
+          @execution_message[:submit_review] = if result[:status] == :success
+                                                 _('Submitted the current review.')
+                                               else
+                                                 result[:message]
+                                               end
+        end
+
+        desc _('Approve a merge request')
+        explanation _('Approve the current merge request.')
+        types MergeRequest
+        condition do
+          quick_action_target.persisted? && quick_action_target.can_be_approved_by?(current_user)
+        end
+        command :approve do
+          success = MergeRequests::ApprovalService.new(quick_action_target.project, current_user).execute(quick_action_target)
+
+          next unless success
+
+          @execution_message[:approve] = _('Approved the current merge request.')
+        end
       end
 
       def merge_orchestration_service

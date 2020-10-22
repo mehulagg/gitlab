@@ -13,6 +13,7 @@ module EE
       include TokenAuthenticatable
       include InsightsFeature
       include HasTimelogsReport
+      include HasWiki
 
       add_authentication_token_field :saml_discovery_token, unique: false, token_generator: -> { Devise.friendly_token(8) }
 
@@ -26,13 +27,13 @@ module EE
       has_one :scim_oauth_access_token
 
       has_many :ldap_group_links, foreign_key: 'group_id', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+      has_many :saml_group_links, foreign_key: 'group_id'
       has_many :hooks, dependent: :destroy, class_name: 'GroupHook' # rubocop:disable Cop/ActiveRecordDependent
 
       has_one :dependency_proxy_setting, class_name: 'DependencyProxy::GroupSetting'
       has_many :dependency_proxy_blobs, class_name: 'DependencyProxy::Blob'
 
-      has_one :allowed_email_domain
-      accepts_nested_attributes_for :allowed_email_domain, allow_destroy: true, reject_if: :all_blank
+      has_many :allowed_email_domains, -> { order(id: :asc) }, autosave: true
 
       # We cannot simply set `has_many :audit_events, as: :entity, dependent: :destroy`
       # here since Group inherits from Namespace, the entity_type would be set to `Namespace`.
@@ -42,10 +43,13 @@ module EE
 
       has_many :managed_users, class_name: 'User', foreign_key: 'managing_group_id', inverse_of: :managing_group
       has_many :cycle_analytics_stages, class_name: 'Analytics::CycleAnalytics::GroupStage'
+      has_many :value_streams, class_name: 'Analytics::CycleAnalytics::GroupValueStream'
 
       has_one :deletion_schedule, class_name: 'GroupDeletionSchedule'
       delegate :deleting_user, :marked_for_deletion_on, to: :deletion_schedule, allow_nil: true
       delegate :enforced_group_managed_accounts?, :enforced_sso?, to: :saml_provider, allow_nil: true
+
+      has_one :group_wiki_repository
 
       belongs_to :file_template_project, class_name: "Project"
 
@@ -66,6 +70,7 @@ module EE
 
       scope :aimed_for_deletion, -> (date) { joins(:deletion_schedule).where('group_deletion_schedules.marked_for_deletion_on <= ?', date) }
       scope :with_deletion_schedule, -> { preload(deletion_schedule: :deleting_user) }
+      scope :with_deletion_schedule_only, -> { preload(:deletion_schedule) }
 
       scope :where_group_links_with_provider, ->(provider) do
         joins(:ldap_group_links).where(ldap_group_links: { provider: provider })
@@ -120,12 +125,12 @@ module EE
         end
 
         after_transition ready: :started do |group, _|
-          group.ldap_sync_last_sync_at = DateTime.now
+          group.ldap_sync_last_sync_at = DateTime.current
           group.save
         end
 
         after_transition started: :ready do |group, _|
-          current_time = DateTime.now
+          current_time = DateTime.current
           group.ldap_sync_last_update_at = current_time
           group.ldap_sync_last_successful_update_at = current_time
           group.ldap_sync_error = nil
@@ -133,14 +138,14 @@ module EE
         end
 
         after_transition started: :failed do |group, _|
-          group.ldap_sync_last_update_at = DateTime.now
+          group.ldap_sync_last_update_at = DateTime.current
           group.save
         end
       end
     end
 
     class_methods do
-      def groups_user_can_read_epics(groups, user, same_root: false)
+      def groups_user_can(groups, user, action, same_root: false)
         groups = ::Gitlab::GroupPlansPreloader.new.preload(groups)
 
         # if we are sure that all groups have the same root group, we can
@@ -150,8 +155,12 @@ module EE
         preset_root_ancestor_for(groups) if same_root
 
         DeclarativePolicy.user_scope do
-          groups.select { |group| Ability.allowed?(user, :read_epic, group) }
+          groups.select { |group| Ability.allowed?(user, action, group) }
         end
+      end
+
+      def groups_user_can_read_epics(groups, user, same_root: false)
+        groups_user_can(groups, user, :read_epic, same_root: same_root)
       end
 
       def preset_root_ancestor_for(groups)
@@ -166,6 +175,12 @@ module EE
       return unless ip_restrictions.present?
 
       ip_restrictions.map(&:range).join(",")
+    end
+
+    def allowed_email_domains_list
+      return if allowed_email_domains.empty?
+
+      allowed_email_domains.domain_names.join(",")
     end
 
     def human_ldap_access
@@ -208,14 +223,19 @@ module EE
       ensure_saml_discovery_token!
     end
 
+    def saml_enabled?
+      return false unless saml_provider
+
+      saml_provider.persisted? && saml_provider.enabled?
+    end
+
     override :multiple_issue_boards_available?
     def multiple_issue_boards_available?
       feature_available?(:multiple_group_issue_boards)
     end
 
     def group_project_template_available?
-      feature_available?(:group_project_templates) ||
-        (custom_project_templates_group_id? && Time.zone.now <= GroupsWithTemplatesFinder::CUT_OFF_DATE)
+      feature_available?(:group_project_templates)
     end
 
     def actual_size_limit
@@ -238,10 +258,10 @@ module EE
       root_ancestor.ip_restrictions
     end
 
-    def root_ancestor_allowed_email_domain
-      return allowed_email_domain if parent_id.nil?
+    def root_ancestor_allowed_email_domains
+      return allowed_email_domains if parent_id.nil?
 
-      root_ancestor.allowed_email_domain
+      root_ancestor.allowed_email_domains
     end
 
     # Overrides a method defined in `::EE::Namespace`
@@ -291,10 +311,6 @@ module EE
       end
     end
 
-    def packages_feature_available?
-      ::Gitlab.config.packages.enabled && feature_available?(:packages)
-    end
-
     def dependency_proxy_feature_available?
       ::Gitlab.config.dependency_proxy.enabled && feature_available?(:dependency_proxy)
     end
@@ -328,6 +344,17 @@ module EE
       )
     end
 
+    def vulnerability_scanners
+      ::Vulnerabilities::Scanner.where(
+        project: ::Project.for_group_and_its_subgroups(self).non_archived.without_deleted
+      )
+    end
+
+    def vulnerability_historical_statistics
+      ::Vulnerabilities::HistoricalStatistic
+        .for_project(::Project.for_group_and_its_subgroups(self).non_archived.without_deleted)
+    end
+
     def max_personal_access_token_lifetime_from_now
       if max_personal_access_token_lifetime.present?
         max_personal_access_token_lifetime.days.from_now
@@ -348,14 +375,59 @@ module EE
 
     def predefined_push_rule
       strong_memoize(:predefined_push_rule) do
-        if push_rule.present?
-          push_rule
-        elsif has_parent?
+        next push_rule if push_rule
+
+        if has_parent?
           parent.predefined_push_rule
         else
           PushRule.global
         end
       end
+    end
+
+    def owners_emails
+      owners.pluck(:email)
+    end
+
+    # this method will be delegated to namespace_settings, but as we need to wait till
+    # all groups will have namespace_settings created via background migration,
+    # we need to serve it from this class
+    def prevent_forking_outside_group?
+      return namespace_settings.prevent_forking_outside_group? if namespace_settings
+
+      root_ancestor.saml_provider&.prohibited_outer_forks?
+    end
+
+    def minimal_access_role_allowed?
+      feature_available?(:minimal_access_role) && !has_parent?
+    end
+
+    override :member?
+    def member?(user, min_access_level = minimal_member_access_level)
+      if min_access_level == ::Gitlab::Access::MINIMAL_ACCESS && minimal_access_role_allowed?
+        all_group_members.find_by(user_id: user.id).present?
+      else
+        super
+      end
+    end
+
+    def minimal_member_access_level
+      minimal_access_role_allowed? ? ::Gitlab::Access::MINIMAL_ACCESS : ::Gitlab::Access::GUEST
+    end
+
+    override :access_level_roles
+    def access_level_roles
+      levels = ::GroupMember.access_level_roles
+      return levels unless minimal_access_role_allowed?
+
+      levels.merge(::Gitlab::Access::MINIMAL_ACCESS_HASH)
+    end
+
+    override :users_count
+    def users_count
+      return all_group_members.count unless minimal_access_role_allowed?
+
+      members.count
     end
 
     private
@@ -376,7 +448,7 @@ module EE
 
     # Members belonging directly to Projects within Group or Projects within subgroups
     def billed_project_members
-      ::ProjectMember.active_without_invites_and_requests.where(
+      ::ProjectMember.active_without_invites_and_requests.without_project_bots.where(
         source_id: ::Project.joins(:group).where(namespace: self_and_descendants)
       )
     end
@@ -401,14 +473,10 @@ module EE
 
     # Members belonging to Groups invited to collaborate with Groups and Subgroups
     def billed_shared_group_members
-      return ::GroupMember.none unless ::Feature.enabled?(:share_group_with_group)
-
       invited_or_shared_group_members(invited_group_in_groups)
     end
 
     def billed_shared_non_guests_group_members
-      return ::GroupMember.none unless ::Feature.enabled?(:share_group_with_group)
-
       invited_or_shared_group_members(invited_non_guest_group_in_groups)
     end
 

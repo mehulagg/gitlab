@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::DependencyProxyForContainersController do
+RSpec.describe Groups::DependencyProxyForContainersController do
   let(:group) { create(:group) }
   let(:token_response) { { status: :success, token: 'abcd1234' } }
 

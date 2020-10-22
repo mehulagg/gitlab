@@ -80,6 +80,33 @@ describe('EpicCreateComponent', () => {
         });
       });
     });
+
+    describe('epicConfidential', () => {
+      describe('set', () => {
+        it('calls `setEpicCreateConfidential` with param `value`', () => {
+          jest.spyOn(vm, 'setEpicCreateConfidential');
+
+          const newEpicConfidential = true;
+
+          vm.epicConfidential = newEpicConfidential;
+
+          expect(vm.setEpicCreateConfidential).toHaveBeenCalledWith(
+            expect.objectContaining({
+              newEpicConfidential,
+            }),
+          );
+        });
+      });
+
+      describe('get', () => {
+        it('returns value of `newEpicConfidential` from state', () => {
+          const newEpicConfidential = true;
+          vm.$store.state.newEpicConfidential = newEpicConfidential;
+
+          expect(vm.epicConfidential).toBe(newEpicConfidential);
+        });
+      });
+    });
   });
 
   describe('template', () => {

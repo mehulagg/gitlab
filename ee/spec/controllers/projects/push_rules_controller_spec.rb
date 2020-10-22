@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::PushRulesController do
+RSpec.describe Projects::PushRulesController do
   let(:project) { create(:project, push_rule: create(:push_rule, prevent_secrets: false)) }
   let(:user) { create(:user) }
 
@@ -39,8 +39,8 @@ describe Projects::PushRulesController do
     shared_examples 'updateable setting' do |rule_attr, updates, new_value|
       it "#{updates ? 'updates' : 'does not update'} the setting" do
         patch :update, params: { namespace_id: project.namespace, project_id: project, id: 1, push_rule: { rule_attr => new_value } }
-
         be_new, be_old = new_value ? [be_truthy, be_falsy] : [be_falsy, be_truthy]
+
         expect(project.reload_push_rule.public_send(rule_attr)).to(updates ? be_new : be_old)
       end
     end

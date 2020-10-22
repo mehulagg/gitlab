@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AuditEventEntity do
+RSpec.describe AuditEventEntity do
   let(:event) { create(:audit_event) }
 
   subject { described_class.new(event) }

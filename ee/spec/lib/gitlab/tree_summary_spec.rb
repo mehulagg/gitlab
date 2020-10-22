@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe Gitlab::TreeSummary do
+RSpec.describe Gitlab::TreeSummary do
   let_it_be(:project) { create(:project, :custom_repo, files: { 'a.txt' => '' }) }
   let_it_be(:path_lock) { create(:path_lock, project: project, path: 'a.txt') }
+  let_it_be(:user) { create(:user) }
 
   let(:commit) { project.repository.head_commit }
 
-  subject { described_class.new(commit, project).summarize.first }
+  subject { described_class.new(commit, project, user).summarize.first }
 
   describe '#summarize (entries)' do
     it 'includes path locks in entries' do

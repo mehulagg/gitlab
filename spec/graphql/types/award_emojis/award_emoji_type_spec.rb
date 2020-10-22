@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['AwardEmoji'] do
-  it { expect(described_class.graphql_name).to eq('AwardEmoji') }
+RSpec.describe GitlabSchema.types['AwardEmoji'] do
+  specify { expect(described_class.graphql_name).to eq('AwardEmoji') }
 
-  it { expect(described_class).to require_graphql_authorizations(:read_emoji) }
+  specify { expect(described_class).to require_graphql_authorizations(:read_emoji) }
 
-  it { expect(described_class).to have_graphql_fields(:description, :unicode_version, :emoji, :name, :unicode, :user) }
+  specify { expect(described_class).to have_graphql_fields(:description, :unicode_version, :emoji, :name, :unicode, :user) }
 end

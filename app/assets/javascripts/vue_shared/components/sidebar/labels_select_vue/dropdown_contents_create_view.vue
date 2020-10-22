@@ -1,18 +1,10 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import {
-  GlTooltipDirective,
-  GlDeprecatedButton,
-  GlIcon,
-  GlFormInput,
-  GlLink,
-  GlLoadingIcon,
-} from '@gitlab/ui';
+import { GlTooltipDirective, GlButton, GlFormInput, GlLink, GlLoadingIcon } from '@gitlab/ui';
 
 export default {
   components: {
-    GlDeprecatedButton,
-    GlIcon,
+    GlButton,
     GlFormInput,
     GlLink,
     GlLoadingIcon,
@@ -60,25 +52,23 @@ export default {
 <template>
   <div class="labels-select-contents-create js-labels-create">
     <div class="dropdown-title d-flex align-items-center pt-0 pb-2">
-      <gl-deprecated-button
+      <gl-button
         :aria-label="__('Go back')"
         variant="link"
-        size="sm"
+        size="small"
         class="js-btn-back dropdown-header-button p-0"
+        icon="arrow-left"
         @click="toggleDropdownContentsCreateView"
-      >
-        <gl-icon name="arrow-left" />
-      </gl-deprecated-button>
+      />
       <span class="flex-grow-1">{{ labelsCreateTitle }}</span>
-      <gl-deprecated-button
+      <gl-button
         :aria-label="__('Close')"
         variant="link"
-        size="sm"
+        size="small"
         class="dropdown-header-button p-0"
+        icon="close"
         @click="toggleDropdownContents"
-      >
-        <gl-icon name="close" />
-      </gl-deprecated-button>
+      />
     </div>
     <div class="dropdown-input">
       <gl-form-input
@@ -98,30 +88,32 @@ export default {
           @click.prevent="handleColorClick(color)"
         />
       </div>
-      <div class="color-input-container d-flex">
+      <div class="color-input-container gl-display-flex">
         <span
           class="dropdown-label-color-preview position-relative position-relative d-inline-block"
           :style="{ backgroundColor: selectedColor }"
         ></span>
-        <gl-form-input v-model.trim="selectedColor" :placeholder="__('Use custom color #FF0000')" />
+        <gl-form-input
+          v-model.trim="selectedColor"
+          class="gl-rounded-top-left-none gl-rounded-bottom-left-none"
+          :placeholder="__('Use custom color #FF0000')"
+        />
       </div>
     </div>
     <div class="dropdown-actions clearfix pt-2 px-2">
-      <gl-deprecated-button
+      <gl-button
         :disabled="disableCreate"
-        variant="primary"
-        class="pull-left d-flex align-items-center"
+        category="primary"
+        variant="success"
+        class="float-left d-flex align-items-center"
         @click="handleCreateClick"
       >
         <gl-loading-icon v-show="labelCreateInProgress" :inline="true" class="mr-1" />
         {{ __('Create') }}
-      </gl-deprecated-button>
-      <gl-deprecated-button
-        class="pull-right js-btn-cancel-create"
-        @click="toggleDropdownContentsCreateView"
-      >
+      </gl-button>
+      <gl-button class="float-right js-btn-cancel-create" @click="toggleDropdownContentsCreateView">
         {{ __('Cancel') }}
-      </gl-deprecated-button>
+      </gl-button>
     </div>
   </div>
 </template>

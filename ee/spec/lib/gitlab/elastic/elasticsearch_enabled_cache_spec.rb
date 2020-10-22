@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Elastic::ElasticsearchEnabledCache, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::Elastic::ElasticsearchEnabledCache, :clean_gitlab_redis_cache do
   describe '.fetch' do
     it 'remembers the result of the first invocation' do
       expect(described_class.fetch(:project, 1) { true }).to eq(true)

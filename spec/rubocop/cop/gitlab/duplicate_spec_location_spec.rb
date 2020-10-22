@@ -2,12 +2,10 @@
 
 require 'fast_spec_helper'
 require 'rubocop'
-require 'rubocop/rspec/support'
 
 require_relative '../../../../rubocop/cop/gitlab/duplicate_spec_location'
 
-describe RuboCop::Cop::Gitlab::DuplicateSpecLocation do
-  include RuboCop::RSpec::ExpectOffense
+RSpec.describe RuboCop::Cop::Gitlab::DuplicateSpecLocation, type: :rubocop do
   include CopHelper
 
   subject(:cop) { described_class.new }
@@ -20,7 +18,7 @@ describe RuboCop::Cop::Gitlab::DuplicateSpecLocation do
 
   context 'Non-EE spec file' do
     it 'registers no offenses' do
-      expect_no_offenses(<<~SOURCE.strip_indent, full_path('spec/foo_spec.rb'))
+      expect_no_offenses(<<~SOURCE, full_path('spec/foo_spec.rb'))
         describe 'Foo' do
         end
       SOURCE
@@ -29,7 +27,7 @@ describe RuboCop::Cop::Gitlab::DuplicateSpecLocation do
 
   context 'Non-EE application file' do
     it 'registers no offenses' do
-      expect_no_offenses(<<~SOURCE.strip_indent, full_path('app/models/blog_post.rb'))
+      expect_no_offenses(<<~SOURCE, full_path('app/models/blog_post.rb'))
         class BlogPost
         end
       SOURCE
@@ -38,7 +36,7 @@ describe RuboCop::Cop::Gitlab::DuplicateSpecLocation do
 
   context 'EE application file' do
     it 'registers no offenses' do
-      expect_no_offenses(<<~SOURCE.strip_indent, full_path('ee/app/models/blog_post.rb'))
+      expect_no_offenses(<<~SOURCE, full_path('ee/app/models/blog_post.rb'))
         class BlogPost
         end
       SOURCE
@@ -49,7 +47,7 @@ describe RuboCop::Cop::Gitlab::DuplicateSpecLocation do
     let(:spec_file_path) { full_path('ee/spec/controllers/foo_spec.rb') }
 
     it 'registers no offenses' do
-      expect_no_offenses(<<~SOURCE.strip_indent, spec_file_path)
+      expect_no_offenses(<<~SOURCE, spec_file_path)
         describe 'Foo' do
         end
       SOURCE
@@ -65,7 +63,7 @@ describe RuboCop::Cop::Gitlab::DuplicateSpecLocation do
       end
 
       it 'marks the describe as offending' do
-        expect_offense(<<~SOURCE.strip_indent, spec_file_path)
+        expect_offense(<<~SOURCE, spec_file_path)
           describe 'Foo' do
           ^^^^^^^^^^^^^^ Duplicate spec location in `ee/spec/controllers/ee/foo_spec.rb`.
           end
@@ -78,7 +76,7 @@ describe RuboCop::Cop::Gitlab::DuplicateSpecLocation do
     let(:spec_file_path) { full_path('ee/spec/controllers/ee/foo_spec.rb') }
 
     it 'registers no offenses' do
-      expect_no_offenses(<<~SOURCE.strip_indent, spec_file_path)
+      expect_no_offenses(<<~SOURCE, spec_file_path)
         describe 'Foo' do
         end
       SOURCE
@@ -94,7 +92,7 @@ describe RuboCop::Cop::Gitlab::DuplicateSpecLocation do
       end
 
       it 'marks the describe as offending' do
-        expect_offense(<<~SOURCE.strip_indent, spec_file_path)
+        expect_offense(<<~SOURCE, spec_file_path)
           describe 'Foo' do
           ^^^^^^^^^^^^^^ Duplicate spec location in `ee/spec/controllers/foo_spec.rb`.
           end

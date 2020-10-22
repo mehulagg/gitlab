@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Audit::Levels::Instance do
+RSpec.describe Gitlab::Audit::Levels::Instance do
   describe '#apply' do
     let_it_be(:audit_events) do
       [

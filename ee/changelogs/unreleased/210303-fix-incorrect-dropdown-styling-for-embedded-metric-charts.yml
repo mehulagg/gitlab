@@ -1,5 +1,0 @@
----
-title: Fix incorrect dropdown styling for embedded metric charts
-merge_request: 29380
-author: Gilang Gumilar
-type: fixed

@@ -16,11 +16,6 @@ module EE
       environments_admin_cluster_path(cluster)
     end
 
-    override :metrics_dashboard_path
-    def metrics_dashboard_path(cluster)
-      metrics_dashboard_admin_cluster_path(cluster)
-    end
-
     private
 
     def can_read_cluster_environments?

@@ -46,12 +46,18 @@ module Types
     field :issues,
           Types::IssueType.connection_type,
           null: true,
-          description: 'Issues of the group',
-          resolver: Resolvers::IssuesResolver
+          description: 'Issues for projects in this group',
+          resolver: Resolvers::GroupIssuesResolver
+
+    field :merge_requests,
+          Types::MergeRequestType.connection_type,
+          null: true,
+          description: 'Merge requests for projects in this group',
+          resolver: Resolvers::GroupMergeRequestsResolver
 
     field :milestones, Types::MilestoneType.connection_type, null: true,
-          description: 'Find milestones',
-          resolver: Resolvers::MilestoneResolver
+          description: 'Milestones of the group',
+          resolver: Resolvers::GroupMilestonesResolver
 
     field :boards,
           Types::BoardType.connection_type,
@@ -64,7 +70,52 @@ module Types
           Types::BoardType,
           null: true,
           description: 'A single board of the group',
-          resolver: Resolvers::BoardsResolver.single
+          resolver: Resolvers::BoardResolver
+
+    field :label,
+          Types::LabelType,
+          null: true,
+          description: 'A label available on this group' do
+            argument :title, GraphQL::STRING_TYPE,
+              required: true,
+              description: 'Title of the label'
+          end
+
+    field :group_members,
+          Types::GroupMemberType.connection_type,
+          description: 'A membership of a user within this group',
+          extras: [:lookahead],
+          resolver: Resolvers::GroupMembersResolver
+
+    def label(title:)
+      BatchLoader::GraphQL.for(title).batch(key: group) do |titles, loader, args|
+        LabelsFinder
+          .new(current_user, group: args[:key], title: titles)
+          .execute
+          .each { |label| loader.call(label.title, label) }
+      end
+    end
+
+    field :labels,
+          Types::LabelType.connection_type,
+          null: true,
+          description: 'Labels available on this group' do
+            argument :search_term, GraphQL::STRING_TYPE,
+              required: false,
+              description: 'A search term to find labels with'
+          end
+
+    def labels(search_term: nil)
+      LabelsFinder
+        .new(current_user, group: group, search: search_term)
+        .execute
+    end
+
+    private
+
+    def group
+      object.respond_to?(:sync) ? object.sync : object
+    end
   end
 end
 

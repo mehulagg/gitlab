@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::EventGapTracking, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::Geo::EventGapTracking, :clean_gitlab_redis_cache do
   let(:previous_event_id) { 7 }
   let(:gap_id) { previous_event_id + 1 }
   let(:event_id_with_gap) { previous_event_id + 2 }
@@ -19,12 +19,12 @@ describe Gitlab::Geo::EventGapTracking, :clean_gitlab_redis_cache do
     end
 
     it 'returns the lowest gap id' do
-      Timecop.travel(50.minutes.ago) do
+      travel_to(50.minutes.ago) do
         gap_tracking.previous_id = 18
         gap_tracking.send(:track_gaps, 20)
       end
 
-      Timecop.travel(40.minutes.ago) do
+      travel_to(40.minutes.ago) do
         gap_tracking.previous_id = 12
         gap_tracking.send(:track_gaps, 14)
       end
@@ -116,7 +116,7 @@ describe Gitlab::Geo::EventGapTracking, :clean_gitlab_redis_cache do
         yielded << event_log
       end
 
-      Timecop.travel(13.minutes.ago) do
+      travel_to(13.minutes.ago) do
         gap_tracking.check!(event_id_with_gap)
       end
       create(:geo_event_log, :updated_event, id: gap_id)
@@ -125,7 +125,7 @@ describe Gitlab::Geo::EventGapTracking, :clean_gitlab_redis_cache do
         expect { gap_tracking.fill_gaps(&blk) }.to change { yielded.count }.by(1)
       end.count
 
-      Timecop.travel(12.minutes.ago) do
+      travel_to(12.minutes.ago) do
         gap_tracking.check!(event_id_with_gap + 3)
       end
       create(:geo_event_log, :updated_event, id: event_id_with_gap + 1)

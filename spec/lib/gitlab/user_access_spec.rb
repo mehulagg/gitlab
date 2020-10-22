@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe Gitlab::UserAccess do
+RSpec.describe Gitlab::UserAccess do
   include ProjectForksHelper
 
-  let(:access) { described_class.new(user, project: project) }
+  let(:access) { described_class.new(user, container: project) }
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
 
@@ -43,7 +43,7 @@ describe Gitlab::UserAccess do
 
     describe 'push to empty project' do
       let(:empty_project) { create(:project_empty_repo) }
-      let(:project_access) { described_class.new(user, project: empty_project) }
+      let(:project_access) { described_class.new(user, container: empty_project) }
 
       it 'returns true for admins' do
         user.update!(admin: true)

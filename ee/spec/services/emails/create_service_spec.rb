@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Emails::CreateService do
+RSpec.describe Emails::CreateService do
   let(:user) { create(:user) }
   let(:opts) { { email: 'new@email.com', user: user } }
 
@@ -12,7 +12,7 @@ describe Emails::CreateService do
     it 'registers a security event' do
       stub_licensed_features(extended_audit_events: true)
 
-      expect { service.execute }.to change { SecurityEvent.count }.by(1)
+      expect { service.execute }.to change { AuditEvent.count }.by(1)
     end
   end
 end

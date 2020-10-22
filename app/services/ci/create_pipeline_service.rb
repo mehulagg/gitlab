@@ -19,10 +19,32 @@ module Ci
                 Gitlab::Ci::Pipeline::Chain::Limit::Size,
                 Gitlab::Ci::Pipeline::Chain::Validate::External,
                 Gitlab::Ci::Pipeline::Chain::Populate,
+                Gitlab::Ci::Pipeline::Chain::StopDryRun,
                 Gitlab::Ci::Pipeline::Chain::Create,
                 Gitlab::Ci::Pipeline::Chain::Limit::Activity,
-                Gitlab::Ci::Pipeline::Chain::Limit::JobActivity].freeze
+                Gitlab::Ci::Pipeline::Chain::Limit::JobActivity,
+                Gitlab::Ci::Pipeline::Chain::CancelPendingPipelines,
+                Gitlab::Ci::Pipeline::Chain::Metrics,
+                Gitlab::Ci::Pipeline::Chain::Pipeline::Process].freeze
 
+    # Create a new pipeline in the specified project.
+    #
+    # @param [Symbol] source                             What event (Ci::Pipeline.sources) triggers the pipeline
+    #                                                    creation.
+    # @param [Boolean] ignore_skip_ci                    Whether skipping a pipeline creation when `[skip ci]` comment
+    #                                                    is present in the commit body
+    # @param [Boolean] save_on_errors                    Whether persisting an invalid pipeline when it encounters an
+    #                                                    error during creation (e.g. invalid yaml)
+    # @param [Ci::TriggerRequest] trigger_request        The pipeline trigger triggers the pipeline creation.
+    # @param [Ci::PipelineSchedule] schedule             The pipeline schedule triggers the pipeline creation.
+    # @param [MergeRequest] merge_request                The merge request triggers the pipeline creation.
+    # @param [ExternalPullRequest] external_pull_request The external pull request triggers the pipeline creation.
+    # @param [Ci::Bridge] bridge                         The bridge job that triggers the downstream pipeline creation.
+    # @param [String] content                            The content of .gitlab-ci.yml to override the default config
+    #                                                    contents (e.g. .gitlab-ci.yml in repostiry). Mainly used for
+    #                                                    generating a dangling pipeline.
+    #
+    # @return [Ci::Pipeline]                             The created Ci::Pipeline object.
     # rubocop: disable Metrics/ParameterLists
     def execute(source, ignore_skip_ci: false, save_on_errors: true, trigger_request: nil, schedule: nil, merge_request: nil, external_pull_request: nil, bridge: nil, **options, &block)
       @pipeline = Ci::Pipeline.new
@@ -48,27 +70,19 @@ module Ci
         push_options: params[:push_options] || {},
         chat_data: params[:chat_data],
         bridge: bridge,
-        **extra_options(options))
+        **extra_options(**options))
 
-      sequence = Gitlab::Ci::Pipeline::Chain::Sequence
+      # Ensure we never persist the pipeline when dry_run: true
+      @pipeline.readonly! if command.dry_run?
+
+      Gitlab::Ci::Pipeline::Chain::Sequence
         .new(pipeline, command, SEQUENCE)
+        .build!
 
-      sequence.build! do |pipeline, sequence|
-        schedule_head_pipeline_update
-
-        if sequence.complete?
-          cancel_pending_pipelines if project.auto_cancel_pending_pipelines?
-          pipeline_created_counter.increment(source: source)
-
-          Ci::ProcessPipelineService
-            .new(pipeline)
-            .execute(nil, initial_process: true)
-        end
-      end
+      schedule_head_pipeline_update if pipeline.persisted?
 
       # If pipeline is not persisted, try to recover IID
-      pipeline.reset_project_iid unless pipeline.persisted? ||
-          Feature.disabled?(:ci_pipeline_rewind_iid, project, default_enabled: true)
+      pipeline.reset_project_iid unless pipeline.persisted?
 
       pipeline
     end
@@ -77,7 +91,7 @@ module Ci
     def execute!(*args, &block)
       execute(*args, &block).tap do |pipeline|
         unless pipeline.persisted?
-          raise CreateError, pipeline.error_messages
+          raise CreateError, pipeline.full_error_messages
         end
       end
     end
@@ -92,52 +106,14 @@ module Ci
       commit.try(:id)
     end
 
-    def cancel_pending_pipelines
-      Gitlab::OptimisticLocking.retry_lock(auto_cancelable_pipelines) do |cancelables|
-        cancelables.find_each do |cancelable|
-          cancelable.auto_cancel_running(pipeline)
-        end
-      end
-    end
-
-    # rubocop: disable CodeReuse/ActiveRecord
-    def auto_cancelable_pipelines
-      # TODO: Introduced by https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/23464
-      if Feature.enabled?(:ci_support_interruptible_pipelines, project, default_enabled: true)
-        project.ci_pipelines
-          .where(ref: pipeline.ref)
-          .where.not(id: pipeline.same_family_pipeline_ids)
-          .where.not(sha: project.commit(pipeline.ref).try(:id))
-          .alive_or_scheduled
-          .with_only_interruptible_builds
-      else
-        project.ci_pipelines
-          .where(ref: pipeline.ref)
-          .where.not(id: pipeline.same_family_pipeline_ids)
-          .where.not(sha: project.commit(pipeline.ref).try(:id))
-          .created_or_pending
-      end
-    end
-    # rubocop: enable CodeReuse/ActiveRecord
-
-    def pipeline_created_counter
-      @pipeline_created_counter ||= Gitlab::Metrics
-        .counter(:pipelines_created_total, "Counter of pipelines created")
-    end
-
     def schedule_head_pipeline_update
       pipeline.all_merge_requests.opened.each do |merge_request|
         UpdateHeadPipelineForMergeRequestWorker.perform_async(merge_request.id)
       end
     end
 
-    def extra_options(options = {})
-      # In Ruby 2.4, even when options is empty, f(**options) doesn't work when f
-      # doesn't have any parameters. We reproduce the Ruby 2.5 behavior by
-      # checking explicitly that no arguments are given.
-      raise ArgumentError if options.any?
-
-      {} # overridden in EE
+    def extra_options(content: nil, dry_run: false)
+      { content: content, dry_run: dry_run }
     end
   end
 end

@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Cleaning up stale Redis sessions
 
 Since version 6.2, GitLab stores web user sessions as key-value pairs in Redis.
@@ -15,7 +21,8 @@ prefixed with `session:gitlab:`, so they would look like
 `session:gitlab:976aa289e2189b17d7ef525a6702ace9`. Below we describe how to
 remove the keys in the old format.
 
-**Note:** the instructions below must be modified in accordance with your
+NOTE: **Note:**
+The instructions below must be modified in accordance with your
 configuration settings if you have used the advanced Redis
 settings outlined in
 [Configuration Files Documentation](https://gitlab.com/gitlab-org/gitlab/blob/master/config/README.md).

@@ -85,4 +85,7 @@ export default {
       ];
     }
   },
+  [types.SET_TARGET_BRANCH](state, targetBranch) {
+    state.targetBranch = targetBranch;
+  },
 };

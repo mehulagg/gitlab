@@ -231,11 +231,11 @@ FactoryBot.define do
 
     trait :lsif do
       file_type { :lsif }
-      file_format { :gzip }
+      file_format { :zip }
 
       after(:build) do |artifact, evaluator|
         artifact.file = fixture_file_upload(
-          Rails.root.join('spec/fixtures/lsif.json.gz'), 'application/x-gzip')
+          Rails.root.join('spec/fixtures/lsif.json.zip'), 'application/zip')
       end
     end
 
@@ -246,6 +246,21 @@ FactoryBot.define do
       after(:build) do |artifact, evaluator|
         artifact.file = fixture_file_upload(
           Rails.root.join('spec/fixtures/build.env.gz'), 'application/x-gzip')
+      end
+    end
+
+    trait :cluster_applications do
+      file_type { :cluster_applications }
+      file_format { :gzip }
+
+      transient do
+        file do
+          fixture_file_upload(Rails.root.join('spec/fixtures/helm/helm_list_v2_prometheus_missing.json.gz'), 'application/x-gzip')
+        end
+      end
+
+      after(:build) do |artifact, evaluator|
+        artifact.file = evaluator.file
       end
     end
 

@@ -1,27 +1,33 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Geo', :orchestrated, :geo do
+  RSpec.describe 'Geo', :orchestrated, :geo do
     describe 'GitLab SSH push' do
       let(:file_name) { 'README.md' }
 
+      key = nil
+
+      after do
+        key&.remove_via_api!
+      end
+
       context 'regular git commit' do
-        it "is replicated to the secondary" do
-          key_title = "key for ssh tests #{Time.now.to_f}"
+        it "is replicated to the secondary", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/686' do
+          key_title = "Geo SSH #{Time.now.to_f}"
           file_content = 'This is a Geo project! Commit from primary.'
           project = nil
-          key = nil
 
           QA::Flow::Login.while_signed_in(address: :geo_primary) do
             # Create a new SSH key for the user
             key = Resource::SSHKey.fabricate_via_api! do |resource|
               resource.title = key_title
+              resource.expires_at = Date.today + 2
             end
 
             # Create a new Project
             project = Resource::Project.fabricate_via_api! do |project|
               project.name = 'geo-project'
-              project.description = 'Geo test project'
+              project.description = 'Geo test project for SSH push'
             end
 
             # Perform a git push over SSH directly to the primary
@@ -42,19 +48,12 @@ module QA
             end
           end
 
-          QA::Runtime::Logger.debug('Visiting the secondary geo node')
+          QA::Runtime::Logger.debug('*****Visiting the secondary geo node*****')
 
           QA::Flow::Login.while_signed_in(address: :geo_secondary) do
             EE::Page::Main::Banner.perform do |banner|
               expect(banner).to have_secondary_read_only_banner
             end
-
-            # Ensure the SSH key has replicated
-            Page::Main::Menu.act { click_settings_link }
-            Page::Profile::Menu.act { click_ssh_keys }
-
-            expect(page).to have_content(key.title)
-            expect(page).to have_content(key.md5_fingerprint)
 
             # Ensure project has replicated
             Page::Main::Menu.perform { |menu| menu.go_to_projects }
@@ -75,11 +74,10 @@ module QA
       end
 
       context 'git-lfs commit' do
-        it "is replicated to the secondary" do
-          key_title = "key for ssh tests #{Time.now.to_f}"
+        it "is replicated to the secondary", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/687' do
+          key_title = "Geo SSH LFS #{Time.now.to_f}"
           file_content = 'The rendered file could not be displayed because it is stored in LFS.'
           project = nil
-          key = nil
 
           QA::Flow::Login.while_signed_in(address: :geo_primary) do
             # Create a new SSH key for the user
@@ -90,7 +88,7 @@ module QA
             # Create a new Project
             project = Resource::Project.fabricate_via_api! do |project|
               project.name = 'geo-project'
-              project.description = 'Geo test project'
+              project.description = 'Geo test project for SSH LFS push'
             end
 
             # Perform a git push over SSH directly to the primary
@@ -115,19 +113,12 @@ module QA
             end
           end
 
-          QA::Runtime::Logger.debug('Visiting the secondary geo node')
+          QA::Runtime::Logger.debug('*****Visiting the secondary geo node*****')
 
           QA::Flow::Login.while_signed_in(address: :geo_secondary) do
             EE::Page::Main::Banner.perform do |banner|
               expect(banner).to have_secondary_read_only_banner
             end
-
-            # Ensure the SSH key has replicated
-            Page::Main::Menu.act { click_settings_link }
-            Page::Profile::Menu.act { click_ssh_keys }
-
-            expect(page).to have_content(key.title)
-            expect(page).to have_content(key.md5_fingerprint)
 
             # Ensure project has replicated
             Page::Main::Menu.perform { |menu| menu.go_to_projects }

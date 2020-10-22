@@ -2,22 +2,26 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['Group'] do
+RSpec.describe GitlabSchema.types['Group'] do
   describe 'nested epic request' do
     it { expect(described_class).to have_graphql_field(:epicsEnabled) }
     it { expect(described_class).to have_graphql_field(:epics) }
     it { expect(described_class).to have_graphql_field(:epic) }
   end
 
+  it { expect(described_class).to have_graphql_field(:iterations) }
   it { expect(described_class).to have_graphql_field(:groupTimelogsEnabled) }
   it { expect(described_class).to have_graphql_field(:timelogs, complexity: 5) }
   it { expect(described_class).to have_graphql_field(:vulnerabilities) }
+  it { expect(described_class).to have_graphql_field(:vulnerability_scanners) }
+  it { expect(described_class).to have_graphql_field(:vulnerabilities_count_by_day_and_severity) }
+  it { expect(described_class).to have_graphql_field(:vulnerability_grades) }
 
   describe 'timelogs field' do
     subject { described_class.fields['timelogs'] }
 
-    it 'finds timelogs between start date and end date' do
-      is_expected.to have_graphql_arguments(:start_date, :end_date, :after, :before, :first, :last)
+    it 'finds timelogs between start time and end time' do
+      is_expected.to have_graphql_arguments(:start_time, :end_time, :start_date, :end_date, :after, :before, :first, :last)
       is_expected.to have_graphql_resolver(Resolvers::TimelogResolver)
       is_expected.to have_non_null_graphql_type(Types::TimelogType.connection_type)
     end
@@ -34,7 +38,7 @@ describe GitlabSchema.types['Group'] do
     let_it_be(:query) do
       %(
         query {
-          group(fullPath:"#{group.full_path}") {
+          group(fullPath: "#{group.full_path}") {
             name
             vulnerabilities {
               nodes {

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe DependencyProxy::FindOrCreateBlobService do
+RSpec.describe DependencyProxy::FindOrCreateBlobService do
   include EE::DependencyProxyHelpers
 
   let(:blob)  { create(:dependency_proxy_blob) }

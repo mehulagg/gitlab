@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe StatusPage::IncidentCommentsFinder do
+RSpec.describe StatusPage::IncidentCommentsFinder do
   let_it_be(:user) { create(:user) }
   let_it_be(:issue) { create(:issue) }
   let_it_be(:unrelated_issue) { create(:issue, project: issue.project) }

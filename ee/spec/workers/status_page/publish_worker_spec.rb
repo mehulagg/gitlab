@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe StatusPage::PublishWorker do
+RSpec.describe StatusPage::PublishWorker do
   include ExclusiveLeaseHelpers
 
   let_it_be(:user) { create(:user) }

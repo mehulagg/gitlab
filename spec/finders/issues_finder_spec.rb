@@ -2,7 +2,8 @@
 
 require 'spec_helper'
 
-describe IssuesFinder do
+RSpec.describe IssuesFinder do
+  using RSpec::Parameterized::TableSyntax
   include_context 'IssuesFinder context'
 
   describe '#execute' do
@@ -132,26 +133,6 @@ describe IssuesFinder do
         end
       end
 
-      context 'filtering by NOT group_id' do
-        let(:params) { { not: { group_id: group.id } } }
-
-        context 'when include_subgroup param not set' do
-          it 'returns all other group issues' do
-            expect(issues).to contain_exactly(issue2, issue3, issue4)
-          end
-        end
-
-        context 'when include_subgroup param is true', :nested_groups do
-          before do
-            params[:include_subgroups] = true
-          end
-
-          it 'returns all other group and subgroup issues' do
-            expect(issues).to contain_exactly(issue2, issue3)
-          end
-        end
-      end
-
       context 'filtering by author ID' do
         let(:params) { { author_id: user2.id } }
 
@@ -205,9 +186,9 @@ describe IssuesFinder do
         let(:params) { { milestone_title: group_milestone.title } }
 
         before do
-          project2.update(namespace: group)
-          issue2.update(milestone: group_milestone)
-          issue3.update(milestone: group_milestone)
+          project2.update!(namespace: group)
+          issue2.update!(milestone: group_milestone)
+          issue3.update!(milestone: group_milestone)
         end
 
         it 'returns issues assigned to that group milestone' do
@@ -292,12 +273,12 @@ describe IssuesFinder do
         context 'using NOT' do
           let(:params) { { not: { milestone_title: Milestone::Upcoming.name } } }
 
-          it 'returns issues not in upcoming milestones for each project or group' do
-            target_issues = @created_issues.reject do |issue|
-              issue.milestone&.due_date && issue.milestone.due_date > Date.current
-            end + @created_issues.select { |issue| issue.milestone&.title == '8.9' }
+          it 'returns issues not in upcoming milestones for each project or group, but must have a due date' do
+            target_issues = @created_issues.select do |issue|
+              issue.milestone&.due_date && issue.milestone.due_date <= Date.current
+            end
 
-            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, *target_issues)
+            expect(issues).to contain_exactly(*target_issues)
           end
         end
       end
@@ -343,107 +324,146 @@ describe IssuesFinder do
           let(:params) { { not: { milestone_title: Milestone::Started.name } } }
 
           it 'returns issues not in the started milestones for each project' do
-            target_issues = Issue.where.not(milestone: Milestone.started)
+            target_issues = Issue.where(milestone: Milestone.not_started)
 
-            expect(issues).to contain_exactly(issue2, issue3, issue4, *target_issues)
+            expect(issues).to contain_exactly(*target_issues)
           end
         end
       end
 
-      context 'filtering by label' do
-        let(:params) { { label_name: label.title } }
+      shared_examples ':label_name parameter' do
+        context 'filtering by label' do
+          let(:params) { { label_name: label.title } }
 
-        it 'returns issues with that label' do
-          expect(issues).to contain_exactly(issue2)
-        end
-
-        context 'using NOT' do
-          let(:params) { { not: { label_name: label.title } } }
-
-          it 'returns issues that do not have that label' do
-            expect(issues).to contain_exactly(issue1, issue3, issue4)
+          it 'returns issues with that label' do
+            expect(issues).to contain_exactly(issue2)
           end
 
-          # IssuableFinder first filters using the outer params (the ones not inside the `not` key.)
-          # Afterwards, it applies the `not` params to that resultset. This means that things inside the `not` param
-          # do not take precedence over the outer params with the same name.
-          context 'shadowing the same outside param' do
-            let(:params) { { label_name: label2.title, not: { label_name: label.title } } }
+          context 'using NOT' do
+            let(:params) { { not: { label_name: label.title } } }
 
-            it 'does not take precedence over labels outside NOT' do
-              expect(issues).to contain_exactly(issue3)
+            it 'returns issues that do not have that label' do
+              expect(issues).to contain_exactly(issue1, issue3, issue4)
+            end
+
+            # IssuableFinder first filters using the outer params (the ones not inside the `not` key.)
+            # Afterwards, it applies the `not` params to that resultset. This means that things inside the `not` param
+            # do not take precedence over the outer params with the same name.
+            context 'shadowing the same outside param' do
+              let(:params) { { label_name: label2.title, not: { label_name: label.title } } }
+
+              it 'does not take precedence over labels outside NOT' do
+                expect(issues).to contain_exactly(issue3)
+              end
+            end
+
+            context 'further filtering outside params' do
+              let(:params) { { label_name: label2.title, not: { assignee_username: user2.username } } }
+
+              it 'further filters on the returned resultset' do
+                expect(issues).to be_empty
+              end
             end
           end
+        end
 
-          context 'further filtering outside params' do
-            let(:params) { { label_name: label2.title, not: { assignee_username: user2.username } } }
+        context 'filtering by multiple labels' do
+          let(:params) { { label_name: [label.title, label2.title].join(',') } }
+          let(:label2) { create(:label, project: project2) }
 
-            it 'further filters on the returned resultset' do
-              expect(issues).to be_empty
+          before do
+            create(:label_link, label: label2, target: issue2)
+          end
+
+          it 'returns the unique issues with all those labels' do
+            expect(issues).to contain_exactly(issue2)
+          end
+
+          context 'using NOT' do
+            let(:params) { { not: { label_name: [label.title, label2.title].join(',') } } }
+
+            it 'returns issues that do not have any of the labels provided' do
+              expect(issues).to contain_exactly(issue1, issue4)
             end
           end
         end
-      end
 
-      context 'filtering by multiple labels' do
-        let(:params) { { label_name: [label.title, label2.title].join(',') } }
-        let(:label2) { create(:label, project: project2) }
+        context 'filtering by a label that includes any or none in the title' do
+          let(:params) { { label_name: [label.title, label2.title].join(',') } }
+          let(:label) { create(:label, title: 'any foo', project: project2) }
+          let(:label2) { create(:label, title: 'bar none', project: project2) }
 
-        before do
-          create(:label_link, label: label2, target: issue2)
+          before do
+            create(:label_link, label: label2, target: issue2)
+          end
+
+          it 'returns the unique issues with all those labels' do
+            expect(issues).to contain_exactly(issue2)
+          end
+
+          context 'using NOT' do
+            let(:params) { { not: { label_name: [label.title, label2.title].join(',') } } }
+
+            it 'returns issues that do not have ANY ONE of the labels provided' do
+              expect(issues).to contain_exactly(issue1, issue4)
+            end
+          end
         end
 
-        it 'returns the unique issues with all those labels' do
-          expect(issues).to contain_exactly(issue2)
-        end
+        context 'filtering by no label' do
+          let(:params) { { label_name: described_class::Params::FILTER_NONE } }
 
-        context 'using NOT' do
-          let(:params) { { not: { label_name: [label.title, label2.title].join(',') } } }
-
-          it 'returns issues that do not have any of the labels provided' do
+          it 'returns issues with no labels' do
             expect(issues).to contain_exactly(issue1, issue4)
           end
         end
-      end
 
-      context 'filtering by a label that includes any or none in the title' do
-        let(:params) { { label_name: [label.title, label2.title].join(',') } }
-        let(:label) { create(:label, title: 'any foo', project: project2) }
-        let(:label2) { create(:label, title: 'bar none', project: project2) }
+        context 'filtering by any label' do
+          let(:params) { { label_name: described_class::Params::FILTER_ANY } }
 
-        before do
-          create(:label_link, label: label2, target: issue2)
+          it 'returns issues that have one or more label' do
+            create_list(:label_link, 2, label: create(:label, project: project2), target: issue3)
+
+            expect(issues).to contain_exactly(issue2, issue3)
+          end
         end
 
-        it 'returns the unique issues with all those labels' do
-          expect(issues).to contain_exactly(issue2)
-        end
+        context 'when the same label exists on project and group levels' do
+          let(:issue1) { create(:issue, project: project1) }
+          let(:issue2) { create(:issue, project: project1) }
 
-        context 'using NOT' do
-          let(:params) { { not: { label_name: [label.title, label2.title].join(',') } } }
+          # Skipping validation to reproduce a "real-word" scenario.
+          # We still have legacy labels on PRD that have the same title on the group and project levels, example: `bug`
+          let(:project_label) { build(:label, title: 'somelabel', project: project1).tap { |r| r.save!(validate: false) } }
+          let(:group_label) { create(:group_label, title: 'somelabel', group: project1.group) }
 
-          it 'returns issues that do not have ANY ONE of the labels provided' do
-            expect(issues).to contain_exactly(issue1, issue4)
+          let(:params) { { label_name: 'somelabel' } }
+
+          before do
+            create(:label_link, label: group_label, target: issue1)
+            create(:label_link, label: project_label, target: issue2)
+          end
+
+          it 'finds both issue records' do
+            expect(issues).to contain_exactly(issue1, issue2)
           end
         end
       end
 
-      context 'filtering by no label' do
-        let(:params) { { label_name: described_class::Params::FILTER_NONE } }
-
-        it 'returns issues with no labels' do
-          expect(issues).to contain_exactly(issue1, issue4)
+      context 'when `optimized_issuable_label_filter` feature flag is off' do
+        before do
+          stub_feature_flags(optimized_issuable_label_filter: false)
         end
+
+        it_behaves_like ':label_name parameter'
       end
 
-      context 'filtering by any label' do
-        let(:params) { { label_name: described_class::Params::FILTER_ANY } }
-
-        it 'returns issues that have one or more label' do
-          create_list(:label_link, 2, label: create(:label, project: project2), target: issue3)
-
-          expect(issues).to contain_exactly(issue2, issue3)
+      context 'when `optimized_issuable_label_filter` feature flag is on' do
+        before do
+          stub_feature_flags(optimized_issuable_label_filter: true)
         end
+
+        it_behaves_like ':label_name parameter'
       end
 
       context 'filtering by issue term' do
@@ -452,14 +472,6 @@ describe IssuesFinder do
         it 'returns issues with title and description match for search term' do
           expect(issues).to contain_exactly(issue1, issue2)
         end
-
-        context 'using NOT' do
-          let(:params) { { not: { search: 'git' } } }
-
-          it 'returns issues with no title and description match for search term' do
-            expect(issues).to contain_exactly(issue3, issue4)
-          end
-        end
       end
 
       context 'filtering by issue term in title' do
@@ -467,14 +479,6 @@ describe IssuesFinder do
 
         it 'returns issues with title match for search term' do
           expect(issues).to contain_exactly(issue1)
-        end
-
-        context 'using NOT' do
-          let(:params) { { not: { search: 'git', in: 'title' } } }
-
-          it 'returns issues with no title match for search term' do
-            expect(issues).to contain_exactly(issue2, issue3, issue4)
-          end
         end
       end
 
@@ -704,6 +708,58 @@ describe IssuesFinder do
         end
       end
 
+      context 'filtering by issue type' do
+        let_it_be(:incident_issue) { create(:incident, project: project1) }
+
+        context 'no type given' do
+          let(:params) { { issue_types: [] } }
+
+          it 'returns all issues' do
+            expect(issues).to contain_exactly(incident_issue, issue1, issue2, issue3, issue4)
+          end
+        end
+
+        context 'incident type' do
+          let(:params) { { issue_types: ['incident'] } }
+
+          it 'returns incident issues' do
+            expect(issues).to contain_exactly(incident_issue)
+          end
+        end
+
+        context 'issue type' do
+          let(:params) { { issue_types: ['issue'] } }
+
+          it 'returns all issues with type issue' do
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4)
+          end
+        end
+
+        context 'multiple params' do
+          let(:params) { { issue_types: %w(issue incident) } }
+
+          it 'returns all issues' do
+            expect(issues).to contain_exactly(incident_issue, issue1, issue2, issue3, issue4)
+          end
+        end
+
+        context 'without array' do
+          let(:params) { { issue_types: 'incident' } }
+
+          it 'returns incident issues' do
+            expect(issues).to contain_exactly(incident_issue)
+          end
+        end
+
+        context 'invalid params' do
+          let(:params) { { issue_types: ['nonsense'] } }
+
+          it 'returns no issues' do
+            expect(issues).to eq(Issue.none)
+          end
+        end
+      end
+
       context 'when the user is unauthorized' do
         let(:search_user) { nil }
 
@@ -786,6 +842,16 @@ describe IssuesFinder do
       finder = described_class.new(admin, state: 'closed')
 
       expect(finder.row_count).to be_zero
+    end
+
+    it 'returns -1 if the query times out' do
+      finder = described_class.new(admin)
+
+      expect_next_instance_of(described_class) do |subfinder|
+        expect(subfinder).to receive(:execute).and_raise(ActiveRecord::QueryCanceled)
+      end
+
+      expect(finder.row_count).to eq(-1)
     end
   end
 
@@ -933,10 +999,6 @@ describe IssuesFinder do
   describe '#use_cte_for_search?' do
     let(:finder) { described_class.new(nil, params) }
 
-    before do
-      stub_feature_flags(attempt_group_search_optimizations: true)
-    end
-
     context 'when there is no search param' do
       let(:params) { { attempt_group_search_optimizations: true } }
 
@@ -953,47 +1015,50 @@ describe IssuesFinder do
       end
     end
 
-    context 'when the attempt_group_search_optimizations flag is disabled' do
-      let(:params) { { search: 'foo', attempt_group_search_optimizations: true } }
+    context 'when all conditions are met' do
+      context "uses group search optimization" do
+        let(:params) { { search: 'foo', attempt_group_search_optimizations: true } }
 
-      before do
-        stub_feature_flags(attempt_group_search_optimizations: false)
-      end
-
-      it 'returns false' do
-        expect(finder.use_cte_for_search?).to be_falsey
-      end
-    end
-
-    context 'when attempt_group_search_optimizations is unset and attempt_project_search_optimizations is set' do
-      let(:params) { { search: 'foo', attempt_project_search_optimizations: true } }
-
-      context 'and the corresponding feature flag is disabled' do
-        before do
-          stub_feature_flags(attempt_project_search_optimizations: false)
-        end
-
-        it 'returns false' do
-          expect(finder.use_cte_for_search?).to be_falsey
+        it 'returns true' do
+          expect(finder.use_cte_for_search?).to be_truthy
         end
       end
 
-      context 'and the corresponding feature flag is enabled' do
-        before do
-          stub_feature_flags(attempt_project_search_optimizations: true)
-        end
+      context "uses project search optimization" do
+        let(:params) { { search: 'foo', attempt_project_search_optimizations: true } }
 
         it 'returns true' do
           expect(finder.use_cte_for_search?).to be_truthy
         end
       end
     end
+  end
 
-    context 'when all conditions are met' do
-      let(:params) { { search: 'foo', attempt_group_search_optimizations: true } }
+  describe '#parent_param=' do
+    let(:finder) { described_class.new(nil) }
 
-      it 'returns true' do
-        expect(finder.use_cte_for_search?).to be_truthy
+    subject { finder.parent_param = obj }
+
+    where(:klass, :param) do
+      :Project | :project_id
+      :Group   | :group_id
+    end
+
+    with_them do
+      let(:obj) { Object.const_get(klass, false).new }
+
+      it 'sets the params' do
+        subject
+
+        expect(finder.params[param]).to eq(obj)
+      end
+    end
+
+    context 'unexpected parent' do
+      let(:obj) { MergeRequest.new }
+
+      it 'raises an error' do
+        expect { subject }.to raise_error('Unexpected parent: MergeRequest')
       end
     end
   end

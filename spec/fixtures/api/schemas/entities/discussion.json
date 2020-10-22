@@ -29,8 +29,15 @@
               "web_url": { "type": "uri" },
               "status_tooltip_html": { "type": ["string", "null"] },
               "path": { "type": "string" }
-            },
-            "additionalProperties": false
+            }, 
+            "required": [
+              "id",
+              "state",
+              "avatar_url",
+              "path",
+              "name",
+              "username"
+            ]
           },
           "created_at": { "type": "date" },
           "updated_at": { "type": "date" },
@@ -53,6 +60,9 @@
           "resolve_with_issue_path": { "type": "string" },
           "cached_markdown_version": { "type": "integer" },
           "human_access": { "type": ["string", "null"] },
+          "is_noteable_author": { "type": "boolean" },
+          "is_contributor": { "type": "boolean" },
+          "project_name": { "type": "string" },
           "toggle_award_path": { "type": "string" },
           "path": { "type": "string" },
           "commands_changes": { "type": "object", "additionalProperties": true },

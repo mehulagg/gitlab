@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe StatusPage::IncidentEntity do
+RSpec.describe StatusPage::IncidentEntity do
   let_it_be(:user) { create(:user) }
 
   let_it_be(:issue, reload: true) do
@@ -11,7 +11,7 @@ describe StatusPage::IncidentEntity do
 
   let(:json) { subject.as_json }
 
-  subject { described_class.new(issue) }
+  subject { described_class.new(issue, user_notes: [], issue_iid: issue.iid) }
 
   it 'exposes JSON fields' do
     expect(json).to eq(
@@ -24,6 +24,10 @@ describe StatusPage::IncidentEntity do
       comments: [],
       links: { details: "data/incident/#{issue.iid}.json" }
     )
+  end
+
+  it 'exposes correct data types' do
+    expect(json.to_json).to match_schema('status_page/incident_details', dir: 'ee')
   end
 
   describe 'field #title' do
@@ -40,6 +44,12 @@ describe StatusPage::IncidentEntity do
       let(:field) { :description }
       let(:value) { json[:description] }
     end
+
+    it_behaves_like 'img upload tags for status page' do
+      let(:object) { issue }
+      let(:field) { :description }
+      let(:value) { json[:description] }
+    end
   end
 
   context 'with user notes' do
@@ -47,7 +57,7 @@ describe StatusPage::IncidentEntity do
       create_list(:note, 1, noteable: issue, project: issue.project)
     end
 
-    subject { described_class.new(issue, user_notes: user_notes) }
+    subject { described_class.new(issue, user_notes: user_notes, issue_iid: issue.iid) }
 
     it 'exposes comments' do
       expect(json).to include(:comments)

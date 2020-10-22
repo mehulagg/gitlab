@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Protected Environments' do
+RSpec.describe 'Protected Environments' do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
   let(:environments) { %w(production development staging test) }
@@ -65,7 +65,7 @@ describe 'Protected Environments' do
       end
     end
 
-    it 'allows updating access to a protected environment', :js, :quarantine do
+    it 'allows updating access to a protected environment', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/11086' do
       within('.protected-branches-list tr', text: 'production') do
         set_allowed_to_deploy('Developers + Maintainers')
       end

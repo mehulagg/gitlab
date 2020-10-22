@@ -2,17 +2,20 @@
 
 require 'spec_helper'
 
-describe ProductivityAnalytics do
+RSpec.describe ProductivityAnalytics do
   describe 'metrics data' do
     subject(:analytics) { described_class.new(merge_requests: finder_mrs, sort: custom_sort) }
 
-    let(:finder_mrs) { ProductivityAnalyticsFinder.new(create(:admin), finder_options).execute }
+    let(:project) { create(:project) }
+    let(:user) { project.owner }
+
+    let(:finder_mrs) { ProductivityAnalyticsFinder.new(user, finder_options).execute }
     let(:finder_options) { { state: 'merged' } }
 
     let(:custom_sort) { nil }
 
-    let(:label_a) { create(:label) }
-    let(:label_b) { create(:label) }
+    let(:label_a) { create(:label, project: project) }
+    let(:label_b) { create(:label, project: project) }
 
     let(:long_mr) do
       metrics_data = {
@@ -25,6 +28,7 @@ describe ProductivityAnalytics do
       }
       create(:labeled_merge_request, :merged, :with_productivity_metrics,
              labels: [label_a, label_b],
+             source_project: project,
              created_at: 31.days.ago,
              metrics_data: metrics_data)
     end
@@ -40,6 +44,7 @@ describe ProductivityAnalytics do
       }
 
       create(:labeled_merge_request, :merged, :with_productivity_metrics,
+             source_project: project,
              created_at: 15.days.ago,
              metrics_data: metrics_data)
     end
@@ -56,6 +61,7 @@ describe ProductivityAnalytics do
 
       create(:labeled_merge_request, :merged, :with_productivity_metrics,
              labels: [label_a, label_b],
+             source_project: project,
              created_at: 31.days.ago,
              metrics_data: metrics_data)
     end
@@ -72,6 +78,7 @@ describe ProductivityAnalytics do
 
       create(:labeled_merge_request, :merged, :with_productivity_metrics,
              labels: [label_a, label_b],
+             source_project: project,
              created_at: 31.days.ago,
              metrics_data: metrics_data)
     end

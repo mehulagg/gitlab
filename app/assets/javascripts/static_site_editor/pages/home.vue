@@ -1,96 +1,153 @@
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
-import { GlSkeletonLoader } from '@gitlab/ui';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import Tracking from '~/tracking';
 
+import SkeletonLoader from '../components/skeleton_loader.vue';
 import EditArea from '../components/edit_area.vue';
-import EditHeader from '../components/edit_header.vue';
-import SavedChangesMessage from '../components/saved_changes_message.vue';
-import PublishToolbar from '../components/publish_toolbar.vue';
+import EditMetaModal from '../components/edit_meta_modal.vue';
 import InvalidContentMessage from '../components/invalid_content_message.vue';
 import SubmitChangesError from '../components/submit_changes_error.vue';
+import appDataQuery from '../graphql/queries/app_data.query.graphql';
+import sourceContentQuery from '../graphql/queries/source_content.query.graphql';
+import hasSubmittedChangesMutation from '../graphql/mutations/has_submitted_changes.mutation.graphql';
+import submitContentChangesMutation from '../graphql/mutations/submit_content_changes.mutation.graphql';
+import { LOAD_CONTENT_ERROR, TRACKING_ACTION_INITIALIZE_EDITOR } from '../constants';
+import { SUCCESS_ROUTE } from '../router/constants';
 
 export default {
   components: {
+    SkeletonLoader,
     EditArea,
-    EditHeader,
+    EditMetaModal,
     InvalidContentMessage,
-    GlSkeletonLoader,
-    SavedChangesMessage,
-    PublishToolbar,
     SubmitChangesError,
   },
+  apollo: {
+    appData: {
+      query: appDataQuery,
+    },
+    sourceContent: {
+      query: sourceContentQuery,
+      update: ({
+        project: {
+          file: { title, content },
+        },
+      }) => {
+        return { title, content };
+      },
+      variables() {
+        return {
+          project: this.appData.project,
+          sourcePath: this.appData.sourcePath,
+        };
+      },
+      skip() {
+        return !this.appData.isSupportedContent;
+      },
+      error() {
+        createFlash(LOAD_CONTENT_ERROR);
+      },
+    },
+  },
+  data() {
+    return {
+      content: null,
+      images: null,
+      submitChangesError: null,
+      isSavingChanges: false,
+    };
+  },
   computed: {
-    ...mapState([
-      'content',
-      'isLoadingContent',
-      'isSavingChanges',
-      'isContentLoaded',
-      'isSupportedContent',
-      'returnUrl',
-      'title',
-      'submitChangesError',
-      'savedContentMeta',
-    ]),
-    ...mapGetters(['contentChanged']),
+    isLoadingContent() {
+      return this.$apollo.queries.sourceContent.loading;
+    },
+    isContentLoaded() {
+      return Boolean(this.sourceContent);
+    },
   },
   mounted() {
-    if (this.isSupportedContent) {
-      this.loadContent();
-    }
+    Tracking.event(document.body.dataset.page, TRACKING_ACTION_INITIALIZE_EDITOR);
   },
   methods: {
-    ...mapActions(['loadContent', 'setContent', 'submitChanges', 'dismissSubmitChangesError']),
+    onHideModal() {
+      this.isSavingChanges = false;
+      this.$refs.editMetaModal.hide();
+    },
+    onDismissError() {
+      this.submitChangesError = null;
+    },
+    onPrepareSubmit({ content, images }) {
+      this.content = content;
+      this.images = images;
+
+      this.isSavingChanges = true;
+      this.$refs.editMetaModal.show();
+    },
+    onSubmit(mergeRequestMeta) {
+      // eslint-disable-next-line promise/catch-or-return
+      this.$apollo
+        .mutate({
+          mutation: hasSubmittedChangesMutation,
+          variables: {
+            input: {
+              hasSubmittedChanges: true,
+            },
+          },
+        })
+        .finally(() => {
+          this.$router.push(SUCCESS_ROUTE);
+        });
+
+      this.$apollo
+        .mutate({
+          mutation: submitContentChangesMutation,
+          variables: {
+            input: {
+              project: this.appData.project,
+              username: this.appData.username,
+              sourcePath: this.appData.sourcePath,
+              content: this.content,
+              images: this.images,
+              mergeRequestMeta,
+            },
+          },
+        })
+        .catch(e => {
+          this.submitChangesError = e.message;
+        })
+        .finally(() => {
+          this.isSavingChanges = false;
+        });
+    },
   },
 };
 </script>
 <template>
-  <div class="d-flex justify-content-center h-100 pt-2">
-    <!-- Success view -->
-    <saved-changes-message
-      v-if="savedContentMeta"
-      class="w-75"
-      :branch="savedContentMeta.branch"
-      :commit="savedContentMeta.commit"
-      :merge-request="savedContentMeta.mergeRequest"
-      :return-url="returnUrl"
-    />
-
-    <!-- Main view -->
-    <template v-else-if="isSupportedContent">
-      <div v-if="isLoadingContent" class="w-50 h-50">
-        <gl-skeleton-loader :width="500" :height="102">
-          <rect width="500" height="16" rx="4" />
-          <rect y="20" width="375" height="16" rx="4" />
-          <rect x="380" y="20" width="120" height="16" rx="4" />
-          <rect y="40" width="250" height="16" rx="4" />
-          <rect x="255" y="40" width="150" height="16" rx="4" />
-          <rect x="410" y="40" width="90" height="16" rx="4" />
-        </gl-skeleton-loader>
-      </div>
-      <div v-if="isContentLoaded" class="d-flex flex-grow-1 flex-column">
-        <submit-changes-error
-          v-if="submitChangesError"
-          class="w-75 align-self-center"
-          :error="submitChangesError"
-          @retry="submitChanges"
-          @dismiss="dismissSubmitChangesError"
-        />
-        <edit-header class="w-75 align-self-center py-2" :title="title" />
-        <edit-area
-          class="w-75 h-100 shadow-none align-self-center"
-          :value="content"
-          @input="setContent"
-        />
-        <publish-toolbar
-          :return-url="returnUrl"
-          :saveable="contentChanged"
-          :saving-changes="isSavingChanges"
-          @submit="submitChanges"
-        />
-      </div>
+  <div class="container d-flex gl-flex-direction-column pt-2 h-100">
+    <template v-if="appData.isSupportedContent">
+      <skeleton-loader v-if="isLoadingContent" class="w-75 gl-align-self-center gl-mt-5" />
+      <submit-changes-error
+        v-if="submitChangesError"
+        :error="submitChangesError"
+        @retry="onSubmit"
+        @dismiss="onDismissError"
+      />
+      <edit-area
+        v-if="isContentLoaded"
+        :title="sourceContent.title"
+        :content="sourceContent.content"
+        :saving-changes="isSavingChanges"
+        :return-url="appData.returnUrl"
+        @submit="onPrepareSubmit"
+      />
+      <edit-meta-modal
+        ref="editMetaModal"
+        :source-path="appData.sourcePath"
+        @primary="onSubmit"
+        @hide="onHideModal"
+      />
     </template>
 
-    <!-- Error view -->
     <invalid-content-message v-else class="w-75" />
   </div>
 </template>

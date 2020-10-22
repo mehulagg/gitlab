@@ -1,5 +1,0 @@
----
-title: Validates ElasticSearch URLs are valid HTTP(S) URLs
-merge_request:
-author: mbergeron
-type: fixed

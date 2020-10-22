@@ -6,6 +6,11 @@ Devise.setup do |config|
     manager.default_strategies(scope: :user).unshift :two_factor_backupable
   end
 
+  # This is the default. This makes it explicit that Devise loads routes
+  # before eager loading. Disabling this seems to cause an error loading
+  # grape-entity `expose` for some reason.
+  config.reload_routes = true
+
   # ==> Mailer Configuration
   # Configure the class responsible to send e-mails.
   config.mailer = "DeviseMailer"
@@ -36,7 +41,7 @@ Devise.setup do |config|
   # Configure which authentication keys should be case-insensitive.
   # These keys will be downcased upon creating or modifying a user and when used
   # to authenticate or find a user. Default is :email.
-  config.case_insensitive_keys = [:email, :email_confirmation]
+  config.case_insensitive_keys = [:email]
 
   # Configure which authentication keys should have whitespace stripped.
   # These keys will have whitespace before and after removed upon creating or
@@ -102,7 +107,7 @@ Devise.setup do |config|
   # config.remember_across_browsers = true
 
   # If true, extends the user's remember period when remembered via cookie.
-  # config.extend_remember_period = false
+  config.extend_remember_period = true
 
   # Options to be passed to the created cookie. For instance, you can set
   # secure: true in order to force SSL only cookies.

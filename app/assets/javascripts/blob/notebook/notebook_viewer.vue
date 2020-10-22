@@ -1,7 +1,7 @@
 <script>
+import { GlLoadingIcon } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import notebookLab from '~/notebook/index.vue';
-import { GlLoadingIcon } from '@gitlab/ui';
 
 export default {
   components: {
@@ -62,9 +62,7 @@ export default {
 </script>
 
 <template>
-  <div
-    class="js-notebook-viewer-mounted container-fluid md prepend-top-default append-bottom-default"
-  >
+  <div class="js-notebook-viewer-mounted container-fluid md gl-mt-3 gl-mb-3">
     <div v-if="loading && !error" class="text-center loading">
       <gl-loading-icon class="mt-5" size="lg" />
     </div>

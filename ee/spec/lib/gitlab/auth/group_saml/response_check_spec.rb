@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::GroupSaml::ResponseCheck do
+RSpec.describe Gitlab::Auth::GroupSaml::ResponseCheck do
   describe 'validations' do
     let(:name_id) { '123-456-789' }
     let(:name_id_format) { 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent' }

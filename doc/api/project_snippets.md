@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Editor
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Project snippets
 
 ## Snippet visibility level
@@ -17,7 +24,7 @@ NOTE: **Note:**
 From July 2019, the `Internal` visibility setting is disabled for new projects, groups,
 and snippets on GitLab.com. Existing projects, groups, and snippets using the `Internal`
 visibility setting keep this setting. You can read more about the change in the
-[relevant issue](https://gitlab.com/gitlab-org/gitlab/issues/12388).
+[relevant issue](https://gitlab.com/gitlab-org/gitlab/-/issues/12388).
 
 ## List snippets
 
@@ -76,17 +83,22 @@ POST /projects/:id/snippets
 
 Parameters:
 
-- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
-- `title` (required) - The title of a snippet
-- `file_name` (required) - The name of a snippet file
-- `description` (optional) - The description of a snippet
-- `content` (required) - The content of a snippet
-- `visibility` (required) - The snippet's visibility
+| Attribute         | Type            | Required | Description                                                                                                     |
+|:------------------|:----------------|:---------|:----------------------------------------------------------------------------------------------------------------|
+| `id`              | integer         | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `title`           | string          | yes      | Title of a snippet                                                                                              |
+| `file_name`       | string          | no       | Deprecated: Use `files` instead. Name of a snippet file                                                         |
+| `content`         | string          | no       | Deprecated: Use `files` instead. Content of a snippet                                                           |
+| `description`     | string          | no       | Description of a snippet                                                                                        |
+| `visibility`      | string          | no       | Snippet's [visibility](#snippet-visibility-level)                                                               |
+| `files`           | array of hashes | no       | An array of snippet files                                                                                       |
+| `files:file_path` | string          | yes      | File path of the snippet file                                                                                   |
+| `files:content`   | string          | yes      | Content of the snippet file                                                                                     |
 
 Example request:
 
 ```shell
-curl --request POST https://gitlab.com/api/v4/projects/:id/snippets \
+curl --request POST "https://gitlab.com/api/v4/projects/:id/snippets" \
      --header "PRIVATE-TOKEN: <your access token>" \
      --header "Content-Type: application/json" \
      -d @snippet.json
@@ -98,9 +110,13 @@ curl --request POST https://gitlab.com/api/v4/projects/:id/snippets \
 {
   "title" : "Example Snippet Title",
   "description" : "More verbose snippet description",
-  "file_name" : "example.txt",
-  "content" : "source code \n with multiple lines\n",
-  "visibility" : "private"
+  "visibility" : "private",
+  "files": [
+    {
+      "file_path": "example.txt",
+      "content" : "source code \n with multiple lines\n",
+    }
+  ]
 }
 ```
 
@@ -114,18 +130,27 @@ PUT /projects/:id/snippets/:snippet_id
 
 Parameters:
 
-- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
-- `snippet_id` (required) - The ID of a project's snippet
-- `title` (optional) - The title of a snippet
-- `file_name` (optional) - The name of a snippet file
-- `description` (optional) - The description of a snippet
-- `content` (optional) - The content of a snippet
-- `visibility` (optional) - The snippet's visibility
+| Attribute             | Type            | Required | Description                                                                                                     |
+|:----------------------|:----------------|:---------|:----------------------------------------------------------------------------------------------------------------|
+| `id`                  | integer         | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `snippet_id`          | integer         | yes      | The ID of a project's snippet                                                                                   |
+| `title`               | string          | no       | Title of a snippet                                                                                              |
+| `file_name`           | string          | no       | Deprecated: Use `files` instead. Name of a snippet file                                                         |
+| `content`             | string          | no       | Deprecated: Use `files` instead. Content of a snippet                                                           |
+| `description`         | string          | no       | Description of a snippet                                                                                        |
+| `visibility`          | string          | no       | Snippet's [visibility](#snippet-visibility-level)                                                               |
+| `files`               | array of hashes | no       | An array of snippet files                                                                                       |
+| `files:action`        | string          | yes      | Type of action to perform on the file, one of: 'create', 'update', 'delete', 'move'                             |
+| `files:file_path`     | string          | no       | File path of the snippet file                                                                                   |
+| `files:previous_path` | string          | no       | Previous path of the snippet file                                                                               |
+| `files:content`       | string          | no       | Content of the snippet file                                                                                     |
+
+Updates to snippets with multiple files *must* use the `files` attribute.
 
 Example request:
 
 ```shell
-curl --request PUT https://gitlab.com/api/v4/projects/:id/snippets/:snippet_id \
+curl --request PUT "https://gitlab.com/api/v4/projects/:id/snippets/:snippet_id" \
      --header "PRIVATE-TOKEN: <your_access_token>" \
      --header "Content-Type: application/json" \
      -d @snippet.json
@@ -137,9 +162,14 @@ curl --request PUT https://gitlab.com/api/v4/projects/:id/snippets/:snippet_id \
 {
   "title" : "Updated Snippet Title",
   "description" : "More verbose snippet description",
-  "file_name" : "new_filename.txt",
-  "content" : "updated source code \n with multiple lines\n",
-  "visibility" : "private"
+  "visibility" : "private",
+  "files": [
+    {
+      "action": "update",
+      "file_path": "example.txt",
+      "content" : "updated source code \n with multiple lines\n"
+    }
+  ]
 }
 ```
 
@@ -159,7 +189,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --request DELETE https://gitlab.com/api/v4/projects/:id/snippets/:snippet_id \
+curl --request DELETE "https://gitlab.com/api/v4/projects/:id/snippets/:snippet_id" \
      --header "PRIVATE-TOKEN: <your_access_token>"
 ```
 
@@ -179,13 +209,35 @@ Parameters:
 Example request:
 
 ```shell
-curl https://gitlab.com/api/v4/projects/:id/snippets/:snippet_id/raw \
+curl "https://gitlab.com/api/v4/projects/:id/snippets/:snippet_id/raw" \
+     --header "PRIVATE-TOKEN: <your_access_token>"
+```
+
+## Snippet repository file content
+
+Returns the raw file content as plain text.
+
+```plaintext
+GET /projects/:id/snippets/:snippet_id/files/:ref/:file_path/raw
+```
+
+Parameters:
+
+- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
+- `snippet_id` (required) - The ID of a project's snippet
+- `ref` (required) - The name of a branch, tag or commit e.g. master
+- `file_path` (required) - The URL-encoded path to the file, e.g. snippet%2Erb
+
+Example request:
+
+```shell
+curl "https://gitlab.com/api/v4/projects/1/snippets/2/files/master/snippet%2Erb/raw" \
      --header "PRIVATE-TOKEN: <your_access_token>"
 ```
 
 ## Get user agent details
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/29508) in GitLab 9.4.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/29508) in GitLab 9.4.
 
 Available only for admins.
 
@@ -201,7 +253,7 @@ GET /projects/:id/snippets/:snippet_id/user_agent_detail
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/snippets/2/user_agent_detail
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/snippets/2/user_agent_detail"
 ```
 
 Example response:

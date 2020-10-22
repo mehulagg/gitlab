@@ -105,12 +105,14 @@ class IssuableFinder
     end
 
     def project?
-      params[:project_id].present?
+      project_id.present?
     end
 
     def group
       strong_memoize(:group) do
-        if params[:group_id].present?
+        if params[:group_id].is_a?(Group)
+          params[:group_id]
+        elsif params[:group_id].present?
           Group.find(params[:group_id])
         else
           nil
@@ -132,11 +134,17 @@ class IssuableFinder
 
     def project
       strong_memoize(:project) do
-        project = Project.find(params[:project_id])
+        next nil unless project?
+
+        project = project_id.is_a?(Project) ? project_id : Project.find(project_id)
         project = nil unless Ability.allowed?(current_user, :"read_#{klass.to_ability_name}", project)
 
         project
       end
+    end
+
+    def project_id
+      params[:project_id]
     end
 
     def projects

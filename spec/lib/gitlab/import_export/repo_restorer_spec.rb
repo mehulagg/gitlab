@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ImportExport::RepoRestorer do
+RSpec.describe Gitlab::ImportExport::RepoRestorer do
   include GitHelpers
 
   describe 'bundle a project Git repo' do
@@ -13,11 +13,8 @@ describe Gitlab::ImportExport::RepoRestorer do
     let(:shared) { project.import_export_shared }
     let(:bundler) { Gitlab::ImportExport::RepoSaver.new(project: project_with_repo, shared: shared) }
     let(:bundle_path) { File.join(shared.export_path, Gitlab::ImportExport.project_bundle_filename) }
-    let(:restorer) do
-      described_class.new(path_to_bundle: bundle_path,
-                          shared: shared,
-                          project: project)
-    end
+
+    subject { described_class.new(path_to_bundle: bundle_path, shared: shared, project: project) }
 
     before do
       allow_next_instance_of(Gitlab::ImportExport) do |instance|
@@ -36,7 +33,24 @@ describe Gitlab::ImportExport::RepoRestorer do
     end
 
     it 'restores the repo successfully' do
-      expect(restorer.restore).to be_truthy
+      expect(subject.restore).to be_truthy
+    end
+
+    context 'when the repository already exists' do
+      it 'deletes the existing repository before importing' do
+        allow(project.repository).to receive(:exists?).and_return(true)
+        allow(project.repository).to receive(:path).and_return('repository_path')
+
+        expect_next_instance_of(Repositories::DestroyService) do |instance|
+          expect(instance).to receive(:execute).and_call_original
+        end
+
+        expect(shared.logger).to receive(:info).with(
+          message: 'Deleting existing "repository_path" to re-import it.'
+        )
+
+        expect(subject.restore).to be_truthy
+      end
     end
   end
 end

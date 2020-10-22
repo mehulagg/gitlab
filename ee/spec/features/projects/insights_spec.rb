@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Project Insights' do
+RSpec.describe 'Project Insights' do
   it_behaves_like 'Insights page' do
     let_it_be(:entity) { create(:project) }
     let(:route) { url_for([entity.namespace, entity, :insights]) }

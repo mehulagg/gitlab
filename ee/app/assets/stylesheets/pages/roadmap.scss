@@ -1,6 +1,7 @@
 $header-item-height: 60px;
 $item-height: 50px;
-$details-cell-width: 320px;
+$details-cell-width: px-to-rem(320px);
+$timeline-cell-height: 32px;
 $timeline-cell-width: 180px;
 $border-style: 1px solid $border-gray-normal;
 $roadmap-gradient-dark-gray: rgba(0, 0, 0, 0.15);
@@ -194,7 +195,7 @@ html.group-epics-roadmap-html {
 
     .item-label,
     .item-sublabel .sublabel-value {
-      color: $gray-600;
+      color: $gray-400;
       font-weight: 400;
 
       &.label-dark {
@@ -255,7 +256,7 @@ html.group-epics-roadmap-html {
   &:hover {
     .epic-details-cell,
     .epic-timeline-cell {
-      background-color: $gray-100;
+      background-color: $gray-50;
     }
   }
 
@@ -410,12 +411,13 @@ html.group-epics-roadmap-html {
 .milestones-list-section {
   .milestones-list-items {
     .milestone-timeline-cell {
+      height: $timeline-cell-height;
       width: $timeline-cell-width;
     }
 
     .timeline-bar-wrapper {
-      height: 32px;
-      color: $gray-700;
+      height: $timeline-cell-height;
+      color: $gray-500;
     }
 
     .milestone-start-and-end {
@@ -506,7 +508,7 @@ html.group-epics-roadmap-html {
 
     .timeline-bar {
       width: 100%;
-      background-color: $gray-700;
+      background-color: $gray-500;
       height: 2px;
       z-index: 1;
       bottom: 4px;
@@ -521,13 +523,13 @@ html.group-epics-roadmap-html {
 
       &::before {
         width: 2px;
-        background-color: $gray-700;
+        background-color: $gray-500;
       }
 
       &::after {
         right: -3px;
         width: 8px;
-        border: 2px solid $gray-700;
+        border: 2px solid $gray-500;
         border-radius: 4px;
         background-color: $white;
       }
@@ -546,4 +548,15 @@ html.group-epics-roadmap-html {
       height: 100%;
     }
   }
+}
+
+.milestone-item-type {
+  .gl-icon {
+    padding-right: $gl-spacing-scale-1;
+  }
+}
+
+.milestone-item-date {
+  color: $gray-500;
+  padding-top: $gl-spacing-scale-1;
 }

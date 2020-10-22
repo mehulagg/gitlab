@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::BlobVerificationPrimaryWorker, :geo do
+RSpec.describe Geo::BlobVerificationPrimaryWorker, :geo do
   let(:package_file) { create(:conan_package_file, :conan_recipe_file) }
 
   describe '#perform' do

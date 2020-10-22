@@ -8,7 +8,7 @@ module QA
           module Project
             class MilestoneBoardList < BaseBoardList
               attribute :project_milestone do
-                QA::EE::Resource::ProjectMilestone.fabricate_via_api! do |project_milestone|
+                QA::Resource::ProjectMilestone.fabricate_via_api! do |project_milestone|
                   project_milestone.project = board.project
                   project_milestone.title = '1.0'
                 end

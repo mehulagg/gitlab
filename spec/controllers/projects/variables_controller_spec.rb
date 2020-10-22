@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::VariablesController do
+RSpec.describe Projects::VariablesController do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
 
@@ -47,6 +47,7 @@ describe Projects::VariablesController do
           protected: variable.protected?.to_s,
           environment_scope: variable.environment_scope }
       end
+
       let(:new_variable_attributes) do
         { key: 'new_key',
           secret_value: 'dummy_value',

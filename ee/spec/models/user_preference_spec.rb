@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe UserPreference do
+RSpec.describe UserPreference do
   let(:user_preference) { create(:user_preference) }
 
   shared_examples 'updates roadmap_epics_state' do |state|

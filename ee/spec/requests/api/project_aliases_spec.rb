@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::ProjectAliases, api: true do
+RSpec.describe API::ProjectAliases, api: true do
   let(:user)  { create(:user) }
   let(:admin) { create(:admin) }
 

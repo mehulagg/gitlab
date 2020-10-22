@@ -5,18 +5,19 @@ import InlineDiffExpansionRow from '~/diffs/components/inline_diff_expansion_row
 import diffFileMockData from '../mock_data/diff_file';
 
 describe('InlineDiffExpansionRow', () => {
-  const matchLine = diffFileMockData.highlighted_diff_lines[5];
+  const mockData = { ...diffFileMockData };
+  const matchLine = mockData.highlighted_diff_lines.pop();
 
   const createComponent = (options = {}) => {
     const cmp = Vue.extend(InlineDiffExpansionRow);
     const defaults = {
-      fileHash: diffFileMockData.file_hash,
+      fileHash: mockData.file_hash,
       contextLinesPath: 'contextLinesPath',
       line: matchLine,
       isTop: false,
       isBottom: false,
     };
-    const props = Object.assign({}, defaults, options);
+    const props = { ...defaults, ...options };
 
     return createComponentWithStore(cmp, createStore(), props).$mount();
   };

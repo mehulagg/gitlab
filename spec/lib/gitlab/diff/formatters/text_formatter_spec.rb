@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Diff::Formatters::TextFormatter do
+RSpec.describe Gitlab::Diff::Formatters::TextFormatter do
   let!(:base) do
     {
       base_sha: 123,
@@ -10,6 +10,7 @@ describe Gitlab::Diff::Formatters::TextFormatter do
       head_sha: 789,
       old_path: 'old_path.txt',
       new_path: 'new_path.txt',
+      file_identifier_hash: '777',
       line_range: nil
     }
   end
@@ -26,6 +27,7 @@ describe Gitlab::Diff::Formatters::TextFormatter do
 
   # Specific text formatter examples
   let!(:formatter) { described_class.new(attrs) }
+  let(:attrs) { base }
 
   describe '#line_age' do
     subject { formatter.line_age }
@@ -40,6 +42,23 @@ describe Gitlab::Diff::Formatters::TextFormatter do
       let(:attrs) { base.merge(old_line: 1) }
 
       it { is_expected.to eq('old') }
+    end
+  end
+
+  describe "#==" do
+    it "is false when the line_range changes" do
+      formatter_1 = described_class.new(base.merge(line_range: { start_line_code: "foo", end_line_code: "bar" }))
+      formatter_2 = described_class.new(base.merge(line_range: { start_line_code: "foo", end_line_code: "baz" }))
+
+      expect(formatter_1).not_to eq(formatter_2)
+    end
+
+    it "is true when the line_range doesn't change" do
+      attrs = base.merge({ line_range: { start_line_code: "foo", end_line_code: "baz" } })
+      formatter_1 = described_class.new(attrs)
+      formatter_2 = described_class.new(attrs)
+
+      expect(formatter_1).to eq(formatter_2)
     end
   end
 end

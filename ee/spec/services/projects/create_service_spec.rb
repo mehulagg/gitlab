@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::CreateService, '#execute' do
+RSpec.describe Projects::CreateService, '#execute' do
   include EE::GeoHelpers
 
   let(:user) { create :user }
@@ -132,7 +132,6 @@ describe Projects::CreateService, '#execute' do
 
       context 'with checks on the namespace' do
         before do
-          stub_const('License::ANY_PLAN_FEATURES', [])
           enable_namespace_license_check!
         end
 
@@ -186,33 +185,102 @@ describe Projects::CreateService, '#execute' do
     end
   end
 
-  context 'push rules sample' do
-    let!(:sample) { create(:push_rule_sample) }
+  context 'push rules' do
+    context 'with sample' do
+      let!(:sample) { create(:push_rule_sample) }
 
-    subject(:push_rule) { create_project(user, opts).push_rule }
-
-    it 'creates push rule from sample' do
-      is_expected.to have_attributes(
-        force_push_regex: sample.force_push_regex,
-        deny_delete_tag: sample.deny_delete_tag,
-        delete_branch_regex: sample.delete_branch_regex,
-        commit_message_regex: sample.commit_message_regex
-      )
-    end
-
-    it 'creates association between project settings and push rule' do
-      project_setting = subject.project.project_setting
-
-      expect(project_setting.push_rule_id).to eq(subject.id)
-    end
-
-    context 'push rules unlicensed' do
       before do
-        stub_licensed_features(push_rules: false)
+        stub_licensed_features(push_rules: true)
       end
 
-      it 'ignores the push rule sample' do
-        is_expected.to be_nil
+      subject(:push_rule) { create_project(user, opts).push_rule }
+
+      it 'creates push rule from sample' do
+        is_expected.to have_attributes(
+          force_push_regex: sample.force_push_regex,
+          deny_delete_tag: sample.deny_delete_tag,
+          delete_branch_regex: sample.delete_branch_regex,
+          commit_message_regex: sample.commit_message_regex
+        )
+      end
+
+      it 'creates association between project settings and push rule' do
+        project_setting = subject.project.project_setting
+
+        expect(project_setting.push_rule_id).to eq(subject.id)
+      end
+
+      context 'push rules unlicensed' do
+        before do
+          stub_licensed_features(push_rules: false)
+        end
+
+        subject(:push_rule) { create_project(user, opts).push_rule }
+
+        it 'ignores the push rule sample' do
+          is_expected.to be_nil
+        end
+      end
+    end
+
+    context 'when there are no push rules' do
+      it 'does not create push rule' do
+        expect(create_project(user, opts).push_rule).to be_nil
+      end
+    end
+  end
+
+  context 'group push rules' do
+    before do
+      stub_licensed_features(push_rules: true)
+    end
+
+    context 'project created within a group' do
+      let(:group) { create(:group) }
+      let(:opts) do
+        {
+          name: "GitLab",
+          namespace_id: group.id
+        }
+      end
+
+      before do
+        group.add_owner(user)
+      end
+
+      context 'when group has push rule defined' do
+        let(:group_push_rule) { create(:push_rule_without_project, force_push_regex: 'testing me') }
+
+        before do
+          group.update!(push_rule: group_push_rule)
+        end
+
+        it 'creates push rule from group push rule' do
+          project = create_project(user, opts)
+          project_push_rule = project.push_rule
+
+          expect(project_push_rule).to have_attributes(
+            force_push_regex: group_push_rule.force_push_regex,
+            deny_delete_tag: group_push_rule.deny_delete_tag,
+            delete_branch_regex: group_push_rule.delete_branch_regex,
+            commit_message_regex: group_push_rule.commit_message_regex,
+            is_sample: false
+          )
+          expect(project.project_setting.push_rule_id).to eq(project_push_rule.id)
+        end
+      end
+
+      context 'when group does not have push rule defined' do
+        let!(:sample) { create(:push_rule_sample) }
+
+        it 'creates push rule from sample' do
+          expect(create_project(user, opts).push_rule).to have_attributes(
+            force_push_regex: sample.force_push_regex,
+            deny_delete_tag: sample.deny_delete_tag,
+            delete_branch_regex: sample.delete_branch_regex,
+            commit_message_regex: sample.commit_message_regex
+          )
+        end
       end
     end
   end
@@ -271,6 +339,7 @@ describe Projects::CreateService, '#execute' do
       let(:fail_condition!) do
         allow(Gitlab::VisibilityLevel).to receive(:allowed_for?).and_return(false)
       end
+
       let(:attributes) do
         {
            author_id: user.id,
@@ -279,7 +348,7 @@ describe Projects::CreateService, '#execute' do
            details: {
              add: 'project',
              author_name: user.name,
-             target_id: @resource.full_path,
+             target_id: @resource.id,
              target_type: 'Project',
              target_details: @resource.full_path
            }

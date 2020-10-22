@@ -1,7 +1,6 @@
 <script>
 import { mapActions } from 'vuex';
-import { GlDeprecatedButton } from '@gitlab/ui';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { GlButton } from '@gitlab/ui';
 import RuleInput from './mr_edit/rule_input.vue';
 import EmptyRuleName from './empty_rule_name.vue';
 import RuleBranches from './rule_branches.vue';
@@ -11,9 +10,8 @@ export default {
     RuleInput,
     EmptyRuleName,
     RuleBranches,
-    GlDeprecatedButton,
+    GlButton,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     rule: {
       type: Object,
@@ -40,7 +38,7 @@ export default {
   },
   computed: {
     showProtectedBranch() {
-      return this.glFeatures.scopedApprovalRules && !this.isMrEdit && this.allowMultiRule;
+      return !this.isMrEdit && this.allowMultiRule;
     },
   },
   methods: {
@@ -61,14 +59,14 @@ export default {
       <rule-input :rule="rule" :is-mr-edit="isMrEdit" />
     </td>
     <td>
-      <gl-deprecated-button
+      <gl-button
         v-if="!allowMultiRule && canEdit"
         class="ml-auto btn-info btn-inverted"
         data-qa-selector="add_approvers_button"
         @click="openCreateModal(null)"
       >
         {{ __('Add approval rule') }}
-      </gl-deprecated-button>
+      </gl-button>
     </td>
   </tr>
 </template>

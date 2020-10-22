@@ -52,7 +52,7 @@ module Projects
 
     def success
       @status.success
-      @project.mark_pages_as_deployed
+      @project.mark_pages_as_deployed(artifacts_archive: build.job_artifacts_archive)
       super
     end
 
@@ -97,6 +97,7 @@ module Projects
       build.artifacts_file.use_file do |artifacts_path|
         SafeZip::Extract.new(artifacts_path)
           .extract(directories: [PUBLIC_DIR], to: temp_path)
+        create_pages_deployment(artifacts_path)
       end
     rescue SafeZip::Extract::Error => e
       raise FailedToExtractError, e.message
@@ -118,6 +119,21 @@ module Projects
       FileUtils.rm_r(previous_public_path, force: true)
     end
 
+    def create_pages_deployment(artifacts_path)
+      return unless Feature.enabled?(:zip_pages_deployments, project)
+
+      File.open(artifacts_path) do |file|
+        deployment = project.pages_deployments.create!(file: file)
+        project.pages_metadatum.update!(pages_deployment: deployment)
+      end
+
+      # TODO: schedule old deployment removal https://gitlab.com/gitlab-org/gitlab/-/issues/235730
+    rescue => e
+      # we don't want to break current pages deployment process if something goes wrong
+      # TODO: remove this rescue as part of https://gitlab.com/gitlab-org/gitlab/-/issues/245308
+      Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
+    end
+
     def latest?
       # check if sha for the ref is still the most recent one
       # this helps in case when multiple deployments happens
@@ -136,7 +152,7 @@ module Projects
     def max_size
       max_pages_size = max_size_from_settings
 
-      return ::Gitlab::Pages::MAX_SIZE if max_pages_size.zero?
+      return ::Gitlab::Pages::MAX_SIZE if max_pages_size == 0
 
       max_pages_size
     end

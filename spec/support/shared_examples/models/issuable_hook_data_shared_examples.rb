@@ -7,6 +7,7 @@ RSpec.shared_examples 'issuable hook data' do |kind|
   include_examples 'project hook data' do
     let(:project) { builder.issuable.project }
   end
+
   include_examples 'deprecated repository hook data'
 
   context "with a #{kind}" do
@@ -37,6 +38,7 @@ RSpec.shared_examples 'issuable hook data' do |kind|
           title_html: %w[foo bar]
         }
       end
+
       let(:data) { builder.build(user: user, changes: changes) }
 
       it 'populates the :changes hash' do

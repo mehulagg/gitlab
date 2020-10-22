@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'NotesHelpers' do
+RSpec.describe 'NotesHelpers' do
   describe '#find_noteable' do
     let!(:group) { create(:group, :public) }
     let!(:other_group) { create(:group, :public) }

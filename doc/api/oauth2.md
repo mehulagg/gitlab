@@ -61,7 +61,7 @@ The web application flow is:
    include the GET `code` parameter, for example:
 
    ```plaintext
-   http://myapp.com/oauth/redirect?code=1234567890&state=YOUR_UNIQUE_STATE_HASH
+   https://example.com/oauth/redirect?code=1234567890&state=YOUR_UNIQUE_STATE_HASH
    ```
 
    You should then use `code` to request an access token.
@@ -72,7 +72,7 @@ The web application flow is:
 
    ```ruby
    parameters = 'client_id=APP_ID&client_secret=APP_SECRET&code=RETURNED_CODE&grant_type=authorization_code&redirect_uri=REDIRECT_URI'
-   RestClient.post 'http://gitlab.example.com/oauth/token', parameters
+   RestClient.post 'https://gitlab.example.com/oauth/token', parameters
    ```
 
    Example response:
@@ -125,7 +125,7 @@ will include a fragment with `access_token` as well as token details in GET
 parameters, for example:
 
 ```plaintext
-http://myapp.com/oauth/redirect#access_token=ABCDExyz123&state=YOUR_UNIQUE_STATE_HASH&token_type=bearer&expires_in=3600
+https://example.com/oauth/redirect#access_token=ABCDExyz123&state=YOUR_UNIQUE_STATE_HASH&token_type=bearer&expires_in=3600
 ```
 
 ### Resource owner password credentials flow
@@ -173,11 +173,14 @@ the following parameters:
 }
 ```
 
+Also you must use HTTP Basic authentication using the `client_id` and`client_secret`
+values to authenticate the client that performs a request.
+
 Example cURL request:
 
 ```shell
 echo 'grant_type=password&username=<your_username>&password=<your_password>' > auth.txt
-curl --data "@auth.txt" --request POST https://gitlab.example.com/oauth/token
+curl --data "@auth.txt" --user client_id:client_secret --request POST "https://gitlab.example.com/oauth/token"
 ```
 
 Then, you'll receive the access token back in the response:
@@ -190,10 +193,12 @@ Then, you'll receive the access token back in the response:
 }
 ```
 
+By default, the scope of the access token is `api`, which provides complete read/write access.
+
 For testing, you can use the `oauth2` Ruby gem:
 
 ```ruby
-client = OAuth2::Client.new('the_client_id', 'the_client_secret', :site => "http://example.com")
+client = OAuth2::Client.new('the_client_id', 'the_client_secret', :site => "https://example.com")
 access_token = client.password.get_token('user@example.com', 'secret')
 puts access_token.token
 ```
@@ -210,7 +215,7 @@ GET https://gitlab.example.com/api/v4/user?access_token=OAUTH-TOKEN
 or you can put the token to the Authorization header:
 
 ```shell
-curl --header "Authorization: Bearer OAUTH-TOKEN" https://gitlab.example.com/api/v4/user
+curl --header "Authorization: Bearer OAUTH-TOKEN" "https://gitlab.example.com/api/v4/user"
 ```
 
 ## Retrieving the token information
@@ -229,7 +234,7 @@ You must supply the access token, either:
 - In the Authorization header:
 
    ```shell
-   curl --header "Authorization: Bearer <OAUTH-TOKEN>" https://gitlab.example.com/oauth/token/info
+   curl --header "Authorization: Bearer <OAUTH-TOKEN>" "https://gitlab.example.com/oauth/token/info"
    ```
 
 The following is an example response:

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Groups > Contribution Analytics', :js do
+RSpec.describe 'Groups > Contribution Analytics', :js do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:empty_project) { create(:project, namespace: group) }

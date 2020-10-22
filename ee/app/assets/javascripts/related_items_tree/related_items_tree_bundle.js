@@ -26,6 +26,7 @@ export default () => {
     autoCompleteIssues,
     userSignedIn,
     allowSubEpics,
+    allowIssuableHealthStatus,
   } = el.dataset;
   const initialData = JSON.parse(el.dataset.initial);
 
@@ -42,6 +43,7 @@ export default () => {
         id,
         iid: Number(iid),
         title: initialData.initialTitleText,
+        confidential: initialData.confidential,
         reference: `${initialData.fullPath}${initialData.issuableRef}`,
         userPermissions: {
           adminEpic: initialData.canAdmin,
@@ -57,6 +59,7 @@ export default () => {
         autoCompleteIssues: parseBoolean(autoCompleteIssues),
         userSignedIn: parseBoolean(userSignedIn),
         allowSubEpics: parseBoolean(allowSubEpics),
+        allowIssuableHealthStatus: parseBoolean(allowIssuableHealthStatus),
       });
     },
     methods: {

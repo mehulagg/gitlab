@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::UniqueIpsLimiter, :clean_gitlab_redis_shared_state do
+RSpec.describe Gitlab::Auth::UniqueIpsLimiter, :clean_gitlab_redis_shared_state do
   include_context 'unique ips sign in limit'
   let(:user) { create(:user) }
 
@@ -26,7 +26,7 @@ describe Gitlab::Auth::UniqueIpsLimiter, :clean_gitlab_redis_shared_state do
         expect(described_class.update_and_return_ips_count(user.id, 'ip2')).to eq(1)
         expect(described_class.update_and_return_ips_count(user.id, 'ip3')).to eq(2)
 
-        Timecop.travel(Time.now.utc + described_class.config.unique_ips_limit_time_window) do
+        travel_to(Time.now.utc + described_class.config.unique_ips_limit_time_window) do
           expect(described_class.update_and_return_ips_count(user.id, 'ip4')).to eq(1)
           expect(described_class.update_and_return_ips_count(user.id, 'ip5')).to eq(2)
         end

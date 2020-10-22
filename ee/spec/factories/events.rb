@@ -6,18 +6,8 @@ FactoryBot.modify do
       group
       author(factory: :user)
       target(factory: :epic)
-      action { Event::CREATED }
+      action { :created }
       project { nil }
-    end
-
-    trait :for_design do
-      transient do
-        design { create(:design, issue: create(:issue, project: project)) }
-        note { create(:note, author: author, project: project, noteable: design) }
-      end
-
-      action { Event::COMMENTED }
-      target { note }
     end
   end
 end

@@ -1,9 +1,14 @@
-/* eslint-disable class-methods-use-this */
+/* eslint-disable class-methods-use-this, no-param-reassign */
+/*
+  no-param-reassign is disabled because one method of BoardsStoreEE
+  modify the passed parameter in conformity with non-ee BoardsStore.
+*/
+
 import { sortBy } from 'lodash';
 import Cookies from 'js-cookie';
 import { __, sprintf } from '~/locale';
 import sidebarEventHub from '~/sidebar/event_hub';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import axios from '~/lib/utils/axios_utils';
 
@@ -67,6 +72,8 @@ class BoardsStoreEE {
         window.history.pushState(null, null, `?${this.store.filter.path}`);
       }
     };
+
+    this.store.updateIssueEpic = this.updateIssueEpic;
 
     sidebarEventHub.$on('updateWeight', this.updateWeight.bind(this));
 
@@ -177,6 +184,10 @@ class BoardsStoreEE {
 
   setMaxIssueCountOnList(id, maxIssueCount) {
     this.store.findList('id', id).maxIssueCount = maxIssueCount;
+  }
+
+  updateIssueEpic(issue, newEpic) {
+    issue.epic = newEpic;
   }
 
   updateWeight(newWeight, id) {

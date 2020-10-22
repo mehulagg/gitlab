@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Filter issues', :js do
+RSpec.describe 'Filter issues', :js do
   include FilteredSearchHelpers
 
   let(:project) { create(:project) }
@@ -20,9 +20,7 @@ describe 'Filter issues', :js do
   let!(:milestone) { create(:milestone, title: "8", project: project, start_date: 2.days.ago) }
 
   def expect_no_issues_list
-    page.within '.issues-list' do
-      expect(page).to have_no_selector('.issue')
-    end
+    expect(page).to have_no_selector('.issue')
   end
 
   before do
@@ -79,6 +77,26 @@ describe 'Filter issues', :js do
     ])
     expect_issues_list_count(1)
     expect_filtered_search_input(search_term)
+  end
+
+  context 'with the NOT queries feature flag disabled' do
+    before do
+      stub_feature_flags(not_issuable_queries: false)
+      visit project_issues_path(project)
+    end
+
+    it 'does not have the != option' do
+      input_filtered_search("label:", submit: false, extra_space: false)
+
+      wait_for_requests
+      within('#js-dropdown-operator') do
+        tokens = all(:css, 'li.filter-dropdown-item')
+        expect(tokens.count).to eq(1)
+        button = tokens[0].find('button')
+        expect(button).to have_content('=')
+        expect(button).not_to have_content('!=')
+      end
+    end
   end
 
   describe 'filter issues by author' do
@@ -153,16 +171,16 @@ describe 'Filter issues', :js do
         expect_filtered_search_input_empty
       end
 
-      it 'filters issues by no label' do
-        input_filtered_search('label:=none')
+      it 'filters issues by any label' do
+        input_filtered_search('label:=any')
 
-        expect_tokens([label_token('None', false)])
+        expect_tokens([label_token('Any', false)])
         expect_issues_list_count(4)
         expect_filtered_search_input_empty
       end
 
       it 'filters issues by no label' do
-        input_filtered_search('label:!=none')
+        input_filtered_search('label:=none')
 
         expect_tokens([label_token('None', false)])
         expect_issues_list_count(4)
@@ -324,7 +342,7 @@ describe 'Filter issues', :js do
 
     context 'issue label clicked' do
       it 'filters and displays in search bar' do
-        find('.issues-list .issue .issuable-main-info .issuable-info a .gl-label-text', text: multiple_words_label.title).click
+        find('[data-qa-selector="issuable-label"]', text: multiple_words_label.title).click
 
         expect_issues_list_count(1)
         expect_tokens([label_token("\"#{multiple_words_label.title}\"")])
@@ -351,14 +369,6 @@ describe 'Filter issues', :js do
         expect_filtered_search_input_empty
       end
 
-      it 'filters issues by negation of no milestone' do
-        input_filtered_search("milestone:!=none ")
-
-        expect_tokens([milestone_token('None', false, '!=')])
-        expect_issues_list_count(5)
-        expect_filtered_search_input_empty
-      end
-
       it 'filters issues by upcoming milestones' do
         create(:milestone, project: project, due_date: 1.month.from_now) do |future_milestone|
           create(:issue, project: project, milestone: future_milestone, author: user)
@@ -376,10 +386,14 @@ describe 'Filter issues', :js do
           create(:issue, project: project, milestone: future_milestone, author: user)
         end
 
+        create(:milestone, project: project, due_date: 3.days.ago) do |past_milestone|
+          create(:issue, project: project, milestone: past_milestone, author: user)
+        end
+
         input_filtered_search("milestone:!=upcoming")
 
         expect_tokens([milestone_token('Upcoming', false, '!=')])
-        expect_issues_list_count(8)
+        expect_issues_list_count(1)
         expect_filtered_search_input_empty
       end
 
@@ -392,10 +406,13 @@ describe 'Filter issues', :js do
       end
 
       it 'filters issues by negation of started milestones' do
+        milestone2 = create(:milestone, title: "9", project: project, start_date: 2.weeks.from_now)
+        create(:issue, project: project, author: user, title: "something else", milestone: milestone2)
+
         input_filtered_search("milestone:!=started")
 
         expect_tokens([milestone_token('Started', false, '!=')])
-        expect_issues_list_count(3)
+        expect_issues_list_count(1)
         expect_filtered_search_input_empty
       end
 

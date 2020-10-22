@@ -2,7 +2,7 @@
 
 require 'rake_helper'
 
-describe 'gitlab:license namespace rake tasks' do
+RSpec.describe 'gitlab:license namespace rake tasks' do
   before do
     Rake.application.rake_require 'tasks/gitlab/license'
   end

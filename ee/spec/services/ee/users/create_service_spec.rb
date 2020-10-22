@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Users::CreateService do
+RSpec.describe Users::CreateService do
   let(:current_user) { create(:admin) }
   let(:params) do
     {
@@ -33,7 +33,7 @@ describe Users::CreateService do
             details: {
               add: 'user',
               author_name: current_user.name,
-              target_id: @resource.full_path,
+              target_id: @resource.id,
               target_type: 'User',
               target_details: @resource.full_path
             }

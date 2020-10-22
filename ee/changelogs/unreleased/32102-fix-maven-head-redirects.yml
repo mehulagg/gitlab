@@ -1,6 +1,0 @@
----
-title: Maven packages API allows HEAD requests to package files when using Amazon
-  S3 as a object storage backend
-merge_request: 27612
-author:
-type: fixed

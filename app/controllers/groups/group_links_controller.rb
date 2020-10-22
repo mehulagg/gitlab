@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class Groups::GroupLinksController < Groups::ApplicationController
-  before_action :check_feature_flag!
   before_action :authorize_admin_group!
   before_action :group_link, only: [:update, :destroy]
+
+  feature_category :subgroups
 
   def create
     shared_with_group = Group.find(params[:shared_with_group_id]) if params[:shared_with_group_id].present?
@@ -25,10 +26,19 @@ class Groups::GroupLinksController < Groups::ApplicationController
 
   def update
     Groups::GroupLinks::UpdateService.new(@group_link).execute(group_link_params)
+
+    if @group_link.expires?
+      render json: {
+        expires_in: helpers.distance_of_time_in_words_to_now(@group_link.expires_at),
+        expires_soon: @group_link.expires_soon?
+      }
+    else
+      render json: {}
+    end
   end
 
   def destroy
-    Groups::GroupLinks::DestroyService.new(nil, nil).execute(@group_link)
+    Groups::GroupLinks::DestroyService.new(group, current_user).execute(@group_link)
 
     respond_to do |format|
       format.html do
@@ -50,9 +60,5 @@ class Groups::GroupLinksController < Groups::ApplicationController
 
   def group_link_params
     params.require(:group_link).permit(:group_access, :expires_at)
-  end
-
-  def check_feature_flag!
-    render_404 unless Feature.enabled?(:share_group_with_group, default_enabled: true)
   end
 end

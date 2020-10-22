@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::ImportExport::AfterExportStrategies::CustomTemplateExportImportStrategy do
+RSpec.describe EE::Gitlab::ImportExport::AfterExportStrategies::CustomTemplateExportImportStrategy do
   subject { described_class.new(export_into_project_id: project.id) }
 
   describe 'validations' do

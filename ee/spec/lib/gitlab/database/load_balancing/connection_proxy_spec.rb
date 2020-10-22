@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::LoadBalancing::ConnectionProxy do
+RSpec.describe Gitlab::Database::LoadBalancing::ConnectionProxy do
   let(:proxy) { described_class.new }
 
   describe '#select' do

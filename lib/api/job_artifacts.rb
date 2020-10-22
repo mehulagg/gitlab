@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class JobArtifacts < Grape::API
+  class JobArtifacts < ::API::Base
     before { authenticate_non_get! }
 
     # EE::API::JobArtifacts would override the following helpers
@@ -54,7 +54,7 @@ module API
 
         bad_request! unless path.valid?
 
-        send_artifacts_entry(build, path)
+        send_artifacts_entry(build.artifacts_file, path)
       end
 
       desc 'Download the artifacts archive from a job' do
@@ -90,11 +90,11 @@ module API
 
         bad_request! unless path.valid?
 
-        send_artifacts_entry(build, path)
+        send_artifacts_entry(build.artifacts_file, path)
       end
 
       desc 'Keep the artifacts to prevent them from being deleted' do
-        success Entities::Job
+        success ::API::Entities::Ci::Job
       end
       params do
         requires :job_id, type: Integer, desc: 'The ID of a job'
@@ -109,7 +109,7 @@ module API
         build.keep_artifacts!
 
         status 200
-        present build, with: Entities::Job
+        present build, with: ::API::Entities::Ci::Job
       end
 
       desc 'Delete the artifacts files from a job' do

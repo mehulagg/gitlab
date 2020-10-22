@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectGroupLink do
+RSpec.describe ProjectGroupLink do
   describe '#destroy' do
     let(:project) { create(:project) }
     let(:group) { create(:group) }

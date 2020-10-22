@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::Security::CredentialsController do
+RSpec.describe Groups::Security::CredentialsController do
   let_it_be(:group_with_managed_accounts) { create(:group_with_managed_accounts, :private) }
   let_it_be(:managed_users) { create_list(:user, 2, :group_managed, managing_group: group_with_managed_accounts) }
 
@@ -136,5 +136,11 @@ describe Groups::Security::CredentialsController do
         expect(response).to have_gitlab_http_status(:not_found)
       end
     end
+  end
+
+  describe 'POST #destroy' do
+    let(:credentials_path) { group_security_credentials_path(filter: 'ssh_keys') }
+
+    it_behaves_like 'credentials inventory controller delete SSH key', group_managed_account: true
   end
 end

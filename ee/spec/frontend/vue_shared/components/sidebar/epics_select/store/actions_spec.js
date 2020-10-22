@@ -5,8 +5,9 @@ import testAction from 'helpers/vuex_action_helper';
 import createDefaultState from 'ee/vue_shared/components/sidebar/epics_select/store/state';
 import * as actions from 'ee/vue_shared/components/sidebar/epics_select/store/actions';
 import * as types from 'ee/vue_shared/components/sidebar/epics_select/store/mutation_types';
-
 import { noneEpic } from 'ee/vue_shared/constants';
+import boardsStore from '~/boards/stores/boards_store';
+
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 import { mockEpic1, mockIssue, mockEpics, mockAssignRemoveRes } from '../../mock_data';
@@ -82,6 +83,19 @@ describe('EpicsSelect', () => {
             mockEpic1,
             state,
             [{ type: types.SET_SELECTED_EPIC, payload: mockEpic1 }],
+            [],
+            done,
+          );
+        });
+      });
+
+      describe('setSelectedEpicIssueId', () => {
+        it('should set `selectedEpicIssueId` param on state', done => {
+          testAction(
+            actions.setSelectedEpicIssueId,
+            mockIssue.epic_issue_id,
+            state,
+            [{ type: types.SET_SELECTED_EPIC_ISSUE_ID, payload: mockIssue.epic_issue_id }],
             [],
             done,
           );
@@ -246,6 +260,35 @@ describe('EpicsSelect', () => {
             [],
             done,
           );
+        });
+
+        it('should update the epic associated with the issue in BoardsStore if the update happened in Boards', done => {
+          boardsStore.detail.issue.updateEpic = jest.fn(() => {});
+          state.issueId = mockIssue.id;
+          const mockApiData = { ...mockAssignRemoveRes };
+          mockApiData.epic.web_url = '';
+
+          testAction(
+            actions.receiveIssueUpdateSuccess,
+            {
+              data: mockApiData,
+              epic: normalizedEpics[0],
+            },
+            state,
+            [
+              {
+                type: types.RECEIVE_ISSUE_UPDATE_SUCCESS,
+                payload: {
+                  selectedEpic: normalizedEpics[0],
+                  selectedEpicIssueId: mockApiData.id,
+                },
+              },
+            ],
+            [],
+            done,
+          );
+
+          expect(boardsStore.detail.issue.updateEpic).toHaveBeenCalled();
         });
 
         it('should set updated selectedEpic with noneEpic to state when payload has matching Epic and Issue IDs and isRemoval param is true', done => {

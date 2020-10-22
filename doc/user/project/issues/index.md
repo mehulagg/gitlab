@@ -1,3 +1,9 @@
+---
+stage: Plan
+group: Project Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Issues
 
 Issues are the fundamental medium for collaborating on ideas and planning work in GitLab.
@@ -87,7 +93,7 @@ must be set.
 
 While you can view and manage the full details of an issue on the [issue page](#issue-page),
 you can also work with multiple issues at a time using the [Issues List](#issues-list),
-[Issue Boards](#issue-boards), Issue references, and [Epics](#epics-ultimate)**(ULTIMATE)**.
+[Issue Boards](#issue-boards), Issue references, and [Epics](#epics)**(PREMIUM)**.
 
 Key actions for Issues include:
 
@@ -102,6 +108,13 @@ Key actions for Issues include:
 
 On an issue's page, you can view [all aspects of the issue](issue_data_and_actions.md),
 and modify them if you have the necessary [permissions](../../permissions.md).
+
+#### Real-time sidebar **(CORE ONLY)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17589) in GitLab 13.3.
+
+Assignees in the sidebar are updated in real time. This feature is **disabled by default**.
+To enable, you need to enable [ActionCable in-app mode](https://docs.gitlab.com/omnibus/settings/actioncable.html).
 
 ### Issues list
 
@@ -137,21 +150,24 @@ With [Design Management](design_management.md), you can upload design
 assets to issues and view them all together to easily share and
 collaborate with your team.
 
-### Epics **(ULTIMATE)**
+### Epics **(PREMIUM)**
 
 [Epics](../../group/epics/index.md) let you manage your portfolio of projects more
 efficiently and with less effort by tracking groups of issues that share a theme, across
 projects and milestones.
 
-### Related issues **(STARTER)**
+### Related issues
 
 You can mark two issues as related, so that when viewing one, the other is always
 listed in its [Related Issues](related_issues.md) section. This can help display important
 context, such as past work, dependencies, or duplicates.
 
+Users on [GitLab Starter, GitLab Bronze, and higher tiers](https://about.gitlab.com/pricing/), can
+also mark issues as blocking or blocked by another issue.
+
 ### Crosslinking issues
 
-You can [crosslink issues](crosslinking_issues.md) by referencing an issue from another
+You can [cross-link issues](crosslinking_issues.md) by referencing an issue from another
 issue or merge request by including its URL or ID. The referenced issue displays a
 message in the Activity stream about the reference, with a link to the other issue or MR.
 
@@ -169,11 +185,11 @@ requires [GraphQL](../../../api/graphql/index.md) to be enabled.
 
 ![Similar issues](img/similar_issues.png)
 
----
-
 ### Health status **(ULTIMATE)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/36427) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.10.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/36427) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.10.
+> - Health status of closed issues [can't be edited](https://gitlab.com/gitlab-org/gitlab/-/issues/220867) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.4 and later.
+> - Issue health status visible in issue lists [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45141) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.6.
 
 To help you track the status of your issues, you can assign a status to each issue to flag work
 that's progressing as planned or needs attention to keep on schedule:
@@ -184,8 +200,11 @@ that's progressing as planned or needs attention to keep on schedule:
 
 !["On track" health status on an issue](img/issue_health_status_dropdown_v12_10.png)
 
-You can then see issue statuses on the
-[Epic tree](../../group/epics/index.md#issue-health-status-in-epic-tree-ultimate).
+After an issue is closed, its health status can't be edited and the "Edit" button becomes disabled
+until the issue is reopened.
+
+You can then see issue statuses in the [issue list](#issues-list) and the
+[Epic tree](../../group/epics/index.md#issue-health-status-in-epic-tree).
 
 #### Disable issue health status
 
@@ -207,4 +226,4 @@ Feature.disable(:save_issuable_health_status)
 - [Export issues](csv_export.md)
 - [Issues API](../../../api/issues.md)
 - Configure an [external issue tracker](../../../integration/external-issue-tracker.md)
-  such as Jira, Redmine, or Bugzilla.
+  such as Jira, Redmine, Bugzilla, or EWM.

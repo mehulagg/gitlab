@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::HashedStorage::BaseAttachmentService do
+RSpec.describe Projects::HashedStorage::BaseAttachmentService do
   let(:project) { create(:project, :repository, storage_version: 0, skip_disk_validation: true) }
 
   subject(:service) { described_class.new(project: project, old_disk_path: project.full_path, logger: nil) }
@@ -30,8 +30,8 @@ describe Projects::HashedStorage::BaseAttachmentService do
       target_path = Dir.mktmpdir
       expect(Dir.exist?(target_path)).to be_truthy
 
-      Timecop.freeze do
-        suffix = Time.now.utc.to_i
+      freeze_time do
+        suffix = Time.current.utc.to_i
         subject.send(:discard_path!, target_path)
 
         expected_renamed_path = "#{target_path}-#{suffix}"
@@ -45,7 +45,7 @@ describe Projects::HashedStorage::BaseAttachmentService do
   describe '#move_folder!' do
     context 'when old_path is not a directory' do
       it 'adds information to the logger and returns true' do
-        Tempfile.create do |old_path|
+        Tempfile.create do |old_path| # rubocop:disable Rails/SaveBang
           new_path = "#{old_path}-new"
 
           expect(subject.send(:move_folder!, old_path, new_path)).to be_truthy

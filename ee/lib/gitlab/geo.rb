@@ -16,6 +16,16 @@ module Gitlab
 
     API_SCOPE = 'geo_api'
 
+    # TODO: Avoid having to maintain a list. Discussions related to possible
+    # solutions can be found at
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/227693
+    REPLICATOR_CLASSES = [
+      ::Geo::MergeRequestDiffReplicator,
+      ::Geo::PackageFileReplicator,
+      ::Geo::TerraformStateVersionReplicator,
+      ::Geo::SnippetRepositoryReplicator
+    ].freeze
+
     def self.current_node
       self.cache_value(:current_node, as: GeoNode) { GeoNode.current_node }
     end
@@ -87,7 +97,7 @@ module Gitlab
 
     def self.l1_cache
       SafeRequestStore[:geo_l1_cache] ||=
-        Gitlab::JsonCache.new(namespace: :geo, backend: ::Gitlab::ThreadMemoryCache.cache_backend)
+        Gitlab::JsonCache.new(namespace: :geo, backend: ::Gitlab::ProcessMemoryCache.cache_backend)
     end
 
     def self.l2_cache
@@ -128,7 +138,7 @@ module Gitlab
     end
 
     def self.repository_verification_enabled?
-      Feature.enabled?('geo_repository_verification', default_enabled: true)
+      Feature.enabled?(:geo_repository_verification, default_enabled: true)
     end
 
     def self.allowed_ip?(ip)
@@ -156,6 +166,10 @@ module Gitlab
       STR
 
       _(template) % { url: url }
+    end
+
+    def self.enabled_replicator_classes
+      REPLICATOR_CLASSES.select(&:enabled?)
     end
   end
 end

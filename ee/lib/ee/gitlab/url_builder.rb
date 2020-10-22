@@ -11,11 +11,11 @@ module EE
         override :build
         def build(object, **options)
           case object.itself
-          when ::DesignManagement::Design
-            design_url(object, **options)
           when Epic
             instance.group_epic_url(object.group, object, **options)
-          when Vulnerability
+          when Iteration
+            instance.iteration_url(object, **options)
+          when ::Vulnerability
             instance.project_security_vulnerability_url(object.project, object, **options)
           else
             super
@@ -35,15 +35,14 @@ module EE
           end
         end
 
-        def design_url(design, **options)
-          size, ref = options.values_at(:size, :ref)
-          options.except!(:size, :ref)
-
-          if size
-            instance.project_design_management_designs_resized_image_url(design.project, design, ref, size, **options)
-          else
-            instance.project_design_management_designs_raw_image_url(design.project, design, ref, **options)
+        override :wiki_url
+        def wiki_url(wiki, **options)
+          if wiki.container.is_a?(Group)
+            options[:controller] = 'groups/wikis'
+            options[:group_id] = wiki.container
           end
+
+          super
         end
       end
     end

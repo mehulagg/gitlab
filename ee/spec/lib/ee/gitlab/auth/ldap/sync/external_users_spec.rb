@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::Auth::Ldap::Sync::ExternalUsers do
+RSpec.describe EE::Gitlab::Auth::Ldap::Sync::ExternalUsers do
   include LdapHelpers
 
   describe '#update_permissions' do
@@ -62,7 +62,7 @@ describe EE::Gitlab::Auth::Ldap::Sync::ExternalUsers do
       end
 
       it 'logs a debug message' do
-        expect(Rails.logger)
+        expect(Gitlab::AppLogger)
           .to receive(:warn)
                 .with("Error syncing external users for provider 'ldapmain'. LDAP connection Error")
                 .at_least(:once)

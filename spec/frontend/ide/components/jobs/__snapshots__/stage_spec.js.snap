@@ -2,7 +2,7 @@
 
 exports[`IDE pipeline stage renders stage details & icon 1`] = `
 <div
-  class="ide-stage card prepend-top-default"
+  class="ide-stage card gl-mt-3"
 >
   <div
     class="card-header"
@@ -14,10 +14,8 @@ exports[`IDE pipeline stage renders stage details & icon 1`] = `
     />
      
     <strong
-      class="prepend-left-8 text-truncate"
+      class="gl-ml-3 text-truncate"
       data-container="body"
-      data-original-title=""
-      title=""
     >
       
       build
@@ -25,7 +23,7 @@ exports[`IDE pipeline stage renders stage details & icon 1`] = `
     </strong>
      
     <div
-      class="append-right-8 prepend-left-4"
+      class="gl-mr-3 gl-ml-2"
     >
       <span
         class="badge badge-pill"
@@ -34,7 +32,7 @@ exports[`IDE pipeline stage renders stage details & icon 1`] = `
       </span>
     </div>
      
-    <icon-stub
+    <gl-icon-stub
       class="ide-stage-collapse-icon"
       name="angle-down"
       size="16"

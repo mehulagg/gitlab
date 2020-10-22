@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::UpdateService do
+RSpec.describe Clusters::UpdateService do
   include KubernetesHelpers
 
   describe '#execute' do
@@ -45,6 +45,39 @@ describe Clusters::UpdateService do
         it 'updates namespace' do
           is_expected.to eq(true)
           expect(cluster.platform.namespace).to eq('custom-namespace')
+        end
+      end
+
+      context 'when service token is empty' do
+        let(:params) do
+          {
+              platform_kubernetes_attributes: {
+                  token: ''
+              }
+          }
+        end
+
+        it 'does not update the token' do
+          current_token = cluster.platform.token
+          is_expected.to eq(true)
+          cluster.platform.reload
+
+          expect(cluster.platform.token).to eq(current_token)
+        end
+      end
+
+      context 'when service token is not empty' do
+        let(:params) do
+          {
+              platform_kubernetes_attributes: {
+                  token: 'new secret token'
+              }
+          }
+        end
+
+        it 'updates the token' do
+          is_expected.to eq(true)
+          expect(cluster.platform.token).to eq('new secret token')
         end
       end
     end
@@ -164,7 +197,7 @@ describe Clusters::UpdateService do
 
         context 'manangement_project is outside of the namespace scope' do
           before do
-            management_project.update(group: create(:group))
+            management_project.update!(group: create(:group))
           end
 
           let(:params) do
@@ -191,7 +224,7 @@ describe Clusters::UpdateService do
 
         context 'manangement_project is outside of the namespace scope' do
           before do
-            management_project.update(group: create(:group))
+            management_project.update!(group: create(:group))
           end
 
           let(:params) do

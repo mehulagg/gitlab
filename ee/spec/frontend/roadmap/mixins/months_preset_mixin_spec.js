@@ -37,7 +37,7 @@ describe('MonthsPresetMixin', () => {
     describe('hasStartDateForMonth', () => {
       it('returns true when Epic.startDate falls within timeframeItem', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, { startDate: mockTimeframeMonths[1] }),
+          epic: { ...mockEpic, startDate: mockTimeframeMonths[1] },
           timeframeItem: mockTimeframeMonths[1],
         });
 
@@ -46,7 +46,7 @@ describe('MonthsPresetMixin', () => {
 
       it('returns false when Epic.startDate does not fall within timeframeItem', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, { startDate: mockTimeframeMonths[0] }),
+          epic: { ...mockEpic, startDate: mockTimeframeMonths[0] },
           timeframeItem: mockTimeframeMonths[1],
         });
 
@@ -65,9 +65,7 @@ describe('MonthsPresetMixin', () => {
         const epicEndDate = new Date(2018, 0, 26); // Jan 26, 2018
 
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, {
-            endDate: epicEndDate,
-          }),
+          epic: { ...mockEpic, endDate: epicEndDate },
         });
 
         expect(vm.isTimeframeUnderEndDateForMonth(timeframeItem)).toBe(true);
@@ -77,9 +75,7 @@ describe('MonthsPresetMixin', () => {
         const epicEndDate = new Date(2018, 1, 26); // Feb 26, 2018
 
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, {
-            endDate: epicEndDate,
-          }),
+          epic: { ...mockEpic, endDate: epicEndDate },
         });
 
         expect(vm.isTimeframeUnderEndDateForMonth(timeframeItem)).toBe(false);
@@ -99,7 +95,7 @@ describe('MonthsPresetMixin', () => {
     describe('getTimelineBarStartOffsetForMonths', () => {
       it('returns empty string when Epic startDate is out of range', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, { startDateOutOfRange: true }),
+          epic: { ...mockEpic, startDateOutOfRange: true },
         });
 
         expect(vm.getTimelineBarStartOffsetForMonths(vm.epic)).toBe('');
@@ -107,10 +103,7 @@ describe('MonthsPresetMixin', () => {
 
       it('returns empty string when Epic startDate is undefined and endDate is out of range', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, {
-            startDateUndefined: true,
-            endDateOutOfRange: true,
-          }),
+          epic: { ...mockEpic, startDateUndefined: true, endDateOutOfRange: true },
         });
 
         expect(vm.getTimelineBarStartOffsetForMonths(vm.epic)).toBe('');
@@ -118,9 +111,7 @@ describe('MonthsPresetMixin', () => {
 
       it('return `left: 0;` when Epic startDate is first day of the month', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, {
-            startDate: new Date(2018, 0, 1),
-          }),
+          epic: { ...mockEpic, startDate: new Date(2018, 0, 1) },
         });
 
         expect(vm.getTimelineBarStartOffsetForMonths(vm.epic)).toBe('left: 0;');
@@ -128,9 +119,7 @@ describe('MonthsPresetMixin', () => {
 
       it('returns proportional `left` value based on Epic startDate and days in the month', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, {
-            startDate: new Date(2018, 0, 15),
-          }),
+          epic: { ...mockEpic, startDate: new Date(2018, 0, 15) },
         });
 
         expect(vm.getTimelineBarStartOffsetForMonths(vm.epic)).toContain('left: 50%');
@@ -141,10 +130,11 @@ describe('MonthsPresetMixin', () => {
       it('returns calculated width value based on Epic.startDate and Epic.endDate', () => {
         vm = createComponent({
           timeframeItem: mockTimeframeMonths[0],
-          epic: Object.assign({}, mockEpic, {
+          epic: {
+            ...mockEpic,
             startDate: new Date(2017, 11, 15), // Dec 15, 2017
             endDate: new Date(2018, 1, 15), // Feb 15, 2017
-          }),
+          },
         });
 
         expect(Math.floor(vm.getTimelineBarWidthForMonths())).toBe(546);

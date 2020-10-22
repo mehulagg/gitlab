@@ -1,5 +1,5 @@
 import { memoize, uniqBy, uniqueId, flatten } from 'lodash';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
@@ -52,8 +52,9 @@ export const requestRules = ({ commit }) => {
   commit(types.SET_LOADING, true);
 };
 
-export const receiveRulesSuccess = ({ commit }, settings) => {
+export const receiveRulesSuccess = ({ commit }, { resetToDefault, settings }) => {
   commit(types.SET_LOADING, false);
+  commit(types.SET_RESET_TO_DEFAULT, resetToDefault);
   commit(types.SET_APPROVAL_SETTINGS, settings);
 };
 
@@ -61,11 +62,14 @@ export const receiveRulesError = () => {
   createFlash(__('An error occurred fetching the approval rules.'));
 };
 
-export const fetchRules = ({ rootState, dispatch }, targetBranch = '') => {
+export const fetchRules = (
+  { rootState, dispatch },
+  { targetBranch = '', resetToDefault = false },
+) => {
   dispatch('requestRules');
 
   const { mrSettingsPath, projectSettingsPath } = rootState.settings;
-  const path = mrSettingsPath || projectSettingsPath;
+  const path = resetToDefault ? projectSettingsPath : mrSettingsPath || projectSettingsPath;
 
   const params = targetBranch
     ? {
@@ -82,7 +86,7 @@ export const fetchRules = ({ rootState, dispatch }, targetBranch = '') => {
       ...settings,
       rules: settings.rules.map(x => (x.id ? x : seedNewRule(x))),
     }))
-    .then(settings => dispatch('receiveRulesSuccess', settings))
+    .then(settings => dispatch('receiveRulesSuccess', { settings, resetToDefault }))
     .catch(() => dispatch('receiveRulesError'));
 };
 
@@ -148,4 +152,7 @@ export const addEmptyRule = ({ commit }) => {
   commit(types.ADD_EMPTY_RULE);
 };
 
-export default () => {};
+export const setTargetBranch = ({ commit }, targetBranch) =>
+  commit(types.SET_TARGET_BRANCH, targetBranch);
+
+export const undoRulesChange = ({ commit }) => commit(types.UNDO_RULES);

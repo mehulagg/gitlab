@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Issues::CreateService do
+RSpec.describe Issues::CreateService do
   let_it_be(:group) { create(:group) }
   let(:project) { create(:project, group: group) }
   let(:user) { create(:user) }
@@ -60,7 +60,8 @@ describe Issues::CreateService do
               issue = service.execute
 
               expect(issue).to be_persisted
-              expect(issue.epic).to eq(epic)
+              expect(issue.reload.epic).to eq(epic)
+              expect(issue.confidential).to eq(false)
             end
           end
 
@@ -77,9 +78,30 @@ describe Issues::CreateService do
               issue = service.execute
 
               expect(issue.milestone).to eq(milestone)
-              expect(issue.epic).to eq(epic)
+              expect(issue.reload.epic).to eq(epic)
               expect(epic.reload.start_date).to eq(milestone.start_date)
               expect(epic.due_date).to eq(milestone.due_date)
+            end
+          end
+
+          context 'when adding a public issue to confidential epic' do
+            it 'creates confidential child issue' do
+              confidential_epic = create(:epic, group: group, confidential: true)
+              params = { title: 'confidential issue', epic_id: confidential_epic.id }
+
+              issue = described_class.new(project, user, params).execute
+
+              expect(issue.confidential).to eq(true)
+            end
+          end
+
+          context 'when adding a confidential issue to public epic' do
+            it 'creates a confidential child issue' do
+              params = { title: 'confidential issue', epic_id: epic.id, confidential: true }
+
+              issue = described_class.new(project, user, params).execute
+
+              expect(issue.confidential).to eq(true)
             end
           end
         end
@@ -88,23 +110,6 @@ describe Issues::CreateService do
 
     it_behaves_like 'new issuable with scoped labels' do
       let(:parent) { project }
-    end
-
-    describe 'publish to status page' do
-      let(:execute) { service.execute }
-      let(:issue_id) { execute&.id }
-
-      context 'when creation succeeds' do
-        let_it_be(:params) { { title: 'New title' } }
-
-        include_examples 'trigger status page publish'
-      end
-
-      context 'when creation fails' do
-        let_it_be(:params) { { title: nil } }
-
-        include_examples 'no trigger status page publish'
-      end
     end
   end
 end

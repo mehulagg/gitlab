@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Mutations::ResolvesIssuable do
+RSpec.describe Mutations::ResolvesIssuable do
   let_it_be(:mutation_class) do
     Class.new(Mutations::BaseMutation) do
       include Mutations::ResolvesIssuable
@@ -12,11 +12,12 @@ describe Mutations::ResolvesIssuable do
   let_it_be(:group)    { create(:group) }
   let_it_be(:user)     { create(:user) }
   let_it_be(:context)  { { current_user: user } }
-  let_it_be(:mutation) { mutation_class.new(object: nil, context: context, field: nil) }
+  let_it_be(:epic) { create(:epic, group: group) }
+  let(:mutation) { mutation_class.new(object: nil, context: context, field: nil) }
 
   context 'with epics' do
-    let_it_be(:issuable) { create(:epic, group: group) }
-    let_it_be(:parent)   { issuable.group }
+    let(:parent)   { issuable.group }
+    let(:issuable) { epic }
 
     before do
       stub_licensed_features(epics: true)

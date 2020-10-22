@@ -1,5 +1,0 @@
----
-title: Fix HTTP status code for Todos API when an epic cannot be found
-merge_request: 28310
-author:
-type: fixed

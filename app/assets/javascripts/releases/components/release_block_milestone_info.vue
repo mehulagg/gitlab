@@ -3,13 +3,13 @@ import {
   GlProgressBar,
   GlLink,
   GlBadge,
-  GlDeprecatedButton,
+  GlButton,
   GlTooltipDirective,
   GlSprintf,
 } from '@gitlab/ui';
+import { sum } from 'lodash';
 import { __, n__, sprintf } from '~/locale';
 import { MAX_MILESTONES_TO_DISPLAY } from '../constants';
-import { sum } from 'lodash';
 
 export default {
   name: 'ReleaseBlockMilestoneInfo',
@@ -17,7 +17,7 @@ export default {
     GlProgressBar,
     GlLink,
     GlBadge,
-    GlDeprecatedButton,
+    GlButton,
     GlSprintf,
   },
   directives: {
@@ -126,21 +126,17 @@ export default {
             v-gl-tooltip
             :title="milestone.description"
             :href="milestone.webUrl"
-            class="append-right-4"
+            class="gl-mr-2"
           >
             {{ milestone.title }}
           </gl-link>
           <template v-if="shouldRenderBullet(index)">
-            <span :key="'bullet-' + milestone.id" class="append-right-4">&bull;</span>
+            <span :key="'bullet-' + milestone.id" class="gl-mr-2">&bull;</span>
           </template>
           <template v-if="shouldRenderShowMoreLink(index)">
-            <gl-deprecated-button
-              :key="'more-button-' + milestone.id"
-              variant="link"
-              @click="toggleShowAll"
-            >
+            <gl-button :key="'more-button-' + milestone.id" variant="link" @click="toggleShowAll">
               {{ moreText }}
-            </gl-deprecated-button>
+            </gl-button>
           </template>
         </template>
       </div>
@@ -148,7 +144,7 @@ export default {
     <div class="d-flex flex-column align-items-start flex-shrink-0 mr-4 mb-3 js-issues-container">
       <span class="mb-1">
         {{ __('Issues') }}
-        <gl-badge pill variant="light" class="font-weight-bold">{{ totalIssuesCount }}</gl-badge>
+        <gl-badge variant="muted" size="sm">{{ totalIssuesCount }}</gl-badge>
       </span>
       <div class="d-flex">
         <gl-link v-if="openIssuesPath" ref="openIssuesLink" :href="openIssuesPath">

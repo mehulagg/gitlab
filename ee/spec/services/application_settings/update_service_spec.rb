@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApplicationSettings::UpdateService do
+RSpec.describe ApplicationSettings::UpdateService do
   let(:user)    { create(:user) }
   let(:setting) { ApplicationSetting.create_from_defaults }
   let(:service) { described_class.new(setting, user, opts) }
@@ -34,26 +34,26 @@ describe ApplicationSettings::UpdateService do
       end
     end
 
-    context 'index dependent' do
-      using RSpec::Parameterized::TableSyntax
+    context 'elasticsearch_indexing update' do
+      context 'index creation' do
+        let(:opts) { { elasticsearch_indexing: true } }
 
-      where(:index_exists, :indexing_enabled, :input_value, :result) do
-        false  | false | true | false
-        false  | true  | true | true
-        true   | false | true | true
-        true   | true  | true | true
-      end
+        context 'when index exists' do
+          it 'skips creating a new index' do
+            expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(true)
+            expect(Gitlab::Elastic::Helper.default).not_to(receive(:create_empty_index))
 
-      with_them do
-        before do
-          allow(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(index_exists)
-          allow(service.application_setting).to(receive(:elasticsearch_indexing)).and_return(indexing_enabled)
+            service.execute
+          end
         end
 
-        let(:opts) { { elasticsearch_indexing: input_value } }
+        context 'when index does not exist' do
+          it 'creates a new index' do
+            expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(false)
+            expect(Gitlab::Elastic::Helper.default).to(receive(:create_empty_index))
 
-        it 'returns correct result' do
-          expect(service.execute).to be(result)
+            service.execute
+          end
         end
       end
     end

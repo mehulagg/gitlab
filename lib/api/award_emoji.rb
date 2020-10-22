@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class AwardEmoji < Grape::API
+  class AwardEmoji < ::API::Base
     include PaginationParams
 
     before { authenticate! }

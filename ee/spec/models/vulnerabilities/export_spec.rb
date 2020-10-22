@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Vulnerabilities::Export do
+RSpec.describe Vulnerabilities::Export do
   it { is_expected.to define_enum_for(:format) }
 
   describe 'associations' do
@@ -23,6 +23,49 @@ describe Vulnerabilities::Export do
 
       it { is_expected.to validate_presence_of(:file) }
     end
+
+    describe 'presence of both project and group' do
+      let(:export) { build(:vulnerability_export, project: project, group: group) }
+      let(:expected_error) { _('Project & Group can not be assigned at the same time') }
+
+      subject { export.errors[:base] }
+
+      before do
+        export.validate
+      end
+
+      context 'when the project is present' do
+        let(:project) { build(:project) }
+
+        context 'when the group is present' do
+          let(:group) { build(:group) }
+
+          it { is_expected.to include(expected_error) }
+        end
+
+        context 'when the group is not present' do
+          let(:group) { nil }
+
+          it { is_expected.not_to include(expected_error) }
+        end
+      end
+
+      context 'when the project is not present' do
+        let(:project) { nil }
+
+        context 'when the group is present' do
+          let(:group) { build(:group) }
+
+          it { is_expected.not_to include(expected_error) }
+        end
+
+        context 'when the group is not present' do
+          let(:group) { nil }
+
+          it { is_expected.not_to include(expected_error) }
+        end
+      end
+    end
   end
 
   describe '#status' do
@@ -41,7 +84,7 @@ describe Vulnerabilities::Export do
         vulnerability_export.start!
       end
 
-      it { is_expected.to have_attributes(status: 'running', started_at: Time.now) }
+      it { is_expected.to have_attributes(status: 'running', started_at: Time.current) }
     end
 
     context 'when the export is running' do
@@ -52,7 +95,7 @@ describe Vulnerabilities::Export do
           vulnerability_export.finish!
         end
 
-        it { is_expected.to have_attributes(status: 'finished', finished_at: Time.now) }
+        it { is_expected.to have_attributes(status: 'finished', finished_at: Time.current) }
       end
 
       context 'and it fails' do
@@ -62,7 +105,7 @@ describe Vulnerabilities::Export do
           vulnerability_export.failed!
         end
 
-        it { is_expected.to have_attributes(status: 'failed', finished_at: Time.now) }
+        it { is_expected.to have_attributes(status: 'failed', finished_at: Time.current) }
       end
     end
   end
@@ -74,19 +117,28 @@ describe Vulnerabilities::Export do
       let(:project) { build(:project) }
       let(:vulnerability_export) { build(:vulnerability_export, project: project) }
 
-      it { is_expected.to eql(project) }
+      it { is_expected.to eq(project) }
     end
 
     context 'when the export does not have project assigned' do
-      let(:author) { build(:user) }
-      let(:vulnerability_export) { build(:vulnerability_export, :user, author: author) }
-      let(:mock_security_dashboard) { instance_double(InstanceSecurityDashboard) }
+      context 'when the export has group assigned' do
+        let(:group) { build(:group) }
+        let(:vulnerability_export) { build(:vulnerability_export, :group, group: group) }
 
-      before do
-        allow(author).to receive(:security_dashboard).and_return(mock_security_dashboard)
+        it { is_expected.to eq(group) }
       end
 
-      it { is_expected.to eql(mock_security_dashboard) }
+      context 'when the export does not have group assigned' do
+        let(:author) { build(:user) }
+        let(:vulnerability_export) { build(:vulnerability_export, :user, author: author) }
+        let(:mock_security_dashboard) { instance_double(InstanceSecurityDashboard) }
+
+        before do
+          allow(author).to receive(:security_dashboard).and_return(mock_security_dashboard)
+        end
+
+        it { is_expected.to eq(mock_security_dashboard) }
+      end
     end
   end
 
@@ -99,6 +151,14 @@ describe Vulnerabilities::Export do
       let(:exportable) { build(:project) }
 
       it 'changes the exportable of the export to given project' do
+        expect { set_exportable }.to change { vulnerability_export.exportable }.to(exportable)
+      end
+    end
+
+    context 'when the exportable is a Group' do
+      let(:exportable) { build(:group) }
+
+      it 'changes the exportable of the export to given group' do
         expect { set_exportable }.to change { vulnerability_export.exportable }.to(exportable)
       end
     end

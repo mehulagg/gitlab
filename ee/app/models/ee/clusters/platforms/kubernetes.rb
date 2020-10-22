@@ -14,8 +14,15 @@ module EE
           if result
             deployments = read_deployments(environment.deployment_namespace)
 
+            ingresses = if ::Feature.enabled?(:canary_ingress_weight_control, environment.project)
+                          read_ingresses(environment.deployment_namespace)
+                        else
+                          []
+                        end
+
             # extract_relevant_deployment_data avoids uploading all the deployment info into ReactiveCaching
             result[:deployments] = extract_relevant_deployment_data(deployments)
+            result[:ingresses] = extract_relevant_ingress_data(ingresses)
           end
 
           result
@@ -25,11 +32,10 @@ module EE
           project = environment.project
 
           deployments = filter_by_project_environment(data[:deployments], project.full_path_slug, environment.slug)
-          pods = filter_by_project_environment(data[:pods], project.full_path_slug, environment.slug) if data[:pods]&.any?
+          pods = filter_by_project_environment(data[:pods], project.full_path_slug, environment.slug)
+          ingresses = data[:ingresses].presence || []
 
-          legacy_deployments = filter_by_legacy_label(data[:deployments], project.full_path_slug, environment.slug)
-
-          ::Gitlab::Kubernetes::RolloutStatus.from_deployments(*deployments, pods: pods, legacy_deployments: legacy_deployments)
+          ::Gitlab::Kubernetes::RolloutStatus.from_deployments(*deployments, pods_attrs: pods, ingresses: ingresses)
         end
 
         private
@@ -40,12 +46,26 @@ module EE
           []
         end
 
+        def read_ingresses(namespace)
+          kubeclient.get_ingresses(namespace: namespace).as_json
+        rescue Kubeclient::ResourceNotFoundError
+          []
+        end
+
         def extract_relevant_deployment_data(deployments)
           deployments.map do |deployment|
             {
               'metadata' => deployment.fetch('metadata', {}).slice('name', 'generation', 'labels', 'annotations'),
               'spec' => deployment.fetch('spec', {}).slice('replicas'),
               'status' => deployment.fetch('status', {}).slice('observedGeneration')
+            }
+          end
+        end
+
+        def extract_relevant_ingress_data(ingresses)
+          ingresses.map do |ingress|
+            {
+              'metadata' => ingress.fetch('metadata', {}).slice('name', 'labels', 'annotations')
             }
           end
         end

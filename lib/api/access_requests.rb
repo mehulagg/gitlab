@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class AccessRequests < Grape::API
+  class AccessRequests < ::API::Base
     include PaginationParams
 
     before { authenticate! }

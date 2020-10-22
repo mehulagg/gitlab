@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe 'epics list', :js do
+RSpec.describe 'epics list', :js do
   let(:group) { create(:group, :public) }
   let(:user) { create(:user) }
 
   before do
     stub_licensed_features(epics: true)
     stub_feature_flags(unfiltered_epic_aggregates: false)
+    stub_feature_flags(async_filtering: false)
 
     sign_in(user)
   end

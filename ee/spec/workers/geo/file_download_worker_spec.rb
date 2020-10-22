@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::FileDownloadWorker, :geo do
+RSpec.describe Geo::FileDownloadWorker, :geo do
   describe '#perform' do
     it 'instantiates and executes FileDownloadService' do
       service = double(:service)

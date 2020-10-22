@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ChatMessage::DeploymentMessage do
+RSpec.describe ChatMessage::DeploymentMessage do
   describe '#pretext' do
     it 'returns a message with the data returned by the deployment data builder' do
       environment = create(:environment, name: "myenvironment")
@@ -69,6 +69,17 @@ describe ChatMessage::DeploymentMessage do
       message = described_class.new(data)
 
       expect(message.pretext).to eq('Deploy to staging unknown')
+    end
+
+    it 'returns a message for a running deployment' do
+      data = {
+          status: 'running',
+          environment: 'production'
+      }
+
+      message = described_class.new(data)
+
+      expect(message.pretext).to eq('Starting deploy to production')
     end
   end
 

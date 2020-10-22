@@ -1,3 +1,10 @@
+---
+type: reference, dev
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+---
+
 # Secure Coding Guidelines
 
 This document contains descriptions and guidelines for addressing security
@@ -23,7 +30,7 @@ For more information about the permission model at GitLab, please see [the GitLa
 ### Impact
 
 Improper permission handling can have significant impacts on the security of an application.
-Some situations may reveal [sensitive data](https://gitlab.com/gitlab-com/gl-infra/production/issues/477) or allow a malicious actor to perform [harmful actions](https://gitlab.com/gitlab-org/gitlab/issues/8180).
+Some situations may reveal [sensitive data](https://gitlab.com/gitlab-com/gl-infra/production/-/issues/477) or allow a malicious actor to perform [harmful actions](https://gitlab.com/gitlab-org/gitlab/-/issues/8180).
 The overall impact depends heavily on what resources can be accessed or modified improperly.
 
 A common vulnerability when permission checks are missing is called [IDOR](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/05-Authorization_Testing/04-Testing_for_Insecure_Direct_Object_References) for Insecure Direct Object References.
@@ -48,11 +55,11 @@ Be careful to **also test [visibility levels](https://gitlab.com/gitlab-org/gitl
 
 Some example of well implemented access controls and tests:
 
-1. [example1](https://dev.gitlab.org/gitlab/gitlab-ee/merge_requests/710/diffs?diff_id=13750#af40ef0eaae3c1e018809e1d88086e32bccaca40_43_43)
+1. [example1](https://dev.gitlab.org/gitlab/gitlab-ee/-/merge_requests/710/diffs?diff_id=13750#af40ef0eaae3c1e018809e1d88086e32bccaca40_43_43)
 1. [example2](https://dev.gitlab.org/gitlab/gitlabhq/-/merge_requests/2511/diffs#ed3aaab1510f43b032ce345909a887e5b167e196_142_155)
 1. [example3](https://dev.gitlab.org/gitlab/gitlabhq/-/merge_requests/3170/diffs?diff_id=17494)
 
-**NB:** any input from development team is welcome, e.g. about rubocop rules.
+**NB:** any input from development team is welcome, e.g. about Rubocop rules.
 
 ## Regular Expressions guidelines
 
@@ -67,7 +74,7 @@ matches = re.findall("^bar$",text)
 print(matches)
 ```
 
-The Python example will output an emtpy array (`[]`) as the matcher considers the whole string `foo\nbar` including the newline (`\n`). In contrast Ruby's Regular Expression engine acts differently:
+The Python example will output an empty array (`[]`) as the matcher considers the whole string `foo\nbar` including the newline (`\n`). In contrast Ruby's Regular Expression engine acts differently:
 
 ```ruby
 text = "foo\nbar"
@@ -82,9 +89,10 @@ This Ruby Regex specialty can have security impact, as often regular expressions
 
 #### Examples
 
-GitLab specific examples can be found [here](https://gitlab.com/gitlab-org/gitlab/issues/36029#note_251262187) and [there](https://gitlab.com/gitlab-org/gitlab/issues/33569).
+GitLab-specific examples can be found in the following [path traversal](https://gitlab.com/gitlab-org/gitlab/-/issues/36029#note_251262187)
+and [open redirect](https://gitlab.com/gitlab-org/gitlab/-/issues/33569) issues.
 
-Another example would be this fictional Ruby On Rails controller:
+Another example would be this fictional Ruby on Rails controller:
 
 ```ruby
 class PingController < ApplicationController
@@ -111,7 +119,7 @@ or controls the regular expression (regex) used, and is able to enter user input
 
 ### Impact
 
-The resource, for example Unicorn, Puma, or Sidekiq, can be made to hang as it takes a long time to evaulate the bad regex match.
+The resource, for example Unicorn, Puma, or Sidekiq, can be made to hang as it takes a long time to evaluate the bad regex match.
 
 ### Examples
 
@@ -127,9 +135,9 @@ class Email < ApplicationRecord
   DOMAIN_MATCH = Regexp.new('([a-zA-Z0-9]+)+\.com')
 
   validates :domain_matches
-  
+
   private
-  
+
   def domain_matches
     errors.add(:email, 'does not match') if email =~ DOMAIN_MATCH
   end
@@ -140,9 +148,9 @@ class Email < ApplicationRecord
 GitLab has `Gitlab::UntrustedRegexp` which internally uses the [`re2`](https://github.com/google/re2/wiki/Syntax) library.
 By utilizing `re2`, we get a strict limit on total execution time, and a smaller subset of available regex features.
 
-All user-provided regexes should use `Gitlab::UntrustedRegexp`.
+All user-provided regular expressions should use `Gitlab::UntrustedRegexp`.
 
-For other regexes, here are a few guidelines:
+For other regular expressions, here are a few guidelines:
 
 - Remove unnecessary backtracking.
 - Avoid nested quantifiers if possible.
@@ -180,11 +188,11 @@ have been reported to GitLab include:
 
 - Network mapping of internal services
   - This can help an attacker gather information about internal services
-  that could be used in further attacks. [More details](https://gitlab.com/gitlab-org/gitlab-foss/issues/51327).
+  that could be used in further attacks. [More details](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/51327).
 - Reading internal services, including cloud service metadata.
   - The latter can be a serious problem, because an attacker can obtain keys that allow control of the victim's cloud infrastructure. (This is also a good reason
-  to give only necessary privileges to the token.). [More details](https://gitlab.com/gitlab-org/gitlab-foss/issues/51490).
-- When combined with CRLF vulnerability, remote code execution. [More details](https://gitlab.com/gitlab-org/gitlab-foss/issues/41293)
+  to give only necessary privileges to the token.). [More details](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/51490).
+- When combined with CRLF vulnerability, remote code execution. [More details](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41293).
 
 ### When to Consider
 
@@ -206,14 +214,14 @@ The [GitLab::HTTP](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab
 `Outbound requests` options that allow instance administrators to block all internal connections, or limit the networks to which connections can be made.
 
 In some cases, it has been possible to configure GitLab::HTTP as the HTTP
-connection library for 3rd-party gems. This is preferrable over re-implementing
+connection library for 3rd-party gems. This is preferable over re-implementing
 the mitigations for a new feature.
 
 - [More details](https://dev.gitlab.org/gitlab/gitlabhq/-/merge_requests/2530/diffs)
 
 #### Feature-specific Mitigations
 
-For situtions in which a whitelist or GitLab:HTTP cannot be used, it will be necessary to implement mitigations directly in the feature. It is best to validate the destination IP addresses themselves, not just domain names, as DNS can be controlled by the attacker. Below are a list of mitigations that should be implemented.
+For situations in which an allowlist or GitLab:HTTP cannot be used, it will be necessary to implement mitigations directly in the feature. It is best to validate the destination IP addresses themselves, not just domain names, as DNS can be controlled by the attacker. Below are a list of mitigations that should be implemented.
 
 **Important Note:** There are many tricks to bypass common SSRF validations. If feature-specific mitigations are necessary, they should be reviewed by the AppSec team, or a developer who has worked on SSRF mitigations previously.
 
@@ -230,7 +238,7 @@ For situtions in which a whitelist or GitLab:HTTP cannot be used, it will be nec
 - For HTTP connections: Disable redirects or validate the redirect destination
 - To mitigate DNS rebinding attacks, validate and use the first IP address received
 
-See [url_blocker_spec.rb](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/lib/gitlab/url_blocker_spec.rb) for examples of SSRF payloads
+See [`url_blocker_spec.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/lib/gitlab/url_blocker_spec.rb) for examples of SSRF payloads
 
 ## XSS guidelines
 
@@ -276,10 +284,11 @@ For any and all input fields, ensure to define expectations on the type/format o
 - Treat all user input as untrusted.
 - Based on the expectations you [defined above](#setting-expectations):
   - Validate the [input size limits](https://youtu.be/2VFavqfDS6w?t=7582).
-  - Validate the input using a [whitelist approach](https://youtu.be/2VFavqfDS6w?t=7816) to only allow characters through which you are expecting to receive for the field.
+  - Validate the input using an [allowlist approach](https://youtu.be/2VFavqfDS6w?t=7816) to only allow characters through which you are expecting to receive for the field.
     - Input which fails validation should be **rejected**, and not sanitized.
+- When adding redirects or links to a user-controlled URL, ensure that the scheme is HTTP or HTTPS. Allowing other schemes like `javascript://` can lead to XSS and other security issues.
 
-Note that blacklists should be avoided, as it is near impossible to block all [variations of XSS](https://owasp.org/www-community/xss-filter-evasion-cheatsheet).
+Note that denylists should be avoided, as it is near impossible to block all [variations of XSS](https://owasp.org/www-community/xss-filter-evasion-cheatsheet).
 
 #### Output encoding
 
@@ -292,40 +301,60 @@ Once you've [determined when and where](#setting-expectations) the user submitte
 
 ### Additional info
 
-#### Mitigating XSS in Rails
+#### XSS mitigation and prevention in Rails
+
+By default, Rails automatically escapes strings when they are inserted into HTML templates. Avoid the
+methods used to keep Rails from escaping strings, especially those related to user-controlled values.
+Specifically, the following options are dangerous because they mark strings as trusted and safe:
+
+| Method               | Avoid these options           |
+|----------------------|-------------------------------|
+| HAML templates       | `html_safe`, `raw`, `!=`      |
+| Embedded Ruby (ERB)  | `html_safe`, `raw`, `<%== %>` |
+In case you want to sanitize user-controlled values against XSS vulnerabilities, you can use
+[`ActionView::Helpers::SanitizeHelper`](https://api.rubyonrails.org/classes/ActionView/Helpers/SanitizeHelper.html).
+Calling `link_to` and `redirect_to` with user-controlled parameters can also lead to cross-site scripting.
+
+Do also sanitize and validate URL schemes.
+
+References:
 
 - [XSS Defense in Rails](https://youtu.be/2VFavqfDS6w?t=2442)
 - [XSS Defense with HAML](https://youtu.be/2VFavqfDS6w?t=2796)
 - [Validating Untrusted URLs in Ruby](https://youtu.be/2VFavqfDS6w?t=3936)
 - [RoR Model Validators](https://youtu.be/2VFavqfDS6w?t=7636)
 
+#### XSS mitigation and prevention in JavaScript and Vue
+
+- When updating the content of an HTML element using JavaScript, mark user-controlled values as `textContent` or `nodeValue` instead of `innerHTML`.
+- Avoid using `v-html` with user-controlled data, use [`v-safe-html`](https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/directives-safe-html-directive--default) instead.
+- Consider using [`gl-sprintf`](../../ee/development/i18n/externalization.md#interpolation) to interpolate translated strings securely.
+- Avoid `__()` with translations that contain user-controlled values.
+- When working with `postMessage`, ensure the `origin` of the message is allowlisted.
+- Consider using the [Safe Link Directive](https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/directives-safe-link-directive--default) to generate secure hyperlinks by default.
+
 #### GitLab specific libraries for mitigating XSS
 
 ##### Vue
 
 - [isSafeURL](https://gitlab.com/gitlab-org/gitlab/-/blob/v12.7.5-ee/app/assets/javascripts/lib/utils/url_utility.js#L190-207)
+- [GlSprintf](https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/utilities-sprintf--default)
 
 #### Content Security Policy
 
 - [Content Security Policy](https://www.youtube.com/watch?v=2VFavqfDS6w&t=12991s)
-- [Use nonce-based Content Security Policy for inline JavaScript](https://gitlab.com/gitlab-org/gitlab-foss/issues/65330)
+- [Use nonce-based Content Security Policy for inline JavaScript](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/65330)
 
-#### Free form input fields
-
-##### Sanitization
-
-- [HTML Sanitization](https://youtu.be/2VFavqfDS6w?t=5075)
-- [DOMPurify](https://youtu.be/2VFavqfDS6w?t=5381)
-
-##### `iframe` sandboxes
-
-- [iframe sandboxing](https://youtu.be/2VFavqfDS6w?t=7043)
+#### Free form input field
 
 ### Select examples of past XSS issues affecting GitLab
 
 - [Stored XSS in user status](https://gitlab.com/gitlab-org/gitlab-foss/issues/55320)
+- [XSS vulnerability on custom project templates form](https://gitlab.com/gitlab-org/gitlab/issues/197302)
+- [Stored XSS in branch names](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/55320)
+- [Stored XSS in merge request pages](https://gitlab.com/gitlab-org/gitlab/-/issues/35096)
 
-### Developer Training
+### Internal Developer Training
 
 - [Introduction to XSS](https://www.youtube.com/watch?v=PXR8PTojHmc&t=7785s)
 - [Reflected XSS](https://youtu.be/2VFavqfDS6w?t=603s)
@@ -345,5 +374,133 @@ Once you've [determined when and where](#setting-expectations) the user submitte
 - [Input Validation](https://youtu.be/2VFavqfDS6w?t=7489)
 - [Validate size limits](https://youtu.be/2VFavqfDS6w?t=7582)
 - [RoR model validators](https://youtu.be/2VFavqfDS6w?t=7636)
-- [Whitelist input validation](https://youtu.be/2VFavqfDS6w?t=7816)
+- [Allowlist input validation](https://youtu.be/2VFavqfDS6w?t=7816)
 - [Content Security Policy](https://www.youtube.com/watch?v=2VFavqfDS6w&t=12991s)
+
+## Path Traversal guidelines
+
+### Description
+
+Path Traversal vulnerabilities grant attackers access to arbitrary directories and files on the server that is executing an application, including data, code or credentials.
+
+### Impact
+
+Path Traversal attacks can lead to multiple critical and high severity issues, like arbitrary file read, remote code execution or information disclosure.
+
+### When to consider
+
+When working with user-controlled filenames/paths and filesystem APIs.
+
+### Mitigation and prevention
+
+In order to prevent Path Traversal vulnerabilities, user-controlled filenames or paths should be validated before being processed.
+
+- Comparing user input against an allowlist of allowed values or verifying that it only contains allowed characters.
+- After validating the user supplied input, it should be appended to the base directory and the path should be canonicalized using the filesystem API.
+
+#### GitLab specific validations
+
+The methods `Gitlab::Utils.check_path_traversal!()` and `Gitlab::Utils.check_allowed_absolute_path!()`
+can be used to validate user-supplied paths and prevent vulnerabilities.
+`check_path_traversal!()` will detect their Path Traversal payloads and accepts URL-encoded paths.
+`check_allowed_absolute_path!()` will check if a path is absolute and whether it is inside the allowed path list. By default, absolute
+paths are not allowed, so you need to pass a list of allowed absolute paths to the `path_allowlist`
+parameter when using `check_allowed_absolute_path!()`.
+
+To use a combination of both checks, follow the example below:
+
+```ruby
+path = Gitlab::Utils.check_path_traversal!(path)
+Gitlab::Utils.check_allowed_absolute_path!(path, path_allowlist)
+```
+
+In the REST API, we have the [`FilePath`](https://gitlab.com/gitlab-org/security/gitlab/-/blob/master/lib/api/validations/validators/file_path.rb)
+validator that can be used to perform the checking on any file path argument the endpoints have.
+It can be used as follows:
+
+```ruby
+requires :file_path, type: String, file_path: { allowlist: ['/foo/bar/', '/home/foo/', '/app/home'] }
+```
+
+The Path Traversal check can also be used to forbid any absolute path:
+
+```ruby
+requires :file_path, type: String, file_path: true
+```
+
+NOTE: **Note:**
+Absolute paths are not allowed by default. If allowing an absolute path is required, you
+need to provide an array of paths to the parameter `allowlist`.  
+
+## OS command injection guidelines
+
+Command injection is an issue in which an attacker is able to execute arbitrary commands on the host
+operating system through a vulnerable application. Such attacks don't always provide feedback to a
+user, but the attacker can use simple commands like `curl` to obtain an answer.
+
+### Impact
+
+The impact of command injection greatly depends on the user context running the commands, as well as
+how data is validated and sanitized. It can vary from low impact because the user running the
+injected commands has limited rights, to critical impact if running as the root user.
+
+Potential impacts include:
+
+- Execution of arbitrary commands on the host machine.
+- Unauthorized access to sensitive data, including passwords and tokens in secrets or configuration
+  files.
+- Exposure of sensitive system files on the host machine, such as `/etc/passwd/` or `/etc/shadow`.
+- Compromise of related systems and services gained through access to the host machine.
+
+You should be aware of and take steps to prevent command injection when working with user-controlled
+data that are used to run OS commands.
+
+### Mitigation and prevention
+
+To prevent OS command injections, user-supplied data shouldn't be used within OS commands. In cases
+where you can't avoid this:
+
+- Validate user-supplied data against an allowlist.
+- Ensure that user-supplied data only contains alphanumeric characters (and no syntax or whitespace
+  characters, for example).
+- Always use `--` to separate options from arguments.
+
+### Ruby
+
+Consider using `system("command", "arg0", "arg1", ...)` whenever you can. This prevents an attacker
+from concatenating commands.
+
+For more examples on how to use shell commands securely, consult
+[Guidelines for shell commands in the GitLab codebase](shell_commands.md).
+It contains various examples on how to securely call OS commands.
+
+### Go
+
+Go has built-in protections that usually prevent an attacker from successfully injecting OS commands.
+
+Consider the following example:
+
+```golang
+package main
+
+import (
+  "fmt"
+  "os/exec"
+)
+
+func main() {
+  cmd := exec.Command("echo", "1; cat /etc/passwd")
+  out, _ := cmd.Output()
+  fmt.Printf("%s", out)
+}
+```
+
+This echoes `"1; cat /etc/passwd"`.
+
+**Do not** use `sh`, as it bypasses internal protections:
+
+```golang
+out, _ = exec.Command("sh", "-c", "echo 1 | cat /etc/passwd").Output()
+```
+
+This outputs `1` followed by the content of `/etc/passwd`.

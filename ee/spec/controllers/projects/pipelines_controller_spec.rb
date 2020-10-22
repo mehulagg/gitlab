@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::PipelinesController do
+RSpec.describe Projects::PipelinesController do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
@@ -101,7 +101,7 @@ describe Projects::PipelinesController do
 
         it 'will return license scanning report in json format' do
           expect(payload.size).to eq(pipeline.license_scanning_report.licenses.size)
-          expect(payload.first.keys).to eq(%w(name classification dependencies count url))
+          expect(payload.first.keys).to match_array(%w(name classification dependencies count url))
         end
 
         it 'will return mit license approved status' do
@@ -114,6 +114,34 @@ describe Projects::PipelinesController do
         it 'will return sorted by name' do
           expect(payload.first['name']).to eq('Apache 2.0')
           expect(payload.last['name']).to eq('unknown')
+        end
+
+        it 'returns a JSON representation of the license data' do
+          expect(payload).to be_present
+
+          payload.each do |item|
+            expect(item['name']).to be_present
+            expect(item['classification']).to have_key('id')
+            expect(item.dig('classification', 'approval_status')).to be_present
+            expect(item.dig('classification', 'name')).to be_present
+            expect(item).to have_key('dependencies')
+            item['dependencies'].each do |dependency|
+              expect(dependency['name']).to be_present
+            end
+            expect(item['count']).to be_present
+            expect(item).to have_key('url')
+          end
+        end
+
+        context "when not authorized" do
+          before do
+            allow(controller).to receive(:can?).and_call_original
+            allow(controller).to receive(:can?).with(user, :read_licenses, project).and_return(false)
+
+            licenses_with_json
+          end
+
+          specify { expect(response).to have_gitlab_http_status(:not_found) }
         end
       end
 

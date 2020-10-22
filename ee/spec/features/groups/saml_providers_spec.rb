@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'SAML provider settings' do
+RSpec.describe 'SAML provider settings' do
   include CookieHelper
 
   let(:user) { create(:user) }
@@ -60,7 +60,7 @@ describe 'SAML provider settings' do
     it 'allows creation of new provider' do
       visit group_saml_providers_path(group)
 
-      fill_in 'Identity provider single sign on URL', with: 'https://localhost:9999/adfs/ls'
+      fill_in 'Identity provider single sign-on URL', with: 'https://localhost:9999/adfs/ls'
       fill_in 'Certificate fingerprint', with: 'aa:bb:cc:dd:ee:ff:11:22:33:44:55:66:77:88:99:0a:1b:2c:3d:00'
 
       expect { submit }.to change(SamlProvider, :count).by(1)
@@ -88,32 +88,18 @@ describe 'SAML provider settings' do
       it 'displays user login URL' do
         visit group_saml_providers_path(group)
 
-        login_url = find('label', text: 'GitLab single sign on URL').find('~* a').text
+        login_url = find('label', text: 'GitLab single sign-on URL').find('~* a').text
 
         expect(login_url).to include "/groups/#{group.full_path}/-/saml/sso"
         expect(login_url).to end_with "?token=#{group.reload.saml_discovery_token}"
       end
 
-      context 'enforced sso enabled', :js do
-        it 'updates the flag' do
-          stub_feature_flags(enforced_sso: true)
+      it 'updates the enforced sso setting', :js do
+        visit group_saml_providers_path(group)
 
-          visit group_saml_providers_path(group)
+        find('.js-group-saml-enforced-sso-toggle').click
 
-          find('.js-group-saml-enforced-sso-toggle').click
-
-          expect { submit }.to change { saml_provider.reload.enforced_sso }.to(true)
-        end
-      end
-
-      context 'enforced sso disabled' do
-        it 'does not update the flag' do
-          stub_feature_flags(enforced_sso: false)
-
-          visit group_saml_providers_path(group)
-
-          expect(page).not_to have_selector('.js-group-saml-enforced-sso-toggle')
-        end
+        expect { submit }.to change { saml_provider.reload.enforced_sso }.to(true)
       end
 
       context 'enforced_group_managed_accounts enabled', :js do

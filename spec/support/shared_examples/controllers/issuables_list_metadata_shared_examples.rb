@@ -34,17 +34,13 @@ RSpec.shared_examples 'issuables list meta-data' do |issuable_type, action = nil
 
     aggregate_failures do
       expect(meta_data.keys).to match_array(issuables.map(&:id))
-      expect(meta_data.values).to all(be_kind_of(Issuable::IssuableMeta))
+      expect(meta_data.values).to all(be_kind_of(Gitlab::IssuableMetadata::IssuableMeta))
     end
   end
 
   context 'searching' do
     let(:result_issuable) { issuables.first }
     let(:search) { result_issuable.title }
-
-    before do
-      stub_feature_flags(attempt_project_search_optimizations: true)
-    end
 
     # .simple_sorts is the same across all Sortable classes
     sorts = ::Issue.simple_sorts.keys + %w[popularity priority label_priority]

@@ -2,6 +2,12 @@ import Vue from 'vue';
 
 import * as types from './mutation_types';
 
+const resetEpics = state => {
+  state.epics = [];
+  state.childrenFlags = {};
+  state.epicIds = [];
+};
+
 export default {
   [types.SET_INITIAL_DATA](state, data) {
     Object.assign(state, { ...data });
@@ -11,12 +17,8 @@ export default {
     state.epics = epics;
   },
 
-  [types.SET_WINDOW_RESIZE_IN_PROGRESS](state, inProgress) {
-    state.windowResizeInProgress = inProgress;
-  },
-
-  [types.UPDATE_EPIC_IDS](state, epicId) {
-    state.epicIds.push(epicId);
+  [types.UPDATE_EPIC_IDS](state, epicIds) {
+    state.epicIds.push(...epicIds);
   },
 
   [types.REQUEST_EPICS](state) {
@@ -106,5 +108,21 @@ export default {
 
   [types.SET_BUFFER_SIZE](state, bufferSize) {
     state.bufferSize = bufferSize;
+  },
+
+  [types.SET_FILTER_PARAMS](state, filterParams) {
+    state.filterParams = filterParams;
+    state.hasFiltersApplied = Boolean(filterParams);
+    resetEpics(state);
+  },
+
+  [types.SET_EPICS_STATE](state, epicsState) {
+    state.epicsState = epicsState;
+    resetEpics(state);
+  },
+
+  [types.SET_SORTED_BY](state, sortedBy) {
+    state.sortedBy = sortedBy;
+    resetEpics(state);
   },
 };

@@ -1,4 +1,7 @@
 ---
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
 type: reference
 description: "GitLab administrator: enable and disable GitLab features deployed behind feature flags"
 ---
@@ -29,7 +32,7 @@ them. It can be done by GitLab administrators with access to GitLab Rails
 console.
 
 If you used a certain feature and identified a bug, a misbehavior, or an
-error, it's very important that you [**provide feedback**](https://gitlab.com/gitlab-org/gitlab/issues/new?issue[title]=Docs%20-%20feature%20flag%20feedback%3A%20Feature%20Name&issue[description]=Describe%20the%20problem%20you%27ve%20encountered.%0A%0A%3C!--%20Don%27t%20edit%20below%20this%20line%20--%3E%0A%0A%2Flabel%20~%22docs%5C-comments%22%20) to GitLab as soon
+error, it's very important that you [**provide feedback**](https://gitlab.com/gitlab-org/gitlab/-/issues/new?issue[title]=Docs%20-%20feature%20flag%20feedback%3A%20Feature%20Name&issue[description]=Describe%20the%20problem%20you%27ve%20encountered.%0A%0A%3C!--%20Don%27t%20edit%20below%20this%20line%20--%3E%0A%0A%2Flabel%20~%22docs%5C-comments%22%20) to GitLab as soon
 as possible so we can improve or fix it while behind a flag. When you upgrade
 GitLab to an earlier version, the feature flag status may change.
 
@@ -62,7 +65,7 @@ For installations from the source:
 sudo -u git -H bundle exec rails console -e production
 ```
 
-For details, see [starting a Rails console session](troubleshooting/debug.md#starting-a-rails-console-session).
+For details, see [starting a Rails console session](operations/rails_console.md#starting-a-rails-console-session).
 
 ### Enable or disable the feature
 
@@ -76,10 +79,10 @@ To enable a feature, run:
 Feature.enable(:<feature flag>)
 ```
 
-Example, to enable Evidence Collection:
+Example, to enable a fictional feature flag named `my_awesome_feature`:
 
 ```ruby
-Feature.enable(:release_evidence_collection)
+Feature.enable(:my_awesome_feature)
 ```
 
 To disable a feature, run:
@@ -88,10 +91,40 @@ To disable a feature, run:
 Feature.disable(:<feature flag>)
 ```
 
-Example, to disable Evidence Collection:
+Example, to disable a fictional feature flag named `my_awesome_feature`:
 
 ```ruby
-Feature.disable(:release_evidence_collection)
+Feature.disable(:my_awesome_feature)
+```
+
+Some feature flags can be enabled or disabled on a per project basis:
+
+```ruby
+Feature.enable(:<feature flag>, Project.find(<project id>))
+```
+
+For example, to enable the [`:product_analytics`](../operations/product_analytics.md#enable-or-disable-product-analytics) feature flag for project `1234`:
+
+```ruby
+Feature.enable(:product_analytics, Project.find(1234))
+```
+
+`Feature.enable` and `Feature.disable` always return `nil`, this is not an indication that the command failed:
+
+```ruby
+irb(main):001:0> Feature.enable(:my_awesome_feature)
+=> nil
+```
+
+To check if a flag is enabled or disabled you can use `Feature.enabled?` or `Feature.disabled?`. For example, for a fictional feature flag named `my_awesome_feature`:
+
+```ruby
+Feature.enable(:my_awesome_feature)
+=> nil
+Feature.enabled?(:my_awesome_feature)
+=> true
+Feature.disabled?(:my_awesome_feature)
+=> false
 ```
 
 When the feature is ready, GitLab will remove the feature flag, the option for

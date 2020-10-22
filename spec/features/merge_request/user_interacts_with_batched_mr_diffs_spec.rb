@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Batch diffs', :js do
+RSpec.describe 'Batch diffs', :js do
   include MergeRequestDiffHelpers
   include RepoHelpers
 
@@ -10,9 +10,6 @@ describe 'Batch diffs', :js do
   let(:merge_request) { create(:merge_request, source_project: project, source_branch: 'master', target_branch: 'empty-branch') }
 
   before do
-    stub_feature_flags(single_mr_diff_view: { enabled: true, thing: project })
-    stub_feature_flags(diffs_batch_load: true)
-
     sign_in(project.owner)
 
     visit diffs_project_merge_request_path(merge_request.project, merge_request)
@@ -22,14 +19,14 @@ describe 'Batch diffs', :js do
     click_diff_line(find('.diff-file.file-holder:first-of-type tr.line_holder.new:first-of-type'))
     page.within('.js-discussion-note-form') do
       fill_in('note_note', with: 'First Line Comment')
-      click_button('Comment')
+      click_button('Add comment now')
     end
 
     # Add discussion to first line of last file
     click_diff_line(find('.diff-file.file-holder:last-of-type tr.line_holder.new:first-of-type'))
     page.within('.js-discussion-note-form') do
       fill_in('note_note', with: 'Last Line Comment')
-      click_button('Comment')
+      click_button('Add comment now')
     end
 
     wait_for_requests

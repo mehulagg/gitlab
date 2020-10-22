@@ -4,8 +4,10 @@ module Gitlab
   class SearchResults
     COUNT_LIMIT = 100
     COUNT_LIMIT_MESSAGE = "#{COUNT_LIMIT - 1}+"
+    DEFAULT_PAGE = 1
+    DEFAULT_PER_PAGE = 20
 
-    attr_reader :current_user, :query, :per_page
+    attr_reader :current_user, :query, :sort, :filters
 
     # Limit search results by passed projects
     # It allows us to search only for projects user has access to
@@ -17,29 +19,26 @@ module Gitlab
     # query
     attr_reader :default_project_filter
 
-    def initialize(current_user, limit_projects, query, default_project_filter: false, per_page: 20)
+    def initialize(current_user, query, limit_projects = nil, sort: nil, default_project_filter: false, filters: {})
       @current_user = current_user
-      @limit_projects = limit_projects || Project.all
       @query = query
+      @limit_projects = limit_projects || Project.all
       @default_project_filter = default_project_filter
-      @per_page = per_page
+      @sort = sort
+      @filters = filters
     end
 
-    def objects(scope, page = nil, without_count = true)
-      collection = case scope
-                   when 'projects'
-                     projects
-                   when 'issues'
-                     issues
-                   when 'merge_requests'
-                     merge_requests
-                   when 'milestones'
-                     milestones
-                   when 'users'
-                     users
-                   else
-                     Kaminari.paginate_array([])
-                   end.page(page).per(per_page)
+    def objects(scope, page: nil, per_page: DEFAULT_PER_PAGE, without_count: true, preload_method: nil)
+      should_preload = preload_method.present?
+      collection = collection_for(scope)
+
+      if collection.nil?
+        should_preload = false
+        collection = Kaminari.paginate_array([])
+      end
+
+      collection = collection.public_send(preload_method) if should_preload # rubocop:disable GitlabSecurity/PublicSend
+      collection = collection.page(page).per(per_page)
 
       without_count ? collection.without_count : collection
     end
@@ -95,10 +94,6 @@ module Gitlab
       @limited_users_count ||= limited_count(users)
     end
 
-    def single_commit_result?
-      false
-    end
-
     def count_limit
       COUNT_LIMIT
     end
@@ -109,7 +104,40 @@ module Gitlab
       UsersFinder.new(current_user, search: query).execute
     end
 
+    # highlighting is only performed by Elasticsearch backed results
+    def highlight_map(scope)
+      {}
+    end
+
     private
+
+    def collection_for(scope)
+      case scope
+      when 'projects'
+        projects
+      when 'issues'
+        issues
+      when 'merge_requests'
+        merge_requests
+      when 'milestones'
+        milestones
+      when 'users'
+        users
+      end
+    end
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def apply_sort(scope)
+      case sort
+      when 'oldest'
+        scope.reorder('created_at ASC')
+      when 'newest'
+        scope.reorder('created_at DESC')
+      else
+        scope
+      end
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     def projects
       limit_projects.search(query)
@@ -122,7 +150,7 @@ module Gitlab
         issues = issues.where(project_id: project_ids_relation) # rubocop: disable CodeReuse/ActiveRecord
       end
 
-      issues
+      apply_sort(issues)
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -142,7 +170,7 @@ module Gitlab
         merge_requests = merge_requests.in_projects(project_ids_relation)
       end
 
-      merge_requests
+      apply_sort(merge_requests)
     end
 
     def default_scope
@@ -180,9 +208,15 @@ module Gitlab
         params[:sort] = 'updated_desc'
 
         if query =~ /#(\d+)\z/
-          params[:iids] = $1
+          params[:iids] = Regexp.last_match(1)
         else
           params[:search] = query
+        end
+
+        params[:state] = filters[:state] if filters.key?(:state)
+
+        if [true, false].include?(filters[:confidential]) && Feature.enabled?(:search_filter_by_confidential)
+          params[:confidential] = filters[:confidential]
         end
       end
     end

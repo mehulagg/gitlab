@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::GroupSaml::SsoEnforcer do
+RSpec.describe Gitlab::Auth::GroupSaml::SsoEnforcer do
   let(:saml_provider) { build_stubbed(:saml_provider, enforced_sso: true) }
   let(:session) { {} }
 
@@ -42,6 +42,27 @@ describe Gitlab::Auth::GroupSaml::SsoEnforcer do
 
       expect(subject).to be_active_session
     end
+
+    describe 'enforced sso expiry' do
+      before do
+        stub_feature_flags(enforced_sso_expiry: saml_provider.group)
+      end
+
+      it 'returns true if a sign in is recently recorded' do
+        subject.update_session
+
+        expect(subject).to be_active_session
+      end
+
+      it 'returns false if the sign in predates the session timeout' do
+        subject.update_session
+
+        days_after_timeout = Gitlab::Auth::GroupSaml::SsoEnforcer::DEFAULT_SESSION_TIMEOUT + 2.days
+        Timecop.freeze(days_after_timeout) do
+          expect(subject).not_to be_active_session
+        end
+      end
+    end
   end
 
   describe '#allows_access?' do
@@ -67,12 +88,6 @@ describe Gitlab::Auth::GroupSaml::SsoEnforcer do
       end
     end
 
-    it 'allows access when the sso enforcement feature is disabled' do
-      stub_feature_flags(enforced_sso: { enabled: false, thing: saml_provider.group })
-
-      expect(subject).not_to be_access_restricted
-    end
-
     it 'prevents access when sso enforcement active but there is no session' do
       expect(subject).to be_access_restricted
     end
@@ -88,10 +103,6 @@ describe Gitlab::Auth::GroupSaml::SsoEnforcer do
     let(:root_group) { create(:group, saml_provider: create(:saml_provider, enabled: true, enforced_sso: true)) }
 
     context 'is restricted' do
-      before do
-        stub_feature_flags(enforced_sso_requires_session: { enabled: true, thing: root_group })
-      end
-
       it 'for a group' do
         expect(described_class).to be_group_access_restricted(root_group)
       end
@@ -109,17 +120,10 @@ describe Gitlab::Auth::GroupSaml::SsoEnforcer do
       end
     end
 
-    context 'is not restricted' do
-      it 'for the group without configured saml_provider' do
-        group = create(:group)
-        stub_feature_flags(enforced_sso_requires_session: { enabled: true, thing: group })
+    context 'for a group without a saml_provider configured' do
+      let(:root_group) { create(:group) }
 
-        expect(described_class).not_to be_group_access_restricted(group)
-      end
-
-      it 'for the group without the feature flag' do
-        stub_feature_flags(enforced_sso_requires_session: { enabled: false, thing: root_group })
-
+      it 'is not restricted' do
         expect(described_class).not_to be_group_access_restricted(root_group)
       end
     end

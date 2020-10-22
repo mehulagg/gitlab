@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Appearance do
+RSpec.describe Appearance do
   include ::EE::GeoHelpers
 
   subject { build(:appearance) }

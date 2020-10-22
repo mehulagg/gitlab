@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User sees pipelines from forked project', :js do
+RSpec.describe 'Merge request > User sees pipelines from forked project', :js do
   include ProjectForksHelper
 
   let(:target_project) { create(:project, :public, :repository) }
@@ -13,6 +13,7 @@ describe 'Merge request > User sees pipelines from forked project', :js do
                                       target_project: target_project,
                                       description: 'Test merge request')
   end
+
   let(:pipeline) do
     create(:ci_pipeline,
            project: forked_project,

@@ -1,0 +1,16 @@
+- if credential.expires?
+  - expiry_date = credential.expires_at.to_date
+  - date_classes = 'gl-display-flex gl-align-items-center has-tooltip gl-w-full gl-justify-content-end gl-justify-content-md-start'
+
+  - if credential.expired?
+    %span{ class: date_classes + ' gl-text-red-500', title: _('This credential has expired'), data: { testid: 'expiry-date-icon' } }
+      = sprite_icon('error', css_class: "gl-icon gl-mr-2")
+      = expiry_date
+  - elsif credential.expires_soon?
+    %span{ class: date_classes + ' gl-text-orange-500', data: { testid: 'expiry-date-icon' } }
+      = sprite_icon('warning', css_class: "gl-icon gl-mr-2")
+      = expiry_date
+  - else
+    = expiry_date
+- else
+  = _('Never')

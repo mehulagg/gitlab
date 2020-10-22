@@ -7,7 +7,7 @@ module StatusPage
 
     sidekiq_options retry: 5
 
-    feature_category :status_page
+    feature_category :incident_management
     worker_has_external_dependencies!
     idempotent!
 

@@ -1,10 +1,11 @@
 <script>
-import { GlPopover, GlIcon, GlLink, GlButton, GlTooltipDirective, GlLoadingIcon } from '@gitlab/ui';
-import { s__ } from '~/locale';
-import createFlash from '~/flash';
+import { GlPopover, GlIcon, GlLink, GlButton, GlTooltipDirective } from '@gitlab/ui';
+import { __, s__ } from '~/locale';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import pollUntilComplete from '~/lib/utils/poll_until_complete';
+import download from '~/lib/utils/downloader';
 
 export const STORAGE_KEY = 'vulnerability_csv_export_popover_dismissed';
 
@@ -14,7 +15,6 @@ export default {
     GlButton,
     GlPopover,
     GlLink,
-    GlLoadingIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -29,6 +29,16 @@ export default {
     isPreparingCsvExport: false,
     showPopover: localStorage.getItem(STORAGE_KEY) !== 'true',
   }),
+  computed: {
+    buttonProps() {
+      const { isPreparingCsvExport } = this;
+      return {
+        title: __('Export as CSV'),
+        loading: isPreparingCsvExport,
+        ...(!isPreparingCsvExport ? { icon: 'export' } : {}),
+      };
+    },
+  },
   methods: {
     closePopover() {
       this.showPopover = false;
@@ -47,13 +57,16 @@ export default {
         .post(this.vulnerabilitiesExportEndpoint)
         .then(({ data }) => pollUntilComplete(data._links.self))
         .then(({ data }) => {
-          const anchor = document.createElement('a');
-          anchor.download = `csv-export-${formatDate(new Date(), 'isoDateTime')}.csv`;
-          anchor.href = data._links.download;
-          anchor.click();
+          if (data.status !== 'finished') {
+            throw new Error();
+          }
+          download({
+            fileName: `csv-export-${formatDate(new Date(), 'isoDateTime')}.csv`,
+            url: data._links.download,
+          });
         })
         .catch(() => {
-          createFlash(s__('SecurityDashboard|There was an error while generating the report.'));
+          createFlash(s__('SecurityReports|There was an error while generating the report.'));
         })
         .finally(() => {
           this.isPreparingCsvExport = false;
@@ -66,18 +79,11 @@ export default {
   <gl-button
     ref="csvExportButton"
     v-gl-tooltip.hover
-    class="align-self-center"
-    :title="__('Export as CSV')"
-    :loading="isPreparingCsvExport"
+    class="gl-align-self-center"
+    v-bind="buttonProps"
     @click="initiateCsvExport"
   >
-    <gl-icon
-      v-if="!isPreparingCsvExport"
-      ref="exportIcon"
-      name="export"
-      class="mr-0 position-top-0"
-    />
-    <gl-loading-icon v-else />
+    {{ __('Export') }}
     <gl-popover
       ref="popover"
       :target="() => $refs.csvExportButton.$el"

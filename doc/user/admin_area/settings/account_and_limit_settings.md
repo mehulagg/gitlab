@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: reference
 ---
 
@@ -15,18 +18,16 @@ If you choose a size larger than what is currently configured for the web server
 you will likely get errors. See the [troubleshooting section](#troubleshooting) for more
 details.
 
-## Maximum namespace storage size
+## Max import size
 
-This sets a maximum size limit on each namespace. The following are included in the namespace size:
-
-- repository
-- wiki
-- LFS objects
-- build artifacts
-- packages
+You can change the maximum file size for imports in GitLab.
+Navigate to **Admin Area (wrench icon) > Settings > General**, then expand **Account and Limit**.
+From here, you can increase or decrease by changing the value in `Maximum import size (MB)`.
 
 NOTE: **Note:**
-This limit is not currently enforced but will be in a future release.
+If you choose a size larger than what is currently configured for the web server,
+you will likely get errors. See the [troubleshooting section](#troubleshooting) for more
+details.
 
 ## Repository size limit **(STARTER ONLY)**
 
@@ -74,12 +75,13 @@ The first push of a new project, including LFS objects, will be checked for size
 and **will** be rejected if the sum of their sizes exceeds the maximum allowed
 repository size.
 
-**Note:** The repository size limit includes repository files and LFS, and does not include artifacts.
+NOTE: **Note:**
+The repository size limit includes repository files and LFS, and does not include artifacts.
 
 For details on manually purging files, see [reducing the repository size using Git](../../project/repository/reducing_the_repo_size_using_git.md).
 
 NOTE: **Note:**
-GitLab.com repository size [is set by GitLab](../../gitlab_com/index.md#repository-size-limit).
+GitLab.com repository size [is set by GitLab](../../gitlab_com/index.md#account-and-limit-settings).
 
 ## Troubleshooting
 
@@ -99,7 +101,7 @@ nginx['client_max_body_size'] = "200m"
 
 ## Limiting lifetime of personal access tokens **(ULTIMATE ONLY)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/3649) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.6.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3649) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.6.
 
 Users can optionally specify an expiration date for
 [personal access tokens](../../profile/personal_access_tokens.md).
@@ -129,9 +131,42 @@ Once a lifetime for personal access tokens is set, GitLab will:
   allowed lifetime. Three hours is given to allow administrators to change the allowed lifetime,
   or remove it, before revocation takes place.
 
+## Optional enforcement of Personal Access Token expiry **(ULTIMATE ONLY)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214723) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
+> - It is deployed behind a feature flag, disabled by default.
+> - It is disabled on GitLab.com.
+> - It is not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-optional-enforcement-of-personal-access-token-expiry-feature). **(CORE ONLY)**
+
+GitLab administrators can choose to prevent personal access tokens from expiring automatically. The tokens will be usable after the expiry date, unless they are revoked explicitly.
+
+To do this:
+
+1. Navigate to **Admin Area > Settings > General**.
+1. Expand the **Account and limit** section.
+1. Uncheck the **Enforce personal access token expiration** checkbox.
+
+### Enable or disable optional enforcement of Personal Access Token expiry Feature **(CORE ONLY)**
+
+Optional Enforcement of Personal Access Token Expiry is deployed behind a feature flag and is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md) can enable it for your instance from the [rails console](../../../administration/feature_flags.md#start-the-gitlab-rails-console).
+
+To enable it:
+
+```ruby
+Feature.enable(:enforce_pat_expiration)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:enforce_pat_expiration)
+```
+
 ## Disabling user profile name changes **(PREMIUM ONLY)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/24605) in GitLab 12.7.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/24605) in GitLab 12.7.
 
 To maintain integrity of user details in [Audit Events](../../../administration/audit_events.md), GitLab administrators can choose to disable a user's ability to change their profile name.
 

@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 module TreeHelper
+  include BlobHelper
+  include WebIdeButtonHelper
+
   FILE_LIMIT = 1_000
 
   # Sorts a repository's tree so that folders are before files and renders
@@ -31,7 +34,7 @@ module TreeHelper
   # mode - File unix mode
   # name - File name
   def tree_icon(type, mode, name)
-    icon([file_type_icon_class(type, mode, name), 'fw'])
+    sprite_icon(file_type_icon_class(type, mode, name))
   end
 
   # Using Rails `*_path` methods can be slow, especially when generating
@@ -196,6 +199,26 @@ module TreeHelper
       ref: ref,
       escaped_ref: ActionDispatch::Journey::Router::Utils.escape_path(ref),
       full_name: project.name_with_namespace
+    }
+  end
+
+  def web_ide_button_data(options = {})
+    {
+      project_path: project_to_use.full_path,
+      ref: ActionDispatch::Journey::Router::Utils.escape_path(@ref),
+
+      is_fork: fork?,
+      needs_to_fork: needs_to_fork?,
+      gitpod_enabled: !current_user.nil? && current_user.gitpod_enabled,
+      is_blob: !options[:blob].nil?,
+
+      show_edit_button: show_edit_button?,
+      show_web_ide_button: show_web_ide_button?,
+      show_gitpod_button: show_gitpod_button?,
+
+      web_ide_url: web_ide_url,
+      edit_url: edit_url,
+      gitpod_url: gitpod_url
     }
   end
 

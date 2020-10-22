@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Analytics::RefreshReassignData do
+RSpec.describe Analytics::RefreshReassignData do
   subject { described_class.new(merge_request) }
 
   let(:merge_request) { create :merge_request }

@@ -2,10 +2,19 @@
 
 require 'spec_helper'
 
-describe Analytics::CycleAnalytics::Stages::CreateService do
+RSpec.describe Analytics::CycleAnalytics::Stages::CreateService do
   let_it_be(:group, refind: true) { create(:group) }
+  let_it_be(:value_stream, refind: true) { create(:cycle_analytics_group_value_stream, group: group) }
   let_it_be(:user, refind: true) { create(:user) }
-  let(:params) { { name: 'my stage', start_event_identifier: :merge_request_created, end_event_identifier: :merge_request_merged } }
+
+  let(:params) do
+    {
+      name: 'my stage',
+      value_stream: value_stream,
+      start_event_identifier: :merge_request_created,
+      end_event_identifier: :merge_request_merged
+    }
+  end
 
   before_all do
     group.add_user(user, :reporter)
@@ -43,8 +52,8 @@ describe Analytics::CycleAnalytics::Stages::CreateService do
   end
 
   describe 'persistence of default stages' do
-    let(:persisted_stages) { group.cycle_analytics_stages }
-    let(:customized_stages) { group.cycle_analytics_stages.where(custom: true) }
+    let(:persisted_stages) { value_stream.stages }
+    let(:customized_stages) { value_stream.stages.where(custom: true) }
     let(:default_stages) { Gitlab::Analytics::CycleAnalytics::DefaultStages.all }
     let(:expected_stage_count) { default_stages.count + customized_stages.count }
 
@@ -72,6 +81,19 @@ describe Analytics::CycleAnalytics::Stages::CreateService do
           expect(group.cycle_analytics_stages.count).to eq(expected_stage_count)
         end
       end
+
+      context 'when creating a stage for the second value stream' do
+        before do
+          first_value_stream = create(:cycle_analytics_group_value_stream, group: group)
+          described_class.new(parent: group, params: params.merge(name: 'other stage', value_stream: first_value_stream), current_user: user).execute
+        end
+
+        it 'persists the new stage and the default stages for the second value streams' do
+          subject
+
+          expect(value_stream.stages.count).to eq(Gitlab::Analytics::CycleAnalytics::DefaultStages.all.size + 1)
+        end
+      end
     end
 
     context 'when params are invalid' do
@@ -96,7 +118,8 @@ describe Analytics::CycleAnalytics::Stages::CreateService do
         start_event_identifier: :issue_label_added,
         end_event_identifier: :issue_label_removed,
         start_event_label_id: label.id,
-        end_event_label_id: label.id
+        end_event_label_id: label.id,
+        value_stream: value_stream
       }
     end
 
@@ -109,6 +132,19 @@ describe Analytics::CycleAnalytics::Stages::CreateService do
 
       expect(stage.start_event_label).to eq(label)
       expect(stage.end_event_label).to eq(label)
+    end
+  end
+
+  context 'when `value_stream` is not provided' do
+    before do
+      params.delete(:value_stream)
+    end
+
+    let(:stage) { subject.payload[:stage] }
+
+    it 'creates a `default` value stream object' do
+      expect(stage).to be_persisted
+      expect(stage.value_stream.name).to eq(Analytics::CycleAnalytics::Stages::BaseService::DEFAULT_VALUE_STREAM_NAME)
     end
   end
 end

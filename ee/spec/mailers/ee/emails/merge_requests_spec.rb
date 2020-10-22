@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'email_spec'
 
-describe EE::Emails::MergeRequests do
+RSpec.describe EE::Emails::MergeRequests do
   include EmailSpec::Matchers
 
   let(:user) { create(:user) }

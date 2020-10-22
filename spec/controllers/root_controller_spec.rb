@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RootController do
+RSpec.describe RootController do
   describe 'GET index' do
     context 'when user is not logged in' do
       it 'redirects to the sign-in page' do
@@ -121,6 +121,30 @@ describe RootController do
           get :index
 
           expect(response).to render_template 'dashboard/projects/index'
+        end
+
+        context 'when experiment is enabled' do
+          before do
+            stub_experiment_for_user(customize_homepage: true)
+          end
+
+          it 'renders the default dashboard' do
+            get :index
+
+            expect(assigns[:customize_homepage]).to be true
+          end
+        end
+
+        context 'when experiment not enabled' do
+          before do
+            stub_experiment(customize_homepage: false)
+          end
+
+          it 'renders the default dashboard' do
+            get :index
+
+            expect(assigns[:customize_homepage]).to be false
+          end
         end
       end
     end

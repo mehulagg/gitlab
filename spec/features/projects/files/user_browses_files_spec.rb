@@ -2,11 +2,14 @@
 
 require "spec_helper"
 
-describe "User browses files" do
+RSpec.describe "User browses files" do
+  include RepoHelpers
+
   let(:fork_message) do
     "You're not allowed to make changes to this project directly. "\
     "A fork of this project has been created that you can make changes in, so you can submit a merge request."
   end
+
   let(:project) { create(:project, :repository, name: "Shop") }
   let(:project2) { create(:project, :repository, name: "Another Project", path: "another-project") }
   let(:tree_path_root_ref) { project_tree_path(project, project.repository.root_ref) }
@@ -171,9 +174,48 @@ describe "User browses files" do
     end
   end
 
+  context 'when commit message has markdown', :js do
+    before do
+      project.repository.create_file(user, 'index', 'test', message: ':star: testing', branch_name: 'master')
+
+      visit(project_tree_path(project, "master"))
+    end
+
+    it 'renders emojis' do
+      expect(page).to have_selector('gl-emoji', count: 2)
+    end
+  end
+
   context "when browsing a `improve/awesome` branch", :js do
     before do
       visit(project_tree_path(project, "improve/awesome"))
+    end
+
+    it "shows files from a repository" do
+      expect(page).to have_content("VERSION")
+        .and have_content(".gitignore")
+        .and have_content("LICENSE")
+
+      click_link("files")
+
+      page.within('.repo-breadcrumb') do
+        expect(page).to have_link('files')
+      end
+
+      click_link("html")
+
+      page.within('.repo-breadcrumb') do
+        expect(page).to have_link('html')
+      end
+
+      expect(page).to have_link('500.html')
+    end
+  end
+
+  context "when browsing a `Ääh-test-utf-8` branch", :js do
+    before do
+      project.repository.create_branch('Ääh-test-utf-8', project.repository.root_ref)
+      visit(project_tree_path(project, "Ääh-test-utf-8"))
     end
 
     it "shows files from a repository" do
@@ -297,6 +339,24 @@ describe "User browses files" do
                  .and have_content("Initial commit")
 
       expect(page).not_to have_content("Ignore DS files")
+    end
+  end
+
+  context "when browsing a file with pathspec characters" do
+    let(:filename) { ':wq' }
+    let(:newrev) { project.repository.commit('master').sha }
+
+    before do
+      create_file_in_repo(project, 'master', 'master', filename, 'Test file')
+      path = File.join('master', filename)
+
+      visit(project_blob_path(project, path))
+    end
+
+    it "shows a raw file content" do
+      click_link("Open raw")
+
+      expect(source).to eq("") # Body is filled in by gitlab-workhorse
     end
   end
 

@@ -5,34 +5,35 @@ module EE
     module CreateService
       extend ::Gitlab::Utils::Override
 
-      override :before_create
-      def before_create(issue)
-        handle_issue_epic_link(issue)
+      override :filter_params
+      def filter_params(issue)
+        handle_epic(issue)
 
         super
+      end
+
+      override :execute
+      def execute(skip_system_notes: false)
+        super.tap do |issue|
+          if issue.previous_changes.include?(:milestone_id) && issue.epic_issue
+            ::Epics::UpdateDatesService.new([issue.epic_issue.epic]).execute
+          end
+        end
       end
 
       override :after_create
       def after_create(issue)
         super
 
-        StatusPage.trigger_publish(project, current_user, issue)
+        add_issue_sla(issue)
       end
 
-      def handle_issue_epic_link(issue)
-        return unless params.key?(:epic)
+      private
 
-        epic_param = params.delete(:epic)
+      def add_issue_sla(issue)
+        return unless issue.sla_available?
 
-        if epic_param
-          EpicIssues::CreateService.new(epic_param, current_user, { target_issuable: issue }).execute
-        else
-          link = EpicIssue.find_by_issue_id(issue.id)
-
-          return unless link
-
-          EpicIssues::DestroyService.new(link, current_user).execute
-        end
+        ::IncidentManagement::Incidents::CreateSlaService.new(issue, current_user).execute
       end
     end
   end

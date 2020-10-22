@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MilestoneRelease do
+RSpec.describe MilestoneRelease do
   let(:project) { create(:project) }
   let(:release) { create(:release, project: project) }
   let(:milestone) { create(:milestone, project: project) }
@@ -10,8 +10,8 @@ describe MilestoneRelease do
   subject { build(:milestone_release, release: release, milestone: milestone) }
 
   describe 'associations' do
-    it { is_expected.to belong_to(:milestone) }
     it { is_expected.to belong_to(:release) }
+    it { is_expected.to belong_to(:milestone) }
   end
 
   context 'when trying to create the same record in milestone_releases twice' do

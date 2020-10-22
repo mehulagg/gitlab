@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeTrainsFinder do
+RSpec.describe MergeTrainsFinder do
   let_it_be(:project) { create(:project) }
   let_it_be(:developer) { create(:user) }
   let_it_be(:guest) { create(:user) }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Elastic::Latest::Config do
+RSpec.describe Elastic::Latest::Config do
   describe '.document_type' do
     it 'returns config' do
       expect(described_class.document_type).to eq('doc')

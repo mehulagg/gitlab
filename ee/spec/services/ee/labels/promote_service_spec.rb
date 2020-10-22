@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Labels::PromoteService do
+RSpec.describe Labels::PromoteService do
   let(:user) { create(:admin) }
   let(:group) { create(:group) }
   let(:project) { create(:project, group: group) }

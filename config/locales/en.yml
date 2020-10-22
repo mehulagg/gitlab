@@ -20,8 +20,12 @@ en:
         token: "Grafana HTTP API Token"
         grafana_url: "Grafana API URL"
         grafana_enabled: "Grafana integration enabled"
+      service_desk_setting:
+        project_key: "Project name suffix"
       user/user_detail:
         job_title: 'Job title'
+      user/user_detail:
+        bio: 'Bio'
   views:
     pagination:
       previous: "Prev"
@@ -272,4 +276,5 @@ en:
       long: "%B %d, %Y %H:%M"
       short: "%d %b %H:%M"
       timeago_tooltip: "%b %-d, %Y %-l:%M%P"
+      with_timezone: "%Y-%m-%d %H:%M:%S %z"
     pm: pm

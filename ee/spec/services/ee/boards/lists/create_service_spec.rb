@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::Lists::CreateService do
+RSpec.describe Boards::Lists::CreateService do
   describe '#execute' do
     let(:project) { create(:project) }
     let(:board) { create(:board, project: project) }

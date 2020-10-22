@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Resolvers::BoardListsResolver do
+RSpec.describe Resolvers::BoardListsResolver do
   include GraphqlHelpers
 
   let_it_be(:user)          { create(:user) }
@@ -49,6 +49,12 @@ describe Resolvers::BoardListsResolver do
   end
 
   def resolve_board_lists(args: {}, current_user: user)
-    resolve(described_class, obj: board, args: args, ctx: { current_user: current_user })
+    context = GraphQL::Query::Context.new(
+      query: OpenStruct.new(schema: nil),
+      values: { current_user: current_user },
+      object: nil
+    )
+
+    resolve(described_class, obj: board, args: args, ctx: context)
   end
 end

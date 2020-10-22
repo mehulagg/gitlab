@@ -1,19 +1,26 @@
-import Vue from 'vue';
 import $ from 'jquery';
 import Dropdown from 'ee/vue_shared/license_compliance/components/add_license_form_dropdown.vue';
-import { KNOWN_LICENSES } from 'ee/vue_shared/license_compliance/constants';
-import mountComponent from 'helpers/vue_mount_component_helper';
+import { shallowMount } from '@vue/test-utils';
+
+let vm;
+let wrapper;
+
+const KNOWN_LICENSES = ['AGPL-1.0', 'AGPL-3.0', 'Apache 2.0', 'BSD'];
+
+const createComponent = (props = {}) => {
+  wrapper = shallowMount(Dropdown, { propsData: { knownLicenses: KNOWN_LICENSES, ...props } });
+  vm = wrapper.vm;
+};
 
 describe('AddLicenseFormDropdown', () => {
-  const Component = Vue.extend(Dropdown);
-  let vm;
-
   afterEach(() => {
-    vm.$destroy();
+    vm = undefined;
+    wrapper.destroy();
   });
 
   it('emits `input` invent on change', () => {
-    vm = mountComponent(Component);
+    createComponent();
+
     jest.spyOn(vm, '$emit').mockImplementation(() => {});
 
     $(vm.$el)
@@ -25,7 +32,7 @@ describe('AddLicenseFormDropdown', () => {
 
   it('sets the placeholder appropriately', () => {
     const placeholder = 'Select a license';
-    vm = mountComponent(Component, { placeholder });
+    createComponent({ placeholder });
 
     const dropdownContainer = $(vm.$el).select2('container')[0];
 
@@ -34,13 +41,13 @@ describe('AddLicenseFormDropdown', () => {
 
   it('sets the initial value correctly', () => {
     const value = 'AWESOME_LICENSE';
-    vm = mountComponent(Component, { value });
+    createComponent({ value });
 
     expect(vm.$el.value).toContain(value);
   });
 
-  it('shows all pre-defined licenses', done => {
-    vm = mountComponent(Component);
+  it('shows all defined licenses', done => {
+    createComponent();
 
     const element = $(vm.$el);
 

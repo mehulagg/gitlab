@@ -1,6 +1,10 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import $ from 'jquery';
-import { GlSkeletonLoading } from '@gitlab/ui';
+import '~/behaviors/markdown/render_gfm';
+
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
+import { forEach, escape } from 'lodash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
 
@@ -16,6 +20,11 @@ export default {
       type: String,
       required: true,
     },
+    commitSha: {
+      type: String,
+      required: false,
+      default: '',
+    },
     filePath: {
       type: String,
       required: false,
@@ -24,6 +33,11 @@ export default {
     projectPath: {
       type: String,
       required: true,
+    },
+    images: {
+      type: Object,
+      required: false,
+      default: () => ({}),
     },
   },
   data() {
@@ -55,6 +69,9 @@ export default {
           text: this.content,
           path: this.filePath,
         };
+        if (this.commitSha) {
+          postBody.ref = this.commitSha;
+        }
         const postOptions = {
           cancelToken: axiosSource.token,
         };
@@ -66,11 +83,19 @@ export default {
             postOptions,
           )
           .then(({ data }) => {
-            this.previewContent = data.body;
+            let previewContent = data.body;
+            forEach(this.images, ({ src, title = '', alt }, key) => {
+              previewContent = previewContent.replace(
+                key,
+                `<img src="${escape(src)}" title="${escape(title)}" alt="${escape(alt)}">`,
+              );
+            });
+
+            this.previewContent = previewContent;
             this.isLoading = false;
 
             this.$nextTick(() => {
-              $(this.$refs['markdown-preview']).renderGFM();
+              $(this.$refs.markdownPreview).renderGFM();
             });
           })
           .catch(() => {
@@ -84,7 +109,7 @@ export default {
 </script>
 
 <template>
-  <div ref="markdown-preview" class="md-previewer">
+  <div ref="markdownPreview" class="md-previewer">
     <gl-skeleton-loading v-if="isLoading" />
     <div v-else class="md" v-html="previewContent"></div>
   </div>

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::ResetChecksumEventStore do
+RSpec.describe Geo::ResetChecksumEventStore do
   include EE::GeoHelpers
 
   let_it_be(:project) { create(:project) }

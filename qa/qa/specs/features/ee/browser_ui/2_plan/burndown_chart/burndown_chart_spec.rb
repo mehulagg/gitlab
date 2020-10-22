@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan', :reliable do
+  RSpec.describe 'Plan', :reliable do
     describe 'Burndown chart' do
       include ::QA::Support::Dates
 
       let(:milestone) do
-        QA::EE::Resource::ProjectMilestone.fabricate_via_api! do |m|
+        Resource::ProjectMilestone.fabricate_via_api! do |m|
           m.start_date = current_date_yyyy_mm_dd
           m.due_date = next_month_yyyy_mm_dd
         end
@@ -21,10 +21,10 @@ module QA
         create_issue(milestone.project, milestone, weight_of_two)
       end
 
-      it 'shows burndown chart on milestone page' do
+      it 'shows burndown chart on milestone page', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/573' do
         milestone.visit!
 
-        QA::EE::Page::Project::Milestone::Show.perform do |show|
+        Page::Milestone::Show.perform do |show|
           expect(show.burndown_chart).to be_visible
           expect(show.burndown_chart).to have_content("Open issues")
 

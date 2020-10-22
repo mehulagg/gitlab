@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::GroupLinks::CreateService, '#execute' do
+RSpec.describe Projects::GroupLinks::CreateService, '#execute' do
   include ProjectForksHelper
 
   let(:user) { create :user }
@@ -21,6 +21,7 @@ describe Projects::GroupLinks::CreateService, '#execute' do
       let(:fail_condition!) do
         create(:project_group_link, project: project, group: group)
       end
+
       let(:attributes) do
         {
            author_id: user.id,

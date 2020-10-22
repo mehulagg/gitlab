@@ -10,18 +10,24 @@ module Gitlab
         @request_context = request_context
       end
 
-      def paginate(relation)
+      def paginate(relation, exclude_total_headers: false)
         paginate_with_limit_optimization(add_default_order(relation)).tap do |data|
-          add_pagination_headers(data)
+          add_pagination_headers(data, exclude_total_headers)
         end
       end
 
       private
 
       def paginate_with_limit_optimization(relation)
-        pagination_data = relation.page(params[:page]).per(params[:per_page])
+        # do not paginate relation if it is already paginated
+        pagination_data = if relation.respond_to?(:current_page) && relation.current_page == params[:page] && relation.limit_value == params[:per_page]
+                            relation
+                          else
+                            relation.page(params[:page]).per(params[:per_page])
+                          end
+
         return pagination_data unless pagination_data.is_a?(ActiveRecord::Relation)
-        return pagination_data unless Feature.enabled?(:api_kaminari_count_with_limit)
+        return pagination_data unless Feature.enabled?(:api_kaminari_count_with_limit, type: :ops)
 
         limited_total_count = pagination_data.total_count_with_limit
         if limited_total_count > Kaminari::ActiveRecordRelationMethods::MAX_COUNT_LIMIT
@@ -41,14 +47,14 @@ module Gitlab
         relation
       end
 
-      def add_pagination_headers(paginated_data)
+      def add_pagination_headers(paginated_data, exclude_total_headers)
         header 'X-Per-Page',    paginated_data.limit_value.to_s
         header 'X-Page',        paginated_data.current_page.to_s
         header 'X-Next-Page',   paginated_data.next_page.to_s
         header 'X-Prev-Page',   paginated_data.prev_page.to_s
         header 'Link',          pagination_links(paginated_data)
 
-        return if data_without_counts?(paginated_data)
+        return if exclude_total_headers || data_without_counts?(paginated_data)
 
         header 'X-Total',       paginated_data.total_count.to_s
         header 'X-Total-Pages', total_pages(paginated_data).to_s

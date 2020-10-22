@@ -34,5 +34,11 @@ module AutoMerge
         merge_request.actual_head_pipeline&.active?
       end
     end
+
+    private
+
+    def notify(merge_request)
+      notification_service.async.merge_when_pipeline_succeeds(merge_request, current_user) if merge_request.saved_change_to_auto_merge_enabled?
+    end
   end
 end

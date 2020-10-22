@@ -1,6 +1,13 @@
-# GitLab NuGet Repository **(PREMIUM)**
+---
+stage: Package
+group: Package
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/20050) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.8.
+# GitLab NuGet Repository
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/20050) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.8.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
 
 With the GitLab NuGet Repository, every project can have its own space to store NuGet packages.
 
@@ -12,7 +19,7 @@ The GitLab NuGet Repository works with:
 
 ## Setting up your development environment
 
-You will need [NuGet CLI 5.2 or later](https://www.nuget.org/downloads). Earlier versions have not been tested
+[NuGet CLI 5.1 or later](https://www.nuget.org/downloads) is required. Earlier versions have not been tested
 against the GitLab NuGet Repository and might not work. If you have [Visual Studio](https://visualstudio.microsoft.com/vs/),
 NuGet CLI is probably already installed.
 
@@ -27,7 +34,7 @@ nuget help
 You should see something similar to:
 
 ```plaintext
-NuGet Version: 5.2.0.6090
+NuGet Version: 5.1.0.6013
 usage: NuGet <command> [args] [options]
 Type 'NuGet help <command>' for help on a specific command.
 
@@ -35,6 +42,9 @@ Available commands:
 
 [output truncated]
 ```
+
+NOTE: **Note:**
+GitLab currently only supports NuGet's protocol version 3. Earlier versions are not supported.
 
 ### macOS support
 
@@ -52,23 +62,25 @@ mono nuget.exe
 
 NOTE: **Note:**
 This option is available only if your GitLab administrator has
-[enabled support for the Package Registry](../../../administration/packages/index.md). **(PREMIUM ONLY)**
+[enabled support for the Package Registry](../../../administration/packages/index.md).
 
-After the NuGet Repository is enabled, it will be available for all new projects
+When the NuGet Repository is enabled, it is available for all new projects
 by default. To enable it for existing projects, or if you want to disable it:
 
-1. Navigate to your project's **Settings > General > Permissions**.
+1. Navigate to your project's **Settings > General > Visibility, project features, permissions**.
 1. Find the Packages feature and enable or disable it.
 1. Click on **Save changes** for the changes to take effect.
 
-You should then be able to see the **Packages** section on the left sidebar.
+You should then be able to see the **Packages & Registries** section on the left sidebar.
 
 ## Adding the GitLab NuGet Repository as a source to NuGet
 
-You will need the following:
+You need the following:
 
 - Your GitLab username.
-- A personal access token. You can generate a [personal access token](../../../user/profile/personal_access_tokens.md) with the scope set to `api` for repository authentication.
+- A personal access token or deploy token. For repository authentication:
+  - You can generate a [personal access token](../../../user/profile/personal_access_tokens.md) with the scope set to `api`.
+  - You can generate a [deploy token](./../../project/deploy_tokens/index.md) with the scope set to `read_package_registry`, `write_package_registry`, or both.
 - A suitable name for your source.
 - Your project ID which can be found on the home page of your project.
 
@@ -83,7 +95,7 @@ You can now add a new source to NuGet with:
 To add the GitLab NuGet Repository as a source with `nuget`:
 
 ```shell
-nuget source Add -Name <source_name> -Source "https://gitlab-instance.example.com/api/v4/projects/<your_project_id>/packages/nuget/index.json" -UserName <gitlab_username> -Password <gitlab_personal_access_token>
+nuget source Add -Name <source_name> -Source "https://gitlab-instance.example.com/api/v4/projects/<your_project_id>/packages/nuget/index.json" -UserName <gitlab_username or deploy_token_username> -Password <gitlab_personal_access_token or deploy_token>
 ```
 
 Where:
@@ -93,22 +105,22 @@ Where:
 For example:
 
 ```shell
-nuget source Add -Name "GitLab" -Source "https//gitlab.example/api/v4/projects/10/packages/nuget/index.json" -UserName carol -Password 12345678asdf
+nuget source Add -Name "GitLab" -Source "https://gitlab.example/api/v4/projects/10/packages/nuget/index.json" -UserName carol -Password 12345678asdf
 ```
 
 ### Add NuGet Repository source with Visual Studio
 
 1. Open [Visual Studio](https://visualstudio.microsoft.com/vs/).
 1. Open the **FILE > OPTIONS** (Windows) or **Visual Studio > Preferences** (Mac OS).
-1. In the **NuGet** section, open **Sources**. You will see a list of all your NuGet sources.
+1. In the **NuGet** section, open **Sources** to see a list of all your NuGet sources.
 1. Click **Add**.
 1. Fill the fields with:
    - **Name**: Desired name for the source
    - **Location**: `https://gitlab.com/api/v4/projects/<your_project_id>/packages/nuget/index.json`
      - Replace `<your_project_id>` with your project ID.
      - If you have a self-managed GitLab installation, replace `gitlab.com` with your domain name.
-   - **Username**: Your GitLab username
-   - **Password**: Your personal access token
+   - **Username**: Your GitLab username or deploy token username
+   - **Password**: Your personal access token or deploy token
 
    ![Visual Studio Adding a NuGet source](img/visual_studio_adding_nuget_source.png)
 
@@ -131,8 +143,8 @@ To add the GitLab NuGet Repository as a source for .NET, create a file named `nu
     </packageSources>
     <packageSourceCredentials>
         <gitlab>
-            <add key="Username" value="<gitlab_username>" />
-            <add key="ClearTextPassword" value="<gitlab_personal_access_token>" />
+            <add key="Username" value="<gitlab_username or deploy_token_username>" />
+            <add key="ClearTextPassword" value="<gitlab_personal_access_token or deploy_token>" />
         </gitlab>
     </packageSourceCredentials>
 </configuration>
@@ -142,10 +154,10 @@ To add the GitLab NuGet Repository as a source for .NET, create a file named `nu
 
 When uploading packages, note that:
 
-- The maximum allowed size is 50 Megabytes.
+- The Package Registry on GitLab.com can store up to 500 MB of content. This limit is [configurable for self-managed GitLab instances](../../../administration/instance_limits.md#package-registry-limits).
 - If you upload the same package with the same version multiple times, each consecutive upload
-  is saved as a separate file. When installing a package, GitLab will serve the most recent file.
-- When uploading packages to GitLab, they will not be displayed in the packages UI of your project
+  is saved as a separate file. When installing a package, GitLab serves the most recent file.
+- When uploading packages to GitLab, they are not displayed in the packages UI of your project
   immediately. It can take up to 10 minutes to process a package.
 
 ### Upload packages with NuGet CLI
@@ -189,7 +201,7 @@ dotnet nuget push MyPackage.1.0.0.nupkg --source gitlab
 CAUTION: **Warning:**
 By default, `nuget` checks the official source at `nuget.org` first. If you have a package in the
 GitLab NuGet Repository with the same name as a package at `nuget.org`, you must specify the source
-name or the wrong package will be installed.
+name to install the correct package.
 
 Install the latest version of a package using the following command:
 
@@ -201,8 +213,8 @@ nuget install <package_id> -OutputDirectory <output_directory> \
 
 Where:
 
-- `<package_id>` is the package id.
-- `<output_directory>` is the output directory, where the package will be installed.
+- `<package_id>` is the package ID.
+- `<output_directory>` is the output directory, where the package is installed.
 - `<package_version>` (Optional) is the package version.
 - `<source_name>` (Optional) is the source name.
 
@@ -222,5 +234,37 @@ dotnet add package <package_id> \
 
 Where:
 
-- `<package_id>` is the package id.
+- `<package_id>` is the package ID.
 - `<package_version>` (Optional) is the package version.
+
+## Publishing a NuGet package with CI/CD
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/36424) in GitLab 13.3.
+
+If you’re using NuGet with GitLab CI/CD, a CI job token can be used instead of a personal access token or deploy token.
+The token inherits the permissions of the user that generates the pipeline.
+
+This example shows how to create a new package each time the `master` branch
+is updated:
+
+1. Add a `deploy` job to your `.gitlab-ci.yml` file:
+
+   ```yaml
+   image: mcr.microsoft.com/dotnet/core/sdk:3.1
+
+   stages:
+     - deploy
+
+   deploy:
+     stage: deploy
+     script:
+       - dotnet restore -p:Configuration=Release
+       - dotnet build -c Release
+       - dotnet pack -c Release
+       - dotnet nuget add source "$CI_SERVER_URL/api/v4/projects/$CI_PROJECT_ID/packages/nuget/index.json" --name gitlab --username gitlab-ci-token --password $CI_JOB_TOKEN --store-password-in-clear-text
+       - dotnet nuget push "bin/Release/*.nupkg" --source gitlab
+     only:
+       - master
+   ```
+
+1. Commit the changes and push it to your GitLab repository to trigger a new CI build.

@@ -1,5 +1,6 @@
-This is an automated notification to let you know that your CI Runner Minutes quota for "<%= @namespace_name %>" has run out.
+<%= _('%{name}(%{url}) has run out of Shared Runner Pipeline minutes so no new jobs or pipelines in its projects will run.') % { name: @namespace.name, url: group_url(@namespace) }%>
 
-Please visit <%= EE::SUBSCRIPTIONS_PLANS_URL %> to purchase more minutes.
+<%= _('We recommend that you buy more Pipeline minutes to resume normal service.') %>
 
-If you need assistance, please contact GitLab support (<%= EE::CUSTOMER_SUPPORT_URL %>).
+
+Buy more Pipeline minutes → <%= EE::SUBSCRIPTIONS_MORE_MINUTES_URL %>

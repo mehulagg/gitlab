@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Milestone' do
+RSpec.describe 'Milestone' do
   let(:group) { create(:group, :public) }
   let(:project) { create(:project, :public, namespace: group) }
   let(:user) { create(:user) }
@@ -25,7 +25,7 @@ describe 'Milestone' do
 
       find('input[name="commit"]').click
 
-      expect(find('.alert-success')).to have_content('Assign some issues to this milestone.')
+      expect(find('[data-testid="no-issues-alert"]')).to have_content('Assign some issues to this milestone.')
       expect(page).to have_content('Nov 16, 2016–Dec 16, 2016')
     end
   end
@@ -37,7 +37,7 @@ describe 'Milestone' do
       create(:issue, title: "Bugfix1", project: project, milestone: milestone, state: "closed")
       visit project_milestone_path(project, milestone)
 
-      expect(find('.alert-success')).to have_content('All issues for this milestone are closed. You may close this milestone now.')
+      expect(find('[data-testid="all-issues-closed-alert"]')).to have_content('All issues for this milestone are closed. You may close this milestone now.')
     end
   end
 
@@ -108,20 +108,6 @@ describe 'Milestone' do
       visit group_milestones_path(group)
 
       expect(page).to have_selector('.js-delete-milestone-button', count: 0)
-    end
-  end
-
-  describe 'deprecation popover', :js do
-    it 'opens deprecation popover' do
-      milestone = create(:milestone, project: project)
-
-      visit group_milestone_path(group, milestone, title: milestone.title)
-
-      expect(page).to have_selector('.milestone-deprecation-message')
-
-      find('.milestone-deprecation-message .js-popover-link').click
-
-      expect(page).to have_selector('.popover')
     end
   end
 

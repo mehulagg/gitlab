@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Gitaly
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -12,7 +15,7 @@ The configuration file is passed as an argument to the `gitaly`
 executable. This is usually done by either Omnibus GitLab or your
 [init](https://en.wikipedia.org/wiki/Init) script.
 
-An [example config file](https://gitlab.com/gitlab-org/gitaly/blob/master/config.toml.example)
+An [example configuration file](https://gitlab.com/gitlab-org/gitaly/blob/master/config.toml.example)
 can be found in the Gitaly project.
 
 ## Format
@@ -88,7 +91,7 @@ certificate_path = '/home/git/cert.cert'
 key_path = '/home/git/key.pem'
 ```
 
-[Read more](index.md#tls-support) about TLS in Gitaly.
+[Read more](index.md#enable-tls-support) about TLS in Gitaly.
 
 ### Storage
 
@@ -135,8 +138,8 @@ Most of the time we use `git cat-file --batch` processes for that. For
 better performance, Gitaly can re-use these `git cat-file` processes
 across RPC calls. Previously used processes are kept around in a
 ["Git cat-file cache"](https://about.gitlab.com/blog/2019/07/08/git-performance-on-nfs/#enter-cat-file-cache).
-In order to control how much system resources this uses, we have a maximum number
-of cat-file processes that can go into the cache.
+To control how much system resources this uses, we have a maximum number of
+cat-file processes that can go into the cache.
 
 The default limit is 100 `cat-file`s, which constitute a pair of
 `git cat-file --batch` and `git cat-file --batch-check` processes. If
@@ -149,7 +152,7 @@ before and after. If the hit ratio does not improve, the higher limit is
 probably not making a meaningful difference. Here is an example
 Prometheus query to see the hit rate:
 
-```text
+```plaintext
 sum(rate(gitaly_catfile_cache_total{type="hit"}[5m])) / sum(rate(gitaly_catfile_cache_total{type=~"(hit)|(miss)"}[5m]))
 ```
 
@@ -157,7 +160,7 @@ sum(rate(gitaly_catfile_cache_total{type="hit"}[5m])) / sum(rate(gitaly_catfile_
 
 A Gitaly process uses one or more `gitaly-ruby` helper processes to
 execute RPC's implemented in Ruby instead of Go. The `[gitaly-ruby]`
-section of the config file contains settings for these helper processes.
+section of the configuration file contains settings for these helper processes.
 
 These processes are known to occasionally suffer from memory leaks.
 Gitaly restarts its `gitaly-ruby` helpers when their memory exceeds the
@@ -190,7 +193,7 @@ For historical reasons
 the Git hooks that allow GitLab to validate and react to Git pushes.
 Because Gitaly "owns" Git pushes, GitLab Shell must therefore be
 installed alongside Gitaly. This will be [simplified in the
-future](https://gitlab.com/gitlab-org/gitaly/issues/1226).
+future](https://gitlab.com/gitlab-org/gitaly/-/issues/1226).
 
 | Name | Type | Required | Description |
 | ---- | ---- | -------- | ----------- |
@@ -230,7 +233,7 @@ The following values configure logging in Gitaly under the `[logging]` section.
 | `format` | string | no | Log format: `text` or `json`. Default: `text`. |
 | `level`  | string | no | Log level: `debug`, `info`, `warn`, `error`, `fatal`, or `panic`. Default: `info`. |
 | `sentry_dsn` | string | no | Sentry DSN for exception monitoring. |
-| `sentry_environment` | string | no | [Sentry Environment](https://docs.sentry.io/enriching-error-data/environments/) for exception monitoring. |
+| `sentry_environment` | string | no | [Sentry Environment](https://docs.sentry.io/product/sentry-basics/environments/) for exception monitoring. |
 | `ruby_sentry_dsn` | string | no | Sentry DSN for `gitaly-ruby` exception monitoring. |
 
 While the main Gitaly application logs go to `stdout`, there are some extra log

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::DependenciesController do
+RSpec.describe Projects::DependenciesController do
   describe 'GET #index' do
     let_it_be(:developer) { create(:user) }
     let_it_be(:guest) { create(:user) }
@@ -195,7 +195,7 @@ describe Projects::DependenciesController do
           end
         end
 
-        context 'when report doesn\'t have dependency list' do
+        context 'when report doesn\'t have dependency list field' do
           let(:user) { developer }
           let!(:pipeline) { create(:ee_ci_pipeline, :with_dependency_scanning_report, project: project) }
 
@@ -203,8 +203,12 @@ describe Projects::DependenciesController do
             get :index, params: params, format: :json
           end
 
-          it 'returns no_dependencies status' do
-            expect(json_response['report']['status']).to eq('no_dependencies')
+          it 'returns dependencies with vulnerabilities' do
+            expect(json_response['dependencies'].count).to eq(4)
+            django = json_response['dependencies'].find { |d| d['name'] == 'Django' }
+            expect(django).not_to be_nil
+            expect(django['vulnerabilities']).to eq([{ "name" => "Possible XSS in traceback section of technical 500 debug page", "severity" => "unknown" }])
+            expect(json_response['report']['status']).to eq('ok')
           end
         end
 

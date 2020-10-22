@@ -1,5 +1,0 @@
----
-title: Geo - Support git clone/pull operations for repositories that are not yet replicated
-merge_request: 27072
-author:
-type: added

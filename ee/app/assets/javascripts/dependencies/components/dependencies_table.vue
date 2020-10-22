@@ -1,11 +1,19 @@
 <script>
 import { cloneDeep } from 'lodash';
-import { GlBadge, GlIcon, GlLink, GlButton, GlSkeletonLoading, GlTable } from '@gitlab/ui';
+import {
+  GlBadge,
+  GlIcon,
+  GlButton,
+  GlSkeletonLoader,
+  GlTable,
+  GlPopover,
+  GlLink,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import DependenciesTableRow from './dependencies_table_row.vue';
 import DependencyLicenseLinks from './dependency_license_links.vue';
 import DependencyVulnerabilities from './dependency_vulnerabilities.vue';
+import DependencyLocation from './dependency_location.vue';
 
 const tdClass = (value, key, item) => {
   const classes = [];
@@ -26,15 +34,16 @@ const tdClass = (value, key, item) => {
 export default {
   name: 'DependenciesTable',
   components: {
-    DependenciesTableRow,
     DependencyLicenseLinks,
     DependencyVulnerabilities,
+    DependencyLocation,
     GlBadge,
     GlIcon,
-    GlLink,
     GlButton,
-    GlSkeletonLoading,
+    GlSkeletonLoader,
     GlTable,
+    GlPopover,
+    GlLink,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -48,18 +57,8 @@ export default {
     },
   },
   data() {
-    const tableSections = [
-      { className: 'section-20', label: s__('Dependencies|Status') },
-      { className: 'section-20', label: s__('Dependencies|Component') },
-      { className: 'section-10', label: s__('Dependencies|Version') },
-      { className: 'section-20', label: s__('Dependencies|Packager') },
-      { className: 'section-15', label: s__('Dependencies|Location') },
-      { className: 'section-15', label: s__('Dependencies|License') },
-    ];
-
     return {
       localDependencies: this.transformDependenciesForUI(this.dependencies),
-      tableSections,
     };
   },
   computed: {
@@ -77,8 +76,13 @@ export default {
     // passed to it in order to track the visibilty of each row's `row-details`
     // slot. So, create a deep clone of them here to avoid mutating the
     // `dependencies` prop.
+    // We also make sure that `vulnerabilities` is always defined to prevent rendering
+    // errors when the user is allowe to see dependencies but not their vulnerabilities.
     transformDependenciesForUI(dependencies) {
-      return cloneDeep(dependencies);
+      return dependencies.map(({ vulnerabilities, ...dep }) => ({
+        ...cloneDeep(dep),
+        vulnerabilities: vulnerabilities ? cloneDeep(vulnerabilities) : [],
+      }));
     },
   },
   fields: [
@@ -89,22 +93,49 @@ export default {
     { key: 'isVulnerable', label: '', tdClass },
   ],
   DEPENDENCIES_PER_PAGE: 20,
+  DEPENDENCY_PATH_LINK:
+    'https://docs.gitlab.com/ee/user/application_security/dependency_list/#dependency-paths',
+  i18n: {
+    tooltipText: s__(
+      'Dependencies|The component dependency path is based on the lock file. There may be several paths. In these cases, the longest path is displayed.',
+    ),
+    tooltipMoreText: s__('Dependencies|Learn more about dependency paths'),
+  },
 };
 </script>
 
 <template>
-  <!-- tbody- and thead-class props can be removed when
-    https://gitlab.com/gitlab-org/gitlab/-/issues/213324 is fixed -->
   <gl-table
-    v-if="glFeatures.dependencyListUi"
     :fields="$options.fields"
     :items="localDependencies"
     :busy="isLoading"
+    data-qa-selector="dependencies_table_content"
     details-td-class="pt-0"
     stacked="md"
-    thead-class="gl-text-gray-900"
-    tbody-class="gl-text-gray-900"
   >
+    <template #head(location)="data">
+      {{ data.label }}
+      <template v-if="glFeatures.pathToVulnerableDependency">
+        <gl-icon id="location-info" name="information" class="gl-text-blue-600" />
+        <gl-popover
+          target="location-info"
+          triggers="hover focus"
+          placement="top"
+          :title="s__('Dependencies|Location and dependency path')"
+        >
+          {{ $options.i18n.tooltipText }}
+          <div class="gl-mt-4">
+            <gl-link
+              :href="$options.DEPENDENCY_PATH_LINK"
+              target="_blank"
+              class="font-size-inherit"
+              >{{ $options.i18n.tooltipMoreText }}</gl-link
+            >
+          </div>
+        </gl-popover>
+      </template>
+    </template>
+
     <!-- toggleDetails and detailsShowing are scoped slot props provided by
       GlTable; they mutate/read the item's _showDetails property, which GlTable
       uses to show/hide the row-details slot -->
@@ -127,10 +158,7 @@ export default {
     </template>
 
     <template #cell(location)="{ item }">
-      <gl-link :href="item.location.blob_path">
-        <gl-icon name="doc-text" class="align-middle" />
-        {{ item.location.path }}
-      </gl-link>
+      <dependency-location :location="item.location" />
     </template>
 
     <template #cell(license)="{ item }">
@@ -138,13 +166,10 @@ export default {
     </template>
 
     <template #cell(isVulnerable)="{ item, toggleDetails }">
-      <!-- This badge usage will be simplified by
-        https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28356 -->
       <gl-badge
         v-if="item.vulnerabilities.length"
         variant="warning"
         href="#"
-        class="d-inline-flex align-items-center bg-warning-100 text-warning-700 bold"
         @click.native="toggleDetails"
       >
         <gl-icon name="warning" class="text-warning-500 mr-1" />
@@ -164,29 +189,8 @@ export default {
 
     <template #table-busy>
       <div class="mt-2">
-        <gl-skeleton-loading v-for="n in $options.DEPENDENCIES_PER_PAGE" :key="n" :lines="1" />
+        <gl-skeleton-loader v-for="n in $options.DEPENDENCIES_PER_PAGE" :key="n" :lines="1" />
       </div>
     </template>
   </gl-table>
-
-  <div v-else>
-    <div class="gl-responsive-table-row table-row-header text-2 bg-secondary-50 px-2" role="row">
-      <div
-        v-for="(section, index) in tableSections"
-        :key="index"
-        class="table-section"
-        :class="section.className"
-        role="rowheader"
-      >
-        {{ section.label }}
-      </div>
-    </div>
-
-    <dependencies-table-row
-      v-for="(dependency, index) in dependencies"
-      :key="index"
-      :dependency="dependency"
-      :is-loading="isLoading"
-    />
-  </div>
 </template>

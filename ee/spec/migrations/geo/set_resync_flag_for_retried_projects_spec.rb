@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('ee', 'db', 'geo', 'migrate', '20180510223634_set_resync_flag_for_retried_projects.rb')
 
-describe SetResyncFlagForRetriedProjects, :geo do
+RSpec.describe SetResyncFlagForRetriedProjects, :geo do
   let(:registry) { table(:project_registry) }
 
   before do

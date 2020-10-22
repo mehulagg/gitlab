@@ -11,6 +11,15 @@ RSpec.shared_examples 'an editable merge request' do
       expect(page).to have_content user.name
     end
 
+    find('.js-reviewer-search').click
+    page.within '.dropdown-menu-user' do
+      click_link user.name
+    end
+    expect(find('input[name="merge_request[reviewer_ids][]"]', visible: false).value).to match(user.id.to_s)
+    page.within '.js-reviewer-search' do
+      expect(page).to have_content user.name
+    end
+
     click_button 'Milestone'
     page.within '.issue-milestone' do
       click_link milestone.title
@@ -38,6 +47,10 @@ RSpec.shared_examples 'an editable merge request' do
         expect(page).to have_content user.name
       end
 
+      page.within '.reviewer' do
+        expect(page).to have_content user.name
+      end
+
       page.within '.milestone' do
         expect(page).to have_content milestone.title
       end
@@ -53,11 +66,15 @@ RSpec.shared_examples 'an editable merge request' do
     find('#merge_request_description').native.send_keys('')
     fill_in 'merge_request_description', with: user.to_reference[0..4]
 
-    wait_for_requests
-
     page.within('.atwho-view') do
       expect(page).to have_content(user2.name)
     end
+  end
+
+  it 'description has quick action autocomplete', :js do
+    find('#merge_request_description').native.send_keys('/')
+
+    expect(page).to have_selector('.atwho-container')
   end
 
   it 'has class js-quick-submit in form' do
@@ -65,7 +82,7 @@ RSpec.shared_examples 'an editable merge request' do
   end
 
   it 'warns about version conflict' do
-    merge_request.update(title: "New title")
+    merge_request.update!(title: "New title")
 
     fill_in 'merge_request_title', with: 'bug 345'
     fill_in 'merge_request_description', with: 'bug description'

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::LogCursor::Events::JobArtifactDeletedEvent, :clean_gitlab_redis_shared_state do
+RSpec.describe Gitlab::Geo::LogCursor::Events::JobArtifactDeletedEvent, :clean_gitlab_redis_shared_state do
   let(:logger) { Gitlab::Geo::LogCursor::Logger.new(described_class, Logger::INFO) }
   let(:event_log) { create(:geo_event_log, :job_artifact_deleted_event) }
   let!(:event_log_state) { create(:geo_event_log_state, event_id: event_log.id - 1) }
@@ -72,5 +72,7 @@ describe Gitlab::Geo::LogCursor::Events::JobArtifactDeletedEvent, :clean_gitlab_
         expect { subject.process }.not_to change { File.exist?(job_artifact.file.path) }.from(true)
       end
     end
+
+    it_behaves_like 'logs event source info'
   end
 end

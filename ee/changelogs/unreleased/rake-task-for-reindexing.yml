@@ -1,5 +1,0 @@
----
-title: Add rake task for reindexing Elasticsearch
-merge_request: 27772
-author:
-type: added

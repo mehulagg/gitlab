@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Ldap do
+RSpec.describe API::Ldap do
   include ApiHelpers
   include LdapHelpers
 

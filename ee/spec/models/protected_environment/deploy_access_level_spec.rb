@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe ProtectedEnvironment::DeployAccessLevel do
+RSpec.describe ProtectedEnvironment::DeployAccessLevel do
+  let_it_be(:project) { create(:project) }
+  let_it_be(:protected_environment) { create(:protected_environment, project: project) }
+  let_it_be(:user) { create(:user) }
+
   describe 'associations' do
     it { is_expected.to belong_to(:protected_environment) }
     it { is_expected.to belong_to(:user) }
@@ -10,17 +14,21 @@ describe ProtectedEnvironment::DeployAccessLevel do
 
   describe 'validations' do
     it { is_expected.to validate_presence_of(:access_level) }
+    it { is_expected.to validate_inclusion_of(:access_level).in_array([Gitlab::Access::REPORTER, Gitlab::Access::DEVELOPER, Gitlab::Access::MAINTAINER]) }
   end
 
   describe '#check_access' do
-    let(:project) { create(:project) }
-    let(:protected_environment) { create(:protected_environment, project: project) }
-    let(:user) { create(:user) }
-
     subject { deploy_access_level.check_access(user) }
 
+    context 'anonymous access' do
+      let(:user) { nil }
+      let(:deploy_access_level) { create(:protected_environment_deploy_access_level, protected_environment: protected_environment) }
+
+      it { is_expected.to be_falsy }
+    end
+
     describe 'admin access' do
-      let(:user) { create(:user, :admin) }
+      let_it_be(:user) { create(:user, :admin) }
 
       context 'when admin user does have specific access' do
         let(:deploy_access_level) { create(:protected_environment_deploy_access_level, protected_environment: protected_environment, user: user) }
@@ -50,7 +58,7 @@ describe ProtectedEnvironment::DeployAccessLevel do
     end
 
     describe 'group access' do
-      let(:group) { create(:group, projects: [project]) }
+      let_it_be(:group) { create(:group, projects: [project]) }
 
       context 'when specific access has been assigned to a group' do
         let(:deploy_access_level) { create(:protected_environment_deploy_access_level, protected_environment: protected_environment, group: group) }
@@ -74,29 +82,43 @@ describe ProtectedEnvironment::DeployAccessLevel do
     end
 
     describe 'access level' do
-      let(:developer_access) { Gitlab::Access::DEVELOPER }
-      let(:deploy_access_level) { create(:protected_environment_deploy_access_level, protected_environment: protected_environment, access_level: developer_access) }
+      context 'with a permitted access level' do
+        let(:developer_access) { Gitlab::Access::DEVELOPER }
+        let(:deploy_access_level) { create(:protected_environment_deploy_access_level, protected_environment: protected_environment, access_level: developer_access) }
 
-      context 'when user is project member above the permitted access level' do
-        before do
-          project.add_developer(user)
+        context 'when user is project member above the permitted access level' do
+          before do
+            project.add_developer(user)
+          end
+
+          it { is_expected.to be_truthy }
         end
 
-        it { is_expected.to be_truthy }
+        context 'when user is project member below the permitted access level' do
+          before do
+            project.add_reporter(user)
+          end
+
+          it { is_expected.to be_falsy }
+        end
       end
 
-      context 'when user is project member below the permitted access level' do
+      context 'when the access level is not permitted' do
+        let(:deploy_access_level) { create(:protected_environment_deploy_access_level, protected_environment: protected_environment, access_level: Gitlab::Access::GUEST) }
+
         before do
-          project.add_reporter(user)
+          project.add_guest(user)
         end
 
-        it { is_expected.to be_falsy }
+        it 'does not save the record' do
+          expect { deploy_access_level }.to raise_error ActiveRecord::RecordInvalid
+        end
       end
     end
   end
 
   describe '#humanize' do
-    let(:protected_environment) { create(:protected_environment) }
+    let_it_be(:protected_environment) { create(:protected_environment) }
 
     subject { deploy_access_level.humanize }
 

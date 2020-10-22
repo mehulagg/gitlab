@@ -32,16 +32,20 @@ module EE
                :extra_shared_runners_minutes_limit, :extra_shared_runners_minutes_limit=,
                to: :namespace
 
-      has_many :reviews,                  foreign_key: :author_id, inverse_of: :author
       has_many :epics,                    foreign_key: :author_id
       has_many :requirements,             foreign_key: :author_id, inverse_of: :author, class_name: 'RequirementsManagement::Requirement'
+      has_many :test_reports,             foreign_key: :author_id, inverse_of: :author, class_name: 'RequirementsManagement::TestReport'
       has_many :assigned_epics,           foreign_key: :assignee_id, class_name: "Epic"
       has_many :path_locks,               dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
       has_many :vulnerability_feedback, foreign_key: :author_id, class_name: 'Vulnerabilities::Feedback'
       has_many :commented_vulnerability_feedback, foreign_key: :comment_author_id, class_name: 'Vulnerabilities::Feedback'
+      has_many :boards_epic_user_preferences, class_name: 'Boards::EpicUserPreference', inverse_of: :user
 
       has_many :approvals,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
       has_many :approvers,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
+
+      has_many :minimal_access_group_members, -> { where(access_level: [::Gitlab::Access::MINIMAL_ACCESS]) }, source: 'GroupMember', class_name: 'GroupMember'
+      has_many :minimal_access_groups, through: :minimal_access_group_members, source: :group
 
       has_many :users_ops_dashboard_projects
       has_many :ops_dashboard_projects, through: :users_ops_dashboard_projects, source: :project
@@ -57,6 +61,8 @@ module EE
 
       has_many :smartcard_identities
       has_many :scim_identities
+
+      has_many :board_preferences, class_name: 'BoardUserPreference', inverse_of: :user
 
       belongs_to :managing_group, class_name: 'Group', optional: true, inverse_of: :managed_users
 
@@ -92,15 +98,6 @@ module EE
 
     class_methods do
       extend ::Gitlab::Utils::Override
-
-      def support_bot
-        email_pattern = "support%s@#{Settings.gitlab.host}"
-
-        unique_internal(where(user_type: :support_bot), 'support-bot', email_pattern) do |u|
-          u.bio = 'The GitLab support bot used for Service Desk'
-          u.name = 'GitLab Support Bot'
-        end
-      end
 
       def visual_review_bot
         email_pattern = "visual_review%s@#{Settings.gitlab.host}"
@@ -182,41 +179,21 @@ module EE
     end
 
     def available_custom_project_templates(search: nil, subgroup_id: nil, project_id: nil)
-      templates = ::Gitlab::CurrentSettings.available_custom_project_templates(subgroup_id)
-
-      params = {}
-
-      if project_id
-        templates = templates.where(id: project_id)
-      else
-        params = { search: search, sort: 'name_asc' }
-      end
-
-      ::ProjectsFinder.new(current_user: self,
-                           project_ids_relation: templates,
-                           params: params)
-                      .execute
+      CustomProjectTemplatesFinder
+        .new(current_user: self, search: search, subgroup_id: subgroup_id, project_id: project_id)
+        .execute
     end
 
     def available_subgroups_with_custom_project_templates(group_id = nil)
       found_groups = GroupsWithTemplatesFinder.new(group_id).execute
 
-      if ::Feature.enabled?(:optimized_groups_with_templates_finder)
-        GroupsFinder.new(self, min_access_level: ::Gitlab::Access::DEVELOPER)
-          .execute
-          .where(id: found_groups.select(:custom_project_templates_group_id))
-          .preload(:projects)
-          .joins(:projects)
-          .reorder(nil)
-          .distinct
-      else
-        GroupsFinder.new(self, min_access_level: ::Gitlab::Access::DEVELOPER)
-          .execute
-          .where(id: found_groups.select(:custom_project_templates_group_id))
-          .includes(:projects)
-          .reorder(nil)
-          .distinct
-      end
+      GroupsFinder.new(self, min_access_level: ::Gitlab::Access::DEVELOPER)
+        .execute
+        .where(id: found_groups.select(:custom_project_templates_group_id))
+        .preload(:projects)
+        .joins(:projects)
+        .reorder(nil)
+        .distinct
     end
 
     def roadmap_layout
@@ -227,41 +204,46 @@ module EE
       super || DEFAULT_GROUP_VIEW
     end
 
-    def any_namespace_with_trial?
-      ::Namespace
-        .from("(#{namespace_union_for_owned(:trial_ends_on)}) #{::Namespace.table_name}")
-        .where('trial_ends_on > ?', Time.now.utc)
-        .any?
-    end
-
+    # Returns true if the user is a Reporter or higher on any namespace
+    # that has never had a trial (now or in the past)
     def any_namespace_without_trial?
       ::Namespace
-        .from("(#{namespace_union_for_owned(:trial_ends_on)}) #{::Namespace.table_name}")
-        .where(trial_ends_on: nil)
+        .from("(#{namespace_union_for_reporter_developer_maintainer_owned}) #{::Namespace.table_name}")
+        .include_gitlab_subscription
+        .where(gitlab_subscriptions: { trial_ends_on: nil })
         .any?
     end
 
+    # Returns true if the user is a Reporter or higher on any namespace
+    # currently on a paid plan
     def has_paid_namespace?
       ::Namespace
         .from("(#{namespace_union_for_reporter_developer_maintainer_owned}) #{::Namespace.table_name}")
         .include_gitlab_subscription
-        .where(gitlab_subscriptions: { hosted_plan: ::Plan.where(name: Plan::PAID_HOSTED_PLANS) })
+        .where(gitlab_subscriptions: { hosted_plan: ::Plan.where(name: ::Plan::PAID_HOSTED_PLANS) })
         .any?
     end
 
-    def owns_paid_namespace?
+    # Returns true if the user is an Owner on any namespace currently on
+    # a paid plan
+    def owns_paid_namespace?(plans: ::Plan::PAID_HOSTED_PLANS)
       ::Namespace
         .from("(#{namespace_union_for_owned}) #{::Namespace.table_name}")
         .include_gitlab_subscription
-        .where(gitlab_subscriptions: { hosted_plan: ::Plan.where(name: Plan::PAID_HOSTED_PLANS) })
+        .where(gitlab_subscriptions: { hosted_plan: ::Plan.where(name: plans) })
         .any?
     end
 
-    def managed_free_namespaces
+    def manageable_groups_eligible_for_subscription
       manageable_groups
+        .where(parent_id: nil)
         .left_joins(:gitlab_subscription)
         .merge(GitlabSubscription.left_joins(:hosted_plan).where(plans: { name: [nil, *::Plan.default_plans] }))
         .order(:name)
+    end
+
+    def manageable_groups_eligible_for_trial
+      manageable_groups.eligible_for_trial.order(:name)
     end
 
     override :has_current_license?
@@ -299,13 +281,17 @@ module EE
       managing_group.present?
     end
 
+    def managed_by?(user)
+      self.group_managed_account? && self.managing_group.owned_by?(user)
+    end
+
     override :ldap_sync_time
     def ldap_sync_time
       ::Gitlab.config.ldap['sync_time']
     end
 
     def admin_unsubscribe!
-      update_column :admin_email_unsubscribed_at, Time.now
+      update_column :admin_email_unsubscribed_at, Time.current
     end
 
     override :allow_password_authentication_for_web?
@@ -322,45 +308,54 @@ module EE
       super
     end
 
-    def ab_feature_enabled?(feature, percentage: nil)
-      return false unless ::Gitlab.com?
-      return false if ::Gitlab::Geo.secondary?
-
-      raise "Currently only discover_security feature is supported" unless feature == :discover_security
-
-      return false unless ::Feature.enabled?(feature)
-
-      filter = user_preference.feature_filter_type.presence || 0
-
-      # We use a 2nd feature flag for control as enabled and percentage_of_time for chatops
-      flipper_feature = ::Feature.get((feature.to_s + '_control').to_sym)
-      percentage ||= flipper_feature.gate_values[:percentage_of_time] || 0 if flipper_feature
-      return false if percentage <= 0
-
-      if filter == UserPreference::FEATURE_FILTER_UNKNOWN
-        filter = SecureRandom.rand * 100 <= percentage ? UserPreference::FEATURE_FILTER_EXPERIMENT : UserPreference::FEATURE_FILTER_CONTROL
-        user_preference.update_column :feature_filter_type, filter
-      end
-
-      filter == UserPreference::FEATURE_FILTER_EXPERIMENT
-    end
-
     def gitlab_employee?
       strong_memoize(:gitlab_employee) do
-        if ::Gitlab.com? && ::Feature.enabled?(:gitlab_employee_badge)
-          confirmed? && human? && Mail::Address.new(email).domain == "gitlab.com"
-        else
-          false
-        end
+        ::Gitlab.com? && ::Feature.enabled?(:gitlab_employee_badge) && gitlab_team_member?
       end
     end
 
-    def organization
-      gitlab_employee? ? 'GitLab' : super
+    def gitlab_team_member?
+      strong_memoize(:gitlab_team_member) do
+        ::Gitlab::Com.gitlab_com_group_member?(id) && human?
+      end
+    end
+
+    def gitlab_service_user?
+      strong_memoize(:gitlab_service_user) do
+        service_user? && ::Gitlab::Com.gitlab_com_group_member_id?(id)
+      end
+    end
+
+    def gitlab_bot?
+      strong_memoize(:gitlab_bot) do
+        bot? && ::Gitlab::Com.gitlab_com_group_member_id?(id)
+      end
     end
 
     def security_dashboard
       InstanceSecurityDashboard.new(self)
+    end
+
+    def owns_upgradeable_namespace?
+      !owns_paid_namespace?(plans: [::Plan::GOLD]) &&
+        owns_paid_namespace?(plans: [::Plan::BRONZE, ::Plan::SILVER])
+    end
+
+    # Returns the groups a user has access to, either through a membership or a project authorization
+    override :authorized_groups
+    def authorized_groups
+      ::Group.unscoped do
+        ::Group.from_union([
+          groups,
+          available_minimal_access_groups,
+          authorized_projects.joins(:namespace).select('namespaces.*')
+        ])
+      end
+    end
+
+    def find_or_init_board_epic_preference(board_id:, epic_id:)
+      boards_epic_user_preferences.find_or_initialize_by(
+        board_id: board_id, epic_id: epic_id)
     end
 
     protected
@@ -392,6 +387,13 @@ module EE
       return true unless License.current.exclude_guests_from_active_count?
 
       highest_role > ::Gitlab::Access::GUEST
+    end
+
+    def available_minimal_access_groups
+      return ::Group.none unless License.feature_available?(:minimal_access_role)
+      return minimal_access_groups unless ::Gitlab::CurrentSettings.should_check_namespace_plan?
+
+      minimal_access_groups.with_feature_available_in_plan(:minimal_access_role)
     end
   end
 end

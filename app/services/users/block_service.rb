@@ -7,6 +7,8 @@ module Users
     end
 
     def execute(user)
+      return error('An internal user cannot be blocked', 403) if user.internal?
+
       if user.block
         after_block_hook(user)
         success
@@ -19,7 +21,7 @@ module Users
     private
 
     def after_block_hook(user)
-      # overriden by EE module
+      # overridden by EE module
     end
   end
 end

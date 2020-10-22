@@ -8,7 +8,7 @@ module EE
 
       return message if raw_message
 
-      message = icon('warning triangle') + ' ' + message
+      message = icon('warning') + ' ' + message
 
       if can?(current_user, :admin_project, @project)
         link_to message, project_mirror_path(@project)
@@ -29,19 +29,12 @@ module EE
     end
 
     def options_for_mirror_user
-      options_from_collection_for_select(default_mirror_users, :id, :name, @project.mirror_user_id || current_user.id)
+      options_from_collection_for_select([current_user], :id, :name, current_user.id)
     end
 
     def mirrored_repositories_count(project = @project)
       count = project.mirror == true ? 1 : 0
       count + @project.remote_mirrors.to_a.count { |mirror| mirror.enabled }
-    end
-
-    def mirror_lfs_sync_message
-      docs_link_url = help_page_path('topics/git/lfs/index')
-      docs_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: docs_link_url }
-
-      _('Git LFS objects will be synced in pull mirrors if LFS is %{docs_link_start}enabled for the project%{docs_link_end}. They will <strong>not</strong> be synced in push mirrors.').html_safe % { docs_link_start: docs_link_start, docs_link_end: '</a>'.html_safe }
     end
   end
 end

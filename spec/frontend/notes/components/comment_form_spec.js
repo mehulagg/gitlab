@@ -9,12 +9,7 @@ import CommentForm from '~/notes/components/comment_form.vue';
 import * as constants from '~/notes/constants';
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
 import { keyboardDownEvent } from '../../issue_show/helpers';
-import {
-  loggedOutnoteableData,
-  notesDataMock,
-  userDataMock,
-  noteableDataMock,
-} from '../../notes/mock_data';
+import { loggedOutnoteableData, notesDataMock, userDataMock, noteableDataMock } from '../mock_data';
 
 jest.mock('autosize');
 jest.mock('~/commons/nav/user_merge_requests');
@@ -272,15 +267,14 @@ describe('issue_comment_form component', () => {
       });
 
       describe('when clicking close/reopen button', () => {
-        it('should disable button and show a loading spinner', done => {
+        it('should disable button and show a loading spinner', () => {
           const toggleStateButton = wrapper.find('.js-action-button');
 
           toggleStateButton.trigger('click');
-          wrapper.vm.$nextTick(() => {
-            expect(toggleStateButton.element.disabled).toEqual(true);
-            expect(toggleStateButton.find('.js-loading-button-icon').exists()).toBe(true);
 
-            done();
+          return wrapper.vm.$nextTick().then(() => {
+            expect(toggleStateButton.element.disabled).toEqual(true);
+            expect(toggleStateButton.props('loading')).toBe(true);
           });
         });
       });
@@ -324,6 +318,35 @@ describe('issue_comment_form component', () => {
 
     it('should not render submission form', () => {
       expect(wrapper.find('textarea').exists()).toBe(false);
+    });
+  });
+
+  describe('when issuable is open', () => {
+    beforeEach(() => {
+      setupStore(userDataMock, noteableDataMock);
+    });
+
+    it.each([['opened', 'warning'], ['reopened', 'warning']])(
+      'when %i, it changes the variant of the btn to %i',
+      (a, expected) => {
+        store.state.noteableData.state = a;
+
+        mountComponent();
+
+        expect(wrapper.find('.js-action-button').props('variant')).toBe(expected);
+      },
+    );
+  });
+
+  describe('when issuable is not open', () => {
+    beforeEach(() => {
+      setupStore(userDataMock, noteableDataMock);
+
+      mountComponent();
+    });
+
+    it('should render the "default" variant of the button', () => {
+      expect(wrapper.find('.js-action-button').props('variant')).toBe('warning');
     });
   });
 });

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApprovalProjectRule do
+RSpec.describe ApprovalProjectRule do
   subject { create(:approval_project_rule) }
 
   describe 'validations' do
@@ -11,10 +11,17 @@ describe ApprovalProjectRule do
     end
   end
 
+  describe 'associations' do
+    subject { build_stubbed(:approval_project_rule) }
+
+    it { is_expected.to have_many(:approval_merge_request_rule_sources) }
+    it { is_expected.to have_many(:approval_merge_request_rules).through(:approval_merge_request_rule_sources) }
+  end
+
   describe '.regular' do
     it 'returns non-report_approver records' do
       rules = create_list(:approval_project_rule, 2)
-      create(:approval_project_rule, :security_report)
+      create(:approval_project_rule, :vulnerability_report)
 
       expect(described_class.regular).to contain_exactly(*rules)
     end
@@ -24,7 +31,7 @@ describe ApprovalProjectRule do
     it 'returns regular or any-approver rules' do
       any_approver_rule = create(:approval_project_rule, rule_type: :any_approver)
       regular_rule = create(:approval_project_rule)
-      create(:approval_project_rule, :security_report)
+      create(:approval_project_rule, :vulnerability_report)
 
       expect(described_class.regular_or_any_approver).to(
         contain_exactly(any_approver_rule, regular_rule)
@@ -41,14 +48,14 @@ describe ApprovalProjectRule do
   end
 
   describe '#regular?' do
-    let(:security_approver_rule) { build(:approval_project_rule, :security_report) }
+    let(:vulnerability_approver_rule) { build(:approval_project_rule, :vulnerability_report) }
 
     it 'returns true for regular rules' do
       expect(subject.regular?).to eq(true)
     end
 
     it 'returns false for report_approver rules' do
-      expect(security_approver_rule.regular?). to eq(false)
+      expect(vulnerability_approver_rule.regular?). to eq(false)
     end
   end
 
@@ -59,14 +66,14 @@ describe ApprovalProjectRule do
   end
 
   describe '#report_approver?' do
-    let(:security_approver_rule) { build(:approval_project_rule, :security_report) }
+    let(:vulnerability_approver_rule) { build(:approval_project_rule, :vulnerability_report) }
 
     it 'returns false for regular rules' do
       expect(subject.report_approver?).to eq(false)
     end
 
     it 'returns true for report_approver rules' do
-      expect(security_approver_rule.report_approver?). to eq(true)
+      expect(vulnerability_approver_rule.report_approver?). to eq(true)
     end
   end
 
@@ -75,8 +82,8 @@ describe ApprovalProjectRule do
       expect(build(:approval_project_rule).rule_type).to eq('regular')
     end
 
-    it 'returns the report_approver type for security report approvers rules' do
-      expect(build(:approval_project_rule, :security_report).rule_type).to eq('report_approver')
+    it 'returns the report_approver type for vulnerability report approvers rules' do
+      expect(build(:approval_project_rule, :vulnerability_report).rule_type).to eq('report_approver')
     end
   end
 
@@ -107,7 +114,7 @@ describe ApprovalProjectRule do
   describe "validation" do
     let(:project_approval_rule) { create(:approval_project_rule) }
     let(:license_compliance_rule) { create(:approval_project_rule, :license_scanning) }
-    let(:vulnerability_check_rule) { create(:approval_project_rule, :security) }
+    let(:vulnerability_check_rule) { create(:approval_project_rule, :vulnerability) }
 
     context "when creating a new rule" do
       specify { expect(project_approval_rule).to be_valid }
@@ -152,61 +159,67 @@ describe ApprovalProjectRule do
     end
   end
 
-  describe '.applicable_to_branch' do
-    let!(:rule) { create(:approval_project_rule) }
-    let(:branch) { 'stable' }
+  describe 'callbacks', :request_store do
+    let_it_be(:user) { create(:user, name: 'Batman') }
+    let_it_be(:group) { create(:group, name: 'Justice League') }
 
-    subject { described_class.applicable_to_branch(branch) }
+    let_it_be(:new_user) { create(:user, name: 'Spiderman') }
+    let_it_be(:new_group) { create(:group, name: 'Avengers') }
 
-    context 'when there are no associated protected branches' do
-      it { is_expected.to eq([rule]) }
+    let_it_be(:rule, reload: true) { create(:approval_project_rule, name: 'Vulnerability', users: [user], groups: [group]) }
+
+    shared_examples 'auditable' do
+      context 'when audit event queue is active' do
+        before do
+          allow(::Gitlab::Audit::EventQueue).to receive(:active?).and_return(true)
+        end
+
+        it 'adds message to audit event queue' do
+          action!
+
+          expect(::Gitlab::Audit::EventQueue.current).to contain_exactly(message)
+        end
+      end
+
+      context 'when audit event queue is not active' do
+        before do
+          allow(::Gitlab::Audit::EventQueue).to receive(:active?).and_return(false)
+        end
+
+        it 'does not add message to audit event queue' do
+          action!
+
+          expect(::Gitlab::Audit::EventQueue.current).to be_empty
+        end
+      end
     end
 
-    context 'when there are associated protected branches' do
-      before do
-        rule.update!(protected_branches: protected_branches)
-      end
+    describe '#audit_add users after :add' do
+      let(:action!) { rule.update(users: [user, new_user]) }
+      let(:message) { 'Added User Spiderman to approval group on Vulnerability rule' }
 
-      context 'and branch matches' do
-        let(:protected_branches) { [create(:protected_branch, name: branch)] }
-
-        it { is_expected.to eq([rule]) }
-      end
-
-      context 'but branch does not match anything' do
-        let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
-
-        it { is_expected.to be_empty }
-      end
-    end
-  end
-
-  describe '.inapplicable_to_branch' do
-    let!(:rule) { create(:approval_project_rule) }
-    let(:branch) { 'stable' }
-
-    subject { described_class.inapplicable_to_branch(branch) }
-
-    context 'when there are no associated protected branches' do
-      it { is_expected.to be_empty }
+      it_behaves_like 'auditable'
     end
 
-    context 'when there are associated protected branches' do
-      before do
-        rule.update!(protected_branches: protected_branches)
-      end
+    describe '#audit_remove users after :remove' do
+      let(:action!) { rule.update(users: []) }
+      let(:message) { 'Removed User Batman from approval group on Vulnerability rule' }
 
-      context 'and branch does not match anything' do
-        let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
+      it_behaves_like 'auditable'
+    end
 
-        it { is_expected.to eq([rule]) }
-      end
+    describe '#audit_add groups after :add' do
+      let(:action!) { rule.update(groups: [group, new_group]) }
+      let(:message) { 'Added Group Avengers to approval group on Vulnerability rule' }
 
-      context 'but branch matches' do
-        let(:protected_branches) { [create(:protected_branch, name: branch)] }
+      it_behaves_like 'auditable'
+    end
 
-        it { is_expected.to be_empty }
-      end
+    describe '#audit_remove groups after :remove' do
+      let(:action!) { rule.update(groups: []) }
+      let(:message) { 'Removed Group Justice League from approval group on Vulnerability rule' }
+
+      it_behaves_like 'auditable'
     end
   end
 end

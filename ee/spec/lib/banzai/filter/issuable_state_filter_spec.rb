@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Banzai::Filter::IssuableStateFilter do
+RSpec.describe Banzai::Filter::IssuableStateFilter do
   include ActionView::Helpers::UrlHelper
   include FilterSpecHelper
 

@@ -6,9 +6,14 @@ class IdeController < ApplicationController
   include ClientsidePreviewCSP
   include StaticObjectExternalStorageCSP
 
+  before_action do
+    push_frontend_feature_flag(:build_service_proxy)
+    push_frontend_feature_flag(:schema_linting)
+  end
+
+  feature_category :web_ide
+
   def index
     Gitlab::UsageDataCounters::WebIdeCounter.increment_views_count
   end
 end
-
-IdeController.prepend_if_ee('EE::IdeController')

@@ -22,7 +22,7 @@ class BlockingMergeRequestEntity < Grape::Entity
 
   expose :head_pipeline,
          if: -> (_, _) { can_read_head_pipeline? },
-         using: ::API::Entities::Pipeline
+         using: ::API::Entities::Ci::Pipeline
 
   expose :assignees, using: ::API::Entities::UserBasic
   expose :milestone, using: ::API::Entities::Milestone

@@ -1,0 +1,34 @@
+- return unless current_user
+- return unless display_namespace_storage_limit_alert?
+
+- namespace = @project&.namespace || @group
+- return unless namespace.present?
+
+- payload = namespace_storage_alert(namespace)
+- return if payload.empty?
+
+- alert_level = payload[:alert_level]
+- root_namespace = payload[:root_namespace]
+
+- style = namespace_storage_alert_style(alert_level)
+- icon = namespace_storage_alert_icon(alert_level)
+- purchase_link = purchase_storage_url if can_purchase_storage_for_namespace?(namespace)
+- usage_link = namespace_storage_usage_link(root_namespace)
+- show_storage_banner_actions = purchase_link || usage_link
+
+.gl-py-5
+  .gl-alert.js-namespace-storage-alert{ class: "gl-alert-#{style}", role: 'alert' }
+    = sprite_icon(icon, css_class: "gl-icon gl-alert-icon")
+    .gl-alert-title
+      %h4.gl-alert-title= payload[:usage_message]
+    - if alert_level != :error
+      %button.js-namespace-storage-alert-dismiss.gl-alert-dismiss.gl-cursor-pointer{ type: 'button', 'aria-label' => _('Dismiss'), data: { id: root_namespace.id, level: alert_level } }
+        = sprite_icon('close', css_class: 'gl-icon')
+    .gl-alert-body
+      = payload[:explanation_message]
+    - if show_storage_banner_actions
+      .gl-alert-actions
+        - if purchase_link
+          = link_to(_('Purchase more storage'), purchase_link, class: "btn gl-alert-action btn-md gl-button btn-success")
+        - if usage_link
+          = link_to(_('Manage storage usage'), usage_link, class: "btn gl-alert-action btn-md gl-button btn-default")

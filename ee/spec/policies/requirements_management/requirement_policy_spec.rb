@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RequirementsManagement::RequirementPolicy do
+RSpec.describe RequirementsManagement::RequirementPolicy do
   let_it_be(:owner) { create(:user) }
   let_it_be(:admin) { create(:admin) }
   let_it_be(:reporter) { create(:user) }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Config do
+RSpec.describe Gitlab::Ci::Config do
   include StubRequests
 
   let_it_be(:user) { create(:user) }
@@ -312,7 +312,7 @@ describe Gitlab::Ci::Config do
         HEREDOC
       end
 
-      it 'raises error YamlProcessor validationError' do
+      it 'raises ConfigError' do
         expect { config }.to raise_error(
           described_class::ConfigError,
           "Included file `invalid` does not have YAML extension!"
@@ -329,7 +329,7 @@ describe Gitlab::Ci::Config do
         HEREDOC
       end
 
-      it 'raises error YamlProcessor validationError' do
+      it 'raises ConfigError' do
         expect { config }.to raise_error(
           described_class::ConfigError,
           'Include `{"remote":"http://url","local":"/local/file.yml"}` needs to match exactly one accessor!'

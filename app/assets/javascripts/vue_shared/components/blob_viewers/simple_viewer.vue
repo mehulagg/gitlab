@@ -1,6 +1,7 @@
 <script>
-import ViewerMixin from './mixins';
+/* eslint-disable vue/no-v-html */
 import { GlIcon } from '@gitlab/ui';
+import ViewerMixin from './mixins';
 import { HIGHLIGHT_CLASS_NAME } from './constants';
 
 export default {
@@ -44,7 +45,8 @@ export default {
 </script>
 <template>
   <div
-    class="file-content code js-syntax-highlight qa-file-content"
+    class="file-content code js-syntax-highlight"
+    data-qa-selector="file_content"
     :class="$options.userColorScheme"
   >
     <div class="line-numbers">

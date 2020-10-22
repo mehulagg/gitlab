@@ -2,8 +2,16 @@ import { shallowMount, mount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import { GlEmptyState, GlLoadingIcon, GlTab, GlTabs, GlAlert, GlBadge } from '@gitlab/ui';
+import {
+  GlEmptyState,
+  GlLoadingIcon,
+  GlTab,
+  GlTabs,
+  GlAlert,
+  GlDeprecatedBadge as GlBadge,
+} from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
+import setWindowLocation from 'helpers/set_window_location_helper';
 
 import { REPORT_STATUS } from 'ee/license_compliance/store/modules/list/constants';
 
@@ -32,6 +40,13 @@ const emptyStateSvgPath = '/';
 const documentationPath = '/';
 
 const noop = () => {};
+
+const transitionStub = () => ({
+  render() {
+    // eslint-disable-next-line no-underscore-dangle
+    return this.$options._renderChildren;
+  },
+});
 
 const createComponent = ({ state, props, options }) => {
   const fakeStore = new Vuex.Store({
@@ -80,8 +95,11 @@ const createComponent = ({ state, props, options }) => {
     },
     ...options,
     store: fakeStore,
+    stubs: { transition: transitionStub() },
   });
 };
+
+const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
 
 describe('Project Licenses', () => {
   afterEach(() => {
@@ -154,7 +172,7 @@ describe('Project Licenses', () => {
     });
   });
 
-  describe('when licensePolicyList feature flag is enabled', () => {
+  describe('when page is shown', () => {
     beforeEach(() => {
       createComponent({
         state: {
@@ -163,11 +181,6 @@ describe('Project Licenses', () => {
             jobPath: '/',
             generatedAt: '',
             status: REPORT_STATUS.ok,
-          },
-        },
-        options: {
-          provide: {
-            glFeatures: { licensePolicyList: true },
           },
         },
       });
@@ -195,6 +208,47 @@ describe('Project Licenses', () => {
       expect(wrapper.find(PipelineInfo).exists()).toBe(true);
     });
 
+    describe.each`
+      givenLocationHash | expectedActiveTab
+      ${'#licenses'}    | ${'licenses'}
+      ${'#policies'}    | ${'policies'}
+    `(
+      'when window.location contains the hash "$givenLocationHash"',
+      ({ givenLocationHash, expectedActiveTab }) => {
+        const originalLocation = window.location;
+
+        beforeEach(() => {
+          setWindowLocation(`http://foo.com/index${givenLocationHash}`);
+
+          createComponent({
+            state: {
+              initialized: true,
+              isLoading: false,
+              licenses: [
+                {
+                  name: 'MIT',
+                  classification: LICENSE_APPROVAL_CLASSIFICATION.DENIED,
+                  components: [],
+                },
+              ],
+              pageInfo: 1,
+            },
+            options: {
+              mount: true,
+            },
+          });
+        });
+
+        afterEach(() => {
+          window.location = originalLocation;
+        });
+
+        it(`sets the active tab to be "${expectedActiveTab}"`, () => {
+          expect(findByTestId(`${expectedActiveTab}Tab`).classes()).toContain('active');
+        });
+      },
+    );
+
     describe('when the tabs are rendered', () => {
       const pageInfo = {
         total: 1,
@@ -220,13 +274,25 @@ describe('Project Licenses', () => {
             pageInfo,
           },
           options: {
-            provide: {
-              glFeatures: { licensePolicyList: true },
-            },
             mount: true,
           },
         });
       });
+
+      it.each`
+        givenActiveTab | expectedLocationHash
+        ${'policies'}  | ${'#policies'}
+        ${'licenses'}  | ${'#licenses'}
+      `(
+        'sets the location hash to "$expectedLocationHash" when the "$givenTab" tab is activate',
+        ({ givenActiveTab, expectedLocationHash }) => {
+          findByTestId(`${givenActiveTab}TabTitle`).trigger('click');
+
+          return wrapper.vm.$nextTick().then(() => {
+            expect(window.location.hash).toBe(expectedLocationHash);
+          });
+        },
+      );
 
       it('it renders the correct count in "Detected in project" tab', () => {
         expect(
@@ -263,45 +329,6 @@ describe('Project Licenses', () => {
           "Detected licenses that are out-of-compliance with the project's assigned policies",
         );
       });
-    });
-  });
-
-  describe('when licensePolicyList feature flag is disabled', () => {
-    beforeEach(() => {
-      createComponent({
-        state: {
-          initialized: true,
-          reportInfo: {
-            jobPath: '/',
-            generatedAt: '',
-            status: REPORT_STATUS.ok,
-          },
-        },
-        options: {
-          provide: {
-            glFeatures: { licensePolicyList: false },
-          },
-        },
-      });
-    });
-
-    it('only renders the "Detected in project" table', () => {
-      expect(wrapper.find(DetectedLicensesTable).exists()).toBe(true);
-      expect(wrapper.find(LicenseManagement).exists()).toBe(false);
-    });
-
-    it('renders no "Policies" table', () => {
-      expect(wrapper.find(GlTabs).exists()).toBe(false);
-      expect(wrapper.find(GlTab).exists()).toBe(false);
-    });
-
-    it('renders the pipeline info', () => {
-      expect(wrapper.find(PipelineInfo).exists()).toBe(true);
-    });
-
-    it('renders no tabs', () => {
-      expect(wrapper.find(GlTabs).exists()).toBe(false);
-      expect(wrapper.find(GlTab).exists()).toBe(false);
     });
   });
 });

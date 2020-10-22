@@ -1,10 +1,10 @@
-import axios from '~/lib/utils/axios_utils';
 import MockAdapter from 'axios-mock-adapter';
+import testAction from 'helpers/vuex_action_helper';
+import { TEST_HOST } from 'helpers/test_constants';
+import axios from '~/lib/utils/axios_utils';
 import * as actions from '~/registry/explorer/stores/actions';
 import * as types from '~/registry/explorer/stores/mutation_types';
-import testAction from 'helpers/vuex_action_helper';
-import createFlash from '~/flash';
-import { TEST_HOST } from 'helpers/test_constants';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { reposServerResponse, registryServerResponse } from '../mock_data';
 
 jest.mock('~/flash.js');
@@ -191,7 +191,10 @@ describe('Actions RegistryExplorer Store', () => {
         {
           tagsPagination: {},
         },
-        [{ type: types.SET_MAIN_LOADING, payload: true }],
+        [
+          { type: types.SET_MAIN_LOADING, payload: true },
+          { type: types.SET_MAIN_LOADING, payload: false },
+        ],
         [
           {
             type: 'setShowGarbageCollectionTip',
@@ -220,8 +223,7 @@ describe('Actions RegistryExplorer Store', () => {
           { type: types.SET_MAIN_LOADING, payload: false },
         ],
         [],
-        done,
-      );
+      ).catch(() => done());
     });
   });
 
@@ -241,7 +243,10 @@ describe('Actions RegistryExplorer Store', () => {
         {
           tagsPagination: {},
         },
-        [{ type: types.SET_MAIN_LOADING, payload: true }],
+        [
+          { type: types.SET_MAIN_LOADING, payload: true },
+          { type: types.SET_MAIN_LOADING, payload: false },
+        ],
         [
           {
             type: 'setShowGarbageCollectionTip',
@@ -273,8 +278,7 @@ describe('Actions RegistryExplorer Store', () => {
           { type: types.SET_MAIN_LOADING, payload: false },
         ],
         [],
-        done,
-      );
+      ).catch(() => done());
     });
   });
 
@@ -311,9 +315,7 @@ describe('Actions RegistryExplorer Store', () => {
           { type: types.SET_MAIN_LOADING, payload: false },
         ],
         [],
-      ).catch(() => {
-        done();
-      });
+      ).catch(() => done());
     });
   });
 });

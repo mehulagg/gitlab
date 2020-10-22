@@ -11,17 +11,21 @@ fragment SnippetBase on Snippet {
   webUrl
   httpUrlToRepo
   sshUrlToRepo
-  blob {
-    binary
-    name
-    path
-    rawPath
-    size
-    simpleViewer {
-      ...BlobViewer
-    }
-    richViewer {
-      ...BlobViewer
+  blobs {
+    nodes {
+      binary
+      name
+      path
+      rawPath
+      size
+      externalStorage
+      renderedAsText
+      simpleViewer {
+        ...BlobViewer
+      }
+      richViewer {
+        ...BlobViewer
+      }
     }
   }
   userPermissions {

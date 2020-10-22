@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe QA::Runtime::API::Request do
+RSpec.describe QA::Runtime::API::Request do
   let(:client)  { QA::Runtime::API::Client.new('http://example.com') }
   let(:request) { described_class.new(client, '/users') }
 
@@ -19,6 +19,12 @@ describe QA::Runtime::API::Request do
       it 'does not adds a private_token query string' do
         expect(request.url).to eq 'http://example.com/api/v4/users?oauth_access_token=foo'
       end
+    end
+  end
+
+  describe '#mask_url' do
+    it 'returns the full API request url with the token masked' do
+      expect(request.mask_url).to eq 'http://example.com/api/v4/users?private_token=[****]'
     end
   end
 

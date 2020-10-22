@@ -2,17 +2,15 @@
 
 require 'spec_helper'
 
-describe Projects::ContainerRepository::CleanupTagsService do
+RSpec.describe Projects::ContainerRepository::CleanupTagsService do
   let_it_be(:user) { create(:user) }
-  let_it_be(:project) { create(:project, :private) }
+  let_it_be(:project, reload: true) { create(:project, :private) }
   let_it_be(:repository) { create(:container_repository, :root, project: project) }
 
   let(:service) { described_class.new(project, user, params) }
 
   before do
     project.add_maintainer(user)
-
-    stub_feature_flags(container_registry_cleanup: true)
 
     stub_container_registry_config(enabled: true)
 
@@ -69,6 +67,47 @@ describe Projects::ContainerRepository::CleanupTagsService do
         end
 
         it_behaves_like 'removes all matches'
+      end
+    end
+
+    context 'with invalid regular expressions' do
+      RSpec.shared_examples 'handling an invalid regex' do
+        it 'keeps all tags' do
+          expect(Projects::ContainerRepository::DeleteTagsService)
+            .not_to receive(:new)
+          subject
+        end
+
+        it 'returns an error' do
+          response = subject
+
+          expect(response[:status]).to eq(:error)
+          expect(response[:message]).to eq('invalid regex')
+        end
+
+        it 'calls error tracking service' do
+          expect(Gitlab::ErrorTracking).to receive(:log_exception).and_call_original
+
+          subject
+        end
+      end
+
+      context 'when name_regex_delete is invalid' do
+        let(:params) { { 'name_regex_delete' => '*test*' } }
+
+        it_behaves_like 'handling an invalid regex'
+      end
+
+      context 'when name_regex is invalid' do
+        let(:params) { { 'name_regex' => '*test*' } }
+
+        it_behaves_like 'handling an invalid regex'
+      end
+
+      context 'when name_regex_keep is invalid' do
+        let(:params) { { 'name_regex_keep' => '*test*' } }
+
+        it_behaves_like 'handling an invalid regex'
       end
     end
 
@@ -204,7 +243,7 @@ describe Projects::ContainerRepository::CleanupTagsService do
         end
 
         it 'succeeds without a user' do
-          expect_delete(%w(Bb Ba C))
+          expect_delete(%w(Bb Ba C), container_expiration_policy: true)
 
           is_expected.to include(status: :success, deleted: %w(Bb Ba C))
         end
@@ -246,10 +285,10 @@ describe Projects::ContainerRepository::CleanupTagsService do
     end
   end
 
-  def expect_delete(tags)
+  def expect_delete(tags, container_expiration_policy: nil)
     expect(Projects::ContainerRepository::DeleteTagsService)
       .to receive(:new)
-      .with(repository.project, user, tags: tags)
+      .with(repository.project, user, tags: tags, container_expiration_policy: container_expiration_policy)
       .and_call_original
 
     expect_any_instance_of(Projects::ContainerRepository::DeleteTagsService)

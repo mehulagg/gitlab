@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::MilestonesController do
+RSpec.describe Projects::MilestonesController do
   let(:project) { create(:project, :repository) }
   let(:user)    { create(:user) }
   let(:milestone) { create(:milestone, project: project) }
@@ -17,7 +17,9 @@ describe Projects::MilestonesController do
     controller.instance_variable_set(:@project, project)
   end
 
-  it_behaves_like 'milestone tabs'
+  it_behaves_like 'milestone tabs' do
+    let(:request_params) { { namespace_id: project.namespace, project_id: project, id: milestone.iid } }
+  end
 
   describe "#show" do
     render_views
@@ -135,17 +137,13 @@ describe Projects::MilestonesController do
   end
 
   describe "#destroy" do
-    before do
-      stub_feature_flags(track_resource_milestone_change_events: false)
-    end
-
     it "removes milestone" do
       expect(issue.milestone_id).to eq(milestone.id)
 
       delete :destroy, params: { namespace_id: project.namespace.id, project_id: project.id, id: milestone.iid }, format: :js
       expect(response).to be_successful
 
-      expect(Event.recent.first.action).to eq(Event::DESTROYED)
+      expect(Event.recent.first).to be_destroyed_action
 
       expect { Milestone.find(milestone.id) }.to raise_exception(ActiveRecord::RecordNotFound)
       issue.reload
@@ -153,10 +151,6 @@ describe Projects::MilestonesController do
 
       merge_request.reload
       expect(merge_request.milestone_id).to eq(nil)
-
-      # Check system note left for milestone removal
-      last_note = project.issues.find(issue.id).notes[-1].note
-      expect(last_note).to eq('removed milestone')
     end
   end
 

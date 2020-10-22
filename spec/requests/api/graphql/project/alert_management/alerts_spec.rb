@@ -1,18 +1,22 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'getting Alert Management Alerts' do
+RSpec.describe 'getting Alert Management Alerts' do
   include GraphqlHelpers
 
+  let_it_be(:payload) { { 'custom' => { 'alert' => 'payload' }, 'runbook' => 'runbook' } }
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:current_user) { create(:user) }
-  let_it_be(:alert_1) { create(:alert_management_alert, :all_fields, project: project) }
-  let_it_be(:alert_2) { create(:alert_management_alert, :all_fields, project: project) }
+  let_it_be(:resolved_alert) { create(:alert_management_alert, :all_fields, :resolved, project: project, issue: nil, severity: :low).present }
+  let_it_be(:triggered_alert) { create(:alert_management_alert, :all_fields, project: project, severity: :critical, payload: payload).present }
+  let_it_be(:other_project_alert) { create(:alert_management_alert, :all_fields).present }
+
+  let(:params) { {} }
 
   let(:fields) do
     <<~QUERY
       nodes {
-        #{all_graphql_fields_for('AlertManagementAlert'.classify)}
+        #{all_graphql_fields_for('AlertManagementAlert', excluded: ['assignees'])}
       }
     QUERY
   end
@@ -21,7 +25,7 @@ describe 'getting Alert Management Alerts' do
     graphql_query_for(
       'project',
       { 'fullPath' => project.full_path },
-      query_graphql_field('alertManagementAlerts', {}, fields)
+      query_graphql_field('alertManagementAlerts', params, fields)
     )
   end
 
@@ -47,37 +51,106 @@ describe 'getting Alert Management Alerts' do
       end
 
       let(:first_alert) { alerts.first }
+      let(:second_alert) { alerts.second }
 
       it_behaves_like 'a working graphql query'
 
       it { expect(alerts.size).to eq(2) }
-      it 'returns the correct properties of the alert' do
+
+      it 'returns the correct properties of the alerts' do
         expect(first_alert).to include(
-          'iid' => alert_2.iid.to_s,
-          'title' => alert_2.title,
-          'severity' => alert_2.severity.upcase,
-          'status' => alert_2.status.upcase,
-          'monitoringTool' => alert_2.monitoring_tool,
-          'service' => alert_2.service,
-          'eventCount' => alert_2.events,
-          'startedAt' => alert_2.started_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
-          'endedAt' => alert_2.ended_at.strftime('%Y-%m-%dT%H:%M:%SZ')
+          'iid' => triggered_alert.iid.to_s,
+          'issueIid' => triggered_alert.issue_iid.to_s,
+          'title' => triggered_alert.title,
+          'description' => triggered_alert.description,
+          'severity' => triggered_alert.severity.upcase,
+          'status' => 'TRIGGERED',
+          'monitoringTool' => triggered_alert.monitoring_tool,
+          'service' => triggered_alert.service,
+          'hosts' => triggered_alert.hosts,
+          'eventCount' => triggered_alert.events,
+          'startedAt' => triggered_alert.started_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+          'endedAt' => nil,
+          'details' => { 'custom.alert' => 'payload', 'runbook' => 'runbook' },
+          'createdAt' => triggered_alert.created_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+          'updatedAt' => triggered_alert.updated_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+          'metricsDashboardUrl' => nil,
+          'detailsUrl' => triggered_alert.details_url,
+          'prometheusAlert' => nil,
+          'runbook' => 'runbook'
+        )
+
+        expect(second_alert).to include(
+          'iid' => resolved_alert.iid.to_s,
+          'issueIid' => resolved_alert.issue_iid.to_s,
+          'status' => 'RESOLVED',
+          'endedAt' => resolved_alert.ended_at.strftime('%Y-%m-%dT%H:%M:%SZ')
         )
       end
 
       context 'with iid given' do
-        let(:query) do
-          graphql_query_for(
-            'project',
-            { 'fullPath' => project.full_path },
-            query_graphql_field('alertManagementAlerts', { iid: alert_1.iid.to_s }, fields)
-          )
-        end
+        let(:params) { { iid: resolved_alert.iid.to_s } }
 
         it_behaves_like 'a working graphql query'
 
         it { expect(alerts.size).to eq(1) }
-        it { expect(first_alert['iid']).to eq(alert_1.iid.to_s) }
+        it { expect(first_alert['iid']).to eq(resolved_alert.iid.to_s) }
+      end
+
+      context 'with statuses given' do
+        let(:params) { 'statuses: [TRIGGERED, ACKNOWLEDGED]' }
+
+        it_behaves_like 'a working graphql query'
+
+        it { expect(alerts.size).to eq(1) }
+        it { expect(first_alert['iid']).to eq(triggered_alert.iid.to_s) }
+      end
+
+      context 'sorting data given' do
+        let(:params) { 'sort: SEVERITY_DESC' }
+        let(:iids) { alerts.map { |a| a['iid'] } }
+
+        it_behaves_like 'a working graphql query'
+
+        it 'sorts in the correct order' do
+          expect(iids).to eq [triggered_alert.iid.to_s, resolved_alert.iid.to_s]
+        end
+
+        context 'ascending order' do
+          let(:params) { 'sort: SEVERITY_ASC' }
+
+          it 'sorts in the correct order' do
+            expect(iids).to eq [resolved_alert.iid.to_s, triggered_alert.iid.to_s]
+          end
+        end
+      end
+
+      context 'searching' do
+        let(:params) { { search: resolved_alert.title } }
+
+        it_behaves_like 'a working graphql query'
+
+        it { expect(alerts.size).to eq(1) }
+        it { expect(first_alert['iid']).to eq(resolved_alert.iid.to_s) }
+
+        context 'unknown criteria' do
+          let(:params) { { search: 'something random' } }
+
+          it { expect(alerts.size).to eq(0) }
+        end
+      end
+
+      context 'assignee_username' do
+        let(:alert) { triggered_alert }
+        let(:assignee) { alert.assignees.first! }
+        let(:params) { { assignee_username: assignee.username } }
+
+        it_behaves_like 'a working graphql query'
+
+        specify do
+          expect(alerts.size).to eq(1)
+          expect(first_alert['iid']).to eq(alert.iid.to_s)
+        end
       end
     end
   end

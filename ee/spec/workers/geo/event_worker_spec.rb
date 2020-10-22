@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe Geo::EventWorker, :geo do
+RSpec.describe Geo::EventWorker, :geo do
   describe "#perform" do
     it "calls Geo::EventService" do
       args = ["package_file", "created", { "model_record_id" => 1 }]

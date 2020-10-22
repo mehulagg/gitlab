@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::EnvironmentSerializer do
+RSpec.describe Clusters::EnvironmentSerializer do
   include KubernetesHelpers
 
   let_it_be(:user) { create(:user) }

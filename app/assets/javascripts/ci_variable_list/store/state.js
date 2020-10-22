@@ -5,13 +5,14 @@ export default () => ({
   projectId: null,
   isGroup: null,
   maskableRegex: null,
+  isProtectedByDefault: null,
   isLoading: false,
   isDeleting: false,
   variable: {
     variable_type: displayText.variableText,
     key: '',
     secret_value: '',
-    protected: false,
+    protected_variable: false,
     masked: false,
     environment_scope: displayText.allEnvironmentsText,
   },
@@ -20,6 +21,6 @@ export default () => ({
   error: null,
   environments: [],
   typeOptions: [displayText.variableText, displayText.fileText],
-  variableBeingEdited: null,
+  variableBeingEdited: false,
   selectedEnvironment: '',
 });

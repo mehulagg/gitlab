@@ -1,3 +1,10 @@
+---
+type: reference, howto
+stage: Manage
+group: Import
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Migrating projects to a GitLab instance
 
 1. [From Bitbucket Cloud](bitbucket.md)
@@ -11,7 +18,7 @@
 1. [From Perforce](perforce.md)
 1. [From SVN](svn.md)
 1. [From TFVC](tfvc.md)
-1. [From repo by URL](repo_by_url.md)
+1. [From repository by URL](repo_by_url.md)
 1. [By uploading a manifest file (AOSP)](manifest.md)
 1. [From Gemnasium](gemnasium.md)
 1. [From Phabricator](phabricator.md)
@@ -25,7 +32,7 @@ There is also the option of [connecting your external repository to get CI/CD be
 
 ## Migrating from self-managed GitLab to GitLab.com
 
-If you only need to migrate Git repos, you can [import each project by URL](repo_by_url.md). Issues and merge requests can't be imported.
+If you only need to migrate Git repositories, you can [import each project by URL](repo_by_url.md). Issues and merge requests can't be imported.
 
 If you want to retain all metadata like issues and merge requests, you can use
 the [import/export feature](../settings/import_export.md) to export projects from self-managed GitLab and import those projects into GitLab.com.
@@ -46,6 +53,10 @@ Keep in mind the limitations of the [import/export feature](../settings/import_e
 
 You will still need to migrate your Container Registry over a series of
 Docker pulls and pushes and re-run any CI pipelines to retrieve any build artifacts.
+
+## Migrating from GitLab.com to self-managed GitLab
+
+The process is essentially the same as for [migrating from self-managed GitLab to GitLab.com](#migrating-from-self-managed-gitlab-to-gitlabcom). The main difference is that users can be created on the self-managed GitLab instance by an admin through the UI or the [users API](../../../api/users.md#user-creation).
 
 ## Migrating between two self-managed GitLab instances
 

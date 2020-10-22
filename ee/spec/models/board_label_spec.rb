@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BoardLabel do
+RSpec.describe BoardLabel do
   describe 'validations' do
     it { is_expected.to validate_presence_of(:board) }
     it { is_expected.to validate_presence_of(:label) }

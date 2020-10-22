@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Mutations::Issues::SetWeight do
+RSpec.describe Mutations::Issues::SetWeight do
   let(:issue) { create(:issue) }
   let(:user) { create(:user) }
 

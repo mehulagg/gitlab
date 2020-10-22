@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe 'Dependency-Scanning.gitlab-ci.yml' do
+RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
   subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('Dependency-Scanning') }
 
   describe 'the created pipeline' do
     let(:user) { create(:admin) }
     let(:default_branch) { 'master' }
-    let(:project) { create(:project, :custom_repo, files: { 'README.txt' => '' }) }
+    let(:files) { { 'README.txt' => '' } }
+    let(:project) { create(:project, :custom_repo, files: files) }
     let(:service) { Ci::CreatePipelineService.new(project, user, ref: 'master' ) }
     let(:pipeline) { service.execute!(:push) }
     let(:build_names) { pipeline.builds.pluck(:name) }
@@ -32,12 +33,6 @@ describe 'Dependency-Scanning.gitlab-ci.yml' do
         allow(License).to receive(:current).and_return(license)
       end
 
-      context 'by default' do
-        it 'includes orchestrator job' do
-          expect(build_names).to match_array(%w[dependency_scanning])
-        end
-      end
-
       context 'when DEPENDENCY_SCANNING_DISABLED=1' do
         before do
           create(:ci_variable, project: project, key: 'DEPENDENCY_SCANNING_DISABLED', value: '1')
@@ -48,35 +43,79 @@ describe 'Dependency-Scanning.gitlab-ci.yml' do
         end
       end
 
-      context 'when DS_DISABLE_DIND=1' do
-        before do
-          create(:ci_variable, project: project, key: 'DS_DISABLE_DIND', value: '1')
-        end
-
+      context 'by default' do
         describe 'language detection' do
           using RSpec::Parameterized::TableSyntax
 
-          where(:case_name, :variables, :include_build_names) do
-            'Go'                   | { "CI_PROJECT_REPOSITORY_LANGUAGES" => "go" }              | %w(gemnasium-dependency_scanning)
-            'Java'                 | { "CI_PROJECT_REPOSITORY_LANGUAGES" => "java" }            | %w(gemnasium-maven-dependency_scanning)
-            'Javascript'           | { "CI_PROJECT_REPOSITORY_LANGUAGES" => "javascript" }      | %w(gemnasium-dependency_scanning retire-js-dependency_scanning)
-            'Multiple languages'   | { "CI_PROJECT_REPOSITORY_LANGUAGES" => "java,javascript" } | %w(gemnasium-dependency_scanning gemnasium-maven-dependency_scanning retire-js-dependency_scanning)
-            'PHP'                  | { "CI_PROJECT_REPOSITORY_LANGUAGES" => "php" }             | %w(gemnasium-dependency_scanning)
-            'Python'               | { "CI_PROJECT_REPOSITORY_LANGUAGES" => "python" }          | %w(gemnasium-python-dependency_scanning)
-            'Ruby'                 | { "CI_PROJECT_REPOSITORY_LANGUAGES" => "ruby" }            | %w(bundler-audit-dependency_scanning gemnasium-dependency_scanning)
-            'Scala'                | { "CI_PROJECT_REPOSITORY_LANGUAGES" => "scala" }           | %w(gemnasium-maven-dependency_scanning)
+          where(:case_name, :files, :include_build_names) do
+            'Go'                             | { 'go.sum' => '' }                        | %w(gemnasium-dependency_scanning)
+            'Java'                           | { 'pom.xml' => '' }                       | %w(gemnasium-maven-dependency_scanning)
+            'Java Gradle'                    | { 'build.gradle' => '' }                  | %w(gemnasium-maven-dependency_scanning)
+            'Java Gradle Kotlin DSL'         | { 'build.gradle.kts' => '' }              | %w(gemnasium-maven-dependency_scanning)
+            'Javascript'                     | { 'package.json' => '' }                  | %w(retire-js-dependency_scanning)
+            'Javascript package-lock.json'   | { 'package-lock.json' => '' }             | %w(gemnasium-dependency_scanning)
+            'Javascript yarn.lock'           | { 'yarn.lock' => '' }                     | %w(gemnasium-dependency_scanning)
+            'Javascript npm-shrinkwrap.json' | { 'npm-shrinkwrap.json' => '' }           | %w(gemnasium-dependency_scanning)
+            'Multiple languages'             | { 'pom.xml' => '', 'package.json' => '' } | %w(gemnasium-maven-dependency_scanning retire-js-dependency_scanning)
+            'NuGet'                          | { 'packages.lock.json' => '' }            | %w(gemnasium-dependency_scanning)
+            'Conan'                          | { 'conan.lock' => '' }                    | %w(gemnasium-dependency_scanning)
+            'PHP'                            | { 'composer.lock' => '' }                 | %w(gemnasium-dependency_scanning)
+            'Python requirements.txt'        | { 'requirements.txt' => '' }              | %w(gemnasium-python-dependency_scanning)
+            'Python requirements.pip'        | { 'requirements.pip' => '' }              | %w(gemnasium-python-dependency_scanning)
+            'Python Pipfile'                 | { 'Pipfile' => '' }                       | %w(gemnasium-python-dependency_scanning)
+            'Python requires.txt'            | { 'requires.txt' => '' }                  | %w(gemnasium-python-dependency_scanning)
+            'Python with setup.py'           | { 'setup.py' => '' }                      | %w(gemnasium-python-dependency_scanning)
+            'Ruby Gemfile.lock'              | { 'Gemfile.lock' => '' }                  | %w(bundler-audit-dependency_scanning gemnasium-dependency_scanning)
+            'Ruby gems.locked'               | { 'gems.locked' => '' }                   | %w(gemnasium-dependency_scanning)
+            'Scala'                          | { 'build.sbt' => '' }                     | %w(gemnasium-maven-dependency_scanning)
           end
 
           with_them do
-            before do
-              variables.each do |(key, value)|
-                create(:ci_variable, project: project, key: key, value: value)
+            let(:project) { create(:project, :custom_repo, files: files_at_depth_x) }
+
+            context 'with file at root' do
+              let(:files_at_depth_x) { files }
+
+              it 'creates a pipeline with the expected jobs' do
+                expect(build_names).to include(*include_build_names)
               end
             end
 
-            it 'creates a pipeline with the expected jobs' do
-              expect(build_names).to include(*include_build_names)
+            context 'with file at depth 1' do
+              # prepend a directory to files (e.g. convert go.sum to foo/go.sum)
+              let(:files_at_depth_x) { files.transform_keys { |k| "foo/#{k}"} }
+
+              it 'creates a pipeline with the expected jobs' do
+                expect(build_names).to include(*include_build_names)
+              end
             end
+
+            context 'with file at depth 2' do
+              # prepend a directory to files (e.g. convert go.sum to foo/bar/go.sum)
+              let(:files_at_depth_x) { files.transform_keys { |k| "foo/bar/#{k}"} }
+
+              it 'creates a pipeline with the expected jobs' do
+                expect(build_names).to include(*include_build_names)
+              end
+            end
+
+            context 'with file at depth > 2' do
+              let(:files_at_depth_x) { files.transform_keys { |k| "foo/bar/baz/#{k}"} }
+
+              it 'includes no job' do
+                expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
+              end
+            end
+          end
+        end
+
+        context 'when PIP_REQUIREMENTS_FILE is defined' do
+          before do
+            create(:ci_variable, project: project, key: 'PIP_REQUIREMENTS_FILE', value: '/some/path/requirements.txt')
+          end
+
+          it 'creates a pipeline with the expected jobs' do
+            expect(build_names).to include('gemnasium-python-dependency_scanning')
           end
         end
       end

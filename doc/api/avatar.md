@@ -15,7 +15,7 @@ If:
 NOTE: **Note:**
 This endpoint can be accessed without authentication.
 
-```text
+```plaintext
 GET /avatar?email=admin@example.com
 ```
 
@@ -29,7 +29,7 @@ Parameters:
 Example request:
 
 ```shell
-curl https://gitlab.example.com/api/v4/avatar?email=admin@example.com&size=32
+curl "https://gitlab.example.com/api/v4/avatar?email=admin@example.com&size=32"
 ```
 
 Example response:

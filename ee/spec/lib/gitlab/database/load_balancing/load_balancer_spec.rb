@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::LoadBalancing::LoadBalancer do
+RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer do
   let(:lb) { described_class.new(%w(localhost localhost)) }
 
   before do

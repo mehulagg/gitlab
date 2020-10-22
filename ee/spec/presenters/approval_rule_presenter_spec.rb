@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApprovalRulePresenter do
+RSpec.describe ApprovalRulePresenter do
   let_it_be(:user) { create(:user) }
   let_it_be(:public_group) { create(:group) }
   let_it_be(:private_group) { create(:group, :private) }

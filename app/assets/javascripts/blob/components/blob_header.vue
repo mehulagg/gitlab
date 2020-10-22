@@ -30,6 +30,11 @@ export default {
       required: false,
       default: SIMPLE_BLOB_VIEWER,
     },
+    hasRenderError: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -66,7 +71,7 @@ export default {
       </template>
     </blob-filepath>
 
-    <div class="file-actions d-none d-sm-flex">
+    <div class="gl-display-none gl-display-sm-flex">
       <viewer-switcher v-if="showViewerSwitcher" v-model="viewer" />
 
       <slot name="actions"></slot>
@@ -75,6 +80,7 @@ export default {
         v-if="showDefaultActions"
         :raw-path="blob.rawPath"
         :active-viewer="viewer"
+        :has-render-error="hasRenderError"
         @copy="proxyCopyRequest"
       />
     </div>

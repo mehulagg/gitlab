@@ -1,7 +1,7 @@
 include:
-  template: License-Management.gitlab-ci.yml
+  template: License-Scanning.gitlab-ci.yml
 
-license_management:
+license_scanning:
   tags:
     - qa
     - test
@@ -9,4 +9,4 @@ license_management:
     - echo "Skipped"
   artifacts:
     reports:
-      license_management: gl-license-management-report.json
+      license_scanning: gl-license-scanning-report.json

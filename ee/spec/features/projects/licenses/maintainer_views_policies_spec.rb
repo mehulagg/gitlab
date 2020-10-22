@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'EE > Projects > Licenses > Maintainer views policies', :js do
+RSpec.describe 'EE > Projects > Licenses > Maintainer views policies', :js do
   let_it_be(:project) { create(:project) }
   let_it_be(:maintainer) do
     create(:user).tap do |user|
@@ -60,10 +60,15 @@ describe 'EE > Projects > Licenses > Maintainer views policies', :js do
       end
     end
 
+    def label_for(dependency)
+      name, version = dependency['name'], dependency['version']
+      version ? "#{name} (#{version})" : name
+    end
+
     def dependencies_for(spdx_id)
       report['dependencies']
         .find_all { |dependency| dependency['licenses'].include?(spdx_id) }
-        .map { |dependency| dependency['name'] }
+        .map { |dependency| label_for(dependency) }
     end
 
     def policy_for(license)

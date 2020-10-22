@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Gitlab::GitAccessDesign do
+RSpec.describe Gitlab::GitAccessDesign do
   include DesignManagementTestHelpers
   using RSpec::Parameterized::TableSyntax
 

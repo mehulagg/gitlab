@@ -6,6 +6,8 @@ module QA
       module Project
         module Wiki
           module Show
+            extend QA::Page::PageConcern
+
             def wait_for_repository_replication(max_wait: Runtime::Geo.max_file_replication_time)
               QA::Runtime::Logger.debug(%Q[#{self.class.name} - wait_for_repository_replication])
               wait_until_geo_max_replication_time(max_wait: max_wait) do

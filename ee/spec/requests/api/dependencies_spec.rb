@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Dependencies do
+RSpec.describe API::Dependencies do
   let_it_be(:project) { create(:project, :public) }
   let_it_be(:user) { create(:user) }
 

@@ -9,9 +9,12 @@ module Types
         implements(Types::Projects::ServiceType)
 
         authorize :admin_project
-        # This is a placeholder for now for the actuall implementation of the JiraServiceType
-        # Here we will want to expose a field with jira_projects fetched through Jira Rest API
-        # MR implementing it https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28190
+
+        field :projects,
+              Types::Projects::Services::JiraProjectType.connection_type,
+              null: true,
+              description: 'List of all Jira projects fetched through Jira REST API',
+              resolver: Resolvers::Projects::JiraProjectsResolver
       end
     end
   end

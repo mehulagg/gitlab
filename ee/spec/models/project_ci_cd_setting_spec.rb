@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectCiCdSetting do
+RSpec.describe ProjectCiCdSetting do
   before do
     stub_feature_flags(disable_merge_trains: false)
   end

@@ -1,16 +1,14 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
-import tooltip from '../../../vue_shared/directives/tooltip';
-import Icon from '../../../vue_shared/components/icon.vue';
+import { GlLoadingIcon, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import CiIcon from '../../../vue_shared/components/ci_icon.vue';
 import Item from './item.vue';
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
-    Icon,
+    GlIcon,
     CiIcon,
     Item,
     GlLoadingIcon,
@@ -56,7 +54,7 @@ export default {
 </script>
 
 <template>
-  <div class="ide-stage card prepend-top-default">
+  <div class="ide-stage card gl-mt-3">
     <div
       ref="cardHeader"
       :class="{
@@ -68,17 +66,17 @@ export default {
       <ci-icon :status="stage.status" :size="24" />
       <strong
         ref="stageTitle"
-        v-tooltip="showTooltip"
+        v-gl-tooltip="showTooltip"
         :title="showTooltip ? stage.name : null"
         data-container="body"
-        class="prepend-left-8 text-truncate"
+        class="gl-ml-3 text-truncate"
       >
         {{ stage.name }}
       </strong>
-      <div v-if="!stage.isLoading || stage.jobs.length" class="append-right-8 prepend-left-4">
+      <div v-if="!stage.isLoading || stage.jobs.length" class="gl-mr-3 gl-ml-2">
         <span class="badge badge-pill"> {{ jobsCount }} </span>
       </div>
-      <icon :name="collapseIcon" class="ide-stage-collapse-icon" />
+      <gl-icon :name="collapseIcon" class="ide-stage-collapse-icon" />
     </div>
     <div v-show="!stage.isCollapsed" ref="jobList" class="card-body p-0">
       <gl-loading-icon v-if="showLoadingIcon" />

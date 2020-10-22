@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge requests > User merges immediately', :js do
+RSpec.describe 'Merge requests > User merges immediately', :js do
   let(:project) { create(:project, :public, :repository) }
   let(:user) { project.creator }
   let!(:merge_request) do
@@ -12,6 +12,7 @@ describe 'Merge requests > User merges immediately', :js do
                                       head_pipeline: pipeline,
                                       source_branch: pipeline.ref)
   end
+
   let(:pipeline) do
     create(:ci_pipeline, project: project,
                          ref: 'master',

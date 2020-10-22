@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe "User downloads artifacts" do
+RSpec.describe "User downloads artifacts" do
   let_it_be(:project) { create(:project, :repository, :public) }
   let_it_be(:pipeline) { create(:ci_empty_pipeline, status: :success, sha: project.commit.id, project: project) }
   let_it_be(:job) { create(:ci_build, :artifacts, :success, pipeline: pipeline) }
@@ -29,6 +29,12 @@ describe "User downloads artifacts" do
 
     context "via branch name and job name" do
       let(:url) { latest_succeeded_project_artifacts_path(project, "#{pipeline.ref}/download", job: job.name) }
+
+      it_behaves_like "downloading"
+    end
+
+    context "via SHA" do
+      let(:url) { latest_succeeded_project_artifacts_path(project, "#{pipeline.sha}/download", job: job.name) }
 
       it_behaves_like "downloading"
     end

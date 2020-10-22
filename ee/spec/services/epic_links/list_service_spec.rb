@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EpicLinks::ListService do
+RSpec.describe EpicLinks::ListService do
   let(:user) { create :user }
   let(:group) { create(:group, :public) }
   let(:parent_epic) { create(:epic, group: group) }

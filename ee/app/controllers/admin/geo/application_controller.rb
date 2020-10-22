@@ -3,6 +3,8 @@
 class Admin::Geo::ApplicationController < Admin::ApplicationController
   helper ::EE::GeoHelper
 
+  feature_category :geo_replication
+
   protected
 
   def check_license!

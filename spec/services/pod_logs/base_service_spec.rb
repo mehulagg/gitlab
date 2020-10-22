@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::PodLogs::BaseService do
+RSpec.describe ::PodLogs::BaseService do
   include KubernetesHelpers
 
   let_it_be(:cluster) { create(:cluster, :provided_by_gcp, environment_scope: '*') }
@@ -101,6 +101,36 @@ describe ::PodLogs::BaseService do
         expect(result[:status]).to eq(:success)
         expect(result[:pod_name]).to eq(pod_name)
         expect(result[:container_name]).to eq(container_name)
+      end
+    end
+
+    context 'when pod_name is not a string' do
+      let(:params) do
+        {
+            'pod_name' => { something_that_is: :not_a_string }
+        }
+      end
+
+      it 'returns error' do
+        result = subject.send(:check_arguments, {})
+
+        expect(result[:status]).to eq(:error)
+        expect(result[:message]).to eq('Invalid pod_name')
+      end
+    end
+
+    context 'when container_name is not a string' do
+      let(:params) do
+        {
+            'container_name' => { something_that_is: :not_a_string }
+        }
+      end
+
+      it 'returns error' do
+        result = subject.send(:check_arguments, {})
+
+        expect(result[:status]).to eq(:error)
+        expect(result[:message]).to eq('Invalid container_name')
       end
     end
   end

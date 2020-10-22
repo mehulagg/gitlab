@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Projects > Settings > Repository settings' do
+RSpec.describe 'Projects > Settings > Repository settings' do
   let(:project) { create(:project_empty_repo) }
   let(:user) { create(:user) }
   let(:role) { :developer }
@@ -30,7 +30,7 @@ describe 'Projects > Settings > Repository settings' do
 
       before do
         stub_container_registry_config(enabled: true)
-        stub_feature_flags(ajax_new_deploy_token: { enabled: false, thing: project })
+        stub_feature_flags(ajax_new_deploy_token: project)
         visit project_settings_repository_path(project)
       end
 
@@ -70,7 +70,7 @@ describe 'Projects > Settings > Repository settings' do
         project.deploy_keys << private_deploy_key
         visit project_settings_repository_path(project)
 
-        find('.deploy-key', text: private_deploy_key.title).find('.ic-pencil').click
+        find('.deploy-key', text: private_deploy_key.title).find('[data-testid="pencil-icon"]').click
 
         fill_in 'deploy_key_title', with: 'updated_deploy_key'
         check 'deploy_key_deploy_keys_projects_attributes_0_can_push'
@@ -84,7 +84,7 @@ describe 'Projects > Settings > Repository settings' do
         project.deploy_keys << public_deploy_key
         visit project_settings_repository_path(project)
 
-        find('.deploy-key', text: public_deploy_key.title).find('.ic-pencil').click
+        find('.deploy-key', text: public_deploy_key.title).find('[data-testid="pencil-icon"]').click
 
         check 'deploy_key_deploy_keys_projects_attributes_0_can_push'
         click_button 'Save changes'
@@ -102,7 +102,7 @@ describe 'Projects > Settings > Repository settings' do
 
         find('.js-deployKeys-tab-available_project_keys').click
 
-        find('.deploy-key', text: private_deploy_key.title).find('.ic-pencil').click
+        find('.deploy-key', text: private_deploy_key.title).find('[data-testid="pencil-icon"]').click
 
         fill_in 'deploy_key_title', with: 'updated_deploy_key'
         click_button 'Save changes'
@@ -116,7 +116,7 @@ describe 'Projects > Settings > Repository settings' do
         project.deploy_keys << private_deploy_key
         visit project_settings_repository_path(project)
 
-        accept_confirm { find('.deploy-key', text: private_deploy_key.title).find('.ic-remove').click }
+        accept_confirm { find('.deploy-key', text: private_deploy_key.title).find('[data-testid="remove-icon"]').click }
 
         expect(page).not_to have_content(private_deploy_key.title)
       end
@@ -219,20 +219,6 @@ describe 'Projects > Settings > Repository settings' do
         else
           direction_select.select(direction.capitalize)
         end
-      end
-    end
-
-    # Removal: https://gitlab.com/gitlab-org/gitlab/-/issues/208828
-    context 'with the `keep_divergent_refs` feature flag disabled' do
-      before do
-        stub_feature_flags(keep_divergent_refs: { enabled: false, thing: project })
-      end
-
-      it 'hides the "Keep divergent refs" option' do
-        visit project_settings_repository_path(project)
-
-        expect(page).not_to have_selector('#keep_divergent_refs')
-        expect(page).not_to have_text('Keep divergent refs')
       end
     end
 

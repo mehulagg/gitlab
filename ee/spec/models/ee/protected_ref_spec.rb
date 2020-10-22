@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::ProtectedRef do
+RSpec.describe EE::ProtectedRef do
   context 'for protected branches' do
     it 'deletes all related access levels' do
       protected_branch = create(:protected_branch)

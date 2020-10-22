@@ -1,3 +1,9 @@
+---
+stage: Plan
+group: Project Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Confidential issues
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/3282) in GitLab 8.6.
@@ -40,7 +46,8 @@ system note in the issue's comments.
 
 ## Indications of a confidential issue
 
->**Note:** If you don't have [enough permissions](#permissions-and-access-to-confidential-issues),
+NOTE: **Note:**
+If you don't have [enough permissions](#permissions-and-access-to-confidential-issues),
 you won't be able to see the confidential issues at all.
 
 There are a few things that visually separate a confidential issue from a
@@ -80,7 +87,7 @@ project's search results respectively.
 
 ## Merge Requests for Confidential Issues
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/58583) in GitLab 12.1.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/58583) in GitLab 12.1.
 
 To help prevent confidential information being leaked from a public project
 in the process of resolving a confidential issue, confidential issues can be

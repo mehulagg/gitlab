@@ -1,7 +1,6 @@
 <script>
-import { mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import { GlEmptyState } from '@gitlab/ui';
-import { s__, sprintf } from '~/locale';
 
 export default {
   name: 'GeoReplicableEmptyState',
@@ -9,7 +8,7 @@ export default {
     GlEmptyState,
   },
   props: {
-    issuesSvgPath: {
+    geoReplicableEmptySvgPath: {
       type: String,
       required: true,
     },
@@ -19,33 +18,30 @@ export default {
     },
   },
   computed: {
-    ...mapState(['replicableType']),
-    linkText() {
-      return sprintf(
-        s__(
-          'If you believe this may be an error, please refer to the %{linkStart}Geo Troubleshooting%{linkEnd} documentation for more information.',
-        ),
-        {
-          linkStart: `<a href="${this.geoTroubleshootingLink}" target="_blank">`,
-          linkEnd: '</a>',
-        },
-        false,
-      );
-    },
+    ...mapGetters(['replicableTypeName']),
   },
 };
 </script>
 
 <template>
   <gl-empty-state
-    :title="sprintf(__('No %{replicableType} match this filter'), { replicableType })"
-    :svg-path="issuesSvgPath"
+    :title="sprintf(__('There are no %{replicableTypeName} to show'), { replicableTypeName })"
+    :svg-path="geoReplicableEmptySvgPath"
   >
     <template #description>
-      <div class="text-center">
-        <p>{{ __('Adjust your filters/search criteria above.') }}</p>
-        <p v-html="linkText"></p>
-      </div>
+      <p>
+        <gl-sprintf
+          :message="
+            s__(
+              'Geo|Adjust your filters/search criteria above. If you believe this may be an error, please refer to the %{linkStart}Geo Troubleshooting%{linkEnd} documentation for more information.',
+            )
+          "
+        >
+          <template #link="{ content }">
+            <gl-link :href="geoTroubleshootingLink" target="_blank">{{ content }}</gl-link>
+          </template>
+        </gl-sprintf>
+      </p>
     </template>
   </gl-empty-state>
 </template>

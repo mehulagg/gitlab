@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Audit::Levels::Group do
+RSpec.describe Gitlab::Audit::Levels::Group do
   describe '#apply' do
     let_it_be(:group) { create(:group) }
     let_it_be(:subgroup) { create(:group, parent: group) }

@@ -6,12 +6,16 @@ import * as actions from 'ee/license_compliance/store/modules/list/actions';
 import * as types from 'ee/license_compliance/store/modules/list/mutation_types';
 import getInitialState from 'ee/license_compliance/store/modules/list/state';
 
-import { FETCH_ERROR_MESSAGE } from 'ee/license_compliance/store/modules/list/constants';
-import createFlash from '~/flash';
+import {
+  FETCH_ERROR_MESSAGE,
+  SORT_BY,
+  SORT_ORDER,
+} from 'ee/license_compliance/store/modules/list/constants';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 import mockLicensesResponse from './data/mock_licenses.json';
 
-jest.mock('~/flash', () => jest.fn());
+jest.mock('~/flash');
 
 describe('Licenses actions', () => {
   const pageInfo = {
@@ -141,6 +145,8 @@ describe('Licenses actions', () => {
           const paramsDefault = {
             page: state.pageInfo.page,
             per_page: 10,
+            sort_by: SORT_BY.CLASSIFICATION,
+            sort_direction: SORT_ORDER.DESC,
           };
 
           mock
@@ -174,6 +180,8 @@ describe('Licenses actions', () => {
         const paramsSent = {
           ...paramsGiven,
           per_page: 10,
+          sort_by: SORT_BY.CLASSIFICATION,
+          sort_direction: SORT_ORDER.DESC,
         };
 
         beforeEach(() => {

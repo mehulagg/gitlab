@@ -5,8 +5,8 @@ import mountComponent from 'helpers/vue_mount_component_helper';
 import { mockNode, mockNodeDetails } from '../mock_data';
 
 const createComponent = ({
-  node = Object.assign({}, mockNode),
-  nodeDetails = Object.assign({}, mockNodeDetails),
+  node = { ...mockNode },
+  nodeDetails = { ...mockNodeDetails },
   nodeDetailsLoading = false,
   nodeDetailsFailed = false,
 }) => {
@@ -65,7 +65,7 @@ describe('GeoNodeHeader', () => {
       });
 
       it(`should ${showWarning ? 'render' : 'not render'} the status icon`, () => {
-        expect(Boolean(vm.$el.querySelector('.ic-warning'))).toBe(showWarning);
+        expect(Boolean(vm.$el.querySelector('[data-testid="warning-icon"]'))).toBe(showWarning);
       });
     });
   });

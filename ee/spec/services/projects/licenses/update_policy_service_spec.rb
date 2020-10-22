@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::Licenses::UpdatePolicyService do
+RSpec.describe Projects::Licenses::UpdatePolicyService do
   subject { described_class.new(project, user, params) }
 
   let(:project) { create(:project, :repository, :private) }

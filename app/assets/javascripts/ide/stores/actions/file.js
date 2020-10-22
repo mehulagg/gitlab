@@ -3,11 +3,10 @@ import { __ } from '~/locale';
 import eventHub from '../../eventhub';
 import service from '../../services';
 import * as types from '../mutation_types';
-import router from '../../ide_router';
-import { addFinalNewlineIfNeeded, setPageTitleForFile } from '../utils';
+import { setPageTitleForFile } from '../utils';
 import { viewerTypes, stageKeys } from '../../constants';
 
-export const closeFile = ({ commit, state, dispatch }, file) => {
+export const closeFile = ({ commit, state, dispatch, getters }, file) => {
   const { path } = file;
   const indexOfClosedFile = state.openFiles.findIndex(f => f.key === file.key);
   const fileWasActive = file.active;
@@ -30,10 +29,12 @@ export const closeFile = ({ commit, state, dispatch }, file) => {
         keyPrefix: nextFileToOpen.staged ? 'staged' : 'unstaged',
       });
     } else {
-      router.push(`/project${nextFileToOpen.url}`);
+      dispatch('router/push', getters.getUrlForPath(nextFileToOpen.path), { root: true });
     }
   } else if (!state.openFiles.length) {
-    router.push(`/project/${file.projectId}/tree/${file.branchId}/`);
+    dispatch('router/push', `/project/${state.currentProjectId}/tree/${state.currentBranchId}/`, {
+      root: true,
+    });
   }
 
   eventHub.$emit(`editor.update.model.dispose.${file.key}`);
@@ -58,7 +59,7 @@ export const setFileActive = ({ commit, state, getters, dispatch }, path) => {
 
 export const getFileData = (
   { state, commit, dispatch, getters },
-  { path, makeFileActive = true, openFile = makeFileActive },
+  { path, makeFileActive = true, openFile = makeFileActive, toggleLoading = true },
 ) => {
   const file = state.entries[path];
   const fileDeletedAndReadded = getters.isFileDeletedAndReadded(path);
@@ -66,7 +67,7 @@ export const getFileData = (
   if (file.raw || (file.tempFile && !file.prevPath && !fileDeletedAndReadded))
     return Promise.resolve();
 
-  commit(types.TOGGLE_LOADING, { entry: file });
+  commit(types.TOGGLE_LOADING, { entry: file, forceValue: true });
 
   const url = joinPaths(
     gon.relative_url_root || '/',
@@ -80,15 +81,15 @@ export const getFileData = (
   return service
     .getFileData(url)
     .then(({ data }) => {
-      setPageTitleForFile(state, file);
-
       if (data) commit(types.SET_FILE_DATA, { data, file });
       if (openFile) commit(types.TOGGLE_FILE_OPEN, path);
-      if (makeFileActive) dispatch('setFileActive', path);
-      commit(types.TOGGLE_LOADING, { entry: file });
+
+      if (makeFileActive) {
+        setPageTitleForFile(state, file);
+        dispatch('setFileActive', path);
+      }
     })
     .catch(() => {
-      commit(types.TOGGLE_LOADING, { entry: file });
       dispatch('setErrorMessage', {
         text: __('An error occurred while loading the file.'),
         action: payload =>
@@ -96,6 +97,9 @@ export const getFileData = (
         actionText: __('Please try again'),
         actionPayload: { path, makeFileActive },
       });
+    })
+    .finally(() => {
+      if (toggleLoading) commit(types.TOGGLE_LOADING, { entry: file, forceValue: false });
     });
 };
 
@@ -107,52 +111,48 @@ export const getRawFileData = ({ state, commit, dispatch, getters }, { path }) =
   const file = state.entries[path];
   const stagedFile = state.stagedFiles.find(f => f.path === path);
 
-  return new Promise((resolve, reject) => {
-    const fileDeletedAndReadded = getters.isFileDeletedAndReadded(path);
-    service
-      .getRawFileData(fileDeletedAndReadded ? stagedFile : file)
-      .then(raw => {
-        if (!(file.tempFile && !file.prevPath && !fileDeletedAndReadded))
-          commit(types.SET_FILE_RAW_DATA, { file, raw, fileDeletedAndReadded });
+  const fileDeletedAndReadded = getters.isFileDeletedAndReadded(path);
+  commit(types.TOGGLE_LOADING, { entry: file, forceValue: true });
+  return service
+    .getRawFileData(fileDeletedAndReadded ? stagedFile : file)
+    .then(raw => {
+      if (!(file.tempFile && !file.prevPath && !fileDeletedAndReadded))
+        commit(types.SET_FILE_RAW_DATA, { file, raw, fileDeletedAndReadded });
 
-        if (file.mrChange && file.mrChange.new_file === false) {
-          const baseSha =
-            (getters.currentMergeRequest && getters.currentMergeRequest.baseCommitSha) || '';
+      if (file.mrChange && file.mrChange.new_file === false) {
+        const baseSha =
+          (getters.currentMergeRequest && getters.currentMergeRequest.baseCommitSha) || '';
 
-          service
-            .getBaseRawFileData(file, baseSha)
-            .then(baseRaw => {
-              commit(types.SET_FILE_BASE_RAW_DATA, {
-                file,
-                baseRaw,
-              });
-              resolve(raw);
-            })
-            .catch(e => {
-              reject(e);
-            });
-        } else {
-          resolve(raw);
-        }
-      })
-      .catch(() => {
-        dispatch('setErrorMessage', {
-          text: __('An error occurred while loading the file content.'),
-          action: payload =>
-            dispatch('getRawFileData', payload).then(() => dispatch('setErrorMessage', null)),
-          actionText: __('Please try again'),
-          actionPayload: { path },
+        return service.getBaseRawFileData(file, state.currentProjectId, baseSha).then(baseRaw => {
+          commit(types.SET_FILE_BASE_RAW_DATA, {
+            file,
+            baseRaw,
+          });
+          return raw;
         });
-        reject();
+      }
+      return raw;
+    })
+    .catch(e => {
+      dispatch('setErrorMessage', {
+        text: __('An error occurred while loading the file content.'),
+        action: payload =>
+          dispatch('getRawFileData', payload).then(() => dispatch('setErrorMessage', null)),
+        actionText: __('Please try again'),
+        actionPayload: { path },
       });
-  });
+      throw e;
+    })
+    .finally(() => {
+      commit(types.TOGGLE_LOADING, { entry: file, forceValue: false });
+    });
 };
 
 export const changeFileContent = ({ commit, state, getters }, { path, content }) => {
   const file = state.entries[path];
   commit(types.UPDATE_FILE_CONTENT, {
     path,
-    content: addFinalNewlineIfNeeded(content),
+    content,
   });
 
   const indexOfChangedFile = state.changedFiles.findIndex(f => f.path === path);
@@ -167,12 +167,6 @@ export const changeFileContent = ({ commit, state, getters }, { path, content })
 export const setFileLanguage = ({ getters, commit }, { fileLanguage }) => {
   if (getters.activeFile) {
     commit(types.SET_FILE_LANGUAGE, { file: getters.activeFile, fileLanguage });
-  }
-};
-
-export const setFileEOL = ({ getters, commit }, { eol }) => {
-  if (getters.activeFile) {
-    commit(types.SET_FILE_EOL, { file: getters.activeFile, eol });
   }
 };
 
@@ -226,7 +220,7 @@ export const discardFileChanges = ({ dispatch, state, commit, getters }, path) =
   if (!isDestructiveDiscard && file.path === getters.activeFile?.path) {
     dispatch('updateDelayViewerUpdated', true)
       .then(() => {
-        router.push(`/project${file.url}`);
+        dispatch('router/push', getters.getUrlForPath(file.path), { root: true });
       })
       .catch(e => {
         throw e;
@@ -275,14 +269,16 @@ export const unstageChange = ({ commit, dispatch, getters }, path) => {
   }
 };
 
-export const openPendingTab = ({ commit, getters, state }, { file, keyPrefix }) => {
+export const openPendingTab = ({ commit, dispatch, getters, state }, { file, keyPrefix }) => {
   if (getters.activeFile && getters.activeFile.key === `${keyPrefix}-${file.key}`) return false;
 
   state.openFiles.forEach(f => eventHub.$emit(`editor.update.model.dispose.${f.key}`));
 
   commit(types.ADD_PENDING_TAB, { file, keyPrefix });
 
-  router.push(`/project/${file.projectId}/tree/${state.currentBranchId}/`);
+  dispatch('router/push', `/project/${state.currentProjectId}/tree/${state.currentBranchId}/`, {
+    root: true,
+  });
 
   return true;
 };

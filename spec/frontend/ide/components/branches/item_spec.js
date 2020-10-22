@@ -1,7 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
-import router from '~/ide/ide_router';
+import { GlIcon } from '@gitlab/ui';
+import { createStore } from '~/ide/stores';
+import { createRouter } from '~/ide/ide_router';
 import Item from '~/ide/components/branches/item.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 import Timeago from '~/vue_shared/components/time_ago_tooltip.vue';
 import { projectData } from '../../mock_data';
 
@@ -13,6 +14,8 @@ const TEST_PROJECT_ID = projectData.name_with_namespace;
 
 describe('IDE branch item', () => {
   let wrapper;
+  let store;
+  let router;
 
   function createComponent(props = {}) {
     wrapper = shallowMount(Item, {
@@ -22,8 +25,14 @@ describe('IDE branch item', () => {
         isActive: false,
         ...props,
       },
+      router,
     });
   }
+
+  beforeEach(() => {
+    store = createStore();
+    router = createRouter(store);
+  });
 
   afterEach(() => {
     wrapper.destroy();
@@ -36,7 +45,7 @@ describe('IDE branch item', () => {
     it('renders branch name and timeago', () => {
       expect(wrapper.text()).toContain(TEST_BRANCH.name);
       expect(wrapper.find(Timeago).props('time')).toBe(TEST_BRANCH.committedDate);
-      expect(wrapper.find(Icon).exists()).toBe(false);
+      expect(wrapper.find(GlIcon).exists()).toBe(false);
     });
 
     it('renders link to branch', () => {
@@ -51,6 +60,6 @@ describe('IDE branch item', () => {
   it('renders icon if is not active', () => {
     createComponent({ isActive: true });
 
-    expect(wrapper.find(Icon).exists()).toBe(true);
+    expect(wrapper.find(GlIcon).exists()).toBe(true);
   });
 });

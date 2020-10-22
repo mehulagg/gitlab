@@ -1,7 +1,6 @@
 {
   "type" : "object",
   "properties" : {
-    "undefined" : { "type": "integer" },
     "ignore" : { "type": "integer" },
     "unknown" : { "type": "integer" },
     "experimental" : { "type": "integer" },

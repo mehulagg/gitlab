@@ -33,8 +33,7 @@
 }
 
 .show.dropdown {
-  .dropdown-menu,
-  .dropdown-menu-nav {
+  .dropdown-menu {
     @include set-visible;
     min-height: $dropdown-min-height;
     max-height: $dropdown-max-height;
@@ -164,11 +163,17 @@
     right: 8px;
   }
 
-  .ic-chevron-down {
+  .dropdown-menu-toggle-icon {
     position: absolute;
-    top: $gl-padding-8;
     right: $gl-padding-8;
     color: $gray-darkest;
+  }
+}
+
+.labels {
+  // Prevent double scroll-bars for labels dropdown.
+  .dropdown-menu-toggle.wide + .dropdown-select {
+    max-height: unset;
   }
 }
 
@@ -184,15 +189,6 @@
   background-color: $gray-darker;
   color: $gl-text-color;
   outline: 0;
-
-  // make sure the text color is not overridden
-  &.text-danger {
-    color: $brand-danger;
-  }
-
-  .avatar {
-    border-color: $white;
-  }
 }
 
 @mixin dropdown-link {
@@ -211,11 +207,6 @@
   text-align: left;
   width: 100%;
 
-  // make sure the text color is not overridden
-  &.text-danger {
-    color: $brand-danger;
-  }
-
   &.disable-hover {
     text-decoration: none;
   }
@@ -227,10 +218,6 @@
     @include dropdown-item-hover;
 
     text-decoration: none;
-
-    .badge.badge-pill {
-      background-color: darken($blue-50, 5%);
-    }
   }
 
   &.dropdown-menu-user-link {
@@ -252,8 +239,7 @@
   }
 }
 
-.dropdown-menu,
-.dropdown-menu-nav {
+.dropdown-menu {
   display: none;
   position: absolute;
   width: auto;
@@ -312,16 +298,10 @@
 
     > a,
     button,
+    .gl-button.btn-link,
     .menu-item {
       @include dropdown-link;
     }
-  }
-
-  // Temporary fix to ensure tick is aligned
-  // Follow up Issue to remove after the GlNewDropdownItem component is fixed
-  // > https://gitlab.com/gitlab-org/gitlab/-/issues/213948
-  li:not(.gl-new-dropdown-item) .dropdown-item {
-    @include dropdown-link;
   }
 
   .divider {
@@ -384,54 +364,65 @@
   }
 }
 
+.dropdown-item {
+  @include dropdown-link;
+}
+
 .droplab-dropdown {
   .dropdown-toggle > i {
     pointer-events: none;
   }
 
-  .dropdown-menu li {
-    cursor: pointer;
+  .dropdown-menu {
+    display: none;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 
-    &.droplab-item-active button {
-      @include dropdown-item-hover;
-    }
+    li {
+      cursor: pointer;
 
-    > a,
-    > button {
-      display: flex;
-      margin: 0;
-      text-overflow: inherit;
-      text-align: left;
+      &.droplab-item-active button {
+        @include dropdown-item-hover;
+      }
 
-      &.btn .fa:not(:last-child) {
+      > a,
+      > button {
+        display: flex;
+        margin: 0;
+        text-overflow: inherit;
+        text-align: left;
+
+        &.btn .fa:not(:last-child) {
+          margin-left: 5px;
+        }
+      }
+
+      > button.dropdown-epic-button {
+        flex-direction: column;
+
+        .reference {
+          color: $gray-300;
+          margin-top: $gl-padding-4;
+        }
+      }
+
+      &.droplab-item-selected i {
+        visibility: visible;
+      }
+
+      .icon {
+        visibility: hidden;
+      }
+
+      .description {
+        display: inline-block;
+        white-space: normal;
         margin-left: 5px;
-      }
-    }
 
-    > button.dropdown-epic-button {
-      flex-direction: column;
-
-      .reference {
-        color: $gl-gray-400;
-        margin-top: $gl-padding-4;
-      }
-    }
-
-    &.droplab-item-selected i {
-      visibility: visible;
-    }
-
-    .icon {
-      visibility: hidden;
-    }
-
-    .description {
-      display: inline-block;
-      white-space: normal;
-      margin-left: 5px;
-
-      p {
-        margin-bottom: 0;
+        p {
+          margin-bottom: 0;
+        }
       }
     }
   }
@@ -443,21 +434,12 @@
   }
 }
 
-.droplab-dropdown .dropdown-menu,
-.droplab-dropdown .dropdown-menu-nav {
-  display: none;
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
 .comment-type-dropdown.show .dropdown-menu {
   display: block;
 }
 
 .filtered-search-box-input-container {
-  .dropdown-menu,
-  .dropdown-menu-nav {
+  .dropdown-menu {
     max-width: 280px;
   }
 }
@@ -592,11 +574,8 @@
 }
 
 .dropdown-title-button {
-  position: absolute;
-  top: 0;
   padding: 0;
   color: $dropdown-title-btn-color;
-  font-size: 14px;
   border: 0;
   background: none;
   outline: 0;
@@ -606,20 +585,9 @@
   }
 }
 
-.dropdown-menu-close {
-  top: $gl-padding-4;
-  right: $gl-padding-8;
-  width: 20px;
-  height: 20px;
-}
-
-.dropdown-menu-close-icon {
-  vertical-align: middle;
-}
-
 .dropdown-menu-back {
-  left: 7px;
-  top: 2px;
+  left: 10px;
+  top: $gl-padding-8;
 }
 
 .dropdown-input {
@@ -629,7 +597,8 @@
 
   .fa,
   .input-icon,
-  .ic-search {
+  .dropdown-input-clear,
+  .dropdown-input-search {
     position: absolute;
     top: $gl-padding-8;
     right: 20px;
@@ -642,9 +611,12 @@
     display: none;
     cursor: pointer;
     pointer-events: all;
-    right: 22px;
-    top: 9px;
+    top: $gl-padding-8;
     font-size: 14px;
+
+    &:not(.gl-icon) {
+      right: 22px;
+    }
   }
 
   &.has-value {
@@ -660,29 +632,32 @@
 
 .dropdown-input-field,
 .default-dropdown-input {
+  background-color: $input-bg;
   display: block;
   width: 100%;
   min-height: 30px;
   padding: 0 7px;
-  color: $gl-gray-700;
+  color: $gray-700;
   line-height: 30px;
   border: 1px solid $dropdown-divider-bg;
   border-radius: 2px;
   outline: 0;
 
   &:focus {
-    color: $gl-gray-700;
+    color: $gray-700;
     border-color: $blue-300;
     box-shadow: 0 0 4px $dropdown-input-focus-shadow;
 
-    ~ .fa {
-      color: $gl-gray-700;
+    ~ .fa,
+    ~ .dropdown-input-clear {
+      color: $gray-700;
     }
   }
 
   &:hover {
-    ~ .fa {
-      color: $gl-gray-700;
+    ~ .fa,
+    ~ .dropdown-input-clear {
+      color: $gray-700;
     }
   }
 }
@@ -853,8 +828,7 @@
   }
 
   header.navbar-gitlab .dropdown {
-    .dropdown-menu,
-    .dropdown-menu-nav {
+    .dropdown-menu {
       width: 100%;
       min-width: 100%;
     }
@@ -943,7 +917,7 @@ header.header-content .dropdown-menu.frequent-items-dropdown-menu {
       position: absolute;
       top: 13px;
       right: 25px;
-      color: $gray-100;
+      color: $gray-50;
     }
   }
 
@@ -982,7 +956,7 @@ header.header-content .dropdown-menu.frequent-items-dropdown-menu {
 
   &:hover {
     .frequent-items-item-avatar-container .avatar {
-      border-color: $gray-100;
+      border-color: $gray-50;
     }
   }
 
@@ -1032,6 +1006,16 @@ header.header-content .dropdown-menu.frequent-items-dropdown-menu {
 }
 
 .labels-select-wrapper {
+  &.is-standalone {
+    .labels-select-dropdown-contents {
+      max-height: 350px;
+
+      .dropdown-content {
+        height: 250px;
+      }
+    }
+  }
+
   .labels-select-dropdown-contents {
     min-height: $dropdown-min-height;
     max-height: 330px;
@@ -1058,7 +1042,7 @@ header.header-content .dropdown-menu.frequent-items-dropdown-menu {
       color: $dropdown-title-btn-color;
 
       &:hover {
-        color: $gl-gray-400;
+        color: $gray-300;
       }
     }
   }
@@ -1076,8 +1060,59 @@ header.header-content .dropdown-menu.frequent-items-dropdown-menu {
 
   .color-input-container {
     .dropdown-label-color-preview {
-      border: 1px solid $gray-200;
+      border: 1px solid $gray-100;
       border-right: 0;
+
+      &[style] {
+        border-color: transparent;
+      }
+    }
+  }
+}
+
+.bulk-update {
+  .dropdown-toggle-text {
+    &.is-default {
+      color: $gl-text-color;
+    }
+  }
+}
+
+// This class won't be needed once we can directly add utility classes to the child
+// https://github.com/bootstrap-vue/bootstrap-vue/issues/5669
+.gl-dropdown-text-py-0 {
+  .b-dropdown-text {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+// This class won't be needed once we can directly add utility classes to the child
+// https://github.com/bootstrap-vue/bootstrap-vue/issues/5669
+.gl-dropdown-text-block {
+  .b-dropdown-text {
+    display: block;
+  }
+}
+
+// This class won't be needed once we can add a prop for this in the GitLab UI component
+// https://gitlab.com/gitlab-org/gitlab-ui/-/issues/966
+.gl-new-dropdown {
+  .gl-dropdown-menu-wide {
+    width: $gl-dropdown-width-wide;
+  }
+}
+
+.gl-dropdown-item-deprecated-adapter {
+  .dropdown-item {
+    align-items: flex-start;
+
+    .gl-new-dropdown-item-text-primary {
+      @include gl-font-weight-bold;
+    }
+
+    .gl-new-dropdown-item-text-secondary {
+      color: inherit;
     }
   }
 }

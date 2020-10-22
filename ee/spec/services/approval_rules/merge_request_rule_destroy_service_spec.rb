@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApprovalRules::MergeRequestRuleDestroyService do
+RSpec.describe ApprovalRules::MergeRequestRuleDestroyService do
   let(:rule) { create(:approval_merge_request_rule) }
   let(:user) { create(:user) }
 

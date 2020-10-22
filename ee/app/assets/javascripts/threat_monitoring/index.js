@@ -9,10 +9,12 @@ export default () => {
     wafStatisticsEndpoint,
     networkPolicyStatisticsEndpoint,
     environmentsEndpoint,
+    networkPoliciesEndpoint,
     chartEmptyStateSvgPath,
     emptyStateSvgPath,
     wafNoDataSvgPath,
     networkPolicyNoDataSvgPath,
+    newPolicyPath,
     documentationPath,
     defaultEnvironmentId,
     showUserCallout,
@@ -25,6 +27,9 @@ export default () => {
     wafStatisticsEndpoint,
     networkPolicyStatisticsEndpoint,
     environmentsEndpoint,
+  });
+  store.dispatch('networkPolicies/setEndpoints', {
+    networkPoliciesEndpoint,
   });
 
   return new Vue({
@@ -42,6 +47,7 @@ export default () => {
           showUserCallout: parseBoolean(showUserCallout),
           userCalloutId,
           userCalloutsPath,
+          newPolicyPath,
         },
       });
     },

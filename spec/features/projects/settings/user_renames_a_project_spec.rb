@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Projects > Settings > User renames a project' do
+RSpec.describe 'Projects > Settings > User renames a project' do
   let(:user) { create(:user) }
   let(:project) { create(:project, namespace: user.namespace, path: 'gitlab', name: 'sample') }
 
@@ -37,7 +37,7 @@ describe 'Projects > Settings > User renames a project' do
     it 'shows errors for invalid project path' do
       change_path(project, 'foo&bar')
 
-      expect(page).to have_field 'Path', with: 'foo&bar'
+      expect(page).to have_field 'Path', with: 'gitlab'
       expect(page).to have_content "Path can contain only letters, digits, '_', '-' and '.'. Cannot start with '-', end in '.git' or end in '.atom'"
     end
   end

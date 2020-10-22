@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'projects/protected_environments/_protected_environment' do
+RSpec.describe 'projects/protected_environments/_protected_environment' do
   it 'displays protected environments without matching environment as text' do
     protected_environment = build_stubbed(:protected_environment, name: 'production')
     expect(protected_environment).to receive(:environment_id?).and_return(false)

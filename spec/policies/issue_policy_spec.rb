@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe IssuePolicy do
+RSpec.describe IssuePolicy do
   include ExternalAuthorizationServiceHelpers
 
   let(:guest) { create(:user) }
@@ -104,7 +104,7 @@ describe IssuePolicy do
       end
 
       it 'does not allow issue author to read or update confidential issue moved to an private project' do
-        confidential_issue.project = build(:project, :private)
+        confidential_issue.project = create(:project, :private)
 
         expect(permissions(author, confidential_issue)).to be_disallowed(:read_issue, :read_issue_iid, :update_issue)
       end
@@ -117,7 +117,7 @@ describe IssuePolicy do
       end
 
       it 'does not allow issue assignees to read or update confidential issue moved to an private project' do
-        confidential_issue.project = build(:project, :private)
+        confidential_issue.project = create(:project, :private)
 
         expect(permissions(assignee, confidential_issue)).to be_disallowed(:read_issue, :read_issue_iid, :update_issue)
       end
@@ -188,7 +188,7 @@ describe IssuePolicy do
 
     context 'when issues are private' do
       before do
-        project.project_feature.update(issues_access_level: ProjectFeature::PRIVATE)
+        project.project_feature.update!(issues_access_level: ProjectFeature::PRIVATE)
       end
       let(:issue) { create(:issue, project: project, author: author) }
       let(:visitor) { create(:user) }
@@ -206,11 +206,25 @@ describe IssuePolicy do
       it 'allows guests to comment' do
         expect(permissions(guest, issue)).to be_allowed(:create_note)
       end
-      it 'allows admins to view' do
-        expect(permissions(admin, issue)).to be_allowed(:read_issue)
+
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it 'allows admins to view' do
+          expect(permissions(admin, issue)).to be_allowed(:read_issue)
+        end
+
+        it 'allows admins to comment' do
+          expect(permissions(admin, issue)).to be_allowed(:create_note)
+        end
       end
-      it 'allows admins to comment' do
-        expect(permissions(admin, issue)).to be_allowed(:create_note)
+
+      context 'when admin mode is disabled' do
+        it 'forbids admins to view' do
+          expect(permissions(admin, issue)).to be_disallowed(:read_issue)
+        end
+
+        it 'forbids admins to comment' do
+          expect(permissions(admin, issue)).to be_disallowed(:create_note)
+        end
       end
     end
 

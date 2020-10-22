@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Commits API
 
 ## List repository commits
@@ -94,7 +101,7 @@ POST /projects/:id/repository/commits
 | `previous_path` | string | no | Original full path to the file being moved. Ex. `lib/class1.rb`. Only considered for `move` action. |
 | `content` | string | no | File content, required for all except `delete`, `chmod`, and `move`. Move actions that do not specify `content` will preserve the existing file content, and any other value of `content` will overwrite the file content. |
 | `encoding` | string | no | `text` or `base64`. `text` is default. |
-| `last_commit_id` | string | no | Last known file commit id. Will be only considered in update, move and delete actions. |
+| `last_commit_id` | string | no | Last known file commit ID. Will be only considered in update, move, and delete actions. |
 | `execute_filemode` | boolean | no | When `true/false` enables/disables the execute flag on the file. Only considered for `chmod` action. |
 
 ```shell
@@ -132,7 +139,7 @@ PAYLOAD=$(cat << 'JSON'
 }
 JSON
 )
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" --data "$PAYLOAD" https://gitlab.example.com/api/v4/projects/1/repository/commits
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" --data "$PAYLOAD" "https://gitlab.example.com/api/v4/projects/1/repository/commits"
 ```
 
 Example response:
@@ -206,7 +213,7 @@ Parameters:
 | `stats` | boolean | no | Include commit stats. Default is true |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/commits/master
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/commits/master"
 ```
 
 Example response:
@@ -292,9 +299,10 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `sha` | string | yes | The commit hash  |
 | `branch` | string | yes | The name of the branch  |
+| `dry_run` | boolean | no | Does not commit any changes. Default is false. [Introduced in GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/231032) |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "branch=master" "https://gitlab.example.com/api/v4/projects/5/repository/commits/master/cherry_pick"
@@ -338,6 +346,19 @@ indicates that the commit already exists in the target branch. The other
 possible error code is `conflict`, which indicates that there was a merge
 conflict.
 
+When `dry_run` is enabled, the server will attempt to apply the cherry-pick _but
+not actually commit any resulting changes_. If the cherry-pick applies cleanly,
+the API will respond with `200 OK`:
+
+```json
+{
+  "dry_run": "success"
+}
+```
+
+In the event of a failure, you'll see an error identical to a failure without
+dry run.
+
 ## Revert a commit
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22919) in GitLab 11.5.
@@ -355,6 +376,7 @@ Parameters:
 | `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
 | `sha`     | string         | yes      | Commit SHA to revert                                                            |
 | `branch`  | string         | yes      | Target branch name                                                              |
+| `dry_run` | boolean        | no       | Does not commit any changes. Default is false. [Introduced in GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/231032) |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "branch=master" "https://gitlab.example.com/api/v4/projects/5/repository/commits/a738f717824ff53aebad8b090c1b79a14f2bd9e8/revert"
@@ -392,6 +414,19 @@ In the event of a failed revert, the response will provide context about why:
 In this case, the revert failed because the attempted revert generated a merge
 conflict. The other possible error code is `empty`, which indicates that the
 changeset was empty, likely due to the change having already been reverted.
+
+When `dry_run` is enabled, the server will attempt to apply the revert _but not
+actually commit any resulting changes_. If the revert applies cleanly, the API
+will respond with `200 OK`:
+
+```json
+{
+  "dry_run": "success"
+}
+```
+
+In the event of a failure, you'll see an error identical to a failure without
+dry run.
 
 ## Get the diff of a commit
 
@@ -498,7 +533,7 @@ POST /projects/:id/repository/commits/:sha/comments
 | `line_type` | string  | no  | The line type. Takes `new` or `old` as arguments |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "note=Nice picture man\!" --form "path=dudeism.md" --form "line=11" --form "line_type=new" https://gitlab.example.com/api/v4/projects/17/repository/commits/18f3e63d05582537db6d183d9d557be09e1f90c8/comments
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "note=Nice picture man\!" --form "path=dudeism.md" --form "line=11" --form "line_type=new" "https://gitlab.example.com/api/v4/projects/17/repository/commits/18f3e63d05582537db6d183d9d557be09e1f90c8/comments"
 ```
 
 Example response:
@@ -521,9 +556,65 @@ Example response:
 }
 ```
 
+## Get the discussions of a commit
+
+Get the discussions of a commit in a project.
+
+```plaintext
+GET /projects/:id/repository/commits/:sha/discussions
+```
+
+Parameters:
+
+| Attribute | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
+| `sha`     | string | yes | The commit hash or name of a repository branch or tag |
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/commits/4604744a1c64de00ff62e1e8a6766919923d2b41/discussions"
+```
+
+Example response:
+
+```json
+[
+  {
+    "id": "4604744a1c64de00ff62e1e8a6766919923d2b41",
+    "individual_note": true,
+    "notes": [
+      {
+        "id": 334686748,
+        "type": null,
+        "body": "I'm the Dude, so that's what you call me.",
+        "attachment": null,
+        "author" : {
+          "id" : 28,
+          "name" : "Jeff Lebowski",
+          "username" : "thedude",
+          "web_url" : "https://gitlab.example.com/thedude",
+          "state" : "active",
+          "avatar_url" : "https://gitlab.example.com/uploads/user/avatar/28/The-Big-Lebowski-400-400.png"
+        },
+        "created_at": "2020-04-30T18:48:11.432Z",
+        "updated_at": "2020-04-30T18:48:11.432Z",
+        "system": false,
+        "noteable_id": null,
+        "noteable_type": "Commit",
+        "resolvable": false,
+        "confidential": null,
+        "noteable_iid": null,
+        "commands_changes": {}
+      }
+    ]
+  }
+]
+
+```
+
 ## Commit status
 
-Since GitLab 8.1, this is the new commit status API.
+In GitLab 8.1 and later, this is the new commit status API.
 
 ### List the statuses of a commit
 
@@ -755,7 +846,7 @@ Example response if commit is GPG signed:
 }
 ```
 
-Example response if commit is x509 signed:
+Example response if commit is X.509 signed:
 
 ```json
 {

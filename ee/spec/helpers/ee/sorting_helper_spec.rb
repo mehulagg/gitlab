@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SortingHelper do
+RSpec.describe SortingHelper do
   describe '#sort_direction_icon' do
     it 'returns lowest for weight' do
       expect(sort_direction_icon('weight')).to eq('sort-lowest')

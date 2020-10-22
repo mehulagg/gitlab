@@ -3,18 +3,20 @@
 cache gems:
   extends:
     - .default-retry
-    - .default-cache
+    - .rails-cache
     - .default-before_script
     - .setup:rules:cache-gems
   stage: test
-  needs: ["setup-test-env pg9"]
+  needs: ["setup-test-env"]
   variables:
+    BUNDLE_INSTALL_FLAGS: --with=production --with=development --with=test --jobs=2 --path=vendor --retry=3 --quiet
     SETUP_DB: "false"
   script:
     - bundle package --all --all-platforms
   artifacts:
     paths:
       - vendor/cache
+    expire_in: 31d
 
 .minimal-job:
   extends:
@@ -26,7 +28,6 @@ dont-interrupt-me:
   stage: sync
   image: alpine:edge
   interruptible: false
-  allow_failure: true
   variables:
     GIT_STRATEGY: none
   script:
@@ -47,3 +48,46 @@ no_ee_check:
   stage: test
   script:
     - scripts/no-ee-check
+
+verify-tests-yml:
+  extends:
+    - .setup:rules:verify-tests-yml
+  image: ruby:2.6-alpine
+  stage: test
+  needs: []
+  script:
+    - source scripts/utils.sh
+    - install_tff_gem
+    - scripts/verify-tff-mapping
+
+.detect-test-base:
+  image: ruby:2.6-alpine
+  needs: []
+  stage: prepare
+  script:
+    - source scripts/utils.sh
+    - install_gitlab_gem
+    - install_tff_gem
+    - tooling/bin/find_foss_tests ${MATCHED_TESTS_FILE}
+    - 'echo "test files affected: $(cat $MATCHED_TESTS_FILE)"'
+  artifacts:
+    expire_in: 7d
+    paths:
+      - ${MATCHED_TESTS_FILE}
+
+detect-tests:
+  extends:
+    - .detect-test-base
+    - .rails:rules:detect-tests
+  variables:
+    MATCHED_TESTS_FILE: tmp/matching_tests.txt
+
+detect-tests as-if-foss:
+  extends:
+    - .detect-test-base
+    - .rails:rules:detect-tests
+    - .as-if-foss
+  variables:
+    MATCHED_TESTS_FILE: tmp/matching_foss_tests.txt
+  before_script:
+    - '[ "$FOSS_ONLY" = "1" ] && rm -rf ee/ qa/spec/ee/ qa/qa/specs/features/ee/ qa/qa/ee/ qa/qa/ee.rb'

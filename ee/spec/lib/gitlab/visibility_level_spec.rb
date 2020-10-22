@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::VisibilityLevel do
+RSpec.describe Gitlab::VisibilityLevel do
   describe '.levels_for_user' do
     it 'returns all levels for an auditor' do
       user = build(:user, :auditor)

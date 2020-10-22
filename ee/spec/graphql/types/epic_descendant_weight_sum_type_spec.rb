@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['EpicDescendantWeights'] do
+RSpec.describe GitlabSchema.types['EpicDescendantWeights'] do
   it { expect(described_class.graphql_name).to eq('EpicDescendantWeights') }
 
   it 'has specific fields' do

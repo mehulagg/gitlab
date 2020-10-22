@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Settings, 'Settings' do
+RSpec.describe API::Settings, 'Settings' do
   let(:user) { create(:user) }
 
   let_it_be(:admin) { create(:admin) }
@@ -15,7 +15,7 @@ describe API::Settings, 'Settings' do
       expect(json_response).to be_an Hash
       expect(json_response['default_projects_limit']).to eq(42)
       expect(json_response['password_authentication_enabled_for_web']).to be_truthy
-      expect(json_response['repository_storages']).to eq(['default'])
+      expect(json_response['repository_storages_weighted']).to eq({ 'default' => 100 })
       expect(json_response['password_authentication_enabled']).to be_truthy
       expect(json_response['plantuml_enabled']).to be_falsey
       expect(json_response['plantuml_url']).to be_nil
@@ -31,13 +31,15 @@ describe API::Settings, 'Settings' do
       expect(json_response['ecdsa_key_restriction']).to eq(0)
       expect(json_response['ed25519_key_restriction']).to eq(0)
       expect(json_response['performance_bar_allowed_group_id']).to be_nil
-      expect(json_response['instance_statistics_visibility_private']).to be(false)
       expect(json_response['allow_local_requests_from_hooks_and_services']).to be(false)
       expect(json_response['allow_local_requests_from_web_hooks_and_services']).to be(false)
       expect(json_response['allow_local_requests_from_system_hooks']).to be(true)
       expect(json_response).not_to have_key('performance_bar_allowed_group_path')
       expect(json_response).not_to have_key('performance_bar_enabled')
       expect(json_response['snippet_size_limit']).to eq(50.megabytes)
+      expect(json_response['spam_check_endpoint_enabled']).to be_falsey
+      expect(json_response['spam_check_endpoint_url']).to be_nil
+      expect(json_response['wiki_page_max_content_bytes']).to be_a(Integer)
     end
   end
 
@@ -50,7 +52,29 @@ describe API::Settings, 'Settings' do
         storages = Gitlab.config.repositories.storages
                      .merge({ 'custom' => 'tmp/tests/custom_repositories' })
         allow(Gitlab.config.repositories).to receive(:storages).and_return(storages)
-        Feature.get(:sourcegraph).enable
+        stub_feature_flags(sourcegraph: true)
+      end
+
+      it "coerces repository_storages_weighted to an int" do
+        put api("/application/settings", admin),
+          params: {
+            repository_storages_weighted: { 'custom' => '75' }
+          }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['repository_storages_weighted']).to eq({ 'custom' => 75 })
+      end
+
+      context "repository_storages_weighted value is outside a 0-100 range" do
+        [-1, 101].each do |out_of_range_int|
+          it "returns a :bad_request for #{out_of_range_int}" do
+            put api("/application/settings", admin),
+              params: {
+                repository_storages_weighted: { 'custom' => out_of_range_int }
+              }
+            expect(response).to have_gitlab_http_status(:bad_request)
+          end
+        end
       end
 
       it "updates application settings" do
@@ -60,18 +84,19 @@ describe API::Settings, 'Settings' do
             default_projects_limit: 3,
             default_project_creation: 2,
             password_authentication_enabled_for_web: false,
-            repository_storages: ['custom'],
+            repository_storages_weighted: { 'custom' => 100 },
             plantuml_enabled: true,
             plantuml_url: 'http://plantuml.example.com',
             sourcegraph_enabled: true,
             sourcegraph_url: 'https://sourcegraph.com',
             sourcegraph_public_only: false,
             default_snippet_visibility: 'internal',
-            restricted_visibility_levels: ['public'],
+            restricted_visibility_levels: 'public',
             default_artifacts_expire_in: '2 days',
             help_page_text: 'custom help text',
             help_page_hide_commercial_content: true,
             help_page_support_url: 'http://example.com/help',
+            help_page_documentation_base_url: 'https://docs.gitlab.com',
             project_export_enabled: false,
             rsa_key_restriction: ApplicationSetting::FORBIDDEN_KEY_VALUE,
             dsa_key_restriction: 2048,
@@ -80,7 +105,6 @@ describe API::Settings, 'Settings' do
             enforce_terms: true,
             terms: 'Hello world!',
             performance_bar_allowed_group_path: group.full_path,
-            instance_statistics_visibility_private: true,
             diff_max_patch_bytes: 150_000,
             default_branch_protection: ::Gitlab::Access::PROTECTION_DEV_CAN_MERGE,
             local_markdown_version: 3,
@@ -90,7 +114,12 @@ describe API::Settings, 'Settings' do
             push_event_activities_limit: 2,
             snippet_size_limit: 5,
             issues_create_limit: 300,
-            raw_blob_request_limit: 300
+            raw_blob_request_limit: 300,
+            spam_check_endpoint_enabled: true,
+            spam_check_endpoint_url: 'https://example.com/spam_check',
+            disabled_oauth_sign_in_sources: 'unknown',
+            import_sources: 'github,bitbucket',
+            wiki_page_max_content_bytes: 12345
           }
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -98,7 +127,7 @@ describe API::Settings, 'Settings' do
         expect(json_response['default_projects_limit']).to eq(3)
         expect(json_response['default_project_creation']).to eq(::Gitlab::Access::DEVELOPER_MAINTAINER_PROJECT_ACCESS)
         expect(json_response['password_authentication_enabled_for_web']).to be_falsey
-        expect(json_response['repository_storages']).to eq(['custom'])
+        expect(json_response['repository_storages_weighted']).to eq({ 'custom' => 100 })
         expect(json_response['plantuml_enabled']).to be_truthy
         expect(json_response['plantuml_url']).to eq('http://plantuml.example.com')
         expect(json_response['sourcegraph_enabled']).to be_truthy
@@ -110,6 +139,7 @@ describe API::Settings, 'Settings' do
         expect(json_response['help_page_text']).to eq('custom help text')
         expect(json_response['help_page_hide_commercial_content']).to be_truthy
         expect(json_response['help_page_support_url']).to eq('http://example.com/help')
+        expect(json_response['help_page_documentation_base_url']).to eq('https://docs.gitlab.com')
         expect(json_response['project_export_enabled']).to be_falsey
         expect(json_response['rsa_key_restriction']).to eq(ApplicationSetting::FORBIDDEN_KEY_VALUE)
         expect(json_response['dsa_key_restriction']).to eq(2048)
@@ -118,7 +148,6 @@ describe API::Settings, 'Settings' do
         expect(json_response['enforce_terms']).to be(true)
         expect(json_response['terms']).to eq('Hello world!')
         expect(json_response['performance_bar_allowed_group_id']).to eq(group.id)
-        expect(json_response['instance_statistics_visibility_private']).to be(true)
         expect(json_response['diff_max_patch_bytes']).to eq(150_000)
         expect(json_response['default_branch_protection']).to eq(Gitlab::Access::PROTECTION_DEV_CAN_MERGE)
         expect(json_response['local_markdown_version']).to eq(3)
@@ -129,6 +158,11 @@ describe API::Settings, 'Settings' do
         expect(json_response['snippet_size_limit']).to eq(5)
         expect(json_response['issues_create_limit']).to eq(300)
         expect(json_response['raw_blob_request_limit']).to eq(300)
+        expect(json_response['spam_check_endpoint_enabled']).to be_truthy
+        expect(json_response['spam_check_endpoint_url']).to eq('https://example.com/spam_check')
+        expect(json_response['disabled_oauth_sign_in_sources']).to eq([])
+        expect(json_response['import_sources']).to match_array(%w(github bitbucket))
+        expect(json_response['wiki_page_max_content_bytes']).to eq(12345)
       end
     end
 
@@ -157,6 +191,14 @@ describe API::Settings, 'Settings' do
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['allow_local_requests_from_hooks_and_services']).to eq(true)
+    end
+
+    it 'disables ability to switch to legacy storage' do
+      put api("/application/settings", admin),
+          params: { hashed_storage_enabled: false }
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['hashed_storage_enabled']).to eq(true)
     end
 
     context 'external policy classification settings' do
@@ -199,8 +241,7 @@ describe API::Settings, 'Settings' do
           snowplow_collector_hostname: "snowplow.example.com",
           snowplow_cookie_domain: ".example.com",
           snowplow_enabled: true,
-          snowplow_app_id: "app_id",
-          snowplow_iglu_registry_url: 'https://example.com'
+          snowplow_app_id: "app_id"
         }
       end
 
@@ -374,12 +415,29 @@ describe API::Settings, 'Settings' do
       end
     end
 
+    it 'supports legacy admin_notification_email' do
+      put api('/application/settings', admin),
+          params: { admin_notification_email: 'test@example.com' }
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['abuse_notification_email']).to eq('test@example.com')
+    end
+
     context "missing sourcegraph_url value when sourcegraph_enabled is true" do
       it "returns a blank parameter error message" do
         put api("/application/settings", admin), params: { sourcegraph_enabled: true }
 
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['error']).to eq('sourcegraph_url is missing')
+      end
+    end
+
+    context "missing spam_check_endpoint_url value when spam_check_endpoint_enabled is true" do
+      it "returns a blank parameter error message" do
+        put api("/application/settings", admin), params: { spam_check_endpoint_enabled: true }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response['error']).to eq('spam_check_endpoint_url is missing')
       end
     end
   end

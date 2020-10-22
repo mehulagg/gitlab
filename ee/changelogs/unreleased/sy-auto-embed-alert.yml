@@ -1,5 +1,0 @@
----
-title: Automatically embed metrics in issues for alerts from manually configured Prometheus instances
-merge_request: 28622
-author:
-type: added

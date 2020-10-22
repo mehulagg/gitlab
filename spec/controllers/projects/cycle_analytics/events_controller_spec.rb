@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::CycleAnalytics::EventsController do
+RSpec.describe Projects::CycleAnalytics::EventsController do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
 
@@ -56,6 +56,8 @@ describe Projects::CycleAnalytics::EventsController do
       end
     end
   end
+
+  include_examples GracefulTimeoutHandling
 
   def get_issue(additional_params: {})
     params = additional_params.merge(namespace_id: project.namespace, project_id: project)

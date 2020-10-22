@@ -1,29 +1,56 @@
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
+import { once } from 'lodash';
 import { componentNames } from 'ee/reports/components/issue_body';
+import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
+import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
-import IssuesList from '~/reports/components/issues_list.vue';
-import Icon from '~/vue_shared/components/icon.vue';
+import Tracking from '~/tracking';
+import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
 import IssueModal from './components/modal.vue';
+import DastModal from './components/dast_modal.vue';
 import securityReportsMixin from './mixins/security_report_mixin';
 import createStore from './store';
-import { GlSprintf, GlLink } from '@gitlab/ui';
 import { mrStates } from '~/mr_popover/constants';
+import { fetchPolicies } from '~/lib/graphql';
+import securityReportSummaryQuery from './graphql/mr_security_report_summary.graphql';
+import SecuritySummary from './components/security_summary.vue';
 
 export default {
   store: createStore(),
   components: {
+    GroupedIssuesList,
     ReportSection,
     SummaryRow,
-    IssuesList,
+    SecuritySummary,
     IssueModal,
-    Icon,
     GlSprintf,
     GlLink,
+    DastModal,
+    GlButton,
+  },
+  directives: {
+    'gl-modal': GlModalDirective,
   },
   mixins: [securityReportsMixin, glFeatureFlagsMixin()],
+  apollo: {
+    dastSummary: {
+      query: securityReportSummaryQuery,
+      fetchPolicy: fetchPolicies.NETWORK_ONLY,
+      variables() {
+        return {
+          fullPath: this.projectFullPath,
+          pipelineIid: this.pipelineIid,
+        };
+      },
+      update(data) {
+        const dast = data?.project?.pipeline?.securityReportSummary?.dast;
+        return dast && Object.keys(dast).length ? dast : null;
+      },
+    },
+  },
   props: {
     enabledReports: {
       type: Object,
@@ -64,6 +91,11 @@ export default {
       required: false,
       default: '',
     },
+    coverageFuzzingHelpPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
     dependencyScanningHelpPath: {
       type: String,
       required: false,
@@ -73,6 +105,11 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    canReadVulnerabilityFeedback: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
     vulnerabilityFeedbackPath: {
       type: String,
@@ -104,6 +141,11 @@ export default {
       required: false,
       default: null,
     },
+    pipelineIid: {
+      type: Number,
+      required: false,
+      default: null,
+    },
     pipelinePath: {
       type: String,
       required: false,
@@ -129,6 +171,10 @@ export default {
       required: false,
       default: '',
     },
+    projectFullPath: {
+      type: String,
+      required: true,
+    },
   },
   componentNames,
   computed: {
@@ -136,6 +182,7 @@ export default {
       'sast',
       'containerScanning',
       'dast',
+      'coverageFuzzing',
       'dependencyScanning',
       'secretScanning',
       'summaryCounts',
@@ -151,10 +198,12 @@ export default {
       'groupedDastText',
       'groupedDependencyText',
       'groupedSecretScanningText',
+      'groupedCoverageFuzzingText',
       'containerScanningStatusIcon',
       'dastStatusIcon',
       'dependencyScanningStatusIcon',
       'secretScanningStatusIcon',
+      'coverageFuzzingStatusIcon',
       'isBaseSecurityReportOutOfDate',
       'canCreateIssue',
       'canCreateMergeRequest',
@@ -173,11 +222,21 @@ export default {
     hasDastReports() {
       return this.enabledReports.dast;
     },
+    hasCoverageFuzzingReports() {
+      /*
+       * Fixes bug https://gitlab.com/gitlab-org/gitlab/-/issues/255183
+       * For https://gitlab.com/gitlab-org/gitlab/-/issues/210343 change to:
+       * return this.enabledReports.coverageFuzzing;
+       */
+      return (
+        gl?.mrWidgetData?.coverage_fuzzing_comparison_path && this.enabledReports.coverageFuzzing
+      );
+    },
     hasSastReports() {
       return this.enabledReports.sast;
     },
     hasSecretScanningReports() {
-      return this.enabledReports.secretScanning;
+      return this.enabledReports.secretDetection;
     },
     isMRActive() {
       return this.mrState !== mrStates.merged && this.mrState !== mrStates.closed;
@@ -185,8 +244,20 @@ export default {
     isMRBranchOutdated() {
       return this.divergedCommitsCount > 0;
     },
-    dastScans() {
-      return this.dast.scans.filter(scan => scan.scanned_resources_count > 0);
+    hasDastScannedResources() {
+      return this.dastSummary?.scannedResourcesCount > 0;
+    },
+    handleToggleEvent() {
+      return once(() => {
+        const { category, action } = trackMrSecurityReportDetails;
+        Tracking.event(category, action);
+      });
+    },
+    dastDownloadLink() {
+      return this.dastSummary?.scannedResourcesCsvPath || '';
+    },
+    coverageFuzzingShowIssues() {
+      return this.coverageFuzzing.newIssues || this.coverageFuzzing.resolvedIssues;
     },
   },
 
@@ -195,6 +266,7 @@ export default {
     this.setBaseBlobPath(this.baseBlobPath);
     this.setSourceBranch(this.sourceBranch);
 
+    this.setCanReadVulnerabilityFeedback(this.canReadVulnerabilityFeedback);
     this.setVulnerabilityFeedbackPath(this.vulnerabilityFeedbackPath);
     this.setVulnerabilityFeedbackHelpPath(this.vulnerabilityFeedbackHelpPath);
     this.setCreateVulnerabilityFeedbackIssuePath(this.createVulnerabilityFeedbackIssuePath);
@@ -237,6 +309,13 @@ export default {
       this.setSecretScanningDiffEndpoint(secretScanningDiffEndpoint);
       this.fetchSecretScanningDiff();
     }
+
+    const coverageFuzzingDiffEndpoint = gl?.mrWidgetData?.coverage_fuzzing_comparison_path;
+
+    if (coverageFuzzingDiffEndpoint && this.hasCoverageFuzzingReports) {
+      this.setCoverageFuzzingDiffEndpoint(coverageFuzzingDiffEndpoint);
+      this.fetchCoverageFuzzingDiff();
+    }
   },
   methods: {
     ...mapActions([
@@ -244,6 +323,7 @@ export default {
       'setHeadBlobPath',
       'setBaseBlobPath',
       'setSourceBranch',
+      'setCanReadVulnerabilityFeedback',
       'setVulnerabilityFeedbackPath',
       'setVulnerabilityFeedbackHelpPath',
       'setCreateVulnerabilityFeedbackIssuePath',
@@ -269,35 +349,39 @@ export default {
       'setDastDiffEndpoint',
       'fetchSecretScanningDiff',
       'setSecretScanningDiffEndpoint',
+      'fetchCoverageFuzzingDiff',
+      'setCoverageFuzzingDiffEndpoint',
     ]),
     ...mapActions('sast', {
       setSastDiffEndpoint: 'setDiffEndpoint',
       fetchSastDiff: 'fetchDiff',
     }),
   },
+  summarySlots: ['success', 'error', 'loading'],
 };
 </script>
 <template>
   <report-section
     :status="summaryStatus"
-    :success-text="groupedSummaryText"
-    :loading-text="groupedSummaryText"
-    :error-text="groupedSummaryText"
     :has-issues="true"
+    :should-emit-toggle-event="true"
     class="mr-widget-border-top grouped-security-reports mr-report"
     data-qa-selector="vulnerability_report_grouped"
+    @toggleEvent="handleToggleEvent"
   >
+    <template v-for="slot in $options.summarySlots" #[slot]>
+      <security-summary :key="slot" :message="groupedSummaryText" />
+    </template>
+
     <template v-if="pipelinePath" #actionButtons>
-      <div>
-        <a
-          :href="securityTab"
-          target="_blank"
-          class="btn btn-default btn-sm float-right append-right-default"
-        >
-          <span>{{ s__('ciReport|View full report') }}</span>
-          <icon :size="16" name="external-link" />
-        </a>
-      </div>
+      <gl-button
+        :href="securityTab"
+        target="_blank"
+        icon="external-link"
+        class="gl-mr-3 report-btn"
+      >
+        {{ s__('ciReport|View full report') }}
+      </gl-button>
     </template>
 
     <template v-if="isMRActive && isBaseSecurityReportOutOfDate" #subHeading>
@@ -339,105 +423,147 @@ export default {
       <div class="mr-widget-grouped-section report-block">
         <template v-if="hasSastReports">
           <summary-row
-            :summary="groupedSastText"
             :status-icon="sastStatusIcon"
             :popover-options="sastPopover"
             class="js-sast-widget"
             data-qa-selector="sast_scan_report"
-          />
+          >
+            <template #summary>
+              <security-summary :message="groupedSastText" />
+            </template>
+          </summary-row>
 
-          <issues-list
+          <grouped-issues-list
             v-if="sast.newIssues.length || sast.resolvedIssues.length"
             :unresolved-issues="sast.newIssues"
             :resolved-issues="sast.resolvedIssues"
-            :all-issues="sast.allIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="js-sast-issue-list report-block-group-list"
+            class="report-block-group-list"
+            data-testid="sast-issues-list"
           />
         </template>
 
         <template v-if="hasDependencyScanningReports">
           <summary-row
-            :summary="groupedDependencyText"
             :status-icon="dependencyScanningStatusIcon"
             :popover-options="dependencyScanningPopover"
             class="js-dependency-scanning-widget"
             data-qa-selector="dependency_scan_report"
-          />
+          >
+            <template #summary>
+              <security-summary :message="groupedDependencyText" />
+            </template>
+          </summary-row>
 
-          <issues-list
+          <grouped-issues-list
             v-if="dependencyScanning.newIssues.length || dependencyScanning.resolvedIssues.length"
             :unresolved-issues="dependencyScanning.newIssues"
             :resolved-issues="dependencyScanning.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="js-dss-issue-list report-block-group-list"
+            class="report-block-group-list"
+            data-testid="dependency-scanning-issues-list"
           />
         </template>
 
         <template v-if="hasContainerScanningReports">
           <summary-row
-            :summary="groupedContainerScanningText"
             :status-icon="containerScanningStatusIcon"
             :popover-options="containerScanningPopover"
             class="js-container-scanning"
             data-qa-selector="container_scan_report"
-          />
+          >
+            <template #summary>
+              <security-summary :message="groupedContainerScanningText" />
+            </template>
+          </summary-row>
 
-          <issues-list
+          <grouped-issues-list
             v-if="containerScanning.newIssues.length || containerScanning.resolvedIssues.length"
             :unresolved-issues="containerScanning.newIssues"
             :resolved-issues="containerScanning.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
             class="report-block-group-list"
+            data-testid="container-scanning-issues-list"
           />
         </template>
 
         <template v-if="hasDastReports">
           <summary-row
-            :summary="groupedDastText"
             :status-icon="dastStatusIcon"
             :popover-options="dastPopover"
             class="js-dast-widget"
             data-qa-selector="dast_scan_report"
           >
-            <template v-if="dastScans.length">
+            <template #summary>
+              <security-summary :message="groupedDastText" />
+            </template>
+
+            <template v-if="hasDastScannedResources">
               <div class="text-nowrap">
-                {{ n__('%d URL scanned', '%d URLs scanned', dastScans[0].scanned_resources_count) }}
+                {{ n__('%d URL scanned', '%d URLs scanned', dastSummary.scannedResourcesCount) }}
               </div>
-              <gl-link
-                class="ml-2"
-                data-qa-selector="dast-ci-job-link"
-                :href="dastScans[0].job_path"
-              >
+              <gl-link v-gl-modal.dastUrl class="ml-2" data-qa-selector="dast-ci-job-link">
                 {{ __('View details') }}
               </gl-link>
+              <dast-modal
+                :scanned-urls="dastSummary.scannedResources.nodes"
+                :scanned-resources-count="dastSummary.scannedResourcesCount"
+                :download-link="dastDownloadLink"
+              />
             </template>
           </summary-row>
-
-          <issues-list
+          <grouped-issues-list
             v-if="dast.newIssues.length || dast.resolvedIssues.length"
             :unresolved-issues="dast.newIssues"
             :resolved-issues="dast.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
             class="report-block-group-list"
+            data-testid="dast-issues-list"
           />
         </template>
 
         <template v-if="hasSecretScanningReports">
           <summary-row
-            :summary="groupedSecretScanningText"
             :status-icon="secretScanningStatusIcon"
             :popover-options="secretScanningPopover"
             class="js-secret-scanning"
             data-qa-selector="secret_scan_report"
-          />
+          >
+            <template #summary>
+              <security-summary :message="groupedSecretScanningText" />
+            </template>
+          </summary-row>
 
-          <issues-list
+          <grouped-issues-list
             v-if="secretScanning.newIssues.length || secretScanning.resolvedIssues.length"
             :unresolved-issues="secretScanning.newIssues"
             :resolved-issues="secretScanning.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
             class="report-block-group-list"
+            data-testid="secret-scanning-issues-list"
+          />
+        </template>
+
+        <template v-if="hasCoverageFuzzingReports">
+          <summary-row
+            :summary="groupedCoverageFuzzingText"
+            :status-icon="coverageFuzzingStatusIcon"
+            :popover-options="coverageFuzzingPopover"
+            class="js-coverage-fuzzing-widget"
+            data-qa-selector="coverage_fuzzing_report"
+          >
+            <template #summary>
+              <security-summary :message="groupedCoverageFuzzingText" />
+            </template>
+          </summary-row>
+
+          <grouped-issues-list
+            v-if="coverageFuzzingShowIssues"
+            :unresolved-issues="coverageFuzzing.newIssues"
+            :resolved-issues="coverageFuzzing.resolvedIssues"
+            :component="$options.componentNames.SecurityIssueBody"
+            class="report-block-group-list"
+            data-testid="coverage-fuzzing-issues-list"
           />
         </template>
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Group empty states' do
+RSpec.describe 'Group empty states' do
   let(:group) { create(:group) }
   let(:user) { create(:group_member, :developer, user: create(:user), group: group ).user }
 
@@ -32,24 +32,32 @@ describe 'Group empty states' do
             expect(page).not_to have_selector('.empty-state')
           end
 
-          it "displays link to create new #{issuable} when no open #{issuable} is found" do
+          it "displays link to create new #{issuable} when no open #{issuable} is found", :js do
             create("closed_#{issuable}", project_relation => project)
             issuable_link_fn = "project_#{issuable}s_path"
 
             visit public_send(issuable_link_fn, project)
 
+            wait_for_all_requests
+
             page.within(find('.empty-state')) do
               expect(page).to have_content(/There are no open #{issuable.to_s.humanize.downcase}/)
-              expect(page).to have_selector("#new_#{issuable}_body_link")
+              new_issuable_path = issuable == :issue ? 'new_project_issue_path' : 'project_new_merge_request_path'
+
+              path = public_send(new_issuable_path, project)
+
+              expect(page.find('a')['href']).to have_content(path)
             end
           end
 
-          it 'displays link to create new issue when the current search gave no results' do
+          it 'displays link to create new issue when the current search gave no results', :js do
             create(issuable, project_relation => project)
 
             issuable_link_fn = "project_#{issuable}s_path"
 
             visit public_send(issuable_link_fn, project, author_username: 'foo', scope: 'all', state: 'opened')
+
+            wait_for_all_requests
 
             page.within(find('.empty-state')) do
               expect(page).to have_content(/Sorry, your filter produced no results/)
@@ -57,16 +65,18 @@ describe 'Group empty states' do
 
               path = public_send(new_issuable_path, project)
 
-              expect(page).to have_selector("#new_#{issuable}_body_link[href='#{path}']")
+              expect(page.find('a')['href']).to have_content(path)
             end
           end
 
-          it "displays conditional text when no closed #{issuable} is found" do
+          it "displays conditional text when no closed #{issuable} is found", :js do
             create(issuable, project_relation => project)
 
             issuable_link_fn = "project_#{issuable}s_path"
 
             visit public_send(issuable_link_fn, project, state: 'closed')
+
+            wait_for_all_requests
 
             page.within(find('.empty-state')) do
               expect(page).to have_content(/There are no closed #{issuable.to_s.humanize.downcase}/)

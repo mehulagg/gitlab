@@ -1,23 +1,34 @@
 import initSidebarBundle from 'ee/sidebar/sidebar_bundle';
-import initRelatedIssues from 'ee/related_issues';
+import trackShowInviteMemberLink from 'ee/projects/track_invite_members';
+import initTestCaseShow from 'ee/test_case_show/test_case_show_bundle';
+
+import { parseIssuableData } from '~/issue_show/utils/parse_data';
+import initRelatedIssues from '~/related_issues';
 import initShow from '~/pages/projects/issues/show';
 import UserCallout from '~/user_callout';
 
-document.addEventListener('DOMContentLoaded', () => {
-  initShow();
-  if (gon.features && !gon.features.vueIssuableSidebar) {
-    initSidebarBundle();
-  }
-  initRelatedIssues();
+import { IssuableType } from '~/issuable_show/constants';
 
-  if (document.getElementById('js-design-management')) {
-    import(/* webpackChunkName: 'design_management' */ 'ee/design_management')
-      .then(module => module.default())
-      .catch(() => {});
-  }
+const { issueType } = parseIssuableData();
 
-  // eslint-disable-next-line no-new
-  new UserCallout({ className: 'js-epics-sidebar-callout' });
-  // eslint-disable-next-line no-new
-  new UserCallout({ className: 'js-weight-sidebar-callout' });
-});
+initShow();
+
+if (issueType === IssuableType.TestCase) {
+  initTestCaseShow({
+    mountPointSelector: '#js-issuable-app',
+  });
+}
+
+if (gon.features && !gon.features.vueIssuableSidebar) {
+  initSidebarBundle();
+}
+initRelatedIssues();
+
+// eslint-disable-next-line no-new
+new UserCallout({ className: 'js-epics-sidebar-callout' });
+// eslint-disable-next-line no-new
+new UserCallout({ className: 'js-weight-sidebar-callout' });
+
+const assigneeDropdown = document.querySelector('.js-sidebar-assignee-dropdown');
+
+if (assigneeDropdown) trackShowInviteMemberLink(assigneeDropdown);

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Import::FogbugzController < Import::BaseController
+  extend ::Gitlab::Utils::Override
+
   before_action :verify_fogbugz_import_enabled
   before_action :user_map, only: [:new_user_map, :create_user_map]
   before_action :verify_blocked_uri, only: :callback
@@ -48,17 +50,12 @@ class Import::FogbugzController < Import::BaseController
       return redirect_to new_import_fogbugz_path
     end
 
-    @repos = client.repos
-
-    @already_added_projects = find_already_added_projects('fogbugz')
-    already_added_projects_names = @already_added_projects.pluck(:import_source)
-
-    @repos.reject! { |repo| already_added_projects_names.include? repo.name }
+    super
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
-  def jobs
-    render json: find_jobs('fogbugz')
+  def realtime_changes
+    super
   end
 
   def create
@@ -69,10 +66,38 @@ class Import::FogbugzController < Import::BaseController
     project = Gitlab::FogbugzImport::ProjectCreator.new(repo, fb_session, current_user.namespace, current_user, umap).execute
 
     if project.persisted?
-      render json: ProjectSerializer.new.represent(project)
+      render json: ProjectSerializer.new.represent(project, serializer: :import)
     else
       render json: { errors: project_save_error(project) }, status: :unprocessable_entity
     end
+  end
+
+  protected
+
+  # rubocop: disable CodeReuse/ActiveRecord
+  override :importable_repos
+  def importable_repos
+    repos = client.repos
+
+    already_added_projects_names = already_added_projects.map(&:import_source)
+
+    repos.reject { |repo| already_added_projects_names.include? repo.name }
+  end
+  # rubocop: enable CodeReuse/ActiveRecord
+
+  override :incompatible_repos
+  def incompatible_repos
+    []
+  end
+
+  override :provider_name
+  def provider_name
+    :fogbugz
+  end
+
+  override :provider_url
+  def provider_url
+    session[:fogbugz_uri]
   end
 
   private
@@ -111,7 +136,7 @@ class Import::FogbugzController < Import::BaseController
   def verify_blocked_uri
     Gitlab::UrlBlocker.validate!(
       params[:uri],
-      {
+      **{
         allow_localhost: allow_local_requests?,
         allow_local_network: allow_local_requests?,
         schemes: %w(http https)

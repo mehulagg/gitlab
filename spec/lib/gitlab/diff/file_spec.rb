@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Diff::File do
+RSpec.describe Gitlab::Diff::File do
   include RepoHelpers
 
   let(:project) { create(:project, :repository) }
@@ -279,6 +279,18 @@ describe Gitlab::Diff::File do
           end
         end
       end
+    end
+  end
+
+  describe '#file_hash' do
+    it 'returns a hash of file_path' do
+      expect(diff_file.file_hash).to eq(Digest::SHA1.hexdigest(diff_file.file_path))
+    end
+  end
+
+  describe '#file_identifier_hash' do
+    it 'returns a hash of file_identifier' do
+      expect(diff_file.file_identifier_hash).to eq(Digest::SHA1.hexdigest(diff_file.file_identifier))
     end
   end
 
@@ -788,6 +800,7 @@ describe Gitlab::Diff::File do
     let(:project) do
       create(:project, :custom_repo, files: {})
     end
+
     let(:branch_name) { 'master' }
 
     context 'when empty file is created' do
@@ -830,6 +843,7 @@ describe Gitlab::Diff::File do
     let(:project) do
       create(:project, :custom_repo, files: {})
     end
+
     let(:branch_name) { 'master' }
 
     context 'when empty file is created' do

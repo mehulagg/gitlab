@@ -4,12 +4,14 @@ FactoryBot.define do
   factory :dependency, class: 'Hash' do
     sequence(:name) { |n| "library#{n}" }
     packager { 'Ruby (Bundler)' }
+    package_manager { 'Ruby (Bundler)' }
     version { '1.8.0' }
     licenses { [] }
-    sequence(:location) do |n|
+    vulnerabilities { [] }
+    location do
       {
-        blob_path: "/some_project/path/File_#{n}.lock",
-        path:      "File_#{n}.lock"
+        blob_path: '/some_project/path/package_file.lock',
+        path: 'package_file.lock'
       }
     end
 
@@ -36,6 +38,37 @@ FactoryBot.define do
            name: 'MIT',
            url: 'http://opensource.org/licenses/mit-license'
          }]
+      end
+    end
+
+    trait :indirect do
+      location do
+        {
+          blob_path: '/some_project/path/package_file.lock',
+          path: 'package_file.lock',
+          ancestors:
+            [{
+               name: 'dep1',
+               version: '1.2'
+             },
+             {
+               name: 'dep2',
+               version: '10.11'
+             }],
+          top_level: false
+        }
+      end
+    end
+
+    trait :direct do
+      location do
+        {
+          blob_path: '/some_project/path/package_file.lock',
+          path: 'package_file.lock',
+          ancestors:
+            [],
+          top_level: true
+        }
       end
     end
 

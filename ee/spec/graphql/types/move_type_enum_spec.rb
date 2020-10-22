@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['MoveType'] do
+RSpec.describe GitlabSchema.types['MoveType'] do
   it { expect(described_class.graphql_name).to eq('MoveType') }
 
   it 'exposes all the existing move values' do

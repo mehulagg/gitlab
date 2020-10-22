@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20200204113225_schedule_recalculate_project_authorizations_third_run.rb')
 
-describe ScheduleRecalculateProjectAuthorizationsThirdRun do
+RSpec.describe ScheduleRecalculateProjectAuthorizationsThirdRun do
   let(:users_table) { table(:users) }
 
   before do
@@ -16,7 +16,7 @@ describe ScheduleRecalculateProjectAuthorizationsThirdRun do
 
   it 'schedules background migration' do
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         expect(BackgroundMigrationWorker.jobs.size).to eq(2)

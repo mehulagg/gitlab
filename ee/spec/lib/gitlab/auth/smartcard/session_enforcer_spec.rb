@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::Smartcard::SessionEnforcer do
+RSpec.describe Gitlab::Auth::Smartcard::SessionEnforcer do
   describe '#update_session' do
     let(:session) { {} }
 

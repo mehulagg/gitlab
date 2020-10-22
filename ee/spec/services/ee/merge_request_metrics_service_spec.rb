@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::MergeRequestMetricsService do
+RSpec.describe EE::MergeRequestMetricsService do
   subject do
     service = MergeRequestMetricsService.new(merge_request.metrics)
     service.merge(event)
@@ -14,7 +14,7 @@ describe EE::MergeRequestMetricsService do
   describe '#merge' do
     let(:merge_request) { create(:merge_request, :merged) }
     let(:expected_commit_count) { 21 }
-    let(:event) { instance_double('Event', author_id: merge_request.author.id, created_at: Time.now) }
+    let(:event) { instance_double('Event', author_id: merge_request.author.id, created_at: Time.current) }
 
     it 'saves metrics with productivity_data' do
       allow(merge_request).to receive(:commits_count).and_return(expected_commit_count)
@@ -32,19 +32,6 @@ describe EE::MergeRequestMetricsService do
 
       it 'updates `removed_lines`' do
         expect { subject }.to change { merge_request.metrics.removed_lines }.from(nil).to(expected_removed_lines)
-      end
-
-      context 'when `store_merge_request_line_metrics` feature flag is disabled' do
-        before do
-          stub_feature_flags(store_merge_request_line_metrics: { enabled: false, thing: merge_request.target_project })
-        end
-
-        it 'does not update line counts' do
-          subject
-
-          expect(merge_request.metrics.added_lines).to be_nil
-          expect(merge_request.metrics.removed_lines).to be_nil
-        end
       end
     end
   end

@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe QuickActions::InterpretService do
+RSpec.describe QuickActions::InterpretService do
   let(:current_user) { create(:user) }
   let(:user) { create(:user) }
   let(:user2) { create(:user) }
   let(:user3) { create(:user) }
-  let(:group) { create(:group) }
-  let(:project) { create(:project, :repository, :public, group: group) }
-  let(:issue) { create(:issue, project: project) }
+  let_it_be_with_refind(:group) { create(:group) }
+  let_it_be_with_refind(:project) { create(:project, :repository, :public, group: group) }
+  let_it_be_with_reload(:issue) { create(:issue, project: project) }
   let(:service) { described_class.new(project, current_user) }
 
   before do
@@ -210,6 +210,149 @@ describe QuickActions::InterpretService do
       end
     end
 
+    context 'iteration command' do
+      let_it_be(:iteration) { create(:iteration, group: group) }
+
+      let(:content) { "/iteration #{iteration.to_reference(project)}" }
+
+      context 'when iterations are enabled' do
+        before do
+          stub_licensed_features(iterations: true)
+        end
+
+        context 'when iteration exists' do
+          context 'with permissions' do
+            before do
+              group.add_developer(current_user)
+            end
+
+            it 'assigns an iteration to an issue' do
+              _, updates, message = service.execute(content, issue)
+
+              expect(updates).to eq(iteration: iteration)
+              expect(message).to eq("Set the iteration to #{iteration.to_reference}.")
+            end
+
+            context 'when iteration is started' do
+              before do
+                iteration.start!
+              end
+
+              it 'assigns an iteration to an issue' do
+                _, updates, message = service.execute(content, issue)
+
+                expect(updates).to eq(iteration: iteration)
+                expect(message).to eq("Set the iteration to #{iteration.to_reference}.")
+              end
+            end
+          end
+
+          context 'when the user does not have enough permissions' do
+            before do
+              allow(current_user).to receive(:can?).with(:use_quick_actions).and_return(true)
+              allow(current_user).to receive(:can?).with(:admin_issue, project).and_return(false)
+            end
+
+            it 'returns empty message' do
+              _, updates, message = service.execute(content, issue)
+
+              expect(updates).to be_empty
+              expect(message).to be_empty
+            end
+          end
+        end
+
+        context 'when iteration does not exist' do
+          let(:content) { "/iteration none" }
+
+          it 'returns empty message' do
+            _, updates, message = service.execute(content, issue)
+
+            expect(updates).to be_empty
+            expect(message).to be_empty
+          end
+        end
+      end
+
+      context 'when iterations are disabled' do
+        before do
+          stub_licensed_features(iterations: false)
+        end
+
+        it 'does not recognize /iteration' do
+          _, updates = service.execute(content, issue)
+
+          expect(updates).to be_empty
+        end
+      end
+
+      context 'when issuable does not support iterations' do
+        it 'does not assign an iteration to an incident' do
+          incident = create(:incident, project: project)
+
+          _, updates = service.execute(content, incident)
+
+          expect(updates).to be_empty
+        end
+      end
+    end
+
+    context 'remove_iteration command' do
+      let_it_be(:iteration) { create(:iteration, group: group) }
+
+      let(:content) { '/remove_iteration' }
+
+      context 'when iterations are enabled' do
+        before do
+          stub_licensed_features(iterations: true)
+          issue.update!(iteration: iteration)
+        end
+
+        it 'removes an assigned iteration from an issue' do
+          _, updates, message = service.execute(content, issue)
+
+          expect(updates).to eq(iteration: nil)
+          expect(message).to eq("Removed #{iteration.to_reference} iteration.")
+        end
+
+        context 'when the user does not have enough permissions' do
+          before do
+            allow(current_user).to receive(:can?).with(:use_quick_actions).and_return(true)
+            allow(current_user).to receive(:can?).with(:admin_issue, project).and_return(false)
+          end
+
+          it 'returns empty message' do
+            _, updates, message = service.execute(content, issue)
+
+            expect(updates).to be_empty
+            expect(message).to be_empty
+          end
+        end
+      end
+
+      context 'when iterations are disabled' do
+        before do
+          stub_licensed_features(iterations: false)
+        end
+
+        it 'does not recognize /remove_iteration' do
+          _, updates = service.execute(content, issue)
+
+          expect(updates).to be_empty
+        end
+      end
+
+      context 'when issuable does not support iterations' do
+        it 'does not assign an iteration to an incident' do
+          incident = create(:incident, project: project)
+
+          _, updates = service.execute(content, incident)
+
+          expect(updates).to be_empty
+        end
+      end
+    end
+
     context 'epic command' do
       let(:epic) { create(:epic, group: group) }
       let(:content) { "/epic #{epic.to_reference(project)}" }
@@ -250,6 +393,16 @@ describe QuickActions::InterpretService do
 
               expect(updates).to be_empty
               expect(message).to eq("Issue #{issue.to_reference} has already been added to epic #{epic.to_reference}.")
+            end
+          end
+
+          context 'when issuable does not support epics' do
+            it 'does not assign an incident to an epic' do
+              incident = create(:incident, project: project)
+
+              _, updates = service.execute(content, incident)
+
+              expect(updates).to be_empty
             end
           end
         end
@@ -524,6 +677,7 @@ describe QuickActions::InterpretService do
               it_behaves_like 'epic relation is removed' do
                 let(:target) { epic }
               end
+
               it_behaves_like 'quick action is available', :remove_child_epic do
                 let(:target) { epic }
               end
@@ -537,6 +691,7 @@ describe QuickActions::InterpretService do
               it_behaves_like 'epic relation is removed' do
                 let(:target) { epic }
               end
+
               it_behaves_like 'quick action is available', :remove_child_epic do
                 let(:target) { epic }
               end
@@ -608,13 +763,18 @@ describe QuickActions::InterpretService do
 
     context 'remove_epic command' do
       let(:epic) { create(:epic, group: group) }
-      let(:content) { "/remove_epic #{epic.to_reference(project)}" }
+      let(:content) { "/remove_epic" }
 
       before do
+        stub_licensed_features(epics: true)
         issue.update!(epic: epic)
       end
 
       context 'when epics are disabled' do
+        before do
+          stub_licensed_features(epics: false)
+        end
+
         it 'does not recognize /remove_epic' do
           _, updates = service.execute(content, issue)
 
@@ -631,6 +791,16 @@ describe QuickActions::InterpretService do
           _, updates = service.execute(content, issue)
 
           expect(updates).to eq(epic: nil)
+        end
+      end
+
+      context 'when issuable does not support epics' do
+        it 'does not recognize /remove_epic' do
+          incident = create(:incident, project: project, epic: epic)
+
+          _, updates = service.execute(content, incident)
+
+          expect(updates).to be_empty
         end
       end
     end
@@ -655,34 +825,6 @@ describe QuickActions::InterpretService do
           service.execute(content, merge_request)
 
           expect(merge_request.approved_by_users).to be_empty
-        end
-      end
-    end
-
-    context 'submit_review command' do
-      using RSpec::Parameterized::TableSyntax
-
-      where(:note) do
-        [
-          'I like it',
-          '/submit_review'
-        ]
-      end
-
-      with_them do
-        let(:merge_request) { create(:merge_request, source_project: project) }
-        let(:content) { '/submit_review' }
-        let!(:draft_note) { create(:draft_note, note: note, merge_request: merge_request, author: current_user) }
-
-        before do
-          stub_licensed_features(batch_comments: true)
-        end
-
-        it 'submits the users current review' do
-          _, _, message = service.execute(content, merge_request)
-
-          expect { draft_note.reload }.to raise_error(ActiveRecord::RecordNotFound)
-          expect(message).to eq('Submitted the current review.')
         end
       end
     end
@@ -758,6 +900,26 @@ describe QuickActions::InterpretService do
       end
     end
 
+    context 'issuable weights not supported by type' do
+      let_it_be(:incident) { create(:incident, project: project) }
+
+      before do
+        stub_licensed_features(issue_weights: true)
+      end
+
+      it 'does not recognise /weight X' do
+        _, updates = service.execute('/weight 5', incident)
+
+        expect(updates).to be_empty
+      end
+
+      it 'does not recognise /clear_weight' do
+        _, updates = service.execute('/clear_weight', incident)
+
+        expect(updates).to be_empty
+      end
+    end
+
     shared_examples 'empty command' do
       it 'populates {} if content contains an unsupported command' do
         _, updates = service.execute(content, issuable)
@@ -793,101 +955,6 @@ describe QuickActions::InterpretService do
       it_behaves_like 'empty command' do
         let(:content) { "/merge" }
         let(:issuable) { build(:merge_request, source_project: project) }
-      end
-    end
-
-    context 'relate command' do
-      shared_examples 'relate command' do
-        it 'relates issues' do
-          service.execute(content, issue)
-
-          expect(IssueLink.where(source: issue).map(&:target)).to match_array(issues_related)
-        end
-      end
-
-      context 'user is member of group' do
-        before do
-          group.add_developer(user)
-        end
-
-        context 'relate a single issue' do
-          let(:other_issue) { create(:issue, project: project) }
-          let(:issues_related) { [other_issue] }
-          let(:content) { "/relate #{other_issue.to_reference}" }
-
-          it_behaves_like 'relate command'
-        end
-
-        context 'relate multiple issues at once' do
-          let(:second_issue) { create(:issue, project: project) }
-          let(:third_issue) { create(:issue, project: project) }
-          let(:issues_related) { [second_issue, third_issue] }
-          let(:content) { "/relate #{second_issue.to_reference} #{third_issue.to_reference}" }
-
-          it_behaves_like 'relate command'
-        end
-
-        context 'empty relate command' do
-          let(:issues_related) { [] }
-          let(:content) { '/relate' }
-
-          it_behaves_like 'relate command'
-        end
-
-        context 'already having related issues' do
-          let(:second_issue) { create(:issue, project: project) }
-          let(:third_issue) { create(:issue, project: project) }
-          let(:issues_related) { [second_issue, third_issue] }
-          let(:content) { "/relate #{third_issue.to_reference(project)}" }
-
-          before do
-            create(:issue_link, source: issue, target: second_issue)
-          end
-
-          it_behaves_like 'relate command'
-        end
-
-        context 'cross project' do
-          let(:another_group) { create(:group, :public) }
-          let(:other_project) { create(:project, group: another_group) }
-
-          before do
-            another_group.add_developer(current_user)
-          end
-
-          context 'relate a cross project issue' do
-            let(:other_issue) { create(:issue, project: other_project) }
-            let(:issues_related) { [other_issue] }
-            let(:content) { "/relate #{other_issue.to_reference(project)}" }
-
-            it_behaves_like 'relate command'
-          end
-
-          context 'relate multiple cross projects issues at once' do
-            let(:second_issue) { create(:issue, project: other_project) }
-            let(:third_issue) { create(:issue, project: other_project) }
-            let(:issues_related) { [second_issue, third_issue] }
-            let(:content) { "/relate #{second_issue.to_reference(project)} #{third_issue.to_reference(project)}" }
-
-            it_behaves_like 'relate command'
-          end
-
-          context 'relate a non-existing issue' do
-            let(:issues_related) { [] }
-            let(:content) { "/relate imaginary##{non_existing_record_iid}" }
-
-            it_behaves_like 'relate command'
-          end
-
-          context 'relate a private issue' do
-            let(:private_project) { create(:project, :private) }
-            let(:other_issue) { create(:issue, project: private_project) }
-            let(:issues_related) { [] }
-            let(:content) { "/relate #{other_issue.to_reference(project)}" }
-
-            it_behaves_like 'relate command'
-          end
-        end
       end
     end
   end

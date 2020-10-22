@@ -1,5 +1,0 @@
----
-title: Preload path locks for TreeSummary
-merge_request: 29949
-author:
-type: performance

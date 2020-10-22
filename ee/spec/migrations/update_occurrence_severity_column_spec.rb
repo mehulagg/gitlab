@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require_migration!
 
-require Rails.root.join('db', 'post_migrate', '20200227140242_update_occurrence_severity_column.rb')
-
-describe UpdateOccurrenceSeverityColumn do
+RSpec.describe UpdateOccurrenceSeverityColumn do
   let(:vulnerabilities) { table(:vulnerability_occurrences) }
   let(:identifiers) { table(:vulnerability_identifiers) }
   let(:scanners) { table(:vulnerability_scanners) }

@@ -3,6 +3,8 @@
 module Gitlab
   module DiscussionsDiff
     class HighlightCache
+      extend Gitlab::Utils::Gzip
+
       class << self
         VERSION = 1
         EXPIRATION = 1.week
@@ -17,7 +19,7 @@ module Gitlab
               mapping.each do |raw_key, value|
                 key = cache_key_for(raw_key)
 
-                multi.set(key, value.to_json, ex: EXPIRATION)
+                multi.set(key, gzip_compress(value.to_json), ex: EXPIRATION)
               end
             end
           end
@@ -36,13 +38,15 @@ module Gitlab
 
           content =
             Redis::Cache.with do |redis|
-              redis.mget(keys)
+              Gitlab::Instrumentation::RedisClusterValidator.allow_cross_slot_commands do
+                redis.mget(keys)
+              end
             end
 
           content.map! do |lines|
             next unless lines
 
-            Gitlab::Json.parse(lines).map! do |line|
+            Gitlab::Json.parse(gzip_decompress(lines)).map! do |line|
               Gitlab::Diff::Line.safe_init_from_hash(line)
             end
           end
@@ -58,7 +62,11 @@ module Gitlab
 
           keys = raw_keys.map { |id| cache_key_for(id) }
 
-          Redis::Cache.with { |redis| redis.del(keys) }
+          Redis::Cache.with do |redis|
+            Gitlab::Instrumentation::RedisClusterValidator.allow_cross_slot_commands do
+              redis.del(keys)
+            end
+          end
         end
 
         def cache_key_for(raw_key)

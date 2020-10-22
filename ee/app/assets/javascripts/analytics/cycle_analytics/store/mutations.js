@@ -6,10 +6,6 @@ export default {
   [types.SET_FEATURE_FLAGS](state, featureFlags) {
     state.featureFlags = featureFlags;
   },
-  [types.SET_SELECTED_GROUP](state, group) {
-    state.selectedGroup = convertObjectPropsToCamelCase(group, { deep: true });
-    state.selectedProjects = [];
-  },
   [types.SET_SELECTED_PROJECTS](state, projects) {
     state.selectedProjects = projects;
   },
@@ -22,8 +18,6 @@ export default {
   },
   [types.REQUEST_CYCLE_ANALYTICS_DATA](state) {
     state.isLoading = true;
-    state.isCreatingCustomStage = false;
-    state.isEditingCustomStage = false;
   },
   [types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS](state) {
     state.errorCode = null;
@@ -36,6 +30,7 @@ export default {
   [types.REQUEST_STAGE_DATA](state) {
     state.isLoadingStage = true;
     state.isEmptyStage = false;
+    state.selectedStageError = '';
   },
   [types.RECEIVE_STAGE_DATA_SUCCESS](state, events = []) {
     state.currentStageEvents = events.map(fields =>
@@ -43,19 +38,21 @@ export default {
     );
     state.isEmptyStage = !events.length;
     state.isLoadingStage = false;
+    state.selectedStageError = '';
   },
-  [types.RECEIVE_STAGE_DATA_ERROR](state) {
+  [types.RECEIVE_STAGE_DATA_ERROR](state, message) {
     state.isEmptyStage = true;
     state.isLoadingStage = false;
+    state.selectedStageError = message;
   },
   [types.REQUEST_STAGE_MEDIANS](state) {
     state.medians = {};
   },
   [types.RECEIVE_STAGE_MEDIANS_SUCCESS](state, medians = []) {
     state.medians = medians.reduce(
-      (acc, { id, value }) => ({
+      (acc, { id, value, error = null }) => ({
         ...acc,
-        [id]: value,
+        [id]: { value, error },
       }),
       {},
     );
@@ -63,73 +60,23 @@ export default {
   [types.RECEIVE_STAGE_MEDIANS_ERROR](state) {
     state.medians = {};
   },
-  [types.SHOW_CUSTOM_STAGE_FORM](state) {
-    state.isCreatingCustomStage = true;
-    state.isEditingCustomStage = false;
-    state.customStageFormInitialData = null;
-    state.customStageFormErrors = null;
-  },
-  [types.SHOW_EDIT_CUSTOM_STAGE_FORM](state, initialData) {
-    state.isEditingCustomStage = true;
-    state.isCreatingCustomStage = false;
-    state.customStageFormInitialData = initialData;
-    state.customStageFormErrors = null;
-  },
-  [types.HIDE_CUSTOM_STAGE_FORM](state) {
-    state.isEditingCustomStage = false;
-    state.isCreatingCustomStage = false;
-    state.customStageFormInitialData = null;
-    state.customStageFormErrors = null;
-  },
-  [types.CLEAR_CUSTOM_STAGE_FORM_ERRORS](state) {
-    state.customStageFormErrors = null;
-  },
-  [types.REQUEST_GROUP_STAGES_AND_EVENTS](state) {
+  [types.REQUEST_GROUP_STAGES](state) {
     state.stages = [];
-    state.customStageFormEvents = [];
   },
-  [types.RECEIVE_GROUP_STAGES_AND_EVENTS_ERROR](state) {
+  [types.RECEIVE_GROUP_STAGES_ERROR](state) {
     state.stages = [];
-    state.customStageFormEvents = [];
   },
-  [types.RECEIVE_GROUP_STAGES_AND_EVENTS_SUCCESS](state, data) {
-    const { events = [], stages = [] } = data;
+  [types.RECEIVE_GROUP_STAGES_SUCCESS](state, stages) {
     state.stages = transformRawStages(stages);
-
-    state.customStageFormEvents = events.map(ev =>
-      convertObjectPropsToCamelCase(ev, { deep: true }),
-    );
-  },
-  [types.REQUEST_CREATE_CUSTOM_STAGE](state) {
-    state.isSavingCustomStage = true;
-    state.customStageFormErrors = {};
-  },
-  [types.RECEIVE_CREATE_CUSTOM_STAGE_ERROR](state, { errors = null } = {}) {
-    state.isSavingCustomStage = false;
-    state.customStageFormErrors = convertObjectPropsToCamelCase(errors, { deep: true });
-  },
-  [types.RECEIVE_CREATE_CUSTOM_STAGE_SUCCESS](state) {
-    state.isSavingCustomStage = false;
-    state.customStageFormErrors = null;
-    state.customStageFormInitialData = null;
   },
   [types.REQUEST_UPDATE_STAGE](state) {
     state.isLoading = true;
-    state.isSavingCustomStage = true;
-    state.customStageFormErrors = null;
   },
   [types.RECEIVE_UPDATE_STAGE_SUCCESS](state) {
     state.isLoading = false;
-    state.isSavingCustomStage = false;
-    state.isEditingCustomStage = false;
-    state.customStageFormErrors = null;
-    state.customStageFormInitialData = null;
   },
-  [types.RECEIVE_UPDATE_STAGE_ERROR](state, { errors = null, data } = {}) {
+  [types.RECEIVE_UPDATE_STAGE_ERROR](state) {
     state.isLoading = false;
-    state.isSavingCustomStage = false;
-    state.customStageFormErrors = convertObjectPropsToCamelCase(errors, { deep: true });
-    state.customStageFormInitialData = convertObjectPropsToCamelCase(data, { deep: true });
   },
   [types.REQUEST_REMOVE_STAGE](state) {
     state.isLoading = true;
@@ -140,15 +87,17 @@ export default {
   [types.INITIALIZE_CYCLE_ANALYTICS](
     state,
     {
-      group: selectedGroup = null,
+      group = null,
       createdAfter: startDate = null,
       createdBefore: endDate = null,
       selectedProjects = [],
+      selectedValueStream = {},
     } = {},
   ) {
     state.isLoading = true;
-    state.selectedGroup = selectedGroup;
+    state.currentGroup = group;
     state.selectedProjects = selectedProjects;
+    state.selectedValueStream = selectedValueStream;
     state.startDate = startDate;
     state.endDate = endDate;
   },
@@ -166,5 +115,49 @@ export default {
   [types.RECEIVE_REORDER_STAGE_ERROR](state) {
     state.isSavingStageOrder = false;
     state.errorSavingStageOrder = true;
+  },
+  [types.REQUEST_CREATE_VALUE_STREAM](state) {
+    state.isCreatingValueStream = true;
+    state.createValueStreamErrors = {};
+  },
+  [types.RECEIVE_CREATE_VALUE_STREAM_ERROR](state, { errors } = {}) {
+    state.isCreatingValueStream = false;
+    state.createValueStreamErrors = errors;
+  },
+  [types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS](state) {
+    state.isCreatingValueStream = false;
+    state.createValueStreamErrors = {};
+  },
+  [types.REQUEST_DELETE_VALUE_STREAM](state) {
+    state.isDeletingValueStream = true;
+    state.deleteValueStreamError = null;
+  },
+  [types.RECEIVE_DELETE_VALUE_STREAM_ERROR](state, message) {
+    state.isDeletingValueStream = false;
+    state.deleteValueStreamError = message;
+  },
+  [types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS](state) {
+    state.isDeletingValueStream = false;
+    state.deleteValueStreamError = null;
+  },
+  [types.SET_SELECTED_VALUE_STREAM](state, valueStream) {
+    state.selectedValueStream = valueStream;
+  },
+  [types.REQUEST_VALUE_STREAMS](state) {
+    state.isLoadingValueStreams = true;
+    state.valueStreams = [];
+  },
+  [types.RECEIVE_VALUE_STREAMS_ERROR](state, errCode) {
+    state.errCode = errCode;
+    state.isLoadingValueStreams = false;
+    state.valueStreams = [];
+  },
+  [types.RECEIVE_VALUE_STREAMS_SUCCESS](state, data) {
+    state.isLoadingValueStreams = false;
+    state.valueStreams = data
+      .map(convertObjectPropsToCamelCase)
+      .sort(({ name: aName = '' }, { name: bName = '' }) => {
+        return aName.toUpperCase() > bName.toUpperCase() ? 1 : -1;
+      });
   },
 };

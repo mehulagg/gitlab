@@ -2,13 +2,14 @@
 
 require "spec_helper"
 
-describe Gitlab::Git::Commit, :seed_helper do
+RSpec.describe Gitlab::Git::Commit, :seed_helper do
   include GitHelpers
 
   let(:repository) { Gitlab::Git::Repository.new('default', TEST_REPO_PATH, '', 'group/project') }
   let(:rugged_repo) do
     Rugged::Repository.new(File.join(TestEnv.repos_path, TEST_REPO_PATH))
   end
+
   let(:commit) { described_class.find(repository, SeedRepo::Commit::ID) }
   let(:rugged_commit) { rugged_repo.lookup(SeedRepo::Commit::ID) }
 
@@ -161,6 +162,26 @@ describe Gitlab::Git::Commit, :seed_helper do
         expect(described_class.find(repository, "+123_4532530XYZ")).to be_nil
       end
 
+      it "returns nil for id started with dash" do
+        expect(described_class.find(repository, "-HEAD")).to be_nil
+      end
+
+      it "returns nil for id containing colon" do
+        expect(described_class.find(repository, "HEAD:")).to be_nil
+      end
+
+      it "returns nil for id containing space" do
+        expect(described_class.find(repository, "HE AD")).to be_nil
+      end
+
+      it "returns nil for id containing tab" do
+        expect(described_class.find(repository, "HE\tAD")).to be_nil
+      end
+
+      it "returns nil for id containing NULL" do
+        expect(described_class.find(repository, "HE\x00AD")).to be_nil
+      end
+
       context 'with broken repo' do
         let(:repository) { Gitlab::Git::Repository.new('default', TEST_BROKEN_REPO_PATH, '', 'group/project') }
 
@@ -171,7 +192,7 @@ describe Gitlab::Git::Commit, :seed_helper do
     end
 
     describe '.find with Gitaly enabled' do
-      it_should_behave_like '.find'
+      it_behaves_like '.find'
     end
 
     describe '.find with Rugged enabled', :enable_rugged do
@@ -183,7 +204,7 @@ describe Gitlab::Git::Commit, :seed_helper do
         described_class.find(repository, SeedRepo::Commit::ID)
       end
 
-      it_should_behave_like '.find'
+      it_behaves_like '.find'
     end
 
     describe '.last_for_path' do
@@ -204,6 +225,34 @@ describe Gitlab::Git::Commit, :seed_helper do
           subject { super().id }
 
           it { is_expected.to eq(SeedRepo::Commit::ID) }
+        end
+      end
+
+      context 'pathspec' do
+        let(:pathspec) { 'files/ruby/*' }
+
+        context 'with default literal_pathspec value' do
+          it 'finds the seed commit' do
+            commit = described_class.last_for_path(repository, 'master', pathspec)
+
+            expect(commit.id).to eq(SeedRepo::Commit::ID)
+          end
+        end
+
+        context 'with literal_pathspec set to false' do
+          it 'finds the seed commit' do
+            commit = described_class.last_for_path(repository, 'master', pathspec, literal_pathspec: false)
+
+            expect(commit.id).to eq(SeedRepo::Commit::ID)
+          end
+        end
+
+        context 'with literal_pathspec set to true' do
+          it 'does not find the seed commit' do
+            commit = described_class.last_for_path(repository, 'master', pathspec, literal_pathspec: true)
+
+            expect(commit).to be_nil
+          end
         end
       end
 
@@ -425,7 +474,7 @@ describe Gitlab::Git::Commit, :seed_helper do
     end
 
     describe '.batch_by_oid with Gitaly enabled' do
-      it_should_behave_like '.batch_by_oid'
+      it_behaves_like '.batch_by_oid'
 
       context 'when oids is empty' do
         it 'makes no Gitaly request' do
@@ -437,7 +486,7 @@ describe Gitlab::Git::Commit, :seed_helper do
     end
 
     describe '.batch_by_oid with Rugged enabled', :enable_rugged do
-      it_should_behave_like '.batch_by_oid'
+      it_behaves_like '.batch_by_oid'
 
       it 'calls out to the Rugged implementation' do
         allow_next_instance_of(Rugged) do |instance|
@@ -540,7 +589,7 @@ describe Gitlab::Git::Commit, :seed_helper do
   end
 
   skip 'move this test to gitaly-ruby' do
-    describe '#init_from_rugged' do
+    RSpec.describe '#init_from_rugged' do
       let(:gitlab_commit) { described_class.new(repository, rugged_commit) }
 
       subject { gitlab_commit }

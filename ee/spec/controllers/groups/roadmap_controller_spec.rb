@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Groups::RoadmapController do
+RSpec.describe Groups::RoadmapController do
   let(:group) { create(:group, :private) }
   let(:epic)  { create(:epic, group: group) }
   let(:user)  { create(:user) }
@@ -9,7 +9,7 @@ describe Groups::RoadmapController do
   describe '#show' do
     context 'when the user is signed in' do
       shared_examples_for 'returns 404 status' do
-        it do
+        specify do
           get :show, params: { group_id: group }
 
           expect(response).to have_gitlab_http_status(:not_found)
@@ -49,7 +49,7 @@ describe Groups::RoadmapController do
             end
 
             it 'defaults to sort_value_start_date_soon' do
-              user.user_preference.update(roadmaps_sort: nil)
+              user.user_preference.update!(roadmaps_sort: nil)
 
               get :show, params: { group_id: group }
 
@@ -59,7 +59,7 @@ describe Groups::RoadmapController do
 
           context 'when roadmaps_sort is present' do
             it 'update roadmaps_sort with current value' do
-              user.user_preference.update(roadmaps_sort: 'created_desc')
+              user.user_preference.update!(roadmaps_sort: 'created_desc')
 
               get :show, params: { group_id: group, sort: 'start_date_asc' }
 

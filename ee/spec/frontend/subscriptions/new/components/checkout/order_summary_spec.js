@@ -19,6 +19,7 @@ describe('Order Summary', () => {
   const initialData = {
     planData: JSON.stringify(planData),
     planId: 'thirdPlanId',
+    namespaceId: null,
     fullName: 'Full Name',
   };
 

@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # User lookup via OpenSSH's AuthorizedPrincipalsCommand
 
 > [Available in](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/19911) GitLab
@@ -50,7 +56,7 @@ the GitLab server itself, but your setup may vary. If the CA is only
 used for GitLab consider putting this in the `Match User git` section
 (described below).
 
-The SSH certificates being issued by that CA **MUST** have a "key id"
+The SSH certificates being issued by that CA **MUST** have a "key ID"
 corresponding to that user's username on GitLab, e.g. (some output
 omitted for brevity):
 
@@ -77,7 +83,7 @@ own `AuthorizedPrincipalsCommand` to do that mapping instead of using
 our provided default.
 
 The important part is that the `AuthorizedPrincipalsCommand` must be
-able to map from the "key id" to a GitLab username in some way, the
+able to map from the "key ID" to a GitLab username in some way, the
 default command we ship assumes there's a 1=1 mapping between the two,
 since the whole point of this is to allow us to extract a GitLab
 username from the key itself, instead of relying on something like the
@@ -122,7 +128,7 @@ into multiple lines of `authorized_keys` output, as described in the
 Normally when using the `AuthorizedKeysCommand` with OpenSSH the
 principal is some "group" that's allowed to log into that
 server. However with GitLab it's only used to appease OpenSSH's
-requirement for it, we effectively only care about the "key id" being
+requirement for it, we effectively only care about the "key ID" being
 correct. Once that's extracted GitLab will enforce its own ACLs for
 that user (e.g. what projects the user can access).
 
@@ -158,7 +164,7 @@ Users can still bypass SSH certificate authentication by manually
 uploading an SSH public key to their profile, relying on the
 `~/.ssh/authorized_keys` fallback to authenticate it. There's
 currently no feature to prevent this, [but there's an open request for
-adding it](https://gitlab.com/gitlab-org/gitlab-foss/issues/49218).
+adding it](https://gitlab.com/gitlab-org/gitlab/-/issues/23260).
 
 Such a restriction can currently be hacked in by e.g. providing a
 custom `AuthorizedKeysCommand` which checks if the discovered key-ID

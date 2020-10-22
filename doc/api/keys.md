@@ -1,10 +1,17 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Keys API
 
 ## Get SSH key with user by ID of an SSH key
 
 Get SSH key with user by ID of an SSH key. Note only administrators can lookup SSH key with user by ID of an SSH key.
 
-```text
+```plaintext
 GET /keys/:id
 ```
 
@@ -15,7 +22,7 @@ GET /keys/:id
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/keys/1
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/keys/1"
 ```
 
 ```json
@@ -63,7 +70,7 @@ curl --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/a
 
 You can search for a user that owns a specific SSH key. Note only administrators can lookup SSH key with the fingerprint of an SSH key.
 
-```text
+```plaintext
 GET /keys
 ```
 
@@ -74,7 +81,7 @@ GET /keys
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/keys?fingerprint=ba:81:59:68:d7:6c:cd:02:02:bf:6a:9b:55:4e:af:d1'
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/keys?fingerprint=ba:81:59:68:d7:6c:cd:02:02:bf:6a:9b:55:4e:af:d1"
 ```
 
 If using sha256 fingerprint API calls, make sure that the fingerprint is URL-encoded.
@@ -82,7 +89,7 @@ If using sha256 fingerprint API calls, make sure that the fingerprint is URL-enc
 For example, `/` is represented by `%2F` and `:` is represented by`%3A`:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/keys?fingerprint=SHA256%3AnUhzNyftwADy8AH3wFY31tAKs7HufskYTte2aXo%2FlCg
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/keys?fingerprint=SHA256%3AnUhzNyftwADy8AH3wFY31tAKs7HufskYTte2aXo%2FlCg"
 ```
 
 Example response:
@@ -133,7 +140,7 @@ Example response:
 
 ## Get user by deploy key fingerprint
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/119209) in GitLab 12.7.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/119209) in GitLab 12.7.
 
 Deploy keys are bound to the creating user, so if you query with a deploy key
 fingerprint you get additional information about the projects using that key.
@@ -141,7 +148,7 @@ fingerprint you get additional information about the projects using that key.
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/keys?fingerprint=SHA256%3AnUhzNyftwADy8AH3wFY31tAKs7HufskYTte2aXo%2FlCg
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/keys?fingerprint=SHA256%3AnUhzNyftwADy8AH3wFY31tAKs7HufskYTte2aXo%2FlCg"
 ```
 
 Example response:

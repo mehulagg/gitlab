@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::AppTextLogger do
+RSpec.describe Gitlab::AppTextLogger do
   subject { described_class.new('/dev/null') }
 
   let(:hash_message) { { message: 'Message', project_id: 123 } }
@@ -17,7 +17,7 @@ describe Gitlab::AppTextLogger do
   end
 
   it 'logs time in UTC with ISO8601.3 standard' do
-    Timecop.freeze do
+    freeze_time do
       expect(subject.format_message('INFO', Time.now, nil, string_message))
         .to include(Time.now.utc.iso8601(3))
     end

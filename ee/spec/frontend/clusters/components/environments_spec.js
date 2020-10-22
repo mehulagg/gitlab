@@ -1,7 +1,6 @@
 import { mount } from '@vue/test-utils';
 import Environments from 'ee/clusters/components/environments.vue';
-import { GlTable, GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlTable, GlEmptyState, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import environments from './mock_data';
 
 describe('Environments', () => {
@@ -28,11 +27,13 @@ describe('Environments', () => {
 
   it('renders an empty state if no deployments are found', () => {
     const emptyState = wrapper.find(GlEmptyState);
-    const emptyStateText =
-      'No deployments found Ensure your environment is part of the deploy stage of your CI pipeline to track deployments to your cluster.  Learn more about deploying to a cluster';
+    const emptyStateText = emptyState.text();
 
     expect(emptyState.exists()).toBe(true);
-    expect(emptyState.text()).toEqual(emptyStateText);
+    expect(emptyStateText).toContain(
+      'No deployments found Ensure your environment is part of the deploy stage of your CI pipeline to track deployments to your cluster.',
+    );
+    expect(emptyStateText).toContain('Learn more about deploying to a cluster');
   });
 
   describe('environments table', () => {
@@ -41,7 +42,7 @@ describe('Environments', () => {
     beforeAll(() => {
       wrapper = mount(Environments, {
         propsData: { ...propsData, environments },
-        stubs: { deploymentInstance: '<div class="js-deployment-instance"></div>' },
+        stubs: { deploymentInstance: { template: '<div class="js-deployment-instance"></div>' } },
       });
 
       table = wrapper.find(GlTable);
@@ -100,7 +101,7 @@ describe('Environments', () => {
 
           if (status !== 'loading' && instances.length === 0) {
             const emptyState = tableRows.at(i).find('.deployments-empty');
-            const emptyStateIcon = emptyState.find(Icon);
+            const emptyStateIcon = emptyState.find(GlIcon);
 
             expect(emptyState.exists()).toBe(true);
             expect(emptyStateIcon.exists()).toBe(true);

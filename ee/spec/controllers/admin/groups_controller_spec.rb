@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Admin::GroupsController do
+RSpec.describe Admin::GroupsController do
   let(:admin) { create(:admin) }
   let(:group) { create(:group) }
 

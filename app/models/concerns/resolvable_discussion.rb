@@ -23,12 +23,14 @@ module ResolvableDiscussion
       :last_note
     )
 
-    delegate :potentially_resolvable?, to: :first_note
+    delegate :potentially_resolvable?,
+             :noteable_id,
+             :noteable_type,
+             to: :first_note
 
     delegate  :resolved_at,
               :resolved_by,
               :resolved_by_push?,
-
               to: :last_resolved_note,
               allow_nil: true
   end
@@ -79,7 +81,7 @@ module ResolvableDiscussion
     return false unless current_user
     return false unless resolvable?
 
-    current_user == self.noteable.author ||
+    current_user == self.noteable.try(:author) ||
       current_user.can?(:resolve_note, self.project)
   end
 

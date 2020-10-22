@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: reference, how-to
 ---
 
@@ -71,7 +74,7 @@ You can skip this step if you already have your GitLab repositories searchable i
 
 ### Configure your GitLab instance with Sourcegraph
 
-1. In GitLab, go to **Admin Area > Settings > Integrations**.
+1. In GitLab, go to **Admin Area > Settings > General**.
 1. Expand the **Sourcegraph** configuration section.
 1. Check **Enable Sourcegraph**.
 1. Set the Sourcegraph URL to your Sourcegraph instance, e.g., `https://sourcegraph.example.com`.
@@ -117,7 +120,7 @@ for updates.
 
 ### Sourcegraph isn't working
 
-If you enabled Sourcegraph for your project but still it doesn't looklike it's working, it might be because Sourcegraph has not indexed theproject yet. You can check for Sourcegraph's availability of your project by visiting `https://sourcegraph.com/gitlab.com/<project-path>`replacing `<project-path>` with the path to your GitLab project.
+If you enabled Sourcegraph for your project but still it doesn't look like it's working, it might be because Sourcegraph has not indexed the project yet. You can check for Sourcegraph's availability of your project by visiting `https://sourcegraph.com/gitlab.com/<project-path>`replacing `<project-path>` with the path to your GitLab project.
 
 ## Sourcegraph and Privacy
 

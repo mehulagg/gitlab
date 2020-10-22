@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Kerberos::Authentication do
+RSpec.describe Gitlab::Kerberos::Authentication do
   let(:user) { create(:omniauth_user, provider: :kerberos, extern_uid: 'gitlab@FOO.COM') }
   let(:login) { 'john' }
   let(:password) { 'password' }

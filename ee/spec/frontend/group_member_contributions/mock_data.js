@@ -41,6 +41,7 @@ export const mockSortOrders = {
   issuesClosed: 1,
   issuesCreated: 1,
   mergeRequestsCreated: 1,
+  mergeRequestsApproved: 1,
   mergeRequestsMerged: 1,
   push: 1,
   totalEvents: 1,

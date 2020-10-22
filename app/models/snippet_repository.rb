@@ -7,10 +7,12 @@ class SnippetRepository < ApplicationRecord
   EMPTY_FILE_PATTERN = /^#{DEFAULT_EMPTY_FILE_NAME}(\d+)\.txt$/.freeze
 
   CommitError = Class.new(StandardError)
+  InvalidPathError = Class.new(CommitError)
+  InvalidSignatureError = Class.new(CommitError)
 
   belongs_to :snippet, inverse_of: :snippet_repository
 
-  delegate :repository, to: :snippet
+  delegate :repository, :repository_storage, to: :snippet
 
   class << self
     def find_snippet(disk_path)
@@ -40,17 +42,32 @@ class SnippetRepository < ApplicationRecord
   rescue Gitlab::Git::Index::IndexError,
          Gitlab::Git::CommitError,
          Gitlab::Git::PreReceiveError,
-         Gitlab::Git::CommandError => e
-    raise CommitError, e.message
+         Gitlab::Git::CommandError,
+         ArgumentError => error
+
+    logger.error(message: "Snippet git error. Reason: #{error.message}", snippet: snippet.id)
+
+    raise commit_error_exception(error)
   end
 
   def transform_file_entries(files)
     next_index = get_last_empty_file_index + 1
 
-    files.each do |file_entry|
+    files.map do |file_entry|
       file_entry[:file_path] = file_path_for(file_entry, next_index) { next_index += 1 }
       file_entry[:action] = infer_action(file_entry) unless file_entry[:action]
-    end
+      file_entry[:action] = file_entry[:action].to_sym
+
+      if only_rename_action?(file_entry)
+        file_entry[:infer_content] = true
+      elsif empty_update_action?(file_entry)
+        # There is no need to perform a repository operation
+        # When the update action has no content
+        file_entry = nil
+      end
+
+      file_entry
+    end.compact
   end
 
   def file_path_for(file_entry, next_index)
@@ -76,7 +93,7 @@ class SnippetRepository < ApplicationRecord
   end
 
   def get_last_empty_file_index
-    repository.ls_files(nil).inject(0) do |max, file|
+    repository.ls_files(snippet.default_branch).inject(0) do |max, file|
       idx = file[EMPTY_FILE_PATTERN, 1].to_i
       [idx, max].max
     end
@@ -85,4 +102,34 @@ class SnippetRepository < ApplicationRecord
   def build_empty_file_name(index)
     "#{DEFAULT_EMPTY_FILE_NAME}#{index}.txt"
   end
+
+  def commit_error_exception(err)
+    if invalid_path_error?(err)
+      InvalidPathError.new('Invalid file name') # To avoid returning the message with the path included
+    elsif invalid_signature_error?(err)
+      InvalidSignatureError.new(err.message)
+    else
+      CommitError.new(err.message)
+    end
+  end
+
+  def invalid_path_error?(err)
+    err.is_a?(Gitlab::Git::Index::IndexError) &&
+      err.message.downcase.start_with?('invalid path', 'path cannot include directory traversal')
+  end
+
+  def invalid_signature_error?(err)
+    err.is_a?(ArgumentError) &&
+      err.message.downcase.match?(/failed to parse signature/)
+  end
+
+  def only_rename_action?(action)
+    action[:action] == :move && action[:content].nil?
+  end
+
+  def empty_update_action?(action)
+    action[:action] == :update && action[:content].nil?
+  end
 end
+
+SnippetRepository.prepend_if_ee('EE::SnippetRepository')

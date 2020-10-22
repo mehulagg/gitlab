@@ -1,11 +1,14 @@
 ---
+stage: Create
+group: Source Code
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference, howto
 description: "Documentation on Git file blame."
 ---
 
 # Git file blame
 
-> [Introduced](https://git.sphere.ly/staff/publicgitlab/commit/39c657930625ddc3ac8a921f01ffc83acadce68f) in GitLab 2.5
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/commit/39c657930625ddc3ac8a921f01ffc83acadce68f) in GitLab 2.5.
 
 [Git blame](https://git-scm.com/docs/git-blame) provides more information
 about every line in a file, including the last modified time, author, and
@@ -25,7 +28,7 @@ for that commit.
 
 ## Blame previous commit
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/19299) in GitLab 12.7.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/19299) in GitLab 12.7.
 
 To see earlier revisions of a specific line, click **View blame prior to this change**
 until you've found the changes you're interested in viewing:

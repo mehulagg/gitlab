@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::SidekiqLogging::StructuredLogger do
+RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
   describe '#call' do
     let(:timestamp) { Time.iso8601('2018-01-01T12:00:00.000Z') }
     let(:created_at) { timestamp - 1.second }
@@ -21,7 +21,10 @@ describe Gitlab::SidekiqLogging::StructuredLogger do
         "correlation_id" => 'cid',
         "error_message" => "wrong number of arguments (2 for 3)",
         "error_class" => "ArgumentError",
-        "error_backtrace" => []
+        "error_backtrace" => [],
+        "db_count" => 1,
+        "db_write_count" => 0,
+        "db_cached_count" => 0
       }
     end
 
@@ -38,6 +41,7 @@ describe Gitlab::SidekiqLogging::StructuredLogger do
         'scheduling_latency_s' => scheduling_latency_s
       )
     end
+
     let(:end_payload) do
       start_payload.merge(
         'message' => 'TestWorker JID-da883554ee4fe414012f5f42: done: 0.0 sec',
@@ -48,6 +52,7 @@ describe Gitlab::SidekiqLogging::StructuredLogger do
         'db_duration_s' => 0.0
       )
     end
+
     let(:exception_payload) do
       end_payload.merge(
         'message' => 'TestWorker JID-da883554ee4fe414012f5f42: fail: 0.0 sec',
@@ -197,7 +202,10 @@ describe Gitlab::SidekiqLogging::StructuredLogger do
 
       let(:expected_end_payload_with_db) do
         expected_end_payload.merge(
-          'db_duration_s' => a_value >= 0.1
+          'db_duration_s' => a_value >= 0.1,
+          'db_count' => 1,
+          'db_cached_count' => 0,
+          'db_write_count' => 0
         )
       end
 
@@ -216,6 +224,27 @@ describe Gitlab::SidekiqLogging::StructuredLogger do
 
         subject.call(job, 'test_queue') { ActiveRecord::Base.connection.execute('SELECT pg_sleep(0.1);') }
         subject.call(job, 'test_queue') { }
+      end
+    end
+
+    context 'when there is extra metadata set for the done log' do
+      let(:expected_start_payload) { start_payload.except('args') }
+
+      let(:expected_end_payload) do
+        end_payload.except('args').merge("#{ApplicationWorker::LOGGING_EXTRA_KEY}.key1" => 15, "#{ApplicationWorker::LOGGING_EXTRA_KEY}.key2" => 16)
+      end
+
+      it 'logs it in the done log' do
+        Timecop.freeze(timestamp) do
+          expect(logger).to receive(:info).with(expected_start_payload).ordered
+          expect(logger).to receive(:info).with(expected_end_payload).ordered
+
+          subject.call(job, 'test_queue') do
+            job["#{ApplicationWorker::LOGGING_EXTRA_KEY}.key1"] = 15
+            job["#{ApplicationWorker::LOGGING_EXTRA_KEY}.key2"] = 16
+            job['key that will be ignored because it does not start with extra.'] = 17
+          end
+        end
       end
     end
   end

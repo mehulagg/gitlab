@@ -1,4 +1,3 @@
-import { viewerInformationForPath } from '~/vue_shared/components/content_viewer/lib/viewer_utils';
 import { decorateData, sortTree } from '../stores/utils';
 
 export const splitParent = path => {
@@ -13,16 +12,7 @@ export const splitParent = path => {
 /**
  * Create file objects from a list of file paths.
  */
-export const decorateFiles = ({
-  data,
-  projectId,
-  branchId,
-  tempFile = false,
-  content = '',
-  base64 = false,
-  binary = false,
-  rawPath = '',
-}) => {
+export const decorateFiles = ({ data, tempFile = false, content = '', rawPath = '' }) => {
   const treeList = [];
   const entries = {};
 
@@ -42,14 +32,10 @@ export const decorateFiles = ({
     parentPath = parentFolder && parentFolder.path;
 
     const tree = decorateData({
-      projectId,
-      branchId,
       id: path,
       name,
       path,
-      url: `/${projectId}/tree/${branchId}/-/${path}/`,
       type: 'tree',
-      parentTreeUrl: parentFolder ? parentFolder.url : `/${projectId}/tree/${branchId}/`,
       tempFile,
       changed: tempFile,
       opened: tempFile,
@@ -75,25 +61,17 @@ export const decorateFiles = ({
     const fileFolder = parent && insertParent(parent);
 
     if (name) {
-      const previewMode = viewerInformationForPath(name);
       parentPath = fileFolder && fileFolder.path;
 
       file = decorateData({
-        projectId,
-        branchId,
         id: path,
         name,
         path,
-        url: `/${projectId}/blob/${branchId}/-/${path}`,
         type: 'blob',
-        parentTreeUrl: fileFolder ? fileFolder.url : `/${projectId}/blob/${branchId}`,
         tempFile,
         changed: tempFile,
         content,
-        base64,
-        binary: (previewMode && previewMode.binary) || binary,
         rawPath,
-        previewMode,
         parentPath,
       });
 

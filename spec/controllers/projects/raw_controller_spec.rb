@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::RawController do
+RSpec.describe Projects::RawController do
   include RepoHelpers
 
   let(:project) { create(:project, :public, :repository) }
@@ -33,6 +33,11 @@ describe Projects::RawController do
 
       it_behaves_like 'project cache control headers'
       it_behaves_like 'content disposition headers'
+      it_behaves_like 'uncached response' do
+        before do
+          subject
+        end
+      end
     end
 
     context 'image header' do

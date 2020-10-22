@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::BackgroundMigration::FixOrphanPromotedIssues, schema: 20200207185149 do
+RSpec.describe Gitlab::BackgroundMigration::FixOrphanPromotedIssues, schema: 20200207185149 do
   let(:users) { table(:users) }
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }

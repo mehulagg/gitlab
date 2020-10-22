@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-shared_examples 'security dashboard JSON endpoint' do
+RSpec.shared_examples 'security dashboard JSON endpoint' do
   context 'when the user is authenticated' do
     let(:security_application_controller_user) { create(:user) }
 

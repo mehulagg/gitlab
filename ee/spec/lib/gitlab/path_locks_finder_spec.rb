@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::PathLocksFinder do
+RSpec.describe Gitlab::PathLocksFinder do
   let_it_be(:project) { create :project }
   let_it_be(:user) { create :user }
   let_it_be(:lock1) { create(:path_lock, project: project, path: 'app') }

@@ -5,7 +5,6 @@ module IssuableCollections
   include PaginatedCollection
   include SortingHelper
   include SortingPreference
-  include Gitlab::IssuableMetadata
   include Gitlab::Utils::StrongMemoize
 
   included do
@@ -42,10 +41,13 @@ module IssuableCollections
   end
 
   def set_pagination
+    row_count = finder.row_count
+
     @issuables          = @issuables.page(params[:page])
     @issuables          = per_page_for_relative_position if params[:sort] == 'relative_position'
-    @issuable_meta_data = issuable_meta_data(@issuables, collection_type, current_user)
-    @total_pages        = issuable_page_count(@issuables)
+    @issuables          = @issuables.without_count if row_count == -1
+    @issuable_meta_data = Gitlab::IssuableMetadata.new(current_user, @issuables).data
+    @total_pages        = page_count_for_relation(@issuables, row_count)
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
@@ -59,14 +61,11 @@ module IssuableCollections
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
-  def issuable_page_count(relation)
-    page_count_for_relation(relation, finder.row_count)
-  end
-
   def page_count_for_relation(relation, row_count)
     limit = relation.limit_value.to_f
 
-    return 1 if limit.zero?
+    return 1 if limit == 0
+    return (params[:page] || 1).to_i + 1 if row_count == -1
 
     (row_count.to_f / limit).ceil
   end
@@ -82,34 +81,36 @@ module IssuableCollections
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def finder_options
-    params[:state] = default_state if params[:state].blank?
+    strong_memoize(:finder_options) do
+      params[:state] = default_state if params[:state].blank?
 
-    options = {
-      scope: params[:scope],
-      state: params[:state],
-      confidential: Gitlab::Utils.to_boolean(params[:confidential]),
-      sort: set_sort_order
-    }
+      options = {
+        scope: params[:scope],
+        state: params[:state],
+        confidential: Gitlab::Utils.to_boolean(params[:confidential]),
+        sort: set_sort_order
+      }
 
-    # Used by view to highlight active option
-    @sort = options[:sort]
+      # Used by view to highlight active option
+      @sort = options[:sort]
 
-    # When a user looks for an exact iid, we do not filter by search but only by iid
-    if params[:search] =~ /^#(?<iid>\d+)\z/
-      options[:iids] = Regexp.last_match[:iid]
-      params[:search] = nil
+      # When a user looks for an exact iid, we do not filter by search but only by iid
+      if params[:search] =~ /^#(?<iid>\d+)\z/
+        options[:iids] = Regexp.last_match[:iid]
+        params[:search] = nil
+      end
+
+      if @project
+        options[:project_id] = @project.id
+        options[:attempt_project_search_optimizations] = true
+      elsif @group
+        options[:group_id] = @group.id
+        options[:include_subgroups] = true
+        options[:attempt_group_search_optimizations] = true
+      end
+
+      params.permit(finder_type.valid_params).merge(options)
     end
-
-    if @project
-      options[:project_id] = @project.id
-      options[:attempt_project_search_optimizations] = true
-    elsif @group
-      options[:group_id] = @group.id
-      options[:include_subgroups] = true
-      options[:attempt_group_search_optimizations] = true
-    end
-
-    params.permit(finder_type.valid_params).merge(options)
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
@@ -148,7 +149,10 @@ module IssuableCollections
                                 when 'Issue'
                                   common_attributes + [:project, project: :namespace]
                                 when 'MergeRequest'
-                                  common_attributes + [:target_project, :latest_merge_request_diff, source_project: :route, head_pipeline: :project, target_project: :namespace]
+                                  common_attributes + [
+                                    :target_project, :latest_merge_request_diff, :approvals, :approved_by_users,
+                                    source_project: :route, head_pipeline: :project, target_project: :namespace
+                                  ]
                                 end
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables

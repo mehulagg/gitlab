@@ -5,8 +5,12 @@ module QA
     module Page
       module Project
         module New
-          def self.prepended(page)
-            page.module_eval do
+          extend QA::Page::PageConcern
+
+          def self.prepended(base)
+            super
+
+            base.class_eval do
               view 'ee/app/views/projects/_project_templates.html.haml' do
                 element :group_templates_tab
                 element :group_template_tab_badge
@@ -23,16 +27,18 @@ module QA
                 element :use_template_button
                 element :template_option_row
               end
+
+              view 'ee/app/views/projects/_new_ci_cd_only_project_tab.html.haml' do
+                element :ci_cd_project_tab
+              end
             end
           end
 
           def go_to_create_from_template_group_tab
-            click_create_from_template_tab
             click_element(:group_templates_tab)
           end
 
           def go_to_create_from_template_instance_tab
-            click_create_from_template_tab
             click_element(:instance_templates_tab)
           end
 
@@ -44,10 +50,8 @@ module QA
             find_element(:instance_template_tab_badge).text
           end
 
-          def use_template_for_project(project_name)
-            within find_element(:template_option_row, text: project_name) do
-              click_element :use_template_button
-            end
+          def click_ci_cd_for_external_repo
+            click_element :ci_cd_project_tab
           end
         end
       end

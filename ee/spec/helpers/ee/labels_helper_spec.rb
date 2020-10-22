@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LabelsHelper do
+RSpec.describe LabelsHelper do
   let(:project) { create(:project) }
   let(:label) { build_stubbed(:label, project: project).present(issuable_subject: nil) }
   let(:scoped_label) { build_stubbed(:label, name: 'key::value', project: project).present(issuable_subject: nil) }

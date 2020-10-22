@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::SetupCiCd do
+RSpec.describe Projects::SetupCiCd do
   let(:user) { create(:user) }
   let(:project) { create(:project, creator: user, import_url: 'http://foo.com') }
 

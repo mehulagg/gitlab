@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20200310215714_migrate_saml_identities_to_scim_identities.rb')
+require_migration!
 
-describe MigrateSamlIdentitiesToScimIdentities, :migration do
+RSpec.describe MigrateSamlIdentitiesToScimIdentities, :migration do
   let(:group1) { table(:namespaces).create!(name: 'group1', path: 'group1') }
   let(:group2) { table(:namespaces).create!(name: 'group2', path: 'group2') }
   let(:saml_provider1) { table(:saml_providers).create!(enabled: true, group_id: group1.id, certificate_fingerprint: '123abc', sso_url: 'https://sso1.example.com') }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Emails::Epics do
+RSpec.describe Emails::Epics do
   it 'adds email methods to Notify' do
     subject.instance_methods.each do |email_method|
       expect(Notify).to be_respond_to(email_method)

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::Checks::PushRules::TagCheck do
+RSpec.describe EE::Gitlab::Checks::PushRules::TagCheck do
   include_context 'push rules checks context'
 
   describe '#validate!' do

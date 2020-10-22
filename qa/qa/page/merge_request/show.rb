@@ -5,13 +5,10 @@ module QA
     module MergeRequest
       class Show < Page::Base
         include Page::Component::Note
-
-        view 'app/assets/javascripts/mr_tabs_popover/components/popover.vue' do
-          element :dismiss_popover_button
-        end
+        include Page::Component::Issuable::Sidebar
 
         view 'app/assets/javascripts/vue_merge_request_widget/components/mr_widget_header.vue' do
-          element :dropdown_toggle
+          element :download_dropdown
           element :download_email_patches
           element :download_plain_diff
           element :open_in_web_ide_button
@@ -47,39 +44,108 @@ module QA
           element :squash_checkbox
         end
 
-        view 'app/assets/javascripts/vue_shared/components/notes/skeleton_note.vue' do
-          element :skeleton_note
-        end
-
         view 'app/views/projects/merge_requests/show.html.haml' do
           element :notes_tab
           element :diffs_tab
         end
 
-        view 'app/assets/javascripts/diffs/components/diff_table_cell.vue' do
-          element :diff_comment
+        view 'app/assets/javascripts/diffs/components/compare_dropdown_layout.vue' do
+          element :dropdown_content
+        end
+
+        view 'app/assets/javascripts/diffs/components/compare_versions.vue' do
+          element :target_version_dropdown
+        end
+
+        view 'app/assets/javascripts/diffs/components/diff_file_header.vue' do
+          element :file_name_content
         end
 
         view 'app/assets/javascripts/diffs/components/inline_diff_table_row.vue' do
           element :new_diff_line
         end
 
-        view 'app/views/shared/issuable/_sidebar.html.haml' do
-          element :assignee_block
-          element :labels_block
-        end
-
         view 'app/views/projects/merge_requests/_mr_title.html.haml' do
           element :edit_button
         end
 
+        view 'app/assets/javascripts/batch_comments/components/publish_button.vue' do
+          element :submit_review
+        end
+
+        view 'app/assets/javascripts/batch_comments/components/review_bar.vue' do
+          element :review_bar
+        end
+
+        view 'app/assets/javascripts/notes/components/note_form.vue' do
+          element :unresolve_review_discussion_checkbox
+          element :resolve_review_discussion_checkbox
+          element :start_review_button
+          element :comment_now_button
+        end
+
+        view 'app/assets/javascripts/batch_comments/components/preview_dropdown.vue' do
+          element :review_preview_toggle
+        end
+
+        def start_review
+          click_element(:start_review_button)
+
+          # After clicking the button, wait for it to disappear
+          # before moving on to the next part of the test
+          has_no_element?(:start_review_button)
+        end
+
+        def click_target_version_dropdown
+          click_element(:target_version_dropdown)
+        end
+
+        def comment_now
+          click_element(:comment_now_button)
+
+          # After clicking the button, wait for it to disappear
+          # before moving on to the next part of the test
+          has_no_element?(:comment_now_button)
+        end
+
+        def version_dropdown_content
+          find_element(:dropdown_content).text
+        end
+
+        def submit_pending_reviews
+          within_element(:review_bar) do
+            click_element(:review_preview_toggle)
+            click_element(:submit_review)
+
+            # After clicking the button, wait for it to disappear
+            # before moving on to the next part of the test
+            has_no_element?(:submit_review)
+          end
+        end
+
+        def discard_pending_reviews
+          within_element(:review_bar) do
+            click_element(:discard_review)
+          end
+          click_element(:modal_delete_pending_comments)
+        end
+
+        def resolve_review_discussion
+          scroll_to_element(:start_review_button)
+          check_element(:resolve_review_discussion_checkbox)
+        end
+
+        def unresolve_review_discussion
+          check_element(:unresolve_review_discussion_checkbox)
+        end
+
         def add_comment_to_diff(text)
           wait_until(sleep_interval: 5) do
-            has_text?("No newline at end of file")
+            has_css?('a[data-linenumber="1"]')
           end
           all_elements(:new_diff_line, minimum: 1).first.hover
           click_element(:diff_comment)
-          fill_element(:reply_input, text)
+          fill_element(:reply_field, text)
         end
 
         def click_discussions_tab
@@ -108,27 +174,19 @@ module QA
           has_no_text?('Fast-forward merge is not possible')
         end
 
+        def has_file?(file_name)
+          has_element?(:file_name_content, text: file_name)
+        end
+
         def has_merge_button?
           refresh
 
           has_element?(:merge_button)
         end
 
-        def has_assignee?(username)
-          page.within(element_selector_css(:assignee_block)) do
-            has_text?(username)
-          end
-        end
-
-        def has_label?(label)
-          within_element(:labels_block) do
-            !!has_element?(:label, label_name: label)
-          end
-        end
-
         def has_pipeline_status?(text)
           # Pipelines can be slow, so we wait a bit longer than the usual 10 seconds
-          has_element?(:merge_request_pipeline_info_content, text: text, wait: 30)
+          has_element?(:merge_request_pipeline_info_content, text: text, wait: 60)
         end
 
         def has_title?(title)
@@ -150,26 +208,33 @@ module QA
             !find_element(:squash_checkbox).disabled?
           end
 
-          click_element :squash_checkbox
+          click_element(:squash_checkbox)
         end
 
         def merge!
-          click_element :merge_button if ready_to_merge?
-
+          wait_until_ready_to_merge
+          click_element(:merge_button)
           finished_loading?
 
           raise "Merge did not appear to be successful" unless merged?
         end
 
         def merged?
-          has_element?(:merged_status_content, text: 'The changes were merged into', wait: 30)
+          has_element?(:merged_status_content, text: 'The changes were merged into', wait: 60)
         end
 
-        def ready_to_merge?
-          # The merge button is disabled on load
-          wait_until do
-            has_element?(:merge_button)
-          end
+        # Check if the MR is able to be merged
+        # Waits up 10 seconds and returns false if the MR can't be merged
+        def mergeable?
+          # The merge button is enabled via JS, but `has_element?` calls
+          # `wait_for_requests`, which should ensure the disabled/enabled
+          # state of the element is reliable
+          has_element?(:merge_button, disabled: false)
+        end
+
+        # Waits up 60 seconds and raises an error if unable to merge
+        def wait_until_ready_to_merge
+          has_element?(:merge_button)
 
           # The merge button is enabled via JS
           wait_until(reload: false) do
@@ -188,7 +253,7 @@ module QA
             !find_element(:mr_rebase_button).disabled?
           end
 
-          click_element :mr_rebase_button
+          click_element(:mr_rebase_button)
 
           success = wait_until do
             has_text?('Fast-forward merge without a merge commit')
@@ -198,16 +263,18 @@ module QA
         end
 
         def try_to_merge!
-          click_element :merge_button if ready_to_merge?
+          wait_until_ready_to_merge
+
+          click_element(:merge_button)
         end
 
         def view_email_patches
-          click_element :dropdown_toggle
+          click_element(:download_dropdown)
           visit_link_in_element(:download_email_patches)
         end
 
         def view_plain_diff
-          click_element :dropdown_toggle
+          click_element(:download_dropdown)
           visit_link_in_element(:download_plain_diff)
         end
 
@@ -217,12 +284,9 @@ module QA
           end
         end
 
-        def wait_for_loading
-          finished_loading? && has_no_element?(:skeleton_note)
-        end
-
         def click_open_in_web_ide
-          click_element :open_in_web_ide_button
+          click_element(:open_in_web_ide_button)
+          wait_for_requests
         end
       end
     end

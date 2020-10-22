@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::Scim::AttributeTransform do
+RSpec.describe EE::Gitlab::Scim::AttributeTransform do
   using RSpec::Parameterized::TableSyntax
 
   describe '#valid?' do

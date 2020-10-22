@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::CleanupService do
+RSpec.describe Projects::CleanupService do
   include ::EE::GeoHelpers
 
   let(:project) { create(:project, :repository, bfg_object_map: fixture_file_upload('spec/fixtures/bfg_object_map.txt')) }

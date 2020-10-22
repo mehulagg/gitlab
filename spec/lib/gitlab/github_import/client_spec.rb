@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Client do
+RSpec.describe Gitlab::GithubImport::Client do
   describe '#parallel?' do
     it 'returns true when the client is running in parallel mode' do
       client = described_class.new('foo', parallel: true)
@@ -169,7 +169,7 @@ describe Gitlab::GithubImport::Client do
       expect(client).to receive(:raise_or_wait_for_rate_limit)
 
       client.with_rate_limit do
-        if retries.zero?
+        if retries == 0
           retries += 1
           raise(Octokit::TooManyRequests)
         end

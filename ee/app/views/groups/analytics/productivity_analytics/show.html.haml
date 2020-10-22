@@ -1,14 +1,14 @@
 - page_title _('Productivity Analytics')
-
+- add_page_specific_style 'page_bundles/productivity_analytics'
 - data_attributes = @request_params.valid? ? @request_params.to_data_attributes : @request_params.to_default_data_attributes
 
 #js-productivity-analytics{ data: data_attributes.merge(hide_group_drop_down: 'true') }
-  .page-title-holder.d-flex.align-items-center
-    .page-title
+  .mb-3
+    %h3
       = _('Productivity Analytics')
   .row-content-block.second-block.d-flex.flex-column.flex-lg-row.mt-3.py-2.px-3
     .js-group-project-select-container
-    .js-search-bar.filter-container.hide
+    .js-search-bar.filter-container.hide.gl-mr-0.mr-lg-3
       = render 'shared/issuable/search_bar', type: :productivity_analytics, placeholder: _('Filter results...')
     .js-timeframe-container{ data: { start_date: ProductivityAnalytics.start_date } }
   .js-productivity-analytics-app-container{ data: { endpoint: group_analytics_productivity_analytics_path(@group), empty_state_svg_path: image_path('illustrations/productivity-analytics-empty-state.svg'), no_access_svg_path: image_path('illustrations/analytics/no-access.svg') } }

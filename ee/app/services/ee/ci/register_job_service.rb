@@ -8,6 +8,7 @@ module EE
     # and be included in the `RegisterJobService` service
     module RegisterJobService
       extend ActiveSupport::Concern
+      extend ::Gitlab::Utils::Override
 
       def execute(params = {})
         db_all_caught_up = ::Gitlab::Database::LoadBalancing::Sticking.all_caught_up?(:runner, runner.id)
@@ -28,11 +29,7 @@ module EE
       def builds_for_shared_runner
         return super unless shared_runner_build_limits_feature_enabled?
 
-        if ::Feature.enabled?(:ci_minutes_enforce_quota_for_public_projects)
-          enforce_minutes_based_on_cost_factors(super)
-        else
-          legacy_enforce_minutes_for_non_public_projects(super)
-        end
+        enforce_minutes_based_on_cost_factors(super)
       end
 
       # rubocop: disable CodeReuse/ActiveRecord
@@ -43,15 +40,6 @@ module EE
         enforce_limits_relation = ::Ci::Build.where('EXISTS (?)', builds_check_limit)
 
         relation.merge(visibility_relation.or(enforce_limits_relation))
-      end
-      # rubocop: enable CodeReuse/ActiveRecord
-
-      # rubocop: disable CodeReuse/ActiveRecord
-      def legacy_enforce_minutes_for_non_public_projects(relation)
-        # select projects which have allowed number of shared runner minutes or are public
-        relation
-          .where("projects.visibility_level=? OR (#{builds_check_limit.to_sql})=1", # rubocop:disable GitlabSecurity/SqlInjection
-                ::Gitlab::VisibilityLevel::PUBLIC)
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -83,6 +71,13 @@ module EE
 
       def shared_runner_build_limits_feature_enabled?
         ENV['DISABLE_SHARED_RUNNER_BUILD_MINUTES_LIMIT'].to_s != 'true'
+      end
+
+      override :pre_assign_runner_checks
+      def pre_assign_runner_checks
+        super.merge({
+          secrets_provider_not_found: -> (build, _) { build.ci_secrets_management_available? && build.secrets? && !build.secrets_provider? }
+        })
       end
     end
   end

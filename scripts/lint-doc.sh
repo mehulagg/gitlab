@@ -40,21 +40,33 @@ then
 fi
 
 # Do not use 'README.md', instead use 'index.md'
-# Number of 'README.md's as of 2018-03-26
-NUMBER_READMES=46
+# Number of 'README.md's as of 2020-10-13
+NUMBER_READMES=36
 FIND_READMES=$(find doc/ -name "README.md" | wc -l)
 echo '=> Checking for new README.md files...'
 echo
 if [ ${FIND_READMES} -ne $NUMBER_READMES ]
 then
   echo
-  echo '  ✖ ERROR: New README.md file(s) detected, prefer index.md over README.md.' >&2
+  echo '  ✖ ERROR: The number of README.md file(s) has changed. Use index.md instead of README.md.' >&2
+  echo '  ✖        If removing a README.md file, update NUMBER_READMES in lint-doc.sh.' >&2
   echo '  https://docs.gitlab.com/ee/development/documentation/styleguide.html#work-with-directories-and-files'
   echo
   ((ERRORCODE++))
 fi
 
-MD_DOC_PATH=${MD_DOC_PATH:-doc}
+# Run Vale and Markdownlint only on changed files. Only works on merged results
+# pipelines, so first checks if a merged results CI variable is present. If not present,
+# runs test on all files.
+if [ -z "${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}" ]
+then
+  MD_DOC_PATH=${MD_DOC_PATH:-doc}
+  echo "Merge request pipeline (detached) detected. Testing all files."
+else
+  MERGE_BASE=$(git merge-base ${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} ${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA})
+  MD_DOC_PATH=$(git diff --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}" 'doc/*.md')
+  echo -e "Merged results pipeline detected. Testing only the following files:\n${MD_DOC_PATH}"
+ fi
 
 function run_locally_or_in_docker() {
   local cmd=$1
@@ -65,7 +77,7 @@ function run_locally_or_in_docker() {
     $cmd $args
   elif hash docker 2>/dev/null
   then
-    docker run -t -v ${PWD}:/gitlab -w /gitlab --rm registry.gitlab.com/gitlab-org/gitlab-docs:lint ${cmd} ${args}
+    docker run -t -v ${PWD}:/gitlab -w /gitlab --rm registry.gitlab.com/gitlab-org/gitlab-docs/lint:latest ${cmd} ${args}
   else
     echo
     echo "  ✖ ERROR: '${cmd}' not found. Install '${cmd}' or Docker to proceed." >&2

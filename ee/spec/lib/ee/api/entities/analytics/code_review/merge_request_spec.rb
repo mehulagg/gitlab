@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::API::Entities::Analytics::CodeReview::MergeRequest do
+RSpec.describe EE::API::Entities::Analytics::CodeReview::MergeRequest do
   subject(:entity_representation) { described_class.new(merge_request).as_json }
 
   let(:merge_request) do
@@ -12,6 +12,7 @@ describe EE::API::Entities::Analytics::CodeReview::MergeRequest do
            metrics_data: { first_comment_at: 1.day.ago, merged_at: 1.hour.ago }
     )
   end
+
   let(:project) { create :project, :repository }
   let(:milestone) { create(:milestone, project: project) }
   let!(:note) { create(:note_on_merge_request, project: project, noteable: merge_request) }

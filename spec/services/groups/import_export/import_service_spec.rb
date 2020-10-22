@@ -2,8 +2,58 @@
 
 require 'spec_helper'
 
-describe Groups::ImportExport::ImportService do
-  context 'with group_import_export_ndjson feature flag disabled' do
+RSpec.describe Groups::ImportExport::ImportService do
+  describe '#async_execute' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:group) { create(:group) }
+
+    context 'when the job can be successfully scheduled' do
+      subject(:import_service) { described_class.new(group: group, user: user) }
+
+      it 'creates group import state' do
+        import_service.async_execute
+
+        import_state = group.import_state
+
+        expect(import_state.user).to eq(user)
+        expect(import_state.group).to eq(group)
+      end
+
+      it 'enqueues an import job' do
+        expect(GroupImportWorker).to receive(:perform_async).with(user.id, group.id)
+
+        import_service.async_execute
+      end
+
+      it 'marks the group import as in progress' do
+        import_service.async_execute
+
+        expect(group.import_state.in_progress?).to eq true
+      end
+
+      it 'returns truthy' do
+        expect(import_service.async_execute).to be_truthy
+      end
+    end
+
+    context 'when the job cannot be scheduled' do
+      subject(:import_service) { described_class.new(group: group, user: user) }
+
+      before do
+        allow(GroupImportWorker).to receive(:perform_async).and_return(nil)
+      end
+
+      it 'returns falsey' do
+        expect(import_service.async_execute).to be_falsey
+      end
+
+      it 'does not mark the group import as created' do
+        expect { import_service.async_execute }.not_to change { group.import_state }
+      end
+    end
+  end
+
+  context 'with group_import_ndjson feature flag disabled' do
     let(:user) { create(:admin) }
     let(:group) { create(:group) }
     let(:import_logger) { instance_double(Gitlab::Import::Logger) }
@@ -11,9 +61,9 @@ describe Groups::ImportExport::ImportService do
     subject(:service) { described_class.new(group: group, user: user) }
 
     before do
-      stub_feature_flags(group_import_export_ndjson: false)
+      stub_feature_flags(group_import_ndjson: false)
 
-      ImportExportUpload.create(group: group, import_file: import_file)
+      ImportExportUpload.create!(group: group, import_file: import_file)
 
       allow(Gitlab::Import::Logger).to receive(:build).and_return(import_logger)
       allow(import_logger).to receive(:error)
@@ -39,9 +89,9 @@ describe Groups::ImportExport::ImportService do
     end
   end
 
-  context 'with group_import_export_ndjson feature flag enabled' do
+  context 'with group_import_ndjson feature flag enabled' do
     before do
-      stub_feature_flags(group_import_export_ndjson: true)
+      stub_feature_flags(group_import_ndjson: true)
     end
 
     context 'when importing a ndjson export' do
@@ -55,11 +105,12 @@ describe Groups::ImportExport::ImportService do
       subject { service.execute }
 
       before do
-        ImportExportUpload.create(group: group, import_file: import_file)
+        ImportExportUpload.create!(group: group, import_file: import_file)
 
         allow(Gitlab::Import::Logger).to receive(:build).and_return(import_logger)
         allow(import_logger).to receive(:error)
         allow(import_logger).to receive(:info)
+        allow(FileUtils).to receive(:rm_rf).and_call_original
       end
 
       context 'when user has correct permissions' do
@@ -71,6 +122,16 @@ describe Groups::ImportExport::ImportService do
           subject
 
           expect(group.import_export_upload.import_file.file).to be_nil
+        end
+
+        it 'removes tmp files' do
+          shared = Gitlab::ImportExport::Shared.new(group)
+          allow(Gitlab::ImportExport::Shared).to receive(:new).and_return(shared)
+
+          subject
+
+          expect(FileUtils).to have_received(:rm_rf).with(shared.base_path)
+          expect(Dir.exist?(shared.base_path)).to eq(false)
         end
 
         it 'logs the import success' do
@@ -155,11 +216,12 @@ describe Groups::ImportExport::ImportService do
       subject { service.execute }
 
       before do
-        ImportExportUpload.create(group: group, import_file: import_file)
+        ImportExportUpload.create!(group: group, import_file: import_file)
 
         allow(Gitlab::Import::Logger).to receive(:build).and_return(import_logger)
         allow(import_logger).to receive(:error)
         allow(import_logger).to receive(:info)
+        allow(FileUtils).to receive(:rm_rf).and_call_original
       end
 
       context 'when user has correct permissions' do
@@ -171,6 +233,16 @@ describe Groups::ImportExport::ImportService do
           subject
 
           expect(group.import_export_upload.import_file.file).to be_nil
+        end
+
+        it 'removes tmp files' do
+          shared = Gitlab::ImportExport::Shared.new(group)
+          allow(Gitlab::ImportExport::Shared).to receive(:new).and_return(shared)
+
+          subject
+
+          expect(FileUtils).to have_received(:rm_rf).with(shared.base_path)
+          expect(Dir.exist?(shared.base_path)).to eq(false)
         end
 
         it 'logs the import success' do

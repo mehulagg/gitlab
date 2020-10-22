@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Templates do
+RSpec.describe API::Templates do
   files = {
     'Dockerfile/custom.dockerfile' => 'Custom dockerfiles',
     'gitignore/custom.gitignore'   => 'Custom gitignores',

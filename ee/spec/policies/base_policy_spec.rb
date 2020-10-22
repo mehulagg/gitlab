@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BasePolicy, :do_not_mock_admin_mode do
+RSpec.describe BasePolicy do
   include ExternalAuthorizationServiceHelpers
 
   let(:auditor) { build(:auditor) }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::MergeRequestsController do
+RSpec.describe Groups::MergeRequestsController do
   let(:user)           { create(:user) }
   let(:group)          { create(:group, :public) }
   let(:project)        { create(:project, :repository, group: group) }

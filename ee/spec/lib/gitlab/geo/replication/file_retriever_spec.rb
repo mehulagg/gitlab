@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::Replication::FileRetriever, :geo do
+RSpec.describe Gitlab::Geo::Replication::FileRetriever, :geo do
   shared_examples_for 'returns necessary params for sending a file from an API endpoint' do
     subject { @subject ||= retriever.execute }
 

@@ -2,13 +2,33 @@
 
 require 'spec_helper'
 
-describe Admin::ApplicationSettingsController do
+RSpec.describe Admin::ApplicationSettingsController do
   include StubENV
 
   let(:admin) { create(:admin) }
 
   before do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
+  end
+
+  describe 'GET #general' do
+    before do
+      sign_in(admin)
+    end
+
+    context 'zero-downtime elasticsearch reindexing' do
+      render_views
+
+      let!(:task) { create(:elastic_reindexing_task) }
+
+      it 'assigns elasticsearch reindexing task' do
+        get :general
+
+        expect(assigns(:elasticsearch_reindexing_task)).to eq(task)
+        expect(response.body).to include('Reindexing status')
+        expect(response.body).to include("State: #{task.state}")
+      end
+    end
   end
 
   describe 'PUT #update' do
@@ -92,6 +112,7 @@ describe Admin::ApplicationSettingsController do
           mirror_capacity_threshold: 2
         }
       end
+
       let(:feature) { :repository_mirrors }
 
       it_behaves_like 'settings for licensed features'
@@ -120,12 +141,29 @@ describe Admin::ApplicationSettingsController do
 
     context 'updating npm packages request forwarding setting' do
       let(:settings) { { npm_package_requests_forwarding: true } }
-      let(:feature) { :packages }
+      let(:feature) { :package_forwarding }
 
       it_behaves_like 'settings for licensed features'
     end
 
-    context 'project deletion adjourned period' do
+    context 'updating maintenance mode setting' do
+      before do
+        stub_feature_flags(maintenance_mode: true)
+      end
+
+      let(:settings) do
+        {
+          maintenance_mode: true,
+          maintenance_mode_message: 'GitLab is in maintenance'
+        }
+      end
+
+      let(:feature) { :geo }
+
+      it_behaves_like 'settings for licensed features'
+    end
+
+    context 'project deletion delay' do
       let(:settings) { { deletion_adjourned_period: 6 } }
       let(:feature) { :adjourned_deletion_for_projects_and_groups }
 
@@ -155,6 +193,14 @@ describe Admin::ApplicationSettingsController do
           prevent_merge_requests_committers_approval: true
         }
       end
+
+      let(:feature) { :admin_merge_request_approvers_rules }
+
+      it_behaves_like 'settings for licensed features'
+    end
+
+    context 'compliance frameworks' do
+      let(:settings) { { compliance_frameworks: [1, 2, 3, 4, 5] } }
       let(:feature) { :admin_merge_request_approvers_rules }
 
       it_behaves_like 'settings for licensed features'
@@ -225,20 +271,11 @@ describe Admin::ApplicationSettingsController do
       end
     end
 
-    describe 'GET #geo_redirection' do
-      subject { get :geo_redirection }
+    it 'updates setting to enforce personal access token expiration' do
+      put :update, params: { application_setting: { enforce_pat_expiration: false } }
 
-      it 'redirects the user to the admin_geo_settings_url' do
-        subject
-
-        expect(response).to redirect_to(admin_geo_settings_url)
-      end
-
-      it 'fires a notice about the redirection' do
-        subject
-
-        expect(response).to set_flash[:notice]
-      end
+      expect(response).to redirect_to(general_admin_application_settings_path)
+      expect(ApplicationSetting.current.enforce_pat_expiration).to be_falsey
     end
   end
 
@@ -256,7 +293,7 @@ describe Admin::ApplicationSettingsController do
     end
 
     context 'when an admin user attempts a request' do
-      let_it_be(:yesterday) { Time.now.utc.yesterday.to_date }
+      let_it_be(:yesterday) { Time.current.utc.yesterday.to_date }
       let_it_be(:max_count) { 15 }
       let_it_be(:current_count) { 10 }
 

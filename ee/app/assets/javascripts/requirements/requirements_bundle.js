@@ -3,6 +3,7 @@ import VueApollo from 'vue-apollo';
 import { GlToast } from '@gitlab/ui';
 import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
 import createDefaultClient from '~/lib/graphql';
+import { parseBoolean } from '~/lib/utils/common_utils';
 
 import RequirementsRoot from './components/requirements_root.vue';
 
@@ -37,12 +38,19 @@ export default () => {
     components: {
       RequirementsRoot,
     },
+    provide: {
+      descriptionPreviewPath: el.dataset.descriptionPreviewPath,
+      descriptionHelpPath: el.dataset.descriptionHelpPath,
+    },
     data() {
       const {
         filterBy,
         page,
         next,
         prev,
+        textSearch,
+        authorUsernames,
+        sortBy,
         projectPath,
         emptyStatePath,
         opened,
@@ -58,8 +66,11 @@ export default () => {
       const ALL = parseInt(all, 10);
 
       return {
-        filterBy: stateFilterBy,
-        requirementsCount: {
+        initialFilterBy: stateFilterBy,
+        initialTextSearch: textSearch,
+        initialAuthorUsernames: authorUsernames ? JSON.parse(authorUsernames) : [],
+        initialSortBy: sortBy,
+        initialRequirementsCount: {
           OPENED,
           ARCHIVED,
           ALL,
@@ -77,13 +88,16 @@ export default () => {
       return createElement('requirements-root', {
         props: {
           projectPath: this.projectPath,
-          filterBy: this.filterBy,
-          requirementsCount: this.requirementsCount,
+          initialFilterBy: this.initialFilterBy,
+          initialTextSearch: this.initialTextSearch,
+          initialAuthorUsernames: this.initialAuthorUsernames,
+          initialSortBy: this.initialSortBy,
+          initialRequirementsCount: this.initialRequirementsCount,
           page: parseInt(this.page, 10) || 1,
           prev: this.prev,
           next: this.next,
           emptyStatePath: this.emptyStatePath,
-          canCreateRequirement: this.canCreateRequirement,
+          canCreateRequirement: parseBoolean(this.canCreateRequirement),
           requirementsWebUrl: this.requirementsWebUrl,
         },
       });

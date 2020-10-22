@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Pipeline::Chain::Sequence do
+RSpec.describe Gitlab::Ci::Pipeline::Chain::Sequence do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
 
@@ -23,9 +23,7 @@ describe Gitlab::Ci::Pipeline::Chain::Sequence do
     end
 
     it 'does not process the second step' do
-      subject.build! do |pipeline, sequence|
-        expect(sequence).not_to be_complete
-      end
+      subject.build!
 
       expect(second_step).not_to have_received(:perform!)
     end
@@ -43,9 +41,7 @@ describe Gitlab::Ci::Pipeline::Chain::Sequence do
     end
 
     it 'iterates through entire sequence' do
-      subject.build! do |pipeline, sequence|
-        expect(sequence).to be_complete
-      end
+      subject.build!
 
       expect(first_step).to have_received(:perform!)
       expect(second_step).to have_received(:perform!)
@@ -56,11 +52,24 @@ describe Gitlab::Ci::Pipeline::Chain::Sequence do
     end
 
     it 'adds sequence duration to duration histogram' do
-      allow(command).to receive(:duration_histogram).and_return(histogram)
+      allow(command.metrics)
+        .to receive(:pipeline_creation_duration_histogram)
+        .and_return(histogram)
 
       subject.build!
 
       expect(histogram).to have_received(:observe)
+    end
+
+    it 'records pipeline size by pipeline source in a histogram' do
+      allow(command.metrics)
+        .to receive(:pipeline_size_histogram)
+        .and_return(histogram)
+
+      subject.build!
+
+      expect(histogram).to have_received(:observe)
+        .with({ source: 'push' }, 0)
     end
   end
 end

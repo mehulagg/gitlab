@@ -7,11 +7,16 @@ module Gitlab
       # Pipeline status badge
       #
       class Status < Badge::Base
-        attr_reader :project, :ref
+        attr_reader :project, :ref, :customization
 
-        def initialize(project, ref)
+        def initialize(project, ref, opts: {})
           @project = project
           @ref = ref
+          @ignore_skipped = Gitlab::Utils.to_boolean(opts[:ignore_skipped], default: false)
+          @customization = {
+            key_width: opts[:key_width].to_i,
+            key_text: opts[:key_text]
+          }
 
           @sha = @project.commit(@ref).try(:sha)
         end
@@ -22,9 +27,11 @@ module Gitlab
 
         # rubocop: disable CodeReuse/ActiveRecord
         def status
-          @project.ci_pipelines
+          pipelines = @project.ci_pipelines
             .where(sha: @sha)
-            .latest_status(@ref) || 'unknown'
+
+          relation = @ignore_skipped ? pipelines.without_statuses([:skipped]) : pipelines
+          relation.latest_status(@ref) || 'unknown'
         end
         # rubocop: enable CodeReuse/ActiveRecord
 

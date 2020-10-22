@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
-class CreateCommitSignatureWorker # rubocop:disable Scalability/IdempotentWorker
+class CreateCommitSignatureWorker
   include ApplicationWorker
 
   feature_category :source_code_management
   weight 2
+  idempotent!
+  loggable_arguments 0
 
   # rubocop: disable CodeReuse/ActiveRecord
   def perform(commit_shas, project_id)
@@ -35,7 +37,7 @@ class CreateCommitSignatureWorker # rubocop:disable Scalability/IdempotentWorker
     commits.each do |commit|
       commit&.signature
     rescue => e
-      Rails.logger.error("Failed to create signature for commit #{commit.id}. Error: #{e.message}") # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.error("Failed to create signature for commit #{commit.id}. Error: #{e.message}")
     end
   end
   # rubocop: enable CodeReuse/ActiveRecord

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::EnvironmentsController do
+RSpec.describe Projects::EnvironmentsController do
   include KubernetesHelpers
 
   let_it_be(:user) { create(:user) }
@@ -61,7 +61,7 @@ describe Projects::EnvironmentsController do
         end
       end
 
-      context 'when license does not has the GitLab_DeployBoard add-on' do
+      context 'when license does not have the GitLab_DeployBoard add-on' do
         before do
           stub_licensed_features(deploy_board: false)
 
@@ -99,7 +99,7 @@ describe Projects::EnvironmentsController do
 
       context 'when user has access to it' do
         before do
-          protected_environment.deploy_access_levels.create(user: user)
+          protected_environment.deploy_access_levels.create!(user: user)
 
           get :terminal, params: environment_params
         end
@@ -135,7 +135,7 @@ describe Projects::EnvironmentsController do
           create(:protected_environment, name: 'staging', project: project)
         end
 
-        it 'shows NOT Found' do
+        it 'shows not found' do
           subject
 
           expect(response).to have_gitlab_http_status(:not_found)

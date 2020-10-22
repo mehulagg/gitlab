@@ -1,5 +1,4 @@
 import { isNumber } from 'lodash';
-import { getDatesInRange } from '~/lib/utils/datetime_utility';
 import {
   isStartEvent,
   isLabelEvent,
@@ -9,30 +8,35 @@ import {
   getLabelEventsIdentifiers,
   flattenDurationChartData,
   getDurationChartData,
-  getDurationChartMedianData,
   transformRawStages,
   isPersistedStage,
   getTasksByTypeData,
   flattenTaskByTypeSeries,
   orderByDate,
   toggleSelectedLabel,
+  transformStagesForPathNavigation,
+  prepareTimeMetricsData,
 } from 'ee/analytics/cycle_analytics/utils';
 import { toYmd } from 'ee/analytics/shared/utils';
+import { getDatesInRange } from '~/lib/utils/datetime_utility';
+import { slugify } from '~/lib/utils/text_utility';
 import {
   customStageEvents as events,
   customStageLabelEvents as labelEvents,
   labelStartEvent,
   customStageStartEvents as startEvents,
   transformedDurationData,
-  transformedDurationMedianData,
   flattenedDurationData,
   durationChartPlottableData,
-  durationChartPlottableMedianData,
   startDate,
   endDate,
   issueStage,
   rawCustomStage,
   rawTasksByTypeData,
+  allowedStages,
+  stageMediansWithNumericIds,
+  pathNavIssueMetric,
+  timeMetricsData,
 } from './mock_data';
 
 const labelEventIds = labelEvents.map(ev => ev.identifier);
@@ -139,18 +143,6 @@ describe('Cycle analytics utils', () => {
       const plottableData = getDurationChartData(transformedDurationData, startDate, endDate);
 
       expect(plottableData).toStrictEqual(durationChartPlottableData);
-    });
-  });
-
-  describe('getDurationChartMedianData', () => {
-    it('computes the plottable data as expected', () => {
-      const plottableData = getDurationChartMedianData(
-        transformedDurationMedianData,
-        startDate,
-        endDate,
-      );
-
-      expect(plottableData).toStrictEqual(durationChartPlottableMedianData);
     });
   });
 
@@ -314,8 +306,65 @@ describe('Cycle analytics utils', () => {
     it('will remove an id that exists', () => {
       expect(toggleSelectedLabel({ selectedLabelIds, value: 2 })).toEqual([1, 3]);
     });
+
     it('will add an id that does not exist', () => {
       expect(toggleSelectedLabel({ selectedLabelIds, value: 4 })).toEqual([1, 2, 3, 4]);
+    });
+  });
+
+  describe('transformStagesForPathNavigation', () => {
+    const stages = allowedStages;
+    const response = transformStagesForPathNavigation({
+      stages,
+      medians: stageMediansWithNumericIds,
+      selectedStage: issueStage,
+    });
+
+    describe('transforms the data as expected', () => {
+      it('returns an array of stages', () => {
+        expect(Array.isArray(response)).toBe(true);
+        expect(response.length).toEqual(stages.length);
+      });
+
+      it('selects the correct stage', () => {
+        const selected = response.filter(stage => stage.selected === true)[0];
+
+        expect(selected.title).toEqual(issueStage.title);
+      });
+
+      it('includes the correct metric for the associated stage', () => {
+        const issue = response.filter(stage => stage.name === 'Issue')[0];
+
+        expect(issue.metric).toEqual(pathNavIssueMetric);
+      });
+    });
+  });
+
+  describe('prepareTimeMetricsData', () => {
+    let prepared;
+    const [{ title: firstTitle }, { title: secondTitle }] = timeMetricsData;
+    const firstKey = slugify(firstTitle);
+    const secondKey = slugify(secondTitle);
+
+    beforeEach(() => {
+      prepared = prepareTimeMetricsData(timeMetricsData, {
+        [firstKey]: 'Is a value that is good',
+      });
+    });
+
+    it('will add a `key` based on the title', () => {
+      expect(prepared).toMatchObject([{ key: firstKey }, { key: secondKey }]);
+    });
+
+    it('will add a `label` key', () => {
+      expect(prepared).toMatchObject([{ label: 'Lead Time' }, { label: 'Cycle Time' }]);
+    });
+
+    it('will add a tooltip text using the key if it is provided', () => {
+      expect(prepared).toMatchObject([
+        { tooltipText: 'Is a value that is good' },
+        { tooltipText: '' },
+      ]);
     });
   });
 });

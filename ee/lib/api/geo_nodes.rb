@@ -1,12 +1,31 @@
 # frozen_string_literal: true
 
 module API
-  class GeoNodes < Grape::API
+  class GeoNodes < ::API::Base
     include PaginationParams
     include APIGuard
     include ::Gitlab::Utils::StrongMemoize
 
-    before { authenticated_as_admin! }
+    before do
+      authenticate_admin_or_geo_node!
+    end
+
+    helpers do
+      def authenticate_admin_or_geo_node!
+        if gitlab_geo_node_token?
+          bad_request! unless update_geo_nodes_endpoint?
+          check_gitlab_geo_request_ip!
+          allow_paused_nodes!
+          authenticate_by_gitlab_geo_node_token!
+        else
+          authenticated_as_admin!
+        end
+      end
+
+      def update_geo_nodes_endpoint?
+        request.put? && request.path.match?(/\/geo_nodes\/\d+/)
+      end
+    end
 
     resource :geo_nodes do
       # Add a new Geo node
@@ -28,8 +47,8 @@ module API
         optional :container_repositories_max_capacity, type: Integer, desc: 'Control the maximum concurrency of container repository sync for this node. Defaults to 10.'
         optional :sync_object_storage, type: Boolean, desc: 'Flag indicating if the secondary Geo node will replicate blobs in Object Storage. Defaults to false.'
         optional :selective_sync_type, type: String, desc: 'Limit syncing to only specific groups, or shards. Valid values: `"namespaces"`, `"shards"`, or `null`'
-        optional :selective_sync_shards, type: Array, desc: 'The repository storages whose projects should be synced, if `selective_sync_type` == `shards`'
-        optional :selective_sync_namespace_ids, as: :namespace_ids, type: Array, desc: 'The IDs of groups that should be synced, if `selective_sync_type` == `namespaces`'
+        optional :selective_sync_shards, type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, desc: 'The repository storages whose projects should be synced, if `selective_sync_type` == `shards`'
+        optional :selective_sync_namespace_ids, as: :namespace_ids, type: Array[Integer], coerce_with: Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'The IDs of groups that should be synced, if `selective_sync_type` == `namespaces`'
         optional :minimum_reverification_interval, type: Integer, desc: 'The interval (in days) in which the repository verification is valid. Once expired, it will be reverified. This has no effect when set on a secondary node.'
       end
       post do
@@ -87,18 +106,19 @@ module API
         not_found!('Geo node not found') unless Gitlab::Geo.current_node
         forbidden!('Failures can only be requested from a secondary node') unless Gitlab::Geo.current_node.secondary?
 
-        finder_klass = case params[:failure_type]
-                       when 'sync'
-                         ::Geo::ProjectRegistrySyncFailedFinder
-                       when 'verification'
-                         ::Geo::ProjectRegistryVerificationFailedFinder
-                       when 'checksum_mismatch'
-                         ::Geo::ProjectRegistryMismatchFinder
-                       else
-                         not_found!('Failure type unknown')
-                       end
+        type = params[:type].to_s.to_sym
 
-        project_registries = finder_klass.new(current_node: Gitlab::Geo.current_node, type: params[:type]).execute
+        project_registries =
+          case params[:failure_type]
+          when 'sync'
+            ::Geo::ProjectRegistry.sync_failed(type)
+          when 'verification'
+            ::Geo::ProjectRegistry.verification_failed(type)
+          when 'checksum_mismatch'
+            ::Geo::ProjectRegistry.mismatch(type)
+          else
+            not_found!('Failure type unknown')
+          end
 
         present paginate(project_registries), with: ::GeoProjectRegistryEntity
       end
@@ -184,8 +204,8 @@ module API
           optional :container_repositories_max_capacity, type: Integer, desc: 'Control the maximum concurrency of container repository sync for this node'
           optional :sync_object_storage, type: Boolean, desc: 'Flag indicating if the secondary Geo node will replicate blobs in Object Storage'
           optional :selective_sync_type, type: String, desc: 'Limit syncing to only specific groups, or shards. Valid values: `"namespaces"`, `"shards"`, or `null`'
-          optional :selective_sync_shards, type: Array, desc: 'The repository storages whose projects should be synced, if `selective_sync_type` == `shards`'
-          optional :selective_sync_namespace_ids, as: :namespace_ids, type: Array, desc: 'The IDs of groups that should be synced, if `selective_sync_type` == `namespaces`'
+          optional :selective_sync_shards, type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, desc: 'The repository storages whose projects should be synced, if `selective_sync_type` == `shards`'
+          optional :selective_sync_namespace_ids, as: :namespace_ids, type: Array[Integer], coerce_with: Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'The IDs of groups that should be synced, if `selective_sync_type` == `namespaces`'
           optional :minimum_reverification_interval, type: Integer, desc: 'The interval (in days) in which the repository verification is valid. Once expired, it will be reverified. This has no effect when set on a secondary node.'
         end
         put do

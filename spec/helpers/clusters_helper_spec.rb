@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ClustersHelper do
+RSpec.describe ClustersHelper do
   describe '#has_rbac_enabled?' do
     context 'when kubernetes platform has been created' do
       let(:platform_kubernetes) { build_stubbed(:cluster_platform_kubernetes) }
@@ -56,6 +56,54 @@ describe ClustersHelper do
       let(:provider) { nil }
 
       it { is_expected.to eq('Create new cluster') }
+    end
+  end
+
+  describe '#js_cluster_agents_list_data' do
+    let_it_be(:project) { build(:project, :repository) }
+
+    subject { helper.js_cluster_agents_list_data(project) }
+
+    it 'displays project default branch' do
+      expect(subject[:default_branch_name]).to eq(project.default_branch)
+    end
+
+    it 'displays image path' do
+      expect(subject[:empty_state_image]).to match(%r(/illustrations/logos/clusters_empty|svg))
+    end
+
+    it 'displays project path' do
+      expect(subject[:project_path]).to eq(project.full_path)
+    end
+  end
+
+  describe '#js_clusters_list_data' do
+    subject { helper.js_clusters_list_data('/path') }
+
+    it 'displays endpoint path' do
+      expect(subject[:endpoint]).to eq('/path')
+    end
+
+    it 'generates svg image data', :aggregate_failures do
+      expect(subject.dig(:img_tags, :aws, :path)).to match(%r(/illustrations/logos/amazon_eks|svg))
+      expect(subject.dig(:img_tags, :default, :path)).to match(%r(/illustrations/logos/kubernetes|svg))
+      expect(subject.dig(:img_tags, :gcp, :path)).to match(%r(/illustrations/logos/google_gke|svg))
+
+      expect(subject.dig(:img_tags, :aws, :text)).to eq('Amazon EKS')
+      expect(subject.dig(:img_tags, :default, :text)).to eq('Kubernetes Cluster')
+      expect(subject.dig(:img_tags, :gcp, :text)).to eq('Google GKE')
+    end
+
+    it 'displays and ancestor_help_path' do
+      expect(subject[:ancestor_help_path]).to eq(help_page_path('user/group/clusters/index', anchor: 'cluster-precedence'))
+    end
+  end
+
+  describe '#js_cluster_new' do
+    subject { helper.js_cluster_new }
+
+    it 'displays a cluster_connect_help_path' do
+      expect(subject[:cluster_connect_help_path]).to eq(help_page_path('user/project/clusters/add_remove_clusters', anchor: 'add-existing-cluster'))
     end
   end
 

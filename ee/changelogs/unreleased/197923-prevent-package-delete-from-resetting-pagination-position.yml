@@ -1,6 +1,0 @@
----
-title: Deleting packages from a deeper paginated page will no longer return you to
-  the first page
-merge_request: 28638
-author:
-type: changed

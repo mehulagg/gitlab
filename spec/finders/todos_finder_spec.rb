@@ -2,16 +2,16 @@
 
 require 'spec_helper'
 
-describe TodosFinder do
+RSpec.describe TodosFinder do
   describe '#execute' do
-    let(:user) { create(:user) }
-    let(:group) { create(:group) }
-    let(:project) { create(:project, namespace: group) }
-    let(:issue) { create(:issue, project: project) }
-    let(:merge_request) { create(:merge_request, source_project: project) }
+    let_it_be(:user) { create(:user) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, :repository, namespace: group) }
+    let_it_be(:issue) { create(:issue, project: project) }
+    let_it_be(:merge_request) { create(:merge_request, source_project: project) }
     let(:finder) { described_class }
 
-    before do
+    before_all do
       group.add_developer(user)
     end
 
@@ -37,16 +37,61 @@ describe TodosFinder do
         end
 
         context 'when filtering by type' do
-          it 'returns correct todos when filtered by a type' do
+          it 'returns todos by type when filtered by a single type' do
             todos = finder.new(user, { type: 'Issue' }).execute
 
             expect(todos).to match_array([todo1])
           end
 
-          it 'returns the correct todos when filtering for multiple types' do
+          it 'returns todos by type when filtered by multiple types' do
+            design_todo = create(:todo, user: user, group: group, target: create(:design))
+
             todos = finder.new(user, { type: %w[Issue MergeRequest] }).execute
 
-            expect(todos).to match_array([todo1, todo2])
+            expect(todos).to contain_exactly(todo1, todo2)
+            expect(todos).not_to include(design_todo)
+          end
+
+          it 'returns all todos when type is nil' do
+            todos = finder.new(user, { type: nil }).execute
+
+            expect(todos).to contain_exactly(todo1, todo2)
+          end
+
+          it 'returns all todos when type is an empty collection' do
+            todos = finder.new(user, { type: [] }).execute
+
+            expect(todos).to contain_exactly(todo1, todo2)
+          end
+
+          it 'returns all todos when type is blank' do
+            todos = finder.new(user, { type: '' }).execute
+
+            expect(todos).to contain_exactly(todo1, todo2)
+          end
+
+          it 'returns todos by type when blank type is in type collection' do
+            todos = finder.new(user, { type: ['', 'MergeRequest'] }).execute
+
+            expect(todos).to contain_exactly(todo2)
+          end
+
+          it 'returns todos of all types when only blanks are in a collection' do
+            todos = finder.new(user, { type: ['', ''] }).execute
+
+            expect(todos).to contain_exactly(todo1, todo2)
+          end
+
+          it 'returns all todos when no type param' do
+            todos = finder.new(user).execute
+
+            expect(todos).to contain_exactly(todo1, todo2)
+          end
+
+          it 'raises an argument error when invalid type is passed' do
+            todos_finder = finder.new(user, { type: %w[Issue MergeRequest NotAValidType] })
+
+            expect { todos_finder.execute }.to raise_error(ArgumentError)
           end
         end
 
@@ -84,8 +129,8 @@ describe TodosFinder do
         end
 
         context 'when filtering by author' do
-          let(:author1) { create(:user) }
-          let(:author2) { create(:user) }
+          let_it_be(:author1) { create(:user) }
+          let_it_be(:author2) { create(:user) }
 
           let!(:todo1) { create(:todo, user: user, author: author1) }
           let!(:todo2) { create(:todo, user: user, author: author2) }
@@ -107,7 +152,7 @@ describe TodosFinder do
 
         context 'by groups' do
           context 'with subgroups' do
-            let(:subgroup) { create(:group, parent: group) }
+            let_it_be(:subgroup) { create(:group, parent: group) }
             let!(:todo3) { create(:todo, user: user, group: subgroup, target: issue) }
 
             it 'returns todos from subgroups when filtered by a group' do
@@ -120,17 +165,14 @@ describe TodosFinder do
           context 'filtering for multiple groups' do
             let_it_be(:group2) { create(:group) }
             let_it_be(:group3) { create(:group) }
+            let_it_be(:subgroup1) { create(:group, parent: group) }
+            let_it_be(:subgroup2) { create(:group, parent: group2) }
 
             let!(:todo1) { create(:todo, user: user, project: project, target: issue) }
             let!(:todo2) { create(:todo, user: user, group: group, target: merge_request) }
             let!(:todo3) { create(:todo, user: user, group: group2, target: merge_request) }
-
-            let(:subgroup1) { create(:group, parent: group) }
             let!(:todo4) { create(:todo, user: user, group: subgroup1, target: issue) }
-
-            let(:subgroup2) { create(:group, parent: group2) }
             let!(:todo5) { create(:todo, user: user, group: subgroup2, target: issue) }
-
             let!(:todo6) { create(:todo, user: user, group: group3, target: issue) }
 
             it 'returns the expected groups' do
@@ -183,6 +225,29 @@ describe TodosFinder do
             todos = finder.new(user, { project_id: [project2.id, project1.id] }).execute
 
             expect(todos).to match_array([todo2, todo1])
+          end
+        end
+
+        context 'when filtering by target id' do
+          it 'returns the expected todos for the target' do
+            todos = finder.new(user, { type: 'Issue', target_id: issue.id }).execute
+
+            expect(todos).to match_array([todo1])
+          end
+
+          it 'returns the expected todos for multiple target ids' do
+            another_issue = create(:issue, project: project)
+            todo3 = create(:todo, user: user, project: project, target: another_issue)
+
+            todos = finder.new(user, { type: 'Issue', target_id: [issue.id, another_issue.id] }).execute
+
+            expect(todos).to match_array([todo1, todo3])
+          end
+
+          it 'returns the expected todos for empty target id collection' do
+            todos = finder.new(user, { target_id: [] }).execute
+
+            expect(todos).to match_array([todo1, todo2])
           end
         end
       end
@@ -260,9 +325,9 @@ describe TodosFinder do
     it 'returns the expected types' do
       expected_result =
         if Gitlab.ee?
-          %w[DesignManagement::Design Epic Issue MergeRequest]
+          %w[Epic Issue MergeRequest DesignManagement::Design AlertManagement::Alert]
         else
-          %w[Issue MergeRequest]
+          %w[Issue MergeRequest DesignManagement::Design AlertManagement::Alert]
         end
 
       expect(described_class.todo_types).to contain_exactly(*expected_result)

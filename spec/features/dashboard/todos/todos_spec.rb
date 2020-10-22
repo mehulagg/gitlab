@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe 'Dashboard Todos' do
-  let(:user)    { create(:user, username: 'john') }
-  let(:author)  { create(:user) }
-  let(:project) { create(:project, :public) }
-  let(:issue)   { create(:issue, due_date: Date.today, title: "Fix bug") }
+RSpec.describe 'Dashboard Todos' do
+  let_it_be(:user)    { create(:user, username: 'john') }
+  let_it_be(:author)  { create(:user) }
+  let_it_be(:project) { create(:project, :public) }
+  let_it_be(:issue)   { create(:issue, due_date: Date.today, title: "Fix bug") }
 
   context 'User does not have todos' do
     before do
@@ -114,7 +114,7 @@ describe 'Dashboard Todos' do
     context 'todo is stale on the page' do
       before do
         todos = TodosFinder.new(user, state: :pending).execute
-        TodoService.new.mark_todos_as_done(todos, user)
+        TodoService.new.resolve_todos(todos, user)
       end
 
       it_behaves_like 'deleting the todo'
@@ -197,6 +197,21 @@ describe 'Dashboard Todos' do
         end
       end
     end
+
+    context 'review request todo' do
+      let(:merge_request) { create(:merge_request, title: "Fixes issue") }
+
+      before do
+        create(:todo, :review_requested, user: user, project: project, target: merge_request, author: user)
+        visit dashboard_todos_path
+      end
+
+      it 'shows you set yourself as an reviewer message' do
+        page.within('.js-todos-all') do
+          expect(page).to have_content("You requested a review of merge request #{merge_request.to_reference} \"Fixes issue\" at #{project.namespace.owner_name} / #{project.name} from yourself")
+        end
+      end
+    end
   end
 
   context 'User has done todos', :js do
@@ -213,7 +228,7 @@ describe 'Dashboard Todos' do
     describe 'restoring the todo' do
       before do
         within first('.todo') do
-          click_link 'Add a To Do'
+          click_link 'Add a to do'
         end
       end
 
@@ -228,7 +243,7 @@ describe 'Dashboard Todos' do
     end
   end
 
-  context 'User has Todos with labels spanning multiple projects' do
+  context 'User has to dos with labels spanning multiple projects' do
     before do
       label1 = create(:label, project: project)
       note1 = create(:note_on_issue, note: "Hello #{label1.to_reference(format: :name)}", noteable_id: issue.id, noteable_type: 'Issue', project: issue.project)
@@ -355,6 +370,40 @@ describe 'Dashboard Todos' do
       href = pipelines_project_merge_request_path(project, todo.target)
 
       expect(page).to have_link "merge request #{todo.target.to_reference}", href: href
+    end
+  end
+
+  context 'User has a todo regarding a design' do
+    let_it_be(:target) { create(:design, issue: issue, project: project) }
+    let_it_be(:note) { create(:note, project: project, note: 'I am note, hear me roar') }
+    let_it_be(:todo) do
+      create(:todo, :mentioned,
+             user: user,
+             project: project,
+             target: target,
+             author: author,
+             note: note)
+    end
+
+    before do
+      project.add_developer(user)
+      sign_in(user)
+
+      visit dashboard_todos_path
+    end
+
+    it 'has todo present' do
+      expect(page).to have_selector('.todos-list .todo', count: 1)
+    end
+
+    it 'has a link that will take me to the design page' do
+      click_link "design #{target.to_reference}"
+
+      expectation = Gitlab::Routing.url_helpers.designs_project_issue_path(
+        target.project, target.issue, target.filename
+      )
+
+      expect(current_path).to eq(expectation)
     end
   end
 end

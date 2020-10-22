@@ -1,0 +1,85 @@
+INFO: Seed: 599314159
+INFO: Loaded 1 modules   (7 inline 8-bit counters): 7 [0x102dbc470, 0x102dbc477),
+INFO: Loaded 1 PC tables (7 PCs): 7 [0x102dbc478,0x102dbc4e8),
+INFO: -max_len is not provided; libFuzzer will not generate inputs larger than 4096 bytes
+INFO: A corpus is not provided, starting from an empty corpus
+#2      INITED cov: 3 ft: 3 corp: 1/1b exec/s: 0 rss: 26Mb
+#8      NEW    cov: 4 ft: 4 corp: 2/5b lim: 4 exec/s: 0 rss: 26Mb L: 4/4 MS: 1 CrossOver-
+#10     REDUCE cov: 4 ft: 4 corp: 2/4b lim: 4 exec/s: 0 rss: 26Mb L: 3/3 MS: 2 CopyPart-EraseBytes-
+#270    REDUCE cov: 5 ft: 5 corp: 3/7b lim: 6 exec/s: 0 rss: 26Mb L: 3/3 MS: 5 ShuffleBytes-EraseBytes-ChangeByte-InsertByte-ChangeBit-
+#12287  NEW    cov: 6 ft: 6 corp: 4/52b lim: 122 exec/s: 0 rss: 27Mb L: 45/45 MS: 2 CopyPart-InsertRepeatedBytes-
+#12323  REDUCE cov: 6 ft: 6 corp: 4/48b lim: 122 exec/s: 0 rss: 27Mb L: 41/41 MS: 1 EraseBytes-
+#12324  REDUCE cov: 6 ft: 6 corp: 4/28b lim: 122 exec/s: 0 rss: 27Mb L: 21/21 MS: 1 EraseBytes-
+#12334  REDUCE cov: 6 ft: 6 corp: 4/23b lim: 122 exec/s: 0 rss: 27Mb L: 16/16 MS: 5 ShuffleBytes-InsertRepeatedBytes-ChangeByte-ChangeBit-EraseBytes-
+#12335  REDUCE cov: 6 ft: 6 corp: 4/21b lim: 122 exec/s: 0 rss: 27Mb L: 14/14 MS: 1 EraseBytes-
+#12582  REDUCE cov: 6 ft: 6 corp: 4/20b lim: 122 exec/s: 0 rss: 27Mb L: 13/13 MS: 2 ShuffleBytes-EraseBytes-
+#12606  REDUCE cov: 6 ft: 6 corp: 4/15b lim: 122 exec/s: 0 rss: 27Mb L: 8/8 MS: 4 ChangeByte-ChangeByte-ChangeBit-EraseBytes-
+#12629  REDUCE cov: 6 ft: 6 corp: 4/13b lim: 122 exec/s: 0 rss: 27Mb L: 6/6 MS: 3 InsertByte-EraseBytes-EraseBytes-
+#12651  REDUCE cov: 6 ft: 6 corp: 4/11b lim: 122 exec/s: 0 rss: 27Mb L: 4/4 MS: 2 ChangeBit-EraseBytes-
+#12811  REDUCE cov: 6 ft: 6 corp: 4/10b lim: 122 exec/s: 0 rss: 27Mb L: 3/3 MS: 5 InsertByte-InsertByte-ChangeByte-ChangeBit-EraseBytes-
+#32469  REDUCE cov: 7 ft: 7 corp: 5/16b lim: 317 exec/s: 0 rss: 30Mb L: 6/6 MS: 3 ChangeBinInt-EraseBytes-CMP- DE: "Z\x00\x00\x00"-
+#32660  REDUCE cov: 7 ft: 7 corp: 5/14b lim: 317 exec/s: 0 rss: 30Mb L: 4/4 MS: 1 EraseBytes-
+=================================================================
+==56857==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x602000099533 at pc 0x000102d7c05a bp 0x7ffeece84080 sp 0x7ffeece84078
+READ of size 1 at 0x602000099533 thread T0
+    #0 0x102d7c059 in FuzzMe(unsigned char const*, unsigned long) fuzz_me.cc:9
+    #1 0x102d7c0ba in LLVMFuzzerTestOneInput fuzz_me.cc:13
+    #2 0x102d98020 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) FuzzerLoop.cpp:556
+    #3 0x102d97765 in fuzzer::Fuzzer::RunOne(unsigned char const*, unsigned long, bool, fuzzer::InputInfo*, bool*) FuzzerLoop.cpp:470
+    #4 0x102d99966 in fuzzer::Fuzzer::MutateAndTestOne() FuzzerLoop.cpp:698
+    #5 0x102d9a665 in fuzzer::Fuzzer::Loop(std::__1::vector<fuzzer::SizedFile, fuzzer::fuzzer_allocator<fuzzer::SizedFile> >&) FuzzerLoop.cpp:830
+    #6 0x102d870cd in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) FuzzerDriver.cpp:829
+    #7 0x102db4f82 in main FuzzerMain.cpp:19
+    #8 0x7fff68ff2cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+
+0x602000099533 is located 0 bytes to the right of 3-byte region [0x602000099530,0x602000099533)
+allocated by thread T0 here:
+    #0 0x102e68cfd in wrap__Znam+0x7d (libclang_rt.asan_osx_dynamic.dylib:x86_64+0x50cfd)
+    #1 0x102d97f31 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) FuzzerLoop.cpp:541
+    #2 0x102d97765 in fuzzer::Fuzzer::RunOne(unsigned char const*, unsigned long, bool, fuzzer::InputInfo*, bool*) FuzzerLoop.cpp:470
+    #3 0x102d99966 in fuzzer::Fuzzer::MutateAndTestOne() FuzzerLoop.cpp:698
+    #4 0x102d9a665 in fuzzer::Fuzzer::Loop(std::__1::vector<fuzzer::SizedFile, fuzzer::fuzzer_allocator<fuzzer::SizedFile> >&) FuzzerLoop.cpp:830
+    #5 0x102d870cd in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) FuzzerDriver.cpp:829
+    #6 0x102db4f82 in main FuzzerMain.cpp:19
+    #7 0x7fff68ff2cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow fuzz_me.cc:9 in FuzzMe(unsigned char const*, unsigned long)
+Shadow bytes around the buggy address:
+  0x1c0400013250: fa fa fd fa fa fa fd fa fa fa fd fa fa fa fd fa
+  0x1c0400013260: fa fa fd fa fa fa fd fa fa fa fd fa fa fa fd fa
+  0x1c0400013270: fa fa fd fa fa fa fd fd fa fa fd fd fa fa fd fa
+  0x1c0400013280: fa fa fd fd fa fa fd fd fa fa fd fa fa fa fd fd
+  0x1c0400013290: fa fa fd fd fa fa fd fa fa fa fd fa fa fa fd fa
+=>0x1c04000132a0: fa fa fd fa fa fa[03]fa fa fa fa fa fa fa fa fa
+  0x1c04000132b0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c04000132c0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c04000132d0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c04000132e0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c04000132f0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+  Shadow gap:              cc
+==56857==ABORTING
+MS: 1 EraseBytes-; base unit: de3a753d4f1def197604865d76dba888d6aefc71
+0x46,0x55,0x5a,
+FUZ
+artifact_prefix='./'; Test unit written to ./crash-0eb8e4ed029b774d80f2b66408203801cb982a60
+Base64: RlVa
+zsh: abort      ./cmd/testdata/libfuzzer-darwin

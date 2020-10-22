@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::Replication::LfsRetriever, :geo do
+RSpec.describe Gitlab::Geo::Replication::LfsRetriever, :geo do
   describe '#execute' do
     subject { retriever.execute }
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AuditEventSerializer do
+RSpec.describe AuditEventSerializer do
   describe '.represent' do
     it 'returns an empty array when there are no audit events' do
       result = described_class.new.represent([])

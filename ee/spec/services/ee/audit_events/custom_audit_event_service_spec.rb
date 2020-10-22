@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::AuditEvents::CustomAuditEventService do
+RSpec.describe EE::AuditEvents::CustomAuditEventService do
   describe '#security_event' do
     include_examples 'logs the custom audit event' do
       let(:user) { create(:user) }

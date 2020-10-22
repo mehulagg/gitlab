@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Max Limits Module' do
+RSpec.describe 'Max Limits Module' do
   let(:clazz) do
     Class.new do
       include EE::Boards::Lists::MaxLimits

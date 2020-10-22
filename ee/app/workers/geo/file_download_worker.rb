@@ -6,6 +6,7 @@ module Geo
     include GeoQueue
 
     sidekiq_options retry: 3, dead: false
+    loggable_arguments 0
 
     def perform(object_type, object_id)
       Geo::FileDownloadService.new(object_type.to_sym, object_id).execute

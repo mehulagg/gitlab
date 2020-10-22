@@ -1,13 +1,10 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
+require 'fast_spec_helper'
 require 'rubocop'
-require 'rubocop/rspec/support'
-
 require_relative '../../../../rubocop/cop/migration/add_index'
 
-describe RuboCop::Cop::Migration::AddIndex do
+RSpec.describe RuboCop::Cop::Migration::AddIndex, type: :rubocop do
   include CopHelper
 
   subject(:cop) { described_class.new }
@@ -18,7 +15,7 @@ describe RuboCop::Cop::Migration::AddIndex do
     end
 
     it 'registers an offense when add_index is used' do
-      expect_offense(<<~PATTERN.strip_indent)
+      expect_offense(<<~PATTERN)
         def change
           add_index :table, :column
           ^^^^^^^^^ `add_index` requires downtime, use `add_concurrent_index` instead
@@ -29,7 +26,7 @@ describe RuboCop::Cop::Migration::AddIndex do
 
   context 'outside of migration' do
     it 'registers no offense' do
-      expect_no_offenses(<<~PATTERN.strip_indent)
+      expect_no_offenses(<<~PATTERN)
         def change
           add_index :table, :column
         end

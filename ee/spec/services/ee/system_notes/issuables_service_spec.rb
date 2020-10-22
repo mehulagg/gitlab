@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::SystemNotes::IssuablesService do
+RSpec.describe ::SystemNotes::IssuablesService do
   let_it_be(:group)    { create(:group) }
   let_it_be(:project)  { create(:project, :repository, group: group) }
   let_it_be(:author)   { create(:user) }
@@ -12,68 +12,6 @@ describe ::SystemNotes::IssuablesService do
   let(:epic)     { create(:epic, group: group) }
 
   let(:service) { described_class.new(noteable: noteable, project: project, author: author) }
-
-  describe '#relate_issue' do
-    let(:noteable_ref) { create(:issue) }
-
-    subject { service.relate_issue(noteable_ref) }
-
-    it_behaves_like 'a system note' do
-      let(:action) { 'relate' }
-    end
-
-    context 'when issue marks another as related' do
-      it 'sets the note text' do
-        expect(subject.note).to eq "marked this issue as related to #{noteable_ref.to_reference(project)}"
-      end
-    end
-  end
-
-  describe '#unrelate_issue' do
-    let(:noteable_ref) { create(:issue) }
-
-    subject { service.unrelate_issue(noteable_ref) }
-
-    it_behaves_like 'a system note' do
-      let(:action) { 'unrelate' }
-    end
-
-    context 'when issue relation is removed' do
-      it 'sets the note text' do
-        expect(subject.note).to eq "removed the relation with #{noteable_ref.to_reference(project)}"
-      end
-    end
-  end
-
-  describe '#change_weight_note' do
-    context 'when weight changed' do
-      let(:noteable) { create(:issue, project: project, title: 'Lorem ipsum', weight: 4) }
-
-      subject { service.change_weight_note }
-
-      it_behaves_like 'a system note' do
-        let(:action) { 'weight' }
-      end
-
-      it 'sets the note text' do
-        expect(subject.note).to eq "changed weight to **4**"
-      end
-    end
-
-    context 'when weight removed' do
-      let(:noteable) { create(:issue, project: project, title: 'Lorem ipsum', weight: nil) }
-
-      subject { service.change_weight_note }
-
-      it_behaves_like 'a system note' do
-        let(:action) { 'weight' }
-      end
-
-      it 'sets the note text' do
-        expect(subject.note).to eq 'removed the weight'
-      end
-    end
-  end
 
   describe '#change_health_status_note' do
     context 'when health_status changed' do
@@ -102,6 +40,20 @@ describe ::SystemNotes::IssuablesService do
       it 'sets the note text' do
         expect(subject.note).to eq 'removed the health status'
       end
+    end
+  end
+
+  describe '#publish_issue_to_status_page' do
+    let_it_be(:noteable) { create(:issue, project: project) }
+
+    subject { service.publish_issue_to_status_page }
+
+    it_behaves_like 'a system note' do
+      let(:action) { 'published' }
+    end
+
+    it 'sets the note text' do
+      expect(subject.note).to eq 'published this issue to the status page'
     end
   end
 end

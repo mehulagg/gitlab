@@ -1,17 +1,15 @@
 # frozen_string_literal: true
 
 class Projects::AlertManagementController < Projects::ApplicationController
-  before_action :ensure_feature_enabled
+  before_action :authorize_read_alert_management_alert!
+
+  feature_category :alert_management
 
   def index
   end
 
   def details
-  end
-
-  private
-
-  def ensure_feature_enabled
-    render_404 unless Feature.enabled?(:alert_management_minimal, project)
+    @alert_id = params[:id]
+    push_frontend_feature_flag(:expose_environment_path_in_alert_details, @project)
   end
 end

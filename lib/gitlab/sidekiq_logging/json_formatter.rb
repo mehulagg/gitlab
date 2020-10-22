@@ -18,9 +18,15 @@ module Gitlab
         when String
           output[:message] = data
         when Hash
-          convert_to_iso8601!(data)
-          stringify_args!(data)
           output.merge!(data)
+
+          # jobstr is redundant and can include information we wanted to
+          # exclude (like arguments)
+          output.delete(:jobstr)
+
+          convert_to_iso8601!(output)
+          convert_retry_to_integer!(output)
+          process_args!(output)
         end
 
         output.to_json + "\n"
@@ -41,8 +47,25 @@ module Gitlab
         Time.at(timestamp).utc.iso8601(3)
       end
 
-      def stringify_args!(payload)
-        payload['args'] = Gitlab::Utils::LogLimitedArray.log_limited_array(payload['args'].map(&:to_s)) if payload['args']
+      def convert_retry_to_integer!(payload)
+        payload['retry'] =
+          case payload['retry']
+          when Integer
+            payload['retry']
+          when false, nil
+            0
+          when true
+            Sidekiq::JobRetry::DEFAULT_MAX_RETRY_ATTEMPTS
+          else
+            -1
+          end
+      end
+
+      def process_args!(payload)
+        return unless payload['args']
+
+        payload['args'] = Gitlab::ErrorTracking::Processor::SidekiqProcessor
+                            .loggable_arguments(payload['args'], payload['class'])
       end
     end
   end

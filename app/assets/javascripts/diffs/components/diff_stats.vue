@@ -1,10 +1,10 @@
 <script>
-import Icon from '~/vue_shared/components/icon.vue';
-import { n__ } from '~/locale';
 import { isNumber } from 'lodash';
+import { GlIcon } from '@gitlab/ui';
+import { n__ } from '~/locale';
 
 export default {
-  components: { Icon },
+  components: { GlIcon },
   props: {
     addedLines: {
       type: Number,
@@ -14,18 +14,21 @@ export default {
       type: Number,
       required: true,
     },
-    diffFilesLength: {
-      type: Number,
+    diffFilesCountText: {
+      type: String,
       required: false,
       default: null,
     },
   },
   computed: {
+    diffFilesLength() {
+      return parseInt(this.diffFilesCountText, 10);
+    },
     filesText() {
       return n__('file', 'files', this.diffFilesLength);
     },
     isCompareVersionsHeader() {
-      return Boolean(this.diffFilesLength);
+      return Boolean(this.diffFilesCountText);
     },
     hasDiffFiles() {
       return isNumber(this.diffFilesLength) && this.diffFilesLength >= 0;
@@ -39,12 +42,12 @@ export default {
     class="diff-stats"
     :class="{
       'is-compare-versions-header d-none d-lg-inline-flex': isCompareVersionsHeader,
-      'd-inline-flex': !isCompareVersionsHeader,
+      'd-none d-sm-inline-flex': !isCompareVersionsHeader,
     }"
   >
     <div v-if="hasDiffFiles" class="diff-stats-group">
-      <icon name="doc-code" class="diff-stats-icon text-secondary" />
-      <span class="text-secondary bold">{{ diffFilesLength }} {{ filesText }}</span>
+      <gl-icon name="doc-code" class="diff-stats-icon text-secondary" />
+      <span class="text-secondary bold">{{ diffFilesCountText }} {{ filesText }}</span>
     </div>
     <div
       class="diff-stats-group cgreen d-flex align-items-center"

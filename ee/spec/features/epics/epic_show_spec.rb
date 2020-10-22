@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Epic show', :js do
+RSpec.describe 'Epic show', :js do
   let_it_be(:user) { create(:user, name: 'Rick Sanchez', username: 'rick.sanchez') }
   let_it_be(:group) { create(:group, :public) }
   let_it_be(:public_project) { create(:project, :public, group: group) }
@@ -10,12 +10,11 @@ describe 'Epic show', :js do
   let_it_be(:label2) { create(:group_label, group: group, title: 'enhancement') }
   let_it_be(:label3) { create(:group_label, group: group, title: 'documentation') }
   let_it_be(:public_issue) { create(:issue, project: public_project) }
-  let_it_be(:note_text) { 'Contemnit enim disserendi elegantiam.' }
   let_it_be(:epic_title) { 'Sample epic' }
 
   let_it_be(:markdown) do
     <<-MARKDOWN.strip_heredoc
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    **Lorem** _ipsum_ dolor sit [amet](https://example.com), consectetur adipiscing elit.
     Nos commodius agimus.
     Ex rebus enim timiditas, non ex vocabulis nascitur.
     Ita prorsus, inquam; Duo Reges: constructio interrete.
@@ -117,6 +116,8 @@ describe 'Epic show', :js do
   end
 
   describe 'Epic metadata' do
+    it_behaves_like 'page meta description', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nos commodius agimus. Ex rebus enim timiditas, non ex vocabulis nascitur. Ita prorsus, inquam; Duo...'
+
     it 'shows epic status, date and author in header' do
       page.within('.epic-page-container .detail-page-header-body') do
         expect(find('.issuable-status-box > span')).to have_content('Open')
@@ -128,13 +129,47 @@ describe 'Epic show', :js do
     it 'shows epic title and description' do
       page.within('.epic-page-container .detail-page-description') do
         expect(find('.title-container .title')).to have_content(epic_title)
-        expect(find('.description .md')).to have_content(markdown.squish)
+        expect(find('.description .md')).to have_content('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nos commodius agimus. Ex rebus enim timiditas, non ex vocabulis nascitur. Ita prorsus, inquam; Duo Reges: constructio interrete.')
       end
     end
 
     it 'shows epic thread filter dropdown' do
       page.within('.js-noteable-awards') do
-        expect(find('.js-discussion-filter-container #discussion-filter-dropdown')).to have_content('Show all activity')
+        expect(find('#discussion-filter-dropdown')).to have_content('Show all activity')
+      end
+    end
+
+    describe 'Sort dropdown' do
+      let!(:notes) { create_list(:note, 2, noteable: epic) }
+
+      context 'when sorted by `Oldest first`' do
+        it 'shows comments in the correct order' do
+          expect(find('.js-dropdown-text')).to have_content('Oldest first')
+
+          items = all('.timeline-entry .timeline-discussion-body .note-text')
+          expect(items[0]).to have_content(notes[0].note)
+          expect(items[1]).to have_content(notes[1].note)
+        end
+      end
+
+      context 'when sorted by `Newest first`' do
+        before do
+          page.within('[data-testid="sort-discussion-filter"]') do
+            find('.js-dropdown-text').click
+            find('.js-newest-first').click
+            wait_for_requests
+          end
+        end
+
+        it 'shows comments in the correct order', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/225637' do
+          page.within('[data-testid="sort-discussion-filter"]') do
+            expect(find('.js-newest-first')).to have_content('Newest first')
+          end
+
+          items = all('.timeline-entry .timeline-discussion-body .note-text')
+          expect(items[0]).to have_content(notes[1].note)
+          expect(items[1]).to have_content(notes[0].note)
+        end
       end
     end
   end
@@ -175,7 +210,7 @@ describe 'Epic show', :js do
 
         it 'shows label create view when `Create group label` is clicked' do
           page.within('.js-labels-block') do
-            find('button', text: 'Create group label').click
+            find('a', text: 'Create group label').click
 
             expect(page).to have_selector('.js-labels-create')
           end
@@ -183,7 +218,7 @@ describe 'Epic show', :js do
 
         it 'creates new label using create view' do
           page.within('.js-labels-block') do
-            find('button', text: 'Create group label').click
+            find('a', text: 'Create group label').click
 
             find('.dropdown-input .gl-form-input').set('Test label')
             find('.suggest-colors-dropdown a', match: :first).click
@@ -200,7 +235,7 @@ describe 'Epic show', :js do
 
         it 'shows labels list view when `Cancel` button is clicked from create view' do
           page.within('.js-labels-block') do
-            find('button', text: 'Create group label').click
+            find('a', text: 'Create group label').click
 
             find('.js-btn-cancel-create').click
             wait_for_requests
@@ -211,7 +246,7 @@ describe 'Epic show', :js do
 
         it 'shows labels list view when back button is clicked from create view' do
           page.within('.js-labels-block') do
-            find('button', text: 'Create group label').click
+            find('a', text: 'Create group label').click
 
             find('.js-btn-back').click
             wait_for_requests

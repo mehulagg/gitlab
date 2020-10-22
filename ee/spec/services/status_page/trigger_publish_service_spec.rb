@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe StatusPage::TriggerPublishService do
+RSpec.describe StatusPage::TriggerPublishService do
   let_it_be(:user) { create(:user) }
   let_it_be(:project, refind: true) { create(:project, :repository) }
 
-  let(:service) { described_class.new(project, user, triggered_by) }
+  let(:service) { described_class.new(project, user, triggered_by, action: :update) }
 
   describe '#execute' do
     # Variables used by shared examples
@@ -18,8 +18,18 @@ describe StatusPage::TriggerPublishService do
 
     subject { service.execute }
 
+    describe 'invalid action' do
+      let(:service) { described_class.new(project, user, double(:issue), action: :something_invalid) }
+
+      it 'raises an argument error and does not process' do
+        expect(StatusPage::PublishWorker).not_to receive(:perform_async)
+
+        expect { subject }.to raise_error(ArgumentError)
+      end
+    end
+
     describe 'triggered by issue' do
-      let_it_be(:triggered_by, reload: true) { create(:issue, project: project) }
+      let_it_be(:triggered_by, reload: true) { create(:issue, :published, project: project) }
       let(:issue_id) { triggered_by.id }
 
       using RSpec::Parameterized::TableSyntax
@@ -41,10 +51,26 @@ describe StatusPage::TriggerPublishService do
 
       context 'without changes' do
         include_examples 'no trigger status page publish'
+
+        context 'with init action' do
+          let(:service) { described_class.new(project, user, triggered_by, action: :init) }
+
+          include_examples 'trigger status page publish'
+        end
       end
 
       context 'when a confidential issue changes' do
         let(:triggered_by) { create(:issue, :confidential, project: project) }
+
+        include_examples 'no trigger status page publish' do
+          before do
+            triggered_by.update!(title: 'changed')
+          end
+        end
+      end
+
+      context 'when a non-published issue changes' do
+        let(:triggered_by) { create(:issue, project: project) }
 
         include_examples 'no trigger status page publish' do
           before do
@@ -65,7 +91,7 @@ describe StatusPage::TriggerPublishService do
 
       context 'when reopening an issue' do
         include_examples 'trigger status page publish' do
-          let_it_be(:triggered_by) { create(:issue, :closed, project: project) }
+          let_it_be(:triggered_by) { create(:issue, :closed, :published, project: project) }
 
           before do
             triggered_by.reopen!
@@ -76,7 +102,7 @@ describe StatusPage::TriggerPublishService do
 
     describe 'triggered by note' do
       let(:issue_id) { triggered_by.noteable_id }
-      let(:emoji_name) { StatusPage::AWARD_EMOJI }
+      let(:emoji_name) { Gitlab::StatusPage::AWARD_EMOJI }
 
       before do
         create(:award_emoji, user: user, name: emoji_name,
@@ -157,7 +183,7 @@ describe StatusPage::TriggerPublishService do
     end
 
     describe 'triggered by award emoji' do
-      let(:emoji_name) { StatusPage::AWARD_EMOJI }
+      let(:emoji_name) { Gitlab::StatusPage::AWARD_EMOJI }
       let(:issue_id) { triggered_by.awardable.noteable_id }
 
       let(:triggered_by) do
@@ -203,7 +229,7 @@ describe StatusPage::TriggerPublishService do
     end
 
     context 'with eligable triggered_by' do
-      let_it_be(:triggered_by) { create(:issue, project: project) }
+      let_it_be(:triggered_by) { create(:issue, :published, project: project) }
       let(:issue_id) { triggered_by.id }
 
       context 'when eligable' do

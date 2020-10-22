@@ -4,12 +4,18 @@ module EE
   module GroupsController
     extend ActiveSupport::Concern
     extend ::Gitlab::Utils::Override
+    include PreventForkingHelper
 
     prepended do
       alias_method :ee_authorize_admin_group!, :authorize_admin_group!
 
-      before_action :set_allowed_domain, only: [:edit]
       before_action :ee_authorize_admin_group!, only: [:restore]
+
+      before_action only: :issues do
+        push_frontend_feature_flag(:scoped_labels, @group, type: :licensed)
+      end
+
+      feature_category :subgroups, [:restore]
     end
 
     override :render_show_html
@@ -34,7 +40,7 @@ module EE
       if result[:status] == :success
         redirect_to group_path(group),
           status: :found,
-          notice: "'#{group.name}' has been scheduled for removal on #{permanent_deletion_date(Time.now.utc)}."
+          notice: "'#{group.name}' has been scheduled for removal on #{permanent_deletion_date(Time.current.utc)}."
       else
         redirect_to edit_group_path(group), status: :found, alert: result[:message]
       end
@@ -64,9 +70,11 @@ module EE
         params_ee << :file_template_project_id if current_group&.feature_available?(:custom_file_templates_for_namespace)
         params_ee << :custom_project_templates_group_id if current_group&.group_project_template_available?
         params_ee << :ip_restriction_ranges if current_group&.feature_available?(:group_ip_restriction)
-        params_ee << { allowed_email_domain_attributes: [:id, :domain] } if current_group&.feature_available?(:group_allowed_email_domains)
+        params_ee << :allowed_email_domains_list if current_group&.feature_available?(:group_allowed_email_domains)
         params_ee << :max_pages_size if can?(current_user, :update_max_pages_size)
         params_ee << :max_personal_access_token_lifetime if current_group&.personal_access_token_expiration_policy_available?
+        params_ee << :delayed_project_removal if current_group&.feature_available?(:adjourned_deletion_for_projects_and_groups)
+        params_ee << :prevent_forking_outside_group if can_change_prevent_forking?(current_user, current_group)
       end
     end
 
@@ -91,12 +99,6 @@ module EE
 
     def default_group_view
       EE::User::DEFAULT_GROUP_VIEW
-    end
-
-    def set_allowed_domain
-      return if group.allowed_email_domain.present?
-
-      group.build_allowed_email_domain
     end
   end
 end

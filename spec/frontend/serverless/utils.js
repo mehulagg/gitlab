@@ -15,6 +15,3 @@ export const adjustMetricQuery = data => {
   updatedMetric.queries = queries;
   return updatedMetric;
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

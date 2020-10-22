@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LfsObject do
+RSpec.describe LfsObject do
   context 'scopes' do
     describe '.not_existing_in_project' do
       it 'contains only lfs objects not linked to the project' do
@@ -152,14 +152,10 @@ describe LfsObject do
     end
 
     describe 'file is being stored' do
-      let(:lfs_object) { create(:lfs_object, :with_file) }
+      subject { create(:lfs_object, :with_file) }
 
       context 'when existing object has local store' do
-        it 'is stored locally' do
-          expect(lfs_object.file_store).to be(ObjectStorage::Store::LOCAL)
-          expect(lfs_object.file).to be_file_storage
-          expect(lfs_object.file.object_store).to eq(ObjectStorage::Store::LOCAL)
-        end
+        it_behaves_like 'mounted file in local store'
       end
 
       context 'when direct upload is enabled' do
@@ -167,13 +163,7 @@ describe LfsObject do
           stub_lfs_object_storage(direct_upload: true)
         end
 
-        context 'when file is stored' do
-          it 'is stored remotely' do
-            expect(lfs_object.file_store).to eq(ObjectStorage::Store::REMOTE)
-            expect(lfs_object.file).not_to be_file_storage
-            expect(lfs_object.file.object_store).to eq(ObjectStorage::Store::REMOTE)
-          end
-        end
+        it_behaves_like 'mounted file in object store'
       end
     end
   end

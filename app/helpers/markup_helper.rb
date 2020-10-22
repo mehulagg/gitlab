@@ -129,8 +129,8 @@ module MarkupHelper
     context.merge!(
       pipeline: :wiki,
       project: @project,
-      project_wiki: @project_wiki,
-      repository: @project_wiki.repository,
+      wiki: @wiki,
+      repository: @wiki.repository,
       page_slug: wiki_page.slug,
       issuable_state_filter_enabled: true
     )
@@ -244,7 +244,6 @@ module MarkupHelper
     content_tag :button,
       type: 'button',
       class: 'toolbar-btn js-md has-tooltip',
-      tabindex: -1,
       data: data,
       title: options[:title],
       aria: { label: options[:title] } do
@@ -300,7 +299,7 @@ module MarkupHelper
 
       # RepositoryLinkFilter and UploadLinkFilter
       commit:         @commit,
-      project_wiki:   @project_wiki,
+      wiki:           @wiki,
       ref:            @ref,
       requested_path: @path
     )

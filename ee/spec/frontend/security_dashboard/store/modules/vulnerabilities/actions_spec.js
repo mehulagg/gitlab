@@ -31,6 +31,10 @@ describe('vulnerabilities count actions', () => {
     state = initialState();
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('setPipelineId', () => {
     const pipelineId = 123;
 
@@ -443,9 +447,8 @@ describe('openModal', () => {
 
 describe('downloadPatch', () => {
   it('creates a download link and clicks on it to download the file', () => {
-    jest.spyOn(document, 'createElement');
-    jest.spyOn(document.body, 'appendChild');
-    jest.spyOn(document.body, 'removeChild');
+    const a = { click: jest.fn() };
+    jest.spyOn(document, 'createElement').mockImplementation(() => a);
 
     actions.downloadPatch({
       state: {
@@ -462,8 +465,10 @@ describe('downloadPatch', () => {
     });
 
     expect(document.createElement).toHaveBeenCalledTimes(1);
-    expect(document.body.appendChild).toHaveBeenCalledTimes(1);
-    expect(document.body.removeChild).toHaveBeenCalledTimes(1);
+    expect(document.createElement).toHaveBeenCalledWith('a');
+    expect(a.click).toHaveBeenCalledTimes(1);
+    expect(a.download).toBe('remediation.patch');
+    expect(a.href).toContain('data:text/plain;base64');
   });
 });
 

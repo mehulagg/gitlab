@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectImportState, type: :model do
+RSpec.describe ProjectImportState, type: :model do
   let_it_be(:correlation_id) { 'cid' }
   let_it_be(:import_state, refind: true) { create(:import_state, correlation_id_value: correlation_id) }
 
@@ -54,6 +54,30 @@ describe ProjectImportState, type: :model do
 
     it 'limits returned collection to given maximum' do
       expect(subject.relation_hard_failures(limit: 1).size).to eq(1)
+    end
+  end
+
+  describe '#mark_as_failed' do
+    let(:error_message) { 'some message' }
+
+    it 'logs error when update column fails' do
+      allow(import_state).to receive(:update_column).and_raise(ActiveRecord::ActiveRecordError)
+
+      expect_next_instance_of(Gitlab::Import::Logger) do |logger|
+        expect(logger).to receive(:error).with(
+          error: 'ActiveRecord::ActiveRecordError',
+          message: 'Error setting import status to failed',
+          original_error: error_message
+        )
+      end
+
+      import_state.mark_as_failed(error_message)
+    end
+
+    it 'updates last_error with error message' do
+      import_state.mark_as_failed(error_message)
+
+      expect(import_state.last_error).to eq(error_message)
     end
   end
 

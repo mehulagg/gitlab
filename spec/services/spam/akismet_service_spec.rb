@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Spam::AkismetService do
+RSpec.describe Spam::AkismetService do
   let(:fake_akismet_client) { double(:akismet_client) }
 
   let_it_be(:text) { "Would you like to buy some tinned meat product?" }
@@ -45,9 +45,7 @@ describe Spam::AkismetService do
       end
 
       it 'logs an error' do
-        logger_spy = double(:logger)
-        expect(Rails).to receive(:logger).and_return(logger_spy)
-        expect(logger_spy).to receive(:error).with(/skipping/)
+        expect(Gitlab::AppLogger).to receive(:error).with(/skipping/)
 
         subject.send(method_call)
       end
@@ -98,9 +96,7 @@ describe Spam::AkismetService do
         end
 
         it 'logs an error' do
-          logger_spy = double(:logger)
-          expect(Rails).to receive(:logger).and_return(logger_spy)
-          expect(logger_spy).to receive(:error).with(/skipping check/)
+          expect(Gitlab::AppLogger).to receive(:error).with(/skipping check/)
 
           subject.spam?
         end

@@ -2,8 +2,12 @@
 
 require 'spec_helper'
 
-describe Analytics::MergeRequestMetricsRefresh do
+RSpec.describe Analytics::MergeRequestMetricsRefresh do
   subject { calculator_class.new(merge_request) }
+
+  around do |example|
+    Timecop.freeze { example.run }
+  end
 
   let(:calculator_class) do
     Class.new do
@@ -18,7 +22,7 @@ describe Analytics::MergeRequestMetricsRefresh do
       end
 
       def update_metric!(metrics)
-        metrics.first_comment_at = Time.now
+        metrics.first_comment_at = Time.zone.now
       end
     end
   end
@@ -27,20 +31,24 @@ describe Analytics::MergeRequestMetricsRefresh do
 
   describe '#execute' do
     it 'updates metric via update_metric! method' do
-      expect { subject.execute }.to change { merge_request.metrics.first_comment_at }.to(be_like_time(Time.now))
+      expect { subject.execute }.to change { merge_request.metrics.first_comment_at }.to(be_like_time(Time.zone.now))
     end
 
     context 'when metric is already present' do
+      let(:first_comment_at) { 1.day.ago }
+
       before do
-        merge_request.metrics.first_comment_at = 1.day.ago
+        merge_request.metrics.update!(first_comment_at: first_comment_at)
       end
 
       it 'does not update metric' do
-        expect { subject.execute }.not_to change { merge_request.metrics.first_comment_at }
+        subject.execute
+
+        expect(merge_request.metrics.reload.first_comment_at).to be_like_time(first_comment_at)
       end
 
       it 'updates metric when forced' do
-        expect { subject.execute(force: true) }.to change { merge_request.metrics.first_comment_at }.to(be_like_time(Time.now))
+        expect { subject.execute(force: true) }.to change { merge_request.metrics.first_comment_at }.to(be_like_time(Time.zone.now))
       end
     end
   end

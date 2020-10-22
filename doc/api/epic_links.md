@@ -1,15 +1,15 @@
 # Epic Links API **(ULTIMATE)**
 
->**Note:**
-> This endpoint was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9188) in GitLab 11.8.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9188) in GitLab 11.8.
 
-Manages parent-child [epic relationships](../user/group/epics/index.md#multi-level-child-epics-ultimate).
+Manages parent-child [epic relationships](../user/group/epics/index.md#multi-level-child-epics).
 
 Every API call to `epic_links` must be authenticated.
 
 If a user is not a member of a group and the group is private, a `GET` request on that group will result to a `404` status code.
 
-Epics are available only in the [Ultimate/Gold tier](https://about.gitlab.com/pricing/). If the epics feature is not available, a `403` status code will be returned.
+Multi-level Epics are available only in GitLab [Ultimate/Gold](https://about.gitlab.com/pricing/).
+If the Multi-level Epics feature is not available, a `403` status code will be returned.
 
 ## List epics related to a given epic
 
@@ -25,7 +25,7 @@ GET /groups/:id/epics/:epic_iid/epics
 | `epic_iid` | integer        | yes      | The internal ID of the epic.                                                                                  |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/1/epics/5/epics/
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/epics/5/epics/"
 ```
 
 Example response:
@@ -80,7 +80,7 @@ POST /groups/:id/epics/:epic_iid/epics
 | `child_epic_id` | integer        | yes      | The global ID of the child epic. Internal ID can't be used because they can conflict with epics from other groups. |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/1/epics/5/epics/6
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/epics/5/epics/6"
 ```
 
 Example response:
@@ -131,9 +131,10 @@ POST /groups/:id/epics/:epic_iid/epics
 | `id`            | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user      |
 | `epic_iid`      | integer        | yes      | The internal ID of the (future parent) epic.                                                                                       |
 | `title`         | string         | yes      | The title of a newly created epic. |
+| `confidential`  | boolean        | no       | Whether the epic should be confidential. Will be ignored if `confidential_epics` feature flag is disabled. Defaults to the confidentiality state of the parent epic.  |
 
 ```shell
-curl --request POST --header  "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/1/epics/5/epics?title=Newpic
+curl --request POST --header  "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/epics/5/epics?title=Newpic"
 ```
 
 Example response:
@@ -168,7 +169,7 @@ PUT /groups/:id/epics/:epic_iid/epics/:child_epic_id
 | `move_after_id`  | integer        | no       | The global ID of a sibling epic that should be placed after the child epic.                                        |
 
 ```shell
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/1/epics/4/epics/5
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/epics/4/epics/5"
 ```
 
 Example response:
@@ -223,7 +224,7 @@ DELETE /groups/:id/epics/:epic_iid/epics/:child_epic_id
 | `child_epic_id` | integer        | yes      | The global ID of the child epic. Internal ID can't be used because they can conflict with epics from other groups. |
 
 ```shell
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/1/epics/4/epics/5
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/epics/4/epics/5"
 ```
 
 Example response:

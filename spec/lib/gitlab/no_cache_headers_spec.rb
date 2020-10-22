@@ -2,9 +2,12 @@
 
 require 'spec_helper'
 
-describe Gitlab::NoCacheHeaders do
-  class NoCacheTester
-    include Gitlab::NoCacheHeaders
+RSpec.describe Gitlab::NoCacheHeaders do
+  before do
+    stub_const('NoCacheTester', Class.new)
+    NoCacheTester.class_eval do
+      include Gitlab::NoCacheHeaders
+    end
   end
 
   describe "#no_cache_headers" do

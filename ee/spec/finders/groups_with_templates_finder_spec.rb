@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupsWithTemplatesFinder do
+RSpec.describe GroupsWithTemplatesFinder do
   let_it_be(:group_1, reload: true) { create(:group, name: 'group-1') }
   let_it_be(:group_2, reload: true) { create(:group, name: 'group-2') }
   let_it_be(:group_3, reload: true) { create(:group, name: 'group-3') }
@@ -36,16 +36,8 @@ describe GroupsWithTemplatesFinder do
         allow(Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?) { true }
       end
 
-      it 'returns all groups before cut-off date' do
-        Timecop.freeze(described_class::CUT_OFF_DATE - 1.day) do
-          expect(described_class.new.execute).to contain_exactly(group_1, group_2, group_3)
-        end
-      end
-
-      it 'returns groups on gold/silver plan after cut-off date' do
-        Timecop.freeze(described_class::CUT_OFF_DATE + 1.day) do
-          expect(described_class.new.execute).to contain_exactly(group_1, group_2)
-        end
+      it 'returns groups on gold/silver plan' do
+        expect(described_class.new.execute).to contain_exactly(group_1, group_2)
       end
 
       context 'with subgroup with template' do
@@ -54,10 +46,8 @@ describe GroupsWithTemplatesFinder do
           create(:project, namespace: subgroup_5)
         end
 
-        it 'returns groups on gold/silver plan after cut-off date' do
-          Timecop.freeze(described_class::CUT_OFF_DATE + 1.day) do
-            expect(described_class.new.execute).to contain_exactly(group_1, group_2, subgroup_4)
-          end
+        it 'returns groups on gold/silver plan' do
+          expect(described_class.new.execute).to contain_exactly(group_1, group_2, subgroup_4)
         end
       end
     end
@@ -84,16 +74,8 @@ describe GroupsWithTemplatesFinder do
         allow(Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?) { true }
       end
 
-      it 'returns given group with it descendants before cut-off date' do
-        Timecop.freeze(described_class::CUT_OFF_DATE - 1.day) do
-          expect(described_class.new(group_3.id).execute).to contain_exactly(group_3)
-        end
-      end
-
-      it 'does not return the group after the cut-off date' do
-        Timecop.freeze(described_class::CUT_OFF_DATE + 1.day) do
-          expect(described_class.new(group_3.id).execute).to be_empty
-        end
+      it 'does not return the group' do
+        expect(described_class.new(group_3.id).execute).to be_empty
       end
 
       context 'with subgroup with template' do
@@ -103,15 +85,11 @@ describe GroupsWithTemplatesFinder do
         end
 
         it 'returns only chosen group' do
-          Timecop.freeze(described_class::CUT_OFF_DATE + 1.day) do
-            expect(described_class.new(group_1.id).execute).to contain_exactly(group_1)
-          end
+          expect(described_class.new(group_1.id).execute).to contain_exactly(group_1)
         end
 
         it 'returns only chosen subgroup' do
-          Timecop.freeze(described_class::CUT_OFF_DATE + 1.day) do
-            expect(described_class.new(subgroup_4.id).execute).to contain_exactly(group_1, subgroup_4)
-          end
+          expect(described_class.new(subgroup_4.id).execute).to contain_exactly(group_1, subgroup_4)
         end
       end
     end

@@ -2,20 +2,22 @@
 
 require 'spec_helper'
 
-describe 'Project elastic search', :js, :elastic do
+RSpec.describe 'Project elastic search', :js, :elastic do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, :wiki_repo, namespace: user.namespace) }
 
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
-
-    project.add_maintainer(user)
-    sign_in(user)
-
-    visit project_path(project)
   end
 
   describe 'searching' do
+    before do
+      project.add_maintainer(user)
+      sign_in(user)
+
+      visit project_path(project)
+    end
+
     it 'finds issues', :sidekiq_inline do
       create(:issue, project: project, title: 'Test searching for an issue')
       ensure_elasticsearch_index!
@@ -84,9 +86,47 @@ describe 'Project elastic search', :js, :elastic do
       expect(page).to have_selector('.results', text: 'def username_regex')
     end
   end
+
+  describe 'displays Advanced Search status' do
+    before do
+      sign_in(user)
+
+      visit search_path(project_id: project.id, repository_ref: repository_ref)
+    end
+
+    context "when `repository_ref` isn't the default branch" do
+      let(:repository_ref) { Gitlab::Git::BLANK_SHA }
+
+      it 'displays that advanced search is disabled' do
+        expect(page).to have_selector('[data-testid="es-status-marker"][data-enabled="false"]')
+
+        default_branch_link = page.find('a[data-testid="es-search-default-branch"]')
+        params = CGI.parse(URI.parse(default_branch_link[:href]).query)
+
+        expect(default_branch_link).to have_content(project.default_branch)
+        expect(params).not_to include(:repository_ref)
+      end
+    end
+
+    context "when `repository_ref` is unset" do
+      let(:repository_ref) { "" }
+
+      it 'displays that advanced search is enabled' do
+        expect(page).to have_selector('[data-testid="es-status-marker"][data-enabled="true"]')
+      end
+    end
+
+    context "when `repository_ref` is the default branch" do
+      let(:repository_ref) { project.default_branch }
+
+      it 'displays that advanced search is enabled' do
+        expect(page).to have_selector('[data-testid="es-status-marker"][data-enabled="true"]')
+      end
+    end
+  end
 end
 
-describe 'Project elastic search redactions', :elastic do
+RSpec.describe 'Project elastic search redactions', :elastic do
   it_behaves_like 'a redacted search results page' do
     let(:search_path) { project_path(public_restricted_project) }
   end

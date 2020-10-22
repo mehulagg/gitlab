@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe "Admin::Users" do
+RSpec.describe "Admin::Users" do
   include Spec::Support::Helpers::Features::ResponsiveTableHelpers
 
   let!(:user) do
@@ -15,10 +15,38 @@ describe "Admin::Users" do
     sign_in(current_user)
   end
 
+  describe 'GET /admin/users' do
+    describe 'send emails to users' do
+      context 'when `send_emails_from_admin_area` feature is enabled' do
+        before do
+          stub_licensed_features(send_emails_from_admin_area: true)
+        end
+
+        it "shows the 'Send email to users' link" do
+          visit admin_users_path
+
+          expect(page).to have_link('Send email to users', href: admin_email_path)
+        end
+      end
+
+      context 'when `send_emails_from_admin_area` feature is disabled' do
+        before do
+          stub_licensed_features(send_emails_from_admin_area: false)
+        end
+
+        it "does not show the 'Send email to users' link" do
+          visit admin_users_path
+
+          expect(page).not_to have_link('Send email to users', href: admin_email_path)
+        end
+      end
+    end
+  end
+
   describe "GET /admin/users/:id" do
     describe 'Shared runners quota status' do
       before do
-        user.namespace.update(shared_runners_minutes_limit: 500)
+        user.namespace.update!(shared_runners_minutes_limit: 500)
       end
 
       context 'with projects with shared runners enabled' do
@@ -106,13 +134,13 @@ describe "Admin::Users" do
       # SSH key should be the first in the list
       within('ul.content-list li.key-list-item:nth-of-type(1)') do
         expect(page).to have_content(key2.title)
-        expect(page).to have_css('a[data-method=delete]', text: 'Remove')
+        expect(page).to have_button('Delete')
       end
 
       # Next, LDAP key
       within('ul.content-list li.key-list-item:nth-of-type(2)') do
         expect(page).to have_content(key1.title)
-        expect(page).not_to have_css('a[data-method=delete]')
+        expect(page).not_to have_button('Delete')
       end
     end
   end

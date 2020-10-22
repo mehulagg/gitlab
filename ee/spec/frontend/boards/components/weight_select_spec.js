@@ -1,13 +1,13 @@
 import { mount } from '@vue/test-utils';
 import WeightSelect from 'ee/boards/components/weight_select.vue';
-import { GlDeprecatedButton, GlDropdown } from '@gitlab/ui';
+import { GlButton, GlDeprecatedDropdown } from '@gitlab/ui';
 
 describe('WeightSelect', () => {
   let wrapper;
 
-  const editButton = () => wrapper.find(GlDeprecatedButton);
+  const editButton = () => wrapper.find(GlButton);
   const valueContainer = () => wrapper.find('.value');
-  const weightDropdown = () => wrapper.find(GlDropdown);
+  const weightDropdown = () => wrapper.find(GlDeprecatedDropdown);
   const weightSelect = () => wrapper.find({ ref: 'weight-select' });
 
   const defaultProps = {
@@ -36,8 +36,8 @@ describe('WeightSelect', () => {
       createComponent();
     });
 
-    it('displays "Any Weight"', () => {
-      expect(valueContainer().text()).toEqual('Any Weight');
+    it('displays "Any weight"', () => {
+      expect(valueContainer().text()).toEqual('Any weight');
     });
 
     it('hides the weight dropdown', () => {
@@ -98,10 +98,10 @@ describe('WeightSelect', () => {
   describe('when a new weight value is selected', () => {
     it.each`
       weight  | text
-      ${null} | ${'Any Weight'}
+      ${null} | ${'Any weight'}
       ${0}    | ${'0'}
       ${1}    | ${'1'}
-      ${-1}   | ${'Any Weight'}
+      ${-1}   | ${'Any weight'}
       ${-2}   | ${'None'}
     `('$weight displays as "$text"', ({ weight, text }) => {
       createComponent({ board: { weight } });

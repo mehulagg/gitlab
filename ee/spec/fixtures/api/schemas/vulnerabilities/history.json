@@ -5,7 +5,6 @@
   ],
   "properties" : {
     "total": { "type" : "object" },
-    "undefined": { "type" : "object" },
     "ignore": { "type" : "object" },
     "unknown": { "type" : "object" },
     "experimental": { "type" : "object" },

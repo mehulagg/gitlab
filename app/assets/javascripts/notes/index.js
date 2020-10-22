@@ -2,26 +2,32 @@ import Vue from 'vue';
 import notesApp from './components/notes_app.vue';
 import initDiscussionFilters from './discussion_filters';
 import initSortDiscussions from './sort_discussions';
-import createStore from './stores';
+import initTimelineToggle from './timeline';
+import { store } from './stores';
 
-document.addEventListener('DOMContentLoaded', () => {
-  const store = createStore();
+const el = document.getElementById('js-vue-notes');
 
+if (el) {
   // eslint-disable-next-line no-new
   new Vue({
-    el: '#js-vue-notes',
+    el,
     components: {
       notesApp,
     },
     store,
     data() {
-      const notesDataset = document.getElementById('js-vue-notes').dataset;
+      const notesDataset = el.dataset;
       const parsedUserData = JSON.parse(notesDataset.currentUserData);
       const noteableData = JSON.parse(notesDataset.noteableData);
       let currentUserData = {};
 
       noteableData.noteableType = notesDataset.noteableType;
       noteableData.targetType = notesDataset.targetType;
+      if (noteableData.discussion_locked === null) {
+        // discussion_locked has never been set for this issuable.
+        // set to `false` for safety.
+        noteableData.discussion_locked = false;
+      }
 
       if (parsedUserData) {
         currentUserData = {
@@ -52,4 +58,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initDiscussionFilters(store);
   initSortDiscussions(store);
-});
+  initTimelineToggle(store);
+}

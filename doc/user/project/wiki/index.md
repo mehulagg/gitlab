@@ -1,4 +1,11 @@
-# Wiki
+---
+stage: Create
+group: Knowledge
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, how-to
+---
+
+# Wiki **(CORE)**
 
 A separate system for documentation called Wiki, is built right into each
 GitLab project. It is enabled by default on all new projects and you can find
@@ -11,6 +18,9 @@ resides.
 You can create Wiki pages in the web interface or
 [locally using Git](#adding-and-editing-wiki-pages-locally) since every Wiki is
 a separate Git repository.
+
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13195) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5,
+**group wikis** became available. Their usage is similar to project wikis, with a few [limitations](../../group/index.md#group-wikis).
 
 ## First time creating the Home page
 
@@ -52,7 +62,7 @@ When you're ready, click the **Create page** and the new page will be created.
 
 ### Attachment storage
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/33475) in GitLab 11.3.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/33475) in GitLab 11.3.
 
 Starting with GitLab 11.3, any file that is uploaded to the wiki via GitLab's
 interface will be stored in the wiki Git repository, and it will be available
@@ -120,13 +130,15 @@ be preceded by the slash (`/`) character.
 
 ## Viewing a list of all created wiki pages
 
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17673/) in GitLab 13.5, wiki pages are displayed as a nested tree in the sidebar and pages overview.
+
 Every wiki has a sidebar from which a short list of the created pages can be
 found. The list is ordered alphabetically.
 
-![Wiki sidebar](img/wiki_sidebar.png)
+![Wiki sidebar](img/wiki_sidebar_v13_5.png)
 
 If you have many pages, not all will be listed in the sidebar. Click on
-**More pages** to see all of them.
+**View All Pages** to see all of them.
 
 ## Viewing the history of a wiki page
 
@@ -134,48 +146,34 @@ The changes of a wiki page over time are recorded in the wiki's Git repository,
 and you can view them by clicking the **Page history** button.
 
 From the history page you can see the revision of the page (Git commit SHA), its
-author, the commit message, when it was last updated, and the page markup format.
+author, the commit message, and when it was last updated.
 To see how a previous version of the page looked like, click on a revision
-number.
+number in the **Page version** column.
 
 ![Wiki page history](img/wiki_page_history.png)
 
+### Viewing the changes between page versions
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15242) in GitLab 13.2.
+
+Similar to versioned diff file views, you can see the changes made in a given Wiki page version:
+
+1. Navigate to the Wiki page you're interested in.
+1. Click on **Page history** to see all page versions.
+1. Click on the commit message in the **Changes** column for the version you're interested in:
+
+   ![Wiki page changes](img/wiki_page_diffs_v13_2.png)
+
 ## Wiki activity records
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/14902) in GitLab 12.10.
-> - It's deployed behind a feature flag, disabled by default.
-> - It's enabled on GitLab.com.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-wiki-events-core-only). **(CORE ONLY)**
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/14902) in **GitLab 12.10.**
+> - Git events were [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216014) in **GitLab 13.0.**
+> - [Feature flag for Git events was removed](https://gitlab.com/gitlab-org/gitlab/-/issues/258665) in **GitLab 13.5**
 
 Wiki events (creation, deletion, and updates) are tracked by GitLab and
 displayed on the [user profile](../../profile/index.md#user-profile),
 [group](../../group/index.md#view-group-activity),
 and [project](../index.md#project-activity) activity pages.
-
-### Limitations
-
-Only edits made in the browser or through the API have their activity recorded.
-Edits made and pushed through Git are not currently listed in the activity list.
-
-### Enable or disable Wiki Events **(CORE ONLY)**
-
-Wiki event activity is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/troubleshooting/navigating_gitlab_via_rails_console.md#starting-a-rails-console-session)
-can enable it for your instance. You're welcome to test it, but use it at your
-own risk.
-
-To enable it:
-
-```ruby
-Feature.enable(:wiki_events)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:wiki_events)
-```
 
 ## Adding and editing wiki pages locally
 
@@ -185,11 +183,36 @@ them like you would do with every other Git repository.
 On the right sidebar, click on **Clone repository** and follow the on-screen
 instructions.
 
+Files that you add to your wiki locally must have one of the following
+supported extensions, depending on the markup language you wish to use,
+otherwise they will not display when pushed to GitLab:
+
+- Markdown extensions: `.mdown`, `.mkd`, `.mkdn`, `.md`, `.markdown`.
+- AsciiDoc extensions: `.adoc`, `.ad`, `.asciidoc`.
+- Other markup extensions: `.textile`, `.rdoc`, `.org`, `.creole`, `.wiki`, `.mediawiki`, `.rst`.
+
 ## Customizing sidebar
 
 On the project's Wiki page, there is a right side navigation that renders the full Wiki pages list by default, with hierarchy.
 
-If the Wiki repository contains a `_sidebar` page, the file of this page replaces the default side navigation.
-This custom file serves to render it's custom content, fully replacing the standard sidebar.
+To customize the sidebar, you can create a file named `_sidebar` to fully replace the default navigation.
+
+CAUTION: **Warning:**
+Unless you link the `_sidebar` file from your custom nav, to edit it you'll have to access it directly
+from the browser's address bar by typing: `https://gitlab.com/<namespace>/<project_name>/-/wikis/_sidebar` (for self-managed GitLab instances, replace `gitlab.com` with your instance's URL).
+
+Example for `_sidebar` (using Markdown format):
+
+```markdown
+### [Home](home)
+
+- [Hello World](hello)
+- [Foo](foo)
+- [Bar](bar)
+
+---
+
+- [Sidebar](_sidebar)
+```
 
 Support for displaying a generated TOC with a custom side navigation is planned.

@@ -1,3 +1,9 @@
+---
+stage: Monitor
+group: Health
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # GitLab Developers Guide to Logging
 
 [GitLab Logs](../administration/logs.md) play a critical role for both
@@ -261,6 +267,8 @@ I, [2020-01-13T19:01:17.091Z #11056]  INFO -- : {"message"=>"Message", "project_
 lifecycle, which can then be added to the web request
 or Sidekiq logs.
 
+The API, Rails and Sidekiq logs contain fields starting with `meta.` with this context information.
+
 Entry points can be seen at:
 
 - [`ApplicationController`](https://gitlab.com/gitlab-org/gitlab/blob/master/app/controllers/application_controller.rb)
@@ -279,10 +287,9 @@ method or variable shouldn't be evaluated right away)
 See our [HOWTO: Use Sidekiq metadata logs](https://www.youtube.com/watch?v=_wDllvO_IY0) for further knowledge on
 creating visualizations in Kibana.
 
-**Note:**
 The fields of the context are currently only logged for Sidekiq jobs triggered
 through web requests. See the
-[follow-up work](https://gitlab.com/gitlab-com/gl-infra/scalability/issues/68)
+[follow-up work](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/68)
 for more information.
 
 ## Exception Handling
@@ -356,8 +363,8 @@ end
    for most users, but you may need to tweak them in [Omnibus GitLab](https://gitlab.com/gitlab-org/omnibus-gitlab).
 
 1. If you add a new file, submit an issue to the [production
-   tracker](https://gitlab.com/gitlab-com/gl-infra/production/issues) or
-   a merge request to the [gitlab_fluentd](https://gitlab.com/gitlab-cookbooks/gitlab_fluentd)
+   tracker](https://gitlab.com/gitlab-com/gl-infra/production/-/issues) or
+   a merge request to the [`gitlab_fluentd`](https://gitlab.com/gitlab-cookbooks/gitlab_fluentd)
    project. See [this example](https://gitlab.com/gitlab-cookbooks/gitlab_fluentd/-/merge_requests/51/diffs).
 
 1. Be sure to update the [GitLab CE/EE documentation](../administration/logs.md) and the [GitLab.com

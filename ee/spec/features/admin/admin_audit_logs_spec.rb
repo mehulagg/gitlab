@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe 'Admin::AuditLogs', :js do
+RSpec.describe 'Admin::AuditLogs', :js do
   include Select2Helper
 
   let(:user) { create(:user) }
+  let(:admin) { create(:admin, name: 'Bruce Wayne') }
 
   before do
-    sign_in(create(:admin))
+    sign_in(admin)
   end
 
   context 'unlicensed' do
@@ -60,16 +61,7 @@ describe 'Admin::AuditLogs', :js do
       end
 
       it 'filters by user' do
-        filter_by_type('User Events')
-
-        click_button 'Search users'
-        wait_for_requests
-
-        within '.dropdown-menu-user' do
-          click_link user.name
-        end
-
-        wait_for_requests
+        filter_for('User Events', user.name)
 
         expect(page).to have_content('Signed in with LDAP authentication')
       end
@@ -86,13 +78,7 @@ describe 'Admin::AuditLogs', :js do
       end
 
       it 'filters by group' do
-        filter_by_type('Group Events')
-
-        find('.group-item-select').click
-        wait_for_requests
-        find('.select2-results').click
-
-        find('.audit-log-table td', match: :first)
+        filter_for('Group Events', group_member.group.name)
 
         expect(page).to have_content('Added user access as Owner')
       end
@@ -110,13 +96,7 @@ describe 'Admin::AuditLogs', :js do
       end
 
       it 'filters by project' do
-        filter_by_type('Project Events')
-
-        find('.project-item-select').click
-        wait_for_requests
-        find('.select2-results').click
-
-        find('.audit-log-table td', match: :first)
+        filter_for('Project Events', project_member.project.name)
 
         expect(page).to have_content('Removed user access')
       end
@@ -125,41 +105,49 @@ describe 'Admin::AuditLogs', :js do
     describe 'filter by date' do
       let_it_be(:audit_event_1) { create(:user_audit_event, created_at: 5.days.ago) }
       let_it_be(:audit_event_2) { create(:user_audit_event, created_at: 3.days.ago) }
-      let_it_be(:audit_event_3) { create(:user_audit_event, created_at: 1.day.ago) }
+      let_it_be(:audit_event_3) { create(:user_audit_event, created_at: Date.current) }
+      let_it_be(:events_path) { :admin_audit_logs_path }
+      let_it_be(:entity) { nil }
 
-      it 'shows only 2 days old events' do
-        visit admin_audit_logs_path(created_after: 4.days.ago.to_date, created_before: 2.days.ago.to_date)
+      it_behaves_like 'audit events date filter'
+    end
 
-        find('.audit-log-table td', match: :first)
+    describe 'impersonated events' do
+      it 'show impersonation details' do
+        visit admin_user_path(user)
 
-        expect(page).not_to have_content(audit_event_1.present.date)
-        expect(page).to have_content(audit_event_2.present.date)
-        expect(page).not_to have_content(audit_event_3.present.date)
-      end
+        click_link 'Impersonate'
 
-      it 'shows only yesterday events' do
-        visit admin_audit_logs_path(created_after: 2.days.ago.to_date)
+        visit(new_project_path)
 
-        find('.audit-log-table td', match: :first)
+        fill_in(:project_name, with: 'Gotham City')
 
-        expect(page).not_to have_content(audit_event_1.present.date)
-        expect(page).not_to have_content(audit_event_2.present.date)
-        expect(page).to have_content(audit_event_3.present.date)
-      end
+        page.within('#content-body') do
+          click_button('Create project')
+        end
 
-      it 'shows a message if provided date is invalid' do
-        visit admin_audit_logs_path(created_after: '12-345-6789')
+        wait_for('Creation to complete') do
+          page.has_content?('was successfully created', wait: 0)
+        end
 
-        expect(page).to have_content('Invalid date format. Please use UTC format as YYYY-MM-DD')
+        click_link 'Stop impersonation'
+
+        visit admin_audit_logs_path
+
+        expect(page).to have_content('by Bruce Wayne')
       end
     end
   end
 
-  def filter_by_type(type)
-    click_button 'All Events'
+  def filter_for(type, name)
+    filter_container = '[data-testid="audit-events-filter"]'
 
-    within '.dropdown-menu-type' do
+    find(filter_container).click
+    within filter_container do
       click_link type
+      click_link name
+
+      find('button[type="button"]:not([name="clear"])').click
     end
 
     wait_for_requests

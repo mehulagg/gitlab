@@ -21,7 +21,7 @@ module Gitlab
               This chatops integration does not have any commands that can be
               executed.
 
-              #{footer}
+              #{help_footer}
             MESSAGE
           end
 
@@ -48,7 +48,7 @@ module Gitlab
              *Documentation*
 
              For more information about GitLab chatops, refer to its
-             documentation: https://docs.gitlab.com/ce/ci/chatops/README.html.
+             documentation: https://docs.gitlab.com/ee/ci/chatops/README.html.
           MESSAGE
 
           message

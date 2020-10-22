@@ -1,0 +1,131 @@
+# frozen_string_literal: true
+
+require 'spec_helper'
+
+RSpec.describe RequirementsManagement::TestReport do
+  describe 'associations' do
+    subject { build(:test_report) }
+
+    it { is_expected.to belong_to(:author).class_name('User') }
+    it { is_expected.to belong_to(:requirement) }
+    it { is_expected.to belong_to(:build) }
+  end
+
+  describe 'validations' do
+    subject { build(:test_report) }
+
+    it { is_expected.to validate_presence_of(:requirement) }
+    it { is_expected.to validate_presence_of(:state) }
+  end
+
+  describe 'scopes' do
+    describe 'for_user_build' do
+      it "returns only test reports matching build's user and pipeline" do
+        user = create(:user)
+        build = create(:ci_build)
+        report1 = create(:test_report, author: user, build: build)
+        create(:test_report, author: user)
+        create(:test_report, build: build)
+
+        expect(described_class.for_user_build(user.id, build.id)).to match_array([report1])
+      end
+    end
+  end
+
+  describe '.persist_requirement_reports' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:build) { create(:ee_ci_build, :requirements_report, project: project) }
+
+    subject { described_class.persist_requirement_reports(build, ci_report) }
+
+    context 'if the CI report contains no entries' do
+      let(:ci_report) { Gitlab::Ci::Reports::RequirementsManagement::Report.new }
+
+      it 'does not create any test reports' do
+        expect { subject }.not_to change { RequirementsManagement::TestReport.count }
+      end
+    end
+
+    context 'if the CI report contains some entries' do
+      context 'and the entries are valid' do
+        let(:ci_report) do
+          Gitlab::Ci::Reports::RequirementsManagement::Report.new.tap do |report|
+            report.add_requirement('1', 'passed')
+            report.add_requirement('2', 'failed')
+            report.add_requirement('3', 'passed')
+          end
+        end
+
+        it 'creates test report with expected status for each open requirement' do
+          requirement1 = create(:requirement, state: :opened, project: project)
+          requirement2 = create(:requirement, state: :opened, project: project)
+          create(:requirement, state: :opened) # different project
+          create(:requirement, state: :archived, project: project) # archived
+
+          expect { subject }.to change { RequirementsManagement::TestReport.count }.by(2)
+
+          reports = RequirementsManagement::TestReport.where(build: build)
+          expect(reports).to match_array([
+            have_attributes(requirement: requirement1,
+                            author: build.user,
+                            state: 'passed'),
+            have_attributes(requirement: requirement2,
+                            author: build.user,
+                            state: 'failed')
+
+          ])
+        end
+      end
+
+      context 'and the entries are not valid' do
+        let(:ci_report) do
+          Gitlab::Ci::Reports::RequirementsManagement::Report.new.tap do |report|
+            report.add_requirement('0', 'passed')
+            report.add_requirement('1', 'nonsense')
+            report.add_requirement('2', nil)
+          end
+        end
+
+        it 'creates test report with expected status for each open requirement' do
+          # ignore requirement IIDs that appear in the test but are missing
+          create(:requirement, state: :opened, project: project, iid: 1)
+          create(:requirement, state: :opened, project: project, iid: 2)
+
+          expect { subject }.not_to change { RequirementsManagement::TestReport.count }
+        end
+      end
+    end
+  end
+
+  describe '.build_report' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:build_author) { create(:user) }
+    let_it_be(:build) { create(:ci_build, author: build_author) }
+    let_it_be(:requirement) { create(:requirement, state: :opened) }
+    let(:now) { Time.current }
+
+    context 'when build is passed as argument' do
+      it 'builds test report with correct attributes' do
+        test_report = described_class.build_report(requirement: requirement, author: user, state: 'failed', build: build, timestamp: now)
+
+        expect(test_report.author).to eq(build.author)
+        expect(test_report.build).to eq(build)
+        expect(test_report.requirement).to eq(requirement)
+        expect(test_report.state).to eq('failed')
+        expect(test_report.created_at).to eq(now)
+      end
+    end
+
+    context 'when build is not passed as argument' do
+      it 'builds test report with correct attributes' do
+        test_report = described_class.build_report(requirement: requirement, author: user, state: 'passed', timestamp: now)
+
+        expect(test_report.author).to eq(user)
+        expect(test_report.build).to eq(nil)
+        expect(test_report.requirement).to eq(requirement)
+        expect(test_report.state).to eq('passed')
+        expect(test_report.created_at).to eq(now)
+      end
+    end
+  end
+end

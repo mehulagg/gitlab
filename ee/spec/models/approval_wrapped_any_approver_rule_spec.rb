@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApprovalWrappedAnyApproverRule do
+RSpec.describe ApprovalWrappedAnyApproverRule do
   let(:merge_request) { create(:merge_request) }
 
   subject { described_class.new(merge_request, rule) }
@@ -46,5 +46,19 @@ describe ApprovalWrappedAnyApproverRule do
 
   it '#approved?' do
     expect(subject.approved?).to eq(true)
+  end
+
+  describe "#commented_approvers" do
+    it "returns an array" do
+      expect(subject.commented_approvers).to be_an(Array)
+    end
+
+    it "returns an array of approvers who have commented" do
+      create(:note, project: merge_request.project, noteable: merge_request, author: approver1)
+
+      allow(merge_request).to receive(:can_approve?).with(approver1).and_return(true)
+
+      expect(subject.commented_approvers).to eq([approver1])
+    end
   end
 end

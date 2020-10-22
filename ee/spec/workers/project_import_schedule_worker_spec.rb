@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectImportScheduleWorker do
+RSpec.describe ProjectImportScheduleWorker do
   describe '#perform' do
     it 'does nothing if the database is read-only' do
       project = create(:project)

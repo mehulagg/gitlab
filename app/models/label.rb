@@ -31,7 +31,7 @@ class Label < ApplicationRecord
   validates :title, uniqueness: { scope: [:group_id, :project_id] }
   validates :title, length: { maximum: 255 }
 
-  default_scope { order(title: :asc) }
+  default_scope { order(title: :asc) } # rubocop:disable Cop/DefaultScope
 
   scope :templates, -> { where(template: true, type: [Label.name, nil]) }
   scope :with_title, ->(title) { where(title: title) }
@@ -133,7 +133,7 @@ class Label < ApplicationRecord
 
   # Searches for labels with a matching title or description.
   #
-  # This method uses ILIKE on PostgreSQL and LIKE on MySQL.
+  # This method uses ILIKE on PostgreSQL.
   #
   # query - The search query as a String.
   #
@@ -147,10 +147,6 @@ class Label < ApplicationRecord
   # index. That means we can have just one character in the LIKE.
   def self.min_chars_for_partial_matching
     1
-  end
-
-  def self.by_ids(ids)
-    where(id: ids)
   end
 
   def self.on_project_board?(project_id, label_id)

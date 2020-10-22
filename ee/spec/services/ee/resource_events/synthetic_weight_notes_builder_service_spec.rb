@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::ResourceEvents::SyntheticWeightNotesBuilderService do
+RSpec.describe EE::ResourceEvents::SyntheticWeightNotesBuilderService do
   describe '#execute' do
     let!(:user) { create(:user) }
 

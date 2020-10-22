@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe List do
+RSpec.describe List do
   let(:board) { create(:board) }
 
   describe 'relationships' do
@@ -32,6 +32,19 @@ describe List do
 
         expect(subject.title).to eq('@some_user')
       end
+    end
+  end
+
+  describe '.without_types' do
+    it 'exclude lists of given types' do
+      board = create(:list, list_type: :label).board
+      # closed list is created by default
+      backlog_list = create(:list, list_type: :backlog, board: board)
+
+      exclude_type = [described_class.list_types[:label], described_class.list_types[:closed]]
+
+      lists = described_class.without_types(exclude_type)
+      expect(lists.where(board: board)).to match_array([backlog_list])
     end
   end
 

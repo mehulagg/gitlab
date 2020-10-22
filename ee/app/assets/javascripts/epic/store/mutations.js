@@ -96,6 +96,9 @@ export default {
   [types.SET_EPIC_CREATE_TITLE](state, { newEpicTitle }) {
     state.newEpicTitle = newEpicTitle;
   },
+  [types.SET_EPIC_CREATE_CONFIDENTIAL](state, { newEpicConfidential }) {
+    state.newEpicConfidential = newEpicConfidential;
+  },
   [types.REQUEST_EPIC_CREATE](state) {
     state.epicCreateInProgress = true;
   },
@@ -117,5 +120,8 @@ export default {
   },
   [types.RECEIVE_EPIC_LABELS_SELECT_FAILURE](state) {
     state.epicLabelsSelectInProgress = false;
+  },
+  [types.SET_EPIC_CONFIDENTIAL](state, confidential) {
+    state.confidential = confidential;
   },
 };

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User sees closing issues message', :js do
+RSpec.describe 'Merge request > User sees closing issues message', :js do
   let(:project) { create(:project, :public, :repository) }
   let(:user) { project.creator }
   let(:issue_1) { create(:issue, project: project)}
@@ -16,6 +16,7 @@ describe 'Merge request > User sees closing issues message', :js do
       title: merge_request_title
     )
   end
+
   let(:merge_request_description) { 'Merge Request Description' }
   let(:merge_request_title) { 'Merge Request Title' }
 

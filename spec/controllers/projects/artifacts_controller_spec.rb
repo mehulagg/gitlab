@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-describe Projects::ArtifactsController do
+RSpec.describe Projects::ArtifactsController do
+  include RepoHelpers
+
   let(:user) { project.owner }
   let_it_be(:project) { create(:project, :repository, :public) }
 
@@ -308,10 +310,13 @@ describe Projects::ArtifactsController do
   end
 
   describe 'GET raw' do
-    subject { get(:raw, params: { namespace_id: project.namespace, project_id: project, job_id: job, path: path }) }
+    let(:query_params) { { namespace_id: project.namespace, project_id: project, job_id: job, path: path } }
+
+    subject { get(:raw, params: query_params) }
 
     context 'when the file exists' do
       let(:path) { 'ci_artifacts.txt' }
+      let(:archive_matcher) { /build_artifacts.zip(\?[^?]+)?$/ }
 
       shared_examples 'a valid file' do
         it 'serves the file using workhorse' do
@@ -323,8 +328,8 @@ describe Projects::ArtifactsController do
           expect(params.keys).to eq(%w(Archive Entry))
           expect(params['Archive']).to start_with(archive_path)
           # On object storage, the URL can end with a query string
-          expect(params['Archive']).to match(/build_artifacts.zip(\?[^?]+)?$/)
-          expect(params['Entry']).to eq(Base64.encode64('ci_artifacts.txt'))
+          expect(params['Archive']).to match(archive_matcher)
+          expect(params['Entry']).to eq(Base64.encode64(path))
         end
 
         def send_data
@@ -357,6 +362,36 @@ describe Projects::ArtifactsController do
           let!(:job) { create(:ci_build, :success, pipeline: pipeline) }
           let(:store) { ObjectStorage::Store::REMOTE }
           let(:archive_path) { 'https://' }
+        end
+      end
+
+      context 'fetching an artifact of different type' do
+        before do
+          job.job_artifacts.each(&:destroy)
+        end
+
+        context 'when the artifact is zip' do
+          let!(:artifact) { create(:ci_job_artifact, :lsif, job: job) }
+          let(:path) { 'lsif/main.go.json' }
+          let(:archive_matcher) { 'lsif.json.zip' }
+          let(:query_params) { super().merge(file_type: :lsif, path: path) }
+
+          it_behaves_like 'a valid file' do
+            let(:store) { ObjectStorage::Store::LOCAL }
+            let(:archive_path) { JobArtifactUploader.root }
+          end
+        end
+
+        context 'when the artifact is not zip' do
+          let(:query_params) { super().merge(file_type: :junit, path: '') }
+
+          it 'responds with not found' do
+            create(:ci_job_artifact, :junit, job: job)
+
+            subject
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
         end
       end
     end
@@ -446,6 +481,22 @@ describe Projects::ArtifactsController do
 
           expect(response).to redirect_to(path)
         end
+      end
+
+      context 'with a failed pipeline on an updated master' do
+        before do
+          create_file_in_repo(project, 'master', 'master', 'test.txt', 'This is test')
+
+          create(:ci_pipeline,
+            project: project,
+            sha: project.commit.sha,
+            ref: project.default_branch,
+            status: 'failed')
+
+          get :latest_succeeded, params: params_from_ref(project.default_branch)
+        end
+
+        it_behaves_like 'redirect to the job'
       end
     end
   end

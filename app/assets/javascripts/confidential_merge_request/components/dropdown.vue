@@ -1,13 +1,11 @@
 <script>
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { __ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   components: {
     GlDropdown,
     GlDropdownItem,
-    Icon,
   },
   props: {
     projects: {
@@ -38,21 +36,15 @@ export default {
 </script>
 
 <template>
-  <gl-dropdown toggle-class="d-flex align-items-center w-100" class="w-100">
-    <template slot="button-content">
-      <span class="str-truncated-100 mr-2">
-        <icon name="lock" />
-        {{ dropdownText }}
-      </span>
-      <icon name="chevron-down" class="ml-auto" />
-    </template>
-    <gl-dropdown-item v-for="project in projects" :key="project.id" @click="selectProject(project)">
-      <icon
-        name="mobile-issue-close"
-        :class="{ icon: project.id !== selectedProject.id }"
-        class="js-active-project-check"
-      />
-      <span class="ml-1">{{ project.name }}</span>
+  <gl-dropdown block icon="lock" :text="dropdownText">
+    <gl-dropdown-item
+      v-for="project in projects"
+      :key="project.id"
+      :is-check-item="true"
+      :is-checked="project.id === selectedProject.id"
+      @click="selectProject(project)"
+    >
+      {{ project.name }}
     </gl-dropdown-item>
   </gl-dropdown>
 </template>

@@ -2,10 +2,28 @@
 
 require 'spec_helper'
 
-describe Audit::Details do
+RSpec.describe Audit::Details do
   let(:user) { create(:user) }
 
   describe '.humanize' do
+    context 'an impersonated event' do
+      let(:impersonated_action) do
+        {
+          add: 'user_access',
+          author_name: user.name,
+          target_id: user.id,
+          target_type: 'User',
+          impersonated_by: 'Agent 47'
+        }
+      end
+
+      it 'includes impersonation details' do
+        string = described_class.humanize(impersonated_action)
+
+        expect(string).to end_with('(by Agent 47)')
+      end
+    end
+
     context 'user' do
       let(:login_action) do
         {
@@ -186,6 +204,7 @@ describe Audit::Details do
           ip_address: '127.0.0.1'
         }
       end
+
       let(:message) { 'Failed to login with GOOGLE authentication' }
 
       it 'shows the correct failed login meessage' do

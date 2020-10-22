@@ -1,3 +1,9 @@
+---
+stage: Plan
+group: Project Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Award Emoji API
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/4575) in GitLab 8.9. Snippet support added in 8.12.
@@ -20,7 +26,7 @@ See [Award Emoji on Comments](#award-emoji-on-comments) for information on using
 
 Get a list of all award emoji for a specified awardable.
 
-```text
+```plaintext
 GET /projects/:id/issues/:issue_iid/award_emoji
 GET /projects/:id/merge_requests/:merge_request_iid/award_emoji
 GET /projects/:id/snippets/:snippet_id/award_emoji
@@ -36,7 +42,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/issues/80/award_emoji
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/issues/80/award_emoji"
 ```
 
 Example response:
@@ -82,7 +88,7 @@ Example response:
 
 Get a single award emoji from an issue, snippet, or merge request.
 
-```text
+```plaintext
 GET /projects/:id/issues/:issue_iid/award_emoji/:award_id
 GET /projects/:id/merge_requests/:merge_request_iid/award_emoji/:award_id
 GET /projects/:id/snippets/:snippet_id/award_emoji/:award_id
@@ -99,7 +105,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/issues/80/award_emoji/1
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/issues/80/award_emoji/1"
 ```
 
 Example response:
@@ -127,7 +133,7 @@ Example response:
 
 Create an award emoji on the specified awardable.
 
-```text
+```plaintext
 POST /projects/:id/issues/:issue_iid/award_emoji
 POST /projects/:id/merge_requests/:merge_request_iid/award_emoji
 POST /projects/:id/snippets/:snippet_id/award_emoji
@@ -142,7 +148,7 @@ Parameters:
 | `name`         | string         | yes      | Name of the emoji without colons.                                            |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/issues/80/award_emoji?name=blowfish
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/issues/80/award_emoji?name=blowfish"
 ```
 
 Example Response:
@@ -173,7 +179,7 @@ Sometimes it's just not meant to be and you'll have to remove the award.
 NOTE: **Note:**
 Only available to administrators or the author of the award.
 
-```text
+```plaintext
 DELETE /projects/:id/issues/:issue_iid/award_emoji/:award_id
 DELETE /projects/:id/merge_requests/:merge_request_iid/award_emoji/:award_id
 DELETE /projects/:id/snippets/:snippet_id/award_emoji/:award_id
@@ -188,7 +194,7 @@ Parameters:
 | `award_id`     | integer        | yes      | ID of an award emoji.                                                        |
 
 ```shell
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/issues/80/award_emoji/344
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/issues/80/award_emoji/344"
 ```
 
 ## Award Emoji on Comments
@@ -204,7 +210,7 @@ easily adapted for comments on a merge request or on a snippet. Therefore, you h
 
 Get all award emoji for a comment (note).
 
-```text
+```plaintext
 GET /projects/:id/issues/:issue_iid/notes/:note_id/award_emoji
 ```
 
@@ -219,7 +225,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/issues/80/notes/1/award_emoji
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/issues/80/notes/1/award_emoji"
 ```
 
 Example response:
@@ -249,7 +255,7 @@ Example response:
 
 Get a single award emoji for a comment (note).
 
-```text
+```plaintext
 GET /projects/:id/issues/:issue_iid/notes/:note_id/award_emoji/:award_id
 ```
 
@@ -265,7 +271,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/issues/80/notes/1/award_emoji/2
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/issues/80/notes/1/award_emoji/2"
 ```
 
 Example response:
@@ -293,7 +299,7 @@ Example response:
 
 Create an award emoji on the specified comment (note).
 
-```text
+```plaintext
 POST /projects/:id/issues/:issue_iid/notes/:note_id/award_emoji
 ```
 
@@ -309,7 +315,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/issues/80/notes/1/award_emoji?name=rocket
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/issues/80/notes/1/award_emoji?name=rocket"
 ```
 
 Example response:
@@ -340,7 +346,7 @@ Sometimes it's just not meant to be and you'll have to remove the award.
 NOTE: **Note:**
 Only available to administrators or the author of the award.
 
-```text
+```plaintext
 DELETE /projects/:id/issues/:issue_iid/notes/:note_id/award_emoji/:award_id
 ```
 
@@ -356,5 +362,5 @@ Parameters:
 Example request:
 
 ```shell
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/issues/80/award_emoji/345
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/issues/80/award_emoji/345"
 ```

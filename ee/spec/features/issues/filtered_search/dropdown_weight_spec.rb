@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Dropdown weight', :js do
+RSpec.describe 'Dropdown weight', :js do
   include FilteredSearchHelpers
 
   let!(:project) { create(:project) }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Analytics::CodeReviewMetricsWorker do
+RSpec.describe Analytics::CodeReviewMetricsWorker do
   subject(:worker) { described_class.new }
 
   describe "#perform" do

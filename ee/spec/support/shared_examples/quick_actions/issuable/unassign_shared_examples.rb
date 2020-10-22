@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-shared_examples 'unassigning a not assigned user' do |is_multiline|
+RSpec.shared_examples 'unassigning a not assigned user' do |is_multiline|
   before do
     target.assignees = [assignee]
   end

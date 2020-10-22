@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'admin Geo Sidebar', :js, :geo do
+RSpec.describe 'admin Geo Sidebar', :js, :geo do
   include ::EE::GeoHelpers
   include StubENV
 
@@ -25,13 +25,13 @@ describe 'admin Geo Sidebar', :js, :geo do
     end
   end
 
-  describe 'clicking the nodes link' do
+  describe 'visiting geo nodes' do
     it_behaves_like 'active sidebar link', 'Nodes' do
       let(:path) { admin_geo_nodes_path }
     end
   end
 
-  describe 'clicking the settings link' do
+  describe 'visiting geo settings' do
     before do
       stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
     end
@@ -46,21 +46,29 @@ describe 'admin Geo Sidebar', :js, :geo do
       stub_secondary_node
     end
 
-    describe 'clicking the projects link' do
-      it_behaves_like 'active sidebar link', 'Projects' do
+    describe 'visiting geo projects' do
+      it_behaves_like 'active sidebar link', 'Replication' do
         let(:path) { admin_geo_projects_path }
       end
     end
 
-    describe 'clicking the designs link' do
-      it_behaves_like 'active sidebar link', 'Designs' do
+    describe 'visiting geo designs' do
+      it_behaves_like 'active sidebar link', 'Replication' do
         let(:path) { admin_geo_designs_path }
       end
     end
 
-    describe 'clicking the uploads link' do
-      it_behaves_like 'active sidebar link', 'Uploads' do
+    describe 'visiting geo uploads' do
+      it_behaves_like 'active sidebar link', 'Replication' do
         let(:path) { admin_geo_uploads_path }
+      end
+    end
+
+    describe 'visiting geo replicables' do
+      Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
+        it_behaves_like 'active sidebar link', 'Replication' do
+          let(:path) { admin_geo_replicables_path(replicable_name_plural: replicator_class.replicable_name_plural) }
+        end
       end
     end
   end

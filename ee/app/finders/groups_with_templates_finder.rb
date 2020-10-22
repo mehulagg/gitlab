@@ -1,15 +1,11 @@
 # frozen_string_literal: true
 class GroupsWithTemplatesFinder
-  # We need to provide grace period for users who are now using group_project_template
-  # feature in free groups.
-  CUT_OFF_DATE = Date.parse('2019/05/22') + 3.months
-
   def initialize(group_id = nil)
     @group_id = group_id
   end
 
   def execute
-    if ::Gitlab::CurrentSettings.should_check_namespace_plan? && Time.zone.now > CUT_OFF_DATE
+    if ::Gitlab::CurrentSettings.should_check_namespace_plan?
       groups = extended_group_search
       simple_group_search(groups)
     else

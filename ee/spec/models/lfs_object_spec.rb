@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LfsObject do
+RSpec.describe LfsObject do
   include EE::GeoHelpers
 
   describe '#destroy' do

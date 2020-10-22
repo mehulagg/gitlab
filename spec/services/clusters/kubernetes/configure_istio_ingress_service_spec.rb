@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Kubernetes::ConfigureIstioIngressService, '#execute' do
+RSpec.describe Clusters::Kubernetes::ConfigureIstioIngressService, '#execute' do
   include KubernetesHelpers
 
   let(:cluster) { create(:cluster, :project, :provided_by_gcp) }
@@ -26,27 +26,21 @@ describe Clusters::Kubernetes::ConfigureIstioIngressService, '#execute' do
 
     stub_kubeclient_get_secret(
       api_url,
-      {
-        metadata_name: "#{namespace}-token",
-        token: Base64.encode64('sample-token'),
-        namespace: namespace
-      }
+      metadata_name: "#{namespace}-token",
+      token: Base64.encode64('sample-token'),
+      namespace: namespace
     )
 
     stub_kubeclient_get_secret(
       api_url,
-      {
-        metadata_name: 'istio-ingressgateway-ca-certs',
-        namespace: 'istio-system'
-      }
+      metadata_name: 'istio-ingressgateway-ca-certs',
+      namespace: 'istio-system'
     )
 
     stub_kubeclient_get_secret(
       api_url,
-      {
-        metadata_name: 'istio-ingressgateway-certs',
-        namespace: 'istio-system'
-      }
+      metadata_name: 'istio-ingressgateway-certs',
+      namespace: 'istio-system'
     )
 
     stub_kubeclient_put_secret(api_url, 'istio-ingressgateway-ca-certs', namespace: 'istio-system')
@@ -120,8 +114,8 @@ describe Clusters::Kubernetes::ConfigureIstioIngressService, '#execute' do
 
       expect(certificate.subject.to_s).to include(serverless_domain_cluster.knative.hostname)
 
-      expect(certificate.not_before).to be_within(1.minute).of(Time.now)
-      expect(certificate.not_after).to be_within(1.minute).of(Time.now + 1000.years)
+      expect(certificate.not_before).to be_within(1.minute).of(Time.current)
+      expect(certificate.not_after).to be_within(1.minute).of(Time.current + 1000.years)
 
       expect(WebMock).to have_requested(:put, api_url + '/api/v1/namespaces/istio-system/secrets/istio-ingressgateway-ca-certs').with(
         body: hash_including(

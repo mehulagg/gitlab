@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Global search' do
+RSpec.describe 'Global search' do
   let(:user) { create(:user) }
   let(:project) { create(:project, namespace: user.namespace) }
 
@@ -14,14 +14,15 @@ describe 'Global search' do
   end
 
   it 'increases usage ping searches counter' do
-    expect(Gitlab::UsageDataCounters::SearchCounter).to receive(:increment_navbar_searches_count)
+    expect(Gitlab::UsageDataCounters::SearchCounter).to receive(:count).with(:navbar_searches)
+    expect(Gitlab::UsageDataCounters::SearchCounter).to receive(:count).with(:all_searches)
 
     submit_search('foobar')
   end
 
   describe 'I search through the issues and I see pagination' do
     before do
-      allow_next_instance_of(Gitlab::SearchResults) do |instance|
+      allow_next_instance_of(SearchService) do |instance|
         allow(instance).to receive(:per_page).and_return(1)
       end
       create_list(:issue, 2, project: project, title: 'initial')
@@ -35,7 +36,7 @@ describe 'Global search' do
     end
   end
 
-  it 'closes the dropdown on blur', :js do
+  it 'closes the dropdown on blur', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/201841' do
     fill_in 'search', with: "a"
     dropdown = find('.js-dashboard-search-options')
 

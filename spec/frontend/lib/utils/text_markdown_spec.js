@@ -1,4 +1,4 @@
-import { insertMarkdownText } from '~/lib/utils/text_markdown';
+import { insertMarkdownText, keypressNoteText } from '~/lib/utils/text_markdown';
 
 describe('init markdown', () => {
   let textArea;
@@ -13,6 +13,23 @@ describe('init markdown', () => {
     textArea.parentNode.removeChild(textArea);
   });
 
+  describe('insertMarkdownText', () => {
+    it('will not error if selected text is a number', () => {
+      const selected = 2;
+
+      insertMarkdownText({
+        textArea,
+        text: '',
+        tag: '',
+        blockTag: null,
+        selected,
+        wrap: false,
+      });
+
+      expect(textArea.value).toBe(selected.toString());
+    });
+  });
+
   describe('textArea', () => {
     describe('without selection', () => {
       it('inserts the tag on an empty line', () => {
@@ -25,13 +42,13 @@ describe('init markdown', () => {
         insertMarkdownText({
           textArea,
           text: textArea.value,
-          tag: '*',
+          tag: '- ',
           blockTag: null,
           selected: '',
           wrap: false,
         });
 
-        expect(textArea.value).toEqual(`${initialValue}* `);
+        expect(textArea.value).toEqual(`${initialValue}- `);
       });
 
       it('inserts the tag on a new line if the current one is not empty', () => {
@@ -43,13 +60,13 @@ describe('init markdown', () => {
         insertMarkdownText({
           textArea,
           text: textArea.value,
-          tag: '*',
+          tag: '- ',
           blockTag: null,
           selected: '',
           wrap: false,
         });
 
-        expect(textArea.value).toEqual(`${initialValue}\n* `);
+        expect(textArea.value).toEqual(`${initialValue}\n- `);
       });
 
       it('inserts the tag on the same line if the current line only contains spaces', () => {
@@ -61,13 +78,13 @@ describe('init markdown', () => {
         insertMarkdownText({
           textArea,
           text: textArea.value,
-          tag: '*',
+          tag: '- ',
           blockTag: null,
           selected: '',
           wrap: false,
         });
 
-        expect(textArea.value).toEqual(`${initialValue}* `);
+        expect(textArea.value).toEqual(`${initialValue}- `);
       });
 
       it('inserts the tag on the same line if the current line only contains tabs', () => {
@@ -79,13 +96,13 @@ describe('init markdown', () => {
         insertMarkdownText({
           textArea,
           text: textArea.value,
-          tag: '*',
+          tag: '- ',
           blockTag: null,
           selected: '',
           wrap: false,
         });
 
-        expect(textArea.value).toEqual(`${initialValue}* `);
+        expect(textArea.value).toEqual(`${initialValue}- `);
       });
 
       it('places the cursor inside the tags', () => {
@@ -115,14 +132,15 @@ describe('init markdown', () => {
     describe('with selection', () => {
       const text = 'initial selected value';
       const selected = 'selected';
+      let selectedIndex;
+
       beforeEach(() => {
         textArea.value = text;
-        const selectedIndex = text.indexOf(selected);
+        selectedIndex = text.indexOf(selected);
         textArea.setSelectionRange(selectedIndex, selectedIndex + selected.length);
       });
 
       it('applies the tag to the selected value', () => {
-        const selectedIndex = text.indexOf(selected);
         const tag = '*';
 
         insertMarkdownText({
@@ -153,6 +171,29 @@ describe('init markdown', () => {
         expect(textArea.value).toEqual(text.replace(selected, `[${selected}](url)`));
       });
 
+      it.each`
+        key    | expected
+        ${'['} | ${`[${selected}]`}
+        ${'*'} | ${`**${selected}**`}
+        ${"'"} | ${`'${selected}'`}
+        ${'_'} | ${`_${selected}_`}
+        ${'`'} | ${`\`${selected}\``}
+        ${'"'} | ${`"${selected}"`}
+        ${'{'} | ${`{${selected}}`}
+        ${'('} | ${`(${selected})`}
+        ${'<'} | ${`<${selected}>`}
+      `('generates $expected when $key is pressed', ({ key, expected }) => {
+        const event = new KeyboardEvent('keydown', { key });
+
+        textArea.addEventListener('keydown', keypressNoteText);
+        textArea.dispatchEvent(event);
+
+        expect(textArea.value).toEqual(text.replace(selected, expected));
+
+        // cursor placement should be after selection + 2 tag lengths
+        expect(textArea.selectionStart).toBe(selectedIndex + expected.length);
+      });
+
       describe('and text to be selected', () => {
         const tag = '[{text}](url)';
         const select = 'url';
@@ -178,7 +219,7 @@ describe('init markdown', () => {
         it('selects the right text when multiple tags are present', () => {
           const initialValue = `${tag} ${tag} ${selected}`;
           textArea.value = initialValue;
-          const selectedIndex = initialValue.indexOf(selected);
+          selectedIndex = initialValue.indexOf(selected);
           textArea.setSelectionRange(selectedIndex, selectedIndex + selected.length);
           insertMarkdownText({
             textArea,
@@ -204,7 +245,7 @@ describe('init markdown', () => {
           const initialValue = `text ${expectedUrl} text`;
 
           textArea.value = initialValue;
-          const selectedIndex = initialValue.indexOf(expectedUrl);
+          selectedIndex = initialValue.indexOf(expectedUrl);
           textArea.setSelectionRange(selectedIndex, selectedIndex + expectedUrl.length);
 
           insertMarkdownText({
@@ -227,24 +268,25 @@ describe('init markdown', () => {
     });
   });
 
-  describe('Ace Editor', () => {
+  describe('Editor Lite', () => {
     let editor;
 
     beforeEach(() => {
       editor = {
-        getSelectionRange: () => ({
-          start: 0,
-          end: 0,
+        getSelection: jest.fn().mockReturnValue({
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: 2,
+          endColumn: 2,
         }),
-        getValue: () => 'this is text \n in two lines',
-        insert: () => {},
-        navigateLeft: () => {},
+        getValue: jest.fn().mockReturnValue('this is text \n in two lines'),
+        selectWithinSelection: jest.fn(),
+        replaceSelectedText: jest.fn(),
+        moveCursor: jest.fn(),
       };
     });
 
-    it('uses ace editor insert text when editor is passed in', () => {
-      jest.spyOn(editor, 'insert').mockReturnValue();
-
+    it('replaces selected text', () => {
       insertMarkdownText({
         text: editor.getValue,
         tag: '*',
@@ -254,12 +296,10 @@ describe('init markdown', () => {
         editor,
       });
 
-      expect(editor.insert).toHaveBeenCalled();
+      expect(editor.replaceSelectedText).toHaveBeenCalled();
     });
 
     it('adds block tags on line above and below selection', () => {
-      jest.spyOn(editor, 'insert').mockReturnValue();
-
       const selected = 'this text \n is multiple \n lines';
       const text = `before \n ${selected} \n after`;
 
@@ -272,11 +312,16 @@ describe('init markdown', () => {
         editor,
       });
 
-      expect(editor.insert).toHaveBeenCalledWith(`***\n${selected}\n***`);
+      expect(editor.replaceSelectedText).toHaveBeenCalledWith(`***\n${selected}\n***\n`, undefined);
     });
 
     it('uses ace editor to navigate back tag length when nothing is selected', () => {
-      jest.spyOn(editor, 'navigateLeft').mockReturnValue();
+      editor.getSelection = jest.fn().mockReturnValue({
+        startLineNumber: 1,
+        startColumn: 1,
+        endLineNumber: 1,
+        endColumn: 1,
+      });
 
       insertMarkdownText({
         text: editor.getValue,
@@ -287,12 +332,10 @@ describe('init markdown', () => {
         editor,
       });
 
-      expect(editor.navigateLeft).toHaveBeenCalledWith(1);
+      expect(editor.moveCursor).toHaveBeenCalledWith(-1);
     });
 
     it('ace editor does not navigate back when there is selected text', () => {
-      jest.spyOn(editor, 'navigateLeft').mockReturnValue();
-
       insertMarkdownText({
         text: editor.getValue,
         tag: '*',
@@ -302,7 +345,7 @@ describe('init markdown', () => {
         editor,
       });
 
-      expect(editor.navigateLeft).not.toHaveBeenCalled();
+      expect(editor.selectWithinSelection).not.toHaveBeenCalled();
     });
   });
 });

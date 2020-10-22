@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: reference, howto
 ---
 
@@ -43,11 +46,25 @@ you want the branches to start with a certain name because you have different
 GitLab CI/CD jobs (`feature`, `hotfix`, `docker`, `android`, etc.) that rely on the
 branch name.
 
-Your developers however, don't always remember that policy, so they push
-various branches and CI pipelines do not work as expected. By restricting the
-branch names globally in Push Rules, you can now sleep without the anxiety
-of your developers' mistakes. Every branch that doesn't match your push rule
-will get rejected.
+Your developers, however, don't always remember that policy, so they might push to
+various branches, and CI pipelines might not work as expected. By restricting the
+branch names globally in Push Rules, such mistakes are prevented.
+Any branch name that doesn't match your push rule will get rejected.
+
+Note that the name of your default branch is always allowed, regardless of the branch naming
+regular expression (regex) specified. GitLab is configured this way
+because merges typically have the default branch as their target.
+If you have other target branches, include them in your regex. (See [Enabling push rules](#enabling-push-rules)).
+
+The default branch also defaults to being a [protected branch](../user/project/protected_branches.md),
+which already limits users from pushing directly.
+
+#### Default restricted branch names
+
+> Introduced in GitLab 12.10.
+
+By default, GitLab restricts certain formats of branch names for security purposes.
+Currently 40-character hexadecimal names, similar to Git commit hashes, are prohibited.
 
 ### Custom Push Rules **(CORE ONLY)**
 
@@ -61,7 +78,7 @@ See [server hooks](../administration/server_hooks.md) for more information.
 NOTE: **Note:**
 GitLab administrators can set push rules globally under
 **Admin Area > Push Rules** that all new projects will inherit. You can later
-override them in a project's settings.
+override them in a project's settings. They can be also set on a [group level](../user/group/index.md#group-push-rules).
 
 1. Navigate to your project's **Settings > Repository** and expand **Push Rules**
 1. Set the rule you want
@@ -80,23 +97,23 @@ The following options are available.
 | Restrict by commit message (negative match)| **Starter** 11.1 | Only commit messages that do not match this regular expression are allowed to be pushed. Leave empty to allow any commit message. Uses multiline mode, which can be disabled using `(?-m)`. |
 | Restrict by branch name | **Starter** 9.3 | Only branch names that match this regular expression are allowed to be pushed. Leave empty to allow any branch name. |
 | Restrict by commit author's email | **Starter** 7.10 | Only commit author's email that match this regular expression are allowed to be pushed. Leave empty to allow any email. |
-| Prohibited file names | **Starter** 7.10 | Any committed filenames that match this regular expression are not allowed to be pushed. Leave empty to allow any filenames. |
+| Prohibited file names | **Starter** 7.10 | Any committed filenames that match this regular expression and do not already exist in the repository are not allowed to be pushed. Leave empty to allow any filenames. See [common examples](#prohibited-file-names). |
 | Maximum file size | **Starter** 7.12 | Pushes that contain added or updated files that exceed this file size (in MB) are rejected. Set to 0 to allow files of any size. Files tracked by Git LFS are exempted. |
 
 TIP: **Tip:**
-GitLab uses [RE2 syntax](https://github.com/google/re2/wiki/Syntax) for regular expressions in push rules, and you can test them at the [GoLang regex tester](https://regex-golang.appspot.com/assets/html/index.html).
+GitLab uses [RE2 syntax](https://github.com/google/re2/wiki/Syntax) for regular expressions in push rules, and you can test them at the [regex101 regex tester](https://regex101.com/).
 
 ## Prevent pushing secrets to the repository
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/385) in [GitLab Starter](https://about.gitlab.com/pricing/) 8.12.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/385) in [GitLab Starter](https://about.gitlab.com/pricing/) 8.12.
 
 Secrets such as credential files, SSH private keys, and other files containing secrets should never be committed to source control.
-GitLab allows you to turn on a predefined blacklist of files which won't be allowed to be
+GitLab allows you to turn on a predefined denylist of files which won't be allowed to be
 pushed to a repository, stopping those commits from reaching the remote repository.
 
 By selecting the checkbox *Prevent committing secrets to Git*, GitLab prevents
 pushes to the repository when a file matches a regular expression as read from
-[`files_blacklist.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/lib/gitlab/checks/files_blacklist.yml) (make sure you are at the right branch
+[`files_denylist.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/lib/gitlab/checks/files_denylist.yml) (make sure you are at the right branch
 as your GitLab version when viewing this file).
 
 NOTE: **Note:**
@@ -159,6 +176,44 @@ id_ecdsa
 #####################
 pry.history
 bash_history
+```
+
+## Prohibited file names
+
+> Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 7.10.
+
+Each file name contained in a Git push is compared to the regular expression in this field. Filenames in Git consist of both the file's name and any directory that may precede it. A singular regular expression can contain multiple independent matches used as exclusions. File names can be broadly matched to any location in the repository, or restricted to specific locations. Filenames can also be partial matches used to exclude file types by extension.
+
+The following examples make use of regex string boundary characters which match the beginning of a string (`^`), and the end (`$`). They also include instances where either the directory path or the filename can include `.` or `/`. Both of these special regex characters have to be escaped with a backslash `\\` to be used as normal characters in a match condition.
+
+Example: prevent pushing any `.exe` files to any location in the repository. This is an example of a partial match, which can match any filename that contains `.exe` at the end:
+
+```plaintext
+\.exe$
+```
+
+Example: prevent a specific configuration file in the repository root from being pushed:
+
+```plaintext
+^config\.yml$
+```
+
+Example: prevent a specific configuration file in a known directory from being pushed:
+
+```plaintext
+^directory-name\/config\.yml$
+```
+
+Example: prevent the specific file named `install.exe` from being pushed to any location in the repository. Note that the parenthesized expression `(^|\/)` will match either a file following a directory separator or a file in the root directory of the repository:
+
+```plaintext
+(^|\/)install\.exe$
+```
+
+Example: combining all of the above in a single expression. Note that all of the preceding expressions rely on the end of string character `$`, so we can move that part of each expression to the end of the grouped collection of match conditions where it will be appended to all matches:
+
+```plaintext
+(\.exe|^config\.yml|^directory-name\/config\.yml|(^|\/)install\.exe)$
 ```
 
 <!-- ## Troubleshooting

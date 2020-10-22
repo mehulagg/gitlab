@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'epics list', :js do
+RSpec.describe 'epics list', :js do
   include FilteredSearchHelpers
 
   let(:user) { create(:user) }

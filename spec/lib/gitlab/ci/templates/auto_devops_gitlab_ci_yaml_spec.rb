@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Auto-DevOps.gitlab-ci.yml' do
+RSpec.describe 'Auto-DevOps.gitlab-ci.yml' do
   subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('Auto-DevOps') }
 
   describe 'the created pipeline' do
@@ -20,16 +20,8 @@ describe 'Auto-DevOps.gitlab-ci.yml' do
       allow(project).to receive(:default_branch).and_return(default_branch)
     end
 
-    it 'creates a build and a test job' do
-      expect(build_names).to include('build', 'test')
-    end
-
-    context 'when the project has no active cluster' do
-      it 'only creates a build and a test stage' do
-        expect(pipeline.stages_names).to eq(%w(build test))
-      end
-
-      it 'does not create any deployment-related builds' do
+    shared_examples 'no Kubernetes deployment job' do
+      it 'does not create any Kubernetes deployment-related builds' do
         expect(build_names).not_to include('production')
         expect(build_names).not_to include('production_manual')
         expect(build_names).not_to include('staging')
@@ -39,12 +31,109 @@ describe 'Auto-DevOps.gitlab-ci.yml' do
       end
     end
 
-    context 'when the project has an active cluster' do
-      let(:cluster) { create(:cluster, :project, :provided_by_gcp, projects: [project]) }
+    it 'creates a build and a test job' do
+      expect(build_names).to include('build', 'test')
+    end
+
+    context 'when the project is set for deployment to AWS' do
+      let(:platform_value) { 'ECS' }
+      let(:review_prod_build_names) { build_names.select {|n| n.include?('review') || n.include?('production')} }
 
       before do
-        allow(cluster).to receive(:active?).and_return(true)
+        create(:ci_variable, project: project, key: 'AUTO_DEVOPS_PLATFORM_TARGET', value: platform_value)
       end
+
+      shared_examples 'no ECS job when AUTO_DEVOPS_PLATFORM_TARGET is not present' do |job_name|
+        context 'when AUTO_DEVOPS_PLATFORM_TARGET is nil' do
+          let(:platform_value) { nil }
+
+          it 'does not trigger the job' do
+            expect(build_names).not_to include(job_name)
+          end
+        end
+
+        context 'when AUTO_DEVOPS_PLATFORM_TARGET is empty' do
+          let(:platform_value) { '' }
+
+          it 'does not trigger the job' do
+            expect(build_names).not_to include(job_name)
+          end
+        end
+      end
+
+      it_behaves_like 'no Kubernetes deployment job'
+
+      it_behaves_like 'no ECS job when AUTO_DEVOPS_PLATFORM_TARGET is not present' do
+        let(:job_name) { 'production_ecs' }
+      end
+
+      it 'creates an ECS deployment job for production only' do
+        expect(review_prod_build_names).to contain_exactly('production_ecs')
+      end
+
+      context 'with FARGATE as a launch type' do
+        let(:platform_value) { 'FARGATE' }
+
+        it 'creates a FARGATE deployment job for production only' do
+          expect(review_prod_build_names).to contain_exactly('production_fargate')
+        end
+      end
+
+      context 'and we are not on the default branch' do
+        let(:platform_value) { 'ECS' }
+        let(:pipeline_branch) { 'patch-1' }
+
+        before do
+          project.repository.create_branch(pipeline_branch)
+        end
+
+        %w(review_ecs review_fargate).each do |job|
+          it_behaves_like 'no ECS job when AUTO_DEVOPS_PLATFORM_TARGET is not present' do
+            let(:job_name) { job }
+          end
+        end
+
+        it 'creates an ECS deployment job for review only' do
+          expect(review_prod_build_names).to contain_exactly('review_ecs')
+        end
+
+        context 'with FARGATE as a launch type' do
+          let(:platform_value) { 'FARGATE' }
+
+          it 'creates an FARGATE deployment job for review only' do
+            expect(review_prod_build_names).to contain_exactly('review_fargate')
+          end
+        end
+      end
+
+      context 'and when the project has an active cluster' do
+        let(:cluster) { create(:cluster, :project, :provided_by_gcp, projects: [project]) }
+
+        before do
+          allow(cluster).to receive(:active?).and_return(true)
+        end
+
+        context 'on default branch' do
+          it 'triggers the deployment to Kubernetes, not to ECS' do
+            expect(build_names).not_to include('review')
+            expect(build_names).to include('production')
+            expect(build_names).not_to include('production_ecs')
+            expect(build_names).not_to include('review_ecs')
+          end
+        end
+      end
+    end
+
+    context 'when the project has no active cluster' do
+      it 'only creates a build and a test stage' do
+        expect(pipeline.stages_names).to eq(%w(build test))
+      end
+
+      it_behaves_like 'no Kubernetes deployment job'
+    end
+
+    context 'when the project has an active cluster' do
+      let!(:cluster) { create(:cluster, :project, :provided_by_gcp, projects: [project]) }
 
       describe 'deployment-related builds' do
         context 'on default branch' do
@@ -116,6 +205,7 @@ describe 'Auto-DevOps.gitlab-ci.yml' do
       'Buildpack'       | { 'README.md' => '' }                   | { 'BUILDPACK_URL' => 'http://example.com' } | %w(build test) | %w()
       'Explicit set'    | { 'README.md' => '' }                   | { 'AUTO_DEVOPS_EXPLICITLY_ENABLED' => '1' } | %w(build test) | %w()
       'Explicit unset'  | { 'README.md' => '' }                   | { 'AUTO_DEVOPS_EXPLICITLY_ENABLED' => '0' } | %w()           | %w(build test)
+      'DOCKERFILE_PATH' | { 'README.md' => '' }                   | { 'DOCKERFILE_PATH' => 'Docker.file' }      | %w(build test) | %w()
       'Dockerfile'      | { 'Dockerfile' => '' }                  | {}                                          | %w(build test) | %w()
       'Clojure'         | { 'project.clj' => '' }                 | {}                                          | %w(build test) | %w()
       'Go modules'      | { 'go.mod' => '' }                      | {}                                          | %w(build test) | %w()

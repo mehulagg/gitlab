@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DependencyListSerializer do
+RSpec.describe DependencyListSerializer do
   let_it_be(:project) { create(:project, :repository, :private) }
   let_it_be(:user) { create(:user) }
   let(:ci_build) { create(:ee_ci_build, :success) }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'view audit events' do
+RSpec.describe 'view audit events' do
   describe 'GET /audit_events' do
     let_it_be(:admin) { create(:admin) }
     let_it_be(:audit_event) { create(:user_audit_event) }

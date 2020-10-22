@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::ReferenceParser::EpicParser do
+RSpec.describe Banzai::ReferenceParser::EpicParser do
   include ReferenceParserHelpers
 
   def link(epic_id)

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class LdapGroupLinks < Grape::API
+  class LdapGroupLinks < ::API::Base
     before { authenticate! }
 
     params do

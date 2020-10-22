@@ -1,5 +1,0 @@
----
-title: Add API methods to manipulate LDAP Override attribute
-merge_request: 28674
-author: Peter Lloyd <peter.lloyd@cambridgeconsultants.com>
-type: added

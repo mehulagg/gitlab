@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-describe Projects::Prometheus::Alerts::NotifyService do
+RSpec.describe Projects::Prometheus::Alerts::NotifyService do
+  include PrometheusHelpers
+
   let_it_be(:project, reload: true) { create(:project) }
 
   let(:service) { described_class.new(project, nil, payload) }
@@ -14,90 +16,49 @@ describe Projects::Prometheus::Alerts::NotifyService do
 
   let(:subject) { service.execute(token_input) }
 
-  before do
-    # We use `let_it_be(:project)` so we make sure to clear caches
-    project.clear_memoization(:licensed_feature_available)
-  end
-
-  shared_examples 'sends notification email' do
-    let(:notification_service) { spy }
-
-    it 'sends a notification for firing alerts only' do
-      expect(NotificationService)
-        .to receive(:new)
-        .and_return(notification_service)
-
-      expect(notification_service)
-        .to receive_message_chain(:async, :prometheus_alerts_fired)
-
-      expect(subject).to be_success
-    end
-  end
-
-  shared_examples 'processes incident issues' do |amount|
-    let(:create_incident_service) { spy }
-
-    it 'processes issues' do
-      expect(IncidentManagement::ProcessPrometheusAlertWorker)
-        .to receive(:perform_async)
-        .with(project.id, kind_of(Hash))
-        .exactly(amount).times
-
-      Sidekiq::Testing.inline! do
-        expect(subject).to be_success
-      end
-    end
-  end
-
-  shared_examples 'does not process incident issues' do
-    it 'does not process issues' do
-      expect(IncidentManagement::ProcessPrometheusAlertWorker)
-        .not_to receive(:perform_async)
-
-      expect(subject).to be_success
-    end
-  end
-
-  shared_examples 'persists events' do
-    let(:create_events_service) { spy }
-
-    it 'persists events' do
-      expect(Projects::Prometheus::Alerts::CreateEventsService)
-        .to receive(:new)
-        .and_return(create_events_service)
-
-      expect(create_events_service)
-        .to receive(:execute)
-
-      expect(subject).to be_success
-    end
-  end
-
-  shared_examples 'notifies alerts' do
-    it_behaves_like 'sends notification email'
-    it_behaves_like 'persists events'
-  end
-
-  shared_examples 'no notifications' do |http_status:|
-    let(:notification_service) { spy }
-    let(:create_events_service) { spy }
-
-    it 'does not notify' do
-      expect(notification_service).not_to receive(:async)
-      expect(create_events_service).not_to receive(:execute)
-
-      expect(subject).to be_error
-      expect(subject.http_status).to eq(http_status)
-    end
-  end
-
   context 'with valid payload' do
-    let(:alert_firing) { create(:prometheus_alert, project: project) }
-    let(:alert_resolved) { create(:prometheus_alert, project: project) }
-    let(:payload_raw) { payload_for(firing: [alert_firing], resolved: [alert_resolved]) }
+    let_it_be(:alert_firing) { create(:prometheus_alert, project: project) }
+    let_it_be(:alert_resolved) { create(:prometheus_alert, project: project) }
+    let_it_be(:cluster) { create(:cluster, :provided_by_user, projects: [project]) }
+    let(:payload_raw) { prometheus_alert_payload(firing: [alert_firing], resolved: [alert_resolved]) }
     let(:payload) { ActionController::Parameters.new(payload_raw).permit! }
     let(:payload_alert_firing) { payload_raw['alerts'].first }
     let(:token) { 'token' }
+
+    context 'with environment specific clusters' do
+      let(:prd_cluster) do
+        cluster
+      end
+
+      let(:stg_cluster) do
+        create(:cluster, :provided_by_user, projects: [project], enabled: true, environment_scope: 'stg/*')
+      end
+
+      let(:stg_environment) do
+        create(:environment, project: project, name: 'stg/1')
+      end
+
+      let(:alert_firing) do
+        create(:prometheus_alert, project: project, environment: stg_environment)
+      end
+
+      before do
+        create(:clusters_applications_prometheus, :installed,
+               cluster: prd_cluster, alert_manager_token: token)
+        create(:clusters_applications_prometheus, :installed,
+               cluster: stg_cluster, alert_manager_token: nil)
+      end
+
+      context 'without token' do
+        let(:token_input) { nil }
+
+        it_behaves_like 'Alert Notification Service sends notification email'
+      end
+
+      context 'with token' do
+        it_behaves_like 'Alert Notification Service sends no notifications', http_status: :unauthorized
+      end
+    end
 
     context 'with project specific cluster' do
       using RSpec::Parameterized::TableSyntax
@@ -116,9 +77,7 @@ describe Projects::Prometheus::Alerts::NotifyService do
 
       with_them do
         before do
-          cluster = create(:cluster, :provided_by_user,
-                           projects: [project],
-                           enabled: cluster_enabled)
+          cluster.update!(enabled: cluster_enabled)
 
           if status
             create(:clusters_applications_prometheus, status,
@@ -129,9 +88,9 @@ describe Projects::Prometheus::Alerts::NotifyService do
 
         case result = params[:result]
         when :success
-          it_behaves_like 'notifies alerts'
+          it_behaves_like 'Alert Notification Service sends notification email'
         when :failure
-          it_behaves_like 'no notifications', http_status: :unauthorized
+          it_behaves_like 'Alert Notification Service sends no notifications', http_status: :unauthorized
         else
           raise "invalid result: #{result.inspect}"
         end
@@ -141,7 +100,7 @@ describe Projects::Prometheus::Alerts::NotifyService do
     context 'without project specific cluster' do
       let!(:cluster) { create(:cluster, enabled: true) }
 
-      it_behaves_like 'no notifications', http_status: :unauthorized
+      it_behaves_like 'Alert Notification Service sends no notifications', http_status: :unauthorized
     end
 
     context 'with manual prometheus installation' do
@@ -170,9 +129,42 @@ describe Projects::Prometheus::Alerts::NotifyService do
 
         case result = params[:result]
         when :success
-          it_behaves_like 'notifies alerts'
+          it_behaves_like 'Alert Notification Service sends notification email'
         when :failure
-          it_behaves_like 'no notifications', http_status: :unauthorized
+          it_behaves_like 'Alert Notification Service sends no notifications', http_status: :unauthorized
+        else
+          raise "invalid result: #{result.inspect}"
+        end
+      end
+    end
+
+    context 'with generic alerts integration' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:alerts_service, :token, :result) do
+        :active   | :valid    | :success
+        :active   | :invalid  | :failure
+        :active   | nil       | :failure
+        :inactive | :valid    | :failure
+        nil       | nil       | :failure
+      end
+
+      with_them do
+        let(:valid) { project.alerts_service.token }
+        let(:invalid) { 'invalid token' }
+        let(:token_input) { public_send(token) if token }
+
+        before do
+          if alerts_service
+            create(:alerts_service, alerts_service, project: project)
+          end
+        end
+
+        case result = params[:result]
+        when :success
+          it_behaves_like 'Alert Notification Service sends notification email'
+        when :failure
+          it_behaves_like 'Alert Notification Service sends no notifications', http_status: :unauthorized
         else
           raise "invalid result: #{result.inspect}"
         end
@@ -188,8 +180,6 @@ describe Projects::Prometheus::Alerts::NotifyService do
       context 'when incident_management_setting does not exist' do
         let!(:setting) { nil }
 
-        it_behaves_like 'persists events'
-
         it 'does not send notification email', :sidekiq_might_not_need_inline do
           expect_any_instance_of(NotificationService)
             .not_to receive(:async)
@@ -199,15 +189,13 @@ describe Projects::Prometheus::Alerts::NotifyService do
       end
 
       context 'when incident_management_setting.send_email is true' do
-        it_behaves_like 'notifies alerts'
+        it_behaves_like 'Alert Notification Service sends notification email'
       end
 
       context 'incident_management_setting.send_email is false' do
         let!(:setting) do
           create(:project_incident_management_setting, send_email: false, project: project)
         end
-
-        it_behaves_like 'persists events'
 
         it 'does not send notification' do
           expect(NotificationService).not_to receive(:new)
@@ -217,63 +205,43 @@ describe Projects::Prometheus::Alerts::NotifyService do
       end
     end
 
-    context 'process incident issues' do
+    context 'process Alert Management alerts' do
+      let(:process_service) { instance_double(AlertManagement::ProcessPrometheusAlertService) }
+
       before do
         create(:prometheus_service, project: project)
         create(:project_alerting_setting, project: project, token: token)
       end
 
-      context 'with create_issue setting enabled' do
-        before do
-          setting.update!(create_issue: true)
+      context 'with multiple firing alerts and resolving alerts' do
+        let(:payload_raw) do
+          prometheus_alert_payload(firing: [alert_firing, alert_firing], resolved: [alert_resolved])
         end
 
-        it_behaves_like 'processes incident issues', 2
+        it 'processes Prometheus alerts' do
+          expect(AlertManagement::ProcessPrometheusAlertService)
+            .to receive(:new)
+            .with(project, nil, kind_of(Hash))
+            .exactly(3).times
+            .and_return(process_service)
+          expect(process_service).to receive(:execute).exactly(3).times
 
-        context 'multiple firing alerts' do
-          let(:payload_raw) do
-            payload_for(firing: [alert_firing, alert_firing], resolved: [])
-          end
-
-          it_behaves_like 'processes incident issues', 2
+          subject
         end
-
-        context 'without firing alerts' do
-          let(:payload_raw) do
-            payload_for(firing: [], resolved: [alert_resolved])
-          end
-
-          it_behaves_like 'processes incident issues', 1
-        end
-      end
-
-      context 'with create_issue setting disabled' do
-        before do
-          setting.update!(create_issue: false)
-        end
-
-        it_behaves_like 'does not process incident issues'
       end
     end
   end
 
   context 'with invalid payload' do
-    context 'without version' do
+    context 'when payload is not processable' do
       let(:payload) { {} }
 
-      it_behaves_like 'no notifications', http_status: :unprocessable_entity
-    end
+      before do
+        allow(described_class).to receive(:processable?).with(payload)
+          .and_return(false)
+      end
 
-    context 'when version is not "4"' do
-      let(:payload) { { 'version' => '5' } }
-
-      it_behaves_like 'no notifications', http_status: :unprocessable_entity
-    end
-
-    context 'with missing alerts' do
-      let(:payload) { { 'version' => '4' } }
-
-      it_behaves_like 'no notifications', http_status: :unauthorized
+      it_behaves_like 'Alert Notification Service sends no notifications', http_status: :unprocessable_entity
     end
 
     context 'when the payload is too big' do
@@ -284,61 +252,50 @@ describe Projects::Prometheus::Alerts::NotifyService do
         allow(Gitlab::Utils::DeepSize).to receive(:new).and_return(deep_size_object)
       end
 
-      it_behaves_like 'no notifications', http_status: :bad_request
+      it_behaves_like 'Alert Notification Service sends no notifications', http_status: :bad_request
 
-      it 'does not process issues' do
-        expect(IncidentManagement::ProcessPrometheusAlertWorker)
-          .not_to receive(:perform_async)
+      it 'does not process Prometheus alerts' do
+        expect(AlertManagement::ProcessPrometheusAlertService)
+          .not_to receive(:new)
 
         subject
       end
     end
   end
 
-  private
+  describe '.processable?' do
+    let(:valid_payload) { prometheus_alert_payload }
 
-  def payload_for(firing: [], resolved: [])
-    status = firing.any? ? 'firing' : 'resolved'
-    alerts = firing + resolved
-    alert_name = alerts.first.title
-    prometheus_metric_id = alerts.first.prometheus_metric_id.to_s
+    subject { described_class.processable?(payload) }
 
-    alerts_map = \
-      firing.map { |alert| map_alert_payload('firing', alert) } +
-      resolved.map { |alert| map_alert_payload('resolved', alert) }
+    context 'with valid payload' do
+      let(:payload) { valid_payload }
 
-    # See https://prometheus.io/docs/alerting/configuration/#%3Cwebhook_config%3E
-    {
-      'version' => '4',
-      'receiver' => 'gitlab',
-      'status' => status,
-      'alerts' => alerts_map,
-      'groupLabels' => {
-        'alertname' => alert_name
-      },
-      'commonLabels' => {
-        'alertname' => alert_name,
-        'gitlab' => 'hook',
-        'gitlab_alert_id' => prometheus_metric_id
-      },
-      'commonAnnotations' => {},
-      'externalURL' => '',
-      'groupKey' => "{}:{alertname=\'#{alert_name}\'}"
-    }
-  end
+      it { is_expected.to eq(true) }
 
-  def map_alert_payload(status, alert)
-    {
-      'status' => status,
-      'labels' => {
-        'alertname' => alert.title,
-        'gitlab' => 'hook',
-        'gitlab_alert_id' => alert.prometheus_metric_id.to_s
-      },
-      'annotations' => {},
-      'startsAt' => '2018-09-24T08:57:31.095725221Z',
-      'endsAt' => '0001-01-01T00:00:00Z',
-      'generatorURL' => 'http://prometheus-prometheus-server-URL'
-    }
+      context 'containing unrelated keys' do
+        let(:payload) { valid_payload.merge('unrelated' => 'key') }
+
+        it { is_expected.to eq(true) }
+      end
+    end
+
+    context 'with invalid payload' do
+      where(:missing_key) do
+        described_class::REQUIRED_PAYLOAD_KEYS.to_a
+      end
+
+      with_them do
+        let(:payload) { valid_payload.except(missing_key) }
+
+        it { is_expected.to eq(false) }
+      end
+    end
+
+    context 'with unsupported version' do
+      let(:payload) { valid_payload.merge('version' => '5') }
+
+      it { is_expected.to eq(false) }
+    end
   end
 end

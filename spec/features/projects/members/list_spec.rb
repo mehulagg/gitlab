@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Project members list' do
+RSpec.describe 'Project members list' do
   include Select2Helper
   include Spec::Support::Helpers::Features::ListRowsHelpers
 
@@ -34,7 +34,7 @@ describe 'Project members list' do
     expect(second_row).to be_blank
   end
 
-  it 'update user acess level', :js do
+  it 'update user access level', :js do
     project.add_developer(user2)
 
     visit_members_page
@@ -64,9 +64,12 @@ describe 'Project members list' do
 
     visit_members_page
 
-    accept_confirm do
-      find(:css, 'li.project_member', text: other_user.name).find(:css, 'a.btn-remove').click
-    end
+    # Open modal
+    find(:css, 'li.project_member', text: other_user.name).find(:css, 'button.btn-danger').click
+
+    expect(page).to have_unchecked_field 'Also unassign this user from related issues and merge requests'
+
+    click_on('Remove member')
 
     wait_for_requests
 
@@ -86,6 +89,23 @@ describe 'Project members list' do
     end
   end
 
+  context 'project bots' do
+    let(:project_bot) { create(:user, :project_bot, name: 'project_bot') }
+
+    before do
+      project.add_maintainer(project_bot)
+    end
+
+    it 'does not show form used to change roles and "Expiration date" or the remove user button' do
+      project_member = project.project_members.find_by(user_id: project_bot.id)
+
+      visit_members_page
+
+      expect(page).not_to have_selector("#edit_project_member_#{project_member.id}")
+      expect(page).to have_no_selector("#project_member_#{project_member.id} .btn-danger")
+    end
+  end
+
   def add_user(id, role)
     page.within ".invite-users-form" do
       select2(id, from: "#user_ids", multiple: true)
@@ -96,6 +116,6 @@ describe 'Project members list' do
   end
 
   def visit_members_page
-    visit project_settings_members_path(project)
+    visit project_project_members_path(project)
   end
 end

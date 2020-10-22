@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::API::Entities::Analytics::GroupActivity do
+RSpec.describe EE::API::Entities::Analytics::GroupActivity do
   let(:count) { 10 }
 
   shared_examples 'exposes count' do |count_type, entity|

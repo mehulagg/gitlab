@@ -7,7 +7,7 @@ module EE
       include ::Gitlab::Utils::StrongMemoize
 
       override :execute
-      def execute(options = {})
+      def execute
         super.tap do |project|
           if project.saved? && custom_template
             custom_template.add_export_job(current_user: current_user,

@@ -6,7 +6,7 @@ module Mutations
       graphql_name 'MergeRequestSetMilestone'
 
       argument :milestone_id,
-               GraphQL::ID_TYPE,
+               ::Types::GlobalIDType[::Milestone],
                required: false,
                loads: Types::MilestoneType,
                description: <<~DESC
@@ -22,7 +22,7 @@ module Mutations
 
         {
           merge_request: merge_request,
-          errors: merge_request.errors.full_messages
+          errors: errors_on_object(merge_request)
         }
       end
     end

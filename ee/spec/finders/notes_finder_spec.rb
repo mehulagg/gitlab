@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe NotesFinder do
+RSpec.describe NotesFinder do
   let(:group) { create(:group) }
   let(:user) { create(:group_member, :owner, group: group, user: create(:user)).user }
   let(:epic) { create(:epic, :opened, author: user, group: group) }

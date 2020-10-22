@@ -1,8 +1,8 @@
 <script>
 import { GlResizeObserverDirective } from '@gitlab/ui';
 import { GlHeatmap } from '@gitlab/ui/dist/charts';
-import dateformat from 'dateformat';
 import { graphDataValidatorForValues } from '../../utils';
+import { formatDate, timezones, formats } from '../../format_date';
 
 export default {
   components: {
@@ -16,6 +16,11 @@ export default {
       type: Object,
       required: true,
       validator: graphDataValidatorForValues.bind(null, false),
+    },
+    timezone: {
+      type: String,
+      required: false,
+      default: timezones.LOCAL,
     },
   },
   data() {
@@ -31,7 +36,7 @@ export default {
       );
     },
     xAxisName() {
-      return this.graphData.x_label || '';
+      return this.graphData.xLabel || '';
     },
     yAxisName() {
       return this.graphData.y_label || '';
@@ -43,7 +48,10 @@ export default {
       return this.result.values.map(val => {
         const [yLabel] = val;
 
-        return dateformat(new Date(yLabel), 'HH:MM:ss');
+        return formatDate(new Date(yLabel), {
+          format: formats.shortTime,
+          timezone: this.timezone,
+        });
       });
     },
     result() {

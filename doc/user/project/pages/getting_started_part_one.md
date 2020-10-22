@@ -1,6 +1,7 @@
 ---
-last_updated: 2018-06-04
-type: concepts, reference
+stage: Release
+group: Release Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # GitLab Pages domain names, URLs, and baseurls
@@ -10,12 +11,9 @@ according to your intended website's URL.
 
 ## GitLab Pages default domain names
 
->**Note:**
-If you use your own GitLab instance to deploy your
-site with GitLab Pages, check with your sysadmin what's your
-Pages wildcard domain. This guide is valid for any GitLab instance,
-you just need to replace Pages wildcard domain on GitLab.com
-(`*.gitlab.io`) with your own.
+If you use your own GitLab instance to deploy your site with GitLab Pages, verify your Pages
+wildcard domain with your sysadmin. This guide is valid for any GitLab instance, provided that you
+replace the Pages wildcard domain on GitLab.com (`*.gitlab.io`) with your own.
 
 If you set up a GitLab Pages project on GitLab,
 it will automatically be accessible under a

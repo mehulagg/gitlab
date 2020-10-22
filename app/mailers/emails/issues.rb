@@ -93,7 +93,7 @@ module Emails
 
     def issues_csv_email(user, project, csv_data, export_status)
       @project = project
-      @issues_count = export_status.fetch(:rows_expected)
+      @count = export_status.fetch(:rows_expected)
       @written_count = export_status.fetch(:rows_written)
       @truncated = export_status.fetch(:truncated)
 
@@ -126,3 +126,5 @@ module Emails
     end
   end
 end
+
+Emails::Issues.prepend_if_ee('EE::Emails::Issues')

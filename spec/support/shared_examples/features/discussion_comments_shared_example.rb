@@ -15,7 +15,7 @@ RSpec.shared_examples 'thread comments' do |resource_name|
 
     find("#{form_selector} .note-textarea").send_keys(comment)
 
-    click_button 'Comment'
+    find('.js-comment-button').click
 
     expect(page).to have_content(comment)
 
@@ -29,6 +29,8 @@ RSpec.shared_examples 'thread comments' do |resource_name|
       find("#{form_selector} .note-textarea").send_keys(comment)
 
       click_button 'Comment & close issue'
+
+      wait_for_all_requests
 
       expect(page).to have_content(comment)
       expect(page).to have_content "@#{user.username} closed"
@@ -144,7 +146,7 @@ RSpec.shared_examples 'thread comments' do |resource_name|
           find("#{comments_selector} .js-vue-discussion-reply").click
           find("#{comments_selector} .note-textarea").send_keys(text)
 
-          click_button "Comment"
+          find("#{comments_selector} .js-comment-button").click
           wait_for_requests
         end
 
@@ -264,7 +266,7 @@ RSpec.shared_examples 'thread comments' do |resource_name|
             end
           end
 
-          it 'has "Comment" selected when opening the menu', quarantine: 'https://gitlab.com/gitlab-org/gitlab/issues/196825' do
+          it 'has "Comment" selected when opening the menu', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/196825' do
             find(toggle_selector).click
 
             find("#{menu_selector} li", match: :first)

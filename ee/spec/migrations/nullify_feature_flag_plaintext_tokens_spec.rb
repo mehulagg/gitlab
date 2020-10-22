@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20191022113635_nullify_feature_flag_plaintext_tokens.rb')
+require_migration!
 
-describe NullifyFeatureFlagPlaintextTokens do
+RSpec.describe NullifyFeatureFlagPlaintextTokens do
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
   let(:feature_flags_clients) { table(:operations_feature_flags_clients) }

@@ -1,16 +1,7 @@
 # frozen_string_literal: true
 
-require 'ee/gitlab/service_desk'
-
 module EE
   module NotificationService
-    extend ::Gitlab::Utils::Override
-
-    # Notify users on new review in system
-    def new_review(review)
-      send_new_review_notification(review)
-    end
-
     # When we add approvers to a merge request we should send an email to:
     #
     #  * the new approvers
@@ -29,17 +20,19 @@ module EE
       unapprove_mr_email(merge_request, merge_request.target_project, current_user)
     end
 
-    override :send_new_note_notifications
-    def send_new_note_notifications(note)
-      super
-      send_service_desk_notification(note)
-    end
-
     def mirror_was_hard_failed(project)
       return if project.emails_disabled?
 
       owners_and_maintainers_without_invites(project).each do |recipient|
         mailer.mirror_was_hard_failed_email(project.id, recipient.user.id).deliver_later
+      end
+    end
+
+    def mirror_was_disabled(project, deleted_user_name)
+      return if project.emails_disabled?
+
+      owners_and_maintainers_without_invites(project).each do |recipient|
+        mailer.mirror_was_disabled_email(project.id, recipient.user.id, deleted_user_name).deliver_later
       end
     end
 
@@ -61,15 +54,15 @@ module EE
       mailer.project_mirror_user_changed_email(new_mirror_user.id, deleted_user_name, project.id).deliver_later
     end
 
-    private
-
-    def send_new_review_notification(review)
-      recipients = ::NotificationRecipients::BuildService.build_new_review_recipients(review)
-
-      recipients.each do |recipient|
-        mailer.new_review_email(recipient.user.id, review.id).deliver_later
-      end
+    def removed_iteration_issue(issue, current_user)
+      removed_iteration_resource_email(issue, current_user)
     end
+
+    def changed_iteration_issue(issue, new_iteration, current_user)
+      changed_iteration_resource_email(issue, new_iteration, current_user)
+    end
+
+    private
 
     def add_mr_approvers_email(merge_request, approvers, current_user)
       approvers.each do |approver|
@@ -93,19 +86,28 @@ module EE
       end
     end
 
-    def send_service_desk_notification(note)
-      return unless EE::Gitlab::ServiceDesk.enabled?
-      return unless note.noteable_type == 'Issue'
+    def removed_iteration_resource_email(target, current_user)
+      recipients = ::NotificationRecipients::BuildService.build_recipients(
+        target,
+        current_user,
+        action: 'removed_iteration'
+      )
 
-      issue = note.noteable
-      support_bot = ::User.support_bot
+      recipients.each do |recipient|
+        mailer.removed_iteration_issue_email(recipient.user.id, target.id, current_user.id).deliver_later
+      end
+    end
 
-      return unless issue.service_desk_reply_to.present?
-      return unless issue.project.service_desk_enabled?
-      return if note.author == support_bot
-      return unless issue.subscribed?(support_bot, issue.project)
+    def changed_iteration_resource_email(target, iteration, current_user)
+      recipients = ::NotificationRecipients::BuildService.build_recipients(
+        target,
+        current_user,
+        action: 'changed_iteration'
+      )
 
-      mailer.service_desk_new_note_email(issue.id, note.id).deliver_later
+      recipients.each do |recipient|
+        mailer.changed_iteration_issue_email(recipient.user.id, target.id, iteration, current_user.id).deliver_later
+      end
     end
 
     def epic_status_change_email(target, current_user, status)

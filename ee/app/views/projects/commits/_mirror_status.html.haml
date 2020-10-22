@@ -1,5 +1,5 @@
 - if @project.mirror?
-  .prepend-top-default.gray-content-block.second-block.clearfix
+  .gl-mt-3.gray-content-block.second-block.clearfix
     - import_url = @project.safe_import_url
     .oneline.project-mirror-text
       This project is mirrored from #{link_to import_url, import_url}.

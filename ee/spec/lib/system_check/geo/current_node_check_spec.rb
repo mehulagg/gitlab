@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'rake_helper'
 
-describe SystemCheck::Geo::CurrentNodeCheck, :geo do
+RSpec.describe SystemCheck::Geo::CurrentNodeCheck, :geo do
   describe '#check?' do
     context 'when the current machine has a matching GeoNode' do
       it 'returns true' do

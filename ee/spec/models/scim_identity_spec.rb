@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ScimIdentity do
+RSpec.describe ScimIdentity do
   describe 'relations' do
     it { is_expected.to belong_to(:group) }
     it { is_expected.to belong_to(:user) }

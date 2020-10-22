@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Geo::ProjectRegistryStatusFinder, :geo, :geo_tracking_db do
+RSpec.describe Geo::ProjectRegistryStatusFinder, :geo, :geo_tracking_db do
   include ::EE::GeoHelpers
 
   let_it_be(:secondary) { create(:geo_node) }
@@ -62,17 +62,6 @@ describe Geo::ProjectRegistryStatusFinder, :geo, :geo_tracking_db do
         never_synced_registry_with_failure,
         verify_failed_registry,
         verify_checksum_mismatch_registry
-      )
-    end
-  end
-
-  describe '#never_synced_projects' do
-    it 'returns only never fully synced registries' do
-      result = subject.never_synced_projects
-
-      expect(result).to contain_exactly(
-        never_synced_registry,
-        never_synced_registry_with_failure
       )
     end
   end

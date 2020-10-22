@@ -1,5 +1,0 @@
----
-title: Add `group_id` column into vulnerability_exports table
-merge_request: 29498
-author:
-type: added

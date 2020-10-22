@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Member, type: :model do
+RSpec.describe Member, type: :model do
   describe '#notification_service' do
     it 'returns a NullNotificationService instance for LDAP users' do
       member = described_class.new

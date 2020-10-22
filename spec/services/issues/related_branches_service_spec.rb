@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Issues::RelatedBranchesService do
+RSpec.describe Issues::RelatedBranchesService do
   let_it_be(:developer) { create(:user) }
   let_it_be(:issue) { create(:issue) }
   let(:user) { developer }
@@ -57,7 +57,7 @@ describe Issues::RelatedBranchesService do
           unreadable_branch_name => unreadable_pipeline
         }.each do |name, pipeline|
           allow(repo).to receive(:find_branch).with(name).and_return(make_branch)
-          allow(project).to receive(:pipeline_for).with(name, sha).and_return(pipeline)
+          allow(project).to receive(:latest_pipeline).with(name, sha).and_return(pipeline)
         end
 
         allow(repo).to receive(:find_branch).with(missing_branch).and_return(nil)

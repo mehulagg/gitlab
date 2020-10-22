@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::Bridge do
+RSpec.describe Ci::Bridge do
   let_it_be(:project) { create(:project) }
   let_it_be(:target_project) { create(:project, name: 'project', namespace: create(:namespace, name: 'my')) }
   let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
@@ -19,6 +19,11 @@ describe Ci::Bridge do
 
   it 'has many sourced pipelines' do
     expect(bridge).to have_many(:sourced_pipelines)
+  end
+
+  it 'has one downstream pipeline' do
+    expect(bridge).to have_one(:sourced_pipeline)
+    expect(bridge).to have_one(:downstream_pipeline)
   end
 
   describe '#tags' do
@@ -42,9 +47,10 @@ describe Ci::Bridge do
         CI_JOB_NAME CI_JOB_STAGE CI_COMMIT_SHA CI_COMMIT_SHORT_SHA
         CI_COMMIT_BEFORE_SHA CI_COMMIT_REF_NAME CI_COMMIT_REF_SLUG
         CI_PROJECT_ID CI_PROJECT_NAME CI_PROJECT_PATH
-        CI_PROJECT_PATH_SLUG CI_PROJECT_NAMESPACE CI_PIPELINE_IID
-        CI_CONFIG_PATH CI_PIPELINE_SOURCE CI_COMMIT_MESSAGE
+        CI_PROJECT_PATH_SLUG CI_PROJECT_NAMESPACE CI_PROJECT_ROOT_NAMESPACE
+        CI_PIPELINE_IID CI_CONFIG_PATH CI_PIPELINE_SOURCE CI_COMMIT_MESSAGE
         CI_COMMIT_TITLE CI_COMMIT_DESCRIPTION CI_COMMIT_REF_PROTECTED
+        CI_COMMIT_TIMESTAMP
       ]
 
       expect(bridge.scoped_variables_hash.keys).to include(*variables)
@@ -53,30 +59,20 @@ describe Ci::Bridge do
 
   describe 'state machine transitions' do
     context 'when bridge points towards downstream' do
-      it 'schedules downstream pipeline creation' do
-        expect(bridge).to receive(:schedule_downstream_pipeline!)
+      %i[created manual].each do |status|
+        it "schedules downstream pipeline creation when the status is #{status}" do
+          bridge.status = status
 
-        bridge.enqueue!
+          expect(bridge).to receive(:schedule_downstream_pipeline!)
+
+          bridge.enqueue!
+        end
       end
-    end
-  end
 
-  describe 'state machine transitions' do
-    context 'when bridge points towards downstream' do
-      it 'schedules downstream pipeline creation' do
-        expect(bridge).to receive(:schedule_downstream_pipeline!)
+      it 'raises error when the status is failed' do
+        bridge.status = :failed
 
-        bridge.enqueue!
-      end
-    end
-  end
-
-  describe 'state machine transitions' do
-    context 'when bridge points towards downstream' do
-      it 'schedules downstream pipeline creation' do
-        expect(bridge).to receive(:schedule_downstream_pipeline!)
-
-        bridge.enqueue!
+        expect { bridge.enqueue! }.to raise_error(StateMachines::InvalidTransition)
       end
     end
   end
@@ -296,6 +292,69 @@ describe Ci::Bridge do
       it 'returns nil' do
         expect(bridge.target_ref).to be_nil
       end
+    end
+  end
+
+  describe '#play' do
+    let(:downstream_project) { create(:project) }
+    let(:user) { create(:user) }
+    let(:bridge) { create(:ci_bridge, :playable, pipeline: pipeline, downstream: downstream_project) }
+
+    subject { bridge.play(user) }
+
+    before do
+      project.add_maintainer(user)
+      downstream_project.add_maintainer(user)
+    end
+
+    it 'enqueues the bridge' do
+      subject
+
+      expect(bridge).to be_pending
+    end
+  end
+
+  describe '#playable?' do
+    context 'when bridge is a manual action' do
+      subject { build_stubbed(:ci_bridge, :manual).playable? }
+
+      it { is_expected.to be_truthy }
+
+      context 'when FF ci_manual_bridges is disabled' do
+        before do
+          stub_feature_flags(ci_manual_bridges: false)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when build is not a manual action' do
+      subject { build_stubbed(:ci_bridge, :created).playable? }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#action?' do
+    context 'when bridge is a manual action' do
+      subject { build_stubbed(:ci_bridge, :manual).action? }
+
+      it { is_expected.to be_truthy }
+
+      context 'when FF ci_manual_bridges is disabled' do
+        before do
+          stub_feature_flags(ci_manual_bridges: false)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when build is not a manual action' do
+      subject { build_stubbed(:ci_bridge, :created).action? }
+
+      it { is_expected.to be_falsey }
     end
   end
 end

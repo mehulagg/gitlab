@@ -2,17 +2,28 @@
 
 RSpec.shared_examples 'milestone tabs' do
   def go(path, extra_params = {})
-    params =
-      case milestone
-      when DashboardMilestone
-        { id: milestone.safe_title, title: milestone.title }
-      when GroupMilestone
-        { group_id: group.to_param, id: milestone.safe_title, title: milestone.title }
-      else
-        { namespace_id: project.namespace.to_param, project_id: project, id: milestone.iid }
+    get path, params: request_params.merge(extra_params)
+  end
+
+  describe '#issues' do
+    context 'as html' do
+      before do
+        go(:issues, format: 'html')
       end
 
-    get path, params: params.merge(extra_params)
+      it 'redirects to milestone#show' do
+        expect(response).to redirect_to(milestone_path)
+      end
+    end
+
+    context 'as json' do
+      it 'renders the issues tab template to a string' do
+        go(:issues, format: 'json')
+
+        expect(response).to render_template('shared/milestones/_issues_tab')
+        expect(json_response).to have_key('html')
+      end
+    end
   end
 
   describe '#merge_requests' do

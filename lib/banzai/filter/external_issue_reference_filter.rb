@@ -34,16 +34,16 @@ module Banzai
         ref_pattern = issue_reference_pattern
         ref_start_pattern = /\A#{ref_pattern}\z/
 
-        each_node do |node|
+        nodes.each_with_index do |node, index|
           if text_node?(node)
-            replace_text_when_pattern_matches(node, ref_pattern) do |content|
+            replace_text_when_pattern_matches(node, index, ref_pattern) do |content|
               issue_link_filter(content)
             end
 
           elsif element_node?(node)
             yield_valid_link(node) do |link, inner_html|
               if link =~ ref_start_pattern
-                replace_link_node_with_href(node, link) do
+                replace_link_node_with_href(node, index, link) do
                   issue_link_filter(link, link_content: inner_html)
                 end
               end
@@ -54,6 +54,8 @@ module Banzai
         doc
       end
 
+      private
+
       # Replace `JIRA-123` issue references in text with links to the referenced
       # issue's details page.
       #
@@ -63,27 +65,31 @@ module Banzai
       # Returns a String with `JIRA-123` references replaced with links. All
       # links have `gfm` and `gfm-issue` class names attached for styling.
       def issue_link_filter(text, link_content: nil)
-        project = context[:project]
-
         self.class.references_in(text, issue_reference_pattern) do |match, id|
-          ExternalIssue.new(id, project)
-
-          url = url_for_issue(id, project, only_path: context[:only_path])
-
-          title = "Issue in #{project.external_issue_tracker.title}"
+          url = url_for_issue(id)
           klass = reference_class(:issue)
           data  = data_attribute(project: project.id, external_issue: id)
-
           content = link_content || match
 
           %(<a href="#{url}" #{data}
-               title="#{escape_once(title)}"
+               title="#{escape_once(issue_title)}"
                class="#{klass}">#{content}</a>)
         end
       end
 
-      def url_for_issue(*args)
-        IssuesHelper.url_for_issue(*args)
+      def url_for_issue(issue_id)
+        return '' if project.nil?
+
+        url = if only_path?
+                project.external_issue_tracker.issue_path(issue_id)
+              else
+                project.external_issue_tracker.issue_url(issue_id)
+              end
+
+        # Ensure we return a valid URL to prevent possible XSS.
+        URI.parse(url).to_s
+      rescue URI::InvalidURIError
+        ''
       end
 
       def default_issues_tracker?
@@ -94,7 +100,13 @@ module Banzai
         external_issues_cached(:external_issue_reference_pattern)
       end
 
-      private
+      def project
+        context[:project]
+      end
+
+      def issue_title
+        "Issue in #{project.external_issue_tracker.title}"
+      end
 
       def external_issues_cached(attribute)
         cached_attributes = Gitlab::SafeRequestStore[:banzai_external_issues_tracker_attributes] ||= Hash.new { |h, k| h[k] = {} }

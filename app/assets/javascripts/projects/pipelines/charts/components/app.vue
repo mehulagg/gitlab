@@ -1,7 +1,7 @@
 <script>
 import dateFormat from 'dateformat';
-import { __, sprintf } from '~/locale';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
+import { __, sprintf } from '~/locale';
 import { getDateInPast } from '~/lib/utils/datetime_utility';
 import StatisticsList from './statistics_list.vue';
 import PipelinesAreaChart from './pipelines_area_chart.vue';
@@ -113,6 +113,9 @@ export default {
 </script>
 <template>
   <div>
+    <div class="mb-3">
+      <h3>{{ s__('PipelineCharts|CI / CD Analytics') }}</h3>
+    </div>
     <h4 class="my-4">{{ s__('PipelineCharts|Overall statistics') }}</h4>
     <div class="row">
       <div class="col-md-6">

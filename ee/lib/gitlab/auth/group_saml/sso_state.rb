@@ -13,7 +13,15 @@ module Gitlab
         end
 
         def active?
-          !session_available? || active_session_data[saml_provider_id]
+          sessionless? || latest_sign_in
+        end
+
+        def active_since?(cutoff)
+          return active? unless cutoff
+          return true if sessionless?
+          return false unless latest_sign_in
+
+          latest_sign_in > cutoff
         end
 
         def update_active(value)
@@ -26,8 +34,12 @@ module Gitlab
           Gitlab::NamespacedSessionStore.new(SESSION_STORE_KEY)
         end
 
-        def session_available?
-          active_session_data.initiated?
+        def sessionless?
+          !active_session_data.initiated?
+        end
+
+        def latest_sign_in
+          active_session_data[saml_provider_id]
         end
       end
     end

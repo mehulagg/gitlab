@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Profiles::UsageQuotasController do
+RSpec.describe Profiles::UsageQuotasController do
   let_it_be(:user) { create(:user) }
 
   before do

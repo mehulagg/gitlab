@@ -37,13 +37,5 @@ module EE
     def stub_elasticsearch_setting(messages)
       allow(::Gitlab.config.elasticsearch).to receive_messages(to_settings(messages))
     end
-
-    def stub_packages_setting(messages)
-      allow(::Gitlab.config.packages).to receive_messages(to_settings(messages))
-    end
-
-    def stub_service_desk_email_setting(messages)
-      allow(::Gitlab.config.service_desk_email).to receive_messages(to_settings(messages))
-    end
   end
 end

@@ -52,13 +52,18 @@ module EE
 
       def build_cross_dependency_relationship_fragment(dependency, search_scope)
         args = dependency.values_at(:job, :ref, :project)
-        dep_id = search_scope.max_build_id_by(*args)
+        args = args.map { |value| ExpandVariables.expand(value, processable_variables) }
 
+        dep_id = search_scope.max_build_id_by(*args)
         model_class.id_in(dep_id)
       end
 
       def user
         processable.user
+      end
+
+      def processable_variables
+        -> { processable.simple_variables_without_dependencies }
       end
 
       def specified_cross_pipeline_dependencies

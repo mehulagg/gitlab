@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::RetryPipelineService, '#execute' do
+RSpec.describe Ci::RetryPipelineService, '#execute' do
   include ProjectForksHelper
 
   let(:user) { create(:user) }
@@ -261,6 +261,39 @@ describe Ci::RetryPipelineService, '#execute' do
 
       service.execute(pipeline)
     end
+
+    context 'when pipeline has processables with nil scheduling_type' do
+      let!(:build1) { create_build('build1', :success, 0) }
+      let!(:build2) { create_build('build2', :failed, 0) }
+      let!(:build3) { create_build('build3', :failed, 1) }
+      let!(:build3_needs_build1) { create(:ci_build_need, build: build3, name: build1.name) }
+
+      before do
+        statuses.update_all(scheduling_type: nil)
+      end
+
+      it 'populates scheduling_type of processables' do
+        service.execute(pipeline)
+
+        expect(build1.reload.scheduling_type).to eq('stage')
+        expect(build2.reload.scheduling_type).to eq('stage')
+        expect(build3.reload.scheduling_type).to eq('dag')
+      end
+    end
+
+    context 'when the pipeline is a downstream pipeline and the bridge is depended' do
+      let!(:bridge) { create(:ci_bridge, :strategy_depend, status: 'success') }
+
+      before do
+        create(:ci_sources_pipeline, pipeline: pipeline, source_job: bridge)
+      end
+
+      it 'marks source bridge as pending' do
+        service.execute(pipeline)
+
+        expect(bridge.reload).to be_pending
+      end
+    end
   end
 
   context 'when user is not allowed to retry pipeline' do
@@ -345,7 +378,7 @@ describe Ci::RetryPipelineService, '#execute' do
                       stage: "stage_#{stage_num}",
                       stage_idx: stage_num,
                       pipeline: pipeline, **opts) do |build|
-      pipeline.update_legacy_status
+      ::Ci::ProcessPipelineService.new(pipeline).execute
     end
   end
 end

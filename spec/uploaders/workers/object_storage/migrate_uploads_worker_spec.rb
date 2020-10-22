@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ObjectStorage::MigrateUploadsWorker do
+RSpec.describe ObjectStorage::MigrateUploadsWorker do
   let(:model_class) { Project }
   let(:uploads) { Upload.all }
   let(:to_store) { ObjectStorage::Store::REMOTE }
@@ -64,5 +64,17 @@ describe ObjectStorage::MigrateUploadsWorker do
         expect { perform(Upload.all) }.not_to exceed_query_limit(query_count).with_threshold(expected_queries_per_migration)
       end
     end
+  end
+
+  context 'for DesignManagement::DesignV432x230Uploader' do
+    let(:model_class) { DesignManagement::Action }
+    let!(:design_actions) { create_list(:design_action, 10, :with_image_v432x230) }
+    let(:mounted_as) { :image_v432x230 }
+
+    before do
+      stub_uploads_object_storage(DesignManagement::DesignV432x230Uploader)
+    end
+
+    it_behaves_like 'uploads migration worker'
   end
 end

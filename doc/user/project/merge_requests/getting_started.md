@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: index, reference
 description: "Getting started with Merge Requests."
 ---
@@ -50,14 +53,14 @@ When you start a new merge request, you can immediately include the following
 options, or add them later by clicking the **Edit** button on the merge
 request's page at the top-right side:
 
-- [Assign](#assignee) the merge request to a colleague for review. With GitLab Starter and higher tiers, you can [assign it to more than one person at a time](#multiple-assignees-starter).
+- [Assign](#assignee) the merge request to a colleague for review. With GitLab Starter and higher tiers, you can [assign it to more than one person at a time](#multiple-assignees).
 - Set a [milestone](../milestones/index.md) to track time-sensitive changes.
 - Add [labels](../labels.md) to help contextualize and filter your merge requests over time.
 - Require [approval](merge_request_approvals.md) from your team. **(STARTER)**
 - [Close issues automatically](#merge-requests-to-close-issues) when they are merged.
 - Enable the [delete source branch when merge request is accepted](#deleting-the-source-branch) option to keep your repository clean.
 - Enable the [squash commits when merge request is accepted](squash_and_merge.md) option to combine all the commits into one before merging, thus keep a clean commit history in your repository.
-- Set the merge request as a [Work In Progress (WIP)](work_in_progress_merge_requests.md) to avoid accidental merges before it is ready.
+- Set the merge request as a [**Draft**](work_in_progress_merge_requests.md) to avoid accidental merges before it is ready.
 
 Once you have created the merge request, you can also:
 
@@ -67,7 +70,7 @@ Once you have created the merge request, you can also:
 - Preview continuous integration [pipelines on the merge request widget](reviewing_and_managing_merge_requests.md#pipeline-status-in-merge-requests-widgets).
 - Preview how your changes look directly on your deployed application with [Review Apps](reviewing_and_managing_merge_requests.md#live-preview-with-review-apps).
 - [Allow collaboration on merge requests across forks](allow_collaboration.md).
-- Perform a [Review](../../discussions/index.md#merge-request-reviews-premium) in order to create multiple comments on a diff and publish them once you're ready. **(PREMIUM)**
+- Perform a [Review](../../discussions/index.md#merge-request-reviews) in order to create multiple comments on a diff and publish them once you're ready.
 - Add [code suggestions](../../discussions/index.md#suggest-changes) to change the content of merge requests directly into merge request threads, and easily apply them to the codebase directly from the UI.
 - Add a time estimation and the time spent with that merge request with [Time Tracking](../time_tracking.md#time-tracking).
 
@@ -86,7 +89,7 @@ and the merge request will be added to their
 
 #### Multiple assignees **(STARTER)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/2004) in [GitLab Starter 11.11](https://about.gitlab.com/pricing/).
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2004) in [GitLab Starter 11.11](https://about.gitlab.com/pricing/).
 
 Multiple people often review merge requests at the same time.
 GitLab allows you to have multiple assignees for merge requests
@@ -107,6 +110,48 @@ It is also possible to manage multiple assignees:
 
 - When creating a merge request.
 - Using [quick actions](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics).
+
+## Reviewer
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216054) in GitLab 13.5.
+> - It's [deployed behind a feature flag](../../../user/feature_flags.md), enabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-merge-request-reviewers). **(CORE ONLY)**
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
+
+Requesting a code review is an important part of contributing code. However, deciding who should review
+your code and asking for a review are no easy tasks. Using the "assignee" field for both authors and
+reviewers makes it hard for others to determine who's doing what on a merge request.
+
+GitLab's Merge Request Reviewers easily allow authors to request a review as well as see the status of the
+review. By selecting one or more users from the **Reviewers** field in the merge request's right-hand
+sidebar, the assigned reviewers will receive a notification of the request to review the merge request.
+
+This makes it easy to determine the relevant roles for the users involved in the merge request, as well as formally requesting a review from a peer.
+
+To request it, open the **Reviewers** drop-down box to search for the user you wish to get a review from.
+
+### Enable or disable Merge Request Reviewers **(CORE ONLY)**
+
+Merge Request Reviewers is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:merge_request_reviewers)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:merge_request_reviewers)
+```
 
 ### Merge requests to close issues
 

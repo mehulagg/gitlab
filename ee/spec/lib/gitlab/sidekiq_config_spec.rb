@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::SidekiqConfig do
+RSpec.describe Gitlab::SidekiqConfig do
   describe '.workers' do
     it 'includes EE workers' do
       worker_classes = described_class.workers.map(&:klass)
@@ -25,7 +25,8 @@ describe Gitlab::SidekiqConfig do
     it 'expands queue namespaces to concrete queue names' do
       queues = described_class.expand_queues(%w[cronjob])
 
-      expect(queues).to include('cronjob:stuck_import_jobs')
+      expect(queues).to include('cronjob:import_stuck_project_import_jobs')
+      expect(queues).to include('cronjob:jira_import_stuck_jira_import_jobs')
       expect(queues).to include('cronjob:stuck_merge_jobs')
     end
 

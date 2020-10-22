@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Projects::IssuesController do
+RSpec.describe Projects::IssuesController do
   include ProjectForksHelper
   include_context 'includes Spam constants'
 
-  let(:project) { create(:project) }
-  let(:user)    { create(:user) }
-  let(:issue)   { create(:issue, project: project) }
+  let_it_be(:project, reload: true) { create(:project) }
+  let_it_be(:user, reload: true) { create(:user) }
+  let(:issue) { create(:issue, project: project) }
 
   describe "GET #index" do
     context 'external issue tracker' do
@@ -39,8 +39,8 @@ describe Projects::IssuesController do
       end
 
       context 'when project has moved' do
-        let(:new_project) { create(:project) }
-        let(:issue) { create(:issue, project: new_project) }
+        let_it_be(:new_project) { create(:project) }
+        let_it_be(:issue) { create(:issue, project: new_project) }
 
         before do
           project.route.destroy
@@ -80,6 +80,16 @@ describe Projects::IssuesController do
         get :index, params: { namespace_id: project.namespace, project_id: project }
 
         expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      it 'returns only list type issues' do
+        issue = create(:issue, project: project)
+        incident = create(:issue, project: project, issue_type: 'incident')
+        create(:issue, project: project, issue_type: 'test_case')
+
+        get :index, params: { namespace_id: project.namespace, project_id: project }
+
+        expect(assigns(:issues)).to contain_exactly(issue, incident)
       end
 
       it "returns 301 if request path doesn't match project path" do
@@ -181,10 +191,56 @@ describe Projects::IssuesController do
         project.add_developer(user)
       end
 
-      it 'builds a new issue' do
+      it 'builds a new issue', :aggregate_failures do
         get :new, params: { namespace_id: project.namespace, project_id: project }
 
         expect(assigns(:issue)).to be_a_new(Issue)
+        expect(assigns(:issue).issue_type).to eq('issue')
+      end
+
+      where(:conf_value, :conf_result) do
+        [
+          [true, true],
+          ['true', true],
+          ['TRUE', true],
+          [false, false],
+          ['false', false],
+          ['FALSE', false]
+        ]
+      end
+
+      with_them do
+        it 'sets the confidential flag to the expected value' do
+          get :new, params: {
+            namespace_id: project.namespace,
+            project_id: project,
+            issue: {
+              confidential: conf_value
+            }
+          }
+
+          assigned_issue = assigns(:issue)
+          expect(assigned_issue).to be_a_new(Issue)
+          expect(assigned_issue.confidential).to eq conf_result
+        end
+      end
+
+      context 'setting issue type' do
+        let(:issue_type) { 'issue' }
+
+        before do
+          get :new, params: { namespace_id: project.namespace, project_id: project, issue: { issue_type: issue_type } }
+        end
+
+        subject { assigns(:issue).issue_type }
+
+        it { is_expected.to eq('issue') }
+
+        context 'incident issue' do
+          let(:issue_type) { 'incident' }
+
+          it { is_expected.to eq(issue_type) }
+        end
       end
 
       it 'fills in an issue for a merge request' do
@@ -210,7 +266,7 @@ describe Projects::IssuesController do
 
     context 'external issue tracker' do
       let!(:service) do
-        create(:custom_issue_tracker_service, project: project, title: 'Custom Issue Tracker', new_issue_url: 'http://test.com')
+        create(:custom_issue_tracker_service, project: project, new_issue_url: 'http://test.com')
       end
 
       before do
@@ -251,6 +307,7 @@ describe Projects::IssuesController do
       project.add_developer(developer)
     end
 
+    let_it_be(:issue) { create(:issue, project: project) }
     let(:developer) { user }
     let(:params) do
       {
@@ -305,8 +362,7 @@ describe Projects::IssuesController do
       end
 
       before do
-        allow(controller).to receive(:find_routable!)
-          .with(Project, project.full_path, any_args).and_return(project)
+        allow(controller).to receive(:find_routable!).and_return(project)
         allow(project).to receive(:default_branch).and_return(master_branch)
         allow_next_instance_of(Issues::RelatedBranchesService) do |service|
           allow(service).to receive(:execute).and_return(related_branches)
@@ -332,15 +388,23 @@ describe Projects::IssuesController do
   # Rails router. A controller-style spec matches the wrong route, and
   # session['user_return_to'] becomes incorrect.
   describe 'Redirect after sign in', type: :request do
-    context 'with an AJAX request' do
+    before_all do
+      project.add_developer(user)
+    end
+
+    before do
+      login_as(user)
+    end
+
+    context 'with a JSON request' do
       it 'does not store the visited URL' do
-        get project_issue_path(project, issue), xhr: true
+        get project_issue_path(project, issue, format: :json)
 
         expect(session['user_return_to']).to be_blank
       end
     end
 
-    context 'without an AJAX request' do
+    context 'with an HTML request' do
       it 'stores the visited URL' do
         get project_issue_path(project, issue)
 
@@ -356,7 +420,7 @@ describe Projects::IssuesController do
     end
 
     context 'when moving issue to another private project' do
-      let(:another_project) { create(:project, :private) }
+      let_it_be(:another_project) { create(:project, :private) }
 
       context 'when user has access to move issue' do
         before do
@@ -393,10 +457,10 @@ describe Projects::IssuesController do
   end
 
   describe 'PUT #reorder' do
-    let(:group)   { create(:group, projects: [project]) }
-    let!(:issue1) { create(:issue, project: project, relative_position: 10) }
-    let!(:issue2) { create(:issue, project: project, relative_position: 20) }
-    let!(:issue3) { create(:issue, project: project, relative_position: 30) }
+    let_it_be(:group)  { create(:group, projects: [project]) }
+    let_it_be(:issue1) { create(:issue, project: project, relative_position: 10) }
+    let_it_be(:issue2) { create(:issue, project: project, relative_position: 20) }
+    let_it_be(:issue3) { create(:issue, project: project, relative_position: 30) }
 
     before do
       sign_in(user)
@@ -509,7 +573,7 @@ describe Projects::IssuesController do
         before do
           stub_application_setting(recaptcha_enabled: true)
           expect_next_instance_of(Spam::SpamVerdictService) do |verdict_service|
-            expect(verdict_service).to receive(:execute).and_return(REQUIRE_RECAPTCHA)
+            expect(verdict_service).to receive(:execute).and_return(CONDITIONAL_ALLOW)
           end
         end
 
@@ -582,7 +646,7 @@ describe Projects::IssuesController do
       before do
         project.add_developer(user)
 
-        issue.update!(last_edited_by: deleted_user, last_edited_at: Time.now)
+        issue.update!(last_edited_by: deleted_user, last_edited_at: Time.current)
 
         deleted_user.destroy
         sign_in(user)
@@ -612,15 +676,15 @@ describe Projects::IssuesController do
   end
 
   describe 'Confidential Issues' do
-    let(:project) { create(:project_empty_repo, :public) }
-    let(:assignee) { create(:assignee) }
-    let(:author) { create(:user) }
-    let(:non_member) { create(:user) }
-    let(:member) { create(:user) }
-    let(:admin) { create(:admin) }
-    let!(:issue) { create(:issue, project: project) }
-    let!(:unescaped_parameter_value) { create(:issue, :confidential, project: project, author: author) }
-    let!(:request_forgery_timing_attack) { create(:issue, :confidential, project: project, assignees: [assignee]) }
+    let_it_be(:project) { create(:project_empty_repo, :public) }
+    let_it_be(:assignee) { create(:assignee) }
+    let_it_be(:author) { create(:user) }
+    let_it_be(:non_member) { create(:user) }
+    let_it_be(:member) { create(:user) }
+    let_it_be(:admin) { create(:admin) }
+    let_it_be(:issue) { create(:issue, project: project) }
+    let_it_be(:unescaped_parameter_value) { create(:issue, :confidential, project: project, author: author) }
+    let_it_be(:request_forgery_timing_attack) { create(:issue, :confidential, project: project, assignees: [assignee]) }
 
     describe 'GET #index' do
       it 'does not list confidential issues for guests' do
@@ -798,7 +862,7 @@ describe Projects::IssuesController do
           update_issue(issue_params: { assignee_ids: [assignee.id] })
 
           expect(json_response['assignees'].first.keys)
-            .to match_array(%w(id name username avatar_url state web_url))
+            .to include(*%w(id name username avatar_url state web_url))
         end
       end
 
@@ -824,7 +888,7 @@ describe Projects::IssuesController do
           context 'when recaptcha is not verified' do
             before do
               expect_next_instance_of(Spam::SpamVerdictService) do |verdict_service|
-                expect(verdict_service).to receive(:execute).and_return(REQUIRE_RECAPTCHA)
+                expect(verdict_service).to receive(:execute).and_return(CONDITIONAL_ALLOW)
               end
             end
 
@@ -938,6 +1002,52 @@ describe Projects::IssuesController do
         expect { issue.update(description: [issue.description, labels].join(' ')) }
           .not_to exceed_query_limit(control_count + 2 * labels.count)
       end
+
+      context 'real-time sidebar feature flag' do
+        using RSpec::Parameterized::TableSyntax
+
+        let_it_be(:project) { create(:project, :public) }
+        let_it_be(:issue) { create(:issue, project: project) }
+
+        where(:action_cable_in_app_enabled, :feature_flag_enabled, :gon_feature_flag) do
+          true  | true  | true
+          true  | false | true
+          false | true  | true
+          false | false | false
+        end
+
+        with_them do
+          before do
+            expect(Gitlab::ActionCable::Config).to receive(:in_app?).and_return(action_cable_in_app_enabled)
+            stub_feature_flags(real_time_issue_sidebar: feature_flag_enabled)
+          end
+
+          it 'broadcasts to the issues channel based on ActionCable and feature flag values' do
+            go(id: issue.to_param)
+
+            expect(Gon.features).to include('realTimeIssueSidebar' => gon_feature_flag)
+          end
+        end
+      end
+
+      it 'logs the view with Gitlab::Search::RecentIssues' do
+        sign_in(user)
+        recent_issues_double = instance_double(::Gitlab::Search::RecentIssues, log_view: nil)
+        expect(::Gitlab::Search::RecentIssues).to receive(:new).with(user: user).and_return(recent_issues_double)
+
+        go(id: issue.to_param)
+
+        expect(response).to be_successful
+        expect(recent_issues_double).to have_received(:log_view).with(issue)
+      end
+
+      context 'when not logged in' do
+        it 'does not log the view with Gitlab::Search::RecentIssues' do
+          expect(::Gitlab::Search::RecentIssues).not_to receive(:new)
+
+          go(id: issue.to_param)
+        end
+      end
     end
 
     describe 'GET #realtime_changes' do
@@ -996,8 +1106,16 @@ describe Projects::IssuesController do
       project.issues.first
     end
 
+    it 'creates the issue successfully', :aggregate_failures do
+      issue = post_new_issue
+
+      expect(issue).to be_a(Issue)
+      expect(issue.persisted?).to eq(true)
+      expect(issue.issue_type).to eq('issue')
+    end
+
     context 'resolving discussions in MergeRequest' do
-      let(:discussion) { create(:diff_note_on_merge_request).to_discussion }
+      let_it_be(:discussion) { create(:diff_note_on_merge_request).to_discussion }
       let(:merge_request) { discussion.noteable }
       let(:project) { merge_request.source_project }
 
@@ -1076,7 +1194,7 @@ describe Projects::IssuesController do
         context 'when captcha is not verified' do
           before do
             expect_next_instance_of(Spam::SpamVerdictService) do |verdict_service|
-              expect(verdict_service).to receive(:execute).and_return(REQUIRE_RECAPTCHA)
+              expect(verdict_service).to receive(:execute).and_return(CONDITIONAL_ALLOW)
             end
           end
 
@@ -1236,6 +1354,20 @@ describe Projects::IssuesController do
         end
       end
     end
+
+    context 'setting issue type' do
+      let(:issue_type) { 'issue' }
+
+      subject { post_new_issue(issue_type: issue_type)&.issue_type }
+
+      it { is_expected.to eq('issue') }
+
+      context 'incident issue' do
+        let(:issue_type) { 'incident' }
+
+        it { is_expected.to eq(issue_type) }
+      end
+    end
   end
 
   describe 'POST #mark_as_spam' do
@@ -1282,9 +1414,9 @@ describe Projects::IssuesController do
     end
 
     context "when the user is owner" do
-      let(:owner)     { create(:user) }
-      let(:namespace) { create(:namespace, owner: owner) }
-      let(:project)   { create(:project, namespace: namespace) }
+      let_it_be(:owner)     { create(:user) }
+      let_it_be(:namespace) { create(:namespace, owner: owner) }
+      let_it_be(:project)   { create(:project, namespace: namespace) }
 
       before do
         sign_in(owner)
@@ -1367,7 +1499,8 @@ describe Projects::IssuesController do
 
   describe 'POST create_merge_request' do
     let(:target_project_id) { nil }
-    let(:project) { create(:project, :repository, :public) }
+
+    let_it_be(:project) { create(:project, :repository, :public) }
 
     before do
       project.add_developer(user)
@@ -1381,6 +1514,7 @@ describe Projects::IssuesController do
     it 'render merge request as json' do
       create_merge_request
 
+      expect(response).to have_gitlab_http_status(:ok)
       expect(response).to match_response_schema('merge_request')
     end
 
@@ -1424,24 +1558,8 @@ describe Projects::IssuesController do
       let(:target_project) { fork_project(project, user, repository: true) }
       let(:target_project_id) { target_project.id }
 
-      context 'create_confidential_merge_request feature is enabled' do
-        before do
-          stub_feature_flags(create_confidential_merge_request: true)
-        end
-
-        it 'creates a new merge request', :sidekiq_might_not_need_inline do
-          expect { create_merge_request }.to change(target_project.merge_requests, :count).by(1)
-        end
-      end
-
-      context 'create_confidential_merge_request feature is disabled' do
-        before do
-          stub_feature_flags(create_confidential_merge_request: false)
-        end
-
-        it 'creates a new merge request' do
-          expect { create_merge_request }.to change(project.merge_requests, :count).by(1)
-        end
+      it 'creates a new merge request', :sidekiq_might_not_need_inline do
+        expect { create_merge_request }.to change(target_project.merge_requests, :count).by(1)
       end
     end
 
@@ -1460,7 +1578,7 @@ describe Projects::IssuesController do
   end
 
   describe 'POST #import_csv' do
-    let(:project) { create(:project, :public) }
+    let_it_be(:project) { create(:project, :public) }
     let(:file) { fixture_file_upload('spec/fixtures/csv_comma.csv') }
 
     context 'unauthorized' do
@@ -1532,7 +1650,7 @@ describe Projects::IssuesController do
       end
 
       it 'allows CSV export' do
-        expect(ExportCsvWorker).to receive(:perform_async).with(viewer.id, project.id, anything)
+        expect(IssuableExportCsvWorker).to receive(:perform_async).with(:issue, viewer.id, project.id, anything)
 
         request_csv
 
@@ -1542,14 +1660,51 @@ describe Projects::IssuesController do
     end
 
     context 'when not logged in' do
-      let(:project) { create(:project_empty_repo, :public) }
+      let(:empty_project) { create(:project_empty_repo, :public) }
 
       it 'redirects to the sign in page' do
         request_csv
 
-        expect(ExportCsvWorker).not_to receive(:perform_async)
+        expect(IssuableExportCsvWorker).not_to receive(:perform_async)
         expect(response).to redirect_to(new_user_session_path)
       end
+    end
+  end
+
+  describe 'GET service_desk' do
+    let_it_be(:project) { create(:project_empty_repo, :public) }
+    let_it_be(:support_bot) { User.support_bot }
+    let_it_be(:other_user) { create(:user) }
+    let_it_be(:service_desk_issue_1) { create(:issue, project: project, author: support_bot) }
+    let_it_be(:service_desk_issue_2) { create(:issue, project: project, author: support_bot, assignees: [other_user]) }
+    let_it_be(:other_user_issue) { create(:issue, project: project, author: other_user) }
+
+    def get_service_desk(extra_params = {})
+      get :service_desk, params: extra_params.merge(namespace_id: project.namespace, project_id: project)
+    end
+
+    it 'adds an author filter for the support bot user' do
+      get_service_desk
+
+      expect(assigns(:issues)).to contain_exactly(service_desk_issue_1, service_desk_issue_2)
+    end
+
+    it 'does not allow any other author to be set' do
+      get_service_desk(author_username: other_user.username)
+
+      expect(assigns(:issues)).to contain_exactly(service_desk_issue_1, service_desk_issue_2)
+    end
+
+    it 'supports other filters' do
+      get_service_desk(assignee_username: other_user.username)
+
+      expect(assigns(:issues)).to contain_exactly(service_desk_issue_2)
+    end
+
+    it 'allows an assignee to be specified by id' do
+      get_service_desk(assignee_id: other_user.id)
+
+      expect(assigns(:users)).to contain_exactly(other_user, support_bot)
     end
   end
 
@@ -1622,7 +1777,7 @@ describe Projects::IssuesController do
       end
 
       context 'with cross-reference system note', :request_store do
-        let(:new_issue) { create(:issue) }
+        let_it_be(:new_issue) { create(:issue) }
         let(:cross_reference) { "mentioned in #{new_issue.to_reference(issue.project)}" }
 
         before do
@@ -1692,8 +1847,35 @@ describe Projects::IssuesController do
     end
   end
 
+  describe 'GET #designs' do
+    context 'when project has moved' do
+      let(:new_project) { create(:project) }
+      let(:issue) { create(:issue, project: new_project) }
+
+      before do
+        sign_in(user)
+
+        project.route.destroy
+        new_project.redirect_routes.create!(path: project.full_path)
+        new_project.add_developer(user)
+      end
+
+      it 'redirects from an old issue/designs correctly' do
+        get :designs,
+            params: {
+              namespace_id: project.namespace,
+              project_id: project,
+              id: issue
+            }
+
+        expect(response).to redirect_to(designs_project_issue_path(new_project, issue))
+        expect(response).to have_gitlab_http_status(:found)
+      end
+    end
+  end
+
   context 'private project with token authentication' do
-    let(:private_project) { create(:project, :private) }
+    let_it_be(:private_project) { create(:project, :private) }
 
     it_behaves_like 'authenticates sessionless user', :index, :atom, ignore_incrementing: true do
       before do
@@ -1713,7 +1895,7 @@ describe Projects::IssuesController do
   end
 
   context 'public project with token authentication' do
-    let(:public_project) { create(:project, :public) }
+    let_it_be(:public_project) { create(:project, :public) }
 
     it_behaves_like 'authenticates sessionless user', :index, :atom, public: true do
       before do

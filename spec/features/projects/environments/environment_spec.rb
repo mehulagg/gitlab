@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Environment' do
+RSpec.describe 'Environment' do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
   let(:role) { :developer }
@@ -333,7 +333,7 @@ describe 'Environment' do
       visit project_branches_filtered_path(project, state: 'all', search: 'feature')
 
       remove_branch_with_hooks(project, user, 'feature') do
-        page.within('.js-branch-feature') { find('a.btn-remove').click }
+        page.within('.js-branch-feature') { find('a.btn-danger').click }
       end
 
       visit_environment(environment)

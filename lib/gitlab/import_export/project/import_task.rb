@@ -59,30 +59,12 @@ module Gitlab
               import_params
             )
 
-            service.execute(measurement_options)
+            service.execute
           end
         end
 
         def execute_sidekiq_job
           Sidekiq::Worker.drain_all
-        end
-
-        def disable_upload_object_storage
-          overwrite_uploads_setting('background_upload', false) do
-            overwrite_uploads_setting('direct_upload', false) do
-              yield
-            end
-          end
-        end
-
-        def overwrite_uploads_setting(key, value)
-          old_value = Settings.uploads.object_store[key]
-          Settings.uploads.object_store[key] = value
-
-          yield
-
-        ensure
-          Settings.uploads.object_store[key] = old_value
         end
 
         def full_path

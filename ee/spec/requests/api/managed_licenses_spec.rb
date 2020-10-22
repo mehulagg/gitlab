@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::ManagedLicenses do
+RSpec.describe API::ManagedLicenses do
   let_it_be(:project) { create(:project, :public) }
   let_it_be(:maintainer_user) { create(:user) }
   let_it_be(:dev_user) { create(:user) }

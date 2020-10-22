@@ -1,5 +1,0 @@
----
-title: Fix caching performance and some cache bugs with elasticsearch enabled check
-merge_request: 29751
-author:
-type: fixed

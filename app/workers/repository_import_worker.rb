@@ -4,10 +4,12 @@ class RepositoryImportWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
   include ExceptionBacktrace
   include ProjectStartImport
-  include ProjectImportOptions
 
   feature_category :importers
   worker_has_external_dependencies!
+  # Do not retry on Import/Export until https://gitlab.com/gitlab-org/gitlab/-/issues/16812 is solved.
+  sidekiq_options retry: false, dead: false
+  sidekiq_options status_expiration: Gitlab::Import::StuckImportJob::IMPORT_JOBS_EXPIRATION
 
   # technical debt: https://gitlab.com/gitlab-org/gitlab/issues/33991
   sidekiq_options memory_killer_memory_growth_kb: ENV.fetch('MEMORY_KILLER_REPOSITORY_IMPORT_WORKER_MEMORY_GROWTH_KB', 50).to_i
@@ -43,7 +45,12 @@ class RepositoryImportWorker # rubocop:disable Scalability/IdempotentWorker
   def start_import
     return true if start(project.import_state)
 
-    Rails.logger.info("Project #{project.full_path} was in inconsistent state (#{project.import_status}) while importing.") # rubocop:disable Gitlab/RailsLogger
+    Gitlab::Import::Logger.info(
+      message: 'Project was in inconsistent state while importing',
+      project_full_path: project.full_path,
+      project_import_status: project.import_status
+    )
+
     false
   end
 

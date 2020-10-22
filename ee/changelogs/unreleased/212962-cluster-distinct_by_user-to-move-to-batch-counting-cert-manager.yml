@@ -1,5 +1,0 @@
----
-title: Move Clusters Application CertManager to batch counting
-merge_request: 28771
-author:
-type: performance

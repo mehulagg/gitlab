@@ -1,18 +1,14 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import {
-  GlBadge,
   GlEmptyState,
   GlIcon,
   GlLoadingIcon,
   GlSprintf,
-  GlTab,
-  GlTabs,
   GlLink,
   GlDeprecatedButton,
 } from '@gitlab/ui';
 import { __ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import DependenciesActions from './dependencies_actions.vue';
 import DependencyListIncompleteAlert from './dependency_list_incomplete_alert.vue';
 import DependencyListJobFailedAlert from './dependency_list_job_failed_alert.vue';
@@ -24,20 +20,16 @@ export default {
   name: 'DependenciesApp',
   components: {
     DependenciesActions,
-    GlBadge,
     GlIcon,
     GlEmptyState,
     GlLoadingIcon,
     GlSprintf,
-    GlTab,
-    GlTabs,
     GlLink,
     GlDeprecatedButton,
     DependencyListIncompleteAlert,
     DependencyListJobFailedAlert,
     PaginatedDependenciesTable,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     endpoint: {
       type: String,
@@ -188,36 +180,11 @@ export default {
           </span>
         </p>
       </div>
-      <dependencies-actions
-        v-if="glFeatures.dependencyListUi"
-        class="mt-2"
-        :namespace="currentList"
-      />
+      <dependencies-actions class="mt-2" :namespace="currentList" />
     </header>
 
-    <article v-if="glFeatures.dependencyListUi">
+    <article>
       <paginated-dependencies-table :namespace="currentList" />
     </article>
-
-    <gl-tabs v-else v-model="currentListIndex" content-class="pt-0">
-      <gl-tab
-        v-for="listType in listTypes"
-        :key="listType.namespace"
-        :disabled="isTabDisabled(listType.namespace)"
-      >
-        <template #title>
-          {{ listType.label }}
-          <gl-badge pill :data-qa-selector="qaCountSelector(listType.label)">
-            {{ totals[listType.namespace] }}
-          </gl-badge>
-        </template>
-        <paginated-dependencies-table :namespace="listType.namespace" />
-      </gl-tab>
-      <template #tabs-end>
-        <li class="d-flex align-items-center ml-sm-auto">
-          <dependencies-actions :namespace="currentList" class="my-2 my-sm-0" />
-        </li>
-      </template>
-    </gl-tabs>
   </section>
 </template>

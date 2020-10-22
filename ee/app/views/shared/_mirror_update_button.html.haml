@@ -1,5 +1,5 @@
 - if @project.mirror? && can?(current_user, :push_code, @project)
-  .append-bottom-default
+  .gl-mb-3
     - if @project.import_state.mirror_update_due?
       %span.btn.disabled
         = icon("refresh spin")
@@ -17,5 +17,5 @@
         = icon("refresh")
         Update Now
     - if @project.mirror_last_update_succeeded?
-      %p.inline.prepend-left-10
+      %p.inline.gl-ml-3
         Successfully updated #{time_ago_with_tooltip(@project.import_state.last_successful_update_at)}.

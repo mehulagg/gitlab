@@ -1,7 +1,0 @@
----
-title: If a parent group enforces SAML SSO, when adding a member to that group, its
-  subgroup or its project the autocomplete shows only users who have identity with
-  the SAML provider of the parent group
-merge_request: 30607
-author:
-type: fixed

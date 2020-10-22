@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::ApproversController do
+RSpec.describe Projects::ApproversController do
   describe '#destroy' do
     let(:user) { create(:user) }
     let(:project) { create(:project) }

@@ -1,5 +1,0 @@
----
-title: Allow unsetting "Required pipeline configuration" for CI/CD
-merge_request: 28432
-author:
-type: fixed

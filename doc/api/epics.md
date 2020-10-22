@@ -1,7 +1,13 @@
+---
+stage: Plan
+group: Portfolio Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Epics API **(PREMIUM)**
 
 > - Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.2.
-> - Single-level Epics [were moved](https://gitlab.com/gitlab-org/gitlab/issues/37081) to [GitLab Premium](https://about.gitlab.com/pricing/) in 12.8.
+> - Single-level Epics [were moved](https://gitlab.com/gitlab-org/gitlab/-/issues/37081) to [GitLab Premium](https://about.gitlab.com/pricing/) in 12.8.
 
 Every API call to epic must be authenticated.
 
@@ -32,11 +38,11 @@ are paginated.
 
 Read more on [pagination](README.md#pagination).
 
-CAUTION: **Deprecation**
+CAUTION: **Deprecation:**
 > `reference` attribute in response is deprecated in favour of `references`.
 > Introduced [GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20354)
 
-NOTE: **Note**
+NOTE: **Note:**
 > `references.relative` is relative to the group that the epic is being requested. When epic is fetched from its origin group
 > `relative` format would be the same as `short` format and when requested cross groups it is expected to be the same as `full` format.
 
@@ -67,9 +73,10 @@ GET /groups/:id/epics?state=opened
 | `updated_before`    | datetime         | no         | Return epics updated on or before the given time                                                                            |
 | `include_ancestor_groups` | boolean    | no         | Include epics from the requested group's ancestors. Default is `false`                                                      |
 | `include_descendant_groups` | boolean  | no         | Include epics from the requested group's descendants. Default is `true`                                                     |
+| `my_reaction_emoji` | string           | no         | Return epics reacted by the authenticated user by the given emoji. `None` returns epics not given a reaction. `Any` returns epics given at least one reaction. Introduced in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31479)|
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/1/epics
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/epics"
 ```
 
 Example response:
@@ -85,7 +92,7 @@ Example response:
   "description": "Molestias dolorem eos vitae expedita impedit necessitatibus quo voluptatum.",
   "state": "opened",
   "confidential": "false",
-  "web_url": "http://localhost:3001/groups/test/-/epics/4",
+  "web_url": "http://gitlab.example.com/groups/test/-/epics/4",
   "reference": "&4",
   "references": {
     "short": "&4",
@@ -98,111 +105,7 @@ Example response:
     "username": "kam",
     "state": "active",
     "avatar_url": "http://www.gravatar.com/avatar/018729e129a6f31c80a6327a30196823?s=80&d=identicon",
-    "web_url": "http://localhost:3001/kam"
-  },
-  "start_date": null,
-  "start_date_is_fixed": false,
-  "start_date_fixed": null,
-  "start_date_from_milestones": null,       //deprecated in favor of start_date_from_inherited_source
-  "start_date_from_inherited_source": null,
-  "end_date": "2018-07-31",                 //deprecated in favor of due_date
-  "due_date": "2018-07-31",
-  "due_date_is_fixed": false,
-  "due_date_fixed": null,
-  "due_date_from_milestones": "2018-07-31", //deprecated in favor of start_date_from_inherited_source
-  "due_date_from_inherited_source": "2018-07-31",
-  "created_at": "2018-07-17T13:36:22.770Z",
-  "updated_at": "2018-07-18T12:22:05.239Z",
-  "closed_at": "2018-08-18T12:22:05.239Z",
-  "labels": [],
-  "upvotes": 4,
-  "downvotes": 0
-  },
-  {
-  "id": 50,
-  "iid": 35,
-  "group_id": 17,
-  "parent_id": 19,
-  "title": "Accusamus iste et ullam ratione voluptatem omnis debitis dolor est.",
-  "description": "Molestias dolorem eos vitae expedita impedit necessitatibus quo voluptatum.",
-  "state": "opened",
-  "web_url": "http://localhost:3001/groups/test/sample/-/epics/4",
-  "reference": "&4",
-  "references": {
-    "short": "&4",
-    "relative": "sample&4",
-    "full": "test/sample&4"
-  },
-  "author": {
-    "id": 10,
-    "name": "Lu Mayer",
-    "username": "kam",
-    "state": "active",
-    "avatar_url": "http://www.gravatar.com/avatar/018729e129a6f31c80a6327a30196823?s=80&d=identicon",
-    "web_url": "http://localhost:3001/kam"
-  },
-  "start_date": null,
-  "start_date_is_fixed": false,
-  "start_date_fixed": null,
-  "start_date_from_milestones": null,       //deprecated in favor of start_date_from_inherited_source
-  "start_date_from_inherited_source": null,
-  "end_date": "2018-07-31",                 //deprecated in favor of due_date
-  "due_date": "2018-07-31",
-  "due_date_is_fixed": false,
-  "due_date_fixed": null,
-  "due_date_from_milestones": "2018-07-31", //deprecated in favor of start_date_from_inherited_source
-  "due_date_from_inherited_source": "2018-07-31",
-  "created_at": "2018-07-17T13:36:22.770Z",
-  "updated_at": "2018-07-18T12:22:05.239Z",
-  "closed_at": "2018-08-18T12:22:05.239Z",
-  "labels": [],
-  "upvotes": 4,
-  "downvotes": 0
-  }
-]
-```
-
-## Single epic
-
-Gets a single epic
-
-```plaintext
-GET /groups/:id/epics/:epic_iid
-```
-
-| Attribute           | Type             | Required   | Description                                                                            |
-| ------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------|
-| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user                |
-| `epic_iid`          | integer/string   | yes        | The internal ID of the epic.  |
-
-```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/1/epics/5
-```
-
-Example response:
-
-```json
-{
-  "id": 30,
-  "iid": 5,
-  "group_id": 7,
-  "title": "Ea cupiditate dolores ut vero consequatur quasi veniam voluptatem et non.",
-  "description": "Molestias dolorem eos vitae expedita impedit necessitatibus quo voluptatum.",
-  "state": "opened",
-  "web_url": "http://localhost:3001/groups/test/-/epics/5",
-  "reference": "&5",
-  "references": {
-    "short": "&5",
-    "relative": "&5",
-    "full": "test&5"
-  },
-  "author":{
-    "id": 7,
-    "name": "Pamella Huel",
-    "username": "arnita",
-    "state": "active",
-    "avatar_url": "http://www.gravatar.com/avatar/a2f5c6fcef64c9c69cb8779cb292be1b?s=80&d=identicon",
-    "web_url": "http://localhost:3001/arnita"
+    "web_url": "http://gitlab.example.com/kam"
   },
   "start_date": null,
   "start_date_is_fixed": false,
@@ -221,7 +124,126 @@ Example response:
   "labels": [],
   "upvotes": 4,
   "downvotes": 0,
-  "subscribed": true
+  "_links":{
+      "self": "http://gitlab.example.com/api/v4/groups/7/epics/4",
+      "epic_issues": "http://gitlab.example.com/api/v4/groups/7/epics/4/issues",
+      "group":"http://gitlab.example.com/api/v4/groups/7"
+  }
+  },
+  {
+  "id": 50,
+  "iid": 35,
+  "group_id": 17,
+  "parent_id": 19,
+  "title": "Accusamus iste et ullam ratione voluptatem omnis debitis dolor est.",
+  "description": "Molestias dolorem eos vitae expedita impedit necessitatibus quo voluptatum.",
+  "state": "opened",
+  "web_url": "http://gitlab.example.com/groups/test/sample/-/epics/35",
+  "reference": "&4",
+  "references": {
+    "short": "&4",
+    "relative": "sample&4",
+    "full": "test/sample&4"
+  },
+  "author": {
+    "id": 10,
+    "name": "Lu Mayer",
+    "username": "kam",
+    "state": "active",
+    "avatar_url": "http://www.gravatar.com/avatar/018729e129a6f31c80a6327a30196823?s=80&d=identicon",
+    "web_url": "http://gitlab.example.com/kam"
+  },
+  "start_date": null,
+  "start_date_is_fixed": false,
+  "start_date_fixed": null,
+  "start_date_from_milestones": null,       //deprecated in favor of start_date_from_inherited_source
+  "start_date_from_inherited_source": null,
+  "end_date": "2018-07-31",                 //deprecated in favor of due_date
+  "due_date": "2018-07-31",
+  "due_date_is_fixed": false,
+  "due_date_fixed": null,
+  "due_date_from_milestones": "2018-07-31", //deprecated in favor of start_date_from_inherited_source
+  "due_date_from_inherited_source": "2018-07-31",
+  "created_at": "2018-07-17T13:36:22.770Z",
+  "updated_at": "2018-07-18T12:22:05.239Z",
+  "closed_at": "2018-08-18T12:22:05.239Z",
+  "labels": [],
+  "upvotes": 4,
+  "downvotes": 0,
+  "_links":{
+      "self": "http://gitlab.example.com/api/v4/groups/17/epics/35",
+      "epic_issues": "http://gitlab.example.com/api/v4/groups/17/epics/35/issues",
+      "group":"http://gitlab.example.com/api/v4/groups/17"
+  }
+  }
+]
+```
+
+## Single epic
+
+Gets a single epic
+
+```plaintext
+GET /groups/:id/epics/:epic_iid
+```
+
+| Attribute           | Type             | Required   | Description                                                                            |
+| ------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------|
+| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user                |
+| `epic_iid`          | integer/string   | yes        | The internal ID of the epic.  |
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/epics/5"
+```
+
+Example response:
+
+```json
+{
+  "id": 30,
+  "iid": 5,
+  "group_id": 7,
+  "title": "Ea cupiditate dolores ut vero consequatur quasi veniam voluptatem et non.",
+  "description": "Molestias dolorem eos vitae expedita impedit necessitatibus quo voluptatum.",
+  "state": "opened",
+  "web_url": "http://gitlab.example.com/groups/test/-/epics/5",
+  "reference": "&5",
+  "references": {
+    "short": "&5",
+    "relative": "&5",
+    "full": "test&5"
+  },
+  "author":{
+    "id": 7,
+    "name": "Pamella Huel",
+    "username": "arnita",
+    "state": "active",
+    "avatar_url": "http://www.gravatar.com/avatar/a2f5c6fcef64c9c69cb8779cb292be1b?s=80&d=identicon",
+    "web_url": "http://gitlab.example.com/arnita"
+  },
+  "start_date": null,
+  "start_date_is_fixed": false,
+  "start_date_fixed": null,
+  "start_date_from_milestones": null,       //deprecated in favor of start_date_from_inherited_source
+  "start_date_from_inherited_source": null,
+  "end_date": "2018-07-31",                 //deprecated in favor of due_date
+  "due_date": "2018-07-31",
+  "due_date_is_fixed": false,
+  "due_date_fixed": null,
+  "due_date_from_milestones": "2018-07-31", //deprecated in favor of start_date_from_inherited_source
+  "due_date_from_inherited_source": "2018-07-31",
+  "created_at": "2018-07-17T13:36:22.770Z",
+  "updated_at": "2018-07-18T12:22:05.239Z",
+  "closed_at": "2018-08-18T12:22:05.239Z",
+  "labels": [],
+  "upvotes": 4,
+  "downvotes": 0,
+  "subscribed": true,
+  "_links":{
+      "self": "http://gitlab.example.com/api/v4/groups/7/epics/5",
+      "epic_issues": "http://gitlab.example.com/api/v4/groups/7/epics/5/issues",
+      "group":"http://gitlab.example.com/api/v4/groups/7"
+  }
 }
 ```
 
@@ -244,15 +266,16 @@ POST /groups/:id/epics
 | `title`             | string           | yes        | The title of the epic |
 | `labels`            | string           | no         | The comma separated list of labels |
 | `description`       | string           | no         | The description of the epic. Limited to 1,048,576 characters.  |
-| `confidential`      | boolean          | no         | Whether the epic should be confidential. Will be ignored if `confidential_epics` feature flag is disabled. |
+| `confidential`      | boolean          | no         | Whether the epic should be confidential |
+| `created_at`        | string           | no         | When the epic was created. Date time string, ISO 8601 formatted, for example `2016-03-11T03:45:40Z` . Requires administrator or project/group owner privileges ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/255309) in GitLab 13.5) |
 | `start_date_is_fixed` | boolean        | no         | Whether start date should be sourced from `start_date_fixed` or from milestones (since 11.3) |
 | `start_date_fixed`  | string           | no         | The fixed start date of an epic (since 11.3) |
 | `due_date_is_fixed` | boolean          | no         | Whether due date should be sourced from `due_date_fixed` or from milestones (since 11.3) |
 | `due_date_fixed`    | string           | no         | The fixed due date of an epic (since 11.3) |
-| `parent_id`         | integer/string   | no         | The id of a parent epic (since 11.11) |
+| `parent_id`         | integer/string   | no         | The ID of a parent epic (since 11.11) |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/1/epics?title=Epic&description=Epic%20description
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/epics?title=Epic&description=Epic%20description"
 ```
 
 Example response:
@@ -266,7 +289,7 @@ Example response:
   "description": "Epic description",
   "state": "opened",
   "confidential": "false",
-  "web_url": "http://localhost:3001/groups/test/-/epics/6",
+  "web_url": "http://gitlab.example.com/groups/test/-/epics/6",
   "reference": "&6",
   "references": {
     "short": "&6",
@@ -297,7 +320,12 @@ Example response:
   "closed_at": "2018-08-18T12:22:05.239Z",
   "labels": [],
   "upvotes": 4,
-  "downvotes": 0
+  "downvotes": 0,
+  "_links":{
+    "self": "http://gitlab.example.com/api/v4/groups/7/epics/6",
+    "epic_issues": "http://gitlab.example.com/api/v4/groups/7/epics/6/issues",
+    "group":"http://gitlab.example.com/api/v4/groups/7"
+  }
 }
 ```
 
@@ -320,8 +348,9 @@ PUT /groups/:id/epics/:epic_iid
 | `epic_iid`          | integer/string   | yes        | The internal ID of the epic  |
 | `title`             | string           | no         | The title of an epic |
 | `description`       | string           | no         | The description of an epic. Limited to 1,048,576 characters.  |
-| `confidential`      | boolean          | no         | Whether the epic should be confidential. Will be ignored if `confidential_epics` feature flag is disabled. |
+| `confidential`      | boolean          | no         | Whether the epic should be confidential |
 | `labels`            | string           | no         | The comma separated list of labels |
+| `updated_at`        | string           | no         | When the epic was updated. Date time string, ISO 8601 formatted, for example `2016-03-11T03:45:40Z` . Requires administrator or project/group owner privileges ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/255309) in GitLab 13.5) |
 | `start_date_is_fixed` | boolean        | no         | Whether start date should be sourced from `start_date_fixed` or from milestones (since 11.3) |
 | `start_date_fixed`  | string           | no         | The fixed start date of an epic (since 11.3) |
 | `due_date_is_fixed` | boolean          | no         | Whether due date should be sourced from `due_date_fixed` or from milestones (since 11.3) |
@@ -329,7 +358,7 @@ PUT /groups/:id/epics/:epic_iid
 | `state_event`       | string           | no         | State event for an epic. Set `close` to close the epic and `reopen` to reopen it (since 11.4) |
 
 ```shell
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/1/epics/5?title=New%20Title
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/epics/5?title=New%20Title"
 ```
 
 Example response:
@@ -343,7 +372,7 @@ Example response:
   "description": "Epic description",
   "state": "opened",
   "confidential": "false",
-  "web_url": "http://localhost:3001/groups/test/-/epics/6",
+  "web_url": "http://gitlab.example.com/groups/test/-/epics/6",
   "reference": "&6",
   "references": {
     "short": "&6",
@@ -392,13 +421,13 @@ DELETE /groups/:id/epics/:epic_iid
 | `epic_iid`          | integer/string   | yes        | The internal ID of the epic.  |
 
 ```shell
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/1/epics/5
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/epics/5"
 ```
 
-## Create a todo
+## Create a to do
 
-Manually creates a todo for the current user on an epic. If
-there already exists a todo for the user on that epic, status code `304` is
+Manually creates a to do for the current user on an epic. If
+there already exists a to do for the user on that epic, status code `304` is
 returned.
 
 ```plaintext
@@ -411,7 +440,7 @@ POST /groups/:id/epics/:epic_iid/todo
 | `epic_iid` | integer | yes          | The internal ID of a group's epic |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/1/epics/5/todo
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/epics/5/todo"
 ```
 
 Example response:
@@ -449,9 +478,9 @@ Example response:
       "username": "arnita",
       "state": "active",
       "avatar_url": "http://www.gravatar.com/avatar/a2f5c6fcef64c9c69cb8779cb292be1b?s=80&d=identicon",
-      "web_url": "http://localhost:3001/arnita"
+      "web_url": "http://gitlab.example.com/arnita"
     },
-    "web_url": "http://localhost:3001/groups/test/-/epics/5",
+    "web_url": "http://gitlab.example.com/groups/test/-/epics/5",
     "reference": "&5",
     "references": {
       "short": "&5",

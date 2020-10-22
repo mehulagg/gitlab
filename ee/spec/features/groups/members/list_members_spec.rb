@@ -1,10 +1,14 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'Groups > Members > List members' do
+RSpec.describe 'Groups > Members > List members' do
   let(:user1) { create(:user, name: 'John Doe') }
   let(:user2) { create(:user, name: 'Mary Jane') }
   let(:group) { create(:group) }
+
+  before do
+    stub_feature_flags(vue_group_members_list: false)
+  end
 
   context 'with Group SAML identity linked for a user' do
     let(:saml_provider) { create(:saml_provider) }
@@ -52,7 +56,6 @@ describe 'Groups > Members > List members' do
     let(:session) { { active_group_sso_sign_ins: { saml_provider.id => DateTime.now } } }
 
     before do
-      stub_feature_flags(enforced_sso: true, group_saml: true)
       stub_licensed_features(group_saml: true)
       allow(Gitlab::Session).to receive(:current).and_return(session)
 

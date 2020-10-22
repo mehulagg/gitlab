@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Set an Epic Subscription' do
+RSpec.describe 'Set an Epic Subscription' do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
@@ -21,9 +21,7 @@ describe 'Set an Epic Subscription' do
   end
 
   context 'when epics feature is disabled' do
-    it_behaves_like 'a mutation that returns top-level errors',
-                    errors: ['The resource that you are attempting to access does not exist '\
-               'or you don\'t have permission to perform this action']
+    it_behaves_like 'a mutation that returns a top-level access error'
 
     it 'does not subscribe user to the epic' do
       post_graphql_mutation(mutation, current_user: current_user)

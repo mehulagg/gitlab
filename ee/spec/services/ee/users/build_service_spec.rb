@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Users::BuildService do
+RSpec.describe Users::BuildService do
   describe '#execute' do
     let(:params) do
       { name: 'John Doe', username: 'jduser', email: 'jd@example.com', password: 'mydummypass' }
@@ -13,14 +13,14 @@ describe Users::BuildService do
       let(:service) { described_class.new(admin_user, ActionController::Parameters.new(params).permit!) }
 
       context 'allowed params' do
+        let(:provider) { create(:saml_provider) }
+        let(:identity_params) { { extern_uid: 'uid', provider: 'group_saml', saml_provider_id: provider.id } }
+
+        before do
+          params.merge!(identity_params)
+        end
+
         context 'with identity' do
-          let(:provider) { create(:saml_provider) }
-          let(:identity_params) { { extern_uid: 'uid', provider: 'group_saml', saml_provider_id: provider.id } }
-
-          before do
-            params.merge!(identity_params)
-          end
-
           it 'sets all allowed attributes' do
             expect(Identity).to receive(:new).with(hash_including(identity_params)).and_call_original
             expect(ScimIdentity).not_to receive(:new)
@@ -35,11 +35,11 @@ describe Users::BuildService do
           end
           let_it_be(:scim_identity_params) { { extern_uid: 'uid', provider: 'group_scim', group_id: 1 } }
 
-          it 'passes allowed attributes to scim identity' do
+          it 'passes allowed attributes to both scim and saml identity' do
             scim_identity_params.delete(:provider)
 
             expect(ScimIdentity).to receive(:new).with(hash_including(scim_identity_params)).and_call_original
-            expect(Identity).not_to receive(:new)
+            expect(Identity).to receive(:new).with(hash_including(identity_params)).and_call_original
 
             service.execute
           end

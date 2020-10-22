@@ -6,8 +6,10 @@ module Gitlab
   module Metrics
     module Samplers
       class BaseSampler < Daemon
+        attr_reader :interval
+
         # interval - The sampling interval in seconds.
-        def initialize(interval)
+        def initialize(interval = self.class::SAMPLING_INTERVAL_SECONDS)
           interval_half = interval.to_f / 2
 
           @interval = interval
@@ -19,7 +21,7 @@ module Gitlab
         def safe_sample
           sample
         rescue => e
-          Rails.logger.warn("#{self.class}: #{e}, stopping") # rubocop:disable Gitlab/RailsLogger
+          Gitlab::AppLogger.warn("#{self.class}: #{e}, stopping")
           stop
         end
 

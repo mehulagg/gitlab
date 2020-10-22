@@ -14,11 +14,7 @@ export default {
     GeoReplicableEmptyState,
   },
   props: {
-    geoSvgPath: {
-      type: String,
-      required: true,
-    },
-    issuesSvgPath: {
+    geoReplicableEmptySvgPath: {
       type: String,
       required: true,
     },
@@ -28,9 +24,9 @@ export default {
     },
   },
   computed: {
-    ...mapState(['isLoading', 'totalReplicableItems']),
+    ...mapState(['isLoading', 'replicableItems', 'useGraphQl']),
     hasReplicableItems() {
-      return this.totalReplicableItems > 0;
+      return this.replicableItems.length > 0;
     },
   },
   created() {
@@ -44,13 +40,14 @@ export default {
 
 <template>
   <article class="geo-replicable-container">
-    <geo-replicable-filter-bar class="mb-3" />
+    <!-- Filtering not currently supported via GraphQl -->
+    <geo-replicable-filter-bar v-if="!useGraphQl" class="mb-3" />
     <gl-loading-icon v-if="isLoading" size="xl" />
     <template v-else>
       <geo-replicable v-if="hasReplicableItems" />
       <geo-replicable-empty-state
         v-else
-        :issues-svg-path="issuesSvgPath"
+        :geo-replicable-empty-svg-path="geoReplicableEmptySvgPath"
         :geo-troubleshooting-link="geoTroubleshootingLink"
       />
     </template>

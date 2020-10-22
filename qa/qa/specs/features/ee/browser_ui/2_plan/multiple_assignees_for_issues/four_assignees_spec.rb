@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan', :reliable do
+  RSpec.describe 'Plan', :reliable do
     describe 'Multiple assignees per issue' do
       before do
         Flow::Login.sign_in
@@ -33,7 +33,7 @@ module QA
         project.visit!
       end
 
-      it 'shows four assignees in the issues list' do
+      it 'shows four assignees in the issues list', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/643' do
         Page::Project::Menu.perform(&:click_issues)
 
         Page::Project::Issue::Index.perform do |index|

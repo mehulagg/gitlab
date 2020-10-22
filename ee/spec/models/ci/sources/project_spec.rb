@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::Sources::Project do
+RSpec.describe Ci::Sources::Project do
   describe 'Relations' do
     it { is_expected.to belong_to(:pipeline).required }
     it { is_expected.to belong_to(:source_project).required }

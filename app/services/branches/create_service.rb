@@ -14,10 +14,11 @@ module Branches
       if new_branch
         success(new_branch)
       else
-        error("Invalid reference name: #{branch_name}")
+        error("Invalid reference name: #{ref}")
       end
-    rescue Gitlab::Git::PreReceiveError => ex
-      error(ex.message)
+    rescue Gitlab::Git::PreReceiveError => e
+      Gitlab::ErrorTracking.track_exception(e, pre_receive_message: e.raw_message, branch_name: branch_name, ref: ref)
+      error(e.message)
     end
 
     def success(branch)

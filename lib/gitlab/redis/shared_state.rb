@@ -9,7 +9,7 @@ module Gitlab
       SESSION_NAMESPACE = 'session:gitlab'
       USER_SESSIONS_NAMESPACE = 'session:user:gitlab'
       USER_SESSIONS_LOOKUP_NAMESPACE = 'session:lookup:user:gitlab'
-      IP_SESSIONS_LOOKUP_NAMESPACE = 'session:lookup:ip:gitlab'
+      IP_SESSIONS_LOOKUP_NAMESPACE = 'session:lookup:ip:gitlab2'
       DEFAULT_REDIS_SHARED_STATE_URL = 'redis://localhost:6382'
       REDIS_SHARED_STATE_CONFIG_ENV_VAR_NAME = 'GITLAB_REDIS_SHARED_STATE_CONFIG_FILE'
 
@@ -29,6 +29,10 @@ module Gitlab
 
           # this will force use of DEFAULT_REDIS_SHARED_STATE_URL when config file is absent
           super
+        end
+
+        def instrumentation_class
+          ::Gitlab::Instrumentation::Redis::SharedState
         end
       end
     end

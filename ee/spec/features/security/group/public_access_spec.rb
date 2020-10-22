@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe '[EE] Public Group access' do
+RSpec.describe '[EE] Public Group access' do
   include AccessMatchers
 
   let_it_be(:group)   { create(:group, :public) }

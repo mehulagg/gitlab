@@ -66,6 +66,12 @@ class Settings < Settingslogic
       (base_url(gitlab) + [gitlab.relative_url_root]).join('')
     end
 
+    def build_gitlab_go_url
+      # "Go package paths are not URLs, and do not include port numbers"
+      # https://github.com/golang/go/issues/38213#issuecomment-607851460
+      "#{gitlab.host}#{gitlab.relative_url_root}"
+    end
+
     def kerberos_protocol
       kerberos.https ? "https" : "http"
     end
@@ -178,14 +184,15 @@ class Settings < Settingslogic
       URI.parse(url_without_path).host
     end
 
-    # Runs at a random time of day on a consistent day of the week based on
+    # Runs at a consistent random time of day on a day of the week based on
     # the instance UUID. This is to balance the load on the service receiving
     # these pings. The sidekiq job handles temporary http failures.
     def cron_for_usage_ping
-      hour = rand(24)
-      minute = rand(60)
       # Set a default UUID for the case when the UUID hasn't been initialized.
       uuid = Gitlab::CurrentSettings.uuid || 'uuid-not-set'
+
+      minute = Digest::MD5.hexdigest(uuid + 'minute').to_i(16) % 60
+      hour = Digest::MD5.hexdigest(uuid + 'hour').to_i(16) % 24
       day_of_week = Digest::MD5.hexdigest(uuid).to_i(16) % 7
 
       "#{minute} #{hour} * * #{day_of_week}"

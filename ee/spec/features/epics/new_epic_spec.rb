@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'New Epic', :js do
+RSpec.describe 'New Epic', :js do
   let(:user) { create(:user) }
   let(:group) { create(:group, :public) }
 
@@ -58,7 +58,7 @@ describe 'New Epic', :js do
 
       it 'can create epic' do
         find('.epic-create-dropdown .btn-success').click
-        find('.epic-create-dropdown .dropdown-menu input').set('test epic title')
+        find('.epic-create-dropdown .dropdown-menu input[type="text"]').set('test epic title')
         find('.epic-create-dropdown .dropdown-menu .btn-success').click
 
         wait_for_requests

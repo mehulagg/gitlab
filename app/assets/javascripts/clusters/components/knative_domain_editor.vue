@@ -6,8 +6,8 @@ import {
   GlLoadingIcon,
   GlSearchBoxByType,
   GlSprintf,
+  GlButton,
 } from '@gitlab/ui';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 import ClipboardButton from '../../vue_shared/components/clipboard_button.vue';
 import { __, s__ } from '~/locale';
 
@@ -17,7 +17,7 @@ const { UPDATING, UNINSTALLING } = APPLICATION_STATUS;
 
 export default {
   components: {
-    LoadingButton,
+    GlButton,
     ClipboardButton,
     GlLoadingIcon,
     GlDropdown,
@@ -82,6 +82,9 @@ export default {
     showDomainsDropdown() {
       return this.availableDomains.length > 0;
     },
+    validationError() {
+      return this.knative.validationError;
+    },
   },
   watch: {
     knativeUpdateSuccessful(updateSuccessful) {
@@ -127,7 +130,6 @@ export default {
         <gl-search-box-by-type
           v-model.trim="searchQuery"
           :placeholder="s__('ClusterIntegration|Search domains')"
-          class="m-2"
         />
         <gl-dropdown-item
           v-for="domain in filteredDomains"
@@ -157,6 +159,8 @@ export default {
         type="text"
         class="form-control js-knative-domainname"
       />
+
+      <span v-if="validationError" class="gl-field-error">{{ validationError }}</span>
     </div>
 
     <template v-if="knativeInstalled">
@@ -210,13 +214,16 @@ export default {
         }}
       </p>
 
-      <loading-button
-        class="btn-success js-knative-save-domain-button mt-3 ml-3"
+      <gl-button
+        class="js-knative-save-domain-button gl-mt-5 gl-ml-5"
+        variant="success"
+        category="primary"
         :loading="saving"
         :disabled="saveButtonDisabled"
-        :label="saveButtonLabel"
         @click="$emit('save')"
-      />
+      >
+        {{ saveButtonLabel }}
+      </gl-button>
     </template>
   </div>
 </template>

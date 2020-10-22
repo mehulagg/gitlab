@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe ProtectedEnvironments::DestroyService, '#execute' do
+RSpec.describe ProtectedEnvironments::DestroyService, '#execute' do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
   let!(:protected_environment) { create(:protected_environment, project: project) }

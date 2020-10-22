@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LicenseTemplateFinder do
+RSpec.describe LicenseTemplateFinder do
   let_it_be(:project) { create(:project) }
 
   let(:params) { {} }

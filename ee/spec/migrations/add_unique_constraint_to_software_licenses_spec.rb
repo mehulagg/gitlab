@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20191108202723_add_unique_constraint_to_software_licenses.rb')
+require_migration!
 
-describe AddUniqueConstraintToSoftwareLicenses do
+RSpec.describe AddUniqueConstraintToSoftwareLicenses do
   let(:migration) { described_class.new }
   let(:projects) { table(:projects) }
   let(:licenses) { table(:software_licenses) }

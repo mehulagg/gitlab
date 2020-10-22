@@ -2,15 +2,15 @@
 
 require 'spec_helper'
 
-describe DeprecatedApprovalsBeforeMerge do
+RSpec.describe DeprecatedApprovalsBeforeMerge do
   shared_examples 'with approvals before merge deprecated' do
     context 'updating approvals_before_merge' do
       it 'creates any_approver rule' do
-        subject.update(approvals_before_merge: 3)
+        subject.update!(approvals_before_merge: 3)
 
         expect_approvals_before_merge_to_be_updated(3)
 
-        subject.update(approvals_before_merge: 5)
+        subject.update!(approvals_before_merge: 5)
 
         expect_approvals_before_merge_to_be_updated(5)
       end

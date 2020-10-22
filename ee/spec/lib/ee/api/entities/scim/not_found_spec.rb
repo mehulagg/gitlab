@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::EE::API::Entities::Scim::NotFound do
+RSpec.describe ::EE::API::Entities::Scim::NotFound do
   let(:entity) do
     described_class.new({})
   end

@@ -7,7 +7,7 @@ module EE
         extend ActiveSupport::Concern
 
         prepended do
-          expose :note
+          expose :using_license_seat?, as: :using_license_seat
         end
       end
     end

@@ -2,60 +2,46 @@
 
 require 'spec_helper'
 
-describe ClustersHelper do
-  shared_examples 'feature availablilty' do |feature|
-    before do
-      # clusterable is provided as a `helper_method`
-      allow(helper).to receive(:clusterable).and_return(clusterable)
+RSpec.describe ClustersHelper do
+  describe '#display_cluster_agents?' do
+    let(:clusterable) { build(:project) }
 
-      expect(clusterable)
-        .to receive(:feature_available?)
-        .with(feature)
-        .and_return(feature_available)
+    subject { helper.display_cluster_agents?(clusterable) }
+
+    context 'without premium license' do
+      it 'does not allows agents to display' do
+        expect(subject).to be_falsey
+      end
     end
 
-    context 'feature unavailable' do
-      let(:feature_available) { true }
+    context 'with premium license' do
+      before do
+        stub_licensed_features(cluster_agents: true)
+      end
 
-      it { is_expected.to be_truthy }
-    end
+      context 'when clusterable is a project' do
+        it 'allows agents to display' do
+          expect(subject).to be_truthy
+        end
+      end
 
-    context 'feature available' do
-      let(:feature_available) { false }
+      context 'when clusterable is a group' do
+        let(:clusterable) { build(:group) }
 
-      it { is_expected.to be_falsey }
-    end
-  end
+        it 'does not allows agents to display' do
+          expect(subject).to be_falsey
+        end
+      end
 
-  describe '#has_multiple_clusters?' do
-    subject { helper.has_multiple_clusters? }
+      context 'when cluster_agent_list feature flag is disabled' do
+        before do
+          stub_feature_flags(cluster_agent_list: false)
+        end
 
-    context 'project level' do
-      let(:clusterable) { instance_double(Project) }
-
-      it_behaves_like 'feature availablilty', :multiple_clusters
-    end
-
-    context 'group level' do
-      let(:clusterable) { instance_double(Group) }
-
-      it_behaves_like 'feature availablilty', :multiple_clusters
-    end
-  end
-
-  describe '#show_cluster_health_graphs?' do
-    subject { helper.show_cluster_health_graphs? }
-
-    context 'project level' do
-      let(:clusterable) { instance_double(Project) }
-
-      it_behaves_like 'feature availablilty', :cluster_health
-    end
-
-    context 'group level' do
-      let(:clusterable) { instance_double(Group) }
-
-      it_behaves_like 'feature availablilty', :cluster_health
+        it 'does not allows agents to display' do
+          expect(subject).to be_falsey
+        end
+      end
     end
   end
 end

@@ -2,11 +2,12 @@
 
 require 'spec_helper'
 
-describe Security::SyncReportsToApprovalRulesService, '#execute' do
+RSpec.describe Security::SyncReportsToApprovalRulesService, '#execute' do
   let(:merge_request) { create(:merge_request) }
   let(:project) { merge_request.project }
   let(:pipeline) { create(:ee_ci_pipeline, :success, project: project, merge_requests_as_head_pipeline: [merge_request]) }
   let(:report_approver_rule) { create(:report_approver_rule, merge_request: merge_request, approvals_required: 2) }
+  let(:base_pipeline) { create(:ee_ci_pipeline, :success, project: project, ref: merge_request.target_branch, sha: merge_request.diff_base_sha) }
 
   subject { described_class.new(pipeline).execute }
 
@@ -23,13 +24,22 @@ describe Security::SyncReportsToApprovalRulesService, '#execute' do
           create(:ee_ci_build, :success, :dependency_scanning, name: 'ds_job', pipeline: pipeline, project: project)
         end
 
-        it "won't change approvals_required count" do
-          expect(
-            pipeline.security_reports.reports.values.all?(&:unsafe_severity?)
-          ).to be true
+        context 'when high-severity vulnerabilities already present in target branch pipeline' do
+          before do
+            create(:ee_ci_build, :success, :dependency_scanning, name: 'ds_job', pipeline: base_pipeline, project: project)
+          end
 
-          expect { subject }
-            .not_to change { report_approver_rule.reload.approvals_required }
+          it 'lowers approvals_required count to zero' do
+            expect { subject }
+              .to change { report_approver_rule.reload.approvals_required }.from(2).to(0)
+          end
+        end
+
+        context 'when high-severity vulnerabilities do not present in target branch pipeline' do
+          it "won't change approvals_required count" do
+            expect { subject }
+              .not_to change { report_approver_rule.reload.approvals_required }
+          end
         end
       end
 
@@ -39,10 +49,6 @@ describe Security::SyncReportsToApprovalRulesService, '#execute' do
         end
 
         it 'lowers approvals_required count to zero' do
-          expect(
-            pipeline.security_reports.reports.values.none?(&:unsafe_severity?)
-          ).to be true
-
           expect { subject }
             .to change { report_approver_rule.reload.approvals_required }.from(2).to(0)
         end
@@ -63,6 +69,10 @@ describe Security::SyncReportsToApprovalRulesService, '#execute' do
 
       context "license compliance policy" do
         let!(:license_compliance_rule) { create(:report_approver_rule, :license_scanning, merge_request: merge_request, approvals_required: 1) }
+
+        before do
+          stub_feature_flags(drop_license_management_artifact: false)
+        end
 
         context "when a license violates the license compliance policy" do
           let!(:software_license_policy) { create(:software_license_policy, :denied, project: project, software_license: denied_license) }
@@ -95,6 +105,10 @@ describe Security::SyncReportsToApprovalRulesService, '#execute' do
           context 'with an old report' do
             let!(:ci_build) { create(:ee_ci_build, :success, :license_management, pipeline: pipeline, project: project) }
 
+            before do
+              stub_feature_flags(drop_license_management_artifact: false)
+            end
+
             specify { expect { subject }.to change { license_compliance_rule.reload.approvals_required }.from(1).to(0) }
             specify { expect(subject[:status]).to be(:success) }
           end
@@ -123,13 +137,22 @@ describe Security::SyncReportsToApprovalRulesService, '#execute' do
           create(:ee_ci_build, :success, :dependency_scanning, name: 'ds_job', pipeline: pipeline, project: project)
         end
 
-        it "won't change approvals_required count" do
-          expect(
-            pipeline.security_reports.reports.values.all?(&:unsafe_severity?)
-          ).to be true
+        context 'when high-severity vulnerabilities already present in target branch pipeline' do
+          before do
+            create(:ee_ci_build, :success, :dependency_scanning, name: 'ds_job', pipeline: base_pipeline, project: project)
+          end
 
-          expect { subject }
-            .not_to change { report_approver_rule.reload.approvals_required }
+          it 'lowers approvals_required count to zero' do
+            expect { subject }
+              .to change { report_approver_rule.reload.approvals_required }.from(2).to(0)
+          end
+        end
+
+        context 'when high-severity vulnerabilities do not present in target branch pipeline' do
+          it "won't change approvals_required count" do
+            expect { subject }
+              .not_to change { report_approver_rule.reload.approvals_required }
+          end
         end
       end
 
@@ -139,12 +162,8 @@ describe Security::SyncReportsToApprovalRulesService, '#execute' do
         end
 
         it 'lowers approvals_required count to zero' do
-          expect(
-            pipeline.security_reports.reports.values.none?(&:unsafe_severity?)
-          ).to be true
-
           expect { subject }
-            .to change { report_approver_rule.reload.approvals_required }
+            .to change { report_approver_rule.reload.approvals_required }.from(2).to(0)
         end
       end
     end

@@ -1,7 +1,7 @@
 import Vue from 'vue';
 
+import { issuableTypesMap } from '~/related_issues/constants';
 import * as types from './mutation_types';
-import { issuableTypesMap } from 'ee/related_issues/constants';
 
 export default {
   [types.SET_INITIAL_CONFIG](
@@ -14,6 +14,7 @@ export default {
       projectsEndpoint,
       userSignedIn,
       allowSubEpics,
+      allowIssuableHealthStatus,
     },
   ) {
     state.epicsEndpoint = epicsEndpoint;
@@ -23,6 +24,7 @@ export default {
     state.projectsEndpoint = projectsEndpoint;
     state.userSignedIn = userSignedIn;
     state.allowSubEpics = allowSubEpics;
+    state.allowIssuableHealthStatus = allowIssuableHealthStatus;
   },
 
   [types.SET_INITIAL_PARENT_ITEM](state, data) {
@@ -142,17 +144,21 @@ export default {
 
     state.showAddItemForm = toggleState;
     state.showCreateEpicForm = false;
+    state.showCreateIssueForm = false;
   },
 
   [types.TOGGLE_CREATE_EPIC_FORM](state, { toggleState }) {
     state.showCreateEpicForm = toggleState;
     state.showAddItemForm = false;
+    state.showCreateIssueForm = false;
     state.issuableType = issuableTypesMap.EPIC;
   },
 
   [types.TOGGLE_CREATE_ISSUE_FORM](state, { toggleState }) {
     state.showCreateIssueForm = toggleState;
     state.showAddItemForm = false;
+    state.showCreateEpicForm = false;
+    state.issuableType = issuableTypesMap.ISSUE;
   },
 
   [types.SET_PENDING_REFERENCES](state, references) {

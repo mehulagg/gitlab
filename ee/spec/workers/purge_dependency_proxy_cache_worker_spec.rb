@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PurgeDependencyProxyCacheWorker do
+RSpec.describe PurgeDependencyProxyCacheWorker do
   let_it_be(:user) { create(:admin) }
   let_it_be(:blob) { create(:dependency_proxy_blob )}
   let_it_be(:group) { blob.group }

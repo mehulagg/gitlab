@@ -1,8 +1,8 @@
 import Service from '../../services';
 import * as types from './mutation_types';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Poll from '~/lib/utils/poll';
-import { __, sprintf } from '~/locale';
+import { __ } from '~/locale';
 
 let eTagPoll;
 
@@ -31,17 +31,9 @@ export function startPolling({ state, commit, dispatch }) {
       commit(types.SET_LOADING, false);
       dispatch('stopPolling');
     },
-    errorCallback: ({ response }) => {
-      let errorMessage = '';
-      if (response && response.data && response.data.message) {
-        errorMessage = response.data.message;
-      }
+    errorCallback: () => {
       commit(types.SET_LOADING, false);
-      createFlash(
-        sprintf(__(`Failed to load errors from Sentry. Error message: %{errorMessage}`), {
-          errorMessage,
-        }),
-      );
+      createFlash(__('Failed to load errors from Sentry.'));
     },
   });
 
@@ -110,5 +102,3 @@ export const fetchPaginatedResults = ({ commit, dispatch }, cursor) => {
 export const removeIgnoredResolvedErrors = ({ commit }, error) => {
   commit(types.REMOVE_IGNORED_RESOLVED_ERRORS, error);
 };
-
-export default () => {};

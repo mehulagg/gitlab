@@ -1,12 +1,17 @@
 <script>
-import { GlDropdown, GlDropdownDivider, GlDropdownHeader, GlDropdownItem } from '@gitlab/ui';
+import {
+  GlDropdown,
+  GlDropdownDivider,
+  GlDropdownSectionHeader,
+  GlDropdownItem,
+  GlIcon,
+} from '@gitlab/ui';
 import { joinPaths, escapeFileUrl } from '~/lib/utils/url_utility';
 import { __ } from '../../locale';
-import Icon from '../../vue_shared/components/icon.vue';
 import getRefMixin from '../mixins/get_ref';
-import getProjectShortPath from '../queries/getProjectShortPath.query.graphql';
-import getProjectPath from '../queries/getProjectPath.query.graphql';
-import getPermissions from '../queries/getPermissions.query.graphql';
+import projectShortPathQuery from '../queries/project_short_path.query.graphql';
+import projectPathQuery from '../queries/project_path.query.graphql';
+import permissionsQuery from '../queries/permissions.query.graphql';
 
 const ROW_TYPES = {
   header: 'header',
@@ -17,19 +22,19 @@ export default {
   components: {
     GlDropdown,
     GlDropdownDivider,
-    GlDropdownHeader,
+    GlDropdownSectionHeader,
     GlDropdownItem,
-    Icon,
+    GlIcon,
   },
   apollo: {
     projectShortPath: {
-      query: getProjectShortPath,
+      query: projectShortPathQuery,
     },
     projectPath: {
-      query: getProjectPath,
+      query: projectPathQuery,
     },
     userPermissions: {
-      query: getPermissions,
+      query: permissionsQuery,
       variables() {
         return {
           projectPath: this.projectPath,
@@ -223,7 +228,7 @@ export default {
         case ROW_TYPES.divider:
           return 'gl-dropdown-divider';
         case ROW_TYPES.header:
-          return 'gl-dropdown-header';
+          return 'gl-dropdown-section-header';
         default:
           return 'gl-dropdown-item';
       }
@@ -241,11 +246,11 @@ export default {
         </router-link>
       </li>
       <li v-if="renderAddToTreeDropdown" class="breadcrumb-item">
-        <gl-dropdown toggle-class="add-to-tree qa-add-to-tree ml-1">
-          <template slot="button-content">
+        <gl-dropdown toggle-class="add-to-tree qa-add-to-tree gl-ml-2">
+          <template #button-content>
             <span class="sr-only">{{ __('Add to tree') }}</span>
-            <icon name="plus" :size="16" class="float-left" />
-            <icon name="chevron-down" :size="16" class="float-left" />
+            <gl-icon name="plus" :size="16" class="float-left" />
+            <gl-icon name="chevron-down" :size="16" class="float-left" />
           </template>
           <template v-for="(item, i) in dropdownItems">
             <component :is="getComponent(item.type)" :key="i" v-bind="item.attrs">

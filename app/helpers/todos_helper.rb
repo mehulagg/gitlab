@@ -16,12 +16,21 @@ module TodosHelper
   def todo_action_name(todo)
     case todo.action
     when Todo::ASSIGNED then todo.self_added? ? 'assigned' : 'assigned you'
+    when Todo::REVIEW_REQUESTED then 'requested a review of'
     when Todo::MENTIONED then "mentioned #{todo_action_subject(todo)} on"
     when Todo::BUILD_FAILED then 'The build failed for'
     when Todo::MARKED then 'added a todo for'
     when Todo::APPROVAL_REQUIRED then "set #{todo_action_subject(todo)} as an approver for"
     when Todo::UNMERGEABLE then 'Could not merge'
     when Todo::DIRECTLY_ADDRESSED then "directly addressed #{todo_action_subject(todo)} on"
+    when Todo::MERGE_TRAIN_REMOVED then "Removed from Merge Train:"
+    end
+  end
+
+  def todo_self_addressing(todo)
+    case todo.action
+    when Todo::ASSIGNED then 'to yourself'
+    when Todo::REVIEW_REQUESTED then 'from yourself'
     end
   end
 
@@ -37,11 +46,12 @@ module TodosHelper
   end
 
   def todo_target_title(todo)
-    if todo.target
-      "\"#{todo.target.title}\""
-    else
-      ""
-    end
+    # Design To Dos' filenames are displayed in `#todo_target_link` (see `Design#to_reference`),
+    # so to avoid displaying duplicate filenames in the To Do list for designs,
+    # we return an empty string here.
+    return "" if todo.target.blank? || todo.for_design?
+
+    "\"#{todo.target.title}\""
   end
 
   def todo_parent_path(todo)
@@ -53,6 +63,9 @@ module TodosHelper
   end
 
   def todo_target_type_name(todo)
+    return _('design') if todo.for_design?
+    return _('alert') if todo.for_alert?
+
     todo.target_type.titleize.downcase
   end
 
@@ -63,6 +76,10 @@ module TodosHelper
 
     if todo.for_commit?
       project_commit_path(todo.project, todo.target, path_options)
+    elsif todo.for_design?
+      todos_design_path(todo, path_options)
+    elsif todo.for_alert?
+      details_project_alert_management_path(todo.project, todo.target)
     else
       path = [todo.resource_parent, todo.target]
 
@@ -89,11 +106,13 @@ module TodosHelper
         'mr'
       when Issue
         'issue'
+      when AlertManagement::Alert
+        'alert'
       end
 
     content_tag(:span, nil, class: 'target-status') do
-      content_tag(:span, nil, class: "status-box status-box-#{type}-#{todo.target.state.dasherize}") do
-        todo.target.state.capitalize
+      content_tag(:span, nil, class: "status-box status-box-#{type}-#{todo.target.state.to_s.dasherize}") do
+        todo.target.state.to_s.capitalize
       end
     end
   end
@@ -130,6 +149,7 @@ module TodosHelper
     [
       { id: '', text: 'Any Action' },
       { id: Todo::ASSIGNED, text: 'Assigned' },
+      { id: Todo::REVIEW_REQUESTED, text: 'Review requested' },
       { id: Todo::MENTIONED, text: 'Mentioned' },
       { id: Todo::MARKED, text: 'Added' },
       { id: Todo::BUILD_FAILED, text: 'Pipelines' },
@@ -151,7 +171,9 @@ module TodosHelper
     [
       { id: '', text: 'Any Type' },
       { id: 'Issue', text: 'Issue' },
-      { id: 'MergeRequest', text: 'Merge Request' }
+      { id: 'MergeRequest', text: 'Merge Request' },
+      { id: 'DesignManagement::Design', text: 'Design' },
+      { id: 'AlertManagement::Alert', text: 'Alert' }
     ]
   end
 
@@ -186,14 +208,37 @@ module TodosHelper
     "&middot; #{content}".html_safe
   end
 
+  def todo_author_display?(todo)
+    !todo.build_failed? && !todo.unmergeable?
+  end
+
   private
+
+  def todos_design_path(todo, path_options)
+    design = todo.target
+
+    designs_project_issue_path(
+      todo.resource_parent,
+      design.issue,
+      path_options.merge(
+        vueroute: design.filename
+      )
+    )
+  end
 
   def todo_action_subject(todo)
     todo.self_added? ? 'yourself' : 'you'
   end
 
   def show_todo_state?(todo)
-    (todo.target.is_a?(MergeRequest) || todo.target.is_a?(Issue)) && %w(closed merged).include?(todo.target.state)
+    case todo.target
+    when MergeRequest, Issue
+      %w(closed merged).include?(todo.target.state)
+    when AlertManagement::Alert
+      %i(resolved).include?(todo.target.state)
+    else
+      false
+    end
   end
 
   def todo_group_options

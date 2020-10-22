@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PersonalAccessTokens::Instance::UpdateLifetimeService do
+RSpec.describe PersonalAccessTokens::Instance::UpdateLifetimeService do
   describe '#execute', :clean_gitlab_redis_shared_state do
     include ExclusiveLeaseHelpers
 

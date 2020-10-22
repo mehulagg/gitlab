@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::WeightEventable do
+RSpec.describe EE::WeightEventable do
   subject { build(:issue) }
 
   describe 'associations' do

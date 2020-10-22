@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::DestroyService do
+RSpec.describe Groups::DestroyService do
   include DatabaseConnectionHelpers
 
   let!(:user)         { create(:user) }
@@ -95,7 +95,7 @@ describe Groups::DestroyService do
   context 'projects in pending_delete' do
     before do
       project.pending_delete = true
-      project.save
+      project.save!
     end
 
     it_behaves_like 'group destruction', false

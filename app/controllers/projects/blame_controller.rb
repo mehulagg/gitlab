@@ -9,6 +9,8 @@ class Projects::BlameController < Projects::ApplicationController
   before_action :assign_ref_vars
   before_action :authorize_download_code!
 
+  feature_category :source_code_management
+
   def show
     @blob = @repository.blob_at(@commit.id, @path)
 
@@ -20,6 +22,7 @@ class Projects::BlameController < Projects::ApplicationController
     environment_params[:find_latest] = true
     @environment = EnvironmentsFinder.new(@project, current_user, environment_params).execute.last
 
-    @blame_groups = Gitlab::Blame.new(@blob, @commit).groups
+    @blame = Gitlab::Blame.new(@blob, @commit)
+    @blame = Gitlab::View::Presenter::Factory.new(@blame, project: @project, path: @path).fabricate!
   end
 end

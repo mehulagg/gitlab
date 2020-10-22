@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Epics::CreateService do
+RSpec.describe Epics::CreateService do
   let_it_be(:group) { create(:group, :internal)}
   let_it_be(:user) { create(:user) }
   let_it_be(:parent_epic) { create(:epic, group: group) }
@@ -24,20 +24,6 @@ describe Epics::CreateService do
       expect(epic.relative_position).not_to be_nil
       expect(epic.confidential).to be_truthy
       expect(NewEpicWorker).to have_received(:perform_async).with(epic.id, user.id)
-    end
-
-    context 'when confidential_epics is disabled' do
-      before do
-        stub_feature_flags(confidential_epics: false)
-      end
-
-      it 'ignores confidential attribute' do
-        expect { subject }.to change { Epic.count }.by(1)
-
-        epic = Epic.last
-        expect(epic).to be_persisted
-        expect(epic.confidential).to be_falsey
-      end
     end
   end
 

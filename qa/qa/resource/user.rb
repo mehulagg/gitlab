@@ -11,6 +11,8 @@ module QA
 
       attribute :id
       attribute :name
+      attribute :first_name
+      attribute :last_name
       attribute :email
 
       def initialize
@@ -32,6 +34,14 @@ module QA
 
       def name
         @name ||= api_resource&.dig(:name) || "QA User #{unique_id}"
+      end
+
+      def first_name
+        name.split(' ').first
+      end
+
+      def last_name
+        name.split(' ').drop(1).join(' ')
       end
 
       def email
@@ -87,6 +97,8 @@ module QA
 
       def api_delete_path
         "/users/#{id}"
+      rescue NoValueError
+        "/users/#{fetch_id(username)}"
       end
 
       def api_get_path
@@ -117,7 +129,10 @@ module QA
             user.password = password
           end
         else
-          self.fabricate!
+          self.fabricate! do |user|
+            user.username = username if username
+            user.password = password if password
+          end
         end
       end
 
@@ -143,7 +158,7 @@ module QA
       end
 
       def fetching_own_data?
-        user&.username == username || Runtime::User.username == username
+        api_user&.username == username || Runtime::User.username == username
       end
     end
   end

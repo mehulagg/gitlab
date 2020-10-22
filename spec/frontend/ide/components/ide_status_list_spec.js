@@ -1,13 +1,16 @@
 import Vuex from 'vuex';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { GlLink } from '@gitlab/ui';
 import IdeStatusList from '~/ide/components/ide_status_list.vue';
+import TerminalSyncStatusSafe from '~/ide/components/terminal_sync/terminal_sync_status_safe.vue';
 
 const TEST_FILE = {
   name: 'lorem.md',
-  eol: 'LF',
   editorRow: 3,
   editorColumn: 23,
   fileLanguage: 'markdown',
+  content: 'abc\nndef',
+  permalink: '/lorem.md',
 };
 
 const localVue = createLocalVue();
@@ -18,6 +21,7 @@ describe('ide/components/ide_status_list', () => {
   let store;
   let wrapper;
 
+  const findLink = () => wrapper.find(GlLink);
   const createComponent = (options = {}) => {
     store = new Vuex.Store({
       getters: {
@@ -50,12 +54,14 @@ describe('ide/components/ide_status_list', () => {
       createComponent();
     });
 
-    it('shows file name', () => {
-      expect(wrapper.text()).toContain(TEST_FILE.name);
+    it('shows a link to the file that contains the file name', () => {
+      expect(findLink().attributes('href')).toBe(TEST_FILE.permalink);
+      expect(findLink().text()).toBe(TEST_FILE.name);
     });
 
     it('shows file eol', () => {
-      expect(wrapper.text()).toContain(TEST_FILE.name);
+      expect(wrapper.text()).not.toContain('CRLF');
+      expect(wrapper.text()).toContain('LF');
     });
 
     it('shows file editor position', () => {
@@ -69,7 +75,8 @@ describe('ide/components/ide_status_list', () => {
 
   describe('with binary file', () => {
     beforeEach(() => {
-      activeFile.binary = true;
+      activeFile.name = 'abc.dat';
+      activeFile.content = '🐱'; // non-ascii binary content
       createComponent();
     });
 
@@ -78,13 +85,9 @@ describe('ide/components/ide_status_list', () => {
     });
   });
 
-  it('adds slot as child of list', () => {
-    createComponent({
-      slots: {
-        default: ['<div class="js-test">Hello</div>', '<div class="js-test">World</div>'],
-      },
-    });
+  it('renders terminal sync status', () => {
+    createComponent();
 
-    expect(wrapper.find('.ide-status-list').findAll('.js-test').length).toEqual(2);
+    expect(wrapper.find(TerminalSyncStatusSafe).exists()).toBe(true);
   });
 });

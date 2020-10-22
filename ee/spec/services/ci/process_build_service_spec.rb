@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Ci::ProcessBuildService, '#execute' do
+RSpec.describe Ci::ProcessBuildService, '#execute' do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository) }
   let(:environment) { create(:environment, project: project, name: 'production') }
@@ -35,7 +35,8 @@ describe Ci::ProcessBuildService, '#execute' do
 
       context 'when user does not have access to the environment' do
         it 'fails the build' do
-          allow(Deployments::FinishedWorker).to receive(:perform_async)
+          allow(Deployments::LinkMergeRequestWorker).to receive(:perform_async)
+          allow(Deployments::ExecuteHooksWorker).to receive(:perform_async)
           subject
 
           expect(ci_build.failed?).to be_truthy
@@ -45,7 +46,7 @@ describe Ci::ProcessBuildService, '#execute' do
 
       context 'when user has access to the environment' do
         before do
-          protected_environment.deploy_access_levels.create(user: user)
+          protected_environment.deploy_access_levels.create!(user: user)
         end
 
         it 'enqueues the build' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RepositoryPushAuditEventWorker do
+RSpec.describe RepositoryPushAuditEventWorker do
   describe '#perform' do
     let(:project) { create(:project, :repository) }
     let(:user) { create(:user) }
@@ -47,7 +47,7 @@ describe RepositoryPushAuditEventWorker do
                                    to: '210987',
                                    target_details: project.full_path)
 
-      events = SecurityEvent.all.map do |event|
+      events = AuditEvent.all.map do |event|
         event
           .attributes
           .deep_symbolize_keys
@@ -71,7 +71,7 @@ describe RepositoryPushAuditEventWorker do
           expect(instance).to receive(:enabled?) { false }
         end
 
-        expect { subject }.not_to change(SecurityEvent, :count)
+        expect { subject }.not_to change(AuditEvent, :count)
       end
     end
   end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectWiki, :elastic do
+RSpec.describe ProjectWiki, :elastic do
   let_it_be(:project) { create(:project, :wiki_repo) }
 
   before do
@@ -14,6 +14,14 @@ describe ProjectWiki, :elastic do
       project.wiki.index_wiki_blobs
 
       ensure_elasticsearch_index!
+    end
+  end
+
+  describe '#use_elasticsearch?' do
+    it 'delegates to Project#use_elasticsearch?' do
+      expect(project).to receive(:use_elasticsearch?)
+
+      project.wiki.use_elasticsearch?
     end
   end
 
@@ -33,13 +41,12 @@ describe ProjectWiki, :elastic do
 
     Sidekiq::Testing.inline! do
       project.wiki.find_page('omega_page').delete
-      last_commit = project.wiki.repository.commit.sha
 
       expect_next_instance_of(Gitlab::Elastic::Indexer) do |indexer|
-        expect(indexer).to receive(:run).with(last_commit).and_call_original
+        expect(indexer).to receive(:run).and_call_original
       end
 
-      project.wiki.index_wiki_blobs(last_commit)
+      project.wiki.index_wiki_blobs
 
       ensure_elasticsearch_index!
     end

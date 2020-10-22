@@ -3,29 +3,35 @@
 RSpec.shared_examples 'a timebox' do |timebox_type|
   let(:project) { create(:project, :public) }
   let(:group) { create(:group) }
-  let(:timebox) { create(timebox_type, project: project) }
+  let(:timebox_args) { [] }
+  let(:timebox) { create(timebox_type, *timebox_args, project: project) }
   let(:issue) { create(:issue, project: project) }
   let(:user) { create(:user) }
   let(:timebox_table_name) { timebox_type.to_s.pluralize.to_sym }
+
+  # Values implementions can override
+  let(:mid_point) { Time.now.utc.to_date }
+  let(:open_on_left) { nil }
+  let(:open_on_right) { nil }
 
   describe 'modules' do
     context 'with a project' do
       it_behaves_like 'AtomicInternalId' do
         let(:internal_id_attribute) { :iid }
-        let(:instance) { build(timebox_type, project: build(:project), group: nil) }
+        let(:instance) { build(timebox_type, *timebox_args, project: build(:project), group: nil) }
         let(:scope) { :project }
         let(:scope_attrs) { { project: instance.project } }
-        let(:usage) {timebox_table_name }
+        let(:usage) { timebox_table_name }
       end
     end
 
     context 'with a group' do
       it_behaves_like 'AtomicInternalId' do
         let(:internal_id_attribute) { :iid }
-        let(:instance) { build(timebox_type, project: nil, group: build(:group)) }
+        let(:instance) { build(timebox_type, *timebox_args, project: nil, group: build(:group)) }
         let(:scope) { :group }
         let(:scope_attrs) { { namespace: instance.group } }
-        let(:usage) {timebox_table_name }
+        let(:usage) { timebox_table_name }
       end
     end
   end
@@ -37,14 +43,14 @@ RSpec.shared_examples 'a timebox' do |timebox_type|
 
     describe 'start_date' do
       it 'adds an error when start_date is greater then due_date' do
-        timebox = build(timebox_type, start_date: Date.tomorrow, due_date: Date.yesterday)
+        timebox = build(timebox_type, *timebox_args, start_date: Date.tomorrow, due_date: Date.yesterday)
 
         expect(timebox).not_to be_valid
         expect(timebox.errors[:due_date]).to include("must be greater than start date")
       end
 
       it 'adds an error when start_date is greater than 9999-12-31' do
-        timebox = build(timebox_type, start_date: Date.new(10000, 1, 1))
+        timebox = build(timebox_type, *timebox_args, start_date: Date.new(10000, 1, 1))
 
         expect(timebox).not_to be_valid
         expect(timebox.errors[:start_date]).to include("date must not be after 9999-12-31")
@@ -53,7 +59,7 @@ RSpec.shared_examples 'a timebox' do |timebox_type|
 
     describe 'due_date' do
       it 'adds an error when due_date is greater than 9999-12-31' do
-        timebox = build(timebox_type, due_date: Date.new(10000, 1, 1))
+        timebox = build(timebox_type, *timebox_args, due_date: Date.new(10000, 1, 1))
 
         expect(timebox).not_to be_valid
         expect(timebox.errors[:due_date]).to include("date must not be after 9999-12-31")
@@ -64,7 +70,7 @@ RSpec.shared_examples 'a timebox' do |timebox_type|
       it { is_expected.to validate_presence_of(:title) }
 
       it 'is invalid if title would be empty after sanitation' do
-        timebox = build(timebox_type, project: project, title: '<img src=x onerror=prompt(1)>')
+        timebox = build(timebox_type, *timebox_args, project: project, title: '<img src=x onerror=prompt(1)>')
 
         expect(timebox).not_to be_valid
         expect(timebox.errors[:title]).to include("can't be blank")
@@ -73,7 +79,7 @@ RSpec.shared_examples 'a timebox' do |timebox_type|
 
     describe '#timebox_type_check' do
       it 'is invalid if it has both project_id and group_id' do
-        timebox = build(timebox_type, group: group)
+        timebox = build(timebox_type, *timebox_args, group: group)
         timebox.project = project
 
         expect(timebox).not_to be_valid
@@ -84,23 +90,24 @@ RSpec.shared_examples 'a timebox' do |timebox_type|
     describe "#uniqueness_of_title" do
       context "per project" do
         it "does not accept the same title in a project twice" do
-          new_timebox = described_class.new(project: timebox.project, title: timebox.title)
+          new_timebox = timebox.dup
           expect(new_timebox).not_to be_valid
         end
 
         it "accepts the same title in another project" do
           project = create(:project)
-          new_timebox = described_class.new(project: project, title: timebox.title)
+          new_timebox = timebox.dup
+          new_timebox.project = project
 
           expect(new_timebox).to be_valid
         end
       end
 
       context "per group" do
-        let(:timebox) { create(timebox_type, group: group) }
+        let(:timebox) { create(timebox_type, *timebox_args, group: group) }
 
         before do
-          project.update(group: group)
+          project.update!(group: group)
         end
 
         it "does not accept the same title in a group twice" do
@@ -110,7 +117,7 @@ RSpec.shared_examples 'a timebox' do |timebox_type|
         end
 
         it "does not accept the same title of a child project timebox" do
-          create(timebox_type, project: group.projects.first)
+          create(timebox_type, *timebox_args, project: group.projects.first)
 
           new_timebox = described_class.new(group: group, title: timebox.title)
 
@@ -142,7 +149,7 @@ RSpec.shared_examples 'a timebox' do |timebox_type|
     end
 
     context 'when project_id is not present' do
-      let(:timebox) { build(timebox_type, group: group) }
+      let(:timebox) { build(timebox_type, *timebox_args, group: group) }
 
       it 'returns false' do
         expect(timebox.project_timebox?).to be_falsey
@@ -152,7 +159,7 @@ RSpec.shared_examples 'a timebox' do |timebox_type|
 
   describe '#group_timebox?' do
     context 'when group_id is present' do
-      let(:timebox) { build(timebox_type, group: group) }
+      let(:timebox) { build(timebox_type, *timebox_args, group: group) }
 
       it 'returns true' do
         expect(timebox.group_timebox?).to be_truthy
@@ -167,7 +174,7 @@ RSpec.shared_examples 'a timebox' do |timebox_type|
   end
 
   describe '#safe_title' do
-    let(:timebox) { create(timebox_type, title: "<b>foo & bar -> 2.2</b>") }
+    let(:timebox) { create(timebox_type, *timebox_args, title: "<b>foo & bar -> 2.2</b>") }
 
     it 'normalizes the title for use as a slug' do
       expect(timebox.safe_title).to eq('foo-bar-22')
@@ -176,7 +183,7 @@ RSpec.shared_examples 'a timebox' do |timebox_type|
 
   describe '#resource_parent' do
     context 'when group is present' do
-      let(:timebox) { build(timebox_type, group: group) }
+      let(:timebox) { build(timebox_type, *timebox_args, group: group) }
 
       it 'returns the group' do
         expect(timebox.resource_parent).to eq(group)
@@ -191,7 +198,7 @@ RSpec.shared_examples 'a timebox' do |timebox_type|
   end
 
   describe "#title" do
-    let(:timebox) { create(timebox_type, title: "<b>foo & bar -> 2.2</b>") }
+    let(:timebox) { create(timebox_type, *timebox_args, title: "<b>foo & bar -> 2.2</b>") }
 
     it "sanitizes title" do
       expect(timebox.title).to eq("foo & bar -> 2.2")
@@ -202,28 +209,28 @@ RSpec.shared_examples 'a timebox' do |timebox_type|
     context "per project" do
       it "is true for projects with MRs enabled" do
         project = create(:project, :merge_requests_enabled)
-        timebox = create(timebox_type, project: project)
+        timebox = create(timebox_type, *timebox_args, project: project)
 
         expect(timebox.merge_requests_enabled?).to be_truthy
       end
 
       it "is false for projects with MRs disabled" do
         project = create(:project, :repository_enabled, :merge_requests_disabled)
-        timebox = create(timebox_type, project: project)
+        timebox = create(timebox_type, *timebox_args, project: project)
 
         expect(timebox.merge_requests_enabled?).to be_falsey
       end
 
       it "is false for projects with repository disabled" do
         project = create(:project, :repository_disabled)
-        timebox = create(timebox_type, project: project)
+        timebox = create(timebox_type, *timebox_args, project: project)
 
         expect(timebox.merge_requests_enabled?).to be_falsey
       end
     end
 
     context "per group" do
-      let(:timebox) { create(timebox_type, group: group) }
+      let(:timebox) { create(timebox_type, *timebox_args, group: group) }
 
       it "is always true for groups, for performance reasons" do
         expect(timebox.merge_requests_enabled?).to be_truthy
@@ -231,20 +238,92 @@ RSpec.shared_examples 'a timebox' do |timebox_type|
     end
   end
 
-  it_behaves_like 'within_timeframe scope' do
-    let_it_be(:now) { Time.now }
-    let_it_be(:project) { create(:project, :empty_repo) }
-    let_it_be(:resource_1) { create(timebox_type, project: project, start_date: now - 1.day, due_date: now + 1.day) }
-    let_it_be(:resource_2) { create(timebox_type, project: project, start_date: now + 2.days, due_date: now + 3.days) }
-    let_it_be(:resource_3) { create(timebox_type, project: project, due_date: now) }
-    let_it_be(:resource_4) { create(timebox_type, project: project, start_date: now) }
-  end
-
   describe '#to_ability_name' do
     it 'returns timebox' do
-      timebox = build(timebox_type)
+      timebox = build(timebox_type, *timebox_args)
 
       expect(timebox.to_ability_name).to eq(timebox_type.to_s)
+    end
+  end
+
+  describe '.within_timeframe' do
+    let(:factory) { timebox_type }
+    let(:min_date) { mid_point - 10.days }
+    let(:max_date) { mid_point + 10.days }
+
+    def box(from, to)
+      create(factory, *timebox_args,
+             start_date: from || open_on_left,
+             due_date: to || open_on_right)
+    end
+
+    it 'can find overlapping timeboxes' do
+      fully_open = box(nil, nil)
+      #  ----| ................     # Not overlapping
+      non_overlapping_open_on_left = box(nil, min_date - 1.day)
+      #   |--| ................     # Not overlapping
+      non_overlapping_closed_on_left = box(min_date - 2.days, min_date - 1.day)
+      #  ------|...............     # Overlapping
+      overlapping_open_on_left_just = box(nil, min_date)
+      #  -----------------------|   # Overlapping
+      overlapping_open_on_left_fully = box(nil, max_date + 1.day)
+      #  ---------|............     # Overlapping
+      overlapping_open_on_left_partial = box(nil, min_date + 1.day)
+      #     |-----|............     # Overlapping
+      overlapping_closed_partial = box(min_date - 1.day, min_date + 1.day)
+      #        |--------------|     # Overlapping
+      exact_match = box(min_date, max_date)
+      #     |--------------------|  # Overlapping
+      larger = box(min_date - 1.day, max_date + 1.day)
+      #        ...|-----|......     # Overlapping
+      smaller = box(min_date + 1.day, max_date - 1.day)
+      #        .........|-----|     # Overlapping
+      at_end = box(max_date - 1.day, max_date)
+      #        .........|---------  # Overlapping
+      at_end_open = box(max_date - 1.day, nil)
+      #      |--------------------  # Overlapping
+      cover_from_left = box(min_date - 1.day, nil)
+      #        .........|--------|  # Overlapping
+      cover_from_middle_closed = box(max_date - 1.day, max_date + 1.day)
+      #        ...............|--|  # Overlapping
+      overlapping_at_end_just = box(max_date, max_date + 1.day)
+      #        ............... |-|  # Not Overlapping
+      not_overlapping_at_right_closed = box(max_date + 1.day, max_date + 2.days)
+      #        ............... |--  # Not Overlapping
+      not_overlapping_at_right_open = box(max_date + 1.day, nil)
+
+      matches = described_class.within_timeframe(min_date, max_date)
+
+      expect(matches).to include(
+        overlapping_open_on_left_just,
+        overlapping_open_on_left_fully,
+        overlapping_open_on_left_partial,
+        overlapping_closed_partial,
+        exact_match,
+        larger,
+        smaller,
+        at_end,
+        at_end_open,
+        cover_from_left,
+        cover_from_middle_closed,
+        overlapping_at_end_just
+      )
+
+      expect(matches).not_to include(
+        non_overlapping_open_on_left,
+        non_overlapping_closed_on_left,
+        not_overlapping_at_right_closed,
+        not_overlapping_at_right_open
+      )
+
+      # Whether we match the 'fully-open' range depends on whether
+      # it is in fact open (i.e. whether the class allows infinite
+      # ranges)
+      if open_on_left.nil? && open_on_right.nil?
+        expect(matches).not_to include(fully_open)
+      else
+        expect(matches).to include(fully_open)
+      end
     end
   end
 end

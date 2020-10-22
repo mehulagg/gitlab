@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Groups::SamlProvidersController, '(JavaScript fixtures)', type: :controller do
+RSpec.describe Groups::SamlProvidersController, '(JavaScript fixtures)', type: :controller do
   include JavaScriptFixturesHelpers
 
   let(:group) { create(:group, :private) }

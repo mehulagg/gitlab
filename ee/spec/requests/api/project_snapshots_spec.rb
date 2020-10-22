@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::ProjectSnapshots do
+RSpec.describe API::ProjectSnapshots do
   include ::EE::GeoHelpers
 
   let(:project) { create(:project) }

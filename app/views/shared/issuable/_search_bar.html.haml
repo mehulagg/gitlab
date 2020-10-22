@@ -1,6 +1,7 @@
 - type = local_assigns.fetch(:type)
 - board = local_assigns.fetch(:board, nil)
 - show_sorting_dropdown = local_assigns.fetch(:show_sorting_dropdown, true)
+- disable_target_branch = local_assigns.fetch(:disable_target_branch, false)
 - placeholder = local_assigns[:placeholder] || _('Search or filter results...')
 - is_not_boards_modal_or_productivity_analytics = type != :boards_modal && type != :productivity_analytics
 - block_css_class = is_not_boards_modal_or_productivity_analytics ? 'row-content-block second-block' : ''
@@ -20,7 +21,8 @@
         .issues-other-filters.filtered-search-wrapper.d-flex.flex-column.flex-md-row
           .filtered-search-box
             - if type != :boards_modal && type != :boards
-              = dropdown_tag(_('Recent searches'),
+              - text = tag.span(sprite_icon('history'), class: "d-md-none") + tag.span(_('Recent searches'), class: "d-none d-md-inline")
+              = dropdown_tag(text,
                 options: { wrapper_class: "filtered-search-history-dropdown-wrapper",
                 toggle_class: "btn filtered-search-history-dropdown-toggle-button",
                 dropdown_class: "filtered-search-history-dropdown",
@@ -74,6 +76,7 @@
                     user: User.new(username: '{{username}}', name: '{{name}}'),
                     avatar: { lazy: true, url: '{{avatar_url}}' }
               = render_if_exists 'shared/issuable/approver_dropdown'
+              = render_if_exists 'shared/issuable/approved_by_dropdown'
               #js-dropdown-milestone.filtered-search-input-dropdown-menu.dropdown-menu
                 %ul{ data: { dropdown: true } }
                   %li.filter-dropdown-item{ data: { value: 'None' } }
@@ -134,7 +137,7 @@
                   %li.filter-dropdown-item
                     %button.btn.btn-link{ type: 'button' }
                       %gl-emoji
-                      %span.js-data-value.prepend-left-10
+                      %span.js-data-value.gl-ml-3
                         {{name}}
               #js-dropdown-wip.filtered-search-input-dropdown-menu.dropdown-menu
                 %ul.filter-dropdown{ data: { dropdown: true } }
@@ -152,10 +155,16 @@
                   %li.filter-dropdown-item{ data: { value: 'no', capitalize: true } }
                     %button.btn.btn-link{ type: 'button' }
                       = _('No')
-              #js-dropdown-target-branch.filtered-search-input-dropdown-menu.dropdown-menu
+              - unless disable_target_branch
+                #js-dropdown-target-branch.filtered-search-input-dropdown-menu.dropdown-menu
+                  %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
+                    %li.filter-dropdown-item
+                      %button.btn.btn-link.js-data-value.monospace
+                        {{title}}
+              #js-dropdown-environment.filtered-search-input-dropdown-menu.dropdown-menu
                 %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
                   %li.filter-dropdown-item
-                    %button.btn.btn-link.js-data-value.monospace
+                    %button.btn.btn-link.js-data-value{ type: 'button' }
                       {{title}}
 
               = render_if_exists 'shared/issuable/filter_weight', type: type
@@ -163,7 +172,7 @@
               = render_if_exists 'shared/issuable/filter_epic', type: type
 
             %button.clear-search.hidden{ type: 'button' }
-              = icon('times')
+              = sprite_icon('close', size: 16, css_class: 'clear-search-icon')
     .filter-dropdown-container.d-flex.flex-column.flex-md-row
       - if type == :boards
         #js-board-labels-toggle
@@ -171,7 +180,9 @@
         - if user_can_admin_list
           = render 'shared/issuable/board_create_list_dropdown', board: board
           - if @project
-            #js-add-issues-btn.prepend-left-10{ data: { can_admin_list: can?(current_user, :admin_list, @project) } }
+            #js-add-issues-btn.gl-ml-3{ data: { can_admin_list: can?(current_user, :admin_list, @project) } }
+        - if current_user && Feature.enabled?(:boards_with_swimlanes, @group)
+          #js-board-epics-swimlanes-toggle
         #js-toggle-focus-btn
       - elsif is_not_boards_modal_or_productivity_analytics && show_sorting_dropdown
         = render 'shared/issuable/sort_dropdown'

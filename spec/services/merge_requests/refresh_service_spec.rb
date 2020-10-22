@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::RefreshService do
+RSpec.describe MergeRequests::RefreshService do
   include ProjectForksHelper
   include ProjectHelpers
 
@@ -92,6 +92,31 @@ describe MergeRequests::RefreshService do
         expect(@fork_merge_request.notes).to be_empty
         expect(@build_failed_todo).to be_done
         expect(@fork_build_failed_todo).to be_done
+      end
+
+      context 'when a merge error exists' do
+        let(:error_message) { 'This is a merge error' }
+
+        before do
+          @merge_request = create(:merge_request,
+            source_project: @project,
+            source_branch: 'feature',
+            target_branch: 'master',
+            target_project: @project,
+            merge_error: error_message)
+        end
+
+        it 'clears merge errors when pushing to the source branch' do
+          expect { refresh_service.execute(@oldrev, @newrev, 'refs/heads/feature') }
+            .to change { @merge_request.reload.merge_error }
+            .from(error_message)
+            .to(nil)
+        end
+
+        it 'does not clear merge errors when pushing to the target branch' do
+          expect { refresh_service.execute(@oldrev, @newrev, 'refs/heads/master') }
+            .not_to change { @merge_request.reload.merge_error }
+        end
       end
 
       it 'reloads source branch MRs memoization' do
@@ -200,25 +225,17 @@ describe MergeRequests::RefreshService do
         context 'when service runs on forked project' do
           let(:project) { @fork_project }
 
-          it 'creates legacy detached merge request pipeline for fork merge request', :sidekiq_might_not_need_inline do
+          before do
+            stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: false)
+          end
+
+          it 'creates detached merge request pipeline for fork merge request', :sidekiq_inline do
             expect { subject }
               .to change { @fork_merge_request.pipelines_for_merge_request.count }.by(1)
 
-            expect(@fork_merge_request.pipelines_for_merge_request.first)
-              .to be_legacy_detached_merge_request_pipeline
-          end
-        end
-
-        context 'when ci_use_merge_request_ref feature flag is false' do
-          before do
-            stub_feature_flags(ci_use_merge_request_ref: false)
-          end
-
-          it 'create legacy detached merge request pipeline for non-fork merge request' do
-            subject
-
-            expect(@merge_request.pipelines_for_merge_request.first)
-              .to be_legacy_detached_merge_request_pipeline
+            merge_request_pipeline = @fork_merge_request.pipelines_for_merge_request.first
+            expect(merge_request_pipeline).to be_detached_merge_request_pipeline
+            expect(merge_request_pipeline.project).to eq(@project)
           end
         end
 
@@ -358,22 +375,23 @@ describe MergeRequests::RefreshService do
         end
 
         it 'updates the merge state' do
-          expect(@merge_request.notes.last.note).to include('merged')
           expect(@merge_request).to be_merged
           expect(@fork_merge_request).to be_merged
-          expect(@fork_merge_request.notes.last.note).to include('merged')
           expect(@build_failed_todo).to be_done
           expect(@fork_build_failed_todo).to be_done
+
+          expect(@merge_request.resource_state_events.last.state).to eq('merged')
+          expect(@fork_merge_request.resource_state_events.last.state).to eq('merged')
         end
       end
 
       context 'when an MR to be closed was empty already' do
         let!(:empty_fork_merge_request) do
           create(:merge_request,
-                 source_project: @fork_project,
-                 source_branch: 'master',
-                 target_branch: 'master',
-                 target_project: @project)
+                  source_project: @fork_project,
+                  source_branch: 'master',
+                  target_branch: 'master',
+                  target_project: @project)
         end
 
         before do
@@ -388,35 +406,36 @@ describe MergeRequests::RefreshService do
 
         it 'only updates the non-empty MRs' do
           expect(@merge_request).to be_merged
-          expect(@merge_request.notes.last.note).to include('merged')
-
           expect(@fork_merge_request).to be_merged
-          expect(@fork_merge_request.notes.last.note).to include('merged')
 
           expect(empty_fork_merge_request).to be_open
           expect(empty_fork_merge_request.merge_request_diff.state).to eq('empty')
           expect(empty_fork_merge_request.notes).to be_empty
+
+          expect(@merge_request.resource_state_events.last.state).to eq('merged')
+          expect(@fork_merge_request.resource_state_events.last.state).to eq('merged')
         end
       end
-    end
 
-    context 'manual merge of source branch', :sidekiq_might_not_need_inline do
-      before do
-        # Merge master -> feature branch
-        @project.repository.merge(@user, @merge_request.diff_head_sha, @merge_request, 'Test message')
-        commit = @project.repository.commit('feature')
-        service.new(@project, @user).execute(@oldrev, commit.id, 'refs/heads/feature')
-        reload_mrs
-      end
+      context 'manual merge of source branch', :sidekiq_might_not_need_inline do
+        before do
+          # Merge master -> feature branch
+          @project.repository.merge(@user, @merge_request.diff_head_sha, @merge_request, 'Test message')
+          commit = @project.repository.commit('feature')
+          service.new(@project, @user).execute(@oldrev, commit.id, 'refs/heads/feature')
+          reload_mrs
+        end
 
-      it 'updates the merge state' do
-        expect(@merge_request.notes.last.note).to include('merged')
-        expect(@merge_request).to be_merged
-        expect(@merge_request.diffs.size).to be > 0
-        expect(@fork_merge_request).to be_merged
-        expect(@fork_merge_request.notes.last.note).to include('merged')
-        expect(@build_failed_todo).to be_done
-        expect(@fork_build_failed_todo).to be_done
+        it 'updates the merge state' do
+          expect(@merge_request.resource_state_events.last.state).to eq('merged')
+          expect(@fork_merge_request.resource_state_events.last.state).to eq('merged')
+
+          expect(@merge_request).to be_merged
+          expect(@merge_request.diffs.size).to be > 0
+          expect(@fork_merge_request).to be_merged
+          expect(@build_failed_todo).to be_done
+          expect(@fork_build_failed_todo).to be_done
+        end
       end
     end
 
@@ -517,11 +536,13 @@ describe MergeRequests::RefreshService do
                                              message: 'Test commit',
                                              branch_name: 'master')
       end
+
       let!(:second_commit) do
         @fork_project.repository.create_file(@user, 'test2.txt', 'More test data',
                                              message: 'Second test commit',
                                              branch_name: 'master')
       end
+
       let!(:forked_master_mr) do
         create(:merge_request,
                source_project: @fork_project,
@@ -529,6 +550,7 @@ describe MergeRequests::RefreshService do
                target_branch: 'master',
                target_project: @project)
       end
+
       let(:force_push_commit) { @project.commit('feature').id }
 
       it 'reloads a new diff for a push to the forked project' do
@@ -573,13 +595,14 @@ describe MergeRequests::RefreshService do
 
     context 'push to origin repo target branch after fork project was removed' do
       before do
-        @fork_project.destroy
+        @fork_project.destroy!
         service.new(@project, @user).execute(@oldrev, @newrev, 'refs/heads/feature')
         reload_mrs
       end
 
       it 'updates the merge request state' do
-        expect(@merge_request.notes.last.note).to include('merged')
+        expect(@merge_request.resource_state_events.last.state).to eq('merged')
+
         expect(@merge_request).to be_merged
         expect(@fork_merge_request).to be_open
         expect(@fork_merge_request.notes).to be_empty
@@ -623,7 +646,7 @@ describe MergeRequests::RefreshService do
           references: [issue],
           author_name: commit_author.name,
           author_email: commit_author.email,
-          committed_date: Time.now
+          committed_date: Time.current
         )
 
         allow_any_instance_of(MergeRequest).to receive(:commits).and_return(CommitCollection.new(@project, [commit], 'feature'))
@@ -773,10 +796,6 @@ describe MergeRequests::RefreshService do
     subject { service.execute(oldrev, newrev, 'refs/heads/merge-commit-analyze-before') }
 
     context 'feature enabled' do
-      before do
-        stub_feature_flags(branch_push_merge_commit_analyze: true)
-      end
-
       it "updates merge requests' merge_commits" do
         expect(Gitlab::BranchPushMergeCommitAnalyzer).to receive(:new).and_wrap_original do |original_method, commits|
           expect(commits.map(&:id)).to eq(%w{646ece5cfed840eca0a4feb21bcd6a81bb19bda3 29284d9bcc350bcae005872d0be6edd016e2efb5 5f82584f0a907f3b30cfce5bb8df371454a90051 8a994512e8c8f0dfcf22bb16df6e876be7a61036 689600b91aabec706e657e38ea706ece1ee8268f db46a1c5a5e474aa169b6cdb7a522d891bc4c5f9})
@@ -791,24 +810,6 @@ describe MergeRequests::RefreshService do
 
         expect(merge_request.merge_commit.id).to eq('646ece5cfed840eca0a4feb21bcd6a81bb19bda3')
         expect(merge_request_side_branch.merge_commit.id).to eq('29284d9bcc350bcae005872d0be6edd016e2efb5')
-      end
-    end
-
-    context 'when feature is disabled' do
-      before do
-        stub_feature_flags(branch_push_merge_commit_analyze: false)
-      end
-
-      it "does not trigger analysis" do
-        expect(Gitlab::BranchPushMergeCommitAnalyzer).not_to receive(:new)
-
-        subject
-
-        merge_request.reload
-        merge_request_side_branch.reload
-
-        expect(merge_request.merge_commit).to eq(nil)
-        expect(merge_request_side_branch.merge_commit).to eq(nil)
       end
     end
   end

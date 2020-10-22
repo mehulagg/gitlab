@@ -1,68 +1,96 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlHeatmap } from '@gitlab/ui/dist/charts';
+import timezoneMock from 'timezone-mock';
 import Heatmap from '~/monitoring/components/charts/heatmap.vue';
-import { graphDataPrometheusQueryRangeMultiTrack } from '../../mock_data';
+import { heatmapGraphData } from '../../graph_data';
 
 describe('Heatmap component', () => {
-  let heatmapChart;
+  let wrapper;
   let store;
 
-  beforeEach(() => {
-    heatmapChart = shallowMount(Heatmap, {
+  const findChart = () => wrapper.find(GlHeatmap);
+
+  const graphData = heatmapGraphData();
+
+  const createWrapper = (props = {}) => {
+    wrapper = shallowMount(Heatmap, {
       propsData: {
-        graphData: graphDataPrometheusQueryRangeMultiTrack,
+        graphData: heatmapGraphData(),
         containerWidth: 100,
+        ...props,
       },
       store,
     });
-  });
+  };
 
-  afterEach(() => {
-    heatmapChart.destroy();
-  });
+  describe('wrapped chart', () => {
+    beforeEach(() => {
+      createWrapper();
+    });
 
-  describe('wrapped components', () => {
-    describe('GitLab UI heatmap chart', () => {
-      let glHeatmapChart;
+    afterEach(() => {
+      wrapper.destroy();
+    });
 
-      beforeEach(() => {
-        glHeatmapChart = heatmapChart.find(GlHeatmap);
+    it('should display a label on the x axis', () => {
+      expect(wrapper.vm.xAxisName).toBe(graphData.xLabel);
+    });
+
+    it('should display a label on the y axis', () => {
+      expect(wrapper.vm.yAxisName).toBe(graphData.y_label);
+    });
+
+    // According to the echarts docs https://echarts.apache.org/en/option.html#series-heatmap.data
+    // each row of the heatmap chart is represented by an array inside another parent array
+    // e.g. [[0, 0, 10]], the format represents the column, the row and finally the value
+    // corresponding to the cell
+
+    it('should return chartData with a length of x by y, with a length of 3 per array', () => {
+      const row = wrapper.vm.chartData[0];
+
+      expect(row.length).toBe(3);
+      expect(wrapper.vm.chartData.length).toBe(6);
+    });
+
+    it('returns a series of labels for the x axis', () => {
+      const { xAxisLabels } = wrapper.vm;
+
+      expect(xAxisLabels.length).toBe(2);
+    });
+
+    describe('y axis labels', () => {
+      const gmtLabels = ['8:10 PM', '8:12 PM', '8:14 PM'];
+
+      it('y-axis labels are formatted in AM/PM format', () => {
+        expect(findChart().props('yAxisLabels')).toEqual(gmtLabels);
       });
 
-      it('is a Vue instance', () => {
-        expect(glHeatmapChart.isVueInstance()).toBe(true);
-      });
+      describe('when in PT timezone', () => {
+        const ptLabels = ['1:10 PM', '1:12 PM', '1:14 PM'];
+        const utcLabels = gmtLabels; // Identical in this case
 
-      it('should display a label on the x axis', () => {
-        expect(heatmapChart.vm.xAxisName).toBe(graphDataPrometheusQueryRangeMultiTrack.x_label);
-      });
+        beforeAll(() => {
+          timezoneMock.register('US/Pacific');
+        });
 
-      it('should display a label on the y axis', () => {
-        expect(heatmapChart.vm.yAxisName).toBe(graphDataPrometheusQueryRangeMultiTrack.y_label);
-      });
+        afterAll(() => {
+          timezoneMock.unregister();
+        });
 
-      // According to the echarts docs https://echarts.apache.org/en/option.html#series-heatmap.data
-      // each row of the heatmap chart is represented by an array inside another parent array
-      // e.g. [[0, 0, 10]], the format represents the column, the row and finally the value
-      // corresponding to the cell
+        it('by default, y-axis is formatted in PT', () => {
+          createWrapper();
+          expect(findChart().props('yAxisLabels')).toEqual(ptLabels);
+        });
 
-      it('should return chartData with a length of x by y, with a length of 3 per array', () => {
-        const row = heatmapChart.vm.chartData[0];
+        it('when the chart uses local timezone, y-axis is formatted in PT', () => {
+          createWrapper({ timezone: 'LOCAL' });
+          expect(findChart().props('yAxisLabels')).toEqual(ptLabels);
+        });
 
-        expect(row.length).toBe(3);
-        expect(heatmapChart.vm.chartData.length).toBe(30);
-      });
-
-      it('returns a series of labels for the x axis', () => {
-        const { xAxisLabels } = heatmapChart.vm;
-
-        expect(xAxisLabels.length).toBe(5);
-      });
-
-      it('returns a series of labels for the y axis', () => {
-        const { yAxisLabels } = heatmapChart.vm;
-
-        expect(yAxisLabels.length).toBe(6);
+        it('when the chart uses UTC, y-axis is formatted in UTC', () => {
+          createWrapper({ timezone: 'UTC' });
+          expect(findChart().props('yAxisLabels')).toEqual(utcLabels);
+        });
       });
     });
   });

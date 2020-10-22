@@ -2,7 +2,7 @@ import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import services from '~/ide/services';
 import Api from '~/api';
-import gqClient from '~/ide/services/gql';
+import { query } from '~/ide/services/gql';
 import { escapeFileUrl } from '~/lib/utils/url_utility';
 import getUserPermissions from '~/ide/queries/getUserPermissions.query.graphql';
 import { projectData } from '../mock_data';
@@ -146,7 +146,7 @@ describe('IDE services', () => {
     it('gives back file.baseRaw for files with that property present', () => {
       file.baseRaw = TEST_FILE_CONTENTS;
 
-      return services.getBaseRawFileData(file, TEST_COMMIT_SHA).then(content => {
+      return services.getBaseRawFileData(file, TEST_PROJECT_ID, TEST_COMMIT_SHA).then(content => {
         expect(content).toEqual(TEST_FILE_CONTENTS);
       });
     });
@@ -155,7 +155,7 @@ describe('IDE services', () => {
       file.tempFile = true;
       file.baseRaw = TEST_FILE_CONTENTS;
 
-      return services.getBaseRawFileData(file, TEST_COMMIT_SHA).then(content => {
+      return services.getBaseRawFileData(file, TEST_PROJECT_ID, TEST_COMMIT_SHA).then(content => {
         expect(content).toEqual(TEST_FILE_CONTENTS);
       });
     });
@@ -192,7 +192,7 @@ describe('IDE services', () => {
         });
 
         it('fetches file content', () =>
-          services.getBaseRawFileData(file, TEST_COMMIT_SHA).then(content => {
+          services.getBaseRawFileData(file, TEST_PROJECT_ID, TEST_COMMIT_SHA).then(content => {
             expect(content).toEqual(TEST_FILE_CONTENTS);
           }));
       },
@@ -207,17 +207,80 @@ describe('IDE services', () => {
         },
       };
       Api.project.mockReturnValue(Promise.resolve({ data: { ...projectData } }));
-      gqClient.query.mockReturnValue(Promise.resolve({ data: { project: gqlProjectData } }));
+      query.mockReturnValue(Promise.resolve({ data: { project: gqlProjectData } }));
 
       return services.getProjectData(TEST_NAMESPACE, TEST_PROJECT).then(response => {
         expect(response).toEqual({ data: { ...projectData, ...gqlProjectData } });
         expect(Api.project).toHaveBeenCalledWith(TEST_PROJECT_ID);
-        expect(gqClient.query).toHaveBeenCalledWith({
+        expect(query).toHaveBeenCalledWith({
           query: getUserPermissions,
           variables: {
             projectPath: TEST_PROJECT_ID,
           },
         });
+      });
+    });
+  });
+
+  describe('getFiles', () => {
+    let mock;
+    let relativeUrlRoot;
+    const TEST_RELATIVE_URL_ROOT = 'blah-blah';
+
+    beforeEach(() => {
+      jest.spyOn(axios, 'get');
+      relativeUrlRoot = gon.relative_url_root;
+      gon.relative_url_root = TEST_RELATIVE_URL_ROOT;
+
+      mock = new MockAdapter(axios);
+
+      mock
+        .onGet(`${TEST_RELATIVE_URL_ROOT}/${TEST_PROJECT_ID}/-/files/${TEST_COMMIT_SHA}`)
+        .reply(200, [TEST_FILE_PATH]);
+    });
+
+    afterEach(() => {
+      mock.restore();
+      gon.relative_url_root = relativeUrlRoot;
+    });
+
+    it('initates the api call based on the passed path and commit hash', () => {
+      return services.getFiles(TEST_PROJECT_ID, TEST_COMMIT_SHA).then(({ data }) => {
+        expect(axios.get).toHaveBeenCalledWith(
+          `${gon.relative_url_root}/${TEST_PROJECT_ID}/-/files/${TEST_COMMIT_SHA}`,
+          expect.any(Object),
+        );
+        expect(data).toEqual([TEST_FILE_PATH]);
+      });
+    });
+  });
+
+  describe('pingUsage', () => {
+    let mock;
+    let relativeUrlRoot;
+    const TEST_RELATIVE_URL_ROOT = 'blah-blah';
+
+    beforeEach(() => {
+      jest.spyOn(axios, 'post');
+      relativeUrlRoot = gon.relative_url_root;
+      gon.relative_url_root = TEST_RELATIVE_URL_ROOT;
+
+      mock = new MockAdapter(axios);
+    });
+
+    afterEach(() => {
+      mock.restore();
+      gon.relative_url_root = relativeUrlRoot;
+    });
+
+    it('posts to usage endpoint', () => {
+      const TEST_PROJECT_PATH = 'foo/bar';
+      const axiosURL = `${TEST_RELATIVE_URL_ROOT}/${TEST_PROJECT_PATH}/usage_ping/web_ide_pipelines_count`;
+
+      mock.onPost(axiosURL).reply(200);
+
+      return services.pingUsage(TEST_PROJECT_PATH).then(() => {
+        expect(axios.post).toHaveBeenCalledWith(axiosURL);
       });
     });
   });

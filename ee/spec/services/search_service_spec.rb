@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SearchService do
+RSpec.describe SearchService do
   describe '#search_objects' do
     context 'redacting search results (repository)', :elastic, :sidekiq_inline do
       let(:project) { create(:project, :repository) }

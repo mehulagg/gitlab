@@ -94,7 +94,7 @@ export default {
           status="none"
           :status-icon-size="24"
           :component="$options.componentNames.MetricsReportsIssueBody"
-          class="prepend-left-4 prepend-top-4 append-bottom-8"
+          class="gl-ml-2 gl-mt-2 gl-mb-3"
         />
       </smart-virtual-list>
     </div>

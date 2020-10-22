@@ -1,6 +1,0 @@
----
-title: Provide instance level setting to enable or disable 'default branch protection'
-  at the group level for group owners
-merge_request: 28997
-author:
-type: added

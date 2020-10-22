@@ -2,11 +2,10 @@
 
 require 'spec_helper'
 
-describe SystemNoteService do
+RSpec.describe SystemNoteService do
   include ProjectForksHelper
   include Gitlab::Routing
   include RepoHelpers
-  include DesignManagementTestHelpers
 
   let_it_be(:group)    { create(:group) }
   let_it_be(:project)  { create(:project, :repository, group: group) }
@@ -14,94 +13,6 @@ describe SystemNoteService do
   let_it_be(:noteable) { create(:issue, project: project) }
   let_it_be(:issue)    { noteable }
   let_it_be(:epic)     { create(:epic, group: group) }
-
-  describe '.relate_issue' do
-    let(:noteable_ref) { double }
-    let(:noteable) { double }
-
-    before do
-      allow(noteable).to receive(:project).and_return(double)
-    end
-
-    it 'calls IssuableService' do
-      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
-        expect(service).to receive(:relate_issue).with(noteable_ref)
-      end
-
-      described_class.relate_issue(noteable, noteable_ref, double)
-    end
-  end
-
-  describe '.unrelate_issue' do
-    let(:noteable_ref) { double }
-    let(:noteable) { double }
-
-    before do
-      allow(noteable).to receive(:project).and_return(double)
-    end
-
-    it 'calls IssuableService' do
-      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
-        expect(service).to receive(:unrelate_issue).with(noteable_ref)
-      end
-
-      described_class.unrelate_issue(noteable, noteable_ref, double)
-    end
-  end
-
-  describe '.design_version_added' do
-    let(:version) { create(:design_version) }
-
-    it 'calls DesignManagementService' do
-      expect_next_instance_of(EE::SystemNotes::DesignManagementService) do |service|
-        expect(service).to receive(:design_version_added).with(version)
-      end
-
-      described_class.design_version_added(version)
-    end
-  end
-
-  describe '.design_discussion_added' do
-    let(:discussion_note) { create(:diff_note_on_design) }
-
-    it 'calls DesignManagementService' do
-      expect_next_instance_of(EE::SystemNotes::DesignManagementService) do |service|
-        expect(service).to receive(:design_discussion_added).with(discussion_note)
-      end
-
-      described_class.design_discussion_added(discussion_note)
-    end
-  end
-
-  describe '.approve_mr' do
-    it 'calls MergeRequestsService' do
-      expect_next_instance_of(::SystemNotes::MergeRequestsService) do |service|
-        expect(service).to receive(:approve_mr)
-      end
-
-      described_class.approve_mr(noteable, author)
-    end
-  end
-
-  describe '.unapprove_mr' do
-    it 'calls MergeRequestsService' do
-      expect_next_instance_of(::SystemNotes::MergeRequestsService) do |service|
-        expect(service).to receive(:unapprove_mr)
-      end
-
-      described_class.unapprove_mr(noteable, author)
-    end
-  end
-
-  describe '.change_weight_note' do
-    it 'calls IssuableService' do
-      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
-        expect(service).to receive(:change_weight_note)
-      end
-
-      described_class.change_weight_note(noteable, project, author)
-    end
-  end
 
   describe '.change_health_status_note' do
     it 'calls IssuableService' do
@@ -238,6 +149,16 @@ describe SystemNoteService do
       end
 
       described_class.change_vulnerability_state(noteable, author)
+    end
+  end
+
+  describe '.publish_issue_to_status_page' do
+    it 'calls IssuablesService' do
+      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
+        expect(service).to receive(:publish_issue_to_status_page)
+      end
+
+      described_class.publish_issue_to_status_page(noteable, project, author)
     end
   end
 end

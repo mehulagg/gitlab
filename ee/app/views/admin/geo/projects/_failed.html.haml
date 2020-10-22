@@ -1,18 +1,21 @@
-- @registries.each do |project_registry|
-  .card.project-card.prepend-top-15
-    .card-header{ id: "project-#{project_registry.project_id}-header" }
-      .d-flex.align-items-center
-        - if project_registry.project.nil?
-          = render partial: 'removed', locals: { project_registry: project_registry }
-        - else
-          %strong.text-truncate.flex-fill
-            = link_to project_registry.project.full_name, admin_namespace_project_path(project_registry.project.namespace, project_registry.project)
-          - if project_registry.candidate_for_redownload?
-            = link_to(force_redownload_admin_geo_project_path(project_registry), method: :post, class: 'btn btn-default btn-sm mr-2') do
-              = s_('Geo|Redownload')
-          = link_to(resync_admin_geo_project_path(project_registry), method: :post, class: 'btn btn-default-primary btn-sm') do
-            = s_('Geo|Resync')
+- if @registries.any?
+  - @registries.each do |project_registry|
+    .card.project-card.gl-mt-5
+      .card-header{ id: "project-#{project_registry.project_id}-header" }
+        .d-flex.align-items-center
+          - if project_registry.project.nil?
+            = render partial: 'removed', locals: { project_registry: project_registry }
+          - else
+            %strong.text-truncate.flex-fill
+              = link_to project_registry.project.full_name, admin_namespace_project_path(project_registry.project.namespace, project_registry.project)
+            - if project_registry.candidate_for_redownload?
+              = link_to(force_redownload_admin_geo_project_path(project_registry), method: :post, class: 'gl-button btn btn-default btn-sm mr-2') do
+                = s_('Geo|Redownload')
+            = link_to(resync_admin_geo_project_path(project_registry), method: :post, class: 'gl-button btn btn-default-primary btn-sm') do
+              = s_('Geo|Resync')
 
-    = render partial: 'registry_failed', locals: { project_registry: project_registry }
+      = render partial: 'registry_failed', locals: { project_registry: project_registry }
 
-= paginate @registries, theme: 'gitlab'
+  = paginate @registries, theme: 'gitlab'
+- else
+  = render 'shared/empty_states/geo_replication', replicable_type: _('projects')

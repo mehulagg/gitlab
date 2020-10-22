@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LicensesFinder do
+RSpec.describe LicensesFinder do
   let(:license) { create(:license) }
 
   let_it_be(:user) { create(:admin) }

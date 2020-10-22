@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-describe Gitlab::ErrorTracking do
+require 'raven/transports/dummy'
+
+RSpec.describe Gitlab::ErrorTracking do
   let(:exception) { RuntimeError.new('boom') }
   let(:issue_url) { 'http://gitlab.com/gitlab-org/gitlab-foss/issues/1' }
 
@@ -16,13 +18,97 @@ describe Gitlab::ErrorTracking do
     ]
   end
 
+  let(:sentry_event) { Gitlab::Json.parse(Raven.client.transport.events.last[1]) }
+
   before do
     stub_sentry_settings
 
     allow(described_class).to receive(:sentry_dsn).and_return(Gitlab.config.sentry.dsn)
     allow(Labkit::Correlation::CorrelationId).to receive(:current_id).and_return('cid')
 
-    described_class.configure
+    described_class.configure do |config|
+      config.encoding = 'json'
+    end
+  end
+
+  describe '.configure' do
+    context 'default tags from GITLAB_SENTRY_EXTRA_TAGS' do
+      context 'when the value is a JSON hash' do
+        it 'includes those tags in all events' do
+          stub_env('GITLAB_SENTRY_EXTRA_TAGS', { foo: 'bar', baz: 'quux' }.to_json)
+
+          described_class.configure do |config|
+            config.encoding = 'json'
+          end
+
+          described_class.track_exception(StandardError.new)
+
+          expect(sentry_event['tags'].except('correlation_id', 'locale', 'program'))
+            .to eq('foo' => 'bar', 'baz' => 'quux')
+        end
+      end
+
+      context 'when the value is not set' do
+        before do
+          stub_env('GITLAB_SENTRY_EXTRA_TAGS', nil)
+        end
+
+        it 'does not log an error' do
+          expect(Gitlab::AppLogger).not_to receive(:debug)
+
+          described_class.configure do |config|
+            config.encoding = 'json'
+          end
+        end
+
+        it 'does not send any extra tags' do
+          described_class.configure do |config|
+            config.encoding = 'json'
+          end
+
+          described_class.track_exception(StandardError.new)
+
+          expect(sentry_event['tags'].keys).to contain_exactly('correlation_id', 'locale', 'program')
+        end
+      end
+
+      context 'when the value is not a JSON hash' do
+        using RSpec::Parameterized::TableSyntax
+
+        where(:env_var, :error) do
+          { foo: 'bar', baz: 'quux' }.inspect | 'JSON::ParserError'
+          [].to_json | 'NoMethodError'
+          [%w[foo bar]].to_json | 'NoMethodError'
+          %w[foo bar].to_json | 'NoMethodError'
+          '"string"' | 'NoMethodError'
+        end
+
+        with_them do
+          before do
+            stub_env('GITLAB_SENTRY_EXTRA_TAGS', env_var)
+          end
+
+          it 'does not include any extra tags' do
+            described_class.configure do |config|
+              config.encoding = 'json'
+            end
+
+            described_class.track_exception(StandardError.new)
+
+            expect(sentry_event['tags'].except('correlation_id', 'locale', 'program'))
+              .to be_empty
+          end
+
+          it 'logs the error class' do
+            expect(Gitlab::AppLogger).to receive(:debug).with(a_string_matching(error))
+
+            described_class.configure do |config|
+              config.encoding = 'json'
+            end
+          end
+        end
+      end
+    end
   end
 
   describe '.with_context' do
@@ -177,6 +263,28 @@ describe Gitlab::ErrorTracking do
           .with(exception, a_hash_including(extra: a_hash_including(extra_info)))
 
         described_class.track_exception(exception, extra_info)
+      end
+    end
+
+    context 'with sidekiq args' do
+      it 'ensures extra.sidekiq.args is a string' do
+        extra = { sidekiq: { 'class' => 'PostReceive', 'args' => [1, { 'id' => 2, 'name' => 'hello' }, 'some-value', 'another-value'] } }
+
+        expect(Gitlab::ErrorTracking::Logger).to receive(:error).with(
+          hash_including({ 'extra.sidekiq' => { 'class' => 'PostReceive', 'args' => ['1', '{"id"=>2, "name"=>"hello"}', 'some-value', 'another-value'] } }))
+
+        described_class.track_exception(exception, extra)
+      end
+
+      it 'filters sensitive arguments before sending' do
+        extra = { sidekiq: { 'class' => 'UnknownWorker', 'args' => ['sensitive string', 1, 2] } }
+
+        expect(Gitlab::ErrorTracking::Logger).to receive(:error).with(
+          hash_including('extra.sidekiq' => { 'class' => 'UnknownWorker', 'args' => ['[FILTERED]', '1', '2'] }))
+
+        described_class.track_exception(exception, extra)
+
+        expect(sentry_event.dig('extra', 'sidekiq', 'args')).to eq(['[FILTERED]', 1, 2])
       end
     end
   end

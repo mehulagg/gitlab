@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Toggling an AwardEmoji' do
+RSpec.describe 'Toggling an AwardEmoji' do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
@@ -15,15 +15,15 @@ describe 'Toggling an AwardEmoji' do
       name: emoji_name
     }
 
-    graphql_mutation(:toggle_award_emoji, variables)
+    graphql_mutation(:award_emoji_toggle, variables)
   end
 
   def mutation_response
-    graphql_mutation_response(:toggle_award_emoji)
+    graphql_mutation_response(:award_emoji_toggle)
   end
 
   shared_examples 'a mutation that does not create or destroy an AwardEmoji' do
-    it do
+    specify do
       expect do
         post_graphql_mutation(mutation, current_user: current_user)
       end.not_to change { AwardEmoji.count }
@@ -44,8 +44,9 @@ describe 'Toggling an AwardEmoji' do
 
       it_behaves_like 'a mutation that does not create or destroy an AwardEmoji'
 
-      it_behaves_like 'a mutation that returns top-level errors',
-                      errors: ['Cannot award emoji to this resource']
+      it_behaves_like 'a mutation that returns top-level errors' do
+        let(:match_errors) { include(/was provided invalid value for awardableId/) }
+      end
     end
 
     context 'when the given awardable is an Awardable but still cannot be awarded an emoji' do
@@ -143,8 +144,6 @@ describe 'Toggling an AwardEmoji' do
 
   context 'when the user does not have permission' do
     it_behaves_like 'a mutation that does not create or destroy an AwardEmoji'
-
-    it_behaves_like 'a mutation that returns top-level errors',
-                    errors: ['The resource that you are attempting to access does not exist or you don\'t have permission to perform this action']
+    it_behaves_like 'a mutation that returns a top-level access error'
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Scim < Grape::API
+  class Scim < ::API::Base
     include ::Gitlab::Utils::StrongMemoize
 
     prefix 'api/scim'
@@ -43,12 +43,18 @@ module API
           unauthorized! unless token && ScimOauthAccessToken.token_matches_for_group?(token, group)
         end
 
+        def sanitize_request_parameters(parameters)
+          filter = ActiveSupport::ParameterFilter.new(::Rails.application.config.filter_parameters)
+          filter.filter(parameters)
+        end
+
         # Instance variable `@group` is necessary for the
         # Gitlab::ApplicationContext in API::API
         def find_and_authenticate_group!(group_path)
           @group = find_group(group_path)
 
           scim_not_found!(message: "Group #{group_path} not found") unless @group
+          scim_not_found!(message: "Group #{group_path} does not have SAML SSO configured") unless @group.saml_provider
 
           check_access_to_group!(@group)
 
@@ -91,23 +97,12 @@ module API
 
         def find_user_identity(group, extern_uid)
           return unless group.saml_provider
-          return group.scim_identities.with_extern_uid(extern_uid).first if scim_identities_enabled?
 
-          GroupSamlIdentityFinder.find_by_group_and_uid(group: group, uid: extern_uid)
-        end
-
-        def scim_identities_enabled?
-          strong_memoize(:scim_identities_enabled) do
-            ::EE::Gitlab::Scim::Feature.scim_identities_enabled?(@group)
-          end
+          group.scim_identities.with_extern_uid(extern_uid).first
         end
 
         def deprovision(identity)
-          if scim_identities_enabled?
-            ::EE::Gitlab::Scim::DeprovisionService.new(identity).execute
-          else
-            GroupSaml::Identity::DestroyService.new(identity).execute(transactional: true)
-          end
+          ::EE::Gitlab::Scim::DeprovisionService.new(identity).execute
 
           true
         rescue => e
@@ -178,9 +173,9 @@ module API
 
             present result.identity, with: ::EE::API::Entities::Scim::User
           when :conflict
-            scim_conflict!(message: "Error saving user with #{params.inspect}: #{result.message}")
+            scim_conflict!(message: "Error saving user with #{sanitize_request_parameters(params).inspect}: #{result.message}")
           when :error
-            scim_error!(message: ["Error saving user with #{params.inspect}", result.message].compact.join(": "))
+            scim_error!(message: ["Error saving user with #{sanitize_request_parameters(params).inspect}", result.message].compact.join(": "))
           end
         end
 
@@ -200,7 +195,7 @@ module API
           if updated
             no_content!
           else
-            scim_error!(message: "Error updating #{identity.user.name} with #{params.inspect}")
+            scim_error!(message: "Error updating #{identity.user.name} with #{sanitize_request_parameters(params).inspect}")
           end
         end
 

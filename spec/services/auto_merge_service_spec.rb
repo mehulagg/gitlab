@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AutoMergeService do
+RSpec.describe AutoMergeService do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
   let(:service) { described_class.new(project, user) }
@@ -148,7 +148,7 @@ describe AutoMergeService do
   end
 
   describe '#update' do
-    subject { service.update(merge_request) }
+    subject { service.update(merge_request) } # rubocop:disable Rails/SaveBang
 
     context 'when auto merge is enabled' do
       let(:merge_request) { create(:merge_request, :merge_when_pipeline_succeeds) }

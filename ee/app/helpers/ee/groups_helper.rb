@@ -7,7 +7,7 @@ module EE
     def group_epics_count(state:)
       EpicsFinder
         .new(current_user, group_id: @group.id, state: state)
-        .execute
+        .execute(skip_visibility_check: true)
         .count
     end
 
@@ -42,14 +42,9 @@ module EE
       ]
     end
 
+    override :group_packages_nav?
     def group_packages_nav?
-      group_packages_list_nav? ||
-        group_dependency_proxy_nav? ||
-        group_container_registry_nav?
-    end
-
-    def group_packages_list_nav?
-      @group.packages_feature_available?
+      super || group_dependency_proxy_nav?
     end
 
     def group_dependency_proxy_nav?
@@ -79,14 +74,10 @@ module EE
     end
 
     def show_discover_group_security?(group)
-      security_feature_available_at = DateTime.new(2019, 11, 1)
-
       !!current_user &&
         ::Gitlab.com? &&
-        current_user.created_at > security_feature_available_at &&
         !@group.feature_available?(:security_dashboard) &&
-        can?(current_user, :admin_group, @group) &&
-        current_user.ab_feature_enabled?(:discover_security)
+        can?(current_user, :admin_group, @group)
     end
 
     def show_group_activity_analytics?
@@ -117,13 +108,19 @@ module EE
       end
     end
 
+    def show_delayed_project_removal_setting?(group)
+      group.feature_available?(:adjourned_deletion_for_projects_and_groups)
+    end
+
     private
 
     def get_group_sidebar_links
       links = super
 
-      if can?(current_user, :read_group_cycle_analytics, @group)
-        links << :cycle_analytics
+      resources = [:cycle_analytics, :merge_request_analytics, :repository_analytics]
+
+      links += resources.select do |resource|
+        can?(current_user, "read_group_#{resource}".to_sym, @group)
       end
 
       if can?(current_user, :read_group_contribution_analytics, @group) || show_promotions?
@@ -144,6 +141,10 @@ module EE
 
       if @group.feature_available?(:productivity_analytics) && can?(current_user, :view_productivity_analytics, @group)
         links << :productivity_analytics
+      end
+
+      if ::Feature.enabled?(:group_iterations, @group, default_enabled: true) && @group.feature_available?(:iterations) && can?(current_user, :read_iteration, @group)
+        links << :iterations
       end
 
       links

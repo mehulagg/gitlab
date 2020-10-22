@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Multiple issue updating from issues#index', :js do
+RSpec.describe 'Multiple issue updating from issues#index', :js do
   let!(:project)   { create(:project) }
   let!(:issue)     { create(:issue, project: project) }
   let!(:user)      { create(:user)}
@@ -51,7 +51,7 @@ describe 'Multiple issue updating from issues#index', :js do
       click_update_issues_button
 
       page.within('.issue .controls') do
-        expect(find('.author-link')["title"]).to have_content(user.name)
+        expect(find('.author-link')['href']).to have_content(user.website_url)
       end
     end
 
@@ -82,12 +82,14 @@ describe 'Multiple issue updating from issues#index', :js do
       find('.dropdown-menu-milestone a', text: milestone.title).click
       click_update_issues_button
 
-      expect(find('.issue')).to have_content milestone.title
+      expect(page.find('.issue')).to have_content milestone.title
     end
 
     it 'sets to no milestone' do
       create_with_milestone
       visit project_issues_path(project)
+
+      wait_for_requests
 
       expect(first('.issue')).to have_content milestone.title
 
@@ -95,7 +97,7 @@ describe 'Multiple issue updating from issues#index', :js do
       find('#check-all-issues').click
       find('.issues-bulk-update .js-milestone-select').click
 
-      find('.dropdown-menu-milestone a', text: "No Milestone").click
+      find('.dropdown-menu-milestone a', text: "No milestone").click
       click_update_issues_button
 
       expect(find('.issue:first-child')).not_to have_content milestone.title

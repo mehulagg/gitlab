@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::MergeToRefService do
+RSpec.describe MergeRequests::MergeToRefService do
   let(:user) { create(:user) }
   let(:merge_request) { create(:merge_request, :simple) }
   let(:project) { merge_request.project }
@@ -13,16 +13,12 @@ describe MergeRequests::MergeToRefService do
   end
 
   describe '#execute' do
-    context 'project has exceeded size limit' do
-      before do
-        allow(project).to receive(:above_size_limit?).and_return(true)
-      end
+    it 'does not check the repository size limit' do
+      expect(project.repository_size_checker).not_to receive(:above_size_limit?)
 
-      it 'bypasses the repository limit check' do
-        result = service.execute(merge_request)
+      result = service.execute(merge_request)
 
-        expect(result[:status]).to eq(:success)
-      end
+      expect(result[:status]).to eq(:success)
     end
 
     context 'when no commit message is explicitly given and push rule is set' do

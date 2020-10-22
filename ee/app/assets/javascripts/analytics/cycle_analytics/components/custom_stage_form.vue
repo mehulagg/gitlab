@@ -1,5 +1,5 @@
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { isEqual } from 'lodash';
 import {
   GlFormGroup,
@@ -7,7 +7,7 @@ import {
   GlFormSelect,
   GlLoadingIcon,
   GlDropdown,
-  GlDropdownHeader,
+  GlDropdownSectionHeader,
   GlDropdownItem,
   GlSprintf,
 } from '@gitlab/ui';
@@ -33,23 +33,37 @@ const defaultFields = {
   endEventLabelId: null,
 };
 
-export const initializeFormData = ({ emptyFieldState, initialFields, errors }) => {
-  const defaultErrors = initialFields?.endEventIdentifier
-    ? { ...emptyFieldState, endEventIdentifier: null }
+const defaultErrors = {
+  id: [],
+  name: [],
+  startEventIdentifier: [],
+  startEventLabelId: [],
+  endEventIdentifier: [],
+  endEventLabelId: [],
+};
+
+const ERRORS = {
+  START_EVENT_REQUIRED: s__('CustomCycleAnalytics|Please select a start event first'),
+  STAGE_NAME_EXISTS: s__('CustomCycleAnalytics|Stage name already exists'),
+  INVALID_EVENT_PAIRS: s__(
+    'CustomCycleAnalytics|Start event changed, please select a valid stop event',
+  ),
+};
+
+export const initializeFormData = ({ emptyFieldState = defaultFields, fields, errors }) => {
+  const initErrors = fields?.endEventIdentifier
+    ? defaultErrors
     : {
-        ...emptyFieldState,
-        endEventIdentifier:
-          initialFields && !initialFields.startEventIdentifier
-            ? [s__('CustomCycleAnalytics|Please select a start event first')]
-            : null,
+        ...defaultErrors,
+        endEventIdentifier: !fields?.startEventIdentifier ? [ERRORS.START_EVENT_REQUIRED] : [],
       };
   return {
     fields: {
       ...emptyFieldState,
-      ...initialFields,
+      ...fields,
     },
-    fieldErrors: {
-      ...defaultErrors,
+    errors: {
+      ...initErrors,
       ...errors,
     },
   };
@@ -63,7 +77,7 @@ export default {
     GlLoadingIcon,
     LabelsSelector,
     GlDropdown,
-    GlDropdownHeader,
+    GlDropdownSectionHeader,
     GlDropdownItem,
     GlSprintf,
   },
@@ -72,42 +86,23 @@ export default {
       type: Array,
       required: true,
     },
-    initialFields: {
-      type: Object,
-      required: false,
-      default: () => {},
-    },
-    isSavingCustomStage: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    isEditingCustomStage: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    errors: {
-      type: Object,
-      required: false,
-      default: null,
-    },
   },
   data() {
-    const { initialFields = {}, errors = null } = this;
-    const { fields, fieldErrors } = initializeFormData({
-      emptyFieldState: defaultFields,
-      initialFields,
-      errors,
-    });
     return {
       labelEvents: getLabelEventsIdentifiers(this.events),
-      fields,
-      fieldErrors,
+      fields: {},
+      errors: [],
     };
   },
   computed: {
     ...mapGetters(['hiddenStages']),
+    ...mapState('customStages', [
+      'isLoading',
+      'isSavingCustomStage',
+      'isEditingCustomStage',
+      'formInitialData',
+      'formErrors',
+    ]),
     startEventOptions() {
       return [
         { value: null, text: s__('CustomCycleAnalytics|Select start event') },
@@ -132,8 +127,7 @@ export default {
     },
     hasErrors() {
       return (
-        this.eventMismatchError ||
-        Object.values(this.fieldErrors).some(errArray => errArray?.length)
+        this.eventMismatchError || Object.values(this.errors).some(errArray => errArray?.length)
       );
     },
     isComplete() {
@@ -162,7 +156,7 @@ export default {
       );
     },
     isDirty() {
-      return !isEqual(this.initialFields, this.fields) && !isEqual(defaultFields, this.fields);
+      return !isEqual(this.fields, this.formInitialData || defaultFields);
     },
     eventMismatchError() {
       const {
@@ -188,35 +182,39 @@ export default {
     },
   },
   watch: {
-    initialFields(newFields) {
+    formInitialData(newFields = {}) {
       this.fields = {
         ...defaultFields,
         ...newFields,
       };
     },
-    errors(newErrors) {
-      this.fieldErrors = {
-        ...defaultFields,
+    formErrors(newErrors = {}) {
+      this.errors = {
         ...newErrors,
       };
     },
   },
+  mounted() {
+    this.resetFields();
+  },
   methods: {
-    handleCancel() {
-      const { initialFields = {}, errors = null } = this;
-      const formData = initializeFormData({
-        emptyFieldState: defaultFields,
-        initialFields,
-        errors,
+    resetFields() {
+      const { formInitialData, formErrors } = this;
+      const { fields, errors } = initializeFormData({
+        fields: formInitialData,
+        errors: formErrors,
       });
-      this.$set(this, 'fields', formData.fields);
-      this.$set(this, 'fieldErrors', formData.fieldErrors);
+      this.fields = { ...fields };
+      this.errors = { ...errors };
+    },
+    handleCancel() {
+      this.resetFields();
       this.$emit('cancel');
     },
     handleSave() {
       const data = convertObjectPropsToSnakeCase(this.fields);
       if (this.isEditingCustomStage) {
-        const { id } = this.initialFields;
+        const { id } = this.fields;
         this.$emit(STAGE_ACTIONS.UPDATE, { ...data, id });
       } else {
         this.$emit(STAGE_ACTIONS.CREATE, data);
@@ -229,31 +227,22 @@ export default {
       this.fields[key] = null;
     },
     hasFieldErrors(key) {
-      return this.fieldErrors[key]?.length > 0;
+      return this.errors[key]?.length > 0;
     },
     fieldErrorMessage(key) {
-      return this.fieldErrors[key]?.join('\n');
+      return this.errors[key]?.join('\n');
     },
     onUpdateNameField() {
-      if (DEFAULT_STAGE_NAMES.includes(this.fields.name.toLowerCase())) {
-        this.$set(this.fieldErrors, 'name', [
-          s__('CustomCycleAnalytics|Stage name already exists'),
-        ]);
-      } else {
-        this.$set(this.fieldErrors, 'name', []);
-      }
+      this.errors.name = DEFAULT_STAGE_NAMES.includes(this.fields.name.toLowerCase())
+        ? [ERRORS.STAGE_NAME_EXISTS]
+        : [];
     },
     onUpdateStartEventField() {
-      const initVal = this.initialFields?.endEventIdentifier
-        ? this.initialFields.endEventIdentifier
-        : null;
-      this.$set(this.fields, 'endEventIdentifier', initVal);
-      this.$set(this.fieldErrors, 'endEventIdentifier', [
-        s__('CustomCycleAnalytics|Start event changed, please select a valid stop event'),
-      ]);
+      this.fields.endEventIdentifier = null;
+      this.errors.endEventIdentifier = [ERRORS.INVALID_EVENT_PAIRS];
     },
     onUpdateEndEventField() {
-      this.$set(this.fieldErrors, 'endEventIdentifier', null);
+      this.errors.endEventIdentifier = [];
     },
     handleRecoverStage(id) {
       this.$emit(STAGE_ACTIONS.UPDATE, { id, hidden: false });
@@ -262,11 +251,18 @@ export default {
 };
 </script>
 <template>
-  <form class="custom-stage-form m-4 mt-0">
-    <div class="mb-1 d-flex flex-row justify-content-between">
+  <div v-if="isLoading">
+    <gl-loading-icon class="mt-4" size="md" />
+  </div>
+  <form v-else class="custom-stage-form m-4 mt-0">
+    <div class="gl-mb-1 gl-display-flex gl-justify-content-space-between gl-align-items-center">
       <h4>{{ formTitle }}</h4>
-      <gl-dropdown :text="__('Recover hidden stage')" class="js-recover-hidden-stage-dropdown">
-        <gl-dropdown-header>{{ __('Default stages') }}</gl-dropdown-header>
+      <gl-dropdown
+        :text="__('Recover hidden stage')"
+        class="js-recover-hidden-stage-dropdown"
+        right
+      >
+        <gl-dropdown-section-header>{{ __('Default stages') }}</gl-dropdown-section-header>
         <template v-if="hasHiddenStages">
           <gl-dropdown-item
             v-for="stage in hiddenStages"
@@ -366,7 +362,6 @@ export default {
         </gl-form-group>
       </div>
     </div>
-
     <div class="custom-stage-form-actions">
       <button
         :disabled="!isDirty"
@@ -386,7 +381,6 @@ export default {
         {{ saveStageText }}
       </button>
     </div>
-
     <div class="mt-2">
       <gl-sprintf
         :message="

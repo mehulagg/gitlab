@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'layouts/nav/sidebar/_admin' do
+RSpec.describe 'layouts/nav/sidebar/_admin' do
   shared_examples 'page has active tab' do |title|
     it "activates #{title} tab" do
       render
@@ -58,21 +58,20 @@ describe 'layouts/nav/sidebar/_admin' do
     it_behaves_like 'page has active sub tab', 'Users'
   end
 
-  context 'on logs' do
-    before do
-      allow(controller).to receive(:controller_name).and_return('logs')
-    end
-
-    it_behaves_like 'page has active tab', 'Monitoring'
-    it_behaves_like 'page has active sub tab', 'Logs'
-  end
-
   context 'on messages' do
     before do
       allow(controller).to receive(:controller_name).and_return('broadcast_messages')
     end
 
     it_behaves_like 'page has active tab', 'Messages'
+  end
+
+  context 'on analytics' do
+    before do
+      allow(controller).to receive(:controller_name).and_return('dev_ops_report')
+    end
+
+    it_behaves_like 'page has active tab', 'Analytics'
   end
 
   context 'on hooks' do
@@ -93,12 +92,30 @@ describe 'layouts/nav/sidebar/_admin' do
   end
 
   context 'on settings' do
+    let(:gitlab_com?) { false }
+
     before do
+      allow(::Gitlab).to receive(:com?) { gitlab_com? }
+
       render
     end
 
     it 'includes General link' do
       expect(rendered).to have_link('General', href: general_admin_application_settings_path)
+    end
+
+    context 'when GitLab.com' do
+      let(:gitlab_com?) { true }
+
+      it 'does not include Integrations link' do
+        expect(rendered).not_to have_link('Integrations', href: integrations_admin_application_settings_path)
+      end
+    end
+
+    context 'when not GitLab.com' do
+      it 'includes Integrations link' do
+        expect(rendered).to have_link('Integrations', href: integrations_admin_application_settings_path)
+      end
     end
 
     context 'when GitLab FOSS' do

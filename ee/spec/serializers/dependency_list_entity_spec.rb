@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DependencyListEntity do
+RSpec.describe DependencyListEntity do
   it_behaves_like 'report list' do
     let(:name) { :dependencies }
     let(:collection) { [build(:dependency)] }

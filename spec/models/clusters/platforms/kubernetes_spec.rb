@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Platforms::Kubernetes do
+RSpec.describe Clusters::Platforms::Kubernetes do
   include KubernetesHelpers
 
   it { is_expected.to belong_to(:cluster) }
@@ -204,6 +204,52 @@ describe Clusters::Platforms::Kubernetes do
     end
 
     it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::KubeClient) }
+
+    context 'ca_pem is a single certificate' do
+      let(:ca_pem) { File.read(Rails.root.join('spec/fixtures/clusters/ca_certificate.pem')) }
+      let(:kubernetes) do
+        build(:cluster_platform_kubernetes,
+              :configured,
+              namespace: 'a-namespace',
+              cluster: cluster,
+              ca_pem: ca_pem)
+      end
+
+      it 'adds it to cert_store' do
+        cert = OpenSSL::X509::Certificate.new(ca_pem)
+        cert_store = kubernetes.kubeclient.kubeclient_options[:ssl_options][:cert_store]
+
+        expect(cert_store.verify(cert)).to be true
+      end
+    end
+
+    context 'ca_pem is a chain' do
+      let(:cert_chain) { File.read(Rails.root.join('spec/fixtures/clusters/chain_certificates.pem')) }
+      let(:kubernetes) do
+        build(:cluster_platform_kubernetes,
+              :configured,
+              namespace: 'a-namespace',
+              cluster: cluster,
+              ca_pem: cert_chain)
+      end
+
+      it 'includes chain of certificates' do
+        cert1_file = File.read(Rails.root.join('spec/fixtures/clusters/root_certificate.pem'))
+        cert1 = OpenSSL::X509::Certificate.new(cert1_file)
+
+        cert2_file = File.read(Rails.root.join('spec/fixtures/clusters/intermediate_certificate.pem'))
+        cert2 = OpenSSL::X509::Certificate.new(cert2_file)
+
+        cert3_file = File.read(Rails.root.join('spec/fixtures/clusters/ca_certificate.pem'))
+        cert3 = OpenSSL::X509::Certificate.new(cert3_file)
+
+        cert_store = kubernetes.kubeclient.kubeclient_options[:ssl_options][:cert_store]
+
+        expect(cert_store.verify(cert1)).to be true
+        expect(cert_store.verify(cert2)).to be true
+        expect(cert_store.verify(cert3)).to be true
+      end
+    end
   end
 
   describe '#rbac?' do
@@ -364,8 +410,9 @@ describe Clusters::Platforms::Kubernetes do
     let(:expected_pod_cached_data) do
       kube_pod.tap { |kp| kp['metadata'].delete('namespace') }
     end
+
     let(:namespace) { "project-namespace" }
-    let(:environment) { instance_double(Environment, deployment_namespace: namespace) }
+    let(:environment) { instance_double(Environment, deployment_namespace: namespace, project: service.cluster.project) }
 
     subject { service.calculate_reactive_cache_for(environment) }
 
@@ -381,6 +428,7 @@ describe Clusters::Platforms::Kubernetes do
       before do
         stub_kubeclient_pods(namespace)
         stub_kubeclient_deployments(namespace)
+        stub_kubeclient_ingresses(namespace)
       end
 
       it { is_expected.to include(pods: [expected_pod_cached_data]) }
@@ -390,6 +438,7 @@ describe Clusters::Platforms::Kubernetes do
       before do
         stub_kubeclient_pods(namespace, status: 500)
         stub_kubeclient_deployments(namespace, status: 500)
+        stub_kubeclient_ingresses(namespace, status: 500)
       end
 
       it { expect { subject }.to raise_error(Kubeclient::HttpError) }
@@ -399,6 +448,7 @@ describe Clusters::Platforms::Kubernetes do
       before do
         stub_kubeclient_pods(namespace, status: 404)
         stub_kubeclient_deployments(namespace, status: 404)
+        stub_kubeclient_ingresses(namespace, status: 404)
       end
 
       it { is_expected.to include(pods: []) }

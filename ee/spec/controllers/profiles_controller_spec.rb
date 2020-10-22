@@ -2,7 +2,7 @@
 
 require('spec_helper')
 
-describe ProfilesController, :request_store do
+RSpec.describe ProfilesController, :request_store do
   let_it_be(:user) { create(:user) }
   let_it_be(:admin) { create(:admin) }
 

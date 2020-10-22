@@ -1,15 +1,13 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
-import icon from '~/vue_shared/components/icon.vue';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlLoadingIcon, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 
 export default {
   components: {
-    icon,
+    GlIcon,
     GlLoadingIcon,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     node: {
@@ -36,15 +34,15 @@ export default {
   <div class="card-header">
     <div class="row">
       <div class="col-md-8 clearfix">
-        <span class="d-flex align-items-center float-left append-right-10">
+        <span class="d-flex align-items-center float-left gl-mr-3">
           <strong>{{ node.name }}</strong>
           <gl-loading-icon
             v-if="nodeDetailsLoading || node.nodeActionActive"
-            class="node-details-loading prepend-left-10 inline"
+            class="node-details-loading gl-ml-3 inline"
           />
-          <icon
+          <gl-icon
             v-if="showNodeWarningIcon"
-            v-tooltip
+            v-gl-tooltip
             class="ml-2 text-warning-500"
             name="warning"
             :size="18"

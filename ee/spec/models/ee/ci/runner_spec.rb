@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Ci::Runner do
+RSpec.describe EE::Ci::Runner do
   describe '#tick_runner_queue' do
     it 'sticks the runner to the primary and calls the original method' do
       runner = create(:ci_runner)

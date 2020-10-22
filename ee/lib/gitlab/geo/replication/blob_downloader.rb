@@ -8,7 +8,7 @@ module Gitlab
 
         attr_reader :replicator
 
-        delegate :replicable_name, :model_record, :primary_checksum, :carrierwave_uploader, to: :replicator
+        delegate :primary_checksum, :carrierwave_uploader, to: :replicator
         delegate :file_storage?, to: :carrierwave_uploader
 
         class Result
@@ -49,7 +49,7 @@ module Gitlab
 
         # @return [String] URL to download the resource from
         def resource_url
-          Gitlab::Geo.primary_node.geo_retrieve_url(replicable_name, model_record.id.to_s)
+          Gitlab::Geo.primary_node.geo_retrieve_url(**replicator.replicable_params)
         end
 
         private
@@ -62,10 +62,7 @@ module Gitlab
         #
         # @return [Hash] HTTP request headers
         def request_headers
-          request_data = {
-            replicable_name: replicable_name,
-            id: model_record.id
-          }
+          request_data = replicator.replicable_params
 
           TransferRequest.new(request_data).headers
         end
@@ -90,9 +87,25 @@ module Gitlab
             unless ensure_destination_path_exists
               return failure_result(reason: 'Skipping transfer as we cannot create the destination directory')
             end
+          else
+            unless sync_object_storage_enabled?
+              return failure_result(reason: 'Skipping transfer as this secondary node is not allowed to replicate content on Object Storage')
+            end
+
+            unless object_store_enabled?
+              return failure_result(reason: "Skipping transfer as this secondary node is not configured to store #{replicator.replicable_name} on Object Storage")
+            end
           end
 
           nil
+        end
+
+        def sync_object_storage_enabled?
+          Gitlab::Geo.current_node.sync_object_storage
+        end
+
+        def object_store_enabled?
+          carrierwave_uploader.class.object_store_enabled?
         end
 
         def absolute_path
@@ -181,7 +194,7 @@ module Gitlab
             pathname = Pathname.new(absolute_path)
             temp = Tempfile.new(TEMP_PREFIX, pathname.dirname.to_s)
           else
-            temp = Tempfile.new("#{TEMP_PREFIX}-#{replicable_name}-#{model_record.id}")
+            temp = Tempfile.new("#{TEMP_PREFIX}-#{replicator.replicable_name}-#{replicator.model_record_id}")
           end
 
           temp.chmod(default_permissions)

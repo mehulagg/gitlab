@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::PhabricatorImport::Cache::Map, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::PhabricatorImport::Cache::Map, :clean_gitlab_redis_cache do
   let_it_be(:project) { create(:project) }
   let(:redis) { Gitlab::Redis::Cache }
 
@@ -50,7 +50,7 @@ describe Gitlab::PhabricatorImport::Cache::Map, :clean_gitlab_redis_cache do
 
   describe '#set_gitlab_model' do
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     it 'sets the class and id in redis with a ttl' do
@@ -66,7 +66,7 @@ describe Gitlab::PhabricatorImport::Cache::Map, :clean_gitlab_redis_cache do
       end
 
       expect(set_data).to eq({ classname: 'Issue', database_id: issue.id.to_s })
-      expect(ttl).to be_within(1.second).of(StuckImportJobsWorker::IMPORT_JOBS_EXPIRATION)
+      expect(ttl).to be_within(1.second).of(Gitlab::Import::StuckImportJob::IMPORT_JOBS_EXPIRATION)
     end
   end
 

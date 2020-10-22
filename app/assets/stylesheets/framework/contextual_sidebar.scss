@@ -98,11 +98,11 @@
     width: $contextual-sidebar-collapsed-width - 1px;
 
     .collapse-text,
-    .icon-angle-double-left {
+    .icon-chevron-double-lg-left {
       display: none;
     }
 
-    .icon-angle-double-right {
+    .icon-chevron-double-lg-right {
       display: block;
       margin: 0;
     }
@@ -137,7 +137,7 @@
     .badge.badge-pill:not(.fly-out-badge),
     .sidebar-context-title,
     .nav-item-name {
-      display: none;
+      @include gl-sr-only;
     }
 
     .sidebar-top-level-items > li > a {
@@ -363,32 +363,41 @@
 // Collapsed nav
 
 .toggle-sidebar-button,
-.close-nav-button {
-  width: $contextual-sidebar-width - 1px;
+.close-nav-button,
+.toggle-right-sidebar-button {
   transition: width $sidebar-transition-duration;
-  position: fixed;
   height: $toggle-sidebar-height;
-  bottom: 0;
   padding: 0 $gl-padding;
   background-color: $gray-light;
   border: 0;
-  border-top: 1px solid $border-color;
   color: $gl-text-color-secondary;
   display: flex;
   align-items: center;
-
-  svg {
-    margin-right: 8px;
-  }
-
-  .icon-angle-double-right {
-    display: none;
-  }
 
   &:hover {
     background-color: $border-color;
     color: $gl-text-color;
   }
+}
+
+.toggle-sidebar-button,
+.close-nav-button {
+  position: fixed;
+  bottom: 0;
+  width: $contextual-sidebar-width - 1px;
+  border-top: 1px solid $border-color;
+
+  svg {
+    margin-right: 8px;
+  }
+
+  .icon-chevron-double-lg-right {
+    display: none;
+  }
+}
+
+.toggle-right-sidebar-button {
+  border-bottom: 1px solid $border-color;
 }
 
 .collapse-text {

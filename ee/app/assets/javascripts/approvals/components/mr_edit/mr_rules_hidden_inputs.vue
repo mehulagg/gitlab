@@ -11,11 +11,13 @@ const INPUT_DELETE = 'merge_request[approval_rules_attributes][][_destroy]';
 const INPUT_REMOVE_HIDDEN_GROUPS =
   'merge_request[approval_rules_attributes][][remove_hidden_groups]';
 const INPUT_FALLBACK_APPROVALS_REQUIRED = 'merge_request[approvals_before_merge]';
+const INPUT_RESET_TO_DEFAULTS_ID = 'merge_request[reset_approval_rules_to_defaults]';
 
 export default {
   computed: {
     ...mapState(['settings']),
     ...mapState({
+      resetToDefault: state => state.approvals.resetToDefault,
       rules: state => state.approvals.rules,
       rulesToDelete: state => state.approvals.rulesToDelete,
       fallbackApprovalsRequired: state => state.approvals.fallbackApprovalsRequired,
@@ -30,11 +32,18 @@ export default {
   INPUT_DELETE,
   INPUT_REMOVE_HIDDEN_GROUPS,
   INPUT_FALLBACK_APPROVALS_REQUIRED,
+  INPUT_RESET_TO_DEFAULTS_ID,
 };
 </script>
 
 <template>
   <div v-if="settings.canEdit">
+    <input
+      v-if="resetToDefault"
+      type="hidden"
+      value="true"
+      :name="$options.INPUT_RESET_TO_DEFAULTS_ID"
+    />
     <div v-for="id in rulesToDelete" :key="id">
       <input :value="id" :name="$options.INPUT_ID" type="hidden" />
       <input :value="1" :name="$options.INPUT_DELETE" type="hidden" />

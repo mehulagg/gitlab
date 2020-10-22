@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SyncSeatLinkWorker, type: :worker do
+RSpec.describe SyncSeatLinkWorker, type: :worker do
   describe '#perform' do
     context 'when current, paid license is active' do
       let(:utc_time) { Time.utc(2020, 3, 12, 12, 00) }
@@ -22,7 +22,7 @@ describe SyncSeatLinkWorker, type: :worker do
       end
 
       it 'executes the SyncSeatLinkRequestWorker with expected params' do
-        Timecop.travel(utc_time) do
+        travel_to(utc_time) do
           subject.perform
 
           expect(SyncSeatLinkRequestWorker).to have_received(:perform_async)
@@ -41,7 +41,7 @@ describe SyncSeatLinkWorker, type: :worker do
         end
 
         it 'executes the SyncSeatLinkRequestWorker with expected params' do
-          Timecop.travel(utc_time) do
+          travel_to(utc_time) do
             expect(Date.current.to_s).to eql('2020-03-13')
 
             subject.perform
@@ -62,7 +62,7 @@ describe SyncSeatLinkWorker, type: :worker do
           end
 
           it 'executes the SyncSeatLinkRequestWorker with expected params' do
-            Timecop.travel(utc_time.beginning_of_day) do
+            travel_to(utc_time.beginning_of_day) do
               expect(Date.current.to_s).to eql('2020-03-11')
 
               subject.perform

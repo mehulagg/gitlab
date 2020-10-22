@@ -12,10 +12,17 @@ module EE
 
       LICENSED_PARSER_FEATURES = {
         sast: :sast,
+        secret_detection: :secret_detection,
         dependency_scanning: :dependency_scanning,
         container_scanning: :container_scanning,
-        dast: :dast
+        dast: :dast,
+        coverage_fuzzing: :coverage_fuzzing,
+        api_fuzzing: :api_fuzzing
       }.with_indifferent_access.freeze
+
+      EE_RUNNER_FEATURES = {
+        vault_secrets: -> (build) { build.ci_secrets_management_available? && build.secrets? }
+      }.freeze
 
       prepended do
         include UsageStatistics
@@ -36,15 +43,7 @@ module EE
       end
 
       def shared_runners_minutes_limit_enabled?
-        if ::Feature.enabled?(:ci_minutes_track_for_public_projects, project.shared_runners_limit_namespace)
-          project.shared_runners_minutes_limit_enabled? && runner&.minutes_cost_factor(project.visibility_level)&.positive?
-        else
-          legacy_shared_runners_minutes_limit_enabled?
-        end
-      end
-
-      def legacy_shared_runners_minutes_limit_enabled?
-        runner && runner.instance_type? && project.shared_runners_minutes_limit_enabled?
+        project.shared_runners_minutes_limit_enabled? && runner&.minutes_cost_factor(project.visibility_level)&.positive?
       end
 
       def stick_build_if_status_changed
@@ -78,11 +77,9 @@ module EE
       end
 
       def collect_license_scanning_reports!(license_scanning_report)
+        return license_scanning_report unless project.feature_available?(:license_scanning)
+
         each_report(::Ci::JobArtifact::LICENSE_SCANNING_REPORT_FILE_TYPES) do |file_type, blob|
-          next if ::Feature.disabled?(:parse_license_management_reports, default_enabled: true)
-
-          next unless project.feature_available?(:license_scanning) || project.feature_available?(:license_management)
-
           ::Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, license_scanning_report)
         end
 
@@ -123,16 +120,57 @@ module EE
         metrics_report
       end
 
+      def collect_requirements_reports!(requirements_report)
+        return requirements_report unless project.feature_available?(:requirements)
+
+        each_report(::Ci::JobArtifact::REQUIREMENTS_REPORT_FILE_TYPES) do |file_type, blob, report_artifact|
+          ::Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, requirements_report)
+        end
+
+        requirements_report
+      end
+
       def retryable?
         !merge_train_pipeline? && super
       end
 
+      def ci_secrets_management_available?
+        project.feature_available?(:ci_secrets_management)
+      end
+
+      override :runner_required_feature_names
+      def runner_required_feature_names
+        super + ee_runner_required_feature_names
+      end
+
+      def secrets_provider?
+        variable_value('VAULT_SERVER_URL').present?
+      end
+
+      def variable_value(key, default = nil)
+        variables_hash.fetch(key, default)
+      end
+
       private
+
+      def variables_hash
+        @variables_hash ||= variables.map do |variable|
+          [variable[:key], variable[:value]]
+        end.to_h
+      end
 
       def parse_security_artifact_blob(security_report, blob)
         report_clone = security_report.clone_as_blank
         ::Gitlab::Ci::Parsers.fabricate!(security_report.type).parse!(blob, report_clone)
         security_report.merge!(report_clone)
+      end
+
+      def ee_runner_required_feature_names
+        strong_memoize(:ee_runner_required_feature_names) do
+          EE_RUNNER_FEATURES.select do |feature, method|
+            method.call(self)
+          end.keys
+        end
       end
     end
   end

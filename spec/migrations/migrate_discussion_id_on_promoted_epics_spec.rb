@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20190715193142_migrate_discussion_id_on_promoted_epics.rb')
 
-describe MigrateDiscussionIdOnPromotedEpics do
+RSpec.describe MigrateDiscussionIdOnPromotedEpics do
   let(:migration_class) { described_class::MIGRATION }
   let(:migration_name)  { migration_class.to_s.demodulize }
 
@@ -53,7 +53,7 @@ describe MigrateDiscussionIdOnPromotedEpics do
       stub_const("#{described_class.name}::BATCH_SIZE", 2)
 
       Sidekiq::Testing.fake! do
-        Timecop.freeze do
+        freeze_time do
           migrate!
 
           expect(migration_name).to be_scheduled_delayed_migration(2.minutes, %w(id1 id2))
@@ -69,7 +69,7 @@ describe MigrateDiscussionIdOnPromotedEpics do
       create_note(create_epic, 'id3')
 
       Sidekiq::Testing.fake! do
-        Timecop.freeze do
+        freeze_time do
           migrate!
 
           expect(migration_name).to be_scheduled_delayed_migration(2.minutes, %w(id1))

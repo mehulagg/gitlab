@@ -19,15 +19,15 @@ module Gitlab
       GITLAB_PROJECTS_TIMEOUT = Gitlab.config.gitlab_shell.git_timeout
       EMPTY_REPOSITORY_CHECKSUM = '0000000000000000000000000000000000000000'
 
-      NoRepository = Class.new(StandardError)
-      InvalidRepository = Class.new(StandardError)
-      InvalidBlobName = Class.new(StandardError)
-      InvalidRef = Class.new(StandardError)
-      GitError = Class.new(StandardError)
-      DeleteBranchError = Class.new(StandardError)
-      TagExistsError = Class.new(StandardError)
-      ChecksumError = Class.new(StandardError)
-      class CreateTreeError < StandardError
+      NoRepository = Class.new(::Gitlab::Git::BaseError)
+      InvalidRepository = Class.new(::Gitlab::Git::BaseError)
+      InvalidBlobName = Class.new(::Gitlab::Git::BaseError)
+      InvalidRef = Class.new(::Gitlab::Git::BaseError)
+      GitError = Class.new(::Gitlab::Git::BaseError)
+      DeleteBranchError = Class.new(::Gitlab::Git::BaseError)
+      TagExistsError = Class.new(::Gitlab::Git::BaseError)
+      ChecksumError = Class.new(::Gitlab::Git::BaseError)
+      class CreateTreeError < ::Gitlab::Git::BaseError
         attr_reader :error_code
 
         def initialize(error_code)
@@ -44,7 +44,7 @@ module Gitlab
       # Relative path of repo
       attr_reader :relative_path
 
-      attr_reader :storage, :gl_repository, :relative_path, :gl_project_path
+      attr_reader :storage, :gl_repository, :gl_project_path
 
       # This remote name has to be stable for all types of repositories that
       # can join an object pool. If it's structure ever changes, a migration
@@ -127,9 +127,9 @@ module Gitlab
         end
       end
 
-      def local_branches(sort_by: nil)
+      def local_branches(sort_by: nil, pagination_params: nil)
         wrapped_gitaly_errors do
-          gitaly_ref_client.local_branches(sort_by: sort_by)
+          gitaly_ref_client.local_branches(sort_by: sort_by, pagination_params: pagination_params)
         end
       end
 
@@ -297,9 +297,16 @@ module Gitlab
           end
 
         file_name = "#{name}.#{extension}"
-        File.join(storage_path, self.gl_repository, sha, file_name)
+        File.join(storage_path, self.gl_repository, sha, archive_version_path, file_name)
       end
       private :archive_file_path
+
+      def archive_version_path
+        return '' unless Feature.enabled?(:include_lfs_blobs_in_archive)
+
+        '@v2'
+      end
+      private :archive_version_path
 
       # Return repo size in megabytes
       def size
@@ -580,9 +587,9 @@ module Gitlab
         tags.find { |tag| tag.name == name }
       end
 
-      def merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref)
+      def merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref, allow_conflicts)
         wrapped_gitaly_errors do
-          gitaly_operation_client.user_merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref)
+          gitaly_operation_client.user_merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref, allow_conflicts)
         end
       end
 
@@ -598,33 +605,35 @@ module Gitlab
         end
       end
 
-      def revert(user:, commit:, branch_name:, message:, start_branch_name:, start_repository:)
+      def revert(user:, commit:, branch_name:, message:, start_branch_name:, start_repository:, dry_run: false)
         args = {
           user: user,
           commit: commit,
           branch_name: branch_name,
           message: message,
           start_branch_name: start_branch_name,
-          start_repository: start_repository
+          start_repository: start_repository,
+          dry_run: dry_run
         }
 
         wrapped_gitaly_errors do
-          gitaly_operation_client.user_revert(args)
+          gitaly_operation_client.user_revert(**args)
         end
       end
 
-      def cherry_pick(user:, commit:, branch_name:, message:, start_branch_name:, start_repository:)
+      def cherry_pick(user:, commit:, branch_name:, message:, start_branch_name:, start_repository:, dry_run: false)
         args = {
           user: user,
           commit: commit,
           branch_name: branch_name,
           message: message,
           start_branch_name: start_branch_name,
-          start_repository: start_repository
+          start_repository: start_repository,
+          dry_run: dry_run
         }
 
         wrapped_gitaly_errors do
-          gitaly_operation_client.user_cherry_pick(args)
+          gitaly_operation_client.user_cherry_pick(**args)
         end
       end
 
@@ -638,7 +647,7 @@ module Gitlab
         }
 
         wrapped_gitaly_errors do
-          gitaly_operation_client.user_update_submodule(args)
+          gitaly_operation_client.user_update_submodule(**args)
         end
       end
 
@@ -813,7 +822,7 @@ module Gitlab
       def fsck
         msg, status = gitaly_repository_client.fsck
 
-        raise GitError.new("Could not fsck repository: #{msg}") unless status.zero?
+        raise GitError.new("Could not fsck repository: #{msg}") unless status == 0
       end
 
       def create_from_bundle(bundle_path)
@@ -953,7 +962,7 @@ module Gitlab
           gitaly_repository_client.cleanup if exists?
         end
       rescue Gitlab::Git::CommandError => e # Don't fail if we can't cleanup
-        Rails.logger.error("Unable to clean repository on storage #{storage} with relative path #{relative_path}: #{e.message}") # rubocop:disable Gitlab/RailsLogger
+        Gitlab::AppLogger.error("Unable to clean repository on storage #{storage} with relative path #{relative_path}: #{e.message}")
         Gitlab::Metrics.counter(
           :failed_repository_cleanup_total,
           'Number of failed repository cleanup events'
@@ -1002,15 +1011,21 @@ module Gitlab
         end
       end
 
-      def list_last_commits_for_tree(sha, path, offset: 0, limit: 25)
+      def list_last_commits_for_tree(sha, path, offset: 0, limit: 25, literal_pathspec: false)
         wrapped_gitaly_errors do
-          gitaly_commit_client.list_last_commits_for_tree(sha, path, offset: offset, limit: limit)
+          gitaly_commit_client.list_last_commits_for_tree(sha, path, offset: offset, limit: limit, literal_pathspec: literal_pathspec)
         end
       end
 
-      def last_commit_for_path(sha, path)
+      def list_commits_by_ref_name(refs)
         wrapped_gitaly_errors do
-          gitaly_commit_client.last_commit_for_path(sha, path)
+          gitaly_commit_client.list_commits_by_ref_name(refs)
+        end
+      end
+
+      def last_commit_for_path(sha, path, literal_pathspec: false)
+        wrapped_gitaly_errors do
+          gitaly_commit_client.last_commit_for_path(sha, path, literal_pathspec: literal_pathspec)
         end
       end
 

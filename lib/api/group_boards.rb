@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class GroupBoards < Grape::API
+  class GroupBoards < ::API::Base
     include BoardsResponses
     include PaginationParams
 

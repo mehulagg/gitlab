@@ -2,7 +2,7 @@
 
 require('spec_helper')
 
-describe Projects::ProtectedBranchesController do
+RSpec.describe Projects::ProtectedBranchesController do
   let(:project) { create(:project, :repository) }
   let(:protected_branch) { create(:protected_branch, project: project) }
   let(:project_params) { { namespace_id: project.namespace.to_param, project_id: project } }
@@ -27,6 +27,7 @@ describe Projects::ProtectedBranchesController do
       { merge_access_levels_attributes: maintainer_access_level,
         push_access_levels_attributes: maintainer_access_level }
     end
+
     let(:create_params) { attributes_for(:protected_branch).merge(access_level_params) }
 
     before do

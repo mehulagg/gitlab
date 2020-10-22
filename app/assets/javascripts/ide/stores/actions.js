@@ -1,14 +1,12 @@
-import $ from 'jquery';
 import Vue from 'vue';
 import { escape } from 'lodash';
 import { __, sprintf } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import * as types from './mutation_types';
 import { decorateFiles } from '../lib/files';
 import { stageKeys } from '../constants';
 import service from '../services';
-import router from '../ide_router';
 import eventHub from '../eventhub';
 
 export const redirectToUrl = (self, url) => visitUrl(url);
@@ -21,29 +19,17 @@ export const discardAllChanges = ({ state, commit, dispatch }) => {
   commit(types.REMOVE_ALL_CHANGES_FILES);
 };
 
-export const closeAllFiles = ({ state, dispatch }) => {
-  state.openFiles.forEach(file => dispatch('closeFile', file));
-};
-
-export const setPanelCollapsedStatus = ({ commit }, { side, collapsed }) => {
-  if (side === 'left') {
-    commit(types.SET_LEFT_PANEL_COLLAPSED, collapsed);
-  } else {
-    commit(types.SET_RIGHT_PANEL_COLLAPSED, collapsed);
-  }
-};
-
 export const setResizingStatus = ({ commit }, resizing) => {
   commit(types.SET_RESIZING_STATUS, resizing);
 };
 
 export const createTempEntry = (
   { state, commit, dispatch, getters },
-  { name, type, content = '', base64 = false, binary = false, rawPath = '' },
+  { name, type, content = '', rawPath = '', openFile = true, makeFileActive = true },
 ) => {
   const fullName = name.slice(-1) !== '/' && type === 'tree' ? `${name}/` : name;
 
-  if (state.entries[name] && !state.entries[name].deleted) {
+  if (getters.entryExists(name)) {
     flash(
       sprintf(__('The name "%{name}" is already taken in this directory.'), {
         name: name.split('/').pop(),
@@ -55,40 +41,44 @@ export const createTempEntry = (
       true,
     );
 
-    return;
+    return undefined;
   }
 
   const data = decorateFiles({
     data: [fullName],
-    projectId: state.currentProjectId,
-    branchId: state.currentBranchId,
     type,
     tempFile: true,
     content,
-    base64,
-    binary,
     rawPath,
   });
   const { file, parentPath } = data;
 
-  commit(types.CREATE_TMP_ENTRY, {
-    data,
-    projectId: state.currentProjectId,
-    branchId: state.currentBranchId,
-  });
+  commit(types.CREATE_TMP_ENTRY, { data });
 
   if (type === 'blob') {
-    commit(types.TOGGLE_FILE_OPEN, file.path);
+    if (openFile) commit(types.TOGGLE_FILE_OPEN, file.path);
     commit(types.STAGE_CHANGE, { path: file.path, diffInfo: getters.getDiffInfo(file.path) });
 
-    dispatch('setFileActive', file.path);
+    if (openFile && makeFileActive) dispatch('setFileActive', file.path);
     dispatch('triggerFilesChange');
   }
 
   if (parentPath && !state.entries[parentPath].opened) {
     commit(types.TOGGLE_TREE_OPEN, parentPath);
   }
+
+  return file;
 };
+
+export const addTempImage = ({ dispatch, getters }, { name, rawPath = '' }) =>
+  dispatch('createTempEntry', {
+    name: getters.getAvailableFileName(name),
+    type: 'blob',
+    content: rawPath.split('base64,')[1],
+    rawPath,
+    openFile: false,
+    makeFileActive: false,
+  });
 
 export const scrollToTab = () => {
   Vue.nextTick(() => {
@@ -176,13 +166,6 @@ export const setLinks = ({ commit }, links) => commit(types.SET_LINKS, links);
 export const setErrorMessage = ({ commit }, errorMessage) =>
   commit(types.SET_ERROR_MESSAGE, errorMessage);
 
-export const openNewEntryModal = ({ commit }, { type, path = '' }) => {
-  commit(types.OPEN_NEW_ENTRY_MODAL, { type, path });
-
-  // open the modal manually so we don't mess around with dropdown/rows
-  $('#ide-new-entry').modal('show');
-};
-
 export const deleteEntry = ({ commit, dispatch, state }, path) => {
   const entry = state.entries[path];
   const { prevPath, prevName, prevParentPath } = entry;
@@ -255,7 +238,7 @@ export const renameEntry = ({ dispatch, commit, state, getters }, { path, name, 
     }
 
     if (newEntry.opened) {
-      router.push(`/project${newEntry.url}`);
+      dispatch('router/push', getters.getUrlForPath(newEntry.path), { root: true });
     }
   }
 
@@ -313,6 +296,3 @@ export * from './actions/tree';
 export * from './actions/file';
 export * from './actions/project';
 export * from './actions/merge_request';
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

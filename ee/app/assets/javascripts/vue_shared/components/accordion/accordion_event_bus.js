@@ -1,5 +1,3 @@
-import Vue from 'vue';
+import createEventHub from '~/helpers/event_hub_factory';
 
-const accordionEventBus = new Vue();
-
-export default accordionEventBus;
+export default createEventHub();

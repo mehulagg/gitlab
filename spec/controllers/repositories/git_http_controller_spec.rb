@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Repositories::GitHttpController do
+RSpec.describe Repositories::GitHttpController do
   include GitHttpHelpers
 
   let_it_be(:project) { create(:project, :public, :repository) }
@@ -17,6 +17,7 @@ describe Repositories::GitHttpController do
       repository_id: repository_id
     }
   end
+
   let(:params) { container_params }
 
   describe 'HEAD #info_refs' do
@@ -60,10 +61,21 @@ describe Repositories::GitHttpController do
 
           get :info_refs, params: params
         end
+
+        include_context 'parsed logs' do
+          it 'adds user info to the logs' do
+            get :info_refs, params: params
+
+            expect(log_data).to include('username' => user.username,
+                                        'user_id' => user.id,
+                                        'meta.user' => user.username)
+          end
+        end
       end
 
       context 'with exceptions' do
         before do
+          allow(controller).to receive(:authenticate_user).and_return(true)
           allow(controller).to receive(:verify_workhorse_api!).and_return(true)
         end
 
@@ -169,6 +181,7 @@ describe Repositories::GitHttpController do
     it_behaves_like 'info_refs behavior' do
       let(:user) { project.owner }
     end
+
     it_behaves_like 'git_upload_pack behavior', true
     it_behaves_like 'access checker class' do
       let(:expected_class) { Gitlab::GitAccess }
@@ -183,6 +196,7 @@ describe Repositories::GitHttpController do
     it_behaves_like 'info_refs behavior' do
       let(:user) { personal_snippet.author }
     end
+
     it_behaves_like 'git_upload_pack behavior', false
     it_behaves_like 'access checker class' do
       let(:expected_class) { Gitlab::GitAccessSnippet }
@@ -197,6 +211,7 @@ describe Repositories::GitHttpController do
     it_behaves_like 'info_refs behavior' do
       let(:user) { project_snippet.author }
     end
+
     it_behaves_like 'git_upload_pack behavior', false
     it_behaves_like 'access checker class' do
       let(:expected_class) { Gitlab::GitAccessSnippet }

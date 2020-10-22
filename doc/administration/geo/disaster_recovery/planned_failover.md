@@ -1,3 +1,10 @@
+---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: howto
+---
+
 # Disaster recovery for planned failover **(PREMIUM ONLY)**
 
 The primary use-case of Disaster Recovery is to ensure business continuity in
@@ -20,7 +27,7 @@ have a high degree of confidence in being able to perform them accurately.
 
 ## Not all data is automatically replicated
 
-If you are using any GitLab features that Geo [doesn't support](../replication/index.md#current-limitations),
+If you are using any GitLab features that Geo [doesn't support](../index.md#limitations),
 you must make separate provisions to ensure that the **secondary** node has an
 up-to-date copy of any data associated with that feature. This may extend the
 required scheduled maintenance period significantly.
@@ -38,8 +45,13 @@ be found in `/var/opt/gitlab/gitlab-rails/shared/pages` if using Omnibus).
 
 ## Preflight checks
 
-Follow these steps before scheduling a planned failover to ensure the process
-will go smoothly.
+Run this command to list out all preflight checks and automatically check if replication and verification are complete before scheduling a planned failover to ensure the process will go smoothly:
+
+```shell
+gitlab-ctl promotion-preflight-checks
+```
+
+Each step is described in more detail below.
 
 ### Object storage
 
@@ -92,7 +104,7 @@ The maintenance window won't end until Geo replication and verification is
 completely finished. To keep the window as short as possible, you should
 ensure these processes are close to 100% as possible during active use.
 
-Navigate to the **{admin}** **Admin Area >** **{location-dot}** **Geo** dashboard on the **secondary** node to
+Navigate to the **Admin Area > Geo** dashboard on the **secondary** node to
 review status. Replicated objects (shown in green) should be close to 100%,
 and there should be no failures (shown in red). If a large proportion of
 objects aren't yet replicated (shown in gray), consider giving the node more
@@ -117,8 +129,8 @@ This [content was moved to another location](background_verification.md).
 
 ### Notify users of scheduled maintenance
 
-On the **primary** node, navigate to **{admin}** **Admin Area >** **{bullhorn}** **Messages**, add a broadcast
-message. You can check under **{admin}** **Admin Area >** **{location-dot}** **Geo** to estimate how long it
+On the **primary** node, navigate to **Admin Area > Messages**, add a broadcast
+message. You can check under **Admin Area > Geo** to estimate how long it
 will take to finish syncing. An example message would be:
 
 > A scheduled maintenance will take place at XX:XX UTC. We expect it to take
@@ -126,7 +138,7 @@ will take to finish syncing. An example message would be:
 
 ## Prevent updates to the **primary** node
 
-Until a [read-only mode](https://gitlab.com/gitlab-org/gitlab-foss/issues/19739) is implemented, updates must be prevented
+Until a [read-only mode](https://gitlab.com/gitlab-org/gitlab/-/issues/14609) is implemented, updates must be prevented
 from happening manually. Note that your **secondary** node still needs read-only
 access to the **primary** node during the maintenance window.
 
@@ -163,7 +175,7 @@ access to the **primary** node during the maintenance window.
    connection.
 
 1. Disable non-Geo periodic background jobs on the **primary** node by navigating
-   to **{admin}** **Admin Area >** **{monitor}** **Monitoring > Background Jobs > Cron**, pressing `Disable All`,
+   to **Admin Area > Monitoring > Background Jobs > Cron**, pressing `Disable All`,
    and then pressing `Enable` for the `geo_sidekiq_cron_config_worker` cron job.
    This job will re-enable several other cron jobs that are essential for planned
    failover to complete successfully.
@@ -172,11 +184,11 @@ access to the **primary** node during the maintenance window.
 
 1. If you are manually replicating any data not managed by Geo, trigger the
    final replication process now.
-1. On the **primary** node, navigate to **{admin}** **Admin Area >** **{monitor}** **Monitoring > Background Jobs > Queues**
+1. On the **primary** node, navigate to **Admin Area > Monitoring > Background Jobs > Queues**
    and wait for all queues except those with `geo` in the name to drop to 0.
    These queues contain work that has been submitted by your users; failing over
    before it is completed will cause the work to be lost.
-1. On the **primary** node, navigate to **{admin}** **Admin Area >** **{location-dot}** **Geo** and wait for the
+1. On the **primary** node, navigate to **Admin Area > Geo** and wait for the
    following conditions to be true of the **secondary** node you are failing over to:
 
    - All replication meters to each 100% replicated, 0% failures.
@@ -184,7 +196,7 @@ access to the **primary** node during the maintenance window.
    - Database replication lag is 0ms.
    - The Geo log cursor is up to date (0 events behind).
 
-1. On the **secondary** node, navigate to **{admin}** **Admin Area >** **{monitor}** **Monitoring > Background Jobs > Queues**
+1. On the **secondary** node, navigate to **Admin Area > Monitoring > Background Jobs > Queues**
    and wait for all the `geo` queues to drop to 0 queued and 0 running jobs.
 1. On the **secondary** node, use [these instructions](../../raketasks/check.md)
    to verify the integrity of CI artifacts, LFS objects, and uploads in file

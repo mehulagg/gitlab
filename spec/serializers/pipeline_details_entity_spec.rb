@@ -2,9 +2,13 @@
 
 require 'spec_helper'
 
-describe PipelineDetailsEntity do
+RSpec.describe PipelineDetailsEntity do
   let_it_be(:user) { create(:user) }
   let(:request) { double('request') }
+
+  let(:entity) do
+    described_class.represent(pipeline, request: request)
+  end
 
   it 'inherrits from PipelineEntity' do
     expect(described_class).to be < PipelineEntity
@@ -14,10 +18,6 @@ describe PipelineDetailsEntity do
     stub_not_protect_default_branch
 
     allow(request).to receive(:current_user).and_return(user)
-  end
-
-  let(:entity) do
-    described_class.represent(pipeline, request: request)
   end
 
   describe '#as_json' do
@@ -157,59 +157,30 @@ describe PipelineDetailsEntity do
 
     context 'when pipeline triggered other pipeline' do
       let(:pipeline) { create(:ci_empty_pipeline) }
-      let(:build) { create(:ci_build, pipeline: pipeline) }
+      let(:build) { create(:ci_build, name: 'child', stage: 'test', pipeline: pipeline) }
+      let(:bridge) { create(:ci_bridge, name: 'cross-project', stage: 'build', pipeline: pipeline) }
+      let(:child_pipeline) { create(:ci_pipeline, project: pipeline.project) }
+      let(:cross_project_pipeline) { create(:ci_pipeline) }
 
       before do
-        create(:ci_sources_pipeline, source_job: build)
-        create(:ci_sources_pipeline, source_job: build)
+        create(:ci_sources_pipeline, source_job: build, pipeline: child_pipeline)
+        create(:ci_sources_pipeline, source_job: bridge, pipeline: cross_project_pipeline)
       end
 
-      it 'contains an information about depedent pipeline' do
+      it 'contains an information about dependent pipeline', :aggregate_failures do
         expect(subject[:triggered]).to be_a(Array)
         expect(subject[:triggered].length).to eq(2)
         expect(subject[:triggered].first[:path]).not_to be_nil
         expect(subject[:triggered].first[:details]).not_to be_nil
         expect(subject[:triggered].first[:details][:status]).not_to be_nil
         expect(subject[:triggered].first[:project]).not_to be_nil
-      end
-    end
 
-    context 'when pipeline has expiring archive artifacts' do
-      let(:pipeline) { create(:ci_empty_pipeline) }
-      let!(:build_1) { create(:ci_build, :artifacts, pipeline: pipeline, artifacts_expire_at: 2.days.from_now, name: 'build_1') }
-      let!(:build_2) { create(:ci_build, :artifacts, pipeline: pipeline, artifacts_expire_at: 2.days.from_now, name: 'build_2') }
-      let!(:build_3) { create(:ci_build, :artifacts, pipeline: pipeline, artifacts_expire_at: 2.days.from_now, name: 'build_3') }
+        source_jobs = subject[:triggered]
+          .index_by { |pipeline| pipeline[:id] }
+          .transform_values { |pipeline| pipeline.fetch(:source_job) }
 
-      let(:names) { subject[:details][:artifacts].map { |a| a[:name] } }
-
-      context 'and preload_job_artifacts_archive is not defined in the options' do
-        it 'defaults to true and eager loads the job_artifacts_archive' do
-          recorder = ActiveRecord::QueryRecorder.new do
-            expect(names).to match_array(%w[build_1 build_2 build_3])
-          end
-
-          expected_queries = Gitlab.ee? ? 42 : 29
-
-          # This makes only one query to fetch all job artifacts
-          expect(recorder.count).to eq(expected_queries)
-        end
-      end
-
-      context 'and preload_job_artifacts_archive is set to false' do
-        let(:entity) do
-          described_class.represent(pipeline, request: request, preload_job_artifacts_archive: false)
-        end
-
-        it 'does not eager load the job_artifacts_archive' do
-          recorder = ActiveRecord::QueryRecorder.new do
-            expect(names).to match_array(%w[build_1 build_2 build_3])
-          end
-
-          expected_queries = Gitlab.ee? ? 44 : 31
-
-          # This makes one query for each job artifact
-          expect(recorder.count).to eq(expected_queries)
-        end
+        expect(source_jobs[cross_project_pipeline.id][:name]).to eq('cross-project')
+        expect(source_jobs[child_pipeline.id][:name]).to eq('child')
       end
     end
   end

@@ -88,7 +88,6 @@ export default {
     :can-edit="canEdit"
     :initial-epic="epic"
     :initial-epic-loading="initialEpicLoading"
-    :block-title="__('Epic')"
   >
     {{ __('None') }}
   </epics-select>

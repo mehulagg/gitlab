@@ -2,12 +2,13 @@
 
 require 'spec_helper'
 
-describe "Populate new pipeline CI variables with url params", :js do
+RSpec.describe "Populate new pipeline CI variables with url params", :js do
   let(:user) { create(:user) }
   let(:project) { create(:project) }
   let(:page_path) { new_project_pipeline_path(project) }
 
   before do
+    stub_feature_flags(new_pipeline_form: false)
     sign_in(user)
     project.add_maintainer(user)
 

@@ -1,5 +1,0 @@
----
-title: Geo - Use bulk insert to improve performance of RegistryBackfillService
-merge_request: 27720
-author:
-type: performance

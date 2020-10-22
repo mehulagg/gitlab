@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe EE::EmailsHelper do
+RSpec.describe EE::EmailsHelper do
   describe '#action_title' do
     using RSpec::Parameterized::TableSyntax
 

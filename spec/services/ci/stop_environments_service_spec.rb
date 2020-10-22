@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::StopEnvironmentsService do
+RSpec.describe Ci::StopEnvironmentsService do
   include CreateEnvironmentsHelpers
 
   let(:project) { create(:project, :private, :repository) }
@@ -222,8 +222,10 @@ describe Ci::StopEnvironmentsService do
 
       it 'tracks the exception' do
         expect(Gitlab::ErrorTracking)
-          .to receive(:track_error)
-          .with(Gitlab::Access::AccessDeniedError, anything).twice
+          .to receive(:track_exception)
+          .with(Gitlab::Access::AccessDeniedError, anything)
+          .twice
+          .and_call_original
 
         subject
       end

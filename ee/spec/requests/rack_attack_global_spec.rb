@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Rack Attack global throttles' do
+RSpec.describe 'Rack Attack global throttles' do
   include_context 'rack attack cache store'
 
   context 'when the request is from Geo secondary' do

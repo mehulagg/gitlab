@@ -24,15 +24,9 @@ module Ci
 
     def status
       strong_memoize(:status) do
-        if Feature.enabled?(:ci_composite_status, project, default_enabled: false)
-          Gitlab::Ci::Status::Composite
-            .new(@jobs)
-            .status
-        else
-          CommitStatus
-            .where(id: @jobs)
-            .legacy_status
-        end
+        Gitlab::Ci::Status::Composite
+          .new(@jobs)
+          .status
       end
     end
 
@@ -46,7 +40,7 @@ module Ci
     end
 
     def self.fabricate(project, stage)
-      stage.statuses.ordered.latest
+      stage.latest_statuses
         .sort_by(&:sortable_name).group_by(&:group_name)
         .map do |group_name, grouped_statuses|
           self.new(project, stage, name: group_name, jobs: grouped_statuses)

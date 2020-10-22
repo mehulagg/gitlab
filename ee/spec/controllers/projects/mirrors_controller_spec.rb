@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::MirrorsController do
+RSpec.describe Projects::MirrorsController do
   include ReactiveCachingHelpers
 
   describe 'setting up a remote mirror' do
@@ -30,33 +30,29 @@ describe Projects::MirrorsController do
         sign_in(project.owner)
       end
 
-      context 'when trying to create a mirror with the same URL' do
-        it 'does not set up the mirror' do
-          do_put(project, mirror: true, import_url: remote_mirror.url)
+      context 'mirror_user is unset' do
+        it 'sets up a pull mirror with the mirror user set to the signed-in user' do
+          expect(project.mirror_user).to be_nil
 
-          expect(project.reload.mirror).to be_falsey
-          expect(project.reload.import_url).to be_blank
+          do_put(project, mirror: true, import_url: 'http://local.dev')
+          project.reload
+
+          expect(project.mirror).to eq(true)
+          expect(project.import_url).to eq('http://local.dev')
+          expect(project.mirror_user).to eq(project.owner)
         end
       end
 
-      context 'when trying to create a mirror with a different URL' do
-        it 'sets up the mirror' do
-          do_put(project, mirror: true, mirror_user_id: project.owner.id, import_url: 'http://local.dev')
+      context 'mirror_user is not the current user' do
+        it 'sets up a pull mirror with the mirror user set to the signed-in user' do
+          new_user = create(:user)
+          project.add_maintainer(new_user)
 
-          expect(project.reload.mirror).to eq(true)
-          expect(project.reload.import_url).to eq('http://local.dev')
-        end
+          do_put(project, mirror: true, mirror_user_id: new_user.id, import_url: 'http://local.dev')
 
-        context 'mirror user is not the current user' do
-          it 'does not set up the mirror' do
-            new_user = create(:user)
-            project.add_maintainer(new_user)
-
-            do_put(project, mirror: true, mirror_user_id: new_user.id, import_url: 'http://local.dev')
-
-            expect(project.reload.mirror).to be_falsey
-            expect(project.reload.import_url).to be_blank
-          end
+          expect(project.mirror).to eq(true)
+          expect(project.import_url).to eq('http://local.dev')
+          expect(project.mirror_user).to eq(project.owner)
         end
       end
     end
@@ -78,7 +74,7 @@ describe Projects::MirrorsController do
           sign_in(admin)
 
           expect do
-            do_put(project, mirror: true, mirror_user_id: admin.id, import_url: url)
+            do_put(project, mirror: true, import_url: url)
           end.to change { Project.mirror.count }.to(1)
         end
       end
@@ -88,7 +84,7 @@ describe Projects::MirrorsController do
           sign_in(project.owner)
 
           expect do
-            do_put(project, mirror: true, mirror_user_id: project.owner.id, import_url: url)
+            do_put(project, mirror: true, import_url: url)
           end.not_to change { Project.mirror.count }
         end
       end
@@ -172,7 +168,7 @@ describe Projects::MirrorsController do
         expect(response).to have_gitlab_http_status(:ok)
 
         import_data = project.reload_import_data
-        expect(import_data.ssh_known_hosts_verified_at).to be_within(1.minute).of(Time.now)
+        expect(import_data.ssh_known_hosts_verified_at).to be_within(1.minute).of(Time.current)
         expect(import_data.ssh_known_hosts_verified_by).to eq(project.owner)
       end
 
@@ -194,8 +190,7 @@ describe Projects::MirrorsController do
 
         do_put(project, { mirror_user_id: other_user.id }, format: :json)
 
-        expect(response).to have_gitlab_http_status(:unprocessable_entity)
-        expect(json_response['mirror_user_id'].first).to eq("is invalid")
+        expect(project.reload.mirror_user).to eq(project.owner)
       end
     end
 

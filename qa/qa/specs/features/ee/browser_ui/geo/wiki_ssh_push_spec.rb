@@ -1,41 +1,44 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Geo', :orchestrated, :geo do
+  RSpec.describe 'Geo', :orchestrated, :geo do
     describe 'GitLab wiki SSH push' do
+      key = nil
+
+      after do
+        key&.remove_via_api!
+      end
+
       context 'wiki commit' do
-        it 'is replicated to the secondary' do
-          wiki_title = 'Geo Replication Wiki'
+        it 'is replicated to the secondary', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/688' do
           wiki_content = 'This tests replication of wikis via SSH'
           push_content = 'This is from the Geo wiki push via SSH!'
-          project_name = "geo-wiki-project-#{SecureRandom.hex(8)}"
-          key_title = "key for ssh tests #{Time.now.to_f}"
           project = nil
-          key = nil
 
           QA::Flow::Login.while_signed_in(address: :geo_primary) do
             # Create a new SSH key
             key = Resource::SSHKey.fabricate_via_api! do |resource|
-              resource.title = key_title
+              resource.title = "Geo wiki SSH #{Time.now.to_f}"
+              resource.expires_at = Date.today + 2
             end
 
             # Create a new project and wiki
             project = Resource::Project.fabricate_via_api! do |project|
-              project.name = project_name
-              project.description = 'Geo project for wiki ssh spec'
+              project.name = 'geo-wiki-ssh-project'
+              project.description = 'Geo project for wiki SSH spec'
             end
 
-            wiki = Resource::Wiki.fabricate! do |wiki|
+            wiki = Resource::Wiki::ProjectPage.fabricate_via_api! do |wiki|
               wiki.project = project
-              wiki.title = wiki_title
+              wiki.title = 'Geo Replication Wiki'
               wiki.content = wiki_content
-              wiki.message = 'First commit'
             end
 
+            wiki.visit!
             validate_content(wiki_content)
 
             # Perform a git push over SSH directly to the primary
-            Resource::Repository::WikiPush.fabricate! do |push|
+            pushed_wiki = Resource::Repository::WikiPush.fabricate! do |push|
               push.ssh_key = key
               push.wiki = wiki
               push.file_name = 'Home.md'
@@ -43,31 +46,22 @@ module QA
               push.commit_message = 'Update Home.md'
             end
 
-            Page::Project::Menu.perform(&:click_wiki)
+            pushed_wiki.visit!
             validate_content(push_content)
           end
 
-          QA::Runtime::Logger.debug('Visiting the secondary geo node')
+          QA::Runtime::Logger.debug('*****Visiting the secondary geo node*****')
 
           QA::Flow::Login.while_signed_in(address: :geo_secondary) do
             EE::Page::Main::Banner.perform do |banner|
               expect(banner).to have_secondary_read_only_banner
             end
 
-            # Ensure the SSH key has replicated
-            Page::Main::Menu.perform(&:click_settings_link)
-            Page::Profile::Menu.perform(&:click_ssh_keys)
-
-            Page::Profile::SSHKeys.perform do |ssh|
-              expect(ssh.keys_list).to have_content(key.title)
-              expect(ssh.keys_list).to have_content(key.md5_fingerprint)
-            end
-
             Page::Main::Menu.perform(&:go_to_projects)
 
             Page::Dashboard::Projects.perform do |dashboard|
-              dashboard.wait_for_project_replication(project_name)
-              dashboard.go_to_project(project_name)
+              dashboard.wait_for_project_replication(project.name)
+              dashboard.go_to_project(project.name)
             end
 
             # Validate git push worked and new content is visible
@@ -85,7 +79,7 @@ module QA
 
       def validate_content(content)
         Page::Project::Wiki::Show.perform do |show|
-          expect(show.wiki_text).to have_content(content)
+          expect(show).to have_content(content)
         end
       end
     end

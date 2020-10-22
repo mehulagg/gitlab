@@ -1,4 +1,5 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { glEmojiTag } from '~/emoji';
 
 import AddRequest from './add_request.vue';
@@ -35,7 +36,12 @@ export default {
       metric: 'active-record',
       title: 'pg',
       header: s__('PerformanceBar|SQL queries'),
-      keys: ['sql'],
+      keys: ['sql', 'cached'],
+    },
+    {
+      metric: 'bullet',
+      header: s__('PerformanceBar|Bullet notifications'),
+      keys: ['notification'],
     },
     {
       metric: 'gitaly',
@@ -50,7 +56,12 @@ export default {
     {
       metric: 'redis',
       header: s__('PerformanceBar|Redis calls'),
-      keys: ['cmd'],
+      keys: ['cmd', 'instance'],
+    },
+    {
+      metric: 'es',
+      header: s__('PerformanceBar|Elasticsearch calls'),
+      keys: ['request', 'body'],
     },
     {
       metric: 'total',

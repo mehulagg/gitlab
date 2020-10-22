@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SystemCheck::App::ElasticsearchCheck do
+RSpec.describe SystemCheck::App::ElasticsearchCheck do
   describe '#skip?' do
     context 'with elasticsearch disabled' do
       before do

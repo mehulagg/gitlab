@@ -9,6 +9,10 @@ export default {
       type: Object,
       required: true,
     },
+    notesUrl: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -23,6 +27,11 @@ export default {
       return this.notes.filter(x => x !== this.systemNote);
     },
   },
+  watch: {
+    discussion(newDiscussion) {
+      this.notes = newDiscussion.notes;
+    },
+  },
   methods: {
     addComment(comment) {
       this.notes.push(comment);
@@ -31,7 +40,7 @@ export default {
       const index = this.notes.indexOf(comment);
 
       if (index > -1) {
-        this.notes.splice(index, 1, Object.assign({}, comment, data));
+        this.notes.splice(index, 1, { ...comment, ...data });
       }
     },
     removeComment(comment) {
@@ -66,6 +75,7 @@ export default {
         ref="existingComment"
         :comment="comment"
         :discussion-id="discussion.reply_id"
+        :notes-url="notesUrl"
         @onCommentUpdated="updateComment"
         @onCommentDeleted="removeComment"
       />
@@ -75,6 +85,7 @@ export default {
       v-else
       ref="newComment"
       :discussion-id="discussion.reply_id"
+      :notes-url="notesUrl"
       @onCommentAdded="addComment"
     />
   </li>

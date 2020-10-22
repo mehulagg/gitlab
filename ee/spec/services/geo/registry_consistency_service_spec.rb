@@ -2,21 +2,36 @@
 
 require 'spec_helper'
 
-describe Geo::RegistryConsistencyService, :geo_fdw, :use_clean_rails_memory_store_caching do
+RSpec.describe Geo::RegistryConsistencyService, :geo, :use_clean_rails_memory_store_caching do
   include EE::GeoHelpers
 
   let(:secondary) { create(:geo_node) }
 
-  subject { described_class.new(registry_class, batch_size: batch_size) }
-
   before do
     stub_current_geo_node(secondary)
+    stub_registry_replication_config(enabled: true)
+    stub_external_diffs_setting(enabled: true)
   end
 
-  ::Geo::Secondary::RegistryConsistencyWorker::REGISTRY_CLASSES.each do |klass|
+  def model_class_factory_name(registry_class)
+    default_factory_name = registry_class::MODEL_CLASS.underscore.tr('/', '_').to_sym
+
+    { Geo::DesignRegistry => :project_with_design,
+      Geo::MergeRequestDiffRegistry => :external_merge_request_diff,
+      Geo::PackageFileRegistry => :package_file_with_file,
+      Geo::TerraformStateVersionRegistry => :terraform_state_version }
+      .fetch(registry_class, default_factory_name)
+  end
+
+  shared_examples 'registry consistency service' do |klass|
     let(:registry_class) { klass }
+    let(:registry_class_factory) { registry_factory_name(registry_class) }
     let(:model_class) { registry_class::MODEL_CLASS }
+    let(:model_class_factory) { model_class_factory_name(registry_class) }
+    let(:model_foreign_key) { registry_class::MODEL_FOREIGN_KEY }
     let(:batch_size) { 2 }
+
+    subject { described_class.new(registry_class, batch_size: batch_size) }
 
     describe 'registry_class interface' do
       it 'defines a MODEL_CLASS constant' do
@@ -31,8 +46,12 @@ describe Geo::RegistryConsistencyService, :geo_fdw, :use_clean_rails_memory_stor
         expect(registry_class).to respond_to(:insert_for_model_ids)
       end
 
-      it 'responds to .finder_class' do
-        expect(registry_class).to respond_to(:finder_class)
+      it 'responds to .delete_for_model_ids' do
+        expect(registry_class).to respond_to(:delete_for_model_ids)
+      end
+
+      it 'responds to .find_registry_differences' do
+        expect(registry_class).to respond_to(:find_registry_differences)
       end
 
       it 'responds to .has_create_events?' do
@@ -42,7 +61,7 @@ describe Geo::RegistryConsistencyService, :geo_fdw, :use_clean_rails_memory_stor
 
     describe '#execute' do
       context 'when there are replicable records missing registries' do
-        let!(:expected_batch) { create_list(model_class.underscore.to_sym, batch_size) }
+        let!(:expected_batch) { create_list(model_class_factory, batch_size) }
 
         it 'creates missing registries' do
           expect do
@@ -55,7 +74,7 @@ describe Geo::RegistryConsistencyService, :geo_fdw, :use_clean_rails_memory_stor
         end
 
         it 'does not exceed batch size' do
-          not_expected = create(model_class.underscore.to_sym)
+          not_expected = create(model_class_factory)
 
           subject.execute
 
@@ -64,7 +83,7 @@ describe Geo::RegistryConsistencyService, :geo_fdw, :use_clean_rails_memory_stor
 
         # Temporarily, until we implement create events for these replicables
         context 'when the number of records is greater than 6 batches' do
-          let!(:five_batches_worth) { create_list(model_class.underscore.to_sym, 5 * batch_size) }
+          let!(:five_batches_worth) { create_list(model_class_factory, 5 * batch_size) }
 
           context 'when the previous batch is greater than 5 batches from the end of the table' do
             context 'when create events are implemented for this replicable' do
@@ -82,8 +101,8 @@ describe Geo::RegistryConsistencyService, :geo_fdw, :use_clean_rails_memory_stor
                 expect(registry_class.model_id_in(expected).count).to eq(2)
               end
 
-              it 'calls #create_missing_in_range only once' do
-                expect(subject).to receive(:create_missing_in_range).once.and_call_original
+              it 'calls #handle_differences_in_range only once' do
+                expect(subject).to receive(:handle_differences_in_range).once.and_call_original
 
                 subject.execute
               end
@@ -104,8 +123,8 @@ describe Geo::RegistryConsistencyService, :geo_fdw, :use_clean_rails_memory_stor
                 expect(registry_class.model_id_in(expected).count).to eq(4)
               end
 
-              it 'calls #create_missing_in_range twice' do
-                expect(subject).to receive(:create_missing_in_range).twice.and_call_original
+              it 'calls #handle_differences_in_range twice' do
+                expect(subject).to receive(:handle_differences_in_range).twice.and_call_original
 
                 subject.execute
               end
@@ -124,8 +143,8 @@ describe Geo::RegistryConsistencyService, :geo_fdw, :use_clean_rails_memory_stor
               end.to change { registry_class.count }.by(batch_size)
             end
 
-            it 'calls #create_missing_in_range once' do
-              expect(subject).to receive(:create_missing_in_range).once.and_call_original
+            it 'calls #handle_differences_in_range once' do
+              expect(subject).to receive(:handle_differences_in_range).once.and_call_original
 
               subject.execute
             end
@@ -133,17 +152,94 @@ describe Geo::RegistryConsistencyService, :geo_fdw, :use_clean_rails_memory_stor
         end
 
         context 'when the number of records is less than 6 batches' do
-          it 'calls #create_missing_in_range once' do
-            expect(subject).to receive(:create_missing_in_range).once.and_call_original
+          it 'calls #handle_differences_in_range once' do
+            expect(subject).to receive(:handle_differences_in_range).once.and_call_original
 
             subject.execute
           end
         end
       end
 
+      context 'when there are unused registries' do
+        context 'with no replicable records' do
+          let(:records) { create_list(model_class_factory, batch_size) }
+          let(:unused_model_ids) { records.map(&:id) }
+
+          let!(:registries) do
+            records.map do |record|
+              create(registry_class_factory, model_foreign_key => record.id)
+            end
+          end
+
+          before do
+            model_class.where(id: unused_model_ids).delete_all
+          end
+
+          it 'deletes unused registries', :sidekiq_inline do
+            subject.execute
+
+            expect(registry_class.where(model_foreign_key => unused_model_ids)).to be_empty
+          end
+
+          it 'returns truthy' do
+            expect(subject.execute).to be_truthy
+          end
+        end
+
+        context 'when the unused registry foreign key ids are lower than the first replicable model id' do
+          let(:records) { create_list(model_class_factory, batch_size) }
+          let(:unused_registry_ids) { [records.first].map(&:id) }
+
+          let!(:registries) do
+            records.map do |record|
+              create(registry_class_factory, model_foreign_key => record.id)
+            end
+          end
+
+          before do
+            model_class.where(model_class.primary_key => unused_registry_ids).delete_all
+          end
+
+          it 'deletes unused registries', :sidekiq_inline do
+            subject.execute
+
+            expect(registry_class.where(model_foreign_key => unused_registry_ids)).to be_empty
+          end
+
+          it 'returns truthy' do
+            expect(subject.execute).to be_truthy
+          end
+        end
+
+        context 'when the unused registry foreign key ids are greater than the last replicable model id' do
+          let(:records) { create_list(model_class_factory, batch_size) }
+          let(:unused_registry_ids) { [records.last].map(&:id) }
+
+          let!(:registries) do
+            records.map do |record|
+              create(registry_class_factory, model_foreign_key => record.id)
+            end
+          end
+
+          before do
+            model_class.where(model_class.primary_key => unused_registry_ids).delete_all
+          end
+
+          it 'deletes unused registries', :sidekiq_inline do
+            subject.execute
+
+            expect(registry_class.where(model_foreign_key => unused_registry_ids)).to be_empty
+          end
+
+          it 'returns truthy' do
+            expect(subject.execute).to be_truthy
+          end
+        end
+      end
+
       context 'when all replicable records have registries' do
         it 'does nothing' do
-          create_list(model_class.underscore.to_sym, batch_size)
+          create_list(model_class_factory, batch_size)
 
           subject.execute # create the missing registries
 
@@ -153,7 +249,7 @@ describe Geo::RegistryConsistencyService, :geo_fdw, :use_clean_rails_memory_stor
         end
 
         it 'returns falsey' do
-          create_list(model_class.underscore.to_sym, batch_size)
+          create_list(model_class_factory, batch_size)
 
           subject.execute # create the missing registries
 
@@ -173,5 +269,9 @@ describe Geo::RegistryConsistencyService, :geo_fdw, :use_clean_rails_memory_stor
         end
       end
     end
+  end
+
+  ::Geo::Secondary::RegistryConsistencyWorker::REGISTRY_CLASSES.each do |klass|
+    it_behaves_like 'registry consistency service', klass
   end
 end

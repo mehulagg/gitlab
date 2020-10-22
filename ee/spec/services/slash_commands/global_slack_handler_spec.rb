@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SlashCommands::GlobalSlackHandler do
+RSpec.describe SlashCommands::GlobalSlackHandler do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
   let(:chat_name) { double(:chat_name, user: user) }

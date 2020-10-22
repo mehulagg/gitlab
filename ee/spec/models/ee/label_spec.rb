@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Label do
+RSpec.describe Label do
   describe '#scoped_label?' do
     context 'with scoped_labels available' do
       before do

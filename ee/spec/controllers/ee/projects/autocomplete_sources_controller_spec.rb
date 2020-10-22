@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Projects::AutocompleteSourcesController do
+RSpec.describe Projects::AutocompleteSourcesController do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:group2) { create(:group) }

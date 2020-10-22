@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe Geo::BlobUploadService do
+RSpec.describe Geo::BlobUploadService do
   let(:package_file) { create(:package_file, :npm) }
 
-  subject { described_class.new(replicable_name: 'package_file', blob_id: package_file.id, decoded_params: {}) }
+  subject { described_class.new(replicable_name: 'package_file', replicable_id: package_file.id, decoded_params: {}) }
 
   describe '#initialize' do
     it 'initializes with valid attributes' do
@@ -19,7 +19,7 @@ describe Geo::BlobUploadService do
     end
 
     it 'errors with an invalid attributes' do
-      service = described_class.new(replicable_name: 'package_file', blob_id: 1234567890, decoded_params: {})
+      service = described_class.new(replicable_name: 'package_file', replicable_id: non_existing_record_id, decoded_params: {})
 
       response = service.execute
 
@@ -27,7 +27,7 @@ describe Geo::BlobUploadService do
     end
 
     it 'returns a file with valid attributes' do
-      service = described_class.new(replicable_name: 'package_file', blob_id: package_file.id,
+      service = described_class.new(replicable_name: 'package_file', replicable_id: package_file.id,
                                     decoded_params: { checksum: package_file.verification_checksum })
 
       response = service.execute

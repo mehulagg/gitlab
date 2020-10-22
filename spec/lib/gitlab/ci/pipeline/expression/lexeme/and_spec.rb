@@ -3,7 +3,7 @@
 require 'fast_spec_helper'
 require 'rspec-parameterized'
 
-describe Gitlab::Ci::Pipeline::Expression::Lexeme::And do
+RSpec.describe Gitlab::Ci::Pipeline::Expression::Lexeme::And do
   let(:left) { double('left', evaluate: nil) }
   let(:right) { double('right', evaluate: nil) }
 
@@ -24,7 +24,7 @@ describe Gitlab::Ci::Pipeline::Expression::Lexeme::And do
 
   describe '.type' do
     it 'is an operator' do
-      expect(described_class.type).to eq :operator
+      expect(described_class.type).to eq :logical_operator
     end
   end
 

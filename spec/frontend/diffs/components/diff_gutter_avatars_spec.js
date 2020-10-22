@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import DiffGutterAvatars from '~/diffs/components/diff_gutter_avatars.vue';
 import discussionsMockData from '../mock_data/diff_discussions';
 
-const getDiscussionsMockData = () => [Object.assign({}, discussionsMockData)];
+const getDiscussionsMockData = () => [{ ...discussionsMockData }];
 
 describe('DiffGutterAvatars', () => {
   let wrapper;
@@ -110,7 +110,7 @@ describe('DiffGutterAvatars', () => {
     it('returns truncated version of comment if it is longer than max length', () => {
       const note = wrapper.vm.discussions[0].notes[1];
 
-      expect(wrapper.vm.getTooltipText(note)).toEqual('Fatih Acet: comment 2 is r...');
+      expect(wrapper.vm.getTooltipText(note)).toEqual('Fatih Acet: comment 2 is rea…');
     });
   });
 });

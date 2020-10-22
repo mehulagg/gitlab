@@ -1,25 +1,25 @@
 - page_title _('Emails')
 - @content_class = "limit-container-width" unless fluid_layout
 
-.row.prepend-top-default
+.row.gl-mt-3
   .col-lg-4.profile-settings-sidebar
-    %h4.prepend-top-0
+    %h4.gl-mt-0
       = page_title
     %p
       = _('Control emails linked to your account')
   .col-lg-8
-    %h4.prepend-top-0
+    %h4.gl-mt-0
       = _('Add email address')
     = form_for 'email', url: profile_emails_path do |f|
       .form-group
         = f.label :email, _('Email'), class: 'label-bold'
         = f.text_field :email, class: 'form-control', data: { qa_selector: 'email_address_field' }
-      .prepend-top-default
-        = f.submit _('Add email address'), class: 'btn btn-success', data: { qa_selector: 'add_email_address_button' }
+      .gl-mt-3
+        = f.submit _('Add email address'), class: 'gl-button btn btn-success', data: { qa_selector: 'add_email_address_button' }
     %hr
-    %h4.prepend-top-0
+    %h4.gl-mt-0
       = _('Linked emails (%{email_count})') % { email_count: @emails.load.size + 1 }
-    .account-well.append-bottom-default
+    .account-well.gl-mb-3
       %ul
         %li
           = _('Your Primary Email will be used for avatar detection.')
@@ -56,8 +56,8 @@
               %span.badge.badge-info= s_('Profiles|Notification email')
             - unless email.confirmed?
               - confirm_title = "#{email.confirmation_sent_at ? _('Resend confirmation email') : _('Send confirmation email')}"
-              = link_to confirm_title, resend_confirmation_instructions_profile_email_path(email), method: :put, class: 'btn btn-sm btn-warning prepend-left-10'
+              = link_to confirm_title, resend_confirmation_instructions_profile_email_path(email), method: :put, class: 'gl-button btn btn-sm btn-warning gl-ml-3'
 
-            = link_to profile_email_path(email), data: { confirm: _('Are you sure?'), qa_selector: 'delete_email_link'}, method: :delete, class: 'btn btn-sm btn-danger prepend-left-10' do
+            = link_to profile_email_path(email), data: { confirm: _('Are you sure?'), qa_selector: 'delete_email_link'}, method: :delete, class: 'gl-button btn btn-sm btn-danger gl-ml-3' do
               %span.sr-only= _('Remove')
-              = icon('trash')
+              = sprite_icon('remove')

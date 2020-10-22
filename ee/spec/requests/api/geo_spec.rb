@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Geo do
+RSpec.describe API::Geo do
   include TermsHelper
   include ApiHelpers
   include ::EE::GeoHelpers
@@ -13,6 +13,10 @@ describe API::Geo do
   let_it_be(:secondary_node) { create(:geo_node) }
   let(:geo_token_header) do
     { 'X-Gitlab-Token' => secondary_node.system_hook.token }
+  end
+
+  let(:invalid_geo_auth_header) do
+    { Authorization: "#{::Gitlab::Geo::BaseRequest::GITLAB_GEO_AUTH_TOKEN_TYPE}...Test" }
   end
 
   let(:not_found_req_header) do
@@ -35,7 +39,7 @@ describe API::Geo do
     end
   end
 
-  describe 'GET /geo/retrieve/:replicable/:id' do
+  describe 'GET /geo/retrieve/:replicable_name/:replicable_id' do
     before do
       stub_current_geo_node(secondary_node)
     end
@@ -75,13 +79,13 @@ describe API::Geo do
 
     context 'invalid requests' do
       it 'responds with 401 with invalid auth header' do
-        get api("/geo/retrieve/#{replicator.replicable_name}/#{resource.id}"), headers: { Authorization: 'Test' }
+        get api("/geo/retrieve/#{replicator.replicable_name}/#{resource.id}"), headers: invalid_geo_auth_header
 
         expect(response).to have_gitlab_http_status(:unauthorized)
       end
 
       it 'responds with 401 with mismatched params in auth headers' do
-        wrong_headers = Gitlab::Geo::TransferRequest.new({ replicable_name: 'wrong', id: 1234 }).headers
+        wrong_headers = Gitlab::Geo::TransferRequest.new({ replicable_name: 'wrong', replicable_id: 1234 }).headers
 
         get api("/geo/retrieve/#{replicator.replicable_name}/#{resource.id}"), headers: wrong_headers
 
@@ -89,7 +93,7 @@ describe API::Geo do
       end
 
       it 'responds with 404 when resource is not found' do
-        model_not_found_header = Gitlab::Geo::TransferRequest.new({ replicable_name: replicator.replicable_name, id: 1234 }).headers
+        model_not_found_header = Gitlab::Geo::TransferRequest.new({ replicable_name: replicator.replicable_name, replicable_id: 1234 }).headers
 
         get api("/geo/retrieve/#{replicator.replicable_name}/1234"), headers: model_not_found_header
 
@@ -135,7 +139,7 @@ describe API::Geo do
 
       it 'responds with 401 when an invalid auth header is provided' do
         path = File.join(api_path, resource.id.to_s)
-        get api(path), headers: { Authorization: 'Test' }
+        get api(path), headers: invalid_geo_auth_header
 
         expect(response).to have_gitlab_http_status(:unauthorized)
       end
@@ -284,7 +288,7 @@ describe API::Geo do
         end
 
         it 'responds with 401 when an invalid auth header is provided' do
-          get api("/geo/transfers/lfs/#{resource.id}"), headers: { Authorization: 'Test' }
+          get api("/geo/transfers/lfs/#{resource.id}"), headers: invalid_geo_auth_header
 
           expect(response).to have_gitlab_http_status(:unauthorized)
         end
@@ -333,29 +337,6 @@ describe API::Geo do
         geo_node_id: secondary_node.id,
         status_message: nil,
         db_replication_lag_seconds: 0,
-        projects_count: 10,
-        repositories_synced_count: 1,
-        repositories_failed_count: 2,
-        wikis_synced_count: 2,
-        wikis_failed_count: 3,
-        lfs_objects_count: 100,
-        lfs_objects_synced_count: 50,
-        lfs_objects_failed_count: 12,
-        lfs_objects_synced_missing_on_primary_count: 4,
-        job_artifacts_count: 100,
-        job_artifacts_synced_count: 50,
-        job_artifacts_failed_count: 12,
-        job_artifacts_synced_missing_on_primary_count: 5,
-        container_repositories_count: 100,
-        container_repositories_synced_count: 50,
-        container_repositories_failed_count: 12,
-        design_repositories_count: 100,
-        design_repositories_synced_count: 50,
-        design_repositories_failed_count: 12,
-        attachments_count: 30,
-        attachments_synced_count: 30,
-        attachments_failed_count: 25,
-        attachments_synced_missing_on_primary_count: 6,
         last_event_id: 2,
         last_event_date: Time.now.utc,
         cursor_last_event_id: 1,
@@ -365,14 +346,46 @@ describe API::Geo do
         repository_updated_max_id: 132,
         repository_deleted_max_id: 23,
         repository_renamed_max_id: 11,
-        repositories_changed_max_id: 109
+        repositories_changed_max_id: 109,
+        status: {
+          projects_count: 10,
+          repositories_synced_count: 1,
+          repositories_failed_count: 2,
+          wikis_synced_count: 2,
+          wikis_failed_count: 3,
+          lfs_objects_count: 100,
+          lfs_objects_synced_count: 50,
+          lfs_objects_failed_count: 12,
+          lfs_objects_synced_missing_on_primary_count: 4,
+          job_artifacts_count: 100,
+          job_artifacts_synced_count: 50,
+          job_artifacts_failed_count: 12,
+          job_artifacts_synced_missing_on_primary_count: 5,
+          container_repositories_count: 100,
+          container_repositories_synced_count: 50,
+          container_repositories_failed_count: 12,
+          design_repositories_count: 100,
+          design_repositories_synced_count: 50,
+          design_repositories_failed_count: 12,
+          attachments_count: 30,
+          attachments_synced_count: 30,
+          attachments_failed_count: 25,
+          attachments_synced_missing_on_primary_count: 6,
+          attachments_replication_enabled: false,
+          container_repositories_replication_enabled: true,
+          design_repositories_replication_enabled: false,
+          job_artifacts_replication_enabled: true,
+          lfs_objects_replication_enabled: true,
+          repositories_replication_enabled: true,
+          repository_verification_enabled: true
+        }
       }
     end
 
     subject(:request) { post api('/geo/status'), params: data, headers: geo_base_request.headers }
 
     it 'responds with 401 with invalid auth header' do
-      post api('/geo/status'), headers: { Authorization: 'Test' }
+      post api('/geo/status'), headers: invalid_geo_auth_header
 
       expect(response).to have_gitlab_http_status(:unauthorized)
     end

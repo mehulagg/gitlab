@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Account recovery regular check callout' do
+RSpec.describe 'Account recovery regular check callout' do
   context 'when signed in' do
     let(:user) { create(:user, created_at: 4.months.ago ) }
     let(:message) { "Please ensure your account's recovery settings are up to date." }

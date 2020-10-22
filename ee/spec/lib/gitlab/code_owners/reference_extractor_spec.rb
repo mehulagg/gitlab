@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::CodeOwners::ReferenceExtractor do
+RSpec.describe Gitlab::CodeOwners::ReferenceExtractor do
   let(:text) do
     <<~TXT
     This is a long text that mentions some users.

@@ -39,6 +39,10 @@ module CacheMarkdownField
 
     context[:markdown_engine] = :common_mark
 
+    if Feature.enabled?(:personal_snippet_reference_filters, context[:author])
+      context[:user] = self.parent_user
+    end
+
     context
   end
 
@@ -102,7 +106,7 @@ module CacheMarkdownField
   def updated_cached_html_for(markdown_field)
     return unless cached_markdown_fields.markdown_fields.include?(markdown_field)
 
-    refresh_markdown_cache if attribute_invalidated?(cached_markdown_fields.html_field(markdown_field))
+    refresh_markdown_cache! if attribute_invalidated?(cached_markdown_fields.html_field(markdown_field))
 
     cached_html_for(markdown_field)
   end
@@ -130,6 +134,10 @@ module CacheMarkdownField
     else
       0
     end
+  end
+
+  def parent_user
+    nil
   end
 
   included do
@@ -161,7 +169,6 @@ module CacheMarkdownField
       define_method(invalidation_method) do
         changed_fields = changed_attributes.keys
         invalidations  = changed_fields & [markdown_field.to_s, *INVALIDATED_BY]
-        invalidations.delete(markdown_field.to_s) if changed_fields.include?("#{markdown_field}_html")
         !invalidations.empty? || !cached_html_up_to_date?(markdown_field)
       end
     end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'admin/application_settings/_elasticsearch_form' do
+RSpec.describe 'admin/application_settings/_elasticsearch_form' do
   let_it_be(:admin) { create(:admin) }
   let(:page) { Capybara::Node::Simple.new(rendered) }
 
@@ -18,6 +18,7 @@ describe 'admin/application_settings/_elasticsearch_form' do
 
     before do
       allow(Gitlab::CurrentSettings).to(receive(:elasticsearch_indexing?)).and_return(es_indexing)
+      allow(Gitlab::CurrentSettings).to(receive(:elasticsearch_pause_indexing?)).and_return(true)
     end
 
     context 'indexing is enabled' do
@@ -28,6 +29,13 @@ describe 'admin/application_settings/_elasticsearch_form' do
 
         expect(rendered).to have_css('a.btn-success', text: button_text)
       end
+
+      it 'renders an enabled pause checkbox' do
+        render
+
+        expect(rendered).to have_css('input[id=application_setting_elasticsearch_pause_indexing]')
+        expect(rendered).not_to have_css('input[id=application_setting_elasticsearch_pause_indexing][disabled="disabled"]')
+      end
     end
 
     context 'indexing is disabled' do
@@ -37,6 +45,12 @@ describe 'admin/application_settings/_elasticsearch_form' do
         render
 
         expect(rendered).not_to have_css('a.btn-success', text: button_text)
+      end
+
+      it 'renders a disabled pause checkbox' do
+        render
+
+        expect(rendered).to have_css('input[id=application_setting_elasticsearch_pause_indexing][disabled="disabled"]')
       end
     end
   end
@@ -58,6 +72,56 @@ describe 'admin/application_settings/_elasticsearch_form' do
       render
       expect(rendered).to have_field('Enter new AWS Secret Access Key', type: 'password')
       expect(page.find_field('Enter new AWS Secret Access Key').value).to be_blank
+    end
+  end
+
+  context 'zero-downtime elasticsearch reindexing' do
+    let(:application_setting) { build(:application_setting) }
+
+    before do
+      assign(:elasticsearch_reindexing_task, task)
+    end
+
+    context 'without extended details' do
+      let(:task) { build(:elastic_reindexing_task) }
+
+      it 'renders the task' do
+        render
+
+        expect(rendered).to include("State: #{task.state}")
+        expect(rendered).not_to include("Task ID:")
+        expect(rendered).not_to include("Error:")
+        expect(rendered).not_to include("Expected documents:")
+        expect(rendered).not_to include("Documents reindexed:")
+      end
+    end
+
+    context 'with extended details' do
+      let(:task) { build(:elastic_reindexing_task, state: :reindexing, elastic_task: 'elastic-task-id', error_message: 'error-message', documents_count_target: 5, documents_count: 10) }
+
+      it 'renders the task' do
+        render
+
+        expect(rendered).to include("State: #{task.state}")
+        expect(rendered).to include("Task ID: #{task.elastic_task}")
+        expect(rendered).to include("Error: #{task.error_message}")
+        expect(rendered).to include("Expected documents: #{task.documents_count}")
+        expect(rendered).to include("Documents reindexed: #{task.documents_count_target} (50.0%)")
+      end
+    end
+
+    context 'with extended details, but without documents_count_target' do
+      let(:task) { build(:elastic_reindexing_task, state: :reindexing, elastic_task: 'elastic-task-id', documents_count: 10) }
+
+      it 'renders the task' do
+        render
+
+        expect(rendered).to include("State: #{task.state}")
+        expect(rendered).to include("Task ID: #{task.elastic_task}")
+        expect(rendered).to include("Expected documents: #{task.documents_count}")
+        expect(rendered).not_to include("Error:")
+        expect(rendered).not_to include("Documents reindexed:")
+      end
     end
   end
 

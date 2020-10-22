@@ -164,7 +164,7 @@ Troubleshooting search result issues is rather straight forward on Elasticsearch
 The first step is to confirm GitLab is using Elasticsearch for the search function.
 To do this:
 
-1. Confirm the integration is enabled in **Admin Area > Settings > Integrations**.
+1. Confirm the integration is enabled in **Admin Area > Settings > General**.
 1. Confirm searches utilize Elasticsearch by accessing the rails console
    (`sudo gitlab-rails console`) and running the following commands:
 
@@ -189,7 +189,7 @@ Moving past that, it is best to attempt the same search using the [Elasticsearch
 
 If the results:
 
-- Sync up, then there is not a technical "issue" per se. Instead, it might be a problem
+- Sync up, then there is not a technical "issue." Instead, it might be a problem
   with the Elasticsearch filters we are using. This can be complicated, so it is best to
   escalate to GitLab support to check these and guide you on the potential on whether or
   not a feature request is needed.
@@ -206,7 +206,7 @@ The best place to start is to determine if the issue is with creating an empty i
 If it is, check on the Elasticsearch side to determine if the `gitlab-production` (the
 name for the GitLab index) exists. If it exists, manually delete it on the Elasticsearch
 side and attempt to recreate it from the
-[`recreate_index`](../../integration/elasticsearch.md#gitlab-elasticsearch-rake-tasks)
+[`recreate_index`](../../integration/elasticsearch.md#gitlab-advanced-search-rake-tasks)
 Rake task.
 
 If you still encounter issues, try creating an index manually on the Elasticsearch
@@ -225,8 +225,8 @@ during the indexing of projects. If errors do occur, they will either stem from 
 
 If the indexing process does not present errors, you will want to check the status of the indexed projects. You can do this via the following Rake tasks:
 
-- [`sudo gitlab-rake gitlab:elastic:index_projects_status`](../../integration/elasticsearch.md#gitlab-elasticsearch-rake-tasks) (shows the overall status)
-- [`sudo gitlab-rake gitlab:elastic:projects_not_indexed`](../../integration/elasticsearch.md#gitlab-elasticsearch-rake-tasks) (shows specific projects that are not indexed)
+- [`sudo gitlab-rake gitlab:elastic:index_projects_status`](../../integration/elasticsearch.md#gitlab-advanced-search-rake-tasks) (shows the overall status)
+- [`sudo gitlab-rake gitlab:elastic:projects_not_indexed`](../../integration/elasticsearch.md#gitlab-advanced-search-rake-tasks) (shows specific projects that are not indexed)
 
 If:
 
@@ -261,6 +261,9 @@ Beyond that, you will want to review the error. If it is:
 - Specifically from the indexer, this could be a bug/issue and should be escalated to
   GitLab support.
 - An OS issue, you will want to reach out to your systems administrator.
+- A `Faraday::TimeoutError (execution expired)` error **and** you're using a proxy,
+  [set a custom  `gitlab_rails['env']` environment variable, called `no_proxy`](https://docs.gitlab.com/omnibus/settings/environment-variables.html)
+  with the IP address of your Elasticsearch host.
 
 ### Troubleshooting performance
 
@@ -330,10 +333,10 @@ feel free to update that page with issues you encounter and solutions.
 
 Setting up Elasticsearch isn't too bad, but it can be a bit finicky and time consuming.
 
-The easiest method is to spin up a docker container with the required version and
+The easiest method is to spin up a Docker container with the required version and
 bind ports 9200/9300 so it can be used.
 
-The following is an example of running a docker container of Elasticsearch v7.2.0:
+The following is an example of running a Docker container of Elasticsearch v7.2.0:
 
 ```shell
 docker pull docker.elastic.co/elasticsearch/elasticsearch:7.2.0
@@ -342,7 +345,7 @@ docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elas
 
 From here, you can:
 
-- Grab the IP of the docker container (use `docker inspect <container_id>`)
+- Grab the IP of the Docker container (use `docker inspect <container_id>`)
 - Use `<IP.add.re.ss:9200>` to communicate with it.
 
 This is a quick method to test out Elasticsearch, but by no means is this a

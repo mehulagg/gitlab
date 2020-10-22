@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::ProjectMirror do
+RSpec.describe API::ProjectMirror do
   describe 'POST /projects/:id/mirror/pull' do
     let(:visibility) { Gitlab::VisibilityLevel::PUBLIC }
     let(:project_mirrored) { create(:project, :repository, :mirror, visibility: visibility) }

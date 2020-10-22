@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database do
+RSpec.describe Gitlab::Database do
   include ::EE::GeoHelpers
 
   describe '.read_only?' do

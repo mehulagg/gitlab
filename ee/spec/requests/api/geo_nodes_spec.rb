@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::GeoNodes, :request_store, :geo_fdw, :prometheus, api: true do
+RSpec.describe API::GeoNodes, :request_store, :geo, :prometheus, api: true do
   include ApiHelpers
   include ::EE::GeoHelpers
 
@@ -33,7 +33,7 @@ describe API::GeoNodes, :request_store, :geo_fdw, :prometheus, api: true do
         url: 'http://example.com',
         selective_sync_type: "shards",
         selective_sync_shards: %w[shard1 shard2],
-        selective_sync_namespace_ids: [group_to_sync.id],
+        selective_sync_namespace_ids: group_to_sync.id,
         minimum_reverification_interval: 10
       }
       expect_any_instance_of(Geo::NodeCreateService).to receive(:execute).once.and_call_original
@@ -279,6 +279,58 @@ describe API::GeoNodes, :request_store, :geo_fdw, :prometheus, api: true do
       put api("/geo_nodes/#{primary.id}", admin), params: params
 
       expect(response).to have_gitlab_http_status(:bad_request)
+    end
+
+    context 'auth with geo node token' do
+      let(:geo_base_request) { Gitlab::Geo::BaseRequest.new(scope: ::Gitlab::Geo::API_SCOPE) }
+
+      before do
+        stub_current_geo_node(primary)
+        allow(geo_base_request).to receive(:requesting_node) { secondary }
+      end
+
+      it 'enables the secondary node' do
+        secondary.update(enabled: false)
+
+        put api("/geo_nodes/#{secondary.id}"), params: { enabled: true }, headers: geo_base_request.headers
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(secondary.reload).to be_enabled
+      end
+
+      it 'disables the secondary node' do
+        secondary.update(enabled: true)
+
+        put api("/geo_nodes/#{secondary.id}"), params: { enabled: false }, headers: geo_base_request.headers
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(secondary.reload).not_to be_enabled
+      end
+
+      it 'returns bad request if you try to update the primary' do
+        put api("/geo_nodes/#{primary.id}"), params: { enabled: false }, headers: geo_base_request.headers
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(primary.reload).to be_enabled
+      end
+
+      it 'responds with 401 when IP is not allowed' do
+        stub_application_setting(geo_node_allowed_ips: '192.34.34.34')
+
+        put api("/geo_nodes/#{secondary.id}"), params: {}, headers: geo_base_request.headers
+
+        expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+
+      it 'responds 401 if auth header is bad' do
+        allow_next_instance_of(Gitlab::Geo::JwtRequestDecoder) do |instance|
+          allow(instance).to receive(:decode).and_raise(Gitlab::Geo::InvalidDecryptionKeyError)
+        end
+
+        put api("/geo_nodes/#{secondary.id}"), params: {}, headers: geo_base_request.headers
+
+        expect(response).to have_gitlab_http_status(:unauthorized)
+      end
     end
   end
 

@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Gitlab::Checks::PushFileCountCheck do
+RSpec.describe Gitlab::Checks::PushFileCountCheck do
   let(:snippet) { create(:personal_snippet, :repository) }
   let(:changes) { { oldrev: oldrev, newrev: newrev, ref: ref } }
   let(:timeout) { Gitlab::GitAccess::INTERNAL_TIMEOUT }
   let(:logger) { Gitlab::Checks::TimedLogger.new(timeout: timeout) }
 
-  subject { described_class.new(changes, repository: snippet.repository, limit: 1, logger: logger) }
+  subject { described_class.new(changes, repository: snippet.repository, limit: 2, logger: logger) }
 
   describe '#validate!' do
     using RSpec::Parameterized::TableSyntax
@@ -31,7 +31,7 @@ describe Gitlab::Checks::PushFileCountCheck do
 
     where(:old, :new, :valid, :message) do
       'single-file' | 'edit-file'            | true  | nil
-      'single-file' | 'multiple-files'       | false | 'The repository can contain at most 1 file(s).'
+      'single-file' | 'multiple-files'       | false | 'The repository can contain at most 2 file(s).'
       'single-file' | 'no-files'             | false | 'The repository must contain at least 1 file.'
       'edit-file'   | 'rename-and-edit-file' | true  | nil
     end

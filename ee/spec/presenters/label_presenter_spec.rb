@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LabelPresenter do
+RSpec.describe LabelPresenter do
   let(:project) { create(:project) }
 
   describe '#scoped_label?' do

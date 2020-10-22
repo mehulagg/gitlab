@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Burndown do
+RSpec.describe Burndown do
   let_it_be(:user) { create(:user) }
   let(:start_date) { "2017-03-01" }
   let(:due_date) { "2017-03-03" }
@@ -102,7 +102,7 @@ describe Burndown do
     end
 
     it "ignores follow-up events with the same action" do
-      create(:event, target: milestone.issues.first, created_at: milestone.start_date + 1.minute, action: Event::REOPENED)
+      create(:event, target: milestone.issues.first, created_at: milestone.start_date + 1.minute, action: :reopened)
       event1 = create(:closed_issue_event, target: milestone.issues.first, created_at: milestone.start_date + 2.minutes)
       event2 = create(:closed_issue_event, target: milestone.issues.first, created_at: milestone.start_date + 3.minutes)
 
@@ -112,7 +112,7 @@ describe Burndown do
 
     context "when all closed issues do not have closed events" do
       before do
-        Event.where(target: milestone.issues, action: Event::CLOSED).destroy_all # rubocop: disable DestroyAll
+        Event.where(target: milestone.issues, action: :closed).destroy_all # rubocop: disable Cop/DestroyAll
       end
 
       it "considers closed_at as milestone start date" do
@@ -137,7 +137,7 @@ describe Burndown do
 
     context "when one but not all closed issues does not have a closed event" do
       it "sets attribute accurate to false" do
-        Event.where(target: milestone.issues.closed.first, action: Event::CLOSED).destroy_all # rubocop: disable DestroyAll
+        Event.where(target: milestone.issues.closed.first, action: :closed).destroy_all # rubocop: disable Cop/DestroyAll
         burndown = described_class.new(milestone.issues_visible_to_user(user), milestone.start_date, milestone.due_date)
 
         aggregate_failures do
@@ -160,6 +160,7 @@ describe Burndown do
           author: user
         }
       end
+
       let(:scope) { project }
     end
   end
@@ -188,6 +189,7 @@ describe Burndown do
             author: user
           }
         end
+
         let(:scope) { group }
       end
     end
@@ -204,6 +206,7 @@ describe Burndown do
             author: user
           }
         end
+
         let(:scope) { group }
       end
     end

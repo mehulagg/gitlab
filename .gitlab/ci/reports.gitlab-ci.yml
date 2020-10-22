@@ -14,9 +14,8 @@ code_quality:
     - .use-docker-in-docker
   stage: test
   needs: []
-  allow_failure: true
   variables:
-    CODE_QUALITY_IMAGE: "registry.gitlab.com/gitlab-org/ci-cd/codequality:0.85.9"
+    CODE_QUALITY_IMAGE: "registry.gitlab.com/gitlab-org/ci-cd/codequality:0.85.10-gitlab.1"
   script:
     - |
       if ! docker info &>/dev/null; then
@@ -44,12 +43,10 @@ code_quality:
   extends:
     - .default-retry
     - .reports:rules:sast
-    - .use-docker-in-docker
   stage: test
   # `needs: []` starts the job immediately in the pipeline
   # https://docs.gitlab.com/ee/ci/yaml/README.html#needs
   needs: []
-  allow_failure: true
   artifacts:
     paths:
       - gl-sast-report.json  # GitLab-specific
@@ -57,15 +54,12 @@ code_quality:
       sast: gl-sast-report.json
     expire_in: 1 week  # GitLab-specific
   variables:
-    # emptying DOCKER_HOST so it can be detected properly on kubernetes executor
-    # with the script below
-    DOCKER_HOST: ""
-    DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: ""
     SAST_ANALYZER_IMAGE_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
     SAST_ANALYZER_IMAGE_TAG: 2
     SAST_BRAKEMAN_LEVEL: 2  # GitLab-specific
-    SAST_EXCLUDED_PATHS: qa,spec,doc,ee/spec  # GitLab-specific
+    SAST_EXCLUDED_PATHS: qa,spec,doc,ee/spec,config/gitlab.yml.example  # GitLab-specific
+    SAST_DISABLE_BABEL: "true"
   script:
     - /analyzer run
 
@@ -87,7 +81,13 @@ nodejs-scan-sast:
 secrets-sast:
   extends: .sast
   image:
-    name: "$SAST_ANALYZER_IMAGE_PREFIX/secrets:$SAST_ANALYZER_IMAGE_TAG"
+    name: "$SAST_ANALYZER_IMAGE_PREFIX/secrets:3"
+  artifacts:
+    paths:
+      - gl-secret-detection-report.json  # GitLab-specific
+    reports:
+      sast: gl-secret-detection-report.json
+    expire_in: 1 week  # GitLab-specific
 
 # We need to duplicate this job's definition because it seems it's impossible to
 # override an included `only.refs`.
@@ -100,10 +100,9 @@ dependency_scanning:
   stage: test
   needs: []
   variables:
+    DS_MAJOR_VERSION: 2
     DS_EXCLUDED_PATHS: "qa/qa/ee/fixtures/secure_premade_reports,spec,ee/spec"  # GitLab-specific
-  allow_failure: true
   script:
-    - export DS_VERSION=${SP_VERSION:-$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')}
     - |
       if ! docker info &>/dev/null; then
         if [ -z "$DOCKER_HOST" -a "$KUBERNETES_PORT" ]; then
@@ -145,7 +144,7 @@ dependency_scanning:
         ) \
         --volume "$PWD:/code" \
         --volume /var/run/docker.sock:/var/run/docker.sock \
-        "registry.gitlab.com/gitlab-org/security-products/dependency-scanning:$DS_VERSION" /code
+        "registry.gitlab.com/gitlab-org/security-products/dependency-scanning:$DS_MAJOR_VERSION" /code
   artifacts:
     paths:
       - gl-dependency-scanning-report.json  # GitLab-specific
@@ -153,43 +152,19 @@ dependency_scanning:
       dependency_scanning: gl-dependency-scanning-report.json
     expire_in: 1 week  # GitLab-specific
 
-# We need to duplicate this job's definition because it seems it's impossible to
-# override an included `only.refs`.
-# See https://gitlab.com/gitlab-org/gitlab/issues/31371.
-dast:
+license_scanning:
   extends:
     - .default-retry
-    - .reports:rules:dast
-  # This is needed so that manual jobs with needs don't block the pipeline.
-  # See https://gitlab.com/gitlab-org/gitlab/-/issues/199979.
-  dependencies: ["review-deploy"]
-  stage: qa  # GitLab-specific
+    - .reports:rules:license_scanning
+  stage: test
   image:
-    name: "registry.gitlab.com/gitlab-org/security-products/dast:$DAST_VERSION"
-  variables:
-    # To be done in a later iteration
-    # DAST_USERNAME: "root"
-    # DAST_USERNAME_FIELD: "user[login]"
-    # DAST_PASSWORD_FIELD: "user[passowrd]"
-    DAST_VERSION: 1
-  allow_failure: true
+    name: "registry.gitlab.com/gitlab-org/security-products/analyzers/license-finder:3"
+    entrypoint: [""]
+  needs: []
   script:
-    - 'export DAST_WEBSITE="${DAST_WEBSITE:-$(cat environment_url.txt)}"'
-    # To be done in a later iteration
-    # - 'export DAST_AUTH_URL="${DAST_WEBSITE}/users/sign_in"'
-    # - 'export DAST_PASSWORD="${REVIEW_APPS_ROOT_PASSWORD}"'
-    - /analyze -t $DAST_WEBSITE
+    - /run.sh analyze .
   artifacts:
-    paths:
-      - gl-dast-report.json  # GitLab-specific
     reports:
-      dast: gl-dast-report.json
+      license_scanning: gl-license-scanning-report.json
     expire_in: 1 week  # GitLab-specific
-
-# To be done in a later iteration: https://gitlab.com/gitlab-org/gitlab/issues/31160#note_278188255
-# schedule:dast:
-#   extends:
-#     - dast
-#     - .reports:schedule-dast
-#   variables:
-#     DAST_FULL_SCAN_ENABLED: "true"
+  dependencies: []

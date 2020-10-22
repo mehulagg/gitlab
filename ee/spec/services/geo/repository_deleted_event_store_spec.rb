@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::RepositoryDeletedEventStore do
+RSpec.describe Geo::RepositoryDeletedEventStore do
   include EE::GeoHelpers
 
   let_it_be(:project) { create(:project, path: 'bar') }

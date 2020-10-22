@@ -10,7 +10,7 @@ import createStore from '~/notes/stores';
 import * as constants from '~/notes/constants';
 import '~/behaviors/markdown/render_gfm';
 // TODO: use generated fixture (https://gitlab.com/gitlab-org/gitlab-foss/issues/62491)
-import * as mockData from '../../notes/mock_data';
+import * as mockData from '../mock_data';
 import * as urlUtility from '~/lib/utils/url_utility';
 import OrderedLayout from '~/vue_shared/components/ordered_layout.vue';
 
@@ -174,6 +174,23 @@ describe('note_app', () => {
     });
   });
 
+  describe('timeline view', () => {
+    beforeEach(() => {
+      setFixtures('<div class="js-discussions-count"></div>');
+
+      axiosMock.onAny().reply(mockData.getIndividualNoteResponse);
+      store.state.commentsDisabled = false;
+      store.state.isTimelineEnabled = true;
+
+      wrapper = mountComponent();
+      return waitForDiscussionsRequest();
+    });
+
+    it('should not render comments form', () => {
+      expect(wrapper.find('.js-main-target-form').exists()).toBe(false);
+    });
+  });
+
   describe('while fetching data', () => {
     beforeEach(() => {
       setFixtures('<div class="js-discussions-count"></div>');
@@ -329,6 +346,8 @@ describe('note_app', () => {
       });
 
       wrapper.vm.$parent.$el.dispatchEvent(toggleAwardEvent);
+
+      jest.advanceTimersByTime(2);
 
       expect(toggleAwardAction).toHaveBeenCalledTimes(1);
       const [, payload] = toggleAwardAction.mock.calls[0];

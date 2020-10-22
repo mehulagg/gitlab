@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'New project' do
+RSpec.describe 'New project' do
   let(:user) { create(:admin) }
 
   before do
@@ -53,6 +53,7 @@ describe 'New project' do
     context 'when licensed' do
       before do
         stub_licensed_features(ci_cd_projects: true)
+        stub_feature_flags(remove_legacy_github_client: false)
       end
 
       it 'shows CI/CD tab and pane' do
@@ -122,7 +123,7 @@ describe 'New project' do
         wait_for_requests
 
         # Mock the POST `/import/github`
-        allow_any_instance_of(Gitlab::LegacyGithubImport::Client).to receive(:repo).and_return(repo)
+        allow_any_instance_of(Gitlab::LegacyGithubImport::Client).to receive(:repository).and_return(repo)
         project = create(:project, name: 'some-github-repo', creator: user, import_type: 'github')
         create(:import_state, :finished, import_url: repo.clone_url, project: project)
         allow_any_instance_of(CiCd::SetupProject).to receive(:setup_external_service)
@@ -291,9 +292,9 @@ describe 'New project' do
           group2.add_owner(user)
           group3.add_owner(user)
           group4.add_owner(user)
-          group1.update(custom_project_templates_group_id: subgroup1.id)
-          group2.update(custom_project_templates_group_id: subgroup2.id)
-          subgroup4.update(custom_project_templates_group_id: subsubgroup4.id)
+          group1.update!(custom_project_templates_group_id: subgroup1.id)
+          group2.update!(custom_project_templates_group_id: subgroup2.id)
+          subgroup4.update!(custom_project_templates_group_id: subsubgroup4.id)
         end
 
         context 'when top level context' do
@@ -373,46 +374,14 @@ describe 'New project' do
                 let(:template_number) { 2 }
               end
             end
-
-            context 'when creating project with templates' do
-              let(:url) { new_project_path(namespace_id: group1.id) }
-
-              before do
-                allow(Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?) { true }
-                create(:gitlab_subscription, :bronze, namespace: group1)
-              end
-
-              around do |example|
-                Timecop.freeze(GroupsWithTemplatesFinder::CUT_OFF_DATE - 1.day) do
-                  example.run
-                end
-              end
-
-              it 'show Group tab in Templates section' do
-                visit url
-                click_link 'Create from template'
-
-                expect(page).to have_css('.custom-group-project-templates-tab')
-              end
-
-              it_behaves_like 'group templates displayed' do
-                let(:template_number) { 2 }
-              end
-            end
           end
 
-          context 'when creating project with templates after grace period' do
+          context 'when not in proper plan' do
             let(:url) { new_project_path(namespace_id: group1.id) }
 
             before do
               stub_application_setting(check_namespace_plan: true)
               create(:gitlab_subscription, :bronze, namespace: group1)
-            end
-
-            around do |example|
-              Timecop.freeze(GroupsWithTemplatesFinder::CUT_OFF_DATE + 1.day) do
-                example.run
-              end
             end
 
             it 'show Group tab in Templates section' do

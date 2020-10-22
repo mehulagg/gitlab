@@ -17,6 +17,22 @@ experiences. Several projects were started with different standards and they
 can still have specifics. They will be described in their respective
 `README.md` or `PROCESS.md` files.
 
+## Dependency Management
+
+Go uses a source-based strategy for dependency management. Dependencies are
+downloaded as source from their source repository. This differs from the more
+common artifact-based strategy where dependencies are downloaded as artifacts
+from a package repository that is separate from the dependency's source
+repository.
+
+Go did not have first-class support for version management prior to 1.11. That
+version introduced Go modules and the use of semantic versioning. Go 1.12
+introduced module proxies, which can serve as an intermediate between clients
+and source version control systems, and checksum databases, which can be used to
+verify the integrity of dependency downloads.
+
+See [Dependency Management in Go](dependencies.md) for more details.
+
 ## Code Review
 
 We follow the common principles of
@@ -63,7 +79,6 @@ file and ask your manager to review and merge.
 ```yaml
 projects:
   gitlab: reviewer go
-  gitlab-foss: reviewer go
 ```
 
 ## Code style and format
@@ -93,20 +108,20 @@ lint:
     - '[ -e .golangci.yml ] || cp /golangci/.golangci.yml .'
     # Write the code coverage report to gl-code-quality-report.json
     # and print linting issues to stdout in the format: path/to/file:line description
-    - golangci-lint run --out-format code-climate | tee gl-code-quality-report.json | jq -r '.[] | "\(.location.path):\(.location.lines.begin) \(.description)"'
+    # remove `--issues-exit-code 0` or set to non-zero to fail the job if linting issues are detected
+    - golangci-lint run --issues-exit-code 0 --out-format code-climate | tee gl-code-quality-report.json | jq -r '.[] | "\(.location.path):\(.location.lines.begin) \(.description)"'
   artifacts:
     reports:
       codequality: gl-code-quality-report.json
     paths:
       - gl-code-quality-report.json
-  allow_failure: true
 ```
 
 Including a `.golangci.yml` in the root directory of the project allows for
 configuration of `golangci-lint`. All options for `golangci-lint` are listed in
 this [example](https://github.com/golangci/golangci-lint/blob/master/.golangci.example.yml).
 
-Once [recursive includes](https://gitlab.com/gitlab-org/gitlab-foss/issues/56836)
+Once [recursive includes](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/56836)
 become available, you will be able to share job templates like this
 [analyzer](https://gitlab.com/gitlab-org/security-products/ci-templates/raw/master/includes-dev/analyzer.yml).
 
@@ -115,7 +130,7 @@ become available, you will be able to share job templates like this
 Dependencies should be kept to the minimum. The introduction of a new
 dependency should be argued in the merge request, as per our [Approval
 Guidelines](../code_review.md#approval-guidelines). Both [License
-Management](../../user/compliance/license_compliance/index.md)
+Scanning](../../user/compliance/license_compliance/index.md)
 **(ULTIMATE)** and [Dependency
 Scanning](../../user/application_security/dependency_scanning/index.md)
 **(ULTIMATE)** should be activated on all projects to ensure new dependencies
@@ -123,7 +138,7 @@ security status and license compatibility.
 
 ### Modules
 
-Since Go 1.11, a standard dependency system is available behind the name [Go
+In Go 1.11 and later, a standard dependency system is available behind the name [Go
 Modules](https://github.com/golang/go/wiki/Modules). It provides a way to
 define and lock dependencies for reproducible builds. It should be used
 whenever possible.
@@ -250,6 +265,59 @@ Programs handling a lot of IO or complex operations should always include
 [benchmarks](https://golang.org/pkg/testing/#hdr-Benchmarks), to ensure
 performance consistency over time.
 
+## Error handling
+
+### Adding context
+
+Adding context before you return the error can be helpful, instead of
+just returning the error. This allows developers to understand what the
+program was trying to do when it entered the error state making it much
+easier to debug.
+
+For example:
+
+```golang
+// Wrap the error
+return nil, fmt.Errorf("get cache %s: %w", f.Name, err)
+
+// Just add context
+return nil, fmt.Errorf("saving cache %s: %v", f.Name, err)
+```
+
+A few things to keep in mind when adding context:
+
+- Decide if you want to expose the underlying error
+  to the caller. If so, use `%w`, if not, you can use `%v`.
+- Don't use words like `failed`, `error`, `didn't`. As it's an error,
+  the user already knows that something failed and this might lead to
+  having strings like `failed xx failed xx failed xx`. Explain _what_
+  failed instead.
+- Error strings should not be capitalized or end with punctuation or a
+  newline. You can use `golint` to check for this.
+
+### Naming
+
+- When using sentinel errors they should always be named like `ErrXxx`.
+- When creating a new error type they should always be named like
+  `XxxError`.
+
+### Checking Error types
+
+- To check error equality don't use `==`. Use
+  [`errors.Is`](https://pkg.go.dev/errors?tab=doc#Is) instead (for Go
+  versions >= 1.13).
+- To check if the error is of a certain type don't use type assertion,
+  use [`errors.As`](https://pkg.go.dev/errors?tab=doc#As) instead (for
+  Go versions >= 1.13).
+
+### References for working with errors
+
+- [Go 1.13 errors](https://blog.golang.org/go1.13-errors).
+- [Programing with
+  errors](https://peter.bourgon.org/blog/2019/09/11/programming-with-errors.html).
+- [Don’t just check errors, handle them
+  gracefully](https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully).
+
 ## CLIs
 
 Every Go program is launched from the command line.
@@ -338,7 +406,7 @@ builds](https://docs.docker.com/develop/develop-images/multistage-build/):
   dependencies.
 - They generate a small, self-contained image, derived from `Scratch`.
 
-Generated docker images should have the program at their `Entrypoint` to create
+Generated Docker images should have the program at their `Entrypoint` to create
 portable commands. That way, anyone can run the image, and without parameters
 it will display its help message (if `cli` has been used).
 
@@ -346,7 +414,7 @@ it will display its help message (if `cli` has been used).
 
 With the exception of [GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner),
 which publishes its own binaries, our Go binaries are created by projects
-managed by the [Distribution group](https://about.gitlab.com/handbook/product/categories/#distribution-group).
+managed by the [Distribution group](https://about.gitlab.com/handbook/product/product-categories/#distribution-group).
 
 The [Omnibus GitLab](https://gitlab.com/gitlab-org/omnibus-gitlab) project creates a
 single, monolithic operating system package containing all the binaries, while
@@ -384,6 +452,28 @@ are:
 
 To reduce unnecessary differences between two distribution methods, Omnibus and
 CNG **should always use the same Go version**.
+
+### Supporting multiple Go versions
+
+Individual Golang-projects need to support multiple Go versions for the following reasons:
+
+1. When a new Go release is out, we should start integrating it into the CI pipelines to verify compatibility with the new compiler.
+1. We must support the [Omnibus official Go version](#updating-go-version), which may be behind the latest minor release.
+1. When Omnibus switches Go version, we still may need to support the old one for security backports.
+
+These 3 requirements may easily be satisfied by keeping support for the 3 latest minor versions of Go.
+
+It's ok to drop support for the oldest Go version and support only 2 latest releases,
+if this is enough to support backports to the last 3 GitLab minor releases.
+
+Example:
+
+In case we want to drop support for `go 1.11` in GitLab `12.10`, we need to verify which Go versions we are using in `12.9`, `12.8`, and `12.7`.
+
+We will not consider the active milestone, `12.10`, because a backport for `12.7` will be required in case of a critical security release.
+
+1. If both [Omnibus and CNG](#updating-go-version) were using Go `1.12` in GitLab `12.7` and later, then we safely drop support for `1.11`.
+1. If Omnibus or CNG were using `1.11` in GitLab `12.7`, then we still need to keep support for Go `1.11` for easier backporting of security fixes.
 
 ## Secure Team standards and style guidelines
 

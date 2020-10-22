@@ -12,11 +12,22 @@ export default {
       default: () => {},
     },
   },
+  computed: {
+    hasHealthStatus() {
+      const { issuesOnTrack, issuesNeedingAttention, issuesAtRisk } = this.healthStatus;
+      const totalHealthStatuses = issuesOnTrack + issuesNeedingAttention + issuesAtRisk;
+      return totalHealthStatuses > 0;
+    },
+  },
 };
 </script>
 
 <template>
-  <div ref="healthStatus" class="health-status d-inline-flex align-items-center">
+  <div
+    v-if="hasHealthStatus"
+    ref="healthStatus"
+    class="health-status d-inline-flex align-items-center"
+  >
     <gl-tooltip :target="() => $refs.healthStatus" placement="top">
       <span
         ><strong>{{ healthStatus.issuesOnTrack }}</strong
@@ -34,36 +45,42 @@ export default {
       >
     </gl-tooltip>
 
-    <span class="gl-label gl-label-text-dark gl-label-sm status-on-track"
-      ><span class="gl-label-text">
+    <span class="gl-label gl-label-text-dark gl-label-sm status-on-track gl-mr-2">
+      <span class="gl-label-text">
         {{ healthStatus.issuesOnTrack }}
-      </span></span
+      </span>
+    </span>
+    <span class="gl-mr-2 mr-md-2 gl-text-gray-500 health-label-long gl-display-none!">
+      {{ __('issues on track') }}
+    </span>
+    <span
+      class="gl-mr-2 mr-md-2 gl-text-gray-500 gl-str-truncated health-label-short gl-display-none!"
+      >{{ __('on track') }}</span
     >
-    <span class="ml-1 mr-1 mr-md-2 text-secondary health-label-long">{{
-      __('issues on track')
-    }}</span>
-    <span class="ml-1 mr-1 mr-md-2 text-secondary text-truncate health-label-short">{{
-      __('on track')
-    }}</span>
 
-    <span class="gl-label gl-label-text-dark gl-label-sm status-needs-attention"
-      ><span class="gl-label-text">
+    <span class="gl-label gl-label-text-dark gl-label-sm status-needs-attention gl-mr-2">
+      <span class="gl-label-text">
         {{ healthStatus.issuesNeedingAttention }}
-      </span></span
+      </span>
+    </span>
+    <span class="gl-mr-2 mr-md-2 gl-text-gray-500 health-label-long gl-display-none!">
+      {{ __('issues need attention') }}
+    </span>
+    <span
+      class="gl-mr-2 mr-md-2 gl-text-gray-500 gl-str-truncated health-label-short gl-display-none!"
+      >{{ __('need attention') }}</span
     >
-    <span class="ml-1 mr-1 mr-md-2 text-secondary health-label-long">{{
-      __('issues need attention')
-    }}</span>
-    <span class="ml-1 mr-1 mr-md-2 text-secondary text-truncate health-label-short">{{
-      __('need attention')
-    }}</span>
 
-    <span class="gl-label gl-label-text-dark gl-label-sm status-at-risk"
-      ><span class="gl-label-text">
+    <span class="gl-label gl-label-text-dark gl-label-sm status-at-risk gl-mr-2">
+      <span class="gl-label-text">
         {{ healthStatus.issuesAtRisk }}
-      </span></span
-    >
-    <span class="ml-1 text-secondary health-label-long">{{ __('issues at risk') }}</span>
-    <span class="ml-1 text-secondary text-truncate health-label-short">{{ __('at risk') }}</span>
+      </span>
+    </span>
+    <span class="gl-text-gray-500 health-label-long gl-display-none!">
+      {{ __('issues at risk') }}
+    </span>
+    <span class="gl-text-gray-500 gl-str-truncated health-label-short gl-display-none!">
+      {{ __('at risk') }}
+    </span>
   </div>
 </template>

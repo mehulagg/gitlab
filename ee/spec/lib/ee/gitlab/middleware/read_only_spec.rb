@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Middleware::ReadOnly do
+RSpec.describe Gitlab::Middleware::ReadOnly do
   include Rack::Test::Methods
   using RSpec::Parameterized::TableSyntax
 
@@ -55,19 +55,19 @@ describe Gitlab::Middleware::ReadOnly do
     context 'whitelisted requests' do
       it_behaves_like 'whitelisted request', :patch, '/admin/geo/nodes/1'
 
-      it_behaves_like 'whitelisted request', :delete, '/admin/geo/projects/1'
+      it_behaves_like 'whitelisted request', :delete, '/admin/geo/replication/projects/1'
 
-      it_behaves_like 'whitelisted request', :post, '/admin/geo/projects/1/resync'
+      it_behaves_like 'whitelisted request', :post, '/admin/geo/replication/projects/1/resync'
 
-      it_behaves_like 'whitelisted request', :post, '/admin/geo/projects/1/reverify'
+      it_behaves_like 'whitelisted request', :post, '/admin/geo/replication/projects/1/reverify'
 
-      it_behaves_like 'whitelisted request', :post, '/admin/geo/projects/reverify_all'
+      it_behaves_like 'whitelisted request', :post, '/admin/geo/replication/projects/reverify_all'
 
-      it_behaves_like 'whitelisted request', :post, '/admin/geo/projects/resync_all'
+      it_behaves_like 'whitelisted request', :post, '/admin/geo/replication/projects/resync_all'
 
-      it_behaves_like 'whitelisted request', :post, '/admin/geo/projects/1/force_redownload'
+      it_behaves_like 'whitelisted request', :post, '/admin/geo/replication/projects/1/force_redownload'
 
-      it_behaves_like 'whitelisted request', :delete, '/admin/geo/uploads/1'
+      it_behaves_like 'whitelisted request', :delete, '/admin/geo/replication/uploads/1'
     end
 
     it 'expects geo replication node api requests to be allowed' do

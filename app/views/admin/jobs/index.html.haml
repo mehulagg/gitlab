@@ -1,4 +1,5 @@
-- breadcrumb_title "Jobs"
+- breadcrumb_title _("Jobs")
+- page_title _("Jobs")
 
 .top-area.scrolling-tabs-container.inner-page-scroll-tabs
   - build_path_proc = ->(scope) { admin_jobs_path(scope: scope) }
@@ -7,7 +8,7 @@
   - if @all_builds.running_or_pending.any?
     #stop-jobs-modal
     .nav-controls
-      %button#stop-jobs-button.btn.btn-danger{ data: { toggle: 'modal',
+      %button#stop-jobs-button.btn.gl-button.btn-danger{ data: { toggle: 'modal',
         target: '#stop-jobs-modal',
         url: cancel_all_admin_jobs_path } }
         = s_('AdminArea|Stop all jobs')

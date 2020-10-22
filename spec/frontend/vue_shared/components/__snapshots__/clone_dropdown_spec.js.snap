@@ -1,9 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Clone Dropdown Button rendering matches the snapshot 1`] = `
-<gl-new-dropdown-stub
+<gl-dropdown-stub
   category="primary"
   headertext=""
+  right=""
   size="medium"
   text="Clone"
   variant="info"
@@ -11,9 +12,9 @@ exports[`Clone Dropdown Button rendering matches the snapshot 1`] = `
   <div
     class="pb-2 mx-1"
   >
-    <gl-new-dropdown-header-stub>
+    <gl-dropdown-section-header-stub>
       Clone with SSH
-    </gl-new-dropdown-header-stub>
+    </gl-dropdown-section-header-stub>
      
     <div
       class="mx-3"
@@ -24,12 +25,7 @@ exports[`Clone Dropdown Button rendering matches the snapshot 1`] = `
         <b-input-group-stub
           tag="div"
         >
-          <b-input-group-prepend-stub
-            tag="div"
-          >
-             
-            <!---->
-          </b-input-group-prepend-stub>
+          <!---->
            
           <b-form-input-stub
             class="gl-form-input"
@@ -43,9 +39,11 @@ exports[`Clone Dropdown Button rendering matches the snapshot 1`] = `
             tag="div"
           >
             <gl-button-stub
-              category="tertiary"
+              buttontextclasses=""
+              category="primary"
               class="d-inline-flex"
               data-clipboard-text="ssh://foo.bar"
+              data-qa-selector="copy_ssh_url_button"
               icon="copy-to-clipboard"
               size="medium"
               title="Copy URL"
@@ -56,9 +54,9 @@ exports[`Clone Dropdown Button rendering matches the snapshot 1`] = `
       </div>
     </div>
      
-    <gl-new-dropdown-header-stub>
+    <gl-dropdown-section-header-stub>
       Clone with HTTP
-    </gl-new-dropdown-header-stub>
+    </gl-dropdown-section-header-stub>
      
     <div
       class="mx-3"
@@ -69,12 +67,7 @@ exports[`Clone Dropdown Button rendering matches the snapshot 1`] = `
         <b-input-group-stub
           tag="div"
         >
-          <b-input-group-prepend-stub
-            tag="div"
-          >
-             
-            <!---->
-          </b-input-group-prepend-stub>
+          <!---->
            
           <b-form-input-stub
             class="gl-form-input"
@@ -88,9 +81,11 @@ exports[`Clone Dropdown Button rendering matches the snapshot 1`] = `
             tag="div"
           >
             <gl-button-stub
-              category="tertiary"
+              buttontextclasses=""
+              category="primary"
               class="d-inline-flex"
               data-clipboard-text="http://foo.bar"
+              data-qa-selector="copy_http_url_button"
               icon="copy-to-clipboard"
               size="medium"
               title="Copy URL"
@@ -101,5 +96,5 @@ exports[`Clone Dropdown Button rendering matches the snapshot 1`] = `
       </div>
     </div>
   </div>
-</gl-new-dropdown-stub>
+</gl-dropdown-stub>
 `;

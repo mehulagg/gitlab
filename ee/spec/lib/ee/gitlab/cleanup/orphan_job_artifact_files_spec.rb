@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Cleanup::OrphanJobArtifactFiles do
+RSpec.describe Gitlab::Cleanup::OrphanJobArtifactFiles do
   include ::EE::GeoHelpers
 
   let(:null_logger) { Logger.new('/dev/null') }

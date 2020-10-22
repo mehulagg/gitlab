@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Push over SSH using Git protocol version 2', :requires_git_protocol_v2 do
       # Note: If you run this test against GDK make sure you've enabled sshd and
       # enabled setting the Git protocol by adding `AcceptEnv GIT_PROTOCOL` to
@@ -27,7 +27,7 @@ module QA
         Page::Main::Menu.perform(&:sign_out_if_signed_in)
       end
 
-      it 'user pushes to the repository' do
+      it 'user pushes to the repository', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/386' do
         project = Resource::Project.fabricate_via_api! do |project|
           project.name = 'git-protocol-project'
         end

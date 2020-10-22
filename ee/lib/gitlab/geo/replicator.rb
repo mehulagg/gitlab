@@ -10,19 +10,28 @@ module Gitlab
     #
     # Each replicator is tied to a specific replicable resource
     class Replicator
+      include ::Gitlab::Utils::StrongMemoize
       include ::Gitlab::Geo::LogHelpers
+      extend ::Gitlab::Geo::LogHelpers
 
       CLASS_SUFFIXES = %w(RegistryFinder RegistriesResolver).freeze
 
       attr_reader :model_record_id
+
       delegate :model, to: :class
+      delegate :replication_enabled_feature_key, to: :class
+      delegate :in_replicables_for_current_secondary?, to: :model_record
+
+      class << self
+        delegate :find_registries_never_attempted_sync, :find_registries_needs_sync_again, to: :registry_class
+      end
 
       # Declare supported event
       #
       # @example Declaring support for :update and :delete events
       #   class MyReplicator < Gitlab::Geo::Replicator
-      #     event :update
-      #     event :delete
+      #     event :updated
+      #     event :deleted
       #   end
       #
       # @param [Symbol] event_name
@@ -47,15 +56,38 @@ module Gitlab
         @events.include?(event_name.to_sym)
       end
 
-      # Return the name of the replicable, e.g. "package_file"
+      # Return the canonical name of the replicable, e.g. "package_file".
       #
       # This can be used to retrieve the replicator class again
-      # by using the `.for_replicable_name` method
+      # by using the `.for_replicable_name` method.
       #
       # @see .for_replicable_name
       # @return [String] slug that identifies this replicator
       def self.replicable_name
         self.name.demodulize.sub('Replicator', '').underscore
+      end
+
+      # Return the pluralized replicable name, e.g. "package_files". In general,
+      # it is preferable to use the canonical replicable_name if possible.
+      #
+      # @return [String] slug that identifies this replicator, pluralized
+      def self.replicable_name_plural
+        self.replicable_name.pluralize
+      end
+
+      # @return [String] human-readable title of this replicator. E.g. "Package File"
+      def self.replicable_title
+        self.replicable_name.titleize
+      end
+
+      # @return [String] human-readable title of this replicator, pluralized. E.g. "Package Files"
+      def self.replicable_title_plural
+        self.replicable_name.pluralize.titleize
+      end
+
+      # @return [String] GraphQL registries field name. E.g. "packageFileRegistries"
+      def self.graphql_field_name
+        "#{self.replicable_name.camelize(:lower)}Registries"
       end
 
       # Return the registry related to the replicable resource
@@ -73,7 +105,7 @@ module Gitlab
         const_get("::Types::Geo::#{replicable_name.camelize}RegistryType", false)
       end
 
-      # Given a `replicable_name`, return the corresponding replicator
+      # Given a `replicable_name`, return the corresponding replicator class
       #
       # @param [String] replicable_name the replicable slug
       # @return [Class<Geo::Replicator>] replicator implementation
@@ -81,6 +113,25 @@ module Gitlab
         replicator_class_name = "::Geo::#{replicable_name.camelize}Replicator"
 
         const_get(replicator_class_name, false)
+      rescue NameError
+        message = "Cannot find a Geo::Replicator for #{replicable_name}"
+        e = NotImplementedError.new(message)
+
+        log_error(message, e, { replicable_name: replicable_name })
+
+        raise e
+      end
+
+      # Given the output of a replicator's `replicable_params`, reinstantiate
+      # the replicator instance
+      #
+      # @param [String] replicable_name of a replicator instance
+      # @param [Integer] replicable_id of a replicator instance
+      # @return [Geo::Replicator] replicator instance
+      def self.for_replicable_params(replicable_name:, replicable_id:)
+        replicator_class = for_replicable_name(replicable_name)
+
+        replicator_class.new(model_record_id: replicable_id)
       end
 
       def self.checksummed
@@ -99,6 +150,30 @@ module Gitlab
         model.count
       end
 
+      def self.registry_count
+        registry_class.count
+      end
+
+      def self.synced_count
+        registry_class.synced.count
+      end
+
+      def self.failed_count
+        registry_class.failed.count
+      end
+
+      def self.enabled?
+        Feature.enabled?(
+          replication_enabled_feature_key,
+          default_enabled: replication_enabled_by_default?)
+      end
+
+      # Replication is set behind a feature flag, which is enabled by default.
+      # If you want it disabled by default, override this method.
+      def self.replication_enabled_by_default?
+        true
+      end
+
       # @example Given `Geo::PackageFileRegistryFinder`, this returns
       #   `::Geo::PackageFileReplicator`
       # @example Given `Resolver::Geo::PackageFileRegistriesResolver`, this
@@ -114,11 +189,15 @@ module Gitlab
         const_get("::Geo::#{name}Replicator", false)
       end
 
+      def self.replication_enabled_feature_key
+        :"geo_#{replicable_name}_replication"
+      end
+
       # @param [ActiveRecord::Base] model_record
       # @param [Integer] model_record_id
       def initialize(model_record: nil, model_record_id: nil)
         @model_record = model_record
-        @model_record_id = model_record_id
+        @model_record_id = model_record_id || model_record&.id
       end
 
       # Instance of the replicable model
@@ -140,8 +219,6 @@ module Gitlab
       # @param [Symbol] event_name
       # @param [Hash] event_data
       def publish(event_name, **event_data)
-        return unless Feature.enabled?(:geo_self_service_framework)
-
         raise ArgumentError, "Unsupported event: '#{event_name}'" unless self.class.event_supported?(event_name)
 
         create_event_with(
@@ -164,11 +241,6 @@ module Gitlab
         consume_method = "consume_event_#{event_name}".to_sym
         raise NotImplementedError, "Consume method not implemented: '#{consume_method}'" unless self.methods.include?(consume_method)
 
-        # Inject model_record based on included class
-        if model_record
-          event_data[:model_record] = model_record
-        end
-
         send(consume_method, **event_data) # rubocop:disable GitlabSecurity/PublicSend
       end
 
@@ -190,14 +262,66 @@ module Gitlab
       #
       # @return [Geo::BaseRegistry] registry instance
       def registry
-        registry_class.for_model_record_id(model_record.id)
+        registry_class.for_model_record_id(model_record_id)
       end
 
       # Checksum value from the main database
       #
       # @abstract
       def primary_checksum
-        nil
+        model_record.verification_checksum
+      end
+
+      def secondary_checksum
+        registry.verification_checksum
+      end
+
+      # Return exactly the data needed by `for_replicable_params` to
+      # reinstantiate this Replicator elsewhere.
+      #
+      # @return [Hash] the replicable name and ID
+      def replicable_params
+        { replicable_name: replicable_name, replicable_id: model_record_id }
+      end
+
+      def handle_after_destroy
+        return false unless Gitlab::Geo.enabled?
+        return unless self.class.enabled?
+
+        publish(:deleted, **deleted_params)
+      end
+
+      def handle_after_update
+        return false unless Gitlab::Geo.enabled?
+        return unless self.class.enabled?
+
+        publish(:updated, **updated_params)
+      end
+
+      def schedule_checksum_calculation
+        raise NotImplementedError
+      end
+
+      def created_params
+        event_params
+      end
+
+      def deleted_params
+        event_params
+      end
+
+      def updated_params
+        event_params
+      end
+
+      def event_params
+        { model_record_id: model_record.id }
+      end
+
+      def needs_checksum?
+        return true unless model_record.respond_to?(:needs_checksum?)
+
+        model_record.needs_checksum?
       end
 
       protected
@@ -223,6 +347,10 @@ module Gitlab
         event
       rescue ActiveRecord::RecordInvalid, NoMethodError => e
         log_error("#{class_name} could not be created", e, params)
+      end
+
+      def current_node
+        Gitlab::Geo.current_node
       end
     end
   end

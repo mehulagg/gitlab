@@ -10,6 +10,7 @@ export default () => ({
   epics: [],
 
   // UI Flags
+  variant: '',
   epicSelectInProgress: false,
   epicsFetchInProgress: false,
 });

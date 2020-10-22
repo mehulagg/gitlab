@@ -11,11 +11,84 @@ import {
   OLD_LINE_TYPE,
   MATCH_LINE_TYPE,
   LINES_TO_BE_RENDERED_DIRECTLY,
-  MAX_LINES_TO_BE_RENDERED,
   TREE_TYPE,
   INLINE_DIFF_VIEW_TYPE,
   PARALLEL_DIFF_VIEW_TYPE,
+  SHOW_WHITESPACE,
+  NO_SHOW_WHITESPACE,
 } from '../constants';
+import { prepareRawDiffFile } from '../diff_file';
+
+export const isAdded = line => ['new', 'new-nonewline'].includes(line.type);
+export const isRemoved = line => ['old', 'old-nonewline'].includes(line.type);
+export const isUnchanged = line => !line.type;
+export const isMeta = line => ['match', 'new-nonewline', 'old-nonewline'].includes(line.type);
+
+/**
+ * Pass in the inline diff lines array which gets converted
+ * to the parallel diff lines.
+ * This allows for us to convert inline diff lines to parallel
+ * on the frontend without needing to send any requests
+ * to the API.
+ *
+ * This method has been taken from the already existing backend
+ * implementation at lib/gitlab/diff/parallel_diff.rb
+ *
+ * @param {Object[]} diffLines - inline diff lines
+ *
+ * @returns {Object[]} parallel lines
+ */
+export const parallelizeDiffLines = (diffLines = []) => {
+  let freeRightIndex = null;
+  const lines = [];
+
+  for (let i = 0, diffLinesLength = diffLines.length, index = 0; i < diffLinesLength; i += 1) {
+    const line = diffLines[i];
+
+    if (isRemoved(line)) {
+      lines.push({
+        [LINE_POSITION_LEFT]: line,
+        [LINE_POSITION_RIGHT]: null,
+      });
+
+      if (freeRightIndex === null) {
+        // Once we come upon a new line it can be put on the right of this old line
+        freeRightIndex = index;
+      }
+      index += 1;
+    } else if (isAdded(line)) {
+      if (freeRightIndex !== null) {
+        // If an old line came before this without a line on the right, this
+        // line can be put to the right of it.
+        lines[freeRightIndex].right = line;
+
+        // If there are any other old lines on the left that don't yet have
+        // a new counterpart on the right, update the free_right_index
+        const nextFreeRightIndex = freeRightIndex + 1;
+        freeRightIndex = nextFreeRightIndex < index ? nextFreeRightIndex : null;
+      } else {
+        lines.push({
+          [LINE_POSITION_LEFT]: null,
+          [LINE_POSITION_RIGHT]: line,
+        });
+
+        freeRightIndex = null;
+        index += 1;
+      }
+    } else if (isMeta(line) || isUnchanged(line)) {
+      // line in the right panel is the same as in the left one
+      lines.push({
+        [LINE_POSITION_LEFT]: line,
+        [LINE_POSITION_RIGHT]: line,
+      });
+
+      freeRightIndex = null;
+      index += 1;
+    }
+  }
+
+  return lines;
+};
 
 export function findDiffFile(files, match, matchKey = 'file_hash') {
   return files.find(file => file[matchKey] === match);
@@ -40,6 +113,7 @@ export function getFormData(params) {
     diffViewType,
     linePosition,
     positionType,
+    lineRange,
   } = params;
 
   const position = JSON.stringify({
@@ -55,6 +129,7 @@ export function getFormData(params) {
     y: params.y,
     width: params.width,
     height: params.height,
+    line_range: lineRange,
   });
 
   const postData = {
@@ -233,7 +308,7 @@ export function trimFirstCharOfLineContent(line = {}) {
   // eslint-disable-next-line no-param-reassign
   delete line.text;
 
-  const parsedLine = Object.assign({}, line);
+  const parsedLine = { ...line };
 
   if (line.rich_text) {
     const firstChar = parsedLine.rich_text.charAt(0);
@@ -276,7 +351,7 @@ function mergeTwoFiles(target, source) {
 
 function ensureBasicDiffFileLines(file) {
   const missingInline = !file.highlighted_diff_lines;
-  const missingParallel = !file.parallel_diff_lines;
+  const missingParallel = !file.parallel_diff_lines || window.gon?.features?.unifiedDiffLines;
 
   Object.assign(file, {
     highlighted_diff_lines: missingInline ? [] : file.highlighted_diff_lines,
@@ -290,9 +365,10 @@ function cleanRichText(text) {
   return text ? text.replace(/^[+ -]/, '') : undefined;
 }
 
-function prepareLine(line) {
+function prepareLine(line, file) {
   if (!line.alreadyPrepared) {
     Object.assign(line, {
+      commentsDisabled: file.brokenSymlink,
       rich_text: cleanRichText(line.rich_text),
       discussionsExpanded: true,
       discussions: [],
@@ -303,24 +379,60 @@ function prepareLine(line) {
   }
 }
 
+export function prepareLineForRenamedFile({ line, diffViewType, diffFile, index = 0 }) {
+  /*
+    Renamed files are a little different than other diffs, which
+    is why this is distinct from `prepareDiffFileLines` below.
+
+    We don't get any of the diff file context when we get the diff
+    (so no "inline" vs. "parallel", no "line_code", etc.).
+
+    We can also assume that both the left and the right of each line
+    (for parallel diff view type) are identical, because the file
+    is renamed, not modified.
+
+    This should be cleaned up as part of the effort around flattening our data
+    ==> https://gitlab.com/groups/gitlab-org/-/epics/2852#note_304803402
+  */
+  const lineNumber = index + 1;
+  const cleanLine = {
+    ...line,
+    line_code: `${diffFile.file_hash}_${lineNumber}_${lineNumber}`,
+    new_line: lineNumber,
+    old_line: lineNumber,
+  };
+
+  prepareLine(cleanLine, diffFile); // WARNING: In-Place Mutations!
+
+  if (diffViewType === PARALLEL_DIFF_VIEW_TYPE) {
+    return {
+      left: { ...cleanLine },
+      right: { ...cleanLine },
+      line_code: cleanLine.line_code,
+    };
+  }
+
+  return cleanLine;
+}
+
 function prepareDiffFileLines(file) {
   const inlineLines = file.highlighted_diff_lines;
   const parallelLines = file.parallel_diff_lines;
   let parallelLinesCount = 0;
 
-  inlineLines.forEach(prepareLine);
+  inlineLines.forEach(line => prepareLine(line, file)); // WARNING: In-Place Mutations!
 
   parallelLines.forEach((line, index) => {
     Object.assign(line, { line_code: getLineCode(line, index) });
 
     if (line.left) {
       parallelLinesCount += 1;
-      prepareLine(line.left);
+      prepareLine(line.left, file); // WARNING: In-Place Mutations!
     }
 
     if (line.right) {
       parallelLinesCount += 1;
-      prepareLine(line.right);
+      prepareLine(line.right, file); // WARNING: In-Place Mutations!
     }
   });
 
@@ -337,12 +449,10 @@ function getVisibleDiffLines(file) {
 }
 
 function finalizeDiffFile(file) {
-  const name = (file.viewer && file.viewer.name) || diffViewerModes.text;
   const lines = getVisibleDiffLines(file);
 
   Object.assign(file, {
     renderIt: lines < LINES_TO_BE_RENDERED_DIRECTLY,
-    collapsed: name === diffViewerModes.text && lines > MAX_LINES_TO_BE_RENDERED,
     isShowingFullFile: false,
     isLoadingFullFile: false,
     discussions: [],
@@ -367,6 +477,7 @@ function deduplicateFilesList(files) {
 
 export function prepareDiffData(diff, priorFiles = []) {
   const cleanedFiles = (diff.diff_files || [])
+    .map((file, index, allFiles) => prepareRawDiffFile({ file, allFiles }))
     .map(ensureBasicDiffFileLines)
     .map(prepareDiffFileLines)
     .map(finalizeDiffFile);
@@ -374,11 +485,11 @@ export function prepareDiffData(diff, priorFiles = []) {
   return deduplicateFilesList([...priorFiles, ...cleanedFiles]);
 }
 
-export function getDiffPositionByLineCode(diffFiles, useSingleDiffStyle) {
+export function getDiffPositionByLineCode(diffFiles) {
   let lines = [];
   const hasInlineDiffs = diffFiles.some(file => file.highlighted_diff_lines.length > 0);
 
-  if (!useSingleDiffStyle || hasInlineDiffs) {
+  if (hasInlineDiffs) {
     // In either of these cases, we can use `highlighted_diff_lines` because
     // that will include all of the parallel diff lines, too
 
@@ -437,6 +548,10 @@ export function getDiffPositionByLineCode(diffFiles, useSingleDiffStyle) {
 // This method will check whether the discussion is still applicable
 // to the diff line in question regarding different versions of the MR
 export function isDiscussionApplicableToLine({ discussion, diffPosition, latestDiff }) {
+  if (!diffPosition) {
+    return false;
+  }
+
   const { line_code, ...dp } = diffPosition;
   // Removing `line_range` from diffPosition because the backend does not
   // yet consistently return this property. This check can be removed,
@@ -662,4 +777,11 @@ export const allDiscussionWrappersExpanded = diff => {
   });
 
   return discussionsExpanded;
+};
+
+export const getDefaultWhitespace = (queryString, cookie) => {
+  // Querystring should override stored cookie value
+  if (queryString) return queryString === SHOW_WHITESPACE;
+  if (cookie === NO_SHOW_WHITESPACE) return false;
+  return true;
 };

@@ -13,7 +13,6 @@ module Epics
       # start_date and end_date columns are no longer writable by users because those
       # are composite fields managed by the system.
       params.extract!(:start_date, :end_date)
-      params.extract!(:confidential) unless ::Feature.enabled?(:confidential_epics, group)
 
       update_task_event(epic) || update(epic)
 
@@ -31,14 +30,14 @@ module Epics
       old_labels = old_associations.fetch(:labels, [])
 
       if has_changes?(epic, old_labels: old_labels)
-        todo_service.mark_pending_todos_as_done(epic, current_user)
+        todo_service.resolve_todos_for_target(epic, current_user)
       end
 
       todo_service.update_epic(epic, current_user, old_mentioned_users)
     end
 
     def handle_task_changes(epic)
-      todo_service.mark_pending_todos_as_done(epic, current_user)
+      todo_service.resolve_todos_for_target(epic, current_user)
       todo_service.update_epic(epic, current_user)
     end
 

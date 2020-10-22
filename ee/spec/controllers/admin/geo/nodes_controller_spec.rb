@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Admin::Geo::NodesController do
+RSpec.describe Admin::Geo::NodesController do
   shared_examples 'unlicensed geo action' do
     it 'redirects to the 403 page' do
       expect(response).to have_gitlab_http_status(:forbidden)
@@ -64,22 +64,6 @@ describe Admin::Geo::NodesController do
       it 'does not redirects to the 403 page' do
         expect(response).not_to redirect_to(:forbidden)
       end
-    end
-
-    context 'with Postgres 9.6 or greater' do
-      before do
-        allow(Gitlab::Database).to receive(:postgresql_minimum_supported_version?).and_return(true)
-      end
-
-      it_behaves_like 'no flash message', :warning
-    end
-
-    context 'without Postgres 9.6 or greater' do
-      before do
-        allow(Gitlab::Database).to receive(:postgresql_minimum_supported_version?).and_return(false)
-      end
-
-      it_behaves_like 'with flash message', :warning, 'Please upgrade PostgreSQL to version 9.6 or greater.'
     end
   end
 

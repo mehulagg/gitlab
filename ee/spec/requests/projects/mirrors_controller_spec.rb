@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe Projects::MirrorsController do
+RSpec.describe Projects::MirrorsController do
   let(:project) do
     create(:project, :repository,
            mirror: true,
            mirror_user: user,
            import_url: 'http://user:pass@test.url')
   end
+
   let(:user) { create(:user) }
 
   describe 'updates the mirror URL' do
@@ -23,7 +24,6 @@ describe Projects::MirrorsController do
                 project: {
           mirror: '1',
           import_url: '',
-          mirror_user_id: user.id,
           mirror_trigger_builds: '0'
         }
       }

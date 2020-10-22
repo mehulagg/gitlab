@@ -27,8 +27,7 @@ module Gitlab
           end
 
           def log_event(job_id)
-            logger.event_info(
-              created_at,
+            super(
               'Migrating project to hashed storage',
                 project_id: event.project_id,
                 old_storage_version: event.old_storage_version,

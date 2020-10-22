@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Trial Sign In' do
+RSpec.describe 'Trial Sign In' do
   let(:user) { create(:user) }
 
   describe 'on GitLab.com' do

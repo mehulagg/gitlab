@@ -3,10 +3,13 @@
 class Dashboard::TodosController < Dashboard::ApplicationController
   include ActionView::Helpers::NumberHelper
   include PaginatedCollection
+  include Analytics::UniqueVisitsHelper
 
   before_action :authorize_read_project!, only: :index
   before_action :authorize_read_group!, only: :index
   before_action :find_todos, only: [:index, :destroy_all]
+
+  feature_category :issue_tracking
 
   def index
     @sort = params[:sort]
@@ -17,7 +20,9 @@ class Dashboard::TodosController < Dashboard::ApplicationController
   end
 
   def destroy
-    TodoService.new.mark_todos_as_done_by_ids(params[:id], current_user)
+    todo = current_user.todos.find(params[:id])
+
+    TodoService.new.resolve_todo(todo, current_user, resolved_by_action: :mark_done)
 
     respond_to do |format|
       format.html do
@@ -31,7 +36,7 @@ class Dashboard::TodosController < Dashboard::ApplicationController
   end
 
   def destroy_all
-    updated_ids = TodoService.new.mark_todos_as_done(@todos, current_user)
+    updated_ids = TodoService.new.resolve_todos(@todos, current_user, resolved_by_action: :mark_all_done)
 
     respond_to do |format|
       format.html { redirect_to dashboard_todos_path, status: :found, notice: _('Everything on your to-do list is marked as done.') }
@@ -41,13 +46,13 @@ class Dashboard::TodosController < Dashboard::ApplicationController
   end
 
   def restore
-    TodoService.new.mark_todos_as_pending_by_ids(params[:id], current_user)
+    TodoService.new.restore_todo(current_user.todos.find(params[:id]), current_user)
 
     render json: todos_counts
   end
 
   def bulk_restore
-    TodoService.new.mark_todos_as_pending_by_ids(params[:ids], current_user)
+    TodoService.new.restore_todos(current_user.todos.for_ids(params[:ids]), current_user)
 
     render json: todos_counts
   end

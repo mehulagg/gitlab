@@ -6,12 +6,15 @@ class Projects::ReleasesController < Projects::ApplicationController
   before_action :release, only: %i[edit show update downloads]
   before_action :authorize_read_release!
   before_action do
-    push_frontend_feature_flag(:release_issue_summary, project, default_enabled: true)
-    push_frontend_feature_flag(:release_evidence_collection, project, default_enabled: true)
-    push_frontend_feature_flag(:release_show_page, project, default_enabled: true)
-    push_frontend_feature_flag(:release_asset_link_editing, project, default_enabled: true)
+    push_frontend_feature_flag(:graphql_release_data, project, default_enabled: true)
+    push_frontend_feature_flag(:graphql_milestone_stats, project, default_enabled: true)
+    push_frontend_feature_flag(:graphql_releases_page, project, default_enabled: true)
+    push_frontend_feature_flag(:graphql_individual_release_page, project, default_enabled: true)
   end
   before_action :authorize_update_release!, only: %i[edit update]
+  before_action :authorize_create_release!, only: :new
+
+  feature_category :release_orchestration
 
   def index
     respond_to do |format|
@@ -22,13 +25,9 @@ class Projects::ReleasesController < Projects::ApplicationController
     end
   end
 
-  def show
-    return render_404 unless Feature.enabled?(:release_show_page, project, default_enabled: true)
-
-    respond_to do |format|
-      format.html do
-        render :show
-      end
+  def new
+    unless Feature.enabled?(:new_release_page, project, default_enabled: true)
+      redirect_to(new_project_tag_path(@project))
     end
   end
 
@@ -36,21 +35,11 @@ class Projects::ReleasesController < Projects::ApplicationController
     redirect_to link.url
   end
 
-  protected
+  private
 
   def releases
     ReleasesFinder.new(@project, current_user).execute
   end
-
-  def edit
-    respond_to do |format|
-      format.html do
-        render :edit
-      end
-    end
-  end
-
-  private
 
   def authorize_update_release!
     access_denied! unless can?(current_user, :update_release, release)

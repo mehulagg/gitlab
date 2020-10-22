@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::LogCursor::Events::RepositoryUpdatedEvent, :clean_gitlab_redis_shared_state do
+RSpec.describe Gitlab::Geo::LogCursor::Events::RepositoryUpdatedEvent, :clean_gitlab_redis_shared_state do
   include ::EE::GeoHelpers
 
   let(:logger) { Gitlab::Geo::LogCursor::Logger.new(described_class, Logger::INFO) }
@@ -26,6 +26,18 @@ describe Gitlab::Geo::LogCursor::Events::RepositoryUpdatedEvent, :clean_gitlab_r
   shared_examples 'RepositoryUpdatedEvent' do
     it 'creates a new project registry if it does not exist' do
       expect { subject.process }.to change(Geo::ProjectRegistry, :count).by(1)
+    end
+
+    context 'when outside selective sync' do
+      before do
+        selective_sync_secondary = create(:geo_node, selective_sync_type: 'shards', selective_sync_shards: ['non-existent'])
+
+        stub_current_geo_node(selective_sync_secondary)
+      end
+
+      it 'does not create a new project registry' do
+        expect { subject.process }.not_to change(Geo::ProjectRegistry, :count)
+      end
     end
 
     context 'when we have an event source' do
@@ -80,9 +92,11 @@ describe Gitlab::Geo::LogCursor::Events::RepositoryUpdatedEvent, :clean_gitlab_r
           subject.process
           reloaded_registry = registry.reload
 
-          expect(reloaded_registry.wiki_verification_checksum_sha).to be_nil
-          expect(reloaded_registry.wiki_checksum_mismatch).to be false
-          expect(reloaded_registry.last_wiki_verification_failure).to be_nil
+          expect(reloaded_registry).to have_attributes(
+            wiki_verification_checksum_sha: nil,
+            wiki_checksum_mismatch: false,
+            last_wiki_verification_failure: nil
+          )
         end
 
         it 'sets resync_wiki_was_scheduled_at to the scheduled time' do
@@ -142,6 +156,8 @@ describe Gitlab::Geo::LogCursor::Events::RepositoryUpdatedEvent, :clean_gitlab_r
           end
         end
       end
+
+      it_behaves_like 'logs event source info'
     end
 
     context 'when associated shard is unhealthy' do

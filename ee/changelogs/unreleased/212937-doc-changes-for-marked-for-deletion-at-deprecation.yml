@@ -1,6 +1,0 @@
----
-title: Document planned deprecation of 'marked_for_deletion_at' attribute in Projects
-  API in GitLab 13.0
-merge_request: 28993
-author:
-type: deprecated

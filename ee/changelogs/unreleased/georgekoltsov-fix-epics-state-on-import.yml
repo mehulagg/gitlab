@@ -1,5 +1,0 @@
----
-title: Fix epics not preserving their state on Group Import
-merge_request: 28203
-author:
-type: fixed

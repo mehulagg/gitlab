@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SoftwareLicensePolicies::CreateService do
+RSpec.describe SoftwareLicensePolicies::CreateService do
   let(:project) { create(:project) }
   let(:params) { { name: 'ExamplePL/2.1', approval_status: 'blacklisted' } }
 

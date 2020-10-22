@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe API::MergeTrains do
+RSpec.describe API::MergeTrains do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:developer) { create(:user) }
   let_it_be(:guest) { create(:user) }
@@ -82,18 +82,6 @@ describe API::MergeTrains do
           subject
 
           expect(response).to have_gitlab_http_status(:forbidden)
-        end
-      end
-
-      context 'when feature flag is disabled' do
-        before do
-          stub_feature_flags(merge_trains_api: false)
-        end
-
-        it 'forbids the request' do
-          subject
-
-          expect(response).to have_gitlab_http_status(:service_unavailable)
         end
       end
     end

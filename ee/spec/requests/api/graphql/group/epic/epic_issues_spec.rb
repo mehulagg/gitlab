@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Getting issues for an epic' do
+RSpec.describe 'Getting issues for an epic' do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
@@ -157,7 +157,10 @@ describe 'Getting issues for an epic' do
         expect(result[epic2.iid]).to eq [issue2.to_global_id.to_s]
       end
 
-      it 'avoids N+1 queries' do
+      # TODO remove the pending state of this spec when
+      # we have an efficient way of preloading data on GraphQL.
+      # For more information check: https://gitlab.com/gitlab-org/gitlab/-/issues/207898
+      xit 'avoids N+1 queries' do
         control_count = ActiveRecord::QueryRecorder.new do
           post_graphql(epic_query(iid: epic.iid), current_user: user)
         end.count

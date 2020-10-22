@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User activates Asana' do
+RSpec.describe 'User activates Asana' do
   include_context 'project service activation'
 
   it 'activates service', :js do
@@ -12,6 +12,6 @@ describe 'User activates Asana' do
 
     click_test_then_save_integration
 
-    expect(page).to have_content('Asana activated.')
+    expect(page).to have_content('Asana settings saved and active.')
   end
 end

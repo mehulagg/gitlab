@@ -1,44 +1,56 @@
-/* global ace */
-
 import $ from 'jquery';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
-import { __ } from '~/locale';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { BLOB_EDITOR_ERROR, BLOB_PREVIEW_ERROR } from './constants';
 import TemplateSelectorMediator from '../blob/file_template_mediator';
-import getModeByFileExtension from '~/lib/utils/ace_utils';
 import { addEditorMarkdownListeners } from '~/lib/utils/text_markdown';
+import EditorLite from '~/editor/editor_lite';
+import FileTemplateExtension from '~/editor/editor_file_template_ext';
 
 export default class EditBlob {
   // The options object has:
   // assetsPath, filePath, currentAction, projectId, isMarkdown
   constructor(options) {
     this.options = options;
-    this.configureAceEditor();
+    this.configureMonacoEditor();
+
+    if (this.options.isMarkdown) {
+      import('~/editor/editor_markdown_ext')
+        .then(MarkdownExtension => {
+          this.editor.use(MarkdownExtension.default);
+          addEditorMarkdownListeners(this.editor);
+        })
+        .catch(() => createFlash(BLOB_EDITOR_ERROR));
+    }
+
     this.initModePanesAndLinks();
-    this.initSoftWrap();
     this.initFileSelectors();
+    this.initSoftWrap();
+    this.editor.focus();
   }
 
-  configureAceEditor() {
-    const { filePath, assetsPath, isMarkdown } = this.options;
-    ace.config.set('modePath', `${assetsPath}/ace`);
-    ace.config.loadModule('ace/ext/searchbox');
-    ace.config.loadModule('ace/ext/modelist');
+  configureMonacoEditor() {
+    const editorEl = document.getElementById('editor');
+    const fileNameEl = document.getElementById('file_path') || document.getElementById('file_name');
+    const fileContentEl = document.getElementById('file-content');
+    const form = document.querySelector('.js-edit-blob-form');
 
-    this.editor = ace.edit('editor');
+    const rootEditor = new EditorLite();
 
-    if (isMarkdown) {
-      addEditorMarkdownListeners(this.editor);
-    }
+    this.editor = rootEditor.createInstance({
+      el: editorEl,
+      blobPath: fileNameEl.value,
+      blobContent: editorEl.innerText,
+    });
+    this.editor.use(FileTemplateExtension);
 
-    // This prevents warnings re: automatic scrolling being logged
-    this.editor.$blockScrolling = Infinity;
+    fileNameEl.addEventListener('change', () => {
+      this.editor.updateModelLanguage(fileNameEl.value);
+    });
 
-    this.editor.focus();
-
-    if (filePath) {
-      this.editor.getSession().setMode(getModeByFileExtension(filePath));
-    }
+    form.addEventListener('submit', () => {
+      fileContentEl.value = this.editor.getValue();
+    });
   }
 
   initFileSelectors() {
@@ -81,7 +93,7 @@ export default class EditBlob {
           currentPane.empty().append(data);
           currentPane.renderGFM();
         })
-        .catch(() => createFlash(__('An error occurred previewing the blob')));
+        .catch(() => createFlash(BLOB_PREVIEW_ERROR));
     }
 
     this.$toggleButton.show();
@@ -90,14 +102,15 @@ export default class EditBlob {
   }
 
   initSoftWrap() {
-    this.isSoftWrapped = false;
+    this.isSoftWrapped = true;
     this.$toggleButton = $('.soft-wrap-toggle');
+    this.$toggleButton.toggleClass('soft-wrap-active', this.isSoftWrapped);
     this.$toggleButton.on('click', () => this.toggleSoftWrap());
   }
 
   toggleSoftWrap() {
     this.isSoftWrapped = !this.isSoftWrapped;
     this.$toggleButton.toggleClass('soft-wrap-active', this.isSoftWrapped);
-    this.editor.getSession().setUseWrapMode(this.isSoftWrapped);
+    this.editor.updateOptions({ wordWrap: this.isSoftWrapped ? 'on' : 'off' });
   }
 }

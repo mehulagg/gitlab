@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Subscriptions Content Security Policy' do
+RSpec.describe 'Subscriptions Content Security Policy' do
   subject { response_headers['Content-Security-Policy'] }
 
   let_it_be(:default_csp_values) { "'self' https://some-cdn.test" }

@@ -18,7 +18,7 @@ module EE
       def enqueue_elasticsearch_indexing
         return unless should_index_commits?
 
-        project.repository.index_commits_and_blobs(from_rev: oldrev, to_rev: newrev)
+        project.repository.index_commits_and_blobs
       end
 
       def enqueue_update_external_pull_requests
@@ -34,12 +34,8 @@ module EE
 
       def should_index_commits?
         return false unless default_branch?
-        return false unless project.use_elasticsearch?
 
-        # Check that we're not already indexing this project
-        ::Gitlab::Redis::SharedState.with do |redis|
-          !redis.sismember(:elastic_projects_indexing, project.id)
-        end
+        project.use_elasticsearch?
       end
     end
   end

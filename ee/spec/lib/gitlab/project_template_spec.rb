@@ -2,15 +2,17 @@
 
 require 'spec_helper'
 
-describe Gitlab::ProjectTemplate do
+RSpec.describe Gitlab::ProjectTemplate do
   describe '.all' do
+    let(:enterprise_templates) { %w[hipaa_audit_protocol] }
+
     context 'when `enterprise_templates` feature is not licensed' do
       before do
         stub_licensed_features(enterprise_templates: false)
       end
 
       it 'does not contain enterprise project templates' do
-        expect(described_class.all).not_to include(*enterprise_templates)
+        expect(described_class.all.map(&:name)).not_to include(*enterprise_templates)
       end
     end
 
@@ -20,16 +22,8 @@ describe Gitlab::ProjectTemplate do
       end
 
       it 'contains enterprise project templates' do
-        expect(described_class.all).to include(*enterprise_templates)
+        expect(described_class.all.map(&:name)).to include(*enterprise_templates)
       end
     end
-  end
-
-  private
-
-  def enterprise_templates
-    [
-      described_class.new('hipaa_audit_protocol', 'HIPAA Audit Protocol', _('A project containing issues for each audit inquiry in the HIPAA Audit Protocol published by the U.S. Department of Health & Human Services'), 'https://gitlab.com/gitlab-org/project-templates/hipaa-audit-protocol')
-    ]
   end
 end

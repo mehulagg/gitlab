@@ -1,31 +1,32 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'fast_spec_helper'
 require 'rubocop'
 require_relative '../../../rubocop/cop/put_project_routes_under_scope'
 
-describe RuboCop::Cop::PutProjectRoutesUnderScope do
+RSpec.describe RuboCop::Cop::PutProjectRoutesUnderScope, type: :rubocop do
   include CopHelper
 
   subject(:cop) { described_class.new }
 
-  before do
-    allow(cop).to receive(:in_project_routes?).and_return(true)
-  end
+  %w[resource resources get post put patch delete].each do |route_method|
+    it "registers an offense when route is outside scope for `#{route_method}`" do
+      offense = "#{route_method} :notes"
+      marker = '^' * offense.size
 
-  it 'registers an offense when route is outside scope' do
-    expect_offense(<<~PATTERN.strip_indent)
+      expect_offense(<<~PATTERN)
       scope '-' do
         resource :issues
       end
 
-      resource :notes
-      ^^^^^^^^^^^^^^^ Put new project routes under /-/ scope
-    PATTERN
+      #{offense}
+      #{marker} Put new project routes under /-/ scope
+      PATTERN
+    end
   end
 
   it 'does not register an offense when resource inside the scope' do
-    expect_no_offenses(<<~PATTERN.strip_indent)
+    expect_no_offenses(<<~PATTERN)
       scope '-' do
         resource :issues
         resource :notes
@@ -34,7 +35,7 @@ describe RuboCop::Cop::PutProjectRoutesUnderScope do
   end
 
   it 'does not register an offense when resource is deep inside the scope' do
-    expect_no_offenses(<<~PATTERN.strip_indent)
+    expect_no_offenses(<<~PATTERN)
       scope '-' do
         resource :issues
         resource :projects do
@@ -42,6 +43,20 @@ describe RuboCop::Cop::PutProjectRoutesUnderScope do
             resource :notes
           end
         end
+      end
+    PATTERN
+  end
+
+  it 'does not register an offense for the root route' do
+    expect_no_offenses(<<~PATTERN)
+      get '/'
+    PATTERN
+  end
+
+  it 'does not register an offense for the root route within scope' do
+    expect_no_offenses(<<~PATTERN)
+      scope '-' do
+        get '/'
       end
     PATTERN
   end

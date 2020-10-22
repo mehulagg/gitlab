@@ -1,23 +1,29 @@
-- page_title "Email Notification"
+- if admin_emails_are_currently_rate_limited?
+  %div{ class: 'gl-alert gl-alert-danger', role: 'alert' }
+    = sprite_icon('warning', css_class: 'gl-icon s16 gl-alert-icon gl-alert-icon-no-title')
+    .gl-alert-body
+      = admin_emails_rate_limited_alert
+
+- page_title _("Email Notification")
 %h3.page-title
-  Send email notification
+  = _('Send email notification')
 %p.light
-  You can notify the app / group or a project by sending them an email notification
+  = _('You can notify the app / group or a project by sending them an email notification')
 
 = form_tag admin_email_path, id: 'new-admin-email' do
-  .form-group.row
+  .form-group.row.ml-1
     %label.col-form-label{ for: :subject } Subject
     .col-sm-10
       = text_field_tag :subject, '', class: 'form-control', required: true
 
-  .form-group.row
+  .form-group.row.ml-1
     %label.col-form-label{ for: :body } Body
     .col-sm-10
       = text_area_tag :body, '', class: 'form-control', rows: 15, required: true
 
-  .form-group.row
+  .form-group.row.ml-1
     %label.col-form-label{ for: :recipients } Recipient group
     .col-sm-10
       = admin_email_select_tag(:recipients)
   .form-actions
-    = submit_tag 'Send message', class: 'btn btn-success'
+    = submit_tag _('Send message'), class: 'gl-button btn btn-success', disabled: admin_emails_are_currently_rate_limited?

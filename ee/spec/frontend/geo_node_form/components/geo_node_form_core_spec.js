@@ -1,16 +1,42 @@
-import { shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
+import { createLocalVue, mount } from '@vue/test-utils';
 import GeoNodeFormCore from 'ee/geo_node_form/components/geo_node_form_core.vue';
+import {
+  VALIDATION_FIELD_KEYS,
+  NODE_NAME_MORE_INFO,
+  NODE_INTERNAL_URL_MORE_INFO,
+} from 'ee/geo_node_form/constants';
 import { MOCK_NODE, STRING_OVER_255 } from '../mock_data';
+
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
 describe('GeoNodeFormCore', () => {
   let wrapper;
+  let store;
 
   const defaultProps = {
     nodeData: MOCK_NODE,
   };
 
   const createComponent = (props = {}) => {
-    wrapper = shallowMount(GeoNodeFormCore, {
+    store = new Vuex.Store({
+      state: {
+        formErrors: Object.values(VALIDATION_FIELD_KEYS).reduce(
+          (acc, cur) => ({ ...acc, [cur]: '' }),
+          {},
+        ),
+      },
+      actions: {
+        setError({ state }, { key, error }) {
+          state.formErrors[key] = error;
+        },
+      },
+    });
+
+    wrapper = mount(GeoNodeFormCore, {
+      localVue,
+      store,
       propsData: {
         ...defaultProps,
         ...props,
@@ -23,7 +49,12 @@ describe('GeoNodeFormCore', () => {
   });
 
   const findGeoNodeFormNameField = () => wrapper.find('#node-name-field');
+  const findGeoNodeFormNameMoreInformation = () => wrapper.find('[data-testid="nodeNameMoreInfo"');
   const findGeoNodeFormUrlField = () => wrapper.find('#node-url-field');
+  const findGeoNodeInternalUrlField = () => wrapper.find('#node-internal-url-field');
+  const findGeoNodeFormInternalUrlMoreInformation = () =>
+    wrapper.find('[data-testid="nodeInternalUrlMoreInfo"');
+  const findErrorMessage = () => wrapper.find('.invalid-feedback');
 
   describe('template', () => {
     beforeEach(() => {
@@ -37,68 +68,77 @@ describe('GeoNodeFormCore', () => {
     it('renders Geo Node Form Url Field', () => {
       expect(findGeoNodeFormUrlField().exists()).toBe(true);
     });
-  });
 
-  describe('computed', () => {
+    it('renders Geo Node Form Name More Information link correctly', () => {
+      expect(findGeoNodeFormNameMoreInformation().attributes('href')).toBe(NODE_NAME_MORE_INFO);
+    });
+
     describe.each`
-      data               | dataDesc            | blur     | value
-      ${''}              | ${'empty'}          | ${false} | ${true}
-      ${''}              | ${'empty'}          | ${true}  | ${false}
-      ${STRING_OVER_255} | ${'over 255 chars'} | ${false} | ${true}
-      ${STRING_OVER_255} | ${'over 255 chars'} | ${true}  | ${false}
-      ${'Test'}          | ${'valid'}          | ${false} | ${true}
-      ${'Test'}          | ${'valid'}          | ${true}  | ${true}
-    `(`validName`, ({ data, dataDesc, blur, value }) => {
-      beforeEach(() => {
-        createComponent({
-          nodeData: { ...defaultProps.nodeData, name: data },
+      primaryNode | showInternalUrl
+      ${true}     | ${true}
+      ${false}    | ${false}
+    `(`conditional fields`, ({ primaryNode, showInternalUrl }) => {
+      describe(`when node is ${primaryNode ? 'primary' : 'secondary'}`, () => {
+        beforeEach(() => {
+          createComponent({
+            nodeData: { ...defaultProps.nodeData, primary: primaryNode },
+          });
+        });
+
+        it(`${showInternalUrl ? 'shows' : 'hides'} the Internal URL Field`, () => {
+          expect(findGeoNodeInternalUrlField().exists()).toBe(showInternalUrl);
+        });
+
+        it(`${showInternalUrl ? 'shows' : 'hides'} the Internal URL More Information Link`, () => {
+          expect(findGeoNodeFormInternalUrlMoreInformation().exists()).toBe(showInternalUrl);
+          if (showInternalUrl) {
+            expect(findGeoNodeFormInternalUrlMoreInformation().attributes('href')).toBe(
+              NODE_INTERNAL_URL_MORE_INFO,
+            );
+          }
         });
       });
+    });
 
-      describe(`when data is: ${dataDesc}`, () => {
-        it(`returns ${value} when blur is ${blur}`, () => {
-          wrapper.vm.fieldBlurs.name = blur;
+    describe('errors', () => {
+      describe.each`
+        data               | showError | errorMessage
+        ${null}            | ${true}   | ${"Node name can't be blank"}
+        ${''}              | ${true}   | ${"Node name can't be blank"}
+        ${STRING_OVER_255} | ${true}   | ${'Node name should be between 1 and 255 characters'}
+        ${'Test'}          | ${false}  | ${null}
+      `(`Name Field`, ({ data, showError, errorMessage }) => {
+        beforeEach(() => {
+          createComponent();
+          findGeoNodeFormNameField().setValue(data);
+        });
 
-          expect(wrapper.vm.validName).toBe(value);
+        it(`${showError ? 'shows' : 'hides'} error when data is ${data}`, () => {
+          expect(findGeoNodeFormNameField().classes('is-invalid')).toBe(showError);
+          if (showError) {
+            expect(findErrorMessage().text()).toBe(errorMessage);
+          }
         });
       });
     });
 
     describe.each`
-      data                    | dataDesc         | blur     | value
-      ${''}                   | ${'empty'}       | ${false} | ${true}
-      ${''}                   | ${'empty'}       | ${true}  | ${false}
-      ${'abcd'}               | ${'invalid url'} | ${false} | ${true}
-      ${'abcd'}               | ${'invalid url'} | ${true}  | ${false}
-      ${'https://gitlab.com'} | ${'valid url'}   | ${false} | ${true}
-      ${'https://gitlab.com'} | ${'valid url'}   | ${true}  | ${true}
-    `(`validUrl`, ({ data, dataDesc, blur, value }) => {
-      beforeEach(() => {
-        createComponent({
-          nodeData: { ...defaultProps.nodeData, url: data },
-        });
-      });
-
-      describe(`when data is: ${dataDesc}`, () => {
-        it(`returns ${value} when blur is ${blur}`, () => {
-          wrapper.vm.fieldBlurs.url = blur;
-
-          expect(wrapper.vm.validUrl).toBe(value);
-        });
-      });
-    });
-  });
-
-  describe('methods', () => {
-    describe('blur', () => {
+      data                    | showError | errorMessage
+      ${null}                 | ${true}   | ${"URL can't be blank"}
+      ${''}                   | ${true}   | ${"URL can't be blank"}
+      ${'abcd'}               | ${true}   | ${'URL must be a valid url (ex: https://gitlab.com)'}
+      ${'https://gitlab.com'} | ${false}  | ${null}
+    `(`URL Field`, ({ data, showError, errorMessage }) => {
       beforeEach(() => {
         createComponent();
+        findGeoNodeFormUrlField().setValue(data);
       });
 
-      it('sets fieldBlur[field] to true', () => {
-        expect(wrapper.vm.fieldBlurs.name).toBeFalsy();
-        wrapper.vm.blur('name');
-        expect(wrapper.vm.fieldBlurs.name).toBeTruthy();
+      it(`${showError ? 'shows' : 'hides'} error when data is ${data}`, () => {
+        expect(findGeoNodeFormUrlField().classes('is-invalid')).toBe(showError);
+        if (showError) {
+          expect(findErrorMessage().text()).toBe(errorMessage);
+        }
       });
     });
   });

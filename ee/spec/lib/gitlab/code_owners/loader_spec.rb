@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::CodeOwners::Loader do
+RSpec.describe Gitlab::CodeOwners::Loader do
   include FakeBlobHelpers
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, namespace: group) }
@@ -39,10 +39,6 @@ describe Gitlab::CodeOwners::Loader do
     let(:expected_entry) { Gitlab::CodeOwners::Entry.new('docs/CODEOWNERS', '@owner-1 owner2@gitlab.org @owner-3 @documentation-owner') }
     let(:first_entry) { loader.entries.first }
 
-    before do
-      stub_feature_flags(sectional_codeowners: false)
-    end
-
     it 'returns entries for the matched line' do
       expect(loader.entries).to contain_exactly(expected_entry)
     end
@@ -71,7 +67,7 @@ describe Gitlab::CodeOwners::Loader do
         expect(loader.entries).to contain_exactly(expected_entry, other_entry)
       end
 
-      it 'only performs 4 queries for users and groups' do
+      it 'performs 6 query for users and groups' do
         test_group = create(:group, path: 'test-group')
         test_group.add_developer(create(:user))
 
@@ -82,10 +78,10 @@ describe Gitlab::CodeOwners::Loader do
 
         # - 1 query for users
         # - 1 for the emails to later divide them across the entries
-        # - 1 for groups with joined routes and users
-        # - 1 for loading the users for the parent group
+        # - 2 for groups with joined routes and users
+        # - 2 for loading the users for the parent group(s)
         #
-        expect { loader.entries }.not_to exceed_query_limit(4)
+        expect { loader.entries }.not_to exceed_query_limit(6)
       end
     end
 
@@ -128,12 +124,28 @@ describe Gitlab::CodeOwners::Loader do
   end
 
   describe '#members' do
-    before do
-      stub_feature_flags(sectional_codeowners: false)
+    shared_examples_for "returns users for passed path" do
+      it "returns users mentioned for the passed path do" do
+        expect(loader.members).to contain_exactly(owner_1, email_owner, documentation_owner)
+      end
     end
 
-    it 'returns users mentioned for the passed path' do
-      expect(loader.members).to contain_exactly(owner_1, email_owner, documentation_owner)
+    context "non-sectional codeowners_content" do
+      it_behaves_like "returns users for passed path"
+    end
+
+    context "when codeowners_content contains sections" do
+      let(:codeowner_content) do
+        <<~CODEOWNERS
+        [Documentation]
+        docs/* @documentation-owner
+        docs/CODEOWNERS @owner-1 owner2@gitlab.org @owner-3 @documentation-owner
+        [Testing]
+        spec/* @test-owner @test-group @test-group/nested-group
+        CODEOWNERS
+      end
+
+      it_behaves_like "returns users for passed path"
     end
   end
 
@@ -154,10 +166,6 @@ describe Gitlab::CodeOwners::Loader do
   end
 
   describe '#empty_code_owners?' do
-    before do
-      stub_feature_flags(sectional_codeowners: false)
-    end
-
     context 'when file does not exist' do
       let(:codeowner_blob) { nil }
 

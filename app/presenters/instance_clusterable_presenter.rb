@@ -8,13 +8,13 @@ class InstanceClusterablePresenter < ClusterablePresenter
     attributes_with_presenter_class = attributes.merge(presenter_class: InstanceClusterablePresenter)
 
     Gitlab::View::Presenter::Factory
-      .new(clusterable, attributes_with_presenter_class)
+      .new(clusterable, **attributes_with_presenter_class)
       .fabricate!
   end
 
   override :index_path
-  def index_path
-    admin_clusters_path
+  def index_path(options = {})
+    admin_clusters_path(options)
   end
 
   override :new_path
@@ -80,6 +80,10 @@ class InstanceClusterablePresenter < ClusterablePresenter
   override :learn_more_link
   def learn_more_link
     link_to(s_('ClusterIntegration|Learn more about instance Kubernetes clusters'), help_page_path('user/instance/clusters/index'), target: '_blank', rel: 'noopener noreferrer')
+  end
+
+  def metrics_dashboard_path(cluster)
+    metrics_dashboard_admin_cluster_path(cluster)
   end
 end
 

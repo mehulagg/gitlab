@@ -6,12 +6,12 @@
 .billing-plan-header.content-block.center
   .billing-plan-logo
     - if namespace_for_user
-      .avatar-container.s96.home-panel-avatar.append-right-default.float-none.mx-auto.mb-4.mt-1
+      .avatar-container.s96.home-panel-avatar.gl-mr-3.float-none.mx-auto.mb-4.mt-1
         = user_avatar_without_link(user: current_user, class: 'mb-3', size: 96)
     - elsif @group.avatar_url.present?
       = group_icon(@group, class: 'border rounded mb-3 mt-1', width: 96, height: 96, alt: @group.name)
     - else
-      .avatar-container.rect-avatar.s96.home-panel-avatar.append-right-default.float-none.mx-auto.mb-4.mt-1.rounded.border
+      .avatar-container.rect-avatar.s96.home-panel-avatar.gl-mr-3.float-none.mx-auto.mb-4.mt-1.rounded.border
         = group_icon(@group, class: 'avatar avatar-tile s96', width: 96, height: 96, alt: @group.name)
 
   %h4

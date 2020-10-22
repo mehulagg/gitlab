@@ -4,30 +4,52 @@ import testAction from 'helpers/vuex_action_helper';
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
 import * as actions from 'ee/analytics/cycle_analytics/store/actions';
 import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 import {
-  selectedGroup,
+  currentGroup,
   allowedStages as stages,
   startDate,
   endDate,
   customizableStagesAndEvents,
   endpoints,
+  valueStreams,
 } from '../mock_data';
-import { shouldFlashAMessage } from '../helpers';
+
+const group = { fullPath: 'fake_group_full_path' };
+const milestonesPath = 'fake_milestones_path';
+const labelsPath = 'fake_labels_path';
 
 const stageData = { events: [] };
 const error = new Error(`Request failed with status code ${httpStatusCodes.NOT_FOUND}`);
 const flashErrorMessage = 'There was an error while fetching value stream analytics data.';
-const [selectedStage] = stages;
+
+stages[0].hidden = true;
+const activeStages = stages.filter(({ hidden }) => !hidden);
+const hiddenStage = stages[0];
+
+const [selectedStage] = activeStages;
 const selectedStageSlug = selectedStage.slug;
+const [selectedValueStream] = valueStreams;
+
+const mockGetters = {
+  currentGroupPath: () => currentGroup.fullPath,
+  currentValueStreamId: () => selectedValueStream.id,
+};
 
 const stageEndpoint = ({ stageId }) =>
-  `/groups/${selectedGroup.fullPath}/-/analytics/value_stream_analytics/stages/${stageId}`;
+  `/groups/${currentGroup.fullPath}/-/analytics/value_stream_analytics/value_streams/${selectedValueStream.id}/stages/${stageId}`;
+
+jest.mock('~/flash');
 
 describe('Cycle analytics actions', () => {
   let state;
   let mock;
+
+  const shouldFlashAMessage = (msg, type = null) => {
+    const args = type ? [msg, type] : [msg];
+    expect(createFlash).toHaveBeenCalledWith(...args);
+  };
 
   beforeEach(() => {
     state = {
@@ -36,26 +58,26 @@ describe('Cycle analytics actions', () => {
       stages: [],
       featureFlags: {
         hasDurationChart: true,
-        hasTasksByTypeChart: true,
-        hasDurationChartMedian: true,
       },
+      activeStages,
+      selectedValueStream,
+      ...mockGetters,
     };
     mock = new MockAdapter(axios);
   });
 
   afterEach(() => {
     mock.restore();
-    state = { ...state, selectedGroup: null };
+    state = { ...state, currentGroup: null };
   });
 
   it.each`
     action                   | type                       | stateKey                | payload
     ${'setFeatureFlags'}     | ${'SET_FEATURE_FLAGS'}     | ${'featureFlags'}       | ${{ hasDurationChart: true }}
-    ${'setSelectedGroup'}    | ${'SET_SELECTED_GROUP'}    | ${'selectedGroup'}      | ${'someNewGroup'}
     ${'setSelectedProjects'} | ${'SET_SELECTED_PROJECTS'} | ${'selectedProjectIds'} | ${[10, 20, 30, 40]}
     ${'setSelectedStage'}    | ${'SET_SELECTED_STAGE'}    | ${'selectedStage'}      | ${{ id: 'someStageId' }}
   `('$action should set $stateKey with $payload and type $type', ({ action, type, payload }) => {
-    testAction(
+    return testAction(
       actions[action],
       payload,
       state,
@@ -69,30 +91,64 @@ describe('Cycle analytics actions', () => {
     );
   });
 
+  describe('setSelectedValueStream', () => {
+    const vs = { id: 'vs-1', name: 'Value stream 1' };
+
+    it('refetches the cycle analytics data', () => {
+      return testAction(
+        actions.setSelectedValueStream,
+        vs,
+        { ...state, selectedValueStream: {} },
+        [{ type: types.SET_SELECTED_VALUE_STREAM, payload: vs }],
+        [{ type: 'fetchValueStreamData' }],
+      );
+    });
+  });
+
+  describe('setPaths', () => {
+    it('dispatches the filters/setEndpoints action with enpoints', () => {
+      return testAction(
+        actions.setPaths,
+        { groupPath: group.fullPath, milestonesPath, labelsPath },
+        state,
+        [],
+        [
+          {
+            type: 'filters/setEndpoints',
+            payload: {
+              groupEndpoint: 'fake_group_full_path',
+              labelsEndpoint: 'fake_labels_path.json',
+              milestonesEndpoint: 'fake_milestones_path.json',
+            },
+          },
+        ],
+      );
+    });
+  });
+
   describe('setDateRange', () => {
     const payload = { startDate, endDate };
 
-    it('dispatches the fetchCycleAnalyticsData action', done => {
-      testAction(
+    it('dispatches the fetchCycleAnalyticsData action', () => {
+      return testAction(
         actions.setDateRange,
         payload,
         state,
         [{ type: types.SET_DATE_RANGE, payload: { startDate, endDate } }],
         [{ type: 'fetchCycleAnalyticsData' }],
-        done,
       );
     });
   });
 
   describe('fetchStageData', () => {
     beforeEach(() => {
-      state = { ...state, selectedGroup };
+      state = { ...state, currentGroup };
       mock = new MockAdapter(axios);
-      mock.onGet(endpoints.stageData).reply(200, { events: [] });
+      mock.onGet(endpoints.stageData).reply(httpStatusCodes.OK, { events: [] });
     });
 
-    it('dispatches receiveStageDataSuccess with received data on success', done => {
-      testAction(
+    it('dispatches receiveStageDataSuccess with received data on success', () => {
+      return testAction(
         actions.fetchStageData,
         selectedStageSlug,
         state,
@@ -104,7 +160,6 @@ describe('Cycle analytics actions', () => {
             payload: { events: [] },
           },
         ],
-        done,
       );
     });
 
@@ -114,8 +169,8 @@ describe('Cycle analytics actions', () => {
         mock.onGet(endpoints.stageData).replyOnce(httpStatusCodes.NOT_FOUND, { error });
       });
 
-      it('dispatches receiveStageDataError on error', done => {
-        testAction(
+      it('dispatches receiveStageDataError on error', () => {
+        return testAction(
           actions.fetchStageData,
           selectedStage,
           state,
@@ -129,37 +184,35 @@ describe('Cycle analytics actions', () => {
               payload: error,
             },
           ],
-          done,
         );
       });
     });
 
     describe('receiveStageDataSuccess', () => {
-      it(`commits the ${types.RECEIVE_STAGE_DATA_SUCCESS} mutation`, done => {
-        testAction(
+      it(`commits the ${types.RECEIVE_STAGE_DATA_SUCCESS} mutation`, () => {
+        return testAction(
           actions.receiveStageDataSuccess,
           { ...stageData },
           state,
           [{ type: types.RECEIVE_STAGE_DATA_SUCCESS, payload: { events: [] } }],
           [],
-          done,
         );
       });
     });
   });
 
   describe('receiveStageDataError', () => {
-    beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-    });
+    const message = 'fake error';
+
     it(`commits the ${types.RECEIVE_STAGE_DATA_ERROR} mutation`, () => {
       return testAction(
         actions.receiveStageDataError,
-        null,
+        { message },
         state,
         [
           {
             type: types.RECEIVE_STAGE_DATA_ERROR,
+            payload: message,
           },
         ],
         [],
@@ -167,10 +220,7 @@ describe('Cycle analytics actions', () => {
     });
 
     it('will flash an error message', () => {
-      actions.receiveStageDataError({
-        commit: () => {},
-      });
-
+      actions.receiveStageDataError({ commit: () => {} }, {});
       shouldFlashAMessage('There was an error fetching data for the selected stage');
     });
   });
@@ -198,27 +248,24 @@ describe('Cycle analytics actions', () => {
     }
 
     beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-      state = { ...state, selectedGroup, startDate, endDate };
+      state = { ...state, currentGroup, startDate, endDate };
     });
 
-    it(`dispatches actions for required value stream analytics analytics data`, done => {
-      testAction(
+    it(`dispatches actions for required value stream analytics analytics data`, () => {
+      return testAction(
         actions.fetchCycleAnalyticsData,
         state,
         null,
         [],
         [
           { type: 'requestCycleAnalyticsData' },
-          { type: 'fetchGroupStagesAndEvents' },
-          { type: 'fetchStageMedianValues' },
+          { type: 'fetchValueStreams' },
           { type: 'receiveCycleAnalyticsDataSuccess' },
         ],
-        done,
       );
     });
 
-    it(`displays an error if fetchStageMedianValues fails`, done => {
+    it(`displays an error if fetchStageMedianValues fails`, () => {
       const { mockDispatchContext } = mockFetchCycleAnalyticsAction({
         fetchStageMedianValues: actions.fetchStageMedianValues({
           dispatch: jest
@@ -227,11 +274,14 @@ describe('Cycle analytics actions', () => {
             .mockImplementation(actions.receiveStageMedianValuesError({ commit: () => {} })),
           commit: () => {},
           state: { ...state },
-          getters,
+          getters: {
+            ...getters,
+            activeStages,
+          },
         }),
       });
 
-      actions
+      return actions
         .fetchCycleAnalyticsData({
           dispatch: mockDispatchContext,
           state: {},
@@ -239,25 +289,23 @@ describe('Cycle analytics actions', () => {
         })
         .then(() => {
           shouldFlashAMessage('There was an error fetching median data for stages');
-          done();
-        })
-        .catch(done.fail);
+        });
     });
 
-    it(`displays an error if fetchGroupStagesAndEvents fails`, done => {
+    it(`displays an error if fetchGroupStagesAndEvents fails`, () => {
       const { mockDispatchContext } = mockFetchCycleAnalyticsAction({
         fetchGroupStagesAndEvents: actions.fetchGroupStagesAndEvents({
           dispatch: jest
             .fn()
             .mockResolvedValueOnce()
-            .mockImplementation(actions.receiveGroupStagesAndEventsError({ commit: () => {} })),
+            .mockImplementation(actions.receiveGroupStagesError({ commit: () => {} })),
           commit: () => {},
           state: { ...state },
           getters,
         }),
       });
 
-      actions
+      return actions
         .fetchCycleAnalyticsData({
           dispatch: mockDispatchContext,
           state: {},
@@ -265,62 +313,16 @@ describe('Cycle analytics actions', () => {
         })
         .then(() => {
           shouldFlashAMessage('There was an error fetching value stream analytics stages.');
-          done();
-        })
-        .catch(done.fail);
-    });
-
-    describe('with an existing error', () => {
-      beforeEach(() => {
-        setFixtures('<div class="flash-container"></div>');
-      });
-
-      it('removes an existing flash error if present', done => {
-        const { mockDispatchContext } = mockFetchCycleAnalyticsAction();
-        createFlash(flashErrorMessage);
-
-        const flashAlert = document.querySelector('.flash-alert');
-
-        expect(flashAlert).toBeVisible();
-
-        actions
-          .fetchCycleAnalyticsData({
-            dispatch: mockDispatchContext,
-            state: {},
-            commit: () => {},
-          })
-          .then(() => {
-            expect(flashAlert.style.opacity).toBe('0');
-            done();
-          })
-          .catch(done.fail);
-      });
-    });
-
-    it('will flash an error when there are no stages', () => {
-      [[], null].forEach(emptyStages => {
-        actions.receiveGroupStagesAndEventsSuccess(
-          {
-            commit: () => {},
-            state: { stages: emptyStages },
-            getters,
-          },
-          {},
-        );
-
-        shouldFlashAMessage(flashErrorMessage);
-      });
+        });
     });
   });
 
   describe('receiveCycleAnalyticsDataError', () => {
-    beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-    });
+    beforeEach(() => {});
 
-    it(`commits the ${types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR} mutation on a 403 response`, done => {
+    it(`commits the ${types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR} mutation on a 403 response`, () => {
       const response = { status: 403 };
-      testAction(
+      return testAction(
         actions.receiveCycleAnalyticsDataError,
         { response },
         state,
@@ -331,13 +333,12 @@ describe('Cycle analytics actions', () => {
           },
         ],
         [],
-        done,
       );
     });
 
-    it(`commits the ${types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR} mutation on a non 403 error response`, done => {
+    it(`commits the ${types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR} mutation on a non 403 error response`, () => {
       const response = { status: 500 };
-      testAction(
+      return testAction(
         actions.receiveCycleAnalyticsDataError,
         { response },
         state,
@@ -348,7 +349,6 @@ describe('Cycle analytics actions', () => {
           },
         ],
         [],
-        done,
       );
     });
 
@@ -365,63 +365,59 @@ describe('Cycle analytics actions', () => {
     });
   });
 
-  describe('receiveGroupStagesAndEventsSuccess', () => {
-    beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-    });
+  describe('receiveGroupStagesSuccess', () => {
+    beforeEach(() => {});
 
-    it(`commits the ${types.RECEIVE_GROUP_STAGES_AND_EVENTS_SUCCESS} mutation`, done => {
-      testAction(
-        actions.receiveGroupStagesAndEventsSuccess,
-        { ...customizableStagesAndEvents },
+    it(`commits the ${types.RECEIVE_GROUP_STAGES_SUCCESS} mutation and dispatches 'setDefaultSelectedStage'`, () => {
+      return testAction(
+        actions.receiveGroupStagesSuccess,
+        { ...customizableStagesAndEvents.stages },
         state,
         [
           {
-            type: types.RECEIVE_GROUP_STAGES_AND_EVENTS_SUCCESS,
-            payload: { ...customizableStagesAndEvents },
+            type: types.RECEIVE_GROUP_STAGES_SUCCESS,
+            payload: { ...customizableStagesAndEvents.stages },
           },
         ],
-        [],
-        done,
+        [{ type: 'setDefaultSelectedStage' }],
       );
     });
+  });
 
-    it("dispatches the 'fetchStageData' action", done => {
-      const stateWithStages = {
-        ...state,
-        stages,
-      };
-
-      testAction(
-        actions.receiveGroupStagesAndEventsSuccess,
-        { ...customizableStagesAndEvents },
-        stateWithStages,
-        [
-          {
-            type: types.RECEIVE_GROUP_STAGES_AND_EVENTS_SUCCESS,
-            payload: { ...customizableStagesAndEvents },
-          },
-        ],
+  describe('setDefaultSelectedStage', () => {
+    it("dispatches the 'fetchStageData' action", () => {
+      return testAction(
+        actions.setDefaultSelectedStage,
+        null,
+        state,
+        [],
         [
           { type: 'setSelectedStage', payload: selectedStage },
           { type: 'fetchStageData', payload: selectedStageSlug },
         ],
-        done,
       );
     });
 
-    it('will flash an error when there are no stages', () => {
-      [[], null].forEach(emptyStages => {
-        actions.receiveGroupStagesAndEventsSuccess(
-          {
-            commit: () => {},
-            state: { stages: emptyStages },
-          },
-          {},
-        );
-      });
-
+    it.each`
+      data
+      ${[]}
+      ${null}
+    `('with $data will flash an error', ({ data }) => {
+      actions.setDefaultSelectedStage({ getters: { activeStages: data }, dispatch: () => {} }, {});
       shouldFlashAMessage(flashErrorMessage);
+    });
+
+    it('will select the first active stage', () => {
+      return testAction(
+        actions.setDefaultSelectedStage,
+        null,
+        state,
+        [],
+        [
+          { type: 'setSelectedStage', payload: stages[1] },
+          { type: 'fetchStageData', payload: stages[1].slug },
+        ],
+      );
     });
   });
 
@@ -430,12 +426,11 @@ describe('Cycle analytics actions', () => {
     const payload = { hidden: true };
 
     beforeEach(() => {
-      mock.onPut(stageEndpoint({ stageId }), payload).replyOnce(200, payload);
-      state = { selectedGroup };
+      mock.onPut(stageEndpoint({ stageId }), payload).replyOnce(httpStatusCodes.OK, payload);
     });
 
-    it('dispatches receiveUpdateStageSuccess with put request response data', done => {
-      testAction(
+    it('dispatches receiveUpdateStageSuccess and customStages/setSavingCustomStage', () => {
+      return testAction(
         actions.updateStage,
         {
           id: stageId,
@@ -445,35 +440,35 @@ describe('Cycle analytics actions', () => {
         [],
         [
           { type: 'requestUpdateStage' },
+          { type: 'customStages/setSavingCustomStage' },
           {
             type: 'receiveUpdateStageSuccess',
             payload,
           },
         ],
-        done,
       );
     });
 
     describe('with a failed request', () => {
       beforeEach(() => {
-        setFixtures('<div class="flash-container"></div>');
         mock = new MockAdapter(axios);
         mock.onPut(stageEndpoint({ stageId })).replyOnce(httpStatusCodes.NOT_FOUND);
       });
 
-      it('dispatches receiveUpdateStageError', done => {
+      it('dispatches receiveUpdateStageError', () => {
         const data = {
           id: stageId,
           name: 'issue',
           ...payload,
         };
-        testAction(
+        return testAction(
           actions.updateStage,
           data,
           state,
           [],
           [
             { type: 'requestUpdateStage' },
+            { type: 'customStages/setSavingCustomStage' },
             {
               type: 'receiveUpdateStageError',
               payload: {
@@ -482,50 +477,49 @@ describe('Cycle analytics actions', () => {
               },
             },
           ],
-          done,
         );
       });
 
-      it('flashes an error if the stage name already exists', done => {
-        actions.receiveUpdateStageError(
-          {
-            commit: () => {},
-            state,
-          },
-          {
-            status: httpStatusCodes.UNPROCESSABLE_ENTITY,
-            responseData: {
-              errors: { name: ['is reserved'] },
+      it('flashes an error if the stage name already exists', () => {
+        return actions
+          .receiveUpdateStageError(
+            {
+              commit: () => {},
+              dispatch: () => Promise.resolve(),
+              state,
             },
-            data: {
-              name: stageId,
+            {
+              status: httpStatusCodes.UNPROCESSABLE_ENTITY,
+              responseData: {
+                errors: { name: ['is reserved'] },
+              },
+              data: {
+                name: stageId,
+              },
             },
-          },
-        );
-
-        shouldFlashAMessage(`'${stageId}' stage already exists`);
-        done();
+          )
+          .then(() => {
+            shouldFlashAMessage(`'${stageId}' stage already exists`);
+          });
       });
 
-      it('flashes an error message', done => {
-        actions.receiveUpdateStageError(
-          {
-            commit: () => {},
-            state,
-          },
-          { status: httpStatusCodes.BAD_REQUEST },
-        );
-
-        shouldFlashAMessage('There was a problem saving your custom stage, please try again');
-        done();
+      it('flashes an error message', () => {
+        return actions
+          .receiveUpdateStageError(
+            {
+              dispatch: () => Promise.resolve(),
+              commit: () => {},
+              state,
+            },
+            { status: httpStatusCodes.BAD_REQUEST },
+          )
+          .then(() => {
+            shouldFlashAMessage('There was a problem saving your custom stage, please try again');
+          });
       });
     });
 
     describe('receiveUpdateStageSuccess', () => {
-      beforeEach(() => {
-        setFixtures('<div class="flash-container"></div>');
-      });
-
       const response = {
         title: 'NEW - COOL',
       };
@@ -536,11 +530,14 @@ describe('Cycle analytics actions', () => {
           response,
           state,
           [{ type: types.RECEIVE_UPDATE_STAGE_SUCCESS }],
-          [{ type: 'fetchGroupStagesAndEvents' }, { type: 'setSelectedStage', payload: response }],
+          [
+            { type: 'fetchGroupStagesAndEvents' },
+            { type: 'customStages/showEditForm', payload: response },
+          ],
         ));
 
-      it('will flash a success message', () =>
-        actions
+      it('will flash a success message', () => {
+        return actions
           .receiveUpdateStageSuccess(
             {
               dispatch: () => {},
@@ -549,8 +546,9 @@ describe('Cycle analytics actions', () => {
             response,
           )
           .then(() => {
-            shouldFlashAMessage('Stage data updated');
-          }));
+            shouldFlashAMessage('Stage data updated', 'notice');
+          });
+      });
 
       describe('with an error', () => {
         it('will flash an error message', () =>
@@ -573,13 +571,11 @@ describe('Cycle analytics actions', () => {
     const stageId = 'cool-stage';
 
     beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-      mock.onDelete(stageEndpoint({ stageId })).replyOnce(200);
-      state = { selectedGroup };
+      mock.onDelete(stageEndpoint({ stageId })).replyOnce(httpStatusCodes.OK);
     });
 
-    it('dispatches receiveRemoveStageSuccess with put request response data', done => {
-      testAction(
+    it('dispatches receiveRemoveStageSuccess with put request response data', () => {
+      return testAction(
         actions.removeStage,
         stageId,
         state,
@@ -590,7 +586,6 @@ describe('Cycle analytics actions', () => {
             type: 'receiveRemoveStageSuccess',
           },
         ],
-        done,
       );
     });
 
@@ -600,8 +595,8 @@ describe('Cycle analytics actions', () => {
         mock.onDelete(stageEndpoint({ stageId })).replyOnce(httpStatusCodes.NOT_FOUND);
       });
 
-      it('dispatches receiveRemoveStageError', done => {
-        testAction(
+      it('dispatches receiveRemoveStageError', () => {
+        return testAction(
           actions.removeStage,
           stageId,
           state,
@@ -613,21 +608,12 @@ describe('Cycle analytics actions', () => {
               payload: error,
             },
           ],
-          done,
         );
       });
 
-      it('flashes an error message', done => {
-        actions.receiveRemoveStageError(
-          {
-            commit: () => {},
-            state,
-          },
-          {},
-        );
-
+      it('flashes an error message', () => {
+        actions.receiveRemoveStageError({ commit: () => {}, state }, {});
         shouldFlashAMessage('There was an error removing your custom stage, please try again');
-        done();
       });
     });
   });
@@ -636,62 +622,91 @@ describe('Cycle analytics actions', () => {
     const stageId = 'cool-stage';
 
     beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-      mock.onDelete(stageEndpoint({ stageId })).replyOnce(200);
-      state = { selectedGroup };
+      mock.onDelete(stageEndpoint({ stageId })).replyOnce(httpStatusCodes.OK);
+      state = { currentGroup };
     });
 
-    it('dispatches fetchCycleAnalyticsData', done => {
-      testAction(
+    it('dispatches fetchCycleAnalyticsData', () => {
+      return testAction(
         actions.receiveRemoveStageSuccess,
         stageId,
         state,
         [{ type: 'RECEIVE_REMOVE_STAGE_RESPONSE' }],
         [{ type: 'fetchCycleAnalyticsData' }],
-        done,
       );
     });
 
-    it('flashes a success message', done => {
-      actions.receiveRemoveStageSuccess(
-        {
-          dispatch: () => {},
-          commit: () => {},
-          state,
-        },
-        {},
-      );
-
-      shouldFlashAMessage('Stage removed');
-      done();
+    it('flashes a success message', () => {
+      return actions
+        .receiveRemoveStageSuccess(
+          {
+            dispatch: () => Promise.resolve(),
+            commit: () => {},
+            state,
+          },
+          {},
+        )
+        .then(() => shouldFlashAMessage('Stage removed', 'notice'));
     });
   });
 
   describe('fetchStageMedianValues', () => {
     let mockDispatch = jest.fn();
+    const fetchMedianResponse = activeStages.map(({ slug: id }) => ({ events: [], id }));
+
     beforeEach(() => {
-      state = { ...state, stages: [{ slug: selectedStageSlug }], selectedGroup };
+      state = { ...state, stages, currentGroup };
       mock = new MockAdapter(axios);
-      mock.onGet(endpoints.stageMedian).reply(200, { events: [] });
+      mock.onGet(endpoints.stageMedian).reply(httpStatusCodes.OK, { events: [] });
       mockDispatch = jest.fn();
     });
 
-    it('dispatches receiveStageMedianValuesSuccess with received data on success', done => {
-      actions
+    it('dispatches receiveStageMedianValuesSuccess with received data on success', () => {
+      return testAction(
+        actions.fetchStageMedianValues,
+        null,
+        state,
+        [{ type: types.RECEIVE_STAGE_MEDIANS_SUCCESS, payload: fetchMedianResponse }],
+        [{ type: 'requestStageMedianValues' }],
+      );
+    });
+
+    it('does not request hidden stages', () => {
+      return actions
         .fetchStageMedianValues({
           state,
-          getters,
+          getters: {
+            ...getters,
+            activeStages,
+          },
           commit: () => {},
           dispatch: mockDispatch,
         })
         .then(() => {
-          expect(mockDispatch).toHaveBeenCalledWith('requestStageMedianValues');
-          expect(mockDispatch).toHaveBeenCalledWith('receiveStageMedianValuesSuccess', [
-            { events: [], id: selectedStageSlug },
-          ]);
-          done();
-        })
-        .catch(done.fail);
+          expect(mockDispatch).not.toHaveBeenCalledWith('receiveStageMedianValuesSuccess', {
+            events: [],
+            id: hiddenStage.id,
+          });
+        });
+    });
+
+    describe(`Status ${httpStatusCodes.OK} and error message in response`, () => {
+      const dataError = 'Too much data';
+      const payload = activeStages.map(({ slug: id }) => ({ value: null, id, error: dataError }));
+
+      beforeEach(() => {
+        mock.onGet(endpoints.stageMedian).reply(httpStatusCodes.OK, { error: dataError });
+      });
+
+      it(`dispatches the 'RECEIVE_STAGE_MEDIANS_SUCCESS' with ${dataError}`, () => {
+        return testAction(
+          actions.fetchStageMedianValues,
+          null,
+          state,
+          [{ type: types.RECEIVE_STAGE_MEDIANS_SUCCESS, payload }],
+          [{ type: 'requestStageMedianValues' }],
+        );
+      });
     });
 
     describe('with a failing request', () => {
@@ -699,180 +714,39 @@ describe('Cycle analytics actions', () => {
         mock.onGet(endpoints.stageMedian).reply(httpStatusCodes.NOT_FOUND, { error });
       });
 
-      it('will dispatch receiveStageMedianValuesError', done => {
-        actions
-          .fetchStageMedianValues({
-            state,
-            getters,
-            commit: () => {},
-            dispatch: mockDispatch,
-          })
-          .then(() => {
-            expect(mockDispatch).toHaveBeenCalledWith('requestStageMedianValues');
-            expect(mockDispatch).toHaveBeenCalledWith('receiveStageMedianValuesError', error);
-            done();
-          })
-          .catch(done.fail);
+      it('will dispatch receiveStageMedianValuesError', () => {
+        return testAction(
+          actions.fetchStageMedianValues,
+          null,
+          state,
+          [],
+          [
+            { type: 'requestStageMedianValues' },
+            { type: 'receiveStageMedianValuesError', payload: error },
+          ],
+        );
       });
     });
   });
 
   describe('receiveStageMedianValuesError', () => {
-    beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-    });
-
-    it(`commits the ${types.RECEIVE_STAGE_MEDIANS_ERROR} mutation`, done => {
+    it(`commits the ${types.RECEIVE_STAGE_MEDIANS_ERROR} mutation`, () =>
       testAction(
         actions.receiveStageMedianValuesError,
-        null,
+        {},
         state,
         [
           {
             type: types.RECEIVE_STAGE_MEDIANS_ERROR,
+            payload: {},
           },
         ],
         [],
-        done,
-      );
-    });
+      ));
 
     it('will flash an error message', () => {
-      actions.receiveStageMedianValuesError({
-        commit: () => {},
-      });
-
+      actions.receiveStageMedianValuesError({ commit: () => {} });
       shouldFlashAMessage('There was an error fetching median data for stages');
-    });
-  });
-
-  describe('receiveStageMedianValuesSuccess', () => {
-    it(`commits the ${types.RECEIVE_STAGE_MEDIANS_SUCCESS} mutation`, done => {
-      testAction(
-        actions.receiveStageMedianValuesSuccess,
-        { ...stageData },
-        state,
-        [{ type: types.RECEIVE_STAGE_MEDIANS_SUCCESS, payload: { events: [] } }],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('createCustomStage', () => {
-    describe('with valid data', () => {
-      const customStageData = {
-        startEventIdentifier: 'start_event',
-        endEventIdentifier: 'end_event',
-        name: 'cool-new-stage',
-      };
-
-      beforeEach(() => {
-        state = { ...state, selectedGroup };
-        mock.onPost(endpoints.baseStagesEndpointstageData).reply(201, customStageData);
-      });
-
-      it(`dispatches the 'receiveCreateCustomStageSuccess' action`, () =>
-        testAction(
-          actions.createCustomStage,
-          customStageData,
-          state,
-          [],
-          [
-            { type: 'requestCreateCustomStage' },
-            {
-              type: 'receiveCreateCustomStageSuccess',
-              payload: { data: customStageData, status: 201 },
-            },
-          ],
-        ));
-    });
-
-    describe('with errors', () => {
-      const message = 'failed';
-      const errors = {
-        endEventIdentifier: ['Cant be blank'],
-      };
-      const customStageData = {
-        startEventIdentifier: 'start_event',
-        endEventIdentifier: '',
-        name: 'cool-new-stage',
-      };
-
-      beforeEach(() => {
-        state = { ...state, selectedGroup };
-        mock
-          .onPost(endpoints.baseStagesEndpointstageData)
-          .reply(httpStatusCodes.UNPROCESSABLE_ENTITY, {
-            message,
-            errors,
-          });
-      });
-
-      it(`dispatches the 'receiveCreateCustomStageError' action`, () =>
-        testAction(
-          actions.createCustomStage,
-          customStageData,
-          state,
-          [],
-          [
-            { type: 'requestCreateCustomStage' },
-            {
-              type: 'receiveCreateCustomStageError',
-              payload: {
-                data: customStageData,
-                errors,
-                message,
-                status: httpStatusCodes.UNPROCESSABLE_ENTITY,
-              },
-            },
-          ],
-        ));
-    });
-  });
-
-  describe('receiveCreateCustomStageError', () => {
-    const response = {
-      data: { name: 'uh oh' },
-    };
-
-    beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-    });
-
-    it('will commit the RECEIVE_CREATE_CUSTOM_STAGE_ERROR mutation', () =>
-      testAction(actions.receiveCreateCustomStageError, response, state, [
-        { type: types.RECEIVE_CREATE_CUSTOM_STAGE_ERROR, payload: { errors: {} } },
-      ]));
-
-    it('will flash an error message', done => {
-      actions.receiveCreateCustomStageError(
-        {
-          commit: () => {},
-        },
-        response,
-      );
-
-      shouldFlashAMessage('There was a problem saving your custom stage, please try again');
-      done();
-    });
-
-    describe('with a stage name error', () => {
-      it('will flash an error message', done => {
-        actions.receiveCreateCustomStageError(
-          {
-            commit: () => {},
-          },
-          {
-            ...response,
-            status: httpStatusCodes.UNPROCESSABLE_ENTITY,
-            errors: { name: ['is reserved'] },
-          },
-        );
-
-        shouldFlashAMessage("'uh oh' stage already exists");
-        done();
-      });
     });
   });
 
@@ -882,7 +756,7 @@ describe('Cycle analytics actions', () => {
     let store;
 
     const initialData = {
-      group: selectedGroup,
+      group: currentGroup,
       projectIds: [1, 2],
     };
 
@@ -897,30 +771,29 @@ describe('Cycle analytics actions', () => {
       };
     });
 
-    describe('with no initialData', () => {
-      it('commits "INITIALIZE_CYCLE_ANALYTICS"', () =>
-        actions.initializeCycleAnalytics(store).then(() => {
-          expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_CYCLE_ANALYTICS', {});
-        }));
+    describe('with only group in initialData', () => {
+      it('commits "INITIALIZE_CYCLE_ANALYTICS"', async () => {
+        await actions.initializeCycleAnalytics(store, { group });
+        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_CYCLE_ANALYTICS', { group });
+      });
 
-      it('dispatches "initializeCycleAnalyticsSuccess"', () =>
-        actions.initializeCycleAnalytics(store).then(() => {
-          expect(mockDispatch).not.toHaveBeenCalledWith('fetchCycleAnalyticsData');
-          expect(mockDispatch).toHaveBeenCalledWith('initializeCycleAnalyticsSuccess');
-        }));
+      it('dispatches "fetchCycleAnalyticsData" and "initializeCycleAnalyticsSuccess"', async () => {
+        await actions.initializeCycleAnalytics(store, { group });
+        expect(mockDispatch).toHaveBeenCalledWith('fetchCycleAnalyticsData');
+      });
     });
 
     describe('with initialData', () => {
-      it('dispatches "fetchCycleAnalyticsData" and "initializeCycleAnalyticsSuccess"', () =>
-        actions.initializeCycleAnalytics(store, initialData).then(() => {
-          expect(mockDispatch).toHaveBeenCalledWith('fetchCycleAnalyticsData');
-          expect(mockDispatch).toHaveBeenCalledWith('initializeCycleAnalyticsSuccess');
-        }));
+      it('dispatches "fetchCycleAnalyticsData" and "initializeCycleAnalyticsSuccess"', async () => {
+        await actions.initializeCycleAnalytics(store, initialData);
+        expect(mockDispatch).toHaveBeenCalledWith('fetchCycleAnalyticsData');
+        expect(mockDispatch).toHaveBeenCalledWith('initializeCycleAnalyticsSuccess');
+      });
 
-      it('commits "INITIALIZE_CYCLE_ANALYTICS"', () =>
-        actions.initializeCycleAnalytics(store, initialData).then(() => {
-          expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_CYCLE_ANALYTICS', initialData);
-        }));
+      it('commits "INITIALIZE_CYCLE_ANALYTICS"', async () => {
+        await actions.initializeCycleAnalytics(store, initialData);
+        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_CYCLE_ANALYTICS', initialData);
+      });
     });
   });
 
@@ -935,63 +808,22 @@ describe('Cycle analytics actions', () => {
       ));
   });
 
-  describe('receiveCreateCustomStageSuccess', () => {
-    const response = {
-      data: {
-        title: 'COOL',
-      },
-    };
-
-    it('will dispatch fetchGroupStagesAndEvents', () =>
-      testAction(
-        actions.receiveCreateCustomStageSuccess,
-        response,
-        state,
-        [{ type: types.RECEIVE_CREATE_CUSTOM_STAGE_SUCCESS }],
-        [{ type: 'fetchGroupStagesAndEvents' }],
-      ));
-
-    describe('with an error', () => {
-      beforeEach(() => {
-        setFixtures('<div class="flash-container"></div>');
-      });
-
-      it('will flash an error message', () =>
-        actions
-          .receiveCreateCustomStageSuccess(
-            {
-              dispatch: () => Promise.reject(),
-              commit: () => {},
-            },
-            response,
-          )
-          .then(() => {
-            shouldFlashAMessage('There was a problem refreshing the data, please try again');
-          }));
-    });
-  });
-
   describe('reorderStage', () => {
     const stageId = 'cool-stage';
     const payload = { id: stageId, move_after_id: '2', move_before_id: '8' };
-
-    beforeEach(() => {
-      state = { selectedGroup };
-    });
 
     describe('with no errors', () => {
       beforeEach(() => {
         mock.onPut(stageEndpoint({ stageId })).replyOnce(httpStatusCodes.OK);
       });
 
-      it(`dispatches the ${types.REQUEST_REORDER_STAGE} and ${types.RECEIVE_REORDER_STAGE_SUCCESS} actions`, done => {
-        testAction(
+      it(`dispatches the ${types.REQUEST_REORDER_STAGE} and ${types.RECEIVE_REORDER_STAGE_SUCCESS} actions`, () => {
+        return testAction(
           actions.reorderStage,
           payload,
           state,
           [],
           [{ type: 'requestReorderStage' }, { type: 'receiveReorderStageSuccess' }],
-          done,
         );
       });
     });
@@ -1001,8 +833,8 @@ describe('Cycle analytics actions', () => {
         mock.onPut(stageEndpoint({ stageId })).replyOnce(httpStatusCodes.NOT_FOUND);
       });
 
-      it(`dispatches the ${types.REQUEST_REORDER_STAGE} and ${types.RECEIVE_REORDER_STAGE_ERROR} actions `, done => {
-        testAction(
+      it(`dispatches the ${types.REQUEST_REORDER_STAGE} and ${types.RECEIVE_REORDER_STAGE_ERROR} actions `, () => {
+        return testAction(
           actions.reorderStage,
           payload,
           state,
@@ -1011,18 +843,16 @@ describe('Cycle analytics actions', () => {
             { type: 'requestReorderStage' },
             { type: 'receiveReorderStageError', payload: { status: httpStatusCodes.NOT_FOUND } },
           ],
-          done,
         );
       });
     });
   });
 
   describe('receiveReorderStageError', () => {
-    beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
-    });
+    beforeEach(() => {});
+
     it(`commits the ${types.RECEIVE_REORDER_STAGE_ERROR} mutation and flashes an error`, () => {
-      testAction(
+      return testAction(
         actions.receiveReorderStageError,
         null,
         state,
@@ -1032,24 +862,274 @@ describe('Cycle analytics actions', () => {
           },
         ],
         [],
-      );
-
-      shouldFlashAMessage(
-        'There was an error updating the stage order. Please try reloading the page.',
-      );
+      ).then(() => {
+        shouldFlashAMessage(
+          'There was an error updating the stage order. Please try reloading the page.',
+        );
+      });
     });
   });
 
   describe('receiveReorderStageSuccess', () => {
-    it(`commits the ${types.RECEIVE_REORDER_STAGE_SUCCESS} mutation`, done => {
-      testAction(
+    it(`commits the ${types.RECEIVE_REORDER_STAGE_SUCCESS} mutation`, () => {
+      return testAction(
         actions.receiveReorderStageSuccess,
         null,
         state,
         [{ type: types.RECEIVE_REORDER_STAGE_SUCCESS }],
         [],
-        done,
       );
+    });
+  });
+
+  describe('createValueStream', () => {
+    const payload = { name: 'cool value stream' };
+
+    beforeEach(() => {
+      state = { currentGroup };
+    });
+
+    describe('with no errors', () => {
+      beforeEach(() => {
+        mock.onPost(endpoints.valueStreamData).replyOnce(httpStatusCodes.OK, {});
+      });
+
+      it(`commits the ${types.REQUEST_CREATE_VALUE_STREAM} and ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} actions`, () => {
+        return testAction(
+          actions.createValueStream,
+          payload,
+          state,
+          [
+            {
+              type: types.REQUEST_CREATE_VALUE_STREAM,
+            },
+          ],
+          [{ type: 'receiveCreateValueStreamSuccess' }],
+        );
+      });
+    });
+
+    describe('with errors', () => {
+      const errors = { name: ['is taken'] };
+      const message = { message: 'error' };
+      const resp = { message, payload: { errors } };
+      beforeEach(() => {
+        mock.onPost(endpoints.valueStreamData).replyOnce(httpStatusCodes.NOT_FOUND, resp);
+      });
+
+      it(`commits the ${types.REQUEST_CREATE_VALUE_STREAM} and ${types.RECEIVE_CREATE_VALUE_STREAM_ERROR} actions `, () => {
+        return testAction(
+          actions.createValueStream,
+          payload,
+          state,
+          [
+            { type: types.REQUEST_CREATE_VALUE_STREAM },
+            {
+              type: types.RECEIVE_CREATE_VALUE_STREAM_ERROR,
+              payload: { message, errors },
+            },
+          ],
+          [],
+        );
+      });
+    });
+  });
+
+  describe('deleteValueStream', () => {
+    const payload = 'my-fake-value-stream';
+
+    beforeEach(() => {
+      state = { currentGroup };
+    });
+
+    describe('with no errors', () => {
+      beforeEach(() => {
+        mock.onDelete(endpoints.valueStreamData).replyOnce(httpStatusCodes.OK, {});
+      });
+
+      it(`commits the ${types.REQUEST_DELETE_VALUE_STREAM} and ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} actions`, () => {
+        return testAction(
+          actions.deleteValueStream,
+          payload,
+          state,
+          [
+            {
+              type: types.REQUEST_DELETE_VALUE_STREAM,
+            },
+            {
+              type: types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS,
+            },
+          ],
+          [{ type: 'fetchCycleAnalyticsData' }],
+        );
+      });
+    });
+
+    describe('with errors', () => {
+      const message = { message: 'failed to delete the value stream' };
+      const resp = { message };
+      beforeEach(() => {
+        mock.onDelete(endpoints.valueStreamData).replyOnce(httpStatusCodes.NOT_FOUND, resp);
+      });
+
+      it(`commits the ${types.REQUEST_DELETE_VALUE_STREAM} and ${types.RECEIVE_DELETE_VALUE_STREAM_ERROR} actions `, () => {
+        return testAction(
+          actions.deleteValueStream,
+          payload,
+          state,
+          [
+            { type: types.REQUEST_DELETE_VALUE_STREAM },
+            {
+              type: types.RECEIVE_DELETE_VALUE_STREAM_ERROR,
+              payload: message,
+            },
+          ],
+          [],
+        );
+      });
+    });
+  });
+
+  describe('fetchValueStreams', () => {
+    beforeEach(() => {
+      state = {
+        ...state,
+        stages: [{ slug: selectedStageSlug }],
+        currentGroup,
+        featureFlags: {
+          ...state.featureFlags,
+          hasCreateMultipleValueStreams: true,
+        },
+      };
+      mock = new MockAdapter(axios);
+      mock.onGet(endpoints.valueStreamData).reply(httpStatusCodes.OK, { stages: [], events: [] });
+    });
+
+    it(`commits ${types.REQUEST_VALUE_STREAMS} and dispatches receiveValueStreamsSuccess with received data on success`, () => {
+      return testAction(
+        actions.fetchValueStreams,
+        null,
+        state,
+        [{ type: types.REQUEST_VALUE_STREAMS }],
+        [
+          {
+            payload: {
+              events: [],
+              stages: [],
+            },
+            type: 'receiveValueStreamsSuccess',
+          },
+        ],
+      );
+    });
+
+    describe('with a failing request', () => {
+      let mockCommit;
+      beforeEach(() => {
+        mockCommit = jest.fn();
+        mock.onGet(endpoints.valueStreamData).reply(httpStatusCodes.NOT_FOUND);
+      });
+
+      it(`will commit ${types.RECEIVE_VALUE_STREAMS_ERROR}`, () => {
+        return actions.fetchValueStreams({ state, getters, commit: mockCommit }).catch(() => {
+          expect(mockCommit.mock.calls).toEqual([
+            ['REQUEST_VALUE_STREAMS'],
+            ['RECEIVE_VALUE_STREAMS_ERROR', httpStatusCodes.NOT_FOUND],
+          ]);
+        });
+      });
+
+      it(`throws an error`, () => {
+        return expect(
+          actions.fetchValueStreams({ state, getters, commit: mockCommit }),
+        ).rejects.toThrow('Request failed with status code 404');
+      });
+    });
+
+    describe('receiveValueStreamsSuccess', () => {
+      it(`with a selectedValueStream in state commits the ${types.RECEIVE_VALUE_STREAMS_SUCCESS} mutation and dispatches 'fetchValueStreamData'`, () => {
+        return testAction(
+          actions.receiveValueStreamsSuccess,
+          valueStreams,
+          state,
+          [
+            {
+              type: types.RECEIVE_VALUE_STREAMS_SUCCESS,
+              payload: valueStreams,
+            },
+          ],
+          [{ type: 'fetchValueStreamData' }],
+        );
+      });
+
+      it(`commits the ${types.RECEIVE_VALUE_STREAMS_SUCCESS} mutation and dispatches 'setSelectedValueStream'`, () => {
+        return testAction(
+          actions.receiveValueStreamsSuccess,
+          valueStreams,
+          {
+            ...state,
+            selectedValueStream: null,
+          },
+          [
+            {
+              type: types.RECEIVE_VALUE_STREAMS_SUCCESS,
+              payload: valueStreams,
+            },
+          ],
+          [{ type: 'setSelectedValueStream', payload: selectedValueStream }],
+        );
+      });
+    });
+
+    describe('with hasCreateMultipleValueStreams disabled', () => {
+      beforeEach(() => {
+        state = {
+          ...state,
+          featureFlags: {
+            ...state.featureFlags,
+            hasCreateMultipleValueStreams: false,
+          },
+        };
+      });
+
+      it(`will dispatch the 'fetchGroupStagesAndEvents' request`, () =>
+        testAction(actions.fetchValueStreams, null, state, [], [{ type: 'fetchValueStreamData' }]));
+    });
+  });
+
+  describe('fetchValueStreamData', () => {
+    beforeEach(() => {
+      state = {
+        ...state,
+        stages: [{ slug: selectedStageSlug }],
+        currentGroup,
+        featureFlags: {
+          ...state.featureFlags,
+          hasCreateMultipleValueStreams: true,
+        },
+      };
+      mock = new MockAdapter(axios);
+      mock.onGet(endpoints.valueStreamData).reply(httpStatusCodes.OK, { stages: [], events: [] });
+    });
+
+    it('dispatches fetchGroupStagesAndEvents, fetchStageMedianValues and durationChart/fetchDurationData', () => {
+      return testAction(
+        actions.fetchValueStreamData,
+        null,
+        state,
+        [],
+        [
+          { type: 'fetchGroupStagesAndEvents' },
+          { type: 'fetchStageMedianValues' },
+          { type: 'durationChart/fetchDurationData' },
+        ],
+      );
+    });
+  });
+
+  describe('setFilters', () => {
+    it('dispatches the fetchCycleAnalyticsData action', () => {
+      return testAction(actions.setFilters, null, state, [], [{ type: 'fetchCycleAnalyticsData' }]);
     });
   });
 });

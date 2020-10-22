@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Jwt do
+RSpec.describe Gitlab::Ci::Jwt do
   let(:namespace) { build_stubbed(:namespace) }
   let(:project) { build_stubbed(:project, namespace: namespace) }
   let(:user) { build_stubbed(:user) }
@@ -20,7 +20,7 @@ describe Gitlab::Ci::Jwt do
     subject(:payload) { described_class.new(build, ttl: 30).payload }
 
     it 'has correct values for the standard JWT attributes' do
-      Timecop.freeze do
+      freeze_time do
         now = Time.now.to_i
 
         aggregate_failures do

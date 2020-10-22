@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Groups > Members > Maintainer/Owner can override LDAP access levels' do
+RSpec.describe 'Groups > Members > Maintainer/Owner can override LDAP access levels' do
   include WaitForRequests
 
   let(:johndoe)  { create(:user, name: 'John Doe') }
@@ -16,6 +16,8 @@ describe 'Groups > Members > Maintainer/Owner can override LDAP access levels' d
   let!(:regular_member) { create(:group_member, :guest, group: group, user: maryjane, ldap: false) }
 
   before do
+    stub_feature_flags(vue_group_members_list: false)
+
     # We need to actually activate the LDAP config otherwise `Group#ldap_synced?` will always be false!
     allow(Gitlab.config.ldap).to receive_messages(enabled: true)
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::DependencyProxy, api: true do
+RSpec.describe API::DependencyProxy, api: true do
   include ExclusiveLeaseHelpers
 
   let_it_be(:user) { create(:user) }

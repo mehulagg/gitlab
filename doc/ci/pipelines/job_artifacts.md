@@ -1,4 +1,7 @@
 ---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 disqus_identifier: 'https://docs.gitlab.com/ee/user/project/pipelines/job_artifacts.html'
 type: reference, howto
 ---
@@ -8,13 +11,13 @@ type: reference, howto
 > - Introduced in GitLab 8.2 and GitLab Runner 0.7.0.
 > - Starting with GitLab 8.4 and GitLab Runner 1.0, the artifacts archive format changed to `ZIP`, and it's now possible to browse its contents, with the added ability of downloading the files separately.
 > - In GitLab 8.17, builds were renamed to jobs.
-> - The artifacts browser will be available only for new artifacts that are sent to GitLab using GitLab Runner version 1.0 and up. It won't be possible to browse old artifacts already uploaded to GitLab.
+> - The artifacts browser is available only for new artifacts that are sent to GitLab using GitLab Runner version 1.0 and up. You cannot browse old artifacts already uploaded to GitLab.
 
 Job artifacts are a list of files and directories created by a job
 once it finishes. This feature is [enabled by default](../../administration/job_artifacts.md) in all
 GitLab installations.
 
-Job artifacts created by GitLab Runner are uploaded to GitLab and are downloadable as a single archive using the GitLab UI or the [GitLab API](../../api/jobs.md#get-job-artifacts).
+Job artifacts created by GitLab Runner are uploaded to GitLab and are downloadable as a single archive using the GitLab UI or the [GitLab API](../../api/job_artifacts.md#get-job-artifacts).
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, watch the video [GitLab CI Pipeline, Artifacts, and Environments](https://www.youtube.com/watch?v=PCKDICEe10s).
@@ -30,21 +33,21 @@ pdf:
   script: xelatex mycv.tex
   artifacts:
     paths:
-    - mycv.pdf
+      - mycv.pdf
     expire_in: 1 week
 ```
 
-A job named `pdf` calls the `xelatex` command in order to build a PDF file from
-the latex source file `mycv.tex`. We then define the `artifacts` paths which in
+A job named `pdf` calls the `xelatex` command to build a PDF file from the
+latex source file `mycv.tex`. We then define the `artifacts` paths which in
 turn are defined with the `paths` keyword. All paths to files and directories
 are relative to the repository that was cloned during the build.
 
-The artifacts will be uploaded when the job succeeds by default, but can be set to upload
-when the job fails, or always, if the [`artifacts:when`](../yaml/README.md#artifactswhen)
-parameter is used. These uploaded artifacts will be kept in GitLab for 1 week as defined
+By default, the artifacts upload when the job succeeds. You can also set artifacts to upload
+when the job fails, or always, by using [`artifacts:when`](../yaml/README.md#artifactswhen)
+keyword. GitLab keeps these uploaded artifacts for 1 week, as defined
 by the `expire_in` definition. You can keep the artifacts from expiring
 via the [web interface](#browsing-artifacts). If the expiry time is not defined, it defaults
-to the [instance wide setting](../../user/admin_area/settings/continuous_integration.md#default-artifacts-expiration-core-only).
+to the [instance wide setting](../../user/admin_area/settings/continuous_integration.md#default-artifacts-expiration).
 
 For more examples on artifacts, follow the [artifacts reference in
 `.gitlab-ci.yml`](../yaml/README.md#artifacts).
@@ -58,12 +61,10 @@ The `artifacts:reports` keyword is used for collecting test reports, code qualit
 reports, and security reports from jobs. It also exposes these reports in GitLab's
 UI (merge requests, pipeline views, and security dashboards).
 
-NOTE: **Note:**
 The test reports are collected regardless of the job results (success or failure).
 You can use [`artifacts:expire_in`](../yaml/README.md#artifactsexpire_in) to set up an expiration
 date for their artifacts.
 
-NOTE: **Note:**
 If you also want the ability to browse the report output files, include the
 [`artifacts:paths`](../yaml/README.md#artifactspaths) keyword.
 
@@ -72,86 +73,85 @@ If you also want the ability to browse the report output files, include the
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20390) in GitLab 11.2.
 > - Requires GitLab Runner 11.2 and above.
 
-The `junit` report collects [JUnit XML files](https://www.ibm.com/support/knowledgecenter/en/SSQ2R2_14.1.0/com.ibm.rsar.analysis.codereview.cobol.doc/topics/cac_useresults_junit.html)
+The `junit` report collects [JUnit report format XML files](https://www.ibm.com/support/knowledgecenter/en/SSQ2R2_14.1.0/com.ibm.rsar.analysis.codereview.cobol.doc/topics/cac_useresults_junit.html)
 as artifacts. Although JUnit was originally developed in Java, there are many
-[third party ports](https://en.wikipedia.org/wiki/JUnit#Ports) for other
+third party ports for other
 languages like JavaScript, Python, Ruby, and so on.
 
-See [JUnit test reports](../junit_test_reports.md) for more details and examples.
-Below is an example of collecting a JUnit XML file from Ruby's RSpec test tool:
+See [Unit test reports](../unit_test_reports.md) for more details and examples.
+Below is an example of collecting a JUnit report format XML file from Ruby's RSpec test tool:
 
 ```yaml
 rspec:
   stage: test
   script:
-  - bundle install
-  - rspec --format RspecJunitFormatter --out rspec.xml
+    - bundle install
+    - rspec --format RspecJunitFormatter --out rspec.xml
   artifacts:
     reports:
       junit: rspec.xml
 ```
 
-The collected JUnit reports will be uploaded to GitLab as an artifact and will
-be automatically shown in merge requests.
+The collected Unit test reports upload to GitLab as an artifact and display in merge requests.
 
-NOTE: **Note:**
-In case the JUnit tool you use exports to multiple XML files, you can specify
-multiple test report paths within a single job and they will be automatically
-concatenated into a single file. Use a filename pattern (`junit: rspec-*.xml`),
+If the JUnit tool you use exports to multiple XML files, specify
+multiple test report paths within a single job to
+concatenate them into a single file. Use a filename pattern (`junit: rspec-*.xml`),
 an array of filenames (`junit: [rspec-1.xml, rspec-2.xml, rspec-3.xml]`), or a
 combination thereof (`junit: [rspec.xml, test-results/TEST-*.xml]`).
 
 #### `artifacts:reports:dotenv`
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/17066) in GitLab 12.9.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17066) in GitLab 12.9.
 > - Requires GitLab Runner 11.5 and later.
 
 The `dotenv` report collects a set of environment variables as artifacts.
 
 The collected variables are registered as runtime-created variables of the job,
-which is useful to [set dynamic environment URLs after a job finishes](../environments.md#set-dynamic-environment-urls-after-a-job-finishes).
-It's not available for download through the web interface.
+which is useful to [set dynamic environment URLs after a job finishes](../environments/index.md#set-dynamic-environment-urls-after-a-job-finishes).
 
-There are a couple of limitations on top of the [original dotenv rules](https://github.com/motdotla/dotenv#rules).
+There are a couple of exceptions to the [original dotenv rules](https://github.com/motdotla/dotenv#rules):
 
-- The variable key can contain only letters, digits and underscore ('_').
-- The size of the dotenv file must be smaller than 5 kilobytes.
-- The number of variables must be less than 10.
-- It does not support variable substitution in the dotenv file itself.
-- It does not support empty lines and comments (`#`) in dotenv file.
-- It does not support quote escape, spaces in a quote, a new line expansion in a quote, in dotenv file.
+- The variable key can contain only letters, digits, and underscores (`_`).
+- The maximum size of the `.env` file is 5 KB.
+- The maximum number of variables is 10.
+- Variable substitution in the `.env` file is not supported.
+- The `.env` file can't have empty lines or comments (starting with `#`).
+- Key values in the `env` file cannot have spaces or newline characters (`\n`), including when using single or double quotes.
+- Quote escaping during parsing (`key = 'value'` -> `{key: "value"}`) is not supported.
 
 #### `artifacts:reports:cobertura`
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/3708) in GitLab 12.9.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3708) in GitLab 12.9.
 > - Requires [GitLab Runner](https://docs.gitlab.com/runner/) 11.5 and above.
 
 The `cobertura` report collects [Cobertura coverage XML files](../../user/project/merge_requests/test_coverage_visualization.md).
-The collected Cobertura coverage reports will be uploaded to GitLab as an artifact
-and will be automatically shown in merge requests.
+The collected Cobertura coverage reports upload to GitLab as an artifact
+and display in merge requests.
 
 Cobertura was originally developed for Java, but there are many
 third party ports for other languages like JavaScript, Python, Ruby, and so on.
 
 #### `artifacts:reports:terraform`
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/207527) in GitLab 12.10.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207528) in GitLab 13.0.
 > - Requires [GitLab Runner](https://docs.gitlab.com/runner/) 11.5 and above.
 
-The `terraform` report collects Terraform `tfplan.json` files. The collected Terraform
-plan reports will be uploaded to GitLab as artifacts and will be automatically shown
-in merge requests.
+The `terraform` report obtains a Terraform `tfplan.json` file. [JQ processing required to remove credentials](../../user/infrastructure/index.md#output-terraform-plan-information-into-a-merge-request). The collected Terraform
+plan report uploads to GitLab as an artifact and displays
+in merge requests. For more information, see
+[Output `terraform plan` information into a merge request](../../user/infrastructure/index.md#output-terraform-plan-information-into-a-merge-request).
 
-#### `artifacts:reports:codequality` **(STARTER)**
+#### `artifacts:reports:codequality`
 
-> - Introduced in GitLab 11.5.
+> - Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 11.5.
+> - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in GitLab 13.2.
 > - Requires GitLab Runner 11.5 and above.
 
 The `codequality` report collects [CodeQuality issues](../../user/project/merge_requests/code_quality.md)
 as artifacts.
 
-The collected Code Quality report will be uploaded to GitLab as an artifact and will
-be summarized in merge requests. It's not available for download through the web interface.
+The collected Code Quality report uploads to GitLab as an artifact and is summarized in merge requests.
 
 #### `artifacts:reports:sast` **(ULTIMATE)**
 
@@ -161,9 +161,21 @@ be summarized in merge requests. It's not available for download through the web
 The `sast` report collects [SAST vulnerabilities](../../user/application_security/sast/index.md)
 as artifacts.
 
-The collected SAST report will be uploaded to GitLab as an artifact and will be summarized
+The collected SAST report uploads to GitLab as an artifact and is summarized
+in merge requests and the pipeline view. It's also used to provide data for security
+dashboards.
+
+#### `artifacts:reports:secret_detection` **(ULTIMATE)**
+
+> - Introduced in GitLab 13.1.
+> - Requires GitLab Runner 11.5 and above.
+
+The `secret-detection` report collects [detected secrets](../../user/application_security/secret_detection/index.md)
+as artifacts.
+
+The collected Secret Detection report is uploaded to GitLab as an artifact and summarized
 in the merge requests and pipeline view. It's also used to provide data for security
-dashboards. It's not available for download through the web interface.
+dashboards.
 
 #### `artifacts:reports:dependency_scanning` **(ULTIMATE)**
 
@@ -173,9 +185,8 @@ dashboards. It's not available for download through the web interface.
 The `dependency_scanning` report collects [Dependency Scanning vulnerabilities](../../user/application_security/dependency_scanning/index.md)
 as artifacts.
 
-The collected Dependency Scanning report will be uploaded to GitLab as an artifact and will
-be summarized in the merge requests and pipeline view. It's also used to provide data for security
-dashboards. It's not available for download through the web interface.
+The collected Dependency Scanning report uploads to GitLab as an artifact and is summarized in merge requests and the pipeline view. It's also used to provide data for security
+dashboards.
 
 #### `artifacts:reports:container_scanning` **(ULTIMATE)**
 
@@ -185,9 +196,9 @@ dashboards. It's not available for download through the web interface.
 The `container_scanning` report collects [Container Scanning vulnerabilities](../../user/application_security/container_scanning/index.md)
 as artifacts.
 
-The collected Container Scanning report will be uploaded to GitLab as an artifact and will
-be summarized in the merge requests and pipeline view. It's also used to provide data for security
-dashboards. It's not available for download through the web interface.
+The collected Container Scanning report uploads to GitLab as an artifact and
+is summarized in merge requests and the pipeline view. It's also used to provide data for security
+dashboards.
 
 #### `artifacts:reports:dast` **(ULTIMATE)**
 
@@ -197,9 +208,8 @@ dashboards. It's not available for download through the web interface.
 The `dast` report collects [DAST vulnerabilities](../../user/application_security/dast/index.md)
 as artifacts.
 
-The collected DAST report will be uploaded to GitLab as an artifact and will
-be summarized in the merge requests and pipeline view. It's also used to provide data for security
-dashboards. It's not available for download through the web interface.
+The collected DAST report uploads to GitLab as an artifact and is summarized in merge requests and the pipeline view. It's also used to provide data for security
+dashboards.
 
 #### `artifacts:reports:license_management` **(ULTIMATE)**
 
@@ -208,15 +218,14 @@ dashboards. It's not available for download through the web interface.
 
 CAUTION: **Warning:**
 This artifact is still valid but is **deprecated** in favor of the
-[artifacts:reports:license_scanning](../pipelines/job_artifacts.md#artifactsreportslicense_scanning-ultimate)
+[artifacts:reports:license_scanning](../pipelines/job_artifacts.md#artifactsreportslicense_scanning)
 introduced in GitLab 12.8.
 
 The `license_management` report collects [Licenses](../../user/compliance/license_compliance/index.md)
 as artifacts.
 
-The collected License Compliance report will be uploaded to GitLab as an artifact and will
-be summarized in the merge requests and pipeline view. It's also used to provide data for security
-dashboards. It's not available for download through the web interface.
+The collected License Compliance report uploads to GitLab as an artifact and is summarized in merge requests and the pipeline view. It's also used to provide data for security
+dashboards.
 
 #### `artifacts:reports:license_scanning` **(ULTIMATE)**
 
@@ -226,8 +235,7 @@ dashboards. It's not available for download through the web interface.
 The `license_scanning` report collects [Licenses](../../user/compliance/license_compliance/index.md)
 as artifacts.
 
-The License Compliance report will be uploaded to GitLab as an artifact and will
-be automatically shown in merge requests, pipeline view and provide data for security
+The License Compliance report uploads to GitLab as an artifact and displays automatically in merge requests and the pipeline view, and provide data for security
 dashboards.
 
 #### `artifacts:reports:performance` **(PREMIUM)**
@@ -235,11 +243,21 @@ dashboards.
 > - Introduced in GitLab 11.5.
 > - Requires GitLab Runner 11.5 and above.
 
-The `performance` report collects [Performance metrics](../../user/project/merge_requests/browser_performance_testing.md)
+The `performance` report collects [Browser Performance Testing metrics](../../user/project/merge_requests/browser_performance_testing.md)
 as artifacts.
 
-The collected Performance report will be uploaded to GitLab as an artifact and will
-be automatically shown in merge requests. It's not available for download through the web interface.
+The collected Browser Performance report uploads to GitLab as an artifact and displays in merge requests.
+
+#### `artifacts:reports:load_performance` **(PREMIUM)**
+
+> - Introduced in [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/35260) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
+> - Requires GitLab Runner 11.5 and above.
+
+The `load_performance` report collects [Load Performance Testing metrics](../../user/project/merge_requests/load_performance_testing.md)
+as artifacts.
+
+The report is uploaded to GitLab as an artifact and is
+shown in merge requests automatically.
 
 #### `artifacts:reports:metrics` **(PREMIUM)**
 
@@ -248,14 +266,24 @@ be automatically shown in merge requests. It's not available for download throug
 The `metrics` report collects [Metrics](../metrics_reports.md)
 as artifacts.
 
-The collected Metrics report will be uploaded to GitLab as an artifact and will
-be automatically shown in merge requests. It's not available for download through the web interface.
+The collected Metrics report uploads to GitLab as an artifact and displays in merge requests.
+
+#### `artifacts:reports:requirements` **(ULTIMATE)**
+
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2859) in GitLab 13.1.
+> - Requires GitLab Runner 11.5 and above.
+
+The `requirements` report collects `requirements.json` files as artifacts.
+
+The collected Requirements report uploads to GitLab as an artifact and
+existing [requirements](../../user/project/requirements/index.md) are
+marked as Satisfied.
 
 ## Browsing artifacts
 
 > - From GitLab 9.2, PDFs, images, videos, and other formats can be previewed directly in the job artifacts browser without the need to download them.
 > - Introduced in [GitLab 10.1](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/14399), HTML files in a public project can be previewed directly in a new tab without the need to download them when [GitLab Pages](../../administration/pages/index.md) is enabled. The same applies for textual formats (currently supported extensions: `.txt`, `.json`, and `.log`).
-> - Introduced in [GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/16675), artifacts in private projects can be previewed when [GitLab Pages access control](../../administration/pages/index.md#access-control) is enabled.
+> - Introduced in [GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/16675), artifacts in internal and private projects can be previewed when [GitLab Pages access control](../../administration/pages/index.md#access-control) is enabled.
 
 After a job finishes, if you visit the job's specific page, there are three
 buttons. You can download the artifacts archive or browse its contents, whereas
@@ -272,21 +300,23 @@ Below you can see what browsing looks like. In this case we have browsed inside
 the archive and at this point there is one directory, a couple files, and
 one HTML file that you can view directly online when
 [GitLab Pages](../../administration/pages/index.md) is enabled (opens in a new tab).
+Select artifacts in internal and private projects can only be previewed when
+[GitLab Pages access control](../../administration/pages/index.md#access-control) is enabled.
 
 ![Job artifacts browser](img/job_artifacts_browser.png)
 
 ## Downloading artifacts
 
-If you need to download the whole archive, there are buttons in various places
+If you need to download an artifact or the whole archive, there are buttons in various places
 in the GitLab UI to do this:
 
 1. While on the pipelines page, you can see the download icon for each job's
-   artifacts archive in the right corner:
+   artifacts and archive in the right corner:
 
    ![Job artifacts in Pipelines page](img/job_artifacts_pipelines_page.png)
 
 1. While on the **Jobs** page, you can see the download icon for each job's
-   artifacts archive in the right corner:
+   artifacts and archive in the right corner:
 
    ![Job artifacts in Builds page](img/job_artifacts_builds_page.png)
 
@@ -307,10 +337,13 @@ so you can use it for scripting purposes.
 
 NOTE: **Note:**
 The latest artifacts are created by jobs in the **most recent** successful pipeline
-for the specific ref. If you run two types of pipelines for the same ref, the latest
-artifact will be determined by timing. For example, if a branch pipeline created
-by merging a merge request runs at the same time as a scheduled pipeline, the
-latest artifact will be from the pipeline that completed most recently.
+for the specific ref. If you run two types of pipelines for the same ref, timing determines the latest
+artifact. For example, if a merge request creates a branch pipeline at the same time as a scheduled pipeline, the pipeline that completed most recently creates the latest artifact.
+
+In [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/201784) and later, artifacts
+for [parent and child pipelines](../parent_child_pipelines.md) are searched in hierarchical
+order from parent to child. For example, if both parent and child pipelines have a
+job with the same name, the artifact from the parent pipeline is returned.
 
 Artifacts for other pipelines can be accessed with direct access to them.
 
@@ -384,7 +417,7 @@ information in the UI.
 DANGER: **Warning:**
 This is a destructive action that leads to data loss. Use with caution.
 
-You can erase a single job via the UI, which will also remove the job's
+You can erase a single job via the UI, which also removes the job's
 artifacts and trace, if you are:
 
 - The owner of the job.
@@ -398,7 +431,20 @@ To erase a job:
 
 ## Retrieve artifacts of private projects when using GitLab CI
 
-In order to retrieve a job artifact of a different project, you might need to use a private token in order to [authenticate and download](../../api/jobs.md#get-job-artifacts) the artifacts.
+To retrieve a job artifact from a different project, you might need to use a
+private token to [authenticate and download](../../api/job_artifacts.md#get-job-artifacts)
+the artifact.
+
+## Troubleshooting
+
+### Error message `No files to upload`
+
+This is often preceded by other errors or warnings that specify the filename and why it wasn't
+generated in the first place. Please check the entire job log for such messages.
+
+If you find no helpful messages, please retry the failed job after activating
+[CI debug logging](../variables/README.md#debug-logging).
+This provides useful information to investigate further.
 
 <!-- ## Troubleshooting
 

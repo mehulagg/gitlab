@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Security::ReportFetchService do
+RSpec.describe Security::ReportFetchService do
   let_it_be(:project) { create(:project) }
 
   let(:service) { described_class.new(project, artifact) }

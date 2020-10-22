@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::Processable do
+RSpec.describe Ci::Processable do
   describe 'delegations' do
     subject { Ci::Processable.new }
 

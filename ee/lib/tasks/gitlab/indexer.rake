@@ -13,7 +13,7 @@ Usage: rake "gitlab:indexer:install[/installation/dir,repo]")
 
       abort "Couldn't find a 'make' binary" unless make
 
-      checkout_or_clone_version(version: version, repo: args.repo, target_dir: args.dir)
+      checkout_or_clone_version(version: version, repo: args.repo, target_dir: args.dir, clone_opts: %w[--depth 1])
 
       Dir.chdir(args.dir) { run_command!([make, 'build']) }
     end

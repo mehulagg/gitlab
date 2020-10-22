@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User searches for code' do
+RSpec.describe 'User searches for code' do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, namespace: user.namespace) }
 
@@ -21,6 +21,7 @@ describe 'User searches for code' do
       expect(page).to have_selector('.results', text: 'application.js')
       expect(page).to have_selector('.file-content .code')
       expect(page).to have_selector("span.line[lang='javascript']")
+      expect(page).to have_link('application.js', href: /master\/files\/js\/application.js/)
     end
 
     context 'when on a project page', :js do
@@ -40,6 +41,9 @@ describe 'User searches for code' do
         find('.btn-search').click
 
         expect(page).to have_selector('.results', text: 'Update capybara, rspec-rails, poltergeist to recent versions')
+
+        find("#L3").click
+        expect(current_url).to match(/master\/.gitignore#L3/)
       end
 
       it 'search mutiple words with refs switching' do
@@ -57,6 +61,7 @@ describe 'User searches for code' do
         expect(page).to have_selector('.results', text: expected_result)
 
         expect(find_field('dashboard_search').value).to eq(search)
+        expect(find("#L1502")[:href]).to match(/v1.0.0\/files\/markdown\/ruby-style-guide.md#L1502/)
       end
     end
 

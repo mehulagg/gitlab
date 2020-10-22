@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SubscriptionsController do
+RSpec.describe SubscriptionsController do
   let_it_be(:user) { create(:user) }
 
   describe 'GET #new' do
@@ -15,7 +15,7 @@ describe SubscriptionsController do
       it 'stores subscription URL for later' do
         subject
 
-        expected_subscription_path = new_subscriptions_path(experiment_started: true, plan_id: 'bronze_id')
+        expected_subscription_path = new_subscriptions_path(plan_id: 'bronze_id')
 
         expect(controller.stored_location_for(:user)).to eq(expected_subscription_path)
       end
@@ -114,6 +114,13 @@ describe SubscriptionsController do
         it 'updates the setup_for_company attribute of the current user' do
           expect { subject }.to change { user.reload.setup_for_company }.from(nil).to(true)
         end
+
+        it 'creates a group based on the company' do
+          expect(Namespace).to receive(:clean_name).with(params.dig(:customer, :company)).and_call_original
+          expect_any_instance_of(EE::Groups::CreateService).to receive(:execute)
+
+          subject
+        end
       end
 
       context 'when not setting up for a company' do
@@ -130,12 +137,13 @@ describe SubscriptionsController do
         it 'does not update the setup_for_company attribute of the current user' do
           expect { subject }.not_to change { user.reload.setup_for_company }
         end
-      end
 
-      it 'creates a group' do
-        expect_any_instance_of(EE::Groups::CreateService).to receive(:execute)
+        it 'creates a group based on the user' do
+          expect(Namespace).to receive(:clean_name).with(user.name).and_call_original
+          expect_any_instance_of(EE::Groups::CreateService).to receive(:execute)
 
-        subject
+          subject
+        end
       end
 
       context 'when an error occurs creating a group' do
@@ -155,7 +163,7 @@ describe SubscriptionsController do
             group.save
             subject
 
-            expect(response.body).to include({ name: [Gitlab::Regex.group_name_regex_message] }.to_json)
+            expect(Gitlab::Json.parse(response.body)['name']).to match_array([Gitlab::Regex.group_name_regex_message, HtmlSafetyValidator.error_message])
           end
         end
       end
@@ -204,6 +212,12 @@ describe SubscriptionsController do
           subject
 
           expect(response.body).to eq({ location: "/#{selected_group.path}" }.to_json)
+        end
+
+        context 'when selected group is a sub group' do
+          let(:selected_group) { create(:group, parent: create(:group))}
+
+          it { is_expected.to have_gitlab_http_status(:not_found) }
         end
       end
 

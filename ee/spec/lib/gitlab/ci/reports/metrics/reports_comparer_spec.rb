@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Reports::Metrics::ReportsComparer do
+RSpec.describe Gitlab::Ci::Reports::Metrics::ReportsComparer do
   let(:first_report) { build :ci_reports_metrics_report, :base_metrics }
   let(:second_report) { build :ci_reports_metrics_report, :head_metrics }
   let(:report_comparer) { described_class.new(first_report, second_report) }

@@ -25,7 +25,7 @@ module Geo
     # @return [Boolean] true if synced, false if not
     def execute
       try_obtain_lease do
-        start_time = Time.now
+        start_time = Time.current
 
         registry.start!
 
@@ -60,7 +60,7 @@ module Geo
         download_success: download_result.success,
         bytes_downloaded: download_result.bytes_downloaded,
         primary_missing_file: download_result.primary_missing_file,
-        download_time_s: (Time.now - start_time).to_f.round(3),
+        download_time_s: (Time.current - start_time).to_f.round(3),
         reason: download_result.reason
       }
       metadata.merge(download_result.extra_details) if download_result.extra_details

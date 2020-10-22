@@ -30,7 +30,6 @@ describe('Productivity analytics filter getters', () => {
       };
     });
 
-    /*
     describe('when chart is not scatterplot', () => {
       it('returns an object with common filter params', () => {
         const expected = {
@@ -48,7 +47,6 @@ describe('Productivity analytics filter getters', () => {
         expect(result).toEqual(expected);
       });
     });
-    */
 
     describe('when chart is scatterplot', () => {
       it('returns an object with common filter params and subtracts 30 days from the merged_after date', () => {

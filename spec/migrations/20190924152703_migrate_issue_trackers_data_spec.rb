@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20190924152703_migrate_issue_trackers_data.rb')
 
-describe MigrateIssueTrackersData do
+RSpec.describe MigrateIssueTrackersData do
   let(:services) { table(:services) }
   let(:migration_class) { Gitlab::BackgroundMigration::MigrateIssueTrackersSensitiveData }
   let(:migration_name)  { migration_class.to_s.demodulize }
@@ -13,27 +13,35 @@ describe MigrateIssueTrackersData do
       'url' => 'http://example.com'
     }
   end
+
   let!(:jira_service) do
     services.create(type: 'JiraService', properties: properties, category: 'issue_tracker')
   end
+
   let!(:jira_service_nil) do
     services.create(type: 'JiraService', properties: nil, category: 'issue_tracker')
   end
+
   let!(:bugzilla_service) do
     services.create(type: 'BugzillaService', properties: properties, category: 'issue_tracker')
   end
+
   let!(:youtrack_service) do
     services.create(type: 'YoutrackService', properties: properties, category: 'issue_tracker')
   end
+
   let!(:youtrack_service_empty) do
     services.create(type: 'YoutrackService', properties: '', category: 'issue_tracker')
   end
+
   let!(:gitlab_service) do
     services.create(type: 'GitlabIssueTrackerService', properties: properties, category: 'issue_tracker')
   end
+
   let!(:gitlab_service_empty) do
     services.create(type: 'GitlabIssueTrackerService', properties: {}, category: 'issue_tracker')
   end
+
   let!(:other_service) do
     services.create(type: 'OtherService', properties: properties, category: 'other_category')
   end
@@ -44,7 +52,7 @@ describe MigrateIssueTrackersData do
 
   it 'schedules background migrations at correct time' do
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         expect(migration_name).to be_scheduled_delayed_migration(3.minutes, jira_service.id, bugzilla_service.id)

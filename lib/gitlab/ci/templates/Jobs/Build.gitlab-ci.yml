@@ -1,10 +1,10 @@
 build:
   stage: build
-  image: "registry.gitlab.com/gitlab-org/cluster-integration/auto-build-image:v0.2.2"
+  image: "registry.gitlab.com/gitlab-org/cluster-integration/auto-build-image:v0.4.0"
   variables:
     DOCKER_TLS_CERTDIR: ""
   services:
-    - docker:19.03.8-dind
+    - docker:19.03.12-dind
   script:
     - |
       if [[ -z "$CI_COMMIT_TAG" ]]; then
@@ -15,6 +15,5 @@ build:
         export CI_APPLICATION_TAG=${CI_APPLICATION_TAG:-$CI_COMMIT_TAG}
       fi
     - /build/build.sh
-  only:
-    - branches
-    - tags
+  rules:
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'

@@ -1,7 +1,7 @@
 <script>
-import { GlSkeletonLoading, GlTable, GlAvatar } from '@gitlab/ui';
-import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlTable, GlAvatar } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
+import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
 import { __, s__ } from '~/locale';
 
 export default {
@@ -36,7 +36,7 @@ export default {
 };
 </script>
 <template>
-  <div class="prepend-top-default">
+  <div class="gl-mt-3">
     <gl-skeleton-loading v-if="isInitialLoadInProgress" />
     <gl-table v-else :items="members" :fields="$options.fields">
       <template #cell(name)="{ item }">

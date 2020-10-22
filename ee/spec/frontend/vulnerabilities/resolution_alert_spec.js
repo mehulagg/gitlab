@@ -1,10 +1,12 @@
+import Cookies from 'js-cookie';
 import { shallowMount } from '@vue/test-utils';
 import { GlAlert } from '@gitlab/ui';
-import ResolutionAlert from 'ee/vulnerabilities/components/resolution_alert.vue';
+import ResolutionAlert, { COOKIE_NAME } from 'ee/vulnerabilities/components/resolution_alert.vue';
 
 describe('Vulnerability list component', () => {
   let wrapper;
-  const DEFAULT_BRANCH_NAME = 'not-always-master';
+  const defaultBranchName = 'not-always-master';
+  const vulnerabilityId = 61;
 
   const createWrapper = (options = {}) => {
     wrapper = shallowMount(ResolutionAlert, options);
@@ -12,19 +14,21 @@ describe('Vulnerability list component', () => {
 
   const findAlert = () => wrapper.find(GlAlert);
 
-  afterEach(() => wrapper.destroy());
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+    Cookies.remove(COOKIE_NAME);
+  });
 
   describe('with a default branch name passed to it', () => {
     beforeEach(() => {
       createWrapper({
-        propsData: { defaultBranchName: DEFAULT_BRANCH_NAME },
+        propsData: { defaultBranchName, vulnerabilityId },
       });
     });
 
     it('should render the default branch name in the alert title', () => {
-      const alert = findAlert();
-
-      expect(alert.attributes().title).toMatch(DEFAULT_BRANCH_NAME);
+      expect(findAlert().attributes().title).toMatch(defaultBranchName);
     });
 
     it('should call the dismiss method when dismissed', () => {
@@ -34,15 +38,26 @@ describe('Vulnerability list component', () => {
     });
   });
 
+  describe('when already dismissed', () => {
+    beforeEach(() => {
+      Cookies.set(COOKIE_NAME, JSON.stringify([vulnerabilityId]));
+      createWrapper({
+        propsData: { defaultBranchName, vulnerabilityId },
+      });
+    });
+
+    it('should not display the alert', () => {
+      expect(findAlert().exists()).toBe(false);
+    });
+  });
+
   describe('with no default branch name', () => {
     beforeEach(() => {
-      createWrapper();
+      createWrapper({ propsData: { vulnerabilityId } });
     });
 
     it('should render the fallback in the alert title', () => {
-      const alert = findAlert();
-
-      expect(alert.attributes().title).toMatch('in the default branch');
+      expect(findAlert().attributes('title')).toMatch('in the default branch');
     });
   });
 });

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Epic shortcuts', :js do
+RSpec.describe 'Epic shortcuts', :js do
   let(:user) { create(:user) }
   let(:group) { create(:group, :public) }
   let(:label) { create(:group_label, group: group, title: 'bug') }
@@ -41,7 +41,7 @@ describe 'Epic shortcuts', :js do
       wait_for_requests
     end
 
-    it "quotes the selected text", :quarantine do
+    it "quotes the selected text", quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/11057' do
       select_element('.note-text')
       find('body').native.send_key('r')
 

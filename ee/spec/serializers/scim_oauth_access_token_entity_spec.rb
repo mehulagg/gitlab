@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ScimOauthAccessTokenEntity do
+RSpec.describe ScimOauthAccessTokenEntity do
   let(:entity) do
     described_class.new(create(:scim_oauth_access_token))
   end

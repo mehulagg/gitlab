@@ -1,20 +1,15 @@
 <script>
-import {
-  GlDeprecatedButton,
-  GlFormGroup,
-  GlFormInput,
-  GlModal,
-  GlModalDirective,
-} from '@gitlab/ui';
+/* eslint-disable vue/no-v-html */
+import { GlButton, GlFormGroup, GlFormInput, GlModal, GlModalDirective } from '@gitlab/ui';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import axios from '~/lib/utils/axios_utils';
 import { __, sprintf } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 export default {
   copyToClipboard: __('Copy'),
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlFormGroup,
     GlFormInput,
     GlModal,
@@ -40,6 +35,11 @@ export default {
     learnMoreUrl: {
       type: String,
       required: true,
+    },
+    disabled: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -88,7 +88,11 @@ export default {
         <div class="input-group">
           <gl-form-input id="notify-url" :readonly="true" :value="notifyUrl" />
           <span class="input-group-append">
-            <clipboard-button :text="notifyUrl" :title="$options.copyToClipboard" />
+            <clipboard-button
+              :text="notifyUrl"
+              :title="$options.copyToClipboard"
+              :disabled="disabled"
+            />
           </span>
         </div>
       </gl-form-group>
@@ -100,7 +104,11 @@ export default {
         <div class="input-group">
           <gl-form-input id="authorization-key" :readonly="true" :value="authorizationKey" />
           <span class="input-group-append">
-            <clipboard-button :text="authorizationKey" :title="$options.copyToClipboard" />
+            <clipboard-button
+              :text="authorizationKey"
+              :title="$options.copyToClipboard"
+              :disabled="disabled"
+            />
           </span>
         </div>
       </gl-form-group>
@@ -118,13 +126,13 @@ export default {
             )
           }}
         </gl-modal>
-        <gl-deprecated-button v-gl-modal.authKeyModal class="js-reset-auth-key">{{
+        <gl-button v-gl-modal.authKeyModal class="js-reset-auth-key" :disabled="disabled">{{
           __('Reset key')
-        }}</gl-deprecated-button>
+        }}</gl-button>
       </template>
-      <gl-deprecated-button v-else class="js-reset-auth-key" @click="resetKey">{{
+      <gl-button v-else :disabled="disabled" class="js-reset-auth-key" @click="resetKey">{{
         __('Generate key')
-      }}</gl-deprecated-button>
+      }}</gl-button>
     </div>
   </div>
 </template>

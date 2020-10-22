@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Status::WaitingForResource do
+RSpec.describe Gitlab::Ci::Status::WaitingForResource do
   subject do
     described_class.new(double('subject'), double('user'))
   end
@@ -25,5 +25,9 @@ describe Gitlab::Ci::Status::WaitingForResource do
 
   describe '#group' do
     it { expect(subject.group).to eq 'waiting-for-resource' }
+  end
+
+  describe '#details_path' do
+    it { expect(subject.details_path).to be_nil }
   end
 end

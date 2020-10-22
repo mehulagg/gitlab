@@ -1,10 +1,10 @@
 import $ from 'jquery';
 import _ from 'lodash';
-import downloadPatchHelper from 'ee/vue_shared/security_reports/store/utils/download_patch_helper';
+import download from '~/lib/utils/downloader';
 import axios from '~/lib/utils/axios_utils';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 import { s__, n__, sprintf } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import toast from '~/vue_shared/plugins/global_toast';
 import * as types from './mutation_types';
 
@@ -149,7 +149,7 @@ export const receiveCreateIssueError = ({ commit }, { flashError }) => {
 
   if (flashError) {
     createFlash(
-      s__('Security Reports|There was an error creating the issue.'),
+      s__('SecurityReports|There was an error creating the issue.'),
       'alert',
       document.querySelector('.ci-table'),
     );
@@ -220,7 +220,7 @@ export const receiveDismissSelectedVulnerabilitiesError = ({ commit }, { flashEr
   commit(types.RECEIVE_DISMISS_SELECTED_VULNERABILITIES_ERROR);
   if (flashError) {
     createFlash(
-      s__('Security Reports|There was an error dismissing the vulnerabilities.'),
+      s__('SecurityReports|There was an error dismissing the vulnerabilities.'),
       'alert',
       document.querySelector('.ci-table'),
     );
@@ -240,9 +240,9 @@ export const dismissVulnerability = (
   const toastMsg = sprintf(
     dismissedVulnerabilitiesHidden
       ? s__(
-          "Security Reports|Dismissed '%{vulnerabilityName}'. Turn off the hide dismissed toggle to view.",
+          "SecurityReports|Dismissed '%{vulnerabilityName}'. Turn off the hide dismissed toggle to view.",
         )
-      : s__("Security Reports|Dismissed '%{vulnerabilityName}'"),
+      : s__("SecurityReports|Dismissed '%{vulnerabilityName}'"),
     {
       vulnerabilityName: vulnerability.name,
     },
@@ -250,7 +250,7 @@ export const dismissVulnerability = (
   const toastOptions = dismissedVulnerabilitiesHidden
     ? {
         action: {
-          text: s__('Security Reports|Undo dismiss'),
+          text: s__('SecurityReports|Undo dismiss'),
           onClick: (e, toastObject) => {
             if (vulnerability.dismissal_feedback) {
               dispatch('undoDismiss', { vulnerability })
@@ -307,7 +307,7 @@ export const receiveDismissVulnerabilityError = ({ commit }, { flashError }) => 
   commit(types.RECEIVE_DISMISS_VULNERABILITY_ERROR);
   if (flashError) {
     createFlash(
-      s__('Security Reports|There was an error dismissing the vulnerability.'),
+      s__('SecurityReports|There was an error dismissing the vulnerability.'),
       'alert',
       document.querySelector('.ci-table'),
     );
@@ -323,10 +323,10 @@ export const addDismissalComment = ({ dispatch }, { vulnerability, comment }) =>
     dismissal_feedback.comment_details && dismissal_feedback.comment_details.comment;
 
   const toastMsg = editingDismissalContent
-    ? sprintf(s__("Security Reports|Comment edited on '%{vulnerabilityName}'"), {
+    ? sprintf(s__("SecurityReports|Comment edited on '%{vulnerabilityName}'"), {
         vulnerabilityName: vulnerability.name,
       })
-    : sprintf(s__("Security Reports|Comment added to '%{vulnerabilityName}'"), {
+    : sprintf(s__("SecurityReports|Comment added to '%{vulnerabilityName}'"), {
         vulnerabilityName: vulnerability.name,
       });
 
@@ -351,7 +351,7 @@ export const deleteDismissalComment = ({ dispatch }, { vulnerability }) => {
 
   const { dismissal_feedback } = vulnerability;
   const url = `${vulnerability.create_vulnerability_feedback_dismissal_path}/${dismissal_feedback.id}`;
-  const toastMsg = sprintf(s__("Security Reports|Comment deleted on '%{vulnerabilityName}'"), {
+  const toastMsg = sprintf(s__("SecurityReports|Comment deleted on '%{vulnerabilityName}'"), {
     vulnerabilityName: vulnerability.name,
   });
 
@@ -433,7 +433,7 @@ export const receiveUndoDismissError = ({ commit }, { flashError }) => {
   commit(types.RECEIVE_REVERT_DISMISSAL_ERROR);
   if (flashError) {
     createFlash(
-      s__('Security Reports|There was an error reverting this dismissal.'),
+      s__('SecurityReports|There was an error reverting this dismissal.'),
       'alert',
       document.querySelector('.ci-table'),
     );
@@ -450,7 +450,7 @@ export const downloadPatch = ({ state }) => {
     https://gitlab.com/gitlab-org/gitlab-ui/issues/188#note_165808493
   */
   const { vulnerability } = state.modal;
-  downloadPatchHelper(vulnerability.remediations[0].diff);
+  download({ fileData: vulnerability.remediations[0].diff, fileName: `remediation.patch` });
   $('#modal-mrwidget-security-issue').modal('hide');
 };
 
@@ -501,7 +501,7 @@ export const receiveCreateMergeRequestError = ({ commit }, { flashError }) => {
 
   if (flashError) {
     createFlash(
-      s__('Security Reports|There was an error creating the merge request.'),
+      s__('SecurityReports|There was an error creating the merge request.'),
       'alert',
       document.querySelector('.ci-table'),
     );
@@ -555,6 +555,3 @@ export const openDismissalCommentBox = ({ commit }) => {
 export const closeDismissalCommentBox = ({ commit }) => {
   commit(types.CLOSE_DISMISSAL_COMMENT_BOX);
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

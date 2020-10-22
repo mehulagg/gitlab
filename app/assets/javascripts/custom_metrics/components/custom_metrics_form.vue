@@ -1,5 +1,5 @@
 <script>
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import csrf from '~/lib/utils/csrf';
 import CustomMetricsFormFields from './custom_metrics_form_fields.vue';
@@ -10,7 +10,7 @@ export default {
   components: {
     CustomMetricsFormFields,
     DeleteCustomMetricModal,
-    GlDeprecatedButton,
+    GlButton,
   },
   props: {
     customMetricsPath: {
@@ -66,7 +66,7 @@ export default {
 </script>
 <template>
   <div class="row my-3">
-    <h4 class="prepend-top-0 col-lg-8 offset-lg-2">{{ titleText }}</h4>
+    <h4 class="gl-mt-0 col-lg-8 offset-lg-2">{{ titleText }}</h4>
     <form ref="form" class="col-lg-8 offset-lg-2" :action="customMetricsPath" method="post">
       <custom-metrics-form-fields
         :form-operation="formOperation"
@@ -76,15 +76,10 @@ export default {
         @formValidation="formValidation"
       />
       <div class="form-actions">
-        <gl-deprecated-button variant="success" :disabled="!formIsValid" @click="submit">
+        <gl-button variant="success" category="primary" :disabled="!formIsValid" @click="submit">
           {{ saveButtonText }}
-        </gl-deprecated-button>
-        <gl-deprecated-button
-          variant="secondary"
-          class="float-right"
-          :href="editProjectServicePath"
-          >{{ __('Cancel') }}</gl-deprecated-button
-        >
+        </gl-button>
+        <gl-button class="float-right" :href="editProjectServicePath">{{ __('Cancel') }}</gl-button>
         <delete-custom-metric-modal
           v-if="metricPersisted"
           :delete-metric-url="customMetricsPath"

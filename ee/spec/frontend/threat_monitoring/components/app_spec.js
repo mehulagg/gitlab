@@ -1,14 +1,15 @@
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
 import { GlAlert } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
 import createStore from 'ee/threat_monitoring/store';
 import ThreatMonitoringApp from 'ee/threat_monitoring/components/app.vue';
 import ThreatMonitoringFilters from 'ee/threat_monitoring/components/threat_monitoring_filters.vue';
+import axios from '~/lib/utils/axios_utils';
 
 const defaultEnvironmentId = 3;
 const documentationPath = '/docs';
+const newPolicyPath = '/policy/new';
 const chartEmptyStateSvgPath = '/chart-svgs';
 const emptyStateSvgPath = '/svgs';
 const wafNoDataSvgPath = '/waf-no-data-svg';
@@ -42,6 +43,7 @@ describe('ThreatMonitoringApp component', () => {
         wafNoDataSvgPath,
         networkPolicyNoDataSvgPath,
         documentationPath,
+        newPolicyPath,
         showUserCallout: true,
         userCalloutId,
         userCalloutsPath,
@@ -57,9 +59,11 @@ describe('ThreatMonitoringApp component', () => {
   const findWafSection = () => wrapper.find({ ref: 'wafSection' });
   const findNetworkPolicySection = () => wrapper.find({ ref: 'networkPolicySection' });
   const findEmptyState = () => wrapper.find({ ref: 'emptyState' });
+  const findNetworkPolicyTab = () => wrapper.find({ ref: 'networkPolicyTab' });
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   describe.each([-1, NaN, Math.PI])(
@@ -114,6 +118,10 @@ describe('ThreatMonitoringApp component', () => {
 
     it('renders the network policy section', () => {
       expect(findNetworkPolicySection().element).toMatchSnapshot();
+    });
+
+    it('renders the network policy tab', () => {
+      expect(findNetworkPolicyTab().element).toMatchSnapshot();
     });
 
     describe('dismissing the alert', () => {

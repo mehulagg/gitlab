@@ -1,13 +1,25 @@
 <script>
-import { GlLink } from '@gitlab/ui';
-import { s__, __, sprintf } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlAlert, GlLink, GlSprintf, GlTable } from '@gitlab/ui';
+import { parseBoolean } from '~/lib/utils/common_utils';
+import { sprintf, s__, __ } from '~/locale';
+import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import AutoFixSettings from './auto_fix_settings.vue';
+import FeatureStatus from './feature_status.vue';
+import ManageFeature from './manage_feature.vue';
 
 export default {
   components: {
+    GlAlert,
     GlLink,
-    Icon,
+    GlSprintf,
+    GlTable,
+    AutoFixSettings,
+    LocalStorageSync,
+    FeatureStatus,
+    ManageFeature,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     autoDevopsEnabled: {
       type: Boolean,
@@ -31,115 +43,166 @@ export default {
       type: Array,
       required: true,
     },
-  },
-  computed: {
-    headerContent() {
-      const body = __('Configure Security %{wordBreakOpportunity}and Compliance');
-      const wordBreakOpportunity = '<wbr />';
-
-      return sprintf(body, { wordBreakOpportunity }, false);
+    autoFixSettingsProps: {
+      type: Object,
+      required: true,
     },
-    callOutLink() {
+    gitlabCiPresent: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    gitlabCiHistoryPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    autoDevopsPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    canEnableAutoDevops: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    // TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/241377
+    createSastMergeRequestPath: {
+      type: String,
+      required: true,
+    },
+  },
+  data: () => ({
+    autoDevopsAlertDismissed: 'false',
+  }),
+  computed: {
+    devopsMessage() {
+      return this.autoDevopsEnabled
+        ? __(
+            'All security scans are enabled because %{linkStart}Auto DevOps%{linkEnd} is enabled on this project',
+          )
+        : __(
+            `The status of the table below only applies to the default branch and is based on the %{linkStart}latest pipeline%{linkEnd}. Once you've enabled a scan for the default branch, any subsequent feature branch you create will include the scan.`,
+          );
+    },
+    devopsUrl() {
       return this.autoDevopsEnabled ? this.autoDevopsHelpPagePath : this.latestPipelinePath;
     },
-    calloutContent() {
-      const bodyDefault = __(`The configuration status of the table below only applies to the default branch and
-          is based on the %{linkStart}latest pipeline%{linkEnd}.
-          Once you've configured a scan for the default branch, any subsequent feature branch you create will include the scan.`);
+    fields() {
+      const borderClasses = 'gl-border-b-1! gl-border-b-solid! gl-border-gray-100!';
+      const thClass = `gl-text-gray-900 gl-bg-transparent! ${borderClasses}`;
 
-      const bodyAutoDevopsEnabled = __(
-        'All security scans are enabled because %{linkStart}Auto DevOps%{linkEnd} is enabled on this project',
+      return [
+        {
+          key: 'feature',
+          label: s__('SecurityConfiguration|Security Control'),
+          thClass,
+        },
+        {
+          key: 'status',
+          label: s__('SecurityConfiguration|Status'),
+          thClass,
+        },
+        {
+          key: 'manage',
+          label: s__('SecurityConfiguration|Manage'),
+          thClass,
+        },
+      ];
+    },
+    shouldShowAutoDevopsAlert() {
+      return Boolean(
+        !parseBoolean(this.autoDevopsAlertDismissed) &&
+          !this.autoDevopsEnabled &&
+          !this.gitlabCiPresent &&
+          this.canEnableAutoDevops,
       );
-
-      const body = this.autoDevopsEnabled ? bodyAutoDevopsEnabled : bodyDefault;
-
-      const linkStart = `<a href="${this.callOutLink}" target="_blank" rel="noopener">`;
-      const linkEnd = '</a>';
-
-      return sprintf(body, { linkStart, linkEnd }, false);
     },
   },
   methods: {
-    getFeatureDocumentationLinkLabel(featureName) {
+    dismissAutoDevopsAlert() {
+      this.autoDevopsAlertDismissed = 'true';
+    },
+    getFeatureDocumentationLinkLabel(item) {
       return sprintf(s__('SecurityConfiguration|Feature documentation for %{featureName}'), {
-        featureName,
+        featureName: item.name,
       });
     },
   },
+  autoDevopsAlertMessage: s__(`
+    SecurityConfiguration|You can quickly enable all security scanning tools by
+    enabling %{linkStart}Auto DevOps%{linkEnd}.`),
+  autoDevopsAlertStorageKey: 'security_configuration_auto_devops_dismissed',
 };
 </script>
 
 <template>
   <article>
     <header>
-      <h2 class="h4 my-3">
-        <span v-html="headerContent"></span>
-        <gl-link
-          target="_blank"
-          :href="helpPagePath"
-          :aria-label="__('Security configuration help link')"
-        >
-          <icon name="question" />
-        </gl-link>
-      </h2>
+      <h4 class="my-3">{{ __('Security Configuration') }}</h4>
+      <h5 class="gl-font-lg mt-5">{{ s__('SecurityConfiguration|Testing & Compliance') }}</h5>
+      <p>
+        <gl-sprintf :message="devopsMessage">
+          <template #link="{ content }">
+            <gl-link ref="pipelinesLink" :href="devopsUrl" target="_blank">{{ content }}</gl-link>
+          </template>
+        </gl-sprintf>
+      </p>
     </header>
-    <section
-      ref="callout"
-      class="bs-callout bs-callout-info mb-3 m-md-1 text-secondary"
-      v-html="calloutContent"
-    ></section>
-    <section ref="featuresTable" class="mt-0">
-      <div
-        class="gl-responsive-table-row table-row-header text-2 font-weight-bold px-2 gl-text-gray-900"
-        role="row"
-      >
-        <div class="table-section section-80">
-          {{ s__('SecurityConfiguration|Secure features') }}
+
+    <local-storage-sync
+      v-model="autoDevopsAlertDismissed"
+      :storage-key="$options.autoDevopsAlertStorageKey"
+    />
+
+    <gl-alert
+      v-if="shouldShowAutoDevopsAlert"
+      :title="__('Auto DevOps')"
+      :primary-button-text="__('Enable Auto DevOps')"
+      :primary-button-link="autoDevopsPath"
+      class="gl-mb-5"
+      @dismiss="dismissAutoDevopsAlert"
+    >
+      <gl-sprintf :message="$options.autoDevopsAlertMessage">
+        <template #link="{ content }">
+          <gl-link :href="autoDevopsHelpPagePath" v-text="content" />
+        </template>
+      </gl-sprintf>
+    </gl-alert>
+
+    <gl-table ref="securityControlTable" :items="features" :fields="fields" stacked="md">
+      <template #cell(feature)="{ item }">
+        <div class="gl-text-gray-900">{{ item.name }}</div>
+        <div>
+          {{ item.description }}
+          <gl-link
+            target="_blank"
+            :href="item.link"
+            :aria-label="getFeatureDocumentationLinkLabel(item)"
+            data-testid="docsLink"
+          >
+            {{ s__('SecurityConfiguration|More information') }}
+          </gl-link>
         </div>
-        <div class="table-section section-20">{{ s__('SecurityConfiguration|Status') }}</div>
-      </div>
-      <div
-        v-for="feature in features"
-        ref="featureRow"
-        :key="feature.name"
-        class="gl-responsive-table-row flex-md-column align-items-md-stretch px-2"
-      >
-        <div class="d-md-flex align-items-center">
-          <div class="table-section section-80 section-wrap pr-md-3">
-            <div role="rowheader" class="table-mobile-header">
-              {{ s__('SecurityConfiguration|Feature') }}
-            </div>
-            <div class="table-mobile-content">
-              <div class="d-flex align-items-center justify-content-end justify-content-md-start">
-                <div class="text-2 gl-text-gray-900">
-                  {{ feature.name }}
-                </div>
-              </div>
-              <div class="text-secondary">
-                {{ feature.description }}
-                <gl-link
-                  target="_blank"
-                  :href="feature.link"
-                  :aria-label="getFeatureDocumentationLinkLabel(feature.name)"
-                  >{{ __('More information') }}</gl-link
-                >
-              </div>
-            </div>
-          </div>
-          <div class="table-section section-20 section-wrap pr-md-3">
-            <div role="rowheader" class="table-mobile-header">
-              {{ s__('SecurityConfiguration|Status') }}
-            </div>
-            <div ref="featureConfigStatus" class="table-mobile-content">
-              {{
-                feature.configured
-                  ? s__('SecurityConfiguration|Configured')
-                  : s__('SecurityConfiguration|Not yet configured')
-              }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+      </template>
+
+      <template #cell(status)="{ item }">
+        <feature-status
+          :feature="item"
+          :gitlab-ci-present="gitlabCiPresent"
+          :gitlab-ci-history-path="gitlabCiHistoryPath"
+        />
+      </template>
+
+      <template #cell(manage)="{ item }">
+        <manage-feature
+          :feature="item"
+          :auto-devops-enabled="autoDevopsEnabled"
+          :create-sast-merge-request-path="createSastMergeRequestPath"
+        />
+      </template>
+    </gl-table>
+    <auto-fix-settings v-if="glFeatures.securityAutoFix" v-bind="autoFixSettingsProps" />
   </article>
 </template>

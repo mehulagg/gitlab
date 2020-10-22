@@ -10,10 +10,12 @@ class Projects::ArtifactsController < Projects::ApplicationController
   before_action :authorize_update_build!, only: [:keep]
   before_action :authorize_destroy_artifacts!, only: [:destroy]
   before_action :extract_ref_name_and_path
-  before_action :validate_artifacts!, except: [:index, :download, :destroy]
+  before_action :validate_artifacts!, except: [:index, :download, :raw, :destroy]
   before_action :entry, only: [:file]
 
   MAX_PER_PAGE = 20
+
+  feature_category :continuous_integration
 
   def index
     # Loading artifacts is very expensive in projects with a lot of artifacts.
@@ -22,7 +24,7 @@ class Projects::ArtifactsController < Projects::ApplicationController
     # issues: https://gitlab.com/gitlab-org/gitlab/issues/32281
     return head :no_content unless Feature.enabled?(:artifacts_management_page, @project)
 
-    finder = ArtifactsFinder.new(@project, artifacts_params)
+    finder = Ci::JobArtifactsFinder.new(@project, artifacts_params)
     all_artifacts = finder.execute
 
     @artifacts = all_artifacts.page(params[:page]).per(MAX_PER_PAGE)
@@ -73,9 +75,11 @@ class Projects::ArtifactsController < Projects::ApplicationController
   end
 
   def raw
+    return render_404 unless zip_artifact?
+
     path = Gitlab::Ci::Build::Artifacts::Path.new(params[:path])
 
-    send_artifacts_entry(build, path)
+    send_artifacts_entry(artifacts_file, path)
   end
 
   def keep
@@ -106,12 +110,12 @@ class Projects::ArtifactsController < Projects::ApplicationController
   end
 
   def validate_artifacts!
-    render_404 unless build&.artifacts?
+    render_404 unless build&.available_artifacts?
   end
 
   def build
     @build ||= begin
-      build = build_from_id || build_from_ref
+      build = build_from_id || build_from_sha || build_from_ref
       build&.present(current_user: current_user)
     end
   end
@@ -125,7 +129,8 @@ class Projects::ArtifactsController < Projects::ApplicationController
     project.builds.find_by_id(params[:job_id]) if params[:job_id]
   end
 
-  def build_from_ref
+  def build_from_sha
+    return if params[:job].blank?
     return unless @ref_name
 
     commit = project.commit(@ref_name)
@@ -134,8 +139,22 @@ class Projects::ArtifactsController < Projects::ApplicationController
     project.latest_successful_build_for_sha(params[:job], commit.id)
   end
 
+  def build_from_ref
+    return if params[:job].blank?
+    return unless @ref_name
+
+    project.latest_successful_build_for_ref(params[:job], @ref_name)
+  end
+
   def artifacts_file
     @artifacts_file ||= build&.artifacts_file_for_type(params[:file_type] || :archive)
+  end
+
+  def zip_artifact?
+    types = HashWithIndifferentAccess.new(Ci::JobArtifact::TYPE_AND_FORMAT_PAIRS)
+    file_type = params[:file_type] || :archive
+
+    types[file_type] == :zip
   end
 
   def entry

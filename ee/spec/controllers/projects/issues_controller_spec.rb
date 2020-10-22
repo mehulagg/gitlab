@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::IssuesController do
+RSpec.describe Projects::IssuesController do
   let(:namespace) { create(:group, :public) }
   let(:project)   { create(:project_empty_repo, :public, namespace: namespace) }
   let(:user) { create(:user) }
@@ -115,87 +115,6 @@ describe Projects::IssuesController do
     end
   end
 
-  describe 'GET service_desk' do
-    def get_service_desk(extra_params = {})
-      get :service_desk, params: extra_params.merge(namespace_id: project.namespace, project_id: project)
-    end
-
-    context 'when Service Desk is available on the project' do
-      let(:support_bot) { User.support_bot }
-      let(:other_user) { create(:user) }
-      let!(:service_desk_issue_1) { create(:issue, project: project, author: support_bot) }
-      let!(:service_desk_issue_2) { create(:issue, project: project, author: support_bot, assignees: [other_user]) }
-      let!(:other_user_issue) { create(:issue, project: project, author: other_user) }
-
-      before do
-        stub_licensed_features(service_desk: true)
-      end
-
-      it 'adds an author filter for the support bot user' do
-        get_service_desk
-
-        expect(assigns(:issues)).to contain_exactly(service_desk_issue_1, service_desk_issue_2)
-      end
-
-      it 'does not allow any other author to be set' do
-        get_service_desk(author_username: other_user.username)
-
-        expect(assigns(:issues)).to contain_exactly(service_desk_issue_1, service_desk_issue_2)
-      end
-
-      it 'supports other filters' do
-        get_service_desk(assignee_username: other_user.username)
-
-        expect(assigns(:issues)).to contain_exactly(service_desk_issue_2)
-      end
-
-      it 'allows an assignee to be specified by id' do
-        get_service_desk(assignee_id: other_user.id)
-
-        expect(assigns(:users)).to contain_exactly(other_user, support_bot)
-      end
-    end
-
-    context 'when Service Desk is not available on the project' do
-      before do
-        stub_licensed_features(service_desk: false)
-      end
-
-      it 'returns a 404' do
-        get_service_desk
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-  end
-
-  describe 'GET #designs' do
-    context 'when project has moved' do
-      let(:new_project) { create(:project) }
-      let(:issue) { create(:issue, project: new_project) }
-
-      before do
-        sign_in(user)
-
-        project.route.destroy
-        new_project.redirect_routes.create!(path: project.full_path)
-        new_project.add_developer(user)
-      end
-
-      it 'redirects from an old issue/designs correctly' do
-        get :designs,
-            params: {
-              namespace_id: project.namespace,
-              project_id: project,
-              id: issue
-            }
-
-        expect(response).to redirect_to(designs_project_issue_path(new_project, issue))
-        expect(response).to have_gitlab_http_status(:found)
-      end
-    end
-  end
-
   describe 'GET #discussions' do
     let(:issue) { create(:issue, project: project) }
     let!(:discussion) { create(:discussion_note_on_issue, noteable: issue, project: issue.project) }
@@ -263,24 +182,23 @@ describe Projects::IssuesController do
       subject { get :discussions, params: { namespace_id: project.namespace, project_id: project, id: issue.iid } }
 
       before do
+        sign_in(user)
         allow(Gitlab).to receive(:com?).and_return(true)
-        note_user = discussion.author
-        note_user.update(email: email)
-        note_user.confirm
+        discussion.update!(author: user)
       end
 
-      shared_examples 'non inclusion of gitlab employee badge' do
+      shared_context 'non inclusion of gitlab team member badge' do |result|
         it 'does not render the is_gitlab_employee attribute' do
           subject
 
           note_json = json_response.first['notes'].first
 
-          expect(note_json['author']['is_gitlab_employee']).to be nil
+          expect(note_json['author']['is_gitlab_employee']).to be result
         end
       end
 
-      context 'when user is a gitlab employee' do
-        let(:email) { 'test@gitlab.com' }
+      context 'when user is a gitlab team member' do
+        include_context 'gitlab team member'
 
         it 'renders the is_gitlab_employee attribute' do
           subject
@@ -295,21 +213,80 @@ describe Projects::IssuesController do
             stub_feature_flags(gitlab_employee_badge: false)
           end
 
-          it_behaves_like 'non inclusion of gitlab employee badge'
+          it_behaves_like 'non inclusion of gitlab team member badge', nil
         end
       end
 
-      context 'when user is not a gitlab employee' do
-        let(:email) { 'test@example.com' }
-
-        it_behaves_like 'non inclusion of gitlab employee badge'
+      context 'when user is not a gitlab team member' do
+        it_behaves_like 'non inclusion of gitlab team member badge', false
 
         context 'when feature flag is disabled' do
           before do
             stub_feature_flags(gitlab_employee_badge: false)
           end
 
-          it_behaves_like 'non inclusion of gitlab employee badge'
+          it_behaves_like 'non inclusion of gitlab team member badge', nil
+        end
+      end
+    end
+  end
+
+  describe 'PUT #update' do
+    let(:issue) { create(:issue, project: project) }
+
+    def update_issue(issue_params: {}, additional_params: {}, id: nil)
+      id ||= issue.iid
+      params = {
+        namespace_id: project.namespace.to_param,
+        project_id: project,
+        id: id,
+        issue: { title: 'New title' }.merge(issue_params),
+        format: :json
+      }.merge(additional_params)
+
+      put :update, params: params
+    end
+
+    context 'changing the assignee' do
+      let(:assignee) { create(:user) }
+
+      before do
+        project.add_developer(assignee)
+        sign_in(assignee)
+      end
+
+      context 'when the gitlab_employee_badge flag is off' do
+        it 'does not expose the is_gitlab_employee attribute on the assignee' do
+          stub_feature_flags(gitlab_employee_badge: false)
+
+          update_issue(issue_params: { assignee_ids: [assignee.id] })
+
+          expect(json_response['assignees'].first.keys)
+            .to match_array(%w(id name username avatar_url state web_url))
+        end
+      end
+
+      context 'when the gitlab_employee_badge flag is on but we are not on gitlab.com' do
+        it 'does not expose the is_gitlab_employee attribute on the assignee' do
+          stub_feature_flags(gitlab_employee_badge: true)
+          allow(Gitlab).to receive(:com?).and_return(false)
+
+          update_issue(issue_params: { assignee_ids: [assignee.id] })
+
+          expect(json_response['assignees'].first.keys)
+            .to match_array(%w(id name username avatar_url state web_url))
+        end
+      end
+
+      context 'when the gitlab_employee_badge flag is on and we are on gitlab.com' do
+        it 'exposes the is_gitlab_employee attribute on the assignee' do
+          stub_feature_flags(gitlab_employee_badge: true)
+          allow(Gitlab).to receive(:com?).and_return(true)
+
+          update_issue(issue_params: { assignee_ids: [assignee.id] })
+
+          expect(json_response['assignees'].first.keys)
+            .to match_array(%w(id name username avatar_url state web_url is_gitlab_employee))
         end
       end
     end

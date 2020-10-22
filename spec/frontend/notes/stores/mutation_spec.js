@@ -9,6 +9,7 @@ import {
   noteableDataMock,
   individualNote,
   notesWithDescriptionChanges,
+  batchSuggestionsInfoMock,
 } from '../mock_data';
 
 const RESOLVED_NOTE = { resolvable: true, resolved: true };
@@ -50,7 +51,7 @@ describe('Notes Store mutations', () => {
   });
 
   describe('ADD_NEW_REPLY_TO_DISCUSSION', () => {
-    const newReply = Object.assign({}, note, { discussion_id: discussionMock.id });
+    const newReply = { ...note, discussion_id: discussionMock.id };
 
     let state;
 
@@ -86,7 +87,7 @@ describe('Notes Store mutations', () => {
 
   describe('EXPAND_DISCUSSION', () => {
     it('should expand a collapsed discussion', () => {
-      const discussion = Object.assign({}, discussionMock, { expanded: false });
+      const discussion = { ...discussionMock, expanded: false };
 
       const state = {
         discussions: [discussion],
@@ -100,7 +101,7 @@ describe('Notes Store mutations', () => {
 
   describe('COLLAPSE_DISCUSSION', () => {
     it('should collapse an expanded discussion', () => {
-      const discussion = Object.assign({}, discussionMock, { expanded: true });
+      const discussion = { ...discussionMock, expanded: true };
 
       const state = {
         discussions: [discussion],
@@ -114,7 +115,7 @@ describe('Notes Store mutations', () => {
 
   describe('REMOVE_PLACEHOLDER_NOTES', () => {
     it('should remove all placeholder notes in indivudal notes and discussion', () => {
-      const placeholderNote = Object.assign({}, individualNote, { isPlaceholderNote: true });
+      const placeholderNote = { ...individualNote, isPlaceholderNote: true };
       const state = { discussions: [placeholderNote] };
       mutations.REMOVE_PLACEHOLDER_NOTES(state);
 
@@ -298,7 +299,7 @@ describe('Notes Store mutations', () => {
 
   describe('TOGGLE_DISCUSSION', () => {
     it('should open a closed discussion', () => {
-      const discussion = Object.assign({}, discussionMock, { expanded: false });
+      const discussion = { ...discussionMock, expanded: false };
 
       const state = {
         discussions: [discussion],
@@ -348,8 +349,8 @@ describe('Notes Store mutations', () => {
     });
 
     it('should open all closed discussions', () => {
-      const discussion1 = Object.assign({}, discussionMock, { id: 0, expanded: false });
-      const discussion2 = Object.assign({}, discussionMock, { id: 1, expanded: true });
+      const discussion1 = { ...discussionMock, id: 0, expanded: false };
+      const discussion2 = { ...discussionMock, id: 1, expanded: true };
       const discussionIds = [discussion1.id, discussion2.id];
 
       const state = { discussions: [discussion1, discussion2] };
@@ -362,8 +363,8 @@ describe('Notes Store mutations', () => {
     });
 
     it('should close all opened discussions', () => {
-      const discussion1 = Object.assign({}, discussionMock, { id: 0, expanded: false });
-      const discussion2 = Object.assign({}, discussionMock, { id: 1, expanded: true });
+      const discussion1 = { ...discussionMock, id: 0, expanded: false };
+      const discussion2 = { ...discussionMock, id: 1, expanded: true };
       const discussionIds = [discussion1.id, discussion2.id];
 
       const state = { discussions: [discussion1, discussion2] };
@@ -382,7 +383,7 @@ describe('Notes Store mutations', () => {
         discussions: [individualNote],
       };
 
-      const updated = Object.assign({}, individualNote.notes[0], { note: 'Foo' });
+      const updated = { ...individualNote.notes[0], note: 'Foo' };
 
       mutations.UPDATE_NOTE(state, updated);
 
@@ -523,6 +524,26 @@ describe('Notes Store mutations', () => {
     });
   });
 
+  describe('SET_SELECTED_COMMENT_POSITION', () => {
+    it('should set comment position state', () => {
+      const state = {};
+
+      mutations.SET_SELECTED_COMMENT_POSITION(state, {});
+
+      expect(state.selectedCommentPosition).toEqual({});
+    });
+  });
+
+  describe('SET_SELECTED_COMMENT_POSITION_HOVER', () => {
+    it('should set comment hover position state', () => {
+      const state = {};
+
+      mutations.SET_SELECTED_COMMENT_POSITION_HOVER(state, {});
+
+      expect(state.selectedCommentPositionHover).toEqual({});
+    });
+  });
+
   describe('DISABLE_COMMENTS', () => {
     it('should set comments disabled state', () => {
       const state = {};
@@ -659,9 +680,10 @@ describe('Notes Store mutations', () => {
     });
 
     it('sets sort order', () => {
-      mutations.SET_DISCUSSIONS_SORT(state, DESC);
+      mutations.SET_DISCUSSIONS_SORT(state, { direction: DESC, persist: false });
 
       expect(state.discussionSortOrder).toBe(DESC);
+      expect(state.persistSortOrder).toBe(false);
     });
   });
 
@@ -698,6 +720,166 @@ describe('Notes Store mutations', () => {
       mutations.TOGGLE_BLOCKED_ISSUE_WARNING(state, false);
 
       expect(state.isToggleBlockedIssueWarning).toEqual(false);
+    });
+  });
+
+  describe('SET_APPLYING_BATCH_STATE', () => {
+    const buildDiscussions = suggestionsInfo => {
+      const suggestions = suggestionsInfo.map(({ suggestionId }) => ({ id: suggestionId }));
+
+      const notes = suggestionsInfo.map(({ noteId }, index) => ({
+        id: noteId,
+        suggestions: [suggestions[index]],
+      }));
+
+      return suggestionsInfo.map(({ discussionId }, index) => ({
+        id: discussionId,
+        notes: [notes[index]],
+      }));
+    };
+
+    let state;
+    let batchedSuggestionInfo;
+    let discussions;
+    let suggestions;
+
+    beforeEach(() => {
+      [batchedSuggestionInfo] = batchSuggestionsInfoMock;
+      suggestions = batchSuggestionsInfoMock.map(({ suggestionId }) => ({ id: suggestionId }));
+      discussions = buildDiscussions(batchSuggestionsInfoMock);
+      state = {
+        batchSuggestionsInfo: [batchedSuggestionInfo],
+        discussions,
+      };
+    });
+
+    it('sets is_applying_batch to a boolean value for all batched suggestions', () => {
+      mutations.SET_APPLYING_BATCH_STATE(state, true);
+
+      const updatedSuggestion = {
+        ...suggestions[0],
+        is_applying_batch: true,
+      };
+
+      const expectedSuggestions = [updatedSuggestion, suggestions[1]];
+
+      const actualSuggestions = state.discussions
+        .map(discussion => discussion.notes.map(n => n.suggestions))
+        .flat(2);
+
+      expect(actualSuggestions).toEqual(expectedSuggestions);
+    });
+  });
+
+  describe('ADD_SUGGESTION_TO_BATCH', () => {
+    let state;
+
+    beforeEach(() => {
+      state = { batchSuggestionsInfo: [] };
+    });
+
+    it("adds a suggestion's info to a batch", () => {
+      const suggestionInfo = {
+        suggestionId: 'a123',
+        noteId: 'b456',
+        discussionId: 'c789',
+      };
+
+      mutations.ADD_SUGGESTION_TO_BATCH(state, suggestionInfo);
+
+      expect(state.batchSuggestionsInfo).toEqual([suggestionInfo]);
+    });
+  });
+
+  describe('REMOVE_SUGGESTION_FROM_BATCH', () => {
+    let state;
+    let suggestionInfo1;
+    let suggestionInfo2;
+
+    beforeEach(() => {
+      [suggestionInfo1, suggestionInfo2] = batchSuggestionsInfoMock;
+
+      state = {
+        batchSuggestionsInfo: [suggestionInfo1, suggestionInfo2],
+      };
+    });
+
+    it("removes a suggestion's info from a batch", () => {
+      mutations.REMOVE_SUGGESTION_FROM_BATCH(state, suggestionInfo1.suggestionId);
+
+      expect(state.batchSuggestionsInfo).toEqual([suggestionInfo2]);
+    });
+  });
+
+  describe('CLEAR_SUGGESTION_BATCH', () => {
+    let state;
+
+    beforeEach(() => {
+      state = {
+        batchSuggestionsInfo: batchSuggestionsInfoMock,
+      };
+    });
+
+    it('removes info for all suggestions from a batch', () => {
+      mutations.CLEAR_SUGGESTION_BATCH(state);
+
+      expect(state.batchSuggestionsInfo.length).toEqual(0);
+    });
+  });
+
+  describe('SET_ISSUE_CONFIDENTIAL', () => {
+    let state;
+
+    beforeEach(() => {
+      state = { noteableData: { confidential: false } };
+    });
+
+    it('should set issuable as confidential', () => {
+      mutations.SET_ISSUE_CONFIDENTIAL(state, true);
+
+      expect(state.noteableData.confidential).toBe(true);
+    });
+  });
+
+  describe('SET_ISSUABLE_LOCK', () => {
+    let state;
+
+    beforeEach(() => {
+      state = { noteableData: { discussion_locked: false } };
+    });
+
+    it('should set issuable as locked', () => {
+      mutations.SET_ISSUABLE_LOCK(state, true);
+
+      expect(state.noteableData.discussion_locked).toBe(true);
+    });
+  });
+
+  describe('UPDATE_ASSIGNEES', () => {
+    it('should update assignees', () => {
+      const state = {
+        noteableData: noteableDataMock,
+      };
+
+      mutations.UPDATE_ASSIGNEES(state, [userDataMock.id]);
+
+      expect(state.noteableData.assignees).toEqual([userDataMock.id]);
+    });
+  });
+
+  describe('UPDATE_DISCUSSION_POSITION', () => {
+    it('should upate the discusion position', () => {
+      const discussion1 = { id: 1, position: { line_code: 'abc_1_1' } };
+      const discussion2 = { id: 2, position: { line_code: 'abc_2_2' } };
+      const discussion3 = { id: 3, position: { line_code: 'abc_3_3' } };
+      const state = {
+        discussions: [discussion1, discussion2, discussion3],
+      };
+      const discussion1Position = { ...discussion1.position };
+      const position = { ...discussion1Position, test: true };
+
+      mutations.UPDATE_DISCUSSION_POSITION(state, { discussionId: discussion1.id, position });
+      expect(state.discussions[0].position).toEqual(position);
     });
   });
 });

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe DependencyProxy::DownloadBlobService do
+RSpec.describe DependencyProxy::DownloadBlobService do
   include EE::DependencyProxyHelpers
 
   let(:image) { 'alpine' }

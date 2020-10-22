@@ -2,12 +2,10 @@
 
 require 'fast_spec_helper'
 require 'rubocop'
-require_relative '../../../support/helpers/expect_offense'
 require_relative '../../../../rubocop/cop/scalability/file_uploads'
 
-describe RuboCop::Cop::Scalability::FileUploads do
+RSpec.describe RuboCop::Cop::Scalability::FileUploads, type: :rubocop do
   include CopHelper
-  include ExpectOffense
 
   subject(:cop) { described_class.new }
 
@@ -15,7 +13,7 @@ describe RuboCop::Cop::Scalability::FileUploads do
 
   context 'with required params' do
     it 'detects File in types array' do
-      expect_offense(<<~PATTERN.strip_indent)
+      expect_offense(<<~PATTERN)
       params do
         requires :certificate, allow_blank: false, types: [String, File]
                                                                    ^^^^ #{message}
@@ -24,7 +22,7 @@ describe RuboCop::Cop::Scalability::FileUploads do
     end
 
     it 'detects File as type argument' do
-      expect_offense(<<~PATTERN.strip_indent)
+      expect_offense(<<~PATTERN)
       params do
         requires :attachment, type: File
                                     ^^^^ #{message}
@@ -35,7 +33,7 @@ describe RuboCop::Cop::Scalability::FileUploads do
 
   context 'with optional params' do
     it 'detects File in types array' do
-      expect_offense(<<~PATTERN.strip_indent)
+      expect_offense(<<~PATTERN)
       params do
         optional :certificate, allow_blank: false, types: [String, File]
                                                                    ^^^^ #{message}
@@ -44,7 +42,7 @@ describe RuboCop::Cop::Scalability::FileUploads do
     end
 
     it 'detects File as type argument' do
-      expect_offense(<<~PATTERN.strip_indent)
+      expect_offense(<<~PATTERN)
       params do
         optional :attachment, type: File
                                     ^^^^ #{message}

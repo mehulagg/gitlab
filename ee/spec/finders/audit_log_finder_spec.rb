@@ -2,16 +2,17 @@
 
 require 'spec_helper'
 
-describe AuditLogFinder do
+RSpec.describe AuditLogFinder do
+  let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:subgroup) { create(:group, parent: group) }
   let_it_be(:project) { create(:project, namespace: group) }
   let_it_be(:subproject) { create(:project, namespace: subgroup) }
 
   let_it_be(:user_audit_event) { create(:user_audit_event, created_at: 3.days.ago) }
-  let_it_be(:project_audit_event) { create(:project_audit_event, entity_id: project.id, created_at: 2.days.ago) }
+  let_it_be(:project_audit_event) { create(:project_audit_event, entity_id: project.id, author_id: user.id, created_at: 2.days.ago) }
   let_it_be(:subproject_audit_event) { create(:project_audit_event, entity_id: subproject.id, created_at: 2.days.ago) }
-  let_it_be(:group_audit_event) { create(:group_audit_event, entity_id: group.id, created_at: 1.day.ago) }
+  let_it_be(:group_audit_event) { create(:group_audit_event, entity_id: group.id, author_id: user.id, created_at: 1.day.ago) }
 
   let(:level) { Gitlab::Audit::Levels::Instance.new }
   let(:params) { {} }
@@ -27,7 +28,7 @@ describe AuditLogFinder do
       end
     end
 
-    context 'filtering by level' do
+    context 'scoping the results' do
       context 'when project level' do
         let(:level) { Gitlab::Audit::Levels::Project.new(project: project) }
 
@@ -176,6 +177,59 @@ describe AuditLogFinder do
           let(:params) { { entity_type: 'Invalid Entity Type' } }
 
           it_behaves_like 'no filtering'
+        end
+      end
+    end
+
+    context 'filtering by author_id' do
+      context 'no author_id provided' do
+        let(:params) { { entity_type: 'Author' } }
+
+        it_behaves_like 'no filtering'
+      end
+
+      context 'invalid author_id' do
+        let(:params) { { author_id: '0' } }
+
+        it 'ignores author_id and returns all events irrespective of entity_type' do
+          expect(subject.count).to eq(4)
+        end
+      end
+
+      shared_examples 'finds the right event' do
+        it 'finds the right event' do
+          expect(subject.count).to eq(1)
+
+          entity = subject.first
+
+          expect(entity.entity_type).to eq(entity_type)
+          expect(entity.id).to eq(audit_event.id)
+          expect(entity.author_id).to eq(audit_event.author_id)
+        end
+      end
+
+      context 'Group Event' do
+        let(:level) { Gitlab::Audit::Levels::Group.new(group: group) }
+        let(:params) { { author_id: group_audit_event.author_id } }
+
+        before do
+          # Only looking for group event, with this on it tests Group and Project events
+          stub_feature_flags(audit_log_group_level: false)
+        end
+
+        it_behaves_like 'finds the right event' do
+          let(:entity_type) { 'Group' }
+          let(:audit_event) { group_audit_event }
+        end
+      end
+
+      context 'Project Event' do
+        let(:level) { Gitlab::Audit::Levels::Project.new(project: project) }
+        let(:params) { { author_id: project_audit_event.author_id } }
+
+        it_behaves_like 'finds the right event' do
+          let(:entity_type) { 'Project' }
+          let(:audit_event) { project_audit_event }
         end
       end
     end

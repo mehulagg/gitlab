@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 class Projects::EnvironmentsController < Projects::ApplicationController
+  # Metrics dashboard code is getting decoupled from environments and is being moved
+  # into app/controllers/projects/metrics_dashboard_controller.rb
+  # See https://gitlab.com/gitlab-org/gitlab/-/issues/226002 for more details.
+
   include MetricsDashboard
 
   layout 'project'
@@ -9,9 +13,9 @@ class Projects::EnvironmentsController < Projects::ApplicationController
     authorize_metrics_dashboard!
 
     push_frontend_feature_flag(:prometheus_computed_alerts)
-    push_frontend_feature_flag(:metrics_dashboard_annotations, project)
+    push_frontend_feature_flag(:disable_metric_dashboard_refresh_rate)
   end
-  before_action :authorize_read_environment!
+  before_action :authorize_read_environment!, except: [:metrics, :additional_metrics, :metrics_dashboard, :metrics_redirect]
   before_action :authorize_create_environment!, only: [:new, :create]
   before_action :authorize_stop_environment!, only: [:stop]
   before_action :authorize_update_environment!, only: [:edit, :update, :cancel_auto_stop]
@@ -20,6 +24,8 @@ class Projects::EnvironmentsController < Projects::ApplicationController
   before_action :verify_api_request!, only: :terminal_websocket_authorize
   before_action :expire_etag_cache, only: [:index], unless: -> { request.format.json? }
   after_action :expire_etag_cache, only: [:cancel_auto_stop]
+
+  feature_category :continuous_delivery
 
   def index
     @environments = project.environments
@@ -101,7 +107,7 @@ class Projects::EnvironmentsController < Projects::ApplicationController
 
     action_or_env_url =
       if stop_action
-        polymorphic_url([project.namespace.becomes(Namespace), project, stop_action])
+        polymorphic_url([project, stop_action])
       else
         project_environment_url(project, @environment)
       end
@@ -155,18 +161,14 @@ class Projects::EnvironmentsController < Projects::ApplicationController
   end
 
   def metrics_redirect
-    environment = project.default_environment
-
-    if environment
-      redirect_to environment_metrics_path(environment)
-    else
-      render :empty_metrics
-    end
+    redirect_to project_metrics_dashboard_path(project)
   end
 
   def metrics
     respond_to do |format|
-      format.html
+      format.html do
+        redirect_to project_metrics_dashboard_path(project, environment: environment )
+      end
       format.json do
         # Currently, this acts as a hint to load the metrics details into the cache
         # if they aren't there already

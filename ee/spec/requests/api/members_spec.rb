@@ -2,7 +2,329 @@
 
 require 'spec_helper'
 
-describe API::Members do
+RSpec.describe API::Members do
+  context 'group members endpoint for group managed accounts' do
+    let(:group) { create(:group) }
+    let(:owner) { create(:user) }
+
+    before do
+      group.add_owner(owner)
+    end
+
+    include_context "group managed account with group members"
+
+    subject do
+      get api(url, owner)
+      json_response
+    end
+
+    describe "GET /groups/:id/members" do
+      let(:url) { "/groups/#{group.id}/members" }
+
+      it_behaves_like 'members response with exposed emails' do
+        let(:emails) { gma_member.email }
+      end
+
+      it_behaves_like 'members response with hidden emails' do
+        let(:emails) { member.email }
+      end
+    end
+
+    describe "GET /groups/:id/members/:user_id" do
+      let(:url) { "/groups/#{group.id}/members/#{user_id}" }
+
+      context 'with group managed account member' do
+        let(:user_id) { gma_member.id }
+
+        it_behaves_like 'member response with exposed email' do
+          let(:email) { gma_member.email }
+        end
+      end
+
+      context 'with a regular member' do
+        let(:user_id) { member.id }
+
+        it_behaves_like 'member response with hidden email'
+      end
+    end
+
+    describe "GET /groups/:id/members/all" do
+      include_context "child group with group managed account members"
+
+      context 'parent group' do
+        let(:url) { "/groups/#{group.id}/members/all" }
+
+        it_behaves_like 'members response with exposed emails' do
+          let(:emails) { gma_member.email }
+        end
+
+        it_behaves_like 'members response with hidden emails' do
+          let(:emails) { member.email }
+        end
+      end
+
+      context 'child group' do
+        let(:url) { "/groups/#{child_group.id}/members/all" }
+
+        it_behaves_like 'members response with exposed emails' do
+          let(:emails) { [gma_member.email, child_gma_member.email] }
+        end
+
+        it_behaves_like 'members response with hidden emails' do
+          let(:emails) { [member.email, child_member.email] }
+        end
+      end
+    end
+
+    describe "GET /groups/:id/members/all/:user_id" do
+      include_context "child group with group managed account members"
+
+      let(:url) { "/groups/#{child_group.id}/members/all/#{user_id}" }
+
+      context 'with group managed account member' do
+        let(:user_id) { gma_member.id }
+
+        it_behaves_like 'member response with exposed email' do
+          let(:email) { gma_member.email }
+        end
+      end
+
+      context 'with regular member' do
+        let(:user_id) { member.id }
+
+        it_behaves_like 'member response with hidden email'
+      end
+
+      context 'with group managed account child group member' do
+        let(:user_id) { child_gma_member.id }
+
+        it_behaves_like 'member response with exposed email' do
+          let(:email) { child_gma_member.email }
+        end
+      end
+
+      context 'with child group regular member' do
+        let(:user_id) { child_member.id }
+
+        it_behaves_like 'member response with hidden email'
+      end
+    end
+  end
+
+  context 'project members endpoint for group managed accounts' do
+    let(:group) { create(:group) }
+    let(:owner) { create(:user) }
+    let(:project) { create(:project, group: group) }
+
+    before do
+      group.add_owner(owner)
+    end
+
+    include_context "group managed account with project members"
+
+    subject do
+      get api(url, owner)
+      json_response
+    end
+
+    describe "GET /projects/:id/members" do
+      let(:url) { "/projects/#{project.id}/members" }
+
+      it_behaves_like 'members response with exposed emails' do
+        let(:emails) { gma_member.email }
+      end
+
+      it_behaves_like 'members response with hidden emails' do
+        let(:emails) { member.email }
+      end
+    end
+
+    describe "GET /projects/:id/members/:user_id" do
+      let(:url) { "/projects/#{project.id}/members/#{user_id}" }
+
+      context 'with group managed account member' do
+        let(:user_id) { gma_member.id }
+
+        it_behaves_like 'member response with exposed email' do
+          let(:email) { gma_member.email }
+        end
+      end
+
+      context 'with a regular member' do
+        let(:user_id) { member.id }
+
+        it_behaves_like 'member response with hidden email'
+      end
+    end
+
+    describe "GET /project/:id/members/all" do
+      include_context "child project with group managed account members"
+
+      context 'parent group project' do
+        let(:url) { "/projects/#{project.id}/members/all" }
+
+        it_behaves_like 'members response with exposed emails' do
+          let(:emails) { gma_member.email }
+        end
+
+        it_behaves_like 'members response with hidden emails' do
+          let(:emails) { member.email }
+        end
+      end
+
+      context 'child group project' do
+        let(:url) { "/projects/#{child_project.id}/members/all" }
+
+        it_behaves_like 'members response with exposed emails' do
+          let(:emails) { [child_gma_member.email] }
+        end
+
+        it_behaves_like 'members response with hidden emails' do
+          let(:emails) { [member.email, child_member.email] }
+        end
+      end
+    end
+
+    describe "GET /projects/:id/members/all/:user_id" do
+      include_context "child project with group managed account members"
+
+      let(:url) { "/projects/#{child_project.id}/members/all/#{user_id}" }
+
+      context 'with group managed account member' do
+        let(:user_id) { gma_member.id }
+
+        it_behaves_like 'member response with hidden email'
+      end
+
+      context 'with regular member' do
+        let(:user_id) { member.id }
+
+        it_behaves_like 'member response with hidden email'
+      end
+
+      context 'with group managed account child group member' do
+        let(:user_id) { child_gma_member.id }
+
+        it_behaves_like 'member response with exposed email' do
+          let(:email) { child_gma_member.email }
+        end
+      end
+
+      context 'with child group regular member' do
+        let(:user_id) { child_member.id }
+
+        it_behaves_like 'member response with hidden email'
+      end
+    end
+  end
+
+  describe "GET /groups/:id/billable_members" do
+    let_it_be(:owner) { create(:user) }
+    let_it_be(:maintainer) { create(:user) }
+    let_it_be(:group) do
+      create(:group) do |group|
+        group.add_owner(owner)
+        group.add_maintainer(maintainer)
+      end
+    end
+
+    let_it_be(:nested_user) { create(:user) }
+    let_it_be(:nested_group) do
+      create(:group, parent: group) do |nested_group|
+        nested_group.add_developer(nested_user)
+      end
+    end
+
+    let(:url) { "/groups/#{group.id}/billable_members" }
+
+    subject do
+      get api(url, owner)
+      json_response
+    end
+
+    context 'with sub group and projects' do
+      let!(:project_user) { create(:user) }
+      let!(:project) do
+        create(:project, :public, group: nested_group) do |project|
+          project.add_developer(project_user)
+        end
+      end
+
+      let!(:linked_group_user) { create(:user) }
+      let!(:linked_group) do
+        create(:group) do |linked_group|
+          linked_group.add_developer(linked_group_user)
+        end
+      end
+
+      let!(:project_group_link) { create(:project_group_link, project: project, group: linked_group) }
+
+      it 'returns paginated billable users' do
+        subject
+
+        expect_paginated_array_response(*[owner, maintainer, nested_user, project_user, linked_group_user].map(&:id))
+      end
+    end
+
+    context 'when feature is disabled' do
+      before do
+        stub_feature_flags(api_billable_member_list: false)
+      end
+
+      it 'returns error' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'with non owner' do
+      it 'returns error' do
+        get api(url, maintainer)
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+      end
+    end
+
+    context 'when group can not be found' do
+      let(:url) { "/groups/foo/billable_members" }
+
+      it 'returns error' do
+        get api(url, owner)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response['message']).to eq('404 Group Not Found')
+      end
+    end
+
+    context 'with non-root group' do
+      let(:child_group) { create :group, parent: group }
+      let(:url) { "/groups/#{child_group.id}/billable_members" }
+
+      it 'returns error' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+      end
+    end
+
+    context 'email' do
+      before do
+        group.add_owner(owner)
+      end
+
+      include_context "group managed account with group members"
+
+      it_behaves_like 'members response with exposed emails' do
+        let(:emails) { gma_member.email }
+      end
+
+      it_behaves_like 'members response with hidden emails' do
+        let(:emails) { member.email }
+      end
+    end
+  end
+
   context 'without LDAP' do
     let(:group) { create(:group) }
     let(:owner) { create(:user) }
@@ -34,7 +356,38 @@ describe API::Members do
         get api("/groups/#{group.to_param}/members", owner)
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to match_response_schema('public_api/v4/members')
+        expect(response).to match_response_schema('public_api/v4/members', dir: 'ee')
+      end
+
+      context 'when the flag gitlab_employee_badge is on and we are on gitlab.com' do
+        it 'includes is_gitlab_employee in the response' do
+          stub_feature_flags(gitlab_employee_badge: true)
+          allow(Gitlab).to receive(:com?).and_return(true)
+
+          get api("/groups/#{group.to_param}/members", owner)
+
+          expect(json_response.first.keys).to include('is_gitlab_employee')
+        end
+      end
+
+      context 'when the flag gitlab_employee_badge is off' do
+        it 'does not include is_gitlab_employee in the response' do
+          stub_feature_flags(gitlab_employee_badge: false)
+
+          get api("/groups/#{group.to_param}/members", owner)
+
+          expect(json_response.first.keys).not_to include('is_gitlab_employee')
+        end
+      end
+
+      context 'when we are not on gitlab.com' do
+        it 'does not include is_gitlab_employee in the response' do
+          allow(Gitlab).to receive(:com?).and_return(false)
+
+          get api("/groups/#{group.to_param}/members", owner)
+
+          expect(json_response.first.keys).not_to include('is_gitlab_employee')
+        end
       end
 
       context 'when a group has SAML provider configured' do

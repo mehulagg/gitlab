@@ -2,8 +2,10 @@
 @import 'framework/mixins';
 @import './ide_mixins';
 @import './ide_monaco_overrides';
+@import './ide_theme_overrides';
 
-@import './themes/dark';
+@import './ide_themes/dark';
+@import './ide_themes/solarized-dark';
 
 $search-list-icon-width: 18px;
 $ide-activity-bar-width: 60px;
@@ -23,11 +25,18 @@ $ide-commit-header-height: 48px;
   @include str-truncated(250px);
 }
 
+.ide-layout {
+  // Fix for iOS 13+, the height of the page is actually less than
+  // 100vh because of the presence of the bottom bar
+  max-height: 100%;
+  position: fixed;
+}
+
 .ide-view {
   position: relative;
   margin-top: 0;
   padding-bottom: $ide-statusbar-height;
-  color: $gl-text-color;
+  color: var(--ide-text-color, $gl-text-color);
   min-height: 0; // firefox fix
 
   &.is-collapsed {
@@ -63,14 +72,15 @@ $ide-commit-header-height: 48px;
   display: flex;
   flex-direction: column;
   flex: 1;
-  border-left: 1px solid $white-dark;
+  border-left: 1px solid var(--ide-border-color, $white-dark);
+  border-right: 1px solid var(--ide-border-color, $white-dark);
   overflow: hidden;
 }
 
 .multi-file-tabs {
   display: flex;
-  background-color: $gray-light;
-  box-shadow: inset 0 -1px $white-dark;
+  background-color: var(--ide-background, $gray-light);
+  box-shadow: inset 0 -1px var(--ide-border-color, $white-dark);
 
   > ul {
     display: flex;
@@ -81,13 +91,13 @@ $ide-commit-header-height: 48px;
     display: flex;
     align-items: center;
     padding: $grid-size $gl-padding;
-    background-color: $gray-normal;
-    border-right: 1px solid $white-dark;
-    border-bottom: 1px solid $white-dark;
+    background-color: var(--ide-background-hover, $gray-normal);
+    border-right: 1px solid var(--ide-border-color, $white-dark);
+    border-bottom: 1px solid var(--ide-border-color, $white-dark);
 
     &.active {
-      background-color: $white;
-      border-bottom-color: $white;
+      background-color: var(--ide-highlight-background, $white);
+      border-bottom-color: transparent;
     }
 
     &:not(.disabled) {
@@ -120,7 +130,7 @@ $ide-commit-header-height: 48px;
   background: none;
   border: 0;
   border-radius: $border-radius-default;
-  color: $gray-900;
+  color: var(--ide-text-color, $gray-900);
 
   svg {
     position: relative;
@@ -135,11 +145,11 @@ $ide-commit-header-height: 48px;
   }
 
   &:not([disabled]):hover {
-    background-color: $gray-200;
+    background-color: var(--ide-input-border, $gray-100);
   }
 
   &:not([disabled]):focus {
-    background-color: $blue-500;
+    background-color: var(--ide-link-color, $blue-500);
     color: $white;
     outline: 0;
 
@@ -166,10 +176,11 @@ $ide-commit-header-height: 48px;
     height: 100%;
     overflow: auto;
     padding: $gl-padding;
+    background-color: var(--ide-border-color, transparent);
   }
 
   .file-container {
-    background-color: $gray-darker;
+    background-color: var(--ide-border-color, $gray-darker);
     display: flex;
     height: 100%;
     align-items: center;
@@ -185,13 +196,13 @@ $ide-commit-header-height: 48px;
 
     .file-info {
       font-size: $label-font-size;
-      color: $diff-image-info-color;
+      color: var(--ide-text-color, $diff-image-info-color);
     }
   }
 }
 
 .ide-mode-tabs {
-  border-bottom: 1px solid $white-dark;
+  border-bottom: 1px solid var(--ide-border-color, $white-dark);
 
   li a {
     padding: $gl-padding-8 $gl-padding;
@@ -205,9 +216,10 @@ $ide-commit-header-height: 48px;
 }
 
 .ide-status-bar {
-  border-top: 1px solid $white-dark;
+  color: var(--ide-text-color, $gl-text-color);
+  border-top: 1px solid var(--ide-border-color, $white-dark);
   padding: 2px $gl-padding-8 0;
-  background: $white;
+  background-color: var(--ide-footer-background, $white);
   display: flex;
   justify-content: space-between;
   height: $ide-statusbar-height;
@@ -238,10 +250,6 @@ $ide-commit-header-height: 48px;
   > div + div {
     padding-left: $gl-padding;
   }
-}
-
-.ide-status-file {
-  text-align: right;
 }
 // Not great, but this is to deal with our current output
 .multi-file-preview-holder {
@@ -278,10 +286,8 @@ $ide-commit-header-height: 48px;
 .multi-file-commit-panel {
   display: flex;
   position: relative;
-  width: 340px;
   padding: 0;
-  background-color: $gray-light;
-  padding-right: 1px;
+  background-color: var(--ide-background, $gray-light);
 
   .context-header {
     width: auto;
@@ -308,9 +314,9 @@ $ide-commit-header-height: 48px;
     display: flex;
     flex: 1;
     flex-direction: column;
-    background-color: $white;
-    border-left: 1px solid $white-dark;
-    border-top: 1px solid $white-dark;
+    background-color: var(--ide-highlight-background, $white);
+    border-left: 1px solid var(--ide-border-color, $white-dark);
+    border-top: 1px solid var(--ide-border-color, $white-dark);
     border-top-left-radius: $border-radius-small;
     min-height: 0; // firefox fix
   }
@@ -335,13 +341,8 @@ $ide-commit-header-height: 48px;
 
 .multi-file-commit-panel-header {
   height: $ide-commit-header-height;
-  border-bottom: 1px solid $white-dark;
+  border-bottom: 1px solid var(--ide-border-color-alt, $white-dark);
   padding: 12px 0;
-}
-
-.multi-file-commit-panel-collapse-btn {
-  border-left: 1px solid $white-dark;
-  margin-left: auto;
 }
 
 .multi-file-commit-list {
@@ -365,7 +366,7 @@ $ide-commit-header-height: 48px;
     display: block;
     margin-left: auto;
     margin-right: auto;
-    color: $gray-700;
+    color: var(--ide-text-color-secondary, $gray-500);
   }
 
   .file-status-icon {
@@ -389,17 +390,17 @@ $ide-commit-header-height: 48px;
 
   &:hover,
   &:focus {
-    background: $gray-100;
+    background: var(--ide-background, $gray-50);
 
     outline: 0;
   }
 
   &:active {
-    background: $gray-200;
+    background: var(--ide-background, $gray-100);
   }
 
   &.is-active {
-    background-color: $white-normal;
+    background-color: var(--ide-background, $white-normal);
   }
 
   svg {
@@ -420,8 +421,8 @@ $ide-commit-header-height: 48px;
 
 .multi-file-commit-form {
   position: relative;
-  background-color: $white;
-  border-left: 1px solid $white-dark;
+  background-color: var(--ide-highlight-background, $white);
+  border-left: 1px solid var(--ide-border-color, $white-dark);
   transition: all 0.3s ease;
 
   > form,
@@ -429,7 +430,7 @@ $ide-commit-header-height: 48px;
     padding: $gl-padding 0;
     margin-left: $gl-padding;
     margin-right: $gl-padding;
-    border-top: 1px solid $white-dark;
+    border-top: 1px solid var(--ide-border-color-alt, $white-dark);
   }
 
   .btn {
@@ -490,6 +491,7 @@ $ide-commit-header-height: 48px;
   height: 100vh;
   align-items: center;
   justify-content: center;
+  background-color: var(--ide-border-color, transparent);
 }
 
 .ide {
@@ -506,7 +508,7 @@ $ide-commit-header-height: 48px;
   margin-right: $gl-padding;
 
   &.is-first {
-    border-bottom: 1px solid $white-dark;
+    border-bottom: 1px solid var(--ide-border-color-alt, $white-dark);
   }
 }
 
@@ -514,12 +516,7 @@ $ide-commit-header-height: 48px;
   width: $ide-commit-row-height;
   height: $ide-commit-row-height;
   color: inherit;
-}
-
-.ide-commit-file-count {
-  min-width: 22px;
-  background-color: $gray-light;
-  border: 1px solid $white-dark;
+  background-color: var(--ide-background, $white-normal);
 }
 
 .ide-commit-options {
@@ -551,7 +548,7 @@ $ide-commit-header-height: 48px;
   height: 60px;
   width: 100%;
   padding: 0 $gl-padding;
-  color: $gl-text-color-secondary;
+  color: var(--ide-text-color-secondary, $gl-text-color-secondary);
   background-color: transparent;
   border: 0;
   border-top: 1px solid transparent;
@@ -564,22 +561,22 @@ $ide-commit-header-height: 48px;
   }
 
   &:hover {
-    color: $gl-text-color;
-    background-color: $gray-100;
+    color: var(--ide-text-color, $gl-text-color);
+    background-color: var(--ide-background-hover, $gray-50);
   }
 
   &:focus {
-    color: $gl-text-color;
-    background-color: $gray-200;
+    color: var(--ide-text-color, $gl-text-color);
+    background-color: var(--ide-background-hover, $gray-100);
   }
 
   &.active {
     // extend width over border of sidebar section
     width: calc(100% + 1px);
     padding-right: $gl-padding + 1px;
-    background-color: $white;
-    border-top-color: $white-dark;
-    border-bottom-color: $white-dark;
+    background-color: var(--ide-highlight-background, $white);
+    border-top-color: var(--ide-border-color, $white-dark);
+    border-bottom-color: var(--ide-border-color, $white-dark);
 
     &::after {
       content: '';
@@ -588,17 +585,18 @@ $ide-commit-header-height: 48px;
       top: 0;
       bottom: 0;
       width: 1px;
-      background: $white;
+      background: var(--ide-highlight-background, $white);
     }
 
-    &.is-right {
-      padding-right: $gl-padding;
-      padding-left: $gl-padding + 1px;
+  }
 
-      &::after {
-        right: auto;
-        left: -1px;
-      }
+  &.is-right {
+    padding-right: $gl-padding;
+    padding-left: $gl-padding + 1px;
+
+    &::after {
+      right: auto;
+      left: -1px;
     }
   }
 }
@@ -611,7 +609,7 @@ $ide-commit-header-height: 48px;
 
 .ide-commit-message-field {
   height: 200px;
-  background-color: $white;
+  background-color: var(--ide-highlight-background, $white);
 
   .md-area {
     display: flex;
@@ -625,7 +623,7 @@ $ide-commit-header-height: 48px;
 
   .form-text.text-muted {
     margin-top: 2px;
-    color: $blue-500;
+    color: var(--ide-link-color, $blue-500);
     cursor: pointer;
   }
 }
@@ -688,14 +686,14 @@ $ide-commit-header-height: 48px;
   padding: 12px 0;
   margin-left: $ide-tree-padding;
   margin-right: $ide-tree-padding;
-  border-bottom: 1px solid $white-dark;
+  border-bottom: 1px solid var(--ide-border-color-alt, $white-dark);
 
   svg {
-    color: $gray-700;
+    color: var(--ide-text-color-secondary, $gray-500);
 
     &:focus,
     &:hover {
-      color: $blue-600;
+      color: var(--ide-link-color, $blue-600);
     }
   }
 
@@ -704,7 +702,7 @@ $ide-commit-header-height: 48px;
   }
 
   button {
-    color: $gl-text-color;
+    color: var(--ide-text-color, $gl-text-color);
   }
 }
 
@@ -720,21 +718,21 @@ $ide-commit-header-height: 48px;
   .dropdown-menu-toggle {
     svg {
       vertical-align: middle;
-      color: $gray-700;
 
+      &,
       &:hover {
-        color: $gray-700;
+        color: var(--ide-text-color-secondary, $gray-500);
       }
     }
 
     &:hover {
-      background-color: $white-normal;
+      background-color: var(--ide-dropdown-btn-hover-background, $white-normal);
     }
   }
 
   &.show {
     .dropdown-menu-toggle {
-      background-color: $white-dark;
+      background-color: var(--ide-input-background, $white-dark);
     }
   }
 }
@@ -800,12 +798,12 @@ $ide-commit-header-height: 48px;
   }
 
   a {
-    color: $blue-600;
+    color: var(--ide-link-color, $blue-600);
   }
 }
 
 .ide-review-sub-header {
-  color: $gl-text-color-secondary;
+  color: var(--ide-text-color-secondary, $gl-text-color-secondary);
 }
 
 .ide-tree-changes {
@@ -821,7 +819,7 @@ $ide-commit-header-height: 48px;
   bottom: 0;
   right: 0;
   z-index: 10;
-  background: $white;
+  background-color: var(--ide-highlight-background, $white);
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -865,9 +863,6 @@ $ide-commit-header-height: 48px;
 .ide-external-link {
   svg {
     display: none;
-    position: absolute;
-    top: 2px;
-    right: -$gl-padding;
   }
 
   &:hover,
@@ -879,22 +874,21 @@ $ide-commit-header-height: 48px;
 }
 
 .ide-sidebar {
-  width: auto;
   min-width: 60px;
 }
 
 .ide-right-sidebar {
-  .ide-activity-bar {
-    border-left: 1px solid $white-dark;
-  }
-
   .multi-file-commit-panel-inner {
-    width: 350px;
-    padding: $grid-size $gl-padding;
-    background-color: $white;
-    border-left: 1px solid $white-dark;
+    padding: $grid-size 0;
+    background-color: var(--ide-highlight-background, $white);
+    border-right: 1px solid var(--ide-border-color, $white-dark);
   }
 
+  .ide-right-sidebar-jobs-detail {
+    padding-bottom: 0;
+  }
+
+  .ide-right-sidebar-terminal,
   .ide-right-sidebar-clientside {
     padding: 0;
   }
@@ -902,6 +896,10 @@ $ide-commit-header-height: 48px;
 
 .ide-pipeline {
   @include ide-trace-view();
+
+  svg {
+    --svg-status-bg: var(--ide-background, #{$white});
+  }
 
   .empty-state {
     p {
@@ -915,15 +913,12 @@ $ide-commit-header-height: 48px;
       margin: 0;
     }
   }
-
-  .build-trace {
-    margin-left: -$gl-padding;
-  }
 }
 
 .ide-pipeline-list {
   flex: 1;
   overflow: auto;
+  padding: 0 $gl-padding;
 }
 
 .ide-pipeline-header {
@@ -937,7 +932,7 @@ $ide-commit-header-height: 48px;
   padding: 16px;
 
   &:not(:last-child) {
-    border-bottom: 1px solid $border-color;
+    border-bottom: 1px solid var(--ide-border-color, $border-color);
   }
 
   .ci-status-icon {
@@ -966,6 +961,7 @@ $ide-commit-header-height: 48px;
 
 .ide-job-header {
   min-height: 60px;
+  padding: 0 $gl-padding;
 }
 
 .ide-nav-form {
@@ -978,7 +974,7 @@ $ide-commit-header-height: 48px;
       text-align: center;
 
       &:not(.active) {
-        background-color: $gray-light;
+        background-color: var(--ide-dropdown-background, $gray-light);
       }
     }
   }
@@ -1027,7 +1023,7 @@ $ide-commit-header-height: 48px;
 .ide-merge-request-project-path {
   font-size: 12px;
   line-height: 16px;
-  color: $gl-text-color-secondary;
+  color: var(--ide-text-color-secondary, $gl-text-color-secondary);
 }
 
 .ide-merge-request-info {
@@ -1043,17 +1039,17 @@ $ide-commit-header-height: 48px;
 
 .ide-entry-dropdown-toggle {
   padding: $gl-padding-4;
-  color: $gl-text-color;
-  background-color: $gray-100;
+  color: var(--ide-text-color, $gl-text-color);
+  background-color: var(--ide-background, $gray-50);
 
   &:hover {
-    background-color: $gray-200;
+    background-color: var(--ide-file-row-btn-hover-background, $gray-100);
   }
 
   &:active,
   &:focus {
     color: $white-normal;
-    background-color: $blue-500;
+    background-color: var(--ide-link-color, $blue-500);
     outline: 0;
   }
 }
@@ -1067,14 +1063,14 @@ $ide-commit-header-height: 48px;
 
   .dropdown.show .ide-entry-dropdown-toggle {
     color: $white-normal;
-    background-color: $blue-500;
+    background-color: var(--ide-link-color, $blue-500);
   }
 }
 
 .ide-preview-header {
   padding: 0 $grid-size;
-  border-bottom: 1px solid $white-dark;
-  background-color: $gray-light;
+  border-bottom: 1px solid var(--ide-border-color-alt, $white-dark);
+  background-color: var(--ide-highlight-background, $gray-light);
   min-height: 44px;
 }
 
@@ -1084,7 +1080,7 @@ $ide-commit-header-height: 48px;
   max-width: 24px;
   padding: 0;
   margin: 0 ($grid-size / 2);
-  color: $gl-gray-light;
+  color: var(--ide-text-color-secondary, $gray-600);
 
   &:first-child {
     margin-left: 0;
@@ -1098,7 +1094,7 @@ $ide-commit-header-height: 48px;
   &:focus {
     outline: 0;
     box-shadow: none;
-    border-color: $gray-200;
+    border-color: var(--ide-border-color, $gray-100);
   }
 }
 
@@ -1110,8 +1106,8 @@ $ide-commit-header-height: 48px;
 
 .ide-file-templates {
   padding: $grid-size $gl-padding;
-  background-color: $gray-light;
-  border-bottom: 1px solid $white-dark;
+  background-color: var(--ide-background, $gray-light);
+  border-bottom: 1px solid var(--ide-border-color, $white-dark);
 
   .dropdown {
     min-width: 180px;
@@ -1125,8 +1121,8 @@ $ide-commit-header-height: 48px;
 .ide-commit-editor-header {
   height: 65px;
   padding: 8px 16px;
-  background-color: $gray-50;
-  box-shadow: inset 0 -1px $white-dark;
+  background-color: var(--ide-background, $gray-10);
+  box-shadow: inset 0 -1px var(--ide-border-color, $white-dark);
 }
 
 .ide-commit-list-changed-icon {
@@ -1137,16 +1133,45 @@ $ide-commit-header-height: 48px;
 .ide-file-icon-holder {
   display: flex;
   align-items: center;
-  color: $gray-700;
+  color: var(--ide-text-color-secondary, $gray-500);
+}
+
+.file-row:active {
+  background: var(--ide-background, $gray-100);
+}
+
+.file-row.is-active {
+  background: var(--ide-background, $gray-50);
 }
 
 .file-row:hover,
 .file-row:focus {
+  background: var(--ide-background, $gray-50);
+
   .ide-new-btn {
     display: block;
   }
 
   .folder-icon {
-    fill: $gl-text-color-secondary;
+    fill: var(--ide-text-color-secondary, $gl-text-color-secondary);
+  }
+}
+
+.ide-terminal {
+  @include ide-trace-view();
+
+  .terminal-wrapper {
+    background: $black;
+    color: $gray-darkest;
+    overflow: hidden;
+  }
+
+  .xterm {
+    height: 100%;
+    padding: $grid-size;
+  }
+
+  .xterm-viewport {
+    overflow-y: auto;
   }
 }

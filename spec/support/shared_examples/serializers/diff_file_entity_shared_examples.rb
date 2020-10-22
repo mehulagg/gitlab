@@ -8,7 +8,7 @@ RSpec.shared_examples 'diff file base entity' do
                                :file_hash, :file_path, :old_path, :new_path,
                                :viewer, :diff_refs, :stored_externally,
                                :external_storage, :renamed_file, :deleted_file,
-                               :a_mode, :b_mode, :new_file)
+                               :a_mode, :b_mode, :new_file, :file_identifier_hash)
   end
 
   # Converted diff files from GitHub import does not contain blob file
@@ -55,16 +55,6 @@ RSpec.shared_examples 'diff file entity' do
       it 'contains only the inline diff lines', :aggregate_failures do
         expect(subject).not_to include(:parallel_diff_lines)
         expect(subject).to include(:highlighted_diff_lines)
-      end
-    end
-
-    context 'when the `single_mr_diff_view` feature is disabled' do
-      before do
-        stub_feature_flags(single_mr_diff_view: { enabled: false, thing: project })
-      end
-
-      it 'contains both kinds of diffs' do
-        expect(subject).to include(:highlighted_diff_lines, :parallel_diff_lines)
       end
     end
   end

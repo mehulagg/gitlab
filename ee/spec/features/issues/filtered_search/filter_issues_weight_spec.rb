@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Filter issues weight', :js do
+RSpec.describe 'Filter issues weight', :js do
   include FilteredSearchHelpers
 
   let!(:project) { create(:project) }

@@ -1,13 +1,7 @@
-require 'action_view/helpers'
-
 task spec: ['geo:db:test:prepare']
 
 namespace :geo do
-  include ActionView::Helpers::DateHelper
-  include ActionView::Helpers::NumberHelper
-
   GEO_LICENSE_ERROR_TEXT = 'GitLab Geo is not supported with this license. Please contact the sales team: https://about.gitlab.com/sales.'.freeze
-  GEO_STATUS_COLUMN_WIDTH = 40
 
   namespace :db do |ns|
     desc 'GitLab | Geo | DB | Drops the Geo tracking database from config/database_geo.yml for the current RAILS_ENV.'
@@ -54,18 +48,6 @@ namespace :geo do
       ns['abort_if_pending_migrations'].invoke
 
       Gitlab::Geo::DatabaseTasks.load_seed
-    end
-
-    desc 'GitLab | Geo | DB | Refresh Foreign Tables definition in Geo Secondary node'
-    task refresh_foreign_tables: [:environment] do
-      if Gitlab::Geo::GeoTasks.foreign_server_configured?
-        print "\nRefreshing foreign tables for FDW: #{Gitlab::Geo::Fdw::FOREIGN_SCHEMA} ... "
-        Gitlab::Geo::GeoTasks.refresh_foreign_tables!
-        puts 'Done!'
-      else
-        puts "Error: Cannot refresh foreign tables, there is no foreign server configured."
-        exit 1
-      end
     end
 
     # IMPORTANT: This task won't dump the schema if ActiveRecord::Base.dump_schema_after_migration is set to false
@@ -153,16 +135,6 @@ namespace :geo do
       task purge: [:environment] do
         Gitlab::Geo::DatabaseTasks::Test.purge
       end
-
-      desc 'GitLab | Geo | DB | Test | Refresh Foreign Tables definition for test environment'
-      task refresh_foreign_tables: [:environment] do
-        old_env = ActiveRecord::Tasks::DatabaseTasks.env
-        ActiveRecord::Tasks::DatabaseTasks.env = 'test'
-
-        ns['geo:db:refresh_foreign_tables'].invoke
-
-        ActiveRecord::Tasks::DatabaseTasks.env = old_env
-      end
     end
   end
 
@@ -218,23 +190,7 @@ namespace :geo do
   task set_secondary_as_primary: :environment do
     abort GEO_LICENSE_ERROR_TEXT unless Gitlab::Geo.license_allows?
 
-    ActiveRecord::Base.transaction do
-      primary_node = GeoNode.primary_node
-
-      unless primary_node
-        abort 'The primary is not set'
-      end
-
-      primary_node.destroy
-
-      current_node = GeoNode.current_node
-
-      unless current_node.secondary?
-        abort 'This is not a secondary node'
-      end
-
-      current_node.update!(primary: true)
-    end
+    Gitlab::Geo::GeoTasks.set_secondary_as_primary
   end
 
   desc 'GitLab | Geo | Update Geo primary node URL'
@@ -256,147 +212,6 @@ namespace :geo do
       exit
     end
 
-    puts
-    puts "Name: #{GeoNode.current_node_name}"
-    puts "URL: #{GeoNode.current_node_url}"
-    puts '-----------------------------------------------------'.color(:yellow)
-
-    unless Gitlab::Database.postgresql_minimum_supported_version?
-      puts
-      puts 'WARNING: Please upgrade PostgreSQL to version 9.6 or greater. The status of the replication cannot be determined reliably with the current version.'.color(:red)
-      puts
-    end
-
-    print 'GitLab Version: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-    puts Gitlab::VERSION
-
-    print 'Geo Role: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-    role =
-      if Gitlab::Geo.primary?
-        'Primary'
-      else
-        Gitlab::Geo.secondary? ? 'Secondary' : 'unknown'.color(:yellow)
-      end
-
-    puts role
-
-    print 'Health Status: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-
-    if current_node_status.healthy?
-      puts current_node_status.health_status
-    else
-      puts current_node_status.health_status.color(:red)
-    end
-
-    unless current_node_status.healthy?
-      print 'Health Status Summary: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-      puts current_node_status.health.color(:red)
-    end
-
-    print 'Repositories: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-    show_failed_value(current_node_status.repositories_failed_count)
-    print "#{current_node_status.repositories_synced_count}/#{current_node_status.projects_count} "
-    puts using_percentage(current_node_status.repositories_synced_in_percentage)
-
-    if Gitlab::Geo.repository_verification_enabled?
-      print 'Verified Repositories: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-      show_failed_value(current_node_status.repositories_verification_failed_count)
-      print "#{current_node_status.repositories_verified_count}/#{current_node_status.projects_count} "
-      puts using_percentage(current_node_status.repositories_verified_in_percentage)
-    end
-
-    print 'Wikis: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-    show_failed_value(current_node_status.wikis_failed_count)
-    print "#{current_node_status.wikis_synced_count}/#{current_node_status.projects_count} "
-    puts using_percentage(current_node_status.wikis_synced_in_percentage)
-
-    if Gitlab::Geo.repository_verification_enabled?
-      print 'Verified Wikis: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-      show_failed_value(current_node_status.wikis_verification_failed_count)
-      print "#{current_node_status.wikis_verified_count}/#{current_node_status.projects_count} "
-      puts using_percentage(current_node_status.wikis_verified_in_percentage)
-    end
-
-    print 'LFS Objects: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-    show_failed_value(current_node_status.lfs_objects_failed_count)
-    print "#{current_node_status.lfs_objects_synced_count}/#{current_node_status.lfs_objects_count} "
-    puts using_percentage(current_node_status.lfs_objects_synced_in_percentage)
-
-    print 'Attachments: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-    show_failed_value(current_node_status.attachments_failed_count)
-    print "#{current_node_status.attachments_synced_count}/#{current_node_status.attachments_count} "
-    puts using_percentage(current_node_status.attachments_synced_in_percentage)
-
-    print 'CI job artifacts: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-    show_failed_value(current_node_status.job_artifacts_failed_count)
-    print "#{current_node_status.job_artifacts_synced_count}/#{current_node_status.job_artifacts_count} "
-    puts using_percentage(current_node_status.job_artifacts_synced_in_percentage)
-
-    if Gitlab.config.geo.registry_replication.enabled
-      print 'Container repositories: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-      show_failed_value(current_node_status.container_repositories_failed_count)
-      print "#{current_node_status.container_repositories_synced_count || 0}/#{current_node_status.container_repositories_count || 0} "
-      puts using_percentage(current_node_status.container_repositories_synced_in_percentage)
-    end
-
-    print 'Design repositories: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-    show_failed_value(current_node_status.design_repositories_failed_count)
-    print "#{current_node_status.design_repositories_synced_count || 0}/#{current_node_status.design_repositories_count || 0} "
-    puts using_percentage(current_node_status.design_repositories_synced_in_percentage)
-
-    if Gitlab::CurrentSettings.repository_checks_enabled
-      print 'Repositories Checked: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-      show_failed_value(current_node_status.repositories_checked_failed_count)
-      print "#{current_node_status.repositories_checked_count}/#{current_node_status.projects_count} "
-      puts using_percentage(current_node_status.repositories_checked_in_percentage)
-    end
-
-    print 'Sync Settings: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-    puts  geo_node.namespaces.any? ? 'Selective' : 'Full'
-
-    print 'Database replication lag: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-    puts "#{Gitlab::Geo::HealthCheck.new.db_replication_lag_seconds} seconds"
-
-    print 'Last event ID seen from primary: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-    last_event = Geo::EventLog.last
-
-    if last_event
-      print last_event&.id
-      puts " (#{time_ago_in_words(last_event&.created_at)} ago)"
-
-      print 'Last event ID processed by cursor: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-      cursor_last_event_id = Geo::EventLogState.last_processed&.event_id
-
-      if cursor_last_event_id
-        print cursor_last_event_id
-        last_cursor_event_date = Geo::EventLog.find_by(id: cursor_last_event_id)&.created_at
-        print " (#{time_ago_in_words(last_cursor_event_date)} ago)" if last_cursor_event_date
-        puts
-      else
-        puts 'N/A'
-      end
-    else
-      puts 'N/A'
-    end
-
-    print 'Last status report was: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-
-    if current_node_status.updated_at
-      puts "#{time_ago_in_words(current_node_status.updated_at)} ago"
-    else
-      # Only primary node can create a status record in the database so if it does not exist
-      # we get unsaved record where updated_at is nil
-      puts "Never"
-    end
-
-    puts
-  end
-
-  def show_failed_value(value)
-    print "#{value}".color(:red) + '/' if value > 0
-  end
-
-  def using_percentage(value)
-    "(#{number_to_percentage(value.floor, precision: 0, strip_insignificant_zeros: true)})"
+    Gitlab::Geo::GeoNodeStatusCheck.new(current_node_status, geo_node).print_status
   end
 end

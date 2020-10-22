@@ -2,22 +2,18 @@
 
 require 'spec_helper'
 
-describe EventsHelper do
+RSpec.describe EventsHelper do
   describe '#event_note_target_url' do
-    let(:project) { event.project }
-    let(:project_base_url) { project_url(project) }
-
     subject { helper.event_note_target_url(event) }
 
-    context 'for design note events' do
-      let(:event) { create(:event, :for_design) }
+    context 'for epic note events' do
+      let_it_be(:group) { create(:group, :public) }
+      let_it_be(:event) { create(:event, group: group) }
 
-      it 'returns an appropriate URL' do
-        iid      = event.note_target.issue.iid
-        filename = event.note_target.filename
-        note_id  = event.target.id
+      it 'returns an epic url' do
+        event.target = create(:note_on_epic, note: 'foo')
 
-        expect(subject).to eq("#{project_base_url}/-/issues/#{iid}/designs/#{filename}#note_#{note_id}")
+        expect(subject).to match("#{group.to_param}/-/epics/#{event.note_target.iid}#note_#{event.target.id}")
       end
     end
   end

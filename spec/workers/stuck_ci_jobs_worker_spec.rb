@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe StuckCiJobsWorker do
+RSpec.describe StuckCiJobsWorker do
   include ExclusiveLeaseHelpers
 
   let!(:runner) { create :ci_runner }
@@ -132,7 +132,7 @@ describe StuckCiJobsWorker do
     let(:updated_at) { 2.days.ago }
 
     before do
-      job.project.update(pending_delete: true)
+      job.project.update!(pending_delete: true)
     end
 
     it 'does drop job' do

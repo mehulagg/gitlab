@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::PaginationDelegate do
+RSpec.describe Gitlab::PaginationDelegate do
   context 'no data' do
     let(:delegate) do
       described_class.new(page: 1,

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PageLayoutHelper do
+RSpec.describe PageLayoutHelper do
   describe 'page_description' do
     it 'defaults to nil' do
       expect(helper.page_description).to eq nil
@@ -115,6 +115,21 @@ describe PageLayoutHelper do
       tags = helper.page_card_meta_tags
 
       expect(tags).to include(%q{content="foo&quot; http-equiv=&quot;refresh"})
+    end
+  end
+
+  describe '#search_context' do
+    subject(:search_context) { helper.search_context }
+
+    describe 'a bare controller' do
+      it 'returns an empty context' do
+        expect(search_context).to have_attributes(project: nil,
+                                                  group: nil,
+                                                  snippets: [],
+                                                  project_metadata: {},
+                                                  group_metadata: {},
+                                                  search_url: '/search')
+      end
     end
   end
 end

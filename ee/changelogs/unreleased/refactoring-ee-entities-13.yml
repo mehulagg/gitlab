@@ -1,5 +1,0 @@
----
-title: Separate user, project and entity helper modules into own class files
-merge_request: 27771
-author: Rajendra Kadam
-type: added

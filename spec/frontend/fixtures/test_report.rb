@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe Projects::PipelinesController, "(JavaScript fixtures)", type: :controller do
+RSpec.describe Projects::PipelinesController, "(JavaScript fixtures)", type: :controller do
   include JavaScriptFixturesHelpers
 
   let(:namespace) { create(:namespace, name: "frontend-fixtures") }
@@ -15,7 +15,6 @@ describe Projects::PipelinesController, "(JavaScript fixtures)", type: :controll
 
   before do
     sign_in(user)
-    stub_feature_flags(junit_pipeline_view: true)
   end
 
   it "pipelines/test_report.json" do

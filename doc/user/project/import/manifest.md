@@ -1,6 +1,13 @@
+---
+type: howto
+stage: Manage
+group: Import
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Import multiple repositories by uploading a manifest file
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/28811) in GitLab 11.2.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/28811) in GitLab 11.2.
 
 GitLab allows you to import all the required Git repositories
 based on a manifest file like the one used by the
@@ -49,10 +56,10 @@ You can start the import with:
 1. From your GitLab dashboard click **New project**
 1. Switch to the **Import project** tab
 1. Click on the **Manifest file** button
-1. Provide GitLab with a manifest xml file
+1. Provide GitLab with a manifest XML file
 1. Select a group you want to import to (you need to create a group first if you don't have one)
 1. Click **List available repositories**. At this point, you will be redirected
    to the import status page with projects list based on the manifest file.
 1. Check the list and click **Import all repositories** to start the import.
 
-   ![Manifest status](img/manifest_status.png)
+   ![Manifest status](img/manifest_status_v13_3.png)

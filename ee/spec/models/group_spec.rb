@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Group do
+RSpec.describe Group do
   let(:group) { create(:group) }
 
   it { is_expected.to include_module(EE::Group) }
@@ -15,10 +15,20 @@ describe Group do
     it { is_expected.to belong_to(:file_template_project).class_name('Project').without_validating_presence }
     it { is_expected.to have_many(:dependency_proxy_blobs) }
     it { is_expected.to have_many(:cycle_analytics_stages) }
+    it { is_expected.to have_many(:value_streams) }
     it { is_expected.to have_many(:ip_restrictions) }
+    it { is_expected.to have_many(:allowed_email_domains) }
+    it { is_expected.to have_many(:compliance_management_frameworks) }
     it { is_expected.to have_one(:dependency_proxy_setting) }
     it { is_expected.to have_one(:deletion_schedule) }
+    it { is_expected.to have_one(:group_wiki_repository) }
     it { is_expected.to belong_to(:push_rule) }
+    it { is_expected.to have_many(:saml_group_links) }
+
+    it_behaves_like 'model with wiki' do
+      let(:container) { create(:group, :nested, :wiki_repo) }
+      let(:container_without_wiki) { create(:group, :nested) }
+    end
   end
 
   describe 'scopes' do
@@ -309,6 +319,42 @@ describe Group do
     end
   end
 
+  describe '#vulnerability_scanners' do
+    subject { group.vulnerability_scanners }
+
+    let(:subgroup) { create(:group, parent: group) }
+    let(:group_project) { create(:project, namespace: group) }
+    let(:subgroup_project) { create(:project, namespace: subgroup) }
+    let(:archived_project) { create(:project, :archived, namespace: group) }
+    let(:deleted_project) { create(:project, pending_delete: true, namespace: group) }
+    let!(:group_vulnerability_scanner) { create(:vulnerabilities_scanner, project: group_project) }
+    let!(:subgroup_vulnerability_scanner) { create(:vulnerabilities_scanner, project: subgroup_project) }
+    let!(:archived_vulnerability_scanner) { create(:vulnerabilities_scanner, project: archived_project) }
+    let!(:deleted_vulnerability_scanner) { create(:vulnerabilities_scanner, project: deleted_project) }
+
+    it 'returns vulnerability scanners for all non-archived, non-deleted projects in the group and its subgroups' do
+      is_expected.to contain_exactly(group_vulnerability_scanner, subgroup_vulnerability_scanner)
+    end
+  end
+
+  describe '#vulnerability_historical_statistics' do
+    subject { group.vulnerability_historical_statistics }
+
+    let(:subgroup) { create(:group, parent: group) }
+    let(:group_project) { create(:project, namespace: group) }
+    let(:subgroup_project) { create(:project, namespace: subgroup) }
+    let(:archived_project) { create(:project, :archived, namespace: group) }
+    let(:deleted_project) { create(:project, pending_delete: true, namespace: group) }
+    let!(:group_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: group_project) }
+    let!(:subgroup_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: subgroup_project) }
+    let!(:archived_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: archived_project) }
+    let!(:deleted_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: deleted_project) }
+
+    it 'returns vulnerability scanners for all non-archived, non-deleted projects in the group and its subgroups' do
+      is_expected.to contain_exactly(group_vulnerability_historical_statistic, subgroup_vulnerability_historical_statistic)
+    end
+  end
+
   describe '#mark_ldap_sync_as_failed' do
     it 'sets the state to failed' do
       group.start_ldap_sync
@@ -413,6 +459,62 @@ describe Group do
     end
   end
 
+  describe '#root_ancestor_ip_restrictions' do
+    let(:root_group) { create(:group) }
+    let!(:ip_restriction) { create(:ip_restriction, group: root_group) }
+
+    it 'returns the ip restrictions configured for the root group' do
+      nested_group = create(:group, parent: root_group)
+      deep_nested_group = create(:group, parent: nested_group)
+      very_deep_nested_group = create(:group, parent: deep_nested_group)
+
+      expect(root_group.root_ancestor_ip_restrictions).to contain_exactly(ip_restriction)
+      expect(nested_group.root_ancestor_ip_restrictions).to contain_exactly(ip_restriction)
+      expect(deep_nested_group.root_ancestor_ip_restrictions).to contain_exactly(ip_restriction)
+      expect(very_deep_nested_group.root_ancestor_ip_restrictions).to contain_exactly(ip_restriction)
+    end
+  end
+
+  describe '#allowed_email_domains_list' do
+    subject { group.allowed_email_domains_list }
+
+    context 'group with no associated allowed_email_domains records' do
+      it 'returns nil' do
+        expect(subject).to be_nil
+      end
+    end
+
+    context 'group with associated allowed_email_domains records' do
+      let(:domains) { ['acme.com', 'twitter.com'] }
+
+      before do
+        domains.each do |domain|
+          create(:allowed_email_domain, group: group, domain: domain)
+        end
+      end
+
+      it 'returns a comma separated string of domains of its allowed_email_domains records' do
+        expect(subject).to eq(domains.join(","))
+      end
+    end
+  end
+
+  describe '#root_ancestor_allowed_email_domains' do
+    let(:root_group) { create(:group) }
+    let!(:allowed_email_domain) { create(:allowed_email_domain, group: root_group) }
+
+    it 'returns the email domain restrictions configured for the root group' do
+      nested_group = create(:group, parent: root_group)
+      deep_nested_group = create(:group, parent: nested_group)
+      very_deep_nested_group = create(:group, parent: deep_nested_group)
+
+      expect(root_group.root_ancestor_allowed_email_domains).to contain_exactly(allowed_email_domain)
+      expect(nested_group.root_ancestor_allowed_email_domains).to contain_exactly(allowed_email_domain)
+      expect(deep_nested_group.root_ancestor_allowed_email_domains).to contain_exactly(allowed_email_domain)
+      expect(very_deep_nested_group.root_ancestor_allowed_email_domains).to contain_exactly(allowed_email_domain)
+    end
+  end
+
   describe '#predefined_push_rule' do
     context 'group with no associated push_rules record' do
       let!(:sample) { create(:push_rule_sample) }
@@ -424,7 +526,7 @@ describe Group do
 
     context 'group with associated push_rules record' do
       context 'with its own push rule' do
-        let(:push_rule) { create(:push_rule )}
+        let(:push_rule) { create(:push_rule) }
 
         it 'returns its own push rule' do
           group.update(push_rule: push_rule)
@@ -548,22 +650,11 @@ describe Group do
           is_expected.to be true
         end
 
-        it 'returns true for groups with group template already set within grace period' do
+        it 'returns false for groups with group template already set but not in proper plan' do
           group.update!(custom_project_templates_group_id: create(:group, parent: group).id)
           group.reload
 
-          Timecop.freeze(GroupsWithTemplatesFinder::CUT_OFF_DATE - 1.day) do
-            is_expected.to be true
-          end
-        end
-
-        it 'returns false for groups with group template already set after grace period' do
-          group.update!(custom_project_templates_group_id: create(:group, parent: group).id)
-          group.reload
-
-          Timecop.freeze(GroupsWithTemplatesFinder::CUT_OFF_DATE + 1.day) do
-            is_expected.to be false
-          end
+          is_expected.to be false
         end
       end
 
@@ -572,8 +663,73 @@ describe Group do
           stub_licensed_features(group_project_templates: false)
         end
 
-        it 'returns false unlicensed instance' do
+        it 'returns false for unlicensed instance' do
           is_expected.to be false
+        end
+      end
+    end
+  end
+
+  describe '#minimal_access_role_allowed?' do
+    subject { group.minimal_access_role_allowed? }
+
+    context 'licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: true)
+      end
+
+      it 'returns true for licensed instance' do
+        is_expected.to be true
+      end
+
+      it 'returns false for subgroup in licensed instance' do
+        expect(create(:group, parent: group).minimal_access_role_allowed?).to be false
+      end
+    end
+
+    context 'unlicensed' do
+      before do
+        stub_licensed_features(minimal_access_role: false)
+      end
+
+      it 'returns false unlicensed instance' do
+        is_expected.to be false
+      end
+    end
+  end
+
+  describe '#member?' do
+    subject { group.member?(user) }
+
+    let(:group) { create(:group) }
+    let(:user) { create(:user) }
+
+    context 'with `minimal_access_role` not licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: false)
+        create(:group_member, :minimal_access, user: user, source: group)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'with `minimal_access_role` licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: true)
+        create(:group_member, :minimal_access, user: user, source: group)
+      end
+
+      context 'when group is a subgroup' do
+        let(:group) { create(:group, parent: create(:group)) }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when group is a top-level group' do
+        it { is_expected.to be_truthy }
+
+        it 'accepts higher level as argument' do
+          expect(group.member?(user, ::Gitlab::Access::DEVELOPER)).to be_falsey
         end
       end
     end
@@ -612,9 +768,27 @@ describe Group do
     end
   end
 
-  describe '#alpha/beta_feature_available?' do
-    it_behaves_like 'an entity with alpha/beta feature support' do
-      let(:entity) { group }
+  describe '#saml_enabled?' do
+    subject { group.saml_enabled? }
+
+    context 'when a SAML provider does not exist' do
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when a SAML provider exists and is persisted' do
+      before do
+        create(:saml_provider, group: group)
+      end
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when a SAML provider is not persisted' do
+      before do
+        build(:saml_provider, group: group)
+      end
+
+      it { is_expected.to eq(false) }
     end
   end
 
@@ -679,7 +853,7 @@ describe Group do
   end
 
   describe '#self_or_ancestor_marked_for_deletion' do
-    context 'adjourned deletion feature is not available' do
+    context 'delayed deletion feature is not available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
         create(:group_deletion_schedule, group: group, marked_for_deletion_on: 1.day.ago)
@@ -690,7 +864,7 @@ describe Group do
       end
     end
 
-    context 'adjourned deletion feature is available' do
+    context 'delayed deletion feature is available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
@@ -738,12 +912,12 @@ describe Group do
   describe '#marked_for_deletion?' do
     subject { group.marked_for_deletion? }
 
-    context 'adjourned deletion feature is available' do
+    context 'delayed deletion feature is available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
 
-      context 'when the group is marked for adjourned deletion' do
+      context 'when the group is marked for delayed deletion' do
         before do
           create(:group_deletion_schedule, group: group, marked_for_deletion_on: 1.day.ago)
         end
@@ -751,17 +925,17 @@ describe Group do
         it { is_expected.to be_truthy }
       end
 
-      context 'when the group is not marked for adjourned deletion' do
+      context 'when the group is not marked for delayed deletion' do
         it { is_expected.to be_falsey }
       end
     end
 
-    context 'adjourned deletion feature is not available' do
+    context 'delayed deletion feature is not available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
       end
 
-      context 'when the group is marked for adjourned deletion' do
+      context 'when the group is marked for delayed deletion' do
         before do
           create(:group_deletion_schedule, group: group, marked_for_deletion_on: 1.day.ago)
         end
@@ -769,7 +943,7 @@ describe Group do
         it { is_expected.to be_falsey }
       end
 
-      context 'when the group is not marked for adjourned deletion' do
+      context 'when the group is not marked for delayed deletion' do
         it { is_expected.to be_falsey }
       end
     end
@@ -786,12 +960,12 @@ describe Group do
       it { is_expected.to be_truthy }
     end
 
-    context 'adjourned deletion feature is available' do
+    context 'delayed deletion feature is available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
 
-      context 'when adjourned deletion period is set to more than 0' do
+      context 'when delayed deletion period is set to more than 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 1)
         end
@@ -799,7 +973,7 @@ describe Group do
         it_behaves_like 'returns true'
       end
 
-      context 'when adjourned deletion period is set to 0' do
+      context 'when delayed deletion period is set to 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 0)
         end
@@ -808,12 +982,12 @@ describe Group do
       end
     end
 
-    context 'adjourned deletion feature is not available' do
+    context 'delayed deletion feature is not available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
       end
 
-      context 'when adjourned deletion period is set to more than 0' do
+      context 'when delayed deletion period is set to more than 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 1)
         end
@@ -821,7 +995,7 @@ describe Group do
         it_behaves_like 'returns false'
       end
 
-      context 'when adjourned deletion period is set to 0' do
+      context 'when delayed deletion period is set to 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 0)
         end
@@ -945,5 +1119,17 @@ describe Group do
         expect(subject).to be_nil
       end
     end
+  end
+
+  describe '#owners_emails' do
+    let(:user) { create(:user, email: 'bob@example.com') }
+
+    before do
+      group.add_owner(user)
+    end
+
+    subject { group.owners_emails }
+
+    it { is_expected.to match([user.email]) }
   end
 end

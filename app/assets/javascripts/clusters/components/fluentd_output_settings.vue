@@ -1,22 +1,16 @@
 <script>
+import { GlAlert, GlButton, GlDropdown, GlDropdownItem, GlFormCheckbox } from '@gitlab/ui';
+import { mapValues } from 'lodash';
 import { __ } from '~/locale';
 import { APPLICATION_STATUS, FLUENTD } from '~/clusters/constants';
-import {
-  GlAlert,
-  GlDeprecatedButton,
-  GlDropdown,
-  GlDropdownItem,
-  GlFormCheckbox,
-} from '@gitlab/ui';
 import eventHub from '~/clusters/event_hub';
-import { mapValues } from 'lodash';
 
 const { UPDATING, UNINSTALLING, INSTALLING, INSTALLED, UPDATED } = APPLICATION_STATUS;
 
 export default {
   components: {
     GlAlert,
-    GlDeprecatedButton,
+    GlButton,
     GlDropdown,
     GlDropdownItem,
     GlFormCheckbox,
@@ -215,26 +209,27 @@ export default {
       </div>
       <div class="form-group flex flex-wrap">
         <gl-form-checkbox :checked="wafLogEnabled" @input="wafLogChanged">
-          <strong>{{ s__('ClusterIntegration|Send ModSecurity Logs') }}</strong>
+          <strong>{{ s__('ClusterIntegration|Send Web Application Firewall Logs') }}</strong>
         </gl-form-checkbox>
         <gl-form-checkbox :checked="ciliumLogEnabled" @input="ciliumLogChanged">
-          <strong>{{ s__('ClusterIntegration|Send Cilium Logs') }}</strong>
+          <strong>{{ s__('ClusterIntegration|Send Container Network Policies Logs') }}</strong>
         </gl-form-checkbox>
       </div>
-      <div v-if="showButtons" class="mt-3">
-        <gl-deprecated-button
+      <div v-if="showButtons" class="gl-mt-5 gl-display-flex">
+        <gl-button
           ref="saveBtn"
-          class="mr-1"
+          class="gl-mr-3"
           variant="success"
+          category="primary"
           :loading="isSaving"
           :disabled="saveButtonDisabled"
           @click="updateApplication"
         >
           {{ saveButtonLabel }}
-        </gl-deprecated-button>
-        <gl-deprecated-button ref="cancelBtn" :disabled="saveButtonDisabled" @click="resetStatus">
+        </gl-button>
+        <gl-button ref="cancelBtn" :disabled="saveButtonDisabled" @click="resetStatus">
           {{ __('Cancel') }}
-        </gl-deprecated-button>
+        </gl-button>
       </div>
     </div>
   </div>

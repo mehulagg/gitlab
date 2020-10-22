@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectStatistics do
+RSpec.describe ProjectStatistics do
   let(:project) { create :project }
   let(:statistics) { project.statistics }
 
@@ -32,7 +32,9 @@ describe ProjectStatistics do
         repository_size: 2.exabytes,
         wiki_size: 1.exabytes,
         lfs_objects_size: 2.exabytes,
-        build_artifacts_size: 3.exabytes - 1
+        build_artifacts_size: 1.exabyte,
+        snippets_size: 1.exabyte,
+        pipeline_artifacts_size: 1.exabyte - 1
       )
 
       statistics.reload
@@ -41,8 +43,10 @@ describe ProjectStatistics do
       expect(statistics.repository_size).to eq(2.exabytes)
       expect(statistics.wiki_size).to eq(1.exabytes)
       expect(statistics.lfs_objects_size).to eq(2.exabytes)
-      expect(statistics.build_artifacts_size).to eq(3.exabytes - 1)
+      expect(statistics.build_artifacts_size).to eq(1.exabyte)
       expect(statistics.storage_size).to eq(8.exabytes - 1)
+      expect(statistics.snippets_size).to eq(1.exabyte)
+      expect(statistics.pipeline_artifacts_size).to eq(1.exabyte - 1)
     end
   end
 
@@ -52,14 +56,37 @@ describe ProjectStatistics do
       statistics.wiki_size = 6
       statistics.lfs_objects_size = 3
       statistics.build_artifacts_size = 4
+      statistics.snippets_size = 5
 
       expect(statistics.total_repository_size).to eq 5
     end
   end
 
   describe '#wiki_size' do
-    it "is initialized with not null value" do
+    it 'is initialized with not null value' do
+      expect(statistics.attributes['wiki_size']).to be_zero
+      expect(statistics.wiki_size).to be_zero
+    end
+
+    it 'coerces any nil value to 0' do
+      statistics.update!(wiki_size: nil)
+
+      expect(statistics.attributes['wiki_size']).to be_nil
       expect(statistics.wiki_size).to eq 0
+    end
+  end
+
+  describe '#snippets_size' do
+    it 'is initialized with not null value' do
+      expect(statistics.attributes['snippets_size']).to be_zero
+      expect(statistics.snippets_size).to be_zero
+    end
+
+    it 'coerces any nil value to 0' do
+      statistics.update!(snippets_size: nil)
+
+      expect(statistics.attributes['snippets_size']).to be_nil
+      expect(statistics.snippets_size).to eq 0
     end
   end
 
@@ -69,6 +96,7 @@ describe ProjectStatistics do
       allow(statistics).to receive(:update_repository_size)
       allow(statistics).to receive(:update_wiki_size)
       allow(statistics).to receive(:update_lfs_objects_size)
+      allow(statistics).to receive(:update_snippets_size)
       allow(statistics).to receive(:update_storage_size)
     end
 
@@ -82,6 +110,7 @@ describe ProjectStatistics do
         expect(statistics).to have_received(:update_repository_size)
         expect(statistics).to have_received(:update_wiki_size)
         expect(statistics).to have_received(:update_lfs_objects_size)
+        expect(statistics).to have_received(:update_snippets_size)
       end
     end
 
@@ -95,6 +124,7 @@ describe ProjectStatistics do
         expect(statistics).not_to have_received(:update_commit_count)
         expect(statistics).not_to have_received(:update_repository_size)
         expect(statistics).not_to have_received(:update_wiki_size)
+        expect(statistics).not_to have_received(:update_snippets_size)
       end
     end
 
@@ -108,9 +138,11 @@ describe ProjectStatistics do
         expect(statistics).to have_received(:update_commit_count)
         expect(statistics).to have_received(:update_repository_size)
         expect(statistics).to have_received(:update_wiki_size)
+        expect(statistics).to have_received(:update_snippets_size)
         expect(statistics.repository_size).to eq(0)
         expect(statistics.commit_count).to eq(0)
         expect(statistics.wiki_size).to eq(0)
+        expect(statistics.snippets_size).to eq(0)
       end
     end
 
@@ -130,9 +162,11 @@ describe ProjectStatistics do
         expect(statistics).to have_received(:update_commit_count)
         expect(statistics).to have_received(:update_repository_size)
         expect(statistics).to have_received(:update_wiki_size)
+        expect(statistics).to have_received(:update_snippets_size)
         expect(statistics.repository_size).to eq(0)
         expect(statistics.commit_count).to eq(0)
         expect(statistics.wiki_size).to eq(0)
+        expect(statistics.snippets_size).to eq(0)
       end
     end
 
@@ -165,6 +199,23 @@ describe ProjectStatistics do
           .not_to receive(:perform_async)
 
         statistics.refresh!(only: [:commit_count])
+      end
+    end
+
+    context 'when the database is read-only' do
+      it 'does nothing' do
+        allow(Gitlab::Database).to receive(:read_only?) { true }
+
+        expect(statistics).not_to receive(:update_commit_count)
+        expect(statistics).not_to receive(:update_repository_size)
+        expect(statistics).not_to receive(:update_wiki_size)
+        expect(statistics).not_to receive(:update_lfs_objects_size)
+        expect(statistics).not_to receive(:update_snippets_size)
+        expect(statistics).not_to receive(:save!)
+        expect(Namespaces::ScheduleAggregationWorker)
+          .not_to receive(:perform_async)
+
+        statistics.refresh!
       end
     end
   end
@@ -202,6 +253,33 @@ describe ProjectStatistics do
     end
   end
 
+  describe '#update_snippets_size' do
+    before do
+      create_list(:project_snippet, 2, project: project)
+      SnippetStatistics.update_all(repository_size: 10)
+    end
+
+    it 'stores the size of snippets' do
+      # Snippet not associated with the project
+      snippet = create(:project_snippet)
+      snippet.statistics.update!(repository_size: 40)
+
+      statistics.update_snippets_size
+
+      expect(statistics.update_snippets_size).to eq 20
+    end
+
+    context 'when not all snippets has statistics' do
+      it 'stores the size of snippets with statistics' do
+        SnippetStatistics.last.delete
+
+        statistics.update_snippets_size
+
+        expect(statistics.update_snippets_size).to eq 10
+      end
+    end
+  end
+
   describe '#update_lfs_objects_size' do
     let!(:lfs_object1) { create(:lfs_object, size: 23.megabytes) }
     let!(:lfs_object2) { create(:lfs_object, size: 34.megabytes) }
@@ -222,12 +300,14 @@ describe ProjectStatistics do
       statistics.update!(
         repository_size: 2,
         wiki_size: 4,
-        lfs_objects_size: 3
+        lfs_objects_size: 3,
+        snippets_size: 2,
+        pipeline_artifacts_size: 3
       )
 
       statistics.reload
 
-      expect(statistics.storage_size).to eq 9
+      expect(statistics.storage_size).to eq 14
     end
 
     it 'works during wiki_size backfill' do
@@ -241,25 +321,75 @@ describe ProjectStatistics do
 
       expect(statistics.storage_size).to eq 5
     end
+
+    context 'when nullable columns are nil' do
+      it 'does not raise any error' do
+        expect do
+          statistics.update!(
+            repository_size: 2,
+            wiki_size: nil,
+            lfs_objects_size: 3,
+            snippets_size: nil
+          )
+        end.not_to raise_error
+
+        expect(statistics.storage_size).to eq 5
+      end
+    end
   end
 
   describe '.increment_statistic' do
     shared_examples 'a statistic that increases storage_size' do
       it 'increases the statistic by that amount' do
-        expect { described_class.increment_statistic(project.id, stat, 13) }
+        expect { described_class.increment_statistic(project, stat, 13) }
           .to change { statistics.reload.send(stat) || 0 }
           .by(13)
       end
 
       it 'increases also storage size by that amount' do
-        expect { described_class.increment_statistic(project.id, stat, 20) }
-         .to change { statistics.reload.storage_size }
-         .by(20)
+        expect { described_class.increment_statistic(project, stat, 20) }
+          .to change { statistics.reload.storage_size }
+          .by(20)
+      end
+    end
+
+    shared_examples 'a statistic that increases storage_size asynchronously' do
+      it 'stores the increment temporarily in Redis', :clean_gitlab_redis_shared_state do
+        described_class.increment_statistic(project, stat, 13)
+
+        Gitlab::Redis::SharedState.with do |redis|
+          increment = redis.get(statistics.counter_key(stat))
+          expect(increment.to_i).to eq(13)
+        end
+      end
+
+      it 'schedules a worker to update the statistic and storage_size async' do
+        expect(FlushCounterIncrementsWorker)
+          .to receive(:perform_in)
+          .with(CounterAttribute::WORKER_DELAY, described_class.name, statistics.id, stat)
+
+        expect(FlushCounterIncrementsWorker)
+          .to receive(:perform_in)
+          .with(CounterAttribute::WORKER_DELAY, described_class.name, statistics.id, :storage_size)
+
+        described_class.increment_statistic(project, stat, 20)
       end
     end
 
     context 'when adjusting :build_artifacts_size' do
       let(:stat) { :build_artifacts_size }
+
+      it_behaves_like 'a statistic that increases storage_size asynchronously'
+
+      it_behaves_like 'a statistic that increases storage_size' do
+        before do
+          stub_feature_flags(efficient_counter_attribute: false)
+        end
+      end
+    end
+
+    context 'when adjusting :pipeline_artifacts_size' do
+      let(:stat) { :pipeline_artifacts_size }
 
       it_behaves_like 'a statistic that increases storage_size'
     end

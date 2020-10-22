@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::LoadBalancing::Session do
+RSpec.describe Gitlab::Database::LoadBalancing::Session do
   after do
     described_class.clear_session
   end

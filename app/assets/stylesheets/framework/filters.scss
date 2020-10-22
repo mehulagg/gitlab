@@ -26,6 +26,12 @@
     margin-right: 6px;
   }
 
+  .bulk-update {
+    .filter-item {
+      margin-right: 0;
+    }
+  }
+
   .sort-filter {
     display: inline-block;
     float: right;
@@ -96,7 +102,7 @@
   }
 
   .name {
-    background-color: $white-normal;
+    background-color: $gray-50;
     color: $gl-text-color-secondary;
     border-radius: 2px 0 0 2px;
     margin-right: 1px;
@@ -128,20 +134,20 @@
     padding-left: 8px;
     padding-right: 0;
 
-    .fa-close {
+    .close-icon {
       color: $gl-text-color-secondary;
     }
 
-    &:hover .fa-close {
+    &:hover .close-icon {
       color: $gl-text-color;
     }
 
     &.inverted {
-      .fa-close {
+      .close-icon {
         color: $gl-text-color-secondary-inverted;
       }
 
-      &:hover .fa-close {
+      &:hover .close-icon {
         color: $gl-text-color-inverted;
       }
     }
@@ -152,7 +158,7 @@
 .filtered-search-token .selected,
 .filtered-search-term .selected {
   .name {
-    background-color: $gray-200;
+    background-color: $gray-100;
   }
 
   .operator {
@@ -237,7 +243,7 @@
     }
   }
 
-  .fa-times {
+  .clear-search-icon {
     right: 10px;
     color: $gray-darkest;
   }
@@ -249,7 +255,7 @@
     outline: none;
     z-index: 1;
 
-    &:hover .fa-times {
+    &:hover .clear-search-icon {
       color: $common-gray-dark;
     }
   }
@@ -259,6 +265,7 @@
   flex: 1;
   position: relative;
   min-width: 0;
+  background-color: $input-bg;
 }
 
 .filtered-search-input-dropdown-menu {
@@ -299,23 +306,6 @@
   &:focus {
     color: $gl-text-color;
     border-color: $border-color;
-  }
-
-  svg {
-    height: 14px;
-    width: 14px;
-    vertical-align: middle;
-    margin-bottom: 4px;
-  }
-
-  .dropdown-toggle-text {
-    display: inline-block;
-    color: inherit;
-
-    .fa {
-      vertical-align: middle;
-      color: inherit;
-    }
   }
 }
 
@@ -358,34 +348,51 @@
 }
 
 @include media-breakpoint-down(sm) {
-  .issues-details-filters {
-    padding-top: 0;
-    padding-bottom: 0;
+  .issues-details-filters,
+  .epics-details-filters {
+    padding-top: $gl-padding-8;
+    padding-bottom: $gl-padding-8;
     background-color: $white;
-    border-top: 0;
   }
 
-  .boards-switcher {
-    margin: 0 0 10px;
+  .filtered-search-block .boards-switcher {
+    @include gl-mr-0;
+    margin-bottom: $gl-input-padding;
 
     .boards-selector-wrapper,
     .dropdown {
-      display: block;
+      @include gl-display-block;
     }
   }
 
   .filter-dropdown-container {
     > div {
-      margin: 0;
+      @include gl-m-0;
 
       > .btn {
-        margin: 0 0 10px;
-        width: 100%;
+        margin: 0 0 $gl-input-padding;
+        @include gl-w-full;
       }
     }
 
     .board-labels-toggle-wrapper {
       margin-bottom: $gl-input-padding;
+    }
+
+    .board-swimlanes-toggle-wrapper {
+      @include gl-h-auto;
+      margin-bottom: $gl-input-padding;
+
+      > span,
+      > .dropdown,
+      .gl-dropdown-toggle {
+        @include gl-w-full;
+        @include gl-m-0;
+      }
+
+      > .dropdown {
+        @include gl-mt-2;
+      }
     }
   }
 
@@ -447,5 +454,36 @@
   .value {
     font-family: $monospace-font;
     font-size: 13px;
+  }
+}
+
+.vue-filtered-search-bar-container {
+  .gl-search-box-by-click {
+    // Absolute width is needed to prevent flex to grow
+    // beyond the available width.
+    .gl-filtered-search-scrollable {
+      width: 1px;
+    }
+
+    // There are several styling issues happening while using
+    // `GlFilteredSearch` in roadmap due to some of our global
+    // styles which we need to override until those are fixed
+    // at framework level.
+    // See https://gitlab.com/gitlab-org/gitlab-ui/-/issues/908
+    .input-group-prepend + .gl-filtered-search-scrollable {
+      border-radius: 0;
+    }
+  }
+
+  @include media-breakpoint-up(md) {
+    .sort-dropdown-container {
+      margin-left: 10px;
+    }
+  }
+
+  @include media-breakpoint-down(sm) {
+    .sort-dropdown-container {
+      margin-top: 10px;
+    }
   }
 }

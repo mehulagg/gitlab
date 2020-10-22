@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::ImportExport::ExportService do
+RSpec.describe Groups::ImportExport::ExportService do
   describe '#async_execute' do
     let(:user) { create(:user) }
     let(:group) { create(:group) }
@@ -49,8 +49,14 @@ describe Groups::ImportExport::ExportService do
       FileUtils.rm_rf(archive_path)
     end
 
+    it 'saves the version' do
+      expect(Gitlab::ImportExport::VersionSaver).to receive(:new).and_call_original
+
+      service.execute
+    end
+
     it 'saves the models using ndjson tree saver' do
-      stub_feature_flags(group_import_export_ndjson: true)
+      stub_feature_flags(group_export_ndjson: true)
 
       expect(Gitlab::ImportExport::Group::TreeSaver).to receive(:new).and_call_original
 
@@ -58,9 +64,17 @@ describe Groups::ImportExport::ExportService do
     end
 
     it 'saves the models using legacy tree saver' do
-      stub_feature_flags(group_import_export_ndjson: false)
+      stub_feature_flags(group_export_ndjson: false)
 
       expect(Gitlab::ImportExport::Group::LegacyTreeSaver).to receive(:new).and_call_original
+
+      service.execute
+    end
+
+    it 'notifies the user' do
+      expect_next_instance_of(NotificationService) do |instance|
+        expect(instance).to receive(:group_was_exported)
+      end
 
       service.execute
     end
@@ -89,12 +103,14 @@ describe Groups::ImportExport::ExportService do
       end
 
       it 'logs the error' do
-        expect(shared.logger).to receive(:error).with(
-          group_id:   group.id,
-          group_name: group.name,
-          error:      expected_message,
-          message:    'Group Import/Export: Export failed'
-        )
+        expect_next_instance_of(Gitlab::Export::Logger) do |logger|
+          expect(logger).to receive(:error).with(
+            group_id: group.id,
+            group_name: group.name,
+            errors: expected_message,
+            message: 'Group Export failed'
+          )
+        end
 
         expect { service.execute }.to raise_error(Gitlab::ImportExport::Error)
       end
@@ -108,15 +124,25 @@ describe Groups::ImportExport::ExportService do
 
     context 'when export fails' do
       context 'when file saver fails' do
-        it 'removes the remaining exported data' do
+        before do
           allow_next_instance_of(Gitlab::ImportExport::Saver) do |saver|
             allow(saver).to receive(:save).and_return(false)
           end
+        end
 
+        it 'removes the remaining exported data' do
           expect { service.execute }.to raise_error(Gitlab::ImportExport::Error)
 
           expect(group.import_export_upload).to be_nil
-          expect(File.exist?(shared.archive_path)).to eq(false)
+          expect(Dir.exist?(shared.base_path)).to eq(false)
+        end
+
+        it 'notifies the user about failed group export' do
+          expect_next_instance_of(NotificationService) do |instance|
+            expect(instance).to receive(:group_was_not_exported)
+          end
+
+          expect { service.execute }.to raise_error(Gitlab::ImportExport::Error)
         end
       end
 
@@ -133,12 +159,13 @@ describe Groups::ImportExport::ExportService do
           expect { service.execute }.to raise_error(Gitlab::ImportExport::Error)
 
           expect(group.import_export_upload).to be_nil
-          expect(File.exist?(shared.archive_path)).to eq(false)
+          expect(Dir.exist?(shared.base_path)).to eq(false)
         end
 
         it 'notifies logger' do
           allow(service).to receive_message_chain(:tree_exporter, :save).and_return(false)
-          expect(shared.logger).to receive(:error)
+
+          expect(service.instance_variable_get(:@logger)).to receive(:error)
 
           expect { service.execute }.to raise_error(Gitlab::ImportExport::Error)
         end

@@ -1,29 +1,28 @@
 <script>
 import $ from 'jquery';
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { mapActions, mapGetters } from 'vuex';
+import { GlButton } from '@gitlab/ui';
 import { getMilestone } from 'ee_else_ce/boards/boards_util';
 import ListIssue from 'ee_else_ce/boards/models/issue';
 import eventHub from '../eventhub';
 import ProjectSelect from './project_select.vue';
 import boardsStore from '../stores/boards_store';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   name: 'BoardNewIssue',
   components: {
     ProjectSelect,
-    GlDeprecatedButton,
+    GlButton,
   },
+  mixins: [glFeatureFlagMixin()],
   props: {
-    groupId: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
     list: {
       type: Object,
       required: true,
     },
   },
+  inject: ['groupId'],
   data() {
     return {
       title: '',
@@ -32,11 +31,15 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['isSwimlanesOn']),
     disabled() {
       if (this.groupId) {
         return this.title === '' || !this.selectedProject.name;
       }
       return this.title === '';
+    },
+    shouldDisplaySwimlanes() {
+      return this.glFeatures.boardsWithSwimlanes && this.isSwimlanesOn;
     },
   },
   mounted() {
@@ -44,6 +47,7 @@ export default {
     eventHub.$on('setSelectedProject', this.setSelectedProject);
   },
   methods: {
+    ...mapActions(['addListIssue', 'addListIssueFailure']),
     submit(e) {
       e.preventDefault();
       if (this.title.trim() === '') return Promise.resolve();
@@ -70,21 +74,31 @@ export default {
       eventHub.$emit(`scroll-board-list-${this.list.id}`);
       this.cancel();
 
+      if (this.shouldDisplaySwimlanes || this.glFeatures.graphqlBoardLists) {
+        this.addListIssue({ list: this.list, issue, position: 0 });
+      }
+
       return this.list
         .newIssue(issue)
         .then(() => {
           // Need this because our jQuery very kindly disables buttons on ALL form submissions
           $(this.$refs.submitButton).enable();
 
-          boardsStore.setIssueDetail(issue);
-          boardsStore.setListDetail(this.list);
+          if (!this.shouldDisplaySwimlanes && !this.glFeatures.graphqlBoardLists) {
+            boardsStore.setIssueDetail(issue);
+            boardsStore.setListDetail(this.list);
+          }
         })
         .catch(() => {
           // Need this because our jQuery very kindly disables buttons on ALL form submissions
           $(this.$refs.submitButton).enable();
 
           // Remove the issue
-          this.list.removeIssue(issue);
+          if (this.shouldDisplaySwimlanes || this.glFeatures.graphqlBoardLists) {
+            this.addListIssueFailure({ list: this.list, issue });
+          } else {
+            this.list.removeIssue(issue);
+          }
 
           // Show error message
           this.error = true;
@@ -92,7 +106,7 @@ export default {
     },
     cancel() {
       this.title = '';
-      eventHub.$emit(`hide-issue-form-${this.list.id}`);
+      eventHub.$emit(`toggle-issue-form-${this.list.id}`);
     },
     setSelectedProject(selectedProject) {
       this.selectedProject = selectedProject;
@@ -119,21 +133,23 @@ export default {
           autocomplete="off"
         />
         <project-select v-if="groupId" :group-id="groupId" :list="list" />
-        <div class="clearfix prepend-top-10">
-          <gl-deprecated-button
-            ref="submit-button"
+        <div class="clearfix gl-mt-3">
+          <gl-button
+            ref="submitButton"
             :disabled="disabled"
             class="float-left"
             variant="success"
+            category="primary"
             type="submit"
-            >{{ __('Submit issue') }}</gl-deprecated-button
+            >{{ __('Submit issue') }}</gl-button
           >
-          <gl-deprecated-button
+          <gl-button
+            ref="cancelButton"
             class="float-right"
             type="button"
             variant="default"
             @click="cancel"
-            >{{ __('Cancel') }}</gl-deprecated-button
+            >{{ __('Cancel') }}</gl-button
           >
         </div>
       </form>

@@ -5,6 +5,9 @@ module Clusters
     class Aws < ApplicationRecord
       include Gitlab::Utils::StrongMemoize
       include Clusters::Concerns::ProviderStatus
+      include IgnorableColumns
+
+      ignore_column :created_by_user_id, remove_with: '13.4', remove_after: '2020-08-22'
 
       self.table_name = 'cluster_providers_aws'
 
@@ -34,7 +37,7 @@ module Clusters
           greater_than: 0
         }
 
-      validates :key_name, :region, :instance_type, :security_group_id, length: { in: 1..255 }
+      validates :kubernetes_version, :key_name, :region, :instance_type, :security_group_id, length: { in: 1..255 }
       validates :subnet_ids, presence: true
 
       def nullify_credentials

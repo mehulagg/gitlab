@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['SentryError'] do
-  it { expect(described_class.graphql_name).to eq('SentryError') }
+RSpec.describe GitlabSchema.types['SentryError'] do
+  specify { expect(described_class.graphql_name).to eq('SentryError') }
 
   it 'exposes the expected fields' do
     expected_fields = %i[

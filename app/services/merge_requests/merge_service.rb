@@ -10,13 +10,14 @@ module MergeRequests
   class MergeService < MergeRequests::MergeBaseService
     delegate :merge_jid, :state, to: :@merge_request
 
-    def execute(merge_request)
+    def execute(merge_request, options = {})
       if project.merge_requests_ff_only_enabled && !self.is_a?(FfMergeService)
         FfMergeService.new(project, current_user, params).execute(merge_request)
         return
       end
 
       @merge_request = merge_request
+      @options = options
 
       validate!
 
@@ -27,6 +28,7 @@ module MergeRequests
           success
         end
       end
+
       log_info("Merge process finished on JID #{merge_jid} with state #{state}")
     rescue MergeError => e
       handle_merge_error(log_message: e.message, save_message_on_model: true)
@@ -54,8 +56,10 @@ module MergeRequests
       error =
         if @merge_request.should_be_rebased?
           'Only fast-forward merge is allowed for your project. Please update your source branch'
-        elsif !@merge_request.mergeable?
+        elsif !@merge_request.mergeable?(skip_discussions_check: @options[:skip_discussions_check])
           'Merge request is not mergeable'
+        elsif !@merge_request.squash && project.squash_always?
+          'This project requires squashing commits when merge requests are accepted.'
         end
 
       raise_error(error) if error
@@ -80,7 +84,7 @@ module MergeRequests
 
       merge_request.update!(merge_commit_sha: commit_id)
     ensure
-      merge_request.update_column(:in_progress_merge_commit_sha, nil)
+      merge_request.update_and_mark_in_progress_merge_commit_sha(nil)
     end
 
     def try_merge
@@ -121,12 +125,12 @@ module MergeRequests
     end
 
     def handle_merge_error(log_message:, save_message_on_model: false)
-      Rails.logger.error("MergeService ERROR: #{merge_request_info} - #{log_message}") # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.error("MergeService ERROR: #{merge_request_info} - #{log_message}")
       @merge_request.update(merge_error: log_message) if save_message_on_model
     end
 
     def log_info(message)
-      @logger ||= Rails.logger # rubocop:disable Gitlab/RailsLogger
+      @logger ||= Gitlab::AppLogger
       @logger.info("#{merge_request_info} - #{message}")
     end
 

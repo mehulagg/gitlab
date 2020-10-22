@@ -1,5 +1,5 @@
 <script>
-import { GlBadge } from '@gitlab/ui';
+import { GlDeprecatedBadge as GlBadge } from '@gitlab/ui';
 import { __ } from '~/locale';
 
 export default {

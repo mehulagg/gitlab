@@ -3,18 +3,19 @@
 module EE
   module Git
     module WikiPushService
+      extend ::Gitlab::Utils::Override
+
+      override :execute
       def execute
         super
 
-        return unless project.use_elasticsearch?
+        # TODO: Support Elasticsearch indexing for group wikis
+        # https://gitlab.com/gitlab-org/gitlab/-/issues/207889
+        return unless wiki.is_a?(::ProjectWiki)
+        return unless wiki.container.use_elasticsearch?
+        return unless default_branch_changes.any?
 
-        # Check if one of the changes we got was for the default branch. If it was, trigger an ES update
-        params[:changes].each do |change|
-          branch_name = ::Gitlab::Git.ref_name(change[:ref])
-          next unless project.wiki.default_branch == branch_name
-
-          project.wiki.index_wiki_blobs(change[:newrev])
-        end
+        wiki.index_wiki_blobs
       end
     end
   end

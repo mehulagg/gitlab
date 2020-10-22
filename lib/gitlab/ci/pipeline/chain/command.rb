@@ -10,17 +10,19 @@ module Gitlab
           :trigger_request, :schedule, :merge_request, :external_pull_request,
           :ignore_skip_ci, :save_incompleted,
           :seeds_block, :variables_attributes, :push_options,
-          :chat_data, :allow_mirror_update, :bridge,
+          :chat_data, :allow_mirror_update, :bridge, :content, :dry_run,
           # These attributes are set by Chains during processing:
-          :config_content, :config_processor, :stage_seeds
+          :config_content, :yaml_processor_result, :stage_seeds
         ) do
           include Gitlab::Utils::StrongMemoize
 
-          def initialize(**params)
+          def initialize(params = {})
             params.each do |key, value|
               self[key] = value
             end
           end
+
+          alias_method :dry_run?, :dry_run
 
           def branch_exists?
             strong_memoize(:is_branch) do
@@ -77,19 +79,22 @@ module Gitlab
             bridge&.parent_pipeline
           end
 
-          def duration_histogram
-            strong_memoize(:duration_histogram) do
-              name = :gitlab_ci_pipeline_creation_duration_seconds
-              comment = 'Pipeline creation duration'
-              labels = {}
-              buckets = [0.01, 0.05, 0.1, 0.5, 1.0, 2.0, 5.0, 20.0, 50.0, 240.0]
-
-              Gitlab::Metrics.histogram(name, comment, labels, buckets)
-            end
+          def metrics
+            @metrics ||= ::Gitlab::Ci::Pipeline::Metrics.new
           end
 
           def observe_creation_duration(duration)
-            duration_histogram.observe({}, duration.seconds)
+            metrics.pipeline_creation_duration_histogram
+              .observe({}, duration.seconds)
+          end
+
+          def observe_pipeline_size(pipeline)
+            metrics.pipeline_size_histogram
+              .observe({ source: pipeline.source.to_s }, pipeline.total_size)
+          end
+
+          def dangling_build?
+            %i[ondemand_dast_scan webide].include?(source)
           end
         end
       end

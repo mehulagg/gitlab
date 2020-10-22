@@ -6,6 +6,7 @@ module StatusPage
   #
   # Use this service for publishing an incident to CDN synchronously.
   # To publish asynchronously use +StatusPage::TriggerPublishService+ instead.
+  # Called within an async job so as to run out of out of band from web requests
   #
   # This services calls:
   # * StatusPage::PublishDetailsService
@@ -13,6 +14,7 @@ module StatusPage
   # * StatusPage::PublishListService
   class PublishService
     include Gitlab::Utils::StrongMemoize
+    include Gitlab::Utils::UsageData
 
     def initialize(user:, project:, issue_id:)
       @user = user
@@ -27,6 +29,8 @@ module StatusPage
       response = process_details
       return response if response.error?
 
+      track_event
+
       process_list
     end
 
@@ -35,10 +39,12 @@ module StatusPage
     attr_reader :user, :project, :issue_id
 
     def process_details
-      if issue.confidential?
-        unpublish_details
-      else
-        publish_details
+      should_unpublish? ? unpublish_details : publish_details
+    end
+
+    def should_unpublish?
+      strong_memoize(:should_unpublish) do
+        issue.confidential? || !issue.status_page_published_incident
       end
     end
 
@@ -88,6 +94,10 @@ module StatusPage
 
     def error(message)
       ServiceResponse.error(message: message)
+    end
+
+    def track_event
+      track_usage_event(:incident_management_incident_published, user.id) unless should_unpublish?
     end
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe ProtectedEnvironments::CreateService, '#execute' do
+RSpec.describe ProtectedEnvironments::CreateService, '#execute' do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
   let(:maintainer_access) { Gitlab::Access::MAINTAINER }

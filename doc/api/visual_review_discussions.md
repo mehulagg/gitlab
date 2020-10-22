@@ -1,9 +1,16 @@
+---
+stage: Verify
+group: Testing
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: reference, api
+---
+
 # Visual Review discussions API **(STARTER)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18710) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.5.
 
 Visual Review discussions are notes on Merge Requests sent as
-feedback from [Visual Reviews](../ci/review_apps/index.md#visual-reviews-starter).
+feedback from [Visual Reviews](../ci/review_apps/index.md#visual-reviews).
 
 ## Create new merge request thread
 
@@ -36,5 +43,5 @@ Parameters:
 | `position[y]`             | integer        | no       | Y coordinate (Only stored for `image` diff notes) |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/merge_requests/11/visual_review_discussions?body=comment
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/merge_requests/11/visual_review_discussions?body=comment"
 ```

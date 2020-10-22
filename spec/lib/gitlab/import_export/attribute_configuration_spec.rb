@@ -9,7 +9,7 @@ require 'spec_helper'
 # to be included as part of the export, or blacklist them using the import_export.yml configuration file.
 # Likewise, new models added to import_export.yml, will need to be added with their correspondent attributes
 # to this spec.
-describe 'Import/Export attribute configuration' do
+RSpec.describe 'Import/Export attribute configuration' do
   include ConfigurationHelper
 
   let(:safe_attributes_file) { 'spec/lib/gitlab/import_export/safe_model_attributes.yml' }
@@ -42,8 +42,5 @@ describe 'Import/Export attribute configuration' do
       SAFE_MODEL_ATTRIBUTES: #{File.expand_path(safe_attributes_file)}
       IMPORT_EXPORT_CONFIG: #{Gitlab::ImportExport.config_file}
     MSG
-  end
-
-  class Author < User
   end
 end

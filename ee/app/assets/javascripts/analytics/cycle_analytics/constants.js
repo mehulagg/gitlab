@@ -1,3 +1,4 @@
+import { gray10 } from '@gitlab/ui/scss_to_js/scss_variables';
 import { __ } from '~/locale';
 
 export const PROJECTS_PER_PAGE = 50;
@@ -25,16 +26,14 @@ export const EMPTY_STAGE_TEXT = {
   staging: __(
     'The staging stage shows the time between merging the MR and deploying code to the production environment. The data will be automatically added once you deploy to production for the first time.',
   ),
-  production: __(
-    'The production stage shows the total time it takes between creating an issue and deploying the code to production. The data will be automatically added once you have completed the full idea to production cycle.',
-  ),
 };
 
-export const DEFAULT_STAGE_NAMES = [...Object.keys(EMPTY_STAGE_TEXT), 'total'];
+export const DEFAULT_STAGE_NAMES = [...Object.keys(EMPTY_STAGE_TEXT)];
 
 export const TASKS_BY_TYPE_SUBJECT_ISSUE = 'Issue';
 export const TASKS_BY_TYPE_SUBJECT_MERGE_REQUEST = 'MergeRequest';
 export const TASKS_BY_TYPE_MAX_LABELS = 15;
+export const PATH_BACKGROUND_COLOR = gray10;
 
 export const TASKS_BY_TYPE_SUBJECT_FILTER_OPTIONS = {
   [TASKS_BY_TYPE_SUBJECT_ISSUE]: __('Issues'),
@@ -53,9 +52,14 @@ export const STAGE_ACTIONS = {
   HIDE: 'hideStage',
   CREATE: 'createStage',
   UPDATE: 'updateStage',
+  ADD_STAGE: 'showAddStageForm',
 };
 
-export const STAGE_NAME = {
-  TOTAL: 'total',
-  PRODUCTION: 'production',
+export const DEFAULT_VALUE_STREAM_ID = 'default';
+
+export const OVERVIEW_METRICS = {
+  TIME_SUMMARY: 'TIME_SUMMARY',
+  RECENT_ACTIVITY: 'RECENT_ACTIVITY',
 };
+
+export const FETCH_VALUE_STREAM_DATA = 'fetchValueStreamData';

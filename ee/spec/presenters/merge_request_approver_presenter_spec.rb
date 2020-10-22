@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequestApproverPresenter do
+RSpec.describe MergeRequestApproverPresenter do
   let(:project) { create(:project, :repository) }
   let(:merge_request) { create(:merge_request, target_project: project, source_project: project) }
   let(:file_paths) { %w{readme.md} }

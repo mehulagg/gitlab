@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::BlobController, '(JavaScript fixtures)', type: :controller do
+RSpec.describe Projects::BlobController, '(JavaScript fixtures)', type: :controller do
   include JavaScriptFixturesHelpers
 
   let(:admin) { create(:admin) }
@@ -29,6 +29,16 @@ describe Projects::BlobController, '(JavaScript fixtures)', type: :controller do
       namespace_id: project.namespace,
       project_id: project,
       id: 'add-ipython-files/files/ipython/basic.ipynb'
+    })
+
+    expect(response).to be_successful
+  end
+
+  it 'blob/show_readme.html' do
+    get(:show, params: {
+      namespace_id: project.namespace,
+      project_id: project,
+      id: 'master/README.md'
     })
 
     expect(response).to be_successful

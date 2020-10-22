@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe "Admin interacts with push rules" do
+RSpec.describe "Admin interacts with push rules" do
   include StubENV
 
   let_it_be(:user) { create(:admin) }

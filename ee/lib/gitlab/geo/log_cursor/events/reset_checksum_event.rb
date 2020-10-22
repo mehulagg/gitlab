@@ -9,18 +9,11 @@ module Gitlab
 
           def process
             registry.reset_checksum! unless skippable?
-            log_event
-          end
 
-          private
-
-          def log_event
-            logger.event_info(
-              created_at,
+            log_event(
               'Reset checksum',
               project_id: event.project_id,
-              skippable: skippable?
-            )
+              skippable: skippable?)
           end
         end
       end

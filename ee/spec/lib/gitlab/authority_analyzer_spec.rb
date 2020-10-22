@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::AuthorityAnalyzer do
+RSpec.describe Gitlab::AuthorityAnalyzer do
   describe '#calculate' do
     let(:project) { create(:project, :repository) }
     let(:author) { create(:user) }

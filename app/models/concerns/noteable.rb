@@ -17,14 +17,14 @@ module Noteable
 
     # `Noteable` class names that support resolvable notes.
     def resolvable_types
-      %w(MergeRequest)
+      %w(MergeRequest DesignManagement::Design)
     end
   end
 
   # The timestamp of the note (e.g. the :created_at or :updated_at attribute if provided via
   # API call)
   def system_note_timestamp
-    @system_note_timestamp || Time.now # rubocop:disable Gitlab/ModuleWithInstanceVariables
+    @system_note_timestamp || Time.current # rubocop:disable Gitlab/ModuleWithInstanceVariables
   end
 
   attr_writer :system_note_timestamp
@@ -65,6 +65,10 @@ module Noteable
 
   def preloads_discussion_diff_highlighting?
     false
+  end
+
+  def has_any_diff_note_positions?
+    notes.any? && DiffNotePosition.where(note: notes).exists?
   end
 
   def discussion_notes
@@ -138,15 +142,25 @@ module Noteable
   end
 
   def note_etag_key
+    return Gitlab::Routing.url_helpers.designs_project_issue_path(project, issue, { vueroute: filename }) if self.is_a?(DesignManagement::Design)
+
     Gitlab::Routing.url_helpers.project_noteable_notes_path(
       project,
       target_type: self.class.name.underscore,
       target_id: id
     )
   end
+
+  def after_note_created(_note)
+    # no-op
+  end
+
+  def after_note_destroyed(_note)
+    # no-op
+  end
 end
 
 Noteable.extend(Noteable::ClassMethods)
 
-Noteable::ClassMethods.prepend_if_ee('EE::Noteable::ClassMethods') # rubocop: disable Cop/InjectEnterpriseEditionModule
+Noteable::ClassMethods.prepend_if_ee('EE::Noteable::ClassMethods')
 Noteable.prepend_if_ee('EE::Noteable')

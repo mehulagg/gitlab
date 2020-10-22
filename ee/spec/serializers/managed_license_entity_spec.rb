@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ManagedLicenseEntity do
+RSpec.describe ManagedLicenseEntity do
   let(:software_license_policy) { create(:software_license_policy) }
   let(:entity) { described_class.new(software_license_policy) }
 

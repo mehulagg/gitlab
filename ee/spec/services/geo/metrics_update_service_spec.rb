@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::MetricsUpdateService, :geo, :prometheus do
+RSpec.describe Geo::MetricsUpdateService, :geo, :prometheus do
   include ::EE::GeoHelpers
 
   let_it_be(:primary) { create(:geo_node, :primary) }
@@ -11,7 +11,7 @@ describe Geo::MetricsUpdateService, :geo, :prometheus do
 
   subject { described_class.new }
 
-  let(:event_date) { Time.now.utc }
+  let(:event_date) { Time.current.utc }
 
   let(:data) do
     {
@@ -82,8 +82,7 @@ describe Geo::MetricsUpdateService, :geo, :prometheus do
 
   describe '#execute' do
     before do
-      response = double(success?: true, parsed_response: data.stringify_keys, code: 200)
-      allow(Gitlab::HTTP).to receive(:post).and_return(response)
+      allow_any_instance_of(Geo::NodeStatusRequestService).to receive(:execute).and_return(true)
     end
 
     context 'when current node is nil' do
@@ -92,7 +91,7 @@ describe Geo::MetricsUpdateService, :geo, :prometheus do
       end
 
       it 'skips posting the status' do
-        expect(Gitlab::HTTP).to receive(:post).never
+        expect_any_instance_of(Geo::NodeStatusRequestService).to receive(:execute).never
 
         subject.execute
       end
@@ -195,7 +194,7 @@ describe Geo::MetricsUpdateService, :geo, :prometheus do
       end
 
       it 'increments a counter when metrics fail to retrieve' do
-        allow_next_instance_of(Geo::NodeStatusPostService) do |instance|
+        allow_next_instance_of(Geo::NodeStatusRequestService) do |instance|
           allow(instance).to receive(:execute).and_return(false)
         end
 

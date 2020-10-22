@@ -4,7 +4,7 @@ module Issuable
   class CommonSystemNotesService < ::BaseService
     attr_reader :issuable
 
-    def execute(issuable, old_labels: [], is_update: true)
+    def execute(issuable, old_labels: [], old_milestone: nil, is_update: true)
       @issuable = issuable
 
       # We disable touch so that created system notes do not update
@@ -22,16 +22,12 @@ module Issuable
         end
 
         create_due_date_note if issuable.previous_changes.include?('due_date')
-        create_milestone_note if has_milestone_changes?
+        create_milestone_change_event(old_milestone) if issuable.previous_changes.include?('milestone_id')
         create_labels_note(old_labels) if old_labels && issuable.labels != old_labels
       end
     end
 
     private
-
-    def has_milestone_changes?
-      issuable.previous_changes.include?('milestone_id')
-    end
 
     def handle_time_tracking_note
       if issuable.previous_changes.include?('time_estimate')
@@ -98,17 +94,9 @@ module Issuable
       SystemNoteService.change_time_spent(issuable, issuable.project, issuable.time_spent_user)
     end
 
-    def create_milestone_note
-      if milestone_changes_tracking_enabled?
-        # Creates a synthetic note
-        ResourceEvents::ChangeMilestoneService.new(issuable, current_user).execute
-      else
-        SystemNoteService.change_milestone(issuable, issuable.project, current_user, issuable.milestone)
-      end
-    end
-
-    def milestone_changes_tracking_enabled?
-      ::Feature.enabled?(:track_resource_milestone_change_events, issuable.project)
+    def create_milestone_change_event(old_milestone)
+      ResourceEvents::ChangeMilestoneService.new(issuable, current_user, old_milestone: old_milestone)
+        .execute
     end
 
     def create_due_date_note

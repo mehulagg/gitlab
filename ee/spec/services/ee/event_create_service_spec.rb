@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EventCreateService do
+RSpec.describe EventCreateService do
   let(:service) { described_class.new }
 
   describe 'Epics' do
@@ -12,7 +12,7 @@ describe EventCreateService do
       it "creates new event" do
         event = service.open_epic(epic, epic.author)
 
-        expect_event(event, Event::CREATED)
+        expect_event(event, 'created')
       end
     end
 
@@ -20,7 +20,7 @@ describe EventCreateService do
       it "creates new event" do
         event = service.close_epic(epic, epic.author)
 
-        expect_event(event, Event::CLOSED)
+        expect_event(event, 'closed')
       end
     end
 
@@ -28,7 +28,7 @@ describe EventCreateService do
       it "creates new event" do
         event = service.reopen_epic(epic, epic.author)
 
-        expect_event(event, Event::REOPENED)
+        expect_event(event, 'reopened')
       end
     end
 
@@ -38,7 +38,7 @@ describe EventCreateService do
 
         event = service.leave_note(note, epic.author)
 
-        expect_event(event, Event::COMMENTED)
+        expect_event(event, 'commented')
       end
     end
 

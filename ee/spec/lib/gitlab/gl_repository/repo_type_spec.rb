@@ -1,33 +1,19 @@
 # frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GlRepository::RepoType do
-  let_it_be(:project) { create(:project) }
-  let_it_be(:personal_snippet) { create(:personal_snippet, author: project.owner) }
-  let_it_be(:project_snippet) { create(:project_snippet, project: project, author: project.owner) }
+RSpec.describe Gitlab::GlRepository::RepoType do
+  describe Gitlab::GlRepository::WIKI do
+    context 'group wiki' do
+      let_it_be(:wiki) { create(:group_wiki) }
 
-  describe Gitlab::GlRepository::DESIGN do
-    it_behaves_like 'a repo type' do
-      let(:expected_identifier) { "design-#{project.id}" }
-      let(:expected_id) { project.id.to_s }
-      let(:expected_suffix) { '.design' }
-      let(:expected_repository) { project.design_repository }
-      let(:expected_container) { project }
-    end
-
-    it 'knows its type' do
-      expect(described_class).to be_design
-      expect(described_class).not_to be_project
-      expect(described_class).not_to be_wiki
-      expect(described_class).not_to be_snippet
-    end
-
-    it 'checks if repository path is valid' do
-      expect(described_class.valid?(project.design_repository.full_path)).to be_truthy
-      expect(described_class.valid?(project.repository.full_path)).to be_falsey
-      expect(described_class.valid?(project.wiki.repository.full_path)).to be_falsey
-      expect(described_class.valid?("snippets/#{personal_snippet.id}")).to be_falsey
-      expect(described_class.valid?("#{project.full_path}/snippets/#{project_snippet.id}")).to be_falsey
+      it_behaves_like 'a repo type' do
+        let(:expected_id) { wiki.group.id }
+        let(:expected_identifier) { "group-#{expected_id}-wiki" }
+        let(:expected_suffix) { '.wiki' }
+        let(:expected_container) { wiki }
+        let(:expected_repository) { ::Repository.new(wiki.full_path, wiki, shard: wiki.repository_storage, disk_path: wiki.disk_path, repo_type: Gitlab::GlRepository::WIKI) }
+      end
     end
   end
 end

@@ -13,7 +13,11 @@ module EE
       end
 
       def subcription_plan_name
-        object = namespace || project
+        object = namespace
+        # Avoid loading the project's namespace if it wasn't loaded
+        object ||= project.namespace if project&.association(:namespace)&.loaded?
+        # Avoid loading or creating a plan if it wasn't already.
+        return unless object&.strong_memoized?(:actual_plan)
 
         object&.actual_plan_name
       end

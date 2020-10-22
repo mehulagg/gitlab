@@ -14,10 +14,12 @@ module Gitlab
         chain.add ::Gitlab::SidekiqMiddleware::ArgumentsLogger if arguments_logger
         chain.add ::Gitlab::SidekiqMiddleware::MemoryKiller if memory_killer
         chain.add ::Gitlab::SidekiqMiddleware::RequestStoreMiddleware
+        chain.add ::Gitlab::SidekiqMiddleware::ExtraDoneLogMetadata
         chain.add ::Gitlab::SidekiqMiddleware::BatchLoader
         chain.add ::Labkit::Middleware::Sidekiq::Server
         chain.add ::Gitlab::SidekiqMiddleware::InstrumentationLogger
         chain.add ::Gitlab::SidekiqMiddleware::AdminMode::Server
+        chain.add ::Gitlab::SidekiqVersioning::Middleware
         chain.add ::Gitlab::SidekiqStatus::ServerMiddleware
         chain.add ::Gitlab::SidekiqMiddleware::WorkerContext::Server
         chain.add ::Gitlab::SidekiqMiddleware::DuplicateJobs::Server

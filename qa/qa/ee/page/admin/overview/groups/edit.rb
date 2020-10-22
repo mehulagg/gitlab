@@ -7,8 +7,12 @@ module QA
         module Overview
           module Groups
             module Edit
-              def self.included(page)
-                page.class_eval do
+              extend QA::Page::PageConcern
+
+              def self.included(base)
+                super
+
+                base.class_eval do
                   view 'ee/app/views/admin/_namespace_plan.html.haml' do
                     element :plan_dropdown
                   end

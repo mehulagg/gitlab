@@ -1,8 +1,8 @@
 <script>
 import { mapActions } from 'vuex';
-import { GlLink, GlDeprecatedButton } from '@gitlab/ui';
+import { GlLink, GlButton } from '@gitlab/ui';
 import { __ } from '~/locale';
-import { ACTION_TYPES } from '../store/constants';
+import { ACTION_TYPES } from '../constants';
 import GeoReplicableStatus from './geo_replicable_status.vue';
 import GeoReplicableTimeAgo from './geo_replicable_time_ago.vue';
 
@@ -10,7 +10,7 @@ export default {
   name: 'GeoReplicableItem',
   components: {
     GlLink,
-    GlDeprecatedButton,
+    GlButton,
     GeoReplicableTimeAgo,
     GeoReplicableStatus,
   },
@@ -21,7 +21,8 @@ export default {
     },
     projectId: {
       type: Number,
-      required: true,
+      required: false,
+      default: null,
     },
     syncStatus: {
       type: String,
@@ -65,6 +66,11 @@ export default {
       ],
     };
   },
+  computed: {
+    hasProject() {
+      return Boolean(this.projectId);
+    },
+  },
   methods: {
     ...mapActions(['initiateReplicableSync']),
   },
@@ -74,14 +80,18 @@ export default {
 
 <template>
   <div class="card">
-    <div class="card-header d-flex align-center">
+    <div v-if="hasProject" class="card-header d-flex align-center">
       <gl-link class="font-weight-bold" :href="`/${name}`" target="_blank">{{ name }}</gl-link>
       <div class="ml-auto">
-        <gl-deprecated-button
+        <gl-button
+          size="small"
           @click="initiateReplicableSync({ projectId, name, action: $options.actionTypes.RESYNC })"
-          >{{ __('Resync') }}</gl-deprecated-button
+          >{{ __('Resync') }}</gl-button
         >
       </div>
+    </div>
+    <div v-else class="card-header">
+      <span class="font-weight-bold">{{ name }}</span>
     </div>
     <div class="card-body">
       <div class="d-flex flex-column flex-md-row">

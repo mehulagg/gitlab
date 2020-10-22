@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'layouts/nav/sidebar/_admin' do
+RSpec.describe 'layouts/nav/sidebar/_admin' do
   context 'on settings' do
     before do
       stub_licensed_features(custom_file_templates: custom_file_templates)

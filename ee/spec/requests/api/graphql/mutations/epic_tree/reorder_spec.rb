@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Updating an epic tree' do
+RSpec.describe 'Updating an epic tree' do
   include GraphqlHelpers
 
   let(:current_user) { create(:user) }
@@ -49,9 +49,9 @@ describe 'Updating an epic tree' do
     end
   end
 
-  context 'when epic feature is enabled' do
+  context 'when epics and subepics features are enabled' do
     before do
-      stub_licensed_features(epics: true)
+      stub_licensed_features(epics: true, subepics: true)
     end
 
     context 'when the user does not have permission' do
@@ -126,7 +126,8 @@ describe 'Updating an epic tree' do
           it 'returns the error message' do
             post_graphql_mutation(mutation, current_user: current_user)
 
-            expect(mutation_response['errors']).to eq(['Only epics and epic_issues are supported.'])
+            expect(graphql_errors.first['message']).to include("\"#{variables[:moved][:id]}\" does not represent an instance of EpicTreeSorting")
+            expect(graphql_errors.first['message']).to include("\"#{variables[:moved][:adjacent_reference_id]}\" does not represent an instance of EpicTreeSorting")
           end
         end
 
@@ -139,6 +140,24 @@ describe 'Updating an epic tree' do
             post_graphql_mutation(mutation, current_user: current_user)
 
             expect(mutation_response['errors']).to eq(["The sibling object's parent must match the current parent epic."])
+          end
+        end
+
+        context 'when the new parent is another epic and subepics feature is disabled' do
+          let(:new_parent_id) { GitlabSchema.id_from_object(base_epic).to_s }
+
+          before do
+            stub_licensed_features(epics: true, subepics: false)
+            other_epic = create(:epic, group: group)
+            epic2.update(parent: other_epic)
+          end
+
+          it_behaves_like 'a mutation that does not update the tree'
+
+          it 'returns the error message' do
+            post_graphql_mutation(mutation, current_user: current_user)
+
+            expect(mutation_response['errors']).to eq(['You don\'t have permissions to move the objects.'])
           end
         end
       end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe TreeEntryPresenter do
+RSpec.describe TreeEntryPresenter do
   include Gitlab::Routing.url_helpers
 
   let(:project) { create(:project, :repository) }
@@ -12,5 +12,9 @@ describe TreeEntryPresenter do
 
   describe '.web_url' do
     it { expect(presenter.web_url).to eq("http://localhost/#{project.full_path}/-/tree/#{tree.commit_id}/#{tree.path}") }
+  end
+
+  describe '#web_path' do
+    it { expect(presenter.web_path).to eq("/#{project.full_path}/-/tree/#{tree.commit_id}/#{tree.path}") }
   end
 end

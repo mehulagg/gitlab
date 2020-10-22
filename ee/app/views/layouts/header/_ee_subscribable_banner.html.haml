@@ -1,9 +1,5 @@
-- if local_assigns[:subscription]
-  - subscribable = decorated_subscription
-  - message = subscription_message
-- else
-  - subscribable = License.current
-  - message = license_message(license: subscribable)
+- subscribable = gitlab_subscription_or_license
+- message = gitlab_subscription_message_or_license_message
 
 - if message.present? && subscribable.present?
   .container-fluid.container-limited.pt-3

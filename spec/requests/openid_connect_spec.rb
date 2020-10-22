@@ -2,21 +2,17 @@
 
 require 'spec_helper'
 
-describe 'OpenID Connect requests' do
+RSpec.describe 'OpenID Connect requests' do
   let(:user) do
     create(
       :user,
       name: 'Alice',
       username: 'alice',
       email: 'private@example.com',
-      emails: [public_email],
-      public_email: public_email.email,
       website_url: 'https://example.com',
       avatar: fixture_file_upload('spec/fixtures/dk.png')
     )
   end
-
-  let(:public_email) { build :email, email: 'public@example.com' }
 
   let(:access_grant) { create :oauth_access_grant, application: application, resource_owner_id: user.id }
   let(:access_token) { create :oauth_access_token, application: application, resource_owner_id: user.id }
@@ -37,7 +33,7 @@ describe 'OpenID Connect requests' do
       'name'           => 'Alice',
       'nickname'       => 'alice',
       'email'          => 'public@example.com',
-      'email_verified' => false,
+      'email_verified' => true,
       'website'        => 'https://example.com',
       'profile'        => 'http://localhost/alice',
       'picture'        => "http://localhost/uploads/-/system/user/avatar/#{user.id}/dk.png",
@@ -60,6 +56,11 @@ describe 'OpenID Connect requests' do
 
   def request_user_info!
     get '/oauth/userinfo', params: {}, headers: { 'Authorization' => "Bearer #{access_token.token}" }
+  end
+
+  before do
+    email = create(:email, :confirmed, email: 'public@example.com', user: user)
+    user.update!(public_email: email.email)
   end
 
   context 'Application without OpenID scope' do
@@ -123,7 +124,7 @@ describe 'OpenID Connect requests' do
       end
 
       it 'has false in email_verified claim' do
-        expect(json_response['email_verified']).to eq(false)
+        expect(json_response['email_verified']).to eq(true)
       end
     end
 
@@ -145,8 +146,16 @@ describe 'OpenID Connect requests' do
         expect(@payload['auth_time']).to eq user.current_sign_in_at.to_i
       end
 
+      it 'has public email in email claim' do
+        expect(@payload['email']).to eq(user.public_email)
+      end
+
+      it 'has true in email_verified claim' do
+        expect(@payload['email_verified']).to eq(true)
+      end
+
       it 'does not include any unknown properties' do
-        expect(@payload.keys).to eq %w[iss sub aud exp iat auth_time sub_legacy]
+        expect(@payload.keys).to eq %w[iss sub aud exp iat auth_time sub_legacy email email_verified]
       end
     end
 
@@ -208,6 +217,21 @@ describe 'OpenID Connect requests' do
 
       it 'has true in email_verified claim' do
         expect(json_response['email_verified']).to eq(true)
+      end
+    end
+
+    context 'ID token payload' do
+      before do
+        request_access_token!
+        @payload = JSON::JWT.decode(json_response['id_token'], :skip_verification)
+      end
+
+      it 'has private email in email claim' do
+        expect(@payload['email']).to eq(user.email)
+      end
+
+      it 'has true in email_verified claim' do
+        expect(@payload['email_verified']).to eq(true)
       end
     end
   end

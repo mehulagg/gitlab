@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference, concepts
 ---
 
@@ -11,7 +14,7 @@ by clicking the **Revert** button in merge requests and commit details.
 
 NOTE: **Note:**
 The **Revert** button will only be available for merge requests
-created since GitLab 8.5. However, you can still revert a merge request
+created in GitLab 8.5 and later. However, you can still revert a merge request
 by reverting the merge commit from the list of Commits page.
 
 NOTE: **Note:**

@@ -17,6 +17,3 @@ export const metrics = state => [
   ...state.existingMetrics,
   ...state.removedMetrics.map(metric => ({ ...metric, wasRemoved: true })),
 ];
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Snippet, :elastic do
+RSpec.describe Snippet, :elastic do
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
@@ -33,6 +33,14 @@ describe Snippet, :elastic do
 
     expect(described_class.elastic_search('home', options: options).total_count).to eq(1)
     expect(described_class.elastic_search('test snippet', options: options).total_count).to eq(1)
+  end
+
+  it "names elasticsearch queries" do
+    described_class.elastic_search('*').total_count
+
+    assert_named_queries('doc:is_a:snippet',
+                         'snippet:match:search_terms',
+                         'snippet:authorized')
   end
 
   it 'returns json with all needed elements' do

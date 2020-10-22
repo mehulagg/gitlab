@@ -1,5 +1,0 @@
----
-title: 'Geo: Fix empty synchronisation status when nothing is synchronised'
-merge_request: 30710
-author:
-type: fixed

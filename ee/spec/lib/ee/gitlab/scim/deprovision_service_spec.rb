@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::EE::Gitlab::Scim::DeprovisionService do
+RSpec.describe ::EE::Gitlab::Scim::DeprovisionService do
   describe '#execute' do
     let_it_be(:identity) { create(:scim_identity, active: true) }
     let_it_be(:group) { identity.group }

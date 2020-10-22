@@ -15,7 +15,7 @@ module EE
         # rubocop:disable Gitlab/ModuleWithInstanceVariables
         override :show
         def show
-          if project.feature_available?(:license_management)
+          if project.feature_available?(:license_scanning)
             @license_management_url = expose_url(api_v4_projects_managed_licenses_path(id: @project.id))
           end
 

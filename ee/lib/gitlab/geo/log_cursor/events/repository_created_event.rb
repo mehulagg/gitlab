@@ -8,25 +8,31 @@ module Gitlab
           include BaseEvent
 
           def process
-            log_event
-            registry.repository_created!(event)
+            if replicable_project?
+              registry.repository_created!(event)
 
-            enqueue_job_if_shard_healthy(event) do
-              ::Geo::ProjectSyncWorker.perform_async(event.project_id, sync_repository: true, sync_wiki: true)
+              job_id = nil
+
+              enqueue_job_if_shard_healthy(event) do
+                job_id = ::Geo::ProjectSyncWorker.perform_async(event.project_id, sync_repository: true, sync_wiki: true)
+              end
             end
+
+            log_event(job_id)
           end
 
           private
 
-          def log_event
-            logger.event_info(
-              created_at,
+          def log_event(job_id)
+            super(
               'Repository created',
               project_id: event.project_id,
               repo_path: event.repo_path,
               wiki_path: event.wiki_path,
               resync_repository: registry.resync_repository,
-              resync_wiki: registry.resync_wiki)
+              resync_wiki: registry.resync_wiki,
+              replicable_project: replicable_project?,
+              job_id: job_id)
           end
         end
       end

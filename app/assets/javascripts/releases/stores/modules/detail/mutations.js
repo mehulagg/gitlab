@@ -1,11 +1,25 @@
-import * as types from './mutation_types';
 import { uniqueId, cloneDeep } from 'lodash';
+import * as types from './mutation_types';
+import { DEFAULT_ASSET_LINK_TYPE } from '../../../constants';
 
 const findReleaseLink = (release, id) => {
   return release.assets.links.find(l => l.id === id);
 };
 
 export default {
+  [types.INITIALIZE_EMPTY_RELEASE](state) {
+    state.release = {
+      tagName: null,
+      name: '',
+      description: '',
+      milestones: [],
+      groupMilestones: [],
+      assets: {
+        links: [],
+      },
+    };
+  },
+
   [types.REQUEST_RELEASE](state) {
     state.isFetchingRelease = true;
   },
@@ -21,6 +35,12 @@ export default {
     state.release = undefined;
   },
 
+  [types.UPDATE_RELEASE_TAG_NAME](state, tagName) {
+    state.release.tagName = tagName;
+  },
+  [types.UPDATE_CREATE_FROM](state, createFrom) {
+    state.createFrom = createFrom;
+  },
   [types.UPDATE_RELEASE_TITLE](state, title) {
     state.release.name = title;
   },
@@ -28,14 +48,22 @@ export default {
     state.release.description = notes;
   },
 
-  [types.REQUEST_UPDATE_RELEASE](state) {
+  [types.UPDATE_RELEASE_MILESTONES](state, milestones) {
+    state.release.milestones = milestones;
+  },
+
+  [types.UPDATE_RELEASE_GROUP_MILESTONES](state, groupMilestones) {
+    state.release.groupMilestones = groupMilestones;
+  },
+
+  [types.REQUEST_SAVE_RELEASE](state) {
     state.isUpdatingRelease = true;
   },
-  [types.RECEIVE_UPDATE_RELEASE_SUCCESS](state) {
+  [types.RECEIVE_SAVE_RELEASE_SUCCESS](state) {
     state.updateError = undefined;
     state.isUpdatingRelease = false;
   },
-  [types.RECEIVE_UPDATE_RELEASE_ERROR](state, error) {
+  [types.RECEIVE_SAVE_RELEASE_ERROR](state, error) {
     state.updateError = error;
     state.isUpdatingRelease = false;
   },
@@ -45,6 +73,7 @@ export default {
       id: uniqueId('new-link-'),
       url: '',
       name: '',
+      linkType: DEFAULT_ASSET_LINK_TYPE,
     });
   },
 
@@ -56,6 +85,11 @@ export default {
   [types.UPDATE_ASSET_LINK_NAME](state, { linkIdToUpdate, newName }) {
     const linkToUpdate = findReleaseLink(state.release, linkIdToUpdate);
     linkToUpdate.name = newName;
+  },
+
+  [types.UPDATE_ASSET_LINK_TYPE](state, { linkIdToUpdate, newType }) {
+    const linkToUpdate = findReleaseLink(state.release, linkIdToUpdate);
+    linkToUpdate.linkType = newType;
   },
 
   [types.REMOVE_ASSET_LINK](state, linkIdToRemove) {

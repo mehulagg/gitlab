@@ -59,7 +59,7 @@ export default {
 
 <template>
   <div>
-    <div class="card-text prepend-top-default">
+    <div class="card-text gl-mt-3">
       <b>{{ __('Evidence collection') }}</b>
     </div>
     <div v-for="(evidence, index) in evidences" :key="evidenceTitle(index)" class="mb-2">
@@ -71,32 +71,26 @@ export default {
           :download="evidenceTitle(index)"
           :href="evidenceUrl(index)"
         >
-          <gl-icon name="review-list" class="align-middle append-right-8" />
+          <gl-icon name="review-list" class="align-middle gl-mr-3" />
           <span>{{ evidenceTitle(index) }}</span>
         </gl-link>
 
         <expand-button>
-          <template slot="short">
+          <template #short>
             <span class="js-short monospace">{{ shortSha(index) }}</span>
           </template>
-          <template slot="expanded">
-            <span class="js-expanded monospace gl-pl-1-deprecated-no-really-do-not-use-me">{{
-              sha(index)
-            }}</span>
+          <template #expanded>
+            <span class="js-expanded monospace gl-pl-2">{{ sha(index) }}</span>
           </template>
         </expand-button>
-        <clipboard-button
-          :title="__('Copy evidence SHA')"
-          :text="sha(index)"
-          css-class="btn-default btn-transparent btn-clipboard"
-        />
+        <clipboard-button :title="__('Copy evidence SHA')" :text="sha(index)" category="tertiary" />
       </div>
 
       <div class="d-flex align-items-center text-muted">
         <gl-icon
           v-gl-tooltip
           name="clock"
-          class="align-middle append-right-8"
+          class="align-middle gl-mr-3"
           :title="collectedAt(index)"
         />
         <span>{{ timeSummary(index) }}</span>

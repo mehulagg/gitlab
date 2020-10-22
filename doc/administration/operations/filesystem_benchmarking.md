@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Filesystem Performance Benchmarking
 
 Filesystem performance has a big impact on overall GitLab performance,
@@ -14,7 +20,7 @@ I/O. The information on this page can be used for either scenario.
 ### Benchmarking with `fio`
 
 We recommend using
-[fio](https://fio.readthedocs.io/en/latest/fio_doc.html) to test I/O
+[Fio](https://fio.readthedocs.io/en/latest/fio_doc.html) to test I/O
 performance. This test should be run both on the NFS server and on the
 application nodes that talk to the NFS server.
 
@@ -26,7 +32,7 @@ To install:
 Then run the following:
 
 ```shell
-fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=test --filename=/path/to/git-data/testfile --bs=4k --iodepth=64 --size=4G --readwrite=randrw --rwmixread=75
+fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=test --bs=4k --iodepth=64 --readwrite=randrw --rwmixread=75 --size=4G --filename=/path/to/git-data/testfile
 ```
 
 This will create a 4GB file in `/path/to/git-data/testfile`. It performs
@@ -65,7 +71,8 @@ operations per second.
 
 ### Simple benchmarking
 
-NOTE: **Note:** This test is naive but may be useful if `fio` is not
+NOTE: **Note:**
+This test is naive but may be useful if `fio` is not
 available on the system. It's possible to receive good results on this
 test but still have poor performance due to read speed and various other
 factors.

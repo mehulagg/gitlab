@@ -40,6 +40,14 @@ module PageLayoutHelper
     end
   end
 
+  def page_canonical_link(link = nil)
+    if link
+      @page_canonical_link = link
+    else
+      @page_canonical_link
+    end
+  end
+
   def favicon
     Gitlab::Favicon.main
   end
@@ -101,6 +109,16 @@ module PageLayoutHelper
       @nav = name
     else
       @nav
+    end
+  end
+
+  # This helper ensures there is always a default `Gitlab::SearchContext` available
+  # to all controller that use the application layout.
+  def search_context
+    strong_memoize(:search_context) do
+      next super if defined?(super)
+
+      Gitlab::SearchContext::Builder.new(controller.view_context).build!
     end
   end
 

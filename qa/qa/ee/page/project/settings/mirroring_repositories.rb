@@ -6,8 +6,12 @@ module QA
       module Project
         module Settings
           module MirroringRepositories
-            def self.prepended(page)
-              page.module_eval do
+            extend QA::Page::PageConcern
+
+            def self.prepended(base)
+              super
+
+              base.class_eval do
                 view 'ee/app/views/projects/mirrors/_mirror_repos_form.html.haml' do
                   element :mirror_direction
                 end

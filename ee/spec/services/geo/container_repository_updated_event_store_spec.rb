@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::ContainerRepositoryUpdatedEventStore do
+RSpec.describe Geo::ContainerRepositoryUpdatedEventStore do
   include EE::GeoHelpers
 
   let_it_be(:secondary_node) { create(:geo_node) }

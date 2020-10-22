@@ -3,9 +3,16 @@
 import $ from 'jquery';
 import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import CreateLabelDropdown from '../../create_label';
 import boardsStore from '../stores/boards_store';
+import { fullLabelId } from '../boards_util';
+import store from '~/boards/stores';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
+
+function shouldCreateListGraphQL(label) {
+  return store.getters.shouldUseGraphQL && !store.getters.getListByLabelId(fullLabelId(label));
+}
 
 $(document)
   .off('created.label')
@@ -14,16 +21,20 @@ $(document)
       return;
     }
 
-    boardsStore.new({
-      title: label.title,
-      position: boardsStore.state.lists.length - 2,
-      list_type: 'label',
-      label: {
-        id: label.id,
+    if (shouldCreateListGraphQL(label)) {
+      store.dispatch('createList', { labelId: fullLabelId(label) });
+    } else {
+      boardsStore.new({
         title: label.title,
-        color: label.color,
-      },
-    });
+        position: boardsStore.state.lists.length - 2,
+        list_type: 'label',
+        label: {
+          id: label.id,
+          title: label.title,
+          color: label.color,
+        },
+      });
+    }
   });
 
 export default function initNewListDropdown() {
@@ -36,7 +47,7 @@ export default function initNewListDropdown() {
       $dropdownToggle.data('projectPath'),
     );
 
-    $dropdownToggle.glDropdown({
+    initDeprecatedJQueryDropdown($dropdownToggle, {
       data(term, callback) {
         axios
           .get($dropdownToggle.attr('data-list-labels-path'))
@@ -73,7 +84,9 @@ export default function initNewListDropdown() {
         const label = options.selectedObj;
         e.preventDefault();
 
-        if (!boardsStore.findListByLabelId(label.id)) {
+        if (shouldCreateListGraphQL(label)) {
+          store.dispatch('createList', { labelId: fullLabelId(label) });
+        } else if (!boardsStore.findListByLabelId(label.id)) {
           boardsStore.new({
             title: label.title,
             position: boardsStore.state.lists.length - 2,

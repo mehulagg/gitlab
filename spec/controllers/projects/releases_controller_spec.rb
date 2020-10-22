@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-describe Projects::ReleasesController do
+RSpec.describe Projects::ReleasesController do
+  include AccessMatchersForController
+
   let!(:project) { create(:project, :repository, :public) }
   let_it_be(:private_project) { create(:project, :repository, :private) }
   let_it_be(:developer)  { create(:user) }
@@ -118,6 +120,15 @@ describe Projects::ReleasesController do
     end
   end
 
+  describe 'GET #new' do
+    let(:request) do
+      get :new, params: { namespace_id: project.namespace, project_id: project }
+    end
+
+    it { expect { request }.to be_denied_for(:reporter).of(project) }
+    it { expect { request }.to be_allowed_for(:developer).of(project) }
+  end
+
   describe 'GET #edit' do
     subject do
       get :edit, params: { namespace_id: project.namespace, project_id: project, tag: tag }
@@ -181,14 +192,6 @@ describe Projects::ReleasesController do
         expect(project_release_path(project, release))
           .to eq("/#{project.namespace.path}/#{project.name}/-/releases/awesome%252Fv1.0")
       end
-    end
-
-    context 'when feature flag `release_show_page` is disabled' do
-      before do
-        stub_feature_flags(release_show_page: false)
-      end
-
-      it_behaves_like 'not found'
     end
 
     context 'when release does not exist' do

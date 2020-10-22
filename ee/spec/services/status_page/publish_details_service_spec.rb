@@ -2,12 +2,14 @@
 
 require 'spec_helper'
 
-describe StatusPage::PublishDetailsService do
+RSpec.describe StatusPage::PublishDetailsService do
+  include ::StatusPage::PublicationServiceResponses
+
   let_it_be(:project, refind: true) { create(:project) }
-  let(:issue) { instance_double(Issue) }
-  let(:user_notes) { double(:user_notes) }
+  let(:user_notes) { [] }
   let(:incident_id) { 1 }
-  let(:key) { StatusPage::Storage.details_path(incident_id) }
+  let(:issue) { instance_double(Issue, notes: user_notes, description: 'Incident Occuring', iid: incident_id) }
+  let(:key) { Gitlab::StatusPage::Storage.details_path(incident_id) }
   let(:content) { { id: incident_id } }
 
   let(:service) { described_class.new(project: project) }
@@ -28,6 +30,37 @@ describe StatusPage::PublishDetailsService do
       it 'returns an error' do
         expect(result).to be_error
         expect(result.message).to eq('Missing object key')
+      end
+    end
+
+    context 'publishing attachments' do
+      before do
+        allow(storage_client).to receive(:upload_object).and_return(success)
+        allow(storage_client).to receive(:list_object_keys).and_return([])
+      end
+
+      context 'when successful' do
+        let(:success_response) { double(error?: false, success?: true) }
+
+        it 'sends attachments to storage and returns success' do
+          expect_next_instance_of(StatusPage::PublishAttachmentsService) do |service|
+            expect(service).to receive(:execute).and_return(success_response)
+          end
+
+          expect(subject.success?).to be true
+        end
+      end
+
+      context 'when error returned from PublishAttachmentsService' do
+        let(:error_response) { double(error?: true, success?: false) }
+
+        it 'returns an error' do
+          expect_next_instance_of(StatusPage::PublishAttachmentsService) do |service|
+            expect(service).to receive(:execute).and_return(error_response)
+          end
+
+          expect(subject.success?).to be false
+        end
       end
     end
   end

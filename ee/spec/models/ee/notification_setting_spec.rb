@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe NotificationSetting do
+RSpec.describe NotificationSetting do
   describe '.email_events' do
     subject { described_class.email_events(target) }
 
@@ -24,10 +24,12 @@ describe NotificationSetting do
             :reopen_merge_request,
             :close_merge_request,
             :reassign_merge_request,
+            :change_reviewer_merge_request,
             :merge_merge_request,
             :failed_pipeline,
             :fixed_pipeline,
             :success_pipeline,
+            :moved_project,
             :new_epic
           ]
         )
@@ -52,10 +54,12 @@ describe NotificationSetting do
             :reopen_merge_request,
             :close_merge_request,
             :reassign_merge_request,
+            :change_reviewer_merge_request,
             :merge_merge_request,
             :failed_pipeline,
             :fixed_pipeline,
-            :success_pipeline
+            :success_pipeline,
+            :moved_project
           ]
         )
       end
@@ -79,10 +83,12 @@ describe NotificationSetting do
             :reopen_merge_request,
             :close_merge_request,
             :reassign_merge_request,
+            :change_reviewer_merge_request,
             :merge_merge_request,
             :failed_pipeline,
             :fixed_pipeline,
             :success_pipeline,
+            :moved_project,
             :new_epic
           ]
         )

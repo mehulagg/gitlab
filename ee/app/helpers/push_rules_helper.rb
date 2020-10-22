@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 module PushRulesHelper
+  def can_modify_group_push_rules?(current_user, group)
+    can?(current_user, :change_push_rules, group)
+  end
+
   def reject_unsigned_commits_description(push_rule)
     message = s_("ProjectSettings|Only signed commits can be pushed to this repository.")
 

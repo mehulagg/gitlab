@@ -2,15 +2,18 @@
 
 require 'spec_helper'
 
-describe Mentionable do
-  class Example
-    include Mentionable
+RSpec.describe Mentionable do
+  before do
+    stub_const('Example', Class.new)
+    Example.class_eval do
+      include Mentionable
 
-    attr_accessor :project, :message
-    attr_mentionable :message
+      attr_accessor :project, :message
+      attr_mentionable :message
 
-    def author
-      nil
+      def author
+        nil
+      end
     end
   end
 
@@ -28,11 +31,11 @@ describe Mentionable do
   end
 
   describe '#any_mentionable_attributes_changed?' do
-    Message = Struct.new(:text)
+    message = Struct.new(:text)
 
     let(:mentionable) { Example.new }
     let(:changes) do
-      msg = Message.new('test')
+      msg = message.new('test')
 
       changes = {}
       changes[msg] = ['', 'some message']
@@ -64,7 +67,7 @@ describe Mentionable do
   end
 end
 
-describe Issue, "Mentionable" do
+RSpec.describe Issue, "Mentionable" do
   describe '#mentioned_users' do
     let!(:user) { create(:user, username: 'stranger') }
     let!(:user2) { create(:user, username: 'john') }
@@ -174,7 +177,7 @@ describe Issue, "Mentionable" do
 
         expect(SystemNoteService).not_to receive(:cross_reference)
 
-        issue.update(description: 'New description')
+        issue.update!(description: 'New description')
         issue.create_new_cross_references!
       end
 
@@ -183,7 +186,7 @@ describe Issue, "Mentionable" do
 
         expect(SystemNoteService).to receive(:cross_reference).with(issues[1], any_args)
 
-        issue.update(description: issues[1].to_reference)
+        issue.update!(description: issues[1].to_reference)
         issue.create_new_cross_references!
       end
 
@@ -193,7 +196,7 @@ describe Issue, "Mentionable" do
 
         expect(SystemNoteService).to receive(:cross_reference).with(issues[1], any_args)
 
-        note.update(note: issues[1].to_reference)
+        note.update!(note: issues[1].to_reference)
         note.create_new_cross_references!
       end
     end
@@ -219,7 +222,7 @@ describe Issue, "Mentionable" do
   end
 end
 
-describe Commit, 'Mentionable' do
+RSpec.describe Commit, 'Mentionable' do
   let(:project) { create(:project, :public, :repository) }
   let(:commit)  { project.commit }
 
@@ -288,7 +291,7 @@ describe Commit, 'Mentionable' do
   end
 end
 
-describe MergeRequest, 'Mentionable' do
+RSpec.describe MergeRequest, 'Mentionable' do
   describe '#store_mentions!' do
     it_behaves_like 'mentions in description', :merge_request
     it_behaves_like 'mentions in notes', :merge_request do
@@ -309,7 +312,7 @@ describe MergeRequest, 'Mentionable' do
   end
 end
 
-describe Snippet, 'Mentionable' do
+RSpec.describe Snippet, 'Mentionable' do
   describe '#store_mentions!' do
     it_behaves_like 'mentions in description', :project_snippet
     it_behaves_like 'mentions in notes', :project_snippet do
@@ -326,7 +329,7 @@ describe Snippet, 'Mentionable' do
   end
 end
 
-describe PersonalSnippet, 'Mentionable' do
+RSpec.describe PersonalSnippet, 'Mentionable' do
   describe '#store_mentions!' do
     it_behaves_like 'mentions in description', :personal_snippet
     it_behaves_like 'mentions in notes', :personal_snippet do
@@ -338,6 +341,22 @@ describe PersonalSnippet, 'Mentionable' do
   describe 'load mentions' do
     it_behaves_like 'load mentions from DB', :personal_snippet do
       let(:note) { create(:note_on_personal_snippet) }
+      let(:mentionable) { note.noteable }
+    end
+  end
+end
+
+RSpec.describe DesignManagement::Design do
+  describe '#store_mentions!' do
+    it_behaves_like 'mentions in notes', :design do
+      let(:note) { create(:diff_note_on_design) }
+      let(:mentionable) { note.noteable }
+    end
+  end
+
+  describe 'load mentions' do
+    it_behaves_like 'load mentions from DB', :design do
+      let(:note) { create(:diff_note_on_design) }
       let(:mentionable) { note.noteable }
     end
   end

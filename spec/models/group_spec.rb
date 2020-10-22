@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Group do
+RSpec.describe Group do
   let!(:group) { create(:group) }
 
   describe 'associations' do
@@ -25,12 +25,9 @@ describe Group do
     it { is_expected.to have_many(:clusters).class_name('Clusters::Cluster') }
     it { is_expected.to have_many(:container_repositories) }
     it { is_expected.to have_many(:milestones) }
-    it { is_expected.to have_many(:sprints) }
-
-    it_behaves_like 'model with wiki' do
-      let(:container) { create(:group, :nested, :wiki_repo) }
-      let(:container_without_wiki) { create(:group, :nested) }
-    end
+    it { is_expected.to have_many(:iterations) }
+    it { is_expected.to have_many(:group_deploy_keys) }
+    it { is_expected.to have_many(:services) }
 
     describe '#members & #requesters' do
       let(:requester) { create(:user) }
@@ -114,6 +111,11 @@ describe Group do
 
       let(:group_notification_email) { 'user+group@example.com' }
       let(:subgroup_notification_email) { 'user+subgroup@example.com' }
+
+      before do
+        create(:email, :confirmed, user: user, email: group_notification_email)
+        create(:email, :confirmed, user: user, email: subgroup_notification_email)
+      end
 
       subject { subgroup.notification_email_for(user) }
 
@@ -219,6 +221,50 @@ describe Group do
           expect(internal_group).to be_valid
         end
       end
+    end
+
+    describe '#two_factor_authentication_allowed' do
+      let_it_be(:group) { create(:group) }
+
+      context 'for a parent group' do
+        it 'is valid' do
+          group.require_two_factor_authentication = true
+
+          expect(group).to be_valid
+        end
+      end
+
+      context 'for a child group' do
+        let(:sub_group) { create(:group, parent: group) }
+
+        it 'is valid when parent group allows' do
+          sub_group.require_two_factor_authentication = true
+
+          expect(sub_group).to be_valid
+        end
+
+        it 'is invalid when parent group blocks' do
+          group.namespace_settings.update!(allow_mfa_for_subgroups: false)
+          sub_group.require_two_factor_authentication = true
+
+          expect(sub_group).to be_invalid
+          expect(sub_group.errors[:require_two_factor_authentication]).to include('is forbidden by a top-level group')
+        end
+      end
+    end
+  end
+
+  describe '.without_integration' do
+    let(:another_group) { create(:group) }
+    let(:instance_integration) { build(:jira_service, :instance) }
+
+    before do
+      create(:jira_service, group: group, project: nil)
+      create(:slack_service, group: another_group, project: nil)
+    end
+
+    it 'returns groups without integration' do
+      expect(Group.without_integration(instance_integration)).to contain_exactly(another_group)
     end
   end
 
@@ -560,114 +606,72 @@ describe Group do
                                     group_access: GroupMember::DEVELOPER })
       end
 
-      context 'when feature flag share_group_with_group is enabled' do
-        before do
-          stub_feature_flags(share_group_with_group: true)
+      context 'with user in the group' do
+        let(:user) { group_user }
+
+        it 'returns correct access level' do
+          expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::DEVELOPER)
+          expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::DEVELOPER)
         end
 
-        context 'with user in the group' do
-          let(:user) { group_user }
+        context 'with lower group access level than max access level for share' do
+          let(:user) { create(:user) }
 
           it 'returns correct access level' do
+            group.add_reporter(user)
+
             expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::DEVELOPER)
-            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::DEVELOPER)
-          end
-
-          context 'with lower group access level than max access level for share' do
-            let(:user) { create(:user) }
-
-            it 'returns correct access level' do
-              group.add_reporter(user)
-
-              expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-              expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::REPORTER)
-              expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::REPORTER)
-            end
-          end
-        end
-
-        context 'with user in the parent group' do
-          let(:user) { parent_group_user }
-
-          it 'returns correct access level' do
-            expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-          end
-        end
-
-        context 'with user in the child group' do
-          let(:user) { child_group_user }
-
-          it 'returns correct access level' do
-            expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-          end
-        end
-
-        context 'unrelated project owner' do
-          let(:common_id) { [Project.maximum(:id).to_i, Namespace.maximum(:id).to_i].max + 999 }
-          let!(:group) { create(:group, id: common_id) }
-          let!(:unrelated_project) { create(:project, id: common_id) }
-          let(:user) { unrelated_project.owner }
-
-          it 'returns correct access level' do
-            expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-          end
-        end
-
-        context 'user without accepted access request' do
-          let!(:user) { create(:user) }
-
-          before do
-            create(:group_member, :developer, :access_request, user: user, group: group)
-          end
-
-          it 'returns correct access level' do
-            expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::REPORTER)
+            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::REPORTER)
           end
         end
       end
 
-      context 'when feature flag share_group_with_group is disabled' do
+      context 'with user in the parent group' do
+        let(:user) { parent_group_user }
+
+        it 'returns correct access level' do
+          expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+        end
+      end
+
+      context 'with user in the child group' do
+        let(:user) { child_group_user }
+
+        it 'returns correct access level' do
+          expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+        end
+      end
+
+      context 'unrelated project owner' do
+        let(:common_id) { [Project.maximum(:id).to_i, Namespace.maximum(:id).to_i].max + 999 }
+        let!(:group) { create(:group, id: common_id) }
+        let!(:unrelated_project) { create(:project, id: common_id) }
+        let(:user) { unrelated_project.owner }
+
+        it 'returns correct access level' do
+          expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+        end
+      end
+
+      context 'user without accepted access request' do
+        let!(:user) { create(:user) }
+
         before do
-          stub_feature_flags(share_group_with_group: false)
+          create(:group_member, :developer, :access_request, user: user, group: group)
         end
 
-        context 'with user in the group' do
-          let(:user) { group_user }
-
-          it 'returns correct access level' do
-            expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-          end
-        end
-
-        context 'with user in the parent group' do
-          let(:user) { parent_group_user }
-
-          it 'returns correct access level' do
-            expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-          end
-        end
-
-        context 'with user in the child group' do
-          let(:user) { child_group_user }
-
-          it 'returns correct access level' do
-            expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-          end
+        it 'returns correct access level' do
+          expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
         end
       end
     end
@@ -679,8 +683,6 @@ describe Group do
       let(:shared_group) { create(:group, :private, parent: shared_group_parent) }
 
       before do
-        stub_feature_flags(share_group_with_group: true)
-
         group.add_owner(user)
 
         create(:group_group_link, { shared_with_group: group,
@@ -695,6 +697,19 @@ describe Group do
         expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::MAINTAINER)
       end
     end
+
+    context 'evaluating admin access level' do
+      let_it_be(:admin) { create(:admin) }
+
+      it 'returns OWNER by default' do
+        expect(group.max_member_access_for_user(admin)).to eq(Gitlab::Access::OWNER)
+      end
+
+      it 'returns NO_ACCESS when only concrete membership should be considered' do
+        expect(group.max_member_access_for_user(admin, only_concrete_membership: true))
+          .to eq(Gitlab::Access::NO_ACCESS)
+      end
+    end
   end
 
   describe '#members_with_parents' do
@@ -705,6 +720,56 @@ describe Group do
     it 'returns parents members' do
       expect(group.members_with_parents).to include(developer)
       expect(group.members_with_parents).to include(maintainer)
+    end
+
+    context 'group sharing' do
+      let!(:shared_group) { create(:group) }
+
+      before do
+        create(:group_group_link, shared_group: shared_group, shared_with_group: group)
+      end
+
+      it 'returns shared with group members' do
+        expect(shared_group.members_with_parents).to(
+          include(developer))
+      end
+    end
+  end
+
+  describe '#members_from_self_and_ancestors_with_effective_access_level' do
+    let!(:group_parent) { create(:group, :private) }
+    let!(:group) { create(:group, :private, parent: group_parent) }
+    let!(:group_child) { create(:group, :private, parent: group) }
+
+    let!(:user) { create(:user) }
+
+    let(:parent_group_access_level) { Gitlab::Access::REPORTER }
+    let(:group_access_level) { Gitlab::Access::DEVELOPER }
+    let(:child_group_access_level) { Gitlab::Access::MAINTAINER }
+
+    before do
+      create(:group_member, user: user, group: group_parent, access_level: parent_group_access_level)
+      create(:group_member, user: user, group: group, access_level: group_access_level)
+      create(:group_member, :minimal_access, user: create(:user), source: group)
+      create(:group_member, user: user, group: group_child, access_level: child_group_access_level)
+    end
+
+    it 'returns effective access level for user' do
+      expect(group_parent.members_from_self_and_ancestors_with_effective_access_level.as_json).to(
+        contain_exactly(
+          hash_including('user_id' => user.id, 'access_level' => parent_group_access_level)
+        )
+      )
+      expect(group.members_from_self_and_ancestors_with_effective_access_level.as_json).to(
+        contain_exactly(
+          hash_including('user_id' => user.id, 'access_level' => group_access_level)
+        )
+      )
+      expect(group_child.members_from_self_and_ancestors_with_effective_access_level.as_json).to(
+        contain_exactly(
+          hash_including('user_id' => user.id, 'access_level' => child_group_access_level)
+        )
+      )
     end
   end
 
@@ -807,6 +872,22 @@ describe Group do
 
       expect(group.user_ids_for_project_authorizations)
         .to include(maintainer.id, developer.id)
+    end
+
+    context 'group sharing' do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:group_user) { create(:user) }
+      let_it_be(:shared_group) { create(:group) }
+
+      before do
+        group.add_developer(group_user)
+        create(:group_group_link, shared_group: shared_group, shared_with_group: group)
+      end
+
+      it 'returns the user IDs for shared with group members' do
+        expect(shared_group.user_ids_for_project_authorizations).to(
+          include(group_user.id))
+      end
     end
   end
 
@@ -1290,6 +1371,224 @@ describe Group do
       groups = described_class.groups_including_descendants_by([parent_group2.id, parent_group1.id])
 
       expect(groups).to contain_exactly(parent_group1, parent_group2, child_group1, child_group2, child_group3)
+    end
+  end
+
+  def subject_and_reload(*models)
+    subject
+    models.map(&:reload)
+  end
+
+  describe '#update_shared_runners_setting!' do
+    context 'enabled' do
+      subject { group.update_shared_runners_setting!('enabled') }
+
+      context 'group that its ancestors have shared runners disabled' do
+        let_it_be(:parent) { create(:group, :shared_runners_disabled) }
+        let_it_be(:group) { create(:group, :shared_runners_disabled, parent: parent) }
+        let_it_be(:project) { create(:project, shared_runners_enabled: false, group: group) }
+
+        it 'raises error and does not enable shared Runners' do
+          expect { subject_and_reload(parent, group, project) }
+            .to raise_error(ActiveRecord::RecordInvalid, 'Validation failed: Shared runners enabled cannot be enabled because parent group has shared Runners disabled')
+            .and not_change { parent.shared_runners_enabled }
+            .and not_change { group.shared_runners_enabled }
+            .and not_change { project.shared_runners_enabled }
+        end
+      end
+
+      context 'root group with shared runners disabled' do
+        let_it_be(:group) { create(:group, :shared_runners_disabled) }
+        let_it_be(:sub_group) { create(:group, :shared_runners_disabled, parent: group) }
+        let_it_be(:project) { create(:project, shared_runners_enabled: false, group: sub_group) }
+
+        it 'enables shared Runners only for itself' do
+          expect { subject_and_reload(group, sub_group, project) }
+            .to change { group.shared_runners_enabled }.from(false).to(true)
+            .and not_change { sub_group.shared_runners_enabled }
+            .and not_change { project.shared_runners_enabled }
+        end
+      end
+    end
+
+    context 'disabled_and_unoverridable' do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:sub_group) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners, parent: group) }
+      let_it_be(:sub_group_2) { create(:group, parent: group) }
+      let_it_be(:project) { create(:project, group: group, shared_runners_enabled: true) }
+      let_it_be(:project_2) { create(:project, group: sub_group_2, shared_runners_enabled: true) }
+
+      subject { group.update_shared_runners_setting!('disabled_and_unoverridable') }
+
+      it 'disables shared Runners for all descendant groups and projects' do
+        expect { subject_and_reload(group, sub_group, sub_group_2, project, project_2) }
+          .to change { group.shared_runners_enabled }.from(true).to(false)
+          .and not_change { group.allow_descendants_override_disabled_shared_runners }
+          .and not_change { sub_group.shared_runners_enabled }
+          .and change { sub_group.allow_descendants_override_disabled_shared_runners }.from(true).to(false)
+          .and change { sub_group_2.shared_runners_enabled }.from(true).to(false)
+          .and not_change { sub_group_2.allow_descendants_override_disabled_shared_runners }
+          .and change { project.shared_runners_enabled }.from(true).to(false)
+          .and change { project_2.shared_runners_enabled }.from(true).to(false)
+      end
+
+      context 'with override on self' do
+        let_it_be(:group) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners) }
+
+        it 'disables it' do
+          expect { subject_and_reload(group) }
+            .to not_change { group.shared_runners_enabled }
+            .and change { group.allow_descendants_override_disabled_shared_runners }.from(true).to(false)
+        end
+      end
+    end
+
+    context 'disabled_with_override' do
+      subject { group.update_shared_runners_setting!('disabled_with_override') }
+
+      context 'top level group' do
+        let_it_be(:group) { create(:group, :shared_runners_disabled) }
+        let_it_be(:sub_group) { create(:group, :shared_runners_disabled, parent: group) }
+        let_it_be(:project) { create(:project, shared_runners_enabled: false, group: sub_group) }
+
+        it 'enables allow descendants to override only for itself' do
+          expect { subject_and_reload(group, sub_group, project) }
+            .to change { group.allow_descendants_override_disabled_shared_runners }.from(false).to(true)
+            .and not_change { group.shared_runners_enabled }
+            .and not_change { sub_group.allow_descendants_override_disabled_shared_runners }
+            .and not_change { sub_group.shared_runners_enabled }
+            .and not_change { project.shared_runners_enabled }
+        end
+      end
+
+      context 'group that its ancestors have shared Runners disabled but allows to override' do
+        let_it_be(:parent) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners) }
+        let_it_be(:group) { create(:group, :shared_runners_disabled, parent: parent) }
+        let_it_be(:project) { create(:project, shared_runners_enabled: false, group: group) }
+
+        it 'enables allow descendants to override' do
+          expect { subject_and_reload(parent, group, project) }
+            .to not_change { parent.allow_descendants_override_disabled_shared_runners }
+            .and not_change { parent.shared_runners_enabled }
+            .and change { group.allow_descendants_override_disabled_shared_runners }.from(false).to(true)
+            .and not_change { group.shared_runners_enabled }
+            .and not_change { project.shared_runners_enabled }
+        end
+      end
+
+      context 'when parent does not allow' do
+        let_it_be(:parent) { create(:group, :shared_runners_disabled, allow_descendants_override_disabled_shared_runners: false ) }
+        let_it_be(:group) { create(:group, :shared_runners_disabled, allow_descendants_override_disabled_shared_runners: false, parent: parent) }
+
+        it 'raises error and does not allow descendants to override' do
+          expect { subject_and_reload(parent, group) }
+            .to raise_error(ActiveRecord::RecordInvalid, 'Validation failed: Allow descendants override disabled shared runners cannot be enabled because parent group does not allow it')
+            .and not_change { parent.allow_descendants_override_disabled_shared_runners }
+            .and not_change { parent.shared_runners_enabled }
+            .and not_change { group.allow_descendants_override_disabled_shared_runners }
+            .and not_change { group.shared_runners_enabled }
+        end
+      end
+
+      context 'top level group that has shared Runners enabled' do
+        let_it_be(:group) { create(:group, shared_runners_enabled: true) }
+        let_it_be(:sub_group) { create(:group, shared_runners_enabled: true, parent: group) }
+        let_it_be(:project) { create(:project, shared_runners_enabled: true, group: sub_group) }
+
+        it 'enables allow descendants to override & disables shared runners everywhere' do
+          expect { subject_and_reload(group, sub_group, project) }
+            .to change { group.shared_runners_enabled }.from(true).to(false)
+            .and change { group.allow_descendants_override_disabled_shared_runners }.from(false).to(true)
+            .and change { sub_group.shared_runners_enabled }.from(true).to(false)
+            .and change { project.shared_runners_enabled }.from(true).to(false)
+        end
+      end
+    end
+  end
+
+  describe "#default_branch_name" do
+    context "group.namespace_settings does not have a default branch name" do
+      it "returns nil" do
+        expect(group.default_branch_name).to be_nil
+      end
+    end
+
+    context "group.namespace_settings has a default branch name" do
+      let(:example_branch_name) { "example_branch_name" }
+
+      before do
+        expect(group.namespace_settings)
+          .to receive(:default_branch_name)
+          .and_return(example_branch_name)
+      end
+
+      it "returns the default branch name" do
+        expect(group.default_branch_name).to eq(example_branch_name)
+      end
+    end
+  end
+
+  describe '#default_owner' do
+    let(:group) { build(:group) }
+
+    context 'the group has owners' do
+      before do
+        group.add_owner(create(:user))
+        group.add_owner(create(:user))
+      end
+
+      it 'is the first owner' do
+        expect(group.default_owner)
+          .to eq(group.owners.first)
+          .and be_a(User)
+      end
+    end
+
+    context 'the group has a parent' do
+      let(:parent) { build(:group) }
+
+      before do
+        group.parent = parent
+        parent.add_owner(create(:user))
+      end
+
+      it 'is the first owner of the parent' do
+        expect(group.default_owner)
+          .to eq(parent.default_owner)
+          .and be_a(User)
+      end
+    end
+
+    context 'we fallback to group.owner' do
+      before do
+        group.owner = build(:user)
+      end
+
+      it 'is the group.owner' do
+        expect(group.default_owner)
+          .to eq(group.owner)
+          .and be_a(User)
+      end
+    end
+  end
+
+  describe '#parent_allows_two_factor_authentication?' do
+    it 'returns true for top-level group' do
+      expect(group.parent_allows_two_factor_authentication?).to eq(true)
+    end
+
+    context 'for subgroup' do
+      let(:subgroup) { create(:group, parent: group) }
+
+      it 'returns true if parent group allows two factor authentication for its descendants' do
+        expect(subgroup.parent_allows_two_factor_authentication?).to eq(true)
+      end
+
+      it 'returns true if parent group allows two factor authentication for its descendants' do
+        group.namespace_settings.update!(allow_mfa_for_subgroups: false)
+
+        expect(subgroup.parent_allows_two_factor_authentication?).to eq(false)
+      end
     end
   end
 end

@@ -1,11 +1,29 @@
-# SAML OmniAuth Provider
+---
+type: reference
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
 
-Note that:
+# SAML OmniAuth Provider **(CORE ONLY)**
 
-- SAML OmniAuth Provider is for SAML on self-managed GitLab instances. For SAML on
-  GitLab.com, see [SAML SSO for GitLab.com Groups](../user/group/saml_sso/index.md).
-- Starting from GitLab 11.4, OmniAuth is enabled by default. If you're using an
-  earlier version, you'll need to explicitly enable it.
+This page describes instance-wide SAML for self-managed GitLab instances. For SAML on GitLab.com, see [SAML SSO for GitLab.com groups](../user/group/saml_sso/index.md).
+
+You should also reference the [OmniAuth documentation](omniauth.md) for general settings that apply to all OmniAuth providers.
+
+## Common SAML Terms
+
+| Term | Description |
+|------|-------------|
+| Identity Provider (IdP) | The service which manages your user identities such as ADFS, Okta, Onelogin, or Ping Identity. |
+| Service Provider (SP) | SAML considers GitLab to be a service provider. |
+| Assertion | A piece of information about a user's identity, such as their name or role. Also know as claims or attributes. |
+| SSO | Single Sign-On. |
+| Assertion consumer service URL | The callback on GitLab where users will be redirected after successfully authenticating with the identity provider. |
+| Issuer | How GitLab identifies itself to the identity provider. Also known as a "Relying party trust identifier". |
+| Certificate fingerprint | Used to confirm that communications over SAML are secure by checking that the server is signing communications with the correct certificate. Also known as a certificate thumbprint. |
+
+## General Setup
 
 GitLab can be configured to act as a SAML 2.0 Service Provider (SP). This allows
 GitLab to consume assertions from a SAML 2.0 Identity Provider (IdP) such as
@@ -95,16 +113,16 @@ in your SAML IdP:
    omniauth:
      providers:
        - {
-           name: 'saml',
-           args: {
-                  assertion_consumer_service_url: 'https://gitlab.example.com/users/auth/saml/callback',
-                  idp_cert_fingerprint: '43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0f:66:73:a8',
-                  idp_sso_target_url: 'https://login.example.com/idp',
-                  issuer: 'https://gitlab.example.com',
-                  name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent'
-                },
-           label: 'Company Login' # optional label for SAML login button, defaults to "Saml"
-         }
+         name: 'saml',
+         args: {
+           assertion_consumer_service_url: 'https://gitlab.example.com/users/auth/saml/callback',
+           idp_cert_fingerprint: '43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0f:66:73:a8',
+           idp_sso_target_url: 'https://login.example.com/idp',
+           issuer: 'https://gitlab.example.com',
+           name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent'
+         },
+         label: 'Company Login'  # optional label for SAML login button, defaults to "Saml"
+       }
    ```
 
 1. Change the value for `assertion_consumer_service_url` to match the HTTPS endpoint
@@ -143,17 +161,10 @@ On the sign in page there should now be a SAML button below the regular sign in 
 Click the icon to begin the authentication process. If everything goes well the user
 will be returned to GitLab and will be signed in.
 
-## Marking Users as External based on SAML Groups
+## SAML Groups
 
->**Note:**
-This setting is only available on GitLab 8.7 and above.
-
-SAML login includes support for automatically identifying whether a user should
-be considered an [external](../user/permissions.md) user based on the user's group
-membership in the SAML identity provider. This feature **does not** allow you to
-automatically add users to GitLab [Groups](../user/group/index.md), it simply
-allows you to mark users as External if they are members of certain groups in the
-Identity Provider.
+You can require users to be members of a certain group, or assign users `external`, `admin` or `auditor` roles based on group membership. This feature **does not** allow you to
+automatically add users to GitLab [Groups](../user/group/index.md).
 
 ### Requirements
 
@@ -164,40 +175,25 @@ with the regular SAML response. Here is an example:
 ```xml
 <saml:AttributeStatement>
   <saml:Attribute Name="Groups">
-    <saml:AttributeValue xsi:type="xs:string">SecurityGroup</saml:AttributeValue>
     <saml:AttributeValue xsi:type="xs:string">Developers</saml:AttributeValue>
-    <saml:AttributeValue xsi:type="xs:string">Designers</saml:AttributeValue>
+    <saml:AttributeValue xsi:type="xs:string">Freelancers</saml:AttributeValue>
+    <saml:AttributeValue xsi:type="xs:string">Admins</saml:AttributeValue>
+    <saml:AttributeValue xsi:type="xs:string">Auditors</saml:AttributeValue>
   </saml:Attribute>
 </saml:AttributeStatement>
 ```
 
 The name of the attribute can be anything you like, but it must contain the groups
 to which a user belongs. In order to tell GitLab where to find these groups, you need
-to add a `groups_attribute:` element to your SAML settings. You will also need to
-tell GitLab which groups are external via the `external_groups:` element:
+to add a `groups_attribute:` element to your SAML settings.
 
-```yaml
-{ name: 'saml',
-  label: 'Our SAML Provider',
-  groups_attribute: 'Groups',
-  external_groups: ['Freelancers', 'Interns'],
-  args: {
-          assertion_consumer_service_url: 'https://gitlab.example.com/users/auth/saml/callback',
-          idp_cert_fingerprint: '43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0f:66:73:a8',
-          idp_sso_target_url: 'https://login.example.com/idp',
-          issuer: 'https://gitlab.example.com',
-          name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent'
-        } }
-```
+### Required groups **(STARTER ONLY)**
 
-## Required groups **(STARTER ONLY)**
+Your IdP passes Group Information to the SP (GitLab) in the SAML Response. You need to configure GitLab to identify:
 
->**Note:**
-This setting is only available on GitLab 10.2 EE and above.
+- Where to look for the groups in the SAML response via the `groups_attribute` setting
+- Which group membership is requisite to sign in via the `required_groups` setting
 
-This setting works like `External Groups` setting. Just like there, your IdP has to
-pass Group Information to GitLab, you have to tell GitLab where to look or the
-groups SAML response, and which group membership should be requisite for logging in.
 When `required_groups` is not set or it is empty, anyone with proper authentication
 will be able to use the service.
 
@@ -207,65 +203,91 @@ Example:
 { name: 'saml',
   label: 'Our SAML Provider',
   groups_attribute: 'Groups',
-  required_groups: ['Developers', 'Managers', 'Admins'],
+  required_groups: ['Developers', 'Freelancers', 'Admins', 'Auditors'],
   args: {
           assertion_consumer_service_url: 'https://gitlab.example.com/users/auth/saml/callback',
           idp_cert_fingerprint: '43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0f:66:73:a8',
           idp_sso_target_url: 'https://login.example.com/idp',
           issuer: 'https://gitlab.example.com',
           name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'
-        } }
+  } }
 ```
 
-## Admin Groups **(STARTER ONLY)**
+### External Groups **(STARTER ONLY)**
 
->**Note:**
-This setting is only available on GitLab 8.8 EE and above.
-
-This setting works very similarly to the `External Groups` setting. The requirements
-are the same, your IdP needs to pass Group information to GitLab, you need to tell
-GitLab where to look for the groups in the SAML response, and which group should be
-considered `admin groups`.
+SAML login supports automatic identification on whether a user should be considered an [external](../user/permissions.md) user. This is based on the user's group membership in the SAML identity provider.
 
 ```yaml
 { name: 'saml',
   label: 'Our SAML Provider',
   groups_attribute: 'Groups',
-  admin_groups: ['Managers', 'Admins'],
+  external_groups: ['Freelancers'],
   args: {
           assertion_consumer_service_url: 'https://gitlab.example.com/users/auth/saml/callback',
           idp_cert_fingerprint: '43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0f:66:73:a8',
           idp_sso_target_url: 'https://login.example.com/idp',
           issuer: 'https://gitlab.example.com',
-          name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'
-        } }
+          name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent'
+  } }
 ```
 
-## Auditor Groups **(STARTER ONLY)**
+### Admin Groups **(STARTER ONLY)**
 
->**Note:**
-This setting is only available on GitLab 11.4 EE and above.
-
-This setting also follows the requirements documented for the `External Groups` setting. GitLab uses the Group information provided by your IdP to determine if a user should be assigned the `auditor` role.
+The requirements are the same as the previous settings, your IdP needs to pass Group information to GitLab, you need to tell
+GitLab where to look for the groups in the SAML response, and which group(s) should be
+considered admin users.
 
 ```yaml
 { name: 'saml',
   label: 'Our SAML Provider',
   groups_attribute: 'Groups',
-  auditor_groups: ['Auditors', 'Security'],
+  admin_groups: ['Admins'],
   args: {
           assertion_consumer_service_url: 'https://gitlab.example.com/users/auth/saml/callback',
           idp_cert_fingerprint: '43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0f:66:73:a8',
           idp_sso_target_url: 'https://login.example.com/idp',
           issuer: 'https://gitlab.example.com',
           name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'
-        } }
+  } }
+```
+
+### Auditor Groups **(STARTER ONLY)**
+
+> Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 11.4.
+
+The requirements are the same as the previous settings, your IdP needs to pass Group information to GitLab, you need to tell
+GitLab where to look for the groups in the SAML response, and which group(s) should be
+considered auditor users.
+
+```yaml
+{ name: 'saml',
+  label: 'Our SAML Provider',
+  groups_attribute: 'Groups',
+  auditor_groups: ['Auditors'],
+  args: {
+          assertion_consumer_service_url: 'https://gitlab.example.com/users/auth/saml/callback',
+          idp_cert_fingerprint: '43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0f:66:73:a8',
+          idp_sso_target_url: 'https://login.example.com/idp',
+          issuer: 'https://gitlab.example.com',
+          name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'
+  } }
 ```
 
 ## Bypass two factor authentication
 
 If you want some SAML authentication methods to count as 2FA on a per session basis, you can register them in the
-`upstream_two_factor_authn_contexts` list:
+`upstream_two_factor_authn_contexts` list.
+
+In addition to the changes in GitLab, make sure that your IdP is returning the
+`AuthnContext`. For example:
+
+```xml
+<saml:AuthnStatement>
+    <saml:AuthnContext>
+        <saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:MediumStrongCertificateProtectedTransport</saml:AuthnContextClassRef>
+    </saml:AuthnContext>
+</saml:AuthnStatement>
+```
 
 **For Omnibus installations:**
 
@@ -306,36 +328,25 @@ If you want some SAML authentication methods to count as 2FA on a per session ba
    omniauth:
      providers:
        - {
-           name: 'saml',
-           args: {
-                   assertion_consumer_service_url: 'https://gitlab.example.com/users/auth/saml/callback',
-                   idp_cert_fingerprint: '43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0f:66:73:a8',
-                   idp_sso_target_url: 'https://login.example.com/idp',
-                   issuer: 'https://gitlab.example.com',
-                   name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent',
-                   upstream_two_factor_authn_contexts:
-                     [
-                       'urn:oasis:names:tc:SAML:2.0:ac:classes:CertificateProtectedTransport',
-                       'urn:oasis:names:tc:SAML:2.0:ac:classes:SecondFactorOTPSMS',
-                       'urn:oasis:names:tc:SAML:2.0:ac:classes:SecondFactorIGTOKEN'
-                     ]
-                 },
-           label: 'Company Login' # optional label for SAML login button, defaults to "Saml"
-         }
+         name: 'saml',
+         args: {
+           assertion_consumer_service_url: 'https://gitlab.example.com/users/auth/saml/callback',
+           idp_cert_fingerprint: '43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0f:66:73:a8',
+           idp_sso_target_url: 'https://login.example.com/idp',
+           issuer: 'https://gitlab.example.com',
+           name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent',
+           upstream_two_factor_authn_contexts:
+             [
+               'urn:oasis:names:tc:SAML:2.0:ac:classes:CertificateProtectedTransport',
+               'urn:oasis:names:tc:SAML:2.0:ac:classes:SecondFactorOTPSMS',
+               'urn:oasis:names:tc:SAML:2.0:ac:classes:SecondFactorIGTOKEN'
+             ]
+         },
+         label: 'Company Login'  # optional label for SAML login button, defaults to "Saml"
+       }
    ```
 
-1. Save the file and [restart GitLab](../administration/restart_gitlab.md#installations-from-source) for the changes ot take effect
-
-In addition to the changes in GitLab, make sure that your Idp is returning the
-`AuthnContext`. For example:
-
-```xml
-<saml:AuthnStatement>
-    <saml:AuthnContext>
-        <saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:MediumStrongCertificateProtectedTransport</saml:AuthnContextClassRef>
-    </saml:AuthnContext>
-</saml:AuthnStatement>
-```
+1. Save the file and [restart GitLab](../administration/restart_gitlab.md#installations-from-source) for the changes to take effect
 
 ## Customization
 
@@ -367,8 +378,7 @@ You may also bypass the auto signin feature by browsing to
 
 ### `attribute_statements`
 
->**Note:**
-This setting is only available on GitLab 8.6 and above.
+NOTE: **Note:**
 This setting should only be used to map attributes that are part of the
 OmniAuth `info` hash schema.
 
@@ -396,6 +406,21 @@ args: {
 }
 ```
 
+#### Setting a username
+
+By default, the email in the SAML response will be used to automatically generate the user's GitLab username. If you'd like to set another attribute as the username, assign it to the `nickname` OmniAuth `info` hash attribute. For example, if you wanted to set the `username` attribute in your SAML Response to the username in GitLab, use the following setting:
+
+```yaml
+args: {
+        assertion_consumer_service_url: 'https://gitlab.example.com/users/auth/saml/callback',
+        idp_cert_fingerprint: '43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0f:66:73:a8',
+        idp_sso_target_url: 'https://login.example.com/idp',
+        issuer: 'https://gitlab.example.com',
+        name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent',
+        attribute_statements: { nickname: ['username'] }
+}
+```
+
 ### `allowed_clock_drift`
 
 The clock of the Identity Provider may drift slightly ahead of your system clocks.
@@ -411,7 +436,7 @@ args: {
         issuer: 'https://gitlab.example.com',
         name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent',
         attribute_statements: { email: ['EmailAddress'] },
-        allowed_clock_drift: 1 # for one second clock drift
+        allowed_clock_drift: 1  # for one second clock drift
 }
 ```
 
@@ -536,10 +561,10 @@ args: {
     <redacted>
     -----END PRIVATE KEY-----',
   security: {
-    authn_requests_signed: true, # enable signature on AuthNRequest
-    want_assertions_signed: true, # enable the requirement of signed assertion
-    embed_sign: true, # embedded signature or HTTP GET parameter signature
-    metadata_signed: false, # enable signature on Metadata
+    authn_requests_signed: true,  # enable signature on AuthNRequest
+    want_assertions_signed: true,  # enable the requirement of signed assertion
+    embed_sign: true,  # embedded signature or HTTP GET parameter signature
+    metadata_signed: false,  # enable signature on Metadata
     signature_method: 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
     digest_method: 'http://www.w3.org/2001/04/xmlenc#sha256',
   }
@@ -557,9 +582,61 @@ Avoid user control of the following attributes:
 
 These attributes define the SAML user. If users can change these attributes, they can impersonate others.
 
-Refer to the documentation for your [SAML Identity Provider](../user/group/saml_sso/index.md#providers) for information on how to fix these attributes.
+Refer to the documentation for your SAML Identity Provider for information on how to fix these attributes.
+
+## Passwords for users created via SAML
+
+The [Generated passwords for users created through integrated authentication](../security/passwords_for_integrated_authentication_methods.md) guide provides an overview of how GitLab generates and sets passwords for users created via SAML.
+
+## Configuring Group SAML on a self-managed GitLab instance **(PREMIUM ONLY)**
+
+For information on the GitLab.com implementation, please see the [SAML SSO for GitLab.com groups page](../user/group/saml_sso).
+
+Group SAML SSO helps if you need to allow access via multiple SAML identity providers, but as a multi-tenant solution is less suited to cases where you administer your own GitLab instance.
+
+To proceed with configuring Group SAML SSO instead, you'll need to enable the `group_saml` OmniAuth provider. This can be done from:
+
+- `gitlab.rb` for [Omnibus GitLab installations](#omnibus-installations).
+- `gitlab/config/gitlab.yml` for [source installations](#source-installations).
+
+### Limitations
+
+Group SAML on a self-managed instance is limited when compared to the recommended
+[instance-wide SAML](../user/group/saml_sso/index.md). The recommended solution allows you to take advantage of:
+
+- [LDAP compatibility](../administration/auth/ldap/index.md).
+- [LDAP Group Sync](../user/group/index.md#manage-group-memberships-via-ldap).
+- [Required groups](#required-groups).
+- [Admin groups](#admin-groups).
+- [Auditor groups](#auditor-groups).
+
+### Omnibus installations
+
+1. Make sure GitLab is
+   [configured with HTTPS](../install/installation.md#using-https).
+1. Enable OmniAuth and the `group_saml` provider in `gitlab.rb`:
+
+   ```ruby
+   gitlab_rails['omniauth_enabled'] = true
+   gitlab_rails['omniauth_providers'] = [{ name: 'group_saml' }]
+   ```
+
+### Source installations
+
+1. Make sure GitLab is
+   [configured with HTTPS](../install/installation.md#using-https).
+1. Enable OmniAuth and the `group_saml` provider in `gitlab/config/gitlab.yml`:
+
+    ```yaml
+    omniauth:
+      enabled: true
+      providers:
+        - { name: 'group_saml' }
+    ```
 
 ## Troubleshooting
+
+You can find the base64-encoded SAML Response in the [`production_json.log`](../administration/logs.md#production_jsonlog).
 
 ### GitLab+SAML Testing Environments
 
@@ -580,13 +657,14 @@ Make sure the IdP provides a claim containing the user's email address, using cl
 If after signing in into your SAML server you are redirected back to the sign in page and
 no error is displayed, check your `production.log` file. It will most likely contain the
 message `Can't verify CSRF token authenticity`. This means that there is an error during
-the SAML request, but this error never reaches GitLab due to the CSRF check.
+the SAML request, but in GitLab 11.7 and earlier this error never reaches GitLab due to
+the CSRF check.
 
 To bypass this you can add `skip_before_action :verify_authenticity_token` to the
 `omniauth_callbacks_controller.rb` file immediately after the `class` line and
-comment out the `protect_from_forgery` line using a `#` then restart Unicorn. This
-will allow the error to hit GitLab, where it can then be seen in the usual logs,
-or as a flash message on the login screen.
+comment out the `protect_from_forgery` line using a `#`. Restart Unicorn for this
+change to take effect. This will allow the error to hit GitLab, where it can then
+be seen in the usual logs, or as a flash message on the login screen.
 
 That file is located in `/opt/gitlab/embedded/service/gitlab-rails/app/controllers`
 for Omnibus installations and by default in `/home/git/gitlab/app/controllers` for
@@ -612,6 +690,8 @@ is the minimum amount of information that needs to be passed. If the IdP server
 is not providing this information, all SAML requests will fail.
 
 Make sure this information is provided.
+
+Another issue that can result in this error is when the correct information is being sent by the IdP, but the attributes don't match the names in the OmniAuth `info` hash. In this case, you'll need to set `attribute_statements` in the SAML configuration to [map the attribute names in your SAML Response to the corresponding OmniAuth `info` hash names](#attribute_statements).
 
 ### Key validation error, Digest mismatch or Fingerprint mismatch
 

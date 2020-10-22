@@ -9,25 +9,18 @@ module Gitlab
       #   * Returning a detailed Result
       #
       class JobArtifactDownloader < BaseDownloader
-        def execute
-          job_artifact = find_resource
-          return fail_before_transfer unless job_artifact.present?
-
-          transfer = ::Gitlab::Geo::Replication::JobArtifactTransfer.new(job_artifact)
-
-          result = if job_artifact.local_store?
-                     transfer.download_from_primary
-                   else
-                     transfer.stream_from_primary_to_object_storage
-                   end
-
-          Result.from_transfer_result(result)
-        end
-
         private
 
-        def find_resource
-          ::Ci::JobArtifact.find_by_id(object_db_id)
+        def resource
+          strong_memoize(:resource) { ::Ci::JobArtifact.find_by_id(object_db_id) }
+        end
+
+        def transfer
+          strong_memoize(:transfer) { ::Gitlab::Geo::Replication::JobArtifactTransfer.new(resource) }
+        end
+
+        def object_store_enabled?
+          ::JobArtifactUploader.object_store_enabled?
         end
       end
     end

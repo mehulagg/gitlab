@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::MergeRequests::DiffsController do
+RSpec.describe Projects::MergeRequests::DiffsController do
   include ProjectForksHelper
 
   shared_examples '404 for unexistent diffable' do
@@ -58,36 +58,14 @@ describe Projects::MergeRequests::DiffsController do
     end
   end
 
-  shared_examples 'persisted preferred diff view cookie' do
-    context 'with view param' do
-      before do
-        go(view: 'parallel')
-      end
+  shared_examples "diff note on-demand position creation" do
+    it "updates diff discussion positions" do
+      service = double("service")
 
-      it 'saves the preferred diff view in a cookie' do
-        expect(response.cookies['diff_view']).to eq('parallel')
-      end
+      expect(Discussions::CaptureDiffNotePositionsService).to receive(:new).with(merge_request).and_return(service)
+      expect(service).to receive(:execute)
 
-      it 'only renders the required view', :aggregate_failures do
-        diff_files_without_deletions = json_response['diff_files'].reject { |f| f['deleted_file'] }
-        have_no_inline_diff_lines = satisfy('have no inline diff lines') do |diff_file|
-          !diff_file.has_key?('highlighted_diff_lines')
-        end
-
-        expect(diff_files_without_deletions).to all(have_key('parallel_diff_lines'))
-        expect(diff_files_without_deletions).to all(have_no_inline_diff_lines)
-      end
-    end
-
-    context 'when the user cannot view the merge request' do
-      before do
-        project.team.truncate
-        go
-      end
-
-      it 'returns a 404' do
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
+      go
     end
   end
 
@@ -144,8 +122,8 @@ describe Projects::MergeRequests::DiffsController do
       it_behaves_like 'forked project with submodules'
     end
 
-    it_behaves_like 'persisted preferred diff view cookie'
     it_behaves_like 'cached diff collection'
+    it_behaves_like 'diff note on-demand position creation'
   end
 
   describe 'GET diffs_metadata' do
@@ -402,6 +380,7 @@ describe Projects::MergeRequests::DiffsController do
 
     def collection_arguments(pagination_data = {})
       {
+        environment: nil,
         merge_request: merge_request,
         diff_view: :inline,
         pagination_data: {
@@ -426,18 +405,6 @@ describe Projects::MergeRequests::DiffsController do
     end
 
     it_behaves_like '404 for unexistent diffable'
-
-    context 'when feature is disabled' do
-      before do
-        stub_feature_flags(diffs_batch_load: false)
-      end
-
-      it 'returns 404' do
-        go
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
 
     context 'when not authorized' do
       let(:other_user) { create(:user) }
@@ -510,7 +477,6 @@ describe Projects::MergeRequests::DiffsController do
     end
 
     it_behaves_like 'forked project with submodules'
-    it_behaves_like 'persisted preferred diff view cookie'
     it_behaves_like 'cached diff collection'
 
     context 'diff unfolding' do

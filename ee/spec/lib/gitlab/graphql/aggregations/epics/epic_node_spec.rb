@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Graphql::Aggregations::Epics::EpicNode do
+RSpec.describe Gitlab::Graphql::Aggregations::Epics::EpicNode do
   include_context 'includes EpicAggregate constants'
 
   let(:epic_id) { 34 }

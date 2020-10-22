@@ -15,16 +15,16 @@ module EE
 
       state_machine :status, initial: :none do
         before_transition [:none, :finished, :failed] => :scheduled do |state, _|
-          state.last_update_scheduled_at = Time.now
+          state.last_update_scheduled_at = Time.current
         end
 
         before_transition scheduled: :started do |state, _|
-          state.last_update_started_at = Time.now
+          state.last_update_started_at = Time.current
         end
 
         before_transition scheduled: :failed do |state, _|
           if state.mirror?
-            state.last_update_at = Time.now
+            state.last_update_at = Time.current
             state.set_next_execution_to_now
           end
         end
@@ -41,7 +41,7 @@ module EE
 
         before_transition started: :failed do |state, _|
           if state.mirror?
-            state.last_update_at = Time.now
+            state.last_update_at = Time.current
             state.increment_retry_count
             state.set_next_execution_timestamp
           end
@@ -49,7 +49,7 @@ module EE
 
         before_transition started: :finished do |state, _|
           if state.mirror?
-            timestamp = Time.now
+            timestamp = Time.current
             state.last_update_at = timestamp
             state.last_successful_update_at = timestamp
 
@@ -59,10 +59,12 @@ module EE
         end
 
         after_transition started: :finished do |state, _|
+          # Create a Geo event so changes will be replicated to secondary node(s).
+          state.project.log_geo_updated_events
+
           if state.project.use_elasticsearch?
             state.run_after_commit do
-              last_indexed_commit = state.project.index_status&.last_commit
-              ElasticCommitIndexerWorker.perform_async(state.project_id, last_indexed_commit)
+              ElasticCommitIndexerWorker.perform_async(state.project_id)
             end
           end
         end
@@ -102,7 +104,7 @@ module EE
       return false if hard_failed?
       return false if updating_mirror?
 
-      next_execution_timestamp <= Time.now
+      next_execution_timestamp <= Time.current
     end
 
     def last_update_status
@@ -138,7 +140,7 @@ module EE
     # We schedule the next sync time based on the duration of the
     # last mirroring period and add it a fixed backoff period with a random jitter
     def set_next_execution_timestamp
-      timestamp = Time.now
+      timestamp = Time.current
       retry_factor = [1, self.retry_count].max
       delay = [base_delay(timestamp), ::Gitlab::Mirror.min_delay].max
       delay = [delay * retry_factor, ::Gitlab::Mirror.max_delay].min
@@ -160,7 +162,7 @@ module EE
     def set_next_execution_to_now(prioritized: false)
       return unless mirror?
 
-      self.next_execution_timestamp = prioritized ? 5.minutes.ago : Time.now
+      self.next_execution_timestamp = prioritized ? 5.minutes.ago : Time.current
     end
 
     def retry_limit_exceeded?

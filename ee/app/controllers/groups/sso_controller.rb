@@ -5,13 +5,17 @@ class Groups::SsoController < Groups::ApplicationController
   skip_before_action :group
 
   before_action :authenticate_user!, only: [:unlink]
-  before_action :require_configured_provider!
+  before_action :require_group_saml_instance!
+  before_action :require_licensed_group!, except: [:unlink]
+  before_action :require_saml_provider!
   before_action :require_enabled_provider!, except: [:unlink]
   before_action :check_user_can_sign_in_with_provider, only: [:saml]
   before_action :redirect_if_group_moved
   before_action :check_oauth_data, only: [:sign_up_form, :sign_up, :authorize_managed_account]
 
   layout 'devise'
+
+  feature_category :authentication_and_authorization
 
   def saml
     @redirect_path = safe_redirect_path(params[:redirect]) || group_path(unauthenticated_group)
@@ -112,20 +116,20 @@ class Groups::SsoController < Groups::ApplicationController
     Gitlab::Auth::GroupSaml::SsoEnforcer.new(unauthenticated_group.saml_provider).update_session
   end
 
-  def require_configured_provider!
-    unless unauthenticated_group&.feature_available?(:group_saml) && Gitlab::Auth::GroupSaml::Config.enabled?
-      return route_not_found
-    end
+  def require_group_saml_instance!
+    route_not_found unless Gitlab::Auth::GroupSaml::Config.enabled?
+  end
 
-    return if unauthenticated_group.saml_provider
+  def require_licensed_group!
+    route_not_found unless unauthenticated_group&.feature_available?(:group_saml)
+  end
 
-    redirect_settings_or_not_found
+  def require_saml_provider!
+    redirect_settings_or_not_found unless unauthenticated_group.saml_provider
   end
 
   def require_enabled_provider!
-    return if unauthenticated_group.saml_provider&.enabled?
-
-    redirect_settings_or_not_found
+    redirect_settings_or_not_found unless unauthenticated_group.saml_provider&.enabled?
   end
 
   def redirect_settings_or_not_found

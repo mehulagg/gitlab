@@ -44,10 +44,11 @@ const createComponent = ({ done, listIssueProps = {}, componentProps = {}, listP
       disabled: false,
       list,
       issues: list.issues,
-      loading: false,
-      issueLinkBase: '/issues',
-      rootPath: '/',
       ...componentProps,
+    },
+    provide: {
+      groupId: null,
+      rootPath: '/',
     },
   }).$mount();
 
@@ -64,7 +65,7 @@ describe('Board list component', () => {
   let getIssues;
   function generateIssues(compWrapper) {
     for (let i = 1; i < 20; i += 1) {
-      const issue = Object.assign({}, compWrapper.list.issues[0]);
+      const issue = { ...compWrapper.list.issues[0] };
       issue.id += i;
       compWrapper.list.issues.push(issue);
     }
@@ -92,7 +93,7 @@ describe('Board list component', () => {
     });
 
     it('renders loading icon', () => {
-      component.loading = true;
+      component.list.loading = true;
 
       return Vue.nextTick().then(() => {
         expect(component.$el.querySelector('.board-list-loading')).not.toBeNull();
@@ -118,7 +119,7 @@ describe('Board list component', () => {
     });
 
     it('shows new issue form after eventhub event', () => {
-      eventHub.$emit(`hide-issue-form-${component.list.id}`);
+      eventHub.$emit(`toggle-issue-form-${component.list.id}`);
 
       return Vue.nextTick().then(() => {
         expect(component.$el.querySelector('.board-new-issue-form')).not.toBeNull();

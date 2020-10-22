@@ -1,15 +1,14 @@
 <script>
-import { GlTooltipDirective, GlLink, GlDeprecatedButton } from '@gitlab/ui';
+import { GlTooltipDirective, GlLink, GlButton, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     ProjectAvatar,
     GlLink,
-    GlDeprecatedButton,
+    GlButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -33,17 +32,17 @@ export default {
 
 <template>
   <div
-    class="d-flex align-items-center page-title-holder text-secondary justify-content-between pb-2"
+    class="d-flex align-items-center page-title-holder text-secondary justify-content-between pb-2 mb-3"
   >
     <div class="d-flex align-items-center">
       <project-avatar :project="project.namespace" :size="20" class="flex-shrink-0" />
       <gl-link class="js-namespace-link text-secondary" :href="`/${project.namespace.full_path}`">
-        <span class="js-namespace append-right-8"> {{ project.namespace.name }} </span>
+        <span class="js-namespace gl-mr-3"> {{ project.namespace.name }} </span>
       </gl-link>
-      <span class="append-right-8">&gt;</span>
+      <span class="gl-mr-3">&gt;</span>
       <project-avatar :project="project" :size="20" class="flex-shrink-0" />
       <gl-link class="js-project-link text-secondary" :href="project.web_url">
-        <span class="js-name append-right-8"> {{ project.name }} </span>
+        <span class="js-name gl-mr-3"> {{ project.name }} </span>
       </gl-link>
     </div>
     <div class="dropdown js-more-actions">
@@ -54,13 +53,13 @@ export default {
         data-toggle="dropdown"
         :title="$options.moreActionsText"
       >
-        <icon name="ellipsis_v" class="text-secondary" />
+        <gl-icon name="ellipsis_v" class="text-secondary" />
       </button>
       <ul class="dropdown-menu dropdown-menu-right">
         <li>
-          <gl-deprecated-button class="js-remove-button" @click="onRemove()">
+          <gl-button class="js-remove-button" variant="link" @click="onRemove()">
             <span class="text-danger"> {{ $options.removeProjectText }} </span>
-          </gl-deprecated-button>
+          </gl-button>
         </li>
       </ul>
     </div>

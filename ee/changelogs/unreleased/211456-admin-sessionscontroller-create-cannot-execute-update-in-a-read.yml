@@ -1,5 +1,0 @@
----
-title: Geo - Does not write to DB when using 2FA via OTP for admin mode
-merge_request: 27450
-author:
-type: fixed

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Members::UpdateService do
+RSpec.describe Members::UpdateService do
   let(:project) { create(:project, :public) }
   let(:group) { create(:group, :public) }
   let(:current_user) { create(:user) }
@@ -10,7 +10,7 @@ describe Members::UpdateService do
   let(:permission) { :update }
   let(:member) { source.members_and_requesters.find_by!(user_id: member_user.id) }
   let(:params) do
-    { access_level: Gitlab::Access::MAINTAINER, expires_at: Date.parse('2020-01-03') }
+    { access_level: Gitlab::Access::MAINTAINER, expires_at: 2.days.from_now }
   end
 
   before do
@@ -19,10 +19,10 @@ describe Members::UpdateService do
   end
 
   shared_examples_for 'logs an audit event' do
-    it do
+    specify do
       expect do
         described_class.new(current_user, params).execute(member, permission: permission)
-      end.to change { SecurityEvent.count }.by(1)
+      end.to change { AuditEvent.count }.by(1)
     end
   end
 

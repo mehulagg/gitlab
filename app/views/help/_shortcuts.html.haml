@@ -2,10 +2,6 @@
   .modal-dialog.modal-lg.modal-1040
     .modal-content
       .modal-header
-        %h4.modal-title
-          = _('Keyboard Shortcuts')
-          %small
-            = link_to _('(Show all)'), '#', class: 'js-more-help-button'
         .js-toggle-shortcuts
         %button.close{ type: "button", "data-dismiss": "modal", "aria-label" => _('Close') }
           %span{ "aria-hidden": true } &times;
@@ -44,6 +40,8 @@
                 %tr
                   %td.shortcut
                     %kbd s
+                    \/
+                    %kbd /
                   %td= _('Start search')
                 %tr
                   %td.shortcut
@@ -76,7 +74,7 @@
                 %tr
                   %td.shortcut
                     %kbd
-                      %i.fa.fa-arrow-up
+                      = sprite_icon('arrow-up', size: 12)
                   %td= _('Edit your most recent comment in a thread (from an empty textarea)')
               %tbody
                 %tr
@@ -93,28 +91,28 @@
                 %tr
                   %td.shortcut
                     %kbd
-                      %i.fa.fa-arrow-left
+                      = sprite_icon('arrow-left', size: 12)
                     \/
                     %kbd h
                   %td= _('Scroll left')
                 %tr
                   %td.shortcut
                     %kbd
-                      %i.fa.fa-arrow-right
+                      = sprite_icon('arrow-right', size: 12)
                     \/
                     %kbd l
                   %td= _('Scroll right')
                 %tr
                   %td.shortcut
                     %kbd
-                      %i.fa.fa-arrow-up
+                      = sprite_icon('arrow-up', size: 12)
                     \/
                     %kbd k
                   %td= _('Scroll up')
                 %tr
                   %td.shortcut
                     %kbd
-                      %i.fa.fa-arrow-down
+                      = sprite_icon('arrow-down', size: 12)
                     \/
                     %kbd j
                   %td= _('Scroll down')
@@ -122,14 +120,14 @@
                   %td.shortcut
                     %kbd
                       shift
-                      %i.fa.fa-arrow-up
+                      = sprite_icon('arrow-up', size: 12)
                       \/ k
                   %td= _('Scroll to top')
                 %tr
                   %td.shortcut
                     %kbd
                       shift
-                      %i.fa.fa-arrow-down
+                      = sprite_icon('arrow-down', size: 12)
                       \/ j
                   %td= _('Scroll to bottom')
           .col-lg-4
@@ -233,12 +231,12 @@
                 %tr
                   %td.shortcut
                     %kbd
-                      %i.fa.fa-arrow-up
+                      = sprite_icon('arrow-up', size: 12)
                   %td= _('Move selection up')
                 %tr
                   %td.shortcut
                     %kbd
-                      %i.fa.fa-arrow-down
+                      = sprite_icon('arrow-down', size: 12)
                   %td= _('Move selection down')
                 %tr
                   %td.shortcut
@@ -313,6 +311,22 @@
                   %td.shortcut
                     %kbd p
                   %td= _('Previous unresolved discussion')
+                %tr
+                  %td.shortcut
+                    %kbd b
+                  %td= _('Copy source branch name')
+              %tbody
+                %tr
+                  %th
+                  %th= _('Merge Request Commits')
+                %tr
+                  %td.shortcut
+                    %kbd c
+                  %td= _('Next commit')
+                %tr
+                  %td.shortcut
+                    %kbd x
+                  %td= _('Previous commit')
               %tbody
                 %tr
                   %th

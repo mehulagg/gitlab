@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe CommitCollection do
+RSpec.describe CommitCollection do
   let(:project) { create(:project, :repository) }
   let(:commit) { project.commit("c1c67abbaf91f624347bb3ae96eabe3a1b742478") }
 
@@ -52,26 +52,49 @@ describe CommitCollection do
   end
 
   describe '#with_latest_pipeline' do
+    let(:another_commit) { project.commit("60ecb67744cb56576c30214ff52294f8ce2def98") }
+
     let!(:pipeline) do
-      create(
-        :ci_empty_pipeline,
-        ref: 'master',
-        sha: commit.id,
-        status: 'success',
-        project: project
-      )
+      create(:ci_empty_pipeline, ref: 'master', sha: commit.id, status: 'success', project: project)
     end
-    let(:collection) { described_class.new(project, [commit]) }
+
+    let!(:another_pipeline) do
+      create(:ci_empty_pipeline, ref: 'master', sha: another_commit.id, status: 'success', project: project)
+    end
+
+    let(:collection) { described_class.new(project, [commit, another_commit]) }
 
     it 'sets the latest pipeline for every commit so no additional queries are necessary' do
       commits = collection.with_latest_pipeline('master')
 
       recorder = ActiveRecord::QueryRecorder.new do
         expect(commits.map { |c| c.latest_pipeline('master') })
-          .to eq([pipeline])
+          .to eq([pipeline, another_pipeline])
       end
 
       expect(recorder.count).to be_zero
+    end
+
+    it 'performs a single query to fetch pipeline warnings' do
+      recorder = ActiveRecord::QueryRecorder.new do
+        collection.with_latest_pipeline('master').each do |c|
+          c.latest_pipeline('master').number_of_warnings.itself
+        end
+      end
+
+      expect(recorder.count).to eq(2) # 1 for pipelines, 1 for warnings counts
+    end
+  end
+
+  describe '#with_markdown_cache' do
+    let(:commits) { [commit] }
+    let(:collection) { described_class.new(project, commits) }
+
+    it 'preloads commits cache markdown' do
+      aggregate_failures do
+        expect(Commit).to receive(:preload_markdown_cache!).with(commits)
+        expect(collection.with_markdown_cache).to eq(collection)
+      end
     end
   end
 

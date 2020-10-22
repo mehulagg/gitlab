@@ -1,14 +1,8 @@
 import MockAdapter from 'axios-mock-adapter';
-import $ from 'jquery';
 import { loadHTMLFixture } from 'helpers/fixtures';
 import { setTestTimeout } from 'helpers/timeout';
 import Clusters from '~/clusters/clusters_bundle';
-import {
-  APPLICATION_STATUS,
-  INGRESS_DOMAIN_SUFFIX,
-  APPLICATIONS,
-  RUNNER,
-} from '~/clusters/constants';
+import { APPLICATION_STATUS, APPLICATIONS, RUNNER } from '~/clusters/constants';
 import axios from '~/lib/utils/axios_utils';
 import initProjectSelectDropdown from '~/project_select';
 
@@ -60,47 +54,6 @@ describe('Clusters', () => {
 
     it('should call initProjectSelectDropdown on construct', () => {
       expect(initProjectSelectDropdown).toHaveBeenCalled();
-    });
-  });
-
-  describe('toggle', () => {
-    it('should update the button and the input field on click', done => {
-      const toggleButton = document.querySelector(
-        '.js-cluster-enable-toggle-area .js-project-feature-toggle',
-      );
-      const toggleInput = document.querySelector(
-        '.js-cluster-enable-toggle-area .js-project-feature-toggle-input',
-      );
-
-      $(toggleInput).one('trigger-change', () => {
-        expect(toggleButton.classList).not.toContain('is-checked');
-        expect(toggleInput.getAttribute('value')).toEqual('false');
-        done();
-      });
-
-      toggleButton.click();
-    });
-  });
-
-  describe('showToken', () => {
-    it('should update token field type', () => {
-      cluster.showTokenButton.click();
-
-      expect(cluster.tokenField.getAttribute('type')).toEqual('text');
-
-      cluster.showTokenButton.click();
-
-      expect(cluster.tokenField.getAttribute('type')).toEqual('password');
-    });
-
-    it('should update show token button text', () => {
-      cluster.showTokenButton.click();
-
-      expect(cluster.showTokenButton.textContent).toEqual('Hide');
-
-      cluster.showTokenButton.click();
-
-      expect(cluster.showTokenButton.textContent).toEqual('Show');
     });
   });
 
@@ -290,13 +243,18 @@ describe('Clusters', () => {
 
       cluster.store.state.applications[applicationId].status = INSTALLABLE;
 
+      const params = {};
+      if (applicationId === 'knative') {
+        params.hostname = 'test-example.com';
+      }
+
       // eslint-disable-next-line promise/valid-params
       cluster
-        .installApplication({ id: applicationId })
+        .installApplication({ id: applicationId, params })
         .then(() => {
           expect(cluster.store.state.applications[applicationId].status).toEqual(INSTALLING);
           expect(cluster.store.state.applications[applicationId].requestReason).toEqual(null);
-          expect(cluster.service.installApplication).toHaveBeenCalledWith(applicationId, undefined);
+          expect(cluster.service.installApplication).toHaveBeenCalledWith(applicationId, params);
           done();
         })
         .catch();
@@ -345,7 +303,6 @@ describe('Clusters', () => {
       return promise.then(() => {
         expect(cluster.store.state.applications.helm.status).toEqual(INSTALLED);
         expect(cluster.store.state.applications.helm.uninstallFailed).toBe(true);
-
         expect(cluster.store.state.applications.helm.requestReason).toBeDefined();
       });
     });
@@ -371,10 +328,8 @@ describe('Clusters', () => {
   describe('handleClusterStatusSuccess', () => {
     beforeEach(() => {
       jest.spyOn(cluster.store, 'updateStateFromServer').mockReturnThis();
-      jest.spyOn(cluster, 'toggleIngressDomainHelpText').mockReturnThis();
       jest.spyOn(cluster, 'checkForNewInstalls').mockReturnThis();
       jest.spyOn(cluster, 'updateContainer').mockReturnThis();
-
       cluster.handleClusterStatusSuccess({ data: {} });
     });
 
@@ -386,50 +341,8 @@ describe('Clusters', () => {
       expect(cluster.checkForNewInstalls).toHaveBeenCalled();
     });
 
-    it('toggles ingress domain help text', () => {
-      expect(cluster.toggleIngressDomainHelpText).toHaveBeenCalled();
-    });
-
     it('updates message containers', () => {
       expect(cluster.updateContainer).toHaveBeenCalled();
-    });
-  });
-
-  describe('toggleIngressDomainHelpText', () => {
-    let ingressPreviousState;
-    let ingressNewState;
-
-    beforeEach(() => {
-      ingressPreviousState = { externalIp: null };
-      ingressNewState = { externalIp: '127.0.0.1' };
-    });
-
-    describe(`when ingress have an external ip assigned`, () => {
-      beforeEach(() => {
-        cluster.toggleIngressDomainHelpText(ingressPreviousState, ingressNewState);
-      });
-
-      it('displays custom domain help text', () => {
-        expect(cluster.ingressDomainHelpText.classList.contains('hide')).toEqual(false);
-      });
-
-      it('updates ingress external ip address', () => {
-        expect(cluster.ingressDomainSnippet.textContent).toEqual(
-          `${ingressNewState.externalIp}${INGRESS_DOMAIN_SUFFIX}`,
-        );
-      });
-    });
-
-    describe(`when ingress does not have an external ip assigned`, () => {
-      it('hides custom domain help text', () => {
-        ingressPreviousState.externalIp = '127.0.0.1';
-        ingressNewState.externalIp = null;
-        cluster.ingressDomainHelpText.classList.remove('hide');
-
-        cluster.toggleIngressDomainHelpText(ingressPreviousState, ingressNewState);
-
-        expect(cluster.ingressDomainHelpText.classList.contains('hide')).toEqual(true);
-      });
     });
   });
 

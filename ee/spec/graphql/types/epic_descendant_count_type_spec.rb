@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['EpicDescendantCount'] do
+RSpec.describe GitlabSchema.types['EpicDescendantCount'] do
   it { expect(described_class.graphql_name).to eq('EpicDescendantCount') }
 
   it 'has specific fields' do

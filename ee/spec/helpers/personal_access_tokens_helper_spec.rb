@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PersonalAccessTokensHelper do
+RSpec.describe PersonalAccessTokensHelper do
   let(:group) do
     build(:group, max_personal_access_token_lifetime: group_level_max_personal_access_token_lifetime)
   end
@@ -127,12 +127,10 @@ describe PersonalAccessTokensHelper do
     end
   end
 
-  describe '#personal_access_token_expiration_policy_licensed?' do
-    subject { helper.personal_access_token_expiration_policy_licensed? }
-
-    context 'with `personal_access_token_expiration_policy` licensed' do
+  shared_examples 'feature availability' do
+    context 'when feature is licensed' do
       before do
-        stub_licensed_features(personal_access_token_expiration_policy: true)
+        stub_licensed_features(feature => true)
       end
 
       it { is_expected.to be_truthy }
@@ -140,10 +138,44 @@ describe PersonalAccessTokensHelper do
 
     context 'with `personal_access_token_expiration_policy` not licensed' do
       before do
-        stub_licensed_features(personal_access_token_expiration_policy: false)
+        stub_licensed_features(feature => false)
       end
 
       it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#personal_access_token_expiration_policy_licensed?' do
+    subject { helper.personal_access_token_expiration_policy_licensed? }
+
+    let(:feature) { :personal_access_token_expiration_policy }
+
+    it_behaves_like 'feature availability'
+  end
+
+  describe '#enforce_pat_expiration_feature_available?' do
+    subject { helper.enforce_pat_expiration_feature_available? }
+
+    let(:feature) { :enforce_pat_expiration }
+
+    it_behaves_like 'feature availability'
+  end
+
+  describe '#token_expiry_banner_message' do
+    subject { helper.token_expiry_banner_message(user) }
+
+    let_it_be(:user) { create(:user) }
+
+    context 'when user has an expired token requiring rotation' do
+      let_it_be(:expired_pat) { create(:personal_access_token, :expired, user: user, created_at: 1.month.ago) }
+
+      it { is_expected.to eq('At least one of your Personal Access Tokens is expired, but expiration enforcement is disabled. %{generate_new}') }
+    end
+
+    context 'when user has an expiring token requiring rotation' do
+      let_it_be(:expiring_pat) { create(:personal_access_token, expires_at: 3.days.from_now, user: user, created_at: 1.month.ago) }
+
+      it { is_expected.to eq('At least one of your Personal Access Tokens will expire soon, but expiration enforcement is disabled. %{generate_new}') }
     end
   end
 end

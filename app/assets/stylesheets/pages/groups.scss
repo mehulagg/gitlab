@@ -14,17 +14,12 @@
   flex-direction: column;
   margin: 0;
 
-  .group-row-contents .controls > .btn:last-child {
-    margin: 0;
-  }
-
   li {
     .title {
       font-weight: 600;
     }
 
     a {
-      color: $gray-900;
       text-decoration: none;
 
       &:hover {
@@ -42,8 +37,6 @@
 }
 
 .group-row {
-  @include basic-list-stats;
-
   .description p {
     margin-bottom: 0;
     color: $gl-text-color-secondary;
@@ -54,6 +47,12 @@
   .form-actions {
     margin-bottom: $gl-padding;
   }
+}
+
+.save-group-loader {
+  margin-top: $gl-padding-50;
+  margin-bottom: $gl-padding-50;
+  color: $gray-700;
 }
 
 .group-nav-container .nav-controls {
@@ -92,6 +91,78 @@
       position: absolute;
       top: 11px;
       right: 8px;
+    }
+  }
+}
+
+.group-home-panel {
+  margin-top: $gl-padding;
+  margin-bottom: $gl-padding;
+
+  .home-panel-avatar {
+    width: $home-panel-title-row-height;
+    height: $home-panel-title-row-height;
+    flex-shrink: 0;
+    flex-basis: $home-panel-title-row-height;
+  }
+
+  .home-panel-title {
+    font-size: 20px;
+    line-height: $gl-line-height-24;
+    font-weight: bold;
+
+    .icon {
+      vertical-align: -1px;
+    }
+
+    .home-panel-topic-list {
+      font-size: $gl-font-size;
+      font-weight: $gl-font-weight-normal;
+
+      .icon {
+        position: relative;
+        top: 3px;
+        margin-right: $gl-padding-4;
+      }
+    }
+  }
+
+  .home-panel-title-row {
+    @include media-breakpoint-down(sm) {
+      .home-panel-avatar {
+        width: $home-panel-avatar-mobile-size;
+        height: $home-panel-avatar-mobile-size;
+        flex-basis: $home-panel-avatar-mobile-size;
+
+        .avatar {
+          font-size: 20px;
+          line-height: 46px;
+        }
+      }
+
+      .home-panel-title {
+        margin-top: 4px;
+        margin-bottom: 2px;
+        font-size: $gl-font-size;
+        line-height: $gl-font-size-large;
+      }
+
+      .home-panel-topic-list,
+      .home-panel-metadata {
+        font-size: $gl-font-size-small;
+      }
+    }
+  }
+
+  .home-panel-metadata {
+    font-weight: normal;
+    font-size: 14px;
+    line-height: $gl-btn-line-height;
+  }
+
+  .home-panel-description {
+    @include media-breakpoint-up(md) {
+      font-size: $gl-font-size-large;
     }
   }
 }
@@ -454,27 +525,8 @@ table.pipeline-project-metrics tr td {
         min-width: 30px;
       }
 
-      > span:last-child {
-        margin-right: 0;
-      }
-
       .stat-value {
         margin: 2px 0 0 5px;
-      }
-    }
-
-    .controls {
-      flex-basis: 90px;
-
-      > .btn {
-        margin: 0 $btn-side-margin 0 0;
-        color: $gl-text-color-secondary;
-      }
-    }
-
-    .metadata {
-      @include media-breakpoint-up(md) {
-        flex-basis: 240px;
       }
     }
   }

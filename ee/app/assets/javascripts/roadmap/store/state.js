@@ -2,9 +2,9 @@ export default () => ({
   // API Calls
   basePath: '',
   epicsState: '',
-  filterQueryString: '',
-  initialEpicsPath: '',
   filterParams: null,
+  groupLabelsEndpoint: '',
+  groupMilestonesEndpoint: '',
 
   // Data
   epicIid: '',
@@ -26,7 +26,7 @@ export default () => ({
   // UI Flags
   defaultInnerHeight: 0,
   isChildEpics: false,
-  windowResizeInProgress: false,
+  hasFiltersApplied: false,
   epicsFetchInProgress: false,
   epicsFetchForTimeframeInProgress: false,
   epicsFetchFailure: false,
@@ -34,4 +34,5 @@ export default () => ({
   milestonesFetchInProgress: false,
   milestonesFetchFailure: false,
   milestonesFetchResultEmpty: false,
+  allowSubEpics: false,
 });

@@ -167,7 +167,7 @@ describe('AdminLicenseManagementRow', () => {
       const buttonEl = findRemoveButton();
 
       expect(buttonEl).not.toBeNull();
-      expect(buttonEl.querySelector('.ic-remove')).not.toBeNull();
+      expect(buttonEl.querySelector('[data-testid="remove-icon"]')).not.toBeNull();
     });
 
     it('renders computed property dropdownText into dropdown toggle', () => {

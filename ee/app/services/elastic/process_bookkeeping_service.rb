@@ -16,13 +16,17 @@ module Elastic
 
         with_redis do |redis|
           # Efficiently generate a guaranteed-unique score for each item
-          max = redis.incrby(REDIS_SCORE_KEY, items.size)
+          max = redis.incrby(self::REDIS_SCORE_KEY, items.size)
           min = (max - items.size) + 1
 
           (min..max).zip(items).each_slice(1000) do |group|
-            logger.debug(message: 'track_items', count: group.count, tracked_items_encoded: group.to_json)
+            logger.debug(class: self.name,
+                         redis_set: self::REDIS_SET_KEY,
+                         message: 'track_items',
+                         count: group.count,
+                         tracked_items_encoded: group.to_json)
 
-            redis.zadd(REDIS_SET_KEY, group)
+            redis.zadd(self::REDIS_SET_KEY, group)
           end
         end
 
@@ -30,11 +34,15 @@ module Elastic
       end
 
       def queue_size
-        with_redis { |redis| redis.zcard(REDIS_SET_KEY) }
+        with_redis { |redis| redis.zcard(self::REDIS_SET_KEY) }
       end
 
       def clear_tracking!
-        with_redis { |redis| redis.del(REDIS_SET_KEY, REDIS_SCORE_KEY) }
+        with_redis do |redis|
+          Gitlab::Instrumentation::RedisClusterValidator.allow_cross_slot_commands do
+            redis.unlink(self::REDIS_SET_KEY, self::REDIS_SCORE_KEY)
+          end
+        end
       end
 
       def logger
@@ -54,10 +62,10 @@ module Elastic
     private
 
     def execute_with_redis(redis)
-      start_time = Time.now
+      start_time = Time.current
 
-      specs = redis.zrangebyscore(REDIS_SET_KEY, '-inf', '+inf', limit: [0, LIMIT], with_scores: true)
-      return if specs.empty?
+      specs = redis.zrangebyscore(self.class::REDIS_SET_KEY, '-inf', '+inf', limit: [0, LIMIT], with_scores: true)
+      return 0 if specs.empty?
 
       first_score = specs.first.last
       last_score = specs.last.last
@@ -77,16 +85,20 @@ module Elastic
       self.class.track!(*failures) if failures.present?
 
       # Remove all the successes
-      redis.zremrangebyscore(REDIS_SET_KEY, first_score, last_score)
+      redis.zremrangebyscore(self.class::REDIS_SET_KEY, first_score, last_score)
+
+      records_count = specs.count
 
       logger.info(
         message: 'bulk_indexing_end',
-        records_count: specs.count,
+        records_count: records_count,
         failures_count: failures.count,
         first_score: first_score,
         last_score: last_score,
-        bulk_execution_duration_s: Time.now - start_time
+        bulk_execution_duration_s: Time.current - start_time
       )
+
+      records_count
     end
 
     def deserialize_all(specs)

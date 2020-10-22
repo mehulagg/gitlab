@@ -2,9 +2,7 @@
 
 require 'spec_helper'
 
-describe TodoService do
-  include DesignManagementTestHelpers
-
+RSpec.describe TodoService do
   let(:author) { create(:user, username: 'author') }
   let(:non_member) { create(:user, username: 'non_member') }
   let(:member) { create(:user, username: 'member') }
@@ -175,10 +173,12 @@ describe TodoService do
           create(:todo, :assigned,
             user: john_doe, project: nil, group: group, target: epic, author: author)
         end
+
         let!(:second_todo) do
           create(:todo, :assigned,
             user: john_doe, project: nil, group: group, target: epic, author: author)
         end
+
         let(:note) { create(:note, noteable: epic, project: nil, author: john_doe, note: mentions) }
 
         context 'when a note is created for an epic' do
@@ -325,34 +325,22 @@ describe TodoService do
         end
       end
     end
-  end
 
-  describe 'Designs' do
-    let(:project) { create(:project) }
-    let(:issue) { create(:issue, project: project) }
-    let(:design) { create(:design, issue: issue) }
+    describe '#merge_train_removed' do
+      let(:merge_participants) { [admin, create(:user)] }
 
-    before do
-      enable_design_management
+      before do
+        allow(merge_request).to receive(:merge_participants).and_return(merge_participants)
+      end
 
-      project.add_guest(author)
-      project.add_developer(john_doe)
-    end
+      it 'creates a pending todo for each merge_participant' do
+        merge_request.update!(merge_when_pipeline_succeeds: true, merge_user: admin)
+        service.merge_train_removed(merge_request)
 
-    let(:note) do
-      build(:diff_note_on_design,
-             noteable: design,
-             author: author,
-             note: "Hey #{john_doe.to_reference}")
-    end
-
-    it 'creates a todo for mentioned user on new diff note' do
-      service.new_note(note, author)
-
-      should_create_todo(user: john_doe,
-                         target: design,
-                         action: Todo::MENTIONED,
-                         note: note)
+        merge_participants.each do |participant|
+          should_create_todo(user: participant, author: participant, target: merge_request, action: Todo::MERGE_TRAIN_REMOVED)
+        end
+      end
     end
   end
 

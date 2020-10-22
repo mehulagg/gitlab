@@ -44,6 +44,8 @@ export default () => ({
   autoCompleteEpics: false,
   autoCompleteIssues: false,
   allowSubEpics: false,
+  allowIssuableHealthStatus: false,
+
   removeItemModalProps: {
     parentItem: {},
     item: {},

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Gcp::FinalizeCreationService, '#execute' do
+RSpec.describe Clusters::Gcp::FinalizeCreationService, '#execute' do
   include GoogleApi::CloudPlatformHelpers
   include KubernetesHelpers
 
@@ -83,12 +83,7 @@ describe Clusters::Gcp::FinalizeCreationService, '#execute' do
   shared_context 'kubernetes information successfully fetched' do
     before do
       stub_cloud_platform_get_zone_cluster(
-        provider.gcp_project_id, provider.zone, cluster.name,
-        {
-          endpoint: endpoint,
-          username: username,
-          password: password
-        }
+        provider.gcp_project_id, provider.zone, cluster.name, { endpoint: endpoint, username: username, password: password }
       )
 
       stub_kubeclient_discover(api_url)
@@ -101,15 +96,12 @@ describe Clusters::Gcp::FinalizeCreationService, '#execute' do
 
       stub_kubeclient_get_secret(
         api_url,
-        {
-          metadata_name: secret_name,
-          token: Base64.encode64(token),
-          namespace: 'default'
-        }
+        metadata_name: secret_name,
+        token: Base64.encode64(token),
+        namespace: 'default'
       )
 
-      stub_kubeclient_get_cluster_role_binding_error(api_url, 'gitlab-admin')
-      stub_kubeclient_create_cluster_role_binding(api_url)
+      stub_kubeclient_put_cluster_role_binding(api_url, 'gitlab-admin')
     end
   end
 

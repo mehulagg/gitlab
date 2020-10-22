@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['SentryDetailedError'] do
-  it { expect(described_class.graphql_name).to eq('SentryDetailedError') }
+RSpec.describe GitlabSchema.types['SentryDetailedError'] do
+  specify { expect(described_class.graphql_name).to eq('SentryDetailedError') }
 
-  it { expect(described_class).to require_graphql_authorizations(:read_sentry_issue) }
+  specify { expect(described_class).to require_graphql_authorizations(:read_sentry_issue) }
 
   it 'exposes the expected fields' do
     expected_fields = %i[
@@ -31,6 +31,8 @@ describe GitlabSchema.types['SentryDetailedError'] do
       lastReleaseLastCommit
       firstReleaseShortVersion
       lastReleaseShortVersion
+      firstReleaseVersion
+      lastReleaseVersion
       gitlabIssuePath
       gitlabCommit
       gitlabCommitPath

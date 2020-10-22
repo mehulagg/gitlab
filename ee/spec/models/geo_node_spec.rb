@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GeoNode, :request_store, :geo, type: :model do
+RSpec.describe GeoNode, :request_store, :geo, type: :model do
   using RSpec::Parameterized::TableSyntax
   include ::EE::GeoHelpers
 
@@ -536,6 +536,14 @@ describe GeoNode, :request_store, :geo, type: :model do
     end
   end
 
+  describe '#geo_retrieve_url' do
+    let(:retrieve_url) { "https://localhost:3000/gitlab/api/#{api_version}/geo/retrieve/package_file/1" }
+
+    it 'returns api url based on node uri' do
+      expect(new_node.geo_retrieve_url(replicable_name: :package_file, replicable_id: 1)).to eq(retrieve_url)
+    end
+  end
+
   describe '#geo_transfers_url' do
     let(:transfers_url) { "https://localhost:3000/gitlab/api/#{api_version}/geo/transfers/lfs/1" }
 
@@ -549,6 +557,12 @@ describe GeoNode, :request_store, :geo, type: :model do
 
     it 'returns api url based on node uri' do
       expect(new_node.status_url).to eq(status_url)
+    end
+  end
+
+  describe '#node_api_url' do
+    it 'returns an api url based on the node uri and provided node id' do
+      expect(new_primary_node.node_api_url(new_node)).to eq("https://localhost:3000/gitlab/api/#{api_version}/geo_nodes/#{new_node.id}")
     end
   end
 
@@ -745,20 +759,121 @@ describe GeoNode, :request_store, :geo, type: :model do
     end
   end
 
-  describe '#job_artifacts' do
-    context 'when selective sync is enabled' do
-      it 'applies a CTE statement' do
-        node.update!(selective_sync_type: 'namespaces')
+  describe '#container_repositories' do
+    let_it_be(:synced_group) { create(:group) }
+    let_it_be(:nested_group) { create(:group, parent: synced_group) }
+    let_it_be(:synced_project) { create(:project, group: synced_group) }
+    let_it_be(:synced_project_in_nested_group) { create(:project, group: nested_group) }
+    let_it_be(:unsynced_project) { create(:project) }
+    let_it_be(:project_broken_storage) { create(:project, :broken_storage) }
 
-        expect(node.job_artifacts.to_sql).to match(/WITH .+restricted_job_artifacts/)
+    let_it_be(:container_repository_1) { create(:container_repository, project: synced_project) }
+    let_it_be(:container_repository_2) { create(:container_repository, project: synced_project_in_nested_group) }
+    let_it_be(:container_repository_3) { create(:container_repository, project: unsynced_project) }
+    let_it_be(:container_repository_4) { create(:container_repository, project: project_broken_storage) }
+
+    before do
+      stub_registry_replication_config(enabled: true)
+    end
+
+    context 'with registry replication disabled' do
+      before do
+        stub_registry_replication_config(enabled: false)
+      end
+
+      it 'returns an empty relation' do
+        expect(node.container_repositories).to be_empty
       end
     end
 
-    context 'when selective sync is disabled' do
-      it 'doest not apply a CTE statement' do
-        node.update!(selective_sync_type: nil)
+    context 'without selective sync' do
+      it 'returns all container repositories' do
+        expect(node.container_repositories).to match_array([container_repository_1, container_repository_2, container_repository_3, container_repository_4])
+      end
+    end
 
-        expect(node.job_artifacts.to_sql).not_to match(/WITH .+restricted_job_artifacts/)
+    context 'with selective sync by namespace' do
+      before do
+        node.update!(selective_sync_type: 'namespaces', namespaces: [synced_group])
+      end
+
+      it 'excludes container repositories that are not in selectively synced projects' do
+        expect(node.container_repositories).to match_array([container_repository_1, container_repository_2])
+      end
+    end
+
+    context 'with selective sync by shard' do
+      before do
+        node.update!(selective_sync_type: 'shards', selective_sync_shards: ['broken'])
+      end
+
+      it 'excludes container repositories that are not in selectively synced shards' do
+        expect(node.container_repositories).to match_array([container_repository_4])
+      end
+    end
+  end
+
+  describe '#lfs_objects' do
+    let_it_be(:synced_group) { create(:group) }
+    let_it_be(:nested_group) { create(:group, parent: synced_group) }
+    let_it_be(:synced_project) { create(:project, group: synced_group) }
+    let_it_be(:synced_project_in_nested_group) { create(:project, group: nested_group) }
+    let_it_be(:unsynced_project) { create(:project) }
+    let_it_be(:project_broken_storage) { create(:project, :broken_storage) }
+
+    let_it_be(:lfs_object_1) { create(:lfs_object) }
+    let_it_be(:lfs_object_2) { create(:lfs_object) }
+    let_it_be(:lfs_object_3) { create(:lfs_object) }
+    let_it_be(:lfs_object_4) { create(:lfs_object) }
+    let_it_be(:lfs_object_5) { create(:lfs_object) }
+
+    before_all do
+      create(:lfs_objects_project, project: synced_project, lfs_object: lfs_object_1)
+      create(:lfs_objects_project, project: synced_project_in_nested_group, lfs_object: lfs_object_2)
+      create(:lfs_objects_project, project: synced_project_in_nested_group, lfs_object: lfs_object_3)
+      create(:lfs_objects_project, project: unsynced_project, lfs_object: lfs_object_4)
+      create(:lfs_objects_project, project: project_broken_storage, lfs_object: lfs_object_5)
+    end
+
+    subject(:lfs_objects) { node.lfs_objects(primary_key_in: 1..LfsObject.last.id) }
+
+    context 'without selective sync' do
+      it 'returns all projects without selective sync' do
+        expect(lfs_objects).to match_array([lfs_object_1, lfs_object_2, lfs_object_3, lfs_object_4, lfs_object_5])
+      end
+    end
+
+    context 'with selective sync by namespace' do
+      before do
+        node.update!(selective_sync_type: 'namespaces', namespaces: [synced_group])
+      end
+
+      it 'excludes LFS objects that are not in selectively synced projects' do
+        expect(lfs_objects).to match_array([lfs_object_1, lfs_object_2, lfs_object_3])
+      end
+
+      it 'excludes LFS objects from fork networks' do
+        forked_project = create(:project, group: synced_group)
+        create(:lfs_objects_project, project: forked_project, lfs_object: lfs_object_1)
+
+        expect(lfs_objects).to match_array([lfs_object_1, lfs_object_2, lfs_object_3])
+      end
+    end
+
+    context 'with selective sync by shard' do
+      before do
+        node.update!(selective_sync_type: 'shards', selective_sync_shards: ['broken'])
+      end
+
+      it 'excludes LFS objects that are not in selectively synced shards' do
+        expect(lfs_objects).to match_array([lfs_object_5])
+      end
+
+      it 'excludes LFS objects from fork networks' do
+        forked_project = create(:project, :broken_storage)
+        create(:lfs_objects_project, project: forked_project, lfs_object: lfs_object_5)
+
+        expect(lfs_objects).to match_array([lfs_object_5])
       end
     end
   end

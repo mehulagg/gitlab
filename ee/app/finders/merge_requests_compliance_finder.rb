@@ -11,24 +11,46 @@
 class MergeRequestsComplianceFinder < MergeRequestsFinder
   def execute
     # rubocop: disable CodeReuse/ActiveRecord
+
+    # This lateral query is used to get the single, latest
+    # "MR merged" event PER project.
     lateral = Event
       .select(:created_at, :target_id)
       .where('projects.id = project_id')
-      .merged
+      .merged_action
       .recent
       .limit(1)
       .to_sql
 
-    sql = params.find_group_projects.arel.as('projects').to_sql
-    records = Project
-      .select('projects.id, events.target_id as merge_request_id')
-      .from([Arel.sql("#{sql} JOIN LATERAL (#{lateral}) #{Event.table_name} ON true")])
+    query = projects_in_group
+      .joins("JOIN LATERAL (#{lateral}) events ON true")
       .order('events.created_at DESC')
-    select_sorted_mrs(records)
+      .select('events.target_id as target_id') # The `target_id` of the `events` are the MR ids.
+
+    ordered_events_cte = Gitlab::SQL::CTE.new(:ordered_events_cte, query)
+
+    MergeRequest
+      .with(ordered_events_cte.to_arel)
+      .joins(inner_join_ordered_events_table(ordered_events_cte))
+      .order(Arel.sql('array_position(ARRAY(SELECT target_id FROM ordered_events_cte), merge_requests.id)'))
+      .preload(preloads)
     # rubocop: enable CodeReuse/ActiveRecord
   end
 
   private
+
+  def inner_join_ordered_events_table(ordered_events_cte)
+    merge_requests_table = MergeRequest.arel_table
+
+    merge_requests_table
+      .join(ordered_events_cte.table, Arel::Nodes::InnerJoin)
+      .on(merge_requests_table[:id].eq(ordered_events_cte.table[:target_id]))
+      .join_sources
+  end
+
+  def projects_in_group
+    params.find_group_projects
+  end
 
   def params
     finder_options = {
@@ -38,18 +60,14 @@ class MergeRequestsComplianceFinder < MergeRequestsFinder
     super.merge(finder_options)
   end
 
-  def select_sorted_mrs(records)
-    hash = {}
-    records.each { |row| hash[row['merge_request_id']] = nil }
-    mrs = MergeRequest.where(id: hash.keys).preload(preloads) # rubocop: disable CodeReuse/ActiveRecord
-
-    mrs.each { |mr| hash[mr.id] = mr }
-
-    hash.compact!
-    hash.values # sorted MRs
-  end
-
   def preloads
-    [:approved_by_users, :metrics, source_project: :route, target_project: :namespace]
+    [
+      :author,
+      :approved_by_users,
+      :metrics,
+      source_project: :route,
+      target_project: :namespace,
+      head_pipeline: [project: :project_feature]
+    ]
   end
 end

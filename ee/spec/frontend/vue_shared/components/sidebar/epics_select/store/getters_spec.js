@@ -86,6 +86,18 @@ describe('EpicsSelect', () => {
           );
         });
       });
+
+      describe('isDropdownVariantSidebar', () => {
+        it('returns `true` when `state.variant` is "sidebar"', () => {
+          expect(getters.isDropdownVariantSidebar({ variant: 'sidebar' })).toBe(true);
+        });
+      });
+
+      describe('isDropdownVariantStandalone', () => {
+        it('returns `true` when `state.variant` is "standalone"', () => {
+          expect(getters.isDropdownVariantStandalone({ variant: 'standalone' })).toBe(true);
+        });
+      });
     });
   });
 });

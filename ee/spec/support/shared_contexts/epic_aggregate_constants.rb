@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-shared_context 'includes EpicAggregate constants' do
+RSpec.shared_context 'includes EpicAggregate constants' do
   before do
     stub_const('EPIC_TYPE', Gitlab::Graphql::Aggregations::Epics::Constants::EPIC_TYPE)
     stub_const('ISSUE_TYPE', Gitlab::Graphql::Aggregations::Epics::Constants::ISSUE_TYPE)

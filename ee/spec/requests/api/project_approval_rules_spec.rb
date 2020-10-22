@@ -2,20 +2,21 @@
 
 require 'spec_helper'
 
-describe API::ProjectApprovalRules do
+RSpec.describe API::ProjectApprovalRules do
   let_it_be(:group) { create(:group_with_members) }
   let_it_be(:user) { create(:user) }
   let_it_be(:user2) { create(:user) }
   let_it_be(:admin) { create(:user, :admin) }
   let_it_be(:project) { create(:project, :public, :repository, creator: user, namespace: user.namespace, only_allow_merge_if_pipeline_succeeds: false) }
   let_it_be(:approver) { create(:user) }
+  let_it_be(:other_approver) { create(:user) }
 
   describe 'GET /projects/:id/approval_rules' do
     let(:url) { "/projects/#{project.id}/approval_rules" }
 
     context 'when the request is correct' do
       let!(:rule) do
-        rule = create(:approval_project_rule, name: 'security', project: project, approvals_required: 7)
+        rule = create(:approval_project_rule, name: 'vulnerability', project: project, approvals_required: 7)
         rule.users << approver
         rule
       end
@@ -39,7 +40,7 @@ describe API::ProjectApprovalRules do
         rule = json.first
 
         expect(rule['approvals_required']).to eq(7)
-        expect(rule['name']).to eq('security')
+        expect(rule['name']).to eq('vulnerability')
       end
 
       context 'private group filtering' do
@@ -72,7 +73,7 @@ describe API::ProjectApprovalRules do
 
       context 'report_approver rules' do
         let!(:report_approver_rule) do
-          create(:approval_project_rule, :security_report, project: project)
+          create(:approval_project_rule, :vulnerability_report, project: project)
         end
 
         it 'includes report_approver rules' do

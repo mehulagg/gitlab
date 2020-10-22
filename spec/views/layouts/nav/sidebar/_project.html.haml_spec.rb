@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe 'layouts/nav/sidebar/_project' do
-  let(:project) { create(:project, :repository) }
+RSpec.describe 'layouts/nav/sidebar/_project' do
+  let_it_be_with_reload(:project) { create(:project, :repository) }
 
   before do
     assign(:project, project)
@@ -47,6 +47,58 @@ describe 'layouts/nav/sidebar/_project' do
     end
   end
 
+  describe 'Packages' do
+    let(:user) { create(:user) }
+
+    let_it_be(:package_menu_name) { 'Packages & Registries' }
+    let_it_be(:package_entry_name) { 'Package Registry' }
+
+    before do
+      project.team.add_developer(user)
+      sign_in(user)
+      stub_container_registry_config(enabled: true)
+    end
+
+    context 'when packages is enabled' do
+      it 'packages link is visible' do
+        render
+
+        expect(rendered).to have_link(package_menu_name, href: project_packages_path(project))
+      end
+
+      it 'packages list link is visible' do
+        render
+
+        expect(rendered).to have_link(package_entry_name, href: project_packages_path(project))
+      end
+
+      it 'container registry link is visible' do
+        render
+
+        expect(rendered).to have_link('Container Registry', href: project_container_registry_index_path(project))
+      end
+    end
+
+    context 'when container registry is disabled' do
+      before do
+        stub_container_registry_config(enabled: false)
+      end
+
+      it 'packages top level and list link are visible' do
+        render
+
+        expect(rendered).to have_link(package_menu_name, href: project_packages_path(project))
+        expect(rendered).to have_link(package_entry_name, href: project_packages_path(project))
+      end
+
+      it 'container registry link is not visible' do
+        render
+
+        expect(rendered).not_to have_link('Container Registry', href: project_container_registry_index_path(project))
+      end
+    end
+  end
+
   describe 'releases entry' do
     it 'renders releases link' do
       render
@@ -66,7 +118,7 @@ describe 'layouts/nav/sidebar/_project' do
       it 'shows the wiki tab with the wiki internal link' do
         render
 
-        expect(rendered).to have_link('Wiki', href: project_wiki_path(project, :home))
+        expect(rendered).to have_link('Wiki', href: wiki_path(project.wiki))
       end
     end
 
@@ -76,7 +128,7 @@ describe 'layouts/nav/sidebar/_project' do
       it 'does not show the wiki tab' do
         render
 
-        expect(rendered).not_to have_link('Wiki', href: project_wiki_path(project, :home))
+        expect(rendered).not_to have_link('Wiki')
       end
     end
   end
@@ -104,7 +156,39 @@ describe 'layouts/nav/sidebar/_project' do
       it 'does not show the external wiki tab' do
         render
 
-        expect(rendered).not_to have_link('External Wiki', href: project_wiki_path(project, :home))
+        expect(rendered).not_to have_link('External Wiki')
+      end
+    end
+  end
+
+  describe 'confluence tab' do
+    let!(:service) { create(:confluence_service, project: project, active: active) }
+
+    before do
+      render
+    end
+
+    context 'when the Confluence integration is active' do
+      let(:active) { true }
+
+      it 'shows the Confluence tab' do
+        expect(rendered).to have_link('Confluence', href: project_wikis_confluence_path(project))
+      end
+
+      it 'does not show the GitLab wiki tab' do
+        expect(rendered).not_to have_link('Wiki')
+      end
+    end
+
+    context 'when it is disabled' do
+      let(:active) { false }
+
+      it 'does not show the Confluence tab' do
+        expect(rendered).not_to have_link('Confluence')
+      end
+
+      it 'shows the GitLab wiki tab' do
+        expect(rendered).to have_link('Wiki', href: wiki_path(project.wiki))
       end
     end
   end
@@ -162,29 +246,35 @@ describe 'layouts/nav/sidebar/_project' do
       end
     end
 
-    describe 'Alert Management' do
-      context 'when alert_management_minimal is enabled' do
-        before do
-          stub_feature_flags(alert_management_minimal: true)
-        end
+    describe 'Tracing' do
+      it 'is not visible to unauthorized user' do
+        allow(view).to receive(:can?).and_return(false)
 
-        it 'shows the Alerts sidebar entry' do
-          render
+        render
 
-          expect(rendered).to have_css('a[title="Alerts"]')
-        end
+        expect(rendered).not_to have_text 'Tracing'
       end
 
-      context 'when alert_management_minimal is disabled' do
-        before do
-          stub_feature_flags(alert_management_minimal: false)
-        end
+      it 'links to Tracing page' do
+        render
 
-        it 'does not show the Alerts sidebar entry' do
+        expect(rendered).to have_link('Tracing', href: project_tracing_path(project))
+      end
+
+      context 'without project.tracing_external_url' do
+        it 'links to Tracing page' do
           render
 
-          expect(rendered).to have_no_css('a[title="Alerts"]')
+          expect(rendered).to have_link('Tracing', href: project_tracing_path(project))
         end
+      end
+    end
+
+    describe 'Alert Management' do
+      it 'shows the Alerts sidebar entry' do
+        render
+
+        expect(rendered).to have_css('a[title="Alerts"]')
       end
     end
   end
@@ -211,6 +301,32 @@ describe 'layouts/nav/sidebar/_project' do
         render
 
         expect(rendered).not_to have_link('Value Stream', href: project_cycle_analytics_path(project))
+      end
+    end
+  end
+
+  describe 'project access tokens' do
+    context 'self-managed instance' do
+      before do
+        allow(Gitlab).to receive(:com?).and_return(false)
+      end
+
+      it 'displays "Access Tokens" nav item' do
+        render
+
+        expect(rendered).to have_link('Access Tokens', href: project_settings_access_tokens_path(project))
+      end
+    end
+
+    context 'gitlab.com' do
+      before do
+        allow(Gitlab).to receive(:com?).and_return(true)
+      end
+
+      it 'displays "Access Tokens" nav item' do
+        render
+
+        expect(rendered).to have_link('Access Tokens', href: project_settings_access_tokens_path(project))
       end
     end
   end

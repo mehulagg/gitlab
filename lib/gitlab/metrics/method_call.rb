@@ -4,16 +4,7 @@ module Gitlab
   module Metrics
     # Class for tracking timing information about method calls
     class MethodCall
-      include Gitlab::Metrics::Methods
-      BASE_LABELS = { module: nil, method: nil }.freeze
-      attr_reader :real_time, :cpu_time, :call_count, :labels
-
-      define_histogram :gitlab_method_call_duration_seconds do
-        docstring 'Method calls real duration'
-        base_labels Transaction::BASE_LABELS.merge(BASE_LABELS)
-        buckets [0.01, 0.05, 0.1, 0.5, 1]
-        with_feature :prometheus_metrics_method_instrumentation
-      end
+      attr_reader :real_time, :cpu_time, :call_count
 
       # name - The full name of the method (including namespace) such as
       #        `User#sign_in`.
@@ -42,24 +33,17 @@ module Gitlab
         @cpu_time += cpu_time
         @call_count += 1
 
-        if above_threshold?
-          self.class.gitlab_method_call_duration_seconds.observe(@transaction.labels.merge(labels), real_time)
+        if above_threshold? && transaction
+          label_keys = labels.keys
+          transaction.observe(:gitlab_method_call_duration_seconds, real_time, labels) do
+            docstring 'Method calls real duration'
+            label_keys label_keys
+            buckets [0.01, 0.05, 0.1, 0.5, 1]
+            with_feature :prometheus_metrics_method_instrumentation
+          end
         end
 
         retval
-      end
-
-      # Returns a Metric instance of the current method call.
-      def to_metric
-        Metric.new(
-          Instrumentation.series,
-          {
-            duration: real_time.in_milliseconds.to_i,
-            cpu_duration: cpu_time.in_milliseconds.to_i,
-            call_count: call_count
-          },
-          method: @name
-        )
       end
 
       # Returns true if the total runtime of this method exceeds the method call
@@ -67,6 +51,10 @@ module Gitlab
       def above_threshold?
         real_time.in_milliseconds >= ::Gitlab::Metrics.method_call_threshold
       end
+
+      private
+
+      attr_reader :labels, :transaction
     end
   end
 end

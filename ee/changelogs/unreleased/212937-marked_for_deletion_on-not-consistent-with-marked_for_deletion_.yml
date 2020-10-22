@@ -1,5 +1,0 @@
----
-title: Expose 'marked_for_deletion_on' attribute in Projects API
-merge_request: 28754
-author:
-type: added

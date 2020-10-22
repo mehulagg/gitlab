@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::LogCursor::Logger, :geo do
+RSpec.describe Gitlab::Geo::LogCursor::Logger, :geo do
   subject(:logger) { described_class.new(LoggerSpec) }
 
   let(:data) { { pid: 111, class: 'LoggerSpec', host: 'localhost', message: 'Test' } }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Getting the current Geo node' do
+RSpec.describe 'Getting the current Geo node' do
   include GraphqlHelpers
   include EE::GeoHelpers
 
@@ -30,6 +30,7 @@ describe 'Getting the current Geo node' do
       }
     QUERY
   end
+
   let(:current_user) { create(:user, :admin) }
 
   before do

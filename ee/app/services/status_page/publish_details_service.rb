@@ -11,22 +11,41 @@ module StatusPage
     private
 
     def process(issue, user_notes)
+      response = publish_json(issue, user_notes)
+      return response if response.error?
+
+      response = publish_attachments(issue, user_notes)
+      return response if response.error?
+
+      success
+    end
+
+    def publish_json(issue, user_notes)
       json = serialize(issue, user_notes)
-      key = object_key(json)
+      key = json_object_key(json)
       return error('Missing object key') unless key
 
-      upload(key, json)
+      upload_json(key, json)
     end
 
     def serialize(issue, user_notes)
       serializer.represent_details(issue, user_notes)
     end
 
-    def object_key(json)
+    def json_object_key(json)
       id = json[:id]
       return unless id
 
-      StatusPage::Storage.details_path(id)
+      Gitlab::StatusPage::Storage.details_path(id)
+    end
+
+    def publish_attachments(issue, user_notes)
+      StatusPage::PublishAttachmentsService.new(
+        project: @project,
+        issue: issue,
+        user_notes: user_notes,
+        storage_client: storage_client
+      ).execute
     end
   end
 end

@@ -145,77 +145,346 @@ describe('getters', () => {
   });
 
   describe('licenseSummaryText', () => {
+    beforeEach(() => {
+      state = {
+        ...createState(),
+        loadLicenseReportError: null,
+        newLicenses: ['foo'],
+        existingLicenses: ['bar'],
+      };
+    });
+
+    it('should be `Loading License Compliance report` text if isLoading', () => {
+      const mockGetters = {};
+      mockGetters.isLoading = true;
+
+      expect(getters.licenseSummaryText(state, mockGetters)).toBe(
+        'Loading License Compliance report',
+      );
+    });
+
+    it('should be `Failed to load License Compliance report` text if an error has happened', () => {
+      const mockGetters = {};
+      state.loadLicenseReportError = new Error('Test');
+
+      expect(getters.licenseSummaryText(state, mockGetters)).toBe(
+        'Failed to load License Compliance report',
+      );
+    });
+
+    it('should call summaryTextWithLicenseCheck if new license are detected and license-check approval group is enabled', () => {
+      const mockGetters = {
+        hasReportItems: true,
+        summaryTextWithLicenseCheck: 'summary text with license check',
+      };
+      expect(
+        getters.licenseSummaryText({ state, hasLicenseCheckApprovalRule: true }, mockGetters),
+      ).toBe('summary text with license check');
+    });
+
+    it('should call summaryTextWithOutLicenseCheck if new license are detected and license-check approval group is disabled', () => {
+      const mockGetters = {
+        hasReportItems: true,
+        summaryTextWithoutLicenseCheck: 'summary text without license check',
+      };
+
+      expect(
+        getters.licenseSummaryText({ state, hasLicenseCheckApprovalRule: false }, mockGetters),
+      ).toBe('summary text without license check');
+    });
+
+    it('should show "License Compliance detected no licenses for the source branch only" if there are no existing licenses', () => {
+      const mockGetters = {
+        baseReportHasLicenses: false,
+      };
+      expect(getters.licenseSummaryText(state, mockGetters)).toBe(
+        'License Compliance detected no licenses for the source branch only',
+      );
+    });
+
+    it('should show "License Compliance detected no new licenses" if there are no new licenses, but existing licenses', () => {
+      const mockGetters = {
+        baseReportHasLicenses: true,
+      };
+      expect(getters.licenseSummaryText(state, mockGetters)).toBe(
+        'License Compliance detected no new licenses',
+      );
+    });
+  });
+
+  describe('summaryTextWithLicenseCheck', () => {
     describe('when licenses exist on both the HEAD and the BASE', () => {
       beforeEach(() => {
         state = {
           ...createState(),
-          loadLicenseReportError: null,
-          newLicenses: ['foo'],
-          existingLicenses: ['bar'],
         };
       });
 
-      it('should be `Loading License Compliance report` text if isLoading', () => {
-        const mockGetters = {};
-        mockGetters.isLoading = true;
+      describe('when blacklisted licenses exist on the HEAD', () => {
+        describe('when a single license is detected', () => {
+          it('should return "License Compliance detected 1 new license and policy violation; approval required"', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: true,
+              baseReportHasLicenses: true,
+              licenseReportLength: 1,
+            };
 
-        expect(getters.licenseSummaryText(state, mockGetters)).toBe(
-          'Loading License Compliance report',
-        );
+            expect(getters.summaryTextWithLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 1 new license and policy violation; approval required',
+            );
+          });
+        });
+
+        describe('when multiple licenses are detected', () => {
+          it('should return License Compliance detected 2 new licenses and policy violations; approval required', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: true,
+              baseReportHasLicenses: true,
+              licenseReportLength: 2,
+            };
+
+            expect(getters.summaryTextWithLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 2 new licenses and policy violations; approval required',
+            );
+          });
+        });
       });
 
-      it('should be `Failed to load License Compliance report` text if an error has happened', () => {
-        const mockGetters = {};
-        state.loadLicenseReportError = new Error('Test');
+      describe('when blacklisted licenses are not detected on the HEAD', () => {
+        describe('when a single license is detected', () => {
+          it('should return "License Compliance detected 1 new license"', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: false,
+              baseReportHasLicenses: true,
+              licenseReportLength: 1,
+            };
 
-        expect(getters.licenseSummaryText(state, mockGetters)).toBe(
-          'Failed to load License Compliance report',
-        );
+            expect(getters.summaryTextWithLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 1 new license',
+            );
+          });
+        });
+
+        describe('when multiple licenses are detected', () => {
+          it('should return "License Compliance detected 2 new licenses"', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: false,
+              baseReportHasLicenses: true,
+              licenseReportLength: 2,
+            };
+
+            expect(getters.summaryTextWithLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 2 new licenses',
+            );
+          });
+        });
       });
-
-      it.each`
-        givenLicenseReport                              | givenReportContainsBlacklistedLicense | expectedSummaryText
-        ${[]}                                           | ${false}                              | ${'License Compliance detected no new licenses'}
-        ${[licenseReportMock[0]]}                       | ${false}                              | ${'License Compliance detected 1 new license'}
-        ${[licenseReportMock[0], licenseReportMock[0]]} | ${false}                              | ${'License Compliance detected 2 new licenses'}
-        ${[licenseReportMock[0]]}                       | ${true}                               | ${'License Compliance detected 1 new license and policy violation; approval required'}
-        ${[licenseReportMock[0], licenseReportMock[0]]} | ${true}                               | ${'License Compliance detected 2 new licenses and policy violations; approval required'}
-      `(
-        `should show "$expectedSummaryText" if the report contains $givenLicenseReport.length license(s) and contains blacklisted licenses is: $givenReportContainsBlacklistedLicense`,
-        ({ givenLicenseReport, givenReportContainsBlacklistedLicense, expectedSummaryText }) => {
-          const mockGetters = {
-            licenseReport: givenLicenseReport,
-            reportContainsBlacklistedLicense: givenReportContainsBlacklistedLicense,
-          };
-
-          expect(getters.licenseSummaryText(state, mockGetters)).toBe(expectedSummaryText);
-        },
-      );
     });
 
     describe('when there are no licenses on the BASE', () => {
       beforeEach(() => {
-        state = createState();
+        state = {
+          ...createState(),
+        };
       });
 
-      it.each`
-        givenLicenseReport                              | givenReportContainsBlacklistedLicense | expectedSummaryText
-        ${[]}                                           | ${false}                              | ${'License Compliance detected no licenses for the source branch only'}
-        ${[licenseReportMock[0]]}                       | ${false}                              | ${'License Compliance detected 1 license for the source branch only'}
-        ${[licenseReportMock[0], licenseReportMock[0]]} | ${false}                              | ${'License Compliance detected 2 licenses for the source branch only'}
-        ${[licenseReportMock[0]]}                       | ${true}                               | ${'License Compliance detected 1 license and policy violation for the source branch only; approval required'}
-        ${[licenseReportMock[0], licenseReportMock[0]]} | ${true}                               | ${'License Compliance detected 2 licenses and policy violations for the source branch only; approval required'}
-      `(
-        `should show "$expectedSummaryText" if the report contains $givenLicenseReport.length license(s) and contains blacklisted licenses is: $givenReportContainsBlacklistedLicense`,
-        ({ givenLicenseReport, givenReportContainsBlacklistedLicense, expectedSummaryText }) => {
-          const mockGetters = {
-            licenseReport: givenLicenseReport,
-            reportContainsBlacklistedLicense: givenReportContainsBlacklistedLicense,
-          };
+      describe('when blacklisted licenses exist on the HEAD', () => {
+        describe('when a single license is detected', () => {
+          it('should return "License Compliance detected 1 license and policy violation for the source branch only; approval required"', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: true,
+              baseReportHasLicenses: false,
+              licenseReportLength: 1,
+            };
 
-          expect(getters.licenseSummaryText(state, mockGetters)).toBe(expectedSummaryText);
-        },
-      );
+            expect(getters.summaryTextWithLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 1 license and policy violation for the source branch only; approval required',
+            );
+          });
+        });
+
+        describe('when multiple licenses are detected', () => {
+          it('should return "License Compliance detected 2 licenses and policy violations for the source branch only; approval required"', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: true,
+              baseReportHasLicenses: false,
+              licenseReportLength: 2,
+            };
+
+            expect(getters.summaryTextWithLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 2 licenses and policy violations for the source branch only; approval required',
+            );
+          });
+        });
+      });
+
+      describe('when blacklisted licenses are not detected on the HEAD', () => {
+        describe('when a single license is detected', () => {
+          it('should return "License Compliance detected 1 license for the source branch only"', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: false,
+              baseReportHasLicenses: false,
+              licenseReportLength: 1,
+            };
+
+            expect(getters.summaryTextWithLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 1 license for the source branch only',
+            );
+          });
+        });
+
+        describe('when multiple licenses are detected', () => {
+          it('should return "License Compliance detected 2 licenses for the source branch only"', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: false,
+              baseReportHasLicenses: false,
+              licenseReportLength: 2,
+            };
+
+            expect(getters.summaryTextWithLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 2 licenses for the source branch only',
+            );
+          });
+        });
+      });
+    });
+  });
+
+  describe('summaryTextWithoutLicenseCheck', () => {
+    describe('when licenses exist on both the HEAD and the BASE', () => {
+      beforeEach(() => {
+        state = {
+          ...createState(),
+        };
+      });
+
+      describe('when blacklisted licenses exist on the HEAD', () => {
+        describe('when a single license is detected', () => {
+          it('should return "License Compliance detected 1 new license and policy violation"', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: true,
+              baseReportHasLicenses: true,
+              licenseReportLength: 1,
+            };
+
+            expect(getters.summaryTextWithoutLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 1 new license and policy violation',
+            );
+          });
+        });
+
+        describe('when multiple licenses are detected', () => {
+          it('should return "License Compliance detected 2 new licenses and policy violations"', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: true,
+              baseReportHasLicenses: true,
+              licenseReportLength: 2,
+            };
+
+            expect(getters.summaryTextWithoutLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 2 new licenses and policy violations',
+            );
+          });
+        });
+      });
+
+      describe('when blacklisted licenses are not detected on the HEAD', () => {
+        describe('when a single license is detected', () => {
+          it('should return "License Compliance detected 1 new license"', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: false,
+              baseReportHasLicenses: true,
+              licenseReportLength: 1,
+            };
+
+            expect(getters.summaryTextWithoutLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 1 new license',
+            );
+          });
+        });
+
+        describe('when multiple licenses are detected', () => {
+          it('should return "License Compliance detected 2 new licenses"', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: false,
+              baseReportHasLicenses: true,
+              licenseReportLength: 2,
+            };
+
+            expect(getters.summaryTextWithoutLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 2 new licenses',
+            );
+          });
+        });
+      });
+    });
+
+    describe('when there are no licenses on the BASE', () => {
+      beforeEach(() => {
+        state = {
+          ...createState(),
+        };
+      });
+
+      describe('when blacklisted licenses exist on the HEAD', () => {
+        describe('when a single license is detected', () => {
+          it('should return "License Compliance detected 1 license and policy violation for the source branch only"', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: true,
+              baseReportHasLicenses: false,
+              licenseReportLength: 1,
+            };
+
+            expect(getters.summaryTextWithoutLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 1 license and policy violation for the source branch only',
+            );
+          });
+        });
+
+        describe('when multiple licenses are detected', () => {
+          it('should return "License Compliance detected 2 licenses and policy violations for the source branch only"', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: true,
+              baseReportHasLicenses: false,
+              licenseReportLength: 2,
+            };
+
+            expect(getters.summaryTextWithoutLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 2 licenses and policy violations for the source branch only',
+            );
+          });
+        });
+      });
+
+      describe('when blacklisted licenses are not detected on the HEAD', () => {
+        describe('when a single license is detected', () => {
+          it('should return "License Compliance detected 1 license for the source branch only"', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: false,
+              baseReportHasLicenses: false,
+              licenseReportLength: 1,
+            };
+
+            expect(getters.summaryTextWithoutLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 1 license for the source branch only',
+            );
+          });
+        });
+
+        describe('when multiple licenses are detected', () => {
+          it('should return "License Compliance detected 2 licenses for the source branch only"', () => {
+            const mockGetters = {
+              reportContainsBlacklistedLicense: false,
+              baseReportHasLicenses: false,
+              licenseReportLength: 2,
+            };
+
+            expect(getters.summaryTextWithoutLicenseCheck(state, mockGetters)).toBe(
+              'License Compliance detected 2 licenses for the source branch only',
+            );
+          });
+        });
+      });
     });
   });
 

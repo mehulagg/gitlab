@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe InstanceConfiguration do
+RSpec.describe InstanceConfiguration do
   context 'without cache' do
     describe '#settings' do
       describe '#ssh_algorithms_hashes' do
@@ -110,7 +110,7 @@ describe InstanceConfiguration do
       end
 
       it 'expires after EXPIRATION_TIME' do
-        allow(Time).to receive(:now).and_return(Time.now + described_class::EXPIRATION_TIME)
+        allow(Time).to receive(:now).and_return(Time.current + described_class::EXPIRATION_TIME)
         Rails.cache.cleanup
 
         expect(Rails.cache.read(described_class::CACHE_KEY)).to eq(nil)

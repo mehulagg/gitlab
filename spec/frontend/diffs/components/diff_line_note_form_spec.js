@@ -9,7 +9,7 @@ describe('DiffLineNoteForm', () => {
   let wrapper;
   let diffFile;
   let diffLines;
-  const getDiffFileMock = () => Object.assign({}, diffFileMockData);
+  const getDiffFileMock = () => ({ ...diffFileMockData });
 
   beforeEach(() => {
     diffFile = getDiffFileMock();
@@ -77,12 +77,32 @@ describe('DiffLineNoteForm', () => {
           .spyOn(wrapper.vm, 'saveDiffDiscussion')
           .mockReturnValue(Promise.resolve());
 
+        const lineRange = {
+          start: {
+            line_code: wrapper.vm.commentLineStart.line_code,
+            type: wrapper.vm.commentLineStart.type,
+            new_line: 1,
+            old_line: null,
+          },
+          end: {
+            line_code: wrapper.vm.line.line_code,
+            type: wrapper.vm.line.type,
+            new_line: 1,
+            old_line: null,
+          },
+        };
+
+        const formData = {
+          ...wrapper.vm.formData,
+          lineRange,
+        };
+
         wrapper.vm
           .handleSaveNote('note body')
           .then(() => {
             expect(saveDiffDiscussionSpy).toHaveBeenCalledWith({
               note: 'note body',
-              formData: wrapper.vm.formData,
+              formData,
             });
           })
           .then(done)

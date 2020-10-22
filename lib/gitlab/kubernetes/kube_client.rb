@@ -20,7 +20,9 @@ module Gitlab
         extensions: { group: 'apis/extensions', version: 'v1beta1' },
         istio: { group: 'apis/networking.istio.io', version: 'v1alpha3' },
         knative: { group: 'apis/serving.knative.dev', version: 'v1alpha1' },
-        networking: { group: 'apis/networking.k8s.io', version: 'v1' }
+        metrics: { group: 'apis/metrics.k8s.io', version: 'v1beta1' },
+        networking: { group: 'apis/networking.k8s.io', version: 'v1' },
+        cilium_networking: { group: 'apis/cilium.io', version: 'v2' }
       }.freeze
 
       SUPPORTED_API_GROUPS.each do |name, params|
@@ -34,7 +36,8 @@ module Gitlab
       end
 
       # Core API methods delegates to the core api group client
-      delegate :get_pods,
+      delegate :get_nodes,
+        :get_pods,
         :get_secrets,
         :get_config_map,
         :get_namespace,
@@ -57,9 +60,7 @@ module Gitlab
 
       # RBAC methods delegates to the apis/rbac.authorization.k8s.io api
       # group client
-      delegate :create_cluster_role_binding,
-        :get_cluster_role_binding,
-        :update_cluster_role_binding,
+      delegate :update_cluster_role_binding,
         to: :rbac_client
 
       # RBAC methods delegates to the apis/rbac.authorization.k8s.io api
@@ -71,9 +72,7 @@ module Gitlab
 
       # RBAC methods delegates to the apis/rbac.authorization.k8s.io api
       # group client
-      delegate :create_role_binding,
-        :get_role_binding,
-        :update_role_binding,
+      delegate :update_role_binding,
         to: :rbac_client
 
       # non-entity methods that can only work with the core client
@@ -93,9 +92,19 @@ module Gitlab
       # group client
       delegate :create_network_policy,
         :get_network_policies,
+        :get_network_policy,
         :update_network_policy,
         :delete_network_policy,
         to: :networking_client
+
+      # CiliumNetworkPolicy methods delegate to the apis/cilium.io api
+      # group client
+      delegate :create_cilium_network_policy,
+        :get_cilium_network_policies,
+        :get_cilium_network_policy,
+        :update_cilium_network_policy,
+        :delete_cilium_network_policy,
+        to: :cilium_networking_client
 
       attr_reader :api_prefix, :kubeclient_options
 
@@ -105,6 +114,31 @@ module Gitlab
           read: 30
         }
       }.freeze
+
+      def self.graceful_request(cluster_id)
+        { status: :connected, response: yield }
+      rescue *Gitlab::Kubernetes::Errors::CONNECTION
+        { status: :unreachable, connection_error: :connection_error }
+      rescue *Gitlab::Kubernetes::Errors::AUTHENTICATION
+        { status: :authentication_failure, connection_error: :authentication_error }
+      rescue Kubeclient::HttpError => e
+        { status: kubeclient_error_status(e.message), connection_error: :http_error }
+      rescue => e
+        Gitlab::ErrorTracking.track_exception(e, cluster_id: cluster_id)
+
+        { status: :unknown_failure, connection_error: :unknown_error }
+      end
+
+      # KubeClient uses the same error class
+      # For connection errors (eg. timeout) and
+      # for Kubernetes errors.
+      def self.kubeclient_error_status(message)
+        if message&.match?(/timed out|timeout/i)
+          :unreachable
+        else
+          :authentication_failure
+        end
+      end
 
       # We disable redirects through 'http_max_redirects: 0',
       # so that KubeClient does not follow redirects and
@@ -133,20 +167,27 @@ module Gitlab
         end
       end
 
-      def create_or_update_cluster_role_binding(resource)
-        if cluster_role_binding_exists?(resource)
-          update_cluster_role_binding(resource)
+      # Ingresses resource is currently on the apis/extensions api group
+      # until Kubernetes 1.21. Kubernetest 1.22+ has ingresses resources in
+      # the networking.k8s.io/v1 api group.
+      #
+      # As we still support Kubernetes 1.12+, we will need to support both.
+      def get_ingresses(**args)
+        extensions_client.discover unless extensions_client.discovered
+
+        if extensions_client.respond_to?(:get_ingresses)
+          extensions_client.get_ingresses(**args)
         else
-          create_cluster_role_binding(resource)
+          networking_client.get_ingresses(**args)
         end
       end
 
+      def create_or_update_cluster_role_binding(resource)
+        update_cluster_role_binding(resource)
+      end
+
       def create_or_update_role_binding(resource)
-        if role_binding_exists?(resource)
-          update_role_binding(resource)
-        else
-          create_role_binding(resource)
-        end
+        update_role_binding(resource)
       end
 
       def create_or_update_service_account(resource)
@@ -171,18 +212,6 @@ module Gitlab
         return if Gitlab::CurrentSettings.allow_local_requests_from_web_hooks_and_services?
 
         Gitlab::UrlBlocker.validate!(api_prefix, allow_local_network: false)
-      end
-
-      def cluster_role_binding_exists?(resource)
-        get_cluster_role_binding(resource.metadata.name)
-      rescue ::Kubeclient::ResourceNotFoundError
-        false
-      end
-
-      def role_binding_exists?(resource)
-        get_role_binding(resource.metadata.name, resource.metadata.namespace)
-      rescue ::Kubeclient::ResourceNotFoundError
-        false
       end
 
       def service_account_exists?(resource)

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::MergeRequestsController do
+RSpec.describe Projects::MergeRequestsController do
   let(:merge_request) { create(:merge_request) }
   let(:project) { merge_request.project }
   let(:user) { merge_request.author }

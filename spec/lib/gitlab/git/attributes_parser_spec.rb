@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Git::AttributesParser, :seed_helper do
+RSpec.describe Gitlab::Git::AttributesParser, :seed_helper do
   let(:attributes_path) { File.join(SEED_STORAGE_PATH, 'with-git-attributes.git', 'info', 'attributes') }
   let(:data) { File.read(attributes_path) }
 
@@ -70,6 +70,14 @@ describe Gitlab::Git::AttributesParser, :seed_helper do
 
     context 'when attributes data is nil' do
       let(:data) { nil }
+
+      it 'returns an empty Hash' do
+        expect(subject.attributes('test.foo')).to eq({})
+      end
+    end
+
+    context 'when attributes data has binary data' do
+      let(:data) { "\xFF\xFE*\u0000.\u0000c\u0000s".b }
 
       it 'returns an empty Hash' do
         expect(subject.attributes('test.foo')).to eq({})

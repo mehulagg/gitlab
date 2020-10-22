@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe Types::IssuableSortEnum do
-  it { expect(described_class.graphql_name).to eq('IssuableSort') }
+RSpec.describe Types::IssuableSortEnum do
+  specify { expect(described_class.graphql_name).to eq('IssuableSort') }
 
   it 'exposes all the existing issuable sort values' do
     expect(described_class.values.keys).to include(

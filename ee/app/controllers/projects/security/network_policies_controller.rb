@@ -5,8 +5,10 @@ module Projects
     class NetworkPoliciesController < Projects::ApplicationController
       POLLING_INTERVAL = 5_000
 
-      before_action :authorize_read_network_policies!
+      before_action :authorize_read_threat_monitoring!
       before_action :set_polling_interval, only: [:summary]
+
+      feature_category :container_network_security
 
       def summary
         return not_found unless environment.has_metrics?
@@ -17,8 +19,8 @@ module Projects
         result = adapter.query(
           :packet_flow, environment.deployment_namespace,
           params[:interval] || "minute",
-          (Time.parse(params[:from]) rescue 1.hour.ago).to_s,
-          (Time.parse(params[:to]) rescue Time.now).to_s
+          parse_time(params[:from], 1.hour.ago).to_s,
+          parse_time(params[:to], Time.current).to_s
         )
 
         respond_to do |format|
@@ -33,7 +35,48 @@ module Projects
         end
       end
 
+      def index
+        response = NetworkPolicies::ResourcesService.new(project: project, environment_id: params[:environment_id]).execute
+        respond_with_service_response(response)
+      end
+
+      def create
+        response = NetworkPolicies::DeployResourceService.new(
+          manifest: params[:manifest],
+          environment: environment
+        ).execute
+
+        respond_with_service_response(response)
+      end
+
+      def update
+        response = NetworkPolicies::DeployResourceService.new(
+          resource_name: params[:id],
+          manifest: params[:manifest],
+          environment: environment,
+          enabled: params[:enabled]
+        ).execute
+
+        respond_with_service_response(response)
+      end
+
+      def destroy
+        response = NetworkPolicies::DeleteResourceService.new(
+          resource_name: params[:id],
+          manifest: params[:manifest],
+          environment: environment
+        ).execute
+
+        respond_with_service_response(response)
+      end
+
       private
+
+      def parse_time(params, fallback)
+        Time.zone.parse(params) || fallback
+      rescue
+        fallback
+      end
 
       def environment
         @environment ||= project.environments.find(params[:environment_id])
@@ -43,8 +86,17 @@ module Projects
         Gitlab::PollingInterval.set_header(response, interval: POLLING_INTERVAL)
       end
 
-      def authorize_read_network_policies!
+      def authorize_read_threat_monitoring!
         render_403 unless can?(current_user, :read_threat_monitoring, project)
+      end
+
+      def respond_with_service_response(response)
+        payload = response.success? ? response.payload : { payload: response.payload, error: response.message }
+        respond_to do |format|
+          format.json do
+            render status: response.http_status, json: payload
+          end
+        end
       end
     end
   end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MetricsReportMetricEntity do
+RSpec.describe MetricsReportMetricEntity do
   let(:metric) { ::Gitlab::Ci::Reports::Metrics::ReportsComparer::ComparedMetric.new('metric_name', 'metric_value') }
   let(:entity) { described_class.new(metric) }
 

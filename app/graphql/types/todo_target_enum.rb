@@ -5,6 +5,8 @@ module Types
     value 'COMMIT', value: 'Commit', description: 'A Commit'
     value 'ISSUE', value: 'Issue', description: 'An Issue'
     value 'MERGEREQUEST', value: 'MergeRequest', description: 'A MergeRequest'
+    value 'DESIGN', value: 'DesignManagement::Design', description: 'A Design'
+    value 'ALERT', value: 'AlertManagement::Alert', description: 'An Alert'
   end
 end
 

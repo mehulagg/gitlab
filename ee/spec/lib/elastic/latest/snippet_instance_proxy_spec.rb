@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Elastic::Latest::SnippetInstanceProxy do
+RSpec.describe Elastic::Latest::SnippetInstanceProxy do
   let(:snippet) { create(:personal_snippet) }
 
   subject { described_class.new(snippet) }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe NotesHelper do
+RSpec.describe NotesHelper do
   let_it_be(:vulnerability) { create(:vulnerability) }
 
   describe '#notes_url' do

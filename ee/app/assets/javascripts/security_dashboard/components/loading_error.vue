@@ -4,19 +4,19 @@ import { s__, __ } from '~/locale';
 import { LOADING_VULNERABILITIES_ERROR_CODES as ERROR_CODES } from '../store/modules/vulnerabilities/constants';
 
 const description = s__(
-  'Security Reports|Security reports can only be accessed by authorized users.',
+  'SecurityReports|Security reports can only be accessed by authorized users.',
 );
 
 export default {
   emptyStatePropsMap: {
     [ERROR_CODES.UNAUTHORIZED]: {
-      title: s__('Security Reports|You must sign in as an authorized user to see this report'),
+      title: s__('SecurityReports|You must sign in as an authorized user to see this report'),
       description,
       primaryButtonText: __('Sign in'),
       primaryButtonLink: '/users/sign_in',
     },
     [ERROR_CODES.FORBIDDEN]: {
-      title: s__('Security Reports|You do not have sufficient permissions to access this report'),
+      title: s__('SecurityReports|You do not have sufficient permissions to access this report'),
       description,
     },
   },

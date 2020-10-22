@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Navigation bar counter', :use_clean_rails_memory_store_caching do
+RSpec.describe 'Navigation bar counter', :use_clean_rails_memory_store_caching do
   let(:user) { create(:user) }
   let(:project) { create(:project, namespace: user.namespace) }
   let(:issue) { create(:issue, project: project) }
@@ -23,7 +23,7 @@ describe 'Navigation bar counter', :use_clean_rails_memory_store_caching do
 
     user.invalidate_cache_counts
 
-    Timecop.travel(3.minutes.from_now) do
+    travel_to(3.minutes.from_now) do
       visit issues_path
 
       expect_counters('issues', '0')
@@ -39,7 +39,7 @@ describe 'Navigation bar counter', :use_clean_rails_memory_store_caching do
 
     user.invalidate_cache_counts
 
-    Timecop.travel(3.minutes.from_now) do
+    travel_to(3.minutes.from_now) do
       visit merge_requests_path
 
       expect_counters('merge_requests', '0')

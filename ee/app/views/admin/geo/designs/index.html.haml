@@ -1,6 +1,4 @@
-- page_title _('Geo Designs')
-
-#js-geo-replicable{ data: { "geo-svg-path" => image_path('illustrations/empty-state/geo-empty.svg'),
-  "issues-svg-path" => image_path('illustrations/issues.svg'),
-  "geo-troubleshooting-link" => help_page_path('administration/geo/replication/troubleshooting.html'),
+= render 'admin/geo/shared/replication_nav'
+#js-geo-replicable{ data: { "geo-replicable-empty-svg-path" => image_path('illustrations/empty-state/geo-replication-empty.svg'),
+  "geo-troubleshooting-link" => help_page_path('administration/geo/replication/troubleshooting.md'),
   "replicable-type" => 'designs' } }

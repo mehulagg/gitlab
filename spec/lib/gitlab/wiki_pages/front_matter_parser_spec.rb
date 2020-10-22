@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe Gitlab::WikiPages::FrontMatterParser do
+RSpec.describe Gitlab::WikiPages::FrontMatterParser do
   subject(:parser) { described_class.new(raw_content, gate) }
 
   let(:content) { 'This is the content' }
   let(:end_divider) { '---' }
-  let(:gate) { double('Gate') }
+  let(:gate) { stub_feature_flag_gate('Gate') }
 
   let(:with_front_matter) do
     <<~MD
@@ -76,11 +76,7 @@ describe Gitlab::WikiPages::FrontMatterParser do
       let(:raw_content) { with_front_matter }
 
       before do
-        stub_feature_flags(Gitlab::WikiPages::FrontMatterParser::FEATURE_FLAG => false)
-        stub_feature_flags(Gitlab::WikiPages::FrontMatterParser::FEATURE_FLAG => {
-          enabled: true,
-          thing: gate
-        })
+        stub_feature_flags(Gitlab::WikiPages::FrontMatterParser::FEATURE_FLAG => gate)
       end
 
       it do

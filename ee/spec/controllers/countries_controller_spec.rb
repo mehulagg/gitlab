@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe CountriesController do
+RSpec.describe CountriesController do
   describe 'GET #index' do
     it 'returns list of countries as json' do
       get :index

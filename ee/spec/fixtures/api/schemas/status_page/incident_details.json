@@ -3,7 +3,7 @@
   "allOf": [
     { "$ref": "basic_incident.json" },
     {
-      "required": ["comments"],
+      "required": ["comments", "description"],
       "properties": {
         "type": "object",
         "items": {

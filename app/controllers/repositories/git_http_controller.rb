@@ -9,7 +9,7 @@ module Repositories
 
     rescue_from Gitlab::GitAccess::ForbiddenError, with: :render_403_with_exception
     rescue_from Gitlab::GitAccess::NotFoundError, with: :render_404_with_exception
-    rescue_from Gitlab::GitAccess::ProjectCreationError, with: :render_422_with_exception
+    rescue_from Gitlab::GitAccessProject::CreationError, with: :render_422_with_exception
     rescue_from Gitlab::GitAccess::TimeoutError, with: :render_503_with_exception
 
     # GET /foo/bar.git/info/refs?service=git-upload-pack (git pull)
@@ -105,7 +105,7 @@ module Repositories
       access.check(git_command, Gitlab::GitAccess::ANY)
 
       if repo_type.project? && !container
-        @project = @container = access.project
+        @project = @container = access.container
       end
     end
 

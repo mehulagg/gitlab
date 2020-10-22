@@ -18,4 +18,7 @@ export default {
   [types.RECEIVE_SAVE_GEO_NODE_COMPLETE](state) {
     state.isLoading = false;
   },
+  [types.SET_ERROR](state, { key, error }) {
+    state.formErrors[key] = error;
+  },
 };

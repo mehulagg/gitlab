@@ -9,7 +9,7 @@ pipeline](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6665).
 
 ```mermaid
 graph TD
-  A["build-qa-image, gitlab:assets:compile pull-cache<br/>(canonical default refs only)"];
+  A["build-qa-image, compile-production-assets<br/>(canonical default refs only)"];
   B[review-build-cng];
   C[review-deploy];
   D[CNG-mirror];
@@ -30,7 +30,7 @@ subgraph "2. gitlab `review-prepare` stage"
   end
 
 subgraph "3. gitlab `review` stage"
-  C["review-deploy<br><br>Helm deploys the Review App using the Cloud<br/>Native images built by the CNG-mirror pipeline.<br><br>Cloud Native images are deployed to the `review-apps-ce` or `review-apps-ee`<br>Kubernetes (GKE) cluster, in the GCP `gitlab-review-apps` project."]
+  C["review-deploy<br><br>Helm deploys the Review App using the Cloud<br/>Native images built by the CNG-mirror pipeline.<br><br>Cloud Native images are deployed to the `review-apps`<br>Kubernetes (GKE) cluster, in the GCP `gitlab-review-apps` project."]
   end
 
 subgraph "4. gitlab `qa` stage"
@@ -44,25 +44,27 @@ subgraph "CNG-mirror pipeline"
 
 ### Detailed explanation
 
-1. On every [pipeline](https://gitlab.com/gitlab-org/gitlab/pipelines/125315730) during the `test` stage, the
-   [`gitlab:assets:compile`](https://gitlab.com/gitlab-org/gitlab/-/jobs/467724487) job is automatically started.
-   - Once it's done, it starts the [`review-build-cng`](https://gitlab.com/gitlab-org/gitlab/-/jobs/467724808)
-     manual job since the [`CNG-mirror`](https://gitlab.com/gitlab-org/build/CNG-mirror) pipeline triggered in the
+1. On every [pipeline](https://gitlab.com/gitlab-org/gitlab/pipelines/125315730) during the `prepare` stage, the
+   [`compile-production-assets`](https://gitlab.com/gitlab-org/gitlab/-/jobs/641770154) job is automatically started.
+   - Once it's done, the [`review-build-cng`](https://gitlab.com/gitlab-org/gitlab/-/jobs/467724808)
+     job starts since the [`CNG-mirror`](https://gitlab.com/gitlab-org/build/CNG-mirror) pipeline triggered in the
      following step depends on it.
-1. The [`review-build-cng`](https://gitlab.com/gitlab-org/gitlab/-/jobs/467724808) job [triggers a pipeline](https://gitlab.com/gitlab-org/build/CNG-mirror/pipelines/44364657)
+1. Once `compile-production-assets` is done, the [`review-build-cng`](https://gitlab.com/gitlab-org/gitlab/-/jobs/467724808)
+   job [triggers a pipeline](https://gitlab.com/gitlab-org/build/CNG-mirror/pipelines/44364657)
    in the [`CNG-mirror`](https://gitlab.com/gitlab-org/build/CNG-mirror) project.
+   - The `review-build-cng` job automatically starts only if your MR includes
+     [CI or frontend changes](../pipelines.md#changes-patterns). In other cases, the job is manual.
    - The [`CNG-mirror`](https://gitlab.com/gitlab-org/build/CNG-mirror/pipelines/44364657) pipeline creates the Docker images of
      each component (e.g. `gitlab-rails-ee`, `gitlab-shell`, `gitaly` etc.)
      based on the commit from the [GitLab pipeline](https://gitlab.com/gitlab-org/gitlab/pipelines/125315730) and stores
      them in its [registry](https://gitlab.com/gitlab-org/build/CNG-mirror/container_registry).
-   - We use the [`CNG-mirror`](https://gitlab.com/gitlab-org/build/CNG-mirror) project so that the `CNG`, (**C**loud
-     **N**ative **G**itLab), project's registry is not overloaded with a
-     lot of transient Docker images.
+   - We use the [`CNG-mirror`](https://gitlab.com/gitlab-org/build/CNG-mirror) project so that the `CNG`, (Cloud
+     Native GitLab), project's registry is not overloaded with a lot of transient Docker images.
    - Note that the official CNG images are built by the `cloud-native-image`
      job, which runs only for tags, and triggers itself a [`CNG`](https://gitlab.com/gitlab-org/build/CNG) pipeline.
-1. Once the `test` stage is done, the [`review-deploy`](https://gitlab.com/gitlab-org/gitlab/-/jobs/467724810) job
+1. Once `review-build-cng` is done, the [`review-deploy`](https://gitlab.com/gitlab-org/gitlab/-/jobs/467724810) job
    deploys the Review App using [the official GitLab Helm chart](https://gitlab.com/gitlab-org/charts/gitlab/) to
-   the [`review-apps-ce`](https://console.cloud.google.com/kubernetes/clusters/details/us-central1-a/review-apps-ce?project=gitlab-review-apps) / [`review-apps-ee`](https://console.cloud.google.com/kubernetes/clusters/details/us-central1-b/review-apps-ee?project=gitlab-review-apps)
+   the [`review-apps`](https://console.cloud.google.com/kubernetes/clusters/details/us-central1-b/review-apps?project=gitlab-review-apps)
    Kubernetes cluster on GCP.
    - The actual scripts used to deploy the Review App can be found at
      [`scripts/review_apps/review-apps.sh`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/scripts/review_apps/review-apps.sh).
@@ -94,18 +96,17 @@ subgraph "CNG-mirror pipeline"
 - The manual `review-stop` can be used to
   stop a Review App manually, and is also started by GitLab once a merge
   request's branch is deleted after being merged.
-- The Kubernetes cluster is connected to the `gitlab-{ce,ee}` projects using
+- The Kubernetes cluster is connected to the `gitlab` projects using
   [GitLab's Kubernetes integration](../../user/project/clusters/index.md). This basically
-  allows to have a link to the Review App directly from the merge request
-  widget.
+  allows to have a link to the Review App directly from the merge request widget.
 
 ### Auto-stopping of Review Apps
 
 Review Apps are automatically stopped 2 days after the last deployment thanks to
-the [Environment auto-stop](../../ci/environments.md#environments-auto-stop) feature.
+the [Environment auto-stop](../../ci/environments/index.md#environments-auto-stop) feature.
 
 If you need your Review App to stay up for a longer time, you can
-[pin its environment](../../ci/environments.md#auto-stop-example) or retry the
+[pin its environment](../../ci/environments/index.md#auto-stop-example) or retry the
 `review-deploy` job to update the "latest deployed at" time.
 
 The `review-cleanup` job that automatically runs in scheduled
@@ -136,11 +137,13 @@ browser performance testing using a
 
 ### Node pools
 
-The `review-apps-ee` and `review-apps-ce` clusters are currently set up with
+The `review-apps` cluster is currently set up with
 the following node pools:
 
-- `review-apps-ee` of preemptible `e2-highcpu-16` (16 vCPU, 16 GB memory) nodes with autoscaling
-- `review-apps-ce` of preemptible `n1-standard-8` (8 vCPU, 16 GB memory) nodes with autoscaling
+- `e2-highcpu-16` (16 vCPU, 16 GB memory) pre-emptible nodes with autoscaling
+
+Node pool image type must be `Container-Optimized OS (cos)`, not `Container-Optimized OS with Containerd (cos_containerd)`,
+due to this [known issue on GitLab Runner Kubernetes executor](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/4755)
 
 ### Helm
 
@@ -152,13 +155,21 @@ used by the `review-deploy` and `review-stop` jobs.
 
 ### Get access to the GCP Review Apps cluster
 
-You need to [open an access request (internal link)](https://gitlab.com/gitlab-com/access-requests/issues/new)
-for the `gcp-review-apps-sg` GCP group.
+You need to [open an access request (internal link)](https://gitlab.com/gitlab-com/access-requests/-/issues/new)
+for the `gcp-review-apps-dev` GCP group and role.
+
+This will grant you the following permissions for:
+
+- [Retrieving pod logs](#dig-into-a-pods-logs). Granted by [Viewer (`roles/viewer`)](https://cloud.google.com/iam/docs/understanding-roles#kubernetes-engine-roles).
+- [Running a Rails console](#run-a-rails-console). Granted by [Kubernetes Engine Developer (`roles/container.pods.exec`)](https://cloud.google.com/iam/docs/understanding-roles#kubernetes-engine-roles).
 
 ### Log into my Review App
 
-The default username is `root` and its password can be found in the 1Password
-secure note named `gitlab-{ce,ee} Review App's root password`.
+For GitLab Team Members only. If you want to sign in to the review app, review
+the GitLab handbook information for the [shared 1Password account](https://about.gitlab.com/handbook/security/#1password-for-teams).
+
+- The default username is `root`.
+- The password can be found in the 1Password secure note named `gitlab-{ce,ee} Review App's root password`.
 
 ### Enable a feature flag for my Review App
 
@@ -175,7 +186,7 @@ secure note named `gitlab-{ce,ee} Review App's root password`.
 
 ### Run a Rails console
 
-1. Make sure you [have access to the cluster](#get-access-to-the-gcp-review-apps-cluster) first.
+1. Make sure you [have access to the cluster](#get-access-to-the-gcp-review-apps-cluster) and the `container.pods.exec` permission first.
 1. [Filter Workloads by your Review App slug](https://console.cloud.google.com/kubernetes/workload?project=gitlab-review-apps),
    e.g. `review-qa-raise-e-12chm0`.
 1. Find and open the `task-runner` Deployment, e.g. `review-qa-raise-e-12chm0-task-runner`.
@@ -183,15 +194,13 @@ secure note named `gitlab-{ce,ee} Review App's root password`.
 1. Click on the `KUBECTL` dropdown, then `Exec` -> `task-runner`.
 1. Replace `-c task-runner -- ls` with `-it -- gitlab-rails console` from the
    default command or
-   - Run `kubectl exec --namespace review-apps-ce review-qa-raise-e-12chm0-task-runner-d5455cc8-2lsvz -it -- gitlab-rails console` and
-     - Replace `review-apps-ce` with `review-apps-ee` if the Review App
-       is running EE, and
+   - Run `kubectl exec --namespace review-apps review-qa-raise-e-12chm0-task-runner-d5455cc8-2lsvz -it -- gitlab-rails console` and
      - Replace `review-qa-raise-e-12chm0-task-runner-d5455cc8-2lsvz`
        with your Pod's name.
 
 ### Dig into a Pod's logs
 
-1. Make sure you [have access to the cluster](#get-access-to-the-gcp-review-apps-cluster) first.
+1. Make sure you [have access to the cluster](#get-access-to-the-gcp-review-apps-cluster) and the `container.pods.getLogs` permission first.
 1. [Filter Workloads by your Review App slug](https://console.cloud.google.com/kubernetes/workload?project=gitlab-review-apps),
    e.g. `review-qa-raise-e-12chm0`.
 1. Find and open the `migrations` Deployment, e.g.
@@ -206,7 +215,7 @@ If [Review App Stability](https://app.periscopedata.com/app/gitlab/496118/Engine
 dips this may be a signal that the `review-apps-ce/ee` cluster is unhealthy.
 Leading indicators may be health check failures leading to restarts or majority failure for Review App deployments.
 
-The [Review Apps Overview dashboard](https://app.google.stackdriver.com/dashboards/6798952013815386466?project=gitlab-review-apps&timeDomain=1d)
+The [Review Apps Overview dashboard](https://console.cloud.google.com/monitoring/classic/dashboards/6798952013815386466?project=gitlab-review-apps&timeDomain=1d)
 aids in identifying load spikes on the cluster, and if nodes are problematic or the entire cluster is trending towards unhealthy.
 
 ### Release failed with `ImagePullBackOff`
@@ -272,14 +281,14 @@ kubectl top pods | sort --key 2 --numeric
 
 **Potential cause:**
 
-This could be a sign that there are too many stale secrets and/or config maps.
+This could be a sign that there are too many stale secrets and/or configuration maps.
 
 **Where to look for further debugging:**
 
 Look at [the list of Configurations](https://console.cloud.google.com/kubernetes/config?project=gitlab-review-apps)
 or `kubectl get secret,cm --sort-by='{.metadata.creationTimestamp}' | grep 'review-'`.
 
-Any secrets or config maps older than 5 days are suspect and should be deleted.
+Any secrets or configuration maps older than 5 days are suspect and should be deleted.
 
 **Useful commands:**
 
@@ -315,7 +324,7 @@ kubectl get cm --sort-by='{.metadata.creationTimestamp}' | grep 'review-' | grep
 
 #### Finding the problem
 
-[In the past](https://gitlab.com/gitlab-org/gitlab-foss/issues/62834), it happened
+[In the past](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/62834), it happened
 that the `dns-gitlab-review-app-external-dns` Deployment was in a pending state,
 effectively preventing all the Review Apps from getting a DNS record assigned,
 making them unreachable via domain name.
@@ -348,7 +357,7 @@ For the record, the debugging steps to find out this issue were:
 1. Web search for exact error message, following rabbit hole to [a relevant Kubernetes bug report](https://github.com/kubernetes/kubernetes/issues/57345)
 1. Access the node over SSH via the GCP console (**Computer Engine > VM
    instances** then click the "SSH" button for the node where the `dns-gitlab-review-app-external-dns` pod runs)
-1. In the node: `systemctl --version` => systemd 232
+1. In the node: `systemctl --version` => `systemd 232`
 1. Gather some more information:
    - `mount | grep kube | wc -l` => e.g. 290
    - `systemctl list-units --all | grep -i var-lib-kube | wc -l` => e.g. 142
@@ -400,7 +409,7 @@ find a way to limit it to only us.**
 ## Other resources
 
 - [Review Apps integration for CE/EE (presentation)](https://docs.google.com/presentation/d/1QPLr6FO4LduROU8pQIPkX1yfGvD13GEJIBOenqoKxR8/edit?usp=sharing)
-- [Stability issues](https://gitlab.com/gitlab-org/quality/team-tasks/issues/212)
+- [Stability issues](https://gitlab.com/gitlab-org/quality/team-tasks/-/issues/212)
 
 ### Helpful command line tools
 

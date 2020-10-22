@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::LfsObjectDeletedEventStore do
+RSpec.describe Geo::LfsObjectDeletedEventStore do
   include EE::GeoHelpers
 
   let_it_be(:secondary_node) { create(:geo_node) }

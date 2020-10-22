@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LdapSyncWorker do
+RSpec.describe LdapSyncWorker do
   let(:subject) { described_class.new }
 
   before do
@@ -23,7 +23,7 @@ describe LdapSyncWorker do
 
     context 'without a license key' do
       before do
-        License.destroy_all # rubocop: disable DestroyAll
+        License.destroy_all # rubocop: disable Cop/DestroyAll
       end
 
       it 'does not sync LDAP users' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Autocomplete::UsersFinder do
+RSpec.describe Autocomplete::UsersFinder do
   let(:current_user) { create(:user) }
   let(:group) { create(:group) }
   let(:saml_provider) { create(:saml_provider, group: group) }

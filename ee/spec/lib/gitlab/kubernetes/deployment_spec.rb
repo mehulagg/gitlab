@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Kubernetes::Deployment do
+RSpec.describe Gitlab::Kubernetes::Deployment do
   include KubernetesHelpers
 
   let(:pods) { {} }

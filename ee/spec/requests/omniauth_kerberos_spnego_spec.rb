@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'OmniAuth Kerberos SPNEGO' do
+RSpec.describe 'OmniAuth Kerberos SPNEGO' do
   let(:path) { '/users/auth/kerberos_spnego/negotiate' }
   let(:controller_class) { OmniauthKerberosSpnegoController }
 

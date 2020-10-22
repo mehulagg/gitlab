@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PathLock do
+RSpec.describe PathLock do
   let!(:path_lock) { create(:path_lock, path: 'app/models') }
   let(:project) { path_lock.project }
 

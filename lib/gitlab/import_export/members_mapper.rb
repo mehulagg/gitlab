@@ -34,8 +34,8 @@ module Gitlab
         @user.id
       end
 
-      def include?(old_author_id)
-        map.has_key?(old_author_id) && map[old_author_id] != default_user_id
+      def include?(old_user_id)
+        map.has_key?(old_user_id)
       end
 
       private
@@ -49,7 +49,7 @@ module Gitlab
       def ensure_default_member!
         return if user_already_member?
 
-        @importable.members.destroy_all # rubocop: disable DestroyAll
+        @importable.members.destroy_all # rubocop: disable Cop/DestroyAll
 
         relation_class.create!(user: @user, access_level: highest_access_level, source_id: @importable.id, importing: true)
       rescue => e
@@ -63,6 +63,8 @@ module Gitlab
       end
 
       def add_team_member(member, existing_user = nil)
+        return true if existing_user && @importable.members.exists?(user_id: existing_user.id)
+
         member['user'] = existing_user
         member_hash = member_hash(member)
 

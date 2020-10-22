@@ -53,7 +53,7 @@ class Burndown
 
   def closed_issues_events_count
     strong_memoize(:closed_issues_events_count) do
-      Event.closed.where(target: closed_issues).count
+      Event.closed_action.where(target: closed_issues).count
     end
   end
 
@@ -76,7 +76,7 @@ class Burndown
 
     strong_memoize(:milestone_events_per_issue) do
       Event
-        .where(target: issues, action: [Event::CLOSED, Event::REOPENED])
+        .where(target: issues, action: [:closed, :reopened])
         .where('created_at <= ?', end_date.end_of_day)
         .order(:created_at)
         .group_by(&:target_id)
@@ -85,7 +85,7 @@ class Burndown
 
   # Use issue creation date as the source of truth for created events
   def transformed_create_event_for(issue)
-    build_burndown_event(issue.created_at, issue.weight, 'created')
+    build_burndown_event(issue.created_at, issue.weight, :created)
   end
 
   # Use issue events as the source of truth for events other than 'created'
@@ -101,10 +101,10 @@ class Burndown
       # created for both of them. We can ignore these "duplicit" events because
       # if an event is already closed, another close action doesn't change its
       # state.
-      next if event.action == previous_action
+      next if event.action.to_s == previous_action.to_s
 
       previous_action = event.action
-      build_burndown_event(event.created_at, issue.weight, Event::ACTIONS.key(event.action).to_s)
+      build_burndown_event(event.created_at, issue.weight, event.action)
     end.compact
   end
 
@@ -113,11 +113,11 @@ class Burndown
     return [] unless issue.closed?
     return [] if milestone_events_per_issue[issue.id]&.any?(&:closed_action?)
 
-    build_burndown_event(start_date.beginning_of_day, issue.weight, 'closed')
+    build_burndown_event(start_date.beginning_of_day, issue.weight, :closed)
   end
 
   def build_burndown_event(created_at, issue_weight, action)
-    { created_at: created_at, weight: issue_weight, action: action }
+    { created_at: created_at, weight: issue_weight, action: action.to_s }
   end
 
   def filter_issues_created_before(date, issues)

@@ -5,7 +5,7 @@ import store from './stores';
 
 export default () => {
   const el = document.querySelector('#js-insights-pane');
-  const { endpoint, queryEndpoint } = el.dataset;
+  const { endpoint, queryEndpoint, notice } = el.dataset;
   const router = createRouter(endpoint);
 
   if (!el) return null;
@@ -22,6 +22,7 @@ export default () => {
         props: {
           endpoint,
           queryEndpoint,
+          notice,
         },
       });
     },

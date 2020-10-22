@@ -7,8 +7,8 @@ import { mockNode, mockNodeDetails } from '../../mock_data';
 const MOCK_VERSION_TEXT = `${mockNodeDetails.version} (${mockNodeDetails.revision})`;
 
 const createComponent = ({
-  node = Object.assign({}, mockNode),
-  nodeDetails = Object.assign({}, mockNodeDetails),
+  node = { ...mockNode },
+  nodeDetails = { ...mockNodeDetails },
   nodeActionsAllowed = true,
   nodeEditAllowed = true,
   nodeRemovalAllowed = true,
@@ -123,19 +123,43 @@ describe('NodeDetailsSectionMain', () => {
       expect(vm.$el.classList.contains('primary-section')).toBe(true);
     });
 
-    it('renders node url element', () => {
-      expect(vm.$el.querySelector('.js-node-url-title').innerText.trim()).toBe('Node URL');
-      expect(vm.$el.querySelector('.js-node-url-value').innerText.trim()).toBe(vm.node.url);
+    describe('node url section', () => {
+      const findNodeUrlContainer = () => vm.$el.querySelector('[data-testid="nodeUrl"]');
+      const findNodeUrlContainerTitle = () =>
+        findNodeUrlContainer().querySelector('span:first-child');
+      const findNodeUrl = () => findNodeUrlContainer().querySelector('a');
+
+      it('renders section correctly', () => {
+        expect(findNodeUrlContainer()).toMatchSnapshot();
+      });
+
+      it('renders node url title correctly', () => {
+        expect(findNodeUrlContainerTitle().innerText.trim()).toBe('Node URL');
+      });
+
+      it('renders node url element correctly', () => {
+        expect(findNodeUrl().innerText.trim()).toContain(mockNode.url);
+        expect(findNodeUrl().href).toBe(mockNode.url);
+      });
     });
 
-    it('renders node version element', () => {
-      expect(vm.$el.querySelector('.js-node-version-title').innerText.trim()).toBe(
-        'GitLab version',
-      );
+    describe('node version section', () => {
+      const findNodeVersionContainer = () => vm.$el.querySelector('[data-testid="nodeVersion"]');
+      const findNodeVersionContainerTitle = () =>
+        findNodeVersionContainer().querySelector('span:first-child');
+      const findNodeVersion = () => findNodeVersionContainer().querySelector('span:last-child');
 
-      expect(vm.$el.querySelector('.js-node-version-value').innerText.trim()).toBe(
-        MOCK_VERSION_TEXT,
-      );
+      it('renders section correctly', () => {
+        expect(findNodeVersionContainer()).toMatchSnapshot();
+      });
+
+      it('renders node version title correctly', () => {
+        expect(findNodeVersionContainerTitle().innerText.trim()).toBe('GitLab version');
+      });
+
+      it('renders node version element correctly', () => {
+        expect(findNodeVersion().innerText.trim()).toContain(MOCK_VERSION_TEXT);
+      });
     });
   });
 });

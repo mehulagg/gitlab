@@ -2,18 +2,25 @@
 
 require 'spec_helper'
 
-describe JiraImport::StartImportService do
+RSpec.describe JiraImport::StartImportService do
   include JiraServiceHelper
 
   let_it_be(:user) { create(:user) }
   let_it_be(:project, reload: true) { create(:project) }
   let(:key) { 'KEY' }
+  let(:mapping) do
+    [
+      { jira_account_id: 'abc', gitlab_id: 12 },
+      { jira_account_id: 'def', gitlab_id: nil },
+      { jira_account_id: nil, gitlab_id: 1 }
+    ]
+  end
 
-  subject { described_class.new(user, project, key).execute }
+  subject { described_class.new(user, project, key, mapping).execute }
 
   context 'when an error is returned from the project validation' do
     before do
-      allow(project).to receive(:validate_jira_import_settings!)
+      allow(Gitlab::JiraImport).to receive(:validate_project_settings!)
         .and_raise(Projects::ImportService::Error, 'Jira import feature is disabled.')
     end
 
@@ -25,7 +32,7 @@ describe JiraImport::StartImportService do
 
     before do
       stub_jira_service_test
-      allow(project).to receive(:validate_jira_import_settings!)
+      allow(Gitlab::JiraImport).to receive(:validate_project_settings!)
     end
 
     context 'when Jira project key is not provided' do
@@ -37,7 +44,7 @@ describe JiraImport::StartImportService do
     context 'when correct data provided' do
       let(:fake_key)  { 'some-key' }
 
-      subject { described_class.new(user, project, fake_key).execute }
+      subject { described_class.new(user, project, fake_key, mapping).execute }
 
       context 'when import is already running' do
         let_it_be(:jira_import_state) { create(:jira_import_state, :started, project: project) }
@@ -45,36 +52,85 @@ describe JiraImport::StartImportService do
         it_behaves_like 'responds with error', 'Jira import is already running.'
       end
 
-      context 'when everything is ok' do
-        it 'returns success response' do
-          expect(subject).to be_a(ServiceResponse)
-          expect(subject).to be_success
+      context 'when an error is raised while scheduling import' do
+        before do
+          expect_next_instance_of(JiraImportState) do |jira_impport|
+            expect(jira_impport).to receive(:schedule!).and_raise(Projects::ImportService::Error, 'Unexpected failure.')
+          end
         end
 
-        it 'schedules Jira import' do
+        it_behaves_like 'responds with error', 'Unexpected failure.'
+
+        it 'saves the error message' do
           subject
 
-          expect(project.latest_jira_import).to be_scheduled
+          expect(JiraImportState.last.error_message).to eq('Unexpected failure.')
+        end
+      end
+
+      context 'when everything is ok' do
+        context 'with complete mapping' do
+          before do
+            expect(Gitlab::JiraImport).to receive(:cache_users_mapping).with(project.id, { 'abc' => 12 })
+          end
+
+          it 'returns success response' do
+            expect(subject).to be_a(ServiceResponse)
+            expect(subject).to be_success
+          end
+
+          it 'schedules Jira import' do
+            subject
+
+            expect(project.latest_jira_import).to be_scheduled
+          end
+
+          it 'creates Jira import data', :aggregate_failures do
+            jira_import = subject.payload[:import_data]
+
+            expect(jira_import.jira_project_xid).to eq(0)
+            expect(jira_import.jira_project_name).to eq(fake_key)
+            expect(jira_import.jira_project_key).to eq(fake_key)
+            expect(jira_import.user).to eq(user)
+          end
+
+          it 'creates Jira import label' do
+            expect { subject }.to change { Label.count }.by(1)
+          end
+
+          it 'creates Jira label title with correct number' do
+            jira_import = subject.payload[:import_data]
+            label_title = "jira-import::#{jira_import.jira_project_key}-1"
+
+            expect(jira_import.label.title).to eq(label_title)
+          end
         end
 
-        it 'creates Jira import data' do
-          jira_import = subject.payload[:import_data]
+        context 'when mapping is nil' do
+          let(:mapping) { nil }
 
-          expect(jira_import.jira_project_xid).to eq(0)
-          expect(jira_import.jira_project_name).to eq(fake_key)
-          expect(jira_import.jira_project_key).to eq(fake_key)
-          expect(jira_import.user).to eq(user)
+          it 'returns success response' do
+            expect(Gitlab::JiraImport).not_to receive(:cache_users_mapping)
+
+            expect(subject).to be_a(ServiceResponse)
+            expect(subject).to be_success
+          end
         end
 
-        it 'creates Jira import label' do
-          expect { subject }.to change { Label.count }.by(1)
-        end
+        context 'when no mapping value is complete' do
+          let(:mapping) do
+            [
+              { jira_account_id: 'def', gitlab_id: nil },
+              { jira_account_id: nil, gitlab_id: 1 }
+            ]
+          end
 
-        it 'creates Jira label title with correct number' do
-          jira_import = subject.payload[:import_data]
+          it 'returns success response' do
+            expect(Gitlab::JiraImport).not_to receive(:cache_users_mapping)
 
-          label_title = "jira-import::#{jira_import.jira_project_key}-1"
-          expect(jira_import.label.title).to eq(label_title)
+            expect(subject).to be_a(ServiceResponse)
+            expect(subject).to be_success
+          end
         end
       end
 
@@ -83,8 +139,8 @@ describe JiraImport::StartImportService do
 
         it 'creates Jira label title with correct number' do
           jira_import = subject.payload[:import_data]
-
           label_title = "jira-import::#{jira_import.jira_project_key}-4"
+
           expect(jira_import.label.title).to eq(label_title)
         end
       end

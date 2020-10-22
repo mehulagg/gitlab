@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequest, :elastic do
+RSpec.describe MergeRequest, :elastic do
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
@@ -38,6 +38,14 @@ describe MergeRequest, :elastic do
     expect(described_class.elastic_search(MergeRequest.last.to_reference, options: options).total_count).to eq(1)
     expect(described_class.elastic_search('term3', options: options).total_count).to eq(0)
     expect(described_class.elastic_search('term3', options: { project_ids: :any, public_and_internal_projects: true }).total_count).to eq(1)
+  end
+
+  it "names elasticsearch queries" do
+    described_class.elastic_search('*').total_count
+
+    assert_named_queries('doc:is_a:merge_request',
+                         'merge_request:match:search_terms',
+                         'merge_request:authorized:project')
   end
 
   it "searches by iid and scopes to type: merge_request only", :sidekiq_might_not_need_inline do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::Scim::FilterParser do
+RSpec.describe EE::Gitlab::Scim::FilterParser do
   describe '#operator' do
     it 'is extracted from the filter' do
       expect(described_class.new('displayName ne ""').operator).to eq 'ne'

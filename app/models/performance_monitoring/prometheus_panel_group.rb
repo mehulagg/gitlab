@@ -7,16 +7,30 @@ module PerformanceMonitoring
     attr_accessor :group, :priority, :panels
 
     validates :group, presence: true
-    validates :panels, presence: true
+    validates :panels, array_members: { member_class: PerformanceMonitoring::PrometheusPanel }
 
-    def self.from_json(json_content)
-      panel_group = new(
-        group: json_content['group'],
-        priority: json_content['priority'],
-        panels: json_content['panels'].map { |panel| PrometheusPanel.from_json(panel) }
-      )
+    class << self
+      def from_json(json_content)
+        build_from_hash(json_content).tap(&:validate!)
+      end
 
-      panel_group.tap(&:validate!)
+      private
+
+      def build_from_hash(attributes)
+        return new unless attributes.is_a?(Hash)
+
+        new(
+          group: attributes['group'],
+          priority: attributes['priority'],
+          panels: initialize_children_collection(attributes['panels'])
+        )
+      end
+
+      def initialize_children_collection(children)
+        return unless children.is_a?(Array)
+
+        children.map { |panels| PerformanceMonitoring::PrometheusPanel.from_json(panels) }
+      end
     end
   end
 end

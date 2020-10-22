@@ -2,12 +2,14 @@
 - @content_class = "limit-container-width" unless fluid_layout
 
 - if current_user.ldap_user?
-  .alert.alert-info
-    = s_('Profiles|Some options are unavailable for LDAP accounts')
+  .gl-alert.gl-alert-info.gl-my-5
+    = sprite_icon('information-o', size: 16, css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+    .gl-alert-body
+      = s_('Profiles|Some options are unavailable for LDAP accounts')
 
-.row.prepend-top-default
+.row.gl-mt-3
   .col-lg-4.profile-settings-sidebar
-    %h4.prepend-top-0
+    %h4.gl-mt-0
       = s_('Profiles|Two-Factor Authentication')
     %p
       = s_("Profiles|Increase your account's security by enabling Two-Factor Authentication (2FA)")
@@ -15,16 +17,16 @@
     %p
       #{_('Status')}: #{current_user.two_factor_enabled? ? _('Enabled') : _('Disabled')}
     - if current_user.two_factor_enabled?
-      = link_to _('Manage two-factor authentication'), profile_two_factor_auth_path, class: 'btn btn-info'
+      = link_to _('Manage two-factor authentication'), profile_two_factor_auth_path, class: 'gl-button btn btn-info'
     - else
-      .append-bottom-10
-        = link_to _('Enable two-factor authentication'), profile_two_factor_auth_path, class: 'btn btn-success'
+      .gl-mb-3
+        = link_to _('Enable two-factor authentication'), profile_two_factor_auth_path, class: 'gl-button btn btn-success', data: { qa_selector: 'enable_2fa_button' }
 
 %hr
 - if display_providers_on_profile?
-  .row.prepend-top-default
+  .row.gl-mt-3
     .col-lg-4.profile-settings-sidebar
-      %h4.prepend-top-0
+      %h4.gl-mt-0
         = s_('Profiles|Social sign-in')
       %p
         = s_('Profiles|Activate signin with one of the following services')
@@ -32,9 +34,9 @@
       = render 'providers', providers: button_based_providers, group_saml_identities: local_assigns[:group_saml_identities]
   %hr
 - if current_user.can_change_username?
-  .row.prepend-top-default
+  .row.gl-mt-3
     .col-lg-4.profile-settings-sidebar
-      %h4.prepend-top-0.warning-title
+      %h4.gl-mt-0.warning-title
         = s_('Profiles|Change username')
       %p
         = s_('Profiles|Changing your username can have unintended side effects.')
@@ -45,9 +47,9 @@
       #update-username{ data: data }
   %hr
 
-.row.prepend-top-default
+.row.gl-mt-3
   .col-lg-4.profile-settings-sidebar
-    %h4.prepend-top-0.danger-title
+    %h4.gl-mt-0.danger-title
       = s_('Profiles|Delete account')
   .col-lg-8
     - if current_user.can_be_removed? && can?(current_user, :destroy_user, current_user)
@@ -55,8 +57,8 @@
         = s_('Profiles|Deleting an account has the following effects:')
       = render 'users/deletion_guidance', user: current_user
 
-      %button#delete-account-button.btn.btn-danger.disabled{ data: { toggle: 'modal',
-        target: '#delete-account-modal' } }
+      -# Delete button here
+      %button#delete-account-button.btn.btn-danger.disabled{ data: { qa_selector: 'delete_account_button' } }
         = s_('Profiles|Delete account')
 
       #delete-account-modal{ data: { action_url: user_registration_path,
@@ -72,4 +74,4 @@
       - else
         %p
           = s_("Profiles|You don't have access to delete this user.")
-.append-bottom-default
+.gl-mb-3

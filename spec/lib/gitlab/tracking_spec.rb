@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Gitlab::Tracking do
+RSpec.describe Gitlab::Tracking do
   let(:timestamp) { Time.utc(2017, 3, 22) }
 
   before do
@@ -9,7 +9,6 @@ describe Gitlab::Tracking do
     stub_application_setting(snowplow_collector_hostname: 'gitfoo.com')
     stub_application_setting(snowplow_cookie_domain: '.gitfoo.com')
     stub_application_setting(snowplow_app_id: '_abc123_')
-    stub_application_setting(snowplow_iglu_registry_url: 'https://example.org')
   end
 
   describe '.snowplow_options' do
@@ -20,25 +19,19 @@ describe Gitlab::Tracking do
         cookieDomain: '.gitfoo.com',
         appId: '_abc123_',
         formTracking: true,
-        linkClickTracking: true,
-        igluRegistryUrl: 'https://example.org'
+        linkClickTracking: true
       }
 
       expect(subject.snowplow_options(nil)).to match(expected_fields)
     end
 
-    it 'enables features using feature flags' do
-      stub_feature_flags(additional_snowplow_tracking: true)
-      allow(Feature).to receive(:enabled?).with(
-        :additional_snowplow_tracking,
-        '_group_'
-      ).and_return(false)
-      addition_feature_fields = {
+    it 'when feature flag is disabled' do
+      stub_feature_flags(additional_snowplow_tracking: false)
+
+      expect(subject.snowplow_options(nil)).to include(
         formTracking: false,
         linkClickTracking: false
-      }
-
-      expect(subject.snowplow_options('_group_')).to include(addition_feature_fields)
+      )
     end
   end
 
@@ -54,7 +47,7 @@ describe Gitlab::Tracking do
     end
 
     around do |example|
-      Timecop.freeze(timestamp) { example.run }
+      travel_to(timestamp) { example.run }
     end
 
     before do

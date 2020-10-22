@@ -1,9 +1,15 @@
+---
+stage: Configure
+group: Configure
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Cluster Environments **(PREMIUM)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/13392) for group-level clusters in [GitLab Premium](https://about.gitlab.com/pricing/) 12.3.
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/14809) for instance-level clusters in [GitLab Premium](https://about.gitlab.com/pricing/) 12.4.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13392) for group-level clusters in [GitLab Premium](https://about.gitlab.com/pricing/) 12.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/14809) for instance-level clusters in [GitLab Premium](https://about.gitlab.com/pricing/) 12.4.
 
-Cluster environments provide a consolidated view of which CI [environments](../../ci/environments.md) are
+Cluster environments provide a consolidated view of which CI [environments](../../ci/environments/index.md) are
 deployed to the Kubernetes cluster and it:
 
 - Shows the project and the relevant environment related to the deployment.
@@ -37,6 +43,5 @@ Once you have successful deployments to your group-level or instance-level clust
 1. Navigate to your group's **Kubernetes** page.
 1. Click on the **Environments** tab.
 
-NOTE: **Note:**
-Only successful deployments to the cluster is included in this page.
-Non-cluster environments will not be included.
+Only successful deployments to the cluster are included in this page.
+Non-cluster environments aren't included.

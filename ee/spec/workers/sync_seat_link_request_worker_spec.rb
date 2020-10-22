@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SyncSeatLinkRequestWorker, type: :worker do
+RSpec.describe SyncSeatLinkRequestWorker, type: :worker do
   describe '#perform' do
     subject do
       described_class.new.perform('2020-01-01', '123', 5, 4)
@@ -43,29 +43,5 @@ describe SyncSeatLinkRequestWorker, type: :worker do
     end
 
     it_behaves_like 'unsuccessful request'
-
-    context 'when the active_users param is not passed' do
-      subject do
-        described_class.new.perform('2020-01-01', '123', 5)
-      end
-
-      it 'still processes the job and sends a request with active_users set to nil' do
-        stub_request(:post, seat_link_url).to_return(status: 200)
-
-        subject
-
-        expect(WebMock).to have_requested(:post, seat_link_url).with(
-          headers: { 'Content-Type' => 'application/json' },
-          body: {
-            date: '2020-01-01',
-            license_key: '123',
-            max_historical_user_count: 5,
-            active_users: nil
-          }.to_json
-        )
-      end
-
-      it_behaves_like 'unsuccessful request'
-    end
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::Smartcard::SANExtension do
+RSpec.describe Gitlab::Auth::Smartcard::SANExtension do
   let(:fqdn) { 'gitlab.example.com' }
   let(:extension_factory) { OpenSSL::X509::ExtensionFactory.new(nil, cert) }
   let(:san_extension) { described_class.new(cert, fqdn) }

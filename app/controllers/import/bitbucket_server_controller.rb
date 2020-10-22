@@ -1,11 +1,16 @@
 # frozen_string_literal: true
 
 class Import::BitbucketServerController < Import::BaseController
+  extend ::Gitlab::Utils::Override
+
   include ActionView::Helpers::SanitizeHelper
 
   before_action :verify_bitbucket_server_import_enabled
   before_action :bitbucket_auth, except: [:new, :configure]
+  before_action :normalize_import_params, only: [:create]
   before_action :validate_import_params, only: [:create]
+
+  rescue_from BitbucketServer::Connection::ConnectionError, with: :bitbucket_connection_error
 
   # As a basic sanity check to prevent URL injection, restrict project
   # repository input and repository slugs to allowed characters. For Bitbucket:
@@ -24,58 +29,63 @@ class Import::BitbucketServerController < Import::BaseController
   end
 
   def create
-    repo = bitbucket_client.repo(@project_key, @repo_slug)
+    repo = client.repo(@project_key, @repo_slug)
 
     unless repo
       return render json: { errors: _("Project %{project_repo} could not be found") % { project_repo: "#{@project_key}/#{@repo_slug}" } }, status: :unprocessable_entity
     end
 
-    project_name = params[:new_name].presence || repo.name
-    namespace_path = params[:new_namespace].presence || current_user.username
-    target_namespace = find_or_create_namespace(namespace_path, current_user)
+    result = Import::BitbucketServerService.new(client, current_user, params).execute(credentials)
 
-    if current_user.can?(:create_projects, target_namespace)
-      project = Gitlab::BitbucketServerImport::ProjectCreator.new(@project_key, @repo_slug, repo, project_name, target_namespace, current_user, credentials).execute
-
-      if project.persisted?
-        render json: ProjectSerializer.new.represent(project)
-      else
-        render json: { errors: project_save_error(project) }, status: :unprocessable_entity
-      end
+    if result[:status] == :success
+      render json: ProjectSerializer.new.represent(result[:project], serializer: :import)
     else
-      render json: { errors: _('This namespace has already been taken! Please choose another one.') }, status: :unprocessable_entity
+      render json: { errors: result[:message] }, status: result[:http_status]
     end
-  rescue BitbucketServer::Connection::ConnectionError => error
-    render json: { errors: _("Unable to connect to server: %{error}") % { error: error } }, status: :unprocessable_entity
   end
 
   def configure
     session[personal_access_token_key] = params[:personal_access_token]
-    session[bitbucket_server_username_key] = params[:bitbucket_username]
+    session[bitbucket_server_username_key] = params[:bitbucket_server_username]
     session[bitbucket_server_url_key] = params[:bitbucket_server_url]
 
     redirect_to status_import_bitbucket_server_path
   end
 
-  # rubocop: disable CodeReuse/ActiveRecord
   def status
-    @collection = bitbucket_client.repos(page_offset: page_offset, limit: limit_per_page, filter: sanitized_filter_param)
-    @repos, @incompatible_repos = @collection.partition { |repo| repo.valid? }
+    super
+  end
 
+  def realtime_changes
+    super
+  end
+
+  protected
+
+  # rubocop: disable CodeReuse/ActiveRecord
+  override :importable_repos
+  def importable_repos
     # Use the import URL to filter beyond what BaseService#find_already_added_projects
-    @already_added_projects = filter_added_projects('bitbucket_server', @repos.map(&:browse_url))
-    already_added_projects_names = @already_added_projects.pluck(:import_source)
+    already_added_projects = filter_added_projects('bitbucket_server', bitbucket_repos.map(&:browse_url))
+    already_added_projects_names = already_added_projects.map(&:import_source)
 
-    @repos.reject! { |repo| already_added_projects_names.include?(repo.browse_url) }
-  rescue BitbucketServer::Connection::ConnectionError => error
-    flash[:alert] = _("Unable to connect to server: %{error}") % { error: error }
-    clear_session_data
-    redirect_to new_import_bitbucket_server_path
+    bitbucket_repos.reject { |repo| already_added_projects_names.include?(repo.browse_url) || !repo.valid? }
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
-  def jobs
-    render json: find_jobs('bitbucket_server')
+  override :incompatible_repos
+  def incompatible_repos
+    bitbucket_repos.reject { |repo| repo.valid? }
+  end
+
+  override :provider_name
+  def provider_name
+    :bitbucket_server
+  end
+
+  override :provider_url
+  def provider_url
+    session[bitbucket_server_url_key]
   end
 
   private
@@ -86,13 +96,23 @@ class Import::BitbucketServerController < Import::BaseController
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
-  def bitbucket_client
-    @bitbucket_client ||= BitbucketServer::Client.new(credentials)
+  def client
+    @client ||= BitbucketServer::Client.new(credentials)
+  end
+
+  def bitbucket_repos
+    @bitbucket_repos ||= client.repos(page_offset: page_offset, limit: limit_per_page, filter: sanitized_filter_param).to_a
+  end
+
+  def normalize_import_params
+    project_key, repo_slug = params[:repo_id].split('/')
+    params[:bitbucket_server_project] = project_key
+    params[:bitbucket_server_repo] = repo_slug
   end
 
   def validate_import_params
-    @project_key = params[:project]
-    @repo_slug = params[:repository]
+    @project_key = params[:bitbucket_server_project]
+    @repo_slug = params[:bitbucket_server_repo]
 
     return render_validation_error('Missing project key') unless @project_key.present? && @repo_slug.present?
     return render_validation_error('Missing repository slug') unless @repo_slug.present?
@@ -152,5 +172,24 @@ class Import::BitbucketServerController < Import::BaseController
 
   def sanitized_filter_param
     sanitize(params[:filter])
+  end
+
+  def bitbucket_connection_error(error)
+    flash[:alert] = _("Unable to connect to server: %{error}") % { error: error }
+    clear_session_data
+
+    respond_to do |format|
+      format.json do
+        render json: {
+          error: {
+            message: _("Unable to connect to server: %{error}") % { error: error },
+            redirect: new_import_bitbucket_server_path
+          }
+        }, status: :unprocessable_entity
+      end
+      format.html do
+        redirect_to new_import_bitbucket_server_path
+      end
+    end
   end
 end

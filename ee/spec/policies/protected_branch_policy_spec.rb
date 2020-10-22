@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProtectedBranchPolicy do
+RSpec.describe ProtectedBranchPolicy do
   let(:user) { create(:user) }
   let(:name) { 'feature' }
   let(:protected_branch) { create(:protected_branch, name: name) }
@@ -13,7 +13,7 @@ describe ProtectedBranchPolicy do
 
   before do
     project.add_maintainer(user)
-    project.project_group_links.create(group: allowed_group)
+    project.project_group_links.create!(group: allowed_group)
   end
 
   context 'when unprotection is limited by access levels' do

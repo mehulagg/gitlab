@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::UsageDataCounters::NetworkPolicyCounter, :clean_gitlab_redis_shared_state do
+RSpec.describe Gitlab::UsageDataCounters::NetworkPolicyCounter, :clean_gitlab_redis_shared_state do
   describe '.add' do
     it 'increases drops and forwards counters' do
       described_class.add(10, 5)

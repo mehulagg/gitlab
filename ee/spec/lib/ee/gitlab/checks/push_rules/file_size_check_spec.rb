@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::Checks::PushRules::FileSizeCheck do
+RSpec.describe EE::Gitlab::Checks::PushRules::FileSizeCheck do
   include_context 'push rules checks context'
 
   describe '#validate!' do

@@ -51,10 +51,19 @@
       "relative": {"type": "string"},
       "full": {"type": "string"}
     },
-    "subscribed": { "type": ["boolean", "null"] }
+    "subscribed": { "type": ["boolean", "null"] },
+    "_links": {
+      "type": "object",
+      "properties": {
+        "self": { "type": "uri" },
+        "epic_issues": { "type": "uri" },
+        "group": { "type": "uri" },
+        "additionalProperties": false
+      }
+    }
   },
   "required": [
-    "id", "iid", "group_id", "title", "confidential"
+    "id", "iid", "group_id", "title", "confidential", "_links"
   ],
   "additionalProperties": false
 }

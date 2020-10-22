@@ -1,5 +1,5 @@
 .issuable-warning-icon {
-  background-color: $orange-100;
+  background-color: $orange-50;
   border-radius: $border-radius-default;
   width: $issuable-warning-size;
   height: $issuable-warning-size;
@@ -50,6 +50,7 @@
 
   .title-container {
     display: flex;
+    align-items: flex-start;
   }
 
   .title {
@@ -65,7 +66,6 @@
 
   .btn-edit {
     margin-left: auto;
-    height: $gl-padding * 2;
   }
 
   .emoji-block {
@@ -74,14 +74,6 @@
     @include media-breakpoint-down(md) {
       padding: $gl-padding-8 0;
     }
-  }
-}
-
-.issuable-filter-count {
-  span {
-    display: block;
-    margin-bottom: -16px;
-    padding: 13px 0;
   }
 }
 
@@ -115,29 +107,16 @@
     font-size: 0;
     margin-bottom: -5px;
   }
-
-  .scoped-label-wrapper {
-    > a {
-      max-width: 100%;
-    }
-
-    .color-label {
-      padding-right: $gl-padding-24;
-    }
-
-    .scoped-label {
-      right: 12px;
-    }
-  }
 }
 
-.assignee {
+.assignee,
+.reviewer {
   .merge-icon {
-    color: $orange-500;
+    color: $orange-400;
     position: absolute;
     bottom: 0;
     right: 0;
-    text-shadow: -1px -1px 0 $white, 1px -1px 0 $white, -1px 1px 0 $white, 1px 1px 0 $white;
+    text-shadow: -1px -1px 2px $white, 1px -1px 2px $white, -1px 1px 2px $white, 1px 1px 2px $white;
   }
 }
 
@@ -167,10 +146,6 @@
     }
   }
 
-  a.gl-label-icon {
-    color: $gray-500;
-  }
-
   .gl-label .gl-label-link:hover {
     text-decoration: none;
     color: inherit;
@@ -180,13 +155,16 @@
     }
   }
 
-  .gl-label .gl-label-icon:hover {
-    text-decoration: none;
-    color: $gray-500;
-  }
-
   .btn-link {
     color: inherit;
+  }
+
+  // TODO remove this class once we can generate a correct hover utility from `gitlab/ui`,
+  // see here: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39286#note_396767000
+  .btn-link-hover:hover {
+    * {
+      @include gl-text-blue-800;
+    }
   }
 
   .issuable-header-text {
@@ -249,25 +227,16 @@
 
   .title {
     color: $gl-text-color;
-    margin-bottom: $gl-padding-8;
-    line-height: 1;
+    margin-bottom: $gl-padding-4;
+    line-height: $gl-line-height-20;
 
     .avatar {
       margin-left: 0;
     }
-
-    a.edit-link:not([href]):hover {
-      color: rgba($gray-normal, 0.2);
-    }
-
-    .confidential-edit,
-    .lock-edit,
-    .edit-link {
-      @extend .btn-link;
-    }
   }
 
-  .cross-project-reference {
+  .cross-project-reference,
+  .sidebar-mr-source-branch {
     color: inherit;
 
     span {
@@ -375,13 +344,6 @@
       margin: 0;
     }
 
-    .username {
-      display: block;
-      margin-top: 4px;
-      font-size: 13px;
-      font-weight: $gl-font-weight-normal;
-    }
-
     .hide-expanded {
       display: none;
     }
@@ -404,8 +366,9 @@
       border-bottom: 0;
       overflow: hidden;
 
-      &:hover {
-        background-color: $sidebar-block-hover-color;
+      &.with-sub-blocks .sub-block:hover,
+      &:not(.with-sub-blocks):hover {
+        background-color: $gray-100;
       }
 
       &.issuable-sidebar-header {
@@ -457,11 +420,6 @@
         svg {
           fill: $gl-text-color;
         }
-      }
-
-      span {
-        display: block;
-        margin-top: 0;
       }
 
       .sidebar-avatar-counter {
@@ -621,18 +579,18 @@
   padding: 16px 0;
 
   small {
-    color: $gray-700;
+    color: $gray-500;
   }
 }
 
 .edited-text {
-  color: $gray-700;
+  color: $gray-500;
   display: block;
   margin: 16px 0 0;
   font-size: 85%;
 
   .author-link {
-    color: $gray-700;
+    color: $gray-500;
   }
 }
 
@@ -696,12 +654,6 @@
   }
 }
 
-.issuable-form-padding-top {
-  @include media-breakpoint-up(sm) {
-    padding-top: 7px;
-  }
-}
-
 .issuable-status-box {
   align-self: stretch;
   display: flex;
@@ -756,14 +708,14 @@
     .issuable-info-container {
       flex: 1;
       display: flex;
-      padding-right: $gl-padding;
 
       .issuable-main-info {
         flex: 1 auto;
         margin-right: 10px;
         min-width: 0;
 
-        .issue-weight-icon {
+        .issue-weight-icon,
+        .issue-estimate-icon {
           vertical-align: sub;
         }
       }
@@ -827,8 +779,8 @@
         }
       }
 
-      .gl-label-icon {
-        color: $gray-500;
+      .milestone {
+        color: $gray-700;
       }
     }
 
@@ -933,12 +885,12 @@
 }
 
 .issuable-todo-btn {
-  .fa-spinner {
+  .gl-spinner {
     display: none;
   }
 
   &.is-loading {
-    .fa-spinner {
+    .gl-spinner {
       display: inline-block;
     }
 
@@ -982,7 +934,7 @@
     .sidebar-collapsed-divider {
       line-height: 5px;
       font-size: 12px;
-      color: $gray-700;
+      color: $gray-500;
 
       + .sidebar-collapsed-icon {
         padding-top: 0;
@@ -995,12 +947,8 @@
   vertical-align: sub;
 }
 
-.suggestion-item a {
-  color: initial;
-}
-
 .suggestion-confidential {
-  color: $orange-600;
+  color: $orange-500;
 }
 
 .suggestion-state-open {
@@ -1022,5 +970,17 @@
   .avatar {
     margin-top: -3px;
     border: 0;
+  }
+}
+
+@include media-breakpoint-down(sm) {
+  // Overriding the following rule with the negative margin
+  // https://gitlab.com/gitlab-org/gitlab/-/blob/146c43c931c3743a140529307aea616e4aa9ff21/app/assets/stylesheets/framework/sidebar.scss#L1-5
+  .container-fluid {
+    .issuable-list,
+    .issues-filters,
+    .epics-filters {
+      margin: 0 (-$gl-padding);
+    }
   }
 }

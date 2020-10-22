@@ -7,7 +7,8 @@ export default () => {
   const touchEnabled =
     'ontouchstart' in window || (window.DocumentTouch && document instanceof DocumentTouch);
 
-  return Object.assign({}, sortableConfig, {
+  return {
+    ...sortableConfig,
     fallbackOnBody: false,
     group: {
       name: 'stages',
@@ -22,5 +23,5 @@ export default () => {
     onMove(e) {
       return !e.related.classList.contains(NO_DRAG_CLASS);
     },
-  });
+  };
 };

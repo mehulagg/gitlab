@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::MilestonesFinder do
+RSpec.describe Boards::MilestonesFinder do
   describe '#execute' do
     let(:group) { create(:group) }
     let(:nested_group) { create(:group, parent: group) }

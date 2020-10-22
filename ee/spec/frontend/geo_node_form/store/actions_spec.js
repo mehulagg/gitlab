@@ -1,11 +1,11 @@
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
-import flash from '~/flash';
-import axios from '~/lib/utils/axios_utils';
-import { visitUrl } from '~/lib/utils/url_utility';
 import * as actions from 'ee/geo_node_form/store/actions';
 import * as types from 'ee/geo_node_form/store/mutation_types';
 import createState from 'ee/geo_node_form/store/state';
+import { deprecatedCreateFlash as flash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { visitUrl } from '~/lib/utils/url_utility';
 import { MOCK_SYNC_NAMESPACES, MOCK_NODE, MOCK_ERROR_MESSAGE } from '../mock_data';
 
 jest.mock('~/flash');
@@ -44,6 +44,7 @@ describe('GeoNodeForm Store Actions', () => {
     ${actions.requestSaveGeoNode}           | ${null}                            | ${types.REQUEST_SAVE_GEO_NODE}           | ${{ type: types.REQUEST_SAVE_GEO_NODE }}                                          | ${noCallback}
     ${actions.receiveSaveGeoNodeSuccess}    | ${null}                            | ${types.RECEIVE_SAVE_GEO_NODE_COMPLETE}  | ${{ type: types.RECEIVE_SAVE_GEO_NODE_COMPLETE }}                                 | ${visitUrlCallback}
     ${actions.receiveSaveGeoNodeError}      | ${{ message: MOCK_ERROR_MESSAGE }} | ${types.RECEIVE_SAVE_GEO_NODE_COMPLETE}  | ${{ type: types.RECEIVE_SAVE_GEO_NODE_COMPLETE }}                                 | ${flashCallback}
+    ${actions.setError}                     | ${{ key: 'name', error: 'error' }} | ${types.SET_ERROR}                       | ${{ type: types.SET_ERROR, payload: { key: 'name', error: 'error' } }}            | ${noCallback}
   `(`non-axios calls`, ({ action, data, mutationName, mutationCall, callback }) => {
     describe(action.name, () => {
       it(`should commit mutation ${mutationName}`, () => {

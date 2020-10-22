@@ -59,13 +59,9 @@ export const getFiles = ({ state, commit, dispatch }, payload = {}) =>
 
       commit(types.CREATE_TREE, { treePath: `${projectId}/${branchId}` });
       service
-        .getFiles(selectedProject.web_url, ref)
+        .getFiles(selectedProject.path_with_namespace, ref)
         .then(({ data }) => {
-          const { entries, treeList } = decorateFiles({
-            data,
-            projectId,
-            branchId,
-          });
+          const { entries, treeList } = decorateFiles({ data });
 
           commit(types.SET_ENTRIES, entries);
 

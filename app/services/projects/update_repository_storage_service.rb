@@ -1,37 +1,50 @@
 # frozen_string_literal: true
 
 module Projects
-  class UpdateRepositoryStorageService < BaseService
-    include Gitlab::ShellAdapter
-
+  class UpdateRepositoryStorageService
     Error = Class.new(StandardError)
     SameFilesystemError = Class.new(Error)
 
-    def initialize(project)
-      @project = project
+    attr_reader :repository_storage_move
+    delegate :project, :source_storage_name, :destination_storage_name, to: :repository_storage_move
+
+    def initialize(repository_storage_move)
+      @repository_storage_move = repository_storage_move
     end
 
-    def execute(new_repository_storage_key)
-      raise SameFilesystemError if same_filesystem?(project.repository.storage, new_repository_storage_key)
+    def execute
+      repository_storage_move.with_lock do
+        return ServiceResponse.success unless repository_storage_move.scheduled? # rubocop:disable Cop/AvoidReturnFromBlocks
 
-      mirror_repositories(new_repository_storage_key)
+        repository_storage_move.start!
+      end
 
-      mark_old_paths_for_archive
+      raise SameFilesystemError if same_filesystem?(source_storage_name, destination_storage_name)
 
-      project.update!(repository_storage: new_repository_storage_key, repository_read_only: false)
-      project.leave_pool_repository
-      project.track_project_repository
+      mirror_repositories
 
+      repository_storage_move.transaction do
+        repository_storage_move.finish_replication!
+
+        project.leave_pool_repository
+        project.track_project_repository
+      end
+
+      remove_old_paths
       enqueue_housekeeping
 
-      success
+      repository_storage_move.finish_cleanup!
+
+      ServiceResponse.success
 
     rescue StandardError => e
-      project.update!(repository_read_only: false)
+      repository_storage_move.do_fail!
 
       Gitlab::ErrorTracking.track_exception(e, project_path: project.full_path)
 
-      error(s_("UpdateRepositoryStorage|Error moving repository storage for %{project_full_path} - %{message}") % { project_full_path: project.full_path, message: e.message })
+      ServiceResponse.error(
+        message: s_("UpdateRepositoryStorage|Error moving repository storage for %{project_full_path} - %{message}") % { project_full_path: project.full_path, message: e.message }
+      )
     end
 
     private
@@ -40,15 +53,19 @@ module Projects
       Gitlab::GitalyClient.filesystem_id(old_storage) == Gitlab::GitalyClient.filesystem_id(new_storage)
     end
 
-    def mirror_repositories(new_repository_storage_key)
-      mirror_repository(new_repository_storage_key)
+    def mirror_repositories
+      mirror_repository
 
       if project.wiki.repository_exists?
-        mirror_repository(new_repository_storage_key, type: Gitlab::GlRepository::WIKI)
+        mirror_repository(type: Gitlab::GlRepository::WIKI)
+      end
+
+      if project.design_repository.exists?
+        mirror_repository(type: ::Gitlab::GlRepository::DESIGN)
       end
     end
 
-    def mirror_repository(new_storage_key, type: Gitlab::GlRepository::PROJECT)
+    def mirror_repository(type: Gitlab::GlRepository::PROJECT)
       unless wait_for_pushes(type)
         raise Error, s_('UpdateRepositoryStorage|Timeout waiting for %{type} repository pushes') % { type: type.name }
       end
@@ -60,13 +77,11 @@ module Projects
 
       # Initialize a git repository on the target path
       new_repository = Gitlab::Git::Repository.new(
-        new_storage_key,
+        destination_storage_name,
         raw_repository.relative_path,
         raw_repository.gl_repository,
         full_path
       )
-
-      new_repository.create_repository
 
       new_repository.replicate(raw_repository)
       new_checksum = new_repository.checksum
@@ -76,29 +91,31 @@ module Projects
       end
     end
 
-    def mark_old_paths_for_archive
-      old_repository_storage = project.repository_storage
-      new_project_path = moved_path(project.disk_path)
+    def remove_old_paths
+      Gitlab::Git::Repository.new(
+        source_storage_name,
+        "#{project.disk_path}.git",
+        nil,
+        nil
+      ).remove
 
-      # Notice that the block passed to `run_after_commit` will run with `project`
-      # as its context
-      project.run_after_commit do
-        GitlabShellWorker.perform_async(:mv_repository,
-                                        old_repository_storage,
-                                        disk_path,
-                                        new_project_path)
-
-        if wiki.repository_exists?
-          GitlabShellWorker.perform_async(:mv_repository,
-                                          old_repository_storage,
-                                          wiki.disk_path,
-                                          "#{new_project_path}.wiki")
-        end
+      if project.wiki.repository_exists?
+        Gitlab::Git::Repository.new(
+          source_storage_name,
+          "#{project.wiki.disk_path}.git",
+          nil,
+          nil
+        ).remove
       end
-    end
 
-    def moved_path(path)
-      "#{path}+#{project.id}+moved+#{Time.now.to_i}"
+      if project.design_repository.exists?
+        Gitlab::Git::Repository.new(
+          source_storage_name,
+          "#{project.design_repository.disk_path}.git",
+          nil,
+          nil
+        ).remove
+      end
     end
 
     # The underlying FetchInternalRemote call uses a `git fetch` to move data
@@ -128,5 +145,3 @@ module Projects
     end
   end
 end
-
-Projects::UpdateRepositoryStorageService.prepend_if_ee('EE::Projects::UpdateRepositoryStorageService')

@@ -1,3 +1,9 @@
+---
+stage: Plan
+group: Project Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Issue Types
 
 Sometimes when a new resource type is added it's not clear if it should be only an
@@ -5,9 +11,9 @@ Sometimes when a new resource type is added it's not clear if it should be only 
 (similar to Issue, Epic, Merge Request, Snippet).
 
 The idea of Issue Types was first proposed in [this
-issue](https://gitlab.com/gitlab-org/gitlab/issues/8767) and its usage was
+issue](https://gitlab.com/gitlab-org/gitlab/-/issues/8767) and its usage was
 discussed few times since then, for example in [incident
-management](https://gitlab.com/gitlab-org/gitlab-foss/issues/55532).
+management](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/55532).
 
 ## What is an Issue Type
 

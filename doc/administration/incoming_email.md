@@ -1,3 +1,9 @@
+---
+stage: Plan
+group: Project Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Incoming email
 
 GitLab has several features based on receiving incoming emails:
@@ -7,13 +13,18 @@ GitLab has several features based on receiving incoming emails:
 - [New issue by email](../user/project/issues/managing_issues.md#new-issue-via-email):
   allow GitLab users to create a new issue by sending an email to a
   user-specific email address.
-- [New merge request by email](../user/project/merge_requests/creating_merge_requests.md#new-merge-request-by-email-core-only):
+- [New merge request by email](../user/project/merge_requests/creating_merge_requests.md#new-merge-request-by-email):
   allow GitLab users to create a new merge request by sending an email to a
   user-specific email address.
 - [Service Desk](../user/project/service_desk.md): provide e-mail support to
-  your customers through GitLab. **(PREMIUM)**
+  your customers through GitLab.
 
 ## Requirements
+
+NOTE: **Note:**
+It is **not** recommended to use an email address that receives or will receive any
+messages not intended for the GitLab instance. Any incoming emails not intended
+for GitLab will receive a reject notice.
 
 Handling incoming emails requires an [IMAP](https://en.wikipedia.org/wiki/Internet_Message_Access_Protocol)-enabled
 email account. GitLab requires one of the following three strategies:
@@ -63,23 +74,28 @@ and [allowed less secure apps to access the account](https://support.google.com/
 or [turn-on 2-step validation](https://support.google.com/accounts/answer/185839)
 and use [an application password](https://support.google.com/mail/answer/185833).
 
+If you want to use Office 365, and two-factor authentication is enabled, make sure
+you're using an
+[app password](https://docs.microsoft.com/en-us/azure/active-directory/user-help/multi-factor-authentication-end-user-app-passwords)
+instead of the regular password for the mailbox.
+
 To set up a basic Postfix mail server with IMAP access on Ubuntu, follow the
 [Postfix setup documentation](reply_by_email_postfix_setup.md).
 
-### Security Concerns
+### Security concerns
 
-**WARNING:** Be careful when choosing the domain used for receiving incoming
-email.
+CAUTION: **Caution:**
+Be careful when choosing the domain used for receiving incoming email.
 
-For the sake of example, suppose your top-level company domain is `hooli.com`.
+For example, suppose your top-level company domain is `hooli.com`.
 All employees in your company have an email address at that domain via Google
 Apps, and your company's private Slack instance requires a valid `@hooli.com`
-email address in order to sign up.
+email address to sign up.
 
 If you also host a public-facing GitLab instance at `hooli.com` and set your
 incoming email domain to `hooli.com`, an attacker could abuse the "Create new
 issue by email" or
-"[Create new merge request by email](../user/project/merge_requests/creating_merge_requests.md#new-merge-request-by-email-core-only)"
+"[Create new merge request by email](../user/project/merge_requests/creating_merge_requests.md#new-merge-request-by-email)"
 features by using a project's unique address as the email when signing up for
 Slack. This would send a confirmation email, which would create a new issue or
 merge request on the project owned by the attacker, allowing them to click the
@@ -92,13 +108,23 @@ authenticate solely based on access to an email domain such as `*.hooli.com.`
 Alternatively, use a dedicated domain for GitLab email communications such as
 `hooli-gitlab.com`.
 
-See GitLab issue [#30366](https://gitlab.com/gitlab-org/gitlab-foss/issues/30366)
+See GitLab issue [#30366](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/30366)
 for a real-world example of this exploit.
+
+CAUTION: **Caution:**
+Use a mail server that has been configured to reduce
+spam.
+A Postfix mail server that is running on a default configuration, for example,
+can result in abuse. All messages received on the configured mailbox will be processed
+and messages that are not intended for the GitLab instance will receive a reject notice.
+If the sender's address is spoofed, the reject notice will be delivered to the spoofed
+`FROM` address, which can cause the mail server's IP or domain to appear on a block
+list.
 
 ### Omnibus package installations
 
 1. Find the `incoming_email` section in `/etc/gitlab/gitlab.rb`, enable the feature
-    and fill in the details for your specific IMAP server and email account (see [examples](#config-examples) below).
+    and fill in the details for your specific IMAP server and email account (see [examples](#configuration-examples) below).
 
 1. Reconfigure GitLab for the changes to take effect:
 
@@ -124,7 +150,7 @@ Reply by email should now be working.
    ```
 
 1. Find the `incoming_email` section in `config/gitlab.yml`, enable the feature
-  and fill in the details for your specific IMAP server and email account (see [examples](#config-examples) below).
+  and fill in the details for your specific IMAP server and email account (see [examples](#configuration-examples) below).
 
 1. Enable `mail_room` in the init script at `/etc/default/gitlab`:
 
@@ -147,7 +173,7 @@ Reply by email should now be working.
 
 Reply by email should now be working.
 
-### Config examples
+### Configuration examples
 
 #### Postfix
 
@@ -182,6 +208,9 @@ gitlab_rails['incoming_email_start_tls'] = false
 gitlab_rails['incoming_email_mailbox_name'] = "inbox"
 # The IDLE command timeout.
 gitlab_rails['incoming_email_idle_timeout'] = 60
+
+# Whether to expunge (permanently remove) messages from the mailbox when they are deleted after delivery
+gitlab_rails['incoming_email_expunge_deleted'] = true
 ```
 
 Example for source installs:
@@ -214,11 +243,17 @@ incoming_email:
     mailbox: "inbox"
     # The IDLE command timeout.
     idle_timeout: 60
+
+    # Whether to expunge (permanently remove) messages from the mailbox when they are deleted after delivery
+    expunge_deleted: true
 ```
 
 #### Gmail
 
 Example configuration for Gmail/G Suite. Assumes mailbox `gitlab-incoming@gmail.com`.
+
+NOTE: **Note:**
+`incoming_email_email` cannot be a Gmail alias account.
 
 Example for Omnibus installs:
 
@@ -249,6 +284,9 @@ gitlab_rails['incoming_email_start_tls'] = false
 gitlab_rails['incoming_email_mailbox_name'] = "inbox"
 # The IDLE command timeout.
 gitlab_rails['incoming_email_idle_timeout'] = 60
+
+# Whether to expunge (permanently remove) messages from the mailbox when they are deleted after delivery
+gitlab_rails['incoming_email_expunge_deleted'] = true
 ```
 
 Example for source installs:
@@ -281,6 +319,9 @@ incoming_email:
     mailbox: "inbox"
     # The IDLE command timeout.
     idle_timeout: 60
+
+    # Whether to expunge (permanently remove) messages from the mailbox when they are deleted after delivery
+    expunge_deleted: true
 ```
 
 #### Microsoft Exchange Server

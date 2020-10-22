@@ -2,12 +2,7 @@
 
 FactoryBot.define do
   factory :ee_ci_pipeline, class: 'Ci::Pipeline', parent: :ci_pipeline do
-    trait :webide do
-      source { :webide }
-      config_source { :webide_source }
-    end
-
-    %i[container_scanning dast dependency_list dependency_scanning license_management license_scanning sast].each do |report_type|
+    %i[api_fuzzing browser_performance codequality container_scanning coverage_fuzzing dast dependency_list dependency_scanning license_management license_scanning load_performance sast secret_detection].each do |report_type|
       trait "with_#{report_type}_report".to_sym do
         status { :success }
 
@@ -57,6 +52,14 @@ FactoryBot.define do
       end
     end
 
+    trait :with_secret_detection_feature_branch do
+      status { :success }
+
+      after(:build) do |pipeline, evaluator|
+        pipeline.builds << build(:ee_ci_build, :secret_detection_feature_branch, pipeline: pipeline, project: pipeline.project)
+      end
+    end
+
     trait :with_dast_feature_branch do
       status { :success }
 
@@ -65,7 +68,7 @@ FactoryBot.define do
       end
     end
 
-    trait :with_license_management_feature_branch do
+    trait :with_license_scanning_feature_branch do
       status { :success }
 
       after(:build) do |pipeline, evaluator|
@@ -73,7 +76,7 @@ FactoryBot.define do
       end
     end
 
-    trait :with_corrupted_license_management_report do
+    trait :with_corrupted_license_scanning_report do
       status { :success }
 
       after(:build) do |pipeline, evaluator|

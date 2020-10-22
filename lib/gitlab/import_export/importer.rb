@@ -24,8 +24,14 @@ module Gitlab
           raise Projects::ImportService::Error.new(shared.errors.to_sentence)
         end
       rescue => e
+        # If some exception was raised could mean that the SnippetsRepoRestorer
+        # was not called. This would leave us with snippets without a repository.
+        # This is a state we don't want them to be, so we better delete them.
+        remove_non_migrated_snippets
+
         raise Projects::ImportService::Error.new(e.message)
       ensure
+        remove_base_tmp_dir
         remove_import_file
       end
 
@@ -34,7 +40,7 @@ module Gitlab
       attr_accessor :archive_file, :current_user, :project, :shared
 
       def restorers
-        [repo_restorer, wiki_restorer, project_tree, avatar_restorer,
+        [repo_restorer, wiki_restorer, project_tree, avatar_restorer, design_repo_restorer,
          uploads_restorer, lfs_restorer, statistics_restorer, snippets_repo_restorer]
       end
 
@@ -71,6 +77,12 @@ module Gitlab
                                                wiki_enabled: project.wiki_enabled?)
       end
 
+      def design_repo_restorer
+        Gitlab::ImportExport::DesignRepoRestorer.new(path_to_bundle: design_repo_path,
+                                                     shared: shared,
+                                                     project: project)
+      end
+
       def uploads_restorer
         Gitlab::ImportExport::UploadsRestorer.new(project: project, shared: shared)
       end
@@ -101,6 +113,10 @@ module Gitlab
         File.join(shared.export_path, Gitlab::ImportExport.wiki_repo_bundle_filename)
       end
 
+      def design_repo_path
+        File.join(shared.export_path, Gitlab::ImportExport.design_repo_bundle_filename)
+      end
+
       def remove_import_file
         upload = project.import_export_upload
 
@@ -111,12 +127,16 @@ module Gitlab
       end
 
       def overwrite_project
-        return unless can?(current_user, :admin_namespace, project.namespace)
+        return true unless overwrite_project?
 
-        if overwrite_project?
-          ::Projects::OverwriteProjectService.new(project, current_user)
-                                             .execute(project_to_overwrite)
+        unless can?(current_user, :admin_namespace, project.namespace)
+          message = "User #{current_user&.username} (#{current_user&.id}) cannot overwrite a project in #{project.namespace.path}"
+          @shared.error(::Projects::ImportService::PermissionError.new(message))
+          return false
         end
+
+        ::Projects::OverwriteProjectService.new(project, current_user)
+                                            .execute(project_to_overwrite)
 
         true
       end
@@ -134,8 +154,18 @@ module Gitlab
           ::Project.find_by_full_path("#{project.namespace.full_path}/#{original_path}")
         end
       end
+
+      def remove_base_tmp_dir
+        FileUtils.rm_rf(@shared.base_path)
+      end
+
+      def remove_non_migrated_snippets
+        project
+          .snippets
+          .left_joins(:snippet_repository)
+          .where(snippet_repositories: { snippet_id: nil })
+          .delete_all
+      end
     end
   end
 end
-
-Gitlab::ImportExport::Importer.prepend_if_ee('EE::Gitlab::ImportExport::Importer')

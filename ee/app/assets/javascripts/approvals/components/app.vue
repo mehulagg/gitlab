@@ -1,6 +1,8 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import { GlLoadingIcon, GlDeprecatedButton } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton } from '@gitlab/ui';
+import showToast from '~/vue_shared/plugins/global_toast';
+import { __ } from '~/locale';
 import ModalRuleCreate from './modal_rule_create.vue';
 import ModalRuleRemove from './modal_rule_remove.vue';
 
@@ -8,7 +10,7 @@ export default {
   components: {
     ModalRuleCreate,
     ModalRuleRemove,
-    GlDeprecatedButton,
+    GlButton,
     GlLoadingIcon,
   },
   props: {
@@ -21,7 +23,9 @@ export default {
   computed: {
     ...mapState({
       settings: 'settings',
+      isLoading: state => state.approvals.isLoading,
       hasLoaded: state => state.approvals.hasLoaded,
+      targetBranch: state => state.approvals.targetBranch,
     }),
     createModalId() {
       return `${this.settings.prefix}-approvals-create-modal`;
@@ -29,19 +33,28 @@ export default {
     removeModalId() {
       return `${this.settings.prefix}-approvals-remove-modal`;
     },
-    targetBranch() {
-      if (this.settings.prefix === 'mr-edit' && !this.settings.mrSettingsPath) {
-        return this.settings.mrCreateTargetBranch;
-      }
-      return null;
-    },
   },
   mounted() {
-    return this.fetchRules(this.targetBranch);
+    return this.fetchRules({ targetBranch: this.targetBranch });
   },
   methods: {
-    ...mapActions(['fetchRules']),
+    ...mapActions(['fetchRules', 'undoRulesChange']),
     ...mapActions({ openCreateModal: 'createModal/open' }),
+    resetToProjectDefaults() {
+      const { targetBranch } = this;
+
+      return this.fetchRules({ targetBranch, resetToDefault: true }).then(() => {
+        const toast = showToast(__('Approval rules reset to project defaults'), {
+          action: {
+            text: __('Undo'),
+            onClick: () => {
+              this.undoRulesChange();
+              toast.goAway(0);
+            },
+          },
+        });
+      });
+    },
   },
 };
 </script>
@@ -54,14 +67,26 @@ export default {
         <slot name="rules"></slot>
       </div>
       <div v-if="settings.canEdit && settings.allowMultiRule" class="border-bottom py-3 px-2">
-        <div v-if="settings.allowMultiRule" class="d-flex">
-          <gl-deprecated-button
-            class="ml-auto btn-info btn-inverted"
+        <div class="gl-display-flex">
+          <gl-button
+            v-if="targetBranch"
+            :disabled="isLoading"
+            data-testid="reset-to-defaults"
+            @click="resetToProjectDefaults"
+          >
+            {{ __('Reset to project defaults') }}
+          </gl-button>
+          <gl-button
+            :class="{ 'gl-ml-3': targetBranch, 'gl-ml-0': !targetBranch }"
+            :disabled="isLoading"
+            category="secondary"
+            variant="info"
             data-qa-selector="add_approvers_button"
+            data-testid="add-approval-rule"
             @click="openCreateModal(null)"
           >
             {{ __('Add approval rule') }}
-          </gl-deprecated-button>
+          </gl-button>
         </div>
       </div>
       <slot name="footer"></slot>

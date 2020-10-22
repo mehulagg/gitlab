@@ -10,6 +10,9 @@ class Projects::TagsController < Projects::ApplicationController
   before_action :authorize_download_code!
   before_action :authorize_admin_tag!, only: [:new, :create, :destroy]
 
+  feature_category :source_code_management, [:index, :show, :new, :destroy]
+  feature_category :release_evidence, [:create]
+
   # rubocop: disable CodeReuse/ActiveRecord
   def index
     params[:sort] = params[:sort].presence || sort_value_recently_updated
@@ -41,16 +44,20 @@ class Projects::TagsController < Projects::ApplicationController
   # rubocop: enable CodeReuse/ActiveRecord
 
   def create
+    # TODO: remove this with the release creation moved to it's own form https://gitlab.com/gitlab-org/gitlab/-/issues/214245
+    evidence_pipeline = find_evidence_pipeline
+
     result = ::Tags::CreateService.new(@project, current_user)
       .execute(params[:tag_name], params[:ref], params[:message])
 
     if result[:status] == :success
-      # Release creation with Tags was deprecated in GitLab 11.7
+      # TODO: remove this with the release creation moved to it's own form https://gitlab.com/gitlab-org/gitlab/-/issues/214245
       if params[:release_description].present?
         release_params = {
           tag: params[:tag_name],
           name: params[:tag_name],
-          description: params[:release_description]
+          description: params[:release_description],
+          evidence_pipeline: evidence_pipeline
         }
 
         Releases::CreateService
@@ -72,25 +79,20 @@ class Projects::TagsController < Projects::ApplicationController
   def destroy
     result = ::Tags::DestroyService.new(project, current_user).execute(params[:id])
 
-    respond_to do |format|
-      if result[:status] == :success
-        format.html do
-          redirect_to project_tags_path(@project), status: :see_other
-        end
-
-        format.js
-      else
-        @error = result[:message]
-
-        format.html do
-          redirect_to project_tags_path(@project),
-            alert: @error, status: :see_other
-        end
-
-        format.js do
-          render status: :unprocessable_entity
-        end
-      end
+    if result[:status] == :success
+      render json: result
+    else
+      render json: { message: result[:message] }, status: result[:return_code]
     end
+  end
+
+  private
+
+  # TODO: remove this with the release creation moved to it's own form https://gitlab.com/gitlab-org/gitlab/-/issues/214245
+  def find_evidence_pipeline
+    evidence_pipeline_sha = @project.repository.commit(params[:ref])&.sha
+    return unless evidence_pipeline_sha
+
+    @project.ci_pipelines.for_sha(evidence_pipeline_sha).last
   end
 end

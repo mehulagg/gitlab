@@ -1,25 +1,9 @@
-- page_title 'Geo Uploads'
-- params[:sync_status] ||= []
+= render 'admin/geo/shared/replication_nav'
+= render 'admin/geo/shared/filter_nav', replicable_name: _('uploads'), replicable_controller: 'admin/geo/uploads'
+- if @registries.any?
+  - @registries.each do |upload_registry|
+    = render partial: 'registry', locals: { upload_registry: upload_registry }
 
-.top-area.scrolling-tabs-container.inner-page-scroll-tabs
-  %ul.nav-links.nav.nav-tabs
-    - opts = params[:sync_status].present? ? {} : { page: admin_geo_uploads_path }
-    = nav_link(opts) do
-      = link_to admin_geo_uploads_path do
-        = s_('Geo|All')
-    = nav_link(html_options: { class: active_when(params[:sync_status] == 'synced') }) do
-      = link_to admin_geo_uploads_path(sync_status: 'synced') do
-        = s_('Geo|Synced')
-    = nav_link(html_options: { class: active_when(params[:sync_status] == 'failed') }) do
-      = link_to admin_geo_uploads_path(sync_status: 'failed') do
-        = s_('Geo|Failed')
-    = nav_link(html_options: { class: active_when(params[:sync_status] == 'never') }) do
-      = link_to admin_geo_uploads_path(sync_status: 'never') do
-        = s_('Geo|Never')
-  .nav-controls
-    = render(partial: 'shared/projects/search_form', autofocus: true)
-
-- @registries.each do |upload_registry|
-  = render partial: 'registry', locals: { upload_registry: upload_registry }
-
-= paginate @registries, theme: 'gitlab'
+  = paginate @registries, theme: 'gitlab'
+- else
+  = render 'shared/empty_states/geo_replication', replicable_type: _('uploads')

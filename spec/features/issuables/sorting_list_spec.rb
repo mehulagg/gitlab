@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'Sort Issuable List' do
+RSpec.describe 'Sort Issuable List' do
   let(:project) { create(:project, :public) }
 
   let(:first_created_issuable) { issuables.order_created_asc.first }
@@ -143,7 +143,7 @@ describe 'Sort Issuable List' do
         let(:issuable_type) { :issue }
 
         it 'is "created date"' do
-          visit_issues_with_state(project, 'open')
+          visit_issues_with_state(project, 'opened')
 
           expect(find('.filter-dropdown-container')).to have_content('Created date')
           expect(first_issue).to include(last_created_issuable.title)
@@ -175,11 +175,11 @@ describe 'Sort Issuable List' do
         end
       end
 
-      context 'when the sort in the URL is id_desc' do
+      context 'when the sort in the URL is created_date', :js do
         let(:issuable_type) { :issue }
 
         before do
-          visit_issues(project, sort: 'id_desc')
+          visit_issues(project, sort: 'created_date')
         end
 
         it 'shows the sort order as created date' do
@@ -190,11 +190,11 @@ describe 'Sort Issuable List' do
       end
     end
 
-    context 'custom sorting' do
+    context 'custom sorting', :js do
       let(:issuable_type) { :issue }
 
       it 'supports sorting in asc and desc order' do
-        visit_issues_with_state(project, 'open')
+        visit_issues_with_state(project, 'opened')
 
         page.within('.filter-dropdown-container') do
           click_button('Created date')

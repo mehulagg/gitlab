@@ -2,13 +2,18 @@
 
 require 'spec_helper'
 
-describe Ldap::OmniauthCallbacksController, :do_not_mock_admin_mode do
+RSpec.describe Ldap::OmniauthCallbacksController do
   include_context 'Ldap::OmniauthCallbacksController'
 
   it 'allows sign in' do
     post provider
 
     expect(request.env['warden']).to be_authenticated
+  end
+
+  it 'creates an authentication event record' do
+    expect { post provider }.to change { AuthenticationEvent.count }.by(1)
+    expect(AuthenticationEvent.last.provider).to eq(provider.to_s)
   end
 
   context 'with sign in prevented' do

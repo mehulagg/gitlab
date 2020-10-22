@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('ee', 'db', 'geo', 'migrate', '20191010204941_migrate_lfs_objects_to_separate_registry.rb')
 
-describe MigrateLfsObjectsToSeparateRegistry, :geo do
+RSpec.describe MigrateLfsObjectsToSeparateRegistry, :geo do
   let(:file_registry) { table(:file_registry) }
   let(:lfs_object_registry) { table(:lfs_object_registry) }
 

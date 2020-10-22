@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::ListsController do
+RSpec.describe Boards::ListsController do
   let_it_be(:group)  { create(:group, :private) }
   let_it_be(:board)  { create(:board, group: group) }
   let_it_be(:user)   { create(:user) }
@@ -33,7 +33,7 @@ describe Boards::ListsController do
 
     context 'with unauthorized user' do
       before do
-        group.group_member(user).destroy
+        group.group_member(user).destroy!
       end
 
       it 'returns a forbidden 403 response' do

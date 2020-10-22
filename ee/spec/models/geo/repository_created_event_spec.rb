@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::RepositoryCreatedEvent, type: :model do
+RSpec.describe Geo::RepositoryCreatedEvent, type: :model do
   describe 'relationships' do
     it { is_expected.to belong_to(:project) }
   end

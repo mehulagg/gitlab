@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::Replication::BlobDownloader do
+RSpec.describe Gitlab::Geo::Replication::BlobDownloader do
   include ::EE::GeoHelpers
 
   let_it_be(:primary) { create(:geo_node, :primary) }
@@ -51,6 +51,40 @@ describe Gitlab::Geo::Replication::BlobDownloader do
         end
 
         xit 'ensures the file destination directory exists' # Not worth testing here as-is. Extract the functionality first.
+      end
+
+      context 'when the file is on Object Storage' do
+        before do
+          stub_package_file_object_storage(enabled: true, direct_upload: true)
+        end
+
+        let!(:model_record) { create(:package_file, :npm, :object_storage) }
+
+        subject { described_class.new(replicator: model_record.replicator) }
+
+        context 'with object storage sync disabled' do
+          before do
+            secondary.update_column(:sync_object_storage, false)
+          end
+
+          it 'returns failure' do
+            result = subject.execute
+
+            expect(result.success).to be_falsey
+          end
+        end
+
+        context 'with object storage disabled' do
+          before do
+            stub_package_file_object_storage(enabled: false)
+          end
+
+          it 'returns failure' do
+            result = subject.execute
+
+            expect(result.success).to be_falsey
+          end
+        end
       end
     end
 

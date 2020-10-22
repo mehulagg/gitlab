@@ -3,6 +3,7 @@ import * as actions from 'ee/vue_shared/license_compliance/store/actions';
 import * as mutationTypes from 'ee/vue_shared/license_compliance/store/mutation_types';
 import createState from 'ee/vue_shared/license_compliance/store/state';
 import { LICENSE_APPROVAL_STATUS } from 'ee/vue_shared/license_compliance/constants';
+import { LICENSE_CHECK_NAME } from 'ee/approvals/constants';
 import { TEST_HOST } from 'spec/test_constants';
 import testAction from 'helpers/vuex_action_helper';
 import { approvedLicense, blacklistedLicense } from '../mock_data';
@@ -10,6 +11,7 @@ import axios from '~/lib/utils/axios_utils';
 
 describe('License store actions', () => {
   const apiUrlManageLicenses = `${TEST_HOST}/licenses/management`;
+  const approvalsApiPath = `${TEST_HOST}/approvalsApiPath`;
   const licensesApiPath = `${TEST_HOST}/licensesApiPath`;
 
   let axiosMock;
@@ -26,6 +28,7 @@ describe('License store actions', () => {
     state = {
       ...createState(),
       apiUrlManageLicenses,
+      approvalsApiPath,
       currentLicenseInModal: approvedLicense,
     };
     licenseId = approvedLicense.id;
@@ -50,6 +53,21 @@ describe('License store actions', () => {
         payload,
         state,
         [{ type: mutationTypes.SET_API_SETTINGS, payload }],
+        [],
+      )
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
+  describe('setKnownLicenses', () => {
+    it('commits SET_KNOWN_LICENSES', done => {
+      const payload = [{ name: 'BSD' }, { name: 'Apache' }];
+      testAction(
+        actions.setKnownLicenses,
+        payload,
+        state,
+        [{ type: mutationTypes.SET_KNOWN_LICENSES, payload }],
         [],
       )
         .then(done)
@@ -474,6 +492,139 @@ describe('License store actions', () => {
           { type: 'requestManagedLicenses' },
           { type: 'receiveManagedLicensesError', payload: expect.any(Error) },
         ],
+      )
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
+  describe('fetchLicenseCheckApprovalRule ', () => {
+    it('dispatches request/receive with detected approval rule', done => {
+      const APPROVAL_RULE_RESPONSE = {
+        approval_rules_left: [{ name: LICENSE_CHECK_NAME }],
+      };
+
+      axiosMock.onGet(approvalsApiPath).replyOnce(200, APPROVAL_RULE_RESPONSE);
+
+      testAction(
+        actions.fetchLicenseCheckApprovalRule,
+        null,
+        state,
+        [],
+        [
+          { type: 'requestLicenseCheckApprovalRule' },
+          {
+            type: 'receiveLicenseCheckApprovalRuleSuccess',
+            payload: { hasLicenseCheckApprovalRule: true },
+          },
+        ],
+        done,
+      );
+    });
+
+    it('dispatches request/receive without detected approval rule', done => {
+      const APPROVAL_RULE_RESPONSE = {
+        approval_rules_left: [{ name: 'Another Approval Rule' }],
+      };
+
+      axiosMock.onGet(approvalsApiPath).replyOnce(200, APPROVAL_RULE_RESPONSE);
+
+      testAction(
+        actions.fetchLicenseCheckApprovalRule,
+        null,
+        state,
+        [],
+        [
+          { type: 'requestLicenseCheckApprovalRule' },
+          {
+            type: 'receiveLicenseCheckApprovalRuleSuccess',
+            payload: { hasLicenseCheckApprovalRule: false },
+          },
+        ],
+        done,
+      );
+    });
+
+    it('dispatches request/receive error when no approvalsAPiPath is provided', done => {
+      const error = new Error('approvalsApiPath not provided');
+      axiosMock.onGet(approvalsApiPath).replyOnce(500);
+
+      testAction(
+        actions.fetchLicenseCheckApprovalRule,
+        null,
+        { ...state, approvalsApiPath: '' },
+        [],
+        [
+          { type: 'requestLicenseCheckApprovalRule' },
+          { type: 'receiveLicenseCheckApprovalRuleError', payload: error },
+        ],
+        done,
+      );
+    });
+
+    it('dispatches request/receive on error', done => {
+      const error = new Error('Request failed with status code 500');
+      axiosMock.onGet(approvalsApiPath).replyOnce(500);
+
+      testAction(
+        actions.fetchLicenseCheckApprovalRule,
+        null,
+        state,
+        [],
+        [
+          { type: 'requestLicenseCheckApprovalRule' },
+          { type: 'receiveLicenseCheckApprovalRuleError', payload: error },
+        ],
+        done,
+      );
+    });
+  });
+
+  describe('requestLicenseCheckApprovalRule', () => {
+    it('commits REQUEST_LICENSE_CHECK_APPROVAL_RULE', done => {
+      testAction(
+        actions.requestLicenseCheckApprovalRule,
+        null,
+        state,
+        [{ type: mutationTypes.REQUEST_LICENSE_CHECK_APPROVAL_RULE }],
+        [],
+      )
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
+  describe('receiveLicenseCheckApprovalRuleSuccess', () => {
+    it('commits REQUEST_LICENSE_CHECK_APPROVAL_RULE', done => {
+      const hasLicenseCheckApprovalRule = true;
+
+      testAction(
+        actions.receiveLicenseCheckApprovalRuleSuccess,
+        { hasLicenseCheckApprovalRule },
+        state,
+        [
+          {
+            type: mutationTypes.RECEIVE_LICENSE_CHECK_APPROVAL_RULE_SUCCESS,
+            payload: { hasLicenseCheckApprovalRule },
+          },
+        ],
+        [],
+      )
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
+  describe('receiveLicenseCheckApprovalRuleError', () => {
+    it('commits RECEIVE_LICENSE_CHECK_APPROVAL_RULE_ERROR', done => {
+      const error = new Error('Error');
+
+      testAction(
+        actions.receiveLicenseCheckApprovalRuleError,
+        error,
+        state,
+        [{ type: mutationTypes.RECEIVE_LICENSE_CHECK_APPROVAL_RULE_ERROR, payload: error }],
+        [],
       )
         .then(done)
         .catch(done.fail);

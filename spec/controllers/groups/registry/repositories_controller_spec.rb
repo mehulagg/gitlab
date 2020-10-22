@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::Registry::RepositoriesController do
+RSpec.describe Groups::Registry::RepositoriesController do
   let_it_be(:user)  { create(:user) }
   let_it_be(:guest) { create(:user) }
   let_it_be(:group, reload: true) { create(:group) }
@@ -17,6 +17,7 @@ describe Groups::Registry::RepositoriesController do
 
   before do
     stub_container_registry_config(enabled: true)
+    stub_container_registry_tags(repository: :any, tags: [])
     group.add_owner(user)
     group.add_guest(guest)
     sign_in(user)
@@ -86,7 +87,7 @@ describe Groups::Registry::RepositoriesController do
 
         it_behaves_like 'with name parameter'
 
-        it_behaves_like 'a gitlab tracking event', described_class.name, 'list_repositories'
+        it_behaves_like 'a package tracking event', described_class.name, 'list_repositories'
 
         context 'with project in subgroup' do
           let_it_be(:test_group) { create(:group, parent: group ) }

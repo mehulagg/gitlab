@@ -6,8 +6,8 @@ module StatusPage
   class IncidentEntity < Grape::Entity
     expose :iid, as: :id
     expose :state, as: :status
-    expose(:title) { |entity| StatusPage::Renderer.markdown(entity, :title) }
-    expose(:description) { |entity| StatusPage::Renderer.markdown(entity, :description) }
+    expose(:title) { |entity| StatusPage::Renderer.markdown(entity, :title, issue_iid: entity.iid) }
+    expose(:description) { |entity| StatusPage::Renderer.markdown(entity, :description, issue_iid: entity.iid) }
     expose :updated_at
     expose :created_at
     expose :user_notes, as: :comments, using: IncidentCommentEntity
@@ -16,7 +16,7 @@ module StatusPage
     private
 
     def links
-      { details: StatusPage::Storage.details_path(object.iid) }
+      { details: Gitlab::StatusPage::Storage.details_path(object.iid) }
     end
 
     def user_notes

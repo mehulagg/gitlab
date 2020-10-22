@@ -1,14 +1,26 @@
 - return unless can?(current_user, :remove_project, project)
+- adjourned_deletion = project.adjourned_deletion?
+- adjourned_date = adjourned_deletion ? permanent_deletion_date(Time.now.utc).to_s : nil;
+- admin_help_path = help_page_path('user/admin_area/settings/visibility_and_access_controls', anchor: 'default-deletion-delay')
+- recovery_help_path = help_page_path('user/project/settings/index', anchor: 'delete-a-project')
+- confirm_phrase = s_('DeleteProject|Delete %{name}') % { name: project.full_name }
 
 - unless project.marked_for_deletion?
   .sub-section
-    %h4.danger-title= _('Remove project')
-    = render 'projects/settings/marked_for_removal'
+    %h4.danger-title= _('Delete project')
     %p
-      %strong= _('Removing the project will delete its repository and all related resources including issues, merge requests etc.')
-    = form_tag(project_path(project), method: :delete) do
+      %strong= s_('Delayed Project Deletion (%{adjourned_deletion})') % { adjourned_deletion: adjourned_deletion ? 'Enabled' : 'Disabled' }
+    - if adjourned_deletion
+      = render 'projects/settings/marked_for_removal'
+      #js-project-adjourned-delete-button{ data: { recovery_help_path: recovery_help_path, adjourned_removal_date: adjourned_date, form_path: project_path(project), confirm_phrase: project.path } }
+    - else
       %p
-        %strong= _('Removed projects cannot be restored!')
-      = button_to _('Remove project'), '#', class: "btn btn-remove js-confirm-danger", data: { "confirm-danger-message" => remove_project_message(project) }
+        %span.gl-text-gray-500= _('Projects will be permanently deleted immediately.')
+        = link_to(_('Customizable by an administrator.'), admin_help_path)
+      %p= permanent_delete_message(project)
+      %p
+        %strong= _('Are you ABSOLUTELY SURE you wish to delete this project?')
+      #js-project-delete-button{ data: { form_path: project_path(project), confirm_phrase: confirm_phrase } }
 - else
   = render 'projects/settings/restore', project: project
+

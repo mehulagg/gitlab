@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'subscriptions/new' do
+RSpec.describe 'subscriptions/new' do
   before do
     allow(view).to receive(:subscription_data).and_return(
       setup_for_company: 'true',

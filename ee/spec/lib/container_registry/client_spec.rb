@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ContainerRegistry::Client do
+RSpec.describe ContainerRegistry::Client do
   let(:token) { '12345' }
   let(:options) { { token: token } }
   let(:client) { described_class.new("http://registry", options) }
@@ -15,6 +15,7 @@ describe ContainerRegistry::Client do
       'User-Agent' => "GitLab/#{Gitlab::VERSION}"
     }
   end
+
   let(:headers_with_accept_types) do
     {
       'Accept' => 'application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json',

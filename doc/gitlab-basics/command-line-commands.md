@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: howto, reference
 ---
 
@@ -56,14 +59,14 @@ nano README.md
 
 It is easy to delete (remove) a file or directory, but be careful:
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 This will **permanently** delete a file.
 
 ```shell
 rm NAME-OF-FILE
 ```
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 This will **permanently** delete a directory and **all** of its contents.
 
 ```shell

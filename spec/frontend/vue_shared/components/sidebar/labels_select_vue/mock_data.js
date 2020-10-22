@@ -24,14 +24,23 @@ export const mockLabels = [
     color: '#FF0000',
     textColor: '#FFFFFF',
   },
+  {
+    id: 29,
+    title: 'Boog',
+    description: 'Label for bugs',
+    color: '#FF0000',
+    textColor: '#FFFFFF',
+  },
 ];
 
 export const mockConfig = {
   allowLabelEdit: true,
   allowLabelCreate: true,
   allowScopedLabels: true,
+  allowMultiselect: true,
   labelsListTitle: 'Assign labels',
   labelsCreateTitle: 'Create label',
+  variant: 'sidebar',
   dropdownOnly: false,
   selectedLabels: [mockRegularLabel, mockScopedLabel],
   labelsSelectInProgress: false,

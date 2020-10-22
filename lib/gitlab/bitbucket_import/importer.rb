@@ -3,8 +3,6 @@
 module Gitlab
   module BitbucketImport
     class Importer
-      include Gitlab::BitbucketImport::Metrics
-
       LABELS = [{ title: 'bug', color: '#FF0000' },
                 { title: 'enhancement', color: '#428BCA' },
                 { title: 'proposal', color: '#69D100' },
@@ -26,6 +24,7 @@ module Gitlab
         import_issues
         import_pull_requests
         handle_errors
+        metrics.track_finished_import
 
         true
       end
@@ -43,7 +42,7 @@ module Gitlab
 
       def store_pull_request_error(pull_request, ex)
         backtrace = Gitlab::BacktraceCleaner.clean_backtrace(ex.backtrace)
-        error = { type: :pull_request, iid: pull_request.iid, errors: ex.message, trace: backtrace, raw_response: pull_request.raw }
+        error = { type: :pull_request, iid: pull_request.iid, errors: ex.message, trace: backtrace, raw_response: pull_request.raw&.to_json }
 
         Gitlab::ErrorTracking.log_exception(ex, error)
 
@@ -114,6 +113,8 @@ module Gitlab
           created_at: issue.created_at,
           updated_at: issue.updated_at
         )
+
+        metrics.issues_counter.increment
 
         gitlab_issue.labels << @labels[label_name]
 
@@ -194,6 +195,8 @@ module Gitlab
           created_at: pull_request.created_at,
           updated_at: pull_request.updated_at
         )
+
+        metrics.merge_requests_counter.increment
 
         import_pull_request_comments(pull_request, merge_request) if merge_request.persisted?
       rescue StandardError => e
@@ -287,6 +290,10 @@ module Gitlab
           project_id: project.id,
           project_path: project.full_path
         }
+      end
+
+      def metrics
+        @metrics ||= Gitlab::Import::Metrics.new(:bitbucket_importer, @project)
       end
     end
   end

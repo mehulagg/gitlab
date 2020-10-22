@@ -66,8 +66,6 @@ export const mockMilestones = [
 ];
 
 export const mockLabels = [
-  [
-    { id: 74, title: 'Alero', color: '#6235f2', text_color: '#FFFFFF' },
-    { id: 9, title: 'Amsche', color: '#581cc8', text_color: '#FFFFFF' },
-  ],
+  { id: 74, title: 'Alero', color: '#6235f2', text_color: '#FFFFFF' },
+  { id: 9, title: 'Amsche', color: '#581cc8', text_color: '#FFFFFF' },
 ];

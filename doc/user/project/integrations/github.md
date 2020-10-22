@@ -1,6 +1,12 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # GitHub project integration **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/3836) in GitLab Premium 10.6.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3836) in GitLab Premium 10.6.
 
 GitLab provides an integration for updating the pipeline statuses on GitHub.
 This is especially useful if using GitLab for CI/CD only.
@@ -14,7 +20,7 @@ and is automatically configured on [GitHub import](../../../integration/github.m
 
 ### Complete these steps on GitHub
 
-This integration requires a [GitHub API token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line)
+This integration requires a [GitHub API token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)
 with `repo:status` access granted:
 
 1. Go to your "Personal access tokens" page at <https://github.com/settings/tokens>
@@ -39,7 +45,7 @@ to configure pipelines to run for open pull requests.
 #### Static / dynamic status check names
 
 > - Introduced in GitLab 11.5: using static status check names as opt-in option.
-> - [In GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/issues/9931), static status check names is default behavior for new projects.
+> - [In GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/issues/9931), static status check names is default behavior for new projects.
 
 This makes it possible to mark these status checks as _Required_ on GitHub.
 With **Static status check names** enabled on the integration page, your

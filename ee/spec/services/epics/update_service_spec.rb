@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Epics::UpdateService do
+RSpec.describe Epics::UpdateService do
   let(:group) { create(:group, :internal) }
   let(:user) { create(:user) }
   let(:epic) { create(:epic, group: group) }
@@ -59,19 +59,6 @@ describe Epics::UpdateService do
 
       it 'updates the last_edited_at value' do
         expect { update_epic(opts) }.to change { epic.last_edited_at }
-      end
-
-      context 'when confidential_epics is disabled' do
-        before do
-          stub_feature_flags(confidential_epics: false)
-        end
-
-        it 'ignores confidential attribute on update' do
-          update_epic(opts)
-
-          expect(epic).to be_valid
-          expect(epic.confidential).to be_falsey
-        end
       end
     end
 
@@ -171,6 +158,7 @@ describe Epics::UpdateService do
             author: user,
             user: user)
         end
+
         let!(:todo2) do
           create(:todo, :mentioned, :pending,
             target: epic,
@@ -311,6 +299,16 @@ describe Epics::UpdateService do
     it_behaves_like 'existing issuable with scoped labels' do
       let(:issuable) { epic }
       let(:parent) { group }
+    end
+
+    context 'with quick actions in the description' do
+      let(:label) { create(:group_label, group: group) }
+
+      it 'adds labels to the epic' do
+        update_epic(description: "/label ~#{label.name}")
+
+        expect(epic.label_ids).to contain_exactly(label.id)
+      end
     end
   end
 end

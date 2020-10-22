@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ElasticsearchIndexedNamespace do
+RSpec.describe ElasticsearchIndexedNamespace do
   before do
     stub_ee_application_setting(elasticsearch_indexing: true)
   end
@@ -18,11 +18,17 @@ describe ElasticsearchIndexedNamespace do
   end
 
   it_behaves_like 'an elasticsearch indexed container' do
+    let_it_be(:namespace) { create(:namespace) }
+
     let(:container) { :elasticsearch_indexed_namespace }
-    let(:attribute) { :namespace_id }
+    let(:container_attributes) { { namespace: namespace } }
+
+    let(:required_attribute) { :namespace_id }
+
     let(:index_action) do
       expect(ElasticNamespaceIndexerWorker).to receive(:perform_async).with(subject.namespace_id, :index)
     end
+
     let(:delete_action) do
       expect(ElasticNamespaceIndexerWorker).to receive(:perform_async).with(subject.namespace_id, :delete)
     end
@@ -55,7 +61,7 @@ describe ElasticsearchIndexedNamespace do
 
     describe '.index_first_n_namespaces_of_plan' do
       it 'creates records, scoped by plan and ordered by namespace id' do
-        expect(::Gitlab::CurrentSettings).to receive(:invalidate_elasticsearch_indexes_project_cache!).and_call_original.exactly(3).times
+        expect(::Gitlab::CurrentSettings).to receive(:invalidate_elasticsearch_indexes_cache!).and_call_original.exactly(3).times
 
         ids = namespaces.map(&:id)
 
@@ -83,7 +89,7 @@ describe ElasticsearchIndexedNamespace do
       end
 
       it 'creates records, scoped by plan and ordered by namespace id' do
-        expect(::Gitlab::CurrentSettings).to receive(:invalidate_elasticsearch_indexes_project_cache!).and_call_original.exactly(3).times
+        expect(::Gitlab::CurrentSettings).to receive(:invalidate_elasticsearch_indexes_cache!).and_call_original.exactly(3).times
 
         ids = namespaces.map(&:id)
 

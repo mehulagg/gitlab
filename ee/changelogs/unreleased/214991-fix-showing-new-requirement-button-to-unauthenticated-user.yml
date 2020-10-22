@@ -1,5 +1,0 @@
----
-title: Fix showing New requirement button to unauthenticated user.
-merge_request: 30085
-author: Gilang Gumilar
-type: fixed

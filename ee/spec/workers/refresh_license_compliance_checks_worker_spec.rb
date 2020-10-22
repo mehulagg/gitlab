@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RefreshLicenseComplianceChecksWorker do
+RSpec.describe RefreshLicenseComplianceChecksWorker do
   subject { described_class.new }
 
   describe '#perform' do

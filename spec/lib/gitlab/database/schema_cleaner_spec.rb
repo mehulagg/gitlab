@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::SchemaCleaner do
+RSpec.describe Gitlab::Database::SchemaCleaner do
   let(:example_schema) { fixture_file(File.join('gitlab', 'database', 'structure_example.sql')) }
   let(:io) { StringIO.new }
 
@@ -15,12 +15,8 @@ describe Gitlab::Database::SchemaCleaner do
     expect(subject).not_to include('COMMENT ON EXTENSION')
   end
 
-  it 'includes the plpgsql extension' do
-    expect(subject).to include('CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;')
-  end
-
-  it 'sets the search_path' do
-    expect(subject.split("\n").first).to eq('SET search_path=public;')
+  it 'no assumption about public being the default schema' do
+    expect(subject).not_to match(/public\.\w+/)
   end
 
   it 'cleans up the full schema as expected (blackbox test with example)' do

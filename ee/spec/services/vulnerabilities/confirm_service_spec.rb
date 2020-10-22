@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Vulnerabilities::ConfirmService do
+RSpec.describe Vulnerabilities::ConfirmService do
   include AccessMatchersGeneric
 
   before do
@@ -20,6 +20,8 @@ describe Vulnerabilities::ConfirmService do
     before do
       project.add_developer(user)
     end
+
+    it_behaves_like 'calls vulnerability statistics utility services in order'
 
     it 'confirms a vulnerability' do
       Timecop.freeze do

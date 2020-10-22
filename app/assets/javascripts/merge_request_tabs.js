@@ -1,11 +1,12 @@
 /* eslint-disable no-new, class-methods-use-this */
 
 import $ from 'jquery';
-import Vue from 'vue';
+import 'vendor/jquery.scrollTo';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import Cookies from 'js-cookie';
+import createEventHub from '~/helpers/event_hub_factory';
 import axios from './lib/utils/axios_utils';
-import flash from './flash';
+import { deprecatedCreateFlash as flash } from './flash';
 import BlobForkSuggestion from './blob/blob_fork_suggestion';
 import initChangesDropdown from './init_changes_dropdown';
 import {
@@ -21,6 +22,7 @@ import { localTimeAgo } from './lib/utils/datetime_utility';
 import syntaxHighlight from './syntax_highlight';
 import Notes from './notes';
 import { polyfillSticky } from './lib/utils/sticky';
+import initAddContextCommitsTriggers from './add_context_commits_modal';
 import { __ } from './locale';
 
 // MergeRequestTabs
@@ -93,7 +95,7 @@ export default class MergeRequestTabs {
     this.pipelinesLoaded = false;
     this.commitsLoaded = false;
     this.fixedLayoutPref = null;
-    this.eventHub = new Vue();
+    this.eventHub = createEventHub();
 
     this.setUrl = setUrl !== undefined ? setUrl : true;
     this.setCurrentAction = this.setCurrentAction.bind(this);
@@ -126,6 +128,13 @@ export default class MergeRequestTabs {
 
   bindEvents() {
     $('.merge-request-tabs a[data-toggle="tabvue"]').on('click', this.clickTab);
+    window.addEventListener('popstate', event => {
+      if (event.state && event.state.action) {
+        this.tabShown(event.state.action, event.target.location);
+        this.currentAction = event.state.action;
+        this.eventHub.$emit('MergeRequestTabChange', this.getCurrentAction());
+      }
+    });
   }
 
   // Used in tests
@@ -155,6 +164,10 @@ export default class MergeRequestTabs {
       } else if (action) {
         const href = e.currentTarget.getAttribute('href');
         this.tabShown(action, href);
+
+        if (this.setUrl) {
+          this.setCurrentAction(action);
+        }
       }
     }
   }
@@ -213,11 +226,8 @@ export default class MergeRequestTabs {
         this.resetViewContainer();
         this.destroyPipelinesView();
       }
-      if (this.setUrl) {
-        this.setCurrentAction(action);
-      }
 
-      this.eventHub.$emit('MergeRequestTabChange', this.getCurrentAction());
+      $('.detail-page-description').renderGFM();
     } else if (action === this.currentAction) {
       // ContentTop is used to handle anything at the top of the page before the main content
       const mainContentContainer = document.querySelector('.content-wrapper');
@@ -241,6 +251,8 @@ export default class MergeRequestTabs {
         }
       }
     }
+
+    this.eventHub.$emit('MergeRequestTabChange', action);
   }
 
   scrollToElement(container) {
@@ -287,19 +299,25 @@ export default class MergeRequestTabs {
     // Ensure parameters and hash come along for the ride
     newState += location.search + location.hash;
 
-    // TODO: Consider refactoring in light of turbolinks removal.
-
-    // Replace the current history state with the new one without breaking
-    // Turbolinks' history.
-    //
-    // See https://github.com/rails/turbolinks/issues/363
-    window.history.replaceState(
-      {
-        url: newState,
-      },
-      document.title,
-      newState,
-    );
+    if (window.history.state && window.history.state.url && window.location.pathname !== newState) {
+      window.history.pushState(
+        {
+          url: newState,
+          action: this.currentAction,
+        },
+        document.title,
+        newState,
+      );
+    } else {
+      window.history.replaceState(
+        {
+          url: window.location.href,
+          action,
+        },
+        document.title,
+        window.location.href,
+      );
+    }
 
     return newState;
   }
@@ -324,6 +342,7 @@ export default class MergeRequestTabs {
         this.scrollToElement('#commits');
 
         this.toggleLoading(false);
+        initAddContextCommitsTriggers();
       })
       .catch(() => {
         this.toggleLoading(false);
@@ -342,7 +361,11 @@ export default class MergeRequestTabs {
         emptyStateSvgPath: pipelineTableViewEl.dataset.emptyStateSvgPath,
         errorStateSvgPath: pipelineTableViewEl.dataset.errorStateSvgPath,
         autoDevopsHelpPath: pipelineTableViewEl.dataset.helpAutoDevopsPath,
-        canRunPipeline: true,
+        canCreatePipelineInTargetProject: Boolean(
+          mrWidgetData?.can_create_pipeline_in_target_project,
+        ),
+        sourceProjectFullPath: mrWidgetData?.source_project_full_path || '',
+        targetProjectFullPath: mrWidgetData?.target_project_full_path || '',
         projectId: pipelineTableViewEl.dataset.projectId,
         mergeRequestId: mrWidgetData ? mrWidgetData.iid : null,
       },
@@ -372,10 +395,6 @@ export default class MergeRequestTabs {
         $container.html(data.html);
 
         initChangesDropdown(this.stickyTop);
-
-        if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-          gl.diffNotesCompileComponents();
-        }
 
         localTimeAgo($('.js-timeago', 'div#diffs'));
         syntaxHighlight($('#diffs .js-syntax-highlight'));
@@ -459,13 +478,14 @@ export default class MergeRequestTabs {
   }
 
   shrinkView() {
-    const $gutterIcon = $('.js-sidebar-toggle i:visible');
+    const $gutterBtn = $('.js-sidebar-toggle:visible');
+    const $expandSvg = $gutterBtn.find('.js-sidebar-expand');
 
     // Wait until listeners are set
     setTimeout(() => {
       // Only when sidebar is expanded
-      if ($gutterIcon.is('.fa-angle-double-right')) {
-        $gutterIcon.closest('a').trigger('click', [true]);
+      if ($expandSvg.length && $expandSvg.hasClass('hidden')) {
+        $gutterBtn.trigger('click', [true]);
       }
     }, 0);
   }
@@ -475,13 +495,14 @@ export default class MergeRequestTabs {
     if (parseBoolean(Cookies.get('collapsed_gutter'))) {
       return;
     }
-    const $gutterIcon = $('.js-sidebar-toggle i:visible');
+    const $gutterBtn = $('.js-sidebar-toggle');
+    const $collapseSvg = $gutterBtn.find('.js-sidebar-collapse');
 
     // Wait until listeners are set
     setTimeout(() => {
       // Only when sidebar is collapsed
-      if ($gutterIcon.is('.fa-angle-double-left')) {
-        $gutterIcon.closest('a').trigger('click', [true]);
+      if ($collapseSvg.length && !$collapseSvg.hasClass('hidden')) {
+        $gutterBtn.trigger('click', [true]);
       }
     }, 0);
   }

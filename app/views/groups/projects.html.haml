@@ -1,6 +1,7 @@
-- breadcrumb_title "Projects"
+- breadcrumb_title _("Projects")
+- page_title _("Projects")
 
-.card.prepend-top-default
+.card.gl-mt-3
   .card-header
     %strong= @group.name
     projects:
@@ -14,7 +15,7 @@
         .controls
           = link_to _('Members'), project_project_members_path(project), id: "edit_#{dom_id(project)}", class: "btn"
           = link_to _('Edit'), edit_project_path(project), id: "edit_#{dom_id(project)}", class: "btn"
-          = link_to _('Remove'), project, data: { confirm: remove_project_message(project)}, method: :delete, class: "btn btn-remove"
+          = link_to _('Delete'), project, data: { confirm: remove_project_message(project)}, method: :delete, class: "gl-button btn btn-danger"
 
         .stats
           %span.badge.badge-pill

@@ -3,11 +3,11 @@ import { throttle } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import {
   GlSprintf,
-  GlIcon,
   GlAlert,
   GlDropdown,
-  GlDropdownHeader,
+  GlDropdownSectionHeader,
   GlDropdownItem,
+  GlDropdownDivider,
   GlInfiniteScroll,
 } from '@gitlab/ui';
 
@@ -22,11 +22,11 @@ import { formatDate } from '../utils';
 export default {
   components: {
     GlSprintf,
-    GlIcon,
     GlAlert,
     GlDropdown,
-    GlDropdownHeader,
+    GlDropdownSectionHeader,
     GlDropdownItem,
+    GlDropdownDivider,
     GlInfiniteScroll,
     LogSimpleFilters,
     LogAdvancedFilters,
@@ -55,6 +55,10 @@ export default {
       type: String,
       required: true,
     },
+    clustersPath: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -63,7 +67,7 @@ export default {
     };
   },
   computed: {
-    ...mapState('environmentLogs', ['environments', 'timeRange', 'logs', 'pods']),
+    ...mapState('environmentLogs', ['environments', 'timeRange', 'logs', 'pods', 'managedApps']),
     ...mapGetters('environmentLogs', ['trace', 'showAdvancedFilters']),
 
     showLoader() {
@@ -85,13 +89,16 @@ export default {
     });
 
     this.fetchEnvironments(this.environmentsPath);
+    this.fetchManagedApps(this.clustersPath);
   },
   methods: {
     ...mapActions('environmentLogs', [
       'setInitData',
       'showEnvironment',
+      'showManagedApp',
       'fetchEnvironments',
-      'fetchLogs',
+      'fetchManagedApps',
+      'refreshPodLogs',
       'fetchMoreLogsPrepend',
       'dismissRequestEnvironmentsError',
       'dismissInvalidTimeRangeWarning',
@@ -100,6 +107,9 @@ export default {
 
     isCurrentEnvironment(envName) {
       return envName === this.environments.current;
+    },
+    isCurrentManagedApp(appName) {
+      return appName === this.managedApps.current;
     },
     topReached() {
       if (!this.logs.isLoading) {
@@ -164,25 +174,34 @@ export default {
       <div class="flex-grow-0">
         <gl-dropdown
           id="environments-dropdown"
-          :text="environments.current"
+          :text="environments.current || managedApps.current"
           :disabled="environments.isLoading"
-          class="mb-2 gl-h-32 pr-2 d-flex d-md-block js-environments-dropdown"
+          class="gl-mr-3 gl-mb-3 gl-display-flex gl-display-md-block js-environments-dropdown"
         >
-          <gl-dropdown-header class="text-center">
-            {{ s__('Environments|Select environment') }}
-          </gl-dropdown-header>
+          <gl-dropdown-section-header>
+            {{ s__('Environments|Environments') }}
+          </gl-dropdown-section-header>
           <gl-dropdown-item
             v-for="env in environments.options"
             :key="env.id"
+            :is-check-item="true"
+            :is-checked="isCurrentEnvironment(env.name)"
             @click="showEnvironment(env.name)"
           >
-            <div class="d-flex">
-              <gl-icon
-                :class="{ invisible: !isCurrentEnvironment(env.name) }"
-                name="status_success_borderless"
-              />
-              <div class="flex-grow-1">{{ env.name }}</div>
-            </div>
+            {{ env.name }}
+          </gl-dropdown-item>
+          <gl-dropdown-divider />
+          <gl-dropdown-section-header>
+            {{ s__('Environments|Managed apps') }}
+          </gl-dropdown-section-header>
+          <gl-dropdown-item
+            v-for="app in managedApps.options"
+            :key="app.id"
+            :is-check-item="true"
+            :is-checked="isCurrentManagedApp(app.name)"
+            @click="showManagedApp(app.name)"
+          >
+            {{ app.name }}
           </gl-dropdown-item>
         </gl-dropdown>
       </div>
@@ -202,9 +221,9 @@ export default {
 
       <log-control-buttons
         ref="scrollButtons"
-        class="flex-grow-0 pr-2 mb-2 controllers"
+        class="flex-grow-0 pr-2 mb-2 controllers gl-display-inline-flex"
         :scroll-down-button-disabled="scrollDownButtonDisabled"
-        @refresh="fetchLogs()"
+        @refresh="refreshPodLogs()"
         @scrollDown="scrollDown"
       />
     </div>

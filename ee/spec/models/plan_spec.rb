@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Plan do
+RSpec.describe Plan do
   describe '#paid?' do
     subject { plan.paid? }
 
@@ -21,5 +21,11 @@ describe Plan do
         it { is_expected.to be_truthy }
       end
     end
+  end
+
+  describe '::PLANS_ELIGIBLE_FOR_TRIAL' do
+    subject { ::Plan::PLANS_ELIGIBLE_FOR_TRIAL }
+
+    it { is_expected.to eq(%w[default free]) }
   end
 end

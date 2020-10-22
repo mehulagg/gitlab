@@ -1,6 +1,7 @@
 /* eslint-disable func-names, no-param-reassign, operator-assignment, consistent-return */
 import $ from 'jquery';
 import { insertText } from '~/lib/utils/common_utils';
+import Shortcuts from '~/behaviors/shortcuts/shortcuts';
 
 const LINK_TAG_PATTERN = '[{text}](url)';
 
@@ -27,18 +28,32 @@ function lineAfter(text, textarea) {
     .split('\n')[0];
 }
 
+function convertMonacoSelectionToAceFormat(sel) {
+  return {
+    start: {
+      row: sel.startLineNumber,
+      column: sel.startColumn,
+    },
+    end: {
+      row: sel.endLineNumber,
+      column: sel.endColumn,
+    },
+  };
+}
+
+function getEditorSelectionRange(editor) {
+  return convertMonacoSelectionToAceFormat(editor.getSelection());
+}
+
 function editorBlockTagText(text, blockTag, selected, editor) {
   const lines = text.split('\n');
-  const selectionRange = editor.getSelectionRange();
+  const selectionRange = getEditorSelectionRange(editor);
   const shouldRemoveBlock =
     lines[selectionRange.start.row - 1] === blockTag &&
     lines[selectionRange.end.row + 1] === blockTag;
 
   if (shouldRemoveBlock) {
     if (blockTag !== null) {
-      // ace is globally defined
-      // eslint-disable-next-line no-undef
-      const { Range } = ace.require('ace/range');
       const lastLine = lines[selectionRange.end.row + 1];
       const rangeWithBlockTags = new Range(
         lines[selectionRange.start.row - 1],
@@ -90,8 +105,7 @@ function moveCursor({
       const endPosition = startPosition + select.length;
       return textArea.setSelectionRange(startPosition, endPosition);
     } else if (editor) {
-      editor.navigateLeft(tag.length - tag.indexOf(select));
-      editor.getSelection().selectAWord();
+      editor.selectWithinSelection(select, tag);
       return;
     }
   }
@@ -115,7 +129,7 @@ function moveCursor({
     }
   } else if (editor && editorSelectionStart.row === editorSelectionEnd.row) {
     if (positionBetweenTags) {
-      editor.navigateLeft(tag.length);
+      editor.moveCursor(tag.length * -1);
     }
   }
 }
@@ -138,9 +152,10 @@ export function insertMarkdownText({
   let editorSelectionEnd;
   let lastNewLine;
   let textToInsert;
+  selected = selected.toString();
 
   if (editor) {
-    const selectionRange = editor.getSelectionRange();
+    const selectionRange = getEditorSelectionRange(editor);
 
     editorSelectionStart = selectionRange.start;
     editorSelectionEnd = selectionRange.end;
@@ -225,7 +240,7 @@ export function insertMarkdownText({
   } else if (tag.indexOf(textPlaceholder) > -1) {
     textToInsert = tag.replace(textPlaceholder, selected);
   } else {
-    textToInsert = String(startChar) + tag + selected + (wrap ? tag : ' ');
+    textToInsert = String(startChar) + tag + selected + (wrap ? tag : '');
   }
 
   if (removedFirstNewLine) {
@@ -237,7 +252,7 @@ export function insertMarkdownText({
   }
 
   if (editor) {
-    editor.insert(textToInsert);
+    editor.replaceSelectedText(textToInsert, select);
   } else {
     insertText(textArea, textToInsert);
   }
@@ -272,21 +287,67 @@ function updateText({ textArea, tag, cursorOffset, blockTag, wrap, select, tagCo
   });
 }
 
+/* eslint-disable @gitlab/require-i18n-strings */
+export function keypressNoteText(e) {
+  if (this.selectionStart === this.selectionEnd) {
+    return;
+  }
+  const keys = {
+    '*': '**{text}**', // wraps with bold character
+    _: '_{text}_', // wraps with italic character
+    '`': '`{text}`', // wraps with inline character
+    "'": "'{text}'", // single quotes
+    '"': '"{text}"', // double quotes
+    '[': '[{text}]', // brackets
+    '{': '{{text}}', // braces
+    '(': '({text})', // parentheses
+    '<': '<{text}>', // angle brackets
+  };
+  const tag = keys[e.key];
+
+  if (tag) {
+    e.preventDefault();
+
+    updateText({
+      tag,
+      textArea: this,
+      blockTag: '',
+      wrap: true,
+      select: '',
+      tagContent: '',
+    });
+  }
+}
+/* eslint-enable @gitlab/require-i18n-strings */
+
+export function updateTextForToolbarBtn($toolbarBtn) {
+  return updateText({
+    textArea: $toolbarBtn.closest('.md-area').find('textarea'),
+    tag: $toolbarBtn.data('mdTag'),
+    cursorOffset: $toolbarBtn.data('mdCursorOffset'),
+    blockTag: $toolbarBtn.data('mdBlock'),
+    wrap: !$toolbarBtn.data('mdPrepend'),
+    select: $toolbarBtn.data('mdSelect'),
+    tagContent: $toolbarBtn.data('mdTagContent'),
+  });
+}
+
 export function addMarkdownListeners(form) {
-  return $('.js-md', form)
+  $('.markdown-area', form)
+    .on('keydown', keypressNoteText)
+    .each(function attachTextareaShortcutHandlers() {
+      Shortcuts.initMarkdownEditorShortcuts($(this), updateTextForToolbarBtn);
+    });
+
+  const $allToolbarBtns = $('.js-md', form)
     .off('click')
     .on('click', function() {
-      const $this = $(this);
-      return updateText({
-        textArea: $this.closest('.md-area').find('textarea'),
-        tag: $this.data('mdTag'),
-        cursorOffset: $this.data('mdCursorOffset'),
-        blockTag: $this.data('mdBlock'),
-        wrap: !$this.data('mdPrepend'),
-        select: $this.data('mdSelect'),
-        tagContent: $this.data('mdTagContent'),
-      });
+      const $toolbarBtn = $(this);
+
+      return updateTextForToolbarBtn($toolbarBtn);
     });
+
+  return $allToolbarBtns;
 }
 
 export function addEditorMarkdownListeners(editor) {
@@ -309,5 +370,11 @@ export function addEditorMarkdownListeners(editor) {
 }
 
 export function removeMarkdownListeners(form) {
+  $('.markdown-area', form)
+    .off('keydown', keypressNoteText)
+    .each(function removeTextareaShortcutHandlers() {
+      Shortcuts.removeMarkdownEditorShortcuts($(this));
+    });
+
   return $('.js-md', form).off('click');
 }

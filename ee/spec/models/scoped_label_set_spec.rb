@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ScopedLabelSet do
+RSpec.describe ScopedLabelSet do
   let_it_be(:kv_label1) { create(:label, title: 'key::label1') }
   let_it_be(:kv_label2) { create(:label, title: 'key::label2') }
   let_it_be(:kv_label3) { create(:label, title: 'key::label3') }

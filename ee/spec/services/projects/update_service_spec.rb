@@ -2,30 +2,52 @@
 
 require 'spec_helper'
 
-describe Projects::UpdateService, '#execute' do
+RSpec.describe Projects::UpdateService, '#execute' do
   include EE::GeoHelpers
 
   let(:user) { create(:user) }
+  let(:admin) { create(:user, :admin) }
   let(:project) { create(:project, :repository, creator: user, namespace: user.namespace) }
 
   context 'repository mirror' do
-    let!(:opts) do
-      {
-      }
-    end
+    let(:opts) { { mirror: true, import_url: 'http://foo.com' } }
 
     before do
       stub_licensed_features(repository_mirrors: true)
     end
 
-    it 'forces an import job' do
-      opts = {
-        import_url: 'http://foo.com',
-        mirror: true,
-        mirror_user_id: user.id,
-        mirror_trigger_builds: true
-      }
+    it 'sets mirror attributes' do
+      result = update_project(project, user, opts)
 
+      expect(result).to eq(status: :success)
+      expect(project).to have_attributes(opts)
+      expect(project.mirror_user).to eq(user)
+    end
+
+    it 'does not touch mirror_user_id for non-mirror changes' do
+      result = update_project(project, user, description: 'anything')
+
+      expect(result).to eq(status: :success)
+      expect(project.mirror_user).to be_nil
+    end
+
+    it 'forbids non-admins from setting mirror_user_id explicitly' do
+      project.team.add_maintainer(admin)
+      result = update_project(project, user, opts.merge(mirror_user_id: admin.id))
+
+      expect(result).to eq(status: :error, message: 'Mirror user is invalid')
+      expect(project.mirror_user).to be_nil
+    end
+
+    it 'allows admins to set mirror_user_id' do
+      project.team.add_maintainer(admin)
+      result = update_project(project, admin, opts.merge(mirror_user_id: user.id))
+
+      expect(result).to eq(status: :success)
+      expect(project.mirror_user).to eq(user)
+    end
+
+    it 'forces an import job' do
       expect_any_instance_of(EE::ProjectImportState).to receive(:force_import_job!).once
 
       update_project(project, user, opts)
@@ -91,6 +113,7 @@ describe Projects::UpdateService, '#execute' do
         let(:operation) do
           update_project(project, user, visibility_level: Gitlab::VisibilityLevel::INTERNAL)
         end
+
         let(:fail_condition!) do
           allow_any_instance_of(Project).to receive(:update).and_return(false)
         end
@@ -119,7 +142,7 @@ describe Projects::UpdateService, '#execute' do
 
       context 'when enabling a wiki' do
         it 'creates a RepositoryUpdatedEvent' do
-          project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+          project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
           project.reload
 
           expect do
@@ -134,7 +157,7 @@ describe Projects::UpdateService, '#execute' do
       context 'when we update project but not enabling a wiki' do
         context 'when the wiki is disabled' do
           it 'does not create a RepositoryUpdatedEvent' do
-            project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+            project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
 
             expect do
               result = update_project(project, user, { name: 'test1' })
@@ -147,7 +170,7 @@ describe Projects::UpdateService, '#execute' do
 
         context 'when the wiki was already enabled' do
           it 'does not create a RepositoryUpdatedEvent' do
-            project.project_feature.update(wiki_access_level: ProjectFeature::ENABLED)
+            project.project_feature.update!(wiki_access_level: ProjectFeature::ENABLED)
 
             expect do
               result = update_project(project, user, { name: 'test1' })
@@ -166,7 +189,7 @@ describe Projects::UpdateService, '#execute' do
       end
 
       it 'does not create a RepositoryUpdatedEvent when enabling a wiki' do
-        project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+        project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
         project.reload
 
         expect do
@@ -207,7 +230,7 @@ describe Projects::UpdateService, '#execute' do
   context 'when there are merge requests in merge train' do
     before do
       stub_licensed_features(merge_pipelines: true, merge_trains: true)
-      project.update(merge_pipelines_enabled: true)
+      project.update!(merge_pipelines_enabled: true)
     end
 
     let!(:first_merge_request) do

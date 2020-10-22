@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::AuditEvents::BulkInsertService do
+RSpec.describe EE::AuditEvents::BulkInsertService do
   let(:user) { create(:user) }
   let(:entity) { create(:project) }
   let(:entity_type) { 'Project' }
@@ -14,15 +14,14 @@ describe EE::AuditEvents::BulkInsertService do
       EE::AuditEvents::RepositoryPushAuditEventService.new(user, entity, target_ref, from, to)
     end
   end
-  let(:timestamp) { Time.new(2019, 10, 10) }
+
+  let(:timestamp) { Time.zone.local(2019, 10, 10) }
   let(:attrs) do
     {
       author_id: user.id,
       entity_id: entity.id,
       entity_type: entity_type,
-      type: 'SecurityEvent',
       created_at: timestamp,
-      updated_at: timestamp,
       details: {
         updated_ref: 'master',
         author_name: user.name,
@@ -37,11 +36,11 @@ describe EE::AuditEvents::BulkInsertService do
 
   describe '#execute' do
     it 'persists audit events' do
-      Timecop.freeze(timestamp) { service.execute }
+      travel_to(timestamp) { service.execute }
 
-      events_attributes = SecurityEvent.all.map { |event| event.attributes.deep_symbolize_keys }
+      events_attributes = AuditEvent.all.map { |event| event.attributes.deep_symbolize_keys }
 
-      expect(SecurityEvent.count).to eq(3)
+      expect(AuditEvent.count).to eq(3)
       expect(events_attributes).to all(include(attrs))
     end
 

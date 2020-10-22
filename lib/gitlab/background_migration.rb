@@ -9,7 +9,7 @@ module Gitlab
     # Begins stealing jobs from the background migrations queue, blocking the
     # caller until all jobs have been completed.
     #
-    # When a migration raises a StandardError is is going to be retries up to
+    # When a migration raises a StandardError it is going to retry up to
     # three times, for example, to recover from a deadlock.
     #
     # When Exception is being raised, it enqueues the migration again, and
@@ -33,6 +33,7 @@ module Gitlab
 
           next unless job.queue == self.queue
           next unless migration_class == steal_class
+          next if block_given? && !(yield migration_args)
 
           begin
             perform(migration_class, migration_args) if job.delete

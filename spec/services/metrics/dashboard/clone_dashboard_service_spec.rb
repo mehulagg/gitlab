@@ -2,10 +2,8 @@
 
 require 'spec_helper'
 
-describe Metrics::Dashboard::CloneDashboardService, :use_clean_rails_memory_store_caching do
+RSpec.describe Metrics::Dashboard::CloneDashboardService, :use_clean_rails_memory_store_caching do
   include MetricsDashboardHelpers
-
-  STAGES = ::Gitlab::Metrics::Dashboard::Stages
 
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :repository) }
@@ -83,7 +81,20 @@ describe Metrics::Dashboard::CloneDashboardService, :use_clean_rails_memory_stor
           allow(::Gitlab::Metrics::Dashboard::Processor).to receive(:new).and_return(double(process: file_content_hash))
         end
 
-        it_behaves_like 'valid dashboard cloning process', ::Metrics::Dashboard::SystemDashboardService::DASHBOARD_PATH, [STAGES::CommonMetricsInserter, STAGES::CustomMetricsInserter, STAGES::Sorter]
+        it_behaves_like 'valid dashboard cloning process', ::Metrics::Dashboard::SystemDashboardService::DASHBOARD_PATH,
+                        [
+                          ::Gitlab::Metrics::Dashboard::Stages::CommonMetricsInserter,
+                          ::Gitlab::Metrics::Dashboard::Stages::CustomMetricsInserter
+                        ]
+
+        it_behaves_like 'valid dashboard cloning process', ::Metrics::Dashboard::ClusterDashboardService::DASHBOARD_PATH,
+                        [
+                          ::Gitlab::Metrics::Dashboard::Stages::CommonMetricsInserter
+                        ]
+
+        it_behaves_like 'valid dashboard cloning process',
+          ::Metrics::Dashboard::SelfMonitoringDashboardService::DASHBOARD_PATH,
+          [::Gitlab::Metrics::Dashboard::Stages::CustomMetricsInserter]
 
         context 'selected branch already exists' do
           let(:branch) { 'existing_branch' }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::LoadBalancing::RackMiddleware, :redis do
+RSpec.describe Gitlab::Database::LoadBalancing::RackMiddleware, :redis do
   let(:app) { double(:app) }
   let(:middleware) { described_class.new(app) }
 

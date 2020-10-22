@@ -8,23 +8,23 @@ module Gitlab
 
         MAX_RESULTS = 500
 
-        def initialize(stage:, query:)
+        def initialize(stage:, params:, query:)
           @stage = stage
+          @params = params
           @query = query
         end
 
         # rubocop: disable CodeReuse/ActiveRecord
         def load
-          query
+          order_by_end_event(query)
             .select(round_duration_to_seconds.as('duration_in_seconds'), stage.end_event.timestamp_projection.as('finished_at'))
-            .reorder(stage.end_event.timestamp_projection.desc)
             .limit(MAX_RESULTS)
         end
         # rubocop: enable CodeReuse/ActiveRecord
 
         private
 
-        attr_reader :stage, :query
+        attr_reader :stage, :query, :params
       end
     end
   end

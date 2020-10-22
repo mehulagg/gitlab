@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EpicIssuePresenter do
+RSpec.describe EpicIssuePresenter do
   include Gitlab::Routing.url_helpers
 
   let(:user)         { create(:user) }

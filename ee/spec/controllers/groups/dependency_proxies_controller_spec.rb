@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::DependencyProxiesController do
+RSpec.describe Groups::DependencyProxiesController do
   let(:group) { create(:group) }
   let(:user)  { create(:user) }
 

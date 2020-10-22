@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import component from 'ee/vue_shared/security_reports/components/dismiss_button.vue';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
+import { GlButton } from '@gitlab/ui';
 
 describe('DismissalButton', () => {
   let wrapper;
@@ -22,7 +22,7 @@ describe('DismissalButton', () => {
     });
 
     it('should emit dismiss vulnerabilty when clicked', () => {
-      wrapper.find(LoadingButton).trigger('click');
+      wrapper.find(GlButton).trigger('click');
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.emitted().dismissVulnerability).toBeTruthy();
       });
@@ -53,7 +53,7 @@ describe('DismissalButton', () => {
     });
 
     it('should emit revertDismissVulnerabilty when clicked', () => {
-      wrapper.find(LoadingButton).trigger('click');
+      wrapper.find(GlButton).trigger('click');
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.emitted().revertDismissVulnerability).toBeTruthy();
       });

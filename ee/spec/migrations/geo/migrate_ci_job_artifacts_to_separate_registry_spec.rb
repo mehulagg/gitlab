@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('ee', 'db', 'geo', 'migrate', '20180322062741_migrate_ci_job_artifacts_to_separate_registry.rb')
+require_migration!
 
-describe MigrateCiJobArtifactsToSeparateRegistry, :geo do
+RSpec.describe MigrateCiJobArtifactsToSeparateRegistry, :geo do
   let(:file_registry) { table(:file_registry) }
   let(:job_artifact_registry) { table(:job_artifact_registry) }
 

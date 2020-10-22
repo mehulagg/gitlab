@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Gitlab::Auth::GroupSaml::MembershipEnforcer do
+RSpec.describe Gitlab::Auth::GroupSaml::MembershipEnforcer do
   let(:user) { create(:user) }
   let(:identity) { create(:group_saml_identity, user: user) }
   let(:group) { identity.saml_provider.group }

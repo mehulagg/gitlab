@@ -1,10 +1,9 @@
 import Vue from 'vue';
 import { shallowMount } from '@vue/test-utils';
 
+import { mockMilestone } from 'jest/boards/mock_data';
+import { GlIcon } from '@gitlab/ui';
 import IssueMilestone from '~/vue_shared/components/issue/issue_milestone.vue';
-import Icon from '~/vue_shared/components/icon.vue';
-
-import { mockMilestone } from '../../../../javascripts/boards/mock_data';
 
 const createComponent = (milestone = mockMilestone) => {
   const Component = Vue.extend(IssueMilestone);
@@ -36,9 +35,7 @@ describe('IssueMilestoneComponent', () => {
     describe('isMilestoneStarted', () => {
       it('should return `false` when milestoneStart prop is not defined', () => {
         wrapper.setProps({
-          milestone: Object.assign({}, mockMilestone, {
-            start_date: '',
-          }),
+          milestone: { ...mockMilestone, start_date: '' },
         });
 
         expect(wrapper.vm.isMilestoneStarted).toBe(false);
@@ -46,9 +43,7 @@ describe('IssueMilestoneComponent', () => {
 
       it('should return `true` when milestone start date is past current date', () => {
         wrapper.setProps({
-          milestone: Object.assign({}, mockMilestone, {
-            start_date: '1990-07-22',
-          }),
+          milestone: { ...mockMilestone, start_date: '1990-07-22' },
         });
 
         expect(wrapper.vm.isMilestoneStarted).toBe(true);
@@ -58,9 +53,7 @@ describe('IssueMilestoneComponent', () => {
     describe('isMilestonePastDue', () => {
       it('should return `false` when milestoneDue prop is not defined', () => {
         wrapper.setProps({
-          milestone: Object.assign({}, mockMilestone, {
-            due_date: '',
-          }),
+          milestone: { ...mockMilestone, due_date: '' },
         });
 
         expect(wrapper.vm.isMilestonePastDue).toBe(false);
@@ -68,9 +61,7 @@ describe('IssueMilestoneComponent', () => {
 
       it('should return `true` when milestone due is past current date', () => {
         wrapper.setProps({
-          milestone: Object.assign({}, mockMilestone, {
-            due_date: '1990-07-22',
-          }),
+          milestone: { ...mockMilestone, due_date: '1990-07-22' },
         });
 
         expect(wrapper.vm.isMilestonePastDue).toBe(true);
@@ -84,9 +75,7 @@ describe('IssueMilestoneComponent', () => {
 
       it('returns string containing absolute milestone start date when due date is not present', () => {
         wrapper.setProps({
-          milestone: Object.assign({}, mockMilestone, {
-            due_date: '',
-          }),
+          milestone: { ...mockMilestone, due_date: '' },
         });
 
         expect(wrapper.vm.milestoneDatesAbsolute).toBe('(January 1, 2018)');
@@ -94,10 +83,7 @@ describe('IssueMilestoneComponent', () => {
 
       it('returns empty string when both milestone start and due dates are not present', () => {
         wrapper.setProps({
-          milestone: Object.assign({}, mockMilestone, {
-            start_date: '',
-            due_date: '',
-          }),
+          milestone: { ...mockMilestone, start_date: '', due_date: '' },
         });
 
         expect(wrapper.vm.milestoneDatesAbsolute).toBe('');
@@ -107,9 +93,7 @@ describe('IssueMilestoneComponent', () => {
     describe('milestoneDatesHuman', () => {
       it('returns string containing milestone due date when date is yet to be due', () => {
         wrapper.setProps({
-          milestone: Object.assign({}, mockMilestone, {
-            due_date: `${new Date().getFullYear() + 10}-01-01`,
-          }),
+          milestone: { ...mockMilestone, due_date: `${new Date().getFullYear() + 10}-01-01` },
         });
 
         expect(wrapper.vm.milestoneDatesHuman).toContain('years remaining');
@@ -117,10 +101,7 @@ describe('IssueMilestoneComponent', () => {
 
       it('returns string containing milestone start date when date has already started and due date is not present', () => {
         wrapper.setProps({
-          milestone: Object.assign({}, mockMilestone, {
-            start_date: '1990-07-22',
-            due_date: '',
-          }),
+          milestone: { ...mockMilestone, start_date: '1990-07-22', due_date: '' },
         });
 
         expect(wrapper.vm.milestoneDatesHuman).toContain('Started');
@@ -128,10 +109,11 @@ describe('IssueMilestoneComponent', () => {
 
       it('returns string containing milestone start date when date is yet to start and due date is not present', () => {
         wrapper.setProps({
-          milestone: Object.assign({}, mockMilestone, {
+          milestone: {
+            ...mockMilestone,
             start_date: `${new Date().getFullYear() + 10}-01-01`,
             due_date: '',
-          }),
+          },
         });
 
         expect(wrapper.vm.milestoneDatesHuman).toContain('Starts');
@@ -139,10 +121,7 @@ describe('IssueMilestoneComponent', () => {
 
       it('returns empty string when milestone start and due dates are not present', () => {
         wrapper.setProps({
-          milestone: Object.assign({}, mockMilestone, {
-            start_date: '',
-            due_date: '',
-          }),
+          milestone: { ...mockMilestone, start_date: '', due_date: '' },
         });
 
         expect(wrapper.vm.milestoneDatesHuman).toBe('');
@@ -156,7 +135,7 @@ describe('IssueMilestoneComponent', () => {
     });
 
     it('renders milestone icon', () => {
-      expect(wrapper.find(Icon).props('name')).toBe('clock');
+      expect(wrapper.find(GlIcon).props('name')).toBe('clock');
     });
 
     it('renders milestone title', () => {

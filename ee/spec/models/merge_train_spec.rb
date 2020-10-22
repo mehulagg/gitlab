@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe MergeTrain do
+RSpec.describe MergeTrain do
   include ProjectForksHelper
 
   let_it_be(:project) { create(:project, :repository) }

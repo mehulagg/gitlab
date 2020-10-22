@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Mutations::Todos::MarkAllDone do
+RSpec.describe Mutations::Todos::MarkAllDone do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
@@ -17,9 +17,11 @@ describe Mutations::Todos::MarkAllDone do
 
   let_it_be(:user3) { create(:user) }
 
+  specify { expect(described_class).to require_graphql_authorizations(:update_user) }
+
   describe '#resolve' do
     it 'marks all pending todos as done' do
-      updated_todo_ids = mutation_for(current_user).resolve.dig(:updated_ids)
+      updated_todo_ids, todos = mutation_for(current_user).resolve.values_at(:updated_ids, :todos)
 
       expect(todo1.reload.state).to eq('done')
       expect(todo2.reload.state).to eq('done')
@@ -27,6 +29,7 @@ describe Mutations::Todos::MarkAllDone do
       expect(other_user_todo.reload.state).to eq('pending')
 
       expect(updated_todo_ids).to contain_exactly(global_id_of(todo1), global_id_of(todo3))
+      expect(todos).to contain_exactly(todo1, todo3)
     end
 
     it 'behaves as expected if there are no todos for the requesting user' do

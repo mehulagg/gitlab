@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AdjournedGroupDeletionWorker do
+RSpec.describe AdjournedGroupDeletionWorker do
   describe "#perform" do
     subject(:worker) { described_class.new }
 
@@ -39,6 +39,17 @@ describe AdjournedGroupDeletionWorker do
 
     it 'does not schedule to delete a group that is marked for deletion after the specified `deletion_adjourned_period`' do
       expect(GroupDestroyWorker).not_to receive(:perform_in).with(0, group_marked_for_deletion_for_later.id, user.id)
+
+      worker.perform
+    end
+
+    it 'schedules groups 10 seconds apart' do
+      group_marked_for_deletion_2 = create(:group_with_deletion_schedule,
+                                            marked_for_deletion_on: 14.days.ago,
+                                            deleting_user: user)
+
+      expect(GroupDestroyWorker).to receive(:perform_in).with(0, group_marked_for_deletion.id, user.id)
+      expect(GroupDestroyWorker).to receive(:perform_in).with(10, group_marked_for_deletion_2.id, user.id)
 
       worker.perform
     end

@@ -7,7 +7,7 @@ module Gitlab
         include QueryAdditionalMetrics
 
         def query
-          AdditionalMetricsParser.load_groups_from_yaml('cluster_metrics.yml')
+          AdditionalMetricsParser.load_groups_from_yaml('queries_cluster_metrics.yml')
             .map(&query_group(base_query_context(8.hours.ago, Time.now)))
         end
       end

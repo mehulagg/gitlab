@@ -99,7 +99,16 @@ module QA
       def find_element(name, **kwargs)
         wait_for_requests
 
-        find(element_selector_css(name), kwargs)
+        element_selector = element_selector_css(name, reject_capybara_query_keywords(kwargs))
+        find(element_selector, only_capybara_query_keywords(kwargs))
+      end
+
+      def only_capybara_query_keywords(kwargs)
+        kwargs.select { |kwarg| Capybara::Queries::SelectorQuery::VALID_KEYS.include?(kwarg) }
+      end
+
+      def reject_capybara_query_keywords(kwargs)
+        kwargs.reject { |kwarg| Capybara::Queries::SelectorQuery::VALID_KEYS.include?(kwarg) }
       end
 
       def active_element?(name)
@@ -132,9 +141,23 @@ module QA
         end
       end
 
+      # Use this to simulate moving the pointer to an element's coordinate
+      # and sending a click event.
+      # This is a helpful workaround when there is a transparent element overlapping
+      # the target element and so, normal `click_element` on target would raise
+      # Selenium::WebDriver::Error::ElementClickInterceptedError
+      def click_element_coordinates(name)
+        page.driver.browser.action.move_to(find_element(name).native).click.perform
+      end
+
       # replace with (..., page = self.class)
-      def click_element(name, page = nil, text: nil, wait: Capybara.default_max_wait_time)
-        find_element(name, text: text, wait: wait).click
+      def click_element(name, page = nil, **kwargs)
+        wait_for_requests
+
+        wait = kwargs.delete(:wait) || Capybara.default_max_wait_time
+        text = kwargs.delete(:text)
+
+        find(element_selector_css(name, kwargs), text: text, wait: wait).click
         page.validate_elements_present! if page
       end
 
@@ -155,13 +178,19 @@ module QA
       end
 
       def has_element?(name, **kwargs)
-        wait_for_requests
+        wait_for_requests(skip_finished_loading_check: !!kwargs.delete(:skip_finished_loading_check))
 
-        wait = kwargs.delete(:wait) || Capybara.default_max_wait_time
-        text = kwargs.delete(:text)
-        klass = kwargs.delete(:class)
+        disabled = kwargs.delete(:disabled)
 
-        has_css?(element_selector_css(name, kwargs), text: text, wait: wait, class: klass)
+        if disabled.nil?
+          wait = kwargs.delete(:wait) || Capybara.default_max_wait_time
+          text = kwargs.delete(:text)
+          klass = kwargs.delete(:class)
+
+          has_css?(element_selector_css(name, kwargs), text: text, wait: wait, class: klass)
+        else
+          find_element(name, kwargs).disabled? == disabled
+        end
       end
 
       def has_no_element?(name, **kwargs)
@@ -187,15 +216,6 @@ module QA
 
       def has_normalized_ws_text?(text, wait: Capybara.default_max_wait_time)
         has_text?(text.gsub(/\s+/, " "), wait: wait)
-      end
-
-      def finished_loading?
-        wait_for_requests
-
-        # The number of selectors should be able to be reduced after
-        # migration to the new spinner is complete.
-        # https://gitlab.com/groups/gitlab-org/-/epics/956
-        has_no_css?('.gl-spinner, .fa-spinner, .spinner', wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
       end
 
       def finished_loading_block?

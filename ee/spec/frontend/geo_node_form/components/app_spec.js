@@ -1,7 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
+import { GlDeprecatedBadge as GlBadge } from '@gitlab/ui';
 import GeoNodeFormApp from 'ee/geo_node_form/components/app.vue';
 import GeoNodeForm from 'ee/geo_node_form/components/geo_node_form.vue';
-import { MOCK_SELECTIVE_SYNC_TYPES, MOCK_SYNC_SHARDS, MOCK_NODE } from '../mock_data';
+import { MOCK_SELECTIVE_SYNC_TYPES, MOCK_SYNC_SHARDS } from '../mock_data';
 
 describe('GeoNodeFormApp', () => {
   let wrapper;
@@ -22,7 +23,8 @@ describe('GeoNodeFormApp', () => {
     wrapper.destroy();
   });
 
-  const findGeoNodeFormTitle = () => wrapper.find('.page-title');
+  const findGeoNodeFormTitle = () => wrapper.find('h2');
+  const findGeoNodeFormBadge = () => wrapper.find(GlBadge);
   const findGeoForm = () => wrapper.find(GeoNodeForm);
 
   describe('render', () => {
@@ -30,35 +32,34 @@ describe('GeoNodeFormApp', () => {
       createComponent();
     });
 
-    it('the Geo Node Form Title', () => {
-      expect(findGeoNodeFormTitle().exists()).toBe(true);
+    describe.each`
+      formType                     | node                  | title              | pillTitle      | variant
+      ${'create a secondary node'} | ${null}               | ${'Add New Node'}  | ${'Secondary'} | ${'light'}
+      ${'update a secondary node'} | ${{ primary: false }} | ${'Edit Geo Node'} | ${'Secondary'} | ${'light'}
+      ${'update a primary node'}   | ${{ primary: true }}  | ${'Edit Geo Node'} | ${'Primary'}   | ${'primary'}
+    `(`form header`, ({ formType, node, title, pillTitle, variant }) => {
+      describe(`when node form is to ${formType}`, () => {
+        beforeEach(() => {
+          propsData.node = node;
+          createComponent();
+        });
+
+        it(`sets the node form title to ${title}`, () => {
+          expect(findGeoNodeFormTitle().text()).toBe(title);
+        });
+
+        it(`sets the node form pill title to ${pillTitle}`, () => {
+          expect(findGeoNodeFormBadge().text()).toBe(pillTitle);
+        });
+
+        it(`sets the node form pill variant to be ${variant}`, () => {
+          expect(findGeoNodeFormBadge().attributes('variant')).toBe(variant);
+        });
+      });
     });
 
     it('the Geo Node Form', () => {
       expect(findGeoForm().exists()).toBe(true);
-    });
-  });
-
-  describe('Geo Node Form Title', () => {
-    describe('when props.node is undefined', () => {
-      beforeEach(() => {
-        createComponent();
-      });
-
-      it('sets title to `New Geo Node`', () => {
-        expect(findGeoNodeFormTitle().text()).toBe('New Geo Node');
-      });
-    });
-
-    describe('when props.node is set', () => {
-      beforeEach(() => {
-        propsData.node = MOCK_NODE;
-        createComponent();
-      });
-
-      it('sets title to `Edit Geo Node`', () => {
-        expect(findGeoNodeFormTitle().text()).toBe('Edit Geo Node');
-      });
     });
   });
 });

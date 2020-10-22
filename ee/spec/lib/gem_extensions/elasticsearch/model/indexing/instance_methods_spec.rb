@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GemExtensions::Elasticsearch::Model::Indexing::InstanceMethods do
+RSpec.describe GemExtensions::Elasticsearch::Model::Indexing::InstanceMethods do
   describe '#index_document' do
     let(:project) { Project.new(id: 1) }
 

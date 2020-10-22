@@ -295,7 +295,7 @@ graph RL
 
 - **DOM**:
   Testing on the real DOM ensures your components work in the intended environment.
-  Part of DOM testing is delegated to [cross-browser testing](https://gitlab.com/gitlab-org/quality/team-tasks/issues/45).
+  Part of DOM testing is delegated to [cross-browser testing](https://gitlab.com/gitlab-org/quality/team-tasks/-/issues/45).
 - **Properties or state of components**:
   On this level, all tests can only perform actions a user would do.
   For example: to change the state of a component, a click event would be fired.
@@ -366,7 +366,7 @@ See also:
 
 - The [RSpec testing guidelines](../testing_guide/best_practices.md#rspec).
 - System / Feature tests in the [Testing Best Practices](best_practices.md#system--feature-tests).
-- [Issue #26159](https://gitlab.com/gitlab-org/gitlab/issues/26159) which aims at combining those guidelines with this page.
+- [Issue #26159](https://gitlab.com/gitlab-org/gitlab/-/issues/26159) which aims at combining those guidelines with this page.
 
 ```mermaid
 graph RL
@@ -482,7 +482,7 @@ Every new feature should come with a [test plan](https://gitlab.com/gitlab-org/g
 
 | Tests path | Testing engine | Notes |
 | ---------- | -------------- | ----- |
-| `qa/qa/specs/features/` | [Capybara](https://github.com/teamcapybara/capybara) + [RSpec](https://github.com/rspec/rspec-rails#feature-specs) + Custom QA framework | Tests should be placed under their corresponding [Product category](https://about.gitlab.com/handbook/product/categories/) |
+| `qa/qa/specs/features/` | [Capybara](https://github.com/teamcapybara/capybara) + [RSpec](https://github.com/rspec/rspec-rails#feature-specs) + Custom QA framework | Tests should be placed under their corresponding [Product category](https://about.gitlab.com/handbook/product/product-categories/) |
 
 > See [end-to-end tests](end_to_end/index.md) for more information.
 

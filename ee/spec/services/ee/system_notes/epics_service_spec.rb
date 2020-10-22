@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::SystemNotes::EpicsService do
+RSpec.describe EE::SystemNotes::EpicsService do
   let_it_be(:group)   { create(:group) }
   let_it_be(:project) { create(:project, :repository, group: group) }
   let_it_be(:author)  { create(:user) }
@@ -73,7 +73,7 @@ describe EE::SystemNotes::EpicsService do
   end
 
   describe '#change_epic_date_note' do
-    let(:timestamp) { Time.now }
+    let(:timestamp) { Time.current }
 
     context 'when start date was changed' do
       let(:noteable) { create(:epic) }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ReturnToLocation do
+RSpec.describe Gitlab::ReturnToLocation do
   describe '#full_path' do
     it 'returns nil when location nil' do
       subject = described_class.new(nil)

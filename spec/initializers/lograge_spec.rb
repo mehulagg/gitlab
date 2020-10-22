@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'lograge', type: :request do
+RSpec.describe 'lograge', type: :request do
   let(:headers) { { 'X-Request-ID' => 'new-correlation-id' } }
 
   let(:large_params) do
@@ -99,7 +99,9 @@ describe 'lograge', type: :request do
   end
 
   context 'with a log subscriber' do
-    let(:subscriber) { Lograge::RequestLogSubscriber.new }
+    include_context 'parsed logs'
+
+    let(:subscriber) { Lograge::LogSubscribers::ActionController.new }
 
     let(:event) do
       ActiveSupport::Notifications::Event.new(
@@ -117,16 +119,6 @@ describe 'lograge', type: :request do
         db_runtime: 0.02,
         view_runtime: 0.01
       )
-    end
-
-    let(:log_output) { StringIO.new }
-    let(:logger) do
-      Logger.new(log_output).tap { |logger| logger.formatter = ->(_, _, _, msg) { msg } }
-    end
-    let(:log_data) { Gitlab::Json.parse(log_output.string) }
-
-    before do
-      Lograge.logger = logger
     end
 
     describe 'with an exception' do
@@ -158,6 +150,36 @@ describe 'lograge', type: :request do
         subscriber.process_action(event)
 
         expect(log_data['etag_route']).to eq(etag_route)
+      end
+    end
+
+    context 'with transaction' do
+      let(:transaction) { Gitlab::Metrics::WebTransaction.new({}) }
+
+      before do
+        allow(Gitlab::Metrics::Transaction).to receive(:current).and_return(transaction)
+      end
+
+      context 'when RequestStore is enabled', :request_store do
+        context 'with db payload' do
+          it 'includes db counters', :request_store do
+            ActiveRecord::Base.connection.execute('SELECT pg_sleep(0.1);')
+            subscriber.process_action(event)
+
+            expect(log_data).to include("db_count" => 1, "db_write_count" => 0, "db_cached_count" => 0)
+          end
+        end
+      end
+
+      context 'when RequestStore is disabled' do
+        context 'with db payload' do
+          it 'does not include db counters' do
+            ActiveRecord::Base.connection.execute('SELECT pg_sleep(0.1);')
+            subscriber.process_action(event)
+
+            expect(log_data).not_to include("db_count" => 1, "db_write_count" => 0, "db_cached_count" => 0)
+          end
+        end
       end
     end
   end

@@ -320,6 +320,20 @@ describe('Epic Store Mutations', () => {
     });
   });
 
+  describe('SET_EPIC_CREATE_CONFIDENTIAL', () => {
+    it('Should set `newEpicConfidential` prop on state as with the value of provided `newEpicConfidential` param', () => {
+      const state = {
+        newEpicConfidential: true,
+      };
+
+      mutations[types.SET_EPIC_CREATE_CONFIDENTIAL](state, {
+        newEpicConfidential: true,
+      });
+
+      expect(state.newEpicConfidential).toBe(true);
+    });
+  });
+
   describe('REQUEST_EPIC_CREATE', () => {
     it('Should set `epicCreateInProgress` flag on state as `true`', () => {
       const state = {
@@ -406,6 +420,20 @@ describe('Epic Store Mutations', () => {
       mutations[types.RECEIVE_EPIC_LABELS_SELECT_FAILURE](state);
 
       expect(state.epicLabelsSelectInProgress).toBe(false);
+    });
+  });
+
+  describe('SET_EPIC_CONFIDENTIAL', () => {
+    it('Should set `confidential` flag on state to `true`', () => {
+      const state = {
+        confidential: false,
+      };
+
+      const confidential = true;
+
+      mutations[types.SET_EPIC_CONFIDENTIAL](state, confidential);
+
+      expect(state.confidential).toBe(true);
     });
   });
 });

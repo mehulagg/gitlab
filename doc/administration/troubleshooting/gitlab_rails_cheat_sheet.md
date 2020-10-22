@@ -11,13 +11,13 @@ having an issue with GitLab, it is highly recommended that you check your
 [support options](https://about.gitlab.com/support/) first, before attempting to use
 this information.
 
-CAUTION: **CAUTION:**
+CAUTION: **Caution:**
 Please note that some of these scripts could be damaging if not run correctly,
 or under the right conditions. We highly recommend running them under the
 guidance of a Support Engineer, or running them in a test environment with a
 backup of the instance ready to be restored, just in case.
 
-CAUTION: **CAUTION:**
+CAUTION: **Caution:**
 Please also note that as GitLab changes, changes to the code are inevitable,
 and so some scripts may not work as they once used to. These are not kept
 up-to-date as these scripts/commands were added as they were found/needed. As
@@ -43,10 +43,13 @@ instance_of_object.method(:foo).source_location
 project.method(:private?).source_location
 ```
 
-## Query an object
+## Query the database using an ActiveRecord Model
 
 ```ruby
-o = Object.where('attribute like ?', 'ex')
+m = Model.where('attribute like ?', 'ex%')
+
+# for example to query the projects
+projects = Project.where('path like ?', 'Oumua%')
 ```
 
 ## View all keys in cache
@@ -150,9 +153,9 @@ Project.update_all(visibility_level: 0)
 #
 projects = Project.where(pending_delete: true)
 projects.each do |p|
-  puts "Project name: #{p.id}"
+  puts "Project ID: #{p.id}"
   puts "Project name: #{p.name}"
-  puts "Repository path: #{p.repository.storage_path}"
+  puts "Repository path: #{p.repository.full_path}"
 end
 
 #
@@ -167,7 +170,7 @@ user = User.find_by_username('root')
 # Find the project, update the xxx-changeme values from above
 project = Project.find_by_full_path('group-changeme/project-changeme')
 
-# Delete the project
+# Immediately delete the project
 ::Projects::DestroyService.new(project, user, {}).execute
 ```
 
@@ -201,6 +204,32 @@ project.repository_read_only = true; project.save
 project.update!(repository_read_only: true)
 ```
 
+### Transfer project from one namespace to another
+
+```ruby
+ p= Project.find_by_full_path('')
+
+ # To set the owner of the project
+ current_user= p.creator
+
+# Namespace where you want this to be moved.
+namespace = Namespace.find_by_full_path("")
+
+::Projects::TransferService.new(p, current_user).execute(namespace)
+```
+
+### For Removing webhooks that is getting timeout due to large webhook logs
+
+```ruby
+# ID will be the webhook_id
+hook=WebHook.find(ID)
+
+WebHooks::DestroyService.new(current_user).execute(hook)
+
+#In case the service gets timeout consider removing webhook_logs
+hook.web_hook_logs.limit(BATCH_SIZE).delete_all
+```
+
 ### Bulk update service integration password for _all_ projects
 
 For example, change the Jira user's password for all projects that have the Jira
@@ -214,13 +243,40 @@ p.each do |project|
 end
 ```
 
+### Bulk update to disable the Slack Notification service
+
+To disable notifications for all projects that have Slack service enabled, do:
+
+```ruby
+# Grab all projects that have the Slack notifications enabled
+p = Project.find_by_sql("SELECT p.id FROM projects p LEFT JOIN services s ON p.id = s.project_id WHERE s.type = 'SlackService' AND s.active = true")
+
+# Disable the service on each of the projects that were found.
+p.each do |project|
+  project.slack_service.update_attribute(:active, false)
+end
+```
+
+### Incorrect repository statistics shown in the GUI
+
+After [reducing a repository size with third-party tools](../../user/project/repository/reducing_the_repo_size_using_git.md)
+the displayed size may still show old sizes or commit numbers. To force an update, do:
+
+```ruby
+p = Project.find_by_full_path('<namespace>/<project>')
+pp p.statistics
+p.statistics.refresh!
+pp p.statistics  # compare with earlier values
+```
+
 ## Wikis
 
 ### Recreate
 
 A Projects Wiki can be recreated by
 
-**Note:** This is a destructive operation, the Wiki will be empty
+NOTE: **Note:**
+This is a destructive operation, the Wiki will be empty.
 
 ```ruby
 p = Project.find_by_full_path('<username-or-group>/<project-name>')  ### enter your projects path
@@ -228,6 +284,16 @@ p = Project.find_by_full_path('<username-or-group>/<project-name>')  ### enter y
 GitlabShellWorker.perform_in(0, :remove_repository, p.repository_storage, p.wiki.disk_path)  ### deletes the wiki project from the filesystem
 
 p.create_wiki  ### creates the wiki project on the filesystem
+```
+
+## Issue boards
+
+### In case of issue boards not loading properly and it's getting time out. We need to call the Issue Rebalancing service to fix this
+
+```ruby
+p=Project.find_by_full_path('PROJECT PATH')
+
+IssueRebalancingService.new(p.issues.take).execute
 ```
 
 ## Imports / Exports
@@ -249,7 +315,7 @@ p.import_state.mark_as_failed("Failed manually through console.")
 
 In a specific situation, an imported repository needed to be renamed. The Support
 Team was informed of a backup restore that failed on a single repository, which created
-the project with an empty repository. The project was successfully restored to a dev
+the project with an empty repository. The project was successfully restored to a development
 instance, then exported, and imported into a new project under a different name.
 
 The Support Team was able to transfer the incorrectly named imported project into the
@@ -288,7 +354,7 @@ you will see two pushes with the same "from" SHA:
 
 ```ruby
 p = Project.find_with_namespace('u/p')
-p.events.code_push.last(100).each do |e|
+p.events.pushed_action.last(100).each do |e|
   printf "%-20.20s %8s...%8s (%s)\n", e.data[:ref], e.data[:before], e.data[:after], e.author.try(:username)
 end
 ```
@@ -297,7 +363,7 @@ GitLab 9.5 and above:
 
 ```ruby
 p = Project.find_by_full_path('u/p')
-p.events.code_push.last(100).each do |e|
+p.events.pushed_action.last(100).each do |e|
   printf "%-20.20s %8s...%8s (%s)\n", e.push_event_payload[:ref], e.push_event_payload[:commit_from], e.push_event_payload[:commit_to], e.author.try(:username)
 end
 ```
@@ -306,23 +372,7 @@ end
 
 ### Find mirrors with "bad decrypt" errors
 
-```ruby
-total = 0
-bad = []
-ProjectImportData.find_each do |data|
-  begin
-    total += 1
-    data.credentials
-  rescue => e
-    bad << data
-  end
-end
-
-puts "Bad count: #{bad.count} / #{total}"
-bad.each do |repo|
-  puts Project.find(repo.project_id).full_path
-end; bad.count
-```
+This content has been converted to a Rake task, see the [Doctor Rake tasks docs](../raketasks/doctor.md).
 
 ### Transfer mirror users and tokens to a single service account
 
@@ -366,44 +416,14 @@ user = User.find_by_username ''
 user.skip_reconfirmation!
 ```
 
-### Get an admin token
-
-```ruby
-# Get the first admin's first access token (no longer works on 11.9+. see: https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22743)
-User.where(admin:true).first.personal_access_tokens.first.token
-
-# Get the first admin's private token (no longer works on 10.2+)
-User.where(admin:true).private_token
-```
-
-### Create personal access token
-
-```ruby
-personal_access_token = User.find(123).personal_access_tokens.create(
-  name: 'apitoken',
-  impersonation: false,
-  scopes: [:api]
-)
-
-puts personal_access_token.token
-```
-
-You might also want to manually set the token string:
-
-```ruby
-User.find(123).personal_access_tokens.create(
-  name: 'apitoken',
-  token_digest: Gitlab::CryptoHelper.sha256('some-token-string-here'),
-  impersonation: false,
-  scopes: [:api]
-)
-```
-
 ### Active users & Historical users
 
 ```ruby
 # Active users on the instance, now
 User.active.count
+
+# Users taking a seat on the instance
+License.current.current_active_users_count
 
 # The historical max on the instance as of the past year
 ::HistoricalData.max_historical_user_count
@@ -464,6 +484,16 @@ user.max_member_access_for_group group.id
 
 ## Groups
 
+### Transfer group to another location
+
+```ruby
+user = User.find_by_username('<username>')
+group = Group.find_by_name("<group_name>")
+parent_group = Group.find_by(id: "") # empty string amounts to root as parent
+service = ::Groups::TransferService.new(group, user)
+service.execute(parent_group)
+```
+
 ### Count unique users in a group and sub-groups
 
 ```ruby
@@ -482,7 +512,7 @@ group = Group.find_by_path_or_name("groupname")
 # Count users from subgroup and up (inherited)
 group.members_with_parents.count
 
-# Count users from parent group and down (specific grants)
+# Count users from the parent group and down (specific grants)
 parent.members_with_descendants.count
 ```
 
@@ -500,11 +530,59 @@ group = Group.find_by_path_or_name('group-name')
 group.project_creation_level=0
 ```
 
+## SCIM
+
+### Fixing bad SCIM identities
+
+```ruby
+def delete_bad_scim(email, group_path)
+    output = ""
+    u = User.find_by_email(email)
+    uid = u.id
+    g = Group.find_by_full_path(group_path)
+    saml_prov_id = SamlProvider.find_by(group_id: g.id).id
+    saml = Identity.where(user_id: uid, saml_provider_id: saml_prov_id)
+    scim = ScimIdentity.where(user_id: uid , group_id: g.id)
+    if saml[0]
+      saml_eid = saml[0].extern_uid
+      output +=  "%s," % [email]
+      output +=  "SAML: %s," % [saml_eid]
+      if scim[0]
+        scim_eid = scim[0].extern_uid
+        output += "SCIM: %s" % [scim_eid]
+        if saml_eid == scim_eid
+          output += " Identities matched, not deleted \n"
+        else
+          scim[0].destroy
+          output += " Deleted \n"
+        end
+      else
+        output = "ERROR No SCIM identify found for: [%s]\n" % [email]
+        puts output
+        return 1
+      end
+    else
+      output = "ERROR No SAML identify found for: [%s]\n" % [email]
+      puts output
+      return 1
+    end
+      puts output
+    return 0
+end
+
+# In case of multiple emails
+emails = [email1, email2]
+
+emails.each do |e|
+  delete_bad_scim(e,'GROUPPATH')
+end
+```
+
 ## Routes
 
 ### Remove redirecting routes
 
-See <https://gitlab.com/gitlab-org/gitlab-foss/issues/41758#note_54828133>.
+See <https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41758#note_54828133>.
 
 ```ruby
 path = 'foo'
@@ -519,8 +597,8 @@ conflicting_permanent_redirects.destroy_all
 ### Close a merge request properly (if merged but still marked as open)
 
 ```ruby
-p = Project.find_by_full_path('')
-m = project.merge_requests.find_by(iid: )
+p = Project.find_by_full_path('<full/path/to/project>')
+m = p.merge_requests.find_by(iid: <iid>)
 u = User.find_by_username('')
 MergeRequests::PostMergeService.new(p, u).execute(m)
 ```
@@ -558,33 +636,11 @@ Ci::Pipeline.where(project_id: p.id).where(status: 'pending').count
 
 ### Remove artifacts more than a week old
 
-The Latest version of these steps can be found in the [job artifacts documentation](../job_artifacts.md)
-
-```ruby
-### SELECTING THE BUILDS TO CLEAR
-# For a single project:
-project = Project.find_by_full_path('')
-builds_with_artifacts =  project.builds.with_artifacts_archive
-
-# Instance-wide:
-builds_with_artifacts = Ci::Build.with_artifacts_archive
-
-# Prior to 10.6 the above lines would be:
-# builds_with_artifacts =  project.builds.with_artifacts
-# builds_with_artifacts = Ci::Build.with_artifacts
-
-### CLEAR THEM OUT
-# Note that this will also erase artifacts that developers marked to "Keep"
-builds_to_clear = builds_with_artifacts.where("finished_at < ?", 1.week.ago)
-builds_to_clear.each do |build|
-  build.artifacts_expire_at = Time.now
-  build.erase_erasable_artifacts!
-end
-```
+This section has been moved to the [job artifacts troubleshooting documentation](../job_artifacts.md#delete-job-artifacts-from-jobs-completed-before-a-specific-date).
 
 ### Find reason failure (for when build trace is empty) (Introduced in 10.3.0)
 
-See <https://gitlab.com/gitlab-org/gitlab-foss/issues/41111>.
+See <https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41111>.
 
 ```ruby
 build = Ci::Build.find(78420)
@@ -628,10 +684,26 @@ Gitlab::CurrentSettings.current_application_settings.runners_registration_token
 
 ## License
 
-### See license plan name (since v9.3.0-ee)
+### See current license information
 
 ```ruby
+# License information (name, company, email address)
+License.current.licensee
+
+# Plan:
 License.current.plan
+
+# Uploaded:
+License.current.created_at
+
+# Started:
+License.current.starts_at
+
+# Expires at:
+License.current.expires_at
+
+# Is this a trial license?
+License.current.trial?
 ```
 
 ### Check if a project feature is available on the instance
@@ -644,7 +716,7 @@ License.current.feature_available?(:jira_dev_panel_integration)
 
 ### Check if a project feature is available in a project
 
-Features listed in <https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/models/license.rb>.
+Features listed in [`license.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/models/license.rb).
 
 ```ruby
 p = Project.find_by_full_path('<group>/<project>')
@@ -716,10 +788,10 @@ end
 As a GitLab administrator, you may need to reduce disk space consumption.
 A common culprit is Docker Registry images that are no longer in use. To find
 the storage broken down by each project, run the following in the
-GitLab Rails console:
+[GitLab Rails console](../troubleshooting/navigating_gitlab_via_rails_console.md):
 
 ```ruby
-projects_and_size = []
+projects_and_size = [["project_id", "creator_id", "registry_size_bytes", "project path"]]
 # You need to specify the projects that you want to look through. You can get these in any manner.
 projects = Project.last(100)
 
@@ -734,16 +806,20 @@ projects.each do |p|
    end
 
    if project_total_size > 0
-      projects_and_size << [p.full_path,project_total_size]
+      projects_and_size << [p.project_id, p.creator.id, project_total_size, p.full_path]
    end
 end
 
 # projects_and_size is filled out now
 # maybe print it as comma separated output?
 projects_and_size.each do |ps|
-   puts "%s,%s" % ps
+   puts "%s,%s,%s,%s" % ps
 end
 ```
+
+### Run the Cleanup policy now
+
+Find this content in the [Container Registry troubleshooting docs](../packages/container_registry.md#run-the-cleanup-policy-now).
 
 ## Sidekiq
 
@@ -780,18 +856,9 @@ area on disk. It remains to be seen exactly how or whether the deletion is usefu
 
 ### Bad Decrypt Script (for encrypted variables)
 
-See <https://gitlab.com/snippets/1730735/raw>.
+This content has been converted to a Rake task, see the [Doctor Rake tasks docs](../raketasks/doctor.md).
 
-This script will go through all the encrypted variables and count how many are not able
-to be decrypted. Might be helpful to run on multiple nodes to see which `gitlab-secrets.json`
-file is most up to date:
-
-```shell
-wget -O /tmp/bad-decrypt.rb https://gitlab.com/snippets/1730735/raw
-gitlab-rails runner /tmp/bad-decrypt.rb
-```
-
-If `ProjectImportData Bad count:` is detected and the decision is made to delete the
+As an example of repairing, if `ProjectImportData Bad count:` is detected and the decision is made to delete the
 encrypted credentials to allow manual reentry:
 
 ```ruby
@@ -822,15 +889,17 @@ encrypted credentials to allow manual reentry:
 If `User OTP Secret Bad count:` is detected. For each user listed disable/enable
 two-factor authentication.
 
-### Decrypt Script for encrypted tokens
-
-This script will search for all encrypted tokens that are causing decryption errors,
-and update or reset as needed:
+The following script will search in some of the tables for encrypted tokens that are
+causing decryption errors, and update or reset as needed:
 
 ```shell
 wget -O /tmp/encrypted-tokens.rb https://gitlab.com/snippets/1876342/raw
 gitlab-rails runner /tmp/encrypted-tokens.rb
 ```
+
+### Decrypt Script for encrypted tokens
+
+This content has been converted to a Rake task, see the [Doctor Rake tasks docs](../raketasks/doctor.md).
 
 ## Geo
 
@@ -865,19 +934,19 @@ Geo::JobArtifactRegistry.synced.missing_on_primary.pluck(:artifact_id)
 #### Get the number of verification failed repositories
 
 ```ruby
-Geo::ProjectRegistryFinder.new.count_verification_failed_repositories
+Geo::ProjectRegistry.verification_failed('repository').count
 ```
 
 #### Find the verification failed repositories
 
 ```ruby
-Geo::ProjectRegistry.verification_failed_repos
+Geo::ProjectRegistry.verification_failed('repository')
 ```
 
 ### Find repositories that failed to sync
 
 ```ruby
-Geo::ProjectRegistryFinder.new.find_failed_project_registries('repository')
+Geo::ProjectRegistry.sync_failed('repository')
 ```
 
 ### Resync repositories

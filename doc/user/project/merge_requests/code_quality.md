@@ -1,10 +1,14 @@
 ---
+stage: Verify
+group: Testing
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference, howto
 ---
 
-# Code Quality **(STARTER)**
+# Code Quality
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.3.
+> - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in 13.2.
 
 Ensuring your project's code stays simple, readable and easy to contribute to can be problematic. With the help of [GitLab CI/CD](../../../ci/README.md), you can analyze your
 source code quality using GitLab Code Quality.
@@ -12,18 +16,23 @@ source code quality using GitLab Code Quality.
 Code Quality:
 
 - Uses [Code Climate Engines](https://codeclimate.com), which are
-  free and open source. Code Quality doesn't require a Code Climate
+  free and open source. Code Quality does not require a Code Climate
   subscription.
 - Runs in [pipelines](../../../ci/pipelines/index.md) using a Docker image built in the
   [GitLab Code
   Quality](https://gitlab.com/gitlab-org/ci-cd/codequality) project using [default Code Climate configurations](https://gitlab.com/gitlab-org/ci-cd/codequality/-/tree/master/codeclimate_defaults).
 - Can make use of a [template](#example-configuration).
 - Is available with [Auto
-  DevOps](../../../topics/autodevops/stages.md#auto-code-quality-starter).
+  DevOps](../../../topics/autodevops/stages.md#auto-code-quality).
 - Can be extended through [Analysis Plugins](https://docs.codeclimate.com/docs/list-of-engines) or a [custom tool](#implementing-a-custom-tool).
 
+## Code Quality Widget
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.3.
+> - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in 13.2.
+
 Going a step further, GitLab can show the Code Quality report right
-in the merge request widget area:
+in the merge request widget area if a report from the target branch is available to compare to:
 
 ![Code Quality Widget](img/code_quality.png)
 
@@ -58,19 +67,17 @@ For instance, consider the following workflow:
 
 ## Example configuration
 
-CAUTION: **Caution:**
-The job definition shown below is supported on GitLab 11.11 and later versions. It
-also requires the GitLab Runner 11.5 or later. For earlier versions, use the
-[previous job definitions](#previous-job-definitions).
-
 This example shows how to run Code Quality on your code by using GitLab CI/CD and Docker.
+It requires GitLab 11.11 or later, and GitLab Runner 11.5 or later. If you are using
+GitLab 11.4 or earlier, you can view the deprecated job definitions in the
+[documentation archive](https://docs.gitlab.com/12.10/ee/user/project/merge_requests/code_quality.html#previous-job-definitions).
 
 First, you need GitLab Runner configured:
 
-- For the [docker-in-docker workflow](../../../ci/docker/using_docker_build.md#use-docker-in-docker-workflow-with-docker-executor).
+- For the [Docker-in-Docker workflow](../../../ci/docker/using_docker_build.md#use-docker-in-docker-workflow-with-docker-executor).
 - With enough disk space to handle generated Code Quality files. For example on the [GitLab project](https://gitlab.com/gitlab-org/gitlab) the files are approximately 7 GB.
 
-Once you set up the Runner, include the CodeQuality template in your CI config:
+Once you set up GitLab Runner, include the Code Quality template in your CI configuration:
 
 ```yaml
 include:
@@ -79,11 +86,10 @@ include:
 
 The above example will create a `code_quality` job in your CI/CD pipeline which
 will scan your source code for code quality issues. The report will be saved as a
-[Code Quality report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportscodequality-starter)
-that you can later download and analyze. Due to implementation limitations we always
-take the latest Code Quality artifact available.
+[Code Quality report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportscodequality)
+that you can later download and analyze.
 
-It is also possible to override the URL to the Code Quality image by
+It's also possible to override the URL to the Code Quality image by
 setting the `CODE_QUALITY_IMAGE` variable. This is particularly useful if you want
 to lock in a specific version of Code Quality, or use a fork of it:
 
@@ -94,6 +100,16 @@ include:
 code_quality:
   variables:
     CODE_QUALITY_IMAGE: "registry.example.com/codequality-fork:latest"
+```
+
+In [GitLab 13.4 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/11100), you can override the [Code Quality environment variables](https://gitlab.com/gitlab-org/ci-cd/codequality#environment-variables):
+
+```yaml
+variables:
+  TIMEOUT_SECONDS: 1
+
+include:
+  - template: Code-Quality.gitlab-ci.yml
 ```
 
 By default, report artifacts are not downloadable. If you need them downloadable on the
@@ -108,7 +124,7 @@ code_quality:
     paths: [gl-code-quality-report.json]
 ```
 
-The included `code_quality` job is running in the `test` stage, so it needs to be included in your CI config, like so:
+The included `code_quality` job is running in the `test` stage, so it needs to be included in your CI configuration, like so:
 
 ```yaml
 stages:
@@ -120,108 +136,69 @@ This information will be automatically extracted and shown right in the merge re
 
 CAUTION: **Caution:**
 On self-managed instances, if a malicious actor compromises the Code Quality job
-definition they will be able to execute privileged docker commands on the Runner
+definition they will be able to execute privileged Docker commands on the runner
 host. Having proper access control policies mitigates this attack vector by
 allowing access only to trusted actors.
 
-### Previous job definitions
+### Disabling the code quality job
 
-CAUTION: **Caution:**
-Before GitLab 11.5, Code Quality job and artifact had to be named specifically to
-automatically extract report data and show it in the merge request widget. While these
-old job definitions are still maintained they have been deprecated and may be removed
-in the next major release, GitLab 12.0. You are advised to update your current `.gitlab-ci.yml`
-configuration to reflect that change.
+The `code_quality` job will not run if the `$CODE_QUALITY_DISABLED` environment
+variable is present. Please refer to the environment variables [documentation](../../../ci/variables/README.md)
+to learn more about how to define one.
 
-For GitLab 11.5 and later, the job should look like:
+To disable the `code_quality` job, add `CODE_QUALITY_DISABLED` as a custom environment
+variable. This can be done:
 
-```yaml
-code_quality:
-  image: docker:stable
-  variables:
-    DOCKER_DRIVER: overlay2
-  allow_failure: true
-  services:
-    - docker:stable-dind
-  script:
-    - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
-    - docker run
-        --env SOURCE_CODE="$PWD"
-        --volume "$PWD":/code
-        --volume /var/run/docker.sock:/var/run/docker.sock
-        "registry.gitlab.com/gitlab-org/ci-cd/codequality:$SP_VERSION" /code
-  artifacts:
-    reports:
-      codequality: gl-code-quality-report.json
-```
+- For the whole project, [in the project settings](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui)
+  or [CI/CD configuration](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui).
+- For a single pipeline run:
 
-In GitLab 12.6, Code Quality switched to the
-[new versioning scheme](https://gitlab.com/gitlab-org/ci-cd/codequality#versioning-and-release-cycle).
-It is highly recommended to include the Code Quality template as shown in the
-[example configuration](#example-configuration), which uses the new versioning scheme.
-If not using the template, the `SP_VERSION` variable can be hardcoded to use the
-new image versions:
+  1. Go to **CI/CD > Pipelines**
+  1. Click **Run Pipeline**
+  1. Add `CODE_QUALITY_DISABLED` as the variable key, with any value.
+
+### Using with merge request pipelines
+
+The configuration provided by the Code Quality template does not let the `code_quality` job
+run on [pipelines for merge requests](../../../ci/merge_request_pipelines/index.md).
+
+If pipelines for merge requests is enabled, the `code_quality:rules` must be redefined.
+
+The template has these [`rules`](../../../ci/yaml/README.md#rules) for the `code quality` job:
 
 ```yaml
 code_quality:
-  image: docker:stable
-  variables:
-    DOCKER_DRIVER: overlay2
-    SP_VERSION: 0.85.6
-  allow_failure: true
-  services:
-    - docker:stable-dind
-  script:
-    - docker run
-        --env SOURCE_CODE="$PWD"
-        --volume "$PWD":/code
-        --volume /var/run/docker.sock:/var/run/docker.sock
-        "registry.gitlab.com/gitlab-org/ci-cd/codequality:$SP_VERSION" /code
-  artifacts:
-    reports:
-      codequality: gl-code-quality-report.json
+  rules:
+    - if: '$CODE_QUALITY_DISABLED'
+      when: never
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
 ```
 
-For GitLab 11.4 and earlier, the job should look like:
+If you are using merge request pipelines, your `rules` (or [`workflow: rules`](../../../ci/yaml/README.md#workflowrules))
+might look like this example:
 
 ```yaml
+job1:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"' # Run job1 in merge request pipelines
+    - if: '$CI_COMMIT_BRANCH == "master"'                # Run job1 in pipelines on the master branch (but not in other branch pipelines)
+    - if: '$CI_COMMIT_TAG'                               # Run job1 in pipelines for tags
+```
+
+To make these work together, you will need to overwrite the code quality `rules`
+so that they match your current `rules`. From the example above, it could look like:
+
+```yaml
+include:
+  - template: Code-Quality.gitlab-ci.yml
+
 code_quality:
-  image: docker:stable
-  variables:
-    DOCKER_DRIVER: overlay2
-  allow_failure: true
-  services:
-    - docker:stable-dind
-  script:
-    - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
-    - docker run
-        --env SOURCE_CODE="$PWD"
-        --volume "$PWD":/code
-        --volume /var/run/docker.sock:/var/run/docker.sock
-        "registry.gitlab.com/gitlab-org/ci-cd/codequality:$SP_VERSION" /code
-  artifacts:
-      paths: [gl-code-quality-report.json]
-```
-
-Alternatively the job name could be `codeclimate` or `codequality` and the artifact
-name could be `codeclimate.json`. These names have been deprecated with GitLab 11.0
-and may be removed in the next major release, GitLab 12.0.
-
-For GitLab 10.3 and earlier, the job should look like:
-
-```yaml
-codequality:
-  image: docker:latest
-  variables:
-    DOCKER_DRIVER: overlay
-  services:
-    - docker:dind
-  script:
-    - docker pull codeclimate/codeclimate:0.69.0
-    - docker run --env CODECLIMATE_CODE="$PWD" --volume "$PWD":/code --volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/cc:/tmp/cc codeclimate/codeclimate:0.69.0 init
-    - docker run --env CODECLIMATE_CODE="$PWD" --volume "$PWD":/code --volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/cc:/tmp/cc codeclimate/codeclimate:0.69.0 analyze -f json > codeclimate.json || true
-  artifacts:
-    paths: [codeclimate.json]
+  rules:
+    - if: '$CODE_QUALITY_DISABLED'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"' # Run code quality job in merge request pipelines
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'      # Run code quality job in pipelines on the master branch (but not in other branch pipelines)
+    - if: '$CI_COMMIT_TAG'                               # Run code quality job in pipelines for tags
 ```
 
 ## Configuring jobs using variables
@@ -239,9 +216,9 @@ do this:
 
 1. Define a job in your `.gitlab-ci.yml` file that generates the
    [Code Quality report
-   artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportscodequality-starter).
+   artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportscodequality).
 1. Configure your tool to generate the Code Quality report artifact as a JSON
-   file that implements subset of the [Code Climate
+   file that implements a subset of the [Code Climate
    spec](https://github.com/codeclimate/platform/blob/master/spec/analyzers/SPEC.md#data-types).
 
 The Code Quality report artifact JSON file must contain an array of objects
@@ -275,11 +252,11 @@ NOTE: **Note:**
 Although the Code Climate spec supports more properties, those are ignored by
 GitLab.
 
-## Code Quality reports
+## Code Quality reports **(STARTER)**
 
 Once the Code Quality job has completed:
 
-- The full list of code quality violations generated by a pipeline is available in the
+- The full list of code quality violations generated by a pipeline is shown in the
   Code Quality tab of the Pipeline Details page.
 - Potential changes to code quality are shown directly in the merge request.
   The Code Quality widget in the merge request compares the reports from the base and head of the branch,
@@ -288,28 +265,64 @@ Once the Code Quality job has completed:
   [downloadable artifact](../../../ci/pipelines/job_artifacts.md#downloading-artifacts)
   for the `code_quality` job.
 
-If multiple jobs in a pipeline generate a code quality artifact, only the artifact from
-the last created job (the job with the largest job ID) is used. To avoid confusion,
-configure only one job to generate a code quality artifact.
+## Extending functionality
 
-If the Code Quality report doesn't have anything to compare to, no information
-will be displayed in the merge request area. That is the case when you add the
-Code Quality job in your `.gitlab-ci.yml` for the very first time.
-Consecutive merge requests will have something to compare to and the Code Quality
-report will be shown properly.
+### Using Analysis Plugins
 
-These reports will only be available as long as the Code Quality artifact(s) required to generate
-them are also available. See
-[`artifacts:expire_in`](../../../ci/yaml/README.md#artifactsexpire_in) for more details.
+Should there be a need to extend the default functionality provided by Code Quality, as stated in [Code Quality](#code-quality), [Analysis Plugins](https://docs.codeclimate.com/docs/list-of-engines) are available.
 
-<!-- ## Troubleshooting
+For example, to use the [SonarJava analyzer](https://docs.codeclimate.com/docs/sonar-java),
+add a file named `.codeclimate.yml` containing the [enablement code](https://docs.codeclimate.com/docs/sonar-java#enable-the-plugin)
+for the plugin to the root of your repository:
 
-Include any troubleshooting steps that you can foresee. If you know beforehand what issues
-one might have when setting this up, or when something is changed, or on upgrading, it's
-important to describe those, too. Think of things that may go wrong and include them here.
-This is important to minimize requests for support, and to avoid doc comments with
-questions that you know someone might ask.
+```yaml
+version: "2"
+plugins:
+  sonar-java:
+    enabled: true
+```
 
-Each scenario can be a third-level heading, e.g. `### Getting error message X`.
-If you have none to add when creating a doc, leave this section in place
-but commented out to help encourage others to add to it in the future. -->
+This adds SonarJava to the `plugins:` section of the [default `.codeclimate.yml`](https://gitlab.com/gitlab-org/ci-cd/codequality/-/blob/master/codeclimate_defaults/.codeclimate.yml)
+included in your project.
+
+Changes to the `plugins:` section do not affect the `exclude_patterns` section of the
+default `.codeclimate.yml`. See the Code Climate documentation for
+[excluding files and folders](https://docs.codeclimate.com/docs/excluding-files-and-folders)
+for more details.
+
+Here's [an example project](https://gitlab.com/jheimbuck_gl/jh_java_example_project) that uses Code Quality with a `.codeclimate.yml` file.
+
+## Troubleshooting
+
+### Changing the default configuration has no effect
+
+A common issue is that the terms `Code Quality` (GitLab specific) and `Code Climate`
+(Engine used by GitLab) are very similar. You must add a **`.codeclimate.yml`** file
+to change the default configuration, **not** a `.codequality.yml` file. If you use
+the wrong filename, the [default `.codeclimate.yml`](https://gitlab.com/gitlab-org/ci-cd/codequality/-/blob/master/codeclimate_defaults/.codeclimate.yml)
+is still used.
+
+### No Code Quality report is displayed in a Merge Request
+
+This can be due to multiple reasons:
+
+- You just added the Code Quality job in your `.gitlab-ci.yml`. The report does not
+  have anything to compare to yet, so no information can be displayed. Future merge
+  requests will have something to compare to.
+- Your pipeline is not set to run the code quality job on your default branch. If there is no report generated from the default branch, your MR branch reports will not have anything to compare to.
+- If no [degradation or error is detected](https://docs.codeclimate.com/docs/maintainability#section-checks),
+  nothing will be displayed.
+- The [`artifacts:expire_in`](../../../ci/yaml/README.md#artifactsexpire_in) CI/CD
+  setting can cause the Code Quality artifact(s) to expire faster than desired.
+- Large `codeclimate.json` files (esp. >10 MB) are [known to prevent the report from being displayed](https://gitlab.com/gitlab-org/gitlab/-/issues/2737).
+  As a work-around, try removing [properties](https://github.com/codeclimate/platform/blob/master/spec/analyzers/SPEC.md#data-types)
+  that are [ignored by GitLab](#implementing-a-custom-tool). You can:
+  - Configure the Code Quality tool to not output those types.
+  - Use `sed`, `awk` or similar commands in the `.gitlab-ci.yml` script to
+    edit the `codeclimate.json` before the job completes.
+
+### Only a single Code Quality report is displayed, but more are defined
+
+GitLab only uses the Code Quality artifact from the latest created job (with the largest job ID).
+If multiple jobs in a pipeline generate a code quality artifact, those of earlier jobs are ignored.
+To avoid confusion, configure only one job to generate a `codeclimate.json`.

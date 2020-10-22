@@ -5,8 +5,12 @@ module QA
     module Page
       module Dashboard
         module Projects
-          def self.prepended(page)
-            page.module_eval do
+          extend QA::Page::PageConcern
+
+          def self.prepended(base)
+            super
+
+            base.class_eval do
               view 'app/views/shared/projects/_list.html.haml' do
                 element :projects_list
               end

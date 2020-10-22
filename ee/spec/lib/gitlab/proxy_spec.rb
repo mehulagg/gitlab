@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Proxy do
+RSpec.describe Gitlab::Proxy do
   describe '.detect_proxy' do
     subject { described_class.detect_proxy }
 

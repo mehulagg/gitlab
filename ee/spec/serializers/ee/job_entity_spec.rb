@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe JobEntity do
+RSpec.describe JobEntity do
   using RSpec::Parameterized::TableSyntax
 
   let(:user) { create(:user) }
@@ -19,7 +19,7 @@ describe JobEntity do
 
     subject { entity.as_json[:playable] }
 
-    it_behaves_like 'protected environments access'
+    it_behaves_like 'protected environments access', direct_access: true
   end
 
   describe '#retryable?' do
@@ -27,6 +27,6 @@ describe JobEntity do
 
     subject { entity.as_json.include?(:retry_path) }
 
-    it_behaves_like 'protected environments access'
+    it_behaves_like 'protected environments access', direct_access: true
   end
 end

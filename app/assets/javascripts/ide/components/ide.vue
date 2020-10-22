@@ -1,8 +1,19 @@
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { GlDeprecatedButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
+import {
+  WEBIDE_MARK_APP_START,
+  WEBIDE_MARK_FILE_FINISH,
+  WEBIDE_MARK_FILE_CLICKED,
+  WEBIDE_MARK_TREE_FINISH,
+  WEBIDE_MEASURE_TREE_FROM_REQUEST,
+  WEBIDE_MEASURE_FILE_FROM_REQUEST,
+  WEBIDE_MEASURE_FILE_AFTER_INTERACTION,
+} from '~/performance_constants';
+import { performanceMarkAndMeasure } from '~/performance_utils';
+import { modalTypes } from '../constants';
+import eventHub from '../eventhub';
 import FindFile from '~/vue_shared/components/file_finder/index.vue';
 import NewModal from './new_dropdown/modal.vue';
 import IdeSidebar from './ide_side_bar.vue';
@@ -14,6 +25,22 @@ import ErrorMessage from './error_message.vue';
 import CommitEditorHeader from './commit_sidebar/editor_header.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
+import { measurePerformance } from '../utils';
+
+eventHub.$on(WEBIDE_MEASURE_TREE_FROM_REQUEST, () =>
+  measurePerformance(WEBIDE_MARK_TREE_FINISH, WEBIDE_MEASURE_TREE_FROM_REQUEST),
+);
+eventHub.$on(WEBIDE_MEASURE_FILE_FROM_REQUEST, () =>
+  measurePerformance(WEBIDE_MARK_FILE_FINISH, WEBIDE_MEASURE_FILE_FROM_REQUEST),
+);
+eventHub.$on(WEBIDE_MEASURE_FILE_AFTER_INTERACTION, () =>
+  measurePerformance(
+    WEBIDE_MARK_FILE_FINISH,
+    WEBIDE_MEASURE_FILE_AFTER_INTERACTION,
+    WEBIDE_MARK_FILE_CLICKED,
+  ),
+);
+
 export default {
   components: {
     NewModal,
@@ -24,22 +51,15 @@ export default {
     FindFile,
     ErrorMessage,
     CommitEditorHeader,
-    GlDeprecatedButton,
+    GlButton,
     GlLoadingIcon,
+    RightPane,
   },
   mixins: [glFeatureFlagsMixin()],
-  props: {
-    rightPaneComponent: {
-      type: Vue.Component,
-      required: false,
-      default: () => RightPane,
-    },
-  },
   computed: {
     ...mapState([
       'openFiles',
       'viewer',
-      'currentMergeRequestId',
       'fileFindVisible',
       'emptyStateSvgPath',
       'currentProjectId',
@@ -48,13 +68,13 @@ export default {
     ]),
     ...mapGetters([
       'activeFile',
-      'hasChanges',
       'someUncommittedChanges',
       'isCommitModeActive',
       'allBlobs',
       'emptyRepo',
       'currentTree',
       'editorTheme',
+      'getUrlForPath',
     ]),
     themeName() {
       return window.gon?.user_color_scheme;
@@ -66,8 +86,11 @@ export default {
     if (this.themeName)
       document.querySelector('.navbar-gitlab').classList.add(`theme-${this.themeName}`);
   },
+  beforeCreate() {
+    performanceMarkAndMeasure({ mark: WEBIDE_MARK_APP_START });
+  },
   methods: {
-    ...mapActions(['toggleFileFinder', 'openNewEntryModal']),
+    ...mapActions(['toggleFileFinder']),
     onBeforeUnload(e = {}) {
       const returnValue = __('Are you sure you want to lose unsaved changes?');
 
@@ -79,7 +102,10 @@ export default {
       return returnValue;
     },
     openFile(file) {
-      this.$router.push(`/project${file.url}`);
+      this.$router.push(this.getUrlForPath(file.path));
+    },
+    createNewFile() {
+      this.$refs.newModal.open(modalTypes.blob);
     },
   },
 };
@@ -104,14 +130,7 @@ export default {
       <div class="multi-file-edit-pane">
         <template v-if="activeFile">
           <commit-editor-header v-if="isCommitModeActive" :active-file="activeFile" />
-          <repo-tabs
-            v-else
-            :active-file="activeFile"
-            :files="openFiles"
-            :viewer="viewer"
-            :has-changes="hasChanges"
-            :merge-request-id="currentMergeRequestId"
-          />
+          <repo-tabs v-else :active-file="activeFile" :files="openFiles" :viewer="viewer" />
           <repo-editor :file="activeFile" class="multi-file-edit-pane-content" />
         </template>
         <template v-else>
@@ -133,14 +152,16 @@ export default {
                         )
                       }}
                     </p>
-                    <gl-deprecated-button
+                    <gl-button
                       variant="success"
+                      category="primary"
                       :title="__('New file')"
                       :aria-label="__('New file')"
-                      @click="openNewEntryModal({ type: 'blob' })"
+                      data-qa-selector="first_file_button"
+                      @click="createNewFile()"
                     >
                       {{ __('New file') }}
-                    </gl-deprecated-button>
+                    </gl-button>
                   </template>
                   <gl-loading-icon v-else-if="!currentTree || currentTree.loading" size="md" />
                   <p v-else>
@@ -156,9 +177,9 @@ export default {
           </div>
         </template>
       </div>
-      <component :is="rightPaneComponent" v-if="currentProjectId" />
+      <right-pane v-if="currentProjectId" />
     </div>
     <ide-status-bar />
-    <new-modal />
+    <new-modal ref="newModal" />
   </article>
 </template>

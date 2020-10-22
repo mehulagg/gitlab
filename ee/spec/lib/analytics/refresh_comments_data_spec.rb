@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Analytics::RefreshCommentsData do
+RSpec.describe Analytics::RefreshCommentsData do
   describe '.for_note' do
     subject { described_class.for_note(note) }
 

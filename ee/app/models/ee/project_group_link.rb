@@ -12,8 +12,8 @@ module EE
       return unless group.present? && project.present?
 
       # For protected branches
-      project.protected_branches.merge_access_by_group(group).destroy_all # rubocop: disable DestroyAll
-      project.protected_branches.push_access_by_group(group).destroy_all # rubocop: disable DestroyAll
+      project.protected_branches.merge_access_by_group(group).destroy_all # rubocop: disable Cop/DestroyAll
+      project.protected_branches.push_access_by_group(group).destroy_all # rubocop: disable Cop/DestroyAll
 
       # For protected tags
       project.protected_tags.create_access_by_group(group).delete_all

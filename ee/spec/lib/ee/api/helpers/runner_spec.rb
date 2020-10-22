@@ -2,19 +2,15 @@
 
 require 'spec_helper'
 
-describe EE::API::Helpers::Runner do
+RSpec.describe EE::API::Helpers::Runner do
   let(:helper) { Class.new { include API::Helpers::Runner }.new }
 
   before do
     allow(helper).to receive(:env).and_return({})
   end
 
-  describe '#authenticate_job' do
-    let(:build) { create(:ci_build) }
-
-    before do
-      allow(helper).to receive(:validate_job!)
-    end
+  describe '#current_job' do
+    let(:build) { create(:ci_build, :running) }
 
     it 'handles sticking of a build when a build ID is specified' do
       allow(helper).to receive(:params).and_return(id: build.id)
@@ -23,7 +19,7 @@ describe EE::API::Helpers::Runner do
         .to receive(:stick_or_unstick)
         .with({}, :build, build.id)
 
-      helper.authenticate_job!
+      helper.current_job
     end
 
     it 'does not handle sticking if no build ID was specified' do
@@ -32,13 +28,13 @@ describe EE::API::Helpers::Runner do
       expect(Gitlab::Database::LoadBalancing::RackMiddleware)
         .not_to receive(:stick_or_unstick)
 
-      helper.authenticate_job!
+      helper.current_job
     end
 
     it 'returns the build if one could be found' do
       allow(helper).to receive(:params).and_return(id: build.id)
 
-      expect(helper.authenticate_job!).to eq(build)
+      expect(helper.current_job).to eq(build)
     end
   end
 

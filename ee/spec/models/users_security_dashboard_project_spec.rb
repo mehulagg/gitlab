@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe UsersSecurityDashboardProject do
+RSpec.describe UsersSecurityDashboardProject do
   subject { build(:users_security_dashboard_project) }
 
   describe 'associations' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::GrafanaApiController do
+RSpec.describe Projects::GrafanaApiController do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
 
@@ -131,10 +131,11 @@ describe Projects::GrafanaApiController do
         get :metrics_dashboard, params: params
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response).to eq({
+        expect(json_response).to include({
           'dashboard' => '{}',
           'status' => 'success'
         })
+        expect(json_response).to include('metrics_data')
       end
     end
 

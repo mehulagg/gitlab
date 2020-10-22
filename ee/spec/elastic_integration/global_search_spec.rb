@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'GlobalSearch', :elastic do
+RSpec.describe 'GlobalSearch', :elastic do
   let(:features) { %i(issues merge_requests repository builds wiki snippets) }
   let(:admin) { create :user, admin: true }
   let(:auditor) {create :user, auditor: true }
@@ -21,7 +21,7 @@ describe 'GlobalSearch', :elastic do
     project.add_guest(guest)
   end
 
-  context "Respect feature visibility levels" do
+  context "Respect feature visibility levels", :aggregate_failures do
     context "Private projects" do
       let(:project) { create(:project, :private, :repository, :wiki_repo) }
 
@@ -127,7 +127,7 @@ describe 'GlobalSearch', :elastic do
         expect_items_to_be_found(nil)
       end
 
-      it "shows items to member only if features are private" do
+      it "shows items to member only if features are private", :aggregate_failures do
         create_items(project, feature_settings(:private))
 
         expect_items_to_be_found(admin)
@@ -160,7 +160,7 @@ describe 'GlobalSearch', :elastic do
 
   # access_level can be :disabled, :enabled or :private
   def feature_settings(access_level)
-    Hash[features.collect { |k| ["#{k}_access_level", ProjectFeature.const_get(access_level.to_s.upcase, false)] }]
+    Hash[features.collect { |k| ["#{k}_access_level", Featurable.const_get(access_level.to_s.upcase, false)] }]
   end
 
   def expect_no_items_to_be_found(user)
@@ -178,9 +178,9 @@ describe 'GlobalSearch', :elastic do
 
     check_count = lambda do |feature, c|
       if arr.include?(feature)
-        expect(c).to be > 0
+        expect(c).to be > 0, "Search returned no #{feature} for #{user}"
       else
-        expect(c).to eq(0)
+        expect(c).to eq(0), "Search returned #{feature} for #{user}"
       end
     end
 

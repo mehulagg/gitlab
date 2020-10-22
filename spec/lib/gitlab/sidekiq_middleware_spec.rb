@@ -3,13 +3,18 @@
 require 'spec_helper'
 require 'sidekiq/testing'
 
-describe Gitlab::SidekiqMiddleware do
-  class TestWorker
-    include Sidekiq::Worker
+RSpec.describe Gitlab::SidekiqMiddleware do
+  before do
+    stub_const('TestWorker', Class.new)
 
-    def perform(_arg)
-      Gitlab::SafeRequestStore['gitaly_call_actual'] = 1
-      Gitlab::GitalyClient.query_time = 5
+    TestWorker.class_eval do
+      include Sidekiq::Worker
+      include ApplicationWorker
+
+      def perform(_arg)
+        Gitlab::SafeRequestStore['gitaly_call_actual'] = 1
+        Gitlab::SafeRequestStore[:gitaly_query_time] = 5
+      end
     end
   end
 
@@ -46,16 +51,19 @@ describe Gitlab::SidekiqMiddleware do
        Gitlab::SidekiqMiddleware::BatchLoader,
        Labkit::Middleware::Sidekiq::Server,
        Gitlab::SidekiqMiddleware::InstrumentationLogger,
+       Gitlab::SidekiqVersioning::Middleware,
        Gitlab::SidekiqStatus::ServerMiddleware,
        Gitlab::SidekiqMiddleware::ServerMetrics,
        Gitlab::SidekiqMiddleware::ArgumentsLogger,
        Gitlab::SidekiqMiddleware::MemoryKiller,
        Gitlab::SidekiqMiddleware::RequestStoreMiddleware,
+       Gitlab::SidekiqMiddleware::ExtraDoneLogMetadata,
        Gitlab::SidekiqMiddleware::WorkerContext::Server,
        Gitlab::SidekiqMiddleware::AdminMode::Server,
        Gitlab::SidekiqMiddleware::DuplicateJobs::Server
       ]
     end
+
     let(:enabled_sidekiq_middlewares) { all_sidekiq_middlewares - disabled_sidekiq_middlewares }
 
     shared_examples "a server middleware chain" do
@@ -72,6 +80,41 @@ describe Gitlab::SidekiqMiddleware do
       end
     end
 
+    shared_examples "a server middleware chain for mailer" do
+      let(:worker_class) { ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper }
+      let(:job_args) do
+        [
+          {
+            "job_class" => "ActionMailer::MailDeliveryJob",
+            "job_id" => "a180b47c-3fd6-41b8-81e9-34da61c3400e",
+            "provider_job_id" => nil,
+            "queue_name" => "mailers",
+            "priority" => nil,
+            "arguments" => [
+              "Notify",
+              "test_email",
+              "deliver_now",
+              {
+                "args" => [
+                  "test@example.com",
+                  "subject",
+                  "body"
+                ],
+                "_aj_symbol_keys" => ["args"]
+              }
+            ],
+            "executions" => 0,
+            "exception_executions" => {},
+            "locale" => "en",
+            "timezone" => "UTC",
+            "enqueued_at" => "2020-07-27T07:43:31Z"
+          }
+        ]
+      end
+
+      it_behaves_like "a server middleware chain"
+    end
+
     context "all optional middlewares off" do
       let(:metrics) { false }
       let(:arguments_logger) { false }
@@ -85,6 +128,7 @@ describe Gitlab::SidekiqMiddleware do
       end
 
       it_behaves_like "a server middleware chain"
+      it_behaves_like "a server middleware chain for mailer"
     end
 
     context "all optional middlewares on" do
@@ -94,6 +138,7 @@ describe Gitlab::SidekiqMiddleware do
       let(:disabled_sidekiq_middlewares) { [] }
 
       it_behaves_like "a server middleware chain"
+      it_behaves_like "a server middleware chain for mailer"
 
       context "server metrics" do
         let(:gitaly_histogram) { double(:gitaly_histogram) }

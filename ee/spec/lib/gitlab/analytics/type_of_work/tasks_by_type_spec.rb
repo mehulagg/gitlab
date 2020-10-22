@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Analytics::TypeOfWork::TasksByType do
+RSpec.describe Gitlab::Analytics::TypeOfWork::TasksByType do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:other_group) { create(:group) }

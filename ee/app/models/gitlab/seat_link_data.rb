@@ -29,7 +29,7 @@ module Gitlab
     end
 
     def default_date
-      Time.now.utc.yesterday.to_date
+      Time.current.utc.yesterday.to_date
     end
 
     def default_key

@@ -7,7 +7,6 @@ import {
   extendTimeframeForWeeksView,
   extendTimeframeForAvailableWidth,
   getEpicsTimeframeRange,
-  getEpicsPathForPreset,
   assignDates,
   sortEpics,
 } from 'ee/roadmap/utils/roadmap_utils';
@@ -342,71 +341,6 @@ describe('getEpicsTimeframeRange', () => {
         dueDate: '2018-2-3',
       }),
     );
-  });
-});
-
-describe('getEpicsPathForPreset', () => {
-  const basePath = '/groups/gitlab-org/-/epics.json';
-  const filterQueryString = 'scope=all&utf8=✓&state=opened&label_name[]=Bug';
-
-  it('returns epics path string based on provided basePath and timeframe for Quarters', () => {
-    const timeframeQuarters = getTimeframeForQuartersView(new Date(2018, 0, 1));
-    const epicsPath = getEpicsPathForPreset({
-      basePath,
-      timeframe: timeframeQuarters,
-      presetType: PRESET_TYPES.QUARTERS,
-    });
-
-    expect(epicsPath).toBe(`${basePath}?state=all&start_date=2017-7-1&end_date=2019-3-31`);
-  });
-
-  it('returns epics path string based on provided basePath and timeframe for Months', () => {
-    const timeframeMonths = getTimeframeForMonthsView(new Date(2018, 0, 1));
-    const epicsPath = getEpicsPathForPreset({
-      basePath,
-      timeframe: timeframeMonths,
-      presetType: PRESET_TYPES.MONTHS,
-    });
-
-    expect(epicsPath).toBe(`${basePath}?state=all&start_date=2017-11-1&end_date=2018-6-30`);
-  });
-
-  it('returns epics path string based on provided basePath and timeframe for Weeks', () => {
-    const timeframeWeeks = getTimeframeForWeeksView(new Date(2018, 0, 1));
-    const epicsPath = getEpicsPathForPreset({
-      basePath,
-      timeframe: timeframeWeeks,
-      presetType: PRESET_TYPES.WEEKS,
-    });
-
-    expect(epicsPath).toBe(`${basePath}?state=all&start_date=2017-12-17&end_date=2018-2-3`);
-  });
-
-  it('returns epics path string while preserving filterQueryString', () => {
-    const timeframeMonths = getTimeframeForMonthsView(new Date(2018, 0, 1));
-    const epicsPath = getEpicsPathForPreset({
-      basePath,
-      filterQueryString,
-      timeframe: timeframeMonths,
-      presetType: PRESET_TYPES.MONTHS,
-    });
-
-    expect(epicsPath).toBe(
-      `${basePath}?state=all&start_date=2017-11-1&end_date=2018-6-30&scope=all&utf8=✓&state=opened&label_name[]=Bug`,
-    );
-  });
-
-  it('returns epics path string containing epicsState', () => {
-    const epicsState = 'opened';
-    const timeframe = getTimeframeForMonthsView(new Date(2018, 0, 1));
-    const epicsPath = getEpicsPathForPreset({
-      presetType: PRESET_TYPES.MONTHS,
-      basePath,
-      timeframe,
-      epicsState,
-    });
-
-    expect(epicsPath).toContain(`state=${epicsState}`);
   });
 });
 

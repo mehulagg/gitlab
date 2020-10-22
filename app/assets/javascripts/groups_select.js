@@ -1,7 +1,7 @@
 import $ from 'jquery';
+import { escape } from 'lodash';
 import axios from './lib/utils/axios_utils';
 import Api from './api';
-import { escape } from 'lodash';
 import { normalizeHeaders } from './lib/utils/common_utils';
 import { __ } from '~/locale';
 
@@ -97,7 +97,10 @@ const groupsSelect = () => {
   });
 };
 
-export default () =>
-  import(/* webpackChunkName: 'select2' */ 'select2/select2')
-    .then(groupsSelect)
-    .catch(() => {});
+export default () => {
+  if ($('.ajax-groups-select').length) {
+    import(/* webpackChunkName: 'select2' */ 'select2/select2')
+      .then(groupsSelect)
+      .catch(() => {});
+  }
+};

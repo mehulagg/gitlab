@@ -25,7 +25,7 @@
   }
 
   &-icon {
-    color: $gray-500;
+    color: $gray-300;
   }
 
   &-footer {
@@ -33,7 +33,7 @@
     height: $gl-padding-32;
 
     &-arrow {
-      color: $gray-300;
+      color: $gray-200;
     }
 
     &-downstream {
@@ -41,7 +41,7 @@
     }
 
     &-extra {
-      background-color: $gray-400;
+      background-color: $gray-200;
       font-size: 10px;
       line-height: $gl-line-height;
       width: $gl-padding;
@@ -67,10 +67,10 @@
       background-repeat: no-repeat;
       background-size: cover;
       background-image: linear-gradient(to right,
-      $gray-100 0%,
-      $gray-50 20%,
-      $gray-100 40%,
-      $gray-100 100%);
+      $gray-50 0%,
+      $gray-10 20%,
+      $gray-50 40%,
+      $gray-50 100%);
       border-radius: $gl-padding;
       height: $gl-padding;
       margin-top: -$gl-padding-8;

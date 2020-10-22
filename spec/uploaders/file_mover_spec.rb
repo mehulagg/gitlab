@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe FileMover do
+RSpec.describe FileMover do
   include FileMoverHelpers
 
   let(:user) { create(:user) }
@@ -14,6 +14,7 @@ describe FileMover do
     "test ![banana_sample](/#{temp_file_path}) "\
     "same ![banana_sample](/#{temp_file_path}) "
   end
+
   let(:file_path) { File.join('uploads/-/system/personal_snippet', snippet.id.to_s, secret, filename) }
   let(:snippet) { create(:personal_snippet, description: temp_description) }
 

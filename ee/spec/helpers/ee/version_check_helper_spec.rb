@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::VersionCheckHelper do
+RSpec.describe EE::VersionCheckHelper do
   include StubVersion
 
   describe '#link_to_version' do

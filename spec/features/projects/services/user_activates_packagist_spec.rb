@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User activates Packagist' do
+RSpec.describe 'User activates Packagist' do
   include_context 'project service activation'
 
   before do
@@ -16,6 +16,6 @@ describe 'User activates Packagist' do
 
     click_test_then_save_integration
 
-    expect(page).to have_content('Packagist activated.')
+    expect(page).to have_content('Packagist settings saved and active.')
   end
 end

@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 module DesignManagementTestHelpers
-  def enable_design_management(enabled = true, ref_filter = true)
+  def enable_design_management(enabled = true)
     stub_lfs_setting(enabled: enabled)
-    stub_feature_flags(design_management_reference_filter_gfm_pipeline: ref_filter)
   end
 
   def delete_designs(*designs)
@@ -36,9 +35,9 @@ module DesignManagementTestHelpers
 
   def act_on_designs(designs, &block)
     issue = designs.first.issue
-    version = build(:design_version, :empty, issue: issue).tap { |v| v.save(validate: false) }
+    version = build(:design_version, :empty, issue: issue).tap { |v| v.save!(validate: false) }
     designs.each do |d|
-      yield.create(design: d, version: version)
+      yield.create!(design: d, version: version)
     end
     version
   end

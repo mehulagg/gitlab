@@ -1,4 +1,4 @@
-resources :snippets, concerns: :awardable do
+resources :snippets, except: [:create, :update, :destroy], concerns: :awardable, constraints: { id: /\d+/ } do
   member do
     get :raw
     post :mark_as_spam
@@ -16,6 +16,12 @@ resources :snippets, concerns: :awardable do
     end
   end
 end
+
+get '/snippets/:snippet_id/raw/:ref/*path',
+  to: 'snippets/blobs#raw',
+  as: :snippet_blob_raw,
+  format: false,
+  constraints: { snippet_id: /\d+/ }
 
 get '/s/:username', to: redirect('users/%{username}/snippets'),
                     constraints: { username: /[a-zA-Z.0-9_\-]+(?<!\.atom)/ }

@@ -6,7 +6,7 @@ class AddMissingOnPrimaryToFileRegistry < ActiveRecord::Migration[4.2]
   disable_ddl_transaction!
 
   def up
-    add_column_with_default :file_registry, :missing_on_primary, :boolean, default: false, allow_null: false
+    add_column_with_default :file_registry, :missing_on_primary, :boolean, default: false, allow_null: false # rubocop:disable Migration/AddColumnWithDefault
   end
 
   def down

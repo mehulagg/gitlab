@@ -1,7 +1,7 @@
 import * as types from './mutation_types';
 import { setAWSConfig } from '../services/aws_services_facade';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 const getErrorMessage = data => {
@@ -55,7 +55,9 @@ export const createCluster = ({ dispatch, state }) => {
       name: state.clusterName,
       environment_scope: state.environmentScope,
       managed: state.gitlabManagedCluster,
+      namespace_per_environment: state.namespacePerEnvironment,
       provider_aws_attributes: {
+        kubernetes_version: state.kubernetesVersion,
         region: state.selectedRegion,
         vpc_id: state.selectedVpc,
         subnet_ids: state.selectedSubnet,
@@ -111,6 +113,10 @@ export const setSecurityGroup = ({ commit }, payload) => {
 
 export const setGitlabManagedCluster = ({ commit }, payload) => {
   commit(types.SET_GITLAB_MANAGED_CLUSTER, payload);
+};
+
+export const setNamespacePerEnvironment = ({ commit }, payload) => {
+  commit(types.SET_NAMESPACE_PER_ENVIRONMENT, payload);
 };
 
 export const setInstanceType = ({ commit }, payload) => {

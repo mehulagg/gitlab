@@ -1,190 +1,251 @@
+import { nextTick } from 'vue';
 import Vuex from 'vuex';
-import { createLocalVue, mount } from '@vue/test-utils';
-import { state, actions, getters, mutations } from '~/import_projects/store';
-import importProjectsTable from '~/import_projects/components/import_projects_table.vue';
-import STATUS_MAP from '~/import_projects/constants';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { GlLoadingIcon, GlButton, GlIntersectionObserver } from '@gitlab/ui';
+import state from '~/import_projects/store/state';
+import * as getters from '~/import_projects/store/getters';
+import { STATUSES } from '~/import_projects/constants';
+import ImportProjectsTable from '~/import_projects/components/import_projects_table.vue';
+import ProviderRepoTableRow from '~/import_projects/components/provider_repo_table_row.vue';
 
 describe('ImportProjectsTable', () => {
-  let vm;
+  let wrapper;
+
+  const findFilterField = () =>
+    wrapper.find('input[data-qa-selector="githubish_import_filter_field"]');
+
   const providerTitle = 'THE PROVIDER';
-  const providerRepo = { id: 10, sanitizedName: 'sanitizedName', fullName: 'fullName' };
-  const importedProject = {
-    id: 1,
-    fullPath: 'fullPath',
-    importStatus: 'started',
-    providerLink: 'providerLink',
-    importSource: 'importSource',
+  const providerRepo = {
+    importSource: {
+      id: 10,
+      sanitizedName: 'sanitizedName',
+      fullName: 'fullName',
+    },
+    importedProject: null,
   };
 
-  function initStore() {
-    const stubbedActions = Object.assign({}, actions, {
-      fetchJobs: jest.fn(),
-      fetchRepos: jest.fn(actions.requestRepos),
-      fetchImport: jest.fn(actions.requestImport),
-    });
+  const findImportAllButton = () =>
+    wrapper
+      .findAll(GlButton)
+      .filter(w => w.props().variant === 'success')
+      .at(0);
+  const findImportAllModal = () => wrapper.find({ ref: 'importAllModal' });
 
-    const store = new Vuex.Store({
-      state: state(),
-      actions: stubbedActions,
-      mutations,
-      getters,
-    });
+  const importAllFn = jest.fn();
+  const importAllModalShowFn = jest.fn();
+  const setPageFn = jest.fn();
+  const fetchReposFn = jest.fn();
 
-    return store;
-  }
-
-  function mountComponent() {
+  function createComponent({
+    state: initialState,
+    getters: customGetters,
+    slots,
+    filterable,
+    paginatable,
+  } = {}) {
     const localVue = createLocalVue();
     localVue.use(Vuex);
 
-    const store = initStore();
+    const store = new Vuex.Store({
+      state: { ...state(), ...initialState },
+      getters: {
+        ...getters,
+        ...customGetters,
+      },
+      actions: {
+        fetchRepos: fetchReposFn,
+        fetchJobs: jest.fn(),
+        fetchNamespaces: jest.fn(),
+        importAll: importAllFn,
+        stopJobsPolling: jest.fn(),
+        clearJobsEtagPoll: jest.fn(),
+        setFilter: jest.fn(),
+        setPage: setPageFn,
+      },
+    });
 
-    const component = mount(importProjectsTable, {
+    wrapper = shallowMount(ImportProjectsTable, {
       localVue,
       store,
       propsData: {
         providerTitle,
+        filterable,
+        paginatable,
+      },
+      slots,
+      stubs: {
+        GlModal: { template: '<div>Modal!</div>', methods: { show: importAllModalShowFn } },
       },
     });
-
-    return component.vm;
   }
 
-  beforeEach(() => {
-    vm = mountComponent();
-  });
-
   afterEach(() => {
-    vm.$destroy();
+    if (wrapper) {
+      wrapper.destroy();
+      wrapper = null;
+    }
   });
 
-  it('renders a loading icon while repos are loading', () =>
-    vm.$nextTick().then(() => {
-      expect(vm.$el.querySelector('.js-loading-button-icon')).not.toBeNull();
-    }));
+  it('renders a loading icon while repos are loading', () => {
+    createComponent({ state: { isLoadingRepos: true } });
 
-  it('renders a table with imported projects and provider repos', () => {
-    vm.$store.dispatch('receiveReposSuccess', {
-      importedProjects: [importedProject],
-      providerRepos: [providerRepo],
-      namespaces: [{ path: 'path' }],
-    });
-
-    return vm.$nextTick().then(() => {
-      expect(vm.$el.querySelector('.js-loading-button-icon')).toBeNull();
-      expect(vm.$el.querySelector('.table')).not.toBeNull();
-      expect(vm.$el.querySelector('.import-jobs-from-col').innerText).toMatch(
-        `From ${providerTitle}`,
-      );
-
-      expect(vm.$el.querySelector('.js-imported-project')).not.toBeNull();
-      expect(vm.$el.querySelector('.js-provider-repo')).not.toBeNull();
-    });
+    expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
   });
 
-  it('renders an empty state if there are no imported projects or provider repos', () => {
-    vm.$store.dispatch('receiveReposSuccess', {
-      importedProjects: [],
-      providerRepos: [],
-      namespaces: [],
-    });
+  it('renders a loading icon while namespaces are loading', () => {
+    createComponent({ state: { isLoadingNamespaces: true } });
 
-    return vm.$nextTick().then(() => {
-      expect(vm.$el.querySelector('.js-loading-button-icon')).toBeNull();
-      expect(vm.$el.querySelector('.table')).toBeNull();
-      expect(vm.$el.innerText).toMatch(`No ${providerTitle} repositories found`);
-    });
+    expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
   });
 
-  it('shows loading spinner when bulk import button is clicked', () => {
-    vm.$store.dispatch('receiveReposSuccess', {
-      importedProjects: [],
-      providerRepos: [providerRepo],
-      namespaces: [{ path: 'path' }],
-    });
-
-    return vm
-      .$nextTick()
-      .then(() => {
-        expect(vm.$el.querySelector('.js-imported-project')).toBeNull();
-        expect(vm.$el.querySelector('.js-provider-repo')).not.toBeNull();
-
-        vm.$el.querySelector('.js-import-all').click();
-      })
-      .then(() => vm.$nextTick())
-      .then(() => {
-        expect(vm.$el.querySelector('.js-import-all .js-loading-button-icon')).not.toBeNull();
-      });
-  });
-
-  it('imports provider repos if bulk import button is clicked', () => {
-    mountComponent();
-
-    vm.$store.dispatch('receiveReposSuccess', {
-      importedProjects: [],
-      providerRepos: [providerRepo],
-      namespaces: [{ path: 'path' }],
-    });
-
-    return vm
-      .$nextTick()
-      .then(() => {
-        expect(vm.$el.querySelector('.js-imported-project')).toBeNull();
-        expect(vm.$el.querySelector('.js-provider-repo')).not.toBeNull();
-
-        vm.$store.dispatch('receiveImportSuccess', { importedProject, repoId: providerRepo.id });
-      })
-      .then(() => vm.$nextTick())
-      .then(() => {
-        expect(vm.$el.querySelector('.js-imported-project')).not.toBeNull();
-        expect(vm.$el.querySelector('.js-provider-repo')).toBeNull();
-      });
-  });
-
-  it('polls to update the status of imported projects', () => {
-    const updatedProjects = [
-      {
-        id: importedProject.id,
-        importStatus: 'finished',
-      },
+  it('renders a table with provider repos', () => {
+    const repositories = [
+      { importSource: { id: 1 }, importedProject: null },
+      { importSource: { id: 2 }, importedProject: { importStatus: STATUSES.FINISHED } },
+      { importSource: { id: 3, incompatible: true }, importedProject: {} },
     ];
 
-    vm.$store.dispatch('receiveReposSuccess', {
-      importedProjects: [importedProject],
-      providerRepos: [],
-      namespaces: [{ path: 'path' }],
+    createComponent({
+      state: { namespaces: [{ fullPath: 'path' }], repositories },
     });
 
-    return vm
-      .$nextTick()
-      .then(() => {
-        const statusObject = STATUS_MAP[importedProject.importStatus];
-
-        expect(vm.$el.querySelector('.js-imported-project')).not.toBeNull();
-        expect(vm.$el.querySelector(`.${statusObject.textClass}`).textContent).toMatch(
-          statusObject.text,
-        );
-
-        expect(vm.$el.querySelector(`.ic-status_${statusObject.icon}`)).not.toBeNull();
-
-        vm.$store.dispatch('receiveJobsSuccess', updatedProjects);
-      })
-      .then(() => vm.$nextTick())
-      .then(() => {
-        const statusObject = STATUS_MAP[updatedProjects[0].importStatus];
-
-        expect(vm.$el.querySelector('.js-imported-project')).not.toBeNull();
-        expect(vm.$el.querySelector(`.${statusObject.textClass}`).textContent).toMatch(
-          statusObject.text,
-        );
-
-        expect(vm.$el.querySelector(`.ic-status_${statusObject.icon}`)).not.toBeNull();
-      });
-  });
-
-  it('renders filtering input field', () => {
+    expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+    expect(wrapper.find('table').exists()).toBe(true);
     expect(
-      vm.$el.querySelector('input[data-qa-selector="githubish_import_filter_field"]'),
-    ).not.toBeNull();
+      wrapper
+        .findAll('th')
+        .filter(w => w.text() === `From ${providerTitle}`)
+        .exists(),
+    ).toBe(true);
+
+    expect(wrapper.findAll(ProviderRepoTableRow)).toHaveLength(repositories.length);
   });
+
+  it.each`
+    hasIncompatibleRepos | count | buttonText
+    ${false}             | ${1}  | ${'Import 1 repository'}
+    ${true}              | ${1}  | ${'Import 1 compatible repository'}
+    ${false}             | ${5}  | ${'Import 5 repositories'}
+    ${true}              | ${5}  | ${'Import 5 compatible repositories'}
+  `(
+    'import all button has "$buttonText" text when hasIncompatibleRepos is $hasIncompatibleRepos and repos count is $count',
+    ({ hasIncompatibleRepos, buttonText, count }) => {
+      createComponent({
+        state: {
+          providerRepos: [providerRepo],
+        },
+        getters: {
+          hasIncompatibleRepos: () => hasIncompatibleRepos,
+          importAllCount: () => count,
+        },
+      });
+
+      expect(findImportAllButton().text()).toBe(buttonText);
+    },
+  );
+
+  it('renders an empty state if there are no repositories available', () => {
+    createComponent({ state: { repositories: [] } });
+
+    expect(wrapper.find(ProviderRepoTableRow).exists()).toBe(false);
+    expect(wrapper.text()).toContain(`No ${providerTitle} repositories found`);
+  });
+
+  it('opens confirmation modal when import all button is clicked', async () => {
+    createComponent({ state: { repositories: [providerRepo] } });
+
+    findImportAllButton().vm.$emit('click');
+    await nextTick();
+
+    expect(importAllModalShowFn).toHaveBeenCalled();
+  });
+
+  it('triggers importAll action when modal is confirmed', async () => {
+    createComponent({ state: { providerRepos: [providerRepo] } });
+
+    findImportAllModal().vm.$emit('ok');
+    await nextTick();
+
+    expect(importAllFn).toHaveBeenCalled();
+  });
+
+  it('shows loading spinner when import is in progress', () => {
+    createComponent({ getters: { isImportingAnyRepo: () => true } });
+
+    expect(findImportAllButton().props().loading).toBe(true);
+  });
+
+  it('renders filtering input field by default', () => {
+    createComponent();
+
+    expect(findFilterField().exists()).toBe(true);
+  });
+
+  it('does not render filtering input field when filterable is false', () => {
+    createComponent({ filterable: false });
+
+    expect(findFilterField().exists()).toBe(false);
+  });
+
+  describe('when paginatable is set to true', () => {
+    const pageInfo = { page: 1 };
+
+    beforeEach(() => {
+      createComponent({
+        state: {
+          namespaces: [{ fullPath: 'path' }],
+          pageInfo,
+          repositories: [
+            { importSource: { id: 1 }, importedProject: null, importStatus: STATUSES.NONE },
+          ],
+        },
+        paginatable: true,
+      });
+    });
+
+    it('does not call fetchRepos on mount', () => {
+      expect(fetchReposFn).not.toHaveBeenCalled();
+    });
+
+    it('renders intersection observer component', () => {
+      expect(wrapper.find(GlIntersectionObserver).exists()).toBe(true);
+    });
+
+    it('calls fetchRepos when intersection observer appears', async () => {
+      wrapper.find(GlIntersectionObserver).vm.$emit('appear');
+
+      await nextTick();
+
+      expect(fetchReposFn).toHaveBeenCalled();
+    });
+  });
+
+  it('calls fetchRepos on mount', () => {
+    createComponent();
+
+    expect(fetchReposFn).toHaveBeenCalled();
+  });
+
+  it.each`
+    hasIncompatibleRepos | shouldRenderSlot | action
+    ${false}             | ${false}         | ${'does not render'}
+    ${true}              | ${true}          | ${'render'}
+  `(
+    '$action incompatible-repos-warning slot if hasIncompatibleRepos is $hasIncompatibleRepos',
+    ({ hasIncompatibleRepos, shouldRenderSlot }) => {
+      const INCOMPATIBLE_TEXT = 'INCOMPATIBLE!';
+
+      createComponent({
+        getters: {
+          hasIncompatibleRepos: () => hasIncompatibleRepos,
+        },
+
+        slots: {
+          'incompatible-repos-warning': INCOMPATIBLE_TEXT,
+        },
+      });
+
+      expect(wrapper.text().includes(INCOMPATIBLE_TEXT)).toBe(shouldRenderSlot);
+    },
+  );
 });

@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe 'CycleAnalytics#staging' do
+RSpec.describe 'CycleAnalytics#staging' do
   extend CycleAnalyticsHelpers::TestGeneration
 
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:from_date) { 10.days.ago }
-  let_it_be(:user) { create(:user, :admin) }
+  let_it_be(:user) { project.owner }
   let_it_be(:project_level) { CycleAnalytics::ProjectLevel.new(project, options: { from: from_date }) }
 
   subject { project_level }

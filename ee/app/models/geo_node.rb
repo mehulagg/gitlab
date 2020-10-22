@@ -179,7 +179,7 @@ class GeoNode < ApplicationRecord
   #
   # @param [String] replicable_name
   # @param [Integer] replicable_id
-  def geo_retrieve_url(replicable_name, replicable_id)
+  def geo_retrieve_url(replicable_name:, replicable_id:)
     geo_api_url("retrieve/#{replicable_name}/#{replicable_id}")
   end
 
@@ -196,11 +196,19 @@ class GeoNode < ApplicationRecord
     geo_api_url('status')
   end
 
+  def node_api_url(node)
+    api_url("geo_nodes/#{node.id}")
+  end
+
   def snapshot_url(repository)
     url = api_url("projects/#{repository.project.id}/snapshot")
     url += "?wiki=1" if repository.repo_type.wiki?
 
     url
+  end
+
+  def repository_url(repository)
+    Gitlab::Utils.append_path(internal_url, "#{repository.full_path}.git")
   end
 
   def oauth_callback_url
@@ -228,53 +236,46 @@ class GeoNode < ApplicationRecord
     # be called in an initializer and we don't want other callbacks
     # to mess with uninitialized dependencies.
     if clone_url_prefix_changed?
-      Rails.logger.info "Geo: modified clone_url_prefix to #{clone_url_prefix}" # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.info "Geo: modified clone_url_prefix to #{clone_url_prefix}"
       update_column(:clone_url_prefix, clone_url_prefix)
     end
   end
 
-  def job_artifacts
-    return Ci::JobArtifact.all unless selective_sync?
-
-    query = Ci::JobArtifact.project_id_in(projects).select(:id)
-    cte = Gitlab::SQL::CTE.new(:restricted_job_artifacts, query)
-    job_artifact_table = Ci::JobArtifact.arel_table
-
-    inner_join_restricted_job_artifacts =
-      cte.table
-        .join(job_artifact_table, Arel::Nodes::InnerJoin)
-        .on(cte.table[:id].eq(job_artifact_table[:id]))
-        .join_sources
-
-    Ci::JobArtifact
-      .with(cte.to_arel)
-      .from(cte.table)
-      .joins(inner_join_restricted_job_artifacts)
-  end
-
   def container_repositories
+    return ContainerRepository.none unless Geo::ContainerRepositoryRegistry.replication_enabled?
     return ContainerRepository.all unless selective_sync?
 
     ContainerRepository.project_id_in(projects)
   end
 
-  def lfs_objects
-    return LfsObject.all unless selective_sync?
+  def container_repositories_include?(container_repository_id)
+    return false unless Geo::ContainerRepositoryRegistry.replication_enabled?
+    return true unless selective_sync?
 
-    query = LfsObjectsProject.project_id_in(projects).select(:lfs_object_id)
-    cte = Gitlab::SQL::CTE.new(:restricted_lfs_objects, query)
-    lfs_object_table = LfsObject.arel_table
+    container_repositories.where(id: container_repository_id).exists?
+  end
 
-    inner_join_restricted_lfs_objects =
-      cte.table
-        .join(lfs_object_table, Arel::Nodes::InnerJoin)
-        .on(cte.table[:lfs_object_id].eq(lfs_object_table[:id]))
-        .join_sources
+  def designs
+    projects.with_designs
+  end
 
-    LfsObject
-      .with(cte.to_arel)
-      .from(cte.table)
-      .joins(inner_join_restricted_lfs_objects)
+  def designs_include?(project_id)
+    return true unless selective_sync?
+
+    designs.where(id: project_id).exists?
+  end
+
+  # @param primary_key_in [Range, LfsObject] arg to pass to primary_key_in scope
+  # @return [ActiveRecord::Relation<LfsObject>] scope of LfsObject filtered by selective sync settings and primary key arg
+  def lfs_objects(primary_key_in:)
+    return LfsObject.primary_key_in(primary_key_in) unless selective_sync?
+
+    ids = LfsObjectsProject.project_id_in(projects)
+                           .where(lfs_object_id: primary_key_in)
+                           .select(:lfs_object_id)
+                           .distinct
+
+    LfsObject.where(id: ids)
   end
 
   def projects
@@ -296,19 +297,19 @@ class GeoNode < ApplicationRecord
   end
 
   def replication_slots_count
-    return unless Gitlab::Database.replication_slots_supported? && primary?
+    return unless primary?
 
     PgReplicationSlot.count
   end
 
   def replication_slots_used_count
-    return unless Gitlab::Database.replication_slots_supported? && primary?
+    return unless primary?
 
     PgReplicationSlot.used_slots_count
   end
 
   def replication_slots_max_retained_wal_bytes
-    return unless Gitlab::Database.replication_slots_supported? && primary?
+    return unless primary?
 
     PgReplicationSlot.max_retained_wal
   end
@@ -418,13 +419,5 @@ class GeoNode < ApplicationRecord
 
   def projects_for_selected_shards
     Project.within_shards(selective_sync_shards)
-  end
-
-  def project_model
-    Project
-  end
-
-  def uploads_model
-    Upload
   end
 end

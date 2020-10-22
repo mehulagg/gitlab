@@ -2,15 +2,18 @@
 
 module SystemNoteHelper
   ICON_NAMES_BY_ACTION = {
+    'approved' => 'approval',
+    'unapproved' => 'unapproval',
     'cherry_pick' => 'cherry-pick-commit',
     'commit' => 'commit',
     'description' => 'pencil-square',
     'merge' => 'git-merge',
     'merged' => 'git-merge',
-    'opened' => 'issue-open',
+    'opened' => 'issues',
     'closed' => 'issue-close',
     'time_tracking' => 'timer',
     'assignee' => 'user',
+    'reviewer' => 'user',
     'title' => 'pencil-square',
     'task' => 'task-done',
     'label' => 'label',
@@ -27,7 +30,15 @@ module SystemNoteHelper
     'locked' => 'lock',
     'unlocked' => 'lock-open',
     'due_date' => 'calendar',
-    'health_status' => 'status-health'
+    'health_status' => 'status-health',
+    'designs_added' => 'doc-image',
+    'designs_modified' => 'doc-image',
+    'designs_removed' => 'doc-image',
+    'designs_discussion_added' => 'doc-image',
+    'status' => 'status',
+    'alert_issue_added' => 'issues',
+    'new_alert_added' => 'warning',
+    'severity' => 'information-o'
   }.freeze
 
   def system_note_icon_name(note)
@@ -42,7 +53,7 @@ module SystemNoteHelper
   extend self
 end
 
-SystemNoteHelper.prepend_if_ee('EE::SystemNoteHelper') # rubocop: disable Cop/InjectEnterpriseEditionModule
+SystemNoteHelper.prepend_if_ee('EE::SystemNoteHelper')
 
 # The methods in `EE::SystemNoteHelper` should be available as both instance and
 # class methods.

@@ -9,7 +9,6 @@ module EE
         migrate_epics
         migrate_requirements_management_requirements
         migrate_vulnerabilities_feedback
-        migrate_reviews
         super
       end
 
@@ -27,10 +26,6 @@ module EE
       def migrate_vulnerabilities_feedback
         user.vulnerability_feedback.update_all(author_id: ghost_user.id)
         user.commented_vulnerability_feedback.update_all(comment_author_id: ghost_user.id)
-      end
-
-      def migrate_reviews
-        user.reviews.update_all(author_id: ghost_user.id)
       end
     end
   end

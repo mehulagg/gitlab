@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20200311130802_schedule_populate_user_highest_roles_table.rb')
 
-describe SchedulePopulateUserHighestRolesTable do
+RSpec.describe SchedulePopulateUserHighestRolesTable do
   let(:users) { table(:users) }
 
   def create_user(id, params = {})
@@ -32,7 +32,7 @@ describe SchedulePopulateUserHighestRolesTable do
     stub_const("#{described_class.name}::BATCH_SIZE", 2)
 
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         expect(described_class::MIGRATION).to be_scheduled_delayed_migration(5.minutes, 1, 4)

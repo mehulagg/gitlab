@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Graphql Field feature flags' do
+RSpec.describe 'Graphql Field feature flags' do
   include GraphqlHelpers
 
   let_it_be(:user) { create(:user) }
@@ -11,6 +11,10 @@ describe 'Graphql Field feature flags' do
   let(:test_object) { double(name: 'My name') }
   let(:query_string) { '{ item { name } }' }
   let(:result) { execute_query(query_type)['data'] }
+
+  before do
+    skip_feature_flags_yaml_validation
+  end
 
   subject { result }
 

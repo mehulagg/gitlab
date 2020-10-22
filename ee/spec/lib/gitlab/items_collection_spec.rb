@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ItemsCollection do
+RSpec.describe Gitlab::ItemsCollection do
   let(:collection) { described_class.new(items) }
   let(:items) { Array.new(42, :dependency) }
 

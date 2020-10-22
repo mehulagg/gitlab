@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LdapGroupSyncWorker do
+RSpec.describe LdapGroupSyncWorker do
   include LdapHelpers
   let(:subject) { described_class.new }
   let(:group) { create(:group) }
@@ -37,7 +37,7 @@ describe LdapGroupSyncWorker do
 
     context 'without a license key' do
       before do
-        License.destroy_all # rubocop: disable DestroyAll
+        License.destroy_all # rubocop: disable Cop/DestroyAll
       end
 
       it 'does not sync groups' do

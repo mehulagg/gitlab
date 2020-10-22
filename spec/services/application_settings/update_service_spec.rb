@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApplicationSettings::UpdateService do
+RSpec.describe ApplicationSettings::UpdateService do
   include ExternalAuthorizationServiceHelpers
 
   let(:application_settings) { create(:application_setting) }
@@ -335,7 +335,7 @@ describe ApplicationSettings::UpdateService do
     end
   end
 
-  context 'when issues_create_limit is passsed' do
+  context 'when issues_create_limit is passed' do
     let(:params) do
       {
         issues_create_limit: 600

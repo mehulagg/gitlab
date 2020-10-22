@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::AuditEvents::ReleaseUpdatedAuditEventService do
+RSpec.describe EE::AuditEvents::ReleaseUpdatedAuditEventService do
   describe '#security_event' do
     include_examples 'logs the release audit event' do
       let(:release) { create(:release, project: entity) }

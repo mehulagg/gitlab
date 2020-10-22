@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MetricsReportsComparerEntity do
+RSpec.describe MetricsReportsComparerEntity do
   let(:base_report) { build(:ci_reports_metrics_report, :base_metrics) }
   let(:head_report) { build(:ci_reports_metrics_report, :head_metrics) }
   let(:comparer) { Gitlab::Ci::Reports::Metrics::ReportsComparer.new(base_report, head_report) }

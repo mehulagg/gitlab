@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupIssuableAutocompleteEntity do
+RSpec.describe GroupIssuableAutocompleteEntity do
   let(:group) { build_stubbed(:group) }
   let(:project) { build_stubbed(:project, group: group) }
   let(:issue) { build_stubbed(:issue, project: project) }

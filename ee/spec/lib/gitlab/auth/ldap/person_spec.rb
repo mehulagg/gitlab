@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::Ldap::Person do
+RSpec.describe Gitlab::Auth::Ldap::Person do
   include LdapHelpers
 
   let(:entry) { ldap_user_entry('john.doe') }
@@ -15,6 +15,13 @@ describe Gitlab::Auth::Ldap::Person do
     it 'appends EE-specific attributes' do
       stub_ldap_config(sync_ssh_keys: 'sshPublicKey')
       expect(described_class.ldap_attributes(ldap_adapter.config)).to include('sshPublicKey')
+    end
+
+    it 'appends first and last name attributes' do
+      stub_ldap_config(options: { 'attributes' => { 'first_name' => 'name', 'last_name' => 'surname' } })
+
+      expect(described_class.ldap_attributes(ldap_adapter.config)).to include('name')
+      expect(described_class.ldap_attributes(ldap_adapter.config)).to include('surname')
     end
   end
 
@@ -53,32 +60,63 @@ describe Gitlab::Auth::Ldap::Person do
   describe '.find_by_kerberos_principal' do
     let(:adapter) { ldap_adapter }
     let(:username) { 'foo' }
-    let(:principal) { username + '@' + kerberos_realm }
     let(:ldap_server) { 'ad.example.com' }
 
-    subject { described_class.find_by_kerberos_principal(principal, adapter) }
+    subject(:ldap_person) { described_class.find_by_kerberos_principal(principal, adapter) }
 
     before do
       stub_ldap_config(uid: 'sAMAccountName', base: 'ou=foo,dc=' + ldap_server.gsub('.', ',dc='))
     end
 
-    context 'LDAP server is not for kerberos realm' do
-      let(:kerberos_realm) { 'kerberos.example.com' }
+    context 'when simple LDAP linking is not configured' do
+      let(:principal) { username + '@' + kerberos_realm }
 
-      it 'returns nil without searching' do
-        expect(adapter).not_to receive(:user)
+      context 'LDAP server is not for kerberos realm' do
+        let(:kerberos_realm) { 'kerberos.example.com' }
 
-        is_expected.to be_nil
+        it 'returns nil without searching' do
+          expect(adapter).not_to receive(:user)
+
+          is_expected.to be_nil
+        end
+      end
+
+      context 'LDAP server is for kerberos realm' do
+        let(:kerberos_realm) { ldap_server }
+
+        it 'searches by configured uid attribute' do
+          expect(adapter).to receive(:user).with('sAMAccountName', username).and_return(:fake_user)
+
+          is_expected.to eq(:fake_user)
+        end
       end
     end
 
-    context 'LDAP server is for kerberos realm' do
-      let(:kerberos_realm) { ldap_server }
+    context 'when simple LDAP linking is enabled' do
+      let(:allowed_realms) { ['kerberos.example.com', ldap_server] }
 
-      it 'searches by configured uid attribute' do
-        expect(adapter).to receive(:user).with('sAMAccountName', username).and_return(:fake_user)
+      before do
+        stub_config(kerberos: { simple_ldap_linking_allowed_realms: allowed_realms })
+      end
 
-        is_expected.to eq(:fake_user)
+      context 'principal domain matches an allowed realm' do
+        let(:principal) { "#{username}@#{allowed_realms[0]}" }
+
+        it 'searches by configured uid attribute' do
+          expect(adapter).to receive(:user).with('sAMAccountName', username).and_return(:fake_user)
+
+          expect(ldap_person).to eq(:fake_user)
+        end
+      end
+
+      context 'principal domain does not match an allowed realm' do
+        let(:principal) { "#{username}@alternate.example.com" }
+
+        it 'returns nil without searching' do
+          expect(adapter).not_to receive(:user)
+
+          is_expected.to be_nil
+        end
       end
     end
   end
@@ -91,7 +129,9 @@ describe Gitlab::Auth::Ldap::Person do
           'attributes'   => {
             'name'       => 'cn',
             'email'      => 'mail',
-            'username'   => %w(uid mail memberof)
+            'username'   => %w(uid mail),
+            'first_name' => 'name',
+            'last_name'  => 'surname'
           },
           'sync_ssh_keys' => value
         }
@@ -100,7 +140,7 @@ describe Gitlab::Auth::Ldap::Person do
 
     let(:config) { Gitlab::Auth::Ldap::Config.new('ldapmain') }
     let(:ldap_attributes) { described_class.ldap_attributes(config) }
-    let(:expected_attributes) { %w(dn cn uid mail memberof) }
+    let(:expected_attributes) { %w(dn cn uid mail memberof name surname) }
 
     it 'includes a real attribute name' do
       stub_sync_ssh_keys('my-ssh-attribute')

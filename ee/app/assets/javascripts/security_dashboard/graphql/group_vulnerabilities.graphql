@@ -1,23 +1,29 @@
-#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
-#import "ee/vulnerabilities/graphql/vulnerability.fragment.graphql"
+#import "~/graphql_shared/fragments/pageInfoCursorsOnly.fragment.graphql"
+#import "./vulnerability.fragment.graphql"
 
 query group(
-  $fullPath: ID!,
-  $after: String,
-  $first: Int,
+  $fullPath: ID!
+  $after: String
+  $first: Int
+  $projectId: [ID!]
   $severity: [VulnerabilitySeverity!]
   $reportType: [VulnerabilityReportType!]
+  $scanner: [String!]
   $state: [VulnerabilityState!]
+  $sort: VulnerabilitySort
 ) {
   group(fullPath: $fullPath) {
     vulnerabilities(
-      after:$after,
-      first:$first,
+      after: $after
+      first: $first
       severity: $severity
       reportType: $reportType
+      scanner: $scanner
       state: $state
-    ){
-      nodes{
+      projectId: $projectId
+      sort: $sort
+    ) {
+      nodes {
         ...Vulnerability
       }
       pageInfo {

@@ -2,11 +2,12 @@
 
 require 'spec_helper'
 
-describe StatusPage::IncidentCommentEntity do
+RSpec.describe StatusPage::IncidentCommentEntity do
   let_it_be(:note, reload: true) { create(:note, note: ':ok:') }
   let(:json) { subject.as_json }
+  let(:issue) { instance_double(Issue, iid: 1) }
 
-  subject { described_class.new(note) }
+  subject { described_class.new(note, issue_iid: issue.iid) }
 
   it 'exposes JSON fields' do
     expect(json).to eq(
@@ -17,6 +18,12 @@ describe StatusPage::IncidentCommentEntity do
 
   describe 'field #note' do
     it_behaves_like 'reference links for status page' do
+      let(:object) { note }
+      let(:field) { :note }
+      let(:value) { json[:note] }
+    end
+
+    it_behaves_like 'img upload tags for status page' do
       let(:object) { note }
       let(:field) { :note }
       let(:value) { json[:note] }

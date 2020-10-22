@@ -48,6 +48,13 @@ class GitlabSchema < GraphQL::Schema
       super(query_str, **kwargs)
     end
 
+    def get_type(type_name)
+      # This is a backwards compatibility hack to work around an accidentally
+      # released argument typed as EEIterationID
+      type_name = type_name.gsub(/^EE/, '') if type_name.end_with?('ID')
+      super(type_name)
+    end
+
     def id_from_object(object, _type = nil, _ctx = nil)
       unless object.respond_to?(:to_global_id)
         # This is an error in our schema and needs to be solved. So raise a
@@ -77,6 +84,8 @@ class GitlabSchema < GraphQL::Schema
     #   will be called.
     # * All other classes will use `GlobalID#find`
     def find_by_gid(gid)
+      return unless gid
+
       if gid.model_class < ApplicationRecord
         Gitlab::Graphql::Loaders::BatchModelLoader.new(gid.model_class, gid.model_id).find
       elsif gid.model_class.respond_to?(:lazy_find)
@@ -107,11 +116,11 @@ class GitlabSchema < GraphQL::Schema
       expected_type = ctx[:expected_type]
       gid = GlobalID.parse(global_id)
 
-      raise Gitlab::Graphql::Errors::ArgumentError, "#{global_id} is not a valid GitLab id." unless gid
+      raise Gitlab::Graphql::Errors::ArgumentError, "#{global_id} is not a valid GitLab ID." unless gid
 
       if expected_type && !gid.model_class.ancestors.include?(expected_type)
         vars = { global_id: global_id, expected_type: expected_type }
-        msg = _('%{global_id} is not a valid id for %{expected_type}.') % vars
+        msg = _('%{global_id} is not a valid ID for %{expected_type}.') % vars
         raise Gitlab::Graphql::Errors::ArgumentError, msg
       end
 
@@ -141,6 +150,13 @@ class GitlabSchema < GraphQL::Schema
         DEFAULT_MAX_DEPTH
       end
     end
+  end
+
+  # This is a backwards compatibility hack to work around an accidentally
+  # released argument typed as EE{Type}ID
+  def get_type(type_name)
+    type_name = type_name.gsub(/^EE/, '') if type_name.end_with?('ID')
+    super(type_name)
   end
 end
 

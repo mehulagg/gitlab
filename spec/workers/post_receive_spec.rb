@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PostReceive do
+RSpec.describe PostReceive do
   let(:changes) { "123456 789012 refs/heads/tést\n654321 210987 refs/tags/tag" }
   let(:wrongly_encoded_changes) { changes.encode("ISO-8859-1").force_encoding("UTF-8") }
   let(:base64_changes) { Base64.encode64(wrongly_encoded_changes) }
@@ -27,7 +27,7 @@ describe PostReceive do
   context 'with a non-existing project' do
     let(:gl_repository) { "project-123456789" }
     let(:error_message) do
-      "Triggered hook for non-existing project with gl_repository \"#{gl_repository}\""
+      "Triggered hook for non-existing gl_repository \"#{gl_repository}\""
     end
 
     it "returns false and logs an error" do
@@ -281,7 +281,7 @@ describe PostReceive do
 
     before do
       # Need to mock here so we can expect calls on project
-      allow(Gitlab::GlRepository).to receive(:parse).and_return([project, project, Gitlab::GlRepository::WIKI])
+      allow(Gitlab::GlRepository).to receive(:parse).and_return([project.wiki, project, Gitlab::GlRepository::WIKI])
     end
 
     it 'updates project activity' do
@@ -290,12 +290,37 @@ describe PostReceive do
 
       # MySQL drops milliseconds in the timestamps, so advance at least
       # a second to ensure we see changes.
-      Timecop.freeze(1.second.from_now) do
+      travel_to(1.second.from_now) do
         expect do
           perform
           project.reload
         end.to change(project, :last_activity_at)
            .and change(project, :last_repository_updated_at)
+      end
+    end
+
+    context "master" do
+      let(:default_branch) { 'master' }
+      let(:oldrev) { '012345' }
+      let(:newrev) { '6789ab' }
+      let(:changes) do
+        <<~EOF
+            #{oldrev} #{newrev} refs/heads/#{default_branch}
+            123456 789012 refs/heads/tést2
+        EOF
+      end
+
+      let(:raw_repo) { double('RawRepo') }
+
+      it 'processes the changes on the master branch' do
+        expect_next_instance_of(Git::WikiPushService) do |service|
+          expect(service).to receive(:execute).and_call_original
+        end
+        expect(project.wiki).to receive(:default_branch).twice.and_return(default_branch)
+        expect(project.wiki.repository).to receive(:raw).and_return(raw_repo)
+        expect(raw_repo).to receive(:raw_changes_between).once.with(oldrev, newrev).and_return([])
+
+        perform
       end
     end
 
@@ -305,6 +330,12 @@ describe PostReceive do
             123456 789012 refs/heads/tést1
             123456 789012 refs/heads/tést2
         EOF
+      end
+
+      before do
+        allow_next_instance_of(Git::WikiPushService) do |service|
+          allow(service).to receive(:execute)
+        end
       end
 
       it 'expires the branches cache' do
@@ -324,7 +355,7 @@ describe PostReceive do
 
   context "webhook" do
     it "fetches the correct project" do
-      expect(Project).to receive(:find_by).with(id: project.id.to_s)
+      expect(Project).to receive(:find_by).with(id: project.id)
 
       perform
     end
@@ -397,7 +428,12 @@ describe PostReceive do
           it 'expires the status cache' do
             expect(snippet.repository).to receive(:empty?).and_return(true)
             expect(snippet.repository).to receive(:expire_status_cache)
-            expect(snippet.repository).to receive(:expire_statistics_caches)
+
+            perform
+          end
+
+          it 'updates snippet statistics' do
+            expect(Snippets::UpdateStatisticsService).to receive(:new).with(snippet).and_call_original
 
             perform
           end
@@ -438,6 +474,19 @@ describe PostReceive do
       let!(:snippet) { create(:project_snippet, :repository, project: project, author: project.owner) }
 
       it_behaves_like 'snippet changes actions'
+    end
+  end
+
+  describe 'processing design changes' do
+    let(:gl_repository) { "design-#{project.id}" }
+
+    it 'does not do anything' do
+      worker = described_class.new
+
+      expect(worker).not_to receive(:process_wiki_changes)
+      expect(worker).not_to receive(:process_project_changes)
+
+      described_class.new.perform(gl_repository, key_id, base64_changes)
     end
   end
 end

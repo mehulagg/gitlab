@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Git::BranchPushService, services: true do
+RSpec.describe Git::BranchPushService, services: true do
   include RepoHelpers
 
   let_it_be(:user) { create(:user) }
@@ -315,7 +315,7 @@ describe Git::BranchPushService, services: true do
     let(:issue) { create :issue, project: project }
     let(:commit_author) { create :user }
     let(:commit) { project.commit }
-    let(:commit_time) { Time.now }
+    let(:commit_time) { Time.current }
 
     before do
       project.add_developer(commit_author)
@@ -416,6 +416,7 @@ describe Git::BranchPushService, services: true do
       before do
         # project.create_jira_service doesn't seem to invalidate the cache here
         project.has_external_issue_tracker = true
+        stub_jira_service_test
         jira_service_settings
         stub_jira_urls("JIRA-1")
 
@@ -635,6 +636,37 @@ describe Git::BranchPushService, services: true do
     end
   end
 
+  describe 'artifacts' do
+    context 'create branch' do
+      let(:oldrev) { blankrev }
+
+      it 'does nothing' do
+        expect(::Ci::RefDeleteUnlockArtifactsWorker).not_to receive(:perform_async)
+
+        execute_service(project, user, oldrev: oldrev, newrev: newrev, ref: ref)
+      end
+    end
+
+    context 'update branch' do
+      it 'does nothing' do
+        expect(::Ci::RefDeleteUnlockArtifactsWorker).not_to receive(:perform_async)
+
+        execute_service(project, user, oldrev: oldrev, newrev: newrev, ref: ref)
+      end
+    end
+
+    context 'delete branch' do
+      let(:newrev) { blankrev }
+
+      it 'unlocks artifacts' do
+        expect(::Ci::RefDeleteUnlockArtifactsWorker)
+          .to receive(:perform_async).with(project.id, user.id, "refs/heads/#{branch}")
+
+        execute_service(project, user, oldrev: oldrev, newrev: newrev, ref: ref)
+      end
+    end
+  end
+
   describe 'Hooks' do
     context 'run on a branch' do
       it 'delegates to Git::BranchHooksService' do
@@ -671,5 +703,69 @@ describe Git::BranchPushService, services: true do
     service = described_class.new(project, user, change: change, push_options: push_options)
     service.execute
     service
+  end
+
+  context 'Jira Connect hooks' do
+    let_it_be(:project) { create(:project, :repository) }
+    let(:branch_to_sync) { nil }
+    let(:commits_to_sync) { [] }
+    let(:params) do
+      { change: { oldrev: oldrev, newrev: newrev, ref: ref } }
+    end
+
+    subject do
+      described_class.new(project, user, params)
+    end
+
+    shared_examples 'enqueues Jira sync worker' do
+      specify do
+        Sidekiq::Testing.fake! do
+          expect(JiraConnect::SyncBranchWorker).to receive(:perform_async)
+                                                     .with(project.id, branch_to_sync, commits_to_sync)
+                                                     .and_call_original
+
+          expect { subject.execute }.to change(JiraConnect::SyncBranchWorker.jobs, :size).by(1)
+        end
+      end
+    end
+
+    shared_examples 'does not enqueue Jira sync worker' do
+      specify do
+        Sidekiq::Testing.fake! do
+          expect { subject.execute }.not_to change(JiraConnect::SyncBranchWorker.jobs, :size)
+        end
+      end
+    end
+
+    context 'with a Jira subscription' do
+      before do
+        create(:jira_connect_subscription, namespace: project.namespace)
+      end
+
+      context 'branch name contains Jira issue key' do
+        let(:branch_to_sync) { 'branch-JIRA-123' }
+        let(:ref) { "refs/heads/#{branch_to_sync}" }
+
+        it_behaves_like 'enqueues Jira sync worker'
+      end
+
+      context 'commit message contains Jira issue key' do
+        let(:commits_to_sync) { [newrev] }
+
+        before do
+          allow_any_instance_of(Commit).to receive(:safe_message).and_return('Commit with key JIRA-123')
+        end
+
+        it_behaves_like 'enqueues Jira sync worker'
+      end
+
+      context 'branch name and commit message does not contain Jira issue key' do
+        it_behaves_like 'does not enqueue Jira sync worker'
+      end
+    end
+
+    context 'without a Jira subscription' do
+      it_behaves_like 'does not enqueue Jira sync worker'
+    end
   end
 end

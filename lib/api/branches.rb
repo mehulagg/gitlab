@@ -3,10 +3,12 @@
 require 'mime/types'
 
 module API
-  class Branches < Grape::API
+  class Branches < ::API::Base
     include PaginationParams
 
     BRANCH_ENDPOINT_REQUIREMENTS = API::NAMESPACE_OR_PROJECT_REQUIREMENTS.merge(branch: API::NO_SLASH_URL_PART_REGEX)
+
+    after_validation { content_type "application/json" }
 
     before do
       require_repository_enabled!
@@ -30,14 +32,17 @@ module API
       params do
         use :pagination
         use :filter_params
+
+        optional :page_token, type: String, desc: 'Name of branch to start the paginaition from'
       end
       get ':id/repository/branches' do
         user_project.preload_protected_branches
 
         repository = user_project.repository
 
-        branches = BranchesFinder.new(repository, declared_params(include_missing: false)).execute
-        branches = paginate(::Kaminari.paginate_array(branches))
+        branches_finder = BranchesFinder.new(repository, declared_params(include_missing: false))
+        branches = Gitlab::Pagination::GitalyKeysetPager.new(self, user_project).paginate(branches_finder)
+
         merged_branch_names = repository.merged_branch_names(branches.map(&:name))
 
         present(

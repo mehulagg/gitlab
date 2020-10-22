@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20200124110831_migrate_design_notes_mentions_to_db')
+require_migration!
 
-describe MigrateDesignNotesMentionsToDb, :sidekiq do
+RSpec.describe MigrateDesignNotesMentionsToDb, :sidekiq do
   let(:users) { table(:users) }
   let(:projects) { table(:projects) }
   let(:namespaces) { table(:namespaces) }

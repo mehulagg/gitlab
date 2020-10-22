@@ -1,9 +1,11 @@
 <script>
+import Cookies from 'js-cookie';
 import { GlAlert } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 
+export const COOKIE_NAME = 'dismissed_resolution_alerts';
+
 export default {
-  name: 'ResolutionAlert',
   components: {
     GlAlert,
   },
@@ -13,10 +15,16 @@ export default {
       required: false,
       default: '',
     },
+    vulnerabilityId: {
+      type: Number,
+      required: true,
+    },
   },
-  data: () => ({
-    isVisible: true,
-  }),
+  data() {
+    return {
+      isVisible: this.isAlreadyDismissed() === false,
+    };
+  },
   computed: {
     resolutionTitle() {
       return this.defaultBranchName
@@ -25,10 +33,19 @@ export default {
     },
   },
   methods: {
+    alreadyDismissedVulnerabilities() {
+      try {
+        return JSON.parse(Cookies.get(COOKIE_NAME));
+      } catch (e) {
+        return [];
+      }
+    },
+    isAlreadyDismissed() {
+      return this.alreadyDismissedVulnerabilities().some(id => id === this.vulnerabilityId);
+    },
     dismiss() {
-      // This isn't the best way to handle the dismissal, but it is a borig solution.
-      // The next iteration of this is tracked in the below issue.
-      // https://gitlab.com/gitlab-org/gitlab/-/issues/212195
+      const dismissed = this.alreadyDismissedVulnerabilities().concat(this.vulnerabilityId);
+      Cookies.set(COOKIE_NAME, JSON.stringify(dismissed), { expires: 90 });
       this.isVisible = false;
     },
   },

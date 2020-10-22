@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProductivityAnalyticsFinder do
+RSpec.describe ProductivityAnalyticsFinder do
   subject { described_class.new(current_user, search_params.merge(state: :merged)) }
 
   let(:current_user) { create(:admin) }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ldap::OmniauthCallbacksController do
+RSpec.describe Ldap::OmniauthCallbacksController do
   include_context 'Ldap::OmniauthCallbacksController'
 
   it "displays LDAP sync flash on first sign in" do
@@ -27,7 +27,7 @@ describe Ldap::OmniauthCallbacksController do
     it 'logs a failure event', retry: 0 do
       stub_licensed_features(extended_audit_events: true)
 
-      expect { post provider }.to change(SecurityEvent, :count).by(1)
+      expect { post provider }.to change(AuditEvent, :count).by(1)
     end
   end
 end

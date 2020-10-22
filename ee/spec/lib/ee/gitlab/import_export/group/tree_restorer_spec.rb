@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ImportExport::Group::TreeRestorer do
+RSpec.describe Gitlab::ImportExport::Group::TreeRestorer do
   include ImportExport::CommonUtil
 
   let(:user) { create(:user) }
@@ -16,10 +16,6 @@ describe Gitlab::ImportExport::Group::TreeRestorer do
     setup_import_export_config('group_exports/light', 'ee')
     group.add_owner(user)
     group_tree_restorer.restore
-  end
-
-  after do
-    cleanup_artifacts_from_extract_archive('group_exports/light', 'ee')
   end
 
   describe 'restore group tree' do

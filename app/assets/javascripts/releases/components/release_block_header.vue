@@ -1,6 +1,5 @@
 <script>
-import { GlTooltipDirective, GlLink, GlBadge } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlTooltipDirective, GlLink, GlBadge, GlButton } from '@gitlab/ui';
 import { BACK_URL_PARAM } from '~/releases/constants';
 import { setUrlParams } from '~/lib/utils/url_utility';
 
@@ -9,7 +8,7 @@ export default {
   components: {
     GlLink,
     GlBadge,
-    Icon,
+    GlButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -41,7 +40,7 @@ export default {
 
 <template>
   <div class="card-header d-flex align-items-center bg-white pr-0">
-    <h2 class="card-title my-2 mr-auto gl-font-size-20-deprecated-no-really-do-not-use-me">
+    <h2 class="card-title my-2 mr-auto">
       <gl-link v-if="selfLink" :href="selfLink" class="font-size-inherit">
         {{ release.name }}
       </gl-link>
@@ -50,14 +49,15 @@ export default {
         __('Upcoming Release')
       }}</gl-badge>
     </h2>
-    <gl-link
+    <gl-button
       v-if="editLink"
       v-gl-tooltip
-      class="btn btn-default append-right-10 js-edit-button ml-2"
+      category="primary"
+      variant="default"
+      icon="pencil"
+      class="gl-mr-3 js-edit-button ml-2 pb-2"
       :title="__('Edit this release')"
       :href="editLink"
-    >
-      <icon name="pencil" />
-    </gl-link>
+    />
   </div>
 </template>

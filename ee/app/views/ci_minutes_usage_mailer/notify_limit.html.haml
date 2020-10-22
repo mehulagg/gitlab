@@ -1,6 +1,7 @@
 %p
-  This is an automated notification to let you know that your CI Runner Minutes quota for "#{@namespace_name}" is below #{@percentage_of_available_mins}%.
+  - name_link = link_to @namespace.name, group_url(@namespace)
+  = html_escape(_('%{name_with_link} has %{percent} or less Shared Runner Pipeline minutes remaining. Once it runs out, no new jobs or pipelines in its projects will run.')) % { name_with_link: name_link.html_safe, percent: "#{@percentage_of_available_mins}%" }
 %p
-  Click #{link_to('here', EE::SUBSCRIPTIONS_PLANS_URL)} to purchase more minutes.
+  = _('We recommend that you buy more Pipeline minutes to avoid any interruption of service.')
 %p
-  If you need assistance, please contact #{link_to('GitLab support', EE::CUSTOMER_SUPPORT_URL)}.
+  #{link_to('Buy more Pipeline minutes →', EE::SUBSCRIPTIONS_MORE_MINUTES_URL)}

@@ -46,10 +46,6 @@ describe('EE Sidebar store', () => {
   });
 
   describe('setWeightData', () => {
-    beforeEach(() => {
-      expect(store.weight).toBe(null);
-    });
-
     it('sets weight data', () => {
       const weight = 3;
       store.setWeightData({

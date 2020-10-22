@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequestPolicy do
+RSpec.describe MergeRequestPolicy do
   include ExternalAuthorizationServiceHelpers
 
   let(:guest) { create(:user) }
@@ -21,15 +21,16 @@ describe MergeRequestPolicy do
     project.add_developer(developer)
   end
 
-  MR_PERMS = %i[create_merge_request_in
+  mr_perms = %i[create_merge_request_in
                 create_merge_request_from
                 read_merge_request
+                approve_merge_request
                 create_note].freeze
 
   shared_examples_for 'a denied user' do
     let(:perms) { permissions(subject, merge_request) }
 
-    MR_PERMS.each do |thing|
+    mr_perms.each do |thing|
       it "cannot #{thing}" do
         expect(perms).to be_disallowed(thing)
       end
@@ -39,7 +40,7 @@ describe MergeRequestPolicy do
   shared_examples_for 'a user with access' do
     let(:perms) { permissions(subject, merge_request) }
 
-    MR_PERMS.each do |thing|
+    mr_perms.each do |thing|
       it "can #{thing}" do
         expect(perms).to be_allowed(thing)
       end
@@ -50,7 +51,7 @@ describe MergeRequestPolicy do
     let!(:merge_request) { create(:merge_request, source_project: project, target_project: project, author: author) }
 
     before do
-      project.project_feature.update(merge_requests_access_level: ProjectFeature::DISABLED)
+      project.project_feature.update!(merge_requests_access_level: ProjectFeature::DISABLED)
     end
 
     describe 'the author' do
@@ -82,8 +83,8 @@ describe MergeRequestPolicy do
     let!(:merge_request) { create(:merge_request, source_project: project, target_project: project, author: author) }
 
     before do
-      project.update(visibility_level: Gitlab::VisibilityLevel::PUBLIC)
-      project.project_feature.update(merge_requests_access_level: ProjectFeature::PRIVATE)
+      project.update!(visibility_level: Gitlab::VisibilityLevel::PUBLIC)
+      project.project_feature.update!(merge_requests_access_level: ProjectFeature::PRIVATE)
     end
 
     describe 'a non-team-member' do

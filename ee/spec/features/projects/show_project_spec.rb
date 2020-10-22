@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Project show page', :feature do
+RSpec.describe 'Project show page', :feature do
   let_it_be(:user) { create(:user) }
 
   describe 'stat button existence' do

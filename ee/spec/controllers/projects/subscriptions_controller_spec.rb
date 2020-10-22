@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::SubscriptionsController do
+RSpec.describe Projects::SubscriptionsController do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
 
@@ -18,7 +18,7 @@ describe Projects::SubscriptionsController do
 
     before do
       plan_limits = create(:plan_limits, :default_plan)
-      plan_limits.update(ci_project_subscriptions: 2)
+      plan_limits.update!(ci_project_subscriptions: 2)
     end
 
     context 'when user is authorized' do
@@ -80,7 +80,7 @@ describe Projects::SubscriptionsController do
 
           context 'when project is not public' do
             before do
-              upstream_project.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+              upstream_project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
             end
 
             it 'does not create a new subscription' do

@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe "CI YML Templates" do
+RSpec.describe "CI YML Templates" do
   using RSpec::Parameterized::TableSyntax
 
-  subject { Gitlab::Ci::YamlProcessor.new(content) }
+  subject { Gitlab::Ci::YamlProcessor.new(content).execute }
 
   where(:template_name) do
     Gitlab::Template::GitlabCiYmlTemplate.all.map(&:full_name)
@@ -24,7 +24,7 @@ describe "CI YML Templates" do
     end
 
     it 'is valid' do
-      expect { subject }.not_to raise_error
+      expect(subject).to be_valid
     end
 
     it 'require default stages to be included' do

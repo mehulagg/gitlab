@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class GroupPolicy < BasePolicy
-  include CrudPolicyHelpers
   include FindGroupProjects
 
   desc "Group is public"
@@ -43,29 +42,46 @@ class GroupPolicy < BasePolicy
     @subject.subgroup_creation_level == ::Gitlab::Access::MAINTAINER_SUBGROUP_ACCESS
   end
 
-  desc "Group has wiki disabled"
-  condition(:wiki_disabled, score: 32) { !feature_available?(:wiki) }
+  condition(:design_management_enabled) do
+    group_projects_for(user: @user, group: @subject, only_owned: false).any? { |p| p.design_management_enabled? }
+  end
+
+  desc "Deploy token with read_package_registry scope"
+  condition(:read_package_registry_deploy_token) do
+    @user.is_a?(DeployToken) && @user.groups.include?(@subject) && @user.read_package_registry
+  end
+
+  desc "Deploy token with write_package_registry scope"
+  condition(:write_package_registry_deploy_token) do
+    @user.is_a?(DeployToken) && @user.groups.include?(@subject) && @user.write_package_registry
+  end
+
+  with_scope :subject
+  condition(:resource_access_token_available) { resource_access_token_available? }
+
+  rule { design_management_enabled }.policy do
+    enable :read_design_activity
+  end
 
   rule { public_group }.policy do
     enable :read_group
     enable :read_package
-    enable :read_wiki
   end
 
-  rule { logged_in_viewable }.policy do
-    enable :read_group
-    enable :read_wiki
-  end
+  rule { logged_in_viewable }.enable :read_group
 
   rule { guest }.policy do
     enable :read_group
-    enable :read_wiki
     enable :upload_file
   end
 
   rule { admin }.policy do
     enable :read_group
     enable :update_max_artifacts_size
+  end
+
+  rule { can?(:read_all_resources) }.policy do
+    enable :read_confidential_issues
   end
 
   rule { has_projects }.policy do
@@ -77,27 +93,31 @@ class GroupPolicy < BasePolicy
     enable :read_list
     enable :read_label
     enable :read_board
+    enable :read_group_member
+  end
+
+  rule { ~can?(:read_group) }.policy do
+    prevent :read_design_activity
   end
 
   rule { has_access }.enable :read_namespace
 
   rule { developer }.policy do
     enable :admin_milestone
-    enable :read_package
     enable :create_metrics_dashboard_annotation
     enable :delete_metrics_dashboard_annotation
     enable :update_metrics_dashboard_annotation
-    enable :create_wiki
   end
 
   rule { reporter }.policy do
     enable :reporter_access
     enable :read_container_image
-    enable :download_wiki_code
     enable :admin_label
     enable :admin_list
     enable :admin_issue
     enable :read_metrics_dashboard_annotation
+    enable :read_prometheus
+    enable :read_package
   end
 
   rule { maintainer }.policy do
@@ -109,10 +129,8 @@ class GroupPolicy < BasePolicy
     enable :create_cluster
     enable :update_cluster
     enable :admin_cluster
-    enable :destroy_deploy_token
     enable :read_deploy_token
-    enable :create_deploy_token
-    enable :admin_wiki
+    enable :create_jira_connect_subscription
   end
 
   rule { owner }.policy do
@@ -124,6 +142,8 @@ class GroupPolicy < BasePolicy
     enable :set_note_created_at
     enable :set_emails_disabled
     enable :update_default_branch_protection
+    enable :create_deploy_token
+    enable :destroy_deploy_token
   end
 
   rule { can?(:read_nested_project_resources) }.policy do
@@ -133,6 +153,7 @@ class GroupPolicy < BasePolicy
     enable :read_group_labels
     enable :read_group_milestones
     enable :read_group_merge_requests
+    enable :read_group_build_report_results
   end
 
   rule { can?(:read_cross_project) & can?(:read_group) }.policy do
@@ -159,13 +180,23 @@ class GroupPolicy < BasePolicy
 
   rule { maintainer & can?(:create_projects) }.enable :transfer_projects
 
-  rule { wiki_disabled }.policy do
-    prevent(*create_read_update_admin_destroy(:wiki))
-    prevent(:download_wiki_code)
+  rule { read_package_registry_deploy_token }.policy do
+    enable :read_package
+    enable :read_group
+  end
+
+  rule { write_package_registry_deploy_token }.policy do
+    enable :create_package
+    enable :read_group
+  end
+
+  rule { resource_access_token_available & can?(:admin_group) }.policy do
+    enable :admin_resource_access_tokens
   end
 
   def access_level
     return GroupMember::NO_ACCESS if @user.nil?
+    return GroupMember::NO_ACCESS unless user_is_user?
 
     @access_level ||= lookup_access_level!
   end
@@ -174,19 +205,18 @@ class GroupPolicy < BasePolicy
     @subject.max_member_access_for_user(@user)
   end
 
-  # TODO: Extract this into a helper shared with ProjectPolicy, once we implement group-level features.
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/208412
-  def feature_available?(feature)
-    return false unless feature == :wiki
+  private
 
-    case @subject.wiki_access_level
-    when ProjectFeature::DISABLED
-      false
-    when ProjectFeature::PRIVATE
-      admin? || access_level >= ProjectFeature.required_minimum_access_level(feature)
-    else
-      true
-    end
+  def user_is_user?
+    user.is_a?(User)
+  end
+
+  def group
+    @subject
+  end
+
+  def resource_access_token_available?
+    true
   end
 end
 

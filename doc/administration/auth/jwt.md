@@ -1,5 +1,8 @@
 ---
 type: reference
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # JWT OmniAuth provider
@@ -59,7 +62,8 @@ JWT will provide you with a secret key for you to use.
      }
    ```
 
-   NOTE: **Note:** For more information on each configuration option refer to
+   NOTE: **Note:**
+   For more information on each configuration option refer to
    the [OmniAuth JWT usage documentation](https://github.com/mbleigh/omniauth-jwt#usage).
 
 1. Change `YOUR_APP_SECRET` to the client secret and set `auth_url` to your redirect URL.

@@ -7,11 +7,12 @@ module EE
       attr_reader :issuable
 
       override :execute
-      def execute(_issuable, old_labels: [], is_update: true)
+      def execute(issuable, old_labels: [], old_milestone: nil, is_update: true)
         super
 
         ActiveRecord::Base.no_touching do
-          handle_weight_change(is_update)
+          handle_weight_change
+          handle_iteration_change
 
           if is_update
             handle_date_change_note
@@ -32,26 +33,22 @@ module EE
         end
       end
 
-      def handle_weight_change(is_update)
+      def handle_iteration_change
+        return unless issuable.previous_changes.include?('sprint_id')
+
+        ::ResourceEvents::ChangeIterationService.new(issuable, current_user, old_iteration_id: issuable.sprint_id_before_last_save).execute
+      end
+
+      def handle_weight_change
         return unless issuable.previous_changes.include?('weight')
 
-        if weight_changes_tracking_enabled?
-          # Only create a resource event here if is_update is true to exclude the move issue operation.
-          # ResourceEvents for moved issues are written within AttributesRewriter.
-          EE::ResourceEvents::ChangeWeightService.new([issuable], current_user, Time.now).execute if is_update
-        else
-          ::SystemNoteService.change_weight_note(issuable, issuable.project, current_user)
-        end
+        ::ResourceEvents::ChangeWeightService.new([issuable], current_user, Time.current).execute
       end
 
       def handle_health_status_change
         return unless issuable.previous_changes.include?('health_status')
 
         ::SystemNoteService.change_health_status_note(issuable, issuable.project, current_user)
-      end
-
-      def weight_changes_tracking_enabled?
-        !issuable.is_a?(Epic) && ::Feature.enabled?(:track_issue_weight_change_events, issuable.project)
       end
     end
   end

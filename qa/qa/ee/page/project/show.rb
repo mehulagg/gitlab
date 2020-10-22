@@ -5,6 +5,8 @@ module QA
     module Page
       module Project
         module Show
+          extend QA::Page::PageConcern
+
           def wait_for_repository_replication(max_wait: Runtime::Geo.max_file_replication_time)
             QA::Runtime::Logger.debug(%Q[#{self.class.name} - wait_for_repository_replication])
             wait_until_geo_max_replication_time(max_wait: max_wait) do
@@ -25,7 +27,7 @@ module QA
 
           def wait_for_import_success
             wait_until(max_duration: 120, sleep_interval: 1) do
-              has_text?('The project was successfully imported.')
+              has_element?(:project_name_content)
             end
           end
         end

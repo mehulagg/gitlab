@@ -1,21 +1,34 @@
+---
+stage: Monitor
+group: Health
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # GitLab self monitoring project
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/32351) in GitLab 12.7, behind a disabled feature flag (`self_monitoring_project`).
-> - The feature flag was removed and the Self Monitoring Project was [made generally available](https://gitlab.com/gitlab-org/gitlab/issues/198511) in GitLab 12.8.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32351) in GitLab 12.7, behind a disabled feature flag (`self_monitoring_project`).
+> - The feature flag was removed and the Self Monitoring Project was [made generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/198511) in GitLab 12.8.
 
-GitLab has been adding the ability for administrators to see insights into the health of
-their GitLab instance. In order to surface this experience in a native way, similar to how
-you would interact with an application deployed via GitLab, a base project called
-"GitLab self monitoring" with
-[internal visibility](../../../public_access/public_access.md#internal-projects) will be
-added under a group called "GitLab Instance Administrators" specifically created for
-visualizing and configuring the monitoring of your GitLab instance.
+GitLab has been adding the ability for administrators to see insights into the
+health of their GitLab instance. To surface this experience in a native way
+(similar to how you would interact with an application deployed using GitLab),
+a base project called "GitLab self monitoring" with
+[internal visibility](../../../public_access/public_access.md#internal-projects)
+will be added under a group called "GitLab Instance Administrators"
+specifically created for visualizing and configuring the monitoring of your
+GitLab instance.
 
-All administrators at the time of creation of the project and group will be added
-as maintainers of the group and project, and as an admin, you'll be able to add new
-members to the group in order to give them maintainer access to the project.
+All administrators at the time of creation of the project and group will be
+added as maintainers of the group and project, and as an admin, you'll be able
+to add new members to the group to give them maintainer access to the project.
 
-This project will be used for self monitoring your GitLab instance.
+This project is used to self monitor your GitLab instance. The metrics dashboard
+of the project shows some basic resource usage charts, such as CPU and memory usage
+of each server in [Omnibus GitLab](https://docs.gitlab.com/omnibus/) installations.
+
+You can also use the project to configure your own
+[custom metrics](../../../operations/metrics/index.md#adding-custom-metrics) using
+metrics exposed by the [GitLab exporter](../prometheus/gitlab_metrics.md#metrics-available).
 
 ## Creating the self monitoring project
 
@@ -35,6 +48,19 @@ project. If you create the project again, it will be created in its default stat
    It can take a few seconds for it to be deleted.
 1. After the project is deleted, GitLab displays a message confirming your action.
 
+## Dashboards available in Omnibus GitLab
+
+Omnibus GitLab provides a dashboard that displays CPU and memory usage
+of each GitLab server. To select the servers to be displayed in the
+panels, provide a regular expression in the **Instance label regex** field.
+The dashboard uses metrics available in
+[Omnibus GitLab](https://docs.gitlab.com/omnibus/) installations.
+
+![GitLab self monitoring overview dashboard](img/self_monitoring_overview_dashboard.png)
+
+You can also
+[create your own dashboards](../../../operations/metrics/dashboards/index.md).
+
 ## Connection to Prometheus
 
 The project will be automatically configured to connect to the
@@ -42,35 +68,36 @@ The project will be automatically configured to connect to the
 instance is present (should be the case if GitLab was installed via Omnibus
 and you haven't disabled it).
 
-If that's not the case or if you have an external Prometheus instance or an HA setup,
+If that's not the case or if you have an external Prometheus instance or a customized setup,
 you should
 [configure it manually](../../../user/project/integrations/prometheus.md#manual-configuration-of-prometheus).
 
 ## Taking action on Prometheus alerts **(ULTIMATE)**
 
-You can [add a webhook](../../../user/project/integrations/prometheus.md#external-prometheus-instances)
-to the Prometheus config in order for GitLab to receive notifications of any alerts.
+You can [add a webhook](../../../operations/metrics/alerts.md#external-prometheus-instances)
+to the Prometheus configuration for GitLab to receive notifications of any
+alerts.
 
 Once the webhook is setup, you can
-[take action on incoming alerts](../../../user/project/integrations/prometheus.md#taking-action-on-incidents-ultimate).
+[take action on incoming alerts](../../../operations/metrics/alerts.md#trigger-actions-from-alerts).
 
 ## Adding custom metrics to the self monitoring project
 
 You can add custom metrics in the self monitoring project by:
 
-1. [Duplicating](../../../user/project/integrations/prometheus.md#duplicating-a-gitlab-defined-dashboard) the default dashboard.
-1. [Editing](../../../user/project/integrations/prometheus.md#view-and-edit-the-source-file-of-a-custom-dashboard) the newly created dashboard file and configuring it with [dashboard YAML properties](../../../user/project/integrations/prometheus.md#dashboard-yaml-properties).
+1. [Duplicating](../../../operations/metrics/dashboards/index.md#duplicate-a-gitlab-defined-dashboard) the overview dashboard.
+1. [Editing](../../../operations/metrics/index.md) the newly created dashboard file and configuring it with [dashboard YAML properties](../../../operations/metrics/dashboards/yaml.md).
 
 ## Troubleshooting
 
 ### Getting error message in logs: `Could not create instance administrators group. Errors: ["You don’t have permission to create groups."]`
 
-There is [a bug](https://gitlab.com/gitlab-org/gitlab/issues/208676) which causes
+There is [a bug](https://gitlab.com/gitlab-org/gitlab/-/issues/208676) which causes
 project creation to fail with the following error (which appears in the log file)
 when the first admin user is an
-[external user](../../../user/permissions.md#external-users-core-only):
+[external user](../../../user/permissions.md#external-users):
 
-```text
+```plaintext
 Could not create instance administrators group. Errors: ["You don’t have permission to create groups."]
 ```
 
@@ -83,6 +110,6 @@ User.admins.active.first.external?
 If this returns true, the first admin user is an external user.
 
 If you face this issue, you can temporarily
-[make the admin user a non-external user](../../../user/permissions.md#external-users-core-only)
+[make the admin user a non-external user](../../../user/permissions.md#external-users)
 and then try to create the project.
 Once the project is created, the admin user can be changed back to an external user.

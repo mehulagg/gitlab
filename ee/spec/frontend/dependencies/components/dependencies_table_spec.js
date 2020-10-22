@@ -1,8 +1,8 @@
 import { nextTick } from 'vue';
-import { mount, shallowMount } from '@vue/test-utils';
-import { GlBadge, GlButton, GlLink, GlSkeletonLoading } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
+import { GlBadge, GlButton, GlLink, GlSkeletonLoader } from '@gitlab/ui';
+import stubChildren from 'helpers/stub_children';
 import DependenciesTable from 'ee/dependencies/components/dependencies_table.vue';
-import DependenciesTableRow from 'ee/dependencies/components/dependencies_table_row.vue';
 import DependencyLicenseLinks from 'ee/dependencies/components/dependency_license_links.vue';
 import DependencyVulnerabilities from 'ee/dependencies/components/dependency_vulnerabilities.vue';
 import { makeDependency } from './utils';
@@ -10,10 +10,11 @@ import { makeDependency } from './utils';
 describe('DependenciesTable component', () => {
   let wrapper;
 
-  const factory = ({ propsData, ...options } = {}) => {
-    wrapper = shallowMount(DependenciesTable, {
+  const createComponent = ({ propsData, ...options } = {}) => {
+    wrapper = mount(DependenciesTable, {
       ...options,
       propsData: { ...propsData },
+      stubs: { ...stubChildren(DependenciesTable), GlTable: false, DependencyLocation: false },
     });
   };
 
@@ -21,9 +22,70 @@ describe('DependenciesTable component', () => {
     wrapper.destroy();
   });
 
+  const findTableRows = () => wrapper.findAll('tbody > tr');
+  const findRowToggleButtons = () => wrapper.findAll(GlButton);
+  const findDependencyVulnerabilities = () => wrapper.find(DependencyVulnerabilities);
+  const normalizeWhitespace = string => string.replace(/\s+/g, ' ');
+
+  const expectDependencyRow = (rowWrapper, dependency) => {
+    const [
+      componentCell,
+      packagerCell,
+      locationCell,
+      licenseCell,
+      isVulnerableCell,
+    ] = rowWrapper.findAll('td').wrappers;
+
+    expect(normalizeWhitespace(componentCell.text())).toBe(
+      `${dependency.name} ${dependency.version}`,
+    );
+
+    expect(packagerCell.text()).toBe(dependency.packager);
+
+    const locationLink = locationCell.find(GlLink);
+    expect(locationLink.attributes().href).toBe(dependency.location.blob_path);
+    expect(locationLink.text()).toBe(dependency.location.path);
+
+    const licenseLinks = licenseCell.find(DependencyLicenseLinks);
+    expect(licenseLinks.exists()).toBe(true);
+    expect(licenseLinks.props()).toEqual({
+      licenses: dependency.licenses,
+      title: dependency.name,
+    });
+
+    const isVulnerableCellText = normalizeWhitespace(isVulnerableCell.text());
+    if (dependency?.vulnerabilities?.length) {
+      expect(isVulnerableCellText).toContain(`${dependency.vulnerabilities.length} vuln`);
+    } else {
+      expect(isVulnerableCellText).toBe('');
+    }
+  };
+
+  describe('given the table is loading', () => {
+    let dependencies;
+
+    beforeEach(() => {
+      dependencies = [makeDependency()];
+      createComponent({
+        propsData: {
+          dependencies,
+          isLoading: true,
+        },
+      });
+    });
+
+    it('renders the loading skeleton', () => {
+      expect(wrapper.find(GlSkeletonLoader).exists()).toBe(true);
+    });
+
+    it('does not render any dependencies', () => {
+      expect(wrapper.text()).not.toContain(dependencies[0].name);
+    });
+  });
+
   describe('given an empty list of dependencies', () => {
     beforeEach(() => {
-      factory({
+      createComponent({
         propsData: {
           dependencies: [],
           isLoading: false,
@@ -31,245 +93,125 @@ describe('DependenciesTable component', () => {
       });
     });
 
-    it('matches the snapshot', () => {
-      expect(wrapper.element).toMatchSnapshot();
+    it('renders the table header', () => {
+      const expectedLabels = DependenciesTable.fields.map(({ label }) => label);
+      const headerCells = wrapper.findAll('thead th').wrappers;
+
+      expect(headerCells.map(cell => cell.text())).toEqual(expectedLabels);
+    });
+
+    it('does not render any rows', () => {
+      expect(findTableRows()).toHaveLength(0);
     });
   });
 
-  [true, false].forEach(isLoading => {
-    describe(`given a list of dependencies (${isLoading ? 'loading' : 'loaded'})`, () => {
-      let dependencies;
-      beforeEach(() => {
-        dependencies = [makeDependency(), makeDependency({ name: 'foo' })];
-        factory({
-          propsData: {
-            dependencies,
-            isLoading,
-          },
-        });
-      });
+  describe.each`
+    description                                                             | vulnerabilitiesPayload
+    ${'given dependencies with no vulnerabilities'}                         | ${{ vulnerabilities: [] }}
+    ${'given dependencies when user is not allowed to see vulnerabilities'} | ${{}}
+  `('$description', ({ vulnerabilitiesPayload }) => {
+    let dependencies;
 
-      it('matches the snapshot', () => {
-        expect(wrapper.element).toMatchSnapshot();
-      });
+    beforeEach(() => {
+      dependencies = [
+        makeDependency({ ...vulnerabilitiesPayload }),
+        makeDependency({ name: 'foo', ...vulnerabilitiesPayload }),
+      ];
 
-      it('passes the correct props to the table rows', () => {
-        const rows = wrapper.findAll(DependenciesTableRow).wrappers;
-        rows.forEach((row, index) => {
-          expect(row.props()).toEqual(
-            expect.objectContaining({
-              dependency: dependencies[index],
-              isLoading,
-            }),
-          );
-        });
+      createComponent({
+        propsData: {
+          dependencies,
+          isLoading: false,
+        },
       });
+    });
+
+    it('renders a row for each dependency', () => {
+      const rows = findTableRows();
+
+      dependencies.forEach((dependency, i) => {
+        expectDependencyRow(rows.at(i), dependency);
+      });
+    });
+
+    it('does not render any row toggle buttons', () => {
+      expect(findRowToggleButtons()).toHaveLength(0);
+    });
+
+    it('does not render vulnerability details', () => {
+      expect(findDependencyVulnerabilities().exists()).toBe(false);
     });
   });
 
-  describe('given the dependencyListUi feature flag is enabled', () => {
-    const createComponent = ({ propsData, ...options } = {}) => {
-      const stubs = Object.keys(DependenciesTable.components).filter(
-        component => component !== 'GlTable',
-      );
+  describe('given some dependencies with vulnerabilities', () => {
+    let dependencies;
 
-      wrapper = mount(DependenciesTable, {
-        ...options,
-        propsData: { ...propsData },
-        provide: { glFeatures: { dependencyListUi: true } },
-        stubs,
-      });
-    };
+    beforeEach(() => {
+      dependencies = [
+        makeDependency({ name: 'qux', vulnerabilities: ['bar', 'baz'] }),
+        makeDependency({ vulnerabilities: [] }),
+        // Guarantee that the component doesn't mutate these, but still
+        // maintains its row-toggling behaviour (i.e., via _showDetails)
+      ].map(Object.freeze);
 
-    const findTableRows = () => wrapper.findAll('tbody > tr');
-    const findRowToggleButtons = () => wrapper.findAll(GlButton);
-    const findDependencyVulnerabilities = () => wrapper.find(DependencyVulnerabilities);
-    const normalizeWhitespace = string => string.replace(/\s+/g, ' ');
-
-    const expectDependencyRow = (rowWrapper, dependency) => {
-      const [
-        componentCell,
-        packagerCell,
-        locationCell,
-        licenseCell,
-        isVulnerableCell,
-      ] = rowWrapper.findAll('td').wrappers;
-
-      expect(normalizeWhitespace(componentCell.text())).toBe(
-        `${dependency.name} ${dependency.version}`,
-      );
-
-      expect(packagerCell.text()).toBe(dependency.packager);
-
-      const locationLink = locationCell.find(GlLink);
-      expect(locationLink.attributes().href).toBe(dependency.location.blob_path);
-      expect(locationLink.text()).toBe(dependency.location.path);
-
-      const licenseLinks = licenseCell.find(DependencyLicenseLinks);
-      expect(licenseLinks.exists()).toBe(true);
-      expect(licenseLinks.props()).toEqual({
-        licenses: dependency.licenses,
-        title: dependency.name,
-      });
-
-      const isVulnerableCellText = normalizeWhitespace(isVulnerableCell.text());
-      if (dependency.vulnerabilities.length) {
-        expect(isVulnerableCellText).toContain(`${dependency.vulnerabilities.length} vuln`);
-      } else {
-        expect(isVulnerableCellText).toBe('');
-      }
-    };
-
-    describe('given the table is loading', () => {
-      let dependencies;
-
-      beforeEach(() => {
-        dependencies = [makeDependency()];
-        createComponent({
-          propsData: {
-            dependencies,
-            isLoading: true,
-          },
-        });
-      });
-
-      it('renders the loading skeleton', () => {
-        expect(wrapper.contains(GlSkeletonLoading)).toBe(true);
-      });
-
-      it('does not render any dependencies', () => {
-        expect(wrapper.text()).not.toContain(dependencies[0].name);
+      createComponent({
+        propsData: {
+          dependencies,
+          isLoading: false,
+        },
       });
     });
 
-    describe('given an empty list of dependencies', () => {
-      beforeEach(() => {
-        createComponent({
-          propsData: {
-            dependencies: [],
-            isLoading: false,
-          },
-        });
-      });
+    it('renders a row for each dependency', () => {
+      const rows = findTableRows();
 
-      it('renders the table header', () => {
-        const expectedLabels = DependenciesTable.fields.map(({ label }) => label);
-        const headerCells = wrapper.findAll('thead th').wrappers;
-
-        expect(headerCells.map(cell => cell.text())).toEqual(expectedLabels);
-      });
-
-      it('does not render any rows', () => {
-        expect(findTableRows()).toHaveLength(0);
+      dependencies.forEach((dependency, i) => {
+        expectDependencyRow(rows.at(i), dependency);
       });
     });
 
-    describe('given dependencies with no vulnerabilities', () => {
-      let dependencies;
+    it('render the toggle button for each row', () => {
+      const toggleButtons = findRowToggleButtons();
 
-      beforeEach(() => {
-        dependencies = [
-          makeDependency({ vulnerabilities: [] }),
-          makeDependency({ name: 'foo', vulnerabilities: [] }),
-        ];
+      dependencies.forEach((dependency, i) => {
+        const button = toggleButtons.at(i);
 
-        createComponent({
-          propsData: {
-            dependencies,
-            isLoading: false,
-          },
-        });
-      });
-
-      it('renders a row for each dependency', () => {
-        const rows = findTableRows();
-
-        dependencies.forEach((dependency, i) => {
-          expectDependencyRow(rows.at(i), dependency);
-        });
-      });
-
-      it('does not render any row toggle buttons', () => {
-        expect(findRowToggleButtons()).toHaveLength(0);
-      });
-
-      it('does not render vulnerability details', () => {
-        expect(findDependencyVulnerabilities().exists()).toBe(false);
+        expect(button.exists()).toBe(true);
+        expect(button.classes('invisible')).toBe(dependency.vulnerabilities.length === 0);
       });
     });
 
-    describe('given some dependencies with vulnerabilities', () => {
-      let dependencies;
+    it('does not render vulnerability details', () => {
+      expect(findDependencyVulnerabilities().exists()).toBe(false);
+    });
+
+    describe('the dependency vulnerabilities', () => {
+      let rowIndexWithVulnerabilities;
 
       beforeEach(() => {
-        dependencies = [
-          makeDependency({ name: 'qux', vulnerabilities: ['bar', 'baz'] }),
-          makeDependency({ vulnerabilities: [] }),
-          // Guarantee that the component doesn't mutate these, but still
-          // maintains its row-toggling behaviour (i.e., via _showDetails)
-        ].map(Object.freeze);
-
-        createComponent({
-          propsData: {
-            dependencies,
-            isLoading: false,
-          },
-        });
+        rowIndexWithVulnerabilities = dependencies.findIndex(dep => dep.vulnerabilities.length > 0);
       });
 
-      it('renders a row for each dependency', () => {
-        const rows = findTableRows();
+      it('can be displayed by clicking on the toggle button', () => {
+        const toggleButton = findRowToggleButtons().at(rowIndexWithVulnerabilities);
+        toggleButton.vm.$emit('click');
 
-        dependencies.forEach((dependency, i) => {
-          expectDependencyRow(rows.at(i), dependency);
-        });
-      });
-
-      it('render the toggle button for each row', () => {
-        const toggleButtons = findRowToggleButtons();
-
-        dependencies.forEach((dependency, i) => {
-          const button = toggleButtons.at(i);
-
-          expect(button.exists()).toBe(true);
-          expect(button.classes('invisible')).toBe(dependency.vulnerabilities.length === 0);
-        });
-      });
-
-      it('does not render vulnerability details', () => {
-        expect(findDependencyVulnerabilities().exists()).toBe(false);
-      });
-
-      describe('the dependency vulnerabilities', () => {
-        let rowIndexWithVulnerabilities;
-
-        beforeEach(() => {
-          rowIndexWithVulnerabilities = dependencies.findIndex(
-            dep => dep.vulnerabilities.length > 0,
-          );
-        });
-
-        it('can be displayed by clicking on the toggle button', () => {
-          const toggleButton = findRowToggleButtons().at(rowIndexWithVulnerabilities);
-          toggleButton.vm.$emit('click');
-
-          return nextTick().then(() => {
-            expect(findDependencyVulnerabilities().props()).toEqual({
-              vulnerabilities: dependencies[rowIndexWithVulnerabilities].vulnerabilities,
-            });
+        return nextTick().then(() => {
+          expect(findDependencyVulnerabilities().props()).toEqual({
+            vulnerabilities: dependencies[rowIndexWithVulnerabilities].vulnerabilities,
           });
         });
+      });
 
-        it('can be displayed by clicking on the vulnerabilities badge', () => {
-          const badge = findTableRows()
-            .at(rowIndexWithVulnerabilities)
-            .find(GlBadge);
-          badge.trigger('click');
+      it('can be displayed by clicking on the vulnerabilities badge', () => {
+        const badge = findTableRows()
+          .at(rowIndexWithVulnerabilities)
+          .find(GlBadge);
+        badge.trigger('click');
 
-          return nextTick().then(() => {
-            expect(findDependencyVulnerabilities().props()).toEqual({
-              vulnerabilities: dependencies[rowIndexWithVulnerabilities].vulnerabilities,
-            });
+        return nextTick().then(() => {
+          expect(findDependencyVulnerabilities().props()).toEqual({
+            vulnerabilities: dependencies[rowIndexWithVulnerabilities].vulnerabilities,
           });
         });
       });

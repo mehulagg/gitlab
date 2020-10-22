@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::CheckUpgradeProgressService do
-  RESCHEDULE_PHASES = ::Gitlab::Kubernetes::Pod::PHASES -
+RSpec.describe Clusters::Applications::CheckUpgradeProgressService do
+  reschedule_phashes = ::Gitlab::Kubernetes::Pod::PHASES -
     [::Gitlab::Kubernetes::Pod::SUCCEEDED, ::Gitlab::Kubernetes::Pod::FAILED, ::Gitlab].freeze
 
   let(:application) { create(:clusters_applications_prometheus, :updating) }
@@ -89,6 +89,6 @@ describe Clusters::Applications::CheckUpgradeProgressService do
       end
     end
 
-    RESCHEDULE_PHASES.each { |phase| it_behaves_like 'a not yet terminated upgrade', phase }
+    reschedule_phashes.each { |phase| it_behaves_like 'a not yet terminated upgrade', phase }
   end
 end

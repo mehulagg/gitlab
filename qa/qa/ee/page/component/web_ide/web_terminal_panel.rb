@@ -6,18 +6,25 @@ module QA
       module Component
         module WebIDE
           module WebTerminalPanel
-            def self.prepended(page)
-              page.module_eval do
+            extend QA::Page::PageConcern
+
+            def self.prepended(base)
+              super
+
+              base.class_eval do
                 view 'app/assets/javascripts/ide/components/panes/collapsible_sidebar.vue' do
                   element :ide_right_sidebar, %q(:data-qa-selector="`ide_${side}_sidebar`") # rubocop:disable QA/ElementWithPattern
+                end
+
+                view 'app/assets/javascripts/ide/components/ide_sidebar_nav.vue' do
                   element :terminal_tab_button, %q(:data-qa-selector="`${tab.title.toLowerCase()}_tab_button`") # rubocop:disable QA/ElementWithPattern
                 end
 
-                view 'ee/app/assets/javascripts/ide/components/terminal/empty_state.vue' do
+                view 'app/assets/javascripts/ide/components/terminal/empty_state.vue' do
                   element :start_web_terminal_button
                 end
 
-                view 'ee/app/assets/javascripts/ide/components/terminal/terminal.vue' do
+                view 'app/assets/javascripts/ide/components/terminal/terminal.vue' do
                   element :loading_container
                   element :terminal_screen
                 end

@@ -1,18 +1,25 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-import diffLineNoteFormMixin from 'ee_else_ce/notes/mixins/diff_line_note_form';
+import diffLineNoteFormMixin from '~/notes/mixins/diff_line_note_form';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__ } from '~/locale';
 import noteForm from '../../notes/components/note_form.vue';
+import MultilineCommentForm from '../../notes/components/multiline_comment_form.vue';
 import autosave from '../../notes/mixins/autosave';
 import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import { DIFF_NOTE_TYPE } from '../constants';
+import {
+  commentLineOptions,
+  formatLineRange,
+} from '../../notes/components/multiline_comment_utils';
 
 export default {
   components: {
     noteForm,
     userAvatarLink,
+    MultilineCommentForm,
   },
-  mixins: [autosave, diffLineNoteFormMixin],
+  mixins: [autosave, diffLineNoteFormMixin, glFeatureFlagsMixin()],
   props: {
     diffFileHash: {
       type: String,
@@ -36,6 +43,16 @@ export default {
       required: false,
       default: '',
     },
+  },
+  data() {
+    return {
+      commentLineStart: {
+        line_code: this.line.line_code,
+        type: this.line.type,
+        old_line: this.line.old_line,
+        new_line: this.line.new_line,
+      },
+    };
   },
   computed: {
     ...mapState({
@@ -62,10 +79,26 @@ export default {
         diffViewType: this.diffViewType,
         diffFile: this.diffFile,
         linePosition: this.linePosition,
+        lineRange: formatLineRange(this.commentLineStart, this.line),
       };
     },
     diffFile() {
       return this.getDiffFileByHash(this.diffFileHash);
+    },
+    commentLineOptions() {
+      const combineSides = (acc, { left, right }) => {
+        // ignore null values match lines
+        if (left && left.type !== 'match') acc.push(left);
+        // if the line_codes are identically, return to avoid duplicates
+        if (left?.line_code === right?.line_code) return acc;
+        if (right && right.type !== 'match') acc.push(right);
+        return acc;
+      };
+      const side = this.line.type === 'new' ? 'right' : 'left';
+      const lines = this.diffFile.highlighted_diff_lines.length
+        ? this.diffFile.highlighted_diff_lines
+        : this.diffFile.parallel_diff_lines.reduce(combineSides, []);
+      return commentLineOptions(lines, this.line, this.line.line_code, side);
     },
   },
   mounted() {
@@ -83,7 +116,6 @@ export default {
   methods: {
     ...mapActions('diffs', [
       'cancelCommentForm',
-      'assignDiscussionsToDiff',
       'saveDiffDiscussion',
       'setSuggestPopoverDismissed',
     ]),
@@ -116,6 +148,13 @@ export default {
 
 <template>
   <div class="content discussion-form discussion-form-container discussion-notes">
+    <div v-if="glFeatures.multilineComments" class="gl-mb-3 gl-text-gray-500 gl-pb-3">
+      <multiline-comment-form
+        v-model="commentLineStart"
+        :line="line"
+        :comment-line-options="commentLineOptions"
+      />
+    </div>
     <user-avatar-link
       v-if="author"
       :link-href="author.path"
@@ -133,7 +172,7 @@ export default {
       :diff-file="diffFile"
       :show-suggest-popover="showSuggestPopover"
       save-button-title="Comment"
-      class="diff-comment-form"
+      class="diff-comment-form gl-mt-3"
       @handleFormUpdateAddToReview="addToReview"
       @cancelForm="handleCancelCommentForm"
       @handleFormUpdate="handleSaveNote"

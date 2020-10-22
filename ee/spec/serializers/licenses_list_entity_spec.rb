@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe LicensesListEntity do
-  let!(:pipeline) { create(:ee_ci_pipeline, :with_license_management_report, project: project) }
-  let(:license_compliance) { ::SCA::LicenseCompliance.new(project) }
+RSpec.describe LicensesListEntity do
+  let!(:pipeline) { create(:ee_ci_pipeline, :with_license_scanning_report, project: project) }
+  let(:license_compliance) { project.license_compliance }
 
   before do
     stub_licensed_features(license_scanning: true)

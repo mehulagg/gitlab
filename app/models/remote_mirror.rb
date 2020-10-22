@@ -68,13 +68,13 @@ class RemoteMirror < ApplicationRecord
     after_transition any => :started do |remote_mirror, _|
       Gitlab::Metrics.add_event(:remote_mirrors_running)
 
-      remote_mirror.update(last_update_started_at: Time.now)
+      remote_mirror.update(last_update_started_at: Time.current)
     end
 
     after_transition started: :finished do |remote_mirror, _|
       Gitlab::Metrics.add_event(:remote_mirrors_finished)
 
-      timestamp = Time.now
+      timestamp = Time.current
       remote_mirror.update!(
         last_update_at: timestamp,
         last_successful_update_at: timestamp,
@@ -86,7 +86,7 @@ class RemoteMirror < ApplicationRecord
     after_transition started: :failed do |remote_mirror|
       Gitlab::Metrics.add_event(:remote_mirrors_failed)
 
-      remote_mirror.update(last_update_at: Time.now)
+      remote_mirror.update(last_update_at: Time.current)
 
       remote_mirror.run_after_commit do
         RemoteMirrorNotificationWorker.perform_async(remote_mirror.id)
@@ -144,9 +144,9 @@ class RemoteMirror < ApplicationRecord
     return unless sync?
 
     if recently_scheduled?
-      RepositoryUpdateRemoteMirrorWorker.perform_in(backoff_delay, self.id, Time.now)
+      RepositoryUpdateRemoteMirrorWorker.perform_in(backoff_delay, self.id, Time.current)
     else
-      RepositoryUpdateRemoteMirrorWorker.perform_async(self.id, Time.now)
+      RepositoryUpdateRemoteMirrorWorker.perform_async(self.id, Time.current)
     end
   end
 
@@ -210,6 +210,10 @@ class RemoteMirror < ApplicationRecord
     super(usernames_whitelist: %w[git])
   end
 
+  def bare_url
+    Gitlab::UrlSanitizer.new(read_attribute(:url)).full_url
+  end
+
   def ensure_remote!
     return unless project
     return unless remote_name && remote_url
@@ -261,7 +265,7 @@ class RemoteMirror < ApplicationRecord
   def recently_scheduled?
     return false unless self.last_update_started_at
 
-    self.last_update_started_at >= Time.now - backoff_delay
+    self.last_update_started_at >= Time.current - backoff_delay
   end
 
   def reset_fields

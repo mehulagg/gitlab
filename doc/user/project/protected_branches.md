@@ -1,8 +1,11 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: reference, howto
 ---
 
-# Protected Branches
+# Protected branches
 
 [Permissions](../permissions.md) in GitLab are fundamentally defined around the
 idea of having read or write permission to the repository and branches. To impose
@@ -45,7 +48,7 @@ that the `master` branch is protected by default.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5081) in GitLab 8.11.
 
-Since GitLab 8.11, we added another layer of branch protection which provides
+In GitLab 8.11 and later, we added another layer of branch protection which provides
 more granular management of protected branches. The "Developers can push"
 option was replaced by an "Allowed to push" setting which can be set to
 allow/prohibit Maintainers and/or Developers to push to a protected branch.
@@ -114,7 +117,7 @@ all matching branches:
 
 ## Creating a protected branch
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/53361) in GitLab 11.9.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/53361) in GitLab 11.9.
 
 When a protected branch or wildcard protected branches are set to
 [**No one** is **Allowed to push**](#using-the-allowed-to-merge-and-allowed-to-push-settings),
@@ -134,7 +137,7 @@ To create a new branch through the user interface:
 
 ## Deleting a protected branch
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/21393) in GitLab 9.3.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/21393) in GitLab 9.3.
 
 From time to time, it may be required to delete or clean up branches that are
 protected.
@@ -155,7 +158,7 @@ command line or a Git client application.
 
 ## Protected Branches approval by Code Owners **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/13251) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.4.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13251) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.4.
 
 It is possible to require at least one approval by a
 [Code Owner](code_owners.md) to a file changed by the
@@ -182,6 +185,8 @@ When enabled, all merge requests targeting these branches will require approval
 by a Code Owner per matched rule before they can be merged.
 Additionally, direct pushes to the protected branch are denied if a rule is matched.
 
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/35097) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5, users and groups who are allowed to push to protected branches do not require a merge request to merge their feature branches. Thus, they can skip merge request approval rules.
+
 ## Running pipelines on protected branches
 
 The permission to merge or push to protected branches is used to define if a user can
@@ -194,11 +199,11 @@ for details about the pipelines security model.
 
 **11.9**
 
-- [Allow protected branches to be created](https://gitlab.com/gitlab-org/gitlab-foss/issues/53361) by Developers (and users with higher permission levels) through the API and the user interface.
+- [Allow protected branches to be created](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/53361) by Developers (and users with higher permission levels) through the API and the user interface.
 
 **9.2**
 
-- Allow deletion of protected branches via the web interface ([issue #21393](https://gitlab.com/gitlab-org/gitlab-foss/issues/21393)).
+- Allow deletion of protected branches via the web interface ([issue #21393](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/21393)).
 
 **8.11**
 

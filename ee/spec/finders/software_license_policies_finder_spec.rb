@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SoftwareLicensePoliciesFinder do
+RSpec.describe SoftwareLicensePoliciesFinder do
   let(:project) { create(:project) }
   let(:software_license_policy) { create(:software_license_policy, project: project) }
 

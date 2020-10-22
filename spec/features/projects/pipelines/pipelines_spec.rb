@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Pipelines', :js do
+RSpec.describe 'Pipelines', :js do
   include ProjectForksHelper
 
   let(:project) { create(:project) }
@@ -65,19 +65,8 @@ describe 'Pipelines', :js do
           expect(page.find('.js-pipelines-tab-all .badge').text).to include('1')
         end
 
-        it 'shows a tab for Pending pipelines and count' do
-          expect(page.find('.js-pipelines-tab-pending').text).to include('Pending')
-          expect(page.find('.js-pipelines-tab-pending .badge').text).to include('0')
-        end
-
-        it 'shows a tab for Running pipelines and count' do
-          expect(page.find('.js-pipelines-tab-running').text).to include('Running')
-          expect(page.find('.js-pipelines-tab-running .badge').text).to include('1')
-        end
-
         it 'shows a tab for Finished pipelines and count' do
           expect(page.find('.js-pipelines-tab-finished').text).to include('Finished')
-          expect(page.find('.js-pipelines-tab-finished .badge').text).to include('0')
         end
 
         it 'shows a tab for Branches' do
@@ -89,9 +78,9 @@ describe 'Pipelines', :js do
         end
 
         it 'updates content when tab is clicked' do
-          page.find('.js-pipelines-tab-pending').click
+          page.find('.js-pipelines-tab-finished').click
           wait_for_requests
-          expect(page).to have_content('There are currently no pending pipelines.')
+          expect(page).to have_content('There are currently no finished pipelines.')
         end
       end
 
@@ -129,7 +118,7 @@ describe 'Pipelines', :js do
         context 'when canceling' do
           before do
             find('.js-pipelines-cancel-button').click
-            find('.js-modal-primary-action').click
+            click_button 'Stop pipeline'
             wait_for_requests
           end
 
@@ -322,7 +311,7 @@ describe 'Pipelines', :js do
         let!(:delayed_job) do
           create(:ci_build, :scheduled,
             pipeline: pipeline,
-            name: 'delayed job',
+            name: 'delayed job 1',
             stage: 'test')
         end
 
@@ -338,7 +327,7 @@ describe 'Pipelines', :js do
           find('.js-pipeline-dropdown-manual-actions').click
 
           time_diff = [0, delayed_job.scheduled_at - Time.now].max
-          expect(page).to have_button('delayed job')
+          expect(page).to have_button('delayed job 1')
           expect(page).to have_content(Time.at(time_diff).utc.strftime("%H:%M:%S"))
         end
 
@@ -346,7 +335,7 @@ describe 'Pipelines', :js do
           let!(:delayed_job) do
             create(:ci_build, :expired_scheduled,
               pipeline: pipeline,
-              name: 'delayed job',
+              name: 'delayed job 1',
               stage: 'test')
           end
 
@@ -360,7 +349,7 @@ describe 'Pipelines', :js do
         context 'when user played a delayed job immediately' do
           before do
             find('.js-pipeline-dropdown-manual-actions').click
-            page.accept_confirm { click_button('delayed job') }
+            page.accept_confirm { click_button('delayed job 1') }
             wait_for_requests
           end
 
@@ -418,7 +407,7 @@ describe 'Pipelines', :js do
           context 'when canceling' do
             before do
               find('.js-pipelines-cancel-button').click
-              find('.js-modal-primary-action').click
+              click_button 'Stop pipeline'
             end
 
             it 'indicates that pipeline was canceled', :sidekiq_might_not_need_inline do
@@ -453,10 +442,12 @@ describe 'Pipelines', :js do
       context 'downloadable pipelines' do
         context 'with artifacts' do
           let!(:with_artifacts) do
-            create(:ci_build, :artifacts, :success,
+            build = create(:ci_build, :success,
               pipeline: pipeline,
               name: 'rspec tests',
               stage: 'test')
+
+            create(:ci_job_artifact, :codequality, job: build)
           end
 
           before do
@@ -470,7 +461,7 @@ describe 'Pipelines', :js do
           it 'has artifacts download dropdown' do
             find('.js-pipeline-dropdown-download').click
 
-            expect(page).to have_link(with_artifacts.name)
+            expect(page).to have_link(with_artifacts.file_type)
           end
 
           it 'has download attribute on download links' do
@@ -537,7 +528,7 @@ describe 'Pipelines', :js do
         end
 
         it 'renders a mini pipeline graph' do
-          expect(page).to have_selector('.js-mini-pipeline-graph')
+          expect(page).to have_selector('[data-testid="widget-mini-pipeline-graph"]')
           expect(page).to have_selector('.js-builds-dropdown-button')
         end
 
@@ -661,6 +652,7 @@ describe 'Pipelines', :js do
       let(:project) { create(:project, :repository) }
 
       before do
+        stub_feature_flags(new_pipeline_form: false)
         visit new_project_pipeline_path(project)
       end
 
@@ -727,6 +719,7 @@ describe 'Pipelines', :js do
       let(:project) { create(:project, :repository) }
 
       before do
+        stub_feature_flags(new_pipeline_form: false)
         visit new_project_pipeline_path(project)
       end
 

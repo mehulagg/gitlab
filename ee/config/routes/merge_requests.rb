@@ -9,11 +9,9 @@ resources :merge_requests, only: [], constraints: { id: /\d+/ } do
     get :container_scanning_reports
     get :dependency_scanning_reports
     get :sast_reports
+    get :secret_detection_reports
     get :dast_reports
-
-    get :approvals
-    post :approvals, action: :approve
-    delete :approvals, action: :unapprove
+    get :coverage_fuzzing_reports
 
     post :rebase
   end
@@ -21,13 +19,4 @@ resources :merge_requests, only: [], constraints: { id: /\d+/ } do
   resources :approvers, only: :destroy
   delete 'approvers', to: 'approvers#destroy_via_user_id', as: :approver_via_user_id
   resources :approver_groups, only: :destroy
-
-  scope module: :merge_requests do
-    resources :drafts, only: [:index, :update, :create, :destroy] do
-      collection do
-        post :publish
-        delete :discard
-      end
-    end
-  end
 end

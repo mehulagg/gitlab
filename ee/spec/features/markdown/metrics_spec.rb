@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Metrics rendering', :js, :kubeclient, :use_clean_rails_memory_store_caching, :sidekiq_inline do
+RSpec.describe 'Metrics rendering', :js, :kubeclient, :use_clean_rails_memory_store_caching, :sidekiq_inline do
   include PrometheusHelpers
   include KubernetesHelpers
   include MetricsDashboardUrlHelpers
@@ -14,12 +14,9 @@ describe 'Metrics rendering', :js, :kubeclient, :use_clean_rails_memory_store_ca
 
   before do
     clear_host_from_memoized_variables
+    stub_gitlab_domain
 
-    allow(::Gitlab.config.gitlab)
-      .to receive(:url)
-      .and_return(urls.root_url.chomp('/'))
-
-    stub_licensed_features(prometheus_alerts: true, cluster_health: true)
+    stub_licensed_features(prometheus_alerts: true)
 
     project.add_maintainer(user)
     sign_in(user)
@@ -105,20 +102,6 @@ describe 'Metrics rendering', :js, :kubeclient, :use_clean_rails_memory_store_ca
         .to have_received(:new)
         .with(cluster, 'GET', 'query_range', hash_including('start', 'end', 'step'))
         .at_least(:once)
-    end
-
-    # Delete when moving to CE
-    context 'unlicensed' do
-      before do
-        stub_licensed_features(cluster_health: false)
-      end
-
-      it 'shows no embedded metrics' do
-        visit project_issue_path(project, issue)
-
-        expect(page).to have_no_css('div.metrics-embed')
-        expect(page).to have_no_css('div.js-render-metrics')
-      end
     end
   end
 

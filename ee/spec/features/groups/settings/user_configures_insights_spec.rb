@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Groups > Settings > User configures Insights', :js do
+RSpec.describe 'Groups > Settings > User configures Insights', :js do
   include Select2Helper
 
   let(:user) { create(:user) }

@@ -65,6 +65,10 @@ FactoryBot.define do
       status_reason { 'something went wrong' }
     end
 
+    trait :uninstalled do
+      status { 10 }
+    end
+
     trait :timed_out do
       installing
       updated_at { ClusterWaitForAppInstallationWorker::TIMEOUT.ago }
@@ -162,6 +166,14 @@ FactoryBot.define do
       host { 'example.com' }
       waf_log_enabled { true }
       cilium_log_enabled { true }
+      cluster factory: %i(cluster with_installed_helm provided_by_gcp)
+
+      trait :no_helm_installed do
+        cluster factory: %i(cluster provided_by_gcp)
+      end
+    end
+
+    factory :clusters_applications_cilium, class: 'Clusters::Applications::Cilium' do
       cluster factory: %i(cluster with_installed_helm provided_by_gcp)
 
       trait :no_helm_installed do

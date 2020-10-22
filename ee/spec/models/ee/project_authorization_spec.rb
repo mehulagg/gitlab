@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectAuthorization do
+RSpec.describe ProjectAuthorization do
   describe '.visible_to_user_and_access_level' do
     let(:user) { create(:user) }
     let(:project1) { create(:project) }

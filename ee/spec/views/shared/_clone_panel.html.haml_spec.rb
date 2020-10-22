@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'shared/_clone_panel' do
+RSpec.describe 'shared/_clone_panel' do
   include EE::GeoHelpers
 
   let_it_be(:primary) { create(:geo_node, :primary) }

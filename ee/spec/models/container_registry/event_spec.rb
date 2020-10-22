@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ContainerRegistry::Event do
+RSpec.describe ContainerRegistry::Event do
   using RSpec::Parameterized::TableSyntax
   include ::EE::GeoHelpers
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Issues::ZoomLinkService do
+RSpec.describe Issues::ZoomLinkService do
   let_it_be(:user) { create(:user) }
   let_it_be(:issue) { create(:issue) }
 
@@ -81,6 +81,13 @@ describe Issues::ZoomLinkService do
         end
 
         include_examples 'can add meeting'
+
+        context 'issue is incident type' do
+          let(:issue) { create(:incident) }
+          let(:current_user) { user }
+
+          it_behaves_like 'an incident management tracked event', :incident_management_incident_zoom_meeting
+        end
 
         context 'with insufficient issue update permissions' do
           include_context 'insufficient issue update permissions'

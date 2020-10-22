@@ -4,8 +4,10 @@ require 'spec_helper'
 
 # For easier debugging set `UNICORN_DEBUG=1`
 
-describe Gitlab::Cluster::Mixins::UnicornHttpServer do
-  UNICORN_STARTUP_TIMEOUT = 30
+RSpec.describe Gitlab::Cluster::Mixins::UnicornHttpServer do
+  before do
+    stub_const('UNICORN_STARTUP_TIMEOUT', 30)
+  end
 
   context 'when running Unicorn' do
     using RSpec::Parameterized::TableSyntax

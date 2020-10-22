@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::Gitlab::Ci::Config::Entry::Need do
+RSpec.describe ::Gitlab::Ci::Config::Entry::Need do
   subject(:need) { described_class.new(config) }
 
   context 'with Bridge config' do

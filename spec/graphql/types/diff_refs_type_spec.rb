@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['DiffRefs'] do
-  it { expect(described_class.graphql_name).to eq('DiffRefs') }
+RSpec.describe GitlabSchema.types['DiffRefs'] do
+  specify { expect(described_class.graphql_name).to eq('DiffRefs') }
 
-  it { expect(described_class).to have_graphql_fields(:head_sha, :base_sha, :start_sha).only }
+  specify { expect(described_class).to have_graphql_fields(:head_sha, :base_sha, :start_sha).only }
 
-  it { expect(described_class.fields['headSha'].type).to be_non_null }
-  it { expect(described_class.fields['baseSha'].type).not_to be_non_null }
-  it { expect(described_class.fields['startSha'].type).to be_non_null }
+  specify { expect(described_class.fields['headSha'].type).to be_non_null }
+  specify { expect(described_class.fields['baseSha'].type).not_to be_non_null }
+  specify { expect(described_class.fields['startSha'].type).to be_non_null }
 end

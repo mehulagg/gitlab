@@ -18,7 +18,7 @@ class Snippet < ApplicationRecord
   include AfterCommitQueue
   extend ::Gitlab::Utils::Override
 
-  MAX_FILE_COUNT = 1
+  MAX_FILE_COUNT = 10
 
   cache_markdown_field :title, pipeline: :single_line
   cache_markdown_field :description
@@ -44,6 +44,9 @@ class Snippet < ApplicationRecord
   has_many :user_mentions, class_name: "SnippetUserMention", dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
   has_one :snippet_repository, inverse_of: :snippet
 
+  # We need to add the `dependent` in order to call the after_destroy callback
+  has_one :statistics, class_name: 'SnippetStatistics', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+
   delegate :name, :email, to: :author, prefix: true, allow_nil: true
 
   validates :author, presence: true
@@ -67,6 +70,7 @@ class Snippet < ApplicationRecord
   validates :visibility_level, inclusion: { in: Gitlab::VisibilityLevel.values }
 
   after_save :store_mentions!, if: :any_mentionable_attributes_changed?
+  after_create :create_statistics
 
   # Scopes
   scope :are_internal, -> { where(visibility_level: Snippet::INTERNAL) }
@@ -76,6 +80,7 @@ class Snippet < ApplicationRecord
   scope :fresh, -> { order("created_at DESC") }
   scope :inc_author, -> { includes(:author) }
   scope :inc_relations_for_view, -> { includes(author: :status) }
+  scope :with_statistics, -> { joins(:statistics) }
 
   attr_mentionable :description
 
@@ -169,6 +174,10 @@ class Snippet < ApplicationRecord
     Snippet.find_by(id: id, project: project)
   end
 
+  def self.max_file_limit
+    MAX_FILE_COUNT
+  end
+
   def initialize(attributes = {})
     # We can't use default_value_for because the database has a default
     # value of 0 for visibility_level. If someone attempts to create a
@@ -204,7 +213,7 @@ class Snippet < ApplicationRecord
   def blobs
     return [] unless repository_exists?
 
-    repository.ls_files(repository.root_ref).map { |file| Blob.lazy(self, repository.root_ref, file) }
+    repository.ls_files(default_branch).map { |file| Blob.lazy(repository, default_branch, file) }
   end
 
   def hook_attrs
@@ -265,7 +274,7 @@ class Snippet < ApplicationRecord
 
   override :repository
   def repository
-    @repository ||= Repository.new(full_path, self, shard: repository_storage, disk_path: disk_path, repo_type: Gitlab::GlRepository::SNIPPET)
+    @repository ||= Gitlab::GlRepository::SNIPPET.repository_for(self)
   end
 
   override :repository_size_checker
@@ -273,7 +282,8 @@ class Snippet < ApplicationRecord
     strong_memoize(:repository_size_checker) do
       ::Gitlab::RepositorySizeChecker.new(
         current_size_proc: -> { repository.size.megabytes },
-        limit: Gitlab::CurrentSettings.snippet_size_limit
+        limit: Gitlab::CurrentSettings.snippet_size_limit,
+        namespace: nil
       )
     end
   end
@@ -297,6 +307,11 @@ class Snippet < ApplicationRecord
       components << self.id
       components.join('/')
     end
+  end
+
+  override :default_branch
+  def default_branch
+    super || 'master'
   end
 
   def repository_storage
@@ -326,13 +341,23 @@ class Snippet < ApplicationRecord
   def file_name_on_repo
     return if repository.empty?
 
-    repository.ls_files(repository.root_ref).first
+    list_files(default_branch).first
+  end
+
+  def list_files(ref = nil)
+    return [] if repository.empty?
+
+    repository.ls_files(ref || default_branch)
+  end
+
+  def multiple_files?
+    list_files.size > 1
   end
 
   class << self
     # Searches for snippets with a matching title, description or file name.
     #
-    # This method uses ILIKE on PostgreSQL and LIKE on MySQL.
+    # This method uses ILIKE on PostgreSQL.
     #
     # query - The search query as a String.
     #

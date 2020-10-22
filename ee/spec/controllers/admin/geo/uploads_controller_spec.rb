@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Admin::Geo::UploadsController, :geo do
+RSpec.describe Admin::Geo::UploadsController, :geo do
   include EE::GeoHelpers
 
   let_it_be(:admin) { create(:admin) }
@@ -76,8 +76,9 @@ describe Admin::Geo::UploadsController, :geo do
         end
       end
 
-      context 'with sync_status=never' do
-        subject { get :index, params: { sync_status: 'never' } }
+      # Explained via: https://gitlab.com/gitlab-org/gitlab/-/issues/216049
+      context 'with sync_status=pending' do
+        subject { get :index, params: { sync_status: 'pending' } }
 
         it 'renders only never synced registries' do
           expect(subject).to have_gitlab_http_status(:ok)

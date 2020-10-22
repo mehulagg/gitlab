@@ -193,7 +193,7 @@ describe.skip('Old Notes (~/notes.js)', () => {
       $('.js-comment-button').click();
 
       const $targetNote = $notesContainer.find(`#note_${noteEntity.id}`);
-      const updatedNote = Object.assign({}, noteEntity);
+      const updatedNote = { ...noteEntity };
       updatedNote.note = 'bar';
       notes.updateNote(updatedNote, $targetNote);
 
@@ -210,13 +210,6 @@ describe.skip('Old Notes (~/notes.js)', () => {
       $note = $(`<div id="${hash}"></div>`);
       jest.spyOn($note, 'filter');
       jest.spyOn($note, 'toggleClass');
-    });
-
-    afterEach(() => {
-      expect(typeof urlUtility.getLocationHash.mock).toBe('object');
-      urlUtility.getLocationHash.mockRestore();
-      expect(urlUtility.getLocationHash.mock).toBeUndefined();
-      expect(urlUtility.getLocationHash()).toBeNull();
     });
 
     // urlUtility is a dependency of the notes module. Its getLocatinHash() method should be called internally.
@@ -629,51 +622,9 @@ describe.skip('Old Notes (~/notes.js)', () => {
         done();
       });
     });
-
-    // This is a bad test carried over from the Karma -> Jest migration.
-    // The corresponding test in the Karma suite tests for
-    // elements and methods that don't actually exist, and gives a false
-    // positive pass.
-    /*
-    it('should show flash error message when comment failed to be updated', done => {
-      mockNotesPost();
-      jest.spyOn(notes, 'addFlash').mockName('addFlash');
-
-      $('.js-comment-button').click();
-
-      deferredPromise()
-        .then(() => {
-          const $noteEl = $notesContainer.find(`#note_${note.id}`);
-          $noteEl.find('.js-note-edit').click();
-          $noteEl.find('textarea.js-note-text').val(updatedComment);
-
-          mockNotesPostError();
-
-          $noteEl.find('.js-comment-save-button').click();
-          notes.updateComment({preventDefault: () => {}});
-        })
-        .then(() => deferredPromise())
-        .then(() => {
-          const $updatedNoteEl = $notesContainer.find(`#note_${note.id}`);
-
-          expect($updatedNoteEl.hasClass('.being-posted')).toEqual(false); // Remove being-posted visuals
-          expect(
-            $updatedNoteEl
-              .find('.note-text')
-              .text()
-              .trim(),
-          ).toEqual(sampleComment); // See if comment reverted back to original
-
-          expect(notes.addFlash).toHaveBeenCalled();
-          expect(notes.flashContainer.style.display).not.toBe('none');
-          done();
-        })
-        .catch(done.fail);
-    }, 5000);
-    */
   });
 
-  describe('postComment with Slash commands', () => {
+  describe('postComment with quick actions', () => {
     const sampleComment = '/assign @root\n/award :100:';
     const note = {
       commands_changes: {
@@ -689,6 +640,7 @@ describe.skip('Old Notes (~/notes.js)', () => {
     let $notesContainer;
 
     beforeEach(() => {
+      loadFixtures('commit/show.html');
       mockAxios.onPost(NOTES_POST_PATH).reply(200, note);
 
       new Notes('', []);
@@ -708,14 +660,49 @@ describe.skip('Old Notes (~/notes.js)', () => {
       $form.find('textarea.js-note-text').val(sampleComment);
     });
 
-    it('should remove slash command placeholder when comment with slash commands is done posting', done => {
+    it('should remove quick action placeholder when comment with quick actions is done posting', done => {
       jest.spyOn(gl.awardsHandler, 'addAwardToEmojiBar');
       $('.js-comment-button').click();
 
-      expect($notesContainer.find('.system-note.being-posted').length).toEqual(1); // Placeholder shown
+      expect($notesContainer.find('.note.being-posted').length).toEqual(1); // Placeholder shown
 
       setImmediate(() => {
-        expect($notesContainer.find('.system-note.being-posted').length).toEqual(0); // Placeholder removed
+        expect($notesContainer.find('.note.being-posted').length).toEqual(0); // Placeholder removed
+        done();
+      });
+    });
+  });
+
+  describe('postComment with slash when quick actions are not supported', () => {
+    const sampleComment = '/assign @root';
+    let $form;
+    let $notesContainer;
+
+    beforeEach(() => {
+      const note = {
+        id: 1234,
+        html: `<li class="note note-row-1234 timeline-entry" id="note_1234">
+                <div class="note-text">${sampleComment}</div>
+                </li>`,
+        note: sampleComment,
+        valid: true,
+      };
+      mockAxios.onPost(NOTES_POST_PATH).reply(200, note);
+
+      new Notes('', []);
+      $form = $('form.js-main-target-form');
+      $notesContainer = $('ul.main-notes-list');
+      $form.find('textarea.js-note-text').val(sampleComment);
+    });
+
+    it('should show message placeholder including lines starting with slash', done => {
+      $('.js-comment-button').click();
+
+      expect($notesContainer.find('.note.being-posted').length).toEqual(1); // Placeholder shown
+      expect($notesContainer.find('.note-body p').text()).toEqual(sampleComment); // No quick action processing
+
+      setImmediate(() => {
+        expect($notesContainer.find('.note.being-posted').length).toEqual(0); // Placeholder removed
         done();
       });
     });

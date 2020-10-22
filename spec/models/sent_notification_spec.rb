@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SentNotification do
+RSpec.describe SentNotification do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
 
@@ -324,6 +324,28 @@ describe SentNotification do
         expect(new_note.in_reply_to?(note)).to be_truthy
         expect(new_note.discussion_id).to eq(note.discussion_id)
       end
+    end
+  end
+
+  describe "#position=" do
+    subject { build(:sent_notification, noteable: create(:issue)) }
+
+    it "doesn't accept non-hash JSON passed as a string" do
+      subject.position = "true"
+
+      expect(subject.attributes_before_type_cast["position"]).to be(nil)
+    end
+
+    it "does accept a position hash as a string" do
+      subject.position = '{ "base_sha": "test" }'
+
+      expect(subject.position.base_sha).to eq("test")
+    end
+
+    it "does accept a hash" do
+      subject.position = { "base_sha" => "test" }
+
+      expect(subject.position.base_sha).to eq("test")
     end
   end
 end

@@ -5,22 +5,14 @@ in production.
 
 ## Starting a Rails console session
 
-Troubleshooting and debugging your GitLab instance often requires a
-[Rails console](https://guides.rubyonrails.org/command_line.html#rails-console).
+Troubleshooting and debugging your GitLab instance often requires a Rails console.
 
-**For Omnibus installations**
+Your type of GitLab installation determines how
+[to start a rails console](../operations/rails_console.md).
+See also:
 
-```shell
-sudo gitlab-rails console
-```
-
-**For installations from source**
-
-```shell
-sudo -u git -H bundle exec rails console -e production
-```
-
-Kubernetes: the console is in the task-runner pod, refer to our [Kubernetes cheat sheet](kubernetes_cheat_sheet.md#gitlab-specific-kubernetes-information) for details.
+- [GitLab Rails Console Cheat Sheet](gitlab_rails_cheat_sheet.md).
+- [Navigating GitLab via Rails console](navigating_gitlab_via_rails_console.md).
 
 ### Enabling Active Record logging
 
@@ -60,10 +52,10 @@ easy to copy and save for future reference, you can run:
 puts Readline::HISTORY.to_a
 ```
 
-## Using the Rails Runner
+## Using the Rails runner
 
 If you need to run some Ruby code in the context of your GitLab production
-environment, you can do so using the [Rails Runner](https://guides.rubyonrails.org/command_line.html#rails-runner). When executing a script file, the script must be accessible by the `git` user.
+environment, you can do so using the [Rails runner](https://guides.rubyonrails.org/command_line.html#rails-runner). When executing a script file, the script must be accessible by the `git` user.
 
 **For Omnibus installations**
 
@@ -73,7 +65,7 @@ sudo gitlab-rails runner "RAILS_COMMAND"
 # Example with a two-line Ruby script
 sudo gitlab-rails runner "user = User.first; puts user.username"
 
-# Example with a ruby script file
+# Example with a ruby script file (make sure to use the full path)
 sudo gitlab-rails runner /path/to/script.rb
 ```
 
@@ -85,7 +77,7 @@ sudo -u git -H bundle exec rails runner -e production "RAILS_COMMAND"
 # Example with a two-line Ruby script
 sudo -u git -H bundle exec rails runner -e production "user = User.first; puts user.username"
 
-# Example with a ruby script file
+# Example with a ruby script file (make sure to use the full path)
 sudo -u git -H bundle exec rails runner -e production /path/to/script.rb
 ```
 
@@ -94,7 +86,7 @@ sudo -u git -H bundle exec rails runner -e production /path/to/script.rb
 A common problem is that mails are not being sent for some reason. Suppose you configured
 an SMTP server, but you're not seeing mail delivered. Here's how to check the settings:
 
-1. Run a [Rails console](#starting-a-rails-console-session).
+1. Run a [Rails console](../operations/rails_console.md#starting-a-rails-console-session).
 
 1. Look at the ActionMailer `delivery_method` to make sure it matches what you
    intended. If you configured SMTP, it should say `:smtp`. If you're using
@@ -234,7 +226,7 @@ separate Rails process to debug the issue:
 1. Log in to your GitLab account.
 1. Copy the URL that is causing problems (e.g. `https://gitlab.com/ABC`).
 1. Create a Personal Access Token for your user (Profile Settings -> Access Tokens).
-1. Bring up the [GitLab Rails console.](#starting-a-rails-console-session)
+1. Bring up the [GitLab Rails console.](../operations/rails_console.md#starting-a-rails-console-session)
 1. At the Rails console, run:
 
    ```ruby
@@ -244,7 +236,7 @@ separate Rails process to debug the issue:
    For example:
 
    ```ruby
-   app.get 'https://gitlab.com/gitlab-org/gitlab-foss/issues/1?private_token=123456'
+   app.get 'https://gitlab.com/gitlab-org/gitlab-foss/-/issues/1?private_token=123456'
    ```
 
 1. In a new window, run `top`. It should show this Ruby process using 100% CPU. Write down the PID.

@@ -67,8 +67,7 @@ describe('Accessibility reports store getters', () => {
         it('returns summary message containing number of errors', () => {
           localState.report = {
             summary: {
-              errors: 1,
-              warnings: 1,
+              errored: 2,
             },
           };
           const result = 'Accessibility scanning detected 2 issues for the source branch only';
@@ -81,8 +80,7 @@ describe('Accessibility reports store getters', () => {
         it('returns summary message containing no errors', () => {
           localState.report = {
             summary: {
-              errors: 0,
-              warnings: 0,
+              errored: 0,
             },
           };
           const result = 'Accessibility scanning detected no issues for the source branch only';
@@ -108,7 +106,7 @@ describe('Accessibility reports store getters', () => {
       it('returns false', () => {
         localState.report = {
           status: 'success',
-          summary: { errors: 0, warnings: 0 },
+          summary: { errored: 0 },
         };
 
         expect(getters.shouldRenderIssuesList(localState)).toEqual(false);
@@ -117,39 +115,33 @@ describe('Accessibility reports store getters', () => {
   });
 
   describe('unresolvedIssues', () => {
-    it('returns concatenated array of unresolved errors, warnings, and notes', () => {
+    it('returns the array unresolved errors', () => {
       localState.report = {
         existing_errors: [1],
-        existing_warnings: [2],
-        existing_notes: [3],
       };
-      const result = [1, 2, 3];
+      const result = [1];
 
       expect(getters.unresolvedIssues(localState)).toEqual(result);
     });
   });
 
   describe('resolvedIssues', () => {
-    it('returns concatenated array of resolved errors, warnings, and notes', () => {
+    it('returns array of resolved errors', () => {
       localState.report = {
         resolved_errors: [1],
-        resolved_warnings: [2],
-        resolved_notes: [3],
       };
-      const result = [1, 2, 3];
+      const result = [1];
 
       expect(getters.resolvedIssues(localState)).toEqual(result);
     });
   });
 
   describe('newIssues', () => {
-    it('returns concatenated array of new errors, warnings, and notes', () => {
+    it('returns array of new errors', () => {
       localState.report = {
         new_errors: [1],
-        new_warnings: [2],
-        new_notes: [3],
       };
-      const result = [1, 2, 3];
+      const result = [1];
 
       expect(getters.newIssues(localState)).toEqual(result);
     });

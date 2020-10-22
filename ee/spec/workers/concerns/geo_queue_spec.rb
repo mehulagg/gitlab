@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GeoQueue do
+RSpec.describe GeoQueue do
   let(:worker) do
     Class.new do
       def self.name

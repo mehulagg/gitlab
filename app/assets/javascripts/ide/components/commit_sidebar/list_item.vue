@@ -1,18 +1,17 @@
 <script>
 import { mapActions } from 'vuex';
-import tooltip from '~/vue_shared/directives/tooltip';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import { viewerTypes } from '../../constants';
-import { getCommitIconMap } from '../../utils';
+import getCommitIconMap from '../../commit_icon';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     FileIcon,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     file: {
@@ -77,7 +76,7 @@ export default {
 <template>
   <div class="multi-file-commit-list-item position-relative">
     <div
-      v-tooltip
+      v-gl-tooltip
       :title="tooltipTitle"
       :class="{
         'is-active': isActive,
@@ -87,7 +86,7 @@ export default {
       @click="openFileInEditor"
     >
       <span class="multi-file-commit-list-file-path d-flex align-items-center">
-        <file-icon :file-name="file.name" class="append-right-8" />
+        <file-icon :file-name="file.name" class="gl-mr-3" />
         <template v-if="file.prevName && file.prevName !== file.name">
           {{ file.prevName }} &#x2192;
         </template>
@@ -95,7 +94,7 @@ export default {
       </span>
       <div class="ml-auto d-flex align-items-center">
         <div class="d-flex align-items-center ide-commit-list-changed-icon">
-          <icon :name="iconName" :size="16" :class="iconClass" />
+          <gl-icon :name="iconName" :size="16" :class="iconClass" />
         </div>
       </div>
     </div>

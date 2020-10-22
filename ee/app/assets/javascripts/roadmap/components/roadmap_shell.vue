@@ -1,6 +1,6 @@
 <script>
 import { mapState } from 'vuex';
-import { GlSkeletonLoading } from '@gitlab/ui';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 
 import { isInViewport } from '~/lib/utils/common_utils';
 import { EXTEND_AS } from '../constants';
@@ -91,7 +91,11 @@ export default {
 </script>
 
 <template>
-  <div class="roadmap-shell" data-qa-selector="roadmap_shell" @scroll="handleScroll">
+  <div
+    class="roadmap-shell js-roadmap-shell"
+    data-qa-selector="roadmap_shell"
+    @scroll="handleScroll"
+  >
     <roadmap-timeline-section
       ref="roadmapTimeline"
       :preset-type="presetType"

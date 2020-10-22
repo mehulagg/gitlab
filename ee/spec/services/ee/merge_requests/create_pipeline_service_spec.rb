@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_state do
+RSpec.describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_state do
   include ProjectForksHelper
 
   describe '#execute' do
@@ -72,14 +72,6 @@ describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_state 
 
     context 'when project setting for merge request pipelines is disabled' do
       let(:merge_pipelines_enabled) { false }
-
-      it_behaves_like 'detached merge request pipeline'
-    end
-
-    context 'when ci_use_merge_request_ref feature flag is disabled' do
-      before do
-        stub_feature_flags(ci_use_merge_request_ref: false)
-      end
 
       it_behaves_like 'detached merge request pipeline'
     end

@@ -51,12 +51,8 @@ module EE
       epic_id.to_i != issue.epic_issue.epic_id
     end
 
-    override :show_moved_service_desk_issue_warning?
-    def show_moved_service_desk_issue_warning?(issue)
-      return false unless issue.moved_from
-      return false unless issue.from_service_desk?
-
-      issue.moved_from.project.service_desk_enabled? && !issue.project.service_desk_enabled?
+    def show_timeline_view_toggle?(issue)
+      issue.incident? && issue.project.feature_available?(:incident_timeline_view)
     end
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::JwtRequestDecoder do
+RSpec.describe Gitlab::Geo::JwtRequestDecoder do
   include EE::GeoHelpers
 
   let!(:primary_node) { FactoryBot.create(:geo_node, :primary) }
@@ -26,18 +26,26 @@ describe Gitlab::Geo::JwtRequestDecoder do
       expect(subject.decode).to be_nil
     end
 
+    it 'decodes when node is disabled if `include_disabled!` is called first' do
+      primary_node.update_attribute(:enabled, false)
+
+      subject.include_disabled!
+
+      expect(subject.decode).to eq(data)
+    end
+
     it 'fails to decode with wrong key' do
       data = request.headers['Authorization']
 
       primary_node.secret_access_key = ''
-      primary_node.save
+      primary_node.save!
       expect(described_class.new(data).decode).to be_nil
     end
 
     it 'successfully decodes when clocks are off by IAT leeway' do
       subject
 
-      Timecop.travel(30.seconds.ago) { expect(subject.decode).to eq(data) }
+      travel_to(30.seconds.ago) { expect(subject.decode).to eq(data) }
     end
 
     it 'raises InvalidSignatureTimeError after expiring' do
@@ -49,7 +57,7 @@ describe Gitlab::Geo::JwtRequestDecoder do
     it 'raises InvalidSignatureTimeError to decode when clocks are not in sync' do
       subject
 
-      Timecop.travel(2.minutes.ago) { expect { subject.decode }.to raise_error(Gitlab::Geo::InvalidSignatureTimeError) }
+      travel_to(2.minutes.ago) { expect { subject.decode }.to raise_error(Gitlab::Geo::InvalidSignatureTimeError) }
     end
 
     it 'raises invalid decryption key error' do

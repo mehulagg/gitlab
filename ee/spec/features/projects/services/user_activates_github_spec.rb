@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User activates GitHub Service' do
+RSpec.describe 'User activates GitHub Service' do
   include_context 'project service activation'
 
   context 'without a license' do
@@ -36,7 +36,7 @@ describe 'User activates GitHub Service' do
     it 'activates service' do
       click_button('Save')
 
-      expect(page).to have_content('GitHub activated.')
+      expect(page).to have_content('GitHub settings saved and active.')
     end
 
     it 'renders a token field of type `password` for masking input' do
@@ -53,10 +53,9 @@ describe 'User activates GitHub Service' do
           headers: { 'Content-Type' => 'application/json' }
         )
 
-        click_button 'Test settings and save changes'
-        wait_for_requests
+        click_test_then_save_integration(expect_test_to_fail: false)
 
-        expect(page).to have_content('GitHub activated.')
+        expect(page).to have_content('GitHub settings saved and active.')
       end
     end
   end

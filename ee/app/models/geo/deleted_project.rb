@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 class Geo::DeletedProject
-  attr_reader :id, :name, :disk_path
+  include ActiveModel::Validations
+
+  attr_accessor :id, :name, :disk_path
+
+  validates :id, :name, :disk_path, presence: true
 
   def initialize(id:, name:, disk_path:, repository_storage:)
     @id = id

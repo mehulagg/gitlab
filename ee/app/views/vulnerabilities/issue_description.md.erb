@@ -1,25 +1,29 @@
-### Description:
+<% if vulnerability.is_a? Vulnerability %>
+<%= _("Issue created from vulnerability %{vulnerability_link}".html_safe) % { vulnerability_link: link_to(vulnerability.id, vulnerability_url(vulnerability)) } %>
+
+<% end %>
+### <%= _("Description") %>:
 
 <%= vulnerability.description %>
 
 <% if vulnerability.severity.present? %>
-* Severity: <%= vulnerability.severity %>
+* <%= _("Severity") %>: <%= vulnerability.severity %>
 <% end %>
 <% if vulnerability.confidence.present? %>
-* Confidence: <%= vulnerability.confidence %>
+* <%= _("Confidence") %>: <%= vulnerability.confidence %>
 <% end %>
-<% if defined?(vulnerability.file) && vulnerability.file.present? %>
-* Location: [<%= vulnerability.location_text %>](<%= vulnerability.location_link %>)
+<% if vulnerability.try(:file) %>
+* <%= _("Location") %>: [<%= vulnerability.location_text %>](<%= vulnerability.location_link %>)
 <% end %>
 
 <% if vulnerability.solution.present? %>
-### Solution:
+### <%= _("Solution") %>:
 
 <%= vulnerability.solution %>
 <% end %>
 
 <% if vulnerability.identifiers.present? %>
-### Identifiers:
+### <%= _("Identifiers") %>:
 
 <% vulnerability.identifiers.each do |identifier| %>
 <% if identifier[:url].present? %>
@@ -31,7 +35,7 @@
 <% end %>
 
 <% if vulnerability.links.present? %>
-### Links:
+### <%= _("Links") %>:
 
 <% vulnerability.links.each do |link| %>
 <% if link[:name].present? %>
@@ -39,5 +43,40 @@
 <% else %>
 * <%= link[:url] %>
 <% end %>
+<% end %>
+<% end %>
+
+<% if vulnerability.remediations.present? && vulnerability.remediations.any? %>
+### <%= _("Remediations") %>:
+
+<% vulnerability.remediations.each do |remediation| %>
+  <details>
+  <summary><%= _("Patch to apply") %></summary>
+
+  ```diff
+  <%= Base64.decode64(remediation[:diff]) %>
+  ```
+
+  </details>
+<% end %>
+<% end %>
+
+<% if vulnerability.try(:scan).present? && vulnerability.try(:scanner).present? %>
+### <%= _("Scanner") %>:
+
+<% if vulnerability&.scanner[:name].present? %>
+* <%= _("Name") %>: <%= vulnerability.scanner[:name] %>
+<% end %>
+<% if vulnerability&.scan[:type].present? %>
+* <%= _("Type") %>: <%= vulnerability.scan[:type] %>
+<% end %>
+<% if vulnerability&.scan[:status].present? %>
+* <%= _("Status") %>: <%= vulnerability.scan[:status] %>
+<% end %>
+<% if vulnerability&.scan[:start_time].present? %>
+* <%= _("Start Time") %>: <%= vulnerability.scan[:start_time] %>
+<% end %>
+<% if vulnerability&.scan[:end_time].present? %>
+* <%= _("End Time") %>: <%= vulnerability.scan[:end_time] %>
 <% end %>
 <% end %>

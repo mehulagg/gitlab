@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Git::BranchHooksService do
+RSpec.describe Git::BranchHooksService do
   include RepoHelpers
   include ProjectForksHelper
 
@@ -91,7 +91,7 @@ describe Git::BranchHooksService do
   end
 
   describe 'Push Event' do
-    let(:event) { Event.find_by_action(Event::PUSHED) }
+    let(:event) { Event.pushed_action.first }
 
     before do
       service.execute
@@ -101,7 +101,7 @@ describe Git::BranchHooksService do
       it 'generates a push event with one commit' do
         expect(event).to be_an_instance_of(PushEvent)
         expect(event.project).to eq(project)
-        expect(event.action).to eq(Event::PUSHED)
+        expect(event).to be_pushed_action
         expect(event.push_event_payload).to be_an_instance_of(PushEventPayload)
         expect(event.push_event_payload.commit_from).to eq(oldrev)
         expect(event.push_event_payload.commit_to).to eq(newrev)
@@ -117,7 +117,7 @@ describe Git::BranchHooksService do
       it 'generates a push event with more than one commit' do
         expect(event).to be_an_instance_of(PushEvent)
         expect(event.project).to eq(project)
-        expect(event.action).to eq(Event::PUSHED)
+        expect(event).to be_pushed_action
         expect(event.push_event_payload).to be_an_instance_of(PushEventPayload)
         expect(event.push_event_payload.commit_from).to be_nil
         expect(event.push_event_payload.commit_to).to eq(newrev)
@@ -133,7 +133,7 @@ describe Git::BranchHooksService do
       it 'generates a push event with no commits' do
         expect(event).to be_an_instance_of(PushEvent)
         expect(event.project).to eq(project)
-        expect(event.action).to eq(Event::PUSHED)
+        expect(event).to be_pushed_action
         expect(event.push_event_payload).to be_an_instance_of(PushEventPayload)
         expect(event.push_event_payload.commit_from).to eq(oldrev)
         expect(event.push_event_payload.commit_to).to be_nil
@@ -348,7 +348,7 @@ describe Git::BranchHooksService do
 
     context 'when the project is forked', :sidekiq_might_not_need_inline do
       let(:upstream_project) { project }
-      let(:forked_project) { fork_project(upstream_project, user, repository: true) }
+      let(:forked_project) { fork_project(upstream_project, user, repository: true, using_service: true) }
 
       let!(:forked_service) do
         described_class.new(forked_project, user, change: { oldrev: oldrev, newrev: newrev, ref: ref })
@@ -426,6 +426,28 @@ describe Git::BranchHooksService do
 
           service.execute
         end
+      end
+    end
+  end
+
+  describe 'Metrics dashboard sync' do
+    context 'with feature flag enabled' do
+      before do
+        Feature.enable(:metrics_dashboards_sync)
+      end
+
+      it 'imports metrics to database' do
+        expect(Metrics::Dashboard::SyncDashboardsWorker).to receive(:perform_async)
+
+        service.execute
+      end
+    end
+
+    context 'with feature flag disabled' do
+      it 'imports metrics to database' do
+        expect(Metrics::Dashboard::SyncDashboardsWorker).to receive(:perform_async)
+
+        service.execute
       end
     end
   end

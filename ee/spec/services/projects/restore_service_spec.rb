@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::RestoreService do
+RSpec.describe Projects::RestoreService do
   let(:user) { create(:user) }
   let(:pending_delete) { nil }
   let(:project) do

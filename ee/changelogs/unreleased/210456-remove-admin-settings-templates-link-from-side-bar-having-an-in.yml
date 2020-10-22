@@ -1,5 +1,0 @@
----
-title: Remove Admin > Settings > Templates link from sidenav when insufficient license
-merge_request: 27172
-author:
-type: fixed

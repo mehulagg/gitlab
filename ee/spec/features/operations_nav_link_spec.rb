@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Operations dropdown navbar EE' do
+RSpec.describe 'Operations dropdown navbar EE' do
   let(:user) { create(:user) }
   let(:project) { create(:project) }
 
@@ -11,7 +11,6 @@ describe 'Operations dropdown navbar EE' do
     sign_in(user)
 
     stub_licensed_features(operations_dashboard: true)
-    stub_feature_flags(environments_dashboard: true)
 
     visit project_issues_path(project)
   end

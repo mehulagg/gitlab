@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Prometheus::Queries::ClusterQuery do
+RSpec.describe Gitlab::Prometheus::Queries::ClusterQuery do
   let(:client) { double('prometheus_client', query_range: nil) }
 
   subject { described_class.new(client) }
@@ -12,7 +12,7 @@ describe Gitlab::Prometheus::Queries::ClusterQuery do
   end
 
   it 'load cluster metrics from yaml' do
-    expect(Gitlab::Prometheus::AdditionalMetricsParser).to receive(:load_groups_from_yaml).with('cluster_metrics.yml').and_call_original
+    expect(Gitlab::Prometheus::AdditionalMetricsParser).to receive(:load_groups_from_yaml).with('queries_cluster_metrics.yml').and_call_original
 
     subject.query
   end

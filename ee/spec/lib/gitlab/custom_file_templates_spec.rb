@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::CustomFileTemplates do
+RSpec.describe Gitlab::CustomFileTemplates do
   using RSpec::Parameterized::TableSyntax
 
   let_it_be(:instance_template_project) { create(:project, :custom_repo, files: template_files('instance')) }

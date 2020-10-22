@@ -2,14 +2,16 @@
 
 require 'spec_helper'
 
-describe 'Issue Sidebar' do
+RSpec.describe 'Issue Sidebar' do
   include MobileHelpers
 
-  let(:group) { create(:group, :nested) }
-  let(:project) { create(:project, :public, namespace: group) }
-  let!(:user) { create(:user)}
-  let!(:label) { create(:label, project: project, title: 'bug') }
-  let(:issue) { create(:labeled_issue, project: project, labels: [label]) }
+  let_it_be(:group) { create(:group, :nested) }
+  let_it_be(:project) { create(:project, :public, namespace: group) }
+  let_it_be(:project_without_group) { create(:project, :public) }
+  let_it_be(:user) { create(:user)}
+  let_it_be(:label) { create(:label, project: project, title: 'bug') }
+  let_it_be(:issue) { create(:labeled_issue, project: project, labels: [label]) }
+  let_it_be(:issue_no_group) { create(:labeled_issue, project: project_without_group, labels: [label]) }
 
   before do
     sign_in(user)
@@ -82,12 +84,24 @@ describe 'Issue Sidebar' do
     end
 
     context 'when health status feature is available' do
-      it 'shows health status on sidebar' do
+      before do
         stub_licensed_features(issuable_health_status: true)
 
         visit_issue(project, issue)
+      end
 
+      it 'shows health status on sidebar' do
         expect(page).to have_selector('.block.health-status')
+      end
+
+      context 'when user closes an issue' do
+        it 'disables the edit button' do
+          page.find('[data-testid="close-issue-button"]').click
+
+          page.within('.health-status') do
+            expect(page).to have_button('Edit', disabled: true)
+          end
+        end
       end
     end
 
@@ -111,6 +125,79 @@ describe 'Issue Sidebar' do
         expect(page).not_to have_selector('.block.health-status')
       end
     end
+  end
+
+  context 'Iterations', :js do
+    context 'when iterations feature available' do
+      let_it_be(:iteration) { create(:iteration, group: group, start_date: 1.day.from_now, due_date: 2.days.from_now, title: 'Iteration 1') }
+
+      before do
+        iteration
+        stub_licensed_features(iterations: true)
+
+        project.add_developer(user)
+
+        visit_issue(project, issue)
+
+        wait_for_all_requests
+      end
+
+      it 'selects and updates the right iteration' do
+        find_and_click_edit_iteration
+
+        select_iteration(iteration.title)
+
+        expect(page.find('[data-testid="select-iteration"]')).to have_content('Iteration 1')
+
+        find_and_click_edit_iteration
+
+        select_iteration('No iteration')
+
+        expect(page.find('[data-testid="select-iteration"]')).to have_content('No iteration')
+      end
+    end
+
+    context 'when a project does not have a group' do
+      before do
+        stub_licensed_features(iterations: true)
+
+        project_without_group.add_developer(user)
+
+        visit_issue(project_without_group, issue_no_group)
+
+        wait_for_all_requests
+      end
+
+      it 'cannot find the select-iteration edit button' do
+        expect(page).not_to have_selector('[data-testid="select-iteration"]')
+      end
+    end
+
+    context 'when iteration feature is not available' do
+      before do
+        stub_licensed_features(iterations: false)
+
+        project.add_developer(user)
+
+        visit_issue(project, issue)
+
+        wait_for_all_requests
+      end
+
+      it 'cannot find the select-iteration edit button' do
+        expect(page).not_to have_selector('[data-testid="select-iteration"]')
+      end
+    end
+  end
+
+  def find_and_click_edit_iteration
+    page.find('[data-testid="iteration-edit-link"]').click
+  end
+
+  def select_iteration(iteration_name)
+    click_button(iteration_name)
+
+    wait_for_all_requests
   end
 
   def visit_issue(project, issue)

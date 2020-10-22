@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe NoteEntity do
+RSpec.describe NoteEntity do
   include Gitlab::Routing
 
   let(:issue) { create(:issue) }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RemoteMirror do
+RSpec.describe RemoteMirror do
   let(:project) { create(:project, :repository, :remote_mirror) }
 
   describe '#sync' do

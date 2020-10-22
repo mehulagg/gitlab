@@ -28,6 +28,7 @@ module Gitlab
         has_external_dependencies: lambda { |value| value == 'true' },
         name: :to_s,
         resource_boundary: :to_sym,
+        tags: :to_sym,
         urgency: :to_sym
       }.freeze
 
@@ -48,7 +49,6 @@ module Gitlab
       # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
       def worker_queues(rails_path = Rails.root.to_s)
-        # https://gitlab.com/gitlab-org/gitlab/issues/199230
         worker_names(all_queues(rails_path))
       end
 
@@ -75,7 +75,7 @@ module Gitlab
       private
 
       def worker_names(workers)
-        workers.map { |queue| queue.is_a?(Hash) ? queue[:name] : queue }
+        workers.map { |queue| queue[:name] }
       end
 
       def query_string_to_lambda(query_string)
@@ -118,7 +118,11 @@ module Gitlab
 
         raise UnknownPredicate.new("Unknown predicate: #{lhs}") unless values_block
 
-        lambda { |queue| values.map(&values_block).include?(queue[lhs.to_sym]) }
+        lambda do |queue|
+          comparator = Array(queue[lhs.to_sym]).to_set
+
+          values.map(&values_block).to_set.intersect?(comparator)
+        end
       end
     end
   end

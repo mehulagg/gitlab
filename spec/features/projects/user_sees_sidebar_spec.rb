@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Projects > User sees sidebar' do
+RSpec.describe 'Projects > User sees sidebar' do
   let(:user) { create(:user) }
   let(:project) { create(:project, :private, public_builds: false, namespace: user.namespace) }
 
@@ -128,8 +128,62 @@ describe 'Projects > User sees sidebar' do
     end
   end
 
+  context 'as anonymous' do
+    let(:project) { create(:project, :public) }
+    let!(:issue) { create(:issue, :opened, project: project, author: user) }
+
+    describe 'project landing page' do
+      before do
+        project.project_feature.update!(
+          builds_access_level: ProjectFeature::DISABLED,
+          merge_requests_access_level: ProjectFeature::DISABLED,
+          repository_access_level: ProjectFeature::DISABLED,
+          issues_access_level: ProjectFeature::DISABLED,
+          wiki_access_level: ProjectFeature::DISABLED
+        )
+      end
+
+      it 'does not show the project file list landing page, but the activity' do
+        visit project_path(project)
+
+        expect(page).not_to have_selector '.project-stats'
+        expect(page).not_to have_selector '.project-last-commit'
+        expect(page).not_to have_selector '.project-show-files'
+        expect(page).to have_selector '.project-show-activity'
+      end
+
+      it 'shows the wiki when enabled' do
+        project.project_feature.update!(wiki_access_level: ProjectFeature::ENABLED)
+
+        visit project_path(project)
+
+        expect(page).to have_selector '.project-show-wiki'
+      end
+
+      it 'shows the issues when enabled' do
+        project.project_feature.update!(issues_access_level: ProjectFeature::ENABLED)
+
+        visit project_path(project)
+
+        expect(page).to have_selector '.issues-list'
+      end
+
+      it 'shows the wiki when wiki and issues are enabled' do
+        project.project_feature.update!(
+          issues_access_level: ProjectFeature::ENABLED,
+          wiki_access_level: ProjectFeature::ENABLED
+        )
+
+        visit project_path(project)
+
+        expect(page).to have_selector '.project-show-wiki'
+      end
+    end
+  end
+
   context 'as guest' do
     let(:guest) { create(:user) }
+    let!(:issue) { create(:issue, :opened, project: project, author: guest) }
 
     before do
       project.add_guest(guest)
@@ -144,11 +198,11 @@ describe 'Projects > User sees sidebar' do
         expect(page).to have_content 'Project'
         expect(page).to have_content 'Issues'
         expect(page).to have_content 'Wiki'
+        expect(page).to have_content 'Operations'
 
         expect(page).not_to have_content 'Repository'
         expect(page).not_to have_content 'CI / CD'
         expect(page).not_to have_content 'Merge Requests'
-        expect(page).not_to have_content 'Operations'
       end
     end
 
@@ -193,13 +247,13 @@ describe 'Projects > User sees sidebar' do
         expect(page).not_to have_selector '.project-stats'
         expect(page).not_to have_selector '.project-last-commit'
         expect(page).not_to have_selector '.project-show-files'
-        expect(page).to have_selector '.project-show-customize_workflow'
+        expect(page).to have_selector '.project-show-activity'
       end
 
-      it 'shows the customize workflow when issues and wiki are disabled' do
+      it 'shows the project activity when issues and wiki are disabled' do
         visit project_path(project)
 
-        expect(page).to have_selector '.project-show-customize_workflow'
+        expect(page).to have_selector '.project-show-activity'
       end
 
       it 'shows the wiki when enabled' do

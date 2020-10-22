@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: reference
 ---
 
@@ -116,7 +119,7 @@ git log <file>
 
 If you get this error message:
 
-```text
+```plaintext
 fatal: ambiguous argument <file_name>: unknown revision or path not in the working tree.
 Use '--' to separate paths from revisions, like this:
 ```

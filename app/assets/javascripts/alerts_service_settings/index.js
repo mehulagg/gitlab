@@ -7,19 +7,31 @@ export default el => {
     return null;
   }
 
-  const { activated: activatedStr, formPath, authorizationKey, url, learnMoreUrl } = el.dataset;
+  const {
+    activated: activatedStr,
+    alertsSetupUrl,
+    alertsUsageUrl,
+    formPath,
+    authorizationKey,
+    url,
+    disabled,
+  } = el.dataset;
+
   const activated = parseBoolean(activatedStr);
+  const isDisabled = parseBoolean(disabled);
 
   return new Vue({
     el,
     render(createElement) {
       return createElement(AlertsServiceForm, {
         props: {
+          alertsSetupUrl,
+          alertsUsageUrl,
           initialActivated: activated,
           formPath,
-          learnMoreUrl,
           initialAuthorizationKey: authorizationKey,
           url,
+          isDisabled,
         },
       });
     },

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::EE::API::Entities::Scim::Emails do
+RSpec.describe ::EE::API::Entities::Scim::Emails do
   let(:user) { build(:user) }
   let(:identity) { build(:group_saml_identity, user: user) }
 

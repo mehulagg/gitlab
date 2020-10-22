@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'EE-specific GitLab Markdown', :aggregate_failures do
+RSpec.describe 'EE-specific GitLab Markdown', :aggregate_failures do
   include Capybara::Node::Matchers
   include MarkupHelper
   include MarkdownMatchers

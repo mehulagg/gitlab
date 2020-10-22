@@ -13,10 +13,10 @@ module Approvable
     approvals_left
     approvals_required
     can_approve?
-    has_approved?
     authors_can_approve?
     committers_can_approve?
     approvers_overwritten?
+    total_approvals_count
   }.freeze
 
   delegate(*FORWARDABLE_METHODS, to: :approval_state)

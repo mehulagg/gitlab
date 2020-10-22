@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::LoadBalancing::Resolver do
+RSpec.describe Gitlab::Database::LoadBalancing::Resolver do
   describe '#resolve' do
     let(:ip_addr) { IPAddr.new('127.0.0.2') }
 

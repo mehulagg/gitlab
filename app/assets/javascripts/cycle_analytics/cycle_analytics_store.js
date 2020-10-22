@@ -23,9 +23,6 @@ const EMPTY_STAGE_TEXTS = {
   staging: __(
     'The staging stage shows the time between merging the MR and deploying code to the production environment. The data will be automatically added once you deploy to production for the first time.',
   ),
-  production: __(
-    'The total stage shows the time it takes between creating an issue and deploying the code to production. The data will be automatically added once you have completed the full idea to production cycle.',
-  ),
 };
 
 export default {
@@ -84,7 +81,7 @@ export default {
     events.forEach(item => {
       if (!item) return;
 
-      const eventItem = Object.assign({}, DEFAULT_EVENT_OBJECTS[stage.slug], item);
+      const eventItem = { ...DEFAULT_EVENT_OBJECTS[stage.slug], ...item };
 
       eventItem.totalTime = eventItem.total_time;
 

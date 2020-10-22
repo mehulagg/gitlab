@@ -21,10 +21,10 @@
           = link_to project_security_dashboard_index_path(@project), title: _('Security Dashboard') do
             %span= _('Security Dashboard')
 
-      - if project_nav_tab?(:security) && Feature.enabled?(:first_class_vulnerabilities, @project)
-        = nav_link(path: 'projects/security/vulnerabilities#index') do
-          = link_to project_security_vulnerabilities_path(@project), title: _('Vulnerability List') do
-            %span= _('Vulnerability List')
+      - if project_nav_tab?(:on_demand_scans)
+        = nav_link(path: sidebar_on_demand_scans_paths) do
+          = link_to project_on_demand_scans_path(@project), title: s_('OnDemandScans|On-demand Scans'), data: { qa_selector: 'on_demand_scans_link' } do
+            %span= s_('OnDemandScans|On-demand Scans')
 
       - if project_nav_tab?(:dependencies)
         = nav_link(path: 'projects/dependencies#index') do
@@ -37,12 +37,12 @@
             %span= _('License Compliance')
 
       - if project_nav_tab?(:threat_monitoring)
-        = nav_link(path: 'projects/threat_monitoring#show') do
+        = nav_link(controller: ['projects/threat_monitoring']) do
           = link_to project_threat_monitoring_path(@project), title: _('Threat Monitoring') do
             %span= _('Threat Monitoring')
 
       - if project_nav_tab?(:security_configuration)
-        = nav_link(path: 'projects/security/configuration#show') do
+        = nav_link(path: ['projects/security/configuration#show', 'projects/security/sast_configuration#show']) do
           = link_to project_security_configuration_path(@project), title: _('Configuration'), data: { qa_selector: 'security_configuration_link'} do
             %span= _('Configuration')
 

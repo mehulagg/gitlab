@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Vulnerabilities::ResolveService do
+RSpec.describe Vulnerabilities::ResolveService do
   include AccessMatchersGeneric
 
   before do
@@ -20,6 +20,8 @@ describe Vulnerabilities::ResolveService do
     before do
       project.add_developer(user)
     end
+
+    it_behaves_like 'calls vulnerability statistics utility services in order'
 
     it 'resolves a vulnerability' do
       Timecop.freeze do

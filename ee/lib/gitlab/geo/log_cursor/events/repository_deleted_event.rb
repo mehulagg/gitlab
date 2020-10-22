@@ -30,15 +30,13 @@ module Gitlab
           end
 
           def log_event(job_id)
-            logger.event_info(
-              created_at,
+            super(
               'Deleted project',
               project_id: event.project_id,
               repository_storage_name: event.repository_storage_name,
               disk_path: event.deleted_path,
               skippable: skippable?,
-              job_id: job_id
-            )
+              job_id: job_id)
           end
         end
       end

@@ -6,8 +6,8 @@ module EE
       module Runner
         extend ::Gitlab::Utils::Override
 
-        override :authenticate_job!
-        def authenticate_job!
+        override :current_job
+        def current_job
           id = params[:id]
 
           if id

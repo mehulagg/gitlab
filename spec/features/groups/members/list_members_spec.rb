@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Groups > Members > List members' do
+RSpec.describe 'Groups > Members > List members' do
   include Select2Helper
   include Spec::Support::Helpers::Features::ListRowsHelpers
 
@@ -12,6 +12,8 @@ describe 'Groups > Members > List members' do
   let(:nested_group) { create(:group, parent: group) }
 
   before do
+    stub_feature_flags(vue_group_members_list: false)
+
     sign_in(user1)
   end
 

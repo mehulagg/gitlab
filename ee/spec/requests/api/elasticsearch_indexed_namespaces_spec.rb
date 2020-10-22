@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::ElasticsearchIndexedNamespaces do
+RSpec.describe API::ElasticsearchIndexedNamespaces do
   let_it_be(:admin) { create(:admin) }
   let_it_be(:non_admin) { create(:user) }
 

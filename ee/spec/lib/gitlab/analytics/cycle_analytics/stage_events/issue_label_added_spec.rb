@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLabelAdded do
+RSpec.describe Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLabelAdded do
   it_behaves_like 'cycle analytics event' do
     let(:params) { { label: GroupLabel.new } }
   end

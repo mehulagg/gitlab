@@ -16,7 +16,7 @@ def prometheus_default_multiproc_dir
 end
 
 Prometheus::Client.configure do |config|
-  config.logger = Rails.logger # rubocop:disable Gitlab/RailsLogger
+  config.logger = Gitlab::AppLogger
 
   config.initial_mmap_file_size = 4 * 1024
 
@@ -42,10 +42,16 @@ if !Rails.env.test? && Gitlab::Metrics.prometheus_metrics_enabled?
   Gitlab::Cluster::LifecycleEvents.on_worker_start do
     defined?(::Prometheus::Client.reinitialize_on_pid_change) && Prometheus::Client.reinitialize_on_pid_change
 
-    Gitlab::Metrics::Samplers::RubySampler.initialize_instance(Settings.monitoring.ruby_sampler_interval).start
+    Gitlab::Metrics::Samplers::RubySampler.initialize_instance.start
+    Gitlab::Metrics::Samplers::DatabaseSampler.initialize_instance.start
+    Gitlab::Metrics::Samplers::ThreadsSampler.initialize_instance.start
+
+    if Gitlab::Runtime.action_cable?
+      Gitlab::Metrics::Samplers::ActionCableSampler.instance.start
+    end
 
     if Gitlab.ee? && Gitlab::Runtime.sidekiq?
-      Gitlab::Metrics::Samplers::GlobalSearchSampler.instance(Settings.monitoring.global_search_sampler_interval).start
+      Gitlab::Metrics::Samplers::GlobalSearchSampler.instance.start
     end
   rescue IOError => e
     Gitlab::ErrorTracking.track_exception(e)
@@ -58,10 +64,14 @@ if !Rails.env.test? && Gitlab::Metrics.prometheus_metrics_enabled?
     if Gitlab::Runtime.unicorn?
       Gitlab::Metrics::Samplers::UnicornSampler.instance(Settings.monitoring.unicorn_sampler_interval).start
     elsif Gitlab::Runtime.puma?
-      Gitlab::Metrics::Samplers::PumaSampler.instance(Settings.monitoring.puma_sampler_interval).start
+      Gitlab::Metrics::Samplers::PumaSampler.instance.start
     end
 
-    Gitlab::Metrics::RequestsRackMiddleware.initialize_http_request_duration_seconds
+    Gitlab::Metrics.gauge(:deployments, 'GitLab Version', {}, :max).set({ version: Gitlab::VERSION }, 1)
+
+    unless Gitlab::Runtime.sidekiq?
+      Gitlab::Metrics::RequestsRackMiddleware.initialize_http_request_duration_seconds
+    end
   rescue IOError => e
     Gitlab::ErrorTracking.track_exception(e)
     Gitlab::Metrics.error_detected!

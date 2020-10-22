@@ -1,6 +1,0 @@
----
-title: Return 202 Accepted status code when fetching incompleted Vulnerability Export
-  from API
-merge_request: 28314
-author:
-type: changed

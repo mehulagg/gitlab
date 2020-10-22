@@ -4,9 +4,11 @@ module Projects
   class DependenciesController < Projects::ApplicationController
     before_action :authorize_read_dependency_list!
 
-    before_action only: [:index] do
-      push_frontend_feature_flag(:dependency_list_ui, project, default_enabled: true)
+    before_action do
+      push_frontend_feature_flag(:path_to_vulnerable_dependency, project)
     end
+
+    feature_category :dependency_scanning
 
     def index
       respond_to do |format|

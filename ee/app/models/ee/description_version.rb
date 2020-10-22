@@ -38,7 +38,7 @@ module EE
       description_versions =
         issuable_description_versions.where('id BETWEEN ? AND ?', start_id, self.id)
 
-      description_versions.update_all(deleted_at: Time.now)
+      description_versions.update_all(deleted_at: Time.current)
 
       issuable&.expire_note_etag_cache
     end

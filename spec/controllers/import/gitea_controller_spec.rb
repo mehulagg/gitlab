@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Import::GiteaController do
+RSpec.describe Import::GiteaController do
   include ImportSpecHelper
 
   let(:provider) { :gitea }
@@ -32,6 +32,14 @@ describe Import::GiteaController do
 
       before do
         assign_host_url
+      end
+
+      it "requests provider repos list" do
+        expect(stub_client(repos: [], orgs: [])).to receive(:repos)
+
+        get :status
+
+        expect(response).to have_gitlab_http_status(:ok)
       end
 
       context 'when host url is local or not http' do

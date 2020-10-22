@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ClusterablePresenter do
+RSpec.describe ClusterablePresenter do
   include Gitlab::Routing.url_helpers
 
   describe '.fabricate' do
@@ -86,5 +86,21 @@ describe ClusterablePresenter do
     let(:cluster) { create(:cluster_for_group, groups: [clusterable]) }
 
     it { is_expected.to be_nil }
+  end
+
+  describe '#index_path' do
+    let(:clusterable) { create(:group) }
+
+    context 'without options' do
+      subject { described_class.new(clusterable).index_path }
+
+      it { is_expected.to eq(group_clusters_path(clusterable)) }
+    end
+
+    context 'with options' do
+      subject { described_class.new(clusterable).index_path(format: :json) }
+
+      it { is_expected.to eq(group_clusters_path(clusterable, format: :json)) }
+    end
   end
 end

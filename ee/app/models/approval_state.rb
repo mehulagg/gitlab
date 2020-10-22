@@ -114,6 +114,8 @@ class ApprovalState
   end
 
   def can_approve?(user)
+    return merge_request.can_be_approved_by?(user) unless merge_request.approval_feature_available?
+
     return false unless user
     return false unless user.can?(:approve_merge_request, merge_request)
 
@@ -126,12 +128,6 @@ class ApprovalState
     return false if !committers_can_approve? && merge_request.committers.include?(user)
 
     true
-  end
-
-  def has_approved?(user)
-    return false unless user
-
-    approved_approvers.include?(user)
   end
 
   def authors_can_approve?
@@ -158,13 +154,16 @@ class ApprovalState
       if approval_rules_overwritten?
         user_defined_merge_request_rules
       else
-        branch = project.scoped_approval_rules_enabled? ? target_branch : nil
-
-        project.visible_user_defined_rules(branch: branch).map do |rule|
+        project.visible_user_defined_rules(branch: target_branch).map do |rule|
           ApprovalWrappedRule.wrap(merge_request, rule)
         end
       end
     end
+  end
+
+  # This is the required + optional approval count
+  def total_approvals_count
+    approvals.size
   end
 
   private
@@ -206,10 +205,9 @@ class ApprovalState
 
   def wrapped_rules
     strong_memoize(:wrapped_rules) do
-      merge_request_rules = merge_request.approval_rules
-      merge_request_rules = merge_request_rules.applicable_to_branch(target_branch) if project.scoped_approval_rules_enabled?
+      merge_request_rules = merge_request.approval_rules.preload_users
 
-      merge_request_rules.map do |rule|
+      merge_request_rules.map! do |rule|
         ApprovalWrappedRule.wrap(merge_request, rule)
       end
     end

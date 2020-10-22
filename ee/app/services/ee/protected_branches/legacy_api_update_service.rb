@@ -14,18 +14,18 @@ module EE
       def delete_redundant_access_levels
         case developers_can_merge
         when true
-          protected_branch.merge_access_levels.developer.destroy_all # rubocop: disable DestroyAll
+          protected_branch.merge_access_levels.developer.destroy_all # rubocop: disable Cop/DestroyAll
         when false
-          protected_branch.merge_access_levels.developer.destroy_all # rubocop: disable DestroyAll
-          protected_branch.merge_access_levels.maintainer.destroy_all # rubocop: disable DestroyAll
+          protected_branch.merge_access_levels.developer.destroy_all # rubocop: disable Cop/DestroyAll
+          protected_branch.merge_access_levels.maintainer.destroy_all # rubocop: disable Cop/DestroyAll
         end
 
         case developers_can_push
         when true
-          protected_branch.push_access_levels.developer.destroy_all # rubocop: disable DestroyAll
+          protected_branch.push_access_levels.developer.destroy_all # rubocop: disable Cop/DestroyAll
         when false
-          protected_branch.push_access_levels.developer.destroy_all # rubocop: disable DestroyAll
-          protected_branch.push_access_levels.maintainer.destroy_all # rubocop: disable DestroyAll
+          protected_branch.push_access_levels.developer.destroy_all # rubocop: disable Cop/DestroyAll
+          protected_branch.push_access_levels.maintainer.destroy_all # rubocop: disable Cop/DestroyAll
         end
       end
     end

@@ -1,15 +1,19 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, howto
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/git_annex.html'
 ---
 
 # Git annex
 
-> **Warning:** GitLab has [completely
-removed](https://gitlab.com/gitlab-org/gitlab/issues/1648) in GitLab 9.0 (2017/03/22).
-Read through the [migration guide from git-annex to Git LFS](../topics/git/lfs/migrate_from_git_annex_to_git_lfs.md).
+CAUTION: **Warning:**
+[Git Annex support was removed](https://gitlab.com/gitlab-org/gitlab/-/issues/1648)
+in GitLab 9.0. Read through the [migration guide from git-annex to Git LFS](../topics/git/lfs/migrate_from_git_annex_to_git_lfs.md).
 
 The biggest limitation of Git, compared to some older centralized version
-control systems, has been the maximum size of the repositories.
+control systems has been the maximum size of the repositories.
 
 The general recommendation is to not have Git repositories larger than 1GB to
 preserve performance. Although GitLab has no limit (some repositories in GitLab
@@ -21,7 +25,7 @@ larger organizations.
 Videos, photos, audio, compiled binaries, and many other types of files are too
 large. As a workaround, people keep artwork-in-progress in a Dropbox folder and
 only check in the final result. This results in using outdated files, not
-having a complete history and increases the risk of losing work.
+having a complete history, and increases the risk of losing work.
 
 This problem is solved in GitLab Enterprise Edition by integrating the
 [git-annex](https://git-annex.branchable.com/) application.
@@ -39,7 +43,7 @@ configuration options required to enable it.
 
 ### Requirements
 
-`git-annex` needs to be installed both on the server and the client side.
+`git-annex` needs to be installed both on the server and the client-side.
 
 For Debian-like systems (for example, Debian and Ubuntu) this can be achieved by running:
 
@@ -90,8 +94,8 @@ one is located in `config.yml` of GitLab Shell.
 
 ## Using GitLab git-annex
 
-> **Note:**
-> Your Git remotes must be using the SSH protocol, not HTTP(S).
+NOTE: **Note:**
+Your Git remotes must be using the SSH protocol, not HTTP(S).
 
 Here is an example workflow of uploading a very large file and then checking it
 into your Git repository:
@@ -193,12 +197,12 @@ if you want to.
 
 ## Troubleshooting tips
 
-Differences in version of `git-annex` on the GitLab server and on local machines
+Differences in the version of `git-annex` on the GitLab server and on local machines
 can cause `git-annex` to raise unpredicted warnings and errors.
 
 Consult the [Annex upgrade page](https://git-annex.branchable.com/upgrades/) for more information about
 the differences between versions. You can find out which version is installed
-on your server by navigating to <https://pkgs.org/download/git-annex> and
+on your server by navigating to `https://pkgs.org/download/git-annex` and
 searching for your distribution.
 
 Although there is no general guide for `git-annex` errors, there are a few tips

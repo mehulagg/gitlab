@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Note, :elastic do
+RSpec.describe Note, :elastic do
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
@@ -55,6 +55,14 @@ describe Note, :elastic do
     expect(described_class.elastic_search('bla-bla', options: { project_ids: :any }).records).to contain_exactly(outside_note)
   end
 
+  it "names elasticsearch queries" do
+    described_class.elastic_search('*').total_count
+
+    assert_named_queries("doc:is_a:note",
+                         "note:match:search_terms",
+                         "note:authorized")
+  end
+
   it "indexes && searches diff notes" do
     notes = []
 
@@ -89,7 +97,8 @@ describe Note, :elastic do
       'noteable_type',
       'noteable_id',
       'created_at',
-      'updated_at'
+      'updated_at',
+      'confidential'
     ).merge({
       'issue' => {
         'assignee_id' => issue.assignee_ids,
@@ -151,9 +160,9 @@ describe Note, :elastic do
       expect(Note.elastic_search('term', options: options).total_count).to eq(1)
     end
 
-    [:admin, :auditor].each do |user_type|
-      it "finds note for #{user_type}", :sidekiq_might_not_need_inline do
-        superuser = create(user_type)
+    shared_examples 'notes finder' do |user_type, no_of_notes|
+      it "finds #{no_of_notes} notes for #{user_type}", :sidekiq_might_not_need_inline do
+        superuser = create(user_type) # rubocop:disable Rails/SaveBang
         issue = create(:issue, :confidential, author: create(:user))
 
         Sidekiq::Testing.inline! do
@@ -163,9 +172,17 @@ describe Note, :elastic do
 
         options = { project_ids: [issue.project.id], current_user: superuser }
 
-        expect(Note.elastic_search('term', options: options).total_count).to eq(1)
+        expect(Note.elastic_search('term', options: options).total_count).to eq(no_of_notes)
       end
     end
+
+    context 'when admin mode is enabled', :enable_admin_mode do
+      it_behaves_like 'notes finder', :admin, 1
+    end
+
+    it_behaves_like 'notes finder', :admin, 0
+
+    it_behaves_like 'notes finder', :auditor, 1
 
     it "return notes with matching content for project members", :sidekiq_might_not_need_inline do
       user = create :user

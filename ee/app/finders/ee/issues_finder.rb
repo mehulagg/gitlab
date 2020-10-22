@@ -18,7 +18,8 @@ module EE
     override :filter_items
     def filter_items(items)
       issues = by_weight(super)
-      by_epic(issues)
+      issues = by_epic(issues)
+      by_iteration(issues)
     end
 
     private
@@ -39,7 +40,7 @@ module EE
 
     override :by_assignee
     def by_assignee(items)
-      if params.assignees.any? && !not_query?
+      if params.assignees.any?
         params.assignees.each do |assignee|
           items = items.assigned_to(assignee)
         end
@@ -55,9 +56,37 @@ module EE
 
       if params.filter_by_no_epic?
         items.no_epic
+      elsif params.filter_by_any_epic?
+        items.any_epic
       else
         items.in_epics(params.epics)
       end
+    end
+
+    def by_iteration(items)
+      return items unless params.iterations
+
+      case params.iterations.to_s.downcase
+      when ::IssuableFinder::Params::FILTER_NONE
+        items.no_iteration
+      when ::IssuableFinder::Params::FILTER_ANY
+        items.any_iteration
+      else
+        items.in_iterations(params.iterations)
+      end
+    end
+
+    override :filter_negated_items
+    def filter_negated_items(items)
+      items = by_negated_epic(items)
+
+      super(items)
+    end
+
+    def by_negated_epic(items)
+      return items unless not_params[:epic_id].present?
+
+      items.not_in_epics(not_params[:epic_id].to_i)
     end
   end
 end

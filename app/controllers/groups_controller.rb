@@ -7,6 +7,7 @@ class GroupsController < Groups::ApplicationController
   include PreviewMarkdown
   include RecordUserLastActivity
   include SendFileUpload
+  include FiltersEvents
   extend ::Gitlab::Utils::Override
 
   respond_to :html
@@ -29,6 +30,11 @@ class GroupsController < Groups::ApplicationController
 
   before_action do
     push_frontend_feature_flag(:vue_issuables_list, @group)
+    push_frontend_feature_flag(:deployment_filters)
+  end
+
+  before_action do
+    set_not_query_feature_flag(@group)
   end
 
   before_action :export_rate_limit, only: [:export, :download_export]
@@ -40,6 +46,17 @@ class GroupsController < Groups::ApplicationController
   skip_cross_project_access_check :show, if: -> { request.format.html? }
 
   layout :determine_layout
+
+  feature_category :subgroups, [
+                     :index, :new, :create, :show, :edit, :update,
+                     :destroy, :details, :transfer
+                   ]
+
+  feature_category :audit_events, [:activity]
+  feature_category :issue_tracking, [:issues, :issues_calendar, :preview_markdown]
+  feature_category :code_review, [:merge_requests, :unfoldered_environment_names]
+  feature_category :projects, [:projects]
+  feature_category :importers, [:export, :download_export]
 
   def index
     redirect_to(current_user ? dashboard_groups_path : explore_groups_path)
@@ -53,6 +70,8 @@ class GroupsController < Groups::ApplicationController
     @group = Groups::CreateService.new(current_user, group_params).execute
 
     if @group.persisted?
+      track_experiment_event(:onboarding_issues, 'created_namespace')
+
       notice = if @group.chat_team.present?
                  "Group '#{@group.name}' and its Mattermost team were successfully created."
                else
@@ -68,7 +87,11 @@ class GroupsController < Groups::ApplicationController
   def show
     respond_to do |format|
       format.html do
-        render_show_html
+        if @group.import_state&.in_progress?
+          redirect_to group_import_path(@group)
+        else
+          render_show_html
+        end
       end
 
       format.atom do
@@ -112,7 +135,7 @@ class GroupsController < Groups::ApplicationController
     if Groups::UpdateService.new(@group, current_user, group_params).execute
       redirect_to edit_group_path(@group, anchor: params[:update_section]), notice: "Group '#{@group.name}' was successfully updated."
     else
-      @group.path = @group.path_before_last_save || @group.path_was
+      @group.reset
       render action: "edit"
     end
   end
@@ -142,7 +165,7 @@ class GroupsController < Groups::ApplicationController
     export_service = Groups::ImportExport::ExportService.new(group: @group, user: current_user)
 
     if export_service.async_execute
-      redirect_to edit_group_path(@group), notice: _('Group export started.')
+      redirect_to edit_group_path(@group), notice: _('Group export started. A download link will be sent by email and made available on this page.')
     else
       redirect_to edit_group_path(@group), alert: _('Group export could not be started.')
     end
@@ -154,6 +177,16 @@ class GroupsController < Groups::ApplicationController
     else
       redirect_to edit_group_path(@group),
         alert: _('Group export link has expired. Please generate a new export from your group settings.')
+    end
+  end
+
+  def unfoldered_environment_names
+    return render_404 unless Feature.enabled?(:deployment_filters)
+
+    respond_to do |format|
+      format.json do
+        render json: EnvironmentNamesFinder.new(@group, current_user).execute
+      end
     end
   end
 
@@ -219,7 +252,9 @@ class GroupsController < Groups::ApplicationController
       :two_factor_grace_period,
       :project_creation_level,
       :subgroup_creation_level,
-      :default_branch_protection
+      :default_branch_protection,
+      :default_branch_name,
+      :allow_mfa_for_subgroups
     ]
   end
 
@@ -260,11 +295,12 @@ class GroupsController < Groups::ApplicationController
   def export_rate_limit
     prefixed_action = "group_#{params[:action]}".to_sym
 
-    if Gitlab::ApplicationRateLimiter.throttled?(prefixed_action, scope: [current_user, prefixed_action, @group])
+    scope = params[:action] == :download_export ? @group : nil
+
+    if Gitlab::ApplicationRateLimiter.throttled?(prefixed_action, scope: [current_user, scope].compact)
       Gitlab::ApplicationRateLimiter.log_request(request, "#{prefixed_action}_request_limit".to_sym, current_user)
 
-      flash[:alert] = _('This endpoint has been requested too many times. Try again later.')
-      redirect_to edit_group_path(@group)
+      render plain: _('This endpoint has been requested too many times. Try again later.'), status: :too_many_requests
     end
   end
 

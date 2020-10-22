@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'EE::Boards::Lists::UpdateService' do
+RSpec.describe 'EE::Boards::Lists::UpdateService' do
   let(:group) { create(:group) }
   let(:user) { create(:group_member, :owner, group: group, user: create(:user)).user }
   let(:unpriviledged_user) { create(:group_member, :guest, group: group, user: create(:user)).user }

@@ -22,7 +22,7 @@ module EE
       end
 
       def review_end_at
-        merged_at || Time.now
+        merged_at || Time.current
       end
     end
   end

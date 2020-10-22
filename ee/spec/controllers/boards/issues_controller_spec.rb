@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::IssuesController do
+RSpec.describe Boards::IssuesController do
   include ExternalAuthorizationServiceHelpers
 
   let(:group) { create(:group, :private) }
@@ -123,7 +123,7 @@ describe Boards::IssuesController do
 
     context 'with unauthorized user' do
       before do
-        group.group_member(user).destroy
+        group.group_member(user).destroy!
       end
 
       it 'returns a forbidden 403 response' do

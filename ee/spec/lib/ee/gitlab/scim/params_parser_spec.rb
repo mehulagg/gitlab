@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::Scim::ParamsParser do
+RSpec.describe EE::Gitlab::Scim::ParamsParser do
   describe '#filter_params' do
     it 'returns the correct filter attributes' do
       filter = 'id eq "6ba81b08-77da"'

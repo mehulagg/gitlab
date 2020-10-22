@@ -1,15 +1,20 @@
 import { mount } from '@vue/test-utils';
-import { GlLink } from '@gitlab/ui';
+import { GlLink, GlIcon } from '@gitlab/ui';
 import { trimText } from 'helpers/text_helper';
+import { getJSONFixture } from 'helpers/fixtures';
+import { cloneDeep } from 'lodash';
 import ReleaseBlockFooter from '~/releases/components/release_block_footer.vue';
-import Icon from '~/vue_shared/components/icon.vue';
-import { release } from '../mock_data';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+
+const originalRelease = getJSONFixture('api/releases/release.json');
+
+const mockFutureDate = new Date(9999, 0, 0).toISOString();
+let mockIsFutureRelease = false;
 
 jest.mock('~/vue_shared/mixins/timeago', () => ({
   methods: {
     timeFormatted() {
-      return '7 fortnights ago';
+      return mockIsFutureRelease ? 'in 1 month' : '7 fortnights ago';
     },
     tooltipTitle() {
       return 'February 30, 2401';
@@ -19,12 +24,12 @@ jest.mock('~/vue_shared/mixins/timeago', () => ({
 
 describe('Release block footer', () => {
   let wrapper;
-  let releaseClone;
+  let release;
 
   const factory = (props = {}) => {
     wrapper = mount(ReleaseBlockFooter, {
       propsData: {
-        ...convertObjectPropsToCamelCase(releaseClone, { deep: true }),
+        ...convertObjectPropsToCamelCase(release, { deep: true }),
         ...props,
       },
     });
@@ -33,11 +38,13 @@ describe('Release block footer', () => {
   };
 
   beforeEach(() => {
-    releaseClone = JSON.parse(JSON.stringify(release));
+    release = cloneDeep(originalRelease);
   });
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
+    mockIsFutureRelease = false;
   });
 
   const commitInfoSection = () => wrapper.find('.js-commit-info');
@@ -50,7 +57,7 @@ describe('Release block footer', () => {
     beforeEach(() => factory());
 
     it('renders the commit icon', () => {
-      const commitIcon = commitInfoSection().find(Icon);
+      const commitIcon = commitInfoSection().find(GlIcon);
 
       expect(commitIcon.exists()).toBe(true);
       expect(commitIcon.props('name')).toBe('commit');
@@ -60,12 +67,12 @@ describe('Release block footer', () => {
       const commitLink = commitInfoSectionLink();
 
       expect(commitLink.exists()).toBe(true);
-      expect(commitLink.text()).toBe(releaseClone.commit.short_id);
-      expect(commitLink.attributes('href')).toBe(releaseClone.commit_path);
+      expect(commitLink.text()).toBe(release.commit.short_id);
+      expect(commitLink.attributes('href')).toBe(release.commit_path);
     });
 
     it('renders the tag icon', () => {
-      const commitIcon = tagInfoSection().find(Icon);
+      const commitIcon = tagInfoSection().find(GlIcon);
 
       expect(commitIcon.exists()).toBe(true);
       expect(commitIcon.props('name')).toBe('tag');
@@ -75,28 +82,60 @@ describe('Release block footer', () => {
       const commitLink = tagInfoSection().find(GlLink);
 
       expect(commitLink.exists()).toBe(true);
-      expect(commitLink.text()).toBe(releaseClone.tag_name);
-      expect(commitLink.attributes('href')).toBe(releaseClone.tag_path);
+      expect(commitLink.text()).toBe(release.tag_name);
+      expect(commitLink.attributes('href')).toBe(release.tag_path);
     });
 
     it('renders the author and creation time info', () => {
       expect(trimText(authorDateInfoSection().text())).toBe(
-        `Created 7 fortnights ago by ${releaseClone.author.username}`,
+        `Created 7 fortnights ago by ${release.author.username}`,
       );
+    });
+
+    describe('when the release date is in the past', () => {
+      it('prefixes the creation info with "Created"', () => {
+        expect(trimText(authorDateInfoSection().text())).toEqual(expect.stringMatching(/^Created/));
+      });
+    });
+
+    describe('renders the author and creation time info with future release date', () => {
+      beforeEach(() => {
+        mockIsFutureRelease = true;
+        factory({ releasedAt: mockFutureDate });
+      });
+
+      it('renders the release date without the author name', () => {
+        expect(trimText(authorDateInfoSection().text())).toBe(
+          `Will be created in 1 month by ${release.author.username}`,
+        );
+      });
+    });
+
+    describe('when the release date is in the future', () => {
+      beforeEach(() => {
+        mockIsFutureRelease = true;
+        factory({ releasedAt: mockFutureDate });
+      });
+
+      it('prefixes the creation info with "Will be created"', () => {
+        expect(trimText(authorDateInfoSection().text())).toEqual(
+          expect.stringMatching(/^Will be created/),
+        );
+      });
     });
 
     it("renders the author's avatar image", () => {
       const avatarImg = authorDateInfoSection().find('img');
 
       expect(avatarImg.exists()).toBe(true);
-      expect(avatarImg.attributes('src')).toBe(releaseClone.author.avatar_url);
+      expect(avatarImg.attributes('src')).toBe(release.author.avatar_url);
     });
 
     it("renders a link to the author's profile", () => {
       const authorLink = authorDateInfoSection().find(GlLink);
 
       expect(authorLink.exists()).toBe(true);
-      expect(authorLink.attributes('href')).toBe(releaseClone.author.web_url);
+      expect(authorLink.attributes('href')).toBe(release.author.web_url);
     });
   });
 
@@ -113,7 +152,7 @@ describe('Release block footer', () => {
 
     it('renders the commit SHA as plain text (instead of a link)', () => {
       expect(commitInfoSectionLink().exists()).toBe(false);
-      expect(commitInfoSection().text()).toBe(releaseClone.commit.short_id);
+      expect(commitInfoSection().text()).toBe(release.commit.short_id);
     });
   });
 
@@ -130,7 +169,7 @@ describe('Release block footer', () => {
 
     it('renders the tag name as plain text (instead of a link)', () => {
       expect(tagInfoSectionLink().exists()).toBe(false);
-      expect(tagInfoSection().text()).toBe(releaseClone.tag_name);
+      expect(tagInfoSection().text()).toBe(release.tag_name);
     });
   });
 
@@ -138,7 +177,18 @@ describe('Release block footer', () => {
     beforeEach(() => factory({ author: undefined }));
 
     it('renders the release date without the author name', () => {
-      expect(trimText(authorDateInfoSection().text())).toBe('Created 7 fortnights ago');
+      expect(trimText(authorDateInfoSection().text())).toBe(`Created 7 fortnights ago`);
+    });
+  });
+
+  describe('future release without any author info', () => {
+    beforeEach(() => {
+      mockIsFutureRelease = true;
+      factory({ author: undefined, releasedAt: mockFutureDate });
+    });
+
+    it('renders the release date without the author name', () => {
+      expect(trimText(authorDateInfoSection().text())).toBe(`Will be created in 1 month`);
     });
   });
 
@@ -147,7 +197,7 @@ describe('Release block footer', () => {
 
     it('renders the author name without the release date', () => {
       expect(trimText(authorDateInfoSection().text())).toBe(
-        `Created by ${releaseClone.author.username}`,
+        `Created by ${release.author.username}`,
       );
     });
   });

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Project', :js do
+RSpec.describe 'Project', :js do
   let(:template_text) { 'Custom license template content' }
   let(:group) { create(:group) }
   let(:template_project) { create(:project, :custom_repo, namespace: group, files: { 'LICENSE/custom.txt' => template_text }) }

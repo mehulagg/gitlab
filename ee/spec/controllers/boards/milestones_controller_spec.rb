@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::MilestonesController do
+RSpec.describe Boards::MilestonesController do
   let(:project) { create(:project, :private) }
   let(:board) { create(:board, project: project) }
   let(:user)  { create(:user) }

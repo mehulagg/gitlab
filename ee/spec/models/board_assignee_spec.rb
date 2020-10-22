@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BoardAssignee do
+RSpec.describe BoardAssignee do
   describe 'relationships' do
     it { is_expected.to belong_to(:board) }
     it { is_expected.to belong_to(:assignee).class_name('User') }

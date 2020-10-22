@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::ListsController do
+RSpec.describe Boards::ListsController do
   let(:project) { create(:project) }
   let(:board)   { create(:board, project: project) }
   let(:user)    { create(:user) }
@@ -257,6 +257,17 @@ describe Boards::ListsController do
         remove_board_list user: guest, board: board, list: planning
 
         expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
+
+    context 'with an error service response' do
+      it 'returns an unprocessable entity response' do
+        allow(Boards::Lists::DestroyService).to receive(:new)
+          .and_return(double(execute: ServiceResponse.error(message: 'error')))
+
+        remove_board_list user: user, board: board, list: planning
+
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
       end
     end
 

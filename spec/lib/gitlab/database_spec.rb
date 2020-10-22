@@ -2,9 +2,17 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database do
+RSpec.describe Gitlab::Database do
   before do
     stub_const('MigrationTest', Class.new { include Gitlab::Database })
+  end
+
+  describe 'EXTRA_SCHEMAS' do
+    it 'contains only schemas starting with gitlab_ prefix' do
+      described_class::EXTRA_SCHEMAS.each do |schema|
+        expect(schema.to_s).to start_with('gitlab_')
+      end
+    end
   end
 
   describe '.config' do
@@ -28,6 +36,12 @@ describe Gitlab::Database do
   describe '.human_adapter_name' do
     it 'returns PostgreSQL when using PostgreSQL' do
       expect(described_class.human_adapter_name).to eq('PostgreSQL')
+    end
+  end
+
+  describe '.system_id' do
+    it 'returns the PostgreSQL system identifier' do
+      expect(described_class.system_id).to be_an_instance_of(Integer)
     end
   end
 
@@ -62,118 +76,64 @@ describe Gitlab::Database do
     end
   end
 
-  describe '.postgresql_9_or_less?' do
-    it 'returns true when using postgresql 8.4' do
-      allow(described_class).to receive(:version).and_return('8.4')
-      expect(described_class.postgresql_9_or_less?).to eq(true)
-    end
-
-    it 'returns true when using PostgreSQL 9.6' do
-      allow(described_class).to receive(:version).and_return('9.6')
-
-      expect(described_class.postgresql_9_or_less?).to eq(true)
-    end
-
-    it 'returns false when using PostgreSQL 10 or newer' do
-      allow(described_class).to receive(:version).and_return('10')
-
-      expect(described_class.postgresql_9_or_less?).to eq(false)
-    end
-  end
-
   describe '.postgresql_minimum_supported_version?' do
-    it 'returns false when using PostgreSQL 9.5' do
-      allow(described_class).to receive(:version).and_return('9.5')
+    it 'returns false when using PostgreSQL 10' do
+      allow(described_class).to receive(:version).and_return('10')
 
       expect(described_class.postgresql_minimum_supported_version?).to eq(false)
     end
 
-    it 'returns true when using PostgreSQL 9.6' do
-      allow(described_class).to receive(:version).and_return('9.6')
+    it 'returns true when using PostgreSQL 11' do
+      allow(described_class).to receive(:version).and_return('11')
 
       expect(described_class.postgresql_minimum_supported_version?).to eq(true)
     end
 
-    it 'returns true when using PostgreSQL 10 or newer' do
-      allow(described_class).to receive(:version).and_return('10')
+    it 'returns true when using PostgreSQL 12' do
+      allow(described_class).to receive(:version).and_return('12')
 
       expect(described_class.postgresql_minimum_supported_version?).to eq(true)
     end
   end
 
-  describe '.replication_slots_supported?' do
-    it 'returns false when using PostgreSQL 9.3' do
-      allow(described_class).to receive(:version).and_return('9.3.1')
+  describe '.check_postgres_version_and_print_warning' do
+    subject { described_class.check_postgres_version_and_print_warning }
 
-      expect(described_class.replication_slots_supported?).to eq(false)
+    it 'prints a warning if not compliant with minimum postgres version' do
+      allow(described_class).to receive(:postgresql_minimum_supported_version?).and_return(false)
+
+      expect(Kernel).to receive(:warn).with(/You are using PostgreSQL/)
+
+      subject
     end
 
-    it 'returns true when using PostgreSQL 9.4.0 or newer' do
-      allow(described_class).to receive(:version).and_return('9.4.0')
+    it 'doesnt print a warning if compliant with minimum postgres version' do
+      allow(described_class).to receive(:postgresql_minimum_supported_version?).and_return(true)
 
-      expect(described_class.replication_slots_supported?).to eq(true)
-    end
-  end
+      expect(Kernel).not_to receive(:warn).with(/You are using PostgreSQL/)
 
-  describe '.pg_wal_lsn_diff' do
-    it 'returns old name when using PostgreSQL 9.6' do
-      allow(described_class).to receive(:version).and_return('9.6')
-
-      expect(described_class.pg_wal_lsn_diff).to eq('pg_xlog_location_diff')
+      subject
     end
 
-    it 'returns new name when using PostgreSQL 10 or newer' do
-      allow(described_class).to receive(:version).and_return('10')
+    it 'doesnt print a warning in Rails runner environment' do
+      allow(described_class).to receive(:postgresql_minimum_supported_version?).and_return(false)
+      allow(Gitlab::Runtime).to receive(:rails_runner?).and_return(true)
 
-      expect(described_class.pg_wal_lsn_diff).to eq('pg_wal_lsn_diff')
-    end
-  end
+      expect(Kernel).not_to receive(:warn).with(/You are using PostgreSQL/)
 
-  describe '.pg_current_wal_insert_lsn' do
-    it 'returns old name when using PostgreSQL 9.6' do
-      allow(described_class).to receive(:version).and_return('9.6')
-
-      expect(described_class.pg_current_wal_insert_lsn).to eq('pg_current_xlog_insert_location')
+      subject
     end
 
-    it 'returns new name when using PostgreSQL 10 or newer' do
-      allow(described_class).to receive(:version).and_return('10')
+    it 'ignores ActiveRecord errors' do
+      allow(described_class).to receive(:postgresql_minimum_supported_version?).and_raise(ActiveRecord::ActiveRecordError)
 
-      expect(described_class.pg_current_wal_insert_lsn).to eq('pg_current_wal_insert_lsn')
-    end
-  end
-
-  describe '.pg_last_wal_receive_lsn' do
-    it 'returns old name when using PostgreSQL 9.6' do
-      allow(described_class).to receive(:version).and_return('9.6')
-
-      expect(described_class.pg_last_wal_receive_lsn).to eq('pg_last_xlog_receive_location')
+      expect { subject }.not_to raise_error
     end
 
-    it 'returns new name when using PostgreSQL 10 or newer' do
-      allow(described_class).to receive(:version).and_return('10')
+    it 'ignores Postgres errors' do
+      allow(described_class).to receive(:postgresql_minimum_supported_version?).and_raise(PG::Error)
 
-      expect(described_class.pg_last_wal_receive_lsn).to eq('pg_last_wal_receive_lsn')
-    end
-  end
-
-  describe '.pg_last_wal_replay_lsn' do
-    it 'returns old name when using PostgreSQL 9.6' do
-      allow(described_class).to receive(:version).and_return('9.6')
-
-      expect(described_class.pg_last_wal_replay_lsn).to eq('pg_last_xlog_replay_location')
-    end
-
-    it 'returns new name when using PostgreSQL 10 or newer' do
-      allow(described_class).to receive(:version).and_return('10')
-
-      expect(described_class.pg_last_wal_replay_lsn).to eq('pg_last_wal_replay_lsn')
-    end
-  end
-
-  describe '.pg_last_xact_replay_timestamp' do
-    it 'returns pg_last_xact_replay_timestamp' do
-      expect(described_class.pg_last_xact_replay_timestamp).to eq('pg_last_xact_replay_timestamp')
+      expect { subject }.not_to raise_error
     end
   end
 
@@ -228,7 +188,6 @@ describe Gitlab::Database do
   describe '.bulk_insert' do
     before do
       allow(described_class).to receive(:connection).and_return(connection)
-      allow(described_class).to receive(:version).and_return(version)
       allow(connection).to receive(:quote_column_name, &:itself)
       allow(connection).to receive(:quote, &:itself)
       allow(connection).to receive(:execute)
@@ -242,8 +201,6 @@ describe Gitlab::Database do
         { c: 6, a: 4, b: 5 }
       ]
     end
-
-    let_it_be(:version) { 9.6 }
 
     it 'does nothing with empty rows' do
       expect(connection).not_to receive(:execute)
@@ -311,28 +268,13 @@ describe Gitlab::Database do
         expect(ids).to eq([10])
       end
 
-      context 'with version >= 9.5' do
-        it 'allows setting the upsert to do nothing' do
-          expect(connection)
-            .to receive(:execute)
-            .with(/ON CONFLICT DO NOTHING/)
+      it 'allows setting the upsert to do nothing' do
+        expect(connection)
+          .to receive(:execute)
+          .with(/ON CONFLICT DO NOTHING/)
 
-          described_class
-            .bulk_insert('test', [{ number: 10 }], on_conflict: :do_nothing)
-        end
-      end
-
-      context 'with version < 9.5' do
-        let(:version) { 9.4 }
-
-        it 'refuses setting the upsert' do
-          expect(connection)
-            .not_to receive(:execute)
-            .with(/ON CONFLICT/)
-
-          described_class
-            .bulk_insert('test', [{ number: 10 }], on_conflict: :do_nothing)
-        end
+        described_class
+          .bulk_insert('test', [{ number: 10 }], on_conflict: :do_nothing)
       end
     end
   end
@@ -413,6 +355,20 @@ describe Gitlab::Database do
       expect(ActiveRecord::Base).to receive(:connection) { raise ActiveRecord::NoDatabaseError, 'broken' }
 
       expect(described_class.exists?).to be(false)
+    end
+  end
+
+  describe '.get_write_location' do
+    it 'returns a string' do
+      connection = ActiveRecord::Base.connection
+
+      expect(described_class.get_write_location(connection)).to be_a(String)
+    end
+
+    it 'returns nil if there are no results' do
+      connection = double(select_all: [])
+
+      expect(described_class.get_write_location(connection)).to be_nil
     end
   end
 

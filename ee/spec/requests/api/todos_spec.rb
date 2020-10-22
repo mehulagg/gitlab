@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Todos do
+RSpec.describe API::Todos do
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, group: group) }
   let(:user) { create(:user) }
@@ -26,22 +26,6 @@ describe API::Todos do
       create(:todo, project: nil, group: new_group, author: author_1, user: user, target: new_epic)
     end
 
-    def create_todo_for_mentioned_in_design
-      issue = create(:issue, project: project)
-      create(:todo, :mentioned,
-             user: user,
-             project: project,
-             target: create(:design, issue: issue),
-             author: create(:user),
-             note: create(:note, project: project, note: "I am note, hear me roar"))
-    end
-
-    shared_examples 'an endpoint that responds with success' do
-      it do
-        expect(response).to have_gitlab_http_status(:ok)
-      end
-    end
-
     context 'when there is an Epic Todo' do
       let!(:epic_todo) { create_todo_for_new_epic }
 
@@ -49,7 +33,9 @@ describe API::Todos do
         get api('/todos', personal_access_token: pat)
       end
 
-      it_behaves_like 'an endpoint that responds with success'
+      specify do
+        expect(response).to have_gitlab_http_status(:ok)
+      end
 
       it 'avoids N+1 queries', :request_store do
         create_todo_for_new_epic
@@ -64,34 +50,6 @@ describe API::Todos do
       it 'includes the Epic Todo in the response' do
         expect(json_response).to include(
           a_hash_including('id' => epic_todo.id)
-        )
-      end
-    end
-
-    context 'when there is a Design Todo' do
-      let!(:design_todo) { create_todo_for_mentioned_in_design }
-
-      def api_request
-        get api('/todos', personal_access_token: pat)
-      end
-
-      before do
-        api_request
-      end
-
-      it_behaves_like 'an endpoint that responds with success'
-
-      it 'avoids N+1 queries', :request_store do
-        control = ActiveRecord::QueryRecorder.new { api_request }
-
-        create_todo_for_mentioned_in_design
-
-        expect { api_request }.not_to exceed_query_limit(control)
-      end
-
-      it 'includes the Design Todo in the response' do
-        expect(json_response).to include(
-          a_hash_including('id' => design_todo.id)
         )
       end
     end

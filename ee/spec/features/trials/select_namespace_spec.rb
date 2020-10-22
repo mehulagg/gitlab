@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Trial Select Namespace', :js do
+RSpec.describe 'Trial Select Namespace', :js do
   include Select2Helper
 
   let(:new_group_name) { 'GitLab' }

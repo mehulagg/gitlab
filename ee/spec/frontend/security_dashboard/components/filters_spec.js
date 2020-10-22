@@ -1,28 +1,55 @@
-import Vue from 'vue';
-import component from 'ee/security_dashboard/components/filters.vue';
+import Vuex from 'vuex';
+import Filters from 'ee/security_dashboard/components/filters.vue';
 import createStore from 'ee/security_dashboard/store';
-import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
+import { mount, createLocalVue } from '@vue/test-utils';
+
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
 describe('Filter component', () => {
-  let vm;
-  const store = createStore();
-  const Component = Vue.extend(component);
+  let wrapper;
+  let store;
+
+  const createWrapper = (props = {}) => {
+    wrapper = mount(Filters, {
+      localVue,
+      store,
+      propsData: {
+        ...props,
+      },
+      slots: {
+        buttons: '<div class="button-slot"></div>',
+      },
+    });
+  };
+
+  beforeEach(() => {
+    store = createStore();
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+  });
 
   describe('severity', () => {
     beforeEach(() => {
-      vm = mountComponentWithStore(Component, { store });
-    });
-
-    afterEach(() => {
-      vm.$destroy();
+      createWrapper();
     });
 
     it('should display all filters', () => {
-      expect(vm.$el.querySelectorAll('.js-filter')).toHaveLength(3);
+      expect(wrapper.findAll('.js-filter')).toHaveLength(3);
     });
 
     it('should display "Hide dismissed vulnerabilities" toggle', () => {
-      expect(vm.$el.querySelectorAll('.js-toggle')).toHaveLength(1);
+      expect(wrapper.findAll('.js-toggle')).toHaveLength(1);
+    });
+  });
+
+  describe('buttons slot', () => {
+    it('should exist', () => {
+      createWrapper();
+      expect(wrapper.find('.button-slot').exists()).toBe(true);
     });
   });
 });

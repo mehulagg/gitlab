@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Repository files API
 
 **CRUD for repository files**
@@ -25,7 +32,7 @@ GET /projects/:id/repository/files/:file_path
 ```
 
 ```shell
-curl --header 'PRIVATE-TOKEN: <your_access_token>' 'https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fmodels%2Fkey%2Erb?ref=master'
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fmodels%2Fkey%2Erb?ref=master"
 ```
 
 Example response:
@@ -51,7 +58,7 @@ Parameters:
 - `ref` (required) - The name of branch, tag or commit
 
 NOTE: **Note:**
-`blob_id` is the blob sha, see [repositories - Get a blob from repository](repositories.md#get-a-blob-from-repository)
+`blob_id` is the blob SHA, see [repositories - Get a blob from repository](repositories.md#get-a-blob-from-repository)
 
 In addition to the `GET` method, you can also use `HEAD` to get just file metadata.
 
@@ -60,12 +67,12 @@ HEAD /projects/:id/repository/files/:file_path
 ```
 
 ```shell
-curl --head --header 'PRIVATE-TOKEN: <your_access_token>' 'https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fmodels%2Fkey%2Erb?ref=master'
+curl --head --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fmodels%2Fkey%2Erb?ref=master"
 ```
 
 Example response:
 
-```text
+```plaintext
 HTTP/1.1 200 OK
 ...
 X-Gitlab-Blob-Id: 79f7bbd25901e8334750839545a9bd021f0e4c83
@@ -89,7 +96,7 @@ GET /projects/:id/repository/files/:file_path/blame
 ```
 
 ```shell
-curl --header 'PRIVATE-TOKEN: <your_access_token>' 'https://gitlab.example.com/api/v4/projects/13083/repository/files/path%2Fto%2Ffile.rb/blame?ref=master'
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/13083/repository/files/path%2Fto%2Ffile.rb/blame?ref=master"
 ```
 
 Example response:
@@ -129,12 +136,12 @@ NOTE: **Note:**
 `HEAD` method return just file metadata as in [Get file from repository](repository_files.md#get-file-from-repository).
 
 ```shell
-curl --head --header 'PRIVATE-TOKEN: <your_access_token>' 'https://gitlab.example.com/api/v4/projects/13083/repository/files/path%2Fto%2Ffile.rb/blame?ref=master'
+curl --head --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/13083/repository/files/path%2Fto%2Ffile.rb/blame?ref=master"
 ```
 
 Example response:
 
-```text
+```plaintext
 HTTP/1.1 200 OK
 ...
 X-Gitlab-Blob-Id: 79f7bbd25901e8334750839545a9bd021f0e4c83
@@ -156,7 +163,7 @@ GET /projects/:id/repository/files/:file_path/raw
 ```
 
 ```shell
-curl --header 'PRIVATE-TOKEN: <your_access_token>' 'https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fmodels%2Fkey%2Erb/raw?ref=master'
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fmodels%2Fkey%2Erb/raw?ref=master"
 ```
 
 Parameters:
@@ -179,7 +186,7 @@ POST /projects/:id/repository/files/:file_path
 curl --request POST --header 'PRIVATE-TOKEN: <your_access_token>' --header "Content-Type: application/json" \
   --data '{"branch": "master", "author_email": "author@example.com", "author_name": "Firstname Lastname", \
     "content": "some content", "commit_message": "create a new file"}' \
-  'https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fproject%2Erb'
+  "https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fproject%2Erb"
 ```
 
 Example response:
@@ -214,7 +221,7 @@ PUT /projects/:id/repository/files/:file_path
 curl --request PUT --header 'PRIVATE-TOKEN: <your_access_token>' --header "Content-Type: application/json" \
   --data '{"branch": "master", "author_email": "author@example.com", "author_name": "Firstname Lastname", \
     "content": "some content", "commit_message": "update file"}' \
-  'https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fproject%2Erb'
+  "https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fproject%2Erb"
 ```
 
 Example response:
@@ -236,7 +243,7 @@ Parameters:
 - `author_name` (optional) - Specify the commit author's name
 - `content` (required) - New file content
 - `commit_message` (required) - Commit message
-- `last_commit_id` (optional) - Last known file commit id
+- `last_commit_id` (optional) - Last known file commit ID
 
 If the commit fails for any reason we return a 400 error with a non-specific
 error message. Possible causes for a failed commit include:
@@ -260,7 +267,7 @@ DELETE /projects/:id/repository/files/:file_path
 curl --request DELETE --header 'PRIVATE-TOKEN: <your_access_token>' --header "Content-Type: application/json" \
   --data '{"branch": "master", "author_email": "author@example.com", "author_name": "Firstname Lastname", \
     "commit_message": "delete file"}' \
-  'https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fproject%2Erb'
+  "https://gitlab.example.com/api/v4/projects/13083/repository/files/app%2Fproject%2Erb"
 ```
 
 Parameters:
@@ -271,4 +278,4 @@ Parameters:
 - `author_email` (optional) - Specify the commit author's email address
 - `author_name` (optional) - Specify the commit author's name
 - `commit_message` (required) - Commit message
-- `last_commit_id` (optional) - Last known file commit id
+- `last_commit_id` (optional) - Last known file commit ID

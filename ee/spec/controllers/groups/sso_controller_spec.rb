@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::SsoController do
+RSpec.describe Groups::SsoController do
   let(:user) { create(:user) }
   let(:group) { create(:group, :private, name: 'our-group', saml_discovery_token: 'test-token') }
 
@@ -62,6 +62,25 @@ describe Groups::SsoController do
       end
     end
 
+    context 'when SAML trial has expired' do
+      before do
+        create(:group_saml_identity, saml_provider: saml_provider, user: user)
+        stub_licensed_features(group_saml: false)
+      end
+
+      it 'DELETE /unlink still allows account unlinking' do
+        expect do
+          delete :unlink, params: { group_id: group }
+        end.to change(Identity, :count).by(-1)
+      end
+
+      it 'GET /saml renders 404' do
+        get :saml, params: { group_id: group }
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
     context 'when user is not signed in' do
       it 'acts as route not found' do
         sign_out(user)
@@ -73,7 +92,7 @@ describe Groups::SsoController do
     end
 
     context 'when group has moved' do
-      let(:redirect_route) { group.redirect_routes.create(path: 'old-path') }
+      let(:redirect_route) { group.redirect_routes.create!(path: 'old-path') }
 
       it 'redirects to new location' do
         get :saml, params: { group_id: redirect_route.path }
@@ -174,7 +193,7 @@ describe Groups::SsoController do
 
       context 'and group managed accounts enforcing is disabled' do
         before do
-          saml_provider.update(enforced_group_managed_accounts: false)
+          saml_provider.update!(enforced_group_managed_accounts: false)
         end
 
         it 'renders 404' do

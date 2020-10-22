@@ -1,11 +1,16 @@
 import Vue from 'vue';
+import VueApollo from 'vue-apollo';
 import $ from 'jquery';
 import Cookies from 'js-cookie';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import createDefaultClient from '~/lib/graphql';
 import BurnCharts from './components/burn_charts.vue';
-import BurndownChartData from './burndown_chart_data';
-import Flash from '~/flash';
-import axios from '~/lib/utils/axios_utils';
-import { __ } from '~/locale';
+
+Vue.use(VueApollo);
+
+const apolloProvider = new VueApollo({
+  defaultClient: createDefaultClient(),
+});
 
 export default () => {
   // handle hint dismissal
@@ -22,34 +27,29 @@ export default () => {
   if ($chartEl.length) {
     const startDate = $chartEl.data('startDate');
     const dueDate = $chartEl.data('dueDate');
+    const milestoneId = $chartEl.data('milestoneId');
     const burndownEventsPath = $chartEl.data('burndownEventsPath');
+    const isLegacy = $chartEl.data('isLegacy');
 
-    axios
-      .get(burndownEventsPath)
-      .then(response => {
-        const burndownEvents = response.data;
-        const chartData = new BurndownChartData(burndownEvents, startDate, dueDate).generate();
-
-        const openIssuesCount = chartData.map(d => [d[0], d[1]]);
-        const openIssuesWeight = chartData.map(d => [d[0], d[2]]);
-
-        return new Vue({
-          el: container,
-          components: {
-            BurnCharts,
-          },
-          render(createElement) {
-            return createElement('burn-charts', {
-              props: {
-                startDate,
-                dueDate,
-                openIssuesCount,
-                openIssuesWeight,
-              },
-            });
+    // eslint-disable-next-line no-new
+    new Vue({
+      el: container,
+      components: {
+        BurnCharts,
+      },
+      mixins: [glFeatureFlagsMixin()],
+      apolloProvider,
+      render(createElement) {
+        return createElement('burn-charts', {
+          props: {
+            showNewOldBurndownToggle: isLegacy,
+            burndownEventsPath,
+            startDate,
+            dueDate,
+            milestoneId,
           },
         });
-      })
-      .catch(() => new Flash(__('Error loading burndown chart data')));
+      },
+    });
   }
 };

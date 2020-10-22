@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectImportOptions do
+RSpec.describe ProjectImportOptions do
   let(:project) { create(:project, :import_started) }
   let(:job) { { 'args' => [project.id, nil, nil], 'jid' => '123' } }
   let(:worker_class) do
@@ -17,7 +17,7 @@ describe ProjectImportOptions do
   end
 
   it 'sets default status expiration' do
-    expect(worker_class.sidekiq_options['status_expiration']).to eq(StuckImportJobsWorker::IMPORT_JOBS_EXPIRATION)
+    expect(worker_class.sidekiq_options['status_expiration']).to eq(Gitlab::Import::StuckImportJob::IMPORT_JOBS_EXPIRATION)
   end
 
   describe '.sidekiq_retries_exhausted' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Projects > Audit Events', :js do
+RSpec.describe 'Projects > Audit Events', :js do
   let(:user) { create(:user) }
   let(:pete) { create(:user, name: 'Pete') }
   let(:project) { create(:project, :repository, namespace: user.namespace) }
@@ -86,18 +86,18 @@ describe 'Projects > Audit Events', :js do
 
       visit project_audit_events_path(project)
 
-      expect(page).to have_content('Add deploy key')
+      expect(page).to have_content('Added deploy key')
 
       visit project_deploy_keys_path(project)
 
       accept_confirm do
-        find('.ic-remove').click
+        find('[data-testid="remove-icon"]').click
       end
 
       visit project_audit_events_path(project)
 
       wait_for('Audit event background creation job is done', polling_interval: 0.5, reload: true) do
-        page.has_content?('Remove deploy key', wait: 0)
+        page.has_content?('Removed deploy key', wait: 0)
       end
     end
   end
@@ -108,7 +108,7 @@ describe 'Projects > Audit Events', :js do
     end
 
     it "appears in the project's audit events" do
-      visit project_settings_members_path(project)
+      visit project_project_members_path(project)
 
       project_member = project.project_member(pete)
 
@@ -121,8 +121,8 @@ describe 'Projects > Audit Events', :js do
 
       click_link 'Audit Events'
 
-      page.within('#audits') do
-        expect(page).to have_content 'Change access level from developer to maintainer'
+      page.within('.audit-log-table') do
+        expect(page).to have_content 'Changed access level from Developer to Maintainer'
         expect(page).to have_content(project.owner.name)
         expect(page).to have_content('Pete')
       end
@@ -154,28 +154,22 @@ describe 'Projects > Audit Events', :js do
 
       wait_for_all_requests
 
-      page.within('#audits') do
+      page.within('.audit-log-table') do
         expect(page).to have_content(project.owner.name)
-        expect(page).to have_content('Change prevent merge request approval from authors')
-        expect(page).to have_content('Change prevent merge request approval from reviewers')
+        expect(page).to have_content('Changed prevent merge request approval from authors')
+        expect(page).to have_content('Changed prevent merge request approval from reviewers')
         expect(page).to have_content(project.name)
       end
     end
   end
 
-  it_behaves_like 'audit event contains custom message' do
-    let(:audit_events_url) { project_audit_events_path(project) }
-  end
-
-  describe 'filter by date', js: false do
+  describe 'filter by date' do
     let!(:audit_event_1) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: 5.days.ago) }
     let!(:audit_event_2) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: 3.days.ago) }
-    let!(:audit_event_3) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: 1.day.ago) }
+    let!(:audit_event_3) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: Date.current) }
+    let!(:events_path) { :project_audit_events_path }
+    let!(:entity) { project }
 
-    before do
-      visit project_audit_events_path(project)
-    end
-
-    it_behaves_like 'audit events filter'
+    it_behaves_like 'audit events date filter'
   end
 end

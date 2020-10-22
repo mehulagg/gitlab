@@ -77,13 +77,16 @@ export default {
     <mr-widget-pipeline
       :pipeline="pipeline"
       :pipeline-coverage-delta="mr.pipelineCoverageDelta"
+      :builds-with-coverage="mr.buildsWithCoverage"
       :ci-status="mr.ciStatus"
       :has-ci="mr.hasCI"
+      :pipeline-must-succeed="mr.onlyAllowMergeIfPipelineSucceeds"
       :source-branch="branch"
       :source-branch-link="branchLink"
-      :troubleshooting-docs-path="mr.troubleshootingDocsPath"
+      :mr-troubleshooting-docs-path="mr.mrTroubleshootingDocsPath"
+      :ci-troubleshooting-docs-path="mr.ciTroubleshootingDocsPath"
     />
-    <template v-slot:footer>
+    <template #footer>
       <div v-if="mr.exposedArtifactsPath" class="js-exposed-artifacts">
         <artifacts-app :endpoint="mr.exposedArtifactsPath" />
       </div>

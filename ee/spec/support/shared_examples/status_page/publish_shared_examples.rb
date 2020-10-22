@@ -2,7 +2,7 @@
 
 RSpec.shared_examples 'publish incidents' do
   let(:status_page_setting_enabled) { true }
-  let(:storage_client) { instance_double(StatusPage::Storage::S3Client) }
+  let(:storage_client) { instance_double(Gitlab::StatusPage::Storage::S3Client) }
   let(:serializer) { instance_double(StatusPage::IncidentSerializer) }
   let(:content_json) { content.to_json }
 
@@ -20,17 +20,15 @@ RSpec.shared_examples 'publish incidents' do
       .and_return(serializer)
   end
 
-  shared_examples 'feature is not available' do
-  end
-
-  context 'when upload succeeds' do
+  context 'when json upload succeeds' do
     before do
-      allow(storage_client).to receive(:upload_object).with(key, content_json)
+      allow(storage_client).to receive(:list_object_keys).and_return(Set.new)
     end
 
     it 'publishes details as JSON' do
+      expect(storage_client).to receive(:upload_object).with(key, content_json)
+
       expect(result).to be_success
-      expect(result.payload).to eq(object_key: key)
     end
   end
 
@@ -39,7 +37,7 @@ RSpec.shared_examples 'publish incidents' do
     let(:error) { StandardError.new }
 
     let(:exception) do
-      StatusPage::Storage::Error.new(bucket: bucket, error: error)
+      Gitlab::StatusPage::Storage::Error.new(bucket: bucket, error: error)
     end
 
     before do
@@ -53,7 +51,7 @@ RSpec.shared_examples 'publish incidents' do
   end
 
   context 'when limits exceeded' do
-    let(:too_big) { 'a' * StatusPage::Storage::JSON_MAX_SIZE }
+    let(:too_big) { 'a' * Gitlab::StatusPage::Storage::JSON_MAX_SIZE }
 
     before do
       if content.is_a?(Array)

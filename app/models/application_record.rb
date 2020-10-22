@@ -5,8 +5,20 @@ class ApplicationRecord < ActiveRecord::Base
 
   alias_method :reset, :reload
 
+  def self.without_order
+    reorder(nil)
+  end
+
   def self.id_in(ids)
     where(id: ids)
+  end
+
+  def self.primary_key_in(values)
+    where(primary_key => values)
+  end
+
+  def self.iid_in(iids)
+    where(iid: iids)
   end
 
   def self.id_not_in(ids)
@@ -30,19 +42,37 @@ class ApplicationRecord < ActiveRecord::Base
     false
   end
 
-  def self.safe_find_or_create_by!(*args)
-    safe_find_or_create_by(*args).tap do |record|
+  def self.at_most(count)
+    limit(count)
+  end
+
+  def self.safe_find_or_create_by!(*args, &block)
+    safe_find_or_create_by(*args, &block).tap do |record|
       record.validate! unless record.persisted?
     end
   end
 
-  def self.safe_find_or_create_by(*args)
+  # Start a new transaction with a shorter-than-usual statement timeout. This is
+  # currently one third of the default 15-second timeout
+  def self.with_fast_statement_timeout
+    transaction(requires_new: true) do
+      connection.exec_query("SET LOCAL statement_timeout = 5000")
+
+      yield
+    end
+  end
+
+  def self.safe_find_or_create_by(*args, &block)
     safe_ensure_unique(retries: 1) do
-      find_or_create_by(*args)
+      find_or_create_by(*args, &block)
     end
   end
 
   def self.underscore
     Gitlab::SafeRequestStore.fetch("model:#{self}:underscore") { self.to_s.underscore }
+  end
+
+  def self.where_exists(query)
+    where('EXISTS (?)', query.select(1))
   end
 end

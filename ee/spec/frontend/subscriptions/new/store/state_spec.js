@@ -19,6 +19,7 @@ describe('projectsSelector default state', () => {
     planData: JSON.stringify(planData),
     groupData: JSON.stringify(groupData),
     planId: 'secondPlanId',
+    namespaceId: null,
     setupForCompany: 'true',
     fullName: 'Full Name',
     newUser: 'true',

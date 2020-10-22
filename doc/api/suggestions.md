@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Suggest Changes API
 
 Every API call to suggestions must be authenticated.
@@ -16,7 +23,7 @@ PUT /suggestions/:id/apply
 | `id` | integer/string | yes | The ID of a suggestion |
 
 ```shell
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/suggestions/5/apply
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/suggestions/5/apply"
 ```
 
 Example response:

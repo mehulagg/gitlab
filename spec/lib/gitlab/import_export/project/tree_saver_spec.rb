@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ImportExport::Project::TreeSaver do
+RSpec.describe Gitlab::ImportExport::Project::TreeSaver do
   let_it_be(:export_path) { "#{Dir.tmpdir}/project_tree_saver_spec" }
   let_it_be(:exportable_path) { 'project' }
 
@@ -29,7 +29,7 @@ describe Gitlab::ImportExport::Project::TreeSaver do
 
       before_all do
         RSpec::Mocks.with_temporary_scope do
-          allow(Feature).to receive(:enabled?) { true }
+          stub_all_feature_flags
           stub_feature_flags(project_export_as_ndjson: ndjson_enabled)
 
           project.add_maintainer(user)
@@ -168,6 +168,28 @@ describe Gitlab::ImportExport::Project::TreeSaver do
         it 'has issue resource label events' do
           expect(subject.first['resource_label_events']).not_to be_empty
         end
+
+        it 'saves the issue designs correctly' do
+          expect(subject.first['designs'].size).to eq(1)
+        end
+
+        it 'saves the issue design notes correctly' do
+          expect(subject.first['designs'].first['notes']).not_to be_empty
+        end
+
+        it 'saves the issue design versions correctly' do
+          issue_json = subject.first
+          actions = issue_json['design_versions'].flat_map { |v| v['actions'] }
+
+          expect(issue_json['design_versions'].size).to eq(2)
+          issue_json['design_versions'].each do |version|
+            expect(version['author_id']).to be_kind_of(Integer)
+          end
+          expect(actions.size).to eq(2)
+          actions.each do |action|
+            expect(action['design']).to be_present
+          end
+        end
       end
 
       context 'with ci_pipelines' do
@@ -199,18 +221,6 @@ describe Gitlab::ImportExport::Project::TreeSaver do
         let(:relation_name) { :labels }
 
         it { is_expected.not_to be_empty }
-      end
-
-      context 'with services' do
-        let(:relation_name) { :services }
-
-        it 'saves the correct service type' do
-          expect(subject.first['type']).to eq('CustomIssueTrackerService')
-        end
-
-        it 'saves the properties for a service' do
-          expect(subject.first['properties']).to eq('one' => 'value')
-        end
       end
 
       context 'with project_feature' do
@@ -265,6 +275,7 @@ describe Gitlab::ImportExport::Project::TreeSaver do
           File.join(shared.export_path, Gitlab::ImportExport.project_filename)
         end
       end
+
       let(:shared) { project.import_export_shared }
       let(:params) { {} }
 
@@ -370,12 +381,6 @@ describe Gitlab::ImportExport::Project::TreeSaver do
 
         expect(project_tree_saver.save).to be true
       end
-
-      it 'has no when YML attributes but only the DB column' do
-        expect_any_instance_of(Gitlab::Ci::YamlProcessor).not_to receive(:build_attributes)
-
-        project_tree_saver.save
-      end
     end
   end
 
@@ -431,7 +436,6 @@ describe Gitlab::ImportExport::Project::TreeSaver do
     create(:resource_label_event, label: group_label, merge_request: merge_request)
 
     create(:event, :created, target: milestone, project: project, author: user)
-    create(:service, project: project, type: 'CustomIssueTrackerService', category: 'issue_tracker', properties: { one: 'value' })
 
     create(:project_custom_attribute, project: project)
     create(:project_custom_attribute, project: project)
@@ -441,6 +445,9 @@ describe Gitlab::ImportExport::Project::TreeSaver do
 
     board = create(:board, project: project, name: 'TestBoard')
     create(:list, board: board, position: 0, label: project_label)
+
+    design = create(:design, :with_file, versions_count: 2, issue: issue)
+    create(:diff_note_on_design, noteable: design, project: project, author: user)
 
     project
   end

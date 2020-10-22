@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe TaskListToggleService do
+RSpec.describe TaskListToggleService do
   let(:markdown) do
     <<-EOT.strip_heredoc
       * [ ] Task 1
@@ -119,7 +119,7 @@ describe TaskListToggleService do
       <<-EOT.strip_heredoc
       > > * [ ] Task 1
       > * [x] Task 2
-    EOT
+      EOT
 
     markdown_html = parse_markdown(markdown)
     toggler = described_class.new(markdown, markdown_html,
@@ -140,7 +140,7 @@ describe TaskListToggleService do
 
       * [ ] Task 1
       * [x] Task 2
-    EOT
+      EOT
 
     markdown_html = parse_markdown(markdown)
     toggler = described_class.new(markdown, markdown_html,
@@ -158,7 +158,7 @@ describe TaskListToggleService do
         <<-EOT.strip_heredoc
       - - [ ] Task 1
         - [x] Task 2
-      EOT
+        EOT
 
       markdown_html = parse_markdown(markdown)
       toggler = described_class.new(markdown, markdown_html,
@@ -175,7 +175,7 @@ describe TaskListToggleService do
         <<-EOT.strip_heredoc
       1. - [ ] Task 1
          - [x] Task 2
-      EOT
+        EOT
 
       markdown_html = parse_markdown(markdown)
       toggler = described_class.new(markdown, markdown_html,

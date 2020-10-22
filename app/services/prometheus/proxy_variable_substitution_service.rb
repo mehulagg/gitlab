@@ -4,16 +4,67 @@ module Prometheus
   class ProxyVariableSubstitutionService < BaseService
     include Stepable
 
+    VARIABLE_INTERPOLATION_REGEX = /
+      {{                  # Variable needs to be wrapped in these chars.
+        \s*               # Allow whitespace before and after the variable name.
+          (?<variable>    # Named capture.
+            \w+           # Match one or more word characters.
+          )
+        \s*
+      }}
+    /x.freeze
+
     steps :validate_variables,
       :add_params_to_result,
       :substitute_params,
-      :substitute_ruby_variables,
-      :substitute_liquid_variables
+      :substitute_variables
 
+    # @param environment [Environment]
+    # @param params [Hash<Symbol,Any>]
+    # @param params - query [String] The Prometheus query string.
+    # @param params - start [String] (optional) A time string in the rfc3339 format.
+    # @param params - start_time [String] (optional) A time string in the rfc3339 format.
+    # @param params - end [String] (optional) A time string in the rfc3339 format.
+    # @param params - end_time [String] (optional) A time string in the rfc3339 format.
+    # @param params - variables [ActionController::Parameters] (optional) Variables with their values.
+    #     The keys in the Hash should be the name of the variable. The value should be the value of the
+    #     variable. Ex: `ActionController::Parameters.new(variable1: 'value 1', variable2: 'value 2').permit!`
+    # @return [Prometheus::ProxyVariableSubstitutionService]
+    #
+    # Example:
+    #      Prometheus::ProxyVariableSubstitutionService.new(environment, {
+    #        params: {
+    #          start_time: '2020-07-03T06:08:36Z',
+    #          end_time: '2020-07-03T14:08:52Z',
+    #          query: 'up{instance="{{instance}}"}',
+    #          variables: { instance: 'srv1' }
+    #        }
+    #      })
     def initialize(environment, params = {})
       @environment, @params = environment, params.deep_dup
     end
 
+    # @return - params [Hash<Symbol,Any>] Returns a Hash containing a params key which is
+    #   similar to the `params` that is passed to the initialize method with 2 differences:
+    #     1. Variables in the query string are substituted with their values.
+    #        If a variable present in the query string has no known value (values
+    #        are obtained from the `variables` Hash in `params` or from
+    #        `Gitlab::Prometheus::QueryVariables.call`), it will not be substituted.
+    #     2. `start` and `end` keys are added, with their values copied from `start_time`
+    #        and `end_time`.
+    #
+    # Example output:
+    #
+    # {
+    #   params: {
+    #     start_time: '2020-07-03T06:08:36Z',
+    #     start: '2020-07-03T06:08:36Z',
+    #     end_time: '2020-07-03T14:08:52Z',
+    #     end: '2020-07-03T14:08:52Z',
+    #     query: 'up{instance="srv1"}',
+    #     variables: { instance: 'srv1' }
+    #   }
+    # }
     def execute
       execute_steps
     end
@@ -23,8 +74,8 @@ module Prometheus
     def validate_variables(_result)
       return success unless variables
 
-      unless variables.is_a?(Array) && variables.size.even?
-        return error(_('Optional parameter "variables" must be an array of keys and values. Ex: [key1, value1, key2, value2]'))
+      unless variables.is_a?(ActionController::Parameters)
+        return error(_('Optional parameter "variables" must be a Hash. Ex: variables[key1]=value1'))
       end
 
       success
@@ -46,41 +97,36 @@ module Prometheus
       success(result)
     end
 
-    def substitute_liquid_variables(result)
+    def substitute_variables(result)
       return success(result) unless query(result)
 
-      result[:params][:query] =
-        TemplateEngines::LiquidService.new(query(result)).render(full_context)
+      result[:params][:query] = gsub(query(result), full_context(result))
 
       success(result)
-    rescue TemplateEngines::LiquidService::RenderError => e
-      error(e.message)
     end
 
-    def substitute_ruby_variables(result)
-      return success(result) unless query(result)
-
-      # The % operator doesn't replace variables if the hash contains string
-      # keys.
-      result[:params][:query] = query(result) % predefined_context.symbolize_keys
-
-      success(result)
-    rescue TypeError, ArgumentError => exception
-      log_error(exception.message)
-      Gitlab::ErrorTracking.track_exception(exception, {
-        template_string: query(result),
-        variables: predefined_context
-      })
-
-      error(_('Malformed string'))
+    def gsub(string, context)
+      # Search for variables of the form `{{variable}}` in the string and replace
+      # them with their value.
+      string.gsub(VARIABLE_INTERPOLATION_REGEX) do |match|
+        # Replace with the value of the variable, or if there is no such variable,
+        # replace the invalid variable with itself. So,
+        # `up{instance="{{invalid_variable}}"}` will remain
+        # `up{instance="{{invalid_variable}}"}` after substitution.
+        context.fetch($~[:variable], match)
+      end
     end
 
-    def predefined_context
-      @predefined_context ||= Gitlab::Prometheus::QueryVariables.call(@environment)
+    def predefined_context(result)
+      Gitlab::Prometheus::QueryVariables.call(
+        @environment,
+        start_time: start_timestamp(result),
+        end_time: end_timestamp(result)
+      ).stringify_keys
     end
 
-    def full_context
-      @full_context ||= predefined_context.reverse_merge(variables_hash)
+    def full_context(result)
+      @full_context ||= predefined_context(result).reverse_merge(variables_hash)
     end
 
     def variables
@@ -88,12 +134,17 @@ module Prometheus
     end
 
     def variables_hash
-      # .each_slice(2) converts ['key1', 'value1', 'key2', 'value2'] into
-      # [['key1', 'value1'], ['key2', 'value2']] which is then converted into
-      # a hash by to_h: {'key1' => 'value1', 'key2' => 'value2'}
-      # to_h will raise an ArgumentError if the number of elements in the original
-      # array is not even.
-      variables&.each_slice(2).to_h
+      variables.to_h
+    end
+
+    def start_timestamp(result)
+      Time.rfc3339(result[:params][:start])
+    rescue ArgumentError
+    end
+
+    def end_timestamp(result)
+      Time.rfc3339(result[:params][:end])
+    rescue ArgumentError
     end
 
     def query(result)

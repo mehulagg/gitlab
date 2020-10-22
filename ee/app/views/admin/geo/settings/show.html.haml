@@ -1,6 +1,7 @@
-- page_title "Geo Settings"
-- @content_class = "limit-container-width geo-admin-settings" unless fluid_layout
-
+- page_title _("Geo Settings")
 = render partial: 'admin/geo/shared/license_alert'
 
-= render_if_exists 'admin/geo/settings/form'
+- if Gitlab::Geo.license_allows?
+  #js-geo-settings-form
+- else
+  = render 'shared/empty_states/geo'

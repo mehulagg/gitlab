@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Security::ProjectsController do
+RSpec.describe Security::ProjectsController do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
 

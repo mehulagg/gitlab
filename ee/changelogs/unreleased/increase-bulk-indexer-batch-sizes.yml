@@ -1,5 +1,0 @@
----
-title: Increase ProcessBookkeepingService batch to 10_000
-merge_request: 30817
-author:
-type: changed

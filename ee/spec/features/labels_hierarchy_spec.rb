@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Labels Hierarchy', :js do
+RSpec.describe 'Labels Hierarchy', :js do
   let!(:user) { create(:user) }
   let!(:grandparent) { create(:group) }
   let!(:parent) { create(:group, parent: grandparent) }

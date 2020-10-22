@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Vulnerabilities::DismissService do
+RSpec.describe Vulnerabilities::DismissService do
   include AccessMatchersGeneric
 
   before do
@@ -20,6 +20,8 @@ describe Vulnerabilities::DismissService do
     before do
       project.add_developer(user)
     end
+
+    it_behaves_like 'calls vulnerability statistics utility services in order'
 
     it 'dismisses a vulnerability and its associated findings' do
       Timecop.freeze do

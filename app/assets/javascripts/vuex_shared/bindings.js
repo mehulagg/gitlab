@@ -32,5 +32,3 @@ export const mapComputed = (list, defaultUpdateFn, root) => {
   });
   return result;
 };
-
-export default () => {};

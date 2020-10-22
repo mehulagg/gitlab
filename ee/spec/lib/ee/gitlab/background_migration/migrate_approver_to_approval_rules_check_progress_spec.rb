@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::BackgroundMigration::MigrateApproverToApprovalRulesCheckProgress do
+RSpec.describe Gitlab::BackgroundMigration::MigrateApproverToApprovalRulesCheckProgress do
   context 'when there is MigrateApproverToApprovalRulesInBatch jobs' do
     it 'reschedules check' do
       allow(Gitlab::BackgroundMigration).to receive(:exists?).with('MigrateApproverToApprovalRulesInBatch').and_return(true)
@@ -14,10 +14,12 @@ describe Gitlab::BackgroundMigration::MigrateApproverToApprovalRulesCheckProgres
   end
 
   context 'when there is no more MigrateApproverToApprovalRulesInBatch jobs' do
+    before do
+      stub_feature_flags(approval_rule: false)
+    end
+
     it 'enables feature' do
       allow(Gitlab::BackgroundMigration).to receive(:exists?).with('MigrateApproverToApprovalRulesInBatch').and_return(false)
-
-      expect(Feature).to receive(:enable).with(:approval_rule)
 
       described_class.new.perform
     end

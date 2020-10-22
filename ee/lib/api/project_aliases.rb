@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectAliases < Grape::API
+  class ProjectAliases < ::API::Base
     include PaginationParams
 
     before { check_feature_availability }

@@ -225,16 +225,28 @@ module Gitlab
         new_path.presence || old_path
       end
 
+      def file_hash
+        Digest::SHA1.hexdigest(file_path)
+      end
+
       def added_lines
-        @stats&.additions || diff_lines.count(&:added?)
+        strong_memoize(:added_lines) do
+          @stats&.additions || diff_lines.count(&:added?)
+        end
       end
 
       def removed_lines
-        @stats&.deletions || diff_lines.count(&:removed?)
+        strong_memoize(:removed_lines) do
+          @stats&.deletions || diff_lines.count(&:removed?)
+        end
       end
 
       def file_identifier
         "#{file_path}-#{new_file?}-#{deleted_file?}-#{renamed_file?}"
+      end
+
+      def file_identifier_hash
+        Digest::SHA1.hexdigest(file_identifier)
       end
 
       def diffable?
@@ -357,7 +369,7 @@ module Gitlab
       def fetch_blob(sha, path)
         return unless sha
 
-        Blob.lazy(repository.project, sha, path)
+        Blob.lazy(repository, sha, path)
       end
 
       def total_blob_lines(blob)

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Issue weight', :js do
+RSpec.describe 'Issue weight', :js do
   let(:project) { create(:project, :public) }
 
   it 'shows weight on issue list row' do
@@ -11,7 +11,7 @@ describe 'Issue weight', :js do
     visit project_issues_path(project)
 
     page.within(first('.issuable-info')) do
-      expect(page).to have_selector('.issue-weight-icon')
+      expect(page).to have_selector('[data-testid="weight"]')
       expect(page).to have_content(2)
     end
   end

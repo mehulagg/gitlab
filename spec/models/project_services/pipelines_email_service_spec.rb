@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PipelinesEmailService, :mailer do
+RSpec.describe PipelinesEmailService, :mailer do
   let(:pipeline) do
     create(:ci_pipeline, :failed,
       project: project,
@@ -34,22 +34,6 @@ describe PipelinesEmailService, :mailer do
       end
 
       it { is_expected.not_to validate_presence_of(:recipients) }
-    end
-  end
-
-  describe '#test_data' do
-    let(:build)   { create(:ci_build) }
-    let(:project) { build.project }
-    let(:user)    { create(:user) }
-
-    before do
-      project.add_developer(user)
-    end
-
-    it 'builds test data' do
-      data = subject.test_data(project, user)
-
-      expect(data[:object_kind]).to eq('pipeline')
     end
   end
 
@@ -97,7 +81,7 @@ describe PipelinesEmailService, :mailer do
     context 'when pipeline is succeeded' do
       before do
         data[:object_attributes][:status] = 'success'
-        pipeline.update(status: 'success')
+        pipeline.update!(status: 'success')
       end
 
       it_behaves_like 'sending email'
@@ -107,7 +91,7 @@ describe PipelinesEmailService, :mailer do
       context 'on default branch' do
         before do
           data[:object_attributes][:ref] = project.default_branch
-          pipeline.update(ref: project.default_branch)
+          pipeline.update!(ref: project.default_branch)
         end
 
         context 'notifications are enabled only for default branch' do
@@ -131,7 +115,7 @@ describe PipelinesEmailService, :mailer do
         before do
           create(:protected_branch, project: project, name: 'a-protected-branch')
           data[:object_attributes][:ref] = 'a-protected-branch'
-          pipeline.update(ref: 'a-protected-branch')
+          pipeline.update!(ref: 'a-protected-branch')
         end
 
         context 'notifications are enabled only for default branch' do
@@ -154,7 +138,7 @@ describe PipelinesEmailService, :mailer do
       context 'on a neither protected nor default branch' do
         before do
           data[:object_attributes][:ref] = 'a-random-branch'
-          pipeline.update(ref: 'a-random-branch')
+          pipeline.update!(ref: 'a-random-branch')
         end
 
         context 'notifications are enabled only for default branch' do
@@ -193,7 +177,7 @@ describe PipelinesEmailService, :mailer do
       context 'with succeeded pipeline' do
         before do
           data[:object_attributes][:status] = 'success'
-          pipeline.update(status: 'success')
+          pipeline.update!(status: 'success')
         end
 
         it_behaves_like 'not sending email'
@@ -211,7 +195,7 @@ describe PipelinesEmailService, :mailer do
         context 'with succeeded pipeline' do
           before do
             data[:object_attributes][:status] = 'success'
-            pipeline.update(status: 'success')
+            pipeline.update!(status: 'success')
           end
 
           it_behaves_like 'not sending email'
@@ -222,7 +206,7 @@ describe PipelinesEmailService, :mailer do
         context 'on default branch' do
           before do
             data[:object_attributes][:ref] = project.default_branch
-            pipeline.update(ref: project.default_branch)
+            pipeline.update!(ref: project.default_branch)
           end
 
           context 'notifications are enabled only for default branch' do
@@ -246,7 +230,7 @@ describe PipelinesEmailService, :mailer do
           before do
             create(:protected_branch, project: project, name: 'a-protected-branch')
             data[:object_attributes][:ref] = 'a-protected-branch'
-            pipeline.update(ref: 'a-protected-branch')
+            pipeline.update!(ref: 'a-protected-branch')
           end
 
           context 'notifications are enabled only for default branch' do
@@ -269,7 +253,7 @@ describe PipelinesEmailService, :mailer do
         context 'on a neither protected nor default branch' do
           before do
             data[:object_attributes][:ref] = 'a-random-branch'
-            pipeline.update(ref: 'a-random-branch')
+            pipeline.update!(ref: 'a-random-branch')
           end
 
           context 'notifications are enabled only for default branch' do
@@ -297,7 +281,7 @@ describe PipelinesEmailService, :mailer do
       context 'with failed pipeline' do
         before do
           data[:object_attributes][:status] = 'failed'
-          pipeline.update(status: 'failed')
+          pipeline.update!(status: 'failed')
         end
 
         it_behaves_like 'not sending email'
@@ -311,7 +295,7 @@ describe PipelinesEmailService, :mailer do
       context 'with failed pipeline' do
         before do
           data[:object_attributes][:status] = 'failed'
-          pipeline.update(status: 'failed')
+          pipeline.update!(status: 'failed')
         end
 
         it_behaves_like 'sending email'

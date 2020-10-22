@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Licenses::DestroyService do
+RSpec.describe Licenses::DestroyService do
   let(:license) { create(:license) }
 
   let_it_be(:user) { create(:admin) }

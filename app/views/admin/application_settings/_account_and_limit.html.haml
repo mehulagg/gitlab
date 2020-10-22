@@ -9,14 +9,6 @@
           = _('Gravatar enabled')
 
     .form-group
-      = f.label :namespace_storage_size_limit, class: 'label-bold' do
-        = _('Maximum namespace storage (MB)')
-      = f.number_field :namespace_storage_size_limit, class: 'form-control', min: 0
-      %span.form-text.text-muted
-        = _('Includes repository storage, wiki storage, LFS objects, build artifacts and packages. 0 for unlimited.')
-        = link_to _('More information'), help_page_path('user/admin_area/settings/account_and_limit_settings', anchor: 'maximum-namespace-storage-size'), target: '_blank'
-
-    .form-group
       = f.label :default_projects_limit, _('Default projects limit'), class: 'label-bold'
       = f.number_field :default_projects_limit, class: 'form-control', title: _('Maximum number of projects.'), data: { toggle: 'tooltip', container: 'body' }
     .form-group
@@ -29,11 +21,16 @@
       = f.label :receive_max_input_size, _('Maximum push size (MB)'), class: 'label-light'
       = f.number_field :receive_max_input_size, class: 'form-control qa-receive-max-input-size-field', title: _('Maximum size limit for a single commit.'), data: { toggle: 'tooltip', container: 'body' }
     .form-group
+      = f.label :max_import_size, _('Maximum import size (MB)'), class: 'label-light'
+      = f.number_field :max_import_size, class: 'form-control qa-receive-max-import-size-field', title: _('Maximum size of import files.'), data: { toggle: 'tooltip', container: 'body' }
+      %span.form-text.text-muted= _('0 for unlimited, only effective with remote storage enabled.')
+    .form-group
       = f.label :session_expire_delay, _('Session duration (minutes)'), class: 'label-light'
       = f.number_field :session_expire_delay, class: 'form-control', title: _('Maximum duration of a session.'), data: { toggle: 'tooltip', container: 'body' }
       %span.form-text.text-muted#session_expire_delay_help_block= _('GitLab restart is required to apply changes.')
 
     = render_if_exists 'admin/application_settings/personal_access_token_expiration_policy', form: f
+    = render_if_exists 'admin/application_settings/enforce_pat_expiration', form: f
 
     .form-group
       = f.label :user_oauth_applications, _('User OAuth applications'), class: 'label-bold'
@@ -47,12 +44,12 @@
         = f.check_box :user_default_external, class: 'form-check-input'
         = f.label :user_default_external, class: 'form-check-label' do
           = _('Newly registered users will by default be external')
-      .prepend-top-10
+      .gl-mt-3
         = _('Internal users')
-      = f.text_field :user_default_internal_regex, placeholder: _('Regex pattern'), class: 'form-control prepend-top-5'
+      = f.text_field :user_default_internal_regex, placeholder: _('Regex pattern'), class: 'form-control gl-mt-2'
       .help-block
         = _('Specify an e-mail address regex pattern to identify default internal users.')
-        = link_to _('More information'), help_page_path('user/permissions', anchor: 'external-users-permissions'),
+        = link_to _('More information'), help_page_path('user/permissions', anchor: 'setting-new-users-to-external'),
           target: '_blank'
     .form-group
       = f.label :user_show_add_ssh_key_message, _('Prompt users to upload SSH keys'), class: 'label-bold'
@@ -63,5 +60,4 @@
 
     = render_if_exists 'admin/application_settings/updating_name_disabled_for_users', form: f
     = render_if_exists 'admin/application_settings/availability_on_namespace_setting', form: f
-
-  = f.submit _('Save changes'), class: 'btn btn-success qa-save-changes-button'
+  = f.submit _('Save changes'), class: 'gl-button btn btn-success qa-save-changes-button'

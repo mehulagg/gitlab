@@ -1,5 +1,8 @@
 ---
 type: index, howto
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # User account
@@ -17,6 +20,11 @@ There are several ways to create users on GitLab. See the [creating users docume
 There are several ways to sign into your GitLab account.
 See the [authentication topic](../../topics/authentication/index.md) for more details.
 
+### Unknown sign-in
+
+GitLab notifies you if a sign-in occurs that is from an unknown IP address or device.
+See [Unknown Sign-In Notification](unknown_sign_in_notification.md) for more details.
+
 ## User profile
 
 To access your profile:
@@ -24,7 +32,7 @@ To access your profile:
 1. Click on your avatar.
 1. Select **Profile**.
 
-On your profile page, you will see the following information:
+On your profile page, you can see the following information:
 
 - Personal information
 - Activity stream: see your activity streamline and the history of your contributions
@@ -43,7 +51,15 @@ To access your profile settings:
 
 From there, you can:
 
-- Update your personal information
+- Update your personal information, including:
+  - Full name
+  - Primary email, public email, and commit email
+  - Social media handles
+  - Website URL
+  - Location
+  - Job title
+  - Bio
+- Change your [password](#changing-your-password)
 - Set a [custom status](#current-status) for your profile
 - Manage your [commit email](#commit-email) for your profile
 - Manage [2FA](account/two_factor_authentication.md)
@@ -60,11 +76,23 @@ From there, you can:
 - [View your active sessions](active_sessions.md) and revoke any of them if necessary
 - Access your audit log, a security log of important events involving your account
 
+## Changing your password
+
+1. Navigate to your [profile's](#profile-settings) **Settings > Password**.
+1. Enter your current password in the 'Current password' field.
+1. Enter your desired new password twice, once in the 'New password' field and
+   once in the 'Password confirmation' field.
+1. Click the 'Save password' button.
+
+If you don't know your current password, select the 'I forgot my password' link.
+
+![Change your password](./img/change_password_v13_0.png)
+
 ## Changing your username
 
 Your `username` is a unique [`namespace`](../group/index.md#namespaces)
 related to your user ID. Changing it can have unintended side effects, read
-[how redirects will behave](../project/index.md#redirects-when-changing-repository-paths)
+[how redirects behave](../project/index.md#redirects-when-changing-repository-paths)
 before proceeding.
 
 To change your `username`:
@@ -88,7 +116,7 @@ which also covers the case where you have projects hosted with
 
 ## Private profile
 
-The following information will be hidden from the user profile page (`https://gitlab.example.com/username`) if this feature is enabled:
+The following information is hidden from the user profile page (`https://gitlab.example.com/username`) if this feature is enabled:
 
 - Atom feed
 - Date when account is created
@@ -129,9 +157,9 @@ To add links to other accounts:
 
 ## Private contributions
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/14078) in GitLab 11.3.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/14078) in GitLab 11.3.
 
-Enabling private contributions will include contributions to private projects, in the user contribution calendar graph and user recent activity.
+Enabling private contributions includes contributions to private projects, in the user contribution calendar graph and user recent activity.
 
 To enable private contributions:
 
@@ -204,7 +232,7 @@ To enable this option:
 1. Select **Use a private email** option.
 1. Click **Update profile settings**.
 
-Once this option is enabled, every Git-related action will be performed using the private commit email.
+Once this option is enabled, every Git-related action is performed using the private commit email.
 
 To stay fully anonymous, you can also copy this private commit email
 and configure it on your local machine using the following command:
@@ -232,7 +260,33 @@ When the `_gitlab_session` expires or isn't available, GitLab uses the `remember
 to get you a new `_gitlab_session` and keep you signed in through browser restarts.
 
 After your `remember_user_token` expires and your `_gitlab_session` is cleared/expired,
-you will be asked to sign in again to verify your identity (which is for security reasons).
+you are asked to sign in again to verify your identity for security reasons.
+
+NOTE: **Note:**
+When any session is signed out, or when a session is revoked
+via [Active Sessions](active_sessions.md), all **Remember me** tokens are revoked.
+While other sessions will remain active, the **Remember me** feature will not restore
+a session if the browser is closed or the existing session expires.
+
+### Increased sign-in time
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/20340) in GitLab 13.1.
+
+The `remember_user_token` lifetime of a cookie can now extend beyond the deadline set by `config.remember_for`, as the `config.extend_remember_period` flag is now set to true.
+
+GitLab uses both session and persistent cookies:
+
+- Session cookie: Session cookies are normally removed at the end of the browser session when the browser is closed. The `_gitlab_session` cookie has no expiration date.
+- Persistent cookie: The `remember_user_token` is a cookie with an expiration date of two weeks. GitLab activates this cookie if you click Remember Me when you sign in.
+
+By default, the server sets a time-to-live (TTL) of 1-week on any session that is used.
+
+When you close a browser, the session cookie may still remain. For example, Chrome has the "Continue where you left off" option that restores session cookies.
+In other words, as long as you access GitLab at least once every 2 weeks, you could remain signed in with GitLab, as long as your browser tab is open.
+The server continues to reset the TTL for that session, independent of whether 2FA is installed,
+If you close your browser and open it up again, the `remember_user_token` cookie allows your user to reauthenticate itself.
+
+Without the `config.extend_remember_period` flag, you would be forced to sign in again after two weeks.
 
 <!-- ## Troubleshooting
 

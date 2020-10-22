@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::UpdateService do
+RSpec.describe Projects::UpdateService do
   include ExternalAuthorizationServiceHelpers
   include ProjectForksHelper
 
@@ -141,7 +141,7 @@ describe Projects::UpdateService do
         let(:group) { create(:group, visibility_level: Gitlab::VisibilityLevel::INTERNAL) }
 
         before do
-          project.update(namespace: group, visibility_level: group.visibility_level)
+          project.update!(namespace: group, visibility_level: group.visibility_level)
         end
 
         it 'does not update project visibility level' do
@@ -149,6 +149,32 @@ describe Projects::UpdateService do
 
           expect(result).to eq({ status: :error, message: 'Visibility level public is not allowed in a internal group.' })
           expect(project.reload).to be_internal
+        end
+      end
+
+      context 'when updating shared runners' do
+        context 'can enable shared runners' do
+          let(:group) { create(:group, shared_runners_enabled: true) }
+          let(:project) { create(:project, namespace: group, shared_runners_enabled: false) }
+
+          it 'enables shared runners' do
+            result = update_project(project, user, shared_runners_enabled: true)
+
+            expect(result).to eq({ status: :success })
+            expect(project.reload.shared_runners_enabled).to be_truthy
+          end
+        end
+
+        context 'cannot enable shared runners' do
+          let(:group) { create(:group, :shared_runners_disabled) }
+          let(:project) { create(:project, namespace: group, shared_runners_enabled: false) }
+
+          it 'does not enable shared runners' do
+            result = update_project(project, user, shared_runners_enabled: true)
+
+            expect(result).to eq({ status: :error, message: 'Shared runners enabled cannot be enabled because parent group does not allow it' })
+            expect(project.reload.shared_runners_enabled).to be_falsey
+          end
         end
       end
     end
@@ -230,7 +256,7 @@ describe Projects::UpdateService do
       end
 
       it 'handles empty project feature attributes' do
-        project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+        project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
 
         result = update_project(project, user, { name: 'test1' })
 
@@ -241,7 +267,7 @@ describe Projects::UpdateService do
 
     context 'when enabling a wiki' do
       it 'creates a wiki' do
-        project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+        project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
         TestEnv.rm_storage_dir(project.repository_storage, project.wiki.path)
 
         result = update_project(project, user, project_feature_attributes: { wiki_access_level: ProjectFeature::ENABLED })
@@ -252,9 +278,9 @@ describe Projects::UpdateService do
       end
 
       it 'logs an error and creates a metric when wiki can not be created' do
-        project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+        project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
 
-        expect_any_instance_of(ProjectWiki).to receive(:wiki).and_raise(ProjectWiki::CouldNotCreateWikiError)
+        expect_any_instance_of(ProjectWiki).to receive(:wiki).and_raise(Wiki::CouldNotCreateWikiError)
         expect_any_instance_of(described_class).to receive(:log_error).with("Could not create wiki for #{project.full_name}")
 
         counter = double(:counter)
@@ -272,7 +298,7 @@ describe Projects::UpdateService do
 
         result = update_project(project, user, project_feature_attributes:
                                  { issues_access_level: ProjectFeature::PRIVATE }
-                               )
+        )
 
         expect(result).to eq({ status: :success })
         expect(project.project_feature.issues_access_level).to be(ProjectFeature::PRIVATE)
@@ -325,20 +351,9 @@ describe Projects::UpdateService do
           expect(project.errors.messages[:base]).to include('There is already a repository with that name on disk')
         end
 
-        it 'renames the project without upgrading it' do
-          result = update_project(project, admin, path: 'new-path')
-
-          expect(result).not_to include(status: :error)
-          expect(project).to be_valid
-          expect(project.errors).to be_empty
-          expect(project.disk_path).to include('new-path')
-          expect(project.reload.hashed_storage?(:repository)).to be_falsey
-        end
-
         context 'when hashed storage is enabled' do
           before do
             stub_application_setting(hashed_storage_enabled: true)
-            stub_feature_flags(skip_hashed_storage_upgrade: false)
           end
 
           it 'migrates project to a hashed storage instead of renaming the repo to another legacy name' do
@@ -348,22 +363,6 @@ describe Projects::UpdateService do
             expect(project).to be_valid
             expect(project.errors).to be_empty
             expect(project.reload.hashed_storage?(:repository)).to be_truthy
-          end
-
-          context 'when skip_hashed_storage_upgrade feature flag is enabled' do
-            before do
-              stub_feature_flags(skip_hashed_storage_upgrade: true)
-            end
-
-            it 'renames the project without upgrading it' do
-              result = update_project(project, admin, path: 'new-path')
-
-              expect(result).not_to include(status: :error)
-              expect(project).to be_valid
-              expect(project.errors).to be_empty
-              expect(project.disk_path).to include('new-path')
-              expect(project.reload.hashed_storage?(:repository)).to be_falsey
-            end
           end
         end
       end
@@ -396,6 +395,24 @@ describe Projects::UpdateService do
       end
     end
 
+    shared_examples 'updating pages configuration' do
+      it 'schedules the `PagesUpdateConfigurationWorker` when pages are deployed' do
+        project.mark_pages_as_deployed
+
+        expect(PagesUpdateConfigurationWorker).to receive(:perform_async).with(project.id)
+
+        subject
+      end
+
+      it "does not schedule a job when pages aren't deployed" do
+        project.mark_pages_as_not_deployed
+
+        expect(PagesUpdateConfigurationWorker).not_to receive(:perform_async).with(project.id)
+
+        subject
+      end
+    end
+
     context 'when updating #pages_https_only', :https_pages_enabled do
       subject(:call_service) do
         update_project(project, admin, pages_https_only: false)
@@ -407,14 +424,7 @@ describe Projects::UpdateService do
           .to(false)
       end
 
-      it 'calls Projects::UpdatePagesConfigurationService' do
-        expect(Projects::UpdatePagesConfigurationService)
-          .to receive(:new)
-          .with(project)
-          .and_call_original
-
-        call_service
-      end
+      it_behaves_like 'updating pages configuration'
     end
 
     context 'when updating #pages_access_level' do
@@ -428,14 +438,7 @@ describe Projects::UpdateService do
           .to(ProjectFeature::ENABLED)
       end
 
-      it 'calls Projects::UpdatePagesConfigurationService' do
-        expect(Projects::UpdatePagesConfigurationService)
-          .to receive(:new)
-          .with(project)
-          .and_call_original
-
-        call_service
-      end
+      it_behaves_like 'updating pages configuration'
     end
 
     context 'when updating #emails_disabled' do
@@ -502,14 +505,14 @@ describe Projects::UpdateService do
           attributes_for(:prometheus_service,
                          project: project,
                          properties: { api_url: "http://new.prometheus.com", manual_configuration: "0" }
-          )
+                        )
         end
 
         let!(:prometheus_service) do
           create(:prometheus_service,
                  project: project,
                  properties: { api_url: "http://old.prometheus.com", manual_configuration: "0" }
-          )
+                )
         end
 
         it 'updates existing record' do
@@ -526,7 +529,7 @@ describe Projects::UpdateService do
             attributes_for(:prometheus_service,
                            project: project,
                            properties: { api_url: "http://example.prometheus.com", manual_configuration: "0" }
-            )
+                          )
           end
 
           it 'creates new record' do
@@ -542,7 +545,7 @@ describe Projects::UpdateService do
             attributes_for(:prometheus_service,
                            project: project,
                            properties: { api_url: nil, manual_configuration: "1" }
-            )
+                          )
           end
 
           it 'does not create new record' do
@@ -550,6 +553,63 @@ describe Projects::UpdateService do
               .not_to change { ::PrometheusService.where(project: project).count }
           end
         end
+      end
+    end
+
+    describe 'when changing repository_storage' do
+      let(:repository_read_only) { false }
+      let(:project) { create(:project, :repository, repository_read_only: repository_read_only) }
+      let(:opts) { { repository_storage: 'test_second_storage' } }
+
+      before do
+        stub_storage_settings('test_second_storage' => { 'path' => 'tmp/tests/extra_storage' })
+      end
+
+      shared_examples 'the transfer was not scheduled' do
+        it 'does not schedule the transfer' do
+          expect do
+            update_project(project, user, opts)
+          end.not_to change(project.repository_storage_moves, :count)
+        end
+      end
+
+      context 'authenticated as admin' do
+        let(:user) { create(:admin) }
+
+        it 'schedules the transfer of the repository to the new storage and locks the project' do
+          update_project(project, admin, opts)
+
+          expect(project).to be_repository_read_only
+          expect(project.repository_storage_moves.last).to have_attributes(
+            state: ::ProjectRepositoryStorageMove.state_machines[:state].states[:scheduled].value,
+            source_storage_name: 'default',
+            destination_storage_name: 'test_second_storage'
+          )
+        end
+
+        context 'the repository is read-only' do
+          let(:repository_read_only) { true }
+
+          it_behaves_like 'the transfer was not scheduled'
+        end
+
+        context 'the storage has not changed' do
+          let(:opts) { { repository_storage: 'default' } }
+
+          it_behaves_like 'the transfer was not scheduled'
+        end
+
+        context 'the storage does not exist' do
+          let(:opts) { { repository_storage: 'nonexistent' } }
+
+          it_behaves_like 'the transfer was not scheduled'
+        end
+      end
+
+      context 'authenticated as user' do
+        let(:user) { create(:user) }
+
+        it_behaves_like 'the transfer was not scheduled'
       end
     end
   end
@@ -608,25 +668,6 @@ describe Projects::UpdateService do
 
         it { is_expected.to eq(false) }
       end
-    end
-  end
-
-  describe 'repository_storage' do
-    let(:admin) { create(:admin) }
-    let(:user) { create(:user) }
-    let(:project) { create(:project, :repository) }
-    let(:opts) { { repository_storage: 'test_second_storage' } }
-
-    it 'calls the change repository storage method if the storage changed' do
-      expect(project).to receive(:change_repository_storage).with('test_second_storage')
-
-      update_project(project, admin, opts).inspect
-    end
-
-    it "doesn't call the change repository storage for non-admin users" do
-      expect(project).not_to receive(:change_repository_storage)
-
-      update_project(project, user, opts).inspect
     end
   end
 

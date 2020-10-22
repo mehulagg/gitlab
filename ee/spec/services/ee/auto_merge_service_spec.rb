@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AutoMergeService do
+RSpec.describe AutoMergeService do
   describe '.all_strategies_ordered_by_preference' do
     subject { described_class.all_strategies_ordered_by_preference }
 

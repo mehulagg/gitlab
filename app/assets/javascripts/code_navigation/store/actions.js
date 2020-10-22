@@ -18,7 +18,10 @@ export default {
         .then(({ data }) => {
           const normalizedData = data.reduce((acc, d) => {
             if (d.hover) {
-              acc[`${d.start_line}:${d.start_char}`] = d;
+              acc[`${d.start_line}:${d.start_char}`] = {
+                ...d,
+                definitionLineNumber: parseInt(d.definition_path?.split('#L').pop() || 0, 10),
+              };
               addInteractionClass(path, d);
             }
             return acc;
@@ -30,7 +33,9 @@ export default {
     });
   },
   showBlobInteractionZones({ state }, path) {
-    Object.values(state.data[path]).forEach(d => addInteractionClass(path, d));
+    if (state.data && state.data[path]) {
+      Object.values(state.data[path]).forEach(d => addInteractionClass(path, d));
+    }
   },
   showDefinition({ commit, state }, { target: el }) {
     let definition;
@@ -65,6 +70,7 @@ export default {
         x: x || 0,
         y: y + window.scrollY || 0,
         height: el.offsetHeight,
+        lineIndex: parseInt(lineIndex, 10),
       };
       definition = data[`${lineIndex}:${charIndex}`];
 

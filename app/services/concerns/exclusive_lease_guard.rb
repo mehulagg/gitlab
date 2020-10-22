@@ -21,7 +21,7 @@ module ExclusiveLeaseGuard
     lease = exclusive_lease.try_obtain
 
     unless lease
-      log_error('Cannot obtain an exclusive lease. There must be another instance already in execution.')
+      log_error("Cannot obtain an exclusive lease for #{self.class.name}. There must be another instance already in execution.")
       return
     end
 
@@ -58,6 +58,6 @@ module ExclusiveLeaseGuard
   end
 
   def log_error(message, extra_args = {})
-    Rails.logger.error(message) # rubocop:disable Gitlab/RailsLogger
+    Gitlab::AppLogger.error(message)
   end
 end

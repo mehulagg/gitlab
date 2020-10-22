@@ -1,8 +1,8 @@
-import Api from '~/api';
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
+import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import getInitialState from '~/ci_variable_list/store/state';
 import * as actions from '~/ci_variable_list/store/actions';
 import * as types from '~/ci_variable_list/store/mutation_types';
@@ -75,13 +75,23 @@ describe('CI variable list store actions', () => {
     });
   });
 
+  describe('setVariableProtected', () => {
+    it('commits SET_VARIABLE_PROTECTED mutation', () => {
+      testAction(actions.setVariableProtected, {}, {}, [
+        {
+          type: types.SET_VARIABLE_PROTECTED,
+        },
+      ]);
+    });
+  });
+
   describe('deleteVariable', () => {
     it('dispatch correct actions on successful deleted variable', done => {
       mock.onPatch(state.endpoint).reply(200);
 
       testAction(
         actions.deleteVariable,
-        mockVariable,
+        {},
         state,
         [],
         [
@@ -100,7 +110,7 @@ describe('CI variable list store actions', () => {
 
       testAction(
         actions.deleteVariable,
-        mockVariable,
+        {},
         state,
         [],
         [
@@ -124,7 +134,7 @@ describe('CI variable list store actions', () => {
 
       testAction(
         actions.updateVariable,
-        mockVariable,
+        {},
         state,
         [],
         [
@@ -273,6 +283,68 @@ describe('CI variable list store actions', () => {
           );
           done();
         },
+      );
+    });
+  });
+
+  describe('Update variable values', () => {
+    it('updateVariableKey', () => {
+      testAction(
+        actions.updateVariableKey,
+        { key: mockVariable.key },
+        {},
+        [
+          {
+            type: types.UPDATE_VARIABLE_KEY,
+            payload: mockVariable.key,
+          },
+        ],
+        [],
+      );
+    });
+
+    it('updateVariableValue', () => {
+      testAction(
+        actions.updateVariableValue,
+        { secret_value: mockVariable.value },
+        {},
+        [
+          {
+            type: types.UPDATE_VARIABLE_VALUE,
+            payload: mockVariable.value,
+          },
+        ],
+        [],
+      );
+    });
+
+    it('updateVariableType', () => {
+      testAction(
+        actions.updateVariableType,
+        { variable_type: mockVariable.variable_type },
+        {},
+        [{ type: types.UPDATE_VARIABLE_TYPE, payload: mockVariable.variable_type }],
+        [],
+      );
+    });
+
+    it('updateVariableProtected', () => {
+      testAction(
+        actions.updateVariableProtected,
+        { protected_variable: mockVariable.protected },
+        {},
+        [{ type: types.UPDATE_VARIABLE_PROTECTED, payload: mockVariable.protected }],
+        [],
+      );
+    });
+
+    it('updateVariableMasked', () => {
+      testAction(
+        actions.updateVariableMasked,
+        { masked: mockVariable.masked },
+        {},
+        [{ type: types.UPDATE_VARIABLE_MASKED, payload: mockVariable.masked }],
+        [],
       );
     });
   });

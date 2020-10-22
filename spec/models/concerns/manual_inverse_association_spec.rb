@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ManualInverseAssociation do
+RSpec.describe ManualInverseAssociation do
   let(:model) do
     Class.new(MergeRequest) do
       belongs_to :manual_association, class_name: 'MergeRequestDiff', foreign_key: :latest_merge_request_diff_id
@@ -14,7 +14,7 @@ describe ManualInverseAssociation do
     stub_const("#{described_class}::Model", model)
   end
 
-  let(:instance) { create(:merge_request).becomes(model) }
+  let(:instance) { create(:merge_request).becomes(model) } # rubocop: disable Cop/AvoidBecomes
 
   describe '.manual_inverse_association' do
     context 'when the relation exists' do

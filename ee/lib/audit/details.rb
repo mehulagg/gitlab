@@ -17,6 +17,8 @@ module Audit
         "Signed in with #{@details[:with].upcase} authentication"
       elsif event_created_by_system?
         "#{action_text} via system job. Reason: #{@details[:reason]}"
+      elsif impersonated_event?
+        "#{action_text} (by #{@details[:impersonated_by]})"
       else
         action_text
       end
@@ -26,6 +28,10 @@ module Audit
 
     def event_created_by_system?
       @details[:system_event]
+    end
+
+    def impersonated_event?
+      @details[:impersonated_by].present?
     end
 
     def action_text
@@ -103,7 +109,7 @@ module Audit
     end
 
     def detail_value
-      @details.each_value.first
+      String(@details.each_value.first)
     end
 
     def oauth_label

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::SeatLinkData do
+RSpec.describe Gitlab::SeatLinkData do
   subject do
     described_class.new(
       date: date,
@@ -35,7 +35,7 @@ describe Gitlab::SeatLinkData do
     end
 
     around do |example|
-      Timecop.travel(utc_time) { example.run }
+      travel_to(utc_time) { example.run }
     end
 
     context 'when passing no params' do

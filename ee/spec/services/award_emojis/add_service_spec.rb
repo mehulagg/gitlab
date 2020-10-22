@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AwardEmojis::AddService do
+RSpec.describe AwardEmojis::AddService do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let_it_be(:awardable) { create(:note_on_issue, project: project) }
@@ -17,7 +17,7 @@ describe AwardEmojis::AddService do
 
       context 'when adding succeeds' do
         context 'with recognized emoji' do
-          let(:name) { StatusPage::AWARD_EMOJI }
+          let(:name) { Gitlab::StatusPage::AWARD_EMOJI }
 
           include_examples 'trigger status page publish'
         end

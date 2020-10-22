@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::GroupLinks::DestroyService do
+RSpec.describe Projects::GroupLinks::DestroyService do
   let!(:user) { create(:user) }
   let!(:group) { create(:group) }
   let!(:project) { create(:project) }
@@ -17,6 +17,7 @@ describe Projects::GroupLinks::DestroyService do
         expect_any_instance_of(ProjectGroupLink)
           .to receive(:destroy).and_return(group_link)
       end
+
       let(:attributes) do
         {
            author_id: user.id,

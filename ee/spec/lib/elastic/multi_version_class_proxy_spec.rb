@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Elastic::MultiVersionClassProxy do
+RSpec.describe Elastic::MultiVersionClassProxy do
   subject { described_class.new(ProjectSnippet) }
 
   describe '#version' do

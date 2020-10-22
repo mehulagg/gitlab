@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeTrains::CheckStatusService do
+RSpec.describe MergeTrains::CheckStatusService do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:maintainer) { create(:user).tap { |u| project.add_maintainer(u)} }
   let(:service) { described_class.new(project, maintainer) }

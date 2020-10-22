@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectAlias do
+RSpec.describe ProjectAlias do
   subject { build(:project_alias) }
 
   it { is_expected.to belong_to(:project) }

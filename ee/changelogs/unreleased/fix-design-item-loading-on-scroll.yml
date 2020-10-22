@@ -1,5 +1,0 @@
----
-title: Fix imageLoading bug when scrolling back to design
-merge_request: 29223
-author:
-type: fixed

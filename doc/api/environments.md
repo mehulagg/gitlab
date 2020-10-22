@@ -1,3 +1,10 @@
+---
+stage: Release
+group: Release Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: concepts, howto
+---
+
 # Environments API
 
 ## List environments
@@ -13,9 +20,10 @@ GET /projects/:id/environments
 | `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `name`    | string  | no       | Return the environment with this name. Mutually exclusive with `search` |
 | `search`  | string  | no       | Return list of environments matching the search criteria. Mutually exclusive with `name` |
+| `states`  | string  | no       | List all environments that match a specific state. Accepted values: `available` or `stopped`. If no state value given, returns all environments. |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/environments?name=review%2Ffix-foo
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/environments?name=review%2Ffix-foo"
 ```
 
 Example response:
@@ -26,7 +34,7 @@ Example response:
     "id": 1,
     "name": "review/fix-foo",
     "slug": "review-fix-foo-dfjre3",
-    "external_url": "https://review-fix-foo-dfjre3.example.gitlab.com",
+    "external_url": "https://review-fix-foo-dfjre3.gitlab.example.com",
     "state": "available"
   }
 ]
@@ -54,7 +62,7 @@ Example of response
   "id": 1,
   "name": "review/fix-foo",
   "slug": "review-fix-foo-dfjre3",
-  "external_url": "https://review-fix-foo-dfjre3.example.gitlab.com"
+  "external_url": "https://review-fix-foo-dfjre3.gitlab.example.com",
   "state": "available",
   "last_deployment": {
     "id": 100,
@@ -70,7 +78,7 @@ Example of response
       "username": "root",
       "avatar_url": "http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon",
       "web_url": "http://localhost:3000/root"
-    }
+    },
     "deployable": {
       "id": 710,
       "status": "success",
@@ -99,7 +107,7 @@ Example of response
         "twitter": "",
         "website_url": "",
         "organization": null
-      }
+      },
       "commit": {
         "id": "416d8ea11849050d3d1f5104cf8cf51053e790ab",
         "short_id": "416d8ea1",
@@ -141,7 +149,7 @@ Example of response
 
 ## Create a new environment
 
-Creates a new environment with the given name and external_url.
+Creates a new environment with the given name and `external_url`.
 
 It returns `201` if the environment was successfully created, `400` for wrong parameters.
 
@@ -156,7 +164,7 @@ POST /projects/:id/environments
 | `external_url` | string  | no     | Place to link to for this environment |
 
 ```shell
-curl --data "name=deploy&external_url=https://deploy.example.gitlab.com" --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/environments"
+curl --data "name=deploy&external_url=https://deploy.gitlab.example.com" --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/environments"
 ```
 
 Example response:
@@ -166,14 +174,14 @@ Example response:
   "id": 1,
   "name": "deploy",
   "slug": "deploy",
-  "external_url": "https://deploy.example.gitlab.com",
+  "external_url": "https://deploy.gitlab.example.com",
   "state": "available"
 }
 ```
 
 ## Edit an existing environment
 
-Updates an existing environment's name and/or external_url.
+Updates an existing environment's name and/or `external_url`.
 
 It returns `200` if the environment was successfully updated. In case of an error, a status code `400` is returned.
 
@@ -186,10 +194,10 @@ PUT /projects/:id/environments/:environments_id
 | `id`            | integer/string | yes                               | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user            |
 | `environment_id` | integer | yes | The ID of the environment  |
 | `name`          | string  | no                                | The new name of the environment  |
-| `external_url`  | string  | no                                | The new external_url             |
+| `external_url`  | string  | no                                | The new `external_url`           |
 
 ```shell
-curl --request PUT --data "name=staging&external_url=https://staging.example.gitlab.com" --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/environments/1"
+curl --request PUT --data "name=staging&external_url=https://staging.gitlab.example.com" --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/environments/1"
 ```
 
 Example response:
@@ -199,7 +207,7 @@ Example response:
   "id": 1,
   "name": "staging",
   "slug": "staging",
-  "external_url": "https://staging.example.gitlab.com",
+  "external_url": "https://staging.gitlab.example.com",
   "state": "available"
 }
 ```
@@ -245,7 +253,7 @@ Example response:
   "id": 1,
   "name": "deploy",
   "slug": "deploy",
-  "external_url": "https://deploy.example.gitlab.com",
+  "external_url": "https://deploy.gitlab.example.com",
   "state": "stopped"
 }
 ```

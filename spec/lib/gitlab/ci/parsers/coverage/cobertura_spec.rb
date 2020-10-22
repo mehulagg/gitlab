@@ -2,7 +2,7 @@
 
 require 'fast_spec_helper'
 
-describe Gitlab::Ci::Parsers::Coverage::Cobertura do
+RSpec.describe Gitlab::Ci::Parsers::Coverage::Cobertura do
   describe '#parse!' do
     subject { described_class.new.parse!(cobertura, coverage_report) }
 
@@ -16,6 +16,41 @@ describe Gitlab::Ci::Parsers::Coverage::Cobertura do
           expect { subject }.not_to raise_error
 
           expect(coverage_report.files).to eq({})
+        end
+      end
+
+      context 'when there is a <sources>' do
+        shared_examples_for 'ignoring sources' do
+          it 'parses XML without errors' do
+            expect { subject }.not_to raise_error
+
+            expect(coverage_report.files).to eq({})
+          end
+        end
+
+        context 'and has a single source' do
+          let(:cobertura) do
+            <<-EOF.strip_heredoc
+            <sources>
+              <source>project/src</source>
+            </sources>
+            EOF
+          end
+
+          it_behaves_like 'ignoring sources'
+        end
+
+        context 'and has multiple sources' do
+          let(:cobertura) do
+            <<-EOF.strip_heredoc
+            <sources>
+              <source>project/src/foo</source>
+              <source>project/src/bar</source>
+            </sources>
+            EOF
+          end
+
+          it_behaves_like 'ignoring sources'
         end
       end
 

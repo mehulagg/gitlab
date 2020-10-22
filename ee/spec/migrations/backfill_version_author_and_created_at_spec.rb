@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20191030223057_backfill_version_author_and_created_at.rb')
+require_migration!
 
-describe BackfillVersionAuthorAndCreatedAt do
+RSpec.describe BackfillVersionAuthorAndCreatedAt do
   let_it_be(:migration_name) { described_class::MIGRATION.to_s.demodulize }
   let_it_be(:projects) { table(:projects) }
   let_it_be(:issues) { table(:issues) }

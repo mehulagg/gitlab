@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'subscriptions/groups/edit' do
+RSpec.describe 'subscriptions/groups/edit' do
   before do
     assign(:group, Group.new)
 

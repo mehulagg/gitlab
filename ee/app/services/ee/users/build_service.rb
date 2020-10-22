@@ -8,6 +8,9 @@ module EE
 
       attr_reader :group_id_for_saml
 
+      GROUP_SAML_PROVIDER = 'group_saml'
+      GROUP_SCIM_PROVIDER = 'group_scim'
+
       override :initialize
       def initialize(current_user, params = {})
         super
@@ -53,7 +56,10 @@ module EE
 
       override :build_identity
       def build_identity(user)
-        return build_scim_identity(user) if params[:provider] == 'group_scim'
+        return super unless params[:provider] == GROUP_SCIM_PROVIDER
+
+        build_scim_identity(user)
+        identity_params[:provider] = GROUP_SAML_PROVIDER
 
         super
       end

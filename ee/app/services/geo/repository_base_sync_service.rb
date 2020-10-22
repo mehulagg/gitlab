@@ -48,6 +48,12 @@ module Geo
       log_info("Trying to fetch #{type}")
       clean_up_temporary_repository
 
+      # TODO: Remove this as part of
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/9803
+      # This line is a workaround to avoid broken project repos in Geo
+      # secondaries after migrating repos to a different storage.
+      repository.expire_exists_cache
+
       if redownload?
         redownload_repository
         @new_repository = true
@@ -67,7 +73,11 @@ module Geo
     def redownload_repository
       log_info("Redownloading #{type}")
 
-      return if fetch_snapshot
+      if fetch_snapshot_into_temp_repo
+        set_temp_repository_as_main
+
+        return
+      end
 
       log_info("Attempting to fetch repository via git")
 
@@ -101,7 +111,7 @@ module Geo
     end
 
     def remote_url
-      Gitlab::Utils.append_path(Gitlab::Geo.primary_node.internal_url, "#{repository.full_path}.git")
+      Gitlab::Geo.primary_node.repository_url(repository)
     end
 
     # Use snapshotting for redownloads *only* when enabled.
@@ -110,7 +120,7 @@ module Geo
     # returned in an inconsistent state. However, a subsequent git fetch
     # will be enqueued by the log cursor, which should resolve any problems
     # it is possible to fix.
-    def fetch_snapshot
+    def fetch_snapshot_into_temp_repo
       # Snapshots will miss the data that are shared in object pools, and snapshotting should
       # be avoided to guard against data loss.
       return if project.pool_repository
@@ -135,13 +145,21 @@ module Geo
     def mark_sync_as_successful(missing_on_primary: false)
       log_info("Marking #{type} sync as successful")
 
-      persisted = registry.finish_sync!(type, missing_on_primary)
+      persisted = registry.finish_sync!(type, missing_on_primary, primary_checksummed?)
 
       reschedule_sync unless persisted
 
       log_info("Finished #{type} sync",
               update_delay_s: update_delay_in_seconds,
               download_time_s: download_time_in_seconds)
+    end
+
+    def primary_checksummed?
+      primary_checksum.present?
+    end
+
+    def primary_checksum
+      project.repository_state&.public_send("#{type}_verification_checksum") # rubocop:disable GitlabSecurity/PublicSend
     end
 
     def reschedule_sync

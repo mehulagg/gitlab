@@ -4,23 +4,15 @@ import { GlToast } from '@gitlab/ui';
 import AccessorUtilities from '~/lib/utils/accessor';
 import PersistentUserCallout from '../persistent_user_callout';
 import { s__, sprintf } from '../locale';
-import Flash from '../flash';
+import { deprecatedCreateFlash as Flash } from '../flash';
 import Poll from '../lib/utils/poll';
 import initSettingsPanels from '../settings_panels';
 import eventHub from './event_hub';
-import {
-  APPLICATION_STATUS,
-  INGRESS,
-  INGRESS_DOMAIN_SUFFIX,
-  CROSSPLANE,
-  KNATIVE,
-  FLUENTD,
-} from './constants';
+import { APPLICATION_STATUS, CROSSPLANE, KNATIVE, FLUENTD } from './constants';
 import ClustersService from './services/clusters_service';
 import ClustersStore from './stores/clusters_store';
 import Applications from './components/applications.vue';
 import RemoveClusterConfirmation from './components/remove_cluster_confirmation.vue';
-import setupToggleButtons from '../toggle_buttons';
 import initProjectSelectDropdown from '~/project_select';
 import initServerlessSurveyBanner from '~/serverless/survey_banner';
 
@@ -68,6 +60,7 @@ export default class Clusters {
       deployBoardsHelpPath,
       cloudRunHelpPath,
       clusterId,
+      ciliumHelpPath,
     } = document.querySelector('.js-edit-cluster-form').dataset;
 
     this.clusterId = clusterId;
@@ -84,6 +77,7 @@ export default class Clusters {
       clustersHelpPath,
       deployBoardsHelpPath,
       cloudRunHelpPath,
+      ciliumHelpPath,
     );
     this.store.setManagePrometheusPath(managePrometheusPath);
     this.store.updateStatus(clusterStatus);
@@ -108,7 +102,6 @@ export default class Clusters {
     });
 
     this.installApplication = this.installApplication.bind(this);
-    this.showToken = this.showToken.bind(this);
 
     this.errorContainer = document.querySelector('.js-cluster-error');
     this.successContainer = document.querySelector('.js-cluster-success');
@@ -119,21 +112,12 @@ export default class Clusters {
     );
     this.errorReasonContainer = this.errorContainer.querySelector('.js-error-reason');
     this.successApplicationContainer = document.querySelector('.js-cluster-application-notice');
-    this.showTokenButton = document.querySelector('.js-show-cluster-token');
     this.tokenField = document.querySelector('.js-cluster-token');
-    this.ingressDomainHelpText = document.querySelector('.js-ingress-domain-help-text');
-    this.ingressDomainSnippet =
-      this.ingressDomainHelpText &&
-      this.ingressDomainHelpText.querySelector('.js-ingress-domain-snippet');
 
     initProjectSelectDropdown();
     Clusters.initDismissableCallout();
     initSettingsPanels();
 
-    const toggleButtonsContainer = document.querySelector('.js-cluster-enable-toggle-area');
-    if (toggleButtonsContainer) {
-      setupToggleButtons(toggleButtonsContainer);
-    }
     this.initApplications(clusterType);
     this.initEnvironments();
 
@@ -186,6 +170,7 @@ export default class Clusters {
             providerType: this.state.providerType,
             preInstalledKnative: this.state.preInstalledKnative,
             rbac: this.state.rbac,
+            ciliumHelpPath: this.state.ciliumHelpPath,
           },
         });
       },
@@ -224,7 +209,7 @@ export default class Clusters {
   initRemoveClusterActions() {
     const el = document.querySelector('#js-cluster-remove-actions');
     if (el && el.dataset) {
-      const { clusterName, clusterPath } = el.dataset;
+      const { clusterName, clusterPath, hasManagementProject } = el.dataset;
 
       this.removeClusterAction = new Vue({
         el,
@@ -233,6 +218,7 @@ export default class Clusters {
             props: {
               clusterName,
               clusterPath,
+              hasManagementProject,
             },
           });
         },
@@ -251,14 +237,13 @@ export default class Clusters {
   }
 
   addBannerCloseHandler(el, status) {
-    el.querySelector('.js-close-banner').addEventListener('click', () => {
+    el.querySelector('.js-close').addEventListener('click', () => {
       el.classList.add('hidden');
       this.setBannerDismissedState(status, true);
     });
   }
 
   addListeners() {
-    if (this.showTokenButton) this.showTokenButton.addEventListener('click', this.showToken);
     eventHub.$on('installApplication', this.installApplication);
     eventHub.$on('updateApplication', data => this.updateApplication(data));
     eventHub.$on('saveKnativeDomain', data => this.saveKnativeDomain(data));
@@ -275,7 +260,6 @@ export default class Clusters {
   }
 
   removeListeners() {
-    if (this.showTokenButton) this.showTokenButton.removeEventListener('click', this.showToken);
     eventHub.$off('installApplication', this.installApplication);
     eventHub.$off('updateApplication', this.updateApplication);
     eventHub.$off('saveKnativeDomain');
@@ -325,34 +309,15 @@ export default class Clusters {
 
   handleClusterStatusSuccess(data) {
     const prevStatus = this.store.state.status;
-    const prevApplicationMap = Object.assign({}, this.store.state.applications);
+    const prevApplicationMap = { ...this.store.state.applications };
 
     this.store.updateStateFromServer(data.data);
 
     this.checkForNewInstalls(prevApplicationMap, this.store.state.applications);
     this.updateContainer(prevStatus, this.store.state.status, this.store.state.statusReason);
 
-    if (this.ingressDomainHelpText) {
-      this.toggleIngressDomainHelpText(
-        prevApplicationMap[INGRESS],
-        this.store.state.applications[INGRESS],
-      );
-    }
-
     if (this.store.state.applications[KNATIVE]?.status === APPLICATION_STATUS.INSTALLED) {
       initServerlessSurveyBanner();
-    }
-  }
-
-  showToken() {
-    const type = this.tokenField.getAttribute('type');
-
-    if (type === 'password') {
-      this.tokenField.setAttribute('type', 'text');
-      this.showTokenButton.textContent = s__('ClusterIntegration|Hide');
-    } else {
-      this.tokenField.setAttribute('type', 'password');
-      this.showTokenButton.textContent = s__('ClusterIntegration|Show');
     }
   }
 
@@ -484,6 +449,11 @@ export default class Clusters {
         return;
       }
 
+      if (appId === KNATIVE && !params.hostname && !params.pages_domain_id) {
+        reject(s__('ClusterIntegration|You must specify a domain before you can install Knative.'));
+        return;
+      }
+
       resolve();
     });
   }
@@ -517,13 +487,6 @@ export default class Clusters {
     });
   }
 
-  toggleIngressDomainHelpText({ externalIp }, { externalIp: newExternalIp }) {
-    if (externalIp !== newExternalIp) {
-      this.ingressDomainHelpText.classList.toggle('hide', !newExternalIp);
-      this.ingressDomainSnippet.textContent = `${newExternalIp}${INGRESS_DOMAIN_SUFFIX}`;
-    }
-  }
-
   saveKnativeDomain(data) {
     const appId = data.id;
     this.store.updateApplication(appId);
@@ -536,6 +499,7 @@ export default class Clusters {
     this.store.updateAppProperty(appId, 'isEditingDomain', true);
     this.store.updateAppProperty(appId, 'hostname', domain);
     this.store.updateAppProperty(appId, 'pagesDomain', domainId ? { id: domainId, domain } : null);
+    this.store.updateAppProperty(appId, 'validationError', null);
   }
 
   setCrossplaneProviderStack(data) {

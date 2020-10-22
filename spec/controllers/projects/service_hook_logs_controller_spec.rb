@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::ServiceHookLogsController do
+RSpec.describe Projects::ServiceHookLogsController do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
   let(:service) { create(:drone_ci_service, project: project) }
@@ -24,7 +24,7 @@ describe Projects::ServiceHookLogsController do
   describe 'GET #show' do
     subject { get :show, params: log_params }
 
-    it do
+    specify do
       expect(response).to be_successful
     end
   end

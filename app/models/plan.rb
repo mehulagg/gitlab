@@ -26,6 +26,10 @@ class Plan < ApplicationRecord
     DEFAULT_PLANS
   end
 
+  def actual_limits
+    self.limits || self.build_limits
+  end
+
   def default?
     self.class.default_plans.include?(name)
   end

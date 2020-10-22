@@ -6,6 +6,8 @@ class Groups::EpicLinksController < Groups::ApplicationController
   before_action :check_epics_available!, only: [:index, :destroy]
   before_action :check_subepics_available!, only: [:create, :update]
 
+  feature_category :epics
+
   def update
     result = EpicLinks::UpdateService.new(child_epic, current_user, params[:epic]).execute
 
@@ -19,6 +21,12 @@ class Groups::EpicLinksController < Groups::ApplicationController
   end
 
   private
+
+  def authorize_admin!
+    return super unless action_name == 'destroy'
+
+    render_403 unless can?(current_user, 'destroy_epic_link', epic)
+  end
 
   def create_service
     EpicLinks::CreateService.new(epic, current_user, create_params)

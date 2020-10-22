@@ -1,5 +1,0 @@
----
-title: Fix Elasticsearch rollout stale cache bug
-merge_request: 29233
-author:
-type: fixed

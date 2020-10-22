@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::PathLocksController do
+RSpec.describe Projects::PathLocksController do
   let(:project) { create(:project, :repository, :public) }
   let(:user)    { project.owner }
   let(:file_path) { 'files/lfs/lfs_object.iso' }

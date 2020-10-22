@@ -10,9 +10,7 @@ module EE
       before_action :log_archive_audit_event, only: [:archive]
       before_action :log_unarchive_audit_event, only: [:unarchive]
 
-      before_action do
-        push_frontend_feature_flag(:service_desk_custom_address, @project)
-      end
+      feature_category :projects, [:restore]
     end
 
     def restore
@@ -79,10 +77,8 @@ module EE
         merge_requests_template
         repository_size_limit
         reset_approvals_on_push
-        service_desk_enabled
         ci_cd_only
         use_custom_template
-        packages_enabled
         require_password_to_approve
         group_with_project_templates_id
       ]
@@ -106,7 +102,6 @@ module EE
       %i[
         mirror
         mirror_trigger_builds
-        mirror_user_id
       ]
     end
 
@@ -125,7 +120,7 @@ module EE
         attrs << :merge_requests_disable_committers_approval
       end
 
-      if can?(current_user, :modify_approvers_rules, project)
+      if can?(current_user, :modify_overriding_approvers_per_merge_request_setting, project)
         attrs << :disable_overriding_approvers_per_merge_request
       end
 
@@ -165,12 +160,6 @@ module EE
 
     def log_unarchive_audit_event
       log_audit_event(message: 'Project unarchived')
-    end
-
-    override :render_edit
-    def render_edit
-      push_frontend_feature_flag(:scoped_approval_rules, project, default_enabled: true)
-      super
     end
   end
 end

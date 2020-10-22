@@ -16,12 +16,9 @@ This page gathers all the resources for the topic **Authentication** within GitL
 
 ## GitLab administrators
 
-- [LDAP (Community Edition)](../../administration/auth/ldap.md)
-- [LDAP (Enterprise Edition)](../../administration/auth/ldap-ee.md) **(STARTER)**
+- [LDAP](../../administration/auth/ldap/index.md)
 - [Enforce Two-factor Authentication (2FA)](../../security/two_factor_authentication.md#enforce-two-factor-authentication-2fa)
 - **Articles:**
-  - [How to Configure LDAP with GitLab CE](../../administration/auth/how_to_configure_ldap_gitlab_ce/index.md)
-  - [How to Configure LDAP with GitLab EE](../../administration/auth/how_to_configure_ldap_gitlab_ee/index.md) **(STARTER)**
   - [Feature Highlight: LDAP Integration](https://about.gitlab.com/blog/2014/07/10/feature-highlight-ldap-sync/)
   - [Debugging LDAP](https://about.gitlab.com/handbook/support/workflows/debugging_ldap.html)
 - **Integrations:**
@@ -38,7 +35,8 @@ This page gathers all the resources for the topic **Authentication** within GitL
 ## API
 
 - [OAuth 2 Tokens](../../api/README.md#oauth2-tokens)
-- [Personal access tokens](../../api/README.md#personal-access-tokens)
+- [Personal access tokens](../../api/README.md#personalproject-access-tokens)
+- [Project access tokens](../../api/README.md#personalproject-access-tokens) **(CORE ONLY)**
 - [Impersonation tokens](../../api/README.md#impersonation-tokens)
 - [GitLab as an OAuth2 provider](../../api/oauth2.md#gitlab-as-an-oauth2-provider)
 
@@ -46,5 +44,4 @@ This page gathers all the resources for the topic **Authentication** within GitL
 
 - [Kanboard Plugin GitLab Authentication](https://github.com/kanboard/plugin-gitlab-auth)
 - [Jenkins GitLab OAuth Plugin](https://wiki.jenkins.io/display/JENKINS/GitLab+OAuth+Plugin)
-- [How to customize GitLab to support OpenID authentication](http://eric.van-der-vlist.com/blog/2013/11/23/how-to-customize-gitlab-to-support-openid-authentication/)
 - [OKD - Configuring Authentication and User Agent](https://docs.okd.io/3.11/install_config/configuring_authentication.html#GitLab)

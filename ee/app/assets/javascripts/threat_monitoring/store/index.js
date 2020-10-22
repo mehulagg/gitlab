@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import threatMonitoring from './modules/threat_monitoring';
 import threatMonitoringStatistics from './modules/threat_monitoring_statistics';
+import networkPolicies from './modules/network_policies';
 
 Vue.use(Vuex);
 
@@ -30,5 +31,6 @@ export default () =>
           },
         };
       }),
+      networkPolicies: networkPolicies(),
     },
   });

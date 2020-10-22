@@ -2,13 +2,19 @@
 
 require 'spec_helper'
 
-describe SearchController, '(JavaScript fixtures)', type: :controller do
+RSpec.describe SearchController, '(JavaScript fixtures)', type: :controller do
   include JavaScriptFixturesHelpers
 
   render_views
 
+  let_it_be(:user) { create(:admin) }
+
   before(:all) do
     clean_frontend_fixtures('search/')
+  end
+
+  before do
+    sign_in(user)
   end
 
   it 'search/show.html' do

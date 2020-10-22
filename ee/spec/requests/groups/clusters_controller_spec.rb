@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::ClustersController do
+RSpec.describe Groups::ClustersController do
   let(:group) { create(:group) }
   let(:user) { create(:user) }
 

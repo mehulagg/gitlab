@@ -9,6 +9,8 @@ module Security
       push_frontend_feature_flag(:instance_security_dashboard, default_enabled: true)
     end
 
+    feature_category :vulnerability_management
+
     protected
 
     def check_feature_enabled!

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe UsernamesController do
+RSpec.describe UsernamesController do
   describe 'GET #suggest' do
     context 'namespace does not exist' do
       it 'returns JSON with the suggested username' do

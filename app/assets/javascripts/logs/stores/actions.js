@@ -2,7 +2,8 @@ import { backOff } from '~/lib/utils/common_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
 import axios from '~/lib/utils/axios_utils';
 import { convertToFixedRange } from '~/lib/utils/datetime_range';
-import { TOKEN_TYPE_POD_NAME } from '../constants';
+import { TOKEN_TYPE_POD_NAME, tracking, logExplorerOptions } from '../constants';
+import trackLogs from '../logs_tracking_helper';
 
 import * as types from './mutation_types';
 
@@ -24,9 +25,15 @@ const requestUntilData = (url, params) =>
 
 const requestLogsUntilData = ({ commit, state }) => {
   const params = {};
-  const { logs_api_path } = state.environments.options.find(
-    ({ name }) => name === state.environments.current,
-  );
+  const type = state.environments.current
+    ? logExplorerOptions.environments
+    : logExplorerOptions.managedApps;
+  const selectedObj = state[type].options.find(({ name }) => name === state[type].current);
+
+  const path =
+    type === logExplorerOptions.environments
+      ? selectedObj.logs_api_path
+      : selectedObj.gitlab_managed_apps_logs_path;
 
   if (state.pods.current) {
     params.pod_name = state.pods.current;
@@ -47,7 +54,7 @@ const requestLogsUntilData = ({ commit, state }) => {
     params.cursor = state.logs.cursor;
   }
 
-  return requestUntilData(logs_api_path, params);
+  return requestUntilData(path, params);
 };
 
 /**
@@ -81,22 +88,32 @@ export const showFilteredLogs = ({ dispatch, commit }, filters = []) => {
   commit(types.SET_CURRENT_POD_NAME, podName);
   commit(types.SET_SEARCH, search);
 
-  dispatch('fetchLogs');
+  dispatch('fetchLogs', tracking.USED_SEARCH_BAR);
 };
 
 export const showPodLogs = ({ dispatch, commit }, podName) => {
   commit(types.SET_CURRENT_POD_NAME, podName);
-  dispatch('fetchLogs');
+  dispatch('fetchLogs', tracking.POD_LOG_CHANGED);
 };
 
 export const setTimeRange = ({ dispatch, commit }, timeRange) => {
   commit(types.SET_TIME_RANGE, timeRange);
-  dispatch('fetchLogs');
+  dispatch('fetchLogs', tracking.TIME_RANGE_SET);
 };
 
 export const showEnvironment = ({ dispatch, commit }, environmentName) => {
   commit(types.SET_PROJECT_ENVIRONMENT, environmentName);
-  dispatch('fetchLogs');
+  dispatch('fetchLogs', tracking.ENVIRONMENT_SELECTED);
+};
+
+export const showManagedApp = ({ dispatch, commit }, managedApp) => {
+  commit(types.SET_MANAGED_APP, managedApp);
+  dispatch('fetchLogs', tracking.MANAGED_APP_SELECTED);
+};
+
+export const refreshPodLogs = ({ dispatch, commit }) => {
+  commit(types.REFRESH_POD_LOGS);
+  dispatch('fetchLogs', tracking.REFRESH_POD_LOGS);
 };
 
 /**
@@ -111,19 +128,39 @@ export const fetchEnvironments = ({ commit, dispatch }, environmentsPath) => {
     .get(environmentsPath)
     .then(({ data }) => {
       commit(types.RECEIVE_ENVIRONMENTS_DATA_SUCCESS, data.environments);
-      dispatch('fetchLogs');
+      dispatch('fetchLogs', tracking.ENVIRONMENT_SELECTED);
     })
     .catch(() => {
       commit(types.RECEIVE_ENVIRONMENTS_DATA_ERROR);
     });
 };
 
-export const fetchLogs = ({ commit, state }) => {
+/**
+ * Fetch managed apps data
+ * @param {Object} store
+ * @param {String} clustersPath
+ */
+
+export const fetchManagedApps = ({ commit }, clustersPath) => {
+  return axios
+    .get(clustersPath)
+    .then(({ data }) => {
+      commit(types.RECEIVE_MANAGED_APPS_DATA_SUCCESS, data.clusters);
+    })
+    .catch(() => {
+      commit(types.RECEIVE_MANAGED_APPS_DATA_ERROR);
+    });
+};
+
+export const fetchLogs = ({ commit, state }, trackingLabel) => {
   commit(types.REQUEST_LOGS_DATA);
 
   return requestLogsUntilData({ commit, state })
     .then(({ data }) => {
       const { pod_name, pods, logs, cursor } = data;
+      if (logs && logs.length > 0) {
+        trackLogs(trackingLabel);
+      }
       commit(types.RECEIVE_LOGS_DATA_SUCCESS, { logs, cursor });
       commit(types.SET_CURRENT_POD_NAME, pod_name);
       commit(types.RECEIVE_PODS_DATA_SUCCESS, pods);
@@ -163,6 +200,3 @@ export const dismissRequestLogsError = ({ commit }) => {
 export const dismissInvalidTimeRangeWarning = ({ commit }) => {
   commit(types.HIDE_TIME_RANGE_INVALID_WARNING);
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

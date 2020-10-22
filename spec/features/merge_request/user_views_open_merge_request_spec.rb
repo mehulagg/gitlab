@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User views an open merge request' do
+RSpec.describe 'User views an open merge request' do
   let(:merge_request) do
     create(:merge_request, source_project: project, target_project: project, description: '# Description header')
   end
@@ -22,7 +22,24 @@ describe 'User views an open merge request' do
       # returns the whole document, not the node's actual parent element
       expect(find(:xpath, "#{node.path}/..").text).to eq(merge_request.description[2..-1])
 
-      expect(page).to have_content(merge_request.title).and have_content(merge_request.description)
+      expect(page).to have_content(merge_request.title)
+    end
+
+    it 'has reviewers in sidebar' do
+      expect(page).to have_css('.reviewer')
+    end
+  end
+
+  context 'when merge_request_reviewers is turned off' do
+    let(:project) { create(:project, :public, :repository) }
+
+    before do
+      stub_feature_flags(merge_request_reviewers: false)
+      visit(merge_request_path(merge_request))
+    end
+
+    it 'has reviewers in sidebar' do
+      expect(page).not_to have_css('.reviewer')
     end
   end
 

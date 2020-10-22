@@ -2,10 +2,24 @@
 
 require 'spec_helper'
 
-describe Issue do
+RSpec.describe Issue do
   include ExternalAuthorizationServiceHelpers
 
   using RSpec::Parameterized::TableSyntax
+
+  describe 'associations' do
+    subject { build(:issue) }
+
+    it { is_expected.to have_many(:resource_weight_events) }
+    it { is_expected.to have_many(:resource_iteration_events) }
+    it { is_expected.to have_one(:issuable_sla) }
+  end
+
+  describe 'modules' do
+    subject { build(:issue) }
+
+    it { is_expected.to include_module(EE::WeightEventable) }
+  end
 
   context 'callbacks' do
     describe '.after_create' do
@@ -57,16 +71,6 @@ describe Issue do
   end
 
   context 'scopes' do
-    describe '.service_desk' do
-      it 'returns the service desk issue' do
-        service_desk_issue = create(:issue, author: ::User.support_bot)
-        regular_issue = create(:issue)
-
-        expect(described_class.service_desk).to include(service_desk_issue)
-        expect(described_class.service_desk).not_to include(regular_issue)
-      end
-    end
-
     describe '.counts_by_health_status' do
       it 'returns counts grouped by health_status' do
         create(:issue, health_status: :on_track)
@@ -78,23 +82,21 @@ describe Issue do
     end
 
     describe '.on_status_page' do
-      context 'with public issue and private issue' do
-        let_it_be(:status_page_setting) { create(:status_page_setting, enabled: true) }
-        let_it_be(:public_issue) { create(:issue, project: status_page_setting.project) }
-        let_it_be(:private_issue) { create(:issue, :confidential, project: status_page_setting.project) }
+      let_it_be(:status_page_setting) { create(:status_page_setting, :enabled) }
+      let_it_be(:project) { status_page_setting.project }
+      let_it_be(:published_issue) { create(:issue, :published, project: project) }
+      let_it_be(:confidential_issue) { create(:issue, :published, :confidential, project: project) }
+      let_it_be(:nonpublished_issue) { create(:issue, project: project) }
 
-        it { expect(Issue.on_status_page.count).to eq(1) }
-        it { expect(Issue.on_status_page.first).to eq(public_issue) }
-      end
+      it { expect(Issue.on_status_page.count).to eq(1) }
+      it { expect(Issue.on_status_page.first).to eq(published_issue) }
 
-      context 'with project status page settings enabled and disabled' do
-        let_it_be(:status_page_setting_enabled) { create(:status_page_setting, enabled: true) }
-        let_it_be(:status_page_setting_disabled) { create(:status_page_setting, enabled: false) }
-        let_it_be(:issue_with_enabled_project) { create(:issue, project: status_page_setting_enabled.project) }
-        let_it_be(:issue_with_disabled_project) { create(:issue, project: status_page_setting_disabled.project) }
+      context 'with status page disabled' do
+        before do
+          status_page_setting.update!(enabled: false)
+        end
 
-        it { expect(Issue.on_status_page.count).to eq(1) }
-        it { expect(Issue.on_status_page.first).to eq(issue_with_enabled_project) }
+        it { expect(Issue.on_status_page.count).to eq(0) }
       end
     end
 
@@ -116,11 +118,93 @@ describe Issue do
         end
       end
 
+      describe '.any_epic' do
+        it 'returns only issues with an epic assigned' do
+          expect(described_class.count).to eq 3
+          expect(described_class.any_epic).to contain_exactly(epic_issue1.issue, epic_issue2.issue)
+        end
+      end
+
       describe '.in_epics' do
         it 'returns only issues in selected epics' do
           expect(described_class.count).to eq 3
           expect(described_class.in_epics([epic1])).to eq [epic_issue1.issue]
         end
+      end
+
+      describe '.not_in_epics' do
+        it 'returns only issues not in selected epics' do
+          expect(described_class.count).to eq 3
+          expect(described_class.not_in_epics([epic1])).to match_array([epic_issue2.issue, issue_no_epic])
+        end
+      end
+
+      describe '.distinct_epic_ids' do
+        it 'returns distinct epic ids' do
+          expect(described_class.distinct_epic_ids.map(&:epic_id)).to match_array([epic1.id, epic2.id])
+        end
+
+        context 'when issues are grouped by labels' do
+          let_it_be(:label_link1) { create(:label_link, target: epic_issue1.issue) }
+          let_it_be(:label_link2) { create(:label_link, target: epic_issue1.issue) }
+
+          it 'respects query grouping and returns distinct epic ids' do
+            ids = described_class.with_label(
+              [label_link1.label.title, label_link2.label.title]
+            ).distinct_epic_ids.map(&:epic_id)
+            expect(ids).to eq([epic1.id])
+          end
+        end
+      end
+    end
+
+    context 'iterations' do
+      let_it_be(:iteration1) { create(:iteration) }
+      let_it_be(:iteration2) { create(:iteration) }
+      let_it_be(:iteration1_issue) { create(:issue, iteration: iteration1) }
+      let_it_be(:iteration2_issue) { create(:issue, iteration: iteration2) }
+      let_it_be(:issue_no_iteration) { create(:issue) }
+
+      before do
+        stub_licensed_features(iterations: true)
+      end
+
+      describe '.no_iteration' do
+        it 'returns only issues without an iteration assigned' do
+          expect(described_class.count).to eq 3
+          expect(described_class.no_iteration).to eq [issue_no_iteration]
+        end
+      end
+
+      describe '.any_iteration' do
+        it 'returns only issues with an iteration assigned' do
+          expect(described_class.count).to eq 3
+          expect(described_class.any_iteration).to contain_exactly(iteration1_issue, iteration2_issue)
+        end
+      end
+
+      describe '.in_iterations' do
+        it 'returns only issues in selected iterations' do
+          expect(described_class.count).to eq 3
+          expect(described_class.in_iterations([iteration1])).to eq [iteration1_issue]
+        end
+      end
+    end
+
+    context 'status page published' do
+      let_it_be(:not_published) { create(:issue) }
+      let_it_be(:published)     { create(:issue, :published) }
+
+      describe '.order_status_page_published_first' do
+        subject { described_class.order_status_page_published_first }
+
+        it { is_expected.to eq([published, not_published]) }
+      end
+
+      describe '.order_status_page_published_last' do
+        subject { described_class.order_status_page_published_last }
+
+        it { is_expected.to eq([not_published, published]) }
       end
     end
   end
@@ -150,7 +234,7 @@ describe Issue do
     describe 'confidential' do
       subject { build(:issue, :confidential) }
 
-      it 'is valid when changing to not-confidential and is associated with not-confidential epic' do
+      it 'is valid when changing to non-confidential and is associated with non-confidential epic' do
         subject.epic = build(:epic)
 
         subject.confidential = false
@@ -158,7 +242,7 @@ describe Issue do
         expect(subject).to be_valid
       end
 
-      it 'is not valid when changing to not-confidential and is associated with confidential epic' do
+      it 'is not valid when changing to non-confidential and is associated with confidential epic' do
         subject.epic = build(:epic, :confidential)
 
         subject.confidential = false
@@ -169,24 +253,11 @@ describe Issue do
   end
 
   describe 'relations' do
-    it { is_expected.to have_and_belong_to_many(:prometheus_alert_events) }
-    it { is_expected.to have_and_belong_to_many(:self_managed_prometheus_alert_events) }
-    it { is_expected.to have_many(:prometheus_alerts) }
     it { is_expected.to have_many(:vulnerability_links).class_name('Vulnerabilities::IssueLink').inverse_of(:issue) }
     it { is_expected.to have_many(:related_vulnerabilities).through(:vulnerability_links).source(:vulnerability) }
     it { is_expected.to belong_to(:promoted_to_epic).class_name('Epic') }
     it { is_expected.to have_many(:resource_weight_events) }
     it { is_expected.to have_one(:status_page_published_incident) }
-
-    describe 'versions.most_recent' do
-      it 'returns the most recent version' do
-        issue = create(:issue)
-        create_list(:design_version, 2, issue: issue)
-        last_version = create(:design_version, issue: issue)
-
-        expect(issue.design_versions.most_recent).to eq(last_version)
-      end
-    end
   end
 
   it_behaves_like 'an editable mentionable with EE-specific mentions' do
@@ -194,50 +265,6 @@ describe Issue do
 
     let(:backref_text) { "issue #{subject.to_reference}" }
     let(:set_mentionable_text) { ->(txt) { subject.description = txt } }
-  end
-
-  describe '#related_issues' do
-    let(:user) { create(:user) }
-    let(:authorized_project) { create(:project) }
-    let(:authorized_project2) { create(:project) }
-    let(:unauthorized_project) { create(:project) }
-
-    let(:authorized_issue_a) { create(:issue, project: authorized_project) }
-    let(:authorized_issue_b) { create(:issue, project: authorized_project) }
-    let(:authorized_issue_c) { create(:issue, project: authorized_project2) }
-
-    let(:unauthorized_issue) { create(:issue, project: unauthorized_project) }
-
-    let!(:issue_link_a) { create(:issue_link, source: authorized_issue_a, target: authorized_issue_b) }
-    let!(:issue_link_b) { create(:issue_link, source: authorized_issue_a, target: unauthorized_issue) }
-    let!(:issue_link_c) { create(:issue_link, source: authorized_issue_a, target: authorized_issue_c) }
-
-    before do
-      authorized_project.add_developer(user)
-      authorized_project2.add_developer(user)
-    end
-
-    it 'returns only authorized related issues for given user' do
-      expect(authorized_issue_a.related_issues(user))
-          .to contain_exactly(authorized_issue_b, authorized_issue_c)
-    end
-
-    it 'returns issues with valid issue_link_type' do
-      link_types = authorized_issue_a.related_issues(user).map(&:issue_link_type)
-
-      expect(link_types).not_to be_empty
-      expect(link_types).not_to include(nil)
-    end
-
-    describe 'when a user cannot read cross project' do
-      it 'only returns issues within the same project' do
-        expect(Ability).to receive(:allowed?).with(user, :read_all_resources, :global).and_call_original
-        expect(Ability).to receive(:allowed?).with(user, :read_cross_project).and_return(false)
-
-        expect(authorized_issue_a.related_issues(user))
-            .to contain_exactly(authorized_issue_b)
-      end
-    end
   end
 
   describe '#allows_multiple_assignees?' do
@@ -310,6 +337,50 @@ describe Issue do
 
         it 'arranges issues with the same weight by their ids' do
           is_expected.to eq([issue4, issue3, issue2, issue])
+        end
+      end
+    end
+
+    context 'by blocking issues' do
+      it 'orders by descending blocking issues count' do
+        issue_1 = create(:issue, blocking_issues_count: 3)
+        issue_2 = create(:issue, blocking_issues_count: 2)
+
+        results = described_class.sort_by_attribute('blocking_issues_desc')
+
+        expect(results.first).to eq(issue_1)
+        expect(results.second).to eq(issue_2)
+      end
+    end
+  end
+
+  describe '#check_for_spam?' do
+    using RSpec::Parameterized::TableSyntax
+    let_it_be(:reusable_project) { create(:project) }
+    let_it_be(:author) { ::User.support_bot }
+
+    where(:visibility_level, :confidential, :new_attributes, :check_for_spam?) do
+      Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'woo' } | true
+      Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'woo' } | true
+      Gitlab::VisibilityLevel::PUBLIC   | true  | { confidential: false } | true
+      Gitlab::VisibilityLevel::PUBLIC   | true  | { description: 'woo' } | true
+      Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'woo', confidential: true } | true
+      Gitlab::VisibilityLevel::INTERNAL | false | { description: 'woo' } | true
+      Gitlab::VisibilityLevel::PRIVATE  | true  | { description: 'woo' } | true
+      Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'original description' } | false
+      Gitlab::VisibilityLevel::PRIVATE  | true  | { weight: 3 } | false
+    end
+
+    with_them do
+      context 'when author is a bot' do
+        it 'only checks for spam when description, title, or confidential status is updated' do
+          project = reusable_project
+          project.update(visibility_level: visibility_level)
+          issue = create(:issue, project: project, confidential: confidential, description: 'original description', author: author)
+
+          issue.assign_attributes(new_attributes)
+
+          expect(issue.check_for_spam?).to eq(check_for_spam?)
         end
       end
     end
@@ -397,43 +468,19 @@ describe Issue do
   end
 
   describe 'relative positioning with group boards' do
-    let(:group) { create(:group) }
-    let!(:board) { create(:board, group: group) }
-    let(:project) { create(:project, namespace: group) }
-    let(:project1) { create(:project, namespace: group) }
-    let(:issue) { build(:issue, project: project) }
-    let(:issue1) { build(:issue, project: project1) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:board) { create(:board, group: group) }
+    let_it_be(:project) { create(:project, namespace: group) }
+    let_it_be(:project1) { create(:project, namespace: group) }
+    let_it_be_with_reload(:issue) { create(:issue, project: project) }
+    let_it_be_with_reload(:issue1) { create(:issue, project: project1, relative_position: issue.relative_position + RelativePositioning::IDEAL_DISTANCE) }
     let(:new_issue) { build(:issue, project: project1, relative_position: nil) }
 
-    before do
-      [issue, issue1].each do |issue|
-        issue.move_to_end && issue.save
-      end
-    end
+    describe '.relative_positioning_query_base' do
+      it 'includes cross project issues in the same group' do
+        siblings = Issue.relative_positioning_query_base(issue)
 
-    describe '#max_relative_position' do
-      it 'returns maximum position' do
-        expect(issue.max_relative_position).to eq issue1.relative_position
-      end
-    end
-
-    describe '#prev_relative_position' do
-      it 'returns previous position if there is an issue above' do
-        expect(issue1.prev_relative_position).to eq issue.relative_position
-      end
-
-      it 'returns nil if there is no issue above' do
-        expect(issue.prev_relative_position).to eq nil
-      end
-    end
-
-    describe '#next_relative_position' do
-      it 'returns next position if there is an issue below' do
-        expect(issue.next_relative_position).to eq issue1.relative_position
-      end
-
-      it 'returns nil if there is no issue below' do
-        expect(issue1.next_relative_position).to eq nil
+        expect(siblings).to include(issue1)
       end
     end
 
@@ -489,18 +536,20 @@ describe Issue do
         issue1.update relative_position: issue.relative_position
 
         new_issue.move_between(issue, issue1)
+        [issue, issue1].each(&:reset)
 
-        expect(new_issue.relative_position).to be > issue.relative_position
-        expect(issue.relative_position).to be < issue1.relative_position
+        expect(new_issue.relative_position)
+          .to be_between(issue.relative_position, issue1.relative_position).exclusive
       end
 
       it 'positions issues between other two if distance is 1' do
         issue1.update relative_position: issue.relative_position + 1
 
         new_issue.move_between(issue, issue1)
+        [issue, issue1].each(&:reset)
 
-        expect(new_issue.relative_position).to be > issue.relative_position
-        expect(issue.relative_position).to be < issue1.relative_position
+        expect(new_issue.relative_position)
+          .to be_between(issue.relative_position, issue1.relative_position).exclusive
       end
 
       it 'positions issue in the middle of other two if distance is big enough' do
@@ -509,24 +558,20 @@ describe Issue do
 
         new_issue.move_between(issue, issue1)
 
-        expect(new_issue.relative_position).to eq(8000)
+        expect(new_issue.relative_position)
+          .to be_between(issue.relative_position, issue1.relative_position).exclusive
       end
 
       it 'positions issue closer to the middle if we are at the very top' do
-        issue1.update relative_position: 6000
+        new_issue.move_between(nil, issue)
 
-        new_issue.move_between(nil, issue1)
-
-        expect(new_issue.relative_position).to eq(6000 - RelativePositioning::IDEAL_DISTANCE)
+        expect(new_issue.relative_position).to eq(issue.relative_position - RelativePositioning::IDEAL_DISTANCE)
       end
 
       it 'positions issue closer to the middle if we are at the very bottom' do
-        issue.update relative_position: 6000
-        issue1.update relative_position: nil
+        new_issue.move_between(issue1, nil)
 
-        new_issue.move_between(issue, nil)
-
-        expect(new_issue.relative_position).to eq(6000 + RelativePositioning::IDEAL_DISTANCE)
+        expect(new_issue.relative_position).to eq(issue1.relative_position + RelativePositioning::IDEAL_DISTANCE)
       end
 
       it 'positions issue in the middle of other two if distance is not big enough' do
@@ -543,8 +588,10 @@ describe Issue do
         issue1.update relative_position: 101
 
         new_issue.move_between(issue, issue1)
+        [issue, issue1].each(&:reset)
 
-        expect(new_issue.relative_position).to be_between(issue.relative_position, issue1.relative_position)
+        expect(new_issue.relative_position)
+          .to be_between(issue.relative_position, issue1.relative_position).exclusive
       end
 
       it 'uses rebalancing if there is no place' do
@@ -555,12 +602,15 @@ describe Issue do
 
         new_issue.move_between(issue1, issue2)
         new_issue.save!
+        [issue, issue1, issue2].each(&:reset)
 
-        expect(new_issue.relative_position).to be_between(issue1.relative_position, issue2.relative_position)
-        expect(issue.reload.relative_position).not_to eq(100)
+        expect(new_issue.relative_position)
+          .to be_between(issue1.relative_position, issue2.relative_position).exclusive
+
+        expect([issue, issue1, issue2, new_issue].map(&:relative_position).uniq).to have_attributes(size: 4)
       end
 
-      it 'positions issue right if we pass none-sequential parameters' do
+      it 'positions issue right if we pass non-sequential parameters' do
         issue.update relative_position: 99
         issue1.update relative_position: 101
         issue2 = create(:issue, relative_position: 102, project: project)
@@ -667,19 +717,122 @@ describe Issue do
 
   it_behaves_like 'having health status'
 
-  describe '#service_desk?' do
-    subject { issue.from_service_desk? }
+  describe '#can_assign_epic?' do
+    let(:user)    { create(:user) }
+    let(:group)   { create(:group) }
+    let(:project) { create(:project, group: group) }
+    let(:issue)   { create(:issue, project: project) }
 
-    context 'when issue author is support bot' do
-      let(:issue) { create(:issue, author: ::User.support_bot) }
+    subject { issue.can_assign_epic?(user) }
 
-      it { is_expected.to be_truthy }
+    context 'when epics feature is available' do
+      before do
+        stub_licensed_features(epics: true)
+      end
+
+      context 'when a user is not a project member' do
+        it 'returns false' do
+          expect(subject).to be_falsey
+        end
+      end
+
+      context 'when a user is a project member' do
+        it 'returns false' do
+          project.add_developer(user)
+
+          expect(subject).to be_falsey
+        end
+      end
+
+      context 'when a user is a group member' do
+        it 'returns true' do
+          group.add_developer(user)
+
+          expect(subject).to be_truthy
+        end
+      end
     end
 
-    context 'when issue author is not support bot' do
-      let(:issue) { create(:issue) }
+    context 'when epics feature is not available' do
+      it 'returns false' do
+        group.add_developer(user)
 
-      it { is_expected.to be_falsey }
+        expect(subject).to be_falsey
+      end
+    end
+
+    describe '#update_blocking_issues_count' do
+      it 'updates blocking issues count' do
+        issue = create(:issue, project: project)
+        blocked_issue_1 = create(:issue, project: project)
+        blocked_issue_2 = create(:issue, project: project)
+        blocked_issue_3 = create(:issue, project: project)
+        create(:issue_link, source: issue, target: blocked_issue_1, link_type: IssueLink::TYPE_BLOCKS)
+        create(:issue_link, source: blocked_issue_2, target: issue, link_type: IssueLink::TYPE_IS_BLOCKED_BY)
+        create(:issue_link, source: issue, target: blocked_issue_3, link_type: IssueLink::TYPE_BLOCKS)
+        # Set to 0 for proper testing, this is being set by IssueLink callbacks.
+        issue.update(blocking_issues_count: 0)
+
+        expect { issue.update_blocking_issues_count! }
+          .to change { issue.blocking_issues_count }.from(0).to(3)
+      end
+    end
+  end
+
+  describe '#supports_iterations?' do
+    let(:group) { build_stubbed(:group) }
+    let(:project_with_group) { build_stubbed(:project, group: group) }
+
+    where(:issuable_type, :project, :supports_iterations) do
+      [
+        [:issue, :project_with_group, true],
+        [:incident, :project_with_group, false]
+      ]
+    end
+
+    with_them do
+      let(:issue) { build_stubbed(issuable_type, project: send(project)) }
+
+      subject { issue.supports_iterations? }
+
+      it { is_expected.to eq(supports_iterations) }
+    end
+  end
+
+  describe '#issue_type_supports?' do
+    let_it_be(:issue) { create(:issue) }
+    let_it_be(:test_case) { create(:quality_test_case) }
+    let_it_be(:incident) { create(:incident) }
+
+    it do
+      expect(issue.issue_type_supports?(:epics)).to be(true)
+      expect(test_case.issue_type_supports?(:epics)).to be(false)
+      expect(incident.issue_type_supports?(:epics)).to be(false)
+    end
+  end
+
+  describe '#sla_available?' do
+    let_it_be(:project) { create(:project) }
+    let_it_be_with_refind(:issue) { create(:incident, project: project) }
+
+    subject { issue.sla_available? }
+
+    where(:incident_type, :license_available, :sla_available) do
+      false | true  | false
+      true  | false | false
+      true  | true  | true
+    end
+
+    with_them do
+      before do
+        stub_licensed_features(incident_sla: license_available)
+        issue_type = incident_type ? 'incident' : 'issue'
+        issue.update(issue_type: issue_type)
+      end
+
+      it 'returns the expected value' do
+        expect(subject).to eq(sla_available)
+      end
     end
   end
 end

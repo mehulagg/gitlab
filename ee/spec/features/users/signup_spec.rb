@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Signup' do
+RSpec.describe 'Signup' do
   context 'almost there page' do
     context 'when public visibility is restricted' do
       before do

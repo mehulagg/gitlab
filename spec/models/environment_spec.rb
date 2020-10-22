@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Environment, :use_clean_rails_memory_store_caching do
+RSpec.describe Environment, :use_clean_rails_memory_store_caching do
   include ReactiveCachingHelpers
   using RSpec::Parameterized::TableSyntax
   include RepoHelpers
@@ -18,6 +18,8 @@ describe Environment, :use_clean_rails_memory_store_caching do
   it { is_expected.to belong_to(:project).required }
   it { is_expected.to have_many(:deployments) }
   it { is_expected.to have_many(:metrics_dashboard_annotations) }
+  it { is_expected.to have_many(:alert_management_alerts) }
+  it { is_expected.to have_one(:latest_opened_most_severe_alert) }
 
   it { is_expected.to delegate_method(:stop_action).to(:last_deployment) }
   it { is_expected.to delegate_method(:manual_actions).to(:last_deployment) }
@@ -310,18 +312,25 @@ describe Environment, :use_clean_rails_memory_store_caching do
 
   describe '#update_merge_request_metrics?' do
     {
+      'gprd' => false,
+      'prod' => true,
+      'prod-test' => false,
+      'PROD' => true,
       'production' => true,
+      'production-test' => false,
+      'PRODUCTION' => true,
       'production/eu' => true,
+      'PRODUCTION/EU' => true,
       'production/www.gitlab.com' => true,
       'productioneu' => false,
-      'Production' => false,
-      'Production/eu' => false,
+      'Production' => true,
+      'Production/eu' => true,
       'test-production' => false
     }.each do |name, expected_value|
       it "returns #{expected_value} for #{name}" do
         env = create(:environment, name: name)
 
-        expect(env.update_merge_request_metrics?).to eq(expected_value)
+        expect(env.update_merge_request_metrics?).to eq(expected_value), "Expected the name '#{name}' to result in #{expected_value}, but it didn't."
       end
     end
   end
@@ -847,6 +856,20 @@ describe Environment, :use_clean_rails_memory_store_caching do
 
     subject { environment.calculate_reactive_cache }
 
+    it 'overrides default reactive_cache_hard_limit to 10 Mb' do
+      expect(described_class.reactive_cache_hard_limit).to eq(10.megabyte)
+    end
+
+    it 'overrides reactive_cache_limit_enabled? with a FF' do
+      environment_with_enabled_ff = build(:environment, project: create(:project))
+      environment_with_disabled_ff = build(:environment, project: create(:project))
+
+      stub_feature_flags(reactive_caching_limit_environment: environment_with_enabled_ff.project)
+
+      expect(environment_with_enabled_ff.send(:reactive_cache_limit_enabled?)).to be_truthy
+      expect(environment_with_disabled_ff.send(:reactive_cache_limit_enabled?)).to be_falsey
+    end
+
     it 'returns cache data from the deployment platform' do
       expect(environment.deployment_platform).to receive(:calculate_reactive_cache_for)
         .with(environment).and_return(pods: %w(pod1 pod2))
@@ -1061,7 +1084,7 @@ describe Environment, :use_clean_rails_memory_store_caching do
       end
 
       context 'when time window arguments are provided' do
-        let(:metric_params) { [1552642245.067, Time.now] }
+        let(:metric_params) { [1552642245.067, Time.current] }
 
         it 'queries with the expected parameters' do
           expect(environment.prometheus_adapter)
@@ -1206,7 +1229,7 @@ describe Environment, :use_clean_rails_memory_store_caching do
       let(:environment) { build(:environment, :will_auto_stop) }
 
       it 'returns when it will expire' do
-        Timecop.freeze { is_expected.to eq(1.day.to_i) }
+        freeze_time { is_expected.to eq(1.day.to_i) }
       end
     end
 
@@ -1232,7 +1255,7 @@ describe Environment, :use_clean_rails_memory_store_caching do
     end
     with_them do
       it 'sets correct auto_stop_in' do
-        Timecop.freeze do
+        freeze_time do
           if expected_result.is_a?(Integer) || expected_result.nil?
             subject
 
@@ -1330,6 +1353,29 @@ describe Environment, :use_clean_rails_memory_store_caching do
 
     it 'returns zero state counts when environments are empty' do
       expect(project.environments.count_by_state).to eq({ stopped: 0, available: 0 })
+    end
+  end
+
+  describe '#has_opened_alert?' do
+    subject { environment.has_opened_alert? }
+
+    let_it_be(:project) { create(:project) }
+    let_it_be(:environment, reload: true) { create(:environment, project: project) }
+
+    context 'when environment has an triggered alert' do
+      let!(:alert) { create(:alert_management_alert, :triggered, project: project, environment: environment) }
+
+      it { is_expected.to be(true) }
+    end
+
+    context 'when environment has an resolved alert' do
+      let!(:alert) { create(:alert_management_alert, :resolved, project: project, environment: environment) }
+
+      it { is_expected.to be(false) }
+    end
+
+    context 'when environment does not have an alert' do
+      it { is_expected.to be(false) }
     end
   end
 end

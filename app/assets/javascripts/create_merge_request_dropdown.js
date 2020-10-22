@@ -1,7 +1,7 @@
 /* eslint-disable no-new */
 import { debounce } from 'lodash';
 import axios from './lib/utils/axios_utils';
-import Flash from './flash';
+import { deprecatedCreateFlash as Flash } from './flash';
 import DropLab from './droplab/drop_lab';
 import ISetter from './droplab/plugins/input_setter';
 import { __, sprintf } from './locale';
@@ -13,7 +13,7 @@ import {
 import confidentialMergeRequestState from './confidential_merge_request/state';
 
 // Todo: Remove this when fixing issue in input_setter plugin
-const InputSetter = Object.assign({}, ISetter);
+const InputSetter = { ...ISetter };
 
 const CREATE_MERGE_REQUEST = 'create-mr';
 const CREATE_BRANCH = 'create-branch';

@@ -1,5 +1,5 @@
-- breadcrumb_title "Messages"
-- page_title "Broadcast Messages"
+- breadcrumb_title _("Messages")
+- page_title _("Broadcast Messages")
 
 %h3.page-title
   Broadcast Messages
@@ -12,7 +12,7 @@
 %br.clearfix
 
 - if @broadcast_messages.any?
-  %table.table
+  %table.table.table-responsive
     %thead
       %tr
         %th Status
@@ -37,8 +37,8 @@
             = message.target_path
           %td
             = message.broadcast_type.capitalize
-          %td
-            = link_to sprite_icon('pencil-square'), edit_admin_broadcast_message_path(message), title: 'Edit', class: 'btn'
-            = link_to sprite_icon('remove'), admin_broadcast_message_path(message), method: :delete, remote: true, title: 'Remove', class: 'js-remove-tr btn btn-danger'
+          %td.gl-white-space-nowrap.gl-display-flex
+            = link_to sprite_icon('pencil-square', css_class: 'gl-icon'), edit_admin_broadcast_message_path(message), title: 'Edit', class: 'btn btn-icon gl-button'
+            = link_to sprite_icon('remove', css_class: 'gl-icon'), admin_broadcast_message_path(message), method: :delete, remote: true, title: 'Remove', class: 'js-remove-tr btn btn-icon gl-button btn-danger ml-2'
 
   = paginate @broadcast_messages, theme: 'gitlab'

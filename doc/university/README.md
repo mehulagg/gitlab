@@ -11,7 +11,7 @@ If you're looking for a GitLab subscription for _your university_, see our [GitL
 
 CAUTION: **Caution:**
 Some of the content in GitLab University may be out of date and we plan to
-[evaluate](https://gitlab.com/gitlab-org/gitlab-foss/issues/41064) it.
+[evaluate](https://gitlab.com/gitlab-org/gitlab/-/issues/20403) it.
 
 The GitLab University curriculum is composed of GitLab videos, screencasts, presentations, projects and external GitLab content hosted on other services and has been organized into the following sections:
 
@@ -47,7 +47,7 @@ The GitLab University curriculum is composed of GitLab videos, screencasts, pres
 1. [Repositories, Projects and Groups - Video](https://www.youtube.com/watch?v=4TWfh1aKHHw&index=1&list=PLFGfElNsQthbQu_IWlNOxul0TbS_2JH-e)
 1. [Creating a Project in GitLab - Video](https://www.youtube.com/watch?v=7p0hrpNaJ14)
 1. [How to Create Files and Directories](https://about.gitlab.com/blog/2016/02/10/feature-highlight-create-files-and-directories-from-files-page/)
-1. [GitLab Todos](https://about.gitlab.com/blog/2016/03/02/gitlab-todos-feature-highlight/)
+1. [GitLab To-Do List](https://about.gitlab.com/blog/2016/03/02/gitlab-todos-feature-highlight/)
 1. [GitLab's Work in Progress (WIP) Flag](https://about.gitlab.com/blog/2016/01/08/feature-highlight-wip/)
 
 ### 1.5. Migrating from other Source Control
@@ -65,19 +65,16 @@ The GitLab University curriculum is composed of GitLab videos, screencasts, pres
 1. [Making GitLab Great for Everyone - Video](https://www.youtube.com/watch?v=GGC40y4vMx0) - Response to "Dear GitHub" letter
 1. [Using Innersourcing to Improve Collaboration](https://about.gitlab.com/blog/2014/09/05/innersourcing-using-the-open-source-workflow-to-improve-collaboration-within-an-organization/)
 1. [The Software Development Market and GitLab - Video](https://www.youtube.com/watch?v=sXlhgPK1NTY&list=PLFGfElNsQthbQu_IWlNOxul0TbS_2JH-e&index=6) - [Slides](https://docs.google.com/presentation/d/1vCU-NbZWz8NTNK8Vu3y4zGMAHb5DpC8PE5mHtw1PWfI/edit)
-1. [The GitLab Book Club](bookclub/index.md)
 1. [GitLab Resources](https://about.gitlab.com/resources/)
 
 ### 1.7 Community and Support
 
 1. [Getting Help](https://about.gitlab.com/get-help/)
    - Proposing Features and Reporting and Tracking bugs for GitLab
-   - The GitLab IRC channel, Gitter Chat Room, Community Forum and Mailing List
+   - The GitLab IRC channel, Gitter Chat Room, Community Forum, and Mailing List
    - Getting Technical Support
    - Being part of our Great Community and Contributing to GitLab
 1. [Getting Started with the GitLab Development Kit (GDK)](https://about.gitlab.com/blog/2016/06/08/getting-started-with-gitlab-development-kit/)
-1. [Contributing Technical Articles to the GitLab Blog](https://about.gitlab.com/blog/2016/01/26/call-for-writers/)
-1. [GitLab Training Workshops](training/end-user/README.md)
 1. [GitLab Professional Services](https://about.gitlab.com/services/)
 
 ### 1.8 GitLab Training Material
@@ -141,11 +138,11 @@ The GitLab University curriculum is composed of GitLab videos, screencasts, pres
 
 ## 3. GitLab Advanced
 
-### 3.1. Dev Ops
+### 3.1. DevOps
 
-1. [Xebia Labs: Dev Ops Terminology](https://xebialabs.com/glossary/)
-1. [Xebia Labs: Periodic Table of DevOps Tools](https://xebialabs.com/periodic-table-of-devops-tools/)
-1. [Puppet Labs: State of Dev Ops 2016 - Book](https://puppet.com/resources/report/2016-state-devops-report/)
+1. [XebiaLabs: DevOps Terminology](https://xebialabs.com/glossary/)
+1. [XebiaLabs: Periodic Table of DevOps Tools](https://digital.ai/periodic-table-of-devops-tools)
+1. [Puppet Labs: State of DevOps 2016 - Book](https://puppet.com/resources/report/2016-state-devops-report/)
 
 ### 3.2. Installing GitLab with Omnibus
 
@@ -176,12 +173,12 @@ The GitLab University curriculum is composed of GitLab videos, screencasts, pres
 
 1. [Scalability and High Availability - Video](https://www.youtube.com/watch?v=cXRMJJb6sp4&list=PLFGfElNsQthbQu_IWlNOxul0TbS_2JH-e&index=2)
 1. [High Availability - Video](https://www.youtube.com/watch?v=36KS808u6bE&index=15&list=PLFGfElNsQthbQu_IWlNOxul0TbS_2JH-e)
-1. [High Availability Documentation](https://about.gitlab.com/solutions/high-availability/)
+1. [High Availability Documentation](https://about.gitlab.com/solutions/reference-architectures/)
 
-### 3.8 Cycle Analytics
+### 3.8 Value Stream Analytics
 
-1. [GitLab Cycle Analytics Overview](https://about.gitlab.com/blog/2016/09/21/cycle-analytics-feature-highlight/)
-1. [GitLab Cycle Analytics - Product Page](https://about.gitlab.com/stages-devops-lifecycle/value-stream-analytics/)
+1. [GitLab Value Stream Analytics Overview (as of 2016)](https://about.gitlab.com/blog/2016/09/21/cycle-analytics-feature-highlight/)
+1. [GitLab Value Stream Analytics - Product Page](https://about.gitlab.com/stages-devops-lifecycle/value-stream-analytics/)
 
 ### 3.9. Integrations
 
@@ -204,7 +201,6 @@ The GitLab University curriculum is composed of GitLab videos, screencasts, pres
 NOTE: **Note:**
 Some content can only be accessed by GitLab team members.
 
-1. [Support Path](support/README.md)
 1. [Sales Path](https://about.gitlab.com/handbook/sales/onboarding/)
 1. [User Training](training/user_training.md)
 1. [GitLab Flow Training](training/gitlab_flow.md)

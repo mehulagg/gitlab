@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe DependencyEntity do
+RSpec.describe DependencyEntity do
   describe '#as_json' do
     subject { described_class.represent(dependency, request: request).as_json }
 
     let_it_be(:user) { create(:user) }
     let(:project) { create(:project, :repository, :private) }
     let(:request) { double('request') }
-    let(:dependency) { build(:dependency, :with_vulnerabilities, :with_licenses) }
+    let(:dependency) { build(:dependency, :with_vulnerabilities, :with_licenses, :indirect) }
 
     before do
       allow(request).to receive(:project).and_return(project)
@@ -28,7 +28,7 @@ describe DependencyEntity do
           project.add_developer(user)
         end
 
-        it { is_expected.to eq(dependency) }
+        it { is_expected.to eq(dependency.except(:package_manager)) }
       end
 
       context 'with reporter' do
@@ -37,7 +37,7 @@ describe DependencyEntity do
         end
 
         it 'includes license info and not vulnerabilities' do
-          is_expected.to eq(dependency.except(:vulnerabilities))
+          is_expected.to eq(dependency.except(:vulnerabilities, :package_manager))
         end
       end
     end
@@ -48,7 +48,19 @@ describe DependencyEntity do
       end
 
       it 'does not include licenses and vulnerabilities' do
-        is_expected.to eq(dependency.except(:vulnerabilities, :licenses))
+        is_expected.to eq(dependency.except(:vulnerabilities, :licenses, :package_manager))
+      end
+    end
+
+    context 'when there is no dependency path attributes' do
+      let(:dependency) { build(:dependency, :with_vulnerabilities, :with_licenses) }
+
+      it 'correctly represent location' do
+        location = subject[:location]
+
+        expect(location[:ancestors]).to be_nil
+        expect(location[:top_level]).to be_nil
+        expect(location[:path]).to eq('package_file.lock')
       end
     end
   end

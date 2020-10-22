@@ -20,31 +20,25 @@ Gitlab.ee do
   end
 end
 
-# When running on multi-threaded runtimes like Puma or Sidekiq,
-# set the number of threads per process as the minimum DB connection pool size.
-# This is to avoid connectivity issues as was documented here:
-# https://github.com/rails/rails/pull/23057
-if Gitlab::Runtime.multi_threaded?
-  max_threads = Gitlab::Runtime.max_threads
-  db_config = Gitlab::Database.config ||
-      Rails.application.config.database_configuration[Rails.env]
-  previous_db_pool_size = db_config['pool']
+# We configure the database connection pool size automatically based on the
+# configured concurrency. We also add some headroom, to make sure we don't run
+# out of connections when more threads besides the 'user-facing' ones are
+# running.
+#
+# Read more about this in doc/development/database/client_side_connection_pool.md
 
-  db_config['pool'] = [db_config['pool'].to_i, max_threads].max
+headroom = (ENV["DB_POOL_HEADROOM"].presence || 10).to_i
+calculated_pool_size = Gitlab::Runtime.max_threads + headroom
 
-  ActiveRecord::Base.establish_connection(db_config)
+db_config = Gitlab::Database.config ||
+            Rails.application.config.database_configuration[Rails.env]
 
-  current_db_pool_size = ActiveRecord::Base.connection.pool.size
+db_config['pool'] = calculated_pool_size
+ActiveRecord::Base.establish_connection(db_config)
 
-  log_pool_size('DB', previous_db_pool_size, current_db_pool_size)
-
-  Gitlab.ee do
-    if Gitlab::Runtime.sidekiq? && Gitlab::Geo.geo_database_configured?
-      previous_geo_db_pool_size = Rails.configuration.geo_database['pool']
-      Rails.configuration.geo_database['pool'] = max_threads
-      Geo::TrackingBase.establish_connection(Rails.configuration.geo_database)
-      current_geo_db_pool_size = Geo::TrackingBase.connection_pool.size
-      log_pool_size('Geo DB', previous_geo_db_pool_size, current_geo_db_pool_size)
-    end
+Gitlab.ee do
+  if Gitlab::Runtime.sidekiq? && Gitlab::Geo.geo_database_configured?
+    Rails.configuration.geo_database['pool'] = calculated_pool_size
+    Geo::TrackingBase.establish_connection(Rails.configuration.geo_database)
   end
 end

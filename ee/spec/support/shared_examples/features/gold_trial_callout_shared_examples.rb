@@ -39,7 +39,9 @@ RSpec.shared_examples 'dashboard gold trial callout' do
     end
 
     it 'hides promotion callout if a trial is active' do
-      group = create(:group, name: 'trial group', trial_ends_on: 1.year.from_now)
+      allow_any_instance_of(EE::DashboardHelper).to receive(:user_default_dashboard?).and_return(true)
+
+      group = create(:group_with_plan, name: 'trial group', plan: :silver_plan, trial_ends_on: 1.year.from_now)
       group.add_owner(user)
 
       visit page_path
@@ -47,7 +49,9 @@ RSpec.shared_examples 'dashboard gold trial callout' do
       expect(page).not_to have_selector '.promotion-callout'
     end
 
-    it 'hides promotion callout if a gold plan is active', :js do
+    it 'hides promotion callout if user owns a paid namespace', :js do
+      allow_any_instance_of(EE::DashboardHelper).to receive(:user_default_dashboard?).and_return(true)
+
       group = create(:group_with_plan, name: 'gold group', plan: :gold_plan)
       group.add_owner(user)
 

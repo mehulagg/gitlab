@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ReferenceExtractor do
+RSpec.describe Gitlab::ReferenceExtractor do
   let(:group)   { create(:group) }
   let(:project) { create(:project, group: group) }
 

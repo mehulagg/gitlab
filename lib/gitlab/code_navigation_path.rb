@@ -5,7 +5,7 @@ module Gitlab
     include Gitlab::Utils::StrongMemoize
     include Gitlab::Routing
 
-    CODE_NAVIGATION_JOB_NAME = 'code_navigation'
+    LATEST_COMMITS_LIMIT = 2
 
     def initialize(project, commit_sha)
       @project = project
@@ -13,10 +13,9 @@ module Gitlab
     end
 
     def full_json_path_for(path)
-      return if Feature.disabled?(:code_navigation, project)
       return unless build
 
-      raw_project_job_artifacts_path(project, build, path: "lsif/#{path}.json")
+      raw_project_job_artifacts_path(project, build, path: "lsif/#{path}.json", file_type: :lsif)
     end
 
     private
@@ -25,10 +24,14 @@ module Gitlab
 
     def build
       strong_memoize(:build) do
-        artifact = ::Ci::JobArtifact
-          .for_sha(commit_sha, project.id)
-          .for_job_name(CODE_NAVIGATION_JOB_NAME)
-          .last
+        latest_commits_shas =
+          project.repository.commits(commit_sha, limit: LATEST_COMMITS_LIMIT).map(&:sha)
+
+        pipeline = @project.ci_pipelines.for_sha(latest_commits_shas).last
+
+        next unless pipeline
+
+        artifact = pipeline.job_artifacts.with_file_types(['lsif']).last
 
         artifact&.job
       end

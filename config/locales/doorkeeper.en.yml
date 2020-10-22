@@ -30,12 +30,12 @@ en:
     errors:
       messages:
         # Common error messages
-        invalid_request: 'The request is missing a required parameter, includes an unsupported parameter value, or is otherwise malformed.'
         invalid_redirect_uri: 'The redirect URI included is not valid.'
         unauthorized_client: 'The client is not authorized to perform this request using this method.'
         access_denied: 'The resource owner or authorization server denied the request.'
         invalid_scope: 'The requested scope is invalid, unknown, or malformed.'
         server_error: 'The authorization server encountered an unexpected condition which prevented it from fulfilling the request.'
+        unconfirmed_email: 'Verify the email address in your account profile before you sign in.'
         temporarily_unavailable: 'The authorization server is currently unable to handle the request due to a temporary overloading or maintenance of the server.'
 
         #configuration error messages
@@ -52,6 +52,12 @@ en:
 
         # Password Access token errors
         invalid_resource_owner: 'The provided resource owner credentials are not valid, or resource owner cannot be found'
+
+        invalid_request:
+          unknown: 'The request is missing a required parameter, includes an unsupported parameter value, or is otherwise malformed.'
+          missing_param: 'Missing required parameter: %{value}.'
+          not_support_pkce: 'Invalid code_verifier parameter. Server does not support pkce.'
+          request_not_authorized: 'Request need to be authorized. Required parameter for authorizing request is missing or invalid.'
 
         invalid_token:
           revoked: "The access token was revoked"
@@ -80,6 +86,8 @@ en:
         Grants read-write access to repositories on private projects using Git-over-HTTP (not using the API).
       read_registry:
         Grants read-only access to container registry images on private projects.
+      write_registry:
+        Grants write access to container registry images on private projects.
       openid:
         Grants permission to authenticate with GitLab using OpenID Connect. Also gives read-only access to the user's profile and group memberships.
       sudo:
@@ -88,6 +96,19 @@ en:
         Grants read-only access to the user's profile data using OpenID Connect.
       email:
         Grants read-only access to the user's primary email address using OpenID Connect.
+    project_access_token_scope_desc:
+      api:
+        Grants complete read/write access to the scoped project API.
+      read_api:
+        Grants read access to the scoped project API.
+      read_repository:
+        Allows read-only access (pull) to the repository.
+      write_repository:
+        Allows read-write access (pull, push) to the repository.
+      read_registry:
+        Allows read-access (pull) to container registry images if the project is private and authorization is required.
+      write_registry:
+        Allows write-access (push) to container registry.
     flash:
       applications:
         create:

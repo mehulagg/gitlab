@@ -2,97 +2,157 @@
 
 require 'spec_helper'
 
-describe Resolvers::TimelogResolver do
+RSpec.describe Resolvers::TimelogResolver do
   include GraphqlHelpers
 
   context "within a group" do
-    let(:current_user) { create(:user) }
-    let(:user)         { create(:user) }
-    let(:group)        { create(:group) }
-    let(:project)      { create(:project, :public, group: group) }
+    let_it_be(:current_user) { create(:user) }
+    let(:group)              { create(:group) }
+    let(:project)            { create(:project, :public, group: group) }
 
     before do
-      group.add_users([current_user, user], :developer)
-      project.add_developer(user)
+      group.add_developer(current_user)
+      project.add_developer(current_user)
       stub_licensed_features(group_timelogs: true)
     end
 
     describe '#resolve' do
-      let(:issue)       { create(:issue, project: project) }
-      let(:issue2)      { create(:issue, project: project) }
-      let!(:timelog1)   { create(:timelog, issue: issue, user: user, spent_at: 5.days.ago) }
-      let!(:timelog2)   { create(:timelog, issue: issue2, user: user, spent_at: 10.days.ago) }
-      let(:start_date)  { 6.days.ago }
-      let(:end_date)    { 2.days.ago }
-
-      shared_examples 'validation fails with error' do
-        it 'raises error with correct message' do
-          expect { resolve_timelogs(start_date: start_date, end_date: end_date) }
-            .to raise_error(
-              error_type,
-              message
-            )
-        end
-      end
+      let(:issue) { create(:issue, project: project) }
+      let(:issue2) { create(:issue, project: project) }
+      let(:args) { { start_time: 6.days.ago, end_time: 2.days.ago.noon } }
+      let!(:timelog1) { create(:timelog, issue: issue, spent_at: 2.days.ago.beginning_of_day) }
+      let!(:timelog2) { create(:timelog, issue: issue2, spent_at: 2.days.ago.end_of_day) }
+      let!(:timelog3) { create(:timelog, issue: issue2, spent_at: 10.days.ago) }
 
       it 'finds all timelogs within given dates' do
-        timelogs = resolve_timelogs(start_date: start_date, end_date: end_date)
+        timelogs = resolve_timelogs(args)
 
         expect(timelogs).to contain_exactly(timelog1)
       end
 
-      context 'when arguments are invalid' do
-        let(:error_type) { Gitlab::Graphql::Errors::ArgumentError }
+      it 'return nothing when user has insufficient permissions' do
+        group.add_guest(current_user)
 
-        context 'when only start_date is present' do
-          let(:end_date) { nil }
-          let(:message) { 'Both start_date and end_date must be present.' }
+        expect(resolve_timelogs(args)).to be_empty
+      end
 
-          it_behaves_like 'validation fails with error'
-        end
+      it 'returns nothing when feature is disabled' do
+        stub_licensed_features(group_timelogs: false)
 
-        context 'when only end_date is present' do
-          let(:start_date) { nil }
-          let(:message) { 'Both start_date and end_date must be present.' }
+        expect(resolve_timelogs(args)).to be_empty
+      end
 
-          it_behaves_like 'validation fails with error'
-        end
+      context 'when start_time and end_date are present' do
+        let(:args) { { start_time: 6.days.ago, end_date: 2.days.ago } }
 
-        context 'when start_date is later than end_date' do
-          let(:start_date) { 3.days.ago }
-          let(:end_date) { 5.days.ago }
-          let(:message) { 'start_date must be earlier than end_date.' }
+        it 'finds timelogs until the end of day of end_date' do
+          timelogs = resolve_timelogs(args)
 
-          it_behaves_like 'validation fails with error'
-        end
-
-        context 'when time range is more than 60 days' do
-          let(:start_date) { 3.months.ago }
-          let(:end_date) { 1.day.ago }
-          let(:message) { 'The date range period cannot contain more than 60 days' }
-
-          it_behaves_like 'validation fails with error'
+          expect(timelogs).to contain_exactly(timelog1, timelog2)
         end
       end
 
-      context 'when resource is not available' do
-        let(:error_type) { Gitlab::Graphql::Errors::ResourceNotAvailable }
-        let(:message) { "The resource is not available or you don't have permission to perform this action" }
+      context 'finds timelogs until the time specified on end_time' do
+        let(:args) { { start_date: 6.days.ago, end_time: 2.days.ago.noon } }
 
-        context 'when feature is disabled' do
-          before do
-            stub_licensed_features(group_timelogs: false)
+        it 'finds all timelogs within start_date and end_time' do
+          timelogs = resolve_timelogs(args)
+
+          expect(timelogs).to contain_exactly(timelog1)
+        end
+      end
+
+      context 'when arguments are invalid' do
+        let_it_be(:error_class) { Gitlab::Graphql::Errors::ArgumentError }
+
+        context 'when no time or date arguments are present' do
+          let(:args) { {} }
+
+          it 'returns correct error' do
+            expect {resolve_timelogs(args)}
+              .to raise_error(error_class, /Start and End arguments must be present/)
           end
-
-          it_behaves_like 'validation fails with error'
         end
 
-        context "when user has insufficient permissions" do
-          before do
-            group.add_guest(current_user)
-          end
+        context 'when only start_time is present' do
+          let(:args) { { start_time: 6.days.ago } }
 
-          it_behaves_like 'validation fails with error'
+          it 'returns correct error' do
+            expect {resolve_timelogs(args)}
+              .to raise_error(error_class, /Both Start and End arguments must be present/)
+          end
+        end
+
+        context 'when only end_time is present' do
+          let(:args) { { end_time: 2.days.ago } }
+
+          it 'returns correct error' do
+            expect {resolve_timelogs(args)}
+              .to raise_error(error_class, /Both Start and End arguments must be present/)
+          end
+        end
+
+        context 'when only start_date is present' do
+          let(:args) { { start_date: 6.days.ago } }
+
+          it 'returns correct error' do
+            expect {resolve_timelogs(args)}
+              .to raise_error(error_class, /Both Start and End arguments must be present/)
+          end
+        end
+
+        context 'when only end_date is present' do
+          let(:args) { { end_date: 2.days.ago } }
+
+          it 'returns correct error' do
+            expect {resolve_timelogs(args)}
+              .to raise_error(error_class, /Both Start and End arguments must be present/)
+          end
+        end
+
+        context 'when start_time and start_date are present' do
+          let(:args) { { start_time: 6.days.ago, start_date: 6.days.ago } }
+
+          it 'returns correct error' do
+            expect {resolve_timelogs(args)}
+              .to raise_error(error_class, /Both Start and End arguments must be present/)
+          end
+        end
+
+        context 'when end_time and end_date are present' do
+          let(:args) { { end_time: 2.days.ago, end_date: 2.days.ago } }
+
+          it 'returns correct error' do
+            expect {resolve_timelogs(args)}
+              .to raise_error(error_class, /Both Start and End arguments must be present/)
+          end
+        end
+
+        context 'when three arguments are present' do
+          let(:args) { { start_date: 6.days.ago, end_date: 2.days.ago, end_time: 2.days.ago } }
+
+          it 'returns correct error' do
+            expect {resolve_timelogs(args)}
+              .to raise_error(error_class, /Only Time or Date arguments must be present/)
+          end
+        end
+
+        context 'when start argument is after end argument' do
+          let(:args) { { start_time: 2.days.ago, end_time: 6.days.ago } }
+
+          it 'returns correct error' do
+            expect {resolve_timelogs(args)}
+              .to raise_error(error_class, /Start argument must be before End argument/)
+          end
+        end
+
+        context 'when time range is more than 60 days' do
+          let(:args) { { start_time: 3.months.ago, end_time: 2.days.ago } }
+
+          it 'returns correct error' do
+            expect {resolve_timelogs(args)}
+              .to raise_error(error_class, /The time range period cannot contain more than 60 days/)
+          end
         end
       end
     end

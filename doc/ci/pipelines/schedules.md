@@ -1,4 +1,7 @@
 ---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 disqus_identifier: 'https://docs.gitlab.com/ee/user/project/pipelines/schedules.html'
 type: reference, howto
 ---
@@ -7,9 +10,6 @@ type: reference, howto
 
 > - Introduced in GitLab 9.1 as [Trigger Schedule](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10533).
 > - [Renamed to Pipeline Schedule](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10853) in GitLab 9.2.
-
-NOTE: **Note:**
-Cron notation is parsed by [Fugit](https://github.com/floraison/fugit).
 
 Pipelines are normally run based on certain conditions being met. For example, when a branch is pushed to repository.
 
@@ -20,6 +20,17 @@ Pipeline schedules can be used to also run [pipelines](index.md) at specific int
 
 In addition to using the GitLab UI, pipeline schedules can be maintained using the
 [Pipeline schedules API](../../api/pipeline_schedules.md).
+
+Schedule timing is configured with cron notation, parsed by [Fugit](https://github.com/floraison/fugit).
+
+## Prerequisites
+
+In order for a scheduled pipeline to be created successfully:
+
+- The schedule owner must have [permissions](../../user/permissions.md) to merge into the target branch.
+- The pipeline configuration must be valid.
+
+Otherwise the pipeline is not created.
 
 ## Configuring pipeline schedules
 

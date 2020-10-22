@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class MergeTrains < ::Grape::API
+  class MergeTrains < ::API::Base
     include PaginationParams
 
     before do
-      service_unavailable! unless Feature.enabled?(:merge_trains_api, user_project, default_enabled: true)
       authorize_read_merge_trains!
     end
 

@@ -1,5 +1,0 @@
----
-title: Use absolute URLs to ensure links to the source of SAST vulnerabilities resolve
-merge_request: 27747
-author:
-type: fixed

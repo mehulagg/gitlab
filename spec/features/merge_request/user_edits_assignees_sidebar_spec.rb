@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User edits assignees sidebar', :js do
+RSpec.describe 'Merge request > User edits assignees sidebar', :js do
   let(:project) { create(:project, :public, :repository) }
   let(:protected_branch) { create(:protected_branch, :maintainers_can_push, name: 'master', project: project) }
   let(:merge_request) { create(:merge_request, :simple, source_project: project, target_branch: protected_branch.name) }
@@ -20,49 +20,63 @@ describe 'Merge request > User edits assignees sidebar', :js do
   let(:sidebar_assignee_dropdown_item) { sidebar_assignee_block.find(".dropdown-menu li[data-user-id=\"#{assignee.id}\"]") }
   let(:sidebar_assignee_dropdown_tooltip) { sidebar_assignee_dropdown_item.find('a')['data-title'] || '' }
 
-  before do
-    stub_const('Autocomplete::UsersFinder::LIMIT', users_find_limit)
+  context 'when user is an owner' do
+    before do
+      stub_const('Autocomplete::UsersFinder::LIMIT', users_find_limit)
 
-    sign_in(project.owner)
+      sign_in(project.owner)
 
-    merge_request.assignees << assignee
+      merge_request.assignees << assignee
 
-    visit project_merge_request_path(project, merge_request)
+      visit project_merge_request_path(project, merge_request)
 
-    wait_for_requests
-  end
-
-  shared_examples 'when assigned' do |expected_tooltip: ''|
-    it 'shows assignee name' do
-      expect(sidebar_assignee_block).to have_text(assignee.name)
+      wait_for_requests
     end
 
-    it "shows assignee tooltip '#{expected_tooltip}'" do
-      expect(sidebar_assignee_tooltip).to eql(expected_tooltip)
-    end
-
-    context 'when edit is clicked' do
-      before do
-        sidebar_assignee_block.click_link('Edit')
-
-        wait_for_requests
+    shared_examples 'when assigned' do |expected_tooltip: ''|
+      it 'shows assignee name' do
+        expect(sidebar_assignee_block).to have_text(assignee.name)
       end
 
-      it "shows assignee tooltip '#{expected_tooltip}" do
-        expect(sidebar_assignee_dropdown_tooltip).to eql(expected_tooltip)
+      it "shows assignee tooltip '#{expected_tooltip}'" do
+        expect(sidebar_assignee_tooltip).to eql(expected_tooltip)
       end
+
+      context 'when edit is clicked' do
+        before do
+          sidebar_assignee_block.click_link('Edit')
+
+          wait_for_requests
+        end
+
+        it "shows assignee tooltip '#{expected_tooltip}" do
+          expect(sidebar_assignee_dropdown_tooltip).to eql(expected_tooltip)
+        end
+      end
+    end
+
+    context 'when assigned to maintainer' do
+      let(:assignee) { project_maintainers.last }
+
+      it_behaves_like 'when assigned', expected_tooltip: ''
+    end
+
+    context 'when assigned to developer' do
+      let(:assignee) { project_developers.last }
+
+      it_behaves_like 'when assigned', expected_tooltip: 'Cannot merge'
     end
   end
 
-  context 'when assigned to maintainer' do
-    let(:assignee) { project_maintainers.last }
+  context 'with invite members experiment considerations' do
+    let_it_be(:user) { create(:user) }
 
-    it_behaves_like 'when assigned', expected_tooltip: ''
-  end
+    before do
+      sign_in(user)
+    end
 
-  context 'when assigned to developer' do
-    let(:assignee) { project_developers.last }
-
-    it_behaves_like 'when assigned', expected_tooltip: 'Cannot merge'
+    include_examples 'issuable invite members experiments' do
+      let(:issuable_path) { project_merge_request_path(project, merge_request) }
+    end
   end
 end

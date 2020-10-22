@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe CohortsService do
+RSpec.describe CohortsService do
   describe '#execute' do
     def month_start(months_ago)
       months_ago.months.ago.beginning_of_month.to_date
@@ -13,7 +13,7 @@ describe CohortsService do
       6.times do |months_ago|
         months_ago_time = (months_ago * 2).months.ago
 
-        create(:user, created_at: months_ago_time, last_activity_on: Time.now)
+        create(:user, created_at: months_ago_time, last_activity_on: Time.current)
         create(:user, created_at: months_ago_time, last_activity_on: months_ago_time)
       end
 

@@ -2,7 +2,7 @@
 
 module API
   # Environments RESTfull API endpoints
-  class Environments < Grape::API
+  class Environments < ::API::Base
     include PaginationParams
 
     before { authenticate! }

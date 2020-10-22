@@ -1,22 +1,37 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import { GlFilteredSearch, GlFilteredSearchToken } from '@gitlab/ui';
 import { __ } from '~/locale';
+import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
+import {
+  prepareTokens,
+  processFilters,
+  filterToQueryObject,
+} from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
+import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
+import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
+import UrlSync from '~/vue_shared/components/url_sync.vue';
+import {
+  DEFAULT_LABEL_NONE,
+  DEFAULT_LABEL_ANY,
+} from '~/vue_shared/components/filtered_search_bar/constants';
 
 export default {
   components: {
-    GlFilteredSearch,
+    FilteredSearchBar,
+    UrlSync,
   },
-  data() {
-    return {
-      searchTerms: [],
-    };
+  props: {
+    projectPath: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
     ...mapState('filters', {
-      milestonePath: 'milestonePath',
-      labelsPath: 'labelsPath',
-      milestones: state => state.milestones.data,
+      selectedMilestone: state => state.milestones.selected,
+      selectedLabelList: state => state.labels.selectedList,
+      milestonesData: state => state.milestones.data,
+      labelsData: state => state.labels.data,
     }),
     tokens() {
       return [
@@ -24,48 +39,63 @@ export default {
           icon: 'clock',
           title: __('Milestone'),
           type: 'milestone',
-          token: GlFilteredSearchToken,
-          options: this.milestones,
+          token: MilestoneToken,
+          initialMilestones: this.milestonesData,
           unique: true,
+          symbol: '%',
+          fetchMilestones: this.fetchMilestones,
+        },
+        {
+          icon: 'labels',
+          title: __('Label'),
+          type: 'labels',
+          token: LabelToken,
+          defaultLabels: [DEFAULT_LABEL_NONE, DEFAULT_LABEL_ANY],
+          initialLabels: this.labelsData,
+          unique: false,
+          symbol: '~',
+          fetchLabels: this.fetchLabels,
         },
       ];
     },
-  },
-  created() {
-    this.fetchMilestones();
+    query() {
+      return filterToQueryObject({
+        milestone_title: this.selectedMilestone,
+        label_name: this.selectedLabelList,
+      });
+    },
+    initialFilterValue() {
+      return prepareTokens({
+        milestone: this.selectedMilestone,
+        labels: this.selectedLabelList,
+      });
+    },
   },
   methods: {
-    ...mapActions('filters', ['fetchMilestones', 'setFilters']),
-    filteredSearchSubmit(filters) {
-      const result = filters.reduce((acc, item) => {
-        const {
-          type,
-          value: { data },
-        } = item;
+    ...mapActions('filters', ['setFilters', 'fetchMilestones', 'fetchLabels']),
+    handleFilter(filters) {
+      const { labels, milestone } = processFilters(filters);
 
-        if (!acc[type]) {
-          acc[type] = [];
-        }
-
-        acc[type].push(data);
-        return acc;
-      }, {});
-
-      this.setFilters({ label_name: result.label, milestone_title: result.milestone });
+      this.setFilters({
+        selectedMilestone: milestone ? milestone[0] : null,
+        selectedLabelList: labels || [],
+      });
     },
   },
 };
 </script>
 
 <template>
-  <div class="bg-secondary-50 p-3 border-top border-bottom">
-    <gl-filtered-search
-      :v-model="searchTerms"
-      :placeholder="__('Filter results')"
-      :clear-button-title="__('Clear')"
-      :close-button-title="__('Close')"
-      :available-tokens="tokens"
-      @submit="filteredSearchSubmit"
+  <div>
+    <filtered-search-bar
+      class="gl-flex-grow-1 row-content-block"
+      :namespace="projectPath"
+      recent-searches-storage-key="code-review-analytics"
+      :search-input-placeholder="__('Filter results')"
+      :tokens="tokens"
+      :initial-filter-value="initialFilterValue"
+      @onFilter="handleFilter"
     />
+    <url-sync :query="query" />
   </div>
 </template>

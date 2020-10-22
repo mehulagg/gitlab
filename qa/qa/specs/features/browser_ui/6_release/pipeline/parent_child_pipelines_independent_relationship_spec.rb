@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Release', :docker, quarantine: { type: :new } do
+  RSpec.describe 'Release', :runner, :reliable do
     describe 'Parent-child pipelines independent relationship' do
       let!(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'pipeline-independent-relationship'
         end
       end
+
       let!(:runner) do
         Resource::Runner.fabricate_via_api! do |runner|
           runner.project = project
@@ -24,26 +25,22 @@ module QA
         runner.remove_via_api!
       end
 
-      it 'parent pipelines passes if child passes' do
+      it 'parent pipelines passes if child passes', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/754' do
         add_ci_files(success_child_ci_file)
         view_pipelines
 
         Page::Project::Pipeline::Show.perform do |parent_pipeline|
-          parent_pipeline.click_linked_job(project.name)
-
-          expect(parent_pipeline).to have_job("child_job")
+          expect(parent_pipeline).to have_child_pipeline
           expect(parent_pipeline).to have_passed
         end
       end
 
-      it 'parent pipeline passes even if child fails' do
+      it 'parent pipeline passes even if child fails', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/753' do
         add_ci_files(fail_child_ci_file)
         view_pipelines
 
         Page::Project::Pipeline::Show.perform do |parent_pipeline|
-          parent_pipeline.click_linked_job(project.name)
-
-          expect(parent_pipeline).to have_job("child_job")
+          expect(parent_pipeline).to have_child_pipeline
           expect(parent_pipeline).to have_passed
         end
       end

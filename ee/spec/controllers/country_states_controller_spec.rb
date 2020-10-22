@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe CountryStatesController do
+RSpec.describe CountryStatesController do
   describe 'GET #index' do
     it 'returns a list of states as json' do
       country = 'NL'

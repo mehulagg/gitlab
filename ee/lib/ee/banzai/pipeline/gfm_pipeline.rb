@@ -10,7 +10,6 @@ module EE
           def metrics_filters
             [
               ::Banzai::Filter::InlineAlertMetricsFilter,
-              ::Banzai::Filter::InlineClusterMetricsFilter,
               *super
             ]
           end
@@ -18,6 +17,13 @@ module EE
           def reference_filters
             [
               ::Banzai::Filter::EpicReferenceFilter,
+              ::Banzai::Filter::IterationReferenceFilter,
+              *super
+            ]
+          end
+
+          def filters
+            [
               *super
             ]
           end

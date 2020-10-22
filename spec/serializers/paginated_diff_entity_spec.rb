@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PaginatedDiffEntity do
+RSpec.describe PaginatedDiffEntity do
   let(:user) { create(:user) }
   let(:request) { double('request', current_user: user) }
   let(:merge_request) { create(:merge_request, :with_diffs) }
@@ -14,6 +14,7 @@ describe PaginatedDiffEntity do
       pagination_data: diff_batch.pagination_data
     }
   end
+
   let(:entity) { described_class.new(diff_batch, options) }
 
   subject { entity.as_json }

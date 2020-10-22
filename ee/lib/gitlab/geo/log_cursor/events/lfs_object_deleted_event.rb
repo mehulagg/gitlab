@@ -20,8 +20,7 @@ module Gitlab
           end
 
           def log_event(job_id)
-            logger.event_info(
-              created_at,
+            super(
               'Delete LFS object scheduled',
               oid: event.oid,
               file_id: event.lfs_object_id,

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Resolvers::Geo::GeoNodeResolver do
+RSpec.describe Resolvers::Geo::GeoNodeResolver do
   include GraphqlHelpers
   include EE::GeoHelpers
 

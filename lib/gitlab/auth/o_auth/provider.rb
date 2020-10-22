@@ -5,10 +5,11 @@ module Gitlab
     module OAuth
       class Provider
         LABELS = {
-          "github"         => "GitHub",
-          "gitlab"         => "GitLab.com",
-          "google_oauth2"  => "Google",
-          "azure_oauth2"   => "Azure AD"
+          "github"            => "GitHub",
+          "gitlab"            => "GitLab.com",
+          "google_oauth2"     => "Google",
+          "azure_oauth2"      => "Azure AD",
+          'atlassian_oauth2'  => 'Atlassian'
         }.freeze
 
         def self.authentication(user, provider)
@@ -41,10 +42,6 @@ module Gitlab
           name.to_s.start_with?('ldap')
         end
 
-        def self.ultraauth_provider?(name)
-          name.to_s.eql?('ultraauth')
-        end
-
         def self.sync_profile_from_provider?(provider)
           return true if ldap_provider?(provider)
 
@@ -66,7 +63,10 @@ module Gitlab
               nil
             end
           else
-            Gitlab.config.omniauth.providers.find { |provider| provider.name == name }
+            provider = Gitlab.config.omniauth.providers.find { |provider| provider.name == name }
+            merge_provider_args_with_defaults!(provider)
+
+            provider
           end
         end
 
@@ -80,6 +80,15 @@ module Gitlab
           name = name.to_s
           config = config_for(name)
           config && config['icon']
+        end
+
+        def self.merge_provider_args_with_defaults!(provider)
+          return unless provider
+
+          provider['args'] ||= {}
+
+          defaults = Gitlab::OmniauthInitializer.default_arguments_for(provider['name'])
+          provider['args'].deep_merge!(defaults.deep_stringify_keys)
         end
       end
     end

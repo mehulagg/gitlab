@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GitalyClient::WikiService do
+RSpec.describe Gitlab::GitalyClient::WikiService do
   let(:project) { create(:project) }
   let(:storage_name) { project.repository_storage }
   let(:relative_path) { project.disk_path + '.git' }
@@ -18,6 +18,7 @@ describe Gitlab::GitalyClient::WikiService do
         Gitaly::WikiFindPageResponse.new(page: Gitaly::WikiPage.new(raw_data: 'b'))
       ]
     end
+
     let(:wiki_page) { subject.first }
     let(:wiki_page_version) { subject.last }
 
@@ -60,6 +61,7 @@ describe Gitlab::GitalyClient::WikiService do
         Gitaly::WikiGetAllPagesResponse.new(end_of_page: true)
       ]
     end
+
     let(:wiki_page_1) { subject[0].first }
     let(:wiki_page_1_version) { subject[0].last }
     let(:wiki_page_2) { subject[1].first }

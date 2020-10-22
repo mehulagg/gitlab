@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Admin::HooksController do
+RSpec.describe Admin::HooksController do
   let(:admin) { create(:admin) }
 
   before do
@@ -28,5 +28,13 @@ describe Admin::HooksController do
       expect(SystemHook.all.size).to eq(1)
       expect(SystemHook.first).to have_attributes(hook_params)
     end
+  end
+
+  describe 'DELETE #destroy' do
+    let!(:hook) { create(:system_hook) }
+    let!(:log) { create(:web_hook_log, web_hook: hook) }
+    let(:params) { { id: hook } }
+
+    it_behaves_like 'Web hook destroyer'
   end
 end

@@ -12,27 +12,43 @@ class DiffFileBaseEntity < Grape::Entity
   expose :submodule?, as: :submodule
 
   expose :submodule_link do |diff_file, options|
-    memoized_submodule_links(diff_file, options).first
+    memoized_submodule_links(diff_file, options)&.web
   end
 
   expose :submodule_tree_url do |diff_file|
-    memoized_submodule_links(diff_file, options).last
+    memoized_submodule_links(diff_file, options)&.tree
+  end
+
+  expose :submodule_compare do |diff_file|
+    url = memoized_submodule_links(diff_file, options)&.compare
+
+    next unless url
+
+    {
+      url: url,
+      old_sha: diff_file.old_blob&.id,
+      new_sha: diff_file.blob&.id
+    }
   end
 
   expose :edit_path, if: -> (_, options) { options[:merge_request] } do |diff_file|
     merge_request = options[:merge_request]
 
-    options = merge_request.persisted? ? { from_merge_request_iid: merge_request.iid } : {}
+    next unless has_edit_path?(merge_request)
 
-    next unless merge_request.source_project
+    target_project, target_branch = edit_project_branch_options(merge_request)
 
-    if Feature.enabled?(:web_ide_default)
-      ide_edit_path(merge_request.source_project, merge_request.source_branch, diff_file.new_path)
-    else
-      project_edit_blob_path(merge_request.source_project,
-        tree_join(merge_request.source_branch, diff_file.new_path),
-        options)
-    end
+    options = merge_request.persisted? && merge_request.source_branch_exists? && !merge_request.merged? ? { from_merge_request_iid: merge_request.iid } : {}
+
+    project_edit_blob_path(target_project, tree_join(target_branch, diff_file.new_path), options)
+  end
+
+  expose :ide_edit_path, if: -> (_, options) { options[:merge_request] } do |diff_file|
+    merge_request = options[:merge_request]
+
+    next unless has_edit_path?(merge_request)
+
+    gitlab_ide_merge_request_path(merge_request)
   end
 
   expose :old_path_html do |diff_file|
@@ -61,16 +77,14 @@ class DiffFileBaseEntity < Grape::Entity
     next unless diff_file.blob
 
     if merge_request&.source_project && current_user
-      can_modify_blob?(diff_file.blob, merge_request.source_project, merge_request.source_branch)
+      can_modify_blob?(diff_file.blob, merge_request.source_project, merge_request.source_branch_exists? ? merge_request.source_branch : merge_request.target_branch)
     else
       false
     end
   end
 
-  expose :file_hash do |diff_file|
-    Digest::SHA1.hexdigest(diff_file.file_path)
-  end
-
+  expose :file_identifier_hash
+  expose :file_hash
   expose :file_path
   expose :old_path
   expose :new_path
@@ -102,15 +116,25 @@ class DiffFileBaseEntity < Grape::Entity
 
   def memoized_submodule_links(diff_file, options)
     strong_memoize(:submodule_links) do
-      if diff_file.submodule?
-        options[:submodule_links].for(diff_file.blob, diff_file.content_sha)
-      else
-        []
-      end
+      next unless diff_file.submodule?
+
+      options[:submodule_links].for(diff_file.blob, diff_file.content_sha, diff_file)
     end
   end
 
   def current_user
     request.current_user
+  end
+
+  def edit_project_branch_options(merge_request)
+    if merge_request.source_branch_exists? && !merge_request.merged?
+      [merge_request.source_project, merge_request.source_branch]
+    else
+      [merge_request.target_project, merge_request.target_branch]
+    end
+  end
+
+  def has_edit_path?(merge_request)
+    merge_request.merged? || merge_request.source_branch_exists?
   end
 end

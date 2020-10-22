@@ -2,63 +2,10 @@
 
 require "spec_helper"
 
-describe IssuesHelper do
+RSpec.describe IssuesHelper do
   let(:project) { create(:project) }
   let(:issue) { create :issue, project: project }
   let(:ext_project) { create :redmine_project }
-
-  describe "url_for_issue" do
-    let(:issues_url) { ext_project.external_issue_tracker.issues_url}
-    let(:ext_expected) { issues_url.gsub(':id', issue.iid.to_s).gsub(':project_id', ext_project.id.to_s) }
-    let(:int_expected) { polymorphic_path([@project.namespace, @project, issue]) }
-
-    it "returns internal path if used internal tracker" do
-      @project = project
-
-      expect(url_for_issue(issue.iid)).to match(int_expected)
-    end
-
-    it "returns path to external tracker" do
-      @project = ext_project
-
-      expect(url_for_issue(issue.iid)).to match(ext_expected)
-    end
-
-    it "returns path to internal issue when internal option passed" do
-      @project = ext_project
-
-      expect(url_for_issue(issue.iid, ext_project, internal: true)).to match(int_expected)
-    end
-
-    it "returns empty string if project nil" do
-      @project = nil
-
-      expect(url_for_issue(issue.iid)).to eq ""
-    end
-
-    it 'returns an empty string if issue_url is invalid' do
-      expect(project).to receive_message_chain('issues_tracker.issue_url') { 'javascript:alert("foo");' }
-
-      expect(url_for_issue(issue.iid, project)).to eq ''
-    end
-
-    it 'returns an empty string if issue_path is invalid' do
-      expect(project).to receive_message_chain('issues_tracker.issue_path') { 'javascript:alert("foo");' }
-
-      expect(url_for_issue(issue.iid, project, only_path: true)).to eq ''
-    end
-
-    describe "when external tracker was enabled and then config removed" do
-      before do
-        @project = ext_project
-        allow(Gitlab.config).to receive(:issues_tracker).and_return(nil)
-      end
-
-      it "returns external path" do
-        expect(url_for_issue(issue.iid)).to match(ext_expected)
-      end
-    end
-  end
 
   describe '#award_user_list' do
     it "returns a comma-separated list of the first X users" do
@@ -215,7 +162,7 @@ describe IssuesHelper do
     context 'with linked issue' do
       context 'with moved issue' do
         before do
-          issue.update(moved_to: new_issue)
+          issue.update!(moved_to: new_issue)
         end
 
         context 'when user has permission to see new issue' do
@@ -234,7 +181,7 @@ describe IssuesHelper do
 
       context 'with duplicated issue' do
         before do
-          issue.update(duplicated_to: new_issue)
+          issue.update!(duplicated_to: new_issue)
         end
 
         context 'when user has permission to see new issue' do
@@ -256,10 +203,55 @@ describe IssuesHelper do
       let(:user) { project.owner }
 
       before do
-        issue.update(moved_to: nil, duplicated_to: nil)
+        issue.update!(moved_to: nil, duplicated_to: nil)
       end
 
       it_behaves_like 'does not display link'
+    end
+  end
+
+  describe '#show_moved_service_desk_issue_warning?' do
+    let(:project1) { create(:project, service_desk_enabled: true) }
+    let(:project2) { create(:project, service_desk_enabled: true) }
+    let!(:old_issue) { create(:issue, author: User.support_bot, project: project1) }
+    let!(:new_issue) { create(:issue, author: User.support_bot, project: project2) }
+
+    before do
+      allow(Gitlab::IncomingEmail).to receive(:enabled?) { true }
+      allow(Gitlab::IncomingEmail).to receive(:supports_wildcard?) { true }
+
+      old_issue.update!(moved_to: new_issue)
+    end
+
+    it 'is true when moved issue project has service desk disabled' do
+      project2.update!(service_desk_enabled: false)
+
+      expect(helper.show_moved_service_desk_issue_warning?(new_issue)).to be(true)
+    end
+
+    it 'is false when moved issue project has service desk enabled' do
+      expect(helper.show_moved_service_desk_issue_warning?(new_issue)).to be(false)
+    end
+  end
+
+  describe '#use_startup_call' do
+    it "returns false when a query param is present" do
+      allow(controller.request).to receive(:query_parameters).and_return({ foo: 'bar' })
+
+      expect(helper.use_startup_call?).to eq(false)
+    end
+
+    it "returns false when user has stored sort preference" do
+      controller.instance_variable_set(:@sort, 'updated_asc')
+
+      expect(helper.use_startup_call?).to eq(false)
+    end
+
+    it 'returns true when request.query_parameters is empty with default sorting preference' do
+      controller.instance_variable_set(:@sort, 'created_date')
+      allow(controller.request).to receive(:query_parameters).and_return({})
+
+      expect(helper.use_startup_call?).to eq(true)
     end
   end
 end

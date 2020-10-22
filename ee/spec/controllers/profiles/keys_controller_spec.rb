@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Profiles::KeysController do
+RSpec.describe Profiles::KeysController do
   let(:user) { create(:user) }
 
   describe '#create' do
@@ -13,7 +13,7 @@ describe Profiles::KeysController do
 
       key = build(:key)
 
-      expect { post :create, params: { key: key.attributes } }.to change { SecurityEvent.count }.by(1)
+      expect { post :create, params: { key: key.attributes } }.to change { AuditEvent.count }.by(1)
     end
   end
 end

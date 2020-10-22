@@ -1,17 +1,16 @@
 import { shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
-import { issuableTypesMap, PathIdSeparator } from 'ee/related_issues/constants';
-import RelatedIssuableInput from 'ee/related_issues/components/related_issuable_input.vue';
+import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
+import RelatedIssuableInput from '~/related_issues/components/related_issuable_input.vue';
 
-jest.mock('ee_else_ce/gfm_auto_complete', () => ({
-  __esModule: true,
-  default() {
+jest.mock('ee_else_ce/gfm_auto_complete', () => {
+  return function gfmAutoComplete() {
     return {
       constructor() {},
       setup() {},
     };
-  },
-}));
+  };
+});
 
 describe('RelatedIssuableInput', () => {
   let propsData;
@@ -71,19 +70,21 @@ describe('RelatedIssuableInput', () => {
   });
 
   describe('focus', () => {
-    it('when clicking anywhere on the input wrapper it should focus the input', () => {
+    it('when clicking anywhere on the input wrapper it should focus the input', async () => {
       const wrapper = shallowMount(RelatedIssuableInput, {
         propsData: {
           ...propsData,
           references: ['foo', 'bar'],
         },
+        // We need to attach to document, so that `document.activeElement` is properly set in jsdom
+        attachToDocument: true,
       });
 
       wrapper.find('li').trigger('click');
 
-      return wrapper.vm.$nextTick().then(() => {
-        expect(document.activeElement).toBe(wrapper.find({ ref: 'input' }).element);
-      });
+      await wrapper.vm.$nextTick();
+
+      expect(document.activeElement).toBe(wrapper.find({ ref: 'input' }).element);
     });
   });
 

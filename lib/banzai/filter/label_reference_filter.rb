@@ -19,7 +19,7 @@ module Banzai
         unescaped_html = unescape_html_entities(text).gsub(pattern) do |match|
           namespace, project = $~[:namespace], $~[:project]
           project_path = full_project_path(namespace, project)
-          label = find_label(project_path, $~[:label_id], $~[:label_name])
+          label = find_label_cached(project_path, $~[:label_id], $~[:label_name])
 
           if label
             labels[label.id] = yield match, label.id, project, namespace, $~
@@ -32,6 +32,12 @@ module Banzai
         return text if labels.empty?
 
         escape_with_placeholders(unescaped_html, labels)
+      end
+
+      def find_label_cached(parent_ref, label_id, label_name)
+        cached_call(:banzai_find_label_cached, label_name&.tr('"', '') || label_id, path: [object_class, parent_ref]) do
+          find_label(parent_ref, label_id, label_name)
+        end
       end
 
       def find_label(parent_ref, label_id, label_name)
@@ -71,13 +77,16 @@ module Banzai
       end
 
       def url_for_object(label, parent)
-        h = Gitlab::Routing.url_helpers
+        label_url_method =
+          if context[:label_url_method]
+            context[:label_url_method]
+          elsif parent.is_a?(Project)
+            :project_issues_url
+          end
 
-        if parent.is_a?(Project)
-          h.project_issues_url(parent, label_name: label.name, only_path: context[:only_path])
-        elsif context[:label_url_method]
-          h.public_send(context[:label_url_method], parent, label_name: label.name, only_path: context[:only_path]) # rubocop:disable GitlabSecurity/PublicSend
-        end
+        return unless label_url_method
+
+        Gitlab::Routing.url_helpers.public_send(label_url_method, parent, label_name: label.name, only_path: context[:only_path]) # rubocop:disable GitlabSecurity/PublicSend
       end
 
       def object_link_text(object, matches)
@@ -116,3 +125,5 @@ module Banzai
     end
   end
 end
+
+Banzai::Filter::LabelReferenceFilter.prepend_if_ee('EE::Banzai::Filter::LabelReferenceFilter')

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::UpdateService, :mailer do
+RSpec.describe MergeRequests::UpdateService, :mailer do
   include ProjectForksHelper
 
   let(:project) { create(:project, :repository) }
@@ -34,6 +34,11 @@ describe MergeRequests::UpdateService, :mailer do
     it_behaves_like 'existing issuable with scoped labels' do
       let(:issuable) { merge_request }
       let(:parent) { project }
+    end
+
+    it_behaves_like 'service with multiple reviewers' do
+      let(:opts) { {} }
+      let(:execute) { update_merge_request(opts) }
     end
 
     def update_merge_request(opts)
@@ -134,7 +139,7 @@ describe MergeRequests::UpdateService, :mailer do
           update_merge_request(approver_ids: [existing_approver, removed_approver].map(&:id).join(','))
         end
 
-        Todo.where(action: Todo::APPROVAL_REQUIRED).destroy_all # rubocop: disable DestroyAll
+        Todo.where(action: Todo::APPROVAL_REQUIRED).destroy_all # rubocop: disable Cop/DestroyAll
         ActionMailer::Base.deliveries.clear
       end
 
@@ -239,6 +244,82 @@ describe MergeRequests::UpdateService, :mailer do
 
           update_merge_request({ assignee_ids: [user2.id] })
         end
+      end
+    end
+
+    context 'reset_approval_rules_to_defaults param' do
+      let!(:existing_any_rule) { create(:any_approver_rule, merge_request: merge_request) }
+      let!(:existing_rule) { create(:approval_merge_request_rule, merge_request: merge_request) }
+      let(:rules) { merge_request.reload.approval_rules }
+
+      shared_examples_for 'undeletable existing approval rules' do
+        it 'does not delete existing approval rules' do
+          aggregate_failures do
+            expect(rules).not_to be_empty
+            expect(rules).to include(existing_any_rule)
+            expect(rules).to include(existing_rule)
+          end
+        end
+      end
+
+      context 'when approval rules can be overridden' do
+        before do
+          merge_request.project.update!(disable_overriding_approvers_per_merge_request: false)
+        end
+
+        context 'when not set' do
+          before do
+            update_merge_request({})
+          end
+
+          it_behaves_like 'undeletable existing approval rules'
+        end
+
+        context 'when set to false' do
+          before do
+            update_merge_request(reset_approval_rules_to_defaults: false)
+          end
+
+          it_behaves_like 'undeletable existing approval rules'
+        end
+
+        context 'when set to true' do
+          context 'and approval_rules_attributes param is not set' do
+            before do
+              update_merge_request(reset_approval_rules_to_defaults: true)
+            end
+
+            it 'deletes existing approval rules' do
+              expect(rules).to be_empty
+            end
+          end
+
+          context 'and approval_rules_attributes param is set' do
+            before do
+              update_merge_request(
+                reset_approval_rules_to_defaults: true,
+                approval_rules_attributes: [{ name: 'New Rule', approvals_required: 1 }]
+              )
+            end
+
+            it 'deletes existing approval rules and creates new one' do
+              aggregate_failures do
+                expect(rules.size).to eq(1)
+                expect(rules).not_to include(existing_any_rule)
+                expect(rules).not_to include(existing_rule)
+              end
+            end
+          end
+        end
+      end
+
+      context 'when approval rules cannot be overridden' do
+        before do
+          merge_request.project.update!(disable_overriding_approvers_per_merge_request: true)
+          update_merge_request(reset_approval_rules_to_defaults: true)
+        end
+
+        it_behaves_like 'undeletable existing approval rules'
       end
     end
   end

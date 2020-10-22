@@ -34,6 +34,11 @@ export default {
       required: false,
       default: () => ({}),
     },
+    apiErrors: {
+      type: Object,
+      required: false,
+      default: null,
+    },
     isLoading: {
       type: Boolean,
       required: false,
@@ -56,45 +61,39 @@ export default {
     },
   },
   i18n: {
-    textAreaInvalidFeedback: TEXT_AREA_INVALID_FEEDBACK,
-    enableToggleLabel: ENABLE_TOGGLE_LABEL,
-    enableToggleDescription: ENABLE_TOGGLE_DESCRIPTION,
+    ENABLE_TOGGLE_LABEL,
+    ENABLE_TOGGLE_DESCRIPTION,
   },
   selectList: [
     {
       name: 'expiration-policy-interval',
       label: EXPIRATION_INTERVAL_LABEL,
-      model: 'older_than',
-      optionKey: 'olderThan',
+      model: 'olderThan',
     },
     {
       name: 'expiration-policy-schedule',
       label: EXPIRATION_SCHEDULE_LABEL,
       model: 'cadence',
-      optionKey: 'cadence',
     },
     {
       name: 'expiration-policy-latest',
       label: KEEP_N_LABEL,
-      model: 'keep_n',
-      optionKey: 'keepN',
+      model: 'keepN',
     },
   ],
   textAreaList: [
     {
       name: 'expiration-policy-name-matching',
       label: NAME_REGEX_LABEL,
-      model: 'name_regex',
+      model: 'nameRegex',
       placeholder: NAME_REGEX_PLACEHOLDER,
-      stateVariable: 'nameRegexState',
       description: NAME_REGEX_DESCRIPTION,
     },
     {
       name: 'expiration-policy-keep-name',
       label: NAME_REGEX_KEEP_LABEL,
-      model: 'name_regex_keep',
+      model: 'nameRegexKeep',
       placeholder: NAME_REGEX_KEEP_PLACEHOLDER,
-      stateVariable: 'nameKeepRegexState',
       description: NAME_REGEX_KEEP_DESCRIPTION,
     },
   ],
@@ -105,22 +104,39 @@ export default {
   },
   computed: {
     ...mapComputedToEvent(
-      ['enabled', 'cadence', 'older_than', 'keep_n', 'name_regex', 'name_regex_keep'],
+      ['enabled', 'cadence', 'olderThan', 'keepN', 'nameRegex', 'nameRegexKeep'],
       'value',
     ),
     policyEnabledText() {
       return this.enabled ? ENABLED_TEXT : DISABLED_TEXT;
     },
-    textAreaState() {
+    textAreaValidation() {
+      const nameRegexErrors = this.apiErrors?.nameRegex || this.validateRegexLength(this.nameRegex);
+      const nameKeepRegexErrors =
+        this.apiErrors?.nameRegexKeep || this.validateRegexLength(this.nameRegexKeep);
+
       return {
-        nameRegexState: this.validateNameRegex(this.name_regex),
-        nameKeepRegexState: this.validateNameRegex(this.name_regex_keep),
+        /*
+         * The state has this form:
+         * null: gray border, no message
+         * true: green border, no message ( because none is configured)
+         * false: red border, error message
+         * So in this function we keep null if the are no message otherwise we 'invert' the error message
+         */
+        nameRegex: {
+          state: nameRegexErrors === null ? null : !nameRegexErrors,
+          message: nameRegexErrors,
+        },
+        nameRegexKeep: {
+          state: nameKeepRegexErrors === null ? null : !nameKeepRegexErrors,
+          message: nameKeepRegexErrors,
+        },
       };
     },
     fieldsValidity() {
       return (
-        this.textAreaState.nameRegexState !== false &&
-        this.textAreaState.nameKeepRegexState !== false
+        this.textAreaValidation.nameRegex.state !== false &&
+        this.textAreaValidation.nameRegexKeep.state !== false
       );
     },
     isFormElementDisabled() {
@@ -140,8 +156,11 @@ export default {
     },
   },
   methods: {
-    validateNameRegex(value) {
-      return value ? value.length <= NAME_REGEX_LENGTH : null;
+    validateRegexLength(value) {
+      if (!value) {
+        return null;
+      }
+      return value.length <= NAME_REGEX_LENGTH ? '' : TEXT_AREA_INVALID_FEEDBACK;
     },
     idGenerator(id) {
       return `${id}_${this.uniqueId}`;
@@ -154,22 +173,22 @@ export default {
 </script>
 
 <template>
-  <div ref="form-elements" class="lh-2">
+  <div ref="form-elements" class="gl-line-height-20">
     <gl-form-group
       :id="idGenerator('expiration-policy-toggle-group')"
       :label-cols="labelCols"
       :label-align="labelAlign"
       :label-for="idGenerator('expiration-policy-toggle')"
-      :label="$options.i18n.enableToggleLabel"
+      :label="$options.i18n.ENABLE_TOGGLE_LABEL"
     >
-      <div class="d-flex align-items-start">
+      <div class="gl-display-flex">
         <gl-toggle
           :id="idGenerator('expiration-policy-toggle')"
           v-model="enabled"
           :disabled="isLoading"
         />
-        <span class="mb-2 ml-1 lh-2">
-          <gl-sprintf :message="$options.i18n.enableToggleDescription">
+        <span class="gl-mb-3 gl-ml-3 gl-line-height-20">
+          <gl-sprintf :message="$options.i18n.ENABLE_TOGGLE_DESCRIPTION">
             <template #toggleStatus>
               <strong>{{ policyEnabledText }}</strong>
             </template>
@@ -193,11 +212,7 @@ export default {
         :disabled="isFormElementDisabled"
         @input="updateModel($event, select.model)"
       >
-        <option
-          v-for="option in formOptions[select.optionKey]"
-          :key="option.key"
-          :value="option.key"
-        >
+        <option v-for="option in formOptions[select.model]" :key="option.key" :value="option.key">
           {{ option.label }}
         </option>
       </gl-form-select>
@@ -210,8 +225,8 @@ export default {
       :label-cols="labelCols"
       :label-align="labelAlign"
       :label-for="idGenerator(textarea.name)"
-      :state="textAreaState[textarea.stateVariable]"
-      :invalid-feedback="$options.i18n.textAreaInvalidFeedback"
+      :state="textAreaValidation[textarea.model].state"
+      :invalid-feedback="textAreaValidation[textarea.model].message"
     >
       <template #label>
         <gl-sprintf :message="textarea.label">
@@ -224,7 +239,7 @@ export default {
         :id="idGenerator(textarea.name)"
         :value="value[textarea.model]"
         :placeholder="textarea.placeholder"
-        :state="textAreaState[textarea.stateVariable]"
+        :state="textAreaValidation[textarea.model].state"
         :disabled="isFormElementDisabled"
         trim
         @input="updateModel($event, textarea.model)"

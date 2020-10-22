@@ -37,7 +37,7 @@ describe('WeeksPresetMixin', () => {
     describe('hasStartDateForWeek', () => {
       it('returns true when Epic.startDate falls within timeframeItem', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, { startDate: mockTimeframeWeeks[1] }),
+          epic: { ...mockEpic, startDate: mockTimeframeWeeks[1] },
           timeframeItem: mockTimeframeWeeks[1],
         });
 
@@ -46,7 +46,7 @@ describe('WeeksPresetMixin', () => {
 
       it('returns false when Epic.startDate does not fall within timeframeItem', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, { startDate: mockTimeframeWeeks[0] }),
+          epic: { ...mockEpic, startDate: mockTimeframeWeeks[0] },
           timeframeItem: mockTimeframeWeeks[1],
         });
 
@@ -76,9 +76,7 @@ describe('WeeksPresetMixin', () => {
         const epicEndDate = new Date(2018, 0, 3); // Jan 3, 2018
 
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, {
-            endDate: epicEndDate,
-          }),
+          epic: { ...mockEpic, endDate: epicEndDate },
         });
 
         expect(vm.isTimeframeUnderEndDateForWeek(timeframeItem)).toBe(true);
@@ -88,9 +86,7 @@ describe('WeeksPresetMixin', () => {
         const epicEndDate = new Date(2018, 0, 15); // Jan 15, 2018
 
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, {
-            endDate: epicEndDate,
-          }),
+          epic: { ...mockEpic, endDate: epicEndDate },
         });
 
         expect(vm.isTimeframeUnderEndDateForWeek(timeframeItem)).toBe(false);
@@ -110,7 +106,7 @@ describe('WeeksPresetMixin', () => {
     describe('getTimelineBarStartOffsetForWeeks', () => {
       it('returns empty string when Epic startDate is out of range', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, { startDateOutOfRange: true }),
+          epic: { ...mockEpic, startDateOutOfRange: true },
         });
 
         expect(vm.getTimelineBarStartOffsetForWeeks(vm.epic)).toBe('');
@@ -118,10 +114,7 @@ describe('WeeksPresetMixin', () => {
 
       it('returns empty string when Epic startDate is undefined and endDate is out of range', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, {
-            startDateUndefined: true,
-            endDateOutOfRange: true,
-          }),
+          epic: { ...mockEpic, startDateUndefined: true, endDateOutOfRange: true },
         });
 
         expect(vm.getTimelineBarStartOffsetForWeeks(vm.epic)).toBe('');
@@ -129,9 +122,7 @@ describe('WeeksPresetMixin', () => {
 
       it('return `left: 0;` when Epic startDate is first day of the week', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, {
-            startDate: mockTimeframeWeeks[0],
-          }),
+          epic: { ...mockEpic, startDate: mockTimeframeWeeks[0] },
         });
 
         expect(vm.getTimelineBarStartOffsetForWeeks(vm.epic)).toBe('left: 0;');
@@ -139,9 +130,7 @@ describe('WeeksPresetMixin', () => {
 
       it('returns proportional `left` value based on Epic startDate and days in the week', () => {
         vm = createComponent({
-          epic: Object.assign({}, mockEpic, {
-            startDate: new Date(2018, 0, 15),
-          }),
+          epic: { ...mockEpic, startDate: new Date(2018, 0, 15) },
         });
 
         expect(vm.getTimelineBarStartOffsetForWeeks(vm.epic)).toContain('left: 38');
@@ -152,10 +141,11 @@ describe('WeeksPresetMixin', () => {
       it('returns calculated width value based on Epic.startDate and Epic.endDate', () => {
         vm = createComponent({
           timeframeItem: mockTimeframeWeeks[0],
-          epic: Object.assign({}, mockEpic, {
+          epic: {
+            ...mockEpic,
             startDate: new Date(2018, 0, 1), // Jan 1, 2018
             endDate: new Date(2018, 1, 2), // Feb 2, 2018
-          }),
+          },
         });
 
         expect(Math.floor(vm.getTimelineBarWidthForWeeks())).toBe(1208);

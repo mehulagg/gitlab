@@ -3,6 +3,8 @@
 class Profiles::KeysController < Profiles::ApplicationController
   skip_before_action :authenticate_user!, only: [:get_keys]
 
+  feature_category :users
+
   def index
     @keys = current_user.keys.order_id_desc
     @key = Key.new
@@ -42,13 +44,13 @@ class Profiles::KeysController < Profiles::ApplicationController
         if user.present?
           render plain: user.all_ssh_keys.join("\n")
         else
-          return render_404
+          render_404
         end
       rescue => e
         render html: e.message
       end
     else
-      return render_404
+      render_404
     end
   end
 

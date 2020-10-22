@@ -1,7 +1,29 @@
 - if merge_request.approval_needed?
-  - approval_tooltip = merge_request.has_approved?(current_user) ? _("Approvals (you've approved)") : _("Approvals")
-  %li.d-none.d-sm-inline-block.has-tooltip{ title: approval_tooltip, class: ('text-success' if merge_request.approved?) }
-    = sprite_icon((merge_request.has_approved?(current_user) ? 'approval-solid' : 'approval'), size: 16, css_class: 'align-middle')
-    = merge_request.approvals_given
-    %span of
-    = merge_request.approvals_required
+
+  - approved = merge_request.approved?
+  - self_approved = merge_request.approved_by?(current_user)
+  - given = merge_request.approvals_given
+  - total = merge_request.total_approvals_count
+
+  - approved_text = _("Required approvals (%{approvals_given} given, you've approved)") % { approvals_given: given }
+  - unapproved_text = _("Required approvals (%{approvals_given} given)") % { approvals_given: given }
+
+  - final_text = n_("%d approver", "%d approvers", total) % total
+  - final_self_text = n_("%d approver (you've approved)", "%d approvers (you've approved)", total) % total
+
+  - if approved
+    - approval_tooltip = self_approved ? final_self_text : final_text
+  - else
+    - approval_tooltip = self_approved ? approved_text : unapproved_text
+
+  - approval_icon = sprite_icon((self_approved ? 'approval-solid' : 'approval'), css_class: 'align-middle')
+
+  %li.d-none.d-sm-inline-block.has-tooltip{ title: approval_tooltip, class: ('text-success' if approved) }
+    = approval_icon
+
+    - if approved
+      = _("Approved")
+    - else
+      = _("%{remaining_approvals} left") % { remaining_approvals: merge_request.approvals_left }
+- else
+  = render_ce "projects/merge_requests/approvals_count", merge_request: merge_request

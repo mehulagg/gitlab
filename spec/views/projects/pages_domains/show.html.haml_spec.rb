@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe 'projects/pages_domains/show' do
+RSpec.describe 'projects/pages_domains/show' do
   let(:project) { create(:project, :repository) }
 
   before do
     assign(:project, project)
-    assign(:domain, domain.present)
+    allow(view).to receive(:domain_presenter).and_return(domain.present)
     stub_pages_setting(external_https: true)
   end
 

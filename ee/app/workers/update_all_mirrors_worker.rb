@@ -38,9 +38,20 @@ class UpdateAllMirrorsWorker # rubocop:disable Scalability/IdempotentWorker
 
     # Ignore mirrors that become due for scheduling once work begins, so we
     # can't end up in an infinite loop
-    now = Time.now
+    now = Time.current
     last = nil
     scheduled = 0
+
+    # On GitLab.com, we stopped processing free mirrors for private
+    # projects on 2020-03-27. Including mirrors with
+    # next_execution_timestamp of that date or earlier in the query will
+    # lead to higher query times:
+    # <https://gitlab.com/gitlab-org/gitlab/-/issues/216252>
+    #
+    # We should remove this workaround in favour of a simpler solution:
+    # <https://gitlab.com/gitlab-org/gitlab/-/issues/216783>
+    #
+    last = Time.utc(2020, 3, 28) if Gitlab.com?
 
     while capacity > 0
       batch_size = [capacity * 2, 500].min
@@ -62,8 +73,8 @@ class UpdateAllMirrorsWorker # rubocop:disable Scalability/IdempotentWorker
 
     if scheduled > 0
       # Wait for all ProjectImportScheduleWorker jobs to complete
-      deadline = Time.now + SCHEDULE_WAIT_TIMEOUT
-      sleep 1 while ProjectImportScheduleWorker.queue_size > 0 && Time.now < deadline
+      deadline = Time.current + SCHEDULE_WAIT_TIMEOUT
+      sleep 1 while ProjectImportScheduleWorker.queue_size > 0 && Time.current < deadline
     end
 
     scheduled
@@ -115,7 +126,7 @@ class UpdateAllMirrorsWorker # rubocop:disable Scalability/IdempotentWorker
         .joins(root_namespaces_join)
         .joins('LEFT JOIN gitlab_subscriptions ON gitlab_subscriptions.namespace_id = root_namespaces.id')
         .joins('LEFT JOIN plans ON plans.id = gitlab_subscriptions.hosted_plan_id')
-        .where(['plans.name IN (?) OR projects.visibility_level = ?', ::Plan::ALL_HOSTED_PLANS, ::Gitlab::VisibilityLevel::PUBLIC])
+        .where(['plans.name IN (?) OR projects.visibility_level = ?', ::Plan::PAID_HOSTED_PLANS, ::Gitlab::VisibilityLevel::PUBLIC])
     end
 
     relation
@@ -131,7 +142,6 @@ class UpdateAllMirrorsWorker # rubocop:disable Scalability/IdempotentWorker
   end
 
   def check_mirror_plans_in_query?
-    ::Gitlab::CurrentSettings.should_check_namespace_plan? &&
-      !::Feature.enabled?(:free_period_for_pull_mirroring, default_enabled: true)
+    ::Gitlab::CurrentSettings.should_check_namespace_plan?
   end
 end

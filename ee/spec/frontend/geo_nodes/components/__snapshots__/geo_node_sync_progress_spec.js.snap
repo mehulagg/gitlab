@@ -5,7 +5,7 @@ exports[`GeoNodeSyncProgress template GlPopover renders each row of popover corr
   class="d-flex align-items-center my-1"
 >
   <div
-    class="mr-2 bg-transparent gl-shim-w-5 gl-shim-h-2"
+    class="mr-2 bg-transparent gl-w-5 gl-h-2"
   />
    
   <span
@@ -24,7 +24,7 @@ exports[`GeoNodeSyncProgress template GlPopover renders each row of popover corr
 
 exports[`GeoNodeSyncProgress template GlPopover renders each row of popover correctly 2`] = `
 <div
-  class="mr-2 bg-transparent gl-shim-w-5 gl-shim-h-2"
+  class="mr-2 bg-transparent gl-w-5 gl-h-2"
 />
 `;
 
@@ -33,7 +33,7 @@ exports[`GeoNodeSyncProgress template GlPopover renders each row of popover corr
   class="d-flex align-items-center my-2"
 >
   <div
-    class="mr-2 bg-success-500 gl-shim-w-5 gl-shim-h-2"
+    class="mr-2 bg-success-500 gl-w-5 gl-h-2"
   />
    
   <span
@@ -52,7 +52,7 @@ exports[`GeoNodeSyncProgress template GlPopover renders each row of popover corr
 
 exports[`GeoNodeSyncProgress template GlPopover renders each row of popover correctly 4`] = `
 <div
-  class="mr-2 bg-success-500 gl-shim-w-5 gl-shim-h-2"
+  class="mr-2 bg-success-500 gl-w-5 gl-h-2"
 />
 `;
 
@@ -61,7 +61,7 @@ exports[`GeoNodeSyncProgress template GlPopover renders each row of popover corr
   class="d-flex align-items-center my-2"
 >
   <div
-    class="mr-2 bg-secondary-200 gl-shim-w-5 gl-shim-h-2"
+    class="mr-2 bg-secondary-200 gl-w-5 gl-h-2"
   />
    
   <span
@@ -80,7 +80,7 @@ exports[`GeoNodeSyncProgress template GlPopover renders each row of popover corr
 
 exports[`GeoNodeSyncProgress template GlPopover renders each row of popover correctly 6`] = `
 <div
-  class="mr-2 bg-secondary-200 gl-shim-w-5 gl-shim-h-2"
+  class="mr-2 bg-secondary-200 gl-w-5 gl-h-2"
 />
 `;
 
@@ -89,7 +89,7 @@ exports[`GeoNodeSyncProgress template GlPopover renders each row of popover corr
   class="d-flex align-items-center my-2"
 >
   <div
-    class="mr-2 bg-danger-500 gl-shim-w-5 gl-shim-h-2"
+    class="mr-2 bg-danger-500 gl-w-5 gl-h-2"
   />
    
   <span
@@ -108,6 +108,6 @@ exports[`GeoNodeSyncProgress template GlPopover renders each row of popover corr
 
 exports[`GeoNodeSyncProgress template GlPopover renders each row of popover correctly 8`] = `
 <div
-  class="mr-2 bg-danger-500 gl-shim-w-5 gl-shim-h-2"
+  class="mr-2 bg-danger-500 gl-w-5 gl-h-2"
 />
 `;

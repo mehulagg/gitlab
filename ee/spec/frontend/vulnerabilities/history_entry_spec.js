@@ -31,7 +31,10 @@ describe('History Entry', () => {
     const discussion = { notes };
 
     wrapper = shallowMount(HistoryEntry, {
-      propsData: { discussion },
+      propsData: {
+        discussion,
+        notesUrl: '/notes',
+      },
       stubs: { EventItem },
     });
   };

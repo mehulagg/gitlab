@@ -5,6 +5,7 @@ export default () => ({
   },
 
   sourceBranch: null,
+  canReadVulnerabilityFeedback: false,
   vulnerabilityFeedbackPath: null,
   vulnerabilityFeedbackHelpPath: null,
   createVulnerabilityFeedbackIssuePath: null,
@@ -43,7 +44,22 @@ export default () => ({
     hasBaseReport: false,
     scans: [],
   },
+  coverageFuzzing: {
+    paths: {
+      head: null,
+      base: null,
+      diffEndpoint: null,
+    },
 
+    isLoading: false,
+    hasError: false,
+
+    newIssues: [],
+    resolvedIssues: [],
+    allIssues: [],
+    baseReportOutofDate: false,
+    hasBaseReport: false,
+  },
   dependencyScanning: {
     paths: {
       head: null,

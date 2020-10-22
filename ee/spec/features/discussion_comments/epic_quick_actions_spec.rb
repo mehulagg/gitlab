@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Epic quick actions', :js do
+RSpec.describe 'Epic quick actions', :js do
   include Spec::Support::Helpers::Features::NotesHelpers
 
   let(:user) { create(:user) }

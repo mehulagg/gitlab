@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Prometheus::Queries::PacketFlowQuery do
+RSpec.describe Gitlab::Prometheus::Queries::PacketFlowQuery do
   let(:namespace) { 'query-12345678-production' }
   let(:query_range_response) { [] }
   let(:query_response) { [] }
@@ -17,12 +17,14 @@ describe Gitlab::Prometheus::Queries::PacketFlowQuery do
         { "metric" => { "verdict" => "DROPPED" }, "values" => [[1582231596.64, "5.002730665588791"]] }
       ]
     end
+
     let(:query_response) do
       [
         { "metric" => { "verdict" => "FORWARDED" }, "value" => [1582231596.64, "73772.43143284984"] },
         { "metric" => { "verdict" => "DROPPED" }, "value" => [1582231596.64, "5.002730665588791"] }
       ]
     end
+
     let(:result) { subject.query(namespace) }
 
     it 'returns ops_rate metric' do

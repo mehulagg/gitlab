@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'New/edit issue', :js do
+RSpec.describe 'New/edit issue', :js do
   include GitlabRoutingHelper
   include ActionView::Helpers::JavaScriptHelper
   include FormHelper
@@ -52,7 +52,7 @@ describe 'New/edit issue', :js do
         wait_for_requests
       end
 
-      it 'displays selected users even if they are not part of the original API call', quarantine: 'https://gitlab.com/gitlab-org/gitlab/issues/28634' do
+      it 'displays selected users even if they are not part of the original API call', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/28634' do
         find('.dropdown-input-field').native.send_keys user2.name
 
         page.within '.dropdown-menu-user' do

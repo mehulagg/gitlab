@@ -1,44 +1,66 @@
 import { shallowMount } from '@vue/test-utils';
-import SeverityBadge, {
-  CLASS_NAME_MAP,
-} from 'ee/vue_shared/security_reports/components/severity_badge.vue';
+import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
+import {
+  SEVERITY_CLASS_NAME_MAP,
+  SEVERITY_TOOLTIP_TITLE_MAP,
+} from 'ee/vue_shared/security_reports/components/constants';
 import { GlIcon } from '@gitlab/ui';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
 describe('Severity Badge', () => {
+  const SEVERITY_LEVELS = ['critical', 'high', 'medium', 'low', 'info', 'unknown'];
+
   let wrapper;
 
-  const factory = (propsData = {}) =>
-    shallowMount(SeverityBadge, {
+  const createWrapper = (propsData = {}) => {
+    wrapper = shallowMount(SeverityBadge, {
       propsData: { ...propsData },
+      directives: {
+        tooltip: createMockDirective(),
+      },
+    });
+  };
+
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+  });
+
+  const findIcon = () => wrapper.find(GlIcon);
+  const findTooltip = () => getBinding(findIcon().element, 'tooltip').value;
+
+  describe.each(SEVERITY_LEVELS)('given a valid severity "%s"', severity => {
+    beforeEach(() => {
+      createWrapper({ severity });
     });
 
-  describe.each(Object.keys(CLASS_NAME_MAP))('given a valid severity %s', severity => {
-    const className = CLASS_NAME_MAP[severity];
+    const className = SEVERITY_CLASS_NAME_MAP[severity];
 
     it(`renders the component with ${severity} badge`, () => {
-      wrapper = factory({ severity });
-
       expect(wrapper.find(`.${className}`).exists()).toBe(true);
     });
 
     it('renders gl-icon with correct name', () => {
-      wrapper = factory({ severity });
-      const icon = wrapper.find(GlIcon);
-      expect(icon.props('name')).toBe(`severity-${severity}`);
+      expect(findIcon().props('name')).toBe(`severity-${severity}`);
     });
 
     it(`renders the component label`, () => {
-      wrapper = factory({ severity });
+      const severityFirstLetterUpper = `${severity.charAt(0).toUpperCase()}${severity.slice(1)}`;
+      expect(wrapper.text()).toBe(severityFirstLetterUpper);
+    });
 
-      expect(wrapper.text()).toMatch(new RegExp(severity, 'i'));
+    it('renders tooltip', () => {
+      expect(findTooltip()).toBe(SEVERITY_TOOLTIP_TITLE_MAP[severity]);
     });
   });
 
   describe.each(['foo', '', ' '])('given an invalid severity "%s"', invalidSeverity => {
-    it(`renders an empty component`, () => {
-      wrapper = factory({ severity: invalidSeverity });
+    beforeEach(() => {
+      createWrapper({ severity: invalidSeverity });
+    });
 
-      expect(wrapper.isEmpty()).toBe(true);
+    it(`renders an empty component`, () => {
+      expect(wrapper.html()).toBe('');
     });
   });
 });

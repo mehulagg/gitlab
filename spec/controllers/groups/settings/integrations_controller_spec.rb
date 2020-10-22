@@ -2,8 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::Settings::IntegrationsController do
-  let_it_be(:project) { create(:project) }
+RSpec.describe Groups::Settings::IntegrationsController do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
 
@@ -27,7 +26,7 @@ describe Groups::Settings::IntegrationsController do
 
       context 'when group_level_integrations not enabled' do
         it 'returns not_found' do
-          stub_feature_flags(group_level_integrations: { enabled: false, thing: group })
+          stub_feature_flags(group_level_integrations: false)
 
           get :index, params: { group_id: group }
 
@@ -60,7 +59,7 @@ describe Groups::Settings::IntegrationsController do
 
       context 'when group_level_integrations not enabled' do
         it 'returns not_found' do
-          stub_feature_flags(group_level_integrations: { enabled: false, thing: group })
+          stub_feature_flags(group_level_integrations: false)
 
           get :edit, params: { group_id: group, id: Service.available_services_names.sample }
 
@@ -82,10 +81,13 @@ describe Groups::Settings::IntegrationsController do
   end
 
   describe '#update' do
-    let(:integration) { create(:jira_service, project: project) }
+    include JiraServiceHelper
+
+    let(:integration) { create(:jira_service, project: nil, group_id: group.id) }
 
     before do
       group.add_owner(user)
+      stub_jira_service_test
 
       put :update, params: { group_id: group, id: integration.class.to_param, service: { url: url } }
     end

@@ -2,11 +2,11 @@
 
 require('spec_helper')
 
-describe ProjectsController do
+RSpec.describe ProjectsController do
   include ExternalAuthorizationServiceHelpers
   include ProjectForksHelper
 
-  let(:project) { create(:project) }
+  let(:project) { create(:project, service_desk_enabled: false) }
   let(:public_project) { create(:project, :public) }
   let(:user) { create(:user) }
   let(:jpg) { fixture_file_upload('spec/fixtures/rails_sample.jpg', 'image/jpg') }
@@ -41,6 +41,27 @@ describe ProjectsController do
           end
         end
       end
+
+      context 'with the new_create_project_ui experiment enabled and the user is part of the control group' do
+        before do
+          stub_experiment(new_create_project_ui: true)
+          stub_experiment_for_user(new_create_project_ui: false)
+          allow_any_instance_of(described_class).to receive(:experimentation_subject_id).and_return('uuid')
+        end
+
+        it 'passes the right tracking parameters to the frontend' do
+          get(:new)
+
+          expect(Gon.tracking_data).to eq(
+            {
+              category: 'Manage::Import::Experiment::NewCreateProjectUi',
+              action: 'click_tab',
+              label: 'uuid',
+              property: 'control_group'
+            }
+          )
+        end
+      end
     end
   end
 
@@ -65,11 +86,13 @@ describe ProjectsController do
   end
 
   describe "GET #activity as JSON" do
+    include DesignManagementTestHelpers
     render_views
 
     let(:project) { create(:project, :public, issues_access_level: ProjectFeature::PRIVATE) }
 
     before do
+      enable_design_management
       create(:event, :created, project: project, target: create(:issue))
 
       sign_in(user)
@@ -82,10 +105,31 @@ describe ProjectsController do
         project.add_developer(user)
       end
 
-      it 'returns count' do
+      def get_activity(project)
         get :activity, params: { namespace_id: project.namespace, id: project, format: :json }
+      end
+
+      it 'returns count' do
+        get_activity(project)
 
         expect(json_response['count']).to eq(1)
+      end
+
+      context 'design events are visible' do
+        include DesignManagementTestHelpers
+        let(:other_project) { create(:project, namespace: user.namespace) }
+
+        before do
+          enable_design_management
+          create(:design_event, project: project)
+          request.cookies[:event_filter] = EventFilter::DESIGNS
+        end
+
+        it 'returns correct count' do
+          get_activity(project)
+
+          expect(json_response['count']).to eq(1)
+        end
       end
     end
 
@@ -169,13 +213,13 @@ describe ProjectsController do
           expect(assigns(:issuable_meta_data)).not_to be_nil
         end
 
-        it 'shows customize workflow page if wiki and issues are disabled' do
+        it 'shows activity page if wiki and issues are disabled' do
           project.project_feature.update_attribute(:wiki_access_level, ProjectFeature::DISABLED)
           project.project_feature.update_attribute(:issues_access_level, ProjectFeature::DISABLED)
 
           get :show, params: { namespace_id: project.namespace, id: project }
 
-          expect(response).to render_template("projects/_customize_workflow")
+          expect(response).to render_template("projects/_activity")
         end
 
         it 'shows activity if enabled by user' do
@@ -327,36 +371,6 @@ describe ProjectsController do
 
         expect { get(:show, params: { namespace_id: public_project.namespace, id: public_project }) }
           .not_to exceed_query_limit(2).for_query(expected_query)
-      end
-    end
-
-    context 'lfs_blob_ids instance variable' do
-      let(:project) { create(:project, :public, :repository) }
-
-      before do
-        sign_in(user)
-      end
-
-      context 'with vue tree view enabled' do
-        before do
-          get :show, params: { namespace_id: project.namespace, id: project }
-        end
-
-        it 'is not set' do
-          expect(assigns[:lfs_blob_ids]).to be_nil
-        end
-      end
-
-      context 'with vue tree view disabled' do
-        before do
-          stub_feature_flags(vue_file_list: false)
-
-          get :show, params: { namespace_id: project.namespace, id: project }
-        end
-
-        it 'is set' do
-          expect(assigns[:lfs_blob_ids]).not_to be_nil
-        end
       end
     end
   end
@@ -541,26 +555,55 @@ describe ProjectsController do
     end
 
     shared_examples_for 'updating a project' do
+      context 'when there is a conflicting project path' do
+        let(:random_name) { "project-#{SecureRandom.hex(8)}" }
+        let!(:conflict_project) { create(:project, name: random_name, path: random_name, namespace: project.namespace) }
+
+        it 'does not show any references to the conflicting path' do
+          expect { update_project(path: random_name) }.not_to change { project.reload.path }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.body).not_to include(random_name)
+        end
+      end
+
       context 'when only renaming a project path' do
-        it "sets the repository to the right path after a rename" do
+        it "doesnt change the disk_path when using hashed storage" do
+          skip unless project.hashed_storage?(:repository)
+
+          hashed_storage_path = ::Storage::Hashed.new(project).disk_path
           original_repository_path = Gitlab::GitalyClient::StorageSettings.allow_disk_access do
             project.repository.path
           end
 
-          expect { update_project path: 'renamed_path' }
-            .to change { project.reload.path }
+          expect { update_project path: 'renamed_path' }.to change { project.reload.path }
           expect(project.path).to include 'renamed_path'
 
           assign_repository_path = Gitlab::GitalyClient::StorageSettings.allow_disk_access do
             assigns(:repository).path
           end
 
-          if project.hashed_storage?(:repository)
-            expect(assign_repository_path).to eq(original_repository_path)
-          else
-            expect(assign_repository_path).to include(project.path)
+          expect(original_repository_path).to include(hashed_storage_path)
+          expect(assign_repository_path).to include(hashed_storage_path)
+        end
+
+        it "upgrades and move project to hashed storage when project was originally legacy" do
+          skip if project.hashed_storage?(:repository)
+
+          hashed_storage_path = Storage::Hashed.new(project).disk_path
+          original_repository_path = Gitlab::GitalyClient::StorageSettings.allow_disk_access do
+            project.repository.path
           end
 
+          expect { update_project path: 'renamed_path' }.to change { project.reload.path }
+          expect(project.path).to include 'renamed_path'
+
+          assign_repository_path = Gitlab::GitalyClient::StorageSettings.allow_disk_access do
+            assigns(:repository).path
+          end
+
+          expect(original_repository_path).not_to include(hashed_storage_path)
+          expect(assign_repository_path).to include(hashed_storage_path)
           expect(response).to have_gitlab_http_status(:found)
         end
       end
@@ -1020,6 +1063,32 @@ describe ProjectsController do
         expect(json_response['body']).to include(expanded_path)
       end
     end
+
+    context 'when path and ref parameters are provided' do
+      let(:project_with_repo) { create(:project, :repository) }
+      let(:preview_markdown_params) do
+        {
+          namespace_id: project_with_repo.namespace,
+          id: project_with_repo,
+          text: "![](./logo-white.png)\n",
+          ref: 'other_branch',
+          path: 'files/images/README.md'
+        }
+      end
+
+      before do
+        project_with_repo.add_maintainer(user)
+        project_with_repo.repository.create_branch('other_branch')
+      end
+
+      it 'renders JSON body with image links expanded' do
+        expanded_path = "/#{project_with_repo.full_path}/-/raw/other_branch/files/images/logo-white.png"
+
+        post :preview_markdown, params: preview_markdown_params
+
+        expect(json_response['body']).to include(expanded_path)
+      end
+    end
   end
 
   describe '#ensure_canonical_path' do
@@ -1134,16 +1203,16 @@ describe ProjectsController do
 
     shared_examples 'rate limits project export endpoint' do
       before do
-        allow(::Gitlab::ApplicationRateLimiter)
-          .to receive(:throttled?)
-          .and_return(true)
+        allow(Gitlab::ApplicationRateLimiter)
+          .to receive(:increment)
+          .and_return(Gitlab::ApplicationRateLimiter.rate_limits["project_#{action}".to_sym][:threshold].call + 1)
       end
 
       it 'prevents requesting project export' do
         post action, params: { namespace_id: project.namespace, id: project }
 
-        expect(flash[:alert]).to eq('This endpoint has been requested too many times. Try again later.')
-        expect(response).to have_gitlab_http_status(:found)
+        expect(response.body).to eq('This endpoint has been requested too many times. Try again later.')
+        expect(response).to have_gitlab_http_status(:too_many_requests)
       end
     end
 
@@ -1200,7 +1269,18 @@ describe ProjectsController do
         end
 
         context 'when the endpoint receives requests above the limit', :clean_gitlab_redis_cache do
-          include_examples 'rate limits project export endpoint'
+          before do
+            allow(Gitlab::ApplicationRateLimiter)
+              .to receive(:increment)
+              .and_return(Gitlab::ApplicationRateLimiter.rate_limits[:project_download_export][:threshold].call + 1)
+          end
+
+          it 'prevents requesting project export' do
+            post action, params: { namespace_id: project.namespace, id: project }
+
+            expect(response.body).to eq('This endpoint has been requested too many times. Try again later.')
+            expect(response).to have_gitlab_http_status(:too_many_requests)
+          end
         end
       end
     end
@@ -1333,7 +1413,79 @@ describe ProjectsController do
     end
   end
 
+  it 'updates Service Desk attributes' do
+    project.add_maintainer(user)
+    sign_in(user)
+    allow(Gitlab::IncomingEmail).to receive(:enabled?) { true }
+    allow(Gitlab::IncomingEmail).to receive(:supports_wildcard?) { true }
+    params = {
+      service_desk_enabled: true
+    }
+
+    put :update,
+        params: {
+          namespace_id: project.namespace,
+          id: project,
+          project: params
+        }
+    project.reload
+
+    expect(response).to have_gitlab_http_status(:found)
+    expect(project.service_desk_enabled).to eq(true)
+  end
+
   def project_moved_message(redirect_route, project)
     "Project '#{redirect_route.path}' was moved to '#{project.full_path}'. Please update any links and bookmarks that may still have the old path."
+  end
+
+  describe 'GET #unfoldered_environment_names' do
+    it 'shows the environment names of a public project to an anonymous user' do
+      create(:environment, project: public_project, name: 'foo')
+
+      get(
+        :unfoldered_environment_names,
+        params: { namespace_id: public_project.namespace, id: public_project, format: :json }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to eq(%w[foo])
+    end
+
+    it 'does not show environment names of a private project to anonymous users' do
+      create(:environment, project: project, name: 'foo')
+
+      get(
+        :unfoldered_environment_names,
+        params: { namespace_id: project.namespace, id: project, format: :json }
+      )
+
+      expect(response).to redirect_to(new_user_session_path)
+    end
+
+    it 'shows environment names of a private project to a project member' do
+      create(:environment, project: project, name: 'foo')
+      project.add_developer(user)
+      sign_in(user)
+
+      get(
+        :unfoldered_environment_names,
+        params: { namespace_id: project.namespace, id: project, format: :json }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to eq(%w[foo])
+    end
+
+    it 'does not show environment names of a private project to a logged-in non-member' do
+      create(:environment, project: project, name: 'foo')
+      sign_in(user)
+
+      get(
+        :unfoldered_environment_names,
+        params: { namespace_id: project.namespace, id: project, format: :json }
+      )
+
+      expect(response).to have_gitlab_http_status(:not_found)
+    end
   end
 end

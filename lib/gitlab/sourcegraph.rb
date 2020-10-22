@@ -12,14 +12,14 @@ module Gitlab
         !feature.off?
       end
 
-      def feature_enabled?(thing = nil)
-        feature.enabled?(thing)
+      def feature_enabled?(actor = nil)
+        feature.enabled?(actor)
       end
 
       private
 
       def feature
-        Feature.get(:sourcegraph)
+        Feature.get(:sourcegraph) # rubocop:disable Gitlab/AvoidFeatureGet
       end
     end
   end

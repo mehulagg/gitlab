@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe 'Pipeline', :js do
-  let(:user) { create(:user) }
-  let(:project) { create(:project, :repository) }
+RSpec.describe 'Pipeline', :js do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :repository) }
 
   before do
     sign_in(user)
@@ -136,7 +136,7 @@ describe 'Pipeline', :js do
 
     context 'with a License Compliance artifact' do
       before do
-        create(:ee_ci_build, :license_management, pipeline: pipeline)
+        create(:ee_ci_build, :license_scanning, pipeline: pipeline)
 
         visit licenses_project_pipeline_path(project, pipeline)
       end
@@ -199,6 +199,11 @@ describe 'Pipeline', :js do
 
           expect(page).to have_content('Function `simulateEvent` has 28 lines of code (exceeds 25 allowed). Consider refactoring.')
           expect(find_link('app/assets/javascripts/test_utils/simulate_drag.js:1')[:href]).to end_with(project_blob_path(project, File.join(pipeline.commit.id, 'app/assets/javascripts/test_utils/simulate_drag.js')) + '#L1')
+        end
+
+        it 'contains events for data tracking', :aggregate_failures do
+          expect(page).to have_selector('[data-track-event="click_button"]')
+          expect(page).to have_selector('[data-track-label="get_codequality_report"]')
         end
       end
     end

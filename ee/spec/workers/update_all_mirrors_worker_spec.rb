@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe UpdateAllMirrorsWorker do
+RSpec.describe UpdateAllMirrorsWorker do
   include ExclusiveLeaseHelpers
 
   subject(:worker) { described_class.new }
@@ -145,10 +145,6 @@ describe UpdateAllMirrorsWorker do
         project
       end
 
-      before do
-        stub_feature_flags(free_period_for_pull_mirroring: false)
-      end
-
       let_it_be(:project1) { scheduled_mirror(at: 8.weeks.ago) }
       let_it_be(:project2) { scheduled_mirror(at: 7.weeks.ago) }
 
@@ -188,9 +184,9 @@ describe UpdateAllMirrorsWorker do
 
       let(:unlicensed_projects) { [unlicensed_project1, unlicensed_project2, unlicensed_project3, unlicensed_project4] }
 
-      context 'after the free period for pull mirroring' do
+      context 'when using SQL to filter projects' do
         before do
-          stub_feature_flags(free_period_for_pull_mirroring: false)
+          allow(subject).to receive(:check_mirror_plans_in_query?).and_return(true)
         end
 
         context 'when capacity is in excess' do
@@ -216,8 +212,7 @@ describe UpdateAllMirrorsWorker do
 
       context 'when checking licenses on each record individually' do
         before do
-          stub_feature_flags(free_period_for_pull_mirroring: true)
-          stub_const('License::ANY_PLAN_FEATURES', [])
+          allow(subject).to receive(:check_mirror_plans_in_query?).and_return(false)
         end
 
         context 'when capacity is in excess' do
@@ -247,7 +242,7 @@ describe UpdateAllMirrorsWorker do
           end
         end
 
-        context 'when capacity is exacly sufficient' do
+        context 'when capacity is exactly sufficient' do
           it "schedules all available mirrors" do
             schedule_mirrors!(capacity: 3)
 

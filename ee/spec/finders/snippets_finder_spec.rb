@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SnippetsFinder do
+RSpec.describe SnippetsFinder do
   let_it_be(:group) { create(:group, :public) }
   let_it_be(:project) { create(:project, :public, group: group) }
   let_it_be(:private_project_snippet) { create(:project_snippet, :private, project: project) }
@@ -180,6 +180,14 @@ describe SnippetsFinder do
             internal_project_snippet,
             private_project_snippet
           )
+      end
+
+      context 'when no personal snippets are visible' do
+        let(:user) { nil }
+
+        it 'does not return any record' do
+          expect(subject).to be_empty
+        end
       end
     end
   end

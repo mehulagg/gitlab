@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class Todos < Grape::API
+  class Todos < ::API::Base
     include PaginationParams
 
     before { authenticate! }
-
-    helpers ::Gitlab::IssuableMetadata
 
     ISSUABLE_TYPES = {
       'merge_requests' => ->(iid) { find_merge_request_with_access(iid) },
@@ -41,8 +39,17 @@ module API
 
     resource :todos do
       helpers do
+        params :todo_filters do
+          optional :action, String, values: Todo::ACTION_NAMES.values.map(&:to_s)
+          optional :author_id, Integer
+          optional :state, String, values: Todo.state_machine.states.map(&:name).map(&:to_s)
+          optional :type, String, values: TodosFinder.todo_types
+          optional :project_id, Integer
+          optional :group_id, Integer
+        end
+
         def find_todos
-          TodosFinder.new(current_user, params).execute
+          TodosFinder.new(current_user, declared_params(include_missing: false)).execute
         end
 
         def issuable_and_awardable?(type)
@@ -65,7 +72,7 @@ module API
             next unless collection
 
             targets = collection.map(&:target)
-            options[type] = { issuable_metadata: issuable_meta_data(targets, type, current_user) }
+            options[type] = { issuable_metadata: Gitlab::IssuableMetadata.new(current_user, targets).data }
           end
         end
       end
@@ -74,7 +81,7 @@ module API
         success Entities::Todo
       end
       params do
-        use :pagination
+        use :pagination, :todo_filters
       end
       get do
         todos = paginate(find_todos.with_entity_associations)
@@ -91,8 +98,9 @@ module API
         requires :id, type: Integer, desc: 'The ID of the todo being marked as done'
       end
       post ':id/mark_as_done' do
-        TodoService.new.mark_todos_as_done_by_ids(params[:id], current_user)
         todo = current_user.todos.find(params[:id])
+
+        TodoService.new.resolve_todo(todo, current_user, resolved_by_action: :api_done)
 
         present todo, with: Entities::Todo, current_user: current_user
       end
@@ -100,7 +108,8 @@ module API
       desc 'Mark all todos as done'
       post '/mark_as_done' do
         todos = find_todos
-        TodoService.new.mark_todos_as_done(todos, current_user)
+
+        TodoService.new.resolve_todos(todos, current_user, resolved_by_action: :api_all_done)
 
         no_content!
       end

@@ -71,8 +71,8 @@ class MergeTrain < ApplicationRecord
   scope :by_id, -> (sort = :asc) { order(id: sort) }
 
   scope :preload_api_entities, -> do
-    preload(:user, merge_request: MergeRequest::PROJECT_ROUTE_AND_NAMESPACE_ROUTE,
-                   pipeline: Ci::Pipeline::PROJECT_ROUTE_AND_NAMESPACE_ROUTE)
+    preload(:user, :merge_request, pipeline: Ci::Pipeline::PROJECT_ROUTE_AND_NAMESPACE_ROUTE)
+      .merge(MergeRequest.preload_routables)
   end
 
   class << self

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::Ldap::Access do
+RSpec.describe Gitlab::Auth::Ldap::Access do
   include LdapHelpers
 
   let(:user) { create(:omniauth_user) }
@@ -188,6 +188,27 @@ describe Gitlab::Auth::Ldap::Access do
 
         it 'updates the name if the user name is different' do
           expect { access.update_user }.to change(user, :name)
+        end
+
+        it 'does not update the email if the user name is different' do
+          expect { access.update_user }.not_to change(user, :email)
+        end
+      end
+
+      context 'when first and last name attributes passed' do
+        before do
+          entry['givenName'] = ['Jane']
+          entry['sn'] = ['Doe']
+        end
+
+        it 'does not update the name when in a read-only GitLab instance' do
+          allow(Gitlab::Database).to receive(:read_only?).and_return(true)
+
+          expect { access.update_user }.not_to change(user, :name)
+        end
+
+        it 'updates the name if the user name is different' do
+          expect { access.update_user }.to change(user, :name).to('Jane Doe')
         end
 
         it 'does not update the email if the user name is different' do

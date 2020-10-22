@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Elastic::MultiVersionInstanceProxy do
+RSpec.describe Elastic::MultiVersionInstanceProxy do
   let(:snippet) { create(:project_snippet) }
 
   subject { described_class.new(snippet) }

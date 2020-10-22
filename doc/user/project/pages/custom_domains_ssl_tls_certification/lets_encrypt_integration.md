@@ -1,11 +1,14 @@
 ---
 type: reference
 description: "Automatic Let's Encrypt SSL certificates for GitLab Pages."
+stage: Release
+group: Release Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # GitLab Pages integration with Let's Encrypt
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/28996) in GitLab 12.1. For versions earlier than GitLab 12.1, see the [manual Let's Encrypt instructions](../lets_encrypt_for_gitlab_pages.md).
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/28996) in GitLab 12.1. For versions earlier than GitLab 12.1, see the [manual Let's Encrypt instructions](../lets_encrypt_for_gitlab_pages.md).
 
 The GitLab Pages integration with Let's Encrypt (LE) allows you
 to use LE certificates for your Pages website with custom domains
@@ -16,13 +19,13 @@ GitLab does it for you, out-of-the-box.
 open source Certificate Authority.
 
 CAUTION: **Caution:**
-This feature covers only certificates for **custom domains**, not the wildcard certificate required to run [Pages daemon](../../../../administration/pages/index.md) **(CORE ONLY)**. Wildcard certificate generation is tracked in [this issue](https://gitlab.com/gitlab-org/omnibus-gitlab/issues/3342).
+This feature covers only certificates for **custom domains**, not the wildcard certificate required to run [Pages daemon](../../../../administration/pages/index.md) **(CORE ONLY)**. Wildcard certificate generation is tracked in [this issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/3342).
 
 ## Requirements
 
 Before you can enable automatic provisioning of an SSL certificate for your domain, make sure you have:
 
-- Created a [project](../getting_started_part_two.md) in GitLab
+- Created a [project](../index.md#getting-started) in GitLab
   containing your website's source code.
 - Acquired a domain (`example.com`) and added a [DNS entry](index.md)
   pointing it to your Pages website.
@@ -30,7 +33,6 @@ Before you can enable automatic provisioning of an SSL certificate for your doma
   and verified your ownership.
 - Verified your website is up and running, accessible through your custom domain.
 
-NOTE: **Note:**
 GitLab's Let's Encrypt integration is enabled and available on GitLab.com.
 For **self-managed** GitLab instances, make sure your administrator has
 [enabled it](../../../../administration/pages/index.md#lets-encrypt-integration).

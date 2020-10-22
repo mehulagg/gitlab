@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Audit::Levels::Project do
+RSpec.describe Gitlab::Audit::Levels::Project do
   describe '#apply' do
     let_it_be(:project) { create(:project) }
 

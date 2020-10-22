@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::CreatePipelineService, '#execute' do
+RSpec.describe Ci::CreatePipelineService, '#execute' do
   let_it_be(:namespace) { create(:namespace) }
   let_it_be(:gold_plan) { create(:gold_plan) }
   let_it_be(:plan_limits) { create(:plan_limits, plan: gold_plan) }
@@ -139,6 +139,37 @@ describe Ci::CreatePipelineService, '#execute' do
           expect(pipeline.processables.pluck(:name)).to eq(%w[hello])
         end
       end
+    end
+  end
+
+  describe 'job with secrets' do
+    before do
+      stub_ci_pipeline_yaml_file <<~YAML
+        deploy:
+          script:
+            - echo
+          secrets:
+            DATABASE_PASSWORD:
+              vault: production/db/password
+      YAML
+    end
+
+    it 'persists secrets as job metadata' do
+      pipeline = create_pipeline!
+
+      expect(pipeline).to be_persisted
+
+      build = Ci::Build.find(pipeline.builds.first.id)
+
+      expect(build.metadata.secrets).to eq({
+        'DATABASE_PASSWORD' => {
+          'vault' => {
+            'engine' => { 'name' => 'kv-v2', 'path' => 'kv-v2' },
+            'path' => 'production/db',
+            'field' => 'password'
+          }
+        }
+      })
     end
   end
 

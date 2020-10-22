@@ -1,44 +1,51 @@
 import Vue from 'vue';
 import MockAdapter from 'axios-mock-adapter';
 import mrWidgetOptions from 'ee/vue_merge_request_widget/mr_widget_options.vue';
-import MRWidgetStore from 'ee/vue_merge_request_widget/stores/mr_widget_store';
-import filterByKey from 'ee/vue_shared/security_reports/store/utils/filter_by_key';
 import mountComponent from 'helpers/vue_mount_component_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
 import { trimText } from 'helpers/text_helper';
 
-import mockData, {
-  baseIssues,
-  headIssues,
-  basePerformance,
-  headPerformance,
-  parsedBaseIssues,
-  parsedHeadIssues,
-} from './mock_data';
-
-import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import axios from '~/lib/utils/axios_utils';
-import { MTWPS_MERGE_STRATEGY, MT_MERGE_STRATEGY } from '~/vue_merge_request_widget/constants';
 import {
   sastDiffSuccessMock,
   dastDiffSuccessMock,
   containerScanningDiffSuccessMock,
   dependencyScanningDiffSuccessMock,
   secretScanningDiffSuccessMock,
+  coverageFuzzingDiffSuccessMock,
 } from 'ee_jest/vue_shared/security_reports/mock_data';
+import mockData, {
+  baseBrowserPerformance,
+  headBrowserPerformance,
+  baseLoadPerformance,
+  headLoadPerformance,
+} from './mock_data';
+
+import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import axios from '~/lib/utils/axios_utils';
 
 const SAST_SELECTOR = '.js-sast-widget';
 const DAST_SELECTOR = '.js-dast-widget';
 const DEPENDENCY_SCANNING_SELECTOR = '.js-dependency-scanning-widget';
 const CONTAINER_SCANNING_SELECTOR = '.js-container-scanning';
 const SECRET_SCANNING_SELECTOR = '.js-secret-scanning';
+const COVERAGE_FUZZING_SELECTOR = '.js-coverage-fuzzing-widget';
 
 describe('ee merge request widget options', () => {
   let vm;
   let mock;
   let Component;
+
+  const DEFAULT_BROWSER_PERFORMANCE = {
+    head_path: 'head.json',
+    base_path: 'base.json',
+  };
+
+  const DEFAULT_LOAD_PERFORMANCE = {
+    head_path: 'head.json',
+    base_path: 'base.json',
+  };
 
   beforeEach(() => {
     delete mrWidgetOptions.extends.el; // Prevent component mounting
@@ -65,7 +72,21 @@ describe('ee merge request widget options', () => {
     });
   });
 
+  const findBrowserPerformanceWidget = () => vm.$el.querySelector('.js-browser-performance-widget');
+  const findLoadPerformanceWidget = () => vm.$el.querySelector('.js-load-performance-widget');
   const findSecurityWidget = () => vm.$el.querySelector('.js-security-widget');
+
+  const setBrowserPerformance = (data = {}) => {
+    const browserPerformance = { ...DEFAULT_BROWSER_PERFORMANCE, ...data };
+    gl.mrWidgetData.browserPerformance = browserPerformance;
+    vm.mr.browserPerformance = browserPerformance;
+  };
+
+  const setLoadPerformance = (data = {}) => {
+    const loadPerformance = { ...DEFAULT_LOAD_PERFORMANCE, ...data };
+    gl.mrWidgetData.loadPerformance = loadPerformance;
+    vm.mr.loadPerformance = loadPerformance;
+  };
 
   const VULNERABILITY_FEEDBACK_ENDPOINT = 'vulnerability_feedback_path';
 
@@ -89,6 +110,7 @@ describe('ee merge request widget options', () => {
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
 
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+        vm.loading = false;
 
         expect(
           findSecurityWidget()
@@ -113,7 +135,7 @@ describe('ee merge request widget options', () => {
                 `${SAST_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
-          ).toEqual('SAST detected 1 new, and 2 fixed vulnerabilities');
+          ).toEqual('SAST detected 1 critical severity vulnerability.');
           done();
         });
       });
@@ -135,7 +157,7 @@ describe('ee merge request widget options', () => {
                 `${SAST_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ).trim(),
-          ).toEqual('SAST detected no vulnerabilities');
+          ).toEqual('SAST detected no vulnerabilities.');
           done();
         });
       });
@@ -203,7 +225,7 @@ describe('ee merge request widget options', () => {
                 `${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
-          ).toEqual('Dependency scanning detected 2 new, and 1 fixed vulnerabilities');
+          ).toEqual('Dependency scanning detected 1 critical and 1 high severity vulnerabilities.');
           done();
         });
       });
@@ -221,7 +243,7 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('renders no new vulnerabilities message', done => {
+      it('renders no vulnerabilities message', done => {
         setImmediate(() => {
           expect(
             trimText(
@@ -229,7 +251,7 @@ describe('ee merge request widget options', () => {
                 `${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
-          ).toEqual('Dependency scanning detected no new vulnerabilities');
+          ).toEqual('Dependency scanning detected no vulnerabilities.');
           done();
         });
       });
@@ -251,7 +273,7 @@ describe('ee merge request widget options', () => {
                 `${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
-          ).toEqual('Dependency scanning detected no vulnerabilities');
+          ).toEqual('Dependency scanning detected no vulnerabilities.');
           done();
         });
       });
@@ -275,28 +297,25 @@ describe('ee merge request widget options', () => {
     });
   });
 
-  describe('code quality', () => {
+  describe('browser_performance', () => {
     beforeEach(() => {
       gl.mrWidgetData = {
         ...mockData,
-        codeclimate: {},
+        browserPerformance: {},
       };
     });
 
     describe('when it is loading', () => {
       it('should render loading indicator', done => {
-        mock.onGet('head.json').reply(200, headIssues);
-        mock.onGet('base.json').reply(200, baseIssues);
+        mock.onGet('head.json').reply(200, headBrowserPerformance);
+        mock.onGet('base.json').reply(200, baseBrowserPerformance);
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
 
-        vm.mr.codeclimate = {
-          head_path: 'head.json',
-          base_path: 'base.json',
-        };
+        vm.mr.browserPerformance = { ...DEFAULT_BROWSER_PERFORMANCE };
 
         vm.$nextTick(() => {
-          expect(trimText(vm.$el.querySelector('.js-codequality-widget').textContent)).toContain(
-            'Loading codeclimate report',
+          expect(trimText(findBrowserPerformanceWidget().textContent)).toContain(
+            'Loading browser-performance report',
           );
 
           done();
@@ -306,195 +325,168 @@ describe('ee merge request widget options', () => {
 
     describe('with successful request', () => {
       beforeEach(() => {
-        mock.onGet('head.json').reply(200, headIssues);
-        mock.onGet('base.json').reply(200, baseIssues);
-
+        mock.onGet(DEFAULT_BROWSER_PERFORMANCE.head_path).reply(200, headBrowserPerformance);
+        mock.onGet(DEFAULT_BROWSER_PERFORMANCE.base_path).reply(200, baseBrowserPerformance);
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
-
-        gl.mrWidgetData.codeclimate = {
-          head_path: 'head.json',
-          base_path: 'base.json',
-        };
-        vm.mr.codeclimate = gl.mrWidgetData.codeclimate;
-
-        // mock worker response
-        jest.spyOn(MRWidgetStore, 'doCodeClimateComparison').mockResolvedValue({
-          newIssues: filterByKey(parsedHeadIssues, parsedBaseIssues, 'fingerprint'),
-          resolvedIssues: filterByKey(parsedBaseIssues, parsedHeadIssues, 'fingerprint'),
-        });
       });
 
-      it('should render provided data', done => {
-        setImmediate(() => {
-          expect(
-            trimText(vm.$el.querySelector('.js-codequality-widget .js-code-text').textContent),
-          ).toEqual('Code quality improved on 1 point and degraded on 1 point');
-          done();
+      describe('default', () => {
+        beforeEach(() => {
+          setBrowserPerformance();
         });
-      });
 
-      describe('text connector', () => {
-        it('should only render information about fixed issues', done => {
+        it('should render provided data', done => {
           setImmediate(() => {
-            vm.mr.codeclimateMetrics.newIssues = [];
-
-            Vue.nextTick(() => {
-              expect(
-                trimText(vm.$el.querySelector('.js-codequality-widget .js-code-text').textContent),
-              ).toEqual('Code quality improved on 1 point');
-              done();
-            });
+            expect(
+              trimText(
+                vm.$el.querySelector('.js-browser-performance-widget .js-code-text').textContent,
+              ),
+            ).toEqual('Browser performance test metrics: 2 degraded, 1 same, 1 improved');
+            done();
           });
         });
 
-        it('should only render information about added issues', done => {
-          setImmediate(() => {
-            vm.mr.codeclimateMetrics.resolvedIssues = [];
-            Vue.nextTick(() => {
-              expect(
-                trimText(vm.$el.querySelector('.js-codequality-widget .js-code-text').textContent),
-              ).toEqual('Code quality degraded on 1 point');
-              done();
+        describe('text connector', () => {
+          it('should only render information about fixed issues', done => {
+            setImmediate(() => {
+              vm.mr.browserPerformanceMetrics.degraded = [];
+              vm.mr.browserPerformanceMetrics.same = [];
+
+              Vue.nextTick(() => {
+                expect(
+                  trimText(
+                    vm.$el.querySelector('.js-browser-performance-widget .js-code-text')
+                      .textContent,
+                  ),
+                ).toEqual('Browser performance test metrics: 1 improved');
+                done();
+              });
+            });
+          });
+
+          it('should only render information about added issues', done => {
+            setImmediate(() => {
+              vm.mr.browserPerformanceMetrics.improved = [];
+              vm.mr.browserPerformanceMetrics.same = [];
+
+              Vue.nextTick(() => {
+                expect(
+                  trimText(
+                    vm.$el.querySelector('.js-browser-performance-widget .js-code-text')
+                      .textContent,
+                  ),
+                ).toEqual('Browser performance test metrics: 2 degraded');
+                done();
+              });
             });
           });
         });
       });
+
+      describe.each`
+        degradation_threshold | shouldExist
+        ${1}                  | ${true}
+        ${3}                  | ${false}
+      `(
+        'with degradation_threshold = $degradation_threshold',
+        ({ degradation_threshold, shouldExist }) => {
+          beforeEach(() => {
+            setBrowserPerformance({ degradation_threshold });
+
+            return waitForPromises();
+          });
+
+          if (shouldExist) {
+            it('should render widget when total score degradation is above threshold', () => {
+              expect(findBrowserPerformanceWidget()).toExist();
+            });
+          } else {
+            it('should not render widget when total score degradation is below threshold', () => {
+              expect(findBrowserPerformanceWidget()).not.toExist();
+            });
+          }
+        },
+      );
     });
 
     describe('with empty successful request', () => {
-      beforeEach(() => {
-        mock.onGet('head.json').reply(200, []);
-        mock.onGet('base.json').reply(200, []);
+      beforeEach(done => {
+        mock.onGet(DEFAULT_BROWSER_PERFORMANCE.head_path).reply(200, []);
+        mock.onGet(DEFAULT_BROWSER_PERFORMANCE.base_path).reply(200, []);
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
 
-        gl.mrWidgetData.codeclimate = {
-          head_path: 'head.json',
-          base_path: 'base.json',
-        };
-        vm.mr.codeclimate = gl.mrWidgetData.codeclimate;
+        gl.mrWidgetData.browserPerformance = { ...DEFAULT_BROWSER_PERFORMANCE };
+        vm.mr.browserPerformance = gl.mrWidgetData.browserPerformance;
 
-        // mock worker response
-        jest.spyOn(MRWidgetStore, 'doCodeClimateComparison').mockResolvedValue({
-          newIssues: filterByKey([], [], 'fingerprint'),
-          resolvedIssues: filterByKey([], [], 'fingerprint'),
-        });
+        // wait for network request from component watch update method
+        setImmediate(done);
       });
 
-      afterEach(() => {
-        mock.restore();
+      it('should render provided data', () => {
+        expect(
+          trimText(
+            vm.$el.querySelector('.js-browser-performance-widget .js-code-text').textContent,
+          ),
+        ).toEqual('Browser performance test metrics: No changes');
       });
 
-      it('should render provided data', done => {
-        setImmediate(() => {
-          expect(
-            trimText(vm.$el.querySelector('.js-codequality-widget .js-code-text').textContent),
-          ).toEqual('No changes to code quality');
-          done();
-        });
-      });
-    });
+      it('does not show Expand button', () => {
+        const expandButton = vm.$el.querySelector(
+          '.js-browser-performance-widget .js-collapse-btn',
+        );
 
-    describe('with a head_path but no base_path', () => {
-      beforeEach(() => {
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
-
-        gl.mrWidgetData.codeclimate = {
-          head_path: 'head.json',
-          base_path: null,
-        };
-        vm.mr.codeclimate = gl.mrWidgetData.codeclimate;
+        expect(expandButton).toBeNull();
       });
 
-      it('should render error indicator', done => {
-        setImmediate(() => {
-          expect(
-            trimText(vm.$el.querySelector('.js-codequality-widget .js-code-text').textContent),
-          ).toContain('Failed to load codeclimate report');
-          done();
-        });
-      });
-
-      it('should render a help icon with more information', done => {
-        setImmediate(() => {
-          expect(vm.$el.querySelector('.js-codequality-widget .btn-help')).not.toBeNull();
-          expect(vm.codequalityPopover.title).toBe('Base pipeline codequality artifact not found');
-          done();
-        });
-      });
-    });
-
-    describe('with codeclimate comparison worker rejection', () => {
-      beforeEach(() => {
-        mock.onGet('head.json').reply(200, headIssues);
-        mock.onGet('base.json').reply(200, baseIssues);
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
-
-        gl.mrWidgetData.codeclimate = {
-          head_path: 'head.json',
-          base_path: 'base.json',
-        };
-        vm.mr.codeclimate = gl.mrWidgetData.codeclimate;
-
-        // mock worker rejection
-        jest.spyOn(MRWidgetStore, 'doCodeClimateComparison').mockRejectedValue();
-      });
-
-      it('should render error indicator', done => {
-        setImmediate(() => {
-          expect(
-            trimText(vm.$el.querySelector('.js-codequality-widget .js-code-text').textContent),
-          ).toEqual('Failed to load codeclimate report');
-          done();
-        });
+      it('shows success icon', () => {
+        expect(
+          vm.$el.querySelector('.js-browser-performance-widget .js-ci-status-icon-success'),
+        ).not.toBeNull();
       });
     });
 
     describe('with failed request', () => {
       beforeEach(() => {
-        mock.onGet('head.json').reply(500, []);
-        mock.onGet('base.json').reply(500, []);
+        mock.onGet(DEFAULT_BROWSER_PERFORMANCE.head_path).reply(500, []);
+        mock.onGet(DEFAULT_BROWSER_PERFORMANCE.base_path).reply(500, []);
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
 
-        gl.mrWidgetData.codeclimate = {
-          head_path: 'head.json',
-          base_path: 'base.json',
-        };
-        vm.mr.codeclimate = gl.mrWidgetData.codeclimate;
+        gl.mrWidgetData.browserPerformance = { ...DEFAULT_BROWSER_PERFORMANCE };
+        vm.mr.browserPerformance = gl.mrWidgetData.browserPerformance;
       });
 
       it('should render error indicator', done => {
         setImmediate(() => {
           expect(
-            trimText(vm.$el.querySelector('.js-codequality-widget .js-code-text').textContent),
-          ).toContain('Failed to load codeclimate report');
+            trimText(
+              vm.$el.querySelector('.js-browser-performance-widget .js-code-text').textContent,
+            ),
+          ).toContain('Failed to load browser-performance report');
           done();
         });
       });
     });
   });
 
-  describe('performance', () => {
+  describe('load_performance', () => {
     beforeEach(() => {
       gl.mrWidgetData = {
         ...mockData,
-        performance: {},
+        loadPerformance: {},
       };
     });
 
     describe('when it is loading', () => {
       it('should render loading indicator', done => {
-        mock.onGet('head.json').reply(200, headPerformance);
-        mock.onGet('base.json').reply(200, basePerformance);
+        mock.onGet(DEFAULT_LOAD_PERFORMANCE.head_path).reply(200, headLoadPerformance);
+        mock.onGet(DEFAULT_LOAD_PERFORMANCE.base_path).reply(200, baseLoadPerformance);
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
 
-        vm.mr.performance = {
-          head_path: 'head.json',
-          base_path: 'base.json',
-        };
+        vm.mr.loadPerformance = { ...DEFAULT_LOAD_PERFORMANCE };
 
         vm.$nextTick(() => {
-          expect(trimText(vm.$el.querySelector('.js-performance-widget').textContent)).toContain(
-            'Loading performance report',
+          expect(trimText(findLoadPerformanceWidget().textContent)).toContain(
+            'Loading load-performance report',
           );
 
           done();
@@ -504,48 +496,50 @@ describe('ee merge request widget options', () => {
 
     describe('with successful request', () => {
       beforeEach(() => {
-        mock.onGet('head.json').reply(200, headPerformance);
-        mock.onGet('base.json').reply(200, basePerformance);
+        mock.onGet(DEFAULT_LOAD_PERFORMANCE.head_path).reply(200, headLoadPerformance);
+        mock.onGet(DEFAULT_LOAD_PERFORMANCE.base_path).reply(200, baseLoadPerformance);
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
-
-        gl.mrWidgetData.performance = {
-          head_path: 'head.json',
-          base_path: 'base.json',
-        };
-        vm.mr.performance = gl.mrWidgetData.performance;
       });
 
-      it('should render provided data', done => {
-        setImmediate(() => {
-          expect(
-            trimText(vm.$el.querySelector('.js-performance-widget .js-code-text').textContent),
-          ).toEqual('Performance metrics improved on 2 points and degraded on 1 point');
-          done();
+      describe('default', () => {
+        beforeEach(done => {
+          setLoadPerformance();
+
+          // wait for network request from component watch update method
+          setImmediate(done);
         });
-      });
 
-      describe('text connector', () => {
-        it('should only render information about fixed issues', done => {
-          setImmediate(() => {
-            vm.mr.performanceMetrics.degraded = [];
+        it('should render provided data', () => {
+          expect(
+            trimText(vm.$el.querySelector('.js-load-performance-widget .js-code-text').textContent),
+          ).toBe('Load performance test metrics: 1 degraded, 1 same, 2 improved');
+        });
+
+        describe('text connector', () => {
+          it('should only render information about fixed issues', done => {
+            vm.mr.loadPerformanceMetrics.degraded = [];
+            vm.mr.loadPerformanceMetrics.same = [];
 
             Vue.nextTick(() => {
               expect(
-                trimText(vm.$el.querySelector('.js-performance-widget .js-code-text').textContent),
-              ).toEqual('Performance metrics improved on 2 points');
+                trimText(
+                  vm.$el.querySelector('.js-load-performance-widget .js-code-text').textContent,
+                ),
+              ).toBe('Load performance test metrics: 2 improved');
               done();
             });
           });
-        });
 
-        it('should only render information about added issues', done => {
-          setImmediate(() => {
-            vm.mr.performanceMetrics.improved = [];
+          it('should only render information about added issues', done => {
+            vm.mr.loadPerformanceMetrics.improved = [];
+            vm.mr.loadPerformanceMetrics.same = [];
 
             Vue.nextTick(() => {
               expect(
-                trimText(vm.$el.querySelector('.js-performance-widget .js-code-text').textContent),
-              ).toEqual('Performance metrics degraded on 1 point');
+                trimText(
+                  vm.$el.querySelector('.js-load-performance-widget .js-code-text').textContent,
+                ),
+              ).toBe('Load performance test metrics: 1 degraded');
               done();
             });
           });
@@ -555,15 +549,12 @@ describe('ee merge request widget options', () => {
 
     describe('with empty successful request', () => {
       beforeEach(done => {
-        mock.onGet('head.json').reply(200, []);
-        mock.onGet('base.json').reply(200, []);
+        mock.onGet(DEFAULT_LOAD_PERFORMANCE.head_path).reply(200, {});
+        mock.onGet(DEFAULT_LOAD_PERFORMANCE.base_path).reply(200, {});
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
 
-        gl.mrWidgetData.performance = {
-          head_path: 'head.json',
-          base_path: 'base.json',
-        };
-        vm.mr.performance = gl.mrWidgetData.performance;
+        gl.mrWidgetData.loadPerformance = { ...DEFAULT_LOAD_PERFORMANCE };
+        vm.mr.loadPerformance = gl.mrWidgetData.loadPerformance;
 
         // wait for network request from component watch update method
         setImmediate(done);
@@ -571,41 +562,38 @@ describe('ee merge request widget options', () => {
 
       it('should render provided data', () => {
         expect(
-          trimText(vm.$el.querySelector('.js-performance-widget .js-code-text').textContent),
-        ).toEqual('No changes to performance metrics');
+          trimText(vm.$el.querySelector('.js-load-performance-widget .js-code-text').textContent),
+        ).toBe('Load performance test metrics: No changes');
       });
 
       it('does not show Expand button', () => {
-        const expandButton = vm.$el.querySelector('.js-performance-widget .js-collapse-btn');
+        const expandButton = vm.$el.querySelector('.js-load-performance-widget .js-collapse-btn');
 
         expect(expandButton).toBeNull();
       });
 
       it('shows success icon', () => {
         expect(
-          vm.$el.querySelector('.js-performance-widget .js-ci-status-icon-success'),
+          vm.$el.querySelector('.js-load-performance-widget .js-ci-status-icon-success'),
         ).not.toBeNull();
       });
     });
 
     describe('with failed request', () => {
       beforeEach(() => {
-        mock.onGet('head.json').reply(500, []);
-        mock.onGet('base.json').reply(500, []);
+        mock.onGet(DEFAULT_LOAD_PERFORMANCE.head_path).reply(500, []);
+        mock.onGet(DEFAULT_LOAD_PERFORMANCE.base_path).reply(500, []);
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
 
-        gl.mrWidgetData.performance = {
-          head_path: 'head.json',
-          base_path: 'base.json',
-        };
-        vm.mr.performance = gl.mrWidgetData.performance;
+        gl.mrWidgetData.loadPerformance = { ...DEFAULT_LOAD_PERFORMANCE };
+        vm.mr.loadPerformance = gl.mrWidgetData.loadPerformance;
       });
 
       it('should render error indicator', done => {
         setImmediate(() => {
           expect(
-            trimText(vm.$el.querySelector('.js-performance-widget .js-code-text').textContent),
-          ).toContain('Failed to load performance report');
+            trimText(vm.$el.querySelector('.js-load-performance-widget .js-code-text').textContent),
+          ).toContain('Failed to load load-performance report');
           done();
         });
       });
@@ -655,7 +643,7 @@ describe('ee merge request widget options', () => {
                 `${CONTAINER_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
-          ).toEqual('Container scanning detected 2 new, and 1 fixed vulnerabilities');
+          ).toEqual('Container scanning detected 1 critical and 1 high severity vulnerabilities.');
           done();
         });
       });
@@ -725,7 +713,7 @@ describe('ee merge request widget options', () => {
             findSecurityWidget()
               .querySelector(`${DAST_SELECTOR} .report-block-list-issue-description`)
               .textContent.trim(),
-          ).toEqual('DAST detected 1 new, and 2 fixed vulnerabilities');
+          ).toEqual('DAST detected 1 critical severity vulnerability.');
           done();
         });
       });
@@ -752,14 +740,84 @@ describe('ee merge request widget options', () => {
     });
   });
 
-  describe('Secret Scanning', () => {
-    const SECRET_SCANNING_ENDPOINT = 'secret_scanning';
+  describe('Coverage Fuzzing', () => {
+    const COVERAGE_FUZZING_ENDPOINT = 'coverage_fuzzing_report';
 
     beforeEach(() => {
       gl.mrWidgetData = {
         ...mockData,
         enabled_reports: {
-          secret_scanning: true,
+          coverage_fuzzing: true,
+        },
+        coverage_fuzzing_comparison_path: COVERAGE_FUZZING_ENDPOINT,
+        vulnerability_feedback_path: VULNERABILITY_FEEDBACK_ENDPOINT,
+      };
+    });
+
+    describe('when it is loading', () => {
+      it('should render loading indicator', () => {
+        mock.onGet(COVERAGE_FUZZING_ENDPOINT).reply(200, coverageFuzzingDiffSuccessMock);
+        mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
+
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+
+        expect(
+          findSecurityWidget()
+            .querySelector(COVERAGE_FUZZING_SELECTOR)
+            .textContent.trim(),
+        ).toContain('Coverage fuzzing is loading');
+      });
+    });
+
+    describe('with successful request', () => {
+      beforeEach(() => {
+        mock.onGet(COVERAGE_FUZZING_ENDPOINT).reply(200, coverageFuzzingDiffSuccessMock);
+        mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
+
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
+
+      it('should render provided data', done => {
+        setImmediate(() => {
+          expect(
+            findSecurityWidget()
+              .querySelector(`${COVERAGE_FUZZING_SELECTOR} .report-block-list-issue-description`)
+              .textContent.trim(),
+          ).toEqual('Coverage fuzzing detected 1 critical and 1 high severity vulnerabilities.');
+          done();
+        });
+      });
+    });
+
+    describe('with failed request', () => {
+      beforeEach(() => {
+        mock.onGet(COVERAGE_FUZZING_ENDPOINT).reply(500, {});
+        mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(500, {});
+
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
+
+      it('should render error indicator', done => {
+        setImmediate(() => {
+          expect(
+            findSecurityWidget()
+              .querySelector(COVERAGE_FUZZING_SELECTOR)
+              .textContent.trim(),
+          ).toContain('Coverage fuzzing: Loading resulted in an error');
+          done();
+        });
+      });
+    });
+  });
+
+  describe('Secret Scanning', () => {
+    const SECRET_SCANNING_ENDPOINT = 'secret_detection_report';
+
+    beforeEach(() => {
+      gl.mrWidgetData = {
+        ...mockData,
+        enabled_reports: {
+          secret_detection: true,
           // The below property needs to exist until
           // secret scanning is implemented in backend
           // Or for some other reason I'm yet to find
@@ -799,7 +857,7 @@ describe('ee merge request widget options', () => {
                 `${SECRET_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
-          ).toEqual('Secret scanning detected 2 new, and 1 fixed vulnerabilities');
+          ).toEqual('Secret scanning detected 1 critical and 1 high severity vulnerabilities.');
           done();
         });
       });
@@ -860,18 +918,6 @@ describe('ee merge request widget options', () => {
 
   describe('computed', () => {
     describe('shouldRenderApprovals', () => {
-      it('should return false when no approvals', () => {
-        vm = mountComponent(Component, {
-          mrData: {
-            ...mockData,
-            has_approvals_available: false,
-          },
-        });
-        vm.mr.state = 'readyToMerge';
-
-        expect(vm.shouldRenderApprovals).toBeFalsy();
-      });
-
       it('should return false when in empty state', () => {
         vm = mountComponent(Component, {
           mrData: {
@@ -896,20 +942,6 @@ describe('ee merge request widget options', () => {
         expect(vm.shouldRenderApprovals).toBeTruthy();
       });
     });
-
-    describe('shouldRenderMergeTrainHelperText', () => {
-      it('should return true if MTWPS is available and the user has not yet pressed the MTWPS button', () => {
-        vm = mountComponent(Component, {
-          mrData: {
-            ...mockData,
-            available_auto_merge_strategies: [MTWPS_MERGE_STRATEGY],
-            auto_merge_enabled: false,
-          },
-        });
-
-        expect(vm.shouldRenderMergeTrainHelperText).toBe(true);
-      });
-    });
   });
 
   describe('rendering source branch removal status', () => {
@@ -927,10 +959,10 @@ describe('ee merge request widget options', () => {
       vm.mr.state = 'readyToMerge';
 
       vm.$nextTick(() => {
-        const tooltip = vm.$el.querySelector('.fa-question-circle');
+        const tooltip = vm.$el.querySelector('[data-testid="question-o-icon"]');
 
         expect(vm.$el.textContent).toContain('Deletes source branch');
-        expect(tooltip.getAttribute('data-original-title')).toBe(
+        expect(tooltip.getAttribute('title')).toBe(
           'A user with write access to the source branch selected this option',
         );
 
@@ -1008,115 +1040,6 @@ describe('ee merge request widget options', () => {
     });
   });
 
-  describe('merge train helper text', () => {
-    const getHelperTextElement = () => vm.$el.querySelector('.js-merge-train-helper-text');
-
-    it('does not render the merge train helpe text if the MTWPS strategy is not available', () => {
-      vm = mountComponent(Component, {
-        mrData: {
-          ...mockData,
-          available_auto_merge_strategies: [MT_MERGE_STRATEGY],
-          pipeline: {
-            ...mockData.pipeline,
-            active: true,
-          },
-        },
-      });
-
-      const helperText = getHelperTextElement();
-
-      expect(helperText).not.toExist();
-    });
-
-    it('renders the correct merge train helper text when there is an existing merge train', () => {
-      vm = mountComponent(Component, {
-        mrData: {
-          ...mockData,
-          available_auto_merge_strategies: [MTWPS_MERGE_STRATEGY],
-          merge_trains_count: 2,
-          merge_train_when_pipeline_succeeds_docs_path: 'path/to/help',
-          pipeline: {
-            ...mockData.pipeline,
-            id: 123,
-            active: true,
-          },
-        },
-      });
-
-      const helperText = getHelperTextElement();
-
-      expect(helperText).toExist();
-      expect(helperText.textContent).toContain(
-        'This merge request will be added to the merge train when pipeline #123 succeeds.',
-      );
-    });
-
-    it('renders the correct merge train helper text when there is no existing merge train', () => {
-      vm = mountComponent(Component, {
-        mrData: {
-          ...mockData,
-          available_auto_merge_strategies: [MTWPS_MERGE_STRATEGY],
-          merge_trains_count: 0,
-          merge_train_when_pipeline_succeeds_docs_path: 'path/to/help',
-          pipeline: {
-            ...mockData.pipeline,
-            id: 123,
-            active: true,
-          },
-        },
-      });
-
-      const helperText = getHelperTextElement();
-
-      expect(helperText).toExist();
-      expect(helperText.textContent).toContain(
-        'This merge request will start a merge train when pipeline #123 succeeds.',
-      );
-    });
-
-    it('renders the correct pipeline link inside the message', () => {
-      vm = mountComponent(Component, {
-        mrData: {
-          ...mockData,
-          available_auto_merge_strategies: [MTWPS_MERGE_STRATEGY],
-          merge_train_when_pipeline_succeeds_docs_path: 'path/to/help',
-          pipeline: {
-            ...mockData.pipeline,
-            id: 123,
-            path: 'path/to/pipeline',
-            active: true,
-          },
-        },
-      });
-
-      const pipelineLink = getHelperTextElement().querySelector('.js-pipeline-link');
-
-      expect(pipelineLink).toExist();
-      expect(pipelineLink.textContent).toContain('#123');
-      expect(pipelineLink).toHaveAttr('href', 'path/to/pipeline');
-    });
-
-    it('renders the documentation link inside the message', () => {
-      vm = mountComponent(Component, {
-        mrData: {
-          ...mockData,
-          available_auto_merge_strategies: [MTWPS_MERGE_STRATEGY],
-          merge_train_when_pipeline_succeeds_docs_path: 'path/to/help',
-          pipeline: {
-            ...mockData.pipeline,
-            active: true,
-          },
-        },
-      });
-
-      const pipelineLink = getHelperTextElement().querySelector('.js-documentation-link');
-
-      expect(pipelineLink).toExist();
-      expect(pipelineLink.textContent).toContain('More information');
-      expect(pipelineLink).toHaveAttr('href', 'path/to/help');
-    });
-  });
-
   describe('data', () => {
     it('passes approval api paths to service', () => {
       const paths = {
@@ -1148,7 +1071,7 @@ describe('ee merge request widget options', () => {
         sast: false,
         container_scanning: false,
         dependency_scanning: false,
-        secret_scanning: false,
+        secret_detection: false,
       },
     ];
 

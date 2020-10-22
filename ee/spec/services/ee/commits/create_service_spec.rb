@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Commits::CreateService do
+RSpec.describe Commits::CreateService do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
 
@@ -24,6 +24,8 @@ describe Commits::CreateService do
     subject(:result) { service.execute }
 
     it 'raises an error if the repositoy exceeds the size limit' do
+      expect(Gitlab::ErrorTracking).to receive(:log_exception)
+        .with(instance_of(Commits::CreateService::ValidationError)).and_call_original
       expect(result[:status]).to be(:error)
       expect(result[:message]).to eq('Your changes could not be committed, because this repository has exceeded its size limit of 1 Byte by 1 Byte')
     end

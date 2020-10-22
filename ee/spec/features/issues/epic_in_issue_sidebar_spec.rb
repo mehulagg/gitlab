@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Epic in issue sidebar', :js do
+RSpec.describe 'Epic in issue sidebar', :js do
   let(:user) { create(:user) }
   let(:group) { create(:group, :public) }
   let(:epic1) { create(:epic, group: group, title: 'Foo') }
@@ -84,8 +84,6 @@ describe 'Epic in issue sidebar', :js do
       stub_licensed_features(epics: true)
 
       sign_in(user)
-      visit project_issue_path(project, issue)
-      wait_for_requests
     end
 
     it_behaves_like 'epic in issue sidebar'

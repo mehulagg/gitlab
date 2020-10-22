@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Editor
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Snippets API
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/6373) in GitLab 8.15.
@@ -21,14 +28,14 @@ Valid values for snippet visibility levels are:
 
 Get a list of the current user's snippets.
 
-```text
+```plaintext
 GET /snippets
 ```
 
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/snippets
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/snippets"
 ```
 
 Example response:
@@ -82,7 +89,7 @@ Example response:
 
 Get a single snippet.
 
-```text
+```plaintext
 GET /snippets/:id
 ```
 
@@ -95,7 +102,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/snippets/1
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/snippets/1"
 ```
 
 Example response:
@@ -128,7 +135,7 @@ Example response:
 
 Get a single snippet's raw contents.
 
-```text
+```plaintext
 GET /snippets/:id/raw
 ```
 
@@ -141,12 +148,40 @@ Parameters:
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/snippets/1/raw
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/snippets/1/raw"
 ```
 
 Example response:
 
-```text
+```plaintext
+Hello World snippet
+```
+
+## Snippet repository file content
+
+Returns the raw file content as plain text.
+
+```plaintext
+GET /snippets/:id/files/:ref/:file_path/raw
+```
+
+Parameters:
+
+| Attribute   | Type    | Required | Description                                                        |
+|:------------|:--------|:---------|:-------------------------------------------------------------------|
+| `id`        | integer | yes      | ID of snippet to retrieve.                                         |
+| `ref`       | string  | yes      | Reference to a tag, branch or commit.                              |
+| `file_path` | string  | yes      | URL-encoded path to the file.                                      |
+
+Example request:
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/snippets/1/files/master/snippet%2Erb/raw"
+```
+
+Example response:
+
+```plaintext
 Hello World snippet
 ```
 
@@ -157,28 +192,46 @@ Create a new snippet.
 NOTE: **Note:**
 The user must have permission to create new snippets.
 
-```text
+```plaintext
 POST /snippets
 ```
 
 Parameters:
 
-| Attribute     | Type   | Required | Description                                        |
-|:--------------|:-------|:---------|:---------------------------------------------------|
-| `title`       | string | yes      | Title of a snippet.                                |
-| `file_name`   | string | yes      | Name of a snippet file.                            |
-| `content`     | string | yes      | Content of a snippet.                              |
-| `description` | string | no       | Description of a snippet.                          |
-| `visibility`  | string | no       | Snippet's [visibility](#snippet-visibility-level). |
+| Attribute         | Type            | Required | Description                                             |
+|:------------------|:----------------|:---------|:--------------------------------------------------------|
+| `title`           | string          | yes      | Title of a snippet                                      |
+| `file_name`       | string          | no       | Deprecated: Use `files` instead. Name of a snippet file |
+| `content`         | string          | no       | Deprecated: Use `files` instead. Content of a snippet   |
+| `description`     | string          | no       | Description of a snippet                                |
+| `visibility`      | string          | no       | Snippet's [visibility](#snippet-visibility-level)       |
+| `files`           | array of hashes | no       | An array of snippet files                               |
+| `files:file_path` | string          | yes      | File path of the snippet file                           |
+| `files:content`   | string          | yes      | Content of the snippet file                             |
 
 Example request:
 
 ```shell
-curl --request POST \
-     --data '{"title": "This is a snippet", "content": "Hello world", "description": "Hello World snippet", "file_name": "test.txt", "visibility": "internal" }' \
+curl --request POST "https://gitlab.example.com/api/v4/snippets" \
      --header 'Content-Type: application/json' \
-     --header "PRIVATE-TOKEN: valid_api_token" \
-     https://gitlab.example.com/api/v4/snippets
+     --header "PRIVATE-TOKEN: <your_access_token>" \
+     -d @snippet.json
+```
+
+`snippet.json` used in the above example request:
+
+```json
+{
+  "title": "This is a snippet",
+  "description": "Hello World snippet",
+  "visibility": "internal",
+  "files": [
+    {
+      "content": "Hello world",
+      "file_path": "test.txt"
+    }
+  ]  
+}
 ```
 
 Example response:
@@ -187,7 +240,6 @@ Example response:
 {
   "id": 1,
   "title": "This is a snippet",
-  "file_name": "test.txt",
   "description": "Hello World snippet",
   "visibility": "internal",
   "author": {
@@ -203,7 +255,16 @@ Example response:
   "created_at": "2012-06-28T10:52:04Z",
   "project_id": null,
   "web_url": "http://example.com/snippets/1",
-  "raw_url": "http://example.com/snippets/1/raw"
+  "raw_url": "http://example.com/snippets/1/raw",
+  "ssh_url_to_repo": "ssh://git@gitlab.example.com:snippets/1.git",
+  "http_url_to_repo": "https://gitlab.example.com/snippets/1.git",
+  "file_name": "test.txt",
+  "files": [
+    {
+      "path": "text.txt",
+      "raw_url": "https://gitlab.example.com/-/snippets/1/raw/master/renamed.md"
+    }
+  ]
 }
 ```
 
@@ -214,29 +275,50 @@ Update an existing snippet.
 NOTE: **Note:**
 The user must have permission to change an existing snippet.
 
-```text
+```plaintext
 PUT /snippets/:id
 ```
 
 Parameters:
 
-| Attribute     | Type    | Required | Description                                        |
-|:--------------|:--------|:---------|:---------------------------------------------------|
-| `id`          | integer | yes      | ID of snippet to update.                           |
-| `title`       | string  | no       | Title of a snippet.                                |
-| `file_name`   | string  | no       | Name of a snippet file.                            |
-| `description` | string  | no       | Description of a snippet.                          |
-| `content`     | string  | no       | Content of a snippet.                              |
-| `visibility`  | string  | no       | Snippet's [visibility](#snippet-visibility-level). |
+| Attribute             | Type            | Required | Description                                                                         |
+|:----------------------|:----------------|:---------|:------------------------------------------------------------------------------------|
+| `id`                  | integer         | yes      | ID of snippet to update                                                             |
+| `title`               | string          | no       | Title of a snippet                                                                  |
+| `file_name`           | string          | no       | Deprecated: Use `files` instead. Name of a snippet file                             |
+| `content`             | string          | no       | Deprecated: Use `files` instead. Content of a snippet                               |
+| `description`         | string          | no       | Description of a snippet                                                            |
+| `visibility`          | string          | no       | Snippet's [visibility](#snippet-visibility-level)                                   |
+| `files`               | array of hashes | no       | An array of snippet files                                                           |
+| `files:action`        | string          | yes      | Type of action to perform on the file, one of: 'create', 'update', 'delete', 'move' |
+| `files:file_path`     | string          | no       | File path of the snippet file                                                       |
+| `files:previous_path` | string          | no       | Previous path of the snippet file                                                   |
+| `files:content`       | string          | no       | Content of the snippet file                                                         |
+
+Updates to snippets with multiple files *must* use the `files` attribute.
 
 Example request:
 
 ```shell
-curl --request PUT \
-     --data '{"title": "foo", "content": "bar"}' \
+curl --request PUT "https://gitlab.example.com/api/v4/snippets/1" \
      --header 'Content-Type: application/json' \
-     --header "PRIVATE-TOKEN: valid_api_token" \
-     https://gitlab.example.com/api/v4/snippets/1
+     --header "PRIVATE-TOKEN: <your_access_token>" \
+     -d @snippet.json
+```
+
+`snippet.json` used in the above example request:
+
+```json
+{
+  "title": "foo",
+  "files": [
+    {
+      "action": "move",
+      "previous_path": "test.txt",
+      "file_path": "renamed.md"
+    }
+  ]
+}
 ```
 
 Example response:
@@ -245,7 +327,6 @@ Example response:
 {
   "id": 1,
   "title": "test",
-  "file_name": "add.rb",
   "description": "description of snippet",
   "visibility": "internal",
   "author": {
@@ -261,7 +342,16 @@ Example response:
   "created_at": "2012-06-28T10:52:04Z",
   "project_id": null,
   "web_url": "http://example.com/snippets/1",
-  "raw_url": "http://example.com/snippets/1/raw"
+  "raw_url": "http://example.com/snippets/1/raw",
+  "ssh_url_to_repo": "ssh://git@gitlab.example.com:snippets/1.git",
+  "http_url_to_repo": "https://gitlab.example.com/snippets/1.git",
+  "file_name": "renamed.md",
+  "files": [
+    {
+      "path": "renamed.md",
+      "raw_url": "https://gitlab.example.com/-/snippets/1/raw/master/renamed.md"
+    }
+  ]
 }
 ```
 
@@ -269,7 +359,7 @@ Example response:
 
 Delete an existing snippet.
 
-```text
+```plaintext
 DELETE /snippets/:id
 ```
 
@@ -296,7 +386,7 @@ The following are possible return codes:
 
 List all public snippets.
 
-```text
+```plaintext
 GET /snippets/public
 ```
 
@@ -310,7 +400,7 @@ Parameters:
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/snippets/public?per_page=2&page=1
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/snippets/public?per_page=2&page=1"
 ```
 
 Example response:
@@ -364,7 +454,7 @@ Example response:
 NOTE: **Note:**
 Available only for administrators.
 
-```text
+```plaintext
 GET /snippets/:id/user_agent_detail
 ```
 
@@ -375,7 +465,7 @@ GET /snippets/:id/user_agent_detail
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/snippets/1/user_agent_detail
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/snippets/1/user_agent_detail"
 ```
 
 Example response:

@@ -2,7 +2,7 @@
 require 'securerandom'
 
 module QA
-  context 'Manage' do
+  RSpec.describe 'Manage' do
     describe 'Group access', :requires_admin, :skip_live_env do
       include Runtime::IPAddress
 
@@ -18,6 +18,16 @@ module QA
           group.sandbox = @sandbox_group
         end
 
+        @project = Resource::Project.fabricate_via_api! do |project|
+          project.group = @group
+          project.name =  'project-in-ip-restricted-group'
+          project.initialize_with_readme = true
+        end
+
+        @project.add_member(@user)
+
+        @api_client = Runtime::API::Client.new(:gitlab, user: @user)
+
         enable_plan_on_group(@sandbox_group.path, "Gold") if Runtime::Env.dot_com?
       end
 
@@ -32,37 +42,114 @@ module QA
         page.visit Runtime::Scenario.gitlab_address
 
         set_ip_address_restriction_to(ip_address)
-
-        Flow::Login.sign_in(as: @user)
       end
 
       context 'when restricted by another ip address' do
         let(:ip_address) { get_next_ip_address(fetch_current_ip_address) }
 
-        it 'denies access' do
-          @group.sandbox.visit!
-          expect(page).to have_text('Page Not Found')
-          page.go_back
+        context 'via the UI' do
+          it 'denies access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/862' do
+            Flow::Login.sign_in(as: @user)
 
-          @group.visit!
-          expect(page).to have_text('Page Not Found')
-          page.go_back
+            @group.sandbox.visit!
+            expect(page).to have_text('Page Not Found')
+            page.go_back
+
+            @group.visit!
+            expect(page).to have_text('Page Not Found')
+            page.go_back
+          end
+        end
+
+        context 'via the API' do
+          it 'denies access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/861' do
+            request = create_request("/groups/#{@sandbox_group.id}")
+            response = get request.url
+            expect(response.code).to eq(404)
+
+            request = create_request("/groups/#{@group.id}")
+            response = get request.url
+            expect(response.code).to eq(404)
+          end
+        end
+
+        # Note: If you run this test against GDK make sure you've enabled sshd
+        # See: https://gitlab.com/gitlab-org/gitlab-qa/blob/master/docs/run_qa_against_gdk.md
+        context 'via the SSH' do
+          let(:key) do
+            Resource::SSHKey.fabricate_via_api! do |ssh_key|
+              ssh_key.api_client = @api_client
+              ssh_key.title = "ssh key for allowed ip restricted access #{Time.now.to_f}"
+            end
+          end
+
+          after do
+            key.remove_via_api!
+          end
+
+          it 'denies access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/860' do
+            expect { push_a_project_with_ssh_key(key) }.to raise_error(QA::Support::Run::CommandError, /fatal: Could not read from remote repository/)
+          end
         end
       end
 
       context 'when restricted by user\'s ip address' do
         let(:ip_address) { fetch_current_ip_address }
 
-        it 'allows access' do
-          @group.sandbox.visit!
-          expect(page).to have_text(@group.sandbox.path)
+        context 'via the UI' do
+          it 'allows access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/865' do
+            Flow::Login.sign_in(as: @user)
 
-          @group.visit!
-          expect(page).to have_text(@group.path)
+            @group.sandbox.visit!
+            expect(page).to have_text(@group.sandbox.path)
+
+            @group.visit!
+            expect(page).to have_text(@group.path)
+          end
+        end
+
+        context 'via the API' do
+          it 'allows access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/864' do
+            request = create_request("/groups/#{@sandbox_group.id}")
+            response = get request.url
+            expect(response.code).to eq(200)
+
+            request = create_request("/groups/#{@group.id}")
+            response = get request.url
+            expect(response.code).to eq(200)
+          end
+        end
+
+        # Note: If you run this test against GDK make sure you've enabled sshd
+        # See: https://gitlab.com/gitlab-org/gitlab-qa/blob/master/docs/run_qa_against_gdk.md
+        context 'via the SSH' do
+          let(:key) do
+            Resource::SSHKey.fabricate_via_api! do |ssh_key|
+              ssh_key.api_client = @api_client
+              ssh_key.title = "ssh key for allowed ip restricted access #{Time.now.to_f}"
+            end
+          end
+
+          after do
+            key.remove_via_api!
+          end
+
+          it 'allows access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/863' do
+            expect { push_a_project_with_ssh_key(key) }.not_to raise_error
+          end
         end
       end
 
       private
+
+      def push_a_project_with_ssh_key(key)
+        Resource::Repository::ProjectPush.fabricate! do |push|
+          push.project = @project
+          push.group = @sandbox_group
+          push.ssh_key = key
+          push.branch_name = "new_branch_#{SecureRandom.hex(8)}"
+        end
+      end
 
       def set_ip_address_restriction_to(ip_address)
         Flow::Login.while_signed_in_as_admin do
@@ -101,6 +188,10 @@ module QA
             edit.click_save_changes_button
           end
         end
+      end
+
+      def create_request(api_endpoint)
+        Runtime::API::Request.new(@api_client, api_endpoint)
       end
     end
   end

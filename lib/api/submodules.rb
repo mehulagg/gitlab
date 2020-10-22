@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Submodules < Grape::API
+  class Submodules < ::API::Base
     before { authenticate! }
 
     helpers do

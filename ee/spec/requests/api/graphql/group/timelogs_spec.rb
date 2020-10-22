@@ -2,48 +2,20 @@
 
 require 'spec_helper'
 
-describe 'Timelogs through GroupQuery' do
+RSpec.describe 'Timelogs through GroupQuery' do
   include GraphqlHelpers
 
   describe 'Get list of timelogs from a group issues' do
-    let(:user)          { create(:user) }
-    let(:group)         { create(:group) }
-    let(:project)       { create(:project, :public, group: group) }
-    let(:milestone)     { create(:milestone, group: group) }
-    let(:epic)          { create(:epic, group: group) }
-    let(:issue)         { create(:issue, project: project, milestone: milestone, epic: epic) }
-    let!(:timelog1)     { create(:timelog, issue: issue, user: user, spent_at: 10.days.ago) }
-    let!(:timelog2)     { create(:timelog, spent_at: 15.days.ago) }
-    let(:timelogs_data) { graphql_data['group']['timelogs']['nodes'] }
-    let(:query) do
-      timelog_nodes = <<~NODE
-      nodes {
-        date
-        spentAt
-        timeSpent
-        user {
-          username
-        }
-        issue {
-          title
-          milestone {
-            title
-          }
-          epic {
-            title
-          }
-        }
-      }
-      NODE
-
-      graphql_query_for("group", { "fullPath" => group.full_path },
-        ['groupTimelogsEnabled', query_graphql_field(
-          "timelogs",
-          { startDate: "#{13.days.ago.to_date}", endDate: "#{2.days.ago.to_date}" },
-          timelog_nodes
-        )]
-      )
-    end
+    let_it_be(:user)      { create(:user) }
+    let_it_be(:group)     { create(:group) }
+    let_it_be(:project)   { create(:project, :public, group: group) }
+    let_it_be(:milestone) { create(:milestone, group: group) }
+    let_it_be(:epic)      { create(:epic, group: group) }
+    let_it_be(:issue)     { create(:issue, project: project, milestone: milestone, epic: epic) }
+    let_it_be(:timelog1)  { create(:timelog, issue: issue, user: user, spent_at: '2019-08-13 14:00:00') }
+    let_it_be(:timelog2)  { create(:timelog, issue: issue, user: user, spent_at: '2019-08-10 08:00:00') }
+    let_it_be(:params)    { { startTime: '2019-08-10 12:00:00', endTime: '2019-08-21 12:00:00' } }
+    let(:timelogs_data)   { graphql_data['group']['timelogs']['nodes'] }
 
     before do
       group.add_developer(user)
@@ -81,13 +53,20 @@ describe 'Timelogs through GroupQuery' do
         expect(milestone_title).to eq([milestone.title])
         expect(epic_title).to eq([epic.title])
       end
+
+      context 'when arguments with no time are present' do
+        let!(:timelog3) { create(:timelog, issue: issue, user: user, spent_at: '2019-08-10 15:00:00') }
+        let!(:timelog4) { create(:timelog, issue: issue, user: user, spent_at: '2019-08-21 15:00:00') }
+        let(:params) { { startDate: '2019-08-10', endDate: '2019-08-21' }}
+
+        it 'sets times as start of day and end of day' do
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(timelog_array.size).to eq 2
+        end
+      end
     end
 
     context 'when requests has errors' do
-      let(:error_message) do
-        "The resource is not available or you don't have permission to perform this action"
-      end
-
       context 'when group_timelogs feature is disabled' do
         before do
           stub_licensed_features(group_timelogs: false)
@@ -97,8 +76,9 @@ describe 'Timelogs through GroupQuery' do
           post_graphql(query, current_user: user)
 
           expect(response).to have_gitlab_http_status(:success)
-          expect(graphql_errors).to include(a_hash_including('message' => error_message))
-          expect(graphql_data['group']).to be_nil
+          expect(graphql_errors).to be_nil
+          expect(timelogs_data).to be_empty
+          expect(graphql_data['group']['groupTimelogsEnabled']).to be_falsey
         end
       end
 
@@ -124,8 +104,9 @@ describe 'Timelogs through GroupQuery' do
           post_graphql(query, current_user: guest)
 
           expect(response).to have_gitlab_http_status(:success)
-          expect(graphql_errors).to include(a_hash_including('message' => error_message))
-          expect(graphql_data['group']).to be_nil
+          expect(graphql_errors).to be_nil
+          expect(timelogs_data).to be_empty
+          expect(graphql_data['group']['groupTimelogsEnabled']).to be_truthy
         end
       end
     end
@@ -135,5 +116,35 @@ describe 'Timelogs through GroupQuery' do
     timelogs_data.map do |item|
       extract_attribute ? item[extract_attribute] : item
     end
+  end
+
+  def query(timelog_params = params)
+    timelog_nodes = <<~NODE
+      nodes {
+        date
+        spentAt
+        timeSpent
+        user {
+          username
+        }
+        issue {
+          title
+          milestone {
+            title
+          }
+          epic {
+            title
+          }
+        }
+      }
+    NODE
+
+    graphql_query_for("group", { "fullPath" => group.full_path },
+      ['groupTimelogsEnabled', query_graphql_field(
+        "timelogs",
+        timelog_params,
+        timelog_nodes
+      )]
+    )
   end
 end

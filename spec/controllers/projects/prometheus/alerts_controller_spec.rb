@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::Prometheus::AlertsController do
+RSpec.describe Projects::Prometheus::AlertsController do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let_it_be(:environment) { create(:environment, project: project) }
@@ -111,6 +111,7 @@ describe Projects::Prometheus::AlertsController do
   describe 'GET #show' do
     let(:alert) do
       create(:prometheus_alert,
+             :with_runbook_url,
              project: project,
              environment: environment,
              prometheus_metric: metric)
@@ -140,6 +141,7 @@ describe Projects::Prometheus::AlertsController do
           'query' => alert.query,
           'operator' => alert.computed_operator,
           'threshold' => alert.threshold,
+          'runbook_url' => alert.runbook_url,
           'alert_path' => alert_path(alert)
         }
       end
@@ -225,7 +227,8 @@ describe Projects::Prometheus::AlertsController do
         'title' => metric.title,
         'query' => metric.query,
         'operator' => '>',
-        'threshold' => 1.0
+        'threshold' => 1.0,
+        'runbook_url' => 'https://sample.runbook.com'
       }
     end
 
@@ -234,6 +237,7 @@ describe Projects::Prometheus::AlertsController do
         opts,
         operator: '>',
         threshold: '1',
+        runbook_url: 'https://sample.runbook.com',
         environment_id: environment,
         prometheus_metric_id: metric
       )
@@ -250,14 +254,14 @@ describe Projects::Prometheus::AlertsController do
       expect(json_response).to include(alert_params)
     end
 
-    it 'returns no_content for an invalid metric' do
+    it 'returns bad_request for an invalid metric' do
       make_request(prometheus_metric_id: 'invalid')
 
-      expect(response).to have_gitlab_http_status(:no_content)
+      expect(response).to have_gitlab_http_status(:bad_request)
     end
 
     it_behaves_like 'unprivileged'
-    it_behaves_like 'project non-specific environment', :no_content
+    it_behaves_like 'project non-specific environment', :bad_request
   end
 
   describe 'PUT #update' do
@@ -302,6 +306,12 @@ describe Projects::Prometheus::AlertsController do
       expect(schedule_update_service).to have_received(:execute)
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response).to include(alert_params)
+    end
+
+    it 'returns bad_request for an invalid alert data' do
+      make_request(runbook_url: 'bad-url')
+
+      expect(response).to have_gitlab_http_status(:bad_request)
     end
 
     it_behaves_like 'unprivileged'
@@ -352,7 +362,7 @@ describe Projects::Prometheus::AlertsController do
       get :metrics_dashboard, params: request_params(id: metric.id, environment_id: alert.environment.id), format: :json
 
       expect(response).to have_gitlab_http_status(:ok)
-      expect(json_response.keys).to contain_exactly('dashboard', 'status')
+      expect(json_response.keys).to contain_exactly('dashboard', 'status', 'metrics_data')
     end
 
     it 'is the correct embed' do

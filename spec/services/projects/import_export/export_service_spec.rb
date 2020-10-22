@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe Projects::ImportExport::ExportService do
+RSpec.describe Projects::ImportExport::ExportService do
   describe '#execute' do
     let!(:user) { create(:user) }
     let(:project) { create(:project) }
     let(:shared) { project.import_export_shared }
-    let(:service) { described_class.new(project, user) }
     let!(:after_export_strategy) { Gitlab::ImportExport::AfterExportStrategies::DownloadNotificationStrategy.new }
+
+    subject(:service) { described_class.new(project, user) }
 
     before do
       project.add_maintainer(user)
@@ -46,14 +47,20 @@ describe Projects::ImportExport::ExportService do
       # in the corresponding EE spec.
       skip if Gitlab.ee?
 
-      # once for the normal repo, once for the wiki
-      expect(Gitlab::ImportExport::RepoSaver).to receive(:new).twice.and_call_original
+      # once for the normal repo, once for the wiki repo, and once for the design repo
+      expect(Gitlab::ImportExport::RepoSaver).to receive(:new).exactly(3).times.and_call_original
 
       service.execute
     end
 
     it 'saves the wiki repo' do
       expect(Gitlab::ImportExport::WikiRepoSaver).to receive(:new).and_call_original
+
+      service.execute
+    end
+
+    it 'saves the design repo' do
+      expect(Gitlab::ImportExport::DesignRepoSaver).to receive(:new).and_call_original
 
       service.execute
     end
@@ -112,9 +119,7 @@ describe Projects::ImportExport::ExportService do
         end
 
         it 'notifies logger' do
-          allow(Rails.logger).to receive(:error)
-
-          expect(Rails.logger).to receive(:error)
+          expect(service.instance_variable_get(:@logger)).to receive(:error)
         end
       end
     end
@@ -142,7 +147,7 @@ describe Projects::ImportExport::ExportService do
       end
 
       it 'notifies logger' do
-        expect(Rails.logger).to receive(:error)
+        expect(service.instance_variable_get(:@logger)).to receive(:error)
       end
 
       it 'does not call the export strategy' do
@@ -178,7 +183,7 @@ describe Projects::ImportExport::ExportService do
       end
     end
 
-    context 'when measurable params are provided' do
+    it_behaves_like 'measurable service' do
       let(:base_log_data) do
         {
           class: described_class.name,
@@ -188,44 +193,8 @@ describe Projects::ImportExport::ExportService do
         }
       end
 
-      subject(:service) { described_class.new(project, user) }
-
-      context 'when measurement is enabled' do
-        let(:logger) { double(:logger) }
-        let(:measurable_options) do
-          {
-            measurement_enabled: true,
-            measurement_logger: logger
-          }
-        end
-
-        before do
-          allow(logger).to receive(:info)
-        end
-
-        it 'measure service execution with Gitlab::Utils::Measuring' do
-          expect(Gitlab::Utils::Measuring).to receive(:execute_with).with(true, logger, base_log_data).and_call_original
-          expect_next_instance_of(Gitlab::Utils::Measuring) do |measuring|
-            expect(measuring).to receive(:with_measuring).and_call_original
-          end
-
-          service.execute(after_export_strategy, measurable_options)
-        end
-      end
-
-      context 'when measurement is disabled' do
-        let(:measurable_options) do
-          {
-            measurement_enabled: false
-          }
-        end
-
-        it 'does not measure service execution' do
-          expect(Gitlab::Utils::Measuring).to receive(:execute_with).with(false, nil, base_log_data).and_call_original
-          expect(Gitlab::Utils::Measuring).not_to receive(:new)
-
-          service.execute(after_export_strategy, measurable_options)
-        end
+      after do
+        service.execute(after_export_strategy)
       end
     end
   end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::BackgroundMigration::RemoveUndefinedOccurrenceSeverityLevel, schema: 20200227140242 do
+RSpec.describe Gitlab::BackgroundMigration::RemoveUndefinedOccurrenceSeverityLevel, schema: 20200227140242 do
   let(:vulnerabilities) { table(:vulnerability_occurrences) }
   let(:identifiers) { table(:vulnerability_identifiers) }
   let(:scanners) { table(:vulnerability_scanners) }

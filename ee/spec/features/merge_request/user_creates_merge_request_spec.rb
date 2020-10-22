@@ -2,13 +2,14 @@
 
 require "spec_helper"
 
-describe "User creates a merge request", :js do
+RSpec.describe "User creates a merge request", :js do
   include ProjectForksHelper
 
   let(:approver) { create(:user) }
   let(:project) do
     create(:project, :repository, merge_requests_template: template_text)
   end
+
   let(:template_text) { "This merge request should contain the following." }
   let(:title) { "Some feature" }
   let(:user) { create(:user) }

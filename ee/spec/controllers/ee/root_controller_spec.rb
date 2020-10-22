@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RootController do
+RSpec.describe RootController do
   include ::EE::GeoHelpers
 
   describe 'GET #index' do

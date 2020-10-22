@@ -1,44 +1,33 @@
-query projectRequirements(
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+#import "./requirement.fragment.graphql"
+
+query projectRequirementsEE(
   $projectPath: ID!
   $state: RequirementState
   $firstPageSize: Int
   $lastPageSize: Int
   $prevPageCursor: String = ""
   $nextPageCursor: String = ""
+  $authorUsernames: [String!] = []
+  $search: String = ""
+  $sortBy: Sort = CREATED_DESC
 ) {
   project(fullPath: $projectPath) {
-    requirementStatesCount {
-      opened
-      archived
-    }
     requirements(
       first: $firstPageSize
       last: $lastPageSize
       after: $nextPageCursor
       before: $prevPageCursor
-      sort: created_desc
       state: $state
+      authorUsername: $authorUsernames
+      search: $search
+      sort: $sortBy
     ) {
       nodes {
-        iid
-        title
-        createdAt
-        updatedAt
-        state
-        userPermissions {
-          updateRequirement
-          adminRequirement
-        }
-        author {
-          name
-          username
-          avatarUrl
-          webUrl
-        }
+        ...Requirement
       }
       pageInfo {
-        startCursor
-        endCursor
+        ...PageInfo
       }
     }
   }

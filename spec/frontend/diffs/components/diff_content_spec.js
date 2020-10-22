@@ -10,7 +10,7 @@ import ImageDiffOverlay from '~/diffs/components/image_diff_overlay.vue';
 import NoteForm from '~/notes/components/note_form.vue';
 import DiffDiscussions from '~/diffs/components/diff_discussions.vue';
 import { IMAGE_DIFF_POSITION_TYPE } from '~/diffs/constants';
-import diffFileMockData from '../../../javascripts/diffs/mock_data/diff_file';
+import diffFileMockData from '../mock_data/diff_file';
 import { diffViewerModes } from '~/ide/constants';
 
 const localVue = createLocalVue();
@@ -177,23 +177,19 @@ describe('DiffContent', () => {
       });
 
       wrapper.find(NoteForm).vm.$emit('handleFormUpdate', noteStub);
-      expect(saveDiffDiscussionMock).toHaveBeenCalledWith(
-        expect.any(Object),
-        {
-          note: noteStub,
-          formData: {
-            noteableData: expect.any(Object),
-            diffFile: currentDiffFile,
-            positionType: IMAGE_DIFF_POSITION_TYPE,
-            x: undefined,
-            y: undefined,
-            width: undefined,
-            height: undefined,
-            noteableType: undefined,
-          },
+      expect(saveDiffDiscussionMock).toHaveBeenCalledWith(expect.any(Object), {
+        note: noteStub,
+        formData: {
+          noteableData: expect.any(Object),
+          diffFile: currentDiffFile,
+          positionType: IMAGE_DIFF_POSITION_TYPE,
+          x: undefined,
+          y: undefined,
+          width: undefined,
+          height: undefined,
+          noteableType: undefined,
         },
-        undefined,
-      );
+      });
     });
   });
 });

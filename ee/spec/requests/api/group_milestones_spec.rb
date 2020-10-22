@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::GroupMilestones do
+RSpec.describe API::GroupMilestones do
   let(:user) { create(:user) }
   let(:group) { create(:group, :private) }
   let(:project) { create(:project, namespace: group) }
@@ -25,10 +25,6 @@ describe API::GroupMilestones do
   end
 
   it_behaves_like 'group and project milestone burndowns', '/groups/:id/milestones/:milestone_id/burndown_events' do
-    let(:route) { "/groups/#{group.id}/milestones" }
-  end
-
-  it_behaves_like 'group and project milestone burnups', '/groups/:id/milestones/:milestone_id/burnup_events' do
     let(:route) { "/groups/#{group.id}/milestones" }
   end
 end

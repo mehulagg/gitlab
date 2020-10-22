@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::RepositoryRenamedEventStore do
+RSpec.describe Geo::RepositoryRenamedEventStore do
   include EE::GeoHelpers
 
   let_it_be(:project) { create(:project, path: 'bar') }

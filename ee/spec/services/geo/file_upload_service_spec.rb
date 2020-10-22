@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::FileUploadService do
+RSpec.describe Geo::FileUploadService do
   include EE::GeoHelpers
 
   let_it_be(:node) { create(:geo_node, :primary) }

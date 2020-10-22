@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupSaml::SamlProvider::CreateService do
+RSpec.describe GroupSaml::SamlProvider::CreateService do
   let(:current_user) { build_stubbed(:user) }
   subject(:service) { described_class.new(current_user, group, params: params) }
 

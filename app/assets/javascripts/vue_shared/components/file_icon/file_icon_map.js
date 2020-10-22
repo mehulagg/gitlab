@@ -9,6 +9,12 @@ const fileExtensionIcons = {
   'md.rendered': 'markdown',
   markdown: 'markdown',
   'markdown.rendered': 'markdown',
+  mdown: 'markdown',
+  'mdown.rendered': 'markdown',
+  mkd: 'markdown',
+  'mkd.rendered': 'markdown',
+  mkdn: 'markdown',
+  'mkdn.rendered': 'markdown',
   rst: 'markdown',
   blink: 'blink',
   css: 'css',
@@ -493,6 +499,7 @@ const fileNameIcons = {
   '.npmignore': 'npm',
   '.npmrc': 'npm',
   '.yarnrc': 'yarn',
+  '.yarnrc.yml': 'yarn',
   'yarn.lock': 'yarn',
   '.yarnclean': 'yarn',
   '.yarn-integrity': 'yarn',
@@ -585,5 +592,16 @@ const fileNameIcons = {
 };
 
 export default function getIconForFile(name) {
-  return fileNameIcons[name] || fileExtensionIcons[name ? name.split('.').pop() : ''] || '';
+  return (
+    fileNameIcons[name] ||
+    fileExtensionIcons[
+      name
+        ? name
+            .split('.')
+            .pop()
+            .toLowerCase()
+        : ''
+    ] ||
+    ''
+  );
 }

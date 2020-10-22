@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['HealthStatus'] do
+RSpec.describe GitlabSchema.types['HealthStatus'] do
   it { expect(described_class.graphql_name).to eq('HealthStatus') }
 
   it 'exposes all the existing epic sort orders' do

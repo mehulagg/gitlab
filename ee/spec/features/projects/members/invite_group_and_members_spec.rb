@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Project > Members > Invite group and members', :js do
+RSpec.describe 'Project > Members > Invite group and members', :js do
   include Select2Helper
   include ActionView::Helpers::DateHelper
 
@@ -11,7 +11,7 @@ describe 'Project > Members > Invite group and members', :js do
   describe 'Share group lock' do
     shared_examples 'the project cannot be shared with groups' do
       it 'user is only able to share with members' do
-        visit project_settings_members_path(project)
+        visit project_project_members_path(project)
 
         expect(page).not_to have_selector('#invite-member-tab')
         expect(page).not_to have_selector('#invite-group-tab')
@@ -22,7 +22,7 @@ describe 'Project > Members > Invite group and members', :js do
 
     shared_examples 'the project cannot be shared with members' do
       it 'user is only able to share with groups' do
-        visit project_settings_members_path(project)
+        visit project_project_members_path(project)
 
         expect(page).not_to have_selector('#invite-member-tab')
         expect(page).not_to have_selector('#invite-group-tab')
@@ -33,7 +33,7 @@ describe 'Project > Members > Invite group and members', :js do
 
     shared_examples 'the project cannot be shared with groups and members' do
       it 'no tabs or share content exists' do
-        visit project_settings_members_path(project)
+        visit project_project_members_path(project)
 
         expect(page).not_to have_selector('#invite-member-tab')
         expect(page).not_to have_selector('#invite-group-tab')
@@ -44,7 +44,7 @@ describe 'Project > Members > Invite group and members', :js do
 
     shared_examples 'the project can be shared with groups and members' do
       it 'both member and group tabs exist' do
-        visit project_settings_members_path(project)
+        visit project_project_members_path(project)
 
         expect(page).not_to have_selector('.invite-member')
         expect(page).not_to have_selector('.invite-group')
@@ -67,7 +67,7 @@ describe 'Project > Members > Invite group and members', :js do
         it_behaves_like 'the project can be shared with groups and members'
 
         it 'the project can be shared with another group' do
-          visit project_settings_members_path(project)
+          visit project_project_members_path(project)
 
           click_on 'invite-group-tab'
 
@@ -99,7 +99,7 @@ describe 'Project > Members > Invite group and members', :js do
 
       context 'when the group has membership lock and "Share with group lock" enabled' do
         before do
-          project.namespace.update(share_with_group_lock: true, membership_lock: true)
+          project.namespace.update!(share_with_group_lock: true, membership_lock: true)
         end
 
         it_behaves_like 'the project cannot be shared with groups and members'
@@ -139,7 +139,7 @@ describe 'Project > Members > Invite group and members', :js do
 
         context 'when the group has membership lock and "Share with group lock" enabled' do
           before do
-            subgroup.update(share_with_group_lock: true, membership_lock: true)
+            subgroup.update!(share_with_group_lock: true, membership_lock: true)
           end
 
           it_behaves_like 'the project cannot be shared with groups and members'
@@ -148,7 +148,7 @@ describe 'Project > Members > Invite group and members', :js do
 
       context 'when the root_group has "Share with group lock" and membership lock enabled' do
         before do
-          root_group.update(share_with_group_lock: true, membership_lock: true)
+          root_group.update!(share_with_group_lock: true, membership_lock: true)
           subgroup.reload
         end
 
@@ -158,7 +158,7 @@ describe 'Project > Members > Invite group and members', :js do
 
         context 'when the subgroup has "Share with group lock" and membership lock disabled (parent overridden)' do
           before do
-            subgroup.update(share_with_group_lock: false, membership_lock: false)
+            subgroup.update!(share_with_group_lock: false, membership_lock: false)
           end
 
           it_behaves_like 'the project can be shared with groups and members'
@@ -184,7 +184,7 @@ describe 'Project > Members > Invite group and members', :js do
 
         context 'when the subgroup has "Share with group lock" and membership lock enabled' do
           before do
-            subgroup.update(membership_lock: true, share_with_group_lock: true)
+            subgroup.update!(membership_lock: true, share_with_group_lock: true)
           end
 
           it_behaves_like 'the project cannot be shared with groups and members'

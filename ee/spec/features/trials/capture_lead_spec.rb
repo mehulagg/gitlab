@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Trial Capture Lead', :js do
+RSpec.describe 'Trial Capture Lead', :js do
   include Select2Helper
   let(:user) { create(:user) }
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Parsers::Security::DependencyList do
+RSpec.describe Gitlab::Ci::Parsers::Security::DependencyList do
   let(:parser) { described_class.new(project, sha) }
   let(:project) { create(:project) }
   let(:sha) { '4242424242424242' }
@@ -44,11 +44,11 @@ describe Gitlab::Ci::Parsers::Security::DependencyList do
       end
     end
 
-    context 'with old dependency scanning artifact' do
+    context 'with dependency scanning artifact without dependency_list' do
       let(:artifact) { create(:ee_ci_job_artifact, :dependency_scanning) }
 
-      it 'returns empty list of dependencies' do
-        expect(report.dependencies.size).to eq(0)
+      it 'list of dependencies with vulnerabilities' do
+        expect(report.dependencies.size).to eq(4)
       end
     end
   end

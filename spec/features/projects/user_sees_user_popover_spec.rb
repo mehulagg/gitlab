@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User sees user popover', :js do
+RSpec.describe 'User sees user popover', :js do
   include Spec::Support::Helpers::Features::NotesHelpers
 
   let_it_be(:project) { create(:project, :repository) }
@@ -19,7 +19,7 @@ describe 'User sees user popover', :js do
   subject { page }
 
   describe 'hovering over a user link in a merge request' do
-    let(:popover_selector) { '.user-popover' }
+    let(:popover_selector) { '[data-testid="user-popover"]' }
 
     before do
       visit project_merge_request_path(project, merge_request)

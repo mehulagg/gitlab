@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'operations/environments.html.haml' do
+RSpec.describe 'operations/environments.html.haml' do
   it 'renders the frontend configuration' do
     render
 

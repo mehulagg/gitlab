@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Slack application' do
+RSpec.describe 'Slack application' do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
   let(:role) { :developer }

@@ -1,6 +1,12 @@
+---
+stage: Release
+group: Release Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # GitLab Pages administration for source installations
 
->**Note:**
+NOTE: **Note:**
 Before attempting to enable GitLab Pages, first make sure you have
 [installed GitLab](../../install/installation.md) successfully.
 
@@ -55,7 +61,7 @@ Before proceeding with the Pages configuration, make sure that:
    Pages artifacts.
 1. (Optional) You have a **wildcard certificate** for the Pages domain if you
    decide to serve Pages (`*.example.io`) under HTTPS.
-1. (Optional but recommended) You have configured and enabled the [Shared Runners](../../ci/runners/README.md)
+1. (Optional but recommended) You have configured and enabled the [shared runners](../../ci/runners/README.md)
    so that your users don't have to bring their own.
 
 ### DNS configuration
@@ -71,7 +77,7 @@ host that GitLab runs. For example, an entry would look like this:
 where `example.io` is the domain under which GitLab Pages will be served
 and `192.0.2.1` is the IP address of your GitLab instance.
 
-> **Note:**
+NOTE: **Note:**
 You should not use the GitLab domain to serve user pages. For more information
 see the [security section](#security).
 
@@ -88,7 +94,7 @@ since that is needed in all configurations.
 
 - [Wildcard DNS setup](#dns-configuration)
 
-URL scheme: `http://page.example.io`
+URL scheme: `http://<namespace>.example.io/<project_slug>`
 
 This is the minimum setup that you can use Pages with. It is the base for all
 other setups as described below. NGINX will proxy all requests to the daemon.
@@ -151,7 +157,7 @@ The Pages daemon doesn't listen to the outside world.
 - [Wildcard DNS setup](#dns-configuration)
 - Wildcard TLS certificate
 
-URL scheme: `https://page.example.io`
+URL scheme: `https://<namespace>.example.io/<project_slug>`
 
 NGINX will proxy all requests to the daemon. Pages daemon doesn't listen to the
 outside world.
@@ -215,7 +221,7 @@ that without TLS certificates.
 - [Wildcard DNS setup](#dns-configuration)
 - Secondary IP
 
-URL scheme: `http://page.example.io` and `http://domain.com`
+URL scheme: `http://<namespace>.example.io/<project_slug>` and `http://custom-domain.com`
 
 In that case, the pages daemon is running, NGINX still proxies requests to
 the daemon but the daemon is also able to receive requests from the outside
@@ -266,7 +272,7 @@ world. Custom domains are supported, but no TLS.
    sudo ln -sf /etc/nginx/sites-{available,enabled}/gitlab-pages.conf
    ```
 
-1. Edit all GitLab related configs in `/etc/nginx/site-available/` and replace
+1. Edit all GitLab related configurations in `/etc/nginx/site-available/` and replace
    `0.0.0.0` with `192.0.2.1`, where `192.0.2.1` the primary IP where GitLab
    listens to.
 1. Restart NGINX
@@ -280,7 +286,7 @@ world. Custom domains are supported, but no TLS.
 - Wildcard TLS certificate
 - Secondary IP
 
-URL scheme: `https://page.example.io` and `https://domain.com`
+URL scheme: `https://<namespace>.example.io/<project_slug>` and `https://custom-domain.com`
 
 In that case, the pages daemon is running, NGINX still proxies requests to
 the daemon but the daemon is also able to receive requests from the outside
@@ -335,7 +341,7 @@ world. Custom domains and TLS are supported.
    sudo ln -sf /etc/nginx/sites-{available,enabled}/gitlab-pages-ssl.conf
    ```
 
-1. Edit all GitLab related configs in `/etc/nginx/site-available/` and replace
+1. Edit all GitLab related configurations in `/etc/nginx/site-available/` and replace
    `0.0.0.0` with `192.0.2.1`, where `192.0.2.1` the primary IP where GitLab
    listens to.
 1. Restart NGINX
@@ -343,10 +349,10 @@ world. Custom domains and TLS are supported.
 
 ## NGINX caveats
 
->**Note:**
+NOTE: **Note:**
 The following information applies only for installations from source.
 
-Be extra careful when setting up the domain name in the NGINX config. You must
+Be extra careful when setting up the domain name in the NGINX configuration. You must
 not remove the backslashes.
 
 If your GitLab Pages domain is `example.io`, replace:
@@ -370,7 +376,7 @@ server_name ~^.*\.pages\.example\.io$;
 
 ## Access control
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/33422) in GitLab 11.5.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/33422) in GitLab 11.5.
 
 GitLab Pages access control can be configured per-project, and allows access to a Pages
 site to be controlled based on a user's membership to that project.
@@ -415,7 +421,7 @@ Pages access control is disabled by default. To enable it:
      auth-server=<URL of the GitLab instance>
    ```
 
-1. Users can now configure it in their [projects' settings](../../user/project/pages/introduction.md#gitlab-pages-access-control-core).
+1. Users can now configure it in their [projects' settings](../../user/project/pages/introduction.md#gitlab-pages-access-control).
 
 ## Change storage path
 

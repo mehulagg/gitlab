@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::CrossProjectIssuableInformationFilter do
+RSpec.describe Banzai::Filter::CrossProjectIssuableInformationFilter do
   include ActionView::Helpers::UrlHelper
   include FilterSpecHelper
 

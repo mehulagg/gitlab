@@ -1,5 +1,5 @@
 import * as types from './mutation_types';
-import { tableSortOrder } from './../../../constants';
+import { tableSortOrder } from '../../../constants';
 
 export default {
   [types.REQUEST_MERGE_REQUESTS](state) {

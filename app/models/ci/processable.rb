@@ -4,11 +4,7 @@ module Ci
   class Processable < ::CommitStatus
     include Gitlab::Utils::StrongMemoize
 
-    has_many :needs, class_name: 'Ci::BuildNeed', foreign_key: :build_id, inverse_of: :build
-
     accepts_nested_attributes_for :needs
-
-    enum scheduling_type: { stage: 0, dag: 1 }, _prefix: true
 
     scope :preload_needs, -> { preload(:needs) }
 
@@ -49,7 +45,7 @@ module Ci
     end
 
     validates :type, presence: true
-    validates :scheduling_type, presence: true, on: :create, if: :validate_scheduling_type?
+    validates :scheduling_type, presence: true, on: :create, unless: :importing?
 
     delegate :merge_request?,
       :merge_request_ref?,
@@ -83,7 +79,7 @@ module Ci
 
     # Overriding scheduling_type enum's method for nil `scheduling_type`s
     def scheduling_type_dag?
-      super || find_legacy_scheduling_type == :dag
+      scheduling_type.nil? ? find_legacy_scheduling_type == :dag : super
     end
 
     # scheduling_type column of previous builds/bridges have not been populated,
@@ -100,10 +96,12 @@ module Ci
       end
     end
 
-    private
+    def ensure_scheduling_type!
+      # If this has a scheduling_type, it means all processables in the pipeline already have.
+      return if scheduling_type
 
-    def validate_scheduling_type?
-      !importing? && Feature.enabled?(:validate_scheduling_type_of_processables, project)
+      pipeline.ensure_scheduling_type!
+      reset
     end
   end
 end

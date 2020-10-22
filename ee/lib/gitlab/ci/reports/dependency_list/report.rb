@@ -5,14 +5,23 @@ module Gitlab
     module Reports
       module DependencyList
         class Report
-          attr_accessor :dependencies
-
           def initialize
-            @dependencies = []
+            @dependencies = {}
+          end
+
+          def dependencies
+            @dependencies.values.map(&:to_hash)
           end
 
           def add_dependency(dependency)
-            dependencies << dependency
+            dep = Dependency.new(dependency)
+            key = dep.composite_key
+            if @dependencies.has_key?(key)
+              existing_dependency = @dependencies[key]
+              existing_dependency.update_dependency(dependency)
+            else
+              @dependencies[key] = dep
+            end
           end
 
           def apply_license(license)

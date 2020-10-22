@@ -36,8 +36,9 @@ module EE
         resource :namespaces, requirements: ::API::API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
           helpers do
             params :gitlab_subscription_optional_attributes do
-              optional :seats, type: Integer, default: 0, desc: 'The number of seats purchased'
-              optional :max_seats_used, type: Integer, default: 0, desc: 'The max number of active users detected in the last month'
+              optional :start_date, type: Date, desc: 'The date when subscription was started'
+              optional :seats, type: Integer, desc: 'The number of seats purchased'
+              optional :max_seats_used, type: Integer, desc: 'The max number of active users detected in the last month'
               optional :plan_code, type: String, desc: 'The code of the purchased plan'
               optional :end_date, type: Date, desc: 'The date when subscription expires'
               optional :auto_renew, type: Grape::API::Boolean, desc: 'Whether the subscription auto renews'
@@ -53,7 +54,11 @@ module EE
           params do
             optional :shared_runners_minutes_limit, type: Integer, desc: "Pipeline minutes quota for this namespace"
             optional :extra_shared_runners_minutes_limit, type: Integer, desc: "Extra pipeline minutes for this namespace"
-            optional :trial_ends_on, type: Date, desc: "Trial expiration date"
+            optional :additional_purchased_storage_size, type: Integer, desc: "Additional storage size for this namespace"
+            optional :additional_purchased_storage_ends_on, type: Date, desc: "End of subscription of the additional purchased storage"
+            optional :gitlab_subscription_attributes, type: Hash do
+              use :gitlab_subscription_optional_attributes
+            end
           end
           put ':id' do
             authenticated_as_admin!
@@ -73,9 +78,9 @@ module EE
             success ::EE::API::Entities::GitlabSubscription
           end
           params do
-            requires :start_date, type: Date, desc: 'The date when subscription was started'
-
             use :gitlab_subscription_optional_attributes
+
+            requires :start_date, type: Date, desc: 'The date when subscription was started'
           end
           post ":id/gitlab_subscription" do
             authenticated_as_admin!
@@ -106,8 +111,6 @@ module EE
             success ::EE::API::Entities::GitlabSubscription
           end
           params do
-            optional :start_date, type: Date, desc: 'The date when subscription was started'
-
             use :gitlab_subscription_optional_attributes
           end
           put ":id/gitlab_subscription" do
@@ -115,10 +118,8 @@ module EE
 
             namespace = find_namespace!(params[:id])
             subscription = namespace.gitlab_subscription
-            trial_ends_on = params[:trial_ends_on]
 
             not_found!('GitlabSubscription') unless subscription
-            bad_request!("Invalid trial expiration date") if trial_ends_on&.past?
 
             subscription_params = declared_params(include_missing: false)
             subscription_params[:trial_starts_on] ||= subscription_params[:start_date] if subscription_params[:trial]

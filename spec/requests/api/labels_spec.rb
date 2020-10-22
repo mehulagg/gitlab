@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Labels do
+RSpec.describe API::Labels do
   def put_labels_api(route_type, user, spec_params, request_params = {})
     if route_type == :deprecated
       put api("/projects/#{project.id}/labels", user),
@@ -17,7 +17,7 @@ describe API::Labels do
 
   let(:user) { create(:user) }
   let(:project) { create(:project, creator_id: user.id, namespace: user.namespace) }
-  let!(:label1) { create(:label, title: 'label1', project: project) }
+  let!(:label1) { create(:label, description: 'the best label', title: 'label1', project: project) }
   let!(:priority_label) { create(:label, title: 'bug', project: project, priority: 3) }
 
   route_types = [:deprecated, :rest]
@@ -219,7 +219,7 @@ describe API::Labels do
                                            'closed_issues_count' => 1,
                                            'open_merge_requests_count' => 0,
                                            'name' => label1.name,
-                                           'description' => nil,
+                                           'description' => 'the best label',
                                            'color' => a_string_matching(/^#\h{6}$/),
                                            'text_color' => a_string_matching(/^#\h{6}$/),
                                            'priority' => nil,

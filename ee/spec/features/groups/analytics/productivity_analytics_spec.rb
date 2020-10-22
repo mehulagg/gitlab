@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Groups::ProductivityAnalytics' do
+RSpec.describe 'Groups::ProductivityAnalytics' do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:project) { create(:project, group: group) }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ClearNamespaceSharedRunnersMinutesService do
+RSpec.describe ClearNamespaceSharedRunnersMinutesService do
   describe '#execute' do
     subject { described_class.new(namespace).execute }
 
@@ -18,7 +18,7 @@ describe ClearNamespaceSharedRunnersMinutesService do
       it 'resets timer' do
         subject
 
-        expect(namespace.namespace_statistics.reload.shared_runners_seconds_last_reset).to be_like_time(Time.now)
+        expect(namespace.namespace_statistics.reload.shared_runners_seconds_last_reset).to be_like_time(Time.current)
       end
 
       it 'successfully clears minutes' do

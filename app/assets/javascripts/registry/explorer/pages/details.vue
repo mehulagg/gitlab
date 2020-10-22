@@ -1,106 +1,60 @@
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
-import {
-  GlTable,
-  GlFormCheckbox,
-  GlDeprecatedButton,
-  GlIcon,
-  GlTooltipDirective,
-  GlPagination,
-  GlModal,
-  GlSprintf,
-  GlEmptyState,
-  GlResizeObserverDirective,
-  GlSkeletonLoader,
-} from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
+import { GlPagination, GlResizeObserverDirective } from '@gitlab/ui';
 import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
-import { n__, s__ } from '~/locale';
-import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import { numberToHumanSize } from '~/lib/utils/number_utils';
-import timeagoMixin from '~/vue_shared/mixins/timeago';
 import Tracking from '~/tracking';
+import DeleteAlert from '../components/details_page/delete_alert.vue';
+import PartialCleanupAlert from '../components/details_page/partial_cleanup_alert.vue';
+import DeleteModal from '../components/details_page/delete_modal.vue';
+import DetailsHeader from '../components/details_page/details_header.vue';
+import TagsList from '../components/details_page/tags_list.vue';
+import TagsLoader from '../components/details_page/tags_loader.vue';
+import EmptyTagsState from '../components/details_page/empty_tags_state.vue';
+
 import { decodeAndParse } from '../utils';
 import {
-  LIST_KEY_TAG,
-  LIST_KEY_IMAGE_ID,
-  LIST_KEY_SIZE,
-  LIST_KEY_LAST_UPDATED,
-  LIST_KEY_ACTIONS,
-  LIST_KEY_CHECKBOX,
-  LIST_LABEL_TAG,
-  LIST_LABEL_IMAGE_ID,
-  LIST_LABEL_SIZE,
-  LIST_LABEL_LAST_UPDATED,
-  DELETE_TAG_SUCCESS_MESSAGE,
-  DELETE_TAG_ERROR_MESSAGE,
-  DELETE_TAGS_SUCCESS_MESSAGE,
-  DELETE_TAGS_ERROR_MESSAGE,
-} from '../constants';
+  ALERT_SUCCESS_TAG,
+  ALERT_DANGER_TAG,
+  ALERT_SUCCESS_TAGS,
+  ALERT_DANGER_TAGS,
+} from '../constants/index';
 
 export default {
   components: {
-    GlTable,
-    GlFormCheckbox,
-    GlDeprecatedButton,
-    GlIcon,
-    ClipboardButton,
+    DeleteAlert,
+    PartialCleanupAlert,
+    DetailsHeader,
     GlPagination,
-    GlModal,
-    GlSkeletonLoader,
-    GlSprintf,
-    GlEmptyState,
+    DeleteModal,
+    TagsList,
+    TagsLoader,
+    EmptyTagsState,
   },
   directives: {
-    GlTooltip: GlTooltipDirective,
     GlResizeObserver: GlResizeObserverDirective,
   },
-  mixins: [timeagoMixin, Tracking.mixin()],
-  loader: {
-    repeat: 10,
-    width: 1000,
-    height: 40,
-  },
+  mixins: [Tracking.mixin()],
   data() {
     return {
-      selectedItems: [],
       itemsToBeDeleted: [],
-      selectAllChecked: false,
-      modalDescription: null,
       isDesktop: true,
+      deleteAlertType: null,
+      dismissPartialCleanupWarning: false,
     };
   },
   computed: {
-    ...mapGetters(['tags']),
-    ...mapState(['tagsPagination', 'isLoading', 'config']),
-    imageName() {
-      const { name } = decodeAndParse(this.$route.params.id);
-      return name;
+    ...mapState(['tagsPagination', 'isLoading', 'config', 'tags']),
+    queryParameters() {
+      return decodeAndParse(this.$route.params.id);
     },
-    fields() {
-      const tagClass = this.isDesktop ? 'w-25' : '';
-      return [
-        { key: LIST_KEY_CHECKBOX, label: '', class: 'gl-w-16' },
-        { key: LIST_KEY_TAG, label: LIST_LABEL_TAG, class: `${tagClass} js-tag-column` },
-        { key: LIST_KEY_IMAGE_ID, label: LIST_LABEL_IMAGE_ID },
-        { key: LIST_KEY_SIZE, label: LIST_LABEL_SIZE },
-        { key: LIST_KEY_LAST_UPDATED, label: LIST_LABEL_LAST_UPDATED },
-        { key: LIST_KEY_ACTIONS, label: '' },
-      ].filter(f => f.key !== LIST_KEY_CHECKBOX || this.isDesktop);
-    },
-    isMultiDelete() {
-      return this.itemsToBeDeleted.length > 1;
+    showPartialCleanupWarning() {
+      return this.queryParameters.cleanup_policy_started_at && !this.dismissPartialCleanupWarning;
     },
     tracking() {
       return {
-        label: this.isMultiDelete ? 'bulk_registry_tag_delete' : 'registry_tag_delete',
+        label:
+          this.itemsToBeDeleted?.length > 1 ? 'bulk_registry_tag_delete' : 'registry_tag_delete',
       };
-    },
-    modalAction() {
-      return n__(
-        'ContainerRegistry|Remove tag',
-        'ContainerRegistry|Remove tags',
-        this.isMultiDelete ? this.itemsToBeDeleted.length : 1,
-      );
     },
     currentPage: {
       get() {
@@ -111,115 +65,48 @@ export default {
       },
     },
   },
+  mounted() {
+    this.requestTagsList({ params: this.$route.params.id });
+  },
   methods: {
     ...mapActions(['requestTagsList', 'requestDeleteTag', 'requestDeleteTags']),
-    setModalDescription(itemIndex = -1) {
-      if (itemIndex === -1) {
-        this.modalDescription = {
-          message: s__(`ContainerRegistry|You are about to remove %{item} tags. Are you sure?`),
-          item: this.itemsToBeDeleted.length,
-        };
-      } else {
-        const { path } = this.tags[itemIndex];
-
-        this.modalDescription = {
-          message: s__(`ContainerRegistry|You are about to remove %{item}. Are you sure?`),
-          item: path,
-        };
-      }
-    },
-    formatSize(size) {
-      return numberToHumanSize(size);
-    },
-    layers(layers) {
-      return layers ? n__('%d layer', '%d layers', layers) : '';
-    },
-    onSelectAllChange() {
-      if (this.selectAllChecked) {
-        this.deselectAll();
-      } else {
-        this.selectAll();
-      }
-    },
-    selectAll() {
-      this.selectedItems = this.tags.map((x, index) => index);
-      this.selectAllChecked = true;
-    },
-    deselectAll() {
-      this.selectedItems = [];
-      this.selectAllChecked = false;
-    },
-    updateSelectedItems(index) {
-      const delIndex = this.selectedItems.findIndex(x => x === index);
-
-      if (delIndex > -1) {
-        this.selectedItems.splice(delIndex, 1);
-        this.selectAllChecked = false;
-      } else {
-        this.selectedItems.push(index);
-
-        if (this.selectedItems.length === this.tags.length) {
-          this.selectAllChecked = true;
-        }
-      }
-    },
-    deleteSingleItem(index) {
-      this.setModalDescription(index);
-      this.itemsToBeDeleted = [index];
+    deleteTags(toBeDeleted) {
+      this.itemsToBeDeleted = this.tags.filter(tag => toBeDeleted[tag.name]);
       this.track('click_button');
       this.$refs.deleteModal.show();
     },
-    deleteMultipleItems() {
-      this.itemsToBeDeleted = [...this.selectedItems];
-      if (this.selectedItems.length === 1) {
-        this.setModalDescription(this.itemsToBeDeleted[0]);
-      } else if (this.selectedItems.length > 1) {
-        this.setModalDescription();
-      }
-      this.track('click_button');
-      this.$refs.deleteModal.show();
-    },
-    handleSingleDelete(itemToDelete) {
+    handleSingleDelete() {
+      const [itemToDelete] = this.itemsToBeDeleted;
       this.itemsToBeDeleted = [];
       return this.requestDeleteTag({ tag: itemToDelete, params: this.$route.params.id })
-        .then(() =>
-          this.$toast.show(DELETE_TAG_SUCCESS_MESSAGE, {
-            type: 'success',
-          }),
-        )
-        .catch(() =>
-          this.$toast.show(DELETE_TAG_ERROR_MESSAGE, {
-            type: 'error',
-          }),
-        );
+        .then(() => {
+          this.deleteAlertType = ALERT_SUCCESS_TAG;
+        })
+        .catch(() => {
+          this.deleteAlertType = ALERT_DANGER_TAG;
+        });
     },
     handleMultipleDelete() {
       const { itemsToBeDeleted } = this;
       this.itemsToBeDeleted = [];
-      this.selectedItems = [];
 
       return this.requestDeleteTags({
-        ids: itemsToBeDeleted.map(x => this.tags[x].name),
+        ids: itemsToBeDeleted.map(x => x.name),
         params: this.$route.params.id,
       })
-        .then(() =>
-          this.$toast.show(DELETE_TAGS_SUCCESS_MESSAGE, {
-            type: 'success',
-          }),
-        )
-        .catch(() =>
-          this.$toast.show(DELETE_TAGS_ERROR_MESSAGE, {
-            type: 'error',
-          }),
-        );
+        .then(() => {
+          this.deleteAlertType = ALERT_SUCCESS_TAGS;
+        })
+        .catch(() => {
+          this.deleteAlertType = ALERT_DANGER_TAGS;
+        });
     },
     onDeletionConfirmed() {
       this.track('confirm_delete');
-      if (this.isMultiDelete) {
+      if (this.itemsToBeDeleted.length > 1) {
         this.handleMultipleDelete();
       } else {
-        const index = this.itemsToBeDeleted[0];
-        this.handleSingleDelete(this.tags[index]);
+        this.handleSingleDelete();
       }
     },
     handleResize() {
@@ -230,126 +117,28 @@ export default {
 </script>
 
 <template>
-  <div v-gl-resize-observer="handleResize" class="my-3 w-100 slide-enter-to-element">
-    <div class="d-flex my-3 align-items-center">
-      <h4>
-        <gl-sprintf :message="s__('ContainerRegistry|%{imageName} tags')">
-          <template #imageName>
-            {{ imageName }}
-          </template>
-        </gl-sprintf>
-      </h4>
-    </div>
+  <div v-gl-resize-observer="handleResize" class="gl-my-3">
+    <delete-alert
+      v-model="deleteAlertType"
+      :garbage-collection-help-page-path="config.garbageCollectionHelpPagePath"
+      :is-admin="config.isAdmin"
+      class="gl-my-2"
+    />
 
-    <gl-table :items="tags" :fields="fields" :stacked="!isDesktop" show-empty>
-      <template v-if="isDesktop" #head(checkbox)>
-        <gl-form-checkbox
-          ref="mainCheckbox"
-          :checked="selectAllChecked"
-          @change="onSelectAllChange"
-        />
-      </template>
-      <template #head(actions)>
-        <gl-deprecated-button
-          ref="bulkDeleteButton"
-          v-gl-tooltip
-          :disabled="!selectedItems || selectedItems.length === 0"
-          class="float-right"
-          variant="danger"
-          :title="s__('ContainerRegistry|Remove selected tags')"
-          :aria-label="s__('ContainerRegistry|Remove selected tags')"
-          @click="deleteMultipleItems()"
-        >
-          <gl-icon name="remove" />
-        </gl-deprecated-button>
-      </template>
+    <partial-cleanup-alert
+      v-if="showPartialCleanupWarning"
+      :run-cleanup-policies-help-page-path="config.runCleanupPoliciesHelpPagePath"
+      :cleanup-policies-help-page-path="config.cleanupPoliciesHelpPagePath"
+      @dismiss="dismissPartialCleanupWarning = true"
+    />
 
-      <template #cell(checkbox)="{index}">
-        <gl-form-checkbox
-          ref="rowCheckbox"
-          class="js-row-checkbox"
-          :checked="selectedItems.includes(index)"
-          @change="updateSelectedItems(index)"
-        />
-      </template>
-      <template #cell(name)="{item}">
-        <span ref="rowName">
-          {{ item.name }}
-        </span>
-        <clipboard-button
-          v-if="item.location"
-          ref="rowClipboardButton"
-          :title="item.location"
-          :text="item.location"
-          css-class="btn-default btn-transparent btn-clipboard"
-        />
-      </template>
-      <template #cell(short_revision)="{value}">
-        <span ref="rowShortRevision">
-          {{ value }}
-        </span>
-      </template>
-      <template #cell(total_size)="{item}">
-        <span ref="rowSize">
-          {{ formatSize(item.total_size) }}
-          <template v-if="item.total_size && item.layers">
-            &middot;
-          </template>
-          {{ layers(item.layers) }}
-        </span>
-      </template>
-      <template #cell(created_at)="{value}">
-        <span ref="rowTime">
-          {{ timeFormatted(value) }}
-        </span>
-      </template>
-      <template #cell(actions)="{index, item}">
-        <gl-deprecated-button
-          ref="singleDeleteButton"
-          :title="s__('ContainerRegistry|Remove tag')"
-          :aria-label="s__('ContainerRegistry|Remove tag')"
-          :disabled="!item.destroy_path"
-          variant="danger"
-          class="js-delete-registry float-right btn-inverted btn-border-color btn-icon"
-          @click="deleteSingleItem(index)"
-        >
-          <gl-icon name="remove" />
-        </gl-deprecated-button>
-      </template>
+    <details-header :image-name="queryParameters.name" />
 
-      <template #empty>
-        <template v-if="isLoading">
-          <gl-skeleton-loader
-            v-for="index in $options.loader.repeat"
-            :key="index"
-            :width="$options.loader.width"
-            :height="$options.loader.height"
-            preserve-aspect-ratio="xMinYMax meet"
-          >
-            <rect width="15" x="0" y="12.5" height="15" rx="4" />
-            <rect width="250" x="25" y="10" height="20" rx="4" />
-            <circle cx="290" cy="20" r="10" />
-            <rect width="100" x="315" y="10" height="20" rx="4" />
-            <rect width="100" x="500" y="10" height="20" rx="4" />
-            <rect width="100" x="630" y="10" height="20" rx="4" />
-            <rect x="960" y="0" width="40" height="40" rx="4" />
-          </gl-skeleton-loader>
-        </template>
-        <gl-empty-state
-          v-else
-          :title="s__('ContainerRegistry|This image has no active tags')"
-          :svg-path="config.noContainersImage"
-          :description="
-            s__(
-              `ContainerRegistry|The last tag related to this image was recently removed.
-            This empty image and any associated data will be automatically removed as part of the regular Garbage Collection process.
-            If you have any questions, contact your administrator.`,
-            )
-          "
-          class="mx-auto my-0"
-        />
-      </template>
-    </gl-table>
+    <tags-loader v-if="isLoading" />
+    <template v-else>
+      <empty-tags-state v-if="tags.length === 0" :no-containers-image="config.noContainersImage" />
+      <tags-list v-else :tags="tags" :is-desktop="isDesktop" @delete="deleteTags" />
+    </template>
 
     <gl-pagination
       v-if="!isLoading"
@@ -358,25 +147,14 @@ export default {
       :per-page="tagsPagination.perPage"
       :total-items="tagsPagination.total"
       align="center"
-      class="w-100"
+      class="gl-w-full gl-mt-3"
     />
 
-    <gl-modal
+    <delete-modal
       ref="deleteModal"
-      modal-id="delete-tag-modal"
-      ok-variant="danger"
-      @ok="onDeletionConfirmed"
+      :items-to-be-deleted="itemsToBeDeleted"
+      @confirmDelete="onDeletionConfirmed"
       @cancel="track('cancel_delete')"
-    >
-      <template #modal-title>{{ modalAction }}</template>
-      <template #modal-ok>{{ modalAction }}</template>
-      <p v-if="modalDescription">
-        <gl-sprintf :message="modalDescription.message">
-          <template #item>
-            <b>{{ modalDescription.item }}</b>
-          </template>
-        </gl-sprintf>
-      </p>
-    </gl-modal>
+    />
   </div>
 </template>

@@ -1,10 +1,13 @@
 ---
+stage: Verify
+group: Runner
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
 # Interactive Web Terminals
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/50144) in GitLab 11.3.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/50144) in GitLab 11.3.
 
 Interactive web terminals give the user access to a terminal in GitLab for
 running one-off commands for their CI pipeline. Since this is giving the user
@@ -23,7 +26,7 @@ terminals are available when using your own group or project runner.
 
 Two things need to be configured for the interactive web terminal to work:
 
-- The Runner needs to have [`[session_server]` configured
+- The runner needs to have [`[session_server]` configured
   properly](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-session_server-section)
 - If you are using a reverse proxy with your GitLab instance, web terminals need to be
   [enabled](../../administration/integration/terminal.md#enabling-and-disabling-terminal-support)
@@ -31,17 +34,19 @@ Two things need to be configured for the interactive web terminal to work:
 NOTE: **Note:**
 Interactive web terminals are not yet supported by
 [`gitlab-runner` Helm chart](https://docs.gitlab.com/charts/charts/gitlab/gitlab-runner/index.html),
-but support [is planned](https://gitlab.com/gitlab-org/charts/gitlab-runner/issues/79).
+but support [is planned](https://gitlab.com/gitlab-org/charts/gitlab-runner/-/issues/79).
 
 ## Debugging a running job
 
-NOTE: **Note:** Not all executors are
+NOTE: **Note:**
+Not all executors are
 [supported](https://docs.gitlab.com/runner/executors/#compatibility-chart).
 
-NOTE: **Note:** The `docker` executor does not keep running
+NOTE: **Note:**
+The `docker` executor does not keep running
 after the build script is finished. At that point, the terminal will automatically
 disconnect and will not wait for the user to finish. Please follow [this
-issue](https://gitlab.com/gitlab-org/gitlab-runner/issues/3605) for updates on
+issue](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3605) for updates on
 improving this behavior.
 
 Sometimes, when a job is running, things don't go as you would expect, and it
@@ -64,6 +69,6 @@ close the terminal window.
 
 ![finished job with terminal open](img/finished_job_with_terminal_open.png)
 
-## Interactive Web Terminals for the Web IDE **(ULTIMATE ONLY)**
+## Interactive Web Terminals for the Web IDE
 
-Read the Web IDE docs to learn how to run [Interactive Terminals through the Web IDE](../../user/project/web_ide/index.md).
+Read the Web IDE docs to learn how to run [Interactive Terminals through the Web IDE](../../user/project/web_ide/index.md#interactive-web-terminals-for-the-web-ide).

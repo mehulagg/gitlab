@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Security::JobsFinder do
+RSpec.describe Security::JobsFinder do
   it 'is an abstract class that does not permit instantiation' do
     expect { described_class.new(pipeline: nil) }.to raise_error(
       NotImplementedError,

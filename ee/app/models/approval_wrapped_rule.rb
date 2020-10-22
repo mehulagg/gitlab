@@ -1,6 +1,19 @@
 # frozen_string_literal: true
 
-# A common state computation interface to wrap around ApprovalRuleLike models
+# A common state computation interface to wrap around ApprovalRuleLike models.
+#
+# There are 2 types of approval rules (`ApprovalProjectRule` and
+# `ApprovalMergeRequestRule`), we want to get the data we need for the approval
+# state of each rule via a common interface. That depends on the approvals data
+# of a merge request.
+#
+# `ApprovalProjectRule` doesn't have access to the merge request unlike
+# `ApprovalMergeRequestRule`. Given that, instead of having different checks and
+# methods when dealing with a `ApprovalProjectRule`, having a comon interface
+# is easier and simpler to interact with.
+#
+# Different types of `ApprovalWrappedRule` also helps since we have different
+# `rule_type`s that can behave differently.
 class ApprovalWrappedRule
   extend Forwardable
   include Gitlab::Utils::StrongMemoize
@@ -11,7 +24,7 @@ class ApprovalWrappedRule
   def_delegators(:@approval_rule,
                  :regular?, :any_approver?, :code_owner?, :report_approver?,
                  :overridden?, :id, :name, :users, :groups, :code_owner,
-                 :source_rule, :rule_type, :approvals_required)
+                 :source_rule, :rule_type, :approvals_required, :section)
 
   def self.wrap(merge_request, rule)
     if rule.any_approver?
@@ -33,10 +46,12 @@ class ApprovalWrappedRule
   end
 
   def approvers
-    filter_approvers(@approval_rule.approvers)
+    strong_memoize(:approvers) do
+      filter_approvers(@approval_rule.approvers)
+    end
   end
 
-  # @return [Array<User>] all approvers related to this rule
+  # @return [Array<User>] of users who have approved the merge request
   #
   # This is dynamically calculated unless it is persisted as `approved_approvers`.
   #
@@ -48,16 +63,20 @@ class ApprovalWrappedRule
   # - Additional complexity to add update hooks
   # - DB updating many MRs for one project rule change is inefficient
   def approved_approvers
-    if merge_request.merged? && approval_rule.is_a?(ApprovalMergeRequestRule) && approval_rule.approved_approvers.present?
+    if merge_request.merged? && approval_rule.is_a?(ApprovalMergeRequestRule) && approval_rule.approved_approvers.any?
       return approval_rule.approved_approvers
     end
 
     strong_memoize(:approved_approvers) do
-      overall_approver_ids = merge_request.approvals.map(&:user_id).to_set
-
       approvers.select do |approver|
         overall_approver_ids.include?(approver.id)
       end
+    end
+  end
+
+  def commented_approvers
+    strong_memoize(:commented_approvers) do
+      merge_request.note_authors & approvers
     end
   end
 
@@ -93,5 +112,17 @@ class ApprovalWrappedRule
       ApprovalState.filter_author(approvers, merge_request)
 
     ApprovalState.filter_committers(filtered_approvers, merge_request)
+  end
+
+  def overall_approver_ids
+    strong_memoize(:overall_approver_ids) do
+      current_approvals = merge_request.approvals
+
+      if current_approvals.is_a?(ActiveRecord::Relation) && !current_approvals.loaded?
+        current_approvals.distinct.pluck(:user_id)
+      else
+        current_approvals.map(&:user_id).to_set
+      end
+    end
   end
 end

@@ -75,10 +75,11 @@ describe('MilestoneItemComponent', () => {
 
     it('returns Milestone.originalStartDate when start date is out of range', () => {
       const mockStartDate = new Date(2018, 0, 1);
-      const mockMilestoneItem = Object.assign({}, mockMilestone2, {
+      const mockMilestoneItem = {
+        ...mockMilestone2,
         startDateOutOfRange: true,
         originalStartDate: mockStartDate,
-      });
+      };
       wrapper = createComponent({ milestone: mockMilestoneItem });
 
       expect(wrapper.vm.startDate).toBe(mockStartDate);
@@ -94,10 +95,11 @@ describe('MilestoneItemComponent', () => {
 
     it('returns Milestone.originalEndDate when end date is out of range', () => {
       const mockEndDate = new Date(2018, 0, 1);
-      const mockMilestoneItem = Object.assign({}, mockMilestone2, {
+      const mockMilestoneItem = {
+        ...mockMilestone2,
         endDateOutOfRange: true,
         originalEndDate: mockEndDate,
-      });
+      };
       wrapper = createComponent({ milestone: mockMilestoneItem });
 
       expect(wrapper.vm.endDate).toBe(mockEndDate);
@@ -112,28 +114,25 @@ describe('MilestoneItemComponent', () => {
     });
 
     it('returns timeframe string correctly when only start date is defined', () => {
-      const mockMilestoneItem = Object.assign({}, mockMilestone2, {
-        endDateUndefined: true,
-      });
+      const mockMilestoneItem = { ...mockMilestone2, endDateUndefined: true };
       wrapper = createComponent({ milestone: mockMilestoneItem });
 
       expect(wrapper.vm.timeframeString(mockMilestoneItem)).toBe('Nov 10, 2017 – No end date');
     });
 
     it('returns timeframe string correctly when only end date is defined', () => {
-      const mockMilestoneItem = Object.assign({}, mockMilestone2, {
-        startDateUndefined: true,
-      });
+      const mockMilestoneItem = { ...mockMilestone2, startDateUndefined: true };
       wrapper = createComponent({ milestone: mockMilestoneItem });
 
       expect(wrapper.vm.timeframeString(mockMilestoneItem)).toBe('No start date – Jul 2, 2018');
     });
 
     it('returns timeframe string with hidden year for start date when both start and end dates are from same year', () => {
-      const mockMilestoneItem = Object.assign({}, mockMilestone2, {
+      const mockMilestoneItem = {
+        ...mockMilestone2,
         startDate: new Date(2018, 0, 1),
         endDate: new Date(2018, 3, 1),
-      });
+      };
       wrapper = createComponent({ milestone: mockMilestoneItem });
 
       expect(wrapper.vm.timeframeString(mockMilestoneItem)).toBe('Jan 1 – Apr 1, 2018');

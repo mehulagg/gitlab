@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectExportWorker do
+RSpec.describe ProjectExportWorker do
   let!(:user) { create(:user) }
   let!(:project) { create(:project) }
 
@@ -22,20 +22,6 @@ describe ProjectExportWorker do
         end
 
         subject.perform(user.id, project.id, { 'klass' => 'Gitlab::ImportExport::AfterExportStrategies::DownloadNotificationStrategy' })
-      end
-
-      context 'with measurement options provided' do
-        it 'calls the ExportService with measurement options' do
-          measurement_options = { measurement_enabled: true }
-          params = {}
-          after_export_strategy = { 'klass' => 'Gitlab::ImportExport::AfterExportStrategies::DownloadNotificationStrategy' }
-
-          expect_next_instance_of(::Projects::ImportExport::ExportService) do |service|
-            expect(service).to receive(:execute).with(instance_of(Gitlab::ImportExport::AfterExportStrategies::DownloadNotificationStrategy), measurement_options)
-          end
-
-          subject.perform(user.id, project.id, after_export_strategy, params, measurement_options)
-        end
       end
 
       context 'export job' do
@@ -69,7 +55,7 @@ describe ProjectExportWorker do
 
     context 'when it fails' do
       it 'does not raise an exception when strategy is invalid' do
-        expect_any_instance_of(::Projects::ImportExport::ExportService).not_to receive(:execute)
+        expect(::Projects::ImportExport::ExportService).not_to receive(:new)
 
         expect { subject.perform(user.id, project.id, { 'klass' => 'Whatever' }) }.not_to raise_error
       end
@@ -81,6 +67,20 @@ describe ProjectExportWorker do
       it 'does not raise error when user cannot be found' do
         expect { subject.perform(non_existing_record_id, project.id, {}) }.not_to raise_error
       end
+    end
+  end
+
+  describe 'sidekiq options' do
+    it 'disables retry' do
+      expect(described_class.sidekiq_options['retry']).to eq(false)
+    end
+
+    it 'disables dead' do
+      expect(described_class.sidekiq_options['dead']).to eq(false)
+    end
+
+    it 'sets default status expiration' do
+      expect(described_class.sidekiq_options['status_expiration']).to eq(StuckExportJobsWorker::EXPORT_JOBS_EXPIRATION)
     end
   end
 end

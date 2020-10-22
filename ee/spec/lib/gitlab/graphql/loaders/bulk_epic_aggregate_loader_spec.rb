@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Graphql::Loaders::BulkEpicAggregateLoader do
+RSpec.describe Gitlab::Graphql::Loaders::BulkEpicAggregateLoader do
   include_context 'includes EpicAggregate constants'
 
   let_it_be(:group) { create(:group, :public) }

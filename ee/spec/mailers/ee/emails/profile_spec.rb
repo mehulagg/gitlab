@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'email_spec'
 
-describe EE::Emails::Profile do
+RSpec.describe EE::Emails::Profile do
   include EmailSpec::Matchers
 
   describe '#policy_revoked_personal_access_tokens_email' do

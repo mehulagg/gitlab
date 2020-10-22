@@ -1,14 +1,6 @@
 {
   "type": "object",
-  "required": [
-    "id",
-    "status",
-    "title",
-    "description",
-    "links",
-    "updated_at",
-    "created_at"
-  ],
+  "required": ["id", "status", "title", "links", "updated_at", "created_at"],
   "properties": {
     "id": { "type": "integer" },
     "status": {

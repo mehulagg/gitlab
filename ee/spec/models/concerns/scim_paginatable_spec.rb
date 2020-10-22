@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ScimPaginatable do
+RSpec.describe ScimPaginatable do
   let(:paginatable_class) { Identity }
 
   describe 'scim_paginate' do

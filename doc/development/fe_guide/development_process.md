@@ -4,7 +4,7 @@ You can find more about the organization of the frontend team in the [handbook](
 
 ## Development Checklist
 
-The idea is to remind us about specific topics during the time we build a new feature or start something. This is a common practice in other industries (like pilots) that also use standardised checklists to reduce problems early on.
+The idea is to remind us about specific topics during the time we build a new feature or start something. This is a common practice in other industries (like pilots) that also use standardized checklists to reduce problems early on.
 
 Copy the content over to your issue or merge request and if something doesn't apply simply remove it from your current list.
 
@@ -23,7 +23,7 @@ Please use your best judgment when to use it and please contribute new points th
 - [ ] Are all necessary UX specifications available that you will need in order to implement? Are there new UX components/patterns in the designs? Then contact the UI component team early on. How should error messages or validation be handled?
 - [ ] **Library usage** Use Vuex as soon as you have even a medium state to manage, use Vue router if you need to have different views internally and want to link from the outside. Check what libraries we already have for which occasions.
 - [ ] **Plan your implementation:**
-  - [ ] **Architecture plan:** Create a plan aligned with GitLab's architecture, how you are going to do the implementation, for example Vue application setup and its components (through [onion skinning](https://gitlab.com/gitlab-org/gitlab-foss/issues/35873#note_39994091)), Store structure and data flow, which existing Vue components can you reuse. It's a good idea to go through your plan with another engineer to refine it.
+  - [ ] **Architecture plan:** Create a plan aligned with GitLab's architecture, how you are going to do the implementation, for example Vue application setup and its components (through [onion skinning](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/35873#note_39994091)), Store structure and data flow, which existing Vue components can you reuse. It's a good idea to go through your plan with another engineer to refine it.
   - [ ] **Backend:** The best way is to kickoff the implementation in a call and discuss with the assigned Backend engineer what you will need from the backend and also when. Can you reuse existing API's? How is the performance with the planned architecture? Maybe create together a JSON mock object to already start with development.
   - [ ] **Communication:** It also makes sense to have for bigger features an own slack channel (normally called #f_{feature_name}) and even weekly demo calls with all people involved.
   - [ ] **Dependency Plan:** Are there big dependencies in the plan between you and others, then maybe create an execution diagram to show what is blocking which part and the order of the different parts.
@@ -73,8 +73,8 @@ With the purpose of being [respectful of others' time](https://about.gitlab.com/
 - Before assigning to a maintainer, assign to a reviewer.
 - If you assigned a merge request or pinged someone directly, be patient because we work in different timezones and asynchronously. Unless the merge request is urgent (like fixing a broken master), please don't DM or reassign the merge request before waiting for a 24-hour window.
 - If you have a question regarding your merge request/issue, make it on the merge request/issue. When we DM each other, we no longer have a SSOT and [no one else is able to contribute](https://about.gitlab.com/handbook/values/#public-by-default).
-- When you have a big WIP merge request with many changes, you're advised to get the review started before adding/removing significant code. Make sure it is assigned well before the release cut-off, as the reviewer(s)/maintainer(s) would always prioritize reviewing finished MRs before WIP ones.
-- Make sure to remove the WIP title before the last round of review.
+- When you have a big **Draft** merge request with many changes, you're advised to get the review started before adding/removing significant code. Make sure it is assigned well before the release cut-off, as the reviewer(s)/maintainer(s) would always prioritize reviewing finished MRs before the **Draft** ones.
+- Make sure to remove the `Draft:` title before the last round of review.
 
 ### Share your work early
 

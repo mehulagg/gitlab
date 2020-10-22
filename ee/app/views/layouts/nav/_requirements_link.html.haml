@@ -1,22 +1,16 @@
-- return unless Feature.enabled?(:requirements_management, project, default_enabled: true)
 - return unless can?(current_user, :read_requirement, project)
 
-- requirements_count = Hash.new(0).merge(project.requirements.counts_by_state)
-- total_count = requirements_count['opened'] + requirements_count['archived']
-
 = nav_link(path: 'requirements#index') do
-  = link_to project_requirements_path(project), class: 'qa-project-requirements-link' do
+  = link_to project_requirements_management_requirements_path(project), class: 'qa-project-requirements-link' do
     .nav-icon-container
       = sprite_icon('requirements')
     %span.nav-item-name
       = _('Requirements')
-    %span.badge.badge-pill.count.js-nav-requirements-count= number_with_delimiter(total_count)
   %ul.sidebar-sub-level-items
     = nav_link(path: 'requirements#index', html_options: { class: "fly-out-top-item" } ) do
-      = link_to project_requirements_path(project) do
+      = link_to project_requirements_management_requirements_path(project) do
         %strong.fly-out-top-item-name= _('Requirements')
-        %span.badge.badge-pill.count.requirements_counter.fly-out-badge.js-nav-requirements-count-fly-out= number_with_delimiter(total_count)
     %li.divider.fly-out-top-item
     = nav_link(path: 'requirements#index', html_options: { class: 'home' }) do
-      = link_to project_requirements_path(project), title: 'List' do
+      = link_to project_requirements_management_requirements_path(project), title: 'List' do
         %span= _('List')

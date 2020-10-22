@@ -3,8 +3,8 @@
 module HasTimelogsReport
   extend ActiveSupport::Concern
 
-  def timelogs(start_date, end_date)
-    @timelogs ||= timelogs_for(start_date, end_date)
+  def timelogs(start_time, end_time)
+    @timelogs ||= timelogs_for(start_time, end_time)
   end
 
   def user_can_access_group_timelogs?(current_user)
@@ -15,7 +15,7 @@ module HasTimelogsReport
 
   private
 
-  def timelogs_for(start_date, end_date)
-    Timelog.between_dates(start_date, end_date).for_issues_in_group(self)
+  def timelogs_for(start_time, end_time)
+    Timelog.between_times(start_time, end_time).for_issues_in_group(self)
   end
 end

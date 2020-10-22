@@ -3,6 +3,7 @@ query groupMilestones(
   $state: MilestoneStateEnum
   $startDate: Time
   $dueDate: Time
+  $includeDescendants: Boolean
 ) {
   group(fullPath: $fullPath) {
     id
@@ -11,6 +12,7 @@ query groupMilestones(
       state: $state
       startDate: $startDate
       endDate: $dueDate
+      includeDescendants: $includeDescendants
     ) {
       edges {
         node {
@@ -21,6 +23,9 @@ query groupMilestones(
           dueDate
           startDate
           webPath
+          projectMilestone
+          groupMilestone
+          subgroupMilestone
         }
       }
     }

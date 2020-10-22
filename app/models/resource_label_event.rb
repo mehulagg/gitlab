@@ -2,21 +2,20 @@
 
 class ResourceLabelEvent < ResourceEvent
   include CacheMarkdownField
+  include IssueResourceEvent
+  include MergeRequestResourceEvent
 
   cache_markdown_field :reference
 
-  belongs_to :issue
-  belongs_to :merge_request
   belongs_to :label
 
   scope :inc_relations, -> { includes(:label, :user) }
-  scope :by_issue, ->(issue) { where(issue_id: issue.id) }
-  scope :by_merge_request, ->(merge_request) { where(merge_request_id: merge_request.id) }
 
   validates :label, presence: { unless: :importing? }, on: :create
   validate :exactly_one_issuable
 
   after_save :expire_etag_cache
+  after_save :usage_metrics
   after_destroy :expire_etag_cache
 
   enum action: {
@@ -73,6 +72,14 @@ class ResourceLabelEvent < ResourceEvent
     end
   end
 
+  def self.visible_to_user?(user, events)
+    ResourceLabelEvent.preload_label_subjects(events)
+
+    events.select do |event|
+      Ability.allowed?(user, :read_label, event)
+    end
+  end
+
   private
 
   def label_reference
@@ -106,6 +113,16 @@ class ResourceLabelEvent < ResourceEvent
 
   def discussion_id_key
     [self.class.name, created_at, user_id]
+  end
+
+  def for_issue?
+    issue_id.present?
+  end
+
+  def usage_metrics
+    return unless for_issue?
+
+    Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_label_changed_action(author: user)
   end
 end
 

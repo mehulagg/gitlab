@@ -1,6 +1,13 @@
-# GitLab NPM Registry **(PREMIUM)**
+---
+stage: Package
+group: Package
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/5934) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.7.
+# GitLab NPM Registry
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5934) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.7.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
 
 With the GitLab NPM Registry, every
 project can have its own space to store NPM packages.
@@ -14,23 +21,23 @@ Only [scoped](https://docs.npmjs.com/misc/scope) packages are supported.
 
 NOTE: **Note:**
 This option is available only if your GitLab administrator has
-[enabled support for the NPM registry](../../../administration/packages/index.md).**(PREMIUM ONLY)**
+[enabled support for the NPM registry](../../../administration/packages/index.md).
 
-After the NPM registry is enabled, it will be available for all new projects
+Enabling the NPM registry makes it available for all new projects
 by default. To enable it for existing projects, or if you want to disable it:
 
-1. Navigate to your project's **Settings > General > Permissions**.
+1. Navigate to your project's **Settings > General > Visibility, project features, permissions**.
 1. Find the Packages feature and enable or disable it.
 1. Click on **Save changes** for the changes to take effect.
 
-You should then be able to see the **Packages** section on the left sidebar.
+You should then be able to see the **Packages & Registries** section on the left sidebar.
 
 Before proceeding to authenticating with the GitLab NPM Registry, you should
 get familiar with the package naming convention.
 
 ## Getting started
 
-This section will cover installing NPM (or Yarn) and building a package for your
+This section covers how to install NPM (or Yarn) and build a package for your
 JavaScript project. This is a quickstart if you are new to NPM packages. If you
 are already using NPM and understand how to build your own packages, move on to
 the [next section](#authenticating-to-the-gitlab-npm-registry).
@@ -87,27 +94,28 @@ Or if you're using Yarn:
 yarn init
 ```
 
-This will take you through a series of questions to produce a `package.json`
+This takes you through a series of questions to produce a `package.json`
 file, which is required for all NPM packages. The most important question is the
 package name. NPM packages must [follow the naming convention](#package-naming-convention)
 and be scoped to the project or group where the registry exists.
 
 Once you have completed the setup, you are now ready to upload your package to
-the GitLab registry. To get started, you will need to set up authentication then
+the GitLab registry. To get started, you need to set up authentication and then
 configure GitLab as a remote registry.
 
 ## Authenticating to the GitLab NPM Registry
 
 If a project is private or you want to upload an NPM package to GitLab,
-credentials will need to be provided for authentication. [Personal access tokens](../../profile/personal_access_tokens.md)
+you need to provide credentials for authentication. [Personal access tokens](../../profile/personal_access_tokens.md)
+and [deploy tokens](../../project/deploy_tokens/index.md)
 are preferred, but support is available for [OAuth tokens](../../../api/oauth2.md#resource-owner-password-credentials-flow).
 
-CAUTION: **2FA is only supported with personal access tokens:**
-If you have 2FA enabled, you need to use a [personal access token](../../profile/personal_access_tokens.md) with OAuth headers with the scope set to `api`. Standard OAuth tokens won't be able to authenticate to the GitLab NPM Registry.
+CAUTION: **Two-factor authentication (2FA) is only supported with personal access tokens:**
+If you have 2FA enabled, you need to use a [personal access token](../../profile/personal_access_tokens.md) with OAuth headers with the scope set to `api` or a [deploy token](../../project/deploy_tokens/index.md) with `read_package_registry` or `write_package_registry` scopes. Standard OAuth tokens cannot authenticate to the GitLab NPM Registry.
 
-### Authenticating with a personal access token
+### Authenticating with a personal access token or deploy token
 
-To authenticate with a [personal access token](../../profile/personal_access_tokens.md),
+To authenticate with a [personal access token](../../profile/personal_access_tokens.md) or [deploy token](../../project/deploy_tokens/index.md),
 set your NPM configuration:
 
 ```shell
@@ -125,7 +133,7 @@ npm config set '//gitlab.com/api/v4/projects/<your_project_id>/packages/npm/:_au
 ```
 
 Replace `<your_project_id>` with your project ID which can be found on the home page
-of your project and `<your_token>` with your personal access token.
+of your project and `<your_token>` with your personal access token or deploy token.
 
 If you have a self-managed GitLab installation, replace `gitlab.com` with your
 domain name.
@@ -158,10 +166,10 @@ Then, you could run `npm publish` either locally or via GitLab CI/CD:
 
 ### Authenticating with a CI job token
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/9104) in GitLab Premium 12.5.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9104) in GitLab Premium 12.5.
 
-If you’re using NPM with GitLab CI/CD, a CI job token can be used instead of a personal access token.
-The token will inherit the permissions of the user that generates the pipeline.
+If you’re using NPM with GitLab CI/CD, a CI job token can be used instead of a personal access token or deploy token.
+The token inherits the permissions of the user that generates the pipeline.
 
 Add a corresponding section to your `.npmrc` file:
 
@@ -173,7 +181,7 @@ Add a corresponding section to your `.npmrc` file:
 
 ## Uploading packages
 
-Before you will be able to upload a package, you need to specify the registry
+Before you can upload a package, you need to specify the registry
 for NPM. To do this, add the following section to the bottom of `package.json`:
 
 ```json
@@ -195,11 +203,11 @@ you can upload an NPM package to your project:
 npm publish
 ```
 
-You can then navigate to your project's **Packages** page and see the uploaded
+You can then navigate to your project's **Packages & Registries** page and see the uploaded
 packages or even delete them.
 
-If you attempt to publish a package with a name that already exists within
-a given scope, you will receive a `403 Forbidden!` error.
+Attempting to publish a package with a name that already exists within
+a given scope causes a `403 Forbidden!` error.
 
 ## Uploading a package with the same version twice
 
@@ -231,13 +239,14 @@ The regex that is used for naming is validating all package names from all packa
 It allows for capital letters, while NPM does not, and allows for almost all of the
 characters NPM allows with a few exceptions (`~` is not allowed).
 
-NOTE: **Note:** Capital letters are needed because the scope is required to be
+NOTE: **Note:**
+Capital letters are needed because the scope is required to be
 identical to the top level namespace of the project. So, for example, if your
 project path is `My-Group/project-foo`, your package must be named `@My-Group/any-package-name`.
 `@my-group/any-package-name` will not work.
 
 CAUTION: **When updating the path of a user/group or transferring a (sub)group/project:**
-If you update the root namespace of a project with NPM packages, your changes will be rejected. To be allowed to do that, make sure to remove any NPM package first. Don't forget to update your `.npmrc` files to follow the above naming convention and run `npm publish` if necessary.
+Make sure to remove any NPM packages first. You cannot update the root namespace of a project with NPM packages. Don't forget to update your `.npmrc` files to follow the above naming convention and run `npm publish` if necessary.
 
 Now, you can configure your project to authenticate with the GitLab NPM
 Registry.
@@ -245,16 +254,16 @@ Registry.
 ## Installing a package
 
 NPM packages are commonly installed using the `npm` or `yarn` commands
-inside a JavaScript project. If you haven't already, you will need to set the
+inside a JavaScript project. If you haven't already, set the
 URL for scoped packages. You can do this with the following command:
 
 ```shell
 npm config set @foo:registry https://gitlab.com/api/v4/packages/npm/
 ```
 
-You will need to replace `@foo` with your scope.
+Replace `@foo` with your scope.
 
-Next, you will need to ensure [authentication](#authenticating-to-the-gitlab-npm-registry)
+Next, you need to ensure [authentication](#authenticating-to-the-gitlab-npm-registry)
 is setup so you can successfully install the package. Once this has been
 completed, you can run the following command inside your project to install a
 package:
@@ -271,11 +280,27 @@ yarn add @my-project-scope/my-package
 
 ### Forwarding requests to npmjs.org
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/55344) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.9.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/55344) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.9.
 
-By default, when an NPM package is not found in the GitLab NPM Registry, the request will be forwarded to [npmjs.com](https://www.npmjs.com/).
+By default, when an NPM package is not found in the GitLab NPM Registry, the request is forwarded to [npmjs.com](https://www.npmjs.com/).
 
 Administrators can disable this behavior in the [Continuous Integration settings](../../admin_area/settings/continuous_integration.md).
+
+### Installing packages from other organizations
+
+You can route package requests to organizations and users outside of GitLab.
+
+To do this, add lines to your `.npmrc` file, replacing `my-org` with the namespace or group that owns your project's repository. The name is case-sensitive and must match the name of your group or namespace exactly.
+
+```shell
+@foo:registry=https://gitlab.example.com/api/v4/packages/npm/
+//gitlab.com/api/v4/packages/npm/:_authToken= "<your_token>"
+//gitlab.com/api/v4/projects/<your_project_id>/packages/npm/:_authToken= "<your_token>"
+
+@my-other-org:registry=https://gitlab.example.com/api/v4/packages/npm/
+//gitlab.com/api/v4/packages/npm/:_authToken= "<your_token>"
+//gitlab.com/api/v4/projects/<your_project_id>/packages/npm/:_authToken= "<your_token>"
+```
 
 ## Removing a package
 
@@ -286,11 +311,11 @@ page.
 ## Publishing a package with CI/CD
 
 To work with NPM commands within [GitLab CI/CD](./../../../ci/README.md), you can use
-`CI_JOB_TOKEN` in place of the personal access token in your commands.
+`CI_JOB_TOKEN` in place of the personal access token or deploy token in your commands.
 
 A simple example `.gitlab-ci.yml` file for publishing NPM packages:
 
-```yml
+```yaml
 image: node:latest
 
 stages:
@@ -299,15 +324,17 @@ stages:
 deploy:
   stage: deploy
   script:
-    - echo '//gitlab.com/api/v4/projects/<your_project_id>/packages/npm/:_authToken=${CI_JOB_TOKEN}'>.npmrc
+    - echo "//gitlab.com/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}">.npmrc
     - npm publish
 ```
 
+Learn more about [using `CI_JOB_TOKEN` to authenticate to the GitLab NPM registry](#authenticating-with-a-ci-job-token).
+
 ## Troubleshooting
 
-### Error running yarn with NPM registry
+### Error running Yarn with NPM registry
 
-If you are using [yarn](https://classic.yarnpkg.com/en/) with the NPM registry, you may get
+If you are using [Yarn](https://classic.yarnpkg.com/en/) with the NPM registry, you may get
 an error message like:
 
 ```shell
@@ -323,10 +350,17 @@ info Visit https://classic.yarnpkg.com/en/docs/cli/install for documentation abo
 ```
 
 In this case, try adding this to your `.npmrc` file (and replace `<your_token>`
-with your personal access token):
+with your personal access token or deploy token):
 
-```text
+```plaintext
 //gitlab.com/api/v4/projects/:_authToken=<your_token>
+```
+
+You can also use `yarn config` instead of `npm config` when setting your auth-token dynamically:
+
+```shell
+yarn config set '//gitlab.com/api/v4/projects/<your_project_id>/packages/npm/:_authToken' "<your_token>"
+yarn config set '//gitlab.com/api/v4/packages/npm/:_authToken' "<your_token>"
 ```
 
 ### `npm publish` targets default NPM registry (`registry.npmjs.org`)
@@ -357,7 +391,7 @@ And the `.npmrc` file should look like:
 
 ### `npm install` returns `Error: Failed to replace env in config: ${NPM_TOKEN}`
 
-You do not need a token to run `npm install` unless your project is private (the token is only required to publish). If the `.npmrc` file was checked in with a reference to `$NPM_TOKEN`, you can remove it. If you prefer to leave the reference in, you'll need to set a value prior to running `npm install` or set the value using [GitLab environment variables](./../../../ci/variables/README.md):
+You do not need a token to run `npm install` unless your project is private (the token is only required to publish). If the `.npmrc` file was checked in with a reference to `$NPM_TOKEN`, you can remove it. If you prefer to leave the reference in, you need to set a value prior to running `npm install` or set the value using [GitLab environment variables](./../../../ci/variables/README.md):
 
 ```shell
 NPM_TOKEN=<your_token> npm install
@@ -366,6 +400,7 @@ NPM_TOKEN=<your_token> npm install
 ### `npm install` returns `npm ERR! 403 Forbidden`
 
 - Check that your token is not expired and has appropriate permissions.
+- Check that [your token does not begin with `-`](https://gitlab.com/gitlab-org/gitlab/-/issues/235473).
 - Check if you have attempted to publish a package with a name that already exists within a given scope.
 - Ensure the scoped packages URL includes a trailing slash:
   - Correct: `//gitlab.com/api/v4/packages/npm/`
@@ -373,7 +408,7 @@ NPM_TOKEN=<your_token> npm install
 
 ## NPM dependencies metadata
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/11867) in GitLab Premium 12.6.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11867) in GitLab Premium 12.6.
 
 Starting from GitLab 12.6, new packages published to the GitLab NPM Registry expose the following attributes to the NPM client:
 
@@ -389,7 +424,7 @@ Starting from GitLab 12.6, new packages published to the GitLab NPM Registry exp
 
 ## NPM distribution tags
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/9425) in GitLab Premium 12.8.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9425) in GitLab Premium 12.8.
 
 You can add [distribution tags](https://docs.npmjs.com/cli/dist-tag) for newly published packages.
 They follow NPM's convention where they are optional, and each tag can only be assigned to one
@@ -405,6 +440,9 @@ npm dist-tag ls @scope/package                 # List all tags under the package
 npm dist-tag rm @scope/package@version my-tag  # Delete a tag from the package
 npm install @scope/package@my-tag              # Install a specific tag
 ```
+
+NOTE: **Note:**
+You cannot use your `CI_JOB_TOKEN` or deploy token with the `npm dist-tag` commands. View [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/258835) for details.
 
 CAUTION: **Warning:**
 Due to a bug in NPM 6.9.0, deleting dist tags fails. Make sure your NPM version is greater than 6.9.1.

@@ -1,116 +1,24 @@
-- page_title "License"
+- page_title _('License')
 
-- if Feature.enabled?(:licenses_app)
-  #instance-license-mount-element{ license_app_data }
-- else
-  %h3.page-title
-    Your License
-    - if @license.trial?
-      = render "upload_buy_license"
-    - else
-      = link_to 'Upload New License', new_admin_license_path, class: "btn btn-success float-right"
+%h3.page-title
+  = _('Your License')
+  - if @license&.trial?
+    = render 'upload_buy_license'
+  - else
+    = link_to _('Upload New License'), new_admin_license_path, class: 'gl-button btn btn-success float-right', data: { qa_selector: 'license_upload_link' }
 
-  %hr
+%hr
 
-  .row
-    .col-md-6
-      .card
-        .card-header
-          Licensed to
-        %ul.content-list
-          - @license.licensee.each do |label, value|
-            %li
-              %span.light #{label}:
-              %strong= value
+- if License.future_dated_only?
+  .gl-alert.gl-alert-info
+    = sprite_icon('information-o', css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+    .gl-alert-body
+      %h4.gl-alert-title= _('You do not have an active license')
+      = _('You have a license that activates at a future date. Please see the License History table below.')
 
-      .card.js-license-info-panel
-        .card-header
-          Details
-        %ul.content-list
-          %li
-            %span.light Plan:
-            %strong= @license.plan.capitalize
-          %li
-            %span.light Uploaded:
-            %strong= time_ago_with_tooltip @license.created_at
-          %li
-            %span.light Started:
-            %strong= time_ago_with_tooltip @license.starts_at
-          %li
-            %span.light
-              - if @license.expired?
-                Expired:
-              - else
-                Expires:
-            - if @license.will_expire? && !@license.expired?
-              - if @license.trial?
-                %strong.has-tooltip{ title: @license.expires_at.to_formatted_s(:long), data: { placement: 'top' } }
-                  Free trial will expire in #{pluralize(@license.remaining_days, 'day')}
-              - else
-                %strong= time_ago_with_tooltip(@license.expires_at)
-            - else
-              %strong Never
+- if @license.present?
+  = render 'info'
+  = render 'breakdown'
 
-            - if @license.expired?
-              %span.badge.badge-danger.float-right
-                %strong Expired
-
-    .col-md-6
-      .card.border-info
-        .card-header.bg-info.text-white
-          Download license
-        .card-body
-          %p Your license will be included in your GitLab backup and will survive upgrades, so in normal usage you should never need to re-upload your <code>.gitlab-license</code> file.
-          %p Still, we recommend keeping a backup saved somewhere. Otherwise, if you ever need it and have lost it, you will need to request GitLab Inc. to send it to you again.
-          %br
-          = link_to 'Download license', download_admin_license_path, class: "btn btn-info"
-          = link_to 'Customer Portal', 'https://customers.gitlab.com', class: 'btn btn-info btn-inverted', data: { track_event: 'click_text', track_label: 'license_dashboard', track_property: 'customer_portal' }, target: '_blank', rel: 'noopener noreferrer'
-
-      .card.border-danger
-        .card-header.bg-danger.text-white
-          Remove license
-        .card-body
-          %p If you remove this license, GitLab will fall back on the previous license, if any.
-          %p If there is no previous license or if the previous license has expired, some GitLab functionality will be blocked until a new, valid license is uploaded.
-          %br
-          = link_to 'Remove license', admin_license_path, data: { confirm: "Are you sure you want to remove the license?" }, method: :delete, class: "btn btn-remove qa-remove-license-link"
-
-  = render "breakdown", license: @license
-
-  - if @licenses.any?
-    %h4 License History
-
-    .card#license_history
-      %table.table
-        %thead.card-header
-          %tr
-            - @license.licensee.keys.each do |label|
-              %th= label
-            %th Plan
-            %th Uploaded on
-            %th Valid from
-            %th Expires on
-            %th Active users
-        %tbody
-          - @licenses.each do |license|
-            %tr{ class: ('gl-bg-blue-50 font-weight-bold gl-text-blue-500' if license == @license), data: { testid: ('license-current' if license == @license) } }
-              - @license.licensee.keys.each do |label|
-                %td= license.licensee[label]
-              %td
-                %span
-                  = license.plan.capitalize
-              %td
-                %span
-                  = license.created_at
-              %td
-                %span
-                  = license.starts_at
-              %td
-                %span
-                  = license.expires_at || "Never"
-              %td
-                %span
-                  - if license.restricted?(:active_user_count)
-                    = license.restrictions[:active_user_count]
-                  - else
-                    Unlimited
+- if @licenses.present?
+  = render 'license_history'

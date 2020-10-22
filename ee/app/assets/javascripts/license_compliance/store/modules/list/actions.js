@@ -1,9 +1,9 @@
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 
-import { FETCH_ERROR_MESSAGE } from './constants';
+import { FETCH_ERROR_MESSAGE, SORT_BY, SORT_ORDER } from './constants';
 import * as types from './mutation_types';
 
 export const setLicensesEndpoint = ({ commit }, endpoint) =>
@@ -21,6 +21,8 @@ export const fetchLicenses = ({ state, dispatch }, params = {}) => {
       params: {
         per_page: 10,
         page: state.pageInfo.page || 1,
+        sort_by: SORT_BY.CLASSIFICATION,
+        sort_direction: SORT_ORDER.DESC,
         ...params,
       },
     })

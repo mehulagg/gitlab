@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Git LFS API and storage' do
+RSpec.describe 'Git LFS API and storage' do
   include WorkhorseHelpers
 
   let(:user) { create(:user) }
@@ -14,6 +14,7 @@ describe 'Git LFS API and storage' do
       'X-Sendfile-Type' => sendfile
     }.compact
   end
+
   let(:authorization) { }
   let(:sendfile) { }
 

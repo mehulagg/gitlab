@@ -2,6 +2,7 @@ import mutations from 'ee/vue_shared/components/sidebar/epics_select/store/mutat
 import createDefaultState from 'ee/vue_shared/components/sidebar/epics_select/store/state';
 
 import * as types from 'ee/vue_shared/components/sidebar/epics_select/store/mutation_types';
+import { DropdownVariant } from 'ee/vue_shared/components/sidebar/epics_select//constants';
 
 import { mockEpic1, mockIssue } from '../../mock_data';
 
@@ -17,6 +18,7 @@ describe('EpicsSelect', () => {
       describe(types.SET_INITIAL_DATA, () => {
         it('should set provided `data` param props to state', () => {
           const data = {
+            variant: DropdownVariant.Sidebar,
             groupId: mockEpic1.group_id,
             issueId: mockIssue.id,
             selectedEpic: mockEpic1,
@@ -25,6 +27,7 @@ describe('EpicsSelect', () => {
 
           mutations[types.SET_INITIAL_DATA](state, data);
 
+          expect(state).toHaveProperty('variant', data.variant);
           expect(state).toHaveProperty('groupId', data.groupId);
           expect(state).toHaveProperty('issueId', data.issueId);
           expect(state).toHaveProperty('selectedEpic', data.selectedEpic);

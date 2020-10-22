@@ -2,32 +2,99 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::Replication::JobArtifactDownloader, :geo do
-  let(:job_artifact) { create(:ci_job_artifact) }
+RSpec.describe Gitlab::Geo::Replication::JobArtifactDownloader, :geo do
+  include ::EE::GeoHelpers
 
   describe '#execute' do
-    context 'with job artifact' do
-      it 'returns a FileDownloader::Result object' do
-        downloader = described_class.new(:job_artifact, job_artifact.id)
-        result = Gitlab::Geo::Replication::BaseTransfer::Result.new(success: true, bytes_downloaded: 1)
+    let_it_be(:secondary, reload: true) { create(:geo_node) }
 
-        allow_next_instance_of(Gitlab::Geo::Replication::JobArtifactTransfer) do |instance|
-          allow(instance).to receive(:download_from_primary).and_return(result)
+    before do
+      stub_current_geo_node(secondary)
+    end
+
+    context 'with job artifact' do
+      context 'on local storage' do
+        let(:job_artifact) { create(:ci_job_artifact) }
+
+        subject(:downloader) { described_class.new(:job_artifact, job_artifact.id) }
+
+        it 'downloads the job artifact from the primary' do
+          result = Gitlab::Geo::Replication::BaseTransfer::Result.new(success: true, bytes_downloaded: 1)
+
+          expect_next_instance_of(Gitlab::Geo::Replication::JobArtifactTransfer) do |instance|
+            expect(instance).to receive(:download_from_primary).and_return(result)
+          end
+
+          expect(downloader.execute).to have_attributes(success: true, bytes_downloaded: 1)
+        end
+      end
+
+      context 'on object storage' do
+        before do
+          stub_artifacts_object_storage
         end
 
-        expect(downloader.execute).to be_a(Gitlab::Geo::Replication::FileDownloader::Result)
+        let!(:job_artifact) { create(:ci_job_artifact, :remote_store) }
+
+        subject(:downloader) { described_class.new(:job_artifact, job_artifact.id) }
+
+        it 'streams the job artifact file from the primary to object storage' do
+          result = Gitlab::Geo::Replication::BaseTransfer::Result.new(success: true, bytes_downloaded: 1)
+
+          expect_next_instance_of(Gitlab::Geo::Replication::JobArtifactTransfer) do |instance|
+            expect(instance).to receive(:stream_from_primary_to_object_storage).and_return(result)
+          end
+
+          expect(downloader.execute).to have_attributes(success: true, bytes_downloaded: 1)
+        end
+
+        context 'with object storage sync disabled' do
+          before do
+            secondary.update_column(:sync_object_storage, false)
+          end
+
+          it 'returns a result indicating a failure before a transfer was attempted' do
+            result = downloader.execute
+
+            expect(result).to have_attributes(
+              success: false,
+              failed_before_transfer: true,
+              reason: 'Skipping transfer as this secondary node is not allowed to replicate content on Object Storage'
+            )
+          end
+        end
+
+        context 'with object storage disabled' do
+          before do
+            stub_artifacts_object_storage(enabled: false)
+          end
+
+          it 'returns a result indicating a failure before a transfer was attempted' do
+            result = downloader.execute
+
+            expect(result).to have_attributes(
+              success: false,
+              failed_before_transfer: true,
+              reason: 'Skipping transfer as this secondary node is not configured to store job artifact on Object Storage'
+            )
+          end
+        end
       end
     end
 
-    context 'with unknown job artifact' do
-      let(:downloader) { described_class.new(:job_artifact, 10000) }
+    context 'with unknown object ID' do
+      let(:unknown_id) { Ci::JobArtifact.maximum(:id).to_i + 1 }
 
-      it 'returns a FileDownloader::Result object' do
-        expect(downloader.execute).to be_a(Gitlab::Geo::Replication::FileDownloader::Result)
-      end
+      subject(:downloader) { described_class.new(:job_artifact, unknown_id) }
 
       it 'returns a result indicating a failure before a transfer was attempted' do
-        expect(downloader.execute.failed_before_transfer).to be_truthy
+        result = downloader.execute
+
+        expect(result).to have_attributes(
+          success: false,
+          failed_before_transfer: true,
+          reason: "Skipping transfer as the job artifact (ID = #{unknown_id}) could not be found"
+        )
       end
     end
   end

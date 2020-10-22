@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Projects::ProtectedEnvironmentsController do
+RSpec.describe Projects::ProtectedEnvironmentsController do
   let(:project) { create(:project) }
   let(:current_user) { create(:user) }
   let(:maintainer_access) { Gitlab::Access::MAINTAINER }

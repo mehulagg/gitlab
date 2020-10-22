@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe OmniAuth::Strategies::KerberosSpnego do
+RSpec.describe OmniAuth::Strategies::KerberosSpnego do
   subject { described_class.new(:app) }
 
   let(:session) { {} }

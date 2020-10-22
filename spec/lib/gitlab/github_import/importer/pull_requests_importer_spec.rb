@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Importer::PullRequestsImporter do
+RSpec.describe Gitlab::GithubImport::Importer::PullRequestsImporter do
   let(:project) { create(:project, import_source: 'foo/bar') }
   let(:client) { double(:client) }
 
@@ -154,15 +154,17 @@ describe Gitlab::GithubImport::Importer::PullRequestsImporter do
         .to receive(:fetch_remote)
         .with('github', forced: false)
 
-      expect(Rails.logger)
-        .to receive(:info)
-        .with(an_instance_of(String))
+      expect_next_instance_of(Gitlab::Import::Logger) do |logger|
+        expect(logger)
+          .to receive(:info)
+          .with(an_instance_of(Hash))
+      end
 
       expect(importer.repository_updates_counter)
         .to receive(:increment)
         .and_call_original
 
-      Timecop.freeze do
+      freeze_time do
         importer.update_repository
 
         expect(project.last_repository_updated_at).to be_like_time(Time.zone.now)

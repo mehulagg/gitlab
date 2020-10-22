@@ -2,9 +2,10 @@
 
 require 'spec_helper'
 
-describe Admin::ProjectsController, :geo do
+RSpec.describe Admin::ProjectsController, :geo do
   include EE::GeoHelpers
 
+  let_it_be(:geo_primary) { create(:geo_node, :primary) }
   let!(:project_registry) { create(:geo_project_registry) }
   let(:project) { project_registry.project }
 
@@ -34,6 +35,7 @@ describe Admin::ProjectsController, :geo do
 
       it 'displays a different read-only message based on skip_readonly_message' do
         expect(subject.body).to match('You may be able to make a limited amount of changes or perform a limited amount of actions on this page')
+        expect(subject.body).to include(geo_primary.url)
       end
     end
 

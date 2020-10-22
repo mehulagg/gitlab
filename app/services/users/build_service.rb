@@ -82,7 +82,8 @@ module Users
         :organization,
         :location,
         :public_email,
-        :user_type
+        :user_type,
+        :note
       ]
     end
 
@@ -90,7 +91,6 @@ module Users
     def signup_params
       [
         :email,
-        :email_confirmation,
         :password_automatically_set,
         :name,
         :first_name,
@@ -104,7 +104,6 @@ module Users
     def build_user_params(skip_authorization:)
       if current_user&.admin?
         user_params = params.slice(*admin_create_params)
-        user_params[:created_by_id] = current_user&.id
 
         if params[:reset_password]
           user_params.merge!(force_random_password: true, password_expires_at: nil)
@@ -124,6 +123,8 @@ module Users
           user_params = user_params.merge(name: fallback_name)
         end
       end
+
+      user_params[:created_by_id] = current_user&.id
 
       if user_default_internal_regex_enabled? && !user_params.key?(:external)
         user_params[:external] = user_external?

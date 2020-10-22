@@ -1,8 +1,14 @@
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Importing a database dump into a staging environment
 
 Sometimes it is useful to import the database from a production environment
 into a staging environment for testing. The procedure below assumes you have
-SSH+sudo access to both the production environment and the staging VM.
+SSH and `sudo` access to both the production environment and the staging VM.
 
 **Destroy your staging VM** when you are done with it. It is important to avoid
 data leaks.
@@ -20,7 +26,7 @@ sudo gitlab-ctl stop sidekiq
 ```
 
 Next, we let the production environment stream a compressed SQL dump to our
-local machine via SSH, and redirect this stream to a psql client on the staging
+local machine via SSH, and redirect this stream to a `psql` client on the staging
 VM.
 
 ```shell

@@ -1,5 +1,0 @@
----
-title: Fix group_plan in group member data for system hooks
-merge_request: 29013
-author:
-type: fixed

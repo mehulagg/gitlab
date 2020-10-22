@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils';
 
+import createStore from 'ee/roadmap/store';
 import EpicItem from 'ee/roadmap/components/epic_item.vue';
 import EpicItemContainer from 'ee/roadmap/components/epic_item_container.vue';
 
@@ -12,6 +13,8 @@ import {
   mockGroupId,
   mockFormattedChildEpic1,
 } from 'ee_jest/roadmap/mock_data';
+
+let store;
 
 const mockTimeframeMonths = getTimeframeForMonthsView(mockTimeframeInitialDate);
 
@@ -26,6 +29,7 @@ const createComponent = ({
   hasFiltersApplied = false,
 } = {}) => {
   return mount(EpicItemContainer, {
+    store,
     stubs: {
       'epic-item': EpicItem,
     },
@@ -46,6 +50,7 @@ describe('EpicItemContainer', () => {
   let wrapper;
 
   beforeEach(() => {
+    store = createStore();
     wrapper = createComponent();
   });
 

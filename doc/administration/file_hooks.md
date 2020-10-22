@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference
+---
+
 # File hooks
 
 > - Introduced in GitLab 10.6.
@@ -35,8 +42,8 @@ Follow the steps below to set up a custom hook:
    `/home/git/gitlab/file_hooks/`. For Omnibus installs the path is
    usually `/opt/gitlab/embedded/service/gitlab-rails/file_hooks`.
 
-    For [highly available](reference_architectures/index.md) configurations, your hook file should exist on each
-    application server.
+    For [configurations with multiple servers](reference_architectures/index.md),
+    your hook file should exist on each application server.
 
 1. Inside the `file_hooks` directory, create a file with a name of your choice,
    without spaces or special characters.
@@ -64,9 +71,9 @@ Below is an example that will only response on the event `project_create` and
 will inform the admins from the GitLab instance that a new project has been created.
 
 ```ruby
+#!/opt/gitlab/embedded/bin/ruby
 # By using the embedded ruby version we eliminate the possibility that our chosen language
 # would be unavailable from
-#!/opt/gitlab/embedded/bin/ruby
 require 'json'
 require 'mail'
 

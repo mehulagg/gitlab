@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::PathRegex do
+RSpec.describe Gitlab::PathRegex do
   describe '.container_image_regex' do
     subject { described_class.container_image_regex }
 

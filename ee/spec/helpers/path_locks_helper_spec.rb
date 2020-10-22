@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PathLocksHelper do
+RSpec.describe PathLocksHelper do
   describe '#text_label_for_lock' do
     it "return correct string for non-nested locks" do
       user = create :user, name: 'John'

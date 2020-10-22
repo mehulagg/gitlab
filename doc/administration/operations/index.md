@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Performing Operations in GitLab
 
 Keep your GitLab instance up and running smoothly.
@@ -12,6 +18,7 @@ Keep your GitLab instance up and running smoothly.
 - [Sidekiq MemoryKiller](sidekiq_memory_killer.md): Configure Sidekiq MemoryKiller
   to restart Sidekiq.
 - [Multiple Sidekiq processes](extra_sidekiq_processes.md): Configure multiple Sidekiq processes to ensure certain queues always have dedicated workers, no matter the number of jobs that need to be processed. **(CORE ONLY)**
+- [Puma](puma.md): Understand Puma and puma-worker-killer.
 - [Unicorn](unicorn.md): Understand Unicorn and unicorn-worker-killer.
 - Speed up SSH operations by [Authorizing SSH users via a fast,
   indexed lookup to the GitLab database](fast_ssh_key_lookup.md), and/or

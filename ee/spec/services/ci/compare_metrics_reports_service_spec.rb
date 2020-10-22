@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::CompareMetricsReportsService do
+RSpec.describe Ci::CompareMetricsReportsService do
   let_it_be(:project) { create(:project, :repository) }
   let(:service) { described_class.new(project) }
 

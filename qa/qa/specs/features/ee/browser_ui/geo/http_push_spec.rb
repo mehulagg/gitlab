@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Geo', :orchestrated, :geo do
+  RSpec.describe 'Geo', :orchestrated, :geo do
     describe 'GitLab HTTP push' do
       let(:file_name) { 'README.md' }
 
       context 'regular git commit' do
-        it 'is replicated to the secondary' do
+        it 'is replicated to the secondary', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/690' do
           file_content = 'This is a Geo project! Commit from primary.'
           project = nil
 
@@ -14,7 +14,7 @@ module QA
             # Create a new Project
             project = Resource::Project.fabricate_via_api! do |project|
               project.name = 'geo-project'
-              project.description = 'Geo test project'
+              project.description = 'Geo test project for http push'
             end
 
             # Perform a git push over HTTP directly to the primary
@@ -60,7 +60,7 @@ module QA
       end
 
       context 'git-lfs commit' do
-        it 'is replicated to the secondary' do
+        it 'is replicated to the secondary', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/689' do
           file_content = 'This is a Geo project!'
           lfs_file_display_message = 'The rendered file could not be displayed because it is stored in LFS.'
           project = nil
@@ -68,7 +68,7 @@ module QA
           QA::Flow::Login.while_signed_in(address: :geo_primary) do
             project = Resource::Project.fabricate_via_api! do |project|
               project.name = 'geo-project'
-              project.description = 'Geo test project'
+              project.description = 'Geo test project for http lfs push'
             end
 
             # Perform a git push over HTTP directly to the primary

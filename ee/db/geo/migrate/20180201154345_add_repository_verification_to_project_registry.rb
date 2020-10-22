@@ -3,8 +3,6 @@ class AddRepositoryVerificationToProjectRegistry < ActiveRecord::Migration[4.2]
 
   # Set this constant to true if this migration requires downtime.
   DOWNTIME = false
-
-  # rubocop:disable Migration/AddColumn
   # rubocop:disable Migration/PreventStrings
   def change
     add_column :project_registry, :repository_verification_checksum, :string
@@ -18,5 +16,4 @@ class AddRepositoryVerificationToProjectRegistry < ActiveRecord::Migration[4.2]
     add_column :project_registry, :last_wiki_verification_failure, :string
   end
   # rubocop:enable Migration/PreventStrings
-  # rubocop:enable Migration/AddColumn
 end

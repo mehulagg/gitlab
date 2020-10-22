@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe SystemCheck::Geo::HttpConnectionCheck do
+RSpec.describe SystemCheck::Geo::HttpConnectionCheck do
   include EE::GeoHelpers
 
   let_it_be(:primary_node) { create(:geo_node, :primary) }

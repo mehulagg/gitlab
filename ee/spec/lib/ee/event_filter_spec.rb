@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EventFilter do
+RSpec.describe EventFilter do
   describe '#apply_filter' do
     let_it_be(:group) { create(:group, :public) }
     let_it_be(:project) { create(:project, :public) }

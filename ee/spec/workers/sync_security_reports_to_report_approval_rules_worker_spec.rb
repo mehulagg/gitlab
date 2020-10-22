@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SyncSecurityReportsToReportApprovalRulesWorker do
+RSpec.describe SyncSecurityReportsToReportApprovalRulesWorker do
   describe '#perform' do
     let(:pipeline) { double(:pipeline, id: 42) }
     let(:sync_service) { double(:service, execute: true) }

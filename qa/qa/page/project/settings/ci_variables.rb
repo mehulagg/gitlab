@@ -5,7 +5,7 @@ module QA
     module Project
       module Settings
         class CiVariables < Page::Base
-          include Common
+          include QA::Page::Settings::Common
 
           view 'app/assets/javascripts/ci_variable_list/components/ci_variable_modal.vue' do
             element :ci_variable_key_field
@@ -23,9 +23,13 @@ module QA
           end
 
           def fill_variable(key, value, masked)
-            fill_element :ci_variable_key_field, key
+            within_element(:ci_variable_key_field) { find('input').set key }
             fill_element :ci_variable_value_field, value
             click_ci_variable_save_button
+
+            wait_until(reload: false) do
+              within_element(:ci_variable_table_content) { has_element?(:edit_ci_variable_button) }
+            end
           end
 
           def click_add_variable

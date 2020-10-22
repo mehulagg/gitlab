@@ -2,15 +2,13 @@
 
 require 'spec_helper'
 
-describe 'View on environment', :js do
+RSpec.describe 'View on environment', :js do
   let(:branch_name) { 'feature' }
   let(:file_path) { 'files/ruby/feature.rb' }
   let(:project) { create(:project, :repository) }
   let(:user) { project.creator }
 
   before do
-    stub_feature_flags(diffs_batch_load: false)
-
     project.add_maintainer(user)
   end
 

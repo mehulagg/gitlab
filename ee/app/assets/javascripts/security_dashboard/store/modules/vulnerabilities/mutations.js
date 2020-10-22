@@ -128,7 +128,7 @@ export default {
     Vue.set(
       state.modal,
       'error',
-      s__('Security Reports|There was an error dismissing the vulnerability.'),
+      s__('SecurityReports|There was an error dismissing the vulnerability.'),
     );
   },
   [types.REQUEST_DISMISS_SELECTED_VULNERABILITIES](state) {
@@ -176,7 +176,7 @@ export default {
   },
   [types.RECEIVE_ADD_DISMISSAL_COMMENT_ERROR](state) {
     state.isDismissingVulnerability = false;
-    Vue.set(state.modal, 'error', s__('Security Reports|There was an error adding the comment.'));
+    Vue.set(state.modal, 'error', s__('SecurityReports|There was an error adding the comment.'));
   },
   [types.REQUEST_DELETE_DISMISSAL_COMMENT](state) {
     state.isDismissingVulnerability = true;
@@ -192,7 +192,7 @@ export default {
   },
   [types.RECEIVE_DELETE_DISMISSAL_COMMENT_ERROR](state) {
     state.isDismissingVulnerability = false;
-    Vue.set(state.modal, 'error', s__('Security Reports|There was an error deleting the comment.'));
+    Vue.set(state.modal, 'error', s__('SecurityReports|There was an error deleting the comment.'));
   },
   [types.REQUEST_REVERT_DISMISSAL](state) {
     state.isDismissingVulnerability = true;
@@ -211,7 +211,7 @@ export default {
     Vue.set(
       state.modal,
       'error',
-      s__('Security Reports|There was an error reverting the dismissal.'),
+      s__('SecurityReports|There was an error reverting the dismissal.'),
     );
   },
   [types.SHOW_DISMISSAL_DELETE_BUTTONS](state) {

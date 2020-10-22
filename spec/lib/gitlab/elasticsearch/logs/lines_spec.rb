@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Elasticsearch::Logs::Lines do
+RSpec.describe Gitlab::Elasticsearch::Logs::Lines do
   let(:client) { Elasticsearch::Transport::Client }
 
   let(:es_message_1) { { timestamp: "2019-12-13T14:35:34.034Z", pod: "production-6866bc8974-m4sk4", message: "10.8.2.1 - - [25/Oct/2019:08:03:22 UTC] \"GET / HTTP/1.1\" 200 13" } }
@@ -90,7 +90,7 @@ describe Gitlab::Elasticsearch::Logs::Lines do
     it 'can search on filebeat 6' do
       expect(client).to receive(:search).with(body: a_hash_equal_to_json(body_with_filebeat_6)).and_return(es_response)
 
-      result = subject.pod_logs(namespace, pod_name: pod_name, filebeat7: false)
+      result = subject.pod_logs(namespace, pod_name: pod_name, chart_above_v2: false)
       expect(result).to eq(logs: [es_message_4, es_message_3, es_message_2, es_message_1], cursor: cursor)
     end
   end

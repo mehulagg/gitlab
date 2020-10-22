@@ -9,32 +9,47 @@ module Ci
         exceeded: 0
       }.freeze
 
-      def initialize(user, project, namespace)
-        @context = Ci::Minutes::Context.new(user, project, namespace)
-        @level = calculate_level if eligible_for_notifications?
+      def initialize(project, namespace)
+        @context = Ci::Minutes::Context.new(project, namespace)
+        @stage = calculate_notification_stage if eligible_for_notifications?
       end
 
-      def show?
-        level.present?
+      def show?(current_user)
+        return false unless @stage
+        return false unless @context.level
+
+        Ability.allowed?(current_user, :read_ci_minutes_quota, @context.level)
       end
 
       def text
-        contextual_map.dig(level, :text)
+        contextual_map.dig(stage, :text)
       end
 
       def style
-        contextual_map.dig(level, :style)
+        contextual_map.dig(stage, :style)
+      end
+
+      def no_remaining_minutes?
+        stage == :exceeded
+      end
+
+      def running_out?
+        [:danger, :warning].include?(stage)
+      end
+
+      def stage_percentage
+        PERCENTAGES[stage]
       end
 
       private
 
-      attr_reader :context, :level
+      attr_reader :context, :stage
 
       def eligible_for_notifications?
-        context.shared_runners_minutes_limit_enabled? && context.can_see_status?
+        context.shared_runners_minutes_limit_enabled?
       end
 
-      def calculate_level
+      def calculate_notification_stage
         percentage = context.shared_runners_remaining_minutes_percent.to_i
 
         if percentage <= PERCENTAGES[:exceeded]
@@ -74,7 +89,7 @@ module Ci
           " minutes remaining.  Once it runs out, no new jobs or pipelines in its projects will run.") %
           {
             namespace_name: context.namespace_name,
-            percentage: PERCENTAGES[level]
+            percentage: PERCENTAGES[stage]
           }
       end
     end

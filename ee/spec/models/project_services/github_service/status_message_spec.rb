@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GithubService::StatusMessage do
+RSpec.describe GithubService::StatusMessage do
   include Rails.application.routes.url_helpers
 
   let(:project) { double(:project, namespace: "me", to_s: 'example_project') }

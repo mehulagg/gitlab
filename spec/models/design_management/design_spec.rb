@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DesignManagement::Design do
+RSpec.describe DesignManagement::Design do
   include DesignManagementTestHelpers
 
   let_it_be(:issue) { create(:issue) }
@@ -10,6 +10,13 @@ describe DesignManagement::Design do
   let_it_be(:design2) { create(:design, :with_versions, issue: issue, versions_count: 1) }
   let_it_be(:design3) { create(:design, :with_versions, issue: issue, versions_count: 1) }
   let_it_be(:deleted_design) { create(:design, :with_versions, deleted: true) }
+
+  it_behaves_like 'a class that supports relative positioning' do
+    let_it_be(:relative_parent) { create(:issue) }
+
+    let(:factory) { :design }
+    let(:default_params) { { issue: relative_parent } }
+  end
 
   describe 'relations' do
     it { is_expected.to belong_to(:project) }
@@ -21,12 +28,13 @@ describe DesignManagement::Design do
   end
 
   describe 'validations' do
-    subject(:design) { build(:design) }
+    subject(:design) { build(:design, issue: issue) }
 
     it { is_expected.to be_valid }
     it { is_expected.to validate_presence_of(:project) }
     it { is_expected.to validate_presence_of(:issue) }
     it { is_expected.to validate_presence_of(:filename) }
+    it { is_expected.to validate_length_of(:filename).is_at_most(255) }
     it { is_expected.to validate_uniqueness_of(:filename).scoped_to(:issue_id) }
 
     it "validates that the extension is an image" do
@@ -146,6 +154,25 @@ describe DesignManagement::Design do
       end
     end
 
+    describe '.ordered' do
+      before_all do
+        design1.update!(relative_position: 2)
+        design2.update!(relative_position: 1)
+        design3.update!(relative_position: nil)
+        deleted_design.update!(relative_position: nil)
+      end
+
+      it 'sorts by relative position and ID in ascending order' do
+        expect(described_class.ordered).to eq([design2, design1, design3, deleted_design])
+      end
+    end
+
+    describe '.in_creation_order' do
+      it 'sorts by ID in ascending order' do
+        expect(described_class.in_creation_order).to eq([design1, design2, design3, deleted_design])
+      end
+    end
+
     describe '.with_filename' do
       it 'returns correct design when passed a single filename' do
         expect(described_class.with_filename(design1.filename)).to eq([design1])
@@ -179,8 +206,17 @@ describe DesignManagement::Design do
     end
   end
 
+  describe ".build_full_path" do
+    it "builds the full path for a design" do
+      design = build(:design, issue: issue, filename: "hello.jpg")
+      expected_path = "#{DesignManagement.designs_directory}/issue-#{design.issue.iid}/hello.jpg"
+
+      expect(described_class.build_full_path(issue, design)).to eq(expected_path)
+    end
+  end
+
   describe '#visible_in?' do
-    let_it_be(:issue) { create(:issue) }
+    let_it_be(:issue) { create(:issue, project: issue.project) }
 
     # It is expensive to re-create complex histories, so we do it once, and then
     # assert that we can establish visibility at any given version.
@@ -236,7 +272,7 @@ describe DesignManagement::Design do
 
   describe '#status' do
     context 'the design is new' do
-      subject { build(:design) }
+      subject { build(:design, issue: issue) }
 
       it { is_expected.to have_attributes(status: :new) }
     end
@@ -256,7 +292,7 @@ describe DesignManagement::Design do
 
   describe '#deleted?' do
     context 'the design is new' do
-      let(:design) { build(:design) }
+      let(:design) { build(:design, issue: issue) }
 
       it 'is falsy' do
         expect(design).not_to be_deleted
@@ -280,7 +316,7 @@ describe DesignManagement::Design do
     end
 
     context 'the design has been deleted, but was then re-created' do
-      let(:design) { create(:design, :with_versions, versions_count: 1, deleted: true) }
+      let(:design) { create(:design, :with_versions, issue: issue, versions_count: 1, deleted: true) }
 
       it 'is falsy' do
         restore_designs(design)
@@ -298,7 +334,7 @@ describe DesignManagement::Design do
     end
 
     it "is true when there are no versions" do
-      expect(build(:design)).to be_new_design
+      expect(build(:design, issue: issue)).to be_new_design
     end
 
     it 'is false for deleted designs' do
@@ -335,7 +371,7 @@ describe DesignManagement::Design do
 
   describe "#full_path" do
     it "builds the full path for a design" do
-      design = build(:design, filename: "hello.jpg")
+      design = build(:design, issue: issue, filename: "hello.jpg")
       expected_path = "#{DesignManagement.designs_directory}/issue-#{design.issue.iid}/hello.jpg"
 
       expect(design.full_path).to eq(expected_path)
@@ -358,15 +394,13 @@ describe DesignManagement::Design do
       let(:versions_count) { 1 }
 
       it 'builds diff refs based on the empty tree if there was only one version' do
-        design = create(:design, :with_file, versions_count: 1)
-
         expect(design.diff_refs.base_sha).to eq(Gitlab::Git::BLANK_SHA)
         expect(design.diff_refs.head_sha).to eq(design.diff_refs.head_sha)
       end
     end
 
     it 'has no diff ref if new' do
-      design = build(:design)
+      design = build(:design, issue: issue)
 
       expect(design.diff_refs).to be_nil
     end
@@ -374,22 +408,15 @@ describe DesignManagement::Design do
 
   describe '#repository' do
     it 'is a design repository' do
-      design = build(:design)
+      design = build(:design, issue: issue)
 
       expect(design.repository).to be_a(DesignManagement::Repository)
     end
   end
 
-  # TODO these tests are being temporarily skipped unless run in EE,
-  # as we are in the process of moving Design Management to FOSS in 13.0
-  # in steps. In the current step the routes have not yet been moved.
-  #
-  # See https://gitlab.com/gitlab-org/gitlab/-/issues/212566#note_327724283.
   describe '#note_etag_key' do
     it 'returns a correct etag key' do
-      skip 'See https://gitlab.com/gitlab-org/gitlab/-/issues/212566#note_327724283' unless Gitlab.ee?
-
-      design = create(:design)
+      design = design1
 
       expect(design.note_etag_key).to eq(
         ::Gitlab::Routing.url_helpers.designs_project_issue_path(design.project, design.issue, { vueroute: design.filename })
@@ -398,47 +425,26 @@ describe DesignManagement::Design do
   end
 
   describe '#user_notes_count', :use_clean_rails_memory_store_caching do
-    let_it_be(:design) { create(:design, :with_file) }
-
-    subject { design.user_notes_count }
-
     # Note: Cache invalidation tests are in `design_user_notes_count_service_spec.rb`
-
     it 'returns a count of user-generated notes' do
-      create(:diff_note_on_design, noteable: design)
+      common_attrs = { issue: issue, project: issue.project, author: issue.project.creator }
+      design, second_design = create_list(:design, 2, :with_file, issue: issue)
+      create(:diff_note_on_design, **common_attrs, noteable: design)
+      create(:diff_note_on_design, **common_attrs, system: true, noteable: design)
+      create(:diff_note_on_design, **common_attrs, noteable: second_design)
 
-      is_expected.to eq(1)
-    end
-
-    it 'does not count notes on other designs' do
-      second_design = create(:design, :with_file)
-      create(:diff_note_on_design, noteable: second_design)
-
-      is_expected.to eq(0)
-    end
-
-    it 'does not count system notes' do
-      create(:diff_note_on_design, system: true, noteable: design)
-
-      is_expected.to eq(0)
+      expect(design.user_notes_count).to eq(1)
     end
   end
 
   describe '#after_note_changed' do
-    subject { build(:design) }
+    it 'calls #delete_cache on DesignUserNotesCountService for non-system notes' do
+      design = design1
 
-    it 'calls #delete_cache on DesignUserNotesCountService' do
-      expect_next_instance_of(DesignManagement::DesignUserNotesCountService) do |service|
-        expect(service).to receive(:delete_cache)
-      end
+      expect(design.send(:user_notes_count_service)).to receive(:delete_cache).once
 
-      subject.after_note_changed(build(:note))
-    end
-
-    it 'does not call #delete_cache on DesignUserNotesCountService when passed a system note' do
-      expect(DesignManagement::DesignUserNotesCountService).not_to receive(:new)
-
-      subject.after_note_changed(build(:note, :system))
+      design.after_note_changed(build(:note, project: issue.project))
+      design.after_note_changed(build(:note, :system, project: issue.project))
     end
   end
 
@@ -466,38 +472,6 @@ describe DesignManagement::Design do
 
       it 'uses the simple format' do
         expect(reference).to eq "#1[homescreen.jpg]"
-      end
-
-      context 'when the filename contains spaces, hyphens, periods, single-quotes, underscores and colons' do
-        let(:filename) { %q{a complex filename: containing - _ : etc., but still 'simple'.gif} }
-
-        it 'uses the simple format' do
-          expect(reference).to eq "#1[#{filename}]"
-        end
-      end
-
-      context 'when the filename contains HTML angle brackets' do
-        let(:filename) { 'a <em>great</em> filename.jpg' }
-
-        it 'uses Base64 encoding' do
-          expect(reference).to eq "#1[base64:#{Base64.strict_encode64(filename)}]"
-        end
-      end
-
-      context 'when the filename contains quotation marks' do
-        let(:filename) { %q{a "great" filename.jpg} }
-
-        it 'uses enclosing quotes, with backslash encoding' do
-          expect(reference).to eq %q{#1["a \"great\" filename.jpg"]}
-        end
-      end
-
-      context 'when the filename contains square brackets' do
-        let(:filename) { %q{a [great] filename.jpg} }
-
-        it 'uses enclosing quotes' do
-          expect(reference).to eq %q{#1["a [great] filename.jpg"]}
-        end
       end
     end
 
@@ -532,31 +506,55 @@ describe DesignManagement::Design do
   end
 
   describe 'reference_pattern' do
-    let(:match) { described_class.reference_pattern.match(ref) }
-    let(:ref) { design.to_reference }
-    let(:design) { build(:design, filename: filename) }
+    it 'is nil' do
+      expect(described_class.reference_pattern).to be_nil
+    end
+  end
 
-    context 'simple_file_name' do
-      let(:filename) { 'simple-file-name.jpg' }
+  describe 'link_reference_pattern' do
+    it 'is not nil' do
+      expect(described_class.link_reference_pattern).not_to be_nil
+    end
 
-      it 'matches :simple_file_name' do
-        expect(match[:simple_file_name]).to eq(filename)
+    it 'does not match the designs tab' do
+      expect(described_class.link_reference_pattern).not_to match(url_for_designs(issue))
+    end
+
+    where(:ext) do
+      (described_class::SAFE_IMAGE_EXT + described_class::DANGEROUS_IMAGE_EXT).flat_map do |ext|
+        [[ext], [ext.upcase]]
       end
     end
 
-    context 'quoted_file_name' do
-      let(:filename) { 'simple "file" name.jpg' }
+    with_them do
+      let(:filename) { "my-file.#{ext}" }
+      let(:design) { build(:design, issue: issue, filename: filename) }
+      let(:url) { url_for_design(design) }
+      let(:captures) { described_class.link_reference_pattern.match(url)&.named_captures }
 
-      it 'matches :simple_file_name' do
-        expect(match[:escaped_filename].gsub(/\\"/, '"')).to eq(filename)
+      it 'matches the URL' do
+        expect(captures).to include(
+          'url_filename' => filename,
+          'issue' => issue.iid.to_s,
+          'namespace' => design.project.namespace.to_param,
+          'project' => design.project.name
+        )
       end
-    end
 
-    context 'Base64 name' do
-      let(:filename) { '<>.png' }
+      context 'the file needs to be encoded' do
+        let(:filename) { "my file.#{ext}" }
 
-      it 'matches base_64_encoded_name' do
-        expect(Base64.decode64(match[:base_64_encoded_name])).to eq(filename)
+        it 'extracts the encoded filename' do
+          expect(captures).to include('url_filename' => 'my%20file.' + ext)
+        end
+      end
+
+      context 'the file is all upper case' do
+        let(:filename) { "file.#{ext}".upcase }
+
+        it 'extracts the encoded filename' do
+          expect(captures).to include('url_filename' => filename)
+        end
       end
     end
   end
@@ -577,6 +575,27 @@ describe DesignManagement::Design do
       let(:composite_ids) do
         all_results.map { |design| { issue_id: design.issue_id, filename: design.filename } }
       end
+    end
+  end
+
+  describe '#immediately_before' do
+    let_it_be(:design) { create(:design, issue: issue, relative_position: 100) }
+    let_it_be(:next_design) { create(:design, issue: issue, relative_position: 200) }
+
+    it 'is true when there is no element positioned between this item and the next' do
+      expect(design.immediately_before?(next_design)).to be true
+    end
+
+    it 'is false when there is an element positioned between this item and the next' do
+      create(:design, issue: issue, relative_position: 150)
+
+      expect(design.immediately_before?(next_design)).to be false
+    end
+
+    it 'is false when the next design is to the left of this design' do
+      further_left = create(:design, issue: issue, relative_position: 50)
+
+      expect(design.immediately_before?(further_left)).to be false
     end
   end
 end

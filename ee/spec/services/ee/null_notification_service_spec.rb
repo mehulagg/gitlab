@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::EE::NullNotificationService do
+RSpec.describe ::EE::NullNotificationService do
   it 'responds to methods implemented by NotificationService' do
     method = NotificationService.instance_methods(false).sample
 

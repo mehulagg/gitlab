@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DashboardEnvironmentEntity do
+RSpec.describe DashboardEnvironmentEntity do
   describe '.as_json' do
     it 'includes environment attributes' do
       user = create(:user)

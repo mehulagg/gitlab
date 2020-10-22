@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan', :reliable do
+  RSpec.describe 'Plan', :reliable do
     describe 'Issues weight visualization' do
       before do
         Flow::Login.sign_in
       end
 
       let(:milestone) do
-        QA::EE::Resource::ProjectMilestone.fabricate_via_api!
+        Resource::ProjectMilestone.fabricate_via_api!
       end
 
       let(:weight) { 1000 }
@@ -22,7 +22,7 @@ module QA
         end
       end
 
-      it 'shows the set weight in the issue page, in the milestone page, and in the issues list page' do
+      it 'shows the set weight in the issue page, in the milestone page, and in the issues list page', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/583' do
         issue.visit!
 
         Page::Project::Issue::Show.perform do |show|
@@ -31,7 +31,7 @@ module QA
           show.click_milestone_link
         end
 
-        QA::EE::Page::Project::Milestone::Show.perform do |show|
+        Page::Milestone::Show.perform do |show|
           expect(show.total_issue_weight_value).to have_content(weight)
         end
 

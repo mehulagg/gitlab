@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe FetchSubscriptionPlansService do
+RSpec.describe FetchSubscriptionPlansService do
   describe '#execute' do
-    let(:endpoint_url) { 'https://customers.gitlab.com/gitlab_plans' }
+    let(:endpoint_url) { "#{EE::SUBSCRIPTIONS_URL}/gitlab_plans" }
 
     subject { described_class.new(plan: 'bronze').execute }
 
@@ -26,7 +26,7 @@ describe FetchSubscriptionPlansService do
       end
 
       it 'logs failure' do
-        expect(Rails).to receive_message_chain(:logger, :info).with('Unable to connect to GitLab Customers App Error message')
+        expect(Gitlab::AppLogger).to receive(:info).with('Unable to connect to GitLab Customers App Error message')
 
         subject
       end

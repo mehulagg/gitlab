@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Prometheus custom metrics', :js do
+RSpec.describe 'Prometheus custom metrics', :js do
   include PrometheusHelpers
 
   include_context 'project service activation'

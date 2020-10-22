@@ -7,39 +7,41 @@ module IncidentManagement
     queue_namespace :incident_management
     feature_category :incident_management
 
-    def perform(project_id, alert_payload, am_alert_id = nil)
-      project = find_project(project_id)
-      return unless project
+    # `project_id` and `alert_payload` are deprecated and can be removed
+    # starting from 14.0 release
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/224500
+    def perform(_project_id = nil, _alert_payload = nil, alert_id = nil)
+      return unless alert_id
 
-      new_issue = create_issue(project, alert_payload)
-      return unless am_alert_id && new_issue.persisted?
+      alert = find_alert(alert_id)
+      return unless alert
 
-      link_issue_with_alert(am_alert_id, new_issue.id)
+      result = create_issue_for(alert)
+      return if result.success?
+
+      log_warning(alert, result)
     end
 
     private
 
-    def find_project(project_id)
-      Project.find_by_id(project_id)
+    def find_alert(alert_id)
+      AlertManagement::Alert.find_by_id(alert_id)
     end
 
-    def create_issue(project, alert_payload)
-      IncidentManagement::CreateIssueService
-        .new(project, alert_payload)
+    def create_issue_for(alert)
+      AlertManagement::CreateAlertIssueService
+        .new(alert, User.alert_bot)
         .execute
     end
 
-    def link_issue_with_alert(alert_id, issue_id)
-      alert = AlertManagement::Alert.find_by_id(alert_id)
-      return unless alert
+    def log_warning(alert, result)
+      issue_id = result.payload[:issue]&.id
 
-      return if alert.update(issue_id: issue_id)
-
-      Gitlab::GitLogger.warn(
-        message: 'Cannot link an Issue with Alert',
+      Gitlab::AppLogger.warn(
+        message: 'Cannot process an Incident',
         issue_id: issue_id,
-        alert_id: alert_id,
-        alert_errors: alert.errors.messages
+        alert_id: alert.id,
+        errors: result.message
       )
     end
   end

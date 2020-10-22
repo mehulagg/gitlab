@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Audit::Changes do
+RSpec.describe Audit::Changes do
   subject(:foo_instance) { Class.new { include Audit::Changes }.new }
 
   describe '.audit_changes' do
@@ -23,7 +23,7 @@ describe Audit::Changes do
         it 'does not call the audit event service' do
           user.update!(email: 'scrooge.mcduck@gitlab.com')
 
-          expect { audit! }.not_to change { SecurityEvent.count }
+          expect { audit! }.not_to change { AuditEvent.count }
         end
       end
 
@@ -33,7 +33,7 @@ describe Audit::Changes do
         it 'does not call the audit event service' do
           user.update!(name: 'Scrooge McDuck')
 
-          expect { audit! }.not_to change { SecurityEvent.count }
+          expect { audit! }.not_to change { AuditEvent.count }
         end
       end
     end

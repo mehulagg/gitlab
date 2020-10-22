@@ -41,8 +41,16 @@ module SystemNoteService
     ::SystemNotes::IssuablesService.new(noteable: issuable, project: project, author: author).change_issuable_assignees(old_assignees)
   end
 
-  def change_milestone(noteable, project, author, milestone)
-    ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).change_milestone(milestone)
+  def change_issuable_reviewers(issuable, project, author, old_reviewers)
+    ::SystemNotes::IssuablesService.new(noteable: issuable, project: project, author: author).change_issuable_reviewers(old_reviewers)
+  end
+
+  def relate_issue(noteable, noteable_ref, user)
+    ::SystemNotes::IssuablesService.new(noteable: noteable, project: noteable.project, author: user).relate_issue(noteable_ref)
+  end
+
+  def unrelate_issue(noteable, noteable_ref, user)
+    ::SystemNotes::IssuablesService.new(noteable: noteable, project: noteable.project, author: user).unrelate_issue(noteable_ref)
   end
 
   # Called when the due_date of a Noteable is changed
@@ -244,6 +252,74 @@ module SystemNoteService
 
   def auto_resolve_prometheus_alert(noteable, project, author)
     ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).auto_resolve_prometheus_alert
+  end
+
+  # Parameters:
+  #   - version [DesignManagement::Version]
+  #
+  # Example Note text:
+  #
+  #   "added [1 designs](link-to-version)"
+  #   "changed [2 designs](link-to-version)"
+  #
+  # Returns [Array<Note>]: the created Note objects
+  def design_version_added(version)
+    ::SystemNotes::DesignManagementService.new(noteable: version.issue, project: version.issue.project, author: version.author).design_version_added(version)
+  end
+
+  # Called when a new discussion is created on a design
+  #
+  # discussion_note - DiscussionNote
+  #
+  # Example Note text:
+  #
+  #   "started a discussion on screen.png"
+  #
+  # Returns the created Note object
+  def design_discussion_added(discussion_note)
+    design = discussion_note.noteable
+
+    ::SystemNotes::DesignManagementService.new(noteable: design.issue, project: design.project, author: discussion_note.author).design_discussion_added(discussion_note)
+  end
+
+  # Called when the merge request is approved by user
+  #
+  # noteable - Noteable object
+  # user     - User performing approve
+  #
+  # Example Note text:
+  #
+  #   "approved this merge request"
+  #
+  # Returns the created Note object
+  def approve_mr(noteable, user)
+    merge_requests_service(noteable, noteable.project, user).approve_mr
+  end
+
+  def unapprove_mr(noteable, user)
+    merge_requests_service(noteable, noteable.project, user).unapprove_mr
+  end
+
+  def change_alert_status(alert, author)
+    ::SystemNotes::AlertManagementService.new(noteable: alert, project: alert.project, author: author).change_alert_status(alert)
+  end
+
+  def new_alert_issue(alert, issue, author)
+    ::SystemNotes::AlertManagementService.new(noteable: alert, project: alert.project, author: author).new_alert_issue(issue)
+  end
+
+  def create_new_alert(alert, monitoring_tool)
+    ::SystemNotes::AlertManagementService.new(noteable: alert, project: alert.project).create_new_alert(monitoring_tool)
+  end
+
+  def change_incident_severity(incident, author)
+    ::SystemNotes::IncidentService.new(noteable: incident, project: incident.project, author: author).change_incident_severity
+  end
+
+  private
+
+  def merge_requests_service(noteable, project, author)
+    ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author)
   end
 end
 

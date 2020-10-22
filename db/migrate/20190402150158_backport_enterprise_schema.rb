@@ -193,12 +193,14 @@ class BackportEnterpriseSchema < ActiveRecord::Migration[5.0]
   end
 
   def drop_table_if_exists(table)
+    # rubocop:disable Migration/DropTable
     drop_table(table) if table_exists?(table)
+    # rubocop:enable Migration/DropTable
   end
 
   def add_column_with_default_if_not_exists(table, name, *args)
     unless column_exists?(table, name)
-      add_column_with_default(table, name, *args)
+      add_column_with_default(table, name, *args) # rubocop:disable Migration/AddColumnWithDefault
     end
   end
 
@@ -912,7 +914,7 @@ class BackportEnterpriseSchema < ActiveRecord::Migration[5.0]
         MSG
       end
 
-    raise Exception.new(message)
+    raise StandardError.new(message)
   end
 
   def create_missing_tables

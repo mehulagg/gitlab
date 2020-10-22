@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Project, :elastic do
+RSpec.describe Project, :elastic do
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
 
   context 'when limited indexing is on' do
-    let_it_be(:project) { create :project, name: 'test1' }
+    let_it_be(:project) { create :project, name: 'main_project' }
 
     before do
       stub_ee_application_setting(elasticsearch_limit_indexing: true)
@@ -47,17 +47,14 @@ describe Project, :elastic do
 
       it 'only indexes enabled projects' do
         Sidekiq::Testing.inline! do
-          # We have to trigger indexing of the previously-created project because we don't have a way to
-          # enable ES for it before it's created, at which point it won't be indexed anymore
-          ElasticIndexerWorker.perform_async(:index, project.class.to_s, project.id, project.es_id)
-          create :project, path: 'test2', description: 'awesome project'
+          create :project, path: 'test_two', description: 'awesome project'
           create :project
 
           ensure_elasticsearch_index!
         end
 
-        expect(described_class.elastic_search('test*', options: { project_ids: :any }).total_count).to eq(1)
-        expect(described_class.elastic_search('test2', options: { project_ids: :any }).total_count).to eq(0)
+        expect(described_class.elastic_search('main_pro*', options: { project_ids: :any }).total_count).to eq(1)
+        expect(described_class.elastic_search('test_two', options: { project_ids: :any }).total_count).to eq(0)
       end
     end
 
@@ -78,18 +75,69 @@ describe Project, :elastic do
 
       it 'indexes only projects under the group' do
         Sidekiq::Testing.inline! do
-          create :project, name: 'test1', group: create(:group, parent: group)
-          create :project, name: 'test2', description: 'awesome project'
-          create :project, name: 'test3', group: group
+          create :project, name: 'group_test1', group: create(:group, parent: group)
+          create :project, name: 'group_test2', description: 'awesome project'
+          create :project, name: 'group_test3', group: group
           create :project, path: 'someone_elses_project', name: 'test4'
 
           ensure_elasticsearch_index!
         end
 
-        expect(described_class.elastic_search('test*', options: { project_ids: :any }).total_count).to eq(2)
-        expect(described_class.elastic_search('test3', options: { project_ids: :any }).total_count).to eq(1)
-        expect(described_class.elastic_search('test2', options: { project_ids: :any }).total_count).to eq(0)
-        expect(described_class.elastic_search('test4', options: { project_ids: :any }).total_count).to eq(0)
+        expect(described_class.elastic_search('group_test*', options: { project_ids: :any }).total_count).to eq(2)
+        expect(described_class.elastic_search('"group_test3"', options: { project_ids: :any }).total_count).to eq(1)
+        expect(described_class.elastic_search('"group_test2"', options: { project_ids: :any }).total_count).to eq(0)
+        expect(described_class.elastic_search('"group_test4"', options: { project_ids: :any }).total_count).to eq(0)
+      end
+
+      context 'default_operator' do
+        RSpec.shared_examples 'use correct default_operator' do |operator|
+          before do
+            Sidekiq::Testing.inline! do
+              create :project, name: 'project1', group: group, description: 'test foo'
+              create :project, name: 'project2', group: group, description: 'test'
+              create :project, name: 'project3', group: group, description: 'foo'
+
+              ensure_elasticsearch_index!
+            end
+          end
+
+          it 'uses correct operator' do
+            count_for_or = described_class.elastic_search('test | foo', options: { project_ids: :any }).total_count
+            expect(count_for_or).to be > 0
+
+            count_for_and = described_class.elastic_search('test + foo', options: { project_ids: :any }).total_count
+            expect(count_for_and).to be > 0
+
+            expect(count_for_or).not_to be equal(count_for_and)
+
+            expected_count = case operator
+                             when :or
+                               count_for_or
+                             when :and
+                               count_for_and
+                             else
+                               raise ArgumentError, 'Invalid operator'
+                             end
+
+            expect(described_class.elastic_search('test foo', options: { project_ids: :any }).total_count).to eq(expected_count)
+          end
+        end
+
+        context 'feature flag is enabled' do
+          before do
+            stub_feature_flags(elasticsearch_use_or_default_operator: true)
+          end
+
+          include_examples 'use correct default_operator', :or
+        end
+
+        context 'feature flag is disabled' do
+          before do
+            stub_feature_flags(elasticsearch_use_or_default_operator: false)
+          end
+
+          include_examples 'use correct default_operator', :and
+        end
       end
     end
   end
@@ -128,12 +176,12 @@ describe Project, :elastic do
       ensure_elasticsearch_index!
     end
 
-    expect(described_class.elastic_search('test1', options: { project_ids: project_ids }).total_count).to eq(1)
-    expect(described_class.elastic_search('test2', options: { project_ids: project_ids }).total_count).to eq(1)
-    expect(described_class.elastic_search('awesome', options: { project_ids: project_ids }).total_count).to eq(1)
+    expect(described_class.elastic_search('"test1"', options: { project_ids: project_ids }).total_count).to eq(1)
+    expect(described_class.elastic_search('"test2"', options: { project_ids: project_ids }).total_count).to eq(1)
+    expect(described_class.elastic_search('"awesome"', options: { project_ids: project_ids }).total_count).to eq(1)
     expect(described_class.elastic_search('test*', options: { project_ids: project_ids }).total_count).to eq(2)
     expect(described_class.elastic_search('test*', options: { project_ids: :any }).total_count).to eq(3)
-    expect(described_class.elastic_search('someone_elses_project', options: { project_ids: project_ids }).total_count).to eq(0)
+    expect(described_class.elastic_search('"someone_elses_project"', options: { project_ids: project_ids }).total_count).to eq(0)
   end
 
   it "finds partial matches in project names" do
@@ -148,6 +196,13 @@ describe Project, :elastic do
     end
 
     expect(described_class.elastic_search('tesla', options: { project_ids: project_ids }).total_count).to eq(2)
+  end
+
+  it "names elasticsearch queries" do
+    described_class.elastic_search('*').total_count
+
+    assert_named_queries('doc:is_a:project',
+                         'project:match:search_terms')
   end
 
   it "returns json with all needed elements" do

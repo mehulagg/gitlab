@@ -2,7 +2,7 @@
 
 module API
   module Admin
-    class Sidekiq < Grape::API
+    class Sidekiq < ::API::Base
       before { authenticated_as_admin! }
 
       namespace 'admin' do

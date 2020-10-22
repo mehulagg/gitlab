@@ -3,39 +3,43 @@
 
 require 'yaml'
 
-SEE_DOC = "See [the documentation](https://docs.gitlab.com/ee/development/changelog.html)."
-CREATE_CHANGELOG_MESSAGE = <<~MSG
-If you want to create a changelog entry for GitLab FOSS, run the following:
+SEE_DOC = "See the [changelog documentation](https://docs.gitlab.com/ee/development/changelog.html)."
 
-```
-bin/changelog -m %<mr_iid>s "%<mr_title>s"
-```
-
-If you want to create a changelog entry for GitLab EE, run the following instead:
-
-```
-bin/changelog --ee -m %<mr_iid>s "%<mr_title>s"
+SUGGEST_MR_COMMENT = <<~SUGGEST_COMMENT
+```suggestion
+merge_request: %<mr_iid>s
 ```
 
-If this merge request [doesn't need a CHANGELOG entry](https://docs.gitlab.com/ee/development/changelog.html#what-warrants-a-changelog-entry), feel free to ignore this message.
-MSG
+#{SEE_DOC}
+SUGGEST_COMMENT
 
 def check_changelog_yaml(path)
-  yaml = YAML.safe_load(File.read(path))
+  raw_file = File.read(path)
+  yaml = YAML.safe_load(raw_file)
 
   fail "`title` should be set, in #{gitlab.html_link(path)}! #{SEE_DOC}" if yaml["title"].nil?
   fail "`type` should be set, in #{gitlab.html_link(path)}! #{SEE_DOC}" if yaml["type"].nil?
 
-  if yaml["merge_request"].nil? && !helper.security_mr?
-    message "Consider setting `merge_request` to #{gitlab.mr_json["iid"]} in #{gitlab.html_link(path)}. #{SEE_DOC}"
-  elsif yaml["merge_request"] != gitlab.mr_json["iid"] && !helper.security_mr?
+  return if helper.security_mr?
+
+  cherry_pick_against_stable_branch = helper.cherry_pick_mr? && helper.stable_branch?
+
+  if yaml["merge_request"].nil?
+    mr_line = raw_file.lines.find_index("merge_request:\n")
+
+    if mr_line
+      markdown(format(SUGGEST_MR_COMMENT, mr_iid: gitlab.mr_json["iid"]), file: path, line: mr_line.succ)
+    else
+      message "Consider setting `merge_request` to #{gitlab.mr_json["iid"]} in #{gitlab.html_link(path)}. #{SEE_DOC}"
+    end
+  elsif yaml["merge_request"] != gitlab.mr_json["iid"] && !cherry_pick_against_stable_branch
     fail "Merge request ID was not set to #{gitlab.mr_json["iid"]}! #{SEE_DOC}"
   end
 rescue Psych::SyntaxError, Psych::DisallowedClass, Psych::BadAlias
   # YAML could not be parsed, fail the build.
   fail "#{gitlab.html_link(path)} isn't valid YAML! #{SEE_DOC}"
 rescue StandardError => e
-  warn "There was a problem trying to check the Changelog. Exception: #{e.name} - #{e.message}"
+  warn "There was a problem trying to check the Changelog. Exception: #{e.class.name} - #{e.message}"
 end
 
 def check_changelog_path(path)
@@ -51,13 +55,8 @@ def check_changelog_path(path)
   end
 end
 
-def sanitized_mr_title
-  helper.sanitize_mr_title(gitlab.mr_json["title"])
-end
-
 if git.modified_files.include?("CHANGELOG.md")
-  fail "**CHANGELOG.md was edited.** Please remove the additions and create a CHANGELOG entry.\n\n" +
-    format(CREATE_CHANGELOG_MESSAGE, mr_iid: gitlab.mr_json["iid"], mr_title: sanitized_mr_title)
+  fail changelog.modified_text
 end
 
 changelog_found = changelog.found
@@ -65,7 +64,8 @@ changelog_found = changelog.found
 if changelog_found
   check_changelog_yaml(changelog_found)
   check_changelog_path(changelog_found)
-elsif changelog.needed?
-  message "**[CHANGELOG missing](https://docs.gitlab.com/ee/development/changelog.html)**:\n\n" +
-          format(CREATE_CHANGELOG_MESSAGE, mr_iid: gitlab.mr_json["iid"], mr_title: sanitized_mr_title)
+elsif changelog.required?
+  fail changelog.required_text
+elsif changelog.optional?
+  message changelog.optional_text
 end

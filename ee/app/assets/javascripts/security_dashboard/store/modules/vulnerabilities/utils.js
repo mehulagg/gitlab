@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { isEqual } from 'lodash';
 
 const isVulnerabilityLike = object =>

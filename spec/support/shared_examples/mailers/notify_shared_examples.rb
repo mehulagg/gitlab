@@ -28,6 +28,7 @@ RSpec.shared_examples 'an email sent to a user' do
     it 'is sent to user\'s group notification email' do
       group_notification_email = 'user+group@example.com'
 
+      create(:email, :confirmed, user: recipient, email: group_notification_email)
       create(:notification_setting, user: recipient, source: group, notification_email: group_notification_email)
 
       expect(subject).to deliver_to(group_notification_email)
@@ -263,6 +264,21 @@ RSpec.shared_examples 'appearance header and footer not enabled' do
 
       expect(subject.text_part).not_to have_body_text(/^Foo/)
       expect(subject.text_part).not_to have_body_text(/Bar$/)
+    end
+  end
+end
+
+RSpec.shared_examples 'no email is sent' do
+  it 'does not send an email' do
+    expect(subject.message).to be_a_kind_of(ActionMailer::Base::NullMail)
+  end
+end
+
+RSpec.shared_examples 'does not render a manage notifications link' do
+  it do
+    aggregate_failures do
+      expect(subject).not_to have_body_text("Manage all notifications")
+      expect(subject).not_to have_body_text(profile_notifications_url)
     end
   end
 end

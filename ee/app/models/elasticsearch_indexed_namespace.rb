@@ -20,7 +20,7 @@ class ElasticsearchIndexedNamespace < ApplicationRecord
 
   def self.index_first_n_namespaces_of_plan(plan, number_of_namespaces)
     indexed_namespaces = self.select(:namespace_id)
-    now = Time.now
+    now = Time.current
 
     ids = GitlabSubscription
       .with_hosted_plan(plan)
@@ -37,8 +37,8 @@ class ElasticsearchIndexedNamespace < ApplicationRecord
         { created_at: now, updated_at: now, namespace_id: id }
       end
 
-      Gitlab::Database.bulk_insert(table_name, insert_rows)
-      invalidate_elasticsearch_indexes_project_cache!
+      Gitlab::Database.bulk_insert(table_name, insert_rows) # rubocop:disable Gitlab/BulkInsert
+      invalidate_elasticsearch_indexes_cache!
 
       jobs = batch_ids.map { |id| [id, :index] }
 
@@ -56,7 +56,7 @@ class ElasticsearchIndexedNamespace < ApplicationRecord
 
     ids.in_groups_of(BATCH_OPERATION_SIZE, false) do |batch_ids|
       where(namespace_id: batch_ids).delete_all
-      invalidate_elasticsearch_indexes_project_cache!
+      invalidate_elasticsearch_indexes_cache!
 
       jobs = batch_ids.map { |id| [id, :delete] }
 

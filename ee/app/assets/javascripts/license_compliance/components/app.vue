@@ -7,15 +7,16 @@ import {
   GlIcon,
   GlTab,
   GlTabs,
-  GlBadge,
+  GlDeprecatedBadge as GlBadge,
   GlAlert,
 } from '@gitlab/ui';
-import { LICENSE_LIST } from '../store/constants';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
+import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
+import { LICENSE_LIST } from '../store/constants';
 import DetectedLicensesTable from './detected_licenses_table.vue';
 import PipelineInfo from './pipeline_info.vue';
-import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { getLocationHash } from '~/lib/utils/url_utility';
 
 export default {
   name: 'LicenseComplianceApp',
@@ -45,18 +46,16 @@ export default {
   },
   data() {
     return {
-      tabIndex: 0,
+      tabIndex: this.activeTabIndex(),
     };
   },
+  tabNames: ['licenses', 'policies'],
   computed: {
     ...mapState(LICENSE_LIST, ['initialized', 'licenses', 'reportInfo', 'listTypes', 'pageInfo']),
     ...mapState(LICENSE_MANAGEMENT, ['managedLicenses']),
     ...mapGetters(LICENSE_LIST, ['isJobSetUp', 'isJobFailed', 'hasPolicyViolations']),
     hasEmptyState() {
       return Boolean(!this.isJobSetUp || this.isJobFailed);
-    },
-    hasLicensePolicyList() {
-      return Boolean(this.glFeatures.licensePolicyList);
     },
     licenseCount() {
       return this.pageInfo.total;
@@ -68,11 +67,25 @@ export default {
       return this.tabIndex === 0;
     },
   },
+  watch: {
+    tabIndex: {
+      handler(newTabIndex) {
+        window.location.hash = this.$options.tabNames[newTabIndex];
+      },
+      // this ensures that the hash will be set on creation if it is empty
+      immediate: true,
+    },
+  },
   created() {
     this.fetchLicenses();
   },
   methods: {
     ...mapActions(LICENSE_LIST, ['fetchLicenses']),
+    activeTabIndex() {
+      const activeTabIndex = this.$options.tabNames.indexOf(getLocationHash());
+
+      return activeTabIndex !== -1 ? activeTabIndex : 0;
+    },
   },
 };
 </script>
@@ -94,7 +107,7 @@ export default {
   />
 
   <div v-else>
-    <gl-alert v-if="hasPolicyViolations" class="mt-2" variant="warning" :dismissible="false">
+    <gl-alert v-if="hasPolicyViolations" class="mt-3" variant="warning" :dismissible="false">
       {{
         s__(
           "Licenses|Detected licenses that are out-of-compliance with the project's assigned policies",
@@ -118,31 +131,26 @@ export default {
       <template v-else>{{ s__('Licenses|Specified policies in this project') }}</template>
     </header>
 
-    <!-- TODO: Remove feature flag -->
-    <template v-if="hasLicensePolicyList">
-      <gl-tabs v-model="tabIndex" content-class="pt-0">
-        <gl-tab>
-          <template #title>
-            {{ s__('Licenses|Detected in Project') }}
-            <gl-badge pill>{{ licenseCount }}</gl-badge>
-          </template>
+    <gl-tabs v-model="tabIndex" content-class="pt-0">
+      <gl-tab data-testid="licensesTab">
+        <template #title>
+          <span data-testid="licensesTabTitle">{{ s__('Licenses|Detected in Project') }}</span>
+          <gl-badge pill>{{ licenseCount }}</gl-badge>
+        </template>
 
-          <detected-licenses-table />
-        </gl-tab>
+        <detected-licenses-table />
+      </gl-tab>
 
-        <gl-tab>
-          <template #title>
-            {{ s__('Licenses|Policies') }}
-            <gl-badge pill>{{ policyCount }}</gl-badge>
-          </template>
+      <gl-tab data-testid="policiesTab">
+        <template #title>
+          <span data-qa-selector="policies_tab" data-testid="policiesTabTitle">{{
+            s__('Licenses|Policies')
+          }}</span>
+          <gl-badge pill>{{ policyCount }}</gl-badge>
+        </template>
 
-          <license-management />
-        </gl-tab>
-      </gl-tabs>
-    </template>
-
-    <template v-else>
-      <detected-licenses-table class="mt-3" />
-    </template>
+        <license-management />
+      </gl-tab>
+    </gl-tabs>
   </div>
 </template>

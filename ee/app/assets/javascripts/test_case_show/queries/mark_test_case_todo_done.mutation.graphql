@@ -1,0 +1,9 @@
+mutation markTestCaseTodoDone($todoMarkDoneInput: TodoMarkDoneInput!) {
+  todoMarkDone(input: $todoMarkDoneInput) {
+    errors
+    clientMutationId
+    todo {
+      id
+    }
+  }
+}

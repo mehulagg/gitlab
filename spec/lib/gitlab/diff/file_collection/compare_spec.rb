@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Diff::FileCollection::Compare do
+RSpec.describe Gitlab::Diff::FileCollection::Compare do
   include RepoHelpers
 
   let(:project) { create(:project, :repository) }
@@ -23,6 +23,7 @@ describe Gitlab::Diff::FileCollection::Compare do
         diff_refs: diffable.diff_refs
       }
     end
+
     let(:diffable) { Compare.new(raw_compare, project) }
     let(:stub_path) { '.gitignore' }
   end

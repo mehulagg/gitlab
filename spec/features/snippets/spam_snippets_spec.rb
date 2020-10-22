@@ -2,8 +2,10 @@
 
 require 'spec_helper'
 
-shared_examples_for 'snippet editor' do
+RSpec.describe 'snippet editor with spam', skip: "Will be handled in https://gitlab.com/gitlab-org/gitlab/-/issues/217722" do
   include_context 'includes Spam constants'
+
+  let_it_be(:user) { create(:user) }
 
   def description_field
     find('.js-description-input').find('input,textarea')
@@ -11,9 +13,6 @@ shared_examples_for 'snippet editor' do
 
   before do
     stub_feature_flags(allow_possible_spam: false)
-    stub_feature_flags(snippets_vue: false)
-    stub_feature_flags(snippets_edit_vue: false)
-    stub_feature_flags(monaco_snippets: flag)
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
 
     Gitlab::CurrentSettings.update!(
@@ -35,7 +34,7 @@ shared_examples_for 'snippet editor' do
 
     find('#personal_snippet_visibility_level_20').set(true)
     page.within('.file-editor') do
-      el = flag == true ? find('.inputarea') : find('.ace_text-input', visible: false)
+      el = find('.inputarea')
       el.send_keys 'Hello World!'
     end
   end
@@ -69,7 +68,7 @@ shared_examples_for 'snippet editor' do
   context 'when SpamVerdictService requires recaptcha' do
     before do
       expect_next_instance_of(Spam::SpamVerdictService) do |verdict_service|
-        expect(verdict_service).to receive(:execute).and_return(REQUIRE_RECAPTCHA)
+        expect(verdict_service).to receive(:execute).and_return(CONDITIONAL_ALLOW)
       end
     end
 
@@ -119,22 +118,6 @@ shared_examples_for 'snippet editor' do
 
       expect(page).not_to have_css('.recaptcha')
       expect(page).to have_content('My Snippet Title')
-    end
-  end
-end
-
-describe 'User creates snippet', :js do
-  let_it_be(:user) { create(:user) }
-
-  context 'when using Monaco' do
-    it_behaves_like "snippet editor" do
-      let(:flag) { true }
-    end
-  end
-
-  context 'when using ACE' do
-    it_behaves_like "snippet editor" do
-      let(:flag) { false }
     end
   end
 end

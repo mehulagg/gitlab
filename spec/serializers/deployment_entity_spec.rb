@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DeploymentEntity do
+RSpec.describe DeploymentEntity do
   let(:user) { developer }
   let(:developer) { create(:user) }
   let(:reporter) { create(:user) }
@@ -28,6 +28,10 @@ describe DeploymentEntity do
 
   it 'exposes nested information about branch' do
     expect(subject[:ref][:name]).to eq 'master'
+  end
+
+  it 'exposes status' do
+    expect(subject).to include(:status)
   end
 
   it 'exposes creation date' do

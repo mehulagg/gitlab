@@ -234,18 +234,6 @@ module API
               name: :project_url,
               type: String,
               desc: 'Project URL'
-            },
-            {
-              required: false,
-              name: :description,
-              type: String,
-              desc: 'Description'
-            },
-            {
-              required: false,
-              name: :title,
-              type: String,
-              desc: 'Title'
             }
           ],
           'buildkite' => [
@@ -259,15 +247,15 @@ module API
               required: true,
               name: :project_url,
               type: String,
-              desc: 'The buildkite project URL'
+              desc: 'The Buildkite pipeline URL'
             },
             {
               required: false,
               name: :enable_ssl_verification,
               type: Boolean,
-              desc: 'Enable SSL verification for communication'
+              desc: 'DEPRECATED: This parameter has no effect since SSL verification will always be enabled'
             }
-          ],
+        ],
           'campfire' => [
             {
               required: true,
@@ -288,6 +276,14 @@ module API
               desc: 'Campfire room'
             }
           ],
+          'confluence' => [
+            {
+              required: true,
+              name: :confluence_url,
+              type: String,
+              desc: 'The URL of the Confluence Cloud Workspace hosted on atlassian.net'
+            }
+          ],
           'custom-issue-tracker' => [
             {
               required: true,
@@ -306,18 +302,6 @@ module API
               name: :project_url,
               type: String,
               desc: 'Project URL'
-            },
-            {
-              required: false,
-              name: :description,
-              type: String,
-              desc: 'Description'
-            },
-            {
-              required: false,
-              name: :title,
-              type: String,
-              desc: 'Title'
             }
           ],
           'discord' => [
@@ -396,6 +380,12 @@ module API
               name: :webhook,
               type: String,
               desc: 'The Hangouts Chat webhook. e.g. https://chat.googleapis.com/v1/spaces…'
+            },
+            {
+              required: false,
+              name: :branches_to_be_notified,
+              type: String,
+              desc: 'Branches for which notifications are to be sent'
             },
             chat_notification_events
           ].flatten,
@@ -583,6 +573,18 @@ module API
               name: :api_url,
               type: String,
               desc: 'Prometheus API Base URL, like http://prometheus.example.com/'
+            },
+            {
+              required: true,
+              name: :google_iap_audience_client_id,
+              type: String,
+              desc: 'Client ID of the IAP secured resource (looks like IAP_CLIENT_ID.apps.googleusercontent.com)'
+            },
+            {
+              required: true,
+              name: :google_iap_service_account_json,
+              type: String,
+              desc: 'Contents of the credentials.json file of your service account, like: { "type": "service_account", "project_id": ... }'
             }
           ],
           'pushover' => [
@@ -635,12 +637,26 @@ module API
               name: :issues_url,
               type: String,
               desc: 'The issues URL'
+            }
+          ],
+          'ewm' => [
+            {
+              required: true,
+              name: :new_issue_url,
+              type: String,
+              desc: 'New Issue URL'
             },
             {
-              required: false,
-              name: :description,
+              required: true,
+              name: :project_url,
               type: String,
-              desc: 'The description of the tracker'
+              desc: 'Project URL'
+            },
+            {
+              required: true,
+              name: :issues_url,
+              type: String,
+              desc: 'Issues URL'
             }
           ],
           'youtrack' => [
@@ -655,12 +671,6 @@ module API
               name: :issues_url,
               type: String,
               desc: 'The issues URL'
-            },
-            {
-              required: false,
-              name: :description,
-              type: String,
-              desc: 'The description of the tracker'
             }
           ],
           'slack' => [
@@ -724,6 +734,15 @@ module API
               desc: 'The Unify Circuit webhook. e.g. https://circuit.com/rest/v2/webhooks/incoming/…'
             },
             chat_notification_events
+          ].flatten,
+          'webex-teams' => [
+            {
+              required: true,
+              name: :webhook,
+              type: String,
+              desc: 'The Webex Teams webhook. e.g. https://api.ciscospark.com/v1/webhooks/incoming/…'
+            },
+            chat_notification_events
           ].flatten
         }
       end
@@ -736,11 +755,13 @@ module API
           ::BambooService,
           ::BugzillaService,
           ::BuildkiteService,
+          ::ConfluenceService,
           ::CampfireService,
           ::CustomIssueTrackerService,
           ::DiscordService,
           ::DroneCiService,
           ::EmailsOnPushService,
+          ::EwmService,
           ::ExternalWikiService,
           ::FlowdockService,
           ::HangoutsChatService,

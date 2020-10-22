@@ -16,17 +16,18 @@ RSpec.shared_examples 'a certificate store' do
 
     subject { described_class.store }
 
-    context 'file does not exist' do
-      it 'raises error' do
-        expect { subject }.to(
-          raise_error(Gitlab::Auth::Smartcard::Certificate::InvalidCAFilePath))
+    context 'loads CA bundle' do
+      it 'uses correct method' do
+        expect_next_instance_of(OpenSSL::X509::Store) do |store|
+          expect(store).to receive(:add_file).and_return(true)
+        end
+
+        subject
       end
     end
 
-    context 'smartcard ca_file is not a valid certificate' do
+    context 'without valid CA file' do
       it 'raises error' do
-        expect(File).to(
-          receive(:read).with('ca_file').and_return('invalid certificate'))
         expect { subject }.to(
           raise_error(Gitlab::Auth::Smartcard::Certificate::InvalidCertificate))
       end

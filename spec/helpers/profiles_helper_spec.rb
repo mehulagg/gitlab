@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProfilesHelper do
+RSpec.describe ProfilesHelper do
   describe '#commit_email_select_options' do
     it 'returns an array with private commit email along with all the verified emails' do
       user = create(:user)
@@ -31,7 +31,7 @@ describe ProfilesHelper do
     end
 
     it 'returns DB stored commit_email' do
-      user.update(commit_email: Gitlab::PrivateCommitEmail::TOKEN)
+      user.update!(commit_email: Gitlab::PrivateCommitEmail::TOKEN)
 
       expect(helper.selected_commit_email(user)).to eq(Gitlab::PrivateCommitEmail::TOKEN)
     end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Repository do
+RSpec.describe Repository do
   include RepoHelpers
   include GitHelpers
 
@@ -88,8 +88,8 @@ describe Repository do
         subject { repository.tags_sorted_by('updated_desc').map(&:name) }
 
         before do
-          double_first = double(committed_date: Time.now)
-          double_last = double(committed_date: Time.now - 1.second)
+          double_first = double(committed_date: Time.current)
+          double_last = double(committed_date: Time.current - 1.second)
 
           allow(tag_a).to receive(:dereferenced_target).and_return(double_first)
           allow(tag_b).to receive(:dereferenced_target).and_return(double_last)
@@ -103,8 +103,8 @@ describe Repository do
         subject { repository.tags_sorted_by('updated_asc').map(&:name) }
 
         before do
-          double_first = double(committed_date: Time.now - 1.second)
-          double_last = double(committed_date: Time.now)
+          double_first = double(committed_date: Time.current - 1.second)
+          double_last = double(committed_date: Time.current)
 
           allow(tag_a).to receive(:dereferenced_target).and_return(double_last)
           allow(tag_b).to receive(:dereferenced_target).and_return(double_first)
@@ -125,8 +125,8 @@ describe Repository do
 
           rugged_repo(repository).tags.create(annotated_tag_name, 'a48e4fc218069f68ef2e769dd8dfea3991362175', options)
 
-          double_first = double(committed_date: Time.now - 1.second)
-          double_last = double(committed_date: Time.now)
+          double_first = double(committed_date: Time.current - 1.second)
+          double_last = double(committed_date: Time.current)
 
           allow(tag_a).to receive(:dereferenced_target).and_return(double_last)
           allow(tag_b).to receive(:dereferenced_target).and_return(double_first)
@@ -227,7 +227,7 @@ describe Repository do
         tree_builder = Rugged::Tree::Builder.new(rugged)
         tree_builder.insert({ oid: blob_id, name: "hello\x80world", filemode: 0100644 })
         tree_id = tree_builder.write
-        user = { email: "jcai@gitlab.com", time: Time.now, name: "John Cai" }
+        user = { email: "jcai@gitlab.com", time: Time.current.to_time, name: "John Cai" }
 
         Rugged::Commit.create(rugged, message: 'some commit message', parents: [rugged.head.target.oid], tree: tree_id, committer: user, author: user)
       end
@@ -252,6 +252,21 @@ describe Repository do
         end
       end
     end
+
+    context 'with filename with pathspec characters' do
+      let(:filename) { ':wq' }
+      let(:newrev) { project.repository.commit('master').sha }
+
+      before do
+        create_file_in_repo(project, 'master', 'master', filename, 'Test file')
+      end
+
+      subject { repository.last_commit_for_path('master', filename, literal_pathspec: true).id }
+
+      it 'returns a commit SHA' do
+        expect(subject).to eq(newrev)
+      end
+    end
   end
 
   describe '#last_commit_id_for_path' do
@@ -274,6 +289,21 @@ describe Repository do
         expect_to_raise_storage_error do
           broken_repository.last_commit_for_path(sample_commit.id, '.gitignore').id
         end
+      end
+    end
+
+    context 'with filename with pathspec characters' do
+      let(:filename) { ':wq' }
+      let(:newrev) { project.repository.commit('master').sha }
+
+      before do
+        create_file_in_repo(project, 'master', 'master', filename, 'Test file')
+      end
+
+      subject { repository.last_commit_id_for_path('master', filename, literal_pathspec: true) }
+
+      it 'returns a commit SHA' do
+        expect(subject).to eq(newrev)
       end
     end
   end
@@ -557,15 +587,19 @@ describe Repository do
       end
 
       it "is expired when the branches caches are expired" do
-        expect(cache).to receive(:delete).with(:merged_branch_names).at_least(:once)
+        expect(cache).to receive(:delete) do |*args|
+          expect(args).to include(:merged_branch_names)
+        end
 
-        repository.send(:expire_branches_cache)
+        repository.expire_branches_cache
       end
 
       it "is expired when the repository caches are expired" do
-        expect(cache).to receive(:delete).with(:merged_branch_names).at_least(:once)
+        expect(cache).to receive(:delete) do |*args|
+          expect(args).to include(:merged_branch_names)
+        end
 
-        repository.send(:expire_all_method_caches)
+        repository.expire_all_method_caches
       end
     end
 
@@ -974,7 +1008,7 @@ describe Repository do
       end
 
       it 'returns nil' do
-        expect(Rails.logger).to receive(:info).with("Remove remote job failed to create for #{project.id} with remote name joe.")
+        expect(Gitlab::AppLogger).to receive(:info).with("Remove remote job failed to create for #{project.id} with remote name joe.")
 
         expect(repository.async_remove_remote('joe')).to be_nil
       end
@@ -1215,6 +1249,33 @@ describe Repository do
     end
   end
 
+  describe '#has_ambiguous_refs?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:branch_names, :tag_names, :result) do
+      nil | nil | false
+      %w() | %w() | false
+      %w(a b) | %w() | false
+      %w() | %w(c d) | false
+      %w(a b) | %w(c d) | false
+      %w(a/b) | %w(c/d) | false
+      %w(a b) | %w(c d a/z) | true
+      %w(a b c/z) | %w(c d) | true
+      %w(a/b/z) | %w(a/b) | false # we only consider refs ambiguous before the first slash
+      %w(a/b/z) | %w(a/b a) | true
+      %w(ab) | %w(abc/d a b) | false
+    end
+
+    with_them do
+      it do
+        allow(repository).to receive(:branch_names).and_return(branch_names)
+        allow(repository).to receive(:tag_names).and_return(tag_names)
+
+        expect(repository.has_ambiguous_refs?).to eq(result)
+      end
+    end
+  end
+
   describe '#expand_ref' do
     let(:ref) { 'ref' }
 
@@ -1446,17 +1507,13 @@ describe Repository do
     let(:empty_repository) { create(:project_empty_repo).repository }
 
     it 'returns empty array for an empty repository' do
-      # rubocop:disable Style/WordArray
-      expect(empty_repository.blobs_at(['master', 'foobar'])).to eq([])
-      # rubocop:enable Style/WordArray
+      expect(empty_repository.blobs_at(%w[master foobar])).to eq([])
     end
 
     it 'returns blob array for a non-empty repository' do
       repository.create_file(User.last, 'foobar', 'CONTENT', message: 'message', branch_name: 'master')
 
-      # rubocop:disable Style/WordArray
-      blobs = repository.blobs_at([['master', 'foobar']])
-      # rubocop:enable Style/WordArray
+      blobs = repository.blobs_at([%w[master foobar]])
 
       expect(blobs.first.name).to eq('foobar')
       expect(blobs.size).to eq(1)
@@ -1900,8 +1957,9 @@ describe Repository do
         :has_visible_content?,
         :issue_template_names,
         :merge_request_template_names,
-        :metrics_dashboard_paths,
-        :xcode_project?
+        :user_defined_metrics_dashboard_paths,
+        :xcode_project?,
+        :has_ambiguous_refs?
       ])
 
       repository.after_change_head
@@ -2046,7 +2104,7 @@ describe Repository do
   describe '#expire_branches_cache' do
     it 'expires the cache' do
       expect(repository).to receive(:expire_method_caches)
-        .with(%i(branch_names merged_branch_names branch_count has_visible_content?))
+        .with(%i(branch_names merged_branch_names branch_count has_visible_content? has_ambiguous_refs?))
         .and_call_original
 
       repository.expire_branches_cache
@@ -2056,7 +2114,7 @@ describe Repository do
   describe '#expire_tags_cache' do
     it 'expires the cache' do
       expect(repository).to receive(:expire_method_caches)
-        .with(%i(tag_names tag_count))
+        .with(%i(tag_names tag_count has_ambiguous_refs?))
         .and_call_original
 
       repository.expire_tags_cache
@@ -2630,7 +2688,7 @@ describe Repository do
         expect(subject).to be_a(Gitlab::Git::Repository)
         expect(subject.relative_path).to eq(project.disk_path + '.wiki.git')
         expect(subject.gl_repository).to eq("wiki-#{project.id}")
-        expect(subject.gl_project_path).to eq(project.full_path)
+        expect(subject.gl_project_path).to eq(project.wiki.full_path)
       end
     end
   end
@@ -2647,6 +2705,7 @@ describe Repository do
        build(:commit, author: author_c),
        build(:commit, author: author_c)]
     end
+
     let(:order_by) { nil }
     let(:sort) { nil }
 
@@ -2869,6 +2928,36 @@ describe Repository do
     end
   end
 
+  describe '#project' do
+    it 'returns the project for a project snippet' do
+      snippet = create(:project_snippet)
+
+      expect(snippet.repository.project).to be(snippet.project)
+    end
+
+    it 'returns nil for a personal snippet' do
+      snippet = create(:personal_snippet)
+
+      expect(snippet.repository.project).to be_nil
+    end
+
+    it 'returns the project for a project wiki' do
+      wiki = create(:project_wiki)
+
+      expect(wiki.project).to be(wiki.repository.project)
+    end
+
+    it 'returns the container if it is a project' do
+      expect(repository.project).to be(project)
+    end
+
+    it 'returns nil if the container is not a project' do
+      repository.container = Group.new
+
+      expect(repository.project).to be_nil
+    end
+  end
+
   describe '#submodule_links' do
     it 'returns an instance of Gitlab::SubmoduleLinks' do
       expect(repository.submodule_links).to be_a(Gitlab::SubmoduleLinks)
@@ -2876,7 +2965,7 @@ describe Repository do
   end
 
   describe '#lfs_enabled?' do
-    let_it_be(:project) { create(:project, :repository, lfs_enabled: true) }
+    let_it_be(:project) { create(:project, :repository, :design_repo, lfs_enabled: true) }
 
     subject { repository.lfs_enabled? }
 
@@ -2899,16 +2988,10 @@ describe Repository do
     context 'for a project wiki repository' do
       let(:repository) { project.wiki.repository }
 
-      it 'returns true when LFS is enabled' do
-        stub_lfs_setting(enabled: true)
+      it 'delegates to the project' do
+        expect(project).to receive(:lfs_enabled?).and_return(true)
 
         is_expected.to be_truthy
-      end
-
-      it 'returns false when LFS is disabled' do
-        stub_lfs_setting(enabled: false)
-
-        is_expected.to be_falsy
       end
     end
 
@@ -2929,6 +3012,22 @@ describe Repository do
 
       it 'returns false when LFS is enabled' do
         stub_lfs_setting(enabled: true)
+
+        is_expected.to be_falsy
+      end
+    end
+
+    context 'for a design repository' do
+      let(:repository) { project.design_repository }
+
+      it 'returns true when LFS is enabled' do
+        stub_lfs_setting(enabled: true)
+
+        is_expected.to be_truthy
+      end
+
+      it 'returns false when LFS is disabled' do
+        stub_lfs_setting(enabled: false)
 
         is_expected.to be_falsy
       end

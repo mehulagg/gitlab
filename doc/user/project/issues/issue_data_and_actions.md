@@ -1,3 +1,9 @@
+---
+stage: Plan
+group: Project Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Issue Data and Actions
 
 Please read through the [GitLab Issue Documentation](index.md) for an overview on GitLab Issues.
@@ -15,13 +21,13 @@ You can find all the information for that issue on one screen.
 - **1.** [New Issue, close issue (reopen issue, report issue)](#new-issue-close-issue-reopen-issue-report-issue)
 - **2.** [To Do](#to-do)
 - **3.** [Assignee](#assignee)
-  - **3.1.** [Multiple Assignees **(STARTER)**](#multiple-assignees-starter)
-- **4.** [Epic **(ULTIMATE)**](#epic-ultimate)
+  - **3.1.** [Multiple Assignees **(STARTER)**](#multiple-assignees)
+- **4.** [Epic **(PREMIUM)**](#epic)
 - **5.** [Milestone](#milestone)
 - **6.** [Time tracking](#time-tracking)
 - **7.** [Due date](#due-date)
 - **8.** [Labels](#labels)
-- **9.** [Weight **(STARTER)**](#weight-starter)
+- **9.** [Weight **(STARTER)**](#weight)
 - **10.** [Confidentiality](#confidentiality)
 - **11.** [Lock issue](#lock-issue)
 - **12.** [Participants](#participants)
@@ -30,7 +36,7 @@ You can find all the information for that issue on one screen.
 - **15.** [Edit](#edit)
 - **16.** [Description](#description)
 - **17.** [Mentions](#mentions)
-- **18.** [Related Issues **(STARTER)**](#related-issues-starter)
+- **18.** [Related Issues](#related-issues)
 - **19.** [Related Merge Requests](#related-merge-requests)
 - **20.** [Award emoji](#award-emoji)
 - **21.** [Show all activity](#show-all-activity)
@@ -74,7 +80,7 @@ The button to do this has a different label depending on whether the issue is al
 List or not. If the issue is:
 
 - Already on your To-Do List: The button is labeled **Mark as done**. Click the button to remove the issue from your To-Do List.
-- Not on your To-Do List: The button is labeled **Add a To Do**. Click the button to add the issue to your To-Do List.
+- Not on your To-Do List: The button is labeled **Add a to do**. Click the button to add the issue to your To-Do List.
 
 ### Assignee
 
@@ -82,7 +88,7 @@ An issue can be assigned to:
 
 - Yourself.
 - Another person.
-- [Many people](#multiple-assignees-STARTER). **(STARTER)**
+- [Many people](#multiple-assignees). **(STARTER)**
 
 The assignee(s) can be changed as often as needed. The idea is that the assignees are
 responsible for that issue until it's reassigned to someone else to take it from there.
@@ -100,7 +106,7 @@ to track in large teams where there is shared ownership of an issue.
 In [GitLab Starter](https://about.gitlab.com/pricing/), you can
 [assign multiple people](multiple_assignees_for_issues.md) to an issue.
 
-### Epic **(ULTIMATE)**
+### Epic **(PREMIUM)**
 
 You can assign issues to an [Epic](../../group/epics/index.md), which allows better
 management of groups of related issues.
@@ -185,12 +191,12 @@ The plain text title and description of the issue fill the top center of the iss
 The description fully supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown-gfm),
 allowing many formatting options.
 
-> [Since GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/issues/10103), changes to an issue's description are listed in the [issue history](#issue-history).**(STARTER)**
+> [In GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/issues/10103) and later, changes to an issue's description are listed in the [issue history](#issue-history).**(STARTER)**
 
 ### Mentions
 
 You can mention a user or a group present in your GitLab instance with `@username` or
-`@groupname` and they will be notified via todos and email, unless they have disabled
+`@groupname` and they will be notified via to-dos and email, unless they have disabled
 all notifications in their profile settings. This is controlled in the
 [notification settings](../../profile/notifications.md).
 
@@ -202,7 +208,7 @@ TIP: **Tip:**
 Avoid mentioning `@all` in issues and merge requests, as it sends an email notification
 to all the members of that project's group, which can be interpreted as spam.
 
-### Related Issues **(STARTER)**
+### Related Issues
 
 Issues that were mentioned as [related issues](related_issues.md) are listed here.
 You can also click the `+` to add more related issues.
@@ -236,7 +242,7 @@ and selecting either:
 Also:
 
 - You can mention a user or a group present in your GitLab instance with
-  `@username` or `@groupname` and they will be notified via To-Do items
+  `@username` or `@groupname` and they will be notified via to-do items
   and email, unless they have [disabled all notifications](#notifications)
   in their profile settings.
 - Mentions for yourself (the current logged in user), will be highlighted
@@ -247,7 +253,7 @@ Also:
 
 ### Create Merge Request
 
-Create a new branch and [WIP merge request](../merge_requests/work_in_progress_merge_requests.md)
+Create a new branch and [**Draft** merge request](../merge_requests/work_in_progress_merge_requests.md)
 in one action. The branch will be named `issuenumber-title` by default, but you can
 choose any name, and GitLab will verify that it is not already in use. The merge request
 will automatically inherit the milestone and labels of the issue, and will be set to
@@ -296,7 +302,7 @@ You can also close the issue from here, so you don't need to scroll to the top o
 
 ### Zoom meetings
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/31103) in GitLab 12.3.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/31103) in GitLab 12.3.
 
 You can attach and remove Zoom meetings to issues using the `/zoom` and `/remove_zoom` [quick actions](../quick_actions.md) as part of
 [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown-gfm).
@@ -305,3 +311,9 @@ Attaching a [Zoom](https://zoom.us) call an issue
 results in a **Join Zoom meeting** button at the top of the issue, just under the header.
 
 Read more how to [add or remove a zoom meeting](associate_zoom_meeting.md).
+
+### Publish an issue **(ULTIMATE)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/30906) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
+
+If a status page application is associated with the project, you can use the `/publish` [quick action](../quick_actions.md) to publish the issue. Refer to [GitLab Status Page](../../../operations/incident_management/status_page.md) for more information.

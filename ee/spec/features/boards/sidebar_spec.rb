@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Issue Boards', :js do
+RSpec.describe 'Issue Boards', :js do
   include BoardHelpers
 
   let(:user)         { create(:user) }
@@ -151,7 +151,7 @@ describe 'Issue Boards', :js do
   context 'epic' do
     before do
       stub_licensed_features(epics: true)
-
+      group.add_owner(user)
       visit project_board_path(project, board)
       wait_for_requests
     end
@@ -166,14 +166,39 @@ describe 'Issue Boards', :js do
     end
 
     context 'when the issue is associated with an epic' do
-      let(:epic)          { create(:epic, group: group) }
-      let!(:epic_issue)   { create(:epic_issue, issue: issue1, epic: epic) }
+      let(:epic1)         { create(:epic, group: group, title: 'Foo') }
+      let!(:epic2)        { create(:epic, group: group, title: 'Bar') }
+      let!(:epic_issue)   { create(:epic_issue, issue: issue1, epic: epic1) }
 
       it 'displays name of epic and links to it' do
         click_card(card1)
         wait_for_requests
 
-        expect(find('.js-epic-label')).to have_link(epic.title, href: epic_path(epic))
+        expect(find('.js-epic-label')).to have_link(epic1.title, href: epic_path(epic1))
+      end
+
+      it 'updates the epic associated with the issue' do
+        click_card(card1)
+        wait_for_requests
+
+        page.within(find('.js-epic-block')) do
+          page.find('.sidebar-dropdown-toggle').click
+          wait_for_requests
+
+          click_link epic2.title
+          wait_for_requests
+
+          expect(page.find('.value')).to have_content(epic2.title)
+        end
+
+        # Ensure that boards_store is also updated the epic associated with the issue.
+        click_card(card1)
+        wait_for_requests
+
+        click_card(card1)
+        wait_for_requests
+
+        expect(find('.js-epic-label')).to have_content(epic2.title)
       end
     end
   end

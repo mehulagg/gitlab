@@ -161,6 +161,26 @@ class NotifyPreview < ActionMailer::Preview
     Notify.remote_mirror_update_failed_email(remote_mirror.id, user.id).message
   end
 
+  def unknown_sign_in_email
+    Notify.unknown_sign_in_email(user, '127.0.0.1', Time.current).message
+  end
+
+  def service_desk_new_note_email
+    cleanup do
+      note = create_note(noteable_type: 'Issue', noteable_id: issue.id, note: 'Issue note content')
+
+      Notify.service_desk_new_note_email(issue.id, note.id).message
+    end
+  end
+
+  def service_desk_thank_you_email
+    Notify.service_desk_thank_you_email(issue.id).message
+  end
+
+  def merge_when_pipeline_succeeds_email
+    Notify.merge_when_pipeline_succeeds_email(user.id, merge_request.id, user.id).message
+  end
+
   private
 
   def project

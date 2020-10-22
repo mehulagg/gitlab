@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::GroupLinksController do
+RSpec.describe Groups::GroupLinksController do
   let(:shared_with_group) { create(:group, :private) }
   let(:shared_group) { create(:group, :private) }
   let(:user) { create(:user) }
@@ -13,6 +13,21 @@ describe Groups::GroupLinksController do
     sign_in(user)
 
     shared_with_group.add_developer(group_member)
+  end
+
+  shared_examples 'placeholder is passed as `id` parameter' do |action|
+    it 'returns a 404' do
+      post(
+        action,
+        params: {
+          group_id: shared_group,
+          id: ':id'
+        },
+        format: :json
+      )
+
+      expect(response).to have_gitlab_http_status(:not_found)
+    end
   end
 
   describe '#create' do
@@ -99,18 +114,6 @@ describe Groups::GroupLinksController do
           expect(flash[:alert]).to eq('error')
         end
       end
-
-      context 'when feature flag is disabled' do
-        before do
-          stub_feature_flags(share_group_with_group: false)
-        end
-
-        it 'renders 404' do
-          subject
-
-          expect(response).to have_gitlab_http_status(:not_found)
-        end
-      end
     end
 
     context 'when user does not have access to the group' do
@@ -137,6 +140,8 @@ describe Groups::GroupLinksController do
         expect(response).to have_gitlab_http_status(:not_found)
       end
     end
+
+    include_examples 'placeholder is passed as `id` parameter', :create
   end
 
   describe '#update' do
@@ -148,10 +153,15 @@ describe Groups::GroupLinksController do
     let(:expiry_date) { 1.month.from_now.to_date }
 
     subject do
-      post(:update, params: { group_id: shared_group,
-                               id: link.id,
-                               group_link: { group_access: Gitlab::Access::GUEST,
-                                             expires_at: expiry_date } })
+      post(
+        :update,
+        params: {
+          group_id: shared_group,
+          id: link.id,
+          group_link: { group_access: Gitlab::Access::GUEST, expires_at: expiry_date }
+        },
+        format: :json
+      )
     end
 
     context 'when user has admin access to the shared group' do
@@ -172,6 +182,26 @@ describe Groups::GroupLinksController do
         expect(link.expires_at).to eq(expiry_date)
       end
 
+      context 'when `expires_at` is set' do
+        it 'returns correct json response' do
+          travel_to Time.now.utc.beginning_of_day
+
+          subject
+
+          expect(json_response).to eq({ "expires_in" => "about 1 month", "expires_soon" => false })
+        end
+      end
+
+      context 'when `expires_at` is not set' do
+        let(:expiry_date) { nil }
+
+        it 'returns empty json response' do
+          subject
+
+          expect(json_response).to be_empty
+        end
+      end
+
       it 'updates project permissions' do
         expect { subject }.to change { group_member.can?(:create_release, project) }.from(true).to(false)
       end
@@ -185,17 +215,7 @@ describe Groups::GroupLinksController do
       end
     end
 
-    context 'when feature flag is disabled' do
-      before do
-        stub_feature_flags(share_group_with_group: false)
-      end
-
-      it 'renders 404' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
+    include_examples 'placeholder is passed as `id` parameter', :update
   end
 
   describe '#destroy' do
@@ -232,16 +252,6 @@ describe Groups::GroupLinksController do
       end
     end
 
-    context 'when feature flag is disabled' do
-      before do
-        stub_feature_flags(share_group_with_group: false)
-      end
-
-      it 'renders 404' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
+    include_examples 'placeholder is passed as `id` parameter', :destroy
   end
 end

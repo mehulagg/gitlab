@@ -1,15 +1,14 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
+RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
   include JavaScriptFixturesHelpers
 
-  let(:group) { create(:group)}
+  let(:group) { create(:group) }
+  let(:value_stream) { create(:cycle_analytics_group_value_stream, group: group) }
   let(:project) { create(:project, :repository, namespace: group) }
   let(:user) { create(:user, :admin) }
-  # let(:issue) { create(:issue, project: project, created_at: 4.days.ago) }
   let(:milestone) { create(:milestone, project: project) }
-  # let(:mr) { create_merge_request_closing_issue(user, project, issue, commit_message: "References #{issue.to_reference}") }
 
   let(:issue) { create(:issue, project: project, created_at: 4.days.ago) }
   let(:issue_1) { create(:issue, project: project, created_at: 5.days.ago) }
@@ -99,7 +98,7 @@ describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
 
     issue = create(:issue, project: project, created_at: 20.days.ago, author: user)
 
-    Timecop.travel(5.days.ago) do
+    travel_to(5.days.ago) do
       Issues::UpdateService.new(
         project,
         user,
@@ -107,7 +106,7 @@ describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
       ).execute(issue)
     end
 
-    Timecop.travel(2.days.ago) do
+    travel_to(2.days.ago) do
       Issues::UpdateService.new(
         project,
         user,
@@ -125,18 +124,17 @@ describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
     clean_frontend_fixtures('cycle_analytics/')
   end
 
-  describe Analytics::CycleAnalytics::StagesController, type: :controller do
+  describe Groups::Analytics::CycleAnalytics::StagesController, type: :controller do
     render_views
 
     let(:params) { { created_after: 3.months.ago, created_before: Time.now, group_id: group.full_path } }
 
     before do
-      stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => true)
       stub_licensed_features(cycle_analytics_for_groups: true)
 
       # Persist the default stages
       Gitlab::Analytics::CycleAnalytics::DefaultStages.all.map do |params|
-        group.cycle_analytics_stages.build(params).save!
+        group.cycle_analytics_stages.build(params.merge(value_stream: value_stream)).save!
       end
 
       create_label_based_cycle_analytics_stage
@@ -184,16 +182,26 @@ describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
     end
   end
 
-  describe Analytics::CycleAnalytics::SummaryController, type: :controller do
+  describe Groups::Analytics::CycleAnalytics::SummaryController, type: :controller do
     render_views
 
     let(:params) { { created_after: 3.months.ago, created_before: Time.now, group_id: group.full_path } }
 
+    def prepare_cycle_time_data
+      issue.update!(created_at: 5.days.ago)
+      issue.metrics.update!(first_mentioned_in_commit_at: 4.days.ago)
+      issue.update!(closed_at: 3.days.ago)
+
+      issue_1.update!(created_at: 8.days.ago)
+      issue_1.metrics.update!(first_mentioned_in_commit_at: 6.days.ago)
+      issue_1.update!(closed_at: 1.day.ago)
+    end
+
     before do
-      stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => true)
       stub_licensed_features(cycle_analytics_for_groups: true)
 
       prepare_cycle_analytics_data
+      prepare_cycle_time_data
 
       sign_in(user)
     end
@@ -203,9 +211,15 @@ describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
 
       expect(response).to be_successful
     end
+
+    it 'analytics/value_stream_analytics/time_summary.json' do
+      get(:time_summary, params: params, format: :json)
+
+      expect(response).to be_successful
+    end
   end
 
-  describe Analytics::TasksByTypeController, type: :controller do
+  describe Groups::Analytics::TasksByTypeController, type: :controller do
     render_views
 
     let(:label) { create(:group_label, group: group) }

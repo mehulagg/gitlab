@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe Pseudonymizer::Uploader do
+RSpec.describe Pseudonymizer::Uploader do
   let(:base_dir) { Dir.mktmpdir }
   let(:options) do
     Pseudonymizer::Options.new(
       config: YAML.load_file(Gitlab.config.pseudonymizer.manifest)
     )
   end
+
   let(:remote_directory) { subject.send(:remote_directory) }
 
   subject { described_class.new(options) }

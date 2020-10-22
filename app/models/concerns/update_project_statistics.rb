@@ -35,8 +35,8 @@ module UpdateProjectStatistics
       @project_statistics_name = project_statistics_name
       @statistic_attribute = statistic_attribute
 
-      after_save(:update_project_statistics_after_save, if: :update_project_statistics_attribute_changed?)
-      after_destroy(:update_project_statistics_after_destroy, unless: :project_destroyed?)
+      after_save(:update_project_statistics_after_save, if: :update_project_statistics_after_save?)
+      after_destroy(:update_project_statistics_after_destroy, if: :update_project_statistics_after_destroy?)
     end
 
     private :update_project_statistics
@@ -44,6 +44,14 @@ module UpdateProjectStatistics
 
   included do
     private
+
+    def update_project_statistics_after_save?
+      update_project_statistics_attribute_changed?
+    end
+
+    def update_project_statistics_after_destroy?
+      !project_destroyed?
+    end
 
     def update_project_statistics_after_save
       attr = self.class.statistic_attribute
@@ -67,25 +75,12 @@ module UpdateProjectStatistics
     end
 
     def schedule_update_project_statistic(delta)
-      return if delta.zero?
-
-      if Feature.enabled?(:update_project_statistics_after_commit, default_enabled: true)
-        # Update ProjectStatistics after the transaction
-        run_after_commit do
-          ProjectStatistics.increment_statistic(
-            project_id, self.class.project_statistics_name, delta)
-        end
-      else
-        # Use legacy-way to update within transaction
-        ProjectStatistics.increment_statistic(
-          project_id, self.class.project_statistics_name, delta)
-      end
+      return if delta == 0
+      return if project.nil?
 
       run_after_commit do
-        next if project.nil?
-
-        Namespaces::ScheduleAggregationWorker.perform_async(
-          project.namespace_id)
+        ProjectStatistics.increment_statistic(
+          project, self.class.project_statistics_name, delta)
       end
     end
   end

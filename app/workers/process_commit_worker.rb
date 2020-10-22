@@ -13,8 +13,8 @@ class ProcessCommitWorker
   feature_category :source_code_management
   urgency :high
   weight 3
-
   idempotent!
+  loggable_arguments 2, 3
 
   # project_id - The ID of the project this commit belongs to.
   # user_id - The ID of the user that pushed the commit.
@@ -80,7 +80,7 @@ class ProcessCommitWorker
     # manually parse these values.
     hash.each do |key, value|
       if key.to_s.end_with?(date_suffix) && value.is_a?(String)
-        hash[key] = Time.parse(value)
+        hash[key] = Time.zone.parse(value)
       end
     end
 

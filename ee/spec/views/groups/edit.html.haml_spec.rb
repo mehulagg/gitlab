@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'groups/edit.html.haml' do
+RSpec.describe 'groups/edit.html.haml' do
   let_it_be(:user) { create(:user) }
   let(:group) { create(:group) }
 
@@ -14,50 +14,57 @@ describe 'groups/edit.html.haml' do
   end
 
   context 'ip_restriction' do
-    before do
-      stub_licensed_features(group_ip_restriction: true)
+    shared_examples_for 'renders ip_restriction setting' do
+      it 'renders ranges in comma separated format' do
+        render
+
+        expect(rendered).to render_template('groups/settings/_ip_restriction')
+        expect(rendered).to(have_field('group_ip_restriction_ranges',
+                                       { disabled: false,
+                                         with: ranges.join(","),
+                                         type: :hidden }))
+      end
     end
 
-    context 'top-level group' do
-      shared_examples 'renders ip_restriction setting' do
-        it 'renders ranges in comma separated format' do
-          render
+    shared_examples_for 'does not render ip_restriction setting' do
+      it 'does not render the ranges' do
+        render
 
-          expect(rendered).to render_template('groups/settings/_ip_restriction')
-          expect(rendered).to(have_field('group_ip_restriction_ranges',
-                                         { disabled: false,
-                                           with: ranges.join(",") }))
-        end
+        expect(rendered).to render_template('groups/settings/_ip_restriction')
+        expect(rendered).not_to have_field('group_ip_restriction_ranges', { type: :hidden })
       end
+    end
 
+    context 'feature is enabled' do
       before do
-        ranges.each do |range|
-          create(:ip_restriction, group: group, range: range)
+        stub_licensed_features(group_ip_restriction: true)
+      end
+
+      context 'top-level group' do
+        before do
+          ranges.each do |range|
+            create(:ip_restriction, group: group, range: range)
+          end
         end
-      end
 
-      context 'with single subnet' do
-        let(:ranges) { ['192.168.0.0/24'] }
+        context 'with single subnet' do
+          let(:ranges) { ['192.168.0.0/24'] }
 
-        it_behaves_like 'renders ip_restriction setting'
-      end
+          it_behaves_like 'renders ip_restriction setting'
+        end
 
-      context 'with multiple subnets' do
-        let(:ranges) { ['192.168.0.0/24', '192.168.1.0/8'] }
+        context 'with multiple subnets' do
+          let(:ranges) { ['192.168.0.0/24', '192.168.1.0/8'] }
 
-        it_behaves_like 'renders ip_restriction setting'
+          it_behaves_like 'renders ip_restriction setting'
+        end
       end
     end
 
     context 'subgroup' do
       let(:group) { create(:group, :nested) }
 
-      it 'does not show ip_restriction setting' do
-        render
-
-        expect(rendered).to render_template('groups/settings/_ip_restriction')
-        expect(rendered).not_to have_field('group_ip_restriction_attributes_range')
-      end
+      it_behaves_like 'does not render ip_restriction setting'
     end
 
     context 'feature is disabled' do
@@ -65,58 +72,67 @@ describe 'groups/edit.html.haml' do
         stub_licensed_features(group_ip_restriction: false)
       end
 
-      it 'does not show ip_restriction setting' do
-        render
-
-        expect(rendered).to render_template('groups/settings/_ip_restriction')
-        expect(rendered).not_to have_field('group_ip_restriction_attributes_range')
-      end
+      it_behaves_like 'does not render ip_restriction setting'
     end
   end
 
   context 'allowed_email_domain' do
-    before do
-      allow(group).to receive(:feature_available?).and_return(false)
-      allow(group).to receive(:feature_available?).with(:group_allowed_email_domains).and_return(true)
-    end
-
-    context 'top-level group' do
-      before do
-        create(:allowed_email_domain, group: group)
-      end
-
-      it 'renders allowed_email_domain setting' do
+    shared_examples_for 'renders allowed_email_domain setting' do
+      it 'renders domains in comma separated format' do
         render
 
         expect(rendered).to render_template('groups/settings/_allowed_email_domain')
-        expect(rendered).to(have_field('group_allowed_email_domain_attributes_domain',
+        expect(rendered).to(have_field('group_allowed_email_domains_list',
                                        { disabled: false,
-                                         with: 'gitlab.com' }))
+                                         with: domains.join(","),
+                                         type: :hidden }))
       end
     end
 
-    context 'subgroup' do
-      let(:group) { create(:group, :nested) }
-
-      it 'does not show allowed_email_domain setting' do
+    shared_examples_for 'does not render allowed_email_domain setting' do
+      it 'does not render the domains' do
         render
 
         expect(rendered).to render_template('groups/settings/_allowed_email_domain')
-        expect(rendered).not_to have_field('group_allowed_email_domain_attributes_domain')
+        expect(rendered).not_to have_field('group_allowed_email_domains_list')
+      end
+    end
+
+    context 'feature is enabled' do
+      before do
+        allow(group).to receive(:feature_available?).and_return(false)
+        allow(group).to receive(:feature_available?).with(:group_allowed_email_domains).and_return(true)
+      end
+
+      context 'top-level group' do
+        before do
+          domains.each do |domain|
+            create(:allowed_email_domain, group: group, domain: domain)
+          end
+        end
+
+        context 'with single domain' do
+          let(:domains) { ['acme.com'] }
+
+          it_behaves_like 'renders allowed_email_domain setting'
+        end
+
+        context 'with multiple domain' do
+          let(:domains) { ['acme.com', 'twitter.com'] }
+
+          it_behaves_like 'renders allowed_email_domain setting'
+        end
+      end
+
+      context 'subgroup' do
+        let(:group) { create(:group, :nested) }
+
+        it_behaves_like 'does not render allowed_email_domain setting'
       end
     end
 
     context 'feature is disabled' do
-      before do
-        stub_licensed_features(group_allowed_email_domains: false)
-      end
-
-      it 'does not show allowed_email_domain setting' do
-        render
-
-        expect(rendered).to render_template('groups/settings/_allowed_email_domain')
-        expect(rendered).not_to have_field('group_allowed_email_domain_attributes_domain')
-      end
+      it_behaves_like 'does not render allowed_email_domain setting'
     end
   end
 end

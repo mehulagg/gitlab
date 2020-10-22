@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 cd $(dirname $0)/..
 app_root=$(pwd)
@@ -43,7 +43,7 @@ restart()
 start_sidekiq()
 {
   cmd="exec"
-  chpst=$(which chpst)
+  chpst=$(command -v chpst)
 
   if [ -n "$chpst" ]; then
     cmd="${cmd} ${chpst} -P"

@@ -1,3 +1,10 @@
+---
+type: reference, howto
+stage: Manage
+group: Import
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Gemnasium **(ULTIMATE)**
 
 This guide describes how to migrate from Gemnasium.com to your own GitLab
@@ -76,7 +83,7 @@ back to both GitLab and GitHub when completed.
 
    ![click on connected project](img/gemnasium/project_connected.png)
 
-   Your project is now mirrored on GitLab, where the Runners will be able to access
+   Your project is now mirrored on GitLab, where the runners will be able to access
    your source code and run your tests.
 
    Optional step: If you set this up on GitLab.com, make sure the project is
@@ -89,7 +96,7 @@ back to both GitLab and GitHub when completed.
    The mirroring is pull-only by default, so you may create or update the file on
    GitHub:
 
-   ![Edit gitlab-ci.yml file](img/gemnasium/edit_gitlab-ci.png)
+   ![Edit YAML file](img/gemnasium/edit_gitlab-ci.png)
 
 1. Once your file has been committed, a new pipeline will be automatically
    triggered if your file is valid:
@@ -98,7 +105,7 @@ back to both GitLab and GitHub when completed.
 
 1. The result of the job will be visible directly from the pipeline view:
 
-   ![Security Dashboard](../../application_security/security_dashboard/img/pipeline_security_dashboard_v12_6.png)
+   ![Security Dashboard](../../application_security/security_dashboard/img/pipeline_security_dashboard_v13_3.png)
 
 NOTE: **Note:**
 If you don't commit very often to your project, you may want to use

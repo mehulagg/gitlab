@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Severity Summary given the message "" interpolates correctly 1`] = `<div />`;
+
+exports[`Severity Summary given the message "%{criticalStart}1 critical%{criticalEnd} and %{highStart}2 high%{highEnd}" interpolates correctly 1`] = `
+<div>
+  <strong
+    class="text-danger-800"
+  >
+    1 critical
+  </strong>
+   and 
+  <strong
+    class="text-danger-600"
+  >
+    2 high
+  </strong>
+</div>
+`;
+
+exports[`Severity Summary given the message "%{criticalStart}1 critical%{criticalEnd}" interpolates correctly 1`] = `
+<div>
+  <strong
+    class="text-danger-800"
+  >
+    1 critical
+  </strong>
+</div>
+`;
+
+exports[`Severity Summary given the message "%{highStart}1 high%{highEnd}" interpolates correctly 1`] = `
+<div>
+  <strong
+    class="text-danger-600"
+  >
+    1 high
+  </strong>
+</div>
+`;
+
+exports[`Severity Summary given the message "foo" interpolates correctly 1`] = `
+<div>
+  foo
+</div>
+`;

@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'email_spec'
 
-describe Emails::Profile do
+RSpec.describe Emails::Profile do
   include EmailSpec::Matchers
   include_context 'gitlab email notification'
 
@@ -154,6 +154,128 @@ describe Emails::Profile do
 
     context 'with User does not exist' do
       it { expect { Notify.access_token_about_to_expire_email('foo') }.not_to raise_error }
+    end
+  end
+
+  describe 'user personal access token has expired' do
+    let_it_be(:user) { create(:user) }
+
+    context 'when valid' do
+      subject { Notify.access_token_expired_email(user) }
+
+      it_behaves_like 'an email sent from GitLab'
+      it_behaves_like 'it should not have Gmail Actions links'
+      it_behaves_like 'a user cannot unsubscribe through footer link'
+
+      it 'is sent to the user' do
+        is_expected.to deliver_to user.email
+      end
+
+      it 'has the correct subject' do
+        is_expected.to have_subject /Your personal access token has expired/
+      end
+
+      it 'mentions the access token has expired' do
+        is_expected.to have_body_text /One or more of your personal access tokens has expired/
+      end
+
+      it 'includes a link to personal access tokens page' do
+        is_expected.to have_body_text /#{profile_personal_access_tokens_path}/
+      end
+
+      it 'includes the email reason' do
+        is_expected.to have_body_text /You're receiving this email because of your account on localhost/
+      end
+    end
+
+    context 'when invalid' do
+      context 'when user does not exist' do
+        it do
+          expect { Notify.access_token_expired_email(nil) }.not_to change { ActionMailer::Base.deliveries.count }
+        end
+      end
+
+      context 'when user is not active' do
+        before do
+          user.block!
+        end
+
+        it do
+          expect { Notify.access_token_expired_email(user) }.not_to change { ActionMailer::Base.deliveries.count }
+        end
+      end
+    end
+  end
+
+  describe 'user unknown sign in email' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:ip) { '169.0.0.1' }
+    let_it_be(:current_time) { Time.current }
+    let_it_be(:email) { Notify.unknown_sign_in_email(user, ip, current_time) }
+
+    subject { email }
+
+    it_behaves_like 'an email sent from GitLab'
+    it_behaves_like 'it should not have Gmail Actions links'
+    it_behaves_like 'a user cannot unsubscribe through footer link'
+
+    it 'is sent to the user' do
+      is_expected.to deliver_to user.email
+    end
+
+    it 'has the correct subject' do
+      is_expected.to have_subject "#{Gitlab.config.gitlab.host} sign-in from new location"
+    end
+
+    it 'mentions the new sign-in IP' do
+      is_expected.to have_body_text ip
+    end
+
+    it 'mentioned the time' do
+      is_expected.to have_body_text current_time.strftime('%Y-%m-%d %l:%M:%S %p %Z')
+    end
+
+    it 'includes a link to the change password documentation' do
+      is_expected.to have_body_text 'https://docs.gitlab.com/ee/user/profile/#changing-your-password'
+    end
+
+    it 'mentions two factor authentication when two factor is not enabled' do
+      is_expected.to have_body_text 'two-factor authentication'
+    end
+
+    it 'includes a link to two-factor authentication documentation' do
+      is_expected.to have_body_text 'https://docs.gitlab.com/ee/user/profile/account/two_factor_authentication.html'
+    end
+
+    context 'when two factor authentication is enabled' do
+      let(:user) { create(:user, :two_factor) }
+
+      it 'does not mention two factor authentication' do
+        expect( Notify.unknown_sign_in_email(user, ip, current_time) )
+          .not_to have_body_text /two-factor authentication/
+      end
+    end
+  end
+
+  describe 'disabled two-factor authentication email' do
+    let_it_be(:user) { create(:user) }
+
+    subject { Notify.disabled_two_factor_email(user) }
+
+    it_behaves_like 'an email sent from GitLab'
+    it_behaves_like 'it should not have Gmail Actions links'
+    it_behaves_like 'a user cannot unsubscribe through footer link'
+
+    it 'is sent to the user' do
+      is_expected.to deliver_to user.email
+    end
+
+    it 'has the correct subject' do
+      is_expected.to have_subject /^Two-factor authentication disabled$/i
+    end
+
+    it 'includes a link to two-factor authentication settings page' do
+      is_expected.to have_body_text /#{profile_two_factor_auth_path}/
     end
   end
 end

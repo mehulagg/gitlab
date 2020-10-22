@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'shared/billings/_trial_status.html.haml' do
+RSpec.describe 'shared/billings/_trial_status.html.haml' do
   include ApplicationHelper
 
   let_it_be(:group) { create(:group) }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::JobsFinder, '#execute' do
+RSpec.describe Ci::JobsFinder, '#execute' do
   let_it_be(:user) { create(:user) }
   let_it_be(:admin) { create(:user, :admin) }
   let_it_be(:project) { create(:project, :private, public_builds: false) }
@@ -51,6 +51,15 @@ describe Ci::JobsFinder, '#execute' do
         let(:params) { { scope: scope } }
 
         it { expect(subject).to match_array([jobs[index]]) }
+      end
+    end
+
+    context 'scope is an array' do
+      let(:jobs) { [job_1, job_2, job_3] }
+      let(:params) {{ scope: ['running'] }}
+
+      it 'filters by the job statuses in the scope' do
+        expect(subject).to match_array([job_2])
       end
     end
   end

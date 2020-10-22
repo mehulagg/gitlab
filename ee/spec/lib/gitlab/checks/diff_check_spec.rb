@@ -2,12 +2,24 @@
 
 require 'spec_helper'
 
-describe Gitlab::Checks::DiffCheck do
+RSpec.describe Gitlab::Checks::DiffCheck do
   include FakeBlobHelpers
 
   include_context 'push rules checks context'
 
   describe '#validate!' do
+    let(:push_allowed) { false }
+
+    before do
+      allow(user_access).to receive(:can_push_to_branch?).and_return(push_allowed)
+    end
+
+    shared_examples_for "returns codeowners validation message" do
+      it "returns an error message" do
+        expect(validation_result).to include("Pushes to protected branches")
+      end
+    end
+
     context 'no push rules active' do
       let_it_be(:push_rule) { create(:push_rule) }
 
@@ -15,6 +27,39 @@ describe Gitlab::Checks::DiffCheck do
         expect(subject).not_to receive(:process_commits)
 
         subject.validate!
+      end
+    end
+
+    describe '#validate_code_owners?' do
+      let_it_be(:push_rule) { create(:push_rule, file_name_regex: 'READ*') }
+      let(:validate_code_owners) { subject.send(:validate_code_owners?) }
+      let(:protocol) { 'ssh' }
+      let(:push_allowed) { false }
+
+      context 'when user can not push to the branch' do
+        context 'when not updated from web' do
+          it 'checks if the branch requires code owner approval' do
+            expect(project).to receive(:branch_requires_code_owner_approval?).and_return(true)
+
+            expect(validate_code_owners).to eq(true)
+          end
+        end
+
+        context 'when updated from the web' do
+          let(:protocol) { 'web' }
+
+          it 'returns false' do
+            expect(validate_code_owners).to eq(false)
+          end
+        end
+      end
+
+      context 'when a user can push to the branch' do
+        let(:push_allowed) { true }
+
+        it 'returns false' do
+          expect(validate_code_owners).to eq(false)
+        end
       end
     end
 
@@ -39,8 +84,6 @@ describe Gitlab::Checks::DiffCheck do
         allow(project.repository).to receive(:code_owners_blob)
           .with(ref: codeowner_lookup_ref)
           .and_return(codeowner_blob)
-
-        stub_feature_flags(sectional_codeowners: false)
       end
 
       context 'the MR contains a renamed file matching a file path' do
@@ -57,22 +100,10 @@ describe Gitlab::Checks::DiffCheck do
           )
         end
 
-        context 'and the user is not listed as a codeowner' do
-          it "returns an error message" do
-            expect { diff_check.validate! }.to raise_error do |error|
-              expect(error).to be_a(Gitlab::GitAccess::ForbiddenError)
-              expect(error.message).to include("CODEOWNERS` were matched:\n- *.js.coffee")
-            end
-          end
-        end
-
-        context 'and the user is listed as a codeowner' do
-          # `user` is set as the owner of the incoming change by the shared
-          #   context found in 'push rules checks context'
-          let(:codeowner_content) { "* @#{user.username}" }
-
-          it "does not return an error message" do
-            expect { diff_check.validate! }.not_to raise_error
+        it "returns an error message" do
+          expect { diff_check.validate! }.to raise_error do |error|
+            expect(error).to be_a(Gitlab::GitAccess::ForbiddenError)
+            expect(error.message).to include("CODEOWNERS` were matched:\n- *.js.coffee")
           end
         end
       end
@@ -82,77 +113,12 @@ describe Gitlab::Checks::DiffCheck do
           subject.send(:validate_code_owners).call(["docs/CODEOWNERS", "README"])
         end
 
-        shared_examples_for "returns an error message" do
-          it "returns the expected error message" do
-            expect(validation_result).to include("Pushes to protected branches")
-          end
+        before do
+          expect(project).to receive(:branch_requires_code_owner_approval?)
+            .at_least(:once).and_return(true)
         end
 
-        context "and the user is not listed as a code owner" do
-          before do
-            stub_feature_flags(sectional_codeowners: false)
-          end
-
-          context "for a non-web-based request" do
-            it_behaves_like "returns an error message"
-
-            it "returns an error message with newline chars" do
-              expect(validation_result).to include("\n")
-            end
-          end
-
-          context "for a web-based request" do
-            before do
-              expect(subject).to receive(:updated_from_web?).and_return(true)
-            end
-
-            it_behaves_like "returns an error message"
-
-            it "returns an error message with newline chars removed" do
-              expect(validation_result).not_to include("\n")
-            end
-          end
-        end
-
-        context "and the user is not listed as a code owner" do
-          it_behaves_like "returns an error message"
-        end
-
-        context "and the user is listed as a code owner" do
-          # `user` is set as the owner of the incoming change by the shared
-          #   context found in 'push rules checks context'
-          let(:codeowner_content) { "* @#{user.username}" }
-
-          it "returns nil" do
-            expect(validation_result).to be_nil
-          end
-        end
-
-        context "when the codeowner entity is a group" do
-          let(:group_a) { create(:group) }
-          let(:project) { create(:project, :repository, namespace: group_a) }
-          let(:codeowner_content) do
-            <<~CODEOWNERS
-            *.rb @#{code_owner.username}
-            docs/CODEOWNERS @#{group_a.name}
-            *.js.coffee @#{group_a.name}
-            CODEOWNERS
-          end
-
-          context "and the user is part of the codeowning-group" do
-            before do
-              group_a.add_developer(user)
-            end
-
-            it "returns nil" do
-              expect(validation_result).to be_nil
-            end
-          end
-
-          context "and the user is not part of the codeowning-group" do
-            it_behaves_like "returns an error message"
-          end
-        end
+        it_behaves_like "returns codeowners validation message"
       end
 
       context "the MR doesn't contain a matching file path" do
@@ -178,16 +144,29 @@ describe Gitlab::Checks::DiffCheck do
       end
 
       context "when the feature is enabled on the project" do
-        before do
-          expect(project).to receive(:branch_requires_code_owner_approval?)
-            .once.and_return(true)
+        context "updated_from_web? == false" do
+          before do
+            expect(subject).to receive(:updated_from_web?).and_return(false)
+            expect(project).to receive(:branch_requires_code_owner_approval?)
+              .once.and_return(true)
+          end
+
+          it "returns an array of Proc(s)" do
+            validations = subject.send(:path_validations)
+
+            expect(validations.any?).to be_truthy
+            expect(validations.any? { |v| !v.is_a? Proc }).to be_falsy
+          end
         end
 
-        it "returns an array of Proc(s)" do
-          validations = subject.send(:path_validations)
+        context "updated_from_web? == true" do
+          before do
+            expect(subject).to receive(:updated_from_web?).and_return(true)
+          end
 
-          expect(validations.any?).to be_truthy
-          expect(validations.any? { |v| !v.is_a? Proc }).to be_falsy
+          it "returns an empty array" do
+            expect(subject.send(:path_validations)).to eq([])
+          end
         end
       end
     end

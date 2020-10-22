@@ -21,7 +21,8 @@ export default {
   props: {
     summary: {
       type: String,
-      required: true,
+      required: false,
+      default: '',
     },
     statusIcon: {
       type: String,
@@ -45,7 +46,7 @@ export default {
 </script>
 <template>
   <div class="report-block-list-issue report-block-list-issue-parent align-items-center">
-    <div class="report-block-list-icon append-right-default">
+    <div class="report-block-list-icon gl-mr-3">
       <gl-loading-icon
         v-if="statusIcon === 'loading'"
         css-class="report-block-list-loading-icon"
@@ -54,9 +55,12 @@ export default {
       <ci-icon v-else :status="iconStatus" :size="24" />
     </div>
     <div class="report-block-list-issue-description">
-      <div class="report-block-list-issue-description-text">
-        {{ summary
-        }}<span v-if="popoverOptions" class="text-nowrap"
+      <div
+        class="report-block-list-issue-description-text"
+        data-testid="test-summary-row-description"
+      >
+        <slot name="summary">{{ summary }}</slot
+        ><span v-if="popoverOptions" class="text-nowrap"
           >&nbsp;<popover v-if="popoverOptions" :options="popoverOptions" class="align-top" />
         </span>
       </div>

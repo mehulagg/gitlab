@@ -1,14 +1,20 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Sidekiq MemoryKiller
 
 The GitLab Rails application code suffers from memory leaks. For web requests
 this problem is made manageable using
-[`unicorn-worker-killer`](https://github.com/kzk/unicorn-worker-killer) which
-restarts Unicorn worker processes in between requests when needed. The Sidekiq
+[`puma-worker-killer`](https://github.com/schneems/puma_worker_killer) which
+restarts Puma worker processes if it exceeds a memory limit. The Sidekiq
 MemoryKiller applies the same approach to the Sidekiq processes used by GitLab
 to process background jobs.
 
-Unlike unicorn-worker-killer, which is enabled by default for all GitLab
-installations since GitLab 6.4, the Sidekiq MemoryKiller is enabled by default
+Unlike puma-worker-killer, which is enabled by default for all GitLab
+installations of GitLab 13.0 and later, the Sidekiq MemoryKiller is enabled by default
 _only_ for Omnibus packages. The reason for this is that the MemoryKiller
 relies on runit to restart Sidekiq after a memory-induced shutdown and GitLab
 installations from source do not all use runit or an equivalent.
@@ -26,8 +32,8 @@ run as a process group leader (e.g., using `chpst -P`). If using Omnibus or the
 
 The MemoryKiller is controlled using environment variables.
 
-- `SIDEKIQ_DAEMON_MEMORY_KILLER`: defaults to 0. When set to 1, the MemoryKiller
-  works in _daemon_ mode. Otherwise, the MemoryKiller works in _legacy_ mode.
+- `SIDEKIQ_DAEMON_MEMORY_KILLER`: defaults to 1. When set to 0, the MemoryKiller
+  works in _legacy_ mode. Otherwise, the MemoryKiller works in _daemon_ mode.
 
   In _legacy_ mode, the MemoryKiller checks the Sidekiq process RSS after each job.
 
@@ -71,5 +77,5 @@ The MemoryKiller is controlled using environment variables.
 
   If the process hard shutdown/restart is not performed by Sidekiq,
   the Sidekiq process will be forcefully terminated after
-  `Sidekiq.options[:timeout] * 2` seconds. An external supervision mechanism
+  `Sidekiq.options[:timeout] + 2` seconds. An external supervision mechanism
   (e.g. runit) must restart Sidekiq afterwards.

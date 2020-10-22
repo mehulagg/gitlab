@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-describe EventsFinder do
+RSpec.describe EventsFinder do
   let_it_be(:user) { create(:user) }
+  let(:private_user) { create(:user, private_profile: true) }
   let(:other_user) { create(:user) }
 
   let(:project1) { create(:project, :private, creator_id: user.id, namespace: user.namespace) }
@@ -11,18 +12,18 @@ describe EventsFinder do
 
   let(:closed_issue) { create(:closed_issue, project: project1, author: user) }
   let(:opened_merge_request) { create(:merge_request, source_project: project2, author: user) }
-  let!(:closed_issue_event) { create(:event, project: project1, author: user, target: closed_issue, action: Event::CLOSED, created_at: Date.new(2016, 12, 30)) }
-  let!(:opened_merge_request_event) { create(:event, project: project2, author: user, target: opened_merge_request, action: Event::CREATED, created_at: Date.new(2017, 1, 31)) }
+  let!(:closed_issue_event) { create(:event, :closed, project: project1, author: user, target: closed_issue, created_at: Date.new(2016, 12, 30)) }
+  let!(:opened_merge_request_event) { create(:event, :created, project: project2, author: user, target: opened_merge_request, created_at: Date.new(2017, 1, 31)) }
   let(:closed_issue2) { create(:closed_issue, project: project1, author: user) }
   let(:opened_merge_request2) { create(:merge_request, source_project: project2, author: user) }
-  let!(:closed_issue_event2) { create(:event, project: project1, author: user, target: closed_issue, action: Event::CLOSED, created_at: Date.new(2016, 2, 2)) }
-  let!(:opened_merge_request_event2) { create(:event, project: project2, author: user, target: opened_merge_request, action: Event::CREATED, created_at: Date.new(2017, 2, 2)) }
+  let!(:closed_issue_event2) { create(:event, :closed, project: project1, author: user, target: closed_issue, created_at: Date.new(2016, 2, 2)) }
+  let!(:opened_merge_request_event2) { create(:event, :created, project: project2, author: user, target: opened_merge_request, created_at: Date.new(2017, 2, 2)) }
   let(:opened_merge_request3) { create(:merge_request, source_project: project1, author: other_user) }
-  let!(:other_developer_event) { create(:event, project: project1, author: other_user, target: opened_merge_request3, action: Event::CREATED) }
+  let!(:other_developer_event) { create(:event, :created, project: project1, author: other_user, target: opened_merge_request3 ) }
 
   let_it_be(:public_project) { create(:project, :public, creator_id: user.id, namespace: user.namespace) }
   let(:confidential_issue) { create(:closed_issue, confidential: true, project: public_project, author: user) }
-  let!(:confidential_event) { create(:event, project: public_project, author: user, target: confidential_issue, action: Event::CLOSED) }
+  let!(:confidential_event) { create(:event, :closed, project: public_project, author: user, target: confidential_issue) }
 
   context 'when targeting a user' do
     it 'returns events between specified dates filtered on action and type' do
@@ -57,31 +58,21 @@ describe EventsFinder do
 
       expect(events).to be_empty
     end
+
+    it 'returns nothing when the target profile is private' do
+      events = described_class.new(source: private_user, current_user: other_user).execute
+
+      expect(events).to be_empty
+    end
   end
 
-  describe 'wiki events feature flag' do
+  describe 'wiki events' do
     let_it_be(:events) { create_list(:wiki_page_event, 3, project: public_project) }
 
     subject(:finder) { described_class.new(source: public_project, target_type: 'wiki', current_user: user) }
 
-    context 'the wiki_events feature flag is disabled' do
-      before do
-        stub_feature_flags(wiki_events: false)
-      end
-
-      it 'omits the wiki page events' do
-        expect(finder.execute).to be_empty
-      end
-    end
-
-    context 'the wiki_events feature flag is enabled' do
-      before do
-        stub_feature_flags(wiki_events: true)
-      end
-
-      it 'can find the wiki events' do
-        expect(finder.execute).to match_array(events)
-      end
+    it 'can find the wiki events' do
+      expect(finder.execute).to match_array(events)
     end
   end
 

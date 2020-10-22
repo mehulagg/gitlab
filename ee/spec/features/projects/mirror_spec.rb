@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Project mirror', :js do
+RSpec.describe 'Project mirror', :js do
   include ReactiveCachingHelpers
 
   let(:project) { create(:project, :repository, creator: user, name: 'Victorialand') }
@@ -15,11 +15,39 @@ describe 'Project mirror', :js do
       sign_in user
     end
 
+    context 'when mirror was updated successfully' do
+      before do
+        import_state.update!(last_successful_update_at: 5.minutes.ago)
+      end
+
+      it 'shows the last successful at timestamp' do
+        visit project_mirror_path(project)
+
+        page.within('.js-mirrors-table-body tr:nth-child(1) td:nth-child(4)') do
+          expect(page).to have_content('5 minutes ago')
+        end
+      end
+    end
+
+    context 'when mirror was never updated successfully' do
+      before do
+        import_state.update!(last_successful_update_at: nil)
+      end
+
+      it 'shows that mirror has never been updated' do
+        visit project_mirror_path(project)
+
+        page.within('.js-mirrors-table-body tr:nth-child(1) td:nth-child(4)') do
+          expect(page).to have_content('Never')
+        end
+      end
+    end
+
     context 'with Update now button' do
       let(:timestamp) { Time.now }
 
       before do
-        import_state.update(last_update_at: 6.minutes.ago, next_execution_timestamp: timestamp + 10.minutes)
+        import_state.update!(last_update_at: 6.minutes.ago, next_execution_timestamp: timestamp + 10.minutes)
       end
 
       context 'when able to force update' do
@@ -38,7 +66,7 @@ describe 'Project mirror', :js do
 
       context 'when unable to force update' do
         before do
-          import_state.update(next_execution_timestamp: timestamp - 1.minute)
+          import_state.update!(next_execution_timestamp: timestamp - 1.minute)
         end
 
         let(:disabled_updating_button) { '[data-qa-selector="updating_button"].disabled' }

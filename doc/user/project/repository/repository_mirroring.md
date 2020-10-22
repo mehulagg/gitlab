@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/repository_mirroring.html'
 ---
 
@@ -8,7 +11,8 @@ Repository mirroring allows for mirroring of repositories to and from external s
 used to mirror branches, tags, and commits between repositories.
 
 A repository mirror at GitLab will be updated automatically. You can also manually trigger an update
-at most once every 5 minutes.
+at most once every 5 minutes. Follow [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/237891)
+for discussions on how to potentially reduce the delay.
 
 ## Overview
 
@@ -28,7 +32,7 @@ immediate update, unless:
 - The mirror is already being updated.
 - 5 minutes haven't elapsed since its last update.
 
-For security reasons, from [GitLab 12.10 onwards](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/27166),
+For security reasons, in [GitLab 12.10 and later](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/27166),
 the URL to the original repository is only displayed to users with
 Maintainer or Owner permissions to the mirrored project.
 
@@ -42,11 +46,17 @@ The following are some possible use cases for repository mirroring:
 - You have old projects in another source that you don't use actively anymore, but don't want to
   remove for archiving purposes. In that case, you can create a push mirror so that your active
   GitLab repository can push its changes to the old location.
+- You are a GitLab self-managed user for privacy reasons and your instance is closed to the public,
+  but you still have certain software components that you want open sourced. In this case, utilizing
+  GitLab to be your primary repository which is closed from the public, and using push mirroring to a
+  GitLab.com repository that's public, allows you to open source specific projects and contribute back
+  to the open source community.
 
 ## Pushing to a remote repository **(CORE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/249) in GitLab Enterprise Edition 8.7.
 > - [Moved to GitLab Core](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18715) in 10.8.
+> - [LFS support over HTTPS added](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40137) in 13.5
 
 For an existing project, you can set up push mirroring as follows:
 
@@ -55,6 +65,7 @@ For an existing project, you can set up push mirroring as follows:
 1. Select **Push** from the **Mirror direction** dropdown.
 1. Select an authentication method from the **Authentication method** dropdown, if necessary.
 1. Check the **Only mirror protected branches** box, if necessary.
+1. Check the **Keep divergent refs** box, if desired.
 1. Click the **Mirror repository** button to save the configuration.
 
 ![Repository mirroring push settings screen](img/repository_mirroring_push_settings.png)
@@ -63,7 +74,7 @@ When push mirroring is enabled, only push commits directly to the mirrored repos
 mirror diverging. All changes will end up in the mirrored repository whenever:
 
 - Commits are pushed to GitLab.
-- A [forced update](#forcing-an-update-core) is initiated.
+- A [forced update](#forcing-an-update) is initiated.
 
 Changes pushed to files in the repository are automatically pushed to the remote mirror at least:
 
@@ -88,31 +99,130 @@ You can choose to only push your protected branches from GitLab to your remote r
 To use this option, check the **Only mirror protected branches** box when creating a repository
 mirror.
 
+### Keep divergent refs **(CORE)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208828) in GitLab 13.0.
+
+By default, if any ref on the remote mirror has diverged from the local
+repository, the *entire push* will fail, and nothing will be updated.
+
+For example, if a repository has `master`, `develop`, and `stable` branches that
+have been mirrored to a remote, and then a new commit is added to `develop` on
+the mirror, the next push attempt will fail, leaving `master` and `stable`
+out-of-date despite not having diverged. No change on any branch can be mirrored
+until the divergence is resolved.
+
+With the **Keep divergent refs** option enabled, the `develop` branch is
+skipped, allowing `master` and `stable` to be updated. The mirror status will
+reflect that `develop` has diverged and was skipped, and be marked as a failed
+update.
+
+NOTE: **Note:**
+After the mirror is created, this option can currently only be modified via the [API](../../../api/remote_mirrors.md).
+
 ## Setting up a push mirror from GitLab to GitHub **(CORE)**
 
 To set up a mirror from GitLab to GitHub, you need to follow these steps:
 
-1. Create a [GitHub personal access token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) with the `public_repo` box checked.
+1. Create a [GitHub personal access token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) with the `public_repo` box checked.
 1. Fill in the **Git repository URL** field using this format: `https://<your_github_username>@github.com/<your_github_group>/<your_github_project>.git`.
 1. Fill in **Password** field with your GitHub personal access token.
 1. Click the **Mirror repository** button.
 
 The mirrored repository will be listed. For example, `https://*****:*****@github.com/<your_github_group>/<your_github_project>.git`.
 
-The repository will push soon. To force a push, click the appropriate button.
+The repository will push soon. To force a push, click the **Update now** (**{retry}**) button.
+
+## Setting up a push mirror from GitLab to AWS CodeCommit
+
+AWS CodeCommit push mirroring is currently the best way to connect GitLab repositories to AWS CodePipeline, as GitLab is not yet supported as one of their Source Code Management (SCM) providers.
+
+Each new AWS Codepipeline needs significant AWS infrastructure setup. It also requires an individual pipeline per branch.
+
+If AWS CodeDeploy is the final step of a CodePipeline, you can, instead, leverage GitLab CI/CD pipelines and simply use the AWS CLI in the final job in `.gitlab-ci.yml` to deploy to CodeDeploy.
+
+NOTE: **Note:**
+GitLab-to-AWS-CodeCommit push mirroring cannot use SSH authentication until [GitLab issue 34014](https://gitlab.com/gitlab-org/gitlab/-/issues/34014) is resolved.
+
+To set up a mirror from GitLab to AWS CodeCommit:
+
+1. In the AWS IAM console, create an IAM user.
+1. Add the following least privileges permissions for repository mirroring as an "inline policy".
+
+   The Amazon Resource Names (ARNs) must explicitly include the region and account. The IAM policy
+   below grants privilege for mirroring access to two sample repositories. These permissions have
+   been tested to be the minimum (least privileged) required for mirroring:
+
+   ```json
+   {
+       "Version": "2012-10-17",
+       "Statement": [
+           {
+               "Sid": "MinimumGitLabPushMirroringPermissions",
+               "Effect": "Allow",
+               "Action": [
+                   "codecommit:GitPull",
+                   "codecommit:GitPush"
+               ],
+               "Resource": [
+                 "arn:aws:codecommit:us-east-1:111111111111:MyDestinationRepo",
+                 "arn:aws:codecommit:us-east-1:111111111111:MyDemo*"
+               ]
+           }
+       ]
+   }
+   ```
+
+1. After the user was created, click the AWS IAM user name.
+1. Click the **Security credentials** tab.
+1. Under **HTTPS Git credentials for AWS CodeCommit** click **Generate credentials**.
+
+   NOTE: **Note:**
+   This Git user ID and password is specific to communicating with CodeCommit. Do
+   not confuse it with the IAM user ID or AWS keys of this user.
+
+1. Copy or download special Git HTTPS user ID and password.
+1. In the AWS CodeCommit console, create a new repository to mirror from your GitLab repository.
+1. Open your new repository and click **Clone URL > Clone HTTPS** (not **Clone HTTPS (GRC)**).
+1. In GitLab, open the repository to be push-mirrored.
+1. Click **Settings > Repository** and expand **Mirroring repositories**.
+1. Fill in the **Git repository URL** field using this format:
+
+   ```plaintext
+   https://<your_aws_git_userid>@git-codecommit.<aws-region>.amazonaws.com/v1/repos/<your_codecommit_repo>
+   ```
+
+   Replace `<your_aws_git_userid>` with the AWS **special HTTPS Git user ID** from the IAM Git
+   credentials created earlier. Replace `<your_codecommit_repo>` with the name of your repository in CodeCommit.
+
+1. For **Mirror direction**, select **Push**.
+1. For **Authentication method**, select **Password** and fill in the **Password** field with the special IAM Git clone user ID **password** created earlier in AWS.
+1. The option **Only mirror protected branches** should be good for CodeCommit as it pushes more
+   frequently (from every five minutes to every minute).
+   CodePipeline requires individual pipeline setups for named branches you wish to have a AWS CI setup for. Since feature branches that have dynamic names will not be supported anyway, configuring **Only mirror protected branches** does not cause flexibility problems with CodePipeline integration as long as you are also willing to protect all the named branches you want to build CodePipelines for.
+
+1. Click **Mirror repository**. You should see the mirrored repository appear:
+
+   ```plaintext
+   https://*****:*****@git-codecommit.<aws-region>.amazonaws.com/v1/repos/<your_codecommit_repo>
+   ```
+
+To test mirroring by forcing a push, click the half-circle arrows button (hover text is **Update now**).
+If **Last successful update** shows a date, you have configured mirroring correctly.
+If it is not working correctly a red `error` tag appears and shows the error message as hover text.
 
 ## Setting up a push mirror to another GitLab instance with 2FA activated
 
-1. On the destination GitLab instance, create a [personal access token](../../profile/personal_access_tokens.md) with `API` scope.
+1. On the destination GitLab instance, create a [personal access token](../../profile/personal_access_tokens.md) with `write_repository` scope.
 1. On the source GitLab instance:
    1. Fill in the **Git repository URL** field using this format: `https://oauth2@<destination host>/<your_gitlab_group_or_name>/<your_gitlab_project>.git`.
-   1. Fill in **Password** field with the GitLab personal access token created on the destination GitLab instance.
+   1. Fill in the **Password** field with the GitLab personal access token created on the destination GitLab instance.
    1. Click the **Mirror repository** button.
 
 ## Pulling from a remote repository **(STARTER)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51) in GitLab Enterprise Edition 8.2.
-> - [Added Git LFS support](https://gitlab.com/gitlab-org/gitlab/issues/10871) in [GitLab Starter](https://about.gitlab.com/pricing/) 11.11.
+> - [Added Git LFS support](https://gitlab.com/gitlab-org/gitlab/-/issues/10871) in [GitLab Starter](https://about.gitlab.com/pricing/) 11.11.
 
 You can set up a repository to automatically have its branches, tags, and commits updated from an
 upstream repository.
@@ -144,7 +254,7 @@ directly to the repository on GitLab. Instead, any commits should be pushed to t
 Changes pushed to the upstream repository will be pulled into the GitLab repository, either:
 
 - Automatically within a certain period of time.
-- When a [forced update](#forcing-an-update-core) is initiated.
+- When a [forced update](#forcing-an-update) is initiated.
 
 CAUTION: **Caution:**
 If you do manually update a branch in the GitLab repository, the branch will become diverged from
@@ -209,8 +319,8 @@ those you expect. GitLab.com and other code hosting sites publish their
 fingerprints in the open for you to check:
 
 - [AWS CodeCommit](https://docs.aws.amazon.com/codecommit/latest/userguide/regions.html#regions-fingerprints)
-- [Bitbucket](https://confluence.atlassian.com/bitbucket/ssh-keys-935365775.html)
-- [GitHub](https://help.github.com/en/github/authenticating-to-github/githubs-ssh-key-fingerprints)
+- [Bitbucket](https://support.atlassian.com/bitbucket-cloud/docs/configure-ssh-and-two-step-verification/)
+- [GitHub](https://docs.github.com/en/github/authenticating-to-github/githubs-ssh-key-fingerprints)
 - [GitLab.com](../../gitlab_com/index.md#ssh-host-keys-fingerprints)
 - [Launchpad](https://help.launchpad.net/SSHFingerprints)
 - [Savannah](http://savannah.gnu.org/maintenance/SshAccess/)
@@ -290,17 +400,17 @@ failed. This will become visible in either the:
 - Pull mirror settings page.
 
 When a project is hard failed, it will no longer get picked up for mirroring. A user can resume the
-project mirroring again by [Forcing an update](#forcing-an-update-core).
+project mirroring again by [Forcing an update](#forcing-an-update).
 
 ### Trigger update using API **(STARTER)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/3453) in [GitLab Starter](https://about.gitlab.com/pricing/) 10.3.
 
 Pull mirroring uses polling to detect new branches and commits added upstream, often minutes
-afterwards. If you notify GitLab by [API](../../../api/projects.md#start-the-pull-mirroring-process-for-a-project-starter),
+afterwards. If you notify GitLab by [API](../../../api/projects.md#start-the-pull-mirroring-process-for-a-project),
 updates will be pulled immediately.
 
-For more information, see [Start the pull mirroring process for a Project](../../../api/projects.md#start-the-pull-mirroring-process-for-a-project-starter).
+For more information, see [Start the pull mirroring process for a Project](../../../api/projects.md#start-the-pull-mirroring-process-for-a-project).
 
 ## Forcing an update **(CORE)**
 
@@ -322,8 +432,8 @@ them and how they will be resolved.
 Rewriting any mirrored commit on either remote will cause conflicts and mirroring to fail. This can
 be prevented by:
 
-- [Pulling only protected branches](#only-mirror-protected-branches-starter).
-- [Pushing only protected branches](#push-only-protected-branches-core).
+- [Pulling only protected branches](#only-mirror-protected-branches).
+- [Pushing only protected branches](#push-only-protected-branches).
 
 You should [protect the branches](../protected_branches.md) you wish to mirror on both
 remotes to prevent conflicts caused by rewriting history.
@@ -333,6 +443,24 @@ branch causes conflicts. The race condition can be mitigated by reducing the mir
 a [Push event webhook](../integrations/webhooks.md#push-events) to trigger an immediate
 pull to GitLab. Push mirroring from GitLab is rate limited to once per minute when only push mirroring
 protected branches.
+
+### Configure a webhook to trigger an immediate pull to GitLab
+
+Assuming you have already configured the [push](#setting-up-a-push-mirror-to-another-gitlab-instance-with-2fa-activated) and [pull](#pulling-from-a-remote-repository) mirrors in the upstream GitLab instance, to trigger an immediate pull as suggested above, you will need to configure a [Push Event Web Hook](../integrations/webhooks.md#push-events) in the downstream instance.
+
+To do this:
+
+- Create a [personal access token](../../profile/personal_access_tokens.md) with `API` scope.
+- Navigate to **Settings > Webhooks**
+- Add the webhook URL which in this case will use the [Pull Mirror API](../../../api/projects.md#start-the-pull-mirroring-process-for-a-project) request to trigger an immediate pull after updates to the repository.
+
+  ```plaintext
+  https://gitlab.example.com/api/v4/projects/:id/mirror/pull?private_token=<your_access_token>
+  ```
+
+- Ensure that the **Push Events** checkbox is selected.
+- Click on **Add Webhook** button to save the webhook.
+- To test the integration click on the **Test** button and confirm GitLab does not return any error.
 
 ### Preventing conflicts using a `pre-receive` hook
 
@@ -366,13 +494,13 @@ proxy_push()
   REFNAME="$3"
 
   # --- Pattern of branches to proxy pushes
-  whitelisted=$(expr "$branch" : "\(master\)")
+  allowlist=$(expr "$branch" : "\(master\)")
 
   case "$refname" in
     refs/heads/*)
       branch=$(expr "$refname" : "refs/heads/\(.*\)")
 
-      if [ "$whitelisted" = "$branch" ]; then
+      if [ "$allowlist" = "$branch" ]; then
         unset GIT_QUARANTINE_PATH # handle https://git-scm.com/docs/git-receive-pack#_quarantine_environment
         error="$(git push --quiet $TARGET_REPO $NEWREV:$REFNAME 2>&1)"
         fail=$?
@@ -413,7 +541,7 @@ Note that this sample has a few limitations:
 - This example may not work verbatim for your use case and might need modification.
   - It does not regard different types of authentication mechanisms for the mirror.
   - It does not work with forced updates (rewriting history).
-  - Only branches that match the `whitelisted` patterns will be proxy pushed.
+  - Only branches that match the `allowlist` patterns will be proxy pushed.
 - The script circumvents the Git hook quarantine environment because the update of `$TARGET_REPO`
   is seen as a ref update and Git will complain about it.
 

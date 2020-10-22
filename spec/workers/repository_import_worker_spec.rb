@@ -2,13 +2,7 @@
 
 require 'spec_helper'
 
-describe RepositoryImportWorker do
-  describe 'modules' do
-    it 'includes ProjectImportOptions' do
-      expect(described_class).to include_module(ProjectImportOptions)
-    end
-  end
-
+RSpec.describe RepositoryImportWorker do
   describe '#perform' do
     let(:project) { create(:project, :import_scheduled) }
     let(:import_state) { project.import_state }
@@ -55,7 +49,7 @@ describe RepositoryImportWorker do
       it 'hide the credentials that were used in the import URL' do
         error = %q{remote: Not Found fatal: repository 'https://user:pass@test.com/root/repoC.git/' not found }
 
-        import_state.update(jid: '123')
+        import_state.update!(jid: '123')
         expect_next_instance_of(Projects::ImportService) do |instance|
           expect(instance).to receive(:execute).and_return({ status: :error, message: error })
         end
@@ -69,8 +63,8 @@ describe RepositoryImportWorker do
       it 'updates the error on Import/Export' do
         error = %q{remote: Not Found fatal: repository 'https://user:pass@test.com/root/repoC.git/' not found }
 
-        project.update(import_type: 'gitlab_project')
-        import_state.update(jid: '123')
+        project.update!(import_type: 'gitlab_project')
+        import_state.update!(jid: '123')
         expect_next_instance_of(Projects::ImportService) do |instance|
           expect(instance).to receive(:execute).and_return({ status: :error, message: error })
         end

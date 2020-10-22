@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe EE::API::Helpers do
+RSpec.describe EE::API::Helpers do
   include Rack::Test::Methods
 
   let(:helper) do
-    Class.new(Grape::API) do
+    Class.new(Grape::API::Instance) do
       helpers EE::API::Helpers
       helpers API::APIGuard::HelperMethods
       helpers API::Helpers
@@ -65,10 +65,12 @@ describe EE::API::Helpers do
   end
 
   describe '#authenticate_by_gitlab_geo_node_token!' do
+    let(:invalid_geo_auth_header) { "#{::Gitlab::Geo::BaseRequest::GITLAB_GEO_AUTH_TOKEN_TYPE}...Test" }
+
     it 'rescues from ::Gitlab::Geo::InvalidDecryptionKeyError' do
       expect_any_instance_of(::Gitlab::Geo::JwtRequestDecoder).to receive(:decode) { raise ::Gitlab::Geo::InvalidDecryptionKeyError }
 
-      header 'Authorization', 'test'
+      header 'Authorization', invalid_geo_auth_header
       get 'protected', params: { current_user: 'test' }
 
       expect(Gitlab::Json.parse(last_response.body)).to eq({ 'message' => 'Gitlab::Geo::InvalidDecryptionKeyError' })
@@ -77,7 +79,7 @@ describe EE::API::Helpers do
     it 'rescues from ::Gitlab::Geo::InvalidSignatureTimeError' do
       allow_any_instance_of(::Gitlab::Geo::JwtRequestDecoder).to receive(:decode) { raise ::Gitlab::Geo::InvalidSignatureTimeError }
 
-      header 'Authorization', 'test'
+      header 'Authorization', invalid_geo_auth_header
       get 'protected', params: { current_user: 'test' }
 
       expect(Gitlab::Json.parse(last_response.body)).to eq({ 'message' => 'Gitlab::Geo::InvalidSignatureTimeError' })

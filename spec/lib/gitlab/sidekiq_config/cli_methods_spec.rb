@@ -3,7 +3,7 @@
 require 'fast_spec_helper'
 require 'rspec-parameterized'
 
-describe Gitlab::SidekiqConfig::CliMethods do
+RSpec.describe Gitlab::SidekiqConfig::CliMethods do
   let(:dummy_root) { '/tmp/' }
 
   describe '.worker_queues' do
@@ -54,14 +54,6 @@ describe Gitlab::SidekiqConfig::CliMethods do
         end
       end
 
-      context 'when the file contains an array of strings' do
-        before do
-          stub_contents(['queue_a'], ['queue_b'])
-        end
-
-        include_examples 'valid file contents'
-      end
-
       context 'when the file contains an array of hashes' do
         before do
           stub_contents([{ name: 'queue_a' }], [{ name: 'queue_b' }])
@@ -84,7 +76,12 @@ describe Gitlab::SidekiqConfig::CliMethods do
 
   describe '.expand_queues' do
     let(:worker_queues) do
-      ['cronjob:stuck_import_jobs', 'cronjob:stuck_merge_jobs', 'post_receive']
+      [
+        'cronjob:import_stuck_project_import_jobs',
+        'cronjob:jira_import_stuck_jira_import_jobs',
+        'cronjob:stuck_merge_jobs',
+        'post_receive'
+      ]
     end
 
     it 'defaults the value of the second argument to .worker_queues' do
@@ -96,12 +93,22 @@ describe Gitlab::SidekiqConfig::CliMethods do
       allow(described_class).to receive(:worker_queues).and_return(worker_queues)
 
       expect(described_class.expand_queues(['cronjob']))
-        .to contain_exactly('cronjob', 'cronjob:stuck_import_jobs', 'cronjob:stuck_merge_jobs')
+        .to contain_exactly(
+          'cronjob',
+          'cronjob:import_stuck_project_import_jobs',
+          'cronjob:jira_import_stuck_jira_import_jobs',
+          'cronjob:stuck_merge_jobs'
+        )
     end
 
     it 'expands queue namespaces to concrete queue names' do
       expect(described_class.expand_queues(['cronjob'], worker_queues))
-        .to contain_exactly('cronjob', 'cronjob:stuck_import_jobs', 'cronjob:stuck_merge_jobs')
+        .to contain_exactly(
+          'cronjob',
+          'cronjob:import_stuck_project_import_jobs',
+          'cronjob:jira_import_stuck_jira_import_jobs',
+          'cronjob:stuck_merge_jobs'
+        )
     end
 
     it 'lets concrete queue names pass through' do
@@ -125,28 +132,32 @@ describe Gitlab::SidekiqConfig::CliMethods do
           feature_category: :category_a,
           has_external_dependencies: false,
           urgency: :low,
-          resource_boundary: :cpu
+          resource_boundary: :cpu,
+          tags: [:no_disk_io, :git_access]
         },
         {
           name: 'a:2',
           feature_category: :category_a,
           has_external_dependencies: false,
           urgency: :high,
-          resource_boundary: :none
+          resource_boundary: :none,
+          tags: [:git_access]
         },
         {
           name: 'b',
           feature_category: :category_b,
           has_external_dependencies: true,
           urgency: :high,
-          resource_boundary: :memory
+          resource_boundary: :memory,
+          tags: [:no_disk_io]
         },
         {
           name: 'c',
           feature_category: :category_c,
           has_external_dependencies: false,
           urgency: :throttled,
-          resource_boundary: :memory
+          resource_boundary: :memory,
+          tags: []
         }
       ]
     end
@@ -184,6 +195,18 @@ describe Gitlab::SidekiqConfig::CliMethods do
         'resource_boundary=memory,cpu' | %w(a b c)
         'resource_boundary=memory|resource_boundary=cpu' | %w(a b c)
         'resource_boundary!=memory,cpu' | %w(a:2)
+
+        # tags
+        'tags=no_disk_io' | %w(a b)
+        'tags=no_disk_io,git_access' | %w(a a:2 b)
+        'tags=no_disk_io|tags=git_access' | %w(a a:2 b)
+        'tags=no_disk_io&tags=git_access' | %w(a)
+        'tags!=no_disk_io' | %w(a:2 c)
+        'tags!=no_disk_io,git_access' | %w(c)
+        'tags=unknown_tag' | []
+        'tags!=no_disk_io' | %w(a:2 c)
+        'tags!=no_disk_io,git_access' | %w(c)
+        'tags!=unknown_tag' | %w(a a:2 b c)
 
         # combinations
         'feature_category=category_a&urgency=high' | %w(a:2)

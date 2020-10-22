@@ -1,10 +1,10 @@
 import Vuex from 'vuex';
 import LicenseManagement from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
-import ReportSection from '~/reports/components/report_section.vue';
-import ReportItem from '~/reports/components/report_item.vue';
 import { LOADING, ERROR, SUCCESS } from 'ee/vue_shared/security_reports/store/constants';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { TEST_HOST } from 'spec/test_constants';
+import ReportItem from '~/reports/components/report_item.vue';
+import ReportSection from '~/reports/components/report_section.vue';
 import {
   approvedLicense,
   blacklistedLicense,
@@ -48,6 +48,7 @@ describe('License Report MR Widget', () => {
     loadingText: 'LOADING',
     errorText: 'ERROR',
     licensesApiPath: `${TEST_HOST}/parsed_license_report.json`,
+    approvalsApiPath: `${TEST_HOST}/path/to/approvals`,
     canManageLicenses: true,
     licenseManagementSettingsPath: `${TEST_HOST}/lm_settings`,
     fullReportPath: `${TEST_HOST}/path/to/the/full/report`,
@@ -59,6 +60,7 @@ describe('License Report MR Widget', () => {
     setAPISettings: () => {},
     fetchManagedLicenses: () => {},
     fetchParsedLicenseReport: () => {},
+    fetchLicenseCheckApprovalRule: () => {},
   };
 
   const mountComponent = ({
@@ -306,7 +308,7 @@ describe('License Report MR Widget', () => {
       const props = { ...defaultProps, fullReportPath: null };
       mountComponent({ props });
 
-      expect(wrapper.contains(selector)).toBe(false);
+      expect(wrapper.find(selector).exists()).toBe(false);
     });
   });
 
@@ -327,7 +329,7 @@ describe('License Report MR Widget', () => {
       const props = { ...defaultProps, licenseManagementSettingsPath: null };
       mountComponent({ props });
 
-      expect(wrapper.contains(selector)).toBe(false);
+      expect(wrapper.find(selector).exists()).toBe(false);
     });
   });
 
@@ -339,24 +341,23 @@ describe('License Report MR Widget', () => {
 
   it('should init store after mount', () => {
     const actions = {
-      setAPISettings: jest.fn(() => {}),
-      fetchParsedLicenseReport: jest.fn(() => {}),
+      setAPISettings: jest.fn(),
+      fetchParsedLicenseReport: jest.fn(),
+      fetchLicenseCheckApprovalRule: jest.fn(),
     };
     mountComponent({ actions });
 
-    expect(actions.setAPISettings).toHaveBeenCalledWith(
-      expect.any(Object),
-      {
-        apiUrlManageLicenses: apiUrl,
-        licensesApiPath: defaultProps.licensesApiPath,
-        canManageLicenses: true,
-      },
-      undefined,
-    );
+    expect(actions.setAPISettings).toHaveBeenCalledWith(expect.any(Object), {
+      apiUrlManageLicenses: apiUrl,
+      licensesApiPath: defaultProps.licensesApiPath,
+      approvalsApiPath: defaultProps.approvalsApiPath,
+      canManageLicenses: true,
+    });
 
-    expect(actions.fetchParsedLicenseReport).toHaveBeenCalledWith(
+    expect(actions.fetchParsedLicenseReport).toHaveBeenCalledWith(expect.any(Object), undefined);
+
+    expect(actions.fetchLicenseCheckApprovalRule).toHaveBeenCalledWith(
       expect.any(Object),
-      undefined,
       undefined,
     );
   });

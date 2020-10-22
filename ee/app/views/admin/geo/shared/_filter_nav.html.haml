@@ -1,25 +1,29 @@
 - action_buttons = local_assigns[:action_buttons] ? action_buttons : []
+- params[:sync_status] ||= []
 
-%nav.row.d-flex.flex-column.flex-sm-row.align-items-center.bg-secondary.border-bottom.border-secondary-100.p-3
-  .dropdown.col.px-1.my-1.my-sm-0.w-100
-    %a.btn.d-flex.align-items-center.justify-content-between.w-100{ href: '#', data: { toggle: 'dropdown' }, 'aria-haspopup' => 'true', 'aria-expanded' => 'false' }
-      = s_('Geo|Filter by status')
-      = sprite_icon("chevron-down", size: 16)
-    %ul.dropdown-menu
-      = nav_link(html_options: { class: ('bg-secondary-100' if !params[:sync_status].present?) }) do
-        = link_to controller: replicable_controller do
-          = sprintf(s_('Geo|All %{replicable_type}'), { replicable_type: replicable_type })
-      = nav_link(html_options: { class: ('bg-secondary-100' if params[:sync_status] == 'pending') }) do
-        = link_to controller: replicable_controller, sync_status: 'pending' do
-          = s_('Geo|In progress')
-      = nav_link(html_options: { class: ('bg-secondary-100' if params[:sync_status] == 'failed') }) do
-        = link_to controller: replicable_controller, sync_status: 'failed' do
-          = s_('Geo|Failed')
-      = nav_link(html_options: { class: ('bg-secondary-100' if params[:sync_status] == 'synced') }) do
-        = link_to controller: replicable_controller, sync_status: 'synced' do
-          = s_('Geo|Synced')
-  .col.replicable-search.px-1.my-1.my-sm-0.w-100
-    = render 'shared/projects/search_form', autofocus: true, search_form_placeholder: _("Filter by name"), icon: true
-  .col.col-sm-6.d-flex.justify-content-end.my-1.my-sm-0.w-100
-    - action_buttons.each do |action_button|
-      = action_button
+%nav.bg-secondary.border-bottom.border-secondary-100.p-3
+  .row.d-flex.flex-column.flex-sm-row
+    .col
+      .d-sm-flex.mx-n1
+        .dropdown.px-1.my-1.my-sm-0.w-100
+          %a.btn.d-flex.align-items-center.justify-content-between.w-100{ href: '#', data: { toggle: 'dropdown' }, 'aria-haspopup' => 'true', 'aria-expanded' => 'false' }
+            = s_('Geo|Filter by status')
+            = sprite_icon("chevron-down")
+          %ul.dropdown-menu
+            = nav_link(html_options: { class: ('bg-secondary-100' if !params[:sync_status].present?) }) do
+              = link_to controller: replicable_controller do
+                = sprintf(s_('Geo|All %{replicable_name}'), { replicable_name: replicable_name })
+            = nav_link(html_options: { class: ('bg-secondary-100' if params[:sync_status] == 'pending') }) do
+              = link_to controller: replicable_controller, sync_status: 'pending' do
+                = s_('Geo|In progress')
+            = nav_link(html_options: { class: ('bg-secondary-100' if params[:sync_status] == 'failed') }) do
+              = link_to controller: replicable_controller, sync_status: 'failed' do
+                = s_('Geo|Failed')
+            = nav_link(html_options: { class: ('bg-secondary-100' if params[:sync_status] == 'synced') }) do
+              = link_to controller: replicable_controller, sync_status: 'synced' do
+                = s_('Geo|Synced')
+        .replicable-search.px-1.my-1.my-sm-0.w-100
+          = render 'shared/projects/search_form', autofocus: true, search_form_placeholder: _("Filter by name"), icon: true
+    .col.col-sm-5.d-flex.justify-content-end.my-1.my-sm-0.w-100
+      - action_buttons.each do |action_button|
+        = action_button

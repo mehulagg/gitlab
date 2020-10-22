@@ -1,4 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
+import { GlSprintf } from '@gitlab/ui';
 import component from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
 
@@ -23,6 +24,7 @@ describe('Merge request note', () => {
 
     beforeEach(() => {
       wrapper = shallowMount(component, {
+        stubs: { GlSprintf },
         propsData: { feedback },
       });
     });
@@ -45,6 +47,7 @@ describe('Merge request note', () => {
 
     beforeEach(() => {
       wrapper = shallowMount(component, {
+        stubs: { GlSprintf },
         propsData: { feedback, project },
       });
     });
@@ -65,6 +68,7 @@ describe('Merge request note', () => {
 
     beforeEach(() => {
       wrapper = shallowMount(component, {
+        stubs: { GlSprintf },
         propsData: {
           feedback,
           project: unsafeProject,
@@ -73,13 +77,8 @@ describe('Merge request note', () => {
     });
 
     it('should escape the project name', () => {
-      // Note: We have to check the computed prop here because
-      // vue test utils unescapes the result of wrapper.text()
-
-      expect(wrapper.vm.eventText).not.toContain(project.value);
-      expect(wrapper.vm.eventText).toContain(
-        'Foo &lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;',
-      );
+      // Test that the XSS text has been rendered literally as safe text.
+      expect(wrapper.text()).toContain(unsafeProject.value);
     });
   });
 });

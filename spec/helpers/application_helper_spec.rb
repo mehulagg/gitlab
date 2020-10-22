@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApplicationHelper do
+RSpec.describe ApplicationHelper do
   describe 'current_controller?' do
     before do
       stub_controller_name('foo')
@@ -68,6 +68,28 @@ describe ApplicationHelper do
 
     def stub_action_name(value)
       allow(helper).to receive(:action_name).and_return(value)
+    end
+  end
+
+  describe '#admin_section?' do
+    context 'when controller is under the admin namespace' do
+      before do
+        allow(helper).to receive(:controller).and_return(Admin::UsersController.new)
+      end
+
+      it 'returns true' do
+        expect(helper.admin_section?).to eq(true)
+      end
+    end
+
+    context 'when controller is not under the admin namespace' do
+      before do
+        allow(helper).to receive(:controller).and_return(UsersController.new)
+      end
+
+      it 'returns true' do
+        expect(helper.admin_section?).to eq(false)
+      end
     end
   end
 
@@ -146,6 +168,42 @@ describe ApplicationHelper do
     it { expect(helper.active_when(false)).to eq(nil) }
   end
 
+  describe '#promo_host' do
+    subject { helper.promo_host }
+
+    it 'returns the url' do
+      is_expected.to eq('about.gitlab.com')
+    end
+  end
+
+  describe '#promo_url' do
+    subject { helper.promo_url }
+
+    it 'returns the url' do
+      is_expected.to eq('https://about.gitlab.com')
+    end
+
+    it 'changes if promo_host changes' do
+      allow(helper).to receive(:promo_host).and_return('foobar.baz')
+
+      is_expected.to eq('https://foobar.baz')
+    end
+  end
+
+  describe '#contact_sales_url' do
+    subject { helper.contact_sales_url }
+
+    it 'returns the url' do
+      is_expected.to eq('https://about.gitlab.com/sales')
+    end
+
+    it 'changes if promo_url changes' do
+      allow(helper).to receive(:promo_url).and_return('https://somewhere.else')
+
+      is_expected.to eq('https://somewhere.else/sales')
+    end
+  end
+
   describe '#support_url' do
     context 'when alternate support url is specified' do
       let(:alternate_url) { 'http://company.example.com/getting-help' }
@@ -161,6 +219,32 @@ describe ApplicationHelper do
       it 'builds the support url from the promo_url' do
         expect(helper.support_url).to eq(helper.promo_url + '/getting-help/')
       end
+    end
+  end
+
+  describe '#instance_review_permitted?' do
+    let_it_be(:non_admin_user) { create :user }
+    let_it_be(:admin_user) { create :user, :admin }
+
+    before do
+      allow(::Gitlab::CurrentSettings).to receive(:instance_review_permitted?).and_return(app_setting)
+      allow(helper).to receive(:current_user).and_return(current_user)
+    end
+
+    subject { helper.instance_review_permitted? }
+
+    where(app_setting: [true, false], is_admin: [true, false, nil])
+
+    with_them do
+      let(:current_user) do
+        if is_admin.nil?
+          nil
+        else
+          is_admin ? admin_user : non_admin_user
+        end
+      end
+
+      it { is_expected.to be(app_setting && is_admin) }
     end
   end
 
@@ -184,6 +268,16 @@ describe ApplicationHelper do
       flags_list = helper.client_js_flags
       expect(flags_list[:isGeneric]).to eq(true)
       expect(flags_list[:isOther]).to eq(true)
+    end
+  end
+
+  describe '#page_startup_api_calls' do
+    it 'returns map containing JS Page Startup Calls' do
+      helper.add_page_startup_api_call("testURL")
+
+      startup_calls = helper.page_startup_api_calls
+
+      expect(startup_calls["testURL"]).to eq({})
     end
   end
 
@@ -256,7 +350,7 @@ describe ApplicationHelper do
             page: 'application',
             page_type_id: nil,
             find_file: nil,
-            group: ''
+            group: nil
           }
         )
       end
@@ -295,12 +389,31 @@ describe ApplicationHelper do
             page: 'application',
             page_type_id: nil,
             find_file: nil,
-            group: '',
+            group: nil,
             project_id: project.id,
             project: project.name,
             namespace_id: project.namespace.id
           }
         )
+      end
+
+      context 'when @project is owned by a group' do
+        let_it_be(:project) { create(:project, :repository, group: create(:group)) }
+
+        it 'includes all possible body data elements and associates the project elements with project' do
+          expect(helper).to receive(:can?).with(nil, :download_code, project)
+          expect(helper.body_data).to eq(
+            {
+              page: 'application',
+              page_type_id: nil,
+              find_file: nil,
+              group: project.group.name,
+              project_id: project.id,
+              project: project.name,
+              namespace_id: project.namespace.id
+            }
+          )
+        end
       end
 
       context 'when controller is issues' do
@@ -320,7 +433,7 @@ describe ApplicationHelper do
                 page: 'projects:issues:show',
                 page_type_id: issue.id,
                 find_file: nil,
-                group: '',
+                group: nil,
                 project_id: issue.project.id,
                 project: issue.project.name,
                 namespace_id: issue.project.namespace.id

@@ -4,7 +4,6 @@ module Gitlab
   module Auth
     module Smartcard
       class Base
-        InvalidCAFilePath = Class.new(StandardError)
         InvalidCertificate = Class.new(StandardError)
 
         delegate :allow_signup?,
@@ -12,17 +11,10 @@ module Gitlab
 
         def self.store
           @store ||= OpenSSL::X509::Store.new.tap do |store|
-            store.add_cert(
-              OpenSSL::X509::Certificate.new(
-                File.read(Gitlab.config.smartcard.ca_file)))
+            store.add_file(Gitlab.config.smartcard.ca_file)
           end
-        rescue Errno::ENOENT => ex
-          logger.error(message: 'Failed to open Gitlab.config.smartcard.ca_file',
-                       error: ex)
-
-          raise InvalidCAFilePath
-        rescue OpenSSL::X509::CertificateError => ex
-          logger.error(message: 'Gitlab.config.smartcard.ca_file is not a valid certificate',
+        rescue OpenSSL::X509::StoreError => ex
+          logger.error(message: 'Gitlab.config.smartcard.ca_file is invalid or does not exist',
                        error: ex)
 
           raise InvalidCertificate

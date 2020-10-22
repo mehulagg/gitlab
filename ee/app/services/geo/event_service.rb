@@ -24,8 +24,7 @@ module Geo
       strong_memoize(:replicator) do
         model_record_id = payload[:model_record_id]
 
-        replicator_class = ::Gitlab::Geo::Replicator.for_replicable_name(replicable_name)
-        replicator_class.new(model_record_id: model_record_id)
+        ::Gitlab::Geo::Replicator.for_replicable_params(replicable_name: replicable_name, replicable_id: model_record_id)
       end
     end
 

@@ -1,5 +1,15 @@
 # frozen_string_literal: true
 
+FactoryBot.modify do
+  factory :group do
+    trait :wiki_repo do
+      after(:create) do |group|
+        raise 'Failed to create wiki repository!' unless group.create_wiki
+      end
+    end
+  end
+end
+
 FactoryBot.define do
   factory :group_with_members, parent: :group do
     after(:create) do |group, evaluator|

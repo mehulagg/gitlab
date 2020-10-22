@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Analytics::CycleAnalytics::RequestParams do
+RSpec.describe Gitlab::Analytics::CycleAnalytics::RequestParams do
   let_it_be(:user) { create(:user) }
   let_it_be(:root_group) { create(:group) }
   let_it_be(:sub_group) { create(:group, parent: root_group) }
@@ -16,13 +16,16 @@ describe Gitlab::Analytics::CycleAnalytics::RequestParams do
 
   let(:project_ids) { root_group_projects.collect(&:id) }
   let(:params) do
-    { created_after: '2019-01-01',
+    {
+      created_after: '2019-01-01',
       created_before: '2019-03-01',
       project_ids: [2, 3],
-      group: root_group }
+      group: root_group,
+      current_user: user
+    }
   end
 
-  subject { described_class.new(params, current_user: user) }
+  subject { described_class.new(params) }
 
   before do
     root_group.add_owner(user)
@@ -39,7 +42,7 @@ describe Gitlab::Analytics::CycleAnalytics::RequestParams do
       end
 
       it 'is valid' do
-        Timecop.travel '2019-03-01' do
+        travel_to '2019-03-01' do
           expect(subject).to be_valid
         end
       end
@@ -79,7 +82,7 @@ describe Gitlab::Analytics::CycleAnalytics::RequestParams do
   describe 'optional `project_ids`' do
     context 'when `project_ids` is not empty' do
       def json_project(project)
-        { id: project.id,
+        { id: project.to_gid.to_s,
           name: project.name,
           path_with_namespace: project.path_with_namespace,
           avatar_url: project.avatar_url }.to_json
@@ -163,5 +166,43 @@ describe Gitlab::Analytics::CycleAnalytics::RequestParams do
 
       it { expect(subject.group).to eq(sub_group.id) }
     end
+  end
+
+  describe 'optional `value_stream`' do
+    context 'when `value_stream` is not empty' do
+      let(:value_stream) { instance_double('Analytics::CycleAnalytics::GroupValueStream') }
+
+      before do
+        params[:value_stream] = value_stream
+      end
+
+      it { expect(subject.value_stream).to eq(value_stream) }
+    end
+
+    context 'when `value_stream` is nil' do
+      before do
+        params[:value_stream] = nil
+      end
+
+      it { expect(subject.value_stream).to eq(nil) }
+    end
+  end
+
+  describe 'issuable filter params' do
+    before do
+      params.merge!(
+        milestone_title: 'title',
+        assignee_username: ['username1'],
+        label_name: %w[label1 label2],
+        author_username: 'author'
+      )
+    end
+
+    subject { described_class.new(params).to_data_attributes }
+
+    it { expect(subject[:milestone]).to eq('title') }
+    it { expect(subject[:assignees]).to eq('["username1"]') }
+    it { expect(subject[:labels]).to eq('["label1","label2"]') }
+    it { expect(subject[:author]).to eq('author') }
   end
 end

@@ -17,8 +17,9 @@ module API
         authorize! :admin_note, note
 
         opts = {
-          note: params[:body]
-        }
+          note: params[:body],
+          confidential: params[:confidential]
+        }.compact
         parent = noteable_parent(noteable)
         project = parent if parent.is_a?(Project)
 
@@ -133,7 +134,7 @@ module API
 
         if resolved
           parent = noteable_parent(noteable)
-          ::Discussions::ResolveService.new(parent, current_user, merge_request: noteable).execute(discussion)
+          ::Discussions::ResolveService.new(parent, current_user, one_or_more_discussions: discussion).execute
         else
           discussion.unresolve!
         end

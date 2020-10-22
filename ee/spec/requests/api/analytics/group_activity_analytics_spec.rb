@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Analytics::GroupActivityAnalytics do
+RSpec.describe API::Analytics::GroupActivityAnalytics do
   let_it_be(:group) { create(:group, :private) }
 
   let_it_be(:reporter) do
@@ -13,8 +13,6 @@ describe API::Analytics::GroupActivityAnalytics do
 
   shared_examples 'GET group_activity' do |activity, count|
     let(:feature_available) { true }
-    let(:feature_enabled_globally) { true }
-    let(:feature_enabled_for_group) { true }
     let(:params) { { group_path: group.full_path } }
     let(:current_user) { reporter }
     let(:request) do
@@ -22,34 +20,23 @@ describe API::Analytics::GroupActivityAnalytics do
     end
 
     before do
-      allow(Feature).to receive(:enabled?).with(:group_activity_analytics, group).and_return(feature_enabled_for_group)
-      allow(Feature).to receive(:enabled?).with(:group_activity_analytics).and_return(feature_enabled_globally)
-
       stub_licensed_features(group_activity_analytics: feature_available)
 
       request
     end
 
-    it 'is successful' do
-      expect(response).to have_gitlab_http_status(:ok)
-    end
+    context 'when feature is enabled for a group' do
+      it 'is successful' do
+        expect(response).to have_gitlab_http_status(:ok)
+      end
 
-    it 'is returns a count' do
-      expect(response.parsed_body).to eq({ "#{activity}_count" => count })
+      it 'is returns a count' do
+        expect(response.parsed_body).to eq({ "#{activity}_count" => count })
+      end
     end
 
     context 'when feature is not available in plan' do
       let(:feature_available) { false }
-      let(:feature_enabled_for_group) { false }
-
-      it 'is returns `forbidden`' do
-        expect(response).to have_gitlab_http_status(:forbidden)
-      end
-    end
-
-    context 'when feature is disabled globally' do
-      let(:feature_enabled_globally) { false }
-      let(:feature_enabled_for_group) { false }
 
       it 'is returns `forbidden`' do
         expect(response).to have_gitlab_http_status(:forbidden)

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Analytics::ProductivityAnalyticsRequestParams do
+RSpec.describe Analytics::ProductivityAnalyticsRequestParams do
   let(:params) do
     {
       author_username: 'user',

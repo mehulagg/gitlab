@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Web terminals
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/7690) in GitLab 8.15.
@@ -8,7 +14,7 @@ Only project maintainers and owners can access web terminals.
 With the introduction of the [Kubernetes integration](../../user/project/clusters/index.md),
 GitLab gained the ability to store and use credentials for a Kubernetes cluster.
 One of the things it uses these credentials for is providing access to
-[web terminals](../../ci/environments.md#web-terminals) for environments.
+[web terminals](../../ci/environments/index.md#web-terminals) for environments.
 
 ## How it works
 
@@ -45,7 +51,8 @@ detail below.
 
 ## Enabling and disabling terminal support
 
-NOTE: **Note:** AWS Elastic Load Balancers (ELBs) do not support web sockets.
+NOTE: **Note:**
+AWS Elastic Load Balancers (ELBs) do not support web sockets.
 AWS Application Load Balancers (ALBs) must be used if you want web terminals
 to work. See [AWS Elastic Load Balancing Product Comparison](https://aws.amazon.com/elasticloadbalancing/features/#compare)
 for more information.
@@ -56,7 +63,7 @@ through to the next one in the chain. If you installed GitLab using Omnibus, or
 from source, starting with GitLab 8.15, this should be done by the default
 configuration, so there's no need for you to do anything.
 
-However, if you run a [load balancer](../high_availability/load_balancer.md) in
+However, if you run a [load balancer](../load_balancer.md) in
 front of GitLab, you may need to make some changes to your configuration. These
 guides document the necessary steps for a selection of popular reverse proxies:
 
@@ -97,4 +104,4 @@ they will receive a `Connection failed` message.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/8413) in GitLab 8.17.
 
 Terminal sessions, by default, do not expire.
-You can limit terminal session lifetime in your GitLab instance. To do so, navigate to **{admin}** [**Admin Area > Settings > Web terminal**](../../user/admin_area/settings/index.md#general), and set a `max session time`.
+You can limit terminal session lifetime in your GitLab instance. To do so, navigate to [**Admin Area > Settings > Web terminal**](../../user/admin_area/settings/index.md#general), and set a `max session time`.

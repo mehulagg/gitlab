@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequestsComplianceFinder do
+RSpec.describe MergeRequestsComplianceFinder do
   subject { described_class.new(current_user, search_params) }
 
   let_it_be(:current_user) { create(:admin) }

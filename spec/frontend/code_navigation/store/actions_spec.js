@@ -69,7 +69,12 @@ describe('Code navigation actions', () => {
               payload: {
                 path: 'index.js',
                 normalizedData: {
-                  '0:0': { start_line: 0, start_char: 0, hover: { value: '123' } },
+                  '0:0': {
+                    definitionLineNumber: 0,
+                    start_line: 0,
+                    start_char: 0,
+                    hover: { value: '123' },
+                  },
                 },
               },
             },
@@ -91,7 +96,12 @@ describe('Code navigation actions', () => {
               payload: {
                 path: 'index.js',
                 normalizedData: {
-                  '0:0': { start_line: 0, start_char: 0, hover: { value: '123' } },
+                  '0:0': {
+                    definitionLineNumber: 0,
+                    start_line: 0,
+                    start_char: 0,
+                    hover: { value: '123' },
+                  },
                 },
               },
             },
@@ -143,13 +153,25 @@ describe('Code navigation actions', () => {
       expect(addInteractionClass.mock.calls[0]).toEqual(['index.js', 'test']);
       expect(addInteractionClass.mock.calls[1]).toEqual(['index.js', 'console.log']);
     });
+
+    it('does not call addInteractionClass when no data exists', () => {
+      const state = {
+        data: null,
+      };
+
+      actions.showBlobInteractionZones({ state }, 'index.js');
+
+      expect(addInteractionClass).not.toHaveBeenCalled();
+    });
   });
 
   describe('showDefinition', () => {
     let target;
 
     beforeEach(() => {
-      setFixtures('<div data-path="index.js"><div class="js-test"></div></div>');
+      setFixtures(
+        '<div data-path="index.js"><div class="line"><div class="js-test"></div></div></div>',
+      );
       target = document.querySelector('.js-test');
     });
 
@@ -176,7 +198,7 @@ describe('Code navigation actions', () => {
             payload: {
               blobPath: 'index.js',
               definition: { hover: 'test' },
-              position: { height: 0, x: 0, y: 0 },
+              position: { height: 0, x: 0, y: 0, lineIndex: 0 },
             },
           },
         ],
@@ -200,7 +222,7 @@ describe('Code navigation actions', () => {
             payload: {
               blobPath: 'index.js',
               definition: { hover: 'test' },
-              position: { height: 0, x: 0, y: 0 },
+              position: { height: 0, x: 0, y: 0, lineIndex: 0 },
             },
           },
         ],
@@ -225,7 +247,7 @@ describe('Code navigation actions', () => {
             payload: {
               blobPath: 'index.js',
               definition: { hover: 'test' },
-              position: { height: 0, x: 0, y: 0 },
+              position: { height: 0, x: 0, y: 0, lineIndex: 0 },
             },
           },
         ],
