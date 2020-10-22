@@ -71,8 +71,9 @@ export default {
       },
       variables() {
         return this.nameKeys.reduce((memo, key) => {
+          console.log('nameKey', this.nameKeys, memo, key);
           const firstKey = `${this.$options.firstKey}${convertToTitleCase(key)}`;
-          return { ...memo, [firstKey]: this.totalDaysToShow };
+          return { ...memo, [firstKey]: this.totalDaysToShow, identifier: key.toUpperCase() };
         }, {});
       },
       update(data) {
@@ -117,6 +118,8 @@ export default {
         '[0].recordedAt',
         { renameKey: this.$options.firstKey },
       );
+
+      console.log('firstDataPoints', firstDataPoints)
 
       return Object.keys(firstDataPoints).reduce((memo, name) => {
         const recordedAt = firstDataPoints[name];

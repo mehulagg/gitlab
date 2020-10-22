@@ -5,6 +5,7 @@ import InstanceStatisticsCountChart from './instance_statistics_count_chart.vue'
 import UsersChart from './users_chart.vue';
 import pipelinesStatsQuery from '../graphql/queries/pipeline_stats.query.graphql';
 import issuesAndMergeRequestsQuery from '../graphql/queries/issues_and_merge_requests.query.graphql';
+import countsQuery from '../graphql/queries/instance_count.query.graphql';
 import ProjectsAndGroupsChart from './projects_and_groups_chart.vue';
 import { TODAY, TOTAL_DAYS_TO_SHOW, START_DATE } from '../constants';
 
@@ -33,12 +34,28 @@ export default {
     InstanceCounts,
     InstanceStatisticsCountChart,
     UsersChart,
-    ProjectsAndGroupsChart,
+    // ProjectsAndGroupsChart,
   },
   TOTAL_DAYS_TO_SHOW,
   START_DATE,
   TODAY,
   configs: [
+    {
+      keyToNameMap: {
+        projects: s__('InstanceAnalytics|Projects'),
+        groups: s__('InstanceAnalytics|Groups'),
+      },
+      prefix: 'projectsAndGroups',
+      loadChartError: s__(
+        'InstanceAnalytics|Could not load the projects and groups chart. Please refresh the page to try again.',
+      ),
+      noDataMessage,
+      chartTitle: s__('InstanceAnalytics|Total projects & groups'),
+      yAxisTitle: s__('InstanceAnalytics|Items'),
+      xAxisTitle: s__('InstanceAnalytics|Month'),
+      query: countsQuery,
+      separateQueries: true,
+    },
     {
       keyToNameMap: PIPELIES_KEY_TO_NAME_MAP,
       prefix: 'pipelines',
@@ -71,11 +88,11 @@ export default {
       :end-date="$options.TODAY"
       :total-data-points="$options.TOTAL_DAYS_TO_SHOW"
     />
-    <projects-and-groups-chart
+    <!-- <projects-and-groups-chart
       :start-date="$options.START_DATE"
       :end-date="$options.TODAY"
       :total-data-points="$options.TOTAL_DAYS_TO_SHOW"
-    />
+    /> -->
     <instance-statistics-count-chart
       v-for="chartOptions in $options.configs"
       :key="chartOptions.chartTitle"
@@ -88,6 +105,6 @@ export default {
       :no-data-message="chartOptions.noDataMessage"
       :chart-title="chartOptions.chartTitle"
     />
-    <pipelines-chart />
+    <!-- <pipelines-chart /> -->
   </div>
 </template>
