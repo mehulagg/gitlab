@@ -1,6 +1,6 @@
 <script>
 import { isEmpty } from 'lodash';
-import { GlIcon, GlButton, GlSprintf, GlLink } from '@gitlab/ui';
+import { GlIcon, GlButton, GlButtonGroup, GlSprintf, GlLink } from '@gitlab/ui';
 import readyToMergeMixin from 'ee_else_ce/vue_merge_request_widget/mixins/ready_to_merge';
 import simplePoll from '~/lib/utils/simple_poll';
 import { __ } from '~/locale';
@@ -36,6 +36,7 @@ export default {
     GlSprintf,
     GlLink,
     GlButton,
+    GlButtonGroup,
     MergeTrainHelperText: () =>
       import('ee_component/vue_merge_request_widget/components/merge_train_helper_text.vue'),
     MergeImmediatelyConfirmationDialog: () =>
@@ -283,12 +284,10 @@ export default {
       <status-icon :status="iconClass" />
       <div class="media-body">
         <div class="mr-widget-body-controls media space-children">
-          <span class="btn-group">
+          <gl-button-group>
             <gl-button
-              size="medium"
               category="primary"
-              class="qa-merge-button accept-merge-request"
-              :variant="mergeButtonVariant"
+              variant="info"
               :disabled="isMergeButtonDisabled"
               :loading="isMakingRequest"
               @click="handleMergeButtonClick(isAutoMergeAvailable)"
@@ -342,7 +341,7 @@ export default {
                 </a>
               </li>
             </ul>
-          </span>
+          </gl-button-group>
           <div class="media-body-wrap space-children">
             <template v-if="shouldShowMergeControls">
               <label v-if="mr.canRemoveSourceBranch">
