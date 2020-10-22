@@ -15219,7 +15219,8 @@ CREATE TABLE projects (
     marked_for_deletion_at date,
     marked_for_deletion_by_user_id integer,
     autoclose_referenced_issues boolean,
-    suggestion_commit_message character varying(255)
+    suggestion_commit_message character varying(255),
+    has_vulnerabilities boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE projects_id_seq
@@ -21343,6 +21344,8 @@ CREATE INDEX index_projects_on_creator_id_and_created_at_and_id ON projects USIN
 CREATE INDEX index_projects_on_creator_id_and_id ON projects USING btree (creator_id, id);
 
 CREATE INDEX index_projects_on_description_trigram ON projects USING gin (description gin_trgm_ops);
+
+CREATE INDEX index_projects_on_has_vulnerabilities ON projects USING btree (has_vulnerabilities);
 
 CREATE INDEX index_projects_on_id_and_archived_and_pending_delete ON projects USING btree (id) WHERE ((archived = false) AND (pending_delete = false));
 
