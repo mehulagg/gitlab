@@ -1,15 +1,11 @@
 <script>
 import { GlLineChart } from '@gitlab/ui/dist/charts';
 import { GlAlert } from '@gitlab/ui';
-import { mapValues, some, sum } from 'lodash';
+import { some } from 'lodash';
+import { produce } from 'immer';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
-import {
-  differenceInMonths,
-  formatDateAsMonth,
-  getDayDifference,
-} from '~/lib/utils/datetime_utility';
-import { convertToTitleCase } from '~/lib/utils/text_utility';
-import { getAverageByMonth, sortByDate, extractValues } from '../utils';
+import { differenceInMonths, formatDateAsMonth } from '~/lib/utils/datetime_utility';
+import { getAverageByMonth } from '../utils';
 import { TODAY, START_DATE } from '../constants';
 
 export default {
@@ -54,8 +50,8 @@ export default {
       type: String,
       required: true,
     },
-    query: {
-      type: Object,
+    queries: {
+      type: Array,
       required: true,
     },
   },
@@ -63,97 +59,30 @@ export default {
     return {
       loading: true,
       loadingError: null,
+      queryPageInfo: {},
+      ...this.queries.reduce(
+        (acc, { name }) => ({
+          ...acc,
+          [name]: [],
+        }),
+        {},
+      ),
     };
-  },
-  apollo: {
-    dataQuery: {
-      query() {
-        return this.query;
-      },
-      variables() {
-        return this.nameKeys.reduce((memo, key) => {
-          const firstKey = `${this.$options.firstKey}${convertToTitleCase(key)}`;
-          return { ...memo, [firstKey]: this.totalDaysToShow };
-        }, {});
-      },
-      update(data) {
-        const allData = extractValues(data, this.nameKeys, this.prefix, this.$options.dataKey);
-        const allPageInfo = extractValues(
-          data,
-          this.nameKeys,
-          this.prefix,
-          this.$options.pageInfoKey,
-        );
-
-        return {
-          ...mapValues(allData, sortByDate),
-          ...allPageInfo,
-        };
-      },
-      result() {
-        if (this.hasNextPage) {
-          this.fetchNextPage();
-        }
-      },
-      error() {
-        this.handleError();
-      },
-    },
   },
   computed: {
     nameKeys() {
       return Object.keys(this.keyToNameMap);
     },
     isLoading() {
-      return this.$apollo.queries.dataQuery.loading;
-    },
-    totalDaysToShow() {
-      return getDayDifference(this.$options.startDate, this.$options.endDate);
-    },
-    firstVariables() {
-      const firstDataPoints = extractValues(
-        this.dataQuery,
-        this.nameKeys,
-        this.$options.dataKey,
-        '[0].recordedAt',
-        { renameKey: this.$options.firstKey },
-      );
-
-      return Object.keys(firstDataPoints).reduce((memo, name) => {
-        const recordedAt = firstDataPoints[name];
-        if (!recordedAt) {
-          return { ...memo, [name]: 0 };
-        }
-
-        const numberOfDays = Math.max(
-          0,
-          getDayDifference(this.$options.startDate, new Date(recordedAt)),
-        );
-
-        return { ...memo, [name]: numberOfDays };
-      }, {});
-    },
-    cursorVariables() {
-      return extractValues(this.dataQuery, this.nameKeys, this.$options.pageInfoKey, 'endCursor');
-    },
-    hasNextPage() {
-      return (
-        sum(Object.values(this.firstVariables)) > 0 &&
-        some(this.dataQuery, ({ hasNextPage }) => hasNextPage)
-      );
+      return some(this.$apollo.queries, query => query.loading);
     },
     hasEmptyDataSet() {
       return this.chartData.every(({ data }) => data.length === 0);
     },
     chartData() {
       const options = { shouldRound: true };
-
-      return this.nameKeys.map(key => {
-        const dataKey = `${this.$options.dataKey}${convertToTitleCase(key)}`;
-        return {
-          name: this.keyToNameMap[key],
-          data: getAverageByMonth(this.dataQuery?.[dataKey], options),
-        };
+      return this.queries.map(({ name, title }) => {
+        return { name: title, data: getAverageByMonth(this[name], options) };
       });
     },
     range() {
@@ -184,26 +113,71 @@ export default {
       };
     },
   },
+  created() {
+    this.queries.forEach(({ query, name, identifier }) => {
+      this.queryPageInfo[name] = {};
+
+      this.$apollo.addSmartQuery(name, {
+        query,
+        variables() {
+          return {
+            identifier: identifier.toUpperCase(),
+            first: this.totalDataPoints,
+            after: null,
+          };
+        },
+        update(data) {
+          return data.instanceStatisticsMeasurements?.nodes || [];
+        },
+        result({ data }) {
+          const {
+            instanceStatisticsMeasurements: { pageInfo },
+          } = data;
+          this.queryPageInfo[name] = pageInfo;
+          this.fetchNextPage({
+            query: this.$apollo.queries[name],
+            pageInfo: this.queryPageInfo[name],
+            name,
+            identifier,
+            errorMessage: this.loadChartError,
+          });
+        },
+        error(error) {
+          this.handleError({
+            message: this.loadGroupsDataError,
+            error,
+            dataKey: name,
+          });
+        },
+      });
+    });
+  },
   methods: {
     handleError() {
       this.loadingError = true;
     },
-    fetchNextPage() {
-      this.$apollo.queries.dataQuery
-        .fetchMore({
-          variables: {
-            ...this.firstVariables,
-            ...this.cursorVariables,
-          },
-          updateQuery: (previousResult, { fetchMoreResult }) => {
-            return Object.keys(fetchMoreResult).reduce((memo, key) => {
-              const { nodes, ...rest } = fetchMoreResult[key];
-              const previousNodes = previousResult[key].nodes;
-              return { ...memo, [key]: { ...rest, nodes: [...previousNodes, ...nodes] } };
-            }, {});
-          },
-        })
-        .catch(this.handleError);
+    fetchNextPage({ query, pageInfo, identifier, name }) {
+      // TODO: properly track how much data we have fetched
+      if (pageInfo?.hasNextPage) {
+        query
+          .fetchMore({
+            variables: {
+              identifier,
+              first: this.totalDataPoints,
+              after: pageInfo.endCursor,
+            },
+            updateQuery: (previousResult, { fetchMoreResult }) => {
+              return produce(fetchMoreResult, newData => {
+                // eslint-disable-next-line no-param-reassign
+                newData.instanceStatisticsMeasurements.nodes = [
+                  ...previousResult.instanceStatisticsMeasurements.nodes,
+                  ...newData.instanceStatisticsMeasurements.nodes,
+                ];
+              });
+            },
+          })
+          .catch(this.handleError);
+      }
     },
   },
 };

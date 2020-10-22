@@ -3,9 +3,7 @@ import { s__ } from '~/locale';
 import InstanceCounts from './instance_counts.vue';
 import InstanceStatisticsCountChart from './instance_statistics_count_chart.vue';
 import UsersChart from './users_chart.vue';
-import pipelinesStatsQuery from '../graphql/queries/pipeline_stats.query.graphql';
-import issuesAndMergeRequestsQuery from '../graphql/queries/issues_and_merge_requests.query.graphql';
-import projectsAndGroupsQuery from '../graphql/queries/projects_and_groups.query.graphql';
+import query from '../graphql/queries/instance_count.query.graphql';
 import { TODAY, TOTAL_DAYS_TO_SHOW, START_DATE } from '../constants';
 
 const PIPELIES_KEY_TO_NAME_MAP = {
@@ -51,7 +49,20 @@ export default {
       chartTitle: s__('InstanceAnalytics|Total projects & groups'),
       yAxisTitle: s__('InstanceAnalytics|Items'),
       xAxisTitle: s__('InstanceAnalytics|Month'),
-      query: projectsAndGroupsQuery,
+      queries: [
+        {
+          query,
+          name: 'projects',
+          title: 'Projects',
+          identifier: 'PROJECTS',
+        },
+        {
+          query,
+          name: 'groups',
+          title: 'Groups',
+          identifier: 'GROUPS',
+        },
+      ],
     },
     {
       keyToNameMap: PIPELIES_KEY_TO_NAME_MAP,
@@ -61,7 +72,38 @@ export default {
       chartTitle: s__('InstanceAnalytics|Pipelines'),
       yAxisTitle: s__('InstanceAnalytics|Items'),
       xAxisTitle: s__('InstanceAnalytics|Month'),
-      query: pipelinesStatsQuery,
+      queries: [
+        {
+          query,
+          name: 'pipelinesTotal',
+          title: 'Pipelines total',
+          identifier: 'PIPELINES',
+        },
+        {
+          query,
+          name: 'pipelinesSucceeded',
+          title: 'Pipelines succeeded',
+          identifier: 'PIPELINES_SUCCEEDED',
+        },
+        {
+          query,
+          name: 'pipelinesFailed',
+          title: 'Pipelines failed',
+          identifier: 'PIPELINES_FAILED',
+        },
+        {
+          query,
+          name: 'pipelinesCanceled',
+          title: 'Pipelines canceled',
+          identifier: 'PIPELINES_CANCELED',
+        },
+        {
+          query,
+          name: 'pipelinesSkipped',
+          title: 'Pipelines skipped',
+          identifier: 'PIPELINES_SKIPPED',
+        },
+      ],
     },
     {
       keyToNameMap: ISSUES_AND_MERGE_REQUESTS_KEY_TO_NAME_MAP,
@@ -71,7 +113,20 @@ export default {
       chartTitle: s__('InstanceAnalytics|Issues & Merge Requests'),
       yAxisTitle: s__('InstanceAnalytics|Items'),
       xAxisTitle: s__('InstanceAnalytics|Month'),
-      query: issuesAndMergeRequestsQuery,
+      queries: [
+        {
+          query,
+          name: 'issues',
+          title: 'Issues',
+          identifier: 'ISSUES',
+        },
+        {
+          query,
+          name: 'mergeRequests',
+          title: 'Merge requests',
+          identifier: 'MERGE_REQUESTS',
+        },
+      ],
     },
   ],
 };
@@ -90,7 +145,7 @@ export default {
       :key="chartOptions.chartTitle"
       :prefix="chartOptions.prefix"
       :key-to-name-map="chartOptions.keyToNameMap"
-      :query="chartOptions.query"
+      :queries="chartOptions.queries"
       :x-axis-title="chartOptions.xAxisTitle"
       :y-axis-title="chartOptions.yAxisTitle"
       :load-chart-error-message="chartOptions.loadChartError"
