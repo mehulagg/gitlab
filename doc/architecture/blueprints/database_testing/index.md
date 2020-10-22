@@ -18,7 +18,7 @@ We are investigating fast and efficient ways to provide lightweight, secure and 
 
 ### Near Term
 
-Investigate of the shelf solutions that can quickly provide cloning, scrubbing and subsetting database features. If we find a vendor that suits our needs we would then
+Investigate off-the-shelf solutions that can quickly provide scrubbing, subsetting, and thin-cloning database features. If we find a vendor that suits our needs we would then
 
 - Grant access to our current set of [database maintainers](https://about.gitlab.com/handbook/engineering/projects/#gitlab_maintainers_database)
 - Add a step to our maintainer process to require running the migration against a clone
