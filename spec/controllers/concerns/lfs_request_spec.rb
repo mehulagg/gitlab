@@ -27,7 +27,7 @@ RSpec.describe LfsRequest do
   end
 
   let(:project) { create(:project, :public) }
-  let(:params) { { namespace_id: project.namespace.full_path, repository_id: "#{project.path}.git" } }
+  let(:params) { { repository_path: "#{project.full_path}.git" } }
 
   before do
     stub_lfs_setting(enabled: true)
@@ -35,7 +35,7 @@ RSpec.describe LfsRequest do
     # Match the routing from config/routes/git_http.rb,
     # the `controller` call above only defines default resource routes
     routes.draw do
-      get ':namespace_id/:repository_id' => 'repositories/git_http_client#show'
+      get ':repository_path' => 'repositories/git_http_client#show'
     end
   end
 
@@ -58,7 +58,7 @@ RSpec.describe LfsRequest do
     context 'without access to the project' do
       context 'project does not exist' do
         it 'returns 404' do
-          get :show, params: params.merge(repository_id: 'does not exist.git')
+          get :show, params: params.merge(repository_path: "#{project.namespace.full_path}/does not exist.git")
 
           expect(response).to have_gitlab_http_status(:not_found)
         end

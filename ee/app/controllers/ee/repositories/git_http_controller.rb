@@ -75,11 +75,7 @@ module EE
       end
 
       def jwt_scope_valid?
-        decoded_authorization[:scope] == repository_full_path
-      end
-
-      def repository_full_path
-        File.join(params[:namespace_id], repository_path)
+        decoded_authorization[:scope] == repository_path.delete_suffix('.git')
       end
 
       def decoded_authorization
