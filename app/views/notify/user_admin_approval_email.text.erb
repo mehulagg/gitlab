@@ -1,0 +1,5 @@
+Hi <%= sanitize_name(@user.name) %>!
+
+<% if Feature.enabled?(:admin_approval_for_new_user_signups, default_enabled: true)%>
+Your GitLab account request has been approved!
+<% end %>

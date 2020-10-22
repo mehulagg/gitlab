@@ -63,6 +63,24 @@ RSpec.describe Emails::Profile do
     end
   end
 
+  describe 'user\'s request to access an instance was approved by an admin' do
+    let(:user) { create(:user, email: new_user_address) }
+
+    subject { Notify.user_admin_approval_email(user.id) }
+
+    it_behaves_like 'an email sent from GitLab'
+    it_behaves_like 'it should not have Gmail Actions links'
+    it_behaves_like 'a user cannot unsubscribe through footer link'
+
+    it 'is sent to the new user' do
+      is_expected.to deliver_to user.email
+    end
+
+    it 'has the correct subject' do
+      is_expected.to have_subject /^Welcome to Gitlab!$/i
+    end
+  end
+
   describe 'user added ssh key' do
     let(:key) { create(:personal_key) }
 

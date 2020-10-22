@@ -9,6 +9,12 @@ module Emails
       mail(to: @user.notification_email, subject: subject("Account was created for you"))
     end
 
+    def user_admin_approval_email(user_id)
+      @current_user = @user = User.find(user_id)
+      @target_url = user_url(@user)
+      mail(to: @user.notification_email, subject: subject("Welcome to GitLab!"))
+    end
+
     # rubocop: disable CodeReuse/ActiveRecord
     def new_ssh_key_email(key_id)
       @key = Key.find_by(id: key_id)

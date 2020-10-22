@@ -326,6 +326,13 @@ class NotificationService
     mailer.new_user_email(user.id, token).deliver_later unless user.identities.any?
   end
 
+  # Notify a user when their request to access an instance is approved
+  def user_admin_approval(user)
+    return true unless member.notifiable?(:subscription)
+
+    mailer.user_admin_approval_email(user.id).deliver_later
+  end
+
   # Notify users on new note in system
   def new_note(note)
     return true unless note.noteable_type.present?
