@@ -25,7 +25,7 @@ This is a partial list of the [RSpec metadata](https://relishapp.com/rspec/rspec
 | `:ldap_tls`       | The test requires a GitLab instance to be configured to use an external LDAP server with TLS enabled. |
 | `:object_storage` | The test requires a GitLab instance to be configured to use multiple [object storage types](https://docs.gitlab.com/ee/administration/object_storage.html). Uses MinIO as the object storage server. |
 | `:smtp`           | The test requires a GitLab instance to be configured to use an SMTP server.  Tests SMTP notification email delivery from Gitlab by using MailHog. |
-| `:group_saml`     | The test requires a GitLab instance that has SAML SSO enabled. Interacts with an external SAML identity provider. This is configured at the group-level. Paired with the `:orchestrated` tag.  |
+| `:group_saml`     | The test requires a GitLab instance that has SAML SSO enabled at the group level. Interacts with an external SAML identity provider. Paired with the `:orchestrated` tag.  |
 | `:saml`           | The test requires a GitLab instance that has SAML enabled. Interacts with an external SAML identity provider. This is configured at the instance-level. Paired with the `:orchestrated` tag. |
 | `:skip_signup_disabled` | - |
 | `:smoke`          | The test belongs to the test suite which verifies basic functionality of a GitLab instance.   |
