@@ -11,5 +11,7 @@ module Types
       description: 'User status message'
     field :emoji, GraphQL::STRING_TYPE, null: true,
       description: 'String representation of emoji'
+    field :availability, Types::AvailabilityEnum, null: true,
+      description: 'User availability status'
   end
 end

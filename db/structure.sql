@@ -16667,7 +16667,8 @@ CREATE TABLE user_statuses (
     cached_markdown_version integer,
     emoji character varying DEFAULT 'speech_balloon'::character varying NOT NULL,
     message character varying(100),
-    message_html character varying
+    message_html character varying,
+    availability integer
 );
 
 CREATE SEQUENCE user_statuses_user_id_seq
