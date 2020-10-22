@@ -1330,4 +1330,46 @@ RSpec.describe 'Git LFS API and storage' do
       "#{sample_oid}012345678"
     end
   end
+
+  context 'when repository container is a project wiki' do
+    let(:container) { create(:project_wiki, :empty_repo, project: project) }
+    let(:body) { upload_body(multiple_objects) }
+    let(:authorization) { authorize_user }
+
+    before do
+      project.add_developer(user)
+
+      post_lfs_json batch_url(container), body, headers
+    end
+
+    it_behaves_like 'LFS http 200 response'
+  end
+
+  context 'when repository container is a project snippet' do
+    let(:container) { create(:project_snippet, :empty_repo, project: project) }
+    let(:body) { upload_body(multiple_objects) }
+    let(:authorization) { authorize_user }
+
+    before do
+      project.add_developer(user)
+
+      post_lfs_json batch_url(container), body, headers
+    end
+
+    # Snippet#lfs_enabled returns false, but we have a project so we end up with a 403 response
+    it_behaves_like 'LFS http 403 response'
+  end
+
+  context 'when repository container is a personal snippet' do
+    let(:container) { create(:personal_snippet, :empty_repo) }
+    let(:body) { upload_body(multiple_objects) }
+    let(:authorization) { authorize_user }
+
+    before do
+      post_lfs_json batch_url(container), body, headers
+    end
+
+    # Snippet#lfs_enabled returns false, but we don't have a project so we end up with a 404 response
+    it_behaves_like 'LFS http 404 response'
+  end
 end
