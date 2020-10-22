@@ -22,14 +22,14 @@ module Gitlab
     end
 
     class << self
+      @destination = Gitlab::Tracking::Destinations::Snowplow.new
+
       def enabled?
         Gitlab::CurrentSettings.snowplow_enabled?
       end
 
       def event(category, action, label: nil, property: nil, value: nil, context: nil)
-        return unless enabled?
-
-        snowplow.track_struct_event(category, action, label, property, value, context, (Time.now.to_f * 1000).to_i)
+        @destination.event(category, action, label: label, property: property, value: value, context: context)
       end
 
       def self_describing_event(schema_url, event_data_json, context: nil)
