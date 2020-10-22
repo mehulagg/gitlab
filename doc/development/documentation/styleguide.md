@@ -1752,7 +1752,7 @@ If applicable, include the paid tier: `([introduced/deprecated](<link-to-issue>)
 Including the issue link is encouraged, but isn't a requirement. For example:
 
 ```markdown
-The voting strategy (introduced in GitLab 13.4) requires
+The voting strategy (in GitLab 13.4 and later) requires
 the primary and secondary voters to agree.
 ```
 
