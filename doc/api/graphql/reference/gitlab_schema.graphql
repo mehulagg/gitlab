@@ -591,7 +591,7 @@ type AlertManagementAlertStatusCountsType {
 }
 
 """
-Describes an endpoint and credentials used to accept alerts for a project
+An endpoint and credentials used to accept alerts for a project
 """
 type AlertManagementHttpIntegration implements AlertManagementIntegration {
   """
@@ -600,7 +600,7 @@ type AlertManagementHttpIntegration implements AlertManagementIntegration {
   active: Boolean
 
   """
-  URL at which metrics can be queried
+  URL at which Prometheus metrics can be queried to populate the metrics dashboard
   """
   apiUrl: String
 
@@ -637,7 +637,7 @@ interface AlertManagementIntegration {
   active: Boolean
 
   """
-  URL at which metrics can be queried
+  URL at which Prometheus metrics can be queried to populate the metrics dashboard
   """
   apiUrl: String
 
@@ -718,7 +718,7 @@ enum AlertManagementIntegrationType {
 }
 
 """
-Describes an endpoint and credentials used to accept Prometheus alerts for a project
+An endpoint and credentials used to accept Prometheus alerts for a project
 """
 type AlertManagementPrometheusIntegration implements AlertManagementIntegration {
   """
@@ -727,7 +727,7 @@ type AlertManagementPrometheusIntegration implements AlertManagementIntegration 
   active: Boolean
 
   """
-  URL at which metrics can be queried
+  URL at which Prometheus metrics can be queried to populate the metrics dashboard
   """
   apiUrl: String
 

@@ -108,12 +108,12 @@ Represents total number of alerts for the represented categories.
 
 ### AlertManagementHttpIntegration
 
-Describes an endpoint and credentials used to accept alerts for a project.
+An endpoint and credentials used to accept alerts for a project.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `active` | Boolean | Whether the endpoint is currently accepting alerts |
-| `apiUrl` | String | URL at which metrics can be queried |
+| `apiUrl` | String | URL at which Prometheus metrics can be queried to populate the metrics dashboard |
 | `id` | ID | ID of the integration |
 | `name` | String | Name of the integration |
 | `token` | String | Token used to authenticate alert notification requests |
@@ -122,12 +122,12 @@ Describes an endpoint and credentials used to accept alerts for a project.
 
 ### AlertManagementPrometheusIntegration
 
-Describes an endpoint and credentials used to accept Prometheus alerts for a project.
+An endpoint and credentials used to accept Prometheus alerts for a project.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `active` | Boolean | Whether the endpoint is currently accepting alerts |
-| `apiUrl` | String | URL at which metrics can be queried |
+| `apiUrl` | String | URL at which Prometheus metrics can be queried to populate the metrics dashboard |
 | `id` | ID | ID of the integration |
 | `name` | String | Name of the integration |
 | `token` | String | Token used to authenticate alert notification requests |

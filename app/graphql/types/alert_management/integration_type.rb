@@ -39,7 +39,7 @@ module Types
       field :api_url,
             GraphQL::STRING_TYPE,
             null: true,
-            description: 'URL at which metrics can be queried'
+            description: 'URL at which Prometheus metrics can be queried to populate the metrics dashboard'
 
       definition_methods do
         def resolve_type(object, context)

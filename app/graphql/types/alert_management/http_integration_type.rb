@@ -4,7 +4,7 @@ module Types
   module AlertManagement
     class HttpIntegrationType < BaseObject
       graphql_name 'AlertManagementHttpIntegration'
-      description "Describes an endpoint and credentials used to accept alerts for a project"
+      description 'An endpoint and credentials used to accept alerts for a project'
 
       implements(Types::AlertManagement::IntegrationType)
 

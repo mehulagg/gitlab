@@ -7,6 +7,7 @@ module Resolvers
 
       def resolve(**args)
         return [] if project.nil?
+        return [] unless Feature.enabled?(:multiple_http_integrations, project)
 
         http_integrations + prometheus_integrations
       end

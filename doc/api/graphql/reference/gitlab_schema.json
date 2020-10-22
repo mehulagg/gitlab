@@ -1483,7 +1483,7 @@
         {
           "kind": "OBJECT",
           "name": "AlertManagementHttpIntegration",
-          "description": "Describes an endpoint and credentials used to accept alerts for a project",
+          "description": "An endpoint and credentials used to accept alerts for a project",
           "fields": [
             {
               "name": "active",
@@ -1501,7 +1501,7 @@
             },
             {
               "name": "apiUrl",
-              "description": "URL at which metrics can be queried",
+              "description": "URL at which Prometheus metrics can be queried to populate the metrics dashboard",
               "args": [
 
               ],
@@ -1616,7 +1616,7 @@
             },
             {
               "name": "apiUrl",
-              "description": "URL at which metrics can be queried",
+              "description": "URL at which Prometheus metrics can be queried to populate the metrics dashboard",
               "args": [
 
               ],
@@ -1853,7 +1853,7 @@
         {
           "kind": "OBJECT",
           "name": "AlertManagementPrometheusIntegration",
-          "description": "Describes an endpoint and credentials used to accept Prometheus alerts for a project",
+          "description": "An endpoint and credentials used to accept Prometheus alerts for a project",
           "fields": [
             {
               "name": "active",
@@ -1871,7 +1871,7 @@
             },
             {
               "name": "apiUrl",
-              "description": "URL at which metrics can be queried",
+              "description": "URL at which Prometheus metrics can be queried to populate the metrics dashboard",
               "args": [
 
               ],

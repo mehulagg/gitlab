@@ -6,7 +6,7 @@ module Types
       include ::Gitlab::Routing
 
       graphql_name 'AlertManagementPrometheusIntegration'
-      description "Describes an endpoint and credentials used to accept Prometheus alerts for a project"
+      description 'An endpoint and credentials used to accept Prometheus alerts for a project'
 
       implements(Types::AlertManagement::IntegrationType)
 
