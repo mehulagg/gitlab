@@ -258,9 +258,9 @@ Refer to the following items when working with directories and files:
 
 1. When you create a new directory, always start with an `index.md` file.
    Don't use another file name and _do not_ create `README.md` files.
-1.  _Do not_ use special characters and spaces, or capital letters in file
+1. _Do not_ use special characters and spaces, or capital letters in file
    names, directory names, branch names, and anything that generates a path.
-1.  When creating or renaming a file or directory and it has more than one word
+1. When creating or renaming a file or directory and it has more than one word
    in its name, use underscores (`_`) instead of spaces or dashes. For example,
    proper naming would be `import_project/import_from_github.md`. This applies
    to both image files and Markdown files.
