@@ -34,11 +34,11 @@
   }
 
   .next-run-cell {
-    color: $gl-text-color-secondary;
+    color: var(--gl-text-color-secondary, $gl-text-color-secondary);
   }
 
   a {
-    color: $gl-text-color;
+    color: var(--gl-text-color, $gl-text-color);
   }
 
   svg {
@@ -54,7 +54,7 @@
   }
 
   #dismiss-callout-btn {
-    color: $gl-text-color;
+    color: var(--gl-text-color, $gl-text-color);
   }
 }
 
