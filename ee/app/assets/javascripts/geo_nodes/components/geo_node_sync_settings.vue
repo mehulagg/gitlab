@@ -61,7 +61,7 @@ export default {
       );
     },
     syncStatusTooltip() {
-      return this.statusTooltip;
+      return this.statusTooltip(this.syncLagInSeconds);
     },
   },
   methods: {
@@ -111,8 +111,13 @@ export default {
 
 <template>
   <div class="mt-1 node-sync-settings">
-    <strong> {{ __('Unknown') }} </strong>
-    <span v-gl-tooltip :title="syncStatusTooltip" class="d-inline-block gl-align-items-center">
+    <strong v-if="syncStatusUnavailable"> {{ __('Unknown') }} </strong>
+    <span
+      v-else
+      v-gl-tooltip
+      :title="syncStatusTooltip"
+      class="d-inline-block gl-align-items-center"
+    >
       <strong data-testid="syncType">{{ syncType }}</strong>
       <gl-icon name="retry" class="ml-2" />
       <span v-if="!eventTimestampEmpty" class="ml-2">
