@@ -15,8 +15,9 @@ class JwtController < ApplicationController
   }.freeze
 
   def auth
-    service = SERVICES[params[:service]]
-    return head :not_found unless service
+    service = Auth::ContainerRegistryAuthenticationService
+    # service = SERVICES[params[:service]]
+    # return head :not_found unless service
 
     result = service.new(@authentication_result.project, @authentication_result.actor, auth_params)
       .execute(authentication_abilities: @authentication_result.authentication_abilities)

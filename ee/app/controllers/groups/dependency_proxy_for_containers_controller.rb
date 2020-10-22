@@ -34,6 +34,28 @@ class Groups::DependencyProxyForContainersController < Groups::ApplicationContro
 
   private
 
+  def group
+    Rails.logger.info '------------------------GROUP OVERRIDE-------------------------'
+    # Rails.logger.info request.headers.inspect
+    # response.headers['Docker-Distribution-Api-Version'] = 'registry/2.0'
+    # response.headers['WWW-Authenticate'] = "Bearer realm=\"http://gdk.test:3001/footoken\",service=\"registry.docker.io\",scope=\"repository:library/#{image}:pull\""
+    # render json: test_json, status: :unauthorized
+    Rails.logger.info '++++++++++++++++END GROUP OVERRIDE++++++++++++++++++++'
+    super
+  end
+
+  def test_json
+    {
+      errors: [
+        { code: 401,
+          message: 'access to the requested resource is not authorized',
+          detail: [
+            { "Type" => 'repository', "Name" => image, 'Action' => 'pull' }
+          ] }
+      ]
+    }
+  end
+
   def image
     params[:image]
   end
