@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # This concern assumes:
+# - a `#container` accessor
 # - a `#project` accessor
 # - a `#user` accessor
 # - a `#authentication_result` accessor
@@ -34,11 +35,11 @@ module LfsRequest
   end
 
   def lfs_check_access!
-    return render_lfs_not_found unless project
+    return render_lfs_not_found unless container
     return if download_request? && lfs_download_access?
     return if upload_request? && lfs_upload_access?
 
-    if project.public? || can?(user, :read_project, project)
+    if project && (project.public? || can?(user, :read_project, project))
       lfs_forbidden!
     else
       render_lfs_not_found
@@ -72,7 +73,7 @@ module LfsRequest
   end
 
   def lfs_download_access?
-    return false unless project.lfs_enabled?
+    return false unless container.lfs_enabled?
 
     ci? || lfs_deploy_token? || user_can_download_code? || build_can_download_code? || deploy_token_can_download_code?
   end
@@ -93,7 +94,7 @@ module LfsRequest
   end
 
   def lfs_upload_access?
-    return false unless project.lfs_enabled?
+    return false unless container.lfs_enabled?
     return false unless has_authentication_ability?(:push_code)
     return false if limit_exceeded?
 
