@@ -748,35 +748,6 @@ To run an on-demand DAST scan, you need:
 
 The on-demand DAST scan runs and the project's dashboard shows the results.
 
-### Enable or disable On-demand Scans
-
-The On-demand DAST Scans feature is enabled by default. You can disable on-demand scans
-instance-wide, or disable it for specific projects if you prefer.
-
-To run on-demand DAST scans, an administrator must enable the
-`security_on_demand_scans_feature_flag` feature flag.
-
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can disable or enable the feature flags.
-
-To disable On-demand DAST Scans:
-
-```ruby
-# Instance-wide
-Feature.disable(:security_on_demand_scans_feature_flag)
-# or by project
-Feature.disable(:security_on_demand_scans_feature_flag, Project.find(<project id>))
-```
-
-To enable On-demand DAST Scans:
-
-```ruby
-# Instance-wide
-Feature.enable(:security_on_demand_scans_feature_flag)
-# or by project
-Feature.enable(:security_on_demand_scans_feature_flag, Project.find(<project ID>))
-```
-
 ## Reports
 
 The DAST tool outputs a report file in JSON format by default. However, this tool can also generate reports in
