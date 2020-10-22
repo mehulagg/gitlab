@@ -8,13 +8,12 @@ RSpec.describe DeleteExpiredProjectBotsWorker do
   describe '#perform' do
     context 'project bots' do
       let(:project) { create(:project) }
-      let(:expired_project_bot) { create(:user, :project_bot) }
-      let(:other_project_bot) { create(:user, :project_bot) }
+      let_it_be(:expired_project_bot) { create(:user, :project_bot) }
+      let_it_be(:other_project_bot) { create(:user, :project_bot) }
 
       context 'expired project bot' do
         before do
           project.add_user(expired_project_bot, :maintainer, expires_at: 1.day.from_now)
-          project.add_user(other_project_bot, :maintainer, expires_at: 10.days.from_now)
           travel_to(3.days.from_now)
         end
 
@@ -28,7 +27,13 @@ RSpec.describe DeleteExpiredProjectBotsWorker do
 
           expect(User.exists?(expired_project_bot.id)).to be(false)
         end
+      end
 
+      context 'non-expired project bot' do
+        before do
+          project.add_user(other_project_bot, :maintainer, expires_at: 10.days.from_now)
+          travel_to(3.days.from_now)
+        end
         it 'does not remove expired project bot that expires in the future' do
           expect { worker.perform }.to change { Member.count }.by(0)
           expect(other_project_bot.reload).to be_present
