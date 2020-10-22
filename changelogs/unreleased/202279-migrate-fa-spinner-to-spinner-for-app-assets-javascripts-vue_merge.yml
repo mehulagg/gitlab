@@ -1,5 +1,5 @@
 ---
-title: Migrate fa-spinner to GlLoadingIcon for mr_widget_auto_merge_enabled.vue
+title: Update loading icon for buttons used in MR's set to merge automatically
 merge_request: 45693
 author:
 type: changed
