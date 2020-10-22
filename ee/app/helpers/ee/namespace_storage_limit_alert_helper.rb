@@ -50,7 +50,7 @@ module EE
       ::Gitlab.dev_env_or_com? &&
         ::Gitlab::CurrentSettings.automatic_purchased_storage_allocation? &&
         ::Feature.enabled?(:buy_storage_link) &&
-        ::Feature.enabled?(:additional_repo_storage_by_namespace, namespace)
+        namespace.additional_repo_storage_by_namespace_enabled?
     end
 
     def namespace_storage_usage_link(namespace)
