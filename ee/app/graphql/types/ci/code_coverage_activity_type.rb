@@ -15,6 +15,9 @@ module Types
 
       field :project_count, GraphQL::INT_TYPE, null: true,
             description: 'Number of projects with code coverage results for the group.'
+
+      field :date, Types::TimeType, null: false,
+            description: 'The date when the code coverage was created.'
     end
   end
 end

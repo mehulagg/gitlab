@@ -26,14 +26,19 @@ module Ci
 
     # Move this to EE
     def self.activity_per_group
-      pluck(
+      group(:date).pluck(
         Arel.sql("AVG(cast(data ->> 'coverage' AS FLOAT))"),
         Arel.sql("COUNT(*)"),
-        Arel.sql("COUNT(DISTINCT ci_daily_build_group_report_results.project_id)")
-      ).each_with_object({}) do |(average_coverage, coverage_count, project_count), result|
-        result[:average_coverage] = average_coverage
-        result[:coverage_count] = coverage_count
-        result[:project_count] = project_count
+        Arel.sql("COUNT(DISTINCT ci_daily_build_group_report_results.project_id)"),
+        Arel.sql("date")
+      )
+      .each_with_object([]) do |(average_coverage, coverage_count, project_count, date), result|
+        result << {
+          average_coverage: average_coverage,
+          coverage_count: coverage_count,
+          project_count: project_count,
+          date: date
+        }
       end
     end
 
