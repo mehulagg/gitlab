@@ -9,7 +9,8 @@ module QA
                       :branch,
                       :commit_message,
                       :file_path,
-                      :sha
+                      :sha,
+                      :force
 
         attribute :short_id
 
@@ -21,6 +22,8 @@ module QA
 
         def initialize
           @commit_message = 'QA Test - Commit message'
+          @force = false
+
         end
 
         def add_files(files)
@@ -84,7 +87,8 @@ module QA
             author_email: @author_email || Runtime::User.default_email,
             author_name: @author_name || Runtime::User.username,
             commit_message: commit_message,
-            actions: actions
+            actions: actions,
+            force: true
           }
         end
 

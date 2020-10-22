@@ -16,7 +16,7 @@ module QA
       let!(:runner) do
         Resource::Runner.fabricate! do |runner|
           runner.name = "qa-runner-#{Time.now.to_i}"
-          runner.run_untagged = true
+          runner.tags = ["runner-for-#{project.name}"]
           runner.executor = :docker
           runner.project = project
         end
@@ -29,18 +29,32 @@ module QA
       it 'publishes a nuget package and deletes it' do
         Flow::Login.sign_in
 
-        Resource::Repository::ProjectPush.fabricate! do |push|
-          push.project = project
-          push.new_branch = false
-          push.directory = Pathname
-                               .new(__dir__)
-                               .join('../../../../fixtures/package_managers/nuget')
-          push.commit_message = 'Add gitlab-ci file for nuget deploy'
+        Resource::Repository::Commit.fabricate_via_api! do |commit|
+          commit.project = project
+          commit.commit_message = 'Add .gitlab-ci.yml'
+          commit.force = true
+          commit.add_files(
+            [
+                {
+                    file_path: '.gitlab-ci.yml',
+                    content: <<~YAML
+          deploy:
+            image: gradle:6.5-jdk11
+            script:
+              - 'gradle publish'
+            only:
+              - master
+            tags:
+              - "runner-for-#{project.name}"
+                    YAML
+                }
+            ]
+          )
         end
 
-        Resource::Pipeline.fabricate_via_api! do |pipeline|
-          pipeline.project = project
-        end.visit!
+        project.visit!
+        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
+        Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
 
         Page::Project::Pipeline::Show.perform do |pipeline|
           pipeline.click_job('deploy')
