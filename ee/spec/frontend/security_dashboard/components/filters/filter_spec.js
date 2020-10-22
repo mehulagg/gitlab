@@ -1,6 +1,5 @@
-import { GlDropdown, GlSearchBoxByType } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlSearchBoxByType } from '@gitlab/ui';
 import Filter from 'ee/security_dashboard/components/filter.vue';
-import FilterOption from 'ee/security_dashboard/components/filters/filter_option.vue';
 import { mount } from '@vue/test-utils';
 import { trimText } from 'helpers/text_helper';
 
@@ -22,7 +21,7 @@ describe('Filter component', () => {
 
   const findSearchBox = () => wrapper.find(GlSearchBoxByType);
   const isDropdownOpen = () => wrapper.find(GlDropdown).classes('show');
-  const dropdownItemsCount = () => wrapper.findAll(FilterOption).length;
+  const dropdownItemsCount = () => wrapper.findAll(GlDropdownItem).length;
 
   afterEach(() => {
     wrapper.destroy();
@@ -47,7 +46,9 @@ describe('Filter component', () => {
     });
 
     it('should display a check next to only the selected items', () => {
-      expect(wrapper.findAll('[data-testid="mobile-issue-close-icon"]')).toHaveLength(3);
+      expect(
+        wrapper.findAll(`[data-testid="mobile-issue-close-icon"]:not(.gl-visibility-hidden)`),
+      ).toHaveLength(3);
     });
 
     it('should correctly display the selected text', () => {
@@ -76,7 +77,7 @@ describe('Filter component', () => {
 
       it('should keep the menu open after clicking on an item', async () => {
         expect(isDropdownOpen()).toBe(true);
-        wrapper.find('.dropdown-item').trigger('click');
+        wrapper.find(GlDropdownItem).trigger('click');
         await wrapper.vm.$nextTick();
 
         expect(isDropdownOpen()).toBe(true);

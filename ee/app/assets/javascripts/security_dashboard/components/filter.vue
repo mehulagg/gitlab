@@ -1,15 +1,21 @@
 <script>
-import { GlDropdown, GlSearchBoxByType, GlIcon, GlTruncate, GlDropdownText } from '@gitlab/ui';
-import FilterOption from './filters/filter_option.vue';
+import {
+  GlDropdown,
+  GlDropdownItem,
+  GlSearchBoxByType,
+  GlIcon,
+  GlTruncate,
+  GlDropdownText,
+} from '@gitlab/ui';
 
 export default {
   components: {
     GlDropdown,
+    GlDropdownItem,
     GlSearchBoxByType,
     GlIcon,
     GlTruncate,
     GlDropdownText,
-    FilterOption,
   },
   props: {
     filter: {
@@ -47,6 +53,7 @@ export default {
   methods: {
     clickFilter(option) {
       this.$emit('setFilter', { filterId: this.filterId, optionId: option.id });
+      this.$refs.dropdown.$refs.dropdown.show();
     },
     isSelected(option) {
       return this.selection.has(option.id);
@@ -59,6 +66,7 @@ export default {
   <div class="dashboard-filter">
     <strong class="js-name">{{ filter.name }}</strong>
     <gl-dropdown
+      ref="dropdown"
       class="gl-mt-2 gl-w-full"
       menu-class="dropdown-extended-height"
       :header-text="filter.name"
@@ -78,13 +86,15 @@ export default {
         :placeholder="__('Filter...')"
       />
 
-      <filter-option
+      <gl-dropdown-item
         v-for="option in filteredOptions"
         :key="option.id"
-        :display-name="option.name"
-        :is-selected="isSelected(option)"
+        is-check-item
+        :is-checked="isSelected(option)"
         @click="clickFilter(option)"
-      />
+      >
+        <gl-truncate :text="option.name" />
+      </gl-dropdown-item>
 
       <gl-dropdown-text v-if="filteredOptions.length <= 0">
         <span class="gl-text-gray-500">{{ __('No matching results') }}</span>
