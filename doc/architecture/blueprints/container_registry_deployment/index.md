@@ -175,6 +175,44 @@ GitLab currently ships with PostgreSQL 11 for self-managed instances. That is _l
 
 It's important to note that apart from online garbage collection, the metadata database's availability will unblock the implementation of many requested features for the GitLab Container Registry, which will only be available for instances using the new version backed by the metadata database.
 
+### New Features and Breaking Changes
+
+#### Third-Party Container Registries
+
+GitLab ships with the GitLab Container Registry by default, but it's also compatible with third-party registries, as long as they comply with the [Docker Distribution V2 Specification](https://docs.docker.com/registry/spec/api/), now superseded by the [Open Container Initiative (OCI) Image Specification](https://github.com/opencontainers/image-spec/blob/master/spec.md).
+
+So far, we strived to maintain full compatibility with third-party registries when adding new features. For example, in 12.8, we introduced a new [tag delete feature](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/23325) to delete a single tag without deleting the underlying manifest. Because this feature is not part of the Docker or OCI specifications, we have kept the previous behavior as a fallback option to maintain compatibility with third-party registries.
+
+However, this will likely change in the future. Apart from online garbage collection, and as described in [challenges](#challenges), the metadata database will unblock the implementation of many requested features for the GitLab Container Registry in the mid/long term. Most of these features will only be available for instances using the GitLab Container Registry. They are not part of the Docker Distribution or OCI specifications, neither we will be able to provide a compatible fallback option.
+
+For this reason, any features that require the use of the GitLab Container Registry will be disabled if using a third-party registry, for as long as third-party registries continue to be supported. 
+
+#### Synchronizing Changes With GitLab Rails
+
+Currently, the GitLab Rails and GitLab Container Registry releases and deployments have been fully independent, as we have not introduced any new API features or breaking chances, apart from the described tag delete feature. 
+
+The registry will remain independent from GitLab Rails changes, but in the mid/long term, the implementation of new features or breaking changes will imply a corresponding change in GitLab Rails, so the latter will depend on a specific minimum version of the registry.
+
+For example, to track the size of each repository, we may extend the metadata database to store that information and then propagate it to GitLab Rails by extending the HTTP API that it consumes. In GitLab Rails, this new information would likely be stored in its database and processed to offer a new feature at the UI/API level.
+
+This kind of changes will require a synchronization between the GitLab Rails and the GitLab Container Registry releases and deployments, as the former will depend on a specific version of the latter.
+
+##### Feature Toggling
+
+All GitLab Rails features dependent on a specific version of the registry should be guarded by validating the registry vendor and version.
+
+This is already done to determine whether a tag should be deleted using the new tag delete feature (only available in the GitLab Container Registry v2.8.1+) or the old method. In this case, GitLab Rails sends an `OPTIONS` request to the registry tag route to determine whether the `DELETE` method is supported or not.
+
+Alternatively, and as the universal long-term solution, we need to determine the registry vendor, version, and supported features (the last two are only applicable if the vendor is GitLab) and persist it in the GitLab Rails database. This information can then be used in realtime to toggle features or fallback to alternative methods, if possible. The initial implementation of this approach was introduced as part of [#204839](https://gitlab.com/gitlab-org/gitlab/-/issues/204839). Currently, it's only used for metrics purposes. Further improvements are required to guarantee that the version information is kept up to date in self-managed instances, where the registry may be hot swapped.
+
+##### Release and Deployment
+
+As described above, feature toggling offers a last line of defense against desynchronized releases and deployments, ensuring that GitLab Rails remains functional in case the registry version that supports new features is not yet available.
+
+However, the release and deployment of GitLab Rails and the GitLab Container Registry should be synchronized to avoid any delays. Contrary to GitLab Rails, the registry release and deployment are manual processes, so special attention must be paid by maintainers to ensure that the GitLab Rails changes are only released and deployed after the corresponding registry changes.
+
+As a solution to strengthen this process, a file can be added to the GitLab Rails codebase, containing the minimum required version of the registry. This file should be updated with every change that depends on a specific version of the registry. It should also be considered when releasing and deploying GitLab Rails, ensuring that the pipeline only goes through once the specified minimum required registry version is deployed.
+
 ## Iterations
 
 1. Design metadata database schema;
