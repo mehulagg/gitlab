@@ -22,6 +22,8 @@ RSpec.describe API::Settings, 'Settings' do
       expect(json_response['default_ci_config_path']).to be_nil
       expect(json_response['sourcegraph_enabled']).to be_falsey
       expect(json_response['sourcegraph_url']).to be_nil
+      expect(json_response['secret_detection_token_revocation_url']).to be_nil
+      expect(json_response['secret_detection_revocation_token_types_url']).to be_nil
       expect(json_response['sourcegraph_public_only']).to be_truthy
       expect(json_response['default_project_visibility']).to be_a String
       expect(json_response['default_snippet_visibility']).to be_a String
@@ -421,6 +423,15 @@ RSpec.describe API::Settings, 'Settings' do
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['abuse_notification_email']).to eq('test@example.com')
+    end
+
+    context "missing secret_detection_token_revocation_url value when secret_detection_token_revocation_enabled is true" do
+      it "returns a blank parameter error message" do
+        put api("/application/settings", admin), params: { secret_detection_token_revocation_enabled: true }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response['error']).to eq('secret_detection_token_revocation_url is missing, secret_detection_revocation_token_types_url is missing')
+      end
     end
 
     context "missing sourcegraph_url value when sourcegraph_enabled is true" do
