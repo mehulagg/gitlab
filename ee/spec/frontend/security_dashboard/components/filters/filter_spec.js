@@ -1,5 +1,5 @@
 import { GlDropdown, GlDropdownItem, GlSearchBoxByType } from '@gitlab/ui';
-import Filter from 'ee/security_dashboard/components/filter.vue';
+import SimpleFilter from 'ee/security_dashboard/components/filters/simple_filter.vue';
 import { mount } from '@vue/test-utils';
 import { trimText } from 'helpers/text_helper';
 
@@ -16,7 +16,7 @@ describe('Filter component', () => {
   let wrapper;
 
   const createWrapper = propsData => {
-    wrapper = mount(Filter, { propsData });
+    wrapper = mount(SimpleFilter, { propsData });
   };
 
   const findSearchBox = () => wrapper.find(GlSearchBoxByType);

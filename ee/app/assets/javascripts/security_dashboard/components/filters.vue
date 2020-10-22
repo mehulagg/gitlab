@@ -1,11 +1,11 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import DashboardFilter from './filter.vue';
+import SimpleFilter from './filters/simple_filter.vue';
 import GlToggleVuex from '~/vue_shared/components/gl_toggle_vuex.vue';
 
 export default {
   components: {
-    DashboardFilter,
+    SimpleFilter,
     GlToggleVuex,
   },
   computed: {
@@ -20,7 +20,7 @@ export default {
 <template>
   <div class="dashboard-filters border-bottom bg-gray-light">
     <div class="row mx-0 p-2">
-      <dashboard-filter
+      <simple-filter
         v-for="filter in visibleFilters"
         :key="filter.id"
         class="col-sm-6 col-md-4 col-lg-2 p-2 js-filter"
