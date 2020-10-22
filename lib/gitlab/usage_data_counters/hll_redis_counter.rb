@@ -90,18 +90,24 @@ module Gitlab
           event_for(event_name).present?
         end
 
-        def combined_events_data
+        def combined_events_monthly_data
           combined_events.to_h do |combination|
-            [combination[:name], calculate_count_for_combination(combination)]
+            [combination[:name], calculate_count_for_combination(combination, start_date: 4.weeks.ago.to_date, end_date: Date.current)]
+          end
+        end
+
+        def combined_events_weekly_data
+          combined_events.to_h do |combination|
+            [combination[:name], calculate_count_for_combination(combination, start_date: 7.days.ago.to_date, end_date: Date.current)]
           end
         end
 
         private
 
-        def calculate_count_for_combination(combination)
+        def calculate_count_for_combination(combination, start_date:, end_date:)
           validate_aggregation_operator!(combination[:operator])
 
-          count_unique_events(event_names: combination[:events], start_date: 4.weeks.ago.to_date, end_date: Date.current) do |events|
+          count_unique_events(event_names: combination[:events], start_date: start_date, end_date: end_date) do |events|
             raise SlotMismatch, events unless events_in_same_slot?(events)
             raise AggregationMismatch, events unless events_same_aggregation?(events)
           end

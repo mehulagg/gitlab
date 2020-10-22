@@ -1214,8 +1214,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     end
   end
 
-  describe 'combined_events' do
-    subject(:combined_events) { described_class.combined_events }
+  describe 'combined_events_weekly' do
+    subject(:combined_events) { described_class.combined_events_weekly }
 
     context 'with product_analytics_combined_events feature flag on' do
       before do
