@@ -18,20 +18,20 @@ RSpec.describe DeleteExpiredProjectBotsWorker do
         end
 
         it 'calls delete bot worker' do
-          expect(DeleteExpiredProjectBotsWorker).to receive(:perform)
+          expect(worker).to receive(:perform)
 
-          DeleteExpiredProjectBotsWorker.new.perform
+          worker.perform
         end
 
         it 'removes expired project bot membership' do
-          expect { DeleteExpiredProjectBotsWorker.new.perform }.to change { Member.count }.by(-1)
+          expect { worker.perform }.to change { Member.count }.by(-1)
           expect(Member.find_by(user_id: expired_project_bot.id)).to be_nil
         end
 
         it 'deletes expired project bot' do
-          DeleteExpiredProjectBotsWorker.new.perform
+          worker.perform
 
-          expect(User.exists?(expired_project_bot.id)).to be(false)
+          expect(expired_project_bot.reload).not_to be_present
         end
       end
 

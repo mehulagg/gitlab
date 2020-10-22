@@ -10,8 +10,12 @@ class DeleteExpiredProjectBotsWorker # rubocop:disable Scalability/IdempotentWor
   # rubocop: disable CodeReuse/ActiveRecord
   def perform
     User.where(user_type: 'project_bot') do |bots|
-      Member.where(user_id: bots.ids) do |bot_members|
-        bot_members.expired.delete_all
+      Member.where(user_id: bots.ids).where('expires_at <= ?', Date.today) do |expired_bots|
+        expired_bots.delete_all
+
+        expired_bots.each do |delete_bot|
+          User.where(id: delete_bot.user_id).delete
+        end
       end
     end
   end
