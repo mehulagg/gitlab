@@ -80,10 +80,10 @@ By default, groups created in:
 - GitLab 12.2 or later allow both Owners and Maintainers to create subgroups.
 - GitLab 12.1 or earlier only allow Owners to create subgroups.
 
-The setting affecting whether Maintainers can create subgroups can be changed
-for any group by a group Owner (in the group's **General Settings**, under
-**Permissions, LFS, 2FA**) or an Administrator (by editing the group in question
-in the **Group** section of the **Admin** area) after the group has been created.
+The setting can be changed for any group by:
+
+- A group owner in the group's **Settings > General > Permissions, LFS, 2FA**.
+- An administrator by editing the group in **Admin Area > Overview > Groups**.
 
 For more information check the
 [permissions table](../../permissions.md#group-members-permissions). For a list
