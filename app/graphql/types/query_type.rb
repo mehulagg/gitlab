@@ -80,6 +80,11 @@ module Types
           description: 'Get statistics on the instance',
           resolver: Resolvers::Admin::Analytics::InstanceStatistics::MeasurementsResolver
 
+    field :devops_adoption_segments, Types::Admin::Analytics::DevopsAdoption::SegmentType.connection_type,
+          null: true,
+          description: 'Get omg on the instance',
+          resolver: Resolvers::Admin::Analytics::DevopsAdoption::SegmentsResolver
+
     field :runner_platforms, Types::Ci::RunnerPlatformType.connection_type,
       null: true, description: 'Supported runner platforms',
       resolver: Resolvers::Ci::RunnerPlatformsResolver
