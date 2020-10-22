@@ -8,6 +8,7 @@ module EE
       # and `Namespace#namespace_statistics` will return stale data.
       ::Ci::Minutes::EmailNotificationService.new(build.project.reset).execute if ::Gitlab.com?
 
+      ScanSecurityReportSecretsWorker.perform_async(build.id) if ::Gitlab::CurrentSettings.secret_detection_token_revocation_enabled?
       RequirementsManagement::ProcessRequirementsReportsWorker.perform_async(build.id)
 
       super
