@@ -13,13 +13,14 @@ RSpec.describe 'Robots.txt Requests', :aggregate_failures do
 
   it 'allows the requests' do
     requests = [
-      '/users/sign_in'
+      '/users/sign_in',
+      '/namespace/subnamespace/design.gitlab.com'
     ]
 
     requests.each do |request|
       get request
 
-      expect(response).not_to have_gitlab_http_status(:service_unavailable)
+      expect(response).not_to have_gitlab_http_status(:service_unavailable), "#{request} must be allowed"
     end
   end
 
@@ -59,13 +60,14 @@ RSpec.describe 'Robots.txt Requests', :aggregate_failures do
       '/foo/bar/protected_branches',
       '/foo/bar/uploads/foo',
       '/foo/bar/project_members',
-      '/foo/bar/settings'
+      '/foo/bar/settings',
+      '/namespace/subnamespace/design.gitlab.com/settings'
     ]
 
     requests.each do |request|
       get request
 
-      expect(response).to have_gitlab_http_status(:service_unavailable)
+      expect(response).to have_gitlab_http_status(:service_unavailable), "#{request} must be disallowed"
     end
   end
 end

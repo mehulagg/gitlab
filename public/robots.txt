@@ -41,7 +41,7 @@ Disallow: /groups/*/group_members
 
 # Project details
 User-Agent: *
-Disallow: /*/*.git
+Disallow: /*/*.git$
 Disallow: /*/archive/
 Disallow: /*/repository/archive*
 Disallow: /*/activity
