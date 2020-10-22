@@ -53,6 +53,9 @@ export default {
   methods: {
     clickFilter(option) {
       this.$emit('setFilter', { filterId: this.filterId, optionId: option.id });
+      // b-dropdown-item, which is used by GlDropdownItem, is hard-coded to always close the dropdown:
+      // https://github.com/bootstrap-vue/bootstrap-vue/blob/dev/src/components/dropdown/dropdown-item.js#L49-L52
+      // We'll work around this be re-opening the dropdown when the GlDropdownItem is clicked.
       this.$refs.dropdown.$refs.dropdown.show();
     },
     isSelected(option) {
