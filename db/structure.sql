@@ -12667,7 +12667,7 @@ CREATE TABLE group_wiki_repositories (
 
 CREATE TABLE historical_data (
     id integer NOT NULL,
-    date date NOT NULL,
+    date timestamp with time zone NOT NULL,
     active_user_count integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone
