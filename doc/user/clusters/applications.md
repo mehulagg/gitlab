@@ -258,7 +258,10 @@ record.
 
 #### Web Application Firewall (ModSecurity)
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21966) in GitLab 12.7.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21966) in GitLab 12.7.
+
+DANGER: **Warning:**
+The Web Application Firewall is deprecated in GitLab 13.6 and planned for removal in GitLab 14.0.
 
 A Web Application Firewall (WAF) examines traffic being sent or received,
 and can block malicious traffic before it reaches your application. The benefits
