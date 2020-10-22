@@ -26,6 +26,9 @@ module EE
 
       scope :checksummed, -> { where(merge_request_diff_detail: ::MergeRequestDiffDetail.checksummed) }
       scope :verification_failed, -> { where(merge_request_diff_detail: ::MergeRequestDiffDetail.verification_failed) }
+      scope :never_attempted_verification, -> { available_replicables.where(merge_request_diff_detail: ::MergeRequestDiffDetail.never_attempted_verification) }
+      scope :needs_verification_again, -> { available_replicables.where(merge_request_diff_detail: ::MergeRequestDiffDetail.needs_verification_again) }
+      scope :needs_verification, -> { available_replicables.where(merge_request_diff_detail: ::MergeRequestDiffDetail.needs_verification) }
       scope :available_replicables, -> { has_external_diffs }
     end
 

@@ -7,6 +7,74 @@ module Geo
     include Delay
 
     class_methods do
+      delegate :model_record_ids_never_attempted_checksum, :model_record_ids_needs_checksum_again, :needs_checksum_count, to: :checksummable_class
+
+      # Called every minute by ChecksumCronWorker
+      def enqueue_checksum_batch_worker
+        return false unless verification_enabled?
+
+        ::Geo::ChecksumBatchWorker.perform_with_capacity(self)
+      end
+
+      def verification_enabled?
+        false # disabled by default for now
+      end
+
+      # Called by ChecksumBatchWorker.
+      #
+      # - Gets next batch of records that need to be checksummed
+      # - Calculates checksums
+      # - Updates the records
+      #
+      def batch_calculate_checksum
+        replicator_batch = self.replicators_to_checksum
+
+        replicator_batch.each(&:calculate_checksum!)
+      end
+
+      # Called by ChecksumBatchWorker.
+      #
+      # - Asks the DB how many things still need to be checksummed (with a limit)
+      # - Converts that to a number of batches
+      #
+      # @return [Integer] number of batches of checksum work remaining, up to the given maximum
+      def remaining_checksum_batch_count(max_batch_count:)
+        needs_checksum_count(limit: max_batch_count * checksum_batch_size)
+          .fdiv(checksum_batch_size)
+          .ceil
+      end
+
+      # @return [Array<Gitlab::Geo::Replicator>] batch of replicators which need to be checksummed
+      def replicators_to_checksum
+        model_record_ids_batch_to_checksum.map do |id|
+          self.new(model_record_id: id)
+        end
+      end
+
+      # @return [Array<Integer>] list of IDs for this replicator's model which need to be checksummed
+      def model_record_ids_batch_to_checksum
+        ids = model_record_ids_never_attempted_checksum(batch_size: checksum_batch_size)
+
+        remaining_batch_size = checksum_batch_size - ids.size
+
+        if remaining_batch_size > 0
+          ids += model_record_ids_needs_checksum_again(batch_size: remaining_batch_size)
+        end
+
+        ids
+      end
+
+      # If primary, query the model table.
+      # If secondary, query the registry table.
+      def checksummable_class
+        Gitlab::Geo.secondary? ? registry_class : model
+      end
+
+      # @return [Integer] number of checksums to calculate per batch job
+      def checksum_batch_size
+        10
+      end
+
       def checksummed
         model.available_replicables.checksummed
       end

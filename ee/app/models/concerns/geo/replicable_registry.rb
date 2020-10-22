@@ -26,6 +26,14 @@ module Geo::ReplicableRegistry
     def registry_consistency_worker_enabled?
       replicator_class.enabled?
     end
+
+    def model_record_ids_never_attempted_checksum(batch_size:)
+      [] # TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/13981
+    end
+
+    def model_record_ids_needs_checksum_again(batch_size:)
+      [] # TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/13981
+    end
   end
 
   def replicator_class

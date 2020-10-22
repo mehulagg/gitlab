@@ -545,6 +545,9 @@ Gitlab.ee do
   Settings.cron_jobs['adjourned_projects_deletion_cron_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['adjourned_projects_deletion_cron_worker']['cron'] ||= '0 4 * * *'
   Settings.cron_jobs['adjourned_projects_deletion_cron_worker']['job_class'] = 'AdjournedProjectsDeletionCronWorker'
+  Settings.cron_jobs['geo_checksum_cron_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['geo_checksum_cron_worker']['cron'] ||= '* * * * *'
+  Settings.cron_jobs['geo_checksum_cron_worker']['job_class'] ||= 'Geo::ChecksumCronWorker'
   Settings.cron_jobs['geo_file_download_dispatch_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['geo_file_download_dispatch_worker']['cron'] ||= '*/1 * * * *'
   Settings.cron_jobs['geo_file_download_dispatch_worker']['job_class'] ||= 'Geo::FileDownloadDispatchWorker'

@@ -31,6 +31,25 @@ module Gitlab
             end
           RUBY
         end
+
+        # Returns IDs of records that have never attempted checksum (on this version of the data, if mutable)
+        def model_record_ids_never_attempted_checksum(batch_size:)
+          never_attempted_verification.limit(batch_size).pluck_primary_key # rubocop:disable CodeReuse/ActiveRecord
+        end
+
+        # Returns IDs of records that need to attempt checksum again. I.e.:
+        #
+        # - Failed checksum
+        # - Needs reverification # TODO https://gitlab.com/gitlab-org/gitlab/-/issues/13843
+        #
+        def model_record_ids_needs_checksum_again(batch_size:)
+          needs_verification_again.order(:verification_retry_at).limit(batch_size).pluck_primary_key # rubocop:disable CodeReuse/ActiveRecord
+        end
+
+        # @return [Integer] number of records that need checksum
+        def needs_checksum_count(limit:)
+          needs_verification.limit(limit).count # rubocop:disable CodeReuse/ActiveRecord
+        end
       end
 
       # Geo Replicator

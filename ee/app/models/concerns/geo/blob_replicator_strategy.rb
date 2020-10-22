@@ -67,6 +67,8 @@ module Geo
     end
 
     def schedule_checksum_calculation
+      return false unless self.class.verification_enabled?
+
       Geo::ChecksumWorker.perform_async(replicable_name, model_record.id)
     end
   end
