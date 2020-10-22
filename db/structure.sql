@@ -13433,6 +13433,8 @@ CREATE TABLE merge_request_diff_details (
     verification_retry_count smallint,
     verification_checksum bytea,
     verification_failure text,
+    verification_state smallint DEFAULT 0,
+    verification_started_at timestamp with time zone,
     CONSTRAINT check_81429e3622 CHECK ((char_length(verification_failure) <= 255))
 );
 
@@ -14335,6 +14337,8 @@ CREATE TABLE packages_package_files (
     verification_failure character varying(255),
     verification_retry_count integer,
     verification_checksum bytea,
+    verification_state smallint DEFAULT 0,
+    verification_started_at timestamp with time zone,
     CONSTRAINT check_4c5e6bb0b3 CHECK ((file_store IS NOT NULL))
 );
 
@@ -16097,6 +16101,8 @@ CREATE TABLE snippet_repositories (
     verified_at timestamp with time zone,
     verification_checksum bytea,
     verification_failure text,
+    verification_state smallint DEFAULT 0,
+    verification_started_at timestamp with time zone,
     CONSTRAINT snippet_repositories_verification_failure_text_limit CHECK ((char_length(verification_failure) <= 255))
 );
 
@@ -16407,6 +16413,8 @@ CREATE TABLE terraform_state_versions (
     verified_at timestamp with time zone,
     verification_checksum bytea,
     verification_failure text,
+    verification_state smallint DEFAULT 0,
+    verification_started_at timestamp with time zone,
     CONSTRAINT check_0824bb7bbd CHECK ((char_length(file) <= 255)),
     CONSTRAINT tf_state_versions_verification_failure_text_limit CHECK ((char_length(verification_failure) <= 255))
 );

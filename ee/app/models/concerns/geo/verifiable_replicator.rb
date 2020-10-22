@@ -16,7 +16,7 @@ module Geo
       end
 
       def checksum_failed_count
-        model.available_replicables.checksum_failed.count
+        model.verification_failed.count
       end
     end
 

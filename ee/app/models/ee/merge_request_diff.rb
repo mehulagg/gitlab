@@ -25,7 +25,7 @@ module EE
       scope :project_id_in, ->(ids) { where(merge_request_id: ::MergeRequest.where(target_project_id: ids)) }
 
       scope :checksummed, -> { where(merge_request_diff_detail: ::MergeRequestDiffDetail.checksummed) }
-      scope :checksum_failed, -> { where(merge_request_diff_detail: ::MergeRequestDiffDetail.checksum_failed) }
+      scope :verification_failed, -> { where(merge_request_diff_detail: ::MergeRequestDiffDetail.verification_failed) }
       scope :available_replicables, -> { has_external_diffs }
     end
 

@@ -7,6 +7,8 @@ module EE
 
       prepended do
         include ::Gitlab::Geo::ReplicableModel
+        include ::Gitlab::Geo::VerificationState
+
         with_replicator Geo::TerraformStateVersionReplicator
 
         scope :with_files_stored_locally, -> { where(file_store: ::ObjectStorage::Store::LOCAL) }
