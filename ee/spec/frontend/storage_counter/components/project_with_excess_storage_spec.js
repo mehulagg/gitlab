@@ -94,7 +94,7 @@ describe('Storage Counter project component', () => {
     });
 
     it('with tooltip', () => {
-      expect(getWarningIconTooltipText().title).toBe('This project is at risk of being locked.');
+      expect(getWarningIconTooltipText().title).toBe('This project is near the free 10GB limit and at risk of being locked.');
     });
   });
 });

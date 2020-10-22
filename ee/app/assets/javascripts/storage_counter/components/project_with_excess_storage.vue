@@ -67,7 +67,7 @@ export default {
         return {
           bgColor: { 'gl-bg-orange-50': true },
           iconClass: 'gl-text-orange-500',
-          tooltipText: s__('UsageQuota|This project is at risk of being locked.'),
+          tooltipText: s__('UsageQuota|This project is near the free 10GB limit and at risk of being locked.'),
         };
       }
 
