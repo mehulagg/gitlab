@@ -201,18 +201,8 @@ RSpec.describe 'Groups > Usage Quotas' do
     let(:alert_level) { :info }
 
     before do
-      allow_next_instance_of(Namespaces::CheckStorageSizeService, namespace, user) do |check_storage_size_service|
-        expect(check_storage_size_service).to receive(:execute).and_return(
-          ServiceResponse.success(
-            payload: {
-                alert_level: alert_level,
-                usage_message: "Usage",
-                explanation_message: "Explanation",
-                root_namespace: namespace
-            }
-          )
-        )
-      end
+      # We should return early and not load the service at all
+      expect(Namespaces::CheckStorageSizeService).not_to receive(:new)
     end
 
     it 'does not render alert from route layout' do
