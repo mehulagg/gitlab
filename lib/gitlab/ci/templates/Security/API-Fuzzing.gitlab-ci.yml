@@ -56,7 +56,7 @@ apifuzzer_fuzz_license:
           when: never
         - if: $API_FUZZING_DISABLED
           when: never
-        - if: $API_FUZZING_DISABLED_FOR_DEFAULT_BRANCH && 
+        - if: $API_FUZZING_DISABLED_FOR_DEFAULT_BRANCH &&
                 $CI_DEFAULT_BRANCH == $CI_COMMIT_REF_NAME
           when: never
         - if: $GITLAB_FEATURES =~ /\bapi_fuzzing\b/
