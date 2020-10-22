@@ -5,7 +5,7 @@
 #
 # For a list of all options, see https://errata-ai.gitbook.io/vale/getting-started/styles
 extends: existence
-message: 'Avoid words like "%s" implying ease of use, as the user may find this action hard.'
+message: 'Avoid words like "%s" that imply ease of use, because the user may find this action hard.'
 level: suggestion
 ignorecase: true
 link: https://docs.gitlab.com/ee/development/documentation/styleguide.html#language-to-avoid
