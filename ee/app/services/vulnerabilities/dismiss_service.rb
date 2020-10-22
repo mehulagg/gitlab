@@ -39,7 +39,8 @@ module Vulnerabilities
         category: finding.report_type,
         feedback_type: 'dismissal',
         project_fingerprint: finding.project_fingerprint,
-        comment: @comment
+        comment: @comment,
+        pipeline: @project.latest_pipeline_with_security_reports(only_successful: true)
       }
     end
 
