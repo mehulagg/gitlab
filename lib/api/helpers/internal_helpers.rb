@@ -29,10 +29,11 @@ module API
       # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
       def access_checker_for(actor, protocol)
+        # NOTE: `params[:project]` is the full repository path from the SSH command
+        # sent by gitlab-shell, including the trailing `.git`
         access_checker_klass.new(actor.key_or_user, container, protocol,
           authentication_abilities: ssh_authentication_abilities,
-          namespace_path: namespace_path,
-          repository_path: project_path,
+          repository_path: params[:project],
           redirected_path: redirected_path)
       end
 
@@ -71,19 +72,7 @@ module API
         false
       end
 
-      def project_path
-        project&.path || project_path_match[:project_path]
-      end
-
-      def namespace_path
-        project&.namespace&.full_path || project_path_match[:namespace_path]
-      end
-
       private
-
-      def project_path_match
-        @project_path_match ||= params[:project].match(Gitlab::PathRegex.full_project_git_path_regex) || {}
-      end
 
       # rubocop:disable Gitlab/ModuleWithInstanceVariables
       def parse_repo_path
@@ -96,7 +85,7 @@ module API
       end
       # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
-      # Project id to pass between components that don't share/don't have
+      # Repository id to pass between components that don't share/don't have
       # access to the same filesystem mounts
       def gl_repository
         repo_type.identifier_for_container(container)
@@ -106,8 +95,7 @@ module API
         repository.full_path
       end
 
-      # Return the repository depending on whether we want the wiki or the
-      # regular repository
+      # Return the repository for the detected type and container
       def repository
         @repository ||= repo_type.repository_for(container)
       end
