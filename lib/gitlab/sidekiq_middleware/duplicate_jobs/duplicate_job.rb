@@ -71,7 +71,7 @@ module Gitlab
         end
 
         def droppable?
-          idempotent? && ::Feature.disabled?("disable_#{queue_name}_deduplication", type: :ops)
+          idempotent? && ::Feature.disabled?("disable_#{queue_name}_deduplication", type: :ops) # rubocop:disable Scalability/OpsFeatureFlag
         end
 
         def scheduled_at

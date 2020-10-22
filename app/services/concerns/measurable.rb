@@ -45,7 +45,7 @@ module Measurable
   private
 
   def measuring?
-    Feature.enabled?("gitlab_service_measuring_#{service_class}", type: :ops)
+    Feature.enabled?("gitlab_service_measuring_#{service_class}", type: :ops) # rubocop:disable Scalability/OpsFeatureFlag
   end
 
   # These attributes are always present in log.

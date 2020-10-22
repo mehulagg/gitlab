@@ -6,7 +6,8 @@
 
 class Feature
   module Shared
-    # optional: defines if a on-disk definition is required for this feature flag type
+    # optional: defines if a on-disk definition is required or optional for this feature flag type
+    # auto_create: if definition is missing auto create it
     # rollout_issue: defines if `bin/feature-flag` asks for rollout issue
     # default_enabled: defines a default state of a feature flag when created by `bin/feature-flag`
     # ee_only: defines that a feature flag can only be created in a context of EE
@@ -15,6 +16,7 @@ class Feature
       development: {
         description: 'Short lived, used to enable unfinished code to be deployed',
         optional: false,
+        auto_create: false,
         rollout_issue: true,
         ee_only: false,
         default_enabled: false,
@@ -27,6 +29,8 @@ class Feature
       ops: {
         description: "Long-lived feature flags that control operational aspects of GitLab's behavior",
         optional: true,
+        # Ops feature flags for are automatically created in non-CI environment
+        auto_create: ENV['CI'] ? false : true,
         rollout_issue: false,
         ee_only: false,
         default_enabled: false,
@@ -38,6 +42,7 @@ class Feature
       licensed: {
         description: 'Permanent feature flags used to temporarily disable licensed features.',
         optional: true,
+        auto_create: false,
         rollout_issue: false,
         ee_only: true,
         default_enabled: true,

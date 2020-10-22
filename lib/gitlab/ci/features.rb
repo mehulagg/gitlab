@@ -47,16 +47,16 @@ module Gitlab
       end
 
       def self.trace_overwrite?
-        ::Feature.enabled?(:ci_trace_overwrite, type: :ops, default_enabled: false)
+        ::Feature.enabled?(:ci_trace_overwrite, type: :ops, default_enabled: false) # rubocop:disable Scalability/OpsFeatureFlag
       end
 
       def self.accept_trace?(project)
         ::Feature.enabled?(:ci_enable_live_trace, project) &&
-          ::Feature.enabled?(:ci_accept_trace, project, type: :ops, default_enabled: true)
+          ::Feature.enabled?(:ci_accept_trace, project, type: :ops, default_enabled: true) # rubocop:disable Scalability/OpsFeatureFlag
       end
 
       def self.log_invalid_trace_chunks?(project)
-        ::Feature.enabled?(:ci_trace_log_invalid_chunks, project, type: :ops, default_enabled: false)
+        ::Feature.enabled?(:ci_trace_log_invalid_chunks, project, type: :ops, default_enabled: false) # rubocop:disable Scalability/OpsFeatureFlag
       end
 
       def self.manual_bridges_enabled?(project)

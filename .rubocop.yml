@@ -412,6 +412,12 @@ Scalability/FileUploads:
     - 'lib/api/**/*.rb'
     - 'ee/lib/api/**/*.rb'
 
+Scalability/OpsFeatureFlag:
+  Enabled: true
+  Exclude:
+    - 'spec/**/*'
+    - 'ee/spec/**/*'
+
 Graphql/Descriptions:
   Enabled: true
   Include:

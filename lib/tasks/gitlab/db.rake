@@ -187,7 +187,7 @@ namespace :gitlab do
 
     desc 'reindex a regular (non-unique) index without downtime to eliminate bloat'
     task :reindex, [:index_name] => :environment do |_, args|
-      unless Feature.enabled?(:database_reindexing, type: :ops)
+      unless Feature.enabled?(:database_reindexing, type: :ops) # rubocop:disable Scalability/OpsFeatureFlag
         puts "This feature (database_reindexing) is currently disabled.".color(:yellow)
         exit
       end

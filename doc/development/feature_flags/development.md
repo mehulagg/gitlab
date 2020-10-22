@@ -40,12 +40,20 @@ This is the default type used when calling `Feature.enabled?`.
 
 ### `ops` type
 
+NOTE: **Note:**
+The usage of `type: :ops` feature flags is restricted.
+
 `ops` feature flags are long-lived feature flags that control operational aspects
 of GitLab's behavior. For example, feature flags that disable features that might
 have a performance impact, like special Sidekiq worker behavior.
 
-`ops` feature flags likely do not have rollout issues, as it is hard to
-predict when they will be enabled or disabled.
+The `ops` should be used only for checks that we don't really plan ever to remove.
+We treat these feature flags as "disaster recovery" if something goes wrong.
+
+It does mean that these features **are already rolled out**.
+It is strongly advised to use **development type** initially and migrate to `ops`
+once feature is fully rolled out, but it is strongly needed for this feature flag
+to not be ever removed.
 
 To use `ops` feature flags, you must append `type: :ops` to `Feature.enabled?`
 invocations:
@@ -59,6 +67,13 @@ Feature.disabled?(:my_ops_flag, project, type: :ops)
 
 # Push feature flag to Frontend
 push_frontend_feature_flag(:my_ops_flag, project, type: :ops)
+```
+
+To use `type: :ops` you additionally need to disable Rubocop rule to prevent
+their usage:
+
+```ruby
+Feature.enabled?(:my_ops_flag, project, type: :ops) # rubocop:disable Scalability/OpsFeatureFlag
 ```
 
 ### `licensed` type

@@ -78,6 +78,17 @@ class Feature
       attributes
     end
 
+    def to_yaml
+      attributes.slice(
+        *::Feature::Shared::PARAMS
+      ).stringify_keys.to_yaml
+    end
+
+    def save!
+      FileUtils.mkdir_p(File.dirname(path))
+      File.write(path, to_yaml)
+    end
+
     class << self
       def paths
         @paths ||= [Rails.root.join('config', 'feature_flags', '**', '*.yml')]
@@ -98,7 +109,11 @@ class Feature
         if definition = definitions[key.to_sym]
           definition.valid_usage!(type_in_code: type, default_enabled_in_code: default_enabled)
         elsif type_definition = self::TYPES[type]
-          raise InvalidFeatureFlagError, "Missing feature definition for `#{key}`" unless type_definition[:optional]
+          if type_definition[:auto_create]
+            auto_create!(key, type: type, default_enabled: default_enabled)
+          elsif !type_definition[:optional]
+            raise InvalidFeatureFlagError, "Missing feature definition for `#{key}`"
+          end
         else
           raise InvalidFeatureFlagError, "Unknown feature flag type used: `#{type}`"
         end
@@ -161,6 +176,24 @@ class Feature
             result[matching_dir] = 'yml'
           end
         end
+      end
+
+      def auto_create!(key, type:, default_enabled:)
+        return if definitions[key.to_sym]
+
+        dir = File.dirname(paths.first) # strip /*.yml
+        dir = File.dirname(dir) # strip /**/
+        path = File.join(dir, type.to_s, key.to_s + '.yml')
+        return if File.exist?(path)
+
+        definition = Feature::Definition.new(
+          path,
+          name: key.to_s,
+          type: type.to_s,
+          default_enabled: default_enabled
+        ).tap(&:save!)
+
+        definitions[definition.key] = definition
       end
     end
   end
