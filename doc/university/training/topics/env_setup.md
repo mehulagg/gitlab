@@ -14,13 +14,59 @@ comments: false
   - If it's not installed, it will prompt you to install it.
 
 - **Linux**
+  
+  - Type `which git` in the Terminal application and hit enter. If the output of that command gives you the path to the git executable, which looks something like `/usr/bin/git`, then you have git already installed on your system.
+  
+  - If git isn't installed on your system, you will recieve an error reporting to you that the command that you tried to execute was not found. 
+  
+  - The easiest way to install git would be using the default package manager of the distribution you are using. Given below are commands to install git on various GNU/Linux distributions using their default package managers. Run the command corresponding to your distribution and once the installation process is completed you should be able to use git on your system.
 
+  - Archlinux and it's derivatives.
+
+    ```shell
+    sudo pacman -S git
+    ```
+  - Fedora/RHEL/CentOS
+    - Using `yum` package manager:
+  
+    ```shell
+    sudo yum install git-all
+    ```
+  
+    - Using `dnf` package manager:
+  
+    ```shell
+    sudo dnf install git
+    ```
+
+  - Debian/Ubuntu and their derivatives: 
+  
+    ```shell
+    sudo apt-get install git
+    ```
+    
+  - Gentoo
+  
+    ```shell
+    sudo emerge --ask --verbose dev-vcs/git
+    ```
+
+  - openSUSE
+    
+    ```shell
+    sudo zypper install git
+    ```
+
+- **FreeBSD**
+  
   ```shell
-  sudo yum install git-all
+  sudo pkg install git
   ```
 
+- **OpenBSD**
+
   ```shell
-  sudo apt-get install git-all
+  doas pkg_add git
   ```
 
 ## Configure Git
