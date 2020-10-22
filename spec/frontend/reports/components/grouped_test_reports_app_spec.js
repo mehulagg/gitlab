@@ -6,6 +6,7 @@ import { getStoreConfig } from '~/reports/store';
 import { failedReport } from '../mock_data/mock_data';
 import successTestReports from '../mock_data/no_failures_report.json';
 import newFailedTestReports from '../mock_data/new_failures_report.json';
+import recentFailuresTestReports from '../mock_data/recent_failures_report.json';
 import newErrorsTestReports from '../mock_data/new_errors_report.json';
 import mixedResultsTestReports from '../mock_data/new_and_fixed_failures_report.json';
 import resolvedFailures from '../mock_data/resolved_failures.json';
@@ -116,6 +117,31 @@ describe('Grouped test reports app', () => {
       expect(findIssueDescription().text()).toContain('New');
       expect(findIssueDescription().text()).toContain(
         'Test#sum when a is 1 and b is 2 returns summary',
+      );
+    });
+  });
+
+  describe('with recent failures counts', () => {
+    beforeEach(() => {
+      setReports(recentFailuresTestReports);
+      mountComponent();
+    });
+
+    it('renders the recently failed tests summary', () => {
+      expect(findHeader().text()).toContain(
+        '2 out of 3 failed tests have failed more than once in the last 14 days',
+      );
+    });
+
+    it('renders the recently failed count on the test suite', () => {
+      expect(findSummaryDescription().text()).toContain(
+        '1 out of 2 failed tests has failed more than once in the last 14 days',
+      );
+    });
+
+    it('renders the recent failures count on the test case', () => {
+      expect(findIssueDescription().text()).toContain(
+        'Failed 8 times in the last 14 days',
       );
     });
   });

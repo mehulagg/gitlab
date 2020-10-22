@@ -168,6 +168,22 @@ describe('Reports store utils', () => {
     });
   });
 
+  describe('recentFailuresTextBuilder', () => {
+    it.each`
+      recentlyFailed | failed | expected
+      ${0}           | ${1}   | ${''}
+      ${1}           | ${1}   | ${'1 out of 1 failed test has failed more than once in the last 14 days'}
+      ${1}           | ${2}   | ${'1 out of 2 failed tests has failed more than once in the last 14 days'}
+      ${2}           | ${3}   | ${'2 out of 3 failed tests have failed more than once in the last 14 days'}
+    `('should render summary for $recentlyFailed out of $failed failures', ({ recentlyFailed, failed, expected }) => {
+      const result = utils.recentFailuresTextBuilder({ recentlyFailed, failed });
+
+      expect(result).toBe(expected);
+    });
+  });
+
+  describe('countRecentlyFailedTests', () => {});
+
   describe('statusIcon', () => {
     describe('with failed status', () => {
       it('returns ICON_WARNING', () => {
