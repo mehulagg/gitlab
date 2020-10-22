@@ -3,9 +3,9 @@
 module Gitlab
   module RobotsTxt
     class Parser
-      DISALLOW_REGEX = /^disallow: /i
-      ALLOW_REGEX = /^allow: /i
-      
+      DISALLOW_REGEX = /^disallow: /i.freeze
+      ALLOW_REGEX = /^allow: /i.freeze
+
       attr_reader :disallow_rules, :allow_rules
 
       def initialize(content)
@@ -20,12 +20,13 @@ module Gitlab
         disallow_rules.any? { |rule| path =~ rule }
       end
 
-      private      
+      private
 
       # This parser is very basic as it only knows about `Disallow:`
-      # and `Allow:` lines, and simply ignores all other lines.    
+      # and `Allow:` lines, and simply ignores all other lines.
+      # It also recognises patterns ending in `$`.
       #
-      # It is case insensitive and `Allow` rules takes precedence 
+      # It is case insensitive and `Allow` rules takes precedence
       # over `Disallow`.
       def parse_raw_content!
         disallowed = []
@@ -40,7 +41,7 @@ module Gitlab
         end
 
         [disallowed, allowed]
-      end      
+      end
 
       def disallow_rule?(line)
         line =~ DISALLOW_REGEX
@@ -61,6 +62,7 @@ module Gitlab
       def get_pattern(line, rule_regex)
         value = line.sub(rule_regex, '').strip
         value = Regexp.escape(value).gsub('\*', '.*')
+        value = value.sub(/\\\$$/, '$')
         Regexp.new("^#{value}")
       end
     end

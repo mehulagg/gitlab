@@ -16,9 +16,11 @@ RSpec.describe Gitlab::RobotsTxt::Parser do
           Disallow: /autocomplete/users
           disallow: /search
           Disallow: /api
-          Allow: /users          
+          Allow: /users
           Disallow: /help
           allow: /help
+          Disallow: /test$
+          Disallow: /ex$mple$
         TXT
       end
 
@@ -33,6 +35,10 @@ RSpec.describe Gitlab::RobotsTxt::Parser do
         '/projects' | false
         '/users' | false
         '/help' | false
+        '/test' | true
+        '/testfoo' | false
+        '/ex$mple' | true
+        '/ex$mplefoo' | false
       end
 
       with_them do

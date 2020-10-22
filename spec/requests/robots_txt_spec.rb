@@ -19,7 +19,7 @@ RSpec.describe 'Robots.txt Requests', :aggregate_failures do
     requests.each do |request|
       get request
 
-      expect(response).not_to have_gitlab_http_status(:service_unavailable)
+      expect(response).not_to have_gitlab_http_status(:service_unavailable), "#{request} must be allowed"
     end
   end
 
@@ -65,7 +65,7 @@ RSpec.describe 'Robots.txt Requests', :aggregate_failures do
     requests.each do |request|
       get request
 
-      expect(response).to have_gitlab_http_status(:service_unavailable)
+      expect(response).to have_gitlab_http_status(:service_unavailable), "#{request} must be disallowed"
     end
   end
 end
