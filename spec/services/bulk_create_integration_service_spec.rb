@@ -49,13 +49,7 @@ RSpec.describe BulkCreateIntegrationService do
     end
 
     context 'with an external wiki integration' do
-      let(:integration) do
-        ExternalWikiService.create!(
-          instance: true,
-          active: true,
-          external_wiki_url: 'http://external-wiki-url.com'
-        )
-      end
+      let(:integration) { create(:external_wiki_service, :instance) }
 
       it 'updates projects#has_external_wiki for external wiki services' do
         described_class.new(integration, batch, association).execute
@@ -73,13 +67,7 @@ RSpec.describe BulkCreateIntegrationService do
     end
 
     context 'with an inactive external wiki integration' do
-      let(:integration) do
-        ExternalWikiService.create!(
-          instance: true,
-          active: false,
-          external_wiki_url: 'http://external-wiki-url.com'
-        )
-      end
+      let(:integration) { create(:external_wiki_service, :instance, active: false) }
 
       it 'does not update projects#has_external_wiki for external wiki services' do
         described_class.new(integration, batch, association).execute
