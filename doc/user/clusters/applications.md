@@ -652,7 +652,12 @@ apps are fetched from the central Helm [stable
 repository](https://kubernetes-charts.storage.googleapis.com/) which is
 scheduled to be deleted on 2020-11-13. Please upgrade to GitLab 13.6, or
 alternatively, you can use the following `.gitlab-ci.yml` (tested on
-GitLab 13.5):
+For GitLab versions 13.5 and below, the Ingress, Fluentd, Prometheus,
+and Sentry apps are fetched from the central Helm
+[stable repository](https://kubernetes-charts.storage.googleapis.com/), which
+will be deleted on November 13, 2020. Upgrade to GitLab 13.6, or
+alternatively, you can use the following `.gitlab-ci.yml`, which has been
+tested on GitLab 13.5:
 
 ```yaml
 include:
