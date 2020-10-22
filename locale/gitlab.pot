@@ -28623,7 +28623,7 @@ msgstr ""
 msgid "UsageQuota|This project is near the free 10GB limit and at risk of being locked."
 msgstr ""
 
-msgid "UsageQuota|This project is locked."
+msgid "UsageQuota|This project is locked because it is using 10GB of free storage and there is no purchased storage available."
 msgstr ""
 
 msgid "UsageQuota|Total excess storage used"

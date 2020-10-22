@@ -58,7 +58,7 @@ export default {
           bgColor: { 'gl-bg-red-50': true },
           iconClass: { 'gl-text-red-500': true },
           linkClass: 'gl-text-red-500!',
-          tooltipText: s__('UsageQuota|This project is locked.'),
+          tooltipText: s__('UsageQuota|This project is locked because it is using 10GB of free storage and there is no purchased storage available.'),
         };
       } else if (
         this.thresholdLevel === WARNING_THRESHOLD ||
