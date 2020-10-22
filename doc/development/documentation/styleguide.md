@@ -1237,16 +1237,6 @@ that:
 - Are accurate, succinct, and unique.
 - Don't use _image of…_ or _graphic of…_ to describe the image.
 
-### Remove image shadow
-
-All images displayed on the [GitLab documentation site](https://docs.gitlab.com)
-have a box shadow by default. To remove the box shadow, use the image class
-`.image-noshadow` applied directly to an HTML `img` tag:
-
-```html
-<img src="path/to/image.jpg" alt="Alt text (required)" class="image-noshadow">
-```
-
 ### Compress images
 
 You should always compress any new images you add to the documentation. One
