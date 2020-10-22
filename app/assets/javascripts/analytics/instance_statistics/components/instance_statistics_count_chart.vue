@@ -27,7 +27,8 @@ export default {
   props: {
     prefix: {
       type: String,
-      required: true,
+      required: false,
+      default: '',
     },
     keyToNameMap: {
       type: Object,
@@ -65,15 +66,14 @@ export default {
     };
   },
   apollo: {
-    pipelineStats: {
+    dataQuery: {
       query() {
         return this.query;
       },
       variables() {
         return this.nameKeys.reduce((memo, key) => {
-          console.log('nameKey', this.nameKeys, memo, key);
           const firstKey = `${this.$options.firstKey}${convertToTitleCase(key)}`;
-          return { ...memo, [firstKey]: this.totalDaysToShow, identifier: key.toUpperCase() };
+          return { ...memo, [firstKey]: this.totalDaysToShow };
         }, {});
       },
       update(data) {
@@ -105,21 +105,19 @@ export default {
       return Object.keys(this.keyToNameMap);
     },
     isLoading() {
-      return this.$apollo.queries.pipelineStats.loading;
+      return this.$apollo.queries.dataQuery.loading;
     },
     totalDaysToShow() {
       return getDayDifference(this.$options.startDate, this.$options.endDate);
     },
     firstVariables() {
       const firstDataPoints = extractValues(
-        this.pipelineStats,
+        this.dataQuery,
         this.nameKeys,
         this.$options.dataKey,
         '[0].recordedAt',
         { renameKey: this.$options.firstKey },
       );
-
-      console.log('firstDataPoints', firstDataPoints)
 
       return Object.keys(firstDataPoints).reduce((memo, name) => {
         const recordedAt = firstDataPoints[name];
@@ -136,17 +134,12 @@ export default {
       }, {});
     },
     cursorVariables() {
-      return extractValues(
-        this.pipelineStats,
-        this.nameKeys,
-        this.$options.pageInfoKey,
-        'endCursor',
-      );
+      return extractValues(this.dataQuery, this.nameKeys, this.$options.pageInfoKey, 'endCursor');
     },
     hasNextPage() {
       return (
         sum(Object.values(this.firstVariables)) > 0 &&
-        some(this.pipelineStats, ({ hasNextPage }) => hasNextPage)
+        some(this.dataQuery, ({ hasNextPage }) => hasNextPage)
       );
     },
     hasEmptyDataSet() {
@@ -159,7 +152,7 @@ export default {
         const dataKey = `${this.$options.dataKey}${convertToTitleCase(key)}`;
         return {
           name: this.keyToNameMap[key],
-          data: getAverageByMonth(this.pipelineStats?.[dataKey], options),
+          data: getAverageByMonth(this.dataQuery?.[dataKey], options),
         };
       });
     },
@@ -196,7 +189,7 @@ export default {
       this.loadingError = true;
     },
     fetchNextPage() {
-      this.$apollo.queries.pipelineStats
+      this.$apollo.queries.dataQuery
         .fetchMore({
           variables: {
             ...this.firstVariables,

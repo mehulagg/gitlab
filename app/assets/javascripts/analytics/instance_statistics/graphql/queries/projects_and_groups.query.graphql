@@ -1,0 +1,34 @@
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+#import "./count.fragment.graphql"
+
+query projectsAndGroups(
+  $firstProjects: Int
+  $firstGroups: Int
+  $endCursorProjects: String
+  $endCursorGroups: String
+) {
+  projectsAndGroupsProjects: instanceStatisticsMeasurements(
+    identifier: PROJECTS
+    first: $firstProjects
+    after: $endCursorProjects
+  ) {
+    nodes {
+      ...Count
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+  projectsAndGroupsGroups: instanceStatisticsMeasurements(
+    identifier: GROUPS
+    first: $firstGroups
+    after: $endCursorGroups
+  ) {
+    nodes {
+      ...Count
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
