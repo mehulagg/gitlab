@@ -7,6 +7,7 @@ module Types
     graphql_name 'Mutation'
 
     mount_mutation Mutations::Admin::SidekiqQueues::DeleteJobs
+    mount_mutation Mutations::Admin::Analytics::DevopsAdoption::Segments::Create
     mount_mutation Mutations::AlertManagement::CreateAlertIssue
     mount_mutation Mutations::AlertManagement::UpdateAlertStatus
     mount_mutation Mutations::AlertManagement::Alerts::SetAssignees
