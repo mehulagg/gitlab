@@ -303,7 +303,7 @@ class Snippet < ApplicationRecord
     @full_path ||= begin
       components = []
       components << project.full_path if project_id?
-      components << '@snippets'
+      components << 'snippets'
       components << self.id
       components.join('/')
     end
