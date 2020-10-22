@@ -48,6 +48,34 @@ export const reportTextBuilder = (name = '', results = {}) => {
   return sprintf(__('%{name} found %{resultsString}'), { name, resultsString });
 };
 
+export const recentFailuresTextBuilder = (summary = {}) => {
+  const { failed, recentlyFailed } = summary;
+  if (!failed || !recentlyFailed) return '';
+
+  const failedString = n__('%d failed test', '%d failed tests', failed);
+  const recentOutOfFailedString = n__(
+    sprintf('%d out of %{failedString} has failed', { failedString }),
+    sprintf('%d out of %{failedString} have failed', {failedString}),
+    recentlyFailed
+  );
+
+  return sprintf(s__(`Reports|%{recentOutOfFailedString} more than once in the last 14 days`), {
+    recentOutOfFailedString,
+  });
+}
+
+export const countRecentlyFailedTests = subject => {
+  // handle either a single report or an array of reports
+  const reports = (!subject.length) ? [subject]: subject;
+
+  return reports.map(report => {
+    return [report.new_failures, report.existing_failures, report.resolved_failures]
+      // only count tests which have failed more than once
+      .map(failureArray => failureArray.filter(failure => failure.recent_failures > 1).length)
+      .reduce((total, count) => total + count, 0);
+    }).reduce((total, count) => total + count, 0);
+}
+
 export const statusIcon = status => {
   if (status === STATUS_FAILED) {
     return ICON_WARNING;

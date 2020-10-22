@@ -190,6 +190,11 @@ msgid_plural "%d failed security jobs"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "%d failed test"
+msgid_plural "%d failed tests"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "%d fixed test result"
 msgid_plural "%d fixed test results"
 msgstr[0] ""
@@ -10935,6 +10940,11 @@ msgstr ""
 
 msgid "Failed"
 msgstr ""
+
+msgid "Failed %d time in the last 14 days"
+msgid_plural "Failed %d times in the last 14 days"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Failed Jobs"
 msgstr ""
@@ -22197,6 +22207,9 @@ msgid "Reporting"
 msgstr ""
 
 msgid "Reports|%{combinedString} and %{resolvedString}"
+msgstr ""
+
+msgid "Reports|%{recentOutOfFailedString} more than once in the last 14 days"
 msgstr ""
 
 msgid "Reports|Accessibility scanning detected %d issue for the source branch only"
