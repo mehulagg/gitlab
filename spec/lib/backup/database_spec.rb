@@ -48,5 +48,20 @@ RSpec.describe Backup::Database do
         expect(output).to include(visible_error)
       end
     end
+
+    context 'with PostgreSQL settings defined in the environment' do
+      let(:cmd) { %W[#{Gem.ruby} -e] + ["$stderr.puts ENV.to_h.select { |k, _| k.start_with?('PG') }"] }
+
+      before do
+        stub_env('GITLAB_BACKUP_PGHOST', 'test.example.com')
+      end
+
+      it 'overrides default config values' do
+        subject.restore
+
+        expect(output).to include(%("PGHOST"=>"test.example.com"))
+        expect(output).to match(/"PGPORT"=>"\d*"/)
+      end
+    end
   end
 end
