@@ -2,14 +2,16 @@
 
 class Groups::DependencyProxyForContainersController < Groups::ApplicationController
   include DependencyProxyAccess
+  include DependencyProxyAuth
   include SendFileUpload
 
+  prepend_before_action :get_user_from_token!
   before_action :ensure_token_granted!
   before_action :ensure_feature_enabled!
 
   attr_reader :token
 
-  feature_category :package_registry
+  feature_category :dependency_proxy
 
   def manifest
     result = DependencyProxy::PullManifestService.new(image, tag, token).execute
@@ -33,6 +35,20 @@ class Groups::DependencyProxyForContainersController < Groups::ApplicationContro
   end
 
   private
+
+  def get_user_from_token!
+    if request.headers['HTTP_AUTHORIZATION']
+      token = Doorkeeper::OAuth::Token.from_bearer_authorization(request)
+      token_payload = JSONWebToken::HMACToken.decode(token, ::Auth::DependencyProxyAuthenticationService.secret).first
+      user = User.find(token_payload['user_id'])
+
+      render_403 unless user
+
+      sign_in(user)
+    else
+      respond_unauthorized_with_oauth!
+    end
+  end
 
   def image
     params[:image]

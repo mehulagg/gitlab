@@ -26,6 +26,12 @@ module EE
         .to_return(status: status, body: body)
     end
 
+    def build_jwt(user)
+      JSONWebToken::HMACToken.new(::Auth::DependencyProxyAuthenticationService.secret).tap do |jwt|
+        jwt['user_id'] = user.id
+      end
+    end
+
     private
 
     def registry

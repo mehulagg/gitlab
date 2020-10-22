@@ -15,7 +15,7 @@ class JwtController < ApplicationController
   }.freeze
 
   def auth
-    service = SERVICES[params[:service]]
+    service = services[params[:service]]
     return head :not_found unless service
 
     result = service.new(@authentication_result.project, @authentication_result.actor, auth_params)
@@ -25,6 +25,10 @@ class JwtController < ApplicationController
   end
 
   private
+
+  def services
+    SERVICES
+  end
 
   def authenticate_project_or_user
     @authentication_result = Gitlab::Auth::Result.new(nil, nil, :none, Gitlab::Auth.read_only_authentication_abilities)
@@ -87,3 +91,5 @@ class JwtController < ApplicationController
     end
   end
 end
+
+JwtController.prepend_if_ee('EE::JwtController')

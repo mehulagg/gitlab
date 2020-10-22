@@ -6,7 +6,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Dependency Proxy **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7934) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.11.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7934) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.11.
+> - [Support for private groups](https://gitlab.com/gitlab-org/gitlab/-/issues/11582) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.6.
 
 The GitLab Dependency Proxy is a local proxy you can use for your frequently-accessed
 upstream images.
@@ -16,9 +17,7 @@ upstream image from a registry, acting as a pull-through cache.
 
 ## Prerequisites
 
-To use the Dependency Proxy:
-
-- Your group must be public. Authentication for private groups is [not supported yet](https://gitlab.com/gitlab-org/gitlab/-/issues/11582).
+The dependency proxy must be [enabled by an administrator](./../../../administration/packages/dependency_proxy.md).
 
 ### Supported images and packages
 
@@ -48,6 +47,27 @@ Prerequisites:
 - Your images must be stored on [Docker Hub](https://hub.docker.com/).
 - Docker Hub must be available. Follow [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/241639)
   for progress on accessing images when Docker Hub is down.
+
+### Authenticating with the depdency proxy
+
+Because the dependency proxy is storing Docker images in space associated with your group,
+you must authenticate against the dependency proxy.
+
+Follow the [instructions for using images from a private registry](../../../ci/docker/using_docker_images.md#define-an-image-from-a-private-container-registry),
+but instead of using `registry.example.com:5000`, use your GitLab domain with no port `gitlab.example.com`.
+
+For example, to manually login:
+
+```shell
+docker login gitlab.example.com --username my_username --password my_password
+```
+
+You can authenticate using:
+
+- Your GitLab username and password.
+- A [personal access token](../../../user/profile/personal_access_tokens.md).
+
+### Using the dependency proxy
 
 To store a Docker image in Dependency Proxy storage:
 

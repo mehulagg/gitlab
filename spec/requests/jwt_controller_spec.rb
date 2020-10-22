@@ -5,13 +5,13 @@ require 'spec_helper'
 RSpec.describe JwtController do
   include_context 'parsed logs'
 
-  let(:service) { double(execute: {}) }
-  let(:service_class) { double(new: service) }
-  let(:service_name) { 'test' }
+  let(:service) { double(execute: {} ) }
+  let(:service_class) { Auth::ContainerRegistryAuthenticationService }
+  let(:service_name) { 'container_registry' }
   let(:parameters) { { service: service_name } }
 
   before do
-    stub_const('JwtController::SERVICES', service_name => service_class)
+    allow(service_class).to receive(:new).and_return(service)
   end
 
   shared_examples 'user logging' do

@@ -32,6 +32,10 @@ RSpec.describe 'Group routing', "routing" do
   end
 
   describe 'dependency proxy for containers' do
+    it 'routes to #pre_request' do
+      expect(get('/v2')).to route_to('groups/dependency_proxy_auth#pre_request')
+    end
+
     context 'image name without namespace' do
       it 'routes to #manifest' do
         expect(get('/v2/gitlabhq/dependency_proxy/containers/ruby/manifests/2.3.6'))

@@ -80,16 +80,6 @@ RSpec.describe 'Group Dependency Proxy' do
         sign_in(developer)
       end
 
-      context 'group is private' do
-        let(:group) { create(:group, :private) }
-
-        it 'informs user that feature is only available for public groups' do
-          visit path
-
-          expect(page).to have_content('Dependency proxy feature is limited to public groups for now.')
-        end
-      end
-
       context 'feature is not supported by the license' do
         it 'renders 404 page' do
           stub_licensed_features(dependency_proxy: false)
