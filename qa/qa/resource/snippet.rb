@@ -53,13 +53,13 @@ module QA
 
       def api_post_body
         {
-            title: @title,
-            description: @description,
-            visibility: @visibility.downcase,
+            title: title,
+            description: description,
+            visibility: visibility.downcase,
             files: [
                 {
-                    content: @file_content,
-                    file_path: @file_name
+                    content: file_content,
+                    file_path: file_name
                 }
             ]
         }

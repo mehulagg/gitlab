@@ -43,7 +43,7 @@ module QA
                 text_area.set(content)
               end
             else
-              text_area.set content
+              text_area.set(content)
             end
           end
 
