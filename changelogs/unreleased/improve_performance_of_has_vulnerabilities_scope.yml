@@ -1,0 +1,5 @@
+---
+title: Add `has_vulnerabilities` column into projects table
+merge_request: 45944
+author:
+type: added
