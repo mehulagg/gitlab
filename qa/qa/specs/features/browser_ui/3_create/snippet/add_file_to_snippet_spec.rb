@@ -38,7 +38,7 @@ module QA
 
           Page::Dashboard::Snippet::Show.perform do |snippet|
             aggregate_failures 'file names and contents' do
-              expect(snippet).to have_file_name('Original file name', 1) 
+              expect(snippet).to have_file_name('Original file name', 1)
               expect(snippet).to have_file_content('Original file content', 1)
               expect(snippet).to have_file_name('Second file name', 2)
               expect(snippet).to have_file_content('Second file content', 2)
