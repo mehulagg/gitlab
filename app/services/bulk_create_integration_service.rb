@@ -34,11 +34,11 @@ class BulkCreateIntegrationService
   end
 
   def run_callbacks(batch)
-    if integration.issue_tracker?
+    if integration.issue_tracker? && integration.active?
       batch.update_all(has_external_issue_tracker: true)
     end
 
-    if integration.type == 'ExternalWikiService'
+    if integration.type == 'ExternalWikiService' && integration.active?
       batch.update_all(has_external_wiki: true)
     end
   end

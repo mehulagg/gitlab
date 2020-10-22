@@ -12,6 +12,7 @@ FactoryBot.define do
     path { name.downcase.gsub(/\s/, '_') }
     # Behaves differently to nil due to cache_has_external_issue_tracker
     has_external_issue_tracker { false }
+    has_external_wiki { false }
 
     # Associations
     namespace
