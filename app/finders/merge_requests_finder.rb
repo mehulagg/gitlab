@@ -66,6 +66,11 @@ class MergeRequestsFinder < IssuableFinder
     by_source_project_id(items)
   end
 
+  def filter_negated_items(items)
+    items = super(items)
+    by_negated_target_branch(items)
+  end
+
   private
 
   def by_commit(items)
@@ -95,6 +100,14 @@ class MergeRequestsFinder < IssuableFinder
     return items unless target_branch
 
     items.where(target_branch: target_branch)
+  end
+  # rubocop: enable CodeReuse/ActiveRecord
+
+  # rubocop: disable CodeReuse/ActiveRecord
+  def by_negated_target_branch(items)
+    return items unless not_params[:target_branch]
+
+    items.where.not(target_branch: not_params[:target_branch])
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
@@ -163,10 +176,6 @@ class MergeRequestsFinder < IssuableFinder
       .execute(items)
   end
   # rubocop: enable CodeReuse/Finder
-
-  def items_assigned_to(items, user)
-    MergeRequest.from_union([super, items.reviewer_assigned_to(user)])
-  end
 
   def by_deployments(items)
     # Until this feature flag is enabled permanently, we retain the old

@@ -14,7 +14,9 @@ module EE
 
     override :add_user
     def add_user(user, access_level, current_user: nil, expires_at: nil)
-      return false if group_member_lock
+      if group_member_lock && !user.project_bot?
+        return false
+      end
 
       super
     end

@@ -2514,7 +2514,10 @@ msgstr ""
 msgid "AlertSettings|HTTP endpoint"
 msgstr ""
 
-msgid "AlertSettings|Learn more about our %{linkStart}upcoming integrations%{linkEnd}"
+msgid "AlertSettings|Integration"
+msgstr ""
+
+msgid "AlertSettings|Learn more about our improvements for %{linkStart}integrations%{linkEnd}"
 msgstr ""
 
 msgid "AlertSettings|Opsgenie"
@@ -2538,7 +2541,7 @@ msgstr ""
 msgid "AlertSettings|Test failed. Do you still want to save your changes anyway?"
 msgstr ""
 
-msgid "AlertSettings|There was an error updating the alert settings"
+msgid "AlertSettings|There was an error updating the alert settings."
 msgstr ""
 
 msgid "AlertSettings|There was an error while trying to reset the key. Please refresh the page to try again."
@@ -3423,6 +3426,9 @@ msgid "Archive jobs"
 msgstr ""
 
 msgid "Archive project"
+msgstr ""
+
+msgid "Archive test case"
 msgstr ""
 
 msgid "Archived"
@@ -5495,6 +5501,9 @@ msgstr ""
 msgid "Cluster type must be specificed for Stages::ClusterEndpointInserter"
 msgstr ""
 
+msgid "ClusterAgents|An error occurred while loading your GitLab Agents"
+msgstr ""
+
 msgid "ClusterAgents|Configuration"
 msgstr ""
 
@@ -7507,6 +7516,9 @@ msgstr ""
 msgid "Could not load instance counts. Please refresh the page to try again."
 msgstr ""
 
+msgid "Could not load the user chart. Please refresh the page to try again."
+msgstr ""
+
 msgid "Could not remove the trigger."
 msgstr ""
 
@@ -8135,6 +8147,9 @@ msgstr ""
 msgid "CycleAnalytics|The given date range is larger than 180 days"
 msgstr ""
 
+msgid "CycleAnalytics|The total time spent in the selected stage for the items that were completed on each date. Data limited to the last 500 items."
+msgstr ""
+
 msgid "CycleAnalytics|Total days to completion"
 msgstr ""
 
@@ -8399,6 +8414,9 @@ msgstr ""
 msgid "Data is still calculating..."
 msgstr ""
 
+msgid "Database update failed"
+msgstr ""
+
 msgid "Datasource name not found"
 msgstr ""
 
@@ -8601,6 +8619,9 @@ msgid "Delete snippet?"
 msgstr ""
 
 msgid "Delete source branch"
+msgstr ""
+
+msgid "Delete subscription"
 msgstr ""
 
 msgid "Delete this attachment"
@@ -9973,7 +9994,10 @@ msgstr ""
 msgid "Enter a number"
 msgstr ""
 
-msgid "Enter a whole number between 0 and 100"
+msgid "Enter an integer number between 0 and 100"
+msgstr ""
+
+msgid "Enter an integer number number between 0 and 100"
 msgstr ""
 
 msgid "Enter at least three characters to search"
@@ -10744,6 +10768,9 @@ msgstr ""
 msgid "Excluding merge commits. Limited to 6,000 commits."
 msgstr ""
 
+msgid "Execution time"
+msgstr ""
+
 msgid "Existing branch name, tag, or commit SHA"
 msgstr ""
 
@@ -11334,7 +11361,7 @@ msgstr ""
 msgid "FeatureFlags|Percent rollout (logged in users)"
 msgstr ""
 
-msgid "FeatureFlags|Percent rollout must be a whole number between 0 and 100"
+msgid "FeatureFlags|Percent rollout must be an integer number between 0 and 100"
 msgstr ""
 
 msgid "FeatureFlags|Protected"
@@ -12234,6 +12261,9 @@ msgstr ""
 msgid "Git strategy for pipelines"
 msgstr ""
 
+msgid "Git transfer in progress"
+msgstr ""
+
 msgid "Git version"
 msgstr ""
 
@@ -12292,6 +12322,12 @@ msgid "GitLab export"
 msgstr ""
 
 msgid "GitLab for Slack"
+msgstr ""
+
+msgid "GitLab is a complete DevOps platform, delivered as a single application, fundamentally changing the way Development, Security, and Ops teams collaborate"
+msgstr ""
+
+msgid "GitLab is a complete DevOps platform, delivered as a single application, fundamentally changing the way%{br_tag}Development, Security, and Ops teams collaborate"
 msgstr ""
 
 msgid "GitLab is a single application for the entire software development lifecycle. From project planning and source code management to CI/CD, monitoring, and security."
@@ -14380,25 +14416,22 @@ msgstr ""
 msgid "Invite teammates (optional)"
 msgstr ""
 
-msgid "InviteEmail|%{inviter} invited you"
+msgid "InviteEmail|%{inviter} invited you to join the %{project_or_group_name} %{project_or_group} as a %{role}"
 msgstr ""
 
-msgid "InviteEmail|%{project_or_group} as a %{role}"
+msgid "InviteEmail|%{inviter} invited you to join the %{strong_start}%{project_or_group_name}%{strong_end}%{br_tag}%{project_or_group} as a %{role}"
 msgstr ""
 
 msgid "InviteEmail|Join now"
 msgstr ""
 
+msgid "InviteEmail|You are invited to join the %{strong_start}%{project_or_group_name}%{strong_end}%{br_tag}%{project_or_group} as a %{role}"
+msgstr ""
+
 msgid "InviteEmail|You are invited!"
 msgstr ""
 
-msgid "InviteEmail|You have been invited"
-msgstr ""
-
-msgid "InviteEmail|to join the %{project_or_group_name} %{project_or_group} as a %{role}"
-msgstr ""
-
-msgid "InviteEmail|to join the %{strong_start}%{project_or_group_name}%{strong_end}"
+msgid "InviteEmail|You have been invited to join the %{project_or_group_name} %{project_or_group} as a %{role}"
 msgstr ""
 
 msgid "InviteMembersBanner|Collaborate with your team"
@@ -15173,9 +15206,6 @@ msgid "Labels|Promote Label"
 msgstr ""
 
 msgid "Labels|Promoting %{labelTitle} will make it available for all projects inside %{groupName}. Existing project labels with the same title will be merged. If a group label with the same title exists, it will also be merged. This action cannot be reversed."
-msgstr ""
-
-msgid "Labels|and %{count} more"
 msgstr ""
 
 msgid "Language"
@@ -16202,6 +16232,12 @@ msgstr ""
 msgid "Member since %{date}"
 msgstr ""
 
+msgid "MemberInviteEmail|%{member_name} invited you to join GitLab"
+msgstr ""
+
+msgid "MemberInviteEmail|Invitation to join the %{project_or_group} %{project_or_group_name}"
+msgstr ""
+
 msgid "Members"
 msgstr ""
 
@@ -16229,6 +16265,18 @@ msgstr ""
 msgid "Members|%{time} by %{user}"
 msgstr ""
 
+msgid "Members|%{userName} is currently a LDAP user. Editing their permissions will override the settings from the LDAP group sync."
+msgstr ""
+
+msgid "Members|An error occurred while trying to enable LDAP override, please try again."
+msgstr ""
+
+msgid "Members|An error occurred while trying to revert to LDAP group sync settings, please try again."
+msgstr ""
+
+msgid "Members|An error occurred while updating the member's expiration date, please try again."
+msgstr ""
+
 msgid "Members|An error occurred while updating the member's role, please try again."
 msgstr ""
 
@@ -16253,7 +16301,19 @@ msgstr ""
 msgid "Members|Are you sure you want to withdraw your access request for \"%{source}\""
 msgstr ""
 
+msgid "Members|Edit permissions"
+msgstr ""
+
+msgid "Members|Expiration date removed successfully."
+msgstr ""
+
+msgid "Members|Expiration date updated successfully."
+msgstr ""
+
 msgid "Members|Expired"
+msgstr ""
+
+msgid "Members|LDAP override enabled."
 msgstr ""
 
 msgid "Members|Leave \"%{source}\""
@@ -18490,9 +18550,6 @@ msgstr ""
 msgid "Open issues"
 msgstr ""
 
-msgid "Open projects"
-msgstr ""
-
 msgid "Open raw"
 msgstr ""
 
@@ -19084,7 +19141,7 @@ msgstr ""
 msgid "People without permission will never get a notification."
 msgstr ""
 
-msgid "Percent rollout must be a whole number between 0 and 100"
+msgid "Percent rollout must be an integer number between 0 and 100"
 msgstr ""
 
 msgid "Percentage"
@@ -19823,9 +19880,6 @@ msgid "Prevent project forking outside current group"
 msgstr ""
 
 msgid "Prevent users from changing their profile name"
-msgstr ""
-
-msgid "Prevent users from modifying merge request approvers list"
 msgstr ""
 
 msgid "Prevent users from performing write operations on GitLab while performing maintenance."
@@ -22073,6 +22127,9 @@ msgstr ""
 msgid "Reopen milestone"
 msgstr ""
 
+msgid "Reopen test case"
+msgstr ""
+
 msgid "Reopen this %{quick_action_target}"
 msgstr ""
 
@@ -22098,6 +22155,9 @@ msgid "Replaces the clone URL root."
 msgstr ""
 
 msgid "Replication"
+msgstr ""
+
+msgid "Replication details"
 msgstr ""
 
 msgid "Replication enabled"
@@ -22268,6 +22328,9 @@ msgid "Repository Graph"
 msgstr ""
 
 msgid "Repository Settings"
+msgstr ""
+
+msgid "Repository already read-only"
 msgstr ""
 
 msgid "Repository check"
@@ -25498,6 +25561,9 @@ msgstr ""
 msgid "Successfully scheduled a pipeline to run. Go to the %{pipelines_link_start}Pipelines page%{pipelines_link_end} for details."
 msgstr ""
 
+msgid "Successfully synced %{synced_timeago}."
+msgstr ""
+
 msgid "Successfully unblocked"
 msgstr ""
 
@@ -25633,10 +25699,16 @@ msgstr ""
 msgid "Sync information"
 msgstr ""
 
+msgid "Sync now"
+msgstr ""
+
 msgid "Synced"
 msgstr ""
 
 msgid "Synchronization disabled"
+msgstr ""
+
+msgid "Syncing…"
 msgstr ""
 
 msgid "System"
@@ -25664,6 +25736,9 @@ msgid "System metrics (Custom)"
 msgstr ""
 
 msgid "System metrics (Kubernetes)"
+msgstr ""
+
+msgid "System output"
 msgstr ""
 
 msgid "Table of Contents"
@@ -25900,13 +25975,28 @@ msgstr ""
 msgid "TestCases|Search test cases"
 msgstr ""
 
+msgid "TestCases|Something went wrong while adding test case to Todo."
+msgstr ""
+
 msgid "TestCases|Something went wrong while creating a test case."
 msgstr ""
 
 msgid "TestCases|Something went wrong while fetching count of test cases."
 msgstr ""
 
+msgid "TestCases|Something went wrong while fetching test case."
+msgstr ""
+
 msgid "TestCases|Something went wrong while fetching test cases list."
+msgstr ""
+
+msgid "TestCases|Something went wrong while marking test case todo as done."
+msgstr ""
+
+msgid "TestCases|Something went wrong while updating the test case labels."
+msgstr ""
+
+msgid "TestCases|Something went wrong while updating the test case."
 msgstr ""
 
 msgid "TestCases|Submit test case"
@@ -25993,7 +26083,7 @@ msgstr ""
 msgid "Thanks! Don't show me this again"
 msgstr ""
 
-msgid "That's it, well done!%{celebrate}"
+msgid "That's it, well done!"
 msgstr ""
 
 msgid "The \"%{group_path}\" group allows you to sign in with your Single Sign-On Account"
@@ -26490,6 +26580,9 @@ msgid "There is already a repository with that name on disk"
 msgstr ""
 
 msgid "There is no chart data available."
+msgstr ""
+
+msgid "There is no data available."
 msgstr ""
 
 msgid "There is no data available. Please change your selection."
@@ -27762,6 +27855,9 @@ msgstr ""
 msgid "Total test time for all commits/merges"
 msgstr ""
 
+msgid "Total users"
+msgstr ""
+
 msgid "Total weight"
 msgstr ""
 
@@ -27769,9 +27865,6 @@ msgid "Total: %{total}"
 msgstr ""
 
 msgid "TotalRefCountIndicator|1000+"
-msgstr ""
-
-msgid "Trace"
 msgstr ""
 
 msgid "Tracing"
@@ -28327,6 +28420,9 @@ msgid "Update iteration"
 msgstr ""
 
 msgid "Update now"
+msgstr ""
+
+msgid "Update username"
 msgstr ""
 
 msgid "Update variable"
@@ -30006,10 +30102,10 @@ msgstr ""
 msgid "You can also create a project from the command line."
 msgstr ""
 
-msgid "You can also press &#8984;-Enter"
+msgid "You can also press Ctrl-Enter"
 msgstr ""
 
-msgid "You can also press Ctrl-Enter"
+msgid "You can also press ⌘-Enter"
 msgstr ""
 
 msgid "You can also star a label to make it a priority label."
@@ -30223,6 +30319,9 @@ msgid "You have been granted %{member_human_access} access to %{title} %{name}."
 msgstr ""
 
 msgid "You have been invited"
+msgstr ""
+
+msgid "You have been redirected to the only result; see the %{a_start}search results%{a_end} instead."
 msgstr ""
 
 msgid "You have been unsubscribed from this thread."

@@ -323,7 +323,7 @@ RSpec.shared_examples 'cycle analytics data endpoint examples' do
     end
 
     it 'succeeds' do
-      Timecop.travel '2019-04-01' do
+      travel_to '2019-04-01' do
         subject
 
         expect(response).to be_successful

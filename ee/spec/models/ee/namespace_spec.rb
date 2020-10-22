@@ -623,6 +623,7 @@ RSpec.describe Namespace do
     subject { namespace.any_project_with_shared_runners_enabled? }
 
     context 'subgroup with shared runners enabled project' do
+      let(:namespace) { create(:group) }
       let(:subgroup) { create(:group, parent: namespace) }
       let!(:subproject) { create(:project, namespace: subgroup, shared_runners_enabled: true) }
 
@@ -1767,6 +1768,32 @@ RSpec.describe Namespace do
 
       expect(namespace).to be_invalid
       expect(namespace.errors[:"namespace_limit.temporary_storage_increase_ends_on"]).to be_present
+    end
+  end
+
+  describe '#root_storage_size' do
+    let_it_be(:namespace) { build(:namespace) }
+
+    subject { namespace.root_storage_size }
+
+    context 'with feature flag :namespace_storage_limit enabled' do
+      it 'initializes a new instance of EE::Namespace::RootStorageSize' do
+        expect(EE::Namespace::RootStorageSize).to receive(:new).with(namespace)
+
+        subject
+      end
+    end
+
+    context 'with feature flag :namespace_storage_limit disabled' do
+      before do
+        stub_feature_flags(namespace_storage_limit: false)
+      end
+
+      it 'initializes a new instance of EE::Namespace::RootExcessStorageSize' do
+        expect(EE::Namespace::RootExcessStorageSize).to receive(:new).with(namespace)
+
+        subject
+      end
     end
   end
 

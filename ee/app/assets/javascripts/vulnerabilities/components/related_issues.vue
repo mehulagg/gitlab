@@ -65,22 +65,22 @@ export default {
   },
   inject: {
     vulnerabilityId: {
-      type: Number,
+      default: 0,
     },
     projectFingerprint: {
-      type: String,
+      default: '',
     },
     createIssueUrl: {
-      type: String,
+      default: '',
     },
     reportType: {
-      type: String,
+      default: '',
     },
     issueTrackingHelpPath: {
-      type: String,
+      default: '',
     },
     permissionsHelpPath: {
-      type: String,
+      default: '',
     },
   },
   created() {

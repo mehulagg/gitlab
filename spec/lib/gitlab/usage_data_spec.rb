@@ -12,33 +12,35 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
   end
 
   describe '.uncached_data' do
-    describe '.usage_activity_by_stage' do
-      subject { described_class.uncached_data }
+    subject { described_class.uncached_data }
 
-      it 'includes usage_activity_by_stage data' do
-        is_expected.to include(:usage_activity_by_stage)
-        is_expected.to include(:usage_activity_by_stage_monthly)
-        expect(subject[:usage_activity_by_stage])
-          .to include(:configure, :create, :manage, :monitor, :plan, :release, :verify)
-        expect(subject[:usage_activity_by_stage_monthly])
-          .to include(:configure, :create, :manage, :monitor, :plan, :release, :verify)
-      end
+    it 'includes basic top and second level keys' do
+      is_expected.to include(:counts)
+      is_expected.to include(:counts_monthly)
+      is_expected.to include(:counts_weekly)
+      is_expected.to include(:license)
+      is_expected.to include(:settings)
 
-      it 'clears memoized values' do
-        allow(described_class).to receive(:clear_memoization)
+      # usage_activity_by_stage data
+      is_expected.to include(:usage_activity_by_stage)
+      is_expected.to include(:usage_activity_by_stage_monthly)
+      expect(subject[:usage_activity_by_stage])
+        .to include(:configure, :create, :manage, :monitor, :plan, :release, :verify)
+      expect(subject[:usage_activity_by_stage_monthly])
+        .to include(:configure, :create, :manage, :monitor, :plan, :release, :verify)
+      expect(subject[:usage_activity_by_stage][:create])
+        .not_to include(:merge_requests_users)
+      expect(subject[:usage_activity_by_stage_monthly][:create])
+        .to include(:merge_requests_users)
+    end
 
-        subject
+    it 'clears memoized values' do
+      allow(described_class).to receive(:clear_memoization)
 
-        described_class::CE_MEMOIZED_VALUES.each do |key|
-          expect(described_class).to have_received(:clear_memoization).with(key)
-        end
-      end
+      subject
 
-      it 'merge_requests_users is included only in montly counters' do
-        expect(subject[:usage_activity_by_stage][:create])
-          .not_to include(:merge_requests_users)
-        expect(subject[:usage_activity_by_stage_monthly][:create])
-          .to include(:merge_requests_users)
+      described_class::CE_MEMOIZED_VALUES.each do |key|
+        expect(described_class).to have_received(:clear_memoization).with(key)
       end
     end
 
@@ -48,7 +50,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       end
       expect(described_class).to receive(:recorded_at).and_raise(Exception.new('Stopped calculating recorded_at'))
 
-      expect { described_class.uncached_data }.to raise_error('Stopped calculating recorded_at')
+      expect { subject }.to raise_error('Stopped calculating recorded_at')
     end
   end
 
@@ -207,6 +209,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
         jira_project = create(:project, creator_id: user.id)
         create(:jira_import_state, :finished, project: jira_project)
+
+        create(:csv_issue_import, user: user)
       end
 
       expect(described_class.usage_activity_by_stage_manage({})).to include(
@@ -224,7 +228,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
           issues_imported: {
             jira: 2,
             fogbugz: 2,
-            phabricator: 2
+            phabricator: 2,
+            csv: 2
           }
         }
       )
@@ -243,7 +248,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
           issues_imported: {
             jira: 1,
             fogbugz: 1,
-            phabricator: 1
+            phabricator: 1,
+            csv: 1
           }
         }
       )
@@ -723,6 +729,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         expect(subject[:git][:version]).to eq(Gitlab::Git.version)
         expect(subject[:database][:adapter]).to eq(Gitlab::Database.adapter_name)
         expect(subject[:database][:version]).to eq(Gitlab::Database.version)
+        expect(subject[:database][:pg_system_id]).to eq(Gitlab::Database.system_id)
         expect(subject[:mail][:smtp_server]).to eq(ActionMailer::Base.smtp_settings[:address])
         expect(subject[:gitaly][:version]).to be_present
         expect(subject[:gitaly][:servers]).to be >= 1
@@ -1034,7 +1041,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
   def for_defined_days_back(days: [31, 3])
     days.each do |n|
-      Timecop.travel(n.days.ago) do
+      travel_to(n.days.ago) do
         yield
       end
     end

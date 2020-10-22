@@ -1,6 +1,0 @@
----
-title: Label filter includes labels from ancestor groups on merge request analytics
-  page
-merge_request: 44987
-author:
-type: fixed

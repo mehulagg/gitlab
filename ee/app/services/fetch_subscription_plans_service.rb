@@ -39,10 +39,6 @@ class FetchSubscriptionPlansService
   end
 
   def cache_key
-    if Feature.enabled?(:subscription_plan_cache_key)
-      "subscription-plan-#{@plan}"
-    else
-      "subscription-plans-#{@plan}"
-    end
+    "subscription-plan-#{@plan}"
   end
 end

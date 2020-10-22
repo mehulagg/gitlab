@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: APM
+group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -40,7 +40,7 @@ of memory and CPU usage.
 
 GitLab is committed to support at least two production-ready Kubernetes minor
 versions at any given time. We regularly review the versions we support, and
-provide a four-month deprecation period before we remove support of a specific
+provide a three-month deprecation period before we remove support of a specific
 version. The range of supported versions is based on the evaluation of:
 
 - Our own needs.
@@ -52,7 +52,7 @@ Currently, GitLab supports the following Kubernetes versions:
 - 1.17
 - 1.16
 - 1.15
-- 1.14
+- 1.14 (deprecated, support ends on December 22, 2020)
 - 1.13 (deprecated, support ends on November 22, 2020)
 
 Some GitLab features may support versions outside the range provided here.

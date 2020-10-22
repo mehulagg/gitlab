@@ -797,12 +797,6 @@ RSpec.describe Project do
     end
   end
 
-  describe '#alpha/beta_feature_available?' do
-    it_behaves_like 'an entity with alpha/beta feature support' do
-      let(:entity) { create(:project) }
-    end
-  end
-
   describe '#feature_available?' do
     let(:namespace) { build(:namespace) }
     let(:plan_license) { nil }
@@ -2242,22 +2236,6 @@ RSpec.describe Project do
         project.repository_size_limit = 200
 
         expect(checker.limit).to eq(200)
-      end
-    end
-
-    describe '#total_repository_size_excess' do
-      it 'returns the total repository size excess of the namespace' do
-        allow(project.namespace).to receive(:total_repository_size_excess).and_return(50)
-
-        expect(checker.total_repository_size_excess).to eq(50)
-      end
-    end
-
-    describe '#additional_purchased_storage' do
-      it 'returns the additional purchased storage size of the namespace' do
-        allow(project.namespace).to receive(:additional_purchased_storage_size).and_return(100)
-
-        expect(checker.additional_purchased_storage).to eq(100.megabytes)
       end
     end
 

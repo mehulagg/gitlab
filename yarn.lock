@@ -866,10 +866,10 @@
   resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.171.0.tgz#abc3092bf804f0898301626130e0f3231834924a"
   integrity sha512-TPfdqIxQDda+0CQHhb9XdF50lmqDmADu6yT8R4oZi6BoUtWLdiHbyFt+RnVU6t7EmjIKicNAii7Ga+f2ljCfUA==
 
-"@gitlab/ui@21.32.1":
-  version "21.32.1"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-21.32.1.tgz#8ed29de1093afc36ea31d3cf93b047bcfe0c6543"
-  integrity sha512-ZZi/rJfDTXMytX1vNV2FU+l0fG6J7V2+1M7CWIkxdPIPVJ1LopkkfwnbBP29zrwBFBmguXcPoRfTjGa2oSNdbg==
+"@gitlab/ui@21.34.2":
+  version "21.34.2"
+  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-21.34.2.tgz#900d4cc4bc09ce948f81b2792a02410298773069"
+  integrity sha512-SBHMgcZGsNLMuE6wVvdEZ6EofqT9e1eqxcn9sVuHX5P6/TlFH+76PMpQ7ar/QIsmiWgl77VivyVQLZGSCi0nKQ==
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
@@ -1173,20 +1173,20 @@
     dom-accessibility-api "^0.5.1"
     pretty-format "^26.4.2"
 
-"@toast-ui/editor@^2.4.0":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/@toast-ui/editor/-/editor-2.4.0.tgz#0ed082da7e0160162dbc8f69d00ad3ab2adf81bc"
-  integrity sha512-49YCYcDnCjv4mC9VVNlytJ23SA5t6ox540GnmysluJHJ8aGRdWcVoH8hiyCZi9ZVIXi90B/TU+2HUQ7mOCHHRQ==
+"@toast-ui/editor@^2.5.0":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@toast-ui/editor/-/editor-2.5.0.tgz#02779b119eaa6dd7601249d75ca031e0b98400f1"
+  integrity sha512-h4LgcGz+oedTqNAaSCp0VpR+k4C6Ag01hdDb1kPvO4aMQ/aTtT8uA34plpmYQgJvM0CWD1mXqWUSPkyJtRzDyA==
   dependencies:
     "@types/codemirror" "0.0.71"
     codemirror "^5.48.4"
 
-"@toast-ui/vue-editor@^2.4.0":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/@toast-ui/vue-editor/-/vue-editor-2.4.0.tgz#18b6629006f2dac5bfef4a26388499931d5fa869"
-  integrity sha512-fj4H4jM+usW43mD0VEIfBeUpANY9/pQLB8GlXLQH2iAmpmJFX+xMZl6r7d/vw6TDJaHLfFxP/iXcYIfyJobepQ==
+"@toast-ui/vue-editor@^2.5.0":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@toast-ui/vue-editor/-/vue-editor-2.5.0.tgz#8094136588b0f726241b5f89d0754a7169f2ffee"
+  integrity sha512-GREAaVOe5esQaQFmFCZLjo6iOtIvqvYhANulvsKpbh4QNnsPLaFRIQoUDSImNPVGkDDQn60wxXBnZVKOl9sMmg==
   dependencies:
-    "@toast-ui/editor" "^2.4.0"
+    "@toast-ui/editor" "^2.5.0"
 
 "@types/aria-query@^4.2.0":
   version "4.2.0"
@@ -4174,10 +4174,10 @@ domhandler@^2.3.0:
   dependencies:
     domelementtype "1"
 
-dompurify@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-2.1.1.tgz#b5aa988676b093a9c836d8b855680a8598af25fe"
-  integrity sha512-NijiNVkS/OL8mdQL1hUbCD6uty/cgFpmNiuFxrmJ5YPH2cXrPKIewoixoji56rbZ6XBPmtM8GA8/sf9unlSuwg==
+dompurify@^2.1.1, dompurify@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-2.2.0.tgz#51d34e76faa38b5d6b4e83a0678530f27fe3965c"
+  integrity sha512-bqFOQ7XRmmozp0VsKdIEe8UwZYxj0yttz7l80GBtBqdVRY48cOpXH2J/CVO7AEkV51qY0EBVXfilec18mdmQ/w==
 
 domutils@^1.5.1:
   version "1.6.2"
@@ -7549,11 +7549,6 @@ linkify-it@^2.0.0:
   integrity sha512-4REs8/062kV2DSHxNfq5183zrqXMl7WP0WzABH9IeJI+NLm429FgE1PDecltYfnOoFDFlZGh2T8PfZn0r+GTRg==
   dependencies:
     uc.micro "^1.0.1"
-
-linkifyjs@^2.1.9:
-  version "2.1.9"
-  resolved "https://registry.yarnpkg.com/linkifyjs/-/linkifyjs-2.1.9.tgz#af06e45a2866ff06c4766582590d098a4d584702"
-  integrity sha512-74ivurkK6WHvHFozVaGtQWV38FzBwSTGNmJolEgFp7QgR2bl6ArUWlvT4GcHKbPe1z3nWYi+VUdDZk16zDOVug==
 
 load-json-file@^1.0.0:
   version "1.1.0"
@@ -12368,10 +12363,10 @@ vue-loader@^15.9.3:
     vue-hot-reload-api "^2.3.0"
     vue-style-loader "^4.1.0"
 
-vue-router@^3.4.6:
-  version "3.4.6"
-  resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-3.4.6.tgz#f7bda2c9a43d39837621c9a02ba7789f5daa24b2"
-  integrity sha512-kaXnB3pfFxhAJl/Mp+XG1HJMyFqrL/xPqV7oXlpXn4AwMmm6VNgf0nllW8ksflmZANfI4kdo0bVn/FYSsAolPQ==
+vue-router@^3.4.7:
+  version "3.4.7"
+  resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-3.4.7.tgz#bf189bafd16f4e4ef783c4a6250a3090f2c1fa1b"
+  integrity sha512-CbHXue5BLrDivOk5O4eZ0WT4Yj8XwdXa4kCnsEIOzYUPF/07ZukayA2jGxDCJxLc9SgVQX9QX0OuGOwGlVB4Qg==
 
 vue-runtime-helpers@^1.1.2:
   version "1.1.2"

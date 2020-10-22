@@ -21,11 +21,11 @@ to uncover, triage, and identify the root cause of slowdowns in the software dev
 
 For information on how to contribute to the development of Value Stream Analytics, see our [contributor documentation](../../development/value_stream_analytics.md).
 
-## Project Level Value Stream Analytics **CORE**
+## Project Level Value Stream Analytics **(CORE)**
 
 Project Level Value Stream Analytics is available via **Project > Analytics > Value Stream**.
 
-## Group Level Value Stream Analytics **PREMIUM**
+## Group Level Value Stream Analytics **(PREMIUM)**
 
 From GitLab 12.9, group level Value Stream Analytics is available via **Group > Analytics > Value Stream**.
 
@@ -339,11 +339,13 @@ Feature.disable(:value_stream_analytics_create_multiple_value_streams)
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21631) in GitLab 12.6.
 > - [Chart median line removed](https://gitlab.com/gitlab-org/gitlab/-/issues/235455) in GitLab 13.4.
 
-This chart visually depicts the total number of days it takes for cycles to be completed.
+This chart visually depicts the total number of days it takes for cycles to be completed. (Totals are being replaced with averages in [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/262070).)
 
 This chart uses the global page filters for displaying data based on the selected
 group, projects, and timeframe. In addition, specific stages can be selected
 from within the chart itself.
+
+The chart data is limited to the last 500 items.
 
 ### Disabling chart
 
@@ -354,7 +356,7 @@ administrator can open a Rails console and disable it with the following command
 Feature.disable(:cycle_analytics_scatterplot_enabled)
 ```
 
-## Type of work - Tasks by type chart **(PREMIUM)**
+## Type of work - Tasks by type chart
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32421) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.10.
 
@@ -377,11 +379,8 @@ The current permissions on the Project Value Stream Analytics dashboard are:
 
 You can [read more about permissions](../../user/permissions.md) in general.
 
-For Value Stream Analytics functionality introduced in GitLab 12.3 and later:
-
-- Users must have Reporter access or above.
-- Features are available only on
-  [Premium or Silver tiers](https://about.gitlab.com/pricing/) and above.
+For Value Stream Analytics functionality introduced in GitLab 12.3 and later, 
+users must have Reporter access or above.
 
 ## More resources
 

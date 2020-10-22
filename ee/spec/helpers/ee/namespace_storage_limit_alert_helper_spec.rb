@@ -32,18 +32,18 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
     end
   end
 
-  describe '#purchase_storage_url' do
-    subject { helper.purchase_storage_url }
+  describe '#can_purchase_storage?' do
+    subject { helper.can_purchase_storage? }
 
     where(:is_dot_com, :enforcement_setting_enabled, :feature_enabled, :result) do
-      false | false | false | nil
-      false | false | true  | nil
-      false | true  | false | nil
-      true  | false | false | nil
-      false | true  | true  | nil
-      true  | true  | false | nil
-      true  | false | true  | nil
-      true  | true  | true  | EE::SUBSCRIPTIONS_MORE_STORAGE_URL
+      false | false | false | false
+      false | false | true  | false
+      false | true  | false | false
+      true  | false | false | false
+      false | true  | true  | false
+      true  | true  | false | false
+      true  | false | true  | false
+      true  | true  | true  | true
     end
 
     with_them do
@@ -55,6 +55,12 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
 
       it { is_expected.to eq(result) }
     end
+  end
+
+  describe '#purchase_storage_url' do
+    subject { helper.purchase_storage_url }
+
+    it { is_expected.to eq(EE::SUBSCRIPTIONS_MORE_STORAGE_URL) }
   end
 
   describe '#namespace_storage_alert' do
@@ -71,47 +77,59 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
       }
     end
 
-    before do
-      allow(helper).to receive(:current_user).and_return(admin)
-      allow_next_instance_of(Namespaces::CheckStorageSizeService, namespace, admin) do |check_storage_size_service|
-        expect(check_storage_size_service).to receive(:execute).and_return(ServiceResponse.success(payload: payload))
-      end
+    where(:namespace_storage_limit_enabled, :additional_repo_storage_by_namespace_enabled, :service_class_name) do
+      true  | false | Namespaces::CheckStorageSizeService
+      true  | true  | Namespaces::CheckStorageSizeService
+      false | true  | Namespaces::CheckExcessStorageSizeService
+      false | false | Namespaces::CheckStorageSizeService
     end
 
-    context 'when payload is not empty and no cookie is set' do
-      it { is_expected.to eq(payload) }
-    end
-
-    context 'when there is no current_user' do
+    with_them do
       before do
-        allow(helper).to receive(:current_user).and_return(nil)
+        stub_feature_flags(namespace_storage_limit: namespace_storage_limit_enabled)
+        stub_feature_flags(additional_repo_storage_by_namespace: additional_repo_storage_by_namespace_enabled)
+
+        allow(helper).to receive(:current_user).and_return(admin)
+        allow_next_instance_of(service_class_name, namespace, admin) do |service|
+          expect(service).to receive(:execute).and_return(ServiceResponse.success(payload: payload))
+        end
       end
 
-      it { is_expected.to eq({}) }
-    end
-
-    context 'when payload is empty' do
-      let(:payload) { {} }
-
-      it { is_expected.to eq({}) }
-    end
-
-    context 'when cookie is set' do
-      before do
-        helper.request.cookies["hide_storage_limit_alert_#{namespace.id}_info"] = 'true'
+      context 'when payload is not empty and no cookie is set' do
+        it { is_expected.to eq(payload) }
       end
 
-      it { is_expected.to eq({}) }
-    end
+      context 'when there is no current_user' do
+        before do
+          allow(helper).to receive(:current_user).and_return(nil)
+        end
 
-    context 'when payload is empty and cookie is set' do
-      let(:payload) { {} }
-
-      before do
-        helper.request.cookies["hide_storage_limit_alert_#{namespace.id}_info"] = 'true'
+        it { is_expected.to eq({}) }
       end
 
-      it { is_expected.to eq({}) }
+      context 'when payload is empty' do
+        let(:payload) { {} }
+
+        it { is_expected.to eq({}) }
+      end
+
+      context 'when cookie is set' do
+        before do
+          helper.request.cookies["hide_storage_limit_alert_#{namespace.id}_info"] = 'true'
+        end
+
+        it { is_expected.to eq({}) }
+      end
+
+      context 'when payload is empty and cookie is set' do
+        let(:payload) { {} }
+
+        before do
+          helper.request.cookies["hide_storage_limit_alert_#{namespace.id}_info"] = 'true'
+        end
+
+        it { is_expected.to eq({}) }
+      end
     end
   end
 
@@ -145,28 +163,28 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
     end
   end
 
-  describe '#namespace_storage_purchase_link' do
-    subject { helper.namespace_storage_purchase_link(namespace) }
+  describe '#can_purchase_storage_for_namespace?' do
+    subject { helper.can_purchase_storage_for_namespace?(namespace) }
 
     let(:namespace) { build(:namespace) }
 
     where(:is_dev_or_com, :auto_storage_allocation_enabled, :buy_storage_link_enabled, :additional_storage_enabled, :result) do
-      true  | true  | true  | true  | EE::SUBSCRIPTIONS_MORE_STORAGE_URL
-      true  | true  | true  | false | nil
-      true  | true  | false | true  | nil
-      true  | true  | false | false | nil
-      true  | false | true  | true  | nil
-      true  | false | true  | false | nil
-      true  | false | false | true  | nil
-      true  | false | false | false | nil
-      false | true  | true  | true  | nil
-      false | true  | true  | false | nil
-      false | true  | false | true  | nil
-      false | true  | false | false | nil
-      false | false | true  | true  | nil
-      false | false | true  | false | nil
-      false | false | false | true  | nil
-      false | false | false | false | nil
+      true  | true  | true  | true  | true
+      true  | true  | true  | false | false
+      true  | true  | false | true  | false
+      true  | true  | false | false | false
+      true  | false | true  | true  | false
+      true  | false | true  | false | false
+      true  | false | false | true  | false
+      true  | false | false | false | false
+      false | true  | true  | true  | false
+      false | true  | true  | false | false
+      false | true  | false | true  | false
+      false | true  | false | false | false
+      false | false | true  | true  | false
+      false | false | true  | false | false
+      false | false | false | true  | false
+      false | false | false | false | false
     end
 
     with_them do

@@ -28,7 +28,6 @@ export default {
   },
   inject: {
     groupFullPath: {
-      type: String,
       default: '',
     },
   },

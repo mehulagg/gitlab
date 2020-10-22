@@ -9294,10 +9294,13 @@ CREATE TABLE application_settings (
     require_admin_approval_after_user_signup boolean DEFAULT false NOT NULL,
     help_page_documentation_base_url text,
     automatic_purchased_storage_allocation boolean DEFAULT false NOT NULL,
+    encrypted_ci_jwt_signing_key text,
+    encrypted_ci_jwt_signing_key_iv text,
     new_user_signups_cap integer,
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
+    CONSTRAINT check_85a39b68ff CHECK ((char_length(encrypted_ci_jwt_signing_key_iv) <= 255)),
     CONSTRAINT check_9c6c447a13 CHECK ((char_length(maintenance_mode_message) <= 255)),
     CONSTRAINT check_d03919528d CHECK ((char_length(container_registry_vendor) <= 255)),
     CONSTRAINT check_d820146492 CHECK ((char_length(spam_check_endpoint_url) <= 255)),
@@ -11270,6 +11273,23 @@ CREATE SEQUENCE conversational_development_index_metrics_id_seq
     CACHE 1;
 
 ALTER SEQUENCE conversational_development_index_metrics_id_seq OWNED BY conversational_development_index_metrics.id;
+
+CREATE TABLE csv_issue_imports (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+CREATE SEQUENCE csv_issue_imports_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE csv_issue_imports_id_seq OWNED BY csv_issue_imports.id;
 
 CREATE TABLE custom_emoji (
     id bigint NOT NULL,
@@ -15753,6 +15773,25 @@ CREATE SEQUENCE routes_id_seq
 
 ALTER SEQUENCE routes_id_seq OWNED BY routes.id;
 
+CREATE TABLE saml_group_links (
+    id bigint NOT NULL,
+    access_level smallint NOT NULL,
+    group_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    saml_group_name text NOT NULL,
+    CONSTRAINT check_1b3fc49d1e CHECK ((char_length(saml_group_name) <= 255))
+);
+
+CREATE SEQUENCE saml_group_links_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE saml_group_links_id_seq OWNED BY saml_group_links.id;
+
 CREATE TABLE saml_providers (
     id integer NOT NULL,
     group_id integer NOT NULL,
@@ -15822,6 +15861,7 @@ CREATE TABLE security_findings (
     confidence smallint NOT NULL,
     project_fingerprint text NOT NULL,
     deduplicated boolean DEFAULT false NOT NULL,
+    "position" integer,
     CONSTRAINT check_b9508c6df8 CHECK ((char_length(project_fingerprint) <= 40))
 );
 
@@ -17505,6 +17545,8 @@ ALTER TABLE ONLY container_repositories ALTER COLUMN id SET DEFAULT nextval('con
 
 ALTER TABLE ONLY conversational_development_index_metrics ALTER COLUMN id SET DEFAULT nextval('conversational_development_index_metrics_id_seq'::regclass);
 
+ALTER TABLE ONLY csv_issue_imports ALTER COLUMN id SET DEFAULT nextval('csv_issue_imports_id_seq'::regclass);
+
 ALTER TABLE ONLY custom_emoji ALTER COLUMN id SET DEFAULT nextval('custom_emoji_id_seq'::regclass);
 
 ALTER TABLE ONLY dast_scanner_profiles ALTER COLUMN id SET DEFAULT nextval('dast_scanner_profiles_id_seq'::regclass);
@@ -17898,6 +17940,8 @@ ALTER TABLE ONLY resource_weight_events ALTER COLUMN id SET DEFAULT nextval('res
 ALTER TABLE ONLY reviews ALTER COLUMN id SET DEFAULT nextval('reviews_id_seq'::regclass);
 
 ALTER TABLE ONLY routes ALTER COLUMN id SET DEFAULT nextval('routes_id_seq'::regclass);
+
+ALTER TABLE ONLY saml_group_links ALTER COLUMN id SET DEFAULT nextval('saml_group_links_id_seq'::regclass);
 
 ALTER TABLE ONLY saml_providers ALTER COLUMN id SET DEFAULT nextval('saml_providers_id_seq'::regclass);
 
@@ -18562,6 +18606,9 @@ ALTER TABLE ONLY container_repositories
 ALTER TABLE ONLY conversational_development_index_metrics
     ADD CONSTRAINT conversational_development_index_metrics_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY csv_issue_imports
+    ADD CONSTRAINT csv_issue_imports_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY custom_emoji
     ADD CONSTRAINT custom_emoji_pkey PRIMARY KEY (id);
 
@@ -19207,6 +19254,9 @@ ALTER TABLE ONLY reviews
 ALTER TABLE ONLY routes
     ADD CONSTRAINT routes_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY saml_group_links
+    ADD CONSTRAINT saml_group_links_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY saml_providers
     ADD CONSTRAINT saml_providers_pkey PRIMARY KEY (id);
 
@@ -19598,6 +19648,8 @@ CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_index ON epic_user_mentions US
 CREATE INDEX idx_audit_events_on_entity_id_desc_author_id_created_at ON audit_events USING btree (entity_id, entity_type, id DESC, author_id, created_at);
 
 CREATE INDEX idx_ci_pipelines_artifacts_locked ON ci_pipelines USING btree (ci_ref_id, id) WHERE (locked = 1);
+
+CREATE INDEX idx_container_exp_policies_on_project_id_next_run_at_enabled ON container_expiration_policies USING btree (project_id, next_run_at, enabled);
 
 CREATE INDEX idx_deployment_clusters_on_cluster_id_and_kubernetes_namespace ON deployment_clusters USING btree (cluster_id, kubernetes_namespace);
 
@@ -20196,6 +20248,10 @@ CREATE UNIQUE INDEX index_container_repositories_on_project_id_and_name ON conta
 CREATE INDEX index_container_repository_on_name_trigram ON container_repositories USING gin (name gin_trgm_ops);
 
 CREATE INDEX index_created_at_on_codeowner_approval_merge_request_rules ON approval_merge_request_rules USING btree (created_at) WHERE ((rule_type = 2) AND (section <> 'codeowners'::text));
+
+CREATE INDEX index_csv_issue_imports_on_project_id ON csv_issue_imports USING btree (project_id);
+
+CREATE INDEX index_csv_issue_imports_on_user_id ON csv_issue_imports USING btree (user_id);
 
 CREATE UNIQUE INDEX index_custom_emoji_on_namespace_id_and_name ON custom_emoji USING btree (namespace_id, name);
 
@@ -21455,6 +21511,8 @@ CREATE INDEX index_routes_on_path_trigram ON routes USING gin (path gin_trgm_ops
 
 CREATE UNIQUE INDEX index_routes_on_source_type_and_source_id ON routes USING btree (source_type, source_id);
 
+CREATE UNIQUE INDEX index_saml_group_links_on_group_id_and_saml_group_name ON saml_group_links USING btree (group_id, saml_group_name);
+
 CREATE INDEX index_saml_providers_on_group_id ON saml_providers USING btree (group_id);
 
 CREATE INDEX index_scim_identities_on_group_id ON scim_identities USING btree (group_id);
@@ -21474,6 +21532,8 @@ CREATE INDEX index_security_findings_on_confidence ON security_findings USING bt
 CREATE INDEX index_security_findings_on_project_fingerprint ON security_findings USING btree (project_fingerprint);
 
 CREATE INDEX index_security_findings_on_scan_id_and_deduplicated ON security_findings USING btree (scan_id, deduplicated);
+
+CREATE UNIQUE INDEX index_security_findings_on_scan_id_and_position ON security_findings USING btree (scan_id, "position");
 
 CREATE INDEX index_security_findings_on_scanner_id ON security_findings USING btree (scanner_id);
 
@@ -21764,8 +21824,6 @@ CREATE INDEX index_vulnerabilities_on_last_edited_by_id ON vulnerabilities USING
 CREATE INDEX index_vulnerabilities_on_milestone_id ON vulnerabilities USING btree (milestone_id);
 
 CREATE INDEX index_vulnerabilities_on_project_id ON vulnerabilities USING btree (project_id);
-
-CREATE INDEX index_vulnerabilities_on_project_id_and_id ON vulnerabilities USING btree (project_id, id);
 
 CREATE INDEX index_vulnerabilities_on_resolved_by_id ON vulnerabilities USING btree (resolved_by_id);
 
@@ -22398,6 +22456,9 @@ ALTER TABLE ONLY deploy_keys_projects
 ALTER TABLE ONLY issue_assignees
     ADD CONSTRAINT fk_5e0c8d9154 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY csv_issue_imports
+    ADD CONSTRAINT fk_5e1572387c FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY project_access_tokens
     ADD CONSTRAINT fk_5f7e8450e1 FOREIGN KEY (personal_access_token_id) REFERENCES personal_access_tokens(id) ON DELETE CASCADE;
 
@@ -22770,6 +22831,9 @@ ALTER TABLE ONLY merge_requests
 ALTER TABLE ONLY issue_links
     ADD CONSTRAINT fk_e71bb44f1f FOREIGN KEY (target_id) REFERENCES issues(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY csv_issue_imports
+    ADD CONSTRAINT fk_e71c0ae362 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY namespaces
     ADD CONSTRAINT fk_e7a0b20a6b FOREIGN KEY (custom_project_templates_group_id) REFERENCES namespaces(id) ON DELETE SET NULL;
 
@@ -23027,6 +23091,9 @@ ALTER TABLE ONLY clusters_applications_runners
 
 ALTER TABLE ONLY service_desk_settings
     ADD CONSTRAINT fk_rails_223a296a85 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY saml_group_links
+    ADD CONSTRAINT fk_rails_22e312c530 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY group_custom_attributes
     ADD CONSTRAINT fk_rails_246e0db83a FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;

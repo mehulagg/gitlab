@@ -11,6 +11,7 @@ import MemberActionButtons from './member_action_buttons.vue';
 import MembersTableCell from './members_table_cell.vue';
 import RoleDropdown from './role_dropdown.vue';
 import RemoveGroupLinkModal from '../modals/remove_group_link_modal.vue';
+import ExpirationDatepicker from './expiration_datepicker.vue';
 
 export default {
   name: 'MembersTable',
@@ -25,6 +26,11 @@ export default {
     MemberActionButtons,
     RoleDropdown,
     RemoveGroupLinkModal,
+    ExpirationDatepicker,
+    LdapOverrideConfirmationModal: () =>
+      import(
+        'ee_component/vue_shared/components/members/ldap/ldap_override_confirmation_modal.vue'
+      ),
   },
   computed: {
     ...mapState(['members', 'tableFields']),
@@ -90,6 +96,12 @@ export default {
         </members-table-cell>
       </template>
 
+      <template #cell(expiration)="{ item: member }">
+        <members-table-cell #default="{ permissions }" :member="member">
+          <expiration-datepicker :permissions="permissions" :member="member" />
+        </members-table-cell>
+      </template>
+
       <template #cell(actions)="{ item: member }">
         <members-table-cell #default="{ memberType, isCurrentUser, permissions }" :member="member">
           <member-action-buttons
@@ -106,5 +118,6 @@ export default {
       </template>
     </gl-table>
     <remove-group-link-modal />
+    <ldap-override-confirmation-modal />
   </div>
 </template>

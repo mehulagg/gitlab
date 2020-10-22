@@ -27,7 +27,15 @@ module EE
       def additional_repo_storage_available?
         return false unless ::Gitlab::CurrentSettings.automatic_purchased_storage_allocation?
 
-        ::Feature.enabled?(:additional_repo_storage_by_namespace)
+        ::Feature.enabled?(:additional_repo_storage_by_namespace, namespace)
+      end
+
+      def total_repository_size_excess
+        namespace&.total_repository_size_excess.to_i
+      end
+
+      def additional_purchased_storage
+        namespace&.additional_purchased_storage_size&.megabytes.to_i
       end
 
       def remaining_additional_purchased_storage

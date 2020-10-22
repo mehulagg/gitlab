@@ -1,5 +1,5 @@
 import { shallowMount, mount } from '@vue/test-utils';
-import { GlLink, GlDeprecatedBadge as GlBadge, GlIcon } from '@gitlab/ui';
+import { GlLink, GlBadge, GlIcon } from '@gitlab/ui';
 import component from 'ee/environments_dashboard/components/dashboard/environment_header.vue';
 import ReviewAppLink from '~/vue_merge_request_widget/components/review_app_link.vue';
 

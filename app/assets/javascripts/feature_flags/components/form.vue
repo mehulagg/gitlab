@@ -3,7 +3,7 @@ import Vue from 'vue';
 import { memoize, isString, cloneDeep, isNumber, uniqueId } from 'lodash';
 import {
   GlButton,
-  GlDeprecatedBadge as GlBadge,
+  GlBadge,
   GlTooltip,
   GlTooltipDirective,
   GlFormTextarea,
@@ -64,10 +64,6 @@ export default {
       required: false,
       default: '',
     },
-    projectId: {
-      type: String,
-      required: true,
-    },
     scopes: {
       type: Array,
       required: false,
@@ -81,15 +77,6 @@ export default {
       type: String,
       required: true,
     },
-    environmentsEndpoint: {
-      type: String,
-      required: true,
-    },
-    featureFlagIssuesEndpoint: {
-      type: String,
-      required: false,
-      default: '',
-    },
     strategies: {
       type: Array,
       required: false,
@@ -99,6 +86,12 @@ export default {
       type: String,
       required: false,
       default: LEGACY_FLAG,
+    },
+  },
+  inject: {
+    projectId: {},
+    featureFlagIssuesEndpoint: {
+      default: '',
     },
   },
   translations: {
@@ -353,7 +346,6 @@ export default {
             :key="keyFor(strategy)"
             :strategy="strategy"
             :index="index"
-            :endpoint="environmentsEndpoint"
             :user-lists="userLists"
             @change="onFormStrategyChange($event, index)"
             @delete="deleteStrategy(strategy)"
@@ -411,7 +403,6 @@ export default {
                     v-else
                     class="col-12"
                     :value="scope.environmentScope"
-                    :endpoint="environmentsEndpoint"
                     :disabled="!canUpdateScope(scope) || scope.environmentScope !== ''"
                     @selectEnvironment="env => (scope.environmentScope = env)"
                     @createClicked="env => (scope.environmentScope = env)"
@@ -497,7 +488,9 @@ export default {
                       :target="rolloutPercentageId(index)"
                     >
                       {{
-                        s__('FeatureFlags|Percent rollout must be a whole number between 0 and 100')
+                        s__(
+                          'FeatureFlags|Percent rollout must be an integer number between 0 and 100',
+                        )
                       }}
                     </gl-tooltip>
                     <span class="ml-1">%</span>
@@ -547,7 +540,6 @@ export default {
                 <div class="table-mobile-content js-feature-flag-status">
                   <environments-dropdown
                     class="js-new-scope-name col-12"
-                    :endpoint="environmentsEndpoint"
                     :value="newScope"
                     @selectEnvironment="env => createNewScope({ environmentScope: env })"
                     @createClicked="env => createNewScope({ environmentScope: env })"

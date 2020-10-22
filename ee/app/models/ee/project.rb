@@ -312,20 +312,6 @@ module EE
       shared_runners_enabled? && shared_runners_limit_namespace.shared_runners_minutes_limit_enabled?
     end
 
-    # This makes the feature disabled by default, in contrary to how
-    # `#feature_available?` makes a feature enabled by default.
-    #
-    # This allows to:
-    # - Enable the feature flag for a given project, regardless of the license.
-    #   This is useful for early testing a feature in production on a given project.
-    # - Enable the feature flag globally and still check that the license allows
-    #   it. This is the case when we're ready to enable a feature for anyone
-    #   with the correct license.
-    def beta_feature_available?(feature)
-      ::Feature.enabled?(feature, type: :licensed) ? feature_available?(feature) : ::Feature.enabled?(feature, self, type: :licensed)
-    end
-    alias_method :alpha_feature_available?, :beta_feature_available?
-
     def push_audit_events_enabled?
       ::Feature.enabled?(:repository_push_audit_event, self)
     end
@@ -532,8 +518,7 @@ module EE
         ::Gitlab::RepositorySizeChecker.new(
           current_size_proc: -> { statistics.total_repository_size },
           limit: actual_size_limit,
-          total_repository_size_excess: namespace.total_repository_size_excess,
-          additional_purchased_storage: namespace.additional_purchased_storage_size.megabytes,
+          namespace: namespace,
           enabled: License.feature_available?(:repository_size_limit)
         )
       end

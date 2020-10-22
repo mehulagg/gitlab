@@ -2,11 +2,13 @@
 
 require 'spec_helper'
 
-RSpec.describe Project do
+RSpec.describe Project, factory_default: :keep do
   include ProjectForksHelper
   include GitHelpers
   include ExternalAuthorizationServiceHelpers
   using RSpec::Parameterized::TableSyntax
+
+  let_it_be(:namespace) { create_default(:namespace) }
 
   it_behaves_like 'having unique enum values'
 
@@ -3003,14 +3005,23 @@ RSpec.describe Project do
   describe '#set_repository_read_only!' do
     let(:project) { create(:project) }
 
-    it 'returns true when there is no existing git transfer in progress' do
-      expect(project.set_repository_read_only!).to be_truthy
+    it 'makes the repository read-only' do
+      expect { project.set_repository_read_only! }
+        .to change(project, :repository_read_only?)
+        .from(false)
+        .to(true)
     end
 
-    it 'returns false when there is an existing git transfer in progress' do
+    it 'raises an error if the project is already read-only' do
+      project.set_repository_read_only!
+
+      expect { project.set_repository_read_only! }.to raise_error(described_class::RepositoryReadOnlyError, /already read-only/)
+    end
+
+    it 'raises an error when there is an existing git transfer in progress' do
       allow(project).to receive(:git_transfer_in_progress?) { true }
 
-      expect(project.set_repository_read_only!).to be_falsey
+      expect { project.set_repository_read_only! }.to raise_error(described_class::RepositoryReadOnlyError, /in progress/)
     end
   end
 

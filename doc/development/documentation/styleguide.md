@@ -583,7 +583,9 @@ tenses, words, and phrases:
 - Avoid the use of [racially-insensitive terminology or phrases](https://www.marketplace.org/2020/06/17/tech-companies-update-language-to-avoid-offensive-terms/). For example:
   - Use *primary* and *secondary* for database and server relationships.
   - Use *allowlist* and *denylist* to describe access control lists.
-- Avoid the word *please*. For details, see [the Microsoft style guide](https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/p/please).
+- Avoid the word _please_. For details, see the [Microsoft style guide](https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/p/please).
+- Avoid words like _easily_, _simply_, _handy_, and _useful._ If the user
+  doesn't find the process to be these things, we lose their trust.
 
 ### Word usage clarifications
 
@@ -658,15 +660,19 @@ Review the general punctuation rules for the GitLab documentation in the
 following table. Check specific punctuation rules for [lists](#lists) below.
 Additional examples are available in the [Pajamas guide for punctuation](https://design.gitlab.com/content/punctuation/).
 
+<!-- vale gitlab.Repetition = NO -->
+
 | Rule                                                             | Example                                                |
 |------------------------------------------------------------------|--------------------------------------------------------|
 | Always end full sentences with a period.                         | _For a complete overview, read through this document._ |
 | Always add a space after a period when beginning a new sentence. | _For a complete overview, check this doc. For other references, check out this guide._ |
 | Do not use double spaces. (Tested in [`SentenceSpacing.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/SentenceSpacing.yml).) | --- |
 | Do not use tabs for indentation. Use spaces instead. You can configure your code editor to output spaces instead of tabs when pressing the tab key. | --- |
-| Use serial commas ("Oxford commas") before the final 'and/or' in a list. (Tested in [`OxfordComma.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/OxfordComma.yml).) | _You can create new issues, merge requests, and milestones._ |
+| Use serial commas (_Oxford commas_) before the final _and_ or _or_ in a list of three or more items. (Tested in [`OxfordComma.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/OxfordComma.yml).) | _You can create new issues, merge requests, and milestones._ |
 | Always add a space before and after dashes when using it in a sentence (for replacing a comma, for example). | _You should try this - or not._ |
 | Always use lowercase after a colon.                              | _Related Issues: a way to create a relationship between issues._ |
+
+<!-- vale gitlab.Repetition = YES -->
 
 ### Placeholder text
 
@@ -1565,13 +1571,13 @@ This is something to be cautious about.
 ### Danger
 
 ```markdown
-DANGER: **Danger:**
+DANGER: **Warning:**
 This is a breaking change, a bug, or something very important to note.
 ```
 
 How it renders on the GitLab documentation site:
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 This is a breaking change, a bug, or something very important to note.
 
 ## Blockquotes
@@ -1978,86 +1984,3 @@ steps aren't required, consider setting up a [table](#tables) with headers of
 
 Learn how to [document features deployed behind flags](feature_flags.md). For
 guidance on developing GitLab with feature flags, see [Feature flags in development of GitLab](../feature_flags/index.md).
-
-## GraphQL API
-
-GraphQL APIs are different from [RESTful APIs](restful_api_styleguide.md). Reference
-information is generated in our [GraphQL reference](../../api/graphql/reference/index.md).
-
-However, it's helpful to include examples on how to use GraphQL for different
-*use cases*, with samples that readers can use directly in the
-[GraphiQL explorer](../api_graphql_styleguide.md#graphiql).
-
-This section describes the steps required to add your GraphQL examples to
-GitLab documentation.
-
-### Add a dedicated GraphQL page
-
-To create a dedicated GraphQL page, create a new `.md` file in the
-`doc/api/graphql/` directory. Give that file a functional name, such as
-`import_from_specific_location.md`.
-
-### Start the page with an explanation
-
-Include a page title that describes the GraphQL functionality in a few words,
-such as:
-
-```markdown
-# Search for [substitute kind of data]
-```
-
-Describe the search. One sentence may be all you need. More information may
-help readers learn how to use the example for their GitLab deployments.
-
-### Include a procedure using the GraphiQL explorer
-
-The GraphiQL explorer can help readers test queries with working deployments.
-Set up the section with the following:
-
-- Use the following title:
-
-  ```markdown
-  ## Set up the GraphiQL explorer
-  ```
-
-- Include a code block with the query that anyone can include in their
-  instance of the GraphiQL explorer:
-
-  ````markdown
-  ```graphql
-  query {
-    <insert queries here>
-  }
-  ```
-  ````
-
-- Tell the user what to do:
-
-  ```markdown
-  1. Open the GraphiQL explorer tool in the following URL: `https://gitlab.com/-/graphql-explorer`.
-  1. Paste the `query` listed above into the left window of your GraphiQL explorer tool.
-  1. Select Play to get the result shown here:
-  ```
-
-- Include a screenshot of the result in the GraphiQL explorer. Follow the naming
-  convention described in the [Save the image](#save-the-image) section.
-- Follow up with an example of what you can do with the output. Make sure the
-  example is something that readers can do on their own deployments.
-- Include a link to the [GraphQL API resources](../../api/graphql/reference/index.md).
-
-### Add the GraphQL example to the Table of Contents
-
-You'll need to open a second MR, against the [GitLab documentation repository](https://gitlab.com/gitlab-org/gitlab-docs/).
-
-We store our Table of Contents in the `default-nav.yaml` file, in the
-`content/_data` subdirectory. You can find the GraphQL section under the
-following line:
-
-```yaml
-- category_title: GraphQL
-```
-
-Be aware that CI tests for that second MR will fail with a bad link until the
-main MR that adds the new GraphQL page is merged.
-
-And that's all you need!

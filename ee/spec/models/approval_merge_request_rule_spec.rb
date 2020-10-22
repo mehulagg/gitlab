@@ -136,9 +136,9 @@ RSpec.describe ApprovalMergeRequestRule do
       end
     end
 
-    describe '.security_report' do
+    describe '.vulnerability_report' do
       it 'returns the correct rules' do
-        expect(described_class.security_report)
+        expect(described_class.vulnerability_report)
           .to contain_exactly(report_approver_rule)
       end
     end
