@@ -1,5 +1,6 @@
 @import 'mixins_and_variables_and_functions';
-@import '@gitlab/ui/src/scss/gitlab_ui';
+// We should only import styles that we actually use.
+// @import '@gitlab/ui/src/scss/gitlab_ui';
 
 $atlaskit-border-color: #dfe1e6;
 

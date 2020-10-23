@@ -22,6 +22,8 @@
       %p Note: this integration only works with accounts on GitLab.com (SaaS).
   - else
     .js-jira-connect-app
+    = webpack_bundle_tag 'jira_connect_app'
+
     %form#add-subscription-form.subscription-form{ action: jira_connect_subscriptions_path }
       .ak-field-group
         %label
