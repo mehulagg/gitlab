@@ -72,12 +72,10 @@ export const groupedSummaryText = (state, getters) => {
     return s__('ciReport|Security scanning failed loading any results');
   }
 
-  if (getters.areReportsLoading && getters.anyReportHasError) {
-    status = s__('ciReport|(is loading, errors when loading results)');
-  } else if (getters.areReportsLoading && !getters.anyReportHasError) {
-    status = s__('ciReport|(is loading)');
-  } else if (!getters.areReportsLoading && getters.anyReportHasError) {
-    status = s__('ciReport|(errors when loading results)');
+  if (getters.anyReportHasError) {
+    status = 'error';
+  } else if (getters.areReportsLoading) {
+    status = 'loading';
   }
 
   const { critical, high, other } = getters.summaryCounts;
