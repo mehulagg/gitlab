@@ -31,7 +31,8 @@ def create_tokens
     secret_key_base: file_secret_key || generate_new_secure_token,
     otp_key_base: env_secret_key || file_secret_key || generate_new_secure_token,
     db_key_base: generate_new_secure_token,
-    openid_connect_signing_key: generate_new_rsa_private_key
+    openid_connect_signing_key: generate_new_rsa_private_key,
+    enc_settings_key_base: generate_new_secure_token
   }
 
   missing_secrets = set_missing_keys(defaults)
