@@ -236,15 +236,18 @@ module EE
 
     # Determines whether a search should use elasticsearch, taking the scope
     # (nil for global search, otherwise a namespace or project) into account
-    def search_using_elasticsearch?(scope: nil)
+    def search_using_elasticsearch?(resource: nil, scope: nil)
       return false unless elasticsearch_indexing? && elasticsearch_search?
       return true unless elasticsearch_limit_indexing?
 
-      case scope
+      # allow global code search for partially indexed instances
+      return true if resource.nil? && scope == 'blobs' && elasticsearch_limit_indexing?
+
+      case resource
       when Namespace
-        elasticsearch_indexes_namespace?(scope)
+        elasticsearch_indexes_namespace?(resource)
       when Project
-        elasticsearch_indexes_project?(scope)
+        elasticsearch_indexes_project?(resource)
       else
         ::Feature.enabled?(:advanced_global_search_for_limited_indexing)
       end

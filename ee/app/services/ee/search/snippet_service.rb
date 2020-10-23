@@ -14,8 +14,8 @@ module EE
                                                     projects)
       end
 
-      override :elasticsearchable_scope
-      def elasticsearchable_scope
+      override :elasticsearchable_resource
+      def elasticsearchable_resource
         nil
       end
     end

@@ -30,7 +30,7 @@ module EE
         project.root_ref?(repository_ref)
       end
 
-      def elasticsearchable_scope
+      def elasticsearchable_resource
         project
       end
     end

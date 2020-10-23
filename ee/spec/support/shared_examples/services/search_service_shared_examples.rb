@@ -7,7 +7,7 @@ RSpec.shared_examples 'EE search service shared examples' do |normal_results, el
     it 'delegates to Gitlab::CurrentSettings.search_using_elasticsearch?' do
       expect(Gitlab::CurrentSettings)
         .to receive(:search_using_elasticsearch?)
-        .with(scope: scope)
+        .with(resource: scope)
         .and_return(:value)
 
       expect(service.use_elasticsearch?).to eq(:value)
@@ -31,7 +31,7 @@ RSpec.shared_examples 'EE search service shared examples' do |normal_results, el
     it 'returns an Elastic result object when elasticsearch is enabled' do
       expect(Gitlab::CurrentSettings)
         .to receive(:search_using_elasticsearch?)
-        .with(scope: scope)
+        .with(resource: scope)
         .and_return(true)
 
       is_expected.to be_a(elasticsearch_results)
@@ -40,7 +40,7 @@ RSpec.shared_examples 'EE search service shared examples' do |normal_results, el
     it 'returns an ordinary result object when elasticsearch is disabled' do
       expect(Gitlab::CurrentSettings)
         .to receive(:search_using_elasticsearch?)
-        .with(scope: scope)
+        .with(resource: scope)
         .and_return(false)
 
       is_expected.to be_a(normal_results)

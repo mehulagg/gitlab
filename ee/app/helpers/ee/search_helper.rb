@@ -142,7 +142,7 @@ module EE
       @current_user &&
         @show_snippets &&
         ::Gitlab.com? &&
-        ::Gitlab::CurrentSettings.search_using_elasticsearch?(scope: nil)
+        ::Gitlab::CurrentSettings.search_using_elasticsearch?(resource: nil)
     end
   end
 end

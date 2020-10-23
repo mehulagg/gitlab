@@ -19,7 +19,7 @@ module EE
           end
 
           def use_elasticsearch?(resource)
-            ::Gitlab::CurrentSettings.search_using_elasticsearch?(scope: resource)
+            ::Gitlab::CurrentSettings.search_using_elasticsearch?(resource: resource)
           end
         end
       end

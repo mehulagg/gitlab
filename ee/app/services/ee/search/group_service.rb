@@ -5,8 +5,8 @@ module EE
     module GroupService
       extend ::Gitlab::Utils::Override
 
-      override :elasticsearchable_scope
-      def elasticsearchable_scope
+      override :elasticsearchable_resource
+      def elasticsearchable_resource
         group
       end
 

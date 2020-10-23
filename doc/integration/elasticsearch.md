@@ -714,8 +714,8 @@ There are a couple of ways to achieve that:
   the Rails console:
 
   ```ruby
-  ::Gitlab::CurrentSettings.search_using_elasticsearch?(scope: Namespace.find_by_full_path("/my-namespace"))
-  ::Gitlab::CurrentSettings.search_using_elasticsearch?(scope: Project.find_by_full_path("/my-namespace/my-project"))
+  ::Gitlab::CurrentSettings.search_using_elasticsearch?(resource: Namespace.find_by_full_path("/my-namespace"))
+  ::Gitlab::CurrentSettings.search_using_elasticsearch?(resource: Project.find_by_full_path("/my-namespace/my-project"))
   ```
 
 ### I updated GitLab and now I can't find anything

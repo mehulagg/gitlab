@@ -8,10 +8,10 @@ module Search
       return false if params[:basic_search]
       return false if SCOPES_ONLY_BASIC_SEARCH.include?(params[:scope])
 
-      ::Gitlab::CurrentSettings.search_using_elasticsearch?(scope: elasticsearchable_scope)
+      ::Gitlab::CurrentSettings.search_using_elasticsearch?(resource: elasticsearchable_resource, scope: params[:scope])
     end
 
-    def elasticsearchable_scope
+    def elasticsearchable_resource
       raise NotImplementedError
     end
   end

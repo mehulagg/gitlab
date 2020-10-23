@@ -21,7 +21,7 @@ module EE
         )
       end
 
-      def elasticsearchable_scope
+      def elasticsearchable_resource
         nil
       end
 
