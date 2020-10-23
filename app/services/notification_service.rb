@@ -328,7 +328,7 @@ class NotificationService
 
   # Notify a user when their request to access an instance is approved
   def user_admin_approval(user)
-    return true unless member.notifiable?(:subscription)
+    return true unless notifiable?(user, :mention)
 
     mailer.user_admin_approval_email(user.id).deliver_later
   end

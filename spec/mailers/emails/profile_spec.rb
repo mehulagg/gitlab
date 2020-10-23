@@ -79,6 +79,11 @@ RSpec.describe Emails::Profile do
     it 'has the correct subject' do
       is_expected.to have_subject /^Welcome to Gitlab!$/i
     end
+
+    it 'contains the user\'s username' do
+      binding.pry
+      is_expected.to have_body_text /#{user.username}/
+    end
   end
 
   describe 'user added ssh key' do

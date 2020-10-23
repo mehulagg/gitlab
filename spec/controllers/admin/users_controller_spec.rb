@@ -133,6 +133,12 @@ RSpec.describe Admin::UsersController do
           expect(user).to be_active
           expect(flash[:notice]).to eq('Successfully approved')
         end
+
+        it 'emails the approved user' do
+          expect(NotificationService.new).to receive(:user_admin_approval)
+
+          subject
+        end
       end
 
       context 'when unsuccessful' do

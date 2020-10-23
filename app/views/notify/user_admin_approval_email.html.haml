@@ -1,12 +1,10 @@
 %p
   Hi #{sanitize_name(@user['name'])}!
 %p
-  - if Gitlab::CurrentSettings.allow_signup?
-    Your account has been created successfully.
-  - else
-    The Administrator created an account for you. Now you are a member of the company GitLab application.
+  - if Feature.enabled?(:admin_approval_for_new_user_signups, default_enabled: true)
+    Your GitLab account request has been approved!
 %p
-  login..........................................
+  Your username is...
   %code= @user['email']
 
 - if @user.created_by_id

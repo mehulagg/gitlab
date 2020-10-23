@@ -67,7 +67,8 @@ class Admin::UsersController < Admin::ApplicationController
     result = Users::ApproveService.new(current_user).execute(user)
 
     if result[:status] == :success
-      DeviseMailer.user_admin_approval_email(user)
+      binding.pry
+      NotificationService.new.user_admin_approval(user)
 
       redirect_back_or_admin_user(notice: _("Successfully approved"))
     else
