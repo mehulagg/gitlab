@@ -21,5 +21,4 @@
 
 -->
 
-/label ~"feature" 
 
