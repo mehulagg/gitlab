@@ -7,7 +7,7 @@ import noteForm from '../../notes/components/note_form.vue';
 import MultilineCommentForm from '../../notes/components/multiline_comment_form.vue';
 import autosave from '../../notes/mixins/autosave';
 import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
-import { DIFF_NOTE_TYPE } from '../constants';
+import { DIFF_NOTE_TYPE, INLINE_DIFF_LINES_KEY } from '../constants';
 import {
   commentLineOptions,
   formatLineRange,
@@ -86,18 +86,8 @@ export default {
       return this.getDiffFileByHash(this.diffFileHash);
     },
     commentLineOptions() {
-      const combineSides = (acc, { left, right }) => {
-        // ignore null values match lines
-        if (left && left.type !== 'match') acc.push(left);
-        // if the line_codes are identically, return to avoid duplicates
-        if (left?.line_code === right?.line_code) return acc;
-        if (right && right.type !== 'match') acc.push(right);
-        return acc;
-      };
       const side = this.line.type === 'new' ? 'right' : 'left';
-      const lines = this.diffFile.highlighted_diff_lines.length
-        ? this.diffFile.highlighted_diff_lines
-        : this.diffFile.parallel_diff_lines.reduce(combineSides, []);
+      const lines = this.diffFile[INLINE_DIFF_LINES_KEY];
       return commentLineOptions(lines, this.line, this.line.line_code, side);
     },
   },

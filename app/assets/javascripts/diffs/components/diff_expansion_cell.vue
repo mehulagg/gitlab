@@ -4,7 +4,7 @@ import { GlIcon } from '@gitlab/ui';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, sprintf } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { UNFOLD_COUNT, INLINE_DIFF_VIEW_TYPE, PARALLEL_DIFF_VIEW_TYPE } from '../constants';
+import { UNFOLD_COUNT, INLINE_DIFF_VIEW_TYPE, INLINE_DIFF_LINES_KEY } from '../constants';
 import * as utils from '../store/utils';
 
 const EXPAND_ALL = 0;
@@ -14,7 +14,6 @@ const EXPAND_DOWN = 2;
 const lineNumberByViewType = (viewType, diffLine) => {
   const numberGetters = {
     [INLINE_DIFF_VIEW_TYPE]: line => line?.new_line,
-    [PARALLEL_DIFF_VIEW_TYPE]: line => (line?.right || line?.left)?.new_line,
   };
   const numberGetter = numberGetters[viewType];
   return numberGetter && numberGetter(diffLine);
@@ -79,17 +78,13 @@ export default {
     ...mapActions('diffs', ['loadMoreLines']),
     getPrevLineNumber(oldLineNumber, newLineNumber) {
       const diffFile = utils.findDiffFile(this.diffFiles, this.fileHash);
-      const lines = {
-        [INLINE_DIFF_VIEW_TYPE]: diffFile.highlighted_diff_lines,
-        [PARALLEL_DIFF_VIEW_TYPE]: diffFile.parallel_diff_lines,
-      };
       const index = utils.getPreviousLineIndex(INLINE_DIFF_VIEW_TYPE, diffFile, {
         oldLineNumber,
         newLineNumber,
       });
 
       return (
-        lineNumberByViewType(INLINE_DIFF_VIEW_TYPE, lines[INLINE_DIFF_VIEW_TYPE][index - 2]) || 0
+        lineNumberByViewType(INLINE_DIFF_VIEW_TYPE, diffFile[INLINE_DIFF_LINES_KEY][index - 2]) || 0
       );
     },
     callLoadMoreLines(

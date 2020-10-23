@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { INLINE_DIFF_VIEW_TYPE } from '../constants';
 import {
   findDiffFile,
   addLineReferences,
@@ -10,6 +9,7 @@ import {
   isDiscussionApplicableToLine,
   updateLineInFile,
 } from './utils';
+import { INLINE_DIFF_LINES_KEY } from '../constants';
 import * as types from './mutation_types';
 
 function updateDiffFilesInState(state, files) {
@@ -101,25 +101,7 @@ export default {
 
     if (!diffFile) return;
 
-    if (diffFile.highlighted_diff_lines.length) {
-      diffFile.highlighted_diff_lines.find(l => l.line_code === lineCode).hasForm = hasForm;
-    }
-
-    if (diffFile.parallel_diff_lines.length) {
-      const line = diffFile.parallel_diff_lines.find(l => {
-        const { left, right } = l;
-
-        return (left && left.line_code === lineCode) || (right && right.line_code === lineCode);
-      });
-
-      if (line.left && line.left.line_code === lineCode) {
-        line.left.hasForm = hasForm;
-      }
-
-      if (line.right && line.right.line_code === lineCode) {
-        line.right.hasForm = hasForm;
-      }
-    }
+    diffFile[INLINE_DIFF_LINES_KEY].find(l => l.line_code === lineCode).hasForm = hasForm;
   },
 
   [types.ADD_CONTEXT_LINES](state, options) {
@@ -149,9 +131,7 @@ export default {
     });
 
     addContextLines({
-      inlineLines: diffFile.highlighted_diff_lines,
-      parallelLines: diffFile.parallel_diff_lines,
-      diffViewType: INLINE_DIFF_VIEW_TYPE,
+      inlineLines: diffFile[INLINE_DIFF_LINES_KEY],
       contextLines: lines,
       bottom,
       lineNumbers,
@@ -219,8 +199,8 @@ export default {
 
     state.diffFiles.forEach(file => {
       if (file.file_hash === fileHash) {
-        if (file.highlighted_diff_lines.length) {
-          file.highlighted_diff_lines.forEach(line => {
+        if (file[INLINE_DIFF_LINES_KEY].length) {
+          file[INLINE_DIFF_LINES_KEY].forEach(line => {
             Object.assign(
               line,
               setDiscussionsExpanded(lineCheck(line) ? mapDiscussions(line) : line),
@@ -228,25 +208,7 @@ export default {
           });
         }
 
-        if (file.parallel_diff_lines.length) {
-          file.parallel_diff_lines.forEach(line => {
-            const left = line.left && lineCheck(line.left);
-            const right = line.right && lineCheck(line.right);
-
-            if (left || right) {
-              Object.assign(line, {
-                left: line.left ? setDiscussionsExpanded(mapDiscussions(line.left)) : null,
-                right: line.right
-                  ? setDiscussionsExpanded(mapDiscussions(line.right, () => !left))
-                  : null,
-              });
-            }
-
-            return line;
-          });
-        }
-
-        if (!file.parallel_diff_lines.length || !file.highlighted_diff_lines.length) {
+        if (!file[INLINE_DIFF_LINES_KEY].length) {
           const newDiscussions = (file.discussions || [])
             .filter(d => d.id !== discussion.id)
             .concat(discussion);
@@ -358,24 +320,18 @@ export default {
   },
   [types.SET_HIDDEN_VIEW_DIFF_FILE_LINES](state, { filePath, lines }) {
     const file = state.diffFiles.find(f => f.file_path === filePath);
-    const hiddenDiffLinesKey =
-      state.diffViewType === 'inline' ? 'parallel_diff_lines' : 'highlighted_diff_lines';
 
-    file[hiddenDiffLinesKey] = lines;
+    file[INLINE_DIFF_LINES_KEY] = lines;
   },
   [types.SET_CURRENT_VIEW_DIFF_FILE_LINES](state, { filePath, lines }) {
     const file = state.diffFiles.find(f => f.file_path === filePath);
-    const currentDiffLinesKey =
-      state.diffViewType === 'inline' ? 'highlighted_diff_lines' : 'parallel_diff_lines';
 
-    file[currentDiffLinesKey] = lines;
+    file[INLINE_DIFF_LINES_KEY] = lines;
   },
   [types.ADD_CURRENT_VIEW_DIFF_FILE_LINES](state, { filePath, line }) {
     const file = state.diffFiles.find(f => f.file_path === filePath);
-    const currentDiffLinesKey =
-      state.diffViewType === 'inline' ? 'highlighted_diff_lines' : 'parallel_diff_lines';
 
-    file[currentDiffLinesKey].push(line);
+    file[INLINE_DIFF_LINES_KEY].push(line);
   },
   [types.TOGGLE_DIFF_FILE_RENDERING_MORE](state, filePath) {
     const file = state.diffFiles.find(f => f.file_path === filePath);
