@@ -114,7 +114,7 @@ In addition to the group and project events, the following user actions are also
 recorded:
 
 - Sign-in events and the authentication type (such as standard, LDAP, or OmniAuth)
-- Failed logins
+- Failed sign-ins
 - Added SSH key
 - Added or removed email
 - Changed password
