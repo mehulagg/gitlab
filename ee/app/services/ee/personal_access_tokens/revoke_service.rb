@@ -6,6 +6,12 @@ module EE
       include ::Gitlab::Allowable
       extend ::Gitlab::Utils::Override
 
+      def execute
+        super.tap do |response|
+          log_audit_event(token) if response.success?
+        end
+      end
+
       private
 
       override :revocation_permitted?
@@ -19,6 +25,18 @@ module EE
         token.user.group_managed_account? &&
           token.user.managing_group == group &&
           can?(current_user, :admin_group_credentials_inventory, group)
+      end
+
+      def log_audit_event(token)
+        audit_event_service(token).for_user(full_path: token.user.username, entity_id: token.user.id).security_event
+      end
+
+      def audit_event_service(token)
+        message = "Revoked personal access token with id #{token.id}"
+
+        EE::AuditEvents::PersonalAccessTokenAuditEventService.new(current_user,
+          @ip_address, # rubocop:disable Gitlab/ModuleWithInstanceVariables
+          message)
       end
     end
   end

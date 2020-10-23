@@ -28728,6 +28728,12 @@ msgstr ""
 msgid "User"
 msgstr ""
 
+msgid "User %{current_user_username} has created personal access token with id %{pat_id} for user %{username}"
+msgstr ""
+
+msgid "User %{current_user_username} has revoked personal access token with id %{pat_id} for user %{username}"
+msgstr ""
+
 msgid "User %{current_user_username} has started impersonating %{username}"
 msgstr ""
 

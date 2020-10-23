@@ -1,0 +1,5 @@
+---
+title: Add logs for PAT create and revoke services
+merge_request: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45976
+author:
+type: added

@@ -112,6 +112,21 @@ RSpec.describe 'Admin::AuditLogs', :js do
       it_behaves_like 'audit events date filter'
     end
 
+    describe 'personal access token events' do
+      let(:message) { 'Created personal access token' }
+
+      before do
+        EE::AuditEvents::PersonalAccessTokenAuditEventService.new(admin, '127.0.0.1', message)
+          .for_user(full_path: user.username, entity_id: user.id).security_event
+      end
+
+      it 'show personal access token event details' do
+        visit admin_audit_logs_path
+
+        expect(page).to have_content(message)
+      end
+    end
+
     describe 'impersonated events' do
       it 'show impersonation details' do
         visit admin_user_path(user)
