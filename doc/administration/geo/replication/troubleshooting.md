@@ -782,3 +782,12 @@ To resolve this issue:
   using IPv6 to send its status to the **primary** node. If it is, add an entry to
   the **primary** node using IPv4 in the `/etc/hosts` file. Alternatively, you should
   [enable IPv6 on the **primary** node](https://docs.gitlab.com/omnibus/settings/nginx.html#setting-the-nginx-listen-address-or-addresses).
+
+## Fixing client errors
+
+### LFS HTTP(s) client requests on a secondary loop or return errors
+
+Versions of `git-lfs` older than 2.4.2 will hit an issue where requests redirected
+from the secondary to the primary will not properly send the Authorization header,
+resulting in either an infinite `Authorization <-> Redirect` loop, or Authorization errors,
+because of a [git-lfs isssue before 2.4.2](https://github.com/git-lfs/git-lfs/issues/3025).
