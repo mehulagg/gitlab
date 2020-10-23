@@ -17,9 +17,9 @@ Then, install the packages whenever you need to use them as a dependency.
 This section explains how to install Maven and build a package.
 
 If you already use Maven and know how to build your own packages, go to the
-[next section](#add-the-package-registry-as-a-maven-remote).
+[next section](#authenticate-to-the-package-registry-with-maven).
 
-Maven repositories work well with Gradle, too. To set up a Gradle project, see [get started with Gradle](#use-gradle-to-create-a-java-project).
+Maven repositories work well with Gradle, too. To set up a Gradle project, see [get started with Gradle](#build-a-java-project-with-gradle).
 
 ### Install Maven
 
@@ -88,7 +88,7 @@ is `my-project`.
 This section explains how to install Gradle and initialize a Java project.
 
 If you already use Gradle and know how to build your own packages, go to the
-[next section](#add-the-package-registry-as-a-maven-remote).
+[next section](#authenticate-to-the-package-registry-with-maven).
 
 ### Install Gradle
 
@@ -269,7 +269,7 @@ The `name` must be `Job-Token`.
 </settings>
 ```
 
-Read more about [how to create Maven packages using GitLab CI/CD](#creating-maven-packages-with-gitlab-cicd).
+Read more about [how to create Maven packages using GitLab CI/CD](#create-maven-packages-with-gitlab-cicd).
 
 ## Authenticate to the Package Registry with Gradle
 
@@ -350,7 +350,7 @@ repositories {
 }
 ```
 
-## Configure the Package Registry as a Maven remote
+## Use the GitLab endpoint for Maven packages
 
 To publish and install packages from GitLab, you need a `repository` and
 `distributionManagement` section in your `pom.xml` file.
@@ -406,7 +406,7 @@ repositories {
 }
 ```
 
-- The `id` is what you [defined in `settings.xml`](#add-the-package-registry-as-a-maven-remote).
+- The `id` is what you [defined in `settings.xml`](#authenticate-to-the-package-registry-with-maven).
 - The `PROJECT_ID` is your project ID, which you can view on your project's home page.
 - Replace `gitlab.example.com` with your domain name.
 - For retrieving artifacts, use either the
@@ -464,7 +464,7 @@ repositories {
 }
 ```
 
-- For the `id`, use what you [defined in `settings.xml`](#add-the-package-registry-as-a-maven-remote).
+- For the `id`, use what you [defined in `settings.xml`](#authenticate-to-the-package-registry-with-maven).
 - For `my-group`, use your group name.
 - For `PROJECT_ID`, use your project ID, which you can view on your project's home page.
 - Replace `gitlab.example.com` with your domain name.
@@ -524,7 +524,7 @@ repositories {
 }
 ```
 
-- The `id` is what you [defined in `settings.xml`](#add-the-package-registry-as-a-maven-remote).
+- The `id` is what you [defined in `settings.xml`](#authenticate-to-the-package-registry-with-maven).
 - The `PROJECT_ID` is your project ID, which you can view on your project's home page.
 - Replace `gitlab.example.com` with your domain name.
 - For retrieving artifacts, use either the
@@ -534,8 +534,8 @@ repositories {
 
 ## Publish a package
 
-After you have set up the [remote and authentication](#add-the-package-registry-as-a-maven-remote)
-and [configured your project](#configuring-your-project-to-use-the-gitlab-maven-repository-url),
+After you have set up the [remote and authentication](#authenticate-to-the-package-registry-with-maven)
+and [configured your project](#use-the-gitlab-endpoint-for-maven-packages),
 publish a Maven artifact from your project.
 
 ### Publish by using Maven
@@ -610,7 +610,7 @@ Now navigate to your project's **Packages & Registries** page and view the publi
 ## Install a package
 
 To install a package from the GitLab Package Registry, you must configure
-the [remote and authenticate](#add-the-package-registry-as-a-maven-remote).
+the [remote and authenticate](#authenticate-to-the-package-registry-with-maven).
 When this is completed, there are two ways to install a package.
 
 ### Use Maven with `mvn install`
