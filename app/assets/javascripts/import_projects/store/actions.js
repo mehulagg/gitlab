@@ -37,7 +37,6 @@ const restartJobsPolling = () => {
   if (eTagPoll) eTagPoll.restart();
 };
 
-const setFilter = ({ commit }, filter) => commit(types.SET_FILTER, filter);
 
 const setImportTarget = ({ commit }, { repoId, importTarget }) =>
   commit(types.SET_IMPORT_TARGET, { repoId, importTarget });
@@ -171,6 +170,12 @@ const fetchNamespacesFactory = (namespacesPath = isRequired()) => ({ commit }) =
       commit(types.RECEIVE_NAMESPACES_ERROR);
     });
 };
+
+const setFilter = ({ commit, dispatch }, filter) => {
+  commit(types.SET_FILTER, filter);
+
+  return dispatch('fetchRepos');
+}
 
 export default ({ endpoints = isRequired() }) => ({
   clearJobsEtagPoll,
