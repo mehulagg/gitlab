@@ -1,10 +1,10 @@
 <script>
-import tooltip from '../../vue_shared/directives/tooltip';
+import { GlTooltipDirective } from '@gitlab/ui';
 
 export default {
   name: 'MrWidgetAuthor',
   directives: {
-    tooltip,
+    GlTooltipDirective,
   },
   props: {
     author: {
