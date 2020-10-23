@@ -285,6 +285,7 @@ db:migrate-from-v12.10.0:
     - '[[ -d "ee/" ]] || export TAG_TO_CHECKOUT="v12.10.0"'
     - git fetch https://gitlab.com/gitlab-org/$PROJECT_TO_CHECKOUT.git $TAG_TO_CHECKOUT
     - git checkout -f FETCH_HEAD
+    - sed -i -e "s/gem 'grpc', '~> 1.19.0'/gem 'grpc', '~> 1.30.2'/" Gemfile # Update gRPC for Ruby 2.7
     - bundle update google-protobuf grpc bootsnap
     - bundle install $BUNDLE_INSTALL_FLAGS
     - date
