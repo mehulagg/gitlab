@@ -1,15 +1,14 @@
 <script>
-import { GlSprintf } from '@gitlab/ui';
+import { GlSprintf, GlModal } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 import { s__, sprintf } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
 import eventHub from '../event_hub';
 
 export default {
   components: {
-    GlModal: DeprecatedModal2,
+    GlModal,
     GlSprintf,
   },
   props: {
@@ -72,7 +71,7 @@ export default {
 </script>
 <template>
   <gl-modal
-    id="promote-label-modal"
+    modal-id="promote-label-modal"
     :footer-primary-button-text="s__('Labels|Promote Label')"
     footer-primary-button-variant="warning"
     @submit="onSubmit"
