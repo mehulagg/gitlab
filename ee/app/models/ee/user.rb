@@ -28,6 +28,8 @@ module EE
       validate :auditor_requires_license_add_on, if: :auditor
       validate :cannot_be_admin_and_auditor
 
+      before_create :mark_as_blocked_if_user_cap_reached
+
       delegate :shared_runners_minutes_limit, :shared_runners_minutes_limit=,
                :extra_shared_runners_minutes_limit, :extra_shared_runners_minutes_limit=,
                to: :namespace
@@ -373,6 +375,17 @@ module EE
     def find_or_init_board_epic_preference(board_id:, epic_id:)
       boards_epic_user_preferences.find_or_initialize_by(
         board_id: board_id, epic_id: epic_id)
+    end
+
+    def mark_as_blocked_if_user_cap_reached
+      user_cap_max = ::ApplicationSetting.current&.new_user_signups_cap
+      return if user_cap_max.nil?
+      return if ::Feature.disabled?(:admin_new_user_signups_cap, default_enabled: true)
+
+      if License.current&.current_active_users_count >= user_cap_max
+        self.state = 'blocked_pending_approval'
+        self.auditor = true
+      end
     end
 
     protected
