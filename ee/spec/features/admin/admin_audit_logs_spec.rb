@@ -113,17 +113,39 @@ RSpec.describe 'Admin::AuditLogs', :js do
     end
 
     describe 'personal access token events' do
-      let(:message) { 'Created personal access token' }
+      shared_examples 'personal access token audit event' do
+        it 'show personal access token event details' do
+          visit admin_audit_logs_path
 
-      before do
-        EE::AuditEvents::PersonalAccessTokenAuditEventService.new(admin, '127.0.0.1', message)
-          .for_user(full_path: user.username, entity_id: user.id).security_event
+          expect(page).to have_content(message)
+        end
       end
 
-      it 'show personal access token event details' do
-        visit admin_audit_logs_path
+      context 'create personal access token' do
+        let(:message) { "Created personal access token with id #{personal_access_token.id}" }
+        let(:personal_access_token_params) { { name: 'Test token', impersonation: false, scopes: [:api], expires_at: Date.today + 1.month } }
+        let(:personal_access_token) do
+          PersonalAccessTokens::CreateService.new(
+            current_user: admin, target_user: user, params: personal_access_token_params
+          ).execute.payload[:personal_access_token]
+        end
 
-        expect(page).to have_content(message)
+        before do
+          personal_access_token
+        end
+
+        it_behaves_like 'personal access token audit event'
+      end
+
+      context 'revoke personal access token' do
+        let(:message) { "Revoked personal access token with id #{personal_access_token.id}" }
+        let(:personal_access_token) { create(:personal_access_token, user: user) }
+
+        before do
+          PersonalAccessTokens::RevokeService.new(admin, token: personal_access_token).execute
+        end
+
+        it_behaves_like 'personal access token audit event'
       end
     end
 
