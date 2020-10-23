@@ -172,15 +172,6 @@ const fetchNamespacesFactory = (namespacesPath = isRequired()) => ({ commit }) =
     });
 };
 
-const setPage = ({ state, commit, dispatch }, page) => {
-  if (page === state.pageInfo.page) {
-    return null;
-  }
-
-  commit(types.SET_PAGE, page);
-  return dispatch('fetchRepos');
-};
-
 export default ({ endpoints = isRequired() }) => ({
   clearJobsEtagPoll,
   stopJobsPolling,
@@ -188,7 +179,6 @@ export default ({ endpoints = isRequired() }) => ({
   setFilter,
   setImportTarget,
   importAll,
-  setPage,
   fetchRepos: fetchReposFactory({ reposPath: endpoints.reposPath }),
   fetchImport: fetchImportFactory(endpoints.importPath),
   fetchJobs: fetchJobsFactory(endpoints.jobsPath),
