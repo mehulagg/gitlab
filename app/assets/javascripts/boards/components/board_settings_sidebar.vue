@@ -73,7 +73,7 @@ export default {
     deleteBoard() {
       // eslint-disable-next-line no-alert
       if (window.confirm(__('Are you sure you want to delete this list?'))) {
-        if (this.glFeatures.graphqlBoardLists) {
+        if (this.shouldUseGraphQL) {
           this.deleteList(this.activeId);
         } else {
           this.activeList.destroy();
