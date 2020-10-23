@@ -121,6 +121,8 @@ export default {
       return this.withBatchComments && this.noteId === '' && !this.discussion.for_commit;
     },
     showResolveDiscussionToggle() {
+      if (!this.discussion?.notes) return false;
+
       return (
         this.discussion?.notes
           .filter(n => n.resolvable)
