@@ -24,7 +24,7 @@ module Gitlab
         return unless validate_config(encrypted)
 
         editor = ENV['EDITOR'] || 'editor'
-        temp_file = Tempfile.new(File.basename(encrypted.content_path))
+        temp_file = Tempfile.new(File.basename(encrypted.content_path), File.dirname(encrypted.content_path))
 
         encrypted.change do |contents|
           contents = encrypted_file_template unless File.exist?(encrypted.content_path)
