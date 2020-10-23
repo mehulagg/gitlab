@@ -18,6 +18,15 @@ variables:
     FUZZAPI_SERVICE_START_TIMEOUT: "300"
     #
 
+apifuzzer_fuzz_license:
+    stage: fuzz
+    allow_failure: true
+    rules:
+        - if: '$GITLAB_FEATURES !~ /\bapi_fuzzing\b/ && $API_FUZZING_DISABLED == null'
+        - when: never
+    script:
+        - echo "Error- Your GitLab license is missing the 'api_fuzzing' feature." ; false
+
 apifuzzer_fuzz:
     stage: fuzz
     image: docker:19.03.12
