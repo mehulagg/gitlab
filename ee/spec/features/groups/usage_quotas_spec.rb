@@ -196,22 +196,6 @@ RSpec.describe 'Groups > Usage Quotas' do
     end
   end
 
-  context 'when storage limit is triggered' do
-    let(:namespace) { group }
-    let(:alert_level) { :info }
-
-    before do
-      # We should return early and not load the service at all
-      expect(Namespaces::CheckStorageSizeService).not_to receive(:new)
-    end
-
-    it 'does not render alert from route layout' do
-      visit_pipeline_quota_page
-
-      expect(page).not_to have_css('.js-namespace-storage-alert')
-    end
-  end
-
   def visit_pipeline_quota_page
     visit group_usage_quotas_path(group)
   end
