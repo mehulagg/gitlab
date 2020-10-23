@@ -10,4 +10,23 @@ RSpec.describe MergeRequest::CleanupSchedule do
   describe 'validations' do
     it { is_expected.to validate_presence_of(:scheduled_at) }
   end
+
+  describe '.scheduled' do
+    let_it_be(:mr_cleanup_schedule_1) { create(:merge_request_cleanup_schedule, scheduled_at: 2.days.ago) }
+    let_it_be(:mr_cleanup_schedule_2) { create(:merge_request_cleanup_schedule, scheduled_at: 1.day.ago) }
+    let_it_be(:mr_cleanup_schedule_3) { create(:merge_request_cleanup_schedule, scheduled_at: 1.day.ago, completed_at: Time.current) }
+    let_it_be(:mr_cleanup_schedule_4) { create(:merge_request_cleanup_schedule, scheduled_at: 4.days.ago) }
+    let_it_be(:mr_cleanup_schedule_5) { create(:merge_request_cleanup_schedule, scheduled_at: 3.days.ago) }
+    let_it_be(:mr_cleanup_schedule_6) { create(:merge_request_cleanup_schedule, scheduled_at: 1.day.from_now) }
+    let_it_be(:mr_cleanup_schedule_7) { create(:merge_request_cleanup_schedule, scheduled_at: 5.days.ago) }
+
+    it 'only includes incomplete schedule within the specified limit' do
+      expect(described_class.scheduled(4)).to eq([
+        mr_cleanup_schedule_2,
+        mr_cleanup_schedule_1,
+        mr_cleanup_schedule_5,
+        mr_cleanup_schedule_4
+      ])
+    end
+  end
 end
