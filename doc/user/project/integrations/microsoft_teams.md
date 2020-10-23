@@ -9,7 +9,15 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 ## On Microsoft Teams
 
 To enable Microsoft Teams integration you must create an incoming webhook integration on Microsoft
-Teams by following the steps described in [Sending messages to Connectors and Webhooks](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using).
+Teams by following the steps below:
+
+- Search for "incoming webhook" on the search bar and select the Incoming Webhook item. ![Select Incoming Webhook](img/microsoft_teams_select_incoming_webhook.png)
+- Click the "Add to a team" button
+- Select the team and channel you want to add the integration to
+- Add a name for the Webhook. The name will be displayed next to every message that comes in through the webhook.
+- Copy the webhook URL
+
+[Learn more about setting up an incoming webhook on Microsoft Teams](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using#setting-up-a-custom-incoming-webhook)
 
 ## On GitLab
 
