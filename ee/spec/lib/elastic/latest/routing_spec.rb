@@ -3,6 +3,8 @@
 require 'fast_spec_helper'
 require 'support/helpers/stub_feature_flags'
 
+# Test change to trigger rspec fail-fast
+
 RSpec.describe Elastic::Latest::Routing do
   let(:proxified_class) { Issue }
   let(:included_class) { Elastic::Latest::ApplicationClassProxy }
