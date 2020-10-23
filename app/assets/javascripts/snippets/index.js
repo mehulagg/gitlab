@@ -1,5 +1,7 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import GetSnippetQuery from 'shared_queries/snippet/snippet.query.graphql';
+
 import Translate from '~/vue_shared/translate';
 import createDefaultClient from '~/lib/graphql';
 
@@ -32,15 +34,40 @@ export default function appFactory(el, Component) {
     },
   });
 
-  return new Vue({
-    el,
-    apolloProvider,
-    render(createElement) {
-      return createElement(Component, {
-        props: {
-          ...restDataset,
-        },
-      });
-    },
-  });
+  const snippetViewApp = () =>
+    new Vue({
+      el,
+      apolloProvider,
+      render(createElement) {
+        return createElement(Component, {
+          props: {
+            ...restDataset,
+          },
+        });
+      },
+    });
+
+  if (el.dataset.snippetGid && window.gl.startup_graphql_calls) {
+    const query = window.gl.startup_graphql_calls.find(
+      call => call.operationName === 'GetSnippetQuery',
+    );
+    if (query) {
+      return query.fetchCall
+        .then(res => res.json())
+        .then(res => {
+          apolloProvider.clients.defaultClient.writeQuery({
+            query: GetSnippetQuery,
+            data: res.data,
+            variables: {
+              ids: el.dataset.snippetGid,
+            },
+          });
+        })
+        .catch(() => {})
+        .finally(() => snippetViewApp());
+    }
+    return Promise.resolve(() => snippetViewApp());
+  } else {
+    return Promise.resolve(() => snippetViewApp());
+  }
 }
