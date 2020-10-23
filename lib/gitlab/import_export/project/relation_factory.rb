@@ -31,7 +31,8 @@ module Gitlab
                       ci_cd_settings: 'ProjectCiCdSetting',
                       error_tracking_setting: 'ErrorTracking::ProjectErrorTrackingSetting',
                       links: 'Releases::Link',
-                      metrics_setting: 'ProjectMetricsSetting' }.freeze
+                      metrics_setting: 'ProjectMetricsSetting',
+                      cleanup_schedule: 'MergeRequest::CleanupSchedule' }.freeze
 
         BUILD_MODELS = %i[Ci::Build commit_status].freeze
 

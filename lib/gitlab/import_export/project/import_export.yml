@@ -75,6 +75,7 @@ tree:
       - resource_label_events:
         - label:
           - :priorities
+      - :cleanup_schedule
     - :external_pull_requests
     - ci_pipelines:
       - notes:
@@ -357,6 +358,8 @@ excluded_attributes:
   system_note_metadata:
     - :description_version_id
     - :note_id
+  cleanup_schedule:
+    - :merge_request_id
 methods:
   notes:
     - :type
