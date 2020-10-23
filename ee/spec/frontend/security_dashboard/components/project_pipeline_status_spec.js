@@ -1,6 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlLink } from '@gitlab/ui';
 import ProjectPipelineStatus from 'ee/security_dashboard/components/project_pipeline_status.vue';
+import PipelineStatusBadge from 'ee/security_dashboard/components/pipeline_status_badge.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 describe('Project Pipeline Status Component', () => {
@@ -14,12 +15,14 @@ describe('Project Pipeline Status Component', () => {
     },
   };
 
-  const findLink = () => wrapper.find(GlLink);
+  const findPipelineStatusBadge = () => wrapper.find(PipelineStatusBadge);
   const findTimeAgoTooltip = () => wrapper.find(TimeAgoTooltip);
+  const findLink = () => wrapper.find(GlLink);
 
-  const createWrapper = () => {
+  const createWrapper = options => {
     return shallowMount(ProjectPipelineStatus, {
       propsData,
+      ...options,
     });
   };
 
@@ -48,6 +51,26 @@ describe('Project Pipeline Status Component', () => {
       expect(GlLinkComponent.exists()).toBeTruthy();
       expect(GlLinkComponent.text()).toBe(`#${propsData.pipeline.id}`);
       expect(GlLinkComponent.attributes('href')).toBe(propsData.pipeline.path);
+    });
+  });
+
+  describe('when there are more than 0 failed jobs', () => {
+    beforeEach(() => {
+      wrapper = createWrapper({ provide: { pipelineSecurityBuildsFailedCount: 5 } });
+    });
+
+    it('should show the pipeline status badge', () => {
+      expect(findPipelineStatusBadge().exists()).toBe(true);
+    });
+  });
+
+  describe('when there are 0 failed jobs', () => {
+    beforeEach(() => {
+      wrapper = createWrapper({ provide: { pipelineSecurityBuildsFailedCount: 0 } });
+    });
+
+    it('should show the pipeline status badge', () => {
+      expect(findPipelineStatusBadge().exists()).toBe(false);
     });
   });
 });
