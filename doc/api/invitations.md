@@ -16,6 +16,45 @@ Due to [an issue](https://gitlab.com/gitlab-org/gitlab/-/issues/219299),
 projects in personal namespaces will not show owner (`50`) permission
 for owner.
 
+ ## List all pending invitations to a group or project
+
+ Gets a list of invited group or project members viewable by the authenticated user.
+ Returns only direct members and not inherited members through ancestors groups.
+
+ This function takes pagination parameters `page` and `per_page` to restrict the list of users.
+
+ ```plaintext
+ GET /groups/:id/invitations
+ GET /projects/:id/invitations
+ ```
+
+ | Attribute | Type | Required | Description |
+ | --------- | ---- | -------- | ----------- |
+ | `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](README.md#namespaced-path-encoding) owned by the authenticated user |
+ | `query`   | string | no     | A query string to search for invited members |
+
+ ```shell
+ curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/invitations"
+ curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/invitations"
+ ```
+
+ Example response:
+
+ ```json
+ [
+   {
+     "id": 1,
+     "invite_email": "member@example.org",
+     "invite_token": "------",
+     "invited_at": "2020-10-22T14:13:35Z",
+     "expires_at": "2020-11-22T14:13:35Z",
+     "username": "Raymond Smith",
+     "access_level": 30,
+     "group_saml_identity": null
+   },
+]
+```
+
 ## Invite a member by email to a group or project
 
 Invites a member by email to a group or project.
