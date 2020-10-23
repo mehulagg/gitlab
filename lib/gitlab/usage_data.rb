@@ -474,7 +474,7 @@ module Gitlab
 
         redis_usage_data do
           counter.count_unique_events(
-            event_action: Gitlab::UsageDataCounters::TrackUniqueEvents::MERGE_REQUEST_ACTION,
+            event_actions: Gitlab::UsageDataCounters::TrackUniqueEvents::MERGE_REQUEST_ACTION,
             date_from: time_period[:created_at].first,
             date_to: time_period[:created_at].last
           )
@@ -708,11 +708,12 @@ module Gitlab
         data = {
           action_monthly_active_users_project_repo: Gitlab::UsageDataCounters::TrackUniqueEvents::PUSH_ACTION,
           action_monthly_active_users_design_management: Gitlab::UsageDataCounters::TrackUniqueEvents::DESIGN_ACTION,
-          action_monthly_active_users_wiki_repo: Gitlab::UsageDataCounters::TrackUniqueEvents::WIKI_ACTION
+          action_monthly_active_users_wiki_repo: Gitlab::UsageDataCounters::TrackUniqueEvents::WIKI_ACTION,
+          action_monthly_active_users_git_write: Gitlab::UsageDataCounters::TrackUniqueEvents::GIT_WRITE_ACTIONS
         }
 
         data.each do |key, event|
-          data[key] = redis_usage_data { Gitlab::UsageDataCounters::TrackUniqueEvents.count_unique_events(event_action: event, **date_range) }
+          data[key] = redis_usage_data { Gitlab::UsageDataCounters::TrackUniqueEvents.count_unique_events(event_actions: event, **date_range) }
         end
       end
 

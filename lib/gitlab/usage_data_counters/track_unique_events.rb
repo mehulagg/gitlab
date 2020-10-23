@@ -3,10 +3,11 @@
 module Gitlab
   module UsageDataCounters
     module TrackUniqueEvents
-      WIKI_ACTION = :wiki_action
-      DESIGN_ACTION = :design_action
-      PUSH_ACTION = :project_action
-      MERGE_REQUEST_ACTION = :merge_request_action
+      WIKI_ACTION = :i_source_code_wiki_action
+      DESIGN_ACTION = :i_source_code_design_action
+      PUSH_ACTION = :i_source_code_project_action
+      GIT_WRITE_ACTIONS = [WIKI_ACTION, DESIGN_ACTION, PUSH_ACTION]
+      MERGE_REQUEST_ACTION = :i_source_code_merge_request_action
 
       ACTION_TRANSFORMATIONS = HashWithIndifferentAccess.new({
         wiki: {
@@ -43,8 +44,8 @@ module Gitlab
           Gitlab::UsageDataCounters::HLLRedisCounter.track_event(author_id, transformed_action.to_s, time)
         end
 
-        def count_unique_events(event_action:, date_from:, date_to:)
-          Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: event_action.to_s, start_date: date_from, end_date: date_to)
+        def count_unique_events(event_actions:, date_from:, date_to:)
+          Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: Array(event_actions).map(&:to_s), start_date: date_from, end_date: date_to)
         end
 
         private

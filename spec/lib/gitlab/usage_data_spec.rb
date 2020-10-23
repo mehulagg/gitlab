@@ -1046,6 +1046,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     let(:user1) { build(:user, id: 1) }
     let(:user2) { build(:user, id: 2) }
     let(:user3) { build(:user, id: 3) }
+    let(:user4) { build(:user, id: 4) }
 
     before do
       counter = Gitlab::UsageDataCounters::TrackUniqueEvents
@@ -1060,6 +1061,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       counter.track_event(event_action: :pushed, event_target: project, author_id: 4, time: time - 3.days)
       counter.track_event(event_action: :created, event_target: wiki, author_id: 3)
       counter.track_event(event_action: :created, event_target: design, author_id: 3)
+      counter.track_event(event_action: :created, event_target: design, author_id: 4)
 
       counter = Gitlab::UsageDataCounters::EditorUniqueCounter
 
@@ -1079,9 +1081,10 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     it 'returns the distinct count of user actions within the specified time period' do
       expect(described_class.action_monthly_active_users(time_period)).to eq(
         {
-          action_monthly_active_users_design_management: 1,
+          action_monthly_active_users_design_management: 2,
           action_monthly_active_users_project_repo: 3,
           action_monthly_active_users_wiki_repo: 1,
+          action_monthly_active_users_git_write: 4,
           action_monthly_active_users_web_ide_edit: 2,
           action_monthly_active_users_sfe_edit: 2,
           action_monthly_active_users_snippet_editor_edit: 2,
