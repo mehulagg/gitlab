@@ -58,6 +58,12 @@ class DiscussionEntity < Grape::Entity
   expose :commit_id
   expose :confidential?, as: :confidential
 
+  expose :current_user do
+    expose :can_resolve do |discussion|
+      discussion.resolvable? && discussion.can_resolve?(current_user)
+    end
+  end
+
   private
 
   def render_truncated_diff_lines?
