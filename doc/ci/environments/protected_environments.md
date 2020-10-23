@@ -9,8 +9,6 @@ type: concepts, howto
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6303) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.3.
 
-## Overview
-
 [Environments](../environments/index.md) can be used for different reasons:
 
 - Some of them are just for testing.
@@ -47,6 +45,36 @@ To protect an environment:
 
 The protected environment will now appear in the list of protected environments.
 
+## Environment access by group membership
+
+A user may be granted access to protected environments as part of
+[group membership](../../user/group/index.md). Users with
+[Reporter permissions](../../user/permissions.md), can only be granted access to
+protected environments with this method.
+
+## Deployment branch access
+
+Users with [Developer permissions](../../user/permissions.md) can be granted
+access to a protected environment through any of these methods:
+
+- As an individual contributor, through a role.
+- Through a group membership.
+
+If the user also has push or merge access to the branch deployed on production,
+they have the following privileges:
+
+- [Stopping an environment](index.md#stopping-an-environment).
+- [Delete a stopped environment](index.md#delete-a-stopped-environment).
+- [Create an environment terminal](index.md#web-terminals).
+
+## Deployment-only access to protected environments
+
+Users granted access to a protected environment, but not push or merge access
+to the branch deployed to it, are only granted access to deploy the environment.
+
+Note that deployment-only access is the only possible access level for users with
+[Reporter permissions](../../user/permissions.md).
+
 ## Modifying and unprotecting environments
 
 Maintainers can:
@@ -54,6 +82,9 @@ Maintainers can:
 - Update existing protected environments at any time by changing the access in the
   **Allowed to Deploy** dropdown menu.
 - Unprotect a protected environment by clicking the **Unprotect** button for that environment.
+
+After an environment is unprotected, all access entries are deleted and must
+be re-entered if the environment is re-protected.
 
 For more information, see [Deployment safety](deployment_safety.md).
 

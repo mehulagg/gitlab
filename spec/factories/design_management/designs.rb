@@ -22,8 +22,12 @@ FactoryBot.define do
       imported { true }
     end
 
+    trait :with_relative_position do
+      sequence(:relative_position) { |n| n * 1000 }
+    end
+
     create_versions = ->(design, evaluator, commit_version) do
-      unless evaluator.versions_count.zero?
+      unless evaluator.versions_count == 0
         project = design.project
         issue = design.issue
         repository = project.design_repository
@@ -71,7 +75,7 @@ FactoryBot.define do
     end
 
     # Use this trait if you want versions in a particular history, but don't
-    # want to pay for gitlay calls.
+    # want to pay for gitaly calls.
     trait :with_versions do
       transient do
         deleted { false }

@@ -11,6 +11,7 @@ RSpec.describe 'Merge request > User merges when pipeline succeeds', :js do
                                       title: 'Bug NS-04',
                                       merge_params: { force_remove_source_branch: '1' })
   end
+
   let(:pipeline) do
     create(:ci_pipeline, project: project,
                          sha: merge_request.diff_head_sha,
@@ -46,7 +47,7 @@ RSpec.describe 'Merge request > User merges when pipeline succeeds', :js do
         it_behaves_like 'Merge when pipeline succeeds activator'
       end
 
-      context 'when enabled after pipeline status changed' do
+      context 'when enabled after pipeline status changed', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/258667' do
         before do
           pipeline.run!
 
@@ -92,19 +93,6 @@ RSpec.describe 'Merge request > User merges when pipeline succeeds', :js do
         it_behaves_like 'Merge when pipeline succeeds activator'
       end
     end
-
-    describe 'enabling Merge when pipeline succeeds via dropdown' do
-      it 'activates the Merge when pipeline succeeds feature' do
-        wait_for_requests
-
-        find('.js-merge-moment').click
-        click_link 'Merge when pipeline succeeds'
-
-        expect(page).to have_content "Set by #{user.name} to be merged automatically when the pipeline succeeds"
-        expect(page).to have_content "The source branch will not be deleted"
-        expect(page).to have_link "Cancel automatic merge"
-      end
-    end
   end
 
   context 'when merge when pipeline succeeds is enabled' do
@@ -115,6 +103,7 @@ RSpec.describe 'Merge request > User merges when pipeline succeeds', :js do
         merge_user: user,
         title: 'MepMep')
     end
+
     let!(:build) do
       create(:ci_build, pipeline: pipeline)
     end
@@ -154,7 +143,7 @@ RSpec.describe 'Merge request > User merges when pipeline succeeds', :js do
 
     context 'view merge request with MWPS enabled but automatically merge fails' do
       before do
-        merge_request.update(
+        merge_request.update!(
           merge_user: merge_request.author,
           merge_error: 'Something went wrong.'
         )
@@ -173,7 +162,7 @@ RSpec.describe 'Merge request > User merges when pipeline succeeds', :js do
 
     context 'view merge request with MWPS enabled but automatically merge fails' do
       before do
-        merge_request.update(
+        merge_request.update!(
           merge_user: merge_request.author,
           merge_error: 'Something went wrong.'
         )

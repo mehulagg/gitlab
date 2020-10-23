@@ -33,15 +33,17 @@ RSpec.describe Packages::PackageFile, type: :model do
   end
 
   context 'updating project statistics' do
+    let_it_be(:package, reload: true) { create(:package) }
+
     context 'when the package file has an explicit size' do
       it_behaves_like 'UpdateProjectStatistics' do
-        subject { build(:package_file, :jar, size: 42) }
+        subject { build(:package_file, :jar, package: package, size: 42) }
       end
     end
 
     context 'when the package file does not have a size' do
       it_behaves_like 'UpdateProjectStatistics' do
-        subject { build(:package_file, size: nil) }
+        subject { build(:package_file, package: package, size: nil) }
       end
     end
   end
@@ -58,7 +60,7 @@ RSpec.describe Packages::PackageFile, type: :model do
   end
 
   describe '#update_file_metadata callback' do
-    let_it_be(:package_file) { build(:package_file, :nuget, file_store: nil, size: nil) }
+    let_it_be(:package_file) { build(:package_file, :nuget, size: nil) }
 
     subject { package_file.save! }
 
@@ -67,9 +69,14 @@ RSpec.describe Packages::PackageFile, type: :model do
         .to receive(:update_file_metadata)
         .and_call_original
 
-      expect { subject }
-        .to change { package_file.file_store }.from(nil).to(::Packages::PackageFileUploader::Store::LOCAL)
-        .and change { package_file.size }.from(nil).to(3513)
+      # This expectation uses a stub because we can no longer test a change from
+      # `nil` to `1`, because the field is no longer nullable, and it defaults
+      # to `1`.
+      expect(package_file)
+        .to receive(:update_column)
+        .with(:file_store, ::Packages::PackageFileUploader::Store::LOCAL)
+
+      expect { subject }.to change { package_file.size }.from(nil).to(3513)
     end
   end
 end

@@ -20,6 +20,10 @@ module EE
               issue.epic if ::Ability.allowed?(options[:current_user], :read_epic, issue.epic)
             end
           end
+
+          with_options if: -> (issue) { issue.project.feature_available?(:issuable_health_status) } do
+            expose :health_status
+          end
         end
       end
     end

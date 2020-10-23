@@ -71,8 +71,10 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value('three').for(:push_event_activities_limit) }
     it { is_expected.not_to allow_value(nil).for(:push_event_activities_limit) }
 
+    it { is_expected.to validate_numericality_of(:container_registry_delete_tags_service_timeout).only_integer.is_greater_than_or_equal_to(0) }
+
     it { is_expected.to validate_numericality_of(:snippet_size_limit).only_integer.is_greater_than(0) }
-    it { is_expected.to validate_numericality_of(:wiki_page_max_content_bytes).only_integer.is_greater_than(0) }
+    it { is_expected.to validate_numericality_of(:wiki_page_max_content_bytes).only_integer.is_greater_than_or_equal_to(1024) }
     it { is_expected.to validate_presence_of(:max_artifacts_size) }
     it { is_expected.to validate_numericality_of(:max_artifacts_size).only_integer.is_greater_than(0) }
     it { is_expected.to validate_presence_of(:max_pages_size) }
@@ -86,11 +88,6 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(nil).for(:minimum_password_length) }
     it { is_expected.not_to allow_value('abc').for(:minimum_password_length) }
     it { is_expected.to allow_value(10).for(:minimum_password_length) }
-
-    it { is_expected.to allow_value(0).for(:namespace_storage_size_limit) }
-    it { is_expected.to allow_value(1).for(:namespace_storage_size_limit) }
-    it { is_expected.not_to allow_value(nil).for(:namespace_storage_size_limit) }
-    it { is_expected.not_to allow_value(-1).for(:namespace_storage_size_limit) }
 
     it { is_expected.to allow_value(300).for(:issues_create_limit) }
     it { is_expected.not_to allow_value('three').for(:issues_create_limit) }
@@ -114,6 +111,35 @@ RSpec.describe ApplicationSetting do
     it { is_expected.to allow_value(50).for(:repository_storages_weighted_default) }
     it { is_expected.to allow_value(nil).for(:repository_storages_weighted_default) }
     it { is_expected.not_to allow_value({ default: 100, shouldntexist: 50 }).for(:repository_storages_weighted) }
+
+    context 'help_page_documentation_base_url validations' do
+      it { is_expected.to allow_value(nil).for(:help_page_documentation_base_url) }
+      it { is_expected.to allow_value('https://docs.gitlab.com').for(:help_page_documentation_base_url) }
+      it { is_expected.to allow_value('http://127.0.0.1').for(:help_page_documentation_base_url) }
+      it { is_expected.not_to allow_value('docs.gitlab.com').for(:help_page_documentation_base_url) }
+
+      context 'when url length validation' do
+        let(:value) { 'http://'.ljust(length, 'A') }
+
+        context 'when value string length is 255 characters' do
+          let(:length) { 255 }
+
+          it 'allows the value' do
+            is_expected.to allow_value(value).for(:help_page_documentation_base_url)
+          end
+        end
+
+        context 'when value string length exceeds 255 characters' do
+          let(:length) { 256 }
+
+          it 'does not allow the value' do
+            is_expected.not_to allow_value(value)
+                                 .for(:help_page_documentation_base_url)
+                                 .with_message('is too long (maximum is 255 characters)')
+          end
+        end
+      end
+    end
 
     context 'grafana_url validations' do
       before do
@@ -194,14 +220,10 @@ RSpec.describe ApplicationSetting do
       it { is_expected.not_to allow_value(nil).for(:snowplow_collector_hostname) }
       it { is_expected.to allow_value("snowplow.gitlab.com").for(:snowplow_collector_hostname) }
       it { is_expected.not_to allow_value('/example').for(:snowplow_collector_hostname) }
-      it { is_expected.to allow_value('https://example.org').for(:snowplow_iglu_registry_url) }
-      it { is_expected.not_to allow_value('not-a-url').for(:snowplow_iglu_registry_url) }
-      it { is_expected.to allow_value(nil).for(:snowplow_iglu_registry_url) }
     end
 
     context 'when snowplow is not enabled' do
       it { is_expected.to allow_value(nil).for(:snowplow_collector_hostname) }
-      it { is_expected.to allow_value(nil).for(:snowplow_iglu_registry_url) }
     end
 
     context "when user accepted let's encrypt terms of service" do
@@ -327,7 +349,7 @@ RSpec.describe ApplicationSetting do
       end
     end
 
-    it_behaves_like 'an object with email-formated attributes', :admin_notification_email do
+    it_behaves_like 'an object with email-formated attributes', :abuse_notification_email do
       subject { setting }
     end
 
@@ -625,6 +647,23 @@ RSpec.describe ApplicationSetting do
           end
         end
       end
+
+      describe '#ci_jwt_signing_key' do
+        it { is_expected.not_to allow_value('').for(:ci_jwt_signing_key) }
+        it { is_expected.not_to allow_value('invalid RSA key').for(:ci_jwt_signing_key) }
+        it { is_expected.to allow_value(nil).for(:ci_jwt_signing_key) }
+        it { is_expected.to allow_value(OpenSSL::PKey::RSA.new(1024).to_pem).for(:ci_jwt_signing_key) }
+
+        it 'is encrypted' do
+          subject.ci_jwt_signing_key = OpenSSL::PKey::RSA.new(1024).to_pem
+
+          aggregate_failures do
+            expect(subject.encrypted_ci_jwt_signing_key).to be_present
+            expect(subject.encrypted_ci_jwt_signing_key_iv).to be_present
+            expect(subject.encrypted_ci_jwt_signing_key).not_to eq(subject.ci_jwt_signing_key)
+          end
+        end
+      end
     end
 
     context 'static objects external storage' do
@@ -645,6 +684,29 @@ RSpec.describe ApplicationSetting do
         is_expected.to be_invalid
       end
     end
+
+    context 'gitpod settings' do
+      it 'is invalid if gitpod is enabled and no url is provided' do
+        allow(subject).to receive(:gitpod_enabled).and_return(true)
+        allow(subject).to receive(:gitpod_url).and_return(nil)
+
+        is_expected.to be_invalid
+      end
+
+      it 'is invalid if gitpod is enabled and an empty url is provided' do
+        allow(subject).to receive(:gitpod_enabled).and_return(true)
+        allow(subject).to receive(:gitpod_url).and_return('')
+
+        is_expected.to be_invalid
+      end
+
+      it 'is invalid if gitpod is enabled and an invalid url is provided' do
+        allow(subject).to receive(:gitpod_enabled).and_return(true)
+        allow(subject).to receive(:gitpod_url).and_return('javascript:alert("test")//')
+
+        is_expected.to be_invalid
+      end
+    end
   end
 
   context 'restrict creating duplicates' do
@@ -652,6 +714,16 @@ RSpec.describe ApplicationSetting do
 
     it 'returns the current settings' do
       expect(described_class.create_from_defaults).to eq(current_settings)
+    end
+  end
+
+  context 'when ApplicationSettings does not have a primary key' do
+    before do
+      allow(ActiveRecord::Base.connection).to receive(:primary_key).with(described_class.table_name).and_return(nil)
+    end
+
+    it 'raises an exception' do
+      expect { described_class.create_from_defaults }.to raise_error(/table is missing a primary key constraint/)
     end
   end
 
@@ -749,6 +821,23 @@ RSpec.describe ApplicationSetting do
 
         expect(setting.sourcegraph_url_is_com?).to eq(is_com)
       end
+    end
+  end
+
+  describe '#instance_review_permitted?', :request_store do
+    subject { setting.instance_review_permitted? }
+
+    before do
+      RequestStore.store[:current_license] = nil
+      expect(Rails.cache).to receive(:fetch).and_return(
+        ::ApplicationSetting::INSTANCE_REVIEW_MIN_USERS + users_over_minimum
+      )
+    end
+
+    where(users_over_minimum: [-1, 0, 1])
+
+    with_them do
+      it { is_expected.to be(users_over_minimum >= 0) }
     end
   end
 

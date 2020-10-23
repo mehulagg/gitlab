@@ -8,7 +8,7 @@ import {
   GlFormInput,
 } from '@gitlab/ui';
 import { visitUrl } from '~/lib/utils/url_utility';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
 import LabelsSelectVue from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
@@ -118,7 +118,7 @@ export default {
     <h3 class="page-title gl-border-b-solid gl-border-b-gray-100 gl-border-b-1 gl-pb-5 gl-mb-6">
       {{ __('New Epic') }}
     </h3>
-    <gl-form class="common-note-form new-epic-form" @submit="save">
+    <gl-form class="common-note-form new-epic-form" @submit.prevent="save">
       <gl-form-group :label="__('Title')" label-for="epic-title">
         <gl-form-input
           id="epic-title"

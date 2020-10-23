@@ -67,7 +67,7 @@ RSpec.describe Note do
     end
 
     context 'when noteable is a personal snippet' do
-      subject { build(:note_on_personal_snippet) }
+      subject { build(:note_on_personal_snippet, noteable: create(:personal_snippet)) }
 
       it 'is valid without project' do
         is_expected.to be_valid
@@ -109,7 +109,8 @@ RSpec.describe Note do
   describe 'callbacks' do
     describe '#notify_after_create' do
       it 'calls #after_note_created on the noteable' do
-        note = build(:note)
+        noteable = create(:issue)
+        note = build(:note, project: noteable.project, noteable: noteable)
 
         expect(note).to receive(:notify_after_create).and_call_original
         expect(note.noteable).to receive(:after_note_created).with(note)
@@ -282,6 +283,56 @@ RSpec.describe Note do
     it "returns false" do
       note = build(:note, system: true)
       expect(note.editable?).to be_falsy
+    end
+  end
+
+  describe "noteable_author?" do
+    let(:user1) { create(:user) }
+    let(:user2) { create(:user) }
+    let(:project) { create(:project, :public, :repository) }
+
+    context 'when note is on commit' do
+      let(:noteable) { create(:commit, project: project, author: user1) }
+
+      context 'if user is the noteable author' do
+        let(:note) { create(:discussion_note_on_commit, commit_id: noteable.id, project: project, author: user1) }
+        let(:diff_note) { create(:diff_note_on_commit, commit_id: noteable.id, project: project, author: user1) }
+
+        it 'returns true' do
+          expect(note.noteable_author?(noteable)).to be true
+          expect(diff_note.noteable_author?(noteable)).to be true
+        end
+      end
+
+      context 'if user is not the noteable author' do
+        let(:note) { create(:discussion_note_on_commit, commit_id: noteable.id, project: project, author: user2) }
+        let(:diff_note) { create(:diff_note_on_commit, commit_id: noteable.id, project: project, author: user2) }
+
+        it 'returns false' do
+          expect(note.noteable_author?(noteable)).to be false
+          expect(diff_note.noteable_author?(noteable)).to be false
+        end
+      end
+    end
+
+    context 'when note is on issue' do
+      let(:noteable) { create(:issue, project: project, author: user1) }
+
+      context 'if user is the noteable author' do
+        let(:note) { create(:note, noteable: noteable, author: user1, project: project) }
+
+        it 'returns true' do
+          expect(note.noteable_author?(noteable)).to be true
+        end
+      end
+
+      context 'if user is not the noteable author' do
+        let(:note) { create(:note, noteable: noteable, author: user2, project: project) }
+
+        it 'returns false' do
+          expect(note.noteable_author?(noteable)).to be false
+        end
+      end
     end
   end
 
@@ -471,6 +522,7 @@ RSpec.describe Note do
           note: "added label #{private_label.to_reference(ext_proj)}",
           system: true
       end
+
       let!(:system_note_metadata) { create(:system_note_metadata, note: note, action: :label) }
 
       it_behaves_like "checks references"
@@ -839,7 +891,8 @@ RSpec.describe Note do
     let(:html) { '<p>some html</p>'}
 
     context 'note for a project snippet' do
-      let(:note) { build(:note_on_project_snippet) }
+      let(:snippet) { create(:project_snippet) }
+      let(:note) { build(:note_on_project_snippet, project: snippet.project, noteable: snippet) }
 
       before do
         expect(Banzai::Renderer).to receive(:cacheless_render_field)
@@ -854,7 +907,8 @@ RSpec.describe Note do
     end
 
     context 'note for a personal snippet' do
-      let(:note) { build(:note_on_personal_snippet) }
+      let(:snippet) { create(:personal_snippet) }
+      let(:note) { build(:note_on_personal_snippet, noteable: snippet) }
 
       before do
         expect(Banzai::Renderer).to receive(:cacheless_render_field)
@@ -888,7 +942,7 @@ RSpec.describe Note do
 
     context 'for a note on a commit' do
       it 'returns true' do
-        note = build(:note_on_commit)
+        note = build(:note_on_commit, project: create(:project, :repository))
 
         expect(note.can_be_discussion_note?).to be_truthy
       end
@@ -912,7 +966,7 @@ RSpec.describe Note do
 
     context 'for a diff note on commit' do
       it 'returns false' do
-        note = build(:diff_note_on_commit)
+        note = build(:diff_note_on_commit, project: create(:project, :repository))
 
         expect(note.can_be_discussion_note?).to be_falsey
       end
@@ -1142,7 +1196,8 @@ RSpec.describe Note do
   end
 
   describe 'expiring ETag cache' do
-    let(:note) { build(:note_on_issue) }
+    let_it_be(:issue) { create(:issue) }
+    let(:note) { build(:note, project: issue.project, noteable: issue) }
 
     def expect_expiration(noteable)
       expect_any_instance_of(Gitlab::EtagCaching::Store)
@@ -1220,22 +1275,6 @@ RSpec.describe Note do
 
       it { is_expected.to include(comment) }
       it { is_expected.not_to include(system_note) }
-    end
-  end
-
-  describe '#special_role=' do
-    let(:role) { Note::SpecialRole::FIRST_TIME_CONTRIBUTOR }
-
-    it 'assigns role' do
-      subject.special_role = role
-
-      expect(subject.special_role).to eq(role)
-    end
-
-    it 'does not assign unknown role' do
-      expect { subject.special_role = :bogus }.to raise_error(/Role is undefined/)
-
-      expect(subject.special_role).to be_nil
     end
   end
 
@@ -1372,10 +1411,10 @@ RSpec.describe Note do
   describe 'banzai_render_context' do
     let(:project) { build(:project_empty_repo) }
 
+    subject(:context) { noteable.banzai_render_context(:title) }
+
     context 'when noteable is a merge request' do
       let(:noteable) { build :merge_request, target_project: project, source_project: project }
-
-      subject(:context) { noteable.banzai_render_context(:title) }
 
       it 'sets the label_url_method in the context' do
         expect(context[:label_url_method]).to eq(:project_merge_requests_url)
@@ -1385,11 +1424,50 @@ RSpec.describe Note do
     context 'when noteable is an issue' do
       let(:noteable) { build :issue, project: project }
 
-      subject(:context) { noteable.banzai_render_context(:title) }
-
       it 'sets the label_url_method in the context' do
         expect(context[:label_url_method]).to eq(:project_issues_url)
       end
+    end
+
+    context 'when noteable is a personal snippet' do
+      let(:noteable) { build(:personal_snippet) }
+
+      it 'sets the parent user in the context' do
+        expect(context[:user]).to eq(noteable.author)
+      end
+    end
+  end
+
+  describe '#parent_user' do
+    it 'returns the author of a personal snippet' do
+      note = build(:note_on_personal_snippet)
+      expect(note.parent_user).to eq(note.noteable.author)
+    end
+
+    it 'returns nil for project snippet' do
+      note = build(:note_on_project_snippet)
+      expect(note.parent_user).to be_nil
+    end
+
+    it 'returns nil when noteable is not a snippet' do
+      note = build(:note_on_issue)
+      expect(note.parent_user).to be_nil
+    end
+  end
+
+  describe '#skip_notification?' do
+    subject(:skip_notification?) { note.skip_notification? }
+
+    context 'when there is no review' do
+      let(:note) { build(:note) }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when the review exists' do
+      let(:note) { build(:note, :with_review) }
+
+      it { is_expected.to be_truthy }
     end
   end
 end

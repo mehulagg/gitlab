@@ -1,5 +1,10 @@
 <script>
-import { GlLink, GlSprintf, GlSkeletonLoading, GlLoadingIcon } from '@gitlab/ui';
+import {
+  GlLink,
+  GlSprintf,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlLoadingIcon,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
@@ -26,11 +31,18 @@ export default {
     },
     isLoadingVulnerability: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
     isLoadingUser: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
+    },
+    isStatusBolded: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
 
@@ -47,13 +59,21 @@ export default {
 
       switch (state) {
         case 'detected':
-          return s__('VulnerabilityManagement|Detected %{timeago} in pipeline %{pipelineLink}');
+          return s__(
+            'VulnerabilityManagement|%{statusStart}Detected%{statusEnd} %{timeago} in pipeline %{pipelineLink}',
+          );
         case 'confirmed':
-          return s__('VulnerabilityManagement|Confirmed %{timeago} by %{user}');
+          return s__(
+            'VulnerabilityManagement|%{statusStart}Confirmed%{statusEnd} %{timeago} by %{user}',
+          );
         case 'dismissed':
-          return s__('VulnerabilityManagement|Dismissed %{timeago} by %{user}');
+          return s__(
+            'VulnerabilityManagement|%{statusStart}Dismissed%{statusEnd} %{timeago} by %{user}',
+          );
         case 'resolved':
-          return s__('VulnerabilityManagement|Resolved %{timeago} by %{user}');
+          return s__(
+            'VulnerabilityManagement|%{statusStart}Resolved%{statusEnd} %{timeago} by %{user}',
+          );
         default:
           return '%timeago';
       }
@@ -66,6 +86,11 @@ export default {
   <span>
     <gl-skeleton-loading v-if="isLoadingVulnerability" :lines="2" class="h-auto" />
     <gl-sprintf v-else :message="statusText">
+      <template #status="{ content }">
+        <span :class="{ 'gl-font-weight-bold': isStatusBolded }" data-testid="status">
+          {{ content }}
+        </span>
+      </template>
       <template #timeago>
         <time-ago-tooltip ref="timeAgo" :time="time" />
       </template>

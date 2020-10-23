@@ -14,6 +14,7 @@ RSpec.describe 'Git LFS API and storage' do
       'X-Sendfile-Type' => sendfile
     }.compact
   end
+
   let(:authorization) { }
   let(:sendfile) { }
 

@@ -20,7 +20,7 @@
 #
 module StatusPage
   class IncidentsFinder
-    MAX_LIMIT = StatusPage::Storage::MAX_RECENT_INCIDENTS
+    MAX_LIMIT = Gitlab::StatusPage::Storage::MAX_RECENT_INCIDENTS
 
     def initialize(project_id:)
       @project_id = project_id

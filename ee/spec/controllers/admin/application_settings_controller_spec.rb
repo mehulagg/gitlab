@@ -11,6 +11,26 @@ RSpec.describe Admin::ApplicationSettingsController do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
   end
 
+  describe 'GET #general' do
+    before do
+      sign_in(admin)
+    end
+
+    context 'zero-downtime elasticsearch reindexing' do
+      render_views
+
+      let!(:task) { create(:elastic_reindexing_task) }
+
+      it 'assigns elasticsearch reindexing task' do
+        get :general
+
+        expect(assigns(:elasticsearch_reindexing_task)).to eq(task)
+        expect(response.body).to include('Reindexing status')
+        expect(response.body).to include("State: #{task.state}")
+      end
+    end
+  end
+
   describe 'PUT #update' do
     before do
       sign_in(admin)
@@ -92,6 +112,7 @@ RSpec.describe Admin::ApplicationSettingsController do
           mirror_capacity_threshold: 2
         }
       end
+
       let(:feature) { :repository_mirrors }
 
       it_behaves_like 'settings for licensed features'
@@ -136,12 +157,13 @@ RSpec.describe Admin::ApplicationSettingsController do
           maintenance_mode_message: 'GitLab is in maintenance'
         }
       end
+
       let(:feature) { :geo }
 
       it_behaves_like 'settings for licensed features'
     end
 
-    context 'project deletion adjourned period' do
+    context 'project deletion delay' do
       let(:settings) { { deletion_adjourned_period: 6 } }
       let(:feature) { :adjourned_deletion_for_projects_and_groups }
 

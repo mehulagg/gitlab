@@ -11,7 +11,7 @@ RSpec.shared_examples 'status page quick actions' do
 
     shared_examples 'skip silently' do
       it 'does not allow publishing' do
-        expect(StatusPage).not_to receive(:mark_for_publication).with(project, user, issue)
+        expect(Gitlab::StatusPage).not_to receive(:mark_for_publication).with(project, user, issue)
         expect(StatusPage::PublishWorker).not_to receive(:perform_async).with(user.id, project.id, issue.id)
 
         add_note('/publish')

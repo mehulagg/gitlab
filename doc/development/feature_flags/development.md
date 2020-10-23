@@ -1,3 +1,10 @@
+---
+type: reference, dev
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+---
+
 # Developing with feature flags
 
 This document provides guidelines on how to use feature flags
@@ -18,9 +25,7 @@ This document is the subject of continued work as part of an epic to [improve in
 
 ## Types of feature flags
 
-Currently, only a single type of feature flag is available.
-Additional feature flag types will be provided in the future,
-with descriptions for their usage.
+Choose a feature flag type that matches the expected usage.
 
 ### `development` type
 
@@ -32,6 +37,53 @@ ideally created using the [Feature Flag Roll Out template](https://gitlab.com/gi
 
 NOTE: **Note:**
 This is the default type used when calling `Feature.enabled?`.
+
+### `ops` type
+
+`ops` feature flags are long-lived feature flags that control operational aspects
+of GitLab's behavior. For example, feature flags that disable features that might
+have a performance impact, like special Sidekiq worker behavior.
+
+`ops` feature flags likely do not have rollout issues, as it is hard to
+predict when they will be enabled or disabled.
+
+To use `ops` feature flags, you must append `type: :ops` to `Feature.enabled?`
+invocations:
+
+```ruby
+# Check if feature flag is enabled
+Feature.enabled?(:my_ops_flag, project, type: :ops)
+
+# Check if feature flag is disabled
+Feature.disabled?(:my_ops_flag, project, type: :ops)
+
+# Push feature flag to Frontend
+push_frontend_feature_flag(:my_ops_flag, project, type: :ops)
+```
+
+### `licensed` type
+
+`licensed` feature flags are used to temporarily disable licensed features. There
+should be a one-to-one mapping of `licensed` feature flags to licensed features.
+
+`licensed` feature flags must be `default_enabled: true`, because that's the only
+supported option in the current implementation. This is under development as per
+the [related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/218667).
+
+The `licensed` type has a dedicated set of functions to check if a licensed
+feature is available for a project or namespace. This check validates
+if the license is assigned to the namespace and feature flag itself.
+The `licensed` feature flag has the same name as a licensed feature name:
+
+```ruby
+# Good: checks if feature flag is enabled
+project.feature_available?(:my_licensed_feature)
+namespace.feature_available?(:my_licensed_feature)
+
+# Bad: licensed flag must be accessed via `feature_available?`
+Feature.enabled?(:my_licensed_feature, type: :licensed)
+push_frontend_feature_flag(:my_licensed_feature, type: :licensed)
+```
 
 ## Feature flag definition and validation
 
@@ -58,7 +110,7 @@ Each feature flag is defined in a separate YAML file consisting of a number of f
 |---------------------|----------|----------------------------------------------------------------|
 | `name`              | yes      | Name of the feature flag.                                      |
 | `type`              | yes      | Type of feature flag.                                          |
-| `default_enabled`   | yes      | The default state of the feature flag that is strongly validated, with `default_enabled:` passed as an argument. |
+| `default_enabled`   | yes      | The default state of the feature flag that is strictly validated, with `default_enabled:` passed as an argument. |
 | `introduced_by_url` | no       | The URL to the Merge Request that introduced the feature flag. |
 | `rollout_issue_url` | no       | The URL to the Issue covering the feature flag rollout.        |
 | `group`             | no       | The [group](https://about.gitlab.com/handbook/product/product-categories/#devops-stages) that owns the feature flag. |
@@ -77,20 +129,22 @@ Only feature flags that have a YAML definition file can be used when running the
 
 ```shell
 $ bin/feature-flag my-feature-flag
->> Please specify the group introducing feature flag, like `group::apm`:
-
+>> Specify the group introducing the feature flag, like `group::apm`:
 ?> group::memory
->> Open this URL and fill the rest of details:
-https://gitlab.com/gitlab-org/gitlab/-/issues/new?issue[title]=%5BFeature+flag%5D+Rollout+of+%60my-feature-flag%60&
 
->> Paste URL here, or enter to skip:
+>> URL of the MR introducing the feature flag (enter to skip):
+?> https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38602
 
-?>
-create config/feature_flags/development/my_feature_flag.yml
+>> Open this URL and fill in the rest of the details:
+https://gitlab.com/gitlab-org/gitlab/-/issues/new?issue%5Btitle%5D=%5BFeature+flag%5D+Rollout+of+%60test-flag%60&issuable_template=Feature+Flag+Roll+Out
+
+>> URL of the rollout issue (enter to skip):
+?> https://gitlab.com/gitlab-org/gitlab/-/issues/232533
+create config/feature_flags/development/test-flag.yml
 ---
-name: my_feature_flag
-introduced_by_url:
-rollout_issue_url:
+name: test-flag
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38602
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/232533
 group: group::memory
 type: development
 default_enabled: false
@@ -98,6 +152,11 @@ default_enabled: false
 
 TIP: **Tip:**
 To create a feature flag that is only used in EE, add the `--ee` flag: `bin/feature-flag --ee`
+
+## Delete a feature flag
+
+See [cleaning up feature flags](controls.md#cleaning-up) for more information about
+deleting feature flags.
 
 ## Develop with a feature flag
 
@@ -134,6 +193,21 @@ else
 end
 
 if Feature.disabled?(:my_feature_flag, project, default_enabled: true)
+  # execute code if feature flag is disabled
+end
+```
+
+If not specified, the default feature flag type for `Feature.enabled?` and `Feature.disabled?`
+is `type: development`. For all other feature flag types, you must specify the `type:`:
+
+```ruby
+if Feature.enabled?(:feature_flag, project, type: :ops)
+  # execute code if ops feature flag is enabled
+else
+  # execute code if ops feature flag is disabled
+end
+
+if Feature.disabled?(:my_feature_flag, project, type: :ops)
   # execute code if feature flag is disabled
 end
 ```
@@ -183,6 +257,15 @@ before_action do
 end
 ```
 
+If not specified, the default feature flag type for `push_frontend_feature_flag`
+is `type: development`. For all other feature flag types, you must specify the `type:`:
+
+```ruby
+before_action do
+  push_frontend_feature_flag(:vim_bindings, project, type: :ops)
+end
+```
+
 ### Feature actors
 
 **It is strongly advised to use actors with feature flags.** Actors provide a simple
@@ -226,44 +309,34 @@ used as an actor for `Feature.enabled?`.
 
 ### Feature flags for licensed features
 
-If a feature is license-gated, there's no need to add an additional
-explicit feature flag check since the flag will be checked as part of the
-`License.feature_available?` call. Similarly, there's no need to "clean up" a
-feature flag once the feature has reached general availability.
-
 The [`Project#feature_available?`](https://gitlab.com/gitlab-org/gitlab/blob/4cc1c62918aa4c31750cb21dfb1a6c3492d71080/app/models/project_feature.rb#L63-68),
 [`Namespace#feature_available?`](https://gitlab.com/gitlab-org/gitlab/blob/4cc1c62918aa4c31750cb21dfb1a6c3492d71080/ee/app/models/ee/namespace.rb#L71-85) (EE), and
 [`License.feature_available?`](https://gitlab.com/gitlab-org/gitlab/blob/4cc1c62918aa4c31750cb21dfb1a6c3492d71080/ee/app/models/license.rb#L293-300) (EE) methods all implicitly check for
 a by default enabled feature flag with the same name as the provided argument.
 
-You'd still want to use an explicit `Feature.enabled?` check if your new feature
-isn't gated by a License or Plan.
-
 **An important side-effect of the implicit feature flags mentioned above is that
 unless the feature is explicitly disabled or limited to a percentage of users,
-the feature flag check will default to `true`.**
+the feature flag check defaults to `true`.**
 
-This is relevant when developing the feature using
-[several smaller merge requests](https://about.gitlab.com/handbook/values/#make-small-merge-requests), or when the feature is considered to be an
-[alpha or beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga), and
-should not be available by default.
+NOTE: **Note:**
+Due to limitations with `feature_available?`, the YAML definition for `licensed` feature
+flags accepts only `default_enabled: true`. This is under development as per the
+[related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/218667).
 
-As an example, if you were to ship the frontend half of a feature without the
-backend, you'd want to disable the feature entirely until the backend half is
-also ready to be shipped. To make sure this feature is disabled for both
-GitLab.com and self-managed instances, you should use the
-[`Namespace#alpha_feature_available?`](https://gitlab.com/gitlab-org/gitlab/blob/458749872f4a8f27abe8add930dbb958044cb926/ee/app/models/ee/namespace.rb#L113) or
-[`Namespace#beta_feature_available?`](https://gitlab.com/gitlab-org/gitlab/blob/458749872f4a8f27abe8add930dbb958044cb926/ee/app/models/ee/namespace.rb#L100-112)
-method, according to our [definitions](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga). This ensures the feature is disabled unless the feature flag is
-_explicitly_ enabled.
+If you want a licensed feature to be disabled by default or enabled only for a given gate, you can use a feature flag with a different name. The feature checks would then
+look like:
+
+```ruby
+Feature.enabled?(:licensed_feature_feature_flag, project) && project.feature_available?(:licensed_feature)
+```
 
 ### Feature groups
 
 Feature groups must be defined statically in `lib/feature.rb` (in the
 `.register_feature_groups` method), but their implementation can obviously be
-dynamic (querying the DB etc.).
+dynamic (querying the DB, for example).
 
-Once defined in `lib/feature.rb`, you will be able to activate a
+Once defined in `lib/feature.rb`, you can to activate a
 feature for a given feature group via the [`feature_group` parameter of the features API](../../api/features.md#set-or-create-a-feature)
 
 ### Enabling a feature flag locally (in development)
@@ -274,7 +347,7 @@ In the rails console (`rails c`), enter the following command to enable a featur
 Feature.enable(:feature_flag_name)
 ```
 
-Similarly, the following command will disable a feature flag:
+Similarly, the following command disables a feature flag:
 
 ```ruby
 Feature.disable(:feature_flag_name)
@@ -288,7 +361,7 @@ Feature.enable(:feature_flag_name, Project.find_by_full_path("root/my-project"))
 
 ## Feature flags in tests
 
-Introducing a feature flag into the codebase creates an additional codepath that should be tested.
+Introducing a feature flag into the codebase creates an additional code path that should be tested.
 It is strongly advised to test all code affected by a feature flag, both when **enabled** and **disabled**
 to ensure the feature works properly.
 
@@ -323,10 +396,10 @@ Feature.enabled?(:ci_live_trace, project2) # => false
 
 The behavior of FlipperGate is as follows:
 
-1. You can enable an override for a specified actor to be enabled
+1. You can enable an override for a specified actor to be enabled.
 1. You can disable (remove) an override for a specified actor,
-   falling back to default state
-1. There's no way to model that you explicitly disable a specified actor
+   falling back to the default state.
+1. There's no way to model that you explicitly disabled a specified actor.
 
 ```ruby
 Feature.enable(:my_feature)
@@ -338,6 +411,21 @@ Feature.disable(:my_feature2)
 Feature.enable(:my_feature2, project1)
 Feature.enabled?(:my_feature2) # => false
 Feature.enabled?(:my_feature2, project1) # => true
+```
+
+### `have_pushed_frontend_feature_flags`
+
+Use `have_pushed_frontend_feature_flags` to test if [`push_frontend_feature_flag`](#frontend)
+has added the feature flag to the HTML.
+
+For example,
+
+```ruby
+stub_feature_flags(value_stream_analytics_path_navigation: false)
+
+visit group_analytics_cycle_analytics_path(group)
+
+expect(page).to have_pushed_frontend_feature_flags(valueStreamAnalyticsPathNavigation: false)
 ```
 
 ### `stub_feature_flags` vs `Feature.enable*`
@@ -367,7 +455,7 @@ Feature.enable_percentage_of_time(:my_feature_3, 50)
 Feature.enable_percentage_of_actors(:my_feature_4, 50)
 ```
 
-Each feature flag that has a defined state will be persisted
+Each feature flag that has a defined state is persisted
 during test execution time:
 
 ```ruby
@@ -394,6 +482,14 @@ stub_feature_flags(ci_live_trace: gate)
 
 Feature.enabled?(:ci_live_trace) # => false
 Feature.enabled?(:ci_live_trace, gate) # => true
+```
+
+You can also disable a feature flag for a specific actor:
+
+```ruby
+gate = stub_feature_flag_gate('CustomActor')
+
+stub_feature_flags(ci_live_trace: false, thing: gate)
 ```
 
 ### Controlling feature flags engine in tests

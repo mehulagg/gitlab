@@ -1,13 +1,11 @@
 <script>
-import { GlDeprecatedBadge as GlBadge, GlTabs, GlTab, GlLink } from '@gitlab/ui';
+import { GlDeprecatedBadge as GlBadge, GlTabs, GlTab, GlLink, GlIcon } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-
-import Icon from '~/vue_shared/components/icon.vue';
 
 import UnscannedProjectsTabContent from './unscanned_projects_tab_content.vue';
 
 export default {
-  components: { GlBadge, GlTabs, GlTab, GlLink, Icon, UnscannedProjectsTabContent },
+  components: { GlBadge, GlTabs, GlTab, GlLink, GlIcon, UnscannedProjectsTabContent },
   props: {
     endpoint: {
       type: String,
@@ -52,7 +50,7 @@ export default {
           :href="helpPath"
           :title="__('Project scanning help page')"
           target="_blank"
-          ><icon name="question" :size="12" class="align-top"
+          ><gl-icon name="question" :size="12" class="align-top"
         /></gl-link>
       </h4>
       <p class="text-secondary mb-0">

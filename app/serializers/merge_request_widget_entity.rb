@@ -3,6 +3,8 @@
 class MergeRequestWidgetEntity < Grape::Entity
   include RequestAwareEntity
 
+  SUGGEST_PIPELINE = 'suggest_pipeline'
+
   expose :id
   expose :iid
 
@@ -60,8 +62,21 @@ class MergeRequestWidgetEntity < Grape::Entity
       merge_request.source_branch,
       file_name: '.gitlab-ci.yml',
       commit_message: s_("CommitMessage|Add %{file_name}") % { file_name: Gitlab::FileDetector::PATTERNS[:gitlab_ci] },
+      mr_path: merge_request_path(merge_request),
       suggest_gitlab_ci_yml: true
     )
+  end
+
+  expose :user_callouts_path, if: -> (_, opts) { opts[:experiment_enabled] == :suggest_pipeline } do |_merge_request|
+    user_callouts_path
+  end
+
+  expose :suggest_pipeline_feature_id, if: -> (_, opts) { opts[:experiment_enabled] == :suggest_pipeline } do |_merge_request|
+    SUGGEST_PIPELINE
+  end
+
+  expose :is_dismissed_suggest_pipeline, if: -> (_, opts) { opts[:experiment_enabled] == :suggest_pipeline } do |_merge_request|
+    current_user && current_user.dismissed_callout?(feature_name: SUGGEST_PIPELINE)
   end
 
   expose :human_access do |merge_request|
@@ -105,8 +120,16 @@ class MergeRequestWidgetEntity < Grape::Entity
     end
 
     expose :base_path do |merge_request|
-      base_pipeline_downloadable_path_for_report_type(:codequality)
+      if use_merge_base_with_merged_results?
+        merge_base_pipeline_downloadable_path_for_report_type(:codequality)
+      else
+        base_pipeline_downloadable_path_for_report_type(:codequality)
+      end
     end
+  end
+
+  expose :security_reports_docs_path do |merge_request|
+    help_page_path('user/application_security/sast/index.md', anchor: 'reports-json-format')
   end
 
   private
@@ -123,7 +146,7 @@ class MergeRequestWidgetEntity < Grape::Entity
       merge_request.source_branch_exists? &&
       merge_request.source_project&.uses_default_ci_config? &&
       !merge_request.source_project.has_ci? &&
-      merge_request.commits_count.positive? &&
+      merge_request.commits_count > 0 &&
       can?(current_user, :read_build, merge_request.source_project) &&
       can?(current_user, :create_pipeline, merge_request.source_project)
   end
@@ -135,6 +158,16 @@ class MergeRequestWidgetEntity < Grape::Entity
 
   def base_pipeline_downloadable_path_for_report_type(file_type)
     object.base_pipeline&.present(current_user: current_user)
+      &.downloadable_path_for_report_type(file_type)
+  end
+
+  def use_merge_base_with_merged_results?
+    Feature.enabled?(:merge_base_pipelines, object.target_project) &&
+      object.actual_head_pipeline&.merge_request_event_type == :merged_result
+  end
+
+  def merge_base_pipeline_downloadable_path_for_report_type(file_type)
+    object.merge_base_pipeline&.present(current_user: current_user)
       &.downloadable_path_for_report_type(file_type)
   end
 end

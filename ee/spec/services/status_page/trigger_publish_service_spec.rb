@@ -102,7 +102,7 @@ RSpec.describe StatusPage::TriggerPublishService do
 
     describe 'triggered by note' do
       let(:issue_id) { triggered_by.noteable_id }
-      let(:emoji_name) { StatusPage::AWARD_EMOJI }
+      let(:emoji_name) { Gitlab::StatusPage::AWARD_EMOJI }
 
       before do
         create(:award_emoji, user: user, name: emoji_name,
@@ -183,7 +183,7 @@ RSpec.describe StatusPage::TriggerPublishService do
     end
 
     describe 'triggered by award emoji' do
-      let(:emoji_name) { StatusPage::AWARD_EMOJI }
+      let(:emoji_name) { Gitlab::StatusPage::AWARD_EMOJI }
       let(:issue_id) { triggered_by.awardable.noteable_id }
 
       let(:triggered_by) do

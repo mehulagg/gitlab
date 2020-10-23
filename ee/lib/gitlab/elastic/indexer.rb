@@ -177,6 +177,15 @@ module Gitlab
 
       # rubocop: disable CodeReuse/ActiveRecord
       def update_index_status(to_sha)
+        unless Project.exists?(id: project.id)
+          Gitlab::Elasticsearch::Logger.build.debug(
+            message: 'Index status could not be updated as the project does not exist',
+            project_id: project.id,
+            wiki: index_wiki?
+          )
+          return false
+        end
+
         raise "Invalid sha #{to_sha}" unless to_sha.present?
 
         # An index_status should always be created,

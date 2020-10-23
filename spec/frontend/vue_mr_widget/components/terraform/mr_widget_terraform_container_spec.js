@@ -1,8 +1,8 @@
-import { GlSkeletonLoading, GlSprintf } from '@gitlab/ui';
-import { invalidPlanWithName, plans, validPlanWithName } from './mock_data';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import axios from '~/lib/utils/axios_utils';
 import MockAdapter from 'axios-mock-adapter';
+import { invalidPlanWithName, plans, validPlanWithName } from './mock_data';
+import axios from '~/lib/utils/axios_utils';
 import MrWidgetExpanableSection from '~/vue_merge_request_widget/components/mr_widget_expandable_section.vue';
 import MrWidgetTerraformContainer from '~/vue_merge_request_widget/components/terraform/mr_widget_terraform_container.vue';
 import Poll from '~/lib/utils/poll';
@@ -49,8 +49,8 @@ describe('MrWidgetTerraformConainer', () => {
     });
 
     it('diplays loading skeleton', () => {
-      expect(wrapper.contains(GlSkeletonLoading)).toBe(true);
-      expect(wrapper.contains(MrWidgetExpanableSection)).toBe(false);
+      expect(wrapper.find(GlSkeletonLoading).exists()).toBe(true);
+      expect(wrapper.find(MrWidgetExpanableSection).exists()).toBe(false);
     });
   });
 
@@ -61,8 +61,8 @@ describe('MrWidgetTerraformConainer', () => {
     });
 
     it('displays terraform content', () => {
-      expect(wrapper.contains(GlSkeletonLoading)).toBe(false);
-      expect(wrapper.contains(MrWidgetExpanableSection)).toBe(true);
+      expect(wrapper.find(GlSkeletonLoading).exists()).toBe(false);
+      expect(wrapper.find(MrWidgetExpanableSection).exists()).toBe(true);
       expect(findPlans()).toEqual(Object.values(plans));
     });
 
@@ -156,7 +156,7 @@ describe('MrWidgetTerraformConainer', () => {
       });
 
       it('stops loading', () => {
-        expect(wrapper.contains(GlSkeletonLoading)).toBe(false);
+        expect(wrapper.find(GlSkeletonLoading).exists()).toBe(false);
       });
 
       it('generates one broken plan', () => {

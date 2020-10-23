@@ -149,6 +149,36 @@ describe('Api', () => {
     });
   });
 
+  describe('groupMilestones', () => {
+    it('fetches group milestones', done => {
+      const groupId = '16';
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}/milestones`;
+      const expectedData = [
+        {
+          id: 12,
+          iid: 3,
+          group_id: 16,
+          title: '10.0',
+          description: 'Version',
+          due_date: '2013-11-29',
+          start_date: '2013-11-10',
+          state: 'active',
+          updated_at: '2013-10-02T09:24:18Z',
+          created_at: '2013-10-02T09:24:18Z',
+          web_url: 'https://gitlab.com/groups/gitlab-org/-/milestones/42',
+        },
+      ];
+      mock.onGet(expectedUrl).reply(httpStatus.OK, expectedData);
+
+      Api.groupMilestones(groupId)
+        .then(({ data }) => {
+          expect(data).toEqual(expectedData);
+        })
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
   describe('groups', () => {
     it('fetches groups', done => {
       const query = 'dummy query';
@@ -365,6 +395,48 @@ describe('Api', () => {
         })
         .then(done)
         .catch(done.fail);
+    });
+  });
+
+  describe('projectMilestones', () => {
+    it('fetches project milestones', done => {
+      const projectId = 1;
+      const options = { state: 'active' };
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/1/milestones`;
+      mock.onGet(expectedUrl).reply(200, [
+        {
+          id: 1,
+          title: 'milestone1',
+          state: 'active',
+        },
+      ]);
+
+      Api.projectMilestones(projectId, options)
+        .then(({ data }) => {
+          expect(data.length).toBe(1);
+          expect(data[0].title).toBe('milestone1');
+        })
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
+  describe('addProjectIssueAsTodo', () => {
+    it('adds issue ID as a todo', () => {
+      const projectId = 1;
+      const issueIid = 11;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/1/issues/11/todo`;
+      mock.onPost(expectedUrl).reply(200, {
+        id: 112,
+        project: {
+          id: 1,
+        },
+      });
+
+      return Api.addProjectIssueAsTodo(projectId, issueIid).then(({ data }) => {
+        expect(data.id).toBe(112);
+        expect(data.project.id).toBe(projectId);
+      });
     });
   });
 
@@ -619,6 +691,27 @@ describe('Api', () => {
     });
   });
 
+  describe('pipelineJobs', () => {
+    it('fetches the jobs for a given pipeline', done => {
+      const projectId = 123;
+      const pipelineId = 456;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectId}/pipelines/${pipelineId}/jobs`;
+      const payload = [
+        {
+          name: 'test',
+        },
+      ];
+      mock.onGet(expectedUrl).reply(httpStatus.OK, payload);
+
+      Api.pipelineJobs(projectId, pipelineId)
+        .then(({ data }) => {
+          expect(data).toEqual(payload);
+        })
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
   describe('createBranch', () => {
     it('creates new branch', done => {
       const ref = 'master';
@@ -661,6 +754,79 @@ describe('Api', () => {
           expect(axios.get).toHaveBeenCalledWith(expectedUrl, {
             params: { visibility: 'private' },
           });
+        })
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
+  describe('createContextCommits', () => {
+    it('creates a new context commit', done => {
+      const projectPath = 'abc';
+      const mergeRequestId = '123456';
+      const commitsData = ['abcdefg'];
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectPath}/merge_requests/${mergeRequestId}/context_commits`;
+      const expectedData = {
+        commits: commitsData,
+      };
+
+      jest.spyOn(axios, 'post');
+
+      mock.onPost(expectedUrl).replyOnce(200, [
+        {
+          id: 'abcdefghijklmnop',
+          short_id: 'abcdefg',
+          title: 'Dummy commit',
+        },
+      ]);
+
+      Api.createContextCommits(projectPath, mergeRequestId, expectedData)
+        .then(({ data }) => {
+          expect(data[0].title).toBe('Dummy commit');
+        })
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
+  describe('allContextCommits', () => {
+    it('gets all context commits', done => {
+      const projectPath = 'abc';
+      const mergeRequestId = '123456';
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectPath}/merge_requests/${mergeRequestId}/context_commits`;
+
+      jest.spyOn(axios, 'get');
+
+      mock
+        .onGet(expectedUrl)
+        .replyOnce(200, [{ id: 'abcdef', short_id: 'abcdefghi', title: 'Dummy commit title' }]);
+
+      Api.allContextCommits(projectPath, mergeRequestId)
+        .then(({ data }) => {
+          expect(data[0].title).toBe('Dummy commit title');
+        })
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
+  describe('removeContextCommits', () => {
+    it('removes context commits', done => {
+      const projectPath = 'abc';
+      const mergeRequestId = '123456';
+      const commitsData = ['abcdefg'];
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectPath}/merge_requests/${mergeRequestId}/context_commits`;
+      const expectedData = {
+        commits: commitsData,
+      };
+
+      jest.spyOn(axios, 'delete');
+
+      mock.onDelete(expectedUrl).replyOnce(204);
+
+      Api.removeContextCommits(projectPath, mergeRequestId, expectedData)
+        .then(() => {
+          expect(axios.delete).toHaveBeenCalledWith(expectedUrl, { data: expectedData });
         })
         .then(done)
         .catch(done.fail);
@@ -1022,6 +1188,46 @@ describe('Api', () => {
           headers: {
             'Content-Type': 'application/json',
           },
+        });
+      });
+    });
+  });
+
+  describe('trackRedisHllUserEvent', () => {
+    const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/usage_data/increment_unique_users`;
+
+    const event = 'dummy_event';
+    const postData = { event };
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    describe('when usage data increment unique users is called with feature flag disabled', () => {
+      beforeEach(() => {
+        gon.features = { ...gon.features, usageDataApi: false };
+      });
+
+      it('returns null', () => {
+        jest.spyOn(axios, 'post');
+        mock.onPost(expectedUrl).replyOnce(httpStatus.OK, true);
+
+        expect(axios.post).toHaveBeenCalledTimes(0);
+        expect(Api.trackRedisHllUserEvent(event)).toEqual(null);
+      });
+    });
+
+    describe('when usage data increment unique users is called', () => {
+      beforeEach(() => {
+        gon.features = { ...gon.features, usageDataApi: true };
+      });
+
+      it('resolves the Promise', () => {
+        jest.spyOn(axios, 'post');
+        mock.onPost(expectedUrl, { event }).replyOnce(httpStatus.OK, true);
+
+        return Api.trackRedisHllUserEvent(event).then(({ data }) => {
+          expect(data).toEqual(true);
+          expect(axios.post).toHaveBeenCalledWith(expectedUrl, postData, { headers });
         });
       });
     });

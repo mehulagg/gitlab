@@ -1,44 +1,62 @@
 import { mount } from '@vue/test-utils';
-import {
-  GlAlert,
-  GlLoadingIcon,
-  GlTable,
-  GlAvatar,
-  GlPagination,
-  GlSearchBoxByType,
-} from '@gitlab/ui';
-import { visitUrl, joinPaths } from '~/lib/utils/url_utility';
+import { GlAlert, GlLoadingIcon, GlTable, GlAvatar, GlEmptyState } from '@gitlab/ui';
+import Tracking from '~/tracking';
+import { visitUrl, joinPaths, mergeUrlParams } from '~/lib/utils/url_utility';
 import IncidentsList from '~/incidents/components/incidents_list.vue';
+import SeverityToken from '~/sidebar/components/severity/severity.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import { I18N } from '~/incidents/constants';
+import {
+  I18N,
+  TH_CREATED_AT_TEST_ID,
+  TH_SEVERITY_TEST_ID,
+  TH_PUBLISHED_TEST_ID,
+  trackIncidentCreateNewOptions,
+  trackIncidentListViewsOptions,
+} from '~/incidents/constants';
 import mockIncidents from '../mocks/incidents.json';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn().mockName('visitUrlMock'),
-  joinPaths: jest.fn().mockName('joinPaths'),
-  mergeUrlParams: jest.fn().mockName('mergeUrlParams'),
+  joinPaths: jest.fn(),
+  mergeUrlParams: jest.fn(),
+  setUrlParams: jest.fn(),
+  updateHistory: jest.fn(),
 }));
+jest.mock('~/tracking');
 
 describe('Incidents List', () => {
   let wrapper;
   const newIssuePath = 'namespace/project/-/issues/new';
+  const emptyListSvgPath = '/assets/empty.svg';
   const incidentTemplateName = 'incident';
+  const incidentType = 'incident';
+  const incidentsCount = {
+    opened: 24,
+    closed: 10,
+    all: 26,
+  };
 
   const findTable = () => wrapper.find(GlTable);
   const findTableRows = () => wrapper.findAll('table tbody tr');
   const findAlert = () => wrapper.find(GlAlert);
   const findLoader = () => wrapper.find(GlLoadingIcon);
   const findTimeAgo = () => wrapper.findAll(TimeAgoTooltip);
-  const findAssingees = () => wrapper.findAll('[data-testid="incident-assignees"]');
+  const findAssignees = () => wrapper.findAll('[data-testid="incident-assignees"]');
+  const findIncidentSlaHeader = () => wrapper.find('[data-testid="incident-management-sla"]');
   const findCreateIncidentBtn = () => wrapper.find('[data-testid="createIncidentBtn"]');
-  const findSearch = () => wrapper.find(GlSearchBoxByType);
   const findClosedIcon = () => wrapper.findAll("[data-testid='incident-closed']");
-  const findPagination = () => wrapper.find(GlPagination);
+  const findEmptyState = () => wrapper.find(GlEmptyState);
+  const findSeverity = () => wrapper.findAll(SeverityToken);
+  const findIncidentSla = () => wrapper.findAll("[data-testid='incident-sla']");
 
-  function mountComponent({ data = { incidents: [] }, loading = false }) {
+  function mountComponent({ data = {}, loading = false, provide = {} } = {}) {
     wrapper = mount(IncidentsList, {
       data() {
-        return data;
+        return {
+          incidents: [],
+          incidentsCount: {},
+          ...data,
+        };
       },
       mocks: {
         $apollo: {
@@ -53,11 +71,21 @@ describe('Incidents List', () => {
         projectPath: '/project/path',
         newIssuePath,
         incidentTemplateName,
-        issuePath: '/project/isssues',
+        incidentType,
+        issuePath: '/project/issues',
+        publishedAvailable: true,
+        emptyListSvgPath,
+        textQuery: '',
+        authorUsernameQuery: '',
+        assigneeUsernameQuery: '',
+        slaFeatureAvailable: true,
+        ...provide,
       },
       stubs: {
         GlButton: true,
         GlAvatar: true,
+        GlEmptyState: true,
+        ServiceLevelAgreementCell: true,
       },
     });
   }
@@ -76,17 +104,35 @@ describe('Incidents List', () => {
     expect(findLoader().exists()).toBe(true);
   });
 
-  it('shows empty state', () => {
-    mountComponent({
-      data: { incidents: { list: [] } },
-      loading: false,
-    });
-    expect(findTable().text()).toContain(I18N.noIncidents);
+  describe('empty state', () => {
+    const {
+      emptyState: { title, emptyClosedTabTitle, description },
+    } = I18N;
+
+    it.each`
+      statusFilter | all  | closed | expectedTitle          | expectedDescription
+      ${'all'}     | ${2} | ${1}   | ${title}               | ${description}
+      ${'open'}    | ${2} | ${0}   | ${title}               | ${description}
+      ${'closed'}  | ${0} | ${0}   | ${title}               | ${description}
+      ${'closed'}  | ${2} | ${0}   | ${emptyClosedTabTitle} | ${undefined}
+    `(
+      `when active tab is $statusFilter and there are $all incidents in total and $closed closed incidents, the empty state
+      has title: $expectedTitle and description: $expectedDescription`,
+      ({ statusFilter, all, closed, expectedTitle, expectedDescription }) => {
+        mountComponent({
+          data: { incidents: { list: [] }, incidentsCount: { all, closed }, statusFilter },
+          loading: false,
+        });
+        expect(findEmptyState().exists()).toBe(true);
+        expect(findEmptyState().attributes('title')).toBe(expectedTitle);
+        expect(findEmptyState().attributes('description')).toBe(expectedDescription);
+      },
+    );
   });
 
   it('shows error state', () => {
     mountComponent({
-      data: { incidents: { list: [] }, errored: true },
+      data: { incidents: { list: [] }, incidentsCount: { all: 0 }, errored: true },
       loading: false,
     });
     expect(findTable().text()).toContain(I18N.noIncidents);
@@ -96,7 +142,7 @@ describe('Incidents List', () => {
   describe('Incident Management list', () => {
     beforeEach(() => {
       mountComponent({
-        data: { incidents: { list: mockIncidents } },
+        data: { incidents: { list: mockIncidents }, incidentsCount },
         loading: false,
       });
     });
@@ -112,14 +158,14 @@ describe('Incidents List', () => {
     describe('Assignees', () => {
       it('shows Unassigned when there are no assignees', () => {
         expect(
-          findAssingees()
+          findAssignees()
             .at(0)
             .text(),
         ).toBe(I18N.unassigned);
       });
 
       it('renders an avatar component when there is an assignee', () => {
-        const avatar = findAssingees()
+        const avatar = findAssignees()
           .at(1)
           .find(GlAvatar);
         const { src, label } = avatar.attributes();
@@ -130,17 +176,52 @@ describe('Incidents List', () => {
         expect(src).toBe(avatarUrl);
       });
 
-      it('contains a link to the issue details', () => {
-        findTableRows()
-          .at(0)
-          .trigger('click');
-        expect(visitUrl).toHaveBeenCalledWith(joinPaths(`/project/isssues/`, mockIncidents[0].iid));
-      });
-
       it('renders a closed icon for closed incidents', () => {
         expect(findClosedIcon().length).toBe(
           mockIncidents.filter(({ state }) => state === 'closed').length,
         );
+      });
+    });
+
+    it('renders severity per row', () => {
+      expect(findSeverity().length).toBe(mockIncidents.length);
+    });
+
+    it('contains a link to the incident details page', async () => {
+      findTableRows()
+        .at(0)
+        .trigger('click');
+      expect(visitUrl).toHaveBeenCalledWith(
+        joinPaths(`/project/issues/incident`, mockIncidents[0].iid),
+      );
+    });
+
+    describe('Incident SLA field', () => {
+      it('displays the column when the feature is available', () => {
+        mountComponent({
+          data: { incidents: { list: mockIncidents } },
+          provide: { slaFeatureAvailable: true },
+        });
+
+        expect(findIncidentSlaHeader().text()).toContain('Time to SLA');
+      });
+
+      it('does not display the column when the feature is not available', () => {
+        mountComponent({
+          data: { incidents: { list: mockIncidents } },
+          provide: { slaFeatureAvailable: false },
+        });
+
+        expect(findIncidentSlaHeader().exists()).toBe(false);
+      });
+
+      it('renders an SLA for each incident', () => {
+        mountComponent({
+          data: { incidents: { list: mockIncidents } },
+          provide: { slaFeatureAvailable: true },
+        });
+
+        expect(findIncidentSla().length).toBe(mockIncidents.length);
       });
     });
   });
@@ -148,137 +229,89 @@ describe('Incidents List', () => {
   describe('Create Incident', () => {
     beforeEach(() => {
       mountComponent({
-        data: { incidents: { list: [] } },
+        data: { incidents: { list: mockIncidents }, incidentsCount: {} },
         loading: false,
       });
     });
 
-    it('shows the button linking to new incidents page with prefilled incident template', () => {
+    it('shows the button linking to new incidents page with pre-filled incident template when clicked', () => {
       expect(findCreateIncidentBtn().exists()).toBe(true);
+      findCreateIncidentBtn().trigger('click');
+      expect(mergeUrlParams).toHaveBeenCalledWith(
+        { issuable_template: incidentTemplateName, 'issue[issue_type]': incidentType },
+        newIssuePath,
+      );
     });
 
-    it('sets button loading on click', () => {
+    it('sets button loading on click', async () => {
       findCreateIncidentBtn().vm.$emit('click');
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findCreateIncidentBtn().attributes('loading')).toBe('true');
+      await wrapper.vm.$nextTick();
+      expect(findCreateIncidentBtn().attributes('loading')).toBe('true');
+    });
+
+    it("doesn't show the button when list is empty", () => {
+      mountComponent({
+        data: { incidents: { list: [] }, incidentsCount: {} },
+        loading: false,
       });
+      expect(findCreateIncidentBtn().exists()).toBe(false);
+    });
+
+    it('should track create new incident button', async () => {
+      findCreateIncidentBtn().vm.$emit('click');
+      await wrapper.vm.$nextTick();
+      expect(Tracking.event).toHaveBeenCalled();
     });
   });
 
-  describe('Pagination', () => {
+  describe('sorting the incident list by column', () => {
     beforeEach(() => {
       mountComponent({
-        data: {
-          incidents: {
-            list: mockIncidents,
-            pageInfo: { hasNextPage: true, hasPreviousPage: true },
-          },
-          errored: false,
-        },
+        data: { incidents: { list: mockIncidents }, incidentsCount },
         loading: false,
       });
     });
 
-    it('should render pagination', () => {
-      expect(wrapper.find(GlPagination).exists()).toBe(true);
+    const descSort = 'descending';
+    const ascSort = 'ascending';
+    const noneSort = 'none';
+
+    it.each`
+      selector                 | initialSort | firstSort   | nextSort
+      ${TH_CREATED_AT_TEST_ID} | ${descSort} | ${ascSort}  | ${descSort}
+      ${TH_SEVERITY_TEST_ID}   | ${noneSort} | ${descSort} | ${ascSort}
+      ${TH_PUBLISHED_TEST_ID}  | ${noneSort} | ${descSort} | ${ascSort}
+    `('updates sort with new direction', async ({ selector, initialSort, firstSort, nextSort }) => {
+      const [[attr, value]] = Object.entries(selector);
+      const columnHeader = () => wrapper.find(`[${attr}="${value}"]`);
+      expect(columnHeader().attributes('aria-sort')).toBe(initialSort);
+      columnHeader().trigger('click');
+      await wrapper.vm.$nextTick();
+      expect(columnHeader().attributes('aria-sort')).toBe(firstSort);
+      columnHeader().trigger('click');
+      await wrapper.vm.$nextTick();
+      expect(columnHeader().attributes('aria-sort')).toBe(nextSort);
     });
+  });
 
-    describe('prevPage', () => {
-      it('returns prevPage button', () => {
-        findPagination().vm.$emit('input', 3);
-
-        return wrapper.vm.$nextTick(() => {
-          expect(
-            findPagination()
-              .findAll('.page-item')
-              .at(0)
-              .text(),
-          ).toBe('Prev');
-        });
-      });
-
-      it('returns prevPage number', () => {
-        findPagination().vm.$emit('input', 3);
-
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.prevPage).toBe(2);
-        });
-      });
-
-      it('returns 0 when it is the first page', () => {
-        findPagination().vm.$emit('input', 1);
-
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.prevPage).toBe(0);
-        });
+  describe('Snowplow tracking', () => {
+    beforeEach(() => {
+      mountComponent({
+        data: { incidents: { list: mockIncidents }, incidentsCount: {} },
+        loading: false,
       });
     });
 
-    describe('nextPage', () => {
-      it('returns nextPage button', () => {
-        findPagination().vm.$emit('input', 3);
-
-        return wrapper.vm.$nextTick(() => {
-          expect(
-            findPagination()
-              .findAll('.page-item')
-              .at(1)
-              .text(),
-          ).toBe('Next');
-        });
-      });
-
-      it('returns nextPage number', () => {
-        mountComponent({
-          data: {
-            incidents: {
-              list: [...mockIncidents, ...mockIncidents, ...mockIncidents],
-              pageInfo: { hasNextPage: true, hasPreviousPage: true },
-            },
-            errored: false,
-          },
-          loading: false,
-        });
-        findPagination().vm.$emit('input', 1);
-
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.nextPage).toBe(2);
-        });
-      });
-
-      it('returns `null` when currentPage is already last page', () => {
-        findPagination().vm.$emit('input', 1);
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.nextPage).toBeNull();
-        });
-      });
+    it('should track incident list views', () => {
+      const { category, action } = trackIncidentListViewsOptions;
+      expect(Tracking.event).toHaveBeenCalledWith(category, action);
     });
 
-    describe('Search', () => {
-      beforeEach(() => {
-        mountComponent({
-          data: {
-            incidents: {
-              list: mockIncidents,
-              pageInfo: { hasNextPage: true, hasPreviousPage: true },
-            },
-            errored: false,
-          },
-          loading: false,
-        });
-      });
-
-      it('renders the search component for incidents', () => {
-        expect(findSearch().exists()).toBe(true);
-      });
-
-      it('sets the `searchTerm` graphql variable', () => {
-        const SEARCH_TERM = 'Simple Incident';
-
-        findSearch().vm.$emit('input', SEARCH_TERM);
-
-        expect(wrapper.vm.$data.searchTerm).toBe(SEARCH_TERM);
-      });
+    it('should track incident creation events', async () => {
+      findCreateIncidentBtn().vm.$emit('click');
+      await wrapper.vm.$nextTick();
+      const { category, action } = trackIncidentCreateNewOptions;
+      expect(Tracking.event).toHaveBeenCalledWith(category, action);
     });
   });
 });

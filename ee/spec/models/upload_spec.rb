@@ -6,7 +6,7 @@ RSpec.describe Upload do
   include EE::GeoHelpers
   using RSpec::Parameterized::TableSyntax
 
-  describe '.replicables_for_geo_node' do
+  describe '.replicables_for_current_secondary' do
     # Selective sync is configured relative to the upload's model. Take care not
     # to specify a model_factory that contradicts factory.
     #
@@ -37,10 +37,16 @@ RSpec.describe Upload do
     end
 
     with_them do
-      subject(:upload_included) { described_class.replicables_for_geo_node.include?(upload) }
+      subject(:upload_included) { described_class.replicables_for_current_secondary(upload).exists? }
 
       let(:model) { create(*model_factory) }
-      let(:node) { create_geo_node(model, sync_object_storage: sync_object_storage) }
+      let(:node) do
+        create(:geo_node_with_selective_sync_for,
+               model: model,
+               namespaces: selective_sync_namespaces,
+               shards: selective_sync_shards,
+               sync_object_storage: sync_object_storage)
+      end
 
       before do
         stub_current_geo_node(node)
@@ -77,42 +83,6 @@ RSpec.describe Upload do
           it { is_expected.to be_falsey }
         end
       end
-    end
-
-    def create_geo_node(model, sync_object_storage:)
-      node = build(:geo_node)
-
-      if selective_sync_namespaces
-        node.selective_sync_type = 'namespaces'
-      elsif selective_sync_shards
-        node.selective_sync_type = 'shards'
-      end
-
-      case selective_sync_namespaces
-      when :model
-        node.namespaces = [model]
-      when :model_parent
-        node.namespaces = [model.parent]
-      when :model_parent_parent
-        node.namespaces = [model.parent.parent]
-      when :other
-        node.namespaces = [create(:group)]
-      end
-
-      case selective_sync_shards
-      when :model
-        node.selective_sync_shards = [model.repository_storage]
-      when :model_project
-        project = create(:project, namespace: model)
-        node.selective_sync_shards = [project.repository_storage]
-      when :other
-        node.selective_sync_shards = ['other_shard_name']
-      end
-
-      node.sync_object_storage = sync_object_storage
-
-      node.save!
-      node
     end
   end
 

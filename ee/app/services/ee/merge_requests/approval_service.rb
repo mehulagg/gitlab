@@ -28,7 +28,7 @@ module EE
 
       override :execute_approval_hooks
       def execute_approval_hooks(merge_request, current_user)
-        if merge_request.approvals_left.zero?
+        if merge_request.approvals_left == 0
           notification_service.async.approve_mr(merge_request, current_user)
           execute_hooks(merge_request, 'approved')
         else

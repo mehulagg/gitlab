@@ -1,11 +1,12 @@
 import { shallowMount } from '@vue/test-utils';
+import { GlDropdownItem, GlSearchBoxByType, GlLoadingIcon, GlButton } from '@gitlab/ui';
 import { createStore } from '~/monitoring/stores';
 import * as types from '~/monitoring/stores/mutation_types';
-import { GlDeprecatedDropdownItem, GlSearchBoxByType, GlLoadingIcon } from '@gitlab/ui';
+import DateTimePicker from '~/vue_shared/components/date_time_picker/date_time_picker.vue';
+import RefreshButton from '~/monitoring/components/refresh_button.vue';
 import DashboardHeader from '~/monitoring/components/dashboard_header.vue';
 import DashboardsDropdown from '~/monitoring/components/dashboards_dropdown.vue';
-import DuplicateDashboardModal from '~/monitoring/components/duplicate_dashboard_modal.vue';
-import CreateDashboardModal from '~/monitoring/components/create_dashboard_modal.vue';
+import ActionsMenu from '~/monitoring/components/dashboard_actions_menu.vue';
 import { setupAllDashboards, setupStoreWithDashboard, setupStoreWithData } from '../store_utils';
 import {
   environmentData,
@@ -30,18 +31,15 @@ describe('Dashboard header', () => {
   const findDashboardDropdown = () => wrapper.find(DashboardsDropdown);
 
   const findEnvsDropdown = () => wrapper.find({ ref: 'monitorEnvironmentsDropdown' });
-  const findEnvsDropdownItems = () => findEnvsDropdown().findAll(GlDeprecatedDropdownItem);
+  const findEnvsDropdownItems = () => findEnvsDropdown().findAll(GlDropdownItem);
   const findEnvsDropdownSearch = () => findEnvsDropdown().find(GlSearchBoxByType);
   const findEnvsDropdownSearchMsg = () => wrapper.find({ ref: 'monitorEnvironmentsDropdownMsg' });
   const findEnvsDropdownLoadingIcon = () => findEnvsDropdown().find(GlLoadingIcon);
 
-  const findActionsMenu = () => wrapper.find('[data-testid="actions-menu"]');
-  const findCreateDashboardMenuItem = () =>
-    findActionsMenu().find('[data-testid="action-create-dashboard"]');
-  const findCreateDashboardDuplicateItem = () =>
-    findActionsMenu().find('[data-testid="action-duplicate-dashboard"]');
-  const findDuplicateDashboardModal = () => wrapper.find(DuplicateDashboardModal);
-  const findCreateDashboardModal = () => wrapper.find('[data-testid="create-dashboard-modal"]');
+  const findDateTimePicker = () => wrapper.find(DateTimePicker);
+  const findRefreshButton = () => wrapper.find(RefreshButton);
+
+  const findActionsMenu = () => wrapper.find(ActionsMenu);
 
   const setSearchTerm = searchTerm => {
     store.commit(`monitoringDashboard/${types.SET_ENVIRONMENTS_FILTER}`, searchTerm);
@@ -118,7 +116,7 @@ describe('Dashboard header', () => {
       });
 
       it('there are no environments listed', () => {
-        expect(findEnvsDropdownItems().length).toBe(0);
+        expect(findEnvsDropdownItems()).toHaveLength(0);
       });
     });
 
@@ -147,12 +145,17 @@ describe('Dashboard header', () => {
         });
       });
 
-      it('renders the environments dropdown with an active element', () => {
-        const selectedItems = findEnvsDropdownItems().filter(
-          item => item.attributes('active') === 'true',
-        );
+      it('environments dropdown items can be checked', () => {
+        const items = findEnvsDropdownItems();
+        const checkItems = findEnvsDropdownItems().filter(item => item.props('isCheckItem'));
 
-        expect(selectedItems.length).toBe(1);
+        expect(items).toHaveLength(checkItems.length);
+      });
+
+      it('checks the currently selected environment', () => {
+        const selectedItems = findEnvsDropdownItems().filter(item => item.props('isChecked'));
+
+        expect(selectedItems).toHaveLength(1);
         expect(selectedItems.at(0).text()).toBe(currentEnvironmentName);
       });
 
@@ -162,7 +165,7 @@ describe('Dashboard header', () => {
         setSearchTerm(searchTerm);
 
         return wrapper.vm.$nextTick().then(() => {
-          expect(findEnvsDropdownItems().length).toBe(resultEnvs.length);
+          expect(findEnvsDropdownItems()).toHaveLength(resultEnvs.length);
         });
       });
 
@@ -171,7 +174,7 @@ describe('Dashboard header', () => {
         setSearchTerm(searchTerm);
 
         return wrapper.vm.$nextTick(() => {
-          expect(findEnvsDropdownItems().length).toBe(environmentData.length);
+          expect(findEnvsDropdownItems()).toHaveLength(environmentData.length);
         });
       });
 
@@ -205,135 +208,168 @@ describe('Dashboard header', () => {
     });
   });
 
-  describe('when a dashboard has been duplicated in the duplicate dashboard modal', () => {
+  describe('date time picker', () => {
     beforeEach(() => {
-      store.state.monitoringDashboard.projectPath = 'root/sandbox';
-
-      setupAllDashboards(store, dashboardGitResponse[0].path);
+      createShallowWrapper();
     });
 
-    it('redirects to the newly created dashboard', () => {
-      delete window.location;
-      window.location = new URL('https://localhost');
+    it('is rendered', () => {
+      expect(findDateTimePicker().exists()).toBe(true);
+    });
 
-      const newDashboard = dashboardGitResponse[1];
+    describe('timezone setting', () => {
+      const setupWithTimezone = value => {
+        store = createStore({ dashboardTimezone: value });
+        createShallowWrapper();
+      };
 
+      describe('local timezone is enabled by default', () => {
+        it('shows the data time picker in local timezone', () => {
+          expect(findDateTimePicker().props('utc')).toBe(false);
+        });
+      });
+
+      describe('when LOCAL timezone is enabled', () => {
+        beforeEach(() => {
+          setupWithTimezone('LOCAL');
+        });
+
+        it('shows the data time picker in local timezone', () => {
+          expect(findDateTimePicker().props('utc')).toBe(false);
+        });
+      });
+
+      describe('when UTC timezone is enabled', () => {
+        beforeEach(() => {
+          setupWithTimezone('UTC');
+        });
+
+        it('shows the data time picker in UTC format', () => {
+          expect(findDateTimePicker().props('utc')).toBe(true);
+        });
+      });
+    });
+  });
+
+  describe('refresh button', () => {
+    beforeEach(() => {
+      createShallowWrapper();
+    });
+
+    it('is rendered', () => {
+      expect(findRefreshButton().exists()).toBe(true);
+    });
+  });
+
+  describe('external dashboard link', () => {
+    beforeEach(() => {
+      store.state.monitoringDashboard.externalDashboardUrl = '/mockUrl';
       createShallowWrapper();
 
-      const newDashboardUrl = 'root/sandbox/-/metrics/dashboard.yml';
-      findDuplicateDashboardModal().vm.$emit('dashboardDuplicated', newDashboard);
+      return wrapper.vm.$nextTick();
+    });
 
-      return wrapper.vm.$nextTick().then(() => {
-        expect(redirectTo).toHaveBeenCalled();
-        expect(redirectTo).toHaveBeenCalledWith(newDashboardUrl);
-      });
+    it('shows the link', () => {
+      const externalDashboardButton = wrapper.find('.js-external-dashboard-link');
+
+      expect(externalDashboardButton.exists()).toBe(true);
+      expect(externalDashboardButton.is(GlButton)).toBe(true);
+      expect(externalDashboardButton.text()).toContain('View full dashboard');
     });
   });
 
   describe('actions menu', () => {
-    beforeEach(() => {
-      store.state.monitoringDashboard.projectPath = '';
-      createShallowWrapper();
-    });
-
-    it('is rendered if projectPath is set in store', () => {
-      store.state.monitoringDashboard.projectPath = mockProjectPath;
-
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findActionsMenu().exists()).toBe(true);
-      });
-    });
-
-    it('is not rendered if projectPath is not set in store', () => {
-      expect(findActionsMenu().exists()).toBe(false);
-    });
-
-    it('contains the create dashboard modal', () => {
-      store.state.monitoringDashboard.projectPath = mockProjectPath;
-
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findActionsMenu().contains(CreateDashboardModal)).toBe(true);
-      });
-    });
-
-    const duplicableCases = [
-      null, // When no path is specified, it uses the default dashboard path.
+    const ootbDashboards = [
       dashboardGitResponse[0].path,
-      dashboardGitResponse[2].path,
       selfMonitoringDashboardGitResponse[0].path,
     ];
-
-    describe.each(duplicableCases)(
-      'when the selected dashboard can be duplicated',
-      dashboardPath => {
-        it('contains menu items for "Create New", "Duplicate Dashboard" and a modal for duplicating dashboards', () => {
-          store.state.monitoringDashboard.projectPath = mockProjectPath;
-          setupAllDashboards(store, dashboardPath);
-
-          return wrapper.vm.$nextTick().then(() => {
-            expect(findCreateDashboardMenuItem().exists()).toBe(true);
-            expect(findCreateDashboardDuplicateItem().exists()).toBe(true);
-            expect(findDuplicateDashboardModal().exists()).toBe(true);
-          });
-        });
-      },
-    );
-
-    const nonDuplicableCases = [
+    const customDashboards = [
       dashboardGitResponse[1].path,
       selfMonitoringDashboardGitResponse[1].path,
     ];
 
-    describe.each(nonDuplicableCases)(
-      'when the selected dashboard cannot be duplicated',
-      dashboardPath => {
-        it('contains a "Create New" menu item, but no "Duplicate Dashboard" menu item and modal', () => {
-          store.state.monitoringDashboard.projectPath = mockProjectPath;
+    it('is rendered', () => {
+      createShallowWrapper();
+
+      expect(findActionsMenu().exists()).toBe(true);
+    });
+
+    describe('adding metrics prop', () => {
+      it.each(ootbDashboards)('gets passed true if current dashboard is OOTB', dashboardPath => {
+        createShallowWrapper({ customMetricsAvailable: true });
+
+        store.state.monitoringDashboard.emptyState = false;
+        setupAllDashboards(store, dashboardPath);
+
+        return wrapper.vm.$nextTick().then(() => {
+          expect(findActionsMenu().props('addingMetricsAvailable')).toBe(true);
+        });
+      });
+
+      it.each(customDashboards)(
+        'gets passed false if current dashboard is custom',
+        dashboardPath => {
+          createShallowWrapper({ customMetricsAvailable: true });
+
+          store.state.monitoringDashboard.emptyState = false;
           setupAllDashboards(store, dashboardPath);
 
           return wrapper.vm.$nextTick().then(() => {
-            expect(findCreateDashboardMenuItem().exists()).toBe(true);
-            expect(findCreateDashboardDuplicateItem().exists()).toBe(false);
-            expect(findDuplicateDashboardModal().exists()).toBe(false);
+            expect(findActionsMenu().props('addingMetricsAvailable')).toBe(false);
           });
+        },
+      );
+
+      it('gets passed false if empty state is shown', () => {
+        createShallowWrapper({ customMetricsAvailable: true });
+
+        store.state.monitoringDashboard.emptyState = true;
+        setupAllDashboards(store, ootbDashboards[0]);
+
+        return wrapper.vm.$nextTick().then(() => {
+          expect(findActionsMenu().props('addingMetricsAvailable')).toBe(false);
         });
-      },
-    );
-  });
+      });
 
-  describe('actions menu modals', () => {
-    beforeEach(() => {
-      store.state.monitoringDashboard.projectPath = mockProjectPath;
-      setupAllDashboards(store);
+      it('gets passed false if custom metrics are not available', () => {
+        createShallowWrapper({ customMetricsAvailable: false });
 
-      createShallowWrapper();
-    });
+        store.state.monitoringDashboard.emptyState = false;
+        setupAllDashboards(store, ootbDashboards[0]);
 
-    it('Clicking on "Create New" opens up a modal', () => {
-      const modalId = 'createDashboard';
-      const modalTrigger = findCreateDashboardMenuItem();
-      const rootEmit = jest.spyOn(wrapper.vm.$root, '$emit');
-
-      modalTrigger.trigger('click');
-
-      return wrapper.vm.$nextTick().then(() => {
-        expect(rootEmit.mock.calls[0]).toContainEqual(modalId);
+        return wrapper.vm.$nextTick().then(() => {
+          expect(findActionsMenu().props('addingMetricsAvailable')).toBe(false);
+        });
       });
     });
 
-    it('"Create new dashboard" modal contains correct buttons', () => {
-      expect(findCreateDashboardModal().props('projectPath')).toBe(mockProjectPath);
-    });
+    it('custom metrics path gets passed', () => {
+      const path = 'https://path/to/customMetrics';
 
-    it('"Duplicate Dashboard" opens up a modal', () => {
-      const modalId = 'duplicateDashboard';
-      const modalTrigger = findCreateDashboardDuplicateItem();
-      const rootEmit = jest.spyOn(wrapper.vm.$root, '$emit');
-
-      modalTrigger.trigger('click');
+      createShallowWrapper({ customMetricsPath: path });
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(rootEmit.mock.calls[0]).toContainEqual(modalId);
+        expect(findActionsMenu().props('customMetricsPath')).toBe(path);
+      });
+    });
+
+    it('validate query path gets passed', () => {
+      const path = 'https://path/to/validateQuery';
+
+      createShallowWrapper({ validateQueryPath: path });
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(findActionsMenu().props('validateQueryPath')).toBe(path);
+      });
+    });
+
+    it('default branch gets passed', () => {
+      const branch = 'branchName';
+
+      createShallowWrapper({ defaultBranch: branch });
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(findActionsMenu().props('defaultBranch')).toBe(branch);
       });
     });
   });

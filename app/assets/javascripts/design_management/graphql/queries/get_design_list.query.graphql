@@ -6,18 +6,15 @@ query getDesignList($fullPath: ID!, $iid: String!, $atVersion: ID) {
     id
     issue(iid: $iid) {
       designCollection {
+        copyState
         designs(atVersion: $atVersion) {
-          edges {
-            node {
-              ...DesignListItem
-            }
+          nodes {
+            ...DesignListItem
           }
         }
         versions {
-          edges {
-            node {
-              ...VersionListItem
-            }
+          nodes {
+            ...VersionListItem
           }
         }
       }

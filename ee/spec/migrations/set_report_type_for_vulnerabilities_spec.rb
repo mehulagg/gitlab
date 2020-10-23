@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20191105094625_set_report_type_for_vulnerabilities.rb')
+require_migration!
 
 RSpec.describe SetReportTypeForVulnerabilities do
   let(:confidence_levels) do
     { undefined: 0, ignore: 1, unknown: 2, experimental: 3, low: 4, medium: 5, high: 6, confirmed: 7 }
   end
+
   let(:severity_levels) { { undefined: 0, info: 1, unknown: 2, low: 4, medium: 5, high: 6, critical: 7 } }
   let(:report_types) { { sast: 0, dependency_scanning: 1, container_scanning: 2, dast: 3 } }
 

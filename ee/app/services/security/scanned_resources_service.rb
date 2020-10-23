@@ -21,8 +21,8 @@ module Security
         scanned_resources = scanned_resources.first(@limit) if @limit
         acc[type] = scanned_resources.map do |resource|
           {
-            'request_method' => resource['method'],
-            'url' => resource['url']
+            'request_method' => resource.request_method,
+            'url' => resource.request_uri.to_s
           }
         end
       end

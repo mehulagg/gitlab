@@ -85,6 +85,17 @@ RSpec.describe Ci::Minutes::BatchResetService do
             expect(namespace.last_ci_minutes_usage_notification_level).to be_nil
           end
         end
+
+        it 'touches the shared_runners_seconds_last_reset for all namespaces' do
+          subject
+
+          expect(
+            [
+              namespace_1.reload, namespace_2.reload, namespace_3.reload,
+              namespace_4.reload, namespace_5.reload
+            ].map(&:shared_runners_seconds_last_reset)
+          ).to all(be_within(1.second).of(Time.current))
+        end
       end
 
       context 'when ID range is not provided' do
@@ -110,35 +121,44 @@ RSpec.describe Ci::Minutes::BatchResetService do
           expect(namespace_6.last_ci_minutes_notification_at).to be_nil
           expect(namespace_6.last_ci_minutes_usage_notification_level).to be_nil
         end
+
+        it 'touches the shared_runners_seconds_last_reset for all namespaces' do
+          subject
+
+          expect(
+            [
+              namespace_1.reload, namespace_2.reload, namespace_3.reload,
+              namespace_4.reload, namespace_5.reload, namespace_6.reload
+            ].map(&:shared_runners_seconds_last_reset)
+          ).to all(be_within(1.second).of(Time.current))
+        end
       end
 
       context 'when an ActiveRecordError is raised' do
         let(:ids_range) { nil }
 
         before do
-          expect(Namespace).to receive(:transaction).once.ordered.and_raise(ActiveRecord::ActiveRecordError)
+          expect(Namespace).to receive(:transaction).once.ordered.and_raise(ActiveRecord::ActiveRecordError, 'something went wrong')
           expect(Namespace).to receive(:transaction).once.ordered.and_call_original
         end
 
-        it 'continues its progress' do
+        it 'continues its progress and raises exception at the end' do
           expect(service).to receive(:reset_ci_minutes!).with([namespace_1, namespace_2, namespace_3]).and_call_original
           expect(service).to receive(:reset_ci_minutes!).with([namespace_4, namespace_5, namespace_6]).and_call_original
 
-          expect(Gitlab::ErrorTracking).to receive(:track_and_raise_exception)
-          subject
-        end
-
-        it 'raises exception with namespace details' do
-          expect(Gitlab::ErrorTracking).to receive(
-            :track_and_raise_exception
-          ).with(
-            Ci::Minutes::BatchResetService::BatchNotResetError.new(
-              'Some namespace shared runner minutes were not reset.'
-            ),
-            { namespace_ranges: [{ count: 3, first_id: 1, last_id: 3 }] }
-          ).once.and_call_original
-
-          expect { subject }.to raise_error(Ci::Minutes::BatchResetService::BatchNotResetError)
+          expect { subject }
+            .to raise_error(described_class::BatchNotResetError) do |error|
+              expect(error.message).to eq('Some namespace shared runner minutes were not reset')
+              expect(error.sentry_extra_data[:failed_batches]).to contain_exactly(
+                {
+                  count: 3,
+                  first_namespace_id: 1,
+                  last_namespace_id: 3,
+                  error_message: 'something went wrong',
+                  error_backtrace: kind_of(Array)
+                }
+              )
+            end
         end
       end
     end

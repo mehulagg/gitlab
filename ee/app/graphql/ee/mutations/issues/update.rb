@@ -7,10 +7,17 @@ module EE
         extend ActiveSupport::Concern
 
         prepended do
-          argument :health_status,
-                   ::Types::HealthStatusEnum,
+          include ::Mutations::Issues::CommonEEMutationArguments
+
+          argument :epic_id, GraphQL::ID_TYPE,
                    required: false,
-                   description: 'The desired health status'
+                   description: 'The ID of the parent epic. NULL when removing the association'
+        end
+
+        def resolve(project_path:, iid:, **args)
+          args[:epic_id] = ::GitlabSchema.parse_gid(args[:epic_id], expected_type: ::Epic).model_id if args[:epic_id]
+
+          super
         end
       end
     end

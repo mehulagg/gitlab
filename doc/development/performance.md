@@ -247,8 +247,12 @@ The following configuration options can be configured:
 
 - `STACKPROF_ENABLED`: Enables stackprof signal handler on SIGUSR2 signal.
   Defaults to `false`.
-- `STACKPROF_INTERVAL_US`: Sampling interval in microseconds. Defaults to
-  `10000` μs (100hz).
+- `STACKPROF_MODE`: See [sampling modes](https://github.com/tmm1/stackprof#sampling).
+  Defaults to `cpu`.
+- `STACKPROF_INTERVAL`: Sampling interval. Unit semantics depend on `STACKPROF_MODE`.
+  For `object` mode this is a per-event interval (every `n`th event will be sampled)
+  and defaults to `1000`.
+  For other modes such as `cpu` this is a frequency and defaults to `10000` μs (100hz).
 - `STACKPROF_FILE_PREFIX`: File path prefix where profiles are stored. Defaults
   to `$TMPDIR` (often corresponds to `/tmp`).
 - `STACKPROF_TIMEOUT_S`: Profiling timeout in seconds. Profiling will
@@ -280,6 +284,10 @@ take care to only send the signal to Puma workers.
 This can be done via `pkill -USR2 puma:`. The `:` disambiguates between `puma
 4.3.3.gitlab.2 ...` (the master process) from `puma: cluster worker 0: ...` (the
 worker processes), selecting the latter.
+
+For Sidekiq, the signal can be sent to the `sidekiq-cluster` process via `pkill
+-USR2 bin/sidekiq-cluster`, which will forward the signal to all Sidekiq
+children. Alternatively, you can also select a specific pid of interest.
 
 Production profiles can be especially noisy. It can be helpful to visualize them
 as a [flamegraph](https://github.com/brendangregg/FlameGraph). This can be done

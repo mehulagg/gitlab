@@ -3,11 +3,9 @@ import {
   GlAlert,
   GlButton,
   GlCollapse,
-  GlDeprecatedButton,
   GlFormCheckbox,
   GlFormCombobox,
   GlFormGroup,
-  GlFormInput,
   GlFormSelect,
   GlFormTextarea,
   GlIcon,
@@ -39,11 +37,9 @@ export default {
     GlAlert,
     GlButton,
     GlCollapse,
-    GlDeprecatedButton,
     GlFormCheckbox,
     GlFormCombobox,
     GlFormGroup,
-    GlFormInput,
     GlFormSelect,
     GlFormTextarea,
     GlIcon,
@@ -124,11 +120,6 @@ export default {
       return '';
     },
     tokenValidationState() {
-      // If the feature flag is off, do not validate. Remove when flag is removed.
-      if (!this.glFeatures.ciKeyAutocomplete) {
-        return true;
-      }
-
       const validator = this.$options.tokens?.[this.variable.key]?.validation;
 
       if (validator) {
@@ -206,19 +197,11 @@ export default {
   >
     <form>
       <gl-form-combobox
-        v-if="glFeatures.ciKeyAutocomplete"
         v-model="key"
         :token-list="$options.tokenList"
         :label-text="__('Key')"
+        data-qa-selector="ci_variable_key_field"
       />
-
-      <gl-form-group v-else :label="__('Key')" label-for="ci-variable-key">
-        <gl-form-input
-          id="ci-variable-key"
-          v-model="key"
-          data-qa-selector="ci_variable_key_field"
-        />
-      </gl-form-group>
 
       <gl-form-group
         :label="__('Value')"
@@ -339,24 +322,25 @@ export default {
       </gl-alert>
     </gl-collapse>
     <template #modal-footer>
-      <gl-deprecated-button @click="hideModal">{{ __('Cancel') }}</gl-deprecated-button>
-      <gl-deprecated-button
+      <gl-button @click="hideModal">{{ __('Cancel') }}</gl-button>
+      <gl-button
         v-if="variableBeingEdited"
         ref="deleteCiVariable"
-        category="secondary"
         variant="danger"
+        category="secondary"
         data-qa-selector="ci_variable_delete_button"
         @click="deleteVarAndClose"
-        >{{ __('Delete variable') }}</gl-deprecated-button
+        >{{ __('Delete variable') }}</gl-button
       >
-      <gl-deprecated-button
+      <gl-button
         ref="updateOrAddVariable"
         :disabled="!canSubmit"
         variant="success"
+        category="primary"
         data-qa-selector="ci_variable_save_button"
         @click="updateOrAddVariable"
         >{{ modalActionText }}
-      </gl-deprecated-button>
+      </gl-button>
     </template>
   </gl-modal>
 </template>

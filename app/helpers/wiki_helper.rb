@@ -69,7 +69,12 @@ module WikiHelper
   end
 
   def wiki_attachment_upload_url
-    expose_url(api_v4_projects_wikis_attachments_path(id: @wiki.container.id))
+    case @wiki.container
+    when Project
+      expose_url(api_v4_projects_wikis_attachments_path(id: @wiki.container.id))
+    else
+      raise TypeError, "Unsupported wiki container #{@wiki.container.class}"
+    end
   end
 
   def wiki_sort_controls(wiki, sort, direction)
@@ -80,7 +85,7 @@ module WikiHelper
 
     link_to(wiki_path(wiki, action: :pages, sort: sort, direction: reversed_direction),
       type: 'button', class: link_class, title: _('Sort direction')) do
-      sprite_icon("sort-#{icon_class}", size: 16)
+      sprite_icon("sort-#{icon_class}")
     end
   end
 
@@ -137,7 +142,8 @@ module WikiHelper
       'wiki-format'               => page.format,
       'wiki-title-size'           => page.title.bytesize,
       'wiki-content-size'         => page.raw_content.bytesize,
-      'wiki-directory-nest-level' => page.path.scan('/').count
+      'wiki-directory-nest-level' => page.path.scan('/').count,
+      'wiki-container-type'       => page.wiki.container.class.name
     }
   end
 
@@ -147,3 +153,5 @@ module WikiHelper
       !container.has_confluence?
   end
 end
+
+WikiHelper.prepend_if_ee('EE::WikiHelper')

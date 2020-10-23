@@ -3,7 +3,7 @@
 require 'mime/types'
 
 module API
-  class Branches < Grape::API::Instance
+  class Branches < ::API::Base
     include PaginationParams
 
     BRANCH_ENDPOINT_REQUIREMENTS = API::NAMESPACE_OR_PROJECT_REQUIREMENTS.merge(branch: API::NO_SLASH_URL_PART_REGEX)
@@ -40,12 +40,8 @@ module API
 
         repository = user_project.repository
 
-        if Feature.enabled?(:branch_list_keyset_pagination, user_project)
-          branches = BranchesFinder.new(repository, declared_params(include_missing: false)).execute(gitaly_pagination: true)
-        else
-          branches = BranchesFinder.new(repository, declared_params(include_missing: false)).execute
-          branches = paginate(::Kaminari.paginate_array(branches))
-        end
+        branches_finder = BranchesFinder.new(repository, declared_params(include_missing: false))
+        branches = Gitlab::Pagination::GitalyKeysetPager.new(self, user_project).paginate(branches_finder)
 
         merged_branch_names = repository.merged_branch_names(branches.map(&:name))
 

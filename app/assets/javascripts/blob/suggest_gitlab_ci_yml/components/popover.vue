@@ -1,5 +1,5 @@
 <script>
-import { GlPopover, GlSprintf, GlDeprecatedButton, GlIcon } from '@gitlab/ui';
+import { GlPopover, GlSprintf, GlButton } from '@gitlab/ui';
 import { parseBoolean, scrollToElement, setCookie, getCookie } from '~/lib/utils/common_utils';
 import { s__ } from '~/locale';
 import Tracking from '~/tracking';
@@ -29,8 +29,7 @@ export default {
   components: {
     GlPopover,
     GlSprintf,
-    GlIcon,
-    GlDeprecatedButton,
+    GlButton,
   },
   mixins: [trackingMixin],
   props: {
@@ -47,6 +46,10 @@ export default {
       required: true,
     },
     humanAccess: {
+      type: String,
+      required: true,
+    },
+    mergeRequestPath: {
       type: String,
       required: true,
     },
@@ -110,20 +113,19 @@ export default {
     :css-classes="['suggest-gitlab-ci-yml', 'ml-4']"
   >
     <template #title>
-      <span v-html="suggestTitle"></span>
+      <span>{{ suggestTitle }}</span>
       <span class="ml-auto">
-        <gl-deprecated-button
+        <gl-button
           :aria-label="__('Close')"
           class="btn-blank"
           name="dismiss"
+          icon="close"
           :data-track-property="humanAccess"
           :data-track-value="$options.dismissTrackValue"
           :data-track-event="$options.clickTrackValue"
           :data-track-label="trackLabel"
           @click="onDismiss"
-        >
-          <gl-icon name="close" aria-hidden="true" />
-        </gl-deprecated-button>
+        />
       </span>
     </template>
 

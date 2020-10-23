@@ -7,12 +7,22 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
   <div
     class="btn-group flex-grow-1 mr-2"
   >
-    <gl-deprecated-dropdown-stub
+    <gl-dropdown-stub
+      category="tertiary"
       class="flex-grow-1 text-center"
+      headertext=""
       right=""
+      size="medium"
       text="Severity"
+      variant="default"
     >
-      <gl-deprecated-dropdown-item-stub>
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightname=""
+        secondarytext=""
+      >
         <span
           class="d-flex"
         >
@@ -25,8 +35,14 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
           Component name
         
         </span>
-      </gl-deprecated-dropdown-item-stub>
-      <gl-deprecated-dropdown-item-stub>
+      </gl-dropdown-item-stub>
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightname=""
+        secondarytext=""
+      >
         <span
           class="d-flex"
         >
@@ -39,8 +55,14 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
           Packager
         
         </span>
-      </gl-deprecated-dropdown-item-stub>
-      <gl-deprecated-dropdown-item-stub>
+      </gl-dropdown-item-stub>
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightname=""
+        secondarytext=""
+      >
         <span
           class="d-flex"
         >
@@ -53,34 +75,39 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
           Severity
         
         </span>
-      </gl-deprecated-dropdown-item-stub>
-    </gl-deprecated-dropdown-stub>
+      </gl-dropdown-item-stub>
+    </gl-dropdown-stub>
      
-    <gl-deprecated-button-stub
+    <gl-button-stub
+      buttontextclasses=""
+      category="primary"
       class="flex-grow-0 js-sort-order"
-      size="md"
+      icon=""
+      size="medium"
       title="Sort direction"
-      variant="secondary"
+      variant="default"
     >
       <gl-icon-stub
         name="sort-lowest"
         size="16"
       />
-    </gl-deprecated-button-stub>
+    </gl-button-stub>
   </div>
    
-  <gl-deprecated-button-stub
+  <gl-button-stub
+    buttontextclasses=""
+    category="primary"
     class="js-download"
     download="dependencies.json"
     href="http://test.host/dependencies.json"
-    size="md"
+    icon="export"
+    size="medium"
     title="Export as JSON"
-    variant="secondary"
+    variant="default"
   >
-    <gl-icon-stub
-      name="export"
-      size="16"
-    />
-  </gl-deprecated-button-stub>
+    
+    Export
+  
+  </gl-button-stub>
 </div>
 `;

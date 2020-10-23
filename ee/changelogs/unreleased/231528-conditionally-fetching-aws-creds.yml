@@ -1,5 +1,0 @@
----
-title: Only send AWS Credentials ENV to indexer when AWS config is enabled
-merge_request: 37865
-author:
-type: fixed

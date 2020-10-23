@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: reference
 ---
 
@@ -64,7 +67,7 @@ To ensure only admin users can delete projects:
 1. Check the **Default project deletion protection** checkbox.
 1. Click **Save changes**.
 
-## Default deletion adjourned period **(PREMIUM ONLY)**
+## Default deletion delay **(PREMIUM ONLY)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32935) in GitLab 12.6.
 
@@ -75,7 +78,7 @@ CAUTION: **Warning:**
 The default behavior of [Delayed Project deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/32935) in GitLab 12.6 was changed to
 [Immediate deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
 
-Projects within a group can be deleted after a delayed period, by [configuring in Group Settings](../../group/index.md#enabling-delayed-project-removal-premium).
+Projects within a group can be deleted after a delayed period, by [configuring in Group Settings](../../group/index.md#enabling-delayed-project-removal).
 
 The default period is 7 days, and can be changed. Setting this period to 0 will enable immediate removal
 of projects or groups.
@@ -85,11 +88,11 @@ To change this period:
 1. Select the desired option.
 1. Click **Save changes**.
 
-### Override default deletion adjourned period
+### Override default deletion delayed period
 
 Alternatively, projects that are marked for removal can be deleted immediately. To do so:
 
-1. [Restore the project](../../project/settings/#restore-a-project-premium).
+1. [Restore the project](../../project/settings/#restore-a-project).
 1. Delete the project as described in the [Administering Projects page](../../admin_area/#administering-projects).
 
 ## Default project visibility

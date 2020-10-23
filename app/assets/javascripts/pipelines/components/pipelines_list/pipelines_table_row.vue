@@ -1,5 +1,7 @@
 <script>
+import { GlButton, GlTooltipDirective, GlModalDirective } from '@gitlab/ui';
 import eventHub from '../../event_hub';
+import { __ } from '~/locale';
 import PipelinesActionsComponent from './pipelines_actions.vue';
 import PipelinesArtifactsComponent from './pipelines_artifacts.vue';
 import CiBadge from '~/vue_shared/components/ci_badge_link.vue';
@@ -8,8 +10,6 @@ import PipelineUrl from './pipeline_url.vue';
 import PipelineTriggerer from './pipeline_triggerer.vue';
 import PipelinesTimeago from './time_ago.vue';
 import CommitComponent from '~/vue_shared/components/commit.vue';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 import { PIPELINES_TABLE } from '../../constants';
 
 /**
@@ -18,6 +18,14 @@ import { PIPELINES_TABLE } from '../../constants';
  * Given the received object renders a table row in the pipelines' table.
  */
 export default {
+  i18n: {
+    cancelTitle: __('Cancel'),
+    redeployTitle: __('Retry'),
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+    GlModalDirective,
+  },
   components: {
     PipelinesActionsComponent,
     PipelinesArtifactsComponent,
@@ -27,8 +35,7 @@ export default {
     PipelineTriggerer,
     CiBadge,
     PipelinesTimeago,
-    LoadingButton,
-    Icon,
+    GlButton,
   },
   props: {
     pipeline: {
@@ -274,6 +281,7 @@ export default {
         <ci-badge
           :status="pipelineStatus"
           :show-text="!isChildView"
+          :icon-classes="'gl-vertical-align-middle!'"
           data-qa-selector="pipeline_commit_status"
         />
       </div>
@@ -322,7 +330,11 @@ export default {
       </div>
     </div>
 
-    <pipelines-timeago :duration="pipelineDuration" :finished-time="pipelineFinishedAt" />
+    <pipelines-timeago
+      class="gl-text-right"
+      :duration="pipelineDuration"
+      :finished-time="pipelineFinishedAt"
+    />
 
     <div
       v-if="displayPipelineActions"
@@ -337,28 +349,35 @@ export default {
           class="d-md-block"
         />
 
-        <loading-button
+        <gl-button
           v-if="pipeline.flags.retryable"
-          :loading="isRetrying"
+          v-gl-tooltip.hover
+          :aria-label="$options.i18n.redeployTitle"
+          :title="$options.i18n.redeployTitle"
           :disabled="isRetrying"
-          container-class="js-pipelines-retry-button btn btn-default btn-retry"
+          :loading="isRetrying"
+          class="js-pipelines-retry-button btn-retry"
           data-qa-selector="pipeline_retry_button"
+          icon="repeat"
+          variant="default"
+          category="secondary"
           @click="handleRetryClick"
-        >
-          <icon name="repeat" />
-        </loading-button>
+        />
 
-        <loading-button
+        <gl-button
           v-if="pipeline.flags.cancelable"
+          v-gl-tooltip.hover
+          v-gl-modal-directive="'confirmation-modal'"
+          :aria-label="$options.i18n.cancelTitle"
+          :title="$options.i18n.cancelTitle"
           :loading="isCancelling"
           :disabled="isCancelling"
-          data-toggle="modal"
-          data-target="#confirmation-modal"
-          container-class="js-pipelines-cancel-button btn btn-remove"
+          icon="close"
+          variant="danger"
+          category="primary"
+          class="js-pipelines-cancel-button"
           @click="handleCancelClick"
-        >
-          <icon name="close" />
-        </loading-button>
+        />
       </div>
     </div>
   </div>

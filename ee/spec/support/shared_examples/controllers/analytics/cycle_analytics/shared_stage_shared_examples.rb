@@ -2,7 +2,6 @@
 
 RSpec.shared_examples 'cycle analytics stages controller' do
   before do
-    stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => true)
     stub_licensed_features(cycle_analytics_for_groups: true)
 
     group.add_reporter(user)
@@ -242,18 +241,6 @@ RSpec.shared_examples 'group permission check on the controller level' do
     end
   end
 
-  context 'when feature flag is disabled' do
-    before do
-      stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => false)
-    end
-
-    it 'renders `not_found` response' do
-      subject
-
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
-  end
-
   context 'when user has no lower access level than `reporter`' do
     before do
       GroupMember.where(user: user).delete_all
@@ -336,7 +323,7 @@ RSpec.shared_examples 'cycle analytics data endpoint examples' do
     end
 
     it 'succeeds' do
-      Timecop.travel '2019-04-01' do
+      travel_to '2019-04-01' do
         subject
 
         expect(response).to be_successful

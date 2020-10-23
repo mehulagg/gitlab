@@ -13,6 +13,9 @@ export const VALIDATION_FIELD_KEYS = {
 export const NODE_NAME_MORE_INFO =
   'https://docs.gitlab.com/ee/administration/geo/replication/configuration.html#step-3-add-the-secondary-node';
 
+export const NODE_INTERNAL_URL_MORE_INFO =
+  'https://docs.gitlab.com/ee/user/admin_area/geo_nodes.html#using-a-different-url-for-synchronization';
+
 export const SELECTIVE_SYNC_MORE_INFO =
   'https://docs.gitlab.com/ee/administration/geo/replication/configuration.html#selective-synchronization';
 

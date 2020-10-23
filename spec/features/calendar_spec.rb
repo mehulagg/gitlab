@@ -36,13 +36,13 @@ RSpec.describe 'Contributions Calendar', :js do
 
   def get_cell_date_selector(contributions, date)
     contribution_text =
-      if contributions.zero?
+      if contributions == 0
         'No contributions'
       else
         "#{contributions} #{'contribution'.pluralize(contributions)}"
       end
 
-    "#{get_cell_color_selector(contributions)}[data-original-title='#{contribution_text}<br />#{date}']"
+    "#{get_cell_color_selector(contributions)}[title='#{contribution_text}<br />#{date}']"
   end
 
   def push_code_contribution
@@ -180,7 +180,7 @@ RSpec.describe 'Contributions Calendar', :js do
       before do
         push_code_contribution
 
-        Timecop.freeze(Date.yesterday) do
+        travel_to(Date.yesterday) do
           Issues::CreateService.new(contributed_project, user, issue_params).execute
         end
       end

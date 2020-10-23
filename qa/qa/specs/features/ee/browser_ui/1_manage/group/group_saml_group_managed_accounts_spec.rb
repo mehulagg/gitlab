@@ -36,7 +36,7 @@ module QA
         Flow::Saml.logout_from_idp(@saml_idp_service)
       end
 
-      it 'removes existing users from the group, forces existing users to create a new account and allows to leave group' do
+      it 'removes existing users from the group, forces existing users to create a new account and allows to leave group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/708' do
         expect(@group.list_members.map { |item| item["username"] }).not_to include(@developer_user.username)
 
         visit_managed_group_url
@@ -85,7 +85,7 @@ module QA
       after(:all) do
         page.visit Runtime::Scenario.gitlab_address
 
-        %w[group_managed_accounts sign_up_on_sso group_scim group_administration_nav_item].each do |flag|
+        [:group_managed_accounts, :sign_up_on_sso, :group_scim, :group_administration_nav_item].each do |flag|
           Runtime::Feature.remove(flag)
         end
 
@@ -119,8 +119,8 @@ module QA
     end
 
     def setup_and_enable_group_managed_accounts
-      %w[group_managed_accounts sign_up_on_sso group_scim group_administration_nav_item].each do |flag|
-        Runtime::Feature.enable_and_verify(flag)
+      [:group_managed_accounts, :sign_up_on_sso, :group_scim, :group_administration_nav_item].each do |flag|
+        Runtime::Feature.enable(flag)
       end
 
       Support::Retrier.retry_on_exception do

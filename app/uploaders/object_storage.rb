@@ -30,6 +30,8 @@ module ObjectStorage
     REMOTE = 2
   end
 
+  SUPPORTED_STORES = [Store::LOCAL, Store::REMOTE].freeze
+
   module Extension
     # this extension is the glue between the ObjectStorage::Concern and RecordsUploads::Concern
     module RecordsUploads
@@ -169,10 +171,6 @@ module ObjectStorage
         object_store_options.connection.to_hash.deep_symbolize_keys
       end
 
-      def consolidated_settings?
-        object_store_options.fetch('consolidated_settings', false)
-      end
-
       def remote_store_path
         object_store_options.remote_directory
       end
@@ -182,15 +180,23 @@ module ObjectStorage
       end
 
       def workhorse_authorize(has_length:, maximum_size: nil)
-        if self.object_store_enabled? && self.direct_upload_enabled?
-          { RemoteObject: workhorse_remote_upload_options(has_length: has_length, maximum_size: maximum_size) }
-        else
-          { TempPath: workhorse_local_upload_path }
+        {}.tap do |hash|
+          if self.object_store_enabled? && self.direct_upload_enabled?
+            hash[:RemoteObject] = workhorse_remote_upload_options(has_length: has_length, maximum_size: maximum_size)
+          else
+            hash[:TempPath] = workhorse_local_upload_path
+          end
+
+          hash[:MaximumSize] = maximum_size if maximum_size.present?
         end
       end
 
       def workhorse_local_upload_path
         File.join(self.root, TMP_UPLOAD_PATH)
+      end
+
+      def object_store_config
+        ObjectStorage::Config.new(object_store_options)
       end
 
       def workhorse_remote_upload_options(has_length:, maximum_size: nil)
@@ -199,10 +205,24 @@ module ObjectStorage
 
         id = [CarrierWave.generate_cache_id, SecureRandom.hex].join('-')
         upload_path = File.join(TMP_UPLOAD_PATH, id)
-        direct_upload = ObjectStorage::DirectUpload.new(self.object_store_credentials, remote_store_path, upload_path,
-          has_length: has_length, maximum_size: maximum_size, consolidated_settings: consolidated_settings?)
+        direct_upload = ObjectStorage::DirectUpload.new(self.object_store_config, upload_path,
+          has_length: has_length, maximum_size: maximum_size)
 
         direct_upload.to_hash.merge(ID: id)
+      end
+    end
+
+    class OpenFile
+      extend Forwardable
+
+      # Explicitly exclude :path, because rubyzip uses that to detect "real" files.
+      def_delegators :@file, *(Zip::File::IO_METHODS - [:path])
+
+      # Even though :size is not in IO_METHODS, we do need it.
+      def_delegators :@file, :size
+
+      def initialize(file)
+        @file = file
       end
     end
 
@@ -255,6 +275,24 @@ module ObjectStorage
       end
     end
 
+    def use_open_file(&blk)
+      Tempfile.open(path) do |file|
+        file.unlink
+        file.binmode
+
+        if file_storage?
+          IO.copy_stream(path, file)
+        else
+          streamer = lambda { |chunk, _, _| file.write(chunk) }
+          Excon.get(url, response_block: streamer)
+        end
+
+        file.seek(0, IO::SEEK_SET)
+
+        yield OpenFile.new(file)
+      end
+    end
+
     #
     # Move the file to another store
     #
@@ -281,6 +319,10 @@ module ObjectStorage
 
     def fog_credentials
       self.class.object_store_credentials
+    end
+
+    def fog_attributes
+      @fog_attributes ||= self.class.object_store_config.fog_attributes
     end
 
     # Set ACL of uploaded objects to not-public (fog-aws)[1] or no ACL at all

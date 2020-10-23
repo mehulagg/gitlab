@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Web terminals
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/7690) in GitLab 8.15.
@@ -57,7 +63,7 @@ through to the next one in the chain. If you installed GitLab using Omnibus, or
 from source, starting with GitLab 8.15, this should be done by the default
 configuration, so there's no need for you to do anything.
 
-However, if you run a [load balancer](../high_availability/load_balancer.md) in
+However, if you run a [load balancer](../load_balancer.md) in
 front of GitLab, you may need to make some changes to your configuration. These
 guides document the necessary steps for a selection of popular reverse proxies:
 

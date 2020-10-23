@@ -2,5 +2,6 @@
 
 module Security
   class DashboardController < ::Security::ApplicationController
+    layout 'instance_security'
   end
 end

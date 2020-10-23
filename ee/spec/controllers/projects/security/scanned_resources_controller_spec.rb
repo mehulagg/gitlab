@@ -5,9 +5,9 @@ require 'spec_helper'
 RSpec.describe Projects::Security::ScannedResourcesController do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :repository) }
-  let_it_be(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
 
-  let_it_be(:action_params) { { project_id: project, namespace_id: project.namespace, pipeline_id: pipeline } }
+  let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
+  let(:action_params) { { project_id: project, namespace_id: project.namespace, pipeline_id: pipeline } }
 
   before do
     stub_licensed_features(dast: true, security_dashboard: true)
@@ -30,19 +30,28 @@ RSpec.describe Projects::Security::ScannedResourcesController do
         end
       end
 
-      it 'returns a CSV representation of the scanned resources' do
-        expect_next_instance_of(::Gitlab::Ci::Parsers::Security::ScannedResources) do |instance|
-          expect(instance).to receive(:scanned_resources_for_csv).and_return([])
-        end
+      it 'returns the CSV data' do
         expect(subject).to have_gitlab_http_status(:ok)
+        expect(parsed_csv_data.size).to be_positive
+      end
+
+      context 'when pipeline_id is from a dangling pipeline' do
+        let(:pipeline) do
+          create(:ci_pipeline,
+            source: :ondemand_dast_scan,
+            project: project,
+            ref: 'master',
+            sha: project.commit.id)
+        end
+
+        it 'returns the CSV data' do
+          expect(subject).to have_gitlab_http_status(:ok)
+          expect(parsed_csv_data.size).to be_positive
+        end
       end
 
       context 'when the pipeline id is missing' do
-        let_it_be(:action_params) { { project_id: project, namespace_id: project.namespace } }
-
-        before do
-          project.add_developer(user)
-        end
+        let(:action_params) { { project_id: project, namespace_id: project.namespace } }
 
         it 'raises an error when pipeline_id param is missing' do
           expect { subject }.to raise_error(ActionController::ParameterMissing)

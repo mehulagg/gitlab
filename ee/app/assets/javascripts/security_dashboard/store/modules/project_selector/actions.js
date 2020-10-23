@@ -1,6 +1,6 @@
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__, sprintf } from '~/locale';
 import addPageInfo from './utils/add_page_info';
 import * as types from './mutation_types';
@@ -142,7 +142,7 @@ export const receiveRemoveProjectSuccess = ({ commit, dispatch }) => {
 export const receiveRemoveProjectError = ({ commit }) => {
   commit(types.RECEIVE_REMOVE_PROJECT_ERROR);
 
-  createFlash(__('Something went wrong, unable to remove project'));
+  createFlash(__('Something went wrong, unable to delete project'));
 };
 
 export const fetchSearchResults = ({ state, dispatch, commit }) => {
@@ -155,25 +155,6 @@ export const fetchSearchResults = ({ state, dispatch, commit }) => {
 
   return searchProjects(searchQuery)
     .then(payload => commit(types.RECEIVE_SEARCH_RESULTS_SUCCESS, payload))
-    .catch(() => dispatch('receiveSearchResultsError'));
-};
-
-export const fetchSearchResultsNextPage = ({ state, dispatch, commit }) => {
-  const {
-    searchQuery,
-    pageInfo: { totalPages, page, nextPage },
-  } = state;
-
-  if (totalPages <= page) {
-    return Promise.resolve();
-  }
-
-  const searchOptions = { page: nextPage };
-
-  return searchProjects(searchQuery, searchOptions)
-    .then(payload => {
-      commit(types.RECEIVE_NEXT_PAGE_SUCCESS, payload);
-    })
     .catch(() => dispatch('receiveSearchResultsError'));
 };
 

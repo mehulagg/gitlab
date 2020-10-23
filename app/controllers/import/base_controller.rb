@@ -4,6 +4,7 @@ class Import::BaseController < ApplicationController
   include ActionView::Helpers::SanitizeHelper
 
   before_action :import_rate_limit, only: [:create]
+  feature_category :importers
 
   def status
     respond_to do |format|
@@ -41,6 +42,10 @@ class Import::BaseController < ApplicationController
     raise NotImplementedError
   end
 
+  def extra_representation_opts
+    {}
+  end
+
   private
 
   def filter_attribute
@@ -58,11 +63,11 @@ class Import::BaseController < ApplicationController
   end
 
   def serialized_provider_repos
-    Import::ProviderRepoSerializer.new(current_user: current_user).represent(importable_repos, provider: provider_name, provider_url: provider_url)
+    Import::ProviderRepoSerializer.new(current_user: current_user).represent(importable_repos, provider: provider_name, provider_url: provider_url, **extra_representation_opts)
   end
 
   def serialized_incompatible_repos
-    Import::ProviderRepoSerializer.new(current_user: current_user).represent(incompatible_repos, provider: provider_name, provider_url: provider_url)
+    Import::ProviderRepoSerializer.new(current_user: current_user).represent(incompatible_repos, provider: provider_name, provider_url: provider_url, **extra_representation_opts)
   end
 
   def serialized_imported_projects

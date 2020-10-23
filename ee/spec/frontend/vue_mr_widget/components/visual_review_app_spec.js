@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import VisualReviewAppLink from 'ee/vue_merge_request_widget/components/visual_review_app_link.vue';
-import { GlDeprecatedButton, GlDeprecatedDropdown, GlModal } from '@gitlab/ui';
+import { GlButton, GlDeprecatedDropdown, GlModal } from '@gitlab/ui';
 import { mockTracking, triggerEvent } from 'helpers/tracking_helper';
 import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
 
@@ -46,11 +46,11 @@ describe('Visual Review App Link', () => {
 
   describe('renders link and text', () => {
     it('renders Review text', () => {
-      expect(wrapper.find(GlDeprecatedButton).text()).toBe('Review');
+      expect(wrapper.find(GlButton).text()).toBe('Review');
     });
 
     it('renders provided cssClass as class attribute', () => {
-      expect(wrapper.find(GlDeprecatedButton).attributes('class')).toEqual(
+      expect(wrapper.find(GlButton).attributes('class')).toEqual(
         expect.stringContaining(propsData.cssClass),
       );
     });

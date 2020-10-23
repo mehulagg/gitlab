@@ -19,23 +19,13 @@ module EE
           'url' => variable_value('VAULT_SERVER_URL'),
           'auth' => {
             'name' => 'jwt',
-            'path' => 'jwt',
+            'path' => variable_value('VAULT_AUTH_PATH', 'jwt'),
             'data' => {
               'jwt' => '${CI_JOB_JWT}',
               'role' => variable_value('VAULT_AUTH_ROLE')
             }.compact
           }
         }
-      end
-
-      def variable_value(key)
-        variables_hash[key]
-      end
-
-      def variables_hash
-        @variables_hash ||= variables.map do |variable|
-          [variable[:key], variable[:value]]
-        end.to_h
       end
     end
   end

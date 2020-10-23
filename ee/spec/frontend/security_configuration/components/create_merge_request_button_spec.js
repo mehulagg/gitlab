@@ -1,12 +1,12 @@
-import * as Sentry from '@sentry/browser';
 import { shallowMount } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
 import { GlButton } from '@gitlab/ui';
-import createFlash from '~/flash';
-import axios from '~/lib/utils/axios_utils';
 import CreateMergeRequestButton from 'ee/security_configuration/components/create_merge_request_button.vue';
-import { redirectTo } from '~/lib/utils/url_utility';
 import waitForPromises from 'helpers/wait_for_promises';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import * as Sentry from '~/sentry/wrapper';
+import axios from '~/lib/utils/axios_utils';
+import { redirectTo } from '~/lib/utils/url_utility';
 
 jest.mock('~/flash.js');
 jest.mock('~/lib/utils/url_utility', () => ({
@@ -16,7 +16,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
 const endpoint = '/endpoint';
 const { i18n } = CreateMergeRequestButton;
 const DEFAULT_BUTTON_PROPS = {
-  category: 'tertiary',
+  category: 'primary',
   variant: 'default',
 };
 const SUCCESS_BUTTON_PROPS = {

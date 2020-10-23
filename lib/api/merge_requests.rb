@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class MergeRequests < Grape::API::Instance
+  class MergeRequests < ::API::Base
     include PaginationParams
 
     CONTEXT_COMMITS_POST_LIMIT = 20
@@ -29,11 +29,13 @@ module API
         remove_labels
         milestone_id
         remove_source_branch
-        state_event
+        allow_collaboration
+        allow_maintainer_to_push
+        squash
         target_branch
         title
+        state_event
         discussion_locked
-        squash
       ]
     end
 
@@ -154,13 +156,13 @@ module API
 
       helpers do
         params :optional_params do
-          optional :description, type: String, desc: 'The description of the merge request'
           optional :assignee_id, type: Integer, desc: 'The ID of a user to assign the merge request'
           optional :assignee_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'The array of user IDs to assign issue'
-          optional :milestone_id, type: Integer, desc: 'The ID of a milestone to assign the merge request'
+          optional :description, type: String, desc: 'The description of the merge request'
           optional :labels, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Comma-separated list of label names'
           optional :add_labels, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Comma-separated list of label names'
           optional :remove_labels, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Comma-separated list of label names'
+          optional :milestone_id, type: Integer, desc: 'The ID of a milestone to assign the merge request'
           optional :remove_source_branch, type: Boolean, desc: 'Remove source branch when merging'
           optional :allow_collaboration, type: Boolean, desc: 'Allow commits from members who can merge to the target branch'
           optional :allow_maintainer_to_push, type: Boolean, as: :allow_collaboration, desc: '[deprecated] See allow_collaboration'
@@ -352,16 +354,16 @@ module API
       end
 
       desc 'Get the merge request pipelines' do
-        success Entities::PipelineBasic
+        success Entities::Ci::PipelineBasic
       end
       get ':id/merge_requests/:merge_request_iid/pipelines' do
         pipelines = merge_request_pipelines_with_access
 
-        present paginate(pipelines), with: Entities::PipelineBasic
+        present paginate(pipelines), with: Entities::Ci::PipelineBasic
       end
 
       desc 'Create a pipeline for merge request' do
-        success Entities::Pipeline
+        success ::API::Entities::Ci::Pipeline
       end
       post ':id/merge_requests/:merge_request_iid/pipelines' do
         pipeline = ::MergeRequests::CreatePipelineService
@@ -372,7 +374,7 @@ module API
           not_allowed!
         elsif pipeline.persisted?
           status :ok
-          present pipeline, with: Entities::Pipeline
+          present pipeline, with: ::API::Entities::Ci::Pipeline
         else
           render_validation_error!(pipeline)
         end

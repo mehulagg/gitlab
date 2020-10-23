@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import axios from '~/lib/utils/axios_utils';
-import flash from '../flash';
+import { Rails } from '~/lib/utils/rails_ujs';
+import { deprecatedCreateFlash as flash } from '../flash';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import TimezoneDropdown, {
   formatTimezone,
@@ -48,9 +49,13 @@ export default class Profile {
   }
 
   submitForm() {
-    return $(this)
-      .parents('form')
-      .submit();
+    const $form = $(this).parents('form');
+
+    if ($form.data('remote')) {
+      Rails.fire($form[0], 'submit');
+    } else {
+      $form.submit();
+    }
   }
 
   onSubmitForm(e) {

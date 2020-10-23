@@ -4,11 +4,11 @@
   }
 
   .issue-title {
-    max-width: px-to-rem(350px);
+    max-width: px-to-rem($issuable-title-max-width);
   }
 
   .milestone-title {
-    max-width: px-to-rem(75px);
+    max-width: px-to-rem($milestone-title-max-width);
   }
 }
 

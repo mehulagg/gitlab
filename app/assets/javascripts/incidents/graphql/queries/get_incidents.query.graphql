@@ -1,18 +1,26 @@
+#import "ee_else_ce/incidents/graphql/fragments/incident_fields.fragment.graphql"
+
 query getIncidents(
   $projectPath: ID!
-  $labelNames: [String]
-  $state: IssuableState
+  $issueTypes: [IssueType!]
+  $sort: IssueSort
+  $status: IssuableState
   $firstPageSize: Int
   $lastPageSize: Int
   $prevPageCursor: String = ""
   $nextPageCursor: String = ""
-  $searchTerm: String
+  $searchTerm: String = ""
+  $authorUsername: String = ""
+  $assigneeUsername: String = ""
 ) {
   project(fullPath: $projectPath) {
     issues(
       search: $searchTerm
-      state: $state
-      labelName: $labelNames
+      types: $issueTypes
+      sort: $sort
+      state: $status
+      authorUsername: $authorUsername
+      assigneeUsername: $assigneeUsername
       first: $firstPageSize
       last: $lastPageSize
       after: $nextPageCursor
@@ -37,6 +45,7 @@ query getIncidents(
             webUrl
           }
         }
+        ...IncidentFields
       }
       pageInfo {
         hasNextPage

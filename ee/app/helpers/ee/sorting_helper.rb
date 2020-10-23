@@ -10,7 +10,8 @@ module EE
         sort_value_end_date   => sort_title_end_date,
         sort_value_less_weight => sort_title_less_weight,
         sort_value_more_weight => sort_title_more_weight,
-        sort_value_weight      => sort_title_weight
+        sort_value_weight      => sort_title_weight,
+        sort_value_blocking_desc => sort_title_blocking
       }.merge(super)
     end
 
@@ -69,7 +70,7 @@ module EE
       opposite_sorting_param = epics_ordering_options_hash[sort] || epics_ordering_options_hash.key(sort)
       sort_icon = sort.end_with?('desc') ? 'sort-highest' : 'sort-lowest'
 
-      link_to sprite_icon(sort_icon, size: 16),
+      link_to sprite_icon(sort_icon),
               page_filter_path(sort: opposite_sorting_param),
               class: "btn btn-default has-tooltip qa-reverse-sort btn-sort-direction",
               title: _("Sort direction")
@@ -93,6 +94,10 @@ module EE
 
     def sort_title_weight
       s_('SortOptions|Weight')
+    end
+
+    def sort_title_blocking
+      s_('SortOptions|Blocking')
     end
 
     def sort_title_project_name
@@ -129,6 +134,10 @@ module EE
 
     def sort_value_weight
       'weight'
+    end
+
+    def sort_value_blocking_desc
+      'blocking_issues_desc'
     end
 
     def sort_value_project_name_asc

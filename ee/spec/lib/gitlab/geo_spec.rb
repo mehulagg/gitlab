@@ -336,9 +336,9 @@ RSpec.describe Gitlab::Geo, :geo, :request_store do
     end
   end
 
-  describe '.replicator_classes' do
+  describe '.enabled_replicator_classes' do
     it 'returns an Array of replicator classes' do
-      result = described_class.replicator_classes
+      result = described_class.enabled_replicator_classes
 
       expect(result).to be_an(Array)
       expect(result).to include(Geo::PackageFileReplicator)
@@ -346,11 +346,11 @@ RSpec.describe Gitlab::Geo, :geo, :request_store do
 
     context 'when replication is disabled' do
       before do
-        stub_feature_flags(geo_vulnerability_export_replication: false)
+        stub_feature_flags(geo_package_file_replication: false)
       end
 
-      it 'does not return the corresponding replicator class' do
-        expect(described_class.replicator_classes).not_to include(Geo::VulnerabilityExportReplicator)
+      it 'does not return the replicator class' do
+        expect(described_class.enabled_replicator_classes).not_to include(Geo::PackageFileReplicator)
       end
     end
   end

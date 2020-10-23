@@ -28,7 +28,7 @@ RSpec.describe AuditLogFinder do
       end
     end
 
-    context 'filtering by level' do
+    context 'scoping the results' do
       context 'when project level' do
         let(:level) { Gitlab::Audit::Levels::Project.new(project: project) }
 

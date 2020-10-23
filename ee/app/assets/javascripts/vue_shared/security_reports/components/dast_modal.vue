@@ -38,7 +38,7 @@ export default {
         text: __('Download as CSV'),
         attributes: {
           variant: 'success',
-          class: 'btn-secondary gl-button',
+          class: 'gl-button btn-success-secondary',
           href: this.downloadLink,
           download: '',
           'data-testid': 'download-button',
@@ -57,7 +57,7 @@ export default {
     :action-secondary="downloadButton"
   >
     <!-- heading -->
-    <div class="row gl-text-gray-600">
+    <div class="row gl-text-gray-400">
       <div class="col-1">{{ __('Method') }}</div>
       <div class="col-11">{{ __('URL') }}</div>
     </div>

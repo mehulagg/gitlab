@@ -24,8 +24,6 @@ module Security
     end
 
     def execute
-      requested_reports = pipeline_reports.select { |report_type| requested_type?(report_type) }
-
       findings = requested_reports.each_with_object([]) do |(type, report), findings|
         raise ParseError, 'JSON parsing failed' if report.error.is_a?(Gitlab::Ci::Parsers::Security::Common::SecurityReportParserError)
 
@@ -54,8 +52,8 @@ module Security
       Gitlab::Utils.stable_sort_by(findings) { |x| [-x.severity_value, -x.confidence_value] }
     end
 
-    def pipeline_reports
-      pipeline&.security_reports&.reports || {}
+    def requested_reports
+      @requested_reports ||= pipeline&.security_reports(report_types: report_types)&.reports || {}
     end
 
     def vulnerabilities_by_finding_fingerprint(report_type, report)
@@ -105,10 +103,6 @@ module Security
       end
     end
 
-    def requested_type?(type)
-      report_types.include?(type)
-    end
-
     def include_dismissed?
       params[:scope] == 'all'
     end
@@ -119,10 +113,10 @@ module Security
 
     def dismissal_feedback_by_fingerprint
       strong_memoize(:dismissal_feedback_by_fingerprint) do
-        pipeline.project.vulnerability_feedback
-          .with_associations
-          .where(feedback_type: 'dismissal') # rubocop:disable CodeReuse/ActiveRecord
-          .group_by(&:project_fingerprint)
+        pipeline.project
+                .vulnerability_feedback
+                .for_dismissal
+                .group_by(&:project_fingerprint)
       end
     end
 

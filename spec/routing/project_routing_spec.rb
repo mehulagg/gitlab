@@ -306,12 +306,9 @@ RSpec.describe 'project routing' do
   end
   #  raw_project_snippet GET    /:project_id/snippets/:id/raw(.:format)  snippets#raw
   #     project_snippets GET    /:project_id/snippets(.:format)          snippets#index
-  #                      POST   /:project_id/snippets(.:format)          snippets#create
   #  new_project_snippet GET    /:project_id/snippets/new(.:format)      snippets#new
   # edit_project_snippet GET    /:project_id/snippets/:id/edit(.:format) snippets#edit
   #      project_snippet GET    /:project_id/snippets/:id(.:format)      snippets#show
-  #                      PUT    /:project_id/snippets/:id(.:format)      snippets#update
-  #                      DELETE /:project_id/snippets/:id(.:format)      snippets#destroy
   describe SnippetsController, 'routing' do
     it 'to #raw' do
       expect(get('/gitlab/gitlabhq/-/snippets/1/raw')).to route_to('projects/snippets#raw', namespace_id: 'gitlab', project_id: 'gitlabhq', id: '1')
@@ -319,10 +316,6 @@ RSpec.describe 'project routing' do
 
     it 'to #index' do
       expect(get('/gitlab/gitlabhq/-/snippets')).to route_to('projects/snippets#index', namespace_id: 'gitlab', project_id: 'gitlabhq')
-    end
-
-    it 'to #create' do
-      expect(post('/gitlab/gitlabhq/-/snippets')).to route_to('projects/snippets#create', namespace_id: 'gitlab', project_id: 'gitlabhq')
     end
 
     it 'to #new' do
@@ -335,14 +328,6 @@ RSpec.describe 'project routing' do
 
     it 'to #show' do
       expect(get('/gitlab/gitlabhq/-/snippets/1')).to route_to('projects/snippets#show', namespace_id: 'gitlab', project_id: 'gitlabhq', id: '1')
-    end
-
-    it 'to #update' do
-      expect(put('/gitlab/gitlabhq/-/snippets/1')).to route_to('projects/snippets#update', namespace_id: 'gitlab', project_id: 'gitlabhq', id: '1')
-    end
-
-    it 'to #destroy' do
-      expect(delete('/gitlab/gitlabhq/-/snippets/1')).to route_to('projects/snippets#destroy', namespace_id: 'gitlab', project_id: 'gitlabhq', id: '1')
     end
 
     it 'to #show from unscope routing' do
@@ -731,6 +716,12 @@ RSpec.describe 'project routing' do
     end
   end
 
+  describe Projects::Settings::CiCdController, 'routing' do
+    it "to #runner_setup_scripts" do
+      expect(get("/gitlab/gitlabhq/-/settings/ci_cd/runner_setup_scripts")).to route_to('projects/settings/ci_cd#runner_setup_scripts', namespace_id: 'gitlab', project_id: 'gitlabhq')
+    end
+  end
+
   describe Projects::TemplatesController, 'routing' do
     describe '#show' do
       def show_with_template_type(template_type)
@@ -821,6 +812,68 @@ RSpec.describe 'project routing' do
       expect(get('/gitlab/gitlabhq/-/snippets/1/raw/master/lib/version.rb'))
         .to route_to('projects/snippets/blobs#raw', namespace_id: 'gitlab',
                      project_id: 'gitlabhq', snippet_id: '1', ref: 'master', path: 'lib/version.rb')
+    end
+  end
+
+  describe Projects::MetricsDashboardController, 'routing' do
+    it 'routes to #show with no dashboard_path and no page' do
+      expect(get: "/gitlab/gitlabhq/-/metrics").to route_to(
+        "projects/metrics_dashboard#show",
+        **base_params
+      )
+    end
+
+    it 'routes to #show with only dashboard_path' do
+      expect(get: "/gitlab/gitlabhq/-/metrics/dashboard1.yml").to route_to(
+        "projects/metrics_dashboard#show",
+        dashboard_path: 'dashboard1.yml',
+        **base_params
+      )
+    end
+
+    it 'routes to #show with only page' do
+      expect(get: "/gitlab/gitlabhq/-/metrics/panel/new").to route_to(
+        "projects/metrics_dashboard#show",
+        page: 'panel/new',
+        **base_params
+      )
+    end
+
+    it 'routes to #show with dashboard_path and page' do
+      expect(get: "/gitlab/gitlabhq/-/metrics/config%2Fprometheus%2Fcommon_metrics.yml/panel/new").to route_to(
+        "projects/metrics_dashboard#show",
+        dashboard_path: 'config/prometheus/common_metrics.yml',
+        page: 'panel/new',
+        **base_params
+      )
+    end
+
+    it 'routes to 404 with invalid page' do
+      expect(get: "/gitlab/gitlabhq/-/metrics/invalid_page").to route_to(
+        'application#route_not_found',
+        unmatched_route: 'gitlab/gitlabhq/-/metrics/invalid_page'
+      )
+    end
+
+    it 'routes to 404 with invalid dashboard_path' do
+      expect(get: "/gitlab/gitlabhq/-/metrics/invalid_dashboard").to route_to(
+        'application#route_not_found',
+        unmatched_route: 'gitlab/gitlabhq/-/metrics/invalid_dashboard'
+      )
+    end
+
+    it 'routes to 404 with invalid dashboard_path and valid page' do
+      expect(get: "/gitlab/gitlabhq/-/metrics/dashboard1/panel/new").to route_to(
+        'application#route_not_found',
+        unmatched_route: 'gitlab/gitlabhq/-/metrics/dashboard1/panel/new'
+      )
+    end
+
+    it 'routes to 404 with valid dashboard_path and invalid page' do
+      expect(get: "/gitlab/gitlabhq/-/metrics/dashboard1.yml/invalid_page").to route_to(
+        'application#route_not_found',
+        unmatched_route: 'gitlab/gitlabhq/-/metrics/dashboard1.yml/invalid_page'
+      )
     end
   end
 end

@@ -33,7 +33,7 @@ module MergeTrains
         raise ProcessError, 'merge request is not on a merge train'
       end
 
-      unless merge_request.mergeable_state?(skip_ci_check: true)
+      unless merge_request.mergeable_state?(skip_ci_check: true, skip_discussions_check: true)
         raise ProcessError, 'merge request is not mergeable'
       end
 
@@ -70,7 +70,7 @@ module MergeTrains
       merge_train.start_merge!
 
       MergeRequests::MergeService.new(project, merge_user, merge_request.merge_params)
-                                 .execute(merge_request)
+                                 .execute(merge_request, skip_discussions_check: true)
 
       raise ProcessError, "failed to merge. #{merge_request.merge_error}" unless merge_request.merged?
 

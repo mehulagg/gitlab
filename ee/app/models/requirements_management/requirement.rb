@@ -7,9 +7,6 @@ module RequirementsManagement
     include AtomicInternalId
     include Sortable
     include Gitlab::SQL::Pattern
-    include IgnorableColumns
-
-    ignore_column :pipeline_id, remove_with: '13.4', remove_after: '2020-08-22'
 
     # the expected name for this table is `requirements_management_requirements`,
     # but to avoid downtime and deployment issues `requirements` is still used
@@ -17,6 +14,7 @@ module RequirementsManagement
     self.table_name = 'requirements'
 
     cache_markdown_field :title, pipeline: :single_line
+    cache_markdown_field :description, issuable_state_filter_enabled: true
 
     strip_attributes :title
 
@@ -60,6 +58,14 @@ module RequirementsManagement
     # so it's better to use resource_parent instead of project directly
     def resource_parent
       project
+    end
+
+    def last_test_report_state
+      test_reports.last&.state
+    end
+
+    def last_test_report_manually_created?
+      test_reports.last&.build.nil?
     end
   end
 end

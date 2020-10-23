@@ -4,7 +4,10 @@ module IssuablesHelper
   include GitlabRoutingHelper
 
   def sidebar_gutter_toggle_icon
-    sidebar_gutter_collapsed? ? icon('angle-double-left', { 'aria-hidden': 'true' }) : icon('angle-double-right', { 'aria-hidden': 'true' })
+    content_tag(:span, class: 'js-sidebar-toggle-container', data: { is_expanded: !sidebar_gutter_collapsed? }) do
+      sprite_icon('chevron-double-lg-left', css_class: "js-sidebar-expand #{'hidden' unless sidebar_gutter_collapsed?}") +
+      sprite_icon('chevron-double-lg-right', css_class: "js-sidebar-collapse #{'hidden' if sidebar_gutter_collapsed?}")
+    end
   end
 
   def sidebar_gutter_collapsed_class
@@ -29,7 +32,7 @@ module IssuablesHelper
   def sidebar_milestone_tooltip_label(milestone)
     return _('Milestone') unless milestone.present?
 
-    [milestone[:title], sidebar_milestone_remaining_days(milestone) || _('Milestone')].join('<br/>')
+    [escape_once(milestone[:title]), sidebar_milestone_remaining_days(milestone) || _('Milestone')].join('<br/>')
   end
 
   def sidebar_milestone_remaining_days(milestone)
@@ -44,12 +47,6 @@ module IssuablesHelper
     return unless due_date
 
     "#{due_date.to_s(:medium)} (#{remaining_days_in_words(due_date, start_date)})"
-  end
-
-  def sidebar_label_filter_path(base_path, label_name)
-    query_params = { label_name: [label_name] }.to_query
-
-    "#{base_path}?#{query_params}"
   end
 
   def multi_label_name(current_labels, default_label)
@@ -79,6 +76,7 @@ module IssuablesHelper
                        when Issue
                          IssueSerializer
                        when MergeRequest
+                         opts[:experiment_enabled] = :suggest_pipeline if experiment_enabled?(:suggest_pipeline) && opts[:serializer] == 'widget'
                          MergeRequestSerializer
                        end
 
@@ -205,7 +203,13 @@ module IssuablesHelper
       author_output
     end
 
-    output << content_tag(:span, (issuable_first_contribution_icon if issuable.first_contribution?), class: 'has-tooltip gl-ml-2', title: _('1st contribution!'))
+    if access = project.team.human_max_access(issuable.author_id)
+      output << content_tag(:span, access, class: "user-access-role has-tooltip d-none d-xl-inline-block gl-ml-3 ", title: _("This user has the %{access} role in the %{name} project.") % { access: access.downcase, name: project.name })
+    elsif project.team.contributor?(issuable.author_id)
+      output << content_tag(:span, _("Contributor"), class: "user-access-role has-tooltip d-none d-xl-inline-block gl-ml-3", title: _("This user has previously committed to the %{name} project.") % { name: project.name })
+    end
+
+    output << content_tag(:span, (sprite_icon('first-contribution', css_class: 'gl-icon gl-vertical-align-middle') if issuable.first_contribution?), class: 'has-tooltip gl-ml-2', title: _('1st contribution!'))
 
     output << content_tag(:span, (issuable.task_status if issuable.tasks?), id: "task_status", class: "d-none d-sm-none d-md-inline-block gl-ml-3")
     output << content_tag(:span, (issuable.task_status_short if issuable.tasks?), id: "task_status_short", class: "d-md-none")
@@ -218,19 +222,6 @@ module IssuablesHelper
     nil
   end
 
-  def issuable_labels_tooltip(labels, limit: 5)
-    first, last = labels.partition.with_index { |_, i| i < limit }
-
-    if labels && labels.any?
-      label_names = first.collect { |label| label.fetch(:title) }
-      label_names << "and #{last.size} more" unless last.empty?
-
-      label_names.join(', ')
-    else
-      _("Labels")
-    end
-  end
-
   def issuables_state_counter_text(issuable_type, state, display_count)
     titles = {
       opened: "Open"
@@ -241,17 +232,25 @@ module IssuablesHelper
 
     if display_count
       count = issuables_count_for_state(issuable_type, state)
-      html << " " << content_tag(:span, number_with_delimiter(count), class: 'badge badge-pill')
+      tag =
+        if count == -1
+          tooltip = _("Couldn't calculate number of %{issuables}.") % { issuables: issuable_type.to_s.humanize(capitalize: false) }
+
+          content_tag(
+            :span,
+            '?',
+            class: 'badge badge-pill has-tooltip',
+            aria: { label: tooltip },
+            title: tooltip
+          )
+        else
+          content_tag(:span, number_with_delimiter(count), class: 'badge badge-pill')
+        end
+
+      html << " " << tag
     end
 
     html.html_safe
-  end
-
-  def issuable_first_contribution_icon
-    content_tag(:span, class: 'fa-stack') do
-      concat(icon('certificate', class: "fa-stack-2x"))
-      concat(content_tag(:strong, '1', class: 'fa-inverse fa-stack-1x'))
-    end
   end
 
   def assigned_issuables_count(issuable_type)
@@ -299,8 +298,10 @@ module IssuablesHelper
 
     {
       hasClosingMergeRequest: issuable.merge_requests_count(current_user) != 0,
+      issueType: issuable.issue_type,
       zoomMeetingUrl: ZoomMeeting.canonical_meeting_url(issuable),
-      sentryIssueIdentifier: SentryIssue.find_by(issue: issuable)&.sentry_issue_identifier # rubocop:disable CodeReuse/ActiveRecord
+      sentryIssueIdentifier: SentryIssue.find_by(issue: issuable)&.sentry_issue_identifier, # rubocop:disable CodeReuse/ActiveRecord
+      iid: issuable.iid.to_s
     }
   end
 
@@ -308,8 +309,8 @@ module IssuablesHelper
     return { groupPath: parent.path } if parent.is_a?(Group)
 
     {
-        projectPath: ref_project.path,
-        projectNamespace: ref_project.namespace.full_path
+      projectPath: ref_project.path,
+      projectNamespace: ref_project.namespace.full_path
     }
   end
 
@@ -339,6 +340,12 @@ module IssuablesHelper
 
   def close_reopen_issuable_path(issuable, should_inverse = false)
     issuable.closed? ^ should_inverse ? reopen_issuable_path(issuable) : close_issuable_path(issuable)
+  end
+
+  def toggle_draft_issuable_path(issuable)
+    wip_event = issuable.work_in_progress? ? 'unwip' : 'wip'
+
+    issuable_path(issuable, { merge_request: { wip_event: wip_event } })
   end
 
   def issuable_path(issuable, *options)
@@ -385,6 +392,12 @@ module IssuablesHelper
     end
   end
 
+  def reviewer_sidebar_data(reviewer, merge_request: nil)
+    { avatar_url: reviewer.avatar_url, name: reviewer.name, username: reviewer.username }.tap do |data|
+      data[:can_merge] = merge_request.can_be_merged_by?(reviewer) if merge_request
+    end
+  end
+
   def issuable_squash_option?(issuable, project)
     if issuable.persisted?
       issuable.squash
@@ -419,7 +432,7 @@ module IssuablesHelper
 
   def issuable_todo_button_data(issuable, is_collapsed)
     {
-      todo_text: _('Add a To Do'),
+      todo_text: _('Add a to do'),
       mark_text: _('Mark as done'),
       todo_icon: sprite_icon('todo-add'),
       mark_icon: sprite_icon('todo-done', css_class: 'todo-undone'),
@@ -471,6 +484,7 @@ module IssuablesHelper
       rootPath: root_path,
       fullPath: issuable[:project_full_path],
       iid: issuable[:iid],
+      severity: issuable[:severity],
       timeTrackingLimitToHours: Gitlab::CurrentSettings.time_tracking_limit_to_hours
     }
   end

@@ -4,6 +4,7 @@ module EE
   module Groups
     module UpdateService
       extend ::Gitlab::Utils::Override
+      EE_SETTINGS_PARAMS = [:prevent_forking_outside_group].freeze
 
       override :execute
       def execute
@@ -90,9 +91,11 @@ module EE
         end
       end
 
+      override :handle_changes
       def handle_changes
         handle_allowed_email_domains_update
         handle_ip_restriction_update
+        super
       end
 
       def handle_ip_restriction_update
@@ -109,6 +112,11 @@ module EE
         comma_separated_domains = params.delete(:allowed_email_domains_list)
 
         AllowedEmailDomains::UpdateService.new(current_user, group, comma_separated_domains).execute
+      end
+
+      override :allowed_settings_params
+      def allowed_settings_params
+        @allowed_settings_params ||= super + EE_SETTINGS_PARAMS
       end
 
       def log_audit_event

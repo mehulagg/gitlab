@@ -1,14 +1,13 @@
 <script>
-import { GlDeprecatedDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlDropdown, GlDropdownItem, GlIcon } from '@gitlab/ui';
 import MergeRequestTableRow from './mr_table_row.vue';
 import Pagination from '~/vue_shared/components/pagination_links.vue';
 
 export default {
   components: {
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
-    Icon,
+    GlDropdown,
+    GlDropdownItem,
+    GlIcon,
     MergeRequestTableRow,
     Pagination,
   },
@@ -65,13 +64,13 @@ export default {
             <div class="d-flex">
               <span class="d-none d-md-flex metric-col">{{ __('Time to merge') }}</span>
 
-              <gl-deprecated-dropdown
+              <gl-dropdown
                 class="w-100 metric-col"
                 toggle-class="dropdown-menu-toggle w-100"
                 menu-class="w-100 mw-100"
                 :text="metricDropdownLabel"
               >
-                <gl-deprecated-dropdown-item
+                <gl-dropdown-item
                   v-for="option in columnOptions"
                   :key="option.key"
                   active-class="is-active"
@@ -79,7 +78,7 @@ export default {
                   @click="$emit('columnMetricChange', option.key)"
                 >
                   <span class="d-flex">
-                    <icon
+                    <gl-icon
                       class="flex-shrink-0 gl-mr-2"
                       :class="{
                         invisible: !isSelectedMetric(option.key),
@@ -88,8 +87,8 @@ export default {
                     />
                     {{ option.label }}
                   </span>
-                </gl-deprecated-dropdown-item>
-              </gl-deprecated-dropdown>
+                </gl-dropdown-item>
+              </gl-dropdown>
             </div>
           </div>
         </div>

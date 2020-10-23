@@ -9,7 +9,6 @@ RSpec.describe Gitlab::Database::CustomStructure do
     <<~DATA
       -- this file tracks custom GitLab data, such as foreign keys referencing partitioned tables
       -- more details can be found in the issue: https://gitlab.com/gitlab-org/gitlab/-/issues/201872
-      SET search_path=public;
     DATA
   end
 
@@ -32,6 +31,7 @@ RSpec.describe Gitlab::Database::CustomStructure do
       Gitlab::Database::PartitioningMigrationHelpers::PartitionedForeignKey.create(
         cascade_delete: true, from_table: 'issues', from_column: 'project_id', to_table: 'projects', to_column: 'id')
     end
+
     let!(:second_fk) do
       Gitlab::Database::PartitioningMigrationHelpers::PartitionedForeignKey.create(
         cascade_delete: false, from_table: 'issues', from_column: 'moved_to_id', to_table: 'issues', to_column: 'id')

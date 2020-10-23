@@ -5,6 +5,8 @@ class Projects::ProductAnalyticsController < Projects::ApplicationController
   before_action :authorize_read_product_analytics!
   before_action :tracker_variables, only: [:setup, :test]
 
+  feature_category :product_analytics
+
   def index
     @events = product_analytics_events.order_by_time.page(params[:page])
   end
@@ -14,6 +16,23 @@ class Projects::ProductAnalyticsController < Projects::ApplicationController
 
   def test
     @event = product_analytics_events.try(:first)
+  end
+
+  def graphs
+    @graphs = []
+    @timerange = 30
+
+    requested_graphs = %w(platform os_timezone br_lang doc_charset)
+
+    requested_graphs.each do |graph|
+      @graphs << ProductAnalytics::BuildGraphService
+        .new(project, { graph: graph, timerange: @timerange })
+        .execute
+    end
+
+    @activity_graph = ProductAnalytics::BuildActivityGraphService
+      .new(project, { timerange: @timerange })
+      .execute
   end
 
   private

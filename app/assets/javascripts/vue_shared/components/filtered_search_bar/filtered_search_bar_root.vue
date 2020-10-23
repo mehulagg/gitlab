@@ -3,18 +3,19 @@ import {
   GlFilteredSearch,
   GlButtonGroup,
   GlButton,
-  GlNewDropdown as GlDropdown,
-  GlNewDropdownItem as GlDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
   GlTooltipDirective,
 } from '@gitlab/ui';
 
+import RecentSearchesStorageKeys from 'ee_else_ce/filtered_search/recent_searches_storage_keys';
 import { __ } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 import RecentSearchesStore from '~/filtered_search/stores/recent_searches_store';
 import RecentSearchesService from '~/filtered_search/services/recent_searches_service';
-import RecentSearchesStorageKeys from 'ee_else_ce/filtered_search/recent_searches_storage_keys';
 
+import { stripQuotes, uniqueTokens } from './filtered_search_utils';
 import { SortDirection } from './constants';
 
 export default {
@@ -44,7 +45,8 @@ export default {
     },
     sortOptions: {
       type: Array,
-      required: true,
+      default: () => [],
+      required: false,
     },
     initialFilterValue: {
       type: Array,
@@ -63,7 +65,7 @@ export default {
     },
   },
   data() {
-    let selectedSortOption = this.sortOptions[0].sortDirection.descending;
+    let selectedSortOption = this.sortOptions[0]?.sortDirection?.descending;
     let selectedSortDirection = SortDirection.descending;
 
     // Extract correct sortBy value based on initialSortBy
@@ -117,6 +119,32 @@ export default {
       return this.selectedSortDirection === SortDirection.ascending
         ? __('Sort direction: Ascending')
         : __('Sort direction: Descending');
+    },
+    /**
+     * This prop fixes a behaviour affecting GlFilteredSearch
+     * where selecting duplicate token values leads to history
+     * dropdown also showing that selection.
+     */
+    filteredRecentSearches() {
+      if (this.recentSearchesStorageKey) {
+        const knownItems = [];
+        return this.recentSearches.reduce((historyItems, item) => {
+          // Only include non-string history items (discard items from legacy search)
+          if (typeof item !== 'string') {
+            const sanitizedItem = uniqueTokens(item);
+            const itemString = JSON.stringify(sanitizedItem);
+            // Only include items which aren't already part of history
+            if (!knownItems.includes(itemString)) {
+              historyItems.push(sanitizedItem);
+              // We're storing string for comparision as doing direct object compare
+              // won't work due to object reference not being the same.
+              knownItems.push(itemString);
+            }
+          }
+          return historyItems;
+        }, []);
+      }
+      return undefined;
     },
   },
   watch: {
@@ -184,6 +212,41 @@ export default {
           this.recentSearches = resultantSearches;
         });
     },
+    /**
+     * When user hits Enter/Return key while typing tokens, we emit `onFilter`
+     * event immediately so at that time, we don't want to keep tokens dropdown
+     * visible on UI so this is essentially a hack which allows us to do that
+     * until `GlFilteredSearch` natively supports this.
+     * See this discussion https://gitlab.com/gitlab-org/gitlab/-/merge_requests/36421#note_385729546
+     */
+    blurSearchInput() {
+      const searchInputEl = this.$refs.filteredSearchInput.$el.querySelector(
+        '.gl-filtered-search-token-segment-input',
+      );
+      if (searchInputEl) {
+        searchInputEl.blur();
+      }
+    },
+    /**
+     * This method removes quotes enclosure from filter values which are
+     * done by `GlFilteredSearch` internally when filter value contains
+     * spaces.
+     */
+    removeQuotesEnclosure(filters = []) {
+      return filters.map(filter => {
+        if (typeof filter === 'object') {
+          const valueString = filter.value.data;
+          return {
+            ...filter,
+            value: {
+              data: stripQuotes(valueString),
+              operator: filter.value.operator,
+            },
+          };
+        }
+        return filter;
+      });
+    },
     handleSortOptionClick(sortBy) {
       this.selectedSortOption = sortBy;
       this.$emit('onSort', sortBy.sortDirection[this.selectedSortDirection]);
@@ -196,19 +259,21 @@ export default {
       this.$emit('onSort', this.selectedSortOption.sortDirection[this.selectedSortDirection]);
     },
     handleHistoryItemSelected(filters) {
-      this.$emit('onFilter', filters);
+      this.$emit('onFilter', this.removeQuotesEnclosure(filters));
     },
     handleClearHistory() {
       const resultantSearches = this.recentSearchesStore.setRecentSearches([]);
       this.recentSearchesService.save(resultantSearches);
       this.recentSearches = [];
     },
-    handleFilterSubmit(filters) {
+    handleFilterSubmit() {
+      const filterTokens = uniqueTokens(this.filterValue);
+      this.filterValue = filterTokens;
       if (this.recentSearchesStorageKey) {
         this.recentSearchesPromise
           .then(() => {
-            if (filters.length) {
-              const resultantSearches = this.recentSearchesStore.addRecentSearch(filters);
+            if (filterTokens.length) {
+              const resultantSearches = this.recentSearchesStore.addRecentSearch(filterTokens);
               this.recentSearchesService.save(resultantSearches);
               this.recentSearches = resultantSearches;
             }
@@ -217,7 +282,8 @@ export default {
             // https://gitlab.com/gitlab-org/gitlab-foss/issues/30821
           });
       }
-      this.$emit('onFilter', filters);
+      this.blurSearchInput();
+      this.$emit('onFilter', this.removeQuotesEnclosure(filterTokens));
     },
   },
 };
@@ -226,10 +292,11 @@ export default {
 <template>
   <div class="vue-filtered-search-bar-container d-md-flex">
     <gl-filtered-search
+      ref="filteredSearchInput"
       v-model="filterValue"
       :placeholder="searchInputPlaceholder"
       :available-tokens="tokens"
-      :history-items="recentSearches"
+      :history-items="filteredRecentSearches"
       class="flex-grow-1"
       @history-item-selected="handleHistoryItemSelected"
       @clear-history="handleClearHistory"
@@ -238,7 +305,7 @@ export default {
       <template #history-item="{ historyItem }">
         <template v-for="(token, index) in historyItem">
           <span v-if="typeof token === 'string'" :key="index" class="gl-px-1">"{{ token }}"</span>
-          <span v-else :key="`${token.type}-${token.value.data}`" class="gl-px-1">
+          <span v-else :key="`${index}-${token.type}-${token.value.data}`" class="gl-px-1">
             <span v-if="tokenTitles[token.type]"
               >{{ tokenTitles[token.type] }} :{{ token.value.operator }}</span
             >
@@ -247,7 +314,7 @@ export default {
         </template>
       </template>
     </gl-filtered-search>
-    <gl-button-group class="sort-dropdown-container d-flex">
+    <gl-button-group v-if="selectedSortOption" class="sort-dropdown-container d-flex">
       <gl-dropdown :text="selectedSortOption.title" :right="true" class="w-100">
         <gl-dropdown-item
           v-for="sortBy in sortOptions"

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class API < Grape::API::Instance
+  class API < ::API::Base
     include APIGuard
 
     LOG_FILENAME = Rails.root.join("log", "api_json.log")
@@ -54,6 +54,10 @@ module API
         namespace: -> { @group },
         caller_id: route.origin
       )
+    end
+
+    before do
+      set_peek_enabled_for_current_request
     end
 
     # The locale is set to the current user's locale when `current_user` is loaded
@@ -116,6 +120,7 @@ module API
     # Ensure the namespace is right, otherwise we might load Grape::API::Helpers
     helpers ::API::Helpers
     helpers ::API::Helpers::CommonHelpers
+    helpers ::API::Helpers::PerformanceBarHelpers
 
     namespace do
       after do
@@ -148,6 +153,9 @@ module API
       mount ::API::Environments
       mount ::API::ErrorTracking
       mount ::API::Events
+      mount ::API::FeatureFlags
+      mount ::API::FeatureFlagScopes
+      mount ::API::FeatureFlagsUserLists
       mount ::API::Features
       mount ::API::Files
       mount ::API::FreezePeriods
@@ -162,6 +170,7 @@ module API
       mount ::API::GroupVariables
       mount ::API::ImportBitbucketServer
       mount ::API::ImportGithub
+      mount ::API::IssueLinks
       mount ::API::Issues
       mount ::API::JobArtifacts
       mount ::API::Jobs
@@ -188,9 +197,13 @@ module API
       mount ::API::NugetPackages
       mount ::API::PypiPackages
       mount ::API::ComposerPackages
-      mount ::API::ConanPackages
+      mount ::API::ConanProjectPackages
+      mount ::API::ConanInstancePackages
+      mount ::API::DebianGroupPackages
+      mount ::API::DebianProjectPackages
       mount ::API::MavenPackages
       mount ::API::NpmPackages
+      mount ::API::GenericPackages
       mount ::API::GoProxy
       mount ::API::Pages
       mount ::API::PagesDomains
@@ -208,6 +221,7 @@ module API
       mount ::API::ProjectStatistics
       mount ::API::ProjectTemplates
       mount ::API::Terraform::State
+      mount ::API::Terraform::StateVersion
       mount ::API::ProtectedBranches
       mount ::API::ProtectedTags
       mount ::API::Releases
@@ -228,6 +242,8 @@ module API
       mount ::API::Templates
       mount ::API::Todos
       mount ::API::Triggers
+      mount ::API::Unleash
+      mount ::API::UsageData
       mount ::API::UserCounts
       mount ::API::Users
       mount ::API::Variables
@@ -236,8 +252,19 @@ module API
     end
 
     mount ::API::Internal::Base
+    mount ::API::Internal::Lfs
     mount ::API::Internal::Pages
     mount ::API::Internal::Kubernetes
+
+    version 'v3', using: :path do
+      # Although the following endpoints are kept behind V3 namespace,
+      # they're not deprecated neither should be removed when V3 get
+      # removed.  They're needed as a layer to integrate with Jira
+      # Development Panel.
+      namespace '/', requirements: ::API::V3::Github::ENDPOINT_REQUIREMENTS do
+        mount ::API::V3::Github
+      end
+    end
 
     route :any, '*path' do
       error!('404 Not Found', 404)

@@ -1,7 +1,7 @@
-- page_title _('Issues Analytics')
+- page_title _('Issue Analytics')
 
 .mb-3
   %h3
-    = _('Issues Analytics')
+    = _('Issue Analytics')
 = render 'shared/issuable/search_bar', type: :issues_analytics, show_sorting_dropdown: false, placeholder: _('Filter results...')
 #js-issues-analytics{ data: { endpoint: group_issues_analytics_path(@group), no_data_empty_state_svg_path: image_path('illustrations/monitoring/getting_started.svg'), filters_empty_state_svg_path: image_path('illustrations/issues.svg'), issues_api_endpoint: expose_url(api_v4_groups_issues_path(id: @group.id)), issues_page_endpoint: issues_group_path(@group) } }

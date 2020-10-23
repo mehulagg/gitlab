@@ -34,6 +34,7 @@ RSpec.describe Projects::TransferService do
           expect(instance).to receive(:has_container_registry_tags?).and_return(true)
         end
       end
+
       let(:attributes) do
         {
            author_id: user.id,

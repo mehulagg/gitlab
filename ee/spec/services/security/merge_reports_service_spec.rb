@@ -82,13 +82,29 @@ RSpec.describe Security::MergeReportsService, '#execute' do
 
   let(:report_1_findings) { [finding_id_1, finding_id_2_loc_1, finding_cwe_2, finding_wasc_1] }
 
+  let(:scanned_resource) do
+    ::Gitlab::Ci::Reports::Security::ScannedResource.new(URI.parse('example.com'), 'GET')
+  end
+
+  let(:scanned_resource_1) do
+    ::Gitlab::Ci::Reports::Security::ScannedResource.new(URI.parse('example.com'), 'POST')
+  end
+
+  let(:scanned_resource_2) do
+    ::Gitlab::Ci::Reports::Security::ScannedResource.new(URI.parse('example.com/2'), 'GET')
+  end
+
+  let(:scanned_resource_3) do
+    ::Gitlab::Ci::Reports::Security::ScannedResource.new(URI.parse('example.com/3'), 'GET')
+  end
+
   let(:report_1) do
     build(
       :ci_reports_security_report,
       scanners: [scanner_1, scanner_2],
       findings: report_1_findings,
       identifiers: report_1_findings.flat_map(&:identifiers),
-      scanned_resources: ['example.com', 'example.com/1', 'example.com/2']
+      scanned_resources: [scanned_resource, scanned_resource_1, scanned_resource_2]
     )
   end
 
@@ -100,7 +116,7 @@ RSpec.describe Security::MergeReportsService, '#execute' do
       scanners: [scanner_2],
       findings: report_2_findings,
       identifiers: finding_id_2_loc_2.identifiers,
-      scanned_resources: ['example.com', 'example.com/3']
+      scanned_resources: [scanned_resource, scanned_resource_1, scanned_resource_3]
     )
   end
 
@@ -153,10 +169,10 @@ RSpec.describe Security::MergeReportsService, '#execute' do
   it 'deduplicates scanned resources' do
     expect(subject.scanned_resources).to(
       eq([
-        'example.com',
-        'example.com/1',
-        'example.com/2',
-        'example.com/3'
+        scanned_resource,
+        scanned_resource_1,
+        scanned_resource_2,
+        scanned_resource_3
       ])
     )
   end

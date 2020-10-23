@@ -33,7 +33,8 @@ exports[`dashboard should match the snapshot 1`] = `
     </h1>
      
     <gl-button-stub
-      category="tertiary"
+      buttontextclasses=""
+      category="primary"
       class="js-add-projects-button"
       icon=""
       role="button"
@@ -50,7 +51,7 @@ exports[`dashboard should match the snapshot 1`] = `
   <p
     class="mt-2 mb-4 js-page-limits-message"
   >
-    This dashboard displays a maximum of 7 projects and 3 environments per project. 
+    This dashboard displays 3 environments per project, and is linked to the Operations Dashboard. When you add or remove a project from one dashboard, GitLab adds or removes the project from the other. 
     <gl-link-stub
       href="/help/user/operations_dashboard/index.html"
       rel="noopener noreferrer"

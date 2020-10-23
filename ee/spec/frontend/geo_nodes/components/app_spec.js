@@ -16,6 +16,7 @@ import {
   mockNodes,
   mockNode,
   rawMockNodeDetails,
+  MOCK_REPLICABLE_TYPES,
 } from '../mock_data';
 
 jest.mock('~/smart_interval');
@@ -23,7 +24,11 @@ jest.mock('ee/geo_nodes/event_hub');
 
 const createComponent = () => {
   const Component = Vue.extend(appComponent);
-  const store = new GeoNodesStore(PRIMARY_VERSION.version, PRIMARY_VERSION.revision);
+  const store = new GeoNodesStore(
+    PRIMARY_VERSION.version,
+    PRIMARY_VERSION.revision,
+    MOCK_REPLICABLE_TYPES,
+  );
   const service = new GeoNodesService(NODE_DETAILS_PATH);
 
   return mountComponent(Component, {

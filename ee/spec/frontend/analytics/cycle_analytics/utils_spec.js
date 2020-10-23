@@ -1,5 +1,4 @@
 import { isNumber } from 'lodash';
-import { getDatesInRange } from '~/lib/utils/datetime_utility';
 import {
   isStartEvent,
   isLabelEvent,
@@ -9,7 +8,6 @@ import {
   getLabelEventsIdentifiers,
   flattenDurationChartData,
   getDurationChartData,
-  getDurationChartMedianData,
   transformRawStages,
   isPersistedStage,
   getTasksByTypeData,
@@ -17,18 +15,19 @@ import {
   orderByDate,
   toggleSelectedLabel,
   transformStagesForPathNavigation,
+  prepareTimeMetricsData,
 } from 'ee/analytics/cycle_analytics/utils';
 import { toYmd } from 'ee/analytics/shared/utils';
+import { getDatesInRange } from '~/lib/utils/datetime_utility';
+import { slugify } from '~/lib/utils/text_utility';
 import {
   customStageEvents as events,
   customStageLabelEvents as labelEvents,
   labelStartEvent,
   customStageStartEvents as startEvents,
   transformedDurationData,
-  transformedDurationMedianData,
   flattenedDurationData,
   durationChartPlottableData,
-  durationChartPlottableMedianData,
   startDate,
   endDate,
   issueStage,
@@ -36,10 +35,9 @@ import {
   rawTasksByTypeData,
   allowedStages,
   stageMediansWithNumericIds,
-  totalStage,
   pathNavIssueMetric,
+  timeMetricsData,
 } from './mock_data';
-import { CAPITALIZED_STAGE_NAME, PATH_HOME_ICON } from 'ee/analytics/cycle_analytics/constants';
 
 const labelEventIds = labelEvents.map(ev => ev.identifier);
 
@@ -145,18 +143,6 @@ describe('Cycle analytics utils', () => {
       const plottableData = getDurationChartData(transformedDurationData, startDate, endDate);
 
       expect(plottableData).toStrictEqual(durationChartPlottableData);
-    });
-  });
-
-  describe('getDurationChartMedianData', () => {
-    it('computes the plottable data as expected', () => {
-      const plottableData = getDurationChartMedianData(
-        transformedDurationMedianData,
-        startDate,
-        endDate,
-      );
-
-      expect(plottableData).toStrictEqual(durationChartPlottableMedianData);
     });
   });
 
@@ -320,13 +306,14 @@ describe('Cycle analytics utils', () => {
     it('will remove an id that exists', () => {
       expect(toggleSelectedLabel({ selectedLabelIds, value: 2 })).toEqual([1, 3]);
     });
+
     it('will add an id that does not exist', () => {
       expect(toggleSelectedLabel({ selectedLabelIds, value: 4 })).toEqual([1, 2, 3, 4]);
     });
   });
 
   describe('transformStagesForPathNavigation', () => {
-    const stages = [...allowedStages, totalStage];
+    const stages = allowedStages;
     const response = transformStagesForPathNavigation({
       stages,
       medians: stageMediansWithNumericIds,
@@ -350,22 +337,34 @@ describe('Cycle analytics utils', () => {
 
         expect(issue.metric).toEqual(pathNavIssueMetric);
       });
+    });
+  });
 
-      describe(`${CAPITALIZED_STAGE_NAME.OVERVIEW} stage specific changes`, () => {
-        const overview = response.filter(stage => stage.name === CAPITALIZED_STAGE_NAME.TOTAL)[0];
+  describe('prepareTimeMetricsData', () => {
+    let prepared;
+    const [{ title: firstTitle }, { title: secondTitle }] = timeMetricsData;
+    const firstKey = slugify(firstTitle);
+    const secondKey = slugify(secondTitle);
 
-        it(`renames '${CAPITALIZED_STAGE_NAME.TOTAL}' stage title to '${CAPITALIZED_STAGE_NAME.OVERVIEW}'`, () => {
-          expect(overview.title).toEqual(CAPITALIZED_STAGE_NAME.OVERVIEW);
-        });
-
-        it('includes the correct icon', () => {
-          expect(overview.icon).toEqual(PATH_HOME_ICON);
-        });
-
-        it(`moves the stage to the front`, () => {
-          expect(response[0]).toEqual(overview);
-        });
+    beforeEach(() => {
+      prepared = prepareTimeMetricsData(timeMetricsData, {
+        [firstKey]: 'Is a value that is good',
       });
+    });
+
+    it('will add a `key` based on the title', () => {
+      expect(prepared).toMatchObject([{ key: firstKey }, { key: secondKey }]);
+    });
+
+    it('will add a `label` key', () => {
+      expect(prepared).toMatchObject([{ label: 'Lead Time' }, { label: 'Cycle Time' }]);
+    });
+
+    it('will add a tooltip text using the key if it is provided', () => {
+      expect(prepared).toMatchObject([
+        { tooltipText: 'Is a value that is good' },
+        { tooltipText: '' },
+      ]);
     });
   });
 });

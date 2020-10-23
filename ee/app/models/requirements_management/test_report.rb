@@ -28,6 +28,16 @@ module RequirementsManagement
         bulk_insert!(reports)
       end
 
+      def build_report(author: nil, state:, requirement:, build: nil, timestamp: Time.current)
+        new(
+          requirement_id: requirement.id,
+          build_id: build&.id,
+          author_id: build&.user_id || author&.id,
+          created_at: timestamp,
+          state: state
+        )
+      end
+
       private
 
       def passed_reports_for_all_requirements(build, timestamp)
@@ -51,16 +61,6 @@ module RequirementsManagement
             reports << build_report(state: new_state, requirement: requirement, build: build, timestamp: timestamp)
           end
         end
-      end
-
-      def build_report(state:, requirement:, build:, timestamp:)
-        new(
-          requirement_id: requirement.id,
-          build_id: build.id,
-          author_id: build.user_id,
-          created_at: timestamp,
-          state: state
-        )
       end
     end
   end

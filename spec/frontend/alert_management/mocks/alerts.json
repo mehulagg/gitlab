@@ -9,7 +9,8 @@
     "endedAt": "2020-04-17T23:18:14.996Z",
     "status": "TRIGGERED",
     "assignees": { "nodes": [] },
-    "notes": { "nodes": [] }
+    "notes": { "nodes": [] },
+    "todos": { "nodes": [] }
   },
   {
     "iid": "1527543",
@@ -19,7 +20,7 @@
     "startedAt": "2020-04-17T23:18:14.996Z",
     "endedAt": "2020-04-17T23:18:14.996Z",
     "status": "ACKNOWLEDGED",
-    "assignees": { "nodes": [{ "username": "root" }] },
+    "assignees": { "nodes": [{ "username": "root", "avatarUrl": "/url", "name": "root" }] },
     "issueIid": "1",
     "notes": {
       "nodes": [
@@ -37,7 +38,8 @@
           "systemNoteIconName": "user"
         }
       ]
-    }
+    },
+    "todos": { "nodes": [] }
   },
   {
     "iid": "1527544",
@@ -47,7 +49,7 @@
     "startedAt": "2020-04-17T23:18:14.996Z",
     "endedAt": "2020-04-17T23:18:14.996Z",
     "status": "RESOLVED",
-    "assignees": { "nodes": [{ "username": "root" }] },
+    "assignees": { "nodes": [{ "username": "root", "avatarUrl": "/url", "name": "root" }] },
     "notes": {
       "nodes": [
         {
@@ -63,6 +65,7 @@
           }
         }
       ]
-    }
+    },
+    "todos": { "nodes": [] }
   }
 ]

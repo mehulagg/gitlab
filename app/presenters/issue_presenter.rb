@@ -3,10 +3,6 @@
 class IssuePresenter < Gitlab::View::Presenter::Delegated
   presents :issue
 
-  def web_url
-    url_builder.build(issue)
-  end
-
   def issue_path
     url_builder.build(issue, only_path: true)
   end
@@ -15,3 +11,5 @@ class IssuePresenter < Gitlab::View::Presenter::Delegated
     issue.subscribed?(current_user, issue.project)
   end
 end
+
+IssuePresenter.prepend_if_ee('EE::IssuePresenter')

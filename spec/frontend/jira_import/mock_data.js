@@ -1,7 +1,18 @@
 import getJiraImportDetailsQuery from '~/jira_import/queries/get_jira_import_details.query.graphql';
 import { IMPORT_STATE } from '~/jira_import/utils/jira_import_utils';
+import { userMappingsPageSize } from '~/jira_import/utils/constants';
 
 export const fullPath = 'gitlab-org/gitlab-test';
+
+export const issuesPath = 'gitlab-org/gitlab-test/-/issues';
+
+export const illustration = 'illustration.svg';
+
+export const jiraIntegrationPath = 'gitlab-org/gitlab-test/-/services/jira/edit';
+
+export const projectId = '5';
+
+export const projectPath = 'gitlab-org/gitlab-test';
 
 export const queryDetails = {
   query: getJiraImportDetailsQuery,
@@ -71,17 +82,13 @@ export const jiraImportMutationResponse = {
   },
 };
 
-export const issuesPath = 'gitlab-org/gitlab-test/-/issues';
-
-export const jiraIntegrationPath = 'gitlab-org/gitlab-test/-/services/jira/edit';
-
-export const illustration = 'illustration.svg';
-
 export const jiraProjects = [
   { text: 'My Jira Project (MJP)', value: 'MJP' },
   { text: 'My Second Jira Project (MSJP)', value: 'MSJP' },
   { text: 'Migrate to GitLab (MTG)', value: 'MTG' },
 ];
+
+export const jiraUsersResponse = new Array(userMappingsPageSize);
 
 export const imports = [
   {

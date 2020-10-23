@@ -88,25 +88,53 @@ RSpec.describe MergeRequestWidgetEntity do
   end
 
   describe 'codequality report artifacts', :request_store do
+    let(:merge_base_pipeline) { create(:ci_pipeline, :with_codequality_report, project: project) }
+
     before do
       project.add_developer(user)
 
       allow(resource).to receive_messages(
+        merge_base_pipeline: merge_base_pipeline,
         base_pipeline: pipeline,
         head_pipeline: pipeline
       )
     end
 
-    context "with report artifacts" do
+    context 'with report artifacts' do
       let(:pipeline) { create(:ci_pipeline, :with_codequality_report, project: project) }
+      let(:generic_job_id) { pipeline.builds.first.id }
+      let(:merge_base_job_id) { merge_base_pipeline.builds.first.id }
 
-      it "has data entry" do
-        expect(subject).to include(:codeclimate)
+      it 'has head_path and base_path entries' do
+        expect(subject[:codeclimate][:head_path]).to be_present
+        expect(subject[:codeclimate][:base_path]).to be_present
+      end
+
+      context 'on pipelines for merged results' do
+        let(:pipeline) { create(:ci_pipeline, :merged_result_pipeline, :with_codequality_report, project: project) }
+
+        context 'with merge_base_pipelines enabled' do
+          it 'returns URLs from the head_pipeline and merge_base_pipeline' do
+            expect(subject[:codeclimate][:head_path]).to include("/jobs/#{generic_job_id}/artifacts/download?file_type=codequality")
+            expect(subject[:codeclimate][:base_path]).to include("/jobs/#{merge_base_job_id}/artifacts/download?file_type=codequality")
+          end
+        end
+
+        context 'with merge_base_pipelines disabled' do
+          before do
+            stub_feature_flags(merge_base_pipelines: false)
+          end
+
+          it 'returns URLs from the head_pipeline and base_pipeline' do
+            expect(subject[:codeclimate][:head_path]).to include("/jobs/#{generic_job_id}/artifacts/download?file_type=codequality")
+            expect(subject[:codeclimate][:base_path]).to include("/jobs/#{generic_job_id}/artifacts/download?file_type=codequality")
+          end
+        end
       end
     end
 
-    context "without artifacts" do
-      it "does not have data entry" do
+    context 'without artifacts' do
+      it 'does not have data entry' do
         expect(subject).not_to include(:codeclimate)
       end
     end
@@ -136,9 +164,22 @@ RSpec.describe MergeRequestWidgetEntity do
         let(:role) { :developer }
 
         it 'has add ci config path' do
-          expected_path = "/#{resource.project.full_path}/-/new/#{resource.source_branch}?commit_message=Add+.gitlab-ci.yml&file_name=.gitlab-ci.yml&suggest_gitlab_ci_yml=true"
+          expected_path = "/#{resource.project.full_path}/-/new/#{resource.source_branch}"
 
-          expect(subject[:merge_request_add_ci_config_path]).to eq(expected_path)
+          expect(subject[:merge_request_add_ci_config_path]).to include(expected_path)
+        end
+
+        it 'has expected params' do
+          expected_params = {
+            commit_message: 'Add .gitlab-ci.yml',
+            file_name: '.gitlab-ci.yml',
+            suggest_gitlab_ci_yml: 'true',
+            mr_path: "/#{resource.project.full_path}/-/merge_requests/#{resource.iid}"
+          }.with_indifferent_access
+
+          uri = Addressable::URI.parse(subject[:merge_request_add_ci_config_path])
+
+          expect(uri.query_values).to match(expected_params)
         end
 
         context 'when auto devops is enabled' do
@@ -197,7 +238,7 @@ RSpec.describe MergeRequestWidgetEntity do
 
         context 'when build feature is disabled' do
           before do
-            project.project_feature.update(builds_access_level: ProjectFeature::DISABLED)
+            project.project_feature.update!(builds_access_level: ProjectFeature::DISABLED)
           end
 
           it 'has no path' do
@@ -256,6 +297,56 @@ RSpec.describe MergeRequestWidgetEntity do
     end
   end
 
+  describe 'user callouts' do
+    context 'when suggest pipeline feature is enabled' do
+      subject { described_class.new(resource, request: request, experiment_enabled: :suggest_pipeline).as_json }
+
+      it 'provides a valid path value for user callout path' do
+        expect(subject[:user_callouts_path]).to eq '/-/user_callouts'
+      end
+
+      it 'provides a valid value for suggest pipeline feature id' do
+        expect(subject[:suggest_pipeline_feature_id]).to eq described_class::SUGGEST_PIPELINE
+      end
+
+      it 'provides a valid value for if it is dismissed' do
+        expect(subject[:is_dismissed_suggest_pipeline]).to be(false)
+      end
+
+      context 'when the suggest pipeline has been dismissed' do
+        before do
+          create(:user_callout, user: user, feature_name: described_class::SUGGEST_PIPELINE)
+        end
+
+        it 'indicates suggest pipeline has been dismissed' do
+          expect(subject[:is_dismissed_suggest_pipeline]).to be(true)
+        end
+      end
+
+      context 'when user is not logged in' do
+        let(:request) { double('request', current_user: nil, project: project) }
+
+        it 'returns a blank is dismissed value' do
+          expect(subject[:is_dismissed_suggest_pipeline]).to be_nil
+        end
+      end
+    end
+
+    context 'when suggest pipeline feature is not enabled' do
+      it 'provides no valid value for user callout path' do
+        expect(subject[:user_callouts_path]).to be_nil
+      end
+
+      it 'provides no valid value for suggest pipeline feature id' do
+        expect(subject[:suggest_pipeline_feature_id]).to be_nil
+      end
+
+      it 'provides no valid value for if it is dismissed' do
+        expect(subject[:is_dismissed_suggest_pipeline]).to be_nil
+      end
+    end
+  end
+
   it 'has human access' do
     project.add_maintainer(user)
 
@@ -277,12 +368,16 @@ RSpec.describe MergeRequestWidgetEntity do
 
     it 'returns a blank rebase_path' do
       allow(merge_request).to receive(:should_be_rebased?).and_return(true)
-      forked_project.destroy
+      forked_project.destroy!
       merge_request.reload
 
       entity = described_class.new(merge_request, request: request).as_json
 
       expect(entity[:rebase_path]).to be_nil
     end
+  end
+
+  it 'has security_reports_docs_path' do
+    expect(subject[:security_reports_docs_path]).not_to be_nil
   end
 end

@@ -3,8 +3,13 @@
 module QA
   context 'Create' do
     describe 'Codeowners' do
-      context 'when the project is in a subgroup' do
-        let(:approver) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
+      context 'when the project is in a subgroup', :requires_admin do
+        let(:approver) do
+          Resource::User.fabricate_via_api! do |resource|
+            resource.api_client = Runtime::API::Client.as_admin
+          end
+        end
+
         let(:project) do
           Resource::Project.fabricate_via_api! do |project|
             project.name = "approve-and-merge"
@@ -22,6 +27,7 @@ module QA
 
         after do
           group_or_project.remove_member(approver)
+          approver.remove_via_api!
         end
 
         context 'and the code owner is the root group' do

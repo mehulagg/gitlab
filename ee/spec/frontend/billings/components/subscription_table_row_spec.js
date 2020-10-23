@@ -54,7 +54,9 @@ describe('Subscription Table Row', () => {
     });
 
     it('should render an icon in the header cell', () => {
-      expect(vm.$el.querySelector(`.header-cell .ic-${header.icon}`)).not.toBe(null);
+      expect(vm.$el.querySelector(`.header-cell [data-testid="${header.icon}-icon"]`)).not.toBe(
+        null,
+      );
     });
 
     columns.forEach((col, idx) => {

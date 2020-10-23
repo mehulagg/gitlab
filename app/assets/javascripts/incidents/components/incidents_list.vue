@@ -2,84 +2,136 @@
 import {
   GlLoadingIcon,
   GlTable,
-  GlAlert,
   GlAvatarsInline,
   GlAvatarLink,
   GlAvatar,
   GlTooltipDirective,
   GlButton,
-  GlSearchBoxByType,
   GlIcon,
-  GlPagination,
+  GlEmptyState,
 } from '@gitlab/ui';
-import { debounce } from 'lodash';
+import Tracking from '~/tracking';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import PaginatedTableWithSearchAndTabs from '~/vue_shared/components/paginated_table_with_search_and_tabs/paginated_table_with_search_and_tabs.vue';
+import {
+  tdClass,
+  thClass,
+  bodyTrClass,
+  initialPaginationState,
+} from '~/vue_shared/components/paginated_table_with_search_and_tabs/constants';
+import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import { s__ } from '~/locale';
-import { mergeUrlParams, joinPaths, visitUrl } from '~/lib/utils/url_utility';
+import { visitUrl, mergeUrlParams, joinPaths } from '~/lib/utils/url_utility';
 import getIncidents from '../graphql/queries/get_incidents.query.graphql';
-import { I18N, DEFAULT_PAGE_SIZE, INCIDENT_SEARCH_DELAY } from '../constants';
-
-const tdClass =
-  'table-col gl-display-flex d-md-table-cell gl-align-items-center gl-white-space-nowrap';
-const thClass = 'gl-hover-bg-blue-50';
-const bodyTrClass =
-  'gl-border-1 gl-border-t-solid gl-border-gray-100 gl-hover-cursor-pointer gl-hover-bg-blue-50 gl-hover-border-b-solid gl-hover-border-blue-200';
-
-const initialPaginationState = {
-  currentPage: 1,
-  prevPageCursor: '',
-  nextPageCursor: '',
-  firstPageSize: DEFAULT_PAGE_SIZE,
-  lastPageSize: null,
-};
+import getIncidentsCountByStatus from '../graphql/queries/get_count_by_status.query.graphql';
+import SeverityToken from '~/sidebar/components/severity/severity.vue';
+import { INCIDENT_SEVERITY } from '~/sidebar/components/severity/constants';
+import {
+  I18N,
+  INCIDENT_STATUS_TABS,
+  TH_CREATED_AT_TEST_ID,
+  TH_INCIDENT_SLA_TEST_ID,
+  TH_SEVERITY_TEST_ID,
+  TH_PUBLISHED_TEST_ID,
+  INCIDENT_DETAILS_PATH,
+  trackIncidentCreateNewOptions,
+  trackIncidentListViewsOptions,
+} from '../constants';
 
 export default {
+  trackIncidentCreateNewOptions,
+  trackIncidentListViewsOptions,
   i18n: I18N,
+  statusTabs: INCIDENT_STATUS_TABS,
   fields: [
+    {
+      key: 'severity',
+      label: s__('IncidentManagement|Severity'),
+      thClass: `${thClass} w-15p`,
+      tdClass: `${tdClass} sortable-cell`,
+      sortable: true,
+      thAttr: TH_SEVERITY_TEST_ID,
+    },
     {
       key: 'title',
       label: s__('IncidentManagement|Incident'),
-      thClass: `gl-pointer-events-none gl-w-half`,
+      thClass: `gl-pointer-events-none`,
       tdClass,
     },
     {
       key: 'createdAt',
       label: s__('IncidentManagement|Date created'),
-      thClass: `${thClass} gl-pointer-events-none`,
-      tdClass,
+      thClass: `${thClass} gl-w-eighth`,
+      tdClass: `${tdClass} sortable-cell`,
+      sortable: true,
+      thAttr: TH_CREATED_AT_TEST_ID,
+    },
+    {
+      key: 'incidentSla',
+      label: s__('IncidentManagement|Time to SLA'),
+      thClass: `gl-pointer-events-none gl-text-right gl-w-eighth`,
+      tdClass: `${tdClass} gl-text-right`,
+      thAttr: TH_INCIDENT_SLA_TEST_ID,
     },
     {
       key: 'assignees',
       label: s__('IncidentManagement|Assignees'),
-      thClass: 'gl-pointer-events-none',
+      thClass: 'gl-pointer-events-none w-15p',
       tdClass,
+    },
+    {
+      key: 'published',
+      label: s__('IncidentManagement|Published'),
+      thClass: `${thClass} w-15p`,
+      tdClass: `${tdClass} sortable-cell`,
+      sortable: true,
+      thAttr: TH_PUBLISHED_TEST_ID,
     },
   ],
   components: {
     GlLoadingIcon,
     GlTable,
-    GlAlert,
     GlAvatarsInline,
     GlAvatarLink,
     GlAvatar,
     GlButton,
     TimeAgoTooltip,
-    GlSearchBoxByType,
     GlIcon,
-    GlPagination,
+    PublishedCell: () => import('ee_component/incidents/components/published_cell.vue'),
+    ServiceLevelAgreementCell: () =>
+      import('ee_component/incidents/components/service_level_agreement_cell.vue'),
+    GlEmptyState,
+    SeverityToken,
+    PaginatedTableWithSearchAndTabs,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  inject: ['projectPath', 'newIssuePath', 'incidentTemplateName', 'issuePath'],
+  inject: [
+    'projectPath',
+    'newIssuePath',
+    'incidentTemplateName',
+    'incidentType',
+    'issuePath',
+    'publishedAvailable',
+    'emptyListSvgPath',
+    'textQuery',
+    'authorUsernameQuery',
+    'assigneeUsernameQuery',
+    'slaFeatureAvailable',
+  ],
   apollo: {
     incidents: {
       query: getIncidents,
       variables() {
         return {
           searchTerm: this.searchTerm,
+          authorUsername: this.authorUsername,
+          assigneeUsername: this.assigneeUsername,
           projectPath: this.projectPath,
-          labelNames: ['incident'],
+          status: this.statusFilter,
+          issueTypes: ['INCIDENT'],
+          sort: this.sort,
           firstPageSize: this.pagination.firstPageSize,
           lastPageSize: this.pagination.lastPageSize,
           prevPageCursor: this.pagination.prevPageCursor,
@@ -96,193 +148,274 @@ export default {
         this.errored = true;
       },
     },
+    incidentsCount: {
+      query: getIncidentsCountByStatus,
+      variables() {
+        return {
+          searchTerm: this.searchTerm,
+          authorUsername: this.authorUsername,
+          assigneeUsername: this.assigneeUsername,
+          projectPath: this.projectPath,
+          issueTypes: ['INCIDENT'],
+        };
+      },
+      update(data) {
+        return data.project?.issueStatusCounts;
+      },
+    },
   },
   data() {
     return {
       errored: false,
       isErrorAlertDismissed: false,
       redirecting: false,
-      searchTerm: '',
-      pagination: initialPaginationState,
       incidents: {},
+      incidentsCount: {},
+      sort: 'created_desc',
+      sortBy: 'createdAt',
+      sortDesc: true,
+      statusFilter: '',
+      filteredByStatus: '',
+      searchTerm: this.textQuery,
+      authorUsername: this.authorUsernameQuery,
+      assigneeUsername: this.assigneeUsernameQuery,
+      pagination: initialPaginationState,
     };
   },
   computed: {
     showErrorMsg() {
-      return this.errored && !this.isErrorAlertDismissed && !this.searchTerm;
+      return this.errored && !this.isErrorAlertDismissed;
     },
     loading() {
       return this.$apollo.queries.incidents.loading;
     },
-    hasIncidents() {
-      return this.incidents?.list?.length;
+    isEmpty() {
+      return !this.incidents?.list?.length;
     },
-    showPaginationControls() {
-      return Boolean(
-        this.incidents?.pageInfo?.hasNextPage || this.incidents?.pageInfo?.hasPreviousPage,
-      );
-    },
-    prevPage() {
-      return Math.max(this.pagination.currentPage - 1, 0);
-    },
-    nextPage() {
-      const nextPage = this.pagination.currentPage + 1;
-      return this.incidents?.list?.length < DEFAULT_PAGE_SIZE ? null : nextPage;
+    showList() {
+      return !this.isEmpty || this.errored || this.loading;
     },
     tbodyTrClass() {
       return {
-        [bodyTrClass]: !this.loading && this.hasIncidents,
+        [bodyTrClass]: !this.loading && !this.isEmpty,
       };
     },
     newIncidentPath() {
-      return mergeUrlParams({ issuable_template: this.incidentTemplateName }, this.newIssuePath);
+      return mergeUrlParams(
+        {
+          issuable_template: this.incidentTemplateName,
+          'issue[issue_type]': this.incidentType,
+        },
+        this.newIssuePath,
+      );
     },
-  },
-  watch: {
-    searchTerm: debounce(function debounceSearch(input) {
-      if (input !== this.searchTerm) {
-        this.searchTerm = input;
+    availableFields() {
+      const isHidden = {
+        published: !this.publishedAvailable,
+        incidentSla: !this.slaFeatureAvailable,
+      };
+
+      return this.$options.fields.filter(({ key }) => !isHidden[key]);
+    },
+    activeClosedTabHasNoIncidents() {
+      const { all, closed } = this.incidentsCount || {};
+      const isClosedTabActive = this.statusFilter === this.$options.statusTabs[1].filters;
+
+      return isClosedTabActive && all && !closed;
+    },
+    emptyStateData() {
+      const {
+        emptyState: { title, emptyClosedTabTitle, description },
+        createIncidentBtnLabel,
+      } = this.$options.i18n;
+
+      if (this.activeClosedTabHasNoIncidents) {
+        return { title: emptyClosedTabTitle };
       }
-    }, INCIDENT_SEARCH_DELAY),
+      return {
+        title,
+        description,
+        btnLink: this.newIncidentPath,
+        btnText: createIncidentBtnLabel,
+      };
+    },
   },
   methods: {
     hasAssignees(assignees) {
       return Boolean(assignees.nodes?.length);
     },
     navigateToIncidentDetails({ iid }) {
-      return visitUrl(joinPaths(this.issuePath, iid));
+      return visitUrl(joinPaths(this.issuePath, INCIDENT_DETAILS_PATH, iid));
     },
-    handlePageChange(page) {
-      const { startCursor, endCursor } = this.incidents.pageInfo;
+    navigateToCreateNewIncident() {
+      const { category, action } = this.$options.trackIncidentCreateNewOptions;
+      Tracking.event(category, action);
+      this.redirecting = true;
+    },
+    fetchSortedData({ sortBy, sortDesc }) {
+      const sortingDirection = sortDesc ? 'DESC' : 'ASC';
+      const sortingColumn = convertToSnakeCase(sortBy)
+        .replace(/_.*/, '')
+        .toUpperCase();
 
-      if (page > this.pagination.currentPage) {
-        this.pagination = {
-          ...initialPaginationState,
-          nextPageCursor: endCursor,
-          currentPage: page,
-        };
-      } else {
-        this.pagination = {
-          lastPageSize: DEFAULT_PAGE_SIZE,
-          firstPageSize: null,
-          prevPageCursor: startCursor,
-          nextPageCursor: '',
-          currentPage: page,
-        };
-      }
-    },
-    resetPagination() {
       this.pagination = initialPaginationState;
+      this.sort = `${sortingColumn}_${sortingDirection}`;
+    },
+    getSeverity(severity) {
+      return INCIDENT_SEVERITY[severity];
+    },
+    pageChanged(pagination) {
+      this.pagination = pagination;
+    },
+    statusChanged({ filters, status }) {
+      this.statusFilter = filters;
+      this.filteredByStatus = status;
+    },
+    filtersChanged({ searchTerm, authorUsername, assigneeUsername }) {
+      this.searchTerm = searchTerm;
+      this.authorUsername = authorUsername;
+      this.assigneeUsername = assigneeUsername;
+    },
+    errorAlertDismissed() {
+      this.isErrorAlertDismissed = true;
     },
   },
 };
 </script>
 <template>
-  <div class="incident-management-list">
-    <gl-alert v-if="showErrorMsg" variant="danger" @dismiss="isErrorAlertDismissed = true">
-      {{ $options.i18n.errorMsg }}
-    </gl-alert>
-
-    <div class="gl-display-flex gl-justify-content-end">
-      <gl-button
-        class="gl-mt-3 gl-mb-3 create-incident-button"
-        data-testid="createIncidentBtn"
-        :loading="redirecting"
-        :disabled="redirecting"
-        category="primary"
-        variant="success"
-        :href="newIncidentPath"
-        @click="redirecting = true"
-      >
-        {{ $options.i18n.createIncidentBtnLabel }}
-      </gl-button>
-    </div>
-
-    <div class="gl-bg-gray-10 gl-p-5 gl-border-b-solid gl-border-b-1 gl-border-gray-100">
-      <gl-search-box-by-type
-        v-model.trim="searchTerm"
-        class="gl-bg-white"
-        :placeholder="$options.i18n.searchPlaceholder"
-      />
-    </div>
-
-    <h4 class="gl-display-block d-md-none my-3">
-      {{ s__('IncidentManagement|Incidents') }}
-    </h4>
-    <gl-table
+  <div>
+    <paginated-table-with-search-and-tabs
+      :show-items="showList"
+      :show-error-msg="showErrorMsg"
+      :i18n="$options.i18n"
       :items="incidents.list || []"
-      :fields="$options.fields"
-      :show-empty="true"
-      :busy="loading"
-      stacked="md"
-      :tbody-tr-class="tbodyTrClass"
-      :no-local-sorting="true"
-      fixed
-      @row-clicked="navigateToIncidentDetails"
+      :page-info="incidents.pageInfo"
+      :items-count="incidentsCount"
+      :status-tabs="$options.statusTabs"
+      :track-views-options="$options.trackIncidentListViewsOptions"
+      filter-search-key="incidents"
+      @page-changed="pageChanged"
+      @tabs-changed="statusChanged"
+      @filters-changed="filtersChanged"
+      @error-alert-dismissed="errorAlertDismissed"
     >
-      <template #cell(title)="{ item }">
-        <div class="gl-display-flex gl-justify-content-center">
-          <div class="gl-max-w-full text-truncate" :title="item.title">{{ item.title }}</div>
-          <gl-icon
-            v-if="item.state === 'closed'"
-            name="issue-close"
-            class="gl-fill-blue-500"
-            data-testid="incident-closed"
-          />
-        </div>
+      <template #header-actions>
+        <gl-button
+          v-if="!isEmpty || activeClosedTabHasNoIncidents"
+          class="gl-my-3 gl-mr-5 create-incident-button"
+          data-testid="createIncidentBtn"
+          data-qa-selector="create_incident_button"
+          :loading="redirecting"
+          :disabled="redirecting"
+          category="primary"
+          variant="success"
+          :href="newIncidentPath"
+          @click="navigateToCreateNewIncident"
+        >
+          {{ $options.i18n.createIncidentBtnLabel }}
+        </gl-button>
       </template>
 
-      <template #cell(createdAt)="{ item }">
-        <time-ago-tooltip :time="item.createdAt" />
+      <template #title>
+        {{ s__('IncidentManagement|Incidents') }}
       </template>
 
-      <template #cell(assignees)="{ item }">
-        <div data-testid="incident-assignees">
-          <template v-if="hasAssignees(item.assignees)">
-            <gl-avatars-inline
-              :avatars="item.assignees.nodes"
-              :collapsed="true"
-              :max-visible="4"
-              :avatar-size="24"
-              badge-tooltip-prop="name"
-              :badge-tooltip-max-chars="100"
-            >
-              <template #avatar="{ avatar }">
-                <gl-avatar-link
-                  :key="avatar.username"
-                  v-gl-tooltip
-                  target="_blank"
-                  :href="avatar.webUrl"
-                  :title="avatar.name"
+      <template #table>
+        <gl-table
+          :items="incidents.list || []"
+          :fields="availableFields"
+          :show-empty="true"
+          :busy="loading"
+          stacked="md"
+          :tbody-tr-class="tbodyTrClass"
+          :no-local-sorting="true"
+          :sort-direction="'desc'"
+          :sort-desc.sync="sortDesc"
+          :sort-by.sync="sortBy"
+          sort-icon-left
+          fixed
+          @row-clicked="navigateToIncidentDetails"
+          @sort-changed="fetchSortedData"
+        >
+          <template #cell(severity)="{ item }">
+            <severity-token :severity="getSeverity(item.severity)" />
+          </template>
+
+          <template #cell(title)="{ item }">
+            <div :class="{ 'gl-display-flex gl-align-items-center': item.state === 'closed' }">
+              <div class="gl-max-w-full text-truncate" :title="item.title">{{ item.title }}</div>
+              <gl-icon
+                v-if="item.state === 'closed'"
+                name="issue-close"
+                class="gl-mx-1 gl-fill-blue-500 gl-flex-shrink-0"
+                :size="16"
+                data-testid="incident-closed"
+              />
+            </div>
+          </template>
+
+          <template #cell(createdAt)="{ item }">
+            <time-ago-tooltip :time="item.createdAt" />
+          </template>
+
+          <template v-if="slaFeatureAvailable" #cell(incidentSla)="{ item }">
+            <service-level-agreement-cell :sla-due-at="item.slaDueAt" data-testid="incident-sla" />
+          </template>
+
+          <template #cell(assignees)="{ item }">
+            <div data-testid="incident-assignees">
+              <template v-if="hasAssignees(item.assignees)">
+                <gl-avatars-inline
+                  :avatars="item.assignees.nodes"
+                  :collapsed="true"
+                  :max-visible="4"
+                  :avatar-size="24"
+                  badge-tooltip-prop="name"
+                  :badge-tooltip-max-chars="100"
                 >
-                  <gl-avatar :src="avatar.avatarUrl" :label="avatar.name" :size="24" />
-                </gl-avatar-link>
+                  <template #avatar="{ avatar }">
+                    <gl-avatar-link
+                      :key="avatar.username"
+                      v-gl-tooltip
+                      target="_blank"
+                      :href="avatar.webUrl"
+                      :title="avatar.name"
+                    >
+                      <gl-avatar :src="avatar.avatarUrl" :label="avatar.name" :size="24" />
+                    </gl-avatar-link>
+                  </template>
+                </gl-avatars-inline>
               </template>
-            </gl-avatars-inline>
+              <template v-else>
+                {{ $options.i18n.unassigned }}
+              </template>
+            </div>
           </template>
-          <template v-else>
-            {{ $options.i18n.unassigned }}
+
+          <template v-if="publishedAvailable" #cell(published)="{ item }">
+            <published-cell
+              :status-page-published-incident="item.statusPagePublishedIncident"
+              :un-published="$options.i18n.unPublished"
+            />
           </template>
-        </div>
-      </template>
+          <template #table-busy>
+            <gl-loading-icon size="lg" color="dark" class="mt-3" />
+          </template>
 
-      <template #table-busy>
-        <gl-loading-icon size="lg" color="dark" class="mt-3" />
+          <template v-if="errored" #empty>
+            {{ $options.i18n.noIncidents }}
+          </template>
+        </gl-table>
       </template>
-
-      <template #empty>
-        {{ $options.i18n.noIncidents }}
+      <template #emtpy-state>
+        <gl-empty-state
+          :title="emptyStateData.title"
+          :svg-path="emptyListSvgPath"
+          :description="emptyStateData.description"
+          :primary-button-link="emptyStateData.btnLink"
+          :primary-button-text="emptyStateData.btnText"
+        />
       </template>
-    </gl-table>
-
-    <gl-pagination
-      v-if="showPaginationControls"
-      :value="pagination.currentPage"
-      :prev-page="prevPage"
-      :next-page="nextPage"
-      align="center"
-      class="gl-pagination gl-mt-3"
-      @input="handlePageChange"
-    />
+    </paginated-table-with-search-and-tabs>
   </div>
 </template>

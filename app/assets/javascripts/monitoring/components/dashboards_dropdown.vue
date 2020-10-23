@@ -2,10 +2,10 @@
 import { mapState, mapGetters } from 'vuex';
 import {
   GlIcon,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
-  GlDeprecatedDropdownHeader,
-  GlDeprecatedDropdownDivider,
+  GlDropdown,
+  GlDropdownItem,
+  GlDropdownSectionHeader,
+  GlDropdownDivider,
   GlSearchBoxByType,
   GlModalDirective,
 } from '@gitlab/ui';
@@ -17,10 +17,10 @@ const events = {
 export default {
   components: {
     GlIcon,
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
-    GlDeprecatedDropdownHeader,
-    GlDeprecatedDropdownDivider,
+    GlDropdown,
+    GlDropdownItem,
+    GlDropdownSectionHeader,
+    GlDropdownDivider,
     GlSearchBoxByType,
   },
   directives: {
@@ -73,50 +73,46 @@ export default {
 };
 </script>
 <template>
-  <gl-deprecated-dropdown
+  <gl-dropdown
     toggle-class="dropdown-menu-toggle"
     menu-class="monitor-dashboard-dropdown-menu"
     :text="selectedDashboardText"
   >
     <div class="d-flex flex-column overflow-hidden">
-      <gl-deprecated-dropdown-header class="monitor-dashboard-dropdown-header text-center">{{
-        __('Dashboard')
-      }}</gl-deprecated-dropdown-header>
-      <gl-deprecated-dropdown-divider />
-      <gl-search-box-by-type
-        ref="monitorDashboardsDropdownSearch"
-        v-model="searchTerm"
-        class="m-2"
-      />
+      <gl-dropdown-section-header>{{ __('Dashboard') }}</gl-dropdown-section-header>
+      <gl-search-box-by-type ref="monitorDashboardsDropdownSearch" v-model="searchTerm" />
 
       <div class="flex-fill overflow-auto">
-        <gl-deprecated-dropdown-item
+        <gl-dropdown-item
           v-for="dashboard in starredDashboards"
           :key="dashboard.path"
-          :active="dashboard.path === selectedDashboardPath"
-          active-class="is-active"
+          :is-check-item="true"
+          :is-checked="dashboard.path === selectedDashboardPath"
           @click="selectDashboard(dashboard)"
         >
-          <div class="d-flex">
-            {{ dashboardDisplayName(dashboard) }}
-            <gl-icon class="text-muted ml-auto" name="star" />
+          <div class="gl-display-flex">
+            <span class="gl-flex-grow-1 gl-min-w-0 gl-overflow-hidden gl-overflow-wrap-break">
+              {{ dashboardDisplayName(dashboard) }}
+            </span>
+            <gl-icon class="text-muted gl-flex-shrink-0 gl-ml-3 gl-align-self-center" name="star" />
           </div>
-        </gl-deprecated-dropdown-item>
-
-        <gl-deprecated-dropdown-divider
+        </gl-dropdown-item>
+        <gl-dropdown-divider
           v-if="starredDashboards.length && nonStarredDashboards.length"
           ref="starredListDivider"
         />
 
-        <gl-deprecated-dropdown-item
+        <gl-dropdown-item
           v-for="dashboard in nonStarredDashboards"
           :key="dashboard.path"
-          :active="dashboard.path === selectedDashboardPath"
-          active-class="is-active"
+          :is-check-item="true"
+          :is-checked="dashboard.path === selectedDashboardPath"
           @click="selectDashboard(dashboard)"
         >
-          {{ dashboardDisplayName(dashboard) }}
-        </gl-deprecated-dropdown-item>
+          <span class="gl-overflow-hidden gl-overflow-wrap-break">
+            {{ dashboardDisplayName(dashboard) }}
+          </span>
+        </gl-dropdown-item>
       </div>
 
       <div
@@ -127,5 +123,5 @@ export default {
         {{ __('No matching results') }}
       </div>
     </div>
-  </gl-deprecated-dropdown>
+  </gl-dropdown>
 </template>

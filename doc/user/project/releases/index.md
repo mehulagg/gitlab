@@ -47,31 +47,30 @@ To view a list of releases:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32812) in GitLab 12.9. Releases can be created directly in the GitLab UI.
 
-NOTE: **Note:**
+You can create a release in the user interface, or by using the
+[Releases API](../../../api/releases/index.md#create-a-release).
+We recommend using the API to create releases as one of the last steps in your
+CI/CD pipeline.
+
 Only users with Developer permissions or higher can create releases.
 Read more about [Release permissions](../../../user/permissions.md#project-members-permissions).
 
-You can create a release in the user interface, or by using the
-[Releases API](../../../api/releases/index.md#create-a-release).
-We recommend using the API to add release notes as one of the last steps in your CI/CD release pipeline.
-
 To create a new release through the GitLab UI:
 
-1. Navigate to **Project overview > Releases** and click the **New release** button.
+1. Navigate to **Project overview > Releases** and click the **New release**
+   button.
 1. In the [**Tag name**](#tag-name) box, enter a name.
-1. In the **Create from** list, select the branch or enter a tag or commit SHA.
-1. In the **Message** box, enter a message associated with the tag.
-1. Optionally, in the [**Release notes**](#release-notes-description)
-   field, enter the release's description. You can use Markdown and drag and drop files to this field.
-   - If you leave this field empty, only a tag will be created.
-   - If you populate it, both a tag and a release will be created.
-1. Click **Create tag**.
 
-If you created a release, you can view it at **Project overview > Releases**.
-If you created a tag, you can view it at **Repository > Tags**.
+   Creating a release based on an existing tag using the user
+   interface is not yet supported. However, this is possible using the
+   [Releases API](../../../api/releases/index.md#create-a-release).
 
-You can now edit the release to [add milestones](#associate-milestones-with-a-release)
-and [release assets](#release-assets).
+1. In the **Create from** list, select a branch, tag, or commit SHA to use when
+   creating the new tag.
+1. Optionally, fill out any additional information about the release, such as its
+   [title](#title), [milestones](#associate-milestones-with-a-release),
+   [release notes](#release-notes-description), or [assets links](#links).
+1. Click **Create release**.
 
 ### Schedule a future release
 
@@ -87,7 +86,6 @@ release tag. When the `released_at` date and time has passed, the badge is autom
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/26016) in GitLab 12.6. Asset link editing was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9427) in GitLab 12.10.
 
-NOTE: **Note:**
 Only users with Developer permissions or higher can edit releases.
 Read more about [Release permissions](../../../user/permissions.md#project-members-permissions).
 
@@ -99,7 +97,7 @@ To edit the details of a release:
 1. Click **Save changes**.
 
 You can edit the release title, notes, associated milestones, and asset links.
-To change other release information, such as the tag or release date, use the
+To change the release date use the
 [Releases API](../../../api/releases/index.md#update-a-release).
 
 ## Add release notes to Git tags
@@ -218,6 +216,20 @@ For more information, see [Deployment safety](../../../ci/environments/deploymen
 
 The following fields are available when you create or edit a release.
 
+### Title
+
+The release title can be customized using the **Release title** field when
+creating or editing a release. If no title is provided, the release's tag name
+is used instead.
+
+Guest users of private projects are allowed to view the **Releases** page
+but are _not_ allowed to view details about the Git repository (in particular,
+tag names). Because of this, release titles are replaced with a generic
+title like "Release-1234" for Guest users to avoid leaking tag name information.
+
+See the [Permissions](../../permissions.md#project-members-permissions) page for
+more information about permissions.
+
 ### Tag name
 
 The release tag name should include the release version. GitLab uses [Semantic Versioning](https://semver.org/)
@@ -238,7 +250,6 @@ Every release has a description. You can add any text you like, but we recommend
 including a changelog to describe the content of your release. This helps users
 quickly scan the differences between each release you publish.
 
-NOTE: **Note:**
 [Git's tagging messages](https://git-scm.com/book/en/v2/Git-Basics-Tagging) and
 Release note descriptions are unrelated. Description supports [Markdown](../../markdown.md).
 
@@ -257,12 +268,12 @@ as pre-built packages, compliance/security evidence, or container images.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/27300) in GitLab 12.9.
 
 The assets associated with a release are accessible through a permanent URL.
-GitLab will always redirect this URL to the actual asset
+GitLab always redirects this URL to the actual asset
 location, so even if the assets move to a different location, you can continue
 to use the same URL. This is defined during [link creation](../../../api/releases/links.md#create-a-link) or [updating](../../../api/releases/links.md#update-a-link).
 
 Each asset has a name, a URL of the *actual* asset location, and optionally, a
-`filepath` parameter, which, if you specify it, will create a URL pointing
+`filepath` parameter, which, if you specify it, creates a URL pointing
 to the asset for the Release. The format of the URL is:
 
 ```plaintext
@@ -286,7 +297,7 @@ This asset has a direct link of:
 https://gitlab.com/gitlab-org/gitlab-runner/releases/v11.9.0-rc2/downloads/binaries/gitlab-runner-linux-amd64
 ```
 
-The physical location of the asset can change at any time and the direct link will remain unchanged.
+The physical location of the asset can change at any time and the direct link remains unchanged.
 
 ### Source code
 
@@ -306,19 +317,19 @@ The four types of links are "Runbook," "Package," "Image," and "Other."
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/26019) in GitLab 12.6.
 
 Each time a release is created, GitLab takes a snapshot of data that's related to it.
-This data is saved in a JSON file and called *release evidence*. It includes linked milestones
-and issues and can facilitate internal processes like external audits.
+This data is saved in a JSON file and called *release evidence*. The feature currently
+includes test artifacts and linked milestones (and will include issues) to facilitate
+internal processes, like external audits.
 
 To access the release evidence, on the Releases page, click the link to the JSON file that's listed
 under the **Evidence collection** heading.
 
-You can also [use the API](../../../api/releases/index.md#collect-release-evidence-premium-only) to
+You can also [use the API](../../../api/releases/index.md#collect-release-evidence) to
 generate release evidence for an existing release. Because of this, each release
 can have multiple release evidence snapshots. You can view the release evidence and
 its details on the Releases page.
 
-NOTE: **Note:**
-When the issue tracker is disabled, release evidence [cannot be downloaded](https://gitlab.com/gitlab-org/gitlab/-/issues/208397).
+When the issue tracker is disabled, release evidence [can't be downloaded](https://gitlab.com/gitlab-org/gitlab/-/issues/208397).
 
 Here is an example of a release evidence object:
 
@@ -384,7 +395,7 @@ Here is an example of a release evidence object:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/199065) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.10.
 
-When a release is created, release evidence is automatically collected. To initiate evidence collection any other time, use an [API call](../../../api/releases/index.md#collect-release-evidence-premium-only). You can collect release evidence multiple times for one release.
+When a release is created, release evidence is automatically collected. To initiate evidence collection any other time, use an [API call](../../../api/releases/index.md#collect-release-evidence). You can collect release evidence multiple times for one release.
 
 Evidence collection snapshots are visible on the Releases page, along with the timestamp the evidence was collected.
 
@@ -414,10 +425,13 @@ ruby:
       junit: rspec.xml
 ```
 
-If the pipeline ran successfully, when you create your release, the `rspec.xml` file is saved as release evidence.
+If the pipeline ran successfully, when you create your release, the `rspec.xml` file is saved as
+release evidence.
 
-NOTE: **Note:**
-If you [schedule release evidence collection](#schedule-release-evidence-collection), some artifacts may already be expired by the time of evidence collection. To avoid this you can use the [`artifacts:expire_in`](../../../ci/yaml/README.md#artifactsexpire_in) keyword. Learn more in [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/222351).
+If you [schedule release evidence collection](#schedule-release-evidence-collection),
+some artifacts may already be expired by the time of evidence collection. To avoid this you can use
+the [`artifacts:expire_in`](../../../ci/yaml/README.md#artifactsexpire_in)
+keyword. Learn more in [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/222351).
 
 ### Schedule release evidence collection
 
@@ -431,21 +445,6 @@ In the API:
 - If you use a past `released_at` date, no evidence is collected.
 - If you do not specify a `released_at` date, release evidence is collected on the
   date the release is created.
-
-### Disable release evidence display **(CORE ONLY)**
-
-The `:release_evidence_collection` feature flag is enabled by default in GitLab
-self-managed instances. To turn it off, ask a GitLab administrator with Rails console
-access to run the following command:
-
-```ruby
-Feature.disable(:release_evidence_collection)
-```
-
-NOTE: **Note:**
-Release evidence is collected regardless of this feature flag,
-which only enables or disables the display of the data on the
-Releases page.
 
 ## GitLab Releaser
 

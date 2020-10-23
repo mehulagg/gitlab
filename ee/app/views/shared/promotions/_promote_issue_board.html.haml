@@ -14,7 +14,7 @@
         = link_to _('Multiple issue boards'), help_page_path('user/project/issue_board.md', anchor:'use-cases-for-multiple-issue-boards'), target: '_blank'
     - unless @project.feature_available?(:scoped_issue_board)
       %li
-        = link_to _('Scoped issue boards'), help_page_path('user/project/issue_board.md', anchor:'configurable-issue-boards-starter'), target: '_blank'
+        = link_to _('Scoped issue boards'), help_page_path('user/project/issue_board.md', anchor:'configurable-issue-boards'), target: '_blank'
   = render 'shared/promotions/promotion_link_project'
   .top-space
     %button.d-block.mb-3.btn.btn-default.btn-block#hide-btn{ :href => "#", "@click.stop" => "clearPromotionState" }

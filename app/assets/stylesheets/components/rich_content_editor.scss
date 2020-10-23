@@ -6,7 +6,7 @@
 
   // Toolbar buttons
   .tui-editor-defaultUI-toolbar .toolbar-button {
-    color: $gl-gray-600;
+    color: $gray-500;
     border: 0;
 
     &:hover,
@@ -20,15 +20,15 @@
   .tui-popup-wrapper {
     @include gl-overflow-hidden;
     @include gl-rounded-base;
-    @include gl-border-gray-400;
+    @include gl-border-gray-200;
 
     hr {
       @include gl-m-0;
-      @include gl-bg-gray-400;
+      @include gl-bg-gray-200;
     }
 
     button {
-      @include gl-text-gray-800;
+      @include gl-text-gray-700;
     }
   }
 
@@ -43,4 +43,12 @@
     @include gl-font-size-monospace;
     @include gl-line-height-20;
   }
+}
+
+/**
+* Styling below ensures that YouTube videos are displayed in the editor the same as they would in about.gitlab.com
+* https://gitlab.com/gitlab-com/www-gitlab-com/-/blob/master/source/stylesheets/_base.scss#L977
+*/
+.video_container {
+  padding-bottom: 56.25%;
 }

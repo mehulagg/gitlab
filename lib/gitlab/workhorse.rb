@@ -156,6 +156,19 @@ module Gitlab
         ]
       end
 
+      def send_scaled_image(location, width, content_type)
+        params = {
+          'Location' => location,
+          'Width' => width,
+          'ContentType' => content_type
+        }
+
+        [
+          SEND_DATA_HEADER,
+          "send-scaled-img:#{encode(params)}"
+        ]
+      end
+
       def channel_websocket(channel)
         details = {
           'Channel' => {
@@ -256,7 +269,8 @@ module Gitlab
               commit_id: metadata['CommitId'],
               prefix: metadata['ArchivePrefix'],
               format: format,
-              path: path.presence || ""
+              path: path.presence || "",
+              include_lfs_blobs: Feature.enabled?(:include_lfs_blobs_in_archive)
             ).to_proto
           )
         }

@@ -7,6 +7,7 @@ module Types
     connection_type_class(Types::IssueConnectionType)
 
     implements(Types::Notes::NoteableType)
+    implements(Types::CurrentUserTodos)
 
     authorize :read_issue
 
@@ -35,27 +36,22 @@ module Types
     end
 
     field :author, Types::UserType, null: false,
-          description: 'User that created the issue',
-          resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(User, obj.author_id).find }
+          description: 'User that created the issue'
 
-    # Remove complexity when BatchLoader is used
-    field :assignees, Types::UserType.connection_type, null: true, complexity: 5,
+    field :assignees, Types::UserType.connection_type, null: true,
           description: 'Assignees of the issue'
 
-    # Remove complexity when BatchLoader is used
-    field :labels, Types::LabelType.connection_type, null: true, complexity: 5,
+    field :labels, Types::LabelType.connection_type, null: true,
           description: 'Labels of the issue'
     field :milestone, Types::MilestoneType, null: true,
-          description: 'Milestone of the issue',
-          resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Milestone, obj.milestone_id).find }
+          description: 'Milestone of the issue'
 
     field :due_date, Types::TimeType, null: true,
           description: 'Due date of the issue'
     field :confidential, GraphQL::BOOLEAN_TYPE, null: false,
           description: 'Indicates the issue is confidential'
     field :discussion_locked, GraphQL::BOOLEAN_TYPE, null: false,
-          description: 'Indicates discussion is locked on the issue',
-          resolve: -> (obj, _args, _ctx) { !!obj.discussion_locked }
+          description: 'Indicates discussion is locked on the issue'
 
     field :upvotes, GraphQL::INT_TYPE, null: false,
           description: 'Number of upvotes the issue has received'
@@ -78,6 +74,10 @@ module Types
           description: 'Time estimate of the issue'
     field :total_time_spent, GraphQL::INT_TYPE, null: false,
           description: 'Total time reported as spent on the issue'
+    field :human_time_estimate, GraphQL::STRING_TYPE, null: true,
+          description: 'Human-readable time estimate of the issue'
+    field :human_total_time_spent, GraphQL::STRING_TYPE, null: true,
+          description: 'Human-readable total time reported as spent on the issue'
 
     field :closed_at, Types::TimeType, null: true,
           description: 'Timestamp of when the issue was closed'
@@ -97,6 +97,30 @@ module Types
 
     field :design_collection, Types::DesignManagement::DesignCollectionType, null: true,
           description: 'Collection of design images associated with this issue'
+
+    field :type, Types::IssueTypeEnum, null: true,
+          method: :issue_type,
+          description: 'Type of the issue'
+
+    field :alert_management_alert,
+          Types::AlertManagement::AlertType,
+          null: true,
+          description: 'Alert associated to this issue'
+
+    field :severity, Types::IssuableSeverityEnum, null: true,
+          description: 'Severity level of the incident'
+
+    def author
+      Gitlab::Graphql::Loaders::BatchModelLoader.new(User, object.author_id).find
+    end
+
+    def milestone
+      Gitlab::Graphql::Loaders::BatchModelLoader.new(Milestone, object.milestone_id).find
+    end
+
+    def discussion_locked
+      !!object.discussion_locked
+    end
   end
 end
 

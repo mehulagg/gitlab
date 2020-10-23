@@ -75,6 +75,7 @@ module Gitlab
 
         client.indices.create create_index_options
         client.indices.put_alias(name: target_name, index: new_index_name) if with_alias
+
         new_index_name
       end
 

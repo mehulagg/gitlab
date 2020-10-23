@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Merge request approvals API **(STARTER)**
 
 Configuration for approvals on all Merge Requests (MR) in the project. Must be authenticated for all endpoints.
@@ -53,7 +60,7 @@ POST /projects/:id/approvals
 | `disable_overriding_approvers_per_merge_request` | boolean | no       | Allow/Disallow overriding approvers per MR                                                          |
 | `merge_requests_author_approval`                 | boolean | no       | Allow/Disallow authors from self approving merge requests; `true` means authors can self approve |
 | `merge_requests_disable_committers_approval`     | boolean | no       | Allow/Disallow committers from self approving merge requests                                        |
-| `require_password_to_approve`                    | boolean | no       | Require approver to enter a password in order to authenticate before adding the approval         |
+| `require_password_to_approve`                    | boolean | no       | Require approver to enter a password to authenticate before adding the approval         |
 
 ```json
 {

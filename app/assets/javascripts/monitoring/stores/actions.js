@@ -1,7 +1,7 @@
-import * as Sentry from '@sentry/browser';
+import * as Sentry from '~/sentry/wrapper';
 import * as types from './mutation_types';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { convertToFixedRange } from '~/lib/utils/datetime_range';
 import {
   gqClient,
@@ -17,7 +17,10 @@ import { convertObjectPropsToCamelCase } from '../../lib/utils/common_utils';
 import { s__, sprintf } from '../../locale';
 import { getDashboard, getPrometheusQueryData } from '../requests';
 
-import { ENVIRONMENT_AVAILABLE_STATE, DEFAULT_DASHBOARD_PATH, VARIABLE_TYPES } from '../constants';
+import { ENVIRONMENT_AVAILABLE_STATE, OVERVIEW_DASHBOARD_PATH, VARIABLE_TYPES } from '../constants';
+
+const axiosCancelToken = axios.CancelToken;
+let cancelTokenSource;
 
 function prometheusMetricQueryParams(timeRange) {
   const { start, end } = convertToFixedRange(timeRange);
@@ -31,6 +34,20 @@ function prometheusMetricQueryParams(timeRange) {
     end_time: end,
     step: Math.max(minStep, Math.ceil(timeDiff / queryDataPoints)),
   };
+}
+
+/**
+ * Extract error messages from API or HTTP request errors.
+ *
+ * - API errors are in `error.response.data.message`
+ * - HTTP (axios) errors are in `error.messsage`
+ *
+ * @param {Object} error
+ * @returns {String} User friendly error message
+ */
+function extractErrorMessage(error) {
+  const message = error?.response?.data?.message;
+  return message ?? error.message;
 }
 
 // Setup
@@ -298,7 +315,7 @@ export const receiveEnvironmentsDataFailure = ({ commit }) => {
 
 export const fetchAnnotations = ({ state, dispatch, getters }) => {
   const { start } = convertToFixedRange(state.timeRange);
-  const dashboardPath = getters.fullDashboardPath || DEFAULT_DASHBOARD_PATH;
+  const dashboardPath = getters.fullDashboardPath || OVERVIEW_DASHBOARD_PATH;
   return gqClient
     .mutate({
       mutation: getAnnotations,
@@ -331,12 +348,12 @@ export const receiveAnnotationsFailure = ({ commit }) => commit(types.RECEIVE_AN
 
 export const fetchDashboardValidationWarnings = ({ state, dispatch, getters }) => {
   /**
-   * Normally, the default dashboard won't throw any validation warnings.
+   * Normally, the overview dashboard won't throw any validation warnings.
    *
-   * However, if a bug sneaks into the default dashboard making it invalid,
+   * However, if a bug sneaks into the overview dashboard making it invalid,
    * this might come handy for our clients
    */
-  const dashboardPath = getters.fullDashboardPath || DEFAULT_DASHBOARD_PATH;
+  const dashboardPath = getters.fullDashboardPath || OVERVIEW_DASHBOARD_PATH;
   return gqClient
     .mutate({
       mutation: getDashboardValidationWarnings,
@@ -472,4 +489,61 @@ export const fetchVariableMetricLabelValues = ({ state, commit }, { defaultQuery
   });
 
   return Promise.all(optionsRequests);
+};
+
+// Panel Builder
+
+export const setPanelPreviewTimeRange = ({ commit }, timeRange) => {
+  commit(types.SET_PANEL_PREVIEW_TIME_RANGE, timeRange);
+};
+
+export const fetchPanelPreview = ({ state, commit, dispatch }, panelPreviewYml) => {
+  if (!panelPreviewYml) {
+    return null;
+  }
+
+  commit(types.SET_PANEL_PREVIEW_IS_SHOWN, true);
+  commit(types.REQUEST_PANEL_PREVIEW, panelPreviewYml);
+
+  return axios
+    .post(state.panelPreviewEndpoint, { panel_yaml: panelPreviewYml })
+    .then(({ data }) => {
+      commit(types.RECEIVE_PANEL_PREVIEW_SUCCESS, data);
+
+      dispatch('fetchPanelPreviewMetrics');
+    })
+    .catch(error => {
+      commit(types.RECEIVE_PANEL_PREVIEW_FAILURE, extractErrorMessage(error));
+    });
+};
+
+export const fetchPanelPreviewMetrics = ({ state, commit }) => {
+  if (cancelTokenSource) {
+    cancelTokenSource.cancel();
+  }
+  cancelTokenSource = axiosCancelToken.source();
+
+  const defaultQueryParams = prometheusMetricQueryParams(state.panelPreviewTimeRange);
+
+  state.panelPreviewGraphData.metrics.forEach((metric, index) => {
+    commit(types.REQUEST_PANEL_PREVIEW_METRIC_RESULT, { index });
+
+    const params = { ...defaultQueryParams };
+    if (metric.step) {
+      params.step = metric.step;
+    }
+    return getPrometheusQueryData(metric.prometheusEndpointPath, params, {
+      cancelToken: cancelTokenSource.token,
+    })
+      .then(data => {
+        commit(types.RECEIVE_PANEL_PREVIEW_METRIC_RESULT_SUCCESS, { index, data });
+      })
+      .catch(error => {
+        Sentry.captureException(error);
+
+        commit(types.RECEIVE_PANEL_PREVIEW_METRIC_RESULT_FAILURE, { index, error });
+        // Continue to throw error so the panel builder can notify using createFlash
+        throw error;
+      });
+  });
 };

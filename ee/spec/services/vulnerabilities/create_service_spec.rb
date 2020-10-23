@@ -39,12 +39,15 @@ RSpec.describe Vulnerabilities::CreateService do
     end
 
     context 'and finding is dismissed' do
-      let(:finding) { create(:vulnerabilities_occurrence, :dismissed, project: project) }
+      let(:finding) { create(:vulnerabilities_occurrence, :with_dismissal_feedback, project: project) }
+      let(:vulnerability) { project.vulnerabilities.last }
 
-      it 'creates a vulnerability in a dismissed state' do
+      it 'creates a vulnerability in a dismissed state and sets dismissal information' do
         expect { subject }.to change { project.vulnerabilities.count }.by(1)
 
-        expect(project.vulnerabilities.last.state).to eq('dismissed')
+        expect(vulnerability.state).to eq('dismissed')
+        expect(vulnerability.dismissed_at).to eq(finding.dismissal_feedback.created_at)
+        expect(vulnerability.dismissed_by_id).to eq(finding.dismissal_feedback.author_id)
       end
     end
 

@@ -58,7 +58,7 @@ module Gitlab
             vulnerabilities.each do |v|
               next if v.empty?
 
-              unique_vulnerabilities.add(Vulnerability.new(v))
+              unique_vulnerabilities.add(::Gitlab::Ci::Reports::DependencyList::Vulnerability.new(v))
             end
 
             unique_vulnerabilities

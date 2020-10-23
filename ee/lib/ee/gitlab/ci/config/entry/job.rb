@@ -12,22 +12,15 @@ module EE
             prepended do
               attributes :secrets
 
-              validations do
-                validates :secrets, absence: { message: 'feature is disabled' }, unless: :secrets_enabled?
-              end
-
-              entry :secrets, ::Gitlab::Ci::Config::Entry::Secrets,
+              entry :secrets, ::Gitlab::Config::Entry::ComposableHash,
                 description: 'Configured secrets for this job',
-                inherit: false
+                inherit: false,
+                metadata: { composable_class: ::Gitlab::Ci::Config::Entry::Secret }
             end
 
             override :value
             def value
               super.merge({ secrets: secrets_value }.compact)
-            end
-
-            def secrets_enabled?
-              ::Gitlab::Ci::Features.secrets_syntax_enabled?
             end
           end
         end

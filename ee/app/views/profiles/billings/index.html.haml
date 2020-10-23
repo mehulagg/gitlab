@@ -1,6 +1,6 @@
 - page_title _('Billing')
 - current_plan = subscription_plan_info(@plans_data, current_user.namespace.actual_plan_name)
 
-= render 'shared/billings/billing_plans', plans_data: @plans_data, namespace: current_user.namespace
+= render 'shared/billings/billing_plans', plans_data: @plans_data, namespace: current_user.namespace, current_plan: current_plan
 
 #js-billing-plans{ data: subscription_plan_data_attributes(current_user.namespace, current_plan) }

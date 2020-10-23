@@ -1,11 +1,9 @@
 <script>
 import { GlTable, GlButton, GlModalDirective, GlSprintf } from '@gitlab/ui';
-import { s__, __ } from '~/locale';
 import { mapState, mapActions } from 'vuex';
-import { MODAL_ID } from '../utils/constants';
+import { s__, __ } from '~/locale';
 
 export default {
-  modalId: MODAL_ID,
   fields: [
     {
       key: 'freezeStart',
@@ -29,7 +27,7 @@ export default {
     GlSprintf,
   },
   directives: {
-    GlModalDirective,
+    GlModal: GlModalDirective,
   },
   computed: {
     ...mapState(['freezePeriods']),
@@ -53,6 +51,7 @@ export default {
       :items="freezePeriods"
       :fields="$options.fields"
       show-empty
+      stacked="lg"
     >
       <template #empty>
         <p data-testid="empty-freeze-periods" class="gl-text-center text-plain">
@@ -70,15 +69,13 @@ export default {
         </p>
       </template>
     </gl-table>
-    <div class="gl-display-flex gl-justify-content-center">
-      <gl-button
-        v-gl-modal-directive="$options.modalId"
-        data-testid="add-deploy-freeze"
-        category="primary"
-        variant="success"
-      >
-        {{ $options.translations.addDeployFreeze }}
-      </gl-button>
-    </div>
+    <gl-button
+      v-gl-modal.deploy-freeze-modal
+      data-testid="add-deploy-freeze"
+      category="primary"
+      variant="success"
+    >
+      {{ $options.translations.addDeployFreeze }}
+    </gl-button>
   </div>
 </template>

@@ -6,6 +6,7 @@ import {
   updateImageDiffNoteOptimisticResponse,
   isValidDesignFile,
   extractDesign,
+  extractDesignNoteId,
 } from '~/design_management/utils/design_management_utils';
 import mockResponseNoDesigns from '../mock_data/no_designs';
 import mockResponseWithDesigns from '../mock_data/designs';
@@ -51,7 +52,7 @@ describe('extractDiscussions', () => {
     };
   });
 
-  it('discards the edges.node artifacts of GraphQL', () => {
+  it('discards the node artifacts of GraphQL', () => {
     expect(extractDiscussions(discussions)).toEqual([
       { id: 1, notes: ['a'], index: 1 },
       { id: 2, notes: ['b'], index: 2 },
@@ -92,14 +93,15 @@ describe('optimistic responses', () => {
             fullPath: '',
             notesCount: 0,
             event: 'NONE',
+            currentUserTodos: {
+              __typename: 'TodoConnection',
+              nodes: [],
+            },
             diffRefs: { __typename: 'DiffRefs', baseSha: '', startSha: '', headSha: '' },
             discussions: { __typename: 'DesignDiscussion', nodes: [] },
             versions: {
               __typename: 'DesignVersionConnection',
-              edges: {
-                __typename: 'DesignVersionEdge',
-                node: { __typename: 'DesignVersion', id: -1, sha: -1 },
-              },
+              nodes: { __typename: 'DesignVersion', id: -1, sha: -1 },
             },
           },
         ],
@@ -172,5 +174,21 @@ describe('extractDesign', () => {
     it('returns the first design available', () => {
       expect(extractDesign(mockResponseWithDesigns)).toEqual(mockDesign);
     });
+  });
+});
+
+describe('extractDesignNoteId', () => {
+  it.each`
+    hash            | expectedNoteId
+    ${'#note_0'}    | ${'0'}
+    ${'#note_1'}    | ${'1'}
+    ${'#note_23'}   | ${'23'}
+    ${'#note_456'}  | ${'456'}
+    ${'note_1'}     | ${null}
+    ${'#note_'}     | ${null}
+    ${'#note_asd'}  | ${null}
+    ${'#note_1asd'} | ${null}
+  `('returns $expectedNoteId when hash is $hash', ({ hash, expectedNoteId }) => {
+    expect(extractDesignNoteId(hash)).toBe(expectedNoteId);
   });
 });

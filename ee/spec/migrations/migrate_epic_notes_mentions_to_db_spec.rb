@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20191115115522_migrate_epic_notes_mentions_to_db')
+require_migration!
 
 RSpec.describe MigrateEpicNotesMentionsToDb, :migration do
   let(:users) { table(:users) }

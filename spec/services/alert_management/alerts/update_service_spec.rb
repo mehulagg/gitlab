@@ -147,8 +147,7 @@ RSpec.describe AlertManagement::Alerts::UpdateService do
         end
 
         it_behaves_like 'does not add a system note'
-        # TODO: We should not add another todo in this scenario
-        it_behaves_like 'adds a todo'
+        it_behaves_like 'does not add a todo'
       end
 
       context 'with multiple users included' do
@@ -161,7 +160,7 @@ RSpec.describe AlertManagement::Alerts::UpdateService do
 
     context 'when a status is included' do
       let(:params) { { status: new_status } }
-      let(:new_status) { AlertManagement::Alert::STATUSES[:acknowledged] }
+      let(:new_status) { :acknowledged }
 
       it 'successfully changes the status' do
         expect { response }.to change { alert.acknowledged? }.to(true)
@@ -172,13 +171,13 @@ RSpec.describe AlertManagement::Alerts::UpdateService do
       it_behaves_like 'adds a system note'
 
       context 'with unknown status' do
-        let(:new_status) { -1 }
+        let(:new_status) { :unknown_status }
 
         it_behaves_like 'error response', 'Invalid status'
       end
 
       context 'with resolving status' do
-        let(:new_status) { AlertManagement::Alert::STATUSES[:resolved] }
+        let(:new_status) { :resolved }
 
         it 'changes the status' do
           expect { response }.to change { alert.resolved? }.to(true)

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class ImportGithub < Grape::API::Instance
+  class ImportGithub < ::API::Base
     rescue_from Octokit::Unauthorized, with: :provider_unauthorized
 
     before do
@@ -10,7 +10,7 @@ module API
 
     helpers do
       def client
-        @client ||= if Feature.enabled?(:remove_legacy_github_client, default_enabled: false)
+        @client ||= if Feature.enabled?(:remove_legacy_github_client)
                       Gitlab::GithubImport::Client.new(params[:personal_access_token])
                     else
                       Gitlab::LegacyGithubImport::Client.new(params[:personal_access_token], client_options)

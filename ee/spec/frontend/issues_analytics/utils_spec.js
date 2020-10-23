@@ -7,7 +7,7 @@ const originalFilters = {
 };
 const tranformedFilters = { labels: ['one', 'two'], milestone: 'title', author_username: 'root' };
 
-describe('issues analytics utils', () => {
+describe('issue analytics utils', () => {
   describe('transformFilters', () => {
     it('transforms the object keys as expected', () => {
       const filters = transformFilters(originalFilters);

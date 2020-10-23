@@ -4,7 +4,7 @@
 
 .search-result-row
   %h5.note-search-caption.str-truncated
-    = sprite_icon('comment', size: 16, css_class: 'gl-vertical-align-text-bottom')
+    = sprite_icon('comment', css_class: 'gl-vertical-align-text-bottom')
     = link_to_member(project, note.author, avatar: false)
     - link_to_project = link_to(project.full_name, project)
     = _("commented on %{link_to_project}").html_safe % { link_to_project: link_to_project }
@@ -18,8 +18,13 @@
     - else
       %span #{note.noteable_type.titleize} ##{noteable_identifier}
       &middot;
-      = link_to note.noteable.title, note_url
+      = link_to note.noteable.title, note_url, data: {track_event: 'click_text', track_label: 'noteable_title', track_property: 'search_result'}
+
+    %span.note-headline-light.note-headline-meta
+      %span.system-note-separator
+        &middot;
+      %span.system-note-separator= time_ago_with_tooltip(note.created_at, placement: 'bottom', html_class: 'note-created-ago')
 
   .note-search-result
     .term
-      = search_md_sanitize(note, :note)
+      = search_md_sanitize(note.note)

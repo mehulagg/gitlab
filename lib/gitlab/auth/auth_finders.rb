@@ -69,9 +69,7 @@ module Gitlab
           current_request.env[JOB_TOKEN_HEADER].presence
         return unless token
 
-        job = ::Ci::Build.find_by_token(token)
-        raise UnauthorizedError unless job
-
+        job = find_valid_running_job_by_token!(token)
         @current_authenticated_job = job # rubocop:disable Gitlab/ModuleWithInstanceVariables
 
         job.user
@@ -82,11 +80,9 @@ module Gitlab
 
         login, password = user_name_and_password(current_request)
         return unless login.present? && password.present?
-        return unless ::Ci::Build::CI_REGISTRY_USER == login
+        return unless ::Gitlab::Auth::CI_JOB_USER == login
 
-        job = ::Ci::Build.find_by_token(password)
-        raise UnauthorizedError unless job
-
+        job = find_valid_running_job_by_token!(password)
         job.user
       end
 
@@ -179,7 +175,7 @@ module Gitlab
         token = parsed_oauth_token
         return unless token
 
-        job = ::Ci::Build.find_by_token(token)
+        job = ::Ci::AuthJobFinder.new(token: token).execute
         return unless job
 
         @current_authenticated_job = job # rubocop:disable Gitlab/ModuleWithInstanceVariables
@@ -294,7 +290,7 @@ module Gitlab
       end
 
       def api_request?
-        current_request.path.starts_with?('/api/')
+        current_request.path.starts_with?(Gitlab::Utils.append_path(Gitlab.config.gitlab.relative_url_root, '/api/'))
       end
 
       def archive_request?
@@ -303,6 +299,12 @@ module Gitlab
 
       def blob_request?
         current_request.path.include?('/raw/')
+      end
+
+      def find_valid_running_job_by_token!(token)
+        ::Ci::AuthJobFinder.new(token: token).execute.tap do |job|
+          raise UnauthorizedError unless job
+        end
       end
     end
   end

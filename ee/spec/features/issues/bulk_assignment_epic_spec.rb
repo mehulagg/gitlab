@@ -10,10 +10,6 @@ RSpec.describe 'Issues > Epic bulk assignment', :js do
   let_it_be(:issue2) { create(:issue, project: project, title: "Issue 2") }
   let!(:epic1) { create(:epic, group: group) }
 
-  before do
-    stub_feature_flags(vue_issuables_list: false)
-  end
-
   context 'as an allowed user', :js do
     before do
       allow(group).to receive(:feature_enabled?).and_return(true)

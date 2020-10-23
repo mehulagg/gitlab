@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon, GlTooltip, GlSprintf, GlBadge } from '@gitlab/ui';
-import AlertWidget from '~/monitoring/components/alert_widget.vue';
 import waitForPromises from 'helpers/wait_for_promises';
-import createFlash from '~/flash';
+import AlertWidget from '~/monitoring/components/alert_widget.vue';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 const mockReadAlert = jest.fn();
 const mockCreateAlert = jest.fn();
@@ -84,7 +84,7 @@ describe('AlertWidget', () => {
       },
     });
   };
-  const hasLoadingIcon = () => wrapper.contains(GlLoadingIcon);
+  const hasLoadingIcon = () => wrapper.find(GlLoadingIcon).exists();
   const findWidgetForm = () => wrapper.find({ ref: 'widgetForm' });
   const findAlertErrorMessage = () => wrapper.find({ ref: 'alertErrorMessage' });
   const findCurrentSettingsText = () =>

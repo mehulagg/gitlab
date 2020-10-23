@@ -1,11 +1,11 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import { STATUS_ICON_NAMES, STATUS_ICON_CLASS, DEFAULT_STATUS } from '../constants';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   name: 'GeoReplicableStatus',
   components: {
-    Icon,
+    GlIcon,
   },
   props: {
     status: {
@@ -40,7 +40,7 @@ export default {
 <template>
   <div>
     <span class="d-flex align-items-center text-capitalize">
-      <icon :name="icon.name" :class="icon.cssClass" class="mr-2" />
+      <gl-icon :name="icon.name" :class="icon.cssClass" class="mr-2" />
       {{ status }}
     </span>
   </div>

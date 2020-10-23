@@ -1,9 +1,9 @@
 import SidebarMediator from 'ee/sidebar/sidebar_mediator';
+import waitForPromises from 'helpers/wait_for_promises';
 import CESidebarMediator from '~/sidebar/sidebar_mediator';
 import CESidebarStore from '~/sidebar/stores/sidebar_store';
 import SidebarService from '~/sidebar/services/sidebar_service';
 import Mock from './ee_mock_data';
-import waitForPromises from 'helpers/wait_for_promises';
 
 describe('EE Sidebar mediator', () => {
   let mediator;

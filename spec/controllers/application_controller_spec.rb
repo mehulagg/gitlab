@@ -171,6 +171,8 @@ RSpec.describe ApplicationController do
 
   describe '#route_not_found' do
     controller(described_class) do
+      skip_before_action :authenticate_user!, only: :index
+
       def index
         route_not_found
       end
@@ -184,26 +186,24 @@ RSpec.describe ApplicationController do
       expect(response).to have_gitlab_http_status(:not_found)
     end
 
+    it 'renders 404 if client is a search engine crawler' do
+      request.env['HTTP_USER_AGENT'] = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+
+      get :index
+
+      expect(response).to have_gitlab_http_status(:not_found)
+    end
+
     it 'redirects to login page if not authenticated' do
       get :index
 
       expect(response).to redirect_to new_user_session_path
     end
 
-    context 'request format is unknown' do
-      it 'redirects if unauthenticated' do
-        get :index, format: 'unknown'
+    it 'redirects if unauthenticated and request format is unknown' do
+      get :index, format: 'unknown'
 
-        expect(response).to redirect_to new_user_session_path
-      end
-
-      it 'returns a 401 if the feature flag is disabled' do
-        stub_feature_flags(devise_redirect_unknown_formats: false)
-
-        get :index, format: 'unknown'
-
-        expect(response).to have_gitlab_http_status(:unauthorized)
-      end
+      expect(response).to redirect_to new_user_session_path
     end
   end
 
@@ -239,6 +239,7 @@ RSpec.describe ApplicationController do
 
       it 'does not redirect if 2FA is not required' do
         allow(controller).to receive(:two_factor_authentication_required?).and_return(false)
+        allow(controller).to receive(:current_user).and_return(create(:user))
 
         expect(controller).not_to receive(:redirect_to)
 
@@ -356,13 +357,17 @@ RSpec.describe ApplicationController do
         let(:user) { create :user, otp_grace_period_started_at: 2.hours.ago }
 
         it 'returns true if the grace period has expired' do
-          allow(controller).to receive(:two_factor_grace_period).and_return(1)
+          allow_next_instance_of(Gitlab::Auth::TwoFactorAuthVerifier) do |verifier|
+            allow(verifier).to receive(:two_factor_grace_period).and_return(2)
+          end
 
           expect(subject).to be_truthy
         end
 
         it 'returns false if the grace period is still active' do
-          allow(controller).to receive(:two_factor_grace_period).and_return(3)
+          allow_next_instance_of(Gitlab::Auth::TwoFactorAuthVerifier) do |verifier|
+            allow(verifier).to receive(:two_factor_grace_period).and_return(3)
+          end
 
           expect(subject).to be_falsey
         end
@@ -421,13 +426,13 @@ RSpec.describe ApplicationController do
         end
 
         it 'returns false if the grace period has expired' do
-          Timecop.freeze(3.hours.from_now) do
+          travel_to(3.hours.from_now) do
             expect(subject).to be_falsey
           end
         end
 
         it 'returns true if the grace period is still active' do
-          Timecop.freeze(1.hour.from_now) do
+          travel_to(1.hour.from_now) do
             expect(subject).to be_truthy
           end
         end
@@ -800,13 +805,8 @@ RSpec.describe ApplicationController do
     end
 
     let(:user) { create(:user) }
-    let(:experiment_enabled) { true }
 
-    before do
-      stub_experiment_for_user(signup_flow: experiment_enabled)
-    end
-
-    context 'experiment enabled and user with required role' do
+    context 'user with required role' do
       before do
         user.set_role_required!
         sign_in(user)
@@ -816,7 +816,7 @@ RSpec.describe ApplicationController do
       it { is_expected.to redirect_to users_sign_up_welcome_path }
     end
 
-    context 'experiment enabled and user without a required role' do
+    context 'user without a required role' do
       before do
         sign_in(user)
         get :index
@@ -824,48 +824,38 @@ RSpec.describe ApplicationController do
 
       it { is_expected.not_to redirect_to users_sign_up_welcome_path }
     end
+  end
 
-    context 'experiment disabled' do
-      let(:experiment_enabled) { false }
+  describe 'rescue_from Gitlab::Auth::IpBlacklisted' do
+    controller(described_class) do
+      skip_before_action :authenticate_user!
 
-      before do
-        user.set_role_required!
-        sign_in(user)
-        get :index
+      def index
+        raise Gitlab::Auth::IpBlacklisted
       end
-
-      it { is_expected.not_to redirect_to users_sign_up_welcome_path }
     end
 
-    describe 'rescue_from Gitlab::Auth::IpBlacklisted' do
-      controller(described_class) do
-        skip_before_action :authenticate_user!
+    it 'returns a 403 and logs the request' do
+      expect(Gitlab::AuthLogger).to receive(:error).with({
+        message: 'Rack_Attack',
+        env: :blocklist,
+        remote_ip: '1.2.3.4',
+        request_method: 'GET',
+        path: '/anonymous'
+      })
 
-        def index
-          raise Gitlab::Auth::IpBlacklisted
-        end
-      end
+      request.remote_addr = '1.2.3.4'
 
-      it 'returns a 403 and logs the request' do
-        expect(Gitlab::AuthLogger).to receive(:error).with({
-          message: 'Rack_Attack',
-          env: :blocklist,
-          remote_ip: '1.2.3.4',
-          request_method: 'GET',
-          path: '/anonymous'
-        })
+      get :index
 
-        request.remote_addr = '1.2.3.4'
-
-        get :index
-
-        expect(response).to have_gitlab_http_status(:forbidden)
-      end
+      expect(response).to have_gitlab_http_status(:forbidden)
     end
   end
 
   describe '#set_current_context' do
     controller(described_class) do
+      feature_category :issue_tracking
+
       def index
         Labkit::Context.with_context do |context|
           render json: context.to_h
@@ -913,6 +903,12 @@ RSpec.describe ApplicationController do
       get :index, format: :json
 
       expect(json_response['meta.caller_id']).to eq('AnonymousController#index')
+    end
+
+    it 'sets the feature_category as defined in the controller' do
+      get :index, format: :json
+
+      expect(json_response['meta.feature_category']).to eq('issue_tracking')
     end
 
     it 'assigns the context to a variable for logging' do

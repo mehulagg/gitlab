@@ -19,9 +19,11 @@ module Gitlab
       attr_reader :model_record_id
 
       delegate :model, to: :class
+      delegate :replication_enabled_feature_key, to: :class
+      delegate :in_replicables_for_current_secondary?, to: :model_record
 
       class << self
-        delegate :find_unsynced_registries, :find_failed_registries, to: :registry_class
+        delegate :find_registries_never_attempted_sync, :find_registries_needs_sync_again, to: :registry_class
       end
 
       # Declare supported event
@@ -133,19 +135,19 @@ module Gitlab
       end
 
       def self.checksummed
-        model.checksummed
+        model.available_replicables.checksummed
       end
 
       def self.checksummed_count
-        model.checksummed.count
+        model.available_replicables.checksummed.count
       end
 
       def self.checksum_failed_count
-        model.checksum_failed.count
+        model.available_replicables.checksum_failed.count
       end
 
       def self.primary_total_count
-        model.count
+        model.available_replicables.count
       end
 
       def self.registry_count
@@ -185,6 +187,10 @@ module Gitlab
         CLASS_SUFFIXES.each { |suffix| name.delete_suffix!(suffix) }
 
         const_get("::Geo::#{name}Replicator", false)
+      end
+
+      def self.replication_enabled_feature_key
+        :"geo_#{replicable_name}_replication"
       end
 
       # @param [ActiveRecord::Base] model_record
@@ -235,11 +241,6 @@ module Gitlab
         consume_method = "consume_event_#{event_name}".to_sym
         raise NotImplementedError, "Consume method not implemented: '#{consume_method}'" unless self.methods.include?(consume_method)
 
-        # Inject model_record based on included class
-        if model_record
-          event_data[:model_record] = model_record
-        end
-
         send(consume_method, **event_data) # rubocop:disable GitlabSecurity/PublicSend
       end
 
@@ -275,26 +276,6 @@ module Gitlab
         registry.verification_checksum
       end
 
-      # This method does not yet cover resources that are owned by a namespace
-      # but not a project, because we do not have that use-case...yet.
-      # E.g. GroupWikis will need it.
-      def excluded_by_selective_sync?
-        # If the replicable is not owned by a project or namespace, then selective sync cannot apply to it.
-        return false unless parent_project_id
-
-        !current_node.projects_include?(parent_project_id)
-      end
-
-      def parent_project_id
-        strong_memoize(:parent_project_id) do
-          # We should never see this at runtime. All Replicators should be tested
-          # by `it_behaves_like 'a replicator'`, which would reveal this problem.
-          selective_sync_not_implemented_error(__method__) unless model_record.respond_to?(:project_id)
-
-          model_record.project_id
-        end
-      end
-
       # Return exactly the data needed by `for_replicable_params` to
       # reinstantiate this Replicator elsewhere.
       #
@@ -303,11 +284,47 @@ module Gitlab
         { replicable_name: replicable_name, replicable_id: model_record_id }
       end
 
-      protected
+      def handle_after_destroy
+        return false unless Gitlab::Geo.enabled?
+        return unless self.class.enabled?
 
-      def self.replication_enabled_feature_key
-        :"geo_#{replicable_name}_replication"
+        publish(:deleted, **deleted_params)
       end
+
+      def handle_after_update
+        return false unless Gitlab::Geo.enabled?
+        return unless self.class.enabled?
+
+        publish(:updated, **updated_params)
+      end
+
+      def schedule_checksum_calculation
+        raise NotImplementedError
+      end
+
+      def created_params
+        event_params
+      end
+
+      def deleted_params
+        event_params
+      end
+
+      def updated_params
+        event_params
+      end
+
+      def event_params
+        { model_record_id: model_record.id }
+      end
+
+      def needs_checksum?
+        return true unless model_record.respond_to?(:needs_checksum?)
+
+        model_record.needs_checksum?
+      end
+
+      protected
 
       # Store an event on the database
       #
@@ -334,11 +351,6 @@ module Gitlab
 
       def current_node
         Gitlab::Geo.current_node
-      end
-
-      def selective_sync_not_implemented_error(method_name)
-        raise NotImplementedError,
-            "#{self.class} does not implement #{method_name}. If selective sync is not applicable, just return nil."
       end
     end
   end

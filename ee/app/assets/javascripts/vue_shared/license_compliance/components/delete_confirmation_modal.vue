@@ -1,10 +1,10 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { escape } from 'lodash';
 import { mapActions, mapState } from 'vuex';
+import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import { s__, sprintf } from '~/locale';
 import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
-
-import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 
 export default {
   name: 'LicenseDeleteConfirmationModal',

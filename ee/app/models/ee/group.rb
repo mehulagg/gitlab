@@ -27,6 +27,7 @@ module EE
       has_one :scim_oauth_access_token
 
       has_many :ldap_group_links, foreign_key: 'group_id', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+      has_many :saml_group_links, foreign_key: 'group_id'
       has_many :hooks, dependent: :destroy, class_name: 'GroupHook' # rubocop:disable Cop/ActiveRecordDependent
 
       has_one :dependency_proxy_setting, class_name: 'DependencyProxy::GroupSetting'
@@ -69,6 +70,7 @@ module EE
 
       scope :aimed_for_deletion, -> (date) { joins(:deletion_schedule).where('group_deletion_schedules.marked_for_deletion_on <= ?', date) }
       scope :with_deletion_schedule, -> { preload(deletion_schedule: :deleting_user) }
+      scope :with_deletion_schedule_only, -> { preload(:deletion_schedule) }
 
       scope :where_group_links_with_provider, ->(provider) do
         joins(:ldap_group_links).where(ldap_group_links: { provider: provider })
@@ -221,6 +223,12 @@ module EE
       ensure_saml_discovery_token!
     end
 
+    def saml_enabled?
+      return false unless saml_provider
+
+      saml_provider.persisted? && saml_provider.enabled?
+    end
+
     override :multiple_issue_boards_available?
     def multiple_issue_boards_available?
       feature_available?(:multiple_group_issue_boards)
@@ -342,6 +350,11 @@ module EE
       )
     end
 
+    def vulnerability_historical_statistics
+      ::Vulnerabilities::HistoricalStatistic
+        .for_project(::Project.for_group_and_its_subgroups(self).non_archived.without_deleted)
+    end
+
     def max_personal_access_token_lifetime_from_now
       if max_personal_access_token_lifetime.present?
         max_personal_access_token_lifetime.days.from_now
@@ -372,18 +385,49 @@ module EE
       end
     end
 
-    def wiki_access_level
-      # TODO: Remove this method once we implement group-level features.
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/208412
-      if ::Feature.enabled?(:group_wiki, self)
-        ::ProjectFeature::ENABLED
+    def owners_emails
+      owners.pluck(:email)
+    end
+
+    # this method will be delegated to namespace_settings, but as we need to wait till
+    # all groups will have namespace_settings created via background migration,
+    # we need to serve it from this class
+    def prevent_forking_outside_group?
+      return namespace_settings.prevent_forking_outside_group? if namespace_settings
+
+      root_ancestor.saml_provider&.prohibited_outer_forks?
+    end
+
+    def minimal_access_role_allowed?
+      feature_available?(:minimal_access_role) && !has_parent?
+    end
+
+    override :member?
+    def member?(user, min_access_level = minimal_member_access_level)
+      if min_access_level == ::Gitlab::Access::MINIMAL_ACCESS && minimal_access_role_allowed?
+        all_group_members.find_by(user_id: user.id).present?
       else
-        ::ProjectFeature::DISABLED
+        super
       end
     end
 
-    def owners_emails
-      owners.pluck(:email)
+    def minimal_member_access_level
+      minimal_access_role_allowed? ? ::Gitlab::Access::MINIMAL_ACCESS : ::Gitlab::Access::GUEST
+    end
+
+    override :access_level_roles
+    def access_level_roles
+      levels = ::GroupMember.access_level_roles
+      return levels unless minimal_access_role_allowed?
+
+      levels.merge(::Gitlab::Access::MINIMAL_ACCESS_HASH)
+    end
+
+    override :users_count
+    def users_count
+      return all_group_members.count unless minimal_access_role_allowed?
+
+      members.count
     end
 
     private

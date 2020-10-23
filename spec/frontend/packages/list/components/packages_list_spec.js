@@ -1,14 +1,14 @@
 import Vuex from 'vuex';
 import { last } from 'lodash';
 import { GlTable, GlPagination, GlModal } from '@gitlab/ui';
-import Tracking from '~/tracking';
 import { mount, createLocalVue } from '@vue/test-utils';
+import stubChildren from 'helpers/stub_children';
+import Tracking from '~/tracking';
 import PackagesList from '~/packages/list/components/packages_list.vue';
 import PackagesListLoader from '~/packages/shared/components/packages_list_loader.vue';
 import PackagesListRow from '~/packages/shared/components/package_list_row.vue';
 import * as SharedUtils from '~/packages/shared/utils';
 import { TrackingActions } from '~/packages/shared/constants';
-import stubChildren from 'helpers/stub_children';
 import { packageList } from '../../mock_data';
 
 const localVue = createLocalVue();
@@ -18,13 +18,12 @@ describe('packages_list', () => {
   let wrapper;
   let store;
 
-  const GlSortingItem = { name: 'sorting-item-stub', template: '<div><slot></slot></div>' };
   const EmptySlotStub = { name: 'empty-slot-stub', template: '<div>bar</div>' };
 
   const findPackagesListLoader = () => wrapper.find(PackagesListLoader);
   const findPackageListPagination = () => wrapper.find(GlPagination);
   const findPackageListDeleteModal = () => wrapper.find(GlModal);
-  const findEmptySlot = () => wrapper.find({ name: 'empty-slot-stub' });
+  const findEmptySlot = () => wrapper.find(EmptySlotStub);
   const findPackagesListRow = () => wrapper.find(PackagesListRow);
 
   const createStore = (isGroupPage, packages, isLoading) => {
@@ -67,7 +66,6 @@ describe('packages_list', () => {
       stubs: {
         ...stubChildren(PackagesList),
         GlTable,
-        GlSortingItem,
         GlModal,
       },
       ...options,

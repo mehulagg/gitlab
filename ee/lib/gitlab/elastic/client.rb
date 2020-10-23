@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'faraday_middleware/aws_sigv4'
+
 module Gitlab
   module Elastic
     module Client
@@ -10,16 +12,17 @@ module Gitlab
       def self.build(config)
         base_config = {
           urls: config[:url],
+          request_timeout: config[:client_request_timeout],
           randomize_hosts: true,
           retry_on_failure: true
-        }
+        }.compact
 
         if config[:aws]
           creds = resolve_aws_credentials(config)
           region = config[:aws_region]
 
           ::Elasticsearch::Client.new(base_config) do |fmid|
-            fmid.request(:aws_signers_v4, credentials: creds, service_name: 'es', region: region)
+            fmid.request(:aws_sigv4, credentials_provider: creds, service: 'es', region: region)
           end
         else
           ::Elasticsearch::Client.new(base_config)

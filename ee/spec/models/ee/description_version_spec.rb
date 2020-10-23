@@ -62,7 +62,7 @@ RSpec.describe DescriptionVersion do
     end
 
     context 'when start_id is not present' do
-      it 'only soft deletes description_version' do
+      it 'only delayed deletes description_version' do
         version = epic.description_versions.last
 
         version.delete!
@@ -73,7 +73,7 @@ RSpec.describe DescriptionVersion do
     end
 
     context 'when start_id is present' do
-      it 'soft deletes description versions of same issuable up to start_id' do
+      it 'delayed deletes description versions of same issuable up to start_id' do
         description_version = epic.description_versions.last.previous_version
         starting_version = epic.description_versions.second
 

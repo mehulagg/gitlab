@@ -5,156 +5,158 @@ require 'spec_helper'
 RSpec.describe EE::TrialHelper do
   using RSpec::Parameterized::TableSyntax
 
+  describe '#should_ask_company_question?' do
+    before do
+      allow(helper).to receive(:glm_params).and_return(glm_source ? { glm_source: glm_source } : {})
+    end
+
+    subject { helper.should_ask_company_question? }
+
+    where(:glm_source, :result) do
+      'about.gitlab.com'  | false
+      'abouts.gitlab.com' | true
+      'about.gitlab.org'  | true
+      'about.gitlob.com'  | true
+      nil                 | true
+    end
+
+    with_them do
+      it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '#glm_params' do
+    let(:glm_source) { nil }
+    let(:glm_content) { nil }
+    let(:params) do
+      ActionController::Parameters.new({
+        controller: 'FooBar', action: 'stuff', id: '123'
+      }.tap do |p|
+        p[:glm_source] = glm_source if glm_source
+        p[:glm_content] = glm_content if glm_content
+      end)
+    end
+
+    before do
+      allow(helper).to receive(:params).and_return(params)
+    end
+
+    subject { helper.glm_params }
+
+    it 'is memoized' do
+      expect(helper).to receive(:strong_memoize)
+
+      subject
+    end
+
+    where(:glm_source, :glm_content, :result) do
+      nil       | nil       | {}
+      'source'  | nil       | { glm_source: 'source' }
+      nil       | 'content' | { glm_content: 'content' }
+      'source'  | 'content' | { glm_source: 'source', glm_content: 'content' }
+    end
+
+    with_them do
+      it { is_expected.to eq(HashWithIndifferentAccess.new(result)) }
+    end
+  end
+
   describe '#namespace_options_for_select' do
     let_it_be(:user) { create :user }
     let_it_be(:group1) { create :group }
     let_it_be(:group2) { create :group }
 
-    let(:expected_group_options) { [] }
-    let(:expected_user_options) { [[user.namespace.name, user.namespace.id]] }
-    let(:generated_html) do
-      grouped_options_for_select({
-        'New' => [['Create group', 0]],
-        'Groups' => expected_group_options,
-        'Users' => expected_user_options
-      }, nil, prompt: 'Please select')
-    end
+    let(:trial_user_namespaces) { [] }
+    let(:trial_group_namespaces) { [] }
+
+    let(:new_optgroup_regex) { /<optgroup label="New"><option/ }
+    let(:groups_optgroup_regex) { /<optgroup label="Groups"><option/ }
+    let(:users_optgroup_regex) { /<optgroup label="Users"><option/ }
 
     before do
-      allow(helper).to receive(:trial_groups).and_return(expected_group_options)
-      allow(helper).to receive(:trial_users).and_return(expected_user_options)
+      allow(helper).to receive(:trial_group_namespaces).and_return(trial_group_namespaces)
+      allow(helper).to receive(:trial_user_namespaces).and_return(trial_user_namespaces)
     end
 
     subject { helper.namespace_options_for_select }
 
-    context 'when the user’s namespace can be trialed' do
-      context 'and the user has no groups or none of their groups can be trialed' do
-        it { is_expected.to eq(generated_html) }
-      end
-
-      context 'and the user has some groups which can be trialed' do
-        let(:expected_group_options) { [group1, group2].map {|g| [g.name, g.id]} }
-
-        it { is_expected.to eq(generated_html) }
+    context 'when there are no eligible group or user namespaces' do
+      it 'returns just the "New" option group', :aggregate_failures do
+        is_expected.to match(new_optgroup_regex)
+        is_expected.not_to match(groups_optgroup_regex)
+        is_expected.not_to match(users_optgroup_regex)
       end
     end
 
-    context 'when the user’s namespace has already been trialed' do
-      let(:expected_user_options) { [] }
+    context 'when only group namespaces are eligible' do
+      let(:trial_group_namespaces) { [group1, group2] }
 
-      context 'and the user has no groups or none of their groups can be trialed' do
-        it { is_expected.to eq(generated_html) }
-      end
-
-      context 'and the user has some groups which can be trialed' do
-        let(:expected_group_options) { [group1, group2].map {|g| [g.name, g.id]} }
-
-        it { is_expected.to eq(generated_html) }
+      it 'returns the "New" and "Groups" option groups', :aggregate_failures do
+        is_expected.to match(new_optgroup_regex)
+        is_expected.to match(groups_optgroup_regex)
+        is_expected.not_to match(users_optgroup_regex)
       end
     end
-  end
 
-  describe '#trial_users' do
-    let_it_be(:user) { create :user }
-    let(:user_eligible_for_trial_result) { [[user.namespace.name, user.namespace.id]] }
-    let(:user_ineligible_for_trial_result) { [] }
+    context 'when only the user namespace is eligible' do
+      let(:trial_user_namespaces) { [user.namespace] }
 
-    before do
-      user.reload # necessary to cache-bust the user.namespace.gitlab_subscription object
-      allow(helper).to receive(:current_user).and_return(user)
-    end
-
-    subject { helper.trial_users }
-
-    context 'when the user has no subscription on their namespace' do
-      it { is_expected.to eq(user_eligible_for_trial_result) }
-    end
-
-    context 'when the user has a subscription on their namespace' do
-      let(:trialed) { false }
-      let!(:subscription) { create :gitlab_subscription, namespace: user.namespace, trial: trialed }
-
-      context 'and the user has not yet trialed their namespace' do
-        it { is_expected.to eq(user_eligible_for_trial_result) }
+      it 'returns the "New" and "Users" option groups', :aggregate_failures do
+        is_expected.to match(new_optgroup_regex)
+        is_expected.to match(users_optgroup_regex)
+        is_expected.not_to match(groups_optgroup_regex)
       end
+    end
 
-      context 'and the user has already trialed their namespace' do
-        let(:trialed) { true }
+    context 'when some group namespaces & the user namespace are eligible' do
+      let(:trial_group_namespaces) { [group1, group2] }
+      let(:trial_user_namespaces) { [user.namespace] }
 
-        it { is_expected.to eq(user_ineligible_for_trial_result) }
+      it 'returns the "New", "Groups", and "Users" option groups', :aggregate_failures do
+        is_expected.to match(new_optgroup_regex)
+        is_expected.to match(groups_optgroup_regex)
+        is_expected.to match(users_optgroup_regex)
       end
     end
   end
 
-  describe '#trial_groups' do
-    let_it_be(:user) { create :user }
-    let(:no_groups) { [] }
-
+  describe '#trial_selection_intro_text' do
     before do
-      allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:any_trial_user_namespaces?).and_return(have_user_namespace)
+      allow(helper).to receive(:any_trial_group_namespaces?).and_return(have_group_namespace)
     end
 
-    subject { helper.trial_groups }
+    subject { helper.trial_selection_intro_text }
 
-    context 'when the user is not an owner/maintainer of any groups' do
-      it { is_expected.to eq(no_groups) }
+    where(:have_user_namespace, :have_group_namespace, :text) do
+      true  | true  | 'You can apply your trial to a new group, an existing group, or your personal account.'
+      true  | false | 'You can apply your trial to a new group or your personal account.'
+      false | true  | 'You can apply your trial to a new group or an existing group.'
+      false | false | 'Create a new group to start your GitLab Gold trial.'
     end
 
-    context 'when the user is an owner/maintainer of some groups' do
-      let_it_be(:group1) { create :group, name: 'Group 1' }
-      let_it_be(:subgroup1) { create :group, parent: group1, name: 'Sub-Group 1' }
-      let_it_be(:group2) { create :group, name: 'Group 2' }
-      let_it_be(:subgroup2) { create :group, parent: group2, name: 'Sub-Group 2' }
-      let_it_be(:subsubgroup1) { create :group, parent: subgroup2, name: 'Sub-Sub-Group 1' }
+    with_them do
+      it { is_expected.to eq(text) }
+    end
+  end
 
-      let(:all_groups) { [group1, group2, subgroup1, subgroup2, subsubgroup1].map {|g| [g.name, g.id] } }
+  describe '#show_trial_namespace_select?' do
+    before do
+      allow(helper).to receive(:any_trial_group_namespaces?).and_return(have_group_namespace)
+      allow(helper).to receive(:any_trial_user_namespaces?).and_return(have_user_namespace)
+    end
 
-      before do
-        group1.add_owner(user)
-        group2.add_maintainer(user)
-      end
+    subject { helper.show_trial_namespace_select? }
 
-      context 'and none of the groups have subscriptions' do
-        it { is_expected.to eq(all_groups) }
-      end
+    where(:have_user_namespace, :have_group_namespace, :result) do
+      true  | true  | true
+      true  | false | true
+      false | true  | true
+      false | false | false
+    end
 
-      context 'and the groups have subscriptions' do
-        let(:trialed_group1) { false }
-        let(:trialed_subgroup1) { false }
-        let(:trialed_group2) { false }
-        let(:trialed_subgroup2) { false }
-        let(:trialed_subsubgroup1) { false }
-
-        let!(:subscription_group1) { create :gitlab_subscription, namespace: group1, trial: trialed_group1 }
-        let!(:subscription_subgroup1) { create :gitlab_subscription, namespace: subgroup1, trial: trialed_subgroup1 }
-        let!(:subscription_group2) { create :gitlab_subscription, namespace: group2, trial: trialed_group2 }
-        let!(:subscription_subgroup2) { create :gitlab_subscription, namespace: subgroup2, trial: trialed_subgroup2 }
-        let!(:subscription_subsubgroup1) { create :gitlab_subscription, namespace: subsubgroup1, trial: trialed_subsubgroup1 }
-
-        context 'and none of the groups have been trialed yet' do
-          it { is_expected.to eq(all_groups) }
-        end
-
-        context 'and some of the groups have been trialed' do
-          let(:trialed_group1) { true }
-          let(:trialed_subgroup1) { true }
-          let(:trialed_subgroup2) { true }
-
-          let(:some_groups) { [group2, subsubgroup1].map {|g| [g.name, g.id]} }
-
-          it { is_expected.to eq(some_groups) }
-        end
-
-        context 'and all of the groups have already been trialed' do
-          let(:trialed_group1) { true }
-          let(:trialed_subgroup1) { true }
-          let(:trialed_group2) { true }
-          let(:trialed_subgroup2) { true }
-          let(:trialed_subsubgroup1) { true }
-
-          it { is_expected.to eq(no_groups) }
-        end
-      end
+    with_them do
+      it { is_expected.to eq(result) }
     end
   end
 

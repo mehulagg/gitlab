@@ -1,10 +1,16 @@
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # PostgreSQL replication and failover with Omnibus GitLab **(PREMIUM ONLY)**
 
-This document will focus only on configuration supported with [GitLab Premium](https://about.gitlab.com/pricing/), using the Omnibus GitLab package.
-If you are a Community Edition or Starter user, consider using a cloud hosted solution.
-This document will not cover installations from source.
+This document focuses on configuration supported with [GitLab Premium](https://about.gitlab.com/pricing/), using the Omnibus GitLab package.
+If you're a Community Edition or Starter user, consider using a cloud hosted solution.
+This document doesn't cover installations from source.
 
-If a setup with replication and failover is not what you were looking for, see
+If a setup with replication and failover isn't what you were looking for, see
 the [database configuration document](https://docs.gitlab.com/omnibus/settings/database.html)
 for the Omnibus GitLab packages.
 
@@ -28,6 +34,11 @@ replication and failover requires:
 You also need to take into consideration the underlying network topology, making
 sure you have redundant connectivity between all Database and GitLab instances
 to avoid the network becoming a single point of failure.
+
+NOTE: **Note:**
+As of GitLab 13.3, PostgreSQL 12 is shipped with Omnibus GitLab. Clustering for PostgreSQL 12 is only supported with
+Patroni. See the [Patroni](#patroni) section for further details. The support for repmgr will not be extended beyond
+PostgreSQL 11.
 
 ### Database node
 
@@ -82,9 +93,9 @@ information.
 
 #### Network information
 
-PostgreSQL does not listen on any network interface by default. It needs to know
-which IP address to listen on in order to be accessible to other services.
-Similarly, PostgreSQL access is controlled based on the network source.
+PostgreSQL doesn't listen on any network interface by default. It needs to know
+which IP address to listen on to be accessible to other services. Similarly,
+PostgreSQL access is controlled based on the network source.
 
 This is why you will need:
 
@@ -97,7 +108,7 @@ This is why you will need:
 
 When using default setup, minimum configuration requires:
 
-- `CONSUL_USERNAME`. Defaults to `gitlab-consul`
+- `CONSUL_USERNAME`. The default user for Omnibus GitLab is `gitlab-consul`
 - `CONSUL_DATABASE_PASSWORD`. Password for the database user.
 - `CONSUL_PASSWORD_HASH`. This is a hash generated out of Consul username/password pair.
    Can be generated with:
@@ -140,7 +151,7 @@ server nodes.
 
 We will need the following password information for the application's database user:
 
-- `POSTGRESQL_USERNAME`. Defaults to `gitlab`
+- `POSTGRESQL_USERNAME`. The default user for Omnibus GitLab is `gitlab`
 - `POSTGRESQL_USER_PASSWORD`. The password for the database user
 - `POSTGRESQL_PASSWORD_HASH`. This is a hash generated out of the username/password pair.
   Can be generated with:
@@ -153,7 +164,7 @@ We will need the following password information for the application's database u
 
 When using default setup, minimum configuration requires:
 
-- `PGBOUNCER_USERNAME`. Defaults to `pgbouncer`
+- `PGBOUNCER_USERNAME`. The default user for Omnibus GitLab is `pgbouncer`
 - `PGBOUNCER_PASSWORD`. This is a password for PgBouncer service.
 - `PGBOUNCER_PASSWORD_HASH`. This is a hash generated out of PgBouncer username/password pair.
   Can be generated with:
@@ -198,7 +209,7 @@ When installing the GitLab package, do not supply `EXTERNAL_URL` value.
 
 ### Configuring the Database nodes
 
-1. Make sure to [configure the Consul nodes](../high_availability/consul.md).
+1. Make sure to [configure the Consul nodes](../consul.md).
 1. Make sure you collect [`CONSUL_SERVER_NODES`](#consul-information), [`PGBOUNCER_PASSWORD_HASH`](#pgbouncer-information), [`POSTGRESQL_PASSWORD_HASH`](#postgresql-information), the [number of db nodes](#postgresql-information), and the [network address](#network-information) before executing the next step.
 
 1. On the master database node, edit `/etc/gitlab/gitlab.rb` replacing values noted in the `# START user configuration` section:
@@ -414,7 +425,7 @@ Check the [Troubleshooting section](#troubleshooting) before proceeding.
 
 1. Make sure you collect [`CONSUL_SERVER_NODES`](#consul-information), [`CONSUL_PASSWORD_HASH`](#consul-information), and [`PGBOUNCER_PASSWORD_HASH`](#pgbouncer-information) before executing the next step.
 
-1. One each node, edit the `/etc/gitlab/gitlab.rb` config file and replace values noted in the `# START user configuration` section as below:
+1. One each node, edit the `/etc/gitlab/gitlab.rb` configuration file and replace values noted in the `# START user configuration` section as below:
 
    ```ruby
    # Disable all components except PgBouncer and Consul agent
@@ -461,7 +472,7 @@ Check the [Troubleshooting section](#troubleshooting) before proceeding.
    gitlab-ctl write-pgpass --host 127.0.0.1 --database pgbouncer --user pgbouncer --hostuser gitlab-consul
    ```
 
-1. [Enable monitoring](../high_availability/pgbouncer.md#enable-monitoring)
+1. [Enable monitoring](../postgresql/pgbouncer.md#enable-monitoring)
 
 #### PgBouncer Checkpoint
 
@@ -790,7 +801,7 @@ After deploying the configuration follow these steps:
 This example uses 3 PostgreSQL servers, and 1 application node (with PgBouncer setup alongside).
 
 It differs from the [recommended setup](#example-recommended-setup) by moving the Consul servers into the same servers we use for PostgreSQL.
-The trade-off is between reducing server counts, against the increased operational complexity of needing to deal with PostgreSQL [failover](#failover-procedure) and [restore](#restore-procedure) procedures in addition to [Consul outage recovery](../high_availability/consul.md#outage-recovery) on the same set of machines.
+The trade-off is between reducing server counts, against the increased operational complexity of needing to deal with PostgreSQL [failover](#failover-procedure) and [restore](#restore-procedure) procedures in addition to [Consul outage recovery](../consul.md#outage-recovery) on the same set of machines.
 
 In this example we start with all servers on the same 10.6.0.0/16 private network range, they can connect to each freely other on those addresses.
 
@@ -1082,7 +1093,7 @@ To restart either service, run `gitlab-ctl restart SERVICE`
 
 For PostgreSQL, it is usually safe to restart the master node by default. Automatic failover defaults to a 1 minute timeout. Provided the database returns before then, nothing else needs to be done. To be safe, you can stop `repmgrd` on the standby nodes first with `gitlab-ctl stop repmgrd`, then start afterwards with `gitlab-ctl start repmgrd`.
 
-On the Consul server nodes, it is important to restart the Consul service in a controlled fashion. Read our [Consul documentation](../high_availability/consul.md#restarting-the-server-cluster) for instructions on how to restart the service.
+On the Consul server nodes, it is important to [restart the Consul service](../consul.md#restart-consul) in a controlled manner.
 
 ### `gitlab-ctl repmgr-check-master` command produces errors
 
@@ -1129,11 +1140,10 @@ postgresql['trust_auth_cidr_addresses'] = %w(123.123.123.123/32 <other_cidrs>)
 
 ### Issues with other components
 
-If you're running into an issue with a component not outlined here, be sure to check the troubleshooting section of their specific documentation page.
+If you're running into an issue with a component not outlined here, be sure to check the troubleshooting section of their specific documentation page:
 
-- [Consul](../high_availability/consul.md#troubleshooting)
+- [Consul](../consul.md#troubleshooting-consul)
 - [PostgreSQL](https://docs.gitlab.com/omnibus/settings/database.html#troubleshooting)
-- [GitLab application](../high_availability/gitlab.md#troubleshooting)
 
 ## Patroni
 
@@ -1259,6 +1269,11 @@ with:
 sudo gitlab-ctl stop patroni
 ```
 
+Note that stopping or restarting Patroni service on the leader node will trigger the automatic failover. If you
+want to signal Patroni to reload its configuration or restart PostgreSQL process without triggering the failover, you
+must use the `reload` or `restart` sub-commands of `gitlab-ctl patroni` instead. These two sub-commands are wrappers of
+the same `patronictl` commands.
+
 ### Manual failover procedure for Patroni
 
 While Patroni supports automatic failover, you also have the ability to perform
@@ -1344,3 +1359,93 @@ You can switch an exiting database cluster to use Patroni instead of repmgr with
 
 1. Repeat the last two steps for all replica nodes. `gitlab.rb` should look the same on all nodes.
 1. Optional: You can remove `gitlab_repmgr` database and role on the primary.
+
+### Upgrading PostgreSQL major version in a Patroni cluster
+
+As of GitLab 13.3, PostgreSQL 11.7 and 12.3 are both shipped with Omnibus GitLab. GitLab still
+uses PostgreSQL 11 by default. Therefore `gitlab-ctl pg-upgrade` does not automatically upgrade
+to PostgreSQL 12. If you want to upgrade to PostgreSQL 12, you must ask for it explicitly.
+
+CAUTION: **Warning:**
+The procedure for upgrading PostgreSQL in a Patroni cluster is different than when upgrading using repmgr.
+The following outlines the key differences and important considerations that need to be accounted for when
+upgrading PostgreSQL.
+
+Here are a few key facts that you must consider before upgrading PostgreSQL:
+
+- The main point is that you will have to **shut down the Patroni cluster**. This means that your
+  GitLab deployment will be down for the duration of database upgrade or, at least, as long as your leader
+  node is upgraded. This can be **a significant downtime depending on the size of your database**.
+
+- Upgrading PostgreSQL creates a new data directory with a new control data. From Patroni's perspective
+  this is a new cluster that needs to be bootstrapped again. Therefore, as part of the upgrade procedure,
+  the cluster state, which is stored in Consul, will be wiped out. Once the upgrade is completed, Patroni
+  will be instructed to bootstrap a new cluster. **Note that this will change your _cluster ID_**.
+
+- The procedures for upgrading leader and replicas are not the same. That is why it is important to use the
+  right procedure on each node.
+
+- Upgrading a replica node **deletes the data directory and resynchronizes it** from the leader using the
+  configured replication method (currently `pg_basebackup` is the only available option). It might take some
+  time for replica to catch up with the leader, depending on the size of your database.
+
+- An overview of the upgrade procedure is outlined in [Patoni's documentation](https://patroni.readthedocs.io/en/latest/existing_data.html#major-upgrade-of-postgresql-version).
+  You can still use `gitlab-ctl pg-upgrade` which implements this procedure with a few adjustments.
+
+Considering these, you should carefully plan your PostgreSQL upgrade:
+
+1. Find out which node is the leader and which node is a replica:
+
+   ```shell
+   gitlab-ctl patroni members
+   ```
+
+   NOTE: **Note:**
+   `gitlab-ctl pg-upgrade` tries to detect the role of the node. If for any reason the auto-detection
+   does not work or you believe it did not detect the role correctly, you can use the `--leader` or `--replica`
+   arguments to manually override it.
+
+1. Stop Patroni **only on replicas**.
+
+   ```shell
+   sudo gitlab-ctl stop patroni
+   ```
+
+1. Enable the maintenance mode on the **application node**:
+
+   ```shell
+   sudo gitlab-ctl deploy-page up
+   ```
+
+1. Upgrade PostgreSQL on **the leader node** and make sure that the upgrade is completed successfully:
+
+   ```shell
+   sudo gitlab-ctl pg-upgrade -V 12
+   ```
+
+1. Check the status of the leader and cluster. You can only proceed if you have a healthy leader:
+
+   ```shell
+   gitlab-ctl patroni check-leader
+
+   # OR
+
+   gitlab-ctl patroni members
+   ```
+
+1. You can now disable the maintenance mode on the **application node**:
+
+   ```shell
+   sudo gitlab-ctl deploy-page down
+   ```
+
+1. Upgrade PostgreSQL **on replicas** (you can do this in parallel on all of them):
+
+   ```shell
+   sudo gitlab-ctl pg-upgrade -V 12
+   ```
+
+NOTE: **Note:**
+Reverting PostgreSQL upgrade with `gitlab-ctl revert-pg-upgrade` has the same considerations as
+`gitlab-ctl pg-upgrade`. You should follow the same procedure by first stopping the replicas,
+then reverting the leader, and finally reverting the replicas.

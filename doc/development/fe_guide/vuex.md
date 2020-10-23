@@ -32,8 +32,9 @@ When using Vuex at GitLab, separate these concerns into different files to impro
   └── mutation_types.js # mutation types
 ```
 
-The following example shows an application that lists and adds users to the state.
-(For a more complex example implementation take a look at the security applications store in [here](https://gitlab.com/gitlab-org/gitlab/tree/master/ee/app/assets/javascripts/vue_shared/security_reports/store))
+The following example shows an application that lists and adds users to the
+state. (For a more complex example implementation, review the security
+applications stored in this [repository](https://gitlab.com/gitlab-org/gitlab/tree/master/ee/app/assets/javascripts/vue_shared/security_reports/store)).
 
 ### `index.js`
 
@@ -54,10 +55,6 @@ export const createStore = () =>
     state,
   });
 ```
-
-_Note:_ Until this
-[RFC](https://gitlab.com/gitlab-org/frontend/rfcs/-/issues/20) is implemented,
-the above will need to disable the `import/prefer-default-export` ESLint rule.
 
 ### `state.js`
 
@@ -138,44 +135,12 @@ import { mapActions } from 'vuex';
 ### `mutations.js`
 
 The mutations specify how the application state changes in response to actions sent to the store.
-The only way to change state in a Vuex store should be by committing a mutation.
+The only way to change state in a Vuex store is by committing a mutation.
 
-**It's a good idea to think of the state before writing any code.**
+Most mutations are committed from an action using `commit`. If you don't have any
+asynchronous operations, you can call mutations from a component using the `mapMutations` helper.
 
-Remember that actions only describe that something happened, they don't describe how the application state changes.
-
-**Never commit a mutation directly from a component**
-
-Instead, you should create an action that will commit a mutation.
-
-```javascript
-  import * as types from './mutation_types';
-
-  export default {
-    [types.REQUEST_USERS](state) {
-      state.isLoading = true;
-    },
-    [types.RECEIVE_USERS_SUCCESS](state, data) {
-      // Do any needed data transformation to the received payload here
-      state.users = data;
-      state.isLoading = false;
-    },
-    [types.RECEIVE_USERS_ERROR](state, error) {
-      state.isLoading = false;
-    },
-    [types.REQUEST_ADD_USER](state, user) {
-      state.isAddingUser = true;
-    },
-    [types.RECEIVE_ADD_USER_SUCCESS](state, user) {
-      state.isAddingUser = false;
-      state.users.push(user);
-    },
-    [types.REQUEST_ADD_USER_ERROR](state, error) {
-      state.isAddingUser = false;
-      state.errorAddingUser = error;
-    },
-  };
-```
+See the Vuex docs for examples of [committing mutations from components](https://vuex.vuejs.org/guide/mutations.html#committing-mutations-in-components).
 
 #### Naming Pattern: `REQUEST` and `RECEIVE` namespaces
 
@@ -252,12 +217,15 @@ A mutation written like this is harder to maintain and more error prone. We shou
 // Good
 export default {
   [types.MARK_AS_CLOSED](state, itemId) {
-    const item = state.items.find(i => i.id == itemId);
-    Vue.set(item, 'closed', true)
+    const item = state.items.find(x => x.id === itemId);
 
-    state.items.splice(index, 1, item)
-  }
-}
+    if (!item) {
+      return;
+    }
+
+    Vue.set(item, 'closed', true);
+  },
+};
 ```
 
 This approach is better because:
@@ -447,29 +415,6 @@ export default {
   </ul>
 </template>
 ```
-
-### Vuex Gotchas
-
-1. Do not call a mutation directly. Always use an action to commit a mutation. Doing so will keep consistency throughout the application. From Vuex docs:
-
-   > Why don't we just call store.commit('action') directly? Well, remember that mutations must be synchronous? Actions aren't. We can perform asynchronous operations inside an action.
-
-   ```javascript
-     // component.vue
-
-     // bad
-     created() {
-       this.$store.commit('mutation');
-     }
-
-     // good
-     created() {
-       this.$store.dispatch('action');
-     }
-   ```
-
-1. Use mutation types instead of hardcoding strings. It will be less error prone.
-1. The State will be accessible in all components descending from the use where the store is instantiated.
 
 ### Testing Vuex
 

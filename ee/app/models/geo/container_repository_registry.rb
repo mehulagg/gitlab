@@ -8,10 +8,11 @@ class Geo::ContainerRepositoryRegistry < Geo::BaseRegistry
 
   belongs_to :container_repository
 
-  scope :never_synced, -> { with_state(:pending).where(last_synced_at: nil) }
   scope :failed, -> { with_state(:failed) }
-  scope :synced, -> { with_state(:synced) }
+  scope :needs_sync_again, -> { failed.retry_due }
+  scope :never_attempted_sync, -> { with_state(:pending).where(last_synced_at: nil) }
   scope :retry_due, -> { where(arel_table[:retry_at].eq(nil).or(arel_table[:retry_at].lt(Time.current))) }
+  scope :synced, -> { with_state(:synced) }
 
   state_machine :state, initial: :pending do
     state :started
@@ -37,12 +38,8 @@ class Geo::ContainerRepositoryRegistry < Geo::BaseRegistry
     end
   end
 
-  def self.finder_class
-    ::Geo::ContainerRepositoryRegistryFinder
-  end
-
-  def self.find_registry_differences(range)
-    finder_class.new(current_node_id: Gitlab::Geo.current_node.id).find_registry_differences(range)
+  def self.find_registries_needs_sync_again(batch_size:, except_ids: [])
+    super.order(Gitlab::Database.nulls_first_order(:last_synced_at))
   end
 
   def self.delete_for_model_ids(container_repository_ids)
@@ -53,10 +50,6 @@ class Geo::ContainerRepositoryRegistry < Geo::BaseRegistry
 
   def self.pluck_container_repository_key
     where(nil).pluck(:container_repository_id)
-  end
-
-  def self.registry_consistency_worker_enabled?
-    Feature.enabled?(:geo_container_registry_ssot_sync, default_enabled: true)
   end
 
   def self.replication_enabled?

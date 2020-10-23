@@ -8,7 +8,7 @@
 #   current_user - which user use
 #   params:
 #     scope: 'created_by_me' or 'assigned_to_me' or 'all'
-#     state: 'open' or 'closed' or 'all'
+#     state: 'opened' or 'closed' or 'all'
 #     group_id: integer
 #     project_id: integer
 #     milestone_title: string
@@ -25,6 +25,7 @@
 #     updated_after: datetime
 #     updated_before: datetime
 #     confidential: boolean
+#     issue_type: array of strings (one of Issue.issue_types)
 #
 class IssuesFinder < IssuableFinder
   CONFIDENTIAL_ACCESS_LEVEL = Gitlab::Access::REPORTER
@@ -40,7 +41,7 @@ class IssuesFinder < IssuableFinder
   # rubocop: enable CodeReuse/ActiveRecord
 
   def params_class
-    IssuesFinder::Params
+    self.class.const_get(:Params, false)
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -73,6 +74,7 @@ class IssuesFinder < IssuableFinder
     issues = super
     issues = by_due_date(issues)
     issues = by_confidential(issues)
+    issues = by_issue_types(issues)
     issues
   end
 
@@ -96,6 +98,14 @@ class IssuesFinder < IssuableFinder
     elsif params.filter_by_due_next_month_and_previous_two_weeks?
       items.due_between(Date.today - 2.weeks, (Date.today + 1.month).end_of_month)
     end
+  end
+
+  def by_issue_types(items)
+    issue_type_params = Array(params[:issue_types]).map(&:to_s)
+    return items if issue_type_params.blank?
+    return Issue.none unless (Issue.issue_types.keys & issue_type_params).sort == issue_type_params.sort
+
+    items.with_issue_type(params[:issue_types])
   end
 end
 

@@ -43,7 +43,8 @@ export default {
     },
     itemValueType: {
       type: String,
-      required: true,
+      required: false,
+      default: VALUE_TYPE.GRAPH,
     },
     customType: {
       type: String,

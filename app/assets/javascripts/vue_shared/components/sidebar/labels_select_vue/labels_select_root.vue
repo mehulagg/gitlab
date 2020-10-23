@@ -2,6 +2,7 @@
 import $ from 'jquery';
 import Vue from 'vue';
 import Vuex, { mapState, mapActions, mapGetters } from 'vuex';
+import { isInViewport } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 
 import DropdownValueCollapsed from '~/vue_shared/components/sidebar/labels_select/dropdown_value_collapsed.vue';
@@ -27,6 +28,11 @@ export default {
     DropdownValueCollapsed,
   },
   props: {
+    allowLabelRemove: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     allowLabelEdit: {
       type: Boolean,
       required: true,
@@ -100,6 +106,11 @@ export default {
       default: __('Manage group labels'),
     },
   },
+  data() {
+    return {
+      contentIsOnViewport: true,
+    };
+  },
   computed: {
     ...mapState(['showDropdownButton', 'showDropdownContents']),
     ...mapGetters([
@@ -117,10 +128,14 @@ export default {
         selectedLabels,
       });
     },
+    showDropdownContents(showDropdownContents) {
+      this.setContentIsOnViewport(showDropdownContents);
+    },
   },
   mounted() {
     this.setInitialState({
       variant: this.variant,
+      allowLabelRemove: this.allowLabelRemove,
       allowLabelEdit: this.allowLabelEdit,
       allowLabelCreate: this.allowLabelCreate,
       allowMultiselect: this.allowMultiselect,
@@ -157,7 +172,11 @@ export default {
         !state.showDropdownButton &&
         !state.showDropdownContents
       ) {
-        this.handleDropdownClose(state.labels.filter(label => label.touched));
+        let filterFn = label => label.touched;
+        if (this.isDropdownVariantEmbedded) {
+          filterFn = label => label.set;
+        }
+        this.handleDropdownClose(state.labels.filter(filterFn));
       }
     },
     /**
@@ -177,7 +196,7 @@ export default {
       ].some(
         className =>
           target?.classList.contains(className) ||
-          target?.parentElement.classList.contains(className),
+          target?.parentElement?.classList.contains(className),
       );
 
       const hadExceptionParent = ['.js-btn-back', '.js-labels-list'].some(
@@ -203,6 +222,20 @@ export default {
     handleCollapsedValueClick() {
       this.$emit('toggleCollapse');
     },
+    setContentIsOnViewport(showDropdownContents) {
+      if (!this.isDropdownVariantEmbedded || !showDropdownContents) {
+        this.contentIsOnViewport = true;
+
+        return;
+      }
+
+      this.$nextTick(() => {
+        if (this.$refs.dropdownContents) {
+          const offset = { top: 100 };
+          this.contentIsOnViewport = isInViewport(this.$refs.dropdownContents.$el, offset);
+        }
+      });
+    },
   },
 };
 </script>
@@ -225,10 +258,13 @@ export default {
         :allow-label-edit="allowLabelEdit"
         :labels-select-in-progress="labelsSelectInProgress"
       />
-      <dropdown-value v-show="!showDropdownButton">
+      <dropdown-value
+        :disable-labels="labelsSelectInProgress"
+        @onLabelRemove="$emit('onLabelRemove', $event)"
+      >
         <slot></slot>
       </dropdown-value>
-      <dropdown-button v-show="dropdownButtonVisible" />
+      <dropdown-button v-show="dropdownButtonVisible" class="gl-mt-2" />
       <dropdown-contents
         v-if="dropdownButtonVisible && showDropdownContents"
         ref="dropdownContents"
@@ -239,6 +275,7 @@ export default {
       <dropdown-contents
         v-if="dropdownButtonVisible && showDropdownContents"
         ref="dropdownContents"
+        :render-on-top="!contentIsOnViewport"
       />
     </template>
   </div>

@@ -34,7 +34,7 @@ RSpec.describe Security::StoreReportsService do
       end
 
       context 'when StoreReportService returns an error for a report' do
-        let(:reports) { Gitlab::Ci::Reports::Security::Reports.new(pipeline.sha) }
+        let(:reports) { Gitlab::Ci::Reports::Security::Reports.new(pipeline) }
         let(:sast_report) { reports.get_report('sast', sast_artifact) }
         let(:dast_report) { reports.get_report('dast', dast_artifact) }
         let(:success) { { status: :success } }
@@ -56,23 +56,6 @@ RSpec.describe Security::StoreReportsService do
 
           is_expected.to eq(error)
         end
-      end
-    end
-
-    context 'history caching' do
-      it 'swallows errors' do
-        allow( Gitlab::Vulnerabilities::HistoryCache).to receive(:new)
-          .and_raise("error")
-
-        expect { subject }.not_to raise_error
-      end
-
-      it 'caches vulnerability history' do
-        expect_next_instance_of(Gitlab::Vulnerabilities::HistoryCache) do |instance|
-          expect(instance).to receive(:fetch)
-        end
-
-        subject
       end
     end
   end

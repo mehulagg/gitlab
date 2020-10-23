@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { mapActions } from 'vuex';
-import Translate from '~/vue_shared/translate';
 import { identity } from 'lodash';
+import Translate from '~/vue_shared/translate';
 import ide from './components/ide.vue';
 import { createStore } from './stores';
 import { createRouter } from './ide_router';
@@ -73,11 +73,9 @@ export function initIde(el, options = {}) {
  * @param {Objects} options - Extra options for the IDE (Used by EE).
  */
 export function startIde(options) {
-  document.addEventListener('DOMContentLoaded', () => {
-    const ideElement = document.getElementById('ide');
-    if (ideElement) {
-      resetServiceWorkersPublicPath();
-      initIde(ideElement, options);
-    }
-  });
+  const ideElement = document.getElementById('ide');
+  if (ideElement) {
+    resetServiceWorkersPublicPath();
+    initIde(ideElement, options);
+  }
 }

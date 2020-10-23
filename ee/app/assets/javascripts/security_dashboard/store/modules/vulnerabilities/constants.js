@@ -8,8 +8,6 @@ export const INFO = 'info';
 export const UNKNOWN = 'unknown';
 export const SEVERITIES = [CRITICAL, HIGH, MEDIUM, LOW, INFO, UNKNOWN];
 
-export const DAY_IN_MS = 1000 * 60 * 60 * 24;
-
 export const DAYS = {
   THIRTY: 30,
   SIXTY: 60,

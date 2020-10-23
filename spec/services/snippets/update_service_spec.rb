@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Snippets::UpdateService do
-  describe '#execute' do
+  describe '#execute', :aggregate_failures do
     let_it_be(:user) { create(:user) }
     let_it_be(:admin) { create :user, admin: true }
     let(:visibility_level) { Gitlab::VisibilityLevel::PRIVATE }
@@ -15,6 +15,7 @@ RSpec.describe Snippets::UpdateService do
         visibility_level: visibility_level
       }
     end
+
     let(:extra_opts) { {} }
     let(:options) { base_opts.merge(extra_opts) }
     let(:updater) { user }
@@ -96,40 +97,81 @@ RSpec.describe Snippets::UpdateService do
     end
 
     shared_examples 'creates repository and creates file' do
-      it 'creates repository' do
-        expect(snippet.repository).not_to exist
-
-        subject
-
-        expect(snippet.repository).to exist
-      end
-
-      it 'commits the files to the repository' do
-        subject
-
-        expect(snippet.blobs.count).to eq 1
-
-        blob = snippet.repository.blob_at('master', options[:file_name])
-
-        expect(blob.data).to eq options[:content]
-      end
-
-      context 'when the repository creation fails' do
-        before do
-          allow(snippet).to receive(:repository_exists?).and_return(false)
-        end
-
-        it 'raise an error' do
-          response = subject
-
-          expect(response).to be_error
-          expect(response.payload[:snippet].errors[:repository].to_sentence).to eq 'Error updating the snippet - Repository could not be created'
-        end
-
-        it 'does not try to commit file' do
-          expect(service).not_to receive(:create_commit)
+      context 'when file_name and content params are used' do
+        it 'creates repository' do
+          expect(snippet.repository).not_to exist
 
           subject
+
+          expect(snippet.repository).to exist
+        end
+
+        it 'commits the files to the repository' do
+          subject
+
+          expect(snippet.blobs.count).to eq 1
+
+          blob = snippet.repository.blob_at('master', options[:file_name])
+
+          expect(blob.data).to eq options[:content]
+        end
+
+        context 'when the repository creation fails' do
+          before do
+            allow(snippet).to receive(:repository_exists?).and_return(false)
+          end
+
+          it 'raise an error' do
+            expect(subject).to be_error
+            expect(subject.payload[:snippet].errors[:repository].to_sentence).to eq 'Error updating the snippet - Repository could not be created'
+          end
+
+          it 'does not try to commit file' do
+            expect(service).not_to receive(:create_commit)
+
+            subject
+          end
+        end
+      end
+
+      context 'when snippet_actions param is used' do
+        let(:file_path) { 'CHANGELOG' }
+        let(:created_file_path) { 'New file'}
+        let(:content) { 'foobar' }
+        let(:snippet_actions) { [{ action: :move, previous_path: snippet.file_name, file_path: file_path }, { action: :create, file_path: created_file_path, content: content }] }
+        let(:base_opts) do
+          {
+            snippet_actions: snippet_actions
+          }
+        end
+
+        it 'performs operation without raising errors' do
+          db_content = snippet.content
+
+          expect(subject).to be_success
+
+          new_blob = snippet.repository.blob_at('master', file_path)
+          created_file = snippet.repository.blob_at('master', created_file_path)
+
+          expect(new_blob.data).to eq db_content
+          expect(created_file.data).to eq content
+        end
+
+        context 'when the repository is not created' do
+          it 'keeps snippet database data' do
+            old_file_name = snippet.file_name
+            old_file_content = snippet.content
+
+            expect_next_instance_of(described_class) do |instance|
+              expect(instance).to receive(:create_repository_for).and_raise(StandardError)
+            end
+
+            snippet = subject.payload[:snippet]
+
+            expect(subject).to be_error
+            expect(snippet.file_name).to eq(old_file_name)
+            expect(snippet.content).to eq(old_file_content)
+          end
         end
       end
     end
@@ -365,10 +407,9 @@ RSpec.describe Snippets::UpdateService do
         let(:snippet_actions) { [{ action: 'invalid_action' }] }
 
         it 'raises a validation error' do
-          response = subject
-          snippet = response.payload[:snippet]
+          snippet = subject.payload[:snippet]
 
-          expect(response).to be_error
+          expect(subject).to be_error
           expect(snippet.errors.full_messages_for(:snippet_actions)).to eq ['Snippet actions have invalid data']
         end
       end
@@ -376,13 +417,12 @@ RSpec.describe Snippets::UpdateService do
       context 'when an error is raised committing the file' do
         it 'keeps any snippet modifications' do
           expect_next_instance_of(described_class) do |instance|
-            expect(instance).to receive(:create_repository_for).and_raise(StandardError)
+            expect(instance).to receive(:create_commit).and_raise(StandardError)
           end
 
-          response = subject
-          snippet = response.payload[:snippet]
+          snippet = subject.payload[:snippet]
 
-          expect(response).to be_error
+          expect(subject).to be_error
           expect(snippet.title).to eq(new_title)
           expect(snippet.file_name).to eq(file_path)
           expect(snippet.content).to eq(content)
@@ -476,6 +516,22 @@ RSpec.describe Snippets::UpdateService do
 
               expect(blob).to be_present
               expect(blob.data).to eq content
+            end
+          end
+
+          context 'when the file_path is not present' do
+            let(:snippet_actions) { [{ action: :move, previous_path: file_path }] }
+
+            it 'generates the name for the renamed file' do
+              old_blob = blob(file_path)
+
+              expect(blob('snippetfile1.txt')).to be_nil
+              expect(subject).to be_success
+
+              new_blob = blob('snippetfile1.txt')
+
+              expect(new_blob).to be_present
+              expect(new_blob.data).to eq old_blob.data
             end
           end
         end
@@ -681,6 +737,7 @@ RSpec.describe Snippets::UpdateService do
       it_behaves_like 'when snippet_actions param is present'
       it_behaves_like 'only file_name is present'
       it_behaves_like 'only content is present'
+      it_behaves_like 'invalid params error response'
       it_behaves_like 'snippets spam check is performed' do
         before do
           subject
@@ -708,6 +765,7 @@ RSpec.describe Snippets::UpdateService do
       it_behaves_like 'when snippet_actions param is present'
       it_behaves_like 'only file_name is present'
       it_behaves_like 'only content is present'
+      it_behaves_like 'invalid params error response'
       it_behaves_like 'snippets spam check is performed' do
         before do
           subject

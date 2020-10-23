@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import MergeRequestTable from 'ee/analytics/productivity_analytics/components/mr_table.vue';
 import MergeRequestTableRow from 'ee/analytics/productivity_analytics/components/mr_table_row.vue';
-import { GlDeprecatedDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { mockMergeRequests } from '../mock_data';
 
 describe('MergeRequestTable component', () => {
@@ -27,8 +27,8 @@ describe('MergeRequestTable component', () => {
 
   const findMergeRequestTableRows = () => wrapper.findAll(MergeRequestTableRow);
   const findTableHeader = () => wrapper.find('.table-row-header');
-  const findDropdown = () => wrapper.find(GlDeprecatedDropdown);
-  const findDropdownItems = () => wrapper.findAll(GlDeprecatedDropdownItem);
+  const findDropdown = () => wrapper.find(GlDropdown);
+  const findDropdownItems = () => wrapper.findAll(GlDropdownItem);
   const findFirstDropdownItem = () => findDropdownItems().at(0);
 
   beforeEach(() => {

@@ -11,15 +11,15 @@ RSpec.describe 'Database schema' do
   let(:columns_name_with_jsonb) { retrieve_columns_name_with_jsonb }
 
   # List of columns historically missing a FK, don't add more columns
-  # See: https://docs.gitlab.com/ce/development/foreign_keys.html#naming-foreign-keys
+  # See: https://docs.gitlab.com/ee/development/foreign_keys.html#naming-foreign-keys
   IGNORED_FK_COLUMNS = {
     abuse_reports: %w[reporter_id user_id],
     application_settings: %w[performance_bar_allowed_group_id slack_app_id snowplow_app_id eks_account_id eks_access_key_id],
     approvals: %w[user_id],
     approver_groups: %w[target_id],
     approvers: %w[target_id user_id],
-    audit_events: %w[author_id entity_id],
-    audit_events_part_5fc467ac26: %w[author_id entity_id],
+    audit_events: %w[author_id entity_id target_id],
+    audit_events_part_5fc467ac26: %w[author_id entity_id target_id],
     award_emoji: %w[awardable_id user_id],
     aws_roles: %w[role_external_id],
     boards: %w[milestone_id],
@@ -31,11 +31,11 @@ RSpec.describe 'Database schema' do
     ci_trigger_requests: %w[commit_id],
     cluster_providers_aws: %w[security_group_id vpc_id access_key_id],
     cluster_providers_gcp: %w[gcp_project_id operation_id],
+    compliance_management_frameworks: %w[group_id],
     commit_user_mentions: %w[commit_id],
     deploy_keys_projects: %w[deploy_key_id],
     deployments: %w[deployable_id environment_id user_id],
     draft_notes: %w[discussion_id commit_id],
-    emails: %w[user_id],
     epics: %w[updated_by_id last_edited_by_id state_id],
     events: %w[target_id],
     forked_project_links: %w[forked_from_project_id],
@@ -165,6 +165,9 @@ RSpec.describe 'Database schema' do
 
   context 'for enums' do
     ApplicationRecord.descendants.each do |model|
+      # skip model if it is an abstract class as it would not have an associated DB table
+      next if model.abstract_class?
+
       describe model do
         let(:ignored_enums) { ignored_limit_enums(model.name) }
         let(:enums) { model.defined_enums.keys - ignored_enums }
@@ -186,6 +189,7 @@ RSpec.describe 'Database schema' do
     "Operations::FeatureFlagScope" => %w[strategies],
     "Operations::FeatureFlags::Strategy" => %w[parameters],
     "Packages::Composer::Metadatum" => %w[composer_json],
+    "RawUsageData" => %w[payload], # Usage data payload changes often, we cannot use one schema
     "Releases::Evidence" => %w[summary]
   }.freeze
 
@@ -231,6 +235,26 @@ RSpec.describe 'Database schema' do
 
     it 'we do not have unexpected schemas' do
       expect(get_schemas.size).to eq(Gitlab::Database::EXTRA_SCHEMAS.size + 1)
+    end
+  end
+
+  context 'primary keys' do
+    let(:exceptions) do
+      %i(
+        elasticsearch_indexed_namespaces
+        elasticsearch_indexed_projects
+        merge_request_context_commit_diff_files
+      )
+    end
+
+    it 'expects every table to have a primary key defined' do
+      connection = ActiveRecord::Base.connection
+
+      problematic_tables = connection.tables.select do |table|
+        !connection.primary_key(table).present?
+      end.map(&:to_sym)
+
+      expect(problematic_tables - exceptions).to be_empty
     end
   end
 

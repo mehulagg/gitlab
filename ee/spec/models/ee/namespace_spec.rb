@@ -170,6 +170,60 @@ RSpec.describe Namespace do
         end
       end
     end
+
+    describe '.eligible_for_trial' do
+      let_it_be(:namespace) { create :namespace }
+
+      subject { described_class.eligible_for_trial.first }
+
+      context 'when there is no subscription' do
+        it { is_expected.to eq(namespace) }
+      end
+
+      context 'when there is a subscription' do
+        context 'with a plan that is eligible for a trial' do
+          where(plan: ::Plan::PLANS_ELIGIBLE_FOR_TRIAL)
+
+          with_them do
+            context 'and has not yet been trialed' do
+              before do
+                create :gitlab_subscription, plan, namespace: namespace
+              end
+
+              it { is_expected.to eq(namespace) }
+            end
+
+            context 'but has already had a trial' do
+              before do
+                create :gitlab_subscription, plan, :expired_trial, namespace: namespace
+              end
+
+              it { is_expected.to be_nil }
+            end
+
+            context 'but is currently being trialed' do
+              before do
+                create :gitlab_subscription, plan, :active_trial, namespace: namespace
+              end
+
+              it { is_expected.to be_nil }
+            end
+          end
+        end
+
+        context 'with a plan that is ineligible for a trial' do
+          where(plan: ::Plan::PAID_HOSTED_PLANS)
+
+          with_them do
+            before do
+              create :gitlab_subscription, plan, namespace: namespace
+            end
+
+            it { is_expected.to be_nil }
+          end
+        end
+      end
+    end
   end
 
   context 'validation' do
@@ -251,13 +305,11 @@ RSpec.describe Namespace do
     end
   end
 
-  describe '#feature_available?' do
+  shared_examples 'feature available' do
     let(:hosted_plan) { create(:bronze_plan) }
     let(:group) { create(:group) }
     let(:licensed_feature) { :epics }
     let(:feature) { licensed_feature }
-
-    subject { group.feature_available?(feature) }
 
     before do
       create(:gitlab_subscription, namespace: group, hosted_plan: hosted_plan)
@@ -314,25 +366,6 @@ RSpec.describe Namespace do
       end
     end
 
-    context 'when the feature is temporarily available on the entire instance' do
-      let(:feature) { :ci_cd_projects }
-
-      before do
-        stub_application_setting_on_object(group, should_check_namespace_plan: true)
-        stub_feature_flags(promo_ci_cd_projects: true)
-      end
-
-      it 'returns true when the feature is available globally' do
-        stub_licensed_features(feature => true)
-
-        is_expected.to be_truthy
-      end
-
-      it 'returns `false` when the feature is not included in the global license' do
-        is_expected.to be_falsy
-      end
-    end
-
     context 'when feature is disabled by a feature flag' do
       it 'returns false' do
         stub_feature_flags(feature => false)
@@ -347,6 +380,32 @@ RSpec.describe Namespace do
 
         is_expected.to eq(true)
       end
+    end
+  end
+
+  describe '#feature_available?' do
+    subject { group.feature_available?(feature) }
+
+    it_behaves_like 'feature available'
+  end
+
+  describe '#feature_available_non_trial?' do
+    subject { group.feature_available_non_trial?(feature) }
+
+    it_behaves_like 'feature available'
+
+    context 'when the group has an active trial' do
+      let(:hosted_plan) { create(:bronze_plan) }
+      let(:group) { create(:group) }
+      let(:feature) { :resource_access_token }
+
+      before do
+        create(:gitlab_subscription, :active_trial, namespace: group, hosted_plan: hosted_plan)
+        stub_licensed_features(feature => true)
+        stub_ee_application_setting(should_check_namespace_plan: true)
+      end
+
+      it { is_expected.to be_falsey }
     end
   end
 
@@ -564,6 +623,7 @@ RSpec.describe Namespace do
     subject { namespace.any_project_with_shared_runners_enabled? }
 
     context 'subgroup with shared runners enabled project' do
+      let(:namespace) { create(:group) }
       let(:subgroup) { create(:group, parent: namespace) }
       let!(:subproject) { create(:project, namespace: subgroup, shared_runners_enabled: true) }
 
@@ -1262,6 +1322,36 @@ RSpec.describe Namespace do
     end
   end
 
+  describe '#eligible_for_trial?' do
+    subject { namespace.eligible_for_trial? }
+
+    where(
+      on_dot_com: [true, false],
+      has_parent: [true, false],
+      never_had_trial: [true, false],
+      plan_eligible_for_trial: [true, false]
+    )
+
+    with_them do
+      before do
+        allow(Gitlab).to receive(:com?).and_return(on_dot_com)
+        allow(namespace).to receive(:has_parent?).and_return(has_parent)
+        allow(namespace).to receive(:never_had_trial?).and_return(never_had_trial)
+        allow(namespace).to receive(:plan_eligible_for_trial?).and_return(plan_eligible_for_trial)
+      end
+
+      context "when#{' not' unless params[:on_dot_com]} on .com" do
+        context "and the namespace #{params[:has_parent] ? 'has' : 'is'} a parent namespace" do
+          context "and the namespace has#{' not yet' if params[:never_had_trial]} been trialed" do
+            context "and the namespace is#{' not' unless params[:plan_eligible_for_trial]} eligible for a trial" do
+              it { is_expected.to eq(on_dot_com && !has_parent && never_had_trial && plan_eligible_for_trial) }
+            end
+          end
+        end
+      end
+    end
+  end
+
   describe '#file_template_project_id' do
     it 'is cleared before validation' do
       project = create(:project, namespace: namespace)
@@ -1316,7 +1406,7 @@ RSpec.describe Namespace do
   describe '#over_storage_limit?' do
     using RSpec::Parameterized::TableSyntax
 
-    where(:is_dot_com, :feature_enabled, :above_size_limit, :result) do
+    where(:enforcement_setting_enabled, :feature_enabled, :above_size_limit, :result) do
       false | false | false | false
       false | false | true  | false
       false | true  | false | false
@@ -1329,7 +1419,7 @@ RSpec.describe Namespace do
 
     with_them do
       before do
-        allow(Gitlab).to receive(:dev_env_or_com?).and_return(is_dot_com)
+        stub_application_setting(enforce_namespace_storage_limit: enforcement_setting_enabled)
         stub_feature_flags(namespace_storage_limit: feature_enabled)
         allow_next_instance_of(EE::Namespace::RootStorageSize, namespace.root_ancestor) do |project|
           allow(project).to receive(:above_size_limit?).and_return(above_size_limit)
@@ -1338,6 +1428,156 @@ RSpec.describe Namespace do
 
       it 'returns a boolean indicating whether the root namespace is over the storage limit' do
         expect(namespace.over_storage_limit?).to be result
+      end
+    end
+  end
+
+  describe '#total_repository_size_excess' do
+    let_it_be(:namespace) { create(:namespace) }
+
+    before do
+      namespace.clear_memoization(:total_repository_size_excess)
+    end
+
+    context 'projects with a variety of repository sizes and limits' do
+      before_all do
+        create_storage_excess_example_projects
+      end
+
+      context 'when namespace-level repository_size_limit is not set' do
+        it 'returns the total excess size of projects with repositories that exceed the size limit' do
+          allow(namespace).to receive(:actual_size_limit).and_return(nil)
+
+          expect(namespace.total_repository_size_excess).to eq(400)
+        end
+      end
+
+      context 'when namespace-level repository_size_limit is 0 (unlimited)' do
+        it 'returns the total excess size of projects with repositories that exceed the size limit' do
+          allow(namespace).to receive(:actual_size_limit).and_return(0)
+
+          expect(namespace.total_repository_size_excess).to eq(400)
+        end
+      end
+
+      context 'when namespace-level repository_size_limit is a positive number' do
+        it 'returns the total excess size of projects with repositories that exceed the size limit' do
+          allow(namespace).to receive(:actual_size_limit).and_return(150)
+
+          expect(namespace.total_repository_size_excess).to eq(560)
+        end
+      end
+    end
+
+    context 'when all projects have repository_size_limit of 0 (unlimited)' do
+      before do
+        create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: 0)
+        create_project(repository_size: 150, lfs_objects_size: 0, repository_size_limit: 0)
+        create_project(repository_size: 200, lfs_objects_size: 100, repository_size_limit: 0)
+
+        allow(namespace).to receive(:actual_size_limit).and_return(150)
+      end
+
+      it 'returns zero regardless of the namespace or instance-level repository_size_limit' do
+        expect(namespace.total_repository_size_excess).to eq(0)
+      end
+    end
+  end
+
+  describe '#repository_size_excess_project_count' do
+    let_it_be(:namespace) { create(:namespace) }
+
+    before do
+      namespace.clear_memoization(:repository_size_excess_project_count)
+    end
+
+    context 'projects with a variety of repository sizes and limits' do
+      before_all do
+        create_storage_excess_example_projects
+      end
+
+      context 'when namespace-level repository_size_limit is not set' do
+        before do
+          allow(namespace).to receive(:actual_size_limit).and_return(nil)
+        end
+
+        it 'returns the count of projects with repositories that exceed the size limit' do
+          expect(namespace.repository_size_excess_project_count).to eq(2)
+        end
+      end
+
+      context 'when namespace-level repository_size_limit is 0 (unlimited)' do
+        before do
+          allow(namespace).to receive(:actual_size_limit).and_return(0)
+        end
+
+        it 'returns the count of projects with repositories that exceed the size limit' do
+          expect(namespace.repository_size_excess_project_count).to eq(2)
+        end
+      end
+
+      context 'when namespace-level repository_size_limit is a positive number' do
+        before do
+          allow(namespace).to receive(:actual_size_limit).and_return(150)
+        end
+
+        it 'returns the count of projects with repositories that exceed the size limit' do
+          expect(namespace.repository_size_excess_project_count).to eq(4)
+        end
+      end
+    end
+
+    context 'when all projects have repository_size_limit of 0 (unlimited)' do
+      before do
+        create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: 0)
+        create_project(repository_size: 150, lfs_objects_size: 0, repository_size_limit: 0)
+        create_project(repository_size: 200, lfs_objects_size: 100, repository_size_limit: 0)
+
+        allow(namespace).to receive(:actual_size_limit).and_return(150)
+      end
+
+      it 'returns zero regardless of the namespace or instance-level repository_size_limit' do
+        expect(namespace.repository_size_excess_project_count).to eq(0)
+      end
+    end
+  end
+
+  describe '#total_repository_size' do
+    let(:namespace) { create(:namespace) }
+
+    before do
+      create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: nil)
+      create_project(repository_size: 150, lfs_objects_size: 100, repository_size_limit: 0)
+      create_project(repository_size: 325, lfs_objects_size: 200, repository_size_limit: 400)
+    end
+
+    it 'returns the total size of all project repositories' do
+      expect(namespace.total_repository_size).to eq(875)
+    end
+  end
+
+  describe '#contains_locked_projects?' do
+    using RSpec::Parameterized::TableSyntax
+
+    let_it_be(:namespace) { create(:namespace) }
+
+    before_all do
+      create(:namespace_limit, namespace: namespace, additional_purchased_storage_size: 10)
+    end
+
+    where(:total_excess, :result) do
+      5.megabytes  | false
+      10.megabytes | false
+      15.megabytes | true
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:total_repository_size_excess).and_return(total_excess)
+      end
+
+      it 'returns a boolean indicating whether the root namespace contains locked projects' do
+        expect(namespace.contains_locked_projects?).to be result
       end
     end
   end
@@ -1529,5 +1769,55 @@ RSpec.describe Namespace do
       expect(namespace).to be_invalid
       expect(namespace.errors[:"namespace_limit.temporary_storage_increase_ends_on"]).to be_present
     end
+  end
+
+  describe '#root_storage_size' do
+    let_it_be(:namespace) { build(:namespace) }
+
+    subject { namespace.root_storage_size }
+
+    context 'with feature flag :namespace_storage_limit enabled' do
+      it 'initializes a new instance of EE::Namespace::RootStorageSize' do
+        expect(EE::Namespace::RootStorageSize).to receive(:new).with(namespace)
+
+        subject
+      end
+    end
+
+    context 'with feature flag :namespace_storage_limit disabled' do
+      before do
+        stub_feature_flags(namespace_storage_limit: false)
+      end
+
+      it 'initializes a new instance of EE::Namespace::RootExcessStorageSize' do
+        expect(EE::Namespace::RootExcessStorageSize).to receive(:new).with(namespace)
+
+        subject
+      end
+    end
+  end
+
+  def create_project(repository_size:, lfs_objects_size:, repository_size_limit:)
+    create(:project, namespace: namespace, repository_size_limit: repository_size_limit).tap do |project|
+      create(:project_statistics, project: project, repository_size: repository_size, lfs_objects_size: lfs_objects_size)
+    end
+  end
+
+  def create_storage_excess_example_projects
+    [
+      { repository_size: 100, lfs_objects_size: 0, repository_size_limit: nil },
+      { repository_size: 150, lfs_objects_size: 0, repository_size_limit: nil },
+      { repository_size: 140, lfs_objects_size: 10, repository_size_limit: nil },
+      { repository_size: 150, lfs_objects_size: 10, repository_size_limit: nil },
+      { repository_size: 200, lfs_objects_size: 100, repository_size_limit: nil },
+      { repository_size: 100, lfs_objects_size: 0, repository_size_limit: 0 },
+      { repository_size: 150, lfs_objects_size: 10, repository_size_limit: 0 },
+      { repository_size: 200, lfs_objects_size: 100, repository_size_limit: 0 },
+      { repository_size: 300, lfs_objects_size: 0, repository_size_limit: 400 },
+      { repository_size: 400, lfs_objects_size: 0, repository_size_limit: 400 },
+      { repository_size: 300, lfs_objects_size: 100, repository_size_limit: 400 },
+      { repository_size: 400, lfs_objects_size: 100, repository_size_limit: 400 },
+      { repository_size: 500, lfs_objects_size: 100, repository_size_limit: 300 }
+    ].map { |attrs| create_project(**attrs) }
   end
 end

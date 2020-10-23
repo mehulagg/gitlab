@@ -1,38 +1,55 @@
 <script>
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import { __, sprintf } from '~/locale';
 import TitleField from '~/vue_shared/components/form/title.vue';
-import { redirectTo } from '~/lib/utils/url_utility';
+import { redirectTo, joinPaths } from '~/lib/utils/url_utility';
 import FormFooterActions from '~/vue_shared/components/form/form_footer_actions.vue';
+import {
+  SNIPPET_MARK_EDIT_APP_START,
+  SNIPPET_MEASURE_BLOBS_CONTENT,
+} from '~/performance_constants';
+import eventHub from '~/blob/components/eventhub';
+import { performanceMarkAndMeasure } from '~/performance_utils';
 
 import UpdateSnippetMutation from '../mutations/updateSnippet.mutation.graphql';
 import CreateSnippetMutation from '../mutations/createSnippet.mutation.graphql';
 import { getSnippetMixin } from '../mixins/snippets';
 import {
-  SNIPPET_VISIBILITY_PRIVATE,
   SNIPPET_CREATE_MUTATION_ERROR,
   SNIPPET_UPDATE_MUTATION_ERROR,
-  SNIPPET_BLOB_ACTION_CREATE,
-  SNIPPET_BLOB_ACTION_UPDATE,
-  SNIPPET_BLOB_ACTION_MOVE,
+  SNIPPET_VISIBILITY_PRIVATE,
 } from '../constants';
-import SnippetBlobEdit from './snippet_blob_edit.vue';
+import defaultVisibilityQuery from '../queries/snippet_visibility.query.graphql';
+import { markBlobPerformance } from '../utils/blob';
+
+import SnippetBlobActionsEdit from './snippet_blob_actions_edit.vue';
 import SnippetVisibilityEdit from './snippet_visibility_edit.vue';
 import SnippetDescriptionEdit from './snippet_description_edit.vue';
+
+eventHub.$on(SNIPPET_MEASURE_BLOBS_CONTENT, markBlobPerformance);
 
 export default {
   components: {
     SnippetDescriptionEdit,
     SnippetVisibilityEdit,
-    SnippetBlobEdit,
+    SnippetBlobActionsEdit,
     TitleField,
     FormFooterActions,
     GlButton,
     GlLoadingIcon,
   },
   mixins: [getSnippetMixin],
+  apollo: {
+    defaultVisibility: {
+      query: defaultVisibilityQuery,
+      manual: true,
+      result({ data: { selectedLevel } }) {
+        this.selectedLevelDefault = selectedLevel;
+      },
+    },
+  },
   props: {
     markdownPreviewPath: {
       type: String,
@@ -55,25 +72,21 @@ export default {
   },
   data() {
     return {
-      blobsActions: {},
       isUpdating: false,
       newSnippet: false,
+      actions: [],
+      selectedLevelDefault: SNIPPET_VISIBILITY_PRIVATE,
     };
   },
   computed: {
-    getActionsEntries() {
-      return Object.values(this.blobsActions);
+    hasBlobChanges() {
+      return this.actions.length > 0;
     },
-    allBlobsHaveContent() {
-      const entries = this.getActionsEntries;
-      return entries.length > 0 && !entries.find(action => !action.content);
-    },
-    allBlobChangesRegistered() {
-      const entries = this.getActionsEntries;
-      return entries.length > 0 && !entries.find(action => action.action === '');
+    hasValidBlobs() {
+      return this.actions.every(x => x.content);
     },
     updatePrevented() {
-      return this.snippet.title === '' || !this.allBlobsHaveContent || this.isUpdating;
+      return this.snippet.title === '' || !this.hasValidBlobs || this.isUpdating;
     },
     isProjectSnippet() {
       return Boolean(this.projectPath);
@@ -84,7 +97,7 @@ export default {
         title: this.snippet.title,
         description: this.snippet.description,
         visibilityLevel: this.snippet.visibilityLevel,
-        blobActions: this.getActionsEntries.filter(entry => entry.action !== ''),
+        blobActions: this.actions,
       };
     },
     saveButtonLabel() {
@@ -95,16 +108,20 @@ export default {
     },
     cancelButtonHref() {
       if (this.newSnippet) {
-        return this.projectPath ? `/${this.projectPath}/-/snippets` : `/-/snippets`;
+        return joinPaths('/', gon.relative_url_root, this.projectPath, '-/snippets');
       }
       return this.snippet.webUrl;
     },
-    titleFieldId() {
-      return `${this.isProjectSnippet ? 'project' : 'personal'}_snippet_title`;
+    newSnippetSchema() {
+      return {
+        title: '',
+        description: '',
+        visibilityLevel: this.selectedLevelDefault,
+      };
     },
-    descriptionFieldId() {
-      return `${this.isProjectSnippet ? 'project' : 'personal'}_snippet_description`;
-    },
+  },
+  beforeCreate() {
+    performanceMarkAndMeasure({ mark: SNIPPET_MARK_EDIT_APP_START });
   },
   created() {
     window.addEventListener('beforeunload', this.onBeforeUnload);
@@ -116,47 +133,10 @@ export default {
     onBeforeUnload(e = {}) {
       const returnValue = __('Are you sure you want to lose unsaved changes?');
 
-      if (!this.allBlobChangesRegistered || this.isUpdating) return undefined;
+      if (!this.hasBlobChanges || this.isUpdating) return undefined;
 
       Object.assign(e, { returnValue });
       return returnValue;
-    },
-    updateBlobActions(args = {}) {
-      // `_constants` is the internal prop that
-      // should not be sent to the mutation. Hence we filter it out from
-      // the argsToUpdateAction that is the data-basis for the mutation.
-      const { _constants: blobConstants, ...argsToUpdateAction } = args;
-      const { previousPath, filePath, content } = argsToUpdateAction;
-      let actionEntry = this.blobsActions[blobConstants.id] || {};
-      let tunedActions = {
-        action: '',
-        previousPath,
-      };
-
-      if (this.newSnippet) {
-        // new snippet, hence new blob
-        tunedActions = {
-          action: SNIPPET_BLOB_ACTION_CREATE,
-          previousPath: '',
-        };
-      } else if (previousPath && filePath) {
-        // renaming of a blob + renaming & content update
-        const renamedToOriginal = filePath === blobConstants.originalPath;
-        tunedActions = {
-          action: renamedToOriginal ? SNIPPET_BLOB_ACTION_UPDATE : SNIPPET_BLOB_ACTION_MOVE,
-          previousPath: !renamedToOriginal ? blobConstants.originalPath : '',
-        };
-      } else if (content !== blobConstants.originalContent) {
-        // content update only
-        tunedActions = {
-          action: SNIPPET_BLOB_ACTION_UPDATE,
-          previousPath: '',
-        };
-      }
-
-      actionEntry = { ...actionEntry, ...argsToUpdateAction, ...tunedActions };
-
-      this.$set(this.blobsActions, blobConstants.id, actionEntry);
     },
     flashAPIFailure(err) {
       const defaultErrorMsg = this.newSnippet
@@ -167,13 +147,13 @@ export default {
     },
     onNewSnippetFetched() {
       this.newSnippet = true;
-      this.snippet = this.$options.newSnippetSchema;
+      this.snippet = this.newSnippetSchema;
     },
     onExistingSnippetFetched() {
       this.newSnippet = false;
     },
     onSnippetFetch(snippetRes) {
-      if (snippetRes.data.snippets.edges.length === 0) {
+      if (snippetRes.data.snippets.nodes.length === 0) {
         this.onNewSnippetFetched();
       } else {
         this.onExistingSnippetFetched();
@@ -214,7 +194,6 @@ export default {
           if (errors.length) {
             this.flashAPIFailure(errors[0]);
           } else {
-            this.originalContent = this.content;
             redirectTo(baseObj.snippet.webUrl);
           }
         })
@@ -222,11 +201,9 @@ export default {
           this.flashAPIFailure(e);
         });
     },
-  },
-  newSnippetSchema: {
-    title: '',
-    description: '',
-    visibilityLevel: SNIPPET_VISIBILITY_PRIVATE,
+    updateActions(actions) {
+      this.actions = actions;
+    },
   },
 };
 </script>
@@ -241,31 +218,22 @@ export default {
       v-if="isLoading"
       :label="__('Loading snippet')"
       size="lg"
-      class="loading-animation prepend-top-20 append-bottom-20"
+      class="loading-animation prepend-top-20 gl-mb-6"
     />
     <template v-else>
       <title-field
-        :id="titleFieldId"
+        id="snippet-title"
         v-model="snippet.title"
         data-qa-selector="snippet_title_field"
         required
         :autofocus="true"
       />
       <snippet-description-edit
-        :id="descriptionFieldId"
         v-model="snippet.description"
         :markdown-preview-path="markdownPreviewPath"
         :markdown-docs-path="markdownDocsPath"
       />
-      <template v-if="blobs.length">
-        <snippet-blob-edit
-          v-for="blob in blobs"
-          :key="blob.name"
-          :blob="blob"
-          @blob-updated="updateBlobActions"
-        />
-      </template>
-      <snippet-blob-edit v-else @blob-updated="updateBlobActions" />
+      <snippet-blob-actions-edit :init-blobs="blobs" @actions="updateActions" />
 
       <snippet-visibility-edit
         v-model="snippet.visibilityLevel"

@@ -47,6 +47,9 @@ RSpec.describe User do
     it { is_expected.to delegate_method(:sourcegraph_enabled).to(:user_preference) }
     it { is_expected.to delegate_method(:sourcegraph_enabled=).to(:user_preference).with_arguments(:args) }
 
+    it { is_expected.to delegate_method(:gitpod_enabled).to(:user_preference) }
+    it { is_expected.to delegate_method(:gitpod_enabled=).to(:user_preference).with_arguments(:args) }
+
     it { is_expected.to delegate_method(:setup_for_company).to(:user_preference) }
     it { is_expected.to delegate_method(:setup_for_company=).to(:user_preference).with_arguments(:args) }
 
@@ -68,6 +71,7 @@ RSpec.describe User do
     it { is_expected.to have_one(:namespace) }
     it { is_expected.to have_one(:status) }
     it { is_expected.to have_one(:user_detail) }
+    it { is_expected.to have_one(:atlassian_identity) }
     it { is_expected.to have_one(:user_highest_role) }
     it { is_expected.to have_many(:snippets).dependent(:destroy) }
     it { is_expected.to have_many(:members) }
@@ -76,6 +80,7 @@ RSpec.describe User do
     it { is_expected.to have_many(:groups) }
     it { is_expected.to have_many(:keys).dependent(:destroy) }
     it { is_expected.to have_many(:deploy_keys).dependent(:nullify) }
+    it { is_expected.to have_many(:group_deploy_keys) }
     it { is_expected.to have_many(:events).dependent(:delete_all) }
     it { is_expected.to have_many(:issues).dependent(:destroy) }
     it { is_expected.to have_many(:notes).dependent(:destroy) }
@@ -176,6 +181,58 @@ RSpec.describe User do
         expect do
           user.update!(email: 'hello@hello.com')
         end.to have_enqueued_job.on_queue('mailers').exactly(:twice)
+      end
+    end
+
+    context 'emails sent on changing password' do
+      context 'when password is updated' do
+        context 'default behaviour' do
+          it 'enqueues the `password changed` email' do
+            user.password = User.random_password
+
+            expect { user.save! }.to have_enqueued_mail(DeviseMailer, :password_change)
+          end
+
+          it 'does not enqueue the `admin changed your password` email' do
+            user.password = User.random_password
+
+            expect { user.save! }.not_to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+          end
+        end
+
+        context '`admin changed your password` email' do
+          it 'is enqueued only when explicitly allowed' do
+            user.password = User.random_password
+            user.send_only_admin_changed_your_password_notification!
+
+            expect { user.save! }.to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+          end
+
+          it '`password changed` email is not enqueued if it is explicitly allowed' do
+            user.password = User.random_password
+            user.send_only_admin_changed_your_password_notification!
+
+            expect { user.save! }.not_to have_enqueued_mail(DeviseMailer, :password_changed)
+          end
+
+          it 'is not enqueued if sending notifications on password updates is turned off as per Devise config' do
+            user.password = User.random_password
+            user.send_only_admin_changed_your_password_notification!
+
+            allow(Devise).to receive(:send_password_change_notification).and_return(false)
+
+            expect { user.save! }.not_to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+          end
+        end
+      end
+
+      context 'when password is not updated' do
+        it 'does not enqueue the `admin changed your password` email even if explicitly allowed' do
+          user.name = 'John'
+          user.send_only_admin_changed_your_password_notification!
+
+          expect { user.save! }.not_to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+        end
       end
     end
   end
@@ -648,6 +705,34 @@ RSpec.describe User do
   end
 
   describe "scopes" do
+    context 'blocked users' do
+      let_it_be(:active_user) { create(:user) }
+      let_it_be(:blocked_user) { create(:user, :blocked) }
+      let_it_be(:ldap_blocked_user) { create(:omniauth_user, :ldap_blocked) }
+      let_it_be(:blocked_pending_approval_user) { create(:user, :blocked_pending_approval) }
+
+      describe '.blocked' do
+        subject { described_class.blocked }
+
+        it 'returns only blocked users' do
+          expect(subject).to include(
+            blocked_user,
+            ldap_blocked_user
+          )
+
+          expect(subject).not_to include(active_user, blocked_pending_approval_user)
+        end
+      end
+
+      describe '.blocked_pending_approval' do
+        subject { described_class.blocked_pending_approval }
+
+        it 'returns only pending approval users' do
+          expect(subject).to contain_exactly(blocked_pending_approval_user)
+        end
+      end
+    end
+
     describe ".with_two_factor" do
       it "returns users with 2fa enabled via OTP" do
         user_with_2fa = create(:user, :two_factor_via_otp)
@@ -658,30 +743,40 @@ RSpec.describe User do
         expect(users_with_two_factor).not_to include(user_without_2fa.id)
       end
 
-      it "returns users with 2fa enabled via U2F" do
-        user_with_2fa = create(:user, :two_factor_via_u2f)
-        user_without_2fa = create(:user)
-        users_with_two_factor = described_class.with_two_factor.pluck(:id)
+      shared_examples "returns the right users" do |trait|
+        it "returns users with 2fa enabled via hardware token" do
+          user_with_2fa = create(:user, trait)
+          user_without_2fa = create(:user)
+          users_with_two_factor = described_class.with_two_factor.pluck(:id)
 
-        expect(users_with_two_factor).to include(user_with_2fa.id)
-        expect(users_with_two_factor).not_to include(user_without_2fa.id)
+          expect(users_with_two_factor).to include(user_with_2fa.id)
+          expect(users_with_two_factor).not_to include(user_without_2fa.id)
+        end
+
+        it "returns users with 2fa enabled via OTP and hardware token" do
+          user_with_2fa = create(:user, :two_factor_via_otp, trait)
+          user_without_2fa = create(:user)
+          users_with_two_factor = described_class.with_two_factor.pluck(:id)
+
+          expect(users_with_two_factor).to eq([user_with_2fa.id])
+          expect(users_with_two_factor).not_to include(user_without_2fa.id)
+        end
+
+        it 'works with ORDER BY' do
+          user_with_2fa = create(:user, :two_factor_via_otp, trait)
+
+          expect(described_class
+                     .with_two_factor
+                     .reorder_by_name).to eq([user_with_2fa])
+        end
       end
 
-      it "returns users with 2fa enabled via OTP and U2F" do
-        user_with_2fa = create(:user, :two_factor_via_otp, :two_factor_via_u2f)
-        user_without_2fa = create(:user)
-        users_with_two_factor = described_class.with_two_factor.pluck(:id)
-
-        expect(users_with_two_factor).to eq([user_with_2fa.id])
-        expect(users_with_two_factor).not_to include(user_without_2fa.id)
+      describe "and U2F" do
+        it_behaves_like "returns the right users", :two_factor_via_u2f
       end
 
-      it 'works with ORDER BY' do
-        user_with_2fa = create(:user, :two_factor_via_otp, :two_factor_via_u2f)
-
-        expect(described_class
-          .with_two_factor
-          .reorder_by_name).to eq([user_with_2fa])
+      describe "and WebAuthn" do
+        it_behaves_like "returns the right users", :two_factor_via_webauthn
       end
     end
 
@@ -695,22 +790,44 @@ RSpec.describe User do
         expect(users_without_two_factor).not_to include(user_with_2fa.id)
       end
 
-      it "excludes users with 2fa enabled via U2F" do
-        user_with_2fa = create(:user, :two_factor_via_u2f)
-        user_without_2fa = create(:user)
-        users_without_two_factor = described_class.without_two_factor.pluck(:id)
+      describe "and u2f" do
+        it "excludes users with 2fa enabled via U2F" do
+          user_with_2fa = create(:user, :two_factor_via_u2f)
+          user_without_2fa = create(:user)
+          users_without_two_factor = described_class.without_two_factor.pluck(:id)
 
-        expect(users_without_two_factor).to include(user_without_2fa.id)
-        expect(users_without_two_factor).not_to include(user_with_2fa.id)
+          expect(users_without_two_factor).to include(user_without_2fa.id)
+          expect(users_without_two_factor).not_to include(user_with_2fa.id)
+        end
+
+        it "excludes users with 2fa enabled via OTP and U2F" do
+          user_with_2fa = create(:user, :two_factor_via_otp, :two_factor_via_u2f)
+          user_without_2fa = create(:user)
+          users_without_two_factor = described_class.without_two_factor.pluck(:id)
+
+          expect(users_without_two_factor).to include(user_without_2fa.id)
+          expect(users_without_two_factor).not_to include(user_with_2fa.id)
+        end
       end
 
-      it "excludes users with 2fa enabled via OTP and U2F" do
-        user_with_2fa = create(:user, :two_factor_via_otp, :two_factor_via_u2f)
-        user_without_2fa = create(:user)
-        users_without_two_factor = described_class.without_two_factor.pluck(:id)
+      describe "and webauthn" do
+        it "excludes users with 2fa enabled via WebAuthn" do
+          user_with_2fa = create(:user, :two_factor_via_webauthn)
+          user_without_2fa = create(:user)
+          users_without_two_factor = described_class.without_two_factor.pluck(:id)
 
-        expect(users_without_two_factor).to include(user_without_2fa.id)
-        expect(users_without_two_factor).not_to include(user_with_2fa.id)
+          expect(users_without_two_factor).to include(user_without_2fa.id)
+          expect(users_without_two_factor).not_to include(user_with_2fa.id)
+        end
+
+        it "excludes users with 2fa enabled via OTP and WebAuthn" do
+          user_with_2fa = create(:user, :two_factor_via_otp, :two_factor_via_webauthn)
+          user_without_2fa = create(:user)
+          users_without_two_factor = described_class.without_two_factor.pluck(:id)
+
+          expect(users_without_two_factor).to include(user_without_2fa.id)
+          expect(users_without_two_factor).not_to include(user_with_2fa.id)
+        end
       end
     end
 
@@ -855,6 +972,24 @@ RSpec.describe User do
       end
     end
 
+    describe '.with_personal_access_tokens_expired_today' do
+      let_it_be(:user1) { create(:user) }
+      let_it_be(:expired_today) { create(:personal_access_token, user: user1, expires_at: Date.current) }
+
+      let_it_be(:user2) { create(:user) }
+      let_it_be(:revoked_token) { create(:personal_access_token, user: user2, expires_at: Date.current, revoked: true) }
+
+      let_it_be(:user3) { create(:user) }
+      let_it_be(:impersonated_token) { create(:personal_access_token, user: user3, expires_at: Date.current, impersonation: true) }
+
+      let_it_be(:user4) { create(:user) }
+      let_it_be(:already_notified) { create(:personal_access_token, user: user4, expires_at: Date.current, after_expiry_notification_delivered: true) }
+
+      it 'returns users whose token has expired today' do
+        expect(described_class.with_personal_access_tokens_expired_today).to contain_exactly(user1)
+      end
+    end
+
     describe '.active_without_ghosts' do
       let_it_be(:user1) { create(:user, :external) }
       let_it_be(:user2) { create(:user, state: 'blocked') }
@@ -873,6 +1008,20 @@ RSpec.describe User do
 
       it 'returns users without ghosts users' do
         expect(described_class.without_ghosts).to match_array([user1, user2])
+      end
+    end
+
+    describe '.by_id_and_login' do
+      let_it_be(:user) { create(:user) }
+
+      it 'finds a user regardless of case' do
+        expect(described_class.by_id_and_login(user.id, user.username.upcase))
+          .to contain_exactly(user)
+      end
+
+      it 'finds a user when login is an email address regardless of case' do
+        expect(described_class.by_id_and_login(user.id, user.email.upcase))
+          .to contain_exactly(user)
       end
     end
   end
@@ -1573,6 +1722,24 @@ RSpec.describe User do
     end
   end
 
+  describe 'blocking a user pending approval' do
+    let(:user) { create(:user) }
+
+    before do
+      user.block_pending_approval
+    end
+
+    context 'an active user' do
+      it 'can be blocked pending approval' do
+        expect(user.blocked_pending_approval?).to eq(true)
+      end
+
+      it 'behaves like a blocked user' do
+        expect(user.blocked?).to eq(true)
+      end
+    end
+  end
+
   describe '.filter_items' do
     let(:user) { double }
 
@@ -1592,6 +1759,12 @@ RSpec.describe User do
       expect(described_class).to receive(:blocked).and_return([user])
 
       expect(described_class.filter_items('blocked')).to include user
+    end
+
+    it 'filters by blocked pending approval' do
+      expect(described_class).to receive(:blocked_pending_approval).and_return([user])
+
+      expect(described_class.filter_items('blocked_pending_approval')).to include user
     end
 
     it 'filters by deactivated' do
@@ -1629,7 +1802,7 @@ RSpec.describe User do
       # add user to project
       project.add_maintainer(user)
 
-      # create invite to projet
+      # create invite to project
       create(:project_member, :developer, project: project, invite_token: '1234', invite_email: 'inviteduser1@example.com')
 
       # create request to join project
@@ -2623,6 +2796,14 @@ RSpec.describe User do
 
       it_behaves_like 'eligible for deactivation'
     end
+
+    context 'a user who is internal' do
+      it 'returns false' do
+        internal_user = create(:user, :bot)
+
+        expect(internal_user.can_be_deactivated?).to be_falsey
+      end
+    end
   end
 
   describe "#contributed_projects" do
@@ -3560,6 +3741,42 @@ RSpec.describe User do
     end
   end
 
+  describe '#source_groups_of_two_factor_authentication_requirement' do
+    let_it_be(:group_not_requiring_2FA) { create :group }
+    let(:user) { create :user }
+
+    before do
+      group.add_user(user, GroupMember::OWNER)
+      group_not_requiring_2FA.add_user(user, GroupMember::OWNER)
+    end
+
+    context 'when user is direct member of group requiring 2FA' do
+      let_it_be(:group) { create :group, require_two_factor_authentication: true }
+
+      it 'returns group requiring 2FA' do
+        expect(user.source_groups_of_two_factor_authentication_requirement).to contain_exactly(group)
+      end
+    end
+
+    context 'when user is member of group which parent requires 2FA' do
+      let_it_be(:parent_group) { create :group, require_two_factor_authentication: true }
+      let_it_be(:group) { create :group, parent: parent_group }
+
+      it 'returns group requiring 2FA' do
+        expect(user.source_groups_of_two_factor_authentication_requirement).to contain_exactly(group)
+      end
+    end
+
+    context 'when user is member of group which child requires 2FA' do
+      let_it_be(:group) { create :group }
+      let_it_be(:child_group) { create :group, require_two_factor_authentication: true, parent: group }
+
+      it 'returns group requiring 2FA' do
+        expect(user.source_groups_of_two_factor_authentication_requirement).to contain_exactly(group)
+      end
+    end
+  end
+
   describe '.active' do
     before do
       described_class.ghost
@@ -3745,7 +3962,7 @@ RSpec.describe User do
 
           it 'changes the namespace (just to compare to when username is not changed)' do
             expect do
-              Timecop.freeze(1.second.from_now) do
+              travel_to(1.second.from_now) do
                 user.update!(username: new_username)
               end
             end.to change { user.namespace.updated_at }
@@ -4173,28 +4390,32 @@ RSpec.describe User do
 
   describe '#required_terms_not_accepted?' do
     let(:user) { build(:user) }
+    let(:project_bot) { create(:user, :project_bot) }
 
     subject { user.required_terms_not_accepted? }
 
     context "when terms are not enforced" do
-      it { is_expected.to be_falsy }
+      it { is_expected.to be_falsey }
     end
 
-    context "when terms are enforced and accepted by the user" do
+    context "when terms are enforced" do
       before do
         enforce_terms
+      end
+
+      it "is not accepted by the user" do
+        expect(subject).to be_truthy
+      end
+
+      it "is accepted by the user" do
         accept_terms(user)
+
+        expect(subject).to be_falsey
       end
 
-      it { is_expected.to be_falsy }
-    end
-
-    context "when terms are enforced but the user has not accepted" do
-      before do
-        enforce_terms
+      it "auto accepts the term for project bots" do
+        expect(project_bot.required_terms_not_accepted?).to be_falsey
       end
-
-      it { is_expected.to be_truthy }
     end
   end
 
@@ -4421,6 +4642,44 @@ RSpec.describe User do
     end
   end
 
+  describe '#notification_settings_for_groups' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:groups) { create_list(:group, 2) }
+
+    subject { user.notification_settings_for_groups(arg) }
+
+    before do
+      groups.each do |group|
+        group.add_maintainer(user)
+      end
+    end
+
+    shared_examples_for 'notification_settings_for_groups method' do
+      it 'returns NotificationSetting objects for provided groups', :aggregate_failures do
+        expect(subject.count).to eq(groups.count)
+        expect(subject.map(&:source_id)).to match_array(groups.map(&:id))
+      end
+    end
+
+    context 'when given an ActiveRecord relationship' do
+      let_it_be(:arg) { Group.where(id: groups.map(&:id)) }
+
+      it_behaves_like 'notification_settings_for_groups method'
+
+      it 'uses #select to maintain lazy querying behavior' do
+        expect(arg).to receive(:select).and_call_original
+
+        subject
+      end
+    end
+
+    context 'when given an Array of Groups' do
+      let_it_be(:arg) { groups }
+
+      it_behaves_like 'notification_settings_for_groups method'
+    end
+  end
+
   describe '#notification_email_for' do
     let(:user) { create(:user) }
     let(:group) { create(:group) }
@@ -4623,7 +4882,8 @@ RSpec.describe User do
             { state: 'blocked' },
             { user_type: :ghost },
             { user_type: :alert_bot },
-            { user_type: :support_bot }
+            { user_type: :support_bot },
+            { user_type: :security_bot }
           ]
         end
 
@@ -4678,6 +4938,7 @@ RSpec.describe User do
         'human'             | true
         'alert_bot'         | false
         'support_bot'       | false
+        'security_bot'      | false
       end
 
       with_them do
@@ -4700,7 +4961,7 @@ RSpec.describe User do
         user.block
       end
 
-      it { is_expected.to eq User::BLOCKED_MESSAGE }
+      it { is_expected.to eq :blocked }
     end
 
     context 'when user is an internal user' do
@@ -4708,7 +4969,7 @@ RSpec.describe User do
         user.update(user_type: :ghost)
       end
 
-      it { is_expected.to be User::LOGIN_FORBIDDEN }
+      it { is_expected.to be :forbidden }
     end
 
     context 'when user is locked' do
@@ -4717,6 +4978,14 @@ RSpec.describe User do
       end
 
       it { is_expected.to be :locked }
+    end
+
+    context 'when user is blocked pending approval' do
+      before do
+        user.block_pending_approval!
+      end
+
+      it { is_expected.to be :blocked_pending_approval }
     end
   end
 
@@ -4781,9 +5050,11 @@ RSpec.describe User do
     it_behaves_like 'bot users', :alert_bot
     it_behaves_like 'bot users', :support_bot
     it_behaves_like 'bot users', :migration_bot
+    it_behaves_like 'bot users', :security_bot
     it_behaves_like 'bot users', :ghost
 
     it_behaves_like 'bot user avatars', :alert_bot, 'alert-bot.png'
     it_behaves_like 'bot user avatars', :support_bot, 'support-bot.png'
+    it_behaves_like 'bot user avatars', :security_bot, 'security-bot.png'
   end
 end

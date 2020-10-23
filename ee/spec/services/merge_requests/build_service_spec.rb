@@ -40,6 +40,14 @@ RSpec.describe MergeRequests::BuildService do
       it 'does not set the MR description from template' do
         expect(merge_request.description).not_to eq(template)
       end
+
+      context 'when description is provided' do
+        let(:description) { 'Description' }
+
+        it "sets the user's description" do
+          expect(merge_request.description).to eq(description)
+        end
+      end
     end
 
     context 'issuable default templates feature available' do
@@ -49,6 +57,39 @@ RSpec.describe MergeRequests::BuildService do
 
       it 'sets the MR description from template' do
         expect(merge_request.description).to eq(template)
+      end
+
+      context 'when description is provided' do
+        let(:description) { 'Description' }
+
+        it "prefers user's description to the default template" do
+          expect(merge_request.description).to eq(description)
+        end
+      end
+
+      context 'when MR is set to close an issue' do
+        let(:issue) { create(:issue, project: project) }
+
+        let(:service) do
+          described_class.new(
+            project,
+            user,
+            description: description,
+            source_branch: source_branch,
+            target_branch: target_branch,
+            source_project: source_project,
+            target_project: target_project,
+            issue_iid: issue.iid
+          )
+        end
+
+        before do
+          project.add_guest(user)
+        end
+
+        it 'appends closing reference once' do
+          expect(merge_request.description).to eq(template + "\n\nCloses ##{issue.iid}")
+        end
       end
     end
   end

@@ -1,3 +1,10 @@
+---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: reference, api
+---
+
 # Project-level Variables API
 
 ## List project variables
@@ -147,9 +154,7 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://git
 ## The `filter` parameter
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/34490) in GitLab 13.2.
-> - It's deployed behind a feature flag, disabled by default.
-> - It's disabled on GitLab.com.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to enable it.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/227052) in GitLab 13.4.
 
 This parameter is used for filtering by attributes, such as `environment_scope`.
 
@@ -157,21 +162,4 @@ Example usage:
 
 ```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/variables/VARIABLE_1?filter[environment_scope]=production"
-```
-
-### Enable or disable
-
-[GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
-can enable it for your instance.
-
-To enable it:
-
-```ruby
-Feature.enable(:ci_variables_api_filter_environment_scope)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:ci_variables_api_filter_environment_scope)
 ```

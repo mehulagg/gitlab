@@ -160,7 +160,8 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
         expect(raw_repo.empty?).to be(false)
       end
     end
-  end # backup_restore task
+  end
+  # backup_restore task
 
   describe 'backup' do
     before do
@@ -283,63 +284,119 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
     end
 
     context 'multiple repository storages' do
-      let(:test_second_storage) do
-        Gitlab::GitalyClient::StorageSettings.new(@default_storage_hash.merge('path' => 'tmp/tests/custom_storage'))
-      end
-      let(:storages) do
-        {
-          'default' => Gitlab.config.repositories.storages.default,
-          'test_second_storage' => test_second_storage
-        }
-      end
+      include StubConfiguration
 
-      before(:all) do
-        @default_storage_hash = Gitlab.config.repositories.storages.default.to_h
-      end
+      let(:default_storage_name) { 'default' }
+      let(:second_storage_name) { 'test_second_storage' }
 
       before do
         # We only need a backup of the repositories for this test
         stub_env('SKIP', 'db,uploads,builds,artifacts,lfs,registry')
-
-        allow(Gitlab.config.repositories).to receive(:storages).and_return(storages)
-
-        # Avoid asking gitaly about the root ref (which will fail because of the
-        # mocked storages)
-        allow_any_instance_of(Repository).to receive(:empty?).and_return(false)
+        stub_storage_settings( second_storage_name => {
+          'gitaly_address' => Gitlab.config.repositories.storages.default.gitaly_address,
+          'path' => TestEnv::SECOND_STORAGE_PATH
+        })
       end
 
-      after do
-        FileUtils.rm_rf(Settings.absolute('tmp/tests/custom_storage'))
-      end
+      shared_examples 'includes repositories in all repository storages' do
+        specify :aggregate_failures do
+          project_a = create(:project, :repository)
+          project_a.track_project_repository
+          project_snippet_a = create(:project_snippet, :repository, project: project_a, author: project_a.owner)
+          project_b = create(:project, :repository, repository_storage: second_storage_name)
+          project_b.track_project_repository
+          project_snippet_b = create(:project_snippet, :repository, project: project_b, author: project_b.owner)
+          project_snippet_b.snippet_repository.update!(shard: project_b.project_repository.shard)
+          create(:wiki_page, container: project_a)
+          create(:design, :with_file, issue: create(:issue, project: project_a))
 
-      it 'includes repositories in all repository storages' do
-        project_a = create(:project, :repository)
-        project_b = create(:project, :repository, repository_storage: 'test_second_storage')
+          move_repository_to_secondary(project_b)
+          move_repository_to_secondary(project_snippet_b)
 
-        b_storage_dir = File.join(Settings.absolute('tmp/tests/custom_storage'), File.dirname(project_b.disk_path))
+          expect { run_rake_task('gitlab:backup:create') }.to output.to_stdout
 
-        FileUtils.mkdir_p(b_storage_dir)
-
-        # Even when overriding the storage, we have to move it there, so it exists
-        Gitlab::GitalyClient::StorageSettings.allow_disk_access do
-          FileUtils.mv(
-            File.join(Settings.absolute(storages['default'].legacy_disk_path), project_b.repository.disk_path + '.git'),
-            Rails.root.join(storages['test_second_storage'].legacy_disk_path, project_b.repository.disk_path + '.git')
+          tar_contents, exit_status = Gitlab::Popen.popen(
+            %W{tar -tvf #{backup_tar} repositories}
           )
+
+          tar_lines = tar_contents.lines.grep(/\.bundle/)
+
+          expect(exit_status).to eq(0)
+
+          [
+            "#{project_a.disk_path}.bundle",
+            "#{project_a.disk_path}.wiki.bundle",
+            "#{project_a.disk_path}.design.bundle",
+            "#{project_b.disk_path}.bundle",
+            "#{project_snippet_a.disk_path}.bundle",
+            "#{project_snippet_b.disk_path}.bundle"
+          ].each do |repo_name|
+            expect(tar_lines.grep(/#{repo_name}/).size).to eq 1
+          end
+        end
+
+        def move_repository_to_secondary(record)
+          Gitlab::GitalyClient::StorageSettings.allow_disk_access do
+            default_shard_legacy_path = Gitlab.config.repositories.storages.default.legacy_disk_path
+            secondary_legacy_path = Gitlab.config.repositories.storages[second_storage_name].legacy_disk_path
+            dst_dir = File.join(secondary_legacy_path, File.dirname(record.disk_path))
+
+            FileUtils.mkdir_p(dst_dir) unless Dir.exist?(dst_dir)
+
+            FileUtils.mv(
+              File.join(default_shard_legacy_path, record.disk_path + '.git'),
+              File.join(secondary_legacy_path, record.disk_path + '.git')
+            )
+          end
+        end
+      end
+
+      context 'no concurrency' do
+        it_behaves_like 'includes repositories in all repository storages'
+      end
+
+      context 'with concurrency' do
+        before do
+          stub_env('GITLAB_BACKUP_MAX_CONCURRENCY', 4)
+        end
+
+        it_behaves_like 'includes repositories in all repository storages'
+      end
+    end
+
+    context 'concurrency settings' do
+      before do
+        # We only need a backup of the repositories for this test
+        stub_env('SKIP', 'db,uploads,builds,artifacts,lfs,registry')
+
+        create(:project, :repository)
+      end
+
+      it 'has defaults' do
+        expect_next_instance_of(::Backup::Repositories) do |instance|
+          expect(instance).to receive(:dump)
+            .with(max_concurrency: 1, max_storage_concurrency: 1)
+            .and_call_original
         end
 
         expect { run_rake_task('gitlab:backup:create') }.to output.to_stdout
+      end
 
-        tar_contents, exit_status = Gitlab::Popen.popen(
-          %W{tar -tvf #{backup_tar} repositories}
-        )
+      it 'passes through concurrency environment variables' do
+        stub_env('GITLAB_BACKUP_MAX_CONCURRENCY', 5)
+        stub_env('GITLAB_BACKUP_MAX_STORAGE_CONCURRENCY', 2)
 
-        expect(exit_status).to eq(0)
-        expect(tar_contents).to match("repositories/#{project_a.disk_path}.bundle")
-        expect(tar_contents).to match("repositories/#{project_b.disk_path}.bundle")
+        expect_next_instance_of(::Backup::Repositories) do |instance|
+          expect(instance).to receive(:dump)
+            .with(max_concurrency: 5, max_storage_concurrency: 2)
+            .and_call_original
+        end
+
+        expect { run_rake_task('gitlab:backup:create') }.to output.to_stdout
       end
     end
-  end # backup_create task
+  end
+  # backup_create task
 
   describe "Skipping items" do
     before do
@@ -434,4 +491,5 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
       expect(backup_tar).to match(/\d+_\d{4}_\d{2}_\d{2}_\d+\.\d+\.\d+.*_gitlab_backup.tar$/)
     end
   end
-end # gitlab:app namespace
+end
+# gitlab:app namespace

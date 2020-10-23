@@ -25,6 +25,8 @@ class Projects::EnvironmentsController < Projects::ApplicationController
   before_action :expire_etag_cache, only: [:index], unless: -> { request.format.json? }
   after_action :expire_etag_cache, only: [:cancel_auto_stop]
 
+  feature_category :continuous_delivery
+
   def index
     @environments = project.environments
       .with_state(params[:scope] || :available)
@@ -159,18 +161,14 @@ class Projects::EnvironmentsController < Projects::ApplicationController
   end
 
   def metrics_redirect
-    environment = project.default_environment
-
-    if environment
-      redirect_to environment_metrics_path(environment)
-    else
-      render :empty_metrics
-    end
+    redirect_to project_metrics_dashboard_path(project)
   end
 
   def metrics
     respond_to do |format|
-      format.html
+      format.html do
+        redirect_to project_metrics_dashboard_path(project, environment: environment )
+      end
       format.json do
         # Currently, this acts as a hint to load the metrics details into the cache
         # if they aren't there already

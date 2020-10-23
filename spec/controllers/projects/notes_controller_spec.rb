@@ -98,7 +98,7 @@ RSpec.describe Projects::NotesController do
       let(:page_2_boundary) { microseconds(page_2.last.updated_at + NotesFinder::FETCH_OVERLAP) }
 
       around do |example|
-        Timecop.freeze do
+        freeze_time do
           example.run
         end
       end
@@ -302,6 +302,7 @@ RSpec.describe Projects::NotesController do
         target_id: merge_request.id
       }.merge(extra_request_params)
     end
+
     let(:extra_request_params) { {} }
 
     let(:project_visibility) { Gitlab::VisibilityLevel::PUBLIC }

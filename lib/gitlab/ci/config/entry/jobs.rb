@@ -7,15 +7,15 @@ module Gitlab
         ##
         # Entry that represents a set of jobs.
         #
-        class Jobs < ::Gitlab::Config::Entry::Node
+        class Jobs < ::Gitlab::Config::Entry::ComposableHash
           include ::Gitlab::Config::Entry::Validatable
 
           validations do
             validates :config, type: Hash
 
             validate do
-              unless has_valid_jobs?
-                errors.add(:config, 'should contain valid jobs')
+              each_unmatched_job do |name|
+                errors.add(name, 'config should implement a script: or a trigger: keyword')
               end
 
               unless has_visible_job?
@@ -23,9 +23,9 @@ module Gitlab
               end
             end
 
-            def has_valid_jobs?
-              config.all? do |name, value|
-                Jobs.find_type(name, value)
+            def each_unmatched_job
+              config.each do |name, value|
+                yield(name) unless Jobs.find_type(name, value)
               end
             end
 
@@ -34,6 +34,10 @@ module Gitlab
                 Jobs.find_type(name, value)&.visible?
               end
             end
+          end
+
+          def composable_class(name, config)
+            self.class.find_type(name, config)
           end
 
           TYPES = [Entry::Hidden, Entry::Job, Entry::Bridge].freeze
@@ -49,29 +53,6 @@ module Gitlab
               type.matching?(name, config)
             end
           end
-
-          # rubocop: disable CodeReuse/ActiveRecord
-          def compose!(deps = nil)
-            super do
-              @config.each do |name, config|
-                node = self.class.find_type(name, config)
-                next unless node
-
-                factory = ::Gitlab::Config::Entry::Factory.new(node)
-                  .value(config || {})
-                  .metadata(name: name)
-                  .with(key: name, parent: self,
-                        description: "#{name} job definition.")
-
-                @entries[name] = factory.create!
-              end
-
-              @entries.each_value do |entry|
-                entry.compose!(deps)
-              end
-            end
-          end
-          # rubocop: enable CodeReuse/ActiveRecord
         end
       end
     end

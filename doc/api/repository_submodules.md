@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Repository submodules API
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41213) in GitLab 11.5
@@ -16,13 +23,13 @@ PUT /projects/:id/repository/submodules/:submodule
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
 | `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
-| `submodule` | string | yes | URL encoded full path to the submodule. For example, `lib%2Fclass%2Erb` |
+| `submodule` | string | yes | URL-encoded full path to the submodule. For example, `lib%2Fclass%2Erb` |
 | `branch` | string | yes | Name of the branch to commit into |
 | `commit_sha` | string | yes | Full commit SHA to update the submodule to |
 | `commit_message` | string | no | Commit message. If no message is provided, a default one will be set |
 
 ```shell
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/submodules/lib%2Fmodules%2Fexample"
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/submodules/lib%2Fmodules%2Fexample" \
 --data "branch=master&commit_sha=3ddec28ea23acc5caa5d8331a6ecb2a65fc03e88&commit_message=Update submodule reference"
 ```
 

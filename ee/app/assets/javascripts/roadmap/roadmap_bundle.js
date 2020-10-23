@@ -15,7 +15,7 @@ import { visitUrl, mergeUrlParams } from '~/lib/utils/url_utility';
 
 import { PRESET_TYPES, EPIC_DETAILS_CELL_WIDTH } from './constants';
 
-import { getEpicsPathForPreset, getTimeframeForPreset } from './utils/roadmap_utils';
+import { getTimeframeForPreset } from './utils/roadmap_utils';
 
 import createStore from './store';
 
@@ -57,9 +57,8 @@ export default () => {
         supportedPresetTypes.indexOf(dataset.presetType) > -1
           ? dataset.presetType
           : PRESET_TYPES.MONTHS;
-      const filterQueryString = window.location.search.substring(1);
       const filterParams = Object.assign(
-        convertObjectPropsToCamelCase(urlParamsToObject(filterQueryString), {
+        convertObjectPropsToCamelCase(urlParamsToObject(window.location.search.substring(1)), {
           dropKeys: ['scope', 'utf8', 'state', 'sort', 'layout'], // These keys are unsupported/unnecessary
         }),
       );
@@ -67,13 +66,6 @@ export default () => {
         presetType,
         window.innerWidth - el.offsetLeft - EPIC_DETAILS_CELL_WIDTH,
       );
-      const initialEpicsPath = getEpicsPathForPreset({
-        basePath: dataset.epicsPath,
-        epicsState: dataset.epicsState,
-        filterQueryString,
-        presetType,
-        timeframe,
-      });
 
       return {
         emptyStateIllustrationPath: dataset.emptyStateIllustration,
@@ -86,10 +78,10 @@ export default () => {
         fullPath: dataset.fullPath,
         epicIid: dataset.iid,
         newEpicEndpoint: dataset.newEpicEndpoint,
+        groupLabelsEndpoint: dataset.groupLabelsEndpoint,
+        groupMilestonesEndpoint: dataset.groupMilestonesEndpoint,
         epicsState: dataset.epicsState,
         sortedBy: dataset.sortedBy,
-        filterQueryString,
-        initialEpicsPath,
         filterParams,
         presetType,
         timeframe,
@@ -105,11 +97,12 @@ export default () => {
         epicsState: this.epicsState,
         timeframe: this.timeframe,
         basePath: this.basePath,
-        filterQueryString: this.filterQueryString,
         filterParams: this.filterParams,
-        initialEpicsPath: this.initialEpicsPath,
+        groupLabelsEndpoint: this.groupLabelsEndpoint,
+        groupMilestonesEndpoint: this.groupMilestonesEndpoint,
         defaultInnerHeight: this.defaultInnerHeight,
         isChildEpics: this.isChildEpics,
+        hasFiltersApplied: this.hasFiltersApplied,
         allowSubEpics: this.allowSubEpics,
       });
     },
@@ -119,10 +112,7 @@ export default () => {
     render(createElement) {
       return createElement('roadmap-app', {
         props: {
-          store: this.store,
           presetType: this.presetType,
-          hasFiltersApplied: this.hasFiltersApplied,
-          epicsState: this.epicsState,
           newEpicEndpoint: this.newEpicEndpoint,
           emptyStateIllustrationPath: this.emptyStateIllustrationPath,
         },

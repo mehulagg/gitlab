@@ -7,7 +7,7 @@ may be filling up. Users will notice when this happens because new branches
 may not show up and merge requests may not be updated. The following are some
 troubleshooting steps that will help you diagnose the bottleneck.
 
-NOTE **Note:**
+NOTE: **Note:**
 GitLab administrators/users should consider working through these
 debug steps with GitLab Support so the backtraces can be analyzed by our team.
 It may reveal a bug or necessary improvement in GitLab.
@@ -212,12 +212,12 @@ the query details.
 ## Managing Sidekiq queues
 
 It is possible to use [Sidekiq API](https://github.com/mperham/sidekiq/wiki/API)
-to perform a number of troubleshooting on Sidekiq.
+to perform a number of troubleshooting steps on Sidekiq.
 
 These are the administrative commands and it should only be used if currently
 admin interface is not suitable due to scale of installation.
 
-All this commands should be run using `gitlab-rails console`.
+All these commands should be run using `gitlab-rails console`.
 
 ### View the queue size
 

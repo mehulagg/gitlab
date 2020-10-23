@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class MergeRequestApprovalRules < ::Grape::API
+  class MergeRequestApprovalRules < ::API::Base
     before { authenticate_non_get! }
 
     helpers do

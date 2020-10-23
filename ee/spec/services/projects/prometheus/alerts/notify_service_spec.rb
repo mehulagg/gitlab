@@ -33,6 +33,7 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
       let(:prd_cluster) do
         create(:cluster, :provided_by_user, projects: [project], enabled: true, environment_scope: '*')
       end
+
       let(:stg_cluster) do
         create(:cluster, :provided_by_user, projects: [project], enabled: true, environment_scope: 'stg/*')
       end

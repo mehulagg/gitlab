@@ -1,27 +1,37 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import { GlFilteredSearch } from '@gitlab/ui';
 import { __ } from '~/locale';
-import MilestoneToken from '../../shared/components/tokens/milestone_token.vue';
-import LabelToken from '../../shared/components/tokens/label_token.vue';
+import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
+import {
+  prepareTokens,
+  processFilters,
+  filterToQueryObject,
+} from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
+import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
+import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
+import UrlSync from '~/vue_shared/components/url_sync.vue';
+import {
+  DEFAULT_LABEL_NONE,
+  DEFAULT_LABEL_ANY,
+} from '~/vue_shared/components/filtered_search_bar/constants';
 
 export default {
   components: {
-    GlFilteredSearch,
+    FilteredSearchBar,
+    UrlSync,
   },
-  data() {
-    return {
-      searchTerms: [],
-    };
+  props: {
+    projectPath: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
     ...mapState('filters', {
-      milestonePath: 'milestonePath',
-      labelsPath: 'labelsPath',
-      milestones: state => state.milestones.data,
-      milestonesLoading: state => state.milestones.isLoading,
-      labels: state => state.labels.data,
-      labelsLoading: state => state.labels.isLoading,
+      selectedMilestone: state => state.milestones.selected,
+      selectedLabelList: state => state.labels.selectedList,
+      milestonesData: state => state.milestones.data,
+      labelsData: state => state.labels.data,
     }),
     tokens() {
       return [
@@ -30,72 +40,62 @@ export default {
           title: __('Milestone'),
           type: 'milestone',
           token: MilestoneToken,
-          milestones: this.milestones,
+          initialMilestones: this.milestonesData,
           unique: true,
           symbol: '%',
-          isLoading: this.milestonesLoading,
-          fetchData: this.fetchMilestones,
+          fetchMilestones: this.fetchMilestones,
         },
         {
           icon: 'labels',
           title: __('Label'),
-          type: 'label',
+          type: 'labels',
           token: LabelToken,
-          labels: this.labels,
+          defaultLabels: [DEFAULT_LABEL_NONE, DEFAULT_LABEL_ANY],
+          initialLabels: this.labelsData,
           unique: false,
           symbol: '~',
-          isLoading: this.labelsLoading,
-          fetchData: this.fetchLabels,
+          fetchLabels: this.fetchLabels,
         },
       ];
     },
-  },
-  created() {
-    this.fetchMilestones();
-    this.fetchLabels();
+    query() {
+      return filterToQueryObject({
+        milestone_title: this.selectedMilestone,
+        label_name: this.selectedLabelList,
+      });
+    },
+    initialFilterValue() {
+      return prepareTokens({
+        milestone: this.selectedMilestone,
+        labels: this.selectedLabelList,
+      });
+    },
   },
   methods: {
-    ...mapActions('filters', ['fetchMilestones', 'fetchLabels', 'setFilters']),
-    processFilters(filters) {
-      return filters.reduce((acc, token) => {
-        const { type, value } = token;
-        const { operator } = value;
-        let tokenValue = value.data;
+    ...mapActions('filters', ['setFilters', 'fetchMilestones', 'fetchLabels']),
+    handleFilter(filters) {
+      const { labels, milestone } = processFilters(filters);
 
-        // remove wrapping double quotes which were added for token values that include spaces
-        if (
-          (tokenValue[0] === "'" && tokenValue[tokenValue.length - 1] === "'") ||
-          (tokenValue[0] === '"' && tokenValue[tokenValue.length - 1] === '"')
-        ) {
-          tokenValue = tokenValue.slice(1, -1);
-        }
-
-        if (!acc[type]) {
-          acc[type] = [];
-        }
-
-        acc[type].push({ value: tokenValue, operator });
-        return acc;
-      }, {});
-    },
-    filteredSearchSubmit(filters) {
-      const { label: labelNames, milestone } = this.processFilters(filters);
-      const milestoneTitle = milestone ? milestone[0] : null;
-      this.setFilters({ labelNames, milestoneTitle });
+      this.setFilters({
+        selectedMilestone: milestone ? milestone[0] : null,
+        selectedLabelList: labels || [],
+      });
     },
   },
 };
 </script>
 
 <template>
-  <div class="bg-secondary-50 p-3 border-top border-bottom">
-    <gl-filtered-search
-      :v-model="searchTerms"
-      :placeholder="__('Filter results')"
-      :clear-button-title="__('Clear')"
-      :close-button-title="__('Close')"
-      :available-tokens="tokens"
-      @submit="filteredSearchSubmit"
+  <div>
+    <filtered-search-bar
+      class="gl-flex-grow-1 row-content-block"
+      :namespace="projectPath"
+      recent-searches-storage-key="code-review-analytics"
+      :search-input-placeholder="__('Filter results')"
+      :tokens="tokens"
+      :initial-filter-value="initialFilterValue"
+      @onFilter="handleFilter"
     />
+    <url-sync :query="query" />
   </div>
 </template>

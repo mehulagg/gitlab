@@ -1,3 +1,4 @@
+import invalidUrl from '~/lib/utils/invalid_url';
 // This import path needs to be relative for now because this mock data is used in
 // Karma specs too, where the helpers/test_constants alias can not be resolved
 import { TEST_HOST } from '../helpers/test_constants';
@@ -170,7 +171,7 @@ export const environmentData = [
 export const dashboardGitResponse = [
   {
     default: true,
-    display_name: 'Default',
+    display_name: 'Overview',
     can_edit: false,
     system_dashboard: true,
     out_of_the_box_dashboard: true,
@@ -209,7 +210,7 @@ export const selfMonitoringDashboardGitResponse = [
     default: true,
     display_name: 'Default',
     can_edit: false,
-    system_dashboard: false,
+    system_dashboard: true,
     out_of_the_box_dashboard: true,
     project_blob_path: null,
     path: 'config/prometheus/self_monitoring_default.yml',
@@ -243,51 +244,6 @@ export const metricsResult = [
     ],
   },
 ];
-
-export const stackedColumnMockedData = {
-  title: 'memories',
-  type: 'stacked-column',
-  x_label: 'x label',
-  y_label: 'y label',
-  metrics: [
-    {
-      label: 'memory_1024',
-      unit: 'count',
-      series_name: 'group 1',
-      prometheus_endpoint_path:
-        '/root/autodevops-deploy-6/-/environments/24/prometheus/api/v1/query_range?query=avg%28sum%28container_memory_usage_bytes%7Bcontainer_name%21%3D%22POD%22%2Cpod_name%3D~%22%5E%25%7Bci_environment_slug%7D-%28%5B%5Ec%5D.%2A%7Cc%28%5B%5Ea%5D%7Ca%28%5B%5En%5D%7Cn%28%5B%5Ea%5D%7Ca%28%5B%5Er%5D%7Cr%5B%5Ey%5D%29%29%29%29.%2A%7C%29-%28.%2A%29%22%2Cnamespace%3D%22%25%7Bkube_namespace%7D%22%7D%29+by+%28job%29%29+without+%28job%29+%2F+count%28avg%28container_memory_usage_bytes%7Bcontainer_name%21%3D%22POD%22%2Cpod_name%3D~%22%5E%25%7Bci_environment_slug%7D-%28%5B%5Ec%5D.%2A%7Cc%28%5B%5Ea%5D%7Ca%28%5B%5En%5D%7Cn%28%5B%5Ea%5D%7Ca%28%5B%5Er%5D%7Cr%5B%5Ey%5D%29%29%29%29.%2A%7C%29-%28.%2A%29%22%2Cnamespace%3D%22%25%7Bkube_namespace%7D%22%7D%29+without+%28job%29%29+%2F1024%2F1024',
-      metricId: 'NO_DB_metric_of_ages_1024',
-      result: [
-        {
-          metric: {},
-          values: [
-            ['2020-01-30T12:00:00.000Z', '5'],
-            ['2020-01-30T12:01:00.000Z', '10'],
-            ['2020-01-30T12:02:00.000Z', '15'],
-          ],
-        },
-      ],
-    },
-    {
-      label: 'memory_1000',
-      unit: 'count',
-      series_name: 'group 2',
-      prometheus_endpoint_path:
-        '/root/autodevops-deploy-6/-/environments/24/prometheus/api/v1/query_range?query=avg%28sum%28container_memory_usage_bytes%7Bcontainer_name%21%3D%22POD%22%2Cpod_name%3D~%22%5E%25%7Bci_environment_slug%7D-%28%5B%5Ec%5D.%2A%7Cc%28%5B%5Ea%5D%7Ca%28%5B%5En%5D%7Cn%28%5B%5Ea%5D%7Ca%28%5B%5Er%5D%7Cr%5B%5Ey%5D%29%29%29%29.%2A%7C%29-%28.%2A%29%22%2Cnamespace%3D%22%25%7Bkube_namespace%7D%22%7D%29+by+%28job%29%29+without+%28job%29+%2F+count%28avg%28container_memory_usage_bytes%7Bcontainer_name%21%3D%22POD%22%2Cpod_name%3D~%22%5E%25%7Bci_environment_slug%7D-%28%5B%5Ec%5D.%2A%7Cc%28%5B%5Ea%5D%7Ca%28%5B%5En%5D%7Cn%28%5B%5Ea%5D%7Ca%28%5B%5Er%5D%7Cr%5B%5Ey%5D%29%29%29%29.%2A%7C%29-%28.%2A%29%22%2Cnamespace%3D%22%25%7Bkube_namespace%7D%22%7D%29+without+%28job%29%29+%2F1024%2F1024',
-      metricId: 'NO_DB_metric_of_ages_1000',
-      result: [
-        {
-          metric: {},
-          values: [
-            ['2020-01-30T12:00:00.000Z', '20'],
-            ['2020-01-30T12:01:00.000Z', '25'],
-            ['2020-01-30T12:02:00.000Z', '30'],
-          ],
-        },
-      ],
-    },
-  ],
-};
 
 export const barMockData = {
   title: 'SLA Trends - Primary Services',
@@ -342,6 +298,11 @@ export const mockNamespace = `${baseNamespace}/1`;
 export const mockNamespaces = [`${baseNamespace}/1`, `${baseNamespace}/2`];
 
 export const mockTimeRange = { duration: { seconds: 120 } };
+
+export const mockFixedTimeRange = {
+  start: '2020-06-17T19:59:08.659Z',
+  end: '2020-07-17T19:59:08.659Z',
+};
 
 export const mockNamespacedData = {
   mockDeploymentData: ['mockDeploymentData'],
@@ -611,10 +572,28 @@ export const storeVariables = [
 
 export const dashboardHeaderProps = {
   defaultBranch: 'master',
-  addDashboardDocumentationPath: 'https://path/to/docs',
   isRearrangingPanels: false,
   selectedTimeRange: {
     start: '2020-01-01T00:00:00.000Z',
     end: '2020-01-01T01:00:00.000Z',
   },
+};
+
+export const dashboardActionsMenuProps = {
+  defaultBranch: 'master',
+  addingMetricsAvailable: true,
+  customMetricsPath: 'https://path/to/customMetrics',
+  validateQueryPath: 'https://path/to/validateQuery',
+  isOotbDashboard: true,
+};
+
+export const mockAlert = {
+  alert_path: 'alert_path',
+  id: 8,
+  metricId: 'mock_metric_id',
+  operator: '>',
+  query: 'testQuery',
+  runbookUrl: invalidUrl,
+  threshold: 5,
+  title: 'alert title',
 };

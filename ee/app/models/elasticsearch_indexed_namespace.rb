@@ -38,7 +38,7 @@ class ElasticsearchIndexedNamespace < ApplicationRecord
       end
 
       Gitlab::Database.bulk_insert(table_name, insert_rows) # rubocop:disable Gitlab/BulkInsert
-      invalidate_elasticsearch_indexes_project_cache!
+      invalidate_elasticsearch_indexes_cache!
 
       jobs = batch_ids.map { |id| [id, :index] }
 
@@ -56,7 +56,7 @@ class ElasticsearchIndexedNamespace < ApplicationRecord
 
     ids.in_groups_of(BATCH_OPERATION_SIZE, false) do |batch_ids|
       where(namespace_id: batch_ids).delete_all
-      invalidate_elasticsearch_indexes_project_cache!
+      invalidate_elasticsearch_indexes_cache!
 
       jobs = batch_ids.map { |id| [id, :delete] }
 

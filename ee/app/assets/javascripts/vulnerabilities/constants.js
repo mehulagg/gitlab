@@ -1,25 +1,29 @@
 import { s__ } from '~/locale';
 
 export const VULNERABILITY_STATE_OBJECTS = {
+  detected: {
+    action: 'revert',
+    state: 'detected',
+    statusBoxStyle: 'expired',
+    displayName: s__('VulnerabilityManagement|Detected'),
+    description: s__('VulnerabilityManagement|Needs triage'),
+  },
   dismissed: {
     action: 'dismiss',
     state: 'dismissed',
-    statusBoxStyle: 'upcoming',
-    displayName: s__('VulnerabilityManagement|Dismiss'),
+    displayName: s__('Dismiss'),
     description: s__('VulnerabilityManagement|Will not fix or a false-positive'),
   },
   confirmed: {
     action: 'confirm',
     state: 'confirmed',
-    statusBoxStyle: 'closed',
-    displayName: s__('VulnerabilityManagement|Confirm'),
+    displayName: s__('Confirm'),
     description: s__('VulnerabilityManagement|A true-positive and will fix'),
   },
   resolved: {
     action: 'resolve',
     state: 'resolved',
-    statusBoxStyle: 'open',
-    displayName: s__('VulnerabilityManagement|Resolved'),
+    displayName: s__('Resolve'),
     description: s__('VulnerabilityManagement|Verified as fixed or mitigated'),
   },
 };
@@ -32,11 +36,6 @@ export const VULNERABILITY_STATES = {
 };
 
 export const HEADER_ACTION_BUTTONS = {
-  issueCreation: {
-    name: s__('ciReport|Create issue'),
-    tagline: s__('ciReport|Investigate this vulnerability by creating an issue'),
-    action: 'createIssue',
-  },
   mergeRequestCreation: {
     name: s__('ciReport|Resolve with merge request'),
     tagline: s__('ciReport|Automatically apply the patch in a new branch'),

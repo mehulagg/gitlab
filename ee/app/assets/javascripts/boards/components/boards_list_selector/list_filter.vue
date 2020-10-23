@@ -1,5 +1,10 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
+
 export default {
+  components: {
+    GlIcon,
+  },
   data() {
     return {
       query: '',
@@ -26,13 +31,12 @@ export default {
       class="dropdown-input-field"
       @keyup="handleInputChange"
     />
-    <i class="fa fa-search dropdown-input-search" aria-hidden="true" data-hidden="true"></i>
-    <i
-      role="button"
-      class="fa fa-times dropdown-input-clear"
+    <gl-icon name="search" class="dropdown-input-search" aria-hidden="true" data-hidden="true" />
+    <gl-icon
+      name="close"
+      class="dropdown-input-clear"
       aria-hidden="true"
-      data-hidden="true"
       @click="handleInputClear"
-    ></i>
+    />
   </div>
 </template>

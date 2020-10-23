@@ -3,12 +3,12 @@
   .row
     .col-lg-7
       %h1.mb-3.font-weight-bold.text-6.mt-0
-        = _("Speed up your DevOps<br>with GitLab").html_safe
+        = html_escape(_("Speed up your DevOps%{br_tag}with GitLab")) % { br_tag: '<br/>'.html_safe }
       %p.text-3
         = _("GitLab is a single application for the entire software development lifecycle. From project planning and source code management to CI/CD, monitoring, and security.")
     .col-lg-5.order-12
       .text-center.mb-3
-        %h2.font-weight-bold.gl-font-size-20-deprecated-no-really-do-not-use-me= _('Register for GitLab')
+        %h2.font-weight-bold= _('Register for GitLab')
       = render 'devise/shared/experimental_separate_sign_up_flow_box'
       = render 'devise/shared/sign_in_link'
 - else

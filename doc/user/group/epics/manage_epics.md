@@ -151,25 +151,22 @@ The sort option and order is saved and used wherever you browse epics, including
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/213068) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.0 behind a feature flag, disabled by default.
 > - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/224513) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
+> - You can [use the Confidentiality option in the epic sidebar](https://gitlab.com/gitlab-org/gitlab/-/issues/197340) in GitLab [Premium](https://about.gitlab.com/pricing/) 13.3 and later.
 
-When you're creating an epic, you can make it confidential by selecting the **Make this epic
-confidential** checkbox.
+If you're working on items that contain private information, you can make an epic confidential.
 
-### Disable confidential epics **(PREMIUM ONLY)**
+NOTE: **Note:**
+A confidential epic can only contain confidential issues and confidential child epics.
 
-The confidential epics feature is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can disable it for your self-managed instance.
+To make an epic confidential:
 
-To disable it:
-
-```ruby
-Feature.disable(:confidential_epics)
-```
+- **When creating an epic:** select the checkbox **Make this epic confidential**.
+- **In an existing epic:** in the epic's sidebar, select **Edit** next to **Confidentiality** then
+  select **Turn on**.
 
 ## Manage issues assigned to an epic
 
-### Add an issue to an epic
+### Add a new issue to an epic
 
 You can add an existing issue to an epic, or, create a new issue that's
 automatically added to the epic.
@@ -181,13 +178,13 @@ subgroups, are eligible to be added to the epic. Newly added issues appear at th
 issues in the **Epics and Issues** tab.
 
 An epic contains a list of issues and an issue can be associated with at most one epic.
-When you add an issue that's already linked to an epic, the issue is automatically unlinked from its
+When you add a new issue that's already linked to an epic, the issue is automatically unlinked from its
 current parent.
 
-To add an issue to an epic:
+To add a new issue to an epic:
 
 1. Click the **Add** dropdown button.
-1. Click **Add an issue**.
+1. Click **Add a new issue**.
 1. Identify the issue to be added, using either of the following methods:
    - Paste the link of the issue.
    - Search for the desired issue by entering part of the issue's title, then selecting the desired
@@ -271,6 +268,16 @@ The following issue metadata will be copied to the epic:
 - Upvotes/downvotes.
 - Participants.
 - Group labels that the issue already has.
+- Parent epic. **(ULTIMATE)**
+
+### Use an epic template for repeating issues
+
+You can create a spreadsheet template to manage a pattern of consistently repeating issues.
+
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+For an introduction to epic templates, see [GitLab Epics and Epic Template Tip](https://www.youtube.com/watch?v=D74xKFNw8vg).
+
+For more on epic templates, see [Epic Templates - Repeatable sets of issues](https://about.gitlab.com/handbook/marketing/product-marketing/getting-started/104/).
 
 ## Manage multi-level child epics **(ULTIMATE)**
 
@@ -279,7 +286,7 @@ The following issue metadata will be copied to the epic:
 To add a child epic to an epic:
 
 1. Click the **Add** dropdown button.
-1. Click **Add an epic**.
+1. Click **Add a new epic**.
 1. Identify the epic to be added, using either of the following methods:
    - Paste the link of the epic.
    - Search for the desired issue by entering part of the epic's title, then selecting the desired
@@ -294,7 +301,7 @@ To add a child epic to an epic:
 
 New child epics appear at the top of the list in the **Epics and Issues** tab.
 You can move child epics from one epic to another.
-When you add an epic that's already linked to a parent epic, the link to its current parent is removed.
+When you add a new epic that's already linked to a parent epic, the link to its current parent is removed.
 Issues and child epics cannot be intermingled.
 
 To move child epics to another epic:

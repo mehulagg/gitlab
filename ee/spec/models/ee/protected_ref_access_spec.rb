@@ -104,6 +104,7 @@ RSpec.describe EE::ProtectedRefAccess do
 
       it "doesn't require access_level if group specified" do
         subject = build(factory_name, access_level: nil, group: create(:group))
+        subject.project.save
         subject.project.project_group_links.create(group: subject.group)
 
         expect(subject).to be_valid

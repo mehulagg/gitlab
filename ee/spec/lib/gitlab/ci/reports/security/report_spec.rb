@@ -3,8 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Reports::Security::Report do
-  let(:report) { described_class.new('sast', commit_sha, created_at) }
-  let(:commit_sha) { "d8978e74745e18ce44d88814004d4255ac6a65bb" }
+  let_it_be(:pipeline) { create(:ci_pipeline) }
+
+  let(:report) { described_class.new('sast', pipeline, created_at) }
   let(:created_at) { 2.weeks.ago }
 
   it { expect(report.type).to eq('sast') }
@@ -61,11 +62,11 @@ RSpec.describe Gitlab::Ci::Reports::Security::Report do
       )
     end
 
-    it 'creates a blank report with copied type and commit SHA' do
+    it 'creates a blank report with copied type and pipeline' do
       clone = report.clone_as_blank
 
       expect(clone.type).to eq(report.type)
-      expect(clone.commit_sha).to eq(report.commit_sha)
+      expect(clone.pipeline).to eq(report.pipeline)
       expect(clone.created_at).to eq(report.created_at)
       expect(clone.findings).to eq([])
       expect(clone.scanners).to eq({})
@@ -82,6 +83,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Report do
         identifiers: [create(:ci_reports_security_identifier)]
       )
     end
+
     let(:other_report) do
       create(
         :ci_reports_security_report,
@@ -113,7 +115,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Report do
       allow(report).to receive(:replace_with!)
     end
 
-    subject { report.merge!(described_class.new('sast', commit_sha, created_at)) }
+    subject { report.merge!(described_class.new('sast', pipeline, created_at)) }
 
     it 'invokes the merge with other report and then replaces this report contents by merge result' do
       subject
@@ -122,62 +124,17 @@ RSpec.describe Gitlab::Ci::Reports::Security::Report do
     end
   end
 
-  describe "#safe?" do
-    subject { described_class.new('sast', commit_sha, created_at) }
+  describe '#primary_scanner' do
+    let(:scanner_1) { create(:ci_reports_security_scanner, external_id: 'external_id_1') }
+    let(:scanner_2) { create(:ci_reports_security_scanner, external_id: 'external_id_2') }
 
-    context "when the sast report has an unsafe vulnerability" do
-      where(severity: %w[unknown Unknown high High critical Critical])
-      with_them do
-        let(:finding) { build(:ci_reports_security_finding, severity: severity) }
+    subject { report.primary_scanner }
 
-        before do
-          subject.add_finding(finding)
-        end
-
-        it { expect(subject.unsafe_severity?).to be(true) }
-        it { expect(subject).not_to be_safe }
-      end
+    before do
+      report.add_scanner(scanner_1)
+      report.add_scanner(scanner_2)
     end
 
-    context "when the sast report has a medium to low severity vulnerability" do
-      where(severity: %w[medium Medium low Low])
-      with_them do
-        let(:finding) { build(:ci_reports_security_finding, severity: severity) }
-
-        before do
-          subject.add_finding(finding)
-        end
-
-        it { expect(subject.unsafe_severity?).to be(false) }
-        it { expect(subject).to be_safe }
-      end
-    end
-
-    context "when the sast report has a vulnerability with a `nil` severity" do
-      let(:finding) { build(:ci_reports_security_finding, severity: nil) }
-
-      before do
-        subject.add_finding(finding)
-      end
-
-      it { expect(subject.unsafe_severity?).to be(false) }
-      it { expect(subject).to be_safe }
-    end
-
-    context "when the sast report has a vulnerability with a blank severity" do
-      let(:finding) { build(:ci_reports_security_finding, severity: '') }
-
-      before do
-        subject.add_finding(finding)
-      end
-
-      it { expect(subject.unsafe_severity?).to be(false) }
-      it { expect(subject).to be_safe }
-    end
-
-    context "when the sast report has zero vulnerabilities" do
-      it { expect(subject.unsafe_severity?).to be(false) }
-      it { expect(subject).to be_safe }
-    end
+    it { is_expected.to eq(scanner_1) }
   end
 end

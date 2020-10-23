@@ -9,6 +9,7 @@ module EE
       # To be removed in https://gitlab.com/gitlab-org/gitlab/issues/13574.
       class MergeRequestApprovalSettingRule < MergeRequestApprovalStateRule
         expose :approvers, using: ::API::Entities::UserBasic, override: true
+        expose :commented_approvers, as: :commented_by, using: ::API::Entities::UserBasic
       end
     end
   end

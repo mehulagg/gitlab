@@ -6,6 +6,7 @@ import { RULE_TYPE_CODE_OWNER, RULE_TYPE_ANY_APPROVER } from 'ee/approvals/const
 import { sprintf, __, s__ } from '~/locale';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 import ApprovedIcon from './approved_icon.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {
@@ -14,6 +15,7 @@ export default {
     ApprovalCheckRulePopover,
     EmptyRuleName,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     approvalRules: {
       type: Array,
@@ -44,7 +46,7 @@ export default {
           rules: orderBy(
             this.approvalRules
               .filter(rule => rule.rule_type === RULE_TYPE_CODE_OWNER)
-              .map(rule => ({ ...rule, nameClass: 'monospace' })),
+              .map(rule => ({ ...rule, nameClass: 'gl-font-monospace gl-word-break-all' })),
             [o => o.section === 'codeowners', 'name', 'section'],
             ['desc', 'asc', 'asc'],
           ),
@@ -92,11 +94,15 @@ export default {
 <template>
   <table class="table m-0">
     <thead class="thead-white text-nowrap">
-      <tr class="d-none d-sm-table-row">
+      <tr
+        :class="glFeatures.approvalsCommentedBy ? 'd-md-table-row' : 'd-sm-table-row'"
+        class="d-none"
+      >
         <th class="w-0"></th>
         <th class="w-25">{{ s__('MRApprovals|Approvers') }}</th>
         <th class="w-50"></th>
         <th>{{ s__('MRApprovals|Approvals') }}</th>
+        <th v-if="glFeatures.approvalsCommentedBy">{{ s__('MRApprovals|Commented by') }}</th>
         <th>{{ s__('MRApprovals|Approved by') }}</th>
       </tr>
     </thead>
@@ -110,7 +116,10 @@ export default {
       <tr v-for="rule in rules" :key="rule.id">
         <td class="w-0"><approved-icon :is-approved="rule.approved" /></td>
         <td :colspan="rule.rule_type === $options.ruleTypeAnyApprover ? 2 : 1">
-          <div class="d-none d-sm-block js-name">
+          <div
+            :class="glFeatures.approvalsCommentedBy ? 'd-md-block' : 'd-sm-block'"
+            class="d-none js-name"
+          >
             <empty-rule-name
               v-if="rule.rule_type === $options.ruleTypeAnyApprover"
               :eligible-approvers-docs-path="eligibleApproversDocsPath"
@@ -131,7 +140,10 @@ export default {
               :security-approvals-help-page-path="securityApprovalsHelpPagePath"
             />
           </div>
-          <div class="d-flex d-sm-none flex-column js-summary">
+          <div
+            :class="glFeatures.approvalsCommentedBy ? 'd-md-none' : 'd-sm-none'"
+            class="d-flex flex-column js-summary"
+          >
             <empty-rule-name
               v-if="rule.rule_type === $options.ruleTypeAnyApprover"
               :eligible-approvers-docs-path="eligibleApproversDocsPath"
@@ -144,6 +156,17 @@ export default {
               :img-size="24"
               empty-text=""
             />
+            <div
+              v-if="glFeatures.approvalsCommentedBy && rule.commented_by.length > 0"
+              class="mt-2"
+            >
+              <span>{{ s__('MRApprovals|Commented by') }}</span>
+              <user-avatar-list
+                class="d-inline-block align-middle"
+                :items="rule.commented_by"
+                :img-size="24"
+              />
+            </div>
             <div v-if="rule.approved_by.length" class="mt-2">
               <span>{{ s__('MRApprovals|Approved by') }}</span>
               <user-avatar-list
@@ -156,15 +179,26 @@ export default {
         </td>
         <td
           v-if="rule.rule_type !== $options.ruleTypeAnyApprover"
-          class="d-none d-sm-table-cell js-approvers"
+          :class="glFeatures.approvalsCommentedBy ? 'd-md-table-cell' : 'd-sm-table-cell'"
+          class="d-none js-approvers"
         >
           <div><user-avatar-list :items="rule.approvers" :img-size="24" empty-text="" /></div>
         </td>
-        <td class="w-0 d-none d-sm-table-cell text-nowrap js-pending">
+        <td
+          :class="glFeatures.approvalsCommentedBy ? 'd-md-table-cell' : 'd-sm-table-cell'"
+          class="w-0 d-none text-nowrap js-pending"
+        >
           {{ pendingApprovalsText(rule) }}
         </td>
-        <td class="d-none d-sm-table-cell js-approved-by">
-          <user-avatar-list :items="rule.approved_by" :img-size="24" />
+        <td
+          v-if="glFeatures.approvalsCommentedBy"
+          :class="glFeatures.approvalsCommentedBy ? 'd-md-table-cell' : 'd-sm-table-cell'"
+          class="d-none js-commented-by"
+        >
+          <user-avatar-list :items="rule.commented_by" :img-size="24" empty-text="" />
+        </td>
+        <td class="d-none d-md-table-cell js-approved-by">
+          <user-avatar-list :items="rule.approved_by" :img-size="24" empty-text="" />
         </td>
       </tr>
     </tbody>

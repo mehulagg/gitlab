@@ -97,7 +97,7 @@
 
 .issuable-note-warning {
   color: $orange-600;
-  background-color: $orange-100;
+  background-color: $orange-50;
   border-radius: $border-radius-default $border-radius-default 0 0;
   border: 1px solid $border-gray-normal;
   border-bottom: 0;
@@ -152,7 +152,7 @@
   }
 
   .sidebar-item-value & {
-    fill: $gray-700;
+    fill: $gray-500;
   }
 }
 
@@ -226,10 +226,6 @@ table {
   display: none;
 }
 
-.parallel-comment {
-  padding: 6px;
-}
-
 .error-alert > .alert {
   margin-top: 5px;
   margin-bottom: 5px;
@@ -282,7 +278,7 @@ table {
     display: table;
 
     svg {
-      fill: $gray-700;
+      fill: $gray-500;
     }
 
     .btn-group {
@@ -311,29 +307,10 @@ table {
   }
 }
 
-.discussion-notes-count {
-  font-size: 16px;
-}
-
-.edit_note {
-  .markdown-area {
-    min-height: 140px;
-    max-height: 500px;
-  }
-
-  .note-form-actions {
-    background: transparent;
-  }
-}
-
 .comment-toolbar {
   padding-top: $gl-padding-top;
   color: $gl-text-color-secondary;
   border-top: 1px solid $border-color;
-}
-
-.md-helper {
-  padding-top: 10px;
 }
 
 .toolbar-button {

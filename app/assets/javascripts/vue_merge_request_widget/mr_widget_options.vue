@@ -4,10 +4,13 @@ import MRWidgetStore from 'ee_else_ce/vue_merge_request_widget/stores/mr_widget_
 import MRWidgetService from 'ee_else_ce/vue_merge_request_widget/services/mr_widget_service';
 import MrWidgetApprovals from 'ee_else_ce/vue_merge_request_widget/components/approvals/approvals.vue';
 import stateMaps from 'ee_else_ce/vue_merge_request_widget/stores/state_maps';
+import { GlSafeHtmlDirective } from '@gitlab/ui';
 import { sprintf, s__, __ } from '~/locale';
 import Project from '~/pages/projects/project';
 import SmartInterval from '~/smart_interval';
-import createFlash from '../flash';
+import { secondsToMilliseconds } from '~/lib/utils/datetime_utility';
+import { deprecatedCreateFlash as createFlash } from '../flash';
+import mergeRequestQueryVariablesMixin from './mixins/merge_request_query_variables';
 import Loading from './components/loading.vue';
 import WidgetHeader from './components/mr_widget_header.vue';
 import WidgetSuggestPipeline from './components/mr_widget_suggest_pipeline.vue';
@@ -42,12 +45,17 @@ import GroupedCodequalityReportsApp from '../reports/codequality_report/grouped_
 import GroupedTestReportsApp from '../reports/components/grouped_test_reports_app.vue';
 import { setFaviconOverlay } from '../lib/utils/common_utils';
 import GroupedAccessibilityReportsApp from '../reports/accessibility_report/grouped_accessibility_reports_app.vue';
+import getStateQuery from './queries/get_state.query.graphql';
+import { isExperimentEnabled } from '~/lib/utils/experimentation';
 
 export default {
   el: '#js-vue-mr-widget',
   // False positive i18n lint: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/25
   // eslint-disable-next-line @gitlab/require-i18n-strings
   name: 'MRWidget',
+  directives: {
+    SafeHtml: GlSafeHtmlDirective,
+  },
   components: {
     Loading,
     'mr-widget-header': WidgetHeader,
@@ -82,7 +90,28 @@ export default {
     TerraformPlan,
     GroupedAccessibilityReportsApp,
     MrWidgetApprovals,
+    SecurityReportsApp: () => import('~/vue_shared/security_reports/security_reports_app.vue'),
   },
+  apollo: {
+    state: {
+      query: getStateQuery,
+      manual: true,
+      pollInterval: 10 * 1000,
+      skip() {
+        return !this.mr || !window.gon?.features?.mergeRequestWidgetGraphql;
+      },
+      variables() {
+        return this.mergeRequestQueryVariables;
+      },
+      result({ data: { project } }) {
+        if (project) {
+          this.mr.setGraphqlData(project);
+          this.loading = false;
+        }
+      },
+    },
+  },
+  mixins: [mergeRequestQueryVariablesMixin],
   props: {
     mrData: {
       type: Object,
@@ -97,9 +126,17 @@ export default {
       mr: store,
       state: store && store.state,
       service: store && this.createService(store),
+      loading: true,
     };
   },
   computed: {
+    isLoaded() {
+      if (window.gon?.features?.mergeRequestWidgetGraphql) {
+        return !this.loading;
+      }
+
+      return this.mr;
+    },
     shouldRenderApprovals() {
       return this.mr.state !== 'nothingToMerge';
     },
@@ -116,7 +153,12 @@ export default {
       return this.mr.hasCI || this.hasPipelineMustSucceedConflict;
     },
     shouldSuggestPipelines() {
-      return gon.features?.suggestPipeline && !this.mr.hasCI && this.mr.mergeRequestAddCiConfigPath;
+      return (
+        isExperimentEnabled('suggestPipeline') &&
+        !this.mr.hasCI &&
+        this.mr.mergeRequestAddCiConfigPath &&
+        !this.mr.isDismissedSuggestPipeline
+      );
     },
     shouldRenderCodeQuality() {
       return this.mr?.codeclimate?.head_path;
@@ -141,6 +183,9 @@ export default {
       return Boolean(
         this.mr.mergePipelinesEnabled && this.mr.sourceProjectId !== this.mr.targetProjectId,
       );
+    },
+    shouldRenderSecurityReport() {
+      return Boolean(window.gon?.features?.coreSecurityMrWidget && this.mr.pipeline.id);
     },
     mergeError() {
       let { mergeError } = this.mr;
@@ -167,7 +212,10 @@ export default {
   },
   mounted() {
     MRWidgetService.fetchInitialData()
-      .then(({ data }) => this.initWidget(data))
+      .then(({ data, headers }) => {
+        this.startingPollInterval = Number(headers['POLL-INTERVAL']);
+        this.initWidget(data);
+      })
       .catch(() =>
         createFlash(__('Unable to load the merge request widget. Try reloading the page.')),
       );
@@ -257,9 +305,10 @@ export default {
     initPolling() {
       this.pollingInterval = new SmartInterval({
         callback: this.checkStatus,
-        startingInterval: 10 * 1000,
-        maxInterval: 240 * 1000,
-        hiddenInterval: window.gon?.features?.widgetVisibilityPolling && 360 * 1000,
+        startingInterval: this.startingPollInterval,
+        maxInterval: this.startingPollInterval + secondsToMilliseconds(4 * 60),
+        hiddenInterval:
+          window.gon?.features?.widgetVisibilityPolling && secondsToMilliseconds(6 * 60),
         incrementByFactorOf: 2,
       });
     },
@@ -374,18 +423,25 @@ export default {
         this.stopPolling();
       });
     },
+    dismissSuggestPipelines() {
+      this.mr.isDismissedSuggestPipeline = true;
+    },
   },
 };
 </script>
 <template>
-  <div v-if="mr" class="mr-state-widget gl-mt-3">
+  <div v-if="isLoaded" class="mr-state-widget gl-mt-3">
     <mr-widget-header :mr="mr" />
     <mr-widget-suggest-pipeline
       v-if="shouldSuggestPipelines"
+      data-testid="mr-suggest-pipeline"
       class="mr-widget-workflow"
       :pipeline-path="mr.mergeRequestAddCiConfigPath"
       :pipeline-svg-path="mr.pipelinesEmptySvgPath"
       :human-access="mr.humanAccess.toLowerCase()"
+      :user-callouts-path="mr.userCalloutsPath"
+      :user-callout-feature-id="mr.suggestPipelineFeatureId"
+      @dismiss="dismissSuggestPipelines"
     />
     <mr-widget-pipeline-container
       v-if="shouldRenderPipelines"
@@ -406,6 +462,13 @@ export default {
         :head-blob-path="mr.headBlobPath"
         :base-blob-path="mr.baseBlobPath"
         :codequality-help-path="mr.codequalityHelpPath"
+      />
+
+      <security-reports-app
+        v-if="shouldRenderSecurityReport"
+        :pipeline-id="mr.pipeline.id"
+        :project-id="mr.targetProjectId"
+        :security-reports-docs-path="mr.securityReportsDocsPath"
       />
 
       <grouped-test-reports-app
@@ -451,7 +514,7 @@ export default {
           </mr-widget-alert-message>
 
           <mr-widget-alert-message v-if="mr.mergeError" type="danger">
-            {{ mergeError }}
+            <span v-safe-html="mergeError"></span>
           </mr-widget-alert-message>
 
           <source-branch-removal-status v-if="shouldRenderSourceBranchRemovalStatus" />

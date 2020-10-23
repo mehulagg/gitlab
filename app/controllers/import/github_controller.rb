@@ -105,15 +105,25 @@ class Import::GithubController < Import::BaseController
   end
 
   def client
-    @client ||= if Feature.enabled?(:remove_legacy_github_client, default_enabled: false)
+    @client ||= if Feature.enabled?(:remove_legacy_github_client)
                   Gitlab::GithubImport::Client.new(session[access_token_key])
                 else
-                  Gitlab::LegacyGithubImport::Client.new(session[access_token_key], client_options)
+                  Gitlab::LegacyGithubImport::Client.new(session[access_token_key], **client_options)
                 end
   end
 
   def client_repos
-    @client_repos ||= filtered(client.octokit.repos)
+    @client_repos ||= if Feature.enabled?(:remove_legacy_github_client)
+                        filtered(concatenated_repos)
+                      else
+                        filtered(client.repos)
+                      end
+  end
+
+  def concatenated_repos
+    return [] unless client.respond_to?(:each_page)
+
+    client.each_page(:repos).flat_map(&:objects)
   end
 
   def oauth_client
@@ -138,19 +148,19 @@ class Import::GithubController < Import::BaseController
     end
   end
 
-  def authorize_url(redirect_uri)
-    if Feature.enabled?(:remove_legacy_github_client, default_enabled: false)
-      oauth_client.auth_code.authorize_url({
-                                             redirect_uri: redirect_uri,
-                                             scope: 'repo, user, user:email'
-                                           })
+  def authorize_url
+    if Feature.enabled?(:remove_legacy_github_client)
+      oauth_client.auth_code.authorize_url(
+        redirect_uri: callback_import_url,
+        scope: 'repo, user, user:email'
+      )
     else
       client.authorize_url(callback_import_url)
     end
   end
 
   def get_token(code)
-    if Feature.enabled?(:remove_legacy_github_client, default_enabled: false)
+    if Feature.enabled?(:remove_legacy_github_client)
       oauth_client.auth_code.get_token(code).token
     else
       client.get_token(code)
@@ -162,7 +172,7 @@ class Import::GithubController < Import::BaseController
   end
 
   def go_to_provider_for_permissions
-    redirect_to authorize_url(callback_import_url)
+    redirect_to authorize_url
   end
 
   def import_enabled?
@@ -201,7 +211,7 @@ class Import::GithubController < Import::BaseController
   def missing_oauth_config
     session[access_token_key] = nil
     redirect_to new_import_url,
-      alert: _('OAuth configuration for GitHub missing.')
+      alert: _('Missing OAuth configuration for GitHub.')
   end
 
   def access_token_key

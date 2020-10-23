@@ -16,48 +16,70 @@ RSpec.describe Gitlab::Ci::Status::Composite do
   end
 
   describe '#status' do
-    shared_examples 'compares composite with SQL status' do
-      it 'returns exactly the same result' do
-        builds = Ci::Build.where(id: all_statuses)
+    using RSpec::Parameterized::TableSyntax
 
-        expect(composite_status.status).to eq(builds.legacy_status)
-        expect(composite_status.warnings?).to eq(builds.failed_but_allowed.any?)
+    shared_examples 'compares status and warnings' do
+      let(:composite_status) do
+        described_class.new(all_statuses, dag: dag)
+      end
+
+      it 'returns status and warnings?' do
+        expect(composite_status.status).to eq(result)
+        expect(composite_status.warnings?).to eq(has_warnings)
       end
     end
 
-    shared_examples 'validate all combinations' do |perms|
-      Ci::HasStatus::STATUSES_ENUM.keys.combination(perms).each do |statuses|
-        context "with #{statuses.join(",")}" do
-          it_behaves_like 'compares composite with SQL status' do
-            let(:all_statuses) do
-              statuses.map { |status| @statuses[status] }
-            end
+    context 'allow_failure: false' do
+      where(:build_statuses, :dag, :result, :has_warnings) do
+        %i(skipped)                         | false | 'skipped'              | false
+        %i(skipped success)                 | false | 'success'              | false
+        %i(skipped success)                 | true  | 'skipped'              | false
+        %i(created)                         | false | 'created'              | false
+        %i(preparing)                       | false | 'preparing'            | false
+        %i(canceled success skipped)        | false | 'canceled'             | false
+        %i(canceled success skipped)        | true  | 'skipped'              | false
+        %i(pending created skipped)         | false | 'pending'              | false
+        %i(pending created skipped success) | false | 'running'              | false
+        %i(running created skipped success) | false | 'running'              | false
+        %i(pending created skipped)         | true  | 'skipped'              | false
+        %i(pending created skipped success) | true  | 'skipped'              | false
+        %i(running created skipped success) | true  | 'skipped'              | false
+        %i(success waiting_for_resource)    | false | 'waiting_for_resource' | false
+        %i(success manual)                  | false | 'manual'               | false
+        %i(success scheduled)               | false | 'scheduled'            | false
+        %i(created preparing)               | false | 'preparing'            | false
+        %i(created success pending)         | false | 'running'              | false
+        %i(skipped success failed)          | false | 'failed'               | false
+        %i(skipped success failed)          | true  | 'skipped'              | false
+        %i(success manual)                  | true  | 'pending'              | false
+        %i(success failed created)          | true  | 'pending'              | false
+      end
 
-            let(:composite_status) do
-              described_class.new(all_statuses)
-            end
-          end
-
-          Ci::HasStatus::STATUSES_ENUM.each do |allow_failure_status, _|
-            context "and allow_failure #{allow_failure_status}" do
-              it_behaves_like 'compares composite with SQL status' do
-                let(:all_statuses) do
-                  statuses.map { |status| @statuses[status] } +
-                    [@statuses_with_allow_failure[allow_failure_status]]
-                end
-
-                let(:composite_status) do
-                  described_class.new(all_statuses)
-                end
-              end
-            end
-          end
+      with_them do
+        let(:all_statuses) do
+          build_statuses.map { |status| @statuses[status] }
         end
+
+        it_behaves_like 'compares status and warnings'
       end
     end
 
-    it_behaves_like 'validate all combinations', 0
-    it_behaves_like 'validate all combinations', 1
-    it_behaves_like 'validate all combinations', 2
+    context 'allow_failure: true' do
+      where(:build_statuses, :dag, :result, :has_warnings) do
+        %i(manual)           | false | 'skipped'   | false
+        %i(skipped failed)   | false | 'success'   | true
+        %i(skipped failed)   | true  | 'skipped'   | true
+        %i(created failed)   | false | 'created'   | true
+        %i(preparing manual) | false | 'preparing' | false
+      end
+
+      with_them do
+        let(:all_statuses) do
+          build_statuses.map { |status| @statuses_with_allow_failure[status] }
+        end
+
+        it_behaves_like 'compares status and warnings'
+      end
+    end
   end
 end

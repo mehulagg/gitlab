@@ -29,9 +29,9 @@ export default {
 };
 </script>
 <template>
-  <div class="bar d-flex">
-    <div v-for="(step, index) in steps" :key="index" :class="classObject(index)">
-      {{ index + 1 }}. {{ step }}
-    </div>
-  </div>
+  <ol class="bar gl-display-flex gl-p-0 gl-m-0">
+    <li v-for="(step, index) in steps" :key="index" :class="classObject(index)">
+      {{ step }}
+    </li>
+  </ol>
 </template>

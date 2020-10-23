@@ -1,15 +1,16 @@
 import initProjectVisibilitySelector from '../../../project_visibility';
 import initProjectNew from '../../../projects/project_new';
 import { __ } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Tracking from '~/tracking';
+import { isExperimentEnabled } from '~/lib/utils/experimentation';
 
 document.addEventListener('DOMContentLoaded', () => {
   initProjectVisibilitySelector();
   initProjectNew.bindEvents();
 
   const { category, property } = gon.tracking_data ?? { category: 'projects:new' };
-  const hasNewCreateProjectUi = 'newCreateProjectUi' in gon?.features;
+  const hasNewCreateProjectUi = isExperimentEnabled('newCreateProjectUi');
 
   if (!hasNewCreateProjectUi) {
     // Setting additional tracking for HAML template

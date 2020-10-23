@@ -119,9 +119,9 @@ module QA
             approve_license(name)
           end
 
-          def blacklist_license_with_mr(name)
+          def deny_license_with_mr(name)
             expand_license_report unless license_report_expanded?
-            blacklist_license(name)
+            deny_license(name)
           end
 
           def expand_vulnerability_report

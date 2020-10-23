@@ -76,6 +76,7 @@ RSpec.describe ApprovalRules::ParamsFilteringService do
             { name: 'bar', user_ids: [outsider.id], group_ids: [accessible_group.id, inaccessible_group.id] }
           ]
         end
+
         let(:expected_groups) { [accessible_group] }
       end
 
@@ -203,6 +204,7 @@ RSpec.describe ApprovalRules::ParamsFilteringService do
             ]
           }
         end
+
         let(:expected_groups) { [accessible_group, existing_private_group] }
       end
 
@@ -294,6 +296,7 @@ RSpec.describe ApprovalRules::ParamsFilteringService do
               ]
             }
           end
+
           let(:expected_groups) { [accessible_group] }
         end
       end

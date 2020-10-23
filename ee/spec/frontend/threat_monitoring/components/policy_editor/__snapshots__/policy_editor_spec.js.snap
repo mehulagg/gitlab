@@ -12,17 +12,21 @@ exports[`PolicyEditorApp component given .yaml editor mode is enabled renders ya
       class="gl-rounded-base gl-border-1 gl-border-solid gl-border-gray-100"
     >
       <h5
-        class="gl-m-0 gl-p-3 gl-bg-gray-10 gl-border-b-gray-100"
+        class="gl-m-0 gl-p-4 gl-bg-gray-10 gl-border-1 gl-border-b-solid gl-border-b-gray-100"
       >
         
           YAML editor
         
       </h5>
        
-      <network-policy-editor-stub
-        id="yamlEditor"
-        value=""
-      />
+      <div
+        class="gl-p-4"
+      >
+        <network-policy-editor-stub
+          height="400"
+          value=""
+        />
+      </div>
     </div>
   </div>
 </div>
@@ -70,6 +74,7 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
       >
         <gl-form-input-stub
           id="policyName"
+          value=""
         />
       </gl-form-group-stub>
     </div>
@@ -130,6 +135,7 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
       >
         <gl-segmented-control-stub
           checked="rule"
+          data-testid="editor-mode"
           options="[object Object],[object Object]"
         />
       </gl-form-group-stub>
@@ -145,37 +151,57 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
     <div
       class="col-sm-12 col-md-6 col-lg-7 col-xl-8"
     >
-      <h4>
-        Rules
-      </h4>
+      <!---->
        
-      <policy-rule-builder-stub />
-       
-      <div
-        class="gl-my-2 gl-p-3 gl-rounded-base gl-border-1 gl-border-solid gl-border-gray-100"
+      <dim-disable-container-stub
+        data-testid="rule-builder-container"
       >
-        <gl-link-stub
-          href="#"
+           
+        <div
+          class="gl-p-3 gl-rounded-base gl-border-1 gl-border-solid gl-border-gray-100 gl-mb-5"
         >
-          New rule
-        </gl-link-stub>
-      </div>
+          <gl-button-stub
+            buttontextclasses=""
+            category="primary"
+            data-testid="add-rule"
+            icon=""
+            size="medium"
+            variant="link"
+          >
+            New rule
+          </gl-button-stub>
+        </div>
+      </dim-disable-container-stub>
        
-      <h4>
-        Actions
-      </h4>
-       
-      <policy-action-picker-stub />
+      <dim-disable-container-stub
+        data-testid="policy-action-container"
+      >
+          
+        <policy-action-picker-stub />
+      </dim-disable-container-stub>
     </div>
      
     <div
       class="col-sm-12 col-md-6 col-lg-5 col-xl-4"
     >
-      <h5>
-        Policy preview
-      </h5>
-       
-      <policy-preview-stub />
+      <dim-disable-container-stub
+        data-testid="policy-preview-container"
+      >
+          
+        <policy-preview-stub
+          initialtab="0"
+          policydescription="Deny all traffic"
+          policyyaml="apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ''
+spec:
+  endpointSelector:
+    matchLabels:
+      network-policy.gitlab.com/disabled_by: gitlab
+"
+        />
+      </dim-disable-container-stub>
     </div>
   </div>
    
@@ -190,7 +216,9 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
       class="col-md-auto"
     >
       <gl-button-stub
+        buttontextclasses=""
         category="primary"
+        data-testid="save-policy"
         icon=""
         size="medium"
         type="submit"
@@ -199,8 +227,12 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
         Create policy
       </gl-button-stub>
        
+      <!---->
+       
       <gl-button-stub
+        buttontextclasses=""
         category="secondary"
+        href="/threat-monitoring"
         icon=""
         size="medium"
         variant="default"
@@ -209,5 +241,19 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
       </gl-button-stub>
     </div>
   </div>
+   
+  <gl-modal-stub
+    actioncancel="[object Object]"
+    actionsecondary="[object Object]"
+    modalclass=""
+    modalid="delete-modal"
+    size="md"
+    title="Delete policy: "
+    titletag="h4"
+  >
+    
+    Are you sure you want to delete this policy? This action cannot be undone.
+  
+  </gl-modal-stub>
 </section>
 `;

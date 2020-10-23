@@ -8,6 +8,8 @@ Devise.omniauth_providers.map(&:downcase).each do |provider|
 end
 
 namespace :import do
+  resources :available_namespaces, only: [:index], controller: :available_namespaces
+
   resource :github, only: [:create, :new], controller: :github do
     post :personal_access_token
     get :status
@@ -67,9 +69,14 @@ namespace :import do
     post :authorize
   end
 
+  resource :bulk_import, only: [:create] do
+    post :configure
+    get :status
+  end
+
   resource :manifest, only: [:create, :new], controller: :manifest do
     get :status
-    get :jobs
+    get :realtime_changes
     post :upload
   end
 

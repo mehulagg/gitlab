@@ -86,6 +86,21 @@ export const getDayName = date =>
   ][date.getDay()];
 
 /**
+ * Returns the i18n month name from a given date
+ * @example
+ * formatDateAsMonth(new Date('2020-06-28')) -> 'Jun'
+ * @param  {String} datetime where month is extracted from
+ * @param  {Object} options
+ * @param  {Boolean} options.abbreviated whether to use the abbreviated month string, or not
+ * @return {String} the i18n month name
+ */
+export function formatDateAsMonth(datetime, options = {}) {
+  const { abbreviated = true } = options;
+  const month = new Date(datetime).getMonth();
+  return getMonthNames(abbreviated)[month];
+}
+
+/**
  * @example
  * dateFormat('2017-12-05','mmm d, yyyy h:MMtt Z' ) -> "Dec 5, 2017 12:00am GMT+0000"
  * @param {date} datetime
@@ -216,8 +231,9 @@ export const timeFor = (time, expiredLabel) => {
   return timeago.format(time, `${timeagoLanguageCode}-remaining`).trim();
 };
 
+export const millisecondsPerDay = 1000 * 60 * 60 * 24;
+
 export const getDayDifference = (a, b) => {
-  const millisecondsPerDay = 1000 * 60 * 60 * 24;
   const date1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
   const date2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
 
@@ -642,6 +658,16 @@ export const secondsToMilliseconds = seconds => seconds * 1000;
 export const secondsToDays = seconds => Math.round(seconds / 86400);
 
 /**
+ * Returns the date n days after the date provided
+ *
+ * @param {Date} date the initial date
+ * @param {Number} numberOfDays number of days after
+ * @return {Date} the date following the date provided
+ */
+export const nDaysAfter = (date, numberOfDays) =>
+  new Date(newDate(date)).setDate(date.getDate() + numberOfDays);
+
+/**
  * Returns the date after the date provided
  *
  * @param {Date} date the initial date
@@ -689,3 +715,80 @@ export const approximateDuration = (seconds = 0) => {
   }
   return n__('1 day', '%d days', seconds < ONE_DAY_LIMIT ? 1 : days);
 };
+
+/**
+ * A utility function which helps creating a date object
+ * for a specific date. Accepts the year, month and day
+ * returning a date object for the given params.
+ *
+ * @param {Int} year the full year as a number i.e. 2020
+ * @param {Int} month the month index i.e. January => 0
+ * @param {Int} day the day as a number i.e. 23
+ *
+ * @return {Date} the date object from the params
+ */
+export const dateFromParams = (year, month, day) => {
+  return new Date(year, month, day);
+};
+
+/**
+ * A utility function which computes the difference in seconds
+ * between 2 dates.
+ *
+ * @param {Date} startDate the start date
+ * @param {Date} endDate the end date
+ *
+ * @return {Int} the difference in seconds
+ */
+export const differenceInSeconds = (startDate, endDate) => {
+  return (endDate.getTime() - startDate.getTime()) / 1000;
+};
+
+/**
+ * A utility function which computes the difference in months
+ * between 2 dates.
+ *
+ * @param {Date} startDate the start date
+ * @param {Date} endDate the end date
+ *
+ * @return {Int} the difference in months
+ */
+export const differenceInMonths = (startDate, endDate) => {
+  const yearDiff = endDate.getYear() - startDate.getYear();
+  const monthDiff = endDate.getMonth() - startDate.getMonth();
+  return monthDiff + 12 * yearDiff;
+};
+
+/**
+ * A utility function which computes the difference in milliseconds
+ * between 2 dates.
+ *
+ * @param {Date|Int} startDate the start date. Can be either a date object or a unix timestamp.
+ * @param {Date|Int} endDate the end date. Can be either a date object or a unix timestamp. Defaults to now.
+ *
+ * @return {Int} the difference in milliseconds
+ */
+export const differenceInMilliseconds = (startDate, endDate = Date.now()) => {
+  const startDateInMS = startDate instanceof Date ? startDate.getTime() : startDate;
+  const endDateInMS = endDate instanceof Date ? endDate.getTime() : endDate;
+  return endDateInMS - startDateInMS;
+};
+
+/**
+ * A utility which returns a new date at the first day of the month for any given date.
+ *
+ * @param {Date} date
+ *
+ * @return {Date} the date at the first day of the month
+ */
+export const dateAtFirstDayOfMonth = date => new Date(newDate(date).setDate(1));
+
+/**
+ * A utility function which checks if two dates match.
+ *
+ * @param {Date|Int} date1 Can be either a date object or a unix timestamp.
+ * @param {Date|Int} date2 Can be either a date object or a unix timestamp.
+ *
+ * @return {Boolean} true if the dates match
+ */
+export const datesMatch = (date1, date2) => differenceInMilliseconds(date1, date2) === 0;

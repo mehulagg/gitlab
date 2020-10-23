@@ -7,11 +7,12 @@ import createState from './state';
 
 Vue.use(Vuex);
 
-const createStore = ({ replicableType, graphqlFieldName }) =>
-  new Vuex.Store({
-    actions,
-    getters,
-    mutations,
-    state: createState({ replicableType, graphqlFieldName }),
-  });
+export const getStoreConfig = ({ replicableType, graphqlFieldName }) => ({
+  actions,
+  getters,
+  mutations,
+  state: createState({ replicableType, graphqlFieldName }),
+});
+
+const createStore = config => new Vuex.Store(getStoreConfig(config));
 export default createStore;

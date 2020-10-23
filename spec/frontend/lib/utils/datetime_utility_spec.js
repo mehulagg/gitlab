@@ -1,6 +1,6 @@
-import { __, s__ } from '~/locale';
 import $ from 'jquery';
 import timezoneMock from 'timezone-mock';
+import { __, s__ } from '~/locale';
 import '~/commons/bootstrap';
 import * as datetimeUtility from '~/lib/utils/datetime_utility';
 
@@ -66,6 +66,34 @@ describe('Date time utils', () => {
       const day = datetimeUtility.getDayName(new Date('07/23/2016'));
 
       expect(day).toBe(__('Saturday'));
+    });
+  });
+
+  describe('formatDateAsMonth', () => {
+    it('should format dash cased date properly', () => {
+      const formattedMonth = datetimeUtility.formatDateAsMonth(new Date('2020-06-28'));
+
+      expect(formattedMonth).toBe('Jun');
+    });
+
+    it('should format return the non-abbreviated month', () => {
+      const formattedMonth = datetimeUtility.formatDateAsMonth(new Date('2020-07-28'), {
+        abbreviated: false,
+      });
+
+      expect(formattedMonth).toBe('July');
+    });
+
+    it('should format date with slashes properly', () => {
+      const formattedMonth = datetimeUtility.formatDateAsMonth(new Date('07/23/2016'));
+
+      expect(formattedMonth).toBe('Jul');
+    });
+
+    it('should format ISO date properly', () => {
+      const formattedMonth = datetimeUtility.formatDateAsMonth('2016-07-23T00:00:00.559Z');
+
+      expect(formattedMonth).toBe('Jul');
     });
   });
 
@@ -626,5 +654,81 @@ describe('localTimeAgo', () => {
 
     expect(element.getAttribute('data-original-title')).toBe(dataOriginalTitle);
     expect(element.getAttribute('title')).toBe(title);
+  });
+});
+
+describe('dateFromParams', () => {
+  it('returns the expected date object', () => {
+    const expectedDate = new Date('2019-07-17T00:00:00.000Z');
+    const date = datetimeUtility.dateFromParams(2019, 6, 17);
+
+    expect(date.getYear()).toBe(expectedDate.getYear());
+    expect(date.getMonth()).toBe(expectedDate.getMonth());
+    expect(date.getDate()).toBe(expectedDate.getDate());
+  });
+});
+
+describe('differenceInSeconds', () => {
+  const startDateTime = new Date('2019-07-17T00:00:00.000Z');
+
+  it.each`
+    startDate                               | endDate                                 | expected
+    ${startDateTime}                        | ${new Date('2019-07-17T00:00:00.000Z')} | ${0}
+    ${startDateTime}                        | ${new Date('2019-07-17T12:00:00.000Z')} | ${43200}
+    ${startDateTime}                        | ${new Date('2019-07-18T00:00:00.000Z')} | ${86400}
+    ${new Date('2019-07-18T00:00:00.000Z')} | ${startDateTime}                        | ${-86400}
+  `('returns $expected for $endDate - $startDate', ({ startDate, endDate, expected }) => {
+    expect(datetimeUtility.differenceInSeconds(startDate, endDate)).toBe(expected);
+  });
+});
+
+describe('differenceInMonths', () => {
+  const startDateTime = new Date('2019-07-17T00:00:00.000Z');
+
+  it.each`
+    startDate                               | endDate                                 | expected
+    ${startDateTime}                        | ${startDateTime}                        | ${0}
+    ${startDateTime}                        | ${new Date('2019-12-17T12:00:00.000Z')} | ${5}
+    ${startDateTime}                        | ${new Date('2021-02-18T00:00:00.000Z')} | ${19}
+    ${new Date('2021-02-18T00:00:00.000Z')} | ${startDateTime}                        | ${-19}
+  `('returns $expected for $endDate - $startDate', ({ startDate, endDate, expected }) => {
+    expect(datetimeUtility.differenceInMonths(startDate, endDate)).toBe(expected);
+  });
+});
+
+describe('differenceInMilliseconds', () => {
+  const startDateTime = new Date('2019-07-17T00:00:00.000Z');
+
+  it.each`
+    startDate                               | endDate                                           | expected
+    ${startDateTime.getTime()}              | ${new Date('2019-07-17T00:00:00.000Z')}           | ${0}
+    ${startDateTime}                        | ${new Date('2019-07-17T12:00:00.000Z').getTime()} | ${43200000}
+    ${startDateTime}                        | ${new Date('2019-07-18T00:00:00.000Z').getTime()} | ${86400000}
+    ${new Date('2019-07-18T00:00:00.000Z')} | ${startDateTime.getTime()}                        | ${-86400000}
+  `('returns $expected for $endDate - $startDate', ({ startDate, endDate, expected }) => {
+    expect(datetimeUtility.differenceInMilliseconds(startDate, endDate)).toBe(expected);
+  });
+});
+
+describe('dateAtFirstDayOfMonth', () => {
+  const date = new Date('2019-07-16T12:00:00.000Z');
+
+  it('returns the date at the first day of the month', () => {
+    const startDate = datetimeUtility.dateAtFirstDayOfMonth(date);
+    const expectedStartDate = new Date('2019-07-01T12:00:00.000Z');
+
+    expect(startDate).toStrictEqual(expectedStartDate);
+  });
+});
+
+describe('datesMatch', () => {
+  const date = new Date('2019-07-17T00:00:00.000Z');
+
+  it.each`
+    date1   | date2                                   | expected
+    ${date} | ${new Date('2019-07-17T00:00:00.000Z')} | ${true}
+    ${date} | ${new Date('2019-07-17T12:00:00.000Z')} | ${false}
+  `('returns $expected for $date1 matches $date2', ({ date1, date2, expected }) => {
+    expect(datetimeUtility.datesMatch(date1, date2)).toBe(expected);
   });
 });

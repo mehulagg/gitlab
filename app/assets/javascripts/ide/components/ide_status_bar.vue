@@ -1,10 +1,9 @@
 <script>
 /* eslint-disable @gitlab/vue-require-i18n-strings */
 import { mapActions, mapState, mapGetters } from 'vuex';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import IdeStatusList from './ide_status_list.vue';
 import IdeStatusMr from './ide_status_mr.vue';
-import icon from '~/vue_shared/components/icon.vue';
-import tooltip from '~/vue_shared/directives/tooltip';
 import timeAgoMixin from '~/vue_shared/mixins/timeago';
 import CiIcon from '../../vue_shared/components/ci_icon.vue';
 import userAvatarImage from '../../vue_shared/components/user_avatar/user_avatar_image.vue';
@@ -12,14 +11,14 @@ import { rightSidebarViews } from '../constants';
 
 export default {
   components: {
-    icon,
+    GlIcon,
     userAvatarImage,
     CiIcon,
     IdeStatusList,
     IdeStatusMr,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   mixins: [timeAgoMixin],
   data() {
@@ -85,7 +84,7 @@ export default {
           @click="openRightPane($options.rightSidebarViews.pipelines)"
         >
           <ci-icon
-            v-tooltip
+            v-gl-tooltip
             :status="latestPipeline.details.status"
             :title="latestPipeline.details.status.text"
           />
@@ -97,12 +96,13 @@ export default {
         {{ latestPipeline.details.status.text }} for
       </span>
 
-      <icon name="commit" />
+      <gl-icon name="commit" />
       <a
-        v-tooltip
+        v-gl-tooltip
         :title="lastCommit.message"
         :href="getCommitPath(lastCommit.short_id)"
         class="commit-sha"
+        data-qa-selector="commit_sha_content"
         >{{ lastCommit.short_id }}</a
       >
       by
@@ -115,7 +115,7 @@ export default {
       />
       {{ lastCommit.author_name }}
       <time
-        v-tooltip
+        v-gl-tooltip
         :datetime="lastCommit.committed_date"
         :title="tooltipTitle(lastCommit.committed_date)"
         data-placement="top"

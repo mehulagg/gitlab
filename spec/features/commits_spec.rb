@@ -112,7 +112,7 @@ RSpec.describe 'Commits' do
         describe 'Cancel build' do
           it 'cancels build', :js, :sidekiq_might_not_need_inline do
             visit pipeline_path(pipeline)
-            find('.js-btn-cancel-pipeline').click
+            find('[data-testid="cancelPipeline"]').click
             expect(page).to have_content 'canceled'
           end
         end
@@ -140,6 +140,7 @@ RSpec.describe 'Commits' do
 
       context 'when accessing internal project with disallowed access', :js do
         before do
+          stub_feature_flags(graphql_pipeline_header: false)
           project.update(
             visibility_level: Gitlab::VisibilityLevel::INTERNAL,
             public_builds: false)

@@ -1,17 +1,17 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import {
-  GlDeprecatedButton,
+  GlButton,
   GlDeprecatedDropdown,
   GlDeprecatedDropdownItem,
   GlFormInput,
   GlSearchBoxByType,
   GlLoadingIcon,
 } from '@gitlab/ui';
-import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 
 import CreateIssueForm from 'ee/related_items_tree/components/create_issue_form.vue';
 import createDefaultStore from 'ee/related_items_tree/store';
+import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 
 import { mockInitialConfig, mockParentItem } from '../mock_data';
 
@@ -233,7 +233,7 @@ describe('CreateIssueForm', () => {
     });
 
     it('renders `Create issue` button', () => {
-      const createIssueButton = wrapper.findAll(GlDeprecatedButton).at(0);
+      const createIssueButton = wrapper.findAll(GlButton).at(0);
 
       expect(createIssueButton.exists()).toBe(true);
       expect(createIssueButton.text()).toBe('Create issue');
@@ -243,7 +243,7 @@ describe('CreateIssueForm', () => {
       wrapper.vm.$store.dispatch('requestCreateItem');
 
       return wrapper.vm.$nextTick(() => {
-        const createIssueButton = wrapper.findAll(GlDeprecatedButton).at(0);
+        const createIssueButton = wrapper.findAll(GlButton).at(0);
 
         expect(createIssueButton.exists()).toBe(true);
         expect(createIssueButton.props('disabled')).toBe(true);
@@ -252,7 +252,7 @@ describe('CreateIssueForm', () => {
     });
 
     it('renders `Cancel` button', () => {
-      const cancelButton = wrapper.findAll(GlDeprecatedButton).at(1);
+      const cancelButton = wrapper.findAll(GlButton).at(1);
 
       expect(cancelButton.exists()).toBe(true);
       expect(cancelButton.text()).toBe('Cancel');

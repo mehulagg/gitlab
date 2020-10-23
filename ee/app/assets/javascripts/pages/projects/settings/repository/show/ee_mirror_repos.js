@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import { __ } from '~/locale';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import MirrorRepos from '~/mirrors/mirror_repos';
 
 export default class EEMirrorRepos extends MirrorRepos {

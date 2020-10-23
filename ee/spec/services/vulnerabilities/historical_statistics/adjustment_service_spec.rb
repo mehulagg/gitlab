@@ -5,6 +5,10 @@ require 'spec_helper'
 RSpec.describe Vulnerabilities::HistoricalStatistics::AdjustmentService do
   let_it_be(:project) { create(:project) }
 
+  around do |example|
+    travel_to(Date.current) { example.run }
+  end
+
   describe '.execute' do
     let(:project_ids) { [1, 2, 3] }
     let(:mock_service_object) { instance_double(described_class, execute: true) }
@@ -37,7 +41,7 @@ RSpec.describe Vulnerabilities::HistoricalStatistics::AdjustmentService do
         'info' => 0,
         'unknown' => 0,
         'letter_grade' => 'f',
-        'date' => Date.today.to_s
+        'date' => Date.current.to_s
       }
     end
 

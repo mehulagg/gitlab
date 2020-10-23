@@ -1,5 +1,5 @@
 import Api from 'ee/api';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 import * as types from './mutation_types';
 

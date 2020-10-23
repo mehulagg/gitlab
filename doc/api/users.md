@@ -2,8 +2,6 @@
 
 ## List users
 
-Active users = Total accounts - Blocked users
-
 Get a list of users.
 
 This function takes pagination parameters `page` and `per_page` to restrict the list of users.
@@ -49,9 +47,9 @@ For example:
 GET /users?username=jack_smith
 ```
 
-In addition, you can filter users based on states eg. `blocked`, `active`
-This works only to filter users who are `blocked` or `active`.
-It does not support `active=false` or `blocked=false`.
+In addition, you can filter users based on the states `blocked` and `active`.
+It does not support `active=false` or `blocked=false`. The list of active users
+is the total number of users minus the blocked users.
 
 ```plaintext
 GET /users?active=true
@@ -59,6 +57,15 @@ GET /users?active=true
 
 ```plaintext
 GET /users?blocked=true
+```
+
+GitLab supports bot users such as the [alert bot](../operations/incident_management/generic_alerts.md)
+or the [support bot](../user/project/service_desk.md#support-bot-user).
+To exclude these users from the users' list, you can use the parameter `exclude_internal=true`
+([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241144) in GitLab 13.4).
+
+```plaintext
+GET /users?exclude_internal=true
 ```
 
 NOTE: **Note:**
@@ -314,7 +321,8 @@ Example Responses:
   "current_sign_in_ip": "196.165.1.102",
   "last_sign_in_ip": "172.127.2.22",
   "plan": "gold",
-  "trial": true
+  "trial": true,
+  "sign_in_count": 1337
 }
 ```
 
@@ -766,7 +774,7 @@ POST /user/keys
 
 Parameters:
 
-- `title` (required) - new SSH Key's title
+- `title` (required) - new SSH key's title
 - `key` (required) - new SSH key
 - `expires_at` (optional) - The expiration date of the SSH key in ISO 8601 format (`YYYY-MM-DDTHH:MM:SSZ`)
 
@@ -805,12 +813,12 @@ POST /users/:id/keys
 Parameters:
 
 - `id` (required) - ID of specified user
-- `title` (required) - new SSH Key's title
+- `title` (required) - new SSH key's title
 - `key` (required) - new SSH key
 - `expires_at` (optional) - The expiration date of the SSH key in ISO 8601 format (`YYYY-MM-DDTHH:MM:SSZ`)
 
 NOTE: **Note:**
-This also adds an audit event, as described in [audit instance events](../administration/audit_events.md#instance-events-premium-only). **(PREMIUM)**
+This also adds an audit event, as described in [audit instance events](../administration/audit_events.md#instance-events). **(PREMIUM)**
 
 ## Delete SSH key for current user
 
@@ -942,7 +950,7 @@ Returns `204 No Content` on success, or `404 Not found` if the key cannot be fou
 
 ## List all GPG keys for given user
 
-Get a list of a specified user's GPG keys. Available only for admins.
+Get a list of a specified user's GPG keys. This endpoint can be accessed without authentication.
 
 ```plaintext
 GET /users/:id/gpg_keys
@@ -972,7 +980,8 @@ Example response:
 
 ## Get a specific GPG key for a given user
 
-Get a specific GPG key for a given user. Available only for admins.
+Get a specific GPG key for a given user. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43693)
+in GitLab 13.5, this endpoint can be accessed without admin authentication.
 
 ```plaintext
 GET /users/:id/gpg_keys/:key_id
@@ -1201,7 +1210,9 @@ Returns:
 
 - `201 OK` on success.
 - `404 User Not Found` if user cannot be found.
-- `403 Forbidden` when trying to block an already blocked user by LDAP synchronization.
+- `403 Forbidden` when trying to block:
+  - A user that is blocked through LDAP.
+  - An internal user.
 
 ## Unblock user
 
@@ -1238,7 +1249,8 @@ Returns:
 - `404 User Not Found` if user cannot be found.
 - `403 Forbidden` when trying to deactivate a user:
   - Blocked by admin or by LDAP synchronization.
-  - That has any activity in past 180 days. These users cannot be deactivated.
+  - That has any activity in past 90 days. These users cannot be deactivated.
+  - That is internal.
 
 ## Activate user
 
@@ -1292,6 +1304,7 @@ Example response:
 [
    {
       "active" : true,
+      "user_id" : 2,
       "scopes" : [
          "api"
       ],
@@ -1304,6 +1317,7 @@ Example response:
    },
    {
       "active" : false,
+      "user_id" : 2,
       "scopes" : [
          "read_user"
       ],
@@ -1343,6 +1357,7 @@ Example response:
 ```json
 {
    "active" : true,
+   "user_id" : 2,
    "scopes" : [
       "api"
    ],
@@ -1386,6 +1401,7 @@ Example response:
 {
    "id" : 2,
    "revoked" : false,
+   "user_id" : 2,
    "scopes" : [
       "api"
    ],

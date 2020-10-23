@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe API::GeoNodes, :request_store, :geo_fdw, :prometheus, api: true do
+RSpec.describe API::GeoNodes, :request_store, :geo, :prometheus, api: true do
   include ApiHelpers
   include ::EE::GeoHelpers
 

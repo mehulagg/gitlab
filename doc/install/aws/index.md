@@ -1,4 +1,7 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: howto
 ---
 
@@ -68,28 +71,32 @@ As we'll be using [Amazon S3 object storage](#amazon-s3-object-storage), our EC2
 1. Click **Create policy**, select the `JSON` tab, and add a policy. We want to [follow security best practices and grant _least privilege_](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege), giving our role only the permissions needed to perform the required actions.
    1. Assuming you prefix the S3 bucket names with `gl-` as shown in the diagram, add the following policy:
 
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "s3:AbortMultipartUpload",
-                "s3:CompleteMultipartUpload",
-                "s3:ListBucket",
-                "s3:PutObject",
-                "s3:GetObject",
-                "s3:DeleteObject",
-                "s3:PutObjectAcl"
-            ],
-            "Resource": [
-                "arn:aws:s3:::gl-*/*"
-            ]
-        }
-    ]
-}
-```
+   ```json
+   {   "Version": "2012-10-17",
+       "Statement": [
+           {
+               "Effect": "Allow",
+               "Action": [
+                   "s3:PutObject",
+                   "s3:GetObject",
+                   "s3:DeleteObject",
+                   "s3:PutObjectAcl"
+               ],
+               "Resource": "arn:aws:s3:::gl-*/*"
+           },
+           {
+               "Effect": "Allow",
+               "Action": [
+                   "s3:ListBucket",
+                   "s3:AbortMultipartUpload",
+                   "s3:ListMultipartUploadParts",
+                   "s3:ListBucketMultipartUploads"
+               ],
+               "Resource": "arn:aws:s3:::gl-*"
+           }
+       ]
+   }
+   ```
 
 1. Click **Review policy**, give your policy a name (we'll use `gl-s3-policy`), and click **Create policy**.
 
@@ -246,7 +253,7 @@ On the EC2 dashboard, look for Load Balancer in the left navigation bar:
    1. For **Ping Protocol**, select HTTP.
    1. For **Ping Port**, enter 80.
    1. For **Ping Path**, enter `/users/sign_in`. (We use `/users/sign_in` as it's a public endpoint that does
-   not require authorization.)
+   not require authentication.)
    1. Keep the default **Advanced Details** or adjust them according to your needs.
 1. Click **Add EC2 Instances** - don't add anything as we will create an Auto Scaling Group later to manage instances for us.
 1. Click **Add Tags** and add any tags you need.
@@ -305,7 +312,7 @@ We need a security group for our database that will allow inbound traffic from t
 
 ### Create the database
 
-DANGER: **Danger:**
+DANGER: **Warning:**
 Avoid using burstable instances (t class instances) for the database as this could lead to performance issues due to CPU credits running out during sustained periods of high load.
 
 Now, it's time to create the database:
@@ -459,7 +466,7 @@ Connect to your GitLab instance via **Bastion Host A** using [SSH Agent Forwardi
 
 #### Disable Let's Encrypt
 
-Since we're adding our SSL certificate at the load balancer, we do not need GitLab's built-in support for Let's Encrypt. Let's Encrypt [is enabled by default](https://docs.gitlab.com/omnibus/settings/ssl.html#lets-encrypt-integration) when using an `https` domain since GitLab 10.7, so we need to explicitly disable it:
+Since we're adding our SSL certificate at the load balancer, we do not need GitLab's built-in support for Let's Encrypt. Let's Encrypt [is enabled by default](https://docs.gitlab.com/omnibus/settings/ssl.html#lets-encrypt-integration) when using an `https` domain in GitLab 10.7 and later, so we need to explicitly disable it:
 
 1. Open `/etc/gitlab/gitlab.rb` and disable it:
 
@@ -575,7 +582,7 @@ Let's create an EC2 instance where we'll install Gitaly:
 1. Finally, acknowledge that you have access to the selected private key file or create a new one. Click **Launch Instances**.
 
 NOTE: **Note:**
-Instead of storing configuration _and_ repository data on the root volume, you can also choose to add an additional EBS volume for repository storage. Follow the same guidance as above. See the [Amazon EBS pricing](https://aws.amazon.com/ebs/pricing/). We do not recommend using EFS as it may negatively impact GitLab’s performance. You can review the [relevant documentation](../../administration/high_availability/nfs.md#avoid-using-awss-elastic-file-system-efs) for more details.
+Instead of storing configuration _and_ repository data on the root volume, you can also choose to add an additional EBS volume for repository storage. Follow the same guidance as above. See the [Amazon EBS pricing](https://aws.amazon.com/ebs/pricing/). We do not recommend using EFS as it may negatively impact GitLab’s performance. You can review the [relevant documentation](../../administration/nfs.md#avoid-using-awss-elastic-file-system-efs) for more details.
 
 Now that we have our EC2 instance ready, follow the [documentation to install GitLab and set up Gitaly on its own server](../../administration/gitaly/index.md#run-gitaly-on-its-own-server). Perform the client setup steps from that document on the [GitLab instance we created](#install-gitlab) above.
 
@@ -643,6 +650,13 @@ to eliminate the need for NFS to support GitLab Pages.
 
 That concludes the configuration changes for our GitLab instance. Next, we'll create a custom AMI based on this instance to use for our launch configuration and auto scaling group.
 
+### Log in for the first time
+
+Using the domain name you used when setting up [DNS for the load balancer](#configure-dns-for-load-balancer), you should now be able to visit GitLab in your browser. You will be asked to set up a password
+for the `root` user which has admin privileges on the GitLab instance. This password will be stored in the database.
+
+When our [auto scaling group](#create-an-auto-scaling-group) spins up new instances, we'll be able to log in with username `root` and the newly created password.
+
 ### Create custom AMI
 
 On the EC2 dashboard:
@@ -697,13 +711,6 @@ As the auto scaling group is created, you'll see your new instances spinning up 
 
 Since our instances are created by the auto scaling group, go back to your instances and terminate the [instance we created manually above](#install-gitlab). We only needed this instance to create our custom AMI.
 
-### Log in for the first time
-
-Using the domain name you used when setting up [DNS for the load balancer](#configure-dns-for-load-balancer), you should now be able to visit GitLab in your browser. The very first time you will be asked to set up a password
-for the `root` user which has admin privileges on the GitLab instance.
-
-After you set it up, login with username `root` and the newly created password.
-
 ## Health check and monitoring with Prometheus
 
 Apart from Amazon's Cloudwatch which you can enable on various services,
@@ -714,10 +721,10 @@ For more information on how to set it up, visit the
 GitLab also has various [health check endpoints](../../user/admin_area/monitoring/health_check.md)
 that you can ping and get reports.
 
-## GitLab Runners
+## GitLab Runner
 
 If you want to take advantage of [GitLab CI/CD](../../ci/README.md), you have to
-set up at least one [GitLab Runner](https://docs.gitlab.com/runner/).
+set up at least one [runner](https://docs.gitlab.com/runner/).
 
 Read more on configuring an
 [autoscaling GitLab Runner on AWS](https://docs.gitlab.com/runner/configuration/runner_autoscale_aws/).
@@ -795,7 +802,7 @@ to request additional material:
 
 - [Scaling GitLab](../../administration/reference_architectures/index.md):
   GitLab supports several different types of clustering.
-- [Geo replication](../../administration/geo/replication/index.md):
+- [Geo replication](../../administration/geo/index.md):
   Geo is the solution for widely distributed development teams.
 - [Omnibus GitLab](https://docs.gitlab.com/omnibus/) - Everything you need to know
   about administering your GitLab instance.

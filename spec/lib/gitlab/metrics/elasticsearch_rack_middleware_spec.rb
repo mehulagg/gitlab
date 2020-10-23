@@ -38,5 +38,16 @@ RSpec.describe Gitlab::Metrics::ElasticsearchRackMiddleware do
 
       expect { middleware.call(env) }.to raise_error(StandardError)
     end
+
+    context 'when there are no elasticsearch requests' do
+      let(:elasticsearch_requests_count) { 0 }
+
+      it 'does not record any metrics' do
+        expect(transaction).not_to receive(:observe).with(:http_elasticsearch_requests_duration_seconds)
+        expect(transaction).not_to receive(:increment).with(:http_elasticsearch_requests_total, 0)
+
+        middleware.call(env)
+      end
+    end
   end
 end

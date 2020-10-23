@@ -450,7 +450,7 @@ module Gitlab
 
       stack_string = Gitlab::BacktraceCleaner.clean_backtrace(caller).drop(1).join("\n")
 
-      Gitlab::SafeRequestStore[:stack_counter] ||= Hash.new
+      Gitlab::SafeRequestStore[:stack_counter] ||= {}
 
       count = Gitlab::SafeRequestStore[:stack_counter][stack_string] || 0
       Gitlab::SafeRequestStore[:stack_counter][stack_string] = count + 1
@@ -476,7 +476,7 @@ module Gitlab
       return unless stack_counter
 
       max = max_call_count
-      return if max.zero?
+      return if max == 0
 
       stack_counter.select { |_, v| v == max }.keys
     end

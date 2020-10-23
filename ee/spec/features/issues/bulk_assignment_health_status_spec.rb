@@ -62,10 +62,6 @@ RSpec.describe 'Issues > Health status bulk assignment' do
     end
   end
 
-  before do
-    stub_feature_flags(vue_issuables_list: false)
-  end
-
   context 'as an allowed user', :js do
     before do
       allow(group).to receive(:feature_enabled?).and_return(true)

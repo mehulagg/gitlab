@@ -14,6 +14,7 @@ RSpec.describe API::Geo do
   let(:geo_token_header) do
     { 'X-Gitlab-Token' => secondary_node.system_hook.token }
   end
+
   let(:invalid_geo_auth_header) do
     { Authorization: "#{::Gitlab::Geo::BaseRequest::GITLAB_GEO_AUTH_TOKEN_TYPE}...Test" }
   end

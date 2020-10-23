@@ -14,6 +14,7 @@ RSpec.describe PaginatedDiffEntity do
       pagination_data: diff_batch.pagination_data
     }
   end
+
   let(:entity) { described_class.new(diff_batch, options) }
 
   subject { entity.as_json }
@@ -29,15 +30,5 @@ RSpec.describe PaginatedDiffEntity do
       next_page_href: "/#{merge_request.project.full_path}/-/merge_requests/#{merge_request.iid}/diffs_batch.json?page=3",
       total_pages: 7
     )
-  end
-
-  context 'when code_navigation feature flag is disabled' do
-    it 'does not execute Gitlab::CodeNavigationPath' do
-      stub_feature_flags(code_navigation: false)
-
-      expect(Gitlab::CodeNavigationPath).not_to receive(:new)
-
-      subject
-    end
   end
 end

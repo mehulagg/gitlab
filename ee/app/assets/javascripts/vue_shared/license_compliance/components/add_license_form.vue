@@ -1,6 +1,6 @@
 <script>
+import { GlButton, GlFormRadioGroup, GlFormRadio } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { GlButton } from '@gitlab/ui';
 import { LICENSE_APPROVAL_STATUS } from '../constants';
 import AddLicenseFormDropdown from './add_license_form_dropdown.vue';
 import { s__ } from '~/locale';
@@ -10,6 +10,8 @@ export default {
   components: {
     AddLicenseFormDropdown,
     GlButton,
+    GlFormRadioGroup,
+    GlFormRadio,
   },
   mixins: [glFeatureFlagsMixin()],
   LICENSE_APPROVAL_STATUS,
@@ -32,6 +34,10 @@ export default {
       type: Array,
       required: false,
       default: () => [],
+    },
+    knownLicenses: {
+      type: Array,
+      required: true,
     },
     loading: {
       type: Boolean,
@@ -78,6 +84,7 @@ export default {
       <add-license-form-dropdown
         id="js-license-dropdown"
         v-model="licenseName"
+        :known-licenses="knownLicenses"
         :placeholder="s__('LicenseCompliance|License name')"
       />
       <div class="invalid-feedback" :class="{ 'd-block': isInvalidLicense }">
@@ -85,28 +92,21 @@ export default {
       </div>
     </div>
     <div class="form-group">
-      <div
-        v-for="option in $options.approvalStatusOptions"
-        :key="option.value"
-        class="form-check"
-        :class="{ 'mb-3': isDescriptionEnabled }"
-      >
-        <input
-          :id="`js-${option.value}-license-radio`"
-          v-model="approvalStatus"
-          class="form-check-input"
-          type="radio"
-          :data-qa-selector="`${option.value}_license_radio`"
+      <gl-form-radio-group v-model="approvalStatus" name="approvalStatus">
+        <gl-form-radio
+          v-for="option in $options.approvalStatusOptions"
+          :key="option.value"
           :value="option.value"
+          :data-qa-selector="`${option.value}_license_radio`"
           :aria-describedby="`js-${option.value}-license-radio`"
-        />
-        <label :for="`js-${option.value}-license-radio`" class="form-check-label pt-1">
-          {{ option.label }}
-        </label>
-        <div v-if="isDescriptionEnabled" class="text-secondary">
-          {{ option.description }}
-        </div>
-      </div>
+          :class="{ 'mb-3': isDescriptionEnabled }"
+        >
+          <template>{{ option.label }}</template>
+          <div v-if="isDescriptionEnabled" class="text-secondary">
+            {{ option.description }}
+          </div>
+        </gl-form-radio>
+      </gl-form-radio-group>
     </div>
     <div class="gl-display-flex">
       <gl-button

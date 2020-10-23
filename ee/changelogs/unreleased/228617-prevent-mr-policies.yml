@@ -1,5 +1,0 @@
----
-title: Prevent certain policies at Merge Request level when namespace exceeds storage limit
-merge_request: 36713
-author:
-type: added

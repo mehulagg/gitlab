@@ -4,7 +4,7 @@ import waitForPromises from 'helpers/wait_for_promises';
 import createState from 'ee/security_dashboard/store/modules/project_selector/state';
 import * as types from 'ee/security_dashboard/store/modules/project_selector/mutation_types';
 import * as actions from 'ee/security_dashboard/store/modules/project_selector/actions';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/flash');
@@ -430,7 +430,7 @@ describe('EE projectSelector actions', () => {
       actions.receiveRemoveProjectError(mockDispatchContext);
 
       expect(createFlash).toHaveBeenCalledTimes(1);
-      expect(createFlash).toHaveBeenCalledWith('Something went wrong, unable to remove project');
+      expect(createFlash).toHaveBeenCalledWith('Something went wrong, unable to delete project');
     });
   });
 
@@ -572,59 +572,6 @@ describe('EE projectSelector actions', () => {
         ],
         [],
       ));
-  });
-
-  describe('fetchSearchResultsNextPage', () => {
-    describe('when the current page-index is smaller than the number of total pages', () => {
-      beforeEach(() => {
-        state.pageInfo.totalPages = 2;
-        state.pageInfo.page = 1;
-      });
-
-      it('dispatches the "receiveNextPageSuccess" action if the request is successful', () => {
-        const projects = [{ id: 0, name: 'mock-name1' }];
-
-        mockAxios.onGet().replyOnce(200, projects, responseHeaders);
-
-        return testAction(
-          actions.fetchSearchResultsNextPage,
-          null,
-          state,
-          [
-            {
-              type: types.RECEIVE_NEXT_PAGE_SUCCESS,
-              payload: { data: projects, headers: responseHeaders, pageInfo },
-            },
-          ],
-          [],
-        );
-      });
-
-      it('dispatches the "receiveSearchResultsError" action if the request is not successful', () => {
-        mockAxios.onGet(mockListEndpoint).replyOnce(500);
-
-        return testAction(
-          actions.fetchSearchResultsNextPage,
-          null,
-          state,
-          [],
-          [
-            {
-              type: 'receiveSearchResultsError',
-            },
-          ],
-        );
-      });
-    });
-
-    describe('when the current page-index is equal to the number of total pages', () => {
-      it('does not commit any mutations or dispatch any actions', () => {
-        state.pageInfo.totalPages = 1;
-        state.pageInfo.page = 1;
-
-        return testAction(actions.fetchSearchResultsNextPage, [], state);
-      });
-    });
   });
 
   describe('setProjectEndpoints', () => {

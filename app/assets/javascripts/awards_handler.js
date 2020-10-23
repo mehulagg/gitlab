@@ -7,7 +7,7 @@ import Cookies from 'js-cookie';
 import { __ } from './locale';
 import { updateTooltipTitle } from './lib/utils/common_utils';
 import { isInVueNoteablePage } from './lib/utils/dom_utils';
-import flash from './flash';
+import { deprecatedCreateFlash as flash } from './flash';
 import axios from './lib/utils/axios_utils';
 import * as Emoji from '~/emoji';
 
@@ -572,7 +572,7 @@ export class AwardsHandler {
   }
 
   findMatchingEmojiElements(query) {
-    const emojiMatches = this.emoji.filterEmojiNamesByAlias(query);
+    const emojiMatches = this.emoji.searchEmoji(query, { match: 'fuzzy' }).map(({ name }) => name);
     const $emojiElements = $('.emoji-menu-list:not(.frequent-emojis) [data-name]');
     const $matchingElements = $emojiElements.filter(
       (i, elm) => emojiMatches.indexOf(elm.dataset.name) >= 0,

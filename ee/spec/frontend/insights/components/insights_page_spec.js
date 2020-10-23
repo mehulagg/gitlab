@@ -1,48 +1,83 @@
-import Vue from 'vue';
+import Vuex from 'vuex';
+import { GlEmptyState } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { GlColumnChart } from '@gitlab/ui/dist/charts';
+
 import InsightsPage from 'ee/insights/components/insights_page.vue';
+import InsightsChart from 'ee/insights/components/insights_chart.vue';
 import { createStore } from 'ee/insights/stores';
-import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { TEST_HOST } from 'helpers/test_constants';
-import { chartInfo, pageInfo, pageInfoNoCharts } from 'ee_jest/insights/mock_data';
+import { chartInfo, pageInfo, pageInfoNoCharts, barChartData } from 'ee_jest/insights/mock_data';
+
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
 describe('Insights page component', () => {
-  let component;
   let store;
-  let Component;
+  let wrapper;
+
+  const createComponent = (props = {}) => {
+    wrapper = shallowMount(InsightsPage, {
+      localVue,
+      store,
+      propsData: {
+        queryEndpoint: `${TEST_HOST}/query`,
+        pageConfig: pageInfoNoCharts,
+        ...props,
+      },
+    });
+  };
+
+  const createLoadingChartData = () => {
+    return pageInfo.charts.reduce((memo, chart) => {
+      return { ...memo, [chart.title]: {} };
+    }, {});
+  };
+
+  const createLoadedChartData = () => {
+    return pageInfo.charts.reduce((memo, chart) => {
+      return {
+        ...memo,
+        [chart.title]: {
+          loaded: true,
+          type: chart.type,
+          description: '',
+          data: barChartData,
+          error: null,
+        },
+      };
+    }, {});
+  };
+
+  const findInsightsChartData = () => wrapper.find(InsightsChart);
 
   beforeEach(() => {
     store = createStore();
     jest.spyOn(store, 'dispatch').mockImplementation(() => {});
-    Component = Vue.extend(InsightsPage);
   });
 
   afterEach(() => {
-    component.$destroy();
+    wrapper.destroy();
+    wrapper = null;
   });
 
   describe('no chart config available', () => {
-    it('shows an empty state', () => {
-      component = mountComponentWithStore(Component, {
-        store,
-        props: {
-          queryEndpoint: `${TEST_HOST}/query`,
-          pageConfig: pageInfoNoCharts,
-        },
-      });
+    beforeEach(() => {
+      createComponent();
+    });
 
-      expect(component.$el.querySelector('.js-empty-state')).not.toBe(null);
+    it('does not fetch chart data when mounted', () => {
+      expect(store.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('shows an empty state', () => {
+      expect(wrapper.find(GlEmptyState).exists()).toBe(true);
     });
   });
 
   describe('charts configured', () => {
     beforeEach(() => {
-      component = mountComponentWithStore(Component, {
-        store,
-        props: {
-          queryEndpoint: `${TEST_HOST}/query`,
-          pageConfig: pageInfo,
-        },
-      });
+      createComponent({ pageConfig: pageInfo });
     });
 
     it('fetches chart data when mounted', () => {
@@ -52,44 +87,44 @@ describe('Insights page component', () => {
       });
     });
 
+    it('does not show empty state', () => {
+      expect(wrapper.find(GlEmptyState).exists()).toBe(false);
+    });
+
+    describe('pageConfig changes', () => {
+      it('reflects new state', async () => {
+        wrapper.setProps({ pageConfig: pageInfoNoCharts });
+
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find(GlEmptyState).exists()).toBe(true);
+      });
+    });
+
     describe('when charts loading', () => {
       beforeEach(() => {
-        component.$store.state.insights.pageLoading = true;
+        store.state.insights.chartData = createLoadingChartData();
       });
 
       it('renders loading state', () => {
-        return component.$nextTick(() => {
-          expect(
-            component.$el.querySelector('.js-insights-page-container .insights-chart-loading'),
-          ).not.toBe(null);
-        });
-      });
-
-      it('does display chart area', () => {
-        return component.$nextTick(() => {
-          expect(
-            component.$el.querySelector('.js-insights-page-container .insights-charts'),
-          ).not.toBe(null);
+        expect(findInsightsChartData().props()).toMatchObject({
+          loaded: false,
         });
       });
 
       it('does not display chart', () => {
-        return component.$nextTick(() => {
-          expect(
-            component.$el.querySelector(
-              '.js-insights-page-container .insights-charts .insights-chart',
-            ),
-          ).toBe(null);
-        });
+        expect(wrapper.find(GlColumnChart).exists()).toBe(false);
       });
     });
 
-    describe('pageConfig changes', () => {
-      it('reflects new state', () => {
-        component.pageConfig = pageInfoNoCharts;
+    describe('charts configured and loaded', () => {
+      beforeEach(() => {
+        store.state.insights.chartData = createLoadedChartData();
+      });
 
-        return component.$nextTick(() => {
-          expect(component.$el.querySelector('.js-empty-state')).not.toBe(null);
+      it('does not render loading state', () => {
+        expect(findInsightsChartData().props()).toMatchObject({
+          loaded: true,
         });
       });
     });

@@ -44,6 +44,28 @@ describe('History Comment Editor', () => {
     expect(wrapper.emitted().onSave[0][0]).toBe(comment);
   });
 
+  it('sanitizes a new comment to protect against an XSS attack', () => {
+    createWrapper();
+    const comment = '"><img src=x onerror=alert(document.domain)>';
+    const sanitizedComment = '"&gt;<img src="x">';
+    textarea().vm.$emit('input', comment);
+    saveButton().vm.$emit('click');
+
+    expect(wrapper.emitted().onSave).toHaveLength(1);
+    expect(wrapper.emitted().onSave[0][0]).toBe(sanitizedComment);
+  });
+
+  it('sanitizes a new comment to protect against an XSS attack using an iframe', () => {
+    createWrapper();
+    const comment = `"><iframe src='hxxps://nefarious.com'>'`;
+    const sanitizedComment = `"&gt;`;
+    textarea().vm.$emit('input', comment);
+    saveButton().vm.$emit('click');
+
+    expect(wrapper.emitted().onSave).toHaveLength(1);
+    expect(wrapper.emitted().onSave[0][0]).toBe(sanitizedComment);
+  });
+
   it('emits the cancel event when the cancel button is clicked', () => {
     createWrapper();
     cancelButton().vm.$emit('click');
@@ -51,20 +73,19 @@ describe('History Comment Editor', () => {
     expect(wrapper.emitted().onCancel).toHaveLength(1);
   });
 
-  it('disables the save button when there is no text or only whitespace in the textarea', () => {
+  it('disables the save button when there is no text or only whitespace in the textarea', async () => {
     createWrapper({ initialComment: 'some comment' });
     textarea().vm.$emit('input', '    ');
+    await wrapper.vm.$nextTick();
 
-    return wrapper.vm.$nextTick().then(() => {
-      expect(saveButton().attributes('disabled')).toBeTruthy();
-    });
+    expect(saveButton().props('disabled')).toBe(true);
   });
 
-  it('disables all elements when the isSaving prop is true', () => {
+  it('disables all elements when the comment is being saved', () => {
     createWrapper({ isSaving: true });
 
     expect(textarea().attributes('disabled')).toBeTruthy();
-    expect(saveButton().attributes('disabled')).toBeTruthy();
-    expect(cancelButton().attributes('disabled')).toBeTruthy();
+    expect(saveButton().props('loading')).toBe(true);
+    expect(cancelButton().props('disabled')).toBe(true);
   });
 });

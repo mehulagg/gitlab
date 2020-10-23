@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Scoped issue boards', :js do
   include FilteredSearchHelpers
+  include MobileHelpers
 
   let(:user) { create(:user) }
   let(:group) { create(:group, :public) }
@@ -34,8 +35,14 @@ RSpec.describe 'Scoped issue boards', :js do
 
       login_as(user)
 
+      # ensure there is enough vertical space for create/edit board modal
+      resize_window(1920, 1080)
       visit project_boards_path(project)
       wait_for_requests
+    end
+
+    after do
+      restore_window_size
     end
 
     context 'new board' do
@@ -238,7 +245,7 @@ RSpec.describe 'Scoped issue boards', :js do
 
           find('.board-card', match: :first)
 
-          expect(page).to have_selector('.board', count: 3)
+          expect(page).to have_selector('.board', count: 4)
           expect(all('.board').first).to have_selector('.board-card', count: 2)
           expect(all('.board').last).to have_selector('.board-card', count: 1)
         end
@@ -391,7 +398,7 @@ RSpec.describe 'Scoped issue boards', :js do
       let!(:list) { create(:list, board: board, label: project_label, position: 0) }
 
       it 'removes issues milestone when removing from the board' do
-        board.update(milestone: milestone, assignee: user)
+        board.update!(milestone: milestone, assignee: user)
         visit project_boards_path(project)
         wait_for_requests
 
@@ -465,14 +472,14 @@ RSpec.describe 'Scoped issue boards', :js do
     button = first('.filter-dropdown-container .btn.btn-inverted')
     expect(button.text).to include(button_title)
     expect(button[:class]).to include('dot-highlight')
-    expect(button['data-original-title']).to include('This board\'s scope is reduced')
+    expect(button['title']).to include('This board\'s scope is reduced')
   end
 
   def expect_no_dot_highlight(button_title)
     button = first('.filter-dropdown-container .btn.btn-inverted')
     expect(button.text).to include(button_title)
     expect(button[:class]).not_to include('dot-highlight')
-    expect(button['data-original-title']).not_to include('This board\'s scope is reduced')
+    expect(button['title']).not_to include('This board\'s scope is reduced')
   end
 
   # Create board helper methods

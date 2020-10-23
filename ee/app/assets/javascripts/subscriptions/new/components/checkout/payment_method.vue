@@ -1,7 +1,7 @@
 <script>
 import { GlSprintf } from '@gitlab/ui';
-import { sprintf, s__ } from '~/locale';
 import { mapState } from 'vuex';
+import { sprintf, s__ } from '~/locale';
 import Step from './step.vue';
 import Zuora from './zuora.vue';
 

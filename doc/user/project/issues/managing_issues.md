@@ -127,6 +127,7 @@ field).
 | title                | `issue[title]`        |                                                       |
 | description          | `issue[description]`  |                                                       |
 | description template | `issuable_template`   |                                                       |
+| issue type           | `issue[issue_type]`   | Either `incident` or `issue`                                     |
 | confidential         | `issue[confidential]` | Parameter value must be `true` to set to confidential |
 
 Follow these examples to form your new issue URL with prefilled fields.
@@ -287,3 +288,7 @@ To add an issue to an [iteration](../../group/iterations/index.md):
 
 1. In an issue sidebar, click **Edit** next to **Iteration**. A dropdown appears.
 1. Click an iteration you'd like to associate this issue with.
+
+You can also use the `/iteration`
+[quick action](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics)
+in a comment or description field.

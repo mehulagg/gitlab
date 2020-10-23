@@ -180,10 +180,6 @@
     word-break: break-all;
   }
 
-  .member-group-link {
-    display: inline-block;
-  }
-
   .form-control {
     width: inherit;
   }
@@ -210,6 +206,32 @@
     .form-control {
       width: 100%;
     }
+  }
+}
+
+
+.members-table {
+  @include media-breakpoint-up(lg) {
+    .col-meta {
+      width: px-to-rem(150px);
+    }
+
+    .col-max-role {
+      width: px-to-rem(175px);
+    }
+
+    .col-expiration {
+      width: px-to-rem(200px);
+    }
+
+    .col-actions {
+      width: px-to-rem(50px);
+    }
+  }
+
+  .gl-datepicker-input {
+    width: px-to-rem(165px);
+    max-width: 100%;
   }
 }
 

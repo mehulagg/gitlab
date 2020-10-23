@@ -141,6 +141,15 @@ module QA
         end
       end
 
+      # Use this to simulate moving the pointer to an element's coordinate
+      # and sending a click event.
+      # This is a helpful workaround when there is a transparent element overlapping
+      # the target element and so, normal `click_element` on target would raise
+      # Selenium::WebDriver::Error::ElementClickInterceptedError
+      def click_element_coordinates(name)
+        page.driver.browser.action.move_to(find_element(name).native).click.perform
+      end
+
       # replace with (..., page = self.class)
       def click_element(name, page = nil, **kwargs)
         wait_for_requests

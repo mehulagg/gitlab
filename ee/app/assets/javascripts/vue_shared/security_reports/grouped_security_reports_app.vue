@@ -2,6 +2,8 @@
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { once } from 'lodash';
 import { componentNames } from 'ee/reports/components/issue_body';
+import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
+import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
@@ -11,9 +13,7 @@ import IssueModal from './components/modal.vue';
 import DastModal from './components/dast_modal.vue';
 import securityReportsMixin from './mixins/security_report_mixin';
 import createStore from './store';
-import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
 import { mrStates } from '~/mr_popover/constants';
-import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
 import { fetchPolicies } from '~/lib/graphql';
 import securityReportSummaryQuery from './graphql/mr_security_report_summary.graphql';
 import SecuritySummary from './components/security_summary.vue';
@@ -223,13 +223,20 @@ export default {
       return this.enabledReports.dast;
     },
     hasCoverageFuzzingReports() {
-      return this.enabledReports.coverageFuzzing;
+      /*
+       * Fixes bug https://gitlab.com/gitlab-org/gitlab/-/issues/255183
+       * For https://gitlab.com/gitlab-org/gitlab/-/issues/210343 change to:
+       * return this.enabledReports.coverageFuzzing;
+       */
+      return (
+        gl?.mrWidgetData?.coverage_fuzzing_comparison_path && this.enabledReports.coverageFuzzing
+      );
     },
     hasSastReports() {
       return this.enabledReports.sast;
     },
     hasSecretScanningReports() {
-      return this.enabledReports.secretScanning;
+      return this.enabledReports.secretDetection;
     },
     isMRActive() {
       return this.mrState !== mrStates.merged && this.mrState !== mrStates.closed;
@@ -237,8 +244,8 @@ export default {
     isMRBranchOutdated() {
       return this.divergedCommitsCount > 0;
     },
-    dastScans() {
-      return this.dast.scans.filter(scan => scan.scanned_resources_count > 0);
+    hasDastScannedResources() {
+      return this.dastSummary?.scannedResourcesCount > 0;
     },
     handleToggleEvent() {
       return once(() => {
@@ -491,15 +498,14 @@ export default {
               <security-summary :message="groupedDastText" />
             </template>
 
-            <template v-if="dastScans.length">
+            <template v-if="hasDastScannedResources">
               <div class="text-nowrap">
-                {{ n__('%d URL scanned', '%d URLs scanned', dastScans[0].scanned_resources_count) }}
+                {{ n__('%d URL scanned', '%d URLs scanned', dastSummary.scannedResourcesCount) }}
               </div>
               <gl-link v-gl-modal.dastUrl class="ml-2" data-qa-selector="dast-ci-job-link">
                 {{ __('View details') }}
               </gl-link>
               <dast-modal
-                v-if="dastSummary"
                 :scanned-urls="dastSummary.scannedResources.nodes"
                 :scanned-resources-count="dastSummary.scannedResourcesCount"
                 :download-link="dastDownloadLink"

@@ -21,21 +21,21 @@ module Geo
         @scheduled_file_ids = scheduled_file_ids
       end
 
-      def find_unsynced_jobs(batch_size:)
+      def find_jobs_never_attempted_sync(batch_size:)
         convert_registry_relation_to_job_args(
-          registry_finder.find_never_synced_registries(find_batch_params(batch_size))
+          registry_finder.find_registries_never_attempted_sync(**find_batch_params(batch_size))
         )
       end
 
-      def find_failed_jobs(batch_size:)
+      def find_jobs_needs_sync_again(batch_size:)
         convert_registry_relation_to_job_args(
-          registry_finder.find_retryable_failed_registries(find_batch_params(batch_size))
+          registry_finder.find_registries_needs_sync_again(**find_batch_params(batch_size))
         )
       end
 
-      def find_synced_missing_on_primary_jobs(batch_size:)
+      def find_jobs_synced_missing_on_primary(batch_size:)
         convert_registry_relation_to_job_args(
-          registry_finder.find_retryable_synced_missing_on_primary_registries(find_batch_params(batch_size))
+          registry_finder.find_retryable_synced_missing_on_primary_registries(**find_batch_params(batch_size))
         )
       end
 

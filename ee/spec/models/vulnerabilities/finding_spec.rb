@@ -108,82 +108,6 @@ RSpec.describe Vulnerabilities::Finding do
     end
   end
 
-  describe '.count_by_day_and_severity' do
-    let(:project) { create(:project) }
-    let(:date_1) { Time.zone.parse('2018-11-11') }
-    let(:date_2) { Time.zone.parse('2018-11-12') }
-
-    before do
-      travel_to(date_1) do
-        pipeline = create(:ci_pipeline, :success, project: project)
-
-        create_list(:vulnerabilities_finding, 2,
-          pipelines: [pipeline], project: project, report_type: :sast, severity: :high)
-      end
-
-      travel_to(date_2) do
-        pipeline = create(:ci_pipeline, :success, project: project)
-
-        create_list(:vulnerabilities_finding, 2,
-          pipelines: [pipeline], project: project, report_type: :dependency_scanning, severity: :low)
-
-        create_list(:vulnerabilities_finding, 1,
-          pipelines: [pipeline], project: project, report_type: :dast, severity: :medium)
-
-        create_list(:vulnerabilities_finding, 1,
-          pipelines: [pipeline], project: project, report_type: :dast, severity: :low)
-
-        create_list(:vulnerabilities_finding, 2,
-          pipelines: [pipeline], project: project, report_type: :secret_detection, severity: :critical)
-      end
-    end
-
-    subject do
-      travel_to(Time.zone.parse('2018-11-15')) do
-        described_class.count_by_day_and_severity(range)
-      end
-    end
-
-    context 'within 3-day period' do
-      let(:range) { 3.days }
-
-      it 'returns expected counts for findings' do
-        first, second, third = subject
-
-        expect(first.day).to eq(date_2)
-        expect(first.severity).to eq('low')
-        expect(first.count).to eq(3)
-        expect(second.day).to eq(date_2)
-        expect(second.severity).to eq('medium')
-        expect(second.count).to eq(1)
-        expect(third.day).to eq(date_2)
-        expect(third.severity).to eq('critical')
-        expect(third.count).to eq(2)
-      end
-    end
-
-    context 'within 4-day period' do
-      let(:range) { 4.days }
-
-      it 'returns expected counts for findings' do
-        first, second, third, forth = subject
-
-        expect(first.day).to eq(date_1)
-        expect(first.severity).to eq('high')
-        expect(first.count).to eq(2)
-        expect(second.day).to eq(date_2)
-        expect(second.severity).to eq('low')
-        expect(second.count).to eq(3)
-        expect(third.day).to eq(date_2)
-        expect(third.severity).to eq('medium')
-        expect(third.count).to eq(1)
-        expect(forth.day).to eq(date_2)
-        expect(forth.severity).to eq('critical')
-        expect(forth.count).to eq(2)
-      end
-    end
-  end
-
   describe '.by_report_types' do
     let!(:vulnerability_sast) { create(:vulnerabilities_finding, report_type: :sast) }
     let!(:vulnerability_secret_detection) { create(:vulnerabilities_finding, report_type: :secret_detection) }
@@ -328,6 +252,44 @@ RSpec.describe Vulnerabilities::Finding do
     end
   end
 
+  describe '.dismissed' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:project2) { create(:project) }
+    let!(:finding1) { create(:vulnerabilities_finding, project: project) }
+    let!(:finding2) { create(:vulnerabilities_finding, project: project, report_type: :dast) }
+    let!(:finding3) { create(:vulnerabilities_finding, project: project2) }
+
+    before do
+      create(
+        :vulnerability_feedback,
+        :dismissal,
+        project: finding1.project,
+        project_fingerprint: finding1.project_fingerprint
+      )
+      create(
+        :vulnerability_feedback,
+        :dismissal,
+        project_fingerprint: finding2.project_fingerprint,
+        project: project2
+      )
+      create(
+        :vulnerability_feedback,
+        :dismissal,
+        category: :sast,
+        project_fingerprint: finding2.project_fingerprint,
+        project: finding2.project
+      )
+    end
+
+    it 'returns all dismissed findings' do
+      expect(described_class.dismissed).to contain_exactly(finding1)
+    end
+
+    it 'returns dismissed findings for project' do
+      expect(project.vulnerability_findings.dismissed).to contain_exactly(finding1)
+    end
+  end
+
   describe '.batch_count_by_project_and_severity' do
     let(:pipeline) { create(:ci_pipeline, :success, project: project) }
     let(:project) { create(:project) }
@@ -451,6 +413,9 @@ RSpec.describe Vulnerabilities::Finding do
         )
       end
 
+      let(:vulnerability) { create(:vulnerability, findings: [finding]) }
+      let!(:issue_link) { create(:vulnerabilities_issue_link, vulnerability: vulnerability, issue: issue)}
+
       it 'returns associated feedback' do
         feedback = finding.issue_feedback
 
@@ -458,6 +423,27 @@ RSpec.describe Vulnerabilities::Finding do
         expect(feedback[:project_id]).to eq project.id
         expect(feedback[:feedback_type]).to eq 'issue'
         expect(feedback[:issue_id]).to eq issue.id
+      end
+
+      context 'when there is no feedback for the vulnerability' do
+        let(:vulnerability_no_feedback) { create(:vulnerability, findings: [finding_no_feedback]) }
+        let!(:finding_no_feedback) { create(:vulnerabilities_finding, :dependency_scanning, project: project) }
+
+        it 'does not return unassociated feedback' do
+          feedback = finding_no_feedback.issue_feedback
+
+          expect(feedback).not_to be_present
+        end
+      end
+
+      context 'when there is no vulnerability associated with the finding' do
+        let!(:finding_no_vulnerability) { create(:vulnerabilities_finding, :dependency_scanning, project: project) }
+
+        it 'does not return feedback' do
+          feedback = finding_no_vulnerability.issue_feedback
+
+          expect(feedback).not_to be_present
+        end
       end
     end
 
@@ -683,13 +669,44 @@ RSpec.describe Vulnerabilities::Finding do
     it { is_expected.to eql(expected_message) }
   end
 
-  describe '#cve' do
+  describe '#cve_value' do
     let(:finding) { build(:vulnerabilities_finding) }
-    let(:expected_cve) { finding.metadata['cve'] }
+    let(:expected_cve) { 'CVE-2020-0000' }
 
-    subject { finding.cve }
+    subject { finding.cve_value }
+
+    before do
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'cve', name: expected_cve)
+    end
 
     it { is_expected.to eql(expected_cve) }
+  end
+
+  describe '#cwe_value' do
+    let(:finding) { build(:vulnerabilities_finding) }
+    let(:expected_cwe) { 'CWE-0000' }
+
+    subject { finding.cwe_value }
+
+    before do
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'cwe', name: expected_cwe)
+    end
+
+    it { is_expected.to eql(expected_cwe) }
+  end
+
+  describe '#other_identifier_values' do
+    let(:finding) { build(:vulnerabilities_finding) }
+    let(:expected_values) { ['ID 1', 'ID 2'] }
+
+    subject { finding.other_identifier_values }
+
+    before do
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'foo', name: expected_values.first)
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'bar', name: expected_values.second)
+    end
+
+    it { is_expected.to match_array(expected_values) }
   end
 
   describe "#metadata" do

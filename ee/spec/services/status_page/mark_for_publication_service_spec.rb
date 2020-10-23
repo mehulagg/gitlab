@@ -56,7 +56,7 @@ RSpec.describe StatusPage::MarkForPublicationService do
         specify { expect(subject).to be_success }
 
         it 'increments the publish counter' do
-          expect(StatusPage::UsageDataCounters::IncidentCounter).to receive(:count).with(:publishes).once
+          expect(Gitlab::StatusPage::UsageDataCounters::IncidentCounter).to receive(:count).with(:publishes).once
 
           subject
         end

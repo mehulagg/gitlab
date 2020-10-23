@@ -136,7 +136,7 @@ module Banzai
       end
 
       def call
-        return doc unless project || group
+        return doc unless project || group || user
 
         ref_pattern = object_class.reference_pattern
         link_pattern = object_class.link_reference_pattern
@@ -265,7 +265,7 @@ module Banzai
         extras = []
 
         if matches.names.include?("anchor") && matches[:anchor] && matches[:anchor] =~ /\A\#note_(\d+)\z/
-          extras << "comment #{$1}"
+          extras << "comment #{Regexp.last_match(1)}"
         end
 
         extension = matches[:extension] if matches.names.include?("extension")
@@ -280,7 +280,7 @@ module Banzai
       end
 
       def object_link_text(object, matches)
-        parent = context[:project] || context[:group]
+        parent = project || group || user
         text = object.reference_link_text(parent)
 
         extras = object_link_text_extras(object, matches)
@@ -436,7 +436,7 @@ module Banzai
         escaped = escape_html_entities(text)
 
         escaped.gsub(REFERENCE_PLACEHOLDER_PATTERN) do |match|
-          placeholder_data[$1.to_i]
+          placeholder_data[Regexp.last_match(1).to_i]
         end
       end
     end

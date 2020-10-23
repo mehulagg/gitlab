@@ -4,18 +4,11 @@ import { GlToast } from '@gitlab/ui';
 import AccessorUtilities from '~/lib/utils/accessor';
 import PersistentUserCallout from '../persistent_user_callout';
 import { s__, sprintf } from '../locale';
-import Flash from '../flash';
+import { deprecatedCreateFlash as Flash } from '../flash';
 import Poll from '../lib/utils/poll';
 import initSettingsPanels from '../settings_panels';
 import eventHub from './event_hub';
-import {
-  APPLICATION_STATUS,
-  INGRESS,
-  INGRESS_DOMAIN_SUFFIX,
-  CROSSPLANE,
-  KNATIVE,
-  FLUENTD,
-} from './constants';
+import { APPLICATION_STATUS, CROSSPLANE, KNATIVE, FLUENTD } from './constants';
 import ClustersService from './services/clusters_service';
 import ClustersStore from './stores/clusters_store';
 import Applications from './components/applications.vue';
@@ -120,10 +113,6 @@ export default class Clusters {
     this.errorReasonContainer = this.errorContainer.querySelector('.js-error-reason');
     this.successApplicationContainer = document.querySelector('.js-cluster-application-notice');
     this.tokenField = document.querySelector('.js-cluster-token');
-    this.ingressDomainHelpText = document.querySelector('.js-ingress-domain-help-text');
-    this.ingressDomainSnippet =
-      this.ingressDomainHelpText &&
-      this.ingressDomainHelpText.querySelector('.js-ingress-domain-snippet');
 
     initProjectSelectDropdown();
     Clusters.initDismissableCallout();
@@ -248,7 +237,7 @@ export default class Clusters {
   }
 
   addBannerCloseHandler(el, status) {
-    el.querySelector('.js-close-banner').addEventListener('click', () => {
+    el.querySelector('.js-close').addEventListener('click', () => {
       el.classList.add('hidden');
       this.setBannerDismissedState(status, true);
     });
@@ -326,13 +315,6 @@ export default class Clusters {
 
     this.checkForNewInstalls(prevApplicationMap, this.store.state.applications);
     this.updateContainer(prevStatus, this.store.state.status, this.store.state.statusReason);
-
-    if (this.ingressDomainHelpText) {
-      this.toggleIngressDomainHelpText(
-        prevApplicationMap[INGRESS],
-        this.store.state.applications[INGRESS],
-      );
-    }
 
     if (this.store.state.applications[KNATIVE]?.status === APPLICATION_STATUS.INSTALLED) {
       initServerlessSurveyBanner();
@@ -503,13 +485,6 @@ export default class Clusters {
     Object.entries(settings).forEach(([key, value]) => {
       this.store.updateAppProperty(FLUENTD, key, value);
     });
-  }
-
-  toggleIngressDomainHelpText({ externalIp }, { externalIp: newExternalIp }) {
-    if (externalIp !== newExternalIp) {
-      this.ingressDomainHelpText.classList.toggle('hide', !newExternalIp);
-      this.ingressDomainSnippet.textContent = `${newExternalIp}${INGRESS_DOMAIN_SUFFIX}`;
-    }
   }
 
   saveKnativeDomain(data) {

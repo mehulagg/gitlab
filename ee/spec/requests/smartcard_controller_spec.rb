@@ -168,7 +168,7 @@ RSpec.describe SmartcardController, type: :request do
 
           expect(AuditEventService).to(
             receive(:new)
-              .with(instance_of(User), instance_of(User), with: auth_method)
+              .with(instance_of(User), instance_of(User), with: auth_method, ip_address: '127.0.0.1')
               .and_return(audit_event_service))
           expect(audit_event_service).to receive_message_chain(:for_authentication, :security_event)
 
@@ -299,6 +299,7 @@ RSpec.describe SmartcardController, type: :request do
           entry['mail'] = ldap_email
         end
       end
+
       let(:ldap_user_search_scope) { 'dc=example,dc=com' }
       let(:ldap_search_params) do
         { attributes: array_including('dn', 'cn', 'mail', 'uid', 'userid'),
@@ -310,7 +311,7 @@ RSpec.describe SmartcardController, type: :request do
 
       subject do
         get(verify_certificate_smartcard_path,
-            { params: params.merge({ provider: 'ldapmain' }) })
+            params: params.merge({ provider: 'ldapmain' }))
       end
 
       before do

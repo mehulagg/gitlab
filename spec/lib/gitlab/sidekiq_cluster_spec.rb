@@ -91,6 +91,7 @@ RSpec.describe Gitlab::SidekiqCluster do
     let(:options) do
       { env: :production, directory: 'foo/bar', max_concurrency: 20, min_concurrency: 0, worker_id: first_worker_id, timeout: 10, dryrun: false }
     end
+
     let(:env) { { "ENABLE_SIDEKIQ_CLUSTER" => "1", "SIDEKIQ_WORKER_ID" => first_worker_id.to_s } }
     let(:args) { ['bundle', 'exec', 'sidekiq', anything, '-eproduction', '-t10', *([anything] * 5)] }
 
@@ -98,7 +99,7 @@ RSpec.describe Gitlab::SidekiqCluster do
       allow(Process).to receive(:spawn).and_return(1)
 
       expect(described_class).to receive(:wait_async).with(1)
-      expect(described_class.start_sidekiq(%w(foo), options)).to eq(1)
+      expect(described_class.start_sidekiq(%w(foo), **options)).to eq(1)
     end
 
     it 'handles duplicate queue names' do
@@ -108,7 +109,7 @@ RSpec.describe Gitlab::SidekiqCluster do
         .and_return(1)
 
       expect(described_class).to receive(:wait_async).with(1)
-      expect(described_class.start_sidekiq(%w(foo foo bar baz), options)).to eq(1)
+      expect(described_class.start_sidekiq(%w(foo foo bar baz), **options)).to eq(1)
     end
 
     it 'runs the sidekiq process in a new process group' do
@@ -118,7 +119,7 @@ RSpec.describe Gitlab::SidekiqCluster do
         .and_return(1)
 
       allow(described_class).to receive(:wait_async)
-      expect(described_class.start_sidekiq(%w(foo bar baz), options)).to eq(1)
+      expect(described_class.start_sidekiq(%w(foo bar baz), **options)).to eq(1)
     end
   end
 

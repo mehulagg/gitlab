@@ -12,8 +12,8 @@ module EE
                  description: 'Returns only the projects which have vulnerabilities'
       end
 
-      def resolve(include_subgroups:, has_vulnerabilities: false)
-        projects = super(include_subgroups: include_subgroups)
+      def resolve(include_subgroups:, search:, sort:, has_vulnerabilities: false)
+        projects = super(include_subgroups: include_subgroups, search: search, sort: sort)
 
         has_vulnerabilities ? projects.has_vulnerabilities : projects
       end

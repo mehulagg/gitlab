@@ -5,19 +5,18 @@ class Projects::PipelinesController < Projects::ApplicationController
   include Analytics::UniqueVisitsHelper
 
   before_action :whitelist_query_limiting, only: [:create, :retry]
-  before_action :pipeline, except: [:index, :new, :create, :charts]
+  before_action :pipeline, except: [:index, :new, :create, :charts, :config_variables]
   before_action :set_pipeline_path, only: [:show]
   before_action :authorize_read_pipeline!
   before_action :authorize_read_build!, only: [:index]
-  before_action :authorize_create_pipeline!, only: [:new, :create]
+  before_action :authorize_create_pipeline!, only: [:new, :create, :config_variables]
   before_action :authorize_update_pipeline!, only: [:retry, :cancel]
   before_action do
-    push_frontend_feature_flag(:junit_pipeline_view, project)
-    push_frontend_feature_flag(:build_report_summary, project)
-    push_frontend_feature_flag(:filter_pipelines_search, project, default_enabled: true)
     push_frontend_feature_flag(:dag_pipeline_tab, project, default_enabled: true)
     push_frontend_feature_flag(:pipelines_security_report_summary, project)
-    push_frontend_feature_flag(:new_pipeline_form)
+    push_frontend_feature_flag(:new_pipeline_form, project)
+    push_frontend_feature_flag(:graphql_pipeline_header, project, type: :development, default_enabled: false)
+    push_frontend_feature_flag(:new_pipeline_form_prefilled_vars, project, type: :development)
   end
   before_action :ensure_pipeline, only: [:show]
 
@@ -31,6 +30,8 @@ class Projects::PipelinesController < Projects::ApplicationController
   wrap_parameters Ci::Pipeline
 
   POLLING_INTERVAL = 10_000
+
+  feature_category :continuous_integration
 
   def index
     @pipelines = Ci::PipelinesFinder
@@ -65,10 +66,27 @@ class Projects::PipelinesController < Projects::ApplicationController
       .new(project, current_user, create_params)
       .execute(:web, ignore_skip_ci: true, save_on_errors: false)
 
-    if @pipeline.created_successfully?
-      redirect_to project_pipeline_path(project, @pipeline)
-    else
-      render 'new', status: :bad_request
+    respond_to do |format|
+      format.html do
+        if @pipeline.created_successfully?
+          redirect_to project_pipeline_path(project, @pipeline)
+        else
+          render 'new', status: :bad_request
+        end
+      end
+      format.json do
+        if @pipeline.created_successfully?
+          render json: PipelineSerializer
+                         .new(project: project, current_user: current_user)
+                         .represent(@pipeline),
+                 status: :created
+        else
+          render json: { errors: @pipeline.error_messages.map(&:content),
+                         warnings: @pipeline.warning_messages(limit: ::Gitlab::Ci::Warnings::MAX_LIMIT).map(&:content),
+                         total_warnings: @pipeline.warning_messages.length },
+                 status: :bad_request
+        end
+      end
     end
   end
 
@@ -178,8 +196,6 @@ class Projects::PipelinesController < Projects::ApplicationController
   end
 
   def test_report
-    return unless Feature.enabled?(:junit_pipeline_view, project)
-
     respond_to do |format|
       format.html do
         render 'show'
@@ -193,10 +209,12 @@ class Projects::PipelinesController < Projects::ApplicationController
     end
   end
 
-  def test_reports_count
-    return unless Feature.enabled?(:junit_pipeline_view, project)
-
-    render json: { total_count: pipeline.test_reports_count }.to_json
+  def config_variables
+    respond_to do |format|
+      format.json do
+        render json: Ci::ListConfigVariablesService.new(@project).execute(params[:sha])
+      end
+    end
   end
 
   private
@@ -257,7 +275,7 @@ class Projects::PipelinesController < Projects::ApplicationController
   end
 
   def latest_pipeline
-    @project.latest_pipeline_for_ref(params['ref'])
+    @project.latest_pipeline(params['ref'])
             &.present(current_user: current_user)
   end
 

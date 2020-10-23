@@ -1,6 +1,6 @@
 import service from '../../services';
 import * as types from './mutation_types';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Poll from '~/lib/utils/poll';
 import { __ } from '~/locale';
 
@@ -10,7 +10,6 @@ const stopPolling = poll => {
   if (poll) poll.stop();
 };
 
-// eslint-disable-next-line import/prefer-default-export
 export function startPollingStacktrace({ commit }, endpoint) {
   stackTracePoll = new Poll({
     resource: service,

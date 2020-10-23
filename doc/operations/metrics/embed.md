@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: APM
+group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -17,18 +17,30 @@ metrics to others, and you want to have relevant information directly available.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/29691) in GitLab 12.2.
 
-NOTE: **Note:**
-Requires [Kubernetes](../../user/project/integrations/prometheus_library/kubernetes.md) metrics.
+This feature requires [Kubernetes](../../user/project/integrations/prometheus_library/kubernetes.md) metrics.
+
+Note: **Note:**
+In GitLab versions 13.3 and earlier, metrics dashboard links were in the form
+`https://<root_url>/<project>/-/environments/<environment_id>/metrics`. These links
+are still supported, and can be used to embed metric charts.
 
 To display metric charts, include a link of the form
-`https://<root_url>/<project>/-/environments/<environment_id>/metrics` in a field
+`https://<root_url>/<project>/-/metrics?environment=<environment_id>` in a field
 that supports GitLab-flavored Markdown:
 
-![Embedded Metrics Markdown](img/embedded_metrics_markdown_v12_8.png)
+```markdown
+### Summary
+
+**Start time:** 2020-01-21T12:00:31+00:00
+
+### Metrics
+
+https://gitlab.com/gitlab-org/monitor/tanuki-inc/-/metrics?environment=1118134
+```
 
 GitLab unfurls the link as an embedded metrics panel:
 
-![Embedded Metrics Rendered](img/embedded_metrics_rendered_v12_8.png)
+![Embedded Metrics Rendered](img/embedded_metrics_rendered_v13_4.png)
 
 You can also embed a single chart. To get a link to a chart, click the
 **{ellipsis_v}** **More actions** menu in the upper right corner of the chart,
@@ -57,7 +69,7 @@ You can open the link directly into your browser for a
 
 ## Embedding metrics in issue templates
 
-You can also embed either the default dashboard metrics or individual metrics in
+You can also embed either the overview dashboard metrics or individual metrics in
 issue templates. For charts to render side-by-side, separate links to the entire metrics
 dashboard or individual metrics by either a comma or a space.
 

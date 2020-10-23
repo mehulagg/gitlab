@@ -1,3 +1,5 @@
+import { __ } from '~/locale';
+
 export const CHART_TYPES = {
   BAR: 'bar',
   LINE: 'line',
@@ -6,4 +8,8 @@ export const CHART_TYPES = {
   PIE: 'pie',
 };
 
-export default { CHART_TYPES };
+export const EMPTY_STATE_TITLE = __('Invalid Insights config file detected');
+export const EMPTY_STATE_DESCRIPTION = __(
+  'Please check the configuration file to ensure that it is available and the YAML is valid',
+);
+export const EMPTY_STATE_SVG_PATH = '/assets/illustrations/monitoring/getting_started.svg';

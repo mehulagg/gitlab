@@ -45,7 +45,7 @@ module IconsHelper
     ActionController::Base.helpers.image_path('file_icons.svg', host: sprite_base_url)
   end
 
-  def sprite_icon(icon_name, size: nil, css_class: nil)
+  def sprite_icon(icon_name, size: DEFAULT_ICON_SIZE, css_class: nil)
     if known_sprites&.exclude?(icon_name)
       exception = ArgumentError.new("#{icon_name} is not a known icon in @gitlab-org/gitlab-svg")
       Gitlab::ErrorTracking.track_and_raise_for_dev_exception(exception)
@@ -76,33 +76,24 @@ module IconsHelper
     content_tag(:span, "", class: "gl-snippet-icon gl-snippet-icon-#{name}")
   end
 
-  def audit_icon(names, options = {})
-    case names
+  def audit_icon(name, css_class: nil)
+    case name
     when "standard"
-      names = "key"
+      name = "key"
     when "two-factor"
-      names = "key"
+      name = "key"
     when "google_oauth2"
-      names = "google"
+      name = "google"
     end
 
-    options.include?(:base) ? fa_stacked_icon(names, options) : fa_icon(names, options)
-  end
-
-  def spinner(text = nil, visible = false)
-    css_class = ['loading']
-    css_class << 'hide' unless visible
-
-    content_tag :div, class: css_class.join(' ') do
-      icon('spinner spin') + text
-    end
+    sprite_icon(name, css_class: css_class)
   end
 
   def boolean_to_icon(value)
     if value
-      icon('circle', class: 'cgreen')
+      sprite_icon('check', css_class: 'cgreen')
     else
-      icon('power-off', class: 'clgray')
+      sprite_icon('power', css_class: 'clgray')
     end
   end
 
@@ -117,12 +108,14 @@ module IconsHelper
         'earth'
       end
 
-    sprite_icon(name, size: DEFAULT_ICON_SIZE, css_class: 'gl-vertical-align-text-bottom')
+    css_class = options.delete(:class)
+
+    sprite_icon(name, size: DEFAULT_ICON_SIZE, css_class: css_class)
   end
 
   def file_type_icon_class(type, mode, name)
     if type == 'folder'
-      icon_class = 'folder'
+      icon_class = 'folder-o'
     elsif type == 'archive'
       icon_class = 'archive'
     elsif mode == '120000'
@@ -133,36 +126,36 @@ module IconsHelper
 
       case File.extname(name).downcase
       when '.pdf'
-        icon_class = 'file-pdf-o'
+        icon_class = 'document'
       when '.jpg', '.jpeg', '.jif', '.jfif',
           '.jp2', '.jpx', '.j2k', '.j2c',
           '.apng', '.png', '.gif', '.tif', '.tiff',
           '.svg', '.ico', '.bmp', '.webp'
-        icon_class = 'file-image-o'
+        icon_class = 'doc-image'
       when '.zip', '.zipx', '.tar', '.gz', '.gzip', '.tgz', '.bz', '.bzip',
           '.bz2', '.bzip2', '.car', '.tbz', '.xz', 'txz', '.rar', '.7z',
           '.lz', '.lzma', '.tlz'
-        icon_class = 'file-archive-o'
+        icon_class = 'doc-compressed'
       when '.mp3', '.wma', '.ogg', '.oga', '.wav', '.flac', '.aac', '.3ga',
           '.ac3', '.midi', '.m4a', '.ape', '.mpa'
-        icon_class = 'file-audio-o'
+        icon_class = 'volume-up'
       when '.mp4', '.m4p', '.m4v',
           '.mpg', '.mp2', '.mpeg', '.mpe', '.mpv',
           '.mpg', '.mpeg', '.m2v', '.m2ts',
           '.avi', '.mkv', '.flv', '.ogv', '.mov',
           '.3gp', '.3g2'
-        icon_class = 'file-video-o'
+        icon_class = 'live-preview'
       when '.doc', '.dot', '.docx', '.docm', '.dotx', '.dotm', '.docb',
           '.odt', '.ott', '.uot', '.rtf'
-        icon_class = 'file-word-o'
+        icon_class = 'doc-text'
       when '.xls', '.xlt', '.xlm', '.xlsx', '.xlsm', '.xltx', '.xltm',
           '.xlsb', '.xla', '.xlam', '.xll', '.xlw', '.ots', '.ods', '.uos'
-        icon_class = 'file-excel-o'
+        icon_class = 'document'
       when '.ppt', '.pot', '.pps', '.pptx', '.pptm', '.potx', '.potm',
           '.ppam', '.ppsx', '.ppsm', '.sldx', '.sldm', '.odp', '.otp', '.uop'
-        icon_class = 'file-powerpoint-o'
+        icon_class = 'doc-chart'
       else
-        icon_class = 'file-text-o'
+        icon_class = 'doc-text'
       end
     end
 

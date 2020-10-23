@@ -1,14 +1,14 @@
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
+import { backoffMockImplementation } from 'jest/helpers/backoff_helper';
 import Tracking from '~/tracking';
 import axios from '~/lib/utils/axios_utils';
 import statusCodes from '~/lib/utils/http_status';
 import * as commonUtils from '~/lib/utils/common_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { defaultTimeRange } from '~/vue_shared/constants';
 import * as getters from '~/monitoring/stores/getters';
 import { ENVIRONMENT_AVAILABLE_STATE } from '~/monitoring/constants';
-import { backoffMockImplementation } from 'jest/helpers/backoff_helper';
 
 import { createStore } from '~/monitoring/stores';
 import * as types from '~/monitoring/stores/mutation_types';
@@ -31,6 +31,7 @@ import {
   duplicateSystemDashboard,
   updateVariablesAndFetchData,
   fetchVariableMetricLabelValues,
+  fetchPanelPreview,
 } from '~/monitoring/stores/actions';
 import {
   gqClient,
@@ -1152,6 +1153,71 @@ describe('Monitoring store actions', () => {
           );
         },
       );
+    });
+  });
+
+  describe('fetchPanelPreview', () => {
+    const panelPreviewEndpoint = '/builder.json';
+    const mockYmlContent = 'mock yml content';
+
+    beforeEach(() => {
+      state.panelPreviewEndpoint = panelPreviewEndpoint;
+    });
+
+    it('should not commit or dispatch if payload is empty', () => {
+      testAction(fetchPanelPreview, '', state, [], []);
+    });
+
+    it('should store the panel and fetch metric results', () => {
+      const mockPanel = {
+        title: 'Go heap size',
+        type: 'area-chart',
+      };
+
+      mock
+        .onPost(panelPreviewEndpoint, { panel_yaml: mockYmlContent })
+        .reply(statusCodes.OK, mockPanel);
+
+      testAction(
+        fetchPanelPreview,
+        mockYmlContent,
+        state,
+        [
+          { type: types.SET_PANEL_PREVIEW_IS_SHOWN, payload: true },
+          { type: types.REQUEST_PANEL_PREVIEW, payload: mockYmlContent },
+          { type: types.RECEIVE_PANEL_PREVIEW_SUCCESS, payload: mockPanel },
+        ],
+        [{ type: 'fetchPanelPreviewMetrics' }],
+      );
+    });
+
+    it('should display a validation error when the backend cannot process the yml', () => {
+      const mockErrorMsg = 'Each "metric" must define one of :query or :query_range';
+
+      mock
+        .onPost(panelPreviewEndpoint, { panel_yaml: mockYmlContent })
+        .reply(statusCodes.UNPROCESSABLE_ENTITY, {
+          message: mockErrorMsg,
+        });
+
+      testAction(fetchPanelPreview, mockYmlContent, state, [
+        { type: types.SET_PANEL_PREVIEW_IS_SHOWN, payload: true },
+        { type: types.REQUEST_PANEL_PREVIEW, payload: mockYmlContent },
+        { type: types.RECEIVE_PANEL_PREVIEW_FAILURE, payload: mockErrorMsg },
+      ]);
+    });
+
+    it('should display a generic error when the backend fails', () => {
+      mock.onPost(panelPreviewEndpoint, { panel_yaml: mockYmlContent }).reply(500);
+
+      testAction(fetchPanelPreview, mockYmlContent, state, [
+        { type: types.SET_PANEL_PREVIEW_IS_SHOWN, payload: true },
+        { type: types.REQUEST_PANEL_PREVIEW, payload: mockYmlContent },
+        {
+          type: types.RECEIVE_PANEL_PREVIEW_FAILURE,
+          payload: 'Request failed with status code 500',
+        },
+      ]);
     });
   });
 });

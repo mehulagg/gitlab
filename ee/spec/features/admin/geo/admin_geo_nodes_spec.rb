@@ -95,7 +95,7 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
     secondary_only_fields = %w(node-selective-synchronization-field node-repository-capacity-field node-file-capacity-field node-object-storage-field)
 
     it 'when primary renders only primary fields' do
-      geo_node.update(primary: true)
+      geo_node.update!(primary: true)
       visit edit_admin_geo_node_path(geo_node)
 
       expect_fields(primary_only_fields)
@@ -103,7 +103,7 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
     end
 
     it 'when secondary renders only secondary fields' do
-      geo_node.update(primary: false)
+      geo_node.update!(primary: false)
       visit edit_admin_geo_node_path(geo_node)
 
       expect_no_fields(primary_only_fields)
@@ -138,7 +138,7 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
 
   describe 'update an existing Geo Node' do
     before do
-      geo_node.update(primary: true)
+      geo_node.update!(primary: true)
 
       visit edit_admin_geo_node_path(geo_node)
     end

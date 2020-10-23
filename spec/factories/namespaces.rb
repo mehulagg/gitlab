@@ -30,6 +30,10 @@ FactoryBot.define do
       association :root_storage_statistics, factory: :namespace_root_storage_statistics
     end
 
+    trait :with_namespace_settings do
+      association :namespace_settings, factory: :namespace_settings
+    end
+
     # Construct a hierarchy underneath the namespace.
     # Each namespace will have `children` amount of children,
     # and `depth` levels of descendants.
@@ -58,6 +62,14 @@ FactoryBot.define do
           depth:    evaluator.depth
         )
       end
+    end
+
+    trait :shared_runners_disabled do
+      shared_runners_enabled { false }
+    end
+
+    trait :allow_descendants_override_disabled_shared_runners do
+      allow_descendants_override_disabled_shared_runners { true }
     end
   end
 end

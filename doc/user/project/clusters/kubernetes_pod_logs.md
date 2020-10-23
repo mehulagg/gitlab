@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: APM
+group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -20,7 +20,7 @@ above the log file data, depending on your configuration:
 - **Namespace** - Select the environment to display. Users with Maintainer or
   greater [permissions](../../permissions.md) can also select Managed Apps.
 - **Search** - Only available if the Elastic Stack managed application is installed.
-- **Time picker** - Select the range of time to display. Only available if the
+- **Select time range** - Select the range of time to display. Only available if the
   Elastic Stack managed application is installed.
 - **Scroll to bottom** **{scroll_down}** - Scroll to the end of the displayed logs.
 - **Refresh** **{retry}** - Reload the displayed logs.
@@ -28,7 +28,6 @@ above the log file data, depending on your configuration:
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 To learn more about the Log Explorer, see [APM - Log Explorer](https://www.youtube.com/watch?v=hWclZHA7Dgw).
 
-NOTE: **Note:**
 [Learn more about Kubernetes + GitLab](https://about.gitlab.com/solutions/kubernetes/).
 Everything you need to build, test, deploy, and run your application at scale.
 

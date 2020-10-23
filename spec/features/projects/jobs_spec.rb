@@ -373,13 +373,29 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
         let(:expire_at) { Time.now + 7.days }
 
         context 'when user has ability to update job' do
-          it 'keeps artifacts when keep button is clicked' do
-            expect(page).to have_content 'The artifacts will be removed in'
+          context 'when artifacts are unlocked' do
+            before do
+              job.pipeline.unlocked!
+            end
 
-            click_link 'Keep'
+            it 'keeps artifacts when keep button is clicked' do
+              expect(page).to have_content 'The artifacts will be removed in'
 
-            expect(page).to have_no_link 'Keep'
-            expect(page).to have_no_content 'The artifacts will be removed in'
+              click_link 'Keep'
+
+              expect(page).to have_no_link 'Keep'
+              expect(page).to have_no_content 'The artifacts will be removed in'
+            end
+          end
+
+          context 'when artifacts are locked' do
+            before do
+              job.pipeline.artifacts_locked!
+            end
+
+            it 'shows the keep button' do
+              expect(page).to have_link 'Keep'
+            end
           end
         end
 
@@ -395,9 +411,26 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
       context 'when artifacts expired' do
         let(:expire_at) { Time.now - 7.days }
 
-        it 'does not have the Keep button' do
-          expect(page).to have_content 'The artifacts were removed'
-          expect(page).not_to have_link 'Keep'
+        context 'when artifacts are unlocked' do
+          before do
+            job.pipeline.unlocked!
+          end
+
+          it 'does not have the Keep button' do
+            expect(page).to have_content 'The artifacts were removed'
+            expect(page).not_to have_link 'Keep'
+          end
+        end
+
+        context 'when artifacts are locked' do
+          before do
+            job.pipeline.artifacts_locked!
+          end
+
+          it 'has the Keep button' do
+            expect(page).not_to have_content 'The artifacts were removed'
+            expect(page).to have_link 'Keep'
+          end
         end
       end
     end
@@ -551,7 +584,7 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
 
         it 'shows deployment message' do
           expect(page).to have_content 'This job is deployed to production'
-          expect(find('.js-environment-link')['href']).to match("environments/#{environment.id}")
+          expect(find('[data-testid="job-environment-link"]')['href']).to match("environments/#{environment.id}")
         end
 
         context 'when there is a cluster used for the deployment' do
@@ -583,7 +616,7 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
 
         it 'shows a link for the job' do
           expect(page).to have_link environment.name
-          expect(find('.js-environment-link')['href']).to match("environments/#{environment.id}")
+          expect(find('[data-testid="job-environment-link"]')['href']).to match("environments/#{environment.id}")
         end
       end
 
@@ -593,7 +626,7 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
         it 'shows a link to latest deployment' do
           expect(page).to have_link environment.name
           expect(page).to have_content 'This job is creating a deployment'
-          expect(find('.js-environment-link')['href']).to match("environments/#{environment.id}")
+          expect(find('[data-testid="job-environment-link"]')['href']).to match("environments/#{environment.id}")
         end
       end
     end
@@ -645,15 +678,15 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
         end
 
         it 'renders a link to the most recent deployment' do
-          expect(find('.js-environment-link')['href']).to match("environments/#{environment.id}")
-          expect(find('.js-job-deployment-link')['href']).to include(second_deployment.deployable.project.path, second_deployment.deployable_id.to_s)
+          expect(find('[data-testid="job-environment-link"]')['href']).to match("environments/#{environment.id}")
+          expect(find('[data-testid="job-deployment-link"]')['href']).to include(second_deployment.deployable.project.path, second_deployment.deployable_id.to_s)
         end
 
         context 'when deployment does not have a deployable' do
           let!(:second_deployment) { create(:deployment, :success, environment: environment, deployable: nil) }
 
           it 'has an empty href' do
-            expect(find('.js-job-deployment-link')['href']).to be_empty
+            expect(find('[data-testid="job-deployment-link"]')['href']).to be_empty
           end
         end
       end
@@ -679,7 +712,7 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
             expected_text = 'This job is creating a deployment to staging'
 
             expect(page).to have_css('.environment-information', text: expected_text)
-            expect(find('.js-environment-link')['href']).to match("environments/#{environment.id}")
+            expect(find('[data-testid="job-environment-link"]')['href']).to match("environments/#{environment.id}")
           end
 
           context 'when it has deployment' do
@@ -690,7 +723,7 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
 
               expect(page).to have_css('.environment-information', text: expected_text)
               expect(page).to have_css('.environment-information', text: 'latest deployment')
-              expect(find('.js-environment-link')['href']).to match("environments/#{environment.id}")
+              expect(find('[data-testid="job-environment-link"]')['href']).to match("environments/#{environment.id}")
             end
           end
         end
@@ -705,7 +738,7 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
               '.environment-information', text: expected_text)
             expect(page).not_to have_css(
               '.environment-information', text: 'latest deployment')
-            expect(find('.js-environment-link')['href']).to match("environments/#{environment.id}")
+            expect(find('[data-testid="job-environment-link"]')['href']).to match("environments/#{environment.id}")
           end
         end
       end

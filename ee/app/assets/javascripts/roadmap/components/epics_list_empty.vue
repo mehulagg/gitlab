@@ -1,4 +1,5 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { s__, sprintf } from '~/locale';
 import { dateInWords } from '~/lib/utils/datetime_utility';
 

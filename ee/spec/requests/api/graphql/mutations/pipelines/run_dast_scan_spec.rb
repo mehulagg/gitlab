@@ -8,9 +8,9 @@ RSpec.describe 'Running a DAST Scan' do
   let(:project) { create(:project, :repository, creator: current_user) }
   let(:current_user) { create(:user) }
   let(:project_path) { project.full_path }
-  let(:target_url) { FFaker::Internet.uri(:https) }
+  let(:target_url) { generate(:url) }
   let(:branch) { project.default_branch }
-  let(:scan_type) { Types::DastScanTypeEnum.enum[:passive] }
+  let(:scan_type) { Types::DastScanTypeEnum.enum[:passive].upcase }
 
   let(:mutation) do
     graphql_mutation(
@@ -24,6 +24,10 @@ RSpec.describe 'Running a DAST Scan' do
 
   def mutation_response
     graphql_mutation_response(:run_dast_scan)
+  end
+
+  before do
+    stub_licensed_features(security_on_demand_scans: true)
   end
 
   context 'when on demand scan feature is not enabled' do

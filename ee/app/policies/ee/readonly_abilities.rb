@@ -5,6 +5,7 @@ module EE
     extend ActiveSupport::Concern
 
     READONLY_ABILITIES_EE = %i[
+      admin_software_license_policy
       modify_auto_fix_setting
     ].freeze
 
@@ -14,7 +15,6 @@ module EE
       approvers
       vulnerability_feedback
       vulnerability
-      license_management
       feature_flag
       feature_flags_client
       iteration

@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 /**
  *
  * Sets the text content of a DOM element to a given value.

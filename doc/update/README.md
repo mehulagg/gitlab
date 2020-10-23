@@ -123,7 +123,7 @@ If using GitLab 12.9 and newer, run:
 sudo gitlab-rails runner -e production 'puts Gitlab::BackgroundMigration.remaining'
 ```
 
-If using GitLab 12.8 and older, run the following using a [Rails console](../administration/troubleshooting/debug.md#starting-a-rails-console-session):
+If using GitLab 12.8 and older, run the following using a [Rails console](../administration/operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 puts Sidekiq::Queue.new("background_migration").size
@@ -141,7 +141,7 @@ cd /home/git/gitlab
 sudo -u git -H bundle exec rails runner -e production 'puts Gitlab::BackgroundMigration.remaining'
 ```
 
-If using GitLab 12.8 and older, run the following using a [Rails console](../administration/troubleshooting/debug.md#starting-a-rails-console-session):
+If using GitLab 12.8 and older, run the following using a [Rails console](../administration/operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
 puts Sidekiq::Queue.new("background_migration").size
@@ -221,6 +221,11 @@ Edition, you can follow [this guide](../downgrade_ee_to_ce/README.md) to make th
 possible.
 
 ## Version specific upgrading instructions
+
+### 13.3.0
+
+The recommended Git version is Git v2.28. The minimum required version of Git
+v2.24 remains the same.
 
 ### 13.2.0
 
@@ -305,3 +310,4 @@ for more information.
 - [Restoring from backup after a failed upgrade](restore_after_failure.md)
 - [Upgrading PostgreSQL Using Slony](upgrading_postgresql_using_slony.md), for
   upgrading a PostgreSQL database with minimal downtime.
+- [Managing PostgreSQL extensions](../install/postgresql_extensions.md)

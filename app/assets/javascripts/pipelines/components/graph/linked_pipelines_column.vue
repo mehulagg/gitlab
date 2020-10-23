@@ -27,7 +27,7 @@ export default {
   computed: {
     columnClass() {
       const positionValues = {
-        right: 'prepend-left-64',
+        right: 'gl-ml-11',
         left: 'gl-mr-7',
       };
       return `graph-position-${this.graphPosition} ${positionValues[this.graphPosition]}`;
@@ -43,6 +43,9 @@ export default {
     },
     onDownstreamHovered(jobName) {
       this.$emit('downstreamHovered', jobName);
+    },
+    onPipelineExpandToggle(jobName, expanded) {
+      this.$emit('pipelineExpandToggle', jobName, expanded);
     },
   },
 };
@@ -65,6 +68,7 @@ export default {
         :project-id="projectId"
         @pipelineClicked="onPipelineClick($event, pipeline, index)"
         @downstreamHovered="onDownstreamHovered"
+        @pipelineExpandToggle="onPipelineExpandToggle"
       />
     </ul>
   </div>

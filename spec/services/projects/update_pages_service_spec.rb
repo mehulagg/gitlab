@@ -16,8 +16,6 @@ RSpec.describe Projects::UpdatePagesService do
   subject { described_class.new(project, build) }
 
   before do
-    stub_feature_flags(safezip_use_rubyzip: true)
-
     project.remove_pages
   end
 
@@ -29,8 +27,9 @@ RSpec.describe Projects::UpdatePagesService do
 
   context 'for new artifacts' do
     context "for a valid job" do
+      let!(:artifacts_archive) { create(:ci_job_artifact, :correct_checksum, file: file, job: build) }
+
       before do
-        create(:ci_job_artifact, file: file, job: build)
         create(:ci_job_artifact, file_type: :metadata, file_format: :gzip, file: metadata, job: build)
 
         build.reload
@@ -49,12 +48,37 @@ RSpec.describe Projects::UpdatePagesService do
         expect(project.pages_deployed?).to be_falsey
         expect(execute).to eq(:success)
         expect(project.pages_metadatum).to be_deployed
+        expect(project.pages_metadatum.artifacts_archive).to eq(artifacts_archive)
         expect(project.pages_deployed?).to be_truthy
 
         # Check that all expected files are extracted
         %w[index.html zero .hidden/file].each do |filename|
           expect(File.exist?(File.join(project.pages_path, 'public', filename))).to be_truthy
         end
+      end
+
+      it 'creates pages_deployment and saves it in the metadata' do
+        expect do
+          expect(execute).to eq(:success)
+        end.to change { project.pages_deployments.count }.by(1)
+
+        deployment = project.pages_deployments.last
+
+        expect(deployment.size).to eq(file.size)
+        expect(deployment.file).to be
+        expect(deployment.file_count).to eq(3)
+        expect(deployment.file_sha256).to eq(artifacts_archive.file_sha256)
+        expect(project.pages_metadatum.reload.pages_deployment_id).to eq(deployment.id)
+      end
+
+      it 'does not create deployment when zip_pages_deployments feature flag is disabled' do
+        stub_feature_flags(zip_pages_deployments: false)
+
+        expect do
+          expect(execute).to eq(:success)
+        end.not_to change { project.pages_deployments.count }
+
+        expect(project.pages_metadatum.reload.pages_deployment_id).to be_nil
       end
 
       it 'limits pages size' do
@@ -73,14 +97,14 @@ RSpec.describe Projects::UpdatePagesService do
         expect(project.pages_deployed?).to be_truthy
         expect(Dir.exist?(File.join(project.pages_path))).to be_truthy
 
-        project.destroy
+        project.destroy!
 
         expect(Dir.exist?(File.join(project.pages_path))).to be_falsey
         expect(ProjectPagesMetadatum.find_by_project_id(project)).to be_nil
       end
 
       it 'fails if sha on branch is not latest' do
-        build.update(ref: 'feature')
+        build.update!(ref: 'feature')
 
         expect(execute).not_to eq(:success)
         expect(project.pages_metadatum).not_to be_deployed
@@ -102,10 +126,6 @@ RSpec.describe Projects::UpdatePagesService do
         let(:file) { fixture_file_upload("spec/fixtures/pages_non_writeable.zip") }
 
         context 'when using RubyZip' do
-          before do
-            stub_feature_flags(safezip_use_rubyzip: true)
-          end
-
           it 'succeeds to extract' do
             expect(execute).to eq(:success)
             expect(project.pages_metadatum).to be_deployed
@@ -162,28 +182,37 @@ RSpec.describe Projects::UpdatePagesService do
       end
 
       context 'with background jobs running', :sidekiq_inline do
-        where(:ci_atomic_processing) do
-          [true, false]
-        end
-
-        with_them do
-          before do
-            stub_feature_flags(ci_atomic_processing: ci_atomic_processing)
-          end
-
-          it 'succeeds' do
-            expect(project.pages_deployed?).to be_falsey
-            expect(execute).to eq(:success)
-          end
+        it 'succeeds' do
+          expect(project.pages_deployed?).to be_falsey
+          expect(execute).to eq(:success)
         end
       end
+    end
+  end
+
+  # this situation should never happen in real life because all new archives have sha256
+  # and we only use new archives
+  # this test is here just to clarify that this behavior is intentional
+  context 'when artifacts archive does not have sha256' do
+    let!(:artifacts_archive) { create(:ci_job_artifact, file: file, job: build) }
+
+    before do
+      create(:ci_job_artifact, file_type: :metadata, file_format: :gzip, file: metadata, job: build)
+
+      build.reload
+    end
+
+    it 'fails with exception raised' do
+      expect do
+        execute
+      end.to raise_error("Validation failed: File sha256 can't be blank")
     end
   end
 
   it 'fails to remove project pages when no pages is deployed' do
     expect(PagesWorker).not_to receive(:perform_in)
     expect(project.pages_deployed?).to be_falsey
-    project.destroy
+    project.destroy!
   end
 
   it 'fails if no artifacts' do
@@ -202,7 +231,7 @@ RSpec.describe Projects::UpdatePagesService do
       file = fixture_file_upload('spec/fixtures/pages.zip')
       metafile = fixture_file_upload('spec/fixtures/pages.zip.meta')
 
-      create(:ci_job_artifact, :archive, file: file, job: build)
+      create(:ci_job_artifact, :archive, :correct_checksum, file: file, job: build)
       create(:ci_job_artifact, :metadata, file: metafile, job: build)
 
       allow(build).to receive(:artifacts_metadata_entry)

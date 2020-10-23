@@ -21,6 +21,7 @@ RSpec.describe Elastic::IndexingControl do
       prepend Elastic::IndexingControl
     end.new
   end
+
   let(:worker_args) { [project.id] }
   let(:worker_context) { { 'correlation_id' => 'context_correlation_id' } }
 

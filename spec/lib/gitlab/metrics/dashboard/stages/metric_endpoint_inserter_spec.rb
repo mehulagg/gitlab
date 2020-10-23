@@ -20,15 +20,23 @@ RSpec.describe Gitlab::Metrics::Dashboard::Stages::MetricEndpointInserter do
 
       transform!
 
-      expect(all_metrics[0][:prometheus_endpoint_path]).to eq(prometheus_path(query))
+      expect(all_metrics[2][:prometheus_endpoint_path]).to eq(prometheus_path(query))
     end
 
     it 'includes a path for the prometheus endpoint with each metric' do
       transform!
 
       expect(all_metrics).to satisfy_all do |metric|
-        metric[:prometheus_endpoint_path] == prometheus_path(metric[:query_range].squish)
+        metric[:prometheus_endpoint_path].present? && !metric[:prometheus_endpoint_path].include?("\n")
       end
+    end
+
+    it 'works when query/query_range is a number' do
+      query = 2000
+
+      transform!
+
+      expect(all_metrics[1][:prometheus_endpoint_path]).to eq(prometheus_path(query))
     end
   end
 

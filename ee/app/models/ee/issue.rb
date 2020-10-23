@@ -15,16 +15,18 @@ module EE
       include Elastic::ApplicationVersionedSearch
       include UsageStatistics
       include WeightEventable
+      include IterationEventable
       include HealthStatus
 
+      scope :order_blocking_issues_desc, -> { reorder(blocking_issues_count: :desc) }
       scope :order_weight_desc, -> { reorder ::Gitlab::Database.nulls_last_order('weight', 'DESC') }
       scope :order_weight_asc, -> { reorder ::Gitlab::Database.nulls_last_order('weight') }
+      scope :order_status_page_published_first, -> { includes(:status_page_published_incident).order('status_page_published_incidents.id ASC NULLS LAST') }
+      scope :order_status_page_published_last, -> { includes(:status_page_published_incident).order('status_page_published_incidents.id ASC NULLS FIRST') }
       scope :no_epic, -> { left_outer_joins(:epic_issue).where(epic_issues: { epic_id: nil }) }
       scope :any_epic, -> { joins(:epic_issue) }
-      scope :in_epics, ->(epics) do
-        issue_ids = EpicIssue.where(epic_id: epics).select(:issue_id)
-        id_in(issue_ids)
-      end
+      scope :in_epics, ->(epics) { joins(:epic_issue).where(epic_issues: { epic_id: epics }) }
+      scope :not_in_epics, ->(epics) { left_outer_joins(:epic_issue).where('epic_issues.epic_id NOT IN (?) OR epic_issues.epic_id IS NULL', epics) }
       scope :no_iteration, -> { where(sprint_id: nil) }
       scope :any_iteration, -> { where.not(sprint_id: nil) }
       scope :in_iterations, ->(iterations) { where(sprint_id: iterations) }
@@ -36,12 +38,19 @@ module EE
       end
       scope :counts_by_health_status, -> { reorder(nil).group(:health_status).count }
       scope :with_health_status, -> { where.not(health_status: nil) }
+      scope :distinct_epic_ids, -> do
+        epic_ids = except(:order, :select).joins(:epic_issue).reselect('epic_issues.epic_id').distinct
+        epic_ids = epic_ids.group('epic_issues.epic_id') if epic_ids.group_values.present?
+
+        epic_ids
+      end
 
       has_one :epic_issue
       has_one :epic, through: :epic_issue
       belongs_to :promoted_to_epic, class_name: 'Epic'
 
       has_one :status_page_published_incident, class_name: 'StatusPage::PublishedIncident', inverse_of: :issue
+      has_one :issuable_sla
 
       has_many :vulnerability_links, class_name: 'Vulnerabilities::IssueLink', inverse_of: :issue
       has_many :related_vulnerabilities, through: :vulnerability_links, source: :vulnerability
@@ -63,7 +72,7 @@ module EE
 
     # override
     def check_for_spam?
-      author.bot? || super
+      author.bot? && (title_changed? || description_changed? || confidential_changed?) || super
     end
 
     # override
@@ -106,7 +115,7 @@ module EE
 
     # override
     def weight
-      super if supports_weight?
+      super if weight_available?
     end
 
     # override
@@ -127,30 +136,17 @@ module EE
       changed_fields && (changed_fields & ELASTICSEARCH_PERMISSION_TRACKED_FIELDS).any?
     end
 
+    override :supports_weight?
     def supports_weight?
-      project&.feature_available?(:issue_weights)
+      !incident?
+    end
+
+    def supports_iterations?
+      !incident?
     end
 
     def can_assign_epic?(user)
       user&.can?(:admin_epic, project.group)
-    end
-
-    def related_issues(current_user, preload: nil)
-      related_issues = ::Issue
-        .select(['issues.*', 'issue_links.id AS issue_link_id',
-                 'issue_links.link_type as issue_link_type_value',
-                 'issue_links.target_id as issue_link_source_id'])
-        .joins("INNER JOIN issue_links ON
-               (issue_links.source_id = issues.id AND issue_links.target_id = #{id})
-               OR
-               (issue_links.target_id = issues.id AND issue_links.source_id = #{id})")
-        .preload(preload)
-        .reorder('issue_link_id')
-
-      cross_project_filter = -> (issues) { issues.where(project: project) }
-      Ability.issues_readable_by_user(related_issues,
-                                      current_user,
-                                      filters: { read_cross_project: cross_project_filter })
     end
 
     # Issue position on boards list should be relative to all group projects
@@ -172,15 +168,6 @@ module EE
       !!promoted_to_epic_id
     end
 
-    def issue_link_type
-      return unless respond_to?(:issue_link_type_value) && respond_to?(:issue_link_source_id)
-
-      type = IssueLink.link_types.key(issue_link_type_value) || IssueLink::TYPE_RELATES_TO
-      return type if issue_link_source_id == id
-
-      IssueLink.inverse_link_type(type)
-    end
-
     class_methods do
       extend ::Gitlab::Utils::Override
 
@@ -198,8 +185,11 @@ module EE
       override :sort_by_attribute
       def sort_by_attribute(method, excluded_labels: [])
         case method.to_s
+        when 'blocking_issues_desc' then order_blocking_issues_desc.with_order_id_desc
         when 'weight', 'weight_asc' then order_weight_asc.with_order_id_desc
         when 'weight_desc'          then order_weight_desc.with_order_id_desc
+        when 'published_asc'        then order_status_page_published_last.with_order_id_desc
+        when 'published_desc'       then order_status_page_published_first.with_order_id_desc
         else
           super
         end
@@ -208,6 +198,17 @@ module EE
       def weight_options
         [WEIGHT_NONE] + WEIGHT_RANGE.to_a
       end
+    end
+
+    def update_blocking_issues_count!
+      blocking_count = ::IssueLink.blocking_issues_count_for(self)
+
+      update!(blocking_issues_count: blocking_count)
+    end
+
+    override :relocation_target
+    def relocation_target
+      super || promoted_to_epic
     end
 
     private
@@ -221,7 +222,7 @@ module EE
     end
 
     def generic_alert_with_default_title?
-      title == ::Gitlab::Alerting::NotificationPayloadParser::DEFAULT_TITLE &&
+      title == ::Gitlab::AlertManagement::Payload::Generic::DEFAULT_TITLE &&
         project.alerts_service_activated? &&
         author == ::User.alert_bot
     end
@@ -230,7 +231,7 @@ module EE
       return unless epic
 
       if !confidential? && epic.confidential?
-        errors.add :issue, _('Cannot set confidential epic for not-confidential issue')
+        errors.add :issue, _('Cannot set confidential epic for a non-confidential issue')
       end
     end
   end

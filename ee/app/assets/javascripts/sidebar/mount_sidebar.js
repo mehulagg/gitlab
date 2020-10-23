@@ -8,6 +8,7 @@ import SidebarWeight from './components/weight/sidebar_weight.vue';
 import IterationSelect from './components/iteration_select.vue';
 import SidebarStore from './stores/sidebar_store';
 import createDefaultClient from '~/lib/graphql';
+import { store } from '~/notes/stores';
 
 Vue.use(VueApollo);
 
@@ -39,6 +40,7 @@ const mountStatusComponent = mediator => {
 
   return new Vue({
     el,
+    store,
     components: {
       SidebarStatus,
     },

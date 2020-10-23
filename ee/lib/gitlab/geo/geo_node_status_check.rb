@@ -164,7 +164,7 @@ module Gitlab
       end
 
       def print_replicators_status
-        Gitlab::Geo.replicator_classes.each do |replicator_class|
+        Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
           print "#{replicator_class.replicable_title_plural}: ".rjust(GEO_STATUS_COLUMN_WIDTH)
 
           show_failed_value(replicator_class.failed_count)
@@ -246,7 +246,7 @@ module Gitlab
       end
 
       def print_replicators_checked_status
-        Gitlab::Geo.replicator_classes.each do |replicator_class|
+        Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
           print "#{replicator_class.replicable_title_plural} Checked: ".rjust(GEO_STATUS_COLUMN_WIDTH)
           show_failed_value(replicator_class.checksum_failed_count)
           print "#{replicator_class.checksummed_count}/#{replicator_class.registry_count} "
@@ -275,7 +275,7 @@ module Gitlab
             r.push current_node_status.container_repositories_failed_count
           end
 
-          Gitlab::Geo.replicator_classes.each do |replicator_class|
+          Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
             r.push replicator_class.failed_count
           end
         end
@@ -294,7 +294,7 @@ module Gitlab
             v.push current_node_status.repositories_checked_failed_count
           end
 
-          Gitlab::Geo.replicator_classes.each do |replicator_class|
+          Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
             v.push replicator_class.checksum_failed_count
           end
         end

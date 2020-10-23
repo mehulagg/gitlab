@@ -6,12 +6,15 @@ import boardCard from './board_card.vue';
 import eventHub from '../eventhub';
 import boardsStore from '../stores/boards_store';
 import { sprintf, __ } from '~/locale';
-import createFlash from '~/flash';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   getBoardSortableDefaultOptions,
   sortableStart,
   sortableEnd,
 } from '../mixins/sortable_default_options';
+
+// This component is being replaced in favor of './board_list_new.vue' for GraphQL boards
 
 if (gon.features && gon.features.multiSelectBoard) {
   Sortable.mount(new MultiDrag());
@@ -24,12 +27,8 @@ export default {
     boardNewIssue,
     GlLoadingIcon,
   },
+  mixins: [glFeatureFlagMixin()],
   props: {
-    groupId: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
     disabled: {
       type: Boolean,
       required: true,
@@ -40,18 +39,6 @@ export default {
     },
     issues: {
       type: Array,
-      required: true,
-    },
-    loading: {
-      type: Boolean,
-      required: true,
-    },
-    issueLinkBase: {
-      type: String,
-      required: true,
-    },
-    rootPath: {
-      type: String,
       required: true,
     },
   },
@@ -72,6 +59,9 @@ export default {
     },
     issuesSizeExceedsMax() {
       return this.list.maxIssueCount > 0 && this.list.issuesSize > this.list.maxIssueCount;
+    },
+    loading() {
+      return this.list.loading;
     },
   },
   watch: {
@@ -108,6 +98,8 @@ export default {
     eventHub.$on(`scroll-board-list-${this.list.id}`, this.scrollToTop);
   },
   mounted() {
+    // TODO: Use Draggable in ./board_list_new.vue to drag & drop issue
+    // https://gitlab.com/gitlab-org/gitlab/-/issues/218164
     const multiSelectOpts = {};
     if (gon.features && gon.features.multiSelectBoard) {
       multiSelectOpts.multiDrag = true;
@@ -430,11 +422,7 @@ export default {
     <div v-if="loading" class="board-list-loading text-center" :aria-label="__('Loading issues')">
       <gl-loading-icon />
     </div>
-    <board-new-issue
-      v-if="list.type !== 'closed' && showIssueForm"
-      :group-id="groupId"
-      :list="list"
-    />
+    <board-new-issue v-if="list.type !== 'closed' && showIssueForm" :list="list" />
     <ul
       v-show="!loading"
       ref="list"
@@ -450,9 +438,6 @@ export default {
         :index="index"
         :list="list"
         :issue="issue"
-        :issue-link-base="issueLinkBase"
-        :group-id="groupId"
-        :root-path="rootPath"
         :disabled="disabled"
       />
       <li v-if="showCount" class="board-list-count text-center" data-issue-id="-1">

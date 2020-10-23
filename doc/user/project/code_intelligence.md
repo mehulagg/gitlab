@@ -26,10 +26,9 @@ Enable code intelligence for a project by adding a GitLab CI/CD job to the proje
 
 ```yaml
 code_navigation:
-  image: golang:1.14.0
+  image: sourcegraph/lsif-go:v1
   allow_failure: true # recommended
   script:
-    - go get github.com/sourcegraph/lsif-go/cmd/lsif-go
     - lsif-go
   artifacts:
     reports:
@@ -40,7 +39,17 @@ The generated LSIF file must be less than 170MiB.
 
 After the job succeeds, code intelligence data can be viewed while browsing the code:
 
-![Code intelligence](img/code_intelligence_v13_1.png)
+![Code intelligence](img/code_intelligence_v13_4.png)
+
+## Find references
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217392) in GitLab 13.2.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/235735) in GitLab 13.4.
+
+To find where a particular object is being used, you can see links to specific lines of code
+under the **References** tab:
+
+![Find references](img/code_intelligence_find_references_v13_3.png)
 
 ## Language support
 
@@ -49,9 +58,9 @@ relevant language.
 
 | Language | Implementation |
 |---|---|
-| Go | [sourcegraph/lsif-go](https://github.com/sourcegraph/lsif-go) |
-| JavaScript | [sourcegraph/lsif-node](https://github.com/sourcegraph/lsif-node) |
-| TypeScript | [sourcegraph/lsif-node](https://github.com/sourcegraph/lsif-node) |
+| Go | [`sourcegraph/lsif-go`](https://github.com/sourcegraph/lsif-go) |
+| JavaScript | [`sourcegraph/lsif-node`](https://github.com/sourcegraph/lsif-node) |
+| TypeScript | [`sourcegraph/lsif-node`](https://github.com/sourcegraph/lsif-node) |
 
 View a complete list of [available LSIF indexers](https://lsif.dev/#implementations-server) on their website and
 refer to their documentation to see how to generate an LSIF file for your specific language.

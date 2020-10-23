@@ -41,7 +41,7 @@ RSpec.describe Notes::CreateService do
       end
 
       it 'TodoService#new_note is called' do
-        note = build(:note, project: project)
+        note = build(:note, project: project, noteable: issue)
         allow(Note).to receive(:new).with(opts) { note }
 
         expect_any_instance_of(TodoService).to receive(:new_note).with(note, user)
@@ -50,12 +50,22 @@ RSpec.describe Notes::CreateService do
       end
 
       it 'enqueues NewNoteWorker' do
-        note = build(:note, id: non_existing_record_id, project: project)
+        note = build(:note, id: non_existing_record_id, project: project, noteable: issue)
         allow(Note).to receive(:new).with(opts) { note }
 
         expect(NewNoteWorker).to receive(:perform_async).with(note.id)
 
         described_class.new(project, user, opts).execute
+      end
+
+      context 'issue is an incident' do
+        subject { described_class.new(project, user, opts).execute }
+
+        let(:issue) { create(:incident, project: project) }
+
+        it_behaves_like 'an incident management tracked event', :incident_management_incident_comment do
+          let(:current_user) { user }
+        end
       end
     end
 
@@ -117,6 +127,7 @@ RSpec.describe Notes::CreateService do
                source_project: project_with_repo,
                target_project: project_with_repo)
       end
+
       let(:line_number) { 14 }
       let(:position) do
         Gitlab::Diff::Position.new(old_path: "files/ruby/popen.rb",
@@ -125,6 +136,7 @@ RSpec.describe Notes::CreateService do
                                    new_line: line_number,
                                    diff_refs: merge_request.diff_refs)
       end
+
       let(:previous_note) do
         create(:diff_note_on_merge_request, noteable: merge_request, project: project_with_repo)
       end
@@ -150,14 +162,6 @@ RSpec.describe Notes::CreateService do
           expect(note).to be_persisted
           expect(note.note_diff_file).to be_present
           expect(note.diff_note_positions).to be_present
-        end
-
-        it 'does not create diff positions merge_ref_head_comments is disabled' do
-          stub_feature_flags(merge_ref_head_comments: false)
-
-          expect(Discussions::CaptureDiffNotePositionService).not_to receive(:new)
-
-          described_class.new(project_with_repo, user, new_opts).execute
         end
       end
 
@@ -282,7 +286,7 @@ RSpec.describe Notes::CreateService do
               QuickAction.new(
                 action_text: "/wip",
                 before_action: -> {
-                  issuable.reload.update(title: "title")
+                  issuable.reload.update!(title: "title")
                 },
                 expectation: ->(issuable, can_use_quick_action) {
                   expect(issuable.work_in_progress?).to eq(can_use_quick_action)
@@ -292,7 +296,7 @@ RSpec.describe Notes::CreateService do
               QuickAction.new(
                 action_text: "/wip",
                 before_action: -> {
-                  issuable.reload.update(title: "WIP: title")
+                  issuable.reload.update!(title: "WIP: title")
                 },
                 expectation: ->(noteable, can_use_quick_action) {
                   expect(noteable.work_in_progress?).not_to eq(can_use_quick_action)
@@ -425,11 +429,18 @@ RSpec.describe Notes::CreateService do
         expect do
           existing_note
 
-          Timecop.freeze(Time.current + 1.minute) { subject }
+          travel_to(Time.current + 1.minute) { subject }
 
           existing_note.reload
         end.to change { existing_note.type }.from(nil).to('DiscussionNote')
             .and change { existing_note.updated_at }
+      end
+
+      it 'returns a DiscussionNote with its parent discussion refreshed correctly' do
+        discussion_notes = subject.discussion.notes
+
+        expect(discussion_notes.size).to eq(2)
+        expect(discussion_notes.first).to be_a(DiscussionNote)
       end
 
       context 'discussion to reply cannot be found' do

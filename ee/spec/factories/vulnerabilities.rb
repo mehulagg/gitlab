@@ -9,6 +9,7 @@ FactoryBot.define do
     severity { :high }
     confidence { :medium }
     report_type { :sast }
+    description { "Description of #{title}" }
 
     trait :detected do
       state { Vulnerability.states[:detected] }
@@ -57,17 +58,62 @@ FactoryBot.define do
       end
     end
 
+    trait :with_notes do
+      transient do
+        notes_count { 3 }
+      end
+
+      after(:create) do |vulnerability, evaluator|
+        create_list(
+          :note_on_vulnerability,
+          evaluator.notes_count,
+          noteable: vulnerability,
+          project: vulnerability.project)
+      end
+    end
+
+    trait :with_finding do
+      after(:build) do |vulnerability|
+        finding = build(
+          :vulnerabilities_finding,
+          :identifier,
+          vulnerability: vulnerability,
+          report_type: vulnerability.report_type,
+          project: vulnerability.project
+        )
+
+        vulnerability.findings = [finding]
+      end
+    end
+
+    trait :with_remediation do
+      after(:build) do |vulnerability|
+        finding = build(
+          :vulnerabilities_finding,
+          :identifier,
+          :with_remediation,
+          vulnerability: vulnerability,
+          report_type: vulnerability.report_type,
+          project: vulnerability.project
+        )
+
+        vulnerability.findings = [finding]
+      end
+    end
+
     trait :with_findings do
       after(:build) do |vulnerability|
         findings_with_solution = build_list(
           :vulnerabilities_finding,
           2,
+          :identifier,
           vulnerability: vulnerability,
           report_type: vulnerability.report_type,
           project: vulnerability.project)
         findings_with_remediation = build_list(
           :vulnerabilities_finding,
           2,
+          :identifier,
           :with_remediation,
           vulnerability: vulnerability,
           report_type: vulnerability.report_type,

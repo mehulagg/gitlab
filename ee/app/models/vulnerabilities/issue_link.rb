@@ -19,5 +19,6 @@ module Vulnerabilities
               if: :created?
 
     scope :by_link_type, -> (link_type) { link_type ? where(link_type: link_type.downcase) : all }
+    scope :for_issue, -> (issue) { where(issue_id: issue) }
   end
 end

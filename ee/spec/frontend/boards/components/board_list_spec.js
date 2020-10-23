@@ -10,11 +10,11 @@ describe('BoardList Component', () => {
         path: '/test',
       },
       real_path: '',
+      webUrl: '',
     };
 
     const componentProps = {
       groupId: undefined,
-      issueLinkBase: '/test/:project_path/issues',
     };
 
     ({ mock, component } = createComponent({

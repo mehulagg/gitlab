@@ -1,8 +1,10 @@
 <script>
+import produce from 'immer';
 import { s__ } from '~/locale';
 import Todo from '~/sidebar/components/todo_toggle/todo.vue';
-import axios from '~/lib/utils/axios_utils';
-import createAlertTodo from '../../graphql/mutations/alert_todo_create.graphql';
+import createAlertTodoMutation from '../../graphql/mutations/alert_todo_create.mutation.graphql';
+import todoMarkDoneMutation from '~/graphql_shared/mutations/todo_mark_done.mutation.graphql';
+import alertQuery from '../../graphql/queries/details.query.graphql';
 
 export default {
   i18n: {
@@ -30,18 +32,28 @@ export default {
   data() {
     return {
       isUpdating: false,
-      isTodo: false,
-      todo: '',
     };
   },
   computed: {
     alertID() {
       return parseInt(this.alert.iid, 10);
     },
+    firstToDoId() {
+      return this.alert?.todos?.nodes[0]?.id;
+    },
+    hasPendingTodos() {
+      return this.alert?.todos?.nodes.length > 0;
+    },
+    getAlertQueryVariables() {
+      return {
+        fullPath: this.projectPath,
+        alertId: this.alert.iid,
+      };
+    },
   },
   methods: {
     updateToDoCount(add) {
-      const oldCount = parseInt(document.querySelector('.todos-count').innerText, 10);
+      const oldCount = parseInt(document.querySelector('.js-todos-count').innerText, 10);
       const count = add ? oldCount + 1 : oldCount - 1;
       const headerTodoEvent = new CustomEvent('todo:toggle', {
         detail: {
@@ -51,38 +63,24 @@ export default {
 
       return document.dispatchEvent(headerTodoEvent);
     },
-    toggleTodo() {
-      if (this.todo) {
-        return this.markAsDone();
-      }
-
+    addToDo() {
       this.isUpdating = true;
       return this.$apollo
         .mutate({
-          mutation: createAlertTodo,
+          mutation: createAlertTodoMutation,
           variables: {
             iid: this.alert.iid,
             projectPath: this.projectPath,
           },
         })
-        .then(({ data: { alertTodoCreate: { todo = {}, errors = [] } } = {} } = {}) => {
+        .then(({ data: { errors = [] } }) => {
           if (errors[0]) {
-            return this.$emit(
-              'alert-error',
-              `${this.$options.i18n.UPDATE_ALERT_TODO_ERROR} ${errors[0]}.`,
-            );
+            return this.throwError(errors[0]);
           }
-
-          this.todo = todo.id;
           return this.updateToDoCount(true);
         })
         .catch(() => {
-          this.$emit(
-            'alert-error',
-            `${this.$options.i18n.UPDATE_ALERT_TODO_ERROR} ${s__(
-              'AlertManagement|Please try again.',
-            )}`,
-          );
+          this.throwError();
         })
         .finally(() => {
           this.isUpdating = false;
@@ -90,19 +88,47 @@ export default {
     },
     markAsDone() {
       this.isUpdating = true;
-
-      return axios
-        .delete(`/dashboard/todos/${this.todo.split('/').pop()}`)
-        .then(() => {
-          this.todo = '';
+      return this.$apollo
+        .mutate({
+          mutation: todoMarkDoneMutation,
+          variables: {
+            id: this.firstToDoId,
+          },
+          update: this.updateCache,
+        })
+        .then(({ data: { errors = [] } }) => {
+          if (errors[0]) {
+            return this.throwError(errors[0]);
+          }
           return this.updateToDoCount(false);
         })
         .catch(() => {
-          this.$emit('alert-error', this.$options.i18n.UPDATE_ALERT_TODO_ERROR);
+          this.throwError();
         })
         .finally(() => {
           this.isUpdating = false;
         });
+    },
+    updateCache(store) {
+      const sourceData = store.readQuery({
+        query: alertQuery,
+        variables: this.getAlertQueryVariables,
+      });
+
+      const data = produce(sourceData, draftData => {
+        // eslint-disable-next-line no-param-reassign
+        draftData.project.alertManagementAlerts.nodes[0].todos.nodes = [];
+      });
+
+      store.writeQuery({
+        query: alertQuery,
+        variables: this.getAlertQueryVariables,
+        data,
+      });
+    },
+    throwError(err = '') {
+      const error = err || s__('AlertManagement|Please try again.');
+      this.$emit('alert-error', `${this.$options.i18n.UPDATE_ALERT_TODO_ERROR} ${error}`);
     },
   },
 };
@@ -114,10 +140,10 @@ export default {
       data-testid="alert-todo-button"
       :collapsed="sidebarCollapsed"
       :issuable-id="alertID"
-      :is-todo="todo !== ''"
+      :is-todo="hasPendingTodos"
       :is-action-active="isUpdating"
       issuable-type="alert"
-      @toggleTodo="toggleTodo"
+      @toggleTodo="hasPendingTodos ? markAsDone() : addToDo()"
     />
   </div>
 </template>

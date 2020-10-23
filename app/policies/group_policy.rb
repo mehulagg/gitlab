@@ -46,6 +46,19 @@ class GroupPolicy < BasePolicy
     group_projects_for(user: @user, group: @subject, only_owned: false).any? { |p| p.design_management_enabled? }
   end
 
+  desc "Deploy token with read_package_registry scope"
+  condition(:read_package_registry_deploy_token) do
+    @user.is_a?(DeployToken) && @user.groups.include?(@subject) && @user.read_package_registry
+  end
+
+  desc "Deploy token with write_package_registry scope"
+  condition(:write_package_registry_deploy_token) do
+    @user.is_a?(DeployToken) && @user.groups.include?(@subject) && @user.write_package_registry
+  end
+
+  with_scope :subject
+  condition(:resource_access_token_available) { resource_access_token_available? }
+
   rule { design_management_enabled }.policy do
     enable :read_design_activity
   end
@@ -80,6 +93,7 @@ class GroupPolicy < BasePolicy
     enable :read_list
     enable :read_label
     enable :read_board
+    enable :read_group_member
   end
 
   rule { ~can?(:read_group) }.policy do
@@ -90,7 +104,6 @@ class GroupPolicy < BasePolicy
 
   rule { developer }.policy do
     enable :admin_milestone
-    enable :read_package
     enable :create_metrics_dashboard_annotation
     enable :delete_metrics_dashboard_annotation
     enable :update_metrics_dashboard_annotation
@@ -104,6 +117,7 @@ class GroupPolicy < BasePolicy
     enable :admin_issue
     enable :read_metrics_dashboard_annotation
     enable :read_prometheus
+    enable :read_package
   end
 
   rule { maintainer }.policy do
@@ -116,6 +130,7 @@ class GroupPolicy < BasePolicy
     enable :update_cluster
     enable :admin_cluster
     enable :read_deploy_token
+    enable :create_jira_connect_subscription
   end
 
   rule { owner }.policy do
@@ -138,6 +153,7 @@ class GroupPolicy < BasePolicy
     enable :read_group_labels
     enable :read_group_milestones
     enable :read_group_merge_requests
+    enable :read_group_build_report_results
   end
 
   rule { can?(:read_cross_project) & can?(:read_group) }.policy do
@@ -164,14 +180,43 @@ class GroupPolicy < BasePolicy
 
   rule { maintainer & can?(:create_projects) }.enable :transfer_projects
 
+  rule { read_package_registry_deploy_token }.policy do
+    enable :read_package
+    enable :read_group
+  end
+
+  rule { write_package_registry_deploy_token }.policy do
+    enable :create_package
+    enable :read_group
+  end
+
+  rule { resource_access_token_available & can?(:admin_group) }.policy do
+    enable :admin_resource_access_tokens
+  end
+
   def access_level
     return GroupMember::NO_ACCESS if @user.nil?
+    return GroupMember::NO_ACCESS unless user_is_user?
 
     @access_level ||= lookup_access_level!
   end
 
   def lookup_access_level!
     @subject.max_member_access_for_user(@user)
+  end
+
+  private
+
+  def user_is_user?
+    user.is_a?(User)
+  end
+
+  def group
+    @subject
+  end
+
+  def resource_access_token_available?
+    true
   end
 end
 

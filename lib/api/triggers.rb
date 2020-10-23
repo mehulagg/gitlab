@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Triggers < Grape::API::Instance
+  class Triggers < ::API::Base
     include PaginationParams
 
     HTTP_GITLAB_EVENT_HEADER = "HTTP_#{WebHookService::GITLAB_EVENT_HEADER}".underscore.upcase
@@ -11,7 +11,7 @@ module API
     end
     resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       desc 'Trigger a GitLab project pipeline' do
-        success Entities::Pipeline
+        success Entities::Ci::Pipeline
       end
       params do
         requires :ref, type: String, desc: 'The commit sha or name of a branch or tag', allow_blank: false
@@ -38,7 +38,7 @@ module API
         if result[:http_status]
           render_api_error!(result[:message], result[:http_status])
         else
-          present result[:pipeline], with: Entities::Pipeline
+          present result[:pipeline], with: Entities::Ci::Pipeline
         end
       end
 

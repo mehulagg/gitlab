@@ -18,6 +18,7 @@ module EE
         ::Project.id_in(updated_project_ids).find_each do |project|
           project.maintain_elasticsearch_update if project.maintaining_elasticsearch?
         end
+        super
       end
 
       def lost_groups

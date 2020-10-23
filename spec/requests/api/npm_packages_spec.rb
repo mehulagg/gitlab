@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe API::NpmPackages do
   include PackagesManagerApiSpecHelpers
+  include HttpBasicAuthHelpers
 
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
@@ -11,7 +12,7 @@ RSpec.describe API::NpmPackages do
   let_it_be(:package, reload: true) { create(:npm_package, project: project) }
   let_it_be(:token) { create(:oauth_access_token, scopes: 'api', resource_owner: user) }
   let_it_be(:personal_access_token) { create(:personal_access_token, user: user) }
-  let_it_be(:job) { create(:ci_build, user: user) }
+  let_it_be(:job, reload: true) { create(:ci_build, user: user, status: :running) }
   let_it_be(:deploy_token) { create(:deploy_token, read_package_registry: true, write_package_registry: true) }
   let_it_be(:project_deploy_token) { create(:project_deploy_token, deploy_token: deploy_token, project: project) }
 
@@ -26,10 +27,17 @@ RSpec.describe API::NpmPackages do
       expect_a_valid_package_response
     end
 
-    it 'returns the package info with job token' do
+    it 'returns the package info with running job token' do
       get_package_with_job_token(package)
 
       expect_a_valid_package_response
+    end
+
+    it 'denies request without running job token' do
+      job.update!(status: :success)
+      get_package_with_job_token(package)
+
+      expect(response).to have_gitlab_http_status(:unauthorized)
     end
 
     it 'denies request without oauth token' do
@@ -80,12 +88,16 @@ RSpec.describe API::NpmPackages do
         it_behaves_like 'returning the npm package info'
 
         context 'with unknown package' do
+          subject { get api("/packages/npm/unknown") }
+
           it 'returns a redirect' do
-            get api("/packages/npm/unknown")
+            subject
 
             expect(response).to have_gitlab_http_status(:found)
             expect(response.headers['Location']).to eq('https://registry.npmjs.org/unknown')
           end
+
+          it_behaves_like 'a gitlab tracking event', described_class.name, 'npm_request_forward'
         end
       end
 
@@ -185,7 +197,7 @@ RSpec.describe API::NpmPackages do
         expect(response.media_type).to eq('application/octet-stream')
       end
 
-      it_behaves_like 'a gitlab tracking event', described_class.name, 'pull_package'
+      it_behaves_like 'a package tracking event', described_class.name, 'pull_package'
     end
 
     context 'private project' do
@@ -293,7 +305,7 @@ RSpec.describe API::NpmPackages do
         context 'with access token' do
           subject { upload_package_with_token(package_name, params) }
 
-          it_behaves_like 'a gitlab tracking event', described_class.name, 'push_package'
+          it_behaves_like 'a package tracking event', described_class.name, 'push_package'
 
           it 'creates npm package with file' do
             expect { subject }
@@ -407,39 +419,37 @@ RSpec.describe API::NpmPackages do
 
     subject { get api(url) }
 
-    context 'without the need for a license' do
-      context 'with public project' do
-        context 'with authenticated user' do
-          subject { get api(url, personal_access_token: personal_access_token) }
+    context 'with public project' do
+      context 'with authenticated user' do
+        subject { get api(url, personal_access_token: personal_access_token) }
 
-          it_behaves_like 'returns package tags', :maintainer
-          it_behaves_like 'returns package tags', :developer
-          it_behaves_like 'returns package tags', :reporter
-          it_behaves_like 'returns package tags', :guest
-        end
-
-        context 'with unauthenticated user' do
-          it_behaves_like 'returns package tags', :no_type
-        end
+        it_behaves_like 'returns package tags', :maintainer
+        it_behaves_like 'returns package tags', :developer
+        it_behaves_like 'returns package tags', :reporter
+        it_behaves_like 'returns package tags', :guest
       end
 
-      context 'with private project' do
-        before do
-          project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-        end
+      context 'with unauthenticated user' do
+        it_behaves_like 'returns package tags', :no_type
+      end
+    end
 
-        context 'with authenticated user' do
-          subject { get api(url, personal_access_token: personal_access_token) }
+    context 'with private project' do
+      before do
+        project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+      end
 
-          it_behaves_like 'returns package tags', :maintainer
-          it_behaves_like 'returns package tags', :developer
-          it_behaves_like 'returns package tags', :reporter
-          it_behaves_like 'rejects package tags access', :guest, :forbidden
-        end
+      context 'with authenticated user' do
+        subject { get api(url, personal_access_token: personal_access_token) }
 
-        context 'with unauthenticated user' do
-          it_behaves_like 'rejects package tags access', :no_type, :forbidden
-        end
+        it_behaves_like 'returns package tags', :maintainer
+        it_behaves_like 'returns package tags', :developer
+        it_behaves_like 'returns package tags', :reporter
+        it_behaves_like 'rejects package tags access', :guest, :forbidden
+      end
+
+      context 'with unauthenticated user' do
+        it_behaves_like 'rejects package tags access', :no_type, :forbidden
       end
     end
   end
@@ -453,39 +463,37 @@ RSpec.describe API::NpmPackages do
 
     subject { put api(url), env: { 'api.request.body': version } }
 
-    context 'without the need for a license' do
-      context 'with public project' do
-        context 'with authenticated user' do
-          subject { put api(url, personal_access_token: personal_access_token), env: { 'api.request.body': version } }
+    context 'with public project' do
+      context 'with authenticated user' do
+        subject { put api(url, personal_access_token: personal_access_token), env: { 'api.request.body': version } }
 
-          it_behaves_like 'create package tag', :maintainer
-          it_behaves_like 'create package tag', :developer
-          it_behaves_like 'rejects package tags access', :reporter, :forbidden
-          it_behaves_like 'rejects package tags access', :guest, :forbidden
-        end
-
-        context 'with unauthenticated user' do
-          it_behaves_like 'rejects package tags access', :no_type, :unauthorized
-        end
+        it_behaves_like 'create package tag', :maintainer
+        it_behaves_like 'create package tag', :developer
+        it_behaves_like 'rejects package tags access', :reporter, :forbidden
+        it_behaves_like 'rejects package tags access', :guest, :forbidden
       end
 
-      context 'with private project' do
-        before do
-          project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-        end
+      context 'with unauthenticated user' do
+        it_behaves_like 'rejects package tags access', :no_type, :unauthorized
+      end
+    end
 
-        context 'with authenticated user' do
-          subject { put api(url, personal_access_token: personal_access_token), env: { 'api.request.body': version } }
+    context 'with private project' do
+      before do
+        project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+      end
 
-          it_behaves_like 'create package tag', :maintainer
-          it_behaves_like 'create package tag', :developer
-          it_behaves_like 'rejects package tags access', :reporter, :forbidden
-          it_behaves_like 'rejects package tags access', :guest, :forbidden
-        end
+      context 'with authenticated user' do
+        subject { put api(url, personal_access_token: personal_access_token), env: { 'api.request.body': version } }
 
-        context 'with unauthenticated user' do
-          it_behaves_like 'rejects package tags access', :no_type, :unauthorized
-        end
+        it_behaves_like 'create package tag', :maintainer
+        it_behaves_like 'create package tag', :developer
+        it_behaves_like 'rejects package tags access', :reporter, :forbidden
+        it_behaves_like 'rejects package tags access', :guest, :forbidden
+      end
+
+      context 'with unauthenticated user' do
+        it_behaves_like 'rejects package tags access', :no_type, :unauthorized
       end
     end
   end
@@ -499,39 +507,37 @@ RSpec.describe API::NpmPackages do
 
     subject { delete api(url) }
 
-    context 'without the need for a license' do
-      context 'with public project' do
-        context 'with authenticated user' do
-          subject { delete api(url, personal_access_token: personal_access_token) }
+    context 'with public project' do
+      context 'with authenticated user' do
+        subject { delete api(url, personal_access_token: personal_access_token) }
 
-          it_behaves_like 'delete package tag', :maintainer
-          it_behaves_like 'rejects package tags access', :developer, :forbidden
-          it_behaves_like 'rejects package tags access', :reporter, :forbidden
-          it_behaves_like 'rejects package tags access', :guest, :forbidden
-        end
-
-        context 'with unauthenticated user' do
-          it_behaves_like 'rejects package tags access', :no_type, :unauthorized
-        end
+        it_behaves_like 'delete package tag', :maintainer
+        it_behaves_like 'rejects package tags access', :developer, :forbidden
+        it_behaves_like 'rejects package tags access', :reporter, :forbidden
+        it_behaves_like 'rejects package tags access', :guest, :forbidden
       end
 
-      context 'with private project' do
-        before do
-          project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-        end
+      context 'with unauthenticated user' do
+        it_behaves_like 'rejects package tags access', :no_type, :unauthorized
+      end
+    end
 
-        context 'with authenticated user' do
-          subject { delete api(url, personal_access_token: personal_access_token) }
+    context 'with private project' do
+      before do
+        project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+      end
 
-          it_behaves_like 'delete package tag', :maintainer
-          it_behaves_like 'rejects package tags access', :developer, :forbidden
-          it_behaves_like 'rejects package tags access', :reporter, :forbidden
-          it_behaves_like 'rejects package tags access', :guest, :forbidden
-        end
+      context 'with authenticated user' do
+        subject { delete api(url, personal_access_token: personal_access_token) }
 
-        context 'with unauthenticated user' do
-          it_behaves_like 'rejects package tags access', :no_type, :unauthorized
-        end
+        it_behaves_like 'delete package tag', :maintainer
+        it_behaves_like 'rejects package tags access', :developer, :forbidden
+        it_behaves_like 'rejects package tags access', :reporter, :forbidden
+        it_behaves_like 'rejects package tags access', :guest, :forbidden
+      end
+
+      context 'with unauthenticated user' do
+        it_behaves_like 'rejects package tags access', :no_type, :unauthorized
       end
     end
   end

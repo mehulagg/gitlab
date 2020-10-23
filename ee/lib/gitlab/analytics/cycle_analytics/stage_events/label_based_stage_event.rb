@@ -32,8 +32,8 @@ module Gitlab
           # rubocop: disable CodeReuse/ActiveRecord
           def apply_query_customization(query)
             query
-              .joins("INNER JOIN (#{subquery.to_sql}) #{join_expression_name} on #{join_expression_name}.model_id = #{quote_table_name(object_type.table_name)}.id")
-              .where("#{join_expression_name}.label_assignment_order = 1")
+              .from(Arel::Nodes::Grouping.new(Arel.sql(object_type.all.to_sql)).as(object_type.table_name)) # This is needed for the LATERAL JOIN: FROM (SELECT * FROM table) as table
+              .joins("INNER JOIN LATERAL (#{subquery.to_sql}) #{join_expression_name} ON TRUE")
           end
           # rubocop: enable CodeReuse/ActiveRecord
 
@@ -58,11 +58,6 @@ module Gitlab
           # - IssueLabelAdded event: find the first assignment (add, id = 1)
           # - IssueLabelRemoved event: find the latest unassignment (remove, id = 4)
           #
-          # This can be achieved with the PARTITION window function.
-          #
-          #  - IssueLabelAdded: order by `created_at` ASC and take the row number 1
-          #  - IssueLabelRemoved: order by `created_at` DESC and take the row number 1
-          #
           #  Arguments:
           #    foreign_key: :issue_id or :merge_request_id (based on resource_label_events table)
           #    label: label model,
@@ -72,9 +67,12 @@ module Gitlab
           # rubocop: disable CodeReuse/ActiveRecord
           def resource_label_events_with_subquery(foreign_key, label, action, order)
             ResourceLabelEvent
-              .select(:created_at, resource_label_events_table[foreign_key].as('model_id'), partition_select(foreign_key, order).as('label_assignment_order'))
+              .select(:created_at)
               .where(action: action)
               .where(label_id: label.id)
+              .where(ResourceLabelEvent.arel_table[foreign_key].eq(object_type.arel_table[:id]))
+              .order(order_expression(order))
+              .limit(1)
           end
           # rubocop: enable CodeReuse/ActiveRecord
 
@@ -83,23 +81,16 @@ module Gitlab
             @join_expression_name ||= quote_table_name("#{self.class.to_s.demodulize.underscore}_#{SecureRandom.hex(5)}")
           end
 
-          # rubocop: disable CodeReuse/ActiveRecord
-          def partition_select(foreign_key, order)
-            order_expression = case order
-                               when :asc
-                                 resource_label_events_table[:created_at].asc
-                               when :desc
-                                 resource_label_events_table[:created_at].desc
-                               else
-                                 raise "unsupported order option: #{order}"
-                               end
-
-            Arel::Nodes::Over.new(
-              Arel::Nodes::NamedFunction.new('row_number', []),
-              Arel::Nodes::Window.new.partition(resource_label_events_table[foreign_key]).order(order_expression)
-            )
+          def order_expression(order)
+            case order
+            when :asc
+              resource_label_events_table[:created_at].asc
+            when :desc
+              resource_label_events_table[:created_at].desc
+            else
+              raise "unsupported order option: #{order}"
+            end
           end
-          # rubocop: enable CodeReuse/ActiveRecord
         end
       end
     end

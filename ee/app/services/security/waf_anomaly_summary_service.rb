@@ -33,7 +33,7 @@ module Security
 
       return { total_traffic: nginx_total_requests, total_anomalous_traffic: modsec_total_requests } if totals_only
 
-      anomalous_traffic_count = nginx_total_requests.zero? ? 0 : (modsec_total_requests / nginx_total_requests).round(2)
+      anomalous_traffic_count = nginx_total_requests == 0 ? 0 : (modsec_total_requests / nginx_total_requests).round(2)
 
       {
         total_traffic: nginx_total_requests,

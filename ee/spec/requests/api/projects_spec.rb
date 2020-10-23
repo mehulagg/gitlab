@@ -930,6 +930,7 @@ RSpec.describe API::Projects do
     let!(:target_namespace) do
       create(:group).tap { |g| g.add_owner(user) }
     end
+
     let!(:group_project) { create(:project, namespace: group)}
     let(:group) { create(:group) }
 
@@ -941,6 +942,7 @@ RSpec.describe API::Projects do
       let(:group) do
         create(:saml_provider, :enforced_group_managed_accounts, prohibited_outer_forks: true).group
       end
+
       let(:user) do
         create(:user, managing_group: group).tap do |u|
           create(:group_saml_identity, user: u, saml_provider: group.saml_provider)
@@ -948,7 +950,7 @@ RSpec.describe API::Projects do
       end
 
       before do
-        stub_licensed_features(group_saml: true)
+        stub_licensed_features(group_saml: true, group_forking_protection: true)
       end
 
       context 'and target namespace is outer' do

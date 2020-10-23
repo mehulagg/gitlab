@@ -39,6 +39,7 @@ RSpec.describe Search::SnippetService do
             { snippet_level: :internal, project_level: :internal, feature_access_level: :enabled, membership: :non_member, expected_count: 1 }
           ]
         end
+
         let(:pending?) do
           pendings.include?(
             {

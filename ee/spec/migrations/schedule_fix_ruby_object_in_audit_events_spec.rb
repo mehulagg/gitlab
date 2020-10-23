@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20200518114540_schedule_fix_ruby_object_in_audit_events.rb')
+require_migration!
 
 RSpec.describe ScheduleFixRubyObjectInAuditEvents do
   let(:audit_events) { table(:audit_events) }
@@ -11,7 +11,6 @@ RSpec.describe ScheduleFixRubyObjectInAuditEvents do
 
     audit_events.create!(
       author_id: -1,
-      type: 'SecurityEvent',
       entity_id: 1,
       entity_type: 'User',
       details: "---\n:failed_login: STANDARD\n:author_name: hacker\n" \
@@ -21,7 +20,6 @@ RSpec.describe ScheduleFixRubyObjectInAuditEvents do
 
     audit_events.create!(
       author_id: 1,
-      type: 'SecurityEvent',
       entity_id: 1,
       entity_type: 'User',
       details: "---\n:failed_login: STANDARD\n:author_name: homer\n" \

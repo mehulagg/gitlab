@@ -30,6 +30,10 @@ RSpec.describe Vulnerabilities::HistoricalStatistics::UpdateService do
       end
 
       context 'when there is already a record in the database' do
+        around do |example|
+          travel_to(Date.current) { example.run }
+        end
+
         it 'changes the existing historical statistic entity' do
           historical_statistic = create(:vulnerability_historical_statistic, project: project, letter_grade: 'c')
 

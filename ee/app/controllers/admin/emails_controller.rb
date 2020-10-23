@@ -6,6 +6,8 @@ class Admin::EmailsController < Admin::ApplicationController
   before_action :check_license_send_emails_from_admin_area_available!
   before_action :check_rate_limit!, only: [:create]
 
+  feature_category :not_owned
+
   def show
   end
 

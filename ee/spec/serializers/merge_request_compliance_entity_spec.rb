@@ -7,25 +7,37 @@ RSpec.describe MergeRequestComplianceEntity do
 
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
-  let(:merge_request) { create(:merge_request, state: :merged) }
+  let_it_be(:merge_request) { create(:merge_request, :merged) }
 
   let(:request) { double('request', current_user: user, project: project) }
-  let(:entity) { described_class.new(merge_request, request: request) }
+  let(:entity) { described_class.new(merge_request.reload, request: request) }
 
   describe '.as_json' do
     subject { entity.as_json }
 
     it 'includes merge request attributes for compliance' do
       expect(subject).to include(
-        :id, :title, :merged_at, :milestone, :path, :issuable_reference, :author, :approved_by_users, :approval_status
+        :id,
+        :title,
+        :merged_at,
+        :milestone,
+        :path,
+        :issuable_reference,
+        :author,
+        :approved_by_users,
+        :approval_status,
+        :target_branch,
+        :target_branch_uri,
+        :source_branch,
+        :source_branch_uri
       )
     end
 
     describe 'with an approver' do
       let_it_be(:approver) { create(:user) }
-      let!(:approval) { create :approval, merge_request: merge_request, user: approver }
+      let_it_be(:approval) { create :approval, merge_request: merge_request, user: approver }
 
-      before do
+      before_all do
         project.add_developer(approver)
       end
 
@@ -39,7 +51,7 @@ RSpec.describe MergeRequestComplianceEntity do
     end
 
     describe 'with a head pipeline' do
-      let!(:pipeline) { create(:ci_empty_pipeline, status: :success, project: project, head_pipeline_of: merge_request) }
+      let_it_be(:pipeline) { create(:ci_empty_pipeline, status: :success, project: project, head_pipeline_of: merge_request) }
 
       describe 'and the user cannot read the pipeline' do
         it 'does not include pipeline status attribute' do

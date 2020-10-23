@@ -30,3 +30,18 @@ export const SNIPPET_BLOB_CONTENT_FETCH_ERROR = __("Can't fetch content for the 
 export const SNIPPET_BLOB_ACTION_CREATE = 'create';
 export const SNIPPET_BLOB_ACTION_UPDATE = 'update';
 export const SNIPPET_BLOB_ACTION_MOVE = 'move';
+export const SNIPPET_BLOB_ACTION_DELETE = 'delete';
+
+export const SNIPPET_MAX_BLOBS = 10;
+
+export const SNIPPET_LEVELS_MAP = {
+  0: SNIPPET_VISIBILITY_PRIVATE,
+  10: SNIPPET_VISIBILITY_INTERNAL,
+  20: SNIPPET_VISIBILITY_PUBLIC,
+};
+export const SNIPPET_LEVELS_RESTRICTED = __(
+  'Other visibility settings have been disabled by the administrator.',
+);
+export const SNIPPET_LEVELS_DISABLED = __(
+  'Visibility settings have been disabled by the administrator.',
+);

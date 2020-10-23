@@ -7,6 +7,15 @@ module Elastic
       extend Elasticsearch::Model::Indexing::ClassMethods
       extend Elasticsearch::Model::Naming::ClassMethods
 
+      # Regex patterns, Elasticsearch regex requires backslash characters to be escaped
+      # Single quotes are used to store the patterns and ruby will escape the \ appropriately
+      ANY_CASE_WORD_PATTERN = '(\p{Ll}+|\p{Lu}\p{Ll}+|\p{Lu}+)' # match words with any upper/lowercase combination
+      CAMEL_CASE_WORD_PATTERN = '(?=([\p{Lu}]+[\p{L}]+))' # match camel cased words, used to split into smaller tokens
+      CODE_TOKEN_PATTERN = '([\p{L}\d_]+)' # letters, numbers & underscores are the most common tokens in programming. Always capture them greedily regardless of context.
+      DIGIT_PATTERN = '(\d+)' # match digits of any length
+      FILE_NAME_PATTERN = '([\p{L}\p{N}_.-]+)' # some common chars in file names to keep the whole filename intact (eg. my_file-name-01.txt)
+      PERIOD_PATTERN = '\.([^.]+)(?=\.|\s|\Z)' # separate terms on periods
+
       self.index_name = [Rails.application.class.module_parent_name.downcase, Rails.env].join('-')
 
       # ES6 requires a single type per index
@@ -61,14 +70,12 @@ module Elastic
                 type: "pattern_capture",
                 preserve_original: true,
                 patterns: [
-                  "(\\p{Ll}+|\\p{Lu}\\p{Ll}+|\\p{Lu}+)",
-                  "(\\d+)",
-                  "(?=([\\p{Lu}]+[\\p{L}]+))",
-                  '"((?:\\"|[^"]|\\")*)"', # capture terms inside quotes, removing the quotes
-                  "'((?:\\'|[^']|\\')*)'", # same as above, for single quotes
-                  '\.([^.]+)(?=\.|\s|\Z)', # separate terms on periods
-                  '([\p{L}_.-]+)', # some common chars in file names to keep the whole filename intact (eg. my_file-name.txt)
-                  '([\p{L}\d_]+)' # letters, numbers and underscores are the most common tokens in programming. Always capture them greedily regardless of context.
+                  ANY_CASE_WORD_PATTERN,
+                  CAMEL_CASE_WORD_PATTERN,
+                  CODE_TOKEN_PATTERN,
+                  DIGIT_PATTERN,
+                  FILE_NAME_PATTERN,
+                  PERIOD_PATTERN
                 ]
               }
             },

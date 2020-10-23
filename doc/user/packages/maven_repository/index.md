@@ -4,44 +4,24 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# GitLab Maven Repository
+# Maven packages in the Package Repository
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5811) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.3.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
 
-With the GitLab [Maven](https://maven.apache.org) Repository, every
-project can have its own space to store its Maven artifacts.
+Publish [Maven](https://maven.apache.org) artifacts in your project’s Package Registry.
+Then, install the packages whenever you need to use them as a dependency.
 
-![GitLab Maven Repository](img/maven_package_view_v12_6.png)
+## Build a Maven package
 
-## Enabling the Maven Repository
+This section explains how to install Maven and build a package.
 
-NOTE: **Note:**
-This option is available only if your GitLab administrator has
-[enabled support for the Maven repository](../../../administration/packages/index.md).
+If you already use Maven and know how to build your own packages, go to the
+[next section](#add-the-package-registry-as-a-maven-remote).
 
-After the Packages feature is enabled, the Maven Repository will be available for
-all new projects by default. To enable it for existing projects, or if you want
-to disable it:
+Maven repositories work well with Gradle, too. To set up a Gradle project, see [get started with Gradle](#use-gradle-to-create-a-java-project).
 
-1. Navigate to your project's **Settings > General > Visibility, project features, permissions**.
-1. Find the Packages feature and enable or disable it.
-1. Click on **Save changes** for the changes to take effect.
-
-You should then be able to see the **Packages & Registries** section on the left sidebar.
-Next, you must configure your project to authorize with the GitLab Maven
-repository.
-
-## Getting Started with Maven
-
-This section will cover installing Maven and building a package. This is a
-quickstart to help if you're new to building Maven packages. If you're already
-using Maven and understand how to build your own packages, move onto the
-[next section](#adding-the-gitlab-package-registry-as-a-maven-remote).
-
-Maven repositories work well with Gradle, too. Move onto [getting started with Gradle](#getting-started-with-gradle) if you want to setup a Gradle project.
-
-### Installing Maven
+### Install Maven
 
 The required minimum versions are:
 
@@ -66,7 +46,7 @@ Default locale: en_GB, platform encoding: UTF-8
 OS name: "mac os x", version: "10.15.2", arch: "x86_64", family: "mac"
 ```
 
-### Creating a project
+### Create a project
 
 Understanding how to create a full Java project is outside the scope of this
 guide but you can follow the steps below to create a new project that can be
@@ -105,14 +85,14 @@ your project has been set up successfully:
 You should see a new directory where you ran this command matching your
 `DartifactId` parameter (in this case it should be `my-project`).
 
-## Getting started with Gradle
+## Use Gradle to create a Java project
 
-This section will cover installing Gradle and initializing a Java project. This is a
-quickstart to help if you're new to Gradle. If you're already
-using Gradle and understand how to build your own packages, move onto the
-[next section](#adding-the-gitlab-package-registry-as-a-maven-remote).
+This section explains how to install Gradle and initialize a Java project.
 
-### Installing Gradle
+If you already use Gradle and know how to build your own packages, go to the
+[next section](#add-the-package-registry-as-a-maven-remote).
+
+### Install Gradle
 
 Installation is needed only if you want to create a new Gradle project. Follow
 instructions at [gradle.org](https://gradle.org/install/) to download and install
@@ -128,7 +108,7 @@ If you want to use an existing Gradle project, installation is not necessary.
 Simply execute `gradlew` (on Linux) or `gradlew.bat` (on Windows) in the project
 directory instead.
 
-You should see something imilar to the below printed in the output:
+You should see something similar to the below printed in the output:
 
 ```plaintext
 ------------------------------------------------------------
@@ -145,7 +125,7 @@ JVM:          11.0.5 (Oracle Corporation 11.0.5+10)
 OS:           Windows 10 10.0 amd64
 ```
 
-### Creating a project in Gradle
+### Create a Java project
 
 Understanding how to create a full Java project in Gradle is outside the scope of this
 guide, but you can follow the steps below to create a new project that can be
@@ -191,7 +171,7 @@ Select build script DSL:
 Enter selection (default: Groovy) [1..2]
 ```
 
-Choose `1` to create a new Java Library project which will be described in Groovy DSL. The output should be:
+Choose `1` to create a new Java Library project which is described in Groovy DSL. The output should be:
 
 ```plaintext
 Select test framework:
@@ -209,23 +189,23 @@ Project name (default: test):
 
 Enter a project name or hit enter to use the directory name as project name.
 
-## Adding the GitLab Package Registry as a Maven remote
+## Add the Package Registry as a Maven remote
 
 The next step is to add the GitLab Package Registry as a Maven remote. If a
 project is private or you want to upload Maven artifacts to GitLab,
-credentials will need to be provided for authorization too. Support is available
-for [personal access tokens](#authenticating-with-a-personal-access-token),
-[CI job tokens](#authenticating-with-a-ci-job-token), and
+credentials must be provided for authorization too. Support is available
+for [personal access tokens](#authenticate-with-a-personal-access-token),
+[CI job tokens](#authenticate-with-a-ci-job-token), and
 [deploy tokens](../../project/deploy_tokens/index.md) only. Regular username/password
 credentials do not work.
 
-### Authenticating with a personal access token
+### Authenticate with a personal access token
 
 To authenticate with a [personal access token](../../profile/personal_access_tokens.md),
 set the scope to `api` when creating one, and add it to your Maven or Gradle configuration
 files.
 
-#### Authenticating with a personal access token in Maven
+#### Authenticate with a personal access token in Maven
 
 Add a corresponding section to your
 [`settings.xml`](https://maven.apache.org/settings.html) file:
@@ -248,7 +228,7 @@ Add a corresponding section to your
 </settings>
 ```
 
-#### Authenticating with a personal access token in Gradle
+#### Authenticate with a personal access token in Gradle
 
 Create a file `~/.gradle/gradle.properties` with the following content:
 
@@ -278,12 +258,12 @@ repositories {
 
 You should now be able to upload Maven artifacts to your project.
 
-### Authenticating with a CI job token
+### Authenticate with a CI job token
 
 If you're using GitLab CI/CD, a CI job token can be used instead
 of a personal access token.
 
-#### Authenticating with a CI job token in Maven
+#### Authenticate with a CI job token in Maven
 
 To authenticate with a CI job token, add a corresponding section to your
 [`settings.xml`](https://maven.apache.org/settings.html) file:
@@ -309,7 +289,7 @@ To authenticate with a CI job token, add a corresponding section to your
 You can read more on
 [how to create Maven packages using GitLab CI/CD](#creating-maven-packages-with-gitlab-cicd).
 
-#### Authenticating with a CI job token in Gradle
+#### Authenticate with a CI job token in Gradle
 
 To authenticate with a CI job token, add a repositories section to your
 [`build.gradle`](https://docs.gradle.org/current/userguide/tutorial_using_tasks.html)
@@ -331,7 +311,7 @@ repositories {
 }
 ```
 
-### Authenticating with a deploy token
+### Authenticate with a deploy token
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/213566) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.0.
 
@@ -339,7 +319,7 @@ To authenticate with a [deploy token](./../../project/deploy_tokens/index.md),
 set the scope to `api` when creating one, and add it to your Maven or Gradle configuration
 files.
 
-#### Authenticating with a deploy token in Maven
+#### Authenticate with a deploy token in Maven
 
 Add a corresponding section to your
 [`settings.xml`](https://maven.apache.org/settings.html) file:
@@ -362,7 +342,7 @@ Add a corresponding section to your
 </settings>
 ```
 
-#### Authenticating with a deploy token in Gradle
+#### Authenticate with a deploy token in Gradle
 
 To authenticate with a deploy token, add a repositories section to your
 [`build.gradle`](https://docs.gradle.org/current/userguide/tutorial_using_tasks.html)
@@ -388,7 +368,7 @@ repositories {
 
 To download and upload packages from GitLab, you need a `repository` and
 `distributionManagement` section in your `pom.xml` file. If you're following the
-steps from above, then you'll need to add the following information to your
+steps from above, then you must add the following information to your
 `my-project/pom.xml` file.
 
 Depending on your workflow and the amount of Maven packages you have, there are
@@ -441,7 +421,7 @@ repositories {
 ```
 
 The `id` must be the same with what you
-[defined in `settings.xml`](#adding-the-gitlab-package-registry-as-a-maven-remote).
+[defined in `settings.xml`](#add-the-package-registry-as-a-maven-remote).
 
 Replace `PROJECT_ID` with your project ID which can be found on the home page
 of your project.
@@ -452,7 +432,7 @@ domain name.
 NOTE: **Note:**
 For retrieving artifacts, you can use either the
 [URL encoded](../../../api/README.md#namespaced-path-encoding) path of the project
-(e.g., `group%2Fproject`) or the project's ID (e.g., `42`). However, only the
+(such as `group%2Fproject`) or the project's ID (such as `42`). However, only the
 project's ID can be used for uploading.
 
 ### Group level Maven endpoint
@@ -462,13 +442,13 @@ project's ID can be used for uploading.
 If you rely on many packages, it might be inefficient to include the `repository` section
 with a unique URL for each package. Instead, you can use the group level endpoint for
 all your Maven packages stored within one GitLab group. Only packages you have access to
-will be available for download.
+are available for download.
 
 The group level endpoint works with any package names, which means the you
 have the flexibility of naming compared to [instance level endpoint](#instance-level-maven-endpoint).
-However, GitLab will not guarantee the uniqueness of the package names within
+However, GitLab does not guarantee the uniqueness of the package names within
 the group. You can have two projects with the same package name and package
-version. As a result, GitLab will serve whichever one is more recent.
+version. As a result, GitLab serves whichever one is more recent.
 
 The example below shows how the relevant `repository` section of your `pom.xml`
 would look like. You still need a project specific URL for uploading a package in
@@ -505,7 +485,7 @@ repositories {
 ```
 
 The `id` must be the same with what you
-[defined in `settings.xml`](#adding-the-gitlab-package-registry-as-a-maven-remote).
+[defined in `settings.xml`](#add-the-package-registry-as-a-maven-remote).
 
 Replace `my-group` with your group name and `PROJECT_ID` with your project ID
 which can be found on the home page of your project.
@@ -516,7 +496,7 @@ domain name.
 NOTE: **Note:**
 For retrieving artifacts, you can use either the
 [URL encoded](../../../api/README.md#namespaced-path-encoding) path of the group
-(e.g., `group%2Fsubgroup`) or the group's ID (e.g., `12`).
+(such as `group%2Fsubgroup`) or the group's ID (such as `12`).
 
 ### Instance level Maven endpoint
 
@@ -524,7 +504,7 @@ For retrieving artifacts, you can use either the
 
 If you rely on many packages, it might be inefficient to include the `repository` section
 with a unique URL for each package. Instead, you can use the instance level endpoint for
-all maven packages stored in GitLab and the packages you have access to will be available
+all maven packages stored in GitLab and the packages you have access to are available
 for download.
 
 Note that **only packages that have the same path as the project** are exposed via
@@ -571,7 +551,7 @@ repositories {
 ```
 
 The `id` must be the same with what you
-[defined in `settings.xml`](#adding-the-gitlab-package-registry-as-a-maven-remote).
+[defined in `settings.xml`](#add-the-package-registry-as-a-maven-remote).
 
 Replace `PROJECT_ID` with your project ID which can be found on the home page
 of your project.
@@ -582,12 +562,12 @@ domain name.
 NOTE: **Note:**
 For retrieving artifacts, you can use either the
 [URL encoded](../../../api/README.md#namespaced-path-encoding) path of the project
-(e.g., `group%2Fproject`) or the project's ID (e.g., `42`). However, only the
+(such as `group%2Fproject`) or the project's ID (such as `42`). However, only the
 project's ID can be used for uploading.
 
 ## Uploading packages
 
-Once you have set up the [remote and authentication](#adding-the-gitlab-package-registry-as-a-maven-remote)
+Once you have set up the [remote and authentication](#add-the-package-registry-as-a-maven-remote)
 and [configured your project](#configuring-your-project-to-use-the-gitlab-maven-repository-url),
 test to upload a Maven artifact from a project of yours.
 
@@ -661,8 +641,8 @@ artifacts or even delete them.
 ## Installing a package
 
 Installing a package from the GitLab Package Registry requires that you set up
-the [remote and authentication](#adding-the-gitlab-package-registry-as-a-maven-remote)
-as above. Once this is completed, there are two ways for installaing a package.
+the [remote and authentication](#add-the-package-registry-as-a-maven-remote)
+as above. Once this is completed, there are two ways to install a package.
 
 ### Install using Maven with `mvn install`
 
@@ -708,7 +688,7 @@ Package details page, allowing for quick and easy installation.
 
 ### Install using Gradle
 
-Add a [dependency](https://docs.gradle.org/current/userguide/declaring_dependencies.html) to build.gradle in the dependencies section:
+Add a [dependency](https://docs.gradle.org/current/userguide/declaring_dependencies.html) to `build.gradle` in the dependencies section:
 
 ```groovy
 dependencies {
@@ -732,7 +712,7 @@ you can configure GitLab CI/CD to build new packages automatically.
 The example below shows how to create a new package each time the `master` branch
 is updated:
 
-1. Create a `ci_settings.xml` file that will serve as Maven's `settings.xml` file.
+1. Create a `ci_settings.xml` file that serves as Maven's `settings.xml` file.
    Add the server section with the same ID you defined in your `pom.xml` file.
    For example, in our case it's `gitlab-maven`:
 
@@ -783,7 +763,7 @@ is updated:
 
    ```yaml
    deploy:
-     image: maven:3.3.9-jdk-8
+     image: maven:3.6-jdk-11
      script:
        - 'mvn deploy -s ci_settings.xml'
      only:
@@ -792,9 +772,9 @@ is updated:
 
 1. Push those files to your repository.
 
-The next time the `deploy` job runs, it will copy `ci_settings.xml` to the
+The next time the `deploy` job runs, it copies `ci_settings.xml` to the
 user's home location (in this case the user is `root` since it runs in a
-Docker container), and Maven will utilize the configured CI
+Docker container), and Maven uses the configured CI
 [environment variables](../../../ci/variables/README.md#predefined-environment-variables).
 
 ### Creating Maven packages with GitLab CI/CD using Gradle
@@ -802,13 +782,13 @@ Docker container), and Maven will utilize the configured CI
 The example below shows how to create a new package each time the `master` branch
 is updated:
 
-1. Make sure you use the Job-Token authentication as described in ["Authenticating with a CI job token in Gradle"](#authenticating-with-a-ci-job-token-in-gradle).
+1. Make sure you use the Job-Token authentication as described in ["Authenticating with a CI job token in Gradle"](#authenticate-with-a-ci-job-token-in-gradle).
 
 1. Add a `deploy` job to your `.gitlab-ci.yml` file:
 
    ```yaml
    deploy:
-     image: gradle:latest
+     image: gradle:6.5-jdk11
      script:
        - 'gradle publish'
      only:

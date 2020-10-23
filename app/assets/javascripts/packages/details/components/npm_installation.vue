@@ -1,10 +1,9 @@
 <script>
 import { GlLink, GlSprintf } from '@gitlab/ui';
-import { s__ } from '~/locale';
-import CodeInstruction from './code_instruction.vue';
-import { NpmManager, TrackingActions, TrackingLabels } from '../constants';
 import { mapGetters, mapState } from 'vuex';
-import InstallationTabs from './installation_tabs.vue';
+import { s__ } from '~/locale';
+import CodeInstruction from '~/vue_shared/components/registry/code_instruction.vue';
+import { NpmManager, TrackingActions, TrackingLabels } from '../constants';
 
 export default {
   name: 'NpmInstallation',
@@ -12,7 +11,6 @@ export default {
     CodeInstruction,
     GlLink,
     GlSprintf,
-    InstallationTabs,
   },
   computed: {
     ...mapState(['npmHelpPath']),
@@ -36,52 +34,52 @@ export default {
     ),
   },
   trackingActions: { ...TrackingActions },
-  trackingLabel: TrackingLabels.NPM_INSTALLATION,
+  TrackingLabels,
 };
 </script>
 
 <template>
-  <installation-tabs :tracking-label="$options.trackingLabel">
-    <template #installation>
-      <p class="gl-mt-3 font-weight-bold">{{ s__('PackageRegistry|npm') }}</p>
-      <code-instruction
-        :instruction="npmCommand"
-        :copy-text="s__('PackageRegistry|Copy npm command')"
-        class="js-npm-install"
-        :tracking-action="$options.trackingActions.COPY_NPM_INSTALL_COMMAND"
-      />
+  <div>
+    <h3 class="gl-font-lg">{{ __('Installation') }}</h3>
 
-      <p class="gl-mt-3 font-weight-bold">{{ s__('PackageRegistry|yarn') }}</p>
-      <code-instruction
-        :instruction="yarnCommand"
-        :copy-text="s__('PackageRegistry|Copy yarn command')"
-        class="js-yarn-install"
-        :tracking-action="$options.trackingActions.COPY_YARN_INSTALL_COMMAND"
-      />
-    </template>
+    <code-instruction
+      :label="s__('PackageRegistry|npm command')"
+      :instruction="npmCommand"
+      :copy-text="s__('PackageRegistry|Copy npm command')"
+      :tracking-action="$options.trackingActions.COPY_NPM_INSTALL_COMMAND"
+      :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
+    />
 
-    <template #setup>
-      <p class="gl-mt-3 font-weight-bold">{{ s__('PackageRegistry|npm') }}</p>
-      <code-instruction
-        :instruction="npmSetup"
-        :copy-text="s__('PackageRegistry|Copy npm setup command')"
-        class="js-npm-setup"
-        :tracking-action="$options.trackingActions.COPY_NPM_SETUP_COMMAND"
-      />
+    <code-instruction
+      :label="s__('PackageRegistry|yarn command')"
+      :instruction="yarnCommand"
+      :copy-text="s__('PackageRegistry|Copy yarn command')"
+      :tracking-action="$options.trackingActions.COPY_YARN_INSTALL_COMMAND"
+      :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
+    />
 
-      <p class="gl-mt-3 font-weight-bold">{{ s__('PackageRegistry|yarn') }}</p>
-      <code-instruction
-        :instruction="yarnSetupCommand"
-        :copy-text="s__('PackageRegistry|Copy yarn setup command')"
-        class="js-yarn-setup"
-        :tracking-action="$options.trackingActions.COPY_YARN_SETUP_COMMAND"
-      />
+    <h3 class="gl-font-lg">{{ __('Registry setup') }}</h3>
 
-      <gl-sprintf :message="$options.i18n.helpText">
-        <template #link="{ content }">
-          <gl-link :href="npmHelpPath" target="_blank">{{ content }}</gl-link>
-        </template>
-      </gl-sprintf>
-    </template>
-  </installation-tabs>
+    <code-instruction
+      :label="s__('PackageRegistry|npm command')"
+      :instruction="npmSetup"
+      :copy-text="s__('PackageRegistry|Copy npm setup command')"
+      :tracking-action="$options.trackingActions.COPY_NPM_SETUP_COMMAND"
+      :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
+    />
+
+    <code-instruction
+      :label="s__('PackageRegistry|yarn command')"
+      :instruction="yarnSetupCommand"
+      :copy-text="s__('PackageRegistry|Copy yarn setup command')"
+      :tracking-action="$options.trackingActions.COPY_YARN_SETUP_COMMAND"
+      :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
+    />
+
+    <gl-sprintf :message="$options.i18n.helpText">
+      <template #link="{ content }">
+        <gl-link :href="npmHelpPath" target="_blank">{{ content }}</gl-link>
+      </template>
+    </gl-sprintf>
+  </div>
 </template>

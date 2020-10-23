@@ -82,10 +82,17 @@ RSpec.describe Projects::Security::SastConfigurationController do
 
     context 'with valid params' do
       it 'returns the new merge request url' do
-        create_sast_configuration user: developer, project: project, params: {}
+        params = {
+          secure_analyzers_prefix: 'localhost:5000/analyzers',
+          sast_analyzer_image_tag: '1',
+          sast_excluded_paths: 'docs',
+          stage: 'security',
+          search_max_depth: 11
+        }
+        create_sast_configuration user: developer, project: project, params: params
 
         expect(json_response["message"]).to eq("success")
-        expect(json_response["filePath"]).to match(/#{project_new_merge_request_url(project, {})}(.*)description(.*)source_branch/)
+        expect(json_response["filePath"]).to match(/#{Gitlab::Routing.url_helpers.project_new_merge_request_url(project, {})}(.*)description(.*)source_branch/)
       end
     end
   end

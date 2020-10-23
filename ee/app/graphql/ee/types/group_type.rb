@@ -18,6 +18,7 @@ module EE
 
         field :epics, ::Types::EpicType.connection_type, null: true,
               description: 'Find epics',
+              extras: [:lookahead],
               max_page_size: 2000,
               resolver: ::Resolvers::EpicsResolver
 
@@ -27,6 +28,7 @@ module EE
 
         field :timelogs, ::Types::TimelogType.connection_type, null: false,
               description: 'Time logged in issues by group members',
+              extras: [:lookahead],
               complexity: 5,
               resolver: ::Resolvers::TimelogResolver
 
@@ -42,11 +44,30 @@ module EE
               description: 'Vulnerability scanners reported on the project vulnerabilties of the group and its subgroups',
               resolver: ::Resolvers::Vulnerabilities::ScannersResolver
 
+        field :vulnerability_severities_count, ::Types::VulnerabilitySeveritiesCountType, null: true,
+              description: 'Counts for each vulnerability severity in the group and its subgroups',
+              resolver: ::Resolvers::VulnerabilitySeveritiesCountResolver
+
+        field :vulnerabilities_count_by_day,
+              ::Types::VulnerabilitiesCountByDayType.connection_type,
+              null: true,
+              description: 'Number of vulnerabilities per day for the projects in the group and its subgroups',
+              resolver: ::Resolvers::VulnerabilitiesCountPerDayResolver
+
         field :vulnerabilities_count_by_day_and_severity,
               ::Types::VulnerabilitiesCountByDayAndSeverityType.connection_type,
               null: true,
               description: 'Number of vulnerabilities per severity level, per day, for the projects in the group and its subgroups',
-              resolver: ::Resolvers::VulnerabilitiesHistoryResolver
+              resolver: ::Resolvers::VulnerabilitiesHistoryResolver,
+              deprecated: { reason: 'Use `vulnerabilitiesCountByDay`', milestone: '13.3' }
+
+        field :vulnerability_grades,
+              [::Types::VulnerableProjectsByGradeType],
+              null: false,
+              description: 'Represents vulnerable project counts for each grade',
+              resolve: -> (obj, _args, ctx) {
+                ::Gitlab::Graphql::Aggregations::VulnerabilityStatistics::LazyAggregate.new(ctx, obj)
+              }
       end
     end
   end

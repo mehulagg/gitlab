@@ -10,7 +10,18 @@ fragment AlertDetailItem on AlertManagementAlert {
   description
   updatedAt
   endedAt
+  hosts
+  environment {
+    name
+    path
+  }
   details
+  runbook
+  todos {
+    nodes {
+      id
+    }
+  }
   notes {
     nodes {
       ...AlertNote

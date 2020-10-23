@@ -26,16 +26,8 @@ RSpec.describe 'Group routing', "routing" do
       expect(get('/groups/gitlabhq/-/security/dashboard')).to route_to('groups/security/dashboard#show', group_id: 'gitlabhq')
     end
 
-    it 'lists vulnerabilities' do
-      expect(get('/groups/gitlabhq/-/security/vulnerability_findings')).to route_to('groups/security/vulnerability_findings#index', group_id: 'gitlabhq')
-    end
-
-    it 'shows vulnerability summary' do
-      expect(get('/groups/gitlabhq/-/security/vulnerability_findings/summary')).to route_to('groups/security/vulnerability_findings#summary', group_id: 'gitlabhq')
-    end
-
-    it 'shows vulnerability history' do
-      expect(get('/groups/gitlabhq/-/security/vulnerability_findings/history')).to route_to('groups/security/vulnerability_findings#history', group_id: 'gitlabhq')
+    it 'shows vulnerability list' do
+      expect(get('/groups/gitlabhq/-/security/vulnerabilities')).to route_to('groups/security/vulnerabilities#index', group_id: 'gitlabhq')
     end
   end
 

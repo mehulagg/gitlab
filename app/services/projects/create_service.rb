@@ -19,6 +19,10 @@ module Projects
 
       @project = Project.new(params)
 
+      # If a project is newly created it should have shared runners settings
+      # based on its group having it enabled. This is like the "default value"
+      @project.shared_runners_enabled = false if !params.key?(:shared_runners_enabled) && @project.group && @project.group.shared_runners_setting != 'enabled'
+
       # Make sure that the user is allowed to use the specified visibility level
       if project_visibility.restricted?
         deny_visibility_level(@project, project_visibility.visibility_level)
@@ -55,9 +59,11 @@ module Projects
 
       save_project_and_import_data
 
-      after_create_actions if @project.persisted?
+      Gitlab::ApplicationContext.with_context(related_class: "Projects::CreateService", project: @project) do
+        after_create_actions if @project.persisted?
 
-      import_schedule
+        import_schedule
+      end
 
       @project
     rescue ActiveRecord::RecordInvalid => e
@@ -112,8 +118,13 @@ module Projects
     # completes), and any other affected users in the background
     def setup_authorizations
       if @project.group
-        current_user.project_authorizations.create!(project: @project,
-                                                    access_level: @project.group.max_member_access_for_user(current_user))
+        group_access_level = @project.group.max_member_access_for_user(current_user,
+                                                                       only_concrete_membership: true)
+
+        if group_access_level > GroupMember::NO_ACCESS
+          current_user.project_authorizations.create!(project: @project,
+                                                      access_level: group_access_level)
+        end
 
         if Feature.enabled?(:specialized_project_authorization_workers)
           AuthorizedProjectUpdate::ProjectCreateWorker.perform_async(@project.id)
@@ -136,7 +147,7 @@ module Projects
 
     def create_readme
       commit_attrs = {
-        branch_name:  Gitlab::CurrentSettings.default_branch_name.presence || 'master',
+        branch_name: @project.default_branch || 'master',
         commit_message: 'Initial commit',
         file_path: 'README.md',
         file_content: "# #{@project.name}\n\n#{@project.description}"
@@ -154,10 +165,9 @@ module Projects
         @project.create_or_update_import_data(data: @import_data[:data], credentials: @import_data[:credentials]) if @import_data
 
         if @project.save
-          unless @project.gitlab_project_import?
-            create_services_from_active_instances_or_templates(@project)
-            @project.create_labels
-          end
+          Service.create_from_active_default_integrations(@project, :project_id, with_templates: true)
+
+          @project.create_labels unless @project.gitlab_project_import?
 
           unless @project.import?
             raise 'Failed to create repository' unless @project.create_repository
@@ -220,15 +230,6 @@ module Projects
     end
 
     private
-
-    # rubocop: disable CodeReuse/ActiveRecord
-    def create_services_from_active_instances_or_templates(project)
-      Service.active.where(instance: true).or(Service.active.where(template: true)).group_by(&:type).each do |type, records|
-        service = records.find(&:instance?) || records.find(&:template?)
-        Service.build_from_integration(project.id, service).save!
-      end
-    end
-    # rubocop: enable CodeReuse/ActiveRecord
 
     def project_namespace
       @project_namespace ||= Namespace.find_by_id(@params[:namespace_id]) || current_user.namespace

@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 class OmniauthCallbacksController < Devise::OmniauthCallbacksController
-  include AuthenticatesWithTwoFactor
-  include Authenticates2FAForAdminMode
+  include AuthenticatesWithTwoFactorForAdminMode
   include Devise::Controllers::Rememberable
   include AuthHelper
   include InitializesCurrentUserMode
@@ -11,6 +10,8 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
   after_action :verify_known_sign_in
 
   protect_from_forgery except: [:kerberos, :saml, :cas3, :failure], with: :exception, prepend: true
+
+  feature_category :authentication_and_authorization
 
   def handle_omniauth
     omniauth_flow(Gitlab::Auth::OAuth)
@@ -27,6 +28,7 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
       user = User.by_login(params[:username])
 
       user&.increment_failed_attempts!
+      log_failed_login(params[:username], failed_strategy.name)
     end
 
     super
@@ -47,12 +49,6 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
     omniauth_flow(Gitlab::Auth::Saml)
   rescue Gitlab::Auth::Saml::IdentityLinker::UnverifiedRequest
     redirect_unverified_saml_initiation
-  end
-
-  def omniauth_error
-    @provider = params[:provider]
-    @error = params[:error]
-    render 'errors/omniauth_error', layout: "oauth_error", status: :unprocessable_entity
   end
 
   def cas3
@@ -88,7 +84,15 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
     end
   end
 
+  def atlassian_oauth2
+    omniauth_flow(Gitlab::Auth::Atlassian)
+  end
+
   private
+
+  def log_failed_login(user, provider)
+    # overridden in EE
+  end
 
   def after_omniauth_failure_path_for(scope)
     if Feature.enabled?(:user_mode_in_session)
@@ -198,9 +202,12 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
   end
 
   def fail_login(user)
-    error_message = user.errors.full_messages.to_sentence
+    log_failed_login(user.username, oauth['provider'])
 
-    redirect_to omniauth_error_path(oauth['provider'], error: error_message)
+    @provider = Gitlab::Auth::OAuth::Provider.label_for(params[:action])
+    @error = user.errors.full_messages.to_sentence
+
+    render 'errors/omniauth_error', layout: "oauth_error", status: :unprocessable_entity
   end
 
   def fail_auth0_login

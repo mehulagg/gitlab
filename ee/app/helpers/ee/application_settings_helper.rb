@@ -20,6 +20,7 @@ module EE
     def visible_attributes
       super + [
         :allow_group_owners_to_manage_ldap,
+        :automatic_purchased_storage_allocation,
         :check_namespace_plan,
         :elasticsearch_aws,
         :elasticsearch_aws_access_key,
@@ -38,6 +39,8 @@ module EE
         :elasticsearch_limit_indexing,
         :elasticsearch_namespace_ids,
         :elasticsearch_project_ids,
+        :elasticsearch_client_request_timeout,
+        :enforce_namespace_storage_limit,
         :geo_status_timeout,
         :geo_node_allowed_ips,
         :help_text,

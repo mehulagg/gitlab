@@ -4,12 +4,12 @@
 
 import { GlBreakpointInstance as breakpointInstance } from '@gitlab/ui/dist/utils';
 import $ from 'jquery';
+import { isFunction } from 'lodash';
+import Cookies from 'js-cookie';
 import axios from './axios_utils';
 import { getLocationHash } from './url_utility';
 import { convertToCamelCase, convertToSnakeCase } from './text_utility';
 import { isObject } from './type_utility';
-import { isFunction } from 'lodash';
-import Cookies from 'js-cookie';
 
 export const getPagePath = (index = 0) => {
   const page = $('body').attr('data-page') || '';
@@ -44,6 +44,7 @@ export const checkPageAndAction = (page, action) => {
   return pagePath === page && actionPath === action;
 };
 
+export const isInIncidentPage = () => checkPageAndAction('incidents', 'show');
 export const isInIssuePage = () => checkPageAndAction('issues', 'show');
 export const isInMRPage = () => checkPageAndAction('merge_requests', 'show');
 export const isInEpicPage = () => checkPageAndAction('epics', 'show');

@@ -68,7 +68,7 @@ module StatusPage
 
     def limit_exceeded?(json)
       !Gitlab::Utils::DeepSize
-        .new(json, max_size: Storage::JSON_MAX_SIZE)
+        .new(json, max_size: ::Gitlab::StatusPage::Storage::JSON_MAX_SIZE)
         .valid?
     end
 

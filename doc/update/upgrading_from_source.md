@@ -124,7 +124,7 @@ rm go1.13.5.linux-amd64.tar.gz
 
 CAUTION: **Caution:**
 From GitLab 13.1, you must use at least Git v2.24 (previous minimum version was v2.22).
-Git v2.26 is recommended.
+Git v2.28 is recommended.
 
 To check you are running the minimum required Git version, see
 [Git versions](../install/requirements.md#git-versions).
@@ -152,9 +152,9 @@ make install
 
 # Download and compile from source
 cd /tmp
-curl --remote-name --location --progress https://www.kernel.org/pub/software/scm/git/git-2.26.0.tar.gz
-echo 'aa168c2318e7187cd295a645f7370cc6d71a324aafc932f80f00c780b6a26bed  git-2.26.0.tar.gz' | shasum -a256 -c - && tar -xzf git-2.26.0.tar.gz
-cd git-2.26.0/
+curl --remote-name --location --progress https://www.kernel.org/pub/software/scm/git/git-2.28.0.tar.gz
+echo 'f914c60a874d466c1e18467c864a910dd4ea22281ba6d4d58077cb0c3f115170  git-2.28.0.tar.gz' | shasum -a256 -c - && tar -xzf git-2.28.0.tar.gz
+cd git-2.28.0/
 ./configure --with-libpcre
 make prefix=/usr/local all
 
@@ -164,7 +164,16 @@ sudo make prefix=/usr/local install
 # You should edit config/gitlab.yml, change the git -> bin_path to /usr/local/bin/git
 ```
 
-### 7. Get latest code
+### 7. Update PostgreSQL
+
+CAUTION: **Caution:**
+From GitLab 13.0, you must use at least PostgreSQL 11.
+
+The latest version of GitLab might depend on a more recent PostgreSQL version than what you are currently running (see the [PostgreSQL requirements](../install/requirements.md#postgresql-requirements)).
+
+In order to upgrade PostgreSQL, please refer to its [documentation](https://www.postgresql.org/docs/11/upgrading.html).
+
+### 8. Get latest code
 
 ```shell
 cd /home/git/gitlab
@@ -192,7 +201,7 @@ cd /home/git/gitlab
 sudo -u git -H git checkout BRANCH-ee
 ```
 
-### 8. Update GitLab Shell
+### 9. Update GitLab Shell
 
 ```shell
 cd /home/git/gitlab-shell
@@ -202,7 +211,7 @@ sudo -u git -H git checkout v$(</home/git/gitlab/GITLAB_SHELL_VERSION)
 sudo -u git -H make build
 ```
 
-### 9. Update GitLab Workhorse
+### 10. Update GitLab Workhorse
 
 Install and compile GitLab Workhorse. GitLab Workhorse uses
 [GNU Make](https://www.gnu.org/software/make/).
@@ -217,7 +226,7 @@ sudo -u git -H git checkout v$(</home/git/gitlab/GITLAB_WORKHORSE_VERSION)
 sudo -u git -H make
 ```
 
-### 10. Update Gitaly
+### 11. Update Gitaly
 
 #### Compile Gitaly
 
@@ -228,7 +237,7 @@ sudo -u git -H git checkout v$(</home/git/gitlab/GITALY_SERVER_VERSION)
 sudo -u git -H make
 ```
 
-### 11. Update GitLab Pages
+### 12. Update GitLab Pages
 
 #### Only needed if you use GitLab Pages
 
@@ -245,7 +254,7 @@ sudo -u git -H git checkout v$(</home/git/gitlab/GITLAB_PAGES_VERSION)
 sudo -u git -H make
 ```
 
-### 12. Update configuration files
+### 13. Update configuration files
 
 #### New configuration options for `gitlab.yml`
 
@@ -318,7 +327,7 @@ For Ubuntu 16.04.1 LTS:
 sudo systemctl daemon-reload
 ```
 
-### 13. Install libraries, migrations, etc
+### 14. Install libraries, migrations, etc
 
 ```shell
 cd /home/git/gitlab
@@ -342,14 +351,14 @@ sudo -u git -H bundle exec rake yarn:install gitlab:assets:clean gitlab:assets:c
 sudo -u git -H bundle exec rake cache:clear RAILS_ENV=production
 ```
 
-### 14. Start application
+### 15. Start application
 
 ```shell
 sudo service gitlab start
 sudo service nginx restart
 ```
 
-### 15. Check application status
+### 16. Check application status
 
 Check if GitLab and its environment are configured correctly:
 

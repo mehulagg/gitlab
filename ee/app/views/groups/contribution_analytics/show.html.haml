@@ -8,7 +8,7 @@
   .sub-header-block
     .float-right
       .dropdown.inline
-        %button.dropdown-toggle.btn.gl-text-gray-700{ type: 'button', 'data-toggle' => 'dropdown' }
+        %button.dropdown-toggle.btn.gl-text-gray-500{ type: 'button', 'data-toggle' => 'dropdown' }
           = sprite_icon('calendar')
           %b.caret
         %ul.dropdown-menu.dropdown-menu-right
@@ -25,12 +25,12 @@
       = s_('ContributionAnalytics|Contribution analytics for issues, merge requests and push events since %{start_date}') % { start_date: @start_date }
 
   %div{ data: { qa_selector: 'push_content' } }
-    %h3= _('Push')
+    %h3= _('Pushes')
     - code_push_count = @data_collector.total_push_count
     - commits_count = @data_collector.total_commit_count
     - person_count = @data_collector.total_push_author_count
     - person_count_string = pluralize person_count, 'person'
-    - pushes_string = s_('ContributionAnalytics|<strong>%{pushes}</strong> pushes, more than <strong>%{commits}</strong> commits by <strong>%{people}</strong> contributors.').html_safe % { pushes: code_push_count, commits: commits_count , people: person_count_string }
+    - pushes_string = html_escape(s_('ContributionAnalytics|%{pushes} pushes, more than %{commits} commits by %{people} contributors.')) % { pushes: tag.strong(code_push_count), commits: tag.strong(commits_count), people: tag.strong(person_count_string) }
     - if code_push_count > 0 || commits_count > 0 || person_count > 0
       = pushes_string
     - else
@@ -45,7 +45,7 @@
     - mr_created_count = @data_collector.total_merge_requests_created_count
     - mr_merged_count = @data_collector.total_merge_requests_merged_count
     - if mr_created_count > 0 || mr_merged_count > 0
-      = s_('ContributionAnalytics|<strong>%{created_count}</strong> created, <strong>%{merged_count}</strong> merged.').html_safe % { created_count: mr_created_count, merged_count: mr_merged_count }
+      = html_escape(s_('ContributionAnalytics|%{created_count} created, %{merged_count} merged.')) % { created_count: tag.strong(mr_created_count), merged_count: tag.strong(mr_merged_count) }
     - else
       = s_('ContributionAnalytics|No merge requests for the selected time period.')
 
@@ -58,7 +58,7 @@
     - issues_created_count = @data_collector.total_issues_created_count
     - issues_closed_count = @data_collector.total_issues_closed_count
     - if issues_created_count > 0 && issues_closed_count > 0
-      = s_('ContributionAnalytics|<strong>%{created_count}</strong> created, <strong>%{closed_count}</strong> closed.').html_safe % { created_count: issues_created_count, closed_count: issues_closed_count }
+      = html_escape(s_('ContributionAnalytics|%{created_count} created, %{closed_count} closed.')) % { created_count: tag.strong(issues_created_count), closed_count: tag.strong(issues_closed_count) }
     - else
       = s_('ContributionAnalytics|No issues for the selected time period.')
 
@@ -67,7 +67,6 @@
       #js_issues_chart_vue
 
   #js-group-member-contributions{ data: { member_contributions_path: group_contribution_analytics_path(@group, { start_date: @start_date, format: :json }) } }
-  -# haml-lint:disable InlineJavaScript
   %script#js-analytics-data{ type: "application/json" }
     = @data_collector.group_member_contributions_table_data.to_json.html_safe
 - elsif show_promotions?

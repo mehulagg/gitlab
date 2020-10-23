@@ -2,7 +2,8 @@
 import { GlAlert, GlButton, GlLoadingIcon, GlPagination, GlTab, GlTabs } from '@gitlab/ui';
 import { __ } from '~/locale';
 import IterationsList from './iterations_list.vue';
-import GroupIterationQuery from '../queries/group_iterations.query.graphql';
+import IterationsQuery from '../queries/iterations.query.graphql';
+import { Namespace } from '../constants';
 
 const pageSize = 20;
 
@@ -17,7 +18,7 @@ export default {
     GlTabs,
   },
   props: {
-    groupPath: {
+    fullPath: {
       type: String,
       required: true,
     },
@@ -26,6 +27,12 @@ export default {
       required: false,
       default: false,
     },
+    namespaceType: {
+      type: String,
+      required: false,
+      default: Namespace.Group,
+      validator: value => Object.values(Namespace).includes(value),
+    },
     newIterationPath: {
       type: String,
       required: false,
@@ -33,15 +40,15 @@ export default {
     },
   },
   apollo: {
-    group: {
-      query: GroupIterationQuery,
+    namespace: {
+      query: IterationsQuery,
       variables() {
         return this.queryVariables;
       },
-      update: data => {
+      update(data) {
         return {
-          iterations: data.group?.iterations?.nodes || [],
-          pageInfo: data.group?.iterations?.pageInfo || {},
+          iterations: data[this.namespaceType]?.iterations?.nodes || [],
+          pageInfo: data[this.namespaceType]?.iterations?.pageInfo || {},
         };
       },
       error() {
@@ -51,7 +58,7 @@ export default {
   },
   data() {
     return {
-      group: {
+      namespace: {
         iterations: [],
         pageInfo: {
           hasNextPage: true,
@@ -68,7 +75,8 @@ export default {
   computed: {
     queryVariables() {
       const vars = {
-        fullPath: this.groupPath,
+        fullPath: this.fullPath,
+        isGroup: this.namespaceType === Namespace.Group,
         state: this.state,
       };
 
@@ -83,10 +91,10 @@ export default {
       return vars;
     },
     iterations() {
-      return this.group.iterations;
+      return this.namespace.iterations;
     },
     loading() {
-      return this.$apollo.queries.group.loading;
+      return this.$apollo.queries.namespace.loading;
     },
     state() {
       switch (this.tabIndex) {
@@ -100,15 +108,15 @@ export default {
       }
     },
     prevPage() {
-      return Number(this.group.pageInfo.hasPreviousPage);
+      return Number(this.namespace.pageInfo.hasPreviousPage);
     },
     nextPage() {
-      return Number(this.group.pageInfo.hasNextPage);
+      return Number(this.namespace.pageInfo.hasNextPage);
     },
   },
   methods: {
     handlePageChange(page) {
-      const { startCursor, endCursor } = this.group.pageInfo;
+      const { startCursor, endCursor } = this.namespace.pageInfo;
 
       if (page > this.pagination.currentPage) {
         this.pagination = {
@@ -144,7 +152,7 @@ export default {
         </gl-alert>
       </div>
       <div v-else>
-        <iterations-list :iterations="iterations" />
+        <iterations-list :iterations="iterations" :namespace-type="namespaceType" />
         <gl-pagination
           v-if="prevPage || nextPage"
           :value="pagination.currentPage"
@@ -158,7 +166,13 @@ export default {
     </gl-tab>
     <template v-if="canAdmin" #tabs-end>
       <li class="gl-ml-auto gl-display-flex gl-align-items-center">
-        <gl-button variant="success" :href="newIterationPath">{{ __('New iteration') }}</gl-button>
+        <gl-button
+          variant="success"
+          data-qa-selector="new_iteration_button"
+          :href="newIterationPath"
+        >
+          {{ __('New iteration') }}
+        </gl-button>
       </li>
     </template>
   </gl-tabs>

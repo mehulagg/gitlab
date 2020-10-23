@@ -1,5 +1,5 @@
 ---
-stage: Defend
+stage: Protect
 group: Container Security
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
@@ -14,10 +14,10 @@ to create a Kubernetes cluster manually using the Google Cloud Platform console.
 We will create and deploy a simple application that we create from a GitLab template.
 
 These instructions will also work for a self-managed GitLab instance. However, you will
-need to ensure your own [Runners are configured](../../ci/runners/README.md) and
+need to ensure your own [runners are configured](../../ci/runners/README.md) and
 [Google OAuth is enabled](../../integration/google.md).
 
-**Note**: GitLab's Web Application Firewall is deployed with [Ingress](../../user/clusters/applications.md#ingress),
+GitLab's Web Application Firewall is deployed with [Ingress](../../user/clusters/applications.md#ingress),
 so it will be available to your applications no matter how you deploy them to Kubernetes.
 
 ## Configuring your Google account
@@ -102,7 +102,7 @@ for you to install.
 
 For this guide, we need to install Ingress. Ingress provides load balancing,
 SSL termination, and name-based virtual hosting, using NGINX behind
-the scenes. Make sure to switch the toogle to the enabled position before installing.
+the scenes. Make sure to switch the toggle to the enabled position before installing.
 
 Both logging and blocking modes are available for WAF. While logging mode is useful for
 auditing anomalous traffic, blocking mode ensures the traffic doesn't reach past Ingress.
@@ -118,7 +118,7 @@ filled in the domain, click **Save changes**.
 
 Prometheus should also be installed. It is an open-source monitoring and
 alerting system that we will use to supervise the deployed application.
-We will not install GitLab Runners as we will use the shared Runners that
+We will not install GitLab Runner as we will use the shared runners that
 GitLab.com provides.
 
 ## Enabling Auto DevOps (optional)
@@ -252,7 +252,7 @@ You can now see the benefits of a using a Web Application Firewall.
 ModSecurity and the OWASP Core Rule Set, offer many more benefits.
 You can explore them in more detail:
 
-- [GitLab Defend Vision](https://about.gitlab.com/direction/defend/#waf)
+- [Category Direction - Web Application Firewall](https://about.gitlab.com/direction/protect/web_application_firewall/)
 - [ModSecurity](https://www.modsecurity.org/)
 - [OWASP Core Rule Set](https://github.com/coreruleset/coreruleset/)
 - [AutoDevOps](../autodevops/index.md)

@@ -5,7 +5,6 @@ FactoryBot.define do
     project
 
     source_storage_name { 'default' }
-    destination_storage_name { 'default' }
 
     trait :scheduled do
       state { ProjectRepositoryStorageMove.state_machines[:state].states[:scheduled].value }
@@ -13,6 +12,10 @@ FactoryBot.define do
 
     trait :started do
       state { ProjectRepositoryStorageMove.state_machines[:state].states[:started].value }
+    end
+
+    trait :replicated do
+      state { ProjectRepositoryStorageMove.state_machines[:state].states[:replicated].value }
     end
 
     trait :finished do

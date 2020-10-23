@@ -422,4 +422,18 @@ describe('Epic Store Mutations', () => {
       expect(state.epicLabelsSelectInProgress).toBe(false);
     });
   });
+
+  describe('SET_EPIC_CONFIDENTIAL', () => {
+    it('Should set `confidential` flag on state to `true`', () => {
+      const state = {
+        confidential: false,
+      };
+
+      const confidential = true;
+
+      mutations[types.SET_EPIC_CONFIDENTIAL](state, confidential);
+
+      expect(state.confidential).toBe(true);
+    });
+  });
 });

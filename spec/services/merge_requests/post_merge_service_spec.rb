@@ -19,6 +19,7 @@ RSpec.describe MergeRequests::PostMergeService do
     it 'refreshes the number of open merge requests for a valid MR', :use_clean_rails_memory_store_caching do
       # Cache the counter before the MR changed state.
       project.open_merge_requests_count
+      merge_request.update!(state: 'merged')
 
       expect { subject }.to change { project.open_merge_requests_count }.from(1).to(0)
     end
@@ -49,7 +50,7 @@ RSpec.describe MergeRequests::PostMergeService do
     end
 
     it 'marks MR as merged regardless of errors when closing issues' do
-      merge_request.update(target_branch: 'foo')
+      merge_request.update!(target_branch: 'foo')
       allow(project).to receive(:default_branch).and_return('foo')
 
       issue = create(:issue, project: project)
@@ -67,6 +68,12 @@ RSpec.describe MergeRequests::PostMergeService do
       expect_next_instance_of(Ci::StopEnvironmentsService) do |stop_environment_service|
         expect(stop_environment_service).to receive(:execute_for_merge_request).with(merge_request)
       end
+
+      subject
+    end
+
+    it 'schedules CleanupRefsService' do
+      expect(MergeRequests::CleanupRefsService).to receive(:schedule).with(merge_request)
 
       subject
     end

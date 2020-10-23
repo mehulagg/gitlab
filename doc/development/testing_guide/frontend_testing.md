@@ -195,21 +195,59 @@ Following you'll find some general common practices you will find as part of our
 
 ### How to query DOM elements
 
-When it comes to querying DOM elements in your tests, it is best to uniquely and semantically target the element. Sometimes this cannot be done feasibly. In these cases, adding test attributes to simplify the selectors might be the best option.
+When it comes to querying DOM elements in your tests, it is best to uniquely and semantically target
+the element.
 
-Preferentially, in component testing with `@vue/test-utils`, you should query for child components using the component itself. This helps enforce that specific behavior can be covered by that component's individual unit tests. Otherwise, try to use:
+Preferentially, this is done by targeting text the user actually sees using [DOM Testing Library](https://testing-library.com/docs/dom-testing-library/intro).
+When selecting by text it is best to use [`getByRole` or `findByRole`](https://testing-library.com/docs/dom-testing-library/api-queries#byrole)
+as these enforce accessibility best practices as well. The examples below demonstrate the order of preference.
+
+Sometimes this cannot be done feasibly. In these cases, adding test attributes to simplify the
+selectors might be the best option.
 
 - A semantic attribute like `name` (also verifies that `name` was setup properly)
 - A `data-testid` attribute ([recommended by maintainers of `@vue/test-utils`](https://github.com/vuejs/vue-test-utils/issues/1498#issuecomment-610133465))
 - a Vue `ref` (if using `@vue/test-utils`)
 
 ```javascript
-// Bad
+import { mount, shallowMount } from '@vue/test-utils'
+import { getByRole, getByText } from '@testing-library/dom'
+
+let wrapper
+let el
+
+const createComponent = (mountFn = shallowMount) => {
+  wrapper = mountFn(Component)
+  el = wrapper.vm.$el // reference to the container element
+}
+
+beforeEach(() => {
+  createComponent()
+})
+
+
 it('exists', () => {
-    wrapper.find('.js-foo');
-    wrapper.find('.btn-primary');
-    wrapper.find('.qa-foo-component');
-    wrapper.find('[data-qa-selector="foo"]');
+  // Best
+
+  // NOTE: both mount and shallowMount work as long as a DOM element is available
+  // Finds a properly formatted link with an accessible name of "Click Me"
+  getByRole(el, 'link', { name: /Click Me/i })
+  getByRole(el, 'link', { name: 'Click Me' })
+  // Finds any element with the text "Click Me"
+  getByText(el, 'Click Me')
+  // Regex is also available
+  getByText(el, /Click Me/i)
+
+  // Good
+  wrapper.find('input[name=foo]');
+  wrapper.find('[data-testid="foo"]');
+  wrapper.find({ ref: 'foo'});
+
+  // Bad
+  wrapper.find('.js-foo');
+  wrapper.find('.btn-primary');
+  wrapper.find('.qa-foo-component');
+  wrapper.find('[data-qa-selector="foo"]');
 });
 
 // Good
@@ -224,6 +262,22 @@ it('exists', () => {
 It is not recommended that you add `.js-*` classes just for testing purposes. Only do this if there are no other feasible options available.
 
 Do not use a `.qa-*` class or `data-qa-selector` attribute for any tests other than QA end-to-end testing.
+
+### Querying for child components
+
+When testing Vue components with `@vue/test-utils` another possible approach is querying for child
+components instead of querying for DOM nodes. This assumes that implementation details of behavior
+under test should be covered by that component's individual unit test. There is no strong preference
+in writing DOM or component queries as long as your tests reliably cover expected behavior for the
+component under test.
+
+Example:
+
+```javascript
+it('exists', () => {
+    wrapper.find(FooComponent);
+});
+```
 
 ### Naming unit tests
 
@@ -267,80 +321,56 @@ it('tests a promise', async () => {
 });
 
 it('tests a promise rejection', async () => {
-  expect.assertions(1);
-  try {
-    await user.getUserName(1);
-  } catch (e) {
-    expect(e).toEqual({
-      error: 'User with 1 not found.',
-    });
-  }
+  await expect(user.getUserName(1)).rejects.toThrow('User with 1 not found.');
 });
 ```
 
-You can also work with Promise chains. In this case, you can make use of the `done` callback and `done.fail` in case an error occurred. Following are some examples:
+You can also simply return a promise from the test function.
+
+NOTE: **Note:**
+Using the `done` and `done.fail` callbacks is discouraged when working with
+promises. They should only be used when testing callback-based code.
 
 **Bad**:
 
 ```javascript
-// missing done callback
+// missing return
 it('tests a promise', () => {
   promise.then(data => {
     expect(data).toBe(asExpected);
   });
 });
 
-// missing catch
-it('tests a promise', done => {
-  promise
-    .then(data => {
-      expect(data).toBe(asExpected);
-    })
-    .then(done);
-});
-
-// use done.fail in asynchronous tests
+// uses done/done.fail
 it('tests a promise', done => {
   promise
     .then(data => {
       expect(data).toBe(asExpected);
     })
     .then(done)
-    .catch(fail);
-});
-
-// missing catch
-it('tests a promise rejection', done => {
-  promise
-    .catch(error => {
-      expect(error).toBe(expectedError);
-    })
-    .then(done);
+    .catch(done.fail);
 });
 ```
 
 **Good**:
 
 ```javascript
-// handling success
-it('tests a promise', done => {
-  promise
+// verifying a resolved promise
+it('tests a promise', () => {
+  return promise
     .then(data => {
       expect(data).toBe(asExpected);
-    })
-    .then(done)
-    .catch(done.fail);
+    });
 });
 
-// failure case
-it('tests a promise rejection', done => {
-  promise
-    .then(done.fail)
-    .catch(error => {
-      expect(error).toBe(expectedError);
-    })
-    .then(done)
-    .catch(done.fail);
+// verifying a resolved promise using Jest's `resolves` matcher
+it('tests a promise', () => {
+  return expect(promise).resolves.toBe(asExpected);
+});
+
+// verifying a rejected promise using Jest's `rejects` matcher
+it('tests a promise rejection', () => {
+  return expect(promise).rejects.toThrow(expectedError);
 });
 ```
 
@@ -636,6 +666,38 @@ unit tests.
 
 Instead of `setImmediate`, use `jest.runAllTimers` or `jest.runOnlyPendingTimers` to run pending timers.
 The latter is useful when you have `setInterval` in the code. **Remember:** our Jest configuration uses fake timers.
+
+## Avoid non-deterministic specs
+
+Non-determinism is the breeding ground for flaky and brittle specs. Such specs end up breaking the CI pipeline, interrupting the work flow of other contributors.
+
+1. Make sure your test subject's collaborators (e.g., axios, apollo, lodash helpers) and test environment (e.g., Date) behave consistently across systems and over time.
+1. Make sure tests are focused and not doing "extra work" (e.g., needlessly creating the test subject more than once in an individual test)
+
+### Faking `Date` for determinism
+
+Consider using `useFakeDate` to ensure a consistent value is returned with every `new Date()` or `Date.now()`.
+
+```javascript
+import { useFakeDate } from 'helpers/fake_date';
+
+describe('cool/component', () => {
+  useFakeDate();
+
+  // ...
+});
+```
+
+### Faking `Math.random` for determinism
+
+Consider replacing `Math.random` with a fake when the test subject depends on it.
+
+```javascript
+beforeEach(() => {
+  // https://xkcd.com/221/
+  jest.spyOn(Math, 'random').mockReturnValue(0.4);
+});
+```
 
 ## Factories
 

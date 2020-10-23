@@ -1,6 +1,6 @@
 ---
-stage: Monitor
-group: APM
+stage: Growth
+group: Product Analytics
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -33,7 +33,7 @@ To enable it:
 # Instance-wide
 Feature.enable(:product_analytics)
 # or by project
-Feature.enable(:product_analytics, Project.find(<project id>))
+Feature.enable(:product_analytics, Project.find(<project ID>))
 ```
 
 To disable it:
@@ -42,7 +42,7 @@ To disable it:
 # Instance-wide
 Feature.disable(:product_analytics)
 # or by project
-Feature.disable(:product_analytics, Project.find(<project id>))
+Feature.disable(:product_analytics, Project.find(<project ID>))
 ```
 
 ## Access Product Analytics
@@ -52,7 +52,7 @@ user interface:
 
 1. Sign in to GitLab as a user with Reporter or greater
    [permissions](../user/permissions.md).
-1. Navigate to **{cloud-gear}** **Operations > Product Analytics**
+1. Navigate to **Operations > Product Analytics**
 
 The user interface contains:
 

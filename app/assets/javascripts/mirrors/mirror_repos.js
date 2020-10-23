@@ -1,9 +1,10 @@
 import $ from 'jquery';
 import { debounce } from 'lodash';
 import { __ } from '~/locale';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import SSHMirror from './ssh_mirror';
+import { hide } from '~/tooltips';
 
 export default class MirrorRepos {
   constructor(container) {
@@ -115,7 +116,7 @@ export default class MirrorRepos {
   /* eslint-disable class-methods-use-this */
   removeRow($target) {
     const row = $target.closest('tr');
-    $('.js-delete-mirror', row).tooltip('hide');
+    hide($('.js-delete-mirror', row));
     row.remove();
   }
   /* eslint-enable class-methods-use-this */

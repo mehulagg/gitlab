@@ -41,11 +41,7 @@ RSpec.describe DependencyProxy::Blob, type: :model do
     subject { create(:dependency_proxy_blob) }
 
     context 'when existing object has local store' do
-      it 'is stored locally' do
-        expect(subject.file_store).to be(ObjectStorage::Store::LOCAL)
-        expect(subject.file).to be_file_storage
-        expect(subject.file.object_store).to eq(ObjectStorage::Store::LOCAL)
-      end
+      it_behaves_like 'mounted file in local store'
     end
 
     context 'when direct upload is enabled' do
@@ -53,13 +49,7 @@ RSpec.describe DependencyProxy::Blob, type: :model do
         stub_dependency_proxy_object_storage(direct_upload: true)
       end
 
-      context 'when file is stored' do
-        it 'is stored remotely' do
-          expect(subject.file_store).to eq(ObjectStorage::Store::REMOTE)
-          expect(subject.file).not_to be_file_storage
-          expect(subject.file.object_store).to eq(ObjectStorage::Store::REMOTE)
-        end
-      end
+      it_behaves_like 'mounted file in object store'
     end
   end
 end

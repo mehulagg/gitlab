@@ -97,7 +97,9 @@ class PrometheusService < MonitoringService
   def prometheus_client
     return unless should_return_client?
 
-    options = { allow_local_requests: allow_local_api_url? }
+    options = prometheus_client_default_options.merge(
+      allow_local_requests: allow_local_api_url?
+    )
 
     if behind_iap?
       # Adds the Authorization header

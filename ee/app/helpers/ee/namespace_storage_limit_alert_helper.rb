@@ -16,7 +16,7 @@ module EE
     def namespace_storage_alert(namespace)
       return {} if current_user.nil?
 
-      payload = Namespaces::CheckStorageSizeService.new(namespace, current_user).execute.payload
+      payload = check_storage_size_service(namespace).execute.payload
 
       return {} if payload.empty?
 
@@ -46,6 +46,13 @@ module EE
       end
     end
 
+    def can_purchase_storage_for_namespace?(namespace)
+      ::Gitlab.dev_env_or_com? &&
+        ::Gitlab::CurrentSettings.automatic_purchased_storage_allocation? &&
+        ::Feature.enabled?(:buy_storage_link) &&
+        ::Feature.enabled?(:additional_repo_storage_by_namespace, namespace)
+    end
+
     def namespace_storage_usage_link(namespace)
       if namespace.group?
         group_usage_quotas_path(namespace, anchor: 'storage-quota-tab')
@@ -54,11 +61,24 @@ module EE
       end
     end
 
-    def purchase_storage_url
-      return unless ::Gitlab.dev_env_or_com?
-      return unless ::Feature.enabled?(:buy_storage_link)
+    def can_purchase_storage?
+      ::Gitlab.dev_env_or_com? &&
+        ::Gitlab::CurrentSettings.enforce_namespace_storage_limit? &&
+        ::Feature.enabled?(:buy_storage_link)
+    end
 
+    def purchase_storage_url
       EE::SUBSCRIPTIONS_MORE_STORAGE_URL
+    end
+
+    private
+
+    def check_storage_size_service(namespace)
+      if namespace.additional_repo_storage_by_namespace_enabled?
+        ::Namespaces::CheckExcessStorageSizeService.new(namespace, current_user)
+      else
+        ::Namespaces::CheckStorageSizeService.new(namespace, current_user)
+      end
     end
   end
 end

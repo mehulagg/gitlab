@@ -36,41 +36,30 @@ module Geo
     #
     # @return [Array] resources to be transferred
     def load_pending_resources
-      resources = find_container_repository_ids_not_synced(batch_size: db_retrieve_batch_size)
+      resources = find_jobs_never_attempted_sync(batch_size: db_retrieve_batch_size)
       remaining_capacity = db_retrieve_batch_size - resources.size
 
-      if remaining_capacity.zero?
+      if remaining_capacity == 0
         resources
       else
-        resources + find_retryable_container_registry_ids(batch_size: remaining_capacity)
+        resources + find_jobs_needs_sync_again(batch_size: remaining_capacity)
       end
     end
 
-    def find_container_repository_ids_not_synced(batch_size:)
-      if Geo::ContainerRepositoryRegistry.registry_consistency_worker_enabled?
-        registry_finder
-          .find_never_synced_registries(batch_size: batch_size, except_ids: scheduled_repository_ids)
-          .pluck_model_foreign_key
-      else
-        registry_finder
-          .find_unsynced(batch_size: batch_size, except_ids: scheduled_repository_ids)
-          .pluck_primary_key
-      end
+    def find_jobs_never_attempted_sync(batch_size:)
+      registry_finder
+        .find_registries_never_attempted_sync(batch_size: batch_size, except_ids: scheduled_repository_ids)
+        .pluck_model_foreign_key
     end
 
-    def find_retryable_container_registry_ids(batch_size:)
-      if Geo::ContainerRepositoryRegistry.registry_consistency_worker_enabled?
-        registry_finder
-          .find_retryable_dirty_registries(batch_size: batch_size, except_ids: scheduled_repository_ids)
-          .pluck_model_foreign_key
-      else
-        registry_finder
-            .find_retryable_failed_ids(batch_size: batch_size, except_ids: scheduled_repository_ids)
-      end
+    def find_jobs_needs_sync_again(batch_size:)
+      registry_finder
+        .find_registries_needs_sync_again(batch_size: batch_size, except_ids: scheduled_repository_ids)
+        .pluck_model_foreign_key
     end
 
     def registry_finder
-      @registry_finder ||= Geo::ContainerRepositoryRegistryFinder.new(current_node_id: current_node.id)
+      @registry_finder ||= Geo::ContainerRepositoryRegistryFinder.new
     end
   end
 end

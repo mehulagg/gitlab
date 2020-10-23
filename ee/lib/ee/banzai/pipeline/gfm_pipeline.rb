@@ -21,6 +21,12 @@ module EE
               *super
             ]
           end
+
+          def filters
+            [
+              *super
+            ]
+          end
         end
       end
     end

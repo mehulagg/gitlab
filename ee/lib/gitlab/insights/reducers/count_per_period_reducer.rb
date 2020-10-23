@@ -45,8 +45,8 @@ module Gitlab
             raise InvalidPeriodError, "Invalid value for `period`: `#{period}`. Allowed values are #{VALID_PERIOD}!"
           end
 
-          unless VALID_PERIOD_FIELDS[issuable_type].include?(period_field)
-            raise InvalidPeriodFieldError, "Invalid value for `period_field`: `#{period_field}`. Allowed values are #{VALID_PERIOD_FIELDS[issuable_type]}!"
+          unless VALID_PERIOD_FIELDS[issuable_type].include?(period_field.to_sym)
+            raise InvalidPeriodFieldError, "Invalid value for `period_field`: `#{period_field}`. Allowed values are #{VALID_PERIOD_FIELDS[issuable_type].join(', ')}!"
           end
 
           unless period_limit > 0

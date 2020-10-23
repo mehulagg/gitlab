@@ -1,7 +1,7 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 
 import CreateEpicForm from 'ee/related_items_tree/components/create_epic_form.vue';
 import createDefaultStore from 'ee/related_items_tree/store';
@@ -106,7 +106,7 @@ describe('RelatedItemsTree', () => {
       });
 
       it('renders form action buttons', () => {
-        const actionButtons = wrapper.findAll(GlDeprecatedButton);
+        const actionButtons = wrapper.findAll(GlButton);
 
         expect(actionButtons.at(0).text()).toBe('Create epic');
         expect(actionButtons.at(1).text()).toBe('Cancel');
