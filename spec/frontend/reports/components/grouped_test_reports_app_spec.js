@@ -1,5 +1,6 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
+import { mockTracking } from 'helpers/tracking_helper';
 import GroupedTestReportsApp from '~/reports/components/grouped_test_reports_app.vue';
 import { getStoreConfig } from '~/reports/store';
 
@@ -93,6 +94,32 @@ describe('Grouped test reports app', () => {
       it('should not render the full test report link', () => {
         expect(findFullTestReportLink().exists()).toBe(false);
       });
+    });
+  });
+
+  describe('`Expand` button', () => {
+    let trackingSpy;
+
+    beforeEach(() => {
+      setReports(newFailedTestReports);
+      mountComponent();
+      document.body.dataset.page = 'projects:merge_requests:show';
+      trackingSpy = mockTracking('_category_', wrapper.element, jest.spyOn);
+    });
+
+    it('tracks an event on click', () => {
+      wrapper.find('.qa-expand-report-button').trigger('click');
+
+      expect(trackingSpy).toHaveBeenCalledWith(undefined, "expand_test_report_widget", {});
+    });
+
+    it('only tracks the first click', () => {
+      expect(trackingSpy).not.toHaveBeenCalled();
+
+      wrapper.find('.qa-expand-report-button').trigger('click');
+      wrapper.find('.qa-expand-report-button').trigger('click');
+
+      expect(trackingSpy).toHaveBeenCalledTimes(1);
     });
   });
 
