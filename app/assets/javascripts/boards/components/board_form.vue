@@ -196,7 +196,7 @@ export default {
       <p v-if="isDeleteForm">{{ __('Are you sure you want to delete this board?') }}</p>
       <form v-else class="js-board-config-modal" @submit.prevent>
         <div v-if="!readonly" class="append-bottom-20">
-          <label class="form-section-title label-bold" for="board-new-name">{{
+          <label class="form-section-title label-bold gl-font-lg" for="board-new-name">{{
             __('Title')
           }}</label>
           <input
