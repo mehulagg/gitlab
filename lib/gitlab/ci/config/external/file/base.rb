@@ -21,7 +21,7 @@ module Gitlab
             end
 
             def matching?
-              location.present?
+              location.present? && location.is_a?(String)
             end
 
             def invalid_location_type?

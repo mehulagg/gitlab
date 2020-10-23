@@ -302,5 +302,65 @@ RSpec.describe Gitlab::Ci::Config::External::Processor do
         end
       end
     end
+
+    context 'with a valid project file is defined' do
+      let(:values) do
+        {
+          include: { project: another_project.full_path, file: '/templates/my-build.yml' },
+          image: 'ruby:2.7'
+        }
+      end
+
+      before do
+        another_project.add_developer(user)
+
+        allow_any_instance_of(Repository).to receive(:blob_data_at).with(another_project.commit.id, '/templates/my-build.yml') do
+          <<~HEREDOC
+            my_build:
+              script: echo Hello World
+          HEREDOC
+        end
+      end
+
+      it 'appends the file to the values' do
+        output = processor.perform
+        expect(output.keys).to match_array([:image, :my_build])
+      end
+    end
+
+    context 'with valid project files is defined in a single include' do
+      let(:values) do
+        {
+          include: {
+            project: another_project.full_path,
+            file: ['/templates/my-build.yml', '/templates/my-test.yml']
+          },
+          image: 'ruby:2.7'
+        }
+      end
+
+      before do
+        another_project.add_developer(user)
+
+        allow_any_instance_of(Repository).to receive(:blob_data_at).with(another_project.commit.id, '/templates/my-build.yml') do
+          <<~HEREDOC
+            my_build:
+              script: echo Hello World
+          HEREDOC
+        end
+
+        allow_any_instance_of(Repository).to receive(:blob_data_at).with(another_project.commit.id, '/templates/my-test.yml') do
+          <<~HEREDOC
+            my_test:
+              script: echo Hello World
+          HEREDOC
+        end
+      end
+
+      it 'appends the file to the values' do
+        output = processor.perform
+        expect(output.keys).to match_array([:image, :my_build, :my_test])
+      end
+    end
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Ci::Config::External::File::Project do
+RSpec.describe Gitlab::Ci::Config::External::File::ProjectFile do
   let_it_be(:context_project) { create(:project) }
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }

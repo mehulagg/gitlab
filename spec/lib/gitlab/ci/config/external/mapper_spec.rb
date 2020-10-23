@@ -100,6 +100,30 @@ RSpec.describe Gitlab::Ci::Config::External::Mapper do
           expect { subject }.to raise_error(described_class::AmbigiousSpecificationError)
         end
       end
+
+      context "when the key is a project's file" do
+        let(:values) do
+          { include: { project: project.full_path, file: local_file },
+            image: 'ruby:2.7' }
+        end
+
+        it 'returns File instances' do
+          expect(subject).to contain_exactly(
+            an_instance_of(Gitlab::Ci::Config::External::File::ProjectFile))
+        end
+      end
+
+      context "when the key is project's files" do
+        let(:values) do
+          { include: { project: project.full_path, file: [local_file, 'another_file_path.yml'] },
+            image: 'ruby:2.7' }
+        end
+
+        it 'returns File instances' do
+          expect(subject).to contain_exactly(
+            an_instance_of(Gitlab::Ci::Config::External::File::ProjectFiles))
+        end
+      end
     end
 
     context "when 'include' is defined as an array" do

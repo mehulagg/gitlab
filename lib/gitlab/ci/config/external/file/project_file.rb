@@ -5,7 +5,7 @@ module Gitlab
     class Config
       module External
         module File
-          class Project < Base
+          class ProjectFile < Base
             extend ::Gitlab::Utils::Override
             include Gitlab::Utils::StrongMemoize
 
