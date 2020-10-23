@@ -2266,6 +2266,9 @@ msgstr ""
 msgid "Administration"
 msgstr ""
 
+msgid "Adoption"
+msgstr ""
+
 msgid "Advanced"
 msgstr ""
 
@@ -9219,6 +9222,9 @@ msgid "DevOps"
 msgstr ""
 
 msgid "DevOps Report"
+msgstr ""
+
+msgid "DevOps Score"
 msgstr ""
 
 msgid "Diff content limits"
