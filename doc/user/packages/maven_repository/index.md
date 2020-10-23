@@ -844,9 +844,3 @@ package:
     - 'mvn help:system'
     - 'mvn package'
 ```
-
-   ```yaml
-   package:
-     script:
-       - 'mvn -s settings/ci.xml package'
-   ```
