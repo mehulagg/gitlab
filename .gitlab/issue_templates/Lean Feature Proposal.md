@@ -8,7 +8,9 @@
 ### Proposal 
 
 <!-- Use this section to explain the feature and how it will work. It can be helpful to add technical details, design proposals, and links to related epics or issues. -->
+/label ~"feature" ~"group::" ~"section::"  ~"Category::" ~"GitLab Core"/~"GitLab Starter"/~"GitLab Premium"/~"GitLab Ultimate" 
 
+<--
 ### Release notes 
 
 <!-- What is the problem and solution you're proposing? This content sets the overall vision for the feature and serves as the release notes that will populate in various places, including the [release post blog](https://about.gitlab.com/releases/categories/releases/) and [Gitlab project releases](https://gitlab.com/gitlab-org/gitlab/-/releases). " -->
