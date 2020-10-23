@@ -11,13 +11,13 @@ class JwtController < ApplicationController
   feature_category :authentication_and_authorization
 
   SERVICES = {
-    Auth::ContainerRegistryAuthenticationService::AUDIENCE => Auth::ContainerRegistryAuthenticationService
+    Auth::ContainerRegistryAuthenticationService::AUDIENCE => Auth::ContainerRegistryAuthenticationService,
+    Auth::DependencyProxyAuthenticationService::AUDIENCE => Auth::DependencyProxyAuthenticationService
   }.freeze
 
   def auth
-    service = Auth::ContainerRegistryAuthenticationService
-    # service = SERVICES[params[:service]]
-    # return head :not_found unless service
+    service = SERVICES[params[:service]]
+    return head :not_found unless service
 
     result = service.new(@authentication_result.project, @authentication_result.actor, auth_params)
       .execute(authentication_abilities: @authentication_result.authentication_abilities)

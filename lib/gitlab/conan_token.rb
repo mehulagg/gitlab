@@ -12,6 +12,10 @@ module Gitlab
     attr_reader :access_token_id, :user_id
 
     class << self
+      def from_user(user)
+        new(access_token_id: user.username, user_id: user.id, expires_in: 20.days)
+      end
+
       def from_personal_access_token(access_token)
         new(access_token_id: access_token.id, user_id: access_token.user_id)
       end
@@ -42,9 +46,10 @@ module Gitlab
       end
     end
 
-    def initialize(access_token_id:, user_id:)
+    def initialize(access_token_id:, user_id:, expires_in: 1.hour)
       @access_token_id = access_token_id
       @user_id = user_id
+      @expires_in = expires_in
     end
 
     def to_jwt
@@ -57,7 +62,7 @@ module Gitlab
       JSONWebToken::HMACToken.new(self.class.secret).tap do |token|
         token['access_token'] = access_token_id
         token['user_id'] = user_id
-        token.expire_time = token.issued_at + 1.hour
+        token.expire_time = token.issued_at + @expires_in
       end
     end
   end

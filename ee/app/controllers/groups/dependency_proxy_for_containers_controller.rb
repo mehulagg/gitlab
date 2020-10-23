@@ -4,12 +4,13 @@ class Groups::DependencyProxyForContainersController < Groups::ApplicationContro
   include DependencyProxyAccess
   include SendFileUpload
 
+  prepend_before_action :get_user_from_token!
   before_action :ensure_token_granted!
   before_action :ensure_feature_enabled!
 
   attr_reader :token
 
-  feature_category :package_registry
+  feature_category :dependency_proxy
 
   def manifest
     result = DependencyProxy::PullManifestService.new(image, tag, token).execute
@@ -34,26 +35,18 @@ class Groups::DependencyProxyForContainersController < Groups::ApplicationContro
 
   private
 
-  def group
-    Rails.logger.info '------------------------GROUP OVERRIDE-------------------------'
-    # Rails.logger.info request.headers.inspect
-    # response.headers['Docker-Distribution-Api-Version'] = 'registry/2.0'
-    # response.headers['WWW-Authenticate'] = "Bearer realm=\"http://gdk.test:3001/footoken\",service=\"registry.docker.io\",scope=\"repository:library/#{image}:pull\""
-    # render json: test_json, status: :unauthorized
-    Rails.logger.info '++++++++++++++++END GROUP OVERRIDE++++++++++++++++++++'
-    super
-  end
+  def get_user_from_token!
+    if request.headers['HTTP_AUTHORIZATION']
+      jwt = Doorkeeper::OAuth::Token.from_bearer_authorization(request)
+      token = ::Gitlab::ConanToken.decode(jwt)
+      @user = User.find(token.user_id)
+      render_403 unless @user
 
-  def test_json
-    {
-      errors: [
-        { code: 401,
-          message: 'access to the requested resource is not authorized',
-          detail: [
-            { "Type" => 'repository', "Name" => image, 'Action' => 'pull' }
-          ] }
-      ]
-    }
+      sign_in(@user)
+    else
+      response.headers['WWW-Authenticate'] = "Bearer realm=\"http://gdk.test:3001/jwt/auth\",service=\"dependency_proxy\",scope=\"repository:library/hello-world:pull\""
+      render json: {}, status: :unauthorized
+    end
   end
 
   def image
