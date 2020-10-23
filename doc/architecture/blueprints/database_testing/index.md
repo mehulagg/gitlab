@@ -5,7 +5,7 @@ description: 'Shift Left in testing database migrations'
 
 # Shift Left in testing database migrations
 
-We have undertaken an effort to identify [common themes of reverted migrations](https://gitlab.com/gitlab-org/gitlab/-/issues/233391) and discovered a theme of migrations breaking when they are tested against staging and production evironments even though they have passed in the developer environment. The goal of this blueprint is to outline the steps we will be taking to provide developers the access to be able to test their data migrations against production-like data earlier in the software development lifecycle. Failures in staging and production are quite expensive as they raise incident escalations. These escalations must be triaged and either reverted or fix it forward. Often this can take place without the original author's involvement due to timezones and/or criticality of the escalation. By providing the ability to test against production-like data in the developers environment, we can catch defects (e.g. failed migrations) much earlier in the process (shift left).
+We have undertaken an effort to identify [common themes of reverted migrations](https://gitlab.com/gitlab-org/gitlab/-/issues/233391) and discovered a theme of migrations breaking when they are tested against staging and production environments even though they have passed in the developer environment. The goal of this blueprint is to outline the steps we will be taking to provide developers the access to be able to test their data migrations against production-like data earlier in the software development lifecycle. Failures in staging and production are quite expensive: they can have a significant effect on availability, block deployments, and generate incident escalations. These escalations must be triaged and either reverted or fixed forward. Often, this can take place without the original author's involvement due to time zones and/or the criticality of the escalation. By providing the ability to test against production-like data in the developer's environment, we can catch defects (e.g. failed migrations) much earlier in the process (shift left).
 
 ## Current Situation
 
@@ -18,7 +18,7 @@ We are investigating fast and efficient ways to provide lightweight, secure and 
 
 ### Near Term
 
-Investigate of the shelf solutions that can quickly provide cloning, scrubbing and subsetting database features. If we find a vendor that suits our needs we would then
+Investigate off-the-shelf solutions that can quickly provide scrubbing, subsetting, and thin-cloning database features. If we find a vendor that suits our needs we would then
 
 - Grant access to our current set of [database maintainers](https://about.gitlab.com/handbook/engineering/projects/#gitlab_maintainers_database)
 - Add a step to our maintainer process to require running the migration against a clone
