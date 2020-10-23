@@ -1705,6 +1705,9 @@ msgstr ""
 msgid "Add new directory"
 msgstr ""
 
+msgid "Add new integrations"
+msgstr ""
+
 msgid "Add or remove previously merged commits"
 msgstr ""
 
@@ -2514,7 +2517,7 @@ msgstr ""
 msgid "AlertSettings|Integration"
 msgstr ""
 
-msgid "AlertSettings|Learn more about our improvements for %{linkStart}integrations%{linkEnd}"
+msgid "AlertSettings|Learn more about our our upcoming %{linkStart}integrations%{linkEnd}"
 msgstr ""
 
 msgid "AlertSettings|Opsgenie"

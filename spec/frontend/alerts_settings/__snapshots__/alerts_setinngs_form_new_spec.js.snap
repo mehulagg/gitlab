@@ -1,9 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AlertsSettingsFormNew with default values renders the initial template 1`] = `
-"<gl-form-stub>
-  <gl-form-group-stub id=\\"integration-type\\" label=\\"1. Select integration type\\" label-for=\\"integration-type\\" description=\\"Learn more.\\">
-    <gl-form-select-stub id=\\"integration-type\\" options=\\"[object Object],[object Object],[object Object]\\" value=\\"generic\\"></gl-form-select-stub>
+"<gl-form-stub class=\\"gl-mt-6\\">
+  <h5 class=\\"gl-font-lg gl-my-5\\">Add new integrations</h5>
+  <gl-form-group-stub id=\\"integration-type\\" label=\\"1. Select integration type\\" label-for=\\"integration-type\\">
+    <gl-form-select-stub id=\\"integration-type\\" options=\\"[object Object],[object Object],[object Object]\\" value=\\"generic\\"></gl-form-select-stub> <span class=\\"gl-text-gray-500\\"><gl-sprintf-stub message=\\"Learn more about our our upcoming %{linkStart}integrations%{linkEnd}\\"></gl-sprintf-stub></span>
   </gl-form-group-stub>
   <b-collapse-stub tag=\\"div\\" class=\\"gl-mt-3\\">
     <gl-form-group-stub id=\\"name-integration\\" label=\\"2. Name integration\\" label-for=\\"name-integration\\">
