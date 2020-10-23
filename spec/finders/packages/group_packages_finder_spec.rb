@@ -5,11 +5,13 @@ RSpec.describe Packages::GroupPackagesFinder do
   using RSpec::Parameterized::TableSyntax
 
   let_it_be(:user) { create(:user) }
-  let_it_be(:group, reload: true) { create(:group) }
-  let_it_be(:project, reload: true) { create(:project, namespace: group, builds_access_level: ProjectFeature::PRIVATE, merge_requests_access_level: ProjectFeature::PRIVATE) }
+  let_it_be_with_reload(:group) { create(:group) }
+  let_it_be_with_reload(:project) { create(:project, namespace: group, builds_access_level: ProjectFeature::PRIVATE, merge_requests_access_level: ProjectFeature::PRIVATE) }
+
+  let(:add_user_to_group) { true }
 
   before do
-    group.add_developer(user)
+    group.add_developer(user) if add_user_to_group
   end
 
   describe '#execute' do
@@ -35,8 +37,8 @@ RSpec.describe Packages::GroupPackagesFinder do
       it { is_expected.to match_array([package1, package2]) }
 
       context 'subgroup has packages' do
-        let_it_be(:subgroup, reload: true) { create(:group, parent: group) }
-        let_it_be(:subproject, reload: true) { create(:project, namespace: subgroup, builds_access_level: ProjectFeature::PRIVATE, merge_requests_access_level: ProjectFeature::PRIVATE) }
+        let_it_be_with_reload(:subgroup) { create(:group, parent: group) }
+        let_it_be_with_reload(:subproject) { create(:project, namespace: subgroup, builds_access_level: ProjectFeature::PRIVATE, merge_requests_access_level: ProjectFeature::PRIVATE) }
         let_it_be(:package4) { create(:npm_package, project: subproject) }
 
         it { is_expected.to match_array([package1, package2, package4]) }
@@ -48,6 +50,8 @@ RSpec.describe Packages::GroupPackagesFinder do
         end
 
         context 'permissions' do
+          let(:add_user_to_group) { false }
+
           where(:role, :project_visibility, :repository_visibility, :packages_returned) do
             :anonymous  | :public  | :enabled | :all
             :guest      | :public  | :enabled | :all
@@ -55,7 +59,7 @@ RSpec.describe Packages::GroupPackagesFinder do
             :developer  | :public  | :enabled | :all
             :maintainer | :public  | :enabled | :all
             :anonymous  | :public  | :private | :none
-            :guest      | :public  | :private | :none
+            :guest      | :public  | :private | :all
             :reporter   | :public  | :private | :all
             :developer  | :public  | :private | :all
             :maintainer | :public  | :private | :all
@@ -74,7 +78,7 @@ RSpec.describe Packages::GroupPackagesFinder do
           with_them do
             let(:expected_packages) do
               case packages_returned
-              when all
+              when :all
                 [package1, package2, package4]
               when :none
                 []
@@ -82,14 +86,14 @@ RSpec.describe Packages::GroupPackagesFinder do
             end
 
             before do
-              subgroup.update!(visibility_level: project_visibility.to_s)
-              group.update!(visibility_level: project_visibility.to_s)
+              subgroup.update!(visibility: project_visibility.to_s)
+              group.update!(visibility: project_visibility.to_s)
               project.update!(
-                visibility_level: project_visibility.to_s,
+                visibility: project_visibility.to_s,
                 repository_access_level: repository_visibility.to_s
               )
               subproject.update!(
-                visibility_level: project_visibility.to_s,
+                visibility: project_visibility.to_s,
                 repository_access_level: repository_visibility.to_s
               )
 
@@ -99,7 +103,7 @@ RSpec.describe Packages::GroupPackagesFinder do
               end
             end
 
-            it { is_expected.to match_array([package1, package2, package4]) }
+            it { is_expected.to match_array(expected_packages) }
           end
         end
 
