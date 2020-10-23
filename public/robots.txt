@@ -63,3 +63,7 @@ Disallow: /*/protected_branches
 Disallow: /*/uploads/
 Disallow: /*/project_members
 Disallow: /*/settings
+
+# Issue details
+User-Agent: *
+Disallow: /*/-/issues/*/realtime_changes

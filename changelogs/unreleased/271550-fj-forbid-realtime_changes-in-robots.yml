@@ -1,0 +1,5 @@
+---
+title: Forbid issues realtime_changes in robots.txt
+merge_request: 45986
+author:
+type: changed

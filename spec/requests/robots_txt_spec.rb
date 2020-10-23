@@ -59,7 +59,8 @@ RSpec.describe 'Robots.txt Requests', :aggregate_failures do
       '/foo/bar/protected_branches',
       '/foo/bar/uploads/foo',
       '/foo/bar/project_members',
-      '/foo/bar/settings'
+      '/foo/bar/settings',
+      '/foo/bar/-/issues/123/realtime_changes'
     ]
 
     requests.each do |request|
