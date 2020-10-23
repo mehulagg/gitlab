@@ -34,9 +34,13 @@ module EE
       def audit_event_service(token)
         message = "Revoked personal access token with id #{token.id}"
 
-        EE::AuditEvents::PersonalAccessTokenAuditEventService.new(current_user,
-          @ip_address, # rubocop:disable Gitlab/ModuleWithInstanceVariables
-          message)
+        ::AuditEventService.new(
+          current_user,
+          current_user,
+          action: :custom,
+          custom_message: message,
+          ip_address: @ip_address
+        )
       end
     end
   end

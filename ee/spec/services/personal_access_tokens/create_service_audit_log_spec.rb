@@ -11,7 +11,11 @@ RSpec.describe PersonalAccessTokens::CreateService do
     let(:service) { described_class.new(current_user: user, target_user: user, params: params) }
 
     it 'creates audit logs' do
-      expect(EE::AuditEvents::PersonalAccessTokenAuditEventService).to receive(:new).with(user, nil, /Created personal access token with id \d+/).and_call_original
+      expect(::AuditEventService)
+        .to receive(:new)
+        .with(user, user, action: :custom,  custom_message: /Created personal access token with id \d+/, ip_address: nil)
+        .and_call_original
+
       subject
     end
   end
