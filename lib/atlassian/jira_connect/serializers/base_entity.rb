@@ -14,7 +14,7 @@ module Atlassian
         private
 
         def monotonic_time
-          Gitlab::Metrics::System.monotonic_time.to_i
+          options[:update_sequence_id] || Client.generate_update_sequence_id
         end
       end
     end
