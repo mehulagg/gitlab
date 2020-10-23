@@ -10,6 +10,10 @@ import EmojiMenuInModal from './emoji_menu_in_modal';
 import * as Emoji from '~/emoji';
 
 const emojiMenuClass = 'js-modal-status-emoji-menu';
+const AVAILABILITY_STATUS = {
+  BUSY: 'busy',
+  NOT_SET: 'not_set',
+};
 
 export default {
   components: {
@@ -39,6 +43,8 @@ export default {
       message: this.currentMessage,
       modalId: 'set-user-status-modal',
       noEmoji: true,
+      // availability:
+      availability_status: '',
     };
   },
   computed: {
@@ -122,6 +128,7 @@ export default {
       this.emoji = '';
       this.message = '';
       this.noEmoji = true;
+      this.availability_status = AVAILABILITY_STATUS.NOT_SET;
       this.clearEmoji();
       this.hideEmojiMenu();
     },
@@ -130,11 +137,12 @@ export default {
       this.setStatus();
     },
     setStatus() {
-      const { emoji, message } = this;
+      const { emoji, message, availability_status } = this;
 
       Api.postUserStatus({
         emoji,
         message,
+        availability: availability_status,
       })
         .then(this.onUpdateSuccess)
         .catch(this.onUpdateFail);
@@ -149,6 +157,11 @@ export default {
       );
 
       this.closeModal();
+    },
+    onToggleAvailability({ currentTarget }) {
+      this.availability_status = currentTarget.checked
+        ? AVAILABILITY_STATUS.BUSY
+        : AVAILABILITY_STATUS.NOT_SET;
     },
   },
 };
@@ -222,6 +235,25 @@ export default {
               <gl-icon name="close" />
             </button>
           </span>
+        </div>
+        <div class="form-group gl-my-2">
+          <div class="gl-display-flex">
+            <label class="form-control-inline">
+              <input
+                v-model="availability"
+                type="checkbox"
+                name="user[status][availability]"
+                :placeholder="s__('SetStatusModal|Busy')"
+                @change="onToggleAvailability"
+              />
+              {{ s__('SetStatusModal|Busy') }}
+            </label>
+          </div>
+          <div class="gl-display-flex">
+            <span class="gl-text-gray-600 gl-ml-4">
+              {{ s__('SetStatusModal|"Busy" will be shown next to your name') }}
+            </span>
+          </div>
         </div>
       </div>
     </div>

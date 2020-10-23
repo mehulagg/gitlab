@@ -29,4 +29,9 @@ module ProfilesHelper
   def user_profile?
     params[:controller] == 'users'
   end
+
+
+  def availability_values
+    Types::AvailabilityEnum.enum
+  end
 end
