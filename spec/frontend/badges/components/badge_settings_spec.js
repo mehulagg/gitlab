@@ -55,10 +55,10 @@ describe('BadgeSettings component', () => {
     const form = vm.$el.querySelector('form:nth-of-type(2)');
 
     expect(form).not.toBe(null);
-    const button = form.querySelector('.btn-success');
+    const button = form.querySelector('[data-testid="add-badge-button"]');
 
     expect(button).not.toBe(null);
-    expect(button).toHaveText('');
+    expect(button).toHaveText(/Add badge/);
   });
 
   it('displays badge list', () => {
