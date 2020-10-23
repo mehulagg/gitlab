@@ -6,6 +6,7 @@ module JiraConnect
 
     queue_namespace :jira_connect
     feature_category :integrations
+    idempotent!
 
     def perform(merge_request_id)
       merge_request = MergeRequest.find_by_id(merge_request_id)
