@@ -19,6 +19,7 @@ module CredentialsInventoryActions
 
     alert = if key.present?
               if Keys::DestroyService.new(current_user).execute(key)
+                notify_deleted_or_revoked_credential(key)
                 _('User key was successfully removed.')
               else
                 _('Failed to remove user key.')
@@ -33,7 +34,12 @@ module CredentialsInventoryActions
   def revoke
     personal_access_token = PersonalAccessTokensFinder.new({ user: users, impersonation: false }, current_user).find(params[:id])
     service = PersonalAccessTokens::RevokeService.new(current_user, token: personal_access_token).execute
-    service.success? ? flash[:notice] = service.message : flash[:alert] = service.message
+    if service.success?
+      flash[:notice] = service.message
+      notify_deleted_or_revoked_credential(personal_access_token)
+    else
+      flash[:alert] = service.message
+    end
 
     redirect_to credentials_inventory_path(page: params[:page])
   end

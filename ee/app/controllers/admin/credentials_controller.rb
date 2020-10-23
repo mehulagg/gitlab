@@ -15,6 +15,16 @@ class Admin::CredentialsController < Admin::ApplicationController
 
   private
 
+  def notify_deleted_or_revoked_credential(credential)
+    return unless Feature.enabled?(:credentials_inventory_revocation_emails)
+
+    if credential.is_a?(Key)
+      CredentialsInventoryMailer.ssh_key_deleted_email(key: credential, deleted_by: current_user).deliver_later
+    elsif credential.is_a?(PersonalAccessToken)
+      CredentialsInventoryMailer.personal_access_token_revoked_email(token: credential, revoked_by: current_user).deliver_later
+    end
+  end
+
   def check_license_credentials_inventory_available!
     render_404 unless credentials_inventory_feature_available?
   end
