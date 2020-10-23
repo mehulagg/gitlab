@@ -9,6 +9,7 @@ module EE
     EVENT_PROCESSING_TIME = 60.seconds
     EVENT_LAG_SHOW_THRESHOLD = DB_LAG_SHOW_THRESHOLD.seconds + LOG_CURSOR_CHECK_TIME + EVENT_PROCESSING_TIME
     DEFAULT_MAINTENANCE_MODE_MESSAGE = 'This GitLab instance is undergoing maintenance and is operating in <b>read-only</b> mode.'
+    MAINTENANCE_MODE_ERROR_MESSAGE = 'This action is not allowed in maintenance mode.'
 
     override :read_only_message
     def read_only_message
@@ -126,8 +127,6 @@ module EE
       show
     end
 
-    private
-
     def maintenance_mode?
       return unless ::Feature.enabled?(:maintenance_mode)
 
@@ -137,6 +136,12 @@ module EE
     def custom_maintenance_mode_message
       s_(application_settings.maintenance_mode_message || DEFAULT_MAINTENANCE_MODE_MESSAGE)
     end
+
+    def maintenance_mode_error
+      s_(MAINTENANCE_MODE_ERROR_MESSAGE)
+    end
+
+    private
 
     def application_settings
       ::Gitlab::CurrentSettings.current_application_settings

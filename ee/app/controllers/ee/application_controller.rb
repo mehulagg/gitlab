@@ -5,8 +5,18 @@ module EE
     extend ActiveSupport::Concern
     extend ::Gitlab::Utils::Override
 
+    # FIXME
+    include EE::ApplicationHelper # rubocop: disable Cop/InjectEnterpriseEditionModule
+
     prepended do
       around_action :set_current_ip_address
+      before_action :check_maintenance_mode, except: [:get, :head]
+    end
+
+    def check_maintenance_mode
+      return unless maintenance_mode?
+
+      flash[:alert] = MAINTENANCE_MODE_ERROR_MESSAGE
     end
 
     def check_if_gl_com_or_dev
