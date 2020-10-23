@@ -1,0 +1,5 @@
+---
+title: Allow retry for Jira Connect Sync Branch Worker
+merge_request: 45989
+author:
+type: fixed
