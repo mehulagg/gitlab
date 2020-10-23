@@ -1,8 +1,23 @@
 <script>
-import { GlButton, GlCollapse, GlForm, GlFormGroup, GlFormSelect, GlFormInput } from '@gitlab/ui';
+import {
+  GlButton,
+  GlCollapse,
+  GlForm,
+  GlFormGroup,
+  GlFormSelect,
+  GlFormInput,
+  GlLink,
+  GlSprintf,
+} from '@gitlab/ui';
+import { s__ } from '~/locale';
 import { integrationTypes } from '../constants';
 
 export default {
+  i18n: {
+    integrationsInfo: s__(
+      'AlertSettings|Learn more about our our upcoming %{linkStart}integrations%{linkEnd}',
+    ),
+  },
   components: {
     GlButton,
     GlCollapse,
@@ -10,6 +25,8 @@ export default {
     GlFormGroup,
     GlFormInput,
     GlFormSelect,
+    GlLink,
+    GlSprintf,
   },
   data() {
     return {
@@ -36,12 +53,13 @@ export default {
 </script>
 
 <template>
-  <gl-form @submit.prevent="onSubmit" @reset.prevent="onReset">
+  <gl-form class="gl-mt-6" @submit.prevent="onSubmit" @reset.prevent="onReset">
+    <h5 class="gl-font-lg gl-my-5">{{ __('Add new integrations') }}</h5>
+
     <gl-form-group
       id="integration-type"
       label="1. Select integration type"
       label-for="integration-type"
-      description="Learn more."
     >
       <gl-form-select
         id="integration-type"
@@ -49,6 +67,18 @@ export default {
         :options="options"
         @change="onIntegrationTypeSelect"
       />
+      <span class="gl-text-gray-500">
+        <gl-sprintf :message="$options.i18n.integrationsInfo">
+          <template #link="{ content }">
+            <gl-link
+              class="gl-display-inline-block"
+              href="https://gitlab.com/groups/gitlab-org/-/epics/4390"
+              target="_blank"
+              >{{ content }}</gl-link
+            >
+          </template>
+        </gl-sprintf>
+      </span>
     </gl-form-group>
     <gl-collapse v-model="formVisible" class="gl-mt-3">
       <gl-form-group id="name-integration" label="2. Name integration" label-for="name-integration">
