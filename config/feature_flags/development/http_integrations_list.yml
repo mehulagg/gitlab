@@ -1,0 +1,7 @@
+---
+name: http_integrations_list
+introduced_by_url:
+rollout_issue_url:
+type: development
+group: group::health
+default_enabled: false

@@ -2487,9 +2487,6 @@ msgstr ""
 msgid "AlertSettings|Add URL and auth key to your Prometheus config file"
 msgstr ""
 
-msgid "AlertSettings|Add new integrations"
-msgstr ""
-
 msgid "AlertSettings|Alert test payload"
 msgstr ""
 
@@ -10001,6 +9998,9 @@ msgid "Enter in your Bitbucket Server URL and personal access token below"
 msgstr ""
 
 msgid "Enter in your Phabricator Server URL and personal access token below"
+msgstr ""
+
+msgid "Enter integration name"
 msgstr ""
 
 msgid "Enter merge request URLs"
@@ -22968,6 +22968,9 @@ msgstr ""
 msgid "Save Push Rules"
 msgstr ""
 
+msgid "Save and test payload"
+msgstr ""
+
 msgid "Save anyway"
 msgstr ""
 
@@ -22981,6 +22984,9 @@ msgid "Save changes before testing"
 msgstr ""
 
 msgid "Save comment"
+msgstr ""
+
+msgid "Save integration"
 msgstr ""
 
 msgid "Save password"
