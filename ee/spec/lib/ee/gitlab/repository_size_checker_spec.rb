@@ -106,39 +106,51 @@ RSpec.describe Gitlab::RepositorySizeChecker do
         stub_feature_flags(namespace_storage_limit: false)
       end
 
-      context 'when current size + total repository size excess are below or equal to the limit + additional purchased storage' do
-        let(:current_size) { 50 }
+      context 'with additional purchased storage' do
         let(:total_repository_size_excess) { 10 }
         let(:additional_purchased_storage) { 10 }
 
-        it 'returns zero' do
-          expect(subject.exceeded_size).to eq(0)
+        context 'when current size + total repository size excess are below or equal to the project\'s limit (no need for additional purchase storage)' do
+          let(:current_size) { 50 }
+
+          it 'returns zero' do
+            expect(subject.exceeded_size).to eq(0)
+          end
+        end
+
+        context 'when there is remaining storage (current size + excess for other projects need to use additional purchased storage but not all of it)' do
+          let(:current_size) { 51 }
+
+          it 'returns 0' do
+            expect(subject.exceeded_size).to eq(0)
+          end
+        end
+
+        context 'when there storage is exceeded (current size + excess for other projects exceed additional purchased storage' do
+          let(:total_repository_size_excess) { 15 }
+          let(:current_size) { 61 }
+
+          it 'returns 1' do
+            expect(subject.exceeded_size).to eq(5.megabytes)
+          end
         end
       end
 
-      context 'when current size + total repository size excess are over the limit + additional purchased storage' do
-        let(:current_size) { 51 }
-        let(:total_repository_size_excess) { 10 }
-        let(:additional_purchased_storage) { 10 }
+      context 'without additional purchased storage' do
+        context 'when change size will be over the limit' do
+          let(:current_size) { 50 }
 
-        it 'returns 1' do
-          expect(subject.exceeded_size).to eq(1.megabytes)
+          it 'returns 1' do
+            expect(subject.exceeded_size(1.megabytes)).to eq(1.megabytes)
+          end
         end
-      end
 
-      context 'when change size will be over the limit' do
-        let(:current_size) { 50 }
+        context 'when change size will not be over the limit' do
+          let(:current_size) { 49 }
 
-        it 'returns 1' do
-          expect(subject.exceeded_size(1.megabytes)).to eq(1.megabytes)
-        end
-      end
-
-      context 'when change size will not be over the limit' do
-        let(:current_size) { 49 }
-
-        it 'returns zero' do
-          expect(subject.exceeded_size(1.megabytes)).to eq(0)
+          it 'returns zero' do
+            expect(subject.exceeded_size(1.megabytes)).to eq(0)
+          end
         end
       end
     end
