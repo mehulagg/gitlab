@@ -34,6 +34,7 @@ export default {
       'newMilestonePath',
       'manageMilestonesPath',
       'projectId',
+      'groupId',
     ]),
     ...mapGetters('detail', ['isValid', 'isExistingRelease']),
     showForm() {
@@ -141,6 +142,7 @@ export default {
           <milestone-combobox
             v-model="releaseMilestones"
             :project-id="projectId"
+            :group-id="groupId"
             :extra-links="milestoneComboboxExtraLinks"
           />
         </div>

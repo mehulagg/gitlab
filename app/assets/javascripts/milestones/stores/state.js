@@ -8,6 +8,11 @@ export default () => ({
       totalCount: 0,
       error: null,
     },
+    groupMilestones: {
+      list: [],
+      totalCount: 0,
+      error: null,
+    },
   },
   selectedMilestones: [],
   requestCount: 0,

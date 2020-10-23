@@ -39,6 +39,10 @@ export default {
       type: String,
       required: true,
     },
+    groupId: {
+      type: String,
+      required: false,
+    },
     extraLinks: {
       type: Array,
       default: () => [],
@@ -58,6 +62,7 @@ export default {
     searchMilestones: s__('MilestoneCombobox|Search Milestones'),
     searhErrorMessage: s__('MilestoneCombobox|An error occurred while searching for milestones'),
     projectMilestones: s__('MilestoneCombobox|Project milestones'),
+    groupMilestones: s__('MilestoneCombobox|Group milestones'),
   },
   computed: {
     ...mapState(['matches', 'selectedMilestones']),
@@ -83,6 +88,11 @@ export default {
     showProjectMilestoneSection() {
       return Boolean(
         this.matches.projectMilestones.totalCount > 0 || this.matches.projectMilestones.error,
+      );
+    },
+    showGroupMilestoneSection() {
+      return Boolean(
+        this.matches.groupMilestones.totalCount > 0 || this.matches.groupMilestones.error,
       );
     },
     showNoResults() {
@@ -115,11 +125,13 @@ export default {
     }, SEARCH_DEBOUNCE_MS);
 
     this.setProjectId(this.projectId);
+    this.setGroupId(this.groupId);
     this.fetchMilestones();
   },
   methods: {
     ...mapActions([
       'setProjectId',
+      'setGroupId',
       'setSelectedMilestones',
       'clearSelectedMilestones',
       'toggleMilestones',
@@ -193,16 +205,31 @@ export default {
       <gl-dropdown-divider />
     </template>
     <template v-else>
-      <milestone-results-section
-        :section-title="$options.translations.projectMilestones"
-        :total-count="matches.projectMilestones.totalCount"
-        :items="matches.projectMilestones.list"
-        :selected-milestones="selectedMilestones"
-        :error="matches.projectMilestones.error"
-        :error-message="$options.translations.searhErrorMessage"
-        data-testid="project-milestones-section"
-        @selected="selectMilestone($event)"
-      />
+      <template v-if="showProjectMilestoneSection">
+        <milestone-results-section
+          :section-title="$options.translations.projectMilestones"
+          :total-count="matches.projectMilestones.totalCount"
+          :items="matches.projectMilestones.list"
+          :selected-milestones="selectedMilestones"
+          :error="matches.projectMilestones.error"
+          :error-message="$options.translations.searhErrorMessage"
+          data-testid="project-milestones-section"
+          @selected="selectMilestone($event)"
+        />
+      </template>
+
+      <template v-if="showGroupMilestoneSection">
+        <milestone-results-section
+          :section-title="$options.translations.groupMilestones"
+          :total-count="matches.groupMilestones.totalCount"
+          :items="matches.groupMilestones.list"
+          :selected-milestones="selectedMilestones"
+          :error="matches.groupMilestones.error"
+          :error-message="$options.translations.searhErrorMessage"
+          data-testid="group-milestones-section"
+          @selected="selectMilestone($event)"
+        />
+      </template>
     </template>
     <gl-dropdown-item
       v-for="(item, idx) in extraLinks"

@@ -6,6 +6,9 @@ export default {
   [types.SET_PROJECT_ID](state, projectId) {
     state.projectId = projectId;
   },
+  [types.SET_GROUP_ID](state, groupId) {
+    state.groupId = groupId;
+  },
   [types.SET_SELECTED_MILESTONES](state, selectedMilestones) {
     Vue.set(state, 'selectedMilestones', selectedMilestones);
   },
@@ -39,6 +42,20 @@ export default {
   },
   [types.RECEIVE_PROJECT_MILESTONES_ERROR](state, error) {
     state.matches.projectMilestones = {
+      list: [],
+      totalCount: 0,
+      error,
+    };
+  },
+  [types.RECEIVE_GROUP_MILESTONES_SUCCESS](state, response) {
+    state.matches.groupMilestones = {
+      list: convertObjectPropsToCamelCase(response.data).map(({ title }) => ({ title })),
+      totalCount: parseInt(response.headers['x-total'], 10),
+      error: null,
+    };
+  },
+  [types.RECEIVE_GROUP_MILESTONES_ERROR](state, error) {
+    state.matches.groupMilestones = {
       list: [],
       totalCount: 0,
       error,

@@ -56,6 +56,7 @@ module ReleasesHelper
   def new_edit_pages_shared_data
     {
       project_id: @project.id,
+      group_id: @project.group.id,
       project_path: @project.full_path,
       markdown_preview_path: preview_markdown_path(@project),
       markdown_docs_path: help_page_path('user/markdown'),

@@ -2,6 +2,7 @@ import Api from '~/api';
 import * as types from './mutation_types';
 
 export const setProjectId = ({ commit }, projectId) => commit(types.SET_PROJECT_ID, projectId);
+export const setGroupId = ({ commit }, groupId) => commit(types.SET_GROUP_ID, groupId);
 
 export const setSelectedMilestones = ({ commit }, selectedMilestones) =>
   commit(types.SET_SELECTED_MILESTONES, selectedMilestones);
@@ -37,15 +38,28 @@ export const fetchMilestones = ({ commit, state }) => {
     .finally(() => {
       commit(types.REQUEST_FINISH);
     });
+
+  commit(types.REQUEST_START);
+
+  Api.groupMilestones(state.groupId)
+    .then(response => {
+      commit(types.RECEIVE_GROUP_MILESTONES_SUCCESS, response);
+    })
+    .catch(error => {
+      commit(types.RECEIVE_GROUP_MILESTONES_ERROR, error);
+    })
+    .finally(() => {
+      commit(types.REQUEST_FINISH);
+    });
 };
 
 export const searchMilestones = ({ commit, state }) => {
-  commit(types.REQUEST_START);
-
   const options = {
     search: state.searchQuery,
     scope: 'milestones',
   };
+
+  commit(types.REQUEST_START);
 
   Api.projectSearch(state.projectId, options)
     .then(response => {
@@ -53,6 +67,19 @@ export const searchMilestones = ({ commit, state }) => {
     })
     .catch(error => {
       commit(types.RECEIVE_PROJECT_MILESTONES_ERROR, error);
+    })
+    .finally(() => {
+      commit(types.REQUEST_FINISH);
+    });
+
+  commit(types.REQUEST_START);
+
+  Api.groupSearch(state.groupId, options)
+    .then(response => {
+      commit(types.RECEIVE_GROUP_MILESTONES_SUCCESS, response);
+    })
+    .catch(error => {
+      commit(types.RECEIVE_GROUP_MILESTONES_ERROR, error);
     })
     .finally(() => {
       commit(types.REQUEST_FINISH);

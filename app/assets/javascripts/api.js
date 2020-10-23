@@ -70,6 +70,7 @@ const Api = {
   featureFlagUserLists: '/api/:version/projects/:id/feature_flags_user_lists',
   featureFlagUserList: '/api/:version/projects/:id/feature_flags_user_lists/:list_iid',
   billableGroupMembersPath: '/api/:version/groups/:id/billable_members',
+  groupSearchPath: '/api/:version/groups/:id/search',
 
   group(groupId, callback = () => {}) {
     const url = Api.buildUrl(Api.groupPath).replace(':id', groupId);
@@ -128,6 +129,19 @@ const Api = {
 
     return axios.get(url, {
       params: {
+        per_page: DEFAULT_PER_PAGE,
+        ...options,
+      },
+    });
+  },
+
+  groupSearch(id, options = {}) {
+    const url = Api.buildUrl(Api.groupSearchPath).replace(':id', encodeURIComponent(id));
+
+    return axios.get(url, {
+      params: {
+        search: options.search,
+        scope: options.scope,
         per_page: DEFAULT_PER_PAGE,
         ...options,
       },

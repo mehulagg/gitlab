@@ -1,5 +1,6 @@
 export default ({
   projectId,
+  groupId,
   projectPath,
   markdownDocsPath,
   markdownPreviewPath,
@@ -13,6 +14,7 @@ export default ({
   defaultBranch = null,
 }) => ({
   projectId,
+  groupId,
   projectPath,
   markdownDocsPath,
   markdownPreviewPath,
