@@ -1,6 +1,6 @@
 <!-- This issue template can be used a great starting point for feature requests. The last section "Release notes" can be used as a summary of the feature and is also required if you want to have your release post blog MR auto generated using the release post item generator:  https://about.gitlab.com/handbook/marketing/blog/release-posts/#release-post-item-generator. The remaining sections are the backbone for every feature in GitLab. -->
 
-### Problem overview 
+### Problem to solve 
 
 <!-- What is the user problem you are trying to solve with this issue? -->
 
