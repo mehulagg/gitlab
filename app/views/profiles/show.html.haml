@@ -68,6 +68,11 @@
           prepend: emoji_button,
           append: reset_message_button,
           placeholder: s_("Profiles|What's your status?")
+
+      .checkbox-icon-inline-wrapper
+        - busy_label = capture do
+          = s_("Profiles|Busy")
+        = f.check_box :busy, label: busy_label, inline: true, wrapper_class: 'gl-mr-0'
   - if Feature.enabled?(:user_time_settings)
     %hr
     .row.user-time-preferences
