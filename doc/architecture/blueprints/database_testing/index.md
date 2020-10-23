@@ -38,6 +38,14 @@ In parallel we would work on an automated solution to replace the manual review 
 - Create a private CI Runner to test migrations automatically and safely without triggering any unintended consequences
 - Automate scrubbing/obfuscation of data
 
+#### Infrastructure/SRE involvement
+
+There will be a considerable amount of involvement required from Infrastructure and SRE as well. 
+
+- Provisioning infrastructure at each step
+- Deploying supporting infrastructure, such as ZFS (see [Anatomy of ZFS DB Storage Node](https://gitlab.com/gitlab-com/gl-infra/readiness/-/tree/master/library/zfs-filesystem#anatomy-of-a-zfs-db-storage-node))
+- Snapshot Automation
+
 Proposal:
 
 | Role                         | Who
