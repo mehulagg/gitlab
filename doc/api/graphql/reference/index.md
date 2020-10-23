@@ -1130,6 +1130,7 @@ Relationship between an epic and an issue.
 | `totalTimeSpent` | Int! | Total time reported as spent on the issue |
 | `type` | IssueType | Type of the issue |
 | `updatedAt` | Time! | Timestamp of when the issue was last updated |
+| `updatedBy` | User | User that last updated issue |
 | `upvotes` | Int! | Number of upvotes the issue has received |
 | `userNotesCount` | Int! | Number of user notes of the issue |
 | `userPermissions` | IssuePermissions! | Permissions for the current user on the resource |
@@ -1323,6 +1324,7 @@ Represents a recorded measurement (object count) for the Admins.
 | `totalTimeSpent` | Int! | Total time reported as spent on the issue |
 | `type` | IssueType | Type of the issue |
 | `updatedAt` | Time! | Timestamp of when the issue was last updated |
+| `updatedBy` | User | User that last updated issue |
 | `upvotes` | Int! | Number of upvotes the issue has received |
 | `userNotesCount` | Int! | Number of user notes of the issue |
 | `userPermissions` | IssuePermissions! | Permissions for the current user on the resource |
