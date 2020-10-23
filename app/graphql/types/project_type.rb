@@ -136,6 +136,11 @@ module Types
           extras: [:lookahead],
           resolver: Resolvers::ProjectMergeRequestsResolver
 
+    field :merge_requests_mean_time_to_merge, GraphQL::INT_TYPE,
+          null: true,
+          resolver: Resolvers::ProjectMergeRequestsMeanTimeToMergeResolver,
+          description: 'Average amount of time, in seconds, between opening and merging merge requests of the project'
+
     field :merge_request,
           Types::MergeRequestType,
           null: true,

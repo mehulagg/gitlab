@@ -14489,6 +14489,21 @@ type Project {
   mergeRequestsFfOnlyEnabled: Boolean
 
   """
+  Average amount of time, in seconds, between opening and merging merge requests of the project
+  """
+  mergeRequestsMeanTimeToMerge(
+    """
+    From time
+    """
+    from: Time
+
+    """
+    To time
+    """
+    to: Time
+  ): Int
+
+  """
   Milestones of the project
   """
   milestones(

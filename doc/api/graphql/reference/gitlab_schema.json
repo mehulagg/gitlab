@@ -42057,6 +42057,39 @@
               "deprecationReason": null
             },
             {
+              "name": "mergeRequestsMeanTimeToMerge",
+              "description": "Average amount of time, in seconds, between opening and merging merge requests of the project",
+              "args": [
+                {
+                  "name": "from",
+                  "description": "From time",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "to",
+                  "description": "To time",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "milestones",
               "description": "Milestones of the project",
               "args": [

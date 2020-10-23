@@ -27,7 +27,7 @@ RSpec.describe GitlabSchema.types['Project'] do
       environment boards jira_import_status jira_imports services releases release
       alert_management_alerts alert_management_alert alert_management_alert_status_counts
       container_expiration_policy service_desk_enabled service_desk_address
-      issue_status_counts terraform_states
+      issue_status_counts terraform_states merge_requests_mean_time_to_merge
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
