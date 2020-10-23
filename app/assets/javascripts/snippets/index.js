@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+
 import Translate from '~/vue_shared/translate';
 import createDefaultClient from '~/lib/graphql';
 
