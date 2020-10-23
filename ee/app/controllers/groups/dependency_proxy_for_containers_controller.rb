@@ -40,11 +40,12 @@ class Groups::DependencyProxyForContainersController < Groups::ApplicationContro
       jwt = Doorkeeper::OAuth::Token.from_bearer_authorization(request)
       token = ::Gitlab::ConanToken.decode(jwt)
       @user = User.find(token.user_id)
+
       render_403 unless @user
 
       sign_in(@user)
     else
-      response.headers['WWW-Authenticate'] = "Bearer realm=\"http://gdk.test:3001/jwt/auth\",service=\"dependency_proxy\",scope=\"repository:library/hello-world:pull\""
+      response.headers['WWW-Authenticate'] = ::DependencyProxy::Registry.authenticate_header
       render json: {}, status: :unauthorized
     end
   end

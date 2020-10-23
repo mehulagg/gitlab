@@ -3,6 +3,7 @@
 class DependencyProxy::Registry
   AUTH_URL = 'https://auth.docker.io'.freeze
   LIBRARY_URL = 'https://registry-1.docker.io/v2'.freeze
+  PROXY_URL = "#{Gitlab.config.gitlab.url}/jwt/auth".freeze
 
   class << self
     def auth_url(image)
@@ -15,6 +16,10 @@ class DependencyProxy::Registry
 
     def blob_url(image, blob_sha)
       "#{LIBRARY_URL}/#{image_path(image)}/blobs/#{blob_sha}"
+    end
+
+    def authenticate_header
+      "Bearer realm=\"#{PROXY_URL}\",service=\"#{::Auth::DependencyProxyAuthenticationService::AUDIENCE}\""
     end
 
     private

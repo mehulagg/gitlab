@@ -9,7 +9,7 @@ class Groups::DependencyProxyAuthController < ApplicationController
     if request.headers['HTTP_AUTHORIZATION']
       render json: {}, status: :ok
     else
-      response.headers['WWW-Authenticate'] = "Bearer realm=\"http://gdk.test:3001/jwt/auth\",service=\"dependency_proxy\",scope=\"repository:library/hello-world:pull\""
+      response.headers['WWW-Authenticate'] = ::DependencyProxy::Registry.authenticate_header
       render json: json_error, status: :unauthorized
     end
   end
