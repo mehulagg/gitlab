@@ -27,7 +27,7 @@ RSpec.describe 'gitlab:ldap:secret rake tasks' do
   end
 
   after do
-    FileUtils.rm_rf('tmp/tests/ldapenc/')
+    FileUtils.rm_rf(Rails.root.join('tmp/tests/ldapenc'))
   end
 
   describe ':show' do
@@ -74,7 +74,7 @@ RSpec.describe 'gitlab:ldap:secret rake tasks' do
     end
 
     it 'displays error when write directory does not exist' do
-      FileUtils.rm_rf('tmp/tests/ldapenc/')
+      FileUtils.rm_rf(Rails.root.join('tmp/tests/ldapenc'))
       expect { run_rake_task('gitlab:ldap:secret:edit') }.to output(/Directory .* does not exist./).to_stdout
     end
   end
