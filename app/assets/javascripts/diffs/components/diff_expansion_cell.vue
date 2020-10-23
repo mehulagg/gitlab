@@ -62,9 +62,6 @@ export default {
   },
   computed: {
     ...mapState({
-      diffViewType(state) {
-        return this.glFeatures.unifiedDiffLines ? INLINE_DIFF_VIEW_TYPE : state.diffs.diffViewType;
-      },
       diffFiles: state => state.diffs.diffFiles,
     }),
     canExpandUp() {
@@ -86,12 +83,14 @@ export default {
         [INLINE_DIFF_VIEW_TYPE]: diffFile.highlighted_diff_lines,
         [PARALLEL_DIFF_VIEW_TYPE]: diffFile.parallel_diff_lines,
       };
-      const index = utils.getPreviousLineIndex(this.diffViewType, diffFile, {
+      const index = utils.getPreviousLineIndex(INLINE_DIFF_VIEW_TYPE, diffFile, {
         oldLineNumber,
         newLineNumber,
       });
 
-      return lineNumberByViewType(this.diffViewType, lines[this.diffViewType][index - 2]) || 0;
+      return (
+        lineNumberByViewType(INLINE_DIFF_VIEW_TYPE, lines[INLINE_DIFF_VIEW_TYPE][index - 2]) || 0
+      );
     },
     callLoadMoreLines(
       endpoint,
@@ -118,7 +117,7 @@ export default {
       this.isRequesting = true;
       const endpoint = this.contextLinesPath;
       const { fileHash } = this;
-      const view = this.diffViewType;
+      const view = INLINE_DIFF_VIEW_TYPE;
       const oldLineNumber = this.line.meta_data.old_pos || 0;
       const newLineNumber = this.line.meta_data.new_pos || 0;
       const offset = newLineNumber - oldLineNumber;

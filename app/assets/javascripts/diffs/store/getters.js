@@ -61,9 +61,9 @@ export const diffHasExpandedDiscussions = state => diff => {
       return acc;
     }, []),
   };
-  return lines[window.gon?.features?.unifiedDiffLines ? 'inline' : state.diffViewType]
-    .filter(l => l.discussions.length >= 1)
-    .some(l => l.discussionsExpanded);
+  return lines[INLINE_DIFF_VIEW_TYPE].filter(l => l.discussions.length >= 1).some(
+    l => l.discussionsExpanded,
+  );
 };
 
 /**
@@ -71,7 +71,7 @@ export const diffHasExpandedDiscussions = state => diff => {
  * @param {Boolean} diff
  * @returns {Boolean}
  */
-export const diffHasDiscussions = state => diff => {
+export const diffHasDiscussions = () => diff => {
   const lines = {
     [INLINE_DIFF_VIEW_TYPE]: diff.highlighted_diff_lines || [],
     [PARALLEL_DIFF_VIEW_TYPE]: (diff.parallel_diff_lines || []).reduce((acc, line) => {
@@ -86,9 +86,7 @@ export const diffHasDiscussions = state => diff => {
       return acc;
     }, []),
   };
-  return lines[window.gon?.features?.unifiedDiffLines ? 'inline' : state.diffViewType].some(
-    l => l.discussions.length >= 1,
-  );
+  return lines[INLINE_DIFF_VIEW_TYPE].some(l => l.discussions.length >= 1);
 };
 
 /**

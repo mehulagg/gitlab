@@ -70,7 +70,7 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
   const urlParams = {
     per_page: DIFFS_PER_PAGE,
     w: state.showWhitespace ? '0' : '1',
-    view: window.gon?.features?.unifiedDiffLines ? 'inline' : state.diffViewType,
+    view: 'inline',
   };
 
   commit(types.SET_BATCH_LOADING, true);
@@ -132,7 +132,7 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
 export const fetchDiffFilesMeta = ({ commit, state }) => {
   const worker = new TreeWorker();
   const urlParams = {
-    view: window.gon?.features?.unifiedDiffLines ? 'inline' : state.diffViewType,
+    view: 'inline',
   };
 
   commit(types.SET_LOADING, true);

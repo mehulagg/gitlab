@@ -151,9 +151,7 @@ export default {
     addContextLines({
       inlineLines: diffFile.highlighted_diff_lines,
       parallelLines: diffFile.parallel_diff_lines,
-      diffViewType: window.gon?.features?.unifiedDiffLines
-        ? INLINE_DIFF_VIEW_TYPE
-        : state.diffViewType,
+      diffViewType: INLINE_DIFF_VIEW_TYPE,
       contextLines: lines,
       bottom,
       lineNumbers,

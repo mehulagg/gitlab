@@ -123,9 +123,7 @@ export default {
         <parallel-diff-view
           v-else-if="isParallelView"
           :diff-file="diffFile"
-          :diff-lines="
-            glFeatures.unifiedDiffLines ? diffLines(diffFile) : diffFile.parallel_diff_lines || []
-          "
+          :diff-lines="diffLines(diffFile)"
           :help-page-path="helpPagePath"
         />
         <gl-loading-icon v-if="diffFile.renderingLines" size="md" class="mt-3" />
