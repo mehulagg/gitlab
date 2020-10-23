@@ -107,15 +107,7 @@ export default {
           })
           .flat(2);
 
-        const nodes = unwrappedGroups.map(group => {
-          const jobs = group.jobs.map(({ name, needs }) => {
-            return { name, needs: needs.map(need => need.name) };
-          });
-
-          return { ...group, jobs };
-        });
-
-        return nodes;
+        return unwrappedGroups;
       }
 
       const { nodeDict } = parseData(makeDAGstyleNodes(this.pipeline));
@@ -181,13 +173,19 @@ export default {
   <div>
     <div class="build-content middle-block js-pipeline-graph">
       <div
-        class="pipeline-visualization pipeline-graph pipeline-min-h gl-overflow-auto gl-bg-gray-10"
+        class="pipeline-visualization pipeline-graph pipeline-min-h gl-position-relative gl-overflow-auto gl-bg-gray-10"
         :class="{ 'gl-py-5': !isLinkedPipeline }"
+        :id="$options.CONTAINER_ID"
+        :ref="$options.CONTAINER_REF"
       >
-        <sf-graph-streamy
-          :id="$options.CONTAINER_ID"
-          :ref="$options.CONTAINER_REF"
-        >
+      <sf-graph-links
+        :pipeline-data="linksData"
+        :highlighted-job="highlightedJob"
+        :container-id="$options.CONTAINER_ID"
+        :container-ref="$options.CONTAINER_REF"
+        @on-highlighted-jobs-change="setHighlightedJobs"
+      >
+        <sf-graph-streamy>
           <template #upstream>
             <linked-pipelines-column
               v-if="showUpstreamPipelines"
@@ -199,13 +197,6 @@ export default {
 
           <template #main>
             <template v-if="!graphLoading">
-              <sf-graph-links
-                :pipeline-data="linksData"
-                :highlighted-job="highlightedJob"
-                :container-id="$options.CONTAINER_ID"
-                :container-ref="$options.CONTAINER_REF"
-                @on-highlighted-jobs-change="setHighlightedJobs"
-              >
                 <stage-column-component
                   v-for="(stage, index) in stages"
                   :key="stage.name"
@@ -225,7 +216,6 @@ export default {
                   @job-for-link-mouseenter="highlightNeeds"
                   @job-for-link-mouseoff="removeHighlightNeeds"
                 />
-                </sf-graph-links>
             </template>
           </template>
 
@@ -240,6 +230,8 @@ export default {
             />
           </template>
         </sf-graph-streamy>
+        </sf-graph-links>
+
       </div>
     </div>
   </div>

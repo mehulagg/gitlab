@@ -89,7 +89,7 @@ export default {
 
       if (statusTooltip) {
         if (this.isDelayedJob) {
-          // fix this not to rely on the string interpolation from the backend 
+          // fix this not to rely on the string interpolation from the backend
           textBuilder.push(sprintf(statusTooltip, { remainingTime: this.remainingTime }));
         } else {
           textBuilder.push(statusTooltip);
@@ -119,6 +119,9 @@ export default {
     },
   },
   methods: {
+    mouseFn() {
+      console.log('I am on div')
+    },
     pipelineActionRequestComplete() {
       this.$emit('pipelineActionRequestComplete');
     },
@@ -126,7 +129,13 @@ export default {
 };
 </script>
 <template>
-  <div class="ci-job-component" data-qa-selector="job_item_container">
+  <div
+    :id="job.id || job.name"
+    class="ci-job-component"
+    data-qa-selector="job_item_container"
+    @mouseenter="$emit('mouseenter')"
+    @mouseleave="$emit('mouseleave')"
+  >
     <gl-link
       v-if="status.has_details"
       v-gl-tooltip="{ boundary, placement: 'bottom' }"

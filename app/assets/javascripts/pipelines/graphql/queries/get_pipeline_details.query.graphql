@@ -21,10 +21,12 @@ query getPipelineDetails($projectPath: ID!, $iid: ID!) {
                 group
                 icon
               }
+              id: name
               name
               size
               jobs {
                 nodes {
+                  id: name
                   name
                   needs {
                     nodes {

@@ -100,7 +100,8 @@ export default {
       try {
         const parsedData = parseData(unwrappedGroups);
         this.links = generateLinksData(parsedData, jobs, this.containerId);
-      } catch {
+      } catch (err) {
+        console.log('DRAW_FAILURE', err);
         this.$emit('error', DRAW_FAILURE);
       }
     },

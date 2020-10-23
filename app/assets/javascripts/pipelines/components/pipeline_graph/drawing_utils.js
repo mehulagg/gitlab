@@ -20,6 +20,8 @@ export const generateLinksData = ({ links }, jobs, containerID) => {
   return links.map(link => {
     const path = d3.path();
 
+    console.log(link.source, link.target);
+
     const sourceId = jobs[link.source].id;
     const targetId = jobs[link.target].id;
 
@@ -51,6 +53,8 @@ export const generateLinksData = ({ links }, jobs, containerID) => {
         .replace('px', ''),
     );
 
+    console.log('PADDING VALS: ', paddingLeft, paddingTop);
+
     const sourceNodeX = sourceNodeCoordinates.right - containerCoordinates.x - paddingLeft;
     const sourceNodeY =
       sourceNodeCoordinates.top -
@@ -63,6 +67,8 @@ export const generateLinksData = ({ links }, jobs, containerID) => {
       containerCoordinates.y -
       paddingTop +
       sourceNodeCoordinates.height / 2;
+
+    console.log('POSITIONS:', sourceNodeX, sourceNodeY, targetNodeX, targetNodeY);
 
     // Start point
     path.moveTo(sourceNodeX, sourceNodeY);

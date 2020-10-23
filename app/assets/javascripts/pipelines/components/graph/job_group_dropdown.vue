@@ -37,7 +37,12 @@ export default {
 };
 </script>
 <template>
-  <div class="ci-job-dropdown-container dropdown dropright">
+  <div
+    :id="group.id || group.name" 
+    class="ci-job-dropdown-container dropdown dropright"
+    @mouseenter="$emit('mouseenter')"
+    @mouseleave="$emit('mouseleave')"
+  >
     <button
       v-gl-tooltip.hover="{ boundary: 'viewport' }"
       :title="tooltipText"

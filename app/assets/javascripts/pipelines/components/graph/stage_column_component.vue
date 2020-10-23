@@ -60,9 +60,15 @@ export default {
     groupId(group) {
       return `ci-badge-${escape(group.name)}`;
     },
+    highlightNeeds(id) {
+      this.$emit('job-for-link-mouseenter', id);
+    },
     pipelineActionRequestComplete() {
       this.$emit('refreshPipelineGraph');
     },
+    removeHighlightNeeds() {
+      this.$emit('job-for-link-mouseoff');
+    }
   },
 };
 </script>
@@ -94,16 +100,16 @@ export default {
             :pipeline-expanded="pipelineExpanded"
             css-class-job-name="build-content"
             @pipelineActionRequestComplete="pipelineActionRequestComplete"
-            @on-mouse-enter="highlightNeeds(job.name)"
-            @on-mouse-leave="removeHighlightNeeds(job.name)"
+            @mouseenter="highlightNeeds(group.jobs[0].name)"
+            @mouseleave="removeHighlightNeeds"
           />
 
           <job-group-dropdown
             v-else
             :group="group"
             @pipelineActionRequestComplete="pipelineActionRequestComplete"
-            @on-mouse-enter="highlightNeeds(group.name)"
-            @on-mouse-leave="removeHighlightNeeds(group.name)"
+            @mouseenter="highlightNeeds(group.name)"
+            @mouseleave="removeHighlightNeeds"
           />
         </div>
       </template>
