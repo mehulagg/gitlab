@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Geo
-  class BlobVerificationPrimaryWorker
+  class VerificationWorker
     include ApplicationWorker
     include GeoQueue
     include ::Gitlab::Geo::LogHelpers
@@ -16,7 +16,7 @@ module Geo
 
       replicator.calculate_checksum!
     rescue ActiveRecord::RecordNotFound
-      log_error("Couldn't find the blob, skipping", replicable_name: replicable_name, replicable_id: replicable_id)
+      log_error("Couldn't find the record, skipping", replicable_name: replicable_name, replicable_id: replicable_id)
     end
   end
 end
