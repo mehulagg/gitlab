@@ -83,12 +83,12 @@ module Gitlab
     end
 
     def encrypt(contents)
-      handle_missing_key
+      handle_missing_key!
       encryptor.encrypt_and_sign contents
     end
 
     def decrypt(contents)
-      handle_missing_key
+      handle_missing_key!
       encryptor.decrypt_and_verify contents
     end
 
@@ -114,7 +114,7 @@ module Gitlab
       YAML.safe_load(contents, permitted_classes: [Symbol]).presence || {}
     end
 
-    def handle_missing_key
+    def handle_missing_key!
       raise MissingKeyError.new if @key.nil?
     end
   end

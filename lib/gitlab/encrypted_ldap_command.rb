@@ -13,8 +13,6 @@ module Gitlab
         puts "File encrypted and saved."
       rescue Interrupt
         puts "Aborted changing file: nothing saved."
-      rescue Gitlab::EncryptedConfiguration::MissingKeyError
-        puts "Missing encryption key enc_settings_key_base."
       rescue ActiveSupport::MessageEncryptor::InvalidMessage
         puts "Couldn't decrypt #{encrypted.content_path}. Perhaps you passed the wrong key?"
       end
@@ -36,8 +34,6 @@ module Gitlab
         puts "File encrypted and saved."
       rescue Interrupt
         puts "Aborted changing file: nothing saved."
-      rescue Gitlab::EncryptedConfiguration::MissingKeyError
-        puts "Missing encryption key enc_settings_key_base."
       rescue ActiveSupport::MessageEncryptor::InvalidMessage
         puts "Couldn't decrypt #{encrypted.content_path}. Perhaps you passed the wrong key?"
       ensure
@@ -46,10 +42,9 @@ module Gitlab
 
       def show
         encrypted = Gitlab::Auth::Ldap::Config.encrypted_secrets
+        return unless validate_config(encrypted)
 
         puts encrypted.read.presence || "File '#{encrypted.content_path}' does not exist. Use `rake gitlab:ldap:secret:edit` to change that."
-      rescue Gitlab::EncryptedConfiguration::MissingKeyError
-        puts "Missing encryption key enc_settings_key_base."
       rescue ActiveSupport::MessageEncryptor::InvalidMessage
         puts "Couldn't decrypt #{encrypted.content_path}. Perhaps you passed the wrong key?"
       end
@@ -61,6 +56,11 @@ module Gitlab
 
         unless File.exist?(dir_path)
           puts "Directory #{dir_path} does not exist. Create the directory and try again."
+          return false
+        end
+
+        if encrypted.key.nil?
+          puts "Missing encryption key enc_settings_key_base."
           return false
         end
 
