@@ -82,8 +82,8 @@ By default, groups created in:
 
 The setting can be changed for any group by:
 
-- A group owner in the group's **Settings > General > Permissions, LFS, 2FA**.
-- An administrator by editing the group in **Admin Area > Overview > Groups**.
+- A group owner. Select the group, and navigate to **Settings > General > Permissions, LFS, 2FA**.
+- An administrator. Navigate to **Admin Area > Overview > Groups**, select the group, and choose **Edit**.
 
 For more information check the
 [permissions table](../../permissions.md#group-members-permissions). For a list
