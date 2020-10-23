@@ -360,6 +360,7 @@ Here are the requirements for using dependency scanning in an offline environmen
   If you are unable to permit access to `https://gitlab.com/gitlab-org/security-products/gemnasium-db.git` you must host an offline copy of this `git` repository and set the `GEMNASIUM_DB_REMOTE_URL` variable to the URL of this repository. See [Dependency Scanning documentation](#configuring-dependency-scanning) for more info on configuration variables. 
 
 This advisory database is constantly being updated, so you will need to periodically sync your local copy with GitLab's.
+
 - _Only if scanning Ruby projects_: Host an offline Git copy of the [advisory database](https://github.com/rubysec/ruby-advisory-db).
 - _Only if scanning npm/yarn projects_: Host an offline copy of the [retire.js](https://github.com/RetireJS/retire.js/) [node](https://github.com/RetireJS/retire.js/blob/master/repository/npmrepository.json) and [js](https://github.com/RetireJS/retire.js/blob/master/repository/jsrepository.json) advisory databases.
 
