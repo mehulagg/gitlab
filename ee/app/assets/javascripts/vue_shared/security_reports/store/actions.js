@@ -370,6 +370,7 @@ export const revertDismissVulnerability = ({ state, dispatch }) => {
         ...state.modal.vulnerability,
         isDismissed: false,
         dismissalFeedback: null,
+        dismissal_feedback: null,
       };
 
       dispatch('receiveDismissVulnerability', updatedIssue);
