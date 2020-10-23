@@ -40,20 +40,35 @@ export default class TaskList {
       taskListField.value = taskListField.dataset.value;
     });
 
-    $(this.taskListContainerSelector).taskList('enable');
-    $(document).on('tasklist:changed', this.taskListContainerSelector, this.updateHandler);
+    this.enable();
   }
 
   getTaskListTarget(e) {
     return e && e.currentTarget ? $(e.currentTarget) : $(this.taskListContainerSelector);
   }
 
+  // disable the 
+  updateNonMarkdownTaskListItems(e) {
+    this.getTaskListTarget(e)
+      .find('.task-list-item')
+      .not('[data-sourcepos]')
+      .find('.task-list-item-checkbox')
+      .prop('disabled', true);
+  }
+
   disableTaskListItems(e) {
     this.getTaskListTarget(e).taskList('disable');
+    this.updateNonMarkdownTaskListItems(e);
   }
 
   enableTaskListItems(e) {
     this.getTaskListTarget(e).taskList('enable');
+    this.updateNonMarkdownTaskListItems(e);
+  }
+
+  enable() {
+    this.enableTaskListItems();
+    $(document).on('tasklist:changed', this.taskListContainerSelector, this.updateHandler);
   }
 
   disable() {
