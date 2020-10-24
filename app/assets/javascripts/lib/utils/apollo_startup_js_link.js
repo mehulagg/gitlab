@@ -1,26 +1,21 @@
 import { ApolloLink, Observable } from 'apollo-link';
 import { parse } from 'graphql';
-import { isEqual } from 'lodash';
+import { isEqual, pickBy } from 'lodash';
+
+/**
+ * Remove undefined values from object
+ * @param obj
+ * @returns {Dictionary<unknown>}
+ */
+const pickDefinedValues = obj => pickBy(obj, x => x !== undefined);
 
 /**
  * Compares two set of variables, order independent
+ *
+ * Ignores undefined values (in the top level) and supports arrays etc.
  */
-const doVariablesMatch = (var1 = {}, var2 = {}) => {
-  const entries1 = Object.entries(var1);
-  const entries2 = Object.entries(var2);
-  if (entries1.length !== entries2.length) {
-    return false;
-  }
-
-  for (let i = 0; i < entries1.length; i += 1) {
-    const [key, value] = entries1[i];
-
-    if (var2[key] !== value) {
-      return false;
-    }
-  }
-
-  return true;
+const variablesMatch = (var1 = {}, var2 = {}) => {
+  return isEqual(pickDefinedValues(var1), pickDefinedValues(var2));
 };
 
 export class StartupJSLink extends ApolloLink {
@@ -72,7 +67,7 @@ export class StartupJSLink extends ApolloLink {
     this.startupCalls.delete(operationName);
 
     // Skip startup call if the variables values do not match
-    if (!isEqual(startupVariables, operation.variables)) {
+    if (!variablesMatch(startupVariables, operation.variables)) {
       return forward(operation);
     }
 

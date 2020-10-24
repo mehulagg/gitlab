@@ -308,6 +308,24 @@ describe('StartupJSLink', () => {
     });
   });
 
+  it('resolves the request if the variables have undefined values', done => {
+    window.gl = {
+      startup_graphql_calls: [
+        {
+          fetchCall: mockFetchCall(),
+          query: STARTUP_JS_QUERY,
+          variables: { name: 'foo' },
+        },
+      ],
+    };
+    setupLink();
+    link.request(mockOperation({ variables: { name: 'foo', undef: undefined } })).subscribe(result => {
+      expect(result).toEqual(STARTUP_JS_RESPONSE);
+      expect(startupLink.startupCalls.size).toBe(0);
+      done();
+    });
+  });
+
   it('resolves the request if the variables are of an array format', done => {
     window.gl = {
       startup_graphql_calls: [
