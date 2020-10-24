@@ -157,6 +157,24 @@ describe('StartupJSLink', () => {
         done();
       });
     });
+
+    it('forwards requests if array variables have a different order', done => {
+      window.gl = {
+        startup_graphql_calls: [
+          {
+            fetchCall: mockFetchCall(),
+            query: STARTUP_JS_QUERY,
+            variables: { id: [3, 4] },
+          },
+        ],
+      };
+      setupLink();
+      link.request(mockOperation({ variables: { id: [4, 3] } })).subscribe(result => {
+        expect(result).toEqual(FORWARDED_RESPONSE);
+        expect(startupLink.startupCalls.size).toBe(0);
+        done();
+      });
+    });
   });
 
   describe('error handling', () => {
@@ -284,6 +302,24 @@ describe('StartupJSLink', () => {
     };
     setupLink();
     link.request(mockOperation({ variables: { name: 'foo', id: 3 } })).subscribe(result => {
+      expect(result).toEqual(STARTUP_JS_RESPONSE);
+      expect(startupLink.startupCalls.size).toBe(0);
+      done();
+    });
+  });
+
+  it('resolves the request if the variables are of an array format', done => {
+    window.gl = {
+      startup_graphql_calls: [
+        {
+          fetchCall: mockFetchCall(),
+          query: STARTUP_JS_QUERY,
+          variables: { id: [3, 4] },
+        },
+      ],
+    };
+    setupLink();
+    link.request(mockOperation({ variables: { id: [3, 4] } })).subscribe(result => {
       expect(result).toEqual(STARTUP_JS_RESPONSE);
       expect(startupLink.startupCalls.size).toBe(0);
       done();

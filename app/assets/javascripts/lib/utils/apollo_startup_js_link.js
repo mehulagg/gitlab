@@ -1,5 +1,6 @@
 import { ApolloLink, Observable } from 'apollo-link';
 import { parse } from 'graphql';
+import { isEqual } from 'lodash';
 
 /**
  * Compares two set of variables, order independent
@@ -71,7 +72,7 @@ export class StartupJSLink extends ApolloLink {
     this.startupCalls.delete(operationName);
 
     // Skip startup call if the variables values do not match
-    if (!doVariablesMatch(startupVariables, operation.variables)) {
+    if (!isEqual(startupVariables, operation.variables)) {
       return forward(operation);
     }
 
