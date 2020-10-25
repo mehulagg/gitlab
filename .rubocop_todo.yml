@@ -842,7 +842,6 @@ Rails/SaveBang:
     - 'spec/controllers/projects/imports_controller_spec.rb'
     - 'spec/controllers/projects/issues_controller_spec.rb'
     - 'spec/controllers/projects/labels_controller_spec.rb'
-    - 'spec/controllers/projects/merge_requests_controller_spec.rb'
     - 'spec/controllers/projects/milestones_controller_spec.rb'
     - 'spec/controllers/projects/notes_controller_spec.rb'
     - 'spec/controllers/projects/pipelines_controller_spec.rb'

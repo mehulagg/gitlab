@@ -6,14 +6,9 @@ RSpec.describe Projects::MergeRequestsController do
   include ProjectForksHelper
   include Gitlab::Routing
 
-  let(:project) { create(:project, :repository) }
-  let(:user)    { project.owner }
+  let_it_be_with_refind(:project) { create(:project, :repository) }
+  let(:user) { project.owner }
   let(:merge_request) { create(:merge_request_with_diffs, target_project: project, source_project: project) }
-  let(:merge_request_with_conflicts) do
-    create(:merge_request, source_branch: 'conflict-resolvable', target_branch: 'conflict-start', source_project: project, merge_status: :unchecked) do |mr|
-      mr.mark_as_unmergeable
-    end
-  end
 
   before do
     sign_in(user)
@@ -107,7 +102,7 @@ RSpec.describe Projects::MergeRequestsController do
         render_views
 
         it 'renders merge request page' do
-          merge_request.merge_request_diff.destroy
+          merge_request.merge_request_diff.destroy!
 
           go(format: :html)
 
@@ -147,7 +142,7 @@ RSpec.describe Projects::MergeRequestsController do
         let(:new_project) { create(:project) }
 
         before do
-          project.route.destroy
+          project.route.destroy!
           new_project.redirect_routes.create!(path: project.full_path)
           new_project.add_developer(user)
         end
@@ -364,7 +359,7 @@ RSpec.describe Projects::MergeRequestsController do
       let!(:merge_request) { create(:merge_request, source_project: forked_project, source_branch: 'add-submodule-version-bump', target_branch: 'master', target_project: project) }
 
       before do
-        forked_project.destroy
+        forked_project.destroy!
       end
 
       it 'closes MR without errors' do
@@ -435,7 +430,7 @@ RSpec.describe Projects::MergeRequestsController do
 
     context 'when the merge request is not mergeable' do
       before do
-        merge_request.update(title: "WIP: #{merge_request.title}")
+        merge_request.update!(title: "WIP: #{merge_request.title}")
 
         post :merge, params: base_params
       end
@@ -475,7 +470,7 @@ RSpec.describe Projects::MergeRequestsController do
 
       context 'when squash is passed as 1' do
         it 'updates the squash attribute on the MR to true' do
-          merge_request.update(squash: false)
+          merge_request.update!(squash: false)
           merge_with_sha(squash: '1')
 
           expect(merge_request.reload.squash_on_merge?).to be_truthy
@@ -484,7 +479,7 @@ RSpec.describe Projects::MergeRequestsController do
 
       context 'when squash is passed as 0' do
         it 'updates the squash attribute on the MR to false' do
-          merge_request.update(squash: true)
+          merge_request.update!(squash: true)
           merge_with_sha(squash: '0')
 
           expect(merge_request.reload.squash_on_merge?).to be_falsey
@@ -547,7 +542,7 @@ RSpec.describe Projects::MergeRequestsController do
 
           context 'and head pipeline is not the current one' do
             before do
-              head_pipeline.update(sha: 'not_current_sha')
+              head_pipeline.update!(sha: 'not_current_sha')
             end
 
             it 'returns :failed' do
@@ -813,7 +808,7 @@ RSpec.describe Projects::MergeRequestsController do
         context 'with public builds' do
           let(:forked_project) do
             fork_project(project, fork_user, repository: true).tap do |new_project|
-              new_project.project_feature.update(builds_access_level: ProjectFeature::ENABLED)
+              new_project.project_feature.update!(builds_access_level: ProjectFeature::ENABLED)
             end
           end
 
@@ -1505,7 +1500,7 @@ RSpec.describe Projects::MergeRequestsController do
   describe 'POST remove_wip' do
     before do
       merge_request.title = merge_request.wip_title
-      merge_request.save
+      merge_request.save!
 
       post :remove_wip,
         params: {
@@ -1626,7 +1621,7 @@ RSpec.describe Projects::MergeRequestsController do
       it 'links to the environment on that project', :sidekiq_might_not_need_inline do
         get_ci_environments_status
 
-        expect(json_response.first['url']).to match /#{forked.full_path}/
+        expect(json_response.first['url']).to match(/#{forked.full_path}/)
       end
 
       context "when environment_target is 'merge_commit'", :sidekiq_might_not_need_inline do
@@ -1653,7 +1648,7 @@ RSpec.describe Projects::MergeRequestsController do
             get_ci_environments_status(environment_target: 'merge_commit')
 
             expect(response).to have_gitlab_http_status(:ok)
-            expect(json_response.first['url']).to match /#{project.full_path}/
+            expect(json_response.first['url']).to match(/#{project.full_path}/)
           end
         end
       end
