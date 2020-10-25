@@ -165,6 +165,8 @@ module Gitlab
             parse_time(value)
           when :integer
             parse_integer(value)
+          when :json
+            parse_json(value)
           else
             value
           end
@@ -178,6 +180,15 @@ module Gitlab
         def parse_integer(value)
           Integer(value)
         rescue ArgumentError, TypeError
+        end
+
+        def parse_json(value)
+          parsed = Gitlab::Json.parse(value)
+          deep_size = Gitlab::Utils::DeepSize.new(parsed)
+          return unless deep_size.valid?
+
+          parsed
+        rescue JSON::ParserError
         end
       end
     end

@@ -167,6 +167,48 @@ RSpec.describe Gitlab::AlertManagement::Payload::Base do
       end
     end
 
+    context 'with a json type provided' do
+      let(:payload_class) do
+        Class.new(described_class) do
+          attribute :test, paths: [['json']], type: :json
+        end
+      end
+
+      let(:raw_payload) { { 'json' => json } }
+
+      context 'with valid json' do
+        let(:json) { '{ "key": "value" }' }
+
+        it { is_expected.to eq('key' => 'value') }
+      end
+
+      context 'with invalid json' do
+        let(:json) { 'invalid json' }
+
+        it { is_expected.to be_nil }
+      end
+
+      context 'with too large json' do
+        let(:json) { '{ "a": "b" }' }
+
+        before do
+          stub_const('Gitlab::Utils::DeepSize::DEFAULT_MAX_SIZE', 1)
+        end
+
+        it { is_expected.to be_nil }
+      end
+
+      context 'with too deep nested json' do
+        let(:json) { '{ "key": { "nested": "value" } }' }
+
+        before do
+          stub_const('Gitlab::Utils::DeepSize::DEFAULT_MAX_DEPTH', 1)
+        end
+
+        it { is_expected.to be_nil }
+      end
+    end
+
     context 'with unknown type provided' do
       let(:payload_class) do
         Class.new(described_class) do
