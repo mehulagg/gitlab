@@ -31,6 +31,21 @@ export default {
       required: false,
       default: '',
     },
+    openMergeRequestsPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    mergedMergeRequestsPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    closedMergeRequestsPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   data() {
     return {
@@ -56,6 +71,21 @@ export default {
     },
     closedIssuesCount() {
       return sum(this.allIssueStats.map(stats => stats.closed || 0));
+    },
+    showMergeRequestStats() {
+      return this.milestones.some(m => m.mrStats);
+    },
+    allMergeRequestStats() {
+      return this.milestones.map(m => m.mrStats || {});
+    },
+    totalMergeRequestsCount() {
+      return sum(this.allMergeRequestStats.map(stats => stats.total || 0));
+    },
+    mergedMergeRequestsCount() {
+      return sum(this.allMergeRequestStats.map(stats => stats.merged || 0));
+    },
+    closedMergeRequestsCount() {
+      return sum(this.allMergeRequestStats.map(stats => stats.closed || 0));
     },
     milestoneLabelText() {
       return n__('Milestone', 'Milestones', this.milestones.length);
@@ -133,6 +163,18 @@ export default {
       :closed="closedIssuesCount"
       :open-path="openIssuesPath"
       :closed-path="closedIssuesPath"
+      data-testid="issue-stats"
+    />
+    <issuable-stats
+      v-if="showMergeRequestStats"
+      :label="__('Merge Requests')"
+      :total="totalMergeRequestsCount"
+      :merged="mergedMergeRequestsCount"
+      :closed="closedMergeRequestsCount"
+      :open-path="openMergeRequestsPath"
+      :merged-path="mergedMergeRequestsPath"
+      :closed-path="closedMergeRequestsPath"
+      data-testid="merge-request-stats"
     />
   </div>
 </template>
