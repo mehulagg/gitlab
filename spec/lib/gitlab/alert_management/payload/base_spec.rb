@@ -166,6 +166,18 @@ RSpec.describe Gitlab::AlertManagement::Payload::Base do
         it { is_expected.to be_nil }
       end
     end
+
+    context 'with unknown type provided' do
+      let(:payload_class) do
+        Class.new(described_class) do
+          attribute :test, paths: [['test']], type: :unknown
+        end
+      end
+
+      let(:raw_payload) { { 'test' => { 'key' => 'value' } } }
+
+      it { is_expected.to eq('key' => 'value') }
+    end
   end
 
   describe '#alert_params' do
