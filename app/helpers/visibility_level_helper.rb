@@ -42,7 +42,7 @@ module VisibilityLevelHelper
     when Gitlab::VisibilityLevel::PRIVATE
       _("The group and its projects can only be viewed by members.")
     when Gitlab::VisibilityLevel::INTERNAL
-      _("The group and any internal projects can be viewed by any logged in user.")
+      _("The group and any internal projects can be viewed by any logged in user except external users.")
     when Gitlab::VisibilityLevel::PUBLIC
       _("The group and any public projects can be viewed without any authentication.")
     end
