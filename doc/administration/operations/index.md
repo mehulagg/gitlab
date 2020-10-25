@@ -15,7 +15,7 @@ Keep your GitLab instance up and running smoothly.
   database after you upgrade to GitLab 7.3.
 - [Rake tasks](../../raketasks/): Tasks for common administration and operational processes such as
   [cleaning up unneeded items from GitLab instance](../../raketasks/cleanup.md), integrity checks,
-  and more.	
+  and more.
 - [Moving repositories](moving_repositories.md): Moving all repositories managed
   by GitLab to another file system or another server.
 - [Sidekiq MemoryKiller](sidekiq_memory_killer.md): Configure Sidekiq MemoryKiller
