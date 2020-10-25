@@ -403,4 +403,54 @@ RSpec.describe Gitlab::AlertManagement::Payload::Base do
 
     it { is_expected.to be(true) }
   end
+
+  describe 'integrations' do
+    # It's "almost" because we don't use `Records` array but a `Record` hash for now
+    describe 'almost AWS CloudWatch' do
+      let(:aws_cloud_watch) do
+        <<~'JSON'
+          {
+            "Record": {
+              "EventSource": "aws:sns",
+              "EventVersion": "1.0",
+              "EventSubscriptionArn": "arn:aws:sns:eu-west-1:000000000000:cloudwatch-alarms:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+              "Sns": {
+                "Type": "Notification",
+                "MessageId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+                "TopicArn": "arn:aws:sns:eu-west-1:000000000000:cloudwatch-alarms",
+                "Subject": "ALARM: \"Example alarm name\" in EU - Ireland",
+                "Message": "{\"AlarmName\":\"Example alarm name\",\"AlarmDescription\":\"Example alarm description.\",\"AWSAccountId\":\"000000000000\",\"NewStateValue\":\"ALARM\",\"NewStateReason\":\"Threshold Crossed: 1 datapoint (10.0) was greater than or equal to the threshold (1.0).\",\"StateChangeTime\":\"2017-01-12T16:30:42.236+0000\",\"Region\":\"EU - Ireland\",\"OldStateValue\":\"OK\",\"Trigger\":{\"MetricName\":\"DeliveryErrors\",\"Namespace\":\"ExampleNamespace\",\"Statistic\":\"SUM\",\"Unit\":null,\"Dimensions\":[],\"Period\":300,\"EvaluationPeriods\":1,\"ComparisonOperator\":\"GreaterThanOrEqualToThreshold\",\"Threshold\":1.0}}",
+                "Timestamp": "2017-01-12T16:30:42.318Z",
+                "SignatureVersion": "1",
+                "Signature": "Cg==",
+                "SigningCertUrl": "https://sns.eu-west-1.amazonaws.com/SimpleNotificationService-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.pem",
+                "UnsubscribeUrl": "https://sns.eu-west-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:eu-west-1:000000000000:cloudwatch-alarms:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+                "MessageAttributes": {}
+              }
+            }
+          }
+        JSON
+      end
+
+      let(:payload_class) do
+        Class.new(described_class) do
+          attribute :starts_at, paths: %w[Record Sns Timestamp], type: :time
+          attribute :title, paths: %w[AlarmName], via: :record
+          attribute :description, paths: %w[AlarmDescription], via: :record
+          attribute :record, paths: %w[Record Sns Message], type: :json
+          private :record
+        end
+      end
+
+      let(:raw_payload) { Gitlab::Json.parse(aws_cloud_watch) }
+
+      specify do
+        expect(parsed_payload).to have_attributes(
+          title: 'Example alarm name',
+          description: 'Example alarm description.',
+          starts_at: Time.parse('2017-01-12T16:30:42.318Z').utc
+        )
+      end
+    end
+  end
 end
