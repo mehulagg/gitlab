@@ -60,6 +60,55 @@ RSpec.describe Gitlab::AlertManagement::Payload::Base do
       end
     end
 
+    context 'with via option provided' do
+      let(:payload_class) do
+        Class.new(described_class) do
+          attribute :nested_json, paths: %w[key]
+          attribute :test, paths: %w[test], via: :nested_json
+        end
+      end
+
+      it { is_expected.to be_nil }
+
+      context 'and dig`able value' do
+        let(:raw_payload) { { 'key' => { 'test' => 'value' } } }
+
+        it { is_expected.to eq 'value' }
+
+        context 'and private attribute' do
+          before do
+            payload_class.class_eval do
+              private :nested_json
+            end
+          end
+
+          it { is_expected.to eq 'value' }
+        end
+      end
+
+      context 'and non-matching sub-value' do
+        let(:raw_payload) { { 'key' => { 'TEST' => 'value' } } }
+
+        it { is_expected.to be_nil }
+      end
+
+      context 'and non-dig`able value' do
+        let(:raw_payload) { { 'key' => 'a string' } }
+
+        it { is_expected.to be_nil }
+      end
+
+      context 'and unknown attribute provided' do
+        let(:payload_class) do
+          Class.new(described_class) do
+            attribute :test, paths: %w[test], via: :unknown
+          end
+        end
+
+        it { is_expected.to be_nil }
+      end
+    end
+
     context 'with a time type provided' do
       let(:test_time) { Time.current.change(usec: 0) }
 

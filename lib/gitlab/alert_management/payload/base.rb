@@ -60,6 +60,9 @@ module Gitlab
         #              that should be specified here
         # @param fallback [Proc] Block to be executed to yield a value if
         #                 a value cannot be idenitied at any provided paths
+        # @param via [Symbol] If another attribute or method should be used to
+        #                     lookup the value. Defaults to `:payload`
+        #
         # Example)
         #    attribute :title
         #              paths: [['title'],
@@ -71,11 +74,12 @@ module Gitlab
         # payload under the key `title` if available, otherwise
         # looking under `details.title`. If neither returns a
         # value, the return value will be `'New Alert'`
-        def self.attribute(key, paths:, type: nil, fallback: -> { nil })
+        def self.attribute(key, paths:, type: nil, fallback: -> { nil }, via: :payload)
           define_method(key) do
             strong_memoize(key) do
               paths = Array(paths).first.is_a?(String) ? [Array(paths)] : paths
-              value = value_for_paths(paths)
+              payload = send(via) if respond_to?(via, true) # rubocop:disable GitlabSecurity/PublicSend
+              value = value_for_paths(paths, payload)
               value = parse_value(value, type) if value
 
               value.presence || fallback.call
@@ -147,7 +151,9 @@ module Gitlab
           end
         end
 
-        def value_for_paths(paths)
+        def value_for_paths(paths, payload)
+          return unless payload.respond_to?(:dig)
+
           target_path = paths.find { |path| payload&.dig(*path) }
 
           payload&.dig(*target_path) if target_path
