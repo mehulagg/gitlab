@@ -44,6 +44,34 @@ RSpec.describe Gitlab::AlertManagement::Payload::Base do
       end
     end
 
+    context 'with numeric parts in paths' do
+      using RSpec::Parameterized::TableSyntax
+
+      let(:payload_class) do
+        paths_param = paths
+
+        Class.new(described_class) do
+          attribute :test, paths: paths_param
+        end
+      end
+
+      where(:raw_payload, :paths, :expected) do
+        ['value'] | ['0']   | 'value'
+        ['value'] | ['-1']  | nil # no support for negative indexes like in Ruby
+        ['value'] | ['2']   | nil
+        ['value'] | ['key'] | nil
+
+        { 'test' => [{ 'key' => 'value' }] } | %w[test 0 key]     | 'value'
+        { 'test' => [{ 'key' => 'value' }] } | %w[test -1 key]    | nil
+        { 'test' => [{ 'key' => 'value' }] } | %w[test 2 key]     | nil
+        { 'test' => [{ 'key' => 'value' }] } | %w[0]              | nil
+      end
+
+      with_them do
+        it { is_expected.to eq expected }
+      end
+    end
+
     context 'with a fallback provided' do
       let(:payload_class) do
         Class.new(described_class) do
@@ -405,12 +433,11 @@ RSpec.describe Gitlab::AlertManagement::Payload::Base do
   end
 
   describe 'integrations' do
-    # It's "almost" because we don't use `Records` array but a `Record` hash for now
-    describe 'almost AWS CloudWatch' do
+    describe 'AWS CloudWatch' do
       let(:aws_cloud_watch) do
         <<~'JSON'
           {
-            "Record": {
+            "Records": [{
               "EventSource": "aws:sns",
               "EventVersion": "1.0",
               "EventSubscriptionArn": "arn:aws:sns:eu-west-1:000000000000:cloudwatch-alarms:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -427,14 +454,14 @@ RSpec.describe Gitlab::AlertManagement::Payload::Base do
                 "UnsubscribeUrl": "https://sns.eu-west-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:eu-west-1:000000000000:cloudwatch-alarms:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
                 "MessageAttributes": {}
               }
-            }
+            }]
           }
         JSON
       end
 
       let(:payload_class) do
         Class.new(described_class) do
-          attribute :record, paths: %w[Record Sns]
+          attribute :record, paths: %w[Records 0 Sns]
           private :record
           attribute :message, paths: 'Message', type: :json, via: :record
           private :message

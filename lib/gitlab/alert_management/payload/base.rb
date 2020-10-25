@@ -56,6 +56,8 @@ module Gitlab
         # @param paths [String, Array<String>, Array<Array<String>>,]
         #              List of (nested) keys at value can be found, the
         #              first to yield a result will be used
+        #              All numeric looking keys are treated as indexes
+        #              and expect the payload to contain array
         # @param type [Symbol] If value should be converted to another type,
         #              that should be specified here
         # @param fallback [Proc] Block to be executed to yield a value if
@@ -63,10 +65,10 @@ module Gitlab
         # @param via [Symbol] If another attribute or method should be used to
         #                     lookup the value. Defaults to `:payload`
         #
-        # Example)
-        #    attribute :title
+        # Example 1)
+        #    attribute :title,
         #              paths: [['title'],
-        #                     ['details', 'title']]
+        #                     ['details', 'title']],
         #              fallback: Proc.new { 'New Alert' }
         #
         # The above sample definition will define a method
@@ -74,6 +76,24 @@ module Gitlab
         # payload under the key `title` if available, otherwise
         # looking under `details.title`. If neither returns a
         # value, the return value will be `'New Alert'`
+        #
+        # Example 2)
+        #     attribute :starts_at,
+        #               paths: ['Records', '0', 'Sns', 'Timestamp']
+        #               type: :time
+        #
+        # From the following payload (AWS CloudWatch) the definition
+        # will parse the the deep nested and array-indexed key as
+        # #starts_at timestamp.
+        #
+        #   {
+        #     "Records": [{
+        #       "Sns": {
+        #         "Timestamp": "2017-01-12T16:30:42.318Z"
+        #         ...
+        #       }
+        #     }]
+        #   }
         def self.attribute(key, paths:, type: nil, fallback: -> { nil }, via: :payload)
           define_method(key) do
             strong_memoize(key) do
@@ -154,9 +174,16 @@ module Gitlab
         def value_for_paths(paths, payload)
           return unless payload.respond_to?(:dig)
 
+          # Convert all numeric looking parts to integers to support array access
+          is_numeric = -> (part) { /\A\d+\z/.match?(part) }
+          paths = paths.map do |path|
+            path.map { |part| is_numeric.call(part) ? part.to_i : part }
+          end
+
           target_path = paths.find { |path| payload&.dig(*path) }
 
           payload&.dig(*target_path) if target_path
+        rescue TypeError
         end
 
         def parse_value(value, type)
