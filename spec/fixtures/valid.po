@@ -842,7 +842,7 @@ msgstr "La etapa de planificación muestra el tiempo desde el paso anterior hast
 msgid "The production stage shows the total time it takes between creating an issue and deploying the code to production. The data will be automatically added once you have completed the full idea to production cycle."
 msgstr "La etapa de producción muestra el tiempo total que tarda entre la creación de una incidencia y el despliegue del código a producción. Los datos se añadirán automáticamente una vez haya finalizado por completo el ciclo de idea a producción."
 
-msgid "The project can be accessed by any logged in user."
+msgid "The project can be accessed by any logged in user except external users."
 msgstr "El proyecto puede ser accedido por cualquier usuario conectado."
 
 msgid "The project can be accessed without any authentication."
