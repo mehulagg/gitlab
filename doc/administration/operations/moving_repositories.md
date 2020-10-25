@@ -12,6 +12,16 @@ another file system or another server. In this document we look
 at some of the ways you can copy all your repositories from
 `/var/opt/gitlab/git-data/repositories` to `/mnt/gitlab/repositories`.
 
+NOTE: **Note:**
+The following is still a valid method to move repositories however,
+it is now recommended that you instead setup `/mnt/gitlab/repositories` as a new 
+[Repository storage path](../repository_storage_paths.md)
+and move the repositories using the [Project repository storage moves API](../../api/project_repository_storage_moves.md).
+This avoids many of the complexities such as down time that must be worked around with below options.
+
+Each of the approaches we list can or does overwrite data in the target directory
+`/mnt/gitlab/repositories`. Do not mix up the source and the target.
+
 We look at three scenarios:
 
 - The target directory is empty.
