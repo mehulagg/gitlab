@@ -8,7 +8,7 @@ import {
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlSprintf,
   GlTable,
-  GLTooltipDirective
+  GlTooltipDirective
 } from '@gitlab/ui';
 import AncestorNotice from './ancestor_notice.vue';
 import NodeErrorHelpText from './node_error_help_text.vue';
