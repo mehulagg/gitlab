@@ -69,11 +69,9 @@ export default {
     <span v-if="showTreeChangesCount" class="ide-tree-changes">
       {{ changesCount }}
       <gl-icon
-        v-gl-tooltip
+        v-gl-tooltip.left.viewport
         :title="folderChangesTooltip"
         :size="12"
-        data-container="body"
-        data-placement="right"
         name="file-modified"
         class="gl-ml-2 ide-file-modified"
       />
