@@ -8,7 +8,7 @@ module Auth
     def execute(authentication_abilities:)
       @authentication_abilities = authentication_abilities
 
-      # return error('UNAVAILABLE', status: 404, message: 'dependency proxy not enabled') unless dependency_proxy.enabled
+      return error('UNAVAILABLE', status: 404, message: 'dependency proxy not enabled') unless ::Gitlab.config.dependency_proxy.enabled
 
       return error('DENIED', status: 403, message: 'access forbidden') unless current_user
 
