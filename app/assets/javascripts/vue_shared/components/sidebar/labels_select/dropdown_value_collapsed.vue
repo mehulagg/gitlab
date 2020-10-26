@@ -47,9 +47,6 @@ export default {
     v-gl-tooltip.left.viewport
     :title="labelsList"
     class="sidebar-collapsed-icon"
-    data-placement="left"
-    data-container="body"
-    data-boundary="viewport"
     @click="handleClick"
   >
     <gl-icon name="labels" />
