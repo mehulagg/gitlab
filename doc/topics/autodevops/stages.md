@@ -669,3 +669,5 @@ To use Auto Monitoring:
 ## Auto Code Intelligence
 
 Code Intelligence is powered by [LSIF](https://lsif.dev/) and available for Go at this stage. We'll support more languages as they become available.
+
+tghis is a test
