@@ -7,6 +7,8 @@ import {
   GlLoadingIcon,
   GlIcon,
   GlButton,
+  GlModal,
+  GlModalDirective,
 } from '@gitlab/ui';
 import { getIssueStatusFromLicenseStatus } from 'ee/vue_shared/license_compliance/store/utils';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
@@ -30,6 +32,7 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    GlModal: GlModalDirective,
   },
 
   props: {
@@ -106,7 +109,7 @@ export default {
           class="js-remove-button gl-ml-3"
           category="tertiary"
           data-toggle="modal"
-          data-target="#modal-license-delete-confirmation"
+          v-gl-modal-directive="#modal-license-delete-confirmation"
           @click="setLicenseInModal(license)"
         />
       </div>
