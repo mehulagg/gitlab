@@ -212,6 +212,17 @@ if Feature.disabled?(:my_feature_flag, project, type: :ops)
 end
 ```
 
+DANGER: **Warning:**
+Do not use feature flags at application _load_ time. For example, using `Feature` class in
+`config/initializers/*` or class-level could cause an unexpected error because a
+feature flag adapter might depend on database as a persistent store but its existence
+is not guaranteed at load time (especially, freash installs).
+Also, checking database existence at load time is not recommended as some adapters
+(e.g. HTTP adapter) do not require database at all. The check logic must be
+abstracted under the `Feature` wrapper.
+In addition, leveraging a feature flag requires application reload. You likely need to communicate with SREs and Delivery teams.
+By these reasons, please use Environment Variables (e.g. `ENV['YOUR_FEATURE_NAME']`) or gitlab.yml instead.
+
 ### Frontend
 
 Use the `push_frontend_feature_flag` method for frontend code, which is
