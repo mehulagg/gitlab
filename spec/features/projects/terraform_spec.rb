@@ -8,8 +8,7 @@ RSpec.describe 'Terraform', :js do
   let(:user) { project.creator }
 
   before do
-    # gitlab_sign_in(user)
-    sign_in(user)
+    gitlab_sign_in(user)
   end
 
   context 'when user does not have any terraform states and visits index page' do
