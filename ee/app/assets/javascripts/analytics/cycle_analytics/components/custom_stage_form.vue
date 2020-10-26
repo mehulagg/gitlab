@@ -365,10 +365,22 @@ export default {
       </div>
     </div>
     <div class="custom-stage-form-actions">
-      <gl-button :disabled="!isDirty" type="gl-button" @click="handleCancel">
+      <gl-button
+        :disabled="!isDirty"
+        variant="success"
+        category="primary"
+        class="js-save-stage-cancel"
+        type="gl-button"
+        @click="handleCancel"
+      >
         {{ __('Cancel') }}
       </gl-button>
-      <gl-button :disabled="!isComplete || !isDirty" type="gl-button" @click="handleSave">
+      <gl-button
+        :disabled="!isComplete || !isDirty"
+        class="js-save-stage"
+        type="gl-button"
+        @click="handleSave"
+      >
         <gl-loading-icon v-if="isSavingCustomStage" size="sm" inline />
         {{ saveStageText }}
       </gl-button>
