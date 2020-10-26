@@ -7,6 +7,6 @@
  * @returns {Number}
  */
 export const getIdFromGraphQLId = (gid = '') =>
-  parseInt((gid || '').replace(/gid:\/\/gitlab\/.*\//g, ''), 10) || null;
+  parseInt(`${gid}`.replace(/gid:\/\/gitlab\/.*\//g, ''), 10) || null;
 
 export default {};
