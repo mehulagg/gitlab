@@ -15,7 +15,7 @@ packages, which can be easily consumed as a dependency in downstream projects.
 | [Composer](composer_repository/index.md) | 13.2+  |
 | [Conan](conan_repository/index.md) | 12.6+  |
 | [Generic packages](generic_packages/index.md) | 13.5+  |
-| [Go](go_repository/index.md) | 13.1+  |
+| [Go](go_proxy/index.md) | 13.1+  |
 | [Maven](maven_repository/index.md) | 11.3+  |
 | [NPM](npm_registry/index.md) | 11.8+  |
 | [NuGet](nuget_repository/index.md) | 12.10+  |
