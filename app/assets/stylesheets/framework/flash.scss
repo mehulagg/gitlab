@@ -97,6 +97,10 @@ $notification-box-shadow-color: rgba(0, 0, 0, 0.25);
 
 .with-system-header .flash-container.sticky {
   top: $flash-container-top + $system-header-height;
+
+  *[class^="flash-"] {
+    @include gl-mb-4;
+  }
 }
 
 .with-performance-bar {
