@@ -9047,6 +9047,9 @@ msgstr ""
 msgid "Description parsed with %{link_start}GitLab Flavored Markdown%{link_end}"
 msgstr ""
 
+msgid "Description template"
+msgstr ""
+
 msgid "Description templates allow you to define context-specific templates for issue and merge request description fields for your project."
 msgstr ""
 

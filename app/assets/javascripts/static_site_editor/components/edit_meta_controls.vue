@@ -1,8 +1,21 @@
 <script>
-import { GlForm, GlFormGroup, GlFormInput, GlFormTextarea } from '@gitlab/ui';
+import {
+  GlDropdown,
+  GlDropdownDivider,
+  GlDropdownItem,
+  GlForm,
+  GlFormGroup,
+  GlFormInput,
+  GlFormTextarea,
+} from '@gitlab/ui';
+
+import { __ } from '~/locale';
 
 export default {
   components: {
+    GlDropdown,
+    GlDropdownDivider,
+    GlDropdownItem,
     GlForm,
     GlFormGroup,
     GlFormInput,
@@ -17,6 +30,24 @@ export default {
       type: String,
       required: true,
     },
+    templates: {
+      type: Array,
+      required: false,
+      default: null,
+    },
+    currentTemplate: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+  },
+  computed: {
+    dropdownLabel() {
+      return this.currentTemplate ? this.currentTemplate.name : __('None');
+    },
+    hasTemplates() {
+      return this.templates?.length > 0;
+    },
   },
   mounted() {
     this.preSelect();
@@ -29,6 +60,9 @@ export default {
       this.$nextTick(() => {
         this.$refs.title.$el.select();
       });
+    },
+    onChangeTemplate(template) {
+      this.$emit('changeTemplate', template || null);
     },
     onUpdate(field, value) {
       const payload = {
@@ -56,6 +90,32 @@ export default {
         type="text"
         @input="onUpdate('title', $event)"
       />
+    </gl-form-group>
+
+    <gl-form-group
+      v-if="hasTemplates"
+      key="template"
+      :label="__('Description template')"
+      :label-for="getId('control', 'template')"
+    >
+      <gl-dropdown ref="dropdown" :text="dropdownLabel">
+        <div class="dropdown-content dropdown-body">
+          <gl-dropdown-item key="none" ref="dropdownItemNone" @click="onChangeTemplate(null)">
+            {{ __('None') }}
+          </gl-dropdown-item>
+
+          <gl-dropdown-divider />
+
+          <gl-dropdown-item
+            v-for="template in templates"
+            :key="template.key"
+            :ref="`dropdownItem${template.key}`"
+            @click="onChangeTemplate(template)"
+          >
+            {{ template.name }}
+          </gl-dropdown-item>
+        </div>
+      </gl-dropdown>
     </gl-form-group>
 
     <gl-form-group
