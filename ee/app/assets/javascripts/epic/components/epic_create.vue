@@ -1,7 +1,6 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import {
-  GlForm,
   GlFormInput,
   GlFormCheckbox,
   GlIcon,
@@ -19,7 +18,6 @@ export default {
     GlFormCheckbox,
     GlIcon,
     GlButton,
-    GlForm,
     GlFormInput,
     GlDropdown,
   },
