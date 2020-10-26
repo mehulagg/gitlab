@@ -41,5 +41,3 @@ Use GitLab CI/CD to create and publish images. Use the GitLab [API](../../api/co
 manage the registry across groups and projects.
 
 The [Dependency Proxy](dependency_proxy/index.md) is a local proxy for frequently-used upstream images and packages.
-
-
