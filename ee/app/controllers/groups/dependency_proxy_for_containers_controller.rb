@@ -2,6 +2,7 @@
 
 class Groups::DependencyProxyForContainersController < Groups::ApplicationController
   include DependencyProxyAccess
+  include DependencyProxyAuth
   include SendFileUpload
 
   prepend_before_action :get_user_from_token!
@@ -37,16 +38,15 @@ class Groups::DependencyProxyForContainersController < Groups::ApplicationContro
 
   def get_user_from_token!
     if request.headers['HTTP_AUTHORIZATION']
-      jwt = Doorkeeper::OAuth::Token.from_bearer_authorization(request)
-      token = ::Gitlab::ConanToken.decode(jwt)
-      @user = User.find(token.user_id)
+      token = Doorkeeper::OAuth::Token.from_bearer_authorization(request)
+      token_payload = JSONWebToken::HMACToken.decode(token, ::Auth::DependencyProxyAuthenticationService.secret).first
+      user = User.find(token_payload['user_id'])
 
-      render_403 unless @user
+      render_403 unless user
 
-      sign_in(@user)
+      sign_in(user)
     else
-      response.headers['WWW-Authenticate'] = ::DependencyProxy::Registry.authenticate_header
-      render json: {}, status: :unauthorized
+      respond_unauthorized_with_oauth!
     end
   end
 
