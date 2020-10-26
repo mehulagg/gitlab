@@ -52,7 +52,7 @@ tasks:
         echo "$(date) – Fixing DB key" | tee -a /workspace/startup.log
         cd gitlab
         # see https://gitlab.com/gitlab-org/gitlab-foss/-/issues/56403#note_132515069
-        printf 'ApplicationSetting.last.update_column(:runners_registration_token_encrypted, nil)\nexit\n' | bundle exec rails c
+        printf 'ApplicationSetting.current.reset_runners_registration_token!\nexit\n' | bundle exec rails c
         cd -
         # Waiting for GitLab ...
         gp await-port 3000
