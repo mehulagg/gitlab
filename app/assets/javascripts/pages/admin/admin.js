@@ -3,11 +3,11 @@ import { refreshCurrentPage } from '../../lib/utils/url_utility';
 
 function showBlacklistType() {
   if ($('input[name="blacklist_type"]:checked').val() === 'file') {
-    $('.blacklist-file').show();
-    $('.blacklist-raw').hide();
+    $('.js-denylist-file').show();
+    $('.js-denylist-raw').hide();
   } else {
-    $('.blacklist-file').hide();
-    $('.blacklist-raw').show();
+    $('.js-denylist-file').hide();
+    $('.js-denylist-raw').show();
   }
 }
 
