@@ -48,7 +48,7 @@
 
 .pipeline-schedules-user-callout {
   .bordered-box.content-block {
-    border: 1px solid $border-color;
+    border: 1px solid var(--border-color, $border-color);
     background-color: transparent;
     padding: 16px;
   }
