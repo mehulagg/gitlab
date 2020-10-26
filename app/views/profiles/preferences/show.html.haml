@@ -1,5 +1,7 @@
 - page_title _('Preferences')
 - @content_class = "limit-container-width" unless fluid_layout
+- @user_fields = { gitpod_enabled: @user.gitpod_enabled, sourcegraph_enabled: @user.sourcegraph_enabled }
+- data_attributes = { integration_views: integration_views.to_json, user_fields: @user_fields.to_json }
 
 - Gitlab::Themes.each do |theme|
   = stylesheet_link_tag "themes/#{theme.css_filename}" if theme.css_filename
@@ -138,7 +140,7 @@
           .form-text.text-muted
             = s_('Preferences|For example: 30 mins ago.')
 
-  = render 'integrations', f: f
+  #js-profile-preferences-app{ data: data_attributes, user_fields: @user_fields.to_json }
 
   .col-lg-4.profile-settings-sidebar
   .col-lg-8

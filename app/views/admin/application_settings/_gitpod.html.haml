@@ -8,7 +8,10 @@
     %button.btn.btn-default.js-settings-toggle{ type: 'button' }
       = expanded ? _('Collapse') : _('Expand')
     %p
-      = gitpod_enable_description
+      - link_start = '<a href="https://gitpod.io/" target="_blank" rel="noopener noreferrer">'.html_safe
+      - link_end = "#{sprite_icon('external-link', size: 12, css_class: 'ml-1 vertical-align-center')}</a>".html_safe
+
+      = gitpod_enable_description.html_safe % { linkStart: link_start, linkEnd: link_end }
       = link_to sprite_icon('question-o'), help_page_path('integration/gitpod.md'), target: '_blank', class: 'has-tooltip', title: _('More information')
 
 
