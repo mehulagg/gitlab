@@ -1,13 +1,12 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
+import { GlButton, GlIcon, GlModal } from '@gitlab/ui';
 import RequestWarning from './request_warning.vue';
-
-import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 
 export default {
   components: {
     RequestWarning,
-    GlModal: DeprecatedModal2,
+    GlButton,
+    GlModal,
     GlIcon,
   },
   props: {
@@ -67,16 +66,16 @@ export default {
     class="view"
     data-qa-selector="detailed_metric_content"
   >
-    <button
+    <gl-button
       :data-target="`#modal-peek-${metric}-details`"
       class="btn-blank btn-link bold"
       type="button"
       data-toggle="modal"
     >
       {{ metricDetailsLabel }}
-    </button>
+    </gl-button>
     <gl-modal
-      :id="`modal-peek-${metric}-details`"
+      :modal-id="`modal-peek-${metric}-details`"
       :header-title-text="header"
       modal-size="xl"
       class="performance-bar-modal"
@@ -98,14 +97,14 @@ export default {
                   :class="{ 'mb-3 bold': keyIndex == 0 }"
                 >
                   {{ item[key] }}
-                  <button
+                  <gl-button
                     v-if="keyIndex == 0 && item.backtrace"
                     class="text-expander js-toggle-button"
                     type="button"
                     :aria-label="__('Toggle backtrace')"
                   >
                     <gl-icon :size="12" name="ellipsis_h" />
-                  </button>
+                  </gl-button>
                 </div>
                 <pre v-if="item.backtrace" class="backtrace-row js-toggle-content mt-2">{{
                   item.backtrace
