@@ -182,7 +182,7 @@ Add a corresponding section to your `.npmrc` file:
 ## Uploading packages
 
 DANGER: **Warning:**
-Due to a recent [bug](https://github.com/npm/cli/issues/1994), versions `7.x`+ of NPM will not respect the package.json's `publishConfig` entry. In order to publish, you will need to use an older version of NPM, or tempraroraily set your `.npmrc` scope to `@foo:registry=https://gitlab.com/api/v4/projects/<project_id>/packages/npm` while attempting to publish. 
+Due to a recent [bug](https://github.com/npm/cli/issues/1994), versions `7.x`+ of NPM will not respect `publishConfig` entry in the `package.json`. In order to publish, you will need to use an older version of NPM, or tempraroraily set your `.npmrc` scope to `@foo:registry=https://gitlab.com/api/v4/projects/<project_id>/packages/npm` while attempting to publish. 
 
 Before you can upload a package, you need to specify the registry
 for NPM. To do this, add the following section to the bottom of `package.json`:
