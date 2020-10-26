@@ -37,7 +37,7 @@ RSpec.describe 'Alert integrations settings form', :js do
     end
 
     context 'with feature flag disabled' do
-      before do 
+      before do
         stub_feature_flags(http_integrations_list: false)
 
         visit project_settings_operations_path(project, anchor: 'js-alert-management-settings')
@@ -53,7 +53,7 @@ RSpec.describe 'Alert integrations settings form', :js do
   describe 'when viewing alert integrations as a developer' do
     before do
       sign_in(developer)
-  
+
       visit project_settings_operations_path(project, anchor: 'js-alert-management-settings')
       wait_for_requests
     end
@@ -61,6 +61,6 @@ RSpec.describe 'Alert integrations settings form', :js do
     it 'shows the old alerts setting form' do
       expect(page).not_to have_selector('.incident-management-list')
       expect(page).not_to have_selector('#js-alert-management-settings')
-    end    
+    end
   end
 end

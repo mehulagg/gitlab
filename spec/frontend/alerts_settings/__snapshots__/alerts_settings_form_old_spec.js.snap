@@ -13,7 +13,7 @@ exports[`AlertsSettingsForm with default values renders the initial template 1`]
     </p>
   </div>
   <gl-form-group-stub label-for=\\"integration-type\\" label=\\"Integration\\">
-    <gl-form-select-stub id=\\"integration-type\\" options=\\"[object Object],[object Object],[object Object]\\" data-testid=\\"alert-settings-select\\" value=\\"generic\\"></gl-form-select-stub> <span class=\\"gl-text-gray-500\\"><gl-sprintf-stub message=\\"Learn more about our our upcoming %{linkStart}integrations%{linkEnd}\\"></gl-sprintf-stub></span>
+    <gl-form-select-stub id=\\"integration-type\\" options=\\"[object Object],[object Object],[object Object],[object Object]\\" data-testid=\\"alert-settings-select\\" value=\\"generic\\"></gl-form-select-stub> <span class=\\"gl-text-gray-500\\"><gl-sprintf-stub message=\\"Learn more about our our upcoming %{linkStart}integrations%{linkEnd}\\"></gl-sprintf-stub></span>
   </gl-form-group-stub>
   <gl-form-group-stub label=\\"Active\\" label-for=\\"activated\\">
     <toggle-button-stub id=\\"activated\\"></toggle-button-stub>

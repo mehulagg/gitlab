@@ -53,7 +53,7 @@ describe('AlertsSettingsFormNew', () => {
     });
 
     it('shows the rest of the form when the dropdown is used', async () => {
-      findSelect.vm.$emit('change', 'prometheus');
+      findSelect().vm.$emit('change', 'prometheus');
 
       await wrapper.vm.$nextTick();
 
