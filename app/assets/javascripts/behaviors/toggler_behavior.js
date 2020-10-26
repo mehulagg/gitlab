@@ -16,7 +16,7 @@ $(() => {
     const $collapseIcon = $container.find('.js-sidebar-collapse');
     const $expandIcon = $container.find('.js-sidebar-expand');
 
-    if (isExpanded) {
+    if (isExpanded && !toggleState) {
       $container.data('is-expanded', false);
       $collapseIcon.addClass('hidden');
       $expandIcon.removeClass('hidden');
