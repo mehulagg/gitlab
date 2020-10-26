@@ -336,8 +336,8 @@ export const reorderStage = ({ dispatch, getters }, initialData) => {
     );
 };
 
-export const receiveCreateValueStreamSuccess = ({ commit, dispatch }) => {
-  commit(types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS);
+export const receiveCreateValueStreamSuccess = ({ commit, dispatch }, valueStream = {}) => {
+  commit(types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS, valueStream);
   return dispatch('fetchCycleAnalyticsData');
 };
 
@@ -346,7 +346,7 @@ export const createValueStream = ({ commit, dispatch, getters }, data) => {
   commit(types.REQUEST_CREATE_VALUE_STREAM);
 
   return Api.cycleAnalyticsCreateValueStream(currentGroupPath, data)
-    .then(() => dispatch('receiveCreateValueStreamSuccess'))
+    .then(({ data: newValueStream }) => dispatch('receiveCreateValueStreamSuccess', newValueStream))
     .catch(({ response } = {}) => {
       const { data: { message, payload: { errors } } = null } = response;
       commit(types.RECEIVE_CREATE_VALUE_STREAM_ERROR, { message, errors });
@@ -372,8 +372,8 @@ export const fetchValueStreamData = ({ dispatch }) =>
     .then(() => dispatch('fetchStageMedianValues'))
     .then(() => dispatch('durationChart/fetchDurationData'));
 
-export const setSelectedValueStream = ({ commit, dispatch }, streamId) => {
-  commit(types.SET_SELECTED_VALUE_STREAM, streamId);
+export const setSelectedValueStream = ({ commit, dispatch }, valueStream) => {
+  commit(types.SET_SELECTED_VALUE_STREAM, valueStream);
   return dispatch(FETCH_VALUE_STREAM_DATA);
 };
 

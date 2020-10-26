@@ -124,9 +124,10 @@ export default {
     state.isCreatingValueStream = false;
     state.createValueStreamErrors = errors;
   },
-  [types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS](state) {
+  [types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS](state, valueStream) {
     state.isCreatingValueStream = false;
     state.createValueStreamErrors = {};
+    state.selectedValueStream = convertObjectPropsToCamelCase(valueStream);
   },
   [types.REQUEST_DELETE_VALUE_STREAM](state) {
     state.isDeletingValueStream = true;
@@ -142,7 +143,7 @@ export default {
     state.selectedValueStream = null;
   },
   [types.SET_SELECTED_VALUE_STREAM](state, valueStream) {
-    state.selectedValueStream = valueStream;
+    state.selectedValueStream = convertObjectPropsToCamelCase(valueStream);
   },
   [types.REQUEST_VALUE_STREAMS](state) {
     state.isLoadingValueStreams = true;
