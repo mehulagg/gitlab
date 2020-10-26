@@ -1,10 +1,11 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton } from '@gitlab/ui';
 
 export default {
   components: {
     GlLoadingIcon,
+    GlButton,
   },
   props: {
     isLoading: {
@@ -48,15 +49,15 @@ export default {
     <template v-else>
       <p>{{ __('Run tests against your code live using the Web Terminal') }}</p>
       <p>
-        <button
+        <gl-button
           :disabled="!isValid"
-          class="btn btn-info"
-          type="button"
+          category="primary"
+          variant="info"
           data-qa-selector="start_web_terminal_button"
           @click="onStart"
         >
           {{ __('Start Web Terminal') }}
-        </button>
+        </gl-button>
       </p>
       <div v-if="!isValid && message" class="bs-callout text-left" v-html="message"></div>
       <p v-else>
