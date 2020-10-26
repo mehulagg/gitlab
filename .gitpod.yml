@@ -13,6 +13,7 @@ tasks:
       (
         set -e
         cd /workspace/gitlab-development-kit
+        cp /workspace/gitlab-development-kit/gitlab/config/secrets.yml /workspace/gitlab/config
         [[ ! -L /workspace/gitlab-development-kit/gitlab ]] && ln -fs /workspace/gitlab /workspace/gitlab-development-kit/gitlab
         # make webpack static, prevents that GitLab tries to connect to localhost webpack from browser outside the workspace
         echo "webpack:" >> gdk.yml
