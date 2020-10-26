@@ -11,26 +11,29 @@ module Projects
 
         @new_disk_path = project.disk_path
 
-        result = move_repositories
+        begin
+          result = move_repositories
 
-        if result
-          project.write_repository_config
-          project.track_project_repository
-        else
+          if result
+            project.write_repository_config
+            project.track_project_repository
+          else
+            rollback_folder_move
+            project.storage_version = nil
+          end
+        rescue Gitlab::Git::CommandError => e
+          logger.error("Project #{project.full_path} (ID: #{project.id}) failed to upgrade. Git operation failed: #{e.inspect}")
+
           rollback_folder_move
           project.storage_version = nil
         end
 
+        result
+      ensure
         project.transaction do
           project.save!(validate: false)
           project.set_repository_writable!
         end
-
-        if result && block_given?
-          yield
-        end
-
-        result
       end
     end
   end
