@@ -8,7 +8,6 @@ import {
   GlButton,
   GlTooltipDirective,
   GlDropdown,
-  GlDropdownForm,
 } from '@gitlab/ui';
 
 import { __ } from '~/locale';
@@ -23,7 +22,6 @@ export default {
     GlForm,
     GlFormInput,
     GlDropdown,
-    GlDropdownForm,
   },
   directives: {
     autofocusonshow,
