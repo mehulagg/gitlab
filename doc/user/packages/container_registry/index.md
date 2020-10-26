@@ -171,6 +171,14 @@ To use CI/CD to authenticate, you can use:
   ```shell
   docker login -u <username> -p <access_token> $CI_REGISTRY
   ```
+  
+- A [project access token](../../project/settings/project_access_tokens.md) with the minimum scope of:
+  - For read (pull) access, `read_registry`.
+  - For write (push) access, `write_registry`.
+
+  ```shell
+  docker login -u <token_name> -p <access_token> $CI_REGISTRY
+  ```
 
 ### Configure your `.gitlab-ci.yml` file
 
