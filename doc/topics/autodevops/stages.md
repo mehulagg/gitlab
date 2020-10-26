@@ -670,6 +670,6 @@ To use Auto Monitoring:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216438) in GitLab 13.5.
 
-[GitLab code intelligence](../../user/project/code_intelligence.html) adds code navigation features common to interactive development environments (IDE), including type signatures, symbol documentation, and go-to definition. It is powered by [LSIF](https://lsif.dev/) and currently available for Auto DevOps projects using Go language only. We plan to add support for more languages as more LSIF indexers become available. You can follow the [code intelligence epic](https://gitlab.com/groups/gitlab-org/-/epics/4212) for updates.
+[GitLab code intelligence](../../user/project/code_intelligence.md) adds code navigation features common to interactive development environments (IDE), including type signatures, symbol documentation, and go-to definition. It is powered by [LSIF](https://lsif.dev/) and currently available for Auto DevOps projects using Go language only. We plan to add support for more languages as more LSIF indexers become available. You can follow the [code intelligence epic](https://gitlab.com/groups/gitlab-org/-/epics/4212) for updates.
 
-As all other Auto DevOps stages, this stage is enabled by default and can be disabled by adding the `CODE_INTELLIGENCE_DISABLED` environment variable. See more about [disabling Auto DevOps jobs](../../topics/autodevops/customize.html#disable-jobs).  
+As all other Auto DevOps stages, this stage is enabled by default and can be disabled by adding the `CODE_INTELLIGENCE_DISABLED` environment variable. See more about [disabling Auto DevOps jobs](../../topics/autodevops/customize.md#disable-jobs).  
