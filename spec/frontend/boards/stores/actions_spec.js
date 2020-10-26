@@ -2,6 +2,7 @@ import testAction from 'helpers/vuex_action_helper';
 import {
   mockListsWithModel,
   mockLists,
+  mockListsById,
   mockIssue,
   mockIssueWithModel,
   mockIssue2WithModel,
@@ -326,10 +327,6 @@ describe('updateList', () => {
 
 describe('deleteList', () => {
   let state;
-  const initialBoardListsState = {
-    'gid://gitlab/List/1': mockListsWithModel[0],
-    'gid://gitlab/List/2': mockListsWithModel[1],
-  };
   const list = mockLists[0];
   const listId = list.id;
   const mutationVariables = {
@@ -341,7 +338,7 @@ describe('deleteList', () => {
 
   beforeEach(() => {
     state = {
-      boardLists: initialBoardListsState,
+      boardLists: mockListsById,
     };
   });
 
@@ -375,7 +372,7 @@ describe('deleteList', () => {
     expect(gqlClient.mutate).toHaveBeenCalledWith(mutationVariables);
     expect(commit.mock.calls).toEqual([
       [types.REMOVE_LIST, listId],
-      [types.REMOVE_LIST_FAILURE, initialBoardListsState],
+      [types.REMOVE_LIST_FAILURE, mockListsById],
     ]);
   });
 });
