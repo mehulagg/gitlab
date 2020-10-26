@@ -1457,8 +1457,17 @@ In this example:
   to continue running even if the job is not triggered (`allow_failure: true`).
 - If `Dockerfile` has not changed, do not add job to any pipeline (same as `when: never`).
 
-To implement a rule similar to [`except: changes`](#onlychangesexceptchanges),
+To implement a rule similar to [`except:changes`](#onlychangesexceptchanges),
 use `when: never`.
+
+To include a build on push to branch pipelines **only**, and not merge request pipelines,
+use a single conjunctive rule followed by the implicit `never`.
+
+```yaml
+  rules:
+  - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+    when: on_success
+```
 
 #### `rules:exists`
 
