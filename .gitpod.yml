@@ -49,13 +49,11 @@ tasks:
           make gitlab-db-migrate
         fi
         # Fix DB key
-        if [ "$GITLAB_FIX_DB_KEY" = true ]; then
-          echo "$(date) – Fixing DB key" | tee -a /workspace/startup.log
-          cd gitlab
-          # see https://gitlab.com/gitlab-org/gitlab-foss/-/issues/56403#note_132515069
-          printf 'ApplicationSetting.last.update_column(:runners_registration_token_encrypted, nil)\nexit\n' | bundle exec rails c
-          cd -
-        fi
+        echo "$(date) – Fixing DB key" | tee -a /workspace/startup.log
+        cd gitlab
+        # see https://gitlab.com/gitlab-org/gitlab-foss/-/issues/56403#note_132515069
+        printf 'ApplicationSetting.last.update_column(:runners_registration_token_encrypted, nil)\nexit\n' | bundle exec rails c
+        cd -
         # Waiting for GitLab ...
         gp await-port 3000
         printf "Waiting for GitLab at $(gp url 3000) ..."
