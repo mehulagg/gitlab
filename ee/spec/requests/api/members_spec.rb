@@ -3,6 +3,35 @@
 require 'spec_helper'
 
 RSpec.describe API::Members do
+  context 'group members endpoint for group with minimal access feature' do
+    let_it_be(:group) { create(:group) }
+    let(:owner) { create(:user) }
+    let_it_be(:minimal_access_member) { create(:group_member, :minimal_access, source: group) }
+
+    before do
+      group.add_owner(owner)
+    end
+
+    subject do
+      get api("/groups/#{group.id}/members", owner)
+      json_response
+    end
+
+    describe "GET /groups/:id/members" do
+      it 'returns user with minimal access when feature is available' do
+        stub_licensed_features(minimal_access_role: true)
+
+        expect(subject.map { |u| u['id'] }).to match_array [owner.id, minimal_access_member.id]
+      end
+
+      it 'does not return user with minimal access when feature is unavailable' do
+        stub_licensed_features(minimal_access_role: false)
+
+        expect(subject.map { |u| u['id'] }).to match_array [owner.id]
+      end
+    end
+  end
+
   context 'group members endpoint for group managed accounts' do
     let(:group) { create(:group) }
     let(:owner) { create(:user) }
@@ -28,8 +57,6 @@ RSpec.describe API::Members do
       it_behaves_like 'members response with hidden emails' do
         let(:emails) { member.email }
       end
-
-      context 'when group '
     end
 
     describe "GET /groups/:id/members/:user_id" do
