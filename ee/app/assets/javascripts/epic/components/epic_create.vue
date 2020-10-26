@@ -7,6 +7,8 @@ import {
   GlIcon,
   GlButton,
   GlTooltipDirective,
+  GlDropdown,
+  GlDropdownForm,
 } from '@gitlab/ui';
 
 import { __ } from '~/locale';
@@ -20,6 +22,8 @@ export default {
     GlButton,
     GlForm,
     GlFormInput,
+    GlDropdown,
+    GlDropdownForm,
   },
   directives: {
     autofocusonshow,
@@ -69,61 +73,54 @@ export default {
 </script>
 
 <template>
-  <div class="dropdown epic-create-dropdown">
+  <gl-dropdown
+    class="epic-create-dropdown"
+    text="New epic"
+    category="primary"
+    variant="success"
+    data-qa-selector="new_epic_button"
+  >
+    <gl-form-input
+      ref="epicTitleInput"
+      v-model="epicTitle"
+      v-autofocusonshow
+      :disabled="epicCreateInProgress"
+      :placeholder="__('Title')"
+      type="text"
+      class="form-control"
+      data-qa-selector="epic_title_field"
+      @keyup.enter.exact="createEpic"
+    />
+    <gl-form-checkbox
+      v-model="epicConfidential"
+      class="mt-3 mb-3 mr-0"
+      data-qa-selector="confidential_epic_checkbox"
+      ><span> {{ __('Make this epic confidential') }} </span>
+      <span
+        v-gl-tooltip.viewport.top.hover
+        :title="
+          __(
+            'This epic and its child elements will only be visible to team members with at minimum Reporter access.',
+          )
+        "
+        :aria-label="
+          __(
+            'This epic and its child elements will only be visible to team members with at minimum Reporter access.',
+          )
+        "
+      >
+        <gl-icon name="question" :size="12"
+      /></span>
+    </gl-form-checkbox>
     <gl-button
+      :disabled="isEpicCreateDisabled"
+      :loading="epicCreateInProgress"
       category="primary"
       variant="success"
-      data-qa-selector="new_epic_button"
-      data-toggle="dropdown"
+      class="gl-mt-3"
+      data-qa-selector="create_epic_button"
+      @click.stop="createEpic"
+      >{{ buttonLabel }}</gl-button
     >
-      {{ __('New epic') }}
-    </gl-button>
-
-    <div :class="{ 'dropdown-menu-right': alignRight }" class="dropdown-menu">
-      <gl-form>
-        <gl-form-input
-          ref="epicTitleInput"
-          v-model="epicTitle"
-          v-autofocusonshow
-          :disabled="epicCreateInProgress"
-          :placeholder="__('Title')"
-          type="text"
-          class="form-control"
-          data-qa-selector="epic_title_field"
-          @keyup.enter.exact="createEpic"
-        />
-        <gl-form-checkbox
-          v-model="epicConfidential"
-          class="mt-3 mb-3 mr-0"
-          data-qa-selector="confidential_epic_checkbox"
-          ><span> {{ __('Make this epic confidential') }} </span>
-          <span
-            v-gl-tooltip.viewport.top.hover
-            :title="
-              __(
-                'This epic and its child elements will only be visible to team members with at minimum Reporter access.',
-              )
-            "
-            :aria-label="
-              __(
-                'This epic and its child elements will only be visible to team members with at minimum Reporter access.',
-              )
-            "
-          >
-            <gl-icon name="question" :size="12"
-          /></span>
-        </gl-form-checkbox>
-        <gl-button
-          :disabled="isEpicCreateDisabled"
-          :loading="epicCreateInProgress"
-          category="primary"
-          variant="success"
-          class="gl-mt-3"
-          data-qa-selector="create_epic_button"
-          @click.stop="createEpic"
-          >{{ buttonLabel }}</gl-button
-        >
-      </gl-form>
-    </div>
-  </div>
+  </gl-dropdown>
 </template>
