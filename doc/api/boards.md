@@ -171,7 +171,7 @@ Example response:
   }
 ```
 
-## Create an issue board **(STARTER)**
+## Create an issue board
 
 Creates a project issue board.
 
@@ -248,7 +248,7 @@ Example response:
   }
 ```
 
-## Update an issue board **(STARTER)**
+## Update an issue board
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5954) in [GitLab Starter](https://about.gitlab.com/pricing/) 11.1.
 
@@ -329,7 +329,7 @@ Example response:
   }
 ```
 
-## Delete an issue board **(STARTER)**
+## Delete an issue board
 
 Deletes a project issue board.
 
