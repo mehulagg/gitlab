@@ -1,6 +1,5 @@
 <script>
 import { GlProgressBar, GlLink, GlButton, GlTooltipDirective } from '@gitlab/ui';
-import { sum } from 'lodash';
 import { __, n__, sprintf } from '~/locale';
 import { MAX_MILESTONES_TO_DISPLAY } from '../constants';
 import IssuableStats from './issuable_stats.vue';
@@ -60,32 +59,45 @@ export default {
       });
     },
     percentComplete() {
-      const percent = Math.round((this.closedIssuesCount / this.totalIssuesCount) * 100);
+      const percent = Math.round((this.issueCounts.closed / this.issueCounts.total) * 100);
       return Number.isNaN(percent) ? 0 : percent;
     },
-    allIssueStats() {
-      return this.milestones.map(m => m.issueStats || {});
-    },
-    totalIssuesCount() {
-      return sum(this.allIssueStats.map(stats => stats.total || 0));
-    },
-    closedIssuesCount() {
-      return sum(this.allIssueStats.map(stats => stats.closed || 0));
+    issueCounts() {
+      return this.milestones
+        .map(m => m.issueStats || {})
+        .reduce(
+          (acc, current) => {
+            acc.total += current.total || 0;
+            acc.closed += current.closed || 0;
+
+            return acc;
+          },
+          {
+            total: 0,
+            closed: 0,
+          },
+        );
     },
     showMergeRequestStats() {
       return this.milestones.some(m => m.mrStats);
     },
-    allMergeRequestStats() {
-      return this.milestones.map(m => m.mrStats || {});
-    },
-    totalMergeRequestsCount() {
-      return sum(this.allMergeRequestStats.map(stats => stats.total || 0));
-    },
-    mergedMergeRequestsCount() {
-      return sum(this.allMergeRequestStats.map(stats => stats.merged || 0));
-    },
-    closedMergeRequestsCount() {
-      return sum(this.allMergeRequestStats.map(stats => stats.closed || 0));
+    mergeRequestCounts() {
+      return this.milestones
+        .map(m => m.mrStats || {})
+        .reduce(
+          (acc, current) => {
+            acc.total += current.total || 0;
+            acc.merged += current.merged || 0;
+            acc.closed += current.closed || 0;
+
+            return acc;
+          },
+          {
+            total: 0,
+            merged: 0,
+            closed: 0,
+          },
+        );
     },
     milestoneLabelText() {
       return n__('Milestone', 'Milestones', this.milestones.length);
@@ -128,7 +140,7 @@ export default {
     >
       <span class="gl-mb-3">{{ percentCompleteText }}</span>
       <span class="gl-w-full">
-        <gl-progress-bar :value="closedIssuesCount" :max="totalIssuesCount" variant="success" />
+        <gl-progress-bar :value="issueCounts.closed" :max="issueCounts.total" variant="success" />
       </span>
     </div>
     <div
@@ -159,8 +171,8 @@ export default {
     </div>
     <issuable-stats
       :label="__('Issues')"
-      :total="totalIssuesCount"
-      :closed="closedIssuesCount"
+      :total="issueCounts.total"
+      :closed="issueCounts.closed"
       :open-path="openIssuesPath"
       :closed-path="closedIssuesPath"
       data-testid="issue-stats"
@@ -168,9 +180,9 @@ export default {
     <issuable-stats
       v-if="showMergeRequestStats"
       :label="__('Merge Requests')"
-      :total="totalMergeRequestsCount"
-      :merged="mergedMergeRequestsCount"
-      :closed="closedMergeRequestsCount"
+      :total="mergeRequestCounts.total"
+      :merged="mergeRequestCounts.merged"
+      :closed="mergeRequestCounts.closed"
       :open-path="openMergeRequestsPath"
       :merged-path="mergedMergeRequestsPath"
       :closed-path="closedMergeRequestsPath"
