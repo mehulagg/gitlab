@@ -119,8 +119,9 @@ const boardsStore = {
         // https://gitlab.com/gitlab-org/gitlab-foss/issues/30821
       });
   },
+
   updateNewListDropdown(listId) {
-    $(`.js-board-list-${listId}`).removeClass('is-active');
+    $(`.js-board-list-${getIdFromGraphQLId(listId)}`).removeClass('is-active');
   },
   shouldAddBlankState() {
     // Decide whether to add the blank state
