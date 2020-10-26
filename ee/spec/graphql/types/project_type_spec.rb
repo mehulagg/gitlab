@@ -193,6 +193,7 @@ RSpec.describe GitlabSchema.types['Project'] do
         query {
           project(fullPath: "#{project.full_path}") {
             clusterAgents {
+              count
               nodes {
                 id
                 name
@@ -227,6 +228,12 @@ RSpec.describe GitlabSchema.types['Project'] do
       expect(agents.first['updatedAt']).to be_present
       expect(agents.first['project']['id']).to eq(project.to_global_id.to_s)
     end
+
+    it 'returns count of cluster agents' do
+      count = subject.dig('data', 'project', 'clusterAgents', 'count')
+
+      expect(count).to be(project.cluster_agents.size)
+    end
   end
 
   describe 'cluster_agent' do
@@ -240,6 +247,7 @@ RSpec.describe GitlabSchema.types['Project'] do
               id
 
               tokens {
+                count
                 nodes {
                   id
                 }
@@ -266,6 +274,13 @@ RSpec.describe GitlabSchema.types['Project'] do
 
       expect(tokens.count).to be(1)
       expect(tokens.first['id']).to eq(agent_token.to_global_id.to_s)
+    end
+
+    it 'returns count of agent tokens' do
+      agent = subject.dig('data', 'project', 'clusterAgent')
+      count = agent.dig('tokens', 'count')
+
+      expect(cluster_agent.agent_tokens.size).to be(count)
     end
   end
 end

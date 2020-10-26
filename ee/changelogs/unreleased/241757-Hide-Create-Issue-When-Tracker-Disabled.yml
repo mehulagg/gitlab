@@ -1,5 +1,0 @@
----
-title: Hide "Create Issue" On Vulnerability Page When Issues Are Disabled
-merge_request: 43725
-author: Kev @KevSlashNull
-type: fixed

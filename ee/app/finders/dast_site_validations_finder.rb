@@ -12,6 +12,7 @@ class DastSiteValidationsFinder
     relation = DastSiteValidation.all
     relation = by_project(relation)
     relation = by_url_base(relation)
+    relation = by_state(relation)
 
     sort(relation)
   end
@@ -30,6 +31,12 @@ class DastSiteValidationsFinder
     return relation if params[:url_base].nil?
 
     relation.by_url_base(params[:url_base])
+  end
+
+  def by_state(relation)
+    return relation if params[:state].nil?
+
+    relation.with_state(params[:state])
   end
 
   # rubocop: disable CodeReuse/ActiveRecord

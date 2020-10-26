@@ -1,5 +1,0 @@
----
-title: Fixes a bug with merge request approval rules being changed after creation
-merge_request: 43209
-author:
-type: fixed

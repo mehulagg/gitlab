@@ -85,6 +85,7 @@ export default {
 
       return {
         totalRepositorySize: this.namespace.totalRepositorySize,
+        actualRepositorySizeLimit: this.namespace.actualRepositorySizeLimit,
         totalRepositorySizeExcess: this.namespace.totalRepositorySizeExcess,
         additionalPurchasedStorageSize: this.namespace.additionalPurchasedStorageSize,
       };

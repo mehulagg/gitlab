@@ -308,29 +308,6 @@ module EE
       super
     end
 
-    def ab_feature_enabled?(feature, percentage: nil)
-      return false unless ::Gitlab.com?
-      return false if ::Gitlab::Geo.secondary?
-
-      raise "Currently only discover_security feature is supported" unless feature == :discover_security
-
-      return false unless ::Feature.enabled?(feature)
-
-      filter = user_preference.feature_filter_type.presence || 0
-
-      # We use a 2nd feature flag for control as enabled and percentage_of_time for chatops
-      flipper_feature = ::Feature.get((feature.to_s + '_control').to_sym) # rubocop:disable Gitlab/AvoidFeatureGet
-      percentage ||= flipper_feature&.percentage_of_time_value || 0
-      return false if percentage <= 0
-
-      if filter == UserPreference::FEATURE_FILTER_UNKNOWN
-        filter = SecureRandom.rand * 100 <= percentage ? UserPreference::FEATURE_FILTER_EXPERIMENT : UserPreference::FEATURE_FILTER_CONTROL
-        user_preference.update_column :feature_filter_type, filter
-      end
-
-      filter == UserPreference::FEATURE_FILTER_EXPERIMENT
-    end
-
     def gitlab_employee?
       strong_memoize(:gitlab_employee) do
         ::Gitlab.com? && ::Feature.enabled?(:gitlab_employee_badge) && gitlab_team_member?
@@ -345,7 +322,7 @@ module EE
 
     def gitlab_service_user?
       strong_memoize(:gitlab_service_user) do
-        service_user? && ::Gitlab::Com.gitlab_com_group_member_id?(id)
+        service_user? && ::Gitlab::Com.gitlab_com_group_member?(id)
       end
     end
 

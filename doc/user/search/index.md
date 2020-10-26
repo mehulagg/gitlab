@@ -211,6 +211,7 @@ You can also type in this search bar to see autocomplete suggestions for:
 - Recently viewed issues (try and type some word from the title of a recently viewed issue)
 - Recently viewed merge requests (try and type some word from the title of a recently viewed merge request)
 - Recently viewed epics (try and type some word from the title of a recently viewed epic)
+- [GitLab Flavored Markdown](../markdown.md#special-gitlab-references) (GFM) for issues within a project (try and type a GFM reference for an issue)
 
 ## Basic search
 
@@ -247,6 +248,14 @@ the search field on the top-right of your screen while the project page is open.
 
 ![code search dropdown](img/project_search_dropdown.png)
 ![code search results](img/project_code_search.png)
+
+### SHA search
+
+You can quickly access a commit from within the project dashboard by entering the SHA
+into the search field on the top right of the screen. If a single result is found, you will be
+redirected to the commit result and given the option to return to the search results page.
+
+![project sha search redirect](img/project_search_sha_redirect.png)
 
 ## Advanced Search **(STARTER)**
 

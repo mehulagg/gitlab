@@ -1,5 +1,0 @@
----
-title: Reduce load time of large number of audit events
-merge_request: 43248
-author:
-type: performance

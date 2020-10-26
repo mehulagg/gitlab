@@ -1,5 +1,0 @@
----
-title: Add ability to sort vulnerabilities by report type in GraphQL
-merge_request: 42979
-author:
-type: added

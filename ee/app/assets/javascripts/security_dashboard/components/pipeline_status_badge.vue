@@ -4,8 +4,8 @@ import { GlBadge, GlIcon } from '@gitlab/ui';
 export default {
   components: { GlBadge, GlIcon },
   inject: {
-    pipelineSecurityBuildsFailedCount: { type: Number, required: false, default: 0 },
-    pipelineSecurityBuildsFailedPath: { type: String, required: false, default: '' },
+    pipelineSecurityBuildsFailedCount: { default: 0 },
+    pipelineSecurityBuildsFailedPath: { default: '' },
   },
 };
 </script>

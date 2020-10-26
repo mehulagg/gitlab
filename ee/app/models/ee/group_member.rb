@@ -38,6 +38,8 @@ module EE
 
     def group_domain_limitations
       if user
+        return if user.project_bot?
+
         validate_users_email
         validate_email_verified
       else
