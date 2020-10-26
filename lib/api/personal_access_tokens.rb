@@ -37,11 +37,6 @@ module API
       def find_token(id)
         PersonalAccessToken.find(id) || not_found!
       end
-
-      def authenticate!
-        unauthorized! unless ::License.feature_available?(:personal_access_token_api_management)
-        super
-      end
     end
 
     resources :personal_access_tokens do

@@ -136,7 +136,6 @@ class License < ApplicationRecord
     insights
     issuable_health_status
     license_scanning
-    personal_access_token_api_management
     personal_access_token_expiration_policy
     enforce_pat_expiration
     prometheus_alerts
