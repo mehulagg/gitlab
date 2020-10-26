@@ -32,7 +32,7 @@ Keep your GitLab instance up and running smoothly.
   that read or write Git repositories. This information will help benchmark
   filesystem performance against known good and bad real-world systems.
 - [The Rails Console](rails_console.md): Provides a way to interact with your GitLab instance from the command line.
-  Used for troubleshooting a problem or retrieving some data that can only be done through direct access of the GitLab application.
+  Used for troubleshooting a problem or retrieving some data that can only be done through direct access to GitLab.
 - [ChatOps Scripts](https://gitlab.com/gitlab-com/chatops): The GitLab.com Infrastructure team uses this repository to house
   common ChatOps scripts they use to troubleshoot and maintain the production instance of GitLab.com.
   These scripts are likely useful to administrators of GitLab instances of all sizes.
