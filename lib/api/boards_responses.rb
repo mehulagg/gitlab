@@ -10,6 +10,36 @@ module API
           board_parent.boards.find(params[:board_id])
         end
 
+        def create_board
+          forbidden! unless board_parent.multiple_issue_boards_available?
+
+          response =
+            ::Boards::CreateService.new(board_parent, current_user, { name: params[:name] }).execute
+
+          present response.payload, with: Entities::Board
+        end
+
+        def update_board
+          service = ::Boards::UpdateService.new(board_parent, current_user, declared_params(include_missing: false))
+          service.execute(board)
+
+          if board.valid?
+            present board, with: Entities::Board
+          else
+            bad_request!("Failed to save board #{board.errors.messages}")
+          end
+        end
+
+        def delete_board
+          forbidden! unless board_parent.multiple_issue_boards_available?
+
+          destroy_conditionally!(board) do |board|
+            service = ::Boards::DestroyService.new(board_parent, current_user)
+            service.execute(board)
+          end
+        end
+
+
         def board_lists
           board.destroyable_lists
         end
@@ -61,6 +91,10 @@ module API
 
         params :list_creation_params do
           requires :label_id, type: Integer, desc: 'The ID of an existing label'
+        end
+
+        params :update_params do
+          optional :labels, type: String, desc: 'Comma-separated list of label names'
         end
       end
     end
